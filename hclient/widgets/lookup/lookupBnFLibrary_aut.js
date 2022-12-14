@@ -46,9 +46,9 @@ $.widget( "heurist.lookupBnFLibrary_aut", $.heurist.recordAction, {
         pagesize: 20 // result list's number of records per page
     },
     
-    recordList:null,
+    recordList: null,
 
-    added_terms: false,
+    tabs_container: null,
 
     //  
     // invoked from _init after loading of html content
@@ -61,7 +61,7 @@ $.widget( "heurist.lookupBnFLibrary_aut", $.heurist.recordAction, {
         var that = this;
 
         // Extra field styling
-        this.element.find('.header.recommended').css({width:'75px', 'min-width':'75px', 'max-width': '80px', display: 'inline-block'}).addClass('truncate');
+        this.element.find('.header.recommended').css({width: '100px', 'min-width': '100px', display: 'inline-block'}).addClass('truncate');
         this.element.find('.bnf_form_field').css({display:'inline-block', 'margin-top': '2.5px'});
 
         // Action button styling
@@ -89,10 +89,7 @@ $.widget( "heurist.lookupBnFLibrary_aut", $.heurist.recordAction, {
         });                
 
         // Init record list
-        this.recordList = this.element.find('#div_result');
-
-        var pos_top = this.element.find('#ent_header').position().top + parseFloat(this.element.find('#ent_header').css('height'));
-        this.recordList.css('top', (pos_top+30)+'px');
+        this.recordList = this.element.find('.div_result');
 
         this.recordList.resultList( this.options.resultList );
         this.recordList.resultList('option', 'pagesize', this.options.pagesize); // so the pagesize doesn't get set to a different value
@@ -121,6 +118,7 @@ $.widget( "heurist.lookupBnFLibrary_aut", $.heurist.recordAction, {
             'keypress':this.startSearchOnEnterPress
         });
 
+        this.tabs_container = this.element.find('#tabs-cont').tabs();
         this.element.find('#inpt_any').focus();
 
         return this._super();
@@ -222,8 +220,6 @@ $.widget( "heurist.lookupBnFLibrary_aut", $.heurist.recordAction, {
 
         var that = this;
 
-        this.added_terms = false;
-
         // get selected recordset
         var recset = this.recordList.resultList('getSelected', false);
 
@@ -256,48 +252,26 @@ $.widget( "heurist.lookupBnFLibrary_aut", $.heurist.recordAction, {
                     if(field_type == 'enum'){
 
                         if(val_isObject){ 
-
-                            if(Object.keys(val).length > 1){ // should not be a term, or alternative handling required
-                                continue;
-                            }else{ // take first option
-                                val = val[Object.keys(val)[0]];
-                            }
-                        }else if(val_isArray){
-                            val = val[0];
+                            val = Object.values(val);
+                        }else if(!val_isArray){
+                            val = [val];
                         }
 
                         var vocab_ID = $Db.dty(dty_ID, 'dty_JsonTermIDTree');
                         var term_Ids = $Db.trm_TreeData(vocab_ID, 'set');
 
-                        var term_found = false;
+                        for(var i=0; i<val.length; i++){
 
-                        for(var i=0; i<term_Ids.length; i++){
-
-                            var trm_Label = $Db.trm(term_Ids[i], 'trm_Label').toLowerCase();
-
-                            if(val_isArray){ // multiple values, Language usually has two values and Type only has one
-
-                                for(var j = 0; j < val.length; j++){
-
-                                    if(val[j].toLowerCase() == trm_Label){
-
-                                        val = term_Ids[i];
-                                        term_found = true;
-                                        break;
-                                    }
-                                }
-                            }else if(val){ // In case of one single value
-                                
-                                if(val.toLowerCase() == trm_Label){
-
-                                    val = term_Ids[i];
-                                    term_found = true;
-                                    break;
-                                }
+                            if(!Number.isInteger(+val[i])){
+                                continue;
                             }
 
-                            if(term_found){
-                                break;
+                            for(let j = 0; j < term_Ids.length; j++){
+                                let trm_code = $Db.trm(term_Ids[j], 'trm_Code');
+                                if(trm_code == val[i]){
+                                    val[i] = term_Ids[j];
+                                    break;
+                                }
                             }
                         }
 
@@ -400,10 +374,17 @@ $.widget( "heurist.lookupBnFLibrary_aut", $.heurist.recordAction, {
         var maxRecords = $('#rec_limit').val(); // limit number of returned records
         maxRecords = (!maxRecords || maxRecords <= 0) ? 20 : maxRecords;
 
-        var sURL = 'http://catalogue.bnf.fr/api/SRU?version=1.2&operation=searchRetrieve&recordSchema=intermarcxchange&maximumRecords='+maxRecords+'&startRecord=1'; // base URL
+        var sURL = 'http://catalogue.bnf.fr/api/SRU?version=1.2&operation=searchRetrieve&recordSchema=unimarcxchange&maximumRecords='+maxRecords+'&startRecord=1'; // base URL
+
+        var accesspointHasValue = this.element.find('#inpt_accesspoint').val() != '';
+        var typeHasValue = this.element.find('#inpt_type').val() != '';
+        var isniHasValue = this.element.find('#inpt_isni').val() != '';
+        var isnidateHasValue = this.element.find('#inpt_isnidate').val() != '';
+        var domainHasValue = this.element.find('#inpt_domain').val() != '';
+        var recidHasValue = this.element.find('#inpt_recordid').val() != '';
 
         // Check that something has been entered
-        if(this.element.find('#inpt_any').val()=='' && this.element.find('#inpt_accesspoint').val()=='' && this.element.find('#inpt_recordid').val()==''){
+        if(this.element.find('#inpt_any').val()=='' && !accesspointHasValue && !typeHasValue && !isniHasValue && !isnidateHasValue && !domainHasValue && !recidHasValue){
 
             window.hWin.HEURIST4.msg.showMsgFlash('Please enter a value in any of the search fields...', 1000);
             return;
@@ -421,25 +402,62 @@ $.widget( "heurist.lookupBnFLibrary_aut", $.heurist.recordAction, {
          * also separating each field query is a boolean logic [and, or, not]
          */
 
-        var accesspointHasValue = this.element.find('#inpt_accesspoint').val() != '';
-        var recidHasValue = this.element.find('#inpt_recordid').val() != '';
-
         // any field
         if(this.element.find('#inpt_any').val()!=''){
             query += 'aut.anywhere '+ this.element.find('#inpt_any_link').val() +' "' + this.element.find('#inpt_any').val() + '"';
 
-            if(accesspointHasValue || recidHasValue){ // add combination logic
+            if(accesspointHasValue || typeHasValue || isniHasValue || isnidateHasValue || domainHasValue || recidHasValue){ // add combination logic
                 query += ' ' + this.element.find('#inpt_any_logic').val() + ' ';
             }
         }
 
-        // author field
+        // access point field
         if(accesspointHasValue){
 
             query += 'aut.accesspoint '+ this.element.find('#inpt_accesspoint_link').val() +' "' + this.element.find('#inpt_accesspoint').val() + '"';
 
-            if(recidHasValue){ // add combination logic
+            if(typeHasValue || isniHasValue || isnidateHasValue || domainHasValue || recidHasValue){ // add combination logic
                 query += ' ' + this.element.find('#inpt_accesspoint_logic').val() + ' ';
+            }
+        }
+
+        // type field
+        if(typeHasValue){
+
+            query += 'aut.type '+ this.element.find('#inpt_type_link').val() +' "' + this.element.find('#inpt_type').val() + '"';
+
+            if(isniHasValue || isnidateHasValue || domainHasValue || recidHasValue){ // add combination logic
+                query += ' ' + this.element.find('#inpt_type_logic').val() + ' ';
+            }
+        }
+
+        // isni field
+        if(isniHasValue){
+
+            query += 'aut.isni '+ this.element.find('#inpt_isni_link').val() +' "' + this.element.find('#inpt_isni').val() + '"';
+
+            if(isnidateHasValue || domainHasValue || recidHasValue){ // add combination logic
+                query += ' ' + this.element.find('#inpt_isni_logic').val() + ' ';
+            }
+        }
+
+        // isni date field
+        if(isnidateHasValue){
+
+            query += 'aut.isnidate '+ this.element.find('#inpt_isnidate_link').val() +' "' + this.element.find('#inpt_isnidate').val() + '"';
+
+            if(domainHasValue || recidHasValue){ // add combination logic
+                query += ' ' + this.element.find('#inpt_isnidate_logic').val() + ' ';
+            }
+        }
+
+        // domain field
+        if(domainHasValue){
+
+            query += 'aut.domain '+ this.element.find('#inpt_domain_link').val() +' "' + this.element.find('#inpt_domain').val() + '"';
+
+            if(recidHasValue){ // add combination logic
+                query += ' ' + this.element.find('#inpt_domain_logic').val() + ' ';
             }
         }
 
@@ -556,6 +574,8 @@ $.widget( "heurist.lookupBnFLibrary_aut", $.heurist.recordAction, {
         if(is_wrong_data){
             this.recordList.resultList('updateResultSet', null);
             window.hWin.HEURIST4.msg.showMsgErr('Service did not return data in an appropriate format');
+        }else{
+            this.tabs_container.tabs('option', 'active', 1); // switch to results tab
         }
     },
 

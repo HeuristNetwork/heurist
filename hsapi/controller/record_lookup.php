@@ -8,6 +8,8 @@
 * GeoName
 * TLCMap
 * BnF Library
+* Nomisma
+* Nakala
 * 
 * @package     Heurist academic knowledge management system
 * @link        http://HeuristNetwork.org
@@ -312,21 +314,38 @@ if($is_debug) print print_r($response, true).'!!!!!<br>';
                 }else if($df_tag == '210' || $df_tag == '214') { // Publisher Location / Publisher Name / Year of Publication
                     
                     $value = '';
-                    foreach ($df_ele->subfield as $sub_key => $sf_ele) {
+                    foreach ($df_ele->subfield as $sub_key => $sf_ele) { // TODO - look for examples of sf_code == {b, r, s}
                         $sf_code = @$sf_ele->attributes()['code'];
 
-                        $str_val = str_replace(array('[', ']', '(', ')'), '', (string)$sf_ele[0]);
+                        $str_val = str_replace(array('[', ']'), '', (string)$sf_ele[0]); //, '(', ')'
 
                         if($sf_code == 'a'){
-                            $formatted_array['publisher'][$publish_idx]['location'][] = $str_val;
+                            //$formatted_array['publisher'][$publish_idx]['location'][] = $str_val;
+                            if(empty($value)){
+                                $value = $str_val;
+                            }else{
+                                $value .= '; ' . $str_val;
+                            }
                         }else if($sf_code == 'c'){
-                            $formatted_array['publisher'][$publish_idx]['name'][] = $str_val;
+                            //$formatted_array['publisher'][$publish_idx]['name'][] = $str_val;
+                            if(empty($value)){
+                                $value = $str_val;
+                            }else{
+                                $value .= ': ' . $str_val;
+                            }
                         }else if($sf_code == 'd'){
-                            $formatted_array['date'] = $str_val;
+                            $formatted_array['date'][] = $str_val;
+                            if(empty($value)){
+                                $value = $str_val;
+                            }else{
+                                $value .= ', ' . $str_val;
+                            }
                         }
                     }
 
-                    $publish_idx ++;
+                    if($value != ''){
+                        $formatted_array['publisher'][] = $value;
+                    }
                 }else if($df_tag == '700' || $df_tag == '702' || $df_tag == '710' || $df_tag == '716') { // Creator
 
                     foreach ($df_ele->subfield as $sub_key => $sf_ele) {
@@ -377,10 +396,7 @@ if($is_debug) print print_r($response, true).'!!!!!<br>';
                     }
 
                     if($value != '') {
-
-                        if($df_tag == '280') {
-                            $formatted_array['description'][] = $value;
-                        }
+                        $formatted_array['description'][] = $value;
                     }
                 }else if($df_tag == '101') { // Language, e.g. fre or FR 101
 
@@ -397,7 +413,7 @@ if($is_debug) print print_r($response, true).'!!!!!<br>';
                         $sf_code = @$sf_ele->attributes()['code'];
 
                         if($sf_code == "a") {
-                            $formatted_array['ext_description'] = (array_key_exists('ext_description', $formatted_array)) ? $formatted_array['ext_description'] . ' ' . (string)$sf_ele[0] : (string)$sf_ele[0];
+                            $formatted_array['ext_description'][] = (string)$sf_ele[0];
                         }
                     }
                 }
@@ -443,27 +459,27 @@ if($is_debug) print print_r($response, true).'!!!!!<br>';
                     continue;
                 }
 
-                if($df_tag == '100' || $df_tag == '110' || $df_tag == '167' || $df_tag == '170') { // Name
+                if($df_tag == '200' || $df_tag == '210' || $df_tag == '215') { // Name
 
                     foreach($df_ele->subfield as $sub_key => $sf_ele) {
 
                         $sf_code = @$sf_ele->attributes()['code'];
 
-                        if($df_tag == '170' && $sf_code == 'a') {
+                        if(false && $df_tag == '170' && $sf_code == 'a') { // TODO - Translate from intermarcxchange '170' to unimarcxchange version
                             $formatted_array['name'] = (string)$sf_ele[0];
                             break;
-                        }else if($df_tag == '100'){
+                        }else if($df_tag == '200'){
 
                             if($sf_code == 'a'){ // Name
                                 $formatted_array['name'] = (string)$sf_ele[0];
-                            }else if($sf_code == 'm'){ // Name
+                            }else if($sf_code == 'b'){ // Name
 
                                 if( array_key_exists('name', $formatted_array)){
                                     $formatted_array['name'] .= ', ' . (string)$sf_ele[0];
                                 }else{
                                     $formatted_array['name'] = (string)$sf_ele[0];
                                 }
-                            }else if($sf_code == 'd'){ // Years active
+                            }else if($sf_code == 'f'){ // Years active
 
                                 if( array_key_exists('name', $formatted_array)){
                                     $formatted_array['name'] .= ' (' . (string)$sf_ele[0] . ')';
@@ -471,7 +487,7 @@ if($is_debug) print print_r($response, true).'!!!!!<br>';
                                     $formatted_array['name'] = 'No Name Provided';
                                 }
                             }
-                        }else if($df_tag == '110'){
+                        }else if($df_tag == '210'){
 
                             if($sf_code == 'a'){ // Name
                                 $formatted_array['name'] = (string)$sf_ele[0];
@@ -483,22 +499,19 @@ if($is_debug) print print_r($response, true).'!!!!!<br>';
                                     $formatted_array['name'] = 'No Name Provided';
                                 }
                             }
-                        }else if($df_tag == '167'){
+                        }else if($df_tag == '215'){
 
                             if($sf_code == 'a'){ // Location
-                                $formatted_array['name'] = (string)$sf_ele[0];
-                            }else if($sf_code == 'm'){ // Dept
 
                                 if( array_key_exists('name', $formatted_array)){
-                                    $formatted_array['name'] .= ' (' . (string)$sf_ele[0] . ')';
+                                    $formatted_array['name'] .= ' ' . (string)$sf_ele[0];
                                 }else{
-                                    $formatted_array['name'] = 'No Name Provided';
-                                    break;
+                                    $formatted_array['name'] = (string)$sf_ele[0];
                                 }
                             }else if($sf_code == 'x'){ // Name
 
                                 if( array_key_exists('name', $formatted_array)){
-                                    $formatted_array['name'] .= ' - ' . (string)$sf_ele[0];
+                                    $formatted_array['name'] = (string)$sf_ele[0] . ' ' . $formatted_array['name'];
                                 }else{
                                     $formatted_array['name'] = (string)$sf_ele[0];
                                 }

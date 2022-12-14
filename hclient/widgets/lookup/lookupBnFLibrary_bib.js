@@ -46,9 +46,11 @@ $.widget( "heurist.lookupBnFLibrary_bib", $.heurist.recordAction, {
         pagesize: 20 // result list's number of records per page
     },
     
-    recordList:null,
+    recordList: null,
 
     action_timeout: null, // timeout for processing doAction
+
+    tabs_container: null, // tabs container
 
     //  
     // invoked from _init after loading of html content
@@ -61,7 +63,7 @@ $.widget( "heurist.lookupBnFLibrary_bib", $.heurist.recordAction, {
         var that = this;
 
         // Extra field styling
-        this.element.find('.header.recommended').css({width:'65px', 'min-width':'65px', display: 'inline-block'});
+        this.element.find('.header.recommended').css({width:'100px', 'min-width':'100px', display: 'inline-block'});
         this.element.find('.bnf_form_field').css({display:'inline-block', 'margin-top': '7.5px'});
 
         // Action button styling
@@ -89,10 +91,7 @@ $.widget( "heurist.lookupBnFLibrary_bib", $.heurist.recordAction, {
         });                
 
         // Init record list
-        this.recordList = this.element.find('#div_result');
-
-        var pos_top = this.element.find('#ent_header').position().top + parseFloat(this.element.find('#ent_header').css('height'));
-        this.recordList.css('top', (pos_top+30)+'px');
+        this.recordList = this.element.find('.div_result');
 
         this.recordList.resultList( this.options.resultList );
         this.recordList.resultList('option', 'pagesize', this.options.pagesize); // so the pagesize doesn't get set to a different value
@@ -120,6 +119,9 @@ $.widget( "heurist.lookupBnFLibrary_bib", $.heurist.recordAction, {
         this._on(this.element.find('input'),{
             'keypress':this.startSearchOnEnterPress
         });
+
+        this.tabs_container = this.element.find('#tabs-cont').tabs();
+        this.element.find('#inpt_any').focus();
 
         return this._super();
     },
@@ -342,14 +344,13 @@ $.widget( "heurist.lookupBnFLibrary_bib", $.heurist.recordAction, {
                         }
 
                         if(!res[dty_ID]){
-                            res[dty_ID] = val;
-                        }else{
-                            res[dty_ID] = res[dty_ID].concat(val);
+                            res[dty_ID] = [];
                         }
+                        res[dty_ID] = res[dty_ID].concat(val);
 
                         continue;
                     }else if(field_name == 'publisher'){ // special treatment for publisher field
-
+/*
                         for(var i = 0; i < val.length; i++){
 
                             var completed_val = [];
@@ -386,6 +387,7 @@ $.widget( "heurist.lookupBnFLibrary_bib", $.heurist.recordAction, {
                         }
 
                         continue;
+*/
                     }else if(field_name == 'language'){ // handle if language equals '###'
 
                         for(var i = 0; i < val.length; i++){
@@ -397,14 +399,17 @@ $.widget( "heurist.lookupBnFLibrary_bib", $.heurist.recordAction, {
                 }
 
                 // Check that val and id are valid, add to response object
-                if(dty_ID>0 && val){
+                if(dty_ID > 0 && val){
 
                     if(!res[dty_ID]){
-                        res[dty_ID] = val;
-                    }else{
-                        res[dty_ID].concat(val);
+                        res[dty_ID] = [];
                     }
 
+                    if(window.hWin.HEURIST4.util.isObject(val)){
+                        res[dty_ID] = res[dty_ID].concat(Object.values(val));
+                    }else{
+                        res[dty_ID] = res[dty_ID].concat(val);    
+                    }
                 }
             }
 
@@ -457,7 +462,7 @@ $.widget( "heurist.lookupBnFLibrary_bib", $.heurist.recordAction, {
         var maxRecords = $('#rec_limit').val(); // limit number of returned records
         maxRecords = (!maxRecords || maxRecords <= 0) ? 20 : maxRecords;
 
-        var sURL = 'http://catalogue.bnf.fr/api/SRU?version=1.2&operation=searchRetrieve&maximumRecords='+maxRecords+'&startRecord=1'; // base URL, &recordSchema=intermarcxchange
+        var sURL = 'http://catalogue.bnf.fr/api/SRU?version=1.2&operation=searchRetrieve&maximumRecords='+maxRecords+'&startRecord=1&recordSchema=unimarcxchange'; // base URL
 
         // Check that something has been entered
         if(this.element.find('#inpt_any').val()=='' && this.element.find('#inpt_title').val()=='' 
@@ -643,6 +648,8 @@ $.widget( "heurist.lookupBnFLibrary_bib", $.heurist.recordAction, {
         if(is_wrong_data){
             this.recordList.resultList('updateResultSet', null);
             window.hWin.HEURIST4.msg.showMsgErr('Service did not return data in an appropriate format');
+        }else{
+            this.tabs_container.tabs('option', 'active', 1); // switch to results tab
         }
     },
 
