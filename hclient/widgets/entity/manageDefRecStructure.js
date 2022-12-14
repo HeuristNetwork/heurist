@@ -3111,24 +3111,44 @@ console.log('_afterDeleteEvenHandler');
                 if($div.find('.ui-icon').length == 0){
                     $div.append($('<span class="ui-icon ui-icon-extlink" />'));
 
-                    that._on($div.find('.ui-icon'), {
-                        'click': (event) => {
-                            let $ele = $(this);
-                            if(!$ele.is('div[data-dtyid]')){
-                                $ele = $ele.parents('div[data-dtyid]');
-                            }
-                            if($ele.attr('data-empty') == 1){
-                                $ele.hide();
+                    $div.contextmenu({
+                        delegate: '.ui-icon',
+                        position: (event, ui) => {
+                            return {my: "left top", at: "right+5 top", of: ui.target};
+                        },
+                        menu: [
+                            {title: 'Search for', isHeader: true},
+                            {title: 'Records WITH field', cmd: 'with', data: {id: dtyid}},
+                            {title: 'Records WITHOUT field', cmd: 'without', data: {id: dtyid}}
+                        ],
+                        select: (event, ui) => {
+
+                            let fld_id = ui.item.data().id;
+                            if(!fld_id || !Number.isInteger(+fld_id) || fld_id < 1){
                                 return;
                             }
 
-                            let fld_id = $ele.attr('data-dtyid');
-
-                            if(fld_id > 0 && $Db.rst(that.options.rty_ID, fld_id) != null){
-
-                                let query = '[{"t":"' + that.options.rty_ID + '"},{"f:' + fld_id + '":""}]'; console.log(encodeURIComponent(query));
-                                window.open(window.hWin.HAPI4.baseURL + '?db=' + window.hWin.HAPI4.database + '&q=' + encodeURIComponent(query), '_blank');
+                            let condition = '';
+                            if(ui.cmd == 'without'){
+                                condition = 'NULL';
                             }
+
+                            let query = '[{"t":"' + that.options.rty_ID + '"},{"f:' + fld_id + '":"'+ condition +'"}]';
+                            window.open(window.hWin.HAPI4.baseURL + '?db=' + window.hWin.HAPI4.database + '&q=' + encodeURIComponent(query), '_blank');
+                        },
+                        beforeOpen: (event, ui) => {
+                            let style = $(ui.menu).attr('style');
+
+                            if(style.indexOf('100000') == -1){
+                                style += 'z-index: 100000 !important;';
+                                $(ui.menu).attr('style', style);
+                            }
+                        }
+                    });
+                    that._on($div.find('.ui-icon'), {
+                        'click': (event) => {
+                            window.hWin.HEURIST4.util.stopEvent(event);
+                            $(this).contextmenu('open', event);
                         }
                     });
                 }

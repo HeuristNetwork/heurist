@@ -9,94 +9,180 @@
 * @package     Heurist academic knowledge management system
 -->
 
-<!-- Search Container -->
-<div id="ent_header" style="height: 10.5em; max-height: 10.5em; overflow-y: auto; padding: 0.2em 0; width: 500px; min-width: 335px;">
+<div id="tabs-cont">
 
-    <fieldset style="display:inline-block; width: 320px; padding-bottom: 0;">
+    <ul>
+        <li><a href="#frm-search">Search Form</a></li>
+        <li><a href="#frm-results">Results</a></li>
+    </ul>
 
-        <!-- Any -->
-        <div class="bnf_form_field">
+    <!-- Search Container -->
+    <div id="frm-search" style="overflow-y: auto; padding: 1em 0 !important;">
 
-            <div class="header recommended" style="text-align: right;">
-                <label for="inpt_any">Any Field:</label>
-            </div>
-            <select id="inpt_any_link">
-                <option value="any">ANY</option>
-                <option value="all" selected>ALL</option>
-                <option value="adj">ADJ</option>
-            </select>
-            <input id="inpt_any" class="text ui-widget-content ui-corner-all" style="max-width:30em;margin-bottom: 7px;"/>
-            <select id="inpt_any_logic">
-                <option value="and" selected>AND</option>
-                <option value="or">OR</option>
-            </select>
+        <fieldset style="display:inline-block;">
 
-        </div>
+            <!-- Any -->
+            <div class="bnf_form_field">
 
-        <!-- Title -->
-        <div class="bnf_form_field">
-
-            <div class="header recommended" style="text-align: right;">
-                <label for="inpt_accesspoint">Access Point:</label>
-            </div>
-            <select id="inpt_accesspoint_link">
-                <option value="any">ANY</option>
-                <option value="all" selected>ALL</option>
-                <option value="adj">ADJ</option>
-            </select>
-            <input id="inpt_accesspoint" class="text ui-widget-content ui-corner-all" style="max-width:30em;margin-bottom: 7px;"/>
-            <select id="inpt_accesspoint_logic">
-                <option value="and" selected>AND</option>
-                <option value="or">OR</option>
-            </select>
-
-        </div>
-
-        <!-- Record ID -->
-        <div class="bnf_form_field">
-
-            <div class="header recommended" style="text-align: right;">
-                <label for="inpt_recordid">Record ID:</label>
-            </div>
-            <select id="inpt_recordid_link">
-                <option value="any">ANY</option>
-                <option value="all" selected>ALL</option>
-                <option value="adj">ADJ</option>
-            </select>
-            <input id="inpt_recordid" class="text ui-widget-content ui-corner-all" style="max-width:30em;margin-bottom: 7px;"/>
-        <!-- There is no field after record id
-            <select id="inpt_recordid_logic">
-                <option value="and" selected>AND</option>
-                <option value="or">OR</option>
-            </select>
-        -->
-
-        </div>
-
-    </fieldset>
-
-    <div style="float: right; margin: 10px 0 0 10px;" id="btn_container">
-        <button id="btnStartSearch">Search</button>
-
-        <div id="rec_filter_fields" style="margin-top: 20px;">
-            <div class="header optional">
-                <label for="rec_limit">Search for </label>
-
-                <select id="rec_limit">
-                    <option value="10">10</option>
-                    <option value="20" selected>20</option>
-                    <option value="50">50</option>
-                    <option value="100">100</option>
-                    <option value="200">200</option>
-                    <option value="500">500</option>
+                <div class="header recommended" style="text-align: right;">
+                    <label for="inpt_any">Any Field:</label>
+                </div>
+                <select id="inpt_any_link">
+                    <option value="any">ANY</option>
+                    <option value="all" selected>ALL</option>
+                    <option value="adj">ADJ</option>
+                </select>
+                <input id="inpt_any" class="text ui-widget-content ui-corner-all" style="max-width:30em;margin-bottom: 7px;"/>
+                <select id="inpt_any_logic">
+                    <option value="and" selected>AND</option>
+                    <option value="or">OR</option>
                 </select>
 
-                <label for="rec_limit"> records</label>
+            </div>
+
+            <!-- Access Point -->
+            <div class="bnf_form_field">
+
+                <div class="header recommended" style="text-align: right;">
+                    <label for="inpt_accesspoint">Access Point:</label>
+                </div>
+                <select id="inpt_accesspoint_link">
+                    <option value="any">ANY</option>
+                    <option value="all" selected>ALL</option>
+                    <option value="adj">ADJ</option>
+                </select>
+                <input id="inpt_accesspoint" class="text ui-widget-content ui-corner-all" style="max-width:30em;margin-bottom: 7px;"/>
+                <select id="inpt_accesspoint_logic">
+                    <option value="and" selected>AND</option>
+                    <option value="or">OR</option>
+                </select>
+
+            </div>
+
+            <!-- Type -->
+            <div class="bnf_form_field">
+
+                <div class="header recommended" style="text-align: right;">
+                    <label for="inpt_type">Type:</label>
+                </div>
+                <select id="inpt_type_link">
+                    <option value="any">ANY</option>
+                    <option value="all" selected>ALL</option>
+                    <option value="adj">ADJ</option>
+                </select>
+                <input id="inpt_type" class="text ui-widget-content ui-corner-all" style="max-width:30em;margin-bottom: 7px;"/>
+                <select id="inpt_type_logic">
+                    <option value="and" selected>AND</option>
+                    <option value="or">OR</option>
+                </select>
+
+            </div>
+
+            <!-- ISNI -->
+            <div class="bnf_form_field">
+
+                <div class="header recommended" style="text-align: right;">
+                    <label for="inpt_isni">ISNI:</label>
+                </div>
+                <select id="inpt_isni_link">
+                    <option value="any">ANY</option>
+                    <option value="all" selected>ALL</option>
+                    <option value="adj">ADJ</option>
+                </select>
+                <input id="inpt_isni" class="text ui-widget-content ui-corner-all" style="max-width:30em;margin-bottom: 7px;"/>
+                <select id="inpt_isni_logic">
+                    <option value="and" selected>AND</option>
+                    <option value="or">OR</option>
+                </select>
+
+            </div>
+
+            <!-- ISNI Date -->
+            <div class="bnf_form_field">
+
+                <div class="header recommended" style="text-align: right;">
+                    <label for="inpt_isnidate">ISNI Date:</label>
+                </div>
+                <select id="inpt_isnidate_link">
+                    <option value="any">ANY</option>
+                    <option value="all" selected>ALL</option>
+                    <option value="adj">ADJ</option>
+                </select>
+                <input id="inpt_isnidate" class="text ui-widget-content ui-corner-all" style="max-width:30em;margin-bottom: 7px;"/>
+                <select id="inpt_isnidate_logic">
+                    <option value="and" selected>AND</option>
+                    <option value="or">OR</option>
+                </select>
+
+            </div>
+
+            <!-- Domain -->
+            <div class="bnf_form_field">
+
+                <div class="header recommended" style="text-align: right;">
+                    <label for="inpt_domain">Domain:</label>
+                </div>
+                <select id="inpt_domain_link">
+                    <option value="any">ANY</option>
+                    <option value="all" selected>ALL</option>
+                    <option value="adj">ADJ</option>
+                </select>
+                <input id="inpt_domain" class="text ui-widget-content ui-corner-all" style="max-width:30em;margin-bottom: 7px;"/>
+                <select id="inpt_domain_logic">
+                    <option value="and" selected>AND</option>
+                    <option value="or">OR</option>
+                </select>
+
+            </div>
+
+            <!-- Record ID -->
+            <div class="bnf_form_field">
+
+                <div class="header recommended" style="text-align: right;">
+                    <label for="inpt_recordid">Record ID:</label>
+                </div>
+                <select id="inpt_recordid_link">
+                    <option value="any">ANY</option>
+                    <option value="all" selected>ALL</option>
+                    <option value="adj">ADJ</option>
+                </select>
+                <input id="inpt_recordid" class="text ui-widget-content ui-corner-all" style="max-width:30em;margin-bottom: 7px;"/>
+            <!-- There is no field after record id
+                <select id="inpt_recordid_logic">
+                    <option value="and" selected>AND</option>
+                    <option value="or">OR</option>
+                </select>
+            -->
+
+            </div>
+
+        </fieldset>
+
+        <div style="margin: 10px 0 0 10px;" id="btn_container">
+            <button id="btnStartSearch">Search</button>
+
+            <div id="rec_filter_fields" style="display: inline-block;">
+                <div class="header optional">
+                    <label for="rec_limit">Search for </label>
+
+                    <select id="rec_limit">
+                        <option value="10">10</option>
+                        <option value="20" selected>20</option>
+                        <option value="50">50</option>
+                        <option value="100">100</option>
+                        <option value="200">200</option>
+                        <option value="500">500</option>
+                    </select>
+
+                    <label for="rec_limit"> records</label>
+                </div>
             </div>
         </div>
     </div>
-</div>
 
-<!-- Result List Container -->
-<div id="div_result" class="ent_content_full" style="display: none;top:9em">
+    <!-- Result List Container -->
+    <div id="frm-results" style="display: none;">
+        <div class="div_result ent_content_full" style="height: 600px;"></div>
+    </div>
+
 </div>
