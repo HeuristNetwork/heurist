@@ -38,13 +38,18 @@ $folder_sql = HEURIST_FILESTORE_DIR.'backup/'.HEURIST_DBNAME.'_sql';
 $progress_flag = HEURIST_FILESTORE_DIR.'backup/inprogress.info';
 
 $mode = @$_REQUEST['mode'];
+$format = array_key_exists('is_zip', $_REQUEST) && $_REQUEST['is_zip'] == 1 ? 'zip' : 'tar';
+$mime = $format == 'tar' ? 'application/x-bzip2' : 'application/zip';
 
 // Download the dumped data as a zip file
-if($mode=='2' && file_exists($folder.".zip") ){
-    downloadFile('application/zip', $folder.".zip"); //see db_files.php
+if(($mode == '2' || $mode == '3') && $format == 'tar'){
+    $format = 'tar.bz2';
+}
+if($mode=='2' && file_exists($folder.".".$format) ){
+    downloadFile($mime, $folder.".".$format); //see db_files.php
     exit();
-}else if($mode=='3' && file_exists($folder_sql.".zip")){
-    downloadFile('application/zip', $folder_sql.".zip", HEURIST_DBNAME.".zip");
+}else if($mode=='3' && file_exists($folder_sql.".".$format)){
+    downloadFile($mime, $folder_sql.".".$format, HEURIST_DBNAME.".".$format);
     exit();
 }
 
@@ -229,7 +234,14 @@ if($mode=='2' && file_exists($folder.".zip") ){
                         Include HML (not required for transfer to a new server, but recommended for long-term archive)
                     </label>
                 </div>
-                
+
+                <div class="input-row">
+                    <label title="Export / Upload the archive in Zip format, instead of BZip">
+                        <input type="checkbox" name="is_zip" value="1">
+                        Use Zip format rather than BZip
+                    </label>
+                </div>
+
                 <div class="input-row" style="display:none;">
                     <label 
                         title="Adds documents describing Heurist structure and data formats - check this box if the output is for long-term archiving">
@@ -256,11 +268,13 @@ if($mode=='2' && file_exists($folder.".zip") ){
         <?php } ?>
 
                 <div id="buttons" class="actionButtons" style="padding-top:10px;text-align:left">
-                    <input type="button" value="<?php echo 'Export' . (array_key_exists('repository', $_REQUEST) ? ' / Upload' : ''); ?>" 
+                    <input type="button" value="<?php echo (array_key_exists('repository', $_REQUEST) ? 'Export & Upload' : 'Download'); ?>" 
                         style="margin-right: 20px;" class="ui-button-action" onClick="{ exportArchive(); }">
 <?php if(@$_REQUEST['inframe']!=1) { ?>                    
                     <input type="button" value="Cancel" onClick="window.close();">
-<?php } ?>                    
+<?php } ?>
+
+<?php echo print_r($_REQUEST, TRUE); ?>
                 </div>
             </form>
             <?php
@@ -271,6 +285,8 @@ if($mode=='2' && file_exists($folder.".zip") ){
             $action = 'exportDB';
             if(!isActionInProgress($action, 2)){
                 exit("It appears that backup operation has been started already. Please try this function later");        
+            }else{
+                echo_flush2("<br>Beginning archive process<br>");
             }
             
             /*
@@ -449,19 +465,39 @@ if($mode=='2' && file_exists($folder.".zip") ){
             // remove old mysql dump - specifically the ones named HEURIST_DBNAME_FULL.sql
             if(file_exists($folder.'/'.HEURIST_DBNAME_FULL.'.sql')) unlink($folder.'/'.HEURIST_DBNAME_FULL.'.sql');
 
+            echo_flush2('<br>Zipping files<br>');
+
             // Create a zipfile of the definitions and data which have been dumped to disk
-            $destination = $folder.'.zip'; // Complete archive
-            if(file_exists($destination)) unlink($destination);
-            
-            $res = createZipArchive($folder, null, $destination, true);
+            $destination = $folder.'.'.$format; // Complete archive
+            if(file_exists($destination)){ 
+                unlink($destination);
+            }
+            if($format == 'tar' && file_exists($folder.'.tar.bz2')){
+                unlink($folder.'.tar.bz2');
+            }
+
+            if($format == 'zip'){
+                $res = createZipArchive($folder, null, $destination, true);
+            }else{
+                $res = createBz2Archive($folder, null, $destination, true);
+            }
 
             $res_sql = false;
             if($separate_sql_zip){
 
-                $destination_sql = $folder.'_sql.zip'; // SQL dump only
-                if(file_exists($destination_sql)) unlink($destination_sql);
+                $destination_sql = $folder.'_sql.'.$format; // SQL dump only
+                if(file_exists($destination_sql)){
+                    unlink($destination_sql);
+                }
+                if($format == 'tar' && file_exists($folder.'_sql.tar.bz2')){
+                    unlink($folder.'_sql.tar.bz2');
+                }
 
-                $res_sql = createZipArchive($folder.'_sql', null, $destination_sql, true);
+                if($format == 'zip'){
+                    $res_sql = createZipArchive($folder.'_sql', null, $destination_sql, true);   
+                }else{
+                    $res_sql = createBz2Archive($folder.'_sql', null, $destination_sql, true);
+                }
             }
             
             /* command line version
@@ -473,27 +509,33 @@ if($mode=='2' && file_exists($folder.".zip") ){
                 print  print_r($output,true).'</p>';
             */
             if(!$res){
-                print "Directory may be non-writeable or zip function is not installed on server (error code 127) - please consult system adminstrator";
+                print "<br>Directory may be non-writeable or zip function is not installed on server (error code 127) - please consult system adminstrator";
+
             } else if(!array_key_exists('repository', $_REQUEST)) {
 ?>                
 <p>Your data have been backed up in <?php echo $folder;?></p>
 <br><br><div class='lbl_form'></div>
-    <a href="exportMyDataPopup.php/<?php echo HEURIST_DBNAME;?>.zip?db=<?php echo HEURIST_DBNAME;?>&mode=2"
+    <a href="exportMyDataPopup.php/<?php echo HEURIST_DBNAME;?>.<?php echo $format; ?>?db=<?php echo HEURIST_DBNAME;?>&mode=2&is_zip=<?php echo ($format == 'zip' ? 1 : 0); ?>"
         target="_blank" style="color:blue; font-size:1.2em">Click here to download your data as a zip archive</a>
 
 <?php if($res_sql){ ?>
     <br><br>
-    <a href="exportMyDataPopup.php/<?php echo HEURIST_DBNAME;?>.zip?db=<?php echo HEURIST_DBNAME;?>&mode=3"
+    <a href="exportMyDataPopup.php/<?php echo HEURIST_DBNAME;?>.<?php echo $format; ?>?db=<?php echo HEURIST_DBNAME;?>&mode=3&format=<?php echo ($format == 'zip' ? 1 : 0); ?>"
         target="_blank" style="color:blue; font-size:1.2em">Click here to download the SQL zip file only</a> 
     <span class="heurist-helper1">(for db transfer on tiered servers)</span>
+<?php }else{ ?>
+    <br><br>
+    <div>Failed to create standalone SQL dump</div>
 <?php } ?>
-
 <span class="heurist-helper1">
 <br><br>Note: If this file fails to download properly (eg. "Failed … file incomplete") the file is too large to download. Please ask your system administrator (<?php echo HEURIST_MAIL_TO_ADMIN; ?>) to send it to you via a large file transfer service</span>        
 <?php                
             }else if(array_key_exists('repository', $_REQUEST)){
 
                 $repo = $_REQUEST['repository'];
+                if($format == 'tar'){
+                    $format = 'tar.bz2';
+                }
 
                 echo_flush2('<hr><br>Uploading archive to ' . $repo . '...');
 
@@ -506,9 +548,9 @@ if($mode=='2' && file_exists($folder.".zip") ){
 
                         $params = array();
                         $params['file'] = array(
-                            'path' => $folder . '.zip',
-                            'type' => 'application/zip',
-                            'name' => HEURIST_DBNAME . '.zip'
+                            'path' => $folder . '.' . $format,
+                            'type' => $mime,
+                            'name' => HEURIST_DBNAME . '.' . $format
                         );
 
                         $params['meta']['title'] = array(
@@ -521,7 +563,7 @@ if($mode=='2' && file_exists($folder.".zip") ){
                         $usr = $system->getCurrentUser();
                         if(is_array($usr) && count($usr) > 0){
                             $params['meta']['creator'] = array(
-                                'value' => 'John Doe',//$usr['ugr_FullName'],
+                                'value' => $usr['ugr_FullName'],
                                 'lang' => null,
                                 'typeUri' => 'http://www.w3.org/2001/XMLSchema#string',
                                 'propertyUri' => 'http://purl.org/dc/terms/creator'
