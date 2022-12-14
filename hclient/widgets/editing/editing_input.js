@@ -2376,7 +2376,7 @@ $.widget( "heurist.editing_input", {
                     $(event.target.parentNode.parentNode).find('.hideTumbnail').show();
 				});
                 
-                var $mirador_link = $('<a href="#" data-id="'+f_nonce+'" class="miradorViewer_link" style="color: blue;" title="Open image in Mirador">'
+                var $mirador_link = $('<a href="#" data-id="'+f_nonce+'" class="miradorViewer_link" style="color: blue;" title="Open in Mirador">'
                     +'<span class="ui-icon ui-icon-mirador" style="width:12px;height:12px;margin-left:5px;font-size:1em;display:inline-block;vertical-align: middle;'
                     +'filter: invert(35%) sepia(91%) saturate(792%) hue-rotate(174deg) brightness(96%) contrast(89%);'
                     +'"></span>&nbsp;Mirador</a>').appendTo( $dwnld_anchor ).hide();
