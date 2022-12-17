@@ -114,8 +114,8 @@ $s_max_size = round($max_size/1024/1024).' MBytes';
 
             <p class="st1_AllRecognized_afterSync import-rem heurist-helper3">All entity types are recognised</p>
 
-            <p class="st1_AllRecognized_beforeSync import-rem heurist-helper3">All entity types are recognised. However it is not guaranteed that they are identical. 
-                Press "Sync" button to make sure that all fields and terms are the same in source and destination databases. If you are sure that structure is valid you may skip sync step and proceed to record import.</p>
+            <p class="st1_AllRecognized_beforeSync import-rem heurist-helper3">Although all entity types are recognised, it is not guaranteed that they are identical. 
+                Press "Synchronise" button to make sure that all fields and terms are the same in source and destination databases. If you are sure that structure is valid you may skip synchronisation step and proceed to record import.</p>
 
             <p class="st1_NotRecognized_afterSync import-rem heurist-helper3">Download definitions from the source database is performed.
                 However <span class="cnt_missed_rt3"></span> still cannot be matched to the target database as shown below.
