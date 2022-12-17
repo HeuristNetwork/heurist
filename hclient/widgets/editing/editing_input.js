@@ -3572,10 +3572,10 @@ console.log('onpaste');
                 +'<div style="padding:15px 0">You are deleting a pointer to a child record, that is a record which is owned by/an integral part of the current record, as identified by a pointer back from the child to the current record.</div>'
                 //Actions:<br>
                 +'<div><label><input type="radio" value="1" name="delete_mode" style="outline:none"/>'
-                            +'Delete parent pointer in the child record</label><br><br>'
+                            +'Delete connection between parent and child</label><br><br>'
                         +'<label><input type="radio" value="2" name="delete_mode" checked="checked" style="outline:none"/>'
                             +'Delete the child record completely</label></div>'
-                +'<div style="padding:15px 0">Warning: If you delete the parent pointer in the child record, this will generally render the record useless as it will lack identifying information.</div></div>';
+                +'<div style="padding:15px 0">Warning: If you delete the connection between the parent and child, this will often render the child record useless as it may lack identifying information.</div></div>';
                 
 //<label><input type="radio" value="0" name="delete_mode"/>Leave child record as-is</label><br>
 //<p style="padding:0 0 15px 0">If you leave the child record as-is, it will remain as a child of the current record and retain a pointer allowing the parent record information to be used in the child\'s record title, custom reports etc.</p>                
