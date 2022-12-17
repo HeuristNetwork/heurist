@@ -671,7 +671,7 @@ CREATE TABLE sysIdentification (
   sys_ConstraintDefaultBehavior enum('locktypetotype','unconstrainedbydefault','allownullwildcards') NOT NULL default 'locktypetotype' COMMENT 'Determines default behaviour when no detail types are specified',
   sys_AllowRegistration tinyint(1) unsigned NOT NULL default '0' COMMENT 'If set, people can apply for registration through web-based form',
   sys_MediaFolders TEXT default NULL COMMENT 'Additional comma-sep directories which can contain files indexed in database',
-  sys_MediaExtensions varchar(1024) default 'jpg,jpe,jpeg,jfif,sid,png,gif,tif,tiff,bmp,rgb,doc,docx,odt,mp3,mp4,mpg,mpeg,mov,avi,wmv,wmz,aif,aiff,ashx,pdf,mbtiles,mid,midi,wms,wmd,qt,evo,cda,wav,csv,tsv,tab,txt,rtf,xml,xsl,xslx,xslt,xls,xlsx,hml,kml,kmz,shp,dbf,shx,svg,htm,html,xhtml,ppt,pptx,zip,gzip,tar,json,ecw' COMMENT 'The file extensions to be harvested from the MediaFolders directories',
+  sys_MediaExtensions varchar(1024) default 'jpg,jpe,jpeg,jfif,sid,png,gif,tif,tiff,bmp,rgb,doc,docx,odt,mp3,mp4,mpg,mpeg,mov,avi,wmv,wmz,aif,aiff,ashx,pdf,mbtiles,mid,midi,wms,wmd,qt,evo,cda,wav,csv,tsv,tab,txt,rtf,xml,xsl,xslx,xslt,xls,xlsx,hml,kml,kmz,shp,dbf,shx,svg,htm,html,xhtml,ppt,pptx,zip,gzip,tar,json,ecw,nxs,nxz,obj,3ds,stl,ply,gltf,glb,off,3dm,fbx,dae,wrl,3mf,ifc,brep,step,iges,fcstd,bim' COMMENT 'The file extensions to be harvested from the MediaFolders directories',
   sys_TreatAsPlaceRefForMapping VARCHAR(1000) DEFAULT '' COMMENT 'Comma delimited list of additional rectypes (local codes) to be considered as Places',
   sys_ExternalReferenceLookups TEXT default NULL COMMENT "Record type-function-field specifications for lookup to external reference sources such as GeoNames",  
   PRIMARY KEY  (sys_ID)
