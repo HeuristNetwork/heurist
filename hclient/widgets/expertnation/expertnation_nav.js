@@ -357,7 +357,8 @@ content = content.replace('http://heurist.sydney.edu.au/heurist/',window.hWin.HA
             ele.empty()
             .css({"min-height": '430px', 'max-height': '430px'})
             .load(window.hWin.HAPI4.baseURL+'hclient/widgets/expertnation/udelaide_roll_images.html',
-                function(){ 
+                function(){
+                    //loads content of gallery and change url to current server 
 
                     //var serv = window.hWin.HAPI4.serverURL+'/HEURIST/';
                     var serv = window.hWin.HAPI4.baseURL_pro.replace('/heurist/','/HEURIST/');
@@ -624,7 +625,8 @@ content = content.replace('http://heurist.sydney.edu.au/heurist/',window.hWin.HA
     //
     //
     //
-    __initGalleryContainer: function(container){
+    __initGalleryContainer: function(container)
+    {
         //image rollover with effects
         container.find('.gallery-slideshow').hide();
 
