@@ -377,10 +377,12 @@ function hexportMenu( container ) {
                 
                 if(opts.format=='iiif'){
                     
-                        params = 'format=iiif';
+                        
                         
                         if(opts.save_as_file==='mirador'){
-                                script = 'hclient/widgets/viewers/miradorViewer.php'
+                            script = 'hclient/widgets/viewers/miradorViewer.php'
+                        }else{
+                            params = 'format=iiif';    
                         }
                 }else {
                         params = params + '&format='+opts.format+'&defs=0&extended='+($('#extendedJSON').is(':checked')?2:1);
