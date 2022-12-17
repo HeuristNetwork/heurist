@@ -83,7 +83,7 @@ if($isOutSideRequest){ //this is request from outside - redirect to master index
         if ($rec!=null){
             $database_url = @$rec['rec_URL'];
             if($database_url==null || $database_url==''){
-                $error_msg = 'Database URL is not set Heurist Reference Index for database ID#'.$database_id;
+                $error_msg = 'Database URL is not set in Heurist_Reference_Index database for database ID#'.$database_id;
             }
                 
         }else{
