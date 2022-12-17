@@ -1426,7 +1426,7 @@ private static function _getGeoJsonFeature($record, $extended=false, $simplify=f
         $res['when'] = array('timespans'=>$timevalues);
     }
     if($symbology){
-        $res['style'] = $symbology;
+        $res['style'] = $symbology; //individual symbology per feature
     }
 
     return $res;
@@ -1745,7 +1745,7 @@ private static function _getIiifCanvas($record, $ulf_ObfuscatedFileID){
     $canvas = '';    
     $comma = '';
     $info = array();
-    $label = strip_tags($record['rec_Title']);
+    $label = htmlspecialchars(strip_tags($record['rec_Title']));
     $rectypeID = $record['rec_RecTypeID'];
     
     //1. get "file" field values
@@ -1881,7 +1881,7 @@ $item = <<<CANVAS2
 {
         "@id": "http://$canvas_uri",
         "@type": "sc:Canvas",
-        "label": "$record_title",
+        "label": "$label",
         "height": $height,
         "width": $width,
         "thumbnail" : {
