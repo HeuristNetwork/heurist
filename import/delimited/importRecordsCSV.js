@@ -2704,8 +2704,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
                             if(keyfields.length>0){
 
                                 var msg = 'Field you marked as identifier contain wrong or out of range values. Table below shows the number of wrong values';
-                                    
-                                $( window.hWin.HEURIST4.msg.createAlertDiv(msg)).appendTo(container3);
+                                var many_values = false;
 
                                 tbl  = $('<table class="tberror"><tr><th>Field</th><th align=center>Non integer values</th><th align=center>Out of range</th></tr>')
                                     .addClass('tbpreview')
@@ -2714,10 +2713,38 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
                                 for (i=0;i<keyfields.length;i++){
                                     
                                     var issues = response.data['err_keyfields'][keyfields[i]];
-                                
+                                    var non_int_issue = [];
+                                    var range_issue = [];
+
+                                    if(window.hWin.HEURIST4.util.isArrayNotEmpty(issues[0])){
+                                        non_int_issue = issues[0];
+                                    }else if($.isPlainObject(issues[0])){
+                                        non_int_issue = Object.values(issues[0]);
+                                    }
+                                    if(non_int_issue.length > 20){
+                                        non_int_issue.splice(20, non_int_issue.length);
+                                        many_values = true;
+                                    }
+
+                                    if(window.hWin.HEURIST4.util.isArrayNotEmpty(issues[1])){
+                                        range_issue = issues[1];
+                                    }else if($.isPlainObject(issues[1])){
+                                        range_issue = Object.values(issues[1]);
+                                    }
+                                    if(range_issue.length > 20){
+                                        range_issue.splice(20, range_issue.length);
+                                        many_values = true;
+                                    }
+
                                     $('<tr><td>'+window.hWin.HEURIST4.util.htmlEscape(response.data['fields'][keyfields[i]])+'</td>'
-                                        +'<td>'+(issues[0]>0?issues[0]:'')+'</td><td>'+(issues[1]>0?issues[1]:'')+'</td></tr>').appendTo(tbl);
-                                }         
+                                        +'<td>'+non_int_issue.join(' ; ')+'</td><td>'+range_issue.join(' ; ')+'</td></tr>').appendTo(tbl);
+                                }
+
+                                if(many_values){
+                                    msg += ' (showing first 20 values only)';
+                                }
+
+                                $( window.hWin.HEURIST4.msg.createAlertDiv(msg)).insertBefore(tbl);
                             }
                             $('<hr>').appendTo(container3);
                             haveErrors = true;

@@ -331,10 +331,10 @@ $.widget( "heurist.navigation", {
                 s.push(this.ids_recurred[i]+' '
                     +this.menuData.fld(this.menuData.getById(this.ids_recurred[i]), DT_NAME));
             }
-            window.hWin.HEURIST4.msg.showMsgDlg('Some menu items are recursive references to a menu containing themselves. '
-            +'Such a structure is not permissible for obvious reasons.<p>'
+            window.hWin.HEURIST4.msg.showMsgDlg('Some menu items are recursive references to a menu containing themselves. <br>'
+            +'Such a structure is not permissible for obvious reasons. Ask website author to fix this issue. <p>'
             +(s.join('<br>'))
-            +'</p>Ask website author to fix this issue');
+            +'</p>If you are the author simply edit the CMS Home record and clean up the list of menu entries there.');
             /*+'<p>How to fix:<ul><li>Open in record editor</li>'
             +'<li>Find parent menu(s) in "Linked From" section</li>'
             +'<li>Open parent menu record and remove link to this record</li></ul>');*/

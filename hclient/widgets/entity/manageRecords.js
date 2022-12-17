@@ -5227,15 +5227,6 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
                     width: 600,
                     modal: true,
 
-                    onInitFinished: function(event){
-
-                        var size = init_value.length;
-                        var that_searchForm = this;
-                        setTimeout(function(){ 
-                            that_searchForm.searchForm.find('#btn_search_start').click(); // run search
-                        }, 500);
-                    },
-
                     // Process selected record set
                     onselect: function(event, data){
 

@@ -482,14 +482,21 @@ function openSearchMenu(that, $select, disableClick=true){
                 if(_timeout==0){
                     $mnu.find('.ui-menu-item-wrapper').css('cursor','progress');
                 }
-                $.each($mnu.find('.ui-menu-item-wrapper'),
-                    function(i,item){
-                        if($(item).text().toLowerCase().indexOf(val)>=0){
-                            $(item).parent().css('display','list-item');
-                        }else{
-                            $(item).parent().css('display','none');
-                        }
-                    });    
+
+                let key = that.f('rst_RecTypeID')+'-'+that.f('rst_DetailTypeID');
+                $.each($mnu.find('.ui-menu-item-wrapper'), function(i,item){
+
+                    let title = $(item).text().toLowerCase();
+                    if($select.attr('rectype-select') == 1 && window.hWin.HEURIST4.browseRecordCache.hasOwnProperty(key)){
+                        title = window.hWin.HEURIST4.browseRecordCache[key][i]['rec_Title'].toLowerCase();
+                    }
+
+                    if(title.indexOf(val)>=0){
+                        $(item).parent().css('display','list-item');
+                    }else{
+                        $(item).parent().css('display','none');
+                    }
+                });
                 $mnu.find('div.not-found').css('display',
                     $mnu.find('.ui-menu-item-wrapper:visible').length==0?'block':'none');
                 _timeout = setTimeout(function(){$mnu.find('.ui-menu-item-wrapper').css('cursor','default');_timeout=0;},500);
@@ -848,10 +855,11 @@ function browseRecords(_editing_input, $input){
                     }
                     
                     that.selObj = window.hWin.HEURIST4.ui.createSelector(null);//, [{key:'select', title:'Search/Add'}]);
-                    
+
+                    $(that.selObj).attr('rectype-select', 1);
                     $(that.selObj).appendTo($inputdiv);
                     $(that.selObj).hide();
-                    
+
                     var search_icon = window.hWin.HAPI4.baseURL+'hclient/assets/magglass_12x11.gif',
                         filter_icon = window.hWin.HAPI4.baseURL+'hclient/assets/filter_icon_black18.png';
                     var opt = window.hWin.HEURIST4.ui.addoption(that.selObj, 'select', 
@@ -889,7 +897,7 @@ function browseRecords(_editing_input, $input){
                         ele.find('.rt-icon').css({width:'12px',height:'12px','margin-right':'10px'});
                         ele.find('.rt-icon2').css({'margin-right':'0px'});
 
-                        openSearchMenu(that, that.selObj, false);
+                        openSearchMenu(that, that.selObj, true);
                     };
 
                     events['onSelectMenu'] = function ( event ){

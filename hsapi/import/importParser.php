@@ -770,10 +770,10 @@ private static function prepareIntegerField($field, $k, $check_keyfield_K, &$err
             //not integer
             if($check_keyfield_K){
 
-                if(is_array(@$err_keyfields[$k])){
-                    $err_keyfields[$k][1]++;
-                }else{
-                    $err_keyfields[$k] = array(0,1);
+                if(is_array(@$err_keyfields[$k]) && count($err_keyfields[$k][1]) <= 20){
+                    $err_keyfields[$k][1][] = $value;
+                }else if(!is_array(@$err_keyfields[$k])){
+                    $err_keyfields[$k] = array(array(), array($value));
                 }
             }
             //exclude from array of fields with integer values
@@ -782,10 +782,10 @@ private static function prepareIntegerField($field, $k, $check_keyfield_K, &$err
         }else if(intval($value)<0 || intval($value)>2147483646){ //max int value in mysql
 
             if($check_keyfield_K){
-                if(is_array(@$err_keyfields[$k])){  //out of range
-                    $err_keyfields[$k][0]++;
-                }else{
-                    $err_keyfields[$k] = array(1,0);
+                if(is_array(@$err_keyfields[$k]) && count($err_keyfields[$k][0]) <= 20){  //out of range
+                    $err_keyfields[$k][0][] = $value;
+                }else if(!is_array(@$err_keyfields[$k])){
+                    $err_keyfields[$k] = array(array($value), array());
                 }
             }
             //exclude from array of fields with integer values

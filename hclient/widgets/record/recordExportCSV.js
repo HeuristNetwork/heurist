@@ -611,7 +611,7 @@ $.widget( "heurist.recordExportCSV", $.heurist.recordAction, {
                         let node_order = that.element.find('[name="tree_order"]:checked').val();
 
                         var res = window.hWin.HEURIST4.dbs.createRectypeStructureTree( null, 6, 
-                                                            rectypes, ['header_ext','all'], parentcode, node_order );
+                                                            rectypes, ['header_ext','all','parent_link'], parentcode, node_order );
                         if(res.length>1){
                             data.result = res;
                         }else{

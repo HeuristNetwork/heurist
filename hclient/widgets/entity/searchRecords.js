@@ -120,7 +120,7 @@ $.widget( "heurist.searchRecords", $.heurist.searchEntity, {
         }else{
             this.btn_add_record.show();
         }
-        
+
         // create list of tabs for every rectype in this.options.rectype_set
         if(!is_addonly && is_expand_rt_list){ //(rt_list.length>1 && rt_list.length<20)
             
@@ -151,44 +151,6 @@ $.widget( "heurist.searchRecords", $.heurist.searchEntity, {
                             .appendTo(groupTabHeader);
                     $('<div id="rty'+rectypeID+'">').appendTo(cont);
                 }
-/*  pair of add+search buttons              
-                $('<button>')
-                    .button({label: label, 
-                             icon: is_browse?'ui-icon-search':"ui-icon-plus"})
-                    .attr({'data-rtyid': rectypeID, 'title': label})
-                    .css({'font-size':'10px',display:'inline-block',width:100,'text-align':'left','margin':'6px 0px 3px 8px','text-transform':'none'})
-                    .addClass('truncate ui-button-action')
-                    .click(function(e) {
-                        
-                        var rtyid = $(e.target).attr('data-rtyid');
-                        if(is_browse){
-                            that.selectRectype.val( rtyid ).hSelect('refresh');
-                            that.selectRectype.change();
-                        }else{
-                            that._trigger( "onaddrecord", null, rtyid );    
-                        }
-                    })
-                    .appendTo(cont);
-                    
-                if(this.options.pointer_mode == 'addorbrowse'){
-                                
-                    $('<button>')
-                        .button({label:window.hWin.HR("Filter by record type"), icon: "ui-icon-search", showLabel:false})
-                        .attr('data-rtyid', rectypeID)
-                        .css({'font-size':'10px',display:'inline-block',width:20,'margin-right':10,'margin':'6px 0 3px 0','text-transform':'none'})
-                        .click(function(e) {
-                            var el = $(e.target);
-                            el = el.is('button') ?el :el.parents('button');
-                            var rtyid = el.attr('data-rtyid'); 
-                            
-                            that.selectRectype.val( rtyid ).hSelect('refresh');
-                            that.selectRectype.change();
-                            //that.startSearch();//
-                        })
-                        .appendTo(cont);
-                    
-                }
-*/                
             }//for
             
             //on switch - change filter
@@ -229,7 +191,7 @@ $.widget( "heurist.searchRecords", $.heurist.searchEntity, {
                 this.element.find('label[for="sel_rectypes-button"]').hide();
                 this.element.find('#sel_rectypes-button').hide();
                 this.btn_select_rt.hide();
-                
+
                 if(is_addonly){
 
                     var search_val = that.element.find('#fill_in_data').val();
@@ -381,7 +343,9 @@ $.widget( "heurist.searchRecords", $.heurist.searchEntity, {
 
         this._trigger( "onstart" ); //trigger ajust          
         
-        if(this.options.fixed_search) this.startSearch() 
+        if(this.options.fixed_search || this.options.parententity > 0 || !window.hWin.HEURIST4.util.isempty(this.options.init_filter)){
+            setTimeout(() => { that.startSearch(); }, 500);
+        }
     },  
 
     //
@@ -405,7 +369,7 @@ $.widget( "heurist.searchRecords", $.heurist.searchEntity, {
         var qstr = '', domain = 'a', qobj = [];
         
         var links_count = null;
-        
+
         //by record type
         let rectype_filter = this.selectRectype.val();
         if(rectype_filter!=''){
