@@ -63,7 +63,10 @@ $.widget( "heurist.navigation", {
             }
             //A11 this.element.addClass('ui-widget-content').css({'background':'none','border':'none'});
         }else{
-            this.element.css('height','100%').addClass('ui-heurist-header2')    
+            this.element.css('height','100%');    
+            if(this.element.parents('.main-header').length>0){
+                this.element.addClass('ui-heurist-header2');
+            }
         }
         
         this.element.disableSelection();// prevent double click to select text

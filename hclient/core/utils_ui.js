@@ -2625,6 +2625,8 @@ window.hWin.HEURIST4.ui = {
             var scripts = [ path+actionName+'.js'];
             if(actionName=='recordAdd'){
                 scripts= [path+'recordAccess.js', path+'recordAdd.js'];
+            }else if( actionName=='thematicMapping'){
+                scripts= [window.hWin.HAPI4.baseURL + 'hclient/widgets/entity/popups/'+actionName+'.js'];
             }
             
             //load missed javascripts
@@ -3088,6 +3090,104 @@ window.hWin.HEURIST4.ui = {
         }
     },
   
+    //
+    //
+    //  options
+    //     selector - for images, by default a[data-fancybox="home-roll-images"]
+    //        OR
+    //     content - array of objects {title:, img: }    
+    //     maxWidth 
+    //     maxHeight  - 430px
+    //     duration - 7000 ms
+    //     fade_duration - 300 ms
+    //     showTitle - false 
+    //
+    //
+    initGalleryContainer: function(container, options)
+    {
+        options = $.extend(options, {selector:'a[data-fancybox="home-roll-images"]'
+                            ,maxHeight:'430px',duration:7000,fade_duration:300});
+                            
+        var imgs = [];
+        
+        if(!options.content){
+        
+            //image rollover with effects
+            container.find('.gallery-slideshow').hide();
+
+            var selector = '.gallery-slideshow > '+options.selector;
+            var thumbs = container.find(selector); //all thumbnails
+            
+            options.content = [];
+            $(thumbs).each(function(idx, alink){
+                options.content.push( {title:$(alink).attr('title') ,img:$(alink).attr('href') });
+            });
+        }else{
+            container.empty();
+        }
+        
+
+        var title_ele = $('<h4>').css({'background-color': 'rgba(0,0,0,0.65)', bottom: 0,
+            color: '#fff', left: 0, margin:'0.2em 0em', padding: '0.75em 1em', position: 'absolute'})
+            .appendTo( container );
+        if(!options.showTitle){
+            title_ele.hide();
+        }
+
+        //init slide show
+        var idx = 0;
+        function __onImageLoad(){
+
+            setInterval(function(){                               
+
+                $(imgs[idx]).hide('fade', null, (options.fade_duration-100), function(){
+                    idx = (idx == imgs.length-1) ?0 :(idx+1);
+                    //show next one
+                    $(imgs[idx]).show('fade', null, options.fade_duration);        
+                    if(options.showTitle){
+                        title_ele.html(imgs[idx].attr('title'));    
+                    }
+                });
+                
+                
+                
+                },options.duration);                  
+        }
+        
+
+        //load full images
+        $.each(options.content, function(idx, item){
+            //add images
+            var img = $('<img>').css('max-height',options.maxHeight).appendTo( container );
+            if(options.maxWidth){
+                img.css('max-width',options.maxWidth);
+            }
+            img.attr('title', item.title);
+            
+            imgs.push(img);
+
+            if(idx>0){ //hide all except first one
+                img.hide().attr('src',item.img);
+            }else{
+                title_ele.html(item.title);    
+                img.load(__onImageLoad).attr('src',item.img); 
+            } 
+        });
+
+        /* fancybox gallery
+        if($.fancybox && $.isFunction($.fancybox)){
+        $.fancybox({selector : selector,
+        loop:true, buttons: [
+        "zoom",
+        "slideShow",
+        "thumbs",
+        "close"
+        ]});
+        }
+        */
+
+    },
+    
 }//end ui
 
 }
@@ -3217,6 +3317,8 @@ $.widget( "heurist.hSelect", $.ui.selectmenu, {
         });
       
   },
+  
+
   
 
 });
