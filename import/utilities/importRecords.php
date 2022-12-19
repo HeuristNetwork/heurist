@@ -170,15 +170,16 @@ $s_max_size = round($max_size/1024/1024).' MBytes';
             -->           
 
 
-            <p class="st1_ImportRtError import-rem heurist-helper3">
-                We were unable to download definitions from the source database for <span class="cnt_missed_rt2"></span> (listed above) specified in the XML file. 
-                <br>This may indicate an unregistered source (if indicated above), deletion of these types from the source database, or errors in the XML file (typos in XML tags, record type or field code). 
+            <p class="st1_ImportRtError import-rem heurist-helper3" style="color:red;">
+                We were unable to download definitions from the source database for 
+                <span class="cnt_missed_rt2"></span> (listed above) specified in the XML file. 
+                <br style="color:black;">This may indicate an unregistered source (if indicated above), deletion of these types from the source database, or errors in the XML file (typos in XML tags, record type or field code). 
                 <br>We recommend corrections to the XML file to eliminate such errors or remove data which cannot be matched, or manual downloading of definitions to match the incoming data.
             </p>
             <p class="st1_ImportRtError2 import-rem heurist-helper3">
                 If you do proceed, data for which there is no appropriate target record type will be ignored. This will result in an incomplete database. Make sure this is what you want before proceeding.
             </p>
-            <p class="st1_ImportRtError3 import-rem heurist-helper3">
+            <p class="st1_ImportRtError3 import-rem heurist-helper3" style="color:red;">
                 There are missing fields. Import is not allowed.
             </p>
 
