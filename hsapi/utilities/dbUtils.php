@@ -111,6 +111,49 @@ class DbUtils {
         }
         return $res;
     }    
+
+    //
+    // set Origin ID for rectype, detail and term defintions for 9999 
+    // (after import from unregistered database)
+    //
+    public static function updateImportedOriginatingIds(){
+
+        self::initialize();
+        
+        $res = true;
+        
+        $dbID = 0;    
+        if(defined('HEURIST_DBID')){
+            $dbID = HEURIST_DBID;    
+        }
+
+        $mysqli = self::$mysqli;
+        $result = 0;
+        $res = $mysqli->query("update defRecTypes set "
+            ."rty_OriginatingDBID='$dbID',rty_NameInOriginatingDB=rty_Name,rty_IDInOriginatingDB=rty_ID "
+            ."where (rty_OriginatingDBID = '9999')");
+        if ($res===false) {$result = 1; }
+        // Fields
+        $res = $mysqli->query("update defDetailTypes set "
+            ."dty_OriginatingDBID='$dbID',dty_NameInOriginatingDB=dty_Name,dty_IDInOriginatingDB=dty_ID "
+            ."where (dty_OriginatingDBID = '9999')");
+        if ($res===false) {$result = 1; }
+        // Terms
+        $res = $mysqli->query("update defTerms set "
+            ."trm_OriginatingDBID='$dbID',trm_NameInOriginatingDB=trm_Label, trm_IDInOriginatingDB=trm_ID "
+            ."where (trm_OriginatingDBID = '9999')");
+        if ($res===false) {$result = 1; }
+
+        
+        if ($result == 1){
+            self::$system->addError(HEURIST_DB_ERROR,
+                        'Error on update IDs "IDInOriginatingDB" fields for unregistered (imported) definitions '.$dbID, $mysqli->error);
+            $res = false;
+        }
+        
+        return $res;
+    }    
+
     
     //
     // $params - registration parameters

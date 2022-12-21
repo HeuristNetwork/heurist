@@ -25,6 +25,7 @@
 require_once(dirname(__FILE__)."/../../admin/verification/verifyValue.php");
 require_once(dirname(__FILE__)."/../../hsapi/dbaccess/db_records.php");
 require_once(dirname(__FILE__).'/../../hsapi/dbaccess/recordsBatch.php');
+require_once(dirname(__FILE__).'/../../hsapi/utilities/dbUtils.php');
 
 
 /*
@@ -35,6 +36,9 @@ importDefintions - Imports missed record types from remote database (uses dbsImp
 importRecords - import records from xml or json file
 
 
+Special case - import from unregistered dastabase
+1) When we import definition with concept code 0000-xxx it is added to target as 9999-xxx
+2) When we import record with concept code 0000-xxx it searches defs in target as 9999-xxx
 
 */
 class ImportHeurist {
@@ -70,7 +74,7 @@ private static function initialize($fields_correspondence=null)
 */
 private static function _readDataFile($filename, $type=null, $validate=true){
    
-   $data=null;
+    $data=null;
     try{
         // TODO: This special-casing based on a specific file name, which could be changed in an entirely
         // different part of the code, is a pretty horrible way of setting a file path. Should be passed directly
@@ -214,6 +218,7 @@ private static function hmlToJson($filename){
 			if($db_url==null){
 				$db_url = ''.$xml_rec->citeAs; 
 				if($db_url!='') $db_url = substr($db_url,0,strpos($db_url,'?'));
+                $db_url = $db_url.'?db='.$xml_doc->database;
 			}
 			
 			foreach($xml_rec->children() as $xml_det){
@@ -355,6 +360,7 @@ public static function getDefintions($filename){
         //find local ids
         foreach ($imp_rectypes as $rtid => $rt){
             $conceptCode = $rt['code']?$rt['code']:rtid;
+            
             $local_id = DbsImport::getLocalCode('rectypes', $database_defs, $conceptCode, false);
             $imp_rectypes[$rtid]['target_RecTypeID'] = $local_id;
         }
@@ -374,6 +380,7 @@ public static function getDefintions($filename){
                 //find local ids
                 foreach ($imp_detailtypes as $dtid => $dt){
                     $conceptCode = $dt['code']?$dt['code']:$dtid;
+                    
                     $local_id = DbsImport::getLocalCode('detailtypes', $database_defs, $conceptCode, false);
                     $imp_detailtypes[$dtid]['target_dtyID'] = $local_id;
                 }
@@ -384,6 +391,7 @@ public static function getDefintions($filename){
         $res = array(
             'database'=>@$data['heurist']['database']['id'],
             'database_name'=>@$data['heurist']['database']['db'],
+            'database_url'=>@$data['heurist']['database']['url'],
             'rectypes'=>$imp_rectypes,    //need to download/sync rectypes
             'detailtypes'=>$imp_detailtypes  //need to show missed detail fields
         );
@@ -421,8 +429,12 @@ public static function importDefintions($filename, $session_id){
         $importDef = new DbsImport( self::$system );
 
 //$time_debug = microtime(true);        
+//    $allow_import_unregistered = (@$params['allow_unregistered']===true || @$params['allow_unregistered']==1);
 
-        if (!(@$data['heurist']['database']['id']>0)) {
+        //special case - target is registered
+
+            
+        if (false && !(@$data['heurist']['database']['id']>0)) {  //TT1 - todo use $allow_import_unregistered
             self::$system->addError(HEURIST_ERROR, '<b>Not possible to determine an origin database id (source of import).</b>'
 .'<br><br><div>Value read = 0 = non-Heurist source or unregistered Heurist database. This will only work if your database already'
 .' contains all the entity types, fields, vocabularies and terms required to hold the incoming data. Please add all required structures'
@@ -438,6 +450,7 @@ public static function importDefintions($filename, $session_id){
                     'session_id'=>$session_id,
                     'defType'=>'rectype', 
                     'databaseID'=>@$data['heurist']['database']['id'], 
+                    'databaseURL'=>@$data['heurist']['database']['url'], 
                     'definitionID'=>array_keys($imp_rectypes),
                     'rectypes'=>$imp_rectypes,
                     'fieldtypes'=>$imp_detailtypes )))
@@ -611,6 +624,7 @@ public static function importRecords($filename, $params){
     $make_public = !(@$params['make_public']===false || @$_REQUEST['make_public']===0);
     $owner_id = @$params['onwer_id']>0 ?$params['onwer_id'] :1;
     $mapping_defs = @$params['mapping_defs'];
+//    $allow_import_unregistered = (@$params['allow_unregistered']===true || @$params['allow_unregistered']==1);
     
     $unique_field_id = @$params['unique_field_id'];
     $allow_insert = true;
@@ -688,7 +702,7 @@ EOD;
         
         //need to copy files
         $source_url = $data['heurist']['database']['url']; //url of database
-        $source_db = $data['heurist']['database']['db']; //name of datbase 
+        $source_db = $data['heurist']['database']['db']; //name of database 
         
         ini_set('max_execution_time', '0');
         
@@ -700,12 +714,17 @@ EOD;
         
         $dbsource_is_registered = (@$data['heurist']['database']['id']>0);
                             
-        if(defined('HEURIST_DBID')){ //target is registered
+        if(defined('HEURIST_DBID') && HEURIST_DBID>0){ //target is registered
             $dbsource_is_same = ( !$dbsource_is_registered || 
                             @$data['heurist']['database']['id']==HEURIST_DBID);
         }else{
-            //if source is registered - source is different
-            $dbsource_is_same = !$dbsource_is_registered;
+            
+            if(!$dbsource_is_registered){
+                $dbsource_is_same = false; //even definitions with conceptcodes 0000-xx will be imported
+            }else{
+                //if source is registered - source is different
+                $dbsource_is_same = !$dbsource_is_registered;
+            }
         }
 
         
@@ -725,6 +744,7 @@ EOD;
                 //for import records by mapping we check and import affected vocabularies only
                 $res2 = $importDef->doPrepare(  array('defType'=>'term', 
                             'databaseID'=>@$data['heurist']['database']['id'], 
+                            'databaseURL'=>@$data['heurist']['database']['url'], 
                             'definitionID'=>$mapping_defs['vocabularies'])); //array of vocabularies to be imported
                             
                 if($res2 && @$mapping_defs['import_vocabularies']==1){
@@ -745,6 +765,7 @@ EOD;
                 //Finds all defintions to be imported
                 $res2 = $importDef->doPrepare(  array('defType'=>'rectype', 
                             'databaseID'=>@$data['heurist']['database']['id'], 
+                            'databaseURL'=>@$data['heurist']['database']['url'], 
                             'definitionID'=>array_keys($imp_rectypes), //array of record type source ids
                             'rectypes'=>$imp_rectypes ));
                             
@@ -1419,11 +1440,14 @@ EOD;
             }
             if(!$is_rollback){ 
                 $idx_mask = $defs['rectypes']['typedefs']['commonNamesToIndex']['rty_TitleMask'];         
-                //update recrord title
+                //update record title
                 foreach ($keep_rectypes as $rec_id=>$rty_id){
                     $mask = @$defs['rectypes']['typedefs'][$rty_id]['commonFields'][$idx_mask];
                     recordUpdateTitle(self::$system, $rec_id, $mask, null);
                 }
+                
+                //update special concept codes 9999-xxx to correct ones
+                DbUtils::updateImportedOriginatingIds();
             }
         }
         

@@ -113,6 +113,25 @@ class DbsImport {
         
       )
     * @return mixed
+    * 
+    * 
+    * It fills various arrays that will be used in importing
+    * 
+    *   $this->imp_recordtypes = array();
+    *   $this->imp_fieldtypes = array();
+    *   $this->imp_terms = array("enum"=>array(), "relation"=>array());
+    *
+    *    //source id => target id  - local ids 
+    *    $this->rectypes_correspondence = array(); //source rectypeID => new (target) rectype ID
+    *    $this->fields_correspondence = array();  //import field id -> target id - IMPORTANT for proper titlemask conversion
+    *    //$fields_correspondence_existed = array();
+    *    $this->terms_correspondence = array(); //"enum"=>array(), "relation"=>array());
+    *    $this->vcg_correspondence = array();
+    *    //$terms_correspondence_existed = array();
+    *    $this->rectypes_upddated  = array();
+    *    $this->rectypes_added  = array();
+    * 
+    * 
     */
     public function doPrepare( $data ){
         
@@ -141,45 +160,52 @@ $time_debug2 = $time_debug;
             $local_ids = $data['definitionID'];
             if(!is_array($local_ids)) $local_ids = array($local_ids);
         }
+        
+        if(!@$data['databaseURL']){
             
-        if(@$data['conceptCode']){  //take db id and def id from concept code
-            
-            $cCode = $data['conceptCode'];
-            
-            if(is_array($cCode)){
-                if(count($cCode)>2){
-                    $db_reg_id = $cCode[2];
-                    $cCode = $cCode[0].'-'.$cCode[1];
-                }else{
-                    $cCode = implode('-',$cCode);    
-                }
-            }            
-            list($db_id, $ent_id) = explode('-', $cCode);
+            if(@$data['conceptCode']){  //take db id and def id from concept code
+                
+                $cCode = $data['conceptCode'];
+                
+                if(is_array($cCode)){
+                    if(count($cCode)>2){
+                        $db_reg_id = $cCode[2];
+                        $cCode = $cCode[0].'-'.$cCode[1];
+                    }else{
+                        $cCode = implode('-',$cCode);    
+                    }
+                }            
+                list($db_id, $ent_id) = explode('-', $cCode);
 
-            if(!(ctype_digit($db_id) && $db_id>0 && ctype_digit($ent_id) && $ent_id>0)){
-                $this->system->addError(HEURIST_INVALID_REQUEST, "Concept code ($cCode) has wrong format - should be two numbers separated by dash");
+                if(!(ctype_digit($db_id) && $db_id>0 && ctype_digit($ent_id) && $ent_id>0)){
+                    $this->system->addError(HEURIST_INVALID_REQUEST, "Concept code ($cCode) has wrong format - should be two numbers separated by dash");
+                    return false;
+                }
+                if(!($db_reg_id>0)){
+                    $db_reg_id = $db_id; //take source database from concept code
+                }
+            }
+            
+            if (!($db_reg_id>0)) {
+                //@todo - check missed definitions
+                //return true;
+                $this->system->addError(HEURIST_ERROR, "Not possible to determine an origin database id (source of import)");
                 return false;
             }
-            if(!($db_reg_id>0)){
-                $db_reg_id = $db_id; //take source database from concept code
+            if(!(count($local_ids)>0 || $cCode)){
+                $this->system->addError(HEURIST_ERROR, "Neither concept code nor local id is defined");
+                return false;   
             }
-        }
+            
+            $this->source_db_reg_id = $db_reg_id;
+            
+            // 1. get database url by database id
+            $database_url = $this->_getDatabaseURL($db_reg_id);        
         
-        if (!($db_reg_id>0)) {
-            //@todo - check missed definitions
-            //return true;
-            $this->system->addError(HEURIST_ERROR, "Not possible to determine an origin database id (source of import)");
-            return false;
+        }else{
+            $this->source_db_reg_id = $db_reg_id;
+            $database_url = $data['databaseURL'];        
         }
-        if(!(count($local_ids)>0 || $cCode)){
-            $this->system->addError(HEURIST_ERROR, "Neither concept code nor local id is defined");
-            return false;   
-        }
-        
-        $this->source_db_reg_id = $db_reg_id;
-        
-        // 1. get database url by database id
-        $database_url = $this->_getDatabaseURL($db_reg_id);        
         
 if(_DBG) error_log('get db url '.(microtime(true)-$time_debug));        
 $time_debug = microtime(true);        
@@ -350,7 +376,12 @@ $time_debug = microtime(true);
                     if(!(@$this->fields_correspondence[$ftId] || in_array($ftId, $this->imp_fieldtypes) )){
 
                         $ccode = $def_dts[$ftId]['commonFields'][$idx_ccode];
-                        $local_ftId = $this->_getLocalCode('detailtype', $this->target_defs, $ccode);
+                        $local_ftId = 0;//DbsImport::_getLocalIfUnregistered($ccode);
+                        if($local_ftId===0){ //registered concept code
+                            $local_ftId = $this->_getLocalCode('detailtype', $this->target_defs, $ccode);
+                        }else{
+                            $local_ftId = 0;
+                        }
 
                         //Get vocabulary for all terms used
                         $dt_Type = $def_dts[$ftId]['commonFields'][$idx_type];
@@ -365,8 +396,9 @@ $time_debug = microtime(true);
                         }
 
                         //there is no such field in target - it must be imported
-                        array_push($this->imp_fieldtypes, $ftId);
-                        
+                        if(!in_array($ftId, $this->imp_fieldtypes)){
+                            array_push($this->imp_fieldtypes, $ftId);    
+                        }
                     }
                 }
             }//for
@@ -379,14 +411,22 @@ $time_debug = microtime(true);
                     if(!(@$this->fields_correspondence[$ftId] || in_array($ftId, $this->imp_fieldtypes) )){
 
                             $ccode = $def_dts[$ftId]['commonFields'][$idx_ccode];
-                            $local_ftId = $this->_getLocalCode('detailtype', $this->target_defs, $ccode);
+                            
+                            $local_ftId = 0; //DbsImport::_getLocalIfUnregistered($ccode);
+                            if($local_ftId===0){ //registered concept code
+                                $local_ftId = $this->_getLocalCode('detailtype', $this->target_defs, $ccode);
+                            }else{
+                                $local_ftId = 0;
+                            }
 
                             if($local_ftId>0){ //already exists in target
                                 $this->fields_correspondence[$ftId] = $local_ftId;
                                 continue; //field with the same concept code is already in database
                             }
                             //there is no such field in target - it must be imported
-                            array_push($this->imp_fieldtypes, $ftId);
+                            if(!in_array($ftId, $this->imp_fieldtypes)){
+                                array_push($this->imp_fieldtypes, $ftId);
+                            }
                     }   
                 }
             }
@@ -572,6 +612,9 @@ foreach ($this->imp_recordtypes as $rtyID){
         //assign canonical to title mask (since in DB we store only rty_TitleMask)
         $def_rectype[$idx_titlemask] = $def_rectype[$idx_titlemask_canonical];
 
+        //converts 0000 origin db to 9999            TT1
+        $def_rectype[$idx_ccode] = DbsImport::convertUnregisteredCode($def_rectype[$idx_ccode],$rtyID);
+
         //fill original ids if missed
         if(!$def_rectype[$idx_origin_dbid] || !$def_rectype[$idx_origin_id]){
             if($def_rectype[$idx_ccode]){
@@ -588,7 +631,7 @@ foreach ($this->imp_recordtypes as $rtyID){
         if(!$def_rectype[$idx_origin_name]){
             $def_rectype[$idx_origin_name] = $def_rectype[$idx_name];
         }
-
+        
         $res = createRectypes($columnNames, array("0"=>array("common"=>$def_rectype)), false, false, null);
     //if(_DBG) error_log('rt '.$rtyID);
         if(is_numeric($res)){
@@ -712,6 +755,8 @@ foreach ($this->imp_fieldtypes as $ftId){
         $def_field[$idx_constraints] = $this->replaceRectypeIds(@$def_field[$idx_constraints]);
     }
 
+    $def_field[$idx_ccode] = DbsImport::convertUnregisteredCode($def_field[$idx_ccode],$ftId);    
+    
     //fill original ids if missed
     if(!$def_field[$idx_origin_dbid] || !$def_field[$idx_origin_id]){
         if($def_field[$idx_ccode]){
@@ -1173,6 +1218,9 @@ $mysqli->commit();
             
         }
         
+        //TT1
+        $conceptCode = DbsImport::convertUnregisteredCode($conceptCode, $source_id);
+        
         if($conceptCode){
             return DbsImport::getLocalCode($defType, $this->target_defs, $conceptCode, false);    
         }else{
@@ -1222,10 +1270,13 @@ $mysqli->commit();
         $local_id = 0;
         
         if(strpos($conceptCode,'-')!==false){
+            
             list($db, $id) = explode('-', $conceptCode); 
             if(ctype_digit($db) && $db==0 && ctype_digit($id) && $id>0){
                  $local_id = $id;          
             }
+            
+            //$local_id = DbsImport::_getLocalIfUnregistered($conceptCode);
         }else{
             $local_id = $conceptCode;
         }
@@ -1240,7 +1291,6 @@ $mysqli->commit();
             
         }else{
             //find by concept code
-
             foreach ($defs as $id => $def) {
                 if(is_numeric($id)){
                     
@@ -1272,6 +1322,38 @@ $mysqli->commit();
         
         return ($sall)?$res:null;
         
+    }
+
+    //
+    // If concept code is from unregistered database (0000-xxx), it converts it to 9999-xxx
+    //
+    public static function convertUnregisteredCode($conceptCode, $defID=null){
+        
+        if(!$conceptCode && $defID>0){
+            return '9999-'.$defID;
+        }   
+        
+        list($db, $id) = explode('-', $conceptCode); 
+        if(ctype_digit($db) && $db==0 && ctype_digit($id) && $id>0){
+             $conceptCode = '9999-'.$id;          
+        }else{
+            return $conceptCode;
+        }
+    }
+    
+    //
+    // Returns second part of concept code if database part is 0
+    //
+    private static function _getLocalIfUnregistered($conceptCode){
+        
+        $local_id = 0;
+        
+        list($db, $id) = explode('-', $conceptCode); 
+        if(ctype_digit($db) && $db==0 && ctype_digit($id) && $id>0){
+             $local_id = $id;          
+        }
+        
+        return $local_id;
     }
     
     // 
@@ -1379,7 +1461,13 @@ $mysqli->commit();
         $ccode = $def_rts[$rectype_id]['commonFields'][$idx_ccode]; //from source
 
         //is this record type already in target?
-        $local_recid = $this->_getLocalCode('rectype', $this->target_defs, $ccode); 
+        $local_recid = 0;//$this->_getLocalIfUnregistered($ccode);
+        if($local_recid===0){ //registered concept code
+            $local_recid = $this->_getLocalCode('rectype', $this->target_defs, $ccode); 
+        }else{
+            $local_recid = 0 ; //Important: it is assumed that record type from unregistered db doesn't exist in target
+        }
+        
         if($local_recid>0){  //already exist in destination
             $this->rectypes_correspondence[$rectype_id] = $local_recid;
             if($excludeDuplication){
@@ -1455,6 +1543,10 @@ $mysqli->commit();
 
             $terms = $this->source_defs['terms'];
             
+            //heurist core definitions may return old format - without new fields
+            if(!(@$terms['fieldNamesToIndex']['trm_OrderInBranch']>0)){
+            
+            }
             if(!(@$terms['fieldNamesToIndex']['trm_NameInOriginatingDB']>0)){
                 $terms['fieldNamesToIndex']['trm_NameInOriginatingDB'] = 19;
                 $terms['commonFieldNames'][19] = 'trm_NameInOriginatingDB';
@@ -1524,6 +1616,10 @@ if($term_id==11 || $term_id==518 || $term_id==497){
                     }
                 }else{
                     //find vocabulary in target and all its terms
+/*error_log('check recursion in '.$new_term_id);
+if($new_term_id==5039){
+    error_log("Next will be ours");
+}*/
                     $all_terms_in_vocab = $this->targetTerms->treeData($new_term_id, 3);
                 }
                 

@@ -38,7 +38,8 @@ function hImportRecords(_max_upload_size) {
     session_id,
     rectypesInSource,
     detailtypesInSource,
-    source_db;
+    source_db,
+    source_db_url;
 
     var targetMissed = 0;
     var targetDtMissed = 0;
@@ -149,9 +150,10 @@ function hImportRecords(_max_upload_size) {
                                 
                                     _hideProgress(0);
                                     if(response.status == window.hWin.ResponseStatus.OK){
-console.log(response);                                        
+//DEBUG console.log(response);                                        
                                         //render list of rectypes to be imported
                                         source_db = response.data.database;
+                                        source_db_url = response.data.database_url;
                                         var source_db_name = response.data.database_name;
                                         
                                         $('#div_sourcedb').html('Source database:&nbsp;&nbsp;&nbsp;id: <b>'
@@ -380,7 +382,7 @@ console.log(response);
             $('.cnt_missed_rt').text(__cntlbl(sourceMissed, sourceDtMissed));
             $('.st1_E').show();
 
-        }else if(!(source_db>0) || source_db==window.hWin.HAPI4.sysinfo.db_registeredid){
+        }else if(source_db==window.hWin.HAPI4.sysinfo.db_registeredid && window.hWin.HAPI4.sysinfo.db_registeredid>0){ //!(source_db>0) ||  TT 2022-12-21
             //source database is not registered or the same database
             //thus we can't or not need import defintions
             //show the list of all definitions in source
@@ -614,7 +616,11 @@ console.log(response);
                         $('#spanRecCount2').html(sMsg);
                         
                         //refresh local defintions
-                        window.hWin.HAPI4.EntityMgr.refreshEntityData('trm');
+                        if(true){
+                            window.hWin.HAPI4.SystemMgr.get_defs_all( false, window.hWin.document);    
+                        }else{
+                            window.hWin.HAPI4.EntityMgr.refreshEntityData('trm');    
+                        }
                         
                         //window.hWin.HEURIST4.msg.showMsgDlg('Imported '+response.data+' records');
                     }else{
