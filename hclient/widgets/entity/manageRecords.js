@@ -4400,6 +4400,20 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
             });
         });
         
+        if(window.hWin.HEURIST4.util.isempty(that._getField('rec_Title'))){
+            this._on($(this.element).find('.child_rec_fld'), {
+                click: (event) => {
+    
+                    if(window.hWin.HEURIST4.util.isempty(that._getField('rec_Title'))){ // Save record first without validation, only if this is a new record
+
+                        var fields = that._editing.getValues(false);
+                        fields['no_validation'] = 1; //do not validate required fields
+                        that._saveEditAndClose( fields, null);
+                    }
+                }
+            });
+        }
+
         //5. init rts_editor action buttons 
         if(this.options.rts_editor){
             //var that = this;

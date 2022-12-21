@@ -1731,6 +1731,7 @@ $.widget( "heurist.editing_input", {
                 }
             }
             rts = (rts.length>0)?rts.join(', '):'record';
+            let classes = 'sel_link2' + (isparententity ? ' child_rec_fld' : '');
             
             //define explicit add resource button
             $( "<button>", {title: "Select record to be linked"})
@@ -1738,7 +1739,7 @@ $.widget( "heurist.editing_input", {
                                label:('&nbsp;&nbsp;&nbsp;<span style="color: #55555566;">'+(isparententity?'create child':'select')+'&nbsp: '
                                +'<div class="truncate" style="max-width:200px;display:inline-block;vertical-align:middle">'
                                +rts+'</div></span>')})
-                        .addClass('sel_link2').css({'max-width':'300px'}) //, 'background': 'lightgray'})
+                        .addClass(classes).css({'max-width':'300px'}) //, 'background': 'lightgray'})
                         .appendTo( $inputdiv );
             
             __show_select_function = null;
