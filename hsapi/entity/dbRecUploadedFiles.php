@@ -829,8 +829,6 @@ When we open "iiif_image" in mirador viewer we generate manifest dynamically.
         }
         else if(@$this->data['delete_unused']){ // delete file records not in use
 
-            $ids = $this->data['delete_unused'];
-            $where_clause = 'WHERE dtl_ID IS NULL';
             if(is_array($ids) && count($ids) > 0){ // multiple
                 $where_clause .= ' AND ulf_ID IN (' . implode(',', $ids) . ')';
             }else if(is_int($ids) && $ids > 0){ // single
@@ -935,6 +933,83 @@ When we open "iiif_image" in mirador viewer we generate manifest dynamically.
 
                 $ret = $results;
             }
+        }
+        else if(@$this->data['merge_duplicates']){ // merge duplicate local + remote files
+
+            $ids = $this->data['merge_duplicates'];
+            $where_ids = '';
+
+            $local_fixes = 0;
+            $remote_fixes = 0;
+
+            if(is_array($ids) && count($ids) > 0){ // multiple
+                $where_ids .= ' AND ulf_ID IN (' . implode(',', $ids) . ')';
+            }else if(is_int($ids) && $ids > 0){ // single
+                $where_ids .= ' AND ulf_ID = ' . $ids;
+            }// else use all
+
+            //search for duplicated local files
+            $query = 'SELECT ulf_FilePath, ulf_FileName, count(*) as cnt FROM recUploadedFiles WHERE ulf_FileName IS NOT NULL' . $where_ids . ' GROUP BY ulf_FilePath, ulf_FileName HAVING cnt > 1';
+            $local_dups = $mysqli->query($query);
+
+            if($local_dups && $local_dups->num_rows > 0){
+
+                //find id with duplicated path+name
+                while($local_file = $local_dups->fetch_row()){
+
+                    $query = 'SELECT ulf_ID FROM recUploadedFiles WHERE ulf_FilePath' 
+                        . ( @$local_file[0]!=null ? '="' . $mysqli->real_escape_string($local_file[0]) . '"' : ' IS NULL' ) .' AND ulf_FileName="'
+                        .$mysqli->real_escape_string($local_file[1]).'"' . $where_ids;
+                    $res = $mysqli->query($query);
+
+                    $dups_ids = array();
+                    while ($local_id = $res->fetch_row()) {
+                        array_push($dups_ids, $local_id[0]);
+                    }
+                    $res->close();
+
+                    $new_ulf_id = array_shift($dups_ids);
+                    $upd_query = 'UPDATE recDetails set dtl_UploadedFileID='.$new_ulf_id.' WHERE dtl_UploadedFileID in ('.implode(',',$dups_ids).')';
+                    $del_query = 'DELETE FROM recUploadedFiles where ulf_ID in ('.implode(',',$dups_ids).')';
+
+                    $mysqli->query($upd_query);
+                    $mysqli->query($del_query);
+                    $local_fixes = $local_fixes + count($dups_ids);
+                }
+                $local_dups->close();
+            }
+
+            //search for duplicated remote files
+            $query = 'SELECT ulf_ExternalFileReference, count(*) as cnt FROM recUploadedFiles WHERE ulf_ExternalFileReference IS NOT NULL'. $where_ids .' GROUP BY ulf_ExternalFileReference HAVING cnt > 1';
+            $remote_dups = $mysqli->query($query);
+            
+            if ($remote_dups && $remote_dups->num_rows > 0) {
+
+                //find id with duplicated url 
+                while ($res = $remote_dups->fetch_row()) {
+
+                    $query = 'SELECT ulf_ID FROM recUploadedFiles WHERE ulf_ExternalFileReference="'.$mysqli->real_escape_string($res[0]).'"' . $where_ids;
+                    $res = $mysqli->query($query);
+
+                    $dups_ids = array();
+                    while ($remote_id = $res->fetch_row()) {
+                        array_push($dups_ids, $remote_id[0]);
+                    }
+                    $res->close();
+
+                    $new_ulf_id = array_shift($dups_ids);
+                    $upd_query = 'UPDATE recDetails set dtl_UploadedFileID='.$new_ulf_id.' WHERE dtl_UploadedFileID in ('.implode(',',$dups_ids).')';
+                    $del_query = 'DELETE FROM recUploadedFiles where ulf_ID in ('.implode(',',$dups_ids).')';
+
+                    $mysqli->query($upd_query);
+                    $mysqli->query($del_query);
+                    $remote_fixes = $remote_fixes + count($dups_ids); 
+                }
+
+                $remote_dups->close();
+            }
+
+            $ret = array('local' => $local_fixes, 'remote' => $remote_fixes);
         }
 
         if($ret===false){

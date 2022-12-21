@@ -31,6 +31,7 @@ $.widget( "heurist.searchRecUploadedFiles", $.heurist.searchEntity, {
         this.btn_add_record_popup = this.element.find('#btn_add_record_popup'); 
         this.btn_add_record_any = this.element.find('#btn_add_record_any');
         this.btn_edit_mimetypes = this.element.find('#btn_edit_mimetypes');
+        this.btn_remove_dups = this.element.find('#btn_remove_dups');
         this.btn_remove_unused = this.element.find('#btn_remove_unused');
         
         if(this.options.edit_mode=='none'){
@@ -73,6 +74,11 @@ $.widget( "heurist.searchRecUploadedFiles", $.heurist.searchEntity, {
                     window.hWin.HEURIST4.ui.showEntityDialog('defFileExtToMimetype',
                                                 {edit_mode:'inline', width:900});
                 }); 
+
+            this.btn_remove_dups.button({label: window.hWin.HR("Combine duplicates")})
+                .click(function(e) {
+                    that._trigger('onremovedups')
+                });
 
             this.btn_remove_unused.button({label: window.hWin.HR("Delete unused files"), icons: {primary: "ui-icon-trash"} })
                 .click(function(e) {

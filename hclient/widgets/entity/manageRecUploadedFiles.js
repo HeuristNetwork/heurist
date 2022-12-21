@@ -69,7 +69,7 @@ $.widget( "heurist.manageRecUploadedFiles", $.heurist.manageEntity, {
                         ?(window.hWin?window.hWin.innerHeight:window.innerHeight)*0.95:this.options.height;
 
         if($.isPlainObject(this.options.selection_on_init)){
-console.log( this.options.selection_on_init);            
+
             this._init_ExternalFileReference = this.options.selection_on_init.ulf_ExternalFileReference 
                                                 ? this.options.selection_on_init.ulf_ExternalFileReference :null;
             this._init_MimeExt = this.options.selection_on_init.ulf_MimeExt
@@ -154,7 +154,8 @@ console.log( this.options.selection_on_init);
                 "searchrecuploadedfilesonaddany": function() { this._additionMode='any'; this.addEditRecord(-1); },
                 "searchrecuploadedfilesonaddlocal": this._uploadFileAndRegister,   //browse, register and exit at once
                 "searchrecuploadedfilesondownload": this._downloadFileRefs,
-                "searchrecuploadedfilesonremoveunused": this._deleteUnused
+                "searchrecuploadedfilesonremoveunused": this._deleteUnused,
+                "searchrecuploadedfilesonremovedups": this._combineDups
         });
 
         return true;
@@ -1450,6 +1451,46 @@ window.hWin.HAPI4.baseURL+'?db=' + window.hWin.HAPI4.database  //(needplayer?'&p
         function(response){
             if(response.status == window.hWin.ResponseStatus.OK){
                 window.hWin.HEURIST4.msg.showMsgFlash(response.data + ' files deleted', 3000);
+            }else{
+                window.hWin.HEURIST4.msg.showMsgErr(response);
+            }
+        });
+    },
+    
+    //
+    // Merge duplicate files into one record
+    //
+    _combineDups: function(){
+
+        var that = this;
+
+        var ids = this.recordList ? this.recordList.resultList('getRecordSet').getIds() : 'all';
+        var request = {
+            'a': 'batch',
+            'entity': that.options.entity.entityName,
+            'merge_duplicates': 'all' //ids
+        };
+        window.hWin.HEURIST4.msg.showMsgFlash('Under development', 3000);
+
+        window.hWin.HAPI4.EntityMgr.doRequest(request, 
+        function(response){
+            if(response.status == window.hWin.ResponseStatus.OK){
+                
+                let res = response.data;
+                let msg = '';
+
+                if(res.local > 0){
+                    msg = res.local + ' local files processed';
+                }
+                if(res.remote > 0){
+                    msg += (msg == '' ? '<br>' : '') + res.remote + ' remote files processed';
+                }
+
+                if(msg == ''){
+                    msg = 'No duplicates found';
+                }
+
+                window.hWin.HEURIST4.msg.showMsgFlash(msg, 3000);
             }else{
                 window.hWin.HEURIST4.msg.showMsgErr(response);
             }
