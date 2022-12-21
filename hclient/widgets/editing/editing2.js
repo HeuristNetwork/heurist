@@ -198,7 +198,7 @@ function hEditing(_options) {
             while(idx<fields.length){
                 if( $.isPlainObject(fields[idx]) && fields[idx].groupType ){ //this is group
                     
-                    if(fields[idx].groupType=='group' && prev_children){
+                    if((fields[idx].groupType=='group' || fields[idx].groupType=='accordion_inner' || fields[idx].groupType=='expanded_inner') && prev_children){
                         //move this group inside previous group on the same level
                         prev_children.push(fields[idx]);    
                         fields.splice(idx,1);
@@ -207,6 +207,8 @@ function hEditing(_options) {
                         prev_children = null;    
                     }else if (fields[idx].groupType=='group'){ //group inside
                         fields[idx].groupType = 'group_break';  
+                    }else if(fields[idx].groupType=='accordion_inner' || fields[idx].groupType=='expanded_inner'){
+                        fields[idx].groupType = (fields[idx].groupType=='accordion_inner') ? 'accordion' : 'expanded';
                     }else{
                         prev_children = fields[idx].children;    
                     }
@@ -275,6 +277,36 @@ function hEditing(_options) {
                         }
                         
                         __createGroup(fields[idx].children, groupContainer, fieldContainer);
+                        continue;
+                    }else if(fields[idx].groupType=='accordion_inner' || fields[idx].groupType=='expanded_inner'){ // accordion within another group
+
+                        let headerText = fields[idx]['groupHeader'];
+                        let headerHelpText = fields[idx]['groupHelpText'];
+
+                        let $group_ele = $('<div>').css('width', '100%').appendTo(fieldContainer);
+                        let $field_ele = $('<fieldset>').addClass(options.className).appendTo($group_ele);
+
+                        let $help_ele = $('<div>').text(headerHelpText)
+                            .addClass('heurist-helper1 tab-separator-helper')
+                            .css({padding:'5px 0 0 5px',display:'inline-block'})
+                            .appendTo($field_ele);
+
+                        $('<h3>').html('<span class="separator2">'+headerText+'</span>').appendTo($group_ele);
+                        $field_ele.appendTo($('<div>').css('border', 'none').appendTo($group_ele));
+
+                        if(parseInt(fields[idx]['dtID'])>0){
+                            $field_ele.attr('data-dtid', fields[idx]['dtID']);
+                            $help_ele.attr('separator-dtid', fields[idx]['dtID']);
+                        }
+
+                        $group_ele.accordion({
+                            heightStyle: 'content',
+                            active: (fields[idx].groupType == 'expanded_inner') ? 0 : false,
+                            collapsible: true
+                        }).css('width', '100%');
+
+
+                        __createGroup(fields[idx].children, groupContainer, $field_ele);
                         continue;
                     }
                     

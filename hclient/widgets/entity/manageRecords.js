@@ -503,8 +503,9 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
     _createNonStandardField: function(dtId, div_ele){
 
         var that = this;
+        let parententity = Number(window.hWin.HAPI4.sysinfo['dbconst']['DT_PARENT_ENTITY']);
 
-        if(dtId == null || $Db.rst(this._currentEditRecTypeID, dtId) != null || $Db.dty(dtId, 'dty_Type') == 'separator'){
+        if(dtId == null || $Db.rst(this._currentEditRecTypeID, dtId) != null || $Db.dty(dtId, 'dty_Type') == 'separator' || dtId == parententity){
             return;
         }
 
@@ -2950,6 +2951,7 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
                                 rfr['rst_DisplayName'] = 'Non-standard fields for this record type';
                                 rfr['dty_Type'] = 'separator';
                                 rfr['rst_DisplayOrder'] = 1100;
+                                rfr['rst_DefaultValue'] = 'group_break';
                                 s_fields.push(rfr);
                             }
                             addhead++;
@@ -2979,6 +2981,7 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
             var temp_group_details = [], hasTabs = false; // check if any groupings are set to tabs
             var max_length_fields = []; // freetext, blobktext, and float fields that are set to max width
             var terms_as_buttons = []; // enum fields, for adjusting each button+label's width
+            var available_groups = ['group', 'group_break', 'tabs', 'tabs_new', 'accordion', 'accordion_inner', 'expanded', 'expanded_inner'];
 
             for(var k=0; k<s_fields.length; k++){
 
@@ -2997,12 +3000,7 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
                         groupHelpText: dtFields['rst_DisplayHelpText'],
                         groupHidden: false,
                         groupTitleVisible: (dtFields['rst_RequirementType']!=='forbidden'),
-                        groupType: (dtFields['rst_DefaultValue']=='group'||
-                                    dtFields['rst_DefaultValue']=='group_break'||
-                                    dtFields['rst_DefaultValue']=='tabs'||
-                                    dtFields['rst_DefaultValue']=='tabs_new'||
-                                    dtFields['rst_DefaultValue']=='accordion'||
-                                    dtFields['rst_DefaultValue']=='expanded')?dtFields['rst_DefaultValue']:'group',
+                        groupType: available_groups.includes(dtFields['rst_DefaultValue']) ? dtFields['rst_DefaultValue'] : 'group',
                         groupStyle: {},
                         children:[]
                     };

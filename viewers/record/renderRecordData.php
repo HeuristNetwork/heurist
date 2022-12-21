@@ -338,6 +338,7 @@ if(!($is_map_popup || $without_header)){
                         var next_group = groups[Number(idx)+1];
                         var key = (next_group == null) ? null : next_group[0];
                         var next_order = (key == null) ? null : next_group[1];
+                        var sep_type = (key == null) ? null : next_group[2];
                         var $field_container = $('<fieldset>').attr('id', order);
 
                         $.each($data, function(idx, detail){
@@ -354,7 +355,11 @@ if(!($is_map_popup || $without_header)){
                         });
 
                         if(group_name != '-'){
-                            $('<h4>').attr('data-order', order).css({'margin': '5px 0px 2px', 'font-size': '1.1em'}).text(group_name).appendTo($group_container);
+                            if(sep_type == 'group' || sep_type == 'accordion_inner' || sep_type == 'expanded_inner'){
+                                $('<h5>').attr('data-order', order).css({'margin': '5px 5px 2px', 'font-size': '1em', 'font-style': 'italic'}).text(group_name).appendTo($group_container);
+                            }else{
+                                $('<h4>').attr('data-order', order).css({'margin': '5px 0px 2px', 'font-size': '1.1em'}).text(group_name).appendTo($group_container);
+                            }
                         }else{
                             $('<hr>').attr('data-order', order).css({'margin': '5px 0px 5px', 'border-top': '1px solid black'}).appendTo($group_container);
                         }
@@ -1439,15 +1444,7 @@ function print_public_details($bib) {
     
     $hasAudioVideo = '';
     if($is_production){
-        $hasNoAudioVideo = 'style="float:right"';
-        foreach ($thumbs as $thumb) {
-            if($thumb['player'] && 
-                   (strpos($thumb['mimeType'],'audio/')===0 || strpos($thumb['mimeType'],'video/')===0)){
-                   $hasNoAudioVideo = '';
-                   break;
-            }
-        }
-        print '<div class="thumbnail production" '.$hasNoAudioVideo.'>';
+        print '<div class="thumbnail production">';
     }else{
         print '<div class="thumbnail">';
     }
@@ -1689,7 +1686,7 @@ function print_public_details($bib) {
     $current_type = null;
     $tabs_list = array();
 
-    $query = "SELECT rst_DisplayName, rst_DisplayOrder 
+    $query = "SELECT rst_DisplayName, rst_DisplayOrder, rst_DefaultValue 
               FROM defRecStructure
               LEFT JOIN defDetailTypes ON rst_DetailTypeID = dty_ID
               WHERE rst_RecTypeID = ". $bib['rec_RecTypeID'] ." AND dty_Type = 'separator' AND rst_RequirementType != 'forbidden'
@@ -1700,7 +1697,7 @@ function print_public_details($bib) {
     if($groups_res){
 
         while ($group = $groups_res->fetch_row()) {
-            $group_details[] = array($group[0], $group[1]);
+            $group_details[] = array($group[0], $group[1], $group[2]);
         }
 
     }
