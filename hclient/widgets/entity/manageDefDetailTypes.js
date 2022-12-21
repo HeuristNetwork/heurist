@@ -1760,8 +1760,8 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
                         buttons: btns,
                         title: 'Field customisation for new record pointer',
                         resizable: false,
-                        width: 605,
-                        height: 302,
+                        width: 640,
+                        height: 322,
                         default_palette_class: 'ui-heurist-design'
                     });
 
