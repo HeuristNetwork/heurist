@@ -4191,82 +4191,79 @@ setTimeout("console.log('2. auto='+ele2.height());",1000);
     //
     _showRecordViewPopup: function( rec_ID ){
                     
-                var recInfoUrl = null;
-                if(this._currentRecordset && rec_ID>0){
-                    recInfoUrl = this._currentRecordset.fld( this._currentRecordset.getById(rec_ID), 'rec_InfoFull' );
-                }else{
-                    return;
-                }
-                var lt = 'WebSearch';//window.hWin.HAPI4.sysinfo['layout'];  
-                if( !recInfoUrl ){
-                    
-                    if ( typeof this.options.rendererExpandDetails === 'string' && this.options.rendererExpandDetails.substr(-4)=='.tpl' ){
+        var recInfoUrl = null;
+        var is_template = false;
+        if(this._currentRecordset && rec_ID>0){
+            recInfoUrl = this._currentRecordset.fld( this._currentRecordset.getById(rec_ID), 'rec_InfoFull' );
+        }else{
+            return;
+        }
+        var lt = 'WebSearch';//window.hWin.HAPI4.sysinfo['layout'];  
+        if( !recInfoUrl ){
+            
+            if ( typeof this.options.rendererExpandDetails === 'string' && this.options.rendererExpandDetails.substr(-4)=='.tpl' ){
 
-                        recInfoUrl = window.hWin.HAPI4.baseURL + 'viewers/smarty/showReps.php?publish=1&debug=0&q=ids:'
-                        + rec_ID
-                        + '&db='+window.hWin.HAPI4.database+'&template='
-                        + encodeURIComponent(this.options.rendererExpandDetails);
-                    }else{
-                        recInfoUrl = window.hWin.HAPI4.baseURL + "viewers/record/renderRecordData.php?db="
-                                +window.hWin.HAPI4.database+"&ll="+lt+"&recID="+rec_ID;  
-                    }
-                }
+                recInfoUrl = window.hWin.HAPI4.baseURL + 'viewers/smarty/showReps.php?publish=1&debug=0&q=ids:'
+                + rec_ID
+                + '&db='+window.hWin.HAPI4.database+'&template='
+                + encodeURIComponent(this.options.rendererExpandDetails);
 
-                var that = this;
-                
-                var pos = null;
-                var dlg = $('#recordview_popup');               
-                
-                
-                var opts = { 
-                        is_h6style: true,
-                        modal: false,
-                        dialogid: 'recordview_popup',    
-                        //width: 700, height: 800, //(lt=='WebSearch'?(window.hWin.innerWidth*0.9):
-                        onmouseover: function(){
-                            that._clearTimeouts();
-                        },
-                        title:window.hWin.HR('Record Info')}                
-                    
-                if(!(dlg.length>0)){
-                    
-                    if(this.element.parent().attr('data-heurist-app-id')){ //CMS publication 
-                        pos = {my:'center', of: window};
-                        opts.width = window.hWin.innerWidth*0.8;
-                        opts.height = window.hWin.innerHeight*0.9;
-                    }else{
-                        //set intial position right to result list - for main interface only!
-                        pos = { my: "left top", at: "right top+100", of: $(this.element) };
-                    }
-                    
-                    opts.position = pos;
-                }
-                
-                
-                
-                window.hWin.HEURIST4.msg.showDialog(recInfoUrl, opts);
+                is_template = true;
+            }else{
+                recInfoUrl = window.hWin.HAPI4.baseURL + "viewers/record/renderRecordData.php?db="
+                        +window.hWin.HAPI4.database+"&ll="+lt+"&recID="+rec_ID;  
+            }
+        }
 
-                if(pos!=null){
-                    dlg = $('#recordview_popup').css('padding',0);
-                    this._on(dlg,{
-                        mouseout:function(){
-                            that._closeRecordViewPopup();
-                        }
-                    });
-                    var dlg_header = dlg.parent().find('.ui-dialog-titlebar');
-                    this._on(dlg_header,{mouseout:function(){
-                        that._closeRecordViewPopup();
-                    }});
-                    
+        var that = this;
+        
+        var pos = null;
+        var dlg = $('#recordview_popup');               
+
+        var opts = {
+            is_h6style: true,
+            modal: false,
+            dialogid: 'recordview_popup',    
+            //width: 700, height: 800, //(lt=='WebSearch'?(window.hWin.innerWidth*0.9):
+            onmouseover: function(){
+                that._clearTimeouts();
+            },
+            title:window.hWin.HR('Record Info'),
+            default_palette_class: 'ui-heurist-explore'
+        }
+
+        if(!(dlg.length>0)){
+            
+            if(this.element.parent().attr('data-heurist-app-id') || this.element.hasClass('cms-element')){ //CMS publication 
+                pos = {my:'center', of: window};
+
+                opts.height = window.hWin.innerHeight*0.9;
+
+                if(is_template){
+                    opts.width = window.hWin.innerWidth*0.8;
                 }
-                
-                /*
-                this._on(dlg, ifrm[0].contentWindow,{mouseover:function(){
-                    console.log('OVER');
-                }});
-                */
-                
-                        
+            }else{
+                //set intial position right to result list - for main interface only!
+                pos = { my: "left top", at: "right top+100", of: $(this.element) };
+            }
+
+            opts.position = pos;
+        }
+
+        window.hWin.HEURIST4.msg.showDialog(recInfoUrl, opts);
+
+        if(pos!=null){
+            dlg = $('#recordview_popup').css('padding',0);
+            this._on(dlg,{
+                mouseout:function(){
+                    that._closeRecordViewPopup();
+                }
+            });
+            var dlg_header = dlg.parent().find('.ui-dialog-titlebar');
+            this._on(dlg_header,{mouseout:function(){
+                that._closeRecordViewPopup();
+            }});
+        }
     }                        
     
     
