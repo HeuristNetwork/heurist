@@ -516,7 +516,7 @@ function openSearchMenu(that, $select, disableClick=true){
 			});
 		}
         
-        var btn_add_term = $menu.find('a.add-trm');
+        var btn_add_term = $menu.find('.add-trm');
         if(btn_add_term.length>0){
             that._on(btn_add_term, {
                 click: function(){
@@ -524,34 +524,31 @@ function openSearchMenu(that, $select, disableClick=true){
                     var suggested_name = $menu.find('input.input_menu_filter').val();
                     var vocab_id = that.f('rst_FilteredJsonTermIDTree');
 
-                    if(!window.hWin.HEURIST4.util.isempty(suggested_name)){
-
-                        var rg_options = {
-                            isdialog: true, 
-                            select_mode: 'manager',
-                            edit_mode: 'editonly',
-                            height: 240,
-                            rec_ID: -1,
-                            trm_VocabularyID: vocab_id,
-                            suggested_name: suggested_name, 
-                            create_one_term: true,
-                            onClose: function(trm_id){
-                                var trm_info = $Db.trm(trm_id, 'trm_ParentTermID'); 
-                                if(trm_info > 0){
-                                    if(that.selObj){
-                                        var ref_id = that.selObj.attr('ref-id');
-                                        that.selObj.remove();    
-                                        that.selObj = null;
-                                        
-                                        var $input = that.element.find('#'+ref_id);
-                                        browseTerms(that, $input, trm_id);                                    
-                                    }
+                    var rg_options = {
+                        isdialog: true, 
+                        select_mode: 'manager',
+                        edit_mode: 'editonly',
+                        height: 240,
+                        rec_ID: -1,
+                        trm_VocabularyID: vocab_id,
+                        suggested_name: suggested_name, 
+                        create_one_term: true,
+                        onClose: function(trm_id){
+                            var trm_info = $Db.trm(trm_id, 'trm_ParentTermID'); 
+                            if(trm_info > 0){
+                                if(that.selObj){
+                                    var ref_id = that.selObj.attr('ref-id');
+                                    that.selObj.remove();    
+                                    that.selObj = null;
+                                    
+                                    var $input = that.element.find('#'+ref_id);
+                                    browseTerms(that, $input, trm_id);                                    
                                 }
                             }
-                        };
+                        }
+                    };
 
-                        window.hWin.HEURIST4.ui.showEntityDialog('defTerms', rg_options);
-                    }
+                    window.hWin.HEURIST4.ui.showEntityDialog('defTerms', rg_options);
                 }
             });        
         }
@@ -1123,13 +1120,14 @@ function browseTerms(_editing_input, $input, value){
 
         var search_icon = window.hWin.HAPI4.baseURL+'hclient/assets/filter_icon_black18.png';
 
-        var  filter_form = '<div style="width:175px;padding:10px 0px">'
+        var filter_form = '<div style="width:265px;padding:10px 0px">'
         +'<span style="padding-right:10px;vertical-align:sub">'
         +'<img src="'+window.hWin.HAPI4.baseURL+'hclient/assets/16x16.gif'
         + '" class="rt-icon rt-icon2" style="background-image: url(&quot;'+search_icon+ '&quot;);"/></span>'
         +'<input class="input_menu_filter" size="15" style="outline: none;background:none;border: 1px solid lightgray;"/>'
         +'<span class="smallbutton ui-icon ui-icon-circlesmall-close" tabindex="-1" title="Clear entered" '
         +'style="position:relative; cursor: pointer; outline: none; box-shadow: none; border-color: transparent;"></span>'
+        +'<span class="add-trm" style="padding: 0 0 0 25px;cursor: pointer;">Add new term</span>'
         + '<div class="not-found" style="padding:10px;color:darkgreen;display:none;width:210px;">No terms match the filter '
         + '<a class="add-trm" href="#" style="padding: 0 0 0 10px;color:blue;display:inline-block;">Add term</a>'
         +'</div></div>';

@@ -895,7 +895,7 @@ $.widget( "heurist.editing_input", {
                             'media table paste help'  //insertdatetime  wordcount
                         ],      
                         //undo redo | code insert  |  fontselect fontsizeselect |  forecolor backcolor | media image link | alignleft aligncenter alignright alignjustify | fullscreen            
-                        toolbar: ['formatselect | bold italic forecolor | customHeuristMedia link | align | bullist numlist outdent indent | table | removeformat | help'],
+                        toolbar: ['formatselect | bold italic forecolor blockquote | customHeuristMedia link | align | bullist numlist outdent indent | table | removeformat | help'],
                         content_css: [
                             '//fonts.googleapis.com/css?family=Lato:300,300i,400,400i'
                             //,'//www.tinymce.com/css/codepen.min.css'
