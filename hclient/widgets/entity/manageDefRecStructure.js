@@ -324,6 +324,7 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
         treeData = [];
         
         var groupIdx = -1;
+        var available_outer_groups = ['tabs', 'tabs_new', 'group_break', 'accordion', 'expanded'];
         var outer_group = {};
         var inner_group = {}; // simple dividers or accordions placed within tabs
 
@@ -355,7 +356,7 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
 
             if(isSep){
 
-                if(sepType == 'tabs' || sepType == 'tabs_new'){ // new tabs
+                if(available_outer_groups.includes(sepType)){ // new outer group
                     if(!$.isEmptyObject(inner_group)){
                         outer_group['children'].push(inner_group);
                     }
@@ -371,7 +372,7 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
                     outer_group['children'].push(inner_group);
                     inner_group = $.extend({}, node);
                     inner_group['children'] = [];
-                }else if(outer_group.data && (outer_group.data.type == 'tabs' || outer_group.data.type == 'tabs_new')) { // new group within tabs
+                }else if(outer_group.data && available_outer_groups.includes(outer_group.data.type)){ // new group within tabs
                     inner_group = $.extend({}, node);
                     inner_group['children'] = [];
                 }else{ // first non-tabs group
@@ -427,8 +428,7 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
 
                 if(ele.hasClass('ui-icon') || ele.attr('data-action') == 'delete'){
                     return;
-                }
-                if(ele.hasClass('fancytree-expander') && ele.parent().hasClass('fancytree-has-children')){
+                }else if(ele.hasClass('fancytree-expander') && ele.parent().hasClass('fancytree-has-children')){
                     //data.node.setExpanded(!data.node.isExpanded());
                     return;
                 }
@@ -442,9 +442,7 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
 
                 if(data.node.key < 1){
                     return;
-                }
-
-                if(that.previewEditor){
+                }else if(that.previewEditor){
                     that.previewEditor.manageRecords('focusField', data.node.key);
                 }
             },
@@ -469,6 +467,11 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
                         }
                         
                     }
+                }
+            },
+            beforeExpand: function(event, data) {
+                if(available_outer_groups.includes(data.node.data.type) && data.node.isExpanded()){
+                    return false;
                 }
             }
         };
@@ -622,7 +625,7 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
 
             let dtyid = $(item).find('span[data-dtid]').attr('data-dtid');
             if($Db.dty(dtyid, 'dty_Type') != 'separator'){
-                $('<div class="detail-count" data-dtyid="'+ dtyid +'" style="position:absolute;right:2px;display:inline-block;padding:4px 3px 0;'
+                $('<div class="detail-count" data-dtyid="'+ dtyid +'" style="position:absolute;right:2px;display:inline-block;padding:4px 0 0 3px;'
                     + 'font-size:10px;font-weight:normal;text-transform:none;color:black;"></div>').appendTo(item);
             }
 
@@ -1788,6 +1791,9 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
                     s += (dt_type=='relmarker'?' or ':' ')+'target entity types';    
                 }
                 s += ': ';
+            }else if(dt_type=='blocktext'){
+                let $ele = this._editing.getFieldByName('rst_DefaultValue').find('.input-cell .heurist-helper3');
+                $('<span class="display:block;" class="heurist-helper2">To trigger WYSIWYG for blank field, enter a html tag such as &lt;p&gt;</span>').insertAfter($ele);
             }
             
             var ele = $('<div style="font-style:italic;padding:10px;display:inline-block">'
@@ -3109,7 +3115,7 @@ console.log('_afterDeleteEvenHandler');
                 $div.text(field_usages[dtyid]);
 
                 if($div.find('.ui-icon').length == 0){
-                    $div.append($('<span class="ui-icon ui-icon-extlink" />'));
+                    $div.append($('<span class="ui-icon ui-icon-extlink" style="color:gray;margin-left:5px;font-size:12px;" />'));
 
                     $div.contextmenu({
                         delegate: '.ui-icon',
