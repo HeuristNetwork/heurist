@@ -1486,7 +1486,9 @@ function recordSearchMenuItems($system, $menuitems, &$result, $find_root_menu=fa
                 if($isWebPage){
                     
                     return recordSearch($system, array('q'=>array('ids'=>$root_rec_id), 
-                        'detail'=>array(DT_NAME,DT_SHORT_SUMMARY,DT_CMS_TARGET,DT_CMS_CSS,DT_CMS_PAGETITLE,DT_EXTENDED_DESCRIPTION,DT_CMS_TOP_MENU,DT_CMS_MENU,DT_THUMBNAIL), //'detail' 
+                        'detail'=>array(DT_NAME,DT_SHORT_SUMMARY,DT_CMS_TARGET,DT_CMS_CSS,
+                                    DT_CMS_PAGETITLE,DT_EXTENDED_DESCRIPTION,DT_CMS_TOP_MENU,DT_CMS_MENU,DT_THUMBNAIL,
+                                    DT_CMS_TOPMENUSELECTABLE), //'detail' 
                         'w'=>'e', 'cms_cut_description'=>1));
                 }else{
                     //find parent home record
@@ -1546,7 +1548,8 @@ function recordSearchMenuItems($system, $menuitems, &$result, $find_root_menu=fa
         }else{
             //return recordset
             return recordSearch($system, array('q'=>array('ids'=>$result), 
-                'detail'=>array(DT_NAME,DT_SHORT_SUMMARY,DT_CMS_TARGET,DT_CMS_CSS,DT_CMS_PAGETITLE,DT_EXTENDED_DESCRIPTION,DT_CMS_TOP_MENU,DT_CMS_MENU,DT_THUMBNAIL), //'detail' 
+                'detail'=>array(DT_NAME,DT_SHORT_SUMMARY,DT_CMS_TARGET,DT_CMS_CSS,DT_CMS_PAGETITLE,DT_EXTENDED_DESCRIPTION,
+                    DT_CMS_TOP_MENU,DT_CMS_MENU,DT_THUMBNAIL,DT_CMS_TOPMENUSELECTABLE), //'detail' 
                 'w'=>'e', 'cms_cut_description'=>1));
         }
     }

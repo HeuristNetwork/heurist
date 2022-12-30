@@ -27,6 +27,7 @@ $.widget( "heurist.navigation", {
        target: 'inline', // inline (#page-content) or poup or target element id
        use_next_level: false,  //if top level consists of the single entry use next level of menues
        onmenuselect: null,   //for cms edit mode it performs special behavior
+       selectable_if_submenu: false, //if item has submenu it is not selectable by default
        aftermenuselect: null,
        toplevel_css:null,  //css for top level items
        expand_levels:0,  //expand levels for treeview
@@ -192,6 +193,15 @@ $.widget( "heurist.navigation", {
         
         var res = (orientation=='list')?[]:'';
         var resitems = [];
+
+        //submenu selectable is taken from home page
+        if(parent_id==0 && menuitems.length==1){ //home page
+            let record = resdata.getById(menuitems[0]);
+            let selectable = resdata.fld(record, DT_CMS_TOPMENUSELECTABLE);
+            if(selectable!==null){
+                 this.options.selectable_if_submenu = (selectable!==TERM_NO && selectable!==TERM_NO_old);
+            }
+        }
     
         for(var i=0; i<menuitems.length; i++)
         {
@@ -214,10 +224,15 @@ $.widget( "heurist.navigation", {
                 var pageTarget = resdata.fld(record, DT_CMS_TARGET);
                 var pageStyle = resdata.fld(record, DT_CMS_CSS);
                 var showTitle = resdata.fld(record, DT_CMS_PAGETITLE); 
-                var selectable = resdata.fld(record, DT_CMS_TOPMENUSELECTABLE);
                 
                 showTitle = (showTitle!==TERM_NO && showTitle!==TERM_NO_old);
-                selectable = (selectable!==TERM_NO && selectable!==TERM_NO_old) || selectable == null;
+                
+                var selectable = resdata.fld(record, DT_CMS_TOPMENUSELECTABLE);
+                if(selectable==null){
+                    selectable = this.options.selectable_if_submenu; //from home page
+                }else{
+                    selectable = (selectable!==TERM_NO && selectable!==TERM_NO_old);    
+                }
                 
                 var hasContent = !window.hWin.HEURIST4.util.isempty(resdata.fld(record, DT_EXTENDED_DESCRIPTION))
                 
@@ -470,7 +485,7 @@ $.widget( "heurist.navigation", {
         /*var mele = $(event.target).parents('.ui-menu[data-level!=0]');
         if(mele.attr('data-level')!=0) mele.hide();*/
         let check_selectable = $(event.target).attr('data-checksubmenu');
-        if(check_selectable && $(event.target).parent().find('ul').length != 0){ // stop click if a submenu exists
+        if(check_selectable!=1 && $(event.target).parent().find('ul').length != 0){ // stop click if a submenu exists
             return;
         }
         
