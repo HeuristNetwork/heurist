@@ -3106,7 +3106,7 @@ window.hWin.HEURIST4.ui = {
     initGalleryContainer: function(container, options)
     {
         options = $.extend(options, {selector:'a[data-fancybox="home-roll-images"]'
-                            ,maxHeight:'430px',duration:7000,fade_duration:300});
+                            ,maxHeight:'430px',duration:5000,fade_duration:300});
                             
         var imgs = [];
         
@@ -3126,9 +3126,9 @@ window.hWin.HEURIST4.ui = {
             container.empty();
         }
         
-
+        
         var title_ele = $('<h4>').css({'background-color': 'rgba(0,0,0,0.65)', bottom: 0,
-            color: '#fff', left: 0, margin:'0.2em 0em', padding: '0.75em 1em', position: 'absolute'})
+            color: '#fff', left: 0, margin:'0.2em 0em', padding: '0.75em 1em', position: 'absolute', 'z-index':9999})
             .appendTo( container );
         if(!options.showTitle){
             title_ele.hide();
@@ -3139,7 +3139,15 @@ window.hWin.HEURIST4.ui = {
         function __onImageLoad(){
 
             setInterval(function(){                               
-
+                let cur_idx = idx;
+                idx = (idx == imgs.length-1) ?0 :(idx+1);
+                $(imgs[idx]).show();
+                $(imgs[cur_idx]).hide('fade', null, options.fade_duration, function(){
+                    if(options.showTitle){
+                        title_ele.html(imgs[idx].attr('title'));    
+                    }
+                });
+                /*
                 $(imgs[idx]).hide('fade', null, (options.fade_duration-100), function(){
                     idx = (idx == imgs.length-1) ?0 :(idx+1);
                     //show next one
@@ -3148,17 +3156,17 @@ window.hWin.HEURIST4.ui = {
                         title_ele.html(imgs[idx].attr('title'));    
                     }
                 });
-                
-                
-                
-                },options.duration);                  
+                */
+                }, options.duration);                  
         }
         
 
         //load full images
+        var z_index = options.content.length;
         $.each(options.content, function(idx, item){
             //add images
-            var img = $('<img>').css('max-height',options.maxHeight).appendTo( container );
+            var img = $('<img>').css({'z-index':z_index,'max-height':options.maxHeight,'position':'absolute'}).appendTo( container );
+            z_index--;  
             if(options.maxWidth){
                 img.css('max-width',options.maxWidth);
             }
