@@ -30,7 +30,7 @@ set_time_limit(0); //no limit
 require_once(dirname(__FILE__).'/../../hclient/framecontent/initPageMin.php');
 require_once(dirname(__FILE__).'/../../hsapi/utilities/utils_file.php');
 require_once(dirname(__FILE__).'/../../hsapi/dbaccess/db_files.php');
-require_once(dirname(__FILE__).'/../../external/php/Mysqldump.php');
+require_once(dirname(__FILE__).'/../../external/php/Mysqldump8.php');
 
 
 $folder = HEURIST_FILESTORE_DIR.'backup/'.HEURIST_DBNAME;
@@ -274,7 +274,6 @@ if($mode=='2' && file_exists($folder.".".$format) ){
                     <input type="button" value="Cancel" onClick="window.close();">
 <?php } ?>
 
-<?php echo print_r($_REQUEST, TRUE); ?>
                 </div>
             </form>
             <?php
@@ -343,7 +342,8 @@ if($mode=='2' && file_exists($folder.".".$format) ){
             
             //copy resource folders
             if(@$_REQUEST['include_docs']=='1'){
-                $folders_to_copy = folderSubs(HEURIST_FILESTORE_DIR, array('backup', 'scratch', 'file_uploads', 'filethumbs'));
+                $folders_to_copy = folderSubs(HEURIST_FILESTORE_DIR, 
+                    array('backup', 'scratch', 'file_uploads', 'filethumbs', 'uploaded_files', 'uploaded_tilestacks'));
                 
                 //limited set
                 //$folders_to_copy = $system->getSystemFolders( 1 );
@@ -438,8 +438,10 @@ if($mode=='2' && file_exists($folder.".".$format) ){
                 echo_flush2("Exporting SQL dump of the whole database (several minutes for large databases)<br>");
 
                 try{
-                    $dump = new Mysqldump( HEURIST_DBNAME_FULL, ADMIN_DBUSERNAME, ADMIN_DBUSERPSWD, HEURIST_DBSERVER_NAME, 'mysql', 
-                    array('skip-triggers' => true,  'add-drop-trigger' => false));
+                    $pdo_dsn = 'mysql:host='.HEURIST_DBSERVER_NAME.';dbname='.HEURIST_DBNAME_FULL.';charset=utf8mb4';
+                    $dump = new Mysqldump( $pdo_dsn, ADMIN_DBUSERNAME, ADMIN_DBUSERPSWD,
+                            array('skip-triggers' => true,  'add-drop-trigger' => false, 'add-drop-table'=>true));
+                            
 /*                    
                             array(
                             'add-drop-table' => true,

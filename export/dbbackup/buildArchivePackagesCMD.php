@@ -80,7 +80,7 @@ if($arg_database==null){
 
 require_once(dirname(__FILE__).'/../../hsapi/System.php');
 require_once(dirname(__FILE__).'/../../hsapi/dbaccess/db_files.php');
-require_once(dirname(__FILE__).'/../../external/php/Mysqldump.php');
+require_once(dirname(__FILE__).'/../../external/php/Mysqldump8.php');
 
 
 //retrieve list of databases
@@ -138,8 +138,8 @@ fclose($fp);
 if($with_triggers){
     $dump_options = array(
             'add-drop-table' => true,
-            'skip-triggers' => false,
             'single-transaction' => true,
+            'skip-triggers' => false,
             'add-drop-trigger' => true,
             'databases' => true,
             'add-drop-database' => true);
@@ -272,7 +272,10 @@ foreach ($arg_database as $idx=>$db_name){
 
     // Do an SQL dump of the whole database
     try{
-        $dump = new Mysqldump( 'hdb_'.$db_name, ADMIN_DBUSERNAME, ADMIN_DBUSERPSWD, HEURIST_DBSERVER_NAME, 'mysql', $dump_options);
+        $pdo_dsn = 'mysql:host='.HEURIST_DBSERVER_NAME.';dbname=hdb_'.$db_name.';charset=utf8mb4';
+        $dump = new Mysqldump( $pdo_dsn, ADMIN_DBUSERNAME, ADMIN_DBUSERPSWD, $dump_options);
+        
+        //$dump = new Mysqldump( 'hdb_'.$db_name, ADMIN_DBUSERNAME, ADMIN_DBUSERPSWD, HEURIST_DBSERVER_NAME, 'mysql', $dump_options);
         $dump->start($folder."/".$db_name."_MySQL_Database_Dump.sql");
     } catch (Exception $e) {
         if(file_exists($progress_flag)) unlink($progress_flag);

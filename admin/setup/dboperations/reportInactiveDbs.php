@@ -121,7 +121,7 @@ require_once(dirname(__FILE__).'/../../../hsapi/consts.php');
 require_once(dirname(__FILE__).'/../../../hsapi/System.php');
 require_once(dirname(__FILE__).'/../../../hsapi/dbaccess/db_files.php');
 require_once(dirname(__FILE__).'/../../../hsapi/utilities/dbUtils.php');
-require_once(dirname(__FILE__).'/../../../external/php/Mysqldump.php');
+require_once(dirname(__FILE__).'/../../../external/php/Mysqldump8.php');
 
 //retrieve list of databases
 $system = new System();
@@ -405,8 +405,11 @@ sendEmail(array($usr_owner['ugr_eMail']), $email_title, $email_text);
                         }
                     }else{
                         try{
-                            $dump = new Mysqldump( 'hdb_'.$db_name, ADMIN_DBUSERNAME, ADMIN_DBUSERPSWD, HEURIST_DBSERVER_NAME, 'mysql', 
-                                            $opts);
+                            //$dump = new Mysqldump( 'hdb_'.$db_name, ADMIN_DBUSERNAME, ADMIN_DBUSERPSWD, HEURIST_DBSERVER_NAME, 'mysql', $opts);
+                                                                                                     
+                            $pdo_dsn = 'mysql:host='.HEURIST_DBSERVER_NAME.';dbname=hdb_'.$db_name.';charset=utf8mb4';
+                            $dump = new Mysqldump( $pdo_dsn, ADMIN_DBUSERNAME, ADMIN_DBUSERPSWD, $opts);
+                                            
                             $dump->start($dumpfile);
                             
                             $cnt_dumped++;            
@@ -465,8 +468,10 @@ sendEmail(array($usr_owner['ugr_eMail']), $email_title, $email_text);
                     }else{
                         // old way
                         try{
-                            $dump = new Mysqldump( 'hdb_'.$db_name, ADMIN_DBUSERNAME, ADMIN_DBUSERPSWD, HEURIST_DBSERVER_NAME, 'mysql', 
-                                $opts);
+                            //$dump = new Mysqldump( 'hdb_'.$db_name, ADMIN_DBUSERNAME, ADMIN_DBUSERPSWD, HEURIST_DBSERVER_NAME, 'mysql', $opts);
+                            $pdo_dsn = 'mysql:host='.HEURIST_DBSERVER_NAME.';dbname=hdb_'.$db_name.';charset=utf8mb4';
+                            $dump = new Mysqldump( $pdo_dsn, ADMIN_DBUSERNAME, ADMIN_DBUSERPSWD, $opts);
+                                
                             //echo $db_name.' purge sysArchive to '.$dumpfile;
                             $dump->start($dumpfile);
                             //echo $db_name.' ... dumped ';

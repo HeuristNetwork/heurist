@@ -42,7 +42,7 @@
 */
 
 require_once(dirname(__FILE__).'/../../hsapi/utilities/utils_db_load_script.php');
-require_once(dirname(__FILE__).'/../../external/php/Mysqldump.php');
+require_once(dirname(__FILE__).'/../../external/php/Mysqldump8.php');
 require_once(dirname(__FILE__).'/../../admin/structure/import/importDefintions.php');
 
 class DbUtils {
@@ -655,8 +655,8 @@ class DbUtils {
             }else if(true){
                 
                 try{
-                    $dump = new Mysqldump( $database_name_full, ADMIN_DBUSERNAME, ADMIN_DBUSERPSWD, HEURIST_DBSERVER_NAME, 
-                            'mysql', $dump_options);
+                    $pdo_dsn = 'mysql:host='.HEURIST_DBSERVER_NAME.';dbname='.$database_name_full.';charset=utf8mb4';
+                    $dump = new Mysqldump( $pdo_dsn, ADMIN_DBUSERNAME, ADMIN_DBUSERPSWD, $dump_options);
                             
                     $dump->start($database_dumpfile);
                 } catch (Exception $e) {
