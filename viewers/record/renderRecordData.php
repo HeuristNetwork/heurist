@@ -596,6 +596,7 @@ if(!($is_map_popup || $without_header)){
         
         div.thumbnail{
             margin-left: 0px;
+            margin-bottom: 25px;
         }
 
         div.thumbnail img {
@@ -639,6 +640,13 @@ if(!($is_map_popup || $without_header)){
 
         .detail img:not(.geo-image, .rv-magglass, .rv-editpencil, .rft){
             width: 50%;
+        }
+        
+        .rft{
+            width: 18px !important;
+            height: 18px;
+            background-repeat: no-repeat;
+            background-position: center;        
         }
 
         .detail span.value:nth-last-child(n+2){
@@ -1550,7 +1558,7 @@ function print_public_details($bib) {
                         .$thumb['id'].', this.parentNode)">show thumbnail</a>';
             }
 
-            print '</div>';
+            print '</div><!-- CLOSE download_link -->';  //CLOSE download_link
 
             if($thumb['player'] && !$is_map_popup && $isAudioVideo){
                 print '<div class="fullSize media-content" style="text-align:left;'
@@ -1586,8 +1594,8 @@ function print_public_details($bib) {
                         ?''
                         :'onClick="zoomInOut(this,\''. htmlspecialchars($thumb['thumb']) .'\',\''. htmlspecialchars($url) .'\')"').'>';
             }
-
             print '</div>';
+            print '</div><!--CLOSE THUMB SECTION-->';
             if($is_map_popup){
                 print '<br>';
                 break; //in map popup show the only thumbnail
@@ -1595,7 +1603,7 @@ function print_public_details($bib) {
             
         }//for
     
-    print '</div>';
+    print '</div><!--CLOSE ALL thumbnails-->';
 
 //<div id="div_public_data" style="float:left; echo (($has_thumbs)?'max-width:900px':'')">
 
