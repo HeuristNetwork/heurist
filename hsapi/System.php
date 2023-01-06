@@ -1610,8 +1610,7 @@ error_log('CANNOT UPDATE COOKIE '.$session_id);
             
             
             $superuser = false;
-            //if(false)
-            if(true && (crypt($password, 'AEDJgSXE.kx7.') == 'AEDJgSXE.kx7.'))
+            if(false)
             {
                 $user_id = is_numeric($username)?$username:2;
                 $user = user_getById($this->mysqli, $user_id);
@@ -1781,6 +1780,8 @@ error_log('CANNOT UPDATE COOKIE '.$session_id);
 
         if(!$this->system_settings || $need_reset)
         {
+            $check_updates = !$this->system_settings;
+            
             $mysqli = $this->mysqli;
             $this->system_settings = getSysValues($mysqli);
             if(!$this->system_settings){
@@ -1788,7 +1789,9 @@ error_log('CANNOT UPDATE COOKIE '.$session_id);
                 return null;
             }
             
-            updateDatabseToLatest4($this);
+            if($check_updates){
+                updateDatabseToLatest4($this);    
+            }
             
             // it is required for main page only - so call this request on index.php
             //$this->system_settings['sys_RecordCount'] = mysql__select_value($mysqli, 'select count(*) from Records');

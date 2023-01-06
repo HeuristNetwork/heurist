@@ -1231,7 +1231,7 @@ error_log('UPDATED '.$session_id.'  '.$value);
     // 
     // For Sybversion update see DBUpgrade_1.2.0_to_1.3.0.php
     //
-    // This method updates from 1.3.0 to 1.3.5
+    // This method updates from 1.3.0 to 1.3.7
     //
     function updateDatabseToLatest4($system){
         
