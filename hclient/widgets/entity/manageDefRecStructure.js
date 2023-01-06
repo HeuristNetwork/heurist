@@ -91,7 +91,7 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
                     +'<span id="field_ttl_usage" title="Count of values in each field for this record type (n = '+ $Db.rty(this.options.rty_ID, 'rty_RecCount') +')"'
                         +'style="display: inline-block;position:absolute;right:8px;padding-top:5px;cursor:default;font-weight:bold;cursor:pointer;">Count'
                     +'</span>'
-                    +'<div class="treeView" style="margin:12px -10px 0 -27px;"/>' //treeview
+                    +'<div class="treeView" style="margin:12px -10px 0 -10px;"/>' //treeview
                     +'<div class="editForm editFormRtStructure" style="top:0px;display:none">EDITOR</div>'
                     +'<div class="recordList" style="display:none"/>'
                 +'</div>';
