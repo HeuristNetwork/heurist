@@ -115,7 +115,11 @@ if(!($is_map_popup || $without_header)){
 ?>
 <html>
     <head>
+        <title>HEURIST - View record</title>
         <meta http-equiv="content-type" content="text/html; charset=utf-8">
+        <link rel="icon" href="<?=HEURIST_BASE_URL?>favicon.ico" type="image/x-icon">
+        <link rel="shortcut icon" href="<?=HEURIST_BASE_URL?>favicon.ico" type="image/x-icon">
+    
         <script type="text/javascript" src="../../external/jquery-ui-1.12.1/jquery-1.12.4.js"></script>
         <script type="text/javascript" src="../../external/jquery-ui-1.12.1/jquery-ui.js"></script>
         <link rel="stylesheet" type="text/css" href="../../external/jquery-ui-iconfont-master/jquery-ui.icon-font.css" />
@@ -656,6 +660,14 @@ if(!($is_map_popup || $without_header)){
 <?php if($is_production){
     print '.detailType {width:160px;}';
 }?>        
+        @media print {
+          .download_link {
+            visibility: hidden;
+          }
+          h4 {
+            page-break-before:auto;    
+          }
+        }
         </style>
     </head>
     <body class="popup" style="overflow-x: hidden;">

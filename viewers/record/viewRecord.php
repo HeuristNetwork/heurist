@@ -99,7 +99,11 @@ $record_renderer_url = HEURIST_BASE_URL.'viewers/record/renderRecordData.php?db=
         .HEURIST_DBNAME.'&'.($bkm_ID>0 ? ('bkmk_id='.$bkm_ID) : ('recID='.$rec_id))
         .$noclutter;
 
-
+if(!@$_REQUEST['popup']){
+    header('Location: '.$record_renderer_url);
+    exit();    
+}
+        
 ?>
 <html>
 
