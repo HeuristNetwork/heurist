@@ -109,6 +109,11 @@ $.widget( "heurist.manageRecUploadedFiles", $.heurist.manageEntity, {
             return false;
         }
         
+        if(this.options.edit_mode=='editonly'){
+            this.addEditRecord( this.options.rec_ID );
+            return;
+        }
+
         // init search header
         this.editForm.css('padding-top',20);
         this.searchForm.searchRecUploadedFiles(this.options);

@@ -867,9 +867,18 @@ $.widget( "heurist.editing_input", {
                             }
 
                             editor.on('init', function(e) {
+                                let $container = $(editor.editorContainer);
                                 setTimeout(function(){
-                                    $(editor.editorContainer).find('.tox-tbtn.tox-tbtn--select.tox-tbtn--bespoke').parent().addClass('tinymce_format_group');
+                                    $container.find('.tox-tbtn.tox-tbtn--select.tox-tbtn--bespoke').parent().addClass('tinymce_format_group');
                                 }, 2000);
+
+                                if($container.parents('.editForm').length == 1){
+                                    let max_w = $container.parents('.editForm').width(); 
+                                    if($container.width() > max_w - 200){
+                                        console.log('too big');
+                                        $container.css('width', (max_w - 245) + 'px');
+                                    }
+                                }
                             });
 
                             editor.on('change', function(e) {
@@ -2187,6 +2196,28 @@ $.widget( "heurist.editing_input", {
                 .clone()
                 .appendTo( $inputdiv )
                 .hide();
+                
+                // Edit file's metadata
+                $edit_details = $('<span class="ui-icon ui-icon-pencil edit_metadata" title="Edit image metadata" style="cursor: pointer;padding-left:5px;">')
+                .insertBefore($clear_container);
+                this._on($edit_details, {
+                    click: (event) => {
+
+                        let popup_opts = {
+                            isdialog: true, 
+                            select_mode: 'manager',
+                            edit_mode: 'editonly',
+                            rec_ID: f_id,
+                            default_palette_class: 'ui-heurist-populate',
+                            width: 950,
+                            onClose: (recset) => {
+                                // nothing to do / nothing to update
+                            }
+                        };
+
+                        window.hWin.HEURIST4.ui.showEntityDialog('recUploadedFiles', popup_opts);
+                    }
+                });
                 
                 /* Change Handler */
                 $input.change(function(event){
