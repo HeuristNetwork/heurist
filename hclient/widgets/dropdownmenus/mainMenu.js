@@ -2466,7 +2466,7 @@ console.log('>>>>'+that.divProfileItems.find('.ui-menu-item').css('padding-left'
                         + "<div style='margin-bottom: 10px'>"
                             + "<div class='header' style='display: table-cell;max-width: 125px; min-width: 125px;'>Download template: </div>"
                             + "<div style='display: table-cell'>"
-                                + "<label for='template-xml'><input name='template-type' id='template-xml' type='radio' value='xml' checked> XML</label>"
+                                + "<label for='template-xml'><input name='template-type' id='template-xml' type='radio' value='xml'> XML</label>"
                                 + "<label for='template-json'><input name='template-type' id='template-json' type='radio' value='json'> JSON</label>"
                             + "</div>"
                         + "</div>"
@@ -2496,15 +2496,25 @@ console.log('>>>>'+that.divProfileItems.find('.ui-menu-item').css('padding-left'
 
             if(is_all_rectypes) { rectype_ids = 'y'; } // get all rectypes
 
+            if(rectype_ids == null){
+                window.hWin.HEURIST4.msg.showMsgFlash('Please select some record types...', 2000);
+                return;
+            }
+
             if(template_type == 'template-xml'){
 
                 window.hWin.HEURIST4.util.downloadURL(window.hWin.HAPI4.baseURL
                         +'export/xml/flathml.php?file=1&'
                         +'rectype_templates='+ rectype_ids
                         +'&db='+window.hWin.HAPI4.database);
-            }else{
+            }else if(template_type == 'template-json'){
 
-                window.hWin.HEURIST4.msg.showMsgFlash('JSON templates are currently unavailable', 3000);
+                window.hWin.HEURIST4.util.downloadURL(window.hWin.HAPI4.baseURL
+                    +'export/json/record_template.php?'
+                    +'rectype_ids='+ rectype_ids
+                    +'&db='+window.hWin.HAPI4.database);
+            }else{
+                window.hWin.HEURIST4.msg.showMsgFlash('Please select what type of template you want...', 2000);
             }
 
             $dlg.dialog('close');
@@ -2566,7 +2576,7 @@ console.log('>>>>'+that.divProfileItems.find('.ui-menu-item').css('padding-left'
             window.hWin.HEURIST4.util.setDisabled($dlg.find('button#rectypes-select, div#rectypes-list'), $(event.target).is(':checked'));
         });
 
-        window.hWin.HEURIST4.util.setDisabled($dlg.find('label[for="template-json"]'), true); // disable json version, currently unavailable
+        //window.hWin.HEURIST4.util.setDisabled($dlg.find('label[for="template-json"]'), true); // disable json version, currently unavailable
 
         return false;
     },
