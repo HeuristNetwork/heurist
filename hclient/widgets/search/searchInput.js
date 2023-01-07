@@ -44,7 +44,9 @@ $.widget( "heurist.searchInput", {
         onresult: null,   //on search result
         
         search_page: null, //target page (for CMS)
-        search_realm:  null  //accepts search/selection events from elements of the same realm only
+        search_realm:  null,  //accepts search/selection events from elements of the same realm only
+
+        update_on_external_search: false // update search box value on ON_REC_SEARCHSTART from facet/other filters
     },
 
     query_request:null,
@@ -101,7 +103,7 @@ $.widget( "heurist.searchInput", {
         // quick filter builder buttons
         //
         this.div_buttons = $('<div>')
-            .css({'text-align': 'center', flex: '0 1 30px', 'vertical-align': 'baseline'})
+            .css({'text-align': 'center', flex: '0 0 30px', 'vertical-align': 'baseline'})
             .appendTo( this.div_search );
         
         var linkGear = $('<a>',{href:'#', 
@@ -115,14 +117,14 @@ $.widget( "heurist.searchInput", {
         // search/filter buttons - may be Search or Bookmarks according to settings and whether logged in
         //
         this.div_search_as_user = $('<div>') //.css({'min-width':'18em','padding-right': '10px'})
-        .css({flex: '0 1 100px','text-align':'right'}) 
+        .css({flex: '0 1 90px','text-align':'right','min-width':'40px'}) 
         .appendTo( this.div_search );
 
         this.btn_start_search = $( "<button>", {
             label: window.hWin.HR(this.options.search_button_label), 
             title: "Apply the filter/search in the search field and display results in the central panel below"
         })
-        .css({'min-height':'30px','min-width':'90px'})
+        .css({'min-height':'30px','width':'100%'})
         .appendTo( this.div_search_as_user )
         .addClass(this.options.button_class+' ui-button-action')
         .button({showLabel:true, icon:this._is_publication?'ui-icon-search':'ui-icon-filter'});
@@ -317,57 +319,55 @@ $.widget( "heurist.searchInput", {
     
     _onSearchGlobalListener: function(e, data){
 
-       var that = this;
+        var that = this;
 
-       if(e.type == window.hWin.HAPI4.Event.ON_REC_SEARCHSTART)
-       {
+        if(e.type == window.hWin.HAPI4.Event.ON_REC_SEARCHSTART) {
 
-           //accept events from the same realm only
-           if(!that._isSameRealm(data)) return;
+            //accept events from the same realm only
+            if(!that._isSameRealm(data)) return;
 
-           //data is search query request
-           if(data.reset){
+            //data is search query request
+            if(data.reset){
                that.input_search.val('');
                that.input_search.change();
-           }else            
-               //topids not defined - this is not rules request
-               if(window.hWin.HEURIST4.util.isempty(data.topids) && data.apply_rules!==true){
+            }
+            else if(window.hWin.HEURIST4.util.isempty(data.topids) && data.apply_rules!==true){ //topids not defined - this is not rules request
 
-                   //request is from some other widget (outside)
-                   if(data.source!=that.element.attr('id')){
-                       var qs;
-                       if($.isArray(data.q)){
-                           qs = JSON.stringify(data.q);
-                       }else{
-                           qs = data.q;
-                       }
+                //request is from some other widget (outside)
+                if(data.source!=that.element.attr('id')){
+                    var qs;
+                    if($.isArray(data.q)){
+                        qs = JSON.stringify(data.q);
+                    }else{
+                        qs = data.q;
+                    }
 
-                       if(!window.hWin.HEURIST4.util.isempty(qs)){
+                    if(!window.hWin.HEURIST4.util.isempty(qs)){
 
-                           if(qs.length<10000){
-                               that.input_search.val(qs);
-                               //that.options.search_domain = data.w;
-                               that.query_request = data;
-                               that._refresh();
-                           }
-                       }
-                   }
+                        if(qs.length<10000){
 
-                   that.input_search.change();
-               }
-       }else 
-           if(e.type == window.hWin.HAPI4.Event.ON_REC_SEARCH_FINISH){ //search completed
+                            if(this.options.update_on_external_search == true){
+                                that.input_search.val(qs);
+                            }
+                            //that.options.search_domain = data.w;
+                            that.query_request = data;
+                            that._refresh();
+                        }
+                    }
+                }
 
-               //accept events from the same realm only
-               if(!that._isSameRealm(data)) return;
+                that.input_search.change();
+            }
+        }
+        else if(e.type == window.hWin.HAPI4.Event.ON_REC_SEARCH_FINISH){ //search completed
 
-               window.hWin.HEURIST4.util.setDisabled(this.input_search, false);
+            //accept events from the same realm only
+            if(!that._isSameRealm(data)) return;
 
-               this._setFocus();
-           }
+            window.hWin.HEURIST4.util.setDisabled(this.input_search, false);
 
-
-
+            this._setFocus();
+        }
     }
 
 

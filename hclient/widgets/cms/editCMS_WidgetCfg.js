@@ -86,8 +86,8 @@ function editCMS_WidgetCfg( widget_cfg, _layout_content, $dlg, main_callback ){
         var widget_name = widget_cfg.appid;
         var opts = window.hWin.HEURIST4.util.isJSON(widget_cfg.options);
 
-        $dlg.find('div[class^="heurist_"]').hide(); //hide all
-        $dlg.find('div.'+widget_name+'').show();
+        $dlg.find('div[class^="heurist_"], hr[class^="heurist_"]').hide(); //hide all
+        $dlg.find('div.'+widget_name+', hr.'+widget_name).show();
         
         //fill page list
         var selPage = $dlg.find('select[name="search_page"]');
