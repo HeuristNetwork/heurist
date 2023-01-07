@@ -434,7 +434,7 @@ $.widget( "heurist.searchBuilder", {
         var selected = -1;
 
         if(this.select_main_rectype){
-            selected = (this.select_main_rectype.val() > 0) ? this.select_main_rectype.val() : -1;
+            selected = (this.select_main_rectype.val() > 0 || this.select_main_rectype.val() == '') ? this.select_main_rectype.val() : -1;
             this._off(this.select_main_rectype,'change');
             this.select_main_rectype.hSelect('destroy'); 
             this.select_main_rectype = null;
@@ -481,23 +481,19 @@ $.widget( "heurist.searchBuilder", {
         if(this.options.rty_ID>0){
             selected = this.options.rty_ID;
         }
-
-        if(this.select_main_rectype.find('option[value=' + selected + ']').length > 0){ 
+        if(selected == '' || this.select_main_rectype.find('option[value=' + selected + ']').length > 0){ 
             this.select_main_rectype.val(selected);
 
             if(this.select_main_rectype.hSelect('instance')!=undefined){
                 this.select_main_rectype.hSelect('refresh'); 
                 
                 if(this.options.rty_ID>0) __onRectypeChange();
-                //this.select_main_rectype.change();
             }
         }else{
             this.pnl_CoverAll 
             .css({ top:this.pnl_Items.css('top'),bottom:this.pnl_Items.css('bottom') })
             .show();
         }
-
-
     }
 
     //
