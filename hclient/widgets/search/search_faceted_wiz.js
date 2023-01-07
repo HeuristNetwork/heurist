@@ -238,7 +238,6 @@ $.widget( "heurist.search_faceted_wiz", {
             // Get usages
             "<span id='get_usages'></span><br>"+
             // Tree order options
-            "<label> Tree: </label>"+
             "<label for='order_alphabetic'><input type='radio' name='tree_order' id='order_alphabetic' style='vertical-align: middle;' value='1' />&nbsp;Alphabetic</label>"+
             "<label for='order_default'><input type='radio' name='tree_order' id='order_default' style='vertical-align: middle;' value='0' checked />&nbsp;Form order</label>"+
             "<br><br>"+
@@ -264,12 +263,12 @@ $.widget( "heurist.search_faceted_wiz", {
             +'<label style="margin-left:16px" for="selViewportLimit">'+window.hWin.HR("Limit lists initially to")+'</label>'
             +'&nbsp;<select id="selViewportLimit"><option value=0>All</option><option value=5>5</option><option value=10>10</option>'
             +'<option value=20>20</option><option value=50>50</option></select>'
-            +'<label style="margin-left:16px;"><input type="checkbox" id="cbAccordionView" style="vetical-align: middle;">'+window.hWin.HR("Accordion view")+'</label>'
-            +'<label style="display:none;margin-left:16px;"><input type="checkbox" id="cbShowAccordIcons" style="vetical-align: middle;" checked>'+window.hWin.HR("Show accordion arrows")+'</label>'
             
             +'<span style="float:right; margin-left:10px;display:none;" id="btnUpdatePreview">Update Preview</span>'
             +'<div style="float:right"><label><input type="checkbox" id="cbShowAdvanced" style="vertical-align: middle;">'
             +window.hWin.HR("Show advanced ")+'</label></div>'
+            +'<label style="display:none;margin-left:16px;"><input type="checkbox" id="cbAccordionView" style="vetical-align: middle;">'+window.hWin.HR("Accordion view")+'</label>'
+            +'<label style="display:none;margin-left:16px;"><input type="checkbox" id="cbShowAccordIcons" style="vetical-align: middle;" checked>'+window.hWin.HR("Show accordion arrows")+'</label>'
             );
             
         $("<div>",{id:'facets_list'}).css({'overflow-y':'auto','padding':'10px 10px 10px 0px',
@@ -1771,11 +1770,11 @@ $.widget( "heurist.search_faceted_wiz", {
                 +'<input name="facet_Help'+idd+'" id="facet_Help'+idd+'" type="text" '
                 +' class="text ui-widget-content ui-corner-all"'
                 +' style="font-size:smaller;margin-top:0.4em;margin-bottom:1.0em;width:200px;"/>'
-                +'<label style="font-size:smaller;"><input name="facet_AccordHide'+idd+'" id="facet_AccordHide'+idd+'" type="checkbox" '
-                +' style="vertical-align: middle;" />Close accordion</label>'
                 +'</div>'
                 
                 + '<div style="float:right;font-size:smaller;margin-right:20px;margin-top: 4px;">'
+                +'<label><input name="facet_AccordHide'+idd+'" id="facet_AccordHide'+idd+'" type="checkbox" '
+                +' style="vertical-align: middle;" />Accordion closed</label>'
                 + sGroupBy 
                 +'<label><input type="checkbox" data-sort="count" data-id="'
                 + idd+'" style="vertical-align: middle;margin-left:16px">'
@@ -1884,7 +1883,9 @@ $.widget( "heurist.search_faceted_wiz", {
                         
                 }});
                 
-                
+                if(facets[k]['accordion_hide'] == true){ // set accordion collasped by default
+                    listdiv.find('input:checkbox[name="facet_AccordHide'+idd+'"]').prop('checked', true);
+                }
                 
                 if(facets[k].type=='date' || facets[k].type=='year'){
                     __dateGrouping(idd);
@@ -1922,8 +1923,16 @@ $.widget( "heurist.search_faceted_wiz", {
             $(this.step3).find('#cbShowAdvanced').attr('checked',false).change(function(event){
                 if($(event.target).is(':checked')){
                      listdiv.find('.optional_settings').show();
+                    $(that.step3).find('#cbAccordionView').parent().show();
                 }else{
-                     listdiv.find('.optional_settings').hide();                    
+                    listdiv.find('.optional_settings').hide();
+                    $(that.step3).find('#cbAccordionView').parent().hide();
+                }
+
+                if($(this.step3).find('#cbAccordionView').is(':checked') && $(event.target).is(':checked')){
+                    $(this.step3).find('#cbShowAccordIcons').prop('checked', true).parent().show();
+                }else{
+                    $(this.step3).find('#cbShowAccordIcons').parent().hide();
                 }
             });
             
@@ -1937,10 +1946,8 @@ $.widget( "heurist.search_faceted_wiz", {
             this._on( $(this.step3).find('#cbAccordionView'), {change: () => { 
                 if($(this.step3).find('#cbAccordionView').is(':checked')){
                     $(this.step3).find('#cbShowAccordIcons').prop('checked', true).parent().show();
-                    $(this.step3).find('').hide();
                 }else{
                     $(this.step3).find('#cbShowAccordIcons').parent().hide();
-                    $(this.step3).find('').hide();
                 }
                 this._refresh_FacetsPreview(); 
             }});

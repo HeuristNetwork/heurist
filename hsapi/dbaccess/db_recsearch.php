@@ -546,8 +546,12 @@ function getDateHistogramData($system, $range, $interval, $rec_ids, $dty_id, $fo
     // Validate Input
     if($rec_ids == null){
         return $system->addError(HEURIST_INVALID_REQUEST, "No record ids have been provided");
-    }else if(!is_array($rec_ids)){
+    }else if(is_string($rec_ids) && strpos($rec_ids, ',') !== false){
+        $rec_ids = explode(',', $rec_ids);
+    }else if(!is_array($rec_ids) && intval($rec_ids) > 0){
         $rec_ids = array($rec_ids);
+    }else if(!is_array($rec_ids)){
+        return $system->addError(HEURIST_INVALID_REQUEST, "Record ids have been provided in an un-supported format<br>".$rec_ids);
     }
 
     if($dty_id == null || !is_numeric($dty_id)){

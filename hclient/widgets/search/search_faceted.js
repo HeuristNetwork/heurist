@@ -270,14 +270,26 @@ $.widget( "heurist.search_faceted", {
         this.btn_terminate = $( "<button>").appendTo( this.div_toolbar )
         .button({icon: "ui-icon-cancel", iconPosition:'end', label:'Interrupt'}).hide();
         
+        $('<span>', {id: 'facet_process_msg', class: 'heurist-helper2', 'data-interrupt': 0})
+            .text('processing facets...')
+            .css({display: 'inline-block', 'padding-right': '10px'})
+            .insertBefore(this.btn_terminate).hide();
         
         this._on( this.btn_submit, { click: "doSearch" });
         this._on( this.btn_reset, { click: "doResetAll" });
         this._on( this.btn_save, { click: "doSaveSearch" });
         this._on( this.btn_close, { click: "doClose" });
-        this._on( this.btn_terminate, { click: function(){ this._terminateFacetCalculation = true; }});
+        this._on( this.btn_terminate, { click: function(){
 
-        
+            this.btn_terminate.hide();
+            this.div_toolbar.find('#facet_process_msg')
+                            .attr('data-interrupt', 1)
+                            .text('some facets not processed')
+                            .css('color', 'red').insertBefore(this.btn_close);
+
+            this._terminateFacetCalculation = true; 
+        }});
+
         this.facets_list_container = $( "<div>" )
         .attr('data-fid','facets_list_container')
         .css({"top":((this.div_title)?'6em':'2em'),"bottom":0,"position":"absolute"}) //was top 3.6
@@ -1544,6 +1556,7 @@ $.widget( "heurist.search_faceted", {
             
                 this._terminateFacetCalculation = false;
                 this.btn_terminate.show();
+                this.div_toolbar.find('#facet_process_msg').show();
                 if(this.btn_reset) this.btn_reset.hide()    
                 this.btn_close.hide();
 
@@ -1783,11 +1796,15 @@ $.widget( "heurist.search_faceted", {
         }
         
         
-        if(i  >= this.options.params.facets.length){
+        if(i >= this.options.params.facets.length){
             
             this.options.params.ui_temporal_filter_initial = null; //used only once
-            
+
             this.btn_terminate.hide();
+            if(this.div_toolbar.find('#facet_process_msg').attr('data-interrupt') != 1){
+                this.div_toolbar.find('#facet_process_msg').hide();
+            }
+
             this._refreshButtons();
         }
     }
@@ -2188,7 +2205,7 @@ $.widget( "heurist.search_faceted", {
                         || field['type']=="date" || field['type']=="year") && field['isfacet']==this._FT_SELECT)
                     {  //add slider
                     
-                        $input_div.find('.input-cell').css('padding-bottom','20px');
+                        $input_div.find('.input-cell').css('padding-bottom','5px'); // 20px
                     
                         $facet_values.parent().css({'display':'block'});
                         //AAA strange padding ,'padding-left':'1em','padding-right':'2em'
@@ -2350,7 +2367,8 @@ $.widget( "heurist.search_faceted", {
                                     
                                     var request = {
                                         a: 'gethistogramdata',  // Get histogram data
-                                        recids: ids_arr,            // record/s of interest
+                                        db: window.hWin.HAPI4.database, // database
+                                        recids: ids,            // record/s of interest
                                         dtyid: dty_ID,     // detail type id
                                         range: [t_min.toISOString(), t_max.toISOString()], // lowest and highest values in ISO format
                                         format: date_type,        // year, month, day
@@ -2454,6 +2472,9 @@ $.widget( "heurist.search_faceted", {
                                             var $slide_handles = $slide_range.parent().find('.ui-slider-handle');
                                             $facet_values.find('.ui-icon-triangle-1-w').position({my: 'right-6 center+5', at: 'right bottom', of: $($slide_handles[0])});
                                             $facet_values.find('.ui-icon-triangle-1-e').position({my: 'left+6 center+5', at: 'left bottom', of: $($slide_handles[1])});
+                                        }else if(window.hWin.HAPI4.has_access() && field['history'].length != 0){
+                                            response.message = 'An error occurred with generating the time graph data<br>' + response.message;
+                                            window.hWin.HEURIST4.msg.showMsgErr(response);
                                         }
                                     });
                                 }
@@ -2647,15 +2668,16 @@ $.widget( "heurist.search_faceted", {
                             }
 
                             var ele2 = $('<div>'
-                            +'<span class="ui-icon ui-icon-triangle-1-w-stop" title="Reset to minimum date"'
-                                +'style="cursor:pointer;font-size:smaller;float:left;color:gray"/>'
-                            +'<span class="ui-icon ui-icon-triangle-1-w" title="Half step"'
-                                +'style="cursor:pointer;font-size:smaller;float:left;color:gray;position:absolute;"/>'
-                            +'<div style="height:0.4em;margin:2px 0px 0px 2px;float:left;width:'+(w-50)+'px"/>'
-                            +'<span class="ui-icon ui-icon-triangle-1-e" title="Half step"'
-                                +'style="cursor:pointer;font-size:smaller;float:left;color:gray;position:absolute;"/>'
-                            +'<span class="ui-icon ui-icon-triangle-1-e-stop" title="Reset to maximum date"'
-                                +'style="cursor:pointer;font-size:smaller;float:left;color:gray"/></div>'
+                                +'<span class="ui-icon ui-icon-triangle-1-w-stop" title="Reset to minimum date"'
+                                    +'style="cursor:pointer;font-size:smaller;float:left;color:gray"/>'
+                                +'<div style="height:0.4em;margin:2px 0px 0px 2px;float:left;width:'+(w-60)+'px"/>'
+                                +'<span class="ui-icon ui-icon-triangle-1-e-stop" title="Reset to maximum date"'
+                                    +'style="cursor:pointer;font-size:smaller;float:left;color:gray"/>'
+                                +'<span class="ui-icon ui-icon-triangle-1-w" title="Half step"'
+                                    +'style="cursor:pointer;font-size:smaller;float:left;color:gray;"/>'
+                                +'<span class="ui-icon ui-icon-triangle-1-e" title="Half step"'
+                                    +'style="cursor:pointer;font-size:smaller;float:right;color:gray;"/>'
+                            +'</div>'
                             ).appendTo($facet_values);
                                         
                             //$("<div>", {facet_index:facet_index})
@@ -2676,8 +2698,8 @@ $.widget( "heurist.search_faceted", {
                                     create: function(){
                                         $(this).find('.ui-slider-handle').css({width:'4px',background:'black'});
 
-                                        //var left_step = ele2.find('span.ui-icon-triangle-1-w').position({my: 'right center', at: 'left bottom', of: $($(this).find('.ui-slider-handle')[0])});
-                                        //var right_step = ele2.find('span.ui-icon-triangle-1-e').position({my: 'left center', at: 'right bottom', of: $($(this).find('.ui-slider-handle')[1])});
+                                        ele2.find('span.ui-icon-triangle-1-w').position({my: 'right-6 center+5', at: 'right bottom', of: $($(this).find('.ui-slider-handle')[0])});
+                                        ele2.find('span.ui-icon-triangle-1-e').position({my: 'left+6 center+5', at: 'left bottom', of: $($(this).find('.ui-slider-handle')[1])});
                                     }
                                 });
                                     
@@ -2849,6 +2871,7 @@ $.widget( "heurist.search_faceted", {
             
                 if(isListOrColumn && $container.not('select').length > 0){ // LIST
 
+                    data.level = level;
                     var f_link = this._createFacetLink( f_index, 
                         data,
                         display_mode );
@@ -2856,7 +2879,7 @@ $.widget( "heurist.search_faceted", {
                     this.terms_drawn++;  //global
                     
                     var ditem = $("<div>").css({'display':(this.terms_drawn>this.options.params.viewport?'none':display_mode),
-                                    'padding':"0 5px 0 "+(level*5)+"px"})
+                                    'padding':"0 5px 0 "+(level*10)+"px"})
                             .addClass('facet-item')        
                             .append(f_link)
                             .appendTo($container);
@@ -2890,7 +2913,7 @@ $.widget( "heurist.search_faceted", {
                         title = tDate.toString('MMM yyyy');
                     }
 
-                    var f_link = this._createFacetLink(f_index, {title:title, value:value[2], count:value[1]}, display_mode);
+                    var f_link = this._createFacetLink(f_index, {title:title, value:value[2], count:value[1], 'level': level}, display_mode);
                     
                     //@todo draw first level for groupby firs tchar always inline
                     var step_level = (field['groupby']=='firstchar' && field['selectedvalue'])
@@ -3096,6 +3119,7 @@ $.widget( "heurist.search_faceted", {
         
         //----
         var f_link_content;
+        var content_max_width = this.options.is_publication ? this.element.parents('.mceNonEditable').width() : this.element.width();
         
         if(window.hWin.HEURIST4.util.isempty(cterm.value)){
             f_link_content = $("<span>").addClass("ui-icon ui-icon-arrowreturnthick-1-w")
@@ -3107,9 +3131,9 @@ $.widget( "heurist.search_faceted", {
 
                 var top_parent = this.element.parents('.mceNonEditable');
                 if(this.options.is_publication){ //this is web publication  top_parent.length>0
-                    f_link_content.css('width',top_parent.width()*0.6).addClass('truncate');
+                    f_link_content.css('width', content_max_width*0.6).addClass('truncate');
                 }else{
-                    f_link_content.css('width',this.element.width()-60).addClass('truncate');    //this.facets_list_container.width()*0.6
+                    f_link_content.css('width', content_max_width-70).addClass('truncate');    //this.facets_list_container.width()*0.6
                 }
             
             
@@ -3133,7 +3157,7 @@ $.widget( "heurist.search_faceted", {
             
             }
         }
-        f_link_content.appendTo(f_link);
+        f_link_content.addClass('facet-label').appendTo(f_link);
         
         //---
         if(cterm.count=='reset' || cterm.count>0){
@@ -3153,6 +3177,11 @@ $.widget( "heurist.search_faceted", {
                      dcount.appendTo(f_link).appendTo(f_link_content);
                 }else{
                      dcount.appendTo(f_link).css({float:'right'});
+
+                     if(cterm.level > 1){
+                        let label_width = f_link_content.width() - 20;
+                        f_link_content.css('width', label_width + 'px');
+                    }
                 }
             }
         }
@@ -3192,18 +3221,6 @@ $.widget( "heurist.search_faceted", {
                     }else{
                         field.selectedvalue = {title:label, value:value, step:step};                    
                     }
-                    
-                    
-                    // assign value to edit_inpout - to remove
-                    //var varid = field['var'];
-                    //$( this._input_fields[ '$X'+varid ] ).editing_input('setValue', value);
-                    
-                    // make link in bold
-                    //$("#fv_"+varid).find('.facets div a').css('font-weight','normal');
-                    //$("#fv_"+varid).find('.facet_link').css({'font-weight':'normal', 'backgground-color':'none'}); 
-                    //link.css({'font-weight':'bold', 'backgground-color':'gray'});
-                    
-                    // this._refresh();
 
                     that.doSearch();
                     
