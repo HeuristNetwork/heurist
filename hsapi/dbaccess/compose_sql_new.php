@@ -2409,6 +2409,8 @@ class HPredicate {
 
             return ($this->negate?'not ':'')."between '$datestamp0' and '$datestamp1'";
 
+        }else if($this->isEmptyValue()){ // {"f:10":"NULL"}
+            return 'NULL';
         }else{
 
             $datestamp = validateAndConvertToISO($this->value);
