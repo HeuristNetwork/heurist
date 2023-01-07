@@ -552,7 +552,30 @@ function openSearchMenu(that, $select, disableClick=true){
                 }
             });        
         }
+
+        var $trm_btns = $select.parents('.input-div').find('.btn_add_term, .btn_add_term');
+        if($trm_btns.length > 0){
+            $trm_btns.clone(true, true).css({
+                'position': 'relative',
+                'margin': '0px 2.5px'
+            }).appendTo($menu.find('span.trm-btns'));
+        }
+
         $inpt.parents('.ui-menu-item-wrapper').removeClass('ui-menu-item-wrapper ui-state-active');
+    }
+
+    // Alter width of menu for term fields
+    let enum_fld = $select.parents('.input-div').find('.enum-selector');
+    if(enum_fld.length > 0){
+
+        $menu.width('auto');
+        let width = $menu.width();
+
+        if(width < 200){
+            $menu.width(200);
+        }else{
+            $menu.width(width+10); // make slightly bigger than needed to avoid resizing
+        }
     }
 
     $inpt.focus();
@@ -1120,14 +1143,14 @@ function browseTerms(_editing_input, $input, value){
 
         var search_icon = window.hWin.HAPI4.baseURL+'hclient/assets/filter_icon_black18.png';
 
-        var filter_form = '<div style="width:265px;padding:10px 0px">'
+        var  filter_form = '<div style="padding:10px 0px">'
         +'<span style="padding-right:10px;vertical-align:sub">'
         +'<img src="'+window.hWin.HAPI4.baseURL+'hclient/assets/16x16.gif'
         + '" class="rt-icon rt-icon2" style="background-image: url(&quot;'+search_icon+ '&quot;);"/></span>'
-        +'<input class="input_menu_filter" size="15" style="outline: none;background:none;border: 1px solid lightgray;"/>'
+        +'<input class="input_menu_filter" size="8" style="outline: none;background:none;border: 1px solid lightgray;"/>'
         +'<span class="smallbutton ui-icon ui-icon-circlesmall-close" tabindex="-1" title="Clear entered" '
         +'style="position:relative; cursor: pointer; outline: none; box-shadow: none; border-color: transparent;"></span>'
-        +'<span class="add-trm" style="padding: 0 0 0 25px;cursor: pointer;">Add new term</span>'
+        +'<span class="trm-btns" style="padding: 0 0 0 10px;cursor: pointer;"></span>'
         + '<div class="not-found" style="padding:10px;color:darkgreen;display:none;width:210px;">No terms match the filter '
         + '<a class="add-trm" href="#" style="padding: 0 0 0 10px;color:blue;display:inline-block;">Add term</a>'
         +'</div></div>';

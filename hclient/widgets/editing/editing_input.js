@@ -905,6 +905,9 @@ $.widget( "heurist.editing_input", {
                         ],      
                         //undo redo | code insert  |  fontselect fontsizeselect |  forecolor backcolor | media image link | alignleft aligncenter alignright alignjustify | fullscreen            
                         toolbar: ['formatselect | bold italic forecolor blockquote | customHeuristMedia link | align | bullist numlist outdent indent | table | removeformat | help'],
+                        /*formats: { q: {block: 'q'} },
+                        style_formats: [ {title: 'Quotation', format: 'q'} ],*/
+                        block_formats: 'Paragraph=p;Heading 1=h1;Heading 2=h2;Heading 3=h3;Heading 4=h4;Heading 5=h5;Heading 6=h6;Preformatted=pre;Quotation=blockquote',
                         content_css: [
                             '//fonts.googleapis.com/css?family=Lato:300,300i,400,400i'
                             //,'//www.tinymce.com/css/codepen.min.css'
