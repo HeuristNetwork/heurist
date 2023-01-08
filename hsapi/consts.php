@@ -109,7 +109,7 @@ if ($installDir == @$_SERVER["SCRIPT_NAME"]) { // this should be the path differ
                 }
     }
     $installDir_pro = implode('/', $iDir);
-    //DEBUG - pro is the same is dev $installDir_pro = $installDir; 
+    //DEBUG - pro is the same as dev $installDir_pro = $installDir; 
 }
 
 if(@$_SERVER["REQUEST_URI"]) define('HEURIST_CURRENT_URL', $serverBaseURL . $_SERVER["REQUEST_URI"]);

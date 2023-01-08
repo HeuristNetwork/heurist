@@ -37,6 +37,62 @@
 // TODO: write /redirects/resolver.php as an XML feed with parameterisation for a human-readable view
 // TODO: the following is a temporary redirect to viewRecord.php which renders a human-readable form
 
+
+//redirection for CMS 
+$requestUri = explode('/', trim($_SERVER['REQUEST_URI'],'/'));
+if(count($requestUri)>2 && $requestUri[1]=='web'){
+/*
+To enable this redirection add to httpd.conf
+
+RewriteEngine On
+#if URI starts with web/ redirect it to controller/web.php
+RewriteRule ^/heurist/web/(.*)$ /h6-ao/index.php
+
+https://HeuristRef.net/web/johns_test_63/1463/2382     
+→ https://heuristref.net/heurist/?db=johns_test_063&website&id=1463&pageid=2382         
+
+The IDs for the website and the pageid are optional, so in most cases, w
+here the website is the first or only one for the database, 
+all that is needed is the database name like this:
+
+https://HeuristRef.net/web/johns_test_63
+
+http://127.0.0.1/h6-ao/web/osmak_9c/17/12
+
+$requestUri:
+0 - "heurist"
+1 - "web" 
+2 - database
+3 - website id
+4 - page id
+*/    
+    $_REQUEST = array();
+    $_REQUEST['db'] = $requestUri[2];
+    $_REQUEST['website'] = 1;
+    
+    $redirect = substr($_SERVER['SCRIPT_URI'],0,strpos($_SERVER['SCRIPT_URI'],$requestUri[0]))
+                .$requestUri[0].'/?website&db='.$requestUri[2];
+    if(@$requestUri[3]>0){
+        $_REQUEST['id'] = $requestUri[3];    
+        $redirect .= '&id='.$requestUri[3];    
+    } 
+    if(@$requestUri[4]>0) {
+        $_REQUEST['pageid'] = $requestUri[4];   
+        $redirect .= '&pageid='.$requestUri[4];    
+    }
+    header('Location: '.$redirect);  
+    exit();
+    
+    /*
+    define('PDIR', 'http://127.0.0.1/h6-ao/');
+    $_SERVER["SCRIPT_NAME"] = '/h6-ao/index.php';
+    $_SERVER["SCRIPT_URL"] = '/h6-ao/';
+    $_SERVER['REQUEST_URI'] = '/h6-ao/';
+    */
+}
+
+
+
 if(@$_REQUEST['fmt']){
     $format = $_REQUEST['fmt'];    
 }elseif(@$_REQUEST['format']){

@@ -21,7 +21,8 @@
 
 $isLocalHost = ($_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0.0.1');
 
-//redirection
+
+//absolete/outdated redirection for CMS 
 if( @$_REQUEST['recID'] || @$_REQUEST['recid'] || array_key_exists('website', $_REQUEST) || array_key_exists('embed', $_REQUEST)){
 
     $recid = 0;
