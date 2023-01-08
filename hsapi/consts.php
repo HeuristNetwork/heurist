@@ -24,6 +24,7 @@
 
 // TODO: Rationalise the duplication of constants across /php/consts.php and /common/connect/initialise.php
 //       in particualr this duplication of HEURIST_MIN_DB_VERSION and any other explicit constants
+require_once (dirname(__FILE__).'/utilities/utils_host.php');
 
 define('HEURIST_VERSION', $version);  //code version is defined congigIni.php
 define('HEURIST_MIN_DBVERSION', "1.3.0"); //minimal version of db for current version of code
@@ -51,20 +52,9 @@ if (@$httpProxy != '') {
     }
 }
 
-// server name or IP address of your Web server, null will pull SERVER_NAME from the request header
-if (!@$serverName) {
-    if(@$_SERVER["SERVER_NAME"]){
-        $serverName = $_SERVER["SERVER_NAME"] . 
-        ((is_numeric(@$_SERVER["SERVER_PORT"]) && $_SERVER["SERVER_PORT"] != "80" && $_SERVER["SERVER_PORT"] != "443") 
-                    ? ":" . $_SERVER["SERVER_PORT"] : "");
-        define('HEURIST_DOMAIN', $_SERVER["SERVER_NAME"]);
-    }else{
-        define('HEURIST_DOMAIN', '127.0.0.1');
-    }
-}else{
-    $k = strpos($serverName,":");
-    define('HEURIST_DOMAIN', ($k>0)?substr($serverName,0,$k-1):$serverName );
-}
+$host_params = getHostParams();
+
+define('HEURIST_DOMAIN', $host_params['domain']);
 
 if (!@$mailDomain) {
     define('HEURIST_MAIL_DOMAIN', HEURIST_DOMAIN);
@@ -72,54 +62,13 @@ if (!@$mailDomain) {
     define('HEURIST_MAIL_DOMAIN', $mailDomain);
 }
 
-
-$isSecure = false;
-if (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] == 'on') {
-    $isSecure = true;
-}
-elseif (!empty($_SERVER['HTTP_X_FORWARDED_PROTO']) && $_SERVER['HTTP_X_FORWARDED_PROTO'] == 'https' || !empty($_SERVER['HTTP_X_FORWARDED_SSL']) && $_SERVER['HTTP_X_FORWARDED_SSL'] == 'on') {
-    $isSecure = true;
-}
-$REQUEST_PROTOCOL = $isSecure ? 'https' : 'http';
-
-
-$serverBaseURL = $REQUEST_PROTOCOL . "://" . $serverName;
-
-// calculate the dir where the Heurist code is installed, for example /h5 or /h5-ij
-$topdirs = "admin|api|applications|common|context_help|export|hapi|hclient|hsapi|import|startup|records|redirects|search|viewers|help|ext|external"; // Upddate in 3 places if changed
-
-$installDir = preg_replace("/\/(" . $topdirs . ")\/.*/", "", @$_SERVER["SCRIPT_NAME"]); // remove "/top level dir" and everything that follows it.
-if ($installDir == @$_SERVER["SCRIPT_NAME"]) { // no top directories in this URI must be a root level script file or blank
-    $installDir = preg_replace("/\/[^\/]*$/", "", @$_SERVER["SCRIPT_NAME"]); // strip away everything past the last slash "/index.php" if it's there
-}
-
-
-if ($installDir == @$_SERVER["SCRIPT_NAME"]) { // this should be the path difference between document root and heurist code root
-    $installDir = '/';
-    $installDir_pro = '/';
-}else{
-    $installDir = $installDir.'/';
-    
-    $iDir = explode('/',$installDir);
-    $cntDir = count($iDir)-1;
-    for ($i=$cntDir; $i>=0; $i--){
-                if($iDir[$i]!='') {
-                    $iDir[$i] = 'heurist';    
-                    break;   
-                }
-    }
-    $installDir_pro = implode('/', $iDir);
-    //DEBUG - pro is the same as dev $installDir_pro = $installDir; 
-}
-
-if(@$_SERVER["REQUEST_URI"]) define('HEURIST_CURRENT_URL', $serverBaseURL . $_SERVER["REQUEST_URI"]);
+define('HEURIST_SERVER_URL', $host_params['server_url']);
+if(@$_SERVER["REQUEST_URI"]) define('HEURIST_CURRENT_URL', $host_params['server_url'] . $_SERVER["REQUEST_URI"]);
 define('HEURIST_SERVER_NAME', @$serverName); // server host name for the configured name, eg. myheurist.net
-if(!defined('HEURIST_DIR')) define('HEURIST_DIR', @$_SERVER["DOCUMENT_ROOT"] . $installDir); //  eg. /var/www/html/HEURIST @todo - read simlink (realpath)
-define('HEURIST_SERVER_URL', $serverBaseURL);
-define('HEURIST_BASE_URL', $serverBaseURL . $installDir  ); // eg. https://myheurist.net/heurist/
+if(!defined('HEURIST_DIR')) define('HEURIST_DIR', @$_SERVER["DOCUMENT_ROOT"] . $host_params['install_dir']); //  eg. /var/www/html/HEURIST @todo - read simlink (realpath)
+define('HEURIST_BASE_URL', $host_params['server_url'] . $host_params['install_dir']  ); // eg. https://myheurist.net/heurist/
 
-
-define('HEURIST_BASE_URL_PRO', $serverBaseURL . $installDir_pro ); // production url eg. https://myheurist.net/heurist/
+define('HEURIST_BASE_URL_PRO', $host_params['server_url'] . $host_params['install_dir_pro'] ); // production url eg. https://myheurist.net/heurist/
 
 
 define('HEURIST_SCRATCHSPACE_DIR', sys_get_temp_dir());

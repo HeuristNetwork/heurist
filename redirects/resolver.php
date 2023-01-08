@@ -40,13 +40,14 @@
 
 //redirection for CMS 
 $requestUri = explode('/', trim($_SERVER['REQUEST_URI'],'/'));
-if(count($requestUri)>2 && $requestUri[1]=='web'){
+if(count($requestUri)>1 && ($requestUri[1]=='web' || $requestUri[0]=='web')){
 /*
 To enable this redirection add to httpd.conf
 
 RewriteEngine On
-#if URI starts with web/ redirect it to controller/web.php
-RewriteRule ^/heurist/web/(.*)$ /h6-ao/index.php
+#if URI starts with web/ redirect it to redirects/resolver.php
+RewriteRule ^heurist/web/(.*)$ /heurist/redirects/resolver.php
+RewriteRule ^web/(.*)$ /heurist/redirects/resolver.php
 
 https://HeuristRef.net/web/johns_test_63/1463/2382     
 → https://heuristref.net/heurist/?db=johns_test_063&website&id=1463&pageid=2382         
@@ -57,8 +58,6 @@ all that is needed is the database name like this:
 
 https://HeuristRef.net/web/johns_test_63
 
-http://127.0.0.1/h6-ao/web/osmak_9c/17/12
-
 $requestUri:
 0 - "heurist"
 1 - "web" 
@@ -66,12 +65,21 @@ $requestUri:
 3 - website id
 4 - page id
 */    
+    if($requestUri[0]=='web'){
+       array_unshift($requestUri, 'h6-alpha');
+    }
+
     $_REQUEST = array();
     $_REQUEST['db'] = $requestUri[2];
     $_REQUEST['website'] = 1;
-    
-    $redirect = substr($_SERVER['SCRIPT_URI'],0,strpos($_SERVER['SCRIPT_URI'],$requestUri[0]))
-                .$requestUri[0].'/?website&db='.$requestUri[2];
+
+    require_once ('../hsapi/utilities/utils_host.php');
+                          
+    $host_params = getHostParams();
+
+    $redirect = $host_params['server_url'] . $host_params['install_dir'].'?website&db='.$requestUri[2];
+                //substr($_SERVER['SCRIPT_URI'],0,strpos($_SERVER['SCRIPT_URI'],$requestUri[0]))
+                //.$requestUri[0].'/?website&db='.$requestUri[2];
     if(@$requestUri[3]>0){
         $_REQUEST['id'] = $requestUri[3];    
         $redirect .= '&id='.$requestUri[3];    
@@ -80,6 +88,9 @@ $requestUri:
         $_REQUEST['pageid'] = $requestUri[4];   
         $redirect .= '&pageid='.$requestUri[4];    
     }
+    //DEBUG print print_r($host_params,true).'<br>';
+    //DEBUG print print_r($_SERVER,true).'<br>';
+    //DEBUG echo $redirect;
     header('Location: '.$redirect);  
     exit();
     
