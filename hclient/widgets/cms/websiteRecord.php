@@ -165,7 +165,8 @@ $home_page_on_init = $rec_id;
 
 if($rec==null){
     //header('Location: '.ERROR_REDIR.'&msg='.rawurlencode('Record #'.$rec_id.' not found'));
-    $message = 'Record #'.$home_page_on_init.' not found';
+    $message = 'Website ID '.$home_page_on_init.' does not refer to a CMS Home record';
+    //'Record #'.$home_page_on_init.' not found';
     include ERROR_REDIR;
     exit();
 }

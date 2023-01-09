@@ -77,7 +77,7 @@ $requestUri:
                           
     $host_params = getHostParams();
 
-    $redirect = $host_params['server_url'] . $host_params['install_dir'].'?website&db='.$requestUri[2];
+    $redirect = $host_params['server_url'] . $host_params['install_dir'].'?db='.$requestUri[2].'&website';
                 //substr($_SERVER['SCRIPT_URI'],0,strpos($_SERVER['SCRIPT_URI'],$requestUri[0]))
                 //.$requestUri[0].'/?website&db='.$requestUri[2];
     if(@$requestUri[3]>0){
