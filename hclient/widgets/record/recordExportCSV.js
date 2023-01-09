@@ -342,7 +342,7 @@ $.widget( "heurist.recordExportCSV", $.heurist.recordAction, {
             
             var settings = this.getSettings(true);
             if(!settings) return;
-           
+
             var request = {
                 'request_id' : window.hWin.HEURIST4.util.random(),
                 'db': window.hWin.HAPI4.database,

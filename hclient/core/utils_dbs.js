@@ -767,7 +767,7 @@ window.hWin.HEURIST4.dbs = {
         
         var $pref = "";
         
-        if (($mode==3) || $fieldtypes.indexOf('all')>=0 
+        if ($fieldtypes.indexOf('all')>=0   //($mode==3) || 
             || window.hWin.HEURIST4.util.findArrayIndex($detailType, $fieldtypes)>=0) //$fieldtypes - allowed types
         {
 

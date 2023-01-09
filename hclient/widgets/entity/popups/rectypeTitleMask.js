@@ -398,7 +398,6 @@ $.widget( "heurist.rectypeTitleMask", $.heurist.recordAction, {
         
         var that = this;
 
-       
         //generate treedata from rectype structure
         var treedata = window.hWin.HEURIST4.dbs.createRectypeStructureTree( null, 3, this.options.rty_ID, ['all','parent_link'] );
 
