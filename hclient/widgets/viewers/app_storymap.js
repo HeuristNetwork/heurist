@@ -668,9 +668,10 @@ $.widget( "heurist.app_storymap", {
                                                         dt_st = that._resultset.fld(record, DT_DATE);
                                                     }
                                                     var dres = window.hWin.HEURIST4.util.parseDates(dt_st, dt_end);
-                                                    
-                                                    that._resultset.setFld(record, DT_START_DATE, dres[0]);
-                                                    that._resultset.setFld(record, DT_END_DATE, dres[1]);
+                                                    if(window.hWin.HEURIST4.util.isArrayNotEmpty(dres) && dres.length==2){
+                                                        that._resultset.setFld(record, DT_START_DATE, dres[0]);
+                                                        that._resultset.setFld(record, DT_END_DATE, dres[1]);
+                                                    }
                                                 });        
                                                 
                                                 //sortFields = {"9":1,"10":1,"11":1};
