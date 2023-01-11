@@ -135,7 +135,7 @@ if(!$edit_OldEditor && $system->is_member(1)){
 if($isWebPage){ //set in websiteRecord.php 
 //WEB PAGE - EMBED
 ?>
-        <div class="ent_wrapper">
+        <div class="ent_wrapper heurist-website">
             <?php
     if($showWarnAboutPublic){
         print '<div style="top:0;height:20px;position:absolute;text-align:center;width:100%;color:red;">Web page record is not public. It will not be visible to the public</div>';  
@@ -154,7 +154,7 @@ if($isWebPage){ //set in websiteRecord.php
 }else{
 ?>
 
-        <div class="ent_wrapper">
+        <div class="ent_wrapper heurist-website">
             <div id="main-header" role="banner"
                 class="mceNonEditable header-element ui-layout-main-menu ui-widget-content navbar navbar-default navbar-fixed-top affix-top">
                 <div class="container">

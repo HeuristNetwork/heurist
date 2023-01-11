@@ -55,7 +55,7 @@ INITIALIZATION workflow:
 
 
 Default layout for Heurist CMS web site consists of 3 divs with absolute positions
-.ent_wrapper
+.ent_wrapper.heurist-website
     .ent_header   #main_header
     .ent_content_full  #main-content-container
 

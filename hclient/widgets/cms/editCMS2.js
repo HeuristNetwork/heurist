@@ -112,7 +112,8 @@ function editCMS2(website_document){
         options.editor_pos = 'west'; //or east
             
         //
-        // add edit layout - top most ent_wrapper becomes 
+        // add edit layout - top most .ent_wrapper/.heurist-website becomes content of ui-layout-center
+        // editor panel is on ui-layout-west
         //
         if(!_editor_panel){ //$(this.document).find('.editStructure').length==0
             
@@ -258,7 +259,7 @@ function editCMS2(website_document){
                         //togglerContent_closed:  '&nbsp;',
                         center:{
                             minWidth:400,
-                            contentSelector: '.ent_wrapper', //@todo !!!! for particule template ent_wrapper can be missed
+                            contentSelector: '.heurist-website', //@todo !!!! for particule template heurist-website can be missed
                             //pane_name, pane_element, pane_state, pane_options, layout_name
                             onresize_end : function(){
                                 //that.handleTabsResize();                            

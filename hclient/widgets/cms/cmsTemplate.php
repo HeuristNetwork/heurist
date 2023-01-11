@@ -33,6 +33,8 @@
     * 
     * main-content - is the target div for content of particular page to be loaded  
     * 
+    * The top most div/container must have class heurist-website. It is required for proper work of CMS editor
+    * 
     * There are following variables (their values are defined in website home record) that can be used in html header
     * $website_title 
     * $meta_keywords
@@ -156,7 +158,7 @@ default content consists of
 if($isWebPage){ //set in websiteRecord.php 
 //WEB PAGE - EMBED
 ?>
-<div class="ent_wrapper">
+<div class="ent_wrapper heurist-website">
 <?php
     if($showWarnAboutPublic){
         print '<div style="top:0;height:20px;position:absolute;text-align:center;width:100%;color:red;">Web page record is not public. It will not be visible to the public</div>';  
@@ -181,7 +183,7 @@ if($isWebPage){ //set in websiteRecord.php
 }else{
 ?>
 
-    <div class="ent_wrapper">
+    <div class="ent_wrapper heurist-website">
     <div id="main-header" class="ent_header ui-heurist-header2" <?php print $image_banner?'style="background-image:url(\''.$image_banner.'\') !important;background-repeat: repeat-x !important;background-size:auto 170px !important;"':'' ?>>
     
 <?php
