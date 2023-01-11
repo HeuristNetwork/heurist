@@ -1721,7 +1721,7 @@ private static function _getMediaViewerData($record){
                                'id'=>$fileid,
                                'mimeType'=>$mimeType,
                                'filename'=>htmlspecialchars($fileinfo['ulf_OrigFileName']),
-                               'external'=>htmlspecialchars($external_url)));
+                               'external'=>htmlspecialchars($external_url)));  //important need restore on client side
                 $comma =  ",\n";
                                
             }

@@ -1457,6 +1457,15 @@ window.hWin.HEURIST4.util = {
 String.prototype.htmlEscape = function() {
     return this.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/'/g, "&#39;");
 }
+/*
+String.prototype.htmlUnescape = function() {
+    var e = document.createElement("textarea");
+    e.innerHTML = this;
+    // handle case of empty input
+    return e.childNodes.length === 0 ? "" : e.childNodes[0].nodeValue;    
+}
+*/
+
 String.prototype.capitalize = function() {
     return this.charAt(0).toUpperCase() + this.slice(1);
 }

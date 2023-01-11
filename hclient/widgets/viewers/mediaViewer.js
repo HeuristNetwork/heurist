@@ -112,6 +112,17 @@ $.widget( "heurist.mediaViewer", {
         }
         
     }
+    
+    , _htmlUnescape:function(text) {
+        if(text){
+            var e = document.createElement("textarea");
+            e.innerHTML = text;
+            // handle case of empty input
+            return e.childNodes.length === 0 ? "" : e.childNodes[0].nodeValue;    
+        }else{
+            return null;
+        }
+    }
 
     //
     //
@@ -135,7 +146,7 @@ $.widget( "heurist.mediaViewer", {
                         mimeType = file.mimeType;
                         filename = file.filename; //to detect _iiif or _tiled
                         filetitle = file.title;
-                        external_url = file.external;
+                        external_url = this._htmlUnescape(file.external);
                         mode_3d_viewer = file.mode_3d_viewer; //3dhop or 3d or ''
                     }else{
                         obf_recID = file[0];
@@ -346,7 +357,7 @@ $.widget( "heurist.mediaViewer", {
                         mimeType = file.mimeType,
                         filename = file.filename, //to detect _iiif or _tiled
                         filetitle = file.title,
-                        external_url = file.external,
+                        external_url = that._htmlUnescape(file.external);
                         mode_3d_viewer = file.mode_3d_viewer;
                     
                         if(!mimeType) mimeType = '';
