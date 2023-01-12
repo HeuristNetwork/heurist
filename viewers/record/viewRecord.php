@@ -92,12 +92,14 @@ if(!($bkm_ID>0) && $system->get_user_id()>0 ){ //logged in
 
 
 $noclutter = array_key_exists('noclutter', $_REQUEST)? '&noclutter' : '';
+$noImages = array_key_exists('noImages', $_REQUEST) ? '&noImages='.$_REQUEST['noImages'] : '';
 
 $rec_title = $rec['rec_Title'];
 
 $record_renderer_url = HEURIST_BASE_URL.'viewers/record/renderRecordData.php?db='
         .HEURIST_DBNAME.'&'.($bkm_ID>0 ? ('bkmk_id='.$bkm_ID) : ('recID='.$rec_id))
-        .$noclutter;
+        .$noclutter
+        .$noImages;
 
 if(!@$_REQUEST['popup']){
     header('Location: '.$record_renderer_url);
