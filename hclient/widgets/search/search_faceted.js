@@ -2899,20 +2899,23 @@ $.widget( "heurist.search_faceted", {
             for(var i = 0; i < data.length; i++){
 
                 var value = data[i];
+                var title = value[0];
+
+                //for enum get term label w/o code
+                if((field['type']=='enum' || field['type']=='reltype') && value[0]>0){
+                    title = $Db.getTermValue(value[0], false);    
+                }else if( field['type']=='date' && field['groupby']=='month' ){
+                    
+                    var tDate = new TDate((new Date(value[0])).toISOString());
+                    title = tDate.toString('MMM yyyy');
+                }
+
+                if(!title){
+                    title = value[0];
+                }
 
                 if(isListOrColumn && $container.not('select').length > 0){ // LIST
                     
-                    var title = value[0];
-                    
-                    //for enum get term label w/o code
-                    if((field['type']=='enum' || field['type']=='reltype') && value[0]>0){
-                        title = $Db.getTermValue(value[0], false);    
-                    }else if( field['type']=='date' && field['groupby']=='month' ){
-                        
-                        var tDate = new TDate((new Date(value[0])).toISOString());
-                        title = tDate.toString('MMM yyyy');
-                    }
-
                     var f_link = this._createFacetLink(f_index, {title:title, value:value[2], count:value[1], 'level': level}, display_mode);
                     
                     //@todo draw first level for groupby firs tchar always inline
@@ -2935,7 +2938,7 @@ $.widget( "heurist.search_faceted", {
 
                 }else{
                     // DROPDOWN
-                    this._createOption(f_index, level, {title: value[0], value: value[2], count: value[1]}).appendTo($container);
+                    this._createOption(f_index, level, {title: title, value: value[2], count: value[1]}).appendTo($container);
                 }
             }
         }
