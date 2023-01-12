@@ -64,9 +64,9 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
         summary_tabs:['0','1']},
     
     // For external lookups, holds values that need to be processed
-    term_values: null,
-    file_values: null,
-    resource_values: null,
+    term_values: [],
+    file_values: {},
+    resource_values: [],
 
     _init: function() {
         
@@ -2487,25 +2487,29 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                 
                 //default values for ownership and viewability from preferences
                 var add_rec_prefs = window.hWin.HAPI4.get_prefs('record-add-defaults');
+                var usr_id = window.hWin.HAPI4.user_id();
                 if(!$.isArray(add_rec_prefs) || add_rec_prefs.length<4){
-                    add_rec_prefs = [0, 0, 'viewable', '']; //rt, owner, access, tags  (default to Everyone)
+                    add_rec_prefs = [0, usr_id, 'viewable', '']; //rt, owner, access, tags  (default to Current user)
                 }
                 if(add_rec_prefs.length<5){
                     add_rec_prefs.push(''); //groups visibility
                 }
                 
                 if (that.options.new_record_params.OwnerUGrpID=='current_user') {
-                    that.options.new_record_params.OwnerUGrpID = window.hWin.HAPI4.user_id();
-                }else if(!(that.options.new_record_params.OwnerUGrpID>=0)){
+                    that.options.new_record_params.OwnerUGrpID = usr_id;
+                }else if(that.options.new_record_params.OwnerUGrpID < 0){
                     that.options.new_record_params.OwnerUGrpID = add_rec_prefs[1];    
                 } 
-                if (!(window.hWin.HAPI4.is_admin() || window.hWin.HAPI4.is_member(add_rec_prefs[1]))) {
-                    that.options.new_record_params.OwnerUGrpID = 0; //default to eveyone window.hWin.HAPI4.currentUser['ugr_ID'];    
+                if (!(window.hWin.HAPI4.is_admin() || window.hWin.HAPI4.is_member(that.options.new_record_params.OwnerUGrpID))) {
+                    that.options.new_record_params.OwnerUGrpID = usr_id; //default to current user   
                 }
                 if(window.hWin.HEURIST4.util.isempty(that.options.new_record_params.NonOwnerVisibility)){
                     that.options.new_record_params.NonOwnerVisibility = add_rec_prefs[2];
                 }
-                if(that.options.new_record_params.NonOwnerVisibility=='viewable'){
+
+                if(that.options.new_record_params.NonOwnerVisibility=='viewable' &&
+                !that.options.new_record_params.NonOwnerVisibilityGroups || that.options.new_record_params.NonOwnerVisibilityGroups < 0){
+
                     that.options.new_record_params.NonOwnerVisibilityGroups = add_rec_prefs[4];
                 }
                 
@@ -4103,9 +4107,9 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
                                                 that.file_values = {}; // list of external urls for file fields
                                                 that.resource_values = []; // list of search values for recpointer fields
 
-                                                if(that.resource_values.length == 0 && recset['ext_url']){
+                                                if(!window.hWin.HEURIST4.util.isempty(recset['ext_url'])){
                                                     that.resource_values.push([recset['ext_url'], 'ext']);
-                                                }else if(that.resource_values.length == 0 && recset['heurist_url']){
+                                                }else if(!window.hWin.HEURIST4.util.isempty(recset['heurist_url'])){
                                                     that.resource_values.push([recset['heurist_url'], 'heurist']);
                                                 }else{
                                                     that.resource_values.push(['']);
@@ -4211,16 +4215,50 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
                                                             var fieldname = $Db.rst(that._currentEditRecTypeID, dt_id, 'rst_DisplayName');
                                                             if(!assigned_fields.includes(fieldname)) { assigned_fields.push(fieldname); }
                                                         } 
+                                                    }else if(dt_id == 'BnF_ID'){ // retrieve record from BnF and place in record scratch pad
+
+                                                        let value = recset['BnF_ID'];
+
+                                                        if(window.hWin.HEURIST4.util.isempty(value)){ // missing | no value
+                                                            continue;
+                                                        }
+
+                                                        let req_url = 'http://catalogue.bnf.fr/api/SRU?version=1.2&operation=searchRetrieve&recordSchema=unimarcxchange&maximumRecords=1&startRecord=1&query=(';                                                        
+                                                        let fld_name = cfg.service == 'bnfLibrary' ? 'bib.recordid' : 'aut.recordid';
+
+                                                        req_url += encodeURIComponent(fld_name + ' all ' + value) + ')';
+
+                                                        let req = {
+                                                            service: req_url,
+                                                            serviceType: 'bnf_recdump'
+                                                        };
+
+                                                        window.hWin.HAPI4.RecordMgr.lookup_external_service(req, (response) => {
+                                                            if(window.hWin.HEURIST4.util.isJSON(response)){
+                                                                response = window.hWin.HEURIST4.util.isJSON(response);
+                                                                if(response.record != null){
+
+                                                                    let scratchpad_txt = response.record + '\r\n\r\n';//JSON.stringify(response.record, null, 4);
+                                                                    let $fld = that._editing.getFieldByName('rec_ScratchPad');
+
+                                                                    if(!window.hWin.HEURIST4.util.isempty($fld.text())){ // if content exists; prepend and add breaks before existing content
+                                                                        scratchpad_txt += '\r\n\r\n' + $fld.text();
+                                                                    }
+
+                                                                    $fld.editing_input('setValue',[scratchpad_txt]);
+                                                                    $fld.editing_input('isChanged', true);
+
+                                                                    that.editFormPopup.layout().open("east"); // expand panel
+                                                                    if($fld.parents('.summary-accordion.ui-accordion').accordion('instance') != undefined){ // expand accordion
+                                                                        $fld.parents('.summary-accordion.ui-accordion').accordion('option', 'active', 0);
+                                                                    }
+                                                                }
+                                                            }
+                                                        });
                                                     }
                                                 }
 
-                                                if(that.term_values.length > 0){
-                                                    that.processTermFields(assigned_fields, {});
-                                                }else if(Object.keys(that.file_values).length > 0){
-                                                    that.processFileFields(assigned_fields);
-                                                }else{
-                                                    that.processResourceFields(assigned_fields);
-                                                }
+                                                that.processTermFields(assigned_fields, {});
                                             }
                                         }
                                     }
@@ -4910,8 +4948,9 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
 
         if(new_terms == null) { new_terms = {}; }
 
-        if(that.term_values == null && Object.keys(new_terms).length == 0){ // no terms to handle
+        if(that.term_values.length == 0 && Object.keys(new_terms).length == 0){ // no terms to handle
             this.processFileFields(completed_fields);
+            return;
         }else if(that.term_values.length == 0){ // all terms handled
 
             if(new_terms['refresh']){ // check whether local cache needs updating
@@ -5036,6 +5075,7 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
 
         if(Object.keys(this.file_values).length == 0){
             this.processResourceFields(completed_fields);
+            return;
         }
 
         var request = {
@@ -5130,7 +5170,7 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
 
         var hasValue = (that.resource_values != null && that.resource_values.length > 1);
 
-        if(hasValue && that.resource_values[0].length == 1){ // contains only the external record link
+        if(hasValue && that.resource_values[0].length == 2){ // contains only the external record link
             if(that.resource_values[0][1] == 'ext'){ // external link
                 url = '<a href="' + that.resource_values[0][0] + '" target="_blank">View external record <span style="font-size:10px;" class="ui-icon ui-icon-extlink" /></a><br><br>';
             }

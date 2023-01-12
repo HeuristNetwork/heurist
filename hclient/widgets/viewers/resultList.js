@@ -117,7 +117,9 @@ $.widget( "heurist.resultList", {
         auto_select_first: false,   //automatically select first record within result list
         placeholder_text: null,      //text to display while no recordset is loaded
         
-        init_completed: false   //flag to be set to true on full widget initializtion
+        init_completed: false,   //flag to be set to true on full widget initializtion
+
+        show_linked_media: false  // show linked media within record viewer
     },
 
     _is_publication:false, //this is CMS publication - take css from parent
@@ -2437,6 +2439,10 @@ $.widget( "heurist.resultList", {
                         infoURL = window.hWin.HAPI4.baseURL + 'viewers/record/renderRecordData.php?recID='
                         +recID
                         +'&db='+window.hWin.HAPI4.database;
+
+                        if(that._is_publication && that.options.show_linked_media == false){
+                            infoURL += '&noImages=1';
+                        }
                     }
                     
                     
@@ -4212,6 +4218,10 @@ setTimeout("console.log('2. auto='+ele2.height());",1000);
             }else{
                 recInfoUrl = window.hWin.HAPI4.baseURL + "viewers/record/renderRecordData.php?db="
                         +window.hWin.HAPI4.database+"&ll="+lt+"&recID="+rec_ID;  
+                
+                if(that._is_publication && that.options.show_linked_media == false){
+                    recInfoUrl += '&noImages=1';
+                }
             }
         }
 

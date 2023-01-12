@@ -169,7 +169,7 @@ $.widget( "heurist.lookupBnFLibrary_bib", $.heurist.recordAction, {
 
             if(fldname == 'author'){
 
-                if(!s){ 
+                if(!s || s == ''){ 
                     return '<div style="display:inline-block;width:'+width+'ex" class="truncate"">No provided creator</div>';
                 }
 
@@ -180,16 +180,25 @@ $.widget( "heurist.lookupBnFLibrary_bib", $.heurist.recordAction, {
                     var cur_string = '';
                     var cur_obj = s[idx];
 
-                    if(cur_obj.hasOwnProperty('firstname') && cur_obj['firstname'] != ''){
-                        cur_string = cur_obj['firstname'];
+                    if($.isPlainObject(cur_obj)){
+                        if(cur_obj.hasOwnProperty('firstname') && cur_obj['firstname'] != ''){
+                            cur_string = cur_obj['firstname'];
+                        }
+                        if(cur_obj.hasOwnProperty('surname') && cur_obj['surname'] != ''){
+                            cur_string = (cur_string != '') ? cur_obj['surname'] + ', ' + cur_string : cur_obj['surname'];
+                        }
+                        if(cur_obj.hasOwnProperty('active') && cur_obj['active'] != ''){
+                            cur_string += ' (' + cur_obj['active'] + ')';
+                        }
+
+                        if(cur_string == ''){
+                            Object.values(cur_obj);
+                        }
+                    }else{
+                        cur_string = cur_obj;
                     }
-                    if(cur_obj.hasOwnProperty('surname') && cur_obj['surname'] != ''){
-                        cur_string = (cur_string != '') ? cur_obj['surname'] + ', ' + cur_string : cur_obj['surname'];
-                    }
-                    if(cur_obj.hasOwnProperty('active') && cur_obj['active'] != ''){
-                        cur_string += ' (' + cur_obj['active'] + ')';
-                    }
-                    if(!cur_string){
+
+                    if(!cur_string || $.isArray(cur_string) || $.isPlainObject(cur_string)){
                         creator_val += 'Missing author; ';
                     }else{
                         creator_val += cur_string + '; ';
@@ -296,6 +305,9 @@ $.widget( "heurist.lookupBnFLibrary_bib", $.heurist.recordAction, {
 
             var map_flds = Object.keys(this.options.mapping.fields); // mapped fields names, to access fields of rec
 
+            res['BnF_ID'] = recset.fld(rec, 'BnF_ID'); // add BnF ID
+            res['ext_url'] = recset.fld(rec, 'biburl'); // add BnF URL
+
             // Assign individual field values, here you would perform any additional processing for selected values (example. get ids for vocabulrary/terms and record pointers)
             for(var k=0; k<map_flds.length; k++){
 
@@ -303,15 +315,13 @@ $.widget( "heurist.lookupBnFLibrary_bib", $.heurist.recordAction, {
                 var dty_ID = this.options.mapping.fields[field_name];
                 val = recset.fld(rec, field_name);
                 var field_type = $Db.dty(dty_ID, 'dty_Type');
+                var obj_keys = [];
 
                 if(val != null && dty_ID != ''){
 
-                    if(field_type == 'resource' && !res['ext_url']){
-                        res['ext_url'] = recset.fld(rec, 'biburl');
-                    }
-
                     // Convert to array
                     if(window.hWin.HEURIST4.util.isObject(val)){
+                        obj_keys = Object.keys(val);
                         val = Object.values(val);
                     }else if(!window.hWin.HEURIST4.util.isArray(val)){
                         val = window.hWin.HEURIST4.util.isnull(val) ? '' : val;
@@ -325,20 +335,24 @@ $.widget( "heurist.lookupBnFLibrary_bib", $.heurist.recordAction, {
                             var completed_val = '';
                             var cur_val = val[i];
 
-                            if(cur_val['firstname']){
-                                completed_val = cur_val['firstname'];
-                            }
-                            if(cur_val['surname']){
-                                completed_val = (completed_val != '') ? completed_val + ' ' + cur_val['surname'] : cur_val['surname'];
-                            }
-                            if(cur_val['active']){
-                                completed_val = (completed_val != '') ? completed_val + ' [' + cur_val['active'] + ']' : 'No Name, years active: ' + cur_val['active'];
-                            }
-                            if(cur_val['id']){
-                                completed_val = (completed_val != '') ? completed_val + ' (id: ' + cur_val['id'] + ')' : 'No Name, id: ' + cur_val['id'];
+                            if($.isPlainObject(cur_val)){
+                                if(cur_val['firstname']){
+                                    completed_val = cur_val['firstname'];
+                                }
+                                if(cur_val['surname']){
+                                    completed_val = (completed_val != '') ? completed_val + ' ' + cur_val['surname'] : cur_val['surname'];
+                                }
+                                if(cur_val['active']){
+                                    completed_val = (completed_val != '') ? completed_val + ' [' + cur_val['active'] + ']' : 'No Name, years active: ' + cur_val['active'];
+                                }
+                                if(obj_keys[k]){
+                                    completed_val = (completed_val != '') ? completed_val + ' (id: ' + obj_keys[k] + ')' : 'No Name, id: ' + obj_keys[k];
+                                }
+                            }else{
+                                completed_val = cur_val;
                             }
 
-                            if(completed_val != ''){
+                            if(completed_val != '' && !$.isArray(completed_val) && !$.isPlainObject(completed_val)){
                                 val[i] = completed_val;
                             }
                         }
@@ -349,51 +363,42 @@ $.widget( "heurist.lookupBnFLibrary_bib", $.heurist.recordAction, {
                         res[dty_ID] = res[dty_ID].concat(val);
 
                         continue;
-                    }else if(field_name == 'publisher'){ // special treatment for publisher field
-/*
-                        for(var i = 0; i < val.length; i++){
-
-                            var completed_val = [];
-                            var cur_val = val[i];
-
-                            if(cur_val['location']){
-                                completed_val = cur_val['location'];
-                            }
-                            if(cur_val['name']){
-
-                                if(!completed_val){
-                                    completed_val = cur_val['name'];
-                                }else{
-
-                                    var pub_name_length = cur_val['name'].length;
-                                    for(var j = 0; j < completed_val.length; j++){
-
-                                        if(j < pub_name_length){ // use current name
-                                            completed_val[j] = cur_val['name'][j] + ' [' + completed_val[j] + ']';
-                                        }else{ // use last available
-                                            completed_val[j] = cur_val['name'][pub_name_length-1] + ' [' + completed_val[j] + ']';
-                                        }
-                                    }
-                                }
-                            }
-
-                            if(completed_val.length > 0){
-                                if(!res[dty_ID]){
-                                    res[dty_ID] = completed_val;
-                                }else{
-                                    res[dty_ID] = res[dty_ID].concat(completed_val);
-                                }
-                            }
-                        }
-
-                        continue;
-*/
                     }else if(field_name == 'language'){ // handle if language equals '###'
 
                         for(var i = 0; i < val.length; i++){
                             if(val[i] == '###'){
                                 val[i] = 'unknown';
                             }
+                        }
+                    }else if(field_type == 'enum'){ // Match term labels with val, need to return the term's id to properly save its value
+
+                        if(val_isObject){ 
+                            val = Object.values(val);
+                        }else if(!val_isArray){
+                            val = [val];
+                        }
+
+                        var vocab_ID = $Db.dty(dty_ID, 'dty_JsonTermIDTree');
+                        var term_Ids = $Db.trm_TreeData(vocab_ID, 'set');
+
+                        for(var i=0; i<val.length; i++){
+
+                            if(!Number.isInteger(+val[i])){
+                                continue;
+                            }
+
+                            for(let j = 0; j < term_Ids.length; j++){
+                                let trm_code = $Db.trm(term_Ids[j], 'trm_Code');
+                                if(trm_code == val[i]){
+                                    val[i] = term_Ids[j];
+                                    break;
+                                }
+                            }
+                        }
+
+                        // Check if a value was found, if not prepare for creating new term
+                        if(!term_found){
+                            new_terms.push(val);
                         }
                     }
                 }
@@ -596,6 +601,7 @@ $.widget( "heurist.lookupBnFLibrary_bib", $.heurist.recordAction, {
             var fields = ['rec_ID', 'rec_RecTypeID']; // added for record set
             var map_flds = Object.keys(this.options.mapping.fields);
             fields = fields.concat(map_flds);            
+            fields = fields.concat('BnF_ID');
             
             // Parse json to Record Set
             var i=0;
@@ -616,13 +622,15 @@ $.widget( "heurist.lookupBnFLibrary_bib", $.heurist.recordAction, {
                     }
                 }
 
+                values.push(record['BnF_ID']);
+
                 res_orders.push(recID);
                 res_records[recID] = values;
             }
 
             if(res_orders.length>0){
 
-                res_records = this.removeDupAuthors(fields.indexOf('author'), res_records);
+                //res_records = this.removeDupAuthors(fields.indexOf('author'), res_records);
 
                 // Create the record set for the resultList
                 var res_recordset = new hRecordSet({

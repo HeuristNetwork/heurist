@@ -58,16 +58,40 @@ require_once(dirname(__FILE__)."/../../hclient/framecontent/initPage.php");
             {
                 /*border-collapse:collapse;*/
                 font-size: 1em;
-            }        
+            }
+
+            div.top-div, 
+			div.bottom-div{
+				display: flex;
+				align-content: center;
+				/*justify-content: center;*/
+				flex-wrap: wrap;
+			}
+			div.bottom-div{
+				flex-wrap: nowrap;
+			}
+
+			div#divStep1{
+				margin-right:10px;
+				flex: 1 1 450px;
+			}
+			div#divStep2{
+				border-right:1px lightgray solid;
+				flex: 0 1 175px;
+			}
+			div#divStep3{
+				margin-left: 10px;
+				flex: 0 1 200px;
+			}
         </style>
         
     </head>
 
     <!-- HTML -->
-    <body style="overflow:hidden;">
-<div style="width:100%;height:60%;position:absolute;top:0">
-<div style="position:absolute;left:0;right:400px; height:100%; margin-right:10px; " id="divStep1">
-    <div class="ent_header" style="height:8em;padding:0">
+    <body style="margin: 0;">
+<div class="top-div">
+<div id="divStep1">
+    <div style="height:8em;padding:0">
         <p><b>Step 1</b></p>
         <p>Paste content in area below (one label per line, may optionally be followed by description, code and semantic URI, with usual delimiters eg. comma)</p>
         <input type="file" id="uploadFile" style="display:none">
@@ -159,13 +183,13 @@ separate term and each of these values with comma or tab.
     </div>                                    
                     
     </div>
-    <textarea id="sourceContent" rows="0" cols="0" class="ent_content_full" 
-    style="top:8em;width:100%;resize:none;padding:0.5em;border:2px solid lightblue;"></textarea>
+    <textarea id="sourceContent" rows="15" cols="0" 
+    style="width:100%;resize:none;padding:0.5em;border:2px solid lightblue;"></textarea>
     
     
 </div>
-<div style="position:absolute;right:200px;width:200px; height:100%; border-right:1px lightgray solid">
-    <div class="ent_header" style="height:10em;">
+<div id="divStep2">
+    <div style="height:10em;">
         <p><b>Step 2</b></p>
         <div>
             <input id="csv_header" 
@@ -175,7 +199,7 @@ separate term and each of these values with comma or tab.
         </div>
         <div id="btnParseData" style="margin-top: 10px;">Analyse</div>
     </div>
-    <fieldset class="ent_content_full" style="top:7em;padding-top:1em;">
+    <fieldset style="padding-top:1em;">
             <div>
                 <label for="csv_delimiter">Field separator:</label>
                 <select id="csv_delimiter" class="text ui-widget-content ui-corner-all" style="width:120px;margin-left:20px">
@@ -211,12 +235,12 @@ separate term and each of these values with comma or tab.
             </div>
     </fieldset>            
 </div>
-<div style="position:absolute;right:0px;height:100%;width:200px;"> 
-    <div class="ent_header" style="height:6em;">
+<div id="divStep3"> 
+    <div style="height:6em;">
         <p><b>Step 3</b></p>
         <p style="padding-top:0.4em; margin-bottom: 10px;">Select field assignment<br>(Term label is required)</p>
     </div>
-    <fieldset class="ent_content" style="top:6em;padding-top:1em;">
+    <fieldset style="padding-top:1em;">
            
             <div>
                 <label style="color:red">Term (Label)</label><br>
@@ -241,22 +265,22 @@ separate term and each of these values with comma or tab.
             
             
     </fieldset> 
-    <div class="ent_footer" style="padding-left:5px;height:5em">
+    <div style="padding-left:5px;height:5em">
         <div id="preparedInfo2" style="font-weight:bold;font-size:1.1em;padding:4px"></div>
         <div id="btnImportData">Import</div>
     </div>
 </div>
-<div id="divCurtain" style="position:absolute;right:0px;height:100%;width:400px;" class="semitransparent">
-<!-- curtain -->
-</div>
+<!-- <div id="divCurtain" style="position:absolute;right:0px;height:350px;width:400px;" class="semitransparent">
+ curtain
+</div> -->
 </div>
 
-<div style="width:100%;height:40%;position:absolute;bottom:0" >
-    <div class="ent_header" style="height:2em;border-bottom:none;border-top:1px solid lightgray;padding-top:10px">
+<div style="margin-top:10px;">
+    <div style="height:2em;border-bottom:none;border-top:1px solid lightgray;padding-top:10px;">
         <b>Preview of the data as it will be imported:</b>
         <div id="preparedInfo" style="float:right;padding-right:10px"> <!-- div to show results of data preparation --></div>
     </div>
-    <div class="ent_content_full" style="top:2.5em;font-size:0.9em;" id="divParsePreview">
+    <div style="font-size:0.9em;" id="divParsePreview">
     </div>
 </div>
 

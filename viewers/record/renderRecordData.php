@@ -61,6 +61,8 @@ $is_production = !$is_map_popup && $layout_name=='WebSearch';
 
 $is_reloadPopup = array_key_exists('reloadPopup', $_REQUEST) && ($_REQUEST['reloadPopup']==1);
 
+$no_linked_media = array_key_exists('noImages', $_REQUEST) && ($_REQUEST['noImages']==1);
+
 $rectypesStructure = dbs_GetRectypeStructures($system); //getAllRectypeStructures(); //get all rectype names
 
 $defTerms = dbs_GetTerms($system);
@@ -1109,7 +1111,7 @@ function print_personal_details($bkmk) {
 // prints recDetails
 //
 function print_public_details($bib) {
-    global $system, $defTerms, $is_map_popup, $without_header, $is_production, $ACCESSABLE_OWNER_IDS, $relRT, $startDT, $already_linked_ids, $group_details;
+    global $system, $defTerms, $is_map_popup, $without_header, $is_production, $ACCESSABLE_OWNER_IDS, $relRT, $startDT, $already_linked_ids, $group_details, $no_linked_media;
     
     $has_thumbs = false;
     
@@ -1472,7 +1474,7 @@ function print_public_details($bib) {
       
     $several_media = count($thumbs);
         
-    if(true) // use/hide old thumbnails   
+    if(!$no_linked_media) // use/hide old thumbnails   
         foreach ($thumbs as $k => $thumb) {
             
             if(strpos($thumb['orig_name'],'_iiif')===0 || 
