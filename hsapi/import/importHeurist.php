@@ -701,8 +701,8 @@ EOD;
         $imp_rectypes = $data['heurist']['database']['rectypes'];
         
         //need to copy files
-        $source_url = $data['heurist']['database']['url']; //url of database
-        $source_db = $data['heurist']['database']['db']; //name of database 
+        $source_url = @$data['heurist']['database']['url']; //base url of database
+        $source_db = @$data['heurist']['database']['db']; //name of database 
         
         ini_set('max_execution_time', '0');
         
@@ -739,12 +739,21 @@ EOD;
         
             $importDef = new DbsImport( self::$system );
 
-            if($mapping_defs!=null){
+            $databaseURL = null;
+            if($source_url){
+                if(strpos($source_url,'?db=')>0){
+                    $databaseURL = $source_url;                                                                                                                
+                }else if($source_db){
+                    $databaseURL = $source_url.'?db='.$source_db;    
+                }
+            }
         
+            if($mapping_defs!=null){
+                
                 //for import records by mapping we check and import affected vocabularies only
                 $res2 = $importDef->doPrepare(  array('defType'=>'term', 
                             'databaseID'=>@$data['heurist']['database']['id'], 
-                            'databaseURL'=>@$data['heurist']['database']['url'], 
+                            'databaseURL'=>$databaseURL, 
                             'definitionID'=>$mapping_defs['vocabularies'])); //array of vocabularies to be imported
                             
                 if($res2 && @$mapping_defs['import_vocabularies']==1){
@@ -765,7 +774,7 @@ EOD;
                 //Finds all defintions to be imported
                 $res2 = $importDef->doPrepare(  array('defType'=>'rectype', 
                             'databaseID'=>@$data['heurist']['database']['id'], 
-                            'databaseURL'=>@$data['heurist']['database']['url'], 
+                            'databaseURL'=>$databaseURL, 
                             'definitionID'=>array_keys($imp_rectypes), //array of record type source ids
                             'rectypes'=>$imp_rectypes ));
                             

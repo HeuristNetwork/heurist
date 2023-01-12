@@ -55,11 +55,12 @@ detectLargeInputs('COOKIE record_lookup', $_COOKIE);
     
     if($is_estc){
 
+        
         $is_allowed = (isset($ESTC_PermittedDBs) && strpos($ESTC_PermittedDBs, @$_REQUEST['org_db']) !== false && isset($ESTC_UserName) && isset($ESTC_Password));
         $def_err_msg = 'For licensing reasons this function is only accessible to authorised projects.<br>Please contact the Heurist team if you wish to use this.';
 
 if($is_debug) print HEURIST_BASE_URL.'  '.HEURIST_MAIN_SERVER.'<br>';
-        
+
         if(strpos(strtolower(HEURIST_BASE_URL), strtolower(HEURIST_MAIN_SERVER)) !== false){ // currently on server where ESTC DB is located
 
             if(array_key_exists('entity', $params)){ // retrieve entity info (term lookup)
@@ -116,6 +117,7 @@ if($is_debug) print HEURIST_BASE_URL.'  '.HEURIST_MAIN_SERVER.'<br>';
                 
 if($is_debug) print 'record_output url: '.$url.'  <br>';                   
 
+                $is_inited = $system->init(@$params['db']);
                 
                 // save file that produced with record_output.php from source to temp file  
                 $heurist_path = tempnam(HEURIST_SCRATCH_DIR, "_temp_");
@@ -128,7 +130,6 @@ if($is_debug)print 'CONTENT '.$filesize;
                 
                 if($filesize>0 && file_exists($heurist_path)){
                     //read temp file, import record
-                    $is_inited = $system->init(@$params['db']);
               
                     require_once (dirname(__FILE__).'/../import/importHeurist.php'); 
                     

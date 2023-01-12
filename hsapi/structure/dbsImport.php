@@ -1034,7 +1034,7 @@ $mysqli->commit();
         $defType = 'rectypes';
         $this->source_defs['rectypes'] = array();
         foreach($mapping as $sourceID=>$fields){
-            if($sourceID>0){
+            if(is_int($sourceID) && $sourceID>0){
                 $this->source_defs['rectypes'][$sourceID] = $fields['rty_ID'];
                 
             }
