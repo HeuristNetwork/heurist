@@ -271,12 +271,13 @@ if($is_debug) print print_r($response, true).'!!!!!<br>';
             $formatted_array = array();
 
             $author_idx = 0;
-            $publish_idx = 0;
 
             foreach ($details->recordData->children('info:lc/xmlns/marcxchange-v2', false)->record->controlfield as $key => $cf_ele) { // controlfield elements
                 $cf_tag = @$cf_ele->attributes()['tag'];
 
-                if($cf_tag == '003') { // Record URL
+                if($cf_tag == '001') { // BnF ID
+                    $formatted_array['BnF_ID'] = (string)$cf_ele[0];
+                }else if($cf_tag == '003') { // Record URL
                     $formatted_array['biburl'] = (string)$cf_ele[0];
                     break;
                 }
@@ -314,67 +315,122 @@ if($is_debug) print print_r($response, true).'!!!!!<br>';
                 }else if($df_tag == '210' || $df_tag == '214') { // Publisher Location / Publisher Name / Year of Publication
                     
                     $value = '';
+                    $is_valid = false;
                     foreach ($df_ele->subfield as $sub_key => $sf_ele) { // TODO - look for examples of sf_code == {b, r, s}
                         $sf_code = @$sf_ele->attributes()['code'];
 
-                        $str_val = str_replace(array('[', ']'), '', (string)$sf_ele[0]); //, '(', ')'
+                        $str_val = str_replace(array('[', ']'), '', (string)$sf_ele[0]);
 
-                        if($sf_code == 'a'){
-                            //$formatted_array['publisher'][$publish_idx]['location'][] = $str_val;
+                        if($sf_code == 'a'){ // publisher location
+
                             if(empty($value)){
                                 $value = $str_val;
                             }else{
-                                $value .= '; ' . $str_val;
+                                if($is_valid){
+                                    $formatted_array['publisher'][] = $value;
+                                }
+                                $value = $str_val;
+
+                                $is_valid = false;
                             }
-                        }else if($sf_code == 'c'){
-                            //$formatted_array['publisher'][$publish_idx]['name'][] = $str_val;
+                        }else if($sf_code == 'c'){ // publisher name
+
                             if(empty($value)){
                                 $value = $str_val;
                             }else{
                                 $value .= ': ' . $str_val;
                             }
+
+                            $is_valid = true;
                         }else if($sf_code == 'd'){
                             $formatted_array['date'][] = $str_val;
-                            if(empty($value)){
-                                $value = $str_val;
-                            }else{
-                                $value .= ', ' . $str_val;
-                            }
                         }
                     }
 
-                    if($value != ''){
+                    if(!empty($value) && $is_valid){
                         $formatted_array['publisher'][] = $value;
                     }
-                }else if($df_tag == '700' || $df_tag == '702' || $df_tag == '710' || $df_tag == '716') { // Creator
+                }else if($df_tag == '700' || $df_tag == '701' || $df_tag == '702' || $df_tag == '710' || $df_tag == '712' || $df_tag == '716') { // Creator
 
+                    /**
+                     * 3 => ID
+                     * a => Surname | Name
+                     * b => Given name
+                     * f => Years active
+                     * 4 => Role Code
+                     */
+
+                    $value = '';
+                    $is_valid = false;
+                    $id = $author_idx;
                     foreach ($df_ele->subfield as $sub_key => $sf_ele) {
+
                         $sf_code = @$sf_ele->attributes()['code'];
 
-                        if($df_tag == '710'){
-                            if($sf_code == '3') {
-                                $formatted_array['author'][$author_idx]['id'] = (string)$sf_ele[0];
-                            }else if($sf_code == 'c') {
-                                $formatted_array['author'][$author_idx]['surname'] = (string)$sf_ele[0];
-                            }else if($sf_code == 'a' || $sf_code == 'b') {
-                                $fname = (array_key_exists('firstname', $formatted_array['author'][$author_idx])) ? $formatted_array['author'][$author_idx]['firstname'].'. '.(string)$sf_ele[0] : (string)$sf_ele[0];
-                                $formatted_array['author'][$author_idx]['firstname'] = $fname;
-                            }
-                        }else{                        
-                            if($sf_code == '3') {
-                                $formatted_array['author'][$author_idx]['id'] = (string)$sf_ele[0];
-                            }else if($sf_code == 'a') {
-                                $formatted_array['author'][$author_idx]['surname'] = (string)$sf_ele[0];
-                            }else if($sf_code == 'b') {
-                                $formatted_array['author'][$author_idx]['firstname'] = (string)$sf_ele[0];
-                            }else if($sf_code == 'f') {
-                                $formatted_array['author'][$author_idx]['active'] = (string)$sf_ele[0];
-                            }
+                        if($sf_code == '3'){
+                            $id = (string)$sf_ele[0];
+                            continue;
                         }
 
+                        switch ($df_tag) {
+                            case '700':
+                            case '701':
+                            case '702':
+                            case '703':
+
+                                if($sf_code == 'a') { // Surname
+                                    $formatted_array['author'][$id]['surname'] = (string)$sf_ele[0];
+                                }else if($sf_code == 'b') { // Given name
+                                    $formatted_array['author'][$id]['firstname'] = (string)$sf_ele[0];
+                                }else if($sf_code == 'f') { // Years active
+                                    $formatted_array['author'][$id]['active'] = (string)$sf_ele[0];
+                                }
+
+                                break;
+                            
+                            case '710':
+                            case '711':
+                            case '712':
+                            case '713':
+
+                                if($sf_code == 'c') { // Date // $sf_code == 'f' Location
+                                    $value .= ' (' . (string)$sf_ele[0] . ')';
+                                    $is_valid = true;
+                                }else if($sf_code == 'b'){ // Sub unit name
+                                    $value .= '. ' . (string)$sf_ele[0];
+                                    $is_valid = true;
+                                }else if($sf_code == 'a') { // Main name
+                                    if(!empty($value)){
+                                        $formatted_array['author'][$id][] = $value;
+                                        $value = '';
+                                    }
+                                    $value = (string)$sf_ele[0];
+                                    $is_valid = true;
+                                }
+
+                                break;
+
+                            case '720':
+                            case '721':
+                            case '722':
+                            case '723':
+
+                                if($sf_code == 'a') { // Name
+                                    $formatted_array['author'][$id][] = (string)$sf_ele[0];
+                                }
+
+                                break;
+
+                            default:
+                                break;
+                        }
                     }
 
-                    $author_idx ++;
+                    if(!empty($value) && $is_valid){
+                        $formatted_array['author'][$id][] = $value;
+                        $author_idx ++;
+                    }
+                    
                 }else if($df_tag == '010') { // ISBN
 
                     foreach ($df_ele->subfield as $sub_key => $sf_ele) {
@@ -438,6 +494,8 @@ if($is_debug) print print_r($response, true).'!!!!!<br>';
         // Retrieve records from results
         $records = $xml_obj->children('http://www.loc.gov/zing/srw/', false)->records->record;
 
+        $df_handled = array(200, 210, 240, 230, 215, 216, 250, 220);
+
         // Move each result's details into seperate array
         foreach ($records as $key => $details) {
 
@@ -446,7 +504,9 @@ if($is_debug) print print_r($response, true).'!!!!!<br>';
             foreach ($details->recordData->children('info:lc/xmlns/marcxchange-v2', false)->record->controlfield as $key => $cf_ele) { // controlfield elements
                 $cf_tag = @$cf_ele->attributes()['tag'];
 
-                if($cf_tag == '003') { // Record URL
+                if($cf_tag == '001') { // BnF ID
+                    $formatted_array['BnF_ID'] = (string)$cf_ele[0];
+                }else if($cf_tag == '003') { // Record URL
                     $formatted_array['auturl'] = (string)$cf_ele[0];
                     break;
                 }
@@ -459,71 +519,152 @@ if($is_debug) print print_r($response, true).'!!!!!<br>';
                     continue;
                 }
 
-                if($df_tag == '200' || $df_tag == '210' || $df_tag == '215') { // Name
+                if(in_array($df_tag, $df_handled)) {
 
                     foreach($df_ele->subfield as $sub_key => $sf_ele) {
 
                         $sf_code = @$sf_ele->attributes()['code'];
 
-                        if(false && $df_tag == '170' && $sf_code == 'a') { // TODO - Translate from intermarcxchange '170' to unimarcxchange version
-                            $formatted_array['name'] = (string)$sf_ele[0];
-                            break;
-                        }else if($df_tag == '200'){
+                        switch ($df_tag) {
+                            case '200': // MISSING - $c $d
 
-                            if($sf_code == 'a'){ // Name
-                                $formatted_array['name'] = (string)$sf_ele[0];
-                            }else if($sf_code == 'b'){ // Name
+                                if($sf_code == 'a'){ // Surname
+                                    $formatted_array['name'] = (string)$sf_ele[0];
+                                }else if($sf_code == 'b'){ // First name
+    
+                                    if( array_key_exists('name', $formatted_array)){
+                                        $formatted_array['name'] .= ', ' . (string)$sf_ele[0];
+                                    }else{
+                                        $formatted_array['name'] = (string)$sf_ele[0];
+                                    }
+                                }else if($sf_code == 'f'){ // Years active
+    
+                                    if( array_key_exists('name', $formatted_array)){
+                                        $formatted_array['name'] .= ' (' . (string)$sf_ele[0] . ')';
+                                    }else{
+                                        $formatted_array['name'] = 'No Name Provided';
+                                    }
+                                }
 
+                                break;
+
+                            case '210': // MISSING - $b
+
+                                if($sf_code == 'a'){ // Name
+                                    $formatted_array['name'] = (string)$sf_ele[0];
+                                }else if($sf_code == 'c'){ // Location
+    
+                                    if( array_key_exists('name', $formatted_array)){
+                                        $formatted_array['name'] .= ' (' . (string)$sf_ele[0] . ')';
+                                    }else{
+                                        $formatted_array['name'] = 'No Name Provided';
+                                    }
+                                }
+
+                                break;
+
+                            case '240':
+
+                                if($sf_code == 'a'){ // Surname
+                                    $formatted_array['name'] = (string)$sf_ele[0];
+                                }else if($sf_code == 'b'){ // First name
+    
+                                    if( array_key_exists('name', $formatted_array)){
+                                        $formatted_array['name'] .= ', ' . (string)$sf_ele[0];
+                                    }else{
+                                        $formatted_array['name'] = (string)$sf_ele[0];
+                                    }
+    
+                                /*}else if($sf_code == 'f'){ // Years active
+                                    if( array_key_exists('name', $formatted_array)){
+                                        $formatted_array['name'] .= ' (' . (string)$sf_ele[0] . ')';
+                                    }else{
+                                        $formatted_array['name'] = 'No Name Provided';
+                                    } */
+                                }else if($sf_code == 't'){
+                                    
+                                    if( array_key_exists('name', $formatted_array)){
+                                        $formatted_array['name'] .= ' [' . (string)$sf_ele[0] . ']';
+                                    }else{
+                                        $formatted_array['name'] = (string)$sf_ele[0];
+                                    }
+                                }
+
+                                break;
+                            
+                            case '230': // MISSING - $b $h $k $m
+
+                                if($sf_code != 'a' || $sf_code != 'i'){
+                                    break;
+                                }
+
+                                // Name
                                 if( array_key_exists('name', $formatted_array)){
-                                    $formatted_array['name'] .= ', ' . (string)$sf_ele[0];
+                                    $formatted_array['name'] .= ' . ' . (string)$sf_ele[0];
                                 }else{
                                     $formatted_array['name'] = (string)$sf_ele[0];
                                 }
-                            }else if($sf_code == 'f'){ // Years active
 
-                                if( array_key_exists('name', $formatted_array)){
-                                    $formatted_array['name'] .= ' (' . (string)$sf_ele[0] . ')';
-                                }else{
-                                    $formatted_array['name'] = 'No Name Provided';
+                                break;
+
+                            case '215':
+
+                                if($sf_code == 'a' || $sf_code == 'x'){
+                                    break;
                                 }
-                            }
-                        }else if($df_tag == '210'){
 
-                            if($sf_code == 'a'){ // Name
-                                $formatted_array['name'] = (string)$sf_ele[0];
-                            }else if($sf_code == 'c'){ // Location
-
-                                if( array_key_exists('name', $formatted_array)){
-                                    $formatted_array['name'] .= ' (' . (string)$sf_ele[0] . ')';
-                                }else{
-                                    $formatted_array['name'] = 'No Name Provided';
-                                }
-                            }
-                        }else if($df_tag == '215'){
-
-                            if($sf_code == 'a'){ // Location
-
+                                // Name
                                 if( array_key_exists('name', $formatted_array)){
                                     $formatted_array['name'] .= ' ' . (string)$sf_ele[0];
                                 }else{
                                     $formatted_array['name'] = (string)$sf_ele[0];
                                 }
-                            }else if($sf_code == 'x'){ // Name
 
+                                break;
+
+                            case '216':
+                            case '250':
+
+                                if($sf_code == 'a'){
+                                    break;
+                                }
+
+                                // Name
                                 if( array_key_exists('name', $formatted_array)){
-                                    $formatted_array['name'] = (string)$sf_ele[0] . ' ' . $formatted_array['name'];
+                                    $formatted_array['name'] .= ' ' . (string)$sf_ele[0];
                                 }else{
                                     $formatted_array['name'] = (string)$sf_ele[0];
                                 }
-                            }
-                        } 
+
+                                break;
+
+                            case '220':
+
+                                if($sf_code == 'a'){ // Name
+                                    $formatted_array['name'] = (string)$sf_ele[0];
+                                }else if($sf_code == 'c'){
+    
+                                    if( array_key_exists('name', $formatted_array)){
+                                        $formatted_array['name'] .= ' (' . (string)$sf_ele[0] . ')';
+                                    }else{
+                                        $formatted_array['name'] = 'No Name Provided';
+                                    }
+                                }
+
+                                break;
+
+                            default:
+                                break;
+                        }
                     }
 
                     break;
                 }
             }
 
-            $results['result'][] = $formatted_array;
+            if(count($formatted_array) > 0){
+                $results['result'][] = $formatted_array;
+            }
         }
 
         // Add other details, can be used for more calls to retrieve all results (currently retrieves 500 records at max)
@@ -531,6 +672,23 @@ if($is_debug) print print_r($response, true).'!!!!!<br>';
         $results['nextStart'] = intval($xml_obj->children('http://www.loc.gov/zing/srw/', false)->nextRecordPosition);
 
         // Encode to json for response to JavaScript
+        $remote_data = json_encode($results);
+    }else if(@$params['serviceType'] == 'bnf_recdump'){
+        $results = array();
+        
+        // Create xml object
+        $xml_obj = simplexml_load_string($remote_data, null, LIBXML_PARSEHUGE);
+        // xml namespace urls: http://www.loc.gov/zing/srw/ (srw), info:lc/xmlns/marcxchange-v2 (mxc)
+
+        // Retrieve records from results
+        $records = $xml_obj->children('http://www.loc.gov/zing/srw/', false)->records->record;
+
+        foreach($records as $key => $details){
+            $record = $details->recordData->children('info:lc/xmlns/marcxchange-v2', false)->record;
+            $results['record'] = $record->asXML();//json_encode($record, JSON_PRETTY_PRINT);
+            break;
+        }
+
         $remote_data = json_encode($results);
     }else if(@$params['serviceType'] == 'nomisma_rdf'){
 

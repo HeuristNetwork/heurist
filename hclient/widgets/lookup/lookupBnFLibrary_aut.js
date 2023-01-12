@@ -230,7 +230,8 @@ $.widget( "heurist.lookupBnFLibrary_aut", $.heurist.recordAction, {
 
             var map_flds = Object.keys(this.options.mapping.fields); // mapped fields names, to access fields of rec
 
-            var new_terms = []; // array of terms that need to be created, [vocab id, detail id, value]
+            res['BnF_ID'] = recset.fld(rec, 'BnF_ID'); // add BnF ID
+            res['ext_url'] = recset.fld(rec, 'auturl'); // add BnF URL
 
             // Assign individual field values, here you would perform any additional processing for selected values (example. get ids for vocabulrary/terms and record pointers)
             for(var k=0; k<map_flds.length; k++){
@@ -240,10 +241,6 @@ $.widget( "heurist.lookupBnFLibrary_aut", $.heurist.recordAction, {
                 var field_type = $Db.dty(dty_ID, 'dty_Type');
 
                 if(val != null){
-
-                    if(field_type == 'resource' && !res['ext_url']){
-                        res['ext_url'] = recset.fld(rec, 'auturl');
-                    }
 
                     var val_isArray = window.hWin.HEURIST4.util.isArray(val);
                     var val_isObject = window.hWin.HEURIST4.util.isObject(val);
@@ -273,11 +270,6 @@ $.widget( "heurist.lookupBnFLibrary_aut", $.heurist.recordAction, {
                                     break;
                                 }
                             }
-                        }
-
-                        // Check if a value was found, if not prepare for creating new term
-                        if(!term_found){
-                            new_terms.push(val);
                         }
                     }else if(field_type == 'resource'){ // prepare search string for user to select/create a record
 
@@ -531,6 +523,7 @@ $.widget( "heurist.lookupBnFLibrary_aut", $.heurist.recordAction, {
             var fields = ['rec_ID', 'rec_RecTypeID']; // added for record set
             var map_flds = Object.keys(this.options.mapping.fields);
             fields = fields.concat(map_flds);            
+            fields = fields.concat('BnF_ID');
             
             // Parse json to Record Set
             var i=0;
@@ -544,6 +537,8 @@ $.widget( "heurist.lookupBnFLibrary_aut", $.heurist.recordAction, {
                 for(var k=0; k<map_flds.length; k++){
                     values.push(record[map_flds[k]]);
                 }
+
+                values.push(record['BnF_ID']);
 
                 res_orders.push(recID);
                 res_records[recID] = values;
