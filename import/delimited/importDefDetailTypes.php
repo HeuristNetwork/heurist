@@ -52,18 +52,42 @@
         	.tbmain
         	{
         		font-size: 1em;
-        	}        
+        	}
+			
+			div.top-div, 
+			div.bottom-div{
+				display: flex;
+				align-content: center;
+				/*justify-content: center;*/
+				flex-wrap: wrap;
+			}
+			div.bottom-div{
+				flex-wrap: nowrap;
+			}
+
+			div#divStep1{
+				margin-right:10px;
+				flex: 1 1 425px;
+			}
+			div#divStep2{
+				border-right:1px lightgray solid;
+				flex: 0 1 175px;
+			}
+			div#divStep3{
+				margin-left: 10px;
+				flex: 0 1 200px;
+			}
         </style>
         
     </head>
 
     <!-- HTML -->
-    <body style="overflow:hidden;">
-    	<div style="width:100%;height:70%;position:absolute;top:0">
+    <body>
+    	<div class="top-div">
 
-    		<div style="position:absolute;left:0;right:400px;height:100%;margin-right:10px;" id="divStep1">
+    		<div id="divStep1">
 
-    			<div class="ent_header" style="height:8em;padding:0">
+    			<div style="height:8em;padding:0">
 
     				<p><b>Step 1</b></p>
     				<p>
@@ -158,14 +182,14 @@
 
     			</div>
 
-    			<textarea id="sourceContent" rows="0" cols="0" class="ent_content_full" 
-    			style="top:14em;width:100%;resize:none;padding:0.5em;border:2px solid lightblue;"></textarea>
+    			<textarea id="sourceContent" rows="25" cols="0" 
+    			style="width:100%;resize:none;padding:0.5em;border:2px solid lightblue;margin-top: 10px;"></textarea>
 
     		</div>
 
-    		<div style="position:absolute;right:215px;width:175px; height:100%; border-right:1px lightgray solid" id="divStep2">
+    		<div id="divStep2">
 
-    			<div class="ent_header" style="height:10em;">
+    			<div style="height:10em;">
     				<p><b>Step 2</b></p>
     				<div>
     					<input id="csv_header" 
@@ -176,7 +200,7 @@
     				<div id="btnParseData" style="margin-top: 10px;">Analyse</div>
     			</div>
 
-    			<fieldset class="ent_content_full" style="top:7em;padding-top:1em;">
+    			<fieldset style="padding-top:1em;">
 
     				<div>
     					<label for="csv_delimiter">Field separator:</label>
@@ -199,13 +223,13 @@
 
 			</div>
 
-			<div style="position:absolute;right:10px;height:100%;width:200px;" id="divStep3"> 
+			<div id="divStep3"> 
 
-				<div class="ent_header" style="height:1em;">
+				<div style="height:1em;">
 					<p><b>Step 3</b></p>
 				</div>
 
-				<fieldset class="ent_content" style="top:1em;padding-top:1em;">
+				<fieldset style="padding-top:1em;">
 
 					<p style="padding-top:0.4em; margin-bottom: 10px; color: red;">Select a Detail Type Group to add the new Fields to</p>
 
@@ -247,7 +271,7 @@
 
 				</fieldset> 
 
-				<div class="ent_footer" style="padding-left:5px;height:5em">
+				<div style="padding-left:5px;height:5em">
 					<div id="preparedInfo2" style="font-weight:bold;font-size:1.1em;padding:4px"></div>
 					<div id="btnImportData">Import</div>
 				</div>
@@ -256,12 +280,12 @@
 
 		</div>
 
-		<div style="width:100%;height:30%;position:absolute;bottom:0">
-			<div class="ent_header" style="height:2em;border-bottom:none;border-top:1px solid lightgray;padding-top:10px">
+		<div style="margin-top:10px;">
+			<div style="height:2em;border-bottom:none;border-top:1px solid lightgray;padding-top:10px;">
 				<b>Preview of the data as it will be imported:</b>
 				<div id="preparedInfo" style="float:right;padding-right:10px"><!-- div to show results of data preparation --></div>
 			</div>
-			<div class="ent_content_full" style="top:2.5em;font-size:0.9em;" id="divParsePreview"><!-- div to show results  --></div>
+			<div style="font-size:0.9em;" id="divParsePreview"><!-- div to show results  --></div>
 		</div>
 	</body>
 </html>

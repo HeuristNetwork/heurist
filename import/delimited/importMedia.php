@@ -56,16 +56,40 @@ require_once(dirname(__FILE__)."/../../hclient/framecontent/initPage.php");
             {
                 /*border-collapse:collapse;*/
                 font-size: 1em;
-            }        
+            }
+            
+            div.top-div, 
+			div.bottom-div{
+				display: flex;
+				align-content: center;
+				/*justify-content: center;*/
+				flex-wrap: wrap;
+			}
+			div.bottom-div{
+				flex-wrap: nowrap;
+			}
+
+			div#divStep1{
+				margin-right:10px;
+				flex: 1 1 265px;
+			}
+			div#divStep2{
+				border-right:1px lightgray solid;
+				flex: 0 1 175px;
+			}
+			div#divStep3{
+				margin-left: 10px;
+				flex: 0 1 200px;
+			}
         </style>
         
     </head>
 
     <!-- HTML -->
-    <body style="overflow:hidden;">
-<div style="width:100%;height:60%;position:absolute;top:0">
-<div style="position:absolute;left:0;right:400px; height:100%; margin-right:10px; " id="divStep1">
-    <div class="ent_header" style="height:8em;padding:0">
+    <body>
+<div class="top-div">
+<div id="divStep1">
+    <div style="height:8em;padding:0">
         <p><b>This function uploads a set of files specified by URLs.</b></p> 
         <p><b>Step 1: </b>Paste URLs + optional description, one file to a line, in the area below. Recommended format is CSV with a header ( URL,Description ) in line 1</p>
         <input type="file" id="uploadFile" style="display:none">
@@ -155,13 +179,13 @@ require_once(dirname(__FILE__)."/../../hclient/framecontent/initPage.php");
     </div>                                    
                     
     </div>
-    <textarea id="sourceContent" rows="0" cols="0" class="ent_content_full" 
-    style="top:8em;width:100%;resize:none;padding:0.5em;border:2px solid lightblue;"></textarea>
+    <textarea id="sourceContent" rows="25" cols="0" 
+    style="width:100%;resize:none;padding:0.5em;border:2px solid lightblue;margin-top: 10px;"></textarea>
     
     
 </div>
-<div style="position:absolute;right:200px;width:200px; height:100%; border-right:1px lightgray solid">
-    <div class="ent_header" style="height:10em;">
+<div id="divStep2">
+    <div style="height:10em;">
         <p><b>Step 2</b></p>
         <div>
             <br>
@@ -172,7 +196,7 @@ require_once(dirname(__FILE__)."/../../hclient/framecontent/initPage.php");
         </div>
         <div id="btnParseData" style="margin-top: 10px;">Analyse</div>
     </div>
-    <fieldset class="ent_content_full" style="top:10em;padding-top:1em;">
+    <fieldset style="padding-top:1em;">
             <div>
                 <br><br>
                 <label for="csv_delimiter">Field separator:</label>
@@ -206,14 +230,14 @@ require_once(dirname(__FILE__)."/../../hclient/framecontent/initPage.php");
                 <input id="multival_separator" value="|" class="text ui-widget-content ui-corner-all" 
                     style="width: 25px;margin-left: 8px;">
             </div>
-    </fieldset>            
+    </fieldset>
 </div>
-<div style="position:absolute;right:0px;height:100%;width:200px;"> 
-    <div class="ent_header" style="height:6em;">
+<div id="divStep3"> 
+    <div style="height:6em;">
         <p><b>Step 3</b></p>
         <p style="padding-top:0.4em; margin-bottom: 10px;">Select field assignment<br>(URL/path is required)</p>
     </div>
-    <fieldset class="ent_content" style="top:6em;padding-top:1em;">
+    <fieldset style="padding-top:1em;">
            
             <div>
                 <label style="color:red">URL/Path</label><br>
@@ -245,22 +269,22 @@ require_once(dirname(__FILE__)."/../../hclient/framecontent/initPage.php");
             
             
     </fieldset> 
-    <div class="ent_footer" style="padding-left:5px;height:5em">
+    <div style="padding-left:5px;height:5em">
         <div id="preparedInfo2" style="font-weight:bold;font-size:1.1em;padding:4px"></div>
         <div id="btnImportData">Import</div>
     </div>
 </div>
-<div id="divCurtain" style="position:absolute;right:0px;height:100%;width:400px;" class="semitransparent">
-<!-- curtain -->
-</div>
+<!-- <div id="divCurtain" style="position:absolute;right:0px;height:520px;width:400px;" class="semitransparent"> 
+ curtain
+</div> -->
 </div>
 
-<div style="width:100%;height:40%;position:absolute;bottom:0" >
-    <div class="ent_header" style="height:2em;border-bottom:none;border-top:1px solid lightgray;padding-top:10px">
+<div style="margin-top:10px;">
+    <div style="height:2em;border-bottom:none;border-top:1px solid lightgray;padding-top:10px;">
         <br><b>Preview of the data as it will be imported</b> <br>(check that columns have been separated with | symbols and that column headings have been read correctly - should be shown in bold, data in normal font)<br>
         <div id="preparedInfo" style="float:right;padding-right:10px"> <!-- div to show results of data preparation --></div>
     </div>
-    <div class="ent_content_full" style="top:6.5em;font-size:0.9em;" id="divParsePreview">
+    <div style="font-size:0.9em;" id="divParsePreview">
     </div>
 </div>
 
