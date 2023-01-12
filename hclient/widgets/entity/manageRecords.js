@@ -2487,25 +2487,29 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                 
                 //default values for ownership and viewability from preferences
                 var add_rec_prefs = window.hWin.HAPI4.get_prefs('record-add-defaults');
+                var usr_id = window.hWin.HAPI4.user_id();
                 if(!$.isArray(add_rec_prefs) || add_rec_prefs.length<4){
-                    add_rec_prefs = [0, 0, 'viewable', '']; //rt, owner, access, tags  (default to Everyone)
+                    add_rec_prefs = [0, usr_id, 'viewable', '']; //rt, owner, access, tags  (default to Current user)
                 }
                 if(add_rec_prefs.length<5){
                     add_rec_prefs.push(''); //groups visibility
                 }
                 
                 if (that.options.new_record_params.OwnerUGrpID=='current_user') {
-                    that.options.new_record_params.OwnerUGrpID = window.hWin.HAPI4.user_id();
-                }else if(!(that.options.new_record_params.OwnerUGrpID>=0)){
+                    that.options.new_record_params.OwnerUGrpID = usr_id;
+                }else if(that.options.new_record_params.OwnerUGrpID < 0){
                     that.options.new_record_params.OwnerUGrpID = add_rec_prefs[1];    
                 } 
-                if (!(window.hWin.HAPI4.is_admin() || window.hWin.HAPI4.is_member(add_rec_prefs[1]))) {
-                    that.options.new_record_params.OwnerUGrpID = 0; //default to eveyone window.hWin.HAPI4.currentUser['ugr_ID'];    
+                if (!(window.hWin.HAPI4.is_admin() || window.hWin.HAPI4.is_member(that.options.new_record_params.OwnerUGrpID))) {
+                    that.options.new_record_params.OwnerUGrpID = usr_id; //default to current user   
                 }
                 if(window.hWin.HEURIST4.util.isempty(that.options.new_record_params.NonOwnerVisibility)){
                     that.options.new_record_params.NonOwnerVisibility = add_rec_prefs[2];
                 }
-                if(that.options.new_record_params.NonOwnerVisibility=='viewable'){
+
+                if(that.options.new_record_params.NonOwnerVisibility=='viewable' &&
+                !that.options.new_record_params.NonOwnerVisibilityGroups || that.options.new_record_params.NonOwnerVisibilityGroups < 0){
+
                     that.options.new_record_params.NonOwnerVisibilityGroups = add_rec_prefs[4];
                 }
                 
