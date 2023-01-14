@@ -983,13 +983,13 @@ if($i<5){
 
     //
     // $rec_IDs - may by csv string or array 
-    // return array of integers
+    // returns array of integers
     //
     function prepareIds($ids, $can_be_zero=false){
         
         if($ids!=null){
             if(!is_array($ids)){
-                if(is_int($ids)){
+                if(ctype_digit($ids)){
                     $ids = array($ids);
                 }else{
                     /*if(substr($ids, -1) === ','){//remove last comma
@@ -1001,7 +1001,7 @@ if($i<5){
             
             $res = array();
             foreach($ids as $v){
-                if (is_numeric($v) && ($v > 0 || ($can_be_zero && $v==0))){
+                if (ctype_digit($v) && ($v > 0 || ($can_be_zero && $v==0))){
                     $res[] = $v;
                 }
             }

@@ -53,8 +53,10 @@ function getHostParams()
     }
 
     // calculate the dir where the Heurist code is installed, for example /h5 or /h5-ij
-    $topdirs = "admin|api|applications|common|context_help|export|hapi|hclient|hsapi|import|startup|records|redirects|search|viewers|help|ext|external|web"; // Upddate in 3 places if changed
+    $topdirs = 'admin|api|applications|common|context_help|export|hapi|hclient|hsapi|import|startup|records|redirects|search|viewers|help|ext|external'; // Upddate in 3 places if changed
 
+    $topdirs = $topdirs . '|web|hml|tpl|view'; //actions for redirection
+    
     $installDir = preg_replace("/\/(" . $topdirs . ")\/.*/", "", @$_SERVER["SCRIPT_NAME"]); // remove "/top level dir" and everything that follows it.
     if ($installDir == @$_SERVER["SCRIPT_NAME"]) { // no top directories in this URI must be a root level script file or blank
         $installDir = preg_replace("/\/[^\/]*$/", "", @$_SERVER["SCRIPT_NAME"]); // strip away everything past the last slash "/index.php" if it's there
