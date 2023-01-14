@@ -14,14 +14,33 @@
     </head>
 
     <body width="600" height="500">
-        <b><font size="4">HEURIST Help</font></b>
 
-        <h2>Searching</h2>
-        <hr>
-        <h4>Simple search strings (filters)</h4>
+        <h2>Filters / Searching</h2>
+       
+<p>The filter (search) function accepts two types of filter string which can be edited in the search box:</p> 
+<p>
+<ul>
+<li>an older simple search format which is useful for quick searches, typically for specific values in a field or text; <br>&nbsp;
+</li><li>a more complex JSon format which allows targeted multi-criteria filters and facet filters and is documented in detail in the main Help system (link under Help at top right of main page).
+</li>
+</ul>
+<p>
+To run the search click 'Search' or press the 'Enter' key while typing; to add a new line hold the 'Control' (or 'Command' for MacOS) key and press the 'Enter' key.
+</p>
+<hr>
+<h4>JSon format</h4>
+<p>To use the JSon format, we recommend using the filter builder to get started and then editing the result incrementally. The JSon format is enclosed in [ ] and consists of a series of comma-separated specifications in { }
+giving a tag (generally a field ID, field name or special indicator) followed by a colon ( : ) then a
+value or values. Tags and values are generally enclosed in double quotes ( " ).
+Values may be repeated within a specification as in [{"t":"107,95"},{"f:36":"1275,3426"}]
+</p>
 
-        <p>
-        NOTE: This page describes simple filter strings similar to Google searches, which were used up to version 4 and are easy to enter manually. These are still supported for basic searching and can therefore be quite useful (some rarely used functions are also still only available this way). Version 5 and above use complex JSon filters which are hard to construct by hand and are therefore created by filter and rule builders.
+
+<hr>
+<h4>Simple search strings (filters)</h4>
+
+<p>
+       Simple filter strings, similar to Google searches, are easy to enter manually. These are still supported for basic searching and can therefore be quite useful (some rarely used functions are also still only available this way). 
         </p>
         <p>
             <b>Basic search:</b> Words typed in the filter field are matched against any part of the record titles
@@ -39,13 +58,13 @@
             <b>Facet search:</b> Last but not least, faceted searching allows one to set up searches which drill down through content
             following links between records and the attributes of the records encountered.</p>
             <p>
-            <u>All search types can be saved as Saved Searches (filters) in the lefthand (navigation) panel using the Save Filter button.</u>u>
+            <u>All search types can be saved as Saved Filters in the lefthand (navigation) panel using the Save Filter button.</u>
         </p>
 
         <h4>What it does</h4>
 
         <p>
-            Searching or filtering the database allows for precisely targeted filters which will retreive precise subseyts of the database
+            Searching or filtering the database allows for precisely targeted filters which will retreive precise subsets of the database
             for specific tasks - analysis, indexing collections, publishing a web page etc.
         </p>
 
