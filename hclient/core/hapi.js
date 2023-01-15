@@ -84,14 +84,23 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
         } else {
             _database = window.hWin.HEURIST4.util.getUrlParameter('db');
         }
+        
+        let script_name = window.hWin.location.pathname;
+        var installDir = '';
 
-        //
-        var installDir = window.hWin.location.pathname.replace(/(((\?|admin|applications|common|context_help|export|hapi|hclient|hsapi|import|startup|records|redirects|search|viewers|help|ext|external)\/.*)|(index.*|test.php))/, ""); // Upddate in 2 places this file and 6 other files if changed
+        //actions for redirection https://hist/heurist/[dbname]/web/
+        if(script_name.search(/\/([A-Za-z0-9_]+)\/(web|hml|tpl|view)\/.*/)>=0){
+            installDir = script_name.replace(/\/([A-Za-z0-9_]+)\/(web|hml|tpl|view)\/.*/, '')+'/';
+            if(installDir=='/') installDir = '/heurist/';
+        }else{
+            installDir = script_name.replace(/(((\?|admin|applications|common|context_help|export|hapi|hclient|hsapi|import|startup|records|redirects|search|viewers|help|ext|external)\/.*)|(index.*|test.php))/, ""); // Upddate in utils_host.php also
+        }
+        
         //TODO: top directories - admin|applications|common| ... are defined in 3 separate locations. Rationalise.
         that.installDir = installDir; //to detect development or production version 
         if (!_baseURL) _baseURL = window.hWin.location.protocol + '//' + window.hWin.location.host + installDir;
         that.baseURL = _baseURL;
-
+        
         //detect production version
         if (installDir && !installDir.endsWith('/heurist/')) {
             installDir = installDir.split('/');

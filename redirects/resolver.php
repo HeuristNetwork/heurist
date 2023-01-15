@@ -79,88 +79,103 @@ $requestUri:
     $error_msg = null;
     $database = $requestUri[1];
     $action = $requestUri[2];
+    $redirect = '';
+
+    $params = array();
+    $params['db'] = $database;
 
     require_once ('../hsapi/utilities/utils_host.php');
-    require_once ('../hsapi/dbaccess/utils_db.php');
-                          
     $host_params = getHostParams();
-    
-    $idirs = explode('/',$host_params['install_dir']); //remove db name
-    $idirs = '/'.$idirs[1].'/';
-    
-    $redirect = $host_params['server_url'] . $idirs;
-    
     
     if($action=='web'){
         
         $redirect .= '?db='.$database.'&website';
                     //substr($_SERVER['SCRIPT_URI'],0,strpos($_SERVER['SCRIPT_URI'],$requestUri[0]))
                     //.$requestUri[0].'/?website&db='.$requestUri[2];
+        $params['website'] = 1;
+                    
         if(@$requestUri[3]>0){
             $redirect .= '&id='.$requestUri[3];    
+            $params['id'] = $requestUri[3];
         } 
         if(@$requestUri[4]>0) {
             $redirect .= '&pageid='.$requestUri[4];    
+            $params['pageid'] = $requestUri[4];
         }
-
-    }else if($action=='view'){
         
-        if(@$requestUri[3] && ctype_digit($requestUri[3]) && $requestUri[3]>0){
-            $redirect .= ('viewers/record/viewRecord.php?db='.$database.'&recID='.$requestUri[3]);
-        }else{
-            $error_msg = 'Record ID is not defined';
-        }
+        $_SERVER["REQUEST_URI"] = $host_params['install_dir']; //'/heurist/';
+        
+        $_REQUEST = $params;
+        define('PDIR', $host_params['server_url'] . $host_params['install_dir']);
+        
+        include '../index.php';
+        //include '../hclient/widgets/cms/websiteRecord.php';
+        exit();
 
-    }else if($action=='hml'){
-  
-// http://127.0.0.1/h6-ao/osmak_9c/hml/18/1
-
-        if(@$requestUri[3]){
-            $redirect .= ('export/xml/flathml.php?db='.$database.'&w=a&q=');
-
-            $ids = prepareIds(@$requestUri[3]);
-            
-            //if(ctype_digit($requestUri[3]) && $requestUri[3]>0){
-            if(count($ids)>0){
-                $redirect .= ('ids:'.$requestUri[3]);    
+    }else {
+        require_once ('../hsapi/dbaccess/utils_db.php');
+        
+        $redirect = $host_params['server_url'] . $host_params['install_dir'];
+    
+        if($action=='view'){
+        
+            if(@$requestUri[3] && ctype_digit($requestUri[3]) && $requestUri[3]>0){
+                $redirect .= ('viewers/record/viewRecord.php?db='.$database.'&recID='.$requestUri[3]);
             }else{
-                $redirect .= $requestUri[3];     
+                $error_msg = 'Record ID is not defined';
             }
-            
-            if(@$requestUri[4]!=null && ctype_digit($requestUri[4]) && $requestUri[4]>=0){
-                $redirect .= ('&depth='.$requestUri[4]);         
-            }else{
-                $redirect .= '&depth=1';     
-            }
-            
-        }else{
-            $error_msg = 'Query or Record ID is not defined';
-        }
-        
-    }else if($action=='tpl'){
-        
-//http://127.0.0.1/h6-ao/osmak_9c/tpl/Basic%20(initial%20record%20types)/t:10        
-        if(@$requestUri[3]){
-        
-            if(@$requestUri[4]){ 
+
+        }else if($action=='hml'){
+      
+    // http://127.0.0.1/h6-ao/osmak_9c/hml/18/1
+
+            if(@$requestUri[3]){
+                $redirect .= ('export/xml/flathml.php?db='.$database.'&w=a&q=');
+
+                $ids = prepareIds(@$requestUri[3]);
                 
-                $redirect .= ('viewers/smarty/showReps.php?db='.$database.'&template='.$requestUri[3].'&publish=1&w=a&q=');
-                
-                $ids = prepareIds(@$requestUri[4]);
-                //if(ctype_digit($requestUri[4]) && $requestUri[4]>0){
+                //if(ctype_digit($requestUri[3]) && $requestUri[3]>0){
                 if(count($ids)>0){
-                    $redirect .= ('ids:'.$requestUri[4]);    
+                    $redirect .= ('ids:'.$requestUri[3]);    
                 }else{
-                    $redirect .= $requestUri[4];     
+                    $redirect .= $requestUri[3];     
                 }
+                
+                if(@$requestUri[4]!=null && ctype_digit($requestUri[4]) && $requestUri[4]>=0){
+                    $redirect .= ('&depth='.$requestUri[4]);         
+                }else{
+                    $redirect .= '&depth=1';     
+                }
+                
             }else{
                 $error_msg = 'Query or Record ID is not defined';
             }
             
-        }else{
-            $error_msg = 'Template is not defined';
+        }else if($action=='tpl'){
+            
+    //http://127.0.0.1/h6-ao/osmak_9c/tpl/Basic%20(initial%20record%20types)/t:10        
+            if(@$requestUri[3]){
+            
+                if(@$requestUri[4]){ 
+                    
+                    $redirect .= ('viewers/smarty/showReps.php?db='.$database.'&template='.$requestUri[3].'&publish=1&w=a&q=');
+                    
+                    $ids = prepareIds(@$requestUri[4]);
+                    //if(ctype_digit($requestUri[4]) && $requestUri[4]>0){
+                    if(count($ids)>0){
+                        $redirect .= ('ids:'.$requestUri[4]);    
+                    }else{
+                        $redirect .= $requestUri[4];     
+                    }
+                }else{
+                    $error_msg = 'Query or Record ID is not defined';
+                }
+                
+            }else{
+                $error_msg = 'Template is not defined';
+            }
+            
         }
-        
     }
     //DEBUG print print_r($host_params,true).'<br>';
     //DEBUG print print_r($_SERVER,true).'<br>';
@@ -168,6 +183,8 @@ $requestUri:
     //DEBUG echo $redirect;
     if($error_msg){
        $redirect .= ('/hclient/framecontent/infoPage.php?error='.rawurlencode($error_msg)); 
+    }else{
+        //http_build_query
     }
     
     header('Location: '.$redirect);  

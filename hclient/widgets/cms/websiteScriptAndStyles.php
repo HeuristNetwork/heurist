@@ -271,7 +271,7 @@ if($_is_new_cms_editor || $edit_OldEditor){ //$edit_OldEditor defined in website
 
 <script>
 function _dout(msg){      
-//    console.log(msg);
+    //console.log(msg);
 }
 
 // global 
@@ -294,7 +294,6 @@ function onPageInit(success)
     }catch{
         
     }
-    
     
     DT_NAME = window.hWin.HAPI4.sysinfo['dbconst']['DT_NAME'];
     DT_EXTENDED_DESCRIPTION = window.hWin.HAPI4.sysinfo['dbconst']['DT_EXTENDED_DESCRIPTION'];
@@ -675,30 +674,48 @@ function afterPageLoad(document, pageid, eventdata){
         // add current page as url parameter in browser url
 
         var spath= location.pathname;
+
         while (spath.substring(0, 2) === '//') spath = spath.substring(1);
+
+        var surl;
+       
+//console.log(spath);       
+       
+        if(spath.search(/\/([A-Za-z0-9_]+)\/web\/.*/)>0){
+
+            //remove after web
+            spath = spath.substring(0,spath.indexOf('/web/')+5);
+            
+            surl = spath + home_page_record_id;
+            if(pageid!=home_page_record_id){
+                surl = surl + '/' + pageid;
+            }
+            
+        }else{
+            var params = window.hWin.HEURIST4.util.getUrlParams(location.href);    
         
-        var params = window.hWin.HEURIST4.util.getUrlParams(location.href);
+            params['db'] = window.hWin.HAPI4.database;
+            params['website'] = '';
+            params['id'] = home_page_record_id;
+            
+            /* IJ Oct 2021 - Hide page id in URL, and cause reloads to move back to website homepage */
+            if(pageid!=home_page_record_id){
+                params['pageid'] = pageid;
+            }
+
+            s = [];        
+            $.each(Object.keys(params),function(i,key){
+                if(key){
+                    var v = encodeURIComponent(params[key]);
+                    if(v!='') v = '=' + v;
+                    s.push(key + v);
+                }
+            });
+            surl = spath + '?' + s.join('&'); 
         
-        params['db'] = window.hWin.HAPI4.database;
-        params['website'] = '';
-        params['id'] = home_page_record_id;
-        
-        /* IJ Oct 2021 - Hide page id in URL, and cause reloads to move back to website homepage */
-        if(pageid!=home_page_record_id){
-            params['pageid'] = pageid;
         }
-        
 
-        s = [];        
-        $.each(Object.keys(params),function(i,key){
-            var v = encodeURIComponent(params[key]);
-            if(v!='') v = '=' + v;
-            s.push(key + v);
-        });
-        s = spath + '?' + s.join('&'); 
-        
-
-        window.history.pushState("object or string", "Title", s);
+        window.history.pushState("object or string", "Title", surl);
         
     }
     

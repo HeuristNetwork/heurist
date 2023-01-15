@@ -47,7 +47,7 @@ if( @$_REQUEST['recID'] || @$_REQUEST['recid'] || array_key_exists('website', $_
             require_once(dirname(__FILE__).'/hsapi/System.php');
             define('PDIR', HEURIST_INDEX_BASE_URL);
         }else{
-            define('PDIR','');    
+            if(!defined('PDIR')) define('PDIR','');    
         }
         include dirname(__FILE__).'/hclient/widgets/cms/websiteRecord.php';
         exit();

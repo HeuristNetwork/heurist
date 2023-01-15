@@ -52,16 +52,22 @@ function getHostParams()
         $isSecure = true;
     }
 
-    // calculate the dir where the Heurist code is installed, for example /h5 or /h5-ij
-    $topdirs = 'admin|api|applications|common|context_help|export|hapi|hclient|hsapi|import|startup|records|redirects|search|viewers|help|ext|external'; // Upddate in 3 places if changed
-
-    $topdirs = $topdirs . '|web|hml|tpl|view'; //actions for redirection
+    $rewrite_actions = 'web|hml|tpl|view'; //actions for redirection https://hist/heurist/[dbname]/web/
+    $matches = array();
+    preg_match("/\/([A-Za-z0-9_]+)\/(" . $rewrite_actions . ")\/.*/", @$_SERVER["SCRIPT_NAME"], $matches);
+    if($matches){
+        $installDir = preg_replace("/\/([A-Za-z0-9_]+)\/(" . $rewrite_actions . ")\/.*/", "", @$_SERVER["SCRIPT_NAME"]);
+    }else{
     
-    $installDir = preg_replace("/\/(" . $topdirs . ")\/.*/", "", @$_SERVER["SCRIPT_NAME"]); // remove "/top level dir" and everything that follows it.
-    if ($installDir == @$_SERVER["SCRIPT_NAME"]) { // no top directories in this URI must be a root level script file or blank
-        $installDir = preg_replace("/\/[^\/]*$/", "", @$_SERVER["SCRIPT_NAME"]); // strip away everything past the last slash "/index.php" if it's there
-    }
+        // calculate the dir where the Heurist code is installed, for example /h5 or /h5-ij
+        $topdirs = 'admin|api|applications|common|context_help|export|hapi|hclient|hsapi|import|startup|records|redirects|search|viewers|help|ext|external'; // Upddate in 3 places if changed
+        
+        $installDir = preg_replace("/\/(" . $topdirs . ")\/.*/", "", @$_SERVER["SCRIPT_NAME"]); // remove "/top level dir" and everything that follows it.
+        if ($installDir == @$_SERVER["SCRIPT_NAME"]) { // no top directories in this URI must be a root level script file or blank
+            $installDir = preg_replace("/\/[^\/]*$/", "", @$_SERVER["SCRIPT_NAME"]); // strip away everything past the last slash "/index.php" if it's there
+        }
 
+    }
 
     if ($installDir == @$_SERVER["SCRIPT_NAME"]) { // this should be the path difference between document root and heurist code root
         $installDir = '/';
