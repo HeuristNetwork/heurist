@@ -681,7 +681,7 @@ function afterPageLoad(document, pageid, eventdata){
        
 //console.log(spath);       
        
-        if(spath.search(/\/([A-Za-z0-9_]+)\/web\/.*/)>0){
+        if(spath.search(/\/([A-Za-z0-9_]+)\/web\/.*/)>=0){
 
             //remove after web
             spath = spath.substring(0,spath.indexOf('/web/')+5);
