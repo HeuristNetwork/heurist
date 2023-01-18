@@ -1011,7 +1011,7 @@ $.widget( "heurist.search", {
 
             var that = this;
 
-            /* concatemation with previos search  -- NOT USED
+            /* concatenation with previos search  -- NOT USED
             if(this.options.search_domain=="c" && !window.hWin.HEURIST4.util.isnull(this.query_request)){ 
             this.options.search_domain = this.query_request.w;
             qsearch = this.query_request.q + ' AND ' + qsearch;

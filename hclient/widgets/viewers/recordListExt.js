@@ -33,6 +33,8 @@ $.widget( "heurist.recordListExt", {
         is_frame_based: true,
         
         reload_for_recordset: false, //refresh every time recordset is changed - for smarty report from CMS
+
+        search_page: null, //target page (for CMS)
         search_realm: null,
         search_initial: null,  //Query or svs_ID for initial search
         
@@ -48,6 +50,8 @@ $.widget( "heurist.recordListExt", {
     _query_request: null, //keeps current query request
     _events: null,
     _dataTable: null,
+    
+    _is_publication:false, //this is CMS publication - take css from parent
 
     placeholder_ele: null, //element holding the placeholder text
 
@@ -56,6 +60,10 @@ $.widget( "heurist.recordListExt", {
 
         if(this.options.widget_id){ //outdated
             this.element.attr('data-widgetid', this.options.widget_id);
+        }
+        
+        if(this.element.parent().attr('data-heurist-app-id') || this.element.hasClass('cms-element')){
+            this._is_publication = true;
         }
         
         var that = this;
@@ -249,6 +257,24 @@ this._dout('onLoadComplete refresh again');
         }
 //2020-03-08        
         //this._trigger( 'loadcomplete2', null, null );
+        
+        if(this.options.is_frame_based && this._is_publication){                
+            //init "a" 
+            if($.isFunction(initLinksAndImages)){
+                
+                var fdoc = this.dosframe[0].contentWindow.document;
+                
+                var script = document.createElement('script');
+                script.type = 'text/javascript';
+                script.src = window.hWin.HAPI4.baseURL + 'hclient/core/detectHeurist.js';
+                fdoc.getElementsByTagName('head')[0].appendChild(script);
+                
+                initLinksAndImages($(fdoc), {search_page:this.options.search_page, search_realm:this.options.search_realm});
+            }
+            
+            
+        }
+        
     },
     
     // 

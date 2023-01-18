@@ -518,6 +518,7 @@ window.hWin.HEURIST4.util = {
     // converts query string to object
     // URL to JSON
     // hQueryParseURL
+    //
     parseHeuristQuery: function(qsearch)
     {
         

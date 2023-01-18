@@ -679,7 +679,8 @@ function afterPageLoad(document, pageid, eventdata){
 
         var surl;
        
-//console.log(spath);       
+//console.log(spath);     
+        if(spath.endsWith('/web')) spath = spath + '/'; //add last slash  
        
         if(spath.search(/\/([A-Za-z0-9_]+)\/web\/.*/)>=0){
 
@@ -768,11 +769,15 @@ function afterPageLoad(document, pageid, eventdata){
 //
 // Adds listeners for all "a" elements with href="pageid" for intepage website links (converts links)
 //
-function initLinksAndImages(){   
+function initLinksAndImages($container, search_data){   
 
+    if(!$container){
+        $container = $('body');
+    }
+    
     // create internal links 
     //find all link elements for loading another page and define onclick handler - loadPageContent
-    $('a').each(function(i,link){
+    $container.find('a').each(function(i,link){
         
         //var href = $(link).attr('data-href');
         //if(!href) 
@@ -791,14 +796,14 @@ function initLinksAndImages(){
             }else if(href.indexOf('./')===0){
                 href = href.substring(2);
                 pageid = href;
-            }else if(href>0){
+            }else if(!isNaN(parseInt(href)) && href>0){ //integer
                 pageid = href;
             }
             if(pageid>0){
                 
                 $(link).attr('data-pageid', pageid);
                 
-                var scr = 'javascript:{loadPageContent('+pageid+');window.hWin.HEURIST4.util.stopEvent(event);}';
+                var scr = 'javascript:{window.hWin.loadPageContent('+pageid+');window.hWin.HEURIST4.util.stopEvent(event);}';
                 $(link).attr('href',scr);
                 //$(link).attr('data-href',scr);
                 
@@ -810,6 +815,40 @@ function initLinksAndImages(){
                 }});
                 */
                 
+            }else if(href.indexOf('q=')===0){
+                
+                    /*
+                    var request = window.hWin.HEURIST4.util.parseHeuristQuery('?'+href);
+
+                    request.w  = 'a';
+                    request.detail = 'ids';
+                    request.search_realm = search_data.search_realm;
+                    request.search_page = search_data.search_page;
+                    */
+                
+                var request = {detail:'ids', neadall:1, w:'a',
+                            q:href.substring(2),
+                            search_page: search_data.search_page,
+                            search_realm: search_data.search_realm};
+                /*                            
+                var scr;
+                
+                if(search_data && search_data.search_page.search_page>0 && search_data.search_page.search_page!=current_page_id){
+
+                    data.event_type = window.hWin.HAPI4.Event.ON_REC_SEARCHSTART;
+                    
+                    scr = 'javascript:{window.hWin.loadPageContent('+pageid+','+JSON.stringify(data)
+                                +');window.hWin.HEURIST4.util.stopEvent(event);}';
+                    
+                }else{
+                    
+                    scr = 'javascript:{window.hWin.startSearch loadPageContent('+pageid+','+JSON.stringify(data)
+                                +');window.hWin.HEURIST4.util.stopEvent(event);}';
+                    
+                }*/
+                var scr = 'javascript:{window.hWin.HAPI4.RecordSearch.doSearch(window.hWin,'+JSON.stringify(request)
+                                +');window.hWin.HEURIST4.util.stopEvent(event);}';
+                $(link).attr('href',scr);
             }
         }
         
