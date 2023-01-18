@@ -47,6 +47,19 @@
 //  heurist/database_name/action/param1/param2
 $requestUri = explode('/', trim($_SERVER['REQUEST_URI'],'/'));
 $allowedActions = array('web','hml','tpl','view');
+
+/*
+if(count($requestUri)==1){
+   if($requestUri[0]==='heurist'){
+       header('Location: ../index.php');
+       exit();
+   }else{
+       $_SERVER["SCRIPT_NAME"] .= '/web/';
+       array_push($requestUri, 'web');
+   }
+}
+*/
+                           // dbname/action                               heurist/dbname/action
 if(count($requestUri)>1 && (in_array($requestUri[1],$allowedActions) || in_array(@$requestUri[2],$allowedActions))){
 /*
 To enable this redirection add to httpd.conf
@@ -73,8 +86,8 @@ $requestUri:
 4 - page id
 */    
     if(in_array($requestUri[1],$allowedActions)){
-       array_unshift($requestUri, 'h6-alpha');
-    }
+       array_unshift($requestUri, 'heurist');//not used
+    }                           
 
     $error_msg = null;
     $database = $requestUri[1];
@@ -86,6 +99,9 @@ $requestUri:
 
     require_once ('../hsapi/utilities/utils_host.php');
     $host_params = getHostParams();
+
+//print $_SERVER["SCRIPT_NAME"].'<br>';
+//print print_r($host_params,true);        
     
     if($action=='web'){
         
@@ -108,8 +124,8 @@ $requestUri:
         $_REQUEST = $params;
         define('PDIR', $host_params['server_url'] . $host_params['install_dir']);
         
+        
         include '../index.php';
-        //include '../hclient/widgets/cms/websiteRecord.php';
         exit();
 
     }else {
@@ -189,13 +205,7 @@ $requestUri:
     
     header('Location: '.$redirect);  
     exit();
-    
-    /*
-    define('PDIR', 'http://127.0.0.1/h6-ao/');
-    $_SERVER["SCRIPT_NAME"] = '/h6-ao/index.php';
-    $_SERVER["SCRIPT_URL"] = '/h6-ao/';
-    $_SERVER['REQUEST_URI'] = '/h6-ao/';
-    */
+
 }
 
 
