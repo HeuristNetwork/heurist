@@ -2472,7 +2472,7 @@ $.widget( "heurist.search_faceted", {
                                             var $slide_handles = $slide_range.parent().find('.ui-slider-handle');
                                             $facet_values.find('.ui-icon-triangle-1-w').position({my: 'right-6 center+5', at: 'right bottom', of: $($slide_handles[0])});
                                             $facet_values.find('.ui-icon-triangle-1-e').position({my: 'left+6 center+5', at: 'left bottom', of: $($slide_handles[1])});
-                                        }else if(window.hWin.HAPI4.has_access() && field['history'].length != 0){
+                                        }else if(window.hWin.HAPI4.has_access()){ //display error message, only if the user is logged in
                                             response.message = 'An error occurred with generating the time graph data<br>' + response.message;
                                             window.hWin.HEURIST4.msg.showMsgErr(response);
                                         }

@@ -266,8 +266,8 @@ $.widget( "heurist.search_faceted_wiz", {
             
             +'<span style="float:right; margin-left:10px;display:none;" id="btnUpdatePreview">Update Preview</span>'
             +'<div style="float:right"><label><input type="checkbox" id="cbShowAdvanced" style="vertical-align: middle;">'
-            +window.hWin.HR("Show advanced ")+'</label></div>'
-            +'<label style="display:none;margin-left:16px;"><input type="checkbox" id="cbAccordionView" style="vetical-align: middle;">'+window.hWin.HR("Accordion view")+'</label>'
+            +window.hWin.HR("All options ")+'</label></div>'
+            +'<label style="margin-left:16px;"><input type="checkbox" id="cbAccordionView" style="vetical-align: middle;">'+window.hWin.HR("Accordion view")+'</label>'
             +'<label style="display:none;margin-left:16px;"><input type="checkbox" id="cbShowAccordIcons" style="vetical-align: middle;" checked>'+window.hWin.HR("Show accordion arrows")+'</label>'
             );
             
@@ -1565,6 +1565,10 @@ $.widget( "heurist.search_faceted_wiz", {
             $(this.step3).find("#cbAccordionView").prop('checked', this.options.params.accordion_view==true);
             $(this.step3).find("#cbShowAccordIcons").prop('checked', this.options.params.show_accordion_icons==true);
             
+            if(this.options.params.accordion_view==true){
+                $(this.step3).find("#cbShowAccordIcons").show();
+            }
+
             var listdiv = $(this.step3).find("#facets_list");
             listdiv.empty();
 
@@ -1686,15 +1690,14 @@ $.widget( "heurist.search_faceted_wiz", {
                 var idd = facets[k]['var'];
                 
                 var sContent =
-                '<div id="facet'+idd+'" style="border-top:1px lightgray solid; padding-top:4px">'
-                +'<div><span class="ui-icon ui-icon-up-down span_for_radio"></span><label>Facet </label>&nbsp;'
-                +'<label style="font-size:smaller">' + harchy.join('') + '</label>'
-                +'<button label="Remove" class="remove_facet" data-var="'+idd+'" /></div>'
-                
-                +'<div style="padding:5px 0 5px 29px">'
-                +'<label style="font-size:smaller" for="facet_Title'+idd+'">Label</label>&nbsp;'   //'<div class="header_narrow"></div>'
+                '<div id="facet'+idd+'" style="border-top:1px lightgray solid; padding:10px 0px;">'
+                +'<div><span class="ui-icon ui-icon-up-down span_for_radio"></span>'
                 +'<input type="text" name="facet_Title'+idd+'" id="facet_Title'+idd+'" '
                 +' style="font-weight:bold;display:inline-block" class="text ui-widget-content ui-corner-all" />'
+                +'<button label="Remove" class="remove_facet" data-var="'+idd+'" /></div>'
+                
+                +'<div style="padding:5px 0 5px 40px">'
+                //+'<label style="font-size:smaller" for="facet_Title'+idd+'">Label</label>&nbsp;'   //'<div class="header_narrow"></div>'
                 
                 + '<div class="ent_search_cb" style="font-style:italic;padding-top:10px">'
                 + '<span id="buttonset'+idd+'">';
@@ -1736,10 +1739,6 @@ $.widget( "heurist.search_faceted_wiz", {
                    
                 }else if(facets[k].type=='enum' || facets[k].type=='reltype'){
                     
-                    if(facets[k].code.indexOf(':addedby')<0 && facets[k].code.indexOf(':owner')<0){
-                        sContent = sContent + '<button label="tree" class="btnset_radio" data-idx="'+idd+'" data-value="tree" data-type="tree"/>';
-                    }
-                    
                     sGroupBy = '<label><input type="checkbox" name="facet_Group'
                                 +idd+'" value="firstlevel"/>Group by first level</label>';
                                 
@@ -1758,12 +1757,16 @@ $.widget( "heurist.search_faceted_wiz", {
                         +'<button label="list" class="btnset_radio" data-idx="'+idd+'" data-value="3"/>'
                         +'<button label="wrapped" class="btnset_radio" data-idx="'+idd+'" data-value="2"/>';
                                         
+                if((facets[k].type=='enum' || facets[k].type=='reltype') && (facets[k].code.indexOf(':addedby')<0 && facets[k].code.indexOf(':owner')<0)){
+                    sContent = sContent + '<button label="tree" class="btnset_radio" data-idx="'+idd+'" data-value="tree" data-type="tree"/>';
+                }
+
                 sContent = sContent        
                         +'<button label="search" class="btnset_radio" data-idx="'+idd+'" data-value="0"/>'
                 + '</span>'+sMultiSel+'</div></div>' 
 
                 //second/optional line
-                +'<div style="padding:5px 0 0 29px;display:none" class="optional_settings">'
+                +'<div style="padding:5px 0 0 40px;" class="optional_settings">'
                 
                 +'<div style="display:inline-block">'
                 +'<label style="font-size:smaller" for="facet_Help'+idd+'">Rollover (optional)&nbsp;</label>'
@@ -1772,7 +1775,7 @@ $.widget( "heurist.search_faceted_wiz", {
                 +' style="font-size:smaller;margin-top:0.4em;margin-bottom:1.0em;width:200px;"/>'
                 +'</div>'
                 
-                + '<div style="float:right;font-size:smaller;margin-right:20px;margin-top: 4px;">'
+                + '<div style="display:inline-block;font-size:smaller;">'
                 +'<label><input name="facet_AccordHide'+idd+'" id="facet_AccordHide'+idd+'" type="checkbox" '
                 +' style="vertical-align: middle;" />Accordion closed</label>'
                 + sGroupBy 
@@ -1781,6 +1784,10 @@ $.widget( "heurist.search_faceted_wiz", {
                 + window.hWin.HR("Order by count")+"</label>"
                 + '</div>'
                 
+                + '</div>'
+                + '<div style="padding-left:40px;" class="optional_settings">'
+                    + '<label>Facet </label>&nbsp;'
+                    + '<label style="font-size:smaller">' + harchy.join('') + '</label>'
                 + '</div>'
                 + '</div>'; 
                 
@@ -1852,7 +1859,7 @@ $.widget( "heurist.search_faceted_wiz", {
                                 if(facets[idx].type=='date' || facets[idx].type=='year'){
                                     var is_allowed = (listdiv.find('button.ui-heurist-btn-header1[data-idx="'+idd+'"]').attr('data-value')>1);
                                                     //(listdiv.find('input:radio[name="facet_Type'+idd+'"]:checked').val()>1);
-                                    listdiv.find('#facet_DateGroup'+idd).css({'visibility':is_allowed?'visible':'hidden'});        
+                                    listdiv.find('#facet_DateGroup'+idd).css({'display':is_allowed?'inline':'none'});        
                                     if(is_allowed){
                                         if(Hul.isempty(facets[idx].groupby)){
                                             facets[idx].groupby = 'year';
@@ -1920,7 +1927,7 @@ $.widget( "heurist.search_faceted_wiz", {
             listdiv.find('.ui-button-text').css({"min-width":"60px","font-size":'0.9em'});
             listdiv.find('button.btnset_radio[data-idx="'+idd+'"]').controlgroup();
                                       
-            $(this.step3).find('#cbShowAdvanced').attr('checked',false).change(function(event){
+            $(this.step3).find('#cbShowAdvanced').attr('checked',true).change(function(event){
                 if($(event.target).is(':checked')){
                      listdiv.find('.optional_settings').show();
                     $(that.step3).find('#cbAccordionView').parent().show();
