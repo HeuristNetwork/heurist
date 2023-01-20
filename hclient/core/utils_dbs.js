@@ -1729,6 +1729,31 @@ window.hWin.HEURIST4.dbs = {
     },
     
     //
+    // Comparison function for terms
+    // Sort by 'Order in branch' then 'Term label'
+    //
+    trm_SortingById: function(a, b){
+
+        var recset = window.hWin.HAPI4.EntityMgr.getEntityData('defTerms');
+
+        let a_name = recset.fld(a,'trm_Label').toLowerCase();
+        let b_name = recset.fld(b,'trm_Label').toLowerCase();
+        let a_order = parseInt(recset.fld(a,'trm_OrderInBranch'), 10);
+        let b_order = parseInt(recset.fld(b,'trm_OrderInBranch'), 10);
+
+        a_order = (!a_order || a_order < 1 || isNaN(a_order)) ? null : a_order;
+        b_order = (!b_order || b_order < 1 || isNaN(b_order)) ? null : b_order;
+
+        if(a_order == null && b_order == null){ // alphabetic
+            return a_name < b_name;
+        }else if(a_order == null || b_order == null){ // null is first
+            return a_order == null;
+        }else{ // branch order
+            return a_order < b_order;
+        }
+    },
+
+    //
     // Returns hierarchy for given vocabulary as a flat array, recordset or tree data
     // (it uses trm_Links)
     // vocab_id - id or "relation"
@@ -1781,23 +1806,8 @@ window.hWin.HEURIST4.dbs = {
                 }
 
                 //sort children by name
-                children.sort(function(a,b){
-                    let a_name = recset.fld(a,'trm_Label').toLowerCase();
-                    let b_name = recset.fld(b,'trm_Label').toLowerCase();
-                    let a_order = recset.fld(a,'trm_OrderInBranch');
-                    let b_order = recset.fld(b,'trm_OrderInBranch');
-
-                    a_order = (!a_order || a_order < 1) ? null : a_order;
-                    b_order = (!b_order || b_order < 1) ? null : b_order;
-
-                    if(a_order == null && b_order == null){ // alphabetic
-                        return a_name < b_name ? -1 : 1;
-                    }else if(a_order == null || b_order == null){ // null is first
-                        return (a_order == null) ? -1 : 1;
-                    }else{ // branch order
-                        return a_order < b_order ? -1 : 1;
-                    }
-                });
+                children = window.hWin.HEURIST4.util.merge_sort(children, $Db.trm_SortingById);
+                //children.sort($Db.trm_SortingById);
                 
                 if(mode=='tree'){
 

@@ -1449,6 +1449,44 @@ window.hWin.HEURIST4.util = {
         var matches = url.match(/^(?:http(?:s)?:\/\/)?(?:www\.)?(?:m\.)?(?:youtu\.be\/|youtube\.com\/(?:(?:watch)?\?(?:.*&)?v(?:i)?=|(?:embed|v|vi|user)\/))([^\?&\"'>]+)/);
 
         return matches[1];
+    },
+
+    //
+    // General merge sorting function
+    // array => Array of items to be sorted
+    // compare => Function used for comparing array indexes
+    //
+    merge_sort: function(array, compare){
+
+        if(!window.hWin.HEURIST4.util.isArray(array) || array.length < 2){
+            return array;
+        }
+        if(!compare){
+            compare = (a, b) => {
+                return a < b;
+            };
+        }else if(!$.isFunction(compare)){
+            return array;
+        }
+
+        let arr_len = array.length;
+        let mid = Math.floor(arr_len / 2);
+
+        var left_array = window.hWin.HEURIST4.util.merge_sort(array.slice(0, mid), compare);
+        var right_array = window.hWin.HEURIST4.util.merge_sort(array.slice(mid), compare);
+
+        var sorted_array = [];
+
+        while(left_array.length != 0 && right_array.length != 0){
+            if(compare(left_array[0], right_array[0])){
+                sorted_array.push(left_array.shift());
+            }else{
+                sorted_array.push(right_array.shift());
+            }
+        }
+        var results = sorted_array.concat(left_array.concat(right_array));
+
+        return results;
     }
     
 }//end util
