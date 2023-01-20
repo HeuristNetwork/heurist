@@ -187,7 +187,7 @@ $.widget( "heurist.resultList", {
             this.options.empty_remark = window.hWin.HR('resultList_empty_remark');
         }
 
-        this._is_publication  = this.element.parent().attr('data-heurist-app-id');
+        this._is_publication  = this.element.parent().attr('data-heurist-app-id') || this.element.hasClass('cms-element');
         
         //this.element.css({'font-size':'0.9em'});
 
@@ -1142,6 +1142,11 @@ $.widget( "heurist.resultList", {
         
         var old_mode = this.options.view_mode;
 
+        if(this._is_publication && (newmode == 'thumbs' || newmode == 'thumbs3')){
+            this.div_content.css('text-align', 'center');
+        }else{
+            this.div_content.css('text-align', '');
+        }
 
         if(!this.div_content.hasClass(newmode) || forceapply===true){
             
