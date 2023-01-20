@@ -844,8 +844,11 @@ $.widget( "heurist.editing_input", {
                         entity_encoding:'raw',
                         inline_styles: true,
                         content_style: "body { font-size: 8pt; font-family: Helvetica,Arial,sans-serif; }",
-                        //width: nw, // '120ex', 
-                        height: ($input.height()+110),
+                        min_height: ($input.height()+110),
+                        max_height: ($input.height()+110),
+                        //autoresize_overflow_padding: 10,
+                        autoresize_bottom_margin: 10,
+                        autoresize_on_init: false,
                         setup:function(editor) {
 
                             if(editor.ui){
@@ -875,7 +878,6 @@ $.widget( "heurist.editing_input", {
                                 if($container.parents('.editForm').length == 1){
                                     let max_w = $container.parents('.editForm').width(); 
                                     if($container.width() > max_w - 200){
-                                        console.log('too big');
                                         $container.css('width', (max_w - 245) + 'px');
                                     }
                                 }
@@ -894,14 +896,30 @@ $.widget( "heurist.editing_input", {
                                     $input.val(newval);     
                                 }
 
+                                // check if editor is 'expanded'
+                                if(editor.settings.max_height != null){
+                                    editor.settings.max_height = null;
+                                    tinymce.activeEditor.execCommand('mceAutoResize');
+                                }
+
                                 //$input.val( ed.getContent() );
                                 that.onChange();
+                            });
+
+                            editor.on('focus', (e) => { // expand text area
+                                editor.settings.max_height = null;
+                                tinymce.activeEditor.execCommand('mceAutoResize');
+                            });
+
+                            editor.on('blur', (e) => { // collapse text area
+                                editor.settings.max_height = editor.settings.min_height;
+                                tinymce.activeEditor.execCommand('mceAutoResize');
                             });
                         },
                         plugins: [ //contextmenu, textcolor since v5 in core
                             'advlist autolink lists link image preview ', //anchor charmap print 
                             'searchreplace visualblocks code fullscreen',
-                            'media table paste help'  //insertdatetime  wordcount
+                            'media table paste help autoresize'  //insertdatetime  wordcount
                         ],      
                         //undo redo | code insert  |  fontselect fontsizeselect |  forecolor backcolor | media image link | alignleft aligncenter alignright alignjustify | fullscreen            
                         toolbar: ['formatselect | bold italic forecolor blockquote | customHeuristMedia link | align | bullist numlist outdent indent | table | removeformat | help'],
@@ -1198,6 +1216,17 @@ $.widget( "heurist.editing_input", {
         
                 {
                     browseTerms(this, $input, value);
+
+                    window.hWin.HEURIST4.ui.initHSelect($input, false);
+                    $input.hSelect({
+                        'open': (e) => {
+                            window.hWin.HEURIST4.util.stopEvent(e);
+                            e.preventDefault();
+
+                            $input.click();
+                            $input.hSelect('close');
+                        }
+                    });
                 }else{
                     $input = this._recreateSelector($input, value); //initial create
                 }
@@ -1222,7 +1251,7 @@ $.widget( "heurist.editing_input", {
                     var isVocabulary = !isNaN(Number(allTerms)); 
 
                     var $btn_termsel = $( '<span>', {title: 'Select Term By Picture'})
-                    .addClass('smallicon ui-icon ui-icon-image')
+                    .addClass('smallicon ui-icon ui-icon-image show-onhover')
                     .css({
                         'margin-top': '2px',
                         'cursor': 'pointer'
@@ -1277,7 +1306,7 @@ $.widget( "heurist.editing_input", {
                     if(window.hWin.HAPI4.is_admin()){            
                         
                         var $btn_termedit2 = $( '<span>', {title: 'Edit term tree'})
-                        .addClass('smallicon ui-icon ui-icon-gear btn_add_term')
+                        .addClass('smallicon ui-icon ui-icon-gear btn_add_term show-onhover')
                         .css({'margin-top':'2px',cursor:'pointer'})
                         .appendTo( $inputdiv );
                         
@@ -1287,7 +1316,7 @@ $.widget( "heurist.editing_input", {
                 
                     
                     var $btn_termedit = $( '<span>', {title: 'Add new term to this list'})
-                    .addClass('smallicon ui-icon ui-icon-plus btn_add_term')
+                    .addClass('smallicon ui-icon ui-icon-plus btn_add_term show-onhover')
                     .css({'margin-top':'2px',cursor:'pointer','font-size':'11px'})
                     .appendTo( $inputdiv );
 
@@ -3395,7 +3424,7 @@ console.log('onpaste');
                     .addClass('field-visibility smallicon ui-icon ui-icon-eye-open')
                     .attr('data-input-id', $input.attr('id'))
                     .css({
-                        'margin-top': '6px',
+                        'margin-top': '3px',
                         'cursor': 'pointer',
                         'vertical-align': 'top'
                     });
@@ -4106,140 +4135,6 @@ console.log('onpaste');
 
         }
         else{ //this is usual enumeration from defTerms
-
-            /* MOVED to browseTerms
-        
-            var headerTerms = '';
-            allTerms = this.f('rst_FilteredJsonTermIDTree');        
-            //headerTerms - disabled terms
-            headerTerms = this.f('rst_TermIDTreeNonSelectableIDs') || this.f('dty_TermIDTreeNonSelectableIDs');
-            
-            if(window.hWin.HEURIST4.util.isempty(allTerms) &&
-               this.options.dtID==window.hWin.HAPI4.sysinfo['dbconst']['DT_RELATION_TYPE'])
-            { //specific behaviour - show all
-                allTerms = 'relation'; //show all possible relations
-            }else if(typeof allTerms == 'string' && allTerms.indexOf('-')>0){ //vocabulary concept code
-                allTerms = $Db.getLocalID('trm', allTerms);
-            }
-            
-            
-            var dt_type = this.detailType;
-            var topOptions = true;
-            if(!window.hWin.HEURIST4.util.isempty(this.f('dty_Type'))){
-                dt_type = this.f('dty_Type');
-                //topOptions = false;
-            }
-            
-            //if($input==null) $input = $('<select>').uniqueId();
-            
-            //this.options.useHtmlSelect native select produce double space for option  Chrome touch screen
-            
-            //vocabulary
-            $input = window.hWin.HEURIST4.ui.createTermSelect($input.get(0),
-                {vocab_id:allTerms, //headerTermIDsList:headerTerms,
-                    defaultTermID:value, topOptions:topOptions, supressTermCode:true, 
-                    useHtmlSelect:this.options.useHtmlSelect});
-
-            //adds filter panel on the top of select menu        
-            if(typeof openSearchMenu!=='undefined' && $.isFunction(openSearchMenu) && this.options.recordset && this.options.recordset.entityName == 'Records'){
-
-                var search_icon = window.hWin.HAPI4.baseURL+'hclient/assets/filter_icon_black18.png';
-
-                var opt = document.createElement('option');
-
-                opt.text = '<div style="width:175px;padding:10px 0px">'
-                +'<span style="padding-right:10px;vertical-align:sub">'
-                +'<img src="'+window.hWin.HAPI4.baseURL+'hclient/assets/16x16.gif'
-                + '" class="rt-icon rt-icon2" style="background-image: url(&quot;'+search_icon+ '&quot;);"/></span>'
-                +'<input class="input_menu_filter" size="15" style="outline: none;background:none;border: 1px solid lightgray;"/>'
-                +'<span class="smallbutton ui-icon ui-icon-circlesmall-close" tabindex="-1" title="Clear entered value" '
-                +'style="position:relative; cursor: pointer; outline: none; box-shadow: none; border-color: transparent;"></span>'
-                + '<div class="not-found" style="padding:10px;color:darkgreen;display:none;width:210px;">No terms match the filter '
-                + '<a class="add-trm" href="#" style="padding: 0 0 0 10px;color:blue;display:inline-block;">Add term</a>'
-                +'</div></div>';
-
-                opt.value = 'select';
-
-                $input.get(0).prepend(opt);
-
-                $input.hSelect('destroy');
-
-                var events = {};
-                var performedOnce = 0;
-
-                events['onOpenMenu'] = function(){ 
-
-                    if(performedOnce == 0){
-
-                        // Extra indenting + re-label blank option
-                        $input.hSelect('menuWidget').find('div[role="option"]').each(function(idx, opt){
-
-                            var l_pad = 0;
-                            var in_styles = $(opt).attr('style');
-                            in_styles = in_styles.slice(0, in_styles.length - 1).split(';').findIndex(function(style){
-                                if(style.indexOf('padding-left:') >= 0){
-                                    l_pad = parseFloat(style.split(':')[1]) + 1;
-                                }
-                            });
-                            $(opt).css('padding-left', l_pad + 'em');
-
-                            if(idx == 1){
-                                $(opt).text('<blank>');
-                            }
-                        });
-
-                        that._on($input.hSelect('menuWidget').find('a.add-trm'), {
-                            click: function(){
-
-                                var label = $input.hSelect('menuWidget').find('input.input_menu_filter').val();
-                                var vocab_id = that.f('rst_FilteredJsonTermIDTree');
-
-                                if(!window.hWin.HEURIST4.util.isempty(label)){
-
-                                    var rg_options = {
-                                        isdialog: true, 
-                                        select_mode: 'manager',
-                                        edit_mode: 'editonly',
-                                        height: 240,
-                                        rec_ID: -1,
-                                        trm_VocabularyID: vocab_id,
-                                        suggested_name: $input.hSelect('menuWidget').find('input.input_menu_filter').val(), 
-                                        create_one_term: true,
-                                        onClose: function(trm_id){
-                                            that._recreateEnumField(vocab_id);
-
-                                            var trm_info = $Db.trm(trm_id, 'trm_ParentTermID');
-                                            if(trm_info && trm_info > 0){
-                                                $input.val(trm_id);
-                                                if($input.hSelect('instance')!=undefined){
-                                                    $input.hSelect('refresh');
-                                                }
-                                                $input.change();
-                                            }
-                                        }
-                                    };
-
-                                    window.hWin.HEURIST4.ui.showEntityDialog('defTerms', rg_options);
-                                }
-                            }
-                        });
-
-                        performedOnce = 1;
-                    }
-
-                    openSearchMenu(that, $input, true); // perform special function, found under editing_exts.js
-                };
-
-                window.hWin.HEURIST4.ui.initHSelect($input, this.options.useHtmlSelect, null, events);
-            }
-
-            //ART0921 - todo in browseTerms
-            var opts = $input.find('option');      
-            if(opts.length==0 || (opts.length==1 && $(opts[0]).text()=='')){
-               $input.hSelect('widget').html('<span style="padding: 0.1em 2.1em 0.2em 0.2em">no terms defined, please add terms</span><span class="ui-selectmenu-icon ui-icon ui-icon-triangle-1-e"></span>'); 
-            }
-            
-            */
             
             //show error message on init -----------                   
             //ART0921 - todo in browseTerms

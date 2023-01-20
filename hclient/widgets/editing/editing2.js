@@ -506,7 +506,7 @@ function hEditing(_options) {
                 }
             }
             
-            if(!hasVisibleFields){
+            if(!hasVisibleFields && fieldContainer.find('.input-cell').length == 0){
                 $('<div>There are no fields visible under this heading/tab. Please define new fields or move fields into this section.</div>')
                     .addClass('heurist-helper3').appendTo(fieldContainer);
             }

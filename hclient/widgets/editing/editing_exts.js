@@ -1042,9 +1042,14 @@ function browseTerms(_editing_input, $input, value){
             window.hWin.HEURIST4.ui.addoption($input[0], trm_ID, trm_Label);
             $input.css('min-width', '');
         }else{
+            window.hWin.HEURIST4.ui.addoption($input[0], '', '&nbsp;');
             $input.css('min-width', '230px');
         }
         $input.val(trm_ID);
+
+        if($input.hSelect('instance') !== undefined){
+            $input.hSelect('refresh');
+        }
     }    
 
     function __createTermTooltips($input){
@@ -1243,16 +1248,21 @@ function browseTerms(_editing_input, $input, value){
             that._off($(that.selObj), 'change');    
         }
             
-            //Adjust position
-            var _ref_id = $input.attr('id');
+        //Adjust position
+        var _ref_id = $input.attr('id');
+        var menu_location = $input;
+
+        if($input.hSelect('instance') !== undefined){
+            menu_location = $input.hSelect('widget');
+        }
            
-            //that.selObj.val('');
-            that.selObj.attr('ref-id', _ref_id); //assign current input id for reference in onSelectMenu
-            that.selObj.hSelect('open');
-            that.selObj.hSelect('widget').hide();
-            that.selObj.hSelect('menuWidget')
-                    .position({my: "left top", at: "left bottom", of: $input});
-            //that._on($(that.selObj),{change:f(){}});
+        //that.selObj.val('');
+        that.selObj.attr('ref-id', _ref_id); //assign current input id for reference in onSelectMenu
+        that.selObj.hSelect('open');
+        that.selObj.hSelect('widget').hide();
+        that.selObj.hSelect('menuWidget')
+            .position({my: "left top", at: "left bottom", of: menu_location});
+        //that._on($(that.selObj),{change:f(){}});
             
         
     } //__show_select_dropdown
