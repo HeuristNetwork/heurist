@@ -637,11 +637,16 @@ Whole value = EQUAL
             ed_options['dtFields'] = null;
             
         }else if(field_type=='resource'){ 
+
+            if(ed_options['rectypeID']){
                 ed_options.dtFields = window.hWin.HEURIST4.util.cloneJSON($Db.rst(ed_options['rectypeID'], ed_options['dtID']));
-                ed_options.dtFields['rst_CreateChildIfRecPtr'] = 0;
-                ed_options.dtFields['rst_PtrFilteredIDs'] = $Db.dty(ed_options['dtID'], 'dty_PtrTargetRectypeIDs');
-                ed_options.dtFields['rst_DefaultValue'] = '';
-                ed_options.dtFields['rst_PointerMode'] = 'browseonly';
+            }else{
+                ed_options.dtFields = window.hWin.HEURIST4.util.cloneJSON($Db.dty(ed_options['dtID']));
+            }
+            ed_options.dtFields['rst_PtrFilteredIDs'] = $Db.dty(ed_options['dtID'], 'dty_PtrTargetRectypeIDs');
+            ed_options.dtFields['rst_CreateChildIfRecPtr'] = 0;
+            ed_options.dtFields['rst_DefaultValue'] = '';
+            ed_options.dtFields['rst_PointerMode'] = 'browseonly';
         }else if(field_type=='freetext' || field_type=='blocktext' || field_type==prev_type){
             ed_options.values = prev_value;
         }
