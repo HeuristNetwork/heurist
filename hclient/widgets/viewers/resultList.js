@@ -4224,7 +4224,7 @@ setTimeout("console.log('2. auto='+ele2.height());",1000);
                 recInfoUrl = window.hWin.HAPI4.baseURL + "viewers/record/renderRecordData.php?db="
                         +window.hWin.HAPI4.database+"&ll="+lt+"&recID="+rec_ID;  
                 
-                if(that._is_publication && that.options.show_linked_media == false){
+                if(this._is_publication && this.options.show_linked_media == false){
                     recInfoUrl += '&noImages=1';
                 }
             }
