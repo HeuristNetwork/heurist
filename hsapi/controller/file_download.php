@@ -134,6 +134,8 @@ if(!$error){
                 //rquest may have special parameters for audio/video players
                 if(@$_REQUEST['fancybox']){
                     $params = $_REQUEST['fancybox']; //returns player in wrapper
+                }else{
+                    $params = null;
                 }
                 
                 print fileGetPlayerTag($fileid, $mimeType, $params, $external_url);

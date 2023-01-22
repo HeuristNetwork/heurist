@@ -777,7 +777,7 @@ function fileGetPlayerTag($fileid, $mimeType, $params, $external_url, $size=null
         }else{
             
             $autoplay = '';
-            if($params && @$params['auto_play']){
+            if(is_array($params) && @$params['auto_play']){
                 $autoplay = ' autoplay="autoplay"  loop="" muted="" ';
             }
             
@@ -811,7 +811,7 @@ function fileGetPlayerTag($fileid, $mimeType, $params, $external_url, $size=null
         }else{
             
             $autoplay = '';
-            if($params && @$params['auto_play']){
+            if(is_array($params) && @$params['auto_play']){
                 $autoplay = ' autoplay="autoplay"';
             }
             
@@ -848,7 +848,7 @@ function fileGetPlayerTag($fileid, $mimeType, $params, $external_url, $size=null
                 $size = 'width="300"';
             }
             $fancybox = '';
-            if(@$params['fancybox']){
+            if(is_array($params) && @$params['fancybox']){
                 $fancybox =' class="fancybox-thumb" data-id="'.$fileid.'" ';               
             }else if(!$external_url){
                 $fancybox =' data-id="'.$fileid.'" ';               
@@ -887,7 +887,7 @@ function fileGetPlayerTag($fileid, $mimeType, $params, $external_url, $size=null
         */    
     }
     
-    if(@$params['fancybox']){
+    if(is_array($params) && @$params['fancybox']){
         $result = '<div style="width:80%;height:90%">'.$result.'</div>';    
     }
     
