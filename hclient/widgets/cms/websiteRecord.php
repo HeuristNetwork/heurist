@@ -304,10 +304,13 @@ if(!$isWebPage && __getValue($rec,DT_EXTENDED_DESCRIPTION)==''){
 //
 // arbitrary external links and scripts
 //
-$external_files = @$rec['details'][DT_CMS_EXTFILES];
-if($external_files!=null){
-    if(!is_array($external_files)){
-        $external_files = array($external_files);
+$external_files = null;
+if($system->defineConstant('DT_CMS_EXTFILES')){
+    $external_files = @$rec['details'][DT_CMS_EXTFILES];
+    if($external_files!=null){
+        if(!is_array($external_files)){
+            $external_files = array($external_files);
+        }
     }
 }
 //custom styles - mainly to override positions/visibility for #main-xxx elements
