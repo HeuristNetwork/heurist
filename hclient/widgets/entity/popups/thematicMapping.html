@@ -1,0 +1,46 @@
+<div id="div_search" class="ent_wrapper">
+    <div class="ent_header" style="height:120px;border-bottom:1px solid gray;">
+    
+        <fieldset>
+            <div style="padding: 0.2em; width: 100%; line-height:3" class="input">
+                <div class="header">
+                    <label for="sel_record_scope">Records type:</label>
+                </div>
+                <div id="div_button-toolbar" style="line-height:1em">
+                    <select id="sel_record_scope" class="text ui-widget-content ui-corner-all" style="width:300px;max-width:40em;"></select>
+                </div>
+            </div>
+        </fieldset>
+        <div>        
+            <div class="heurist-helper2"  style="padding: 5px 0 10px 0;">
+                Define thematic symbology for selected record type....
+                <ul><li>Select record type that have geo field or Place as a resource field</li>
+                <li>Select fields that will define symbology for particular place. For example "Country" for "color" "Population" for "size" and "City type" for "icon"</li>
+                <li>For each field define symbology properties that will overwrtire base symbology</li>
+                <li>Define ranges or categories for field values</li>
+                <li>Define symbol properties for each range/category</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- TREE for field selection -->
+    <div style="top:127px; bottom:0; position:absolute; width:500px;" class="input ent_content">
+        <div style="padding:10px 0 0 18px"><label>Select fields</label></div>
+        <div class="detailRow rtt-tree tree-csv" style="padding:10px;outline: none;" id="rectype_tree">
+        </div>
+    </div>
+
+    <div id="div_work_area" style="position:absolute; top:117px; bottom:0px; left:501px; right:0px; border-left:1px solid gray;overflow:auto">
+    </div>
+</div>
+
+<div class="ent_wrapper progressbar_div" style="display: none; background:white">
+        <div class="loading" style="display:none;height:100%"></div>
+        <div style="width:80%;height:40px;padding:5px;text-align:center;margin:auto;margin-top:20%;">
+            <div id="progressbar">
+                <div class="progress-label">Processing data...</div>
+            </div>
+            <div class="progress_stop" style="text-align:center;margin-top:4px">Abort</div>
+        </div>
+</div>

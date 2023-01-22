@@ -339,6 +339,7 @@ $dtDefines = array('DT_NAME' => array(2, 1),
     'DT_MAP_BOOKMARK' => array(3, 1082),
     'DT_SYMBOLOGY_POINTMARKER' => array(3, 1091),  //outdated
     'DT_SYMBOLOGY' => array(3, 1092),  //MAIN field that stores ALL styles for map symbology
+    'DT_THEMATIC_MAP' => array(2, 1094), 
     'DT_ZOOM_KM_POINT' => array(2, 925), //area to zoom in on point selection (per map space document)
     //'DT_SYMBOLOGY_THEMES' => array(3, 1093),  // Thematic mapping @todo
     'DT_POPUP_TEMPLATE' => array(2, 922),  // smarty template to produce popup info 

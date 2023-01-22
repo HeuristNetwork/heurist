@@ -1592,9 +1592,11 @@ function recordSearchMenuItems($system, $menuitems, &$result, $find_root_menu=fa
 *
 *       detail (former 'f') - ids       - only record ids
 *                             count     - only count of records  
-*                             header    - record header
+*                             header    - record header only
 *                             timemap   - record header + timemap details (time, location and symbology fields)
-*                             detail    - record header + all details
+*                             detail    - record header + list of details
+*                                           list of rec_XXX and field ids, if rec_XXX is missed all header fields are included
+*                             complete  - all header fields, relations, full file info 
 *                             structure - record header + all details + record type structure (for editing) - NOT USED
 *       tags                  returns with tags for current user (@todo for given user, group)
 *       CLIENT SIDE
@@ -1654,7 +1656,7 @@ function recordSearch($system, $params)
     //for error message
     $savedSearchName = @$params['qname']?"Saved search: ".$params['qname']."<br>":"";
 
-    if(!@$params['detail']){
+    if(!@$params['detail']){// list of rec_XXX and field ids, if rec_XXX is missed all header fields are included
         $params['detail'] = @$params['f']; //backward capability
     }
 
@@ -1680,6 +1682,7 @@ function recordSearch($system, $params)
         $needCompleteInformation = true; //all header fields, relations, full file info
     }
     
+    $header_fields = null;
     $fieldtypes_ids = null;
     if(@$params['detail']=='timemap'){ //($istimemap_request){
         $params['detail']=='detail';
@@ -1731,7 +1734,7 @@ function recordSearch($system, $params)
 
     }else 
         if(  !in_array(@$params['detail'], array('header','timemap','detail','structure')) ){ //list of specific detailtypes
-            //specific set of detail fields
+            //specific set of detail fields and header fields
             if(is_array($params['detail'])){
                 $fieldtypes_ids = $params['detail'];
             } else {
@@ -1742,6 +1745,7 @@ function recordSearch($system, $params)
             //(count($fieldtypes_ids)>1 || is_numeric($fieldtypes_ids[0])) )
             {
                 $f_res = array();
+                $header_fields = array();
 
                 foreach ($fieldtypes_ids as $dt_id){
 
@@ -1751,20 +1755,30 @@ function recordSearch($system, $params)
                         $needThumbField = true;
                     }else if($dt_id=='rec_ThumbnailBg'){
                         $needThumbBackground = true;
+                    }else if(strpos($dt_id,'rec_')===0){
+                        array_push($header_fields, $dt_id);
                     }
-            }
-            if(is_array($f_res) && count($f_res)>0){
-                $fieldtypes_ids = implode(',', $f_res);
-                $params['detail'] = 'detail';
-                $needThumbField = true;
+                }
+                
+                if(is_array($f_res) && count($f_res)>0){
+                    $fieldtypes_ids = implode(',', $f_res);
+                    $params['detail'] = 'detail';
+                    $needThumbField = true;
+                }else{
+                    $fieldtypes_ids = null;
+                }
+                if(count($header_fields)==0){
+                    $header_fields = null;
+                }else{
+                    //always include rec_ID and rec_RecTypeID
+                    if(!in_array('rec_RecTypeID',$header_fields)) array_unshift($header_fields, 'rec_RecTypeID');
+                    if(!in_array('rec_ID',$header_fields)) array_unshift($header_fields, 'rec_ID');
+                }
+
             }else{
                 $fieldtypes_ids = null;
+                $params['detail'] = 'ids';
             }
-
-        }else{
-            $fieldtypes_ids = null;
-            $params['detail'] = 'ids';
-        }
 
     }else{
         $needThumbField = true;
@@ -1807,6 +1821,10 @@ function recordSearch($system, $params)
         //
         $select_clause = 'select SQL_CALC_FOUND_ROWS DISTINCT rec_ID ';
 
+    }else if ($header_fields!=null){
+        
+        $select_clause = 'select SQL_CALC_FOUND_ROWS DISTINCT '.implode(',',$header_fields).' ';
+        
     }else{
 
         $select_clause = 'select SQL_CALC_FOUND_ROWS DISTINCT '   //this function does not pay attention on LIMIT - it returns total number of rows
@@ -2238,6 +2256,8 @@ function recordSearch($system, $params)
                     .' records. Memory limit does not allow to retrieve all of them.'
                     .' Please filter to a smaller set of results.');
             }
+            
+            $rec_RecTypeID_index = false;
 
             if($is_ids_only)
             { //------------------------  LOAD and RETURN only IDS
@@ -2316,6 +2336,8 @@ function recordSearch($system, $params)
                 foreach($_flds as $fld){
                     array_push($fields, $fld->name);
                 }
+                $rec_ID_index = array_search('rec_ID', $fields);
+                $rec_RecTypeID_index = array_search('rec_RecTypeID', $fields);
                 $date_add_index = array_search('rec_Added', $fields);
                 $date_mod_index = array_search('rec_Modified', $fields);
 
@@ -2329,7 +2351,7 @@ function recordSearch($system, $params)
                 while ($row = $res->fetch_row()) {
 
                     if($needThumbField) {
-                        $tres = fileGetThumbnailURL($system, $row[2], $needThumbBackground);   
+                        $tres = fileGetThumbnailURL($system, $row[$rec_ID_index], $needThumbBackground);   
                         array_push( $row, $tres['url'] );
                         if($needThumbBackground) array_push( $row, $tres['bg_color'] );
                     }
@@ -2339,7 +2361,7 @@ function recordSearch($system, $params)
                         'rtl_RecID'=>$row[2] ));*/
 
                         $query = 'SELECT tag_Text FROM usrTags, usrRecTagLinks WHERE tag_ID=rtl_TagID AND tag_UGrpID='
-                        .$needTags.' AND rtl_RecID='.$row[2];
+                        .$needTags.' AND rtl_RecID='.$row[$rec_ID_index];
                         array_push( $row, mysql__select_list2($mysqli, $query));
                     }
 
@@ -2363,10 +2385,10 @@ function recordSearch($system, $params)
 
 
                     //array_push( $row, $row[4] ); //by default icon if record type ID
-                    $records[$row[2]] = $row;
-                    array_push($order, $row[2]);
-                    if(!@$rectypes[$row[4]]){
-                        $rectypes[$row[4]]=1;
+                    $records[$row[$rec_ID_index]] = $row;
+                    array_push($order, $row[$rec_ID_index]);
+                    if($rec_RecTypeID_index>=0 && !@$rectypes[$row[$rec_RecTypeID_index]]){  //rectypes is resultset
+                        $rectypes[$row[$rec_RecTypeID_index]]=1;
                     }
 
                     if(count($order)>5000){
@@ -2576,7 +2598,7 @@ function recordSearch($system, $params)
                                         if($istimemap_counter<$search_detail_limit){
                                             $tm_records[$recID] = $record;        
                                             array_push($order, $recID);
-                                            $rectypes[$record[4]]=1; 
+                                            if($rec_RecTypeID_index>=0) $rectypes[$record[$rec_RecTypeID_index]] = 1; 
                                             //$records[$recID] = null; //unset
                                             //unset($records[$recID]);
                                         }else{

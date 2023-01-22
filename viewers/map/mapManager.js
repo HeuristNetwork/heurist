@@ -565,6 +565,9 @@ function hMapManager( _options )
 
                                                 var selected_opts = Object.values(mapdoc_visible);
                                                 selected_opts = selected_opts.length == 0 ? ['Current result set'] : selected_opts;
+                                                if(!mapdoc_select.hSelect('instance')){
+                                                    mapdoc_select.hSelect();
+                                                }
                                                 mapdoc_select.hSelect('widget').attr('title', selected_opts.join(', '));
 
                                                 if(selected_opts.length == 1){
@@ -592,6 +595,29 @@ function hMapManager( _options )
                                             if(not_visible){ //reset
                                                 node.setSelected(false);
                                             }
+                                        }else if(node.data.type=='theme'){
+
+//console.log(node);                          
+                                            //if(node.parent.isSelected()){
+                                                var mapdoc_id = node.data.mapdoc_id;
+                                                var layer_id = node.data.layer_id;
+                                                var not_visible = true;
+                                                if( layer_id>0 && 
+                                                    ((mapdoc_id>0 && mapdoc_visible[mapdoc_id])|| mapdoc_id==0 || mapdoc_id=='temp')){
+                                                    //node.key - heurist layer record id
+                                                    var layer_rec = mapDocuments.getLayer(mapdoc_id, layer_id);
+                                                    if(layer_rec){
+                                                        var theme = node.isSelected()?node.data.theme:null;
+                                                        (layer_rec['layer']).applyThematicMap(theme);  
+                                                        not_visible = !node.isSelected();
+                                                        
+                                                    } 
+                                                }
+                                                if(not_visible){ //reset
+                                                    node.setSelected(false);
+                                                }
+                                            //}
+                                            
                                         }
 
 
@@ -677,13 +703,19 @@ function hMapManager( _options )
                                             
                                                 //backgroundImage: "url(skin-custom/customDoc2.gif)",
                                                 //backgroundPosition: "0 0"
-                                        }
-                                        else if(item.data.type=='mapdocument'){
+                                        }else 
+                                        if(item.data.type=='theme'){
+                                            
+                                            
+                                        } else if(item.data.type=='mapdocument'){
                                             var $span = $(item.span);
                                             $span.find("> span.fancytree-checkbox").addClass('fancytree-radio');
                                                 //.css('background-position-y', '-48px !important');
                                         }
-                                        _defineActionIcons( item );
+
+                                        if(item.data.type!='theme'){
+                                            _defineActionIcons( item );                                        
+                                        }
                                     }
                                     // The following options are only required, if we have more than one tree on one page:
                                     //          initId: "treeData",

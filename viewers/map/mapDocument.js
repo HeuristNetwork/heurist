@@ -58,6 +58,7 @@ function hMapDocument( _options )
     RT_QUERY_SOURCE = 0,
     DT_QUERY_STRING = 0,
     DT_SYMBOLOGY = 0, 
+    DT_THEMATIC_MAP = 0, 
     DT_GEO_OBJECT = 0,
     DT_MAP_BOOKMARK = 0,
     DT_NAME = 0,
@@ -88,6 +89,7 @@ function hMapDocument( _options )
         DT_QUERY_STRING = window.hWin.HAPI4.sysinfo['dbconst']['DT_QUERY_STRING'];
         RT_QUERY_SOURCE = window.hWin.HAPI4.sysinfo['dbconst']['RT_QUERY_SOURCE'];
         DT_SYMBOLOGY = window.hWin.HAPI4.sysinfo['dbconst']['DT_SYMBOLOGY'];
+        DT_THEMATIC_MAP = window.hWin.HAPI4.sysinfo['dbconst']['DT_THEMATIC_MAP'];
         DT_NAME      = window.hWin.HAPI4.sysinfo['dbconst']['DT_NAME'];
         DT_GEO_OBJECT = window.hWin.HAPI4.sysinfo['dbconst']['DT_GEO_OBJECT'];
         DT_MAP_BOOKMARK = window.hWin.HAPI4.sysinfo['dbconst']['DT_MAP_BOOKMARK'];
@@ -109,7 +111,7 @@ function hMapDocument( _options )
             
             var request = {
                         q: 't:'+RT_MAP_DOCUMENT,w: 'a',
-                        detail: [DT_GEO_OBJECT,DT_MAP_BOOKMARK,DT_SYMBOLOGY,DT_MINIMUM_ZOOM,DT_MAXIMUM_ZOOM,DT_ZOOM_KM_POINT], //fields_to_be_downloaded
+                        detail: [DT_GEO_OBJECT,DT_MAP_BOOKMARK,DT_SYMBOLOGY,DT_THEMATIC_MAP,DT_MINIMUM_ZOOM,DT_MAXIMUM_ZOOM,DT_ZOOM_KM_POINT], //fields_to_be_downloaded
                         source: 'map_document'};
             //perform search        
             window.hWin.HAPI4.RecordMgr.search(request,
@@ -171,6 +173,26 @@ function hMapDocument( _options )
                         }else{
                             $res['selected'] = true;
                         } 
+
+                        if(DT_THEMATIC_MAP>0){
+                            var theme = resdata.fld(record, DT_THEMATIC_MAP);
+                            theme = window.hWin.HEURIST4.util.isJSON(theme)
+                            if(theme){
+                                
+                                let themeName = theme.title?theme.title:'Thematic map';
+
+                                var $theme = {};  
+                                $theme['key'] = 'theme'+recID;
+                                $theme['title'] = "<span style='font-style:italic;'>" + themeName + "</span>";
+                                $theme['type'] = 'theme';
+                                $theme['layer_id'] = recID; //reference to parent layer
+                                $theme['mapdoc_id'] = mapdoc_id; //reference to parent mapdoc
+                                $theme['theme'] = theme;     
+                                $theme['selected'] = false;
+                                $res['children'] = [$theme];
+                            }
+                        }
+                        
                         
                         treedata.push($res);
                     }
@@ -983,7 +1005,7 @@ function hMapDocument( _options )
         },
         
         //
-        // adds new layers (by record ids) to mapdcoument
+        // adds new layers (by record ids) to mapdocument
         //
         addLayerRecords: function(mapdoc_id, layers_ids, callback ){
 

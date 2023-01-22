@@ -70,12 +70,13 @@ require_once(dirname(__FILE__)."/../initPage.php");
         <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/entity/searchDefCalcFunctions.js"></script>
         
         <script type="text/javascript" src="<?php echo PDIR;?>admin/structure/import/importStructure.js"></script>
-        <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/record/recordLookupCfg.js"></script>
+        <!-- <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/record/recordLookupCfg.js"></script> -->
         
         <script type="text/javascript" src="<?php echo PDIR;?>external/js/evol.colorpicker.js" charset="utf-8"></script>
         <link href="<?php echo PDIR;?>external/js/evol.colorpicker.css" rel="stylesheet" type="text/css">
 
         <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/record/recordAction.js"></script>
+        <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/entity/popups/thematicMapping.js"></script>
         <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/search/searchBuilder.js"></script>
         <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/search/searchBuilderItem.js"></script>
         <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/search/searchBuilderSort.js"></script>
@@ -150,8 +151,9 @@ require_once(dirname(__FILE__)."/../initPage.php");
                         $('#inputdiv').find('.ui-datepicker-trigger').hide();
                 
                 //open at once 
+                testThematicMaps();
                 //testLookuService();
-                testEntity(true);
+                //testEntity(true);
                 //testEditSymbology();
                 
                 //test console.log('>>>'+$Db.isTermByReference(6302, 528));
@@ -172,6 +174,11 @@ require_once(dirname(__FILE__)."/../initPage.php");
                  window.hWin.HEURIST4.ui.showRecordActionDialog('recordLookupCfg');
             }
 
+            function testThematicMaps(){
+                 window.hWin.HEURIST4.ui.showRecordActionDialog('thematicMapping');
+            }
+            
+            
             function testImportStruc(){
 
                 if(false){
@@ -538,6 +545,7 @@ print $targetPath.'<br>';
                     <button onclick="testImportStruc()">Import structure</button>
 
                     <button onclick="testLookuService()">Lookup service config</button>
+                    <button onclick="testThematicMaps()">Thematic mapping</button>
 
                     
                     <!-- button onclick="testEditSymbology()">Edit symbology</button -->

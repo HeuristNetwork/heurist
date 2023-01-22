@@ -32,8 +32,9 @@ function hMapLayer2( _options ) {
         
         //mapdoc_recordset: // recordset to retrieve values from rec_layer and rec_datasource
         
-        //rec_layer:       // record of type Heurist layer, it is needed for symbology and min/max zoom
-        //rec_datasource:  // record of type map dataseource
+        //rec_layer:       // record of type Heurist layer, it is needed 
+                           // for symbology (DT_SYMBOLOGY), thematic map (DT_MAP_THEMATIC) and min/max zoom
+        //rec_datasource:  // record of type map datasource
         
         //not_init_atonce  - if true don't add to nativemap
         //mapdocument_id
@@ -44,7 +45,8 @@ function hMapLayer2( _options ) {
         _recordset,  //referense to map document recordset
         _parent_mapdoc = null; //map document id
         
-    var _nativelayer_id = 0;
+    var _nativelayer_id = 0,
+        _dataset_type = null;
     
     var is_inited = false,
         is_visible = false,
@@ -332,6 +334,7 @@ function hMapLayer2( _options ) {
                                 timeline_data: null,
                                 layer_style: layer_style,
                                 dataset_name:dataset_name,
+                                dataset_type:'shp',
                                 preserveViewport:options.preserveViewport });
                                 
                         _triggerLayerStatus( 'visible' );
@@ -393,6 +396,7 @@ function hMapLayer2( _options ) {
                                         //popup_template: layer_popup_template,
                                         //origination_db: null,
                                         dataset_name:_recordset.fld(options.rec_layer || _record, 'rec_Title'),  //name for timeline
+                                        dataset_type:'kml',
                                         preserveViewport:options.preserveViewport });
                                                              
                         }else {
@@ -454,7 +458,7 @@ function hMapLayer2( _options ) {
                     if(response['geojson'] && response['timeline']){
                         geojson_data = response['geojson'];
                         timeline_data = response['timeline'];   
-                        if(response['layers_ids']) layers_ids = response['layers_ids'];   
+                        if(response['layers_ids']) layers_ids = response['layers_ids']; //layers records from clearinghouse  
                     }else{
                         geojson_data = response;
                     }
@@ -462,7 +466,8 @@ function hMapLayer2( _options ) {
                     if( window.hWin.HEURIST4.util.isGeoJSON(geojson_data, true) 
                         || window.hWin.HEURIST4.util.isArrayNotEmpty(timeline_data) )
                     {
-                                                         
+                                                     
+                        _dataset_type = 'db';
                         _nativelayer_id = options.mapwidget.mapping('addGeoJson', 
                                     {geojson_data: geojson_data,
                                     timeline_data: timeline_data,
@@ -470,9 +475,11 @@ function hMapLayer2( _options ) {
                                     popup_template: layer_popup_template,
                                     origination_db: origination_db,
                                     dataset_name:_recordset.fld(options.rec_layer || _record, 'rec_Title'),  //name for timeline
+                                    dataset_type:'db',
                                     preserveViewport:options.preserveViewport });
                                                          
                         _triggerLayerStatus( 'visible' );
+                        
                    }else {
                         _triggerLayerStatus( 'error' );
                         window.hWin.HEURIST4.msg.showMsgErr(response);
@@ -512,12 +519,14 @@ function hMapLayer2( _options ) {
             || window.hWin.HEURIST4.util.isArrayNotEmpty(timeline_data) )
         {
                                              
+            _dataset_type = 'db';
             _nativelayer_id = options.mapwidget.mapping('addGeoJson', 
                         {geojson_data: geojson_data,
                         timeline_data: timeline_data,
                         layer_style: layer_style,
                         popup_template: layer_popup_template,
                         dataset_name:_recordset.fld(options.rec_layer || _record, 'rec_Title'),  //name for timeline
+                        dataset_type: 'db',
                         preserveViewport:options.preserveViewport });
                                              
             _triggerLayerStatus( 'visible' );
@@ -555,6 +564,150 @@ function hMapLayer2( _options ) {
             }
         }
     }
+    
+    //
+    // loop trough all elements of top_layer (record ids)
+    // 1. find detail field values and assign them to feature.properties.details
+    // 2. select the appropriate value style (part values)
+    // 3. generate fully defined style object (base style+value style
+    // 4. assign it to feature.theme[name]
+    //        
+    function _applyThematicMap( theme ){    
+        
+        /*
+        theme = {
+            "title": "First theme ever",
+            "symbol":{"iconType":"circle","stroke":"1","color":"#ff0000","weight":"2","fill":"1","fillColor":"#0000FF","iconSize":"8"},
+            "rules": {}, //find records linked to place
+            "fields": [
+                {"code":1109,"title":"Population","ranges":[
+                    {"value":"1", "symbol":{"iconSize":10 } },
+                    {"value":"2<>3", "symbol":{"iconSize":20 } },
+                    {"value":"4,5", "symbol":{"iconSize":30, "fillColor":"#00ff50" } }
+                ]}
+                //{"code":133,"title":"Place Type"}
+            ]
+        };*/
+        
+        //feature.properties.rec_ID
+        if(_dataset_type!='db') return;
+        
+        theme = window.hWin.HEURIST4.util.isJSON(theme);
+        
+        if(!theme){
+            //off current theme
+            that.applyStyle(null, null);
+            return;
+        }
+        
+        //get codes - field ids
+        var theme_fields = [];
+        $.each(theme.fields, function(i,ftheme){
+            theme_fields.push(ftheme.code);
+            //prepare ranges
+            for(var j=0; j<ftheme.ranges.length; j++){
+                var range = ftheme.ranges[j].value;
+                if(typeof range==='string'){
+                    var values = range.split(',');
+                    if(values.length>=2){
+                        ftheme.ranges[j].value = values;
+                    }else{
+                        values = range.split('<>');
+                        if(values.length==2){
+                            ftheme.ranges[j].min = values[0];
+                            ftheme.ranges[j].max = values[1];
+                        }
+                    }
+                }
+            }
+        });
+        
+        var server_request = {
+            q: 'ids:420,421,422,435,436,437,438', //"f133":5321  *f133:"City"
+            rules: theme.rules,
+            w: 'a',
+            zip: 1,
+            detail:'rec_RecTypeID,'+theme_fields.join(',')  //'133,1109'
+            };
+                                          //_new  format:'json'
+        window.hWin.HAPI4.RecordMgr.search(server_request,
+            function(response){
+                    var def_layer_style = that.getStyle();
+
+                    if(response.status == window.hWin.ResponseStatus.OK){
+                        var resdata = new hRecordSet(response.data);
+                        
+                        //assign symbol for each record in the resultset
+                        var res_thematic_map = {}; //recid=>symbol
+                        resdata.each(function(recID, record){
+                            for(var i=0; i<theme.fields.length; i++){
+                                let ftheme = theme.fields[i];
+                                let value = resdata.fld(record, ftheme.code);
+                                
+                                let fsymb = null;
+                                
+                                if(ftheme.range_type=='equal' || ftheme.range_type=='log'){
+                                    //@todo find min and max value
+                                }else{
+                                    for(var j=0; j<ftheme.ranges.length; j++){
+                                        var range = ftheme.ranges[j];
+                                        if($.isArray(range.value))
+                                        {
+                                            if(window.hWin.HEURIST4.util.findArrayIndex(value, range.value)>-1){
+                                                fsymb = range.symbol;       
+                                                break;
+                                            }
+                                        }else if(!window.hWin.HEURIST4.util.isnull(range.min) && 
+                                                 !window.hWin.HEURIST4.util.isnull(range.max)){
+                                                     
+                                            if(value>=range.min && value<=range.max){
+                                                fsymb = range.symbol;
+                                                break;
+                                            }
+                                        }else if(value==range.value){
+                                                fsymb = range.symbol;
+                                                break;
+                                        }
+                                    }//for
+                                    if(fsymb!=null){
+                                        // @todo if theme.symbol is not defined take def_layer_style
+                                        res_thematic_map[recID] = _mergeThematicSymbol(theme.symbol, fsymb);
+                                    }
+                                }
+                            }
+                            
+                            //var datasource_record = resdata.getById( datasource_recID );                            
+                            
+                        });
+                        
+//console.log('result ',res_thematic_map);   
+                        that.applyStyle(null, res_thematic_map);                     
+                        
+                    }else {
+                        that.applyStyle(null, null);
+                        window.hWin.HEURIST4.msg.showMsgErr(response);
+                    }
+                
+            });
+
+
+        
+    }
+    
+    //
+    //
+    //
+    function _mergeThematicSymbol(basesymbol, fsymb){
+        
+            var use_style = window.hWin.HEURIST4.util.cloneJSON( basesymbol );
+        
+            var keys = Object.keys(fsymb);
+            for(var j=0; j<keys.length; j++){
+                use_style[keys[j]] = fsymb[keys[j]];
+            }
+            
+            return use_style;
+    }    
     
     //public members
     var that = {
@@ -797,9 +950,9 @@ function hMapLayer2( _options ) {
                 options.mapwidget.mapping('removeLayer', _nativelayer_id);
         },
         
-        applyStyle: function( newStyle ){
+        applyStyle: function( newStyle, newTheme ){
             if(_nativelayer_id>0)
-                options.mapwidget.mapping('applyStyle', _nativelayer_id, newStyle);
+                options.mapwidget.mapping('applyStyle', _nativelayer_id, newStyle, newTheme);
         },
 
         getStyle: function(){
@@ -812,8 +965,20 @@ function hMapLayer2( _options ) {
         
         getNativeId: function(){
             return _nativelayer_id;
-        }
+        },
         
+        
+        //
+        // loop trough all elements of top_layer (record ids)
+        // 1. find detail field values and assign them to feature.properties.details
+        // 2. select the appropriate value style (part values)
+        // 3. generate fully defined style object (base style+value style
+        // 4. assign it to feature.theme[name]
+        //
+        // theme - json with thematic map configuration
+        applyThematicMap: function(theme){
+            _applyThematicMap(theme);
+        }
     }
 
     _init( _options );

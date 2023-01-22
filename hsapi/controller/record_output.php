@@ -137,6 +137,9 @@
     
 
     $is_csv = (@$params['format'] == 'csv');
+    /*if(@$params['format']=='json' && @$params['detail']!=null){
+        $search_params['detail'] = $params['detail'];    
+    }else */
     if(@$params['format']){
         //search only ids - all 
         $search_params['detail'] = 'ids';

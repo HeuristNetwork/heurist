@@ -384,7 +384,7 @@ XML;
 
     //CONTENT
     $timeline_data = [];
-    $layers_record_ids = [];
+    $layers_record_ids = []; //list of ids RT_MAP_LAYER if this is search for layers in clearinghouse
     
     $comma = '';
     $cnt = 0;
@@ -432,6 +432,37 @@ XML;
     $row_placeholder = array();
     $need_rec_type = false;
     
+    if($params['format']=='json' && @$params['detail']){
+    
+                //same code as in dt_recsearch.php
+                $fieldtypes_ids = is_array($params['detail'])?$params['detail']:explode(',',$params['detail']);
+                $f_res = array();
+                $retrieve_header_fields = array();
+                foreach ($fieldtypes_ids as $dt_id){
+
+                    if(is_numeric($dt_id) && $dt_id>0){
+                        array_push($f_res, $dt_id);
+                    }else if(strpos($dt_id,'rec_')===0){
+                        array_push($retrieve_header_fields, $dt_id);
+                    }
+                }
+                
+                if(is_array($f_res) && count($f_res)>0){
+                    $retrieve_detail_fields = $f_res;
+                }else{
+                    $retrieve_detail_fields = false;
+                }
+                if(count($retrieve_header_fields)==0){
+                    $retrieve_header_fields = null;
+                }else{
+                    //always include rec_ID and rec_RecTypeID
+                    if(!in_array('rec_RecTypeID',$retrieve_header_fields)) array_unshift($retrieve_header_fields, 'rec_RecTypeID');
+                    if(!in_array('rec_ID',$retrieve_header_fields)) array_unshift($retrieve_header_fields, 'rec_ID');
+                    $retrieve_header_fields = implode(',', $retrieve_header_fields);
+                }
+        
+        
+    }else
     if($params['format']=='iiif' || ($params['format']=='json' && @$params['extended']==3)){
         $retrieve_detail_fields = array('file');
         $retrieve_header_fields = 'rec_ID,rec_RecTypeID,rec_Title';
@@ -534,14 +565,16 @@ XML;
     $records_count = (@$params['datatable']>0)?$records_original_count:count($records);
     
     $idx = 0;
-    while ($idx<$records_count){   //loop by record ids
+    //while ($idx<$records_count){   //loop by record ids
+    foreach($records as $idx=>$record){
     
-        $recID = $records[$idx];
-        if(is_array($recID)){
+        //$recID = $records[$idx];
+        if(is_array($record)){
             //record data is already loaded
-            $record = $records[$idx];
+            //$record = $records[$idx];
             $recID = $record['rec_ID'];
         }else{
+            $recID = $record;
             $record = recordSearchByID(self::$system, $recID, $retrieve_detail_fields, $retrieve_header_fields );
         }
         $idx++;
@@ -695,12 +728,13 @@ XML;
         }
         
         
-        if($is_tlc_export && $idx==count($records)){
-            //calculate extent of mapdocument - last record
-            $records[$idx] = self::_calculateSummaryExtent($maplayer_extents, true);
-            $is_tlc_export = false; //avoid infinite loop
-        }
     }//while records
+    
+    if($is_tlc_export){ // && $idx==count($records)
+        //calculate extent of mapdocument - last record
+        $records[$idx] = self::_calculateSummaryExtent($maplayer_extents, true);
+        $is_tlc_export = false; //avoid infinite loop
+    }
     
     
     //CLOSE brackets ----------------------------------------

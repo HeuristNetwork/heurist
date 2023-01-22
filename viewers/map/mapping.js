@@ -1,5 +1,6 @@
 /**
 
+
 @todo Later?
 KML is loaded as a single collection (without access to particular feature) Need to use our kml parser to parse and load each kml' placemark individually
 Altough our kml parser supports Placemarks only. It means no external links, image overlays and other complex kml features. 
@@ -70,7 +71,7 @@ Thematic mapping
     _clearHighlightedMarkers - removes special "highlight" selection circle markers from map
     setStyleDefaultValues - assigns default values for style (size,color and marker type)
     _createMarkerIcon - creates marker icon for url(image) and fonticon (divicon)
-    _stylerFunction - returns style for every path and polygone, either individual feature style of parent layer style.
+    _stylerForPoly - returns style for every path and polygone, either individual feature style of parent layer style.
     _getMarkersByRecordID - returns markers by heurist ids (for filter and highlight)
     
 * Events: 
@@ -983,6 +984,7 @@ $.widget( "heurist.mapping", {
     //      geojson_data
     //      timeline_data
     //      dataset_name
+    //      dataset_type: db|shp|kml
     //      preserveViewport
     //      layer_style
     //      popup_template   - smarty template for popup info
@@ -1013,6 +1015,7 @@ $.widget( "heurist.mapping", {
                     , layer_name: dataset_name
                     , popup_template: popup_template
                     , origination_db: options.origination_db
+                    , dataset_type: options.dataset_type
                     , selectable: selectable
                     //The onEachFeature option is a function that gets called on each feature before adding it to a GeoJSON layer. A common reason to use this option is to attach a popup to features when they are clicked.
                    /* 
@@ -1097,7 +1100,7 @@ $.widget( "heurist.mapping", {
             this._updatePanels();
 
             //apply layer ot default style and fill markercluster
-            this.applyStyle( new_layer._leaflet_id, layer_style ?layer_style: this.setStyleDefaultValues() ); //{color: "#00b0f0"}
+            this.applyStyle( new_layer._leaflet_id, layer_style ?layer_style: this.setStyleDefaultValues(), null ); //{color: "#00b0f0"}
 
             
             if(!preserveViewport){
@@ -1651,12 +1654,18 @@ $.widget( "heurist.mapping", {
         }
     },
     //
-    // Applies style for given top layer
-    // it takes style from options.default_style, each feature may have its own style that overwrites layer's one
+    // Applies style for given TOP layer
+    // it takes style from this.options.default_style (defined user prereferences)
+    //   or from affected_layer.options.default_style
+    //   or each feature may have its own feature.style that overwrites layer's one
     // 
     // It is invoked from addGeoJson or after symbology editor
-    // Besides the style it assign "selectable" property for child layer
-    applyStyle: function(layer_id, newStyle) {
+    // Besides the style, it assigns "selectable" property for child layer
+    //
+    //  newStyle - style object 
+    //  newThematicMap - thematic map array {rec_ID=>symbol}
+    //
+    applyStyle: function(layer_id, newStyle, newThematicMap) {
         
         var affected_layer = this.all_layers[layer_id];
         
@@ -1668,24 +1677,36 @@ $.widget( "heurist.mapping", {
 
         
         var that = this;
+        var theme_has_changed = false;
         
-        //create icons (@todo for all themes and recctypes)
-        style = window.hWin.HEURIST4.util.isJSON(newStyle);
-        if(!style && affected_layer.options.default_style){
+        if(newThematicMap!=null){
+            theme_has_changed = window.hWin.HEURIST4.util.isnull( affected_layer.options.thematic_map );
+            affected_layer.options.thematic_map = newThematicMap;
+        }else{
+            theme_has_changed = !window.hWin.HEURIST4.util.isnull( affected_layer.options.thematic_map );
+            affected_layer.options.thematic_map = null;
+        }
+        
+        //create icons (@todo for all themes and rec types)
+        var style = window.hWin.HEURIST4.util.isJSON(newStyle);
+        if(!style && affected_layer.options.default_style && !theme_has_changed){
             //new style is not defined and layer already has default one - no need action
             return;
         }
-   
-        //update markers only if style has been changed
-        //var marker_style = null;
-        //var myIcon = new L.Icon.Default();
-        
-        // set default values -------       
-        style = this.setStyleDefaultValues( style );
-        
-        //set default values ------- END
-        
-        affected_layer.options.default_style = style;
+       
+        if(style || !affected_layer.options.default_style){
+       
+            //update markers only if style has been changed
+            //var marker_style = null;
+            //var myIcon = new L.Icon.Default();
+            
+            // set default values -------       
+            style = this.setStyleDefaultValues( style );
+            
+            affected_layer.options.default_style = style;
+        }else{
+            style = affected_layer.options.default_style;
+        }
         
         
         if(this.isMarkerClusterEnabled){
@@ -1811,14 +1832,18 @@ $.widget( "heurist.mapping", {
                 layer.on('click', function(e){that._onLayerClick(e)} );
             }
 
+            //loop all children and fill all_markers[layer_id]
             affected_layer.eachLayer( function(child_layer){ 
                     child_layer.options.selectable = affected_layer.options.selectable;
-                    child_layer.feature.default_style = style;
+                    child_layer.feature.default_style = style;  //default style for feature is parent layer style
+                    
+                    child_layer.feature.thematic_style = that._getThematicMapStyle(affected_layer, child_layer.feature);
+                    
                     __extractMarkers(child_layer, affected_layer, child_layer.feature);
             } );
             
         }else{
-            
+            //assign default           
             this._assignStyleToFeature(affected_layer, style);
             
         }
@@ -1832,8 +1857,13 @@ $.widget( "heurist.mapping", {
                 var markerStyle;
                 var setIcon;
                 
-                layer.feature.default_style = style;
-                
+                layer.feature.default_style = style; //default style for feature is parent layer style
+                layer.feature.thematic_style = that._getThematicMapStyle(affected_layer, layer.feature);
+
+                if(layer.feature.thematic_style){ //thematic map is active
+                    markerStyle = layer.feature.thematic_style; 
+                    setIcon = that._createMarkerIcon( markerStyle );
+                }else    
                 if(layer.feature.style){ //indvidual style per record
                     markerStyle = that.setStyleDefaultValues(layer.feature.style);
                     setIcon = that._createMarkerIcon( markerStyle );
@@ -1855,31 +1885,56 @@ $.widget( "heurist.mapping", {
             }
         }
         
-        //apply style for other than markers 
-        affected_layer.setStyle(function(feature){ return that._stylerFunction(feature); });
+        //apply style for polygons and polylines 
+        affected_layer.setStyle(function(feature){ return that._stylerForPoly(feature); });
         
     },
     
     //
-    // assign style to feature.default_style - to use in _stylerFunction 
+    //
+    //
+    _getThematicMapStyle: function(top_layer, feature){
+        
+        if(!top_layer.options.thematic_map) return null; //there is not active thematic map
+        
+        var id = 0;
+        if(feature){
+            var id = (feature.properties && feature.properties.rec_ID>0)
+                            ?feature.properties.rec_ID
+                            :feature.id;
+        }
+        
+        if(id>0 && top_layer.options.thematic_map[id]){ 
+                return top_layer.options.thematic_map[id];
+        }else{
+                return null;
+        }
+    },
+    
+    //
+    // assign "style" to feature.default_style - to use in _stylerForPoly 
+    // individual style per feature (from DT_SYMBOLOGY) is stored in feature.style
+    // if feature.style is not defined feature.default_style will be used
     //
     _assignStyleToFeature: function(affected_layer, style)
     {
+        var that = this;
         function __childLayers(layer, feature){
             if(layer instanceof L.LayerGroup){
                 layer.eachLayer( function(child_layer){__childLayers(child_layer, feature) } );
-            }else if(layer instanceof L.Polyline && !(layer instanceof L.Polygon)){
-                var use_style = window.hWin.HEURIST4.util.cloneJSON( style );
-                use_style.fill = false;
+            }else {
+                
+                var use_style = style;
+                if(layer instanceof L.Polyline && !(layer instanceof L.Polygon)){
+                    use_style = window.hWin.HEURIST4.util.cloneJSON( style );
+                    use_style.fill = false;
+                }
+                
                 if(!layer.feature){
                     layer.feature = {properties: feature.properties};
                 } 
                 layer.feature.default_style = use_style;
-            }else{
-                if(!layer.feature){
-                    layer.feature = {properties: feature.properties};
-                }
-                layer.feature.default_style = style;        
+                layer.feature.thematic_style = that._getThematicMapStyle(affected_layer, layer.feature);
             }
         }
         
@@ -1891,7 +1946,7 @@ $.widget( "heurist.mapping", {
     },
     
     //
-    // apply style for particular layer 
+    // apply style for particular layer (map element)  (currently used in app_storemap)
     //
     applyStyleForLayer: function(top_layer, layer, newStyle) {
         
@@ -1902,13 +1957,17 @@ $.widget( "heurist.mapping", {
         //for markers
         this.applyStyleForMarker(top_layer, layer, style);
         
-        //for other
+        //for other (polygones, polylines)
         var that = this;
-        top_layer.setStyle(function(feature){ return that._stylerFunction(feature); });
+        top_layer.setStyle(function(feature){ return that._stylerForPoly(feature); });
         
     },
 
-    applyStyleForMarker: function(top_layer, layer, markerStyle, setIcon) {
+    //
+    // for marker "layer" that belongs to given "top_layer"
+    //
+    applyStyleForMarker: function(top_layer, layer, markerStyle, setIcon) 
+    {
         
         var parent_id = 0;
         if(top_layer) parent_id = top_layer._leaflet_id;
@@ -2290,6 +2349,8 @@ $.widget( "heurist.mapping", {
     // assigns default values for style (size,color and marker type)
     // default values priority: widget options, topmost mapdocument, user preferences
     //
+    //  suppress_prefs - false - take default style values from user preference
+    //
     setStyleDefaultValues: function(style, suppress_prefs, is_selection_style){
         
         //take map style from user preferences
@@ -2329,16 +2390,16 @@ $.widget( "heurist.mapping", {
                         dashArray: '',
                         fillOpacity:0.3, iconSize:18, stroke:true, fill:true};
             }
-            def_style.weight = def_style.weight>=0 ?def_style.weight :3;
-            def_style.opacity = def_style.opacity>=0 ?def_style.opacity :1;
-            def_style.fillOpacity = def_style.fillOpacity>=0 ?def_style.fillOpacity :0.3;
+            def_style.weight = ($.isNumeric(def_style.opacity) && def_style.weight>=0) ?def_style.weight :3;
+            def_style.opacity = ($.isNumeric(def_style.opacity) && def_style.opacity>=0) ?def_style.opacity :1;
+            def_style.fillOpacity = ($.isNumeric(def_style.fillOpacity) && def_style.fillOpacity>=0) ?def_style.fillOpacity :0.3;
             def_style.fill = true;
             def_style.stroke = true;
             
 //console.log(def_style);            
             
         }else{
-            //'#00b0f0' - lighy blue
+            //'#00b0f0' - lighty blue
             def_style = {iconType:'rectype', color:'#ff0000', fillColor:'#ff0000', weight:3, opacity:1, 
                     dashArray: '',
                     fillOpacity:0.2, iconSize:18, stroke:true, fill:true};
@@ -2353,9 +2414,9 @@ $.widget( "heurist.mapping", {
         }
         style.color = (style.color?style.color:def_style.color);   //light blue
         style.fillColor = (style.fillColor?style.fillColor:def_style.fillColor);   //light blue
-        style.weight = style.weight>=0 ?style.weight :def_style.weight;
-        style.opacity = style.opacity>=0 ?style.opacity :def_style.opacity;
-        style.fillOpacity = style.fillOpacity>=0 ?style.fillOpacity :def_style.fillOpacity;
+        style.weight = ($.isNumeric(style.weight) && style.weight>=0) ?style.weight :def_style.weight;
+        style.opacity = ($.isNumeric(style.opacity) && style.opacity>=0) ?style.opacity :def_style.opacity;
+        style.fillOpacity = ($.isNumeric(style.fillOpacity) && style.fillOpacity>=0) ?style.fillOpacity :def_style.fillOpacity;
         
         style.fill = window.hWin.HEURIST4.util.isnull(style.fill)?def_style.fill:style.fill;
         style.fill = window.hWin.HEURIST4.util.istrue(style.fill);
@@ -2440,14 +2501,12 @@ $.widget( "heurist.mapping", {
     // returns style for every path and polygone, either individual feature style of parent layer style.
     // for markers style is defined in applyStyle
     //
-    _stylerFunction: function(feature){
-        
+    _stylerForPoly: function(feature){
         
         //feature.style - individual style (set in symbology field per record)
         //feature.default_style - style of parent heurist layer (can be changed via legend)
-        var use_style = feature.style || feature.default_style;
+        var use_style = feature.thematic_style || feature.style || feature.default_style;
        
-                
         /* expremental HARDCODE for HIE
         if(this.isHamburgIslamicImpire){
             if( window.hWin.HEURIST4.util.findArrayIndex(feature.properties.rec_ID, this.hie_places_with_events)<0 ){ 
@@ -2462,9 +2521,9 @@ $.widget( "heurist.mapping", {
             use_style.fill = false;
         }
         
-       
         //change color for selected features
-        if( feature.properties && this.selected_rec_ids.indexOf( feature.properties.rec_ID )>=0){
+        if( feature.properties && this.selected_rec_ids.indexOf( feature.properties.rec_ID )>=0)
+        {
             use_style = window.hWin.HEURIST4.util.cloneJSON( use_style );
             use_style.color = this.selection_style.color; //'#62A7F8'; 
             use_style.fillColor = this.selection_style.fillColor; //'#e6fdeb';
@@ -2490,7 +2549,7 @@ $.widget( "heurist.mapping", {
         
         that.nativemap.eachLayer(function(top_layer){    
             if(top_layer instanceof L.LayerGroup){  //apply only for geojson
-                top_layer.setStyle(function(feature) { return that._stylerFunction(feature); });
+                top_layer.setStyle(function(feature) { return that._stylerForPoly(feature); });
             }
         });
         
@@ -2500,7 +2559,7 @@ $.widget( "heurist.mapping", {
         for(var idx in selected_markers){
             var layer = selected_markers[idx];
             /*if(layer instanceof L.CircleMarker){
-                layer.setStyle( {color: '#ffff00'});//function(feature) {that._stylerFunction(feature); });
+                layer.setStyle( {color: '#ffff00'});//function(feature) {that._stylerForPoly(feature); });
             }else{*/
                 //create special hightlight marker below this one
                 var use_style = layer.feature.style || layer.feature.default_style;
@@ -4239,3 +4298,20 @@ $.widget( "heurist.mapping", {
     }
     
 });
+/*
+0. Полностью согласен с прогнозами. Воевать не собираются, сдаваться тоже. Это на годы - хватит и моим детям
+1. Надо валить. Либо всем, либо если ехать одному надо быть уверенным что можно будет вывести семью в течении дней
+2. Все упирается в вопрос денег. У меня денег только на один билет. Рубли превратились в неконвертируемые фантики. 
+То есть уехав, я буду на нервах ибо вопрос передачи дальнобойных ракет и авиации вопрос след 2 месяцев.
+3. Другой вопрос, цель моего отъезда. Если просто пересидеть 3 месяца, но потом будет и 3-я и 4-я волна 
+(А потом просто будут хватать на улицах всех у кого есть хотя бы одна рука и один глаз - как это происходит сейчас на УА). 
+
+Искать новую работу для визы бессмысленно (возраст,неправильная национальность) и не хочется ибо то чем занимаюсь 
+последние 10 лет стало смыслом.
+
+4. 
+*/
+
+
+
+
