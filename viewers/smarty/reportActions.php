@@ -187,7 +187,7 @@ class ReportActions {
         return array("ok"=>$template_file);
     }
 
-    
+    // in php v8 use str_ends_with
     private function endsWith($haystack, $needle) {
         // search forward starting from end minus needle length characters
         return $needle === "" || (($temp = strlen($haystack) - strlen($needle)) >= 0 && strpos($haystack, $needle, $temp) !== false);

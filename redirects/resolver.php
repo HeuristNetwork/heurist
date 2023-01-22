@@ -59,6 +59,7 @@ if(count($requestUri)==1){
    }
 }
 */
+
                            // dbname/action                               heurist/dbname/action
 if(count($requestUri)>1 && (in_array($requestUri[1],$allowedActions) || in_array(@$requestUri[2],$allowedActions))){
 /*
@@ -207,7 +208,6 @@ $requestUri:
     exit();
 
 }
-
 
 
 if(@$_REQUEST['fmt']){
