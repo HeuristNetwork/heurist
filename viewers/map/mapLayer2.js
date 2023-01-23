@@ -46,7 +46,8 @@ function hMapLayer2( _options ) {
         _parent_mapdoc = null; //map document id
         
     var _nativelayer_id = 0,
-        _dataset_type = null;
+        _dataset_type = null,
+        _geojson_ids = null; //array of record ids on map (for thematic map)
     
     var is_inited = false,
         is_visible = false,
@@ -466,7 +467,9 @@ function hMapLayer2( _options ) {
                     if( window.hWin.HEURIST4.util.isGeoJSON(geojson_data, true) 
                         || window.hWin.HEURIST4.util.isArrayNotEmpty(timeline_data) )
                     {
-                                                     
+                                     
+                        _geojson_ids = response['geojson_ids']; //all record ids to be plotted on map
+                        
                         _dataset_type = 'db';
                         _nativelayer_id = options.mapwidget.mapping('addGeoJson', 
                                     {geojson_data: geojson_data,
@@ -518,7 +521,8 @@ function hMapLayer2( _options ) {
         if( window.hWin.HEURIST4.util.isGeoJSON(geojson_data, true) 
             || window.hWin.HEURIST4.util.isArrayNotEmpty(timeline_data) )
         {
-                                             
+                         
+            _geojson_ids = data['geojson_ids']; //all record ids to be plotted on map                    
             _dataset_type = 'db';
             _nativelayer_id = options.mapwidget.mapping('addGeoJson', 
                         {geojson_data: geojson_data,
@@ -590,7 +594,7 @@ function hMapLayer2( _options ) {
         };*/
         
         //feature.properties.rec_ID
-        if(_dataset_type!='db') return;
+        if(_dataset_type!='db' || _geojson_ids==null || _geojson_ids.length==0) return;
         
         theme = window.hWin.HEURIST4.util.isJSON(theme);
         
@@ -623,8 +627,8 @@ function hMapLayer2( _options ) {
         });
         
         var server_request = {
-            q: 'ids:420,421,422,435,436,437,438', //"f133":5321  *f133:"City"
-            rules: theme.rules,
+            q: 'ids:'+_geojson_ids.join(','),  //'420,421,422,435,436,437,438', //"f133":5321  *f133:"City"
+            rules: theme.rules,  //search for linked records
             w: 'a',
             zip: 1,
             detail:'rec_RecTypeID,'+theme_fields.join(',')  //'133,1109'
@@ -777,23 +781,24 @@ function hMapLayer2( _options ) {
                 }else{
                     _rec['maxzoom'] = -1;
                     _rec['minzoom'] = -1;
-                    var dty_id = window.hWin.HAPI4.sysinfo['dbconst']['DT_MAXIMUM_ZOOM'];
-                    var layer_bnd = (_rec['layer']).getBounds();
-                    
-                    if(dty_id>0){
-                        var val = parseFloat(_recordset.fld(_rec, dty_id));
-                        if(val>0.01){ //old default value
-                            _rec['maxzoom'] = options.mapwidget.mapping('convertZoomToNative', val, layer_bnd);
+                    if(_rec['layer']){
+                        var dty_id = window.hWin.HAPI4.sysinfo['dbconst']['DT_MAXIMUM_ZOOM'];
+                        var layer_bnd = (_rec['layer']).getBounds();
+                        
+                        if(dty_id>0){
+                            var val = parseFloat(_recordset.fld(_rec, dty_id));
+                            if(val>0.01){ //old default value
+                                _rec['maxzoom'] = options.mapwidget.mapping('convertZoomToNative', val, layer_bnd);
+                            }
+                        }
+                        dty_id = window.hWin.HAPI4.sysinfo['dbconst']['DT_MINIMUM_ZOOM'];
+                        if(dty_id>0){
+                            var val = parseFloat(_recordset.fld(_rec, dty_id));
+                            if(val>0 && val!=20 && val!=90){ //old default value
+                                _rec['minzoom'] = options.mapwidget.mapping('convertZoomToNative', val, layer_bnd);
+                            }
                         }
                     }
-                    dty_id = window.hWin.HAPI4.sysinfo['dbconst']['DT_MINIMUM_ZOOM'];
-                    if(dty_id>0){
-                        var val = parseFloat(_recordset.fld(_rec, dty_id));
-                        if(val>0 && val!=20 && val!=90){ //old default value
-                            _rec['minzoom'] = options.mapwidget.mapping('convertZoomToNative', val, layer_bnd);
-                        }
-                    }
-                    
                     that.setVisibilityForZoomRange( current_zoom );
                     return;
                 }

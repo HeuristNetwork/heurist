@@ -141,9 +141,9 @@ function hMapManager( _options )
     isExpanded = false,
     keepWidth = 250,
     
-    basemaplayer =null;  //current basemap layer
+    basemaplayer =null,  //current basemap layer
     
-
+    _suppress_select_event = false;
 
     // Any time the widget is called with no arguments or with only an option hash, 
     // the widget is initialized; this includes when the widget is created.
@@ -492,7 +492,7 @@ function hMapManager( _options )
                                     //extensions: ["filter"],
                                     //            extensions: ["select"],
                                     checkbox: true,
-                                    selectMode: 3,  // hierarchical multi-selection
+                                    selectMode: 2,  // hierarchical multi-selection
                                     source: treedata,
                                     /*
                                     beforeSelect: function(event, data){
@@ -553,6 +553,16 @@ function hMapManager( _options )
                                             }else{
 
                                                 mapDocuments.setMapDocumentVisibility(mapdoc_id, node.isSelected());
+                                          
+                                                if(node.hasChildren()){
+                                                    var mapdoc_vis = node.isSelected();
+                                                    //set selection in legend for child layers
+                                                    _suppress_select_event = true;
+                                                    $.each(node.getChildren(), function(i, layer_node){
+                                                           layer_node.setSelected( mapdoc_vis );
+                                                    });
+                                                    _suppress_select_event = false;
+                                                }
                                             }
                                             
                                             if(node.isSelected()){
@@ -560,6 +570,7 @@ function hMapManager( _options )
                                             }else{
                                                 delete mapdoc_visible[mapdoc_id]; // remove from list
                                             }
+                                            
 
                                             if(mapdoc_select !== null){
 
@@ -581,6 +592,8 @@ function hMapManager( _options )
                                             //mapDocuments.openMapDocument(node.key, dfd);
                                         }else if(node.data.type=='layer'){
                                             
+                                            if(_suppress_select_event) return;
+                                            
                                             var mapdoc_id = node.data.mapdoc_id;
                                             var not_visible = true;
                                             if((mapdoc_id>0 && mapdoc_visible[mapdoc_id]) || mapdoc_id==0 || mapdoc_id=='temp'){
@@ -591,6 +604,9 @@ function hMapManager( _options )
                                                     not_visible = !node.isSelected();
                                                     
                                                 } 
+                                            }
+                                            if(mapdoc_id>0 && !mapdoc_visible[mapdoc_id]){
+                                                not_visible = true;
                                             }
                                             if(not_visible){ //reset
                                                 node.setSelected(false);

@@ -644,9 +644,9 @@ mapDraw.js initial_wkt -> parseWKT -> GeoJSON -> _loadGeoJSON (as set of separat
         var tot = 0;
         
         //{"geojson":[]}
-        var res_geo = [];
-        var res_time = [];
-        
+        var res_geo = [],
+            res_time = [],
+            res_geo_ids = [];
         
         function __getGeoJsonFeature(record, extended, simplify){
                  
@@ -817,12 +817,13 @@ mapDraw.js initial_wkt -> parseWKT -> GeoJSON -> _loadGeoJSON (as set of separat
                 }
                 if(!feature['geometry']) continue;
                 res_geo.push(feature);
+                res_geo_ids.push(feature.id);
                 
                 if(max_limit>0 && res_geo.length>max_limit) break;
             }
         }//for records    
         
-        return {geojson:res_geo, timeline:res_time};
+        return {geojson:res_geo, timeline:res_time, geojson_ids:res_geo_ids};
                 
     }//end _toTimemap
     

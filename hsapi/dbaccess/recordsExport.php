@@ -385,6 +385,7 @@ XML;
     //CONTENT
     $timeline_data = [];
     $layers_record_ids = []; //list of ids RT_MAP_LAYER if this is search for layers in clearinghouse
+    $geojson_ids = [];
     
     $comma = '';
     $cnt = 0;
@@ -635,6 +636,8 @@ XML;
                    }
                    
                    if(!@$feature['geometry']) continue;
+                   
+                   array_push($geojson_ids, $recID);
             }
 
             fwrite($fd, $comma.json_encode($feature));
@@ -744,7 +747,9 @@ XML;
         fwrite($fd, ']');
         
         if(@$params['leaflet']){ //return 2 array - pure geojson and timeline items
+        
            fwrite($fd, ',"timeline":'.json_encode($timeline_data));
+           fwrite($fd, ',"geojson_ids":'.json_encode($geojson_ids));
            fwrite($fd, ',"layers_ids":'.json_encode($layers_record_ids).'}');
         }else{
            fwrite($fd, '}'); //close for FeatureCollection
