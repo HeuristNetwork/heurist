@@ -915,6 +915,7 @@ $.widget( "heurist.editing_input", {
                                 editor.settings.max_height = editor.settings.min_height;
                                 tinymce.activeEditor.execCommand('mceAutoResize');
                             });
+
                         },
                         plugins: [ //contextmenu, textcolor since v5 in core
                             'advlist autolink lists link image preview ', //anchor charmap print 
@@ -1218,6 +1219,7 @@ $.widget( "heurist.editing_input", {
                     browseTerms(this, $input, value);
 
                     window.hWin.HEURIST4.ui.initHSelect($input, false);
+                    
                     $input.hSelect({
                         'open': (e) => {
                             window.hWin.HEURIST4.util.stopEvent(e);
@@ -1227,6 +1229,7 @@ $.widget( "heurist.editing_input", {
                             $input.hSelect('close');
                         }
                     });
+
                 }else{
                     $input = this._recreateSelector($input, value); //initial create
                 }

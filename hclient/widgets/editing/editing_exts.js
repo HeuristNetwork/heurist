@@ -1020,7 +1020,7 @@ function browseTerms(_editing_input, $input, value){
     function __recreateTrmLabel($input, trm_ID){
 
         $input.empty();
-        if(trm_ID>0){
+        if(window.hWin.HEURIST4.util.isNumber(trm_ID) && trm_ID>0){
             
             var trm_Label = $Db.trm(trm_ID, 'trm_Label');
             var trm_info = $Db.trm(trm_ID);
@@ -1044,6 +1044,7 @@ function browseTerms(_editing_input, $input, value){
         }else{
             window.hWin.HEURIST4.ui.addoption($input[0], '', '&nbsp;');
             $input.css('min-width', '230px');
+            trm_ID = '';
         }
         $input.val(trm_ID);
 
@@ -1242,7 +1243,7 @@ function browseTerms(_editing_input, $input, value){
         //recreate dropdown if not inited
         if(!that.selObj || !$(that.selObj).hSelect('instance')){
 
-                __recreateSelector();
+            __recreateSelector();
                 
         }else{
             that._off($(that.selObj), 'change');    
@@ -1273,16 +1274,15 @@ function browseTerms(_editing_input, $input, value){
     
     if($input.is('select')){
         $input.addClass('enum-selector').css({'min-width':'230px', width:'auto', 'padding-left': '15px'});
-        if(value>0){
-            __recreateTrmLabel($input, value);
-        }
+        
+        __recreateTrmLabel($input, value);
+        
         /*replace with div
         $input = $('<div>').uniqueId()
                 .addClass('enum-selector')
                 .appendTo( $inputdiv );
         */
     }
-    
     
     return __show_select_dropdown;
 }
