@@ -188,7 +188,9 @@ if($_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0.0.1'){
         <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/record/recordAction.js"></script>
         <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/record/recordAccess.js"></script>
         
+        <!-- loaded dynamically in editing.js
         <script type="text/javascript" src="<?php echo PDIR;?>external/tinymce5/tinymce.min.js"></script>
+        -->
 
         <!-- Calendar picker -->
         <script type="text/javascript" src="../../../external/jquery.calendars-1.2.1/jquery.calendars.js"></script>

@@ -258,8 +258,9 @@ number of widgets. Currently it is commented out of the code in layout_default.j
 <link rel="stylesheet" type="text/css" href="<?php echo PDIR;?>external/jquery.fancybox/jquery.fancybox.css" />
 <script type="text/javascript" src="<?php echo PDIR;?>external/jquery.fancybox/jquery.fancybox.js"></script>
 
+<!-- loaded dynamically in editing.js
 <script type="text/javascript" src="<?php echo PDIR;?>external/tinymce5/tinymce.min.js"></script>
-
+-->
 <!-- Calendar picker -->
 <script type="text/javascript" src="<?php echo PDIR;?>external/jquery.calendars-1.2.1/jquery.calendars.js"></script>
 <script type="text/javascript" src="<?php echo PDIR;?>external/jquery.calendars-1.2.1/jquery.calendars.plus.js"></script>

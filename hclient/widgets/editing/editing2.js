@@ -35,7 +35,7 @@ function hEditing(_options) {
     /**
     * Initialization
     * options:
-    *   container - element Id or jqyuery element
+    *   container - element Id or jquery element
     *   entity 
     *   recstructure - configuration of fields
     *   recdata - initial data
@@ -72,9 +72,31 @@ function hEditing(_options) {
         
         options = _options;
         
-        _initEditForm(_options.recstructure, _options.recdata);
+        if(typeof tinymce === 'undefined'){
+            _loadTinyMCE(function(){
+                _initEditForm(_options.recstructure, _options.recdata);    
+            });        
+        }else{
+            _initEditForm(_options.recstructure, _options.recdata);    
+        }
     }
 
+    //
+    //
+    //
+    function _loadTinyMCE(callback) {
+       const tinyMCEPath = window.hWin.HAPI4.baseURL+'external/tinymce5/tinymce.min.js';
+       const script = window.hWin.document.createElement('script');
+       script.id = 'tiny-mce-script';
+       script.onload = function(){  //() => 
+         // tinymce is loaded at this point
+         //this.setState({tinymceLoaded: true});
+         callback.call(this);
+       };
+       script.src = tinyMCEPath;
+       window.hWin.document.head.appendChild(script);
+    }    
+    
     //
     // reload existing form        NOT USED
     //
