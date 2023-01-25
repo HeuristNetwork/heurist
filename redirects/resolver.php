@@ -58,7 +58,14 @@ if(count($requestUri)==1){
        array_push($requestUri, 'web');
    }
 }
+http://127.0.0.1/h6-ao/MBH
 */
+if(count($requestUri)==1 && @$requestUri[0]=='MBH'){
+    
+    header('Location: /MBH/web/');  
+    exit();
+}
+
 
                            // dbname/action                               heurist/dbname/action
 if(count($requestUri)>1 && (in_array($requestUri[1],$allowedActions) || in_array(@$requestUri[2],$allowedActions))){
@@ -94,6 +101,10 @@ $requestUri:
     $database = $requestUri[1];
     $action = $requestUri[2];
     $redirect = '';
+    
+    if($database=='MBH'){
+        $database='MBH_Manuscripta_Bibliae_Hebraicae';
+    }
 
     $params = array();
     $params['db'] = $database;
