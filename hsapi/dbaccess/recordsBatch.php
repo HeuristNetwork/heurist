@@ -972,14 +972,17 @@ error_log('count '.count($childNotFound).'  '.count($toProcess).'  '.print_r(  $
         $dtyID = $this->data['dtyID'];
         $dtyName = (@$this->data['dtyName'] ? "'".$this->data['dtyName']."'" : "id:".$this->data['dtyID']);
         $isDeleteAll = (!array_key_exists("sVal",$this->data) || $this->data['sVal']=='');  //without conditions
-        $unconditionally = false;
+        if($isDeleteAll){
+            $unconditionally = true;    
+        }
+        
         
         $isDeleteInAllRecords = $this->recIDs[0]=='all' && is_array($this->rtyIDs) && count($this->rtyIDs)>0;
         
         $mysqli = $this->system->get_mysqli();
         
         if($isDeleteAll){
-            $searchClause = '1';
+            $searchClause = '1=1';
         }else{
         
             $basetype = mysql__select_value($mysqli, 'select dty_Type from defDetailTypes where dty_ID = '.$dtyID);

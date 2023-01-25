@@ -152,7 +152,6 @@ title: "Overview"
                         data.otherNode.data.parent_id = target_parent;
 
                         var request = {actions:[]};
-
                         if(source_parent!=target_parent){
                             //remove from source
                             request.actions.push(
@@ -164,11 +163,14 @@ title: "Overview"
                         }
                         //return;
                         //change order in target
+                        
+                        //at first - remove all current children
                         request.actions.push(
                             {a: 'delete',
                                 recIDs: target_parent,
                                 dtyID: target_parent==window.hWin.home_page_record_id?DT_CMS_TOP_MENU:DT_CMS_MENU});
 
+                        //add chiildren in new order        
                         for (var i=0; i<data.otherNode.parent.children.length; i++){
 
                             var menu_node = data.otherNode.parent.children[i];
@@ -191,7 +193,7 @@ title: "Overview"
                             }else{
                                 window.hWin.HEURIST4.msg.showMsgErr(response);
                             }
-                        });                                        
+                        });             
 
                     }
                 },
