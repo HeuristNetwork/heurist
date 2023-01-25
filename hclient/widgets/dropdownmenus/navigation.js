@@ -352,7 +352,7 @@ $.widget( "heurist.navigation", {
             window.hWin.HEURIST4.msg.showMsgDlg('Some menu items are recursive references to a menu containing themselves. <br>'
             +'Such a structure is not permissible for obvious reasons. Ask website author to fix this issue. <p>'
             +(s.join('<br>'))
-            +'</p>If you are the author simply edit the CMS Home record and clean up the list of menu entries there.');
+            +'</p>If you are the author, simply edit the CMS Home record through the website editor (Site tab, then the Edit website layout/properties button), and delete duplicates (this will not delete the page content, only the extra reference to the menu entry)');
             /*+'<p>How to fix:<ul><li>Open in record editor</li>'
             +'<li>Find parent menu(s) in "Linked From" section</li>'
             +'<li>Open parent menu record and remove link to this record</li></ul>');*/
