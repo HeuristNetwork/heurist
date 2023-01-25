@@ -256,7 +256,7 @@ public static function execute($mask, $rt, $mode, $rec_id=null, $rep_mode=_ERR_R
 
                 $cond_mask[0] = trim($cond_mask[0], ' {}'); // remove curly brackets
 
-                $cond_parts = explode("\\", $cond_mask[0]); // split apart
+                $cond_parts = explode("\\", $cond_mask[0]); //@todo mb_split apart
                 if(is_numeric(trim($cond_parts[0])) || empty($cond_parts[0])){
                     $str_maxlen = intval($cond_parts[0]);
                     array_shift($cond_parts);
@@ -274,8 +274,8 @@ public static function execute($mask, $rt, $mode, $rec_id=null, $rep_mode=_ERR_R
                                 break;
                             }
 
-                            $new_str = ($str_maxlen > 0 && strlen($replacements[$cond_field]) > $str_maxlen ? substr($replacements[$cond_field], 0, $str_maxlen) . '...' : $new_str);
-                            $con_part = str_ireplace($cond_field, $new_str, $con_part);
+                            $new_str = ($str_maxlen > 0 && mb_strlen($replacements[$cond_field]) > $str_maxlen ? mb_substr($replacements[$cond_field], 0, $str_maxlen) . '...' : $new_str);
+                            $con_part = str_ireplace($cond_field, $new_str, $con_part); //@todo mb_eregi_replace
                         }
 
                         if($is_valid){
@@ -294,7 +294,7 @@ public static function execute($mask, $rt, $mode, $rec_id=null, $rep_mode=_ERR_R
                     $new_str = array_key_exists($cond_field[0], $replacements) ? $replacements[$cond_field[0]] : '';
 
                     if(!empty($new_str)){
-                        $cond_replace = $cond_parts[0] . ' ' . ($str_maxlen > 0 && strlen($new_str) > $str_maxlen ? substr($new_str, 0, $str_maxlen) . '...' : $new_str);
+                        $cond_replace = $cond_parts[0] . ' ' . ($str_maxlen > 0 && mb_strlen($new_str) > $str_maxlen ? mb_substr($new_str, 0, $str_maxlen) . '...' : $new_str);
                     }else if(empty($cond_parts[1])){
                         $cond_replace = '';
                     }else{
@@ -303,7 +303,7 @@ public static function execute($mask, $rt, $mode, $rec_id=null, $rep_mode=_ERR_R
                 }
 
                 if($cond_replace !== null){ // replace part 
-                    $mask = str_ireplace($cond_str, $cond_replace, $mask);
+                    $mask = str_ireplace($cond_str, $cond_replace, $mask);  //@todo mb_eregi_replace
                 }
             }
         }
@@ -1047,7 +1047,7 @@ private static function __fill_field($field_name, $rt, $mode, $rec_id=null) {
             }else{
                 
                 $inner_rectype = self::__get_dt_field($rt, $rdt_id, $mode, 'rst_PtrFilteredIDs');
-                $inner_rectype = explode(",", $inner_rectype);
+                $inner_rectype = explode(",", $inner_rectype); //mb_split
                 if(count($inner_rectype)==1 && $inner_rectype[0]>0){
                     $inner_rectype = $inner_rectype[0];
                     $ishift = 2;
