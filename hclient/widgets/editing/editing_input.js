@@ -3442,7 +3442,7 @@ console.log('onpaste');
                     
                     
         var chbox_field_visibility = $( '<div><span class="smallicon ui-icon ui-icon-check-off" style="font-size:1em"/> '
-                    +'Per record visibility<div>', 
+                    +'Hide this value from public<div>', 
                     {title: 'Per record visibility'})
                     .addClass('field-visibility2 graytext')
                     .attr('data-input-id', $input.attr('id'))
