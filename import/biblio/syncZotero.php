@@ -818,12 +818,6 @@ if($step=="1"){  //first step - info about current status
             
 			$err_msg = $err_msg . '\nZotero entries that are not mapped to Heurist record types: '.$cnt_ignored;
         }
-        if($cnt_notmapped>0){
-            print '<br>Zotero keys that are not mapped to Heurist field types: <br>'.$cnt_notmapped;
-            print "<div style ='padding-left:20px'>- ".implode('<br>- ',$arr_notmapped).'</div>';
-			
-			$err_msg = $err_msg . '\nZotero keys that are not mapped to Heurist field types: '.$cnt_notmapped;
-        }
         if($cnt_empty>0){
             print '<br>Zotero entries ignored because there are no properly mapped keys: '.$cnt_empty;
             print "<div style ='color:red; padding-left:20px'>- ".implode('<br>- ',$arr_empty).'</div>';
@@ -837,19 +831,27 @@ if($step=="1"){  //first step - info about current status
 			$err_msg = $err_msg . '\nZotero keys are mapped to field types that are not found in this database: '.$cnt_notfound;
         }
         print '</div>';
+        
+        print '<div style="color:black">';
+        if($cnt_notmapped>0){
+            print '<br>Zotero keys that are not mapped to Heurist field types: '.$cnt_notmapped;
+            print "<div style ='padding-left:20px'>- ".implode('<br>- ',$arr_notmapped).'</div>';
+            
+            $err_msg = $err_msg . '\nZotero keys that are not mapped to Heurist field types: '.$cnt_notmapped;
+        }
+        print '</div>';
 		
-        $system->addError('Zotero Synchronisation Error', 
-                    'Zotero Synchronisation has Encountered ' . $tot_erros . ' Errors',
+        $system->addError('Zotero Synchronisation Warnings', 
+                    'Zotero Synchronisation has reported ' . $tot_erros . ' warnings',
                     $err_msg);
     
-        print '<span><br>An advisory email has been sent to the Heurist Team, however if you wish to provide additional information you can contant the '.CONTACT_HEURIST_TEAM.' here.</span>';
+        print '<span><br>If you think the Zotero import needs updating or wish to provide additional information you can contact the '.CONTACT_HEURIST_TEAM.' here.</span>';
         
         print '<script>window.hWin.HEURIST4.msg.showMsgDlg("Warning: '.$tot_erros
-            .' errors were encountered. Please check the errors (in red at the end of the list of records synchronised)'
-            .' to see what problems have been encountered. '
-            .'Since we depend on a third party things can change, which may throw out our synchronisation. '
-            .'Please submit a bug report (Help > Bug report) if you think there is something wrong with the Zotero import."'
-            .',null,"Zotero synchronisation errors");</script>';
+            .' warnings reported: Please check the warnings listed. '
+            .' We do not map all fields from Zotero as for most purposes these are fields of little use in your database.'
+            .' Please submit a bug report (Help > Bug report) if you think the Zotero import needs updating."'
+            .',null,"Zotero synchronisation warnings");</script>';
     }
 
     if(count($unresolved_pointers)>0){
