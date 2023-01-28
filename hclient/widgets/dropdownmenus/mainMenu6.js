@@ -926,6 +926,9 @@ $.widget( "heurist.mainMenu6", {
         }
 
         var $favourite_container = this.menues.explore.find('ul.favourite-filters');
+        if($favourite_container.length < 0){
+            return;
+        }
 
         if(!favourite_filters){
             favourite_filters = window.hWin.HAPI4.get_prefs_def('favourite_filters', ['']);
@@ -936,14 +939,19 @@ $.widget( "heurist.mainMenu6", {
             this.menues.explore.find('.favour-help').show();
         }
 
-        if($favourite_container.length > 0 && favourite_filters[0] != ''){
+        var cont_height = this.menues.explore.height() - $favourite_container.position().top;
+        $favourite_container.css('height', cont_height + 'px');
+
+        if(this.menues.explore[0].clientHeight <= this.menues.explore[0].scrollHeight){ console.log(this.menues.explore[0].clientHeight, this.menues.explore[0].scrollHeight);
+            cont_height -= (this.menues.explore[0].scrollHeight - this.menues.explore[0].clientHeight) + 40;
+            $favourite_container.css('height', cont_height + 'px');
+        }
+
+        if(favourite_filters[0] != ''){
 
             if(!this.svs_list){
                 this.getSvsList();
             }
-
-            var cont_height = this.menues.explore.height() - $favourite_container.position().top - 50;
-            $favourite_container.css('height', cont_height + 'px');
 
             for(var filter of favourite_filters){
 
