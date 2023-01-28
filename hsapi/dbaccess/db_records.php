@@ -1108,7 +1108,7 @@ function recordGetIncrementedValue($system, $params){
             }else{
                 $res = mysql__select_value($mysqli, 'select dtl_Value FROM recDetails, Records'
                     .' WHERE dtl_RecID=rec_ID and rec_RecTypeID='.$rt_ID.' and dtl_DetailTypeID='.$dt_ID
-                    .' ORDER BY dtl_ID desc LIMIT 1');    
+                    .' ORDER BY rec_Added DESC LIMIT 1');    
             }
 
             $value = 1;
@@ -1123,7 +1123,9 @@ function recordGetIncrementedValue($system, $params){
                     $matches = array();
                     if (preg_match('/(\d+)$/', $value, $matches)){
                         $digits = $matches[1];
-                        $value = substr($value,0,-strlen($digits)).(intval($digits)+1);    
+                        $increment_digit = str_pad(intval($digits) + 1, strlen($digits), '0', STR_PAD_LEFT);
+
+                        $value = substr($value,0,-strlen($digits)).($increment_digit);
                     }else{
                         $value = $value.'1';
                     }
