@@ -2030,6 +2030,8 @@ $.widget( "heurist.resultList", {
             this.div_content.scrollTop(spos);
         }
                             
+        this.div_content.find('.hide-recview').remove();
+                            
         this.div_content.find('.recordDiv .action-button-container').css('display','');
     },
     
@@ -2420,6 +2422,48 @@ $.widget( "heurist.resultList", {
                                 ele.css({'margin':'0px'});
                             }
                             ele.appendTo($rdiv);
+                        }else if((this.options.view_mode == 'thumbs' || this.options.view_mode == 'thumbs3') && !this._expandAllDivs){ // append to 'end of row'
+
+                            let upper_limit = $rdiv.position().top + $rdiv.height();
+                            let $next_record = $rdiv;
+    
+                            let $divs = this.div_content.find('div[recid]');
+                            $.each($divs, (idx, ele) => {
+    
+                                let $ele = $(ele);
+    
+                                if($ele.position().top <= upper_limit){
+                                    return;
+                                }
+    
+                                $next_record = $ele;
+                                return false;
+                            });
+    
+                            if($next_record.attr('recid') != recID){
+    
+                                // add up arrow to close record details
+                                let $close_arrow = $('<span>')
+                                    .addClass('ui-icon ui-icon-caret-2-n hide-recview')
+                                    .css({
+                                        cursor: 'pointer',
+                                        float: 'left',
+                                        fontSize: 'large',
+                                        margin: '10px'
+                                    })
+                                    .attr('title', 'Close record details');
+    
+                                this._on($close_arrow, {
+                                    'click': () => {
+                                        this.closeExpandedDivs();
+                                    }
+                                });
+    
+                                $close_arrow.insertBefore($next_record);
+                                ele.insertBefore($next_record); // insert after 'row'
+                            }else{
+                                ele.insertAfter($rdiv); // just insert after record    
+                            }
                         }else{
                             ele.insertAfter($rdiv);
                         }
