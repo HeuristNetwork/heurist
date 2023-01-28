@@ -131,6 +131,7 @@ private static function findRecordIds($imp_session, $params){
     //get rectype to import
     $recordType = @$params['sa_rectype'];
     $currentSeqIndex = @$params['seq_index'];
+    $ignore_rectype = @$params['ignore_rectype'] ? $params['ignore_rectype'] : 0;
     
     $detDefs = dbs_GetDetailTypes(self::$system, 'all', 1 );
     
@@ -200,7 +201,10 @@ private static function findRecordIds($imp_session, $params){
 
                 //BEGIN statement constructor
                 $select_query_match_from = array("Records");
-                $select_query_match_where = array("rec_RecTypeID=".$recordType);
+                $select_query_match_where = array();
+                if($ignore_rectype != 1){
+                    $select_query_match_where = array_push($select_query_match_where, "rec_RecTypeID=".$recordType);
+                }
                 
                 $multivalue_selquery_from = null;
                 $multivalue_selquery_where = null;
@@ -390,6 +394,10 @@ private static function findRecordIds($imp_session, $params){
 
                         if(count($disamb)==0  || $resolved_recid<0){ //nothing found - insert
                         
+                            if($ignore_rectype == 1){ // never create new records when ignoring record type
+                                continue;
+                            }
+
                             $new_id = $ind;
                             $ind--;
                             $rec = $row;
@@ -447,6 +455,7 @@ private static function findRecordIds($imp_session, $params){
             
             if($is_update) $cnt_update_rows++;
             if($is_insert) $cnt_insert_rows++;
+            if(!$is_update && !$is_insert && $ignore_rectype == 1) $imp_session['validation']['count_ignore_rows']++;
 
         }//while import table
 
@@ -2378,6 +2387,7 @@ public static function performImport($params, $mode_output){
     //rectype to import
     $import_table = $imp_session['import_table'];
     $recordType = @$params['sa_rectype'];
+    $ignore_rectype = @$params['ignore_rectype'] ? $params['ignore_rectype'] : 0;
     
     $utm_zone = @$params['utm_zone'];
     $hemisphere = 'N';
@@ -2568,8 +2578,13 @@ public static function performImport($params, $mode_output){
         }
 
         $record_count = $res ? $res->num_rows : 0;
+        $org_recordType = $recordType;
 
         while ($row = $res->fetch_row()){
+
+            if($org_recordType != $recordType){
+                $recordType = $org_recordType;
+            }
 
             //split multivalue index field
             $id_field_values = array();
@@ -2607,6 +2622,10 @@ public static function performImport($params, $mode_output){
                                 
                             //$details = retainExisiting($details, $details2, $params, $recordTypeStructure, $idx_reqtype);
                             //import detail is sorted by rec_id -0 thus it is possible to assign the same recId for several imp_id
+
+                            if($ignore_rectype == 1 && $recordId > 0){ // update record type id
+                                $recordType = mysql__select_value(self::$mysqli, 'SELECT rec_RecTypeID FROM Records WHERE rec_ID=' . $recordId);
+                            }
                             $new_id = self::doInsertUpdateRecord($recordId, $import_table, $recordType, $csv_mvsep, 
                                                         $details, $id_field, $prev_ismulti_id?$prev_recid_in_idfield:null, $mode_output,
                                                         $ignore_errors, $record_count);
@@ -2637,11 +2656,18 @@ public static function performImport($params, $mode_output){
                                 $details = $details_orig;
                             }
 
+                        }else if($ignore_rectype == 1){ // no insert when ignoring rectype
+                            self::$rep_skipped ++;
+                            continue;
                         }else{
                             $recordId = null; //insert for negative
                         }
                     }
 
+                }
+                else if($ignore_rectype == 1) { // no insert when ignoring rectype
+                    self::$rep_skipped ++;
+                    continue;
                 }
                 else
                 { //INSERT - if field is not defined - always insert for each line in import data
@@ -3094,6 +3120,9 @@ public static function performImport($params, $mode_output){
             $allow_operation = ! (($recordId>0) ?$ignore_update:$ignore_insert);
             if($allow_operation){
             
+                if($ignore_rectype == 1 && $recordId > 0){ // update record type id
+                    $recordType = mysql__select_value(self::$mysqli, 'SELECT rec_RecTypeID FROM Records WHERE rec_ID=' . $recordId);
+                }
                 $new_id = self::doInsertUpdateRecord($recordId, $import_table, $recordType, $csv_mvsep, 
                                                     $details, $id_field, $ismulti_id?$recid_in_idfield:null,  $mode_output,
                                                     $ignore_errors, $record_count);

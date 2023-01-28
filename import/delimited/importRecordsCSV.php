@@ -181,7 +181,7 @@ if(!$format) $format='csv';
 </div>
 <!-- STEP 2 parse uploaded data -->
 <div style="width:100%; height:100%;display:none;" id="divStep2" class="selectmenu-parent">
-    <div class="ent_header" style="height:27em;padding-top:1em;">
+    <div class="ent_header" style="height:30em;padding-top:1em;">
     
         <div id="btnBackToStart2"
                 style="margin-left:2em;"
@@ -363,7 +363,7 @@ if(!$format) $format='csv';
                 <div id="btnParseStep1" style="position:absolute;bottom:1em;left:2em" 
                     title="By clicking on this button Heurist starts to analyse the header of uploaded CSV data according to your parse parameters, extracts column names and verifies encoding and tries to convert it to UTF8">Analyse data</div>
         </fieldset>            
-        <div style="position:absolute;right:10px;left:440px;top:1.2em;bottom:0">
+        <div style="position:absolute;right:10px;left:440px;top:2.5em;bottom:0;">
                 <div class="ent_header" style="border:none;display:none" id="divFieldRolesHeader">
                     <h2>Specify identifier and date columns</h2><br>
                     <div style="font-weight:bold;padding-bottom:1em">
@@ -394,7 +394,7 @@ if(!$format) $format='csv';
         </div>
         
     </div>
-    <div class="ent_content_full" style="top:28em;padding:0.5em" id="divParsePreview">
+    <div class="ent_content_full" style="top:31em;padding:0.5em" id="divParsePreview">
     
     </div>
 </div>
@@ -524,6 +524,13 @@ if(!$format) $format='csv';
             <input type="radio" name="sa_match" id="sa_match2" value="2" class="text" 
                         onchange="{importRecordsCSV.onMatchModeSet();importRecordsCSV.doMatchingInit();}">&nbsp;
             <label for="sa_match2">Skip matching (all new records)</label>
+
+            <span style="display:inline-block;padding-left:50px;">
+                <input type="checkbox" name="ignore_rectype" id="ignore_rectype" value="1" class="text"
+                            onchange="{importRecordsCSV.onIgnoreRectype();}">&nbsp;
+                <label for="ignore_rectype" style="display:inline-flex;">Target record type is only specified to allow selection of fields.
+                    <br>Matching and updates will be applied across all record types for which the base field(s) apply.</label>
+            </span>
 
             <div class="heurist-helper1" id="divMatchingSettingHelp" style="display:block;padding-top:1em;padding-bottom:3px;">
             </div>
