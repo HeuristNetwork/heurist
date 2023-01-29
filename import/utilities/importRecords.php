@@ -83,7 +83,7 @@ $s_max_size = round($max_size/1024/1024).' MBytes';
     </head>
 
 
-    <body class="popup ui-heurist-populate" style="margin:0 20px 0  0 !important; color:black">
+    <body class="popup ui-heurist-populate" style="margin:15px 0 0 20px !important; color:black">
 
         <div class="banner">
             <h2>Import XML or JSON</h2>
@@ -132,7 +132,7 @@ $s_max_size = round($max_size/1024/1024).' MBytes';
             <div id="div_tsv" style="display:none"></div>
 
             <!-- list of missing definitions -->
-            <div id="div_RectypeToBeImported" style="max-width:740px;max-height: 128px;overflow-y: auto;">
+            <div id="div_RectypeToBeImported" style="max-width:740px;max-height:400px;overflow-y: auto;border:1px solid lightgray;">
             </div>     
 
             <!-- source broken: import blocked -->

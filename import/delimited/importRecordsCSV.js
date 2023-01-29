@@ -3163,6 +3163,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
          
            
             var session_id = window.hWin.HEURIST4.msg.showProgress( $('#progressbar_div'),  0, 1000, false );
+            var handle_rectype = $('#ignore_rectype').is(':checked') ? '1' : '0';
            
             var request = {
                 session   : session_id,
@@ -3171,7 +3172,8 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
                 sa_rectype: imp_session['sequence'][currentSeqIndex]['rectype'],
                 seq_index: currentSeqIndex,
                 mapping   : field_mapping,  //index => field_type
-                match_mode: matchMode  //0 - mapping, 1 - id, 2 - skip match 
+                match_mode: matchMode,  //0 - mapping, 1 - id, 2 - skip match 
+                ignore_rectype: handle_rectype
             };
             if(multifields.length>0){
                 request['multifield'] = multifields[0];  //get index of multivalue field
@@ -3304,8 +3306,8 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
             window.hWin.HEURIST4.msg.showMsgErr(window.hWin.HR('You have to select record type'));
         }
         
-    }         
-    
+    }
+
     //
     //
     //
@@ -3598,6 +3600,8 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
             retain_existing = $("input[name='sa_upd2']:checked"). val();
         }
         
+        var handle_rectype = $('#ignore_rectype').is(':checked') ? '1' : '0';
+        
         var request = {
             db        : window.hWin.HAPI4.database,
             session   : session_id,
@@ -3618,7 +3622,8 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
             //1 - Add new data only if field is empty
             //2 - Replace all existing value(s) 
             sa_upd: update_mode, 
-            sa_upd2: retain_existing  //if no data: retain existing (0) or remove existing (1)
+            sa_upd2: retain_existing,  //if no data: retain existing (0) or remove existing (1)
+            ignore_rectype: handle_rectype
         };
         
 //        request['DBGSESSID']='425288446588500001;d=1,p=0,c=0';
@@ -4863,6 +4868,22 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
         }
         _adjustTablePosition();
     }
+
+    //
+    // Disable create new records option while ignoring record type
+    //
+    function _onIgnoreRectype(){
+
+        var $ignore_rectype = $('#ignore_rectype');
+        var isChecked = $ignore_rectype.is(':checked');
+        window.hWin.HEURIST4.util.setDisabled($('#sa_match2'), isChecked);
+
+        if(isChecked){
+            $('#sa_match2, [for="sa_match2"]').attr('title', 'Option is disabled while ignoring record type')
+        }else{
+            $('#sa_match2, [for="sa_match2"]').attr('title', '');
+        }
+    }
     
     //public members
     var that = {
@@ -4884,6 +4905,9 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
         },
         doMatchingInit:function (event){
             _doMatchingInit();
+        },
+        onIgnoreRectype: function(event){
+            _onIgnoreRectype();
         }
         
         

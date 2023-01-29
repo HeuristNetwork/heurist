@@ -263,8 +263,8 @@ function hImportRecords(_max_upload_size) {
             s = s + '<tr><td>'
                 + rectype_source+ '</td><td>'
                 + rectype['count']+ '</td><td>'
-                //+rectype['target_RecTypeID']+'</td><td>'
-                +rectype['name']+ '</td><td>';
+                + rectype['name']+ '</td><td>'
+                + rectype_source+'</td></tr>';
             
             if(afterSync && rectype['code'] &&!(rectype['target_RecTypeID']>0)){
                 //try to find again
@@ -338,7 +338,8 @@ function hImportRecords(_max_upload_size) {
 
                     s = s + '<tr><td>'
                     +dt_source+'</td><td></td><td>'
-                    +detailtype['name']+'</td><td>';
+                    +detailtype['name']+'</td><td>'
+                    +dt_source+'</td><td>';
 
                     if(is_issue){
                         target_id = '\tnot found\n';
@@ -366,7 +367,7 @@ function hImportRecords(_max_upload_size) {
             return false;
         });
         $('#div_RectypeToBeImported').html('<table><tr>'
-            +'<td>ID read from file</td><td>Rec count</td><td>Name</td><td>ID in this db</td></tr>'
+            +'<td>ID read from file</td><td>Rec count</td><td>Name</td><td>Target DB concept</td><td>ID in this db</td></tr>'
             +s+'</table>');
 
         _showStep(1);   

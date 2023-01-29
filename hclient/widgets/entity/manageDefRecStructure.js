@@ -45,6 +45,8 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
     _show_optional: false,
     defval_container: null,
     
+    _calculated_usages: false, // has field usages been calculated (re-calculate on reload)
+    
     //
     //
     //    
@@ -282,6 +284,7 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
 
             window.hWin.HAPI4.EntityMgr.doRequest(req, function(response){
                 if(response.status == window.hWin.ResponseStatus.OK){
+                    that._calculated_usages = true;
                     that.updateFieldUsage(response.data);
                 }else{
                     window.hWin.HEURIST4.msg.showMsgErr(response);
@@ -561,6 +564,10 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
             $.each( that.element.find('.treeView .fancytree-node'), function( idx, item ){
                 that.__defineActionIcons(item);
             });
+
+            if(that._calculated_usages || $Db.rty(that.options.rty_ID, 'rty_RecCount') < 2000){ // trigger usage calculations
+                that.element.find('#field_usage').click();
+            }
         }, delay);
     },
 
@@ -626,7 +633,7 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
             let dtyid = $(item).find('span[data-dtid]').attr('data-dtid');
             if($Db.dty(dtyid, 'dty_Type') != 'separator'){
                 $('<div class="detail-count" data-dtyid="'+ dtyid +'" style="position:absolute;right:2px;display:inline-block;padding:4px 0 0 3px;'
-                    + 'font-size:10px;font-weight:normal;text-transform:none;color:black;"></div>').appendTo(item);
+                    + 'font-size:10px;font-weight:normal;text-transform:none;color:black;"><span></span></div>').appendTo(item);
             }
 
             var field_tooltip;
@@ -666,11 +673,15 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
 
                     // update button position based on existance of usage
                     let $ele_usage = node.find('.detail-count');
-                    if($ele_usage.attr('data-empty') == 1 || window.hWin.HEURIST4.util.isempty($ele_usage.text())){ // no usage
+                    let count = node.find('.detail-count span:first-child');
+                    if($ele_usage.length == 0 || $ele_usage.attr('data-empty') == 1 || window.hWin.HEURIST4.util.isempty(count)){ // no usage
+
                         $ele_usage.hide();
                         node.find('.svs-contextmenu3').css('right', '2px');
-                    }else if(!window.hWin.HEURIST4.util.isempty($ele_usage.text())){
-                        node.find('.svs-contextmenu3').css('right', '20px'); // leave external link icon visible
+                    }else if(!window.hWin.HEURIST4.util.isempty(count)){
+
+                        let right = 50 + (5 * (count.length - 1));
+                        node.find('.svs-contextmenu3').css('right', right + 'px'); // leave external link icon visible
                     }
 
                     //highlight in preview
@@ -1843,8 +1854,8 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
                 }); 
             }
             
-            var ele = this._editing.getInputs('rst_DisplayName');
-            this._on( $(ele[0]), {
+            edit_ele = this._editing.getInputs('rst_DisplayName');
+            this._on( $(edit_ele[0]), {
                 keypress: window.hWin.HEURIST4.ui.preventChars} );
 
             $('<label style="margin-left:195px;"><input id="alter_basefield" type="checkbox" tabindex="-1"> also change base field name and help</label>')
@@ -3106,19 +3117,35 @@ console.log('_afterDeleteEvenHandler');
             return;
         }
 
+        var search_func = (fld_id, version) => {
+
+            if(!fld_id || !Number.isInteger(+fld_id) || fld_id < 1){
+                return;
+            }
+
+            let condition = '';
+            if(version == 'without'){
+                condition = 'NULL';
+            }
+
+            let query = '[{"t":"' + that.options.rty_ID + '"},{"f:' + fld_id + '":"'+ condition +'"}]';
+            window.open(window.hWin.HAPI4.baseURL + '?db=' + window.hWin.HAPI4.database + '&q=' + encodeURIComponent(query), '_blank');
+        };
+
         $.each(this.element.find('.treeView .detail-count'), function(idx, div){
 
             let $div = $(div);
             let dtyid = $div.attr('data-dtyid');
 
             if(dtyid && field_usages[dtyid]){
-                $div.text(field_usages[dtyid]);
+                $div.find('span:first-child').text(field_usages[dtyid]);
 
                 if($div.find('.ui-icon').length == 0){
-                    $div.append($('<span class="ui-icon ui-icon-extlink" style="color:gray;margin-left:5px;font-size:12px;" />'));
+                    $div.append($('<span class="ui-icon ui-icon-check" title="Search for records WITH field" style="color:gray;margin-left:5px;font-size:12px;" />'))
+                        .append($('<span class="ui-icon ui-icon-close" title="Search for records WITHOUT field" style="color:gray;font-size:12px;" />'));
 
                     $div.contextmenu({
-                        delegate: '.ui-icon',
+                        delegate: 'span',
                         position: (event, ui) => {
                             return {my: "left top", at: "right+5 top", of: ui.target};
                         },
@@ -3128,19 +3155,8 @@ console.log('_afterDeleteEvenHandler');
                             {title: 'Records WITHOUT field', cmd: 'without', data: {id: dtyid}}
                         ],
                         select: (event, ui) => {
-
                             let fld_id = ui.item.data().id;
-                            if(!fld_id || !Number.isInteger(+fld_id) || fld_id < 1){
-                                return;
-                            }
-
-                            let condition = '';
-                            if(ui.cmd == 'without'){
-                                condition = 'NULL';
-                            }
-
-                            let query = '[{"t":"' + that.options.rty_ID + '"},{"f:' + fld_id + '":"'+ condition +'"}]';
-                            window.open(window.hWin.HAPI4.baseURL + '?db=' + window.hWin.HAPI4.database + '&q=' + encodeURIComponent(query), '_blank');
+                            search_func(fld_id, ui.cmd);
                         },
                         beforeOpen: (event, ui) => {
                             let style = $(ui.menu).attr('style');
@@ -3154,7 +3170,10 @@ console.log('_afterDeleteEvenHandler');
                     that._on($div.find('.ui-icon'), {
                         'click': (event) => {
                             window.hWin.HEURIST4.util.stopEvent(event);
-                            $(this).contextmenu('open', event);
+                            let type = $(event.target).hasClass('ui-icon-close') ? 'without' : 'with';
+                            let fld_id = $(event.target).parent('div[data-dtyid]').attr('data-dtyid');
+                            search_func(fld_id, type);
+                            //$(this).contextmenu('open', event);
                         }
                     });
                 }
@@ -3165,7 +3184,7 @@ console.log('_afterDeleteEvenHandler');
                 $div.attr('data-empty', 1);
             }
 
-            $div.parent().find('span.fancytree-title').css({'max-width': '80%', 'overflow': 'hidden'});
+            //$div.parent().find('span.fancytree-title').css({'max-width': '80%', 'overflow': 'hidden'});
         });
     },
 

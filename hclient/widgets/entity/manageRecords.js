@@ -1317,6 +1317,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
     _onDialogResize: function(){
         this._super();
         this._adjustResultListTop();
+        this.saveUiPreferences(); // save UI settings
     },
     
     //
@@ -4340,6 +4341,38 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
             this.element.find('.chb_opt_fields').prop('checked', isfields_on);
             this.element.find('.chb_show_help').prop('checked', ishelp_on);
         }
+
+        //add resizing buttons to dialog title bar
+        if(this._as_dialog){
+
+            $('<span>', {id: 'btn_Fullscreen'}).appendTo(this._as_dialog.parent().find('.ui-dialog-titlebar'));
+            $('<span>', {id: 'btn_Standard'}).appendTo(this._as_dialog.parent().find('.ui-dialog-titlebar'));
+
+            this._as_dialog.parent().find('#btn_Fullscreen').button({label:window.hWin.HR('Fullscreen')}).css({
+                margin: '-0.9em 0 0 0',
+                right: '12.5em',
+                top: '45%',
+                position: 'absolute',
+                background: 'none',
+                color: 'white'
+            }).click((e) => {
+                that._setDialogSize(true);
+            });
+
+            this._as_dialog.parent().find('#btn_Standard').button({label:window.hWin.HR('Standard')}).css({
+                margin: '-0.9em 0 0 0',
+                right: '5.5em',
+                top: '45%',
+                position: 'absolute',
+                background: 'none',
+                color: 'white'
+            }).click((e) => {
+                that._setDialogSize(false);
+            });
+
+            this._as_dialog.parent().css('box-shadow', '2px 3px 10px #00000080');
+        }
+
         //add record title at the top ======================
         
             //this.editFormPopup.css('top',0);
@@ -4793,6 +4826,36 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
         window.hWin.HAPI4.save_pref('prefs_'+this._entityName, params);
         
         return true;
+    },
+
+    //
+    // Set popup height + width to value based on current window
+    //
+    _setDialogSize: function(is_full = false){
+
+        let width = window.hWin.innerWidth * 0.8;
+        let height = window.hWin.innerHeight * 0.8;
+
+        if(is_full){
+            width = window.hWin.innerWidth * 0.95;
+            height = window.hWin.innerHeight * 0.95;
+        }
+
+        // Update width + height, and reset dialog's position to center
+        if(this._as_dialog){
+            this._as_dialog.dialog('option', 'width', width);
+            this._as_dialog.dialog('option', 'height', height);
+            this._as_dialog.dialog('option', 'position', this._as_dialog.dialog('option', 'position'));
+        }else if(this._edit_dialog){
+            this._edit_dialog.dialog('option', 'width', width);
+            this._edit_dialog.dialog('option', 'height', height);
+            this._edit_dialog.dialog('option', 'position', this._edit_dialog.dialog('option', 'position'));
+        }else{
+            return;
+        }
+
+        //this._onDialogResize();
+        this.editFormPopup.layout().resizeAll(); // resize layout
     },
 
     //
