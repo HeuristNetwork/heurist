@@ -73,8 +73,8 @@ if (($_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0.0.1')
     if(true || !$edit_OldEditor){ //creates new instance of heurist
         print '<script>window.hWin = window;</script>';
     }
+    //init js variables from REQUEST
 ?>
-    
 <script>
     var _time_debug = new Date().getTime() / 1000;
     var page_first_not_empty = 0;
@@ -326,7 +326,7 @@ function onPageInit(success)
                 echo 'if(typeof first_not_empty_page !== "undefined" && first_not_empty_page>0){ load_initially=first_not_empty_page;}';  
             }?>
             is_execute_homepage_custom_javascript = true;
-            loadPageContent( load_initially );
+            loadPageContent( load_initially ); //on logo click
     });
     
     //fix bug for tinymce popups - it lost focus if it is called from dialog
@@ -349,7 +349,21 @@ function onPageInit(success)
                 echo 'if(typeof first_not_empty_page !== "undefined" && first_not_empty_page>0){ load_initially=first_not_empty_page;}';  
             }?>
             is_execute_homepage_custom_javascript = true;
-            loadPageContent( init_page_record_id>0 ?init_page_record_id :load_initially);
+
+            //if url has "q" parameter - load page with initial search
+            var initial_query_from_url = window.hWin.HEURIST4.util.getUrlParameter('q');            
+            var eventdata = null;
+            if(initial_query_from_url){
+            
+                    eventdata = {detail:'ids', neadall:1, w:'a',
+                                 q:initial_query_from_url,
+                                 source: 'search_on_page_load',
+                                 event_type: window.hWin.HAPI4.Event.ON_REC_SEARCHSTART,
+                                 search_realm: 'search_group_1'
+                                 };
+            }
+            loadPageContent( init_page_record_id>0 ?init_page_record_id :load_initially, eventdata); //on page init
+
         }
         
         var topmenu = $('#main-menu');
@@ -391,7 +405,7 @@ function initMainMenu( afterInitMainMenu ){
                 orientation: 'horizontal',
                 toplevel_css: {background:'none'}, //bg_color 'rgba(112,146,190,0.7)'
                 onInitComplete: afterInitMainMenu,
-                onmenuselect: loadPageContent,
+                onmenuselect: loadPageContent,  //on main menu select
                 language: weblang
                 };
     
@@ -422,7 +436,11 @@ function loadPageContent(pageid, eventdata){
             heurist_resultListExt: {record_with_custom_styles: home_page_record_id},
             heurist_Navigation: {aftermenuselect: initLinksAndImages}
         };
-        
+        if(eventdata && (eventdata.event_type == window.hWin.HAPI4.Event.ON_REC_SEARCHSTART 
+            || eventdata.event_type == window.hWin.HAPI4.Event.ON_REC_SELECT)){
+            supp_options['heurist_SearchTree'] = {suppress_default_search:true};
+            supp_options['heurist_SearchInput'] = {suppress_default_search:true};
+        }
 
 <?php        
 //style from field DT_CMS_CSS of home record 
@@ -513,7 +531,7 @@ if($website_custom_css!=null){
             }
 
     }
-}
+} // loadPageContent
 
 var page_cache = {};
 var previous_page_id = -1;
@@ -670,8 +688,8 @@ function afterPageLoad(document, pageid, eventdata){
     is_execute_homepage_custom_javascript = false;
     
 
+    // add current page as url parameter in browser url
     if(!is_embed){ 
-        // add current page as url parameter in browser url
 
         var spath= location.pathname;
 
@@ -679,10 +697,10 @@ function afterPageLoad(document, pageid, eventdata){
 
         var surl;
        
-//console.log(spath);     
         if(spath.endsWith('/web')) spath = spath + '/'; //add last slash  
        
         if(spath.search(/\/([A-Za-z0-9_]+)\/web\/.*/)>=0){
+            //folder style parameters [database]/web/[site id]/[page id]/?q=[query params]
 
             //remove after web
             spath = spath.substring(0,spath.indexOf('/web/')+5);
@@ -692,27 +710,45 @@ function afterPageLoad(document, pageid, eventdata){
                 surl = surl + '/' + pageid;
             }
             
+            if(eventdata && 
+                eventdata.event_type == window.hWin.HAPI4.Event.ON_REC_SEARCHSTART &&
+                eventdata.q){
+                surl =  surl + '/?q=' + eventdata.q;
+            }
+            
         }else{
+            //usual url parameters
+            
             var params = window.hWin.HEURIST4.util.getUrlParams(location.href);    
         
             params['db'] = window.hWin.HAPI4.database;
             params['website'] = '';
             params['id'] = home_page_record_id;
-            
+      
             /* IJ Oct 2021 - Hide page id in URL, and cause reloads to move back to website homepage */
             if(pageid!=home_page_record_id){
                 params['pageid'] = pageid;
             }
 
             s = [];        
+            
             $.each(Object.keys(params),function(i,key){
                 if(key){
                     var v = encodeURIComponent(params[key]);
                     if(v!='') v = '=' + v;
-                    s.push(key + v);
+                    if(key!='q'){
+                        s.push(key + v);    
+                    }
                 }
             });
+            if(eventdata &&
+                eventdata.event_type == window.hWin.HAPI4.Event.ON_REC_SEARCHSTART &&
+                eventdata.q){
+                s.push('q=' + eventdata.q);
+            }
             surl = spath + '?' + s.join('&'); 
+        
+        
         
         }
 
@@ -720,7 +756,7 @@ function afterPageLoad(document, pageid, eventdata){
         
     }
     
-    // add listeners for internal links  
+    // add listeners for internal links and images 
     initLinksAndImages();
 
     //var ele = $('#mobilemenu');
@@ -729,7 +765,8 @@ function afterPageLoad(document, pageid, eventdata){
     //Execute event - this search has been inited from different page
     if(eventdata && eventdata.event_type){
         if(eventdata.event_type == window.hWin.HAPI4.Event.ON_REC_SEARCHSTART 
-            || eventdata.event_type == window.hWin.HAPI4.Event.ON_REC_SELECT){
+            || eventdata.event_type == window.hWin.HAPI4.Event.ON_REC_SELECT)
+        {
             window.hWin.HAPI4.RecordSearch.doSearch( this, eventdata );
         }else{
             $(document).trigger(eventdata.event_type, eventdata);  //for select  
@@ -738,27 +775,30 @@ function afterPageLoad(document, pageid, eventdata){
     
     // Init search on different page  data.search_page!=current_page_id
     $(this.document).on(window.hWin.HAPI4.Event.ON_REC_SEARCHSTART
-            +' '+window.hWin.HAPI4.Event.ON_REC_SELECT, function(e, data) {        
+            +' '+window.hWin.HAPI4.Event.ON_REC_SELECT, function(e, eventdata) {        
                 
-                if(data && data.search_page>0 && data.search_page!=current_page_id){
+                
+
+                if(eventdata && eventdata.search_page>0 && eventdata.search_page!=current_page_id){
                     
-                    var new_pageid = data.search_page;
-                    data.search_page = null
+                    var new_pageid = eventdata.search_page;
+                    eventdata.search_page = null
                     
                     if(e.type==window.hWin.HAPI4.Event.ON_REC_SELECT){
-                        if($.isArray(data.selection) && data.selection.length>0){
+                        if($.isArray(eventdata.selection) && eventdata.selection.length>0){
                             //convert SELECT to SEARCHSTART
-                            data = {detail:'ids', neadall:1, w:'a',
-                                 q:'ids:'+data.selection.join(','),
-                                 search_realm: data.search_realm};
+                            eventdata = {detail:'ids', neadall:1, w:'a',
+                                 q:'ids:'+eventdata.selection.join(','),
+                                 source: 'search_on_page_load',
+                                 search_realm: eventdata.search_realm};
                             
                         }else{
                             return; //ignore empty selection
                         }
                     }
-                    
-                    data.event_type = window.hWin.HAPI4.Event.ON_REC_SEARCHSTART; //e.type;
-                    loadPageContent(new_pageid, data); //eventdata
+
+                    eventdata.event_type = window.hWin.HAPI4.Event.ON_REC_SEARCHSTART; //e.type;
+                    loadPageContent(new_pageid, eventdata); //on link or selection - execute search on different page
                 }
                 
             });
@@ -782,7 +822,7 @@ function initLinksAndImages($container, search_data){
         //var href = $(link).attr('data-href');
         //if(!href) 
         var href = $(link).attr('href');
-        if (href && href!='#') 
+        if (href && href!='#' && $(link).attr('target')!='_blank') 
         {
             var pageid = 0;
             if(  (href.indexOf(window.hWin.HAPI4.baseURL)===0 || href[0] == '?' 
@@ -791,7 +831,7 @@ function initLinksAndImages($container, search_data){
                 && window.hWin.HEURIST4.util.getUrlParameter('id',href) == home_page_record_id)
             {
                 pageid = window.hWin.HEURIST4.util.getUrlParameter('pageid',href);
-            }else if(href.indexOf(window.hWin.HAPI4.baseURL)===0){
+            }else if(href.indexOf(window.hWin.HAPI4.baseURL)===0){ //starts with 
                 pageid = href.substr(window.hWin.HAPI4.baseURL.length);
             }else if(href.indexOf('./')===0){
                 href = href.substring(2);
@@ -799,6 +839,7 @@ function initLinksAndImages($container, search_data){
             }else if(!isNaN(parseInt(href)) && href>0){ //integer
                 pageid = href;
             }
+            
             if(pageid>0){
                 
                 $(link).attr('data-pageid', pageid);
@@ -815,7 +856,7 @@ function initLinksAndImages($container, search_data){
                 }});
                 */
                 
-            }else if(href.indexOf('q=')===0){
+            }else if(href.indexOf('q=')===0){ //special case for links in smarty reports
                 
                     /*
                     var request = window.hWin.HEURIST4.util.parseHeuristQuery('?'+href);

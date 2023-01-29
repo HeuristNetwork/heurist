@@ -50,7 +50,9 @@ $.widget( "heurist.svs_list", {
         simple_search_header: 'Simple search', // header text for 'search everything' filter
         simple_search_text: 'Search everything:', // field label for the simple search filter
         
-        language: 'xx'  //use default
+        language: 'xx',  //use default
+        
+        suppress_default_search: false //if true prevents default search (init_svsID) execution - useful in cms
     },
 
     isPublished: false,
@@ -826,7 +828,7 @@ console.log('refresh '+(window.hWin.HAPI4.currentUser.usr_SavedSearch==null));
         }
 
         //
-        if(this.isPublished && this.options.init_svsID){
+        if(this.isPublished && this.options.init_svsID && !this.options.suppress_default_search){
             this.doSearchByID( this.options.init_svsID );
         }
     },
@@ -1092,11 +1094,13 @@ console.log('refresh '+(window.hWin.HAPI4.currentUser.usr_SavedSearch==null));
         this.accordeon.show();
         
         //if the only search - start search at once
-        if(visible_cnt==1){//this.loaded_saved_searches &&
-            var btn = $(this.accordeon).find('button[data-svs-id="'+visible_svsID+'"]');
-            btn.attr('data-only-one',1).click(); //only one is visible
-        }else if(this.options.init_svsID){
-            $(this.accordeon).find('button[data-svs-id="'+this.options.init_svsID+'"]').click();
+        if(!this.options.suppress_default_search){
+            if(visible_cnt==1){//this.loaded_saved_searches &&
+                var btn = $(this.accordeon).find('button[data-svs-id="'+visible_svsID+'"]');
+                btn.attr('data-only-one',1).click(); //only one is visible
+            }else if(this.options.init_svsID){
+                $(this.accordeon).find('button[data-svs-id="'+this.options.init_svsID+'"]').click();
+            }
         }
         
         //messages for not found groups and filters

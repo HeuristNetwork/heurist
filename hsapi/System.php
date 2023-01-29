@@ -716,7 +716,7 @@ error_log(print_r($_REQUEST, true));
         return true;
     }
 
-    //
+    /*
     // NOT USED. It is assumed that it is in HEURIST folder
     //
     private function getInstallPath(){
@@ -725,7 +725,7 @@ error_log(print_r($_REQUEST, true));
         if( $documentRoot && substr($documentRoot, -1, 1) != '/' ) $documentRoot = $documentRoot.'/';
 
         $topDirs = "admin|api|applications|common|context_help|export|hapi|hclient|hsapi|import|records|redirects|search|viewers|help|ext|external"; // Upddate in 3 places if changed
-        $installDir = preg_replace("/\/(" . $topDirs . ")\/.*/", "", @$_SERVER["SCRIPT_NAME"]); // remove "/top level dir" and everything that follows it.
+        $installDir = preg_replace("/\/(" . $topDirs . ")\/.* /", "", @$_SERVER["SCRIPT_NAME"]); // remove "/top level dir" and everything that follows it.
 
         if ($installDir == @$_SERVER["SCRIPT_NAME"]) { // no top directories in this URI must be a root level script file or blank
             $installDir = preg_replace("/\/[^\/]*$/", "", @$_SERVER["SCRIPT_NAME"]); // strip away everything past the last slash "/index.php" if it's there
@@ -777,7 +777,7 @@ error_log(print_r($_REQUEST, true));
 
         return $install_path;
     }
-
+    */
 
 
     /**

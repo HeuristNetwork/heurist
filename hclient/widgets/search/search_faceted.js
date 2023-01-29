@@ -330,6 +330,7 @@ $.widget( "heurist.search_faceted", {
                 if(e.type == window.hWin.HAPI4.Event.ON_REC_SEARCHSTART){
                 
                         if(data){
+                            
                             if(data.source && data.source==that.element.attr('id') ){   //search from this widget
                                   that._current_query_request_id = data.id;
                             }else{

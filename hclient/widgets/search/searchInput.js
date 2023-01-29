@@ -38,6 +38,7 @@ $.widget( "heurist.searchInput", {
         button_class: 'ui-heurist-btn-header1',
         
         preliminary_filter: null,
+        suppress_default_search: false,
         
         // callbacks
         onsearch: null,  //on start search
