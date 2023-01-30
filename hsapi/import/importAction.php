@@ -203,7 +203,7 @@ private static function findRecordIds($imp_session, $params){
                 $select_query_match_from = array("Records");
                 $select_query_match_where = array();
                 if($ignore_rectype != 1){
-                    $select_query_match_where = array_push($select_query_match_where, "rec_RecTypeID=".$recordType);
+                    array_push($select_query_match_where, "rec_RecTypeID=".$recordType);
                 }
                 
                 $multivalue_selquery_from = null;
