@@ -138,6 +138,7 @@ if($response==false){
 }    
 
 // Return the response object as JSON
-header('Content-type: application/json;charset=UTF-8');
+//header('Content-type: application/json;charset=UTF-8');
+$system->setResponseHeader();
 print json_encode($response);
 ?>

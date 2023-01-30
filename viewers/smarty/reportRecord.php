@@ -24,7 +24,7 @@ require_once (dirname(__FILE__).'/../../vendor/autoload.php'); //for geoPHP
 public methods
    constant - returns value of heurist constants
    rty_id, dty_id, trm_id - returns local code for given concept code
-   getRecord - returns full info for given record ID in heurist smarty format 
+   getRecord - returns full info for given record ID in heurist smarty format (including visibility for current user)
    getRelatedRecords
    getLinkedRecords
 
@@ -110,6 +110,8 @@ class ReportRecord {
         if($rec){
             $rec['rec_Tags'] = recordSearchPersonalTags($this->system, $rec_ID); //for current user only
             if(is_array($rec['rec_Tags'])) $rec['rec_Tags'] = implode(',',$rec['rec_Tags']);
+            
+            $rec['rec_IsVisible'] = $this->recordIsVisible($rec); //for current user only
         }
         
         $res1 = $this->getRecordForSmarty($rec); 
@@ -117,6 +119,51 @@ class ReportRecord {
         //debug $res1['original'] = $rec;
         
         return $res1;
+    }
+    
+    //
+    // returns true if record is visible for current user
+    //
+    public function recordIsVisible($rec)
+    {
+        
+        if(@$rec['rec_FlagTemporary']==1) return false;
+        
+        $currentUser = $this->system->getCurrentUser();
+        
+        $res = true;
+        
+        if($currentUser['ugr_ID']!=2) //db owner
+        {
+            if($rec['rec_NonOwnerVisibility']=='hidden'){
+                $res = false;
+            }else if($currentUser['ugr_ID']>0 && $rec['rec_NonOwnerVisibility']=='viewable'){
+                
+                $wg_ids = array();
+                if(@$currentUser['ugr_Groups']){
+                        $wg_ids = array_keys($currentUser['ugr_Groups']);
+                        array_push($wg_ids, $currentUser['ugr_ID']);
+                }else{
+                        $wg_ids = $this->system->get_user_group_ids();    
+                }
+                array_push($wg_ids, 0); // be sure to include the generic everybody workgroup    
+                
+                if(is_array($wg_ids) && count($wg_ids)>0){
+                    if(!in_array($rec['rec_OwnerUGrpID'],$wg_ids)){
+                        
+                        $query = 'select rcp_UGrpID from usrRecPermissions where rcp_RecID='.$rec['rec_ID'];
+                        $allowed_groups = mysql__select_list2($this->system->get_mysqli(), $query);     
+                        if(count($allowed_groups)>0 && count(array_intersect($allowed_groups, $wg_ids)==0)){
+                            $res = false;
+                        }
+                    }
+                }
+            
+            }
+        }
+        
+        return $res; 
+        
     }
     
     //

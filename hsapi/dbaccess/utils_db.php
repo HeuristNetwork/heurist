@@ -1231,6 +1231,7 @@ error_log('UPDATED '.$session_id.'  '.$value);
     // This method updates from 1.3.0 to 1.3.7
     //
     function updateDatabseToLatest4($system){
+        //update sysIdentification set sys_dbVersion=1, sys_dbSubVersion=3, sys_dbSubSubVersion=4 where sys_ID=1
         
         $dbVer = $system->get_system('sys_dbVersion');
         $dbVerSub = $system->get_system('sys_dbSubVersion');

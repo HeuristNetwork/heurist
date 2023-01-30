@@ -11,7 +11,7 @@
 * recordSearchRelated
 * recordLinkedCount  - search count by target record type for given source type and base field
 * recordSearchPermissions  - all view group permissions for given set of records
-* recordGetOwnerVisibility
+* recordGetOwnerVisibility - NOT USED returns sql where to check record visibility 
 * recordGetRelationshipType - returns only first relationship type ID for 2 given records
 * recordGetRelationship - returns relrecord (RT#1) for given pair of records (id or full record)
 * recordGetLinkedRecords - returns all linked record and their types (for update titles)
@@ -1259,8 +1259,9 @@ function recordSearchPermissions($system, $ids){
 
 }
 
-//
+// NOT USED
 //  returns SQL owner/visibility conditions for given user/group
+// see also  _getRecordOwnerConditions in dbDefRecTypes
 //    
 function recordGetOwnerVisibility($system, $ugrID){
 
@@ -2898,7 +2899,8 @@ function recordSearchByID($system, $id, $need_details = true, $fields = null)
         rec_Added,
         rec_Modified,
         rec_AddedByUGrpID,
-        rec_Hash";
+        rec_Hash,
+        rec_FlagTemporary";
     }
 
     $mysqli = $system->get_mysqli();
@@ -3211,5 +3213,12 @@ function recordSearchPersonalTags($system, $rec_ID) {
     return mysql__select_list2($mysqli, 
         'SELECT tag_Text FROM usrRecTagLinks, usrTags WHERE '
         ."tag_ID = rtl_TagID and tag_UGrpID= ".$system->get_user_id()." and rtl_RecID = $rec_ID order by rtl_Order");        
-}       
+}  
+
+//
+// load personal tags (current user) for given record ID
+//
+function recordIsVisible($system, $rec_ID) {
+    
+}
 ?>

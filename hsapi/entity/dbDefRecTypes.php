@@ -601,24 +601,26 @@ class DbDefRecTypes extends DbEntityBase
         
         $from = '';
         $wg_ids = array();
-        if($ugr_ID>0){
-            
-            $currentUser = $this->system->getCurrentUser();
-            
-            if($currentUser['ugr_ID']==$ugr_ID){
-                if(@$currentUser['ugr_Groups']){
-                    $wg_ids = array_keys($currentUser['ugr_Groups']);
-                    array_push($wg_ids, $ugr_ID);
-                }else{
-                    $wg_ids = $this->system->get_user_group_ids();    
-                }
-            }
-        }
-        array_push($wg_ids, 0); // be sure to include the generic everybody workgroup    
         
         $where2 = '';
         $where2_conj = '';
         if($ugr_ID!=2){ //by default always exclude "hidden" for not database owner
+        
+                if($ugr_ID>0){
+                    
+                    $currentUser = $this->system->getCurrentUser();
+                    
+                    if($currentUser['ugr_ID']==$ugr_ID){
+                        if(@$currentUser['ugr_Groups']){
+                            $wg_ids = array_keys($currentUser['ugr_Groups']);
+                            array_push($wg_ids, $ugr_ID);
+                        }else{
+                            $wg_ids = $this->system->get_user_group_ids();    
+                        }
+                    }
+                }
+                array_push($wg_ids, 0); // be sure to include the generic everybody workgroup    
+        
                     //$where2 = '(not r0.rec_NonOwnerVisibility="hidden")';
                 
                 $where2 = '(r0.rec_NonOwnerVisibility in ("public","pending"))';
