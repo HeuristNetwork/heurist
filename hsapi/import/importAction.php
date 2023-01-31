@@ -1514,33 +1514,56 @@ them to incoming data before you can import new records:<br><br>'.implode(",", $
 
                 while ($row = $res->fetch_row()){
 
-                    $wkt = $row[0];
                     $imp_id = $row[count($row)-1];
+                    $values = self::getMultiValues($row[0], $imp_session['csv_enclosure'], $imp_session['csv_mvsep']);
 
-                    if(!preg_match('/\d/', $wkt)){
-                        array_push($imp_session['validation']['geo_invalid']['invalid'], $imp_id);
-                        continue;
-                    }
+                    foreach($values as $wkt){
 
-                    $allOutWGS = true;
-                    $valid_geo = false;
+                        if(!preg_match('/\d/', $wkt) && !in_array($imp_id, $imp_session['validation']['geo_invalid']['invalid'])){
+                            array_push($imp_session['validation']['geo_invalid']['invalid'], $imp_id);
+                            continue 2;
+                        }
 
-                    try{
+                        $allOutWGS = true;
+                        $valid_geo = false;
 
-                        $geom = geoPHP::load($wkt, 'wkt');
-                        if($geom!=null && !$geom->isEmpty()){
-                            $bbox = $geom->getBBox();
-                            $allOutWGS = $allOutWGS 
-                                && (abs($bbox['minx'])>180) && (abs($bbox['miny'])>90)
-                                && (abs($bbox['maxx'])>180) && (abs($bbox['maxy'])>90);
-                            if (!$allOutWGS){
-                                array_push($imp_session['validation']['geo_invalid']['outOfBounds'], $imp_id);
+                        try{
+
+                            $geom = geoPHP::load($wkt, 'wkt');
+                            if($geom!=null && !$geom->isEmpty()){
+                                $bbox = $geom->getBBox();
+                                $allOutWGS = $allOutWGS 
+                                    && (abs($bbox['minx'])>=-180) && (abs($bbox['miny'])>=-90)
+                                    && (abs($bbox['maxx'])<=180) && (abs($bbox['maxy'])<=90);
+                                if (!$allOutWGS && !in_array($imp_id, $imp_session['validation']['geo_invalid']['outOfBounds'])){
+                                    array_push($imp_session['validation']['geo_invalid']['outOfBounds'], $imp_id);
+                                }
+                            }else{
+                                // Attempt to convert to POINT(x,y)
+                                $valid_geo = self::validateGeoField($wkt, $imp_id, $import_table, $geo_fields[0]);
+
+                                if(!$valid_geo && !in_array($imp_id, $imp_session['validation']['geo_invalid']['invalid'])){
+                                    array_push($imp_session['validation']['geo_invalid']['invalid'], $imp_id);
+                                }else{
+
+                                    $geom = geoPHP::load($valid_geo, 'wkt');
+                                    if($geom!=null && !$geom->isEmpty()){
+                                        $bbox = $geom->getBBox();
+                                        $allOutWGS = $allOutWGS 
+                                            && (abs($bbox['minx'])<-180) && (abs($bbox['miny'])<-90)
+                                            && (abs($bbox['maxx'])>180) && (abs($bbox['maxy'])>90);
+                                        if (!$allOutWGS && !in_array($imp_id, $imp_session['validation']['geo_invalid']['outOfBounds'])){
+                                            array_push($imp_session['validation']['geo_invalid']['outOfBounds'], $imp_id);
+                                        }
+                                    }
+                                }
                             }
-                        }else{
+
+                        } catch (Exception $e){
                             // Attempt to convert to POINT(x,y)
                             $valid_geo = self::validateGeoField($wkt, $imp_id, $import_table, $geo_fields[0]);
 
-                            if(!$valid_geo){
+                            if(!$valid_geo && !in_array($imp_id, $imp_session['validation']['geo_invalid']['invalid'])){
                                 array_push($imp_session['validation']['geo_invalid']['invalid'], $imp_id);
                             }else{
 
@@ -1548,38 +1571,18 @@ them to incoming data before you can import new records:<br><br>'.implode(",", $
                                 if($geom!=null && !$geom->isEmpty()){
                                     $bbox = $geom->getBBox();
                                     $allOutWGS = $allOutWGS 
-                                        && (abs($bbox['minx'])>180) && (abs($bbox['miny'])>90)
+                                        && (abs($bbox['minx'])<-180) && (abs($bbox['miny'])<-90)
                                         && (abs($bbox['maxx'])>180) && (abs($bbox['maxy'])>90);
-                                    if (!$allOutWGS){
+                                    if (!$allOutWGS && !in_array($imp_id, $imp_session['validation']['geo_invalid']['outOfBounds'])){
                                         array_push($imp_session['validation']['geo_invalid']['outOfBounds'], $imp_id);
                                     }
                                 }
                             }
                         }
 
-                    } catch (Exception $e){
-                        // Attempt to convert to POINT(x,y)
-                        $valid_geo = self::validateGeoField($wkt, $imp_id, $import_table, $geo_fields[0]);
-
-                        if(!$valid_geo){
-                            array_push($imp_session['validation']['geo_invalid']['invalid'], $imp_id);
-                        }else{
-
-                            $geom = geoPHP::load($valid_geo, 'wkt');
-                            if($geom!=null && !$geom->isEmpty()){
-                                $bbox = $geom->getBBox();
-                                $allOutWGS = $allOutWGS 
-                                    && (abs($bbox['minx'])>180) && (abs($bbox['miny'])>90)
-                                    && (abs($bbox['maxx'])>180) && (abs($bbox['maxy'])>90);
-                                if (!$allOutWGS){
-                                    array_push($imp_session['validation']['geo_invalid']['outOfBounds'], $imp_id);
-                                }
-                            }
+                        if(!$allOutWGS){
+                            $allInteger = $allOutWGS;
                         }
-                    }
-
-                    if(!$allOutWGS){
-                        $allInteger = $allOutWGS;
                     }
                 }
             }else{ //lat long fields
