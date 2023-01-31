@@ -283,9 +283,9 @@ function recordSearchFacets($system, $params){
 
             }else{    
 
-                $select_field = "cast(if(cast(getTemporalDateString( $select_field ) as DATETIME) is null,"
-                ."concat(cast(getTemporalDateString( $select_field ) as SIGNED),'-1-1'),"  //year
-                ."getTemporalDateString( $select_field )) as DATETIME)";
+                $select_field = "cast(if(cast(concat('00',getTemporalDateString( $select_field )) as DATETIME) is null,"
+                ."concat('00',cast(getTemporalDateString( $select_field ) as SIGNED),'-1-1'),"  //year
+                ."concat('00',getTemporalDateString( $select_field ))) as DATETIME)";
 
                 $select_clause = "SELECT min($select_field) as min, max($select_field) as max, count(distinct r0.rec_ID) as cnt ";
 
@@ -743,7 +743,7 @@ function getDateHistogramData($system, $range, $interval, $rec_ids, $dty_id, $fo
     }
 
     // Get record dates
-    $sql = "SELECT cast(if(cast(getTemporalDateString(dtl_Value) as DATETIME) is null, concat(cast(getTemporalDateString(dtl_Value) as SIGNED), '-1-1'), getTemporalDateString(dtl_Value)) as DATETIME)
+    $sql = "SELECT cast(if(cast(concat('00',getTemporalDateString(dtl_Value)) as DATETIME) is null, concat('00',cast(getTemporalDateString(dtl_Value) as SIGNED), '-1-1'), concat('00',getTemporalDateString(dtl_Value))) as DATETIME)
             FROM recDetails
             WHERE dtl_RecID IN (".implode(',', $rec_ids).") AND dtl_DetailTypeID = ".$dty_id." AND (NULLIF(dtl_Value, '') is not null) AND (cast(getTemporalDateString(dtl_Value) as DATETIME) is not null OR (cast(getTemporalDateString(dtl_Value) as SIGNED) is not null AND cast(getTemporalDateString(dtl_Value) as SIGNED) != 0))";
 
