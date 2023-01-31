@@ -2665,7 +2665,7 @@ class HPredicate {
             $res = ' in (select ulf_ID from recUploadedFiles where '.$res.')';
             
         }else
-        if (($this->field_type=='float' || $this->field_type=='integer' || $this->field_type == 'link') && is_numeric($this->value)) {
+        if (($this->field_type=='float' || $this->field_type=='integer' || $this->field_type == 'link') && (is_numeric($this->value) || strpos($this->value, "<>") !== false)) {
             
             if (strpos($this->value,"<>")>0) {
                 $vals = explode("<>", $this->value);
