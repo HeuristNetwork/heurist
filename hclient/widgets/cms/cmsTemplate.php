@@ -77,7 +77,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="icon" href="<?php echo $image_icon;?>"> <!--  type="image/x-icon" -->
     <link rel="shortcut icon" href="<?php echo $image_icon;?>">
-    
+    <base href="<?php echo HEURIST_BASE_URL; ?>">
     <?php
         include $websiteScriptAndStyles_php;  //include heurist scripts and styles
     ?>
