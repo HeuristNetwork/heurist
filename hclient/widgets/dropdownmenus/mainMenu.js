@@ -2595,6 +2595,7 @@ console.log('>>>>'+that.divProfileItems.find('.ui-menu-item').css('padding-left'
         this.version_message = true;
 
         let is_alpha = window.hWin.HAPI4.baseURL.match(/h\d+-alpha|alpha/);
+        //is_alpha = true;
         if(!is_alpha){ // need to check that an alpha version is available on this server
             window.hWin.HAPI4.SystemMgr.check_for_alpha({a:'check_for_alpha'}, function(response){ 
                 

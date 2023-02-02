@@ -42,8 +42,9 @@ $.widget( "heurist.recordListExt", {
         record_with_custom_styles: 0, //record id with custom css and style links DT_CMS_CSS and DT_CMS_EXTFILES
         
         onLoadComplete: null,  //callback
-        
-        placeholder_text: null //text to display while no record/recordset is loaded
+
+        empty_remark: null, //html content for empty message  (search returns empty result)
+        placeholder_text: null //text to display while no record/recordset is loaded  (search is not prefromed)
     },
 
     _current_url: null, //keeps current url - see loadURL 
@@ -107,7 +108,7 @@ that._dout('credentials');
                 
                 that.options.recordset = data.recordset; //hRecordSet
                 
-that._dout('search finised');                
+that._dout('search finished');                
                 that._refresh();
                 that.loadanimation(false);
 
@@ -201,12 +202,15 @@ that._dout('>>'+this.options.search_initial);
             this.options.search_initial = null;
         }        
 
-        if(!window.hWin.HEURIST4.util.isempty(this.options.placeholder_text)){
+        if(!window.hWin.HEURIST4.util.isempty(this.options.placeholder_text)
+        || !window.hWin.HEURIST4.util.isempty(this.options.empty_remark)){
             this.placeholder_ele = $('<div>')
                 .css('white-space', 'pre-wrap')
                 .prependTo(this.element)
-                .html(this.options.placeholder_text);
+                .html(window.hWin.HEURIST4.util.isempty(this.options.empty_remark)
+                    ?this.options.placeholder_text:this.options.empty_remark);
         }
+        
     }, //end _create
 
     //
@@ -359,12 +363,13 @@ this._dout('update dataset '+request.q);
 
         if(this.placeholder_ele != null){
             this.placeholder_ele.hide();
+            //this.div_content.css('visibility','visibile');
         }
 
 this._dout('refresh vis='+this.element.is(':visible'));            
 
         //refesh if element is visible only - otherwise it costs much resources
-        if(!this.element.is(':visible') || window.hWin.HEURIST4.util.isempty(this.options.url)){
+        if( (!this.element.is(':visible') && !this._is_publication) || window.hWin.HEURIST4.util.isempty(this.options.url)){
             return;  
         } 
 
@@ -400,11 +405,23 @@ this._dout('refresh vis='+this.element.is(':visible'));
                 }
             }
             if(newurl==null){
+
                 this._current_url = null;
-                if(this.options.is_frame_based){
-                    this.dosframe.attr('src', window.hWin.HRes('recordSelectMsg'));
+                
+                if(!window.hWin.HEURIST4.util.isempty(this.options.placeholder_text)){
+                    this.placeholder_ele.html(this.options.placeholder_text).show();
+                    if(this.options.is_frame_based){
+                        this.dosframe.attr('src', null);
+                    }else{
+                        this.div_content.empty();
+                    }
                 }else{
-                    this.div_content.load(window.hWin.HRes('recordSelectMsg'));
+                    
+                    if(this.options.is_frame_based){
+                        this.dosframe.attr('src', window.hWin.HRes('recordSelectMsg'));
+                    }else{
+                        this.div_content.load(window.hWin.HRes('recordSelectMsg'));
+                    }
                 }
             }else{
                 newurl = window.hWin.HAPI4.baseURL +  newurl;
@@ -414,7 +431,8 @@ this._dout('refresh vis='+this.element.is(':visible'));
                 }
             }
 
-        }else if(!this.options.reload_for_recordset && this._current_url!==this.options.url){
+        }else 
+        if(!this.options.reload_for_recordset && this._current_url!==this.options.url){
 
             this.options.url = window.hWin.HAPI4.baseURL +  this.options.url.replace("[dbname]",  window.hWin.HAPI4.database);
 
@@ -460,28 +478,35 @@ this._dout('refresh vis='+this.element.is(':visible'));
 
             if(this.options.is_frame_based){
                 //there is heurist apps in iframe - smarty report, crosstabs analysis or mapping
-
-                var showReps = this.dosframe[0].contentWindow.showReps;
-                if(showReps){
-                    //@todo - reimplement - send on server JSON with list of record IDs
-                    //{"resultCount":23,"recordCount":23,"recIDs":"8005,11272,8599,8604,8716,8852,8853,18580,18581,18582,18583,18584,8603,8589,11347,8601,8602,8600,8592,10312,11670,11672,8605"}
-                    if (this.options.recordset!=null){
-                        this._checkRecordsetLengthAndRunSmartyReport(-1);
-                    }
-                }else if (this.dosframe[0].contentWindow.crosstabsAnalysis) {
-                    
-                    if (this.options.recordset!=null){
-                        this._checkRecordsetLengthAndRunCrosstabsAnalysis(6000, query_string_main);
-                    }
-                    
+                
+                if ((this.options.recordset==null || this.options.recordset.length()==0) &&
+                    !window.hWin.HEURIST4.util.isempty(this.options.empty_remark)) 
+                {
+                    this.placeholder_ele.html(this.options.empty_remark).show();
                 }else{
-                    var showMap = this.dosframe[0].contentWindow.showMap;
-                    if(showMap){ //not used anymore
-                        showMap.processMap();
-                    }else if(this.dosframe[0].contentWindow.updateRuleBuilder && this.options.recordset) {
 
-                        //todo - swtich to event trigger????
-                        this.dosframe[0].contentWindow.updateRuleBuilder(this.options.recordset.getRectypes(), this._query_request);
+                    var showReps = this.dosframe[0].contentWindow.showReps;
+                    if(showReps){
+                        //@todo - reimplement - send on server JSON with list of record IDs
+                        //{"resultCount":23,"recordCount":23,"recIDs":"8005,11272,8599,8604,8716,8852,8853,18580,18581,18582,18583,18584,8603,8589,11347,8601,8602,8600,8592,10312,11670,11672,8605"}
+                        if (this.options.recordset!=null){
+                            this._checkRecordsetLengthAndRunSmartyReport(-1);
+                        }
+                    }else if (this.dosframe[0].contentWindow.crosstabsAnalysis) {
+                        
+                        if (this.options.recordset!=null){
+                            this._checkRecordsetLengthAndRunCrosstabsAnalysis(6000, query_string_main);
+                        }
+                        
+                    }else{
+                        var showMap = this.dosframe[0].contentWindow.showMap;
+                        if(showMap){ //not used anymore
+                            showMap.processMap();
+                        }else if(this.dosframe[0].contentWindow.updateRuleBuilder && this.options.recordset) {
+
+                            //todo - swtich to event trigger????
+                            this.dosframe[0].contentWindow.updateRuleBuilder(this.options.recordset.getRectypes(), this._query_request);
+                        }
                     }
                 }
             }

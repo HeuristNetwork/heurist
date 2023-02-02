@@ -58,7 +58,7 @@ $.widget( "heurist.resultList", {
         //searchsource: null,
 
         emptyMessageURL: null, //url of page to be loaded on empty result set 
-        empty_remark: 'def', //html content for empty message
+        empty_remark: 'def', //html content for empty message (search returns no result)
         pagesize: -1,
         
         
@@ -115,7 +115,7 @@ $.widget( "heurist.resultList", {
 		blog_result_list: false,    //whether the result list is used for blog records, limiting pagesize if it is
 
         auto_select_first: false,   //automatically select first record within result list
-        placeholder_text: null,      //text to display while no recordset is loaded
+        placeholder_text: null,     //text to display while no recordset is loaded (search is not prefromed yet)
         
         init_completed: false,   //flag to be set to true on full widget initializtion
 
@@ -443,6 +443,7 @@ $.widget( "heurist.resultList", {
 
         }
 
+        
         this._init_completed = true;
 
         this._refresh();
@@ -502,7 +503,7 @@ $.widget( "heurist.resultList", {
 
         //------------------------------------------       
 
-        this.div_header =  $( "<div>" ).css('height','auto').appendTo( this.element ); //41px
+        this.div_header =  $( "<div>" ).css({'height':'auto'}).appendTo( this.element ); //41px
         
         if(this.options.is_h6style){
 
@@ -549,7 +550,7 @@ $.widget( "heurist.resultList", {
 
         this.div_toolbar = $( "<div>" )
         .addClass('div-result-list-toolbar ent_header')
-        .css({'width':'100%','top':'0px'})
+        .css({'width':'100%','top':'0px','min-height':'23px'})
         .appendTo( this.element );
 
         this.div_content = $( "<div>" )
@@ -945,6 +946,8 @@ $.widget( "heurist.resultList", {
     //adjust top,height according to visibility settings -----------
     _adjustHeadersPos: function(){
 
+        if(!this.element.is(':visible')) return;
+        
         var top = 0;    
         if(this.options.show_inner_header){
             this.div_header.show();
@@ -1002,7 +1005,7 @@ $.widget( "heurist.resultList", {
             
             top = top + this.div_content_header.height();
         }
-        
+   
         //move content down to leave space for header
         this.div_content.css({'top': top+'px'}); //'110px'});
 		
