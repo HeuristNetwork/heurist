@@ -840,7 +840,7 @@ function initLinksAndImages($container, search_data){
                 pageid = href;
             }
             
-            if(pageid>0){
+            if(window.hWin.HEURIST4.util.isNumber(pageid) && pageid>0){
                 
                 $(link).attr('data-pageid', pageid);
                 
@@ -891,6 +891,11 @@ function initLinksAndImages($container, search_data){
                                 +');window.hWin.HEURIST4.util.stopEvent(event);}';
                 $(link).attr('href',scr);
             }
+        }
+        var href = $(link).attr('href');
+        if (href && href!='#' && (href.indexOf('./')==0 || href.indexOf('/')==0)){ //relative path
+              href = window.hWin.HAPI4.baseURL + href.substring(href.indexOf('/')==0?1:2);
+              $(link).attr('href', href);
         }
         
     });
@@ -1109,6 +1114,19 @@ function _openCMSeditor(event){
 
     btn.html(isCMS_active?'close editor':'website editor');
 }
+
+//
+// overwrite the standard jquery show method
+/*
+console.log('var orgShow = $.fn.show;');
+var orgShow = $.fn.show;
+$.fn.show = function()
+{
+    orgShow.apply( this, arguments ); //apply original show
+    $(this).trigger( 'myOnShowEvent' );
+    return this;
+}
+*/
 
 //
 // Init HAPI 
