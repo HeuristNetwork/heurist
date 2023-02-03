@@ -465,7 +465,7 @@ if($website_custom_css!=null){
                     if (! editCMS_instance2.startCMS({record_id:pageid, container:'#main-content',
                                     close: function(){
                                         isCMS_active = false;
-                                        $('#btnOpenCMSeditor').html('CMS');
+                                        $('#btnOpenCMSeditor').html('website editor');
                                         //$('#btnOpenCMSeditor').show();
                                     }})) //see editCMS2.js    
                     {
