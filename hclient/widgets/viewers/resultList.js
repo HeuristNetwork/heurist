@@ -119,7 +119,7 @@ $.widget( "heurist.resultList", {
         
         init_completed: false,   //flag to be set to true on full widget initializtion
 
-        show_linked_media: false  // show linked media within record viewer
+        recviewer_images: 1 // show images in record viewer; 0 - show all images, 1 - no linked media, 2 - no images
     },
 
     _is_publication:false, //this is CMS publication - take css from parent
@@ -2492,8 +2492,8 @@ $.widget( "heurist.resultList", {
                         +recID
                         +'&db='+window.hWin.HAPI4.database;
 
-                        if(that._is_publication && that.options.show_linked_media == false){
-                            infoURL += '&noImages=1';
+                        if(that._is_publication && that.options.recviewer_images != 0){
+                            infoURL += '&hideImages=' + that.options.recviewer_images;
                         }
                     }
                     
@@ -4271,8 +4271,8 @@ setTimeout("console.log('2. auto='+ele2.height());",1000);
                 recInfoUrl = window.hWin.HAPI4.baseURL + "viewers/record/renderRecordData.php?db="
                         +window.hWin.HAPI4.database+"&ll="+lt+"&recID="+rec_ID;  
                 
-                if(this._is_publication && this.options.show_linked_media == false){
-                    recInfoUrl += '&noImages=1';
+                if(this._is_publication && this.options.recviewer_images != 0){
+                    recInfoUrl += '&hideImages=' + this.options.recviewer_images;
                 }
             }
         }

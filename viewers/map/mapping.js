@@ -132,7 +132,7 @@ $.widget( "heurist.mapping", {
         
         map_margins: {padding: L.point(50, 50)},
 
-        show_linked_media: false // show linked media within record viewer
+        recviewer_images: 1  // show images in record viewer; 0 - show all images, 1 - no linked media, 2 - no images
     },
     
     /* expremental 
@@ -2284,8 +2284,8 @@ $.widget( "heurist.mapping", {
                         popupURL = popupURL+'&mapPopup=1&ll='+window.hWin.HAPI4.sysinfo['layout'];    
                     }
                     
-                    if(that.options.show_linked_media==false){
-                        popupURL = popupURL + '&noImages=1';
+                    if(that.options.recviewer_images!=0){
+                        popupURL = popupURL + '&hideImages=' + that.options.recviewer_images;
                     }
                 }  
             }              

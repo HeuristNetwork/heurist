@@ -61,7 +61,7 @@ $is_production = !$is_map_popup && $layout_name=='WebSearch';
 
 $is_reloadPopup = array_key_exists('reloadPopup', $_REQUEST) && ($_REQUEST['reloadPopup']==1);
 
-$no_linked_media = array_key_exists('noImages', $_REQUEST) && ($_REQUEST['noImages']==1);
+$hide_images = array_key_exists('hideImages', $_REQUEST) ? $_REQUEST['hideImages'] : 0; // 1 - No linked media, 2 - No images
 
 $rectypesStructure = dbs_GetRectypeStructures($system); //getAllRectypeStructures(); //get all rectype names
 
@@ -1111,13 +1111,13 @@ function print_personal_details($bkmk) {
 // prints recDetails
 //
 function print_public_details($bib) {
-    global $system, $defTerms, $is_map_popup, $without_header, $is_production, $ACCESSABLE_OWNER_IDS, $relRT, $startDT, $already_linked_ids, $group_details, $no_linked_media;
+    global $system, $defTerms, $is_map_popup, $without_header, $is_production, $ACCESSABLE_OWNER_IDS, $relRT, $startDT, $already_linked_ids, $group_details, $hide_images;
     
     $has_thumbs = false;
     
     $mysqli = $system->get_mysqli();
 
-    $query = 'select rst_DisplayOrder, dtl_ID, dty_ID,
+    $query = 'select rst_DisplayOrder, dtl_RecID, dtl_ID, dty_ID,
         IF(rdr.rst_DisplayName is NULL OR rdr.rst_DisplayName=\'\', dty_Name, rdr.rst_DisplayName) as name,
         dtl_Value as val,
         dtl_UploadedFileID,
@@ -1175,7 +1175,7 @@ function print_public_details($bib) {
         $bds_res->close();
   
         //get linked records with file fields
-        $query = 'select 999 as rst_DisplayOrder, d2.dtl_ID, dt2.dty_ID, "Linked media" as name, '
+        $query = 'select 999 as rst_DisplayOrder, d2.dtl_RecID, d2.dtl_ID, dt2.dty_ID, "Linked media" as name, '
                 .'d2.dtl_Value as val, '
                 .'d2.dtl_UploadedFileID, '
                 .'dt2.dty_Type, '
@@ -1289,6 +1289,10 @@ function print_public_details($bib) {
                 
                 $fileinfo = null;
                 
+                if($hide_images == 2 || ($hide_images == 1 && $bd['dtl_RecID'] != $bib['rec_ID'])){ // skip all images || skip linked media
+                    continue;
+                }
+
                 if(!($bd['dtl_UploadedFileID']>0)){
                      // FIX on fly - @todo  remove on 2022-08-22
                      $ruf_entity = new DbRecUploadedFiles($system, array('entity'=>'recUploadedFiles'));
@@ -1474,7 +1478,7 @@ function print_public_details($bib) {
       
     $several_media = count($thumbs);
         
-    if(!$no_linked_media) // use/hide old thumbnails   
+    if($hide_images != 2) // use/hide old thumbnails   
         foreach ($thumbs as $k => $thumb) {
             
             if(strpos($thumb['orig_name'],'_iiif')===0 || 
