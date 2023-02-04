@@ -27,43 +27,50 @@ function editCMS_SelectElement( callback ){
 
     var t_components = {
         
-    grp1:{name:'Content', description:'Content layouts or templates', is_header:true},
-        
-        //text_media:{name:'Text with media', description:'media and text '},
-        text_1:{name:'Simple text box', description:''},
-        text_2:{name:'Text in 2 columns', description:'2 columns layout'},
-        text_3:{name:'Text in 3 columns', description:'3 columns layout'},
-        //group_2:{name:'Groups as 2 columns', description:'2 columns layout'},
-        text_banner:{name:'Text on banner', description:'Text over background image'},
-        
-    grp4:{name:'Composite Pages', description:'Content layouts or templates', is_header:true},
-        tpl_default: {name:'Simple Page', description:'Simple blank page'},
-        tpl_discover: {name:'Discover (filters/results/map)', description:'3 columns layout'},
-        tpl_blog: {name:'Blog', description:''},
+        header1:{name:'Web pages', description:'#web_pages', is_section_header: true},
 
-    grp2:{name:'Widgets', description:'Heurist Widgets for dynamic content or interaction', is_header:true},
-        
-        heurist_SearchInput:{name:'Filter', description:'Search field (with standard filter builder)'},
-        heurist_SearchTree:{name:'Saved filters', description:'Simple &amp; facet filters, selection or tree'},            
+        //grp4:{name:'Composite Pages', description:'#composite_pages', is_group_header:true}, //Content layouts or templates
+            tpl_default: {name:'Simple Page', description:'#simple_page'}, //Simple blank page
+            tpl_discover: {name:'Discover (filters/results/map)', description:'#discover'}, //3 columns layout
+            //tpl_database: {name:'Database description', description:'#database'},
+            tpl_blog: {name:'Blog', description:'#blog'},
 
-        heurist_resultList:{name:'Standard filter result', description:'Switchable modes, action controls'},            
-        heurist_resultListExt:{name:'Custom report', description:'Also use for single record view'},            
-        heurist_resultListDataTable:{name:'Table format', description:'Result list as data table'},            
+        separator:{name:' ', description:'#', is_separator: true},
 
-        heurist_Map:{name:'Map and timeline', description:'Map and timeline widgets'},            
-        heurist_StoryMap:{name:'Story Map', description:'Storyline/map controller widgets'},            
-        heurist_Graph:{name:'Network graph', description:'Visualization for records links and relationships'},            
-        
-        heurist_Navigation:{name:'Menu', description:'Navigation Menu'},            
-        heurist_recordAddButton:{name:'Add Record', description:'Button to addition of new Heurist record'},
-        heurist_emailForm:{name:'Email Us Form', description:'Form to send email to addrees specified in home page as site owner email'},
-        
-    grp3:{name:'Containers', description:'to be described....', is_header:true},
+        header2:{name:'Page Content', description:'#page_content', is_section_header: true},
 
-        group:{name:'Group', description:'Container for elements'},
-        accordion:{name:'Accordion', description:'Set of collapsable groups'},            
-        tabs:{name:'Tabs', description:'Tab/Page control. Each page may have group of elements'},            
-        cardinal:{name:'Cardinal', description:'Container for five groups or elements placed orthogonally (N-S-E-W,-Center panels)'},                                                    
+            grp3:{name:'Containers', description:'#containers', is_group_header:true},
+
+                group:{name:'Group', description:'#group'}, //Container for elements
+                accordion:{name:'Accordion', description:'#accordion'}, //Set of collapsable groups
+                tabs:{name:'Tabs', description:'#tabs'}, //Tab/Page control. Each page may have group of elements
+                cardinal:{name:'Cardinal', description:'#cardinal'}, //Container for five groups or elements placed orthogonally (N-S-E-W,-Center panels)
+
+            grp1:{name:'Content', description:'Content layouts or templates', is_group_header:true},
+                
+                //text_media:{name:'Text with media', description:'media and text '},
+                text_1:{name:'Simple text box', description:'#simple_text'},
+                text_2:{name:'Text in 2 columns', description:'#2_columns'}, //2 columns layout
+                text_3:{name:'Text in 3 columns', description:'#3_columns'}, //3 columns layout
+                //group_2:{name:'Groups as 2 columns', description:'2 columns layout'},
+                text_banner:{name:'Text on banner', description:'#text_banner'}, //Text over background image
+
+            grp2:{name:'Widgets', description:'#widgets', is_group_header:true}, //Heurist Widgets for dynamic content or interaction
+                
+                heurist_SearchInput:{name:'Filter', description:'#filter'}, //Search field (with standard filter builder)
+                heurist_SearchTree:{name:'Saved filters', description:'#saved_filter'}, //Simple &amp; facet filters, selection or tree            
+
+                heurist_resultList:{name:'Standard filter result', description:'#result_list'}, //Switchable modes, action controls            
+                heurist_resultListExt:{name:'Custom report', description:'#custom_report'}, //Also use for single record view            
+                heurist_resultListDataTable:{name:'Table format', description:'#data_table'}, //Result list as data table            
+
+                heurist_Map:{name:'Map and timeline', description:'#map_timeline'}, //Map and timeline widgets
+                heurist_StoryMap:{name:'Story Map', description:'#story_map'}, //Storyline/map controller widgets
+                heurist_Graph:{name:'Network graph', description:'#network_graph'}, //Visualization for records links and relationships            
+                
+                heurist_Navigation:{name:'Menu', description:'#menu'}, //Navigation Menu
+                heurist_recordAddButton:{name:'Add Record', description:'#add_record'}, //Button to addition of new Heurist record
+                heurist_emailForm:{name:'Email Us Form', description:'#email_form'}, //Form to send email to addrees specified in home page as site owner email
         
     };
 
@@ -92,8 +99,8 @@ function editCMS_SelectElement( callback ){
         buttons, window.hWin.HR('Insert component into web page'), 
         {  container:'cms-add-widget-popup',
             default_palette_class: 'ui-heurist-publish',
-            width: 340,
-            height: 600,
+            width: 680,
+            height: 724,
             close: function(){
                 $dlg.dialog('destroy');       
                 $dlg.remove();
@@ -107,41 +114,45 @@ function editCMS_SelectElement( callback ){
                 //load list of groups and elements and init selector
                 var sel = $dlg.find('#components');
                 $.each(t_components, function(key, item){
-                    if(item.is_header){
-                            var grp = document.createElement("optgroup");
-                            grp.label =  item.name;
-                            sel[0].appendChild(grp);
+                    if(item.is_group_header || item.is_section_header){
+                        var grp = document.createElement("optgroup");
+                        grp.label = item.name;
+                        sel[0].appendChild(grp);
+
+                        grp.classList.add(item.is_group_header ? 'group-header' : 'section-header');
+                    }else if(item.is_separator){
+                        var opt = window.hWin.HEURIST4.ui.addoption(sel[0], null, '&nbsp;', true);
+                        opt.classList.add('separator-opt')
                     }else{
-                        window.hWin.HEURIST4.ui.addoption(sel[0], key, item.name);    
+                        window.hWin.HEURIST4.ui.addoption(sel[0], key, item.name);
                     }
-                    
-                    
-                });
-
-                sel.mouseover(function(e){
-                    window.hWin.HEURIST4.util.setDisabled( $dlg.parents('.ui-dialog').find('#btnDoAction'), false );
-                    var t_name = $(e.target).val();
-                    //selected_element  = t_name;
-                    var desc = '';
-                    if(t_components[t_name]){
-                        desc = t_components[t_name];    
-                    }
-                    if(desc){
-                        desc = desc.description
-                    }
-                    $dlg.find('.template_description').html(desc);    
 
                 });
+
                 sel.change(function(e){
                     window.hWin.HEURIST4.util.setDisabled( $dlg.parents('.ui-dialog').find('#btnDoAction'), false );
                     var sel = e.target;
                     var t_name = $(sel).val();
                     selected_element  = t_name;
                     selected_name = sel.options[sel.selectedIndex].text;
+
+                    let component = t_components[t_name];
+                    let desc_id = component.description;
+
+                    let $desc_ele = $dlg.find('#descriptions ' + desc_id);
+                    let $desc_missing = $dlg.find('#descriptions #missing');
+
+                    $dlg.find('#descriptions > div').addClass('hide-desc'); // Hide all component help
+                    $dlg.find('#help_name').text(component.name); // Update component name
+                    if(desc_id == '#' || $desc_ele.length == 0){
+                        $desc_missing.removeClass('hide-desc'); // No help text currently
+                    }else{
+                        $desc_ele.removeClass('hide-desc'); // Show help text
+                    }
                 });
 
-                sel.val('text_1').change();
-                selected_element = 'text';
+                sel.val('group').change();
+                selected_element = 'group';
 
             }
     });
