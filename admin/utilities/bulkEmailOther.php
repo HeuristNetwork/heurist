@@ -283,6 +283,33 @@ if(isset($_REQUEST['get_email']) && isset($_REQUEST['recid'])) {	/* Get the Titl
 
 	print $rtn;
 	
+} else if(isset($_REQUEST['rec_count']) && isset($_REQUEST['db_list'])){ // Get a count of records
+
+	$dbs = $_REQUEST['db_list'];
+	if(!is_array($dbs)){
+		$dbs = explode(',', $dbs);
+	}
+
+	$data = array();
+	foreach($dbs as $db){
+
+		$query = 'SELECT count(*) FROM ' . $db . '.Records WHERE rec_FlagTemporary != 1';
+		$res = $mysqli->query($query);
+		if(!$res){
+			$data[$db] = 'error';
+			continue;
+		}
+
+		while($row = $res->fetch_row()){
+			$data[$db] = $row[0];	
+		}
+	}
+
+	$response = array("status"=>HEURIST_OK, "data"=>$data, "request"=>implode(',', $dbs));
+	$rtn = json_encode($response);
+
+	print $rtn;
+
 } else if(isset($_REQUEST['sysadmin_pwd'])) { // Verify Admin Password
 
 	if(!$system->verifyActionPassword($_REQUEST['sysadmin_pwd'], $passwordForServerFunctions)){
