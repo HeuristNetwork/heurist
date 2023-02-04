@@ -1531,6 +1531,11 @@ private static function _getJsonFlat( $record, $columns, $row_placeholder, $leve
         $rt_id = $record['rec_RecTypeID'];
     }
 
+    if(self::$defTerms==null) {
+        self::$defTerms = dbs_GetTerms(self::$system);
+        self::$defTerms = new DbsTerms(self::$system, self::$defTerms);
+    }
+
     if(!array_key_exists($rt_id, $columns)) return null;
 
     foreach($columns[$rt_id] as $column){
@@ -1597,7 +1602,7 @@ private static function _getJsonFlat( $record, $columns, $row_placeholder, $leve
                             $res[$rt_id_link] = $field_value;    
                         }
                     }
-                    $field_value = $link_rec_Id;
+                    $field_value = $record['rec_Title']; //$link_rec_Id Record ID replaced with Record Title
 
                 }else if ($field_type=='file'){
 
@@ -1607,7 +1612,10 @@ private static function _getJsonFlat( $record, $columns, $row_placeholder, $leve
 
                     $field_value = @$field_value['geo']['wkt'];
 
-                //}else if ($field_type=='enum' || $field_type=='relationtype'){
+                }else if (($field_type=='enum' || $field_type=='relationtype')){
+
+                    $field_value = self::$defTerms->getTermLabel($field_value, true);
+
                 }
 
                 if($field_value!=null){

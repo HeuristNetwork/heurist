@@ -298,31 +298,6 @@ that._dout('myOnShowEvent');
                             }else{
                                 cols[i]['render'] = null;
                             }
-                        }else{
-                            var ids = cols[i]['data'].split('.');
-                            if(ids && ids.length>0){
-                                var dt = ids[ids.length-1];
-                                var type = $Db.dty(dt,'dty_Type');
-                                if(type=='enum' || type=='relationtype'){
-                                    cols[i]['render'] = function(data,type){
-
-                                        if(type === 'display'){
-
-                                            if(window.hWin.HEURIST4.util.isArray(data)){
-                                                for(var i = 0; i < data.length; i++){
-                                                    data[i] = (data[i] > 0) ? $Db.trm(data[i], 'trm_Label') : data[i];
-                                                }
-                                                return data;
-                                            }else{
-                                                return (data > 0) ? $Db.trm(data,'trm_Label') : data;
-                                            }
-
-                                        }else{
-                                            return data;
-                                        }
-                                    }
-                                }
-                            }
                         }
 
                         if(cols[i]['visible'] === "false" || cols[i]['visible'] === false){
@@ -471,7 +446,7 @@ this._dout('reload datatable '+this.options.serverSide);
                     this.selConfigs.configEntity({
                         entityName: 'defRecTypes',
                         configName: 'datatable',
-                        loadSettingLabel: 'Choose fields:',
+                        loadSettingLabel: 'Field list',
 
                         getSettings: null,
                         setSettings: function( settings ){ //callback function to apply configuration
@@ -480,7 +455,7 @@ this._dout('reload datatable '+this.options.serverSide);
 
                         divSaveSettings: null,
                         showButtons: true,
-                        buttons: {rename:'save as', openedit:'edit', remove:'delete'},
+                        buttons: {rename:'save as', openedit:'select fields for display', remove:'delete'},
                         openEditAction: function(is_new){ //overwrite default behaviour - open configuration popup
                                 that._openColumnDefinition( is_new );
                         }
@@ -490,6 +465,8 @@ this._dout('reload datatable '+this.options.serverSide);
                     this.selConfigs.find('span.btn-action-div').css({display: 'inline-block','padding-top':'10px'});
                     this.selConfigs.configEntity('updateList', 'all', 
                             that.options.initial_cfg?that.options.initial_cfg.cfg_name:null);
+
+                    this.selConfigs.find('.btn-openedit').prependTo(this.selConfigs.find('div:first-child')).css('margin', '0 15px');
                 }                    
                 
                 //add button to configure columns

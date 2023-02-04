@@ -1452,6 +1452,10 @@ div.saved-search > .edit-delete-buttons, .recordDiv > .edit-delete-buttons {
     margin: 0px 2px;
 }
 
+/* List view - Datatable */
+table.dataTable th{
+    text-align: left;
+}
 
 /* Allow Font Awesome Icons in lieu of jQuery UI and only apply when using a FA icon
 Remove the jQuery UI Icon
