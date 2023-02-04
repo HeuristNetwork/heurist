@@ -2206,7 +2206,7 @@ $.widget( "heurist.search_faceted", {
                         || field['type']=="date" || field['type']=="year") && field['isfacet']==this._FT_SELECT)
                     {  //add slider
                     
-                        $input_div.find('.input-cell').css('padding-bottom','5px'); // 20px
+                        $input_div.find('.input-cell').css('padding-bottom','25px');
                     
                         $facet_values.parent().css({'display':'block'});
                         //AAA strange padding ,'padding-left':'1em','padding-right':'2em'
@@ -2242,8 +2242,9 @@ $.widget( "heurist.search_faceted", {
                                 if(mmin.indexOf("-00-00")>0){
                                     mmin = mmin.replace("-00-00","-01-01");
                                 }
-                                if(mmax.indexOf("-00-00")>0){
-                                    mmax = mmax.replace("-00-00","-01-01");
+                                if(mmax.indexOf("-00-00")>0 || mmax.indexOf("-01-01")>0){
+                                    let to_replace = mmax.indexOf("-00-00")>0 ? "-00-00" : "-01-01";
+                                    mmax = mmax.replace(to_replace,"-01-02");
                                 }
                                 
                                 mmin = mmin.replace(' ','T');                                                                     
@@ -2433,7 +2434,7 @@ $.widget( "heurist.search_faceted", {
                                             col_width -= col_gap;
 
                                             if(col_width < 3) {
-                                                col_width = 3;
+                                                col_width = $diagram.width() / data.length;
                                                 col_gap = 0;
                                             }
                                             if(data.length == 1){
@@ -2458,13 +2459,13 @@ $.widget( "heurist.search_faceted", {
                                                     }
                                                 }
 
-                                                var $column = $('<div id="histo_col_'+i+'">')
+                                                $('<div id="histo_col_'+i+'">')
                                                 .css({
                                                     'background-color': 'gray', 
                                                     'width': col_width+'px', 
                                                     'margin-right': col_gap+'px', 
                                                     'display': 'inline-block', 
-                                                    'height': height+'px',
+                                                    'height': ((height == 0) ? 2 : height) +'px',
                                                     'visibility': (height == 0) ? 'hidden' : 'visible',
                                                     'margin-top': 'auto'
                                                 }).appendTo($diagram);
@@ -2652,8 +2653,8 @@ $.widget( "heurist.search_faceted", {
                                    buttons: buttons,
                                    title:'Define selection range',
                                    resizable: false,
-                                   width:280,
-                                   height:190,
+                                   width:300,
+                                   height:212,
                                    position:{my:'bottom left',at:'top left',of:$(event.target)} 
                                 });
                             }
