@@ -2517,9 +2517,9 @@ window.hWin.HEURIST4.ui = {
     //
     // show map style edit dialog
     //
-    showEditSymbologyDialog: function(current_value, needName, callback){
+    showEditSymbologyDialog: function(current_value, mode_edit, callback){
         //todo optionally load dynamically editing_exts.js
-        editSymbology(current_value, needName, callback);
+        editSymbology(current_value, mode_edit, callback);
     },
 
     //

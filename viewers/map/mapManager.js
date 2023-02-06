@@ -590,7 +590,7 @@ function hMapManager( _options )
 
                                             //
                                             //mapDocuments.openMapDocument(node.key, dfd);
-                                        }else if(node.data.type=='layer'){
+                                        }else if(node.data.type=='layer'){   //show/hide layer
                                             
                                             if(_suppress_select_event) return;
                                             
@@ -611,9 +611,11 @@ function hMapManager( _options )
                                             if(not_visible){ //reset
                                                 node.setSelected(false);
                                             }
-                                        }else if(node.data.type=='theme'){
+                                        }else if(node.data.type=='theme'){ //show/hide theme
+                                        
+                                            //theme is obtained from resdata.fld(record, DT_SYMBOLOGY); see _getTreeData
 
-//console.log(node);                          
+
                                             //if(node.parent.isSelected()){
                                                 var mapdoc_id = node.data.mapdoc_id;
                                                 var layer_id = node.data.layer_id;
@@ -720,7 +722,7 @@ function hMapManager( _options )
                                                 //backgroundImage: "url(skin-custom/customDoc2.gif)",
                                                 //backgroundPosition: "0 0"
                                         }else 
-                                        if(item.data.type=='theme'){
+                                        if(item.data.type=='theme'){ //render theme label in treeview
                                             
                                             
                                         } else if(item.data.type=='mapdocument'){

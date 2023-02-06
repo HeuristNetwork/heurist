@@ -24,6 +24,11 @@
 * See the License for the specific language governing permissions and limitations under the License.
 */
 
+//
+//  mode_edit 2 - symbology for general map draw style
+//            1 - symbology editor from map legend
+//            3  - symbology editor from recrd edit for map layer
+// 
 function editSymbology(current_value, mode_edit, callback){
 
     var edit_dialog = null;
@@ -128,13 +133,50 @@ function editSymbology(current_value, mode_edit, callback){
         ];
         
     }else{
+        
+        var ptr_fields = [];
+        if(mode_edit===3){
+            //get list of pointer fields
+            var rty_as_place = window.hWin.HAPI4.sysinfo['rty_as_place'];
+            rty_as_place = (rty_as_place)?rty_as_place.split(','):[];
+            rty_as_place.push((''+window.hWin.HAPI4.sysinfo['dbconst']['RT_PLACE']));
+            
+            $Db.dty().each2(function(dty_ID, record){
+                
+                var dty_Type = record['dty_Type'];
+                if(record['dty_Type']=='resource') 
+                {
+                    is_parent = false;
+                    
+                    var ptr = record['dty_PtrTargetRectypeIDs'];
+                    if(ptr){
+                        ptr = ptr.split(',');  
+                        const has_entry = ptr.filter(value => rty_as_place.includes(value));
+                        if(has_entry.length>0){
+                          ptr_fields.push({"key":$Db.getConceptID('dty',dty_ID),"title":record['dty_Name']});  
+                        }
+                    } 
+                }
+            });
+        }
+        
+        
         editFields = [                
         {"dtID": "sym_Name",
             "dtFields":{
                 "dty_Type":"freetext",
                 //"rst_RequirementType":"required",                        
                 "rst_DisplayName":"Name:",
-                "rst_Display": (mode_edit===true)?"visible":"hidden"
+                "rst_Display": (mode_edit===1)?"visible":"hidden"
+        }},
+
+        {"dtID": "geofield",
+            "dtFields":{
+                "dty_Type":"enum",
+                //"rst_RequirementType":"required",                        
+                "rst_DisplayName":"Geofield:",
+                "rst_Display": (mode_edit===3)?"visible":"hidden",
+                "rst_FieldConfig":ptr_fields, //{"entity":"defDetailTypes","csv":false},
         }},
         
         

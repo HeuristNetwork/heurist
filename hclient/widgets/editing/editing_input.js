@@ -3160,7 +3160,9 @@ console.log('onpaste');
         //----------------- color or symbology editor
         if( this.options.dtID > 0 && this.options.dtID == window.hWin.HAPI4.sysinfo['dbconst']['DT_SYMBOLOGY']){
 
-                $input.attr('readonly','readonly');
+                if(that.options.rectypeID!=window.hWin.HAPI4.sysinfo['dbconst']['RT_MAP_LAYER']){
+                    $input.attr('readonly','readonly');
+                }
                 
                 if(this.options.rectypeID == window.hWin.HAPI4.sysinfo['dbconst']['RT_CMS_HOME']){
                     
@@ -3197,9 +3199,16 @@ console.log('onpaste');
                         .appendTo( $inputdiv );
                     
                     this._on( $btn_edit_switcher, { click: function(){
+                        
+                            var mode_edit = 0;
+                        
+                            if(that.options.rectypeID==window.hWin.HAPI4.sysinfo['dbconst']['RT_MAP_LAYER']){
+                                mode_edit = 3;
+                            }
+                        
                             var current_val = window.hWin.HEURIST4.util.isJSON($input.val());
                             if(!current_val) current_val = {};
-                            window.hWin.HEURIST4.ui.showEditSymbologyDialog(current_val, false, function(new_value){
+                            window.hWin.HEURIST4.ui.showEditSymbologyDialog(current_val, mode_edit, function(new_value){
                                 $input.val(JSON.stringify(new_value));
                                 that.onChange();
                             });

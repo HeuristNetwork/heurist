@@ -47,7 +47,9 @@ function hMapLayer2( _options ) {
         
     var _nativelayer_id = 0,
         _dataset_type = null,
-        _geojson_ids = null; //array of record ids on map (for thematic map)
+        _geojson_ids = null; 
+                             //arrays of record ids grouped by geofields (optional) to retrieve detail fields (for thematic mapping)
+                             //_geojson_ids[geofield] = [record ids] or _geojson_ids['all'] = [all record ids]
     
     var is_inited = false,
         is_visible = false,
@@ -417,10 +419,76 @@ function hMapLayer2( _options ) {
     //
     function _addQueryLayer(){
 
-        var layer_style = _recordset.fld(options.rec_layer || _record, 
-                                    window.hWin.HAPI4.sysinfo['dbconst']['DT_SYMBOLOGY']);
         var layer_popup_template = _recordset.fld(options.rec_layer || _record, 
                                     window.hWin.HAPI4.sysinfo['dbconst']['DT_POPUP_TEMPLATE']);
+        
+        var layer_geofields = []
+        var layer_default_style = null;
+        if(window.hWin.HAPI4.sysinfo['dbconst']['DT_SYMBOLOGY']>0){
+            var layer_themes = _recordset.fld(options.rec_layer || _record, 
+                                        window.hWin.HAPI4.sysinfo['dbconst']['DT_SYMBOLOGY']);
+  
+/*            
+        {   //additional filter and default layer symbol
+            "geofield": "2-134"//2-134 (birth) or 1161-254 (death) Field id for pointer to Place, optional    
+            "symbol":{"iconType":"circle","stroke":"1","color":"#ff0000","weight":"2","fill":"1","fillColor":"#0000FF","iconSize":"8"},
+        },  
+        OR "symbol":{"geofield":...., }
+        {
+            "title": "First theme ever",
+            "symbol":{"iconType":"circle","stroke":"1","color":"#ff0000","weight":"2","fill":"1","fillColor":"#0000FF","iconSize":"8"},
+            "rules": {}, //find records linked to place
+            "fields": []
+        }
+        
+{
+            "title": "Death",
+            "symbol":{"iconType":"circle","stroke":"1","color":"#ff0000","weight":"2","fill":"1","fillColor":"#000000","iconSize":"6"}
+}        
+*/            
+           
+            //find "geofield" in thematic maps - download geodata from these fields only
+            layer_themes = window.hWin.HEURIST4.util.isJSON(layer_themes);
+            
+            if(layer_themes){
+                
+                if($.isPlainObject(layer_themes)){
+                    layer_themes = [layer_themes];
+                }
+
+                $.each(layer_themes, function(i,item){
+                    if(item.geofield){
+                        layer_geofields.push(item.geofield);
+                        layer_default_style = item.symbol?item.symbol:item;
+                        return false;       
+                    }else if(!item.fields){
+                        layer_default_style = item.symbol?item.symbol:item;
+                    }
+                });
+
+                    
+                /* simplify    
+                var need_all_geofields = false;    
+                    
+                $.each(layer_themes, function(i,item){
+                    if(item.geofield){
+                        layer_geofields.push(item.geofield); //it is assumed that this one geofield for thematic map        
+                    }else if(item.fields){ //theme without geofield
+                         need_all_geofields = true; 
+                    }else { //theme without fields, this is default symbol
+                        layer_default_style = item.symbol?item.symbol:layer_themes;
+                    }
+                });
+                
+                if(layer_geofields.length>0 && need_all_geofields){
+                    layer_geofields.unshift('all');
+                }
+                */
+            }
+        }
+        if(layer_geofields.length==0) layer_geofields = null;
+                                    
+                                    
         var origination_db = null;
         
         var query = _recordset.fld(_record, window.hWin.HAPI4.sysinfo['dbconst']['DT_QUERY_STRING']);
@@ -432,6 +500,7 @@ function hMapLayer2( _options ) {
                 q: request.q,
                 rules: request.rules,
                 w: request.w,
+                geofields: layer_geofields, //additional filter - get geodata from specified fields only
                 //returns strict geojson and timeline data as two separate arrays, withoud details, only header fields rec_ID, RecTypeID and rec_Title
                 leaflet: true, 
                 simplify: true, //simplify paths with more than 1000 vertices
@@ -474,7 +543,7 @@ function hMapLayer2( _options ) {
                         _nativelayer_id = options.mapwidget.mapping('addGeoJson', 
                                     {geojson_data: geojson_data,
                                     timeline_data: timeline_data,
-                                    layer_style: layer_style,
+                                    layer_style: layer_default_style,
                                     popup_template: layer_popup_template,
                                     origination_db: origination_db,
                                     dataset_name:_recordset.fld(options.rec_layer || _record, 'rec_Title'),  //name for timeline
@@ -522,7 +591,7 @@ function hMapLayer2( _options ) {
             || window.hWin.HEURIST4.util.isArrayNotEmpty(timeline_data) )
         {
                          
-            _geojson_ids = data['geojson_ids']; //all record ids to be plotted on map                    
+            _geojson_ids = data['geojson_ids']; //simpify {all: data['geojson_ids']}; //all record ids to be plotted on map                    
             _dataset_type = 'db';
             _nativelayer_id = options.mapwidget.mapping('addGeoJson', 
                         {geojson_data: geojson_data,
@@ -578,8 +647,14 @@ function hMapLayer2( _options ) {
     //        
     function _applyThematicMap( theme ){    
         
+        //sample of thematic map configuration
         /*
-        theme = {
+        theme = 
+        {   //additional filter and default layer symbol
+            "geofield": "2-134"//2-134 (birth) or 1161-254 (death) Field id for pointer to Place, optional    
+            "symbol":{"iconType":"circle","stroke":"1","color":"#ff0000","weight":"2","fill":"1","fillColor":"#0000FF","iconSize":"8"},
+        },
+        {
             "title": "First theme ever",
             "symbol":{"iconType":"circle","stroke":"1","color":"#ff0000","weight":"2","fill":"1","fillColor":"#0000FF","iconSize":"8"},
             "rules": {}, //find records linked to place
@@ -594,62 +669,68 @@ function hMapLayer2( _options ) {
         };*/
         
         //feature.properties.rec_ID
+        // _geojson_ids - list of heurist records in layer
         if(_dataset_type!='db' || _geojson_ids==null || _geojson_ids.length==0) return;
         
         theme = window.hWin.HEURIST4.util.isJSON(theme);
         
         if(!theme){
-            //off current theme
+            //switch off current theme
             that.applyStyle(null, null);
             return;
         }
         
         //get codes - field ids
         var theme_fields = [];
-        $.each(theme.fields, function(i,ftheme){
-            theme_fields.push(ftheme.code);
-            //prepare ranges
-            for(var j=0; j<ftheme.ranges.length; j++){
-                var range = ftheme.ranges[j].value;
-                if(typeof range==='string'){
-                    var values = range.split(',');
-                    if(values.length>=2){
-                        ftheme.ranges[j].value = values;
-                    }else{
-                        values = range.split('<>');
-                        if(values.length==2){
-                            ftheme.ranges[j].min = values[0];
-                            ftheme.ranges[j].max = values[1];
+        if(theme.fields && theme.fields.length>0)
+        {
+            //find values
+        
+            $.each(theme.fields, function(i,ftheme){
+                theme_fields.push(ftheme.code);
+                //prepare ranges
+                for(var j=0; j<ftheme.ranges.length; j++){
+                    var range = ftheme.ranges[j].value;
+                    if(typeof range==='string'){
+                        var values = range.split(',');
+                        if(values.length>=2){
+                            ftheme.ranges[j].value = values;
+                        }else{
+                            values = range.split('<>');
+                            if(values.length==2){
+                                ftheme.ranges[j].min = values[0];
+                                ftheme.ranges[j].max = values[1];
+                            }
                         }
                     }
                 }
-            }
-        });
+            });
         
-        var server_request = {
-            q: 'ids:'+_geojson_ids.join(','),  //'420,421,422,435,436,437,438', //"f133":5321  *f133:"City"
-            rules: theme.rules,  //search for linked records
-            w: 'a',
-            zip: 1,
-            detail:'rec_RecTypeID,'+theme_fields.join(',')  //'133,1109'
+            var server_request = {
+                q: 'ids:'+_geojson_ids.join(','), //"f133":5321  *f133:"City"
+                rules: theme.rules,  //search for linked records
+                w: 'a',
+                zip: 1,
+                detail:'rec_RecTypeID,'+theme_fields.join(',')  //'133,1109'
             };
-                                          //_new  format:'json'
-        window.hWin.HAPI4.RecordMgr.search(server_request,
-            function(response){
+//console.log('AAAA', server_request);           
+            //_new  format:'json'
+            window.hWin.HAPI4.RecordMgr.search(server_request,
+                function(response){
                     var def_layer_style = that.getStyle();
 
                     if(response.status == window.hWin.ResponseStatus.OK){
                         var resdata = new hRecordSet(response.data);
-                        
+
                         //assign symbol for each record in the resultset
-                        var res_thematic_map = {}; //recid=>symbol
+                        var res_thematic_map = {}; //heurist recid=>symbol
                         resdata.each(function(recID, record){
                             for(var i=0; i<theme.fields.length; i++){
                                 let ftheme = theme.fields[i];
                                 let value = resdata.fld(record, ftheme.code);
-                                
+
                                 let fsymb = null;
-                                
+
                                 if(ftheme.range_type=='equal' || ftheme.range_type=='log'){
                                     //@todo find min and max value
                                 }else{
@@ -662,40 +743,43 @@ function hMapLayer2( _options ) {
                                                 break;
                                             }
                                         }else if(!window.hWin.HEURIST4.util.isnull(range.min) && 
-                                                 !window.hWin.HEURIST4.util.isnull(range.max)){
-                                                     
-                                            if(value>=range.min && value<=range.max){
+                                            !window.hWin.HEURIST4.util.isnull(range.max)){
+
+                                                if(value>=range.min && value<=range.max){
+                                                    fsymb = range.symbol;
+                                                    break;
+                                                }
+                                            }else if(value==range.value){
                                                 fsymb = range.symbol;
                                                 break;
                                             }
-                                        }else if(value==range.value){
-                                                fsymb = range.symbol;
-                                                break;
-                                        }
                                     }//for
                                     if(fsymb!=null){
-                                        // @todo if theme.symbol is not defined take def_layer_style
-                                        res_thematic_map[recID] = _mergeThematicSymbol(theme.symbol, fsymb);
+                                        //if theme.symbol is not defined it takes def_layer_style)
+                                        res_thematic_map[recID] = _mergeThematicSymbol(theme.symbol?theme.symbol:def_layer_style, fsymb);
                                     }
                                 }
                             }
-                            
+
                             //var datasource_record = resdata.getById( datasource_recID );                            
-                            
+
                         });
-                        
-//console.log('result ',res_thematic_map);   
+
+                        //console.log('result ',res_thematic_map);   
                         that.applyStyle(null, res_thematic_map);                     
-                        
+
                     }else {
                         that.applyStyle(null, null);
                         window.hWin.HEURIST4.msg.showMsgErr(response);
                     }
-                
+
             });
 
 
-        
+        }else{ //there is no fields - use one default symbology
+              var use_symbol = theme.symbol?theme.symbol:that.getStyle();;
+              that.applyStyle(use_symbol, null);
+        }
     }
     
     //

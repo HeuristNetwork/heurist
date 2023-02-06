@@ -3141,19 +3141,21 @@ function recordLinksFileContent($system, $record){
 
 // 
 // find geo in linked places 
-// @todo - use as place record type defined in $system->user_GetPreference('deriveMapLocation', 1)
+// $find_geo_by_linked_rty - if true it searches for linked RT_PLACE 
+//                        or it is array of rectypes defined in sys_TreatAsPlaceRefForMapping + RT_PLACE
+// $find_geo_by_linked_dty - list of pointer fields search for geo limited to
 //
-function recordSearchGeoDetails($system, $recID, $find_places_for_geo) {
+function recordSearchGeoDetails($system, $recID, $find_geo_by_linked_rty, $find_geo_by_linked_dty) {
 
     $details = array();    
     
     if(true){ //$system->defineConstant('DT_GEO_OBJECT')
     
-        if ($find_places_for_geo===true && $system->defineConstant('RT_PLACE')){
-            $find_places_for_geo = array(RT_PLACE);
+        if ($find_geo_by_linked_rty===true && $system->defineConstant('RT_PLACE')){
+            $find_geo_by_linked_rty = array(RT_PLACE);
         }
         
-        if(is_array($find_places_for_geo) && count($find_places_for_geo)>0){
+        if(is_array($find_geo_by_linked_rty) && count($find_geo_by_linked_rty)>0){
 
             //$recID = $record["rec_ID"];     
             $squery = 'SELECT rl_SourceID,dtl_DetailTypeID,dtl_Value,ST_asWKT(dtl_Geo) as dtl_Geo, '
@@ -3161,11 +3163,19 @@ function recordSearchGeoDetails($system, $recID, $find_places_for_geo) {
             .' FROM recDetails, recLinks, Records '
             .' WHERE (dtl_Geo IS NOT NULL) '  //'dtl_DetailTypeID='. DT_GEO_OBJECT
             .' AND dtl_RecID=rl_TargetID AND rl_TargetID=rec_ID AND rec_RecTypeID'
-                   .(count($find_places_for_geo)==1
-                        ?('='.$find_places_for_geo[0])
-                        :(' IN ('.implode(',',$find_places_for_geo).')'))
-            .' AND rl_SourceID = '.$recID
-            .' ORDER BY rl_ID'; 
+                   .(count($find_geo_by_linked_rty)==1
+                        ?('='.$find_geo_by_linked_rty[0])
+                        :(' IN ('.implode(',',$find_geo_by_linked_rty).')'))
+            .' AND rl_SourceID = '.$recID;
+            
+            if(is_array($find_geo_by_linked_dty) && count($find_geo_by_linked_dty)>0){
+                $squery = $squery.' AND rl_DetailTypeID'
+                   .(count($find_geo_by_linked_dty)==1
+                        ?('='.$find_geo_by_linked_dty[0])
+                        :(' IN ('.implode(',',$find_geo_by_linked_dty).')')); 
+            }
+            
+            $squery = $squery.' ORDER BY rl_ID'; 
             //'in (' . join(',', $chunk_rec_ids) . ')';
 
             $mysqli = $system->get_mysqli();

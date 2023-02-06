@@ -978,7 +978,7 @@ $.widget( "heurist.mapping", {
     },
     
     //
-    // adds geojson layer to map
+    // adds geojson layer to map ( see mapLayer2 )
     // returns nativemap id
     // options:
     //      geojson_data

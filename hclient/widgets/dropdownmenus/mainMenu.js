@@ -1648,7 +1648,7 @@ console.log('>>>>'+that.divProfileItems.find('.ui-menu-item').css('padding-left'
             $btn_edit_switcher.on( { click: function(){
                     var current_val = window.hWin.HEURIST4.util.isJSON( $dlg.find(sname).val() );
                     if(!current_val) current_val = {};
-                    window.hWin.HEURIST4.ui.showEditSymbologyDialog(current_val, false, function(new_value){
+                    window.hWin.HEURIST4.ui.showEditSymbologyDialog(current_val, 0, function(new_value){
                         $dlg.find(sname).val(JSON.stringify(new_value));
                     });
             }});

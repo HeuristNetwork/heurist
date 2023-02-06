@@ -1113,6 +1113,7 @@ error_log(print_r($_REQUEST, true));
                     'host_url'=>$host_url,
                     
                     'media_ext'=>HEURIST_ALLOWED_EXT, //$this->get_system('sys_MediaExtensions'),
+                    'rty_as_place'=>$this->get_system('sys_TreatAsPlaceRefForMapping'),
                     
                     'need_encode'=>$needEncodeRecordDetails, 
                     
