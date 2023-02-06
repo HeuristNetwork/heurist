@@ -19,13 +19,38 @@
 */
 -->
 
+<style>
+
+    optgroup{
+        background-color: transparent !important;
+    }
+
+    optgroup.section-header{
+        margin: 10px 0;
+        font-size: 15px;
+    }
+
+    optgroup.group-header{
+        font-size: 12px;
+        font-weight: 800;
+    }
+
+    option.separator-opt{
+        border-bottom: 1px solid black;
+    }
+
+    .hide-desc{
+        display: none;
+    }
+</style>
+
 <div class="heurist-helper1" style="padding:5px;">
     See 
     <a href="#" class="heurist-online-help" target="_blank">website help</a>
 </div>
 
 
-<div style="display: flex; gap: 5px; justify-content: flex-start; align-items: flex-start;">
+<div style="display: flex; gap: 35px; justify-content: flex-start; align-items: flex-start;">
 
 <div style="width:300px">
 
@@ -35,10 +60,35 @@
 
 </div>
 
-<div style="width:220px; display:none;">
-    <h4>Description</h4>
-    <p class="template_description" style="padding:5px;min-height:70px;"></p>
-    <p style="padding:5px;border:1px solid gray; min-height:100px; min-width:100px;">Placeholder for image</p>
+<div style="width: 300px;margin-top: 50px;background: #F4F2F4 !important;padding-left: 10px;" class="ui-widget-content ui-corner-all">
+
+    <h2 id="help_name">#</h2>
+    <div id="descriptions" style="padding:10px 5px;min-height:400px;font-size: 12px;">
+        <div id="group">
+            <div>
+                A group is normally used to keep several other elements togather so that they can be displayed and scaled across the page, for example a search on the left, results in the middle and a custom report or map on the right.
+                <br><br>
+                Without groups, all the elements will normally be displayed one above the other.
+            </div>
+        </div>
+
+        <div id="simple_text">
+            <div>
+                The simple text box contains WYSIWYG text which can be edited with the embedded TinyMCE text editor. This allows for headings, font styles, quotes, hyperlinks, etc...
+                <br><br>
+                Embedded media referenced by the database (whether local to the database or a remote reference) will be rendered in place in the page.
+                <br><br>
+                The simple text box may occupy the whole width of the page or be placed within a container or other element to be scaled in width and/or sit next to other elements.
+            </div>
+        </div>
+
+        <div id="missing">
+            <div>
+                Description to be provided
+            </div>
+        </div>
+    </div>
+    <!--<p style="padding:5px;border:1px solid gray; min-height:100px; min-width:100px;display:none;">Placeholder for image</p>-->
 </div>
 
 </div>

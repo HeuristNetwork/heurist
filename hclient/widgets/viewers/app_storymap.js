@@ -157,8 +157,8 @@ $.widget( "heurist.app_storymap", {
                                 },
                                 "empty_remark": 
                         '<h3 class="not-found" style="color:teal;">'
-                        + top.HR('There are no visible story points for the selected record (they may exist but not made public)')
-                        + '</h3>',
+                        + top.HR('<br><br>There are no story elements to display for the selected item')
+                        + '</h3><i>Story elements may exist but not be publicly visible>/i><br><br>)',
                                 "onScroll": function(event){ that._onScroll(event, that) },
                                 "expandDetailsWithoutWarning": true,
                                 "show_toolbar":false,
@@ -862,8 +862,8 @@ $.widget( "heurist.app_storymap", {
             //this.options.storyRecordID = null;
             this.pnlOverview.html(
             '<h3 class="not-found" style="color:teal;">'
-            +top.HR('There are no visible story points for the selected record (they may exist but not made public)')
-            +'</h3>');
+            +top.HR('<br><br>There are no story elements to display for the selected item')
+            +'</h3><i>Story elements may exist but not be publicly visible>/i><br><br>)');
         }
         
         if(this._btn_clear_story){

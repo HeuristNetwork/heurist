@@ -141,8 +141,11 @@ if(!($rec_id>0))
     if(@$res['status']==HEURIST_OK){
         $rec_id = @$res['data']['records'][0];
         if(!($rec_id>0)){
+
+            $try_login = $system->getCurrentUser() == null;
             $message = 'Sorry, there are no publicly accessible websites defined for this database. '
-            .'Please ask the owner to publish their website(s).';
+            .'Please ' . ($try_login ? '<span class="login-link">login</span> or' : '') . ' ask the owner to publish their website(s).';
+
             include ERROR_REDIR;
             exit();
         }

@@ -74,6 +74,67 @@ if(!isset($message)){
         <!-- CSS -->
         <?php include dirname(__FILE__).'/initPageCss.php'; ?>
         <link rel="stylesheet" type="text/css" href="<?php echo PDIR;?>external/jquery-ui-iconfont-master/jquery-ui.icon-font.css" />
+
+        <style>
+            span.login-link{
+                text-decoration: underline;
+                color: blue;
+                cursor: pointer;
+            }
+        </style>
+    <?php
+    if(isset($try_login) && $try_login === true){ // Does a login link need to be handled
+
+        if (($_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0.0.1'))  {
+        ?>
+
+            <script type="text/javascript" src="<?php echo PDIR;?>external/jquery-ui-1.12.1/jquery-1.12.4.js"></script>
+            <script type="text/javascript" src="<?php echo PDIR;?>external/jquery-ui-1.12.1/jquery-ui.js"></script>
+
+        <?php
+        }else{
+        ?>
+
+            <script src="https://code.jquery.com/jquery-1.12.2.min.js" integrity="sha256-lZFHibXzMHo3GGeehn1hudTAP3Sc0uKXBXAzHX1sjtk=" crossorigin="anonymous"></script>
+            <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js" integrity="sha256-VazP97ZCwtekAsvgPBSUwPFKdrwD3unUfSGVYrahUqU=" crossorigin="anonymous"></script>
+
+        <?php
+        }
+        ?>
+
+        <script>window.hWin = window;</script>
+        <script type="text/javascript" src="<?php echo PDIR;?>hclient/core/detectHeurist.js"></script>
+    
+        <script type="text/javascript" src="<?php echo PDIR;?>hclient/core/hapi.js"></script>
+        <script type="text/javascript" src="<?php echo PDIR;?>hclient/core/utils.js"></script>
+        <script type="text/javascript" src="<?php echo PDIR;?>hclient/core/utils_ui.js"></script>
+        <script type="text/javascript" src="<?php echo PDIR;?>hclient/core/utils_msg.js"></script>
+        <script type="text/javascript" src="<?php echo PDIR;?>hclient/core/localization.js"></script>
+        <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/profile/profile_login.js"></script>   
+        <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/profile/profile_edit.js"></script>
+
+        <script>
+
+            function onHapiInit() {
+                let $login_ele = $(document).find('.login-link');
+                if($login_ele.length > 0 && window.hWin && window.hWin.HEURIST4){
+                    $login_ele.on('click', () => {
+                        if(window.hWin && window.hWin.HEURIST4){
+                            window.hWin.HEURIST4.ui.checkAndLogin(true, () => {
+                                location.reload();
+                            });
+                        }
+                    });
+                }
+            }
+
+            $(document).ready(() => {
+                window.hWin.HAPI4 = new hAPI('<?php echo $_REQUEST['db']?>', onHapiInit);
+            });
+        </script>
+    <?php
+    }
+    ?>
     </head>
     <body style="padding:44px;" class="ui-heurist-header1">
         <div class="ui-corner-all ui-widget-content" style="text-align:left; width:70%; min-width:220px; margin:0px auto; padding: 0.5em;">

@@ -225,8 +225,8 @@ if(!$has_emails || empty($emails)) {
             .l-col {
                 float: left;
 
-                width: 15%;
-                max-width: 15%;
+                min-width: 15%;
+                max-width: 30%;
             }
 
             #dbSelection {
@@ -253,17 +253,41 @@ if(!$has_emails || empty($emails)) {
             
             var current_db = "<?php echo $current_db ?>";
             
+            //
+            // Get list of currently selected databases
+            //
             function getDbList(){
-                    var checked_dbs = $("#dbSelection").find(".dbListCB:checked");
-                    var dbs = [];
-                    checked_dbs.each(function(idx, ele){
-                        dbs.push($(ele).attr("id"));
-                    });
 
-                    //input[name="databases"]
-                    $('#db_list').val(dbs.join(','));
+                var checked_dbs = $("#dbSelection").find(".dbListCB:checked");
+                var dbs = [];
+                checked_dbs.each(function(idx, ele){
+                    dbs.push($(ele).attr("id"));
+                });
+
+                //input[name="databases"]
+                $('#db_list').val(dbs.join(','));
+
+                return dbs;
             }
 
+            //
+            // Get list of all databases in current list
+            //
+            function getAllDbs() {
+
+                var dbs = [];
+
+                var checked_dbs = $("#dbSelection").find(".dbListCB");
+                checked_dbs.each(function(idx, ele){
+                    dbs.push($(ele).attr("id"));
+                });
+
+                return dbs;
+            }
+
+            //
+            // Prepare and run export script
+            //
             function exportCSV(isValid) {
 
                 var action = $("#emailOptions").attr("onsubmit");
@@ -289,6 +313,9 @@ if(!$has_emails || empty($emails)) {
                 return false;
             }
 
+            //
+            // Valid main form
+            //
             function validateForm(e) {
 
                 var isValid = true;
@@ -357,6 +384,9 @@ if(!$has_emails || empty($emails)) {
                 }
             }
 
+            //
+            // Setup database list (left hand section)
+            //
             function setupDBSelection(dbs) {
 
                 var $db_selection = $("#dbSelection");
@@ -373,7 +403,8 @@ if(!$has_emails || empty($emails)) {
 
                     $db_selection.append(
                         "<div class='label non-selectable' title='"+ name +"'> "
-                      + '  <label><input type="checkbox" class="dbListCB" id="'+value+'" value="'+ value +'">' + name + "</label>"
+                        + '<label><input type="checkbox" class="dbListCB" id="'+value+'" value="'+ value +'">' + name + "</label>"
+                        + '<label data-id="'+value+'"></label>'
                       + "</div>"
                     );
                 });
@@ -404,6 +435,9 @@ if(!$has_emails || empty($emails)) {
                 $("#filterMsg").hide().text("Filtering Databases...");
             }
 
+            //
+            // Setup user filtering elements
+            //
             function setupUserSelection() {
 
                 var $user_selection = $('#userSelection');
@@ -421,7 +455,6 @@ if(!$has_emails || empty($emails)) {
                 ];
 
                 window.hWin.HEURIST4.ui.createSelector(select.get(0), options);
-                //window.hWin.HEURIST4.ui.initHSelect(select, true); // was false, but apparently the menu widget will not open
 
                 if(select.hSelect("instance")!=undefined) {
                     select.hSelect("widget").css({"margin-top": "5px", "min-width": "15em", "width": "310px"});
@@ -432,6 +465,9 @@ if(!$has_emails || empty($emails)) {
                 select.on("change", getUserCount);
             }
 
+            //
+            // Setup email selection elements
+            //
             function setupEmailSelection() {
                 
                 var $email_selection = $("#emailOutline");
@@ -448,15 +484,6 @@ if(!$has_emails || empty($emails)) {
                 });
 
                 window.hWin.HEURIST4.ui.createSelector($email_selection.get(0), options);
-                /*
-                window.hWin.HEURIST4.ui.initHSelect($email_selection, true); // was false, but apparently the menu widget will not open
-
-                if($email_selection.hSelect("instance")!=undefined) {
-                    $email_selection.hSelect("widget").css({"min-width": "20em"});
-                }else{
-console.log('FAIL');                                    
-                }
-                */
 
                 $email_selection.on({
                     change: function(event) {
@@ -473,13 +500,13 @@ console.log('FAIL');
                 });
             }            
 
+            //
+            // Setup remaining elements
+            //
             function setupOtherElements() {
 
                 var modifySel = $("#recModifiedSel");
                 var modifyLogic = $("#recModifiedLogic");
-
-                //window.hWin.HEURIST4.ui.initHSelect(modifySel.get(0), true); // was false, but apparently the menu widget will not open
-                //window.hWin.HEURIST4.ui.initHSelect(modifyLogic.get(0), true); // was false, but apparently the menu widget will not open
 
                 window.hWin.HEURIST4.util.setDisabled($("#recModified"), true);
                 window.hWin.HEURIST4.util.setDisabled($("#recModifiedLogic-button"), true);
@@ -566,7 +593,10 @@ console.log('FAIL');
                 });
             }
 
-            function getDBList() {
+            //
+            // Get complete list of databases on current server
+            //
+            function getInitDbList() {
 
                 $.ajax({
                     url: 'bulkEmailOther.php',
@@ -602,6 +632,9 @@ console.log('FAIL');
                 });
             }
 
+            //
+            // Retrieve selected email details
+            //
             function getEmailDetails(id) {
 
                 $.ajax({
@@ -637,19 +670,87 @@ console.log('FAIL');
                 });
             }
 
-            function getUserCount() {
+            //
+            // Display record counts for databases
+            //
+            function displayRecordCount(data) {
+                
+                var $db_list = $("#dbSelection");
 
-                var dbs = [];
+                $.each(data, (db, count) => {
+                    let $ele = $db_list.find('[data-id="'+ db +'"]');
 
-                var checked_dbs = $("#dbSelection").find(".dbListCB:checked");
-                if(checked_dbs.length == 0){
-                    $("#userCount").text("0");
+                    if($ele.length > 0){
+
+                        let max_width = $ele.parent().width() - 30;
+
+                        $ele.text('[' + count + ']').css({'float': 'right', 'padding-left': '5px'});
+                    }
+                });
+
+                $("#allDBs").parent().parent().find('span').show();
+            }
+
+            //
+            // Retrieve record count for list of databases
+            //
+            function getRecordCount() {
+
+                var dbs = getAllDbs();
+
+                if(dbs.length == 0){
                     return;
                 }
 
-                checked_dbs.each(function(idx, ele){
-                    dbs.push($(ele).attr("id"));
-                });
+                var data = {
+                    db: current_db,
+                    db_list: dbs,
+                    rec_count: 1
+                };
+
+                $.ajax({
+                    url: 'bulkEmailOther.php',
+                    type: 'POST',
+                    data: data,
+                    dataType: 'json',
+                    cache: false,
+                    xhrFields: {
+                        withCredentials: true
+                    },
+                    error: (jqXHR, textStatus, errorThrown) => {
+
+                        window.hWin.HEURIST4.msg.showMsgErr("An error has occurred with retrieving the the user count for the selected databases and user type."
+                                + "<br>Error Details: " + jqXHR.status + " => " + textStatus
+                                + "<br><br>Please contact the Heurist team if this problem persists");
+                    },
+                    success: (response, textStatus, jqXHR) => {
+
+                        if(response.status == "ok"){
+                            displayRecordCount(response.data);
+                        } else {
+
+                            if(window.hWin.HEURIST4.util.isempty(response.message)){
+                                window.hWin.HEURIST4.msg.showMsgErr("An unknown error has occurred, please contact the Heurist team.");
+                            } else {
+                                var msg = response.message + '<br>' + (!window.hWin.HEURIST4.util.isempty(response.error_msg) ? response.error_msg : '');
+                                window.hWin.HEURIST4.msg.showMsgErr({message: msg, title: "Heurist"});
+                            }
+                        }
+                    }
+                })
+            }
+
+            //
+            // Get distinct user count for selected databases
+            //
+            function getUserCount() {
+
+                var dbs = getDbList();
+
+                if(dbs.length == 0){
+                    $("#userCount").text('0');
+                    return;
+                }
 
                 var data = {
                     db: current_db,
@@ -689,6 +790,9 @@ console.log('FAIL');
                 });
             }
 
+            //
+            // Verify sysadmin password
+            //
             function verifySystemAdminPwd() {
                 
                 var data = {
@@ -762,7 +866,9 @@ console.log('FAIL');
                     })
                     .css('margin-left', '10px');
 
-                getDBList();
+                $("#btnCalRecCount").click(getRecordCount);
+
+                getInitDbList();
             });
 
         </script>
@@ -824,7 +930,10 @@ console.log('FAIL');
                     <div id="dbArea">
 
                         <div style="margin-bottom: 15px;">Get users from these databases:</div>
-                        <div class="non-selectable" style="margin: 0px 0px 10px 5px;"><input type="checkbox" id="allDBs">Select All</div>
+                        <div class="non-selectable" style="margin: 0px 0px 10px 5px;">
+                            <label><input type="checkbox" id="allDBs"> Select All</label> 
+                            <span style="float: right; display: none; margin-right: 10px;">Record count:</span>
+                        </div>
                         <div id="dbSelection">
                         </div>
 
@@ -835,7 +944,9 @@ console.log('FAIL');
                 <div class="r-col">
                     
                     <div style="margin-bottom: 20px;">
-                        Send email to: <span id="userSelection"></span> &nbsp;&nbsp;&nbsp; Count of distinct users: <span id="userCount">0</span>
+                        Send email to: <span id="userSelection"></span> &nbsp;&nbsp;&nbsp; 
+                        Count of distinct users: <span id="userCount">0</span> 
+                        <button id="btnCalRecCount" style="margin-left: 10px;" onclick="return false;">Count total DB records (slow)</button>
                     </div>
 
                     <div class="non-selectable" style="margin-bottom: 20px;"> 
@@ -893,7 +1004,7 @@ console.log('FAIL');
                 </div>
 
                 <input name="db" value="<?php echo $_REQUEST['db']; ?>" style="display: none;" readonly />
-                <!-- <textarea id="db_list" name="databases" style="display: none;"></textarea> -->
+
                 <input id="db_list" name="databases" type="hidden" />
                 <input name="exportCSV" value="false" style="display: none;" readonly />
 

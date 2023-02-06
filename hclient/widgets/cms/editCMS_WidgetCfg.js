@@ -838,7 +838,7 @@ function editCMS_WidgetCfg( widget_cfg, _layout_content, $dlg, main_callback ){
                                 var $select3 = $dlg.find('select[name="rep_template"]'); 
 
                                 window.hWin.HEURIST4.ui.createTemplateSelector( $select3 
-                                    ,null, $select3.attr('data-template'));
+                                    ,[{key:'',title:'Standard record view template'}], $select3.attr('data-template'));
 
 
             }else 
@@ -1018,10 +1018,16 @@ function editCMS_WidgetCfg( widget_cfg, _layout_content, $dlg, main_callback ){
                     opts['template'] = $dlg.find('select[name="rep_template"]').val();
                     opts['reload_for_recordset'] = true;
                     opts['emptysetmessage'] = $dlg.find('#empty_remark').val() == '' ? 'def' : $dlg.find('#empty_remark').val();
-                    opts['url'] = 'viewers/smarty/showReps.php?publish=1&debug=0'
-                    +'&emptysetmessage='+encodeURIComponent(opts['emptysetmessage'])
-                    +'&template='+encodeURIComponent(opts['template'])
-                    +'&[query]';
+
+                    if(opts['template'] != ''){
+                        opts['url'] = 'viewers/smarty/showReps.php?publish=1&debug=0'
+                        +'&emptysetmessage='+encodeURIComponent(opts['emptysetmessage'])
+                        +'&template='+encodeURIComponent(opts['template'])
+                        +'&[query]';
+                    }else{
+                        opts['url'] = 'viewers/record/renderRecordData.php?db=[dbname]&recID=[recID]';
+                    }
+
                     opts['placeholder_text'] = $dlg.find('#placeholder_text').val();
                 }else if(widget_name=='heurist_resultList'){
                     opts['show_toolbar'] = opts['show_counter'] || opts['show_viewmode'];

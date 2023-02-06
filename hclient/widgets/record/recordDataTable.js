@@ -290,7 +290,7 @@ $.widget( "heurist.recordDataTable", $.heurist.recordAction, {
                     if(rty>=0 && $Db.rty(rectype_Ids[rty],'rty_Name')){
                         rty = rectype_Ids[rty];
                         var name = $Db.rty(rty,'rty_Plural');
-console.log(name);                        
+
                         if(!name) name = $Db.rty(rty,'rty_Name');
                         window.hWin.HEURIST4.ui.addoption(selScope,rty,name); //'only: '+
                     }

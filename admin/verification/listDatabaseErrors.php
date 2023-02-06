@@ -2285,10 +2285,10 @@ if($active_all || in_array('geo_values', $active)){ // Check for geo fields that
             if($geom!=null && !$geom->isEmpty()){ // Check that long (x) < 180 AND lat (y) < 90
 
                 $bbox = $geom->getBBox();
-                $allOutWGS = (abs($bbox['minx'])<-180) || (abs($bbox['miny'])<-90) 
-                          || (abs($bbox['maxx'])>180) || (abs($bbox['maxy'])>90);
+                $within_bounds = (abs($bbox['minx'])<=180) && (abs($bbox['miny'])<=90)
+                              && (abs($bbox['maxx'])<=180) && (abs($bbox['maxy'])<=90);
 
-                if ($allOutWGS){
+                if (!$within_bounds){
                     array_push($bibs2, $row);
                     array_push($ids2, $row['rec_ID']);
                     continue;

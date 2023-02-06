@@ -1532,9 +1532,8 @@ them to incoming data before you can import new records:<br><br>'.implode(",", $
                             $geom = geoPHP::load($wkt, 'wkt');
                             if($geom!=null && !$geom->isEmpty()){
                                 $bbox = $geom->getBBox();
-                                $allOutWGS = $allOutWGS 
-                                    && (abs($bbox['minx'])>=-180) && (abs($bbox['miny'])>=-90)
-                                    && (abs($bbox['maxx'])<=180) && (abs($bbox['maxy'])<=90);
+                                $allOutWGS = (abs($bbox['minx'])<=180) && (abs($bbox['miny'])<=90)
+                                          && (abs($bbox['maxx'])<=180) && (abs($bbox['maxy'])<=90);
                                 if (!$allOutWGS && !in_array($imp_id, $imp_session['validation']['geo_invalid']['outOfBounds'])){
                                     array_push($imp_session['validation']['geo_invalid']['outOfBounds'], $imp_id);
                                 }
@@ -1549,9 +1548,8 @@ them to incoming data before you can import new records:<br><br>'.implode(",", $
                                     $geom = geoPHP::load($valid_geo, 'wkt');
                                     if($geom!=null && !$geom->isEmpty()){
                                         $bbox = $geom->getBBox();
-                                        $allOutWGS = $allOutWGS 
-                                            && (abs($bbox['minx'])<-180) && (abs($bbox['miny'])<-90)
-                                            && (abs($bbox['maxx'])>180) && (abs($bbox['maxy'])>90);
+                                        $allOutWGS = (abs($bbox['minx'])<=180) && (abs($bbox['miny'])<=90)
+                                                  && (abs($bbox['maxx'])<=180) && (abs($bbox['maxy'])<=90);
                                         if (!$allOutWGS && !in_array($imp_id, $imp_session['validation']['geo_invalid']['outOfBounds'])){
                                             array_push($imp_session['validation']['geo_invalid']['outOfBounds'], $imp_id);
                                         }
@@ -1570,9 +1568,8 @@ them to incoming data before you can import new records:<br><br>'.implode(",", $
                                 $geom = geoPHP::load($valid_geo, 'wkt');
                                 if($geom!=null && !$geom->isEmpty()){
                                     $bbox = $geom->getBBox();
-                                    $allOutWGS = $allOutWGS 
-                                        && (abs($bbox['minx'])<-180) && (abs($bbox['miny'])<-90)
-                                        && (abs($bbox['maxx'])>180) && (abs($bbox['maxy'])>90);
+                                    $allOutWGS = (abs($bbox['minx'])<=180) && (abs($bbox['miny'])<=90)
+                                              && (abs($bbox['maxx'])<=180) && (abs($bbox['maxy'])<=90);
                                     if (!$allOutWGS && !in_array($imp_id, $imp_session['validation']['geo_invalid']['outOfBounds'])){
                                         array_push($imp_session['validation']['geo_invalid']['outOfBounds'], $imp_id);
                                     }
