@@ -893,7 +893,7 @@ function initLinksAndImages($container, search_data){
             }
         }
         var href = $(link).attr('href');
-        if (href && href!='#' && (href.indexOf('./')==0 || href.indexOf('/')==0)){ //relative path
+        if (!window.hWin.HEURIST4.util.isempty(href) && href!='#' && (href.indexOf('./')==0 || href.indexOf('/')==0)){ //relative path
               href = window.hWin.HAPI4.baseURL + href.substring(href.indexOf('/')==0?1:2);
               $(link).attr('href', href);
         }
@@ -913,6 +913,11 @@ function initLinksAndImages($container, search_data){
 
         if(!window.hWin.HEURIST4.util.isempty(file_id)){
             $(image).attr('src', window.hWin.HAPI4.baseURL_pro + '?db=' + window.hWin.HAPI4.database + '&file=' + file_id + '&fancybox=1');
+        }else 
+        if (!window.hWin.HEURIST4.util.isempty(src) 
+            && (src.indexOf('./')==0 || src.indexOf('/')==0)){ //relative path
+              src = window.hWin.HAPI4.baseURL + src.substring(src.indexOf('/')==0?1:2);
+              $(image).attr('src', src);
         }
     });
 
