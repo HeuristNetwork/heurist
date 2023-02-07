@@ -4,16 +4,16 @@
     * Map digitizing tool - LEAFLET based
     *
     * @package     Heurist academic knowledge management system
-    * @link        http://HeuristNetwork.org
+    * @link        https://HeuristNetwork.org
     * @copyright   (C) 2005-2020 University of Sydney
     * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
-    * @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
+    * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
     * @version     4.0
     */
 
     /*
     * Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except in compliance
-    * with the License. You may obtain a copy of the License at http://www.gnu.org/licenses/gpl-3.0.txt
+    * with the License. You may obtain a copy of the License at https://www.gnu.org/licenses/gpl-3.0.txt
     * Unless required by applicable law or agreed to in writing, software distributed under the License is
     * distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
     * See the License for the specific language governing permissions and limitations under the License.
@@ -184,6 +184,10 @@ console.log('load google map api')
                     });
 
                 });
+                
+                $("#fix-x-coords").button().click(function(){
+                
+                });
                 // load from map -> geojson
                 $('#get-geometry-button').button().click(function(){
                     
@@ -210,6 +214,7 @@ console.log('load google map api')
 
                         $dlg.find('#geodata_textarea').val(geodata);
 
+console.log(geodata);                        
                         mapping.mapping( 'drawLoadGeometry', geodata);
                         $dlg.dialog( "close" );
                     };
@@ -230,7 +235,6 @@ console.log('load google map api')
                        var el_name = $(e.target).attr('id');
 //console.log(el_name+'  '+is_checked);
                        var el_text = $(e.target).parents('#get-set-coordinates').find('#geodata_textarea');
-
 
                        if(el_name=='get-coord-wkt' && is_checked){
                            
@@ -690,7 +694,8 @@ console.log(JSON.stringify(res));
         <div id="get-set-coordinates" style="display: none;">
             <!--
             -->
-            <div id="set-coordinates-helper">
+            <div>
+            <div id="set-coordinates-helper" style="display:inline-block;width:80%">
                 <label>Paste geo data as Simple points (X,Y or X Y), GeoJSON or WKT</label>
                 <div class="heurist-helper1" style="padding:5px 0">
                     WKT:  POINT(x y)   LINESTRING(x1 y1, x2 y2, x3 y3)   POLYGON((x1 y1, x2 y2, x3 y3)) see 
@@ -698,10 +703,14 @@ console.log(JSON.stringify(res));
                     Coordinates in decimal lat/long or UTM (x/easting then y/northing). Easting in W hemisphere starts at -180, northing in S Hemisphere starts at -90.<br>
                 </div>
             </div>
-            <div id="get-coordinates-helper">
+            <div id="get-coordinates-helper" style="display:inline-block;width:80%">
                 <label>Select format: </label>
                 <label><input type="radio" name="get-coord-format" id="get-coord-json" checked="true">GeoJSON</label>
                 <label><input type="radio" name="get-coord-format" id="get-coord-wkt">WKT</label>
+            </div>
+            <div style="float:right;width:140px">
+                <input value="360" type="number" size="4" style="width:4em"/>&nbsp;<button id="fix-x-coords">Fix Long</button>
+            </div>                  
             </div>
             <textarea cols="" rows="" id="geodata_textarea"
                 style="position:absolute;top:4em;bottom:0;width:97%;resize:none"></textarea>

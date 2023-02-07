@@ -10,16 +10,16 @@
 * @returns hAPI Object
 *
 * @package     Heurist academic knowledge management system
-* @link        http://HeuristNetwork.org
+* @link        https://HeuristNetwork.org
 * @copyright   (C) 2005-2020 University of Sydney
 * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
-* @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
+* @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
 * @version     4.0
 */
 
 /*
 * Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except in compliance
-* with the License. You may obtain a copy of the License at http://www.gnu.org/licenses/gpl-3.0.txt
+* with the License. You may obtain a copy of the License at https://www.gnu.org/licenses/gpl-3.0.txt
 * Unless required by applicable law or agreed to in writing, software distributed under the License is
 * distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
 * See the License for the specific language governing permissions and limitations under the License.
@@ -215,7 +215,7 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
             request.notes = null; //unset to reduce traffic
         }
 
-        //set d=0 and c=0 to disable debug  http://www.nusphere.com/kb/technicalfaq/faq_dbg_related.htm
+        //set d=0 and c=0 to disable debug  https://www.nusphere.com/kb/technicalfaq/faq_dbg_related.htm
         request.DBGSESSID = (_use_debug) ? '425944380594800002;d=1,p=0,c=1' : '425944380594800002;d=0,p=0,c=0';
 
         var url = that.baseURL + "hsapi/controller/" + action + ".php"; //+(new Date().getTime());
@@ -231,6 +231,7 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
             xhrFields: {
                 withCredentials: true
             },
+            //Content-type: application/json
             /* DEPRECATED  */
 
             error: function (jqXHR, textStatus, errorThrown) {
@@ -1969,7 +1970,7 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
                 //todo - verify basic params
                 request['request_id'] = window.hWin.HEURIST4.util.random();
 
-                //set d and c=0 to disable debug  http://www.nusphere.com/kb/technicalfaq/faq_dbg_related.htm
+                //set d and c=0 to disable debug  https://www.nusphere.com/kb/technicalfaq/faq_dbg_related.htm
                 request.DBGSESSID = (_use_debug) ? '425944380594800002;d=1,p=0,c=1' : '425944380594800002;d=0,p=0,c=0';
 
                 _callserver('entityScrud', request, callback);

@@ -4,17 +4,17 @@
 * createNewDB.php: Create a new database by applying blankDBStructure.sql and coreDefinitions.txt
 *
 * @package     Heurist academic knowledge management system
-* @link        http://HeuristNetwork.org
+* @link        https://HeuristNetwork.org
 * @copyright   (C) 2005-2020 University of Sydney
 * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
 * @author      Ian Johnson     <ian.johnson@sydney.edu.au>
-* @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
+* @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
 * @version     4
 */
 
 /*
 * Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except in compliance
-* with the License. You may obtain a copy of the License at http://www.gnu.org/licenses/gpl-3.0.txt
+* with the License. You may obtain a copy of the License at https://www.gnu.org/licenses/gpl-3.0.txt
 * Unless required by applicable law or agreed to in writing, software distributed under the License is
 * distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
 * See the License for the specific language governing permissions and limitations under the License.
@@ -458,7 +458,7 @@ if($registrationRequired){ //show user registration dialog again after wrong cap
                         THIS DATABASE IS CURRENTLY UNDER DEVELOPMENT - PLEASE DON'T USE THIS OPTION
                         <br/>
                         A training database consisting of interlinked information about Shakespeare's plays, company, actors, theatres, performances etc.
-                        Use this database as a starting point for becoming familiar with Heurist<br>(See <a href="http://HeuristNetwork.org/screencasts" target="_blank">introductory video</a>).
+                        Use this database as a starting point for becoming familiar with Heurist<br>(See <a href="https://HeuristNetwork.org/screencasts" target="_blank">introductory video</a>).
                     </div>
 
                     <div id="nextSteps" style="padding:10px 0 10px 26px;width:600px;display:none">
