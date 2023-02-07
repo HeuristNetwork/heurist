@@ -43,6 +43,12 @@ function hEditing(_options) {
     */
     function _init(_options) {
         
+        if(typeof tinymce === 'undefined'){
+            _loadTinyMCE(function(){
+                _init(_options);    
+            });
+            return;        
+        }
         
         if (typeof _options.container==="string") {
             $container = $("#"+_options.container);
@@ -73,6 +79,10 @@ function hEditing(_options) {
         options = _options;
         
         _initEditForm(_options.recstructure, _options.recdata);
+        
+        if($.isFunction(_options.oninit)){
+            _options.oninit.call(that);
+        }
     }
 
     //
@@ -147,13 +157,6 @@ function hEditing(_options) {
             $container.show();
             return;     
         } 
-        
-        if(typeof tinymce === 'undefined'){
-            _loadTinyMCE(function(){
-                _initEditForm(_recstructure, _recdata, _is_insert);    
-            });
-            return;        
-        }
         
         if(_recstructure) recstructure = _recstructure;
                 

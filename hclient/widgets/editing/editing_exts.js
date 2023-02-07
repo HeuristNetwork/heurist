@@ -66,8 +66,11 @@ function editSymbology(current_value, mode_edit, callback){
 
             }
 
-    }});
-    
+        },
+        oninit: function(){
+            
+            _editing_symbology = this;
+            
     if(current_value){
         current_value.fill = window.hWin.HEURIST4.util.istrue(current_value.fill)?'1':'0';
         current_value.stroke = window.hWin.HEURIST4.util.istrue(current_value.stroke)?'1':'0';
@@ -313,7 +316,6 @@ function editSymbology(current_value, mode_edit, callback){
         ];
     }
     
-    
     _editing_symbology.initEditForm( editFields, recdata );
 
     var edit_buttons = [
@@ -391,6 +393,10 @@ function editSymbology(current_value, mode_edit, callback){
     });                
 
     edit_dialog.parent().addClass('ui-heurist-design');
+    
+        }//on init
+    });
+    
 }//end editSymbology
 
 

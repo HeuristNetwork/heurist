@@ -892,7 +892,26 @@ window.hWin.HAPI4.baseURL+'?db=' + window.hWin.HAPI4.database  //(needplayer?'&p
         //find file element
         var that = this;
         
-            if(!this._editing_uploadfile){ //form is not yet defined
+    
+        function __initEditForm_cont(){
+                //init hidden edit form  that contains the only field - file uploader
+                that._editing_uploadfile.initEditForm([{
+                        "dtID": "ulf_FileUpload",
+                        "dtFields":{
+                            "dty_Type":"file",
+                            "rst_DisplayName":"File upload:",
+                            "rst_FieldConfig":{"entity":"recUploadedFiles", "registerAtOnce":1, 
+                                            "tiledImageStack": (is_tiled===true || that._additionMode=='tiled')?1:0},
+                            "dty_Role":"virtual",
+                            "rst_Display":"hidden"
+                        }
+                    }], null);
+                that._editing_uploadfile.getContainer().hide(); //this form is hidden
+                var ele = that._editing_uploadfile.getFieldByName('ulf_FileUpload');    
+                ele.find('.fileupload').click(); //open file select dialog
+        }        
+        
+        if(!this._editing_uploadfile){ //form is not yet defined
 
                 var container = $('<div>').css({width:0,height:0}).appendTo(this.editForm.parent());
                 
@@ -919,27 +938,17 @@ window.hWin.HAPI4.baseURL+'?db=' + window.hWin.HAPI4.database  //(needplayer?'&p
                             that.addEditRecord(ulf_ID, true);
                         }
                     }
+                },
+                oninit:function(){
+                    that._editing_uploadfile = this;
+                    __initEditForm_cont();        
                 }}); //pass container
+                return;
+        }
             
-            }
-        
-            //init hidden edit form  that contains the only field - file uploader
-            this._editing_uploadfile.initEditForm([{
-                    "dtID": "ulf_FileUpload",
-                    "dtFields":{
-                        "dty_Type":"file",
-                        "rst_DisplayName":"File upload:",
-                        "rst_FieldConfig":{"entity":"recUploadedFiles", "registerAtOnce":1, 
-                                        "tiledImageStack": (is_tiled===true || this._additionMode=='tiled')?1:0},
-                        "dty_Role":"virtual",
-                        "rst_Display":"hidden"
-                    }
-                }], null);
-            this._editing_uploadfile.getContainer().hide(); //this form is hidden
-            var ele = this._editing_uploadfile.getFieldByName('ulf_FileUpload');    
-            ele.find('.fileupload').click(); //open file select dialog
-
+        __initEditForm_cont();        
     },
+
     
     _saveEditAndClose: function(fields, afterAction, ignoreCheck){
 

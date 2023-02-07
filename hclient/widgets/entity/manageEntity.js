@@ -1758,9 +1758,13 @@ this._time_debug = fin_time;
             this._editing = new hEditing({entity:this.options.entity, container:this.editForm, 
                 className: this.options.editClassName,
                 onchange:function(){
-                that.onEditFormChange(this); //"this" is changed_element
-            }}); //pass container
-            this._initEditForm_step2(recID);
+                    that.onEditFormChange(this); //"this" is changed_element
+                },
+                oninit:function(){
+                    that._editing = this;
+                    that._initEditForm_step2(recID);        
+                }
+            }); //pass container
             
         }else{
             this._allowActionIfModified( function(){ that._initEditForm_step2(recID); } );
