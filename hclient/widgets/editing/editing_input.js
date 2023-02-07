@@ -811,6 +811,8 @@ $.widget( "heurist.editing_input", {
                 }
 
                 function __showEditor(is_manual){
+                    
+                    if(typeof tinymce === 'undefined') return false; //not loaded yet
 
                     var eid = '#'+$input.attr('id')+'_editor';
 
@@ -933,6 +935,8 @@ $.widget( "heurist.editing_input", {
                         ]
                     });
                     $input.hide();
+                    
+                    return true;
                 } // _showEditor()
 
                 var isCMS_content = (( 
@@ -999,8 +1003,9 @@ $.widget( "heurist.editing_input", {
                         $label_edit_switcher.hide();
                         var eid = '#'+$input.attr('id')+'_editor';                    
                         if($input.is(':visible')){
-                            $btn_edit_switcher.text('text');
-                            __showEditor(true); //show tinymce editor
+                            if __showEditor(true) //show tinymce editor
+                                $btn_edit_switcher.text('text');
+                                
                         }else{
                             $btn_edit_switcher.text('wysiwyg');
                             $input.show();
@@ -1011,10 +1016,11 @@ $.widget( "heurist.editing_input", {
                         }                        
                     }});
                     this._on( $btn_edit_switcher2, { click: function(){
-                        $btn_edit_switcher2.hide();
-                        $label_edit_switcher.hide();
-                        $btn_edit_switcher.text('text');
-                        __showEditor(true); //show tinymce editor
+                        if __showEditor(true){ //show tinymce editor
+                            $btn_edit_switcher2.hide();
+                            $label_edit_switcher.hide();
+                            $btn_edit_switcher.text('text');
+                        } 
                     }});
 
                     
@@ -1063,8 +1069,8 @@ $.widget( "heurist.editing_input", {
                         click: function(){
                             var eid = '#'+$input.attr('id')+'_editor';                    
                             if($input.is(':visible')){
-                                $btn_edit_switcher.text('text');
-                                __showEditor(true); //show tinymce editor
+                                if __showEditor(true) //show tinymce editor
+                                    $btn_edit_switcher.text('text');
                             }else{
                                 $btn_edit_switcher.text('wysiwyg');
                                 $input.show();
@@ -1079,18 +1085,19 @@ $.widget( "heurist.editing_input", {
                 //what is visible initially
                 if( !isCMS_content && this.options.dtID != window.hWin.HAPI4.sysinfo['dbconst']['DT_KML'] ) {
                     var nodes = $.parseHTML(value);
-                    if(nodes && (nodes.length>1 || (nodes[0] && nodes[0].nodeName!='#text'))){ //if it has html show editor at once
+                    if(nodes && (nodes.length>1 || (nodes[0] && nodes[0].nodeName!='#text'))){ //if it has html - show editor at once
                         setTimeout(function(){
 
-                            if($btn_edit_switcher.is('span')){
-                                $btn_edit_switcher.text('text'); 
-                            }else{
-                                cur_action = 'wysiwyg';
-                                $btn_edit_switcher.find('span').css('text-decoration', '');
-                                $btn_edit_switcher.find('span:contains("wysiwyg")').css('text-decoration', 'underline');
+                            if(__showEditor()){
+                                if($btn_edit_switcher.is('span')){
+                                    $btn_edit_switcher.text('text'); 
+                                }else{
+                                    cur_action = 'wysiwyg';
+                                    $btn_edit_switcher.find('span').css('text-decoration', '');
+                                    $btn_edit_switcher.find('span:contains("wysiwyg")').css('text-decoration', 'underline');
+                                }
                             }
-
-                            __showEditor(); 
+                            
                         },1200); 
                     }
                 }
