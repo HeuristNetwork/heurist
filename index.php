@@ -5,7 +5,7 @@
 *
 * @package     Heurist academic knowledge management system
 * @link        https://HeuristNetwork.org
-* @copyright   (C) 2005-2020 University of Sydney
+* @copyright   (C) 2005-2023 University of Sydney
 * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
 * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
 * @version     4.0
@@ -541,7 +541,7 @@ if($isLocalHost){
         <div class='logo'></div>
         <h4>Heurist Academic Knowledge Management System</h4>
         <p style="margin-top:1em;">version <?=HEURIST_VERSION?></p>
-        <p style="margin-top: 1em;">Copyright (C) 2005-2020 <a href="https://sydney.edu.au/arts/" style="outline:0;" target="_blank">University of Sydney</a></p>
+        <p style="margin-top: 1em;">Copyright (C) 2005-2023 <a href="https://sydney.edu.au/arts/" style="outline:0;" target="_blank">University of Sydney</a></p>
     </div>
 
     <div id="heurist-platform-warning" style="display:none;">

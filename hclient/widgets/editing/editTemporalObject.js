@@ -1,5 +1,5 @@
 /*
-* Copyright (C) 2005-2020 University of Sydney
+* Copyright (C) 2005-2023 University of Sydney
 *
 * Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except
 * in compliance with the License. You may obtain a copy of the License at
@@ -20,7 +20,7 @@
 * @author      Ian Johnson   <ian.johnson@sydney.edu.au>
 * @author      Stephen White
 * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
-* @copyright   (C) 2005-2020 University of Sydney
+* @copyright   (C) 2005-2023 University of Sydney
 * @link        https://HeuristNetwork.org
 * @version     3.1.0
 * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0

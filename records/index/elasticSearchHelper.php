@@ -5,7 +5,7 @@
      *
      * @package     Heurist academic knowledge management system
      * @link        https://HeuristNetwork.org
-     * @copyright   (C) 2005-2020 University of Sydney
+     * @copyright   (C) 2005-2023 University of Sydney
      * @author      Ian Johnson     <ian.johnson@sydney.edu.au>
      * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
      * @author      Jan Jaap de Groot    <jjedegroot@gmail.com>
