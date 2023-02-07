@@ -72,13 +72,7 @@ function hEditing(_options) {
         
         options = _options;
         
-        if(typeof tinymce === 'undefined'){
-            _loadTinyMCE(function(){
-                _initEditForm(_options.recstructure, _options.recdata);    
-            });        
-        }else{
-            _initEditForm(_options.recstructure, _options.recdata);    
-        }
+        _initEditForm(_options.recstructure, _options.recdata);
     }
 
     //
@@ -153,6 +147,13 @@ function hEditing(_options) {
             $container.show();
             return;     
         } 
+        
+        if(typeof tinymce === 'undefined'){
+            _loadTinyMCE(function(){
+                _initEditForm(_recstructure, _recdata, _is_insert);    
+            });
+            return;        
+        }
         
         if(_recstructure) recstructure = _recstructure;
                 

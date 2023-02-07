@@ -942,7 +942,8 @@ $.widget( "heurist.mainMenu6", {
         var cont_height = this.menues.explore.height() - $favourite_container.position().top;
         $favourite_container.css('height', cont_height + 'px');
 
-        if(this.menues.explore[0].clientHeight <= this.menues.explore[0].scrollHeight){ console.log(this.menues.explore[0].clientHeight, this.menues.explore[0].scrollHeight);
+        if(this.menues.explore[0].clientHeight <= this.menues.explore[0].scrollHeight){ 
+//console.log(this.menues.explore[0].clientHeight, this.menues.explore[0].scrollHeight);
             cont_height -= (this.menues.explore[0].scrollHeight - this.menues.explore[0].clientHeight) + 40;
             $favourite_container.css('height', cont_height + 'px');
         }
@@ -1134,7 +1135,8 @@ $.widget( "heurist.mainMenu6", {
 
                         // remove from prefs
                         var idx = cur_favs.findIndex(filter => filter[0] == filter_id);
-                        var removed = cur_favs.splice(idx, 1); console.log(cur_favs);
+                        var removed = cur_favs.splice(idx, 1); 
+//console.log(cur_favs);
 
                         if(cur_favs.length == 0){
                             cur_favs = [''];

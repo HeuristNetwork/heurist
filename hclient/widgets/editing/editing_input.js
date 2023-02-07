@@ -1003,7 +1003,7 @@ $.widget( "heurist.editing_input", {
                         $label_edit_switcher.hide();
                         var eid = '#'+$input.attr('id')+'_editor';                    
                         if($input.is(':visible')){
-                            if __showEditor(true) //show tinymce editor
+                            if (__showEditor(true)) //show tinymce editor
                                 $btn_edit_switcher.text('text');
                                 
                         }else{
@@ -1016,7 +1016,7 @@ $.widget( "heurist.editing_input", {
                         }                        
                     }});
                     this._on( $btn_edit_switcher2, { click: function(){
-                        if __showEditor(true){ //show tinymce editor
+                        if (__showEditor(true)){ //show tinymce editor
                             $btn_edit_switcher2.hide();
                             $label_edit_switcher.hide();
                             $btn_edit_switcher.text('text');
@@ -1069,7 +1069,7 @@ $.widget( "heurist.editing_input", {
                         click: function(){
                             var eid = '#'+$input.attr('id')+'_editor';                    
                             if($input.is(':visible')){
-                                if __showEditor(true) //show tinymce editor
+                                if (__showEditor(true)) //show tinymce editor
                                     $btn_edit_switcher.text('text');
                             }else{
                                 $btn_edit_switcher.text('wysiwyg');
