@@ -686,7 +686,8 @@ function editCMS_WidgetCfg( widget_cfg, _layout_content, $dlg, main_callback ){
                     {key:'Stamen.Toner', title:'Stamen.Toner'},
                     {key:'Stamen.TerrainBackground', title:'Stamen.TerrainBackground'},
                     {key:'Esri.NatGeoWorldMap',title:'Esri.NatGeoWorldMap'},
-                    {key:'Esri.WorldGrayCanvas',title:'Esri.WorldGrayCanvas'}
+                    {key:'Esri.WorldGrayCanvas',title:'Esri.WorldGrayCanvas'},
+                    {key:'MapTilesAPI.OSMEnglish',title:'MapTilesAPI.OSMEnglish'}
                 ];
 
                 window.hWin.HEURIST4.ui.fillSelector($selectBaseMap[0], baseMapOptions);
