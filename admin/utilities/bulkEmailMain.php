@@ -175,10 +175,6 @@ if(!$has_emails || empty($emails)) {
                 margin-right: 5px;
             }
 
-            #recModifiedLogic-button span.ui-selectmenu-text {
-                padding: 0.1em 0.1em 0.2em 0.2em;
-            }
-
             #recModifiedSel-button {
                 min-width: 7em !important;
 
@@ -198,10 +194,6 @@ if(!$has_emails || empty($emails)) {
             div.ui-state-active {
                 color: #000 !important;
                 background: #DDDDDD !important;
-            }
-
-            span.ui-selectmenu-text {
-                background-color: #f6f6f6 !important;
             }
 
             /* Misc */
@@ -226,7 +218,7 @@ if(!$has_emails || empty($emails)) {
                 float: left;
 
                 min-width: 15%;
-                max-width: 30%;
+                max-width: 25%;
             }
 
             #dbSelection {
@@ -241,6 +233,14 @@ if(!$has_emails || empty($emails)) {
                 max-width: 70%;
 
                 margin: 20px 0px 0px 65px;
+            }
+
+            span.truncate {
+                display: inline-block;
+
+                max-width: 250px;
+
+                vertical-align: middle;
             }
 
         </style>
@@ -403,7 +403,7 @@ if(!$has_emails || empty($emails)) {
 
                     $db_selection.append(
                         "<div class='label non-selectable' title='"+ name +"'> "
-                        + '<label><input type="checkbox" class="dbListCB" id="'+value+'" value="'+ value +'">' + name + "</label>"
+                        + '<label><input type="checkbox" class="dbListCB" id="'+value+'" value="'+ value +'"><span class="truncate">' + name + "</span></label>"
                         + '<label data-id="'+value+'"></label>'
                       + "</div>"
                     );
@@ -674,8 +674,12 @@ if(!$has_emails || empty($emails)) {
             // Display record counts for databases
             //
             function displayRecordCount(data) {
-                
-                var $db_list = $("#dbSelection");
+
+                // Update individual record counts + update total record count for selected databases
+                let $db_list = $("#dbSelection");
+
+                let selected_dbs = getDbList();
+                let total = 0;
 
                 $.each(data, (db, count) => {
                     let $ele = $db_list.find('[data-id="'+ db +'"]');
@@ -686,9 +690,16 @@ if(!$has_emails || empty($emails)) {
 
                         $ele.text('[' + count + ']').css({'float': 'right', 'padding-left': '5px'});
                     }
+
+                    if(count > 0 && selected_dbs.indexOf(db) >= 0){
+                        total += parseInt(count, 10);
+                    }
                 });
 
                 $("#allDBs").parent().parent().find('span').show();
+                $("#recCount").text(total);
+
+                set_element_position();
             }
 
             //
@@ -696,7 +707,7 @@ if(!$has_emails || empty($emails)) {
             //
             function getRecordCount() {
 
-                var dbs = getAllDbs();
+                let dbs = getAllDbs();
 
                 if(dbs.length == 0){
                     return;
@@ -840,6 +851,22 @@ if(!$has_emails || empty($emails)) {
                 return false;
             }
 
+            function set_element_position(){
+                $("#btnEmail")
+                    .position({
+                        my: "left top+20",
+                        at: "left bottom",
+                        of: "#sm_pwd"
+                    });
+
+                $("#csvExport")
+                    .position({
+                        my: "left+10 top",
+                        at: "right top",
+                        of: "#btnEmail"
+                    });
+            }
+
             $(document).ready(function() {
 
                 setupUserSelection();
@@ -850,21 +877,7 @@ if(!$has_emails || empty($emails)) {
                     window.hWin.HR = function(token){return token};
                 }
 
-                $("#btnEmail")
-                    .position({
-                        my: "left top",
-                        at: "left bottom",
-                        of: "#sm_pwd"
-                    })
-                    .css('margin-top', '20px');
-
-                $("#csvExport")
-                    .position({
-                        my: "left top",
-                        at: "right top",
-                        of: "#btnEmail"
-                    })
-                    .css('margin-left', '10px');
+                set_element_position();
 
                 $("#btnCalRecCount").click(getRecordCount);
 
@@ -946,7 +959,8 @@ if(!$has_emails || empty($emails)) {
                     <div style="margin-bottom: 20px;">
                         Send email to: <span id="userSelection"></span> &nbsp;&nbsp;&nbsp; 
                         Count of distinct users: <span id="userCount">0</span> 
-                        <button id="btnCalRecCount" style="margin-left: 10px;" onclick="return false;">Count total DB records (slow)</button>
+                        <button id="btnCalRecCount" style="margin-left: 10px;" onclick="return false;">Count total DB records (slow)</button> 
+                        Total count of records (selected databases): <span id="recCount">0</span> 
                     </div>
 
                     <div class="non-selectable" style="margin-bottom: 20px;"> 
