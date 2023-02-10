@@ -32,7 +32,7 @@ function editCMS_SelectElement( callback ){
         //grp4:{name:'Composite Pages', description:'#composite_pages', is_group_header:true}, //Content layouts or templates
             tpl_default: {name:'Simple Page', description:'#simple_page'}, //Simple blank page
             tpl_discover: {name:'Discover (filters/results/map)', description:'#discover'}, //3 columns layout
-            //tpl_database: {name:'Database description', description:'#database'},
+            tpl_database: {name:'Database description', description:'#database'},
             tpl_blog: {name:'Blog', description:'#blog'},
 
         separator:{name:' ', description:'#', is_separator: true},
@@ -121,7 +121,7 @@ function editCMS_SelectElement( callback ){
 
                         grp.classList.add(item.is_group_header ? 'group-header' : 'section-header');
                     }else if(item.is_separator){
-                        var opt = window.hWin.HEURIST4.ui.addoption(sel[0], null, '&nbsp;', true);
+                        var opt = window.hWin.HEURIST4.ui.addoption(sel[0], null, ' ', true);
                         opt.classList.add('separator-opt')
                     }else{
                         window.hWin.HEURIST4.ui.addoption(sel[0], key, item.name);
