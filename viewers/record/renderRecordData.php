@@ -875,7 +875,7 @@ function print_header_line($bib) {
 
     <div class=HeaderRow style="margin-bottom:<?php echo $is_map_popup?5:15?>px;min-height:0px;">
         <h2 style="text-transform:none;line-height:16px;font-size:1.4em;margin-bottom:0;<?php echo ($is_map_popup)?'max-width: 380px;':'';?>">
-                <?= strip_tags($bib['rec_Title']) ?>
+                <?= strip_tags($bib['rec_Title'],ALLOWED_TAGS) ?>
         </h2>
 
         <div <?="style='padding:0 10px 0 22px;margin:10px 0 0;height:20px;background-repeat: no-repeat;background-image:url("
