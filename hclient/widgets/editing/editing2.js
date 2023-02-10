@@ -536,13 +536,6 @@ function hEditing(_options) {
                 $('<div>There are no fields visible under this heading/tab. Please define new fields or move fields into this section.</div>')
                     .addClass('heurist-helper3').appendTo(fieldContainer);
             }
-            
-            if(recdata && recdata.entityName=='Records' && fieldContainer && fieldContainer.find('.optional_hint').length == 0
-                && fieldContainer.find("div.optional").length > 0 && fieldContainer.find("div.required, div.recommended").length == 0)
-            {
-                $('<div>').css({padding: '4px'}).addClass('optional_hint')
-                    .html('Fields missing? Turn on <u>optional fields</u> (checkbox at the top of page)').appendTo(fieldContainer);
-            }
         }//end of function
 
         $container.addClass(options.className);
@@ -570,7 +563,9 @@ function hEditing(_options) {
                 +'  style="cursor:pointer;display:inline-block;color:#7D9AAA;">'
                 +'Modify structure</span> to enable them.').appendTo($div_hints);
         }
-        if($container.find('ul[role="tablist"]').length>0 && recdata && recdata.entityName=='Records'){
+
+        let is_Records = recdata && recdata.entityName=='Records';
+        if(is_Records && $container.find('ul[role="tablist"]').length>0){
             
             var tab_groups = $container.find('ul[role="tablist"]');
             $.each(tab_groups, function(idx, group){
@@ -594,7 +589,10 @@ function hEditing(_options) {
                 });
             }
         }
-        
+        if(is_Records && $container.find("div.optional").length > 0){
+            $('<div>').css({padding: '4px'}).addClass('optional_hint')
+                    .html('Fields missing? Turn on <u>optional fields</u> (checkbox at the top of page)').appendTo($container);
+        }
     }
     
     //

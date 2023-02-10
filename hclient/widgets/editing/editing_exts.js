@@ -892,8 +892,10 @@ function browseRecords(_editing_input, $input){
                                    that.is_disabled = false;
                                    if(window.hWin.HEURIST4.util.isJSON(response)) {
                                        if(response['records'] && response['records'].length>0){
+
+                                            let rec_title = response['records'].replace(/[\r\n]+/g, ' ');
                                            //keep in cache
-                                           __assignCache(response['records']);
+                                            __assignCache(rec_title);
                                            __show_select_dropdown(ref_id); //call again after loading list of records
 
                                        }else{
