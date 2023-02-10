@@ -52,7 +52,9 @@ $.widget( "heurist.svs_list", {
         
         language: 'xx',  //use default
         
-        suppress_default_search: false //if true prevents default search (init_svsID) execution - useful in cms
+        suppress_default_search: false, //if true prevents default search (init_svsID) execution - useful in cms
+
+        hide_no_value_facets: true // for facet searches, hide facets that have no available values
     },
 
     isPublished: false,
@@ -2205,7 +2207,9 @@ console.log('refresh '+(window.hWin.HAPI4.currentUser.usr_SavedSearch==null));
                         showclosebutton: this.showclosebutton,
                         showresetbutton: (this.options.showresetbutton!==false),
                         search_realm:this.options.search_realm,
-                        language: this.options.language};
+                        language: this.options.language,
+                        hide_no_value_facets: this.options.hide_no_value_facets
+                    };
                     
                     
                     if(that.options.is_h6style){

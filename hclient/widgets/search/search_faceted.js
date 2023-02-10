@@ -156,7 +156,9 @@ $.widget( "heurist.search_faceted", {
         onclose: null,// callback
         is_publication: false,
         respect_relation_direction: false,
-        language: 'xx'  //use default
+        language: 'xx',  //use default
+
+        hide_no_value_facets: true // hide facets with no values, default true
     },
     
     _current_query_request_id:null,
@@ -183,6 +185,8 @@ $.widget( "heurist.search_faceted", {
     _date_range_dialog_instance: null,
 
     terms_drawn: 0, // for rendering terms
+    
+    no_value_facets: [], // {facet_id: facet_name}, for facets with no values
     
     // the widget's constructor
     _create: function() {
@@ -348,6 +352,7 @@ $.widget( "heurist.search_faceted", {
                           that._current_query_request_id = null;
                           that._currentRecordset = recset;
                           that._isInited = false;
+                          that.no_value_facets.push(facet_index)
                           that._recalculateFacets(-1);       
                           that.refreshSubsetSign();
 
@@ -1206,6 +1211,7 @@ $.widget( "heurist.search_faceted", {
             //search at once - even none facet value provided
             this.doSearch();
         }else{
+            this.no_value_facets = []; // reset no value facets
             this._recalculateFacets(-1);     
             
             //trigget empty fake event to update messge in result list
@@ -1806,6 +1812,35 @@ $.widget( "heurist.search_faceted", {
                 this.div_toolbar.find('#facet_process_msg').hide();
             }
 
+            if(this.options.hide_no_value_facets && this.no_value_facets.length > 0){
+
+                let $parent_container = $(this.element).find('.svs-list-container');
+
+                $('<div>').text('Subset has no values for:')
+                          .css({
+                            width: '100%',
+                            padding: '10px 5px 5px',
+                            'border-top': '1px black solid', // or <hr>
+                            'font-size': 'smaller'
+                          })
+                          .appendTo($parent_container);
+
+                let $no_value_container = $('<div>').css({
+                    'margin-left': '15px', 
+                    'font-size': 'smaller'
+                }).appendTo($parent_container);
+
+                for(let j = 0; j < this.no_value_facets.length; j ++){
+
+                    let f_idx = this.no_value_facets[j];
+                    let field = this.options.params.facets[f_idx];
+
+                    let f_title = window.hWin.HEURIST4.util.htmlEscape(window.hWin.HRJ('title', field, this.options.language));
+
+                    $parent_container.find("#fv_" + field['var']).hide();
+                    $no_value_container.append('<span>' + f_title + '</span><br>');
+                }
+            }
             this._refreshButtons();
         }
     }
@@ -2167,6 +2202,7 @@ $.widget( "heurist.search_faceted", {
 
                             if(term && term.hasOwnProperty('count') && term.count == 0){
                                 this._createOption( facet_index, 0, {title:window.hWin.HR('no values'), value:null, count:0} ).appendTo($sel);
+                                this.no_value_facets.push(facet_index)
                             }else{
                                 this._createOption( facet_index, 0, {title:window.hWin.HR('select...'), value:null, count:0} ).appendTo($sel);
                             }
@@ -2847,6 +2883,7 @@ $.widget( "heurist.search_faceted", {
 
                     if($facet_values.is(':empty')){
                         $("<span>").text(window.hWin.HR('no values')).css({'font-style':'italic', 'padding-left':'10px'}).appendTo($facet_values);
+                        this.no_value_facets.push(facet_index);
                     }
 
                     //search next facet
