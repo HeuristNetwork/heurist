@@ -32,20 +32,20 @@
 },
 {
     "service": "geoName",
-    "rty_ID": "",
+    "rty_ID": "3-1009",
     "label": "GeoNames",
     "description": "Returns a list of locations for the placename query.",
     "dialog": "lookupGN",
     "fields": {
-        "name":"",
-        "lng":"",    
-        "lat":"",    
-        "countryCode":"",    
+        "name":"2-1",
+        "lng":"2-28_long",    
+        "lat":"2-28_lat",
+        "countryCode":"2-26",    
         "adminCode1":"",    
         "adminName1":"",
-        "fclName":"",
+        "fclName":"3-1068",
         "fcodeName":"",
-        "geonameId":"",
+        "geonameId":"2-581",
         "population":""
     }
 },
@@ -183,20 +183,20 @@
 },
 {
     "service": "nakala",
-    "rty_ID": "",
+    "rty_ID": "2-5",
     "label": "Nakala Lookup",
     "dialog": "lookupNakala",
     "description": "A proof of concept for searching Nakala Records via their API (under development)",
     "fields": {
-        "url": "",
-        "title": "",
-        "author": "",
-        "date": "",
-        "license": "",
-        "mime_type": "",
-        "abstract": "",
+        "url": "2-38",
+        "title": "2-1",
+        "author": "2-15",
+        "date": "2-10",
+        "license": "1144-318",
+        "mime_type": "2-41",
+        "abstract": "2-3",
         "rec_url": "",
-        "filename": ""
+        "filename": "2-62"
     }
 },
 {

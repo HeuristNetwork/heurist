@@ -1271,6 +1271,23 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                         acc.find('.summary-content').removeClass('ui-widget-content');
                     }
 
+                    // Alternative for closing east panel (record summary)
+                    $('<span>', {title: 'Close summary panel'}).css({
+                        height: '32px',
+                        width: '32px',
+                        position: 'absolute',
+                        top: '13px',
+                        'font-size': '32px',
+                        cursor: 'pointer',
+                        'z-index': 1000 // above first accordion container
+                    }).addClass('closeSummaryPanel ui-icon ui-icon-carat-2-e')
+                      .prependTo(this.editFormSummary);
+
+                    this._on(this.editFormSummary.find('.closeSummaryPanel'), {
+                        click: () => {
+                            this.editFormPopup.layout().close("east");
+                        }
+                    });
                 }
             }
         }//!isOpenAready
@@ -4026,276 +4043,7 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
             
             //lookup external values
             //there is 3d party service for lookup values
-            var notfound = true;
-            var lookup_div = this.element.find('.btn-lookup-values');
-            lookup_div.empty();
-            var service_config = window.hWin.HEURIST4.util.isJSON(window.hWin.HAPI4.sysinfo['service_config']);//sys_ExternalReferenceLookups
-            
-//console.log(service_config);            
-            if(service_config!==false){
-                
-                window.hWin.HAPI4.sysinfo['service_config'] = service_config;
-                
-                let btn_label = "Lookup External Sources: ";
-
-                var label = $('<div>')
-                    .html(btn_label)
-                    .css({'font-size': 'small'})
-                    .appendTo(lookup_div); 
-                
-                for(var srvname in service_config)
-                {
-                    var cfg = service_config[srvname];    
-                    
-                    if(cfg.rty_ID == this._currentEditRecTypeID){   //@todo many services
-                        notfound = false;                    
-                       
-                        var btn = $('<div>')
-                            .button({label:cfg.label?cfg.label:('Lookup '+cfg.service) })
-                            .attr('data-cfg', srvname).css({'font-size': 'inherit', // 'padding-right':'4px',
-                                border: '1px solid', 'font-weight': 'bold', 'margin-right': '5px'})
-                            .appendTo(label);
-                        
-                        this._on(btn, {click:
-                            function(event){ 
-                                
-                                var srvname = $(event.target).attr('data-cfg');
-
-                                var cfg = window.hWin.HAPI4.sysinfo['service_config'][srvname];
-                                var dialog_name = cfg.dialog;
-                                var service_name = cfg.service;
-
-                                if(dialog_name == 'recordLookup' || dialog_name == 'lookupTCL'){
-                                    dialog_name = 'lookupTLC';
-                                }else if(dialog_name == 'recordLookupBnFLibrary' || dialog_name == 'lookupBnFLibrary'){
-                                    dialog_name = 'lookupBnFLibrary_bib';
-                                }else if(dialog_name.includes('recordLookup')){
-                                    dialog_name = dialog_name.replace('recordLookup', 'lookup');
-                                }
-
-                                var dlg_opts = { 
-                                    mapping: cfg, 
-                                    edit_fields: this._editing.getValues(true),
-                                    edit_record: this._currentEditRecordset,
-                                    path: 'widgets/lookup/',
-                                    onClose:function(recset){
-                                        if(recset){
-                                            
-                                            if( window.hWin.HEURIST4.util.isRecordSet(recset) ){
-                                            
-                                                var rec = recset.getFirstRecord();
-                                                // loop all fields in selected values
-                                                // find field in edit form
-                                                // assign value
-                                                var fields = recset.getFields();
-                                                for(var k=2; k<fields.length; k++){
-                                                    var dt_id = cfg.fields[fields[k]];
-                                                    if(dt_id>0)
-                                                    {
-                                                        var newval = recset.fld(rec, fields[k]);
-                                                        newval = window.hWin.HEURIST4.util.isnull(newval)?'':newval;
-                                                        that._editing.setFieldValueByName( dt_id, newval );
-                                                        //var ele_input = that._editing.getFieldByName(dt_id );
-                                                    }
-                                                }
-                                            }else{
-                                                //lookup dialog returns pairs - dtyID=>value
-                                                var dtyIds = Object.keys(recset);
-
-                                                var assigned_fields = []; // list of fields assigned
-
-                                                that.term_values = []; // list of label values for enum/term fields
-                                                that.file_values = {}; // list of external urls for file fields
-                                                that.resource_values = []; // list of search values for recpointer fields
-
-                                                if(!window.hWin.HEURIST4.util.isempty(recset['ext_url'])){
-                                                    that.resource_values.push([recset['ext_url'], 'ext']);
-                                                }else if(!window.hWin.HEURIST4.util.isempty(recset['heurist_url'])){
-                                                    that.resource_values.push([recset['heurist_url'], 'heurist']);
-                                                }else{
-                                                    that.resource_values.push(['']);
-                                                }
-
-                                                for(var k=0; k<dtyIds.length; k++){
-
-                                                    var dt_id = dtyIds[k];
-
-                                                    if(dt_id>0){
-
-                                                        var newval = recset[dt_id];
-                                                        var type = $Db.dty(dt_id, 'dty_Type');
-
-                                                        if(type == 'resource' || type == 'enum'){
-
-                                                            var completed = []; // completed recpointers/terms
-
-                                                            if(window.hWin.HEURIST4.util.isArray(newval)){
-
-                                                                for(var i = 0; i < newval.length; i++){
-
-                                                                    if(Number.isInteger(+newval[i])){ // is fine
-                                                                        completed.push(newval[i]);
-                                                                        continue;
-                                                                    }
-
-                                                                    // needs additional handling
-                                                                    if(type == 'resource'){
-                                                                        that.resource_values.push([dt_id, newval[i]]);
-                                                                    }else{
-
-                                                                        var vocab_id = $Db.dty(dt_id, 'dty_JsonTermIDTree');
-
-                                                                        if(window.hWin.HEURIST4.util.isArray(newval[i])){
-                                                                            for(var j = 0; j < newval[i].length; j++){
-
-                                                                                var trm_id = $Db.getTermByLabel(vocab_id, newval[i][j]);
-
-                                                                                if(trm_id == null){
-                                                                                    that.term_values.push([dt_id, newval[i][j]]);
-                                                                                }else{
-                                                                                    completed.push(trm_id);
-                                                                                }
-                                                                            }
-                                                                        }else{
-                                                                            var trm_id = $Db.getTermByLabel(vocab_id, newval[i]);
-
-                                                                            if(trm_id == null){
-                                                                                that.term_values.push([dt_id, newval[i]]);
-                                                                            }else{
-                                                                                completed.push(trm_id);
-                                                                            }
-                                                                        }
-                                                                    }
-                                                                }
-                                                            }else{
-
-                                                                if(Number.isInteger(+newval)){
-                                                                    completed.push(newval);
-                                                                }else{
-
-                                                                    if(type == 'resource'){
-                                                                        that.resource_values.push([dt_id, newval]);
-                                                                    }else{
-                                                                        
-                                                                        var vocab_id = $Db.dty(dt_id, 'dty_JsonTermIDTree');
-                                                                        var trm_id = $Db.getTermByLabel(vocab_id, newval);
-
-                                                                        if(trm_id == null){
-                                                                            that.term_values.push([dt_id, newval]);
-                                                                        }else{
-                                                                            completed.push(trm_id);
-                                                                        }
-                                                                    }
-                                                                }
-                                                            }
-
-                                                            if(completed.length > 0){
-                                                                that._editing.setFieldValueByName(dt_id, completed);
-
-                                                                var fieldname = $Db.rst(that._currentEditRecTypeID, dt_id, 'rst_DisplayName');
-                                                                if(!assigned_fields.includes(fieldname)) { assigned_fields.push(fieldname); }
-                                                            }
-                                                        }else if(type == 'file'){ // need to create new remote file records
-
-                                                            if(!Object.hasOwnProperty(dt_id, that.file_values)){
-                                                                that.file_values[dt_id] = [];
-                                                            }
-                                                            if(window.hWin.HEURIST4.util.isArray(newval)){
-                                                                that.file_values[dt_id] = that.file_values[dt_id].concat(newval);
-                                                            }else{
-                                                                that.file_values[dt_id].push(newval);
-                                                            }
-                                                        }else{
-                                                            if(!$.isArray(newval)){
-                                                                newval = window.hWin.HEURIST4.util.isnull(newval)?'':newval;
-                                                                newval = [newval];
-                                                            }
-
-                                                            that._editing.setFieldValueByName( dt_id, newval );
-
-                                                            var fieldname = $Db.rst(that._currentEditRecTypeID, dt_id, 'rst_DisplayName');
-                                                            if(!assigned_fields.includes(fieldname)) { assigned_fields.push(fieldname); }
-                                                        } 
-                                                    }else if(dt_id == 'BnF_ID'){ // retrieve record from BnF and place in record scratch pad
-
-                                                        let value = recset['BnF_ID'];
-
-                                                        if(window.hWin.HEURIST4.util.isempty(value)){ // missing | no value
-                                                            continue;
-                                                        }
-
-                                                        let req_url = 'http://catalogue.bnf.fr/api/SRU?version=1.2&operation=searchRetrieve&recordSchema=unimarcxchange&maximumRecords=1&startRecord=1&query=(';                                                        
-                                                        let fld_name = cfg.service == 'bnfLibrary' ? 'bib.recordid' : 'aut.recordid';
-
-                                                        req_url += encodeURIComponent(fld_name + ' all ' + value) + ')';
-
-                                                        let req = {
-                                                            service: req_url,
-                                                            serviceType: 'bnf_recdump'
-                                                        };
-
-                                                        window.hWin.HAPI4.RecordMgr.lookup_external_service(req, (response) => {
-                                                            if(window.hWin.HEURIST4.util.isJSON(response)){
-                                                                response = window.hWin.HEURIST4.util.isJSON(response);
-                                                                if(response.record != null){
-
-                                                                    let scratchpad_txt = response.record + '\r\n\r\n';//JSON.stringify(response.record, null, 4);
-                                                                    let $fld = that._editing.getFieldByName('rec_ScratchPad');
-
-                                                                    if(!window.hWin.HEURIST4.util.isempty($fld.text())){ // if content exists; prepend and add breaks before existing content
-                                                                        scratchpad_txt += '\r\n\r\n' + $fld.text();
-                                                                    }
-
-                                                                    $fld.editing_input('setValue',[scratchpad_txt]);
-                                                                    $fld.editing_input('isChanged', true);
-
-                                                                    that.editFormPopup.layout().open("east"); // expand panel
-                                                                    if($fld.parents('.summary-accordion.ui-accordion').accordion('instance') != undefined){ // expand accordion
-                                                                        $fld.parents('.summary-accordion.ui-accordion').accordion('option', 'active', 0);
-                                                                    }
-                                                                }
-                                                            }
-                                                        });
-                                                    }
-                                                }
-
-                                                that.processTermFields(assigned_fields, {});
-                                            }
-                                        }
-                                    }
-                                };
-
-                                if(service_name == 'ESTC_editions' || service_name == 'ESTC_works' || service_name == 'ESTC'){
-
-                                    var req = {
-                                        a: 'check_allow_estc',
-                                        db: window.hWin.HAPI4.database,
-                                        ver: service_name
-                                    };
-                                    window.hWin.HAPI4.SystemMgr.check_allow_estc(req, function(response){
-                                        if(response.status == window.hWin.ResponseStatus.OK){
-                                            window.hWin.HEURIST4.ui.showRecordActionDialog(dialog_name, dlg_opts);
-                                        }else{
-                                            window.hWin.HEURIST4.msg.showMsgErr(response);
-                                            return false;
-                                        }
-                                    });
-                                }else{
-                                    window.hWin.HEURIST4.ui.showRecordActionDialog(dialog_name, dlg_opts);
-                                }
-                            }
-                        });
-                    }
-                }
-            }
-            if(notfound){
-                lookup_div.hide();    
-            }else{
-                lookup_div.show();    
-            }
-            
-            
-            
+            this._setupExternalLookups();           
             
             //bug report
             this.element.find('.btn-bugreport').button({icon:'ui-icon-bug'})
@@ -4965,7 +4713,7 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
 
             var $gear_icon = $('<span>')
                               .addClass('ui-icon ui-icon-gear')
-                              .css({'color': 'rgb(125, 154, 170)', 'margin-bottom': '2px', 'min-width': '22px', 'cursor': 'pointer'})
+                              .css({'color': 'rgb(125, 154, 170)', 'min-width': '22px', 'cursor': 'pointer'})
                               .attr('title', 'Open Title Mask Editor')
                               .click(function(e) { that.editRecordTypeTitle(); });
 
@@ -4994,6 +4742,315 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
 
             // Append to top
             top_fieldset.append(url_field);
+        }
+    },
+	
+    //
+    // Setup external lookup buttons, placed at top of popup/window
+    //
+    _setupExternalLookups: function(){
+
+        var that = this;
+
+        var notfound = true;
+        var lookup_div = this.element.find('.btn-lookup-values');
+        lookup_div.empty();
+        var service_config = window.hWin.HEURIST4.util.isJSON(window.hWin.HAPI4.sysinfo['service_config']);
+
+        if(service_config!==false){
+            
+            window.hWin.HAPI4.sysinfo['service_config'] = service_config;
+            
+            let lbl_text = "Lookup External Sources: ";
+
+            var $ext_lookup_cont = $('<div>')
+                .html(lbl_text)
+                .css({'font-size': 'small'})
+                .appendTo(lookup_div); 
+            
+            let $config_lookups = $('<span>', {title: 'Configure external lookups'})
+                .addClass('ui-icon ui-icon-gear')
+                .css({padding: '0 10px 0 5px', color: 'rgb(125, 154, 170)', cursor: 'pointer'})
+                .appendTo($ext_lookup_cont);
+
+            this._on($config_lookups, {
+                click: () => {
+
+                    window.hWin.HEURIST4.ui.showRecordActionDialog('lookupConfig', {
+                        service_config: window.hWin.HAPI4.sysinfo['service_config'],
+                        onClose: function(){
+                            that._setupExternalLookups();
+                        },
+                        classes:{
+                            "ui-dialog": "ui-heurist-design",
+                            "ui-dialog-titlebar": "ui-heurist-design"
+                        },
+                        title: 'Lookup service configuration',
+                        path: 'widgets/lookup/'
+                    });
+                }
+            });
+
+            for(var srvname in service_config){
+
+                var cfg = service_config[srvname];    
+                
+                if(cfg.rty_ID == this._currentEditRecTypeID){
+                    notfound = false;                    
+                    
+                    var btn = $('<div>')
+                        .button({label:cfg.label?cfg.label:('Lookup '+cfg.service) })
+                        .attr('data-cfg', srvname).css({'font-size': 'inherit', // 'padding-right':'4px',
+                            border: '1px solid', 'font-weight': 'bold', 'margin-right': '5px'})
+                        .appendTo($ext_lookup_cont);
+                    
+                    this._on(btn, {click:
+                        function(event){ 
+                            
+                            var srvname = $(event.target).attr('data-cfg');
+
+                            var cfg = window.hWin.HAPI4.sysinfo['service_config'][srvname];
+                            var dialog_name = cfg.dialog;
+                            var service_name = cfg.service;
+
+                            if(dialog_name == 'recordLookup' || dialog_name == 'lookupTCL'){
+                                dialog_name = 'lookupTLC';
+                            }else if(dialog_name == 'recordLookupBnFLibrary' || dialog_name == 'lookupBnFLibrary'){
+                                dialog_name = 'lookupBnFLibrary_bib';
+                            }else if(dialog_name.includes('recordLookup')){
+                                dialog_name = dialog_name.replace('recordLookup', 'lookup');
+                            }
+
+                            var dlg_opts = { 
+                                mapping: cfg, 
+                                edit_fields: this._editing.getValues(true),
+                                edit_record: this._currentEditRecordset,
+                                path: 'widgets/lookup/',
+                                onClose:function(recset){
+                                    that._handleLookupResponse(recset);
+                                }
+                            };
+
+                            if(service_name == 'ESTC_editions' || service_name == 'ESTC_works' || service_name == 'ESTC'){
+
+                                var req = {
+                                    a: 'check_allow_estc',
+                                    db: window.hWin.HAPI4.database,
+                                    ver: service_name
+                                };
+                                window.hWin.HAPI4.SystemMgr.check_allow_estc(req, function(response){
+                                    if(response.status == window.hWin.ResponseStatus.OK){
+                                        window.hWin.HEURIST4.ui.showRecordActionDialog(dialog_name, dlg_opts);
+                                    }else{
+                                        window.hWin.HEURIST4.msg.showMsgErr(response);
+                                        return false;
+                                    }
+                                });
+                            }else{
+                                window.hWin.HEURIST4.ui.showRecordActionDialog(dialog_name, dlg_opts);
+                            }
+                        }
+                    });
+                }
+            }
+        }
+        if(notfound){
+            lookup_div.hide();    
+        }else{
+            lookup_div.show();    
+        }
+    },
+
+    //
+    //
+    //
+    _handleLookupResponse: function(recset){
+
+        var that = this;
+
+        if(!recset || window.hWin.HEURIST4.util.isempty(recset)){
+            return;
+        }
+
+        if( window.hWin.HEURIST4.util.isRecordSet(recset) ){
+        
+            var rec = recset.getFirstRecord();
+            // loop all fields in selected values
+            // find field in edit form
+            // assign value
+            var fields = recset.getFields();
+            for(var k=2; k<fields.length; k++){
+                var dt_id = cfg.fields[fields[k]];
+                if(dt_id>0)
+                {
+                    var newval = recset.fld(rec, fields[k]);
+                    newval = window.hWin.HEURIST4.util.isnull(newval)?'':newval;
+                    that._editing.setFieldValueByName( dt_id, newval );
+                    //var ele_input = that._editing.getFieldByName(dt_id );
+                }
+            }
+        }else{
+            //lookup dialog returns pairs - dtyID=>value
+            var dtyIds = Object.keys(recset);
+
+            var assigned_fields = []; // list of fields assigned
+
+            that.term_values = []; // list of label values for enum/term fields
+            that.file_values = {}; // list of external urls for file fields
+            that.resource_values = []; // list of search values for recpointer fields
+
+            if(!window.hWin.HEURIST4.util.isempty(recset['ext_url'])){
+                that.resource_values.push([recset['ext_url'], 'ext']);
+            }else if(!window.hWin.HEURIST4.util.isempty(recset['heurist_url'])){
+                that.resource_values.push([recset['heurist_url'], 'heurist']);
+            }else{
+                that.resource_values.push(['']);
+            }
+
+            for(var k=0; k<dtyIds.length; k++){
+
+                var dt_id = dtyIds[k];
+
+                if(dt_id>0){
+
+                    var newval = recset[dt_id];
+                    var type = $Db.dty(dt_id, 'dty_Type');
+
+                    if(type == 'resource' || type == 'enum'){
+
+                        var completed = []; // completed recpointers/terms
+
+                        if(window.hWin.HEURIST4.util.isArray(newval)){
+
+                            for(var i = 0; i < newval.length; i++){
+
+                                if(Number.isInteger(+newval[i])){ // is fine
+                                    completed.push(newval[i]);
+                                    continue;
+                                }
+
+                                // needs additional handling
+                                if(type == 'resource'){
+                                    that.resource_values.push([dt_id, newval[i]]);
+                                }else{
+
+                                    var vocab_id = $Db.dty(dt_id, 'dty_JsonTermIDTree');
+
+                                    if(window.hWin.HEURIST4.util.isArray(newval[i])){
+                                        for(var j = 0; j < newval[i].length; j++){
+
+                                            var trm_id = $Db.getTermByLabel(vocab_id, newval[i][j]);
+
+                                            if(trm_id == null){
+                                                that.term_values.push([dt_id, newval[i][j]]);
+                                            }else{
+                                                completed.push(trm_id);
+                                            }
+                                        }
+                                    }else{
+                                        var trm_id = $Db.getTermByLabel(vocab_id, newval[i]);
+
+                                        if(trm_id == null){
+                                            that.term_values.push([dt_id, newval[i]]);
+                                        }else{
+                                            completed.push(trm_id);
+                                        }
+                                    }
+                                }
+                            }
+                        }else{
+
+                            if(Number.isInteger(+newval)){
+                                completed.push(newval);
+                            }else{
+
+                                if(type == 'resource'){
+                                    that.resource_values.push([dt_id, newval]);
+                                }else{
+                                    
+                                    var vocab_id = $Db.dty(dt_id, 'dty_JsonTermIDTree');
+                                    var trm_id = $Db.getTermByLabel(vocab_id, newval);
+
+                                    if(trm_id == null){
+                                        that.term_values.push([dt_id, newval]);
+                                    }else{
+                                        completed.push(trm_id);
+                                    }
+                                }
+                            }
+                        }
+
+                        if(completed.length > 0){
+                            that._editing.setFieldValueByName(dt_id, completed);
+
+                            var fieldname = $Db.rst(that._currentEditRecTypeID, dt_id, 'rst_DisplayName');
+                            if(!assigned_fields.includes(fieldname)) { assigned_fields.push(fieldname); }
+                        }
+                    }else if(type == 'file'){ // need to create new remote file records
+
+                        if(!Object.hasOwnProperty(dt_id, that.file_values)){
+                            that.file_values[dt_id] = [];
+                        }
+                        if(window.hWin.HEURIST4.util.isArray(newval)){
+                            that.file_values[dt_id] = that.file_values[dt_id].concat(newval);
+                        }else{
+                            that.file_values[dt_id].push(newval);
+                        }
+                    }else{
+                        if(!$.isArray(newval)){
+                            newval = window.hWin.HEURIST4.util.isnull(newval)?'':newval;
+                            newval = [newval];
+                        }
+
+                        that._editing.setFieldValueByName( dt_id, newval );
+
+                        var fieldname = $Db.rst(that._currentEditRecTypeID, dt_id, 'rst_DisplayName');
+                        if(!assigned_fields.includes(fieldname)) { assigned_fields.push(fieldname); }
+                    } 
+                }else if(dt_id == 'BnF_ID'){ // retrieve record from BnF and place in record scratch pad
+
+                    let value = recset['BnF_ID'];
+
+                    if(window.hWin.HEURIST4.util.isempty(value)){ // missing | no value
+                        continue;
+                    }
+
+                    let req_url = 'http://catalogue.bnf.fr/api/SRU?version=1.2&operation=searchRetrieve&recordSchema=unimarcxchange&maximumRecords=1&startRecord=1&query=(';                                                        
+                    let fld_name = cfg.service == 'bnfLibrary' ? 'bib.recordid' : 'aut.recordid';
+
+                    req_url += encodeURIComponent(fld_name + ' all ' + value) + ')';
+
+                    let req = {
+                        service: req_url,
+                        serviceType: 'bnf_recdump'
+                    };
+
+                    window.hWin.HAPI4.RecordMgr.lookup_external_service(req, (response) => {
+                        if(window.hWin.HEURIST4.util.isJSON(response)){
+                            response = window.hWin.HEURIST4.util.isJSON(response);
+                            if(response.record != null){
+
+                                let scratchpad_txt = response.record + '\r\n\r\n';//JSON.stringify(response.record, null, 4);
+                                let $fld = that._editing.getFieldByName('rec_ScratchPad');
+
+                                if(!window.hWin.HEURIST4.util.isempty($fld.text())){ // if content exists; prepend and add breaks before existing content
+                                    scratchpad_txt += '\r\n\r\n' + $fld.text();
+                                }
+
+                                $fld.editing_input('setValue',[scratchpad_txt]);
+                                $fld.editing_input('isChanged', true);
+
+                                that.editFormPopup.layout().open("east"); // expand panel
+                                if($fld.parents('.summary-accordion.ui-accordion').accordion('instance') != undefined){ // expand accordion
+                                    $fld.parents('.summary-accordion.ui-accordion').accordion('option', 'active', 0);
+                                }
+                            }
+                        }
+                    });
+                }
+            }
+
+            that.processTermFields(assigned_fields, {});
         }
     },
 	

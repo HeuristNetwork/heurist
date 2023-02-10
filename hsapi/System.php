@@ -278,7 +278,22 @@ error_log(print_r($_REQUEST, true));
                             $cfg['rty_ID'] = $rty_ID;
                            
                             foreach($cfg['fields'] as $field=>$code){
-                                $cfg['fields'][$field] = ConceptCode::getDetailTypeLocalID($code);
+
+                                $extra = '_';
+
+                                if(strpos($code, '_') !== false){
+                                    $parts = explode('_', $code);
+                                    $code = $parts[0];
+                                    $extra .= $parts[1];
+                                }
+
+                                $dty_ID = ConceptCode::getDetailTypeLocalID($code);
+
+                                if($dty_ID != null && $extra != '_'){
+                                    $dty_ID .= $extra;
+                                }
+
+                                $cfg['fields'][$field] = $dty_ID;
                             }
                            
                             $config_res[] = $cfg;

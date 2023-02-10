@@ -58,6 +58,9 @@ $.widget( "heurist.lookupConfig", {
 
     example_results: {},    
     
+    save_btn: null,
+    close_btn: null,
+    
     // the widget's constructor
     _create: function() {
         // prevent double click to select text
@@ -144,16 +147,27 @@ $.widget( "heurist.lookupConfig", {
     //
     _getActionButtons: function(){
 
-        var that = this;        
+        var that = this;
+
         return [
-                 {text:window.hWin.HR('Done'), 
-                    id:'btnCancel',
-                    css:{'float':'right','margin-left':'30px'}, 
-                    click: function() { 
-                        that.closeDialog();
-                    }
-                 }
-                ];
+            {
+                text:window.hWin.HR('Close'), 
+                id:'btnClose',
+                css:{'float':'right','margin-left':'30px'}, 
+                click: function() { 
+                    that._closeHandler(false, false, null);
+                }
+            },
+            {
+                text:window.hWin.HR('Save'),
+                id:'btnSave',
+                css:{'float':'right'},
+                click: function() {
+                    that._closeHandler(true, false, null);
+                },
+                class: "ui-button-action"
+            }
+        ];
     },
 
     //
@@ -221,6 +235,8 @@ $.widget( "heurist.lookupConfig", {
                 window.hWin.HEURIST4.ui.initDialogHintButtons(this._as_dialog, null, helpURL, false);    
             }
             
+            this.save_btn = this._as_dialog.find('#btnSave');
+            this.close_btn = this._as_dialog.find('#btnClose');
         }
     },
     
@@ -337,10 +353,8 @@ $.widget( "heurist.lookupConfig", {
             this.element.find('.ui-heurist-header').text(this.options.title);
 
             // bottom bar buttons
-            this.element.find('#btnSave').button().on('click', function() {that._closeHandler(true, false, null);} );
-            this.element.find('#btnClose').button().on('click', function() {that._closeHandler(false, false, null);} );
-
-            window.hWin.HEURIST4.util.setDisabled(this.element.find('#btnSave'), !this._services_modified);
+            this.save_btn = this.element.find('#btnSave').button().on('click', function() {that._closeHandler(true, false, null);} );
+            this.close_btn = this.element.find('#btnClose').button().on('click', function() {that._closeHandler(false, false, null);} );
 
             // mouse leaves container
             this.element.find('.ent_wrapper:first').on('mouseleave', function(event) {
@@ -351,6 +365,7 @@ $.widget( "heurist.lookupConfig", {
             } );
         }
         
+        window.hWin.HEURIST4.util.setDisabled(this.save_btn, !this._services_modified);
         //show hide hints and helps according to current level
         window.hWin.HEURIST4.ui.applyCompetencyLevel(-1, this.element); 
 
@@ -528,7 +543,8 @@ $.widget( "heurist.lookupConfig", {
                 that._is_modified = false;
                 that._services_modified = false;
 
-                window.hWin.HEURIST4.util.setDisabled(that.element.find('#btnSave'), !this._services_modified);
+                window.hWin.HEURIST4.util.setDisabled(that.save_btn, !that._services_modified);
+                window.hWin.HEURIST4.msg.showMsgFlash('Saved lookup configurations...', 3000);
             }else{
                 window.hWin.HEURIST4.msg.showMsgErr(response);
             }
@@ -574,7 +590,11 @@ $.widget( "heurist.lookupConfig", {
             if(isSave){
                 this.saveConfigrations();
             }else{
-                this.element.empty().hide();
+                if(this.options.isdialog && this._as_dialog.dialog('instance') !== undefined){
+                    this._as_dialog.dialog('close'); // this.closeDialog(true);
+                }else{
+                    this.element.empty().hide();
+                }
             }
         }
     },
@@ -1040,10 +1060,20 @@ $.widget( "heurist.lookupConfig", {
                     }
                 }
 
-                if (dty_ID!=null && !(dty_ID>0) && (dty_ID.indexOf('_long') >= 0 || dty_ID.indexOf('_lat') >= 0)){
-                  
-                }else{
-                    dty_ID = dty_ID>0 ?$Db.getLocalID('dty', dty_ID) :'';
+                if (!window.hWin.HEURIST4.util.isempty(dty_ID) && dty_ID.indexOf('-') >= 0){ // concept id - default mapping
+
+                    let extra = '_';
+                    if(dty_ID.indexOf('_') > 0){
+                        let parts = dty_ID.split('_');
+                        dty_ID = parts[0]; // concept id
+                        extra = parts[1]; // long | lat
+                    }
+
+                    dty_ID = $Db.getLocalID('dty', dty_ID);
+
+                    if(!window.hWin.HEURIST4.util.isempty(dty_ID) && extra != '_'){
+                        dty_ID += extra;
+                    }
                 }
                 
                 var sel = window.hWin.HEURIST4.ui.createRectypeDetailSelect(ele, rty_ID, 
@@ -1205,7 +1235,7 @@ $.widget( "heurist.lookupConfig", {
                 this._isNewCfg = false;
 
                 this._services_modified = true;
-                window.hWin.HEURIST4.util.setDisabled(this.element.find('#btnSave'), !this._services_modified);
+                window.hWin.HEURIST4.util.setDisabled(this.save_btn, !this._services_modified);
 
                 this._reloadServiceList(); // reload left panel
 
@@ -1237,7 +1267,7 @@ $.widget( "heurist.lookupConfig", {
             is_del = true;
 
             this._services_modified = true;
-            window.hWin.HEURIST4.util.setDisabled(this.element.find('#btnSave'), !this._services_modified);
+            window.hWin.HEURIST4.util.setDisabled(this.save_btn, !this._services_modified);
         }
 
         if(is_del){
