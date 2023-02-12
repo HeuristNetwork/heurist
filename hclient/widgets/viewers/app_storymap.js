@@ -1138,8 +1138,8 @@ console.log('>sctop '+ele.scrollTop());
         
                     var server_request = {
                                     q: query, 
-                                    leaflet: true, 
-                                    simplify: true, //simplify paths with more than 1000 vertices
+                                    leaflet: 1, 
+                                    simplify: 1, //simplify paths with more than 1000 vertices
                                     //suppress_linked_places: 1, //do not load assosiated places
                                     zip: 1,
                                     format:'geojson'};
@@ -1319,8 +1319,8 @@ console.log('>sctop '+ele.scrollTop());
             
             var server_request = {
                             q: {ids: this._resultset.getIds()}, //list of story elements/events
-                            leaflet: true, 
-                            simplify: true, //simplify paths with more than 1000 vertices
+                            leaflet: 1, 
+                            simplify: 1, //simplify paths with more than 1000 vertices
                             //suppress_linked_places: 1, //do not load assosiated places
                             zip: 1,
                             format:'geojson'};
@@ -1580,8 +1580,8 @@ console.log('>sctop '+ele.scrollTop());
                         // 2. retrieve all places from server side as geojson
                         var server_request = {
                             q: qq,
-                            leaflet: true, 
-                            simplify: true, //simplify paths with more than 1000 vertices
+                            leaflet: 1, 
+                            simplify: 1, //simplify paths with more than 1000 vertices
                             zip: 1,
                             format:'geojson'};
                         window.hWin.HAPI4.RecordMgr.search_new(server_request,

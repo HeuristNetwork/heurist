@@ -177,7 +177,7 @@ function editSymbology(current_value, mode_edit, callback){
             "dtFields":{
                 "dty_Type":"enum",
                 //"rst_RequirementType":"required",                        
-                "rst_DisplayName":"Geofield:",
+                "rst_DisplayName":"Field to be mapped:",
                 "rst_Display": (mode_edit===3)?"visible":"hidden",
                 "rst_FieldConfig":ptr_fields, //{"entity":"defDetailTypes","csv":false},
         }},

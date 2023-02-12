@@ -380,7 +380,7 @@ console.log(re);
                     that.map_curr_search_inited = true;
                     
                     if(that.map_cache_got && that.options.use_cache){
-                        //do not reload current search since first request load full dataset - just hide items that are not in current search
+                        //do not reload current search since first request loads full dataset - just hide items that are not in current search
                         var _selection = null;
                         if(that.options.recordset=='show_all' || that.options.recordset=='hide_all'){
                             _selection = that.options.recordset;
@@ -396,7 +396,8 @@ console.log(re);
                     }else{
                         
                         //add layer to virtual mapdocument
-                        mapping.mapping('addSearchResult', that.options.recordset, 'Current query', that.options.preserveViewport);
+                        mapping.mapping('addSearchResult', that.options.recordset, 
+                                {name:window.hWin.HR('Current query'), viewport:that.options.preserveViewport, is_current_search:true});
                         that.options.preserveViewport = false; //restore it before each call if require
                         that.map_cache_got = true; //@todo need to check that search is really performed
                     }
@@ -466,7 +467,7 @@ console.log(re);
         if(this.mapframe[0].contentWindow){
             mapping = this.mapframe[0].contentWindow.mapping;
             if(mapping){
-                mapping.mapping('addSearchResult', data, dataset_name);    
+                mapping.mapping('addSearchResult', data, {name:dataset_name});    
                 
                 return true;
             }else if(data['q']){

@@ -683,8 +683,8 @@ $.widget( "heurist.mapping", {
     // data - recordset, heurist query or json
     // this method is invoked on global onserachfinish event in app_timemap
     //
-    addSearchResult: function(data, dataset_name, preserveViewport ) {
-        this.current_query_layer = this.mapManager.addSearchResult( data, dataset_name, preserveViewport );
+    addSearchResult: function(data, dataset_options ) {
+        this.current_query_layer = this.mapManager.addSearchResult( data, dataset_options );
     },
 
     //
@@ -1530,7 +1530,7 @@ $.widget( "heurist.mapping", {
     },
     
     //
-    //
+    // remove top layer
     //
     removeLayer: function(layer_id)
     {
@@ -1580,7 +1580,7 @@ $.widget( "heurist.mapping", {
                 //hide all
                 affected_layer.remove();
                 if(this.all_clusters[nativelayer_id]) this.all_clusters[nativelayer_id].remove();
-            }else{
+            }else if(!affected_layer._map){
                 affected_layer.addTo(this.nativemap);
                 if(this.all_clusters[nativelayer_id]) this.all_clusters[nativelayer_id].addTo(this.nativemap);
             }
@@ -1680,17 +1680,18 @@ $.widget( "heurist.mapping", {
         var that = this;
         var theme_has_changed = false;
         
+        /* REMOVE
         if(newThematicMap!=null){
             theme_has_changed = window.hWin.HEURIST4.util.isnull( affected_layer.options.thematic_map );
             affected_layer.options.thematic_map = newThematicMap;
         }else{
             theme_has_changed = !window.hWin.HEURIST4.util.isnull( affected_layer.options.thematic_map );
             affected_layer.options.thematic_map = null;
-        }
+        }*/
         
         //create icons (@todo for all themes and rec types)
         var style = window.hWin.HEURIST4.util.isJSON(newStyle);
-        if(!style && affected_layer.options.default_style && !theme_has_changed){
+        if(!style && affected_layer.options.default_style && !newThematicMap){
             //new style is not defined and layer already has default one - no need action
             return;
         }
@@ -1771,13 +1772,13 @@ $.widget( "heurist.mapping", {
                 });
                 
             }else{
-                this.all_clusters[layer_id].clearLayers() 
+                this.all_clusters[layer_id].clearLayers(); 
             }
             
         }else{
             is_new_markercluster = window.hWin.HEURIST4.util.isnull(this.all_markers[layer_id]);
         }
-            
+        
         if(is_new_markercluster){
 
             //all markers per top layer            
@@ -1799,7 +1800,7 @@ $.widget( "heurist.mapping", {
                     layer.feature = feature;
                     
                     if(that.isMarkerClusterEnabled){
-                        parent_layer.removeLayer( layer );  
+                        parent_layer.removeLayer( layer ); //remove from original parent/top layer  
                         layer.cluster_layer_id = layer_id;
                     }else{
                         //need to store reference to add/remove marker on style change  
@@ -1820,7 +1821,8 @@ $.widget( "heurist.mapping", {
                             layer.feature.style = that.hie_places_wo_events_style;
                         }
                     }*/
-                    that.all_markers[layer_id].push( layer );    
+                    that.all_markers[layer_id].push( layer );  
+                      
                 }else if(layer instanceof L.Polyline && !(layer instanceof L.Polygon)){
                     var use_style = window.hWin.HEURIST4.util.cloneJSON( style );
                     use_style.fill = false;
@@ -1838,20 +1840,19 @@ $.widget( "heurist.mapping", {
                     child_layer.options.selectable = affected_layer.options.selectable;
                     child_layer.feature.default_style = style;  //default style for feature is parent layer style
                     
-                    child_layer.feature.thematic_style = that._getThematicMapStyle(affected_layer, child_layer.feature);
-                    
                     __extractMarkers(child_layer, affected_layer, child_layer.feature);
             } );
             
         }else{
-            //assign default           
-            this._assignStyleToFeature(affected_layer, style);
+            //assign default style          
+            this._assignDefaultStyleToFeature(affected_layer, style);
             
         }
         
         var myIcon = this._createMarkerIcon( style );
         
         //apply marker style
+        var all_visible_markers = [];
         $(this.all_markers[layer_id]).each(function(idx, layer){
             
                 var feature = layer.feature;
@@ -1859,7 +1860,6 @@ $.widget( "heurist.mapping", {
                 var setIcon;
                 
                 layer.feature.default_style = style; //default style for feature is parent layer style
-                layer.feature.thematic_style = that._getThematicMapStyle(affected_layer, layer.feature);
 
                 if(layer.feature.thematic_style){ //thematic map is active
                     markerStyle = layer.feature.thematic_style; 
@@ -1875,12 +1875,31 @@ $.widget( "heurist.mapping", {
                 }
 
                 that.applyStyleForMarker(layer_id, layer, markerStyle, setIcon);
+                
+                layer = that.all_markers[layer_id][idx]; //need reassign sine previous function may replace styles
+                
+                if(layer.feature.thematic_style===false){ //thematic map is active and this feature does not fit to conditions
+                    //hide on map
+                    layer.hidden_by_theme = true;
+                    layer.remove(); 
+                }else{
+                    
+                    if(layer.hidden_by_filter!==true){
+                        all_visible_markers.push(layer); 
+                           
+                        if(layer.hidden_by_theme===true && !that.isMarkerClusterEnabled && !layer._map){
+                            layer.addTo( that.nativemap );     
+                        } 
+                         
+                    }
+                    layer.hidden_by_theme = false;
+                }
             
         });
      
         //add all markers to cluster
         if(this.isMarkerClusterEnabled){
-            this.all_clusters[layer_id].addLayers(this.all_markers[layer_id]);                                 
+            this.all_clusters[layer_id].addLayers(all_visible_markers); //was this.all_markers[layer_id]                                  
             if(is_new_markercluster){
                 this.all_clusters[layer_id].addTo( this.nativemap );
             }
@@ -1889,27 +1908,69 @@ $.widget( "heurist.mapping", {
         //apply style for polygons and polylines 
         affected_layer.setStyle(function(feature){ return that._stylerForPoly(feature); });
         
+        //show/hide polygons and polylines if they do not fit thematic map conditions
+        this.eachLayerFeature(affected_layer, function(layer){
+                if(layer.feature.thematic_style===false){ //thematic map is active and this feature does not fit to conditions
+                    //hide on map
+                    layer.hidden_by_theme = true;
+                    layer.remove(); 
+                }else{
+                    if(layer.hidden_by_theme===true && layer.hidden_by_filter!==true && !layer._map){
+                        layer.addTo( that.nativemap );
+                    }
+                    layer.hidden_by_theme = false;
+                    
+                }
+        });    
+        
     },
     
     //
+    // callback obtains as parameter child element (child layer)
     //
-    //
-    _getThematicMapStyle: function(top_layer, feature){
+    eachLayerFeature: function(nativelayer_id, callback){
         
-        if(!top_layer.options.thematic_map) return null; //there is not active thematic map
-        
-        var id = 0;
-        if(feature){
-            var id = (feature.properties && feature.properties.rec_ID>0)
-                            ?feature.properties.rec_ID
-                            :feature.id;
-        }
-        
-        if(id>0 && top_layer.options.thematic_map[id]){ 
-                return top_layer.options.thematic_map[id];
+        var affected_layer;
+        if(nativelayer_id instanceof L.Layer){
+            affected_layer = nativelayer_id;   
         }else{
-                return null;
+            affected_layer = this.all_layers[nativelayer_id];
         }
+        
+        if(affected_layer){
+            
+            var layer_id = affected_layer._leaflet_id;
+
+            var that = this;
+            function __childLayers(layer, feature){
+                if(layer instanceof L.LayerGroup){
+                    layer.eachLayer( function(child_layer){__childLayers(child_layer, feature) } );
+                }else {
+                    if(!layer.feature){
+                        layer.feature = {properties: feature.properties};
+                    } 
+                    
+                    callback.call(that, layer);
+                }
+            }
+            
+            if(affected_layer instanceof L.LayerGroup){
+                affected_layer.eachLayer( function(child_layer){ __childLayers(child_layer, child_layer.feature) });
+                
+                //for markers
+                if(this.all_markers.hasOwnProperty(layer_id)){
+                        var markers = this.all_markers[layer_id];
+                        $(markers).each(function(idx, layer){
+                            if (layer.feature){
+                                callback.call(that, layer);
+                            }
+                        });
+                }
+                
+            }else{
+                __childLayers(affected_layer, affected_layer.feature);
+            }        
+        }        
     },
     
     //
@@ -1917,43 +1978,36 @@ $.widget( "heurist.mapping", {
     // individual style per feature (from DT_SYMBOLOGY) is stored in feature.style
     // if feature.style is not defined feature.default_style will be used
     //
-    _assignStyleToFeature: function(affected_layer, style)
+    // feature.default_style - default style (used if individual style or thematic_style are not defined)
+    // feature.style - individual style for feature (from DT_SYMBOLOGY)
+    // feature.thematic_style - style assigned by applyThematicMap in mapLayer 
+    //
+    _assignDefaultStyleToFeature: function(affected_layer, style)
     {
+
         var that = this;
-        function __childLayers(layer, feature){
-            if(layer instanceof L.LayerGroup){
-                layer.eachLayer( function(child_layer){__childLayers(child_layer, feature) } );
-            }else {
-                
+        this.eachLayerFeature(affected_layer, function(layer){
                 var use_style = style;
                 if(layer instanceof L.Polyline && !(layer instanceof L.Polygon)){
                     use_style = window.hWin.HEURIST4.util.cloneJSON( style );
                     use_style.fill = false;
                 }
                 
-                if(!layer.feature){
-                    layer.feature = {properties: feature.properties};
-                } 
                 layer.feature.default_style = use_style;
-                layer.feature.thematic_style = that._getThematicMapStyle(affected_layer, layer.feature);
-            }
-        }
+                layer.options.selectable = affected_layer.options.selectable;
+        });
         
-        if(affected_layer instanceof L.LayerGroup){
-            affected_layer.eachLayer( function(child_layer){ __childLayers(child_layer, child_layer.feature) });
-        }else{
-            __childLayers(affected_layer, affected_layer.feature);
-        }
     },
     
     //
     // apply style for particular layer (map element)  (currently used in app_storemap)
+    // it does not take thematic map into account
     //
     applyStyleForLayer: function(top_layer, layer, newStyle) {
         
         var style = this.setStyleDefaultValues(newStyle);
         
-        this._assignStyleToFeature(layer, style);
+        this._assignDefaultStyleToFeature(layer, style);
         
         //for markers
         this.applyStyleForMarker(top_layer, layer, style);
@@ -1971,10 +2025,15 @@ $.widget( "heurist.mapping", {
     {
         
         var parent_id = 0;
-        if(top_layer) parent_id = top_layer._leaflet_id;
+
+        if(top_layer instanceof L.Layer){
+            parent_id = top_layer._leaflet_id;   
+        }else if(top_layer>0){
+            parent_id = top_layer;
+        }
 
         if(parent_id>0 && !this.all_markers[parent_id]) return;  //there is no markers for this parent layer
-        
+
         var that = this;
         
         markerStyle = this.setStyleDefaultValues(markerStyle);
@@ -2506,7 +2565,12 @@ $.widget( "heurist.mapping", {
         
         //feature.style - individual style (set in symbology field per record)
         //feature.default_style - style of parent heurist layer (can be changed via legend)
+        
         var use_style = feature.thematic_style || feature.style || feature.default_style;
+
+        if(feature.thematic_style===false){ //hidden
+            return use_style;
+        }
        
         /* expremental HARDCODE for HIE
         if(this.isHamburgIslamicImpire){
@@ -2559,9 +2623,8 @@ $.widget( "heurist.mapping", {
         var selected_markers = this._getMarkersByRecordID(_selection);
         for(var idx in selected_markers){
             var layer = selected_markers[idx];
-            /*if(layer instanceof L.CircleMarker){
-                layer.setStyle( {color: '#ffff00'});//function(feature) {that._stylerForPoly(feature); });
-            }else{*/
+            if(!(layer.hidden_by_filter || layer.hidden_by_theme)){
+
                 //create special hightlight marker below this one
                 var use_style = layer.feature.style || layer.feature.default_style;
                 var iconSize = ((use_style && use_style.iconSize>0)?use_style.iconSize:16);
@@ -2574,7 +2637,7 @@ $.widget( "heurist.mapping", {
                 new_layer.addTo( this.nativemap );
                 new_layer.bringToBack();
                 this.highlightedMarkers.push(new_layer);
-            //}
+            }
         }        
           
         //this.main_layer.remove();
@@ -2710,6 +2773,7 @@ $.widget( "heurist.mapping", {
             if(top_layer instanceof L.LayerGroup)   //geojson only
                 top_layer.eachLayer(function(layer){
                     if (layer instanceof L.Layer && layer.feature && //(!(layer.cluster_layer_id>0)) &&
+                        (!(layer.hidden_by_filter || layer.hidden_by_theme))
                         (window.hWin.HEURIST4.util.findArrayIndex(layer.feature.properties.rec_ID, _selection)>=0)) 
                     {
                         bounds.push( that.getLayerBounds(layer, useRuler) );
@@ -2739,11 +2803,11 @@ $.widget( "heurist.mapping", {
                         if (_selection===true || (layer.feature &&
                          window.hWin.HEURIST4.util.findArrayIndex(layer.feature.properties.rec_ID, _selection)>=0)){
                               selected_markers.push( layer );
-                              if(selected_markers.length==_selection.length) return false;
+                              //if(selected_markers.length==_selection.length) return false;
                          }
                     });
             }
-            if(selected_markers.length==_selection.length) break;
+            //if(selected_markers.length==_selection.length) break;
         }        
         
         return selected_markers;
@@ -2933,26 +2997,31 @@ $.widget( "heurist.mapping", {
         
             that.nativemap.eachLayer(function(top_layer){    
                 if(top_layer instanceof L.LayerGroup)
-                top_layer.eachLayer(function(layer){
-                      if (layer instanceof L.Layer && layer.feature && (!(layer.cluster_layer_id>0)) &&
-                      ( _selection===true || 
-                        window.hWin.HEURIST4.util.findArrayIndex(layer.feature.properties.rec_ID, _selection)>=0)) 
-                      {
-                          if(is_visible==false){
+                    top_layer.eachLayer(function(layer){
+                        if (layer instanceof L.Layer && layer.feature && (!(layer.cluster_layer_id>0)) &&
+                            ( _selection===true || 
+                                window.hWin.HEURIST4.util.findArrayIndex(layer.feature.properties.rec_ID, _selection)>=0)) 
+                        {
+                            if(is_visible==false){
+                                layer.hidden_by_filter = true;
                                 layer.remove();    
-                          }else if(layer._map==null){
-                                layer.addTo( that.nativemap );    
-                          }
-                          /*
-                          if($.isFunction(layer.getElement)){
-                                var ele = layer.getElement();
-                                if(ele) ele.style.display = vis_val;
-                          }else{
-                                    layer.setStyle({display:vis_val});
-                          }
-                          */
-                      }
-                });
+                            }else{
+                                layer.hidden_by_filter = false; 
+                                if(layer.hidden_by_theme!==true && !layer._map){
+                                    layer.addTo( that.nativemap );
+                                }
+                            }
+
+                            /*
+                            if($.isFunction(layer.getElement)){
+                            var ele = layer.getElement();
+                            if(ele) ele.style.display = vis_val;
+                            }else{
+                            layer.setStyle({display:vis_val});
+                            }
+                            */
+                        }
+                    });
             });
             
             
@@ -2964,9 +3033,11 @@ $.widget( "heurist.mapping", {
                     var layer = selected_markers[idx];
                     if(layer.cluster_layer_id>0 && that.all_clusters[layer.cluster_layer_id]){
                         if(is_visible==false){
+                            layer.hidden_by_filter = true;
                             that.all_clusters[layer.cluster_layer_id].removeLayer(layer);
                         }else {
-                            if(!that.all_clusters[layer.cluster_layer_id].hasLayer(layer)){
+                            layer.hidden_by_filter = false; 
+                            if(layer.hidden_by_theme!==true && !that.all_clusters[layer.cluster_layer_id].hasLayer(layer)){
                                 that.all_clusters[layer.cluster_layer_id].addLayer(layer);
                             }
                         }

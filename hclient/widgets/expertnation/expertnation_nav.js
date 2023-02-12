@@ -1168,7 +1168,7 @@ content = content.replace('http://heurist.sydney.edu.au/heurist/',window.hWin.HA
                     var mapping = $('#cp_mapframe')[0].contentWindow.mapping;
                     /* leaflet way
                     if(mapping && mapping.mapping){
-                        mapping.mapping('addSearchResult', map_recset, 'Current query');
+                        mapping.mapping('addSearchResult', map_recset, {name:'Current query'});
                         clearInterval(interval);
                     }
                     */
@@ -2208,7 +2208,7 @@ content = content.replace('http://heurist.sydney.edu.au/heurist/',window.hWin.HA
                     var mapping = $('#p_mapframe')[0].contentWindow.mapping;
                     /* lealet way
                     if(mapping && mapping.mapping){
-                        mapping.mapping('addSearchResult', map_recset, 'Current query');
+                        mapping.mapping('addSearchResult', map_recset, {name:'Current query'});
                         clearInterval(interval);
                     }
                     */

@@ -3155,7 +3155,7 @@ function recordSearchGeoDetails($system, $recID, $find_geo_by_linked_rty, $find_
             $find_geo_by_linked_rty = array(RT_PLACE);
         }
         
-        if(is_array($find_geo_by_linked_rty) && count($find_geo_by_linked_rty)>0){
+        if(is_array($find_geo_by_linked_rty) && count($find_geo_by_linked_rty)>0){   //search geo in linked records
 
             //$recID = $record["rec_ID"];     
             $squery = 'SELECT rl_SourceID,dtl_DetailTypeID,dtl_Value,ST_asWKT(dtl_Geo) as dtl_Geo, '

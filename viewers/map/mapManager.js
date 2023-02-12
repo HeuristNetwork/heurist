@@ -611,30 +611,38 @@ function hMapManager( _options )
                                             if(not_visible){ //reset
                                                 node.setSelected(false);
                                             }
-                                        }else if(node.data.type=='theme'){ //show/hide theme
+                                        }else if(node.data.type=='theme'){ //on show/hide theme
                                         
                                             //theme is obtained from resdata.fld(record, DT_SYMBOLOGY); see _getTreeData
 
 
                                             //if(node.parent.isSelected()){
-                                                var mapdoc_id = node.data.mapdoc_id;
-                                                var layer_id = node.data.layer_id;
-                                                var not_visible = true;
-                                                if( layer_id>0 && 
-                                                    ((mapdoc_id>0 && mapdoc_visible[mapdoc_id])|| mapdoc_id==0 || mapdoc_id=='temp')){
-                                                    //node.key - heurist layer record id
-                                                    var layer_rec = mapDocuments.getLayer(mapdoc_id, layer_id);
-                                                    if(layer_rec){
-                                                        var theme = node.isSelected()?node.data.theme:null;
-                                                        (layer_rec['layer']).applyThematicMap(theme);  
-                                                        not_visible = !node.isSelected();
-                                                        
-                                                    } 
+                                            var mapdoc_id = node.data.mapdoc_id;
+                                            var layer_id = node.data.layer_id;
+                                            var not_visible = true;
+                                            if( layer_id>0 && 
+                                                ((mapdoc_id>0 && mapdoc_visible[mapdoc_id])|| mapdoc_id==0 || mapdoc_id=='temp')){
+                                            
+                                                var active_themes = [];
+                                                var layer_rec = mapDocuments.getLayer(mapdoc_id, layer_id);
+                                                if(layer_rec){
+                                                    var siblings = node.parent.children;
+                                                    
+                                                    for(var i=0; i<siblings.length; i++){
+                                                            if(siblings[i].isSelected()){
+                                                                active_themes.push(siblings[i].data.theme);
+                                                                not_visible = false;
+                                                            }
+                                                    }
+                                                    //node.visitSiblings(function(){},true);
+                                                    
                                                 }
-                                                if(not_visible){ //reset
-                                                    node.setSelected(false);
-                                                }
-                                            //}
+                                                
+                                                (layer_rec['layer']).applyThematicMap( active_themes );
+                                            }
+                                            if(not_visible){ //reset
+                                                node.setSelected(false);
+                                            }
                                             
                                         }
 
@@ -1361,13 +1369,13 @@ function hMapManager( _options )
         },
         
         //
-        // adds new layer to search results mapdoc
+        // adds new layer to search results mapdoc (index=0)
         // data - recordset, heurist query or json
         // it sends request to server and obtain geojson to be passed to mapping.addGeoJson
         //
-        addSearchResult: function( data, dataset_name, preserveViewport )
+        addSearchResult: function( data, dataset_options )
         {
-            var record = mapDocuments.addSearchResult( 0, data, dataset_name, preserveViewport );
+            var record = mapDocuments.addSearchResult( 0, data, dataset_options );
             
             //refresh search results
             _refreshSearchContent(); 

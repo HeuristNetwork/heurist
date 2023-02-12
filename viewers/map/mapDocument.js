@@ -185,7 +185,7 @@ function hMapDocument( _options )
                                 }
                                 
                                 $.each(layer_themes, function(i, theme){
-                                    if(theme && theme.fields){
+                                    if(theme && theme.fields){ //object with field is theme
                                         
                                         let themeName = theme.title?theme.title:'Thematic map';
 
@@ -196,7 +196,8 @@ function hMapDocument( _options )
                                         $theme['layer_id'] = recID; //reference to parent layer
                                         $theme['mapdoc_id'] = mapdoc_id; //reference to parent mapdoc
                                         $theme['theme'] = theme;     
-                                        $theme['selected'] = false;
+                                        $theme['selected'] = (theme.active===true);
+
                                         $themes.push($theme);
                                         
                                     }
@@ -457,14 +458,34 @@ function hMapDocument( _options )
     //
     function _getSymbology( mapdoc_id, rec_id ){
         
+        function __extractStyle( def_style ){
+            
+            var layer_themes = window.hWin.HEURIST4.util.isJSON(def_style);
+            var layer_default_style = null;
+            
+            if(layer_themes!==false){
+                if($.isPlainObject(layer_themes)){
+                    layer_themes = [layer_themes];
+                }
+
+                $.each(layer_themes, function(i, theme){
+                    if(!theme.fields){
+                        //object without fields is layer's default symbol
+                        layer_default_style = theme.symbol?theme.symbol:theme;
+                        return false;
+                    }
+                });
+            }
+            return layer_default_style;
+        }
+        
         
         if(!rec_id){
             
             if(map_documents){
                 var record2 = (mapdoc_id>0) ? map_documents.getById( mapdoc_id ) 
                                             : map_documents.getFirstRecord();
-                var def_style = map_documents.fld(record2, DT_SYMBOLOGY);
-                return window.hWin.HEURIST4.util.isJSON(def_style);
+                return __extractStyle(map_documents.fld(record2, DT_SYMBOLOGY));
             }else{
                 return false;
             }
@@ -476,8 +497,8 @@ function hMapDocument( _options )
         if(!_record['source_rectype'] || _record['source_rectype'] == RT_QUERY_SOURCE){
             //for query of recordset symbology is stored in details
             
-            var layer_style = _recset.fld(_record, DT_SYMBOLOGY);
-            var layer_style = window.hWin.HEURIST4.util.isJSON(layer_style);
+            var layer_style = __extractStyle(_recset.fld(_record, DT_SYMBOLOGY));
+
             if(!layer_style){
                 if(_record['layer']){
                     layer_style = (_record['layer']).getStyle();    
@@ -588,9 +609,11 @@ function hMapDocument( _options )
         //
         // returns record to use in mapping widget
         //
-        addSearchResult: function(mapdoc_id, data, dataset_name, preserveViewport){
+        addSearchResult: function(mapdoc_id, data, dataset_options){
 
             var curr_request, original_heurist_query;
+            
+            const dataset_name = dataset_options.name;
             
             if( (typeof data.isA == "function") && data.isA("hRecordSet") ){
                     
@@ -644,13 +667,14 @@ function hMapDocument( _options )
             _record['source_rectype'] = RT_QUERY_SOURCE;
             
             //always preserve for mapdoc layers 
-            preserveViewport = (mapdoc_id!=0) || (preserveViewport===true);
+            const preserveViewport = (mapdoc_id!=0) || (dataset_options.viewport===true);
             
             recset.setFld(_record, 'layer',
                         new hMapLayer2({rec_datasource: _record, 
                                         mapdoc_recordset: recset, //need to get fields
                                         mapwidget: options.mapwidget,  //need to call back addGeoJson when data ara obtained from server
                                         mapdocument_id: mapdoc_id,
+                                        is_current_search: dataset_options.is_current_search,
                                         preserveViewport:preserveViewport })); //zoom to current search 
                                               
                                               
