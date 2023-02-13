@@ -3001,13 +3001,13 @@ console.log(err)
             }
             if(empty.length>0){
                 if(sMsg!='') sMsg = sMsg + '<br><br>';
-                sMsg += ('&nbsp;&nbsp;There are no saved filters defined for the workgroup '
+                sMsg += ('&nbsp;There are no saved filters defined for the workgroup '
                          +(empty.length>1?'s':'')
                          + empty.join(', '));
                 
                 if(is_logged){
-                    sMsg += '. Please create some saved filters there (if you know what '
-                    + 'you\'re doing you may also edit the widget parameters to indicate another workgroup).';
+                    sMsg += '. Please create some saved filters there or '
+                    + 'edit this widget to indicate another workgroup or a specific search).';
                 }else{
                     sMsg += '. Please advise website owner.';
                 }
