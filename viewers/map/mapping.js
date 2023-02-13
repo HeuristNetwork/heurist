@@ -248,7 +248,7 @@ $.widget( "heurist.mapping", {
     //{name:'OpenWeatherMap'}
     {name:'Esri.NatGeoWorldMap'},
     {name:'Esri.WorldGrayCanvas'},
-    {name:'MapTilesAPI.OSMEnglish', options:{accessToken: '4b2ce9cc3dmshb0ed4b109c9e660p1f9a50jsne0544286f8bb'}}, 
+    {name:'MapTilesAPI.OSMEnglish', options:{accessToken: ''}}, 
     {name:'None'}
     ],
 
