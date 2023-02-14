@@ -352,7 +352,7 @@ $.widget( "heurist.search_faceted", {
                           that._current_query_request_id = null;
                           that._currentRecordset = recset;
                           that._isInited = false;
-                          that.no_value_facets.push(facet_index)
+
                           that._recalculateFacets(-1);       
                           that.refreshSubsetSign();
 
