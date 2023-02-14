@@ -248,7 +248,7 @@ $.widget( "heurist.mapping", {
     //{name:'OpenWeatherMap'}
     {name:'Esri.NatGeoWorldMap'},
     {name:'Esri.WorldGrayCanvas'},
-    {name:'MapTilesAPI.OSMEnglish', options:{accessToken: ''}}, 
+    {name:'MapTilesAPI.OSMEnglish', options:{accessToken: '4b2ce9cc3dmshb0ed4b109c9e660p1f9a50jsne0544286f8bb'}}, 
     {name:'None'}
     ],
 
@@ -2773,7 +2773,7 @@ $.widget( "heurist.mapping", {
             if(top_layer instanceof L.LayerGroup)   //geojson only
                 top_layer.eachLayer(function(layer){
                     if (layer instanceof L.Layer && layer.feature && //(!(layer.cluster_layer_id>0)) &&
-                        (!(layer.hidden_by_filter || layer.hidden_by_theme))
+                        (!(layer.hidden_by_filter || layer.hidden_by_theme)) &&
                         (window.hWin.HEURIST4.util.findArrayIndex(layer.feature.properties.rec_ID, _selection)>=0)) 
                     {
                         bounds.push( that.getLayerBounds(layer, useRuler) );
