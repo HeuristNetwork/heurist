@@ -537,6 +537,7 @@ function openSearchMenu(that, $select, disableClick=true){
                     let title = $(item).text().toLowerCase();
                     if($select.attr('rectype-select') == 1 && window.hWin.HEURIST4.browseRecordCache.hasOwnProperty(key)){
                         title = window.hWin.HEURIST4.browseRecordCache[key][i]['rec_Title'].toLowerCase();
+                        title = title.replace(/[\r\n]+/g, ' ');
                     }
 
                     if(title.indexOf(val)>=0){
@@ -893,9 +894,8 @@ function browseRecords(_editing_input, $input){
                                    if(window.hWin.HEURIST4.util.isJSON(response)) {
                                        if(response['records'] && response['records'].length>0){
 
-                                            let rec_title = response['records'].replace(/[\r\n]+/g, ' ');
                                            //keep in cache
-                                            __assignCache(rec_title);
+                                           __assignCache(response['records']);
                                            __show_select_dropdown(ref_id); //call again after loading list of records
 
                                        }else{
@@ -951,7 +951,9 @@ function browseRecords(_editing_input, $input){
                     
                     $.each(window.hWin.HEURIST4.browseRecordCache[key], function(idx, item){
                         
-                        var opt = window.hWin.HEURIST4.ui.addoption(that.selObj, item['rec_ID'], item['rec_Title'].substr(0,64)); 
+                        let title = item['rec_Title'].substr(0,64).replace(/[\r\n]+/g, ' ');
+                        
+                        var opt = window.hWin.HEURIST4.ui.addoption(that.selObj, item['rec_ID'], title); 
                         
                         var icon = window.hWin.HAPI4.iconBaseURL + item['rec_RecTypeID'];
                         $(opt).attr('icon-url', icon);
