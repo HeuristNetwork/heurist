@@ -345,6 +345,10 @@ function hMapManager( _options )
                                   + map_providers[k]['name']+'</label><br>';
             }
             
+            content = content + '<span style="color: darkgray; padding-left: 5px;" class="heurist-helper1">Email team for '
+                + '<a href="http://leaflet-extras.github.io/leaflet-providers/preview/index.html" target="_blank" '
+                    + 'style="display: inline; background: transparent; text-decoration: underline; color: black;">other base maps</a>'
+                + '</span>';
             content = content + '<div style="text-align:center; display: inline-block;margin-left: 5px;" id="basemap_filter_btns">'
                 +'<button name="basemap_filter">filters</button>'
                 +'<button name="basemap_filter_reset">reset</button></div>';
