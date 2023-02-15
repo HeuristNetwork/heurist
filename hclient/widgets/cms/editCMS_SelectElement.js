@@ -89,8 +89,36 @@ function editCMS_SelectElement( callback ){
             css:{'float':'right'}, 
             click: function() { 
                 if(selected_element){
-                    callback.call(this, selected_element, selected_name);
-                    $dlg.dialog( "close" );    
+
+                    if(selected_element.indexOf('tpl_') !== -1){
+
+                        let $comp_dlg;
+                        let msg = '<div>'
+                            + '<label><input type="radio" name="insertMethod" value="new_" checked="checked"> insert as a separate page (at the end of the menu)</label><br>'
+                            + '<label><input type="radio" name="insertMethod" value=""> insert as components at the end of the current page</label>'
+                        + '</div>';
+
+                        let btns = {};
+                        btns[window.hWin.HR('OK')] = () => {
+
+                            let option = $comp_dlg.find('input:checked');
+
+                            if(option.val() == "new_"){
+                                selected_element = "new_" + selected_element;
+                            }
+
+                            $comp_dlg.dialog( "close" );
+                            callback.call(this, selected_element, selected_name);
+                            $dlg.dialog( "close" );
+
+                        };
+                        btns[window.hWin.HR('Cancel')] = () => { $comp_dlg.dialog( "close" ); };
+
+                        $comp_dlg = window.hWin.HEURIST4.msg.showMsgDlg(msg, btns, {title: 'New composite page', yes: window.hWin.HR('OK'), no: window.hWin.HR('Cancel')}, {default_palette_class: 'ui-heurist-publish'})
+                    }else{
+                        callback.call(this, selected_element, selected_name);
+                        $dlg.dialog( "close" );
+                    }
                 }
     }}];
 

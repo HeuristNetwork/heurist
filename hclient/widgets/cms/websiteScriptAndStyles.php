@@ -900,24 +900,43 @@ function initLinksAndImages($container, search_data){
         
     });
 
-    // Ensure each image source is correct for current server + database
-    $('img').each(function(idx, image){
+    // Ensure each image and embedded source is correct for current server + database
+    $('img, embed').each(function(idx, ele){
 
-        var src = $(image).attr('src');
-        var file_id = $(image).attr('data-id');
+        var src = $(ele).attr('src');
+        var file_id = $(ele).attr('data-id');
+        var db = window.hWin.hAPI4.database;
+        var extra_params = '';
 
-        if(!window.hWin.HEURIST4.util.isempty(src) && src.indexOf('&file=') > 0){
+        if(!window.hWin.HEURIST4.util.isempty(src)){
             var query = src.slice(src.indexOf('?'));
-            file_id = window.hWin.HEURIST4.util.getUrlParameter('file', query);
+
+            if(src.indexOf('file=') > 0){
+                file_id = window.hWin.HEURIST4.util.getUrlParameter('file', query);
+            }
+
+            if(src.indexOf('embedplayer=') > 0){
+                extra_params += '&embedplayer='+window.hWin.HEURIST4.util.getUrlParameter('embedplayer', query);
+            }
+
+            if(src.indexOf('fancybox=') > 0){
+                extra_params += '&fancybox='+window.hWin.HEURIST4.util.getUrlParameter('fancybox', query);
+            }else{
+                extra_params += '&fancybox=1';
+            }
+
+            if(src.indexOf('db=') > 0){
+                db = window.hWin.HEURIST4.util.getUrlParameter('db', query);
+            }
         }
 
-        if(!window.hWin.HEURIST4.util.isempty(file_id)){
-            $(image).attr('src', window.hWin.HAPI4.baseURL_pro + '?db=' + window.hWin.HAPI4.database + '&file=' + file_id + '&fancybox=1');
+        if(!window.hWin.HEURIST4.util.isempty(file_id) && !window.hWin.HEURIST4.util.isempty(db)){
+            $(ele).attr('src', window.hWin.HAPI4.baseURL_pro + '?db=' + db + '&file=' + file_id + extra_params);
         }else 
         if (!window.hWin.HEURIST4.util.isempty(src) 
             && (src.indexOf('./')==0 || src.indexOf('/')==0)){ //relative path
               src = window.hWin.HAPI4.baseURL + src.substring(src.indexOf('/')==0?1:2);
-              $(image).attr('src', src);
+              $(ele).attr('src', src);
         }
     });
 
@@ -1003,12 +1022,24 @@ $website_title -> #main-title>h2
 $title_alt -> #main-title-alt 
 $title_alt2 -> #main-title-alt2 
 */
-  //main logo image
-  if($('#main-logo').length>0){
-            $('#main-logo').empty();
-            $('<a href="#" style="text-decoration:none;"><?php print $image_logo;?></a>')
-            .appendTo($('#main-logo'));
-  }
+
+var setup_title_adjust = false;
+//main logo image
+if($('#main-logo').length>0){
+    $('#main-logo').empty();
+    $('<a href="#" style="text-decoration:none;"><?php print $image_logo;?></a>')
+    .appendTo($('#main-logo'));
+
+    let $img = $('#main-logo img');
+    if($img.length > 0 && !$img[0].complete && !window.hWin.HEURIST4.util.isempty($img.attr('src'))){
+        $img.on('load', () => {
+            $('#main-title').css({ left:$('#main-logo').width()+10 });
+            $('#main-title').fadeIn(500);
+        });
+
+        setup_title_adjust = true;
+    }
+}
   
   if($('#main-logo-alt').length>0){
   <?php if($image_altlogo){ ?>
@@ -1039,15 +1070,20 @@ $title_alt2 -> #main-title-alt2
         . str_replace("'",'&#039;',strip_tags($website_title,'<i><b><u><em><strong><sup><sub><small><br>'))
         .'</h2>\').appendTo(ele);';
   ?>
-      if(ele.parent().is('#main-header'))
-      {
-          if(!$('#main-logo-alt').is(':visible')){
-                ele.css({right:10}); 
-          }
-          setTimeout(function(){ ele.css({left:$('#main-logo').width()+10 });ele.fadeIn(500); },2000);
-      }
-      
-      
+    if(ele.parent().is('#main-header')) {
+        if(!$('#main-logo-alt').is(':visible')){
+            ele.css({right:10}); 
+        }
+
+        let $img = $('#main-logo img');
+        if($img.length > 0 && $img[0].complete){ // already loaded logo
+            ele.css({left:$('#main-logo').width()+10 });
+            ele.fadeIn(500);
+        }else if(!setup_title_adjust){ // add timeout
+            setTimeout(function(){ ele.css({left:$('#main-logo').width()+10 });ele.fadeIn(500); },3000);
+        }
+    }
+
   }else{
       ele.show();
   }
