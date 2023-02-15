@@ -2700,7 +2700,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
             var add_fill_data = this._currentEditID == -1 && !window.hWin.HEURIST4.util.isempty(this.options.fill_in_data);
 
             //pass structure and record details
-            that._currentEditID = that._getField('rec_ID');;
+            that._currentEditID = that._getField('rec_ID');
             that._currentEditRecTypeID = rectypeID;
 
             //find all parent rectypes
@@ -3006,6 +3006,9 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
             var terms_as_buttons = []; // enum fields, for adjusting each button+label's width
             var available_groups = ['group', 'group_break', 'tabs', 'tabs_new', 'accordion', 'accordion_inner', 'expanded', 'expanded_inner'];
 
+            var has_rec_access = window.hWin.HAPI4.has_access(this._getField('rec_OwnerUGrpID'));
+            //var cur_record = that._currentEditRecordset.getFirstRecord();
+
             for(var k=0; k<s_fields.length; k++){
 
                 var dtFields = that._prepareFieldForEditor( s_fields[k] );
@@ -3048,7 +3051,13 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
                         add_fill_data = false;
                     }
 
-                    if(group_fields!=null){
+                    let fld_vis = $Db.rst(this._currentEditRecTypeID, dtFields['dt_ID'], 'rst_NonOwnerVisibility'); 
+                    //let fld_vis_status = that._currentEditRecordset.getFieldVisibilites(cur_record, dtFields['dt_ID']);
+                    let hide_fld = fld_vis == 'hidden' && !has_rec_access;
+
+                    if(hide_fld){
+                        continue;
+                    }else if(group_fields!=null){
                         group_fields.push({"dtID": dtFields['dt_ID'], "dtFields":dtFields});
                     }else{
                         fields.push({"dtID": dtFields['dt_ID'], "dtFields":dtFields});
