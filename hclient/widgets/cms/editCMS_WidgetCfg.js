@@ -834,13 +834,27 @@ function editCMS_WidgetCfg( widget_cfg, _layout_content, $dlg, main_callback ){
                 
             }else
             if(widget_name=='heurist_resultListExt' && 
-                            $dlg.find('select[name="rep_template"]').find('options').length==0){
+                $dlg.find('select[name="rep_template"]').find('options').length==0){
 
-                                var $select3 = $dlg.find('select[name="rep_template"]'); 
+                    var $select3 = $dlg.find('select[name="rep_template"]'); 
 
-                                window.hWin.HEURIST4.ui.createTemplateSelector( $select3 
-                                    ,[{key:'',title:'Standard record view template'}], $select3.attr('data-template'));
+                    window.hWin.HEURIST4.ui.createTemplateSelector( $select3 
+                        ,[{key:'',title:'Standard record view template'}], $select3.attr('data-template'));
 
+                    $select3.on('change', () => {
+
+                        if($select3.val() == ''){ console.log('hiding checkbox at change');
+                            $dlg.find('input[name="is_single_selection"]').parent().hide();
+                        }else{
+                            $dlg.find('input[name="is_single_selection"]').parent().show();
+                        }
+                    });
+
+                    if($select3.attr('data-template') == ''){
+                        $dlg.find('input[name="is_single_selection"]').parent().hide();
+                    }else{
+                        $dlg.find('input[name="is_single_selection"]').parent().show();
+                    }
 
             }else 
             if(widget_name=='heurist_resultList' && 
@@ -1027,6 +1041,7 @@ function editCMS_WidgetCfg( widget_cfg, _layout_content, $dlg, main_callback ){
                         +'&[query]';
                     }else{
                         opts['url'] = 'viewers/record/renderRecordData.php?db=[dbname]&recID=[recID]';
+                        opts['is_single_selection'] = true; // force single selection
                     }
 
                     opts['placeholder_text'] = $dlg.find('#placeholder_text').val();

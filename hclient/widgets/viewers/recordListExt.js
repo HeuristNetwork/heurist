@@ -210,6 +210,11 @@ that._dout('>>'+this.options.search_initial);
                 .html(window.hWin.HEURIST4.util.isempty(this.options.empty_remark)
                     ?this.options.placeholder_text:this.options.empty_remark);
         }
+
+        // Force single selection for normal record viewer
+        if(!window.hWin.HEURIST4.util.isempty(this.options.url) && this.options.url.indexOf('renderRecordData.php') != -1){
+            this.options.is_single_selection = true;
+        }
         
     }, //end _create
 
