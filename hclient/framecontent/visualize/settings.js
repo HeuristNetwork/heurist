@@ -230,6 +230,9 @@ function handleSettingsInUI() {
 	$('#expand-links').change( function(){ // expand single links
         tick(); 
 	});
+    if(settings.isDatabaseStructure){ // show all links by default for database structure vis
+        $('#expand-links').prop('checked', true);
+    }
         
     $( "#setLinksMode" ).controlgroup();    
     
