@@ -399,7 +399,7 @@ this._dout('reload datatable '+this.options.serverSide);
 
         if(this.options.show_rt_filter || this.options.show_column_config){
 
-            var sel_container = this.div_content.find('div.selectors').css({float:'left',padding:'15px 0px','min-width':'200px'});
+            var sel_container = this.div_content.find('div.selectors').css({float:'left',padding:'15px 0px','min-width':'570px'});
 
             if(this.options.show_rt_filter){
                 
@@ -439,7 +439,7 @@ this._dout('reload datatable '+this.options.serverSide);
                 //var selConfigs = $('<select>').appendTo(sel_container).css({'min-width':'15em'});
                 
                 if($.isFunction($('body')['configEntity'])){ //OK! widget script js has been loaded
-                    this.selConfigs = $('<fieldset>').css({display:'inline-block'}).appendTo(sel_container);
+                    this.selConfigs = $('<div>').appendTo(sel_container);
                     
                     var that = this;
                     
@@ -466,7 +466,6 @@ this._dout('reload datatable '+this.options.serverSide);
                     this.selConfigs.configEntity('updateList', 'all', 
                             that.options.initial_cfg?that.options.initial_cfg.cfg_name:null);
 
-                    this.selConfigs.find('.btn-openedit').prependTo(this.selConfigs.find('div:first-child')).css('margin', '0 15px');
                 }                    
                 
                 //add button to configure columns

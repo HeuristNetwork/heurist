@@ -68,20 +68,35 @@ $.widget( "heurist.configEntity", {
             st = ' style="display:table-cell"';
         }
 
+        let loadSettingLabel = this.options.loadSettingLabel?this.options.loadSettingLabel:'Saved settings:';
+
         if(this.options.configName == "crosstabs"){
 
             $('<div style="margin-left: 20px;"><label for="sel_saved_settings">'
-                +(this.options.loadSettingLabel?this.options.loadSettingLabel:'Saved settings:')+'</label></div>'
+                +(loadSettingLabel)+'</label></div>'
                 +'<div style="margin-left: 10px;"><select class="sel_saved_settings text ui-widget-content ui-corner-all" style="width:100%;"></select></div>'
                 + ((this.options.showButtons)?
                 ('<div class="btn-action-div" style="margin-left: 15px;"><span class="btn-action btn-rename bg-warning saveEditButton"/>'
                 +'<span class="btn-action btn-openedit"/>'
                 +'<span style="margin: 2px;" class="btn-action btn-remove bg-danger saveRemoveButton"/></div></div>'):'') )
             .appendTo(this.element);
+        }else if(this.options.configName == "datatable"){ // TODO - setup for datatable version
+
+            $('<div style="display:flex; align-content: center; flex-wrap: wrap; align-items: center;">'
+            + ((this.options.showButtons)?'<div style="flex: 0 0 140px;"><span class="btn-action btn-openedit"/></div>' : '')
+            + '<div style="flex: 0 0 300px;">'
+                + '<label for="sel_saved_settings" style="display:inline-block; margin-right: 10px;">'+loadSettingLabel+'</label><select class="sel_saved_settings text ui-widget-content ui-corner-all"></select>'
+            + '</div>'
+            +  ((this.options.showButtons)?
+                ('<div class="btn-action-div" style="flex: 0 0 125px">&nbsp;&nbsp;'
+                    + '<span class="btn-action btn-rename"/>'
+                    + '<span class="btn-action btn-remove"/>'
+                + '</div>'):'')
+            + '</div>').appendTo(this.element);
         }else{
 
             $('<div'+st+'><label for="sel_saved_settings">'
-                +(this.options.loadSettingLabel?this.options.loadSettingLabel:'Saved settings:')+'</label></div>'
+                +(loadSettingLabel)+'</label></div>'
                 +'<div'+st+'><select class="sel_saved_settings text ui-widget-content ui-corner-all"></select></div>'
                 + ((this.options.showButtons)?
                 ('<div class="btn-action-div"'+st+'>&nbsp;&nbsp;<span class="btn-action btn-rename"/>'
