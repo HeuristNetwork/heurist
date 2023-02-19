@@ -1,0 +1,1356 @@
+@use "variables"as *;
+@use 'bootstrap';
+@use 'sass:color';
+
+/* Bootstrap 2.3.2 variables */
+/* Bootstrap 3.1.0 variables */
+/* nav bar */
+/* relative path to icons */
+/* for modal lightbox */
+html,
+body {
+    height: 100%;
+    background-color: transparent;
+}
+
+html {
+    background: color.scale($blackbrown, $lightness: -40%) url("https://heuristplus.sydney.edu.au/heurist/?db=ExpertNation&file=66d0506ba37ce78ee2bd6a9d80ecceaa2e54f364") no-repeat center center;
+    background-size: 90%;
+    background-position: top center;
+}
+
+.white-background {
+    background: white;
+}
+
+.auto-height {
+    height: fit-content;
+}
+
+.smarty-report {
+    @extend .white-background;
+    @extend .auto-height;
+}
+
+// @media only screen and (-webkit-min-device-pixel-ratio: 2),
+// (min-resolution: 192dpi) {
+//     html {
+//         Xbackground-image: url("assets/beyond1914/images/common/background@2x.jpg");
+//     }
+// }
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+    color: color.scale($redbrown, $lightness: 50%);
+    text-transform: uppercase;
+}
+
+.container {
+    margin-top: 122px;
+    *margin-top: 140px;
+    margin-top: 140px\9;
+}
+
+#main-content {
+    font-size: 14px;
+    line-height: 22px;
+    background-color: white;
+    color: #404348;
+    box-shadow: 0 0 2px 0 rgba(0, 0, 0, 0.5);
+}
+
+.bor-sepia-50 img {
+    filter: sepia(0.5);
+}
+
+.bor-sepia-30 img {
+    filter: sepia(0.3);
+}
+
+.bor-sepia-70 img {
+    filter: sepia(0.7);
+}
+
+.bor-img-full img {
+    width: 100%;
+    object-fit: cover;
+}
+
+.bor-section-title {
+    font-size: 30px;
+    line-height: 34px;
+    color: $redbrown;
+}
+
+.bor-tooltip {
+    color: #7f7f7f;
+    font-size: 17px;
+    width: 17px;
+    height: 17px;
+    margin-left: 4px;
+    display: inline-block;
+}
+
+.bor-body-section {
+    margin-bottom: 30px;
+}
+
+.bor-body-region {
+    padding: 25px 30px 5px 30px;
+}
+
+.bor-body-region :first-child {
+    margin-top: 0;
+}
+
+.bor-body-region .h1 {
+    margin-bottom: 30px;
+}
+
+.bor-body-region .bor-emblem {
+    margin-bottom: -40px;
+}
+
+.bor-map {
+    width: 100%;
+    height: 500px;
+}
+
+.bor-full-bleed {
+    position: relative;
+    margin-left: -30px;
+    margin-right: -30px;
+}
+
+.bor-full-bleed .bor-veil {
+    position: absolute;
+    top: 0px;
+    right: 0px;
+    width: 50%;
+    height: 100%;
+    box-sizing: border-box;
+    background-color: #6e6e6e;
+    background-color: rgba(0, 0, 0, 0.65);
+    text-shadow: 0 0 3px black;
+    padding: 50px 50px;
+    z-index: 1;
+    color: white;
+}
+
+.bor-full-bleed .bor-veil h1,
+.bor-full-bleed .bor-veil .h1,
+.bor-full-bleed .bor-veil h2,
+.bor-full-bleed .bor-veil .h2 {
+    color: white;
+}
+
+.bor-full-bleed .bor-veil :first-child {
+    margin-top: 0;
+}
+
+.bor-map-infowindow {
+    font-family: Arial, sans-serif;
+}
+
+.bor-map-infowindow .bor-map-infowindow-heading {
+    color: $redbrown;
+    font-size: 14px;
+    line-height: 16px;
+}
+
+.bor-map-infowindow .bor-map-infowindow-description {
+    font-size: 12px;
+    line-height: 14px;
+    color: #404348;
+    margin-top: 5px;
+}
+
+.bor-map-infowindow .bor-map-button {
+    font-size: 12px;
+    margin: 5px 0px;
+    text-transform: uppercase;
+    line-height: 24px;
+    height: 25px;
+}
+
+.bor-map-infowindow .bor-map-button:focus {
+    text-decoration: none;
+    color: white;
+}
+
+.bor-gutter {
+    background-color: #fcfcfc;
+    padding: 0px;
+    text-align: center;
+}
+
+.bor-gutter-main-content {
+    background-color: #ffffff;
+    padding: 0px;
+}
+
+.bor-group-emphasised {
+    width: 100%;
+    text-align: left;
+    padding-left: 20px;
+    padding-right: 20px;
+    padding-bottom: 0px;
+    margin: 0px;
+    /* artem remarked it
+  padding-bottom: 20px;
+  margin: 20px 0px;*/
+    border-bottom: 1px solid #f7f7f7;
+}
+
+.bor-group-emphasised .bor-group-title {
+    font-size: 18px;
+    line-height: 24px;
+    color: $redbrown;
+    padding: 0px;
+    /*artem*/
+    margin: 0px;
+    /*artem*/
+}
+
+.bor-group-emphasised .bor-group {
+    font-size: 14px;
+    padding-left: 30px;
+}
+
+.bor-group-emphasised .bor-group .bor-group-date {
+    display: inline-block;
+    vertical-align: middle;
+    font-size: 12px;
+    font-weight: bold;
+    color: #888888;
+}
+
+.help-block {
+    clear: both;
+}
+
+.bor-gallery {
+    margin: 30px 0px;
+}
+
+.bor-gallery .bor-gallery-link {
+    width: 100px;
+    height: 100px;
+    margin-right: 20px;
+    margin-bottom: 20px;
+    display: inline-block;
+    text-align: left;
+    float: left;
+}
+
+.bor-gallery .bor-thumbnail {
+    background: #eee;
+    vertical-align: top;
+}
+
+.bor-aggregate-hero {
+    width: 100%;
+}
+
+.bor-pagination {
+    text-align: center;
+}
+
+@media (min-width: 992px) {
+    .bor-veiled {
+        overflow: hidden;
+    }
+
+    .bor-veiled .bor-veil-reveal {
+        right: -50%;
+        opacity: 0;
+        -webkit-transition: right 0.5s, opacity 0.4s;
+        -o-transition: right 0.5s, opacity 0.4s;
+        transition: right 0.5s, opacity 0.4s;
+        -webkit-transition-timing-function: cubic-bezier(0, -0.21, 0, 1);
+        transition-timing-function: cubic-bezier(0, -0.21, 0, 1);
+    }
+
+    .bor-veiled .bor-veil-reveal.bor-veil-revealed {
+        right: 0;
+        opacity: 1;
+    }
+}
+
+@media (max-width: 991px) {
+    .bor-section-title {
+        font-size: 24px;
+        line-height: 32px;
+        color: $redbrown;
+    }
+
+    .bor-body-region {
+        padding: 30px 15px;
+    }
+
+    .bor-dismiss-veil {
+        display: none;
+    }
+
+    .bor-full-bleed {
+        position: static;
+        margin-left: -15px;
+        margin-right: -15px;
+    }
+
+    .bor-full-bleed .bor-veil {
+        position: static;
+        width: 100%;
+        background-color: white;
+        height: 100%;
+        padding: 30px 25px;
+        color: #404348;
+        text-shadow: none;
+    }
+
+    .bor-full-bleed .bor-veil h1,
+    .bor-full-bleed .bor-veil .h1,
+    .bor-full-bleed .bor-veil h2,
+    .bor-full-bleed .bor-veil .h2 {
+        color: $redbrown;
+    }
+
+    .bor-gallery .bor-thumbnail {
+        margin-right: 10px;
+    }
+
+    .bor-map {
+        height: 250px;
+    }
+}
+
+@media (max-width: 480px) {
+    .bor-gallery .bor-thumbnail {
+        margin: 2px auto;
+    }
+}
+
+.browsehappy {
+    position: relative;
+    top: 100px;
+}
+
+/* Bootstrap 2.3.2 variables */
+/* Bootstrap 3.1.0 variables */
+/* nav bar */
+/* relative path to icons */
+/* for modal lightbox */
+.bor-sydney-logo {
+    height: 100px;
+    width: 210px;
+    margin: 0 -15px -1px;
+    margin: 0;
+    display: inline-block;
+    background: url("assets/beyond1914/images/common/sydney-logo.png") no-repeat center center;
+    background-size: 210px 100px;
+    text-align: left;
+    text-indent: -2000px;
+}
+
+@media only screen and (-webkit-min-device-pixel-ratio: 2),
+(min-resolution: 192dpi) {
+    .bor-sydney-logo {
+        background-image: url("assets/beyond1914/images/common/sydney-logo@2x.png");
+    }
+}
+
+.bor-header {
+    color: white;
+    margin-bottom: 20px;
+
+    .bor-logo {
+        display: block;
+        width: 520px;
+        height: 180px;
+        margin: 25px auto;
+        background: transparent url("assets/beyond1914/images/common/beyond-1939-logo.png") no-repeat center center;
+        background-size: 425px 86px;
+    }
+
+    .bor-header-title {
+        text-align: center;
+    }
+
+    .bor-header-sub-title {
+        text-align: center;
+    }
+
+    .bor-header-search {
+        position: relative;
+        max-width: 520px;
+        margin: 0 auto 50px auto;
+    }
+
+    .bor-header-search button.submit {
+        background-color: #fff;
+        border: 0px;
+        box-sizing: initial;
+        padding: 0px;
+        margin: 0px;
+        position: absolute;
+        top: 8px;
+        right: 22px;
+        min-width: 30px;
+    }
+
+    .bor-header-search .fa-search {
+        color: #5d6161;
+        font-size: 28px;
+    }
+}
+
+@media (max-width: 480px) {
+    .bor-sydney-logo {
+        display: block;
+        margin: auto;
+        width: 221px;
+    }
+
+    .bor-header .bor-logo {
+        background-size: 90%;
+        width: 100%;
+        margin: 40px auto 0px auto;
+    }
+
+    .bor-header .bor-header-search {
+        width: 100%;
+    }
+}
+
+.bor-utility-nav {
+    position: fixed;
+    z-index: 2;
+    width: 100%;
+    top: 0;
+    background-color: color.scale($blackbrown, $alpha: -20%, $lightness: -50%);
+    border: none;
+
+    // Control position of dropdown in menu
+    .ui-menu .ui-menu {
+        border-radius: 0;
+        background: color.scale($blackbrown, $alpha: -10%);
+        border: color.scale($blackbrown, $alpha: -10%) !important;
+        top: unset !important;
+        left: unset !important;
+        right: 0px !important;
+    }
+
+    .bor-nav {
+        float: right;
+        text-align: right;
+        margin-top: 25px;
+        margin-bottom: 25px;
+    }
+
+    .bor-nav ul {
+        font-size: 16px;
+        text-shadow: 0px 0px 2px rgba(0, 0, 0, 0.5);
+    }
+
+    .ui-menu-item {
+        color: white;
+    }
+
+    .ui-menu-item>a {
+        padding: 15px !important;
+        color: white;
+        line-height: 20px;
+    }
+
+    .navbar-header .navbar-toggle {
+        border: none;
+        margin-top: 34px;
+        margin-bottom: 34px;
+        -webkit-transition: margin 0.15s linear;
+        -o-transition: margin 0.15s linear;
+        transition: margin 0.15s linear;
+    }
+
+    .navbar-header .navbar-toggle .fa-bars {
+        color: white;
+    }
+
+    .navbar-header .navbar-toggle:hover .fa-bars,
+    .bor-utility-nav .navbar-header .navbar-toggle:focus .fa-bars {
+        color: black;
+    }
+
+    .navbar-header .bor-sydney-logo {
+        position: absolute;
+        -webkit-transition: height 0.15s linear;
+        -o-transition: height 0.15s linear;
+        transition: height 0.15s linear;
+    }
+
+    .bor-utility-nav-wrapper {
+        width: 520px;
+        margin: 0 auto;
+    }
+
+    .container {
+        margin-top: 0px;
+    }
+
+    .ui-menu-item a:hover,
+    .ui-menu-item a:focus,
+    .ui-state-active,
+    .selected {
+        text-decoration: none;
+        color: white;
+        background: unset !important;
+        background-color: $redbrown !important;
+        -moz-border-radius: 2px !important;
+        -webkit-border-radius: 2px !important;
+        border-radius: 5px !important;
+        border-color: $redbrown;
+    }
+}
+
+.lt-ie9 .bor-utility-nav .bor-sydney-logo {
+    padding: 0;
+}
+
+
+
+
+.bor-utility-nav-scrolled .navbar-header .navbar-toggle {
+    margin-top: 11px;
+    margin-bottom: 11px;
+}
+
+.bor-utility-nav-scrolled .bor-nav {
+    margin-top: 10px;
+    margin-bottom: 10px;
+}
+
+.bor-utility-nav-scrolled .bor-nav ul li a {
+    padding-top: 10px;
+    padding-bottom: 10px;
+}
+
+@media (max-width: 767px) {
+    .bor-utility-nav .container {
+        padding-right: 0px;
+    }
+
+    .bor-utility-nav .bor-nav {
+        margin: 0px 0px 0px -15px;
+        padding: 0px;
+        width: 100%;
+        border: none;
+        box-shadow: none;
+    }
+
+    .bor-utility-nav .bor-nav ul {
+        width: 100%;
+        text-align: center;
+    }
+
+    .bor-utility-nav-scrolled .bor-sydney-logo {
+        height: 55px;
+        width: 291px;
+        background: $redbrown url("assets/beyond1914/images/common/sydney-logo-horizontal.png") no-repeat center center;
+        background-size: 271px 35px;
+    }
+}
+
+@media only screen and (max-width: 767px) and (-webkit-min-device-pixel-ratio: 2),
+(max-width: 767px) and (min-resolution: 192dpi) {
+    .bor-utility-nav-scrolled .bor-sydney-logo {
+        background-image: url("assets/beyond1914/images/common/sydney-logo-horizontal@2x.png");
+    }
+}
+
+@media (max-width: 767px) {
+
+    .bor-utility-nav-scrolled .bor-sydney-logo:hover,
+    .bor-utility-nav-scrolled .bor-sydney-logo:focus {
+        background-color: $redbrown;
+    }
+}
+
+@media (min-width: 767px) {
+    .bor-utility-nav .bor-nav {
+        -webkit-transition: margin 0.15s linear;
+        -o-transition: margin 0.15s linear;
+        transition: margin 0.15s linear;
+        -moz-transform: translateZ(0);
+        -ms-transform: translateZ(0);
+        -webkit-transform: translateZ(0);
+        transform: translateZ(0);
+        -webkit-backface-visibility: hidden;
+        -moz-backface-visibility: hidden;
+        backface-visibility: hidden;
+        -webkit-perspective: 1000;
+        -moz-perspective: 1000;
+        perspective: 1000;
+    }
+}
+
+@media (max-width: 480px) {
+    .bor-utility-nav {
+        padding-left: 0px;
+        padding-right: 0px;
+    }
+
+    .bor-utility-nav.bor-utility-nav-scrolled .bor-sydney-logo {
+        height: 55px;
+        width: 275px;
+        background-size: 252px 33px;
+    }
+}
+
+.bor-footer {
+    color: white;
+    font-size: 12px;
+    text-align: center;
+    margin-top: 50px;
+    text-shadow: 0 0 5px #0b0b0b;
+}
+
+.bor-footer .bor-footer-separator {
+    width: 200px;
+    display: inline-block;
+}
+
+.bor-footer .bor-footer-separator-icon {
+    font-size: 18px;
+    margin: -20px 25px 10px 25px;
+    vertical-align: middle;
+    display: inline-block;
+}
+
+.bor-footer .bor-photographer {
+    padding-top: 15px;
+    color: white;
+    font-size: 13px;
+    text-shadow: 0 0 5px #0b0b0b;
+}
+
+.bor-footer .bor-photographer a {
+    color: white;
+    text-decoration: underline;
+}
+
+.bor-footer .bor-photographer a:hover {
+    color: white;
+}
+
+.bor-footer .bor-legal {
+    display: inline-block;
+    margin-bottom: 40px;
+}
+
+.bor-footer .bor-sponsors {
+    font-size: 14px;
+}
+
+.bor-footer .bor-sponsors .bor-sponsors-logo {
+    margin: 10px;
+    width: 150px;
+}
+
+.bor-footer .lead {
+    margin-top: 10px;
+}
+
+@media (max-width: 767px) {
+    .bor-footer .bor-footer-separator {
+        width: 190px;
+    }
+}
+
+@media (max-width: 480px) {
+    .bor-footer .bor-footer-separator {
+        width: 100px;
+    }
+}
+
+.bor-social-badges {
+    text-shadow: none;
+    font-size: 20px;
+}
+
+.bor-social-badge {
+    padding-top: 4px;
+    display: inline-block;
+    margin: 0px 10px;
+    background: white;
+    color: black;
+    width: 28px;
+    height: 28px;
+    -moz-border-radius: 50%;
+    -webkit-border-radius: 50%;
+    border-radius: 50%;
+}
+
+.bor-social-badge:hover {
+    color: white;
+    background-color: black;
+}
+
+.thumbnail.pull-right {
+    margin-left: 20px;
+}
+
+.thumbnail.pull-left {
+    margin-right: 20px;
+}
+
+.thumbnail.pull-left,
+.thumbnail.pull-right {
+    margin-bottom: 20px;
+}
+
+.thumbnail.pull-left:first-child,
+.thumbnail.pull-right:first-child {
+    margin-top: 0;
+}
+
+.thumbnail.pull-left:last-child,
+.thumbnail.pull-right:last-child {
+    margin-bottom: 0;
+}
+
+@media (max-width: 991px) {
+    .thumbnail.pull-right {
+        margin-left: 0;
+    }
+
+    .thumbnail.pull-left {
+        margin-right: 0;
+    }
+}
+
+.bor-toggler .bor-toggle-show-on {
+    display: none;
+}
+
+.bor-toggler.bor-toggler-on .bor-toggle-show-on {
+    display: inherit;
+}
+
+.bor-toggler.bor-toggler-on .bor-toggle-show-off {
+    display: none;
+}
+
+.bor-toggler:hover,
+.bor-toggler:focus {
+    text-decoration: none;
+}
+
+.bor-button {
+    -moz-border-radius: 2px;
+    -webkit-border-radius: 2px;
+    border-radius: 2px;
+    text-shadow: 0, 1px, 0, rgba(0, 0, 0, 0.1);
+    -webkit-appearance: none;
+    border: none;
+    padding: 0 10px;
+    margin: 10px 2px;
+    cursor: pointer;
+    vertical-align: middle;
+    overflow: visible;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 16px;
+    height: 36px;
+    line-height: 37px;
+    /* IE8 */
+    *line-height: 36px;
+    /* IE7 */
+    background-color: $redbrown;
+    color: white !important;
+}
+
+.bor-button:not([dummy]) {
+    line-height: auto;
+    /* NOT IE7/IE8 */
+}
+
+.bor-button:hover {
+    -webkit-box-shadow: 0 1px 5px rgba(0, 0, 0, 0.4);
+    box-shadow: 0 1px 5px rgba(0, 0, 0, 0.4);
+    background-image: url('data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0idXRmLTgiPz4gPHN2ZyB2ZXJzaW9uPSIxLjEiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGRlZnM+PGxpbmVhckdyYWRpZW50IGlkPSJncmFkIiBncmFkaWVudFVuaXRzPSJvYmplY3RCb3VuZGluZ0JveCIgeDE9IjAuNSIgeTE9IjAuMCIgeDI9IjAuNSIgeTI9IjEuMCI+PHN0b3Agb2Zmc2V0PSIwJSIgc3RvcC1jb2xvcj0iI2RjMTIyOSIvPjxzdG9wIG9mZnNldD0iMTAwJSIgc3RvcC1jb2xvcj0iI2FkMGUyMCIvPjwvbGluZWFyR3JhZGllbnQ+PC9kZWZzPjxyZWN0IHg9IjAiIHk9IjAiIHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiIGZpbGw9InVybCgjZ3JhZCkiIC8+PC9zdmc+IA==');
+    background-size: 100%;
+    background-image: -moz-linear-gradient(#dc1229, #ad0e20);
+    background-image: -webkit-linear-gradient(#dc1229, #ad0e20);
+    background-image: linear-gradient(#dc1229, #ad0e20);
+    color: white;
+    text-decoration: none;
+}
+
+.bor-button:active {
+    -webkit-box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.5);
+    box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.5);
+}
+
+.bor-button[disabled] {
+    background: white;
+    color: #757575;
+    -webkit-box-shadow: none;
+    box-shadow: none;
+    text-shadow: none;
+    cursor: default;
+    border: 1px solid black;
+}
+
+@media (max-width: 480px) {
+    .bor-button {
+        text-align: center;
+        display: block;
+        margin: auto;
+    }
+}
+
+.bor-stop {
+    padding-bottom: 15px;
+    min-height: 53px;
+}
+
+.bor-stop .bor-stop-label,
+.bor-stop .bor-stop-image {
+    border: 1px solid #e5e5e5;
+    text-align: center;
+    float: left;
+    background-color: white;
+    -moz-border-radius: 50%;
+    -webkit-border-radius: 50%;
+    border-radius: 50%;
+    font-weight: bold;
+    font-size: 80%;
+    line-height: 36px;
+    margin-right: 19px;
+    width: 38px;
+    height: 38px;
+}
+
+.bor-stop .bor-stop-image {
+    width: 38px;
+    height: 38px;
+    overflow: hidden;
+}
+
+.bor-stop .bor-stop-image.bor-stop-image-placeholder {
+    background: white url("assets/portraits/portrait.png") no-repeat center center;
+    background-size: 38px 38px;
+}
+
+@media only screen and (-webkit-min-device-pixel-ratio: 2),
+(min-resolution: 192dpi) {
+    .bor-stop .bor-stop-image.bor-stop-image-placeholder {
+        background-image: url("assets/portraits/portrait@2x.png");
+    }
+}
+
+.bor-stop .bor-stop-description {
+    margin: 0px;
+    padding-top: 7px;
+    overflow: hidden;
+    line-height: 22px;
+
+    h3 {
+        margin-block-start: 0;
+    }
+
+}
+
+.bor-stop.bor-stop-large {
+    min-height: 80px;
+}
+
+.bor-stop.bor-stop-large .bor-stop-label,
+.bor-stop.bor-stop-large .bor-stop-image {
+    line-height: 63px;
+    margin-right: 32.5px;
+    width: 65px;
+    height: 65px;
+    font-size: 120%;
+}
+
+.bor-stop.bor-stop-large .bor-stop-image {
+    width: 65px;
+    height: 65px;
+}
+
+.bor-stop.bor-stop-large .bor-stop-image.bor-stop-image-placeholder {
+    background: white url("assets/portraits/portrait.png") no-repeat center center;
+    background-size: 65px 65px;
+}
+
+@media only screen and (-webkit-min-device-pixel-ratio: 2),
+(min-resolution: 192dpi) {
+    .bor-stop.bor-stop-large .bor-stop-image.bor-stop-image-placeholder {
+        background-image: url("assets/portraits/portrait@2x.png");
+    }
+}
+
+.bor-stop.bor-stop-large .bor-stop-description {
+    padding-top: 18px;
+    line-height: 22px;
+}
+
+.bor-stories {
+    list-style-type: none;
+    margin: 25px 0 0 0;
+    padding: 0;
+    overflow: hidden;
+}
+
+.bor-stories .bor-stop {
+    float: left;
+    width: 50%;
+    padding-right: 10px;
+}
+
+.bor-stories .bor-stop:nth-child(odd) {
+    clear: left;
+}
+
+.bor-path {
+    list-style-type: none;
+    position: relative;
+    padding: 0;
+    margin: 30px 50px 0;
+}
+
+.bor-path .bor-stop {
+    padding-bottom: 25px;
+    min-height: 63px;
+    border-left: 1px solid #e5e5e5;
+}
+
+.bor-path .bor-stop .bor-stop-label,
+.bor-path .bor-stop .bor-stop-image {
+    margin-left: -19px;
+}
+
+.bor-path .bor-stop.bor-stop-large .bor-stop-label,
+.bor-path .bor-stop.bor-stop-large .bor-stop-image {
+    margin-left: -32.5px;
+}
+
+.bor-path .bor-stop:nth-last-child(2) {
+    padding-bottom: 25px;
+}
+
+.bor-path .bor-stop:last-child {
+    border: 0px;
+    padding-bottom: 0px;
+}
+
+.bor-path .bor-stop.bor-stop-large {
+    min-height: 90px;
+}
+
+@media (max-width: 991px) {
+    .bor-path {
+        margin: 50px 5px 50px 35px;
+    }
+}
+
+@media (max-width: 480px) {
+    .bor-stories .bor-stop {
+        display: block;
+        float: none;
+        width: 100%;
+    }
+}
+
+.bor-emblem {
+    overflow: hidden;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-evenly;
+    flex-wrap: wrap;
+}
+
+.bor-emblem .bor-emblem-portrait {
+    display: inline-block;
+    text-align: center;
+    width: 150px;
+    margin: 0px 25px 40px;
+    text-decoration: none;
+    vertical-align: top;
+}
+
+.bor-emblem .bor-emblem-portrait:hover {
+    text-decoration: none;
+}
+
+.bor-emblem .bor-emblem-portrait .bor-emblem-portrait-image.placeholder {
+    background: transparent url("assets/portraits/portrait.png") no-repeat center center;
+    background-size: 100% 100%;
+    margin: 0px auto;
+    width: 130px;
+    height: 130px;
+}
+
+@media only screen and (-webkit-min-device-pixel-ratio: 2),
+(min-resolution: 192dpi) {
+    .bor-emblem .bor-emblem-portrait .bor-emblem-portrait-image.placeholder {
+        background-image: url("assets/portraits/portrait@2x.png");
+    }
+}
+
+.bor-emblem .bor-emblem-portrait .img-circle {
+    border: 1px solid #b2b2b2;
+    width: 130px;
+    height: 130px;
+    overflow: hidden;
+    display: inline-block;
+    background-color: $blackbrown;
+}
+
+.bor-emblem .bor-emblem-portrait .bor-emblem-portrait-name {
+    font-size: 18px;
+    color: $redbrown;
+    margin-top: 16px;
+    padding: 0 10px;
+}
+
+.bor-emblem .bor-emblem-portrait .bor-emblem-portrait-rank {
+    line-height: 16px;
+    margin-top: 6px;
+    color: #404348;
+}
+
+.bor-emblem .bor-emblem-card {
+    display: inline-block;
+    text-align: center;
+    width: 200px;
+    margin: 0px 20px 40px;
+}
+
+.bor-emblem .bor-emblem-card .bor-emblem-card-text {
+    line-height: 40px;
+    background-color: #e5e5e5;
+}
+
+@media (max-width: 1200px) {
+    .bor-emblem {
+        padding: 0px;
+    }
+
+    .bor-emblem .bor-emblem-portrait {
+        margin: 0px 20px 40px;
+    }
+
+    .bor-emblem .bor-emblem-card {
+        margin: 0px 0px 40px;
+    }
+}
+
+@media (max-width: 991px) {
+
+    .bor-emblem .bor-emblem-portrait {
+        margin: 0px 25px 40px;
+    }
+
+    .bor-emblem .bor-emblem-card {
+        margin: 0px 10px 20px;
+    }
+}
+
+.bor-page-profile {
+    background-color: #ffffff;
+}
+
+.bor-page-profile .bor-emblem .bor-emblem-portrait {
+    width: 100%;
+    margin: 0px;
+    padding: 40px 0px;
+    background-color: #f7f7f7;
+}
+
+.bor-page-profile .bor-emblem .bor-emblem-portrait .bor-emblem-portrait-name {
+    line-height: 32px;
+    font-size: 28px;
+}
+
+.bor-page-profile .bor-emblem .bor-emblem-portrait .bor-emblem-portrait-rank {
+    font-size: 16px;
+    line-height: 18px;
+}
+
+.bor-page-profile .bor-map {
+    height: 400px;
+}
+
+.bor-page-profile .bor-profile-separator {
+    width: 450px;
+    color: #e5e5e5;
+    margin-top: 0px;
+    margin-bottom: 0px;
+}
+
+h2 .bor-tooltip,
+.h2 .bor-tooltip {
+    top: -2px;
+}
+
+.bor-page-profile-incomplete .bor-gutter {
+    min-height: 575px;
+}
+
+.tooltip-inner {
+    font-size: 14px;
+    padding: 10px;
+}
+
+@media (max-width: 991px) {
+    .bor-page-profile .bor-map {
+        height: 250px;
+    }
+
+    .bor-page-profile .bor-emblem {
+        padding-top: 0px;
+    }
+
+    .bor-page-profile .bor-profile-separator {
+        width: 250px;
+    }
+
+    .bor-page-profile-incomplete .bor-gutter {
+        min-height: 0;
+    }
+}
+
+.bor-search-page-title {
+    line-height: 43px;
+    font-size: 38px;
+    color: $redbrown;
+    padding: 20px;
+    margin: 0px;
+}
+
+.bor-search-result {
+    display: grid;
+    grid-template-areas: "image desc";
+    grid-template-columns: 65px 1fr;
+    column-gap: 1em;
+    
+    .bor-search-result-title {
+        font-size: 22px;
+        line-height: 26px;
+        color: #004c7f;
+    }
+
+    .bor-search-result-text {
+        font-size: 14px;
+        line-height: 22px;
+    }
+
+    .bor-stop-image {
+        margin-top: 18px;
+        grid-area: image;
+    }
+
+    .bor-description {
+        grid-area: desc;
+    }
+}
+
+.bor-page-search .bor-gutter {
+    text-align: left;
+}
+
+.bor-page-search .bor-gutter .bor-section-title {
+    margin: 20px;
+}
+
+.bor-filter {
+    -webkit-transform: translateZ(0);
+    transform: translateZ(0);
+    overflow: hidden;
+    -webkit-transition: max-height 0.5s;
+    -o-transition: max-height 0.5s;
+    transition: max-height 0.5s;
+    margin-bottom: 0;
+    padding-left: 0;
+    list-style-type: none;
+    position: relative;
+}
+
+.bor-filter>li {
+    position: relative;
+    padding-right: 20px;
+}
+
+.bor-filter>li .bor-filter-category {
+    display: block;
+}
+
+.bor-filter>li .badge,
+.bor-filter>li .bor-filter-remove {
+    position: absolute;
+    right: 0;
+    top: 2px;
+    opacity: .65;
+}
+
+.bor-filter>li .badge:hover,
+.bor-filter>li .badge:focus,
+.bor-filter>li .bor-filter-remove:hover,
+.bor-filter>li .bor-filter-remove:focus {
+    text-decoration: none;
+}
+
+.bor-filter>li .bor-filter-remove {
+    font-size: 135%;
+    color: #999;
+}
+
+.bor-filter>li:hover .bor-filter-remove,
+.bor-filter>li:hover .badge {
+    opacity: 1;
+}
+
+.bor-filter> :last-child {
+    margin-bottom: 10px;
+}
+
+.bor-filter:after {
+    box-shadow: 0 0 60px rgba(0, 0, 0, 0.6);
+    width: 80%;
+    content: 'h';
+    display: block;
+    position: absolute;
+    bottom: -40px;
+    left: 10%;
+    opacity: 0;
+    -webkit-transition: opacity 1s;
+    -o-transition: opacity 1s;
+    transition: opacity 1s;
+}
+
+.bor-filter.bor-filter-collapsed {
+    max-height: 185px !important;
+}
+
+.bor-filter.bor-filter-collapsed:after {
+    opacity: 1;
+}
+
+.bor-filter-expand {
+    text-align: center;
+    display: block;
+    /*max-height: 25px;*/
+    border-top: 1px solid #bbb;
+    overflow: hidden;
+    position: relative;
+    -webkit-transition: border-top-color 1s;
+    -o-transition: border-top-color 1s;
+    transition: border-top-color 1s;
+}
+
+.bor-filter-expand span {
+    display: block;
+    padding-top: 2px;
+}
+
+/*artem was 5px */
+.bor-filter-expand.bor-toggler-on {
+    border-top-color: #eee;
+}
+
+.bor-search-results {
+    margin-top: 20px;
+    min-height: 300px;
+}
+
+@media (max-width: 768px) {
+    .bor-gutter .bor-section-title {
+        display: inline-block;
+        color: #fff;
+        background-color: $redbrown;
+        border-color: $redbrown;
+        border-radius: 4px;
+        padding: 6px 12px;
+        cursor: pointer;
+    }
+}
+
+// Stylings for specific page types in Beyond 1939
+.bor-people-list .bor-pagination {
+    margin: 35px auto 25px;
+}
+
+.pagination {
+    position: relative;
+    z-index: 0;
+}
+
+.bor-search-main-area {
+    height: 90vh;
+    min-height: 500px;
+}
+
+.smarty-report.div-result-list-content {
+    height: auto;
+    padding-left: 1em;
+    min-height: 100%;
+}
+
+#newsletter-form ul.hasError,
+#newsletter-form label.error {
+    color: red !important;
+    margin-top: 10px;
+}
+
+@media screen and (max-width: 396px) {
+    #html_element {
+        overflow: hidden;
+    }
+}
+
+a.facet_link span:first-child {
+    font-style: normal;
+    color: #428bca;
+    text-decoration: none;
+}
+
+a.facet_link span:first-child:hover,
+a.facet_link span:first-child:focus {
+    font-style: normal;
+    color: #2a6496;
+    text-decoration: underline;
+}
+
+a.facet_link span:first-child:focus {
+    outline: thin dotted;
+    outline: 5px auto -webkit-focus-ring-color;
+    outline-offset: -2px;
+}
+
+.float-panel {
+    position: absolute;
+    width: 180px;
+    /*height: 65px;*/
+    padding: 4px;
+    top: 180px;
+    right: 10px;
+    background-color: #1ABC9C;
+    color: #fff;
+    text-align: center;
+}
+
+/* trick to hide PDF toolbar in FF */
+#outerContainer #mainContainer div.toolbar {
+    display: none !important;
+    /* hide PDF viewer toolbar */
+}
+
+#outerContainer #mainContainer #viewerContainer {
+    top: 0 !important;
+    /* move doc up into empty bar space */
+}
