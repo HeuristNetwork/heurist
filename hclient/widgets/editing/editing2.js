@@ -80,7 +80,7 @@ function hEditing(_options) {
         
         _initEditForm(_options.recstructure, _options.recdata);
         
-        if($.isFunction(_options.oninit)){
+        if($.isFunction(_options.oninit)){ //init completed
             _options.oninit.call(that);
         }
     }

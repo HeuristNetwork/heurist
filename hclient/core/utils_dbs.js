@@ -716,7 +716,12 @@ window.hWin.HEURIST4.dbs = {
             }
 
             if($dtl_fields.length > 0){
-                $children.push({title: 'fields', folder: true, expanded:(!parentcode), is_rec_fields: true, children: $dtl_fields});
+                if($children.length==0 && $mode==6){
+                    //no header fields - avoid 
+                    $children = $dtl_fields;
+                }else{
+                    $children.push({title: 'fields', folder: true, expanded:(!parentcode), is_rec_fields: true, children: $dtl_fields});    
+                }
             }
 
             if($mode<5 || $recursion_depth==0){

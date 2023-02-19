@@ -3212,7 +3212,11 @@ $.widget( "heurist.hSelect", $.ui.selectmenu, {
       //this._setText( buttonItem, item.label );
       buttonItem.html(item.label).css({'min-height': '17px'});
      
-      buttonItem.css( "background-color", item.value )
+      if(window.hWin.HEURIST4.util.isColor(item.value)){
+            buttonItem.css( "background-color", item.value )
+      }else{
+            buttonItem.css( "background-color", 'none' )
+      }
      
       return buttonItem;
    },   

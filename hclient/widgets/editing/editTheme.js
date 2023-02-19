@@ -18,6 +18,8 @@
 * See the License for the specific language governing permissions and limitations under the License.
 */
 
+var _theme_editing_symbology;
+
 function editTheme(current_value, callback){
 
     var edit_dialog = null;
@@ -34,18 +36,25 @@ function editTheme(current_value, callback){
     var editForm = $('<div class="ent_content_full editForm" style="top:0">')
     .appendTo($('<div class="ent_wrapper">').appendTo(popup_dlg));
 
-    var _editing_symbology = new hEditing({container:editForm, 
+    _theme_editing_symbology = new hEditing({container:editForm, 
         onchange:
         function(){
             if(edit_dialog){
                 var ele = edit_dialog.parent().find('#btnRecSave');
                 if(ele){
-                    var isChanged = _editing_symbology.isModified();
+                    var isChanged = _theme_editing_symbology.isModified();
                     var mode = isChanged?'visible':'hidden';
                     edit_dialog.parent().find('#btnRecSave').css('visibility', mode);
                 }
             }
-    }});
+        },
+        oninit: function(){
+            editForm = this;
+            __editTheme_continue();
+        }
+    });
+
+function __editTheme_continue(){
     
     var recdata = current_value ? new hRecordSet({count:1, order:[1], 
         records:{1:current_value}, 
@@ -306,7 +315,7 @@ function editTheme(current_value, callback){
     ];
     
     
-    _editing_symbology.initEditForm( editFields, recdata, true );
+    _theme_editing_symbology.initEditForm( editFields, recdata, true );
 
     var edit_buttons = [
         {text:window.hWin.HR('Cancel'), 
@@ -319,7 +328,7 @@ function editTheme(current_value, callback){
             id:'btnRecSave',
             css:{'visibility':'hidden', 'float':'right'},  
             click: function() { 
-                var res = _editing_symbology.getValues(); //all values
+                var res = _theme_editing_symbology.getValues(); //all values
                 //remove empty values
                 var propNames = Object.getOwnPropertyNames(res);
                 for (var i = 0; i < propNames.length; i++) {
@@ -332,7 +341,7 @@ function editTheme(current_value, callback){
                     res['cd_corner']=0;
                 }
                 
-                _editing_symbology.setModified(false);
+                _theme_editing_symbology.setModified(false);
                 edit_dialog.dialog('close');
                 
                 if($.isFunction(callback)){
@@ -355,7 +364,7 @@ function editTheme(current_value, callback){
         },
         beforeClose: function(){
             //show warning in case of modification
-            if(_editing_symbology.isModified()){
+            if(_theme_editing_symbology.isModified()){
                 var $dlg, buttons = {};
                 buttons['Save'] = function(){ 
                     //that._saveEditAndClose(null, 'close'); 
@@ -363,7 +372,7 @@ function editTheme(current_value, callback){
                     $dlg.dialog('close'); 
                 }; 
                 buttons['Ignore and close'] = function(){ 
-                    _editing_symbology.setModified(false);
+                    _theme_editing_symbology.setModified(false);
                     edit_dialog.dialog('close'); 
                     $dlg.dialog('close'); 
                 };
@@ -385,4 +394,5 @@ function editTheme(current_value, callback){
 
     edit_dialog.parent().addClass('ui-heurist-design');
                 
+}
 }//end editTheme

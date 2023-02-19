@@ -700,8 +700,15 @@ function hMapLayer2( _options ) {
             var theme = active_themes[j];
             
             $.each(theme.fields, function(i, ftheme){
-                if(theme_fields.indexOf(ftheme.code)<0){
-                    theme_fields.push(ftheme.code);    
+                
+                let tfield = ftheme.code;
+                if(typeof tfield == 'string' && tfield.indexOf(':')>0){
+                    let codes = tfield.split(':');
+                    tfield = codes[codes.length-1];
+                }
+                
+                if(theme_fields.indexOf(tfield)<0){
+                    theme_fields.push(tfield);    
                 }
                 //prepare ranges
                 for(var j=0; j<ftheme.ranges.length; j++){
@@ -743,6 +750,7 @@ function hMapLayer2( _options ) {
                 zip: 1,
                 detail:'rec_RecTypeID,'+request_theme_fields.join(',')  //request detail fields
             };
+            
             //_new  format:'json'
             window.hWin.HAPI4.RecordMgr.search(server_request,
                 function(response){
@@ -800,9 +808,17 @@ function hMapLayer2( _options ) {
         for(var k=0; k<themes.length; k++)
             for(var i=0; i<themes[k].fields.length; i++)
             {
+                
                 let theme = themes[k];
                 let ftheme = theme.fields[i];
-                let value = feature[ftheme.code];
+                
+                let tfield = ftheme.code;
+                if(typeof tfield == 'string' && tfield.indexOf(':')>0){
+                    let codes = tfield.split(':');
+                    tfield = codes[codes.length-1];
+                }
+                
+                let value = feature[tfield];
 
                 let fsymb = null;
 

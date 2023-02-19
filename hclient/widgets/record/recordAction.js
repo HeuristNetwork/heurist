@@ -317,7 +317,6 @@ $.widget( "heurist.recordAction", {
     //
     closeDialog: function(is_force){
         if(this.options.isdialog){
-            
             if(is_force===true){
                 this._as_dialog.dialog('option','beforeClose',null);
             }

@@ -35,6 +35,7 @@ require_once(dirname(__FILE__)."/../initPage.php");
         
         <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/editing/editing2.js"></script>
         <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/editing/editing_input.js"></script>
+        <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/editing/editing_exts.js"></script>
         <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/editing/select_imagelib.js"></script>
         
         <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/viewers/resultList.js"></script>
@@ -175,7 +176,22 @@ require_once(dirname(__FILE__)."/../initPage.php");
             }
 
             function testThematicMaps(){
-                 window.hWin.HEURIST4.ui.showRecordActionDialog('thematicMapping');
+                 window.hWin.HEURIST4.ui.showRecordActionDialog('thematicMapping', {
+                        maplayer_query: 't:4',
+                        thematic_mapping: {"title":"Persons thematic map",
+                            "symbol":{color:'red'}, 
+                            "fields":[{"code":"10:1014",
+                                       "title":"Person height","type":"integer", 
+    "ranges":[  //sample of exact ranges
+       {"value":"40", "title":"","symbol":{color:"green"} },
+       {"value":"40<>50", "symbol":{color:"blue"} },
+       {"value":"69,71,75", "symbol":{color:"black"} }] }]},
+                        onClose: function(context){
+                            if(context){
+                               console.log(context);
+                            }
+                        }                     
+                 });
             }
             
             

@@ -761,6 +761,34 @@ $.widget( "heurist.editing_input", {
             //count number of lines
             setTimeout(__adjustTextareaHeight, 1000);
             
+            
+            if(this.configMode && this.configMode['thematicmap']){ //-----------------------------------------------
+
+                    var $btn_edit_switcher = $( '<span>themes editor</span>', {title: 'Open thematic maps editor'})
+                        //.addClass('smallicon ui-icon ui-icon-gear btn_add_term')
+                        .addClass('smallbutton btn_add_term')
+                        .css({'line-height': '20px','vertical-align':'top',cursor:'pointer','text-decoration':'underline'})
+                        .appendTo( $inputdiv );
+                    
+                    this._on( $btn_edit_switcher, { click: function(){
+                        
+                            var current_val = window.hWin.HEURIST4.util.isJSON($input.val());
+                            if(!current_val) current_val = [];
+                            window.hWin.HEURIST4.ui.showRecordActionDialog(
+                            'thematicMapping',
+                            {maplayer_query: 't:4',
+                            thematic_mapping: current_val,
+                                onClose: function(context){
+                                    if(context){
+                                        var newval = window.hWin.HEURIST4.util.isJSON(context);
+                                        newval = (!newval)?'':JSON.stringify(newval);
+                                        $input.val(newval);
+                                        that.onChange();
+                                    }
+                                }}                     
+                            );
+                    }});
+            }else
             if( this.options.dtID != window.hWin.HAPI4.sysinfo['dbconst']['DT_SYMBOLOGY']
             //&& this.options.dtID != window.hWin.HAPI4.sysinfo['dbconst']['DT_MAP_IMAGE_WORLDFILE']
             && this.options.dtID > 0)
@@ -3002,7 +3030,7 @@ console.log('onpaste');
                 //this._on( $btn_digitizer_dialog, { click: __show_mapdigit_dialog } );
                 this._on( $input, { keypress: __show_mapdigit_dialog, click: __show_mapdigit_dialog } );
                 this._on( $gicon, { click: __show_mapdigit_dialog } );
-                
+
             }else if(this.configMode && this.configMode['colorpicker']){ //-----------------------------------------------
                 
                 $input.colorpicker({

@@ -63,6 +63,15 @@ window.hWin.HEURIST4.util = {
         }
     },
     
+    isColor: function (strColor){
+        if (window.hWin.HEURIST4.util.isempty(strColor)) {
+            return false
+        }
+        var s = new Option().style;
+        s.color = strColor;
+        return s.color == strColor;
+    },   
+
     byteLength: function(str) {
       // returns the byte length of an utf8 string
       var s = str.length;

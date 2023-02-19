@@ -27,18 +27,21 @@
 //
 //  mode_edit 2 - symbology for general map draw style
 //            1 - symbology editor from map legend
-//            3  - symbology editor from recrd edit for map layer
+//            3 - symbology editor from recrd edit for map layer
+//            4 - symbology editor from thematic map
 // 
 function editSymbology(current_value, mode_edit, callback){
 
-    var edit_dialog = null;
+    var edit_symb_dialog = null;
     
-    var popup_dlg = $('#heurist-dialog-editSymbology');
+    var dialog_div_id = 'heurist-dialog-editSymbology'+(mode_edit>=3?mode_edit:'');
+    
+    var popup_dlg = $('#'+dialog_div_id);
 
     if(popup_dlg.length>0){
         popup_dlg.empty();
     }else{
-        popup_dlg = $('<div id="heurist-dialog-editSymbology">')
+        popup_dlg = $('<div id="'+dialog_div_id+'">')
             .appendTo( $(window.hWin.document).find('body') );
     }
 
@@ -50,7 +53,7 @@ function editSymbology(current_value, mode_edit, callback){
         function(){
             var isChanged = _editing_symbology.isModified();
             var mode = isChanged?'visible':'hidden';
-            edit_dialog.parent().find('#btnRecSave').css('visibility', mode);
+            edit_symb_dialog.parent().find('#btnRecSave').css('visibility', mode);
 
             if(isChanged){
 
@@ -71,15 +74,40 @@ function editSymbology(current_value, mode_edit, callback){
             
             _editing_symbology = this;
             
-    if(current_value){
-        current_value.fill = window.hWin.HEURIST4.util.istrue(current_value.fill)?'1':'0';
-        current_value.stroke = window.hWin.HEURIST4.util.istrue(current_value.stroke)?'1':'0';
-    }
-    
-    var recdata = current_value ? new hRecordSet({count:1, order:[1], 
-        records:{1:current_value}, 
-        fields: {'stub':0}}) :null;
-        //Object.getOwnPropertyNames(current_value)
+            if(current_value){
+                //detect base layer symbology
+                if($.isArray(current_value)){
+                    var thematicMap = [];
+                    var baseSymb = {};
+                    for(var i=0; i<current_value.length; i++){
+                        if(current_value[i].fields){
+                            //thematic map
+                            thematicMap.push(current_value[i]);
+                        }else{
+                            baseSymb = current_value[i];
+                        }
+                    }
+                    current_value = baseSymb;
+                    current_value.thematicMap = JSON.stringify(thematicMap);
+                }
+                
+                if(mode_edit==4 && window.hWin.HEURIST4.util.isempty(current_value.stroke)){
+                    current_value.stroke = '';
+                }else{
+                    current_value.stroke = window.hWin.HEURIST4.util.istrue(current_value.stroke)?'1':'0';    
+                }
+                if(mode_edit==4 && window.hWin.HEURIST4.util.isempty(current_value.fill)){
+                    current_value.fill = '';
+                }else{
+                    current_value.fill = window.hWin.HEURIST4.util.istrue(current_value.fill)?'1':'0';
+                }
+                
+            }
+            
+            var recdata = current_value ? new hRecordSet({count:1, order:[1], 
+                records:{1:current_value}, 
+                fields: {'stub':0}}) :null;
+                //Object.getOwnPropertyNames(current_value)
 
         
     /*
@@ -135,7 +163,8 @@ function editSymbology(current_value, mode_edit, callback){
         }}
         ];
         
-    }else{
+    }
+    else{
         
         var ptr_fields = [];
         if(mode_edit===3){
@@ -241,7 +270,13 @@ function editSymbology(current_value, mode_edit, callback){
                 "rst_DisplayName": "Stroke:",
                 "rst_DefaultValue": "1",
                 "rst_DisplayHelpText": "Whether to draw stroke along the path. Set it to false to disable borders on polygons or circles.",
-                "rst_FieldConfig":[
+                "rst_FieldConfig":
+                (mode_edit===4)?
+                [{"key":"","title":"&nbsp;"},
+                    {"key":"0","title":"No"},
+                    {"key":"1","title":"Yes"}
+                ]
+                :[
                     {"key":"0","title":"No"},
                     {"key":"1","title":"Yes"}
                 ]
@@ -292,7 +327,13 @@ function editSymbology(current_value, mode_edit, callback){
                 "rst_DisplayName": "Fill:",
                 "rst_DisplayHelpText": "Whether to fill the path with color. Set it to false to disable filling on polygons or circles.",
                 "rst_DefaultValue": "1",
-                "rst_FieldConfig":[
+                "rst_FieldConfig":
+                (mode_edit===4)?
+                [{"key":"","title":"&nbsp;"},
+                    {"key":"0","title":"No"},
+                    {"key":"1","title":"Yes"}
+                ]
+                :[
                     {"key":"0","title":"No"},
                     {"key":"1","title":"Yes"}
                 ]
@@ -310,9 +351,26 @@ function editSymbology(current_value, mode_edit, callback){
                 "rst_DisplayName": "Fill opacity:",
                 "rst_DisplayHelpText": "Value from 0 (transparent) to 100 (opaque)"
         }}
-        ]}
+        ]},
         //fillRule  A string that defines how the inside of a shape is determined.
 
+        {
+        "groupHeader": "Thematic maps",
+        "groupTitleVisible": (mode_edit===3),
+        "groupType": "group",
+            "children":[
+            {"dtID": "thematicMap",
+                "dtFields":{
+                "dty_Type":"blocktext",
+                "rst_DisplayWidth": "50",
+                "rst_DisplayHeight": "2",
+                "rst_DisplayName": "Thematic maps:",
+                "rst_Display": (mode_edit===3)?"visible":"hidden",
+                "rst_DisplayHelpText": "Thematic maps configuration",
+                "rst_FieldConfig":{"thematicmap":"thematicmap"}  //use thematic map widget
+                }}
+        ]}
+        
         ];
     }
     
@@ -323,7 +381,7 @@ function editSymbology(current_value, mode_edit, callback){
             id:'btnRecCancel',
             css:{'float':'right'}, 
             click: function() { 
-                edit_dialog.dialog('close'); 
+                edit_symb_dialog.dialog('close'); 
         }},
         {text:window.hWin.HR('Save'),
             id:'btnRecSave',
@@ -341,8 +399,17 @@ function editSymbology(current_value, mode_edit, callback){
                 if(res['iconType']=='circle'){
                     res['radius'] = (res['iconSize']>0?res['iconSize']:8);
                 }
+                if(res['thematicMap']){
+                    let tmaps = window.hWin.HEURIST4.util.isJSON(res['thematicMap']);
+                    delete res['thematicMap'];
+                    if(tmaps){
+                        tmaps.unshift(res);
+                        res = tmaps;
+                    }
+                }
+                
                 _editing_symbology.setModified(false);
-                edit_dialog.dialog('close');
+                edit_symb_dialog.dialog('close');
                 
                 if($.isFunction(callback)){
                     callback.call(this, res);
@@ -353,9 +420,9 @@ function editSymbology(current_value, mode_edit, callback){
 
     //
     //
-    edit_dialog = popup_dlg.dialog({
+    edit_symb_dialog = popup_dlg.dialog({
         autoOpen: true,
-        height: (mode_edit==2)?300:700,
+        height: (mode_edit==2)?300:700, //((mode_edit==3)?750:700),
         width:  740,
         modal:  true,
         title: window.hWin.HR('Define Symbology'),
@@ -368,12 +435,12 @@ function editSymbology(current_value, mode_edit, callback){
                 var $dlg, buttons = {};
                 buttons['Save'] = function(){ 
                     //that._saveEditAndClose(null, 'close'); 
-                    edit_dialog.parent().find('#btnRecSave').click();
+                    edit_symb_dialog.parent().find('#btnRecSave').click();
                     $dlg.dialog('close'); 
                 }; 
                 buttons['Ignore and close'] = function(){ 
                     _editing_symbology.setModified(false);
-                    edit_dialog.dialog('close'); 
+                    edit_symb_dialog.dialog('close'); 
                     $dlg.dialog('close'); 
                 };
 
@@ -392,7 +459,7 @@ function editSymbology(current_value, mode_edit, callback){
         buttons: edit_buttons
     });                
 
-    edit_dialog.parent().addClass('ui-heurist-design');
+    edit_symb_dialog.parent().addClass('ui-heurist-design');
     
         }//on init
     });

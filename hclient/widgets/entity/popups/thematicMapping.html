@@ -1,37 +1,69 @@
 <div id="div_search" class="ent_wrapper">
-    <div class="ent_header" style="height:120px;border-bottom:1px solid gray;">
+    <div class="ent_header" style="height:110px;border-bottom:1px solid gray;padding:0px">
     
-        <fieldset>
-            <div style="padding: 0.2em; width: 100%; line-height:3" class="input">
+        <div style="width:300px;display:inline-block">
+            <h4 style="margin: 5px;width:290px;">
+                Thematic maps
+                <span id="btn_tm_add" class="ui-icon ui-icon-circle-b-plus" style="margin-top:2px;float:right;cursor:pointer" title="Add new thematic map"/>
+            </h4>
+            <select id="thematic_maps_list" size="5" style="width:290px;margin:5px"></select>
+        </div>
+    
+        <fieldset style="display:inline-block">
+            <div style="padding: 0.2em; width: 100%; line-height:2" class="input">
                 <div class="header">
-                    <label for="sel_record_scope">Records type:</label>
+                    <label for="tm_name">Thematic map title:</label>
                 </div>
-                <div id="div_button-toolbar" style="line-height:1em">
-                    <select id="sel_record_scope" class="text ui-widget-content ui-corner-all" style="width:300px;max-width:40em;"></select>
+                <div style="line-height:1em">
+                    <input id="tm_name" class="text ui-widget-content ui-corner-all" style="width:300px;max-width:40em;"/>
+                    <button id="btn_map_remove">Remove Theme</button>
+                </div>
+            </div>
+            <div style="padding: 0.2em; width: 100%; line-height:2" class="input">                   
+                <div class="header">
+                    <label for="tm_active">Activate on layer load:</label>
+                </div>
+                <div style="line-height:1em">
+                    <input id="tm_active" class="text ui-widget-content ui-corner-all" type="checkbox"/>
+                </div>
+            </div>
+            <div style="padding: 0.2em; width: 100%; line-height:2" class="input">                   
+                <div class="header">
+                    <label for="tm_symbol">Base symbology:</label>
+                </div>
+                <div style="line-height:1em">
+                    <input id="tm_symbol" class="text ui-widget-content ui-corner-all" style="width:500px;"/>
                 </div>
             </div>
         </fieldset>
-        <div>        
-            <div class="heurist-helper2"  style="padding: 5px 0 10px 0;">
-                Define thematic symbology for selected record type....
-                <ul><li>Select record type that have geo field or Place as a resource field</li>
-                <li>Select fields that will define symbology for particular place. For example "Country" for "color" "Population" for "size" and "City type" for "icon"</li>
-                <li>For each field define symbology properties that will overwrtire base symbology</li>
-                <li>Define ranges or categories for field values</li>
-                <li>Define symbol properties for each range/category</li>
-                </ul>
-            </div>
-        </div>
     </div>
 
     <!-- TREE for field selection -->
-    <div style="top:127px; bottom:0; position:absolute; width:500px;" class="input ent_content">
-        <div style="padding:10px 0 0 18px"><label>Select fields</label></div>
-        <div class="detailRow rtt-tree tree-csv" style="padding:10px;outline: none;" id="rectype_tree">
+    <div style="top:115px; bottom:0; position:absolute; width:300px;" class="input ent_content">
+        <h4 style="margin: 5px;width:290px;">Thematic Map Fields</h4>
+        <select id="selected_fields" size="5" style="width:290px;margin:5px"></select>
+        <div style="padding:10px 0 0 18px">
+            <label>Select fields:</label><br>
+            <select id="sel_record_scope" class="text ui-widget-content ui-corner-all" style="width:270px;margin-top:7px"></select>
+        </div>
+        <div class="detailRow rtt-tree tree-csv" style="padding:10px; overflow:auto; position:absolute; width:280px; top:147px;bottom:0px" id="rectype_tree">
         </div>
     </div>
 
-    <div id="div_work_area" style="position:absolute; top:117px; bottom:0px; left:501px; right:0px; border-left:1px solid gray;overflow:auto">
+    <!-- FIELD's ranges -->
+    <div id="div_work_area" style="display:none;position:absolute; top:115px; bottom:0px; left:301px; right:0px; border-left:1px solid gray;overflow:auto; padding:0px 10px">
+        <h4 style="margin: 5px;">Field ranges/categories</h4>
+        <div style="margin-top: 10px">
+                <label for="f_title">Title:</label>
+                <input id="f_title" class="text ui-widget-content ui-corner-all" style="width:300px;"/>
+                <button id="btn_f_remove" >Remove Field</button>
+        </div>
+        <div id="f_toolbar" style="padding:5px;margin-top: 22px">
+            <button id="btn_f_range_add">Add range</button>
+            <button id="btn_f_range_auto">Auto</button>
+            <button id="btn_f_range_reset">Remove All</button>
+        </div>
+        <div id="f_ranges"></div>
     </div>
 </div>
 
