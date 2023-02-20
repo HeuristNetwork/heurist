@@ -855,8 +855,8 @@ $.widget( "heurist.thematicMapping", $.heurist.recordAction, {
             }else if(key=='btn_f_range_auto'){
                 
                 //find min/max and unique values show ranges dialog
-                
-                
+                var selfield = this.selectedFields[this.currentField];
+                this._findFieldValues(selfield.code);
             
             }else if(key=='btn_f_range_reset'){
                 
@@ -877,7 +877,72 @@ $.widget( "heurist.thematicMapping", $.heurist.recordAction, {
     //
     _findFieldValues: function(code){
         
-        //this.options.maplayer_query
+console.log(this.options.maplayer_query)        
+        if(!this.options.maplayer_query) return;
+        
+        var field = window.hWin.HEURIST4.query.createFacetQuery(code, true);
+        
+        //
+        // substitute $IDS in facet query with list of ids OR current query(todo)
+        // 
+        var that = this;
+        function __fillQuery(q){
+                    $(q).each(function(idx, predicate){
+                        
+                        $.each(predicate, function(key,val)
+                        {
+                                if( $.isArray(val) || $.isPlainObject(val) ){
+                                    __fillQuery(val);
+                                 }else if( (typeof val === 'string') && (val == '$IDS') ) {
+                                    //substitute with array of ids
+                                    predicate[key] = that.options.maplayer_query;
+                                 }
+                        });                            
+                    });
+        }        
+        
+        
+        var query, needcount = 2;
+        if( (typeof field['facet'] === 'string') && (field['facet'] == '$IDS') ){ //this is field form target record type
+        
+            //replace with list of ids
+            query = this.options.maplayer_query; //{ids: this._currentRecordset.getMainSet().join(',')};
+        
+            needcount = 1;
+            
+        }else{
+            query = window.hWin.HEURIST4.util.cloneJSON(field['facet']); //clone 
+            
+            //change $IDS for current set of target record type
+            __fillQuery(query);                
+        }
+        
+        field['type'] = $Db.dty(field['id'], 'dty_Type');
+
+        var request = {q: query, count_query:null, w: 'a', a:'getfacets',
+                         facet_index: 0, 
+                         field:  field['id'],
+                         type:   field['type'],
+                         step:   0,
+                         facet_type: 1, //0 direct search search, 1 - select/slider, 2 - list inline, 3 - list column
+                         facet_groupby: null, //by first char for freetext, by year for dates, by level for enum
+                         vocabulary_id: null, //special case for firstlevel group - got it from field definitions
+                         needcount: 0,         
+                         qname:'',
+                         //request_id:this._request_id,
+                         source:this.element.attr('id') }; //, facets: facets
+        
+        
+                window.HAPI4.RecordMgr.get_facets(request, function(response){ 
+                    
+                        if(response.status == window.hWin.ResponseStatus.OK){
+                            console.log(response);
+                        }else{
+                            console.log('ERROR in get_facets');
+                            console.log(response.message);
+                        }
+                });            
+        
         
         
     }

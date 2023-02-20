@@ -776,7 +776,7 @@ $.widget( "heurist.editing_input", {
                             if(!current_val) current_val = [];
                             window.hWin.HEURIST4.ui.showRecordActionDialog(
                             'thematicMapping',
-                            {maplayer_query: 't:4',
+                            {maplayer_query: this.configMode['thematicmap']===true?null:this.configMode['thematicmap'], //query from map layer
                             thematic_mapping: current_val,
                                 onClose: function(context){
                                     if(context){
@@ -3236,13 +3236,53 @@ console.log('onpaste');
                     this._on( $btn_edit_switcher, { click: function(){
                         
                             var mode_edit = 0;
-                        
-                            if(that.options.rectypeID==window.hWin.HAPI4.sysinfo['dbconst']['RT_MAP_LAYER']){
-                                mode_edit = 3;
-                            }
-                        
                             var current_val = window.hWin.HEURIST4.util.isJSON($input.val());
                             if(!current_val) current_val = {};
+                        
+                            if(that.options.rectypeID==window.hWin.HAPI4.sysinfo['dbconst']['RT_MAP_LAYER']){
+                                
+                                //get query from linked datasource
+                                var ele = that.options.editing.getFieldByName(window.hWin.HAPI4.sysinfo['dbconst']['DT_DATA_SOURCE']);
+                                var vals = ele.editing_input('getValues');
+                                var dataset_record_id = vals[0];
+                                
+                                if(dataset_record_id>0){
+                                    
+                                    const DT_QUERY_STRING = window.hWin.HAPI4.sysinfo['dbconst']['DT_QUERY_STRING'];
+                                
+                                    var server_request = {
+                                        q: 'ids:'+dataset_record_id,
+                                        restapi: 1,
+                                        columns: 
+                                        ['rec_ID', DT_QUERY_STRING],
+                                        zip: 1,
+                                        format:'json'};
+                    
+                                    //perform search see record_output.php       
+                                    window.hWin.HAPI4.RecordMgr.search_new(server_request,
+                                        function(response){
+                                               if(window.hWin.HEURIST4.util.isJSON(response)) {
+                                                    let hquery = null;
+                                                    mode_edit = 3;
+                                                    if(response['records'] && response['records'].length>0){
+                                                        var res = response['records'][0]['details'];
+                                                        //{12:{4407:"t:10"}}
+                                                        hquery = res[DT_QUERY_STRING][ Object.keys(res[DT_QUERY_STRING])[0] ];
+                                                    }
+                                                    
+                                                    current_val.maplayer_query = hquery;
+                                                    
+                                                    window.hWin.HEURIST4.ui.showEditSymbologyDialog(current_val, 3, function(new_value){
+                                                        $input.val(JSON.stringify(new_value));
+                                                        that.onChange();
+                                                    });
+                                                    
+                                                }
+                                            });
+                                    return;        
+                                }
+                            }
+                        
                             window.hWin.HEURIST4.ui.showEditSymbologyDialog(current_val, mode_edit, function(new_value){
                                 $input.val(JSON.stringify(new_value));
                                 that.onChange();

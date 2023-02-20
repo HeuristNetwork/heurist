@@ -498,4 +498,75 @@ window.hWin.HEURIST4.query = {
         
     },
 
-}//end utils_query
+    //
+    // Converts string 10:123 to heurist query {t:10, f123: }
+    //
+    createFacetQuery: function(code, need_query){
+
+        var result = {};
+        
+console.log(code);        
+        
+        code = code.split(':');
+
+        var dtid = code[code.length-1];
+        var linktype = dtid.substr(0,2);
+        if(linktype=='lt' || linktype=='lf' || linktype=='rt' || linktype=='rf'){
+            //unconstrained link
+            code.push('0');         //!!!!!!!!
+            code.push('title');
+        }
+
+        result['id']   = code[code.length-1]; //last dty_ID
+        result['rtid'] = code[code.length-2];
+        
+        //creates lists of queries to search facet values
+        if(need_query===true){  //not direct input
+
+            //create query to search facet values
+            function __crt( idx ){
+                var res = null;
+                if(idx>0){  //this is relation or link
+
+                    res = [];
+
+                    var pref = '';
+                    var qp = {};
+
+                    if(code[idx]>0){ //if 0 - unconstrained
+                        qp['t'] = code[idx];
+                        res.push(qp);
+                    }
+
+                    var fld = code[idx-1]; //link field
+                    if(fld.indexOf('lf')==0){
+                        pref = 'linked_to';    
+                    }else if(fld.indexOf('lt')==0){
+                        pref = 'linkedfrom';    
+                    }else if(fld.indexOf('rf')==0){
+                        pref = that.options.respect_relation_direction?'related_to':'related';    
+                    }else if(fld.indexOf('rt')==0){
+                        pref = that.options.respect_relation_direction?'relatedfrom':'related';
+                    }
+
+                    qp = {};
+                    qp[pref+':'+fld.substr(2)] = __crt(idx-2);    
+                    res.push(qp);
+                }else{ //this is simple field
+                    res = '$IDS'; //{'ids':'$IDS}'};
+                }
+                return res;
+            }
+
+            /*if(code.length-2 == 0){
+            res['facet'] = {ids:'$IDS'};
+            }else{}*/
+            result['facet'] = __crt( code.length-2 );
+console.log(JSON.stringify(result['facet']));
+        }
+
+        return result;
+    }
+    
+}
+}

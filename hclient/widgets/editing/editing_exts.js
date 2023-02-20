@@ -37,12 +37,18 @@ function editSymbology(current_value, mode_edit, callback){
     var dialog_div_id = 'heurist-dialog-editSymbology'+(mode_edit>=3?mode_edit:'');
     
     var popup_dlg = $('#'+dialog_div_id);
-
+    
     if(popup_dlg.length>0){
         popup_dlg.empty();
     }else{
         popup_dlg = $('<div id="'+dialog_div_id+'">')
             .appendTo( $(window.hWin.document).find('body') );
+    }
+    
+    var maplayer_query = true;
+    if(current_value && current_value.maplayer_query){
+        maplayer_query = current_value.maplayer_query;
+        delete current_value.maplayer_query;
     }
 
     var editForm = $('<div class="ent_content_full editForm" style="top:0">')
@@ -351,27 +357,33 @@ function editSymbology(current_value, mode_edit, callback){
                 "rst_DisplayName": "Fill opacity:",
                 "rst_DisplayHelpText": "Value from 0 (transparent) to 100 (opaque)"
         }}
-        ]},
-        //fillRule  A string that defines how the inside of a shape is determined.
-
-        {
-        "groupHeader": "Thematic maps",
-        "groupTitleVisible": (mode_edit===3),
-        "groupType": "group",
-            "children":[
-            {"dtID": "thematicMap",
-                "dtFields":{
-                "dty_Type":"blocktext",
-                "rst_DisplayWidth": "50",
-                "rst_DisplayHeight": "2",
-                "rst_DisplayName": "Thematic maps:",
-                "rst_Display": (mode_edit===3)?"visible":"hidden",
-                "rst_DisplayHelpText": "Thematic maps configuration",
-                "rst_FieldConfig":{"thematicmap":"thematicmap"}  //use thematic map widget
-                }}
         ]}
-        
+        //fillRule  A string that defines how the inside of a shape is determined.
         ];
+        
+        if(mode_edit==3){
+            
+            editFields.push(
+                {
+                "groupHeader": "Thematic maps",
+                "groupTitleVisible": true,
+                "groupType": "group",
+                    "children":[
+                    {"dtID": "thematicMap",
+                        "dtFields":{
+                        "dty_Type":"blocktext",
+                        "rst_DisplayWidth": "50",
+                        "rst_DisplayHeight": "2",
+                        "rst_DisplayName": "Thematic maps:",
+                        "rst_Display": "visible",
+                        "rst_DisplayHelpText": "Thematic maps configuration",
+                        "rst_FieldConfig":{"thematicmap": maplayer_query}  //use thematic map widget
+                        }}
+                ]}
+            );
+        }
+        
+        
     }
     
     _editing_symbology.initEditForm( editFields, recdata );

@@ -563,68 +563,11 @@ $.widget( "heurist.search_faceted", {
 
             //value is defined - it will be used to create query
             if( !window.hWin.HEURIST4.util.isnull(field['var']) && field['code']){
-                //create new query and add new parameter
-                var code = field['code'];
-
-                code = code.split(':');
-
-                var dtid = code[code.length-1];
-                var linktype = dtid.substr(0,2);
-                if(linktype=='lt' || linktype=='lf' || linktype=='rt' || linktype=='rf'){
-                    //unconstrained link
-                    code.push('0');         //!!!!!!!!
-                    code.push('title');
-                }
-
-                field['id']   = code[code.length-1]; //last dty_ID
-                field['rtid'] = code[code.length-2];
-                
-                // 1. creates lists of queries to search facet values
-                if(field['isfacet']!=that._FT_INPUT){  //not direct input
-
-                    //create query to search facet values
-                    function __crt( idx ){
-                        var res = null;
-                        if(idx>0){  //this is relation or link
-
-                            res = [];
-
-                            var pref = '';
-                            var qp = {};
-
-                            if(code[idx]>0){ //if 0 - unconstrained
-                                qp['t'] = code[idx];
-                                res.push(qp);
-                            }
-
-                            var fld = code[idx-1]; //link field
-                            if(fld.indexOf('lf')==0){
-                                pref = 'linked_to';    
-                            }else if(fld.indexOf('lt')==0){
-                                pref = 'linkedfrom';    
-                            }else if(fld.indexOf('rf')==0){
-                                pref = that.options.respect_relation_direction?'related_to':'related';    
-                            }else if(fld.indexOf('rt')==0){
-                                pref = that.options.respect_relation_direction?'relatedfrom':'related';
-                            }
-
-                            qp = {};
-                            qp[pref+':'+fld.substr(2)] = __crt(idx-2);    
-                            res.push(qp);
-                        }else{ //this is simple field
-                            res = '$IDS'; //{'ids':'$IDS}'};
-                        }
-                        return res;
-                    }
-
-                    /*if(code.length-2 == 0){
-                    field['facet'] = {ids:'$IDS'};
-                    }else{}*/
-                    field['facet'] = __crt( code.length-2 );
-
-                }
-
-
+                //1. creates query to retrieve facet values
+                let res = window.hWin.HEURIST4.query.createFacetQuery(field['code'], (field['isfacet']!=that._FT_INPUT));
+                field['id'] = res['id']; //last id in the code - dty_ID
+                field['rtid'] = res['rtid'];
+                if(res['facet']) field['facet'] = res['facet'];
                 
                 //
                 // 2. creates main JSON query

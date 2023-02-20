@@ -445,7 +445,10 @@ function recordSearchFacets($system, $params){
                 (($dt_type=="year" || $dt_type=="date") && $facet_groupby==null)  ){
                     $third_element = $row[2];          // slider - third parameter is MAX for range
 					
-                    if(!$missingIds && !array_key_exists('ids', $params['q']) && $row[2] != 0){ // For range's histogram
+                    if(!$missingIds && 
+                        (is_Array($params['q']) && !array_key_exists('ids', $params['q'])) && 
+                        $row[2] != 0)
+                    { // For range's histogram
                         $missingIds = true;
                     }
                 }else if ($dt_type=="year" || $dt_type=="date") {
@@ -474,7 +477,8 @@ function recordSearchFacets($system, $params){
 
             if($missingIds){
 
-				$recid_query = "SELECT DISTINCT rec_ID " . $qclauses["from"] . $detail_link . " WHERE " . $qclauses["where"] . $details_where . $grouporder_clause;
+				$recid_query = "SELECT DISTINCT rec_ID " . $qclauses["from"] . $detail_link . 
+                        " WHERE " . $qclauses["where"] . $details_where . $grouporder_clause;
 
                 $recid_res = $mysqli->query($recid_query);
                 if($recid_res){
