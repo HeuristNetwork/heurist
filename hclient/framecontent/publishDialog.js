@@ -122,8 +122,8 @@ function hPublishDialog( _options )
             var hquery = (options.mapwidget)?options.mapwidget.current_query_layer['original_heurist_query']:'';
             
             if($(popupelement).find("#m_query").is(':checked')){
-                params_search = window.hWin.HEURIST4.util.composeHeuristQuery2(hquery, false);
-                params_search_encoded = window.hWin.HEURIST4.util.composeHeuristQuery2(hquery, true);
+                params_search = window.hWin.HEURIST4.query.composeHeuristQuery2(hquery, false);
+                params_search_encoded = window.hWin.HEURIST4.query.composeHeuristQuery2(hquery, true);
             }else{
                 params_search = '?';
                 params_search_encoded = '?';
@@ -195,7 +195,7 @@ function hPublishDialog( _options )
 
         if(options.mapwidget){
             var hquery = (options.mapwidget)?options.mapwidget.current_query_layer['original_heurist_query']:'';
-            var query = window.hWin.HEURIST4.util.composeHeuristQuery2(window.hWin.HEURIST4.current_query_request, false);
+            var query = window.hWin.HEURIST4.query.composeHeuristQuery2(window.hWin.HEURIST4.current_query_request, false);
             if(query=='?'){
                 window.hWin.HEURIST4.msg.showMsgDlg("Define filter and apply to database");
             }else{

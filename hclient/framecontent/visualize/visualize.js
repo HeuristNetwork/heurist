@@ -1514,12 +1514,12 @@ function addLabels(name, color) {
 //
 function showEmbedDialog(){
 
-    var query = window.hWin.HEURIST4.util.composeHeuristQuery2(window.hWin.HEURIST4.current_query_request, false);
+    var query = window.hWin.HEURIST4.query.composeHeuristQuery2(window.hWin.HEURIST4.current_query_request, false);
     query = query + ((query=='?')?'':'&') + 'db='+window.hWin.HAPI4.database;
     var url = window.hWin.HAPI4.baseURL+'hclient/framecontent/visualize/springDiagram.php' + query;
 
     //encode
-    query = window.hWin.HEURIST4.util.composeHeuristQuery2(window.hWin.HEURIST4.current_query_request, true);
+    query = window.hWin.HEURIST4.query.composeHeuristQuery2(window.hWin.HEURIST4.current_query_request, true);
     query = query + ((query=='?')?'':'&') + 'db='+window.hWin.HAPI4.database;
     var url_enc = window.hWin.HAPI4.baseURL+'hclient/framecontent/visualize/springDiagram.php' + query;
 

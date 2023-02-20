@@ -186,7 +186,7 @@ $.widget( "heurist.manageUsrSavedSearches", $.heurist.manageEntity, {
         var recID   = fld('svs_ID');
         
         var qsearch = recordset.fld(record, 'svs_Query');
-        var params = window.hWin.HEURIST4.util.parseHeuristQuery(qsearch);
+        var params = window.hWin.HEURIST4.query.parseHeuristQuery(qsearch);
         
         var iconBtn = 'ui-icon-search';
         if(params.type==3){

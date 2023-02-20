@@ -211,7 +211,7 @@ function ShowReps( is_snippet_editor ) {
     */
     function _getQueryAndTemplate(template_file, isencode){
 
-        var squery = window.hWin.HEURIST4.util.composeHeuristQueryFromRequest( _currentQuery, true );
+        var squery = window.hWin.HEURIST4.query.composeHeuristQueryFromRequest( _currentQuery, true );
 
         if(window.hWin.HEURIST4.util.isempty(squery) ||  (squery.indexOf("&q=")<0) || 
             (squery.indexOf("&q=") == squery.length-3)) {
@@ -2029,7 +2029,7 @@ this_id       : "term"
             var template_file = $('#selTemplates').val(); //current template
             if(window.hWin.HEURIST4.util.isempty(template_file)) { return; }
 
-            var squery = window.hWin.HEURIST4.util.composeHeuristQueryFromRequest( _currentQuery, true );
+            var squery = window.hWin.HEURIST4.query.composeHeuristQueryFromRequest( _currentQuery, true );
             squery = squery.replace('"','%22');
             
             var surl = window.hWin.HAPI4.baseURL + "viewers/smarty/showReps.php?"+
@@ -2048,7 +2048,7 @@ this_id       : "term"
         if(window.hWin.HEURIST4.util.isempty(template_file)) return;
         
         var mode = window.hWin.HAPI4.get_prefs('showSelectedOnlyOnMapAndSmarty'); //not used
-        var squery = window.hWin.HEURIST4.util.composeHeuristQueryFromRequest( _currentQuery, true );
+        var squery = window.hWin.HEURIST4.query.composeHeuristQueryFromRequest( _currentQuery, true );
 
         var q = 'hquery='+encodeURIComponent(squery)+'&template='+template_file;
         

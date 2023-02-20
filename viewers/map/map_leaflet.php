@@ -312,7 +312,7 @@ if (!(@$_REQUEST['notimeline']=='true' || @$_REQUEST['notimeline']=='1')) { ?>
                 mapwdiget.mapping('getMapManager').toggleMapDocument( mapdocument ); //load map document
             }
         
-            var request = window.hWin.HEURIST4.util.parseHeuristQuery(location.search );
+            var request = window.hWin.HEURIST4.query.parseHeuristQuery(location.search );
             if( !window.hWin.HEURIST4.util.isempty(request['q']) ){
                 //do not zoom to current search if mapdoc is defined - preserve viewport
                 mapwdiget.mapping('addSearchResult', request, 'Current results', with_mapdoc);

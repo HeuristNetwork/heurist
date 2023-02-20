@@ -2366,7 +2366,7 @@ console.log('>>>>'+that.divProfileItems.find('.ui-menu-item').css('padding-left'
 
             if(!window.hWin.HEURIST4.util.isnull(window.hWin.HEURIST4.current_query_request)){
                 
-                q = window.hWin.HEURIST4.util.composeHeuristQuery2(window.hWin.HEURIST4.current_query_request, true);
+                q = window.hWin.HEURIST4.query.composeHeuristQuery2(window.hWin.HEURIST4.current_query_request, true);
                 
                 isEntireDb = (window.hWin.HAPI4.currentRecordset && 
                     window.hWin.HAPI4.currentRecordset.length()==window.hWin.HAPI4.sysinfo.db_total_records);

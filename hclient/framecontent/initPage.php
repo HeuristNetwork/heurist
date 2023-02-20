@@ -206,6 +206,7 @@ if($isLocalHost){
 <script type="text/javascript" src="<?php echo PDIR;?>hclient/core/hapi.js"></script>
 <script type="text/javascript" src="<?php echo PDIR;?>hclient/core/hRecordSearch.js"></script>
 <script type="text/javascript" src="<?php echo PDIR;?>hclient/core/recordset.js"></script>
+<script type="text/javascript" src="<?php echo PDIR;?>hclient/core/utils_query.js"></script>
 <script type="text/javascript" src="<?php echo PDIR;?>hclient/core/utils_msg.js"></script>
 <script type="text/javascript" src="<?php echo PDIR;?>hclient/core/utils_geo.js"></script>
 <script type="text/javascript" src="<?php echo PDIR;?>hclient/core/utils_collection.js"></script>

@@ -474,7 +474,7 @@ function hMapLayer2( _options ) {
         var origination_db = null;
         
         var query = _recordset.fld(_record, window.hWin.HAPI4.sysinfo['dbconst']['DT_QUERY_STRING']);
-        var request = window.hWin.HEURIST4.util.parseHeuristQuery(query);
+        var request = window.hWin.HEURIST4.query.parseHeuristQuery(query);
 
         if(request.q){
             
@@ -1003,8 +1003,8 @@ function hMapLayer2( _options ) {
                         + '&db=' + window.hWin.HAPI4.database;
                 }else{
                     var query = _recordset.fld(_record, window.hWin.HAPI4.sysinfo['dbconst']['DT_QUERY_STRING']);
-                    var params = window.hWin.HEURIST4.util.parseHeuristQuery(query);
-                    sQuery = window.hWin.HEURIST4.util.composeHeuristQuery2(params, true);
+                    var params = window.hWin.HEURIST4.query.parseHeuristQuery(query);
+                    sQuery = window.hWin.HEURIST4.query.composeHeuristQuery2(params, true);
                     sQuery = sQuery + '&db=' + (params.db?params.db:window.hWin.HAPI4.database);
                 }
                 sQuery = sQuery + '&format=geojson'; //(layer_ID>0?layer_ID:dataset_ID); //layerName; //zip=1&

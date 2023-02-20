@@ -152,7 +152,7 @@ console.log(re);
                     
                     if(that.options.current_search_filter){
                         //data.recordset
-                        var sub_query = window.hWin.HEURIST4.util.mergeHeuristQuery(
+                        var sub_query = window.hWin.HEURIST4.query.mergeHeuristQuery(
                                     data.recordset.getIds(2000), that.options.current_search_filter);
                                     
                         var sub_request = {q: sub_query, w: 'all', detail:'ids', id:window.hWin.HEURIST4.util.random()};

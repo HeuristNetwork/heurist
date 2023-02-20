@@ -2278,7 +2278,7 @@ console.log('refresh '+(window.hWin.HAPI4.currentUser.usr_SavedSearch==null));
 
                 var request = params;
 
-                request.rules = window.hWin.HEURIST4.util.cleanRules(request.rules);
+                request.rules = window.hWin.HEURIST4.query.cleanRules(request.rules);
                 
                 //query is not defenied, but rules are - this is pure RuleSet - apply it to current result set
                 if(Hul.isempty(request.q)&&!Hul.isempty(request.rules)){
@@ -2642,12 +2642,12 @@ console.log(node);
         if(prms.type!=3){
             
             
-            var crules = window.hWin.HEURIST4.util.cleanRules( prms.rules );                                                      
+            var crules = window.hWin.HEURIST4.query.cleanRules( prms.rules );                                                      
             prms.rules = crules==null?'':crules; //JSON.stringify(crules);
             
             prms.db = window.hWin.HAPI4.database;
             
-            window.hWin.HEURIST4.util.hQueryCopyPopup(prms, pos_element);
+            window.hWin.HEURIST4.query.hQueryCopyPopup(prms, pos_element);
         }
     },
 
@@ -2889,7 +2889,7 @@ console.log(err)
         {
             if(svsID && ssearches[svsID][_GRPID]==ugr_ID){
 
-                var prms = window.hWin.HEURIST4.util.parseHeuristQuery(ssearches[svsID][_QUERY]);
+                var prms = window.hWin.HEURIST4.query.parseHeuristQuery(ssearches[svsID][_QUERY]);
 
                 if(!domain || domain==prms.w){
                     var sname = ssearches[svsID][_NAME];

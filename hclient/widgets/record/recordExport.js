@@ -127,7 +127,7 @@ $.widget( "heurist.recordExport", $.heurist.recordAction, {
                 
                 //'+(rec_RecTypeID>0?('t:'+rec_RecTypeID+' '):'')+'
                 
-                q = window.hWin.HEURIST4.util.composeHeuristQuery2(window.hWin.HEURIST4.current_query_request, true);
+                q = window.hWin.HEURIST4.query.composeHeuristQuery2(window.hWin.HEURIST4.current_query_request, true);
                 
             }
             

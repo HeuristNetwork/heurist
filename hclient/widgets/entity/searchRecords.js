@@ -456,7 +456,7 @@ $.widget( "heurist.searchRecords", $.heurist.searchEntity, {
         }       
         
         if(this.element.find('#cb_initial').is(':checked')){
-            qobj = window.hWin.HEURIST4.util.mergeHeuristQuery(qobj, 
+            qobj = window.hWin.HEURIST4.query.mergeHeuristQuery(qobj, 
                             (this.options.pointer_filter?this.options.pointer_filter:''));
         }
         

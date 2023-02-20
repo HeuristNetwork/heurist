@@ -447,7 +447,7 @@ this._dout('refresh vis='+this.element.is(':visible'));
 
             var query_string_all = null,
             query_string_sel = null,
-            query_string_main = window.hWin.HEURIST4.util.composeHeuristQueryFromRequest( this._query_request, true );
+            query_string_main = window.hWin.HEURIST4.query.composeHeuristQueryFromRequest( this._query_request, true );
 
 /*
 

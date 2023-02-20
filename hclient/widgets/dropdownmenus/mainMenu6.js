@@ -1435,7 +1435,7 @@ $.widget( "heurist.mainMenu6", {
                          q = q + ' after:"1 week ago"';
                          qname = 'Recent changes';
                     }
-                    var request = window.hWin.HEURIST4.util.parseHeuristQuery(q); 
+                    var request = window.hWin.HEURIST4.query.parseHeuristQuery(q); 
                     request.qname = qname;
                     window.hWin.HAPI4.RecordSearch.doSearch( this, request );
                 }

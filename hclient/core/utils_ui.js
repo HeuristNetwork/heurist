@@ -1846,7 +1846,7 @@ window.hWin.HEURIST4.ui = {
                 
                 if(query_request){
                     if($.isPlainObject(query_request)){
-                        url = url + window.hWin.HEURIST4.util.composeHeuristQueryFromRequest(query_request, true);
+                        url = url + window.hWin.HEURIST4.query.composeHeuristQueryFromRequest(query_request, true);
                     }else{
                         url = url + 'db=' + window.hWin.HAPI4.database + '&q=' + encodeURIComponent(query_request);                              }
                 }else{

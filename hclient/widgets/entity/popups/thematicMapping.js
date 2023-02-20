@@ -870,6 +870,16 @@ $.widget( "heurist.thematicMapping", $.heurist.recordAction, {
             }
             
         }
+    },
+    
+    //
+    // Searches for min/max and unique values for given field
+    //
+    _findFieldValues: function(code){
+        
+        //this.options.maplayer_query
+        
+        
     }
     
 

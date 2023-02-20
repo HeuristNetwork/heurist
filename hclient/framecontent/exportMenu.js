@@ -279,7 +279,7 @@ function hexportMenu( container ) {
 
             if(!window.hWin.HEURIST4.util.isnull(window.hWin.HEURIST4.current_query_request)){
                 
-                q = window.hWin.HEURIST4.util.composeHeuristQuery2(window.hWin.HEURIST4.current_query_request, true);
+                q = window.hWin.HEURIST4.query.composeHeuristQuery2(window.hWin.HEURIST4.current_query_request, true);
                 
                 /*
                 q = encodeURIComponent(window.hWin.HEURIST4.current_query_request.q);
@@ -425,7 +425,7 @@ function hexportMenu( container ) {
         var q = "";
         if(isAll){
 
-            q = window.hWin.HEURIST4.util.composeHeuristQuery2(window.hWin.HEURIST4.current_query_request, false);
+            q = window.hWin.HEURIST4.query.composeHeuristQuery2(window.hWin.HEURIST4.current_query_request, false);
 
             if(q=='?'){
                 window.hWin.HEURIST4.msg.showMsgDlg("Define filter and apply to database");

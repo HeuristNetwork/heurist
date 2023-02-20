@@ -95,6 +95,7 @@ if (($_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0.0.1')
 
 <script type="text/javascript" src="<?php echo PDIR;?>hclient/core/hapi.js"></script>
 <script type="text/javascript" src="<?php echo PDIR;?>hclient/core/utils.js"></script>
+<script type="text/javascript" src="<?php echo PDIR;?>hclient/core/utils_query.js"></script>
 <script type="text/javascript" src="<?php echo PDIR;?>hclient/core/utils_dbs.js"></script>
 <script type="text/javascript" src="<?php echo PDIR;?>hclient/core/utils_ui.js"></script>
 <script type="text/javascript" src="<?php echo PDIR;?>hclient/core/utils_msg.js"></script>
@@ -859,7 +860,7 @@ function initLinksAndImages($container, search_data){
             }else if(href.indexOf('q=')===0){ //special case for links in smarty reports
                 
                     /*
-                    var request = window.hWin.HEURIST4.util.parseHeuristQuery('?'+href);
+                    var request = window.hWin.HEURIST4.query.parseHeuristQuery('?'+href);
 
                     request.w  = 'a';
                     request.detail = 'ids';

@@ -873,7 +873,7 @@ $.widget( "heurist.search", {
                     is_keep = (is_keep==1 || is_keep==true || is_keep=='true');
 
                     if(is_keep && !this.options.search_realm){
-                        var qs = window.hWin.HEURIST4.util.composeHeuristQueryFromRequest(data, true);
+                        var qs = window.hWin.HEURIST4.query.composeHeuristQueryFromRequest(data, true);
                         if(qs && qs.length<2000){
                             var s = location.pathname;
                             while (s.substring(0, 2) === '//') s = s.substring(1);
@@ -978,7 +978,7 @@ $.widget( "heurist.search", {
 
             window.hWin.HAPI4.SystemMgr.user_log('search_Record_direct');
 
-            var request = window.hWin.HEURIST4.util.parseHeuristQuery(qsearch);
+            var request = window.hWin.HEURIST4.query.parseHeuristQuery(qsearch);
 
             request.w  = this.options.search_domain;
             request.detail = 'ids'; //'detail';

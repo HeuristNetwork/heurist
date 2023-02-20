@@ -215,12 +215,12 @@ $.widget( "heurist.searchInput", {
             var that = this;
 
             if(this.options.sup_filter){
-                qsearch = window.hWin.HEURIST4.util.mergeHeuristQuery(this.options.sup_filter, qsearch);    
+                qsearch = window.hWin.HEURIST4.query.mergeHeuristQuery(this.options.sup_filter, qsearch);    
             }
             
             window.hWin.HAPI4.SystemMgr.user_log('search_Record_direct');
             
-            var request = {}; //window.hWin.HEURIST4.util.parseHeuristQuery(qsearch);
+            var request = {}; //window.hWin.HEURIST4.query.parseHeuristQuery(qsearch);
 
             request.q = qsearch;
             request.w  = this.options.search_domain;

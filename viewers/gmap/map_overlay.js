@@ -1080,7 +1080,7 @@ map.data.addListener('mouseover', function(event) {
         // Query
         if(source && !window.hWin.HEURIST4.util.isempty(source.query)) {
             //console.log("Query: " + source.query);
-            var request = window.hWin.HEURIST4.util.parseHeuristQuery(source.query);
+            var request = window.hWin.HEURIST4.query.parseHeuristQuery(source.query);
             
             if(window.hWin.HEURIST4.util.isempty(request.q)){
                 $('#mapping').css('cursor','auto');

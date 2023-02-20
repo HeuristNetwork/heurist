@@ -895,7 +895,7 @@ function browseRecords(_editing_input, $input){
                         if(qobj==null){
                             qobj = pointer_filter;
                         }else{
-                            qobj = window.hWin.HEURIST4.util.mergeHeuristQuery(qobj, pointer_filter);
+                            qobj = window.hWin.HEURIST4.query.mergeHeuristQuery(qobj, pointer_filter);
                         }
                     }
                     if(window.hWin.HEURIST4.util.isempty(qobj)){

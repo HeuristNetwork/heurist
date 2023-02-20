@@ -514,7 +514,7 @@ $.widget( "heurist.search_faceted_wiz", {
                         .button({'label':window.hWin.HR('Get current query')}) //{icons: {primary: "ui-icon-search"}, text:false}
                         .css({'height':'16px','font-size':'0.8em',width:'45px'})
                         .click(function( event ) {
-                            var res = window.hWin.HEURIST4.util.hQueryStringify(window.hWin.HEURIST4.current_query_request, true);
+                            var res = window.hWin.HEURIST4.query.hQueryStringify(window.hWin.HEURIST4.current_query_request, true);
                             if($dlg.find('#svs_Query').val().trim()!=''){
                                 var that_dlg = window.hWin.HEURIST4.msg.showMsgDlg(
                                     window.hWin.HR("Are you sure?"),

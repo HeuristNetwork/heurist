@@ -471,7 +471,7 @@ $system->defineConstants();
 
     function showEmbedDialog(){
 
-        var query = window.hWin.HEURIST4.util.composeHeuristQuery2(window.hWin.HEURIST4.current_query_request, false);
+        var query = window.hWin.HEURIST4.query.composeHeuristQuery2(window.hWin.HEURIST4.current_query_request, false);
         query = query + ((query=='?')?'':'&') + 'db='+window.hWin.HAPI4.database;
         if(mapping.map_control.getCurrentMapdocumentId()>0){
             query = query + '&mapdocument=' + mapping.map_control.getCurrentMapdocumentId();
@@ -490,7 +490,7 @@ $system->defineConstants();
         //document.getElementById("linkKml").href = url_kml;
 
         //encode
-        query = window.hWin.HEURIST4.util.composeHeuristQuery2(window.hWin.HEURIST4.current_query_request, true);
+        query = window.hWin.HEURIST4.query.composeHeuristQuery2(window.hWin.HEURIST4.current_query_request, true);
         query = query + ((query=='?')?'':'&') + 'db='+window.hWin.HAPI4.database;
         url = window.hWin.HAPI4.baseURL+'viewers/gmap/map.php' + query;
         if(mapping.map_control.getCurrentMapdocumentId()>0){
@@ -522,7 +522,7 @@ $system->defineConstants();
 
     function exportKML(){
 
-        var query = window.hWin.HEURIST4.util.composeHeuristQuery2(window.hWin.HEURIST4.current_query_request, false);
+        var query = window.hWin.HEURIST4.query.composeHeuristQuery2(window.hWin.HEURIST4.current_query_request, false);
         if(query=='?'){
             window.hWin.HEURIST4.msg.showMsgDlg("Define filter and apply to database");
         }else{

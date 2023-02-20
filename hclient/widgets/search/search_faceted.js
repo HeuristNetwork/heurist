@@ -551,8 +551,9 @@ $.widget( "heurist.search_faceted", {
     //Methods specific for this widget---------------------------------
 
     //
-    // 1. create lists of queries to search facet values
-    // 2. create main JSON query
+    // 1. creates lists of queries to search facet values
+    //       Converts field['code'] to heurist querty and store it in field['facet']
+    // 2. creates main JSON query
     //
     ,_initFacetQueries: function(){
 
@@ -575,8 +576,10 @@ $.widget( "heurist.search_faceted", {
                     code.push('title');
                 }
 
-                field['id']   = code[code.length-1];
+                field['id']   = code[code.length-1]; //last dty_ID
                 field['rtid'] = code[code.length-2];
+                
+                // 1. creates lists of queries to search facet values
                 if(field['isfacet']!=that._FT_INPUT){  //not direct input
 
                     //create query to search facet values
@@ -622,6 +625,10 @@ $.widget( "heurist.search_faceted", {
                 }
 
 
+                
+                //
+                // 2. creates main JSON query
+                //
                 function __checkEntry(qarr, key, val){
                     var len0 = qarr.length, notfound = true, isarray;
 
@@ -763,7 +770,7 @@ $.widget( "heurist.search_faceted", {
             }
         }
         
-        this._current_query = window.hWin.HEURIST4.util.mergeHeuristQuery(
+        this._current_query = window.hWin.HEURIST4.query.mergeHeuristQuery(
                             (this._use_sup_filter)?this.options.params.sup_filter:'', 
                             //this.options.params.add_filter,
                             this._prepareSpatial(this.options.params.spatial_filter));
@@ -1490,7 +1497,7 @@ $.widget( "heurist.search_faceted", {
             //1) it requires that this filter must be a valid json  - FIXED
             //2) it makes whole request heavier
             //adds additional/supplementary and spatial filters
-            this._current_query = window.hWin.HEURIST4.util.mergeHeuristQuery(query, 
+            this._current_query = window.hWin.HEURIST4.query.mergeHeuristQuery(query, 
                             (this._use_sup_filter)?this.options.params.sup_filter:'', 
                             search_any_filter,
                             this._prepareSpatial(this.options.params.spatial_filter),
@@ -1595,7 +1602,7 @@ $.widget( "heurist.search_faceted", {
                 
                 if(this.options.params.ui_temporal_filter_initial || this._isInited || (field.multisel && field.selectedvalue!=null)){
                     //replace with current query   - @todo check for empty 
-                    subs_value = window.hWin.HEURIST4.util.mergeHeuristQuery(this._first_query, 
+                    subs_value = window.hWin.HEURIST4.query.mergeHeuristQuery(this._first_query, 
                                     (this._use_sup_filter)?this.options.params.sup_filter:'',
                                     this.options.params.add_filter,
                                     this._prepareSpatial(this.options.params.spatial_filter));
@@ -1603,7 +1610,7 @@ $.widget( "heurist.search_faceted", {
                 }else{
                     
                     //replace with list of ids
-                    subs_value = window.hWin.HEURIST4.util.mergeHeuristQuery(this._first_query,
+                    subs_value = window.hWin.HEURIST4.query.mergeHeuristQuery(this._first_query,
                                         {ids:this._currentRecordset.getMainSet().join(',')});
                     
                 }
@@ -1665,7 +1672,7 @@ $.widget( "heurist.search_faceted", {
                         query = this._first_query;
 
                         //add additional/supplementary filter
-                        query = window.hWin.HEURIST4.util.mergeHeuristQuery(query, 
+                        query = window.hWin.HEURIST4.query.mergeHeuristQuery(query, 
                                         (this._use_sup_filter)?this.options.params.sup_filter:'',   //suplementary filter defined in wiz
                                         this.options.params.add_filter,
                                         this._prepareSpatial(this.options.params.spatial_filter));  //dynaminc addition filter
@@ -1701,7 +1708,7 @@ $.widget( "heurist.search_faceted", {
                 //this is query to calculate counts for facet values
                 // it is combination of a) currect first query plus ids of result OR first query plus supplementary filters
                 // b) facets[i].query  with replacement of $Xn to value
-                count_query = window.hWin.HEURIST4.util.mergeHeuristQuery(subs_value, count_query)
+                count_query = window.hWin.HEURIST4.query.mergeHeuristQuery(subs_value, count_query)
 
                 
                 //var count_query = window.hWin.HEURIST4.util.cloneJSON( this.options.params.q );

@@ -1132,7 +1132,7 @@ console.log('>sctop '+ele.scrollTop());
                     var query = [{ids:storyIDs}];
 
                     if( !window.hWin.HEURIST4.util.isempty(that.options.reportOverviewMapFilter)){
-                        query = window.hWin.HEURIST4.util.mergeTwoHeuristQueries( query, that.options.reportOverviewMapFilter );    
+                        query = window.hWin.HEURIST4.query.mergeTwoHeuristQueries( query, that.options.reportOverviewMapFilter );    
                     }
                     
         
@@ -1227,7 +1227,7 @@ console.log('>sctop '+ele.scrollTop());
         
 
         if( !window.hWin.HEURIST4.util.isempty(that.options.reportOverviewMapFilter)){
-            query = window.hWin.HEURIST4.util.mergeTwoHeuristQueries( query, that.options.reportOverviewMapFilter );    
+            query = window.hWin.HEURIST4.query.mergeTwoHeuristQueries( query, that.options.reportOverviewMapFilter );    
         }
 
 //console.log(query);
@@ -1572,7 +1572,7 @@ console.log('>sctop '+ele.scrollTop());
                         var qq = {ids:that._cache_story_places[recID]['places']};
                         
                         if(that.options.reportElementMapMode=='filtered'){ //additional filter for places 
-                            qq = window.hWin.HEURIST4.util.mergeTwoHeuristQueries( qq, that.options.reportElementMapFilter );
+                            qq = window.hWin.HEURIST4.query.mergeTwoHeuristQueries( qq, that.options.reportElementMapFilter );
                         }
                         
 

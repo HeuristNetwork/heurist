@@ -1083,7 +1083,7 @@ function hMapDocument( _options )
                 r_style = recset.fld(_record, DT_SYMBOLOGY);
                 
                 
-            r_query = window.hWin.HEURIST4.util.hQueryStringify(r_query);
+            r_query = window.hWin.HEURIST4.query.hQueryStringify(r_query);
             if(window.hWin.HEURIST4.util.isJSON(r_style)) r_style = JSON.stringify(r_style);
             
             if(window.hWin.HEURIST4.util.isempty( r_query )) return;
