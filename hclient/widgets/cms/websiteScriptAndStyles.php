@@ -906,7 +906,7 @@ function initLinksAndImages($container, search_data){
 
         var src = $(ele).attr('src');
         var file_id = $(ele).attr('data-id');
-        var db = window.hWin.hAPI4.database;
+        var db = window.hWin.HAPI4.database;
         var extra_params = '';
 
         if(!window.hWin.HEURIST4.util.isempty(src)){

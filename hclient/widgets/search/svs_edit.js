@@ -124,8 +124,7 @@ function hSvsEdit(args) {
                 var is_rules_only = (request.rulesonly>0 || request.rulesonly==true);
                 svs_rules_only.prop('checked', is_rules_only);
                 
-                $dlg.find('#svs_RulesOnly1').prop('checked', (request.rulesonly!=2));
-                $dlg.find('#svs_RulesOnly2').prop('checked', (request.rulesonly==2));
+                $dlg.find('#svs_RulesOnly'+request.rulesonly).prop('checked', true);
                 
                 svs_notes.val( request.notes );
                 svs_viewmode.val( request.viewmode );
@@ -565,7 +564,7 @@ function hSvsEdit(args) {
                         
                         var rules_only = 0;
                         if(svs_rules_only.is(':checked')){
-                            rules_only = $dlg.find('#svs_RulesOnly1').is(':checked')?1:2;
+                            rules_only = $dlg.find('input[name="svs_RulesOnly"]:checked').val();
                         }
 
                         var params = {};

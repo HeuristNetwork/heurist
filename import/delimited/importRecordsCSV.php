@@ -566,12 +566,15 @@ if(!$format) $format='csv';
                 <span class="ui-icon ui-icon-triangle-1-e" id="divImport3_marker"></span>&nbsp;&nbsp;Other options
             </a>           
             
-            <div style="padding-left: 60px; vertical-align: top; display: none;" id="divImport3">
+            <div style="padding-left: 20px; vertical-align: top; display: none;" id="divImport3">
+
+                <input type="radio" name="sa_upd" id="sa_upd22" value="22" class="text">&nbsp;
+                <label for="sa_upd22">Add new values without deletion of existing values (retaining duplicates)</label><br>
 
                 <input type="radio" name="sa_upd" id="sa_upd1" value="1" class="text">&nbsp;
-                <label for="sa_upd1">Add new values only if field is empty (new values ignored for non-empty fields)</label><!--<br>-->
+                <label for="sa_upd1">Add new values only if field is empty (new values ignored for non-empty fields)</label><br>
 
-                <input type="radio" name="sa_upd" id="sa_upd20" value="20" class="text" style="margin-left: 50px;">&nbsp;
+                <input type="radio" name="sa_upd" id="sa_upd20" value="20" class="text">&nbsp;
                 <label for="sa_upd20"> Replace existing values with new values, retain existing value if no new value supplied</label>
 
             </div>

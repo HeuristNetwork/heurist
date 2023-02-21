@@ -901,7 +901,7 @@ function recordSave($system, $record, $use_transaction=true, $suppress_parent_ch
         }
 
         $res = sendPHPMailer('info@HeuristNetwork.org', 'Heurist DB '.HEURIST_DBNAME.'. ID: '.$recID, //'Workflow stage update notification', 
-                    $swf_emails, $title, $msg, null);
+                    $swf_emails, $title, $msg, null, true);
 
         if($total_record_count > 1 && $res){ // block further emails for imports, only if the email was sent
             $block_swf_email = true;

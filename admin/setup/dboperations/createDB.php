@@ -213,6 +213,80 @@ if( isset($passwordForDatabaseCreation) && $passwordForDatabaseCreation!='' &&
                     array_push($warnings, 'Error importing sample data from '.$dataInsertionSQLFile);                
                 }
             }
+
+            //ADD DEFAULT LOOKUPS
+            $def_lookups = array();
+
+            $to_replace = array('DB_ID', 'DTY_ID', 'RTY_ID');
+            $dty_CCode = 'SELECT dty_ID FROM defDetailTypes INNER JOIN defRecStructure ON rst_DetailTypeID = dty_ID WHERE dty_OriginatingDBID = DB_ID AND dty_IDInOriginatingDB = DTY_ID AND rst_RecTypeID = RTY_ID';
+
+            // GeoNames
+            $rty_query = 'SELECT rty_ID FROM '. $database_name_full .'.defRecTypes WHERE rty_OriginatingDBID = 3 AND rty_IDInOriginatingDB = 1009';
+            $rty_id = mysql__select_value($mysqli, $rty_query);
+            if(!empty($rty_id)){
+
+                $fld_name = mysql__select_value($mysqli, str_replace($to_replace, array('2', '1', $rty_id), $dty_CCode));
+                $fld_name = (empty($fld_name)) ? '' : $fld_name;
+
+                $fld_geo = mysql__select_value($mysqli, str_replace($to_replace, array('2', '28', $rty_id), $dty_CCode));
+                $fld_geo = (empty($fld_geo)) ? '' : $fld_geo;
+
+                $fld_cc = mysql__select_value($mysqli, str_replace($to_replace, array('2', '26', $rty_id), $dty_CCode));
+                $fld_cc = (empty($fld_cc)) ? '' : $fld_cc;
+
+                $fld_fname = mysql__select_value($mysqli, str_replace($to_replace, array('3', '1068', $rty_id), $dty_CCode));
+                $fld_fname = (empty($fld_fname)) ? '' : $fld_fname;
+
+                $fld_id = mysql__select_value($mysqli, str_replace($to_replace, array('2', '581', $rty_id), $dty_CCode));
+                $fld_id = (empty($fld_id)) ? '' : $fld_id;
+
+                $key = 'geoName_' . $rty_id;
+                $def_lookups[$key] = array('service' => 'geoName', 'rty_ID' => $rty_id, 'label' => 'GeoName', 'dialog' => 'lookupGN', 'fields' => null);
+                $def_lookups[$key]['fields'] = array('name' => $fld_name, 'lng' => $fld_geo, 'lat' => $fld_geo, 'countryCode' => $fld_cc, 'adminCode1' => "", 'fclName' => $fld_fname, 'fcodeName' => "", 'geonameId' => $fld_id, 'population' => "");
+            }
+
+            // Nakala
+            $rty_query = 'SELECT rty_ID FROM '. $database_name_full .'.defRecTypes WHERE rty_OriginatingDBID = 2 AND rty_IDInOriginatingDB = 5';
+            $rty_id = mysql__select_value($mysqli, $rty_query);
+            if(!empty($rty_id)){
+
+                $fld_url = mysql__select_value($mysqli, str_replace($to_replace, array('2', '38', $rty_id), $dty_CCode));
+                $fld_url = (empty($fld_url)) ? '' : $fld_url;
+
+                $fld_title = mysql__select_value($mysqli, str_replace($to_replace, array('2', '1', $rty_id), $dty_CCode));
+                $fld_title = (empty($fld_title)) ? '' : $fld_title;
+
+                $fld_aut = mysql__select_value($mysqli, str_replace($to_replace, array('2', '15', $rty_id), $dty_CCode));
+                $fld_aut = (empty($fld_aut)) ? '' : $fld_aut;
+
+                $fld_date = mysql__select_value($mysqli, str_replace($to_replace, array('2', '10', $rty_id), $dty_CCode));
+                $fld_date = (empty($fld_date)) ? '' : $fld_date;
+
+                $fld_lic = mysql__select_value($mysqli, str_replace($to_replace, array('1144', '318', $rty_id), $dty_CCode));
+                $fld_lic = (empty($fld_lic)) ? '' : $fld_lic;
+
+                $fld_type = mysql__select_value($mysqli, str_replace($to_replace, array('2', '41', $rty_id), $dty_CCode));
+                $fld_type = (empty($fld_type)) ? '' : $fld_type;
+
+                $fld_desc = mysql__select_value($mysqli, str_replace($to_replace, array('2', '3', $rty_id), $dty_CCode));
+                $fld_desc = (empty($fld_desc)) ? '' : $fld_desc;
+
+                $fld_name = mysql__select_value($mysqli, str_replace($to_replace, array('2', '62', $rty_id), $dty_CCode));
+                $fld_name = (empty($fld_name)) ? '' : $fld_name;
+
+                $key = 'nakala_' . $rty_id;
+                $def_lookups[$key] = array('service' => 'nakala', 'rty_ID' => $rty_id, 'label' => 'Nakala Lookup', 'dialog' => 'lookupNakala', 'fields' => null);
+                $def_lookups[$key]['fields'] = array('url' => $fld_url, 'title' => $fld_title, 'author' => $fld_aut, 'date' => $fld_date, 'license' => $fld_lic, 'mime_type' => $fld_type, 'abstract' => $fld_desc, 'rec_url' => '', 'filename' => $fld_name);
+            }
+
+            if(!empty($def_lookups)){
+
+                $lookup_str = json_encode($def_lookups);
+                $upd_query = "UPDATE ". $database_name_full .".sysIdentification SET sys_ExternalReferenceLookups = '" . $lookup_str . "' WHERE sys_ID = 1";
+                $mysqli->query($upd_query);
+            }else{
+                //$warnings.push('Unable to setup default lookup services.');
+            }
         }
 
         

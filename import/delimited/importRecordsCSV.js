@@ -1895,7 +1895,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
         }else if(currentStep==4 || (currentStep==5 && !$('#sa_update').prop('checked')) ){ //+28
             h = 340 //328
         }else if(currentStep==5){ //+100
-            h = 400
+            h = 430
         }
 
         $('#divStep3 > .ent_header').height(h);
@@ -3593,8 +3593,8 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
         var update_mode = $("input[name='sa_upd']:checked"). val();
         var retain_existing = 0
         if(update_mode>=20){
-            retain_existing = update_mode==20?0:1;
-            update_mode = 2;
+            retain_existing = update_mode==21?1:0;
+            update_mode = update_mode==22?3:2;
         }else{
             //pre 2020-06-08
             retain_existing = $("input[name='sa_upd2']:checked"). val();

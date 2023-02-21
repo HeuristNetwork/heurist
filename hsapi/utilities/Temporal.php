@@ -253,6 +253,10 @@ function removeLeadingYearZeroes($value, $is_greg_or_julian=true, $is_strict_iso
                     $res = str_pad($res,6,'0',STR_PAD_LEFT);
                 }else if(abs($date['year'])<10000){
                     $res = str_pad($res,4,'0',STR_PAD_LEFT);
+
+                    if($need_day && count($date) == 1){ // only year, add -01-01 for ISO format
+                        $res = $res . '-01-01';
+                    }
                 }
             }
 		}else if($is_strict_iso){

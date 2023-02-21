@@ -1921,7 +1921,7 @@ function recordSearch($system, $params)
         $resSearch = recordSearch($system, $params); //search for main set
 
         $keepMainSet = (@$params['rulesonly']!=1 && @$params['rulesonly']!=2);
-        $keepLastSetOnly = (@$params['rulesonly']==2);
+        $keepLastSetOnly = (@$params['rulesonly']==2 || @$params['rulesonly']==3);
 
         if(is_array($resSearch) && $resSearch['status']!=HEURIST_OK){  //error
             return $resSearch;

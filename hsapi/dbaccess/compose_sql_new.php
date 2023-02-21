@@ -1542,8 +1542,10 @@ class HPredicate {
         }else{
             
             if($this->field_type == 'date' && trim($this->value)!='') { //false && $this->isDateTime()){
-                $field_name = 'getTemporalDateString('.$p.'dtl_Value) ';
-                //$field_name = 'str_to_date(getTemporalDateString('.$p.'dtl_Value), "%Y-%m-%d %H:%i:%s") ';
+                $field_name = 'CAST( IF( CAST( CONCAT("00",getTemporalDateString( '.$p.'dtl_Value )) as DATETIME) is null, '
+                    . 'CONCAT("00",CAST(getTemporalDateString( '.$p.'dtl_Value ) as SIGNED),"-1-1"), '
+                    . 'CONCAT("00",getTemporalDateString( '.$p.'dtl_Value ))) as DATETIME) ';
+                //'getTemporalDateString('.$p.'dtl_Value) ';
             }else if($this->field_type == 'file'){
                 $field_name = $p."dtl_UploadedFileID ";  //only for search non empty values
             }else{
