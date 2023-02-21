@@ -177,15 +177,17 @@ require_once(dirname(__FILE__)."/../initPage.php");
 
             function testThematicMaps(){
                  window.hWin.HEURIST4.ui.showRecordActionDialog('thematicMapping', {
-                        maplayer_query: 't:4',
-                        thematic_mapping: {"title":"Persons thematic map",
+                        maplayer_query: 't:10',
+                        thematic_mapping: [{"iconType":"circle","iconSize":"7","stroke":"1","color":"#ff0000","weight":"2","opacity":"100","fill":"1","fillColor":"#000000","radius":"7"},{"title":"HEIGHT","active":false,"fields":[{"code":"10:10","title":"Birth date","ranges":[{"value":"111","symbol":""}]},{"code":"10:20","title":"Gender","ranges":[{"value":"1","symbol":""},{"value":"2","symbol":""}]},{"code":"10:1014","title":"height (cm)","ranges":[{"value":"100<>160","symbol":{"iconSize":"8","fill":"1","fillColor":"#ff0000"}},{"value":"160<>180","symbol":{"iconSize":"12","fill":"1","fillColor":"#00b050"}},{"value":"180<>250","symbol":{"iconSize":"18"}}]}],"symbol":""}],
+/*                        
+                        {"title":"Persons thematic map",
                             "symbol":{color:'red'}, 
                             "fields":[{"code":"10:1014",
                                        "title":"Person height","type":"integer", 
     "ranges":[  //sample of exact ranges
        {"value":"40", "title":"","symbol":{color:"green"} },
        {"value":"40<>50", "symbol":{color:"blue"} },
-       {"value":"69,71,75", "symbol":{color:"black"} }] }]},
+       {"value":"69,71,75", "symbol":{color:"black"} }] }]},*/
                         onClose: function(context){
                             if(context){
                                console.log(context);

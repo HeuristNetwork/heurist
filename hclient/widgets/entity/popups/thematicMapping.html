@@ -76,3 +76,74 @@
             <div class="progress_stop" style="text-align:center;margin-top:4px">Abort</div>
         </div>
 </div>
+
+<div id="divAutoRanges" style="display: none; background:white">
+        <!-- for numeric and dates -->
+        <fieldset style="display:inline-block" class="numeric date">
+            <div style="padding: 0.2em; width: 100%; line-height:2" class="input">
+                <div class="header">
+                    <label for="int_count">Intervals count:</label>
+                </div>
+                <div style="line-height:1em">
+                    <input id="int_count" class="text ui-widget-content ui-corner-all" type="number" min="1" max="50" style="width:80px;"/>
+                </div>
+            </div>
+            <div style="padding: 0.2em; width: 100%; line-height:2" class="input">                   
+                <div class="header">
+                    <label for="int_min">Min / Range from:</label>
+                </div>
+                <div style="line-height:1em">
+                    <input id="int_min" class="text ui-widget-content ui-corner-all" style="width:150px;"/>
+                </div>
+            </div>
+            <div style="padding: 0.2em; width: 100%; line-height:2" class="input">                   
+                <div class="header">
+                    <label for="int_max">Max / Range to:</label>
+                </div>
+                <div style="line-height:1em">
+                    <input id="int_max" class="text ui-widget-content ui-corner-all" style="width:150px;"/>
+                </div>
+            </div>
+            <div style="padding: 0.2em; width: 100%; line-height:2" class="input numeric">                   
+                <div class="header">
+                    <label for="int_round">Rounding:</label>
+                </div>
+                <div style="line-height:1em">
+                    <select id="int_round" class="text ui-widget-content ui-corner-all" style="width:100px;">
+                        <option value="100000">100000</option>
+                        <option value="10000">10000</option>
+                        <option value="1000">1000</option>
+                        <option value="100">100</option>
+                        <option value="10">10</option>
+                        <option value="0" selected>0</option>
+                        <option value="1">1</option>
+                        <option value="2">2</option>
+                        <option value="3">3</option>
+                    </select>
+                </div>
+            </div>
+            <div style="padding: 0.2em; width: 100%; line-height:2; display:none" class="input date">                   
+                <div class="header">
+                    <label for="int_round_date">Rounding:</label>
+                </div>
+                <div style="line-height:1em">
+                    <select id="int_round_date" class="text ui-widget-content ui-corner-all" style="width:150px;">
+                        <option value="none" selected></option>
+                        <option value="day">days</option>
+                        <option value="month">months</option>
+                        <option value="year">years</option>
+                        <option value="decade">decades</option>
+                        <option value="century">centuries</option>
+                    </select>
+                </div>
+            </div>
+        </fieldset>
+        <!-- for enums -->
+        <fieldset style="display:none" class="enum">
+            <div style="padding: 0.2em; width: 100%; line-height:2" class="input">                   
+                <label><input type="radio" checked id="enum_db" name="enum_mode"/>Use actual values from database</label>
+                <label><input type="radio" id="enum_all" name="enum_mode"/>Use all terms</label>
+            </div>
+        </fieldset>
+        <div id="ranges_preview"/>
+</div>

@@ -443,7 +443,7 @@ function recordSearchFacets($system, $params){
 
                 if((($dt_type=="integer" || $dt_type=="float") && $facet_type==_FT_SELECT)  || 
                 (($dt_type=="year" || $dt_type=="date") && $facet_groupby==null)  ){
-                    $third_element = $row[2];          // slider - third parameter is MAX for range
+                    $third_element = $row[2];          // slider - third parameter is COUNT for range
 					
                     if(!$missingIds && 
                         (is_Array($params['q']) && !array_key_exists('ids', $params['q'])) && 

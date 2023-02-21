@@ -81,6 +81,9 @@ $.widget( "heurist.thematicMapping", $.heurist.recordAction, {
     baseLayerSymbol: null,
     currentField: 0,
     selectedFields:{},
+    enumValues: null, 
+    currentType: null,
+    popele: null,
     
     _destroy: function() {
         this._super(); 
@@ -178,6 +181,9 @@ $.widget( "heurist.thematicMapping", $.heurist.recordAction, {
 
         this._on(this.element.find('#btn_tm_add'),
                                     {click:this._addThematicMap});
+                        
+        this.popele = this.element.find('#divAutoRanges');
+        this._on(this.popele.find('input,select'),{change:this._defineAutoRanges2});
         
     },
             
@@ -569,7 +575,7 @@ $.widget( "heurist.thematicMapping", $.heurist.recordAction, {
                 for(var i=0; i<flds.length; i++){
                     var fld = flds[i];
                     var key = fld.code.split(':');
-                    key = key[key.length-1];
+                    key = key[key.length-1];//dty_ID
                     
                     this.selectedFields[key] = fld;
                     
@@ -740,50 +746,56 @@ $.widget( "heurist.thematicMapping", $.heurist.recordAction, {
     //
     // inits and returns range element
     //
-    _defThemeFieldRange: function(idx, range){                                                           
-        
-       var ele = $('<div style="padding:5px" class="field-range">'
-       +'<span class="ui-icon ui-icon-circle-b-close" style="margin:2px 0 0 12px;cursor:pointer"/>'
-       +'<input class="val1 text ui-widget-content ui-corner-all" style="width:100px;margin-left:5px"/>'
-       +'<span>&nbsp;&lt;&gt;&nbsp;</span><input class="val2 text ui-widget-content ui-corner-all" style="width:100px"/>'
-       +'<span style="display:inline-block;width:50px"/>'
-       +'<input class="field-symbol text ui-widget-content ui-corner-all" style="width:250px"/>'
-       +'</div>').appendTo(this.element.find('#f_ranges'));
-       
-       ele.uniqueId();
-       var uid = ele.attr('id');
-       range.uid = uid;
-       
-       var val1 = range.value, val2 = '';
-       if(val1 && val1.indexOf('<>')>0){
-           var vals = val1.split('<>');
-           val2 = (vals && vals.length==2)?vals[1]:'';
-           val1 = (vals && vals.length==2)?vals[0]:'';
-       }
-       
-       ele.find('input.val1').val(val1)
-       ele.find('input.val2').val(val2);
-       if(range.symbol){
+    _defThemeFieldRange: function(idx, range){   
+
+        var selfield = this.selectedFields[this.currentField];
+        var key = selfield.code.split(':');
+        key = key[key.length-1];//dty_ID
+        var dty_Type = $Db.dty(key, 'dty_Type');
+
+        var ele = $('<div style="padding:5px" class="field-range">'
+            +'<span class="ui-icon ui-icon-circle-b-close" style="margin:2px 0 0 12px;cursor:pointer"/>'
+            +'<input class="val1 text ui-widget-content ui-corner-all" style="width:100px;margin-left:5px"/>'
+            +((dty_Type=='enum')?''
+            :'<span>&nbsp;&lt;&gt;&nbsp;</span><input class="val2 text ui-widget-content ui-corner-all" style="width:100px"/>')
+            +'<span style="display:inline-block;width:50px"/>'
+            +'<input class="field-symbol text ui-widget-content ui-corner-all" style="width:250px"/>'
+            +'</div>').appendTo(this.element.find('#f_ranges'));
+
+        ele.uniqueId();
+        var uid = ele.attr('id');
+        range.uid = uid;
+
+        var val1 = range.value, val2 = '';
+        if(val1 && val1.indexOf('<>')>0){
+            var vals = val1.split('<>');
+            val2 = (vals && vals.length==2)?vals[1]:'';
+            val1 = (vals && vals.length==2)?vals[0]:'';
+        }
+
+        ele.find('input.val1').val(val1)
+        ele.find('input.val2').val(val2);
+        if(range.symbol){
             ele.find('.field-symbol').val($.isPlainObject(range.symbol)?JSON.stringify(range.symbol):range.symbol);    
-       }
-       
-       this._initSymbolEditor( ele.find('.field-symbol') ); 
-       
-       this._on(ele.find('.ui-icon-circle-b-close'),{click:function(event){
-           var ele = $(event.target).parents('.field-range');
-           var range_uid = ele.attr('id');
-           ele.remove();
-           
-           var selfield = this.selectedFields[this.currentField];
-           
-           $.each(selfield.ranges,function(i,item){
-              if(item.uid  == range_uid){
+        }
+
+        this._initSymbolEditor( ele.find('.field-symbol') ); 
+
+        this._on(ele.find('.ui-icon-circle-b-close'),{click:function(event){
+            var ele = $(event.target).parents('.field-range');
+            var range_uid = ele.attr('id');
+            ele.remove();
+
+            var selfield = this.selectedFields[this.currentField];
+
+            $.each(selfield.ranges,function(i,item){
+                if(item.uid  == range_uid){
                     selfield.ranges.splice(i,1);     
                     return false;
-              }
-           });
-       }});
-                        
+                }
+            });
+        }});
+
     },
     
     //
@@ -856,7 +868,7 @@ $.widget( "heurist.thematicMapping", $.heurist.recordAction, {
                 
                 //find min/max and unique values show ranges dialog
                 var selfield = this.selectedFields[this.currentField];
-                this._findFieldValues(selfield.code);
+                this._defineAutoRanges(selfield.code);
             
             }else if(key=='btn_f_range_reset'){
                 
@@ -875,75 +887,209 @@ $.widget( "heurist.thematicMapping", $.heurist.recordAction, {
     //
     // Searches for min/max and unique values for given field
     //
-    _findFieldValues: function(code){
+    _defineAutoRanges: function(code){
         
-console.log(this.options.maplayer_query)        
-        if(!this.options.maplayer_query) return;
+        var $dlg;
         
         var field = window.hWin.HEURIST4.query.createFacetQuery(code, true);
+        field['type'] = $Db.dty(field['id'], 'dty_Type');
+         
+        this.popele.find('.numeric').hide();
+
+        if (field['type']=='enum'){
+            this.popele.find('.enum').show();
+        }else{ 
+            //'year','date','integer','float','resource'
+            this.popele.find('.enum').hide();
+            if(field['type']=='date'){
+                this.popele.find('.date').show();    
+            }else{
+                this.popele.find('.numeric').show();    
+            }
+        }
+        
+        this.currentType = null;
+        this.enumValues = null;
+        this.popele.find('input').val('');
+        this.popele.find('#int_count').val(10);
         
         //
         // substitute $IDS in facet query with list of ids OR current query(todo)
         // 
-        var that = this;
-        function __fillQuery(q){
-                    $(q).each(function(idx, predicate){
-                        
-                        $.each(predicate, function(key,val)
+        if(this.options.maplayer_query){
+            var that = this;
+            function __fillQuery(q){
+                $(q).each(function(idx, predicate){
+
+                    $.each(predicate, function(key,val)
                         {
-                                if( $.isArray(val) || $.isPlainObject(val) ){
-                                    __fillQuery(val);
-                                 }else if( (typeof val === 'string') && (val == '$IDS') ) {
-                                    //substitute with array of ids
-                                    predicate[key] = that.options.maplayer_query;
-                                 }
-                        });                            
-                    });
-        }        
-        
-        
-        var query, needcount = 2;
-        if( (typeof field['facet'] === 'string') && (field['facet'] == '$IDS') ){ //this is field form target record type
-        
-            //replace with list of ids
-            query = this.options.maplayer_query; //{ids: this._currentRecordset.getMainSet().join(',')};
-        
-            needcount = 1;
-            
-        }else{
-            query = window.hWin.HEURIST4.util.cloneJSON(field['facet']); //clone 
-            
-            //change $IDS for current set of target record type
-            __fillQuery(query);                
+                            if( $.isArray(val) || $.isPlainObject(val) ){
+                                __fillQuery(val);
+                            }else if( (typeof val === 'string') && (val == '$IDS') ) {
+                                //substitute with array of ids
+                                predicate[key] = that.options.maplayer_query;
+                            }
+                    });                            
+                });
+            }        
+
+
+            var query, needcount = 2;
+            if( (typeof field['facet'] === 'string') && (field['facet'] == '$IDS') ){ //this is field form target record type
+                //replace with list of ids
+                query = this.options.maplayer_query; //{ids: this._currentRecordset.getMainSet().join(',')};
+                needcount = 1;
+
+            }else{
+                query = window.hWin.HEURIST4.util.cloneJSON(field['facet']); //clone 
+                //change $IDS for current set of target record type
+                __fillQuery(query);                
+            }
+
+            var request = {q: query, count_query:null, w: 'a', a:'getfacets',
+                facet_index: 0, 
+                field:  field['id'],
+                type:   field['type'],
+                step:   0,
+                facet_type: 1, //0 direct search search, 1 - select/slider, 2 - list inline, 3 - list column
+                facet_groupby: null, //by first char for freetext, by year for dates, by level for enum
+                vocabulary_id: null, //special case for firstlevel group - got it from field definitions
+                needcount: 0,         
+                qname:'',
+                //request_id:this._request_id,
+                source:this.element.attr('id') }; //, facets: facets
+
+            var that = this;
+            window.HAPI4.RecordMgr.get_facets(request, function(response){ 
+
+                if(response.status == window.hWin.ResponseStatus.OK){
+                    console.log(response);
+
+                    //var this.popele = that.element.find('#divAutoRanges');
+                    
+                    that.currentType = field['type'];
+
+                    if(field['type']=='enum'){
+                        that.enumValues = response.data;
+                    }else{
+                        try{
+                            that.popele.find('#int_min').val(response.data[0][0]);
+                            that.popele.find('#int_max').val(response.data[0][1]);
+                        }catch(e){
+                        }
+                    }
+
+                    that._defineAutoRanges2();
+                    
+                }else{
+                    console.log(response.message);
+                }
+            });            
         }
         
-        field['type'] = $Db.dty(field['id'], 'dty_Type');
+            
+        
+        var btns = [
+                    {text:window.hWin.HR('Apply'),
+                        click: function(){
 
-        var request = {q: query, count_query:null, w: 'a', a:'getfacets',
-                         facet_index: 0, 
-                         field:  field['id'],
-                         type:   field['type'],
-                         step:   0,
-                         facet_type: 1, //0 direct search search, 1 - select/slider, 2 - list inline, 3 - list column
-                         facet_groupby: null, //by first char for freetext, by year for dates, by level for enum
-                         vocabulary_id: null, //special case for firstlevel group - got it from field definitions
-                         needcount: 0,         
-                         qname:'',
-                         //request_id:this._request_id,
-                         source:this.element.attr('id') }; //, facets: facets
-        
-        
-                window.HAPI4.RecordMgr.get_facets(request, function(response){ 
-                    
-                        if(response.status == window.hWin.ResponseStatus.OK){
-                            console.log(response);
-                        }else{
-                            console.log('ERROR in get_facets');
-                            console.log(response.message);
+                            //var title = this.popele.find('input[id="bkm_name"]').val();
+                            
+                            $dlg.dialog('close');
                         }
-                });            
+                    },
+                    {text:window.hWin.HR('Close'),
+                        click: function() { $dlg.dialog('close'); }
+                    }
+                ];
+
+                $dlg = window.hWin.HEURIST4.msg.showElementAsDialog({
+                    window:  window.hWin, //opener is top most heurist window
+                    title: window.hWin.HR('Define ranges'),
+                    width: 575,
+                    height: 600,
+                    element:  this.popele[0],
+                    resizable: true,
+                    buttons: btns,
+                    default_palette_class: 'ui-heurist-design'
+                });        
+    },
+    
+    //
+    //
+    //
+    _defineAutoRanges2: function(){
+
+        //var this.popele = this.element.find('#divAutoRanges');
         
+        var div_preview = this.popele.find('#ranges_preview').empty();
         
+        if(this.currentType==null) return;
+        
+        var ranges = [];
+
+        if(this.currentType=='enum'){
+            
+            if(this.popele.find('#enum_db').is(':checked')){
+                //actual db values
+                for (var i=0; i<this.enumValues.length; i++){
+                    ranges.push({min:this.enumValues[i][0]});
+                }
+            }else{
+                //all available enums 
+                
+            }
+            
+        }else{
+
+            var minVal = parseFloat(this.popele.find('#int_min').val());
+            var maxVal = parseFloat(this.popele.find('#int_max').val());
+            var count = parseInt(this.popele.find('#int_count').val());
+            var int_round = parseInt(this.popele.find('#int_round').val());
+            
+            if(isNaN(minVal) || isNaN(maxVal) || isNaN(count) || count<=0 || minVal>maxVal) return;
+            
+            var step = (maxVal-minVal)/count;
+            
+            if(this.currentType=='integer'){
+                step = Math.round(step);
+            }
+            
+            function __rnd(original){
+                if(this.currentType=='float' && int_round<10){
+                    //var multiplier = Math.pow(10, int_round);
+                    //return Math.round(original*multiplier)/multiplier;   
+                    return int_round==0?Math.round(original): (original).toFixed(int_round);
+                }else if(int_round>=10){
+                    return Math.round(original/int_round)*int_round;   
+                }else{
+                    return original;
+                }
+            }
+            
+            
+            var cnt = 0;
+            var val0 = minVal;
+            while (val0<maxVal && cnt<count){
+                
+                var val1 = (val0+step>maxVal)?maxVal:val0+step;
+                if(cnt==count-1 && val1!=maxVal){
+                    val1 = maxVal;
+                }
+                
+                ranges.push({min:__rnd(val0), max:__rnd(val1)});    
+                val0 = val1;
+                cnt++;;
+            }
+        }
+        
+        for (var i=0; i<ranges.length; i++){
+            $('<div style="padding:5px" class="field-range">'
+            +'<span style="display:inline-block;width:100px;">'+ranges[i].min+'</span>'
+            +((this.currentType=='enum')?('<span>'+$Db.trm(ranges[i].min, 'trm_Label')+'</span>')
+            :('<span style="display:inline-block;width:50px;">&nbsp;to&nbsp;&lt;&nbsp;</span><span>'+ranges[i].max+'</span>'))
+            +'</div>').appendTo(div_preview);
+        }
         
     }
     
