@@ -501,11 +501,11 @@ window.hWin.HEURIST4.query = {
     //
     // Converts string 10:123 to heurist query {t:10, f123: }
     //
-    createFacetQuery: function(code, need_query){
+    createFacetQuery: function(code, need_query, respect_relation_direction){
 
         var result = {};
         
-console.log(code);        
+//console.log(code);        
         
         code = code.split(':');
 
@@ -544,9 +544,9 @@ console.log(code);
                     }else if(fld.indexOf('lt')==0){
                         pref = 'linkedfrom';    
                     }else if(fld.indexOf('rf')==0){
-                        pref = that.options.respect_relation_direction?'related_to':'related';    
+                        pref = respect_relation_direction?'related_to':'related';    
                     }else if(fld.indexOf('rt')==0){
-                        pref = that.options.respect_relation_direction?'relatedfrom':'related';
+                        pref = respect_relation_direction?'relatedfrom':'related';
                     }
 
                     qp = {};
@@ -562,7 +562,7 @@ console.log(code);
             res['facet'] = {ids:'$IDS'};
             }else{}*/
             result['facet'] = __crt( code.length-2 );
-console.log(JSON.stringify(result['facet']));
+//console.log(JSON.stringify(result['facet']));
         }
 
         return result;

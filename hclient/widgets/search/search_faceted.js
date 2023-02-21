@@ -564,11 +564,15 @@ $.widget( "heurist.search_faceted", {
             //value is defined - it will be used to create query
             if( !window.hWin.HEURIST4.util.isnull(field['var']) && field['code']){
                 //1. creates query to retrieve facet values
-                let res = window.hWin.HEURIST4.query.createFacetQuery(field['code'], (field['isfacet']!=that._FT_INPUT));
+                let res = window.hWin.HEURIST4.query.createFacetQuery(field['code'], 
+                                                    (field['isfacet']!=that._FT_INPUT),
+                                                    that.options.respect_relation_direction);
                 field['id'] = res['id']; //last id in the code - dty_ID
                 field['rtid'] = res['rtid'];
                 if(res['facet']) field['facet'] = res['facet'];
                 
+                var code = field['code'];
+                code = code.split(':')
                 //
                 // 2. creates main JSON query
                 //
@@ -1745,8 +1749,7 @@ $.widget( "heurist.search_faceted", {
                         return;
                     }
                     that._redrawFacets(response, true) 
-                });            
-                                
+                });                                            
                 break;
             }
 

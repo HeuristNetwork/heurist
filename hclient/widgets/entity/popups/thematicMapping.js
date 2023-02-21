@@ -891,7 +891,7 @@ $.widget( "heurist.thematicMapping", $.heurist.recordAction, {
         
         var $dlg;
         
-        var field = window.hWin.HEURIST4.query.createFacetQuery(code, true);
+        var field = window.hWin.HEURIST4.query.createFacetQuery(code, true, false);
         field['type'] = $Db.dty(field['id'], 'dty_Type');
          
         this.popele.find('.numeric').hide();
