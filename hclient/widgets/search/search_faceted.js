@@ -2237,8 +2237,11 @@ $.widget( "heurist.search_faceted", {
                                 mmax = mmax.replace(' ','T');
                                 mmin = Date.parse(mmin); 
                                 mmax = Date.parse(mmax); 
-                                //mmin = moment(mmin).valueOf();//unix offset  
-                                //mmax = moment(mmax).valueOf();
+
+                                if(field.history.length == 0){ // Account for possible loss of a day
+                                    mmax += 1000 * 60 * 60 * 24;
+                                }
+
                                 //find date interval for proper formating
                                 var delta = mmax-mmin;
                                 var date_format = "dd MMM yyyy HH:mm"; //"YYYY-MM-DD hh:mm:ss";
