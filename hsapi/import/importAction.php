@@ -2992,8 +2992,10 @@ public static function performImport($params, $mode_output){
                             }
            
 //sa_upd
-//0 - Retain existing values and append distinct new data as repeat values(existing values are not duplicated)                  //1 - Add new data only if field is empty (new data ignored for non-empty fields)
+//0 - Retain existing values and append distinct new data as repeat values(existing values are not duplicated)
+//1 - Add new data only if field is empty (new data ignored for non-empty fields)
 //2 - Replace all existing value(s) for the fields specified below
+//3 - Add all values, regardless of duplication
 //    sa_upd2
 //       0   Retain existing if no new data supplied for record
 //       1   Delete existing even if no new data supplied for record   
@@ -3014,7 +3016,7 @@ public static function performImport($params, $mode_output){
                                         unset($details_orig["t:".$field_type]);
                                     }
                                     
-                                }else  if($params['sa_upd']==0){ //add distinct only
+                                }else if($params['sa_upd']==0 || $params['sa_upd']==3){ //add distinct only
                                 
                                     $need_add = true; //retain existing and add new distinct one
                                 }
@@ -3025,7 +3027,7 @@ public static function performImport($params, $mode_output){
                                         if(strlen($value)<200){
                                             $details_lc = array_map('trim_lower_accent', $details["t:".$field_type]);
                                             //duplications not found - can be added
-                                            $need_add = (array_search(trim_lower_accent($value), $details_lc, true)===false);
+                                            $need_add = (array_search(trim_lower_accent($value), $details_lc, true)===false || $params['sa_upd'] == 3);
                                             $cnt = count(@$details["t:".$field_type])+1;
                                         }
                                     }else{
