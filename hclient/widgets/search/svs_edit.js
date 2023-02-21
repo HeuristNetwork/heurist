@@ -279,7 +279,7 @@ function hSvsEdit(args) {
 
     
     function  _hasRules (query){
-        var prms = Hul.parseHeuristQuery(query);
+        var prms = window.hWin.HEURIST4.query.parseHeuristQuery(query);
         if(Hul.isempty(prms.q)){
             return Hul.isempty(prms.rules) ?-1:2;
         }else {

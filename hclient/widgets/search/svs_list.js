@@ -1034,7 +1034,7 @@ console.log('refresh '+(window.hWin.HAPI4.currentUser.usr_SavedSearch==null));
             {
                 var svsID = svsIDs[i];
                 
-                var params = Hul.parseHeuristQuery(this.loaded_saved_searches[svsID][_QUERY]);
+                var params = window.hWin.HEURIST4.query.parseHeuristQuery(this.loaded_saved_searches[svsID][_QUERY]);
 
                 var iconBtn = 'ui-icon-search';
                 if(params.type==3){
@@ -1368,13 +1368,13 @@ console.log('refresh '+(window.hWin.HAPI4.currentUser.usr_SavedSearch==null));
                                 squery = svs[_QUERY];
                                 /*if(!node.data.isfaceted){
                                     var qsearch = svs[_QUERY];
-                                    prms = Hul.parseHeuristQuery(qsearch);
+                                    prms = window.hWin.HEURIST4.query.parseHeuristQuery(qsearch);
                                 }*/
                             }
                             s_hint2 = node.key+':'+node.title;
                         }
 
-                        var prms = Hul.parseHeuristQuery(squery);
+                        var prms = window.hWin.HEURIST4.query.parseHeuristQuery(squery);
                         
                         var s = window.hWin.HRJ('ui_name', prms, that.options.language);
                         
@@ -2173,7 +2173,7 @@ console.log('refresh '+(window.hWin.HAPI4.currentUser.usr_SavedSearch==null));
 
         if ( qsearch ) {
 
-            var params = Hul.parseHeuristQuery( qsearch );
+            var params = window.hWin.HEURIST4.query.parseHeuristQuery( qsearch );
             
             var context_on_exit = null;
             
@@ -2602,9 +2602,9 @@ console.log(node);
         var svs = window.hWin.HAPI4.currentUser.usr_SavedSearch[svs_ID];
         if(svs ){
             var qsearch = svs[_QUERY];
-            var prms = Hul.parseHeuristQuery(qsearch); //url to json
+            var prms = window.hWin.HEURIST4.query.parseHeuristQuery(qsearch); //url to json
             if(prms.type!=3){
-                var res = Hul.hQueryStringify(prms); //json to string
+                var res = window.hWin.HEURIST4.query.hQueryStringify(prms); //json to string
 
                 if(!Hul.isempty(res)){
                             var dummy = document.createElement("input");
@@ -2638,7 +2638,7 @@ console.log(node);
         if(!svs) return;
         
         var qsearch = svs[_QUERY];
-        var prms = Hul.parseHeuristQuery(qsearch); //url to json
+        var prms = window.hWin.HEURIST4.query.parseHeuristQuery(qsearch); //url to json
         if(prms.type!=3){
             
             

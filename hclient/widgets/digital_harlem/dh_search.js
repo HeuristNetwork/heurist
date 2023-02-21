@@ -570,7 +570,7 @@ $.widget( "heurist.dh_search", {
             this._currenttype = facet_params.rectypes[0];
 
         } else {
-            var request = Hul.parseHeuristQuery(qsearch);
+            var request = window.hWin.HEURIST4.query.parseHeuristQuery(qsearch);
 
 
             request.detail = 'detail';
