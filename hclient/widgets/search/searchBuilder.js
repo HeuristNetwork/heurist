@@ -1079,7 +1079,7 @@ $.widget( "heurist.searchBuilder", {
                     request.rules = ruleset;
                 }
                 if(ruleset_only.is(':checked')){
-                    request.rulesonly = this.rulesetSection.find('#svs_RulesOnly1').is(':checked')?1:2;
+                    request.rulesonly = this.rulesetSection.find('input[name="svs_RulesOnly"]:checked').val();
                 }
 
                 window.hWin.HAPI4.RecordSearch.doSearch( this, request );

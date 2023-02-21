@@ -886,8 +886,8 @@ $.widget( "heurist.search_faceted_wiz", {
 
                 var is_rules_only = (this.options.params.rulesonly>0 || this.options.params.rulesonly==true);
                 svs_rules_only.prop('checked', is_rules_only);
-                $dlg.find('#svs_RulesOnly1').prop('checked', (this.options.params.rulesonly!=2));
-                $dlg.find('#svs_RulesOnly2').prop('checked', (this.options.params.rulesonly==2));
+                
+                $dlg.find('#svs_RulesOnly'+this.options.params.rulesonly).prop('checked', true);
 
 
                 this.options.domain = this.options.params.domain;
@@ -2147,7 +2147,7 @@ $.widget( "heurist.search_faceted_wiz", {
             
             var rules_only = 0;
             if(svs_rules_only.is(':checked')){
-                rules_only = $dlg.find('#svs_RulesOnly1').is(':checked')?1:2;
+                rules_only = $dlg.find('input[name="svs_RulesOnly"]:checked').val();
             }
             this.options.params.rulesonly = rules_only;
             
