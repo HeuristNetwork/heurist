@@ -82,7 +82,7 @@ $.widget( "heurist.thematicMapping", $.heurist.recordAction, {
     currentField: 0,
     selectedFields:{},
     enumValues: null, 
-    currentType: null,
+    fieldSelected: null,
     popele: null,
     
     _destroy: function() {
@@ -183,7 +183,7 @@ $.widget( "heurist.thematicMapping", $.heurist.recordAction, {
                                     {click:this._addThematicMap});
                         
         this.popele = this.element.find('#divAutoRanges');
-        this._on(this.popele.find('input,select'),{change:this._defineAutoRanges2});
+        this._on(this.popele.find('input,select'),{change:this._definePreviewRanges});
         
     },
             
@@ -780,7 +780,7 @@ $.widget( "heurist.thematicMapping", $.heurist.recordAction, {
         }
 
         this._initSymbolEditor( ele.find('.field-symbol') ); 
-
+        
         this._on(ele.find('.ui-icon-circle-b-close'),{click:function(event){
             var ele = $(event.target).parents('.field-range');
             var range_uid = ele.attr('id');
@@ -878,6 +878,78 @@ $.widget( "heurist.thematicMapping", $.heurist.recordAction, {
                     that.element.find('#f_ranges').empty();
                 });
                 
+            }else if(key=='btn_f_range_symb'){
+
+                var selfield = this.selectedFields[this.currentField];
+                var cnt = selfield.ranges.length;
+                
+                window.hWin.HEURIST4.ui.showEditSymbologyDialog({}, 5, function(new_value){
+                    var fillGradient = [], colorGradient = [], strokeOpacity = [], fillOpacity = [];
+                    if(new_value.fillColor1 && new_value.fillColor2){
+                        fillGradient = window.hWin.HEURIST4.ui.getColourGradient(new_value.fillColor1, new_value.fillColor2, cnt);
+                    }
+                    if(new_value.strokeColor1 && new_value.strokeColor2){
+                        colorGradient = window.hWin.HEURIST4.ui.getColourGradient(new_value.strokeColor1, new_value.strokeColor2, cnt);
+                    }
+                    
+                    function __prepareInt(val){
+                        if(!window.hWin.HEURIST4.util.isNumber(val)){
+                            val = 0
+                        }else{
+                            val = parseInt(val);
+                        }
+                        return val;
+                    }
+
+                    new_value.fillOpacity1 = __prepareInt(new_value.fillOpacity1);
+                    new_value.fillOpacity2 = __prepareInt(new_value.fillOpacity2);
+
+                    if(new_value.fillOpacity1>0 || new_value.fillOpacity2>0){
+                        var step = (new_value.fillOpacity2 - new_value.fillOpacity1)/cnt;
+                        var val = new_value.fillOpacity1;
+                        for(var i=0; i<cnt; i++){
+                            fillOpacity.push((i==cnt-1)?new_value.fillOpacity2:val);
+                            val = val + step;
+                        }
+                    }
+
+                    new_value.strokeOpacity1 = __prepareInt(new_value.strokeOpacity1);
+                    new_value.strokeOpacity2 = __prepareInt(new_value.strokeOpacity2);
+
+                    if(new_value.strokeOpacity1>0 || new_value.strokeOpacity2>0){
+                        var step = (new_value.strokeOpacity2 - new_value.strokeOpacity1)/cnt;
+                        var val = new_value.strokeOpacity1;
+                        for(var i=0; i<cnt; i++){
+                            strokeOpacity.push((i==cnt-1)?new_value.strokeOpacity2:val);
+                            val = val + step;
+                        }
+                    }
+                    
+                    var f_ranges = that.element.find('#f_ranges');
+                    
+                    for(var i=0; i<cnt; i++){
+                        
+                        var symbol = window.hWin.HEURIST4.util.isJSON(selfield.ranges[i].symbol);
+                        if(!symbol) symbol = {};
+                        if(fillGradient.length>0){
+                            symbol.fillColor = fillGradient[i];
+                        }
+                        if(colorGradient.length>0){
+                            symbol.color = colorGradient[i];
+                        }
+                        if(fillOpacity.length>0){
+                            symbol.fillOpacity = fillOpacity[i];
+                        }
+                        if(strokeOpacity.length>0){
+                            symbol.opacity = strokeOpacity[i];
+                        }
+                        
+                        selfield.ranges[i].symbol = symbol;
+                        //assign to UI
+                        f_ranges.find('.field-range[id='+selfield.ranges[i].uid+'] > .field-symbol').val(JSON.stringify(symbol));
+                    }
+                });
+                
                 
             }
             
@@ -908,7 +980,7 @@ $.widget( "heurist.thematicMapping", $.heurist.recordAction, {
             }
         }
         
-        this.currentType = null;
+        this.fieldSelected = null;
         this.enumValues = null;
         this.popele.find('input').val('');
         this.popele.find('#int_count').val(10);
@@ -967,7 +1039,7 @@ $.widget( "heurist.thematicMapping", $.heurist.recordAction, {
 
                     //var this.popele = that.element.find('#divAutoRanges');
                     
-                    that.currentType = field['type'];
+                    that.fieldSelected = field;
 
                     if(field['type']=='enum'){
                         that.enumValues = response.data;
@@ -979,7 +1051,7 @@ $.widget( "heurist.thematicMapping", $.heurist.recordAction, {
                         }
                     }
 
-                    that._defineAutoRanges2();
+                    that._definePreviewRanges();
                     
                 }else{
                     console.log(response.message);
@@ -993,9 +1065,25 @@ $.widget( "heurist.thematicMapping", $.heurist.recordAction, {
                     {text:window.hWin.HR('Apply'),
                         click: function(){
 
-                            //var title = this.popele.find('input[id="bkm_name"]').val();
-                            
                             $dlg.dialog('close');
+
+                            //create new ranges
+                            if(that.preview_ranges.length>0){
+                                
+                                var selfield = that.selectedFields[that.currentField];
+                                selfield.ranges = [];
+                                
+                                var main_area = that.element.find('#div_work_area');        
+                                main_area.find('#f_ranges').empty();
+                                
+                                //add ranges elements
+                                for (var k=0;k<that.preview_ranges.length;k++){
+                                    var range = that.preview_ranges[k];
+                                    selfield.ranges.push({value:$.isPlainObject(range)?(range.min+'<>'+range.max):range, symbol:''})
+                                    that._defThemeFieldRange(k, selfield.ranges[k]);
+                                }                                
+                                
+                            }
                         }
                     },
                     {text:window.hWin.HR('Close'),
@@ -1016,31 +1104,42 @@ $.widget( "heurist.thematicMapping", $.heurist.recordAction, {
     },
     
     //
+    // Event listener - recalc preview ranges
     //
-    //
-    _defineAutoRanges2: function(){
+    _definePreviewRanges: function(){
 
         //var this.popele = this.element.find('#divAutoRanges');
-        
+        this.preview_ranges = [];
+        var ranges = [];
         var div_preview = this.popele.find('#ranges_preview').empty();
         
-        if(this.currentType==null) return;
+        if(this.fieldSelected==null) return;
         
-        var ranges = [];
+        var dty_Type = this.fieldSelected['type'];
 
-        if(this.currentType=='enum'){
+        if(dty_Type=='enum'){
             
             if(this.popele.find('#enum_db').is(':checked')){
                 //actual db values
                 for (var i=0; i<this.enumValues.length; i++){
-                    ranges.push({min:this.enumValues[i][0]});
+                    ranges.push(this.enumValues[i][0]);
                 }
             }else{
                 //all available enums 
-                
+                var vocab_id = $Db.dty(this.fieldSelected['id'],'dty_JsonTermIDTree');
+                //$Db.rst(this.fieldSelected['rtid'],this.fieldSelected['id'],'rst_FilteredJsonTermIDTree');
+                ranges = $Db.trm_TreeData(vocab_id, 'set');
+            }
+
+            for (var i=0; i<ranges.length; i++){
+                $('<div style="padding:5px" class="field-range">'
+                +'<span style="display:inline-block;width:100px;">'+ranges[i]+'</span>'
+                +'<span>'+$Db.trm(ranges[i], 'trm_Label')+'</span>'  
+                +'</div>').appendTo(div_preview);
             }
             
-        }else{
+        }
+        else{
 
             var minVal = parseFloat(this.popele.find('#int_min').val());
             var maxVal = parseFloat(this.popele.find('#int_max').val());
@@ -1051,12 +1150,12 @@ $.widget( "heurist.thematicMapping", $.heurist.recordAction, {
             
             var step = (maxVal-minVal)/count;
             
-            if(this.currentType=='integer'){
+            if(dty_Type=='integer'){
                 step = Math.round(step);
             }
             
             function __rnd(original){
-                if(this.currentType=='float' && int_round<10){
+                if(dty_Type=='float' && int_round<10){
                     //var multiplier = Math.pow(10, int_round);
                     //return Math.round(original*multiplier)/multiplier;   
                     return int_round==0?Math.round(original): (original).toFixed(int_round);
@@ -1067,30 +1166,40 @@ $.widget( "heurist.thematicMapping", $.heurist.recordAction, {
                 }
             }
             
-            
-            var cnt = 0;
-            var val0 = minVal;
-            while (val0<maxVal && cnt<count){
-                
-                var val1 = (val0+step>maxVal)?maxVal:val0+step;
-                if(cnt==count-1 && val1!=maxVal){
-                    val1 = maxVal;
+            if(int_round>=10 && int_round>=maxVal){
+                ranges.push({min:minVal, max:maxVal});        
+            }else{
+                if(int_round>=10 &&  int_round>step){
+                    step = int_round;
                 }
                 
-                ranges.push({min:__rnd(val0), max:__rnd(val1)});    
-                val0 = val1;
-                cnt++;;
+                var cnt = 0;
+                var val0 = minVal;
+                while (val0<maxVal && cnt<count){
+                    
+                    var val1 = (val0+step>maxVal)?maxVal:val0+step;
+                    if(cnt==count-1 && val1!=maxVal){
+                        val1 = maxVal;
+                    }else{
+                        val1 = __rnd(val1);
+                    }
+                    
+                    ranges.push({min:__rnd(val0), max:val1});    
+                    val0 = val1;
+                    cnt++;;
+                }
             }
+
+            for (var i=0; i<ranges.length; i++){
+                $('<div style="padding:5px" class="field-range">'
+                +'<span style="display:inline-block;width:100px;">'+ranges[i].min+'</span>'
+                +('<span style="display:inline-block;width:50px;">&nbsp;to&nbsp;&lt;&nbsp;</span><span>'+ranges[i].max+'</span>')
+                +'</div>').appendTo(div_preview);
+            }
+        
         }
         
-        for (var i=0; i<ranges.length; i++){
-            $('<div style="padding:5px" class="field-range">'
-            +'<span style="display:inline-block;width:100px;">'+ranges[i].min+'</span>'
-            +((this.currentType=='enum')?('<span>'+$Db.trm(ranges[i].min, 'trm_Label')+'</span>')
-            :('<span style="display:inline-block;width:50px;">&nbsp;to&nbsp;&lt;&nbsp;</span><span>'+ranges[i].max+'</span>'))
-            +'</div>').appendTo(div_preview);
-        }
-        
+        this.preview_ranges = ranges;
     }
     
 

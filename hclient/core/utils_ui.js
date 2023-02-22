@@ -27,7 +27,7 @@ createSelector - create SELECT element (if selObj is null) and fill with given o
 
 
 createVocabularySelect - creatres selector with vocabularies only (top level terms)
-createTermSelect
+createTermSelect - create terms selector for given vocabulary
 
 
 createRectypeGroupSelect - get SELECT for record type groups

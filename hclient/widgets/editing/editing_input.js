@@ -2100,7 +2100,8 @@ $.widget( "heurist.editing_input", {
                     //$input.focusout( __url_input_state ); 
                     __url_input_state(true);               
                 
-            }else if(this.detailType=="freetext" && ($input.val().indexOf('http://')==0 || $input.val().indexOf('https://')==0)){ // add link to external url
+            }
+            else if(this.detailType=="freetext" && ($input.val().indexOf('http://')==0 || $input.val().indexOf('https://')==0)){ // add link to external url
 
                 var $btn_extlink = $('<span>')
                                     .attr('title', 'Open URL in new window')
@@ -2113,7 +2114,8 @@ $.widget( "heurist.editing_input", {
 
                 this._on($btn_extlink, {click: function(){ window.open($input.val(), '_blank'); }} );
 
-            }else if(this.detailType=="integer" || this.detailType=="year"){//-----------------------------------------
+            }
+            else if(this.detailType=="integer" || this.detailType=="year"){//-----------------------------------------
 
                  
                 $input.keypress(function (e) {
@@ -3038,7 +3040,7 @@ console.log('onpaste');
                         showOn: "both",
                         val:value});
                 $input.parent('.evo-cp-wrap').css({display:'inline-block',width:'200px'});
-
+                
             }else if(this.options.dtID && this.options.dtID == window.hWin.HAPI4.sysinfo['dbconst']['DT_MAP_BOOKMARK']){ // Geo Bookmark, five input form, experimental 
 
                 $input.css({cursor:'hand'});
@@ -4153,9 +4155,9 @@ console.log('onpaste');
 
         var allTerms = this.f('rst_FieldConfig');
 
-        if(!window.hWin.HEURIST4.util.isempty(allTerms)){//this is not vocabulary ID, this is something more complex
+        if(!window.hWin.HEURIST4.util.isempty(allTerms)){
 
-            if($.isPlainObject(this.configMode))    { 
+            if($.isPlainObject(this.configMode))    { //this is not vocabulary ID, this is something more complex
 
                 if(this.configMode.entity){ //this lookup for entity
                     

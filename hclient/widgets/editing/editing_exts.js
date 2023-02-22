@@ -29,6 +29,7 @@
 //            1 - symbology editor from map legend
 //            3 - symbology editor from recrd edit for map layer
 //            4 - symbology editor from thematic map
+//            5 - define symbology ranges
 // 
 function editSymbology(current_value, mode_edit, callback){
 
@@ -64,15 +65,16 @@ function editSymbology(current_value, mode_edit, callback){
             if(isChanged){
 
                 var ele = _editing_symbology.getFieldByName('iconType');
-                var res = ele.editing_input('getValues'); 
-                var ele_icon_url = _editing_symbology.getFieldByName('iconUrl').hide();
-                var ele_icon_font = _editing_symbology.getFieldByName('iconFont').hide();
-                if(res[0]=='url'){
-                    ele_icon_url.show();
-                }else if(res[0]=='iconfont'){
-                    ele_icon_font.show();
+                if(ele!=null){
+                    var res = ele.editing_input('getValues'); 
+                    var ele_icon_url = _editing_symbology.getFieldByName('iconUrl').hide();
+                    var ele_icon_font = _editing_symbology.getFieldByName('iconFont').hide();
+                    if(res[0]=='url'){
+                        ele_icon_url.show();
+                    }else if(res[0]=='iconfont'){
+                        ele_icon_font.show();
+                    }
                 }
-
             }
 
         },
@@ -170,6 +172,64 @@ function editSymbology(current_value, mode_edit, callback){
         ];
         
     }
+    else if(mode_edit==5){
+        
+        editFields = [
+        {"dtID": "strokeColor1",
+            "dtFields":{
+                "dty_Type":"freetext",
+                "rst_DisplayName": "Stroke color from:",
+                "rst_DisplayHelpText": "",
+                "rst_FieldConfig":{"colorpicker":"colorpicker"}  //use colorpicker widget
+        }},
+        {"dtID": "strokeColor2",
+            "dtFields":{
+                "dty_Type":"freetext",
+                "rst_DisplayName": "Stroke color to:",
+                "rst_DisplayHelpText": "",
+                "rst_FieldConfig":{"colorpicker":"colorpicker"}  //use colorpicker widget
+        }},
+        {"dtID": "strokeOpacity1",
+            "dtFields":{
+                "dty_Type":"integer",
+                "rst_DisplayName": "Stroke opacity fromm :",
+                "rst_DisplayHelpText": "Value from 0 (transparent) to 100 (opaque)"
+        }},
+        {"dtID": "strokeOpacity2",
+            "dtFields":{
+                "dty_Type":"integer",
+                "rst_DisplayName": "Stroke opacity to:",
+                "rst_DisplayHelpText": "Value from 0 (transparent) to 100 (opaque)"
+        }},
+        {"dtID": "fillColor1",
+            "dtFields":{
+                "dty_Type":"freetext",
+                "rst_DisplayName": "Fill color from:",
+                "rst_DisplayHelpText": "",
+                "rst_FieldConfig":{"colorpicker":"colorpicker"}  //use colorpicker widget
+        }},
+        {"dtID": "fillColor2",
+            "dtFields":{
+                "dty_Type":"freetext",
+                "rst_DisplayName": "Fill color to:",
+                "rst_DisplayHelpText": "",
+                "rst_FieldConfig":{"colorpicker":"colorpicker"}  //use colorpicker widget
+        }},
+        {"dtID": "fillOpacity1",
+            "dtFields":{
+                "dty_Type":"float",
+                "rst_DisplayName": "Fill opacity from:",
+                "rst_DisplayHelpText": "Value from 0 (transparent) to 100 (opaque)"
+        }},
+        {"dtID": "fillOpacity2",
+            "dtFields":{
+                "dty_Type":"float",
+                "rst_DisplayName": "Fill opacity to:",
+                "rst_DisplayHelpText": "Value from 0 (transparent) to 100 (opaque)"
+        }}
+        ];
+        
+    }    
     else{
         
         var ptr_fields = [];
@@ -434,7 +494,7 @@ function editSymbology(current_value, mode_edit, callback){
     //
     edit_symb_dialog = popup_dlg.dialog({
         autoOpen: true,
-        height: (mode_edit==2)?300:700, //((mode_edit==3)?750:700),
+        height: (mode_edit==2)?300:((mode_edit==5)?450:700), //((mode_edit==3)?750:700),
         width:  740,
         modal:  true,
         title: window.hWin.HR('Define Symbology'),
