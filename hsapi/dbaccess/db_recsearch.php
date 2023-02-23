@@ -1597,6 +1597,7 @@ function recordSearchMenuItems($system, $menuitems, &$result, $find_root_menu=fa
 *
 *       detail (former 'f') - ids       - only record ids
 *                             count     - only count of records  
+*                             count_by_rty - only count of records grouped by record types
 *                             header    - record header only
 *                             timemap   - record header + timemap details (time, location and symbology fields)
 *                             detail    - record header + list of details
@@ -1795,6 +1796,8 @@ function recordSearch($system, $params)
 
 
     $is_count_only = ('count'==$params['detail']);
+    $is_count_by_rty = ('count_by_rty'==$params['detail']);
+    if($is_count_by_rty) $is_count_only = true;
     $is_ids_only = ('ids'==$params['detail']);
     $return_h3_format = (@$params['vo']=='h3' &&  $is_ids_only);
 
@@ -1819,7 +1822,12 @@ function recordSearch($system, $params)
 
     if($is_count_only){
 
-        $select_clause = 'select count(rec_ID) ';
+        if($is_count_by_rty){
+            $select_clause = 'select rec_RecTypeID, count(rec_ID) ';
+        }else{
+            $select_clause = 'select count(rec_ID) ';    
+        }
+        
 
     }else if($is_ids_only){
 
@@ -2190,13 +2198,17 @@ function recordSearch($system, $params)
 
         if($is_count_only || ($is_ids_only && @$params['needall']) || !$system->has_access() ){ //not logged in
             $search_detail_limit = PHP_INT_MAX;
-            $aquery["limit"] = '';
+            $aquery['limit'] = '';
+            $aquery['sort'] = '';
+            $aquery['offset'] = '';
         }else{
             $search_detail_limit = $system->user_GetPreference('search_detail_limit'); //limit for map/timemap output
         }
+        if($is_count_by_rty){
+            $aquery['sort'] = ' GROUP BY rec_RecTypeID';
+        }
 
-
-        $query =  $select_clause.$aquery["from"]." WHERE ".$aquery["where"].$aquery["sort"].$aquery["limit"].$aquery["offset"];
+        $query =  $select_clause.$aquery['from'].' WHERE '.$aquery["where"].$aquery["sort"].$aquery["limit"].$aquery["offset"];
 
     }
 
@@ -2230,8 +2242,25 @@ function recordSearch($system, $params)
         
         //$response = $system->addError(HEURIST_DB_ERROR, $savedSearchName.
         //    ' Search query error on saved search. Parameters:'.print_r($params, true).' Query '.$query, $mysqli->error);
+    }else if($is_count_by_rty){
+        
+        $total_count_rows = 0;
+        $records = array();
+        
+        while ($row = $res->fetch_row())  {
+            $records[$row[0]] = (int)$row[1];
+            $total_count_rows = $total_count_rows + (int)$row[1];
+        }
+        $res->close();
+                
+        $response = array('status'=>HEURIST_OK,
+            'data'=> array(
+                'queryid'=>@$params['id'],  //query unqiue id
+                'recordtypes'=>$records,
+                'count'=>$total_count_rows));
+                
     }else if($is_count_only){
-
+        
         $total_count_rows = $res->fetch_row();
         $total_count_rows = (int)$total_count_rows[0];
         $res->close();

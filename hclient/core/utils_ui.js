@@ -68,6 +68,10 @@ initHelper - Inits helper div (slider) and button
 createRecordLinkInfo - return ui for link and relationship
 
 onInactive invokes cb after ms user inactivity
+
+For mapping:
+
+prepareMapSymbol
 */
 
 if (!window.hWin.HEURIST4){
@@ -625,7 +629,6 @@ window.hWin.HEURIST4.ui = {
 
                         var opt = window.hWin.HEURIST4.ui.addoption(selObj, rtyID, name);
                         $(opt).attr('depth', 1);
-                        
                         $(opt).attr('title', $Db.rtg(rtyID, 'rty_Description'));
                         
                         
@@ -2805,6 +2808,11 @@ window.hWin.HEURIST4.ui = {
     hexToRgbStr: function (hex, opacity) {
         var rgb = window.hWin.HEURIST4.ui.hexToRgb(hex);
         if(rgb!=null){
+
+            if(opacity>1){
+                opacity = parseInt(opacity)/100;
+            }
+            
             if(opacity>0 && opacity<1){
                 return 'rgba('+rgb.r+','+rgb.g+','+rgb.b+','+opacity+')';
             }else{
@@ -3195,6 +3203,55 @@ window.hWin.HEURIST4.ui = {
         */
 
     },
+    
+    //
+    //
+    //    
+    prepareMapSymbol: function(style, def_style){
+            
+        if(!def_style){
+            //'#00b0f0' - lighty blue
+            def_style = {iconType:'rectype', color:'#ff0000', fillColor:'#ff0000', weight:3, opacity:1, 
+                    dashArray: '',
+                    fillOpacity:0.2, iconSize:18, stroke:true, fill:true};
+        }
+        
+        if(!style) style = {};
+        if(!style.iconType || style.iconType=='default') style.iconType = def_style.iconType;
+        if(style.iconType=='url' && typeof style.iconSize == 'string' && style.iconSize.indexOf(',')>0){
+            
+        }else{
+            style.iconSize = (style.iconSize>0) ?parseInt(style.iconSize) :def_style.iconSize; //((style.iconType=='circle')?9:18);
+        }
+        style.color = (style.color?style.color:def_style.color);   //light blue
+        style.fillColor = (style.fillColor?style.fillColor:def_style.fillColor);   //light blue
+        style.weight = ($.isNumeric(style.weight) && style.weight>=0) ?style.weight :def_style.weight;
+        style.opacity = ($.isNumeric(style.opacity) && style.opacity>=0) ?style.opacity :def_style.opacity;
+        style.fillOpacity = ($.isNumeric(style.fillOpacity) && style.fillOpacity>=0) ?style.fillOpacity :def_style.fillOpacity;
+        
+        style.fill = window.hWin.HEURIST4.util.isnull(style.fill)?def_style.fill:style.fill;
+        style.fill = window.hWin.HEURIST4.util.istrue(style.fill);
+        style.stroke = window.hWin.HEURIST4.util.isnull(style.stroke)?def_style.stroke :style.stroke;
+        style.stroke = window.hWin.HEURIST4.util.istrue(style.stroke);
+
+        if(style.stroke){
+            style.dashArray = window.hWin.HEURIST4.util.isnull(style.dashArray)?def_style.dashArray:style.dashArray;
+        }
+        
+        if(!style.iconFont && def_style.iconFont){
+            style.iconFont = def_style.iconFont;
+        }
+        
+        //opacity accepts values 0~1 so need to 
+        if(style.fillOpacity>1){
+            style.fillOpacity = style.fillOpacity/100;
+        }
+        if(style.opacity>1){
+            style.opacity = style.opacity/100;
+        }
+        
+        return style;        
+    }
     
 }//end ui
 

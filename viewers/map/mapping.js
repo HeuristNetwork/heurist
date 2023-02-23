@@ -2414,7 +2414,7 @@ $.widget( "heurist.mapping", {
     setStyleDefaultValues: function(style, suppress_prefs, is_selection_style){
         
         //take map style from user preferences
-        var def_style;
+        var def_style = null;
         if(suppress_prefs!==true){
             
             if(this.options.default_style){
@@ -2431,7 +2431,8 @@ $.widget( "heurist.mapping", {
                 if(def_style) def_style = window.hWin.HEURIST4.util.isJSON(def_style);
             }
             def_style = this.setStyleDefaultValues(def_style, true, is_selection_style);
-        }else if(is_selection_style){
+        }
+        else if(is_selection_style){
             //options for selection style
             // 1. from widget parameters
             // 2. from user preferences
@@ -2456,48 +2457,14 @@ $.widget( "heurist.mapping", {
             def_style.fill = true;
             def_style.stroke = true;
             
+           
 //console.log(def_style);            
             
-        }else{
-            //'#00b0f0' - lighty blue
-            def_style = {iconType:'rectype', color:'#ff0000', fillColor:'#ff0000', weight:3, opacity:1, 
-                    dashArray: '',
-                    fillOpacity:0.2, iconSize:18, stroke:true, fill:true};
+        }
+        else{
         }
         
-        if(!style) style = {};
-        if(!style.iconType || style.iconType=='default') style.iconType = def_style.iconType;
-        if(style.iconType=='url' && typeof style.iconSize == 'string' && style.iconSize.indexOf(',')>0){
-            
-        }else{
-            style.iconSize = (style.iconSize>0) ?parseInt(style.iconSize) :def_style.iconSize; //((style.iconType=='circle')?9:18);
-        }
-        style.color = (style.color?style.color:def_style.color);   //light blue
-        style.fillColor = (style.fillColor?style.fillColor:def_style.fillColor);   //light blue
-        style.weight = ($.isNumeric(style.weight) && style.weight>=0) ?style.weight :def_style.weight;
-        style.opacity = ($.isNumeric(style.opacity) && style.opacity>=0) ?style.opacity :def_style.opacity;
-        style.fillOpacity = ($.isNumeric(style.fillOpacity) && style.fillOpacity>=0) ?style.fillOpacity :def_style.fillOpacity;
-        
-        style.fill = window.hWin.HEURIST4.util.isnull(style.fill)?def_style.fill:style.fill;
-        style.fill = window.hWin.HEURIST4.util.istrue(style.fill);
-        style.stroke = window.hWin.HEURIST4.util.isnull(style.stroke)?def_style.stroke :style.stroke;
-        style.stroke = window.hWin.HEURIST4.util.istrue(style.stroke);
-
-        if(style.stroke){
-            style.dashArray = window.hWin.HEURIST4.util.isnull(style.dashArray)?def_style.dashArray:style.dashArray;
-        }
-        
-        if(!style.iconFont && def_style.iconFont){
-            style.iconFont = def_style.iconFont;
-        }
-        
-        //opacity accepts values 0~1 so need to 
-        if(style.fillOpacity>1){
-            style.fillOpacity = style.fillOpacity/100;
-        }
-        if(style.opacity>1){
-            style.opacity = style.opacity/100;
-        }
+        style = window.hWin.HEURIST4.ui.prepareMapSymbol(style, def_style);
         
         return style;
     },        

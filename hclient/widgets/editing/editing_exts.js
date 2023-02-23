@@ -185,20 +185,20 @@ function editSymbology(current_value, mode_edit, callback){
         {"dtID": "strokeColor2",
             "dtFields":{
                 "dty_Type":"freetext",
-                "rst_DisplayName": "Stroke color to:",
+                "rst_DisplayName": "to:",
                 "rst_DisplayHelpText": "",
                 "rst_FieldConfig":{"colorpicker":"colorpicker"}  //use colorpicker widget
         }},
         {"dtID": "strokeOpacity1",
             "dtFields":{
                 "dty_Type":"integer",
-                "rst_DisplayName": "Stroke opacity fromm :",
+                "rst_DisplayName": "Stroke opacity from :",
                 "rst_DisplayHelpText": "Value from 0 (transparent) to 100 (opaque)"
         }},
         {"dtID": "strokeOpacity2",
             "dtFields":{
                 "dty_Type":"integer",
-                "rst_DisplayName": "Stroke opacity to:",
+                "rst_DisplayName": "to:",
                 "rst_DisplayHelpText": "Value from 0 (transparent) to 100 (opaque)"
         }},
         {"dtID": "fillColor1",
@@ -211,7 +211,7 @@ function editSymbology(current_value, mode_edit, callback){
         {"dtID": "fillColor2",
             "dtFields":{
                 "dty_Type":"freetext",
-                "rst_DisplayName": "Fill color to:",
+                "rst_DisplayName": "to:",
                 "rst_DisplayHelpText": "",
                 "rst_FieldConfig":{"colorpicker":"colorpicker"}  //use colorpicker widget
         }},
@@ -224,8 +224,18 @@ function editSymbology(current_value, mode_edit, callback){
         {"dtID": "fillOpacity2",
             "dtFields":{
                 "dty_Type":"float",
-                "rst_DisplayName": "Fill opacity to:",
+                "rst_DisplayName": "to:",
                 "rst_DisplayHelpText": "Value from 0 (transparent) to 100 (opaque)"
+        }},
+        {"dtID": "iconSize1",
+            "dtFields":{
+                "dty_Type":"integer",
+                "rst_DisplayName": "Icon size from:"
+        }},
+        {"dtID": "iconSize2",
+            "dtFields":{
+                "dty_Type":"integer",
+                "rst_DisplayName": "to:"
         }}
         ];
         
@@ -494,10 +504,10 @@ function editSymbology(current_value, mode_edit, callback){
     //
     edit_symb_dialog = popup_dlg.dialog({
         autoOpen: true,
-        height: (mode_edit==2)?300:((mode_edit==5)?450:700), //((mode_edit==3)?750:700),
+        height: (mode_edit==2)?300:((mode_edit==5)?500:700), //((mode_edit==3)?750:700),
         width:  740,
         modal:  true,
-        title: window.hWin.HR('Define Symbology'),
+        title: window.hWin.HR((mode_edit==5)?'Define symbology gradient values':'Define Symbology'),
         resizeStop: function( event, ui ) {//fix bug
             //that.element.css({overflow: 'none !important','width':that.element.parent().width()-24 });
         },

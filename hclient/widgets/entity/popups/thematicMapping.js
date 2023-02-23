@@ -78,7 +78,7 @@ $.widget( "heurist.thematicMapping", $.heurist.recordAction, {
         helpContent: 'thematicMapping.html' //in context_help folder
     },
     
-    baseLayerSymbol: null,
+    baseLayerSymbol: null, //from layer 
     currentField: 0,
     selectedFields:{},
     enumValues: null, 
@@ -114,23 +114,6 @@ $.widget( "heurist.thematicMapping", $.heurist.recordAction, {
 
         this.selectRecordScope.empty();
 
-        var opt, selScope = this.selectRecordScope.get(0);
-        
-        this.selectRecordScope = window.hWin.HEURIST4.ui.createRectypeSelectNew( selScope,
-        {
-            topOptions: [{key:'-1',title:'select record type...'}],
-            useHtmlSelect: false,
-            useCounts: true,
-            showAllRectypes: true
-        });
-        
-        
-        this._on( this.selectRecordScope, {
-                change: this._onRecordScopeChange} );        
-        this._onRecordScopeChange();
-        
-        selScope = this.selectRecordScope.get(0);
-        window.hWin.HEURIST4.ui.initHSelect(selScope);
         
         var fields_sel = this.element.find('#selected_fields');
         
@@ -141,6 +124,11 @@ $.widget( "heurist.thematicMapping", $.heurist.recordAction, {
         this.element.find('button[id^="btn_f_range_add"]').button({icon:'ui-icon-circle-b-plus'});
         
         this._initSymbolEditor(this.element.find('#tm_symbol'));
+        
+        this._on(this.element.find('#tm_symbol'), {change:function(){
+            this._renderSymbolPreview( null, //update all 
+                        this.mapDefaultSymbol, this.element.find('#tm_symbol').val(), null);
+        }});
         
         
         this.options.thematic_mapping = window.hWin.HEURIST4.util.isJSON( this.options.thematic_mapping );
@@ -168,6 +156,14 @@ $.widget( "heurist.thematicMapping", $.heurist.recordAction, {
                 this.options.thematic_mapping.splice(i,1);
             }
         }
+        
+        //default layer symbol
+        var def_style = window.hWin.HEURIST4.util.isJSON(this.baseLayerSymbol);
+        if(!def_style){
+            def_style = window.hWin.HAPI4.get_prefs('map_default_style');
+            if(def_style) def_style = window.hWin.HEURIST4.util.isJSON(def_style);
+        }
+        this.mapDefaultSymbol = window.hWin.HEURIST4.ui.prepareMapSymbol(def_style, null);
 
         if(themes_list.find('option').length==0){
             this._addThematicMap();
@@ -184,6 +180,80 @@ $.widget( "heurist.thematicMapping", $.heurist.recordAction, {
                         
         this.popele = this.element.find('#divAutoRanges');
         this._on(this.popele.find('input,select'),{change:this._definePreviewRanges});
+        
+        
+        //
+        //
+        //
+        var opt, selScope = this.selectRecordScope.get(0);
+        this.selectRecordScope = window.hWin.HEURIST4.ui.createRectypeSelectNew( selScope,
+        {
+            topOptions: [{key:'-1',title:'select record type...'}],
+            useHtmlSelect: false,
+            useCounts: false,
+            showAllRectypes: true
+        });
+        this._on( this.selectRecordScope, {
+                change: this._onRecordScopeChange} );        
+        
+        selScope = this.selectRecordScope.get(0);
+        window.hWin.HEURIST4.ui.initHSelect(selScope);
+        
+        
+        //
+        // search record types in map query
+        //
+        if(this.options.maplayer_query){
+            
+            var request = { q: this.options.maplayer_query,
+                    w: 'a',
+                    detail: 'count_by_rty',
+                    id: window.hWin.HEURIST4.util.random(),
+                    source:this.element.attr('id') };
+
+            var that = this;
+            window.HAPI4.RecordMgr.search(request, function(response){ 
+
+                if(response.status == window.hWin.ResponseStatus.OK){
+
+                    if(response.data && $.isPlainObject(response.data.recordtypes)){
+                        var rty_IDs = Object.keys(response.data.recordtypes);
+                        
+                        if(rty_IDs.length>0){
+
+                            for(var i=0; i<rty_IDs.length; i++){
+                                var name = window.hWin.HEURIST4.util.htmlEscape($Db.rty(rty_IDs[i], 'rty_Name'));
+                                
+                                var option = document.createElement("option");
+                                option.text = name;
+                                option.value = rty_IDs[i];
+                                $(option).attr('depth', 1);
+                                selScope.insertBefore(option, selScope.options[1]);
+                                //var opt = window.hWin.HEURIST4.ui.addoption(selScope, rty_IDs[i], name);
+                                //$(opt).attr('depth', 1);
+                            }
+                            
+                            var option = document.createElement("option");
+                            option.text = 'Record types in layer';
+                            option.disabled = 'disabled'
+                            $(option).attr('group', 1);
+                            selScope.insertBefore(option, selScope.options[1]);
+                            
+                            that.selectRecordScope.val(rty_IDs[0])
+                            that.selectRecordScope.hSelect('refresh');
+                            that.selectRecordScope.trigger('change');
+                            
+                        }
+                    }
+                    
+                }else{
+                    console.log(response.message);
+                }
+            });            
+        
+        }else{
+            this._onRecordScopeChange();
+        }
         
     },
             
@@ -620,39 +690,6 @@ $.widget( "heurist.thematicMapping", $.heurist.recordAction, {
     },
     
     
-    _addThemeField_old: function(){
-        
-        var tree = this.element.find('.rtt-tree').fancytree("getTree");
-        var fieldIds = tree.getSelectedNodes(false);
-        var k, len = fieldIds.length;
-        
-        
-        for (k=0;k<len;k++){
-            var node =  fieldIds[k];
-            if(window.hWin.HEURIST4.util.isempty(node.data.code)) continue;
-
-            var key = node.key.split(':');
-            key = key[key.length-1];
-            
-            if(!this.selectedFields[key]){
-                this.selectedFields[key] = {code:node.data.code, title:node.data.name, ranges:[]};
-            } 
-            
-        }
-
-        var sel = this.element.find('#selected_fields');
-        var keep_val = sel.val();
-        sel.empty();
-        len = Object.keys(this.selectedFields).length;
-        for (k=0;k<len;k++){
-            key = Object.keys(this.selectedFields)[k];
-            window.hWin.HEURIST4.ui.addoption(sel[0], key, this.selectedFields[key].title+' ('+this.selectedFields[key].code+'  '+key+')');
-        }
-
-        
-        sel.val(keep_val);
-        if(!(sel[0].selectedIndex>0)) sel[0].selectedIndex = 0;
-    },
     
     //
     //
@@ -675,13 +712,19 @@ $.widget( "heurist.thematicMapping", $.heurist.recordAction, {
                     $.each(selfield.ranges,function(i,item){
                         if(item.uid  == range_uid){
                             
-                            let val1 = ele.find('input.val1').val();
-                            let val2 = ele.find('input.val2').val();
-                            if(val1 && val2) {
-                                val1 = val1+'<>'+val2
-                            }else if(val2) {
-                                val1 = val2;
+                            let val1;
+                            if(ele.find('select.val1').length>0){
+                                val1 = ele.find('select.val1').val();
+                            }else{
+                                val1 = ele.find('input.val1').val();
+                                let val2 = ele.find('input.val2').val();
+                                if(val1 && val2) {
+                                    val1 = val1+'<>'+val2
+                                }else if(val2) {
+                                    val1 = val2;
+                                }
                             }
+                            
                                 
                             if(val1){
                                 selfield.ranges[i].value = val1;
@@ -752,13 +795,15 @@ $.widget( "heurist.thematicMapping", $.heurist.recordAction, {
         var key = selfield.code.split(':');
         key = key[key.length-1];//dty_ID
         var dty_Type = $Db.dty(key, 'dty_Type');
+        var vocab_id = $Db.dty(key, 'dty_JsonTermIDTree');
 
         var ele = $('<div style="padding:5px" class="field-range">'
             +'<span class="ui-icon ui-icon-circle-b-close" style="margin:2px 0 0 12px;cursor:pointer"/>'
-            +'<input class="val1 text ui-widget-content ui-corner-all" style="width:100px;margin-left:5px"/>'
-            +((dty_Type=='enum')?''
-            :'<span>&nbsp;&lt;&gt;&nbsp;</span><input class="val2 text ui-widget-content ui-corner-all" style="width:100px"/>')
-            +'<span style="display:inline-block;width:50px"/>'
+            + ((dty_Type=='enum')
+            ? '<select class="val1 text ui-widget-content ui-corner-all" style="width:100px;margin-left:5px"/>'
+            : ('<input class="val1 text ui-widget-content ui-corner-all" style="width:100px;margin-left:5px"/>'
+              +'<span>&nbsp;&lt;&gt;&nbsp;</span><input class="val2 text ui-widget-content ui-corner-all" style="width:100px"/>'))
+            +'<span class="field-symbol-preview" style="position:relative;top:9px;display:inline-block;width:40px;height:40px;margin:2px"/>'
             +'<input class="field-symbol text ui-widget-content ui-corner-all" style="width:250px"/>'
             +'</div>').appendTo(this.element.find('#f_ranges'));
 
@@ -773,13 +818,29 @@ $.widget( "heurist.thematicMapping", $.heurist.recordAction, {
             val1 = (vals && vals.length==2)?vals[0]:'';
         }
 
-        ele.find('input.val1').val(val1)
-        ele.find('input.val2').val(val2);
+        this._on(ele.find('.field-symbol'), {change:function(event){
+            
+            this._renderSymbolPreview( $(event.target).parent().find('.field-symbol-preview'), 
+                    this.mapDefaultSymbol, this.element.find('#tm_symbol').val(), $(event.target).val());
+        }});
+        
+        if(dty_Type=='enum'){
+            window.hWin.HEURIST4.ui.createTermSelect(ele.find('select.val1')[0],
+                {vocab_id:vocab_id, //headerTermIDsList:headerTerms,
+                    defaultTermID:val1, supressTermCode:true, 
+                    useHtmlSelect:false});                
+        }else{
+            ele.find('input.val1').val(val1)
+            ele.find('input.val2').val(val2);
+        }
+        
         if(range.symbol){
             ele.find('.field-symbol').val($.isPlainObject(range.symbol)?JSON.stringify(range.symbol):range.symbol);    
         }
+        ele.find('.field-symbol').change();
 
         this._initSymbolEditor( ele.find('.field-symbol') ); 
+        
         
         this._on(ele.find('.ui-icon-circle-b-close'),{click:function(event){
             var ele = $(event.target).parents('.field-range');
@@ -818,14 +879,14 @@ $.widget( "heurist.thematicMapping", $.heurist.recordAction, {
         
         var $btn_edit_switcher = $( '<span>open editor</span>', {title: 'Open symbology editor'})
             .addClass('smallbutton btn_add_term')
-            .css({'line-height': '20px','vertical-align':'top',cursor:'pointer','text-decoration':'underline'})
+            .css({'line-height': '20px',cursor:'pointer','text-decoration':'underline'}) //'vertical-align':'top'
             .appendTo( fele.parent('div') );
         
         $btn_edit_switcher.on( { click: function(){
                 var current_val = window.hWin.HEURIST4.util.isJSON( fele.val() );
                 if(!current_val) current_val = {};
                 window.hWin.HEURIST4.ui.showEditSymbologyDialog(current_val, 4, function(new_value){
-                    fele.val(JSON.stringify(new_value));
+                    fele.val(JSON.stringify(new_value)).change();
                 });
         }});
             
@@ -884,7 +945,7 @@ $.widget( "heurist.thematicMapping", $.heurist.recordAction, {
                 var cnt = selfield.ranges.length;
                 
                 window.hWin.HEURIST4.ui.showEditSymbologyDialog({}, 5, function(new_value){
-                    var fillGradient = [], colorGradient = [], strokeOpacity = [], fillOpacity = [];
+                    var fillGradient = [], colorGradient = [], strokeOpacity = [], fillOpacity = [], iconSize = [];
                     if(new_value.fillColor1 && new_value.fillColor2){
                         fillGradient = window.hWin.HEURIST4.ui.getColourGradient(new_value.fillColor1, new_value.fillColor2, cnt);
                     }
@@ -924,6 +985,19 @@ $.widget( "heurist.thematicMapping", $.heurist.recordAction, {
                             val = val + step;
                         }
                     }
+
+                    new_value.iconSize1 = __prepareInt(new_value.iconSize1);
+                    new_value.iconSize2 = __prepareInt(new_value.iconSize2);
+
+                    if(new_value.iconSize1>0 || new_value.iconSize2>0){
+                        var step = (new_value.iconSize2 - new_value.iconSize1)/cnt;
+                        var val = new_value.iconSize1;
+                        for(var i=0; i<cnt; i++){
+                            iconSize.push((i==cnt-1)?new_value.iconSize2:val);
+                            val = val + step;
+                        }
+                    }
+
                     
                     var f_ranges = that.element.find('#f_ranges');
                     
@@ -943,10 +1017,14 @@ $.widget( "heurist.thematicMapping", $.heurist.recordAction, {
                         if(strokeOpacity.length>0){
                             symbol.opacity = strokeOpacity[i];
                         }
+                        if(iconSize.length>0){
+                            symbol.iconSize = iconSize[i];
+                        }
                         
                         selfield.ranges[i].symbol = symbol;
                         //assign to UI
-                        f_ranges.find('.field-range[id='+selfield.ranges[i].uid+'] > .field-symbol').val(JSON.stringify(symbol));
+                        f_ranges.find('.field-range[id='+selfield.ranges[i].uid+'] > .field-symbol')
+                                        .val(JSON.stringify(symbol)).change();
                     }
                 });
                 
@@ -1035,7 +1113,6 @@ $.widget( "heurist.thematicMapping", $.heurist.recordAction, {
             window.HAPI4.RecordMgr.get_facets(request, function(response){ 
 
                 if(response.status == window.hWin.ResponseStatus.OK){
-                    console.log(response);
 
                     //var this.popele = that.element.find('#divAutoRanges');
                     
@@ -1094,7 +1171,7 @@ $.widget( "heurist.thematicMapping", $.heurist.recordAction, {
                 $dlg = window.hWin.HEURIST4.msg.showElementAsDialog({
                     window:  window.hWin, //opener is top most heurist window
                     title: window.hWin.HR('Define ranges'),
-                    width: 575,
+                    width: 400,
                     height: 600,
                     element:  this.popele[0],
                     resizable: true,
@@ -1158,7 +1235,7 @@ $.widget( "heurist.thematicMapping", $.heurist.recordAction, {
                 if(dty_Type=='float' && int_round<10){
                     //var multiplier = Math.pow(10, int_round);
                     //return Math.round(original*multiplier)/multiplier;   
-                    return int_round==0?Math.round(original): (original).toFixed(int_round);
+                    return int_round==0?Math.round(original): parseFloat( original.toFixed(int_round) );
                 }else if(int_round>=10){
                     return Math.round(original/int_round)*int_round;   
                 }else{
@@ -1193,14 +1270,91 @@ $.widget( "heurist.thematicMapping", $.heurist.recordAction, {
             for (var i=0; i<ranges.length; i++){
                 $('<div style="padding:5px" class="field-range">'
                 +'<span style="display:inline-block;width:100px;">'+ranges[i].min+'</span>'
-                +('<span style="display:inline-block;width:50px;">&nbsp;to&nbsp;&lt;&nbsp;</span><span>'+ranges[i].max+'</span>')
+                +('<span style="display:inline-block;width:50px;">&nbsp;to&nbsp;&lt;&nbsp;</span>'
+                +'<span style="display:inline-block;width:100px">'+ranges[i].max+'</span>')
                 +'</div>').appendTo(div_preview);
             }
         
         }
         
         this.preview_ranges = ranges;
+    },
+    
+    //
+    //
+    //
+    _renderSymbolPreview: function(ele, layer_symbol, base_symbol, range_symbol){
+        
+            if(ele==null){
+                //update all ranges
+                var that = this;
+                var f_ranges = this.element.find('#f_ranges');
+                if(f_ranges.children().length>0){
+                    $.each(f_ranges.children(), function(i, ele){
+                        ele = $(ele);
+
+                        that._renderSymbolPreview( ele.find('.field-symbol-preview'), 
+                            that.mapDefaultSymbol, that.element.find('#tm_symbol').val(), 
+                            ele.find('.field-symbol').val());
+                    });
+                }
+                return;
+            }
+        
+            //theme symbology
+            base_symbol = window.hWin.HEURIST4.util.isJSON( base_symbol );
+            base_symbol = (base_symbol)?base_symbol:layer_symbol;
+            
+            base_symbol = window.hWin.HEURIST4.ui.prepareMapSymbol(base_symbol, null)
+            
+            function __mergeThematicSymbol(basesymbol, fsymb){
+                
+                    var use_style = window.hWin.HEURIST4.util.cloneJSON( basesymbol );
+                    if($.isPlainObject(range_symbol)){
+                        var keys = Object.keys(fsymb);
+                        for(var j=0; j<keys.length; j++){
+                            use_style[keys[j]] = fsymb[keys[j]];
+                        }
+                    }
+                    
+                    return use_style;
+            }    
+
+            range_symbol = window.hWin.HEURIST4.util.isJSON( range_symbol );
+        
+            var style = __mergeThematicSymbol(base_symbol, range_symbol);
+        
+            var dcss = {'display':'inline-block', 'background-image':'none'};
+            if(style['stroke']!==false){
+                
+                var opacity = style['opacity']>0?style['opacity']:1;
+                var weight = (style['weight']>0&&style['weight']<10)?style['weight']:10;
+                dcss['width']  = 22-weight*2; 
+                dcss['height'] = 22-weight*2;
+                
+                dcss['border'] = weight+'px solid '
+                                + window.hWin.HEURIST4.ui.hexToRgbStr(style['color'], opacity);
+                if ( style['opacity']>0 && style['opacity']<1 ) {
+                    dcss['-webkit-background-clip'] = 'padding-box'; //for Safari
+                    dcss['background-clip'] = 'padding-box'; //for IE9+, Firefox 4+, Opera, Chrome
+                }
+                
+            } else {
+                dcss['border'] = 'none';
+            }
+
+            if(style['fill']!==false){
+                var fillColor = style['fillColor']?style['fillColor']:style['color'];
+                var fillOpacity = style['fillOpacity']>0?style['fillOpacity']:0.2;
+                dcss['background-color'] = window.hWin.HEURIST4.ui.hexToRgbStr(fillColor, fillOpacity);
+            }else{
+                dcss['background'] = 'none';
+            }
+                                                
+            ele.css(dcss);
+                                                        
     }
+    
     
 
 });
