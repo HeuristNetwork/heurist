@@ -1320,7 +1320,7 @@ console.log(aCodes);
         }
         
         
-        if(mainquery.length>0){
+        if(mainquery.length>0 || !window.hWin.HEURIST4.util.isempty(that.rulesetSection.find('#svs_Rules').val())){
 
         
             if(rty_IDs>0){
