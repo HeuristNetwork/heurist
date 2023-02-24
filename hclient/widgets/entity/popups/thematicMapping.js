@@ -83,7 +83,8 @@ $.widget( "heurist.thematicMapping", $.heurist.recordAction, {
     selectedFields:{},
     enumValues: null, 
     fieldSelected: null,
-    popele: null,
+    popele: null, //element for popup dialog
+    maplayer_ids: null, //list of ids from map layer - result of maplayer_query 
     
     _destroy: function() {
         this._super(); 
@@ -207,9 +208,7 @@ $.widget( "heurist.thematicMapping", $.heurist.recordAction, {
             
             var request = { q: this.options.maplayer_query,
                     w: 'a',
-                    detail: 'count_by_rty',
-                    id: window.hWin.HEURIST4.util.random(),
-                    source:this.element.attr('id') };
+                    detail: 'count_by_rty'};
 
             var that = this;
             window.HAPI4.RecordMgr.search(request, function(response){ 
@@ -242,6 +241,20 @@ $.widget( "heurist.thematicMapping", $.heurist.recordAction, {
                             that.selectRecordScope.val(rty_IDs[0])
                             that.selectRecordScope.hSelect('refresh');
                             that.selectRecordScope.trigger('change');
+                            
+                            
+                            if(response.data.count<1000){
+                                //search ids
+                                var request2 = { q: that.options.maplayer_query,
+                                        w: 'a',
+                                        detail: 'ids'};
+                                window.HAPI4.RecordMgr.search(request2, function(response){ 
+                                    if(response && response.data && $.isArray(response.data.records)){
+                                        that.maplayer_ids = response.data.records.join(',');                                    
+                                    }
+                                    
+                                });
+                            }                            
                             
                         }
                     }
@@ -969,8 +982,8 @@ $.widget( "heurist.thematicMapping", $.heurist.recordAction, {
                         var step = (new_value.fillOpacity2 - new_value.fillOpacity1)/cnt;
                         var val = new_value.fillOpacity1;
                         for(var i=0; i<cnt; i++){
-                            fillOpacity.push((i==cnt-1)?new_value.fillOpacity2:val);
-                            val = val + step;
+                            fillOpacity.push((i==cnt-1 || val>new_value.fillOpacity2)?new_value.fillOpacity2:val);
+                            val = Math.round(val + step);
                         }
                     }
 
@@ -981,8 +994,8 @@ $.widget( "heurist.thematicMapping", $.heurist.recordAction, {
                         var step = (new_value.strokeOpacity2 - new_value.strokeOpacity1)/cnt;
                         var val = new_value.strokeOpacity1;
                         for(var i=0; i<cnt; i++){
-                            strokeOpacity.push((i==cnt-1)?new_value.strokeOpacity2:val);
-                            val = val + step;
+                            strokeOpacity.push((i==cnt-1 || val>new_value.strokeOpacity2)?new_value.strokeOpacity2:val);
+                            val = Math.round(val + step);
                         }
                     }
 
@@ -993,8 +1006,8 @@ $.widget( "heurist.thematicMapping", $.heurist.recordAction, {
                         var step = (new_value.iconSize2 - new_value.iconSize1)/cnt;
                         var val = new_value.iconSize1;
                         for(var i=0; i<cnt; i++){
-                            iconSize.push((i==cnt-1)?new_value.iconSize2:val);
-                            val = val + step;
+                            iconSize.push((i==cnt-1 || val>new_value.iconSize2)?new_value.iconSize2:val);
+                            val = Math.round(val + step);
                         }
                     }
 
@@ -1067,6 +1080,7 @@ $.widget( "heurist.thematicMapping", $.heurist.recordAction, {
         // substitute $IDS in facet query with list of ids OR current query(todo)
         // 
         if(this.options.maplayer_query){
+
             var that = this;
             function __fillQuery(q){
                 $(q).each(function(idx, predicate){
@@ -1077,20 +1091,25 @@ $.widget( "heurist.thematicMapping", $.heurist.recordAction, {
                                 __fillQuery(val);
                             }else if( (typeof val === 'string') && (val == '$IDS') ) {
                                 //substitute with array of ids
-                                predicate[key] = that.options.maplayer_query;
+                                predicate[key] = that.maplayer_ids?that.maplayer_ids:that.options.maplayer_query;
                             }
                     });                            
                 });
             }        
 
 
-            var query, needcount = 2;
+            var query;
             if( (typeof field['facet'] === 'string') && (field['facet'] == '$IDS') ){ //this is field form target record type
                 //replace with list of ids
                 query = this.options.maplayer_query; //{ids: this._currentRecordset.getMainSet().join(',')};
-                needcount = 1;
 
             }else{
+                if(!this.maplayer_ids && !window.hWin.HEURIST4.util.isJSON(this.options.maplayer_query)){
+                    window.hWin.HEURIST4.msg.showMsgDlg('To allow thematic map be based on values from linked records, '
+                    +'Map layer query must be in JSON format');
+                    return;
+                }
+                
                 query = window.hWin.HEURIST4.util.cloneJSON(field['facet']); //clone 
                 //change $IDS for current set of target record type
                 __fillQuery(query);                
@@ -1111,7 +1130,7 @@ $.widget( "heurist.thematicMapping", $.heurist.recordAction, {
 
             var that = this;
             window.HAPI4.RecordMgr.get_facets(request, function(response){ 
-
+//console.log(response);
                 if(response.status == window.hWin.ResponseStatus.OK){
 
                     //var this.popele = that.element.find('#divAutoRanges');

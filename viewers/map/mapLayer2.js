@@ -686,7 +686,7 @@ function hMapLayer2( _options ) {
             //switch off current theme
             options.mapwidget.mapping('eachLayerFeature', _nativelayer_id, 
                 function(layer){
-                    //define thematic map symbol symbol
+                    //reset active thematic map symbol symbol
                     layer.feature.thematic_style = null;
                 }
             );
@@ -694,22 +694,65 @@ function hMapLayer2( _options ) {
             return;
         }
         
-        // 1. get all fields that are used in active_themes
-        var theme_fields = [];
+        // 1. get all fields that are used in active_themes and prepare ranges
+        var theme_fields = {};
+        var theme_queries = {};
+
+        function __fillQuery(q){
+            $(q).each(function(idx, predicate){
+                $.each(predicate, function(key,val)
+                    {
+                        if( $.isArray(val) || $.isPlainObject(val) ){
+                            __fillQuery(val);
+                        }else if( (typeof val === 'string') && (val == '$IDS') ) {
+                            //substitute with array of ids
+                            predicate[key] = _geojson_ids.join(',');//maplayer_query;
+                        }
+                });                            
+            });
+        }                         
+        
         for(var j=0; j<active_themes.length; j++){
             var theme = active_themes[j];
             
             $.each(theme.fields, function(i, ftheme){
                 
-                let tfield = ftheme.code;
+                if(ftheme.code!='rec_GeoField'){
+                
+                    var field = window.hWin.HEURIST4.query.createFacetQuery(ftheme.code, true, false);
+                    
+                    //field.code - code without last dty_ID
+                    
+                    if(theme_fields[field.code]){ //query already defined
+                        theme_fields[field.code].push(field.id);
+                    }else{
+                    
+                        var query;
+                        if( (typeof field['facet'] === 'string') && (field['facet'] == '$IDS') ){ //this is field form target record type
+                            query = 'ids:'+_geojson_ids.join(',');//maplayer_query;
+
+                        }else{
+                            
+                            query = window.hWin.HEURIST4.util.cloneJSON(field['facet']); //clone 
+                            //change $IDS for current set of target record type
+                            __fillQuery(query);                
+                        }
+                        
+                        theme_queries[field.code] = query;
+                        theme_fields[field.code] = [field.id];
+                    }
+                }
+                
+                /*
                 if(typeof tfield == 'string' && tfield.indexOf(':')>0){
                     let codes = tfield.split(':');
                     tfield = codes[codes.length-1];
                 }
-                
                 if(theme_fields.indexOf(tfield)<0){
                     theme_fields.push(tfield);    
                 }
+                */
+                
                 //prepare ranges
                 for(var j=0; j<ftheme.ranges.length; j++){
                     var range = ftheme.ranges[j].value;
@@ -732,57 +775,67 @@ function hMapLayer2( _options ) {
             });
         }
         
-        var request_theme_fields = theme_fields;
-        // 2. check what fields are missed in features  @todo
-        if(theme_fields.length==1 && theme_fields[0]=='rec_GeoField'){
-            request_theme_fields = [];   
-        }
-        
         // 3. request for values. if there are not fields to request then assign symbols
-        if(request_theme_fields && request_theme_fields.length>0)
+        if(Object.keys(theme_queries).length>0)
         {
             
-            //find values
-            var server_request = {
-                q: 'ids:'+_geojson_ids.join(','), //search for all records in layer
-                rules: theme.rules,  //search for linked records
-                w: 'a',
-                zip: 1,
-                detail:'rec_RecTypeID,'+request_theme_fields.join(',')  //request detail fields
-            };
+            var query_codes = Object.keys(theme_queries);
             
-            //_new  format:'json'
-            window.hWin.HAPI4.RecordMgr.search(server_request,
-                function(response){
-                    
+            function __executeQuery(query_idx){
+                
+                var code = query_codes[query_idx];
+            
+                //find values
+                var server_request = {
+                    q: theme_queries[code],
+                    //rules: theme.rules,  search for linked records
+                    w: 'a',
+                    zip: 1,
+                    detail:'rec_RecTypeID,'+theme_fields[code].join(',')  //request detail fields
+                };
+                
+                //_new  format:'json'
+                window.hWin.HAPI4.RecordMgr.search(server_request,
+                    function(response){
+                        
 
-                    if(response.status == window.hWin.ResponseStatus.OK){
-                        var resdata = new hRecordSet(response.data);
-
-                        //assign symbol for each element of layer
-                        options.mapwidget.mapping('eachLayerFeature', _nativelayer_id, 
-                            function(layer){
-                                //get record from result set and assign field values
-                                let id = layer.feature.properties.rec_ID;
-                                var record = resdata.getRecord(id);
-                                for (var k=0; k<request_theme_fields.length; k++){
-                                    var dty_ID = request_theme_fields[k];
-                                    layer.feature.properties[dty_ID] = resdata.fld(record, dty_ID);
+                        if(response.status == window.hWin.ResponseStatus.OK){
+                            var resdata = new hRecordSet(response.data);
+//console.log(response.data);
+                            //assign symbol for each element of layer
+                            options.mapwidget.mapping('eachLayerFeature', _nativelayer_id, 
+                                function(layer){
+                                    //get record from result set and assign field values
+                                    let id = layer.feature.properties.rec_ID; 
+//console.log(code, id);                                    
+                                    var record = resdata.getRecord(id);
+                                    for (var k=0; k<theme_fields[code].length; k++){
+                                        var dty_ID = theme_fields[code][k];
+                                        layer.feature.properties[code+':'+dty_ID] = resdata.fld(record, dty_ID);
+                                    }
                                 }
+                            );
+                            
+                            if(query_idx+1==query_codes.length){
                                 //define thematic map symbol symbol
-                                layer.feature.thematic_style = _defineThematicMapSymbol(layer.feature.properties, active_themes);
+                                options.mapwidget.mapping('eachLayerFeature', _nativelayer_id, 
+                                    function(layer){
+                                        layer.feature.thematic_style = _defineThematicMapSymbol(layer.feature.properties, active_themes);
+                                });
+                                that.applyStyle(null, true);    
+                            }else{
+                                __executeQuery(query_idx+1);    
                             }
-                        );
-                        that.applyStyle(null, true);
 
-                    }else {
-                        //that.applyStyle(null, null);
-                        window.hWin.HEURIST4.msg.showMsgErr(response);
-                    }
+                        }else {
+                            window.hWin.HEURIST4.msg.showMsgErr(response);
+                        }
 
-            });
+                });
+            } //__executeQuery
 
-
+            __executeQuery(0);
+            
         }else{ 
             //all fields are already loaded
             options.mapwidget.mapping('eachLayerFeature', _nativelayer_id, 
@@ -813,10 +866,12 @@ function hMapLayer2( _options ) {
                 let ftheme = theme.fields[i];
                 
                 let tfield = ftheme.code;
+                /*
                 if(typeof tfield == 'string' && tfield.indexOf(':')>0){
                     let codes = tfield.split(':');
                     tfield = codes[codes.length-1];
                 }
+                */
                 
                 let value = feature[tfield];
 

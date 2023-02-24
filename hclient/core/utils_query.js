@@ -565,6 +565,9 @@ window.hWin.HEURIST4.query = {
 //console.log(JSON.stringify(result['facet']));
         }
 
+        code.pop();
+        result['code'] = code.join(':');  //qcode without last dty_ID
+        
         return result;
     }
     
