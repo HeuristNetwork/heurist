@@ -524,15 +524,33 @@ function hMapLayer2( _options ) {
 //DEBUG console.log(response);                        
                         if(options.is_current_search && response['geojson_dty_ids']){
                             _geojson_dty_ids = response['geojson_dty_ids'];    
-
+                            
+                            var _geojson_rty_ids = response['geojson_rty_ids'];
                             //dynamic thematic map for current search
                             var thematic_map = [];
                             for(var i=0; i<_geojson_dty_ids.length; i++)
                             {
                                 var dty_ID = _geojson_dty_ids[i];
+
+                                var title = [];                                
+                                if(dty_ID=='Path'){
+                                    title = 'Path';                                   
+                                }else{
+                                    for(var j=0; j<_geojson_rty_ids.length; j++){
+                                        let t1 = $Db.rst(_geojson_rty_ids[j], dty_ID, 'rst_DisplayName');
+                                        if(!window.hWin.HEURIST4.util.isempty(t1)) title.push(t1);
+                                    }
+                                    if(title.length>1){
+                                        let t1 = $Db.dty(dty_ID, 'dty_Name');
+                                        title = (window.hWin.HEURIST4.util.isempty(t1)?'':t1)+'( '+title.join('/')+' )';
+                                    }else{
+                                        title = title[0];    
+                                    }
+                                }
+                                
                                 thematic_map.push(
                                 {
-                                    "title": $Db.dty(dty_ID, 'dty_Name'),
+                                    "title": title,
                                     "active":true,
                                     "fields": [{"code":"rec_GeoField","ranges":[{"value": _geojson_dty_ids[i]}]}]
                                 }

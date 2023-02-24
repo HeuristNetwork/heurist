@@ -204,6 +204,7 @@ function hMapDocument( _options )
                                 });
                                 
                                 if($themes.length>0){
+                                    $res['expanded'] = true;
                                     $res['children'] = $themes;
                                 }
                             }

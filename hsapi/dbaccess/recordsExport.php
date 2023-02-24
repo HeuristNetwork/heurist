@@ -168,6 +168,7 @@ public static function output($data, $params){
     $find_places_for_geo = false;
     $geojson_ids = array(); //simplify array('all'=>array());
     $geojson_dty_ids = array();
+    $geojson_rty_ids = array();
     
     //
     // HEADER ------------------------------------------------------------
@@ -713,6 +714,8 @@ XML;
                             $geojson_dty_ids[] = $geoms_dty[$idx];  
                         } 
                 }
+                $geojson_rty_ids = array_keys($rt_counts);
+                
             }else{
                 fwrite($fd, $comma.json_encode($feature));    
             }
@@ -827,6 +830,7 @@ XML;
            fwrite($fd, ',"timeline":'.json_encode($timeline_data));
            fwrite($fd, ',"geojson_ids":'.json_encode($geojson_ids));
            fwrite($fd, ',"geojson_dty_ids":'.json_encode($geojson_dty_ids));
+           fwrite($fd, ',"geojson_rty_ids":'.json_encode($geojson_rty_ids));
            fwrite($fd, ',"layers_ids":'.json_encode($layers_record_ids).'}');
         }else{
            fwrite($fd, '}'); //close for FeatureCollection
@@ -1518,7 +1522,8 @@ private static function _getGeoJsonFeature($record, $extended=false, $simplify=f
             
             
             if(count($path['coordinates'])>0){
-                $geovalues[] = $path;    
+                $geovalues[] = $path;
+                $geovalues_dty[] = 'Path';    
             }
         }
     }//if search for linked values
@@ -1531,7 +1536,7 @@ private static function _getGeoJsonFeature($record, $extended=false, $simplify=f
         }
         if($separate_geo_by_dty){
             $res['geometries'] = $geovalues;
-            $res['geometries_dty'] = $geovalues_dty; //dty_ID 
+            $res['geometries_dty'] = $geovalues_dty; //dty_ID                 
         }
     }
 
