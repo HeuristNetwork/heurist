@@ -233,7 +233,7 @@ function editCMS2(website_document){
                                     +(isWebPage
                                     ?('<div style="padding:20px"><a href="#" class="btn-website-edit">'
                                         +'<span class="ui-icon ui-icon-pencil"/>&nbsp;Configure webpage</a></div>')
-                                    :'<h2 class="truncate"></h2>')
+                                    :'<h3 class="truncate" style="margin-block-start: 0.7em; margin-block-end: 0.7em;"></h3>')
                                     +'<span style="float:left;" class="heurist-helper1 page_tree">'
                                         +'Drag elements to re-order</span>'
                                     +'<span style="float:right" class="heurist-helper1 page_tree">'
@@ -245,7 +245,7 @@ function editCMS2(website_document){
                                         
                                 +'</div>'
                             
-                                +'<div class="treePage ent_content_full" style="top:70px;padding:10px;border-top:1px solid gray"/>' //treeview - edit page
+                                +'<div class="treePage ent_content_full" style="top:30px;padding:10px;border-top:1px solid gray"/>' //treeview - edit page
                                 +'<div class="propertyView ent_content_full ui-widget-content-gray" '
                                     +' style="top:190px;padding:10px 0px;display:none;"/>' //edit properties for element
                                 
@@ -528,7 +528,7 @@ function editCMS2(website_document){
                 }
             ];            
             
-            var sMsg = '"'+ _editor_panel.find('.treePageHeader > h2').text() +'" '+window.hWin.HR('page has been modified');
+            var sMsg = '"'+ _editor_panel.find('.treePageHeader > h3').text() +'" '+window.hWin.HR('page has been modified');
             $dlg = window.hWin.HEURIST4.msg.showMsgDlg(sMsg, _buttons, {title:window.hWin.HR('Page changed')});   
 
             return true;     
@@ -646,7 +646,7 @@ var sMsg = '<p>Heurist\'s CMS editor has been upgraded to a new system which is 
             _layout_content = res;
             _initTreePage(_layout_content);
         }
-        _editor_panel.find('.treePageHeader > h2')
+        _editor_panel.find('.treePageHeader > h3')
                 .text( options.record_id==home_page_record_id ? window.hWin.HR('Home Page') :opts.page_name );
         
         if(_editCMS_SiteMenu) _editCMS_SiteMenu.highlightCurrentPage();
@@ -1712,11 +1712,11 @@ function(value){
 
       
         //1. show div with properties over treeview
-        var h = _panel_treePage.find('ul.fancytree-container').height();
+        var h = _panel_treePage.find('ul.fancytree-container').height() + 10;
 
-        h = (h<90)?h:100; 
+        h = (h<200)?h:200; 
         _panel_treePage.css('height',h+'px');//_panel_treePage.hide();
-        _panel_propertyView.css('top',(h+90)+'px');
+        _panel_propertyView.css('top',(h+70)+'px');
         _editor_panel.find('.page_tree').hide();
         _editor_panel.find('.element_edit').show();
         _toolbar_Page.hide();
@@ -1726,13 +1726,23 @@ function(value){
             _keep_EditPanelWidth = _ws_body.layout().state['west']['outerWidth'];
             _ws_body.layout().sizePane('west', 400);    
         }
+
+        // move 'website help' link, after property panel is shown
+        setTimeout(() => {
+            _editor_panel.find('.element_edit').position({
+                my: 'left+5 bottom-5',
+                at: 'left top',
+                of: _panel_propertyView
+            });
+        }, 100);
         
         //scroll tree that selected element will be visible
         var node = _panel_treePage.fancytree('getTree').getNodeByKey(ele_id);
         var top1 = $(node.li).position().top;
-        if(_panel_treePage[0].scrollTop+h<top1){
-            _panel_treePage[0].scrollTop = top1;    
-        }
+        /*if(_panel_treePage[0].scrollTop+h<top1){
+            setTimeout(()=>{ _panel_treePage[0].scrollTop = top1; }, 500); console.log(_panel_treePage[0].scrollTop, top1);
+        }*/
+        _panel_treePage.animate({scrollTop: $(node.li).offset().top}, 1);
         _panel_treePage.find('span.fancytree-title').css({'font-style':'normal','text-decoration':'none'});
         $(node.li).find('.fancytree-node').removeClass('fancytree-active');
         $(node.li).find('span.fancytree-title:first').css({'font-style':'italic','text-decoration':'underline'}); //
