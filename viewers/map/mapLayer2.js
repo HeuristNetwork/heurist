@@ -458,7 +458,23 @@ function hMapLayer2( _options ) {
 
                 $.each(layer_themes, function(i,item){
                     if(item.geofield){
-                        layer_geofields.push(item.geofield);
+                        //geo field can be 2 types
+                        //1. code request (rt:dt:rt:dt) that alows to drill for geo values in linked records
+                        //2. dty_ID - pointer/resource field 
+                        
+                        if(item.geofield.indexOf(':')>0){
+                            //1. code request
+                            var field = window.hWin.HEURIST4.query.createFacetQuery(item.geofield, true, false);
+                            if(field['facet'] && Object.keys(field['facet']).length>1){
+                                layer_geofields.push({id:field['id'],q:field['facet']}); //in linked records
+                            }else{
+                                layer_geofields.push({id:field['id']}); //in main record
+                            }
+                        }else{
+                            //2. pointer field
+                            layer_geofields.push(item.geofield);    
+                        }
+                        
                         layer_default_style = item.symbol?item.symbol:item;
                         return false;       
                     }else if(!item.fields){

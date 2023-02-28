@@ -2732,7 +2732,7 @@ function recordSearch($system, $params)
                     //description of recordtype and used detail types
                     $rectype_structures = dbs_GetRectypeStructures($system, $rectypes, 1); //no groups
                 }
-
+                
                 //"query"=>$query,
                 $response = array('status'=>HEURIST_OK,
                     'data'=> array(
@@ -3244,6 +3244,74 @@ function recordSearchGeoDetails($system, $recID, $find_geo_by_linked_rty, $find_
         }
     }
     return $details;
+}
+
+//replace $IDS in $query to $recID
+function __fillQuery(&$q, $recID){
+    foreach ($q as $idx=>$predicate){
+
+        foreach ($predicate as $key=>$val)
+        {
+                if( is_array($val)){
+                    __fillQuery($val, $recID);
+                    $q[$idx][$key] = $val;
+                }else if( is_string($val) && $val == '$IDS') {
+                    //substitute with array of ids
+                    $q[$idx][$key] = $recID;
+                }
+        }
+    }
+}  
+//
+//
+//
+function recordSearchLinkedDetails($system, $recID, $dty_IDs, $query) {
+    
+
+    $mysqli = $system->get_mysqli();
+    
+    __fillQuery($query, $recID);
+    
+    if(is_string($dty_IDs)){
+        $dty_IDs = explode(',',$dty_IDs);
+    }else if(is_numeric($dty_IDs)){
+        $dty_IDs = array($dty_IDs);
+    }
+    
+    //create query
+    $recs = recordSearch($system, array('detail'=>'ids', 'q'=>$query));    
+    $res = array();
+    foreach($recs['data']['records'] as $recid){
+        $rec = array('rec_ID'=>$recid);
+        recordSearchDetails($system, $rec, $dty_IDs);
+        foreach($rec['details'] as $dty_ID=>$field_details){
+            if(!@$res[$dty_ID]){
+                $res[$dty_ID] = $field_details;     
+            }else{
+                foreach ($field_details as $dtl_ID=>$value){
+                    $res[$dty_ID][$dtl_ID] = $value;
+                }
+            }
+        }
+        
+        //$res = array_merge($res, $rec['details']);
+    }
+        
+/*    
+    foreach($recs['data']['records'] as $recid=>$record){
+        foreach ($record['d'] as $dty_ID=>$field_details){
+            foreach ($field_details as $dtl_ID=>$value){
+                if(@$value['geo']){
+                    $value['geo']['placeID'] = $recid;
+                    if(!@$res[$dty_ID]) $res[$dty_ID] = array();
+                    $res[$dty_ID][$dtl_ID] = $value;
+                }
+            }
+        }
+    }
+*/    
+    return $res;
+
 }
 
 //

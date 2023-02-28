@@ -1578,114 +1578,15 @@ $.widget( "heurist.search_faceted_wiz", {
                 //title
                 //help tip (take from rectype structure?)
                 //type of facet (radio group)
-                var removeFacet = false;
-                var harchy = [];
-                var harchy_fields = []; //for facet.title
-                var codes = facets[k]['code'].split(':');
-                var j = 0;
-                while(j<codes.length){
-                    var rtid = codes[j];
-                    var dtid = codes[j+1];
-                    
-                    if(rtid.indexOf(',')>0){
-                        rtid = rtid.split(',')[0];
-                    }
-                    
-                    if($Db.rty(rtid)==null){
-                        //record type was removed - remove facet
-                        removeFacet = true;
-                        break;
-                    }
-                    
-                    harchy.push('<b>'+$Db.rty(rtid,'rty_Name')+'</b>');
-                    
-                    if(j==0 && dtid=='title'){
-                       harchy_fields.push('Constructed record title');
-                    }else
-                    if(dtid=='modified'){
-                       harchy_fields.push("Modified"); 
-                    }else if(dtid=='added'){
-                       harchy_fields.push("Added"); 
-                    }else if(dtid=='ids'){
-                       harchy_fields.push("Record ID"); 
-                    }else if(dtid=='typeid' || dtid=='t'){
-                       harchy_fields.push("Type ID"); 
-                    }else if(dtid=='typename'){ //record type name rty_Name
-                       harchy_fields.push("Type Name"); 
-                    }else if(dtid=='addedby'){
-                       harchy_fields.push("Creator"); 
-                    }else if(dtid=='owner'){
-                       harchy_fields.push("Record Owner"); 
-                    }else if(dtid=='access'){
-                       harchy_fields.push("Record Visibility"); 
-                    }else if(dtid=='notes'){
-                       harchy_fields.push("Notes"); 
-                    }else if(dtid=='url'){
-                       harchy_fields.push("URL"); 
-                    }else if(dtid=='tag'){
-                       harchy_fields.push("Tags"); 
-                    }
-                    
-                    if(dtid.indexOf('r.')==0){
-                        dtid = dtid.substr(2);
-                    }
-                    
-                    var linktype = dtid.substr(0,2);                                
-                    if(isNaN(Number(linktype))){
-                        dtid = dtid.substr(2);
-                        
-                        if(dtid>0){
-                        
-                            
-                        if(linktype=='lt' || linktype=='rt'){
-                            
-                            var sFieldName = $Db.rst(rtid, dtid, 'rst_DisplayName');
-                            
-                            if(window.hWin.HEURIST4.util.isempty(sFieldName)){
-                                //field was removed - remove facet
-                                removeFacet = true;
-                                break;
-                            }
-                            
-                            harchy.push(' . '+sFieldName+' &gt ');
-                            harchy_fields.push(sFieldName);
-                        }else{
-                            var from_rtid = codes[j+2];
-
-                            var sFieldName = $Db.rst(from_rtid, dtid, 'rst_DisplayName');
-                            
-                            if(window.hWin.HEURIST4.util.isempty(sFieldName)){
-                                //field was removed - remove facet
-                                removeFacet = true;
-                                break;
-                            }
-                            
-                            harchy.push(' &lt '+sFieldName+' . ');
-                        }
-                        
-                        }//dtid>0
-                        
-                    }else{
-
-                        var sFieldName = $Db.rst(rtid, dtid, 'rst_DisplayName');
-                        
-                        if(window.hWin.HEURIST4.util.isempty(sFieldName)){
-                            //field was removed - remove facet
-                            removeFacet = true;
-                            break;
-                        }
-                        
-                        harchy.push(' . '+sFieldName);
-                        harchy_fields.push(sFieldName);
-                    }
-                    j = j+2;
-                }//while codes
+                var resh = $Db.getHierarchyTitles(facets[k]['code']);
                 
-                if(removeFacet){
+                if(!resh){ //remove facet - one of record type is missed
                     facets.splice(k,1);
                     continue;
                 }
                 
+                var harchy = resh.harchy;
+                var harchy_fields = resh.harchy_fields;
                 
                 var idd = facets[k]['var'];
                 
