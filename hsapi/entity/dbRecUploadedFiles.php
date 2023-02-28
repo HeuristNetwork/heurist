@@ -829,6 +829,7 @@ When we open "iiif_image" in mirador viewer we generate manifest dynamically.
         }
         else if(@$this->data['delete_unused']){ // delete file records not in use
 
+            $where_clause = 'WHERE dtl_ID IS NULL';
             if(is_array($ids) && count($ids) > 0){ // multiple
                 $where_clause .= ' AND ulf_ID IN (' . implode(',', $ids) . ')';
             }else if(is_int($ids) && $ids > 0){ // single
@@ -844,7 +845,14 @@ When we open "iiif_image" in mirador viewer we generate manifest dynamically.
 
                 if($res === true){
                     $ret = count($to_delete);
+                }else{
+                    $ret = false;
                 }
+            }else if($mysqli->error == ''){ // no un-used files to delete
+                $ret = 0;
+            }else{ // error
+                $ret = false;
+                $this->system->addError(HEURIST_ERROR, 'Unable to retrieve ids of un-used files.');
             }
         }
         else if(@$this->data['regExternalFiles']){ // attempt to register multiple URLs at once, and return necessary information for record editor
@@ -941,6 +949,8 @@ When we open "iiif_image" in mirador viewer we generate manifest dynamically.
 
             $local_fixes = 0;
             $remote_fixes = 0;
+            $dif_local_fixes = 0;
+            $to_delete = array(); // array(new_ulf_id => array(dup_ulf_ids))
 
             if(is_array($ids) && count($ids) > 0){ // multiple
                 $where_ids .= ' AND ulf_ID IN (' . implode(',', $ids) . ')';
@@ -970,11 +980,21 @@ When we open "iiif_image" in mirador viewer we generate manifest dynamically.
 
                     $new_ulf_id = array_shift($dups_ids);
                     $upd_query = 'UPDATE recDetails set dtl_UploadedFileID='.$new_ulf_id.' WHERE dtl_UploadedFileID in ('.implode(',',$dups_ids).')';
-                    $del_query = 'DELETE FROM recUploadedFiles where ulf_ID in ('.implode(',',$dups_ids).')';
-
                     $mysqli->query($upd_query);
-                    $mysqli->query($del_query);
+
+                    if($mysqli->error !== ''){
+                        $ret = false;
+                        $this->system->addError(HEURIST_DB_ERROR, $mysqli->error);
+                        break;
+                    }else if($mysqli->affected_rows == 0){
+                        continue;
+                    }
+
+                    $to_delete[$new_ulf_id] = $dups_ids;
+
                     $local_fixes = $local_fixes + count($dups_ids);
+                    //$del_query = 'DELETE FROM recUploadedFiles where ulf_ID in ('.implode(',',$dups_ids).')';
+                    //$mysqli->query($del_query);
                 }
                 $local_dups->close();
             }
@@ -998,18 +1018,144 @@ When we open "iiif_image" in mirador viewer we generate manifest dynamically.
                     $res->close();
 
                     $new_ulf_id = array_shift($dups_ids);
-                    $upd_query = 'UPDATE recDetails set dtl_UploadedFileID='.$new_ulf_id.' WHERE dtl_UploadedFileID in ('.implode(',',$dups_ids).')';
-                    $del_query = 'DELETE FROM recUploadedFiles where ulf_ID in ('.implode(',',$dups_ids).')';
 
+                    $upd_query = 'UPDATE recDetails set dtl_UploadedFileID='.$new_ulf_id.' WHERE dtl_UploadedFileID in ('.implode(',',$dups_ids).')';
                     $mysqli->query($upd_query);
-                    $mysqli->query($del_query);
+
+                    if($mysqli->error !== ''){
+                        $ret = false;
+                        $this->system->addError(HEURIST_DB_ERROR, $mysqli->error);
+                        break;
+                    }else if($mysqli->affected_rows == 0){
+                        continue;
+                    }
+
+                    $to_delete[$new_ulf_id] = $dups_ids;
+
                     $remote_fixes = $remote_fixes + count($dups_ids); 
+                    //$del_query = 'DELETE FROM recUploadedFiles where ulf_ID in ('.implode(',',$dups_ids).')';
+                    //$mysqli->query($del_query);
                 }
 
                 $remote_dups->close();
             }
 
-            $ret = array('local' => $local_fixes, 'remote' => $remote_fixes);
+            $query = 'SELECT ulf_OrigFileName, count(*) AS cnt '
+            . 'FROM recUploadedFiles '
+            . 'WHERE ulf_OrigFileName IS NOT NULL AND ulf_OrigFileName<>"_remote" AND ulf_OrigFileName NOT LIKE "_iiif%"'. $where_ids . ' '
+            . 'GROUP BY ulf_OrigFileName HAVING cnt > 1';
+            $local_dups = $mysqli->query($query);
+
+            if($local_dups && $local_dups->num_rows > 0){
+
+                while($local_file = $local_dups->fetch_row()){
+
+                    $dup_query = 'SELECT ulf_ID, ulf_FilePath, ulf_FileName FROM recUploadedFiles WHERE ulf_OrigFileName="'.$mysqli->real_escape_string($local_file[0]).'"';
+                    $dup_local_files = $mysqli->query($dup_query);
+            
+                    $dups_files = array(); //ulf_ID => path, size, md, array(dup_ulf_ids)
+                    
+                    while ($file_dtls = $dup_local_files->fetch_assoc()) {
+                        
+                        //compare files 
+                        if(@$file_dtls['ulf_FilePath']==null){
+                            $res_fullpath = $file_dtls['ulf_FileName'];
+                        }else{
+                            $res_fullpath = resolveFilePath( $file_dtls['ulf_FilePath'].$file_dtls['ulf_FileName'] ); //see db_files.php
+                        }
+                       
+                        
+                        $f_size = filesize($res_fullpath);
+                        $f_md5 = md5_file($res_fullpath);
+                        $is_unique = true;
+                        foreach ($dups_files as $ulf_ID => $file_arr){ 
+                            if ($file_arr['size'] == $f_size && $file_arr['md5'] == $f_md5){ // same file
+                                $is_unique = false;
+                                $dups_files[$ulf_ID]['dups'][] = $file_dtls['ulf_ID'];
+                                break;
+                            }
+                        }
+                        if($is_unique){
+                            $dups_files[$file_dtls['ulf_ID']] = array('path'=>$res_fullpath, 'md5'=>$f_md5, 'size'=>$f_size, 'dups'=>array());
+                        }
+                    }
+                    $dup_local_files->close();
+
+                    foreach ($dups_files as $ulf_ID => $file_arr) {
+                        if(count($file_arr['dups']) > 0){
+
+                            $dup_ids = implode(',', $file_arr['dups']);
+                            $upd_query = 'UPDATE recDetails SET dtl_UploadedFileID='.$ulf_ID.' WHERE dtl_UploadedFileID IN (' . $dup_ids .')';
+                            $affected_rows = $mysqli->query($upd_query);
+
+                            if($mysqli->error !== ''){
+                                $ret = false;
+                                $this->system->addError(HEURIST_DB_ERROR, $mysqli->error);
+                                break;
+                            }else if($mysqli->affected_rows == 0){
+                                continue;
+                            }
+
+                            $to_delete[$ulf_ID] = $file_arr['dups'];
+                            $dif_local_fixes = $dif_local_fixes + count($file_arr['dups']);
+                        }
+                    }
+                }
+            }
+
+            // Add existing descriptions in dup records to new main record, then delete
+            if($ret && count($to_delete) > 0){
+                foreach ($to_delete as $ulf_ID => $d_ids) {
+
+                    $dup_ids = $d_ids;
+                    if(is_array($dup_ids)){
+                        $dup_ids = implode(',', $dup_ids);
+                        $to_delete[$ulf_ID] = $dup_ids;
+                    }
+
+                    // Concat descriptions
+                    $query = 'SELECT ulf_Description FROM recUploadedFiles WHERE ulf_ID IN (' . $dup_ids . ') AND ulf_Description != ""';
+                    $res = $mysqli->query($query);
+                    $extra_desc = "";
+
+                    if($mysqli->error != ''){
+                        $this->system->addError(HEURIST_DB_ERROR, $mysqli->error);
+                        $ret = false;
+                        break;
+                    }else if(!$res){
+                        $this->system->addError(HEURIST_DB_ERROR, 'An unknown error occurred');
+                        $ret = false;
+                        break;
+                    }
+
+                    while($file_desc = $res->fetch_row()){
+                        $extra_desc .= $file_desc[0] . "\n";
+                    }
+
+                    $query = 'SELECT ulf_Description FROM recUploadedFiles WHERE ulf_ID = ' . $ulf_ID;
+                    $res = $mysqli->query($query);
+
+                    if($mysqli->error == ''){
+                        $desc = $res->fetch_row()[0];
+                        if(!empty($desc)){
+                            $extra_desc = $desc . "\n" . $extra_desc;
+                        }
+                    }
+
+                    if(!empty($extra_desc)){
+                        $upd_query = 'UPDATE recUploadedFiles SET ulf_Description ="'. $extra_desc .'" WHERE ulf_ID=' . $ulf_ID;
+                        $mysqli->query($upd_query);
+                    }
+                }
+
+                // Delete files
+                $this->data[$this->primaryField] = $to_delete;
+                $ret = $this->delete();
+            }
+
+            if($ret){
+                $ret = array('local' => $local_fixes, 'remote' => $remote_fixes, 'location_local' => $dif_local_fixes);
+            }
         }
 
         if($ret===false){

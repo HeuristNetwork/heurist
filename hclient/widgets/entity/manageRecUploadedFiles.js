@@ -811,9 +811,7 @@ $.widget( "heurist.manageRecUploadedFiles", $.heurist.manageEntity, {
             recTitle = '<div class="item" style="width:auto">'+fld('ulf_OrigFileName')+' &nbsp;&nbsp; [ '+fld('ulf_FilePath')+' ] &nbsp;&nbsp; [ '+fld('ulf_FileSizeKB')+'KB ]</div>';
         }
         
-        var recIcon = '';//@todo take default icon from extnstions table and or for default image/audio/video
-
-
+        var recIcon = '';//@todo take default icon from extensions table and or for default image/audio/video
         
         var html_thumb = '<div class="recTypeThumb realThumb" style="background-image: url(&quot;'+ 
         window.hWin.HAPI4.baseURL + '?db=' + window.hWin.HAPI4.database + '&thumb='+
@@ -828,7 +826,7 @@ window.hWin.HAPI4.baseURL+'?db=' + window.hWin.HAPI4.database  //(needplayer?'&p
         var html = '<div class="recordDiv" id="rd'+recID+'" recid="'+recID+'" rectype="'+rectype+'">'
         + html_thumb
         + '<div class="recordSelector"><input type="checkbox" /></div>'
-        + '<div class="recordIcons">' //recid="'+recID+'" bkmk_id="'+bkm_ID+'">'
+        + '<div class="recordIcons" style="display:none;">' //recid="'+recID+'" bkmk_id="'+bkm_ID+'">'
         +     '<img src="'+window.hWin.HAPI4.baseURL+'hclient/assets/16x16.gif'
         +     '" style="background-image: url(&quot;'+recIcon+'&quot;);">'   //class="rt-icon" 
         + '</div>'
@@ -839,7 +837,7 @@ window.hWin.HAPI4.baseURL+'?db=' + window.hWin.HAPI4.database  //(needplayer?'&p
         // add edit/remove action buttons
         if(this.options.select_mode=='manager' && this.options.edit_mode!='none'){
 
-            let style = 'style="height:20px;position:relative;left:-20px"';
+            let style = 'style="height:20px;margin-left:0px;"';
             html = html 
                 + '<div title="Click to edit file" '+style+' role="button" aria-disabled="false" data-key="edit" '
                 +   'class="action-button logged-in-only ui-button ui-widget ui-state-default ui-corner-all ui-button-icon-only">'
@@ -1464,7 +1462,14 @@ window.hWin.HAPI4.baseURL+'?db=' + window.hWin.HAPI4.database  //(needplayer?'&p
         window.hWin.HAPI4.EntityMgr.doRequest(request, 
         function(response){
             if(response.status == window.hWin.ResponseStatus.OK){
-                window.hWin.HEURIST4.msg.showMsgFlash(response.data + ' files deleted', 3000);
+
+                let text = 'No files to delete';
+                if(response.data > 0){
+                    text = response.data + ' file' + (response.data > 1 ? 's' : '') + ' deleted';
+                }
+
+                window.hWin.HEURIST4.msg.showMsgFlash(text, 3000);
+                that.searchForm.searchRecUploadedFiles('searchRecent', null); // refresh
             }else{
                 window.hWin.HEURIST4.msg.showMsgErr(response);
             }
@@ -1493,8 +1498,9 @@ window.hWin.HAPI4.baseURL+'?db=' + window.hWin.HAPI4.database  //(needplayer?'&p
                 let res = response.data;
                 let msg = '';
 
-                if(res.local > 0){
-                    msg = res.local + ' local files processed';
+                if(res.local > 0 || res.location_local > 0){
+                    let local_other = res.location_local > 0 ? res.location_local > 0 : 0;
+                    msg = (res.local + local_other) + ' local files processed';
                 }
                 if(res.remote > 0){
                     msg += (msg == '' ? '<br>' : '') + res.remote + ' remote files processed';
@@ -1505,6 +1511,7 @@ window.hWin.HAPI4.baseURL+'?db=' + window.hWin.HAPI4.database  //(needplayer?'&p
                 }
 
                 window.hWin.HEURIST4.msg.showMsgFlash(msg, 3000);
+                that.searchForm.searchRecUploadedFiles('searchRecent', null); // refresh
             }else{
                 window.hWin.HEURIST4.msg.showMsgErr(response);
             }
