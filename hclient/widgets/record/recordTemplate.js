@@ -61,7 +61,7 @@ $.widget( "heurist.recordTemplate", $.heurist.recordAction, {
     //
     doAction: function(mode){
 
-            var header_fields = {id:'rec_ID',title:'rec_Title',url:'rec_URL',modified:'rec_Modified',tags:'rec_Tags'};
+            var header_fields = {ids:'rec_ID',title:'rec_Title',url:'rec_URL',modified:'rec_Modified',tag:'rec_Tags'};
             function __removeLinkType(dtid){
                 if(header_fields[dtid]){
                     dtid = header_fields[dtid];

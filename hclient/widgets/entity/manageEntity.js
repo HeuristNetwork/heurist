@@ -1415,6 +1415,8 @@ $.widget( "heurist.manageEntity", {
     //
     _getValidatedValues: function(){
         
+        var that = this;
+
         if(this._editing.validate()){
             return this._editing.getValues(false);    
         }else{
@@ -1424,29 +1426,40 @@ $.widget( "heurist.manageEntity", {
                 +((eles.length>1)?(' for '+eles.length+' fields.'):'')
                 ,3000);
                 
-            var ele = $(eles[0]);
+            var $first_ele = $(eles[0]);
 
             // Activate accordion or switch tabs
-            let tabs = ele.parents('div.ui-tabs');
-            let accordion = ele.parents('.ui-accordion');
+            let tabs = $first_ele.parents('div.ui-tabs');
+            let accordion = $first_ele.parents('.ui-accordion');
             if(tabs.length>0 && tabs.tabs('instance')){ // tab separator
-                var idx = ele.parents('fieldset.ui-tabs-panel').attr('data-tabindex');        
+                var idx = $first_ele.parents('fieldset.ui-tabs-panel').attr('data-tabindex');        
                 tabs.tabs('option','active', idx);
             }else if(accordion.length>0 && accordion.accordion('instance')){ // accordion separator
 
-                let accordion_content = $ele.parents('.ui-accordion-content');
+                let accordion_content = $first_ele.parents('.ui-accordion-content');
                 if(!accordion_content.is(':visible')){
                     let id = accordion_content.attr('aria-labelledby');
-                    $.each($ele.parents('.ui-accordion:first').find('.ui-accordion-header'), function(idx, item){ // Find corresponding header
+                    $.each($first_ele.parents('.ui-accordion:first').find('.ui-accordion-header'), function(idx, item){ // Find corresponding header
                         if($(item).attr('id') == id){
-                            $ele.parents('.ui-accordion:first').accordion('option', 'active', idx);
+                            $first_ele.parents('.ui-accordion:first').accordion('option', 'active', idx);
                             return false;
                         }
                     });
                 }
             }
 
-            ele.focus();
+            $first_ele.focus();
+
+            this.editForm.find('.ui-tabs-anchor.ui-state-error').removeClass('ui-state-error');
+            $.each(eles, (idx, ele) => {
+
+                let $ele = $(ele);
+
+                if($ele.parents('fieldset.ui-tabs-panel').length > 0){
+                    let tab_id = $ele.parents('fieldset.ui-tabs-panel').attr('id');
+                    that.editForm.find('a[href="#'+ tab_id +'"]').addClass('ui-state-error');
+                }
+            });
             
             return null;
         }
