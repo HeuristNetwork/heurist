@@ -737,6 +737,10 @@ public static function output($data, $params){
                 }else if (count($record_urls)>0){
                     $record_row[] = implode($csv_delimiter,$record_urls); // two separate columns
                 }
+
+                if($value == '' && $dt_type=="resource" && $include_resource_titles){ // to avoid mismatched rows when adding details
+                    $record_row[] = $value;
+                }
             }
 
         }//for fields
@@ -864,10 +868,13 @@ public static function output_header($data, $params)
     $fields = @$params['prefs']['fields'];
     $details = array();  //array of detail fields included into output
     $relmarker_details = array(); //relmarker fields included into output
+    $fld_type_names = dbs_GetDtLookups();
     
     if(self::$defRecTypes==null) self::$defRecTypes = dbs_GetRectypeStructures(self::$system, null, 2);
     $idx_name = self::$defRecTypes['typedefs']['dtFieldNamesToIndex']['rst_DisplayName'];
     $idx_dtype = self::$defRecTypes['typedefs']['dtFieldNamesToIndex']['dty_Type'];
+    $idx_count = self::$defRecTypes['typedefs']['dtFieldNamesToIndex']['rst_MaxValues'];
+    $idx_require = self::$defRecTypes['typedefs']['dtFieldNamesToIndex']['rst_RequirementType'];
     $idx_term_tree = self::$defRecTypes['typedefs']['dtFieldNamesToIndex']['rst_FilteredJsonTermIDTree'];
     $idx_term_nosel = self::$defRecTypes['typedefs']['dtFieldNamesToIndex']['dty_TermIDTreeNonSelectableIDs'];
     
@@ -875,6 +882,7 @@ public static function output_header($data, $params)
     //create header
     $any_rectype = null;
     $headers = array();
+    $fld_details = array();
     $terms_pickup = array();
     if($fields){
         foreach($fields as $rt=>$flds){
@@ -889,6 +897,7 @@ public static function output_header($data, $params)
             
             $details[$rt] = array();
             $headers[$rt] = array();
+            $fld_details[$rt] = array();
             $relmarker_details[$rt] = array();
             
             foreach($flds as $dt_id){
@@ -944,6 +953,21 @@ public static function output_header($data, $params)
                     }
                 }
     
+                $fld = self::$defRecTypes['typedefs'][$rt]['dtFields'][$dt_id];
+                $count = $fld[$idx_count] != 1 ? 'Multivalue' : 'Single';
+                $typename = !empty($fld_type_names[$field_type]) ? $fld_type_names[$field_type] : 'Built-in';
+                $requirement = $fld[$idx_require];
+
+                if($requirement == ''){
+                    if($dt_id == 'rec_ID'){ 
+                        $requirement = 'required';
+                    }else{
+                        $requirement = 'optional';
+                    }
+                }
+
+                array_push($fld_details[$rt], array($field_name, $typename, $count, ucfirst($requirement)));
+
                 if($field_type=='enum' || $field_type=='relationtype'){
 
                     array_push($headers[$rt], $field_name);  //labels are always included           
@@ -1003,7 +1027,8 @@ public static function output_header($data, $params)
                 
                 foreach($terms_pickup[$rty_ID] as $dtid => $field){
                     $headers[$rty_ID][] = $field['name'].': Lookup list';
-                    $placeholders[] = $field['name'].'. Use to create value control lists';
+                    $placeholders[] = strtoupper($field['name']);
+                    $ph_help[] = '<Use to create value control lists>';
                     //get list of terms
                     $vocabId = $field['term_ids'];
                     $terms = $defTerms->treeData($vocabId, 3);
@@ -1020,10 +1045,19 @@ public static function output_header($data, $params)
             fputcsv($fd, $headers[$rty_ID], $csv_delimiter, $csv_enclosure);
             fwrite($fd, "\n\n");
               
+            //write field details
+            if(array_key_exists($rty_ID, $fld_details)){
+                foreach ($fld_details[$rty_ID] as $details) {
+                    fputcsv($fd, $details, $csv_delimiter, $csv_enclosure);
+                }
+                fwrite($fd, "\n\n");
+            }
+
             //write terms
             if($placeholders!=null){
                 
                 fputcsv($fd, $placeholders, $csv_delimiter, $csv_enclosure);
+                fputcsv($fd, $ph_help, $csv_delimiter, $csv_enclosure);
             
                 $k = 0;
                 while ($k<$max_count){
