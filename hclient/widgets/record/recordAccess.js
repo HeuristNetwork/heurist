@@ -81,117 +81,119 @@ $.widget( "heurist.recordAccess", $.heurist.recordAction, {
     //    
     _fillAccessControls: function(){
 
+        var that = this;
+        let groups = window.hWin.HAPI4.is_admin() ? 'all_users_and_groups' : null;
+
         var fieldSelect = this.element.find('#sel_Ownership');
-        window.hWin.HEURIST4.ui.createUserGroupsSelect(fieldSelect[0], null,  //take groups of current user
-                [{key:0, title:'Any logged-in user'},
-                 {key:'current_user', title:'Current user'},
-                 {key:window.hWin.HAPI4.currentUser['ugr_ID'], title:window.hWin.HAPI4.currentUser['ugr_FullName']}
-                 ]);
-        
-        fieldSelect = window.hWin.HEURIST4.ui.initHSelect(fieldSelect, false);
-        
-        this._off(fieldSelect,'change');
-        this._off( this.element.find('input[name="rb_Owner"]'),'change');
-        this._off( this.element.find('input[name="rb_Access"]'),'change');
-        
-              
-        this._on(fieldSelect,{change:
-            function(){
-                if(fieldSelect.val()==0){
-                    this.element.find('.access-hidden').hide();   
-                    if(!this.element.find('#rb_Access-public').is(':checked'))
-                        this.element.find('#rb_Access-viewable').prop('checked', true); 
-                }else{
-                    this.element.find('.access-hidden').show();    
+        window.hWin.HEURIST4.ui.createUserGroupsSelect(fieldSelect[0], groups,
+            [{key:0, title:'Any logged-in user'}, {key:'current_user', title:'Current user'}], () => {
+
+                fieldSelect = window.hWin.HEURIST4.ui.initHSelect(fieldSelect, false);
+                
+                that._off(fieldSelect,'change');
+                that._off( that.element.find('input[name="rb_Owner"]'),'change');
+                that._off( that.element.find('input[name="rb_Access"]'),'change');
+
+                that._on(fieldSelect,{change:
+                    function(){
+                        if(fieldSelect.val()==0){
+                            that.element.find('.access-hidden').hide();   
+                            if(!that.element.find('#rb_Access-public').is(':checked'))
+                                that.element.find('#rb_Access-viewable').prop('checked', true); 
+                        }else{
+                            that.element.find('.access-hidden').show();    
+                        }
+                        that._onRecordScopeChange();
+                        
+                    }
+                });
+                
+                //define group selector for edit
+                var ele = that.element.find('#sel_OwnerGroups');
+                /*
+                if(!ele.editing_input('instance')){
+                    ele.empty();
+                    this._createGroupSelectorElement('sel_OwnerGroups', null);    
                 }
-                this._onRecordScopeChange();
+                */
+                ele.hide();    
                 
-            }
-        });
-        
-        //define group selector for edit
-        var ele = this.element.find('#sel_OwnerGroups');
-        /*
-        if(!ele.editing_input('instance')){
-            ele.empty();
-            this._createGroupSelectorElement('sel_OwnerGroups', null);    
-        }
-        */
-        ele.hide();    
-        
-        
-        //define group selector for access
-        var ele = this.element.find('#sel_AccessGroups');
-        if(!ele.editing_input('instance')){
-            ele.empty();
-            this._createGroupSelectorElement('sel_AccessGroups', this.options.currentAccessGroups);    
-        }
-        //ele.hide();    
-
-        if(!window.hWin.HEURIST4.util.isempty(this.options.currentOwner) || this.options.currentOwner==0){
-            
-            fieldSelect.val(this.options.currentOwner);
-            if( fieldSelect.val()==null && this.options.currentOwner){
-                var editors = this.options.currentOwner.split(',');
-                fieldSelect.val(editors[0]);
-            }
-            if( fieldSelect.val()==null ){
-                fieldSelect.val( window.hWin.HAPI4.currentUser['ugr_ID'] );
-            }
-            
-            /* multigroup edit option
-            if(this.options.currentOwner==0){
-                this.element.find('#rb_Owner-everyone').prop('checked', true);    
-            }else if(this.options.currentOwner == window.hWin.HAPI4.currentUser['ugr_ID']){
-                this.element.find('#rb_Owner-user').prop('checked', true);    
-            }else{
-                this.element.find('#rb_Owner-group').prop('checked', true);    
-                this.element.find('#sel_OwnerGroups').show().editing_input('setValue', [this.options.currentOwner]);
-            }
-            */
-        }
-        fieldSelect.hSelect('refresh');
-
-        
-        if(this.options.currentAccess){
-            //fieldSelect.val(this.options.currentOwner);
-            
-            if( this.options.currentAccess=='hidden'){
-                //|| (this.options.currentAccess=='viewable' && this.options.currentAccessGroups)){
-                this.element.find('#rb_Access-hidden').prop('checked', true); //was viewable-group
-                this.element.find('#div_AccessGroups').show();//css({display:'table-row'});
-                this._adjustHeight();
-            }else{
-                this.element.find('#rb_Access-'+this.options.currentAccess).prop('checked', true);
                 
+                //define group selector for access
+                var ele = that.element.find('#sel_AccessGroups');
+                if(!ele.editing_input('instance')){
+                    ele.empty();
+                    that._createGroupSelectorElement('sel_AccessGroups', that.options.currentAccessGroups);    
+                }
+                //ele.hide();    
+
+                if(!window.hWin.HEURIST4.util.isempty(that.options.currentOwner) || that.options.currentOwner==0){
+                    
+                    fieldSelect.val(that.options.currentOwner);
+                    if( fieldSelect.val()==null && that.options.currentOwner){
+                        var editors = that.options.currentOwner.split(',');
+                        fieldSelect.val(editors[0]);
+                    }
+                    if( fieldSelect.val()==null ){
+                        fieldSelect.val( window.hWin.HAPI4.currentUser['ugr_ID'] );
+                    }
+                    
+                    /* multigroup edit option
+                    if(this.options.currentOwner==0){
+                        this.element.find('#rb_Owner-everyone').prop('checked', true);    
+                    }else if(this.options.currentOwner == window.hWin.HAPI4.currentUser['ugr_ID']){
+                        this.element.find('#rb_Owner-user').prop('checked', true);    
+                    }else{
+                        this.element.find('#rb_Owner-group').prop('checked', true);    
+                        this.element.find('#sel_OwnerGroups').show().editing_input('setValue', [this.options.currentOwner]);
+                    }
+                    */
+                }
+                fieldSelect.hSelect('refresh');
+
+                
+                if(that.options.currentAccess){
+                    //fieldSelect.val(this.options.currentOwner);
+                    
+                    if( that.options.currentAccess=='hidden'){
+                        //|| (this.options.currentAccess=='viewable' && this.options.currentAccessGroups)){
+                        that.element.find('#rb_Access-hidden').prop('checked', true); //was viewable-group
+                        that.element.find('#div_AccessGroups').show();//css({display:'table-row'});
+                        that._adjustHeight();
+                    }else{
+                        that.element.find('#rb_Access-'+that.options.currentAccess).prop('checked', true);
+                        
+                    }
+                }
+                
+                that._on( that.element.find('input[name="rb_Owner"]'),{change:function(){
+                    
+                    if(that.element.find('#rb_Owner-group').prop('checked')){
+                        that.element.find('#sel_OwnerGroups').show();
+                    }else{
+                        that.element.find('#sel_OwnerGroups').hide();
+                    }
+                    
+                    that._onRecordScopeChange();
+                    
+                }});
+                
+                that._on( that.element.find('input[name="rb_Access"]'), {change:function(){
+                    
+                    if(that.element.find('#rb_Access-hidden').prop('checked')){ //was viewable-group
+                        that.element.find('#div_AccessGroups').show();//css({display:'table-row'});
+                    }else{
+                        that.element.find('#div_AccessGroups').hide();
+                    }
+                    
+                    that._adjustHeight();
+                   
+                    that._onRecordScopeChange();
+                }});
+
+                that._onRecordScopeChange();
             }
-        }
-        
-        this._on( this.element.find('input[name="rb_Owner"]'),{change:function(){
-            
-            if(this.element.find('#rb_Owner-group').prop('checked')){
-                this.element.find('#sel_OwnerGroups').show();
-            }else{
-                this.element.find('#sel_OwnerGroups').hide();
-            }
-            
-            this._onRecordScopeChange();
-            
-        }});
-        
-        this._on( this.element.find('input[name="rb_Access"]'), {change:function(){
-            
-            if(this.element.find('#rb_Access-hidden').prop('checked')){ //was viewable-group
-                this.element.find('#div_AccessGroups').show();//css({display:'table-row'});
-            }else{
-                this.element.find('#div_AccessGroups').hide();
-            }
-            
-            this._adjustHeight();
-           
-            this._onRecordScopeChange();
-        }});
-        
+        );
     },
     
     _adjustHeight: function(){
