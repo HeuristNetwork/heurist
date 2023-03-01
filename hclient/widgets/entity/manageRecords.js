@@ -3007,7 +3007,8 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
             var available_groups = ['group', 'group_break', 'tabs', 'tabs_new', 'accordion', 'accordion_inner', 'expanded', 'expanded_inner'];
 
             var has_rec_access = window.hWin.HAPI4.has_access(this._getField('rec_OwnerUGrpID'));
-            //var cur_record = that._currentEditRecordset.getFirstRecord();
+            var cur_record = that._currentEditRecordset.getFirstRecord();
+            let rty_ConceptCode = $Db.getConceptID('rty', this._currentEditRecTypeID);
 
             for(var k=0; k<s_fields.length; k++){
 
@@ -3054,6 +3055,7 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
                     let fld_vis = $Db.rst(this._currentEditRecTypeID, dtFields['dt_ID'], 'rst_NonOwnerVisibility'); 
                     //let fld_vis_status = that._currentEditRecordset.getFieldVisibilites(cur_record, dtFields['dt_ID']);
                     let hide_fld = fld_vis == 'hidden' && !has_rec_access;
+                    let dty_ConceptCode = $Db.getConceptID('dty', dtFields['dt_ID']);
 
                     if(hide_fld){
                         continue;
@@ -3069,6 +3071,15 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
                         max_length_fields.push(dtFields['dt_ID']);
                     }else if(dtFields['dty_Type'] == 'enum' && dtFields['rst_TermsAsButtons'] == 1){
                         terms_as_buttons.push(dtFields['dt_ID']);
+                    }
+
+                    // Concat multi-value page content fields into one
+                    if(rty_ConceptCode == '99-52' && dty_ConceptCode == '2-4'){
+                        let fld_value = that._currentEditRecordset.values(cur_record, dtFields['dt_ID']); //fld
+
+                        if(fld_value != null && fld_value.length > 1){
+                            that._currentEditRecordset.setFld(cur_record, dtFields['dt_ID'], fld_value.join('')); 
+                        }
                     }
                 }
             }//for s_fields
@@ -3445,10 +3456,12 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
 
                 var hasValue = false, hasDtlField = false, hasScript = false;
 
+                let rty_ConceptCode = $Db.getConceptID('rty', this._currentEditRecTypeID);
                 //verify max lengtn in 64kB per value
                 for (var dtyID in fields){
                     if(parseInt(dtyID)>0){
                         
+                        let dty_ConceptCode = $Db.getConceptID('dty', dtyID);
                         var dt = $Db.dty(dtyID, 'dty_Type');
                         hasDtlField = true;
                         if(dt=='geo' || dt=='file') continue;
@@ -3460,6 +3473,31 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
                         hasValue = true;
                         if(!$.isArray(values)) values = [values];
 
+                        // Split CMS MenuPage's Page content into several values
+                        if(rty_ConceptCode == '99-52' && dty_ConceptCode == '2-4'){
+
+                            let complete_value = values.join(''); //
+
+                            let len = window.hWin.HEURIST4.util.byteLength(complete_value);
+                            let len2 = complete_value.length;
+                            let lim = (len-len2<200)?64000:32768;
+
+                            if(len > lim){ // split into parts
+
+                                lim = lim - 1000; //reduce for a bit of room
+                                let parts_count = Math.ceil(len / lim);
+                                let start = 0;
+                                let new_values = []; //new Array(parts_count)
+
+                                for (let i = 0; i < parts_count; i ++){
+                                    new_values.push(complete_value.substr(start, lim));
+                                    start += lim;
+                                }
+
+                                values = new_values;
+                            }
+                        }
+
                         for (var k=0; k<values.length; k++){
                             
                             var len = window.hWin.HEURIST4.util.byteLength(values[k]);
@@ -3468,7 +3506,7 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
                             var lim2 = (len-len2<200)?64:32;
                             
                             if(len>lim){ //65535){  32768
-                                var sMsg = 'The data in field '
+                                var sMsg = 'The data in field ' //+ $Db.rst(that._currentEditRecTypeID, dtyID)
                                 +' exceeds the maximum size for a field of '+lim2+'Kbytes. '
                                 +'Note that this does not mean '+lim2+'K characters, '
                                 +'as Unicode uses multiple bytes per character.';

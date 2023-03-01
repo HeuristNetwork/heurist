@@ -511,10 +511,15 @@ if($website_custom_css!=null){
                            if(response['records'] && response['records'].length>0){
                                var res = response['records'][0]['details'];
                                var keys = Object.keys(res);
-                               for(var idx in keys){
-                                   var key = keys[idx];
-                                   res[key] = res[key][ Object.keys(res[key])[0] ];
-                               }
+                                for(var idx in keys){
+                                    var key = keys[idx];
+
+                                    if(key == DT_EXTENDED_DESCRIPTION){
+                                        res[key] = Object.values(res[key]).join('');
+                                    }else{
+                                        res[key] = res[key][ Object.keys(res[key])[0] ];
+                                    }
+                                }
                                //res[DT_NAME] = res[DT_NAME]
                                //res[DT_NAME, DT_EXTENDED_DESCRIPTION, DT_CMS_SCRIPT, DT_CMS_CSS, DT_CMS_PAGETITLE]
                                page_cache[pageid] = res;

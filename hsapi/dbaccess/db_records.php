@@ -2732,16 +2732,16 @@ function _prepareDetails($system, $rectype, $record, $validation_mode, $recID, $
                     unset($det_required[$dtyID]);
                 }
 
+                $dval['dtl_UploadedFileID'] = $dtl_UploadedFileID;
+                $dval['dtl_Geo'] = $dtl_Geo;
+                $dval['dtl_HideFromPublic'] = $dtl_HideFromPublic;
                 if(count($splitValues)>0){
                     foreach($splitValues as $val){
-                        array_push($insertValues, $val);
+                        $dval['dtl_Value'] = $val;                        
+                        array_push($insertValues, $dval);
                     }
                 }else{
                     $dval['dtl_Value'] = $dtl_Value;
-                    $dval['dtl_UploadedFileID'] = $dtl_UploadedFileID;
-                    $dval['dtl_Geo'] = $dtl_Geo;
-                    $dval['dtl_HideFromPublic'] = $dtl_HideFromPublic;
-
                     array_push($insertValues, $dval);
                 }
             }else{
