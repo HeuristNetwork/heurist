@@ -1,0 +1,54 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html>
+<head>
+<meta http-equiv="Expires" content="Fri, Jan 01 1900 00:00:00 GMT">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Cache-Control" content="no-cache">
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<meta http-equiv="Lang" content="en">
+<meta name="author" content="Ian Johnson">
+<meta http-equiv="Reply-to" content="@.com">
+<meta name="description" content="">
+<meta name="keywords" content="">
+<meta name="creation-date" content="2018-01-01">
+<title>Record Type Title mask</title>
+<link rel="stylesheet" type="text/css" href="../h4styles.css">
+</head>
+    <body>
+
+        <div id="content">
+
+            <h2>Record Type Title Mask</h2>
+
+            <hr>
+            
+                    The title mask builds a composite title from fields in the record (see manual).
+
+                    Field values identified by [ ] are inserted into the mask,<br>
+
+                    e.g. <b>[Title], pp. [Start_Page]-[End_Page] </b> might generate:
+
+                    <b>"Alice in Wonderland, pp. 37-39" </b><br>&nbsp;<br>
+
+                    The element names in square brackets should match field names for this record type.<br>
+
+                    The constructed value is used as the extended title displayed in search results and other lists.<br>
+
+                    To insert a literal square-bracket, use two consecutive square-brackets ([[ or ]]).<br>&nbsp;<br>
+
+                    Add optional text if a value is not available by adding {\Text for existing value \Text for missing value} after a field.<br>
+
+                    e.g. <b>[Starting_date] {\Starting date of: \No starting date}</b> will either generate:<br>
+
+                    <b>"Starting date of: 04-11-1974"</b> or <b>"No starting date"</b> if there isn't Start_date is empty.<br>
+
+                    Additional add a character cap to field values by adding the desire amount within the optional text like so,<br>
+
+                    {<b>50</b> \Text for existing value \Text for missing value} will cause the value, if it exists, to show 50 characters max.<br>&nbsp;<br>
+               
+			
+        </div>
+
+    </body>
+
+</html>
