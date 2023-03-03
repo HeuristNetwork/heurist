@@ -26,7 +26,7 @@ if (!window.hWin.HEURIST4.query)
 
 window.hWin.HEURIST4.query = {
 
-    //--- HEURIST QUERY ROUTINE -------
+    //--- HEURIST QUERY ROUTINES -------
     
     //
     // from object to query string

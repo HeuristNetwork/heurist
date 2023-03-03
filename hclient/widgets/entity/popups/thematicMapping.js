@@ -1,5 +1,5 @@
 /**
-* recordFindDuplicates.js - Find duplicates by record type and selected fields
+* thematicMapping.js - Find duplicates by record type and selected fields
 *                           It uses levenshtein function on server side
 *
 * @package     Heurist academic knowledge management system

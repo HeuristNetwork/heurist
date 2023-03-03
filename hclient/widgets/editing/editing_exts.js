@@ -714,9 +714,6 @@ function editSymbology(current_value, mode_edit, callback){
                                     selectedFields.push(code);
                                     var harchy = $Db.getHierarchyTitles(code);
                                     titles.push(harchy.harchy.join(''));
-                                    
-//var field = window.hWin.HEURIST4.query.createFacetQuery(code, true, false);                                    
-//console.log(code, field['facet']);                                    
                                 }
                             }                            
                             //geofield_input.val(selectedFields.join(','));

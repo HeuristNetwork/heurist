@@ -2199,7 +2199,7 @@ function recordSearch($system, $params)
         if($is_count_only || ($is_ids_only && @$params['needall']) || !$system->has_access() ){ //not logged in
             $search_detail_limit = PHP_INT_MAX;
             $aquery['limit'] = '';
-            $aquery['sort'] = '';
+            if($is_count_only) $aquery['sort'] = '';
             $aquery['offset'] = '';
         }else{
             $search_detail_limit = $system->user_GetPreference('search_detail_limit'); //limit for map/timemap output
@@ -3248,17 +3248,19 @@ function recordSearchGeoDetails($system, $recID, $find_geo_by_linked_rty, $find_
 
 //replace $IDS in $query to $recID
 function __fillQuery(&$q, $recID){
-    foreach ($q as $idx=>$predicate){
+    if(is_array($q)){
+        foreach ($q as $idx=>$predicate){
 
-        foreach ($predicate as $key=>$val)
-        {
-                if( is_array($val)){
-                    __fillQuery($val, $recID);
-                    $q[$idx][$key] = $val;
-                }else if( is_string($val) && $val == '$IDS') {
-                    //substitute with array of ids
-                    $q[$idx][$key] = $recID;
-                }
+            foreach ($predicate as $key=>$val)
+            {
+                    if( is_array($val)){
+                        __fillQuery($val, $recID);
+                        $q[$idx][$key] = $val;
+                    }else if( is_string($val) && $val == '$IDS') {
+                        //substitute with array of ids
+                        $q[$idx][$key] = $recID;
+                    }
+            }
         }
     }
 }  
@@ -3267,21 +3269,16 @@ function __fillQuery(&$q, $recID){
 //
 function recordSearchLinkedDetails($system, $recID, $dty_IDs, $query) {
     
-
-    $mysqli = $system->get_mysqli();
+    $dty_IDs = prepareIds($dty_IDs);
     
-    __fillQuery($query, $recID);
+    __fillQuery($query, $recID);    
     
-    if(is_string($dty_IDs)){
-        $dty_IDs = explode(',',$dty_IDs);
-    }else if(is_numeric($dty_IDs)){
-        $dty_IDs = array($dty_IDs);
-    }
-    
-    //create query
+    //find linked record ids
     $recs = recordSearch($system, array('detail'=>'ids', 'q'=>$query));    
+    $recs = $recs['data']['records'];
+    
     $res = array();
-    foreach($recs['data']['records'] as $recid){
+    foreach($recs as $recid){
         $rec = array('rec_ID'=>$recid);
         recordSearchDetails($system, $rec, $dty_IDs);
         foreach($rec['details'] as $dty_ID=>$field_details){
@@ -3293,25 +3290,40 @@ function recordSearchLinkedDetails($system, $recID, $dty_IDs, $query) {
                 }
             }
         }
-        
-        //$res = array_merge($res, $rec['details']);
     }
+    return $res;
+
+}
+
+//
+// Search details for list of records
+//
+function recordSearchDetailsForRecIds($system, $recIDs, $dty_IDs) {
+
+    $dty_IDs = prepareIds($dty_IDs);
+    
+    $res2 = array();
+    foreach($recIDs as $recid){
+        $rec = array('rec_ID'=>$recid);
+        recordSearchDetails($system, $rec, $dty_IDs);
         
-/*    
-    foreach($recs['data']['records'] as $recid=>$record){
-        foreach ($record['d'] as $dty_ID=>$field_details){
-            foreach ($field_details as $dtl_ID=>$value){
-                if(@$value['geo']){
-                    $value['geo']['placeID'] = $recid;
-                    if(!@$res[$dty_ID]) $res[$dty_ID] = array();
+        $res = array();
+        foreach($rec['details'] as $dty_ID=>$field_details){
+            if(!@$res[$dty_ID]){
+                $res[$dty_ID] = $field_details;     
+            }else{
+                foreach ($field_details as $dtl_ID=>$value){
                     $res[$dty_ID][$dtl_ID] = $value;
                 }
             }
         }
+        $res2[$recid] = $res;
+        
+        
     }
-*/    
-    return $res;
-
+    return $res2;
+    
+    
 }
 
 //

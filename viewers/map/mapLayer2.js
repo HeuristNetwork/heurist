@@ -732,20 +732,6 @@ function hMapLayer2( _options ) {
         var theme_fields = {};
         var theme_queries = {};
 
-        function __fillQuery(q){
-            $(q).each(function(idx, predicate){
-                $.each(predicate, function(key,val)
-                    {
-                        if( $.isArray(val) || $.isPlainObject(val) ){
-                            __fillQuery(val);
-                        }else if( (typeof val === 'string') && (val == '$IDS') ) {
-                            //substitute with array of ids
-                            predicate[key] = _geojson_ids.join(',');//maplayer_query;
-                        }
-                });                            
-            });
-        }                         
-        
         for(var j=0; j<active_themes.length; j++){
             var theme = active_themes[j];
             
@@ -763,13 +749,13 @@ function hMapLayer2( _options ) {
                     
                         var query;
                         if( (typeof field['facet'] === 'string') && (field['facet'] == '$IDS') ){ //this is field form target record type
-                            query = 'ids:'+_geojson_ids.join(',');//maplayer_query;
+                            query = '$IDS'; //'ids:'+_geojson_ids.join(',');//maplayer_query;
 
                         }else{
                             
                             query = window.hWin.HEURIST4.util.cloneJSON(field['facet']); //clone 
                             //change $IDS for current set of target record type
-                            __fillQuery(query);                
+                            // it will be done on server side__fillQuery(query);                
                         }
                         
                         theme_queries[field.code] = query;
@@ -809,6 +795,8 @@ function hMapLayer2( _options ) {
             });
         }
         
+console.log(theme_queries);        
+        
         // 3. request for values. if there are not fields to request then assign symbols
         if(Object.keys(theme_queries).length>0)
         {
@@ -823,9 +811,11 @@ function hMapLayer2( _options ) {
                 var server_request = {
                     q: theme_queries[code],
                     //rules: theme.rules,  search for linked records
+                    a: 'links_details',
+                    ids: _geojson_ids.join(','),
                     w: 'a',
                     zip: 1,
-                    detail:'rec_RecTypeID,'+theme_fields[code].join(',')  //request detail fields
+                    detail:theme_fields[code].join(',')  //request detail fields   'rec_RecTypeID,'+
                 };
                 
                 //_new  format:'json'
@@ -834,19 +824,29 @@ function hMapLayer2( _options ) {
                         
 
                         if(response.status == window.hWin.ResponseStatus.OK){
-                            var resdata = new hRecordSet(response.data);
-//console.log(response.data);
+                            //var resdata = new hRecordSet(response.data);
                             //assign symbol for each element of layer
                             options.mapwidget.mapping('eachLayerFeature', _nativelayer_id, 
                                 function(layer){
                                     //get record from result set and assign field values
                                     let id = layer.feature.properties.rec_ID; 
-//console.log(code, id);                                    
+                                    var record = response.data[id];
+                                    for (var k=0; k<theme_fields[code].length; k++){
+                                        var dty_ID = theme_fields[code][k];
+                                        //get first value from array
+                                        for (var dtl_ID in record[dty_ID]){
+                                            layer.feature.properties[code+':'+dty_ID] = record[dty_ID][dtl_ID];    
+                                            break;
+                                        }
+                                    }
+
+                                    /*
                                     var record = resdata.getRecord(id);
                                     for (var k=0; k<theme_fields[code].length; k++){
                                         var dty_ID = theme_fields[code][k];
                                         layer.feature.properties[code+':'+dty_ID] = resdata.fld(record, dty_ID);
                                     }
+                                    */
                                 }
                             );
                             

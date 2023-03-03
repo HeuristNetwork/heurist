@@ -164,6 +164,20 @@ detectLargeInputs('COOKIE record_search', $_COOKIE);
         $resids = array();
         $response = recordSearchMapDocItems($system, $_REQUEST['ids'], $resids);
     */
+    }else if(@$_REQUEST['a'] == 'links_details'){
+        
+        $ids = prepareIds($_REQUEST['ids']);
+        $response = array();
+        if($_REQUEST['q']=='$IDS'){
+            $response = recordSearchDetailsForRecIds($system, $ids, $_REQUEST['detail']);
+        }else{
+            foreach ($ids as $recID){
+                $response[$recID] = recordSearchLinkedDetails($system, $recID, $_REQUEST['detail'], $_REQUEST['q']);    
+            }
+        }
+        $response = array('status'=>HEURIST_OK, 'data'=> $response);
+        
+        
     }else {
         
         if(@$_REQUEST['remote'] == 'master'){
