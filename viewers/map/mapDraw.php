@@ -536,7 +536,7 @@ console.log(geodata);
                     
                     refreshImageOverlay( false ); //repos
 
-console.log(JSON.stringify(res));     
+//console.log(JSON.stringify(res));     
                     
                 }else{
                     $('#coords1').text('');

@@ -74,6 +74,20 @@ Thematic mapping
     _stylerForPoly - returns style for every path and polygone, either individual feature style of parent layer style.
     _getMarkersByRecordID - returns markers by heurist ids (for filter and highlight)
     
+    
+    DRAW Methods
+    drawLoadGeometry - detects format and calls the appropriate method to load geo data for drawing (WKT, simple points or JSON)
+    drawLoadSimplePoints - converts coordinate pairs (points) to WKT and loads for drawing
+    drawLoadWKT - parses WKT, converts to JSON and calls drawLoadJson to adds to drawItems
+    drawLoadJson - adds geojson to drawnItems 
+    
+    drawGetWkt - Gets drawn items as json and converts to WKT string
+    drawGetJson -  returns current drawn items as geojson
+    
+    drawClearAll - remove all drawn items fromm map 
+    drawZoomTo - zoom to drawn items
+    
+    
 * Events: 
 * onInitComplete - triggers options.oninit event handler
 * 
@@ -116,6 +130,7 @@ $.widget( "heurist.mapping", {
         ondraw_editstart:null,
         ondrawend:null,
         ondraw_save_on_addition: false, //if true save digitizing at once (on addition of geometry to map)
+        drawMode: null,
         
         isEditAllowed: true,
         isPublished: false,
@@ -149,11 +164,11 @@ $.widget( "heurist.mapping", {
     mapManager: null,    //legend
     
     is_crs_simple: false,
-    raster_coord: null,
     basemap_layer: null, //user's ImageOverlay as a base map
     basemap_layer_id: 0, //heurist layer record id for base map
     basemap_layer_width: 0,
     basemap_layer_height: 0,
+    basemap_layer_maxzoom: 19, //required for conversion pixels to coordinates for Cortesian CRS
     
     _inited_mapdocs: false,
     _inited_basemap: false,
@@ -334,9 +349,10 @@ $.widget( "heurist.mapping", {
         
         var map_options = {zoomControl:false, tb_del:true};
         
-
-        var map_crs_simple = window.hWin.HAPI4.database == 'johns_Tilemap_Test' 
-                        || window.hWin.HAPI4.database == 'osmak_12';
+        // cortesian 
+        var map_crs_simple = (window.hWin.HAPI4.get_prefs_def('map_crs_simple',0)==1);
+                        //window.hWin.HAPI4.database == 'johns_Tilemap_Test' 
+                        //|| window.hWin.HAPI4.database == 'osmak_12';
                         //|| window.hWin.HAPI4.database == 'osmak_9b';  //iiif test
                         //|| window.hWin.HAPI4.get_prefs_def('map_crs_simple',0);
         if(map_crs_simple){
@@ -358,6 +374,7 @@ $.widget( "heurist.mapping", {
                     var currZoom = that.nativemap.getZoom();
                     md.updateLayerVisibility(currZoom);   
                 }
+                
             }
         });
                         
@@ -394,8 +411,10 @@ $.widget( "heurist.mapping", {
         this.map_legend = L.control.manager({ position: 'topright' }).addTo( this.nativemap );
 
         //map scale
-        this.map_scale = L.control.scale({ position: 'bottomleft' }).addTo( this.nativemap );
-        $(this.map_scale._container).css({'margin-left': '20px', 'margin-bottom': '20px'});
+        if(!map_crs_simple){
+            this.map_scale = L.control.scale({ position: 'bottomleft' }).addTo( this.nativemap );
+            $(this.map_scale._container).css({'margin-left': '20px', 'margin-bottom': '20px'});
+        }
         
         //content for legend
         this.mapManager = new hMapManager({container:this.map_legend._container, mapwidget:this.element, is_ui_main:is_ui_main});
@@ -409,6 +428,17 @@ $.widget( "heurist.mapping", {
         this.adjustToolbarHeight();
         this._adjustLegendHeight();
         
+    },
+    
+    //
+    //
+    //
+    getCurrentCRS: function(){
+        if(this.is_crs_simple){
+            return 'Simple';
+        }else{
+            return 'WGS';
+        }
     },
 
     //Called whenever the option() method is called
@@ -495,18 +525,16 @@ $.widget( "heurist.mapping", {
     //    it is invoked on completion of hMapManager initialization - map is inited and all mapdocuments are loaded
     //
     onInitComplete:function(mode_complete){
-//console.log('onInitComplete '+mode_complete);
 
-        if(mode_complete=='mapdocs'){
+        if(mode_complete=='mapdocs'){  //mapDocuments.loadMapDocuments is completed
             this._inited_mapdocs = true;
-        }else if(mode_complete=='basemap'){
+        }else if(mode_complete=='basemap'){ //basemap layer has been added and loaded
             this._inited_basemap = true;
         }
             
         if($.isFunction(this.options.oninit) && this._inited_mapdocs && this._inited_basemap){
                 this.options.oninit.call(this, this.element);
         }
-        
     },
     
     
@@ -552,11 +580,11 @@ $.widget( "heurist.mapping", {
     },
     
     //
-    // load as a base map Heurist Image Layer record
+    // loads as a base map Heurist Image Layer record (called from updateLayout)
     //
     loadBaseMapImage: function(record_id){
     
-        if(this.basemap_layer_id==record_id) return;
+        if( record_id==0 || this.basemap_layer_id==record_id) return; //base map is not changed
 
         //continuousWorld
         this.basemap_layer = hMapLayer2({record_id:record_id, mapwidget:this.element});
@@ -569,9 +597,12 @@ $.widget( "heurist.mapping", {
             var id = that.basemap_layer.getNativeId();
             
             if(that.all_layers[id]){
+                
                 cnt = 50;
-                var bounds = that.basemap_layer.getBounds();
+                var bounds2 = that.basemap_layer.getBounds();
+                that.basemap_layer_maxzoom =  that.basemap_layer.getMaxZoomLevel();
 
+                /*
                 if(that.basemap_layer_id==424){ //paris iiif
                     
                     bounds = L.latLngBounds(L.latLng(-256,-256), L.latLng(256,256));//soutwest northeast 
@@ -581,12 +612,12 @@ $.widget( "heurist.mapping", {
                     that.basemap_layer_width = 16384;
                     that.basemap_layer_height = 16384;
                     
-                }else if(that.basemap_layer_id==10 || that.basemap_layer_id==12){ //Japan world map
+                }else if(that.basemap_layer_id==10 || that.basemap_layer_id==12 || that.basemap_layer_id==21){ //Japan world map
                     
-                    bounds = L.latLngBounds(L.latLng(-256, 0), L.latLng(-138, 256));//soutwest northeast 
-         
+                    bounds2 = L.latLngBounds(L.latLng(-256, 0), L.latLng(-138, 256));//soutwest northeast 
                     that.basemap_layer_width = 32700;
                     that.basemap_layer_height = 15043;
+                    
                 }else{
 
                     bounds = L.latLngBounds(L.latLng(-256,-256), L.latLng(256,256));//soutwest northeast 
@@ -600,12 +631,16 @@ $.widget( "heurist.mapping", {
                         256
                     ) / Math.log(2)
                 );
+                */
 
-//console.log(id);                
-//console.log(bounds);
-                if(bounds && bounds.isValid()){
-                    that.nativemap.setMaxBounds(bounds);
-                    that.nativemap.fitBounds(bounds);        
+//console.log('>>', that.basemap_layer_maxzoom, bounds2);
+                
+                if(that.basemap_layer_maxzoom>0 && bounds2 && bounds2.isValid()){
+                    if(that.currentDrawMode == 'none' || that.currentDrawMode == null ){
+                        that.nativemap.setMaxBounds(bounds2); //to avoid pan out of extent
+                    }
+                    that.nativemap.fitBounds(bounds2); //initial zoom         
+                    //that.zoomToLayer(id);
                 }
                 
                 that.onInitComplete('basemap');
@@ -842,8 +877,9 @@ $.widget( "heurist.mapping", {
     // for simple crs - from latlong to pixels
     // for epsg       - from epsg to wgs
     //  --------------------
+    // if to_pixels is false
     // for simple crs  - convert from pixels to latlong
-    // for EPSG   - convert from WGS(laslong) to target EPSG projection
+    // for EPSG   - convert from WGS(latlong) to target EPSG projection
     //
     //
     projectGeoJson:function(gjson, to_pixels){
@@ -884,6 +920,9 @@ $.widget( "heurist.mapping", {
                             return isValid;
                     }                    
                     
+                    //
+                    // 
+                    //
                     function _convertXY(pnt){
                         
                         if(to_pixels){
@@ -1004,9 +1043,9 @@ $.widget( "heurist.mapping", {
 
         if (window.hWin.HEURIST4.util.isGeoJSON(geojson_data, true) || 
             window.hWin.HEURIST4.util.isArrayNotEmpty(timeline_data)){
-                
+              
             if(this.is_crs_simple){
-                this.projectGeoJson( geojson_data, false );
+                this.projectGeoJson( geojson_data, false ); //from pixels to latlong
             }
                 
             var that = this;
@@ -1349,6 +1388,13 @@ $.widget( "heurist.mapping", {
             
         }
         
+    },
+    
+    //
+    // Returns leaflet 
+    //
+    getNativeMap: function(){
+        return this.nativemap;
     },
     
     //
@@ -3050,6 +3096,8 @@ $.widget( "heurist.mapping", {
     updateLayout: function(){
         
         var params = this.options.layout_params;
+        
+        var that = this;
        
         function __parseval(val){
             if(val===false || val===true) return val;
@@ -3247,7 +3295,6 @@ $.widget( "heurist.mapping", {
             controls.push('help');
         }
         
-        var that = this;
         function __controls(val){
             var is_visible = (controls.indexOf('all')>=0  
                                 || controls.indexOf(val)>=0);
@@ -3374,13 +3421,16 @@ $.widget( "heurist.mapping", {
         
         var map_basemap_layer = window.hWin.HAPI4.get_prefs_def('map_basemap_layer',0);
         //map_basemap_layer = 1049; //broomley map
+        //record ID for basemap 
+        /*
         if(window.hWin.HAPI4.database == 'johns_Tilemap_Test'){
             map_basemap_layer = 10;
         }else if(window.hWin.HAPI4.database == 'osmak_12'){
-            map_basemap_layer = 21; // Japan world map 
+            //map_basemap_layer = 21; // Japan world map 
         }else if(window.hWin.HAPI4.database == 'osmak_9b'){
             map_basemap_layer = 424; //Paris IIIF
         }
+        */
         
         
         if(map_basemap_layer>0){
@@ -3395,7 +3445,7 @@ $.widget( "heurist.mapping", {
         }else{
             
             this._inited_basemap = true;
-            this.mapManager.loadBaseMap( 0 );  
+            this.mapManager.loadBaseMap( 0 ); //load default basemap 
         }
 
         if(params['template']){
@@ -3405,7 +3455,7 @@ $.widget( "heurist.mapping", {
         $('#'+map_element_id).find('#map-loading').empty();
         
         // extent: fixed extent    
-    },
+    },//updateLayout
     
     //
     //
@@ -3493,13 +3543,13 @@ $.widget( "heurist.mapping", {
 
         if(that.map_help){
             $(that.map_help.getContainer()).hide();
-
+            if(window.parent){
             window.hWin.HEURIST4.ui.initHelper({ button:toolbar.find('.ui-icon-help').button(),
                 url: window.hWin.HRes('mapping_overview.html #content'),
                 position: { my: 'center center', at: 'center center', 
                     of: $(window.parent.document).find('#map-frame').parent() } 
                 , no_init:true} ); //this.element
-
+            }
         }else{
             toolbar.find('.ui-icon-help').hide();
         }
@@ -3782,7 +3832,7 @@ $.widget( "heurist.mapping", {
 //----------------------- draw routines ----------------------    
     
     //
-    //  detects format and calls appropriate method
+    //  detects format and calls the appropriate method to load geo data for drawing (WKT, simple points or JSON)
     // 
     drawLoadGeometry: function(data){
 
@@ -3805,8 +3855,9 @@ $.widget( "heurist.mapping", {
         
         
     },
-
+    
     //
+    // converts coordinate pairs (points) to WKT and loads for drawing (adds to drawItems)
     // requires mapDraw.js - called from doigitizer only
     //
     drawLoadSimplePoints: function(sCoords, type, UTMzone){
@@ -3815,9 +3866,10 @@ $.widget( "heurist.mapping", {
         
         simplePointsToWKT(sCoords, type, UTMzone, function(wkt){ that.drawLoadWKT(wkt, false); });
     },
-    
+
     //
     //  Addition of wkt to drawItems
+    //  Parses WKT, converts to JSON and calls drawLoadJson to adds to drawItems
     //  force_clear - remove all current shapes on map
     //
     drawLoadWKT: function(wkt, force_clear){
@@ -3853,6 +3905,7 @@ $.widget( "heurist.mapping", {
         }        
         
     },
+
     
 //{"type":"LineString","coordinates":[[-0.140634,51.501877],[-0.130785,51.525804],[-0.129325,51.505243],[-0.128982,51.5036]]}}    
     
@@ -3874,6 +3927,10 @@ $.widget( "heurist.mapping", {
 
             var that = this;
             
+            if(this.is_crs_simple){
+                this.projectGeoJson( gjson, false );
+            }            
+
             var l2 = L.geoJSON(gjson);
             
             function __addDrawItems(lg){
@@ -3952,8 +4009,8 @@ $.widget( "heurist.mapping", {
             
             this.drawZoomTo();
 
-    },    
-
+    },   
+    
     //
     // zoom to drawn items
     //    
@@ -3979,7 +4036,7 @@ $.widget( "heurist.mapping", {
     },
 
     //
-    // Get draw aa json and convert to WKT string
+    // Gets drawn items as json and converts to WKT string
     //
     drawGetWkt: function( show_warning ){
         
@@ -4012,7 +4069,7 @@ $.widget( "heurist.mapping", {
         
         return res;
     },
-    
+       
     //
     // returns current drawn items as geojson
     //

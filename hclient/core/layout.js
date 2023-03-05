@@ -1471,6 +1471,12 @@ console.log('Cardinal layout widget does not have proper options');
             if(app && app.widget)
                 $(app.widget)[widgetname](method, command);
         },
+
+        executeWidgetMethod: function( element_id, widgetname, method, params ){
+            var app = window.hWin.document.getElementById(element_id);
+            if(app && $.isFunction($(app)[widgetname]))
+                $(app)[widgetname](method, params);
+        },
     
         //
         //

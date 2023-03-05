@@ -54,6 +54,8 @@ function hMapLayer2( _options ) {
     var is_inited = false,
         is_visible = false,
         is_outof_range = false;
+        
+    var _max_zoom_level = 0;
 
     //
     //
@@ -650,16 +652,53 @@ function hMapLayer2( _options ) {
         }
         
     }
+
+
+    function _getMaxZoomLevel(){
+        var layer_maxzoom = _recordset.fld(_record, window.hWin.HAPI4.sysinfo['dbconst']['DT_MAXIMUM_ZOOM_LEVEL']);
+        return layer_maxzoom;
+    }
     
     //
     // return extent in leaflet format (for tiler and image layers)
     //
     function _getBoundingBox(){
 
-        return window.hWin.HEURIST4.geo.getWktBoundingBox(
+        var ext = window.hWin.HEURIST4.geo.getWktBoundingBox(
             _recordset.getFieldGeoValue(_record, window.hWin.HAPI4.sysinfo['dbconst']['DT_GEO_OBJECT'])
         );
-
+             
+//console.log('_getBoundingBox', ext);             
+             
+        if(options.mapwidget.mapping('getCurrentCRS')=='Simple'){
+            //convert pixels to lat/long
+            var nativemap = options.mapwidget.mapping('getNativeMap');
+            var maxzoom = _getMaxZoomLevel();
+            
+            var max_dim = Math.max(ext[1][0]-ext[0][0], ext[1][1]-ext[0][1]);
+            
+            if(!(maxzoom>1) && max_dim>512){
+                //@todo 
+                maxzoom =  Math.ceil(
+                    Math.log(
+                        max_dim /
+                        256
+                    ) / Math.log(2)
+                );        
+            }
+            
+            _max_zoom_level = maxzoom;
+            
+            if(maxzoom>0 && max_dim>512){
+                var latlong1 = nativemap.unproject([ext[0][1],ext[0][0]], maxzoom);
+                var latlong2 = nativemap.unproject([ext[1][1],ext[1][0]], maxzoom);
+                
+                ext = [latlong1, latlong2];
+//console.log('>>>', ext);  
+            }          
+        }
+        
+        return ext;
     }
 
 
@@ -794,8 +833,6 @@ function hMapLayer2( _options ) {
                 }
             });
         }
-        
-console.log(theme_queries);        
         
         // 3. request for values. if there are not fields to request then assign symbols
         if(Object.keys(theme_queries).length>0)
@@ -1158,6 +1195,13 @@ console.log(theme_queries);
                 options.mapwidget.mapping('zoomToLayer', _nativelayer_id);
             }
 
+        },
+        
+        //
+        // For images
+        //
+        getMaxZoomLevel: function(){
+            return _max_zoom_level; 
         },
         
         //

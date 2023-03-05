@@ -293,8 +293,6 @@ if (!(@$_REQUEST['notimeline']=='true' || @$_REQUEST['notimeline']=='1')) { ?>
     //
     function onMapInit( mapwdiget ){
         
-//console.log('>>>onMapInit');
-        
         //take url parameters and open mapdocument or/and perform query
             //take from frame
             var mapdocument = window.hWin.HEURIST4.util.getUrlParameter('mapdocument', location.search);
@@ -317,6 +315,12 @@ if (!(@$_REQUEST['notimeline']=='true' || @$_REQUEST['notimeline']=='1')) { ?>
                 //do not zoom to current search if mapdoc is defined - preserve viewport
                 mapwdiget.mapping('addSearchResult', request, 'Current results', with_mapdoc);
             }
+            
+            var app_timemap_widget = window.hWin.HEURIST4.util.getUrlParameter('widget', location.search);
+            if(app_timemap_widget && window.hWin && window.hWin.HAPI4){
+                window.hWin.HAPI4.LayoutMgr.executeWidgetMethod(app_timemap_widget,'app_timemap','onMapInit');
+            }
+            
     }
 
     //

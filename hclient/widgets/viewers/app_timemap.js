@@ -280,18 +280,18 @@ console.log(re);
                     url = window.hWin.HAPI4.baseURL + 'viewers/gmap/map.php?';
                 }
                 url = url + 'db=' + window.hWin.HAPI4.database;
-
+                
                 if(this.options.layout_params){
             
                     if(!this.options.leaflet){ //for leafleat we assign parameters onMapInit
-                    
-                    for(var key in this.options.layout_params){
-                        if(key=='style' && window.hWin.HEURIST4.util.isJSON(this.options.layout_params[key])){
-                            url = url + '&'+key + '=' +  encodeURIComponent(JSON.stringify( this.options.layout_params[key] ));
-                        }else{
-                            url = url + '&'+key + '=' + this.options.layout_params[key];    
+                        
+                        for(var key in this.options.layout_params){
+                            if(key=='style' && window.hWin.HEURIST4.util.isJSON(this.options.layout_params[key])){
+                                url = url + '&'+key + '=' +  encodeURIComponent(JSON.stringify( this.options.layout_params[key] ));
+                            }else{
+                                url = url + '&'+key + '=' + this.options.layout_params[key];    
+                            }
                         }
-                    }
                     
                     }
 
@@ -326,6 +326,8 @@ console.log(re);
                 if(this.options.search_initial){
                     url = url + '&q='+encodeURIComponent(this.options.search_initial); 
                 }
+                url = url + '&widget='+this.element.attr('id');
+                
                 (this.mapframe).attr('src', url);
                 
             }
@@ -348,8 +350,17 @@ console.log(re);
     //
     _initmap: function( cnt_call ){
 
-        if( !window.hWin.HEURIST4.util.isnull(this.mapframe) && this.mapframe.length > 0 ){
+        if( !window.hWin.HEURIST4.util.isnull(this.mapframe) && this.mapframe.length > 0){
 
+            if(this.options.leaflet){
+                
+                this._applyCurrentSearch(); 
+                
+                return;
+            }
+            
+            //all stuff below for google maps only
+            
             //access mapping object in mapframe to referesh content 
             var mapping = null;
             if(this.mapframe[0].contentWindow){
@@ -367,16 +378,90 @@ console.log(re);
             
             if(this.is_map_inited && cnt_call>0) return;
             
-            if(this.options.leaflet){ //LEAFLET
+            //google to remove
+            this.is_map_inited = true;
+            this.options.init_completed = true;
             
-                if(!this.is_map_inited){ //once
-                            
-                    mapping.mapping('option', {'layout_params':this.options.layout_params});        
-                }    
-                
-            
-                if(!that.map_curr_search_inited && that.options.recordset){
+            mapping.load( null, //mapdataset,
+                this.options.selection,  //array of record ids
+                this.options.mapdocument,    //map document on load
+                function(selected){  //callback if something selected on map
+                    $(that.document).trigger(window.hWin.HAPI4.Event.ON_REC_SELECT,
+                        { selection:selected, source:that.element.attr('id'), search_realm:that.options.search_realm } );
+                },
+                function(){ //callback function on native map init completion
+                    var params = {id:'main', recordset:that.options.recordset, title:'Current query'};
+                    that.addRecordsetLayer(params, -1);
+                }
+            );
 
+            this.recordset_changed = false;
+        }
+
+    }
+    
+    //
+    // Event listener - it is called when mapping is fully loaded (basemap and mapdocuments are inited)
+    //
+    , onMapInit: function(){
+        
+        //execte once - assign listeners
+        if(!this.is_map_inited){ 
+            
+            var that=this;
+            
+            var mapping = this.mapframe[0].contentWindow.mapping;
+            
+            //assign listeneres
+            mapping.mapping('option', {'layout_params':this.options.layout_params});        
+
+            mapping.mapping('option','onselect',function(selected ) {
+                    $(that.document).trigger(window.hWin.HAPI4.Event.ON_REC_SELECT,
+                            { selection:selected, source:that.element.attr('id'), search_realm:that.options.search_realm } );
+                });
+                
+            mapping.mapping('option','onlayerstatus',function( layer_id, status ) {
+
+                    if(layer_id>0)
+                    $(that.document).trigger(window.hWin.HAPI4.Event.ON_REC_STATUS,
+                            { selection:[layer_id], map_layer_status:status,
+                              source:that.element.attr('id'), search_realm:that.options.search_realm } );
+
+            });
+
+            this.is_map_inited = true;
+            this.options.init_completed = true;
+
+            if($.isFunction(this.options.onMapInit)){
+                this.options.onMapInit.call();
+            }
+            
+            //call special method to inject custom links (css and javascript) to iframe map document
+            if(that.options.custom_links){
+                //custom_links - urls to be injected as css and js
+                mapping.mapping('injectLinks', that.options.custom_links);
+            }
+        }
+        
+        // seach object on maps and timeline for current search
+        this._applyCurrentSearch();
+    }
+    
+    //
+    // seach object on maps and timeline for current search
+    //
+    ,_applyCurrentSearch: function(){
+    
+            if(!this.is_map_inited){
+                return;
+            }
+        
+            var that=this;
+        
+            if(!that.map_curr_search_inited && that.options.recordset){
+
+                    var mapping = this.mapframe[0].contentWindow.mapping;
+                
                     that.map_curr_search_inited = true;
                     
                     if(that.map_cache_got && that.options.use_cache){
@@ -401,65 +486,8 @@ console.log(re);
                         that.options.preserveViewport = false; //restore it before each call if require
                         that.map_cache_got = true; //@todo need to check that search is really performed
                     }
-                //}else if(this.options.selection){
-                }
-                if(!this.is_map_inited){
-                    //assign listener
-               
-                    mapping.mapping('option','onselect',function(selected ) {
-                            $(that.document).trigger(window.hWin.HAPI4.Event.ON_REC_SELECT,
-                                    { selection:selected, source:that.element.attr('id'), search_realm:that.options.search_realm } );
-                        });
-                        
-                    mapping.mapping('option','onlayerstatus',function( layer_id, status ) {
-
-                            if(layer_id>0)
-                            $(that.document).trigger(window.hWin.HAPI4.Event.ON_REC_STATUS,
-                                    { selection:[layer_id], map_layer_status:status,
-                                      source:that.element.attr('id'), search_realm:that.options.search_realm } );
-
-                    });
-                
-                    this.is_map_inited = true;
-                    this.options.init_completed = true;
-
-                    if($.isFunction(this.options.onMapInit)){
-                        this.options.onMapInit.call();
-                    }
-                    
-                    //call special method to inject custom links (css and javascript) to iframe map document
-                    if(that.options.custom_links){
-                        //custom_links - urls to be injected as css and js
-                        mapping.mapping('injectLinks', that.options.custom_links);
-                    }
-                    
-                }
-                
-                
-            
-            }else{
-                //google to remove
-                this.is_map_inited = true;
-                this.options.init_completed = true;
-                
-                mapping.load( null, //mapdataset,
-                    this.options.selection,  //array of record ids
-                    this.options.mapdocument,    //map document on load
-                    function(selected){  //callback if something selected on map
-                        $(that.document).trigger(window.hWin.HAPI4.Event.ON_REC_SELECT,
-                            { selection:selected, source:that.element.attr('id'), search_realm:that.options.search_realm } );
-                    },
-                    function(){ //callback function on native map init completion
-                        var params = {id:'main', recordset:that.options.recordset, title:'Current query'};
-                        that.addRecordsetLayer(params, -1);
-                    }
-                );
-            
             }
-
             this.recordset_changed = false;
-        }
-
     }
     
     , updateDataset: function(data, dataset_name){
@@ -547,8 +575,9 @@ console.log(re);
                 //if layer is visible - select and zoom to record in search results
                 var recID = selection[0];
                 var layer_rec = mapping.mapping('getMapManager').getLayer( 0, recID );
-                (layer_rec['layer']).zoomToLayer();
-                
+                if(layer_rec && layer_rec['layer']){
+                    (layer_rec['layer']).zoomToLayer();    
+                }
             }
         }        
     }
