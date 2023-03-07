@@ -338,9 +338,8 @@ $dtDefines = array('DT_NAME' => array(2, 1),
     'DT_MINOR_SPAN' => array(3, 1076),              //deprecated
     'DT_MAP_BOOKMARK' => array(3, 1082),
     'DT_SYMBOLOGY_POINTMARKER' => array(3, 1091),  //outdated
-    'DT_SYMBOLOGY' => array(3, 1092),  //MAIN field that stores ALL styles for map symbology
+    'DT_SYMBOLOGY' => array(3, 1092),  //MAIN field that stores ALL styles for map symbology (including themtic maps)
     'DT_ZOOM_KM_POINT' => array(2, 925), //area to zoom in on point selection (per map space document)
-    //'DT_SYMBOLOGY_THEMES' => array(3, 1093),  // Thematic mapping @todo
     'DT_POPUP_TEMPLATE' => array(2, 922),  // smarty template to produce popup info 
     'DT_SYMBOLOGY_COLOR' => array(3, 1037), // outdated
     'DT_BG_COLOR' => array(2, 551),         // outdated
@@ -352,6 +351,9 @@ $dtDefines = array('DT_NAME' => array(2, 1),
     'DT_SHAPE_FILE' => array(3, 1069),
     'DT_DBF_FILE' => array(3, 1070),
     'DT_SHX_FILE' => array(3, 1071),
+    
+    'DT_CRS' => array(2, 1092), // Coordinate Reference System
+    'DT_WORLD_BASEMAP' => array(2, 1093),  // Need to use trm_Label for terms to get basemap name
 
     'DT_EXTRACTED_TEXT' => array(2, 652),  //for pdf parser
     

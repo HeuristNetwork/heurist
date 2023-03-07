@@ -272,7 +272,6 @@ console.log(re);
                 if(mapdoc>0){
                     this.options.mapdocument = mapdoc;    
                 }
-                
                 var url;
                 if(this.options.leaflet){
                     url = window.hWin.HAPI4.baseURL + 'viewers/map/map_leaflet.php?';

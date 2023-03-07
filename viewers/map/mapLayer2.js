@@ -671,31 +671,33 @@ function hMapLayer2( _options ) {
 //console.log('_getBoundingBox', ext);             
              
         if(options.mapwidget.mapping('getCurrentCRS')=='Simple'){
-            //convert pixels to lat/long
-            var nativemap = options.mapwidget.mapping('getNativeMap');
             var maxzoom = _getMaxZoomLevel();
             
-            var max_dim = Math.max(ext[1][0]-ext[0][0], ext[1][1]-ext[0][1]);
+            if($.isArray(ext) && ext.length==2){
             
-            if(!(maxzoom>1) && max_dim>512){
-                //@todo 
-                maxzoom =  Math.ceil(
-                    Math.log(
-                        max_dim /
-                        256
-                    ) / Math.log(2)
-                );        
-            }
-            
-            _max_zoom_level = maxzoom;
-            
-            if(maxzoom>0 && max_dim>512){
-                var latlong1 = nativemap.unproject([ext[0][1],ext[0][0]], maxzoom);
-                var latlong2 = nativemap.unproject([ext[1][1],ext[1][0]], maxzoom);
+                var max_dim = Math.max(ext[1][0]-ext[0][0], ext[1][1]-ext[0][1]);
                 
-                ext = [latlong1, latlong2];
-//console.log('>>>', ext);  
-            }          
+                if(!(maxzoom>1) && max_dim>512){
+                    //@todo 
+                    maxzoom =  Math.ceil(
+                        Math.log(
+                            max_dim /
+                            256
+                        ) / Math.log(2)
+                    );        
+                }
+                
+                if(maxzoom>0 && max_dim>512){
+                    //convert pixels to lat/long
+                    var nativemap = options.mapwidget.mapping('getNativeMap');
+                    var latlong1 = nativemap.unproject([ext[0][1],ext[0][0]], maxzoom);
+                    var latlong2 = nativemap.unproject([ext[1][1],ext[1][0]], maxzoom);
+                    
+                    ext = [latlong1, latlong2];
+    //console.log('>>>', ext);  
+                }          
+            }
+            _max_zoom_level = maxzoom;
         }
         
         return ext;

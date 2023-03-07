@@ -996,7 +996,7 @@ window.hWin.HAPI4.baseURL+'?db=' + window.hWin.HAPI4.database  //(needplayer?'&p
                 var ele = this._editing.getFieldByName('ulf_MimeExt');
                 var extension = ele.editing_input("getValues");
                 if(!extension || !extension[0] || 
-                    extension[0].match(/(gif|jpg|jpeg|png)?/i)[0]=='')
+                    extension[0].match(/(gif|jpg|jpeg|png|json)?/i)[0]=='')
                 {
                     window.hWin.HEURIST4.msg.showMsgDlg(  
                         'You have to define the correct image type for tile image stack (normally image/jpeg or png)',

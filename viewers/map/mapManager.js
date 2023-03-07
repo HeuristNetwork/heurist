@@ -572,6 +572,9 @@ function hMapManager( _options )
                                             if(node.isSelected()){
                                                 mapdoc_visible[mapdoc_id] = node.title; // add to list
                                             }else{
+                                                //restore default CRS if mapdoc is off
+                                                options.mapwidget.mapping('defineCRS', '');
+                                                that.loadBaseMap(0); //loads default
                                                 delete mapdoc_visible[mapdoc_id]; // remove from list
                                             }
                                             
@@ -856,6 +859,7 @@ function hMapManager( _options )
                     var mapdoc_id = ele.parents('.svs-contextmenu3').attr('data-mapdoc');
                     
                         if(ele.hasClass('ui-icon-arrow-4-diag')){
+                            //zoom to extent
                             
                             if(recid>0){
                                 
@@ -1488,7 +1492,7 @@ function hMapManager( _options )
             }
 
             options.mapwidget.mapping('loadBaseMap', idx);
-            options.container.find('input[data-mapindex="'+idx+'"]').attr('checked',true);
+            options.container.find('input[data-mapindex="'+idx+'"]').prop('checked',true);
 
             options.container.find('input[data-mapindex="'+idx+'"]').parent().after(options.container.find('#basemap_filter_btns'));
         },

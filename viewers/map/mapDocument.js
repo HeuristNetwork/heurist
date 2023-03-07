@@ -22,7 +22,7 @@
 */
 
 /**
-* put your comment there...
+* Manages list of map documents
 * 
 * 
 * @param _options
@@ -65,6 +65,8 @@ function hMapDocument( _options )
     DT_ZOOM_KM_POINT = 0,
     DT_MINIMUM_ZOOM = 0, //bounds for mapdoc and visibility for layers in km
     DT_MAXIMUM_ZOOM = 0,
+    DT_WORLD_BASEMAP = 0,
+    DT_CRS = 0,
     
     map_documents = null, //recordset - all loaded documents
     map_documents_content = {}, //mapdoc_id=>recordset with all layers and datasources of document
@@ -94,6 +96,8 @@ function hMapDocument( _options )
         DT_MINIMUM_ZOOM = window.hWin.HAPI4.sysinfo['dbconst']['DT_MINIMUM_ZOOM'];
         DT_MAXIMUM_ZOOM = window.hWin.HAPI4.sysinfo['dbconst']['DT_MAXIMUM_ZOOM'];
         DT_ZOOM_KM_POINT = window.hWin.HAPI4.sysinfo['dbconst']['DT_ZOOM_KM_POINT'];
+        DT_WORLD_BASEMAP = window.hWin.HAPI4.sysinfo['dbconst']['DT_WORLD_BASEMAP'];
+        DT_CRS = window.hWin.HAPI4.sysinfo['dbconst']['DT_CRS'];
         
         //_loadMapDocuments();
     }
@@ -107,9 +111,17 @@ function hMapDocument( _options )
             
             var that = this;
             
+            var details = [DT_GEO_OBJECT,DT_MAP_BOOKMARK,DT_SYMBOLOGY,DT_MINIMUM_ZOOM,DT_MAXIMUM_ZOOM,DT_ZOOM_KM_POINT];
+            if(DT_WORLD_BASEMAP>0){
+                details.push( DT_WORLD_BASEMAP );
+            }
+            if(DT_CRS>0){
+                details.push( DT_CRS );
+            }
+            
             var request = {
                         q: 't:'+RT_MAP_DOCUMENT,w: 'a',
-                        detail: [DT_GEO_OBJECT,DT_MAP_BOOKMARK,DT_SYMBOLOGY,DT_MINIMUM_ZOOM,DT_MAXIMUM_ZOOM,DT_ZOOM_KM_POINT], //fields_to_be_downloaded
+                        detail: details, //fields_to_be_downloaded
                         source: 'map_document'};
             //perform search        
             window.hWin.HAPI4.RecordMgr.search(request,
@@ -288,11 +300,15 @@ function hMapDocument( _options )
     }
 
     //
-    // opens map document - loads content (resolve deferred - to updated treeview) and adds layers on map
+    // opens map document 
+    // 1. loads content (resolve deferred - to updated treeview) 
+    // 2. Set CRS (if defined) otherwise use default Leaflet CRS
+    // 3. Set world base map (if defined)
+    // 4. Adds layers on map
     //
     function _openMapDocument(mapdoc_id, deferred){
         
-        //get list of layers and datasets
+        //1. Gets list of layers and datasets
         if($.isArray(mapdoc_id) || !map_documents_content[mapdoc_id]){ //if array this is set of layers for temp mapspace
             //map doc is not loaded yet
             _loadMapDocumentContent(mapdoc_id, deferred);    
@@ -302,11 +318,22 @@ function hMapDocument( _options )
             return;
         }
         
-        _defineZooms( mapdoc_id );
         
+        
+        //2.Set CRS
+        if (_defineCRS( mapdoc_id )){
+            //3. Set world base map (if defined)
+            _loadBaseMap( mapdoc_id );
+            
+            _defineZooms( mapdoc_id );
+        }else{
+            that.zoomToMapDocument( mapdoc_id );
+        }
+        
+        //4. Adds layers on map
         var resdata = map_documents_content[mapdoc_id];
         
-        var idx, records = resdata.getRecords();
+        var idx, records = resdata.getRecords();  //layers
         for(idx in records){
             if(idx)
             {
@@ -339,6 +366,52 @@ function hMapDocument( _options )
                                 
     }
 
+    //
+    //
+    //
+    function _loadBaseMap( mapdoc_id ){
+        var basemap_name = 0;
+        if(mapdoc_id=='None'){
+            basemap_name = 'None';
+        }else
+        if(mapdoc_id!='temp'){
+            var record2 = map_documents.getById( mapdoc_id );
+            if(DT_WORLD_BASEMAP>0){
+                basemap_name = map_documents.fld(record2, DT_WORLD_BASEMAP);
+                basemap_name = $Db.trm(basemap_name, 'trm_Label');
+            }
+        }
+
+        var mapManager = options.mapwidget.mapping('getMapManager');            
+        mapManager.loadBaseMap(basemap_name);
+    }
+
+    //
+    // Defines CRS. It returns true if CRS is not set or not simple
+    //
+    function _defineCRS( mapdoc_id ){
+        var crs = '';
+        if(mapdoc_id!='temp'){
+            var record2 = map_documents.getById( mapdoc_id );
+            if(DT_CRS>0){
+                var crs_id = map_documents.fld(record2, DT_CRS);
+                if(crs_id){
+                    crs = $Db.trm(crs_id, 'trm_Code');
+                    if(crs=='XY') crs = 'Simple'
+                    else if(!crs) crs = '';
+                }
+            }
+        }
+        
+        if(crs!=''){
+            _loadBaseMap('None');
+        }
+        
+        options.mapwidget.mapping('defineCRS', crs);            
+        
+        return (crs=='');
+    }
+    
     //
     // Converts min/max zoom in km to nativemap zoom levels and assign to map
     //
@@ -567,10 +640,16 @@ function hMapDocument( _options )
         isA: function (strClass) {return (strClass === _className);},
         getVersion: function () {return _version;},
 
+        //
+        // Loads list of map documents
+        //
         loadMapDocuments: function( onRefreshList ){
             _loadMapDocuments( onRefreshList );    
         },
         
+        //
+        // Load content for given document - called once in mapManager tree lazy load 
+        //
         openMapDocument: function(mapdoc_id, deferred){
             _openMapDocument(mapdoc_id, deferred);
         },
@@ -794,7 +873,13 @@ function hMapDocument( _options )
             }
             
             if(is_visibile){
-                _defineZooms( mapdoc_id );
+                if (_defineCRS( mapdoc_id )){
+                    //not simple
+                    _loadBaseMap( mapdoc_id );
+                    _defineZooms( mapdoc_id );
+                }else{
+                    that.zoomToMapDocument( mapdoc_id );
+                }
             }else{
                 options.mapwidget.mapping('defineMaxZoom', 'doc'+mapdoc_id, -1); //remove
                 options.mapwidget.mapping('defineMinZoom', 'doc'+mapdoc_id, -1); //remove
@@ -910,32 +995,57 @@ function hMapDocument( _options )
         //
         zoomToMapDocument: function(mapdoc_id){
 
-            var mapdoc_extent = null;
+            var ext = null;
             
             if(map_documents!=null && mapdoc_id!='temp'){ //for temp always zoom to real extent
             
                 var record2 = map_documents.getById( mapdoc_id );
 
-                mapdoc_extent = window.hWin.HEURIST4.geo.getWktBoundingBox(
+                ext = window.hWin.HEURIST4.geo.getWktBoundingBox(
                             map_documents.getFieldGeoValue(record2, DT_GEO_OBJECT));
-                if(mapdoc_extent==null){
-                    mapdoc_extent = window.hWin.HEURIST4.geo.getHeuristBookmarkBoundingBox(
+                            
+                if(options.mapwidget.mapping('getCurrentCRS')=='Simple'){
+                    
+                    if($.isArray(ext) && ext.length==2){
+                        var max_dim = Math.max(ext[1][0]-ext[0][0], ext[1][1]-ext[0][1]);
+
+                        var maxzoom =  Math.ceil(
+                            Math.log(
+                                max_dim /
+                                256
+                            ) / Math.log(2)
+                        );        
+                    
+                        if(maxzoom>0 && max_dim>512){
+                            var nativemap = options.mapwidget.mapping('getNativeMap');
+                            var latlong1 = nativemap.unproject([ext[0][1],ext[0][0]], maxzoom);
+                            var latlong2 = nativemap.unproject([ext[1][1],ext[1][0]], maxzoom);
+                            
+                            ext = [latlong1, latlong2];
+//console.log('>>>', ext);  
+                        }          
+                    }
+                            
+                }else            
+                if(ext==null){
+                    ext = window.hWin.HEURIST4.geo.getHeuristBookmarkBoundingBox(
                             map_documents.fld(record2, DT_MAP_BOOKMARK));
                 }
             }    
                 
-            if(mapdoc_extent!=null){ 
+            if(ext!=null){ 
 
                     //extent is taken from mapdocument
-                    options.mapwidget.mapping('zoomToBounds', mapdoc_extent);
+                    options.mapwidget.mapping('zoomToBounds', ext);
                 
             }else{
                 //neither bbox nor bookmark are defined
                 //find all layer ids and zoom to summary extent
                 var ids = that.getNativeIdsForDocument( mapdoc_id );
                 
-                if(ids.length>0)
+                if(ids.length>0){
                     options.mapwidget.mapping('zoomToLayer', ids);
+                }
             }
         },
         

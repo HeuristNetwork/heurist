@@ -92,7 +92,7 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
         //actions for redirection https://hist/heurist/[dbname]/web/
         if(script_name.search(/\/([A-Za-z0-9_]+)\/(web|hml|tpl|view)\/.*/)>=0){
             installDir = script_name.replace(/\/([A-Za-z0-9_]+)\/(web|hml|tpl|view)\/.*/, '')+'/';
-            if(installDir=='/') installDir = '/heurist/';
+            if(installDir=='/') installDir = '/h6-alpha/';
         }else{
             installDir = script_name.replace(/(((\?|admin|applications|common|context_help|export|hapi|hclient|hsapi|import|startup|records|redirects|search|viewers|help|ext|external)\/.*)|(index.*|test.php))/, ""); // Upddate in utils_host.php also
         }
@@ -101,7 +101,7 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
         that.installDir = installDir; //to detect development or production version 
         if (!_baseURL) _baseURL = window.hWin.location.protocol + '//' + window.hWin.location.host + installDir;
         that.baseURL = _baseURL;
-        
+
         //detect production version
         if (installDir && !installDir.endsWith('/heurist/')) {
             installDir = installDir.split('/');
