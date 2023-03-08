@@ -1514,6 +1514,7 @@ $.widget( "heurist.mapping", {
     
     //
     // remove top layer
+    // layer_id -  native it
     //
     removeLayer: function(layer_id)
     {
@@ -1533,8 +1534,9 @@ $.widget( "heurist.mapping", {
                 this.all_markers[layer_id] = null;
                 delete this.all_markers[layer_id];
             }
-            
+            this.nativemap.removeLayer( affected_layer );
             affected_layer.remove();
+            affected_layer = null;
             this.all_layers[layer_id] = null;
             delete this.all_layers[layer_id];
             

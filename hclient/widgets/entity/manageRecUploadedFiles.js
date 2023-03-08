@@ -472,7 +472,7 @@ $.widget( "heurist.manageRecUploadedFiles", $.heurist.manageEntity, {
                     
                 this._edit_dialog.find('#btn_select_file').css({'min-width':'9em','z-index':2})
                     .button({label: window.hWin.HR('Choose previously referenced '
-                            +(this._additionMode=='tiled'?'image stack':'file'))
+                            +(this._additionMode=='tiled'?'image stack or IIIF':'file'))
                     ,icons: {
                             primary: "ui-icon-grid"
                     }})
@@ -898,8 +898,9 @@ window.hWin.HAPI4.baseURL+'?db=' + window.hWin.HAPI4.database  //(needplayer?'&p
                         "dtFields":{
                             "dty_Type":"file",
                             "rst_DisplayName":"File upload:",
-                            "rst_FieldConfig":{"entity":"recUploadedFiles", "registerAtOnce":1, 
-                                            "tiledImageStack": (is_tiled===true || that._additionMode=='tiled')?1:0},
+                            "rst_FieldConfig":{"entity":"recUploadedFiles", 
+                                               "registerAtOnce":1, 
+                                               "tiledImageStack": (is_tiled===true || that._additionMode=='tiled')?1:0},
                             "dty_Role":"virtual",
                             "rst_Display":"hidden"
                         }
@@ -1012,6 +1013,9 @@ window.hWin.HAPI4.baseURL+'?db=' + window.hWin.HAPI4.database  //(needplayer?'&p
 
     },	
     
+    //
+    //
+    //
     _afterSaveEventHandler: function( recID, fieldvalues ){
     
 

@@ -69,7 +69,7 @@ function hMapDocument( _options )
     DT_CRS = 0,
     
     map_documents = null, //recordset - all loaded documents
-    map_documents_content = {}, //mapdoc_id=>recordset with all layers and datasources of document
+    map_documents_content = {}, //array mapdoc_id=>recordset with all layers and datasources of document
     //mapdoc_id - 0 current search, temp temporal mapspace, or record id
     
     _uniqueid = 9000000;   
@@ -151,8 +151,8 @@ function hMapDocument( _options )
         
         var limit_for_search = 11;
         
-        var resdata = map_documents_content[mapdoc_id];
-        if(resdata){ //we may use resdata.each
+        if(_isDocumentLoaded(mapdoc_id)){
+            var resdata = map_documents_content[mapdoc_id];
             var idx, records = resdata.getRecords();
             for(idx in records){
                 if(idx)
@@ -253,7 +253,6 @@ function hMapDocument( _options )
 
 //{"any":[{"ids":mapdoc_id},{"all":{"t":RT_MAP_LAYER,"linkedfrom":mapdoc_id}}]},    //mapdoc and layer linked to given mapdoc     
 //{"t":RT_MAP_LAYER,"linkedfrom":mapdoc_id},  //layers linked to given mapdoc
-
             var request = {
                         w: 'a',
                         detail: 'detail',
@@ -307,18 +306,17 @@ function hMapDocument( _options )
     // 4. Adds layers on map
     //
     function _openMapDocument(mapdoc_id, deferred){
-        
+
         //1. Gets list of layers and datasets
         if($.isArray(mapdoc_id) || !map_documents_content[mapdoc_id]){ //if array this is set of layers for temp mapspace
             //map doc is not loaded yet
+            if(!$.isArray(mapdoc_id)) map_documents_content[mapdoc_id] = 'loading';
             _loadMapDocumentContent(mapdoc_id, deferred);    
             return;
-        }else if(map_documents_content[mapdoc_id]=='error'){
+        }else if(map_documents_content[mapdoc_id]=='error' || map_documents_content[mapdoc_id]=='loading'){
             //prevent loop
             return;
         }
-        
-        
         
         //2.Set CRS
         if (_defineCRS( mapdoc_id )){
@@ -454,7 +452,8 @@ function hMapDocument( _options )
     //
     function _addLayerRecord(mapdoc_id, rec_ids, callback){
         
-            if(!(map_documents_content[mapdoc_id] && map_documents_content[mapdoc_id].isA("hRecordSet") )) return;
+            if(!_isDocumentLoaded(mapdoc_id)) return;
+            
             if(!rec_ids) return;
             if(!$.isArray(rec_ids)) rec_ids = [rec_ids];
         
@@ -631,8 +630,15 @@ function hMapDocument( _options )
             }
         });        
     }
-
     
+    //
+    //
+    //
+    function _isDocumentLoaded(mapdoc_id){
+            var recset = map_documents_content[mapdoc_id];
+            return (!window.hWin.HEURIST4.util.isnull(recset) && (typeof recset.isA == "function") && recset.isA('hRecordSet'));
+    }
+        
     
     //public members
     var that = {
@@ -655,7 +661,7 @@ function hMapDocument( _options )
         },
         
         isLoaded: function(mapdoc_id){
-           return !window.hWin.HEURIST4.util.isnull( map_documents_content[mapdoc_id] );
+           return _isDocumentLoaded(mapdoc_id);
         },
         
         //
@@ -714,7 +720,7 @@ function hMapDocument( _options )
                  curr_request = data;
             }
                 
-            if(!map_documents_content[mapdoc_id]){
+            if(!_isDocumentLoaded(mapdoc_id)){
                 map_documents_content[mapdoc_id] = new hRecordSet(); //create new recordset - list of layers for mapdocument
             }
             
@@ -766,9 +772,10 @@ function hMapDocument( _options )
         //
         getLayerByName: function( mapdoc_id, dataset_name, dataset_id ){
             
-            var recset = map_documents_content[mapdoc_id];
             //dataset_name is unique within mapdoc
-            if(recset){
+            if (_isDocumentLoaded(mapdoc_id)){
+
+                var recset = map_documents_content[mapdoc_id];
                 
                 var recID;
                 if(dataset_id>0){
@@ -804,7 +811,7 @@ function hMapDocument( _options )
                     
             }
                 
-            if(!map_documents_content[mapdoc_id]){
+            if(!_isDocumentLoaded(mapdoc_id)){
                 map_documents_content[mapdoc_id] = new hRecordSet(); //create new recordset
             }
             
@@ -859,6 +866,8 @@ function hMapDocument( _options )
         //
         setMapDocumentVisibility: function( mapdoc_id, is_visibile ){
             //loop trough all 
+            if(!_isDocumentLoaded(mapdoc_id)) return;
+            
             var resdata = map_documents_content[mapdoc_id];
             var idx, records = resdata.getRecords();
             for(idx in records){
@@ -914,15 +923,19 @@ function hMapDocument( _options )
             }
             
             if(mapdoc_id>0){
-                var resdata = map_documents_content[mapdoc_id];
-                __updateLayers(resdata);
+                if(_isDocumentLoaded(mapdoc_id )){
+                    var resdata = map_documents_content[mapdoc_id];
+                    __updateLayers(resdata);
+                }
             }else{ 
                 //loop trough all 
                 var m_ids = Object.keys(map_documents_content);
                 for(var k in m_ids){
                     if(m_ids[k]!='temp'){
-                        var resdata = map_documents_content[ m_ids[k] ];
-                        __updateLayers(resdata);
+                        if(_isDocumentLoaded( m_ids[k] )){
+                            var resdata = map_documents_content[ m_ids[k] ];
+                            __updateLayers(resdata);
+                        }
                     }
                 }
             }
@@ -935,8 +948,8 @@ function hMapDocument( _options )
         //
         closeMapDocument: function( mapdoc_id ){
             //loop trough all 
-            var resdata = map_documents_content[mapdoc_id];
-            if(resdata){
+            if(_isDocumentLoaded(mapdoc_id )){
+                var resdata = map_documents_content[mapdoc_id];
                 var idx, records = resdata.getRecords();
                 for(idx in records){
                     if(idx)
@@ -949,7 +962,10 @@ function hMapDocument( _options )
                         }
                     }
                 }
+            }
+            if(map_documents_content[mapdoc_id]){
                 map_documents_content[mapdoc_id] = null;
+                delete map_documents_content[mapdoc_id];
             }
          
             if(mapdoc_id!='temp'){
@@ -1022,7 +1038,6 @@ function hMapDocument( _options )
                             var latlong2 = nativemap.unproject([ext[1][1],ext[1][0]], maxzoom);
                             
                             ext = [latlong1, latlong2];
-//console.log('>>>', ext);  
                         }          
                     }
                             
@@ -1055,7 +1070,7 @@ function hMapDocument( _options )
         //
         getLayer: function(mapdoc_id, rec_id){
             
-            if(map_documents_content[mapdoc_id]){
+            if(_isDocumentLoaded(mapdoc_id)){
                 var _record = null;
                 if(rec_id>0){
                     _record = (map_documents_content[mapdoc_id]).getById( rec_id );
@@ -1079,10 +1094,11 @@ function hMapDocument( _options )
         //
         //
         getNativeIdsForDocument: function(mapdoc_id){
-                var resdata = map_documents_content[mapdoc_id];
-            
+
                 var ids = [];
-                if(resdata){
+
+                if(_isDocumentLoaded(mapdoc_id)){
+                    var resdata = map_documents_content[mapdoc_id];
                     var idx, records = resdata.getRecords();
                     for(idx in records){
                         if(idx)
@@ -1158,18 +1174,24 @@ function hMapDocument( _options )
         //
         addLayerRecords: function(mapdoc_id, layers_ids, callback ){
 
-            var to_remove = [];
-            //remove from map_document
-            map_documents_content[mapdoc_id].each(function(recID, record){
-                 if(recID<9000000 && window.hWin.HEURIST4.util.findArrayIndex(recID, layers_ids)<0){
-                     var rtype = record['rec_RecTypeID'];
-                     if(rtype==RT_MAP_LAYER || rtype==RT_TLCMAP_DATASET){
-                         to_remove.push(recID);
+            if(!_isDocumentLoaded(mapdoc_id)){
+
+               map_documents_content[mapdoc_id] = new hRecordSet();
+            }else{
+                
+                var to_remove = [];
+                //remove from map_document
+                map_documents_content[mapdoc_id].each(function(recID, record){
+                     if(recID<9000000 && window.hWin.HEURIST4.util.findArrayIndex(recID, layers_ids)<0){
+                         var rtype = record['rec_RecTypeID'];
+                         if(rtype==RT_MAP_LAYER || rtype==RT_TLCMAP_DATASET){
+                             to_remove.push(recID);
+                         }
                      }
-                 }
-            });
-            for (var idx=0; idx<to_remove.length; idx++){
-                that.removeLayer(mapdoc_id, to_remove[idx]);    
+                });
+                for (var idx=0; idx<to_remove.length; idx++){
+                    that.removeLayer(mapdoc_id, to_remove[idx]);    
+                }
             }
             
             if(window.hWin.HEURIST4.util.isArrayNotEmpty(layers_ids)){

@@ -539,7 +539,6 @@ function hMapLayer2( _options ) {
                     {
                          
                         _geojson_ids = response['geojson_ids']; //all record ids to be plotted on map
-//DEBUG console.log(response);                        
                         if(options.is_current_search && response['geojson_dty_ids']){
                             _geojson_dty_ids = response['geojson_dty_ids'];    
                             
@@ -668,8 +667,6 @@ function hMapLayer2( _options ) {
             _recordset.getFieldGeoValue(_record, window.hWin.HAPI4.sysinfo['dbconst']['DT_GEO_OBJECT'])
         );
              
-//console.log('_getBoundingBox', ext);             
-             
         if(options.mapwidget.mapping('getCurrentCRS')=='Simple'){
             var maxzoom = _getMaxZoomLevel();
             
@@ -694,7 +691,6 @@ function hMapLayer2( _options ) {
                     var latlong2 = nativemap.unproject([ext[1][1],ext[1][0]], maxzoom);
                     
                     ext = [latlong1, latlong2];
-    //console.log('>>>', ext);  
                 }          
             }
             _max_zoom_level = maxzoom;
@@ -1241,8 +1237,9 @@ function hMapLayer2( _options ) {
             }
         },
 
-
-
+        //
+        //
+        //
         removeLayer: function(){
             if(_nativelayer_id>0)
                 options.mapwidget.mapping('removeLayer', _nativelayer_id);
