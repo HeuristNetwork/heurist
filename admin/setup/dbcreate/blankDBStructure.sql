@@ -861,7 +861,7 @@ CREATE TABLE usrReportSchedule (
   rps_ID smallint(5) unsigned NOT NULL auto_increment COMMENT 'Primary ID of a report output update specification',
   rps_Type enum('smarty') NOT NULL default 'smarty' COMMENT 'The type of report being generated',
   rps_Title varchar(64) NOT NULL COMMENT 'A title for this specification for use in selection menus',
-  rps_FilePath varchar(128) default NULL COMMENT 'The full file path to whic hthe report is to be generated, filestore/dbname/generated-reports if blank',
+  rps_FilePath varchar(128) default NULL COMMENT 'The full file path to which the report is to be generated, filestore/dbname/generated-reports if blank',
   rps_URL varchar(128) default NULL COMMENT 'The corresponding URL for web access to the directory in which this report is published, to , filestore/dbname/generated-reports if blank',
   rps_FileName varchar(64) NOT NULL COMMENT 'The base name of the report being published - wil lbe compelted with file types',
   rps_HQuery text NOT NULL COMMENT 'The Heurist query to be used in generating this report',

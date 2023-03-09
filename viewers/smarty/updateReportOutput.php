@@ -17,7 +17,7 @@
 /**
 * updateReportOutput.php
 *
-* takes a report ID (rps_ID in usrReportSchedule) and writes out the report (html and js files)
+* It takes a report ID (rps_ID in usrReportSchedule) and writes out the report (html and js files)
 * to the location specified for that ID.
 * If ID is 0 it should trigger sequential refreshing of all the reports
 *
@@ -30,6 +30,9 @@
 * If publish=1 then the script displays a web page with a report on the process
 * (success or errors as below). If not set, then the errors (file can't be written, can't find template,
 * can't find file path, empty query etc) are sent by email to the database owner.
+* 
+* Use this script in cronjob for auto regenerate all reports
+* viewers/smarty/updateReportOutput.php?db=xxx&publish=3
 *
 * @author      Tom Murtagh
 * @author      Kim Jackson
@@ -134,10 +137,10 @@ function doReport($row){
             if($row['rps_IntervalMinutes']>0){
                 $dt1 = new DateTime("now");
                 $dt2 = new DateTime();
-                $dt2->setTimestamp(filemtime($outputfile));
+                $dt2->setTimestamp(filemtime($outputfile)); //get file time
                 $interval = $dt1->diff( $dt2 );
                 if($interval->i > $row['rps_IntervalMinutes']){
-                    $publish = 2;
+                    $publish = 2; //save into file
                 }
             }
             if($publish == 3){ //request for current files
@@ -154,7 +157,7 @@ function doReport($row){
 			    return;
             }
 		}
-		$publish = 1; //file does not exists - regenerate
+		$publish = 1; //file does not exists - regenerates
 	}//publish==3
 
 	$hquery = $row['rps_HQuery'];

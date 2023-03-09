@@ -222,29 +222,47 @@ class DbUsrReminders extends DbEntityBase
     //
     public function batch_action(){
         
-        /*
-        $recordIDs = prepareIds($this->data['recIDs']);
-        if(count($recordIDs)>0){
-            //find record by ids  - todo
-            
-        }
-        */
-        
-        if(!$this->prepareRecords()){
-                return false;    
-        }
-        
         $rec_IDs = prepareIds(@$this->data['rec_IDs']);
-        $is_notification = (count($rec_IDs)>0);
+        $is_notification = (count($rec_IDs)>0); //sends emails for given set of records
+        
+        $query = 'SELECT * FROM '.$this->config['tableName'];
+        
+        if($is_notification){
+            $ugrID = $this->system->get_user_id();
+            
+            if(!($ugrID>0)){
+                $this->system->addError(HEURIST_REQUEST_DENIED, 
+                    'You have to be logged in to send reminders'
+                    .' Insufficient rights (logout/in to refresh) for this operation');
+                return false;
+            }
+            
+            $query = $query . ' WHERE rem_RecID IN ('.imploder(',',$rec_IDs).') AND rem_OwnerUGrpID='.$ugrID;
+        }else{
+            //validate that this script is run from command line
+            if (php_sapi_name() != 'cli'){
+                $this->system->addError(HEURIST_REQUEST_DENIED, 
+                    'This script can be executed from CLI only');
+                return false;
+            }
+            
+            //send emails/reminders for records with rem_StartDate<=current date
+            // and rem_Freq
+            $query = $query . 
+                ' WHERE DATEDIFF(NOW(), rem_StartDate)>IF(rem_Freq="annually", 365, '
+                .'IF(rem_Freq="monthly",30, IF(rem_Freq="weekly",7, 1)))';
+            
+            //'once','daily','weekly','monthly','annually
+        }
         
         $mysqli = $this->system->get_mysqli();
-        
-        foreach($this->records as $record){
-            
-            if($record[$this->primaryField]>0){
-                $this->recordIDs[] = $record[$this->primaryField];
-            }
-                    
+        $res = $mysqli->query($query);
+        if($res){
+            while ($record = $res->fetch_assoc()) {
+
+            //    
+            // fill $recipients list
+            //        
             $recipients = array();
             if (@$record['rem_ToEmail']) {
                 array_push($recipients, array(
@@ -288,6 +306,9 @@ class DbUsrReminders extends DbEntityBase
                         "u"        => $row[3]));
             }
             
+            //
+            //
+            //
             if(count($recipients)>0){
 
             //sender params - reminder owner
@@ -379,7 +400,9 @@ class DbUsrReminders extends DbEntityBase
                     }
                     
                     //$res = sendEmail($recipient['email'], $email_title, $email_text, $email_headers, true);
-                    return sendPHPMailer(null, $email_from_name, $recipient['email'], $email_title, $email_text, null, false);
+                    
+                    sendPHPMailer(null, $email_from_name, $recipient['email'], $email_title, $email_text, null, false);
+                    //print "\n".$email_from_name.'   '.$recipient['email'].'   '.$email_title;
                     
                 }//for recipients
             
@@ -394,8 +417,15 @@ class DbUsrReminders extends DbEntityBase
                 return false;
             }
             
+            if(!$is_notification && $record['rem_Freq'] != "once"){
+                //update start date
+                $update = 'UPDATE '.$this->config['tableName'].' SET rem_StartDate=NOW() WHERE rem_ID='.$record['rem_ID'];
+                $mysqli->query($update);
+            }
+            
+            }//while
+            $res->close();        
         }//for reminders        
-        
         
         return true;
     }

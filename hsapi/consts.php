@@ -70,7 +70,6 @@ define('HEURIST_BASE_URL', $host_params['server_url'] . $host_params['install_di
 
 define('HEURIST_BASE_URL_PRO', $host_params['server_url'] . $host_params['install_dir_pro'] ); // production url eg. https://myheurist.net/heurist/
 
-
 define('HEURIST_SCRATCHSPACE_DIR', sys_get_temp_dir());
 
 if ($dbHost) {
