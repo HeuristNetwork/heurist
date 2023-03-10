@@ -241,13 +241,13 @@ public static function output($data, $params){
                     if($constr_rt_id>0){
                         $rectypename_is_in_fieldname = (strpos(strtolower($field_name), 
                             strtolower(self::$defRecTypes['names'][$constr_rt_id]))!==false);
-                        $field_name_title = $field_name.' '
-                        //.($rectypename_is_in_fieldname?'':(self::$defRecTypes['names'][$constr_rt_id].' '))
-                        .'RecordTitle';
+                        $field_name_title = $field_name.($rectypename_is_in_fieldname
+                            ?'':' ('.self::$defRecTypes['names'][$constr_rt_id].')').' Record Title';
+
                         $field_name = $field_name.($rectypename_is_in_fieldname
                             ?'':' ('.self::$defRecTypes['names'][$constr_rt_id].')').' H-ID';
                     }else{
-                        $field_name_title = $field_name.' RecordTitle';
+                        $field_name_title = $field_name.' Record Title';
                     }
                     if($field_type=='relmarker'){
                         $relmarker_details[$rt][$dt_id] = $constr_rt_id; 
@@ -363,7 +363,7 @@ public static function output($data, $params){
                     array_push($headers[$rt], $field_name_title);
                     $columnInfo[$rt][] = [
                         'index' => count($headers[$rt]) - 1,
-                        'type' => 'resource_title',
+                        'type' => 'value', //resource_title
                         'field_id' => $fieldFullID,
                     ];
                 }
@@ -738,7 +738,7 @@ public static function output($data, $params){
                     $record_row[] = implode($csv_delimiter,$record_urls); // two separate columns
                 }
 
-                if($value == '' && $dt_type=="resource" && $include_resource_titles){ // to avoid mismatched rows when adding details
+                if($value == '' && $dt_type=="resource" && $include_resource_titles && count($resource_titles)==0){ // to avoid mismatched rows when adding details
                     $record_row[] = $value;
                 }
             }
