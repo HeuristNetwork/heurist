@@ -3506,11 +3506,12 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
                             var lim2 = (len-len2<200)?64:32;
                             
                             if(len>lim){ //65535){  32768
-                                var sMsg = 'The data in field ' //+ $Db.rst(that._currentEditRecTypeID, dtyID)
-                                +' exceeds the maximum size for a field of '+lim2+'Kbytes. '
-                                +'Note that this does not mean '+lim2+'K characters, '
-                                +'as Unicode uses multiple bytes per character.';
-                                window.hWin.HEURIST4.msg.showMsgFlash(sMsg,1500);
+                                var sMsg = 'The data in field ' + $Db.rst(that._currentEditRecTypeID, dtyID, 'rst_DisplayName')
+                                +' exceeds the maximum size for a field of 64Kbytes.<br>' //lim2
+                                +'Note that this does not mean 64K characters, ' //lim2
+                                +'as Unicode uses multiple bytes per character.<br>'
+                                +'You can store more than 64Kbytes by making the field repeating and splitting the data into two or more values for this field.';
+                                window.hWin.HEURIST4.msg.showMsgErr(sMsg);
                                 
                                 var inpt = this._editing.getFieldByName(dtyID);
                                 if(inpt){
