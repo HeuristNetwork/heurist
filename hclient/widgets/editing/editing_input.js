@@ -876,7 +876,6 @@ $.widget( "heurist.editing_input", {
                         content_style: "body { font-size: 8pt; font-family: Helvetica,Arial,sans-serif; }",
                         min_height: ($input.height()+110),
                         max_height: ($input.height()+110),
-                        //autoresize_overflow_padding: 10,
                         autoresize_bottom_margin: 10,
                         autoresize_on_init: false,
                         setup:function(editor) {
@@ -899,6 +898,7 @@ $.widget( "heurist.editing_input", {
                                 });                                        
                             }
 
+                            let has_initd = false, is_blur = false;
                             editor.on('init', function(e) {
                                 let $container = $(editor.editorContainer);
                                 setTimeout(function(){
@@ -911,6 +911,8 @@ $.widget( "heurist.editing_input", {
                                         $container.css('width', (max_w - 245) + 'px');
                                     }
                                 }
+
+                                has_initd = true;
                             });
 
                             editor.on('change', function(e) {
@@ -942,8 +944,19 @@ $.widget( "heurist.editing_input", {
                             });
 
                             editor.on('blur', (e) => { // collapse text area
+                                is_blur = true;
                                 editor.settings.max_height = editor.settings.min_height;
+                                editor.settings.autoresize_min_height = null;
                                 tinymce.activeEditor.execCommand('mceAutoResize');
+                            });
+
+                            editor.on('ResizeContent', (e) => {
+                                if(is_blur){
+                                    is_blur = false;
+                                }else if(has_initd){
+                                    editor.settings.max_height = null;
+                                    editor.settings.autoresize_min_height = $(editor.container).height();
+                                }
                             });
 
                         },

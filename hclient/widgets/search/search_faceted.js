@@ -286,6 +286,7 @@ $.widget( "heurist.search_faceted", {
         this._on( this.btn_terminate, { click: function(){
 
             this.btn_terminate.hide();
+            this.div_toolbar.css('padding-right', '0px');
             this.div_toolbar.find('#facet_process_msg')
                             .attr('data-interrupt', 1)
                             .text('some facets not processed')
@@ -1517,6 +1518,7 @@ $.widget( "heurist.search_faceted", {
             
                 this._terminateFacetCalculation = false;
                 this.btn_terminate.show();
+                this.div_toolbar.css('padding-right', '18px');
                 this.div_toolbar.find('#facet_process_msg').show();
                 if(this.btn_reset) this.btn_reset.hide()    
                 this.btn_close.hide();
@@ -2195,7 +2197,7 @@ $.widget( "heurist.search_faceted", {
                         || field['type']=="date" || field['type']=="year") && field['isfacet']==this._FT_SELECT)
                     {  //add slider
                     
-                        $input_div.find('.input-cell').css('padding-bottom','25px');
+                        $input_div.find('.input-cell').css({'padding-bottom': '25px', 'padding-left': '10px'});
                     
                         $facet_values.parent().css({'display':'block'});
                         //AAA strange padding ,'padding-left':'1em','padding-right':'2em'
@@ -2671,29 +2673,59 @@ $.widget( "heurist.search_faceted", {
                                     +'style="cursor:pointer;font-size:smaller;float:left;color:gray;"/>'
                                 +'<span class="ui-icon ui-icon-triangle-1-e" title="Half step"'
                                     +'style="cursor:pointer;font-size:smaller;float:right;color:gray;"/>'
+                                +'<span class="heurist-helper1 min-val" title="Original minimum value" style="font-size:smaller;cursor:default;" />'
+                                +'<span class="heurist-helper1 max-val" title="Original maximum value" style="font-size:smaller;cursor:default;" />'
                             +'</div>'
                             ).appendTo($facet_values);
                                         
-                            //$("<div>", {facet_index:facet_index})
-                            // .css({'height':'0.4em',margin:'1px 15px'})
-                            //.appendTo($facet_values);
+                            let range_min = field.mmin0;
+                            let range_max = field.mmax0;
+                            let min_label = false;
+                            let max_label = false;
+
+                            if(mmin != range_min){
+                                let ten_percent = mmin * 0.05; //0.1
+                                range_min = (mmin - ten_percent > range_min) ? mmin - ten_percent : range_min;
+                                min_label = true;
+                            }
+                            if(mmax != range_max){
+                                let ten_percent = mmax * 0.05; //0.1
+                                range_max = (mmax + ten_percent < range_max) ? mmax + ten_percent : range_max;
+                                max_label = true;
+                            }
+
                             var slider = ele2.find('div')
                                 .attr('facet_index',facet_index)
                                 .slider({
                                     range: true,
-                                    min: field.mmin0, //(mmin-delta<field.mmin0)?field.mmin0:(mmin-delta)
-                                    max: field.mmax0, //(mmax+delta>field.mmax0)?field.mmax0:(mmax+delta)
+                                    min: range_min, //field.mmin0 (mmin-delta<field.mmin0)?field.mmin0:(mmin-delta)
+                                    max: range_max, //field.mmax0 (mmax+delta>field.mmax0)?field.mmax0:(mmax+delta)
                                     values: [ mmin, mmax ],
                                     slide: __updateSliderLabel,
                                     stop: __onSlideStop,
                                     start: function(){
-                                        ele2.find('.ui-icon-triangle-1-w, .ui-icon-triangle-1-e').css('visibility', 'hidden');
+                                        ele2.find('.ui-icon-triangle-1-w, .ui-icon-triangle-1-e, .min-val, .max-val').css('visibility', 'hidden');
                                     },
                                     create: function(){
                                         $(this).find('.ui-slider-handle').css({width:'4px',background:'black'});
 
                                         ele2.find('span.ui-icon-triangle-1-w').position({my: 'right-6 center+5', at: 'right bottom', of: $($(this).find('.ui-slider-handle')[0])});
                                         ele2.find('span.ui-icon-triangle-1-e').position({my: 'left+6 center+5', at: 'left bottom', of: $($(this).find('.ui-slider-handle')[1])});
+
+                                        let lbl_min = __dateToString(field.mmin0);
+                                        let lbl_max = __dateToString(field.mmax0);
+
+                                        //ele2.find('.min-val').position({my: 'right top', at: 'right bottom', of: ele2.find('span.ui-icon-triangle-1-w-stop')}).text(lbl_min);
+                                        ele2.find('.min-val').css({
+                                            position: 'relative',
+                                            top: '10px',
+                                            left: '-20px'
+                                        }).text(lbl_min);
+                                        ele2.find('.max-val').position({my: 'left top+10', at: 'left bottom', of: ele2.find('span.ui-icon-triangle-1-e-stop')}).text(lbl_max);
+                                        /*setTimeout( () => {
+                                            ele2.find('.min-val').position({my: 'right top', at: 'right bottom', of: ele2.find('span.ui-icon-triangle-1-w-stop')}).text(lbl_min);
+                                            ele2.find('.max-val').position({my: 'left top', at: 'left bottom', of: ele2.find('span.ui-icon-triangle-1-e-stop')}).text(lbl_max);
+                                        }, 1000);*/
                                     }
                                 });
                                     
@@ -2719,9 +2751,11 @@ $.widget( "heurist.search_faceted", {
                                  
                             if(mmin==field.mmin0){
                                 ele2.find('span.ui-icon-triangle-1-w-stop, span.ui-icon-triangle-1-w').css('visibility','hidden');
+                                ele2.find('span.min-val').hide();
                             }
                             if(mmax==field.mmax0){
                                 ele2.find('span.ui-icon-triangle-1-e-stop, span.ui-icon-triangle-1-e').css('visibility','hidden');
+                                ele2.find('span.max-val').hide();
                             }
                                  
                             //show initial values

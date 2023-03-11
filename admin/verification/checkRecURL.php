@@ -62,16 +62,17 @@ if($is_included){
 
 $mysqli = $system->get_mysqli();
 
+
+// Check rec_URL values
 $passed_cnt = 0;
 $passed_rec_ids = array();
 $broken_cnt = 0;
-
 
 $query = 'SELECT rec_ID, rec_URL FROM Records WHERE(rec_URL!="") AND (rec_URL IS NOT NULL)';
     
 $res = $mysqli->query($query);
 if ($res){
-    $result = array();
+
     while ($row = $res->fetch_row()){
 
         $rec_id = $row[0];
@@ -109,10 +110,8 @@ if ($res){
         $has_broken_url = true;
         print '<div style="padding-top:20px;color:red">There are <b>'.$broken_cnt
         .'</b> records with broken url. Search "_BROKEN_" for details</div>';
-
-        //echo '<div><h3 class="error"> XXX Records have broken URL</h3></div>';        
     }else{
-        echo '<div><h3 class="res-valid">OK: All records have valid URL</h3></div>';        
+        echo '<div><h3 class="res-valid">OK: All records have valid URL</h3></div>';
     }
 
 }else{
@@ -120,7 +119,138 @@ if ($res){
 }
 
 
-    
+// Check freetext and blocktext fields for urls and validate
+$passed_cnt = 0;
+$rec_cnt = 0;
+$broken_cnt = 0;
+$broken_field_urls = array();
+
+if($is_included){
+    print '<div style="padding:10px 10px 10px 0px"><h3 id="records_url_msg">Check Record Field URLs</h3><br>';
+}else{
+    print '<div class="banner" style="padding-left: 0px;"><h3>Check Record Field URLs</h3></div>';
+}
+
+$query = 'SELECT dtl_RecID, dtl_Value, dtl_DetailTypeID '
+    . 'FROM recDetails '
+    . 'INNER JOIN defDetailTypes ON dty_ID = dtl_DetailTypeID '
+    . 'INNER JOIN Records ON rec_ID = dtl_RecID '
+    . 'WHERE (dty_Type = "freetext" OR dty_Type = "blocktext") AND dtl_Value REGEXP "https?://"';
+
+$res = $mysqli->query($query);
+if($res){
+
+    while($row = $res->fetch_row()){
+
+        $rec_id = $row[0];
+        $value = $row[1];
+        $dty_id = $row[2];
+
+        $urls = array();
+
+        preg_match_all("/https?:\/\/[^\s\"'>()\\\\]*/", $value, $urls);
+
+        if(is_array($urls) && count($urls[0]) > 0){
+
+            $rec_cnt ++;
+
+            foreach ($urls[0] as $url) {
+
+                if($url[-1] == '.'){
+                    $url = substr($url, 0, -1);
+                }
+
+                $data = loadRemoteURLContentWithRange($url, "0-1000", true, 10);
+
+                if ($data){
+                    $passed_cnt ++;
+                }else{
+
+                    if(!array_key_exists($rec_id, $broken_field_urls)){
+                        $broken_field_urls[$rec_id] = array();
+                    }
+                    if(!array_key_exists($dty_id, $broken_field_urls[$rec_id])){
+                        $broken_field_urls[$rec_id][$dty_id] = '';
+                    }
+
+                    $broken_cnt ++;                            
+                    $broken_field_urls[$rec_id][$dty_id] .= '<div>'.$url.' '.$glb_curl_error.'</div>';
+                }
+            }
+        }
+    }
+    $res->close();
+}
+
+// Check external URLs in use
+$query = 'SELECT dtl_RecID, ulf_ExternalFileReference, dtl_DetailTypeID '
+    . 'FROM recDetails '
+    . 'INNER JOIN defDetailTypes ON dty_ID = dtl_DetailTypeID '
+    . 'INNER JOIN recUploadedFiles ON ulf_ID = dtl_UploadedFileID '
+    . 'WHERE dty_Type = "file" AND ulf_ExternalFileReference != ""';
+
+$res = $mysqli->query($query);
+if($res){
+
+    while ($row = $res->fetch_row()) {
+        
+        $rec_id = $row[0];
+        $url = $row[1];
+        $dty_id = $row[2];
+
+        $data = loadRemoteURLContentWithRange($url, "0-1000", true, 10);
+
+        if($data){
+            $passed_cnt++;
+        }else{
+            if(!array_key_exists($rec_id, $broken_field_urls)){
+                $rec_cnt ++;
+                $broken_field_urls[$rec_id] = array();
+            }
+            if(!array_key_exists($dty_id, $broken_field_urls[$rec_id])){
+                $broken_field_urls[$rec_id][$dty_id] = '';
+            }
+
+            $broken_cnt ++;
+            $broken_field_urls[$rec_id][$dty_id] .= '<div>'.$url.' '.$glb_curl_error.'</div>';
+        }
+    }
+    $res->close();
+}
+
+// Report broken freetext/blocktext and file fields values
+if($rec_cnt > 0){
+
+    print '<p>Processed: '. $rec_cnt .' records, ' . $passed_cnt . ' urls passed</p>';
+
+    $fld_query = 'SELECT rst_DisplayName FROM Records INNER JOIN defRecStructure ON rst_RecTypeID = rec_RecTypeID WHERE rec_ID = RECID AND rst_DetailTypeID IN (DTYID)';
+    $def_name_query = 'SELECT dty_Name FROM defDetailTypes WHERE dty_ID IN (DTYID)';
+
+    if(count($broken_field_urls) > 0){
+
+        foreach ($broken_field_urls as $recid => $flds) {
+            if(count($flds) == 0){
+                continue;
+            }
+
+            $dtyids = implode(',', array_keys($flds));
+
+            $fld_names = mysql__select_list2($mysqli, str_replace(array('RECID', 'DTYID'), array($recid, $dtyids), $fld_query));
+            if(empty($fld_names)){
+                 $fld_names = mysql__select_list2($mysqli, str_replace(array('DTYID'), array($dtyids), $def_name_query));
+            }
+
+            print '<div>' . $recid . ': ' . implode(' ; ', array_values($flds)) . '[found in field(s): ' . implode(',', $fld_names) . ']<br>';
+        }
+
+        $has_broken_url = true;
+        print '<div style="padding-top:20px;color:red"><b>'.$broken_cnt.'</b> broken urls found within record fields.</div>';
+
+    }else{
+        echo '<div><h3 class="res-valid">OK: All URLs in record fields are valid</h3></div>';
+    }
+}
+
 if(!$is_included){    
     print '</div></body></html>';
 }else{
