@@ -1703,10 +1703,12 @@ $.widget( "heurist.search_faceted_wiz", {
                     //for text field default is search for others slider/dropdown
                     if(facets[k].type=='enum' || facets[k].type=='reltype'){
                         
-                        var vocab_id = $Db.dty(dtid, 'dty_JsonTermIDTree');    
-                        var list = $Db.trm_TreeData(vocab_id, 'set');
-                        
                         if(!(facets[k].isfacet>0)){
+                            let dtid = facets[k].code.split(':');
+                            dtid = dtid[dtid.length-1];
+                            var vocab_id = $Db.dty(dtid, 'dty_JsonTermIDTree');    
+                            var list = $Db.trm_TreeData(vocab_id, 'set');
+                            
                             if(list.length<5){
                                 facets[k].isfacet = 2; //wrap 
                             }else if (list.length<25) {
