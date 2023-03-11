@@ -55,7 +55,7 @@ function ShowReps( is_snippet_editor ) {
     
     var top_repcontainer = '36px';
     
-    var progressInterval = null;
+    //var progressInterval = null;
 
     /**
     *  show the list of available reports
@@ -114,7 +114,7 @@ function ShowReps( is_snippet_editor ) {
             window.hWin.HEURIST4.ui.initHSelect(sel2, false);
             
             if(sel.selectedIndex>=0){
-                _reload(context[sel2.selectedIndex].filename);
+                //_reload(context[sel2.selectedIndex].filename);
             }
         }
         
@@ -306,9 +306,9 @@ function ShowReps( is_snippet_editor ) {
     //
     function _showProgress( session_id ){
 
-        if(!(session_id>0)) {
+        if(that.progressInterval>0){ //!(session_id>0)) { //clear previous interval requests
              _hideProgress();
-             return;
+             //return;
         }
        
         var progressCounter = 0;        
@@ -344,16 +344,14 @@ function ShowReps( is_snippet_editor ) {
               }
         });*/
         
-        progressInterval = setInterval(function(){ 
-            
+        that.progressInterval = setInterval(function(){ 
+
             var request = {t:(new Date()).getMilliseconds(), session:session_id};            
             
             window.hWin.HEURIST4.util.sendRequest(progress_url, request, null, function(response){
                 
-//console.log(response);                
                 if(!response || response.status==window.hWin.ResponseStatus.UNKNOWN_ERROR){
                     _hideProgress();
-                    //console.log(response+'  '+session_id);                   
                 }else{
                     
                     var resp = response?response.split(','):[0,0];
@@ -392,10 +390,10 @@ function ShowReps( is_snippet_editor ) {
         
         $('body').css('cursor','auto');
         
-        if(progressInterval!=null){
+        if(that.progressInterval!=null){
             
-            clearInterval(progressInterval);
-            progressInterval = null;
+            clearInterval(that.progressInterval);
+            that.progressInterval = null;
         }
         $('#progressbar_div').hide();
         $('#toolbardiv').show();
@@ -2073,6 +2071,10 @@ this_id       : "term"
     //public members
     var that = {
 
+        
+    
+        progressInterval: null,    
+
         /*setQuery: function(q_all, q_sel, q_main){
         if(q_all) squery_all = q_all;
         squery_sel = q_sel;
@@ -2192,7 +2194,6 @@ this_id       : "term"
         isA: function (strClass) {
             return (strClass === _className);
         }
-
     };
 
     // init on load
