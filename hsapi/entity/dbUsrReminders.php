@@ -27,6 +27,18 @@ require_once (dirname(__FILE__).'/../utilities/utils_mail.php');
 
 class DbUsrReminders extends DbEntityBase
 {
+    
+ function __construct( $system, $data ) {
+        
+       if($data==null){
+           $data = array();
+       } 
+       if(!@$data['entity']){
+           $data['entity'] = 'usrReminders';
+       }
+        
+       parent::__construct( $system, $data );
+    }    
 
     /**
     *  search usrReminders
@@ -362,7 +374,7 @@ class DbUsrReminders extends DbEntityBase
                                     .'> would like to draw some records to your attention, with the following note:'. "\n\n"
                                     . '"'.$record['rem_Message'] . '"' . "\n\n"
                                     . 'Access them and add them (if desired) to your Heurist records at:' . "\n\n"
-                                    . HEURIST_BASE_URL.'?w=all&db='.HEURIST_DBNAME.'&q=ids:'.implode(',', $rec_IDs) . "\n\n"
+                                    . HEURIST_BASE_URL.'?w=all&db='.$this->system->dbname().'&q=ids:'.implode(',', $rec_IDs) . "\n\n"
                                     . 'To add records, select them and then Selected > Bookmark' . "\n\n"
                                     . "Id      Title\n" . "------  ---------\n";                            
                         foreach($bibs as $rec_id => $rec_title){
@@ -377,7 +389,7 @@ class DbUsrReminders extends DbEntityBase
                         $email_text = 'Reminder From: ' . ($record['rem_ToUserID'] == $record['rem_OwnerUGrpID'] ? 'you'
                                                             : $email_owner) . "\n\n"
                                     . 'For: "'.$bib[0].'"' . "\n\n" //rec_Title
-                                    . 'URL: '.HEURIST_BASE_URL.'?w=all&db='.HEURIST_DBNAME.'&q=ids:'.$record['rem_RecID'] . "\n\n";
+                                    . 'URL: '.HEURIST_BASE_URL.'?w=all&db='.$this->system->dbname().'&q=ids:'.$record['rem_RecID'] . "\n\n";
 
                         if ($bib[1] && $bib[2] == 'hidden') { //rec_OwnerUGrpID  rec_NonOwnerVisibility
                             $email_text .= "Note: Record belongs to workgroup ".$bib[3] . "\n"   //ugr_Name
@@ -391,7 +403,7 @@ class DbUsrReminders extends DbEntityBase
                                         .  "You will receive this reminder " . $record['rem_Freq'] . "\n"
                                         .  "Click below if you do not wish to receive this reminder again:\n\n"
                                         .  $BASE_URL."records/reminders/deleteReminder.php?r=".$record['rem_ID']
-                                        . "db=".HEURIST_DBNAME
+                                        . "db=".$this->system->dbname()
                                         .  ($recipient['u'] ? "&u=".$recipient['u'] : "&e=".$recipient['e']) . "&h=".$record['rem_Nonce'] . "\n\n";
                         } else {
                             $email_text .= "-------------------------------------------\n\n"
@@ -420,7 +432,7 @@ class DbUsrReminders extends DbEntityBase
             if(!$is_notification && $record['rem_Freq'] != "once"){
                 //update start date
                 $update = 'UPDATE '.$this->config['tableName'].' SET rem_StartDate=NOW() WHERE rem_ID='.$record['rem_ID'];
-                $mysqli->query($update);
+//TEMP                $mysqli->query($update);
             }
             
             }//while

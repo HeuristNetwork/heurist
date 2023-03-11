@@ -28,31 +28,35 @@
     initSmarty();
 
 
-function initSmarty(){
+function initSmarty($smarty_templates_dir=null){
     global $smarty;
     
-    if(defined('HEURIST_SMARTY_TEMPLATES_DIR')){
+    if($smarty_templates_dir==null && defined('HEURIST_SMARTY_TEMPLATES_DIR')){
+        $smarty_templates_dir = HEURIST_SMARTY_TEMPLATES_DIR;
+    }
+    
+    if($smarty_templates_dir){
     
         $smarty = new Smarty();
         
         //check folder existance and create new folders if they are missing
-        if(!folderCreate(HEURIST_SMARTY_TEMPLATES_DIR, true)){
+        if(!folderCreate($smarty_templates_dir, true)){
             die('Failed to create folder for smarty templates');
         }
-        if(!folderCreate(HEURIST_SMARTY_TEMPLATES_DIR.'configs/', true)){
+        if(!folderCreate($smarty_templates_dir.'configs/', true)){
             die('Failed to create configs folder for smarty templates');
         }
-        if(!folderCreate(HEURIST_SMARTY_TEMPLATES_DIR.'templates_c/', true)){
+        if(!folderCreate($smarty_templates_dir.'templates_c/', true)){
             die('Failed to create templates_c folder for smarty templates');
         }
-        if(!folderCreate(HEURIST_SMARTY_TEMPLATES_DIR.'cache/', true)){
+        if(!folderCreate($smarty_templates_dir.'cache/', true)){
             die('Failed to create cache folder for smarty templates');
         }
 
-        $smarty->setTemplateDir(HEURIST_SMARTY_TEMPLATES_DIR);
-        $smarty->setCompileDir(HEURIST_SMARTY_TEMPLATES_DIR.'templates_c');
-        $smarty->setCacheDir(HEURIST_SMARTY_TEMPLATES_DIR.'cache');
-        $smarty->setConfigDir(HEURIST_SMARTY_TEMPLATES_DIR.'configs');    
+        $smarty->setTemplateDir($smarty_templates_dir);
+        $smarty->setCompileDir($smarty_templates_dir.'templates_c');
+        $smarty->setCacheDir($smarty_templates_dir.'cache');
+        $smarty->setConfigDir($smarty_templates_dir.'configs');    
         
         $smarty->registerResource("string", array("str_get_template",
             "str_get_timestamp",

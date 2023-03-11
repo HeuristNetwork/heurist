@@ -615,6 +615,27 @@ error_log(print_r($_REQUEST, true));
     }
     
     //
+    //
+    //
+    public function getSysDir($folder_name=null, $database_name=null){
+        
+        $upload_root = defined('HEURIST_FILESTORE_ROOT')
+                            ?HEURIST_FILESTORE_ROOT 
+                            :$this->getFileStoreRootFolder();
+
+        if($database_name==null){
+            $dbfolder = $upload_root.$this->dbname.'/';
+        }else{
+            $dbfolder = $upload_root.$database_name.'/';
+        }
+        if($folder_name!=null){
+            $dbfolder = $dbfolder . $folder_name . '/';
+        }
+        
+        return $dbfolder;
+    }
+    
+    //
     // $dbname - shortname (without prefix)
     //
     public function initPathConstants($dbname=null){

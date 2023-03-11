@@ -29,6 +29,31 @@ function getHostParams()
     
     $host_params = array();
     
+    $installDir = '';
+
+    if (php_sapi_name() == 'cli'){
+
+        $k = strpos($serverName,":");
+        $host_params['domain'] = ($k>0)?substr($serverName,0,$k-1):$serverName;
+        $isSecure = true;
+        
+        $sDir = getcwd();
+        
+        $iDir = explode('/', $sDir);
+        $cntDir = count($iDir)-1;
+        $path = null;
+        for ($i=$cntDir; $i>=0; $i--){
+            if($iDir[$i]=='heurist' || $iDir[$i]=='h6-alpha') {
+                $installDir = $iDir[$i].'/';
+                $path = array_slice($iDir, 0, i-1);
+                break;   
+            }
+        }
+        $installDir_pro = 'heurist/';
+        $host_params['heurist_dir'] = implode('/',$path).'/';
+        
+    }else{
+    
     // server name or IP address of your Web server, null will pull SERVER_NAME from the request header
     if (!@$serverName) {
         if(@$_SERVER["SERVER_NAME"]){
@@ -43,7 +68,7 @@ function getHostParams()
         $k = strpos($serverName,":");
         $host_params['domain'] = ($k>0)?substr($serverName,0,$k-1):$serverName;
     }
-    
+
     $isSecure = false;
     if (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] == 'on') {
         $isSecure = true;
@@ -91,7 +116,10 @@ function getHostParams()
         $installDir_pro = implode('/', $iDir);
         //DEBUG - pro is the same as dev $installDir_pro = $installDir; 
     }
-
+    
+    }    
+    
+    
     $host_params['server_url'] = ($isSecure ? 'https' : 'http') . "://" . $serverName;
     $host_params['install_dir'] = $installDir;
     $host_params['install_dir_pro'] = $installDir_pro;

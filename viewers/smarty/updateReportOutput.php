@@ -48,65 +48,71 @@
 */
 require_once(dirname(__FILE__).'/../../viewers/smarty/showReps.php');
 
-//system is defined in showReps
-if(!$system->is_inited()){
-    echo 'System is not inited';
-    exit();
-}
+if(!isset($system)){ //if set it is included in dailyCronJobs
 
-$rps_ID = (array_key_exists('id',$_REQUEST)) ? $_REQUEST['id'] :0;
-
-//mode of publication  3 - redirect to existing  html or js wrapper
-if(array_key_exists('publish',$_REQUEST)){
-	$publish = intval($_REQUEST['publish']);
-}else{
-	$publish = 1;
-}
-$format = (array_key_exists('mode',$_REQUEST) && $_REQUEST['mode']=="js") ?"js":"html";
-
-$mysqli = $system->get_mysqli();
-
-if($publish==3){
-    header("Content-type: text/html;charset=UTF-8");
-}
-
-
-if($rps_ID==0){
-	//regenerate all reports
-	$res = $mysqli->query('select * from usrReportSchedule');
-    if($res){
-        while ($row = $res->fetch_assoc()) {
-            doReport($row);
-        }
-        $res->close();        
+    //system is defined in showReps
+    if(!$system->is_inited()){
+        echo 'System is not inited';
+        exit();
     }
 
-}else if(is_numeric($rps_ID)){
-	//load one
-    
-	$row = mysql__select_row_assoc($mysqli, "select * from usrReportSchedule where rps_ID=".$rps_ID);
-    if($row){
-			doReport($row);
-	}
+    $rps_ID = (array_key_exists('id',$_REQUEST)) ? $_REQUEST['id'] :0;
 
-}else{
-    echo "Wrong report ID parameter: ".$rps_ID;
+    //mode of publication  3 - redirect to existing  html or js wrapper
+    if(array_key_exists('publish',$_REQUEST)){
+	    $publish = intval($_REQUEST['publish']);
+    }else{
+	    $publish = 1;
+    }
+    $format = (array_key_exists('mode',$_REQUEST) && $_REQUEST['mode']=="js") ?"js":"html";
+
+    $mysqli = $system->get_mysqli();
+
+    if($publish==3){
+        header("Content-type: text/html;charset=UTF-8");
+    }
+
+
+    if($rps_ID==0){
+	    //regenerate all reports
+	    $res = $mysqli->query('select * from usrReportSchedule');
+        if($res){
+            while ($row = $res->fetch_assoc()) {
+                doReport($system, $publish, $format, $row);
+            }
+            $res->close();        
+        }
+
+    }else if(is_numeric($rps_ID)){
+	    //load one
+        
+	    $row = mysql__select_row_assoc($mysqli, "select * from usrReportSchedule where rps_ID=".$rps_ID);
+        if($row){
+			    doReport($system, $publish, $format, $row);
+	    }
+
+    }else{
+        echo "Wrong report ID parameter: ".$rps_ID;
+    }
+
+    exit();
 }
-
-exit();
-
 //
-// generate report
+// Generates report
+// returns:
+// 1 - creates new one
+// 2 - update the report, see rps_IntervalMinutes
+// 3 - takes the exising one
 //
-function doReport($row){
-
-	global $system, $publish, $format;
+function doReport($system, $publish, $format, $row){
+    
+    $res = 0;    
 
 	if($row['rps_FilePath']!=null){
 		$dir = $row['rps_FilePath'];
 		if(substr($dir,-1)!="/") $dir = $dir."/";
 	}else{
-		$dir = HEURIST_FILESTORE_DIR."generated-reports/";
+		$dir = $system->getSysDir('smarty-templates')."generated-reports/";
         if(!folderCreate($dir, true)){
             die('Failed to create folder for generated reports');
         }   
@@ -141,9 +147,12 @@ function doReport($row){
                 $interval = $dt1->diff( $dt2 );
                 if($interval->i > $row['rps_IntervalMinutes']){
                     $publish = 2; //save into file
+                    $res = 2;
                 }
             }
             if($publish == 3){ //request for current files
+                $recreated++;
+                $res = 3;
             
 			    $content = file_get_contents($outputfile);
 			    if($format=="js" && $ext != $format){
@@ -158,6 +167,7 @@ function doReport($row){
             }
 		}
 		$publish = 1; //file does not exists - regenerates
+        $res = 1;
 	}//publish==3
 
 	$hquery = $row['rps_HQuery'];

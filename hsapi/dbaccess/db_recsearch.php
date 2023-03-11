@@ -2464,7 +2464,7 @@ function recordSearch($system, $params)
                     $file_field_types = array();
                     if(true){
                         $file_field_types = mysql__select_list2($mysqli,'select dty_ID from defDetailTypes where dty_Type="file"');
-                        $ruf_entity = new DbRecUploadedFiles($system, array('entity'=>'recUploadedFiles'));
+                        $ruf_entity = new DbRecUploadedFiles($system, null);
                     }
 
                     $loop_cnt=1;                            
@@ -3080,7 +3080,7 @@ function recordSearchDetails($system, &$record, $detail_types) {
 
                     if(!($rd['dtl_UploadedFileID']>0)){
                          // FIX on fly - @todo  remove on 2022-08-22
-                         $ruf_entity = new DbRecUploadedFiles($system, array('entity'=>'recUploadedFiles'));
+                         $ruf_entity = new DbRecUploadedFiles($system, null);
                          $fileinfo = $ruf_entity->registerURL($rd['dtl_Value'], false, $rd['dtl_ID']);
                     }else{
                         $fileinfo = fileGetFullInfo($system, $rd["dtl_UploadedFileID"]);

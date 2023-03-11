@@ -23,13 +23,14 @@
     * See the License for the specific language governing permissions and limitations under the License.
     */
 
+/*    
 if (@$argv) {
     //php -f entityScrud.php -- -db xxx -entity usrReminders -a batch
 
     // handle command-line
     $ARGV = array();
     for ($i = 0;$i < count($argv);++$i) {
-        if ($argv[$i][0] === '-') {                    
+        if ($argv[$i][0] === '-') {  //pair: -param value                  
             if (@$argv[$i + 1] && $argv[$i + 1][0] != '-') {
                 $ARGV[substr($argv[$i],1)] = $argv[$i + 1];
                 ++$i;
@@ -42,9 +43,8 @@ if (@$argv) {
     $_REQUEST = $ARGV;
     
     define('HEURIST_DIR', getcwd().'/../../');
-
 }
-    
+*/    
     
     require_once (dirname(__FILE__).'/../System.php');
     require_once ('entityScrudSrv.php');

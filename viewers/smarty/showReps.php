@@ -55,10 +55,6 @@ require_once(dirname(__FILE__).'/../../hsapi/dbaccess/db_files.php');
 require_once(dirname(__FILE__).'/../../vendor/autoload.php'); //for geoPHP
 require_once(dirname(__FILE__).'/../../vendor/ezyang/htmlpurifier/library/HTMLPurifier.auto.php');
 
-detectLargeInputs('REQUEST showReps', $_REQUEST);
-detectLargeInputs('COOKIE showReps', $_COOKIE);
-
-
 $outputfile = null;
 $isJSout = false;
 
@@ -231,8 +227,9 @@ function executeSmartyTemplate($system, $params){
         if(substr($template_file,-4)!=".tpl"){
             $template_file = $template_file.".tpl";
         }
-        if(file_exists(HEURIST_SMARTY_TEMPLATES_DIR.$template_file)){
-            $content = file_get_contents(HEURIST_SMARTY_TEMPLATES_DIR.$template_file);
+        
+        if(file_exists($system->getSysDir('smarty-templates').$template_file)){
+            $content = file_get_contents($system->getSysDir('smarty-templates').$template_file);
         }else{
             $error = "<b><font color='#ff0000'>Template file $template_file does not exist</font></b>";
             
@@ -281,7 +278,7 @@ function executeSmartyTemplate($system, $params){
 
     
     if(!isset($smarty) || $smarty==null){
-        initSmarty(); //global function from smartyInit.php
+        initSmarty($system->getSysDir('smarty-templates')); //global function from smartyInit.php
         if(!isset($smarty) || $smarty==null){
             smarty_error_output($system, 'Cannot init Smarty report engine');
             exit();
@@ -528,7 +525,7 @@ function smarty_output_filter_strip_js($tpl_source, Smarty_Internal_Template $te
                 .'var rec_Files=[];'
                 .'$(document).ready(function() {'
                     .'$("body").mediaViewer({rec_Files:rec_Files, showLink:false, selector:".fancybox-thumb", '
-                    .'database:"'.HEURIST_DBNAME.'", baseURL:"'.HEURIST_BASE_URL.'"});'    
+                    .'database:"'.$system->dbname().'", baseURL:"'.HEURIST_BASE_URL.'"});'    
                   .'});'
                 .'</script>');
             }
@@ -563,7 +560,7 @@ function smarty_output_filter_strip_js($tpl_source, Smarty_Internal_Template $te
     .'document.getElementsByTagName("head")[0].insertAdjacentHTML("beforeend","<link rel=\"stylesheet\" href=\"'.HEURIST_BASE_URL.'external/jquery.fancybox/jquery.fancybox.css\" />");'                
                     
                         .'$("body").mediaViewer({rec_Files:rec_Files, showLink:false, selector:".fancybox-thumb", '
-                        .'database:"'.HEURIST_DBNAME.'", baseURL:"'.HEURIST_BASE_URL.'"});'    
+                        .'database:"'.$system->dbname().'", baseURL:"'.HEURIST_BASE_URL.'"});'    
                       .'});'
                     .'</script>');
             }
@@ -643,7 +640,7 @@ function smarty_output_filter_strip_js($tpl_source, Smarty_Internal_Template $te
         $config->set('HTML.DefinitionRev', 1);
 
         //$config = HTMLPurifier_Config::createDefault();
-        $config->set('Cache', 'SerializerPath', HEURIST_SCRATCHSPACE_DIR);
+        $config->set('Cache', 'SerializerPath', $system->getSysDir('scratch'));
         $config->set('CSS.Trusted', true);
         $config->set('Attr.AllowedFrameTargets','_blank');
         $config->set('HTML.SafeIframe', true);
@@ -712,7 +709,7 @@ function smarty_output_filter($tpl_source, Smarty_Internal_Template $template)
 //
 function save_report_output2($tpl_source){
 
-    global $outputfile, $isJSout, $gparams, $publishmode, $is_included;
+    global $system, $outputfile, $isJSout, $gparams, $publishmode, $is_included;
 
     $errors = null;
     $res_file = null;
@@ -796,7 +793,7 @@ function save_report_output2($tpl_source){
             $rps_recid = @$gparams['rps_id'];
             if($rps_recid){
 
-                $link = HEURIST_BASE_URL."viewers/smarty/updateReportOutput.php?db=".HEURIST_DBNAME."&publish=3&id=".$rps_recid;
+                $link = HEURIST_BASE_URL."viewers/smarty/updateReportOutput.php?db=".$system->dbname()."&publish=3&id=".$rps_recid;
                 ?>
 
                 <p style="font-size: 14px;">View the generated files by clicking the links below:<br /><br />
@@ -807,7 +804,7 @@ function save_report_output2($tpl_source){
             }
 
             // code for insert of dynamic report output - duplication of functionality in repMenu.html
-            $surl = HEURIST_BASE_URL."viewers/smarty/showReps.php?db=".HEURIST_DBNAME.
+            $surl = HEURIST_BASE_URL."viewers/smarty/showReps.php?db=".$system->dbname().
             "&ver=".$gparams['ver']."&w=".$gparams['w']."&q=".$gparams['q'].
             "&publish=1&debug=0&template=".$gparams['template'];
 
@@ -920,6 +917,7 @@ function smarty_function_out($params, &$smarty)
 //
 function smarty_function_wrap($params, &$smarty)
 {
+    global $system;
 
     if($params['var']){
 
@@ -1010,9 +1008,9 @@ function smarty_function_wrap($params, &$smarty)
                 $file_Ext= $fileinfo['ulf_MimeExt'];
                 $sourceType = $fileinfo['ulf_PreferredSource'];
                     
-                $file_playerURL = HEURIST_BASE_URL.'?db='.HEURIST_DBNAME.'&file='.$file_nonce.'&mode=tag';
-                $file_thumbURL  = HEURIST_BASE_URL.'?db='.HEURIST_DBNAME.'&thumb='.$file_nonce;
-                $file_URL   = HEURIST_BASE_URL.'?db='.HEURIST_DBNAME.'&file='.$file_nonce; //download
+                $file_playerURL = HEURIST_BASE_URL.'?db='.$system->dbname().'&file='.$file_nonce.'&mode=tag';
+                $file_thumbURL  = HEURIST_BASE_URL.'?db='.$system->dbname().'&thumb='.$file_nonce;
+                $file_URL   = HEURIST_BASE_URL.'?db='.$system->dbname().'&file='.$file_nonce; //download
                             
                 if($mode=="link") {
 
@@ -1069,7 +1067,7 @@ function smarty_function_wrap($params, &$smarty)
                         $res = '<a href="http://maps.google.com/maps?z=18&q='.$point->y().",".$point->x().'" target="_blank">'.$label."</a>";
                     }else{
                         $recid = $value['recid'];
-                        $url = HEURIST_BASE_URL."viewers/gmap/mapStatic.php?".$mapsize."&q=ids:".$recid."&db=".HEURIST_DBNAME; //"&t="+d;
+                        $url = HEURIST_BASE_URL."viewers/gmap/mapStatic.php?".$mapsize."&q=ids:".$recid."&db=".$system->dbname(); //"&t="+d;
                         return "<img src=\"".$url."\" ".$size."/>";
                     }
                 }

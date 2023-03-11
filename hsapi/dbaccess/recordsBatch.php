@@ -1540,7 +1540,7 @@ error_log('count '.count($childNotFound).'  '.count($toProcess).'  '.print_r(  $
         //5. If download - register new file
         //6. Replace ulf_ID in dtl_UploadedFileID
 
-        $file_entity = new DbRecUploadedFiles($this->system, array('entity'=>'recUploadedFiles'));
+        $file_entity = new DbRecUploadedFiles($this->system, null);
         
         //1. find external urls for field values
         $query = 'SELECT dtl_ID, ulf_ID, ulf_ExternalFileReference, dtl_RecID FROM recUploadedFiles, recDetails '

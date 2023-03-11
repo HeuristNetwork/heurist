@@ -573,7 +573,7 @@ public static function saveMapDocumentSnapShot($rec_ID, $tlcmapshot){
         //$mysqli = self::$system->get_mysqli();           
 
         //2. save encoded image as file and register it
-        $entity = new DbRecUploadedFiles(self::$system, array('entity'=>'recUploadedFiles'));
+        $entity = new DbRecUploadedFiles(self::$system, null);
         $ulf_ID = $entity->registerImage($tlcmapshot, 'map_snapshot_'.$rec_ID); //it returns ulf_ID
         if( is_bool($ulf_ID) && !$ulf_ID ){
             return false;
