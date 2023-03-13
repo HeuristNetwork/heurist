@@ -195,7 +195,7 @@ class DbRecUploadedFiles extends DbEntityBase
                             if($idx!==false) $mimeType = $row[$idx]; 
                             $idx = array_search('ulf_ExternalFileReference', $fields);
                             if($idx!==false) $external_url = $row[$idx]; 
-                            array_push($row, fileGetPlayerTag($fileid, $mimeType, null, $external_url));  //add ulf_PlayerTag  
+                            array_push($row, fileGetPlayerTag($this->system, $fileid, $mimeType, null, $external_url));  //add ulf_PlayerTag  
                         }else{
                             array_push($row, '');
                         }

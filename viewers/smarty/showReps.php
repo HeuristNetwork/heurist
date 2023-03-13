@@ -66,9 +66,17 @@ $gparams = null;
 $loaded_recs = array();
 $max_allowed_depth = 2;
 
-//'publish' - 0  Heurist User Interface (smarty tab),  1 - publish,  2 - no browser output (save into file only)
-//    3 - redirect to the existing report (use already publshed output), if it does not exist, recreate it (publish=1)
-//    4 - execute smarty from string (for calculated fields and title mask). It is nearly same as 0
+//"publish"
+// 0  - Heurist User Interface (smarty tab) it truncates number of records to be out (see smarty-output-limit)
+// 4 - execute smarty from string (for calculated fields and title mask). It is nearly same as 0
+// 
+// otherwise it works in publish mode and takes all records from search output
+// if param "output" ($outputfile) is defined it saves smarty report into file 
+// and
+// 1 produces info page (user report) only 
+// 2 downloads it under given output name (no browser output) 
+// 3 outputs smarty report into browser
+//
 $publishmode = 0;
 
 $execution_counter = 0;
@@ -102,7 +110,7 @@ smarty_post_filter - SMARTY callback: adds a small piece of code in main loop wi
 smarty_output_filter - SMARTY callback:  calls save_report_output2
 smarty_output_filter_strip_js  - purify html and strip js
 
-save_report_output2  - save report output as file (if there is parameter output)
+save_report_output2  - save report output as file (if there is parameter "output")
 */
 
 /**
@@ -127,7 +135,7 @@ function executeSmartyTemplate($system, $params){
            
     if(!isset($system) || !$system->is_inited()){
         smarty_error_output( $system, null );
-        return;
+        return false;
     }
     
     $is_jsallowed = $system->is_js_acript_allowed();
@@ -140,6 +148,8 @@ function executeSmartyTemplate($system, $params){
     
     $params["f"] = 1; //always search (do not use cache)
 
+    $params["void"] = (@$params["void"]==true);
+    
     $gparams = $params; //keep to use in other functions
 
     if( !array_key_exists("limit", $params) ){ //not defined
@@ -208,13 +218,14 @@ function executeSmartyTemplate($system, $params){
                 if($publishmode>0){
                     $error = "<b><font color='#ff0000'>Note: There are no records in this view. The URL will only show records to which the viewer has access. Unless you are logged in to the database, you can only see records which are marked as Public visibility</font></b>";
                 }else{
+                    //message for UI
                     $error = "<b><font color='#ff0000'>Search or Select records to see template output</font></b>";
                 }
             }
             
             smarty_error_output( $system, $error );
         }
-        exit();
+        return true; //exit();
     }
 
     //get name of template file
@@ -234,7 +245,7 @@ function executeSmartyTemplate($system, $params){
             $error = "<b><font color='#ff0000'>Template file $template_file does not exist</font></b>";
             
             smarty_error_output($system, $error);
-            exit();
+            return false; //exit();
         }
     }else{
         $content = $template_body;
@@ -258,7 +269,7 @@ function executeSmartyTemplate($system, $params){
                     .'support at HeuristNetwork dot org and we will adjust the template for you.</p>';
            
            smarty_error_output($system, $error);
-           exit();
+           return false; //exit();
     }
     
 
@@ -357,7 +368,7 @@ function executeSmartyTemplate($system, $params){
                 unlink($template_folder.$template_file);   
             }
             echo $output;
-            exit();
+            return true; //exit();
         }
     }
     else
@@ -386,21 +397,29 @@ function executeSmartyTemplate($system, $params){
     
     //$smarty->registerFilter('pre','smarty_pre_filter'); //before compilation: remove script tags
     $smarty->registerFilter('post','smarty_post_filter'); //after compilation: to add progress support
-
-    if($session_id>0){
+    
+    if($publishmode==0 && $session_id>0){
         mysql__update_progress($mysqli, $session_id, true, '0,'.count($results));
     }
+    
     $execution_counter = -1;
     $execution_total_counter = count($results);
+    
+    
+    $result = true;
     
     $smarty->assign('template_file', $template_file);    
     try{
         if($outputfile==null && $publishmode==1 && !$is_included){
             header("Content-type: text/html;charset=UTF-8");
         }
-        $smarty->display($template_file);
-
-        if(!$is_snippet_output && !@$template_body){
+        if($gparams['void']){
+            $smarty->fetch($template_file);
+        }else{
+            $smarty->display($template_file);    
+        }
+        
+        if(!$is_snippet_output && !@$template_body && !$params["void"]){
             // log activity, rec ids separated by spaces
             log_smarty_activity($system, $results);
             //$system->user_LogActivity('custRep', array(implode(' ',$results), count($results)), null, TRUE); 
@@ -409,19 +428,24 @@ function executeSmartyTemplate($system, $params){
     } catch (Exception $e) {
         smarty_error_output($system, 'Exception on execution: '.$e->getMessage());
         //echo 'Exception on execution: ', $e->getMessage(), "\n";
+        $result = false;
     }
 
     if($session_id>0){
         mysql__update_progress($mysqli, $session_id, false, 'REMOVE');
     }
-    $mysqli->close();        
+    if(!$params["void"]){
+        $mysqli->close();        
+    }
     
     if($publishmode==0 && $params["limit"] < count($recIDs)){
         echo '<div><b>Report preview has been truncated to '.$params["limit"].' records.<br>'
         .'Please use publish or print to get full set of records.<br Or increase the limit in preferences</b></div>';
     }
     
-}
+    return $result;
+    
+} //END executeSmartyTemplate
 
 //
 // remove all <script> tags from template
@@ -705,7 +729,13 @@ function smarty_output_filter($tpl_source, Smarty_Internal_Template $template)
 }
 
 //
-// save report output as file (if there is parameter output)
+// save smarty report output as a file (if there is parameter "output" -> $outputfile) 
+//
+// if param "output" ($outputfile) is defined it saves smarty report into file 
+// and
+// $publishmode - 1 produces info page (user report) only 
+//                2 downloads it under given output name (no file save, no browser output) 
+//                3 outputs smarty report into browser
 //
 function save_report_output2($tpl_source){
 
@@ -714,44 +744,61 @@ function save_report_output2($tpl_source){
     $errors = null;
     $res_file = null;
     
-    if($publishmode<2){ //save into file - otherwise download with given file name
-    //$publishmode = (array_key_exists("publish", $gparams))? intval($gparams['publish']):0;
-    try{
+    if($publishmode!=2){ //saves into $outputfile 
 
-        $path_parts = pathinfo($outputfile);
-        $dirname = (array_key_exists('dirname',$path_parts))?$path_parts['dirname']:"";
+        try{
 
-
-        if(!file_exists($dirname)){
-            $errors = "Output folder $dirname does not exist";
-        }else{
-            if($isJSout){
-                $tpl_res = add_javascript_wrap4($tpl_source);
-                $ext =  ".js";
-            }else{
-                $tpl_res = $tpl_source;
-                $ext =  ".html";
+            $path_parts = pathinfo($outputfile);
+            $dirname = (array_key_exists('dirname',$path_parts))?$path_parts['dirname']:'';
+            
+            //if folder is not defined - output into generated-reports
+            if(!$dirname){
+                $dirname = $system->getSysDir('generated-reports');
+                if(!folderCreate($dirname, true)){
+                    $errors = 'Failed to create folder for generated reports';
+                }
+            }else if(!file_exists($dirname)){
+                $errors = "Output folder $dirname does not exist";
             }
 
-            $res_file = $dirname."/".$path_parts['filename'].$ext;
-            $file = fopen ($res_file, "w");
-            if(!$file){
-                $errors = "Can't write file $res_file. Check permission for directory";
-            }else{
-                fwrite($file, $tpl_source);
-                fclose ($file);
+
+            if($errors==null){
+                if($isJSout){
+                    $tpl_res = add_javascript_wrap4($tpl_source);
+                    $ext =  ".js";
+                }else{
+                    $tpl_res = $tpl_source;
+                    $ext =  ".html";
+                }
+
+                $res_file = $dirname."/".$path_parts['filename'].$ext;
+                $file = fopen ($res_file, "w");
+                if(!$file){
+                    $errors = "Can't write file $res_file. Check permission for directory";
+                }else{
+                    fwrite($file, $tpl_source);
+                    fclose ($file);
+                }
+
             }
 
+        }catch(Exception $e)
+        {
+            $errors = $e->getMessage();
         }
-
-    }catch(Exception $e)
+        
+        if($gparams['void'] && $errors!=null){
+            echo $errors."\n";        
+        }
+    }
+    
+    
+    if(!$gparams['void'])
     {
-        $errors = $e->getMessage();
-    }
-    }
 
-    //$publishmode=2 save into file or download (no browser output)
     if($publishmode!=1){
+        //2 - download with given file name (no browser output)
+        //3 - smarty report output
 
         if($errors!=null){
             $tpl_source = $tpl_source."<div style='color:#ff0000;font-weight:bold;'>$errors</div>";
@@ -765,15 +812,15 @@ function save_report_output2($tpl_source){
             $tpl_res = $tpl_source;
         }
         if($publishmode==2){
-            //set file name
+            //set file name - for download
             header('Pragma: public');
             header('Content-Disposition: attachment; filename="'.$outputfile.'"'); 
             header('Content-Length: ' . strlen($tpl_res));
         }
-
+        
         echo $tpl_res;
 
-    }else if ($publishmode==1){ //report about success of publishing and where to get it
+    }else if ($publishmode==1){ //info about success of publishing and where to get it
         
         if($errors!=null){
             header("Content-type: text/html;charset=UTF-8");
@@ -833,6 +880,7 @@ function save_report_output2($tpl_source){
             echo "</p></body></html>";
 
         }
+    }
     }
 }
 
@@ -1031,7 +1079,7 @@ function smarty_function_wrap($params, &$smarty)
                     
                 }else{ //player is default
 
-                    $sres = $sres.fileGetPlayerTag($file_nonce, $mimeType, $params, $external_url, $size, $style); //see db_files
+                    $sres = $sres.fileGetPlayerTag($system, $file_nonce, $mimeType, $params, $external_url, $size, $style); //see db_files
                     
                 }
                 

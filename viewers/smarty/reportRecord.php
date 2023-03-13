@@ -522,7 +522,7 @@ class ReportRecord {
                                 }else 
                                 if(@$value['file']['ulf_ObfuscatedFileID']){
                                     //local
-                                    array_push($res, HEURIST_BASE_URL."?db=".HEURIST_DBNAME
+                                    array_push($res, HEURIST_BASE_URL."?db=".$this->system->dbname()
                                             ."&file=".$value['file']['ulf_ObfuscatedFileID']);
                                 }
                                 //keep reference to record id

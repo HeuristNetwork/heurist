@@ -229,27 +229,44 @@ class DbUsrReminders extends DbEntityBase
         
     }    
     
+    public function setmysql($mysqli){
+        $this->system->set_mysqli($mysqli);    
+    }
+    
     //
     // batch action for reminders - email sending 
+    // It either 
+    // sends emails for given set of records (of param rec_IDs is defined)
+    // OR 
+    // sends emails/reminders for records with rem_StartDate<=current date
     //
     public function batch_action(){
         
         $rec_IDs = prepareIds(@$this->data['rec_IDs']);
         $is_notification = (count($rec_IDs)>0); //sends emails for given set of records
-        
-        $query = 'SELECT * FROM '.$this->config['tableName'];
+        $query = null;
+        $record = null;
         
         if($is_notification){
+            //sends emails for given set of records
             $ugrID = $this->system->get_user_id();
             
             if(!($ugrID>0)){
                 $this->system->addError(HEURIST_REQUEST_DENIED, 
-                    'You have to be logged in to send reminders'
+                    'You have to be logged in to send notification'
                     .' Insufficient rights (logout/in to refresh) for this operation');
                 return false;
             }
             
-            $query = $query . ' WHERE rem_RecID IN ('.imploder(',',$rec_IDs).') AND rem_OwnerUGrpID='.$ugrID;
+            $query = ' WHERE rem_RecID IN ('.imploder(',',$rec_IDs).') AND rem_OwnerUGrpID='.$ugrID;
+        }else if(@$this->data['fields'] && @$this->data['fields']['rem_RecID']>0){
+        
+            $is_notification = true;
+            $record = $this->data['fields'];
+            if(!(@$record['rem_OwnerUGrpID']>0)){
+                    $record['rem_OwnerUGrpID'] = $this->system->get_user_id();
+            }            
+            
         }else{
             //validate that this script is run from command line
             if (php_sapi_name() != 'cli'){
@@ -258,19 +275,36 @@ class DbUsrReminders extends DbEntityBase
                 return false;
             }
             
-            //send emails/reminders for records with rem_StartDate<=current date
+            //sends emails/reminders for records with rem_StartDate<=current date
             // and rem_Freq
-            $query = $query . 
+            $query = 
                 ' WHERE DATEDIFF(NOW(), rem_StartDate)>IF(rem_Freq="annually", 365, '
                 .'IF(rem_Freq="monthly",30, IF(rem_Freq="weekly",7, 1)))';
             
             //'once','daily','weekly','monthly','annually
         }
         
+        $report = array();
+
         $mysqli = $this->system->get_mysqli();
-        $res = $mysqli->query($query);
+/*        
+        if(!$mysqli){
+echo 'Database connection not established '.spl_object_id($this->system).'   '.isset($mysqli).'>>>'."\n";   
+exit();         
+            //$this->system->addError(HEURIST_ERROR, 'Database connection not established');
+            return false;
+        }
+*/
+        
+        if($query==null){
+            $res = true;
+        }else{
+            $query = 'SELECT * FROM '.$this->config['tableName'].$query;
+            $res = $mysqli->query($query);
+        }
+        
         if($res){
-            while ($record = $res->fetch_assoc()) {
+            while ($query==null || $record = $res->fetch_assoc()) {
 
             //    
             // fill $recipients list
@@ -289,7 +323,7 @@ class DbUsrReminders extends DbEntityBase
                     .'WHERE usr.ugr_Type="user" and usr.ugr_ID='.$record['rem_ToUserID']);
                 if ($row) {
                     array_push($recipients, array(
-                        "email" => $row[0].' '.$row[1].' <'.$row[2].'>',
+                        "email" => $row[0].' '.$row[1].' <'.$row[2].'>', //username <email>
                         "e"        => null,
                         "u"        => $record['rem_ToUserID']));
                 }
@@ -319,9 +353,12 @@ class DbUsrReminders extends DbEntityBase
             }
             
             //
-            //
+            //  
             //
             if(count($recipients)>0){
+                
+                if(!@$report[$record['rem_Freq']]) $report[$record['rem_Freq']] = 0;
+                $report[$record['rem_Freq']] = $report[$record['rem_Freq']] + count($recipients);
 
             //sender params - reminder owner
             $owner = mysql__select_row($mysqli,
@@ -329,11 +366,11 @@ class DbUsrReminders extends DbEntityBase
                     .'FROM sysUGrps usr where usr.ugr_Type="user" and usr.ugr_ID='
                     .$record['rem_OwnerUGrpID']);
             if ($owner) {
-                
+                //from email
                 $email_owner = $owner[0].' '.$owner[1].' <'.$owner[2].'>';
                 
                 if($is_notification){
-                    
+                    //sened notification email for one or several records
                     $email_from_name = 'Heurist notification';
                     $email_headers = 'From: '.$email_owner.' <no-reply@'.HEURIST_SERVER_NAME.'>';    
                     
@@ -345,7 +382,8 @@ class DbUsrReminders extends DbEntityBase
                     $email_title = '[HEURIST] Email from '.$owner[0].' '.$owner[1].' ('
                         .(count($bibs)>1?count($bibs).' references':'one reference').')';
                 }else{
-
+                    //sened reminder email about particular record
+                    
                     $email_from_name = 'Heurist reminder service';
                     $email_headers = 'From: Heurist reminder service <no-reply@'.HEURIST_SERVER_NAME.'>';        
                     
@@ -412,9 +450,8 @@ class DbUsrReminders extends DbEntityBase
                     }
                     
                     //$res = sendEmail($recipient['email'], $email_title, $email_text, $email_headers, true);
-                    
                     sendPHPMailer(null, $email_from_name, $recipient['email'], $email_title, $email_text, null, false);
-                    //print "\n".$email_from_name.'   '.$recipient['email'].'   '.$email_title;
+                    
                     
                 }//for recipients
             
@@ -432,14 +469,19 @@ class DbUsrReminders extends DbEntityBase
             if(!$is_notification && $record['rem_Freq'] != "once"){
                 //update start date
                 $update = 'UPDATE '.$this->config['tableName'].' SET rem_StartDate=NOW() WHERE rem_ID='.$record['rem_ID'];
-//TEMP                $mysqli->query($update);
+                $mysqli->query($update);
             }
             
+                if($query==null){
+                    return true;
+                }
+            
             }//while
+            
             $res->close();        
         }//for reminders        
         
-        return true;
+        return $is_notification?true:$report;
     }
     
 }

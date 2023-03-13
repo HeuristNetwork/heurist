@@ -48,7 +48,7 @@
 */
 require_once(dirname(__FILE__).'/../../viewers/smarty/showReps.php');
 
-if(!isset($system)){ //if set it is included in dailyCronJobs
+if(isset($_REQUEST) && count($_REQUEST)>0){ //if set it is included in dailyCronJobs
 
     //system is defined in showReps
     if(!$system->is_inited()){
@@ -60,15 +60,15 @@ if(!isset($system)){ //if set it is included in dailyCronJobs
 
     //mode of publication  3 - redirect to existing  html or js wrapper
     if(array_key_exists('publish',$_REQUEST)){
-	    $publish = intval($_REQUEST['publish']);
+	    $update_mode = intval($_REQUEST['publish']);
     }else{
-	    $publish = 1;
+	    $update_mode = 1;
     }
     $format = (array_key_exists('mode',$_REQUEST) && $_REQUEST['mode']=="js") ?"js":"html";
 
     $mysqli = $system->get_mysqli();
 
-    if($publish==3){
+    if($update_mode==3){
         header("Content-type: text/html;charset=UTF-8");
     }
 
@@ -78,7 +78,7 @@ if(!isset($system)){ //if set it is included in dailyCronJobs
 	    $res = $mysqli->query('select * from usrReportSchedule');
         if($res){
             while ($row = $res->fetch_assoc()) {
-                doReport($system, $publish, $format, $row);
+                doReport($system, $update_mode, $format, $row);
             }
             $res->close();        
         }
@@ -88,7 +88,7 @@ if(!isset($system)){ //if set it is included in dailyCronJobs
         
 	    $row = mysql__select_row_assoc($mysqli, "select * from usrReportSchedule where rps_ID=".$rps_ID);
         if($row){
-			    doReport($system, $publish, $format, $row);
+			    doReport($system, $update_mode, $format, $row);
 	    }
 
     }else{
@@ -99,20 +99,27 @@ if(!isset($system)){ //if set it is included in dailyCronJobs
 }
 //
 // Generates report
-// returns:
-// 1 - creates new one
-// 2 - update the report, see rps_IntervalMinutes
-// 3 - takes the exising one
 //
-function doReport($system, $publish, $format, $row){
+// $update_mode
+// 1 saves into file and produces (into browser) the report only (with urls)
+// 2 executes report and download it under given output name (no file save, no browser output) 
+// 3 redirects to the existing report (use already publshed output), if it does not exist, recreate it (publish=1) 
+// 4 supress output
+//
+// returns:
+// 1 - report is created 
+// 2 - report is updated
+// 3 - report is intakted (not updated) 
+//
+function doReport($system, $update_mode, $format, $row){
     
-    $res = 0;    
+    $res = 1;    
 
 	if($row['rps_FilePath']!=null){
 		$dir = $row['rps_FilePath'];
 		if(substr($dir,-1)!="/") $dir = $dir."/";
 	}else{
-		$dir = $system->getSysDir('smarty-templates')."generated-reports/";
+		$dir = $system->getSysDir('generated-reports');
         if(!folderCreate($dir, true)){
             die('Failed to create folder for generated reports');
         }   
@@ -122,13 +129,13 @@ function doReport($system, $publish, $format, $row){
 
 	$outputfile = $dir.$filename;
 
-	if($publish==3){  //if published file already exists take it
+	if($update_mode==3 || $update_mode==4){  //if published file already exists take it
 
 		$path_parts = pathinfo($outputfile);
 		$ext = array_key_exists('extension',$path_parts)?$path_parts['extension']:null;
 
-		if ($ext == null) {
-
+		if ($ext == null) { 
+            //add extension
 			$filename2 = $outputfile.".".$format;
 			if(file_exists($filename2)){
 				$outputfile = $filename2;
@@ -138,6 +145,7 @@ function doReport($system, $publish, $format, $row){
 				$ext = "html";
 			}
 		}
+        
 		if(file_exists($outputfile)){
             
             if($row['rps_IntervalMinutes']>0){
@@ -145,30 +153,33 @@ function doReport($system, $publish, $format, $row){
                 $dt2 = new DateTime();
                 $dt2->setTimestamp(filemtime($outputfile)); //get file time
                 $interval = $dt1->diff( $dt2 );
-                if($interval->i > $row['rps_IntervalMinutes']){
-                    $publish = 2; //save into file
-                    $res = 2;
+
+                $tot_minutes = ($interval->days*1440 + $interval->h*60 + $interval->i);
+                if($tot_minutes > $row['rps_IntervalMinutes']){
+                    $publish = 3; //saves into file and produces smarty output
+                    $res = 2; //to update
                 }
             }
-            if($publish == 3){ //request for current files
-                $recreated++;
-                $res = 3;
-            
-			    $content = file_get_contents($outputfile);
-			    if($format=="js" && $ext != $format){
-				    $content = str_replace("\n","",$content);
-				    $content = str_replace("\r","",$content);
-				    $content = str_replace("'","&#039;",$content);
-    			    echo "document.write('". $content."');";
-			    }else{
-				    echo $content;
-			    }
-			    return;
+            if($res == 1){ //request for current files (without smarty execution)
+                if($update_mode==3){
+			        $content = file_get_contents($outputfile);
+			        if($format=="js" && $ext != $format){
+				        $content = str_replace("\n","",$content);
+				        $content = str_replace("\r","",$content);
+				        $content = str_replace("'","&#039;",$content);
+    			        echo "document.write('". $content."');";
+			        }else{
+				        echo $content;
+			        }
+                }
+			    return 3; //intakted - existing taken
             }
 		}
-		$publish = 1; //file does not exists - regenerates
-        $res = 1;
+		$publish = 1; //file does not exist - regenerates and output into browser
 	}//publish==3
+    else{
+        $publish = $update_mode; //1 - regenerates and output user info OR 2 - download
+    }
 
 	$hquery = $row['rps_HQuery'];
 	if(strpos($hquery, "&q=")>0){
@@ -189,7 +200,16 @@ function doReport($system, $publish, $format, $row){
 	$params["mode"] 	= $format;
 	$params["publish"] 	= $publish;
 	$params["rps_id"] 	= $row['rps_ID'];
+    $params["void"]     = ($update_mode==4); //no browser output
+
+	$success = executeSmartyTemplate($system, $params); //in showReps
     
-	executeSmartyTemplate($system, $params); //in showReps
+    if(!$success) $res = 0;
+
+    if($update_mode==4){
+        echo $outputfile.'  '.($res==0?'error':($res==1?'created':'updated'))."\n";                
+    }
+    
+    return $res;
 }
 ?>

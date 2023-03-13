@@ -562,7 +562,7 @@ function dbs_GetRectypeConstraint($system) {
         array_push($terms['commonFieldNames'],'trm_HasImage');        
         
         if($res){
-            $lib_dir = HEURIST_FILESTORE_ROOT. $system->dbname() . '/term-images/';  //HEURIST_FILESTORE_DIR . 'term-images/';
+            $lib_dir = $system->getSysDir('term-images');  //HEURIST_FILESTORE_DIR . 'term-images/';
             
             while ($row = $res->fetch_row()) {
                 $hasImage = file_exists($lib_dir.$row[0].'.png');

@@ -7,9 +7,12 @@
 * 1. Send record remainders sepcified in usrReminders
 * 2. Updates reports by schedule specified in usrReportSchedule
 * 
-* Databases in HEURIST/databases_not_to_crons.txt are ignored
+* Databases in HEURIST/databases_exclude_cronjobs.txt are ignored
 * 
 * Runs from shell only
+* 
+* in heuristConfigIni.php define $serverName
+* if (!@$serverName && php_sapi_name() == 'cli') $serverName = 'heuristref.net';
 *
 * @package     Heurist academic knowledge management system
 * @link        https://HeuristNetwork.org
@@ -54,8 +57,8 @@ if (@$argv) {
         }
     }
     
-print print_r($ARGV,true)."\n";
-exit();    
+//print print_r($ARGV,true)."\n";
+//exit();    
 
     if(@$ARGV['reminder']){
         $do_reminders = true;
@@ -68,11 +71,14 @@ exit();
         $do_reports = true;        
     }
 
-
+    
 }else{
-    //exit('This function must be run from the shell');
-        $do_reminders = false;
-        $do_reports = true;        
+    exit('This function must be run from the shell');
+    /*
+        $do_reminders = true;
+        $do_reports = false;        
+        $eol = "<br>";
+    */    
 }
 
 require_once(dirname(__FILE__).'/../../../configIni.php'); // read in the configuration file
@@ -102,6 +108,8 @@ $databases = mysql__getdatabases4($mysqli, false);  //list of all databases with
 
 $upload_root = $system->getFileStoreRootFolder();
 
+echo "root : ".$upload_root."\n";
+
 //define('HEURIST_FILESTORE_ROOT', $upload_root );
 
 $exclusion_list = exclusion_list(); //read databases_not_to_crons 
@@ -116,11 +124,17 @@ $email_list = array();
 $reminders = null;
 
 if($do_reminders){
+//echo ">>>>>".spl_object_id($system)."\n";      
     $reminders = new DbUsrReminders($system, $params);
 }
 
 print 'HEURIST_SERVER_NAME='.HEURIST_SERVER_NAME."\n";
 print 'HEURIST_BASE_URL='.HEURIST_BASE_URL."\n";
+print 'HEURIST_MAIL_TO_INFO='.HEURIST_MAIL_TO_INFO."\n";
+
+//print $do_reports.'  '.$do_reminders;
+//print print_r($databases,true);
+//print print_r($exclusion_list,true);
 
 // HEURIST_SERVER_NAME
 // HEURIST_MAIL_TO_INFO
@@ -129,6 +143,7 @@ print 'HEURIST_BASE_URL='.HEURIST_BASE_URL."\n";
 // HEURIST_SCRATCHSPACE_DIR      $system->getSysDir('scratch')
 // HEURIST_DBNAME                $system->dbname()   
 
+//$databases = array(0=>'osmak_1');
 
 foreach ($databases as $idx=>$db_name){
     
@@ -138,15 +153,18 @@ foreach ($databases as $idx=>$db_name){
 
     $report='';
     
+
     if(!mysql__usedatabase($mysqli, $db_name)){
         echo $system->getError()['message']."\n";
         continue;
     }
     
+    $system->set_mysqli($mysqli);
     $system->set_dbname_full($db_name);
+//echo spl_object_id($system).'    >>>'.isset($mysqli)."<<<<\n";      
     
     if($do_reports){
-        $report = array(1=>0,2=>0,3=>0);
+        $report = array(0=>0,1=>0,2=>0,3=>0);
         
         //regenerate all reports
         $is_ok = false;
@@ -156,32 +174,46 @@ foreach ($databases as $idx=>$db_name){
             $smarty = null; //reset
             
             while ($row = $res->fetch_assoc()) {
-                if($smarty==null){
+//echo print_r($row,true);
+                if($smarty==null){ //init smarty for new db if there is at least one entry in schedule table
                     initSmarty($system->getSysDir('smarty-templates')); //reinit global smarty object for new database
                     if(!isset($smarty) || $smarty==null){
                         echo 'Cannot init Smarty report engine for database '.$db_name.$eol;
-                        $res->close();
-                        continue;
+                        break;
+                        //continue;
                     }
                 }
-                $res = doReport($system, '3', 'html', $row);
-                if($res>0){
-                    $report[$res]++;
+                $rep = doReport($system, 4, 'html', $row);
+                if($rep>0){
+                    $report[$rep]++;
                     $is_ok = true;
                 }
-            }
+            }//while
             $res->close();        
         }
         
         if($is_ok){
             $report_list[$db_name] = $report;
-            echo $tabs0.$db_name.$tabs.implode(' ',$report).$eol;
+            //echo $tabs0.$db_name;
+            echo $tabs0.$db_name.$eol;
+            echo $tabs.' reports: '.implode(' ',$report).$eol;
         }
             
     }
     
     if($do_reminders){
-        $reminders->batch_action();
+        $reminders->setmysql($mysqli);
+        $report = $reminders->batch_action();
+        if(count($report)>0){
+            echo $tabs0.$db_name;
+            echo $tabs.' reminders: ';
+            foreach($report as $freq=>$cnt){
+                echo $freq.':'.$cnt.'  ';  
+                if(!@$email_list[$freq]) $email_list[$freq] = 0;
+                $email_list[$freq] = $email_list[$freq] + $cnt;  
+            }
+            echo $eol;
+        }
     }
 
 //echo $tabs0.$db_name.' cannot execute query for Records table'.$eol;
@@ -191,40 +223,50 @@ foreach ($databases as $idx=>$db_name){
 }//foreach
 
 
-echo ($tabs0.'finished'.$eol);
+echo ($eol.$tabs0.'finished'.$eol);
 
 if(count($email_list)>0 || count($report_list)>0){
 
+    $errors = 0;
     $created = 0;
     $updated = 0;
     $intacted = 0;
     foreach($report_list as $dbname=>$rep){
+        $errors = $errors + $rep[0];
         $created = $created + $rep[1];
         $updated = $updated + $rep[2];    
         $intacted = $intacted + $rep[3];    
     }
+    $text = '';
+    foreach($email_list as $freq=>$cnt){
+          $text = $text. $freq.':'.$cnt.'  ';
+    }
     
-    
-sendEmail(HEURIST_MAIL_TO_ADMIN, "Daily cronjob report on ".HEURIST_SERVER_NAME,
-    "Number of reminder emails sent:\n"
-    .implode(",\n", $email_list)
+    $text = "Number of reminder emails sent:\n"
+    .$text
     ."\n\nNumber of reports "
     ."\n created: ".$created
     ."\n updated: ".$updated
-    ."\n intacted: ".$intacted);
+    ."\n intacted: ".$intacted
+    ."\n errors: ".$errors."\n";
+    
+    echo $text;
+    
+    sendEmail(HEURIST_MAIL_TO_ADMIN, "Daily cronjob report on ".HEURIST_SERVER_NAME,
+                $text);
     
 }
 
 function exclusion_list(){
     
     $res = array();
-    $fname = realpath(dirname(__FILE__)."/../../../../databases_not_to_crons.txt");
+    $fname = realpath(dirname(__FILE__)."/../../../../databases_exclude_cronjobs.txt");
     if($fname!==false && file_exists($fname)){
         //ini_set('auto_detect_line_endings', 'true');
         $handle = @fopen($fname, "r");
         while (!feof($handle)) {
             $line = trim(fgets($handle, 100));
-            if($line=='' || substr($line,0,1)=='#') continue;
+            if($line=='' || substr($line,0,1)=='#') continue; //remarked
             $res[] = $line;
         }
         fclose($handle);

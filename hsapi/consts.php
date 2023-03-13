@@ -52,7 +52,7 @@ if (@$httpProxy != '') {
     }
 }
 
-$host_params = getHostParams();
+$host_params = getHostParams(@$argv);
 
 define('HEURIST_DOMAIN', $host_params['domain']);
 
@@ -67,8 +67,8 @@ define('HEURIST_SERVER_NAME', @$serverName); // server host name for the configu
 
 if(@$_SERVER["REQUEST_URI"]) define('HEURIST_CURRENT_URL', $host_params['server_url'] . $_SERVER["REQUEST_URI"]); //NOT USED
 if(!defined('HEURIST_DIR')) define('HEURIST_DIR', 
-        @$host_params['heurist_dir']? $host_params['heurist_dir']
-        :@$_SERVER["DOCUMENT_ROOT"] . $host_params['install_dir']); //  eg. /var/www/html/HEURIST @todo - read simlink (realpath)
+    (@$host_params['heurist_dir']? $host_params['heurist_dir'] :@$_SERVER["DOCUMENT_ROOT"]) 
+    . $host_params['install_dir']); //  eg. /var/www/html/HEURIST @todo - read simlink (realpath)
 
 define('HEURIST_BASE_URL', $host_params['server_url'] . $host_params['install_dir']  ); // eg. https://myheurist.net/heurist/
 

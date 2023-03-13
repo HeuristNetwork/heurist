@@ -23,7 +23,7 @@
 // domain
 // server_url
 // install dir
-function getHostParams()
+function getHostParams( $argv )
 {
     global $serverName;
     
@@ -32,26 +32,36 @@ function getHostParams()
     $installDir = '';
 
     if (php_sapi_name() == 'cli'){
+        
+        if(!isset($serverName) || !$serverName){
+            $serverName = '127.0.0.1';
+        }
 
         $k = strpos($serverName,":");
         $host_params['domain'] = ($k>0)?substr($serverName,0,$k-1):$serverName;
         $isSecure = true;
         
-        $sDir = getcwd();
-        
+        //$sDir = getcwd();
+        $sDir = dirname(realpath($argv[0]));
+
+        $sDir = str_replace('\\','/',$sDir);
+
         $iDir = explode('/', $sDir);
         $cntDir = count($iDir)-1;
         $path = null;
         for ($i=$cntDir; $i>=0; $i--){
-            if($iDir[$i]=='heurist' || $iDir[$i]=='h6-alpha') {
-                $installDir = $iDir[$i].'/';
-                $path = array_slice($iDir, 0, i-1);
+            if($iDir[$i]=='heurist' || $iDir[$i]=='h6-alpha' || $iDir[$i]=='h6-ao') {
+                $installDir = '/'.$iDir[$i].'/';
+                $path = array_slice($iDir, 0, $i);
                 break;   
             }
         }
-        $installDir_pro = 'heurist/';
+        $installDir_pro = '/heurist/';
         $host_params['heurist_dir'] = implode('/',$path).'/';
-        
+      
+//echo "Install dir      $installDir \n";
+//echo "3>>> ".$host_params['heurist_dir']."\n";
+
     }else{
     
     // server name or IP address of your Web server, null will pull SERVER_NAME from the request header

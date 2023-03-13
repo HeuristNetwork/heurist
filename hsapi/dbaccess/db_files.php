@@ -126,7 +126,7 @@ function fileGetByFileName($system, $fullname){
         $filename = $path_parts['basename'];
         
         // get relative path to db root folder
-        $relative_path = getRelativePath(HEURIST_FILESTORE_DIR, $dirname);
+        $relative_path = getRelativePath($system->getSysDir(), $dirname);
         
         $mysqli = $system->get_mysqli();
       
@@ -283,7 +283,7 @@ function fileGetThumbnailURL($system, $recID, $get_bgcolor){
             $thumb_url = HEURIST_THUMB_URL.$thumbfile;
         }else{
             //it will be redirected to hsapi/controller/file_download.php
-            $thumb_url = HEURIST_BASE_URL."?db=".HEURIST_DBNAME."&thumb=".$fileid;
+            $thumb_url = HEURIST_BASE_URL."?db=".$system->dbname()."&thumb=".$fileid;
         }
         
         if($get_bgcolor){
@@ -729,7 +729,7 @@ function downloadFileWithMetadata($system, $fileinfo, $rec_ID){
 // output the appropriate html tag to view media content
 // $params - array of special parameters for audio/video playback AND for IIIF (from smarty)
 //
-function fileGetPlayerTag($fileid, $mimeType, $params, $external_url, $size=null, $style=null){ 
+function fileGetPlayerTag($system, $fileid, $mimeType, $params, $external_url, $size=null, $style=null){ 
 
     $result = '';    
     $is_iiif = false;
@@ -748,12 +748,12 @@ function fileGetPlayerTag($fileid, $mimeType, $params, $external_url, $size=null
         $filepath = $external_url;  //external 
     }else{
         //to itself
-        $filepath = HEURIST_BASE_URL_PRO."?db=".HEURIST_DBNAME."&file=".$fileid;
+        $filepath = HEURIST_BASE_URL_PRO."?db=".$system->dbname()."&file=".$fileid;
         
         //to avoid download via proxy 
         $filepath = $filepath.'&fancybox=1';
     }
-    $thumb_url = HEURIST_BASE_URL_PRO."?db=".HEURIST_DBNAME."&thumb=".$fileid;
+    $thumb_url = HEURIST_BASE_URL_PRO."?db=".$system->dbname()."&thumb=".$fileid;
 
     if ( $is_video ) {
 
@@ -831,7 +831,7 @@ function fileGetPlayerTag($fileid, $mimeType, $params, $external_url, $size=null
         $iiif_type = $params['var'][0]['ulf_OrigFileName']; //image or manifest
         
         $miradorViewer = HEURIST_BASE_URL.'hclient/widgets/viewers/miradorViewer.php?db='
-                    .HEURIST_DBNAME;
+                    .$system->dbname();
         if(($iiif_type=='_iiif_image' || $params['var'][0]['ulf_PreferredSource']=='iiif_image')
             && @$params['var'][0]['rec_ID']>0){
             $miradorViewer = $miradorViewer.'&q=ids:'.$params['var'][0]['rec_ID'];

@@ -138,7 +138,7 @@ if(!$error){
                     $params = null;
                 }
                 
-                print fileGetPlayerTag($fileid, $mimeType, $params, $external_url);
+                print fileGetPlayerTag($system, $fileid, $mimeType, $params, $external_url);
             }
             else  //just download file from heurist server or redirect to original remote url
             {
