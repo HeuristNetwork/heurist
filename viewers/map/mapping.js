@@ -711,7 +711,7 @@ $.widget( "heurist.mapping", {
                             return this.options._extent;  
                         }});
         
-        if(layer_options['IIIF']){ //not implemented
+        if(layer_options['IIIF']){ 
         
                 HeuristTilerLayer = L.TileLayer.Iiif.extend({
                         getBounds: function(){
@@ -721,7 +721,7 @@ $.widget( "heurist.mapping", {
                 layer_options['fitBounds'] = false;
                 
                 new_layer = new HeuristTilerLayer(layer_url, layer_options).addTo(this.nativemap);                
-                //new L.tileLayer.iiif
+                //new L.TileLayer.iiif
         
         }else
         if(layer_options['BingLayer'])
@@ -763,6 +763,10 @@ $.widget( "heurist.mapping", {
                            
         }else if(layer_options['MapTiler'] && layer_url.indexOf('{q}')>0)
         {
+                // TMS naming scheme (Y is flipped)
+                // Tile Map Service: an early standard supported by OpenLayers. 
+                // One difference is the y axis is positive southwards in TMS
+            
                 var MapTilerLayer = HeuristTilerLayer.extend({
                     getTileUrl: function (tilePoint) {
                         //this._adjustTilePoint(tilePoint);
@@ -789,6 +793,7 @@ $.widget( "heurist.mapping", {
             */
                 
         }else{
+            // Google Map/OSM
             
             //transparency for jpeg
             if(layer_options['MapTiler'] && layer_options['extension']=='.jpg'){
@@ -823,7 +828,7 @@ $.widget( "heurist.mapping", {
 
         return new_layer._leaflet_id;
     }, //addTileLayer
-    
+
     //
     // adds image overlay to map
     //
