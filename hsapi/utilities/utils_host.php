@@ -23,7 +23,7 @@
 // domain
 // server_url
 // install dir
-function getHostParams( $argv )
+function getHostParams( $argv=null )
 {
     global $serverName;
     
@@ -41,8 +41,12 @@ function getHostParams( $argv )
         $host_params['domain'] = ($k>0)?substr($serverName,0,$k-1):$serverName;
         $isSecure = true;
         
-        //$sDir = getcwd();
-        $sDir = dirname(realpath($argv[0]));
+        if($argv==null || !is_array($argv)){
+            $sDir = getcwd();  
+        }else{
+            $sDir = dirname(realpath($argv[0]));    
+        }
+        
 
         $sDir = str_replace('\\','/',$sDir);
 
