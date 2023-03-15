@@ -22,7 +22,7 @@ var _theme_editing_symbology;
 
 function editTheme(current_value, callback){
 
-    var edit_dialog = null;
+    var edit_dialog = null; //assigned on popup_dlg.dialog
     
     var popup_dlg = $('#heurist-dialog-editTheme');
 
@@ -49,7 +49,7 @@ function editTheme(current_value, callback){
             }
         },
         oninit: function(){
-            editForm = this;
+            _theme_editing_symbology = this;
             __editTheme_continue();
         }
     });

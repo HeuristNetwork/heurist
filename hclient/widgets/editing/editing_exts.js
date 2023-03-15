@@ -33,7 +33,7 @@
 // 
 function editSymbology(current_value, mode_edit, callback){
 
-    var edit_symb_dialog = null;
+    var edit_symb_dialog = null; //assigned on popup_dlg.dialog
     
     var dialog_div_id = 'heurist-dialog-editSymbology'+(mode_edit>=3?mode_edit:'');
     

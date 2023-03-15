@@ -131,7 +131,7 @@
 */
 #main-menu .ui-menu > li > a.selected{
     background: black !important;
-    /*color: white !important;*/
+    color: white !important;
 }
 .cms-button{
     font-size:0.8em;
