@@ -66,6 +66,11 @@ if( @$_REQUEST['recID'] || @$_REQUEST['recid'] || array_key_exists('website', $_
     header('Location: redirects/resolver.php?db='.@$_REQUEST['db'].'&recID='.$recid.'&fmt='.$format);
     return;
 
+}else if (@$_REQUEST['ent']){
+
+    header('Location: hsapi/controller/api.php?'.$_SERVER['QUERY_STRING']);
+    return;
+    
 }else 
     if (@$_REQUEST['rty'] || @$_REQUEST['dty'] || @$_REQUEST['trm']){
         //download xml template for given db defintion

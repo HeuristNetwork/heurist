@@ -7,8 +7,6 @@ RewriteEngine On
 RewriteRule ^/heurist/api/(.*)$ /heurist/hsapi/controller/api.php
 
 */
-
-  
   
 $requestUri = explode('/', trim($_SERVER['REQUEST_URI'],'/'));
 
@@ -39,13 +37,15 @@ $entities = array(
 'fields'=>'DefDetailTypes',
 'rectypegroups'=>'DefRecTypeGroups',
 'rectypes'=>'DefRecTypes',
+'reminders'=>'DbUsrReminders',
 'users'=>'SysUsers',
 'groups'=>'SysGroups',
 'records'=>'Records',
 'login'=>'System',
-'logout'=>'System'
-);
+'logout'=>'System',
 
+'rem'=>'UsrReminders'
+);
 //records 
     //controlles:    
     //record_batch - batch actions for records
@@ -57,6 +57,7 @@ $entities = array(
 
 //echo print_r($requestUri,true);
 //echo '<br>'.$method;
+// hsapi/controller/api.php?ent=
 
 if(count($requestUri)>0){
     $last_one = $requestUri[count($requestUri)-1];
@@ -67,9 +68,9 @@ if(count($requestUri)>0){
 }
 
 if(@$requestUri[1]!== 'api' || @$entities[@$requestUri[2]] == null){
-    
+
     //try to detect entity as parameter
-    if(@$_REQUEST['ent']!=null && @$entities[$_REQUEST['ent']] != null){
+    if(@$_REQUEST['ent']!=null && @$entities[$_REQUEST['ent']] != null ){
         $requestUri = array(0, 'api', $_REQUEST['ent'], @$_REQUEST['id']);
     }else{
         exitWithError('API Not Found', 400);    
@@ -77,8 +78,10 @@ if(@$requestUri[1]!== 'api' || @$entities[@$requestUri[2]] == null){
     
 }
 
+$allowed_methods = array('search','add','save','delete');
+
 $method = getAction($method);
-if($method == null){
+if($method == null || !in_array($method, $allowed_methods)){
     exitWithError('Method Not Allowed', 405);
 }
 
@@ -179,6 +182,8 @@ function getAction($method){
         return 'save';
     }else if($method=='DELETE'){
         return 'delete';
+    }else{
+        return $method;
     }       
     return null;
 }

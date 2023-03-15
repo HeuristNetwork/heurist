@@ -88,7 +88,7 @@ if (@$argv) {
             //$req = $entity->getData();
             $req = array();
             
-            if(count($res)==0 && @$req['a'] == 'search'){
+            if(@$req['a'] == 'search' && count($res)==0){
                 $code = 404;    
             }else if (@$req['a'] == 'save'){
                 $code = 201;

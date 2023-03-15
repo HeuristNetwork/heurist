@@ -126,6 +126,7 @@
             else if($entity_name=='trm') $entity_name = 'defTerms';
             else if($entity_name=='vcg') $entity_name = 'defVocabularyGroups';
             else if($entity_name=='rst') $entity_name = 'defRecStructure';   
+            else if($entity_name=='rem') $entity_name = 'dbUsrReminders';   
             else if($entity_name=='swf') $entity_name = 'sysWorkflowRules';   
             
             return $entity_name;

@@ -320,7 +320,8 @@ exit();
                 
                 $row = mysql__select_row($mysqli,
                     'select usr.ugr_FirstName,usr.ugr_LastName,usr.ugr_eMail FROM sysUGrps usr '
-                    .'WHERE usr.ugr_Type="user" and usr.ugr_ID='.$record['rem_ToUserID']);
+                    .' left join usrRemindersBlockList on rbl_UGrpID=usr.ugr_ID and rbl_RemID = '.$record['rem_ID']
+                    .'WHERE usr.ugr_Type="user" and usr.ugr_ID='.$record['rem_ToUserID']).' and isnull(rbl_RemID)';
                 if ($row) {
                     array_push($recipients, array(
                         "email" => $row[0].' '.$row[1].' <'.$row[2].'>', //username <email>
@@ -439,10 +440,11 @@ exit();
                         if (@$record['rem_ID']  &&  $record['rem_Freq'] != "once") {
                             $email_text .= "-------------------------------------------\n\n"
                                         .  "You will receive this reminder " . $record['rem_Freq'] . "\n"
-                                        .  "Click below if you do not wish to receive this reminder again:\n\n"
-                                        .  $BASE_URL."records/reminders/deleteReminder.php?r=".$record['rem_ID']
-                                        . "db=".$this->system->dbname()
+                                        .  "Click this link if you do not wish to receive this reminder again: \n\n"
+                                        .  HEURIST_BASE_URL."?ent=rem&method=delete&id=".$record['rem_ID']
+                                        .  "&db=".$this->system->dbname()
                                         .  ($recipient['u'] ? "&u=".$recipient['u'] : "&e=".$recipient['e']) . "&h=".$record['rem_Nonce'] . "\n\n";
+                                        
                         } else {
                             $email_text .= "-------------------------------------------\n\n"
                                         .  "You will not receive this reminder again.\n\n";
@@ -482,6 +484,39 @@ exit();
         }//for reminders        
         
         return $is_notification?true:$report;
+    }
+    
+    //
+    // ...?db=xxx&ent=rem&id=1&e=some@xyz.com&h=3ab77f51&method=delete
+    //
+    public function delete($disable_foreign_checks=false){
+
+        if(is_numeric(@$this->data['rem_ID']) && $this->data['rem_ID']>0 && $this->data['h']){
+                                       
+            //find reminder
+            $mysqli = $this->system->get_mysqli();        
+            $query = 'SELECT rem_ID FROM '.$this->config['tableName'].' WHERE rem_ID='.$this->data['rem_ID']
+                .' and rem_Nonce="'.$mysqli->real_escape_string($this->data['h']).'"';
+                    
+            $rem_ID = mysql__select_value($mysqli, $query);  
+            if($rem_ID>0){
+                
+                //@$this->data['e'] || 
+                if(is_numeric(@$this->data['u']) && $this->data['u']>0){
+                    //adds reminder into block list
+                    $query = 'INSERT INTO usrRemindersBlockList VALUES ('.$rem_ID.','.$this->data['u'].')';
+                }else{
+                    //remove reminder
+                    $query = 'DELETE FROM '.$this->config['tableName'].' WHERE rem_ID='.$this->data['rem_ID'];
+                }
+                $res = $mysqli->query($query);
+            }
+            
+            return 'You will not receive this reminder again';
+                       
+        }else{
+            return parent::delete($disable_foreign_checks);
+        }
     }
     
 }
