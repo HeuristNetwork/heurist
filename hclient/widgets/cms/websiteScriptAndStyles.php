@@ -1030,41 +1030,48 @@ $title_alt2 -> #main-title-alt2
 */
 
 var setup_title_adjust = false;
-//main logo image
-if($('#main-logo').length>0){
-    $('#main-logo').empty();
-    $('<a href="#" style="text-decoration:none;"><?php print $image_logo;?></a>')
-    .appendTo($('#main-logo'));
+    //main logo image
+    if($('#main-logo').length>0){
+        $('#main-logo').empty();
+        $('<a href="#" style="text-decoration:none;"><?php print $image_logo;?></a>')
+        .appendTo($('#main-logo'));
 
-    let $img = $('#main-logo img');
-    if($img.length > 0 && !$img[0].complete && !window.hWin.HEURIST4.util.isempty($img.attr('src'))){
-        $img.on('load', () => {
-            $('#main-title').css({ left:$('#main-logo').width()+10 });
-            $('#main-title').fadeIn(500);
-        });
+        let $img = $('#main-logo img');
+        if($img.length > 0 && !$img[0].complete && !window.hWin.HEURIST4.util.isempty($img.attr('src'))){
+            $img.on('load', () => {
+                $('#main-title').css({ left:$('#main-logo').width()+10 });
+                $('#main-title').fadeIn(500);
+            });
 
-        setup_title_adjust = true;
+            setup_title_adjust = true;
+        }
     }
-}
   
-  if($('#main-logo-alt').length>0){
-  <?php if($image_altlogo){ ?>
-      var ele = $('#main-logo-alt').css({'background-size':'contain',
+    if($('#main-logo-alt').length>0){
+    <?php if($image_altlogo){ ?>
+        var ele = $('#main-logo-alt').css({'background-size':'contain',
                 'background-position': 'top',
                 'background-repeat': 'no-repeat',
                 'background-image':'url(\'<?php print $image_altlogo;?>\')'}).show();
-  <?php if($image_altlogo_url){ ?>
+    <?php if($image_altlogo_url){ ?>
         ele.css('cursor','pointer').on({click:function(){window.open("<?php print $image_altlogo_url;?>",'_blank')}});
-  <?php }}else{ ?>
-      $('#main-logo-alt').hide();
-  <?php } ?>
-  }
-  if($('#main-title-alt').length>0){
-      $('#main-title-alt').html('<?php print str_replace("'",'&#039;', $title_alt);?>');
-  }
-  if($('#main-title-alt2').length>0){
-      $('#main-title-alt2').html('<?php print str_replace("'",'&#039;', $title_alt2);?>');
-  }
+    <?php }}else{ ?>
+        $('#main-logo-alt').hide();
+    <?php } ?>
+    }
+    if($('#main-title-alt').length>0){
+        $('#main-title-alt').html('<?php print str_replace("'",'&#039;', $title_alt);?>');
+    }
+    if($('#main-title-alt2').length>0){
+        $('#main-title-alt2').html('<?php print str_replace("'",'&#039;', $title_alt2);?>');
+    }
+
+    // Setup login button, if needed
+    if($('#btn_signin').length>0){
+        $('#btn_signin').on('click', () => {
+            window.hWin.HEURIST4.ui.checkAndLogin(true, () => {location.reload();});
+        });
+    }
   
   <?php if($website_title){  ?>
   
