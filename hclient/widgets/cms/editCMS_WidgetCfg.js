@@ -721,16 +721,23 @@ function editCMS_WidgetCfg( widget_cfg, _layout_content, $dlg, main_callback ){
             if(widget_name=='heurist_StoryMap'){
                 
                 if(!opts['reportOverviewMode']) opts['reportOverviewMode'] = 'inline';
+                if(!opts['reportEndPageMode']) opts['reportEndPageMode'] = 'inline';
                 if(!opts['reportElementMode']) opts['reportElementMode'] = 'vertical';
                 if(!opts['reportElementMapMode']) opts['reportElementMapMode'] = 'linked';
                 
                 
                 $dlg.find('select[name="reportOverviewMode"]').val(opts['reportOverviewMode']);
+                $dlg.find('select[name="reportEndPageMode"]').val(opts['reportEndPageMode']);
                 
                 var $selectTemplate = $dlg.find('select[name="reportOverview"]'); 
 
                 window.hWin.HEURIST4.ui.createTemplateSelector( $selectTemplate
                     ,[{key:'',title:'Standard record view'}], opts['reportOverview']);
+                    
+                $selectTemplate = $dlg.find('select[name="reportEndPage"]'); 
+
+                window.hWin.HEURIST4.ui.createTemplateSelector( $selectTemplate
+                    ,[{key:'',title:'Standard record view'}], opts['reportEndPage']);
                     
                 $selectTemplate = $dlg.find('select[name="reportElement"]'); 
 
