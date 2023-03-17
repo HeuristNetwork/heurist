@@ -2340,7 +2340,7 @@ input[type="file"] {
     border: none !important;
     font-weight:bold !important;
     padding-bottom: 0 !important;
-    padding-left: 1.2em !important;
+    padding-left: 8px !important;
 }
 
 .tree-accordeon-header > .ui-accordion-header-icon{

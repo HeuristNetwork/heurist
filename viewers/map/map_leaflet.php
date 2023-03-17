@@ -399,9 +399,9 @@ if (!(@$_REQUEST['notimeline']=='true' || @$_REQUEST['notimeline']=='1')) { ?>
                 <button id="btn_layout_map" class="ui-heurist-button" style="height: 24px;display:inline-block;margin-left: 20px;">Map</button>
                 <button id="btn_layout_timeline" class="ui-heurist-button" style="height: 24px;display:inline-block;">Timeline</button>
 
-                <span style="display:inline-block;margin-left: 10px;font-size: small;">
-                Legend <a class="ui-icon ui-icon-list" style="width: 22px; height: 22px;padding:0px;display:inline-block;margin-left: 5px;"></a>
-                </span>
+                <a id="btn_legend_map" class="toggle-legend ui-icon ui-icon-list" 
+                        style="width: 22px; height: 22px;padding:0px;display:inline-block;margin-left: 5px;"></a>
+                <a class="toggle-legend">Legend</a>                  
 
                 <a class="ui-icon ui-icon-plus" style="width: 22px; height: 22px;padding:0px;display:inline-block;margin-left: 20px;"></a>
                 <a class="ui-icon ui-icon-minus" style="width: 22px; height: 22px;padding:0px;display:inline-block;"></a>

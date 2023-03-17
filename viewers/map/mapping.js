@@ -3383,7 +3383,8 @@ $.widget( "heurist.mapping", {
     },//updateLayout
     
     //
-    //
+    // Toolbar is active in main UI only
+    // Hides all controls (plugins) on map and assign their actions to buttons on toolbar
     //    
     initToolbarInMainUI: function(){
     
@@ -3407,8 +3408,8 @@ $.widget( "heurist.mapping", {
             }
         }});
 
-        toolbar.find('.ui-icon-list').attr('title','Map Legend')
-        .button()
+        toolbar.find('#btn_legend_map').button();
+        toolbar.find('.toggle-legend') 
         .on({click:function(){that.mapManager.toggle();}});
 
         if(that.map_bookmark){
@@ -3491,11 +3492,11 @@ $.widget( "heurist.mapping", {
         $(that.map_zoom.getContainer()).hide();
         
 
-
         //addmapdoc plugin
         $(that.map_addmapdoc.getContainer()).hide();
 
-        toolbar.find('#btn_add_mapdoc')
+        // btn_add_mapdoc are hidden since 2023-03-16
+        toolbar.find('#btn_add_mapdoc').hide()
         .attr('title', window.hWin.HR('Create new map document'))
         .html('<span class="ui-icon ui-map-document" style="width:22px;margin:0px;height:22px">'
             +'<span class="ui-icon ui-icon-plus" style="position:absolute;right:0px;font-size:12px;color:white;text-shadow: 2px 2px gray;bottom:0px" />'
@@ -3524,6 +3525,8 @@ $.widget( "heurist.mapping", {
             toolbar.find('.ui-icon-search').hide();
         }
 
+        toolbar.find('#mapDocumentSel').parent().hide();
+        /* Hidden since 2023-03-16
         var $mapdocSel = toolbar.find('#mapDocumentSel');
         this._on(toolbar.find('#btn_layout_map').button({text:'Map'}),
             {click:function(e){  
@@ -3538,7 +3541,7 @@ $.widget( "heurist.mapping", {
                 this._updatePanels()
             }});
         this.mapManager.populateMapDocuments($mapdocSel);
-        
+        */
         
 
         if(true){ //init digitizing tool button
