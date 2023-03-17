@@ -103,12 +103,12 @@ $trmDuplicates = @$lists2["trm_dupes"];
                 var cbs = document.getElementsByName(sname);
                 if (!cbs  ||  ! cbs instanceof Array)
                     return false;
-                var ids = '';
+                var ids = [];
                 for (var i = 0; i < cbs.length; i++) {
                     if (cbs[i].checked)
-                        ids = ids + cbs[i].value + ',';
+                        ids.push(cbs[i].value);
                 }
-                return ids;
+                return ids.join(',');
             }
 
             function mark_all_by_name(ele,  sname){
@@ -208,6 +208,18 @@ $trmDuplicates = @$lists2["trm_dupes"];
                     var format = $('input[type="radio"][name="date_format"]:checked').val();
 
                     window.open('listDatabaseErrors.php?db=<?= HEURIST_DBNAME?>&fixdates=1&date_format='+format+'&recids='+ids,'_self')
+                }else{
+                    window.hWin.HEURIST4.msg.showMsgDlg('Mark at least one record to correct');
+                }
+            }
+
+            function removeMultiSpacing(){
+
+                var ids = get_selected_by_name('multi_spaces'); 
+
+                if(ids){
+                    $('#linkbar').hide();
+                    window.open('listDatabaseErrors.php?db=<?= HEURIST_DBNAME?>&fixmultispace=1&recids='+ids,'_self')
                 }else{
                     window.hWin.HEURIST4.msg.showMsgDlg('Mark at least one record to correct');
                 }
@@ -2250,6 +2262,8 @@ if($active_all || in_array('geo_values', $active)){ // Check for geo fields that
             continue;
         }
 
+        $dtl_Value = $row['dtl_Value'];
+
         $geoType = super_trim(substr($dtl_Value, 0, 2));
         $hasGeoType = false;
 
@@ -2306,11 +2320,13 @@ if($active_all || in_array('geo_values', $active)){ // Check for geo fields that
     }
     if($res) $res->close();
 
+    $has_invalid_geo = false;
+
     // Invalid wkt values
     if(count($bibs3) == 0){
-        print '<h3 class="res-valid">OK: No invalid geospatial values</h3>';
-        echo '<script>$(".geo_values").css("background-color", "#6AA84F");</script>';
+        print '<h3 class="res-valid">OK: No invalid geospatial values</h3><br>';
     }else{
+        $has_invalid_geo = true;
         echo '<script>$(".geo_values").css("background-color", "#E60000");</script>';
 
         ?>
@@ -2371,9 +2387,9 @@ if($active_all || in_array('geo_values', $active)){ // Check for geo fields that
 
     // Missing wkt or general invalid value
     if(count($bibs1) == 0){
-        print '<h3 class="res-valid">OK: No missing geospatial values</h3>';
-        echo '<script>$(".geo_values").css("background-color", "#6AA84F");</script>';
+        print '<h3 class="res-valid">OK: No missing geospatial values</h3><br>';
     }else{
+        $has_invalid_geo = true;
         echo '<script>$(".geo_values").css("background-color", "#E60000");</script>';
 
         ?>
@@ -2435,8 +2451,8 @@ if($active_all || in_array('geo_values', $active)){ // Check for geo fields that
     // Value that is out of bounds, i.e. -90 > lat || lat > 90 || -180 > long || long > 180
     if(count($bibs2) == 0){
         print '<h3 class="res-valid">OK: All geospatial data is within bounds</h3>';
-        echo '<script>$(".geo_values").css("background-color", "#6AA84F");</script>';
     }else{
+        $has_invalid_geo = true;
         echo '<script>$(".geo_values").css("background-color", "#E60000");</script>';
 
         ?>
@@ -2495,8 +2511,201 @@ if($active_all || in_array('geo_values', $active)){ // Check for geo fields that
         <?php
     }
 
+    if(!$has_invalid_geo){
+        echo '<script>$(".geo_values").css("background-color", "#6AA84F");</script>';
+    }
+
     print '<br /><br /></div>';
 } //END geo_values check
+
+if($active_all || in_array('fld_spacing', $active)){ // Check spacing in freetext and blocktext values
+
+    ?>
+    <div id="fld_spacing" style="top:110px"> <!-- Start of Spacing in field value check -->
+
+    <script>
+        $('#links').append('<li class="fld_spacing"><a href="#fld_spacing" style="white-space: nowrap;padding-right:10px;color:black;">Spaces in values</a></li>');
+        tabs_obj.tabs('refresh');
+    </script>
+
+    <?php
+
+    $records_to_fix = array();
+    if(@$_REQUEST['fixmultispace'] == 1 && isset($_REQUEST['recids'])){
+        $records_to_fix = explode(',', $_REQUEST['recids']);
+    }
+
+    $query = 'SELECT rec_ID, rec_Title, rec_RecTypeID, dtl_ID, dtl_Value, dty_Name, rty_Name 
+              FROM Records 
+              LEFT JOIN recDetails ON rec_ID = dtl_RecID 
+              LEFT JOIN defDetailTypes ON dty_ID = dtl_DetailTypeID 
+              LEFT JOIN defRecTypes ON rty_ID = rec_RecTypeID 
+              WHERE (dty_Type = "freetext" OR dty_Type = "blocktext") AND dtl_Value != ""';
+
+    $res = $mysqli->query($query);
+
+    // values that have double, leading, and/or trailing spaces
+    $bibs1 = array(0 => array(), 1 => array());
+    $ids1 = array();
+    // values that have multiple spaces
+    $bibs2 = array();
+    $ids2 = array();
+    $fixed2 = array();
+
+    while ($row = $res->fetch_assoc()){
+
+        $fixed_multi = false;
+        $org_val = $row['dtl_Value'];
+        $new_val = $org_val;
+        $rec_id = $row['rec_ID'];
+
+        if(empty($org_val) || empty(super_trim($org_val)) || preg_match('/\s/', $org_val) === false){ // empty value, or no spaces
+            continue;
+        }
+
+        if(preg_match('/(\S)\s\s(\S)/', $new_val) > 0){ // Double spaces
+
+            $new_val = preg_replace('/(\S)\s\s(\S)/', '$1 $2', $new_val);
+            $bibs1[0][] = $row['dtl_ID'];
+        }
+        if(super_trim($new_val) != $new_val){ // Leading/Trailing spaces
+
+            $new_val = super_trim($new_val);
+            $bibs1[1][] = $row['dtl_ID'];
+        }
+
+        if(preg_match('/\s\s\s+/', $new_val) > 0){ // Multiple spaces (3 or more)
+
+            if(in_array($rec_id, $records_to_fix)){
+                $new_val = preg_replace('/\s\s\s+/', ' ', $new_val);
+                $fixed_multi = true;
+            }else{
+
+                $row['dtl_Value'] = $new_val;
+                $bibs2[] = $row;
+    
+                if(!in_array($ids2, $rec_id)){
+                    $ids2[] = $rec_id;
+                }
+            }
+        }
+
+        if($new_val != $org_val){ // update existing value
+
+            $upd_query = 'UPDATE recDetails SET dtl_Value = "' . $new_val . '" WHERE dtl_ID = ' . $row['dtl_ID'];
+            $mysqli->query($upd_query);
+
+            if($fixed_multi && !in_array($fixed2, $rec_id)){
+                $fixed2[] = $rec_id;
+            }else if(!in_array($ids1, $rec_id)){
+                $ids1[] = $rec_id;
+            }
+        }
+    }
+    if($res) $res->close();
+
+    $has_invalid_spacing = false;
+
+    // Value has double, leading, and/or trailing spaces; [0] => Double, [1] => Leading/Trailing
+    if(count($ids1) == 0){
+        print '<h3 class="res-valid">OK: No double, leading, or trailing spaces found in field values</h3><br>';
+    }else{
+        $has_invalid_spacing = true;
+        echo '<script>$(".fld_spacing").css("background-color", "#E60000");</script>';
+
+        if(count($bibs1[0]) > 0){
+            print '<h3>'. count($bibs1[0]) .' double spaces in text fields have been converted to single spaces.</h3><br>';
+            print '<span>Double spaces are almost always a typo and in any case they are ignored by html rendering.</span><br>';
+        }
+        if(count($bibs1[1]) > 0){
+            print '<h3>'. count($bibs1[1]) .' leading or trailing spaces have been removed.</h3><br>';
+            print '<span>Leading and trailing spaces should never exist in data.</span><br>';
+        }
+
+        print '<a target=_new href="'.HEURIST_BASE_URL.'?db='.HEURIST_DBNAME.'&w=all&q=ids:'.implode(',', $ids1).'">Search for updated values '
+            . '<img src="'.HEURIST_BASE_URL.'hclient/assets/external_link_16x16.gif"></a>';
+    }
+
+    // Value that has multi-spaces, except double spacing
+    if(count($bibs2) == 0){
+        print '<h3 class="res-valid">OK: No multiple spaces found in field values</h3>';
+    }else{
+        $has_invalid_spacing = true;
+        echo '<script>$(".fld_spacing").css("background-color", "#E60000");</script>';
+
+        ?>
+
+        <h3>Multiple consecutive spaces detected</h3><br>
+        <span>
+            We recommend reducing these to single spaces.<br>
+            If these spaces are intended as formatting eg. for indents, removing them could throw out some formatting.<br>
+            However we strongly discourage the use of spaces in this way, as they are ignored by html rendering<br>
+            and will not necessarily work consistently in case of varying fonts.
+        </span>
+        <span>
+            <a target=_new href='<?=HEURIST_BASE_URL.'?db='.HEURIST_DBNAME?>&w=all&q=ids:<?= implode(',', $ids2) ?>'>
+                (show results as search) <img src='<?php echo HEURIST_BASE_URL.'hclient/assets/external_link_16x16.gif'?>'></a>
+            <a target=_new href='#' id=selected_link5 onClick="return open_selected_by_name('multi_spaces');">(show selected as search) <img src='<?php echo HEURIST_BASE_URL.'hclient/assets/external_link_16x16.gif'?>'></a>
+            <button onclick="removeMultiSpacing()">Fix selected records</button>
+        </span>
+
+        <table>
+
+            <tr>
+                <td colspan="6">
+                    <label><input type=checkbox onclick="{mark_all_by_name(event.target, 'multi_spaces');}">Mark all</label>
+                </td>
+            </tr>
+
+
+            <?php
+            $rec_id = null;
+            foreach ($bibs2 as $row) {
+                if($rec_id==null || $rec_id!=$row['rec_ID']) {
+                    ?>
+                    <tr>
+                        <td>
+                            <input type=checkbox name="multi_spaces" value=<?= $row['rec_ID'] ?>>
+                        </td>
+                        <td style="white-space: nowrap;">
+                            <a target=_new
+                                href='<?=HEURIST_BASE_URL?>?fmt=edit&db=<?= HEURIST_DBNAME?>&recID=<?= $row['rec_ID'] ?>'>
+                                <?= $row['rec_ID'] ?>
+                                <img class="rft" style="background-image:url(<?php echo HEURIST_RTY_ICON.$row['rec_RecTypeID']?>)" title="<?php echo $row['rty_Name']?>" 
+                                    src="<?php echo HEURIST_BASE_URL.'hclient/assets/16x16.gif'?>">&nbsp;
+                                <img src='<?php echo HEURIST_BASE_URL.'hclient/assets/external_link_16x16.gif'?>' title='Click to edit record'>
+                            </a>
+                        </td>
+
+                        <td class="truncate" style="max-width:400px"><?=strip_tags($row['rec_Title']) ?></td>                      
+                        <?php
+                        $rec_id = $row['rec_ID'];
+                    }else{
+                        print '<tr><td colspan="3"></td>';
+                    }
+                    ?>
+
+                    <td><?= $row['dty_ID'] ?></td>
+                    <td width="100px" style="max-width:100px" class="truncate"><?= $row['dty_Name'] ?></td>
+                    <td class="truncate" style="max-width:400px;" title="<?= strip_tags($row['dtl_Value']) ?>"><?= strip_tags($row['dtl_Value']) ?></td>
+                </tr>
+                <?php
+            }
+            ?>
+        </table>
+        <?php
+    }
+
+    if(count($fixed2) > 0){
+        print '<br><h3>'. count($fixed2) .' multi-spaced values changed to single space</h3><br>';
+    }
+
+    if(!$has_invalid_spacing){
+        echo '<script>$(".fld_spacing").css("background-color", "#6AA84F");</script>';
+    }
+
+    print '<br /><br /></div>';
+} //END fld_spacing check
         ?>
 
         </div>

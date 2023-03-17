@@ -138,7 +138,7 @@
     font-weight:bold;
     color:blue;
 }
-#btn_editor, #btnOpenCMSeditor{
+#btn_editor, #btnOpenCMSeditor, #btn_signin{
     padding: 2px 8px;
     background-color: white !important;
     outline: darkblue solid 1px;
@@ -167,6 +167,9 @@ if($isWebPage){ //set in websiteRecord.php
         .'style="position:absolute;left:95px; top:5px;color:blue !important;z-index:1;" class="cms-button">database</a>'
         .'<a href="#" id="btnOpenCMSeditor" onclick="_openCMSeditor(event); return false;" '
         .'style="position:absolute;left:5px;top:5px;color:blue !important;z-index:1;" class="cms-button">website editor</a>';
+    }
+    if(!$edit_OldEditor && $system->get_user_id() == 0){
+        print '<a href="#" id="btn_signin" style="position:absolute;left:5px; top:5px;color:blue !important;" class="cms-button">login</a>'; // login link
     }
 ?>
     <div class="ent_content_full ui-heurist-bg-light" style="top:<?php echo ($showWarnAboutPublic)?20:0; ?>px" 
@@ -212,7 +215,9 @@ if($isWebPage){ //set in websiteRecord.php
         .'style="position:absolute;left:95px; top:5px;color:blue !important;" class="cms-button">database</a>'
         .'<a href="#" id="btnOpenCMSeditor" onclick="_openCMSeditor(event); return false;" '
         .'style="position:absolute;left:5px;top:5px;color:blue !important;" class="cms-button">website editor</a>';
-    
+    }
+    if(!$edit_OldEditor && $system->get_user_id() == 0){
+        print '<a href="#" id="btn_signin" style="position:absolute;left:5px; top:5px;color:blue !important;" class="cms-button">login</a>'; // login link
     }
     ?>  
         <div id="main-pagetitle" class="ui-heurist-bg-light"></div>       
