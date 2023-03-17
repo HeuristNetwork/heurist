@@ -354,8 +354,13 @@ $.widget( "heurist.svs_list", {
             if(this.options.is_h6style){
                 this.accordeon.css('top', 36);
             }else{
-                var px = 0;//window.hWin.HEURIST4.util.em(2.5);
-                this.accordeon.css('top', this.div_header.height() + is_vis*px + 5);
+                var additional_height = 0;
+
+                if(this.direct_search_div){
+                    additional_height = this.direct_search_div.outerHeight();
+                }
+
+                this.accordeon.css('top', this.div_header.height() + additional_height + 5);
             }
         }
     },
@@ -3043,14 +3048,14 @@ console.log(err)
         var header_label = !window.hWin.HEURIST4.util.isempty(this.options.simple_search_header) ? this.options.simple_search_header : 'Simple search';
         var field_text = !window.hWin.HEURIST4.util.isempty(this.options.simple_search_text) ? this.options.simple_search_text : 'Search everything:';
 
-        this.direct_search_div = $('<div style="height:7.5em;padding:4px 4px 4px 15px;width:100%">'
+        this.direct_search_div = $('<div style="height:6em;padding:4px 4px 4px 15px;width:100%">'
             +'<h4 style="padding:10px 0px;margin:0">'+ header_label +'</h4><label>'+ field_text +'</label>'
             +'&nbsp;<input id="search_query" style="display:inline-block;width:40%" type="search" value="">'
             +'&nbsp;<button id="search_button"/></div>');
 
-        if(is_buttons){ console.log('insert after accordeon');
+        if(is_buttons){
             this.direct_search_div.insertAfter(this.accordeon);
-        }else{ console.log('insert before accordeon / somewhere else');
+        }else{
             this.direct_search_div.insertBefore(this.accordeon);
         }
 
