@@ -509,7 +509,7 @@ private static function __get_related_record_ids($rec_id, $dty_ID) {
     //direct 
     $query = 'SELECT rl_TargetID  as record_ID '
         .'FROM recLinks, Records WHERE rl_SourceID='.$rec_id
-        .' AND rl_SourceID=rec_ID AND rec_FlagTemporary=0 ';
+        .' AND rl_TargetID=rec_ID AND rec_FlagTemporary=0 ';
     if($reltypes){
         $query = $query.' AND rl_RelationTypeID'.$reltypes;
     }    
@@ -521,7 +521,7 @@ private static function __get_related_record_ids($rec_id, $dty_ID) {
     $query = $query.' UNION '
         .'SELECT rl_SourceID as record_ID '
         .'FROM recLinks, Records WHERE rl_TargetID='.$rec_id
-        .' AND rl_TargetID=rec_ID AND rec_FlagTemporary=0 ';
+        .' AND rl_SourceID=rec_ID AND rec_FlagTemporary=0 ';
     if($reltypes){
         $query = $query.' AND rl_RelationTypeID'.$reltypes;
     }    
