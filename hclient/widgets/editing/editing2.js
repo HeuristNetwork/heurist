@@ -144,8 +144,9 @@ function hEditing(_options) {
     
     function _initEditForm(_recstructure, _recdata, _is_insert){
         
-        that.wasModified = 0;
+        if(!($container && $container.length>0)) return;
         
+        that.wasModified = 0;
         $container.hide();
         $container.empty(); //clear previous edit elements
         editing_inputs = [];
