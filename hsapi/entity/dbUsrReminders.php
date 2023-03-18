@@ -247,26 +247,37 @@ class DbUsrReminders extends DbEntityBase
         $query = null;
         $record = null;
         
-        if($is_notification){
+        if( (count($rec_IDs)>0) || (@$this->data['fields']['rem_RecID']>0) )
+        {
             //sends emails for given set of records
             $ugrID = $this->system->get_user_id();
-            
             if(!($ugrID>0)){
                 $this->system->addError(HEURIST_REQUEST_DENIED, 
                     'You have to be logged in to send notification'
                     .' Insufficient rights (logout/in to refresh) for this operation');
                 return false;
             }
+            $is_notification = true;
             
-            $query = ' WHERE rem_RecID IN ('.imploder(',',$rec_IDs).') AND rem_OwnerUGrpID='.$ugrID;
+            if(count($rec_IDs)==0){
+                $rec_IDs = array($this->data['fields']['rem_RecID']);                
+            }
+            $record = $this->data['fields'];
+            
+            //$query = ' WHERE rem_RecID IN ('.implode(',',$rec_IDs).') AND rem_OwnerUGrpID='.$ugrID;
+            if(!(@$record['rem_OwnerUGrpID']>0)){
+                    $record['rem_OwnerUGrpID'] = $ugrID;
+            }            
+        /*    
         }else if(@$this->data['fields'] && @$this->data['fields']['rem_RecID']>0){
         
+            $rec_IDs = array($this->data['fields']['rem_RecID']);
             $is_notification = true;
             $record = $this->data['fields'];
             if(!(@$record['rem_OwnerUGrpID']>0)){
-                    $record['rem_OwnerUGrpID'] = $this->system->get_user_id();
+                    $record['rem_OwnerUGrpID'] = $ugrID;
             }            
-            
+        */    
         }else{
             //validate that this script is run from command line
             if (php_sapi_name() != 'cli'){
@@ -299,6 +310,7 @@ exit();
         if($query==null){
             $res = true;
         }else{
+            //find reminders that can be send now
             $query = 'SELECT * FROM '.$this->config['tableName'].$query;
             $res = $mysqli->query($query);
         }
