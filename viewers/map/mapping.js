@@ -761,13 +761,13 @@ $.widget( "heurist.mapping", {
                    detectRetina: true
                 }*/
                            
-        }else if(layer_options['MapTiler'] && layer_url.indexOf('{q}')>0)
+            }else if(layer_options['TMS'] && layer_url.indexOf('{q}')>0)
         {
                 // TMS naming scheme (Y is flipped)
                 // Tile Map Service: an early standard supported by OpenLayers. 
                 // One difference is the y axis is positive southwards in TMS
             
-                var MapTilerLayer = HeuristTilerLayer.extend({
+                var TMS_Layer = HeuristTilerLayer.extend({
                     getTileUrl: function (tilePoint) {
                         //this._adjustTilePoint(tilePoint);
                         return L.Util.template(this._url, {
@@ -775,7 +775,7 @@ $.widget( "heurist.mapping", {
                             q: this._maptiler(tilePoint.x, tilePoint.y, this._getZoomForUrl())
                         });
                     },
-                    _maptiler: function (x, y, z) {
+                    _maptiler: function (x, y, z) { //invert Y
                         
                         var bound = Math.pow(2, z);
                         var s = ''+z+'/'+x+'/'+(bound - y - 1); 
@@ -784,7 +784,7 @@ $.widget( "heurist.mapping", {
                     }
                 });    
                 
-            new_layer = new MapTilerLayer(layer_url, layer_options).addTo(this.nativemap);  
+            new_layer = new TMS_Layer(layer_url, layer_options).addTo(this.nativemap);  
 
             /*            
               layer_url = 'http://127.0.0.1/heurist/external/php/tileserver.php?/index.json?/c:/xampp/htdocs/HEURIST_FILESTORE/tileserver/mapa/{z}/{x}/{y}.png';
@@ -795,8 +795,8 @@ $.widget( "heurist.mapping", {
         }else{
             // Google Map/OSM
             
-            //transparency for jpeg
-            if(layer_options['MapTiler'] && layer_options['extension']=='.jpg'){
+            //transparency for jpeg  layer_options['OSM'] && 
+            if(layer_options['extension']=='.jpg'){
                 layer_options['matchRGBA'] = [ 0,  0,  0, 0  ]; //replace that match
                 layer_options['missRGBA'] =  null; //replace that not match
                 layer_options['pixelCodes'] = [ [255, 255, 255] ]; //search for

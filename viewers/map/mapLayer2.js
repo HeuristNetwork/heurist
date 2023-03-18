@@ -230,9 +230,9 @@ function hMapLayer2( _options ) {
                     layer_url = layer_url + '{q}';
                 }
                 
-            }else if(tilingSchema && ccode1=='2-548'){ //maptiler tilingSchema[idx_ccode]
+            }else if(tilingSchema && ccode1=='2-548'){ // tilingSchema[idx_ccode]
 
-                layer_options['MapTiler'] = true;
+                layer_options['TMS'] = true;
 
                 if(layer_url.indexOf('{q}')<0 && layer_url.indexOf('{x}')<0){
                     layer_url = layer_url + '{q}'
@@ -240,9 +240,11 @@ function hMapLayer2( _options ) {
                 }
                 
             }else{
+                //GoogleMap/OSM
+                layer_options['OSM'] = true;
                 
                 if(layer_url.indexOf('{x}')<0){
-                    layer_url = layer_url + '/{z}/{x}/{y}'
+                    layer_url = layer_url + (layer_url[layer_url.length]=='/'?'':'/')+'{z}/{x}/{y}'
                                 + ext;
                 }
                 /* Blocked because of possible Remote file disclosure
