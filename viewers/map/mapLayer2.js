@@ -562,8 +562,9 @@ function hMapLayer2( _options ) {
                                         if(!window.hWin.HEURIST4.util.isempty(t1)) title.push(t1);
                                     }
                                     if(title.length>1){
-                                        let t1 = $Db.dty(dty_ID, 'dty_Name');
-                                        title = (window.hWin.HEURIST4.util.isempty(t1)?'':t1)+'( '+title.join('/')+' )';
+                                        //let t1 = $Db.dty(dty_ID, 'dty_Name');
+                                        //(window.hWin.HEURIST4.util.isempty(t1)?'':t1)
+                                        title = title.join(' | ');
                                     }else{
                                         title = title[0];    
                                     }

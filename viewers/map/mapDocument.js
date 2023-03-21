@@ -174,7 +174,7 @@ function hMapDocument( _options )
                         
                         var $res = {};  
                         $res['key'] = recID;
-                        $res['title'] = "<span style='font-style:italic;'>" + recName + "</span>";
+                        $res['title'] = '<span style="'+(mapdoc_id==0?'font-size:1.1em':'font-style:italic;')+'">' + recName + '</span>';
                         $res['type'] = 'layer';
                         $res['mapdoc_id'] = mapdoc_id; //reference to parent mapdoc
                         
