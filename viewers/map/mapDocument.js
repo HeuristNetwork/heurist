@@ -149,7 +149,8 @@ function hMapDocument( _options )
         
         var treedata = [];
         
-        var limit_for_search = 11;
+        var limit_layers_for_current_result_set = 0; //number of map layers visible in current result set as separate items (was 10)
+        var limit_layers_for_temp_mapdoc = 11; //search result set from clearinghouse
         
         if(_isDocumentLoaded(mapdoc_id)){
             var resdata = map_documents_content[mapdoc_id];
@@ -216,8 +217,13 @@ function hMapDocument( _options )
                                 });
                                 
                                 if($themes.length>0){
-                                    $res['expanded'] = true;
-                                    $res['children'] = $themes;
+                                    if(mapdoc_id==0 && $themes.length==1){
+                                        //do not add the only theme for current search
+                                    }else{
+                                        $res['expanded'] = true;
+                                        $res['children'] = $themes;
+                                    }
+                                
                                 }
                             }
                         }
@@ -227,10 +233,10 @@ function hMapDocument( _options )
                 }
             }//for
             
-            if(mapdoc_id==0 && treedata.length > limit_for_search){
+            if(mapdoc_id==0 && treedata.length > limit_layers_for_current_result_set){
                 //remove invisible 
                 var i = 0;
-                while(i<treedata.length && treedata.length > limit_for_search){
+                while(i<treedata.length && treedata.length > limit_layers_for_current_result_set){
                     if(!treedata[i]['selected'] && treedata[i]['key']<9000000){
                         treedata.splice(i,1);
                     }else{

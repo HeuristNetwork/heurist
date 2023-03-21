@@ -597,7 +597,8 @@ function hMapManager( _options )
 
                                             //
                                             //mapDocuments.openMapDocument(node.key, dfd);
-                                        }else if(node.data.type=='layer'){   //show/hide layer
+                                        }
+                                        else if(node.data.type=='layer'){   //show/hide layer
                                             
                                             if(_suppress_select_event) return;
                                             
@@ -607,18 +608,39 @@ function hMapManager( _options )
                                                 //node.key - heurist layer record id
                                                 var layer_rec = mapDocuments.getLayer(mapdoc_id, node.key);
                                                 if(layer_rec){
+                                                    //set layer visibility on map
                                                     (layer_rec['layer']).setVisibility( node.isSelected() );  
                                                     not_visible = !node.isSelected();
                                                     
                                                 } 
+                                                
+                                                
+                                                
                                             }
                                             if(mapdoc_id>0 && !mapdoc_visible[mapdoc_id]){
-                                                not_visible = true;
+                                                not_visible = true; //mapdocument is not visible
                                             }
                                             if(not_visible){ //reset
                                                 node.setSelected(false);
+                                            }else if(mapdoc_id==0 || mapdoc_id=='temp'){
+                                                //need to make all themes visible if none of them marked
+                                                var themes = node.children;
+                                                if(themes.length>0){
+                                                    var all_hidden = true;
+                                                    for(var i=0; i<themes.length; i++){
+                                                        if(themes[i].isSelected()){
+                                                            all_hidden = flase;
+                                                            break;
+                                                        }
+                                                    }
+                                                    if(all_hidden)
+                                                    for(var i=0; i<themes.length; i++){
+                                                        themes[i].setSelected(true);
+                                                    }
+                                                }
                                             }
-                                        }else if(node.data.type=='theme'){ //on show/hide theme
+                                        }
+                                        else if(node.data.type=='theme'){ //on show/hide theme
                                         
                                             //theme is obtained from resdata.fld(record, DT_SYMBOLOGY); see _getTreeData
 
@@ -626,7 +648,7 @@ function hMapManager( _options )
                                             //if(node.parent.isSelected()){
                                             var mapdoc_id = node.data.mapdoc_id;
                                             var layer_id = node.data.layer_id;
-                                            var not_visible = true;
+                                            var not_visible = true; 
                                             if( layer_id>0 && 
                                                 ((mapdoc_id>0 && mapdoc_visible[mapdoc_id])|| mapdoc_id==0 || mapdoc_id=='temp')){
                                             
@@ -647,8 +669,16 @@ function hMapManager( _options )
                                                 
                                                 (layer_rec['layer']).applyThematicMap( active_themes );
                                             }
-                                            if(not_visible){ //reset
-                                                node.setSelected(false);
+                                            if(not_visible){ //all themes are invisible - hide parent layer as well
+                                                mapdoc_id = node.parent.data.mapdoc_id;
+                                                if(mapdoc_id==0 || mapdoc_id=='temp'){ //current search
+                                                    node.parent.setSelected(false);    
+                                                }
+                                            }else{
+                                                //something is visible but parent layer is not - set it visible
+                                                if(!node.parent.isSelected()){
+                                                    node.parent.setSelected(true);    
+                                                }
                                             }
                                             
                                         }
