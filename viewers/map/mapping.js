@@ -761,7 +761,7 @@ $.widget( "heurist.mapping", {
                    detectRetina: true
                 }*/
                            
-            }else if(layer_options['TMS'] && layer_url.indexOf('{q}')>0)
+        }else if(layer_options['TMS']) // && layer_url.indexOf('{q}')>0
         {
                 // TMS naming scheme (Y is flipped)
                 // Tile Map Service: an early standard supported by OpenLayers. 
@@ -770,9 +770,13 @@ $.widget( "heurist.mapping", {
                 var TMS_Layer = HeuristTilerLayer.extend({
                     getTileUrl: function (tilePoint) {
                         //this._adjustTilePoint(tilePoint);
+                        var zoom = this._getZoomForUrl();
                         return L.Util.template(this._url, {
                             s: this._getSubdomain(tilePoint),
-                            q: this._maptiler(tilePoint.x, tilePoint.y, this._getZoomForUrl())
+                            q: this._maptiler(tilePoint.x, tilePoint.y, zoom),
+                            z: zoom,
+                            x: tilePoint.x,
+                            y: Math.pow(2, zoom) - tilePoint.y - 1
                         });
                     },
                     _maptiler: function (x, y, z) { //invert Y

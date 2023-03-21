@@ -235,7 +235,8 @@ function hMapLayer2( _options ) {
                 layer_options['TMS'] = true;
 
                 if(layer_url.indexOf('{q}')<0 && layer_url.indexOf('{x}')<0){
-                    layer_url = layer_url + '{q}'
+                    layer_url = layer_url 
+                                + (layer_url[layer_url.length-1]=='/'?'':'/') + '{q}'
                                 + ext;
                 }
                 
@@ -243,8 +244,9 @@ function hMapLayer2( _options ) {
                 //GoogleMap/OSM
                 layer_options['OSM'] = true;
                 
-                if(layer_url.indexOf('{x}')<0){
-                    layer_url = layer_url + (layer_url[layer_url.length]=='/'?'':'/')+'{z}/{x}/{y}'
+                if(layer_url.indexOf('{q}')<0 && layer_url.indexOf('{x}')<0){
+                    layer_url = layer_url 
+                                + (layer_url[layer_url.length-1]=='/'?'':'/') + '{z}/{x}/{y}'
                                 + ext;
                 }
                 /* Blocked because of possible Remote file disclosure
