@@ -573,8 +573,6 @@ $.widget( "heurist.search_faceted", {
                 field['rtid'] = res['rtid'];
                 if(res['facet']) field['facet'] = res['facet'];
                 
-                var code = field['code'];
-                code = code.split(':')
                 //
                 // 2. creates main JSON query
                 //
@@ -612,8 +610,17 @@ $.widget( "heurist.search_faceted", {
                     }else{
                         return qarr;
                     }
-                }            
+                }//__checkEntry            
 
+                var code = field['code'];
+                code = code.split(':')
+                var linktype = code[code.length-1].substr(0,2);
+                if(linktype=='lt' || linktype=='lf' || linktype=='rt' || linktype=='rf'){
+                    //unconstrained link
+                    code.push('0');         //!!!!!!!!
+                    code.push('title');
+                }
+                
                 var curr_level = mainquery;     
                 var j = 0;    
                 while(j<code.length){
