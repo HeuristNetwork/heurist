@@ -529,11 +529,10 @@ detectLargeInputs('COOKIE user_info', $_COOKIE);
                 );
 
                 // User API Key
-                $usr_prefs = user_getPreferences($system);
-                if(array_key_exists('nakala_api_key', $usr_prefs)){
-                    $params['api_key'] = $usr_prefs['nakala_api_key'];
+                if($system->get_system('sys_NakalaKey')){
+                    $params['api_key'] = $system->get_system('sys_NakalaKey');
                 }else{
-                    $system->addError(HEURIST_INVALID_REQUEST, 'No Nakala API Key provided, please ensure you have entered your personal key into My preferences');
+                    $system->addError(HEURIST_INVALID_REQUEST, 'No Nakala API Key provided, please ensure you have entered your personal key into Design > Setup > Properties > Personal Nakala API Key');
                 }
 
                 $params['status'] = 'published'; // publish uploaded file, return url to newly uploaded file on Nakala

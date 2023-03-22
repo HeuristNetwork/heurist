@@ -32,7 +32,7 @@
     *  prepareIds
     *  checkMaxLength - check max length for TEXT field
     * 
-    * 
+    *  updateDatabseToLatest4 - make changes in database structure according to the latest version
     * 
     * @package     Heurist academic knowledge management system
     * @link        https://HeuristNetwork.org
@@ -1228,7 +1228,7 @@ error_log('UPDATED '.$session_id.'  '.$value);
     // 
     // For Sybversion update see DBUpgrade_1.2.0_to_1.3.0.php
     //
-    // This method updates from 1.3.0 to 1.3.7
+    // This method updates from 1.3.0 to 1.3.8
     //
     function updateDatabseToLatest4($system){
         //update sysIdentification set sys_dbVersion=1, sys_dbSubVersion=3, sys_dbSubSubVersion=4 where sys_ID=1
@@ -1427,9 +1427,31 @@ UNIQUE KEY swf_StageKey (swf_RecTypeID, swf_Stage)
                 }  
             }
             
+            if($dbVerSubSub<8){
+                $sysValues = $system->get_system();
+                if(!array_key_exists('sys_NakalaKey', $sysValues))
+                {
+                    $query = "ALTER TABLE `sysIdentification` ADD COLUMN `sys_NakalaKey` TEXT default NULL COMMENT 'Nakala API key. Retrieved from Nakala website'";
+                    $res = $mysqli->query($query);
+                    if($res){
+                        $usr_prefs = user_getPreferences($system);
+                        if(array_key_exists('nakala_api_key', $usr_prefs)){
+                            $query = "UPDATE `sysIdentification` SET sys_NakalaKey='"
+                                    .$mysqli->real_escape_string($usr_prefs['nakala_api_key'])."' WHERE 1";
+                            $res = $mysqli->query($query);
+                        }
+                    }else{
+                        $system->addError(HEURIST_DB_ERROR, 'Cannot modify sysIdentification to add sys_NakalaKey', $mysqli->error);
+                        return false;
+                    }                    
+                    
+                }
+            }
+            
+            
             //update version
-            if($dbVerSubSub<7){
-                $mysqli->query('UPDATE sysIdentification SET sys_dbVersion=1, sys_dbSubVersion=3, sys_dbSubSubVersion=7 WHERE 1');
+            if($dbVerSubSub<8){
+                $mysqli->query('UPDATE sysIdentification SET sys_dbVersion=1, sys_dbSubVersion=3, sys_dbSubSubVersion=8 WHERE 1');
             }
             
             

@@ -674,6 +674,7 @@ CREATE TABLE sysIdentification (
   sys_MediaExtensions varchar(1024) default 'jpg,jpe,jpeg,jfif,sid,png,gif,tif,tiff,bmp,rgb,doc,docx,odt,mp3,mp4,mpg,mpeg,mov,avi,wmv,wmz,aif,aiff,ashx,pdf,mbtiles,mid,midi,wms,wmd,qt,evo,cda,wav,csv,tsv,tab,txt,rtf,xml,xsl,xslx,xslt,xls,xlsx,hml,kml,kmz,shp,dbf,shx,svg,htm,html,xhtml,ppt,pptx,zip,gzip,tar,json,ecw,nxs,nxz,obj,3ds,stl,ply,gltf,glb,off,3dm,fbx,dae,wrl,3mf,ifc,brep,step,iges,fcstd,bim' COMMENT 'The file extensions to be harvested from the MediaFolders directories',
   sys_TreatAsPlaceRefForMapping VARCHAR(1000) DEFAULT '' COMMENT 'Comma delimited list of additional rectypes (local codes) to be considered as Places',
   sys_ExternalReferenceLookups TEXT default NULL COMMENT "Record type-function-field specifications for lookup to external reference sources such as GeoNames",  
+  sys_NakalaKey varchar(250) default NULL COMMENT "Nakala API key. Retrieved from Nakala website",  
   PRIMARY KEY  (sys_ID)
 ) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COMMENT='Identification/version for this Heurist database (single rec)';
 
@@ -1014,7 +1015,7 @@ CREATE TABLE usrWorkingSubsets (
   sys_dbSubSubVersion,sys_eMailImapServer,sys_eMailImapPort,
   sys_eMailImapProtocol,sys_eMailImapUsername,sys_eMailImapPassword,
   sys_UGrpsdatabase,sys_OwnerGroupID,sys_ConstraintDefaultBehavior,sys_MediaFolders)
-  VALUES (1,0,1,3,6,NULL,NULL,NULL,NULL,NULL,NULL,1,'locktypetotype','uploaded_files');
+  VALUES (1,0,1,3,8,NULL,NULL,NULL,NULL,NULL,NULL,1,'locktypetotype','uploaded_files');
 
   -- Note: database sub version updated manually to '1' at 6pm 22/8/12
   -- 0 is everyone, 1 is the owning admins group, 2 is default dbAdmin user

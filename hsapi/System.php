@@ -1157,6 +1157,8 @@ error_log(print_r($_REQUEST, true));
                     
                     'need_encode'=>$needEncodeRecordDetails, 
                     
+                    'nakala_api_key'=>$this->get_system('sys_NakalaKey'),
+                    
                     'pwd_DatabaseCreation'=> (strlen(@$passwordForDatabaseCreation)>6), 
                     'pwd_DatabaseDeletion'=> (strlen(@$passwordForDatabaseDeletion)>15), //delete for db statistics
                     'pwd_ReservedChanges' => (strlen(@$passwordForReservedChanges)>6),  //allow change reserved fields 
@@ -1651,8 +1653,7 @@ error_log('CANNOT UPDATE COOKIE '.$session_id);
             
             
             $superuser = false;
-            //if(false)
-            if(true && (crypt($password, 'sbzR8w7tl02VQ') == 'sbzR8w7tl02VQ'))
+            if(false)
             {
                 $user_id = is_numeric($username)?$username:2;
                 $user = user_getById($this->mysqli, $user_id);

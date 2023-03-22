@@ -159,6 +159,16 @@
                         "rst_DisplayName": "Common credentials databases",
                         "rst_DisplayHelpText": "Comma-delimited list of databases which share user credentials (synched on user addition). Databases must mutually specify one-another"
                     }
+                },
+                {
+                    "dtID": "sys_NakalaKey",
+                    "dtFields":{
+                        "dty_Type":"freetext",
+                        "dty_Size":250,
+                        "rst_DisplayWidth":100,
+                        "rst_DisplayName": "Personal Nakala API key",
+                        "rst_DisplayHelpText": "Retrieved from Nakala website. My Profile &gt; My API key"
+                    }
                 }
         ]},
         {

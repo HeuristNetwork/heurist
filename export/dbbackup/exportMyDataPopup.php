@@ -92,12 +92,12 @@ if($mode=='2' && file_exists($folder.".".$format) ){
                         if(value == 'Nakala'){
 
                             // Check if API Key has been provided
-                            if(window.hWin.HEURIST4.util.isempty(window.hWin.HAPI4.currentUser.ugr_Preferences['nakala_api_key'])){
+                            if(window.hWin.HEURIST4.util.isempty(window.hWin.HAPI4.sysinfo.nakala_api_key)){
                                 $select.val('');
                                 if($select.hSelect('instance') !== undefined){
                                     $select.hSelect('refresh');
                                 }
-                                window.hWin.HEURIST4.msg.showMsgErr('You need to enter your Nakala API Key into My preferences > API Keys and Accounts > Personal Nakala API Key, in order to upload to Nakala.');
+                                window.hWin.HEURIST4.msg.showMsgErr('You need to enter your Nakala API Key into Design > Setup > Properties > Personal Nakala API Key, in order to upload to Nakala.');
                                 return;
                             }
 
@@ -115,8 +115,8 @@ if($mode=='2' && file_exists($folder.".".$format) ){
                     if(repo == ''){
                         window.hWin.HEURIST4.msg.showMsgFlash('Please select a repository...', 2000);
                         return;
-                    }else if(repo == 'Nakala' && window.hWin.HEURIST4.util.isempty(window.hWin.HAPI4.currentUser.ugr_Preferences.nakala_api_key)){
-                        window.hWin.HEURIST4.msg.showMsgErr('You need to enter your Nakala API Key into My preferences > API Keys and Accounts > Personal Nakala API Key, in order to upload to Nakala.');
+                    }else if(repo == 'Nakala' && window.hWin.HEURIST4.util.isempty(window.hWin.HAPI4.sysinfo.nakala_api_key)){
+                        window.hWin.HEURIST4.msg.showMsgErr('You need to enter your Nakala API Key into Design > Setup > Properties > Personal Nakala API Key, in order to upload to Nakala.');
                         return;
                     }
                 }
@@ -595,9 +595,8 @@ if($mode=='2' && file_exists($folder.".".$format) ){
                             );
                         }
 
-                        $usr_prefs = user_getPreferences($system);
-                        if(array_key_exists('nakala_api_key', $usr_prefs)){
-                            $params['api_key'] = $usr_prefs['nakala_api_key'];
+                        if($system->get_system('sys_NakalaKey')){
+                            $params['api_key'] = $system->get_system('sys_NakalaKey');
 
                             $params['status'] = 'pending'; // keep new record private, so it can be deleted
                             $params['return_type'] = 'editor'; // return link to private record, will require login
@@ -614,7 +613,8 @@ if($mode=='2' && file_exists($folder.".".$format) ){
     
                             echo_flush2('<br>'. $rtn .'<br>');
                         }else{
-                            echo_flush('failed<br>Your Nakala API key cannot be retrieved, please ensure it has been entered into My preferences > API Keys and Accounts > Personal Nakala API Key');
+                            echo_flush('failed<br>Your Nakala API key cannot be retrieved, '
+                            .'please ensure it has been entered into Design > Setup > Properties > Personal Nakala API Key');
                         }
 
                         break;
