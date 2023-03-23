@@ -2873,14 +2873,17 @@ function recordTemplateByRecTypeID($system, $id){
         'rec_AddedByUGrpID'=>2);
 
     $mysqli = $system->get_mysqli();
-    $fields = mysql__select_assoc2($mysqli, 'select dty_ID, dty_Type '
+    $fields = mysql__select_assoc($mysqli, 'select dty_ID, dty_Type, dty_JsonTermIDTree, dty_PtrTargetRectypeIDs '
         .'from defRecStructure, defDetailTypes where dty_ID = rst_DetailTypeID '
         .'and rst_RecTypeID = '.$id);
 
     $details = array();
     $idx = 1;
 
-    foreach ($fields as $dty_ID=>$dty_Type){
+    foreach ($fields as $dty_ID=>$fieldDetails){
+
+        $dty_Type = $fieldDetails['dty_Type'];
+
         if($dty_Type=='separator')continue;
 
 
@@ -2888,16 +2891,51 @@ function recordTemplateByRecTypeID($system, $id){
             $details[$dty_ID] = array($idx=>array('file'=>array('file'=>'TEXT', 'fileid'=>'TEXT')) );    
 
         }else if($dty_Type=='resource'){
-            $details[$dty_ID] = array($idx=>array('id'=>'RECORD_REFERENCE', 'type'=>0, 'title'=>''));    
 
+            $extra_details = '';
+            if(array_key_exists('dty_PtrTargetRectypeIDs', $fieldDetails)){ // retrieve list of rectype names
+
+                $rty_names = mysql__select_list2($mysqli, 'SELECT rty_Name FROM defRecTypes WHERE rty_ID IN (' . $fieldDetails['dty_PtrTargetRectypeIDs'] .')');
+                if(!empty($rty_names)){
+                    $extra_details = ' to ' . implode(' | ', $rty_names);
+                }
+            }
+
+            $details[$dty_ID] = array($idx=>array('id'=>'RECORD_REFERENCE'.$extra_details, 'type'=>0, 'title'=>''));
         }else if($dty_Type=='relmarker'){
-            $details[$dty_ID] = array($idx=>'SEE NOTES AT START');    
 
+            $extra_details = '';
+            if(array_key_exists('dty_JsonTermIDTree', $fieldDetails)){ // retrieve list of vocab labels
+                $trm_names = mysql__select_list2($mysqli, 'SELECT trm_Label FROM defTerms WHERE trm_ID IN ('. $fieldDetails['dty_JsonTermIDTree'] .')');
+                if(!empty($trm_names)){
+                    $extra_details = ', ' . implode(' | ', $trm_names) . ' relation to ';
+                }
+            }
+            if(array_key_exists('dty_PtrTargetRectypeIDs', $fieldDetails)){ // retrieve list of rectype names
+                $rty_names = mysql__select_list2($mysqli, 'SELECT rty_Name FROM defRecTypes WHERE rty_ID IN ('. $fieldDetails['dty_PtrTargetRectypeIDs'] .')');
+                if(!empty($rty_names)){
+                    if(empty($extra_details)){
+                        $extra_details = ', relation to ';
+                    }
+                    $extra_details .= implode(' | ', $rty_names);
+                }
+            }
+
+            $details[$dty_ID] = array($idx=>'SEE NOTES AT START'.$extra_details);
         }else if($dty_Type=='geo'){
             $details[$dty_ID] = array($idx=>array('geo'=>array('wkt'=>'WKT_VALUE')) ); //'type'=>'TEXT',     
 
         }else if($dty_Type=='enum' || $dty_Type=='relationtype'){
-            $details[$dty_ID] = array($idx=>'VALUE');        
+
+            $extra_details = '';
+            if(array_key_exists('dty_JsonTermIDTree', $fieldDetails)){ // retrieve list of vocab labels
+                $trm_names = mysql__select_list2($mysqli, 'SELECT trm_Label FROM defTerms WHERE trm_ID IN ('. $fieldDetails['dty_JsonTermIDTree'] .')');
+                if(!empty($trm_names)){
+                    $extra_details = ' from ' . implode(' | ', $trm_names);
+                }
+            }
+
+            $details[$dty_ID] = array($idx=>'VALUE'.$extra_details);        
         }else if($dty_Type=='integer' || $dty_Type=='float' || $dty_Type=='year' ){
             $details[$dty_ID] = array($idx=>'NUMERIC');
         }else if($dty_Type=='blocktext' ){

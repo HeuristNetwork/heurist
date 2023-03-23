@@ -2466,7 +2466,7 @@ console.log('>>>>'+that.divProfileItems.find('.ui-menu-item').css('padding-left'
                         + "<div style='margin-bottom: 10px'>"
                             + "<div class='header' style='display: table-cell;max-width: 125px; min-width: 125px;'>Download template: </div>"
                             + "<div style='display: table-cell'>"
-                                + "<label for='template-xml'><input name='template-type' id='template-xml' type='radio' value='xml'> XML</label>"
+                                + "<label for='template-xml'><input name='template-type' id='template-xml' type='radio' value='xml' checked='checked'> XML</label>"
                                 + "<label for='template-json'><input name='template-type' id='template-json' type='radio' value='json'> JSON</label>"
                             + "</div>"
                         + "</div>"
@@ -2474,7 +2474,7 @@ console.log('>>>>'+that.divProfileItems.find('.ui-menu-item').css('padding-left'
                         + "<div>"
                             + "<div class='header' style='display: table-cell;max-width: 125px; min-width: 125px;'>Record types: </div>"
                             + "<div style='display: table-cell'>"
-                                + "<label for='rectypes-all'><input id='rectypes-all' type='checkbox'> All Rectypes</label>"
+                                + "<label for='rectypes-all'><input id='rectypes-all' type='checkbox' checked='checked'> All Rectypes</label>"
                                 + "<div style='margin: 5px 0px'>or</div>"
                                 + "<button id='rectypes-select'>Select record types</button>"
                                 + "<div style='margin: 10px 0px'>Selected Record Types: </div>"
@@ -2517,6 +2517,7 @@ console.log('>>>>'+that.divProfileItems.find('.ui-menu-item').css('padding-left'
                 window.hWin.HEURIST4.msg.showMsgFlash('Please select what type of template you want...', 2000);
             }
 
+            window.hWin.HEURIST4.msg.showMsgFlash('Downloading File...', 3000);
             $dlg.dialog('close');
         };
         btns['Close'] = function(){
@@ -2574,9 +2575,7 @@ console.log('>>>>'+that.divProfileItems.find('.ui-menu-item').css('padding-left'
 
         $dlg.find('input#rectypes-all').on('change', function(event){
             window.hWin.HEURIST4.util.setDisabled($dlg.find('button#rectypes-select, div#rectypes-list'), $(event.target).is(':checked'));
-        });
-
-        //window.hWin.HEURIST4.util.setDisabled($dlg.find('label[for="template-json"]'), true); // disable json version, currently unavailable
+        }).change();
 
         return false;
     },
