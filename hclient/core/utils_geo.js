@@ -778,6 +778,7 @@ window.hWin.HEURIST4.geo = {
     //
     wktValueToDescription:function(wkt){
 
+        let decPoints = 7; //5
         var matches = wkt.match(/\??(\S+)\s+(.*)/);
         if (! matches) {
             return { type:'', summary:''};
@@ -801,7 +802,7 @@ window.hWin.HEURIST4.geo = {
             
                 var point = resdata.Point[0][0];
             
-                return { type: "Point", summary: point.lng.toFixed(5)+", "+point.lat.toFixed(5) };
+                return { type: "Point", summary: point.lng.toFixed(decPoints)+", "+point.lat.toFixed(decPoints) };
             
         }else if(resdata.Point.length==0 && resdata.Polyline.length==1 && resdata.Polygon.length==0){
             
@@ -809,9 +810,9 @@ window.hWin.HEURIST4.geo = {
                 var point1 = path.shift();
                 var point2 = path.pop();
                 return { type: "Path", summary: "X,Y ("+ 
-                            point1.lng.toFixed(5)+","+point1.lat.toFixed(5)
+                            point1.lng.toFixed(decPoints)+","+point1.lat.toFixed(decPoints)
                             +") - ("+
-                            point2.lng.toFixed(5)+","+point2.lat.toFixed(5)+")" };
+                            point2.lng.toFixed(decPoints)+","+point2.lat.toFixed(decPoints)+")" };
             
         }else if (resdata.Point.length>0 || resdata.Polyline.length>0 || resdata.Polygon.length>0){
             
@@ -828,12 +829,11 @@ window.hWin.HEURIST4.geo = {
             }
             
             var extent = resdata._extent;
-            var decPoints = 5;
             let summary = "X "+extent.xmin.toFixed(decPoints)+","+extent.xmax.toFixed(decPoints)
                         +" Y "+extent.ymin.toFixed(decPoints)+","+extent.ymax.toFixed(decPoints);
             if(type == 'Polygon'){
                 decPoints = extent.xmin > 180 || extent.xmax > 180 || extent.xmin < -180 || extent.xmax < -180
-                            || extent.ymin > 90 || extent.ymax > 90 || extent.ymin < -90 || extent.ymax < -90 ? 0 : 5;
+                            || extent.ymin > 90 || extent.ymax > 90 || extent.ymin < -90 || extent.ymax < -90 ? 0 : decPoints;
 
                 let point_count = 0;
                 for(let i = 0; i < gjson.coordinates.length; i ++){
