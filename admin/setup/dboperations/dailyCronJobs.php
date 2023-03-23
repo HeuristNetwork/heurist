@@ -227,6 +227,11 @@ foreach ($databases as $idx=>$db_name){
 
     if($do_url_check){
 
+        $perform_url_check = mysql__select_value($mysqli, 'SELECT sys_URLCheckFlag FROM sysIdentification');
+        if(!$perform_url_check || $perform_url_check == 0){ // check for flag setting
+            continue;
+        }
+
         $url_results = checkURLs($system, true); // [0] => rec_URL, [1] => Freetext/blocktext fields, [2] => Files using external url
 
         $invalid_rec_urls = $url_results[0];
