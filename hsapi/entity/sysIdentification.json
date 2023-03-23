@@ -221,7 +221,6 @@
                         "dty_Type":"enum",
                         "rst_DisplayName": "Carry out nightly URL validation (can overload targets)",
                         "rst_DisplayHelpText": "",
-                        "rst_Display":"hidden",
                         "rst_FieldConfig":{"type":"radio","hideclear":"1","values":[
                             {"key":"0","title":"No"},
                             {"key":"1","title":"Yes"}
