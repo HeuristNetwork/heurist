@@ -97,6 +97,10 @@ $.widget( "heurist.manageSysIdentification", $.heurist.manageEntity, {
         if(ele.length>0){
             ele.fileupload('option','pasteZone', this.editForm); //this._as_dialog);
         }
+
+        if(!window.hWin.HAPI4.has_access(2)){
+            this._editing.getFieldByName('sys_URLCheckFlag').hide();
+        }
     },
 	
     _saveEditAndClose: function( fields, afterAction, onErrorAction ){
@@ -110,6 +114,10 @@ $.widget( "heurist.manageSysIdentification", $.heurist.manageEntity, {
 
         if(!fields){
             fields = this._getValidatedValues();
+        }
+
+        if(!window.hWin.HAPI4.has_access(2)){ // reset value, just in case
+            that._cachedRecordset.each2((i, values) => { fields['sys_URLCheckFlag'] = values['sys_URLCheckFlag'] });
         }
 
         if(!window.hWin.HEURIST4.util.isempty(fields['sys_SyncDefsWithDB'])){

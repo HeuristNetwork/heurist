@@ -119,7 +119,8 @@ $.widget( "heurist.resultList", {
         
         init_completed: false,   //flag to be set to true on full widget initializtion
 
-        recviewer_images: 1 // show images in record viewer; 0 - show all images, 1 - no linked media, 2 - no images
+        recviewer_images: 1, // show images in record viewer; 0 - show all images, 1 - no linked media, 2 - no images
+        field_for_ext_classes: 20 // add class related to field value to record's row; 0 - disabled, n > 0 - detail type id
     },
 
     _is_publication:false, //this is CMS publication - take css from parent
@@ -3636,6 +3637,10 @@ setTimeout("console.log('2. auto='+ele2.height());",1000);
                 this.div_content.mediaViewer({selector:'.realThumb', search_initial:'ids:'+rec_onpage.join(',') });        
             }
         }
+
+        if(this.options.field_for_ext_classes > 0){
+            this._addCustomClasses();
+        }
     },
     
     //
@@ -4326,7 +4331,66 @@ setTimeout("console.log('2. auto='+ele2.height());",1000);
                 that._closeRecordViewPopup();
             }});
         }
-    }                        
-    
+    },
+
+    //
+    // Add class to record div based on field value; currently set for term values only
+    //
+    _addCustomClasses: function(){
+        
+        var that = this;
+        let dty_id = this.options.field_for_ext_classes;
+
+        if(dty_id == 0 || dty_id < 1 || this.div_content.find('.recordDiv').length == 0){
+            return;
+        }
+
+        let dty_dtls = $Db.dty(dty_id);
+        if(!dty_dtls || dty_dtls['dty_Type'] != 'enum'){
+            return;
+        }
+
+        let recids = [];
+
+        $.each(this.div_content.find('.recordDiv'), (idx, ele) => {
+            recids.push($(ele).attr('recid'));
+        });
+
+        if(recids.length == 0){
+            return;
+        }
+
+        rec_ids = recids.join(',');//that._currentRecordset.getOrder().join(',');
+
+        let request = {
+            q: '{"ids":"'+ rec_ids +'"}',
+            w: 'a',
+            detail: 'rec_ID,'+dty_id,
+            id:window.hWin.HEURIST4.util.random(),
+            pageno: that.current_page,
+            source: this.element.attr('id')
+        }; // retrieve field values
+
+        window.hWin.HAPI4.RecordMgr.search(request, (response) => {
+            if(response.status == window.hWin.ResponseStatus.OK){
+
+                let records = new hRecordSet(response.data);
+
+                records.each2((id, record) => {
+                    let rec_div = that.div_content.find('.recordDiv[recid="'+ id +'"]');
+
+                    if(rec_div.length == 0){
+                        return;
+                    }
+
+                    if(record.hasOwnProperty('d')){
+                        rec_div.addClass(record.d[dty_id].join(' '));  
+                    }
+                });
+            }else{
+                //window.hWin.HEURIST4.msg.showMsgErr(response);
+            }
+        });
+    }
     
 });

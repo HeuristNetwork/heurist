@@ -39,6 +39,9 @@ $tabs0 = '';
 
 $do_reports = false;
 $do_reminders = false;
+$do_url_check = false;
+
+$func_return = 1; // for checkRecURL.php
 
 if (@$argv) {
     
@@ -66,9 +69,13 @@ if (@$argv) {
     if(@$ARGV['report']){
         $do_reports = true;        
     }
-    if(!$do_reminders && !$do_reports){
+    if(@$ARGV['url']){
+        $do_url_check = true;
+    }
+    if(!$do_reminders && !$do_reports && !$do_url_check){
         $do_reminders = true;
-        $do_reports = true;        
+        $do_reports = true;
+        $do_url_check = true;
     }
 
     
@@ -87,6 +94,7 @@ require_once(dirname(__FILE__).'/../../../hsapi/System.php');
 require_once(dirname(__FILE__).'/../../../hsapi/dbaccess/db_files.php');
 require_once(dirname(__FILE__).'/../../../hsapi/utilities/dbUtils.php');
 require_once(dirname(__FILE__).'/../../../hsapi/entity/dbUsrReminders.php');
+require_once(dirname(__FILE__).'/../../../admin/verification/checkRecURL.php');
 
 //retrieve list of databases
 $system = new System();
@@ -121,6 +129,7 @@ $datetime1 = date_create('now');
 $cnt_archived = 0;
 $report_list = array();
 $email_list = array();
+$url_list = array();
 $reminders = null;
 
 if($do_reminders){
@@ -216,6 +225,82 @@ foreach ($databases as $idx=>$db_name){
         }
     }
 
+    if($do_url_check){
+
+        $perform_url_check = mysql__select_value($mysqli, 'SELECT sys_URLCheckFlag FROM sysIdentification');
+        if(!$perform_url_check || $perform_url_check == 0){ // check for flag setting
+            continue;
+        }
+
+        $url_results = checkURLs($system, true); // [0] => rec_URL, [1] => Freetext/blocktext fields, [2] => Files using external url
+
+        $invalid_rec_urls = $url_results[0];
+        $invalid_fb_urls = $url_results[1];
+        $invalid_file_urls = $url_results[2];
+
+        /*if(!empty($invalid_rec_urls[0]) || !empty($invalid_fb_urls) || !empty($invalid_file_urls)){
+            echo $eol.$tabs0.$db_name;
+            echo $eol.$tabs.' url checks: '.$eol;
+        }*/
+
+        if(!empty($invalid_rec_urls[0])){
+            if(!is_array($invalid_rec_urls[0])){ // error
+                echo $invalid_rec_urls[0];
+            }else{
+
+                echo 'invalid rec_URL: ' . implode(',', $invalid_rec_urls[0]);
+                
+                $url_list[$db_name] = array();
+                $url_list[$db_name][0] = implode(',', $invalid_rec_urls[0]);
+            }
+        }
+
+        if(!empty($invalid_fb_urls)){
+            if(!is_array($invalid_fb_urls)){ // error
+                echo $invalid_fb_urls;
+            }else{
+
+                echo 'fields containing invalid urls: ';
+                foreach ($invalid_fb_urls as $rec_id => $flds) {
+                    echo $eol.$rec_id.': ';
+                    foreach($flds as $dty_id => $urls){
+                        echo $eol.$tabs.$dty_id.': '.implode(',', $urls);
+                    }
+
+                    if(!array_key_exists($db_name, $url_list)){
+                        $url_list[$db_name] = array();
+                    }
+                    if(!array_key_exists(1, $url_list[$db_name])){
+                        $url_list[$db_name][1] = array();
+                    }
+                    $url_list[$db_name][1][] = $rec_id . ' : ' . implode(',', array_keys($flds));
+                }
+            }
+        }else if(!empty($invalid_file_urls)){
+            echo 'Record fields contain invalid urls: ';
+        }
+
+        if(!empty($invalid_file_urls)){
+            if(!is_array($invalid_file_urls)){ // error
+                echo $invalid_file_urls;
+            }else{
+                foreach ($invalid_file_urls as $rec_id => $flds) {
+                    echo $eol.$rec_id.': ';
+                    foreach($flds as $dty_id => $urls){
+                        echo $eol.$tabs.$dty_id.': '.implode(',', $urls);
+                    }
+
+                    if(!array_key_exists($db_name, $url_list)){
+                        $url_list[$db_name] = array();
+                    }
+                    if(!array_key_exists(1, $url_list[$db_name])){
+                        $url_list[$db_name][1] = array();
+                    }
+                    $url_list[$db_name][1][] = $rec_id . ' : ' . implode(',', array_keys($flds));
+                }
+            }
+        }
+    }
 //echo $tabs0.$db_name.' cannot execute query for Records table'.$eol;
 
 
@@ -225,7 +310,7 @@ foreach ($databases as $idx=>$db_name){
 
 echo ($eol.$tabs0.'finished'.$eol);
 
-if(count($email_list)>0 || count($report_list)>0){
+if(count($email_list)>0 || count($report_list)>0 || count($url_list)>0){
 
     $errors = 0;
     $created = 0;
@@ -250,6 +335,23 @@ if(count($email_list)>0 || count($report_list)>0){
     ."\n intacted: ".$intacted
     ."\n errors: ".$errors."\n";
     
+    $text = $text."\n\nInvalid urls: ";
+    foreach($url_list as $dbname=>$reps){
+        $rec_URL = 'None';
+        $fld_URL = 'None';
+        if(array_key_exists(0, $reps)){
+            $rec_URL = $reps[0];
+        }
+        if(array_key_exists(1, $reps)){
+            $fld_URL = "\n  ".implode("\n  ", $reps[1]);
+        }
+        $text = $text . "\n" . $dbname . "\n rec_URL => " . $rec_URL . "\n Fields => " . $fld_URL;
+    }
+    if(count($url_list) == 0){
+        $text = $text . "None";
+    }
+    $text = $text . "\n";
+
     echo $text;
     
     sendEmail(HEURIST_MAIL_TO_ADMIN, "Daily cronjob report on ".HEURIST_SERVER_NAME,

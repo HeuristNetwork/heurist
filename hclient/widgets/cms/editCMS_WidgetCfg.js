@@ -297,6 +297,9 @@ function editCMS_WidgetCfg( widget_cfg, _layout_content, $dlg, main_callback ){
                     }
                     $dlg.find('#empty_remark').val(opts['empty_remark']);
                     $dlg.find('#placeholder_text').val(opts['placeholder_text']);
+                    if(opts['field_for_ext_classes']){
+                        $dlg.find('select[name="field_for_ext_classes"]').attr('fld-id', opts['field_for_ext_classes']);
+                    }
                 }else if(widget_name=='heurist_resultListDataTable'){ // datatable
                     $dlg.find('#dataTableParams').val(opts['dataTableParams']);
                     $dlg.find('#empty_remark').val(opts['emptyTableMsg']);
@@ -864,14 +867,20 @@ function editCMS_WidgetCfg( widget_cfg, _layout_content, $dlg, main_callback ){
                     }
 
             }else 
-            if(widget_name=='heurist_resultList' && 
-                            $dlg.find('select[name="rendererExpandDetails"]').find('options').length==0){
+            if(widget_name=='heurist_resultList'){
 
-                                    var $select4 = $dlg.find('select[name="rendererExpandDetails"]'); 
+                if($dlg.find('select[name="rendererExpandDetails"]').find('options').length==0){
+                    var $select4 = $dlg.find('select[name="rendererExpandDetails"]'); 
 
-                                    window.hWin.HEURIST4.ui.createTemplateSelector( $select4
-                                        ,[{key:'',title:'Standard record view template'}], $select4.attr('data-template'));
+                    window.hWin.HEURIST4.ui.createTemplateSelector( $select4
+                        ,[{key:'',title:'Standard record view template'}], $select4.attr('data-template'));
+                }
 
+                if($dlg.find('select[name="field_for_ext_classes"]').find('options').length==0){ // list of record fields that are enum
+                    var $select5 = $dlg.find('select[name="field_for_ext_classes"]');
+
+                    window.hWin.HEURIST4.ui.createRectypeDetailSelect($select5[0], null, ['enum'], [{key: 0, title: 'None'}], {'selectedValue': $select5.attr('fld-id')});
+                }
             }
             
 
