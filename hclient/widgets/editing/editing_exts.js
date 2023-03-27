@@ -986,13 +986,22 @@ function openSearchMenu(that, $select, disableClick=true){
 
 //
 // It uses window.hWin.HEURIST4.browseRecordCache
+// It returns selection function that opens record selection popup dialog
 //
 function browseRecords(_editing_input, $input){
     
     var that = _editing_input;
     
     var $inputdiv = $input.parent(); //div.input-div
+    var __current_input_id = $input.attr('id');
 
+/*
+$inputdiv.uniqueId();                                
+console.log('BEFORE');
+console.log('input', $input.attr('id'),$input.parents('fieldset').attr('id'));
+console.log('inputdiv',$inputdiv.attr('id'),$inputdiv.parents('fieldset').attr('id'));
+*/
+    
     if ($inputdiv.find('.sel_link2 > .ui-button-icon').hasClass('rotate')) return;
     
     var isparententity = (that.f('rst_CreateChildIfRecPtr')==1);
@@ -1030,8 +1039,35 @@ function browseRecords(_editing_input, $input){
                     pointer_source_rectype:  (isparententity)?0:that.options.rectypeID,
                     parententity: (isparententity)?that.options.recID:0,
                     
-                    onselect:function(event, data){
+                    onselect: function(event, data){
+                        
                              if( window.hWin.HEURIST4.util.isRecordSet(data.selection) ){
+
+                                var f_id = $('#'+__current_input_id).parents('fieldset').attr('id');
+                                
+                                if(!f_id){
+                                    //for parent-child there is chance that edit form can be reloaded after open this popup
+                                    //and original target elements will be missed (it saves record to obtain title)
+                                    //we have to find new targets 
+                                    var edit_ele = that.options.editing.getFieldByName(that.options.dtID);    
+                                            
+                                    $input = null;   
+                                    var inputs = edit_ele.editing_input('getInputs');
+                                    for (var idx in inputs) {
+                                        //$(edit_ele.editing_input('getInputs')[idx])
+                                        if($(inputs[idx]).parent().find('.child_rec_fld:visible').length>0){
+                                            $inputdiv = $(inputs[idx]).parent();
+                                            $input = inputs[idx];
+                                            break;
+                                        }
+                                    }
+                                    if(!$input){ //last resort - take last one
+                                       $input = inputs[inputs.length-1];
+                                       $inputdiv = $input.parent(); 
+                                    }
+                                }
+                                
+                                 
                                 var recordset = data.selection;
                                 var record = recordset.getFirstRecord();
                                 
@@ -1045,6 +1081,7 @@ function browseRecords(_editing_input, $input){
                                 var targetID = recordset.fld(record,'rec_ID');
                                 var rec_Title = recordset.fld(record,'rec_Title');
                                 var rec_RecType = recordset.fld(record,'rec_RecTypeID');
+                                var is_new = Object.keys(that.newvalues).length==1;
                                 that.newvalues[$input.attr('id')] = targetID;
                                 
                                 //window.hWin.HEURIST4.ui.setValueAndWidth($input, rec_Title);
@@ -1061,9 +1098,12 @@ function browseRecords(_editing_input, $input){
                                      rec_RecTypeID: rec_RecType,
                                      rec_IsChildRecord:isparententity
                                     }, __show_select_dialog);
-                                //ele.appendTo($inputdiv);
+                                //if(is_new) ele.appendTo($inputdiv);
                                 that.onChange();
-                                
+                                ele.css({margin:'4px', 'border':'2px red solid !important'});
+                                $inputdiv.css('border','4px green solid !important');
+                                $input.css('border','1px blue solid');
+
                                 if( $inputdiv.find('.link-div').length>0 ){ //hide this button if there are links
                                     $input.show();
                                     $inputdiv.find('.sel_link2').hide(); 
@@ -1074,7 +1114,7 @@ function browseRecords(_editing_input, $input){
                                 
                              }
                     }
-    };
+    }; //popup_options
 
     // select/add target record with help of manageRecords popup dialog
     //

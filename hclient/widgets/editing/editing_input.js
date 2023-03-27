@@ -1816,7 +1816,7 @@ $.widget( "heurist.editing_input", {
             //replace input with div
             $input = $( "<div>").css({'display':'inline-block','vertical-align':'middle','min-wdith':'25ex'})
                             .uniqueId().appendTo( $inputdiv );
-            
+                            
             var ptrset = that._prepareIds(that.f('rst_PtrFilteredIDs'));
             
             var rts = [];
@@ -1827,7 +1827,13 @@ $.widget( "heurist.editing_input", {
                 }
             }
             rts = (rts.length>0)?rts.join(', '):'record';
-            let classes = 'sel_link2' + (isparententity ? ' child_rec_fld' : '');
+            let classes = 'sel_link2';
+
+            if(isparententity){
+                classes = classes + ' child_rec_fld';
+                $input.addClass('child_rec_input');    
+            }
+
             
             //define explicit add resource button
             $( "<button>", {title: "Select record to be linked"})
@@ -1840,7 +1846,7 @@ $.widget( "heurist.editing_input", {
             
             __show_select_function = null;
             if(typeof browseRecords!=='undefined' && $.isFunction(browseRecords)){
-                __show_select_function = browseRecords(this, $input); //see editing_exts
+                __show_select_function = browseRecords(that, $input);//see editing_exts
             }
             
             that._findAndAssignTitle($input, value, __show_select_function);
@@ -5182,7 +5188,7 @@ console.log('onpaste');
                 dateFormat: 'yyyy-mm-dd',
                 pickerClass: 'calendars-jumps',
                 onShow: function($calendar, calendar_locale, config){
-                    config.div.css('z-index', 60000);
+                    config.div.css('z-index', 9999999);
                 },
                 onSelect: function(date){
 
