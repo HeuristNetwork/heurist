@@ -1139,6 +1139,29 @@ console.log('inputdiv',$inputdiv.attr('id'),$inputdiv.parents('fieldset').attr('
                 }
             }
             
+            
+             // Save record first without validation, only if this is a new record
+            var et = that.options.editing.getFieldByName('rec_Title');
+            if(et && et.editing_input('instance') && et.editing_input('getValues')[0] == ''){
+
+                var is_empty = true;
+                var fields = that.options.editing.getValues(false);
+                for (var dtid in fields) {
+                    if(parseInt(dtid)>0 && fields[dtid]!=''){
+                        is_empty = false;
+                        break;
+                    }
+                }
+                if(is_empty){
+                    window.hWin.HEURIST4.msg.showMsgFlash('To add child record you have to define some fields in parent record<br>(it is required to compose valid record title)', 2500);    
+                    return;
+                }else if(that.options.editing && $.isFunction(that.options.editing.getOptions().onaction)){
+                    //quick save without validation
+                    that.options.editing.getOptions().onaction(null, 'save_quick');
+                }
+            }
+            
+            
             var usrPreferences = window.hWin.HAPI4.get_prefs_def('select_dialog_'+that.configMode.entity, 
                 {width: null,  //null triggers default width within particular widget
                 height: (window.hWin?window.hWin.innerHeight:window.innerHeight)*0.95 });

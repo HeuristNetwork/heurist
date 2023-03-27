@@ -402,7 +402,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
             var fields = this._editing.getValues(false);
             fields['no_validation'] = 1; //do not validate required fields
             this._saveEditAndClose( fields, _callback);           
-        }else{
+        }else if($.isFunction(_callback)){
             _callback();
         }
         
@@ -690,6 +690,11 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                     window.open(url, "_new");
                     res = true;
                 }
+                else if(action=='save_quick'){
+                    this.saveQuickWithoutValidation();    
+                    res = true;
+                }
+                
                 
             }
             return res;
@@ -4267,8 +4272,9 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
                     field_id:$(event.target).attr('data-cms-field')} );
             });
         });
-        
-        if(window.hWin.HEURIST4.util.isempty(that._getField('rec_Title'))){
+
+//Artem: move it to browseRecords - avoid open select record popup if record can not be saved
+        if(false && window.hWin.HEURIST4.util.isempty(that._getField('rec_Title'))){
             this._on($(this.element).find('.child_rec_fld'), {
                 click: (event) => {
     

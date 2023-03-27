@@ -2808,7 +2808,7 @@ function _prepareDetails($system, $rectype, $record, $validation_mode, $recID, $
 
     }else if (!is_array($insertValues) || count($insertValues)<1) {
 
-        $system->addError(HEURIST_INVALID_REQUEST, "Fields are not defined");
+        $system->addError(HEURIST_INVALID_REQUEST, "It is not possible save record. No fields are defined");
 
     }else{
         $res = $insertValues;

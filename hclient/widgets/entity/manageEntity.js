@@ -1770,6 +1770,11 @@ this._time_debug = fin_time;
         if(!this._editing){
             this._editing = new hEditing({entity:this.options.entity, container:this.editForm, 
                 className: this.options.editClassName,
+                
+                //callback function to allows save action from edit form object
+                onaction:function(event, action){
+                    that._onActionListener(event, action);
+                },
                 onchange:function(){
                     that.onEditFormChange(this); //"this" is changed_element
                 },

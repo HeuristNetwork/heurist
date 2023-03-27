@@ -84,7 +84,7 @@ function hEditing(_options) {
             _options.oninit.call(that);
         }
     }
-
+    
     //
     //
     //
@@ -1025,8 +1025,11 @@ function hEditing(_options) {
             }else{
                 return _editStructureMode;
             }
-        }
+        },
         
+        getOptions: function (){
+            return options;
+        }
     }
 
     _init(_options);
