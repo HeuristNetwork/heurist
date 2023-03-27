@@ -2667,7 +2667,8 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
                 if(term_name.toLowerCase().indexOf( entered )>=0 || 
                     (term_code && term_code.toLowerCase().indexOf( entered )>=0))
                 {
-                    var ele = $('<div>').appendTo(that.fields_list_div);
+                    var ele = $('<div>').css({'padding-top':'4px','border-bottom':'0.5px solid lightgray'})
+                                .appendTo(that.fields_list_div);
 
                     //find parents
                     var s = '', ids = [trm_ID];
