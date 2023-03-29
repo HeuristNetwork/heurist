@@ -1045,7 +1045,7 @@ console.log('inputdiv',$inputdiv.attr('id'),$inputdiv.parents('fieldset').attr('
 
                                 var f_id = $('#'+__current_input_id).parents('fieldset').attr('id');
                                 
-                                if(!f_id){
+                                if(!f_id && that.options.editing){
                                     //for parent-child there is chance that edit form can be reloaded after open this popup
                                     //and original target elements will be missed (it saves record to obtain title)
                                     //we have to find new targets 
@@ -1141,23 +1141,25 @@ console.log('inputdiv',$inputdiv.attr('id'),$inputdiv.parents('fieldset').attr('
             
             
              // Save record first without validation, only if this is a new record
-            var et = that.options.editing.getFieldByName('rec_Title');
-            if(et && et.editing_input('instance') && et.editing_input('getValues')[0] == ''){
+            if(that.options.editing){
+                var et = that.options.editing.getFieldByName('rec_Title');
+                if(et && et.editing_input('instance') && et.editing_input('getValues')[0] == ''){
 
-                var is_empty = true;
-                var fields = that.options.editing.getValues(false);
-                for (var dtid in fields) {
-                    if(parseInt(dtid)>0 && fields[dtid]!=''){
-                        is_empty = false;
-                        break;
+                    var is_empty = true;
+                    var fields = that.options.editing.getValues(false);
+                    for (var dtid in fields) {
+                        if(parseInt(dtid)>0 && fields[dtid]!=''){
+                            is_empty = false;
+                            break;
+                        }
                     }
-                }
-                if(is_empty){
-                    window.hWin.HEURIST4.msg.showMsgFlash('To add child record you have to define some fields in parent record<br>(it is required to compose valid record title)', 2500);    
-                    return;
-                }else if(that.options.editing && $.isFunction(that.options.editing.getOptions().onaction)){
-                    //quick save without validation
-                    that.options.editing.getOptions().onaction(null, 'save_quick');
+                    if(is_empty){
+                        window.hWin.HEURIST4.msg.showMsgFlash('To add child record you have to define some fields in parent record<br>(it is required to compose valid record title)', 2500);    
+                        return;
+                    }else if(that.options.editing && $.isFunction(that.options.editing.getOptions().onaction)){
+                        //quick save without validation
+                        that.options.editing.getOptions().onaction(null, 'save_quick');
+                    }
                 }
             }
             
