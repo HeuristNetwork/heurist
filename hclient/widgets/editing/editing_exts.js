@@ -1143,7 +1143,10 @@ console.log('inputdiv',$inputdiv.attr('id'),$inputdiv.parents('fieldset').attr('
              // Save record first without validation, only if this is a new record
             if(that.options.editing){
                 var et = that.options.editing.getFieldByName('rec_Title');
-                if(et && et.editing_input('instance') && et.editing_input('getValues')[0] == ''){
+                
+                var isparententity = (that.f('rst_CreateChildIfRecPtr')==1);
+                
+                if(et && et.editing_input('instance') && et.editing_input('getValues')[0] == '' && isparententity){
 
                     var is_empty = true;
                     var fields = that.options.editing.getValues(false);
