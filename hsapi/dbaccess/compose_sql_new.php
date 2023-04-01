@@ -1077,20 +1077,25 @@ class HPredicate {
         $this->pred_type  = $key[0];
         $ll = count($key);
         if($ll>1){ //get field ids "f:5" -> 5
-            $this->field_id = $key[1];
-            if($ll>2){ //get subfield for terms "f:5:desc:lang" 
-                $val1 = $key[2];    
-                $val2 = null;
-                if($ll>3){
-                    $val2 = $key[3];    
+            if($this->pred_type=='f'){
+                $this->field_id = $key[1];
+                if($ll>2){ //get subfield for terms "f:5:desc:lang" 
+                        $val1 = $key[2];    
+                        $val2 = null;
+                        if($ll>3){
+                            $val2 = $key[3];    
+                        }
+                        if(@$this->allowed_term_fields[$val1]){
+                            $this->field_term = $val1;    
+                            if($val2) $this->field_lang = $val2;
+                        }else if(@$this->allowed_term_fields[$val2]){
+                            $this->field_term = $val2;    
+                            $this->field_lang = $val1;
+                        }
                 }
-                if(@$this->allowed_term_fields[$val1]){
-                    $this->field_term = $val1;    
-                    if($val2) $this->field_lang = $val2;
-                }else if(@$this->allowed_term_fields[$val2]){
-                    $this->field_term = $val2;    
-                    $this->field_lang = $val1;
-                }
+            }else{
+                // get field id for predicates like "linkedfrom:10:240"  (10 is rectype)
+                $this->field_id = $key[$l1-1];
             }
         }
 
