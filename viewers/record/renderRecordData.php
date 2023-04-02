@@ -880,7 +880,7 @@ function print_header_line($bib) {
 
         <div <?="style='padding:0 10px 0 22px;margin:10px 0 0;height:20px;background-repeat: no-repeat;background-image:url("
                     .HEURIST_RTY_ICON.$bib['rty_ID'].")' title='".htmlspecialchars($bib['rty_Description'])."'" ?> >
-            Type&nbsp;<?= htmlspecialchars($bib['rty_Name']) .': id '. htmlspecialchars($bib['rec_ID']) ?>
+            &nbsp;<?= '<strong>'. htmlspecialchars($bib['rty_Name']) .'</strong>: id '. htmlspecialchars($bib['rec_ID']) ?>
 
         <?php if($system->has_access()){ ?>
 
@@ -1334,7 +1334,7 @@ function print_public_details($bib) {
                         'thumb' => $file_thumbURL,
                         'player' => $file_playerURL,
                         'nonce' => $file_nonce,
-                        'linked' => ($bd['name']=='Linked media'),
+                        'linked' => ($bd['dtl_RecID'] != $bib['rec_ID']),
                         'description' => $file_description
                     ));
                     
@@ -1586,7 +1586,12 @@ function print_public_details($bib) {
                 print '<div class="thumb_image media-content"  style="'.($isImageOrPdf?'':'cursor:default;')
                     .($k>0?'display:none;':'').'">';
             }
-            print '<h5 style="margin-block:0.5em;">LINKED MEDIA</h5>';
+
+            if($thumb['linked'] == true){
+                print '<h5 style="margin-block:0.5em;">LINKED MEDIA</h5>';
+            }else{
+                print '<h5 style="margin-block:0.5em;">MEDIA</h5>';
+            }
 
             if($thumb['player'] && !$is_map_popup){
 

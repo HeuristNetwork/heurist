@@ -214,6 +214,33 @@ text.shadow {
     cursor: pointer;
 }
 
+/**Node information iframe
+  *ADDED BY ISH */
+  #iframeDiv {
+    display: none;
+    position: absolute;
+    right: 16px;
+    bottom: 0px;
+    width: 30%;
+    height: 40%;
+    min-width: 300px;
+    min-height: 330px;
+    max-width: 330px;
+    max-height: 350px;
+    box-shadow: 0 3px 10px rgb(0 0 0 / 0.2);
+}
+
+/**Close Node information iframe button
+  *ADDED BY ISH */
+#closeButton {
+    display: block;
+    position: absolute;
+    top: 0px;
+    right: 0px;
+    /*overflow: visible;*/
+    z-index: 60001;
+}
+
 /** Selection */
 #selection {
     fill: #fff;
@@ -227,6 +254,7 @@ text.shadow {
 .toolbar-section{
     padding:0 4px;
     margin-bottom: 5px;
+    display: inline-block;
 }
 .toolbar-section > label{
     font-size:0.8em;
@@ -235,11 +263,72 @@ text.shadow {
     line-height: 10px;    
     display:table-cell;
     height:auto;
-    /*border: solid 1px gray;*/
 }
-#toolbar > div{
-    /*display:table-row;*/
-    float:left;
+#toolbar.split_bar {
+    display: flex;
+    margin-left: auto;
+    margin-right: auto;
+    position: relative;
+    width: 400px;
+}
+
+#toolbar2 {
+    line-height: 0px;
+    display: table-cell;
+    height: 70;
+    bottom: 0;
+}
+
+#toolbar2>div {
+    bottom: 0;
+    padding: 10;
+    background-color: #00ff00;
+}
+
+.dropbtn {
+    background-color: #04AA6D;
+    color: white;
+    padding: 16px;
+    font-size: 16px;
+    border: none;
+}
+
+
+.dropdown-content1, 
+.dropdown-content2, 
+.dropdown-content3 {
+    padding: 5px;
+    margin-top: 10px;
+    display: none;
+    position: relative;
+    background-color: #f1f1f1;
+    min-width: 200px;
+    box-shadow: 0px 8px 16px 0px rgba(0, 0, 0, 0.2);
+    z-index: 1;
+}
+
+
+.dropdown-content a:hover {
+    background-color: #ddd;
+}
+
+.dropdown1:hover .dropdown-content1,
+.dropdown2:hover .dropdown-content2,
+.dropdown3:hover .dropdown-content3 {
+    display: block;
+}
+
+.dropdown:hover .dropbtn {
+    background-color: #1fb5cf;
+}
+
+ul.split_bar {
+
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+    background-color: #333;
 }
 
 .ui-icon-cursor{
@@ -276,4 +365,12 @@ text.shadow {
     background-image: url(link_stepped.png) !important; 
     width: 16;
     height: 16;
+}
+
+#nodecontrolbox {
+    border: 1px solid black;
+    background-color: rgb(175, 174, 174);
+    font-size: 20px;
+    padding-left: 2px;
+    padding-right: 2px;
 }

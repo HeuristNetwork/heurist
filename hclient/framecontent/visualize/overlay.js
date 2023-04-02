@@ -101,7 +101,8 @@ function getRecordOverlayData(record) {
                 }
                
                 // Relation
-                var relation = {text: truncateText(link.source.name, maxLength) + " ↔ " + truncateText(link.target.name, maxLength), size: "8px", height: fontSize, xpos:xpos, multiline:true};
+                var relation = {text: truncateText(window.hWin.HEURIST4.util.stripTags(link.source.name), maxLength) + " ↔ " + truncateText(window.hWin.HEURIST4.util.stripTags(link.target.name), maxLength), 
+                        size: "8px", height: fontSize, xpos:xpos, multiline:true};
                 if(settings.showCounts) {
                     relation.text += ", n=" + link.relation.count
                 }
@@ -151,8 +152,8 @@ function getRelationOverlayData(line) {
     var maxLength = 60;
 
     // Header
-    var header1 = truncateText(line.source.name, maxLength);
-    var header2 = truncateText(line.target.name, maxLength);
+    var header1 = truncateText(window.hWin.HEURIST4.util.stripTags(line.source.name), maxLength);
+    var header2 = truncateText(window.hWin.HEURIST4.util.stripTags(line.target.name), maxLength);
     if(header1.length+header2.length > maxLength) {
         array.push({text: header1 + " >", size: "11px", style: "bold"});
         array.push({text: header2, size: "11px", style: "bold", enter: true});
@@ -171,7 +172,7 @@ function getRelationOverlayData(line) {
             // Show information for all links, with same source and target ids
             if(link.source.id == line.source.id && link.target.id == line.target.id){
                 var relation = {type: link.relation.type, cnt: link.targetcount, 
-                        text: truncateText(link.relation.name, maxLength) + count, size: "10px", dir: "to"};
+                        text: truncateText(window.hWin.HEURIST4.util.stripTags(link.relation.name), maxLength) + count, size: "10px", dir: "to"};
 
                 array.push(relation);
 
@@ -190,7 +191,7 @@ function getRelationOverlayData(line) {
             // Reverse Links, information about links that are sourced from the target
             if(link.source.id == line.target.id && link.target.id == line.source.id){
                 var relation = {type: link.relation.type, cnt: link.targetcount, 
-                        text: truncateText(link.relation.name, maxLength) + count, size: "10px", dir: "from"};
+                        text: truncateText(window.hWin.HEURIST4.util.stripTags(link.relation.name), maxLength) + count, size: "10px", dir: "from"};
 
                 array.push(relation);
 
@@ -212,7 +213,7 @@ function getRelationOverlayData(line) {
 
         // Show information for this link only
         var relation = {type: line.relation.type, cnt: line.targetcount, text: 
-                truncateText(line.relation.name, maxLength) + count, size: "10px", subheader:0};
+                truncateText(window.hWin.HEURIST4.util.stripTags(line.relation.name), maxLength) + count, size: "10px", subheader:0};
 
         array.push(relation);
     }
@@ -274,7 +275,7 @@ function addMissingFields(node_info){
         }
 
         // add new field
-        new_fields.push({text: truncateText(field['rst_DisplayName'], maxLength), size: "8px", xpos:xpos, multiline:true, 
+        new_fields.push({text: truncateText(window.hWin.HEURIST4.util.stripTags(field['rst_DisplayName']), maxLength), size: "8px", xpos:xpos, multiline:true, 
                         weight: (field['rst_RequirementType']=='required') ? "bold" : "normal", style:"italic", height: fontSize, enter: true, subheader: 1, 
                         require_type: (field['rst_RequirementType']=='required') ? 'y' : 'n', dtyid: field['rst_DetailTypeID']});
     }
@@ -368,6 +369,8 @@ function createOverlay(x, y, type, selector, node_obj, parent_node) {
 
     var outline_colour = (type == 'record') ? '#666' : '#ff0000';
     
+    var nodecolor = getSetting(setting_entitycolor);
+
     // Draw a semi transparant rectangle       
     var rect_full = overlay.append("rect")
                            .attr("class", "semi-transparant info-mode-full rect-info-full")              
@@ -376,6 +379,7 @@ function createOverlay(x, y, type, selector, node_obj, parent_node) {
                            .attr("rx", 6)
                            .attr("ry", 6)
                            .attr("rtyid", info[0].rtyid)
+                           .attr("fill", nodecolor)
                            .style('stroke', outline_colour)
                            .style("stroke-width", 0.75);
 
@@ -386,6 +390,7 @@ function createOverlay(x, y, type, selector, node_obj, parent_node) {
                            .attr("rx", 6)
                            .attr("ry", 6)
                            .attr("rtyid", info[0].rtyid)
+                           .attr("fill", nodecolor)
                            .style('stroke', outline_colour)
                            .style("stroke-width", 0.75);
         
@@ -395,6 +400,9 @@ function createOverlay(x, y, type, selector, node_obj, parent_node) {
     var fontColor = getSetting(setting_textcolor, '#000000');
 
     var offset = (type=='record')?10:6;
+    if (currentMode == 'icons'){
+        offset = (type=='record')?29:25; 
+    }
     var position = 16;
 
     // Adding text
@@ -722,7 +730,7 @@ function createOverlay(x, y, type, selector, node_obj, parent_node) {
                     tick();
                 });
       
-      if( settings.isDatabaseStructure ||  settings.onRefreshData){
+      if( !settings.isDatabaseStructure ||  settings.onRefreshData){
       
           //link button      
           var btnAddLink = overlay

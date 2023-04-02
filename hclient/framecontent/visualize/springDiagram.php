@@ -124,7 +124,10 @@ function onPageInit(success){
 
     <body>
         <!-- Visualize HTML -->
-        <?php include "visualize.html"; ?>
+        <?php 
+            $isDatabaseStructure = 0;
+            include "visualize.php"; 
+        ?>
 
         <!-- Call from parent iframe -->
         <script>
@@ -271,18 +274,18 @@ function onPageInit(success){
                     showCounts: false,
                     showEntitySettings: false,
                     showFormula: false,
-                    gravity: 'touch' // activate gravity, for a moment, to scatter graph
+                    gravity: 'off' //'touch', activate gravity, for a moment, to scatter graph
                 });
 
-                setTimeout(function(){ setGravity('off'); }, 3000); // turn off gravity
+                //setTimeout(function(){ setGravity('off'); }, 3000); // turn off gravity
 
                 changeViewMode('icons');
         }
             
         function onVisualizeResize(){
                 var width = $(window).width();
-                var supw = (width<744)?3.8:0; //1120
-                $('#divSvg').css('top', 5+supw+'em');
+                var supw = 3.5;//(width<744)?3.8:3.5;
+                $('#divSvg').css('top', supw+'em');
         }
             
         </script>
