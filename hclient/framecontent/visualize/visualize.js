@@ -129,7 +129,7 @@ var svg;        // The SVG where the visualisation will be executed on
             markercolor: "#000",
             
             entityradius: 30,
-            entitycolor: "#b5b5b5",
+            entitycolor: setting_entitycolor,//"#b5b5b5"
             
             labels: true,
             fontsize: "8px",
@@ -454,6 +454,8 @@ function visualizeData() {
             
         $('#lblShowRectypeSelector').text(sText);
 
+    }else{
+        inIframe();
     }
 
     if(settings.isDatabaseStructure || isStandAlone){
@@ -503,7 +505,10 @@ function addContainer() {
     var scaleExtentVals = [0.9, 2]; ////[0.75, 7.5]
 
     if(!settings.isDatabaseStructure){
-        scaleExtentVals = [0.5, 3];
+        //scaleExtentVals = [0.5, 3];
+
+        //Travis Doyle 28/9 - Adjusted scale extent values to increase zoom out/in
+        scaleExtentVals = [0.2, 15];
     }
 
     // Zoom behaviour                   
@@ -516,11 +521,92 @@ function addContainer() {
     return container;
 }
 
+/**
+* Update label scaling
+*/
+function updateLabels() {
+
+    let scale = (d3.event?.scale !== undefined) ? d3.event.scale : this.zoomBehaviour.scale();
+
+    //Gerard Zoom Scaling
+    if (currentMode == 'icons' && !settings.isDatabaseStructure) {
+
+        /*
+        if (d3.event.scale < 0.5) {
+            const nodeList = document.querySelectorAll('.nodelabel');  //.setAttribute('style', 'scale: 5 !important;');
+            for (let i = 0; i < nodeList.length; i++) {
+                nodeList[i].style.scale = "4";
+                nodeList[i].style.transform = "translate(-21px, -9px)";
+            }
+        }
+        */
+
+        /*
+        if (/*d3.event.scale > 0.5 && d3.event.scale < 0.9) {
+            const nodeList = document.querySelectorAll('.nodelabel');  //.setAttribute('style', 'scale: 5 !important;');
+            for (let i = 0; i < nodeList.length; i++) {
+                nodeList[i].style.scale = "3.5";
+                nodeList[i].style.transform = "translate(-20px, -9px)";
+            }
+        }
+        */
+
+        if (/*d3.event.scale > 0.9 && */scale < 1.5) {
+            const nodeList = document.querySelectorAll('.nodelabel');  //.setAttribute('style', 'scale: 5 !important;');
+            for (let i = 0; i < nodeList.length; i++) {
+                nodeList[i].style.scale = "3.25";
+                nodeList[i].style.transform = "translate(-20px, -9px)";
+            }
+        }
+
+        if (scale > 1.5 && scale < 2) {
+            const nodeList = document.querySelectorAll('.nodelabel');  //.setAttribute('style', 'scale: 5 !important;');
+            for (let i = 0; i < nodeList.length; i++) {
+                nodeList[i].style.scale = "2.75";
+                nodeList[i].style.transform = "translate(-18px, -8px)";
+            }
+        }
+
+        if (scale > 2 && scale < 2.5) {
+            const nodeList = document.querySelectorAll('.nodelabel');  //.setAttribute('style', 'scale: 5 !important;');
+            for (let i = 0; i < nodeList.length; i++) {
+                nodeList[i].style.scale = "2";
+                nodeList[i].style.transform = "translate(-14px, -7px)";
+            }
+        }
+
+        if (scale > 2.5 && scale < 3.5) {
+            const nodeList = document.querySelectorAll('.nodelabel');  //.setAttribute('style', 'scale: 5 !important;');
+            for (let i = 0; i < nodeList.length; i++) {
+                nodeList[i].style.scale = "1.5";
+                nodeList[i].style.transform = "translate(-9px, -5px)";
+            }
+        }
+
+        if (scale > 3.5 /*&& d3.event.scale < 5*/) {
+            const nodeList = document.querySelectorAll('.nodelabel');  //.setAttribute('style', 'scale: 5 !important;');
+            for (let i = 0; i < nodeList.length; i++) {
+                nodeList[i].style.scale = "1";
+                nodeList[i].style.transform = "translate(0px, 0px)";
+            }
+        }
+
+    } else {
+        const nodeList = document.querySelectorAll('.nodelabel');  //.setAttribute('style', 'scale: 5 !important;');
+        for (let i = 0; i < nodeList.length; i++) {
+            nodeList[i].style.scale = "1";
+            nodeList[i].style.transform = "translate(0px, 0px)";
+        }
+    }
+}
 
 /**
 * Called after a zoom-event takes place.
 */
 function zoomed() { 
+
+    updateLabels();
+
     //keep current setting Translate   
     var translateXY = [];
     var notDefined = false;
@@ -582,7 +668,7 @@ function zoomToFit(){
         midY = box.y + height / 2;
 
     var scale = getFitToExtentScale();
-    if (scale != null && Number(scale) != NaN) return; // nothing to fit
+    if (scale == null && Number(scale) == NaN) return; // nothing to fit
 
     var translate = [
         fullWidth  / 2 - scale * midX,
@@ -919,8 +1005,9 @@ function tick() {
     var bottomLines = d3.selectAll(".bottom-lines");
     var rolloverLines = d3.selectAll(".rollover-lines");
 
+    // Junze: no removal for those exsiting object just update their attributes to improve performance
     // remove additional visible lines
-    $(".offset_line").remove();
+    // $(".offset_line").remove();
 
     var linetype = getSetting(setting_linetype, 'straight');
     if(linetype == "curved") {
@@ -937,6 +1024,9 @@ function tick() {
         updateStraightLines(rolloverLines, "rollover-lines");
     }
     
+    // Update label scaling
+    //updateLabels();
+
     // Update node locations
     updateNodes();
     
@@ -1018,13 +1108,13 @@ function updateCurvedLines(lines) {
 */
 function updateStraightLines(lines, type) {
     
-    var pairs = {}, full_pairs = {};
+    var pairs = {};
     var isExpanded = $('#expand-links').is(':Checked');
-    var isFullMode = (currentMode == 'infoboxes_full');
     
     $(".icon_self").each(function() {
         $(this).remove();
     });
+    let container = d3.select('#container');
     
     // Calculate the straight points
     lines.attr("d", function(d) {
@@ -1088,19 +1178,24 @@ function updateStraightLines(lines, type) {
 
                 if(type == 'bottom-lines'){
 
-                    var line = d3.select("#container").insert("svg:line", ".id"+d.source.id+" + *");
-
+                    let id = `selfibfbtlinesrc_${d.source.id}_${d.relation.id}`;
+                    let selectedLine = container.select(`#${id}`);
                     //add extra starting line
-                    line.attr("class", "offset_line")
+                    if (selectedLine.empty()) {
+                        selectedLine = container.insert("svg:line", `.id${d.source.id} + *`)
+                        .attr("class", "offset_line")
+                        .attr("id", id)
                         .attr("stroke", "darkgray")
                         .attr("stroke-linecap", "round")
                         .style("stroke-width", "3px")
+                        .attr("marker-end", "url(#blob)")
+                        .attr("marker-start", "url(#self-link)");
+                    }
+                    selectedLine
                         .attr("x1", s_x)
                         .attr("y1", s_y)
                         .attr("x2", s_x2)
-                        .attr("y2", s_y)
-                        .attr("marker-end", "url(#blob)")
-                        .attr("marker-start", "url(#self-link)");
+                        .attr("y2", s_y);
                 }
             }else{
 
@@ -1205,34 +1300,45 @@ function updateStraightLines(lines, type) {
                     elevation_diff = true;
                 }
 
-                var line;
-
                 if(type == 'bottom-lines'){
-
-                    line = d3.select("#container").insert("svg:line", ".id"+d.source.id+" + *");
-
-                    //add extra starting line
-                    line.attr("class", "offset_line")
+                    // Junze: Node2NodeInfoBoxesFullBottomLineSource
+                    let id = `n2nibfbtlinesrc_${d.source.id}_${d.relation.id}_${d.target.id}`;
+                    let selectedLine = container.select(`#${id}`);
+                    if (selectedLine.empty()) {
+                        //add extra starting line + blob
+                        selectedLine = container.insert("svg:line", `.id${d.source.id} + *`)
+                        .attr("class", "offset_line")
+                        .attr("id", id)
                         .attr("stroke", "darkgray")
                         .attr("stroke-linecap", "round")
                         .style("stroke-width", "3px")
+                        .attr("marker-end", "url(#blob)");
+                    }
+                    selectedLine
                         .attr("x1", s_x)
                         .attr("y1", s_y)
                         .attr("x2", s_x2)
-                        .attr("y2", s_y)
-                        .attr("marker-end", "url(#blob)");
-
+                        .attr("y2", s_y);
                     var linecolour = (!ismultivalue) ? 'darkgray' : 'dimgray';
                     var linewidth = (!ismultivalue) ? '3px' : '2px';
-                    line = d3.select("#container").insert("svg:line", ".id"+d.target.id+" + *");
+                    // Junze: Node2NodeInfoBoxesFullBottomLineTarget
+                    id = `n2nibfbltgt_${d.target.id}_${d.relation.id}_${d.source.id}`;
+                    selectedLine = container.select(`#${id}`);
 
-                    if(!elevation_diff){
-
+                    if (!elevation_diff) {
                         // add extra ending line
-                        line.attr("class", "offset_line")
+                        // Junze: check the line exist
+                        if (selectedLine.empty()) {
+                            // Junze: if not exist create the line
+                            selectedLine = container.insert("svg:line", `.id${d.target.id} + *`)
+                            .attr("class", "offset_line")
+                            .attr("id", id)
                             .attr("stroke", linecolour)
                             .attr("stroke-linecap", "round")
                             .style("stroke-width", linewidth)
+                        }
+                        // Junze: update the coordinates
+                        selectedLine
                             .attr("x1", t_x)
                             .attr("y1", t_y)
                             .attr("x2", t_x2)
@@ -1241,39 +1347,77 @@ function updateStraightLines(lines, type) {
                         //add crows foot, if multi value
                         if(ismultivalue){
 
-                            d3.select("#container")
-                              .insert("svg:path", ".id"+d.source.id+" + *")
-                              .attr("class", "offset_line")
-                              .attr("stroke", linecolour)
-                              .attr("stroke-linecap", "round")
-                              .attr("stroke-width", linewidth)
-                              .attr("fill", "none")
-                              .attr("d", "M " + t_x2 + " " + (t_y+5) + " L " + t_x + " " + t_y + " L " + t_x2 + " " + (t_y-5));
+                            let hideId = `#n2nibfsrc_${d.target.id}_${d.relation.id}_${d.source.id}`;
+                            let hideLine = container.select(hideId);
+                            if (!hideLine.empty())
+                                hideLine.style("display", "none")
+                            // Node2NodeInfoBoxesFullBottomLineSourceMultiValue
+                            id = `n2nibfblsrcmv_${d.source.id}_${d.relation.id}_${d.target.id}`;
+                            selectedLine = container.select(`#${id}`);
+                            if (selectedLine.empty()) {
+                                selectedLine = container.insert("svg:path", `.id${d.source.id} + *`)
+                                .attr("id", id)
+                                .attr("class", "offset_line")
+                                .attr("stroke-linecap", "round")
+                                .attr("fill", "none")
+                            }
+                            selectedLine
+                                .attr("stroke-width", linewidth)
+                                .attr("stroke", linecolour)
+                                .style("display", null)
+                                //   .attr("d", "M " + t_x2 + " " + (t_y+5) + " L " + t_x + " " + t_y + " L " + t_x2 + " " + (t_y-5))
+                                .attr("d", `M ${t_x2} ${t_y + 5} L ${t_x} ${t_y} L ${t_x2} ${t_y - 5}`);
                         }
                     }else{
 
                         //add crows foot, if multi value
                         if(ismultivalue){
-
-                            // add extra ending line
-                            line.attr("class", "offset_line")
+                            if (selectedLine.empty()) {
+                                selectedLine = container.insert("svg:line", `.id${d.target.id} + *`)
+                                .attr("class", "offset_line")
+                                .attr("id", id)
                                 .attr("stroke", linecolour)
                                 .attr("stroke-linecap", "round")
                                 .style("stroke-width", linewidth)
+                            }
+                            // add extra ending line
+                            selectedLine
                                 .attr("x1", t_x)
                                 .attr("y1", t_y)
                                 .attr("x2", t_x)
                                 .attr("y2", t_y2);
+                            let hideId = `#n2nibfblsrcmv_${d.source.id}_${d.relation.id}_${d.target.id}`;
+                            let hideLine = container.select(hideId);
+                            if (!hideLine.empty()) 
+                                hideLine.style("display", "none");
+                            id = `n2nibfsrc_${d.target.id}_${d.relation.id}_${d.source.id}`;
+                            selectedLine = container.select(`#${id}`);
+                            if (selectedLine.empty()) {
+                                selectedLine = container.insert("svg:path", `.id${d.source.id} + *`)
+                                .attr("id", id)
+                                .attr("class", "offset_line")
+                                .attr("stroke-linecap", "round")
+                                .attr("fill", "none")
+                            }
+                            selectedLine
+                                .style("display", null)
+                                .attr("stroke", linecolour)
+                                .attr("stroke-width", linewidth)
+                                .attr("fill", "none")
 
-                            d3.select("#container")
-                              .insert("svg:path", ".id"+d.source.id+" + *")
-                              .attr("class", "offset_line")
-                              .attr("stroke", linecolour)
-                              .attr("stroke-linecap", "round")
-                              .attr("stroke-width", linewidth)
-                              .attr("fill", "none")
-                              .attr("d", "M " + (t_x+5) + " " + t_y2 + " L " + t_x + " " + t_y + " L " + (t_x-5) + " " + t_y2);
+                                //   .attr("d", "M " + (t_x+5) + " " + t_y2 + " L " + t_x + " " + t_y + " L " + (t_x-5) + " " + t_y2);
+                                // Junze: use format to improve performance and reduce GC pressure
+                                .attr("d", `M ${t_x + 5} ${t_y2} L ${t_x} ${t_y} L ${t_x - 5} ${t_y2}`);
                         }else{
+
+                            if(!settings.isDatabaseStructure){
+                                let hideId = `#n2nibfbltgt_${d.target.id}_${d.relation.id}_${d.source.id}`;
+                                let hideLine = container.select(hideId);
+                                if (!hideLine.empty()) {
+                                    hideLine.style("display", "none");
+                                }
+                            }
+
                             t_y = t_y2;
                         }
                     }
@@ -1446,7 +1590,7 @@ function addBackgroundCircles() {
                         return getEntityRadius(d.count);
                     })
                     .attr("class", "background")
-                    .attr("fill", entitycolor);
+                    //.attr("fill", entitycolor);
     return circles;
 }
 
@@ -1459,6 +1603,7 @@ function addForegroundCircles() {
     var circles = d3.selectAll(".node")
                     .append("circle")
                     .attr("r", circleSize)
+                    .attr("fill", entitycolor)
                     .attr("class", 'foreground')
                     .style("stroke", "#ddd")
                     .style("stroke-opacity", function(d) {
@@ -1544,3 +1689,100 @@ function showEmbedDialog(){
     });
 */    
 }            
+
+function inIframe() { 
+
+    let fullscreenbtn = document.getElementById("windowPopOut");
+    let closewindowbtn = document.getElementById("closegraphbutton");
+    let refreshData = document.getElementById("resetbutton");
+    //let refreshbuttonfullscreen = document.getElementById("resetbuttonfullscreen");
+
+    let gravitymodeZero = document.getElementById("gravityMode0");
+    let gravitymodeOne = document.getElementById("gravityMode1");
+    //let gravitymodeTwo = document.getElementById("gravityMode2");
+    //let gravitymodeThree = document.getElementById("gravityMode3");
+
+    if (window.location !== window.parent.location) {
+        //Page is in iFrame
+        fullscreenbtn.style.visibility = 'visible';
+        closewindowbtn.style.display = 'none';
+        refreshData.style.visibility = 'visible';
+        //refreshbuttonfullscreen.style.display = 'none';
+        gravitymodeZero.style.visibility = 'visible';
+        gravitymodeOne.style.visibility = 'visible';
+        //gravitymodeTwo.style.display = 'none';
+        //gravitymodeThree.style.display = 'none';
+
+    } else {
+        //Page is not in iFrame
+        fullscreenbtn.style.display = 'none';
+        closewindowbtn.style.visibility = 'visible';
+        refreshData.style.display = 'visible';
+        //refreshbuttonfullscreen.style.visibility = 'visible';
+        gravitymodeZero.style.display = 'visible';
+        gravitymodeOne.style.display = 'visible';
+        //gravitymodeTwo.style.visibility = 'visible';
+        //gravitymodeThree.style.visibility = 'visible';
+
+    }
+
+}
+
+//New graph refresh button - Created by Travis Doyle 24/9/2022
+function refreshButton() {
+
+    let query = window.location.search;
+
+    if(window.location !== window.parent.location){ // handle iframe
+        query = window.hWin.HEURIST4.util.composeHeuristQuery2(window.hWin.HEURIST4.current_query_request, false);
+        query = query + ((query == '?') ? '' : '&') + 'db=' + window.hWin.HAPI4.database;
+    }
+
+    location.href = query;
+}
+
+//refresh graph while in fullscreen mode - Travis Doyle 28/9
+function refreshButtonFullscreen() {
+    return;
+    var url2 = window.hWin.HAPI4.baseURL + 'hclient/framecontent/visualize/springDiagram.php' + window.location.search;
+    location.href = url2;
+}
+//Gravity Fullscreen Button Fix - Travis Doyle 6/10
+function refreshGravityOn() {
+    return;
+    var gravitystat = getSetting(setting_gravity);
+
+    var url2 = window.hWin.HAPI4.baseURL + 'hclient/framecontent/visualize/springDiagram.php' + window.location.search;
+    location.href = url2;
+
+    if (gravitystat == 'off') {
+        setGravity('touch');
+    }
+}
+function refreshGravityOff() {
+    return;
+    var gravitystat = getSetting(setting_gravity);
+
+    var url2 = window.hWin.HAPI4.baseURL + 'hclient/framecontent/visualize/springDiagram.php' + window.location.search;
+    location.href = url2;
+
+    if (gravitystat == 'touch') {
+        setGravity('off');
+    }
+}
+//open graph in fullscreen - Travis Doyle 28/9
+function openWin() {
+    var hrefnew = window.hWin.HEURIST4.util.composeHeuristQuery2(window.hWin.HEURIST4.current_query_request, false);
+    hrefnew = hrefnew + ((hrefnew == '?') ? '' : '&') + 'db=' + window.hWin.HAPI4.database;
+    var url2 = window.hWin.HAPI4.baseURL + 'hclient/framecontent/visualize/springDiagram.php' + hrefnew;
+    window.open(url2);
+}
+//close fullscreen graph - Travis Doyle 28/9
+function closeWin() {
+    window.close();
+    return;
+    var hrefnew = window.hWin.HEURIST4.util.composeHeuristQuery2(window.hWin.HEURIST4.current_query_request, false);
+    hrefnew = hrefnew + ((hrefnew == '?') ? '' : '&') + 'db=' + window.hWin.HAPI4.database;
+    var url2 = window.hWin.HAPI4.baseURL + 'hclient/framecontent/visualize/springDiagram.php' + hrefnew;
+    window.close();
+}

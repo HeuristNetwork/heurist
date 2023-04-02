@@ -195,8 +195,8 @@ function handleSettingsInUI() {
         .click( function(){ setFormulaMode('unweighted'); });
     $( "#setNodesMode" ).controlgroup();    
 
-    
-    $("#entityColor")
+    if($('#entityColor').length > 0){
+        $("#entityColor")
         //.addClass('ui-icon ui-icon-bullet')
         //.css({'font-size':'3.5em','color':getSetting(setting_entitycolor)})
         .val(getSetting(setting_entitycolor))
@@ -207,10 +207,14 @@ function handleSettingsInUI() {
         .on('change.color', function(event, color){
             if(color){
                 putSetting(setting_entitycolor, color);
-                $(".background").attr("fill", color);
+                //$(".background").attr("fill", color);
+                updateCircles(".node", foregroundColor, getSetting(setting_entitycolor));
+                updateRectangles(".node", getSetting(setting_entitycolor));
                 visualizeData();
             }
         });
+    }
+
     //------------ LINKS ----------
 
     //$("input[name='linksMode'][value='" +getSetting(setting_linetype)+ "']").attr("checked", true);
@@ -500,7 +504,7 @@ function _syncUI(){
 }
 
 function changeViewMode(mode){
-    
+    $(".offset_line").remove();
     if(mode!=currentMode){
         if(mode=='infoboxes'){ // && currentMode=='icons'
             currentMode = 'infoboxes';
@@ -552,6 +556,8 @@ function changeViewMode(mode){
         _syncUI();
 
         tick();
+
+        updateLabels(); // update labels
     }
 }
 

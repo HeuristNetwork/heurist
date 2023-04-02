@@ -31,7 +31,14 @@ function addNodes() {
                   .selectAll(".node")
                   .data(data.nodes)
                   .enter()
-                  .append("g");
+                  .append("g")
+                  .on("dblclick", (d) => {
+                    if(!settings.isDatabaseStructure){ //Added Double Click to Edit Function - Travis Doyle 19/9
+                        window.open(window.hWin.HAPI4.baseURL + '?fmt=edit&db=' + window.hWin.HAPI4.database + '&recID=' + d.id, '_blank');
+                    }else if(window.hWin.HAPI4.is_admin()){ console.log(d);
+                        _editRecStructure(d.id);
+                    }
+                  });
                   
     // Dragging
     var drag = d3.behavior.drag()
@@ -76,12 +83,13 @@ function addNodes() {
             })
             .attr("class", "background icon-background")
             .style({'fill-opacity': '0.5', 'display': icon_display})
-            .attr("fill", entitycolor);        
+            .attr("fill", determineColour); //entitycolor        
         
         //add internal circle
         node.append("circle")
             .attr("r", circleSize)
             .attr("class", 'foreground icon-foreground')
+            .attr("fill", entitycolor)
             .style({"stroke": "#ddd", 'display': icon_display})
             .style("stroke-opacity", function(d) {
                 if(d.selected == true) {
@@ -142,16 +150,62 @@ function addNodes() {
               closeRectypeSelector();
               // Check if it's not a click after dragging
               if(!d3.event.defaultPrevented) {
-                  // Remove all overlays and create a record overlay for selected node
-                  //tempXXX
-                  //removeOverlays();
-                  //onRecordNodeClick(d3.event, d, ".node.id"+d.id);
+                // Load record details
+                showNodeInformation(d);//Added by ISH
               }
          })
          .call(drag);
 
      });            
      return nodes;
+}
+
+/*Shows the record details in an iframe when a node is clicked
+  Added by "ISH"
+*/
+function showNodeInformation(d){
+
+    if(settings.isDatabaseStructure){
+        return;
+    }
+
+    var iframeDiv = d3.select("#iframeDiv");//select the parent div
+    var infoBox = d3.select("#iframeInfo");//select the iframe
+
+    if(iframeDiv.length == 0 || infoBox.length == 0){
+        return;
+    }
+
+    iframeDiv.style("display", "block");// make iframe visible
+
+    if(infoBox.attr("recid") == d.id){ // block retrival of last record in quick succession
+        return;
+    }
+
+    window.hWin.HEURIST4.msg.bringCoverallToFront(iframeDiv, {'background-color': 'white', 'opacity': 1, 'font-weight': 'bold', 'font-size': 'smaller', 'color': 'black'}, 
+        'Loading<br><br>'+ window.hWin.HEURIST4.util.stripTags(truncateText(d.name, 40)));
+
+
+    var srcURL = window.hWin.HAPI4.baseURL + 'viewers/record/renderRecordData.php?recID=' + d.id + '&db=' + window.hWin.HAPI4.database;//URL for source of information iframe
+    infoBox.attr("src", srcURL)
+           .attr("recid", d.id)
+           .on('load', () => {
+                window.hWin.HEURIST4.msg.sendCoverallToBack(true);
+           });//supply document to iframe
+
+    // Remove block after 5 seconds
+    setTimeout((id) => {
+        if(infoBox.attr("recid") == id){
+            infoBox.attr("recid", "");
+        }
+    }, 5000, d.id);
+}
+
+/*Hides record details shown by showNodeInformation
+  Added by "ISH"
+*/
+function hideNodeInformation(){
+    d3.select("#iframeDiv").style("display", "none");//close the box when clicked 
 }
 
 /**
@@ -166,12 +220,16 @@ function updateNodes() {
     });
 }
 
+var currentNode = null;
+
 // Functions to make dragging, moving and zooming possible
 
 /** Called when a dragging event starts */
 function dragstart(d, i) {
     
     d3.event.sourceEvent.stopPropagation();
+    d3.event.sourceEvent.preventDefault();
+
     force.stop();
 
     // Fixed node positions?
@@ -182,6 +240,7 @@ function dragstart(d, i) {
             return d.fixed;
        }); 
     d.fixed = true; 
+    currentNode = d.id;
     
     updateCircles(".node.id"+d.id, selectionColor, selectionColor);
 }
@@ -191,8 +250,8 @@ function dragmove(d, i) {
     
     // Update all selected nodes. A node is selected when the .foreground color is 190,228,248
     svg.selectAll(".node").each(function(d, i) {
-        var color = d3.select(this).select(".foreground").style("fill");
-        if(color == "rgb(190, 228, 248)") {
+        //var color = d3.select(this).select(".foreground").style("fill");
+        if(d.id == currentNode) {
             // Update locations
             d.px += d3.event.dx;
             d.py += d3.event.dy;
@@ -230,12 +289,10 @@ function dragend(d, i) {
     // Update nodes & lines
     var gravity = getSetting(setting_gravity);
     d.fixed = ( gravity !== "aggressive");
-//console.log("Fixed: ", d.fixed);
-    
     
             // Update the location in localstorage
             var record = getSetting(d.id); 
-            //console.log("Record", record);
+
             var obj;
             if(record === null) {
                 obj = {}; 
@@ -250,11 +307,13 @@ function dragend(d, i) {
             obj.y = d.y;
             putSetting(d.id, JSON.stringify(obj));
     
-//console.log("save pos "+d.id+'  '+JSON.stringify(obj));    
-    
     // Check if force may resume
     if(gravity !== "off") {
         force.resume(); 
+    }
+
+    if(currentNode == d.id){
+        currentNode = null;
     }
 /*    setTimeout(function(){    //tick();
         d3.select("#container").attr("transform","scale(1)");

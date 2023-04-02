@@ -252,7 +252,10 @@ A:link {
 
             <div class="ui-layout-center">
                 <div id="main_content" class="ent_wrapper" style="left:0px">
-                    <?php include dirname(__FILE__).'/visualize.html';?>
+                    <?php 
+                        $isDatabaseStructure = 1;
+                        include dirname(__FILE__).'/visualize.php';
+                    ?>
                 </div>
             </div>
         </div>
