@@ -584,6 +584,9 @@ $.widget( "heurist.app_storymap", {
         window.hWin.HEURIST4.util.setDisabled(this.element.find('#btn-prev'), dis_prev );
         window.hWin.HEURIST4.util.setDisabled(this.element.find('#btn-next'), dis_next );
         
+        if(is_inline_endpage){
+            len ++;
+        }
         
         this.element.find('#nav-status').text((idx+1)+' of '+len);
     },
@@ -1134,9 +1137,22 @@ console.log('>sctop '+ele.scrollTop());
 
                             $tabs.tabs('refresh');
                         }else{
-                            var ele = that._resultList.find('.stub_space');    
-                            $('<div class="recordDiv outline_suppress expanded" recid="0" tabindex="0">')
-                                .html(that.pnlEndPage.html()).insertBefore(ele);
+
+                            let $ele = that._resultList.find('.recordDiv');
+                            let $div = $('<div class="recordDiv outline_suppress expanded" recid="0" tabindex="0">').html(that.pnlEndPage.html());
+
+                            if($ele.length == 0 && that._resultList.find('.stub_space').length == 0){
+                                $ele = that._resultList.find('.div-result-list-content');
+                            }
+
+                            if($ele.length > 0){
+                                $div.insertAfter($ele.last());
+                            }else if(that._resultList.find('.stub_space').length > 0){
+                                $ele = that._resultList.find('.stub_space');
+                                $div.insertBefore($ele);
+                            }else{
+                                // something has gone wrong
+                            }
                         }
                         
                     }else if(that.options.reportEndPageMode=='footer'){
