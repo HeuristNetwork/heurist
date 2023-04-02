@@ -1,6 +1,6 @@
 -- HEURIST Vsn 3 Build: Relational Constraints Addition
 
--- Ian Johnson 5 Nov 2010  Last updated 7pm 19/9/11
+-- Ian Johnson 5 Nov 2010  Last updated 02/04/2023
 
 -- Added additional constraints on defTerms and defRelationshipConstraints 24 Feb
 
@@ -31,8 +31,8 @@
 -- tag_UGrpID
 
 -- ----------------------------------------------------------------------------
-
-ALTER TABLE `defTranslations` ADD CONSTRAINT fk_trn_LanguageCode3 FOREIGN KEY (trn_LanguageCode3) REFERENCES defLanguages (lng_NISOZ3953) ON UPDATE CASCADE;
+-- defTranslations uses ISO639
+-- ALTER TABLE `defTranslations` ADD CONSTRAINT fk_trn_LanguageCode FOREIGN KEY (trn_LanguageCode) REFERENCES defLanguages (lng_ISO639) ON UPDATE CASCADE;
 
 -- ----------------------------------------------------------------------------
 

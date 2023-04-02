@@ -19,6 +19,7 @@
 --    * Database structure version: 1.1.0
 --    * Database structure version: 1.2.0  @ 14/9/2017, 
 --    * Database structure version: 1.3.6  @ 20/10/2022, 
+--    * Database structure version: 1.3.9  @ 02/04/2023, 
 
 --    * THE INSERTION STATEMENTS AT THE END ARE * NOT * PART OF THE DUMP
 --    * DO NOT DELETE THEM
@@ -415,15 +416,15 @@ CREATE TABLE defTermsLinks (
 --
 
 CREATE TABLE defTranslations (
-  trn_ID int(10) unsigned NOT NULL auto_increment COMMENT 'Primary key of defTranslations table',
-  trn_Source enum('rty_Name','dty_Name','ont_ShortName','vcb_Name','trm_Label','rst_DisplayName','rtg_Name','dtl_Value') NOT NULL COMMENT 'The table/column to be translated (unique names identify source)',
-  trn_Code smallint(5) unsigned NOT NULL COMMENT 'The primary key / ID in the table containing the text to be translated',
-  trn_LanguageCode3 char(3) NOT NULL COMMENT 'The translation language code (NISO 3 character) for this record',
-  trn_Translation varchar(63) NOT NULL COMMENT 'The translation of the text in this location (table/field/id)',
+  trn_ID int unsigned NOT NULL auto_increment COMMENT 'Primary key of defTranslations table',
+  trn_Source varchar(64) NOT NULL COMMENT 'The column to be translated (unique names identify source)',
+  trn_Code int unsigned NOT NULL COMMENT 'The primary key / ID in the table containing the text to be translated',
+  trn_LanguageCode char(2) NOT NULL COMMENT 'The translation language code ISO639',
+  trn_Translation varchar(20000) NOT NULL COMMENT 'The translation of the text in this location (table/field/id)',
   trn_Modified timestamp NOT NULL default CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP COMMENT 'Date of last modification of this record, used to get last updated date for table',
   PRIMARY KEY  (trn_ID),
-  UNIQUE KEY trn_composite (trn_Source,trn_Code,trn_LanguageCode3),
-  KEY trn_LanguageCode3 (trn_LanguageCode3)
+  UNIQUE KEY trn_composite (trn_Source,trn_Code,trn_LanguageCode),
+  KEY trn_LanguageCode (trn_LanguageCode)
 ) ENGINE=InnoDB COMMENT='Translation table into multiple languages for all translatab';
 
 -- --------------------------------------------------------
@@ -1015,7 +1016,7 @@ CREATE TABLE usrWorkingSubsets (
   sys_dbSubSubVersion,sys_eMailImapServer,sys_eMailImapPort,
   sys_eMailImapProtocol,sys_eMailImapUsername,sys_eMailImapPassword,
   sys_UGrpsdatabase,sys_OwnerGroupID,sys_ConstraintDefaultBehavior,sys_MediaFolders)
-  VALUES (1,0,1,3,8,NULL,NULL,NULL,NULL,NULL,NULL,1,'locktypetotype','uploaded_files');
+  VALUES (1,0,1,3,9,NULL,NULL,NULL,NULL,NULL,NULL,1,'locktypetotype','uploaded_files');
 
   -- Note: database sub version updated manually to '1' at 6pm 22/8/12
   -- 0 is everyone, 1 is the owning admins group, 2 is default dbAdmin user

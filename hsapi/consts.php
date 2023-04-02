@@ -164,6 +164,12 @@ define('WEBSITE_THUMBNAIL_SERVICE', $websiteThumbnailService);
 //Expose all relationship vocabularies as options for term fields.
 define("HEURIST_UNITED_TERMS", true);
 
+//common languages for translation database definitions (ISO639-1 codes)
+if(!isset($common_languages_for_translation)){
+    $common_languages_for_translation = array('en'=>'English','fr'=>'French','zh'=>'Mandarin','es'=>'Spanish','ar'=>'Arabic','de'=>'German');    
+}
+define ("HEURIST_LANGUAGES_COMMON", json_encode($common_languages_for_translation));
+
 //---------------------------------
 // used in Uploadhandler.php
 define('HEURIST_ALLOWED_EXT', 

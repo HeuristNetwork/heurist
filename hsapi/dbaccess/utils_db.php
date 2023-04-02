@@ -524,6 +524,7 @@
     * @param mixed $table_prefix  - config array of fields or table prefix
     * @param mixed $record   - array(fieldname=>value) - all values considered as String except when field ended with ID
     *                          fields that don't have specified prefix are ignored
+    * @param boolean $allow_insert_with_newid if true, negative record id will be abs and turns into new record id 
     */
     function mysql__insertupdate($mysqli, $table_name, $table_prefix, $record, $allow_insert_with_newid=false){
 
@@ -1448,12 +1449,28 @@ UNIQUE KEY swf_StageKey (swf_RecTypeID, swf_Stage)
                 }
             }
             
-            
-            //update version
-            if($dbVerSubSub<8){
-                $mysqli->query('UPDATE sysIdentification SET sys_dbVersion=1, sys_dbSubVersion=3, sys_dbSubSubVersion=8 WHERE 1');
+            if($dbVerSubSub<9){
+                $mysqli->query('DROP TABLE IF EXISTS defTranslations;');
+                $mysqli->query(<<<'DEFTAB'
+CREATE TABLE defTranslations (
+  trn_ID int unsigned NOT NULL auto_increment COMMENT 'Primary key of defTranslations table',
+  trn_Source varchar(64) NOT NULL COMMENT 'The column to be translated (unique names identify source)',
+  trn_Code int unsigned NOT NULL COMMENT 'The primary key / ID in the table containing the text to be translated',
+  trn_LanguageCode char(2) NOT NULL COMMENT 'The translation language code ISO639',
+  trn_Translation varchar(20000) NOT NULL COMMENT 'The translation of the text in this location (table/field/id)',
+  trn_Modified timestamp NOT NULL default CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP COMMENT 'Date of last modification of this record, used to get last updated date for table',
+  PRIMARY KEY  (trn_ID),
+  UNIQUE KEY trn_composite (trn_Source,trn_Code,trn_LanguageCode),
+  KEY trn_LanguageCode (trn_LanguageCode)
+) ENGINE=InnoDB COMMENT='Translation table into multiple languages for all translatab';
+DEFTAB);
             }
             
+            //update version
+            if($dbVerSubSub<9){
+                $mysqli->query('UPDATE sysIdentification SET sys_dbVersion=1, sys_dbSubVersion=3, sys_dbSubSubVersion=9 WHERE 1');
+            }
+
             
             //import field 2-1080 Workflowstages
             if($dbVerSubSub<4 && !(ConceptCode::getDetailTypeLocalID('2-1080')>0)){

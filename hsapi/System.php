@@ -1157,6 +1157,8 @@ error_log(print_r($_REQUEST, true));
                     
                     'need_encode'=>$needEncodeRecordDetails, 
                     
+                    'common_languages'=>HEURIST_LANGUAGES_COMMON,
+                    
                     'nakala_api_key'=>$this->get_system('sys_NakalaKey'),
                     
                     'pwd_DatabaseCreation'=> (strlen(@$passwordForDatabaseCreation)>6), 
