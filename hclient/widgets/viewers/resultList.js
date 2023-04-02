@@ -4384,7 +4384,7 @@ setTimeout("console.log('2. auto='+ele2.height());",1000);
                     }
 
                     if(record.hasOwnProperty('d')){
-                        rec_div.addClass(record.d[dty_id].join(' '));  
+                        rec_div.addClass('c' + record.d[dty_id].join(' c'));  
                     }
                 });
             }else{
