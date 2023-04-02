@@ -401,7 +401,6 @@ $.widget( "heurist.emailForm", {
         }
         
         if(err_text==''){
-
             var fields = {
                 website_id: this.options.website_record_id,
                 person: this._element_form.find('#letter_name').val(),

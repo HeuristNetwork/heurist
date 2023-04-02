@@ -41,8 +41,12 @@ class DbEntityBase
     */
     protected $config;  
     
-    //name of primary key field from $config
+    //name of primary key field from $config  by dty_Role="primary"
     protected $primaryField; 
+
+
+    //names of multilang fiekds from $config by rst_MultiLang=1
+    protected $multilangFields = array(); 
     
     /*
         fields structure description from json (used in validataion and access)
@@ -58,6 +62,14 @@ class DbEntityBase
     * @var array
     */
     protected $records = array();
+    
+    
+    /**
+    * keeps translated values for fields that are extracted from request in prepareRecords
+    * 
+    * @var array
+    */
+    protected $translation = array();
     
     
     /**
@@ -419,6 +431,8 @@ class DbEntityBase
                                     $this->config['tableName'], $this->fields,
                                     $values );
 
+            $isinsert = (intval(@$record[$this->primaryField])<1);
+                                    
             if($ret===true || $ret==null){ //it returns true for non-numeric primary field
                    $results[] = $record[$this->primaryField];
             }else if(is_numeric($ret)){
@@ -434,6 +448,35 @@ class DbEntityBase
                         'Cannot save data in table '.$this->config['entityName'], $ret);
                     return false;
             }
+            
+            //update translations
+            if(is_array(@$this->translation[$rec_idx]) && count($this->translation[$rec_idx])>0)
+            {
+                foreach($this->translation[$rec_idx] as $fieldname=>$langs){
+                    //delete previous translations for this record
+                    if(!$isinsert){
+                        $mysqli->query('DELETE FROM defTranslations where trn_Source="'
+                            .$fieldname.'" AND trn_Code='.$this->records[$rec_idx][$this->primaryField]);
+                    }
+                    
+                    foreach($langs as $lang=>$value){
+                        if($value!=null && trim($value)!=''){
+                            mysql__insertupdate($mysqli, 
+                                    'defTranslations', 'trn',
+                            array('trn_ID'=>0,
+                                  'trn_Source'=>$fieldname,          
+                                  'trn_Code'=>$this->records[$rec_idx][$this->primaryField],
+                                  'trn_LanguageCode'=>$lang,
+                                  'trn_Translation'=>$value));
+                        }
+                    }
+                }
+                
+                
+                
+            }
+            
+            
             
         }//for records
         if($this->need_transaction){
@@ -466,11 +509,30 @@ class DbEntityBase
         
         $mysqli = $this->system->get_mysqli();
         
+        if(count($this->recordIDs)>1){
+            $recids_compare = ' in ('.implode(',', $this->recordIDs).')';
+        }else{
+            $recids_compare = ' = '.$this->recordIDs[0];    
+        }
+        
         
         $mysqli->query('SET foreign_key_checks = 0');
-        $query = 'DELETE FROM '.$this->config['tableName'].' WHERE '.$this->primaryField.' in ('.implode(',', $this->recordIDs).')';
+        $query = 'DELETE FROM '.$this->config['tableName'].' WHERE '.$this->primaryField
+                .$recids_compare;
         $ret = $mysqli->query($query);
         $affected = $mysqli->affected_rows;
+        
+        //
+        // delete from translation table all fields that starts with current table prefix and with given record ids
+        // array('rty','dty','ont','vcb','trm','rst','rtg')
+        //
+        if(count($this->multilangFields)>0)
+        {
+            $mysqli->query('DELETE FROM defTranslations where trn_Source LIKE "'
+                                .$this->config['tablePrefix'].'%" AND trn_Code '
+                                .$recids_compare);
+        }
+        
         $mysqli->query('SET foreign_key_checks = 1');
         
         if(!$ret){
@@ -573,6 +635,10 @@ class DbEntityBase
             }else{
                 if(!$isinsert) continue;
                 $value = null;
+            }
+            
+            if(@$field_config['rst_MultiLang'] && is_array($value)){
+                $value = count($value)>0?$value[0]:'';
             }
             
             if( ( $value===null  || trim($value)=='' ) && 
@@ -695,9 +761,11 @@ class DbEntityBase
     
     //
     // read fields definition from config file
-    // assign primaryField
+    // assign primaryField, multilangFields
     //
     private function _readFields($fields){
+        
+        //$this->multilangFields = array();
 
         foreach($fields as $field){
             
@@ -713,7 +781,9 @@ class DbEntityBase
                 if(@$field['dtFields']['dty_Role']=='primary'){
                     $this->primaryField = $field['dtID'];
                 }
-                
+                if(@$field['dtFields']['rst_MultiLang']){
+                    array_push($this->multilangFields, $field['dtID']);
+                }
             }
         }
         
@@ -870,6 +940,7 @@ class DbEntityBase
     // it is used in delete, save
     //            
     //  fields:[fldname:value,fieldname2:values,.....]
+    //  translation:[fldname:"lang:value",fieldname2:"lang:value",.....]
     //
     protected function prepareRecords(){
         //fields contains record data
@@ -882,7 +953,7 @@ class DbEntityBase
                 $this->system->addError(HEURIST_INVALID_REQUEST, "Missing 'fields' parameter. Fields are not defined");
                 return false;    
         }
-        //detect wheter this is multi record save
+        //detect whether this is multi record save
         if(array_keys($this->data['fields']) !== range(0, count($this->data['fields']) - 1)){
             //number of keys equals to number of entries it means single record
             $this->records = array();
@@ -893,14 +964,51 @@ class DbEntityBase
             $this->records = $this->data['fields'];
         }
         
+        if(defined('HEURIST_LANGUAGES_COMMON')){
+            $allowed_languages = json_decode(HEURIST_LANGUAGES_COMMON, true);
+            $allowed_languages = array_keys($allowed_languages);
+        }
+        
         //exctract primary keys
         $this->recordIDs = array();
         foreach($this->records as $idx=>$record){
             if($this->is_addition){
                 $this->records[$idx][$this->primaryField] = 0;
             }
-            if(@$record[$this->primaryField]>0){
-                $this->recordIDs[] = $record[$this->primaryField];
+            $rec_ID = @$this->records[$idx][$this->primaryField];
+            if($rec_ID>0){
+                $this->recordIDs[] = $rec_ID;
+            }
+            
+            //extract translated values into separate array
+            foreach($this->multilangFields as $fieldname){
+                $values = $record[$fieldname];
+                if(is_array($values)){
+                    $mainvalue = null;
+                    foreach($values as $k => $val){
+                        if(is_string($val) && mb_strlen($val)>3 && $val[2]==':' 
+                            && in_array(substr($val,0,2), $allowed_languages))
+                        {
+                            $lang = substr($val,0,2);
+                            $val = substr($val,3);
+                            if(!@$this->translation[$idx]){
+                                $this->translation[$idx] = array();  
+                            } 
+                            if(!@$this->translation[$idx][$fieldname]){
+                                $this->translation[$idx][$fieldname] = array();
+                            }
+                            
+                            $this->translation[$idx][$fieldname][$lang] = $val;
+                        
+                        }else if(!$mainvalue){
+                            //without lang prefix, take first only
+                            $mainvalue = $val;
+                        } 
+                    }//values
+                    if($mainvalue!=null && @$this->translation[$idx][$fieldname]){
+                        $this->records[$idx][$fieldname] = $mainvalue;    
+                    }
+                }
             }
         }
        

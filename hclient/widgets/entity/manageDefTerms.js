@@ -49,7 +49,8 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
 
     options:{
         vocab_type:null, // vocab type, enum or relation
-        create_one_term: false // only allow the creation of one term, returns new term's ID
+        create_one_term: false, // only allow the creation of one term, returns new term's ID
+        edit_need_load_fullrecord: true
     },
 
     //
@@ -91,7 +92,7 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
         this.options.edit_height = 660;
         }*/
         this.options.edit_height = 440;
-        this.options.edit_width = (this.options.auxilary=='term')?550:610;
+        this.options.edit_width = (this.options.auxilary=='term')?600:660;
 
         this._super();
         
@@ -428,39 +429,6 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
                     view_mode: 'list',
                     pagesize: 999999,
                     recordDivEvenClass:'', //suppress highlight for even lines
-                    /*  INLINE EDITOR disabled 2020-12-01            
-                    recordview_onselect:'inline',
-                    expandDetailsOnClick: false,
-                    rendererExpandDetails: function(recordset, trm_id){
-                    if(true || this.options.view_mode=='list'){
-                    var $rdiv = $(this.element).find('div[recid='+trm_id+']');
-                    var ele = $('<div>')
-                    .attr('data-recid', $rdiv.attr('recid'))
-                    .css({'max-height':'255px','overflow':'hidden','height':'255px', })
-                    .addClass('record-expand-info');
-                    ele.appendTo($rdiv);
-
-                    $rdiv.addClass('selected expanded');
-
-                    if(this.options.view_mode!='list'){
-                    $rdiv.css({width:'97%', height:'266px', outline:'red'});
-                    ele.css('position','initial');
-                    }
-
-                    that._showEditorInline(ele, trm_id);
-
-                    if(this.options.view_mode=='list'){
-                    ele.css('width','100%');
-                    ele.find('.ent_wrapper:first').css({'top':25,margin:'4px 5%',border:'1px gray solid'});
-                    }else{
-                    ele.find('.ent_wrapper:first').css({'top':25});
-                    }
-
-                    }else{
-                    that.addEditRecord(trm_id);
-                    }
-                        return null;
-                    },*/
                     draggable: function(){
 
                         that.recordList.find('.rt_draggable > .item').draggable({ //    
@@ -781,63 +749,6 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
         }
 
     },         
-
-
-    //
-    //
-    /*
-    selectedRecords: function(selected_recs){
-
-    var res = this._super( selected_recs );            
-
-    if(selected_recs && this.options.auxilary=='vocabulary' && this.options.reference_trm_manger &&
-    this.options.reference_trm_manger.manageDefTerms('option','edit_mode')=='inline'){
-
-    //inline editor for vocabularies          
-    this._onActionListener(event, {action:'edit'});
-    }
-    return res;
-    },*/
-
-    //
-    // DISABLE 2020-12-01
-    //
-    _showEditorInline: function(container, recID){
-
-
-        if(container.manageDefTerms('instance') 
-            && container.manageDefTerms('option','auxilary')==this.options.auxilary)
-        {
-
-            container.manageDefTerms('option','edit_recordset', this.recordList.resultList('getRecordSet'));
-            container.manageDefTerms('option','trm_ParentTermID', this.options.trm_VocabularyID);
-            container.manageDefTerms('option','trm_VocabularyGroupID', this.options.trm_VocabularyGroupID);
-            container.manageDefTerms( 'addEditRecord', recID );
-
-        }else{
-
-            var that = this;
-            var rg_options = {
-                isdialog: false, 
-                isFrontUI: true,
-                container: container,
-                title: 'Edit '+this.options.auxilary,
-                select_mode: 'manager',
-                edit_mode: 'editonly',
-                edit_recordset: this.recordList.resultList('getRecordSet'), //filterd one
-                auxilary: this.options.auxilary,
-                reference_trm_manger: this.element,
-                rec_ID: recID,
-                trm_VocabularyID: this.options.trm_VocabularyID,
-                trm_VocabularyGroupID: this.options.trm_VocabularyGroupID,
-                onClose: function(){
-                    that.recordList.resultList('closeExpandedDivs');
-                }
-            };
-            window.hWin.HEURIST4.ui.showEntityDialog('defTerms', rg_options); // it recreates  
-        }
-
-    },    
 
 
     //

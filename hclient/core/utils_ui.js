@@ -597,7 +597,13 @@ window.hWin.HEURIST4.ui = {
                     &&
                     (showAllRectypes || $Db.rty(rtyID,'rty_ShowInLists')==1)){
                         
-                   groups[$Db.rty(rtyID,'rty_RecTypeGroupID')]['rty'].push(rtyID);
+                    var grp_id = $Db.rty(rtyID,'rty_RecTypeGroupID');
+                    if(groups[grp_id] && groups[grp_id]['rty']){
+                        groups[grp_id]['rty'].push(rtyID);
+                    }else{
+                        console.log('group ',grp_id,'not found for ',rtyID);
+                    }
+                        
                 }
                 
             });
@@ -2251,29 +2257,38 @@ window.hWin.HEURIST4.ui = {
     },
 
     //
-    //  @todo - load from database
+    //  List of languages defined in heurist config ini
+    //  if $select is not define it return html string with <option>s
     //    
     createLanguageSelect: function($select, topOptions, defValue, showName){
         
-            var context = [{code:'en',name:'English'},
-            {code:'fr',name:'French'},{code:'zh',name:'Mandarin'},{code:'es',name:'Spanish'},
-            {code:'ar',name:'Arabic'},{code:'de',name:'German'}];
+            /*var context = '{"en":"English","fr":"French","zh":"Mandarin","es":"Spanish","ar":"Arabic","de":"German"}';*/
             
-            $select.empty();
-
+            var languages = JSON.parse(window.hWin.HAPI4.sysinfo.common_languages);
+            var content = [];
+            
             var opts = topOptions?topOptions:[];
-            if(context && context.length>0){
-                for (var i=0; i<context.length; i++){
-                    opts.push({key:context[i].code, title:showName?context[i].name:context[i].code});
+            var keys = Object.keys(languages);
+            if(keys.length>0){
+                for (var i in keys){
+                    var code = keys[i]; 
+                    opts.push({key:code, title:(showName===false?code:languages[code])});
+                    
+                    content.push('<option value="'+code+'">'+(showName===false?code:languages[code])+'</option>');
                 } // for
             }
             
-            window.hWin.HEURIST4.ui.fillSelector($select[0], opts);
-            if(defValue){
-                $select.val( defValue );
+            if($select==null){
+                return content.join('');
+            }else{
+                $select.empty();
+                window.hWin.HEURIST4.ui.fillSelector($select[0], opts);
+                if(defValue){
+                    $select.val( defValue );
+                }
+                window.hWin.HEURIST4.ui.initHSelect($select[0], false);
             }
-            window.hWin.HEURIST4.ui.initHSelect($select[0], false);
-
+            
     },
 
     //

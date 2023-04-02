@@ -1854,7 +1854,6 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
             refreshEntityData: function (entityNames, callback) {
 
                 //var s_time = new Date().getTime() / 1000;
-
                 //'multi':1,   
                 _callserver('entityScrud', { a: 'structure', 'entity': entityNames, 'details': 'full' },
                     function (response) {
@@ -1885,13 +1884,14 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
             //
             getEntityData: function (entityName, force_reload, callback) {
 
+                
                 if ($.isEmptyObject(entity_data[entityName]) || force_reload == true) {
 
                     var det = 'list';
-                    if (entityName == 'defRecStructure') {
+                    if (entityName == 'defRecStructure'){ //|| entityName == 'defTerms') {
                         det = 'full';
                     }
-
+                    
                     //var s_time = new Date().getTime() / 1000;
 
                     _callserver('entityScrud', { a: 'search', 'entity': entityName, 'details': det },

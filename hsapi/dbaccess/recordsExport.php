@@ -303,7 +303,7 @@ public static function output($data, $params){
                     "@language": "en"
                 }
             ],
-            "canvases": [
+            "canvases": [   
 IIIF;
         }else{
             

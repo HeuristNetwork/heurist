@@ -390,7 +390,7 @@ class DbEntitySearch
     //
     // $calculatedFields - is function that returns array of fieldnames or calculate and adds values of this field to result row
     //
-    public function execute($query, $is_ids_only, $entityName, $calculatedFields=null){        
+    public function execute($query, $is_ids_only, $entityName, $calculatedFields=null, $multiLangs=null){        
         
         $mysqli = $this->system->get_mysqli();
         
@@ -433,8 +433,13 @@ class DbEntitySearch
                     // read all field names
                     $_flds =  $res->fetch_fields();
                     $fields = array();
+                    $fields_idx = array();
                     foreach($_flds as $fld){
                         array_push($fields, $fld->name);
+                        
+                        if($multiLangs && in_array($fld->name, $multiLangs)){
+                            $fields_idx[$fld->name] = count($fields)-1;    
+                        }
                     }
                     //add calculated fields to header
                     if($calculatedFields!=null){
@@ -451,15 +456,15 @@ class DbEntitySearch
                         if($calculatedFields!=null){
                             $row = $calculatedFields($fields, $row); //adds values
                         }
-                        
-                        $records[$row[0]] = $row;
+                        $records[$row[0]] = $row;   //record[primary key] = row from db table
                         $order[] = $row[0];
                     }
                     $res->close();
                     
                     
                     if(@$this->data['restapi']==1){
-                        
+                       
+                       //converts records to [fieldname=>value,... ]
                        $response = array(); 
                        foreach ($records as $record) {
                            $rec = array();
@@ -473,6 +478,33 @@ class DbEntitySearch
                        }
 
                     }else{    
+
+                        //search for translations
+                        if($multiLangs!=null && count($order)==1){
+                            
+                            $query = 'SELECT trn_Code, trn_Source, trn_LanguageCode, trn_Translation FROM defTranslations '
+                            .'WHERE trn_Code = '.$order[0]   //'IN ('.implode(',',$order).') '
+                            .' AND trn_Source IN ("'.implode('","', $multiLangs).'")';
+                            
+                            $res = $mysqli->query($query);
+                            if ($res){
+                                while ($row = $res->fetch_row()){
+                                    
+                                    $idx = $fields_idx[$row[1]];
+                                    
+                                    if($idx>0){
+                                        if(!is_array($records[$row[0]][$idx])){
+                                            $records[$row[0]][$idx] = array($records[$row[0]][$idx]);
+                                        }
+                                        array_push($records[$row[0]][$idx], $row[2].':'.$row[3]);    
+                                    }
+                                }
+                                $res->close();
+                            }
+                            
+                        }
+
+                        //form result array
                         $response = array(
                                 'queryid'=>@$this->data['request_id'],  //query unqiue id set in doRequest
                                 'pageno'=>@$this->data['pageno'],  //page number to sync

@@ -825,7 +825,7 @@ mapDraw.js initial_wkt -> parseWKT -> GeoJSON -> _loadGeoJSON (as set of separat
         
         return {geojson:res_geo, timeline:res_time, geojson_ids:res_geo_ids};
                 
-    }//end _toTimemap
+    }//end _toGeoJSON
     
    
     // some important id for record and detail types in local values
@@ -1978,7 +1978,7 @@ mapDraw.js initial_wkt -> parseWKT -> GeoJSON -> _loadGeoJSON (as set of separat
         },
         */ 
         /**
-        * Converts recordSet to OS Timemap dataset
+        * Converts recordSet to geoJSON (for leaflet mapping)
         * 
         * geoType 
         * 0, undefined - all
@@ -1989,6 +1989,14 @@ mapDraw.js initial_wkt -> parseWKT -> GeoJSON -> _loadGeoJSON (as set of separat
             return _toGeoJSON(filter_rt, geoType, max_limit);
         },
         
+        /**
+        * Converts recordSet to GoogleMap Timemap dataset
+        * 
+        * geoType 
+        * 0, undefined - all
+        * 1 - main geo only
+        * 2 - rec_Shape only
+        */
         toTimemap: function(dataset_name, filter_rt, symbology, geoType){
             return _toTimemap(dataset_name, filter_rt, symbology, geoType);
         },

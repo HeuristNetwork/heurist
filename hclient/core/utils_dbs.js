@@ -22,13 +22,13 @@ Selectors:
 
 TERMS
 
-getInverseTermById
+getInverseTermById  - (used in record edit for relmarker fields)
 
-getTermValue - returns label and code for term by id
+getTermValue - Returns Label and Termcode in brackets (optionally) (used in EN and faceted search)
 
-getTermByCode - returns term by code in given vocab
+getTermByCode - returns term by code in given vocab (used in lookup geonames only)
 
-getTermByLabel
+getTermByLabel - returns term ID in vocabulary by label (in record edit for search and duplication check)
 
 getTermVocab - returns vocabulary for given term - real vocabulary (not by reference)
 
@@ -36,7 +36,7 @@ trm_InVocab - returns true if term belongs to vocabulary (including by reference
 
 isTermByReference - return false if given term belongs to vocabulary, otherwise returns level of reference
 
-getColorFromTermValue - Returns hex color by label or code for term by id
+getColorFromTermValue - Returns hex color by label or code for term by id (for googlemaps only)
 
     trm_TreeData  - returns hierarchy for given vocabulary as a flat array, recordset or tree data
     trm_HasChildren - is given term has children
@@ -178,13 +178,13 @@ window.hWin.HEURIST4.dbs = {
     
 
     /**
+    *  Returns Label and Termcode in brackets (optionally)
      * @function getTermvalue
      * Returns label and code for term by id
      * @param {number} termID 
      * @param {number} withcode 
      * @returns {string} Term name and its code if any
      */
-
     getTermValue: function(termID, withcode){
         
         var term = $Db.trm(termID);
@@ -206,11 +206,13 @@ window.hWin.HEURIST4.dbs = {
     },
     
     /**
+     * Returns empty string if term is not found. trm_InverseTermId if inverse term is found or termID if it is not  
+     * (used in record edit for relmarker fields)
+     * 
      * @function getInverseTermById
      * get inverse term id
      * @param {number} termID 
      * @returns {string|number} 
-     * empty string if term is not found. invtermID if inverse term is found or termID if it is not  
      */
     
     getInverseTermById: function(termID){
@@ -224,13 +226,14 @@ window.hWin.HEURIST4.dbs = {
     },
     
     /**
-     * @function getColorFromTermValue
-     * Returns hex color by label or code for term by id
-     * @param {number} termID 
-     * @returns {string}
-     */
-
-    
+    *  Converts term code or label for hex color - used in recordset.toTimemap only
+    *  (for google maps)
+    * 
+    * @function getColorFromTermValue
+    * Returns hex color by label or code for term by id
+    * @param {number} termID 
+    * @returns {string}
+    */
     getColorFromTermValue: function(termID){
 
         var termName, termCode='';

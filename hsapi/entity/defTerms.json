@@ -37,7 +37,8 @@
                         "rst_DisplayWidth":40,
                         "rst_DefaultValue":"",
                         "rst_RequirementType":"required",
-                        "rst_MaxValues":1
+                        "rst_MaxValues":1,
+                        "rst_MultiLang":1
                     }
                 },
                 {
@@ -68,7 +69,8 @@
                         "dty_Size":1000,
                         "rst_DisplayWidth":60,
                         "rst_DisplayHeight":2,
-                        "rst_DisplayHelpText": "A concise but comprehensive description of this term or category."
+                        "rst_DisplayHelpText": "A concise but comprehensive description of this term or category.",
+                        "rst_MultiLang":1
                     }
                 },
                 {

@@ -94,6 +94,7 @@ class DbDefTerms extends DbEntityBase
               return false;   
         }
         
+        $multiLangs = null;
         $orderBy = '';
         //compose WHERE 
         $where = array();    
@@ -144,7 +145,7 @@ class DbDefTerms extends DbEntityBase
             .',trm_VocabularyGroupID,trm_OrderInBranch,trm_Code,trm_Status,trm_Domain,trm_SemanticReferenceURL'
             .',trm_OriginatingDBID,trm_IDInOriginatingDB, "" as trm_Parents'; //trm_Modified
             
-            
+            $multiLangs = $this->multilangFields;
             //$orderBy = ' ORDER BY trm_Label ';
             //$this->data['details'] = implode(',', array_keys($this->fields) );
         }else {
@@ -184,7 +185,7 @@ class DbDefTerms extends DbEntityBase
          }
          $query = $query.$orderBy.$this->searchMgr->getLimit().$this->searchMgr->getOffset();
         
-        $res = $this->searchMgr->execute($query, $is_ids_only, 'defTerms');
+        $res = $this->searchMgr->execute($query, $is_ids_only, 'defTerms', null, $multiLangs );
         return $res;
 
     }

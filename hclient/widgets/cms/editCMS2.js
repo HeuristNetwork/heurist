@@ -1224,17 +1224,18 @@ var sMsg = '<p>Heurist\'s CMS editor has been upgraded to a new system which is 
                         })
 
                     }else if(action=='translate'){
+                        
                         //define new translation - show popup to select language
                         window.hWin.HEURIST4.msg.showPrompt('<p>Select language to translate content: '
 +"<select id=\'dlg-prompt-value\' class=\'text ui-corner-all\'"
 +" style=\'max-width: 250px; min-width: 10em; width: 250px; margin-left:0.2em\' autocomplete=\'off\'>"
-+        
-"<option value=\'en\'>English</option><option value=\'fr\'>French</option><option value=\'de\'>German</option><option value=\'zh\'>Mandarin</option><option value=\'es\'>Spanish</option><option value=\'ar\'>Arabic</option><option value=\'\'>Armenian</option><option value=\'sr\'>Bosnian</option><option value=\'id\'>Bahasa-Indonesian</option><option value=\'\'>Bengali</option><option value=\'\'>Bulgarian</option><option value=\'\'>Burmese</option><option value=\'\'>Cantonese</option><option value=\'\'>Croatian</option><option value=\'\'>Czech</option><option value=\'\'>Danish</option><option value=\'\'>Dutch</option><option value=\'\'>Estonian</option><option value=\'\'>Farsi</option><option value=\'\'>Finnish</option><option value=\'\'>Greek</option><option value=\'\'>Hebrew</option><option value=\'\'>Hindi</option><option value=\'\'>Hungarian</option><option value=\'\'>Italian</option><option value=\'\'>Japanese</option><option value=\'\'>Khmer</option><option value=\'\'>Korean</option><option value=\'\'>Latvian</option><option value=\'\'>Lithuanian</option><option value=\'\'>Malay</option><option value=\'\'>Norwegian</option><option value=\'\'>Polish</option><option value=\'\'>Portuguese</option><option value=\'\'>Romanian</option><option value=\'\'>Russian</option><option value=\'\'>Slovak</option><option value=\'\'>Slovenian</option><option value=\'\'>Swahili Swedish</option><option value=\'\'>Tagalog</option><option value=\'\'>Taiwanese</option><option value=\'\'>Thai</option><option value=\'\'>Turkish</option><option value=\'\'>Ukrainian</option><option value=\'\'>Urdu</option><option value=\'\'>Vietnamese</option>"
++ window.hWin.HEURIST4.ui.createLanguageSelect() //returns content for language selector
+//+        
+//"<option value=\'en\'>English</option><option value=\'fr\'>French</option><option value=\'de\'>German</option><option value=\'zh\'>Mandarin</option><option value=\'es\'>Spanish</option><option value=\'ar\'>Arabic</option><option value=\'\'>Armenian</option><option value=\'sr\'>Bosnian</option><option value=\'id\'>Bahasa-Indonesian</option><option value=\'\'>Bengali</option><option value=\'\'>Bulgarian</option><option value=\'\'>Burmese</option><option value=\'\'>Cantonese</option><option value=\'\'>Croatian</option><option value=\'\'>Czech</option><option value=\'\'>Danish</option><option value=\'\'>Dutch</option><option value=\'\'>Estonian</option><option value=\'\'>Farsi</option><option value=\'\'>Finnish</option><option value=\'\'>Greek</option><option value=\'\'>Hebrew</option><option value=\'\'>Hindi</option><option value=\'\'>Hungarian</option><option value=\'\'>Italian</option><option value=\'\'>Japanese</option><option value=\'\'>Khmer</option><option value=\'\'>Korean</option><option value=\'\'>Latvian</option><option value=\'\'>Lithuanian</option><option value=\'\'>Malay</option><option value=\'\'>Norwegian</option><option value=\'\'>Polish</option><option value=\'\'>Portuguese</option><option value=\'\'>Romanian</option><option value=\'\'>Russian</option><option value=\'\'>Slovak</option><option value=\'\'>Slovenian</option><option value=\'\'>Swahili Swedish</option><option value=\'\'>Tagalog</option><option value=\'\'>Taiwanese</option><option value=\'\'>Thai</option><option value=\'\'>Turkish</option><option value=\'\'>Ukrainian</option><option value=\'\'>Urdu</option><option value=\'\'>Vietnamese</option>"
 +"</select></p>",
 function(value){
     if(value){
         //change or add content of specified language
-            
         _ws_body.layout().open(options.editor_pos);    
     }            
 },
