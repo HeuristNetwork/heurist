@@ -26,7 +26,8 @@ $.widget( "heurist.staticPage", {
     options: {
         title: '',
         url:null,
-        isframe: false
+        isframe: false,
+        init_at_once: false
     },
 
     _loaded_url:null,
@@ -47,14 +48,16 @@ $.widget( "heurist.staticPage", {
                 that._refresh();
             }
         });
-
         
         $(this.document).on(window.hWin.HAPI4.Event.ON_CREDENTIALS, function(e, data) {
             that._loaded_url = null; //reload on login-logout
             that._refresh();
         });
         
-        that._refresh();
+        
+        if(this.options.init_at_once){
+            that._refresh();  
+        }        
         //$(this.document).on(window.hWin.HAPI4.Event.ON_SYSTEM_INITED, function(e, data) {});
 
     }, //end _create
