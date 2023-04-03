@@ -167,7 +167,7 @@ $.widget( "heurist.search_faceted_wiz", {
             draggable: this.options.is_modal, //!this.options.is_h6style,
             //position: this.options.position,
             
-            title: window.hWin.HR('Facet builder'),
+            title: window.hWin.HR('Facets builder'),
             resizeStop: function( event, ui ) {//fix bug
                     var pele = that.element.parents('div[role="dialog"]');
                     that.element.css({overflow: 'none !important', 'width':pele.width()-24 });

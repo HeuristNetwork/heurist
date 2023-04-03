@@ -149,7 +149,7 @@ $.widget( "heurist.svs_list", {
         if(this.options.is_h6style){
             this.element.css({'overflow':'hidden'});
             //add title 
-            this.div_header =  $('<div class="ui-heurist-header" style="top:0px;">Saved filters</div>') 
+            this.div_header =  $('<div class="ui-heurist-header" style="top:0px;">'+window.hWin.HR('Saved Filters')+'</div>') 
             // <span style="font-style:italic;font-size:x-small">by workgroups</span>
                 .hide()
                 .appendTo(this.element);
@@ -208,12 +208,13 @@ $.widget( "heurist.svs_list", {
                 }
 
                 if(!this.isPublished){
+                    /*
                     this.helper_top = $( '<div>'+window.hWin.HR('right-click in list for menu')+'</div>' )
-                    //.addClass('logged-in-only heurist-helper1')
                     .appendTo( $( "<div>" )
                         .css({'padding':'0.2em 0 0 1.2em','font-size':'1em','font-style':'italic'})
                         .addClass('svs-header')
                         .appendTo(this.div_header) );
+                    */    
                 }else{
                     toppos = 2;
                 }
@@ -378,7 +379,7 @@ $.widget( "heurist.svs_list", {
         }else if(key=='allowed_UGrpID' || key=='hide_header'){
             this._refresh();
         }else if(key=='filter_by_type'){
-            this.div_header.text(value=='2'?'Rules':'Saved filters');
+            this.div_header.text(window.hWin.HR(value=='2'?'RuleSets':'Saved Filters'));
             var that = this;            
             $(this.treeviews, function(groupID, tree){
                 that._applyTreeViewFilter(groupID, value);            

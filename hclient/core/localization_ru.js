@@ -224,7 +224,7 @@ regional['ru'] = {
     'Recent': 'Недавние',
     'All': 'Все',
     'Entities': 'Типы записей',
-    'Saved filters': 'Каталог фильтров',
+    'Saved Filters': 'Каталог фильтров',
     'Build': 'Создать',
     'Filter builder': 'Условия поиска',
     'Facets builder': 'Многогранный поиск',

@@ -731,7 +731,7 @@ function hSvsEdit(args) {
                 isRules = _fromDataToUI(svsID, squery, groupID, allowChangeGroupID);
             }
             
-            edit_dialog.dialog("option",'title', window.hWin.HR(isRules?'Edit RuleSet':'Edit saved filter criteria'));
+            edit_dialog.dialog("option",'title', window.hWin.HR(isRules?'Edit RuleSet':'Edit saved filter'));
 
             edit_dialog.dialog("option",'height', is_short?360:520 );
             if(is_short){

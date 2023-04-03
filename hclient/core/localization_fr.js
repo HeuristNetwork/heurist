@@ -145,7 +145,8 @@ regional['fr'] = {
     'Recent changes': 'Changements récents',
     'All records': 'Tous les records',
     'All (date order)': 'Tous (ordonnés par date)',
-    'Edit saved search': 'Éditer la recherche sauvegardée',
+    'Edit saved filter': 'Éditer la recherche sauvegardée',
+    'Edit RuleSet': 'Éditer la règle',
     'Delete saved search': 'Supprimer la recherche sauvegardée',
     'Manage Saved Searches': 'Gérer mes recherches sauvegardées',
     'Create new saved search': 'Créer une nouvelle recherche sauvegardée',
@@ -228,7 +229,8 @@ regional['fr'] = {
     'Recent': 'Ajouts récents',
     'All': 'Tous',
     'Entities': 'Par type d\'enregistrement',
-    'Saved filters': 'Filtres enregistrés',
+    'Filter by entity': 'Par type d\'enregistrement',
+    'Saved Filters': 'Filtres enregistrés',
     'Build': 'Créer',
     'Filter builder': 'Créer un filtre',
     'Facets builder': 'Créer des facettes',
@@ -236,6 +238,7 @@ regional['fr'] = {
     'Advanced': 'Avancé',
     'Rules': 'Règles',
     'Favourites': '',
+    'By Usage': 'Par Usage',
     
     //admin menu
     'Database': 'Base de données',

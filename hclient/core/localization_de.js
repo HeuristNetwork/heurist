@@ -80,7 +80,7 @@ regional['de'] = {
     'Recent': 'Kürzlich bearbeitet',
     'All': 'Alles',
     'Entities': 'Datentypen',
-    'Saved filters': 'Gespeicherte Filter',
+    'Saved Filters': 'Gespeicherte Filter',
     'Build': 'Erstellen',
     'Filter builder': 'Filterbearbeitung',
     'Facets builder': 'Facettenbearbeitung',

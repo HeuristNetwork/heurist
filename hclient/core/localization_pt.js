@@ -79,7 +79,7 @@ regional['pt'] = {
     'Recent': 'Recentes',
     'All': 'Todos',
     'Entities': 'Entidades',
-    'Saved filters': 'Filtros gardados',
+    'Saved Filters': 'Filtros gardados',
     'Build': 'Construir',
     'Filter builder': 'Construtor de filtros',
     'Facets builder': 'Construtor de facetas',

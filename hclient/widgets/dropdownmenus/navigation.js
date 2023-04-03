@@ -54,7 +54,6 @@ $.widget( "heurist.navigation", {
 
         var that = this;
         
-//console.log('>>'+this.options.language);        
         if(!this.options.language) this.options.language = 'xx'; //"xx" means use current language
 
         if(this.element.parent().attr('data-heurist-app-id') || this.element.attr('data-heurist-app-id')){

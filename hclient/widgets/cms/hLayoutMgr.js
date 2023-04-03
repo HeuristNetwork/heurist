@@ -392,9 +392,9 @@ function hLayoutMgr(){
             }
         }
         
-        var weblang = window.hWin.HEURIST4.util.getUrlParameter('weblang');
+        var weblang = window.hWin.HEURIST4.util.getUrlParameter('lang');
         if(weblang) layout.options['language'] = weblang;
-        
+
         if (app && app.script && app.widgetname) { //widgetname - function name to init widget
 
             if($.isFunction($('body')[app.widgetname])){ //OK! widget script js has been loaded            

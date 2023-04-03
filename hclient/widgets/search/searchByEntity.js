@@ -69,11 +69,13 @@ $.widget( "heurist.searchByEntity", {
         //configuration - select favorites
         if(this.options.use_combined_select){
             
-            this.combined_select = $('<div class="ui-heurist-header" style="top:0px;">Filter by entity</div>'
+            this.combined_select = $('<div class="ui-heurist-header" style="top:0px;">'+window.hWin.HR('Filter by entity')+'</div>'
                 +'<div style="top:37px;position:absolute;width:100%">'  //width:100%;
-                    +'<div class="ui-heurist-title favorites" style="width: 100%;padding:12px 0px 0px 6px;">Favorites</div>'
+                    +'<div class="ui-heurist-title favorites" style="width: 100%;padding:12px 0px 0px 6px;">'
+                                +window.hWin.HR('Favorites')+'</div>'
                     +'<ul class="by-selected" style="list-style-type:none;margin:0;padding:6px"/>'
-                    +'<div class="ui-heurist-title" style="width: 100%;border-top:1px gray solid; padding:12px 0px 0px 6px;">By Usage</div>'
+                    +'<div class="ui-heurist-title" style="width: 100%;border-top:1px gray solid; padding:12px 0px 0px 6px;">'
+                                +window.hWin.HR('By Usage')+'</div>'
                     +'<ul class="by-usage" style="list-style-type:none;margin:0;padding:6px"/>'
                     )
                 .appendTo(this.element);

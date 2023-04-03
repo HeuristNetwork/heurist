@@ -393,7 +393,7 @@ function initMainMenu( afterInitMainMenu ){
     
     _dout('initMainMenu');
     
-    var weblang = window.hWin.HEURIST4.util.getUrlParameter('weblang');
+    var weblang = window.hWin.HEURIST4.util.getUrlParameter('lang');
 
 //console.log(weblang);
 
