@@ -291,6 +291,26 @@ window.hWin.HEURIST4.dbs = {
      */
     createRectypeStructureTree: function( db_structure, $mode, rectypeids, fieldtypes, parentcode, field_order ) {
         
+        var options = {db_structure:db_structure, mode: $mode, rectypeids:rectypeids, fieldtypes:fieldtypes, parentcode:parentcode, field_order:field_order};
+    
+        return window.hWin.HEURIST4.dbs.createRectypeStructureTree_new( options );
+    },
+
+    createRectypeStructureTree_new: function( options )
+    {
+        var db_structure = options.db_structure,
+            $mode = options.mode,
+            rectypeids = options.rectypeids,
+            fieldtypes = options.fieldtypes,
+            parentcode = options.parentcode,
+            field_order = options.field_order
+            enum_mode = options.enum_mode; 
+        
+        if($mode==3 || $mode==7){
+            enum_mode = 'expanded'
+        }
+        
+        
         var DT_PARENT_ENTITY  = window.hWin.HAPI4.sysinfo['dbconst']['DT_PARENT_ENTITY'];
         
         var rst_links = $Db.rst_links();
@@ -798,24 +818,29 @@ window.hWin.HEURIST4.dbs = {
             case 'relationtype':
 
                 $res = {};
-                if($mode==3){ // title mask
-
+                
+                if(enum_mode=='expanded'){
                     $res['children'] = [
-                        {key:'term',title: 'Term',code: 'term'},       
-                        {key:'code',title: 'Code',code: 'code'},       
-                        {key:'conceptid',title: 'Con-ID',code: 'conceptid'},       
-                        {key:'internalid',title: 'Int-ID',code: 'internalid'}
-                    ];
-                }else if($mode == 7){ // smarty
-
-                    $res['children'] = [
-                        //replaced with "term" {key: 'label',title: 'Label', code: 'label'},
-                        {key:'term',title: 'Term',code: 'term'},       
+                        {key:'term',title: 'Term',code: 'term'}, //label
                         {key:'code',title: 'Code',code: 'code'},       
                         {key:'conceptid',title: 'Concept ID',code: 'conceptid'},       
+                        {key:'desc',title: 'Description',code: 'desc'},       
                         {key:'internalid',title: 'Internal ID',code: 'internalid'}
                     ];
+                    
+                    //title mask (3) or smarty (7)
+                    if($mode==3 || $mode == 7){ // title mask
+                    
+                        if($mode==3){
+                            $res['children'][2]['title'] = 'Con-ID';
+                            $res['children'][4]['title'] = 'Int-ID';
+                        }
+                    
+                        $res['children'].splice(3,1);
+                    }
                 }
+                
+                
                 break;
 
             case 'resource': // link to another record type

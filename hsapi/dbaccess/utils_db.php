@@ -31,6 +31,7 @@
     *  stripAccents
     *  prepareIds
     *  checkMaxLength - check max length for TEXT field
+    *  extractLangPrefix - splits and extract language code and value from string code:value
     * 
     *  updateDatabseToLatest4 - make changes in database structure according to the latest version
     * 
@@ -1058,7 +1059,7 @@ if($i<5){
             return null;
         }
     }
-
+    
     //
     //
     //
@@ -1105,6 +1106,28 @@ if($i<5){
             return null;
         }
         
+    }
+
+    //
+    //  splits and extract language code and value from string code:value
+    //    
+    function extractLangPrefix($val, $allowed_languages=null){
+    
+        if(is_string($val) && mb_strlen($val)>3 && $val[2]==':'){
+            
+            if(!$allowed_languages  && defined('HEURIST_LANGUAGES_COMMON')){
+                $allowed_languages = json_decode(HEURIST_LANGUAGES_COMMON, true);
+                $allowed_languages = array_keys($allowed_languages);
+            }
+
+            $lang = substr($val,0,2);
+            
+            if (in_array($lang, $allowed_languages)){
+                return array($lang, substr($val,3));
+            }
+        } 
+        
+        return array(null, $val);    
     }
     
     //

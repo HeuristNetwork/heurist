@@ -999,7 +999,7 @@ class HPredicate {
     var $field_id = null; //dty_ID
     var $field_type = null;
     var $field_term = null; //term field: array('term', 'label', 'concept', 'conceptid', 'desc', 'code') // trm_XXX fields
-    var $field_lang = null; // third or fourth code in predicate f:[dty_ID]:[trm_ID]:[lng_ISO639]
+    //var $field_lang = null; // third or fourth code in predicate f:[dty_ID]:[trm_ID]:[lng_ISO639-1]
 
     var $value;
     var $valid = false;
@@ -1079,8 +1079,12 @@ class HPredicate {
         if($ll>1){ //get field ids "f:5" -> 5
             if($this->pred_type=='f'){
                 $this->field_id = $key[1];
-                if($ll>2){ //get subfield for terms "f:5:desc:lang" 
+                if($ll>2){ //get subfield for terms "f:5:desc" 
                         $val1 = $key[2];    
+                        if(@$this->allowed_term_fields[$val1]){
+                            $this->field_term = $val1;    
+                        }
+                        /*
                         $val2 = null;
                         if($ll>3){
                             $val2 = $key[3];    
@@ -1091,7 +1095,7 @@ class HPredicate {
                         }else if(@$this->allowed_term_fields[$val2]){
                             $this->field_term = $val2;    
                             $this->field_lang = $val1;
-                        }
+                        }*/
                 }
             }else{
                 // get field id for predicates like "linkedfrom:10:240"  (10 is rectype)
@@ -2622,7 +2626,7 @@ class HPredicate {
             */
             
             //search for trm_ID
-            if(is_array($parent_ids) && count($parent_ids)>0){
+            if(is_array($parent_ids) && count($parent_ids)>0 && $this->field_term==null){
                 
                 $all_terms = null;
                 if(!$this->exact){
@@ -2643,31 +2647,64 @@ class HPredicate {
                     
             }else{
             //search for trm_Label or trm_Code
-                $value = $mysqli->real_escape_string($this->value);
                 $res  = ' in (select trm_ID from defTerms where ';
                 
                 if($this->field_term!=null){
                     //'term', 'label', 'concept', 'conceptid', 'desc', 'code'
                     $trm_Field = $this->allowed_term_fields[$this->field_term];
-
-                    
                 }else{
                     $trm_Field = 'trm_Label';
                 }
+
+                $value = $mysqli->real_escape_string($this->value);
                 
                 if($trm_Field == 'trm_ConceptId'){
-                    $res = $res.' "'.$value.'" = CONCAT(trm_OriginatingDBID,"-",trm_IDInOriginatingDB)';    
+                    $res = $res.' "'.$value
+                        .'" = CONCAT(trm_OriginatingDBID,"-",trm_IDInOriginatingDB)';    
                 }else{
-                    $res = $res.$trm_Field;
-                    if($this->exact){
-                        $res  =  $res.' ="'.$value.'"'; 
-                    } else {
-                        $res  =  $res.' LIKE "%'.$value.'%"';
+                    //check language prefix in $value
+                    list($lang, $value) = extractLangPrefix($value);
+                    
+                    if($lang!=null)
+                    {
+                        //search in translation table first
+                        $query_tran = 'SELECT trn_Code FROM defTranslations WHERE '
+                                  .'trn_Source="'.$trm_Field.'" AND '
+                                  .'trn_LanguageCode="'.$lang.'" AND '
+                                  .'trn_Translation';
+                        
+                        if($this->exact){
+                            $query_tran  =  $query_tran.' ="'.$value.'"'; 
+                        } else {
+                            $query_tran  =  $query_tran.' LIKE "%'.$value.'%"';
+                        }
+                        
+                        $ids = mysql__select_list2($mysqli, $query_tran); 
+                        
+                        if(count($ids)==0){
+                            $res = ($this->negate?'>0':'=0');
+                        }else if(count($ids)==1){
+                            $res = ($this->negate?'<>':'=').$ids[0];
+                        }else{
+                            $res = ($this->negate?' NOT':'').' IN ('.implode(',',$ids).')';    
+                        }
+                        
+                        
+                    }else{
+                    
+                        $res = $res.$trm_Field;
+                        if($this->exact){
+                            $res  =  $res.' ="'.$value.'"'; 
+                        } else {
+                            $res  =  $res.' LIKE "%'.$value.'%"';
+                        }
+                        if($this->field_term==null){
+                            $res  =  $res.' or trm_Code="'.$value.'"';
+                        }
+                        
+                        $res  =  $res.')';
                     }
-                    if($this->field_term==null){
-                        $res  =  $res.' or trm_Code="'.$value.'"';
-                    }
-                    $res  =  $res.')';
+                    
                 }
             }
             //if put negate here is will accept any multivalue enum field

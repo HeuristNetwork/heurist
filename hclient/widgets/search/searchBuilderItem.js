@@ -56,7 +56,9 @@ $.widget( "heurist.searchBuilderItem", {
         top_rty_ID: 0,
         rty_ID: 0,
         
-        dty_ID: 0, //field id or token       
+        dty_ID: 0, //field id or token   
+        
+        enum_field: null, //subfield for enums    
         
         hasFieldSelector: false,
         
@@ -322,9 +324,16 @@ $.widget( "heurist.searchBuilderItem", {
             var res = $Db.parseHierarchyCode(this.options.code, this.options.top_rty_ID);
             if(res!==false){
                 if(this.options.top_rty_ID>0){
+                    
+                    var lbl_text = res.harchy[res.harchy.length-1];
+                    if(this.options.enum_field!=null){
+                        lbl_text = lbl_text + '.'+this.options.enum_field;
+                    }
+                    
                     this.element
                         .find('span.ui-selectmenu-button>span.ui-selectmenu-text')
-                        .text(res.harchy[res.harchy.length-1]);
+                        .text(lbl_text);
+
                 }
 
                 if(res.harchy.length>2){
@@ -339,7 +348,11 @@ $.widget( "heurist.searchBuilderItem", {
                 this.label_token.text('broken!');
             }
         }else if(this.options.dty_ID>0){
-            this.label_token.text($Db.dty(this.options.dty_ID,'dty_Name'));    
+            let lbl_text = $Db.dty(this.options.dty_ID,'dty_Name');
+            if(this.options.enum_field!=null){
+                lbl_text = lbl_text + '.' + this.options.enum_field;
+            }
+            this.label_token.text(lbl_text);    
         }
         
         var that = this;
@@ -401,6 +414,10 @@ $.widget( "heurist.searchBuilderItem", {
             }
             ed_options['detailtype'] = (field_type=='blocktext' || field_type=='file')?'freetext':field_type;
             ed_options['dtID'] = dty_ID;
+            
+            if(field_type=='enum' && this.options.enum_field!=null){
+                ed_options['detailtype'] = 'freetext';
+            }
 
         }
         else{        
@@ -455,6 +472,12 @@ $.widget( "heurist.searchBuilderItem", {
 
             eqopts = [{key:'',title:'equals'},
                       {key:'-',title:'not equals'}];   //- negate
+                      
+            if(this.options.enum_field!=null){
+                eqopts[0].key = '=';
+                eqopts.unshift({key:'',title:'like'}); //string match
+            }
+                      
 
         } else if(field_type=='float' || field_type=='integer'){
 
@@ -673,6 +696,11 @@ Whole value = EQUAL
     getCodes: function(){
         var codes = this.options.code.split(':');
         codes[codes.length-1] = this.options.dty_ID
+        
+        if(this.options.enum_field!=null){
+            //codes.push(this.options.enum_field);
+        }
+        
         return codes.join(':');
     },
     
@@ -706,7 +734,7 @@ Whole value = EQUAL
             }else if(op=='NULL'){
                     op = '';
                     vals = ['NULL'];
-            }else if( (this._current_field_type=='enum' 
+            }else if( ( (this._current_field_type=='enum'  && this.enum_field==null)
                         || this._current_field_type=='relationtype' 
                         || this._current_field_type=='ids'
                         || this._current_field_type=='user'
@@ -764,6 +792,11 @@ Whole value = EQUAL
             }else    
             if(this.options.dty_ID>0){
                 key = 'f:'+this.options.dty_ID; 
+                
+                if(this.options.enum_field!=null){
+                    key = key + ':' + this.options.enum_field;
+                }
+                
             }else 
             if(this.options.dty_ID=='anyfield' || this.options.dty_ID==''){
                 key = 'f';

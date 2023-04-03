@@ -58,6 +58,8 @@ $.widget( "heurist.searchBuilder", {
     
     select_field_for_id: null,
 
+    enum_fields: ['term','code','conceptid','desc','internalid'],
+    
     // the widget's constructor
     _create: function() {
 
@@ -348,6 +350,14 @@ $.widget( "heurist.searchBuilder", {
             if(true){
                 
                 if(!codes) codes = code.split(':');
+                
+                var enum_field = null;
+                if (this.enum_fields.indexOf(codes[codes.length-1])>=0){
+                    enum_field = codes[codes.length-1];
+                    codes.splice(-1);
+                    code = codes.join(':');
+                    if(enum_field=='internalid') enum_field = null;
+                }
         
                 var rty_ID = codes[codes.length-2];
                 var dty_ID = codes[codes.length-1];
@@ -365,7 +375,8 @@ $.widget( "heurist.searchBuilder", {
                             code: code,
                             top_rty_ID: top_rty_ID, 
                             rty_ID: rty_ID,
-                            dty_ID: dty_ID});
+                            dty_ID: dty_ID,
+                            enum_field:enum_field});
 
                 }else{
                     var ele = $('<div>').uniqueId().attr('data-code',code).insertBefore(this.btnAddFieldItem);
@@ -379,6 +390,7 @@ $.widget( "heurist.searchBuilder", {
                             top_rty_ID: top_rty_ID, 
                             rty_ID: rty_ID,
                             dty_ID: dty_ID,
+                            enum_field: enum_field,
                             onremove: function(){
                                 var id = this.element.attr('id');
                                 $.each(that.field_array,function(k,item){
@@ -783,7 +795,10 @@ $.widget( "heurist.searchBuilder", {
                 var allowed_fieldtypes = ['header_ext','anyfield','enum','freetext','blocktext',
                                 'geo','year','date','integer','float','resource','relmarker','relationtype','file','separator'];
                       
-                var treedata = window.hWin.HEURIST4.dbs.createRectypeStructureTree( null, 5, rectype, allowed_fieldtypes, null, node_order );
+                var treedata = window.hWin.HEURIST4.dbs.createRectypeStructureTree_new( 
+                                {
+                                    mode:5, rectypeids:rectype, fieldtypes:allowed_fieldtypes, field_order:node_order, enum_mode:'expanded' 
+                                } );
 
                             treedata[0].expanded = true; //first expanded
 
@@ -833,8 +848,16 @@ $.widget( "heurist.searchBuilder", {
                                     var rectypes = node.data.rt_ids;
 
                                     let node_order = that.element.find('[name="tree_order"]:checked').val();
-                                    var res = window.hWin.HEURIST4.dbs.createRectypeStructureTree( null, 5, rectypes, 
-                                                                                            allowed_fieldtypes, parentcode, node_order );
+                                    //var res = window.hWin.HEURIST4.dbs.createRectypeStructureTree( null, 5, rectypes, 
+                                    //                                                        allowed_fieldtypes, parentcode, node_order );
+                                                                                            
+                                    var res = window.hWin.HEURIST4.dbs.createRectypeStructureTree_new( 
+                                    {
+                                        mode:5, rectypeids:rectypes, fieldtypes:allowed_fieldtypes, 
+                                        parentcode: parentcode,
+                                        field_order:node_order, enum_mode:'expanded' 
+                                    } );
+                                                                                            
                                                                                             
                                     if(res.length>1){
                                         data.result = res;
@@ -1176,7 +1199,14 @@ console.log(aCodes);
             
             if(value!=null){
                 codes = code.split(':');
-                
+
+                var enum_field = null;
+                if (that.enum_fields.indexOf(codes[codes.length-1])>=0){
+                    enum_field = codes[codes.length-1];
+                    if(enum_field=='internalid') enum_field = null;
+                    codes.splice(-1);
+                }
+
                 branch = fields_query;    
                 //find branch
                 if(codes.length>2){
@@ -1234,6 +1264,10 @@ console.log(aCodes);
                                 if(codes[k+1]==codes[k-1] || (k-1==0 && codes[k+1]==that.select_main_rectype.val())){
                                     key = 'related:'+key.split(':')[1];        
                                 }
+                            }
+                            
+                            if(enum_field!=null){
+                                key = key+':'+enum_field;
                             }
                         
                             //find

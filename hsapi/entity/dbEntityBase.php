@@ -986,11 +986,11 @@ class DbEntityBase
                 if(is_array($values)){
                     $mainvalue = null;
                     foreach($values as $k => $val){
-                        if(is_string($val) && mb_strlen($val)>3 && $val[2]==':' 
-                            && in_array(substr($val,0,2), $allowed_languages))
+                        
+                        list($lang, $val) = extractLangPrefix($val, $allowed_languages);
+                        
+                        if($lang!=null)
                         {
-                            $lang = substr($val,0,2);
-                            $val = substr($val,3);
                             if(!@$this->translation[$idx]){
                                 $this->translation[$idx] = array();  
                             } 
