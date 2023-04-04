@@ -1699,9 +1699,16 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
         }else if(!window.hWin.HEURIST4.util.isempty(fields['trm_ParentTermID'])){
             //request['trm_parentID'] = fields['trm_ParentTermID'];
         }
+        
+        var lbl = $.isArray(fields['trm_Label'])?fields['trm_Label'][0]:fields['trm_Label'];
 
-        if(this._currentEditID == -1 && this.options.auxilary == 'vocabulary' && !fields['trm_Label'].search(/vocab/i) == -1){ // add 'vocab' to the end of new vocabulary
-            fields['trm_Label'] += ' vocab';
+        if(this._currentEditID == -1 && this.options.auxilary == 'vocabulary' && !lbl.search(/vocab/i) == -1){ // add 'vocab' to the end of new vocabulary
+            lbl += ' vocab';
+            if($.isArray(fields['trm_Label'])){
+                fields['trm_Label'][0] = lbl;
+            }else{
+                fields['trm_Label'] = lbl;
+            }
         }
 
         this._super( fields, afterAction, onErrorAction );
@@ -2674,7 +2681,8 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
             if(vocab_id>0){
                 //vocab_id = $Db.getTermVocab(vocab_id);   
                 var trm_id = fields['trm_ID'];
-                var lbl = fields['trm_Label'].toLowerCase();
+                var lbl_orig = $.isArray(fields['trm_Label'])?fields['trm_Label'][0]:fields['trm_Label'];
+                var lbl = lbl_orig.toLowerCase();
 
                 if(trm_id<0 || window.hWin.HEURIST4.util.isempty(trm_id)){ //new one
                     var all_labels = $Db.trm_TreeData(vocab_id, 'labels');
@@ -2695,7 +2703,7 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
 
                 if(is_already_exists){    
                     window.hWin.HEURIST4.msg.showMsgFlash('Term with label "'
-                        +fields['trm_Label']+'" already exists in vocabulary',1500);
+                        +lbl_orig+'" already exists in vocabulary',1500);
                     return null;
                 }
             }

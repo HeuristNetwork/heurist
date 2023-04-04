@@ -1799,6 +1799,8 @@ function translationSupport(_input_or_values, is_text_area, callback){
                         callback.call(this, res);
                     }else{
                         that.setValue(res);    
+                        that.isChanged(true);
+                        that.onChange();
                     }
                 }
                 _dlg.remove();

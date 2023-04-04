@@ -682,7 +682,7 @@ $.widget( "heurist.editing_input", {
     onChange: function(event){
     
         let repeatable = (Number(this.f('rst_MaxValues')) != 1); 
-        if(this.options.values && this.options.values.length>1 && !repeatable){
+        if(this.options.values && this.options.values.length>1 && !repeatable && this.f('rst_MultiLang')!=1){
             this.showErrorMsg('Repeated value for a single value field - please correct');
         }else{
             this.showErrorMsg(null);
@@ -3504,7 +3504,7 @@ console.log('onpaste');
         }
         
         // add visible icon for dragging/sorting field values
-        if(this.is_sortable && !this.is_disabled && !this.enum_buttons){
+        if(this.is_sortable && !this.is_disabled && !this.enum_buttons && this.f('rst_MultiLang')!=1){
 
             var $btn_sort = $('<span>')
                 .addClass('ui-icon ui-icon-arrow-2-n-s btn_input_move smallicon')
@@ -4522,7 +4522,7 @@ console.log('onpaste');
         }
 
         var repeatable = (Number(this.f('rst_MaxValues')) != 1);
-        if(values.length>1 && !repeatable){
+        if(values.length>1 && !repeatable && this.f('rst_MultiLang')!=1){
             this.showErrorMsg('Repeated value for a single value field - please correct');
         }else{
             //this.showErrorMsg(null);

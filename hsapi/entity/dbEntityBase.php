@@ -452,27 +452,36 @@ class DbEntityBase
             //update translations
             if(is_array(@$this->translation[$rec_idx]) && count($this->translation[$rec_idx])>0)
             {
-                foreach($this->translation[$rec_idx] as $fieldname=>$langs){
+                foreach($this->multilangFields as $fieldname){
                     //delete previous translations for this record
                     if(!$isinsert){
                         $mysqli->query('DELETE FROM defTranslations where trn_Source="'
                             .$fieldname.'" AND trn_Code='.$this->records[$rec_idx][$this->primaryField]);
                     }
-                    
-                    foreach($langs as $lang=>$value){
-                        if($value!=null && trim($value)!=''){
-                            mysql__insertupdate($mysqli, 
-                                    'defTranslations', 'trn',
-                            array('trn_ID'=>0,
-                                  'trn_Source'=>$fieldname,          
-                                  'trn_Code'=>$this->records[$rec_idx][$this->primaryField],
-                                  'trn_LanguageCode'=>$lang,
-                                  'trn_Translation'=>$value));
+                    if(@$this->translation[$rec_idx][$fieldname]!=null){
+                        
+                        $langs = $this->translation[$rec_idx][$fieldname];
+                        
+                        foreach($langs as $lang=>$value){
+                            if($value!=null && trim($value)!=''){
+                                mysql__insertupdate($mysqli, 
+                                        'defTranslations', 'trn',
+                                array('trn_ID'=>0,
+                                      'trn_Source'=>$fieldname,          
+                                      'trn_Code'=>$this->records[$rec_idx][$this->primaryField],
+                                      'trn_LanguageCode'=>$lang,
+                                      'trn_Translation'=>$value));
+                            }
                         }
                     }
                 }
                 
+            }else if(!$isinsert && count($this->multilangFields)>0){ 
+                //remove all translation for this record
                 
+                $mysqli->query('DELETE FROM defTranslations where trn_Source LIKE "'
+                .$this->config['tablePrefix']
+                .'%" AND trn_Code='.$this->records[$rec_idx][$this->primaryField]);
                 
             }
             
