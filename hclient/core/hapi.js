@@ -65,6 +65,7 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
         _is_callserver_in_progress = false,
 
         _use_debug = false;
+        
 
     /**
     * initialization of hAPI object
@@ -177,6 +178,30 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
         }
 
     }
+    
+    var _key_count;
+    function _getKeyCount(data, level) {
+        level = level || 0;
+        //_key_count[level] = _key_count[level] || 0;
+        var _key_count = 0;
+        for (var k in data) {
+            data.hasOwnProperty(k) && _key_count++;
+            if(typeof data[k] === 'object'){
+                _key_count = _key_count + _getKeyCount(data[k], level + 1);   
+            }
+        }
+        return _key_count;
+    }
+    /*    
+    function _getKeyCount2(o, l, r) {
+        l = l || 0; //level            
+        return Object.keys(o).reduce(function (r, k) {
+            r[l] = (r[l] || 0) + 1;
+            typeof o[k] === 'object' && _getKeyCount(o[k], l + 1, r);
+            return r;
+        }, r || []);
+    }    
+    */
     /**
      * Signature for _callserver callback
      * 
@@ -219,6 +244,16 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
         request.DBGSESSID = (_use_debug) ? '425944380594800002;d=1,p=0,c=1' : '425944380594800002;d=0,p=0,c=0';
 
         var url = that.baseURL + "hsapi/controller/" + action + ".php"; //+(new Date().getTime());
+        
+        //@todo - count keys in request to avoid "Input variables exceeded 1000" on server side
+        var cnt = _getKeyCount(request);
+        if(cnt>999){
+            if(that.baseURL.indexOf('127.0.0.1')>0){
+                alert('Input variables exceeded 1000: '+cnt+' ,'+action);              
+            }
+            console.log(request);              
+            console.error('Input variables exceeded 1000',cnt);
+        }
 
         var request_code = { script: action, action: request.a };
         //note jQuery ajax does not properly in the loop - success callback does not work often
