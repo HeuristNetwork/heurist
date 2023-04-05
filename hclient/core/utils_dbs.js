@@ -850,7 +850,7 @@ window.hWin.HEURIST4.dbs = {
                 if ($mode==4){ //$mode==6 || 
                    $max_depth = 3;
                 }else if ($mode==3){
-                   $max_depth = 4;
+                   $max_depth = 3; //4
                 }else if ($mode==5 || $mode==6 || $mode==7) //make it 1 for lazy load
                    $max_depth = 1; 
                                                                 
@@ -915,7 +915,7 @@ window.hWin.HEURIST4.dbs = {
                                     $res['constraint'] = $rectype_ids.length;
                                     if($mode<5) $res['children'] = [];
                                 }
-                                if($mode==5 || $mode==6 || $mode==7){
+                                if($mode==5 || $mode==6 || $mode==7){ 
                                     $res['rt_ids'] = $pointerRecTypeId;
                                     $res['lazy'] = true;
                                     

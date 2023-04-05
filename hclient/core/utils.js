@@ -243,8 +243,9 @@ window.hWin.HEURIST4.util = {
         
     },
 
-    //
-    //
+    //  1 - encode ../
+    //  2 - use encodeURIComponent  
+    //  3 - JSON.stringify
     //
     encodeRequest: function(request, params, need_encode){
         

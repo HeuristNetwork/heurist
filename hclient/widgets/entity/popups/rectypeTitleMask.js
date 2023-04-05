@@ -63,6 +63,7 @@ $.widget( "heurist.rectypeTitleMask", $.heurist.recordAction, {
         
         //init tree
         this._loadRecordTypeTreeView();
+
         
         //init buttons
         var btn = this.element.find('#btnInsertField').button();
@@ -454,6 +455,7 @@ $.widget( "heurist.rectypeTitleMask", $.heurist.recordAction, {
                 }
             },
             lazyLoad: function(event, data){
+                
                 var node = data.node;
                 var parentcode = node.data.code; 
                 var rectypes = node.data.rt_ids;
