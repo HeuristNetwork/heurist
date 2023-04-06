@@ -176,9 +176,17 @@ $.widget( "heurist.editTranslations", {
             
             if(check_default){
                 
-                if(!window.hWin.HEURIST4.util.isempty(value) && value.substr(2,1)==':'){
-                    lang = value.substr(0,2);
-                    value = value.substr(3).trim();
+                if(!window.hWin.HEURIST4.util.isempty(value)){
+                    if(value.substr(3,1)==':'){ //ISO639-2
+                        lang = value.substr(0,3);
+                        value = value.substr(4).trim();
+                    }else if(value.substr(2,1)==':'){ //ISO639-1
+                        lang = value.substr(0,2);
+                        value = value.substr(3).trim();
+                        //convert to ISO639-2
+                        
+                    }
+                    lang = lang.toUpperCase();
                 }
                 
                 var _is_default = window.hWin.HEURIST4.util.isempty(lang);
@@ -238,7 +246,7 @@ $.widget( "heurist.editTranslations", {
                     .attr('title', 'Select language' )
                     .attr('data-input-id', inpt_id)
                     .addClass('text ui-corner-all')
-                    .css({'margin-left':'2em','min-width':'40px','max-width':'40px'})
+                    .css({'margin-left':'2em','min-width':'70px','max-width':'70px'})
                     .hide()
                     .appendTo( this.sel_container );
                     

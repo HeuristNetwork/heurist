@@ -1099,7 +1099,7 @@ class HPredicate {
                 }
             }else{
                 // get field id for predicates like "linkedfrom:10:240"  (10 is rectype)
-                $this->field_id = $key[$l1-1];
+                $this->field_id = $key[$ll-1];
             }
         }
 
@@ -1432,7 +1432,7 @@ class HPredicate {
         
         if($this->pred_type=='count' || $this->pred_type=='cnt'){
             $this->field_type = 'link'; //integer without quotes
-        }else if($this->field_type == 'file'){
+        }else if($this->field_type=='file'){
             
         }else if(intval($this->field_id)>0){
             //find field type - @todo from cache
@@ -1571,12 +1571,12 @@ class HPredicate {
             
         }else{
             
-            if($this->field_type == 'date' && trim($this->value)!='') { //false && $this->isDateTime()){
+            if($this->field_type=='date' && trim($this->value)!='') { //false && $this->isDateTime()){
                 $field_name = 'CAST( IF( CAST( CONCAT("00",getTemporalDateString( '.$p.'dtl_Value )) as DATETIME) is null, '
                     . 'CONCAT("00",CAST(getTemporalDateString( '.$p.'dtl_Value ) as SIGNED),"-1-1"), '
                     . 'CONCAT("00",getTemporalDateString( '.$p.'dtl_Value ))) as DATETIME) ';
                 //'getTemporalDateString('.$p.'dtl_Value) ';
-            }else if($this->field_type == 'file'){
+            }else if($this->field_type=='file'){
                 $field_name = $p."dtl_UploadedFileID ";  //only for search non empty values
             }else{
                 
@@ -2750,7 +2750,7 @@ class HPredicate {
             $res = ' in (select ulf_ID from recUploadedFiles where '.$res.')';
             
         }else
-        if (($this->field_type=='float' || $this->field_type=='integer' || $this->field_type == 'link') && (is_numeric($this->value) || strpos($this->value, "<>") !== false)) {
+        if (($this->field_type=='float' || $this->field_type=='integer' || $this->field_type=='link') && (is_numeric($this->value) || strpos($this->value, "<>") !== false)) {
             
             if (strpos($this->value,"<>")>0) {
                 $vals = explode("<>", $this->value);
@@ -2758,7 +2758,7 @@ class HPredicate {
                 if(is_numeric($vals[0]) && is_numeric($vals[1])){
                     $res = $between.$vals[0]." and ".$vals[1];
                 }
-            }else if($this->field_type == "link"){
+            }else if($this->field_type=="link"){
                 $res = " $eq ".intval($this->value);  //no quotes
             }else{
                 $res = " $eq ".($this->field_type=='float'?floatval($this->value):intval($this->value));//."'";
@@ -2789,7 +2789,7 @@ class HPredicate {
                 $cs_ids = null;    
             }else
             if($this->pred_type=='title' || $this->pred_type=='url' || $this->pred_type=='notes'
-                || $this->field_type =='date'){
+                || $this->field_type=='date'){
                 $cs_ids = null;
             }else{
                 $cs_ids = getCommaSepIds($this->value);
@@ -2804,7 +2804,7 @@ class HPredicate {
 
                 $this->field_list = true;
 
-            } else if($this->field_type =='date'){ //$this->isDateTime()){
+            } else if($this->field_type=='date'){ //$this->isDateTime()){
                 //
                 $res = $this->makeDateClause();
 

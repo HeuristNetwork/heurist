@@ -27,11 +27,14 @@ See /context_help folder. Localizations are in /ru, /fr …. subfolders
 Text to be localized may be either plain text such as “Open”, “Close”, “Database manager” or (if text is long or could be ambiguated in different widgets) some keyword (for example resultList_viewmode or error_message_need_login).
 
 All these pairs are defined in localization.js. To translate to different language please copy localization.js tp localization_[lang code].js. and translate values for all pairs.
+
+For translation of UI (labels, help, documentation) use 2 chars codes 
+
 */        
 
 
 var regional = {};
-regional['en'] = {
+regional['ENG'] = {
     language: 'English',
     Databases: 'Databases',
     

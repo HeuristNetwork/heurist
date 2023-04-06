@@ -101,7 +101,12 @@ if( @$_REQUEST['recID'] || @$_REQUEST['recid'] || array_key_exists('website', $_
     }
 
     $locale = @$_REQUEST['lang']; //locale
-    $locale = ($locale && $locale!='en')?($locale.'/'):'';
+    if($locale){
+        $locale = strtolower($locale);
+        $locale = ($locale=='eng')?'' :($locale.'/');
+    }else{
+        $locale = '';    
+    }
 
     $asset = 'context_help/'.$locale.$name;
     if(!file_exists($asset)){

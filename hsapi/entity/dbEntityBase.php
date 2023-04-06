@@ -973,11 +973,6 @@ class DbEntityBase
             $this->records = $this->data['fields'];
         }
         
-        if(defined('HEURIST_LANGUAGES_COMMON')){
-            $allowed_languages = json_decode(HEURIST_LANGUAGES_COMMON, true);
-            $allowed_languages = array_keys($allowed_languages);
-        }
-        
         //exctract primary keys
         $this->recordIDs = array();
         foreach($this->records as $idx=>$record){
@@ -996,7 +991,7 @@ class DbEntityBase
                     $mainvalue = null;
                     foreach($values as $k => $val){
                         
-                        list($lang, $val) = extractLangPrefix($val, $allowed_languages);
+                        list($lang, $val) = extractLangPrefix($val);
                         
                         if($lang!=null)
                         {

@@ -15,7 +15,7 @@
 * See the License for the specific language governing permissions and limitations under the License.
 */
 
-regional['ru'] = {
+regional['RUS'] = {
     language: 'Русский',
     'Databases': 'Базы данных',
     'Design database': 'Настройка БД',

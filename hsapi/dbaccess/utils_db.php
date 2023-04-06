@@ -50,7 +50,7 @@
     * distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
     * See the License for the specific language governing permissions and limitations under the License.
     */
-
+    
     /**
     * Connect to db server 
     *
@@ -1110,21 +1110,43 @@ if($i<5){
 
     //
     //  splits and extract language code and value from string code:value
+    //  if $val is 2 chars code ISO639-1 - it will be converted to 3 chars ISO639-2
     //    
-    function extractLangPrefix($val, $allowed_languages=null){
+    function extractLangPrefix($val){
+        
+        global $glb_lang_codes, $common_languages_for_translation;
     
-        if(is_string($val) && mb_strlen($val)>3 && $val[2]==':'){
+        if(is_string($val) && mb_strlen($val)>4){
             
-            if(!$allowed_languages  && defined('HEURIST_LANGUAGES_COMMON')){
-                $allowed_languages = json_decode(HEURIST_LANGUAGES_COMMON, true);
-                $allowed_languages = array_keys($allowed_languages);
+            $lang = null;
+            $pos = 3;
+            
+            if($val[2]==':'){
+                $lang = strtolower(substr($val,0,2));
+                //find 3 chars code
+                if(!isset($glb_lang_codes)){
+                    $glb_lang_codes = json_decode(file_get_contents('../../hclient/assets/language-codes-3b2.json'),true);
+                }
+                foreach($glb_lang_codes as $codes){
+                    if($codes['a2']==$lang){
+                        $lang = $codes['a3'];
+                        break;
+                    }
+                }
+                
+            }else if($val[3]==':'){
+                $lang = substr($val,0,3);
+                $pos = 4;
             }
 
-            $lang = substr($val,0,2);
-            
-            if (in_array($lang, $allowed_languages)){
-                return array($lang, substr($val,3));
+            if($lang){
+                $lang = strtoupper($lang);
+                if (in_array($lang, $common_languages_for_translation)){
+                    return array($lang, substr($val, $pos));
+                }
             }
+
+            
         } 
         
         return array(null, $val);    
@@ -1252,7 +1274,7 @@ error_log('UPDATED '.$session_id.'  '.$value);
     // 
     // For Sybversion update see DBUpgrade_1.2.0_to_1.3.0.php
     //
-    // This method updates from 1.3.0 to 1.3.8
+    // This method updates from 1.3.0 to 1.3.10
     //
     function updateDatabseToLatest4($system){
         //update sysIdentification set sys_dbVersion=1, sys_dbSubVersion=3, sys_dbSubSubVersion=4 where sys_ID=1
@@ -1472,7 +1494,7 @@ UNIQUE KEY swf_StageKey (swf_RecTypeID, swf_Stage)
                 }
             }
             
-            if($dbVerSubSub<9){
+            if($dbVerSubSub<10){
                 $mysqli->query('DROP TABLE IF EXISTS defTranslations;');
                 $mysqli->query(<<<'DEFTAB'
 CREATE TABLE defTranslations (
@@ -1490,8 +1512,8 @@ DEFTAB);
             }
             
             //update version
-            if($dbVerSubSub<9){
-                $mysqli->query('UPDATE sysIdentification SET sys_dbVersion=1, sys_dbSubVersion=3, sys_dbSubSubVersion=9 WHERE 1');
+            if($dbVerSubSub<10){
+                $mysqli->query('UPDATE sysIdentification SET sys_dbVersion=1, sys_dbSubVersion=3, sys_dbSubSubVersion=10 WHERE 1');
             }
 
             

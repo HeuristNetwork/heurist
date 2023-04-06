@@ -1091,15 +1091,17 @@ mapDraw.js initial_wkt -> parseWKT -> GeoJSON -> _loadGeoJSON (as set of separat
                             return d[fldname][0];    
                         }
                         */
-                        //"xx" means take default - without code: prefix                        
+                        //"xx" means take current system language
                         if(lang){
+                            lang = window.hWin.HAPI4.getLangCode3(lang);
+                            
                             var def_val = '';
                             for(var i=0; i<d[fldname].length; i++){
                                 var val = d[fldname][i];
                                 
-                                if(val.substr(2,1)==':'){
-                                    if(val.substr(0,2)==lang){
-                                        def_val = val.substr(3).trim();
+                                if(val.length>4 && val.substr(3,1)==':'){
+                                    if(val.substr(0,3)==lang){
+                                        def_val = val.substr(4).trim();
                                         break;
                                     }
                                 }else if(lang=='xx'){

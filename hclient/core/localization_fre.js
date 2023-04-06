@@ -19,7 +19,7 @@
 * See the License for the specific language governing permissions and limitations under the License.
 */
 
-regional['fr'] = {
+regional['FRE'] = {
     language: 'Langue',
     'Databases': 'Bases de données',
     'Design database': 'Concevoir une base de données',

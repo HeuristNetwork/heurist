@@ -57,7 +57,7 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
         _version = "0.4",
         _database = null, //same as public property  @toremove      
 
-        _region = null, //current region
+        _region = null, //current region ISO639-2 (alpha3) in uppercase
         _regional = null, //localization resources
 
         _guestUser = { ugr_ID: 0, ugr_FullName: 'Guest' },
@@ -124,7 +124,7 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
 
         // regional - global variable defined in localization.js
         if (!window.hWin.HR) {
-            window.hWin.HR = that.setLocale('en');
+            window.hWin.HR = that.setLocale('ENG');
         }
 
         if (!$.isFunction(that.fancybox)) {
@@ -162,7 +162,7 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
                         //save in preferences
                         window.hWin.HAPI4.save_pref('layout_language', lang);
                     } else {
-                        lang = window.hWin.HAPI4.get_prefs_def('layout_language', 'en');
+                        lang = window.hWin.HAPI4.get_prefs_def('layout_language', 'ENG');
                     }
                     window.hWin.HR = that.setLocale(lang);
                     window.hWin.HRA = that.HRA; //localize all elements with class slocale for given element
@@ -2359,6 +2359,32 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
         /*RecordMgr: function(){
         return /();
         }*/
+        
+        //
+        // Returns 3 letters language code in upper case by 2 letters code 
+        // or default language
+        //
+        getLangCode3: function(lang, def){
+
+            if(lang && lang != 'xx'){
+                if(lang.length==2){
+                    lang = lang.toLowerCase();
+                    for(var code3 in that.sysinfo.common_languages){
+                        if(lang==that.sysinfo.common_languages[code3]['a2']){
+                            return code3;
+                        }
+                    }
+                }else if(lang.length==3){
+                    lang = lang.toUpperCase();
+                    if(that.sysinfo.common_languages && that.sysinfo.common_languages[lang]){
+                          return lang;
+                    }
+                }
+            }
+            
+            //not found - English is default
+            return (def ?def:(_region?_region:'ENG'));
+        },
 
         //
         // returns current locale - language code
@@ -2370,16 +2396,16 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
         * Returns function to string resouce according to current region setting
         */
         setLocale: function (region) {
-
-            if (!region) region = 'en'; //default
-
+            
+            region = that.getLangCode3(region, 'ENG'); //English is default
+            
             if (_regional && _regional[region]) {
                 //already loaded - switch region
                 _region = region;
                 _regional = regional[_region];
             } else {
                 $.getScript(that.baseURL + 'hclient/core/localization'
-                    + (region == 'en' ? '' : ('_' + region)) + '.js', function () {
+                    + (region == 'ENG' ? '' : ('_' + region.toLowerCase())) + '.js', function () {
                         _region = region;
                         _regional = regional[_region];
                     });
@@ -2400,9 +2426,9 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
                     return _regional[key];
                 } else {
                     //if not found take from english version
-                    if (_region != 'en' && regional['en'] && regional['en'][key]) {
+                    if (_region != 'ENG' && regional['ENG'] && regional['ENG'][key]) {
 
-                        return regional['en'][key];
+                        return regional['ENG'][key];
 
                     } else if (key.indexOf('menu-') == 0) {
 
@@ -2437,8 +2463,10 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
         HRJ: function (name, options, lang) {
 
             var def_value = options[name];
+            
+            lang = that.getLangCode3(lang, _region);
 
-            var loc_value = options[name + ':' + ((lang && lang != 'xx') ? lang : _region)];
+            var loc_value = options[name + ':' + lang];
 
             return loc_value ? loc_value : def_value;
         },

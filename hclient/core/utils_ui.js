@@ -46,7 +46,7 @@ initHSelect - converts HTML select to jquery selectmenu
 getRecordTitle - retuns of title for given record id
 createTemplateSelector - fills with names of smarty templates
 
-createLanguageSelect
+createLanguageSelect - fill html select with list of languages for translation 
 
 ENTITY
 
@@ -2259,22 +2259,22 @@ window.hWin.HEURIST4.ui = {
     //
     //  List of languages defined in heurist config ini
     //  if $select is not define it return html string with <option>s
+    //  It uses 3 chars codes: ISO639-2
+    //  it is used in editTranslations and editCMS2
     //    
     createLanguageSelect: function($select, topOptions, defValue, showName){
         
-            /*var context = '{"en":"English","fr":"French","zh":"Mandarin","es":"Spanish","ar":"Arabic","de":"German"}';*/
-            
-            var languages = JSON.parse(window.hWin.HAPI4.sysinfo.common_languages);
+            var languages = window.hWin.HAPI4.sysinfo.common_languages;
             var content = [];
             
             var opts = topOptions?topOptions:[];
             var keys = Object.keys(languages);
             if(keys.length>0){
-                for (var i in keys){
+                for (var i in keys){ //ISO639-2 (alpha3)
                     var code = keys[i]; 
-                    opts.push({key:code, title:(showName===false?code:languages[code])});
+                    opts.push({key:code, title:(showName===false?code:languages[code]['name'])});
                     
-                    content.push('<option value="'+code+'">'+(showName===false?code:languages[code])+'</option>');
+                    content.push('<option value="'+code+'">'+(showName===false?code:languages[code]['name'])+'</option>');
                 } // for
             }
             

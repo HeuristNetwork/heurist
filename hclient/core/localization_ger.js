@@ -18,7 +18,7 @@
 */  
 
 // German localisation
-regional['de'] = {
+regional['GER'] = {
     language: 'Deutsch',
     
     //common words
