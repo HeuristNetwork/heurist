@@ -575,34 +575,48 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
         }
         
         var $dosframe;
+        
+        
+        function __canAccessIframe(iframe) {
+          try {
+            return Boolean(iframe.contentDocument);
+          }
+          catch(e){
+            return false;
+          }
+        }        
 
         if($dlg.length>0){
             //reassign dialog onclose and call new parameters
-            $dosframe = $dlg.find('iframe');
-            var content = $dosframe[0].contentWindow;
-
-            //close dialog from inside of frame - need redifine each time
-            content.close = function() {
-                
-                var did = $dlg.attr('id');
-
-                var rval = true;
-                var closeCallback = options['callback'];
-                if($.isFunction(closeCallback)){
-                    rval = closeCallback.apply(opener, arguments);
-                }
-                if ( rval===false ){ //!rval  &&  rval !== undefined){
-                    return false;
-                }
-                $dlg.dialog('close');
-                return true;
-            };
             
             $dlg.dialog('open');  
+            
+            $dosframe = $dlg.find('iframe');
+            if(__canAccessIframe($dosframe[0]))
+            {
+                var content = $dosframe[0].contentWindow;
+                
+                //close dialog from inside of frame - need redifine each time
+                content.close = function() {
+                    
+                    var did = $dlg.attr('id');
 
-            // if content in iframe has function "assignParameters" we may pass parameters
-            if(options['params'] && $.isFunction(content.assignParameters)) {
-                content.assignParameters(options['params']);
+                    var rval = true;
+                    var closeCallback = options['callback'];
+                    if($.isFunction(closeCallback)){
+                        rval = closeCallback.apply(opener, arguments);
+                    }
+                    if ( rval===false ){ //!rval  &&  rval !== undefined){
+                        return false;
+                    }
+                    $dlg.dialog('close');
+                    return true;
+                };
+
+                // if content in iframe has function "assignParameters" we may pass parameters
+                if(options['params'] && $.isFunction(content.assignParameters)) {
+                    content.assignParameters(options['params']);
+                }
             }
             if(options['height']>0 && options['width']>0){
                  $dlg.dialog('option', 'width', options['width']);    
@@ -676,68 +690,75 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
                     return;
                 }
 
-                var content = $dosframe[0].contentWindow;
-                try{
-                    //replace standard "alert" to Heurist dialog    
-                    content.alert = function(txt){
-                        $dlg_alert = window.hWin.HEURIST4.msg.showMsgDlg(txt, null, ""); // Title was an unhelpful and inelegant "Info"
-                        $dlg_alert.dialog('open');
-                        return true;
-                    }
-                }catch(e){
-                    console.log(e);
-                }
-
-                if(!options["title"]){
-                    $dlg.dialog( "option", "title", content.document.title );
-                }  
-
-                /*
-                content.confirm = function(txt){
-                var resConfirm = false,
-                isClosed = false;
-
-                var $confirm_dlg = window.hWin.HEURIST4.msg.showMsgDlg(txt, function(){
-                resConfirm = true;
-                }, "Confirm");
-
-                $confirm_dlg.dialog('option','close',
-                function(){
-                isClosed = true;        
-                });
-
-                while(!isClosed){
-                $.wait(1000);
-                }
-
-                return resConfirm;
-                }*/
-
-                //content.document.reference_to_parent_dialog = $dlg.attr('id');
-                //$dosframe[0].contentDocument.reference_to_parent_dialog = $dlg.attr('id');
-                //functions in internal document
-                //content.close = $dosframe[0].close;    // make window.close() do what we expect
-
-                //close dialog from inside of frame
-                content.close = function() {
+                let has_access = __canAccessIframe($dosframe[0]);
+                
+                if(has_access)
+                {
                     
-                    var did = $dlg.attr('id');
-
-                    var rval = true;
-                    var closeCallback = options['callback'];
-                    if($.isFunction(closeCallback)){
-                        rval = closeCallback.apply(opener, arguments);
+                    var content = $dosframe[0].contentWindow;
+                    try{
+                        //replace standard "alert" to Heurist dialog    
+                        content.alert = function(txt){
+                            $dlg_alert = window.hWin.HEURIST4.msg.showMsgDlg(txt, null, ""); // Title was an unhelpful and inelegant "Info"
+                            $dlg_alert.dialog('open');
+                            return true;
+                        }
+                    }catch(e){
+                        console.log(e);
                     }
-                    if ( rval===false ){ //!rval  &&  rval !== undefined){
-                        return false;
+
+                    if(!options["title"]){
+                        $dlg.dialog( "option", "title", content.document.title );
+                    }  
+
+                    /*
+                    content.confirm = function(txt){
+                    var resConfirm = false,
+                    isClosed = false;
+
+                    var $confirm_dlg = window.hWin.HEURIST4.msg.showMsgDlg(txt, function(){
+                    resConfirm = true;
+                    }, "Confirm");
+
+                    $confirm_dlg.dialog('option','close',
+                    function(){
+                    isClosed = true;        
+                    });
+
+                    while(!isClosed){
+                    $.wait(1000);
                     }
-                    $dlg.dialog('close');
-                    return true;
-                };
 
-                //content.popupOpener = opener;
-                content.doDialogResize = $dosframe[0].doDialogResize;
+                    return resConfirm;
+                    }*/
 
+                    //content.document.reference_to_parent_dialog = $dlg.attr('id');
+                    //$dosframe[0].contentDocument.reference_to_parent_dialog = $dlg.attr('id');
+                    //functions in internal document
+                    //content.close = $dosframe[0].close;    // make window.close() do what we expect
+
+                    //close dialog from inside of frame
+                    content.close = function() {
+                        
+                        var did = $dlg.attr('id');
+
+                        var rval = true;
+                        var closeCallback = options['callback'];
+                        if($.isFunction(closeCallback)){
+                            rval = closeCallback.apply(opener, arguments);
+                        }
+                        if ( rval===false ){ //!rval  &&  rval !== undefined){
+                            return false;
+                        }
+                        $dlg.dialog('close');
+                        return true;
+                    };
+
+                    //content.popupOpener = opener;
+                    content.doDialogResize = $dosframe[0].doDialogResize;
+
+                }
+                
                 $dlg.removeClass('loading');
                 $dosframe.show();    
 
@@ -746,12 +767,14 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
                     onloadCallback.call(opener, $dosframe[0]);
                 }
 
-                if($.isFunction(content.onFirstInit)) {  //see mapPreview
-                    content.onFirstInit();
-                }
-                //pass parameters to frame 
-                if(options['params'] && $.isFunction(content.assignParameters)) {
-                    content.assignParameters(options['params']);
+                if(has_access){
+                    if($.isFunction(content.onFirstInit)) {  //see mapPreview
+                        content.onFirstInit();
+                    }
+                    //pass parameters to frame 
+                    if(options['params'] && $.isFunction(content.assignParameters)) {
+                        content.assignParameters(options['params']);
+                    }
                 }
                 
                 if(options['onmouseover']){ 
