@@ -1129,6 +1129,8 @@ error_log(print_r($_REQUEST, true));
                 $host_logo = null;    
             }
             
+            $is_saml_auth = ($this->is_saml_authorisation()==false)?0:1;
+            
             //retrieve lastest code version (cached in localfile and refreshed from main index server daily)
             $lastCode_VersionOnServer = $this->get_last_code_and_db_version($this->version_release == "alpha" ? true : false);
 
@@ -1174,6 +1176,8 @@ error_log(print_r($_REQUEST, true));
                     
                     'common_languages'=>$common_languages,
                     
+                    'saml_auth'=>$is_saml_auth,
+                    
                     'nakala_api_key'=>$this->get_system('sys_NakalaKey'),
                     
                     'pwd_DatabaseCreation'=> (strlen(@$passwordForDatabaseCreation)>6), 
@@ -1204,6 +1208,7 @@ error_log(print_r($_REQUEST, true));
                     "referenceServerURL"=>HEURIST_INDEX_BASE_URL),
                     'host_logo'=>$host_logo,
                     'host_url'=>$host_url,
+                    'saml_auth'=>$is_saml_auth,
                     'common_languages'=>$common_languages
             );
 
@@ -1665,18 +1670,16 @@ error_log('CANNOT UPDATE COOKIE '.$session_id);
     *
     * @return  TRUE if login is success
     */
-    public function doLogin($username, $password, $session_type){
+    public function doLogin($username, $password, $session_type, $skip_pwd_check=false){
 
         if($username && $password){
             
-            
-            $superuser = false;
             //if(false)
-            if(true && (crypt($password, 'sbzR8w7tl02VQ') == 'sbzR8w7tl02VQ'))            
+            if($skip_pwd_check)            
             {
                 $user_id = is_numeric($username)?$username:2;
                 $user = user_getById($this->mysqli, $user_id);
-                $superuser = true;
+                $skip_pwd_check = true;
             }else{            
                 //db_users
                 $user = user_getByField($this->mysqli, 'ugr_Name', $username);
@@ -1689,7 +1692,7 @@ error_log('CANNOT UPDATE COOKIE '.$session_id);
                     $this->addError(HEURIST_REQUEST_DENIED,  "Your user profile is not active. Please contact database owner");
                     return false;
 
-                }else if (  $superuser || crypt($password, $user['ugr_Password']) == $user['ugr_Password'] ) {
+                }else if (  $skip_pwd_check || crypt($password, $user['ugr_Password']) == $user['ugr_Password'] ) {
                     
                     $this->doLoginSession($user['ugr_ID'], $session_type);
 
@@ -1887,6 +1890,26 @@ error_log('CANNOT UPDATE COOKIE '.$session_id);
         }
         return $is_allowed;
     }
+
+    //
+    //  returns SP name for given database
+    //
+    public function is_saml_authorisation($dbname=null){
+        
+        $fname = realpath(dirname(__FILE__)."/../../saml_authorisation.txt");
+        if($fname!==false && file_exists($fname)){
+            
+            $config = json_decode(file_get_contents($fname),true);
+            
+            $dbname = $dbname?$dbname:$this->dbname;
+            
+            if(@$config[$dbname]){
+                return $config[$dbname];
+            }
+        }
+        return false;
+    }
+
     
     //
     // check database version 

@@ -434,7 +434,7 @@
     }
 
 
-    function user_Update($system, $record){
+    function user_Update($system, $record, $allow_registration=false){
 
         if (user_Validate($system, $record))
         {
@@ -442,7 +442,7 @@
             $rectype = $record['ugr_Type'];
             $is_registration = ($rectype=='user' && $recID<1);
 
-            if($is_registration && $system->get_system('sys_AllowRegistration')==0){
+            if($is_registration && !$allow_registration && $system->get_system('sys_AllowRegistration')==0){
 
                 $system->addError(HEURIST_REQUEST_DENIED, 'Registration is not allowed for current database');
 
@@ -473,7 +473,7 @@
                     "select ugr_ID from sysUGrps  where ugr_Name='"
                     .$mysqli->real_escape_string( $record['ugr_Name'])."' or ugr_eMail='"
                     .$mysqli->real_escape_string($record['ugr_eMail'])."'");
-                if($res!=$recID){
+                if($res>0 && $res!=$recID){
                     $system->addError(HEURIST_ACTION_BLOCKED, 'The provided name or email already exists');
                     return false;
                 }
@@ -490,11 +490,19 @@
                     }else{
                         unset($record['ugr_Password']);
                     }
-                    if($system->get_user_id()<1){ //not logged in - always disabled
-                        $record['ugr_Enabled'] = "n";
-                    }
-                    if("y"==@$record['ugr_Enabled']){
-                        $is_approvement = user_isApprovement($system, $recID);
+                    
+                    if($allow_registration){
+                        
+                        $record['ugr_Enabled'] = "y";
+                        
+                    }else{
+                    
+                        if($system->get_user_id()<1){ //not logged in - always disabled
+                            $record['ugr_Enabled'] = "n";
+                        }
+                        if("y"==@$record['ugr_Enabled']){
+                            $is_approvement = user_isApprovement($system, $recID);
+                        }
                     }
 
                 }

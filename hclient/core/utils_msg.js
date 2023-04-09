@@ -496,11 +496,30 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
     * 
     * options
     *   dialogid - unique id to reuse dialog  (in this case dialog will not be removed on close)
+    *   force_reload - to reload iframe contenr if dialogid is define dialog div is preserved
     * 
     *   is_h6style - apply heurist6 style
     *   position - adjust dialog position
     *   maximize - set maximum allowed widht and height  
     *   default_palette_class - color scheme class
+    *   window - opener
+    *   params - to be send to iframe via function assignParameters
+    * 
+    *   onpopupload - function that will be called on iframe load complete
+    *   callback - called on iframe close event, if it returns true dialog will be closes
+    *   afterclose - on close dialog event (for iframe close event see "callback")
+    * 
+    *   modal - is dialog modal
+    *   onmouseover - event listener 
+    *   default_palette_class - dialog css class
+    *   padding - dialog padding (around iframe)
+    *   allowfullscreen
+    *   noClose - hide close button on dialog titlebar
+    *   borderless - hide titlebae and border for dialog
+    *   title
+    *   width, height
+    * 
+    *   on frame load it calls onFirstInit function within iframe
     */
     showDialog: function(url, options){
 
@@ -564,6 +583,7 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
 
             //close dialog from inside of frame - need redifine each time
             content.close = function() {
+                
                 var did = $dlg.attr('id');
 
                 var rval = true;
@@ -580,6 +600,7 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
             
             $dlg.dialog('open');  
 
+            // if content in iframe has function "assignParameters" we may pass parameters
             if(options['params'] && $.isFunction(content.assignParameters)) {
                 content.assignParameters(options['params']);
             }
@@ -699,6 +720,7 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
 
                 //close dialog from inside of frame
                 content.close = function() {
+                    
                     var did = $dlg.attr('id');
 
                     var rval = true;
@@ -771,7 +793,7 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
                 }
             };
             $dlg.dialog(opts);
-
+            
             if($dlg.attr('data-palette'))
                 $dlg.parent().removeClass($dlg.attr('data-palette'));
             if(options.default_palette_class){

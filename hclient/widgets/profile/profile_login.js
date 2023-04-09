@@ -19,6 +19,11 @@
 
 //isforsed - if true - it is not possible to get out from login other than switch database
 function showLoginDialog(isforsed, callback, parentwin, dialog_id){
+    
+    if(window.hWin.HAPI4.sysinfo && window.hWin.HAPI4.sysinfo.saml_auth==1){
+        doSamlLogin(callback, parentwin);
+        return;
+    }
 
     var is_secondary_parent = false;
     if(!parentwin){
@@ -286,6 +291,9 @@ function showLoginDialog(isforsed, callback, parentwin, dialog_id){
     }
 }
 
+//
+//
+//
 function doRegister( parentwin ){
 
     var is_secondary_parent = false;
@@ -314,5 +322,43 @@ function doRegister( parentwin ){
         });
     }
 
+}
+
+//
+//
+//
+function doSamlLogin(callback, parentwin){
+    
+    //loads saml dialog into iframe
+    window.hWin.HEURIST4.msg.showDialog(
+    window.hWin.HAPI4.baseURL+'hsapi/controller/saml.php?a=login&db='+window.hWin.HAPI4.database,
+    {
+        title: 'BnF Authentification',
+        width: 980,
+        height: 420,
+        callback:function(context){
+                console.log(context);        
+                if(context){
+                    window.hWin.HAPI4.SystemMgr.sys_info(function (success) {
+                    if (success) {
+                        console.log(window.hWin.HAPI4.currentUser);
+                        
+                        $(window.hWin.document).trigger(window.hWin.HAPI4.Event.ON_CREDENTIALS, 
+                                                    [window.hWin.HAPI4.currentUser]);
+
+                        if( window.hWin.HAPI4.SystemMgr.versionCheck() ) {
+                            //version is old 
+                            return;
+                        }
+
+                    }});            
+                    return true;
+                }else{
+                    return false;
+                }
+        
+    }});
+    
+    
 }
 
