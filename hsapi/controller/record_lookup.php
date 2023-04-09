@@ -29,9 +29,6 @@
     require_once (dirname(__FILE__).'/../System.php');
     require_once (dirname(__FILE__).'/../dbaccess/utils_db.php');
 
-detectLargeInputs('REQUEST record_lookup', $_REQUEST);
-detectLargeInputs('COOKIE record_lookup', $_COOKIE);
-    
     $response = array();
 
     $system = new System();

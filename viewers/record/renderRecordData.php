@@ -32,10 +32,6 @@
 require_once(dirname(__FILE__)."/../../hsapi/System.php");
 require_once(dirname(__FILE__).'/../../hsapi/utilities/Temporal.php');
 
-detectLargeInputs('REQUEST renderRecordData', $_REQUEST);
-detectLargeInputs('COOKIE renderRecordData', $_COOKIE);
-
-
 $system = new System();
 $inverses = null;
 

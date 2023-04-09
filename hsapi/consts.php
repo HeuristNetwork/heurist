@@ -403,14 +403,6 @@ $trmDefines = array(
 
 
 //---------------------------------
-function detectLargeInputs($name, $array)
-{
-  if(is_array($array) && count($array) > 500){
-      error_log('Large input in '.$name);
-      error_log(print_r(array_slice($array, 0, 100),true));
-      error_log(print_r($_SERVER, true));
-  }
-}
 
 function boot_error_handler($errno, $errstr, $errfile, $errline){
     switch($errno){

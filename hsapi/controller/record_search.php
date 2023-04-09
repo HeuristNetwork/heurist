@@ -33,8 +33,6 @@
     require_once (dirname(__FILE__).'/../dbaccess/db_recsearch.php');
     require_once (dirname(__FILE__).'/../dbaccess/utils_db.php');
 
-detectLargeInputs('REQUEST record_search', $_REQUEST);
-detectLargeInputs('COOKIE record_search', $_COOKIE);
     /*
      parameters
 

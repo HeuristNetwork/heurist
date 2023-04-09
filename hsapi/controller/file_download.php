@@ -43,9 +43,6 @@
 require_once (dirname(__FILE__).'/../System.php');
 require_once (dirname(__FILE__).'/../dbaccess/db_files.php');
 
-detectLargeInputs('REQUEST file_download', $_REQUEST);
-detectLargeInputs('COOKIE file_download', $_COOKIE);
-
 $system = new System(); //without connection
 $db = @$_REQUEST['db'];
 

@@ -24,9 +24,6 @@
     require_once (dirname(__FILE__).'/../dbaccess/recordsBatch.php');
     require_once (dirname(__FILE__).'/../dbaccess/utils_db.php');
 
-detectLargeInputs('REQUEST record_batch', $_REQUEST);
-detectLargeInputs('COOKIE record_batch', $_COOKIE);
-    
     $response = array();
     $res = false;
 

@@ -24,9 +24,6 @@ require_once(dirname(__FILE__).'/../utilities/utils_file.php');
 require_once(dirname(__FILE__).'/../utilities/utils_image.php');
 require_once(dirname(__FILE__).'/../utilities/UploadHandler.php');
 
-detectLargeInputs('REQUEST fileUpload', $_REQUEST);
-detectLargeInputs('COOKIE fileUpload', $_COOKIE);
-
 $response = null;
 $system = new System();
 

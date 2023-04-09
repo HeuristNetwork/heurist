@@ -23,9 +23,6 @@
     require_once (dirname(__FILE__).'/../System.php');
     require_once (dirname(__FILE__).'/../dbaccess/db_records.php');
 
-detectLargeInputs('REQUEST record_edit', $_REQUEST);
-detectLargeInputs('COOKIE record_edit', $_COOKIE);
-    
     $response = array();
     
     $system = new System();

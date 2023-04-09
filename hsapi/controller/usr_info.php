@@ -27,9 +27,6 @@
     require_once (dirname(__FILE__).'/../utilities/utils_file.php');
     require_once (dirname(__FILE__).'/../utilities/utils_image.php');	
 
-detectLargeInputs('REQUEST user_info', $_REQUEST);
-detectLargeInputs('COOKIE user_info', $_COOKIE);
-    
     $response = array(); //"status"=>"fatal", "message"=>"OBLOM");
     $res = false;
 

@@ -23,10 +23,6 @@
 require_once (dirname(__FILE__).'/../System.php');        
 require_once (dirname(__FILE__).'/../utilities/titleMask.php');
 
-detectLargeInputs('REQUEST record_titlemask', $_REQUEST);
-detectLargeInputs('COOKIE record_titlemask', $_COOKIE);
-
-
 /*
 parameters
 

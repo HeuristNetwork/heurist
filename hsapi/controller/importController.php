@@ -98,10 +98,6 @@ require_once (dirname(__FILE__).'/../import/importAction.php'); //work with impo
 require_once (dirname(__FILE__).'/../import/importHeurist.php'); //work with Heurist exchange format
 
 
-detectLargeInputs('REQUEST importController', $_REQUEST);
-detectLargeInputs('COOKIE importController', $_COOKIE);
-
-
 set_time_limit(0);
     
 $response = null;

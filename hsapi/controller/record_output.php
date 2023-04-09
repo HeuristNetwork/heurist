@@ -67,9 +67,6 @@
     require_once (dirname(__FILE__).'/../dbaccess/recordsExport.php');
     require_once (dirname(__FILE__).'/../dbaccess/recordsExportCSV.php');
  
-//detectLargeInputs('REQUEST record_output', $_REQUEST);
-//detectLargeInputs('COOKIE record_output', $_COOKIE);
-   
     $response = array();
 
     if(@$_REQUEST['postdata']){
