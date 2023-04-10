@@ -336,22 +336,46 @@ function doSamlLogin(callback, parentwin){
         title: 'BnF Authentification',
         width: 980,
         height: 420,
+        noClose: true,
+        /*afterclose: function() {
+            if(!window.hWin.HAPI4.has_access() ){
+                //redirects to startup page - list of all databases
+                window.hWin.location  = window.HAPI4.baseURL; //startup page 
+            }
+        },*/
         callback:function(context){
-                console.log(context);        
                 if(context){
-                    window.hWin.HAPI4.SystemMgr.sys_info(function (success) {
-                    if (success) {
-                        console.log(window.hWin.HAPI4.currentUser);
-                        
+/*
+console.log('!!!!', context);                        
+                    var data = window.hWin.HEURIST4.util.isJSON(context);
+                    if(data){                   
+                            if (data.currentUser) {
+                                window.hWin.HAPI4.setCurrentUser(data.currentUser);
+                            }
+                            if (data.sysinfo) {
+                                window.hWin.HAPI4.sysinfo = data.sysinfo;
+                            }
                         $(window.hWin.document).trigger(window.hWin.HAPI4.Event.ON_CREDENTIALS, 
                                                     [window.hWin.HAPI4.currentUser]);
+                        
+                    }else{
+*/
+                        window.hWin.HAPI4.SystemMgr.sys_info(function (success) {
+                            
+                            if (success) {
+console.log(window.hWin.HAPI4.currentUser);
+                                
+                                $(window.hWin.document).trigger(window.hWin.HAPI4.Event.ON_CREDENTIALS, 
+                                                            [window.hWin.HAPI4.currentUser]);
 
-                        if( window.hWin.HAPI4.SystemMgr.versionCheck() ) {
-                            //version is old 
-                            return;
-                        }
+                                if( window.hWin.HAPI4.SystemMgr.versionCheck() ) {
+                                    //version is old 
+                                    return;
+                                }
 
-                    }});            
+                            }
+                        });            
+//}
                     return true;
                 }else{
                     return false;

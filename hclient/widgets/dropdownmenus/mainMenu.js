@@ -2139,7 +2139,8 @@ console.log('>>>>'+that.divProfileItems.find('.ui-menu-item').css('padding-left'
     },
     
     //
-    //
+    // show login popup dialog if not logged in
+    // if login fails show list of databases
     //
     doLogin: function(){
         

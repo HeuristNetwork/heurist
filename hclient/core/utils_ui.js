@@ -1651,7 +1651,7 @@ window.hWin.HEURIST4.ui = {
     },
     
     //
-    //
+    // show login popup dialog 
     //
     checkAndLogin: function(isforsed, callback){
 

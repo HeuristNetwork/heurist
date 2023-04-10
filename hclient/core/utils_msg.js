@@ -739,7 +739,6 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
 
                     //close dialog from inside of frame
                     content.close = function() {
-                        
                         var did = $dlg.attr('id');
 
                         var rval = true;

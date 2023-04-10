@@ -1,5 +1,10 @@
 <?php
-require('/var/simplesamlphp/lib/_autoload.php');
+$saml_script = '/var/simplesamlphp/lib/_autoload.php';
+$is_debug = true;
+if(file_exists($saml_script)){
+    require($saml_script);    
+    $is_debug = false;
+}
 require_once (dirname(__FILE__).'/../System.php');
 require_once (dirname(__FILE__).'/../dbaccess/db_users.php');
 
@@ -33,22 +38,29 @@ if($error){
         }
     }else if ($action == "login"){
 
-/*            
-        if(!@$_REQUEST['auth']){
-            ?>
-            <html>
-                <?php  echo $_SERVER['PHP_SELF']; ?><br>
-                <a href="<?php echo $_SERVER['PHP_SELF'].'?a=login&auth=1&db='.$_REQUEST['db']; ?>">LOGIN</a></html>
-            <?php
-            exit();
-*/            
-        $as = new \SimpleSAML\Auth\Simple($sp);
-        //$as = new SimpleSAML_Auth_Simple($sp);
-        if(!$as->isAuthenticated()){
-            $as->requireAuth();    //after login - it returns to this page again
-            exit();
+        if($is_debug){
+            if(!@$_REQUEST['auth']){
+                    ?>
+                    <html>
+                        <?php  echo $_SERVER['PHP_SELF']; ?><br>
+                        <a href="<?php echo $_SERVER['PHP_SELF'].'?a=login&auth=1&db='.$_REQUEST['db']; ?>">LOGIN</a></html>
+                    <?php
+                    exit();
+            }
+        }else{    
+            $as = new \SimpleSAML\Auth\Simple($sp);
+            //$as = new SimpleSAML_Auth_Simple($sp);
+            if(!$as->isAuthenticated()){
+                $as->requireAuth();    //after login - it returns to this page again
+                exit();
+            }
+        }
+        
+        if($is_debug){
+            $attr = array();
         }else{
             $attr = $as->getAttributes();
+        }
 
             if(count($attr)==0){
                 $attr = 
@@ -114,12 +126,14 @@ if($error){
                 if($user_id>0){
                     if($system->doLogin($user_id, 'x', 'remember', true)){
                         //after login - close parent dialog and reload CurrentUserAndSysInfo
+                        //$res = $system->getCurrentUserAndSysInfo();
+                        //$res = json_encode($res);
                         ?>
                         <html>
                         <body>
                         <script>
                             window.onload = function(){
-                                setTimeout(function(){window.close(true); }, 1000);    
+                                setTimeout(function(){window.close('<?php echo 'ok';?>'); }, 500);    
                             }                 
                         </script>
                         Authentification completed
@@ -133,11 +147,10 @@ if($error){
 
             }
 
-        }
 
     }else{
         //after logout - close parent window
-        print '<script>window.close();</script>';
+        print '<script>window.close(false);</script>';
         exit();  
     }
 
