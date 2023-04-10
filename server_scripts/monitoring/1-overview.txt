@@ -1,5 +1,5 @@
 
-Directory:	/server_scripts
+Directory:	/server_scripts/monitoring
 
 Overview:	Scripts for installation, update and verification of instances
             and management of databases on a server
@@ -17,3 +17,4 @@ Created: 	24th Feb 2016, Mostly work in progress @ oct 2022
 * @version     6
 
 
+These scripts should be installed on any Heurist server and configured with a cronjob such as the one included here.
