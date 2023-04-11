@@ -211,6 +211,10 @@ $websiteThumbnailPassword = '';
 $default_CMS_Template = '';
 
 $absolutePathsToRemoveFromWebPages = null;
+
+//array - pairs: "sp id"=>"Service Provide Name"
+$saml_service_provides = null;
+
 // system default file - if a heuristConfigIni.php file exists in the parent directory of the installation,
 // the configIni.php in the installation does not need to be configured. This allows unconfigured ConfigIni.php files
 // to exist in multiple experimental codebases on a single server and avoids accidental distribution of passwords etc.
@@ -222,4 +226,5 @@ $defaultFaimsModulesPath = ""; // FAIMS only: the location where FAIMS module fi
 if (is_file($parentIni)){
     include_once($parentIni);
 }
+
 ?>

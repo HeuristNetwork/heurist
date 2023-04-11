@@ -128,4 +128,8 @@ if (!@$needEncodeRecordDetails) $needEncodeRecordDetails = 0;
 
 // common languages for translation database definitions (ISO639-2 codes) in upper case
 $common_languages_for_translation = array('ARA','BUR','CHI','CZE','DAN','DUT','ENG','EST','FIN','FRE','GER','GRE','HIN','HUN','IND','ITA','JPN','JAV','KOR','KUR','LAO','LAT','MAO','MAY','MKH','BUR','NEP','NOR','PER','POR','RUS','SLO',' SLV','SPA','SWA','SWE','THA','TIB','TUR','UIG','UKR','VIE','YID','ZUL');
+
+// array of saml service providers
+$saml_service_provides = null;
+//for example:  $saml_service_provides = array("default-sp"=>"BnF Authentication");
 ?>

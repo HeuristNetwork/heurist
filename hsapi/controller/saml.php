@@ -18,7 +18,8 @@ if($error){
     $system->addError(HEURIST_INVALID_REQUEST, $error);
 }else{
 
-    $sp = $system->is_saml_authorisation($_REQUEST['db']); //'default-sp';
+    $sp = @$_REQUEST['sp'];
+    if(!$sp) $sp = 'default-sp';
     
     if(!$sp){
         $system->addError(HEURIST_INVALID_REQUEST, 'Database '.$_REQUEST['db'].' does not support SAML authorisation');
@@ -110,12 +111,18 @@ if($error){
                 if(!($user_id>0)){
                     //add new user
                     //$attr['uid'][0]
+                    
+                    $bytes = random_bytes(5);
+                    $rand_pwd = bin2hex($bytes);
+                    
+                    list($givenName, $surName) = explode(' ',$attr['displayName'][0]);
+                    
                     // displayName, givenName, sn, department
                     $record = array('ugr_ID'=>-1, 'ugr_Type'=>'user', 
                         'ugr_Name'=>$attr['uid'][0], //login
-                        'ugr_eMail'=>$attr['mail'][0], 'ugr_Password'=>$attr['uid'][0], 
-                        'ugr_FirstName'=>$attr['givenName'][0],
-                        'ugr_LastName'=>$attr['sn'][0],
+                        'ugr_eMail'=>$attr['mail'][0], 'ugr_Password'=>$rand_pwd, 
+                        'ugr_FirstName'=>$givenName, //$attr['givenName'][0],
+                        'ugr_LastName'=>$surName,  //$attr['sn'][0],
                         'ugr_Department'=>@$attr['department'][0],
                         'ugr_Organisation'=>'na',
                         'ugr_Interests'=>'na',
@@ -128,12 +135,13 @@ if($error){
                         //after login - close parent dialog and reload CurrentUserAndSysInfo
                         //$res = $system->getCurrentUserAndSysInfo();
                         //$res = json_encode($res);
+                        //pass to window.close('echo $res;');
                         ?>
                         <html>
                         <body>
                         <script>
                             window.onload = function(){
-                                setTimeout(function(){window.close('<?php echo 'ok';?>'); }, 500);    
+                                setTimeout(function(){window.close('ok'); }, 500);    
                             }                 
                         </script>
                         Authentification completed

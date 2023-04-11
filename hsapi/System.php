@@ -1066,7 +1066,7 @@ error_log(print_r($_REQUEST, true));
         global $passwordForDatabaseCreation, $passwordForDatabaseDeletion,
                $passwordForReservedChanges, $passwordForServerFunctions,
                $needEncodeRecordDetails, 
-               $common_languages_for_translation, $glb_lang_codes;
+               $common_languages_for_translation, $glb_lang_codes, $saml_service_provides;
    
         if(!isset($needEncodeRecordDetails)){
             $needEncodeRecordDetails = 0;
@@ -1129,8 +1129,6 @@ error_log(print_r($_REQUEST, true));
                 $host_logo = null;    
             }
             
-            $is_saml_auth = ($this->is_saml_authorisation()==false)?0:1;
-            
             //retrieve lastest code version (cached in localfile and refreshed from main index server daily)
             $lastCode_VersionOnServer = $this->get_last_code_and_db_version($this->version_release == "alpha" ? true : false);
 
@@ -1176,7 +1174,7 @@ error_log(print_r($_REQUEST, true));
                     
                     'common_languages'=>$common_languages,
                     
-                    'saml_auth'=>$is_saml_auth,
+                    'saml_service_provides'=>$saml_service_provides,
                     
                     'nakala_api_key'=>$this->get_system('sys_NakalaKey'),
                     
@@ -1208,7 +1206,7 @@ error_log(print_r($_REQUEST, true));
                     "referenceServerURL"=>HEURIST_INDEX_BASE_URL),
                     'host_logo'=>$host_logo,
                     'host_url'=>$host_url,
-                    'saml_auth'=>$is_saml_auth,
+                    'saml_service_provides'=>$saml_service_provides,
                     'common_languages'=>$common_languages
             );
 
@@ -1891,26 +1889,6 @@ error_log('CANNOT UPDATE COOKIE '.$session_id);
         return $is_allowed;
     }
 
-    //
-    //  returns SP name for given database
-    //
-    public function is_saml_authorisation($dbname=null){
-        
-        $fname = realpath(dirname(__FILE__)."/../../saml_authorisation.txt");
-        if($fname!==false && file_exists($fname)){
-            
-            $config = json_decode(file_get_contents($fname),true);
-            
-            $dbname = $dbname?$dbname:$this->dbname;
-            
-            if(@$config[$dbname]){
-                return $config[$dbname];
-            }
-        }
-        return false;
-    }
-
-    
     //
     // check database version 
     // first check version in file lastAdviceSent, version stored in this file valid for 24 hrs

@@ -20,10 +20,13 @@
 //isforsed - if true - it is not possible to get out from login other than switch database
 function showLoginDialog(isforsed, callback, parentwin, dialog_id){
     
+    //window.hWin.HEURIST4.util.isArrayNotEmpty(window.hWin.HAPI4.saml_service_provides)
+    /*
     if(window.hWin.HAPI4.sysinfo && window.hWin.HAPI4.sysinfo.saml_auth==1){
         doSamlLogin(callback, parentwin);
         return;
     }
+    */
 
     var is_secondary_parent = false;
     if(!parentwin){
@@ -47,6 +50,21 @@ function showLoginDialog(isforsed, callback, parentwin, dialog_id){
         }
     }    
     
+    function __onDialogClose($dlg) {
+             
+            var allFields = $dlg.find('input');       
+            allFields.val( "" ).removeClass( "ui-state-error" );
+            
+            if($.isFunction(callback)){
+                callback(window.hWin.HAPI4.has_access());
+            }else
+            if( isforsed && !window.hWin.HAPI4.has_access() ){
+                //redirects to startup page - list of all databases
+                window.hWin.location  = window.HAPI4.baseURL; //startup page 
+            }
+            $dlg.remove();
+    }
+    
 
     if(login_dialog.length<1)  // login_dialog.is(':empty') )
     {
@@ -62,6 +80,29 @@ function showLoginDialog(isforsed, callback, parentwin, dialog_id){
                             +window.hWin.HEURIST4.util.random(), 
             function(){ 
 
+            
+            var iWidth = 450;
+            if($.isPlainObject(window.hWin.HAPI4.sysinfo.saml_service_provides)){
+                var sp_keys = Object.keys(window.hWin.HAPI4.sysinfo.saml_service_provides);
+                if(sp_keys.length>0){
+                    var sel = $dlg.find('#saml_sp');
+                    for(let id of sp_keys){
+                        window.hWin.HEURIST4.ui.addoption(sel[0],id,window.hWin.HAPI4.sysinfo.saml_service_provides[id]);
+                    }
+                    iWidth = 650;
+                    $dlg.find('#fld_login > fieldset').css({'width':'370px','display':'inline-block'});
+                    $dlg.find('#fld_saml').show(); //css({'display':'inline'});
+                    $dlg.find('#btn_saml_auth').button().click(function(){
+                        
+                        $dlg.dialog('option','close',function(){ 
+                                $dlg.remove(); 
+                        });;
+                        $dlg.dialog('close');
+                        doSamlLogin(callback, parentwin, sel.val());
+                    });
+                }
+            }
+            
                 
             $dlg.find('#span-database').text(window.hWin.HAPI4.database);
 
@@ -90,7 +131,6 @@ function showLoginDialog(isforsed, callback, parentwin, dialog_id){
             $dlg.find('#span-owner-email').html('<a href="mailto:'
                     +window.hWin.HAPI4.sysinfo.dbowner_email+'">'+window.hWin.HAPI4.sysinfo.dbowner_email+'</a>');
             
-//console.log(window.hWin.HAPI4.sysinfo.db_total_records);            
             if(window.hWin.HAPI4.sysinfo.db_total_records && window.hWin.HAPI4.sysinfo.db_total_records>=0){
                 $dlg.find('#span-reccount').text(window.hWin.HAPI4.sysinfo.db_total_records+' records');
             }else{
@@ -245,23 +285,11 @@ function showLoginDialog(isforsed, callback, parentwin, dialog_id){
             $dlg.dialog({
                 autoOpen: false,
                 //height: 300,
-                width: 450,
+                width: iWidth,
                 modal: true,
                 resizable: false,
                 title: window.hWin.HR('Heurist Login'),
                 buttons: arr_buttons,
-                close: function() {
-                    allFields.val( "" ).removeClass( "ui-state-error" );
-                    
-                    if($.isFunction(callback)){
-                        callback(window.hWin.HAPI4.has_access());
-                    }else
-                    if( isforsed && !window.hWin.HAPI4.has_access() ){
-                        //redirects to startup page - list of all databases
-                        window.hWin.location  = window.HAPI4.baseURL; //startup page 
-                    }
-                    $dlg.remove();
-                },
                 open: function() {
                     isreset = false;
                     $("#btn_login2").button("option","label",'<b>'+window.hWin.HR('Login')+'</b>');
@@ -272,8 +300,8 @@ function showLoginDialog(isforsed, callback, parentwin, dialog_id){
                 }
                 //position:{ my: "center center", at: "center center", of: $(top.document) }
             });
-
-            $dlg.dialog("open");
+            
+            login_dialog = $dlg.dialog("open");
             if(is_secondary_parent)$dlg.addClass('ui-dialog-heurist').css({'font-size':'0.8em'});
             $dlg.parent().position({ my: "center center", at: "center center", of: $(top.document) });
 
@@ -282,13 +310,19 @@ function showLoginDialog(isforsed, callback, parentwin, dialog_id){
             var btn_db = $( "<button>" ).appendTo( left_pane )
             .button( {title: window.hWin.HR("Change database")} ).click( function() { $dlg.dialog( "close" ); } );
             }*/
+            
+            login_dialog.dialog('option','close', function(){__onDialogClose($dlg)});
 
         });//load html
     }else{
         //show dialogue
         login_dialog.dialog("open");
         login_dialog.parent().addClass('ui-dialog-heurist');
+        login_dialog.dialog('option','close', function(){__onDialogClose(login_dialog)});
     }
+    
+    
+    
 }
 
 //
@@ -327,11 +361,11 @@ function doRegister( parentwin ){
 //
 //
 //
-function doSamlLogin(callback, parentwin){
+function doSamlLogin(callback, parentwin, sp_entity){
     
     //loads saml dialog into iframe
     window.hWin.HEURIST4.msg.showDialog(
-    window.hWin.HAPI4.baseURL+'hsapi/controller/saml.php?a=login&db='+window.hWin.HAPI4.database,
+    window.hWin.HAPI4.baseURL+'hsapi/controller/saml.php?a=login&sp='+sp_entity+'&db='+window.hWin.HAPI4.database,
     {
         title: 'BnF Authentification',
         width: 980,
@@ -345,25 +379,9 @@ function doSamlLogin(callback, parentwin){
         },*/
         callback:function(context){
                 if(context){
-/*
-console.log('!!!!', context);                        
-                    var data = window.hWin.HEURIST4.util.isJSON(context);
-                    if(data){                   
-                            if (data.currentUser) {
-                                window.hWin.HAPI4.setCurrentUser(data.currentUser);
-                            }
-                            if (data.sysinfo) {
-                                window.hWin.HAPI4.sysinfo = data.sysinfo;
-                            }
-                        $(window.hWin.document).trigger(window.hWin.HAPI4.Event.ON_CREDENTIALS, 
-                                                    [window.hWin.HAPI4.currentUser]);
-                        
-                    }else{
-*/
                         window.hWin.HAPI4.SystemMgr.sys_info(function (success) {
                             
                             if (success) {
-console.log(window.hWin.HAPI4.currentUser);
                                 
                                 $(window.hWin.document).trigger(window.hWin.HAPI4.Event.ON_CREDENTIALS, 
                                                             [window.hWin.HAPI4.currentUser]);
