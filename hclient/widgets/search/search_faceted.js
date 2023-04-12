@@ -1063,7 +1063,12 @@ $.widget( "heurist.search_faceted", {
                     
                     inpt.find('.header').attr('title', facet_rollover)
                         .css('display','block')
-                        .html('<h4 style="display:inline-block;margin:0;">'+facet_title+'</h4>');
+                        .html('<h4 style="display:inline-block;margin:0;">'+facet_title
+                        
+                        +((facet_rollover)?'<span class="bor-tooltip ui-icon ui-icon-circle-help" '
+                          +'style="width:17px;height:17px;margin-left:4px;display:inline-block;vertical-align:text-bottom;" title="'
+                          +facet_rollover+'"></span>':'')                        
+                        +'</h4>');
                                                                         
                     inpt.find('.input-cell').css({
                         border: 'none',
@@ -2250,12 +2255,12 @@ $.widget( "heurist.search_faceted", {
                             
                             if(field['type']=="date"){
                                 
-                                if(mmin.indexOf("-00-00")>0){
-                                    mmin = mmin.replace("-00-00","-01-01");
+                                if(mmin.indexOf("-00")>0){
+                                    mmin = mmin.replaceAll("-00","-01");
                                 }
-                                if(mmax.indexOf("-00-00")>0 || mmax.indexOf("-01-01")>0){
+                                if(mmax.indexOf("-00")>0){ //|| mmax.indexOf("-01-01")>0
                                     let to_replace = mmax.indexOf("-00-00")>0 ? "-00-00" : "-01-01";
-                                    mmax = mmax.replace(to_replace,"-01-02");
+                                    mmax = mmax.replaceAll('-00','-01');
                                 }
                                 
                                 mmin = mmin.replace(' ','T');                                                                     
@@ -2293,7 +2298,7 @@ $.widget( "heurist.search_faceted", {
                                 delta = daymsec;
                             }else if(mmin==mmax){ //years
                                 delta = 10;
-                            }
+                            }                              
                             
                         /*if(mmin==mmax){
                             $("<span>").text(cterm[0]).css({'font-style':'italic', 'padding-left':'10px'}).appendTo($facet_values);

@@ -283,7 +283,8 @@ function recordSearchFacets($system, $params){
 
             }else{    
 
-                $select_field = "cast(if(cast(concat('00',getTemporalDateString( $select_field )) as DATETIME) is null,"
+                //concat('00',
+                $select_field = "cast(if(cast(getTemporalDateString( $select_field ) as DATETIME) is null,"
                 ."concat('00',cast(getTemporalDateString( $select_field ) as SIGNED),'-1-1'),"  //year
                 ."concat('00',getTemporalDateString( $select_field ))) as DATETIME)";
 
