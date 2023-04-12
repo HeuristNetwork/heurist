@@ -311,7 +311,7 @@ $.widget( "heurist.recordAccess", $.heurist.recordAction, {
     //
     doAction: function(){
 
-            var scope_val = (this.options.scope_types=='none')?'any':this.selectRecordScope.val();
+            var scope_val = (this.options.scope_types=='none' || !this.selectRecordScope)?'any':this.selectRecordScope.val();
             
             if(window.hWin.HEURIST4.util.isempty(scope_val)) return; 
     
@@ -396,7 +396,7 @@ $.widget( "heurist.recordAccess", $.heurist.recordAction, {
     _onRecordScopeChange: function () 
     {
         
-        var scope_val = (this.options.scope_types=='none')?'any':this.selectRecordScope.val();
+        var scope_val = (this.options.scope_types=='none' || !this.selectRecordScope)?'any':this.selectRecordScope.val();
         var isdisabled = !(scope_val!='' && this.getSelectedParameters(false))
             
         window.hWin.HEURIST4.util.setDisabled( this.element.parents('.ui-dialog').find('#btnDoAction'), isdisabled );

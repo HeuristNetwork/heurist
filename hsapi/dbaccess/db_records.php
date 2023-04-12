@@ -1156,6 +1156,10 @@ function recordUpdateOwnerAccess($system, $params){
 
     $recids = prepareIds($recids);
     if(count($recids)>0){
+        
+        if(@$params['OwnerUGrpID']=='current_user'){
+            $params['OwnerUGrpID'] = $system->get_user_id();
+        }
 
         $owner_grps = prepareIds( @$params['OwnerUGrpID'], true);
         $access = @$params['NonOwnerVisibility'];
