@@ -1734,7 +1734,7 @@ function refreshButton() {
     let query = window.location.search;
 
     if(window.location !== window.parent.location){ // handle iframe
-        query = window.hWin.HEURIST4.util.composeHeuristQuery2(window.hWin.HEURIST4.current_query_request, false);
+        query = window.hWin.HEURIST4.query.composeHeuristQuery2(window.hWin.HEURIST4.current_query_request, false);
         query = query + ((query == '?') ? '' : '&') + 'db=' + window.hWin.HAPI4.database;
     }
 
@@ -1772,7 +1772,7 @@ function refreshGravityOff() {
 }
 //open graph in fullscreen - Travis Doyle 28/9
 function openWin() {
-    var hrefnew = window.hWin.HEURIST4.util.composeHeuristQuery2(window.hWin.HEURIST4.current_query_request, false);
+    var hrefnew = window.hWin.HEURIST4.query.composeHeuristQuery2(window.hWin.HEURIST4.current_query_request, false);
     hrefnew = hrefnew + ((hrefnew == '?') ? '' : '&') + 'db=' + window.hWin.HAPI4.database;
     var url2 = window.hWin.HAPI4.baseURL + 'hclient/framecontent/visualize/springDiagram.php' + hrefnew;
     window.open(url2);
@@ -1781,7 +1781,7 @@ function openWin() {
 function closeWin() {
     window.close();
     return;
-    var hrefnew = window.hWin.HEURIST4.util.composeHeuristQuery2(window.hWin.HEURIST4.current_query_request, false);
+    var hrefnew = window.hWin.HEURIST4.query.composeHeuristQuery2(window.hWin.HEURIST4.current_query_request, false);
     hrefnew = hrefnew + ((hrefnew == '?') ? '' : '&') + 'db=' + window.hWin.HAPI4.database;
     var url2 = window.hWin.HAPI4.baseURL + 'hclient/framecontent/visualize/springDiagram.php' + hrefnew;
     window.close();
