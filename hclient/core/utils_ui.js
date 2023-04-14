@@ -1200,7 +1200,7 @@ window.hWin.HEURIST4.ui = {
  
             var menu = selObj.hSelect({ 
                 style: 'dropdown',
-                position: (navigator.userAgent.indexOf('Firefox')<0)?{collision: "flip"}:{},
+                position: {collision: "flip"},  //(navigator.userAgent.indexOf('Firefox')<0)?{collision: "flip"}:{},
                 appendTo: parent_ele,
                 change: function( event, data ) {
  
