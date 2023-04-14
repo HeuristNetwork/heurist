@@ -1463,6 +1463,10 @@ console.log('inputdiv',$inputdiv.attr('id'),$inputdiv.parents('fieldset').attr('
                 that.selObj.attr('ref-id', _ref_id);
                 that.selObj.hSelect('open');
                 that.selObj.hSelect('widget').hide();
+                var prn = that.selObj.hSelect('menuWidget').parent('div.ui-selectmenu-menu');
+                if(prn.length>0){
+                    prn.css({'position':'fixed'}); //to show above all 
+                }
                 that.selObj.hSelect('menuWidget')
                         .position({my: "left top", at: "left bottom", of: $inpt_ele});
                 //that._on($(that.selObj),{change:f(){}});
@@ -1735,6 +1739,10 @@ function browseTerms(_editing_input, $input, value){
         that.selObj.attr('ref-id', _ref_id); //assign current input id for reference in onSelectMenu
         that.selObj.hSelect('open');
         that.selObj.hSelect('widget').hide();
+        var prn = that.selObj.hSelect('menuWidget').parent('div.ui-selectmenu-menu');
+        if(prn.length>0){
+            prn.css({'position':'fixed'}); //to show above all 
+        }
         that.selObj.hSelect('menuWidget')
             .position({my: "left top", at: "left bottom", of: menu_location});
         //that._on($(that.selObj),{change:f(){}});
