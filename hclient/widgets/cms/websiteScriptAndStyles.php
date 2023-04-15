@@ -911,44 +911,7 @@ function initLinksAndImages($container, search_data){
     });
 
     // Ensure each image and embedded source is correct for current server + database
-    $('img, embed').each(function(idx, ele){
-
-        var src = $(ele).attr('src');
-        var file_id = $(ele).attr('data-id');
-        var db = window.hWin.HAPI4.database;
-        var extra_params = '';
-
-        if(!window.hWin.HEURIST4.util.isempty(src)){
-            var query = src.slice(src.indexOf('?'));
-
-            if(src.indexOf('file=') > 0){
-                file_id = window.hWin.HEURIST4.util.getUrlParameter('file', query);
-            }
-
-            if(src.indexOf('embedplayer=') > 0){
-                extra_params += '&embedplayer='+window.hWin.HEURIST4.util.getUrlParameter('embedplayer', query);
-            }
-
-            if(src.indexOf('fancybox=') > 0){
-                extra_params += '&fancybox='+window.hWin.HEURIST4.util.getUrlParameter('fancybox', query);
-            }else{
-                extra_params += '&fancybox=1';
-            }
-
-            if(src.indexOf('db=') > 0){
-                db = window.hWin.HEURIST4.util.getUrlParameter('db', query);
-            }
-        }
-
-        if(!window.hWin.HEURIST4.util.isempty(file_id) && !window.hWin.HEURIST4.util.isempty(db)){
-            $(ele).attr('src', window.hWin.HAPI4.baseURL_pro + '?db=' + db + '&file=' + file_id + extra_params);
-        }else 
-        if (!window.hWin.HEURIST4.util.isempty(src) 
-            && (src.indexOf('./')==0 || src.indexOf('/')==0)){ //relative path
-              src = window.hWin.HAPI4.baseURL + src.substring(src.indexOf('/')==0?1:2);
-              $(ele).attr('src', src);
-        }
-    });
+    $('img, embed').each(function(i,ele){window.hWin.HEURIST4.util.restoreRelativeURL(ele);});
 
     
 }

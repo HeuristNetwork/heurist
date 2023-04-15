@@ -1025,7 +1025,55 @@ window.hWin.HEURIST4.util = {
         var results = sorted_array.concat(left_array.concat(right_array));
 
         return results;
+    },
+    
+    //
+    // Restore IMG url. Converts from relative path to current "pro"
+    //
+    restoreRelativeURL: function(ele)
+    {
+        
+        var src = ele.getAttribute('src');
+        var file_id = ele.getAttribute('data-id');
+        var db = window.hWin.HAPI4.database;
+        var extra_params = '';
+
+        //extract params from image src and recreate new url pointed to  baseURL_pro
+        if(!window.hWin.HEURIST4.util.isempty(src)){
+            var query = src.slice(src.indexOf('?'));
+
+console.log('>>>>',src);
+
+            if(src.indexOf('file=') > 0){
+                file_id = window.hWin.HEURIST4.util.getUrlParameter('file', query);
+            }
+
+            if(src.indexOf('embedplayer=') > 0){
+                extra_params += '&embedplayer='+window.hWin.HEURIST4.util.getUrlParameter('embedplayer', query);
+            }
+
+            if(src.indexOf('fancybox=') > 0){
+                extra_params += '&fancybox='+window.hWin.HEURIST4.util.getUrlParameter('fancybox', query);
+            }else{
+                extra_params += '&fancybox=1';
+            }
+
+            if(src.indexOf('db=') > 0){
+                db = window.hWin.HEURIST4.util.getUrlParameter('db', query);
+            }
+        }
+
+        //yes this is link to registered image
+        if(!window.hWin.HEURIST4.util.isempty(file_id) && !window.hWin.HEURIST4.util.isempty(db)){
+            ele.setAttribute('src', window.hWin.HAPI4.baseURL_pro + '?db=' + db + '&file=' + file_id + extra_params);
+        }else 
+        if (!window.hWin.HEURIST4.util.isempty(src) 
+            && (src.indexOf('./')==0 || src.indexOf('/')==0)){ //relative path
+              src = window.hWin.HAPI4.baseURL + src.substring(src.indexOf('/')==0?1:2);
+              ele.setAttribute('src', src);
+        }        
     }
+    
     
 }//end util
 

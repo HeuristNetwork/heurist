@@ -260,24 +260,8 @@ if(!($is_map_popup || $without_header)){
                     $eles.each(function(idx, ele){
                         var $ele = $(ele);
 
-                        $ele.find('img').each(function(i, image){
-                            var src = $(image).attr('src');
-                            var file_id = $(image).attr('data-id');
-
-                            if(src.indexOf('\"') > 0){ // fix img source
-
-                                if(!window.hWin.HEURIST4.util.isempty(src) && src.indexOf('&file=') > 0){
-                                    var query = src.slice(src.indexOf('?'));
-                                    file_id = window.hWin.HEURIST4.util.getUrlParameter('file', query);
-                                }
-
-                                if(!window.hWin.HEURIST4.util.isempty(file_id)){
-                                    file_id = file_id.replace('\"', '');
-                                    $(image).attr('src', window.hWin.HAPI4.baseURL_pro + '?db=' + window.hWin.HAPI4.database + '&file=' + file_id + '&fancybox=1');
-                                }
-                            }
-                        });
-
+                        $ele.find('img').each(function(i,img){window.hWin.HEURIST4.util.restoreRelativeURL(img);});
+                        
                         $('<div class="detail" style="cursor:pointer;text-decoration:underline;" title="Click to view web page content in a popup">View web page content</div>').on('click', function(){
                             window.hWin.HEURIST4.msg.showElementAsDialog({'element': $ele[0], 'default_palette_class': 'ui-heurist-explore', 'title': 'Web page content'});
                         }).insertBefore($ele);
