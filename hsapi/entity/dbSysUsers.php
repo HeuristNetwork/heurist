@@ -125,7 +125,7 @@ class DbSysUsers extends DbEntityBase
         }else if(@$this->data['details']=='full'){
 
             $this->data['details'] = 'ugr_ID,ugr_Name,ugr_FirstName,ugr_LastName,ugr_eMail,ugr_Department,ugr_Organisation,'
-            .'ugr_City,ugr_State,ugr_Postcode,ugr_Interests,ugr_Enabled';
+            .'ugr_City,ugr_State,ugr_Postcode,ugr_Interests,ugr_Enabled,usr_ExternalAuthentication';
             
             if($needRole){
                 $this->data['details'] .= ',ugl_Role';  

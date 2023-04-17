@@ -1510,10 +1510,22 @@ CREATE TABLE defTranslations (
 ) ENGINE=InnoDB COMMENT='Translation table into multiple languages for all translatab';
 DEFTAB);
             }
+        
+            if($dbVerSubSub<11){
+                if(!hasColumn($mysqli, 'sysUGrps', 'usr_ExternalAuthentication')){
+                    //alter table
+                    $query = "ALTER TABLE `sysUGrps` ADD `usr_ExternalAuthentication` varchar(1000) default NULL COMMENT 'JSON array with external authentication preferences'";
+                    $res = $mysqli->query($query);
+                    if(!$res){
+                        $system->addError(HEURIST_DB_ERROR, 'Cannot modify sysUGrps to add usr_ExternalAuthentication', $mysqli->error);
+                        return false;
+                    }
+                }
+            }
             
             //update version
-            if($dbVerSubSub<10){
-                $mysqli->query('UPDATE sysIdentification SET sys_dbVersion=1, sys_dbSubVersion=3, sys_dbSubSubVersion=10 WHERE 1');
+            if($dbVerSubSub<11){
+                $mysqli->query('UPDATE sysIdentification SET sys_dbVersion=1, sys_dbSubVersion=3, sys_dbSubSubVersion=11 WHERE 1');
             }
 
             

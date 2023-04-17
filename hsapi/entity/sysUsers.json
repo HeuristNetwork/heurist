@@ -223,10 +223,60 @@
                         "rst_DisplayHelpText": "Image to represent this user", 
                         "rst_FieldConfig":{"entity":"sysUsers", "accept":".png,.jpg,.gif", "size":200},
                         "dty_Role":"virtual"
-                    }
+                    }                                                                             
                 }
             ]
-        }
+        },
+        {
+        "groupID": "SAML",
+        "groupHeader": "External Authentication",
+        "groupTitleVisible": true,
+        "groupType": "accordion",
+            "children":[
+                {
+                    "dtID": "ugl_SpID",
+                    "dtFields":{
+                        "dty_Type":"enum",
+                        "dty_Role":"virtual",
+                        "rst_DisplayName": "Service Provider:",
+                        "rst_FieldConfig":["BnF"],
+                        "rst_DisplayHelpText": "Select Authentication service provider to define User ID and/or Email used to refer to Heurist user"
+                    }
+                },
+                {
+                    "dtID": "ugl_SpUID",
+                    "dtFields":{
+                        "dty_Type":"freetext",
+                        "dty_Role":"virtual",
+                        "rst_DisplayName": "User ID:",
+                        "rst_DisplayHelpText": "User identificator in selected SP"
+                    }
+                },
+                {
+                    "dtID": "ugl_SpMail",
+                    "dtFields":{
+                        "dty_Type":"enum",
+                        "dty_Role":"virtual",
+                        "rst_DisplayName": "Use Mail:",
+                        "rst_DefaultValue": "n",
+                        "rst_FieldConfig":[
+                            {"key":"y","title":"Yes"},
+                            {"key":"n","title":"No"}
+                        ],
+                        "rst_DisplayHelpText": "Use user email as additional referral"
+                    }
+                },
+                {
+                    "dtID": "usr_ExternalAuthentication",
+                    "dtFields":{
+                        "dty_Type":"freetext",
+                        "rst_DisplayName": "Value:",
+                        "rst_Display":"hidden"
+                    }
+                }
+                ]
+        }            
+            
                 
                 
                 

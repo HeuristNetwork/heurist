@@ -89,9 +89,9 @@ function showLoginDialog(isforsed, callback, parentwin, dialog_id){
                     for(let id of sp_keys){
                         window.hWin.HEURIST4.ui.addoption(sel[0],id,window.hWin.HAPI4.sysinfo.saml_service_provides[id]);
                     }
-                    iWidth = 650;
+                    iWidth = 700;
                     $dlg.find('#fld_login > fieldset').css({'width':'370px','display':'inline-block'});
-                    $dlg.find('#fld_saml').show(); //css({'display':'inline'});
+                    $dlg.find('#fld_saml').css({'display':'inline-block'});
                     $dlg.find('#btn_saml_auth').button().click(function(){
                         
                         $dlg.dialog('option','close',function(){ 
@@ -370,22 +370,24 @@ function doSamlLogin(callback, parentwin, sp_entity){
         title: 'BnF Authentification',
         width: 980,
         height: 420,
-        noClose: true,
-        /*afterclose: function() {
+        //noClose: true,
+        
+        afterclose: function() {
+            $(window.hWin.document).trigger(window.hWin.HAPI4.Event.ON_CREDENTIALS, 
+                                                            [window.hWin.HAPI4.currentUser]);
+            /*
             if(!window.hWin.HAPI4.has_access() ){
                 //redirects to startup page - list of all databases
                 window.hWin.location  = window.HAPI4.baseURL; //startup page 
             }
-        },*/
+            */
+        },
         callback:function(context){
                 if(context){
                         window.hWin.HAPI4.SystemMgr.sys_info(function (success) {
-                            
+
                             if (success) {
                                 
-                                $(window.hWin.document).trigger(window.hWin.HAPI4.Event.ON_CREDENTIALS, 
-                                                            [window.hWin.HAPI4.currentUser]);
-
                                 if( window.hWin.HAPI4.SystemMgr.versionCheck() ) {
                                     //version is old 
                                     return;

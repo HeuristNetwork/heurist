@@ -64,51 +64,31 @@ if($error){
         }
 
             if(count($attr)==0){
-                $attr = 
-                array
-                (
-                    'uid' => array
-                    (
-                        0 => 'BNF0017879'
-                    ),
-
-                    'mail' => array
-                    (
-                        0 => 'philippe.yard@bnf.fr'
-                    ),
-
-                    'displayName' => array
-                    (
-                        0 => 'Philippe YARD'
-                    ),
-
-                    'givenName' => array
-                    (
-                        0 => 'Philippe (PFVD)'
-                    ),
-
-                    'sn' => array
-                    (
-                        0 => 'YARD (PFVD)'
-                    ),
-
-                    'department' => array
-                    (
-                        0 => 'DSR/DSI/SED/B2I'
-                    ),
-                );      
+                $system->addError(HEURIST_ACTION_BLOCKED, 'External authentication returns empty attributes. Please contact Service provider admin');
             }      
 
             //$idp = $as->getAuthData('saml:sp:IdP');
             //$nameId = $as->getAuthData('saml:sp:NameID')['Value'];
 
             //find user in sysUGrps by email, if not found add new one
-            if( $system->init( @$_REQUEST['db'] ) ){ 
+            if(count($attr)>0 && $system->init( @$_REQUEST['db'] ) ){
+            
+                $mysqli = $system->get_mysqli();
+                $spe = $mysqli->real_escape_string($sp);
+$query = 'SELECT ugr_ID FROM hdb_osmak_9c.sysugrps where usr_ExternalAuthentication is not null '
+.' and  (usr_ExternalAuthentication->\'$."'.$spe.'".uid\'="" OR usr_ExternalAuthentication->\'$."'.$spe.'".uid\'="'.$mysqli->real_escape_string($attr['uid'][0]).'")'
+.' and  (usr_ExternalAuthentication->\'$."'.$spe.'".mail\'="n" OR ugr_eMail="'.$mysqli->real_escape_string($attr['mail'][0]).'")';            
 
-                $user_id = mysql__select_value($system->get_mysqli(),'SELECT ugr_ID FROM sysUGrps WHERE ugr_eMail="'
-                    .$attr['mail'][0].'"');
+                $user_id = mysql__select_value($system->get_mysqli(), $query);
 
                 if(!($user_id>0)){
+                    //show error
+                    $system->addError(HEURIST_ACTION_BLOCKED, 'Heurist Database '.$_REQUEST['db'].' does not have an user with provided attributes');
+                }
+                /*
+                $user_id = mysql__select_value($system->get_mysqli(),'SELECT ugr_ID FROM sysUGrps WHERE ugr_eMail="'
+                    .$attr['mail'][0].'"');
+                if(false && !($user_id>0)){
                     //add new user
                     //$attr['uid'][0]
                     
@@ -128,8 +108,9 @@ if($error){
                         'ugr_Interests'=>'na',
                         'ugr_Enabled'=>'y' );
                     $user_id = user_Update($system, $record, true);
-
                 }
+                */
+                
                 if($user_id>0){
                     if($system->doLogin($user_id, 'x', 'remember', true)){
                         //after login - close parent dialog and reload CurrentUserAndSysInfo
@@ -165,9 +146,13 @@ if($error){
 }
 //show error
 $msg = $system->getError();
+print '<html><body>';
 if($msg && @$msg['message']){
     print $msg['message'];     
 }else{
     print 'Indefenite error';     
 }
 ?>
+</body>
+</html>
+

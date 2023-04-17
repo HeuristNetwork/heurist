@@ -726,6 +726,7 @@ CREATE TABLE sysUGrps (
   ugr_Modified timestamp NOT NULL default CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP COMMENT 'Date of last modification of this record, used to get last updated date for table',
   ugr_NavigationTree MEDIUMTEXT default NULL COMMENT 'JSON array that describes treeview for filters',
   ugr_Preferences MEDIUMTEXT default NULL COMMENT 'JSON array with user preferences',
+  usr_ExternalAuthentication varchar(1000) default NULL COMMENT 'JSON array with external authentication preferences',
   PRIMARY KEY  (ugr_ID),
   UNIQUE KEY ugr_Name (ugr_Name),
   UNIQUE KEY ugr_eMail (ugr_eMail)

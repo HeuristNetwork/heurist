@@ -1650,6 +1650,7 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
                 if(requirement_sel.hSelect('instance') != undefined){
                     window.hWin.HEURIST4.ui.initHSelect(requirement_sel.get(0), false);
                 }
+                
             }else{
                 this.previewEditor.hide();
             }

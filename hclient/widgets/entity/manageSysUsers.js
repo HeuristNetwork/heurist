@@ -21,6 +21,8 @@
 $.widget( "heurist.manageSysUsers", $.heurist.manageEntity, {
    
     _entityName:'sysUsers',
+    
+    _currentSaml: null,
 
     //
     //
@@ -521,8 +523,101 @@ $.widget( "heurist.manageSysUsers", $.heurist.manageEntity, {
             input_ele.hide();
             //input_ele.editing_input('f', 'rst_Display', 'hidden');
         }
+        
+        //fill SAML service providers list
+        var saml_sel = this._editing.getFieldByName('ugl_SpID').find('select');
+        var has_saml = false;
+        if($.isPlainObject(window.hWin.HAPI4.sysinfo.saml_service_provides)){
+            var sp_keys = Object.keys(window.hWin.HAPI4.sysinfo.saml_service_provides);
+            if(sp_keys.length>0){
+                saml_sel.empty();
+                
+                for(let id of sp_keys){
+                    window.hWin.HEURIST4.ui.addoption(saml_sel[0],id,window.hWin.HAPI4.sysinfo.saml_service_provides[id]);
+                    has_saml = true;
+                }
+                                       
+            }
+        }
+        
+        this._currentSaml = null;
+        if(has_saml){
+            window.hWin.HEURIST4.ui.initHSelect(saml_sel[0], false);
+            this._on(saml_sel, {change:function(event){
+//DEBUG console.log($(event.target).val());  
+               
+               //save current and load new one
+               this._Saml_from_UI( this._currentSaml );
+               
+               //assign new one
+               this._Saml_To_UI( $(event.target).val() );
+            }});
+            
+            saml_sel.change();
+            
+        }else{
+            let content = saml_sel.parents('.ui-accordion-content');
+            content.hide();
+            this.editForm.find('#'+content.attr('aria-labelledby')).hide(); // .ui-accordion-header 
+        }
+        
 
     },    
+    
+    //
+    // save current saml values
+    //
+    _Saml_from_UI: function( saml_id ){
+       
+       if(saml_id){
+           let auth = this._editing.getValue('usr_ExternalAuthentication')[0];
+           auth = window.hWin.HEURIST4.util.isJSON(auth);
+           if(!auth) auth = {};
+           
+           let uid = this._editing.getValue('ugl_SpUID')[0];
+           let mail = this._editing.getValue('ugl_SpMail')[0];
+
+           if(uid!='' || mail=='y'){
+               //replace SP
+               auth[saml_id] = {uid:uid, mail:mail};
+           }else if (auth[saml_id]){
+               //remove SP
+               auth[saml_id] = null;
+               delete auth[saml_id];
+           }
+           
+           this._editing.setFieldValueByName('usr_ExternalAuthentication', JSON.stringify(auth));
+       }
+    },
+    
+    //
+    // assign values to UI
+    //
+    _Saml_To_UI: function( saml_id ){
+        
+       this._currentSaml = saml_id;
+
+       let auth = this._editing.getValue('usr_ExternalAuthentication')[0];
+
+       auth = window.hWin.HEURIST4.util.isJSON(auth);
+       if(auth && auth[saml_id]){
+            this._editing.setFieldValueByName('ugl_SpUID', auth[saml_id]['uid'], false);
+            this._editing.setFieldValueByName('ugl_SpMail', auth[saml_id]['mail'], false);
+       }else{
+            this._editing.setFieldValueByName('ugl_SpUID', '', false);
+            this._editing.setFieldValueByName('ugl_SpMail', 'n', false);
+       }
+        
+    },               
+    
+    //
+    //
+    //
+    _getValidatedValues: function(){
+        this._Saml_from_UI( this._currentSaml );
+        return this._super();
+    },
+    
     
     // update list after save (refresh)
     //
