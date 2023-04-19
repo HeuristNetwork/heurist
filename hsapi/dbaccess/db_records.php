@@ -165,7 +165,7 @@ function recordAddDefaultValues($system, $record=null){
 function recordAdd($system, $record, $return_id_only=false){
 
     if ( $system->get_user_id()<1 ) {
-        return $system->addError(HEURIST_REQUEST_DENIED);
+        return $system->addError(HEURIST_REQUEST_DENIED, 'User should be looged in to add the record');
     }
     
     $mysqli = $system->get_mysqli();
@@ -428,7 +428,7 @@ function recordSave($system, $record, $use_transaction=true, $suppress_parent_ch
     }
 
     if ( $system->get_user_id()<1 ) {
-        return $system->addError(HEURIST_REQUEST_DENIED);
+        return $system->addError(HEURIST_REQUEST_DENIED, 'User should be looged in to edit the record');
     }
 
     $recID = intval(@$record['ID']);
@@ -2869,7 +2869,7 @@ function prepareGeoValue($mysqli, $dtl_Value){
 function recordDuplicate($system, $id){
 
     if ( $system->get_user_id()<1 ) {
-        return $system->addError(HEURIST_REQUEST_DENIED);
+        return $system->addError(HEURIST_REQUEST_DENIED, 'User should be looged in to duplicate the record');
     }
 
     $mysqli = $system->get_mysqli();

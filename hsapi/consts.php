@@ -288,6 +288,7 @@ $dtDefines = array('DT_NAME' => array(2, 1),
     'DT_MAXIMUM_ZOOM' => array(3, 1085), //in UI this field acts as minimum zoom in km  
     
     'DT_SERVICE_URL' => array(2, 34),
+    'DT_URL' => array(3, 1058),
     'DT_ORIGINAL_RECORD_ID' => array(2, 36),
     'DT_FILE_RESOURCE' => array(2, 38),
     'DT_THUMBNAIL' => array(2, 39),

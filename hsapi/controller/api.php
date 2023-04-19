@@ -19,7 +19,7 @@ if(@$_REQUEST['method']){
     if ($method == 'POST' && array_key_exists('HTTP_X_HTTP_METHOD', $_SERVER)) {  //add
         if ($_SERVER['HTTP_X_HTTP_METHOD'] == 'DELETE') {
             $method = 'DELETE';
-        } else if ($_SERVER['HTTP_X_HTTP_METHOD'] == 'PUT') {
+        } else if ($_SERVER['HTTP_X_HTTP_METHOD'] == 'PUT' || $_SERVER['HTTP_X_HTTP_METHOD'] == 'PATCH') {
             $method = 'PUT';   //replace
         } else {
             exitWithError('Unexpected Header', 400);
@@ -27,9 +27,12 @@ if(@$_REQUEST['method']){
     } 
 }
 
+//error_log($method);
+
 //$requestUri[1] = "api"
-//$requestUri[2] - resource(entity )
-//$requestUri[3] - selector - id or name
+//$requestUri[2] - database name
+//$requestUri[3] - resource(entity )
+//$requestUri[4] - selector - id or name
 
 //allowed entities for entityScrud
 $entities = array(
@@ -44,7 +47,8 @@ $entities = array(
 'login'=>'System',
 'logout'=>'System',
 
-'rem'=>'UsrReminders'
+'rem'=>'UsrReminders',
+'annotations'=>'Annotations',
 );
 //records 
     //controlles:    
@@ -60,23 +64,40 @@ $entities = array(
 // hsapi/controller/api.php?ent=
 
 if(count($requestUri)>0){
-    $last_one = $requestUri[count($requestUri)-1];
-    $k = strpos($last_one, '?');
-    if($k>0){
-        $requestUri[count($requestUri)-1] = substr($last_one,0,$k);
+    $params = array();
+    foreach($requestUri as $prm){
+        $k = strpos($prm, '?');
+        if($k>0){
+            $params[] = substr($prm,0,$k);
+            break;
+        }
+        $params[] = $prm;
     }
+    $requestUri = $params;
 }
 
-if(@$requestUri[1]!== 'api' || @$entities[@$requestUri[2]] == null){
+if(@$requestUri[1]!== 'api' || @$_REQUEST['ent']!=null){ 
+    //takes all parameters from $_REQUEST
 
     //try to detect entity as parameter
-    if(@$_REQUEST['ent']!=null && @$entities[$_REQUEST['ent']] != null ){
-        $requestUri = array(0, 'api', $_REQUEST['ent'], @$_REQUEST['id']);
+    if(@$entities[$_REQUEST['ent']] != null ){
+        $requestUri = array(0, 'api', $_REQUEST['db'], $_REQUEST['ent'], @$_REQUEST['id']);
     }else{
         exitWithError('API Not Found', 400);    
     }
     
+}else if(@$_REQUEST['db'] && @$requestUri[2]!=null){ //backward when database is parameter
+    
+    if(@$entities[$requestUri[2]]!=null){
+        $requestUri = array(0, 'api', $_REQUEST['db'], $requestUri[2], @$requestUri[3]);
+    }else{
+        exitWithError('API Not Found', 400);    
+    }
+    
+}else if(@$requestUri[2]!=null){
+    $_REQUEST['db'] = $requestUri[2];    
 }
+
 
 $allowed_methods = array('search','add','save','delete');
 
@@ -110,7 +131,7 @@ if($method=='save' || $method=='add'){
 }
 
 // throw new RuntimeException('Unauthorized - authentication failed', 401);
-if ($entities[$requestUri[2]]=='System') {
+if ($entities[@$requestUri[3]]=='System') {
     
     include '../System.php';
     
@@ -120,7 +141,7 @@ if ($entities[$requestUri[2]]=='System') {
         $system->error_exit_api(); //exit from script
     }
     
-    if($requestUri[2]==='login'){
+    if($requestUri[3]==='login'){
         
         if(!$system->doLogin(@$_REQUEST['fields']['login'], @$_REQUEST['fields']['password'], 'shared'))
         {
@@ -132,7 +153,7 @@ if ($entities[$requestUri[2]]=='System') {
                     $cres = setcookie('heurist-sessionid', $session_id, $time, '/', '', $is_https );
         }
         
-    }else if($requestUri[2]==='logout'){
+    }else if($requestUri[3]==='logout'){
         $system->doLogout();
     }
     
@@ -141,12 +162,12 @@ if ($entities[$requestUri[2]]=='System') {
 else
 {
     //action
-    $_REQUEST['entity'] = $entities[$requestUri[2]];
+    $_REQUEST['entity'] = $entities[@$requestUri[3]];
     $_REQUEST['a'] = $method;
     $_REQUEST['restapi'] = 1; //set http response code
 
-    if(@$requestUri[3]!=null){
-      $_REQUEST['recID'] = $requestUri[3];  
+    if(@$requestUri[4]!=null){
+      $_REQUEST['recID'] = $requestUri[4];  
     } 
 
     if($_REQUEST['entity']=='Records'){

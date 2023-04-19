@@ -2151,7 +2151,7 @@ private static function findOriginalRecord($recordId){
 
         $details['recordURL'] = $row[0];
         $details['recordNotes'] = $row[1];
-
+                           
         $query = "SELECT dtl_Id, dtl_DetailTypeID, dtl_Value, ST_asWKT(dtl_Geo), dtl_UploadedFileID FROM recDetails WHERE dtl_RecID=".$recordId." ORDER BY dtl_DetailTypeID";
         $dets = mysql__select_all(self::$mysqli, $query);
         if($dets){
