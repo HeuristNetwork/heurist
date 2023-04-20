@@ -232,7 +232,7 @@ if($_is_new_cms_editor || $edit_OldEditor){ //$edit_OldEditor defined in website
   background: rgba(201, 194, 249, 1) !important;
 }
 /*
-, .ui-heurist-publish .fancytree-node:hover 
+.ui-heurist-publish .fancytree-node:hover 
 */
 .ui-heurist-publish span.fancytree-node {
     padding: 3px 0px !important;
@@ -321,7 +321,7 @@ function onPageInit(success)
     
     //reload website by click on logo, opens first page with content
     $("#main-logo,#custom-logo").click(function(event){
-            //location.reload();
+            
             var load_initially = home_page_record_id;
             <?php if($isEmptyHomePage){
                 echo 'if(typeof first_not_empty_page !== "undefined" && first_not_empty_page>0){ load_initially=first_not_empty_page;}';  
@@ -379,7 +379,7 @@ function onPageInit(success)
         
         $(document).trigger(window.hWin.HAPI4.Event.ON_SYSTEM_INITED, []);
         
-        var itop = $('#main-header').height(); //[0].scrollHeight;
+        var itop = $('#main-header').height();
         //MOVED to top right corner $('#btn_editor').css({top:itop-70, right:20});
         
     },300);
@@ -431,8 +431,6 @@ function loadPageContent(pageid, eventdata){
     _dout('loadPageContent '+pageid);
     
     if(pageid>0){
-        //window.hWin.HEURIST4.msg.bringCoverallToFront($('body').find('#main-content'));
-        
         
         var page_target = $('#main-content');
         //_dout('load page  '+pageid+'   '+page_footer.length);              
@@ -462,7 +460,6 @@ if($website_custom_css!=null){
                 $('#btnOpenCMSeditor').html(isCMS_active?'close editor':'website editor');
                 
                 if(isCMS_active){
-                    //$('#btnOpenCMSeditor').hide();
                     if(!editCMS_instance2) {
                         editCMS_instance2 = editCMS2(this.document);    //editCMS_Init
                     }
@@ -471,7 +468,6 @@ if($website_custom_css!=null){
                                     close: function(){
                                         isCMS_active = false;
                                         $('#btnOpenCMSeditor').html('website editor');
-                                        //$('#btnOpenCMSeditor').show();
                                     }})) //see editCMS2.js    
                     {
                         //page is not loaded (previous page has been modified and not saved
@@ -524,8 +520,6 @@ if($website_custom_css!=null){
                                         res[key] = res[key][ Object.keys(res[key])[0] ];
                                     }
                                 }
-                               //res[DT_NAME] = res[DT_NAME]
-                               //res[DT_NAME, DT_EXTENDED_DESCRIPTION, DT_CMS_SCRIPT, DT_CMS_CSS, DT_CMS_PAGETITLE]
                                page_cache[pageid] = res;
                                __loadPageContent();
                            }else if(pageid!=home_page_record_id){ //load home page by default
@@ -614,7 +608,7 @@ function afterPageLoad(document, pageid, eventdata){
             && $(page_cache[previous_page_id][DT_CMS_CSS]).is('style')){
             //remove previous
             var style = page_cache[previous_page_id][DT_CMS_CSS];
-            //style.innerHTML = ''; 
+            
             document.getElementsByTagName('head')[0].removeChild(style);
         }
     
@@ -667,12 +661,11 @@ function afterPageLoad(document, pageid, eventdata){
                 script.type = 'text/javascript';
                 script.innerHTML = 'function '+func_name 
                 +'(document, pageid, eventdata){\n'
-                //+' console.log("run script for '+pageid+'");\n'
+                //DEBUG +' console.log("run script for '+pageid+'");\n'
                 +'try{\n' + script_code + '\n}catch(e){console.log(e)}}';
-                //s.src = "http://somedomain.com/somescript";
+
                 $("head").append(script);
                 
-                //page_cache[pageid][DT_CMS_SCRIPT] = false;
             }
         }
         
@@ -769,9 +762,6 @@ function afterPageLoad(document, pageid, eventdata){
     // add listeners for internal links and images 
     initLinksAndImages();
 
-    //var ele = $('#mobilemenu');
-    //_dout('MOBILE '+ele.find('a.extern').length);
-    
     //Execute event - this search has been inited from different page
     if(eventdata && eventdata.event_type){
         if(eventdata.event_type == window.hWin.HAPI4.Event.ON_REC_SEARCHSTART 
@@ -829,8 +819,6 @@ function initLinksAndImages($container, search_data){
     //find all link elements for loading another page and define onclick handler - loadPageContent
     $container.find('a').each(function(i,link){
         
-        //var href = $(link).attr('data-href');
-        //if(!href) 
         var href = $(link).attr('href');
         if (href && href!='#' && $(link).attr('target')!='_blank') 
         {
@@ -856,47 +844,14 @@ function initLinksAndImages($container, search_data){
                 
                 var scr = 'javascript:{window.hWin.loadPageContent('+pageid+');window.hWin.HEURIST4.util.stopEvent(event);}';
                 $(link).attr('href',scr);
-                //$(link).attr('data-href',scr);
-                
-                /*
-                $(link).on({click:function(e){
-                    var pageid = $(e.target).attr('data-pageid');
-                    loadPageContent(pageid);            
-                    window.hWin.HEURIST4.util.stopEvent(e);
-                }});
-                */
                 
             }else if(href.indexOf('q=')===0){ //special case for links in smarty reports
-                
-                    /*
-                    var request = window.hWin.HEURIST4.query.parseHeuristQuery('?'+href);
-
-                    request.w  = 'a';
-                    request.detail = 'ids';
-                    request.search_realm = search_data.search_realm;
-                    request.search_page = search_data.search_page;
-                    */
                 
                 var request = {detail:'ids', neadall:1, w:'a',
                             q:href.substring(2),
                             search_page: search_data.search_page,
                             search_realm: search_data.search_realm};
-                /*                            
-                var scr;
-                
-                if(search_data && search_data.search_page.search_page>0 && search_data.search_page.search_page!=current_page_id){
-
-                    data.event_type = window.hWin.HAPI4.Event.ON_REC_SEARCHSTART;
-                    
-                    scr = 'javascript:{window.hWin.loadPageContent('+pageid+','+JSON.stringify(data)
-                                +');window.hWin.HEURIST4.util.stopEvent(event);}';
-                    
-                }else{
-                    
-                    scr = 'javascript:{window.hWin.startSearch loadPageContent('+pageid+','+JSON.stringify(data)
-                                +');window.hWin.HEURIST4.util.stopEvent(event);}';
-                    
-                }*/
+                            
                 var scr = 'javascript:{window.hWin.HAPI4.RecordSearch.doSearch(window.hWin,'+JSON.stringify(request)
                                 +');window.hWin.HEURIST4.util.stopEvent(event);}';
                 $(link).attr('href',scr);
@@ -1119,9 +1074,6 @@ function _openCMSeditor(event){
         //btn.show();
     }else{
 
-        // Hide cms editor button
-        //btn.hide();
-
         isCMS_active = true;
         if(!editCMS_instance2) editCMS_instance2 = editCMS2(this.document); //editCMS_Init
         editCMS_instance2.startCMS({record_id: current_page_id, 
@@ -1129,27 +1081,13 @@ function _openCMSeditor(event){
             container:'#main-content',
             close: function(){
                 isCMS_active = false;
-                //btn.show();
         }}); //see editCMS2.js
     }
 
     btn.html(isCMS_active?'close editor':'website editor');
 }
 
-//
-// overwrite the standard jquery show method
-/*
-console.log('var orgShow = $.fn.show;');
-var orgShow = $.fn.show;
-$.fn.show = function()
-{
-    orgShow.apply( this, arguments ); //apply original show
-    $(this).trigger( 'myOnShowEvent' );
-    return this;
-}
-*/
-
-//
+s//
 // Init HAPI 
 //
 $(document).ready(function() {
@@ -1169,7 +1107,7 @@ $(document).ready(function() {
 
 _dout('webpage doc ready ');
 */
-//+(window.hWin.HAPI4)+'    '+(new Date().getTime() / 1000 - _time_debug));
+
         _time_debug = new Date().getTime() / 1000;
     
         // Standalone check
@@ -1278,7 +1216,6 @@ function _getMenuContent($parent_id, $menuitems, $lvl){
                     
                     array_push($ids_was_added, $page_id);
                         
-                    //$url = '?db='.HEURIST_DBNAME.'&id='.$home_page_on_init.'&pageid='.$page_id;
                     $url = 'javascript:{loadPageContent('.$page_id.');window.hWin.HEURIST4.util.stopEvent(event);}';
                         
                     $res = $res.'<li><a href="'.$url.'" data-pageid="'.$page_id.'"'
@@ -1295,7 +1232,6 @@ function _getMenuContent($parent_id, $menuitems, $lvl){
                     }
                     //has submenu
                     if(is_array($submenu)){
-                        //if(!is_array($submenu)) $submenu = explode(',',$submenu);
                         
                         if(count($submenu)>0){ 
                             
@@ -1325,5 +1261,4 @@ function _getMenuContent($parent_id, $menuitems, $lvl){
             
             return $res;
 }//_getMenuContent   
-
 ?>
