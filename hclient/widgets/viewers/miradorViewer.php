@@ -1,23 +1,27 @@
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
-<html>
-<head>
-<meta http-equiv="Pragma" content="no-cache">
-<meta http-equiv="Cache-Control" content="no-cache">
-<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-<meta http-equiv="Lang" content="en">
-<meta name="author" content="">
-<meta name="description" content="">
-<meta name="keywords" content="">
-<title>Heurist Mirador Viewer</title>
-<!--
-<script src="https://unpkg.com/mirador@latest/dist/mirador.min.js"></script>
- By default uses Roboto font. Be sure to load this or change the font
-<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500">
- -->
- <base href="../../../external/mirador3/"/>
-</head>
-<body>
 <?php
+    /**
+    * Mirador viewer. It uses customized Mirador viwer (from external folder) with annotation and image tools
+    * If it is missed, it uses latest mirador distribution from unpkg.com
+    * 
+    * For annotations, heurist database must have either RT_MAP_ANNOTATION or RT_ANNOTATION
+    *
+    * @package     Heurist academic knowledge management system
+    * @link        https://HeuristNetwork.org
+    * @copyright   (C) 2005-2023 University of Sydney
+    * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
+    * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
+    * @version     4.0
+    */
+
+    /*
+    * Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except in compliance
+    * with the License. You may obtain a copy of the License at https://www.gnu.org/licenses/gpl-3.0.txt
+    * Unless required by applicable law or agreed to in writing, software distributed under the License is
+    * distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
+    * See the License for the specific language governing permissions and limitations under the License.
+    */
+
+
 /*
 Parameters:
 
@@ -69,25 +73,46 @@ if q only defined all images linked to record(s) will be included
     
     //$_SERVER['QUERY_STRING'];
         $manifest_url = $url;
+        
+        $use_custom_mirador = file_exists(dirname(__FILE__).'/../../../external/mirador3/dist/main.js');
 ?>
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html>
+<head>
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Cache-Control" content="no-cache">
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<meta http-equiv="Lang" content="en">
+<meta name="author" content="">
+<meta name="description" content="">
+<meta name="keywords" content="">
+<title>Heurist Mirador Viewer</title>
+<?php 
+if($use_custom_mirador){
+    print '<base href="../../../external/mirador3/"/>';    
+}else{
+?>
+<script src="https://unpkg.com/mirador@latest/dist/mirador.min.js"></script>
+<!-- By default uses Roboto font. Be sure to load this or change the font -->
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500">
+<?php
+}
+?> 
+</head>
+<body>
 <div id="demo"></div>
 <script>
     window.endpointURL = "<?php echo $baseUrl.'/h6-alpha/api/'.$_REQUEST['db'].'/annotations';?>";
     window.manifestUrl = "<?php echo $manifest_url;?>";
 </script>
-<script src="dist/main.js"></script>
-
-<!-- Container element of Mirador whose id should be passed to the instantiating call as "id" 
-<div id="my-mirador"/> 
-
-<script type="module">
-</script>
-
-
+<?php
+if($use_custom_mirador){
+    print '<script src="dist/main.js"></script>';
+}else{
+?>
 <script type="text/javascript">
-
 var mirador = Mirador.viewer({
-  "id": "my-mirador",
+  "id": "demo",
   "windows": [
     {
       "loadedManifest": "<?php echo $manifest_url;?>",
@@ -96,6 +121,8 @@ var mirador = Mirador.viewer({
   ]
 });
 </script>  
--->  
+<?php
+}
+?> 
 </body>
 </html>
