@@ -1087,7 +1087,7 @@ function _openCMSeditor(event){
     btn.html(isCMS_active?'close editor':'website editor');
 }
 
-s//
+//
 // Init HAPI 
 //
 $(document).ready(function() {
