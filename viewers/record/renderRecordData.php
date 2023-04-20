@@ -1413,7 +1413,7 @@ function print_public_details($bib) {
     }
 
     //print info about parent record
-    if(!$is_production) {
+    if(true || !$is_production) {
         foreach ($bds as $bd) {
             if(defined('DT_PARENT_ENTITY') && $bd['dty_ID']==DT_PARENT_ENTITY){
 

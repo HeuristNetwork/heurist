@@ -1042,8 +1042,6 @@ window.hWin.HEURIST4.util = {
         if(!window.hWin.HEURIST4.util.isempty(src)){
             var query = src.slice(src.indexOf('?'));
 
-console.log('>>>>',src);
-
             if(src.indexOf('file=') > 0){
                 file_id = window.hWin.HEURIST4.util.getUrlParameter('file', query);
             }

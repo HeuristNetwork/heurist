@@ -3461,7 +3461,7 @@ setTimeout("console.log('2. auto='+ele2.height());",1000);
             $(item).prop('tabindex',idx);
         });
 
-
+        //
         // show record info on mouse over
         //
         if(this.options.recordview_onselect===false || this.options.recordview_onselect==='none'){
@@ -4320,16 +4320,18 @@ setTimeout("console.log('2. auto='+ele2.height());",1000);
         window.hWin.HEURIST4.msg.showDialog(recInfoUrl, opts);
 
         if(pos!=null){
-            dlg = $('#recordview_popup').css('padding',0);
-            this._on(dlg,{
-                mouseout:function(){
+            if(this.options.recordview_onselect===false || this.options.recordview_onselect==='none'){            
+                dlg = $('#recordview_popup').css('padding',0);
+                this._on(dlg,{
+                    mouseout:function(){
+                        that._closeRecordViewPopup();
+                    }
+                });
+                var dlg_header = dlg.parent().find('.ui-dialog-titlebar');
+                this._on(dlg_header,{mouseout:function(){
                     that._closeRecordViewPopup();
-                }
-            });
-            var dlg_header = dlg.parent().find('.ui-dialog-titlebar');
-            this._on(dlg_header,{mouseout:function(){
-                that._closeRecordViewPopup();
-            }});
+                }});
+            }
         }
     },
 
