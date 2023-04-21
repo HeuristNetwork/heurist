@@ -27,13 +27,20 @@ class DbAnnotations extends DbEntityBase
 {
     
     function __construct( $system, $data ) {
-       $this->system = $system;
-       $this->data = $data;
-       
-//error_log(print_r($data, true));  
-       
-       
-       $this->init();
+        $this->system = $system;
+        $this->data = $data;
+
+        //error_log(print_r($data, true));  
+
+        $this->system->defineConstant('RT_ANNOTATION');
+        $this->system->defineConstant('RT_MAP_ANNOTATION');
+        $this->system->defineConstant('DT_NAME');
+        $this->system->defineConstant('DT_URL');
+        $this->system->defineConstant('DT_ORIGINAL_RECORD_ID');
+        $this->system->defineConstant('DT_EXTENDED_DESCRIPTION');
+        $this->system->defineConstant('DT_SHORT_SUMMARY');
+
+        $this->init();
     }
 
     public function isvalid(){
@@ -80,10 +87,6 @@ error_log(print_r($sjson, true));
                        
 
         //find all annotation for given uri 
-        $this->system->defineConstant('DT_URL');
-        $this->system->defineConstant('DT_EXTENDED_DESCRIPTION');
-        $this->system->defineConstant('DT_ORIGINAL_RECORD_ID');
-        
                     
         if($this->data['recID']=='pages'){
             $sjson['items'] = array();
@@ -156,7 +159,6 @@ error_log(print_r($sjson, true));
             }
             
             //remove annotation with given ID
-            $this->system->defineConstant('DT_ORIGINAL_RECORD_ID');
             $recordId = $this->findRecID_by_UUID($this->data['recID']);
             if($recordId>0){
                 return recordDelete($this->system, $recordId);
@@ -184,11 +186,10 @@ error_log(print_r($sjson, true));
           uuid: annotation.id,
         },
 */      
-        $this->system->defineConstant('RT_ANNOTATION');
-        $this->system->defineConstant('RT_MAP_ANNOTATION');
         if( !(defined('RT_MAP_ANNOTATION') || defined('RT_MAP_ANNOTATION')) ){
             $this->system->addError(HEURIST_ACTION_BLOCKED, 
-                    'This database does not have either "Map/Image Annotation" or "Annotation" record type. Import required record type');
+                    'Can not add annotation. This database does not have either "Map/Image Annotation" or "Annotation" record type. '
+                    .'Import required record type');
             return false;
         }
 
@@ -202,7 +203,7 @@ error_log(print_r($sjson, true));
              $recordId = 0;
         }else{     
             //find record id by annotation UID
-            $recordId = findRecID_by_UUID($anno['uuid']);
+            $recordId = $this->findRecID_by_UUID($anno['uuid']);
 
             if($recordId>0){
                 //@todo make common function findOriginalRecord (see importAction)
@@ -227,15 +228,11 @@ error_log(print_r($sjson, true));
                $recordId = 0; //add new annotation 
             }
         }
-        $this->system->defineConstant('DT_NAME');
-        $this->system->defineConstant('DT_URL');
-        $this->system->defineConstant('DT_ORIGINAL_RECORD_ID');
-        $this->system->defineConstant('DT_EXTENDED_DESCRIPTION');
-        
         //"body":{"type":"TextualBody","value":"<p>VOKZAL</p>"},
         $anno_dec = json_decode($anno['data'], true);
         if(is_array($anno_dec) && @$anno_dec['body']['type']=='TextualBody'){
-            $details[DT_NAME][] = $anno_dec['body']['value'];
+            $details[DT_NAME][] = substr(strip_tags($anno_dec['body']['value']),0,50);
+            $details[DT_SHORT_SUMMARY][] = $anno_dec['body']['value'];
         }
         if(@$anno['canvas']){
             $details[DT_URL][] = $anno['canvas'];

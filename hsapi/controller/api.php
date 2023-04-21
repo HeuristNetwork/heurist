@@ -24,6 +24,9 @@ if(@$_REQUEST['method']){
         } else {
             exitWithError('Unexpected Header', 400);
         }
+    }
+    if($method == 'PATCH'){
+        $method = 'PUT';
     } 
 }
 
