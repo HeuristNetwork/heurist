@@ -104,6 +104,7 @@ if($use_custom_mirador){
 <script>
     window.endpointURL = "<?php echo $baseUrl.'/h6-alpha/api/'.$_REQUEST['db'].'/annotations';?>";
     window.manifestUrl = "<?php echo $manifest_url;?>";
+    window.hideThumbs = <?php echo (@$_REQUEST['iiif_image']?'true':'false');?>; 
 </script>
 <?php
 if($use_custom_mirador){
@@ -115,8 +116,8 @@ var mirador = Mirador.viewer({
   "id": "demo",
   "windows": [
     {
-      "loadedManifest": "<?php echo $manifest_url;?>",
-      "thumbnailNavigationPosition": "far-bottom"
+      "loadedManifest": "<?php echo $manifest_url;?>"
+      <?php echo (@$_REQUEST['iiif_image']?'':',"thumbnailNavigationPosition": "far-bottom"');?>
     }
   ]
 });

@@ -494,7 +494,7 @@ if(!($is_map_popup || $without_header)){
                     +  database
                     + '&iiif_image=' + obf_recID;
 
-                    if(window.hWin && window.hWin.HEURIST4){
+                    if(false && window.hWin && window.hWin.HEURIST4){
                         //borderless:true, 
                         window.hWin.HEURIST4.msg.showDialog(url, 
                             {dialogid:'mirador-viewer',

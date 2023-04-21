@@ -306,7 +306,7 @@ public static function output($data, $params){
             "canvases": [   
 IIIF;
         }else{
-            
+            //VERSION 3
             
 $pageURL = 'http';
 
@@ -2104,31 +2104,39 @@ CANVAS2;
 //  "duration": 5,
 //        "height": $height,
 //        "width": $width
+//http://127.0.0.1//h6-alpha/?db=osmak_9c&file=d58b3ea73a8bad96475d1e3850a3f417f6c500f8
+//      "id": "https://$canvas_uri",
+//AnnotationPage: "id": "https://$canvas_uri/page",
+//Annotation:     "id": "https://$canvas_uri/page/annotation",
+
+$canvas_uri = $resource_url;
 
 $label = preg_replace('/\r|\n/','\n',trim($label));
 $item = <<<CANVAS3
 {
-      "id": "https://$canvas_uri",
+      "id": "$canvas_uri",
       "type": "Canvas",
       "label": "$label",
                 "height": $height,
                 "width": $width,
       "items": [
         {
-          "id": "https://$canvas_uri/page",
+          "id": "$canvas_uri&page=1",
           "type": "AnnotationPage",
           "items": [
             {
-              "id": "https://$canvas_uri/page/annotation",
+              "id": "$canvas_uri&annot=1",
               "type": "Annotation",
               "motivation": "painting",
               "body": {
                 $service
                 "id": "$resource_url",
                 "type": "$resource_type",
-                "format": "$mimeType"
+                "format": "$mimeType",
+                "height": $height,
+                "width": $width
               },
-              "target": "https://$canvas_uri"
+              "target": "$canvas_uri"
             }
           ]
         }
@@ -2145,6 +2153,19 @@ $item = <<<CANVAS3
 
  }
 CANVAS3;
+
+/*
+ #xywh=0,0,$width,$height
+"selector":{"type":"FragmentSelector","value":"xywh=0,0,$width,$height"},
+      "rendering": [
+        {
+          "id": "$resource_url",
+          "type": "Text",
+          "type": "$resource_type",
+          "format": "$mimeType"
+        }
+      ],                
+*/
 
 /*
                 "height": $height,
