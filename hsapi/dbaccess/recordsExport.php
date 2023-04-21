@@ -1990,6 +1990,17 @@ private static function _getIiifCanvas($record, $ulf_ObfuscatedFileID){
             $resource_url = HEURIST_BASE_URL_PRO."?db=".HEURIST_DBNAME."&file=".$fileid;
         }
         
+        $height = 800;
+        $width = 1000;
+        if($resource_type=='Image' && $fileinfo['ulf_OrigFileName']!='_iiif_image'){
+            $img_size = getimagesize($resource_url);    
+            if(is_array($img_size)){
+                $width = $img_size[0];
+                $height = $img_size[1];
+            }
+        }
+        
+        
         $thumbfile = HEURIST_THUMB_DIR.'ulf_'.$fileid.'.png';
         if(file_exists($thumbfile)){
             $tumbnail_url = HEURIST_BASE_URL_PRO."?db=".HEURIST_DBNAME."&thumb=".$fileid;
@@ -1997,8 +2008,6 @@ private static function _getIiifCanvas($record, $ulf_ObfuscatedFileID){
             $tumbnail_url = HEURIST_ICON_URL.$rectypeID.'&version=thumb';
         }
         
-        $height = 800;
-        $width = 1000;
         $service = '';        
         
         //get iiif image parameters
@@ -2108,6 +2117,8 @@ CANVAS2;
 //      "id": "https://$canvas_uri",
 //AnnotationPage: "id": "https://$canvas_uri/page",
 //Annotation:     "id": "https://$canvas_uri/page/annotation",
+//$width = 800;
+//$height = 1063;
 
 $canvas_uri = $resource_url;
 
@@ -2132,9 +2143,7 @@ $item = <<<CANVAS3
                 $service
                 "id": "$resource_url",
                 "type": "$resource_type",
-                "format": "$mimeType",
-                "height": $height,
-                "width": $width
+                "format": "$mimeType"
               },
               "target": "$canvas_uri"
             }
@@ -2153,19 +2162,6 @@ $item = <<<CANVAS3
 
  }
 CANVAS3;
-
-/*
- #xywh=0,0,$width,$height
-"selector":{"type":"FragmentSelector","value":"xywh=0,0,$width,$height"},
-      "rendering": [
-        {
-          "id": "$resource_url",
-          "type": "Text",
-          "type": "$resource_type",
-          "format": "$mimeType"
-        }
-      ],                
-*/
 
 /*
                 "height": $height,
