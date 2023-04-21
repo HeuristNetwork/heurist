@@ -31,9 +31,8 @@ $mysqli  = $system->get_mysqli();
 $sErrorMsg = null;
 
 $regID = mysql__select_value($mysqli, 'select sys_dbRegisteredID from sysIdentification where 1');
-if(true || $regID > 0){
-    print '<h4 style="margin-inline-start: 10px;margin-block-start: 20px;">'
-            . 'Database renaming is blocked for registered databases.<br><br>If you need to rename your registered database, please contact the Heurist team.</h4>';
+if($regID > 0 && $user_id != 2){
+    print '<h4 style="margin-inline-start: 10px;margin-block-start: 20px;">Renaming registered databases can only be performed by the database owner</h4>';
     exit();
 }
 
@@ -237,21 +236,93 @@ function perform_rename($new_name){
     }
 
 	// clone db
-    if(!perform_clone($mysqli, $new_name, $org_name)){
+    if(!perform_clone($mysqli, $new_db_name, $org_name)){
         return false;
     }
 
-    print '<p><b>Cloning Completed<br><br>Archiving current database</b></p>';
+    print '<p><b>Cloning Completed</b></p><br>';
 
+    // update details for registered database
+    $regID = mysql__select_value($mysqli, 'select sys_dbRegisteredID from sysIdentification where 1');
+    if($regID > 0){
+
+        print '<p><b>Updating registered database record on Heurist Master Index</b></p><br>';
+        // Update registered db record in Index database
+        $res = updateRegDetails($mysqli, $regID, $new_db_name, $new_dbname_full);
+
+        if(!$res){
+            return false;
+        }
+
+        print '<p><b>Completed record update</b></p><br>';
+    }
+
+    print '<p><b>Archiving current database</b></p><br>';
 	// delete current db - create archive
     if(!DbUtils::databaseDrop(true, $org_name, true)){
         DbUtils::databaseDrop(false, $new_dbname_full, false);
+
+        if($regID > 0){
+            $res = updateRegDetails($mysqli, $regID, $new_db_name, $new_dbname_full);
+
+            if(!$res){
+                //print '<br><br><p><b>Please contact the Heurist team about this error</b></p>';
+                return false;
+            }
+        }
+
         return false;
     }
 
     // transfer user to new db
     print '<script>window.hWin.HEURIST4.msg.showMsgDlg("Your renamed database is accessible from <a href=\''. $new_url .'\'>here</a>", null, '
             . '"Databse renamed", {close: function(){window.hWin.document.location = \''. $new_url .'\';}});</script>';
+
+    return true;
+}
+
+function updateRegDetails($mysqli, $regID, $new_db_name, $new_dbname_full){
+
+    //$dbowner = user_getDbOwner($mysqli);
+    $serverURL = HEURIST_SERVER_URL . '/heurist/' . "?db=" . $new_db_name;
+
+    $params = array(
+        'db'=>HEURIST_INDEX_DATABASE,
+        'dbID'=>$regID,
+        //'org_dbReg'=>$org_name,
+        'dbReg'=>$new_db_name,
+        'usrPassword'=>$dbowner['ugr_Password'],
+        'usrEmail'=>$dbowner['ugr_eMail'],
+        'serverURL'=>$serverURL
+    );
+
+    $data = 'Unknown error';
+    if(strpos(HEURIST_INDEX_BASE_URL, HEURIST_SERVER_URL)===0){
+        $data = DbUtils::updateRegisteredDatabase($params);
+    }else{
+        $reg_url =   HEURIST_INDEX_BASE_URL
+            .'admin/setup/dbproperties/getNextDBRegistrationID.php?'
+            .http_build_query($params);
+
+        $data = loadRemoteURLContentWithRange($reg_url, null, true);
+
+        if (!isset($data) || $data==null) {
+            global $glb_curl_error;
+            $error_code = (!empty($glb_curl_error)) ? $glb_curl_error : 'Error code: 500 Heurist Error';
+
+            echo '<p class="ui-state-error">'
+                .'Unable to connect Heurist master index, possibly due to timeout or proxy setting<br><br>'
+                . $error_code . '<br>'
+                ."URL requested: $reg_url</p><br>";
+            return false;
+        }
+    }
+
+    if($data != $regID){
+        DbUtils::databaseDrop(false, $new_dbname_full, false);
+        echo $data;
+        return false;    
+    }
 
     return true;
 }
@@ -305,24 +376,6 @@ function perform_clone($mysqli, $targetdbname, $sourcedbname){
         DbUtils::databaseDrop( false, $targetdbname_full, false);
         return false;
     }
-
-    // SKIP - Renaming registered databases is blocked currently
-    /* 5. remove registration info and assign originID for definitions
-    //$sourceRegID = mysql__select_value($mysqli, 'select sys_dbRegisteredID from sysIdentification where 1');
-
-    // RESET register db ID and zotero credentials
-    //$query1 = "update sysIdentification set sys_dbRegisteredID=0, sys_hmlOutputDirectory=null, sys_htmlOutputDirectory=null, sys_SyncDefsWithDB=null, sys_MediaFolders='uploaded_files', sys_eMailImapProtocol='', sys_eMailImapUsername='', sys_dbRights='', sys_NewRecOwnerGrpID=0 where 1";
-    $res1 = $mysqli->query($query1);
-    if ($mysqli->error)  { //(mysql_num_rows($res1) == 0)
-        print "<p><h4>Warning</h4><b>Unable to reset sys_dbRegisteredID in sysIdentification table. (".$mysqli->error.
-        ")<br> Please reset the registration ID manually</b></p>";
-
-        DbUtils::databaseDrop( false, $targetdbname_full, false);
-        return false;
-    }
-
-    //assign origin ID    
-    DbUtils::databaseRegister($sourceRegID);*/
 
     // Copy the images and the icons directories
     $res = folderRecurseCopy( HEURIST_FILESTORE_ROOT.$source_database, HEURIST_FILESTORE_ROOT.$targetdbname );    
