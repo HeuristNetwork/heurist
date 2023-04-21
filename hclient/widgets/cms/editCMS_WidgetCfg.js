@@ -58,13 +58,18 @@ function editCMS_WidgetCfg( widget_cfg, _layout_content, $dlg, main_callback ){
         }else{
             //open as popup
 
+            let height = 700;
+            if(widget_cfg.appid == 'StoryMap'){
+                height = 830;
+            }
+
             $dlg = window.hWin.HEURIST4.msg.showMsgDlgUrl(window.hWin.HAPI4.baseURL
                 +"hclient/widgets/cms/editCMS_WidgetCfg.html?t="+(new Date().getTime()), 
                 buttons, 'Modify Widget Properties', 
                 {  container:'cms-add-widget-popup',
                     default_palette_class: 'ui-heurist-publish',
                     width: 800,
-                    height: 700,
+                    height: height,
                     close: function(){
                         $dlg.dialog('destroy');       
                         $dlg.remove();
