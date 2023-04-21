@@ -266,8 +266,6 @@ text.shadow {
 }
 #toolbar.split_bar {
     display: flex;
-    margin-left: auto;
-    margin-right: auto;
     position: relative;
     width: 400px;
 }
@@ -316,6 +314,12 @@ text.shadow {
 .dropdown2:hover .dropdown-content2,
 .dropdown3:hover .dropdown-content3 {
     display: block;
+}
+
+.dropdown-content1 div,
+.dropdown-content2 div,
+.dropdown-content3 div {
+    margin: 5px 0px 0px 5px;
 }
 
 .dropdown:hover .dropbtn {

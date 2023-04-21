@@ -375,6 +375,118 @@ class DbUtils {
         
     }
     
+    //
+    // Remotely update registered database details
+    // @todo Needs some sort of validation
+    public static function updateRegisteredDatabase($params){
+
+        self::initialize(); 
+        $mysqli = self::$mysqli;
+        
+        //switch to master index
+        $connect_failure = (mysql__usedatabase($mysqli, HEURIST_INDEX_DATABASE)!=true);
+        if($connect_failure){
+            return 'Failed to connect to Master Index database';
+        }
+
+        // Get parameters passed from update request
+        $serverURL = $params["serverURL"];
+        $serverURL_lc = strtolower($params["serverURL"]);
+        $dbReg = $params["dbReg"]; // Database name
+        $dbTitle = $params["dbTitle"]; // Database description
+        $usrEmail = $params["usrEmail"];
+        $usrPassword = $params["usrPassword"];
+        $dbID = @$params["dbID"];
+
+        // $var is null, blank, 0 or false --> false
+        if (!$dbID || (!$serverURL && !$dbReg && !$dbTitle)) { // error in one or more parameters
+            $returnData = 'Bad parameters passed';
+            return $returnData;
+        }
+
+        // Check the record exists
+        $res = mysql__select_value($mysqli, 'SELECT rec_ID FROM Records WHERE rec_ID = ' . $dbID);
+        if(!$res){
+            return 'Unable to locate database record id '.$dbID;
+        }
+
+        if(strpos($serverURL_lc,'http://')===false && strpos($serverURL_lc,'https://')===false){
+            $serverURL = 'https://'.$serverURL;  //https by default
+            $serverURL_lc = strtolower($serverURL);
+        }
+
+        if(strpos($serverURL_lc, '//localhost')>0 ||  strpos($serverURL_lc, '//127.0.0.1')>0 || strpos($serverURL_lc, '//web.local')>0){
+            return 'Registered databases cannot be on local server '.$serverURL;
+        }
+
+        $user_id = 0; // existing record owner
+        // Retrieve user - OWNER CAN BE CHANGED + DETAILS CAN BE CHANGED
+        $usrEmail = strtolower(trim($usrEmail));
+        $user_id = mysql__select_value($mysqli, 'select ugr_ID from sysUGrps where lower(ugr_eMail)="'.$mysqli->real_escape_string($usrEmail).'"');
+
+        // Check if the email address is recognised as a user name
+        if($user_id <= 0){
+            $user_id = mysql__select_value($mysqli, 'select ugr_ID from sysUGrps where lower(ugr_Name)="'.$mysqli->real_escape_string($usrEmail).'"');
+        }
+
+        // Unable to retrieve existing user
+        if($user_id <= 0){
+            return 'Cannot retrieve your user account within the Heurist Index database.'
+                . '<br>Please ensure that your email address and password on the Heurist Index database match your current email address and password.'
+                . '<br>Contact the Heurist team if you require help with updating your email address and password on the Index database.';
+        }
+
+        // Check user is owner of record
+        $res = mysql__select_value($mysqli, 'SELECT rec_ID FROM Records WHERE rec_ID = ' . $dbID . ' AND rec_OwnerUGrpID = ' . $user_id);
+        if(!$res){
+            return 'You do not own the record for this registered database, this could be due to a previous transfer in database ownership.'
+                . '<br>Please contact the Heurist team and request that the record for your database be updated.';
+        }
+
+        if(!empty($serverURL) || !empty($dbTitle)){
+            $record = array(
+                'rec_ID'=>$dbID,
+                'rec_Modified'=>date('Y-m-d H:i:s')
+            );
+
+            $err_msg = '';
+            if(!empty($serverURL)){
+                $record['rec_URL'] = $mysqli->real_escape_string($serverURL);
+                $err_msg = 'URL (server URL)';
+            }
+            if(!empty($dbTitle)){
+                $record['rec_Title'] = $mysqli->real_escape_string($dbTitle);
+                $err_msg = $err_msg . (!empty($err_msg) ? ' and ' : '') . 'Title (database name)';
+            }
+            $res = mysql__insertupdate($mysqli, 'Records', 'rec_', $record, true);
+
+            if(!$res && $res != $dbID){
+                return 'Failed to update record\'s ' . $err_msg . ', Error: ' . $mysqli->error;
+            }
+        }
+
+        // Database name
+        if($dbReg){
+
+            $dty_id = ConceptCode::getDetailTypeLocalID("1176-469");
+            $fld_id = mysql__select_value($mysqli, 'SELECT dtl_ID FROM recDetails WHERE dtl_DetailTypeID='.$dty_id.' AND dtl_RecID='.$dbID);
+
+            $detail = array(
+                'dtl_DetailTypeID'=>$dty_id,
+                'dtl_Value'=>$dbReg
+            );
+
+            if($fld_id != null){ // update
+                $detial['dtl_ID'] = $fld_id;
+            }else{ // insert - shouldn't be needed
+                $detail['dtl_RecID'] = $dbID;
+            }
+
+            mysql__insertupdate($mysqli, 'recDetails', 'dtl_', $detail);   
+        }
+
+        return $dbID;
+    }
 
     //
     // remove database entirely

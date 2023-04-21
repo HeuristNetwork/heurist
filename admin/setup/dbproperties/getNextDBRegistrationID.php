@@ -51,7 +51,11 @@ if($connect_failure){
     return;
 }
 
-$out = DbUtils::databaseNextRegisterID($_REQUEST);
+if(isset($_REQUEST['dbID'])){ // Remote update registered details (usually from renameDB.php)
+    $out = DbUtils::updateRegisteredDatabase($_REQUEST);
+}else{
+    $out = DbUtils::databaseNextRegisterID($_REQUEST);
+}
 
 echo $out;
 ?>

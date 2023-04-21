@@ -829,6 +829,7 @@ When we open "iiif_image" in mirador viewer we generate manifest dynamically.
         }
         else if(@$this->data['delete_unused']){ // delete file records not in use
 
+            $ids = $this->data['delete_unused'];
             $where_clause = 'WHERE dtl_ID IS NULL';
             if(is_array($ids) && count($ids) > 0){ // multiple
                 $where_clause .= ' AND ulf_ID IN (' . implode(',', $ids) . ')';
@@ -840,19 +841,35 @@ When we open "iiif_image" in mirador viewer we generate manifest dynamically.
             $to_delete = mysql__select_list2($mysqli, $query);
 
             if(count($to_delete) > 0){
-                $this->data[$this->primaryField] = $to_delete;
-                $res = $this->delete();
 
-                if($res === true){
-                    $ret = count($to_delete);
-                }else{
-                    $ret = false;
+                // Check if Obfuscated ID is referenced in values
+                $to_remove = array();
+                foreach ($to_delete as $ulf_ID) {
+                    
+                    $ulf_ObfuscatedFileID = mysql__select_value($mysqli, 'SELECT ulf_ObfuscatedFileID FROM ' . $this->config['tableName'] . ' WHERE ulf_ID = ' . $ulf_ID);
+                    if(!$ulf_ObfuscatedFileID){ // missing ulf_ObfuscatedFileID
+                        $to_remove[] = $ulf_ID;
+                        continue;
+                    }
+
+                    $is_used = mysql__select_value($mysqli, "SELECT dtl_ID FROM recDetails WHERE dtl_Value LIKE '%". $ulf_ObfuscatedFileID ."%'");
+                    if($is_used){
+                        $to_remove[] = $ulf_ID;
+                    }
                 }
-            }else if($mysqli->error == ''){ // no un-used files to delete
-                $ret = 0;
-            }else{ // error
-                $ret = false;
-                $this->system->addError(HEURIST_ERROR, 'Unable to retrieve ids of un-used files.');
+
+                if(!count($to_remove) > 0){
+                    $to_delete = array_diff($to_delete, $to_remove);
+                }
+
+                if(count($to_delete) > 0){
+                    $this->data[$this->primaryField] = $to_delete;
+                    $res = $this->delete();
+    
+                    if($res === true){
+                        $ret = count($to_delete);
+                    }
+                }
             }
         }
         else if(@$this->data['regExternalFiles']){ // attempt to register multiple URLs at once, and return necessary information for record editor
