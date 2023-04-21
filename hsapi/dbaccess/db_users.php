@@ -727,7 +727,7 @@
                 "\n\nTo change your password go to Profile -> My User Info in the top right menu";
             }
 
-            $email_text = $email_text."\n\nWe recommend visiting https://HeuristNetwork.org and the online Help ".
+            $email_text = $email_text."\n\nWe recommend visiting https://HeuristNetwork.org and the online documentation ".
             "pages, which provide comprehensive overviews and step-by-step instructions for using Heurist.\n\n".
             "Database Owner: ".$dbowner_Email;
 

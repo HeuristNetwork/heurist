@@ -256,9 +256,9 @@ regional['ENG'] = {
         
     //HELP menu
     HELP: '',
-        'menu-help-online': 'Online help',
+        'menu-help-online': 'Documentation',
         'menu-help-website': 'Heurist Network website',
-        'menu-help-online-hint': 'Comprehensive online help for the Heurist system',
+        'menu-help-online-hint': 'Comprehensive online documentation for the Heurist system',
         'menu-help-website-hint': 'Heurist Network website - a source for a wide range of information, services and contacts', 
     CONTACT: '',
         'menu-help-bugreport': 'Bug report/feature request',
