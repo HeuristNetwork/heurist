@@ -868,7 +868,20 @@ function initLinksAndImages($container, search_data){
     // Ensure each image and embedded source is correct for current server + database
     $('img, embed').each(function(i,ele){window.hWin.HEURIST4.util.restoreRelativeURL(ele);});
 
-    
+    // Handle login buttons within webpage content
+    let $btn_signin = $('#btn_signin').not('.cms-button');
+    if(window.hWin.HAPI4.currentUser.ugr_ID == 0){
+
+        if($btn_signin.length>0){
+            $btn_signin.on('click', () => {
+                window.hWin.HEURIST4.ui.checkAndLogin(true, () => {location.reload();});
+            });
+
+            $('#btn_signin.cms-button').hide();
+        }else{
+            $('#btn_signin.cms-button').show();
+        }
+    }
 }
 
 //
