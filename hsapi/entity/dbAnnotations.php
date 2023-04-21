@@ -90,7 +90,11 @@ error_log(print_r($sjson, true));
                     
         if($this->data['recID']=='pages'){
             $sjson['items'] = array();
-            $uri = $this->data['uri'].(@$this->data['file']?'&file='.$this->data['file']:'');
+            
+            if($this->data['uri']){
+                $this->data['uri'] = substr($_SERVER['QUERY_STRING'],4);
+            }
+            $uri = $this->data['uri']; //.(@$this->data['file']?'&file='.$this->data['file']:'');
             $items = $this->findItems_by_Canvas($uri);
             if(is_array($items) && count($items)>0){
                 
