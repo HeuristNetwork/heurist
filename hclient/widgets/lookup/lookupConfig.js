@@ -371,20 +371,26 @@ $.widget( "heurist.lookupConfig", {
 
         this._on(this.element.find('#example_records .ui-icon'), {
             'click': function(event){
-                var idx = that.element.find('#tbl_matches').attr('data-idx');
+
+                let idx = that.element.find('#tbl_matches').attr('data-idx');
+                let service = that.selectServiceType.val();
+                let max = that.example_results[service] ? that.example_results[service].length - 1 : 0;
 
                 if($(event.target).hasClass('ui-icon-arrowthick-1-e')){
-                    idx = idx == 9 ? 0 : parseInt(idx) + 1;
+                    idx = idx == max ? 0 : parseInt(idx) + 1;
                 }else{
-                    idx = idx == 0 ? 9 : parseInt(idx) - 1;
+                    idx = idx == 0 ? max : parseInt(idx) - 1;
                 }
 
                 that.element.find('#current_idx').text(parseInt(idx)+1);
                 that.element.find('#tbl_matches').attr('data-idx', idx);
 
-                that._displayTestResults(that.selectServiceType.val());
+                that._displayTestResults(service);
             }
         });
+
+        let rpanel_width = this.element.find('#editing_panel').width() - 140;
+        this.element.find('#service_mapping').width(rpanel_width);
 
         return true;
     },
@@ -820,14 +826,18 @@ $.widget( "heurist.lookupConfig", {
         this._fillConfigForm(null, cfg0);
     },
 
+    //
+    // Display example records available services
+    //
     _displayTestResults: function(service_name){
 
         var that = this;
 
-        var handled_services = ['bnfLibrary', 'bnfLibraryAut', 'tlcmap', 'geoName', 'postalCodeSearch']; // 'nomisma' 
+        const handled_services = ['bnfLibrary', 'bnfLibraryAut', 'tlcmap', 'geoName', 'postalCodeSearch', 'nomisma', 'nakala', 'nakala_author'];
+
+        this.element.find('#example_records').hide();
 
         if(handled_services.indexOf(service_name) == -1 || window.hWin.HEURIST4.util.isempty(this.selectRecordType.val())){
-            this.element.find('#example_records').hide();
             return;
         }
 
@@ -846,8 +856,9 @@ $.widget( "heurist.lookupConfig", {
                     serviceType = 'bnflibrary_aut';
                     break;
                 case 'nomisma':
-                    url = 'http://nomisma.org/apis/getMints?id=denarius'; // getMints, getHoards, getFindspots
-                    request['search_type'] = 'mint';
+                    this._runTestNomisma('getMints'); // run all nomisma services
+                    //url = 'http://nomisma.org/apis/getMints?id=denarius'; // getMints, getHoards, getFindspots
+                    //request['search_type'] = 'mint';
                     break;
                 case 'tlcmap':
                     url = 'http://tlcmap.org/ghap/search?format=csv&paging=10&fuzzyname=London';
@@ -860,6 +871,14 @@ $.widget( "heurist.lookupConfig", {
                     url = 'http://api.geonames.org/postalCodeLookupJSON?username=osmakov&maxRows=10&placename=London';
                     serviceType = 'geonames';
                     break;
+                case 'nakala':
+                    url = 'https://api.nakala.fr/search?q=Literature&fq=scope%3Ddatas&order=relevance&page=1&size=15';
+                    serviceType = 'nakala_search';
+                    break;
+                case 'nakala_author':
+                    url = 'https://api.nakala.fr/authors/search?q=John&order=asc&page=1&limit=15';
+                    serviceType = 'nakala_search_author';
+                    break;
                 default:
                     break;
             }
@@ -869,21 +888,23 @@ $.widget( "heurist.lookupConfig", {
             }
 
             request = {
-                'service': url, // request url
-                'serviceType': serviceType // requesting service, otherwise no
+                service: url, // request url
+                serviceType: serviceType // requesting service, otherwise no
             };
 
             window.hWin.HAPI4.RecordMgr.lookup_external_service(request, function(response){
 
                 if(service_name.indexOf('bnfLibrary') != -1){
-                    that.example_results[service_name] = response.result;
+                    response = response.result;
                 }else if(service_name == 'geoName'){
-                    that.example_results[service_name] = response.geonames;
+                    response = response.geonames;
                 }else if(service_name == 'postalCodeSearch'){
-                    that.example_results[service_name] = response.postalcodes;
-                }else{
-                    that.example_results[service_name] = response;
+                    response = response.postalcodes;
+                }else if(service_name == 'nakala'){
+                    response = response.records;
                 }
+
+                that.example_results[service_name] = response;
 
                 that._displayTestResults(service_name);
                 return;
@@ -897,6 +918,12 @@ $.widget( "heurist.lookupConfig", {
 
         var idx = this.element.find('#tbl_matches').attr('data-idx');
         var data = this.example_results[service_name] ? this.example_results[service_name][idx] : null;
+
+        if(service_name == 'nakala'){
+            let rec_IDs = Object.keys(this.example_results[service_name]);
+            idx = rec_IDs[idx];
+            data = this.example_results[service_name][idx];
+        }
 
         if(data){
 
@@ -913,8 +940,19 @@ $.widget( "heurist.lookupConfig", {
 
                     var fld_parts = field.split('.');
                     value = data[fld_parts[0]];
+
+                    if(window.hWin.HEURIST4.util.isempty(value)){
+                        return;
+                    }
+
                     for(var i = 1; i < fld_parts.length; i++){
+
+                        if(window.hWin.HEURIST4.util.isempty(value[fld_parts[i]]) && !window.hWin.HEURIST4.util.isempty(value[0])){
+                            value = value[0];
+                        }
+
                         value = value[fld_parts[i]];
+
                         if(window.hWin.HEURIST4.util.isempty(value)){
                             break;
                         }
@@ -977,7 +1015,7 @@ $.widget( "heurist.lookupConfig", {
 
                             value = main_str;
                         }
-                    }else if(service_name == 'tlcmap'){
+                    }else if(service_name == 'tlcmap' || service_name == 'nomisma'){
 
                         if(field == 'geometry'){
 
@@ -1015,8 +1053,66 @@ $.widget( "heurist.lookupConfig", {
                 }
             });
 
+            if(service_name == 'nomisma'){
+                let type = this.example_results[service_name][idx]['properties']['type'];
+                this.element.find('#example_fluff').html('Search example records: (currently: <strong>'+ type +'</strong>');
+            }else{
+                this.element.find('#example_fluff').text('Search example records: ');
+            }
+
             this.element.find('#example_records').show();
         }
+    },
+
+    //
+    // Run all handled requests to Nomisma API
+    //
+    _runTestNomisma: function(type = ''){
+
+        var that = this;
+        let service_name = 'nomisma';
+        const nomismaServices = ['getMints', 'getHoards', 'getFindspots'];
+
+        if(type == '' && this.example_results.hasOwnProperty(service_name)){
+            this._displayTestResults(service_name);
+            return;
+        }
+
+        if(!this.example_results.hasOwnProperty(service_name)){
+            this.example_results[service_name] = [];
+        }
+
+        type = (type == '') ? 'getMints' : type;
+
+        if(nomismaServices.indexOf(type) == -1){
+            window.hWin.HEURIST4.msg.showMsgErr('An invalid request was made in attempting to retrieve sample Nomisma records.<br>Attempting to retrieve "'+ type +'"');
+            return;
+        }
+
+        let url = 'http://nomisma.org/apis/'+ type +'?id=denarius';
+
+        let request = {
+            service: url,
+            serviceType: service_name
+        };
+
+        window.hWin.HAPI4.RecordMgr.lookup_external_service(request, function(response){
+
+            if(window.hWin.HEURIST4.util.isGeoJSON(response, true)){
+                const value = response.features.slice(0, 5);
+                that.example_results[service_name].push(...value);
+            }
+
+            if(type == 'getMints'){
+                that._runTestNomisma('getHoards');
+            }else if(type == 'getHoards'){
+                that._runTestNomisma('getFindspots');
+            }else{
+                that._runTestNomisma('');
+            }
+
+            return;
+        });
     },
 
     //
