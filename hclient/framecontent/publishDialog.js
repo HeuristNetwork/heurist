@@ -269,7 +269,7 @@ function hPublishDialog( _options )
                     popupdialog = null;
                },
                open: function(){
-                    _initControls();
+                    setTimeout(_initControls, 500);
                }
             });        
         
