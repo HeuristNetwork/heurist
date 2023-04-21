@@ -526,77 +526,11 @@ function addContainer() {
 */
 function updateLabels() {
 
-    let scale = (d3.event?.scale !== undefined) ? d3.event.scale : this.zoomBehaviour.scale();
-
     //Gerard Zoom Scaling
-    if (currentMode == 'icons' && !settings.isDatabaseStructure) {
-
-        /*
-        if (d3.event.scale < 0.5) {
-            const nodeList = document.querySelectorAll('.nodelabel');  //.setAttribute('style', 'scale: 5 !important;');
-            for (let i = 0; i < nodeList.length; i++) {
-                nodeList[i].style.scale = "4";
-                nodeList[i].style.transform = "translate(-21px, -9px)";
-            }
-        }
-        */
-
-        /*
-        if (/*d3.event.scale > 0.5 && d3.event.scale < 0.9) {
-            const nodeList = document.querySelectorAll('.nodelabel');  //.setAttribute('style', 'scale: 5 !important;');
-            for (let i = 0; i < nodeList.length; i++) {
-                nodeList[i].style.scale = "3.5";
-                nodeList[i].style.transform = "translate(-20px, -9px)";
-            }
-        }
-        */
-
-        if (/*d3.event.scale > 0.9 && */scale < 1.5) {
-            const nodeList = document.querySelectorAll('.nodelabel');  //.setAttribute('style', 'scale: 5 !important;');
-            for (let i = 0; i < nodeList.length; i++) {
-                nodeList[i].style.scale = "3.25";
-                nodeList[i].style.transform = "translate(-20px, -9px)";
-            }
-        }
-
-        if (scale > 1.5 && scale < 2) {
-            const nodeList = document.querySelectorAll('.nodelabel');  //.setAttribute('style', 'scale: 5 !important;');
-            for (let i = 0; i < nodeList.length; i++) {
-                nodeList[i].style.scale = "2.75";
-                nodeList[i].style.transform = "translate(-18px, -8px)";
-            }
-        }
-
-        if (scale > 2 && scale < 2.5) {
-            const nodeList = document.querySelectorAll('.nodelabel');  //.setAttribute('style', 'scale: 5 !important;');
-            for (let i = 0; i < nodeList.length; i++) {
-                nodeList[i].style.scale = "2";
-                nodeList[i].style.transform = "translate(-14px, -7px)";
-            }
-        }
-
-        if (scale > 2.5 && scale < 3.5) {
-            const nodeList = document.querySelectorAll('.nodelabel');  //.setAttribute('style', 'scale: 5 !important;');
-            for (let i = 0; i < nodeList.length; i++) {
-                nodeList[i].style.scale = "1.5";
-                nodeList[i].style.transform = "translate(-9px, -5px)";
-            }
-        }
-
-        if (scale > 3.5 /*&& d3.event.scale < 5*/) {
-            const nodeList = document.querySelectorAll('.nodelabel');  //.setAttribute('style', 'scale: 5 !important;');
-            for (let i = 0; i < nodeList.length; i++) {
-                nodeList[i].style.scale = "1";
-                nodeList[i].style.transform = "translate(0px, 0px)";
-            }
-        }
-
-    } else {
-        const nodeList = document.querySelectorAll('.nodelabel');  //.setAttribute('style', 'scale: 5 !important;');
-        for (let i = 0; i < nodeList.length; i++) {
-            nodeList[i].style.scale = "1";
-            nodeList[i].style.transform = "translate(0px, 0px)";
-        }
+    const nodeList = document.querySelectorAll('.nodelabel');  //.setAttribute('style', 'scale: 5 !important;');
+    for (let i = 0; i < nodeList.length; i++) {
+        nodeList[i].style.scale = "1";
+        nodeList[i].style.transform = "translate(0px, 0px)";
     }
 }
 
@@ -1669,25 +1603,7 @@ function showEmbedDialog(){
     var url_enc = window.hWin.HAPI4.baseURL+'hclient/framecontent/visualize/springDiagram.php' + query;
 
     window.hWin.HEURIST4.ui.showPublishDialog({mode:'graph', url: url, url_encoded: url_enc});
-    
-/*   
-    document.getElementById("code-textbox").value = '<iframe src=\'' + url +
-    '\' width="800" height="650" frameborder="0"></iframe>';
 
-    document.getElementById("code-textbox2").value = '<iframe src=\'' + url_enc +
-    '\' width="800" height="650" frameborder="0"></iframe>';
-    
-    var $dlg = $("#embed-dialog");
-
-    $dlg.dialog({
-        autoOpen: true,
-        height: 320,
-        width: 700,
-        modal: true,
-        resizable: false,
-        title: window.hWin.HR('Publish Network Diagram')
-    });
-*/    
 }            
 
 function inIframe() { 
@@ -1781,8 +1697,4 @@ function openWin() {
 function closeWin() {
     window.close();
     return;
-    var hrefnew = window.hWin.HEURIST4.query.composeHeuristQuery2(window.hWin.HEURIST4.current_query_request, false);
-    hrefnew = hrefnew + ((hrefnew == '?') ? '' : '&') + 'db=' + window.hWin.HAPI4.database;
-    var url2 = window.hWin.HAPI4.baseURL + 'hclient/framecontent/visualize/springDiagram.php' + hrefnew;
-    window.close();
 }
