@@ -1939,7 +1939,7 @@ private static function _getIiifCanvas($record, $ulf_ObfuscatedFileID){
     $label = htmlspecialchars(strip_tags($record['rec_Title']));
     $rectypeID = $record['rec_RecTypeID'];
     
-    //1. get "file" field values
+    //1. get "file" from field values
     foreach ($record['details'] as $dty_ID=>$field_details) {
         foreach($field_details as $dtl_ID=>$file){
             
@@ -2011,7 +2011,7 @@ private static function _getIiifCanvas($record, $ulf_ObfuscatedFileID){
         $service = '';        
         
         //get iiif image parameters
-        if($fileinfo['ulf_OrigFileName']=='_iiif_image'){
+        if($fileinfo['ulf_OrigFileName']=='_iiif_image'){ //create dynamic manifest based on image
             
                 $iiif_manifest = loadRemoteURLContent($fileinfo['ulf_ExternalFileReference']); //retrieve iiif image.info to be included into manifest
                 $iiif_manifest = json_decode($iiif_manifest, true);
@@ -2075,7 +2075,7 @@ SERVICE3;
         $tumbnail_height = 200;
         $tumbnail_width = 200;
 
-        if(self::$version==2){
+        if(self::$version==2){ //not used - outdated for mirador v2
                       
 $item = <<<CANVAS2
 {
@@ -2120,7 +2120,20 @@ CANVAS2;
 //$width = 800;
 //$height = 1063;
 
-$canvas_uri = $resource_url;
+// Returns json
+// https://heuristref.net/heurist/api/[dbname]/iiif/manifest/[image obfuscation id]/manifest.json
+// https://heuristref.net/heurist/api/[dbname]/iiif/canvas/[image obfuscation id][.json]
+// https://heuristref.net/heurist/api/[dbname]/iiif/page/[image obfuscation id][.json]
+// https://heuristref.net/heurist/api/[dbname]/iiif/annotation/[image obfuscation id][.json]
+// https://heuristref.net/heurist/api/[dbname]/iiif/image/[image obfuscation id]/info.json
+
+$root_uri = HEURIST_BASE_URL_PRO.'api/'.HEURIST_DBNAME.'/iiif/';
+$canvas_uri = $root_uri.'canvas/'.$fileid;
+$annopage_uri = $root_uri.'page/'.$fileid;
+$annotation_uri = $root_uri.'annotation/'.$fileid;
+$image_uri = $root_uri.'image/'.$fileid.'/info.json';
+
+//$canvas_uri = $resource_url;
 
 $label = preg_replace('/\r|\n/','\n',trim($label));
 $item = <<<CANVAS3
@@ -2132,11 +2145,11 @@ $item = <<<CANVAS3
                 "width": $width,
       "items": [
         {
-          "id": "$canvas_uri&page=1",
+          "id": "$annopage_uri",
           "type": "AnnotationPage",
           "items": [
             {
-              "id": "$canvas_uri&annot=1",
+              "id": "$annotation_uri",
               "type": "Annotation",
               "motivation": "painting",
               "body": {
@@ -2174,7 +2187,7 @@ CANVAS3;
         $canvas = $canvas.$comma.$item;
         $comma =  ",\n";
         
-        }//for
+        }//for info in fileinfo
     
     }//count($file_ids)>0
     
