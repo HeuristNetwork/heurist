@@ -268,7 +268,7 @@ public static function output($data, $params){
             fwrite($fd, '{"records":[');             
         }
 
-    }else if($params['format']=='iiif'){ //it creates iiif manifest see _getIiifCanvas
+    }else if($params['format']=='iiif'){ //it creates iiif manifest see getIiifResource
         
         self::$version = (@$params['version']==2 || @$params['v']==2)?2:3;
         
@@ -771,7 +771,7 @@ XML;
 
         }else if($params['format']=='iiif'){ 
             
-            $canvas = self::_getIiifCanvas($record, @$params['iiif_image']);
+            $canvas = self::getIiifResource($record, @$params['iiif_image']);
             if($canvas && $canvas!=''){
                 fwrite($fd, $comma.$canvas);
                 $comma = ",\n";
@@ -1931,28 +1931,63 @@ private static function _getMediaViewerData($record){
 // 
 // return null if not media content found
 //
-private static function _getIiifCanvas($record, $ulf_ObfuscatedFileID){
+public static function getIiifResource($record, $ulf_ObfuscatedFileID, $type_resource='Canvas'){
+    
+    //validate $resource_type
+    
+    
 
     $canvas = '';    
     $comma = '';
     $info = array();
-    $label = htmlspecialchars(strip_tags($record['rec_Title']));
-    $rectypeID = $record['rec_RecTypeID'];
     
-    //1. get "file" from field values
-    foreach ($record['details'] as $dty_ID=>$field_details) {
-        foreach($field_details as $dtl_ID=>$file){
+    if($record==null){
+        //find file infor by obfuscation id
+        $info = fileGetFullInfo(self::$system, $ulf_ObfuscatedFileID);
+        
+        if(count($info)>0){
+            $label = trim(htmlspecialchars(strip_tags($info[0]['ulf_Description'])));    
             
-            if($ulf_ObfuscatedFileID){
-                if($file['file']['ulf_ObfuscatedFileID']==$ulf_ObfuscatedFileID){
-                    array_push($info, $file['file']);
-                    break 2;
-                }
+            if($label==''){
+                //find name from linked record
+                $query = 'SELECT rec_RecTypeID, rec_Title FROM Records, recDetails '
+                .'WHERE rec_ID=dtl_RecID and dtl_UploadedFileID='.$info[0]['ulf_ID']
+                .' LIMIT 1';
+                
+                $record = mysql__select_row(self::$mysqli, $query);
+                $label = htmlspecialchars(strip_tags($record[1])); //rec_Title
+                $rectypeID = $record[0]; //rec_RecTypeID
             }else{
-                array_push($info, $file['file']);    
+                $rectypeID = 5;
+            }
+            
+        }else{
+            self::$system->addError(HEURIST_NOT_FOUND, 'Resource with given id not found');
+            return false;
+        }
+        
+    }else{
+    
+        $label = htmlspecialchars(strip_tags($record['rec_Title']));
+        $rectypeID = $record['rec_RecTypeID'];
+        //1. get "file" from field values
+        foreach ($record['details'] as $dty_ID=>$field_details) {
+            foreach($field_details as $dtl_ID=>$file){
+                
+                if($ulf_ObfuscatedFileID){
+                    if($file['file']['ulf_ObfuscatedFileID']==$ulf_ObfuscatedFileID){
+                        array_push($info, $file['file']);
+                        break 2;
+                    }
+                }else{
+                    array_push($info, $file['file']);    
+                }
             }
         }
+        
     }
+        
+    $label = preg_replace('/\r|\n/','\n',trim($label));
     
     //2. get file info
     if(count($info)>0){
@@ -2011,7 +2046,7 @@ private static function _getIiifCanvas($record, $ulf_ObfuscatedFileID){
         $service = '';        
         
         //get iiif image parameters
-        if($fileinfo['ulf_OrigFileName']=='_iiif_image'){ //create dynamic manifest based on image
+        if($fileinfo['ulf_OrigFileName']=='_iiif_image'){ //this is image info - it gets all required info from json
             
                 $iiif_manifest = loadRemoteURLContent($fileinfo['ulf_ExternalFileReference']); //retrieve iiif image.info to be included into manifest
                 $iiif_manifest = json_decode($iiif_manifest, true);
@@ -2113,41 +2148,15 @@ CANVAS2;
 //  "duration": 5,
 //        "height": $height,
 //        "width": $width
-//http://127.0.0.1//h6-alpha/?db=osmak_9c&file=d58b3ea73a8bad96475d1e3850a3f417f6c500f8
-//      "id": "https://$canvas_uri",
-//AnnotationPage: "id": "https://$canvas_uri/page",
-//Annotation:     "id": "https://$canvas_uri/page/annotation",
-//$width = 800;
-//$height = 1063;
 
 // Returns json
-// https://heuristref.net/heurist/api/[dbname]/iiif/manifest/[image obfuscation id]/manifest.json
-// https://heuristref.net/heurist/api/[dbname]/iiif/canvas/[image obfuscation id][.json]
-// https://heuristref.net/heurist/api/[dbname]/iiif/page/[image obfuscation id][.json]
-// https://heuristref.net/heurist/api/[dbname]/iiif/annotation/[image obfuscation id][.json]
-// https://heuristref.net/heurist/api/[dbname]/iiif/image/[image obfuscation id]/info.json
-
 $root_uri = HEURIST_BASE_URL_PRO.'api/'.HEURIST_DBNAME.'/iiif/';
 $canvas_uri = $root_uri.'canvas/'.$fileid;
 $annopage_uri = $root_uri.'page/'.$fileid;
 $annotation_uri = $root_uri.'annotation/'.$fileid;
 $image_uri = $root_uri.'image/'.$fileid.'/info.json';
 
-//$canvas_uri = $resource_url;
-
-$label = preg_replace('/\r|\n/','\n',trim($label));
-$item = <<<CANVAS3
-{
-      "id": "$canvas_uri",
-      "type": "Canvas",
-      "label": "$label",
-                "height": $height,
-                "width": $width,
-      "items": [
-        {
-          "id": "$annopage_uri",
-          "type": "AnnotationPage",
-          "items": [
+$annotation = <<<ANNOTATION3
             {
               "id": "$annotation_uri",
               "type": "Annotation",
@@ -2160,8 +2169,35 @@ $item = <<<CANVAS3
               },
               "target": "$canvas_uri"
             }
+ANNOTATION3;
+
+if($type_resource=='annotation'){
+    return $annotation;
+}
+
+$annotation_page = <<<PAGE3
+        {
+          "id": "$annopage_uri",
+          "type": "AnnotationPage",
+          "items": [
+                $annotation
           ]
         }
+PAGE3;
+
+if($type_resource=='page'){
+    return $annotation_page;
+}
+
+$item = <<<CANVAS3
+{
+      "id": "$canvas_uri",
+      "type": "Canvas",
+      "label": "$label",
+                "height": $height,
+                "width": $width,
+      "items": [
+           $annotation_page
       ],
       "thumbnail": [
         {
@@ -2214,7 +2250,7 @@ private static function _array_to_xml( $data, &$xml_data ) {
 }
 
 //
-//
+// not used 
 //
 private static function gen_uuid2() {
     return vsprintf( '%s%s-%s-%s-%s-%s%s%s', str_split(bin2hex(random_bytes(16)), 4) );

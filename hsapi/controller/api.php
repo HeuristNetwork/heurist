@@ -51,7 +51,8 @@ $entities = array(
 'logout'=>'System',
 
 'rem'=>'UsrReminders',
-'annotations'=>'Annotations',
+'annotations'=>'Annotations', //for iiif annotation server
+'iiif'=>'iiif', //for iiif presenatation v3 (only GET allowed)
 );
 //records 
     //controlles:    
@@ -134,7 +135,20 @@ if($method=='save' || $method=='add'){
 }
 
 // throw new RuntimeException('Unauthorized - authentication failed', 401);
-if ($entities[@$requestUri[3]]=='System') {
+if (@$requestUri[3]=='iiif') {
+
+    if($method=='search'){
+        $_REQUEST['resource'] = @$requestUri[4];
+        $_REQUEST['id'] = @$requestUri[5];
+        $_REQUEST['restapi'] = 1; //set http response code
+        
+        include '../../hsapi/controller/iiif_presentation.php';
+    }else{
+        exitWithError('Method Not Allowed', 405);
+    }
+    
+    
+}else if ($entities[@$requestUri[3]]=='System') {
     
     include '../System.php';
     
