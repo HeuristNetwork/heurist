@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Expires" content="Fri, Jan 01 2050 00:00:00 GMT">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Cache-Control" content="no-cache">
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<meta http-equiv="Lang" content="en">
+<meta name="author" content="Ian Johnson ian.johnson.france@gmail.com">
+<meta name="description" content="Heurist development history/ new features">
+<meta name="keywords" content="">
+<meta name="creation-date" content="24/04/2023">
+<meta name="revisit-after" content="15 days">
+<title>Heurist development history and new features</title>
+<link rel="stylesheet" type="text/css" href="my.css">
+</head>
+<body>
+<h1>Heurist development history</h1>
+This page contains an ordered history of the main changes implemented in the Heurist software ( <a href="http://HeuristNetwork.org" target=_blank>HeuristNetwork.org</a> ) since 2018. Note that bug fixes and minor layout changes are not included here and the style is somewhat telegraphic up to April 2023. We plan to make it more visual from this date onwards.</span></p>
+<p><strong>April 2023</strong></p>
+<p><strong>March 2023</strong></p>
+<p><strong>Feb 2023</strong></p>
+<p><strong>Jan 2023</strong></p>
+<p><span style="font-weight: 400;">Current as at 17 Dec 2022 / Vsn 6.3.11 - later changes to be added</span></p>
+<p><strong>Dec 2022</strong></p>
+<ul>
+<li style="font-weight: 400;" aria-level="1"><span style="font-weight: 400;">Representative image/thumbnail to Primary/preferred image&nbsp;</span></li>
+<li style="font-weight: 400;" aria-level="1"><span style="font-weight: 400;">Improved query handling</span></li>
+<li style="font-weight: 400;" aria-level="1"><span style="font-weight: 400;">Fix up registering json IIIF manifests through the File field type</span></li>
+<li style="font-weight: 400;" aria-level="1"><span style="font-weight: 400;">Link to Mirador on View record, can show single or multiple images</span></li>
+<li style="font-weight: 400;" aria-level="1"><span style="font-weight: 400;">Deletion of all values option when a field is deleted from a record type</span></li>
+<li style="font-weight: 400;" aria-level="1"><span style="font-weight: 400;">3D model visualisation with 3DHOP for very compressed nxz files</span></li>
+<li style="font-weight: 400;" aria-level="1"><span style="font-weight: 400;">Online 3D Viewer for</span> <span style="font-weight: 400;">'obj', '3ds', 'stl', 'ply', 'gltf', 'glb', 'off', '3dm', 'fbx', 'dae', 'wrl', '3mf', 'ifc', 'brep', 'step', 'iges', 'fcstd', 'bim'</span></li>
+<li style="font-weight: 400;" aria-level="1"><span style="font-weight: 400;">Nakala lookup / submit / multi-file submit and remove from Heurist database</span></li>
+<li style="font-weight: 400;" aria-level="1"><span style="font-weight: 400;">Submit entire database archive to Nakala</span></li>
+<li style="font-weight: 400;" aria-level="1"><span style="font-weight: 400;">Fix Nomisma lookup</span></li>
+<li style="font-weight: 400;" aria-level="1"><span style="font-weight: 400;">Accordion facets in facet search</span></li>
+<li style="font-weight: 400;" aria-level="1"><span style="font-weight: 400;">Option to sort field trees in field order or alphabetically</span></li>
+<li style="font-weight: 400;" aria-level="1"><span style="font-weight: 400;">Improve layout of Record view particularly image links</span></li>
+<li style="font-weight: 400;" aria-level="1"><span style="font-weight: 400;">From data entry open all records for which a given field has been recorded/not recorded</span></li>
+<li style="font-weight: 400;" aria-level="1"><span style="font-weight: 400;">Allow accordion headings within blocks in data edit form</span></li>
+<li style="font-weight: 400;" aria-level="1"><span style="font-weight: 400;">Allow one-click addition of non-standard fields at the bottom of data entry to a record type</span></li>
+<li style="font-weight: 400;" aria-level="1"><span style="font-weight: 400;">Combine duplicate images in file manage</span></li>
+<li style="font-weight: 400;" aria-level="1"><span style="font-weight: 400;">Better error report on CSV import of pointer field codes</span></li>
+<li style="font-weight: 400;" aria-level="1"><span style="font-weight: 400;">Improved child record search and add</span></li>
+<li style="font-weight: 400;" aria-level="1"><span style="font-weight: 400;">Lookups show compact representation of the search applied and better layout</span></li>
+<li style="font-weight: 400;" aria-level="1"><span style="font-weight: 400;">BnF lookups changed to Unimarc</span></li>
+<li style="font-weight: 400;" aria-level="1"><span style="font-weight: 400;">Database download archive switched from zip to bzip for compatibility with other archive functions</span></li>
+</ul>
+<p><strong>Nov 2022</strong></p>
+<ul>
+<li style="font-weight: 400;" aria-level="1"><span style="font-weight: 400;">Upgrade to PHP8</span></li>
+<li style="font-weight: 400;" aria-level="1"><span style="font-weight: 400;">Remove deleted fulltext indexes (php 5 bug)</span></li>
+<li style="font-weight: 400;" aria-level="1"><span style="font-weight: 400;">Initial version Nakala lookup</span></li>
+<li style="font-weight: 400;" aria-level="1"><span style="font-weight: 400;">Rename base field option when renaming field in a record type</span></li>
+<li style="font-weight: 400;" aria-level="1"><span style="font-weight: 400;">Add sorting to ESTC external lookup</span></li>
+<li style="font-weight: 400;" aria-level="1"><span style="font-weight: 400;">Link to switch between alpha and standard version with bug report</span></li>
+<li style="font-weight: 400;" aria-level="1"><span style="font-weight: 400;">Download remote file referenced in a file field and convert to local file reference</span></li>
+<li style="font-weight: 400;" aria-level="1"><span style="font-weight: 400;">Upload files referenced in a text list of URLs</span></li>
+<li style="font-weight: 400;" aria-level="1"><span style="font-weight: 400;">Avoid duplication of local files on upload</span></li>
+<li style="font-weight: 400;" aria-level="1"><span style="font-weight: 400;">Handle more than 500 fields in a single record type (!)</span></li>
+<li style="font-weight: 400;" aria-level="1"><span style="font-weight: 400;">Allow simple dividers with no labeling</span></li>
+<li style="font-weight: 400;" aria-level="1"><span style="font-weight: 400;">Show and distinguish all dividers in field tree</span></li>
+<li style="font-weight: 400;" aria-level="1"><span style="font-weight: 400;">Allow set proxy server even for internal resources</span></li>
+<li style="font-weight: 400;" aria-level="1"><span style="font-weight: 400;">Auto-load of child records in StoryMap widget when a record is displayed in record view</span></li>
+<li style="font-weight: 400;" aria-level="1"><span style="font-weight: 400;">Add tabs for multiple record display in StoryMap widget</span></li>
+<li style="font-weight: 400;" aria-level="1"><span style="font-weight: 400;">Improvements to database and table purging script</span></li>
+<li style="font-weight: 400;" aria-level="1"><span style="font-weight: 400;">Manual reordering of terms in branches of the tree</span></li>
+<li style="font-weight: 400;" aria-level="1"><span style="font-weight: 400;">Marking fields as private/logged-in/public&nbsp;</span></li>
+<li style="font-weight: 400;" aria-level="1"><span style="font-weight: 400;">Per-record temporary hiding of a field (checkbox) in record edit&nbsp;</span></li>
+</ul>
+<p><strong>Oct 2022</strong></p>
+<ul>
+<li style="font-weight: 400;" aria-level="1"><span style="font-weight: 400;">upgrade to PHP8, remove deleted fulltext indexes (php 5 bug)</span></li>
+<li style="font-weight: 400;" aria-level="1"><span style="font-weight: 400;">initial version Nakala lookup</span></li>
+<li style="font-weight: 400;" aria-level="1"><span style="font-weight: 400;">rename base field option when renaming field in a record type</span></li>
+<li style="font-weight: 400;" aria-level="1"><span style="font-weight: 400;">add sorting to ESTC external lookup</span></li>
+<li style="font-weight: 400;" aria-level="1"><span style="font-weight: 400;">link to switch between alpha and standard version with bug report</span></li>
+<li style="font-weight: 400;" aria-level="1"><span style="font-weight: 400;">download remote file referenced in a file field and convert to local file reference</span></li>
+<li style="font-weight: 400;" aria-level="1"><span style="font-weight: 400;">upload files referenced in a text list of URLs</span></li>
+<li style="font-weight: 400;" aria-level="1"><span style="font-weight: 400;">avoid duplication of local files on upload</span></li>
+<li style="font-weight: 400;" aria-level="1"><span style="font-weight: 400;">handle more than 500 fields in a single record type (!)</span></li>
+<li style="font-weight: 400;" aria-level="1"><span style="font-weight: 400;">allow simple dividers with no labeling</span></li>
+<li style="font-weight: 400;" aria-level="1"><span style="font-weight: 400;">show and distinguish all dividers in field trees</span></li>
+<li style="font-weight: 400;" aria-level="1"><span style="font-weight: 400;">allow set proxy server even for internal resources</span></li>
+<li style="font-weight: 400;" aria-level="1"><span style="font-weight: 400;">auto-load of child records in StoryMap widget when a record is displayed in record view</span></li>
+<li style="font-weight: 400;" aria-level="1"><span style="font-weight: 400;">add tabs for multiple record display in StoryMap widget</span></li>
+<li style="font-weight: 400;" aria-level="1"><span style="font-weight: 400;">improvements to database and table purging script</span></li>
+<li style="font-weight: 400;" aria-level="1"><span style="font-weight: 400;">manual reordering of terms in branches of the tree</span></li>
+<li style="font-weight: 400;" aria-level="1"><span style="font-weight: 400;">marking fields as private/logged-in/public</span></li>
+<li style="font-weight: 400;" aria-level="1"><span style="font-weight: 400;">per-record temporary hiding of a field (checkbox in record edit)</span></li>
+<li style="font-weight: 400;" aria-level="1"><span style="font-weight: 400;">change Representative image/thumbnail to Primary/preferred image (new DBs / if name &amp; label not edited)</span></li>
+<li style="font-weight: 400;" aria-level="1"><span style="font-weight: 400;">fix several problems with crosstabs</span></li>
+<li style="font-weight: 400;" aria-level="1"><span style="font-weight: 400;">allow image size change on gallery widget</span></li>
+<li style="font-weight: 400;" aria-level="1"><span style="font-weight: 400;">add reset control to Storymap&nbsp;</span></li>
+<li style="font-weight: 400;" aria-level="1"><span style="font-weight: 400;">show terms usage count in manage vocabularies</span></li>
+<li style="font-weight: 400;" aria-level="1"><span style="font-weight: 400;">show field usage count in record structure modification</span></li>
+</ul>
+<p>&nbsp;</p>
+<p><strong>Sep 2022</strong></p>
+<ul>
+<li style="font-weight: 400;" aria-level="1"><span style="font-weight: 400;">file management: download spreadsheet of file information for current filtered set of files</span></li>
+<li style="font-weight: 400;" aria-level="1"><span style="font-weight: 400;">big cleanup of edit record code resulting in huge speed improvement (&gt; 10 times) for complex records with many repeated term values</span></li>
+<li style="font-weight: 400;" aria-level="1"><span style="font-weight: 400;">auto identification of field matches by name in CSV import</span></li>
+<li style="font-weight: 400;" aria-level="1"><span style="font-weight: 400;">improve New (record addition) shortcut on main screen</span></li>
+<li style="font-weight: 400;" aria-level="1"><span style="font-weight: 400;">creation of new records from unrecognized H-ID numbers in CSV import</span></li>
+<li style="font-weight: 400;" aria-level="1"><span style="font-weight: 400;">revise layout of filter icons next to filter field on main screen Explore</span></li>
+<li style="font-weight: 400;" aria-level="1"><span style="font-weight: 400;">error codes returned and shown when cannot access remote server</span></li>
+<li style="font-weight: 400;" aria-level="1"><span style="font-weight: 400;">option to delete the base field when a field is deleted if it is unused</span></li>
+<li style="font-weight: 400;" aria-level="1"><span style="font-weight: 400;">option to carry renaming and help text of field through to base field when changed</span></li>
+<li style="font-weight: 400;" aria-level="1"><span style="font-weight: 400;">cleaner format for Record view</span></li>
+<li style="font-weight: 400;" aria-level="1"><span style="font-weight: 400;">more readable no-visibility icon</span></li>
+<li style="font-weight: 400;" aria-level="1"><span style="font-weight: 400;">single click navigation in list of fields in structure modification mode with double-click to edit</span></li>
+<li style="font-weight: 400;" aria-level="1"><span style="font-weight: 400;">network visualisation options to not show links and to reorganise as columns without gravity</span></li>
+<li style="font-weight: 400;" aria-level="1"><span style="font-weight: 400;">saving of layout of visualisation in no-link mode</span></li>
+<li style="font-weight: 400;" aria-level="1"><span style="font-weight: 400;">improve formatting of contrrols on website editing</span></li>
+<li style="font-weight: 400;" aria-level="1"><span style="font-weight: 400;">render recognisable URLs in file description as hyperlinks</span></li>
+<li style="font-weight: 400;" aria-level="1"><span style="font-weight: 400;">handle variants on ISO format in date import</span></li>
+<li style="font-weight: 400;" aria-level="1"><span style="font-weight: 400;">handle remote URLs in multimedia import</span></li>
+<li style="font-weight: 400;" aria-level="1"><span style="font-weight: 400;">drag up/down icon on field values rollover in edit to tell people they can be reordered,&nbsp;</span></li>
+</ul>
+<p><strong>July-Aug 2022</strong></p>
+<ul>
+<li style="font-weight: 400;" aria-level="1"><span style="font-weight: 400;">allow use of bootstrap in custom reports</span></li>
+<li style="font-weight: 400;" aria-level="1"><span style="font-weight: 400;">method for defining alternative language texts in multilingual websites</span></li>
+<li style="font-weight: 400;" aria-level="1"><span style="font-weight: 400;">allow use of unprojected and alternative projection map data</span></li>
+<li style="font-weight: 400;" aria-level="1"><span style="font-weight: 400;">direct annotation references on map widget including pixel coordiantes on tilestacks</span></li>
+<li style="font-weight: 400;" aria-level="1"><span style="font-weight: 400;">better handling of ISO dates</span></li>
+<li style="font-weight: 400;" aria-level="1"><span style="font-weight: 400;">Portuguese translation of interface</span></li>
+<li style="font-weight: 400;" aria-level="1"><span style="font-weight: 400;">create new field definitions from a CSV file</span></li>
+<li style="font-weight: 400;" aria-level="1"><span style="font-weight: 400;">option to delete all data when deleting a field from a record type</span></li>
+<li style="font-weight: 400;" aria-level="1"><span style="font-weight: 400;">option to remove base field altogether, if not used, when deleting a field from a record</span></li>
+<li style="font-weight: 400;" aria-level="1"><span style="font-weight: 400;">improved handling of dates histogram in facet search</span></li>
+<li style="font-weight: 400;" aria-level="1"><span style="font-weight: 400;">integrity check across all databases on server,&nbsp;</span></li>
+</ul>
+<p><strong>May-June 2022</strong></p>
+<ul>
+<li style="font-weight: 400;" aria-level="1"><span style="font-weight: 400;">script improvements, backup as a standalone and parameterisation</span></li>
+<li style="font-weight: 400;" aria-level="1"><span style="font-weight: 400;">HeuristRef.net as reference server for Heuriverse</span></li>
+<li style="font-weight: 400;" aria-level="1"><span style="font-weight: 400;">Add initial filters to map and custom report widgets</span></li>
+<li style="font-weight: 400;" aria-level="1"><span style="font-weight: 400;">improve map zoom limit handling</span></li>
+<li style="font-weight: 400;" aria-level="1"><span style="font-weight: 400;">improvements to IIIF partial image handling</span></li>
+<li style="font-weight: 400;" aria-level="1"><span style="font-weight: 400;">zoom timing on Storymaps</span></li>
+<li style="font-weight: 400;" aria-level="1"><span style="font-weight: 400;">calcualted fields using custom report to generate data</span></li>
+<li style="font-weight: 400;" aria-level="1"><span style="font-weight: 400;">verification of remote fiel references at time of creation</span></li>
+<li style="font-weight: 400;" aria-level="1"><span style="font-weight: 400;">auto purging of sysArchive table to zip file if over 50K records</span></li>
+<li style="font-weight: 400;" aria-level="1"><span style="font-weight: 400;">databases_not_to_purge.txt file to protect reference databases from auto deletion when never updated</span></li>
+<li style="font-weight: 400;" aria-level="1"><span style="font-weight: 400;">auto deletion of unused databases after 3, 6, 12 months depending on record count</span></li>
+<li style="font-weight: 400;" aria-level="1"><span style="font-weight: 400;">new options for GeoJSon export</span></li>
+<li style="font-weight: 400;" aria-level="1"><span style="font-weight: 400;">adjust Publish menu</span></li>
+<li style="font-weight: 400;" aria-level="1"><span style="font-weight: 400;">Favourites section for saved searches in Explore menu</span></li>
+<li style="font-weight: 400;" aria-level="1"><span style="font-weight: 400;">CSV export sanitise within-field line breaks</span></li>
+<li style="font-weight: 400;" aria-level="1"><span style="font-weight: 400;">add Ruleset to standard filter builder</span></li>
+<li style="font-weight: 400;" aria-level="1"><span style="font-weight: 400;">months in Persian</span></li>
+<li style="font-weight: 400;" aria-level="1"><span style="font-weight: 400;">small improvements to search display</span></li>
+<li style="font-weight: 400;" aria-level="1"><span style="font-weight: 400;">option to generate archive package SQL only (no HML)</span></li>
+<li style="font-weight: 400;" aria-level="1"><span style="font-weight: 400;">remote lookup on Heurist db allow View record for retrieved records</span></li>
+<li style="font-weight: 400;" aria-level="1"><span style="font-weight: 400;">link to open semantic URIs for concepts</span></li>
+<li style="font-weight: 400;" aria-level="1"><span style="font-weight: 400;">staggered layout when multiple windows on top of one another for better contextualisation</span></li>
+<li style="font-weight: 400;" aria-level="1"><span style="font-weight: 400;">improved workflow for new record type creation within record pointer field definition</span></li>
+<li style="font-weight: 400;" aria-level="1"><span style="font-weight: 400;">improved new record title mask handling</span></li>
+<li style="font-weight: 400;" aria-level="1"><span style="font-weight: 400;">make CSV export 'advanced' functions more accessible</span></li>
+<li style="font-weight: 400;" aria-level="1"><span style="font-weight: 400;">handle creation of duplicate field name intuitively</span></li>
+<li style="font-weight: 400;" aria-level="1"><span style="font-weight: 400;">create new record types from a CSV file&nbsp;</span></li>
+</ul>
+<p><strong>April 2022</strong></p>
+<ul>
+<li style="font-weight: 400;" aria-level="1"><span style="font-weight: 400;">Change hardcoded references to Sydney server&nbsp;</span></li>
+<li style="font-weight: 400;" aria-level="1"><span style="font-weight: 400;">Security fixes</span></li>
+<li style="font-weight: 400;" aria-level="1"><span style="font-weight: 400;">Improvements to StoryMaps including new behaviours</span></li>
+<li style="font-weight: 400;" aria-level="1"><span style="font-weight: 400;">Map header bar</span></li>
+</ul>
+<p><strong>Mar 2022</strong></p>
+<ul>
+<li style="font-weight: 400;" aria-level="1"><span style="font-weight: 400;">Continued work on StoryMaps - now running pretty smoothly</span></li>
+<li style="font-weight: 400;" aria-level="1"><span style="font-weight: 400;">Make relationships fully bidirectional</span></li>
+<li style="font-weight: 400;" aria-level="1"><span style="font-weight: 400;">Specify target page and search_group for widget that will listen to source events</span></li>
+<li style="font-weight: 400;" aria-level="1"><span style="font-weight: 400;">Improvements to external lookups notably prompted manual insertion of record pointers</span></li>
+<li style="font-weight: 400;" aria-level="1"><span style="font-weight: 400;">Improvements to web editing</span></li>
+<li style="font-weight: 400;" aria-level="1"><span style="font-weight: 400;">Option to update names on structure download of existing concepts</span></li>
+<li style="font-weight: 400;" aria-level="1"><span style="font-weight: 400;">Improved records/fields tree in filter builders, title mask and custom reports including greater visibility of constructed record title</span></li>
+<li style="font-weight: 400;" aria-level="1"><span style="font-weight: 400;">Filtered dropdown for term list fields, increase in tree depth to 4 levels&nbsp;</span></li>
+<li style="font-weight: 400;" aria-level="1"><span style="font-weight: 400;">Improved stylesheet load order so websites load quicker and more cleanly</span></li>
+<li style="font-weight: 400;" aria-level="1"><span style="font-weight: 400;">Vertical option for image gallery</span></li>
+<li style="font-weight: 400;" aria-level="1"><span style="font-weight: 400;">New methodology for manual addition and sorting of records to/in a saved filter</span></li>
+<li style="font-weight: 400;" aria-level="1"><span style="font-weight: 400;">Fulltext search on record titles for greater speed</span></li>
+<li style="font-weight: 400;" aria-level="1"><span style="font-weight: 400;">French and German localisations - first draft</span></li>
+<li style="font-weight: 400;" aria-level="1"><span style="font-weight: 400;">Improvements to bulk emailer</span></li>
+<li style="font-weight: 400;" aria-level="1"><span style="font-weight: 400;">Choose record types to include in XML template</span></li>
+<li style="font-weight: 400;" aria-level="1"><span style="font-weight: 400;">Relationship markers displayed in field order in record view and simplified rendering for greater readability</span></li>
+<li style="font-weight: 400;" aria-level="1"><span style="font-weight: 400;">Attempt to match field names in CSV import</span></li>
+<li style="font-weight: 400;" aria-level="1"><span style="font-weight: 400;">Workflow stages system</span></li>
+<li style="font-weight: 400;" aria-level="1"><span style="font-weight: 400;">Title mask editor icon next to constructed title in edit form makes editing of title masks more obvious/convenient</span></li>
+<li style="font-weight: 400;" aria-level="1"><span style="font-weight: 400;">Checkboxes/radio buttons as an option for term list fields with &lt;25 values</span></li>
+<li style="font-weight: 400;" aria-level="1"><span style="font-weight: 400;">Improve map popup to reduce appearance of horizontal scrollbar</span></li>
+<li style="font-weight: 400;" aria-level="1"><span style="font-weight: 400;">Trap and fix format errors in geo data in CSV importer</span></li>
+<li style="font-weight: 400;" aria-level="1"><span style="font-weight: 400;">Popup decent size edit box when you click on the filter field in Explore,&nbsp;</span></li>
+</ul>
+<p><strong>Feb 2022&nbsp;</strong></p>
+<p><span style="font-weight: 400;">Option to treat periods in terms as hierarchy or not, improved record pointer selection popup with tabs, simple divider within tabs in edit form, improve file bulk upload reporting, tidy up workflow management, first draft storymap, adding tabs from list in new record type, improve font sizes,&nbsp;</span></p>
+<p><strong>Jan 2022&nbsp;</strong></p>
+<p><span style="font-weight: 400;">New website editor, BnF lookup which handles term and record pointer fields, improvements to IIIF Mirador, workflow manager prototype, increase max term length, improvements to xml import, further refinements to structure visualisation, full window image viewer option, fast dropdown-style selection of record pointers with filtering up to 1000 records, allow text field conversions to date or numeric, limit text length in constructed titles, improve date correction, import terms containing periods, many cosmetics&nbsp;</span></p>
+<p><strong>Dec 2021&nbsp;</strong></p>
+<p><span style="font-weight: 400;">Fixed up problems with messed up term trees in core definitions, lots of further work on new website editor, prototype IIIF handling with Mirador and creation of manifests, preliminary external data lookups for BnF, cleaner edit form headers, refinements to structure visualisaiton, conditional values in title mask, lots of small bug fixes</span></p>
+<p><strong>Nov 2021&nbsp;</strong></p>
+<p><span style="font-weight: 400;">Add semantic URI to defRecStructure table, rework structure visualisation, new CMS editor (currently in test mode), a lot of minor bug fixing, improved Zotero synch reporting, auto matching column to field names in CSV import</span></p>
+<p><strong>Oct 2021&nbsp;</strong></p>
+<p><span style="font-weight: 400;">Improved error reporting, handling of non-transparent monochrome backgrounds on JPG tile images, improvemetns to definitions editing workflow, improvements to CSV import workflows, better display of length for memo texts in wysiwyg, new metadata display landing page, facet search date histograms (draft), dropdown at end of long list of facets, remember open tab in data entry, auto prompt to change simpel headers to tabs, heading breaks in Record View, separate menu entryt for assigning external lookup fucntions to record types, improved field selection trees with closed sections for record-level fields etc., display breaks in ordinary text fields in record view and metadata.</span></p>
+<p><strong>Sep 2021&nbsp;</strong></p>
+<p><span style="font-weight: 400;">New Intro page showing database metadata and allowing edit, suppress duplicates or make copies of edited files in bulk upload of files and of records in XML file upload, cope better with long directory names on bulk uploads, cleaner source codd edit of website pages, API fixes, record counts for facet search folliwing relationship markers, streamline CSV importer display of fields and shortcut option to create all new records without matching step.</span></p>
+<p><strong>Aug 2021&nbsp;</strong></p>
+<p><span style="font-weight: 400;">Uploading of tile stack images, convert 3-34 to from Text field to File field, added supplementart title 2 for websites, first draft bulk emailer</span></p>
+<p><span style="font-weight: 400;">Ability to change filestore path not jsut via simlinks, web site editing and multibyute character fixes, final removal of yui code and move other old code to /shelved, improve some scary messages, standard check and download of missing record type, imporved file uploads and recognition incl. PDFs, bigger tabs on visualisation panel, improved Map tab - controls at top, turn map and timeline on separately, new functiosn for saving CSVs</span></p>
+<p><strong>July 2021&nbsp;</strong></p>
+<p><span style="font-weight: 400;">Improivements to field selection trees in filters - additional record-level fields, layout and memo texts, better layout of rule builder dropdowns and auto selection of start point, fix html escapes in Gephi output, match missing fields correctly in csv import</span></p>
+<p><strong>June 2021&nbsp;</strong></p>
+<p><span style="font-weight: 400;">Multiple allocation of lookup services to different recor types, fix for zero height div in website</span></p>
+<p><span style="font-weight: 400;">Add blog to new websites, new Zotero mapping, improve configuration of external lookup services, elimination of the use of yui,&nbsp;</span></p>
+<p><span style="font-weight: 400;">Various fixes and improvements to field trees, duplicatingg records increments increment fields, fix TinyMCE/new source editor interactions and various cosmetics, replace filter builder with new one in website search widget, better website error reporting</span></p>
+<p><strong>May 2021&nbsp;</strong></p>
+<p><span style="font-weight: 400;">Improved workflow for new record type creation, import XML can read labels as well as concept codes, freeze image thumbnails open in record edit (not just rollover), boundign boxes via digitiser, further improvements to filter builder for relationship markers and missing values, facets for months for use in blogs, initial once-only filter for facet search display, insert templates (blog, discover) into web pages, web page source code editor with indents and syntax, revised crosstabs function (in progress), grouping and merging sheets on CSV export</span></p>
+<p><span style="font-weight: 400;">Improved duplicates finder handles scale and field selections, reduce email notificatiosn with daily logfile, improved database deletion fucntions with zipping and mail to owner, additional filter builder options incl. file fields and relationship markers, tighten control on term moving and deletions and imporved automatic fixups, db ownership transfer, cleaner blog and website loading, better error trapping on directory permission error, interpreting non-iso dates in zotero synch</span></p>
+<p><strong>Apr 2021&nbsp;</strong></p>
+<p><span style="font-weight: 400;">Revised draft dupes finder, remove incorrect correction of yyy-mm dates to 1st of month and past month end to following month, missing and present selection on filter builder, dump sysArchive as CSV (not yet in menus)</span></p>
+<p><span style="font-weight: 400;">First draft new dupes finder but too slow, MPCE lookup function incorporated, vrious cosmetic and bug fixes</span></p>
+<p><strong>Mar 2021&nbsp;</strong></p>
+<p><span style="font-weight: 400;">lots of bug fixes on new version, extra checks and helpful instructions, fix XML structure download and geoJSon, summarising on CSV output (count, group, sort), additional integrity checks and automated fixing of bad terms, facet search multi-select, enhanced filter builder with AND, OR and multi-level searches, spatial search on specific fields, use of FULLTEXT search for word searches&nbsp;</span></p>
+<p><strong>Feb 2021&nbsp;</strong></p>
+<p><span style="font-weight: 400;">Replaced H5 as default on Sydney server. Customised templates for websites on a erver, set default template for new websites</span></p>
+<p><strong>Jan 2021&nbsp;</strong></p>
+<p><span style="font-weight: 400;">(Planned replacement of version 5 as default) Blog function (draft), multi-select on facet searches, easy access to edit relationship attributes from relationship markers, improved automatic date fixing in Verify Integrity, auto relationship cache rebuild, better length adjustments for result list content display, sorting by addition date, use of xml in remote data access for MPCE, server-specific custom website template function (draft), fix issues with all images due to git settings error, lots of small nips and tucks on H6 interface.</span></p>
+<p><span style="font-weight: 400;">Trash group for rectypes, fields and vocabs, synch and style corrections, increase archive blob to 16M max, adjust result list content display to actual length</span></p>
+<p><span style="font-weight: 400;">Bug fixing, better menu interactions, better website handling, Trash folder for rectypes/vocabs/fields</span></p>
+<p><span style="font-weight: 400;">Bug fixing. cosmetics</span></p>
+<p><span style="font-weight: 400;">Bug fixing, new display mode for continuous details result lists</span></p>
+<p><strong>Dec 2020</strong></p>
+<p><span style="font-weight: 400;">// h6.1.1 19 Dec 2020 Fix up problems with icons for record types in core definitions</span></p>
+<p><span style="font-weight: 400;">// h6.1.0 16 Dec 2020 Alpha release of version 6 to 'inner circle'&nbsp;</span></p>
+<p><strong>Oct 2020</strong></p>
+<p><span style="font-weight: 400;">// h6.0.1 22 Oct 2020 H6 interface, new db definition managers</span></p>
+<p><strong>Aug 2020</strong></p>
+<p><span style="font-weight: 400;">// h5.2.13 25 Aug 2020 Improve speed on record view, fix problems with loading xml and with web site fucntions, new USyd server, Initial development of H6 interface in h6dev branch&nbsp;&nbsp;</span></p>
+<p><strong>July 2020</strong></p>
+<p><span style="font-weight: 400;">// h5.2.11 12 July 2020 Sort pointer field alphabetically, table view and data table widget</span></p>
+<p><span style="font-weight: 400;">// h5.2.10 5 July 2020 Consistent ordering of record types in trees, fix crosstabs, convert UTM gridref coords in polygons, first draft data table view in main interface and website widget</span></p>
+<p><strong>June 2020</strong></p>
+<p><span style="font-weight: 400;">// h5.2.9 21 June 2020 Active subset function, save CSV specifications, save crosstabs specifications and fixes, fix UTF8 encoding issues, secondary menu/tree navigation widget in web pages, slim down new websites, exclude all but final level retrieved by ruleset, improved PID resolver addressing, duplicate saved searches,&nbsp;</span></p>
+<p><strong>May 2020</strong></p>
+<p><span style="font-weight: 400;">// h5.2.7 31 May 2020 Handling of 4 byte UTF encoding, working subset function, improvements to CSV import including large files, clarify remote lookup from edit record, template import, structure editor,</span></p>
+<p><span style="font-weight: 400;">// h5.2.6 4 May 2020 Tabbed interface fixes, multi-type facet search, improve map clustering and widget parameters, remove following reverse pointers on XML export, warn on projected shapefiles&nbsp;</span></p>
+<p><strong>April 2020</strong></p>
+<p><span style="font-weight: 400;">// h5.2.5 24 april 2020 Further fixes new structure editor, collapsible and tab headers, web page contet &gt;64K, chunking large archive files for download removing size limit</span></p>
+<p><span style="font-weight: 400;">// h5.2.4 4 April 2020 Fixes to new structure editor and workflow in record editing</span></p>
+<p><strong>March 2020</strong></p>
+<p><span style="font-weight: 400;">// h5.2.3 31 March 2020 New structure editor within record edit form, fix minor bug in quick query form</span></p>
+<p><span style="font-weight: 400;">// h5.2.2 13 March 2020 Omeka S import (wip), import fixes, Digital Harlem fixes</span></p>
+<p><span style="font-weight: 400;">// h5.2.1 8 March 2020 Fix potential exploits, sanitisation with htmlpurifier, improved record collect/widget, horizontal results list ribbon (images), improvements in leaflet map and digitser, support multimedia export/import via hash, general improvements to web widgets</span></p>
+<p><strong>Feb 2020</strong></p>
+<p><span style="font-weight: 400;">//h5.2.0 15 Feb 2020 Review security, sanitise html, block JS execution etc.&nbsp;</span></p>
+<p><span style="font-weight: 400;">//h5.1.14 11 Feb 2020 Improvements to map legend, map CSV files (not yet tested), add acknowledgements page, Add Design button, remove structure menu, add DB parameter to mappable queries, lookup service, add base field edit from field edit, spatial search</span></p>
+<p><strong>Jan 2020</strong></p>
+<p><span style="font-weight: 400;">//h5.1.13 27 Jan 2020 Smarty can reference CSS in a record, fix data archive and auditing, new result set display style with better buttons, Protected records, spatial search specifications in facet searches, autiomatic map thumbnail capture</span></p>
+<p><span style="font-weight: 400;">// h5.1.12 14 Jan 2020 (5.1.11 included) Improvements to HML import, new functiosn on website editor (record collector, data source fixes for shapefiles, standalone pages for iframe, exrtra parameters on widgets, web map embed dialgue with parameters), multi-database shared login, block deletion of pointer targets, revise change audit data saved, gazeteer or other source lookup, results list image+long title</span></p>
+<ul>
+<li style="font-weight: 400;" aria-level="1"><span style="font-weight: 400;">Ability to pre-filter the records which appear as possible targets in a record pointer field, along with the ability to only allow addition of new target records or only allow selection of existing targets:</span></li>
+</ul>
+<p><span style="font-weight: 400;">// h5.1.12 14 Jan 2020 (5.1.11 included) Improvements to HML import, new functiosn on website editor (record collector, data source fixes for shapefiles, standalone pages for iframe, exrtra parameters on widgets, web map embed dialgue with parameters), multi-database shared login, block deletion of pointer targets, revise change audit data saved, gazeteer or other source lookup, results list image+long title, revise record poitner field edit</span></p>
+<p><strong>Dec 2019</strong></p>
+<p><span style="font-weight: 400;">// h5.1.10 4 Dec 2019 Support KMZ, other KML nad mapping fixes, new map symbology function, improved website generator including custom header section and single page for embedding in iframe, automate welcome letter, improve hml import, many bug fixes</span></p>
+<p><strong>Nov 2019</strong></p>
+<p><span style="font-weight: 400;">// h5.1.9 11 Nov 2019 Improved automatic date correction, compatibility issues with MySQL 8, big rationalisation of colour settings across all code, finalise HML import and template export, location inheritance from Place in Leaflet</span></p>
+<p><strong>Oct 2019</strong></p>
+<p><span style="font-weight: 400;">// h5.1.8 : 23 Oct 2019 HML(XML) import from Heurist DB or external including all relationships, HML template generator, Custom JS in website home pages, fixes to chld record conversion &amp; Leaflet mapping, smarty report for info popups, cosmetics and imporved error messages.&nbsp;</span></p>
+<p><strong>Aug/Sep 2019</strong></p>
+<p><span style="font-weight: 400;">// h5.1.7 : 6 Sep 2019&nbsp; Major work on website designer, add background maps to digitiser, entity buttons above search field, small improvements to CSV import and Leaflet maps, custom report for View record popup</span></p>
+<p><strong>July 2019</strong></p>
+<p><span style="font-weight: 400;">22 July 2019 CMS website generator with widget embed, Customize tiny MCE toolbar with widget insertion, Improved dashboard, Acknowledgement of hosting institution, Fixes to import CSV</span></p>
+<p><span style="font-weight: 400;">// h5.1.6 : 12 July 2019 Fixes on Leaflet, fixes for timeouts, PDF uploads, selectable set of entity buttons above search field, Maptiler MBTilefile file support, CMS website first draft</span></p>
+<p><strong>June 2019</strong></p>
+<p><span style="font-weight: 400;">// h5.1.5 : 20 June 2019 Mapping with Leaflet in place of GMap, internal documentation of JSon export files, import hierarchichal terms, improve tabs in structure browsers, hosting logo, relationship vocabs usable for term fields, better error reporting particularly Zotero import&nbsp;</span></p>
+<p><strong>May 2019</strong></p>
+<p><span style="font-weight: 400;">// h5.1.4 8 May 2019 Many small cosmetic/message improvements and bug fixes, added SKOS, FOAF, DOAP, BIO, BIBO, RDF, DCMI-TYPES/TERMS vocabularies.</span></p>
+<p><strong>April 2019</strong></p>
+<p><span style="font-weight: 400;">// h5.1.3 15 April 2019 Fixes to verification function and file upload, complete RESTful API and Swagger doco, minor cosmetic and workflow fixes.</span></p>
+<p><a href="https://heuristplus.sydney.edu.au/h5-ao/documentation_and_templates/api/"><span style="font-weight: 400;">https://heuristplus.sydney.edu.au/h5-ao/documentation_and_templates/api/</span></a></p>
+<p><span style="font-weight: 400;">Inheritance of images from multimedia records linked to a record, as though they existed in the record itself. Tjis works much like the inheritance of location from Place records, although there is no option (yet) to specify multiple record types as acting as Digital Media Items - that seems less necessary than with Place records.</span></p>
+<p><strong>March 2019</strong></p>
+<p><span style="font-weight: 400;">// h5.1.2 3 Apr 2019 case sensitive/exact multilingual search, DB properties file folder manager, multi file upload duplicates directory structure, import dot-separated hierarchical terms, CSV data entry template generation,&nbsp; auto image display from linked multimedia, HML import first draft, Restful API WIP&nbsp;</span></p>
+<p><strong>February 2019</strong></p>
+<p><span style="font-weight: 400;">// h5.1.1 26 Feb 2019 Render simple html &amp; hyperlinks in record titles, better handling of map zooms, add Google analytics detail, import child records, better error reporting, drag and drop reordering of values in edit form, instant preview of search in facet search builder, clear marker of non-public records, import multimedia with dirctory structure, output Gephi node types,&nbsp;</span></p>
+<p><span style="font-weight: 400;">// h5.0.5 Feb 2019 Drag/drop images, expose semantic reference fields, expose parent record fields in facet search tree, improved startup help, improved map view info popup, clustering and zooming, KML and map tile handling, mapdocument and views parameters for embedded searches, lots of small fixes and cosmetics</span></p>
+<p><strong>January 2019</strong></p>
+<ul>
+<li style="font-weight: 400;" aria-level="1"><span style="font-weight: 400;">Pointer fields list target type(s) eg. "select Person, Organisation, &hellip;" instead of just "select record"</span></li>
+<li style="font-weight: 400;" aria-level="1"><span style="font-weight: 400;">Searching on access rights etc:</span></li>
+<ul>
+<li style="font-weight: 400;" aria-level="2"><span style="font-weight: 400;">User: </span> <span style="font-weight: 400;">{"addedby":"johnson,lentz"}&nbsp; {"addedby":"29,57"}&nbsp;&nbsp;</span></li>
+</ul>
+</ul>
+<p><span style="font-weight: 400;">{"addedby":"-osmakov"}&nbsp; negation indicates not-added-by</span></p>
+<ul>
+<li style="font-weight: 400;" aria-level="2"><span style="font-weight: 400;">Owner:</span> <span style="font-weight: 400;">{"owner":"Database Managers"}&nbsp; {&ldquo;owner":1}&nbsp;&nbsp;</span></li>
+<li style="font-weight: 400;" aria-level="2"><span style="font-weight: 400;">Viewability:</span> <span style="font-weight: 400;">{"access":"hidden"} &nbsp; {"access":"viewable"} &nbsp; {"access":"public"}&nbsp;&nbsp;&nbsp;</span></li>
+<li style="font-weight: 400;" aria-level="2"><span style="font-weight: 400;">Combine:</span> <span style="font-weight: 400;">{"owner":3,"access":"viewable"}</span></li>
+<li style="font-weight: 400;" aria-level="2"><span style="font-weight: 400;">?????</span> <span style="font-weight: 400;">{"owner":"viewable"}</span><span style="font-weight: 400;"><br /><br /></span></li>
+</ul>
+<ul>
+<li style="font-weight: 400;" aria-level="1"><span style="font-weight: 400;">Initial ordering of fields in facet search wizard is order in tree rather than order they are checked</span></li>
+<li style="font-weight: 400;" aria-level="1"><span style="font-weight: 400;">Added import of semantic URIs to import of terms from a text file into the term tree</span></li>
+<li style="font-weight: 400;" aria-level="1"><span style="font-weight: 400;">More controlled zoom into single-location clusters and handling list of records in popup</span></li>
+<li style="font-weight: 400;" aria-level="1"><span style="font-weight: 400;">Improved workflow in the browse templates function</span></li>
+<li style="font-weight: 400;" aria-level="1"><span style="font-weight: 400;">Various options to output labels, codes and record IDs in CSV export</span></li>
+<li style="font-weight: 400;" aria-level="1"><span style="font-weight: 400;">Immediate preview of facet search on right when changing display parameters</span></li>
+<li style="font-weight: 400;" aria-level="1"><span style="font-weight: 400;">Very obvious record-is-private marker</span></li>
+<li style="font-weight: 400;" aria-level="1"><span style="font-weight: 400;">Fixed ctrl-S saving of record</span></li>
+<li style="font-weight: 400;" aria-level="1"><span style="font-weight: 400;">Allow system administrator to register clones with a specific ID (verifies ID is unused)</span></li>
+<li style="font-weight: 400;" aria-level="1"><span style="font-weight: 400;">Several fixes of small problems with new servers notably in CSV import, fiel upload</span></li>
+<li style="font-weight: 400;" aria-level="1"><span style="font-weight: 400;">Reordering values by dragging and dropping in record edit</span></li>
+<li style="font-weight: 400;" aria-level="1"><span style="font-weight: 400;">Google analytics</span></li>
+<li style="font-weight: 400;" aria-level="1"><span style="font-weight: 400;">Remembers user settings across sessions even if you logout</span></li>
+<li style="font-weight: 400;" aria-level="1"><span style="font-weight: 400;">Negative dates on timeline fixed</span></li>
+<li style="font-weight: 400;" aria-level="1"><span style="font-weight: 400;">Better error monitoring allows us to pickl up on problems immediately</span></li>
+<li style="font-weight: 400;" aria-level="1"><span style="font-weight: 400;">Version 5.0.5</span></li>
+<li style="font-weight: 400;" aria-level="1"><span style="font-weight: 400;">Operation of challenge passwords</span></li>
+<li style="font-weight: 400;" aria-level="1"><span style="font-weight: 400;">views= parameter to show map and/or list and specify which opens first on embedded search results&nbsp;</span></li>
+<li style="font-weight: 400;" aria-level="1"><span style="font-weight: 400;">Change any Required separator fields to Recommended (caused problems b/c couldn't enter data!)</span></li>
+<li style="font-weight: 400;" aria-level="1"><span style="font-weight: 400;">Render hyperlink in several places where titles with &lt;a href embedded are shown</span></li>
+<li style="font-weight: 400;" aria-level="1"><span style="font-weight: 400;">Render bold, italic, underline in titles where html tags are specified</span></li>
+<li style="font-weight: 400;" aria-level="1"><span style="font-weight: 400;">New parameters on embedded searches: &amp;views=list,map&nbsp; (the first one is the one which is opened by default)</span></li>
+<li style="font-weight: 400;" aria-level="1"><span style="font-weight: 400;">New parameter on embedded maps to default to a speciied map document &amp;mapdocid=xx</span></li>
+<li style="font-weight: 400;" aria-level="1"><span style="font-weight: 400;">Improved popup information when you click a point on the map</span></li>
+<li style="font-weight: 400;" aria-level="1"><span style="font-weight: 400;">Trap very large URL requests and give better error message</span></li>
+</ul>
+<p><strong>December 2018</strong></p>
+<ul>
+<li style="font-weight: 400;" aria-level="1"><span style="font-weight: 400;">Default date 'today' saves actual date rather than 'today' (whose meaning changes &hellip;)</span></li>
+<li style="font-weight: 400;" aria-level="1"><span style="font-weight: 400;">Allow CSV import niot jsut of missing values for required fiedls, but of data where there is no column for a required field</span></li>
+<li style="font-weight: 400;" aria-level="1"><span style="font-weight: 400;">Reduce nesting levels in archive package so everythign is relative to root of database fiels directory</span></li>
+<li style="font-weight: 400;" aria-level="1"><span style="font-weight: 400;">Stop bounding boxes plotted on the map from blocking click on objects in lower layers</span></li>
+<li style="font-weight: 400;" aria-level="1"><span style="font-weight: 400;">Zoom on layer zooms to the individual layer rather than to the map document extent</span></li>
+<li style="font-weight: 400;" aria-level="1"><span style="font-weight: 400;">Better handling of KML and tiled image files</span></li>
+<li style="font-weight: 400;" aria-level="1"><span style="font-weight: 400;">More informative message when you try and delete a record type on which a pointer field depends</span></li>
+<li style="font-weight: 400;" aria-level="1"><span style="font-weight: 400;">Improve layout of term/relationship type&nbsp; editing dialogue</span></li>
+<li style="font-weight: 400;" aria-level="1"><span style="font-weight: 400;">Bug: stop digitiser reating duplicate points when trying to re-digitse a location</span></li>
+<li style="font-weight: 400;" aria-level="1"><span style="font-weight: 400;">mproved startup help - does not sho message about setting a startup filter until there are at least 100 records in teh database</span></li>
+<li style="font-weight: 400;" aria-level="1"><span style="font-weight: 400;">Expose fields of parent records (defined by a parent-child pointer field) for use in facet searches</span></li>
+<li style="font-weight: 400;" aria-level="1"><span style="font-weight: 400;">Automation of downloading missinfg record types needed for specific functionsExpose trm_SemanticReferenceURL as a field in the term addition and term editing forms</span></li>
+<li style="font-weight: 400;" aria-level="1"><span style="font-weight: 400;">Bug: fixed problem with Adblocker blocking our server API because it didn't like the name "hserver"&nbsp;</span></li>
+<li style="font-weight: 400;" aria-level="1"><span style="font-weight: 400;">NEW: images can now be dragged and dropped or pasted with Ctrl-V, for upload of images to records, to terms</span></li>
+<li style="font-weight: 400;" aria-level="1"><span style="font-weight: 400;">NEW: Extract text from PDF files attached to records and place in 2-652 "Extracted text" field, up to 64K.</span></li>
+<li style="font-weight: 400;" aria-level="1"><span style="font-weight: 400;">CSV export: Improved form, options to output both the code/pointer ID and the label for term list and poiner fields, selection of fields from linked records and output of linked record types as multiple files</span></li>
+<li style="font-weight: 400;" aria-level="1"><span style="font-weight: 400;">Correct record count on search results so it excludes records which are not visible to the current user</span></li>
+<li style="font-weight: 400;" aria-level="1"><span style="font-weight: 400;">&lt;a href in constructed record title will generate a hyperlinked title</span></li>
+</ul>
+<p><strong>November 2018&nbsp;</strong></p>
+<ul>
+<li style="font-weight: 400;" aria-level="1"><span style="font-weight: 400;">Improved use of challenge passwords to allow sysadmin to register and delete databases even if they are not the database owner</span></li>
+<li style="font-weight: 400;" aria-level="1"><span style="font-weight: 400;">NEW: </span><a href="http://heurist.sydney.edu.au/h5-ao/admin/verification/fieldsWithIndividualTermSelection.php?db=johns_test111&amp;html=1"><span style="font-weight: 400;">/h5-ao/admin/verification/fieldsWithIndividualTermSelection.php?db=anyvaliddatabase&amp;html=1 </span></a><span style="font-weight: 400;">&nbsp;Lists term fields which use term selection or exclusion rather than vocabs. html=1 gives html table, otherwise you get CSV.</span></li>
+<li style="font-weight: 400;" aria-level="1"><span style="font-weight: 400;">NEW: University of Adelaide and U Tasmania websites</span></li>
+<li style="font-weight: 400;" aria-level="1"><span style="font-weight: 400;">Entities dropdown shows a list of all entities in the database with their counts and a link to populate the search results with that entity:</span></li>
+</ul>
+<ul>
+<li style="font-weight: 400;" aria-level="1"><span style="font-weight: 400;">Added parameter startView=[list|small|medium|large] to the URL for embedding facet searches into a website. This will determine the view used to show the list of results.&nbsp;</span></li>
+<li style="font-weight: 400;" aria-level="1"><span style="font-weight: 400;">Improved landscape format layout for Record View when used in public websites (as popup from facet search results) with thumbnail to right of the data fields and administrative details hidden with a </span><span style="font-weight: 400;">more &hellip; </span><span style="font-weight: 400;">link. Also improved display when used in righthand panel on main interface.</span></li>
+<li style="font-weight: 400;" aria-level="1"><span style="font-weight: 400;">Fixed some ugly overwriting of text, thumbnails and icons in filter results display, increased effective icon size.</span></li>
+<li style="font-weight: 400;" aria-level="1"><span style="font-weight: 400;">NEW: html editor added to memo text fields. This allows addition of formatting and layout to memo fields. Fields can be switched to and fro between wysiwyg and plain text-with-markup view. Formatting is applied within custom report formats, markup is displayed in View Record.</span><span style="font-weight: 400;"><br /><br /></span></li>
+<li style="font-weight: 400;" aria-level="1"><span style="font-weight: 400;">NEW: Manually sorted records - new sort specification sortby:set applied to a list of IDs causes results to be displayed in the specified order rather than the default (alphabetic) order. New menu entry Reorder: </span><span style="font-weight: 400;"><br /></span><span style="font-weight: 400;"> &nbsp; </span> <span style="font-weight: 400;"><br /></span><span style="font-weight: 400;">allows manual reordering of the retrieved subset which is then saved as a saved filter with the specified order and sortby:set</span></li>
+<li style="font-weight: 400;" aria-level="1"><span style="font-weight: 400;">Fixed sorting of numeric fields - previously was alphabetic</span></li>
+<li style="font-weight: 400;" aria-level="1"><span style="font-weight: 400;">Up and down arrows operate in the filter results list</span></li>
+<li style="font-weight: 400;" aria-level="1"><span style="font-weight: 400;">Warning when you create optional fields in a form and optional is off (so they don't show)</span></li>
+</ul>
+<ul>
+<li style="font-weight: 400;" aria-level="1"><span style="font-weight: 400;">Prevent accidental creation of floating child records - user now gets a message and has to check a checkbox before they can proceed</span></li>
+<li style="font-weight: 400;" aria-level="1"><span style="font-weight: 400;">Fixed Bookmarklet which has been broken for some time (since H4), plus reporting by email if thumbnailer fails</span></li>
+<li style="font-weight: 400;" aria-level="1"><span style="font-weight: 400;">Fixed problems with re-allocation of record pointers as child record pointers and verification fixes to bad pointers</span></li>
+</ul>
+<p><strong>October 2018</strong></p>
+<ul>
+<li style="font-weight: 400;" aria-level="1"><span style="font-weight: 400;">NEW: Streamlined addition of fields to structure</span></li>
+<li style="font-weight: 400;" aria-level="1"><span style="font-weight: 400;">NEW: Dashboard</span></li>
+<li style="font-weight: 400;" aria-level="1"><span style="font-weight: 400;">NEW: read-only groups</span></li>
+<li style="font-weight: 400;" aria-level="1"><span style="font-weight: 400;">NEW: conversion to child records</span></li>
+<li style="font-weight: 400;" aria-level="1"><span style="font-weight: 400;">NEW: revised layout of the interface. Standard menu at top replaces tabs and additional page of obscure functions, most functions now pop up in a window on top of the main interface providing a better sense of context.</span></li>
+<li style="font-weight: 400;" aria-level="1"><span style="font-weight: 400;">NEW: menus refleect user level</span></li>
+<li style="font-weight: 400;" aria-level="1"><span style="font-weight: 400;">NEW: Version 5: Upgrade to PHP7 (backward compatible to PHP4) and general code cleanup and removal of old code.</span></li>
+</ul>
+<p>&nbsp;</p>
+<p><span style="font-weight: 400;">// 5.0.2 10 Nov 2018 Really working h5. Dashboard, streamlined field definition, read-only groups, revised import templates, conversion to child records, U of Adelaide website from Expert nation, finalise Beyond1914.</span></p>
+<p><span style="font-weight: 400;">// 5.0.1 25 Jul 18&nbsp; 1)php7 conformity 2)got rid h3 client libs 3)got rid mysql__ functions</span></p>
+<p><span style="font-weight: 400;">SEPTEMBER 2018 Quarterly news</span></p>
+<p><span style="font-weight: 400;">// 4.5.13 13 Jul 18 Handle multi valus for pointer field in CSV import, bug fixing/cosmetics on mapping, reinstate time filter</span></p>
+<p><span style="font-weight: 400;">// 4.5.12 27 Jun 18 Implicit location of entities on Map view based on connected Place records, minor bug fixing</span></p>
+<p><span style="font-weight: 400;">// 4.5.11 6 Jun 18 Improve integrity when structure is edited, improve handling of child pointers in title generation, various bug fixes and cosmetics</span></p>
+<p><span style="font-weight: 400;">// 4.5.10 14 Apr 18 Rewritten settings functions based on Artem's entity model, improved display of relationships in edit mode, UTM conversion on import/digitiser, clone template databases, correct facet search counts, fixes to child records and titles, permissions fixes, lots of small bug fixing</span></p>
+<p><span style="font-weight: 400;">// 4.5.9 18 Mar 18 Improve CSV import incl. URLs for file fields, URL and tags export in CSV, UTM import, display reverse relationships inline, clone template databases incl. data, lots of bug fixing and cosmetics</span></p>
+<p><span style="font-weight: 400;">// 4.5.8 16 Feb 18 HTML5 media player, title masks for child records, improve timeline layout, fixes to editing, major imrovements to CSV import, bulk convert records to children, lots of cosmetics</span></p>
+<p><span style="font-weight: 400;">// 4.5.7 23 Jan 18 A large number of cosmetic changes and bugfixes particularly to editing function, merging recods&nbsp;</span></p>
+  
+</body>
+</html>
