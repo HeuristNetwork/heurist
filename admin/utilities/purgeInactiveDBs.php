@@ -1,16 +1,23 @@
 <?php
 
 /**
-* Reports (default) or purge/archive any database not updated for more than: 
+* purgeInactiveDBs.php: Reports (default) or purge/archive inactive databases 
+* 
+* Report/purge occurs if no data added/edited for more than:
+* 
 *           3 months with 10 records or less
 *           6 months with 50 records or less
 *           one year with 200 records or less 
-* Send sysadmin a list of databases
-*            for more than a year with more than 200 records
+* 
+* Sends sysadmin a list of databases
+*            inactive for more than a year with more than 200 records
 
 * @TODO: Should send the message out as a warning message one month before and 1 week before
 *        stressing in particular the need to tell us if you want your database marked as non-purging
-*  
+* 
+* @TODO: Should also check date of last modification of record types and record type structures 
+*        to detect databases which are being configured but have very little data
+* 
 * Dump and bz2 import tables that are 
 *           more than 2 months old
 *           older than 1 month if more than 10 tables
@@ -56,8 +63,10 @@ if (@$argv) {
 //  sudo php -f /var/www/html/h6-alpha/setup/dboperations/reportInactiveDbs.php -- -purge
 //  sudo php -f reportInactiveDbs.php -- -purge  -  action, otherwise only report 
 
-// TODO: It would be good if this had a parameter option to also delete the database for use when transferring to a new server
-// TODO: WARNING: AT THIS TIME (21 May 2022) IT DOES NOT REPORT AN ERROR IF THERE IS NO FILESTORE FOLDER
+// TODO: It would be good if this had a parameter option to also delete the database 
+//       for use when transferring to a new server
+
+// TODO: WARNING: it does not report an error if there is no filestore folder for the database
 
 
 /*
