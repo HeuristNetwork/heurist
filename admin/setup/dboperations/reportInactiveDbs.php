@@ -7,7 +7,10 @@
 *           one year with 200 records or less 
 * Send sysadmin a list of databases
 *            for more than a year with more than 200 records
-* 
+
+* @TODO: Should send the message out as a warning message one month before and 1 week before
+*        stressing in particular the need to tell us if you want your database marked as non-purging
+*  
 * Dump and bz2 import tables that are 
 *           more than 2 months old
 *           older than 1 month if more than 10 tables
@@ -259,19 +262,27 @@ foreach ($databases as $idx=>$db_name){
                     $email_text = <<<EOD
 Dear {$usr_owner['ugr_FirstName']} {$usr_owner['ugr_LastName']},                    
                     
-Your Heurist database {$db_name} on {$server_name} has been archived. We would like to help you get (re)started.
+Your Heurist database {$db_name} on {$server_name} has been archived. We would like to help you get (re)started, and can restore the database if it is still required (please read through this email before contacting us).
 
-In order to conserve server space (or as part of moving to another server) we have archived your database on {$server_name} since it has not been used for several months and/or no data has ever been created and/or it is being recreated somewhere else. 
+In order to conserve server space and reduce clutter we have archived your database on {$server_name} since it has not been modified for several months and/or no data has ever been created (you may also get this message if we are migrating a database to a new server for you). 
+
+The criteria for purging unused databases are:
+
+   No data modification for 3 months and <= 10 records
+   No data modification for 6 months and <= 50 records
+   No data modification for 1 year and <= 200 records
  
+Note that structure modification is not taken into account in this calculation.
+
 If you got as far as creating a database but did not know how to proceed you are not alone, but those who persevere, even a little, will soon find the system easy to use and surprisingly powerful. We invite you to get in touch ( support@HeuristNetwork.org ) so that we can help you over that (small) initial hump and help you see how it fits with your research (or other use). 
 
-With a brand new interface in 2021, developed in collaboration with an experienced UX designer, Heurist is significantly easier to use than previous versions. The new interface (version 6) remains compatible with databases created more than 10 years ago - we believe in sustainability.
+Please contact us if you need your database re-enabled or visit one of our free servers to create a new database (visit HeuristNetwork dot org). If you didn't do any work on your database (entry of real data or setting up a structure for future use) please just create a new database (you can re-use the same name). 
+
+IMPORTANT: If the database was a finished project or reference database which will not be further modified, please let us know so that we can mark it as protected from future purges.
  
-Please contact us if you need your database re-enabled or visit one of our free servers to create a new database (visit HeuristNetwork dot org).
+Heurist is research-led and responds rapidly to evolving user needs - we often turn around small user suggestions (and most bug-fixes) in a day and larger ones within a couple of weeks. Visit our website to see current developments. We aim for stable backwards compatibility and long-term sustainability, with active databases going back as far as the earliest version of Heurist (2005).
  
-Heurist is research-led and responds rapidly to evolving user needs - we often turn around small user suggestions (and most bug-fixes) in a day and larger ones within a couple of weeks. We are still forging ahead with new capabilities such as enhancements to the integrated CMS website builder, new output formats, improved data exchange through XML, JSON, remote resource lookups and linked open data, and improved search, mapping and visualisation widgets (embeddable in websites). 
- 
-For more information email us at support@HeuristNetwork.org and visit our website at HeuristNetwork.org. We normally respond within hours, depending on time zones. We are actively developing new documentation and training resources for version 6 and can make advance copies available on request.                    
+For more information email us at support@HeuristNetwork.org and visit our website at HeuristNetwork.org. We normally respond within hours, depending on time zones.                    
 EOD;
                             
 sendEmail(array($usr_owner['ugr_eMail']), $email_title, $email_text);                
