@@ -60,8 +60,8 @@ $tabs0 = '';
 if (@$argv) {
     
 // example:
-//  sudo php -f /var/www/html/h6-alpha/setup/dboperations/reportInactiveDbs.php -- -purge
-//  sudo php -f reportInactiveDbs.php -- -purge  -  action, otherwise only report 
+//  sudo php -f /var/www/html/h6-alpha/admin/utilities/purgeInactiveDbs.php -- -purge
+//  sudo php -f purgeInactiveDbs.php -- -purge  -  action, otherwise only report 
 
 // TODO: It would be good if this had a parameter option to also delete the database 
 //       for use when transferring to a new server
