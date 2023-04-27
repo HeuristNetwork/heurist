@@ -2853,7 +2853,7 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
                 $label.find('.term_usage').text('[' + term_usages[trm_id] + ']');
                 $label.css('color', '');
             }else{ // not used
-                $label.find('.term_usage').text('');
+                $label.find('.term_usage').text('[--]');
                 $label.css('color', 'gray');
             }
         });
