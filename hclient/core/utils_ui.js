@@ -1008,7 +1008,7 @@ window.hWin.HEURIST4.ui = {
         if(groups=='all_users' || groups=='all_users_and_groups'){ //all users
         
         
-                if(window.hWin.HEURIST4.allUsersCache){
+                if(window.hWin.HEURIST4.allUsersCache && window.hWin.HEURIST4.util.isArrayNotEmpty(window.hWin.HEURIST4.allUsersCache)){
                     if(topOptions){
                         topOptions = window.hWin.HEURIST4.util.cloneJSON(topOptions);
                         topOptions.push({key:'', title:'──────────',disabled:true});    
@@ -1025,16 +1025,16 @@ window.hWin.HEURIST4.ui = {
                 //It uses It uses window.hWin.HEURIST4.allUsersCache
         
                     //get all users
-                    var request = {a:'search', entity:'sysUsers', details:'fullname'};
+                    var request = {a:'search', entity:'sysUsers', details:'fullname', 'sort:ugr_LastName': '1'};
                 
                     window.hWin.HAPI4.EntityMgr.doRequest(request, 
                     function(response){
                         if(response.status == window.hWin.ResponseStatus.OK){
                             
                             var recordset = new hRecordSet(response.data);
-                            window.hWin.HEURIST4.allUsersCache = {};                    
+                            window.hWin.HEURIST4.allUsersCache = [];
                             recordset.each2(function(id,rec){
-                                window.hWin.HEURIST4.allUsersCache[id] = rec['ugr_FullName'];
+                                window.hWin.HEURIST4.allUsersCache.push({id: id, name: rec['ugr_FullName']});
                             });
                             window.hWin.HEURIST4.ui.createUserGroupsSelect(selObj, groups, topOptions, callback);
                             
@@ -1075,7 +1075,7 @@ window.hWin.HEURIST4.ui = {
                 }
             }
         }
-        if(groups){   //it may 1) array of group ids 2) [ids=>name] 3) [ids=>array(0,name,0)]
+        if(groups){   //it may 1) array of group ids 2) array of objects 3) [ids=>name] 4) [ids=>array(0,name,0)]
 
             for (var idx in groups)
             {
@@ -1085,10 +1085,13 @@ window.hWin.HEURIST4.ui = {
                     var name = null;
                     if(parseInt(groupID)>0){ //case 1
                         name = window.hWin.HAPI4.sysinfo.db_usergroups[groupID];
-                    }else{
+                    }else if(window.hWin.HEURIST4.util.isObject(groupID) && Object.hasOwn(groupID, 'id')){ //case 2
+                        name = groupID['name'];
+                        gorupID = groupID['id'];
+                    }else{ //case 3
                         groupID = idx;
                         name = groups[groupID];    
-                        if($.isArray(name)) name = name[1] //backward  case 3
+                        if($.isArray(name)) name = name[1] //backward  case 4
                     }
                     
                     if(window.hWin.HEURIST4.util.findArrayIndex(groupID,addedontop)<0 

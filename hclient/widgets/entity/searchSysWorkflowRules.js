@@ -54,10 +54,10 @@ $.widget( "heurist.searchSysWorkflowRules", $.heurist.searchEntity, {
                  showAllRectypes: true}); //topOptions:'select record type'
         this._on(rty_selector,  { change:this.startSearch });
 
-        if(!window.hWin.HEURIST4.allUsersCache){
+        if(!window.hWin.HEURIST4.allUsersCache || !window.hWin.HEURIST4.util.isArrayNotEmpty(window.hWin.HEURIST4.allUsersCache)){
 
             //get all users
-            var request = {a:'search', entity:'sysUsers', details:'fullname'};
+            var request = {a:'search', entity:'sysUsers', details:'fullname', 'sort:ugr_LastName': '1'};
             var that = this;
         
             window.hWin.HAPI4.EntityMgr.doRequest(request, 
@@ -65,9 +65,9 @@ $.widget( "heurist.searchSysWorkflowRules", $.heurist.searchEntity, {
                 if(response.status == window.hWin.ResponseStatus.OK){
                     
                     var recordset = new hRecordSet(response.data);
-                    window.hWin.HEURIST4.allUsersCache = {};                    
+                    window.hWin.HEURIST4.allUsersCache = [];                    
                     recordset.each2(function(id,rec){
-                        window.hWin.HEURIST4.allUsersCache[id] = rec['ugr_FullName'];
+                        window.hWin.HEURIST4.allUsersCache.push({id: id, name: rec['ugr_FullName']});
                     });
                     
                     that.startSearch();

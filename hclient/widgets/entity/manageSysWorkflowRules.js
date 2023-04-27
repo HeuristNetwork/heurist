@@ -518,7 +518,15 @@ $.widget( "heurist.manageSysWorkflowRules", $.heurist.manageEntity, {
                     var names = [];
                     $.each(val.split(','), function(i,item){
                         var name = window.hWin.HAPI4.sysinfo.db_usergroups[item];
-                        if(!name && window.hWin.HEURIST4.allUsersCache) name = window.hWin.HEURIST4.allUsersCache[item];
+                        if(!name && window.hWin.HEURIST4.allUsersCache){
+                            let idx = window.hWin.HEURIST4.allUsersCache.findIndex((user) => {
+                                return user.name == name;
+                            });
+
+                            if(idx >= 0){
+                                name = window.hWin.HEURIST4.allUsersCache[idx];
+                            }
+                        }
                         if(name) names.push(window.hWin.HEURIST4.util.htmlEscape(name));        
                     });
                     return names.join('<br>');    
