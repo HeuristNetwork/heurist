@@ -99,7 +99,7 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
             }else if(response.status==window.hWin.ResponseStatus.INVALID_REQUEST){
 
                 msg = msg + '<br><br>' + window.hWin.HR('Error_Wrong_Request') 
-                    '<br><br>' + window.hWin.HR('Error_Report_Team');
+                    +'<br><br>' + window.hWin.HR('Error_Report_Team');
 
             }else if(response.status==window.hWin.ResponseStatus.REQUEST_DENIED){
                 

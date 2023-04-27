@@ -705,7 +705,7 @@ $failed_exts = array();
             }//manifest does not exists
             else{
                 //create empty manifest XML  - TODO!!!!
-                $s_manifest = <<<XML
+                $s_manifest = <<<'XML'
 <?xml version="1.0" encoding="UTF-8"?>
 <fieldhelper version="1">
   <info>

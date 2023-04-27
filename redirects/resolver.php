@@ -60,9 +60,9 @@ if(count($requestUri)==1){
 }
 http://127.0.0.1/h6-ao/MBH
 */
-if(count($requestUri)==1 && @$requestUri[0]=='MBH'){
+if(count($requestUri)==1 && (@$requestUri[0]=='MBH' || @$requestUri[0]=='johns_test_BnF')){
     
-    header('Location: /MBH/web/');  
+    header('Location: /'.$requestUri[0].'/web/');  
     exit();
 }
 

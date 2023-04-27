@@ -1278,7 +1278,8 @@ error_log('UPDATED '.$session_id.'  '.$value);
     //
     function updateDatabseToLatest4($system){
         //update sysIdentification set sys_dbVersion=1, sys_dbSubVersion=3, sys_dbSubSubVersion=4 where sys_ID=1
-        
+       
+        $sysValues = $system->get_system();        
         $dbVer = $system->get_system('sys_dbVersion');
         $dbVerSub = $system->get_system('sys_dbSubVersion');
         $dbVerSubSub = 0;
@@ -1308,7 +1309,6 @@ error_log('UPDATED '.$session_id.'  '.$value);
                 $mysqli->query($query);
             }
             
-            $sysValues = $system->get_system();
             if(!array_key_exists('sys_ExternalReferenceLookups', $sysValues))
             {
                 $query = "ALTER TABLE `sysIdentification` ADD COLUMN `sys_ExternalReferenceLookups` TEXT default NULL COMMENT 'Record type-function-field specifications for lookup to external reference sources such as GeoNames'";
@@ -1473,10 +1473,8 @@ UNIQUE KEY swf_StageKey (swf_RecTypeID, swf_Stage)
                 }  
             }
             
-            if($dbVerSubSub<8){
-                $sysValues = $system->get_system();
-                if(!array_key_exists('sys_NakalaKey', $sysValues))
-                {
+            if($dbVerSubSub<9 || !array_key_exists('sys_NakalaKey', $sysValues)){
+
                     $query = "ALTER TABLE `sysIdentification` ADD COLUMN `sys_NakalaKey` TEXT default NULL COMMENT 'Nakala API key. Retrieved from Nakala website'";
                     $res = $mysqli->query($query);
                     if($res){
@@ -1490,14 +1488,12 @@ UNIQUE KEY swf_StageKey (swf_RecTypeID, swf_Stage)
                         $system->addError(HEURIST_DB_ERROR, 'Cannot modify sysIdentification to add sys_NakalaKey', $mysqli->error);
                         return false;
                     }                    
-                    
-                }
             }
             
             if($dbVerSubSub<10){
+                
                 $mysqli->query('DROP TABLE IF EXISTS defTranslations;');
-                $mysqli->query(<<<'DEFTAB'
-CREATE TABLE defTranslations (
+                $mysqli->query("CREATE TABLE defTranslations (
   trn_ID int unsigned NOT NULL auto_increment COMMENT 'Primary key of defTranslations table',
   trn_Source varchar(64) NOT NULL COMMENT 'The column to be translated (unique names identify source)',
   trn_Code int unsigned NOT NULL COMMENT 'The primary key / ID in the table containing the text to be translated',
@@ -1507,8 +1503,7 @@ CREATE TABLE defTranslations (
   PRIMARY KEY  (trn_ID),
   UNIQUE KEY trn_composite (trn_Source,trn_Code,trn_LanguageCode),
   KEY trn_LanguageCode (trn_LanguageCode)
-) ENGINE=InnoDB COMMENT='Translation table into multiple languages for all translatab';
-DEFTAB);
+) ENGINE=InnoDB COMMENT='Translation table into multiple languages for all translatab';");
             }
         
             if($dbVerSubSub<11){

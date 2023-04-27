@@ -963,8 +963,10 @@ private static function saveToDatabase($preproc){
     if(strpos($filename,"'")>0){
         $filename = str_replace("'","\\'",$filename);
     }
-    ;
+    
+    //allow_local_infile
     $mysqli->query('SET GLOBAL local_infile = true');
+    //$mysqli->query('SET GLOBAL allow_local_infile = true'); //for MySQL v8
     //load file into table  LOCAL
     $query = "LOAD DATA LOCAL INFILE '".$filename."' INTO TABLE ".$import_table
     ." CHARACTER SET utf8mb4"    //was UTF8 this is alias for utf8mb3
@@ -983,7 +985,9 @@ private static function saveToDatabase($preproc){
 .'<br>[mysqld] '
 .'<br>local-infile = 1'
 .'<br>[mysql] '
-.'<br>local-infile = 1' , $mysqli->error);
+.'<br>local-infile = 1'
+.'<br><br>Add to php.ini'
+.'<br>mysqli.allow_local_infile = On', $mysqli->error);
 //.'<br>2. Replace the driver php5-mysql by the native driver'
 //.'<br><br>see: http://stackoverflow.com/questions/10762239/mysql-enable-load-data-local-infile', $mysqli->error);
         

@@ -55,33 +55,7 @@ class DbAnnotations extends DbEntityBase
     *  @todo overwrite
     */
     public function search(){
-/*        
-error_log(print_r($this->data, true));
-   
-$sjson = <<<RESP
-{"id":"",
-"items":[{
-"body":{"type":"TextualBody","value":"<p>VOKZAL</p>"},
-"id":"7d740bb6-135f-4f72-88b9-7e9b4afacab7",
-"motivation":"commenting",
-"target":{"source":"https://purl.stanford.edu/sn904cj3429/iiif/canvas/sn904cj3429_1",
-"selector":[{"type":"FragmentSelector","value":"xywh=3259,3389,609,530"},
-            {"type":"SvgSelector","value":"<svg xmlns='http://www.w3.org/2000/svg'><path xmlns=\"http://www.w3.org/2000/svg\" d=\"M3259.20088,3919.65562v-530.33233h609.88218v530.33233z\" data-paper-data=\"{&quot;state&quot;:null}\" fill=\"none\" fill-rule=\"nonzero\" stroke=\"#d0021b\" stroke-width=\"5\" stroke-linecap=\"butt\" stroke-linejoin=\"miter\" stroke-miterlimit=\"10\" stroke-dasharray=\"\" stroke-dashoffset=\"0\" font-family=\"none\" font-weight=\"none\" font-size=\"none\" text-anchor=\"none\" style=\"mix-blend-mode: normal\"/></svg>"
-            }
-           ]
-         },
-"type":"Annotation"},
-{"body":{"type":"TextualBody","value":"<p>PORT</p>"},"id":"d5947d1c-8a2f-4d77-8e18-f69c5ab9bf94","motivation":"commenting","target":{"source":"https://purl.stanford.edu/sn904cj3429/iiif/canvas/sn904cj3429_1","selector":[{"type":"FragmentSelector","value":"xywh=6361,5802,994,835"},{"type":"SvgSelector","value":"<svg xmlns='http://www.w3.org/2000/svg'><path xmlns=\"http://www.w3.org/2000/svg\" d=\"M6361.64499,6637.60879v-835.27341h994.37311v835.27341z\" data-paper-data=\"{&quot;state&quot;:null}\" fill=\"none\" fill-rule=\"nonzero\" stroke=\"#00bfff\" stroke-width=\"1\" stroke-linecap=\"butt\" stroke-linejoin=\"miter\" stroke-miterlimit=\"10\" stroke-dasharray=\"\" stroke-dashoffset=\"0\" font-family=\"none\" font-weight=\"none\" font-size=\"none\" text-anchor=\"none\" style=\"mix-blend-mode: normal\"/></svg>"}]},"type":"Annotation"}],"type":"AnnotationPage"}
-RESP;
 
-$sjson = json_decode($sjson, true);
-
-$sjson['id'] = "http://$_SERVER[HTTP_HOST]$_SERVER[REQUEST_URI]";
-
-error_log(print_r($sjson, true));  
-
-        return $sjson;
-*/
         $sjson = array('id'=>"http://$_SERVER[HTTP_HOST]$_SERVER[REQUEST_URI]", 
                         'type' => 'AnnotationPage');
                        
