@@ -1611,8 +1611,10 @@ $.widget( "heurist.search_faceted_wiz", {
                     sGroupBy =
                         '<label><input type="checkbox" name="facet_Group'+idd+'" value="firstchar"/>'
                         +'Group by first character</label>';
-                        //+'<label title="applicable for list and wrapped modes only">'
-                        //+'<input type="checkbox" name="facet_MultiSel'+idd+'" value="1"/>multi-select</label>';
+						
+                    sMultiSel = '<label title="applicable for list and wrapped modes only" style="font-size: smaller;">'
+                            + '<input type="checkbox" name="facet_MultiSel'
+                            + idd+'" value="1"/>multi-select</label>';
 						
                     includeDropdown = facets[k].type != 'blocktext';
                    

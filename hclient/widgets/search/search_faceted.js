@@ -1026,6 +1026,7 @@ $.widget( "heurist.search_faceted", {
                     dty_ID = dty_ID.substr(2);    
                  }
                  
+                 let fld_type = (field['type'] == 'blocktext') ? 'freetext' : field['type'];
                  var ed_options = {
                                 varid: field['var'],  //content_id+"_"+
                                 recID: -1,
@@ -1036,12 +1037,37 @@ $.widget( "heurist.search_faceted", {
                                 readonly: false,
                                 title:  (that.options.params.title_hierarchy?harchy:'')
                                         + "<span style='font-weight:bold'>" + facet_title + "</span>",
-                                detailtype: (field['type'] == 'blocktext') ? 'freetext' : field['type'],//overwrite detail type from db (for example freetext instead of memo)
+                                detailtype: fld_type,//overwrite detail type from db (for example freetext instead of memo)
                                 showclear_button: false,
                                 showedit_button: false,
                                 suppress_prompts: true,  //supress help, error and required features
-                                suppress_repeat: true,
-                                is_faceted_search: true
+                                suppress_repeat: (fld_type == 'freetext' && field['multisel']) ? 'force_repeat' : true, // true
+                                is_faceted_search: true,
+                                onrecreate: () => {
+
+                                    if(fld_type != 'freetext'){
+                                        return;
+                                    }
+
+                                    //let $field = that._input_fields['$X'+field['var']];
+                                    if(!that._input_fields.hasOwnProperty('$X'+field['var'])){ //  $field == null || $field.length == 0
+                                        return;
+                                    }
+
+                                    let $fields = that._input_fields['$X'+field['var']].find('.input-div');
+                                    if($fields.length < 0){
+                                        return;
+                                    }
+
+                                    let $org_last = $fields.eq(-2);
+                                    let $new_fld = $fields.last();
+
+                                    $org_last.after(() => {
+                                        return "<br><br>";
+                                    }); // add space between inputs
+
+                                    that._handleNewInput($new_fld.find('input'));
+                                }
                         };
                         
                    if(isNaN(Number(dty_ID))){
@@ -1072,11 +1098,22 @@ $.widget( "heurist.search_faceted", {
                                                                         
                     inpt.find('.input-cell').css({
                         border: 'none',
-                        background: 'none'
+                        background: 'none',
+                        display: 'block'
                     });
                     // Setup as an accordion
                     if(that.options.params.accordion_view){
-                        inpt.find('.editint-inout-repeat-button').remove(); // repeating not used here, remove to avoid confusing the accordion
+
+                        // remove/move to avoid confusing the accordion
+                        if(ed_options.suppress_repeat === true){
+                            inpt.find('.editint-inout-repeat-button').remove();
+                        }else{
+                            let $rep_ele = inpt.find('.editint-inout-repeat-button').parent();
+                            if(!$rep_ele.parent().hasClass('input-cell')){
+                                $rep_ele.prependTo(inpt.find('.input-cell'));
+                            }
+                        }
+
                         inpt.accordion({
                             collapsible: true,
                             heightStyle: 'content'
@@ -1089,68 +1126,34 @@ $.widget( "heurist.search_faceted", {
                         }
                     }
 
-                    //@todo make as event listeneres
-                    //assign event listener
-                    //var $inputs = inpt.editing_input('getInputs');
-                    that._on( inpt.find('input'), {
-                            keypress:
-                            function(e){
-                                var code = (e.keyCode ? e.keyCode : e.which);
-                                if (code == 13) {
-                                    window.hWin.HEURIST4.util.stopEvent(e);
-                                    e.preventDefault();
-                                    that.doSearch();
-                                }
-                            },
-                            keyup: function(e){
-                                    var btn_reset = inpt.find('.resetbutton');
-                                    if($(e.target).val()==''){
-                                        btn_reset.css('visibility','hidden');   
-                                    }else{
-                                        btn_reset.css('visibility','visible');   
-                                    }
-                            }
-                    });
-                    that._on( inpt.find('select'), {
-                        change: function(e){
-                                var btn_reset = inpt.find('.resetbutton');
-                                if($(e.target).val()==''){
-                                    btn_reset.css('visibility','hidden');   
-                                }else{
-                                    btn_reset.css('visibility','visible');   
-                                }
-                                that.doSearch();
-                        }});//"doSearch"});                   
-                    
-                    inpt.find('.input-cell > .input-div').css({'display':'inline-block',padding:0}); // !important
-                    inpt.find('.input-cell').css('display','block');
-                    
-                    //since it takes default width from field definitions
-                    //force width for direct input and selectors to 150px 
-                    var w = that.element.width();
-                    if(!(w>0) || w<200) w = 200;
-                    inpt.find('input').removeClass('text').css({'width':(w-70)+'px','max-width':(w-70)+'px','min-width':'auto'});
-                    inpt.find('select').removeClass('text').css({'width':(w-45)+'px','min-width': (w-45)+'px'}); // was 30
-                    
+                    if(inpt.find('.editint-inout-repeat-button').length > 0){
+
+                        let btn_container_css = {
+                            'min-width': '15px', 
+                            'display': 'inline-block',
+                            'padding-left': '5px'
+                        };
+
+                        if(that.options.params.accordion_view){
+                            btn_container_css['display'] = 'block';
+                            btn_container_css['padding-left'] = '0px';
+                        }
+
+                        inpt.find('.editint-inout-repeat-button').parent().css(btn_container_css);
+                        inpt.find('.editint-inout-repeat-button').css({
+                            'min-width': '15px',
+                            'margin': '0px'
+                        });
+                    }
+
+                    that._handleNewInput(inpt.find('input,select'));
+
                     var btn_add = $( "<button>",{title:'To clear previous search click the RESET button'})
-                    .addClass("smallbutton")
-                    //.css('position','absolute')
-                    .insertBefore( inpt.find('.input-cell .heurist-helper1') )
-                    .button({icons:{primary: "ui-icon-search"}, text:false})
+                        .addClass("smallbutton")
+                        .insertBefore( inpt.find('.input-cell .heurist-helper1') )
+                        .button({icons:{primary: "ui-icon-search"}, text:false});
+
                     that._on( btn_add, { click: "doSearch" });
-
-                    var btn_clear = $( "<span>")
-                    .insertBefore( inpt.find('.input-cell .input-div') )
-                    .addClass("ui-icon ui-icon-arrowreturnthick-1-w resetbutton")
-                    .css({'display':'inline-block', 'visibility':'hidden', 'font-size':'0.9em', 'vertical-align':'middle'})
-                    that._on( btn_clear, { click: function(){
-                        inpt.find('input').val('');
-                        inpt.find('select').val('');
-                        inpt.find('.resetbutton').css('visibility','hidden');
-                        that.doSearch();
-                    } });
-
-                    
              }
            }
        });
@@ -1188,6 +1191,90 @@ $.widget( "heurist.search_faceted", {
                 +'Please select from facets on left</h3></div>', search_realm:this.options.search_realm} ]);
         }
        
+    }
+
+    //
+    // Apply events and styling to normal input and multi-select
+    //
+    ,_handleNewInput: function ($input){
+
+        var that = this;
+        let is_select = $input.is('select');
+        let $input_div = $input.parent();
+        let $input_cell = $input_div.parent();
+
+        //@todo make as event listeneres
+        //assign event listener
+        if(!is_select){
+            that._on( $input, {
+                keypress: function(e){
+                    var code = (e.keyCode ? e.keyCode : e.which);
+                    if (code == 13) {
+                        window.hWin.HEURIST4.util.stopEvent(e);
+                        e.preventDefault();
+                        that.doSearch();
+                    }
+                },
+                keyup: function(e){
+                    var btn_reset = $input_div.prev();//.find('.resetbutton');
+                    if($(e.target).val()==''){
+                        btn_reset.css('visibility','hidden');   
+                    }else{
+                        btn_reset.css('visibility','visible');   
+                    }
+                }
+            });
+        }else{
+            that._on( $input, {
+                change: function(e){
+                    var btn_reset = $input_div.prev();//.find('.resetbutton');
+                    if($(e.target).val()==''){
+                        btn_reset.css('visibility','hidden');   
+                    }else{
+                        btn_reset.css('visibility','visible');   
+                    }
+                    that.doSearch();
+                }
+            });//"doSearch"});
+        }
+
+        $input_div.css({'display':'inline-block',padding:0}); // !important
+
+        //since it takes default width from field definitions
+        //force width for direct input and selectors to 150px
+        var w = that.element.width();
+        if(!(w>0) || w<200) w = 200;
+
+        let input_style = {};
+        if(is_select){
+            input_style = {'width':(w-45)+'px','min-width': (w-45)+'px'}; // was 30
+        }else{
+            input_style = {'width':(w-70)+'px','max-width':(w-70)+'px','min-width':'auto'};
+        }
+
+        $input.removeClass('text').css(input_style);
+
+        var btn_clear = $( "<span>")
+            .insertBefore( $input_div )
+            .addClass("ui-icon ui-icon-arrowreturnthick-1-w resetbutton")
+            .css({'display':'inline-block', 'visibility':'hidden', 'font-size':'0.9em', 'vertical-align':'middle'});
+
+        that._on( btn_clear, { click: function(){
+            $input.val('');
+
+            if($input_div.parent().find('.input-div').length > 1){
+                let i = 0;
+                while(i < 3){
+                    $input_div.prev().remove();
+                    i++;
+                }
+                $input_div.remove();
+            }else{
+                $input_div.prev().css('visibility','hidden');
+            }
+
+            that.doSearch();
+        } });
     }
 
     ,doSaveSearch: function(){
@@ -1277,78 +1364,90 @@ $.widget( "heurist.search_faceted", {
                             if(facets[facet_index]["var"] == val.substr(2)){ //find facet by variable
 
                                 if(facets[facet_index]['isfacet']==that._FT_INPUT){  //this is direct input
-                                     var sel = $(_inputs[val]).editing_input('getValues');
-                                     if(sel && sel.length>0){
-                                         var val = sel[0];
-                                         var search_all_words = false;
+                                    var sel = $(_inputs[val]).editing_input('getValues');
+                                    if(sel && sel.length>0){
 
-                                         if(val.length>2 && val[0]=='"' && val[val.length-1]=='"'){
-                                            val = val.substring(1,val.length-1);
-                                         }else if(!window.hWin.HEURIST4.util.isempty(val) && val.indexOf(' ')>0){
-                                            search_all_words = true;
-                                         }
-                                         
-                                         facets[facet_index].selectedvalue = {value:val};
+                                        let multi_preds = [];
+                                        for (let k = 0; k < sel.length; k++) {
 
-                                         //search for words, ANDed by default check for OR and handle as needed
-                                         if(search_all_words){
-                                            var values = val.split(' ');
-                                            var predicates = [];
-                                            var hasOR = false;
-                                            for (var i=0; i<values.length; i++){
-                                                var pre = {};
-                                                if(window.hWin.HEURIST4.util.isempty(values[i])
-                                                    || values[i].toLowerCase() == 'or' 
-                                                    || values[i].toLowerCase() == 'and'){ // Ignore the AND, follows default behaviour
+                                            let val = sel[k];
+                                            let search_all_words = false;
+                                            let pred = [];
 
-                                                    if(values[i].toLowerCase() == 'or' && values[i-1] && values[i+1]){ // check that both sides of the OR exist
-
-                                                        var or_pred = [];
-                                                        var j = i-1; // starting point
-
-                                                        for(; j < values.length; j++){
-
-                                                            var pre_temp = {};
-                                                            
-                                                            if(window.hWin.HEURIST4.util.isempty(values[j]) || values[j].toLowerCase() == 'and'){ // end of OR statement
-                                                                break;
-                                                            }else if(values[j].toLowerCase() != 'or'){
-                                                                pre_temp[key] = values[j];
-                                                                or_pred.push(pre_temp);
+                                            if(val.length>2 && val[0]=='"' && val[val.length-1]=='"'){
+                                                val = val.substring(1,val.length-1);
+                                            }else if(!window.hWin.HEURIST4.util.isempty(val) && (val.indexOf(' ')>0 || sel.length > 0)){
+                                                search_all_words = true;
+                                            }
+                                            
+                                            facets[facet_index].selectedvalue = {value:val}; // TODO - Handle multivalue, store in selectedvalue.value as comma list
+    
+                                            //search for words, ANDed by default check for OR and handle as needed
+                                            if(search_all_words){
+                                                let values = val.split(' ');
+                                                let predicates = [];
+                                                for (var i=0; i<values.length; i++){
+                                                    let pred_parts = {};
+                                                    if(window.hWin.HEURIST4.util.isempty(values[i])
+                                                        || values[i].toLowerCase() == 'or' 
+                                                        || values[i].toLowerCase() == 'and'){ // Ignore the AND, follows default behaviour
+    
+                                                        if(values[i].toLowerCase() == 'or' && values[i-1] && values[i+1]){ // check that both sides of the OR exist
+    
+                                                            var or_pred = [];
+                                                            var j = i-1; // starting point
+    
+                                                            for(; j < values.length; j++){
+    
+                                                                var pre_temp = {};
+                                                                
+                                                                if(window.hWin.HEURIST4.util.isempty(values[j]) || values[j].toLowerCase() == 'and'){ // end of OR statement
+                                                                    break;
+                                                                }else if(values[j].toLowerCase() != 'or'){
+                                                                    pre_temp[key] = values[j];
+                                                                    or_pred.push(pre_temp);
+                                                                }
                                                             }
-                                                        }                                                     
-
-                                                        if(or_pred.length > 1){ // add to query
-                                                            q.push({"any":or_pred});
-                                                            hasOR = true;
-                                                            i = j-1; // outter search's continuing point
+    
+                                                            if(or_pred.length > 1){ // add to query
+                                                                pred.push({"any":or_pred});
+                                                                i = j-1; // outter search's continuing point
+                                                            }
                                                         }
+                                                    }else{
+    
+                                                        if(values[i+1] && values[i+1].toLowerCase() == "or"){ // Skip if predicate is part of an OR statement
+                                                            continue;
+                                                        }
+                                                        pred_parts[key] = values[i];
+                                                        predicates.push(pred_parts);
                                                     }
-                                                }else{
-
-                                                    if(values[i+1] && values[i+1].toLowerCase() == "or"){ // Skip if predicate is part of an OR statement
-                                                        continue;
+                                                }
+                                                if(predicates.length > 0){
+                                                    for(var i = 0; i < predicates.length; i++){
+                                                        pred.push(predicates[i]);
                                                     }
-                                                    pre[key] = values[i];
-                                                    predicates.push(pre);
                                                 }
                                             }
-                                            if(predicates.length>1 || hasOR){
-                                                if(predicates.length>=1){
-                                                    for(var i = 0; i < predicates.length; i++){
-                                                        q.push(predicates[i]);
-                                                    }
-                                                }
-                                                isbranch_empty = false;
-                                                delete predicate[key];
-                                                continue;
-                                            }                                             
 
-                                         }
-                                         
-                                     }else{
-                                         facets[facet_index].selectedvalue = null;
-                                     }
+                                            if(pred.length > 0){
+                                                multi_preds.push({"all": pred});
+                                            }
+                                        }
+
+                                        if(multi_preds.length > 0){
+
+                                            q.push({"any": multi_preds});
+
+                                            isbranch_empty = false;
+                                            delete predicate[key];
+
+                                            continue;
+                                        }
+                                        
+                                    }else{
+                                        facets[facet_index].selectedvalue = null;
+                                    }
                                 }else if(facet_index_do_not_touch==facet_index){ //this is for count calculation query
                                      predicate[key] = '$FACET_VALUE';
                                      isbranch_empty = false;
@@ -1525,21 +1624,24 @@ $.widget( "heurist.search_faceted", {
         // this._currentquery
         // this._resultset
         if(isNaN(field_index) || field_index<0){
-                field_index = -1;  
-                
-                this._request_id =  Math.round(new Date().getTime() + (Math.random() * 100));
+            field_index = -1;  
             
-                this._terminateFacetCalculation = false;
-                this.btn_terminate.show();
-                this.div_toolbar.css('padding-right', '18px');
-                this.div_toolbar.find('#facet_process_msg').show();
-                if(this.btn_reset) this.btn_reset.hide()    
-                this.btn_close.hide();
+            this._request_id =  Math.round(new Date().getTime() + (Math.random() * 100));
+        
+            this._terminateFacetCalculation = false;
+            this.btn_terminate.show();
+            this.div_toolbar.css('padding-right', '18px');
+            this.div_toolbar.find('#facet_process_msg').show();
+            if(this.btn_reset) this.btn_reset.hide()    
+            this.btn_close.hide();
 
-                var div_facets = this.facets_list.find(".facets");
-                if(div_facets.length>0)
-                    div_facets.empty()
-                    .css('background','url('+window.hWin.HAPI4.baseURL+'hclient/assets/loading-animation-white20.gif) no-repeat center center');
+            var div_facets = this.facets_list.find(".facets");
+            if(div_facets.length>0)
+                div_facets.empty()
+                .css('background','url('+window.hWin.HAPI4.baseURL+'hclient/assets/loading-animation-white20.gif) no-repeat center center');
+
+            // Re-display all facets
+            this.facets_list.find("[id^='fv_']").show();
         }
         if(this._terminateFacetCalculation){
             field_index  = this.options.params.facets.length;
@@ -1786,8 +1888,6 @@ $.widget( "heurist.search_faceted", {
 
             if(this.options.hide_no_value_facets && this.no_value_facets.length > 0){
 
-                let $parent_container = $(this.element).find('.svs-list-container');
-
                 let empty_facets = [];
                 for(let j = 0; j < this.no_value_facets.length; j ++){
 
@@ -1796,7 +1896,7 @@ $.widget( "heurist.search_faceted", {
 
                     let f_title = window.hWin.HEURIST4.util.htmlEscape(window.hWin.HRJ('title', field, this.options.language));
 
-                    $parent_container.find("#fv_" + field['var']).hide();
+                    this.facets_list.find("#fv_" + field['var']).hide();
                     //$no_value_container.append(f_title);
                     empty_facets.push(f_title);
                 }
@@ -1809,7 +1909,7 @@ $.widget( "heurist.search_faceted", {
                             'border-top': '1px black solid', // or <hr>
                             'font-size': 'smaller'
                           })
-                          .appendTo($parent_container);
+                          .appendTo(this.facets_list);
 
                 let max_w = $ele.width() - 80;
                 $('<span>', {class: 'truncate'}).css({
