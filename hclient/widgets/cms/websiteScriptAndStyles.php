@@ -869,18 +869,15 @@ function initLinksAndImages($container, search_data){
     $('img, embed').each(function(i,ele){window.hWin.HEURIST4.util.restoreRelativeURL(ele);});
 
     // Handle login buttons within webpage content
-    let $btn_signin = $('#btn_signin').not('.cms-button');
-    if(window.hWin.HAPI4.currentUser.ugr_ID == 0){
+    let $btn_signin = $($container[0].querySelectorAll('#btn_signin:not(.cms-button)'));
+    if($btn_signin.length>0){
+        $btn_signin.on('click', () => {
+            window.hWin.HEURIST4.ui.checkAndLogin(true, () => {location.reload();});
+        });
 
-        if($btn_signin.length>0){
-            $btn_signin.on('click', () => {
-                window.hWin.HEURIST4.ui.checkAndLogin(true, () => {location.reload();});
-            });
-
-            $('#btn_signin.cms-button').hide();
-        }else{
-            $('#btn_signin.cms-button').show();
-        }
+        $('#btn_signin.cms-button').hide();
+    }else{
+        $('#btn_signin.cms-button').show();
     }
 }
 
