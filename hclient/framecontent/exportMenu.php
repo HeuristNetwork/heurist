@@ -52,7 +52,12 @@ require_once(dirname(__FILE__)."/initPage.php");
 <body class="ui-heurist-bg-light" style="font-size:0.8em">
     <div style="top:0;bottom:0;left:0;position:absolute;padding:10px;font-size:1.2em">
 
-        <h2>File export</h2>
+        <h2 style="margin-bottom:0px;">Export result set</h2>
+        <div style="font-size:13px;margin-bottom:20px;">
+            These functions export the current result set (the subset of records selected by the current search
+            / filter), either as a file or through a feed URL which will generate the results on-the-fly for input
+            to other software.
+        </div>
 
         <div id="menu-export-csv" class="export-item">
             <button class="export-button">CSV</button>
