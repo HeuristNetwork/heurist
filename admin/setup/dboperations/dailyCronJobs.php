@@ -327,12 +327,13 @@ if(count($email_list)>0 || count($report_list)>0 || count($url_list)>0){
           $text = $text. $freq.':'.$cnt.'  ';
     }
     
-    $text = "Number of reminder emails sent:\n"
+    $text = "Reminder emails sent, reports updated and URLs verified\n\n"
+    ."Number of reminder emails sent:\n"
     .$text
     ."\n\nNumber of reports "
     ."\n created: ".$created
     ."\n updated: ".$updated
-    ."\n intacted: ".$intacted
+    ."\n unchanged: ".$intacted
     ."\n errors: ".$errors."\n";
     
     $text = $text."\n\nInvalid urls: ";
@@ -354,7 +355,8 @@ if(count($email_list)>0 || count($report_list)>0 || count($url_list)>0){
 
     echo $text;
     
-    sendEmail(HEURIST_MAIL_TO_ADMIN, "Daily cronjob report on ".HEURIST_SERVER_NAME,
+    $rep_count = $created + $updated + $intacted;
+    sendEmail(HEURIST_MAIL_TO_ADMIN, "Daily cronjob report on ".HEURIST_SERVER_NAME." Emails sent: ".$cnt." | Reports:".$rep_count." | Errors: ".$errors." | Bad URLs: ".count($url_list),
                 $text);
     
 }
