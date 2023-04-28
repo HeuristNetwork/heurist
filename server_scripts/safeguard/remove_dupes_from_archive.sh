@@ -48,7 +48,7 @@
 # and will pick up any significant editing of the data, which is what we care about safeguarding.
 
 # REMOVE EMPTY AND IDENTICAL SIZED COPIES
-# First, remove any files smaller than 10K - these will be failures, the smallest are 50K+
+# First, remove any hdb_ files smaller than 10K - these will be failures, the smallest are 50K+
 # Then, remove multiple copies of the bz2 files with the same dbname and size, but different date 
 # strings, keeping the newest (broadly speaking these are identical or near-identical database copies). 
 # The reason for doing this is that it cleans up multiple copies resulting from an incomplete
@@ -57,9 +57,11 @@
 # occurred in the past.
 
 # PURGE OLDER BZ2 FILES
-# Leave all files up to 30 days old (these are the most useful for instant restore after errors).
-# Remove all except the newest from 31-60, 61-90 days old (errors discovered within a couple of months).
-# Remove all except the newest from 90-180, 181-365, 366-730, >731
+# Never delete a bz2 file without a date string appended
+#   (these will always be the last safeguard, even if faulty)
+# Leave all files up to 7 days old (these are the most useful for instant restore after errors).
+# Remove all except the newest from 8-15, 16-30, 31-60 days old (recover within a couple of months).
+# Remove all except the newest from 60-180, 181-365, 366-730, >731
 #  (this allows for people wanting databases they forgot about for 2 - 3 years ... 
 #   That covers people who go away on extended overseas fieldwork, an exchange posting or hiatus 
 #   in a project. In any case, this should leave 1 copy of long-term inactive and deleted databases)
