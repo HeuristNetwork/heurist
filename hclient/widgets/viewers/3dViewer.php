@@ -1,6 +1,6 @@
 <?php
 /**
-* 3D online viewer for 
+* 3D online viewer (https://3dviewer.net/) for 
 *  obj, 3ds, stl, ply, gltf, glb, off, 3dm, fbx, dae, wrl, 3mf, ifc, brep, step, iges, fcstd, bim
 *
 * @package     Heurist academic knowledge management system
@@ -41,6 +41,9 @@ $db = @$_REQUEST['db'];
 // init main system class
 $system = new System();
 
+//define('EDIR','../../../external/3D/');
+define('EDIR','http://127.0.0.1/h6-alpha/external/3D/');
+
 if($system->init($db, true, false)){
 
     if(@$_REQUEST['file'] || @$_REQUEST['ulf_ID']) { //ulf_ID is obfuscation id here
@@ -58,7 +61,86 @@ if($system->init($db, true, false)){
                 
                 $system->initPathConstants($db);
                 
-                $url = HEURIST_FILESTORE_URL.$fileinfo['fullPath'];
+                //$url = HEURIST_BASE_URL.'?db='.$db.'&file='.$fileinfo['ulf_ObfuscatedFileID'].'&ext=file.obj';
+                $url = HEURIST_FILESTORE_URL.$fileinfo['fullPath']; //need extension
+                $textures = array();
+                
+                //find related mtl and texture files by original file name
+                if($fileExt=='obj'){
+                    $file_obj = HEURIST_FILESTORE_DIR.$fileinfo['fullPath'];
+                    $file_mtl = null;
+                    //find mtl file name  'mtllib name_of_file.mtl'
+                    $handle = @fopen($file_obj, 'r');
+                    
+                    if($handle){
+                        while (($line = fgets($handle, 4096)) !== false) {
+                            if(strpos($line,'mtllib')===0)  //strpos($line,'#')===false
+                            {
+                                $file_mtl = trim(substr($line,7));
+                                break;    
+                            }
+                            if(strpos($line,'v ')===0){
+                                break;
+                            }
+                        }
+                        fclose($handle);
+                        
+                        $file_mtl_full = null;
+                        if($file_mtl!=null){
+                            $file_mtl_full = fileRenameToOriginal($system, $file_mtl);
+                        }
+                        
+                        //read mtl and find textures  map_**, bump disp decal 
+                        if($file_mtl_full && file_exists($file_mtl_full)){
+                            
+                            array_push($textures, $file_mtl);
+                            
+                            $is_changed = false;
+                            $content = array();
+                            foreach(file($file_mtl_full) as $line) {
+                                // do stuff here
+                                $line = trim($line);
+                                if(strpos($line, 'map_')===0){ 
+                                    // || strpos($line, 'bump')===0 || strpos($line, 'disp')===0 || strpos($line, 'decal')===0)
+                                    $k = strpos($line,' ');
+                                    $file_txt2 = trim(substr($line, $k+1));
+                                    $file_txt = preg_replace('/\s+/', '', $file_txt2);
+                                    
+                                    if($file_txt!=$file_txt2){
+                                        $line = substr($line, 0, $k).' '.$file_txt;
+                                        $is_changed = true;
+                                    }
+                                    
+                                    $file_txt_full = fileRenameToOriginal($system, $file_txt2, $file_txt);
+                                    if($file_txt_full!=null && file_exists($file_txt_full)){
+                                        array_push($textures, $file_txt);            
+                                    }
+                                }
+                                array_push($content, $line."\n");
+                            }
+                            if($is_changed){
+                                file_put_contents($file_mtl_full, $content);
+                            }                    
+                        }
+                        
+                    }
+                    
+                    foreach($textures as $idx=>$fname) {
+                        $textures[$idx] = HEURIST_FILESTORE_URL.'file_uploads/'.$fname;
+                        //$textures[$idx] = '../../../../HEURIST_FILESTORE/osmak_9b/file_uploads/'.$fname;
+                    }
+                }
+                if(count($textures)>0){
+                    $textures = ',"'.implode('","',$textures).'"';
+                }else{
+                    $textures = '';
+                }
+                
+                
+                //$url_mtl = 'http://127.0.0.1/HEURIST_FILESTORE/osmak_9b/file_uploads/ulf_128_Ms 1 ouvert 2.mtl';
+                //$url_texture = 'http://127.0.0.1/HEURIST_FILESTORE/osmak_9b/file_uploads/ulf_127_Ms1ouvert2.jpg';
+                
+                //'http://127.0.0.1/h6-alpha/?db=osmak_9b&file=2eb0b92c4d6a7792646b255bee7f124b3a7b5500';
                 //$url = HEURIST_BASE_URL.'?db='.$db.'&file='.$fileid;
                 $is_not_inited = false;    
                 
@@ -82,7 +164,7 @@ if($is_not_inited){
 
 }
 
-define('EDIR','../../../external/3D/');
+
 
 //$url = EDIR."models/car.glb";
 //$url = EDIR."models/solids.obj";
@@ -98,14 +180,15 @@ define('EDIR','../../../external/3D/');
 <script type="text/javascript" src="<?php echo EDIR;?>o3dv.min.js"></script>
 </head>
 <body>
-<div id="online_3d_viewer" class="online_3d_viewer" style="width:100%;height:100%">
+<div id="online_3d_viewer" class="online_3d_viewer" style="width:50%;height:100%;border:2px solid red">
 </div>
 </body>
 <script type="text/javascript">
 
-OV.SetExternalLibLocation ('libs'); // tell the engine where to find the libs folder
-
 function setup3viewer() { 
+    
+    // set the location of the external libraries
+    OV.SetExternalLibLocation ('libs');
     
     if(false){
         //attribute for div model="<?php echo $url?>"
@@ -118,13 +201,9 @@ function setup3viewer() {
 
     // initialize the viewer with the parent element and some parameters
     let opts1 = {
-        backgroundColor : new OV.RGBAColor (255, 255, 255, 255),
-        defaultColor : new OV.RGBColor (200, 200, 200),
-        edgeSettings : {
-            showEdges : false,
-            edgeColor : new OV.RGBColor (0, 0, 0),
-            edgeThreshold : 1
-        },
+        backgroundColor : new OV.RGBAColor (255, 255, 255, 255)
+        ,defaultColor : new OV.RGBColor (200, 200, 200)
+        ,edgeSettings : new OV.EdgeSettings (false, new OV.RGBColor (0, 0, 0), 1)
         //toolbarDiv: 
         /*        
         environmentSettings : {
@@ -156,7 +235,7 @@ function setup3viewer() {
 
     // load a model providing model urls
     viewer.LoadModelFromUrlList ([
-        '<?php echo $url;?>'
+        "<?php echo $url;?>"<?php echo $textures; ?>
     ]);
 }
 

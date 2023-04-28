@@ -10,6 +10,8 @@
 * fileRegister - register file in recUploadedFiles
 * fileGetByObfuscatedId - get id by obfuscated id (NOT USED)
 * fileGetByFileName
+* fileGetByOriginalFileName
+* fileRenameToOriginal
 * fileGetFullInfo  - local paths, external links, mimetypes and parameters (mediatype and source)
 * fileGetThumbnailURL - URL to thumbnail for given record ID and specified bg color
 * fileGetMetadata - return metadata for registered media, plus width,height for images
@@ -136,6 +138,61 @@ function fileGetByFileName($system, $fullname){
 
         return $file_id;
         
+}
+
+
+/**
+* Get file ID by original file name
+*
+* @param mixed $orig_name
+*/
+function fileGetByOriginalFileName($system, $orig_name){
+    
+        $mysqli = $system->get_mysqli();
+      
+        $fileinfo = mysql__select_row_assoc($mysqli, 'select * from recUploadedFiles '
+            .'where ulf_OrigFileName = "'.$mysqli->real_escape_string($orig_name).'"');
+
+        return $fileinfo;
+
+}
+
+//
+// Finds registered file by original name, rename ulf_xxx_ to original name and update recUploadedFiles
+//
+function fileRenameToOriginal($system, $orig_name, $new_name=null){
+
+    if($new_name==null) $new_name = $orig_name;
+    $file_fullpath = HEURIST_FILESTORE_DIR.'file_uploads/'.$new_name;
+    
+    if(!file_exists($file_fullpath)){
+        //find by original file name
+        $fileinfo = fileGetByOriginalFileName($system, $orig_name);
+        if($fileinfo){
+            
+            $reg_name = HEURIST_FILESTORE_DIR.$fileinfo['ulf_FilePath'].$fileinfo['ulf_FileName'];
+            if(file_exists($reg_name)){
+                //rename file to original (without prefix ulf_xxx_) and update in database 
+                rename($reg_name, $file_fullpath);
+                
+                $mysqli = $system->get_mysqli();
+                $new_name = $mysqli->real_escape_string($new_name);
+                
+                $qupdate = 'UPDATE recUploadedFiles set ulf_FilePath="file_uploads/", '
+                .' ulf_FileName="'.$new_name.'", ulf_OrigFileName="'.$new_name.'" '
+                .'WHERE ulf_ID='.$fileinfo['ulf_ID'];
+                
+                $mysqli->query($qupdate);
+                
+            }else{
+                return null;  //registered file missed
+            } 
+        }else{
+            return null;  //registered file not found by original name
+        }
+    }
+        
+    return $file_fullpath;
 }
 
 /**
