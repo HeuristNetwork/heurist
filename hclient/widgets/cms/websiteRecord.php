@@ -212,6 +212,9 @@ $website_title = '';
 $show_pagetitle = false;
 $isWebPage = false;
 
+$TRM_NO = ConceptCode::getTermLocalID('2-531'); //TRM_NO
+$TRM_NO_OLD = ConceptCode::getTermLocalID('99-5447'); //TRM_NO_OLD
+
 if(!(@$_REQUEST['field']>1)){
     
     $website_title = __getValue($rec, DT_NAME);
@@ -224,8 +227,8 @@ if(!(@$_REQUEST['field']>1)){
     
     if(!$isWebPage){ //for standalone webpage always without title
         $show_pagetitle = __getValue($rec, DT_CMS_PAGETITLE);
-        $show_pagetitle = ($show_pagetitle!==ConceptCode::getTermLocalID('2-531') &&  //TRM_NO
-                           $show_pagetitle!==ConceptCode::getTermLocalID('99-5447'));    //TRM_NO_OLD
+        $show_pagetitle = ($show_pagetitle!== $TRM_NO && //TRM_NO
+                           $show_pagetitle!== $TRM_NO_OLD); //TRM_NO_OLD
     }
     
 }
@@ -297,6 +300,13 @@ $image_logo = $image_logo?'<img style="max-height:80px;max-width:270px;" src="'.
 
 $meta_keywords = htmlspecialchars(__getValue($rec, DT_CMS_KEYWORDS));
 $meta_description = htmlspecialchars(__getValue($rec, DT_SHORT_SUMMARY));
+
+$show_login_button = __getValue($rec, '2-1095'); // by default, show login button
+if(!$isWebPage && !empty($show_login_button)){
+    $show_login_button = (($show_login_button == $TRM_NO) || 
+                          ($show_login_button == $TRM_NO_OLD)) ? false : true;
+}
+
 //2-532 - YES   2-531 - NO
 
 if(!$isWebPage && __getValue($rec,DT_EXTENDED_DESCRIPTION)==''){
