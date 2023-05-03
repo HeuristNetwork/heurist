@@ -210,7 +210,7 @@ $.widget( "heurist.editing_input", {
                     .appendTo( btn_cont )
                 //.button({icon:"ui-icon-circlesmall-plus", showLabel:false, label:'Add another ' + lblTitle +' value'})
                 .attr('tabindex', '-1')
-                .attr('title', 'Add another ' + lblTitle +(is_translation?' translation':' value' ))                    
+                .attr('title', 'Add another ' + window.hWin.HEURIST4.util.stripTags(lblTitle) +(is_translation?' translation':' value' ))                    
                 .css({display:'block', 
                 'font-size': (is_translation?'1em':'1.9em'), cursor:'pointer', 
                 //'vertical-align':'top', //'padding-top':'2px',
@@ -429,7 +429,9 @@ $.widget( "heurist.editing_input", {
         this._setVisibilityStatus();
     
         if(this.options.show_header){
-            this.header.css('display','table-cell');//show();
+            if(this.header.css('display')=='none'){
+                this.header.css('display','table-cell');//show();
+            }
         }else{
             this.header.hide();
         }      
