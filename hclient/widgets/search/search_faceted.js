@@ -340,8 +340,7 @@ $.widget( "heurist.search_faceted", {
                                   that._current_query_request_id = data.id;
                             }else{
                                 //search from outside - close this widget
-                                that._trigger( "onclose");
-                                //that.doClose();
+                                that.doClose();
                             }
                         }
                     
@@ -368,7 +367,7 @@ $.widget( "heurist.search_faceted", {
                         that.refreshSubsetSign();
                     }
                     if(data.closeFacetedSearch){
-                        that._trigger( "onclose" );    
+                        that.doClose();
                     }else
                     if(data.restartSearch){
                         that.doSearch();
@@ -1294,6 +1293,12 @@ $.widget( "heurist.search_faceted", {
     ,doClose: function(){
         //$(this.document).trigger(window.hWin.HAPI4.Event.ON_REC_SEARCHSTART, [ {reset:true, search_realm:this.options.search_realm} ]);  //global app event to clear views
         this._trigger( "onclose");
+        if($.isFunction(this.options.onclose)){
+            this.options.onclose(this);
+        }
+        if(!this.options.is_publication){
+            setTimeout((context) => { $(context.document).trigger(window.hWin.HAPI4.Event.ON_LAYOUT_RESIZE); }, 500, this);
+        }
     }
 
 

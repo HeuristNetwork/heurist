@@ -168,7 +168,7 @@ if($isWebPage){ //set in websiteRecord.php
         .'<a href="#" id="btnOpenCMSeditor" onclick="_openCMSeditor(event); return false;" '
         .'style="position:absolute;left:5px;top:5px;color:blue !important;z-index:1;" class="cms-button">website editor</a>';
     }
-    if(!$edit_OldEditor && $system->get_user_id() == 0){
+    if(!$edit_OldEditor && $system->get_user_id() == 0 && $show_login_button){
         print '<a href="#" id="btn_signin" style="position:absolute;right:5px; top:5px;color:blue !important;" class="cms-button">login</a>'; // login link
     }
 ?>
@@ -216,7 +216,7 @@ if($isWebPage){ //set in websiteRecord.php
         .'<a href="#" id="btnOpenCMSeditor" onclick="_openCMSeditor(event); return false;" '
         .'style="position:absolute;left:5px;top:5px;color:blue !important;" class="cms-button">website editor</a>';
     }
-    if(!$edit_OldEditor && $system->get_user_id() == 0){
+    if(!$edit_OldEditor && $system->get_user_id() == 0 && $show_login_button){
         print '<a href="#" id="btn_signin" style="position:absolute;right:5px; top:5px;color:blue !important;" class="cms-button">login</a>'; // login link
     }
     ?>  

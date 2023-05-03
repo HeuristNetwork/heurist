@@ -356,7 +356,7 @@ if(count($email_list)>0 || count($report_list)>0 || count($url_list)>0){
     echo $text;
     
     $rep_count = $created + $updated + $intacted;
-    sendEmail(HEURIST_MAIL_TO_ADMIN, "Daily cronjob report on ".HEURIST_SERVER_NAME." Emails sent: ".$cnt." | Reports:".$rep_count." | Errors: ".$errors." | Bad URLs: ".count($url_list),
+    sendEmail(HEURIST_MAIL_TO_ADMIN, HEURIST_SERVER_NAME." Emails sent: ".$cnt." | Reports:".$rep_count." | Errors: ".$errors." | Bad URLs: ".count($url_list),
                 $text);
     
 }

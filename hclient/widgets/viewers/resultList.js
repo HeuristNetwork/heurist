@@ -112,6 +112,7 @@ $.widget( "heurist.resultList", {
         aggregate_values: null, //supplementary values per record id - usually to store counts, sum, avg 
         aggregate_link: null,    //link to assigned to aggregate value label
 		
+        allow_record_content_view: false,   // show record_content mode as an option, for Webpage
 		blog_result_list: false,    //whether the result list is used for blog records, limiting pagesize if it is
 
         auto_select_first: false,   //automatically select first record within result list
@@ -682,7 +683,8 @@ $.widget( "heurist.resultList", {
             +'<button value="icons" class="btnset_radio"/>'
             +'<button value="thumbs" class="btnset_radio"/>'
             +'<button value="thumbs3" class="btnset_radio"/>';
-        if(this.options.entityName=='records'){
+
+        if(this.options.entityName=='records' && (!this._is_publication || this.options.allow_record_content_view)){
             smodes += '<button value="record_content" class="btnset_radio"/>';
             //smodes += '<button value="tabs" class="btnset_radio"/>';
         }
@@ -1125,7 +1127,12 @@ $.widget( "heurist.resultList", {
         
         var allowed = ['list','icons','thumbs','thumbs3','horizontal','vertical','icons_list','record_content','tabs'];
         
-        if(newmode=='icons_expanded') newmode=='record_content'; //backward capability 
+        if(newmode=='icons_expanded') newmode='record_content'; //backward capability 
+
+        if(this._is_publication && !this.options.allow_record_content_view){ // switch to list mode and hide button
+            newmode = 'list';
+            this.view_mode_selector.find('button[value="record_content"]').hide();
+        }
 
         if(window.hWin.HEURIST4.util.isempty(newmode) || allowed.indexOf(newmode)<0) {
             newmode = window.hWin.HAPI4.get_prefs('rec_list_viewmode_'+this.options.entityName);
