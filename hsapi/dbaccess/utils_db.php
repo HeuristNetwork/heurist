@@ -1473,8 +1473,8 @@ UNIQUE KEY swf_StageKey (swf_RecTypeID, swf_Stage)
                 }  
             }
             
-            if($dbVerSubSub<9 || !array_key_exists('sys_NakalaKey', $sysValues)){
-
+            if(!array_key_exists('sys_NakalaKey', $sysValues)){ //$dbVerSubSub<9 && 
+                
                     $query = "ALTER TABLE `sysIdentification` ADD COLUMN `sys_NakalaKey` TEXT default NULL COMMENT 'Nakala API key. Retrieved from Nakala website'";
                     $res = $mysqli->query($query);
                     if($res){

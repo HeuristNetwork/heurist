@@ -157,7 +157,7 @@ default content consists of
 if($isWebPage){ //set in websiteRecord.php 
 //WEB PAGE - EMBED
 ?>
-<div class="ent_wrapper heurist-website">
+<div class="ent_wrapper heurist-website selectmenu-parent">
 <?php
     if($showWarnAboutPublic){
         print '<div style="top:0;height:20px;position:absolute;text-align:center;width:100%;color:red;">Web page record is not public. It will not be visible to the public</div>';  
@@ -168,7 +168,7 @@ if($isWebPage){ //set in websiteRecord.php
         .'<a href="#" id="btnOpenCMSeditor" onclick="_openCMSeditor(event); return false;" '
         .'style="position:absolute;left:5px;top:5px;color:blue !important;z-index:1;" class="cms-button">website editor</a>';
     }
-    if(!$edit_OldEditor && $system->get_user_id() == 0){
+    if(!$edit_OldEditor && $system->get_user_id() == 0 && $show_login_button){
         print '<a href="#" id="btn_signin" style="position:absolute;right:5px; top:5px;color:blue !important;" class="cms-button">login</a>'; // login link
     }
 ?>
@@ -185,7 +185,7 @@ if($isWebPage){ //set in websiteRecord.php
 }else{
 ?>
 
-    <div class="ent_wrapper heurist-website">
+    <div class="ent_wrapper heurist-website selectmenu-parent">
     <div id="main-header" class="ent_header ui-heurist-header2" <?php print $image_banner?'style="background-image:url(\''.$image_banner.'\') !important;background-repeat: repeat-x !important;background-size:auto 170px !important;"':'' ?>>
     
 <?php
@@ -216,7 +216,7 @@ if($isWebPage){ //set in websiteRecord.php
         .'<a href="#" id="btnOpenCMSeditor" onclick="_openCMSeditor(event); return false;" '
         .'style="position:absolute;left:5px;top:5px;color:blue !important;" class="cms-button">website editor</a>';
     }
-    if(!$edit_OldEditor && $system->get_user_id() == 0){
+    if(!$edit_OldEditor && $system->get_user_id() == 0 && $show_login_button){
         print '<a href="#" id="btn_signin" style="position:absolute;right:5px; top:5px;color:blue !important;" class="cms-button">login</a>'; // login link
     }
     ?>  

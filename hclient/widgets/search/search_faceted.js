@@ -340,8 +340,7 @@ $.widget( "heurist.search_faceted", {
                                   that._current_query_request_id = data.id;
                             }else{
                                 //search from outside - close this widget
-                                that._trigger( "onclose");
-                                //that.doClose();
+                                that.doClose();
                             }
                         }
                     
@@ -368,7 +367,7 @@ $.widget( "heurist.search_faceted", {
                         that.refreshSubsetSign();
                     }
                     if(data.closeFacetedSearch){
-                        that._trigger( "onclose" );    
+                        that.doClose();
                     }else
                     if(data.restartSearch){
                         that.doSearch();
@@ -738,12 +737,11 @@ $.widget( "heurist.search_faceted", {
        
        if(this.facets_list) this.facets_list.empty();
        
-       var $fieldset = $("<fieldset>").css({'font-size':'0.9em','background-color':'white'})
+       var $fieldset = $("<fieldset>").css({'font-size':'0.9em','background-color':'white', padding:'0 5px'})
                     .addClass('fieldset_search').appendTo(this.facets_list);
 
        //hide submit button will be displayed in case all fields are input fields (not facets)
        if(true){ 
-            $fieldset.css({'padding':'0'});
             this.btn_submit.hide();
        }
        
@@ -1087,15 +1085,16 @@ $.widget( "heurist.search_faceted", {
                     inpt.appendTo($fieldset);
                     that._input_fields['$X'+field['var']] = inpt;
                     
+                    //inpt.find('.header').css({'font-size':'','padding-left':'0px'});
                     inpt.find('.header').attr('title', facet_rollover)
-                        .css('display','block')
+                        .css({'font-size':'','display':'block'})
                         .html('<h4 style="display:inline-block;margin:0;">'+facet_title
                         
                         +((facet_rollover)?'<span class="bor-tooltip ui-icon ui-icon-circle-help" '
                           +'style="width:17px;height:17px;margin-left:4px;display:inline-block;vertical-align:text-bottom;" title="'
                           +facet_rollover+'"></span>':'')                        
                         +'</h4>');
-                                                                        
+                        
                     inpt.find('.input-cell').css({
                         border: 'none',
                         background: 'none',
@@ -1131,21 +1130,25 @@ $.widget( "heurist.search_faceted", {
                         let btn_container_css = {
                             'min-width': '15px', 
                             'display': 'inline-block',
-                            'padding-left': '5px'
+                            'width': 'auto'
                         };
 
                         if(that.options.params.accordion_view){
                             btn_container_css['display'] = 'block';
                             btn_container_css['padding-left'] = '0px';
                         }
-
-                        inpt.find('.editint-inout-repeat-button').parent().css(btn_container_css);
+                                                               
+                        inpt.find('.header').css(btn_container_css);         //padding-top
+                        inpt.find('.editint-inout-repeat-button').parent()
+                            .css(btn_container_css)
+                            .css({'padding-top':'15px'});
                         inpt.find('.editint-inout-repeat-button').css({
                             'min-width': '15px',
-                            'margin': '0px'
+                            'margin': '0px',
+                            'padding-left': '3px'
                         });
                     }
-
+           
                     that._handleNewInput(inpt.find('input,select'));
 
                     var btn_add = $( "<button>",{title:'To clear previous search click the RESET button'})
@@ -1159,8 +1162,14 @@ $.widget( "heurist.search_faceted", {
        });
        
        //'background-color': 'lightgray', 
-       $fieldset.find('.header').css({width: '100%', padding: '5px', width:'100%'})
-       $fieldset.find('.input-cell').css({ 'padding':'5px' });
+       //2023-05-02 
+       $fieldset.find('.header').css({width: 'auto', padding: '15px 0px 5px 0px'});
+       if(this.options.params.ui_separate_line){
+            $fieldset.find('.header').parent().css('border-top',$fieldset.find('.ui-widget-content:first').css('border'));    
+       }
+       
+       //2023-05-02 
+       $fieldset.find('.input-cell').css({ 'padding':'5px 0px' });
        
        $fieldset.find('.bor-tooltip').tooltip({
             position: { my: "center bottom", at: "center top-5" },
@@ -1284,6 +1293,12 @@ $.widget( "heurist.search_faceted", {
     ,doClose: function(){
         //$(this.document).trigger(window.hWin.HAPI4.Event.ON_REC_SEARCHSTART, [ {reset:true, search_realm:this.options.search_realm} ]);  //global app event to clear views
         this._trigger( "onclose");
+        if($.isFunction(this.options.onclose)){
+            this.options.onclose(this);
+        }
+        if(!this.options.is_publication){
+            setTimeout((context) => { $(context.document).trigger(window.hWin.HAPI4.Event.ON_LAYOUT_RESIZE); }, 500, this);
+        }
     }
 
 
@@ -1974,7 +1989,6 @@ $.widget( "heurist.search_faceted", {
                         }
                         field.history.push(field.selectedvalue);
                     }
-                    
                     //
                     //draw show more/less toggler for long lists
                     //
@@ -2234,6 +2248,7 @@ $.widget( "heurist.search_faceted", {
                        
                         //calculate the total number of terms with value
                         var tot_cnt = __calcTerm(term, 0, field['groupby']);
+                        term.supress_count_draw = true; //for root
                         var as_list = (field['isfacet']==this._FT_COLUMN || field['isfacet']==this._FT_LIST);    //is list
                                             //is dropdown but too many entries
 //this feature is remarked on 2017-01-26 || (field['isfacet']==2 && tot_cnt > that._MIN_DROPDOWN_CONTENT)); 
@@ -2272,12 +2287,12 @@ $.widget( "heurist.search_faceted", {
                             var $sel = $('<select style="font-size: 0.6em !important;">').css('width', (w-45)+'px'); // was 30
 
                             if(needsDropdown !== true && $facet_values.find('span.bor-toggle-show-off').length > 0){
-                                $sel.appendTo( $("<div>").css({"display":"inline-block","padding":"0 5px"}).appendTo($facet_values.find('span.bor-toggle-show-off')) );
+                                $sel.appendTo( $("<div>").css({"display":"inline-block","padding":"0px"}).appendTo($facet_values.find('span.bor-toggle-show-off')) );
                                 $sel.css('width', ((w - 66) * 0.8)+'px');
 
                                 $facet_values.css('margin-bottom', '15px');
                             }else{
-                                $sel.appendTo( $("<div>").css({"display":"inline-block","padding":"0 5px"}).appendTo($facet_values) );
+                                $sel.appendTo( $("<div>").css({"display":"inline-block","padding":"0px"}).appendTo($facet_values) );
                             }
 
                             if(term && term.hasOwnProperty('count') && term.count == 0){
@@ -2295,9 +2310,18 @@ $.widget( "heurist.search_faceted", {
 
                             //convert to jquery selectmenu
                             selObj = window.hWin.HEURIST4.ui.initHSelect($sel, false);
-                            selObj.hSelect( "widget" ).css({"font-size": "0.9em", "min-width": "8em"});
                             selObj.hSelect( "menuWidget" ).css({'font-size':'0.9em'});
-
+                            //change appearance for dropdown button
+                            var btn_dropdown = selObj.hSelect( "widget" );//.css({"font-size": "0.9em", "min-width": "8em"});
+                            if(this.options.params.viewport < this.terms_drawn){
+                                btn_dropdown.css({"font-size": "0.96em", width: 'auto', color:"#999999", 
+                                    'min-width':'', background: 'none'});
+                                btn_dropdown.addClass('borderless');
+                                btn_dropdown.find('.ui-selectmenu-text').html('dropdown')
+                                    .css({'min-height':'', padding:'', 'padding-right':'16px'});
+                            }else{
+                                btn_dropdown.css({"font-size": "0.9em", "min-width": "8em"});
+                            }
                             $sel.change(function(event){ that._onDropdownSelect(event); });
                         }
                         
@@ -2311,7 +2335,7 @@ $.widget( "heurist.search_faceted", {
                                 var rtID = cterm[0];
                                 var f_link = this._createFacetLink(facet_index, 
                                     {title:$Db.rty(rtID,'rty_Name'), query:rtID, count:cterm[1]}, 'inline-block');
-                                $("<div>").css({"display":"inline-block","padding":"0 3px"})
+                                $("<div>").css({"display":"inline-block","padding":"0px"})
                                   .addClass('facet-item')
                                   .append(f_link).appendTo($facet_values);
                             }
@@ -2421,9 +2445,9 @@ $.widget( "heurist.search_faceted", {
                             //show the only date without slider
                             s = temporalSimplifyDate(cterm[0]);
                             
-                            $("<span>").html(s 
-                                    + ((sl_count>0) ?'<span class="badge" style="float: right;">'+sl_count+'</span>':''))
-                                   .appendTo($facet_values); 
+                            let s_counts = this._getCountSpan(sl_count); //for slider
+                            
+                            $("<span>").html(s + s_counts).appendTo($facet_values); 
                             
                         }else{
                             
@@ -2621,11 +2645,14 @@ $.widget( "heurist.search_faceted", {
                                         min = __roundNumericLabel(min);
                                         max = __roundNumericLabel(max);
                                     }
-                                    that.element.find( "#facet_range"+facet_index )
+                                    var range_ele = that.element.find( "#facet_range"+facet_index )
                                         .html('<a href="#" class="link2">'+min
-                                            +'</a> - <a href="#" class="link2">'+max+'</a>' 
-                                            + ((cnt>0)?
-                                            '<span class="badge" style="float: right;">'+cnt+'</span>':''));
+                                            +'</a> - <a href="#" class="link2">'+max+'</a>');
+                                            
+                                    var sl_count = that._getCountSpan(cnt); //for slider
+                                    if(sl_count!=''){
+                                        $(sl_count).insertAfter(range_ele);
+                                    }
                                 }
                             }
                             
@@ -2720,7 +2747,7 @@ $.widget( "heurist.search_faceted", {
                                 if(!that._date_range_dialog){
                                     
                                     that._date_range_dialog = $(
-                                    '<div><div style="padding:10px 0 5px 35px;" id="date-range"></div>'                      
+                                    '<div><div style="padding:10px 0 5px 5px;" id="date-range"></div>'                      
                                     +'<fieldset class="narrow"><div id="date-start"/>'
                                     +'<div id="date-end"/>'
                                     +'</fieldset></div>')
@@ -2780,7 +2807,7 @@ $.widget( "heurist.search_faceted", {
                         
                             var w = that.element.width();
                             var flbl = $("<div>",{id:"facet_range"+facet_index})
-                                        .css({display: 'inline-block', 'padding': '0 0 1em 16px', width:(w-40)})
+                                        .css({display: 'inline-block', 'padding': '0 0 1em 16px'}) //, width:(w-40)
                                         .appendTo($facet_values);
                                         
                             if(field['type']=="date"){
@@ -2900,7 +2927,7 @@ $.widget( "heurist.search_faceted", {
                         var cterm = field.selectedvalue;
                         var f_link = this._createFacetLink(facet_index, {title:cterm.title, value:cterm.value, count:'reset'}, 'block');
                         
-                        var ditem = $("<div>").css({'display':'block',"padding":"0 3px"})
+                        var ditem = $("<div>").css({'display':'block',"padding":"0px"})
                                                 .addClass('facet-item')
                                                 .append(f_link).appendTo($facet_values);
                     }
@@ -2981,16 +3008,26 @@ $.widget( "heurist.search_faceted", {
                                 $opt.attr('selected',true);
                             }
 
+                            needsDropdown = true;
                             selObj = window.hWin.HEURIST4.ui.initHSelect($sel, needsDropdown !== true ? true : false);
                             if(needsDropdown === true){
-                                selObj.hSelect( "widget" ).css({"font-size": "0.9em", "min-width": "8em", "width": w+"px"});
+                                //selObj.hSelect( "widget" ).css({"font-size": "0.9em", "min-width": "8em", "width": w+"px"});
                                 selObj.hSelect( "menuWidget" ).css({'font-size':'0.9em'});
+                                
+                                var btn_dropdown = selObj.hSelect( "widget" );
+                                    btn_dropdown.css({"font-size": "0.96em", width: 'auto', color:"#999999", 
+                                        'min-width':'', background: 'none'});
+                                    btn_dropdown.addClass('borderless');
+                                    btn_dropdown.find('.ui-selectmenu-text').html('dropdown')
+                                        .css({'min-height':'', padding:'', 'padding-right':'16px'});
+                                
+                                
                             }else{
-                            var sel_w = $sel.css('width', 'auto').width();
-                            if(sel_w > w){
-                                $sel.css('width', w+'px');
+                                var sel_w = $sel.css('width', 'auto').width();
+                                if(sel_w > w){
+                                    $sel.css('width', w+'px');
+                                    }
                             }
-                        }
 
                             $sel.change(function(event){ that._onDropdownSelect(event); });
                         }
@@ -3015,6 +3052,22 @@ $.widget( "heurist.search_faceted", {
     //
     //
     //
+    ,_getCountSpan: function(sl_count){          
+        var s_counts = '';                  
+        if((sl_count>0) && this.options.params.ui_counts_mode!='none'){
+            let s_slign = (this.options.params.ui_counts_align=='left')?'margin-left:3px;text-decoration:none':'float:right';
+            if(this.options.params.ui_counts_mode=='bracket'){
+                s_counts = '<span style="'+s_slign+'">('+sl_count+')</span>';
+            }else{
+                s_counts = '<span class="badge" style="'+s_slign+'">'+sl_count+'</span>';
+            }
+        }
+        return s_counts; 
+    }
+
+    //
+    //
+    //
     , __drawData: function(data, level, $container, f_index, field) {
 
         var display_mode = (field['isfacet'] == this._FT_COLUMN) ? 'block' : 'inline-block';
@@ -3033,7 +3086,7 @@ $.widget( "heurist.search_faceted", {
                     this.terms_drawn++;  //global
                     
                     var ditem = $("<div>").css({'display':(this.terms_drawn>this.options.params.viewport?'none':display_mode),
-                                    'padding':"0 5px 0 "+(level*10)+"px"})
+                                    'padding':"0 0px 0 "+((level-1)*10)+"px"})
                             .addClass('facet-item')        
                             .append(f_link)
                             .appendTo($container);
@@ -3076,7 +3129,7 @@ $.widget( "heurist.search_faceted", {
                     var step_level = (field['groupby']=='firstchar' && field['selectedvalue'])
                                         ?field['selectedvalue'].step:0;
                                                                                               
-                    var ditem = $("<div>").css({'display':(i>this.options.params.viewport-1?'none':display_mode),"padding":"0 3px"})
+                    var ditem = $("<div>").css({'display':(i>this.options.params.viewport-1?'none':display_mode),"padding":"0px"})
                                         .addClass('facet-item')
                                         .append(f_link).appendTo($container);
                                         
@@ -3129,9 +3182,16 @@ $.widget( "heurist.search_faceted", {
             if(key === null){
                 continue;
             }
+            
+            var sl_count = that._getCountSpan(cur_data['count']); //in tree
 
-            let title = '<span title="' + cur_data['title'] + '" data-value="' + key + '">' + cur_data['title'] + '</span>'
-                      + '<span style="float: right;" class="badge">' + cur_data['count'] + '</span>';
+            let title = '<span title="' + cur_data['title'] + '" data-value="' + key + '">' + cur_data['title'];
+                     
+            if(this.options.params.ui_counts_align=='left'){
+                title = title + sl_count + '</span>';
+            }else{
+                title = title  + '</span>' + sl_count;
+            }
 
             node['title'] = title;
             node['key'] = key;
@@ -3323,17 +3383,25 @@ $.widget( "heurist.search_faceted", {
             if(cterm.count=='reset'){
                 txt = 'X';
             }else if(cterm.count>0 && cterm.supress_count_draw!==true){
-                    txt = cterm.count;
+                txt = cterm.count;
             }
             
-            if(txt!=''){ // This is what is creating the listing
-            
-                var dcount = $('<span>').addClass('badge').text(txt);
+            if(txt!='' && field['isfacet']!=this._FT_INPUT){ // This is what is creating the listing
+ 
+                let s_counts = this._getCountSpan(txt);
+                var dcount = $(s_counts); 
+                
+                if(this.options.params.ui_counts_align=='left' || display_mode=='inline-block'){
+                    dcount.appendTo(f_link);
+                    dcount.appendTo(f_link_content);
+                }else{
+                    dcount.appendTo(f_link);    
+                }
                 
                 if(display_mode=='inline-block'){
-                     dcount.appendTo(f_link).appendTo(f_link_content);
+                     //dcount.appendTo(f_link).appendTo(f_link_content);
                 }else{
-                     dcount.appendTo(f_link).css({float:'right'});
+                     //dcount.appendTo(f_link).css({float:'right'});
 
                      if(cterm.level > 1){
                         let label_width = f_link_content.width() - 20;

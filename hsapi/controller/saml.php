@@ -58,7 +58,7 @@ if($error){
         }
         
         if($is_debug){
-            $attr = array();
+            $attr = array('uid'=>array('1111'));//testing
         }else{
             $attr = $as->getAttributes();
         }
@@ -73,13 +73,34 @@ if($error){
             //find user in sysUGrps by email, if not found add new one
             if(count($attr)>0 && $system->init( @$_REQUEST['db'] ) ){
             
+                $user_id = 0;
                 $mysqli = $system->get_mysqli();
+                
+                $query = 'SELECT ugr_ID,ugr_eMail,usr_ExternalAuthentication FROM sysUGrps where usr_ExternalAuthentication is not null';
+                $res = $system->get_mysqli()->query($query);
+                if ($res){
+                    while ($row = $res->fetch_row()){
+                        $prm = json_decode($row[2],true);
+                        if( @$prm[$sp] 
+                            && ($prm[$sp]['uid']=='' || $prm[$sp]['uid']==$attr['uid'][0])
+                            && (@$prm[$sp]['mail']=='n' || $row[1]==$attr['mail'][0]) ){
+                        
+                            $user_id = $row[0];
+                            break;        
+                        }
+                    }
+                    $res->close();
+                }
+                
+                
+                /*using MySQL feature to query fields with JSON - unfortunately it does not work for MariaDB
                 $spe = $mysqli->real_escape_string($sp);
-$query = 'SELECT ugr_ID FROM hdb_osmak_9c.sysugrps where usr_ExternalAuthentication is not null '
+$query = 'SELECT ugr_ID FROM sysUGrps where usr_ExternalAuthentication is not null '
 .' and  (usr_ExternalAuthentication->\'$."'.$spe.'".uid\'="" OR usr_ExternalAuthentication->\'$."'.$spe.'".uid\'="'.$mysqli->real_escape_string($attr['uid'][0]).'")'
 .' and  (usr_ExternalAuthentication->\'$."'.$spe.'".mail\'="n" OR ugr_eMail="'.$mysqli->real_escape_string($attr['mail'][0]).'")';            
 
                 $user_id = mysql__select_value($system->get_mysqli(), $query);
+                */
 
                 if(!($user_id>0)){
                     //show error

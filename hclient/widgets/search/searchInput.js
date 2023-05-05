@@ -76,7 +76,7 @@ $.widget( "heurist.searchInput", {
 
         //1> Search functions container
         this.div_search   = $('<div>')
-                .css({ 'width':'100%', display: 'flex','justify-content': 'center', flex: '1 1 auto' })
+                .css({ 'width':'100%', display: 'flex' })
                 .appendTo( this.element ); 
         
         //header-label
@@ -104,7 +104,7 @@ $.widget( "heurist.searchInput", {
         // quick filter builder buttons
         //
         this.div_buttons = $('<div>')
-            .css({'text-align': 'center', flex: '0 0 30px', 'vertical-align': 'baseline'})
+            .css({'text-align': 'center', flex: '0 0 35px'})
             .appendTo( this.div_search );
         
         var linkGear = $('<a>',{href:'#', 

@@ -273,7 +273,35 @@
                 maxlength="40" size="40" />
         </div>    
 </div>
-
+<div>
+    <div class="header">
+        <label>Show counts as</label>
+    </div>
+    <label><input name="svs_FacetCounts" class="text ui-widget-content ui-corner-all" type="radio" checked value="bage"
+            style="display:inline-block;margin:0.3em 0 0.5em"/>Badge</label>
+    <label><input name="svs_FacetCounts" class="text ui-widget-content ui-corner-all" type="radio" value="bracket"
+            style="display:inline-block;margin-left:10px"/>Brackets</label>
+    <label><input name="svs_FacetCounts" class="text ui-widget-content ui-corner-all" type="radio" value="none"
+            style="display:inline-block;margin-left:10px"/>None</label>
+            
+</div>
+<div>
+    <div class="header">
+        <label>Counts alignment in LIST mode</label>
+    </div>
+    <label><input name="svs_AlignCounts" class="text ui-widget-content ui-corner-all" type="radio" checked value="right"
+            style="display:inline-block;margin:0.3em 0 0.5em"/>Right</label>
+    <label><input name="svs_AlignCounts" class="text ui-widget-content ui-corner-all" type="radio" value="left"
+            style="display:inline-block;margin-left:10px"/>Left (appended to label)</label>
+            
+</div>
+<div>
+    <div class="header">
+        <label for="svs_FacetSeparator">Show separating lines</label>
+    </div>
+    <input name="svs_FacetSeparator" id="svs_FacetSeparator" class="text ui-widget-content ui-corner-all" type="checkbox"
+            style="display:inline-block;margin:0" title="Show horizontal separating lines between facets"/>
+</div>
 
 </fieldset>
 </div>

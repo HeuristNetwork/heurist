@@ -159,7 +159,7 @@ default content consists of
     if ($isWebPage) { //set in websiteRecord.php 
         //WEB PAGE - EMBED
     ?>
-        <div class="ent_wrapper heurist-website">
+        <div class="ent_wrapper heurist-website selectmenu-parent">
             <?php
             if ($showWarnAboutPublic) {
                 print '<div style="top:0;height:20px;position:absolute;text-align:center;width:100%;color:red;">Web page record is not public. It will not be visible to the public</div>';
@@ -182,7 +182,7 @@ default content consists of
     } else {
     ?>
 
-        <div class="ent_wrapper heurist-website">
+        <div class="ent_wrapper heurist-website selectmenu-parent">
             <div id="main-header" class="ent_header ui-heurist-header2" <?php print $image_banner ? 'style="background-image:url(\'' . $image_banner . '\') !important;background-repeat: repeat-x !important;"' : '' ?>>
 
                 <?php

@@ -228,12 +228,12 @@ function editCMS2(website_document){
                             +'</div>'
                             +'<div id="treePage" style="font-size:1em;top:43px" class="ent_wrapper">'
                             
-                                +'<div class="treePageHeader ent_header" style="height:85px;font-size:0.9em">'
+                                +'<div class="treePageHeader ent_header" style="height:85px;font-size:0.9em;line-height:normal;">'
                                     
                                     +(isWebPage
                                     ?('<div style="padding:20px"><a href="#" class="btn-website-edit">'
                                         +'<span class="ui-icon ui-icon-pencil"/>&nbsp;Configure webpage</a></div>')
-                                    :'<h3 class="truncate" style="margin-block-start: 0.7em; margin-block-end: 0.7em;"></h3>')
+                                    :'<h3 class="truncate" style="margin-block-start: 0.7em; margin-block-end: 0.7em; font-size: revert; font-family: revert;"></h3>')
                                     +'<span style="float:left;" class="heurist-helper1 page_tree">'
                                         +'Drag elements to re-order</span>'
                                     +'<span style="float:right" class="heurist-helper1 page_tree">'
@@ -245,7 +245,7 @@ function editCMS2(website_document){
                                         
                                 +'</div>'
                             
-                                +'<div class="treePage ent_content_full" style="top:30px;padding:10px;border-top:1px solid gray"/>' //treeview - edit page
+                                +'<div class="treePage ent_content_full" style="top:30px;padding:10px;border-top:1px solid gray;line-height:normal;"/>' //treeview - edit page
                                 +'<div class="propertyView ent_content_full ui-widget-content-gray" '
                                     +' style="top:190px;padding:10px 0px;display:none;"/>' //edit properties for element
                                 

@@ -163,8 +163,7 @@ $.widget( "heurist.searchBuilderItem", {
             .attr('title', 'Should field satisfy all criteria or any of them' )
             .addClass('text ui-corner-all')
             .css({'margin':'10px 0px 2px 8px',border:'none',width:33}) //mr:1 w:40 for "and"
-            .appendTo( this.sel_container )
-            .hide();
+            .appendTo( this.sel_container );
             
         
         this.select_relationtype = $( '<select>' )
@@ -415,7 +414,9 @@ $.widget( "heurist.searchBuilderItem", {
             ed_options['detailtype'] = (field_type=='blocktext' || field_type=='file')?'freetext':field_type;
             ed_options['dtID'] = dty_ID;
             
-            if(field_type=='enum' && this.options.enum_field!=null){
+            if(field_type=='enum' && this.options.enum_field!=null && 
+                !(this.options.enum_field=='term' && this.select_comparison.val() != '')){
+
                 ed_options['detailtype'] = 'freetext';
             }
 
@@ -612,6 +613,15 @@ Whole value = EQUAL
                 this._predicate_input_ele.editing_input('setBetweenMode', false);        
             }
             
+            if(field_type=='enum' && this.options.enum_field=='term' && cval != 'any' && cval != 'NULL'){
+
+                if((cval=='' && this._predicate_input_ele.find('.input-div > input').length == 0) ||
+                    cval!='' && this._predicate_input_ele.find('.input-div > select').length == 0){ // check that input is correct version (text input or dropdown)
+
+                    this._onSelectField(); //this._refresh();
+                }
+            }
+            
             if($.isFunction(this.options.onchange)){
                     this.options.onchange.call(this);
             }
@@ -722,11 +732,18 @@ Whole value = EQUAL
                 has_relatype_value = (relatype_vals.length>1 ||!window.hWin.HEURIST4.util.isempty(relatype_vals[0]));
             }
             has_value =  (vals.length>1 || !window.hWin.HEURIST4.util.isempty(vals[0]));
-
             
             if (!(has_relatype_value || has_value) && !(op=='any' || op=='NULL')){
                 return null;
             }            
+
+            if(this._current_field_type=='enum' && this.options.enum_field=='term' && 
+                this._predicate_input_ele.find('.input-div > select').length > 0){ // change from ids to label
+
+                for (let i = 0; i < vals.length; i++) {
+                    vals[i] = $Db.trm(vals[i], 'trm_Label');
+                }
+            }
 
             if(op=='any'){
                     op = '';
@@ -734,7 +751,7 @@ Whole value = EQUAL
             }else if(op=='NULL'){
                     op = '';
                     vals = ['NULL'];
-            }else if( ( (this._current_field_type=='enum'  && this.enum_field==null)
+            }else if( ( (this._current_field_type=='enum'  && this.options.enum_field==null)
                         || this._current_field_type=='relationtype' 
                         || this._current_field_type=='ids'
                         || this._current_field_type=='user'
@@ -867,6 +884,7 @@ Whole value = EQUAL
             this.select_conjunction.hide();
         }else{
             this.select_conjunction.css('visibility', 'visible');
+            this.select_conjunction.show();
             
             var is_any = (this.select_conjunction.val()=='any');
             

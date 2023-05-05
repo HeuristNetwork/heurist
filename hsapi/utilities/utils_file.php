@@ -71,6 +71,8 @@
     createBz2Archive
     
     ===
+    getTitleFromURL
+    
     loadRemoteURLContentSpecial tries to avoid curl if url on the same domain
     
     loadRemoteURLContent
@@ -1356,6 +1358,34 @@ function saveURLasFile($url, $filename)
     }else{
         return 0;
     }
+}
+
+/**
+* Returns title of html dcoument for given url
+* 
+* @param mixed $url
+* @return $title
+*/
+function getTitleFromURL($url){
+
+    $title = null;
+    
+    $url = str_replace(' ', '+', $url);
+
+    $data = loadRemoteURLContentWithRange($url, "0-10000");//get title of webpage
+
+    if ($data){
+
+        // "/<title>(.*)<\/title>/siU"
+        preg_match('!<\s*title[^>]*>\s*([^<]+?)\s*</title>!is', $data, $matches);
+        if ($matches) {
+            // Clean up title: remove EOL's and excessive whitespace.
+            $title = preg_replace('/\s+/', ' ', $matches[1]);   
+            $title = trim($title);
+        }
+    }
+    
+    return $title;
 }
 
 //

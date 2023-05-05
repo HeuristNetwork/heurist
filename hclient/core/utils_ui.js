@@ -1170,6 +1170,7 @@ window.hWin.HEURIST4.ui = {
                         if(parent_ele.length==0)
                         */
                         if(!parent_ele || parent_ele.length==0) {
+                            //among parent not found - global search
                             parent_ele = $('.selectmenu-parent');
                             if(!parent_ele || parent_ele.length==0) {                
                                 parent_ele = selObj.parent();   

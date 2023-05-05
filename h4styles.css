@@ -1414,7 +1414,7 @@ div.saved-search > .edit-delete-buttons, .recordDiv > .edit-delete-buttons {
 .tag5{font-size:1.2em;}
 
 .facet-item {
-    line-height:1.8em;
+    line-height:1.4em; /* was 1.8 */
 }
 .facet_link {
     text-decoration: none;

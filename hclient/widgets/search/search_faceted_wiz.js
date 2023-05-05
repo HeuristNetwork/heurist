@@ -949,7 +949,15 @@ $.widget( "heurist.search_faceted_wiz", {
 
                 $dlg.find('#svs_ExitButton').prop('checked', this.options.params.ui_exit_button!==false);
                 $dlg.find('#svs_ExitButtonLabel').val(this.options.params.ui_exit_button_label);
+
+                if(!this.options.params.ui_counts_mode) this.options.params.ui_counts_mode = 'badge';
+                $dlg.find('input[name="svs_FacetCounts"][value="'+this.options.params.ui_counts_mode+'"]').prop('checked', true);
+
+                if(!this.options.params.ui_counts_align) this.options.params.ui_counts_align = 'right';
+                $dlg.find('input[name="svs_AlignCounts"][value="'+this.options.params.ui_counts_align+'"]').prop('checked', true);
                 
+                $dlg.find('#svs_FacetSeparator').prop('checked', this.options.params.ui_separate_line===true);
+
                 
                 if(this.options.params.sort_order){
                     var s = this.options.params.sort_order;
@@ -998,6 +1006,11 @@ $.widget( "heurist.search_faceted_wiz", {
                 
                 $dlg.find('#svs_ExitButton').prop('checked', true);
                 $dlg.find('#svs_ExitButtonLabel').val('');
+                
+                $dlg.find('input[name="svs_FacetCounts"][value="badge"]').prop('checked', true);
+                $dlg.find('input[name="svs_AlignCounts"][value="right"]').prop('checked', true);
+
+                $dlg.find('#svs_FacetSeparator').prop('checked', false);
                 
                 sa_order.val('')
                 
@@ -1528,7 +1541,7 @@ $.widget( "heurist.search_faceted_wiz", {
                             orderby: old_facet.orderby,
                             type: node.data.type,
                             order: old_facet.order>=0?old_facet.order:order_for_new,
-                            trm_tree: old_facet.trm_tree && old_facet.trm_tree === true
+                            trm_tree: (old_facet.trm_tree && old_facet.trm_tree === true)
                         } );
 
                         if(!(old_facet.order>=0)) order_for_new++;
@@ -1912,6 +1925,8 @@ $.widget( "heurist.search_faceted_wiz", {
                 if(facet == 'tree'){
                     facet = 3; // force list
                     this.options.params.facets[k].trm_tree = true;
+                }else{
+                    this.options.params.facets[k].trm_tree = false;
                 }
                 this.options.params.facets[k].isfacet = facet;
 
@@ -2082,6 +2097,10 @@ $.widget( "heurist.search_faceted_wiz", {
         
         this.options.params.ui_exit_button = $dlg.find('#svs_ExitButton').is(':checked');
         this.options.params.ui_exit_button_label = $dlg.find('#svs_ExitButtonLabel').val();
+        
+        this.options.params.ui_counts_mode = $dlg.find('input[name="svs_FacetCounts"]:checked').val();
+        this.options.params.ui_counts_align = $dlg.find('input[name="svs_AlignCounts"]:checked').val();
+        this.options.params.ui_separate_line = $dlg.find('#svs_FacetSeparator').is(':checked');
         
         //localized paramerers
         //this.options.params.ui_title =  $dlg.find('#svs_Title').val();

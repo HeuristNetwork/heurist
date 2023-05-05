@@ -41,8 +41,7 @@ $db = @$_REQUEST['db'];
 // init main system class
 $system = new System();
 
-//define('EDIR','../../../external/3D/');
-define('EDIR','http://127.0.0.1/h6-alpha/external/3D/');
+define('EDIR','../../../external/3D/');
 
 if($system->init($db, true, false)){
 
@@ -178,9 +177,9 @@ if($is_not_inited){
 <meta content="charset=UTF-8"/>
 <title>3D Viewer</title>
 <script type="text/javascript" src="<?php echo EDIR;?>o3dv.min.js"></script>
-</head>
+</head>                                     
 <body>
-<div id="online_3d_viewer" class="online_3d_viewer" style="width:50%;height:100%;border:2px solid red">
+<div id="online_3d_viewer" class="online_3d_viewer" style="width:100%;height:100%;Xborder:2px solid red">
 </div>
 </body>
 <script type="text/javascript">

@@ -615,3 +615,7 @@ span.fancytree-node:hover{
     background-color: none !important;
     border: none !important;
 }
+
+.borderless{
+    border: none !important;
+}
