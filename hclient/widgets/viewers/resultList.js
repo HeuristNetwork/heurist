@@ -1129,7 +1129,7 @@ $.widget( "heurist.resultList", {
         
         if(newmode=='icons_expanded') newmode='record_content'; //backward capability 
 
-        if(this._is_publication && !this.options.allow_record_content_view){ // switch to list mode and hide button
+        if(this._is_publication && this.options.allow_record_content_view){ // switch to list mode and hide button
             newmode = 'list';
             this.view_mode_selector.find('button[value="record_content"]').hide();
         }
