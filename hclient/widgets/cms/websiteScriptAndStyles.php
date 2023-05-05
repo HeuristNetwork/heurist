@@ -429,7 +429,7 @@ function initMainMenu( afterInitMainMenu ){
 //
 function loadPageContent(pageid, eventdata){
     _dout('loadPageContent '+pageid);
-    
+
     if(pageid>0){
         
         var page_target = $('#main-content');
@@ -807,7 +807,8 @@ function afterPageLoad(document, pageid, eventdata){
 }
 
 //
-// Adds listeners for all "a" elements with href="pageid" for intepage website links (converts links)
+// Adds listeners for all "a" elements with href="pageid" for inter page website links (converts links)
+// this is global function - see recordListExt
 //
 function initLinksAndImages($container, search_data){   
 
@@ -820,47 +821,75 @@ function initLinksAndImages($container, search_data){
     $container.find('a').each(function(i,link){
         
         var href = $(link).attr('href');
-        if (href && href!='#' && $(link).attr('target')!='_blank') 
+        if ((href && href!='#' && $(link).attr('target')!='_blank') || $(link).attr('data-query')) 
         {
-            var pageid = 0;
-            if(  (href.indexOf(window.hWin.HAPI4.baseURL)===0 || href[0] == '?' 
-                || href.indexOf('../heurist/?')===0  || href.indexOf('./?')===0)
-                && window.hWin.HEURIST4.util.getUrlParameter('db',href) == window.hWin.HAPI4.database
-                && window.hWin.HEURIST4.util.getUrlParameter('id',href) == home_page_record_id)
-            {
-                pageid = window.hWin.HEURIST4.util.getUrlParameter('pageid',href);
-            }else if(href.indexOf(window.hWin.HAPI4.baseURL)===0){ //starts with 
-                pageid = href.substr(window.hWin.HAPI4.baseURL.length);
-            }else if(href.indexOf('./')===0){
-                href = href.substring(2);
-                pageid = href;
-            }else if(!isNaN(parseInt(href)) && href>0){ //integer
-                pageid = href;
+            var pageid = 0, query=null;
+            
+            if(!$(link).attr('data-query')){
+                if(  (href.indexOf(window.hWin.HAPI4.baseURL)===0 || href[0] == '?' 
+                    || href.indexOf('../heurist/?')===0  || href.indexOf('./?')===0)
+                    && window.hWin.HEURIST4.util.getUrlParameter('db',href) == window.hWin.HAPI4.database
+                    && window.hWin.HEURIST4.util.getUrlParameter('id',href) == home_page_record_id)
+                {
+                    pageid = window.hWin.HEURIST4.util.getUrlParameter('pageid',href);
+                    query = window.hWin.HEURIST4.util.getUrlParameter('q', href);
+
+                }else if(href.indexOf(window.hWin.HAPI4.baseURL)===0){ //starts with 
+                    pageid = href.substr(window.hWin.HAPI4.baseURL.length);
+                }else if(href.indexOf('./')===0){
+                    href = href.substring(2);
+                    pageid = href;                                  
+                }else if(!isNaN(parseInt(href)) && href>0){ //integer
+                    pageid = href;
+                }
             }
             
             if(window.hWin.HEURIST4.util.isNumber(pageid) && pageid>0){
                 
                 $(link).attr('data-pageid', pageid);
                 
-                var scr = 'javascript:{window.hWin.loadPageContent('+pageid+');window.hWin.HEURIST4.util.stopEvent(event);}';
-                $(link).attr('href',scr);
+                var eventdata = null;
+                //if(query!=null){
+                //    eventdata = {event_type: window.hWin.HAPI4.Event.ON_REC_SEARCHSTART, q:query};
+                //}
                 
-            }else if(href.indexOf('q=')===0){ //special case for links in smarty reports
+                $(link).click(function(event){
+                    window.hWin.loadPageContent(pageid, eventdata);
+                    window.hWin.HEURIST4.util.stopEvent(event);
+                    return false;
+                });
+                //var scr = 'javascript:{}';
+                //attr('href',scr);
                 
-                var request = {detail:'ids', neadall:1, w:'a',
-                            q:href.substring(2),
-                            search_page: search_data.search_page,
-                            search_realm: search_data.search_realm};
+            }else if(href.indexOf('q=')===0 || $(link).attr('data-query') ){ //special case for links in smarty reports
+            
+                var query = $(link).attr('data-query')
+                        ? $(link).attr('data-query')
+                        : href.substring(2);
+                
+                var current_template = '__def';
+                var request = {detail:'ids', neadall:1, w:'a', q:query};
+                if(search_data){
+                        if(search_data.search_page) request['search_page'] = search_data.search_page;
+                        if(search_data.search_realm) request['search_realm'] = search_data.search_realm;
+                        if(search_data.smarty_template) current_template = search_data.smarty_template;
+                }
+                if(!href || href=='#' || href.indexOf('q=')===0){
+                    //need for right click - open link in new tab
+                    href = '/' + window.hWin.HAPI4.database+'/tpl/'+current_template+'/'+encodeURIComponent(query);
+                }
                             
-                var scr = 'javascript:{window.hWin.HAPI4.RecordSearch.doSearch(window.hWin,'+JSON.stringify(request)
-                                +');window.hWin.HEURIST4.util.stopEvent(event);}';
-                $(link).attr('href',scr);
+                $(link).click(function(event){
+                    window.hWin.HEURIST4.util.stopEvent(event);
+                    window.hWin.HAPI4.RecordSearch.doSearch(window.hWin,request);
+                    return false;
+                });
+                
             }
         }
-        var href = $(link).attr('href');
         if (!window.hWin.HEURIST4.util.isempty(href) && href!='#' && (href.indexOf('./')==0 || href.indexOf('/')==0)){ //relative path
               href = window.hWin.HAPI4.baseURL + href.substring(href.indexOf('/')==0?1:2);
-              $(link).attr('href', href);
+              $(link).attr('href',href);
         }
         
     });

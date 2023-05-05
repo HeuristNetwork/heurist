@@ -130,7 +130,6 @@ $requestUri:
             $redirect .= '&pageid='.$requestUri[4];    
             $params['pageid'] = $requestUri[4];
         }
-        
         $_SERVER["REQUEST_URI"] = $host_params['install_dir']; //'/heurist/';
         
         $_REQUEST = $params;

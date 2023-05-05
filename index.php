@@ -344,7 +344,7 @@ if($isLocalHost){
         ?>
 
         var lt = window.hWin.HAPI4.sysinfo['layout'];
-        
+
         window.hWin.HAPI4.is_publish_mode = (lt=='Beyond1914' ||  lt=='UAdelaide' ||
             lt=='DigitalHarlem' || lt=='DigitalHarlem1935' || lt=='WebSearch' );
         

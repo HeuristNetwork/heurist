@@ -264,24 +264,62 @@ this._dout('onLoadComplete refresh again');
             fdoc.getElementsByTagName('head')[0].appendChild(style);
             
         }
-//2020-03-08        
-        //this._trigger( 'loadcomplete2', null, null );
         
-        if(this.options.is_frame_based && this._is_publication){                
-            //init "a" 
-            if($.isFunction(initLinksAndImages)){
+        if(this.options.is_frame_based){                
+            
+            var fdoc = this.dosframe[0].contentWindow.document;
+            var smarty_template = window.hWin.HEURIST4.util.getUrlParameter('template', this.options.url);
+            
+            if(this._is_publication && $.isFunction(initLinksAndImages))
+            {
+                //init "a href" for CMS pages
                 
-                var fdoc = this.dosframe[0].contentWindow.document;
+                if(!window.hWin.HEURIST4){
+                    var script = document.createElement('script');
+                    script.type = 'text/javascript';
+                    script.src = window.hWin.HAPI4.baseURL + 'hclient/core/detectHeurist.js';
+                    fdoc.getElementsByTagName('head')[0].appendChild(script);
+                }
                 
-                var script = document.createElement('script');
-                script.type = 'text/javascript';
-                script.src = window.hWin.HAPI4.baseURL + 'hclient/core/detectHeurist.js';
-                fdoc.getElementsByTagName('head')[0].appendChild(script);
+                initLinksAndImages($(fdoc.body), {
+                        search_page: this.options.search_page, 
+                        search_realm: this.options.search_realm,
+                        smarty_template: smarty_template
+                });
+            }else if(smarty_template){
                 
-                initLinksAndImages($(fdoc), {search_page:this.options.search_page, search_realm:this.options.search_realm});
+                $(fdoc.body).find('a').each(function(i,link){
+                    var href = $(link).attr('href');
+                    if ((href && href.indexOf('q=')===0) || $(link).attr('data-query')) 
+                    {
+                        var query = $(link).attr('data-query')
+                                ? $(link).attr('data-query')
+                                : href.substring(2);
+                        
+                        var request = {detail:'ids', neadall:1, w:'a', q:query};
+                        if(this.options.search_realm) request['search_realm'] = this.options.search_realm;
+                        
+                        if(!href || href=='#' || href.indexOf('q=')===0){
+                            //need for right click - open link in new tab
+                            href = '/' + window.hWin.HAPI4.database+'/tpl/'+smarty_template+'/'+encodeURIComponent(query);
+                        }
+                                    
+                        $(link).click(function(event){
+                            window.hWin.HEURIST4.util.stopEvent(event);
+                            window.hWin.HAPI4.RecordSearch.doSearch(window.hWin,request);
+                            return false;
+                        });
+
+                        
+                        
+                    }
+                    if (!window.hWin.HEURIST4.util.isempty(href) && href!='#' && (href.indexOf('./')==0 || href.indexOf('/')==0)){ //relative path
+                            href = window.hWin.HAPI4.baseURL + href.substring(href.indexOf('/')==0?1:2);
+                            $(link).attr('href',href);
+                    }
+                    
+                });
             }
-            
-            
         }
         
     },
