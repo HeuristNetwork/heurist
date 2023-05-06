@@ -491,6 +491,7 @@ function smarty_output_filter_strip_js($tpl_source, Smarty_Internal_Template $te
             $head = '';
             $close_tags = '';
         
+            // TODO: Don't output html header and footer for reports in raw text mode    
             if(strpos($tpl_source, '<html>')===false){
                 $open_tags = '<html><head><meta http-equiv="Content-Type" content="text/html; charset=utf-8"></head><body>';
                 $close_tags = '</body></html>';

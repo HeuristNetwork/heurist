@@ -59,6 +59,7 @@ function hPublishDialog( _options )
             if(options.mode=='smarty'){
                 popupelement.find("#btnScheduleSmarty").button().click(_scheduleSmarty);
                 popupelement.find("#lbl_mode2").text('javascript wrap');
+                popupelement.find("#lbl_mode3").text('raw text');
             }
             
             _fillUrls();      
