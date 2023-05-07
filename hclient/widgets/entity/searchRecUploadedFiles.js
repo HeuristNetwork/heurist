@@ -33,6 +33,8 @@ $.widget( "heurist.searchRecUploadedFiles", $.heurist.searchEntity, {
         this.btn_edit_mimetypes = this.element.find('#btn_edit_mimetypes');
         this.btn_remove_dups = this.element.find('#btn_remove_dups');
         this.btn_remove_unused = this.element.find('#btn_remove_unused');
+        this.btn_refresh_index = this.element.find('#btn_refresh_index');
+        this.btn_create_records = this.element.find('#btn_create_records');
         
         if(this.options.edit_mode=='none'){
             this.element.find('#div_add_record').hide();
@@ -84,6 +86,30 @@ $.widget( "heurist.searchRecUploadedFiles", $.heurist.searchEntity, {
                 .click(function(e) {
                     that._trigger('onremoveunused');
                 }); 
+
+            this.btn_create_records.button({label: window.hWin.HR("Create multimedia records for selected")})
+                .click(function() {
+                    that._trigger('onfilerecs')
+                }).position({
+                    my: 'right top+5',
+                    at: 'right bottom',
+                    of: this.btn_remove_unused
+                });
+
+            this.btn_refresh_index.button({label: window.hWin.HR("Refresh index")})
+                .click(function() {
+                    that._trigger('onrefreshindex')
+                }).hide();
+
+            this.element.find('#select_all')
+                .change(function() {
+                    that._trigger('onselectall');
+                })
+                .parent().position({
+                my: 'right-10 center',
+                at: 'left center',
+                of: this.btn_create_records
+            });
         }
 
         this.selectGroup = this.element.find('#sel_group');

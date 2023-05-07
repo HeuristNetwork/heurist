@@ -24,6 +24,7 @@ require_once (dirname(__FILE__).'/../System.php');
 require_once (dirname(__FILE__).'/dbEntityBase.php');
 require_once (dirname(__FILE__).'/dbEntitySearch.php');
 require_once (dirname(__FILE__).'/../dbaccess/db_files.php');
+require_once (dirname(__FILE__).'/../dbaccess/db_records.php');
 
 /**
 * some public methods
@@ -1172,6 +1173,149 @@ When we open "iiif_image" in mirador viewer we generate manifest dynamically.
 
             if($ret){
                 $ret = array('local' => $local_fixes, 'remote' => $remote_fixes, 'location_local' => $dif_local_fixes);
+            }
+        }
+        else if(@$this->data['create_media_records']){ // create Multi Media records for files without one
+
+            $ids = $this->data['create_media_records'];
+            if(is_int($ids) && $ids > 0){ // multiple
+                $ids = array($ids);
+            }else if(!is_array($ids) && count($ids) > 0){ // single
+                $ids = explode(',', $ids);
+            }
+
+            $cnt_skipped = 0;
+            $cnt_error = array();
+            $cnt_new = array();
+
+            // ----- Reqruied
+            $rty_id = 0;
+            $dty_file = 0;
+            $dty_title = 0;
+            // ----- Recommended
+            $dty_desc = defined('DT_SHORT_SUMMARY') ? DT_SHORT_SUMMARY : 0;
+            $dty_name = defined('DT_FILE_NAME') ? DT_FILE_NAME : 0;
+            // ----- Optional
+            $dty_path = defined('DT_FILE_FOLDER') ? DT_FILE_FOLDER : 0;
+            $dty_ext = defined('DT_FILE_EXT') ? DT_FILE_EXT : 0;
+            $dty_size = defined('DT_FILE_SIZE') ? DT_FILE_SIZE : 0;
+            // ulf_ExternalFileReference goes into rec_URL
+
+            if(defined('RT_MEDIA_RECORD') || ($this->system->defineConstant('RT_MEDIA_RECORD') && RT_MEDIA_RECORD > 0)){
+                $rty_id = RT_MEDIA_RECORD;
+            }
+            if(defined('DT_FILE_RESOURCE') || ($this->system->defineConstant('DT_FILE_RESOURCE') && DT_FILE_RESOURCE > 0)){
+                $dty_file = DT_FILE_RESOURCE;
+            }
+            if(defined('DT_NAME') || ($this->system->defineConstant('DT_NAME') && DT_NAME > 0)){
+                $dty_title = DT_NAME;
+            }
+
+            if(defined('DT_SHORT_SUMMARY') || ($this->system->defineConstant('DT_SHORT_SUMMARY') && DT_SHORT_SUMMARY > 0)){
+                $dty_desc = DT_SHORT_SUMMARY;
+            }
+            if(defined('DT_FILE_NAME') || ($this->system->defineConstant('DT_FILE_NAME') && DT_FILE_NAME > 0)){
+                $dty_name = DT_FILE_NAME;
+            }
+
+            if(defined('DT_FILE_FOLDER') || ($this->system->defineConstant('DT_FILE_FOLDER') && DT_FILE_FOLDER > 0)){
+                $dty_path = DT_FILE_FOLDER;
+            }
+            if(defined('DT_FILE_EXT') || ($this->system->defineConstant('DT_FILE_EXT') && DT_FILE_EXT > 0)){
+                $dty_ext = DT_FILE_EXT;
+            }
+            if(defined('DT_FILE_SIZE') || ($this->system->defineConstant('DT_FILE_SIZE') && DT_FILE_SIZE > 0)){
+                $dty_size = DT_FILE_SIZE;
+            }
+
+            if($rty_id > 0 && $dty_file > 0 && $dty_title > 0){
+
+                $rec_search = 'SELECT count(rec_ID) AS cnt '
+                            . 'FROM Records INNER JOIN recDetails ON rec_ID = dtl_RecID '
+                            . 'WHERE rec_FlagTemporary!=1 AND rec_RecTypeID='.$rty_id
+                            . ' AND dtl_DetailTypeID='.$dty_file.' AND dtl_UploadedFileID=';
+
+                $file_search = 'SELECT ulf_OrigFileName, ulf_Description, ulf_FileName, ulf_FilePath, ulf_MimeExt, ulf_FileSizeKB, ulf_ExternalFileReference '
+                            .  'FROM recUploadedFiles '
+                            .  'WHERE ulf_ID=';
+
+                $record = array(
+                    'ID' => 0,
+                    'RecTypeID' => $rty_id,
+                    'no_validation' => true,
+                    'URL' => '',
+                    'ScratchPad' => null,
+                    'AddedByUGrpID' => $this->system->get_user_id(), //ulf_UploaderUGrpID
+                    'details' => array()
+                );
+                foreach ($ids as $ulf_id) {
+
+                    $record['URL'] = '';
+                    $record['details'] = array();
+
+                    $rec_res = mysql__select_value($mysqli, $rec_search . $ulf_id);
+                    if($rec_res > 0){ // already have a record
+                        $cnt_skipped ++;
+                        continue;
+                    }
+
+                    $file_details = mysql__select_row_assoc($mysqli, $file_search . $ulf_id);
+                    if($file_details == null || $file_details == false){ // unable to retrieve file data
+                        $cnt_error[] = $ulf_id;
+                        continue;
+                    }
+
+                    $details = array(
+                        $dty_file => $ulf_id,
+                        $dty_title => $file_details['ulf_OrigFileName']
+                    );
+
+                    if($file_details['ulf_OrigFileName'] == '_remote'){
+                        $record['URL'] = $file_details['ulf_ExternalFileReference'];
+                    }
+
+                    if($dty_desc > 0 && !empty($file_details['ulf_Description'])){
+                        $details[$dty_desc] = $file_details['ulf_Description'];
+                    }
+                    if($dty_name > 0 && !empty($file_details['ulf_FileName'])){
+                        $details[$dty_name] = $file_details['ulf_FileName'];
+                    }
+                    if($dty_path > 0 && !empty($file_details['ulf_FilePath'])){
+                        $details[$dty_path] = $file_details['ulf_FilePath'];
+                    }
+                    if($dty_ext > 0 && !empty($file_details['ulf_MimeExt'])){
+                        $details[$dty_ext] = $file_details['ulf_MimeExt'];
+                    }
+                    if($dty_size > 0 && !empty($file_details['ulf_FileSizeKB'])){
+                        $details[$dty_size] = $file_details['ulf_FileSizeKB'];
+                    }
+
+                    $record['details'] = $details;
+
+                    $res = recordSave($this->system, $record); //see db_records.php
+                    if(@$res['status'] != HEURIST_OK){
+                        $cnt_error[] = $ulf_id;
+                        continue;
+                    }
+
+                    $cnt_new[] = $res['data'];
+                }
+                
+                $ret = array('new' => $cnt_new, 'error' => $cnt_error, 'skipped' => $cnt_skipped);
+            }else{
+
+                $extra = '';
+                if($rty_id <= 0){
+                    $extra = 'missing the Digital media record type (2-5)';
+                }
+                if($dty_file <= 0){
+                    $extra .= (($extra == '' && $dty_title > 0) ? ', ': ($extra == '' ? ' and ' : '')) . 'missing the required file field (2-38)';
+                }
+                if($dty_title <= 0){
+                    $extra .= (($extra == '') ? ' and ': '') . 'missing the required title field (2-1)';
+                }
+
+                $this->system->addError(HEURIST_ACTION_BLOCKED, 'Unable to proceed with Media record creations, due to ' . $extra);
             }
         }
 

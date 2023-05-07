@@ -160,7 +160,16 @@ $.widget( "heurist.manageRecUploadedFiles", $.heurist.manageEntity, {
                 "searchrecuploadedfilesonaddlocal": this._uploadFileAndRegister,   //browse, register and exit at once
                 "searchrecuploadedfilesondownload": this._downloadFileRefs,
                 "searchrecuploadedfilesonremoveunused": this._deleteUnused,
-                "searchrecuploadedfilesonremovedups": this._combineDups
+                "searchrecuploadedfilesonremovedups": this._combineDups,
+                "searchrecuploadedfilesonrefreshindex": this._refreshIndex,
+                "searchrecuploadedfilesonfilerecs": this._createMediaRecords,
+                "searchrecuploadedfilesonselectall": function(event){ 
+                    let val = 'all';
+                    if($(event.target).find('#select_all').length > 0){
+                        val = $(event.target).find('#select_all').prop('checked') ? 'all' : '';
+                    }
+                    this.recordList.resultList('setSelected', val); 
+                }
         });
 
         return true;
@@ -1455,7 +1464,8 @@ window.hWin.HAPI4.baseURL+'?db=' + window.hWin.HAPI4.database  //(needplayer?'&p
 
         var that = this;
 
-        var ids = this.recordList ? this.recordList.resultList('getRecordSet').getIds() : 'all';
+        var ids = this.recordList ? this.recordList.resultList('getSelected', true) : 'all';
+
         var request = {
             'a': 'batch',
             'entity': that.options.entity.entityName,
@@ -1486,13 +1496,13 @@ window.hWin.HAPI4.baseURL+'?db=' + window.hWin.HAPI4.database  //(needplayer?'&p
 
         var that = this;
 
-        var ids = this.recordList ? this.recordList.resultList('getRecordSet').getIds() : 'all';
+        var ids = this.recordList ? this.recordList.resultList('getSelected', true) : 'all';
+
         var request = {
             'a': 'batch',
             'entity': that.options.entity.entityName,
             'merge_duplicates': 'all' //ids
         };
-        window.hWin.HEURIST4.msg.showMsgFlash('Under development', 3000);
 
         window.hWin.HAPI4.EntityMgr.doRequest(request, 
         function(response){
@@ -1515,6 +1525,74 @@ window.hWin.HAPI4.baseURL+'?db=' + window.hWin.HAPI4.database  //(needplayer?'&p
 
                 window.hWin.HEURIST4.msg.showMsgFlash(msg, 3000);
                 that.searchForm.searchRecUploadedFiles('searchRecent', null); // refresh
+            }else{
+                window.hWin.HEURIST4.msg.showMsgErr(response);
+            }
+        });
+    },
+
+    _refreshIndex: function(){
+
+        window.hWin.HEURIST4.msg.showMsgFlash('Currently in development', 3000);
+        return;
+        var that = this;
+        var request = {
+            'a': 'batch',
+            'entity': that.options.entity.entityName,
+            'refresh_indexes': 1
+        };
+
+        window.hWin.HAPI4.EntityMgr.doRequest(request, 
+        function(response){ console.log(response);
+
+            if(response.status == window.hWin.ResponseStatus.OK){
+
+                let count = response.data;
+                let msg = count + ' new indexes created';
+
+                window.hWin.HEURIST4.msg.showMsgFlash(msg, 3000);
+                that.searchForm.searchRecUploadedFiles('searchRecent', null); // refresh
+            }else{
+                window.hWin.HEURIST4.msg.showMsgErr(response);
+            }
+        });
+    },
+
+    _createMediaRecords: function(){
+
+        var that = this;
+        var ids = this.recordList ? this.recordList.resultList('getSelected', true) : [];
+
+        if(!window.hWin.HEURIST4.util.isArrayNotEmpty(ids)){
+            window.hWin.HEURIST4.msg.showMsgFlash('Select some files to create media records...', 4000);
+            return;
+        }
+
+        var request = {
+            'a': 'batch',
+            'entity': that.options.entity.entityName,
+            'create_media_records': ids
+        };
+
+        window.hWin.HAPI4.EntityMgr.doRequest(request, 
+        function(response){
+            if(response.status == window.hWin.ResponseStatus.OK){
+                
+                let counts = response.data;
+                let msg = '';
+                if(counts.new.length > 0){
+                    let url = window.hWin.HAPI4.baseURL+'?db='+window.hWin.HAPI4.database+'&q=ids:'+counts.new.join(',');
+                    msg = counts.new.length + ' new media record(s) created (search <a href="window.open(\''+url+'\', \'_blank\')">here</a>)<br>';
+                }
+                if(counts.skipped > 0){
+                    msg += counts.skipped + ' already have a media record<br>';
+                }
+                if(counts.error.length > 0){
+                    msg += counts.error.length + ' skipped due to an error (file id(s): '+ counts.error.join(', ') +')';
+                }
+
+                window.hWin.HEURIST4.msg.showMsgDlg(msg, null, null, {default_palette_class: 'ui-heurist-admin'});
+                //that.searchForm.searchRecUploadedFiles('searchRecent', null); // refresh - not need in this case
             }else{
                 window.hWin.HEURIST4.msg.showMsgErr(response);
             }
