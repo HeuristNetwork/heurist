@@ -677,9 +677,9 @@ console.log(menu.find('.ui-menu-item').css('padding'));
     },
     
 
-    //-------------------------------------- ADD, REPLACE, DELETE FIELD VALUES -------------------------------
+    //------ ADD, REPLACE, DELETE FIELD VALUES, CHANGE RECTYPE -------------------------------
     //
-    //  MAIN  in use
+    //  MAIN  in use 
     //  
     detailBatchEditPopup: function(action_type, callback) {
         
@@ -709,8 +709,9 @@ console.log(menu.find('.ui-menu-item').css('padding'));
             }
         }
         
-        var url = window.hWin.HAPI4.baseURL + 'hclient/framecontent/'+script_name+'.php?db='+window.hWin.HAPI4.database+'&action='+action_type;
-
+        var url = window.hWin.HAPI4.baseURL + 'hclient/framecontent/'+script_name+'.php?'
+                +'db='+window.hWin.HAPI4.database+'&action='+action_type;
+                
         window.hWin.HEURIST4.msg.showDialog(url, {height:450, width:750,
             padding: '0px',
             title: window.hWin.HR(action_type),

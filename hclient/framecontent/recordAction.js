@@ -97,7 +97,6 @@ function hRecordAction(_action_type, _scope_type, _field_type, _field_value) {
 
         selectRecordScope.empty();
 
-
         if(!window.hWin.HAPI4.currentRecordset){
             //debug
             window.hWin.HAPI4.currentRecordset = new hRecordSet({count: "1",offset: 0,reccount: 1,records: [1069], rectypes:[25]});
@@ -108,7 +107,7 @@ function hRecordAction(_action_type, _scope_type, _field_type, _field_value) {
 
         opt = new Option("please select the records to be affected …", "");
         selScope.appendChild(opt);
-        
+
         var is_initscope_empty = window.hWin.HEURIST4.util.isempty(init_scope_type);
         var inititally_selected = '';
         
@@ -121,20 +120,23 @@ function hRecordAction(_action_type, _scope_type, _field_type, _field_value) {
             selScope.appendChild(opt);
             inititally_selected = init_scope_type;
         }else{
-            
-            //selected count option
-            if((is_initscope_empty || init_scope_type=='selected') &&
-               (window.hWin.HAPI4.currentRecordsetSelection &&  window.hWin.HAPI4.currentRecordsetSelection.length > 0)) {
-                opt = new Option("Selected results set (count=" + window.hWin.HAPI4.currentRecordsetSelection.length+")", "Selected");
-                selScope.appendChild(opt);
-                inititally_selected = 'Selected';
-            }
+
             if(is_initscope_empty || init_scope_type=='current'){
                 //add result count option default
                 opt = new Option("Current results set (count="+ window.hWin.HAPI4.currentRecordset.length()+")", "Current");
                 selScope.appendChild(opt);
                 inititally_selected = 'Current';
+            }            
+            //selected count option
+            if( (action_type=='rectype_change') || 
+               ((is_initscope_empty || init_scope_type=='selected') &&
+               (window.hWin.HAPI4.currentRecordsetSelection &&  window.hWin.HAPI4.currentRecordsetSelection.length > 0))) 
+            {
+                opt = new Option("Selected results set (count=" + window.hWin.HAPI4.currentRecordsetSelection.length+")", "Selected");
+                selScope.appendChild(opt);
+                inititally_selected = 'Selected';
             }
+
             if(is_initscope_empty){
                 //find all types for result and add option for each with counts.
                 var rectype_Ids = window.hWin.HAPI4.currentRecordset.getRectypes();
