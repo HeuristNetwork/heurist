@@ -565,7 +565,12 @@ Whole value = EQUAL
             eqopts.push({key:'', title:'──────────', disabled:true});
             eqopts.push({key:'any', title:'any value (exists)'});
             if(field_type!='relationtype'){
-                eqopts.push({key:'NULL', title:'no data (missing)'});    
+                eqopts.push({key:'NULL', title:'no data (missing)'});
+
+                // Field count filtering
+                eqopts.push({key:'count', title:'count of values'});
+                eqopts.push({key:'', title:'Use n <n >n n1<>n2,', disabled: true});
+                eqopts.push({key:'', title:'where n is the count', disabled: true});
             }
         }
 
@@ -591,14 +596,16 @@ Whole value = EQUAL
         this._on( this.select_comparison, { change: function(){
 
             var cval = this.select_comparison.val();
-            if(cval=='NULL' || cval=='any' ){
+            if(cval=='NULL' || cval=='any' || cval=='count' ){
                 if(this._predicate_reltype_ele) this._predicate_reltype_ele.css('visibility', 'hidden');
-                this._predicate_input_ele.css('visibility', 'hidden');
+                this._predicate_input_ele.css('visibility', (cval=='count' ? 'visible' : 'hidden'));
+                this._predicate_input_ele.find('.editint-inout-repeat-button').parent().css('visibility', 'hidden');
                 this.select_conjunction.css('visibility', 'hidden');
                 this.cb_negate.hide();
             }else{
                 if(this._predicate_reltype_ele) this._predicate_reltype_ele.css('visibility', 'visible');
                 this._predicate_input_ele.css('visibility', 'visible');
+                this._predicate_input_ele.find('.editint-inout-repeat-button').parent().css('visibility', 'visible');
                 this._manageConjunction();
                 //this.cb_negate.show();
             }
@@ -784,7 +791,7 @@ Whole value = EQUAL
                 }else if(op=='ends'){
                     op = '';
                     $.each(vals,function(i,val){vals[i]='%'+vals[i]});
-                }else if (op=='<>'){
+                }else if (op=='<>' || op=='count'){
                     op = '';
                 }else if (op=='-<>'){
                     op = '-';
@@ -808,7 +815,8 @@ Whole value = EQUAL
                 key = 'r:'+this.options.dty_ID.substr(2); 
             }else    
             if(this.options.dty_ID>0){
-                key = 'f:'+this.options.dty_ID; 
+                let org_op = this.select_comparison.val();
+                key = (org_op!='count' ? 'f:' : 'fc:') + this.options.dty_ID;
                 
                 if(this.options.enum_field!=null){
                     key = key + ':' + this.options.enum_field;

@@ -1748,6 +1748,8 @@ $.widget( "heurist.mainMenu6", {
     //
     addSavedSearch: function( mode, is_modal, left_position, top_position ){
 
+        var that = this;
+
         if(this.edit_svs_dialog==null){
             this.edit_svs_dialog = new hSvsEdit();    
         }

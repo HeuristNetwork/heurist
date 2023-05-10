@@ -60,6 +60,8 @@ $.widget( "heurist.searchBuilder", {
 
     enum_fields: ['term','code','conceptid','desc','internalid'],
     
+    running_filter: false,
+    
     // the widget's constructor
     _create: function() {
 
@@ -685,6 +687,14 @@ $.widget( "heurist.searchBuilder", {
                         if(s) window.hWin.HEURIST4.util.copyStringToClipboard(s);
                 }});
                 
+                $(this.document).on(window.hWin.HAPI4.Event.ON_REC_SEARCH_FINISH, function(e, data){
+                    if(that.running_filter){
+                        that.running_filter = false;
+                        if(that.element.find('.save-filter').is(':checked')){
+                            that._doSaveSearch();
+                        }
+                    }
+                });
             }
                 
                 
@@ -1049,12 +1059,21 @@ $.widget( "heurist.searchBuilder", {
     }
 
     //
-    // save into database
+    // popup save filter dialog for current query
     //
-    ,_doSaveSearch: function(prevent_real_save){
-        
-        this._doCompose();
+    ,_doSaveSearch: function(prevent_real_save=false){
 
+        const widget = window.hWin.HAPI4.LayoutMgr.getWidgetByName('mainMenu6');
+        if(widget && !prevent_real_save){
+
+            const top = this.element.parent().css('top');
+            const left = this.element.parent().css('left');
+            setTimeout(() => {
+                widget.mainMenu6('show_ExploreMenu', null, 'svsAdd', {'top': top, 'left': left});
+            }, 2000);
+        }
+
+        this.element.find('.save-filter').prop('checked', false);
     }
 
     ,_doSearch: function(){
@@ -1105,6 +1124,7 @@ $.widget( "heurist.searchBuilder", {
                     request.rulesonly = this.rulesetSection.find('input[name="svs_RulesOnly"]:checked').val();
                 }
 
+                this.running_filter = true;
                 window.hWin.HAPI4.RecordSearch.doSearch( this, request );
             }
             
@@ -1198,7 +1218,7 @@ console.log(aCodes);
             var is_relationship = false; //is current branch is relationship (rt,rf)
             
             if(value!=null){
-                codes = code.split(':');
+                var codes = code.split(':');
 
                 var enum_field = null;
                 if (that.enum_fields.indexOf(codes[codes.length-1])>=0){
