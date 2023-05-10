@@ -152,7 +152,7 @@ $.widget( "heurist.search", {
         .css({
             'max-width':'99%',
             'resize':'none', 
-            'padding':'2px 0px 2px 5px',
+            'padding':'2px 50px 2px 5px',
             'line-height': '14px', 
             'min-width':'80px', 'width':'100%' }) 
         .addClass("text ui-widget-content ui-corner-all")
@@ -175,13 +175,12 @@ $.widget( "heurist.search", {
         if(this._is_publication || this.options.is_h6style){
 
             if(this._is_publication){
-                this.input_search.css({'height':'27px','min-height':'27px','padding':'2px 0px'}); //, 'width':'400'
+                this.input_search.css({'height':'27px','min-height':'27px','padding':'2px 0px','width':'100%'}); //, 'width':'400'
             }
 
             var sTop = isNotFirefox?'-35px':'-28px';
             this.input_search_prompt2.addClass('ui-widget-content').css({border:'none',top:sTop});
 
-            this.input_search.css({width:'100%'});
             this.input_search_prompt2.css({height:'calc(100%-2px)',
                 width:'calc(100%-2px)'});    
         }else{
@@ -306,6 +305,7 @@ $.widget( "heurist.search", {
 
             this.div_buttons.css({'min-width':'70px'});
 
+            // Saved filters 'dropdown'
             this.btn_saved_filters = 
             $('<span class="ui-main-color" '
                 +'style="font-size: 9px;position: absolute;min-width: 50px;cursor:pointer;">'
@@ -354,7 +354,7 @@ $.widget( "heurist.search", {
             // Save filter button
             this.btn_save_filter = $('<a>', {href: '#', title: window.hWin.HR('Save current filter')})
             .addClass('ui-main-color btn-aux logged-in-only')
-            .css({display:'inline-block','margin-left':'10px',width:'70px',position:'relative',top:'-3px'})
+            .css({display:'inline-block',width:'70px',position:'absolute'})
             .append('<span class="ui-icon ui-icon-save" />')
             .append('<span style="display: inline-block; text-decoration: none; font-size: smaller; margin-left: 5px">'+ window.hWin.HR('Save filter') +'</span>')
             .appendTo(this.div_buttons); // div_save_filter
@@ -376,7 +376,7 @@ $.widget( "heurist.search", {
         //
         // search/filter buttons - may be Search or Bookmarks according to settings and whether logged in
         //
-        this.div_search_as_user = $('<div>') //.css({'min-width':'18em','padding-right': '10px'})
+        this.div_search_as_user = $('<div>')
         .addClass('div-table-cell')  // logged-in-only
         .appendTo( this.div_search );
 
@@ -609,7 +609,10 @@ $.widget( "heurist.search", {
             function(e, data) { that._onSearchGlobalListener(e, data) } );
 
 
-        this.div_search.find('.div-table-cell').css('vertical-align','top');
+        this.div_search.find('.div-table-cell').css({
+            'vertical-align': 'top',
+            'padding-left': '5px'
+        });
 
         this._refresh();
 
@@ -773,39 +776,52 @@ $.widget( "heurist.search", {
         if(!this._is_publication && this.options.is_h6style 
             && this.btn_search_as_user && this.btn_search_as_user.button('instance')){
 
+                let showing_label = true;
                 if(this.element.width()<440){
                     this.div_buttons.css('min-width',50);
                     this.div_buttons.find('.btn-aux').width(25);
                     this.div_buttons.find('.btn-aux :nth-child(2)').hide();
                     this.btn_search_as_user.button('option','showLabel',false);
                     this.btn_search_as_user.css('min-width',31);
-                    this.btn_save_filter.css('margin-left',0);
+
+                    showing_label = false;
                 }else{
-                    this.div_buttons.css('min-width',70);
+                    //this.div_buttons.css('min-width',70);
                     this.div_buttons.find('.btn-aux :nth-child(2)').show();
                     this.btn_save_filter.width(70);
                     this.btn_faceted_wiz.width(90);
                     this.btn_filter_wiz.width(90);
                     this.btn_search_as_user.button('option','showLabel',true);
                     this.btn_search_as_user.css('min-width',90);
-                    this.btn_save_filter.css('margin-left',15);
                 }
 
-            if(this.element.width()<201){
-                this.div_buttons.hide();
-                this.btn_save_filter.parent().hide();
-            }else{
-                this.div_buttons.show();
-                this.btn_save_filter.parent().show();
-            }
-
-            this.div_buttons.position({
-                my: 'left bottom',
-                at: 'left bottom',
-                of: this.div_search_input
-            });
-
-            // Move small 'saved filters' dropdown
+                if(this.element.width()<201){
+                    this.div_buttons.hide();
+                }else{
+                    this.div_buttons.show();
+                }
+    
+                if(!this.options.btn_visible_newrecord){
+    
+                    let parent_width = this.element.width() * (showing_label ? 0.65 : 0.75);
+    
+                    this.input_search.parent().width(parent_width);
+                    this.input_search.width(parent_width - 52);
+                }
+    
+                this.div_buttons.position({
+                    my: 'left bottom',
+                    at: 'left bottom',
+                    of: this.div_search_input
+                });
+    
+                this.btn_save_filter.position({
+                    my: 'left top+10',
+                    at: 'left bottom',
+                    of: this.btn_search_as_user
+                });
+    
+                // Move 'saved filters' dropdown
             if(this.btn_saved_filters && this.btn_saved_filters.length != 0){
 
                 this.btn_saved_filters.position({
@@ -907,6 +923,12 @@ $.widget( "heurist.search", {
                     }
                 }
 
+                if(that.btn_save_filter.is(':visible')){ // 'flash' save filter button
+
+                    that.btn_save_filter.fadeOut(100)
+                                        .fadeIn(100)
+                                        .effect('highlight', {color: '#4477B9'}, 1000);
+                }
             }else 
                 if(e.type == window.hWin.HAPI4.Event.ON_STRUCTURE_CHANGE){
 
