@@ -61,7 +61,7 @@ tag, keyword, kwd:   tag
 id, ids:  id
 t, type:  record type id (for rectype allowed name or concept code also)
 f, field:   field id
-cnt:field id  search for number of field instances
+count, cnt, fc:field id  search for number of field instances
 
 latitude, lat:
 longitude, long, lng:
@@ -158,7 +158,7 @@ Record header fields:  ids|id|title|added|url|notes|addedby|access
 Record rec_Modified:  modified|before|after|since
 Record rec_OwnerUGrpID:  workgroup|wg|owner  
 Base field:    field|f      
-Base field counts:    count|cnt  
+Base field counts:    count|cnt|fc  
 Search location dtl_Geo:   geo : WKT
 Search record by tags:     tag|keyword|kwd  
 
@@ -317,7 +317,7 @@ function parse_query_to_json($query){
                     $keyword = 'f';
                     $dty_id = @$match[2];
 
-                }else if(preg_match('/^(count|cnt|geo|file)(\d*)$/', $word, $match)>0){ //special base field
+                }else if(preg_match('/^(count|cnt|fc|geo|file)(\d*)$/', $word, $match)>0){ //special base field
 
                     $keyword = $match[1];
                     $dty_id = @$match[2];
@@ -1032,7 +1032,7 @@ class HPredicate {
             'addedby','owner','access',
             'user','usr',
             'f','field',
-            'count','cnt','geo', 'file',
+            'count','cnt','fc','geo', 'file',
             'lt','linked_to','linkedto','lf','linkedfrom',
             'related','rt','related_to','relatedto','rf','relatedfrom',
             'links','plain',
@@ -1296,6 +1296,7 @@ class HPredicate {
             
             case 'count':
             case 'cnt':
+            case 'fc':
             
                 if(!$this->field_id) return null;
                 $this->pred_type = strtolower($this->pred_type);
@@ -1430,7 +1431,7 @@ class HPredicate {
             $several_ids = null;
         }
         
-        if($this->pred_type=='count' || $this->pred_type=='cnt'){
+        if($this->pred_type=='count' || $this->pred_type=='cnt' || $this->pred_type=='fc'){
             $this->field_type = 'link'; //integer without quotes
         }else if($this->field_type=='file'){
             
@@ -1553,7 +1554,7 @@ class HPredicate {
             
             $res = "(r".$this->qlevel.".rec_ID IN ".$val.")"; 
         
-        }else if($this->pred_type=='count' || $this->pred_type=='cnt'){ //search for records where field occurs N times (repeatable values)
+        }else if($this->pred_type=='count' || $this->pred_type=='cnt' || $this->pred_type=='fc'){ //search for records where field occurs N times (repeatable values)
 
             $res = "(select count(dtl_ID) from recDetails ".$p." where r".$this->qlevel.".rec_ID=".$p."dtl_RecID AND "
             .$p.'dtl_DetailTypeID';
