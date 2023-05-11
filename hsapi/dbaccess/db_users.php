@@ -245,7 +245,7 @@
             $query = 'select ugl_UserID, ugl_Role, ugr_FirstName, ugr_LastName, ugr_Organisation '
             .' from sysUsrGrpLinks left join sysUGrps usr on usr.ugr_ID=ugl_UserID where '
             .' ugl_GroupID='.$ugr_ID
-            .' and usr.ugr_Type = "user" and usr.ugr_Enabled="y" order by ugl_UserID';
+            .' and usr.ugr_Type = "user" and usr.ugr_Enabled!="n" order by ugl_UserID';
 
             $res = $mysqli->query($query);
             if($res){
@@ -483,6 +483,8 @@
                 $tmp_password = null;
                 if($rectype=='user'){
 
+                    $allowed_status = array('n', 'y', 'y_no_add', 'y_no_delete', 'y_no_add_delete');
+                    $record['ugr_Enabled'] = (in_array($record['ugr_Enabled'], $allowed_status) ? $record['ugr_Enabled'] : 'n'); // y_no_add_delete
 
                     if(@$record['ugr_Password'] && $record['ugr_Password']!=''){
                         $tmp_password = $record['ugr_Password'];
@@ -500,8 +502,8 @@
                         if($system->get_user_id()<1){ //not logged in - always disabled
                             $record['ugr_Enabled'] = "n";
                         }
-                        if("y"==@$record['ugr_Enabled']){
-                            $is_approvement = user_isApprovement($system, $recID);
+                        if("n"!=@$record['ugr_Enabled']){
+                            $is_approvement = user_isApprovement($system, $recID) ? $record['ugr_Enabled'] : false;
                         }
                     }
 
@@ -636,7 +638,7 @@
 
                         }else if($is_approvement){
                             //enable user
-                            $query1 = "update $ldb.sysUGrps set ugr_Enabled='y' where ugr_ID=".$userID;                            
+                            $query1 = "update $ldb.sysUGrps set ugr_Enabled='". $is_approvement ."' where ugr_ID=".$userID;                            
                         }
 
                         $res = $mysqli->query($query1);

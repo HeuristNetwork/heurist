@@ -26,7 +26,7 @@ require_once (dirname(__FILE__).'/dbEntitySearch.php');
 require_once (dirname(__FILE__).'/../dbaccess/db_files.php');
 require_once (dirname(__FILE__).'/../dbaccess/db_records.php'); //for recordDelete
 require_once (dirname(__FILE__).'/../dbaccess/db_users.php'); //send email methods
-
+require_once (dirname(__FILE__).'/../dbaccess/utils_db.php'); //for checkUserAccountStatus
 
 class DbSysUsers extends DbEntityBase
 {
@@ -263,8 +263,12 @@ class DbSysUsers extends DbEntityBase
             }
             if(!$this->system->is_admin() && (!@$this->records[$idx]['ugr_ID'] || $this->records[$idx]['ugr_Type']<0)){
                 $this->records[$idx]['ugr_Enabled'] = 'n';
-            }else if(!($this->records[$idx]['ugr_Enabled']=='n' || $this->records[$idx]['ugr_Enabled']=='y')){
-                $this->records[$idx]['ugr_Enabled'] = 'n';    
+            }else if(array_key_exists('ugr_Enabled', $this->records[$idx])){
+
+                $allowed_status = array('n', 'y', 'y_no_add', 'y_no_delete', 'y_no_add_delete');
+                $is_valid = in_array($this->records[$idx]['ugr_Enabled'], $allowed_status);
+
+                $this->records[$idx]['ugr_Enabled'] = ($is_valid ? $this->records[$idx]['ugr_Enabled'] : 'n'); // y_no_add_delete
             }
 
             //validate duplication
@@ -306,6 +310,10 @@ class DbSysUsers extends DbEntityBase
     //
     public function save(){
 
+        $response = checkUserStatusColumn($this->system); // update enum values for ugr_Enabled
+        if(!$response){
+            return false;
+        }
 
         $ret = parent::save();
 

@@ -1685,7 +1685,7 @@ error_log('CANNOT UPDATE COOKIE '.$session_id);
 
             if($user){
 
-                if($user['ugr_Enabled'] != 'y'){
+                if($user['ugr_Enabled'] == 'n'){
 
                     $this->addError(HEURIST_REQUEST_DENIED,  "Your user profile is not active. Please contact database owner");
                     return false;
