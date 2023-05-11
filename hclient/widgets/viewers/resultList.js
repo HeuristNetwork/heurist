@@ -3169,13 +3169,16 @@ setTimeout("console.log('2. auto='+ele2.height());",1000);
 
             if(!recordset) return;
 
-            this._renderPagesNavigator(); //redraw paginator
-            if(pageno<0){
-                pageno = 0;
-            }else if(pageno>=this.max_page){
+            if(pageno>=this.max_page){
                 pageno= this.max_page - 1;
             }
+            if(pageno<0){
+                pageno = 0;
+            }
+
             this.current_page = pageno<0?0:pageno;
+
+            this._renderPagesNavigator(); //redraw paginator
 
             idx = pageno*this.options.pagesize;
             len = Math.min(recordset.length(), idx+this.options.pagesize)
