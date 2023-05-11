@@ -116,7 +116,8 @@ if(isset($_REQUEST['get_email']) && isset($_REQUEST['recid'])) {	/* Get the Titl
 } else if(isset($_REQUEST['db_filtering'])) { /* Get a list of DBs based on the list of provided filters, first search gets all dbs */
 
 	$db_request = $_REQUEST['db_filtering'];
-	$dbs = array();
+	$dbs = array(); // list of databases
+	$databases = array(); // array of database details
 	$invalid_dbs = array();
 
 	// Get all dbs that start with the Heurist prefix
@@ -163,7 +164,11 @@ if(isset($_REQUEST['get_email']) && isset($_REQUEST['recid'])) {	/* Get the Titl
 	}//while
 
 	if($db_request == "all"){ // No additional filtering needed
-		$data = $dbs;
+
+		$data = array('list' => $dbs, 'details' => array());
+		$details = getDatabaseDetails($mysqli, $dbs);
+		$data['details'] = $details;
+
 	} else if(is_array($db_request) && count($db_request)==4){ // Do filtering, record count and last modified
 
 		$count = $db_request['count'];
@@ -330,4 +335,61 @@ if(isset($_REQUEST['get_email']) && isset($_REQUEST['recid'])) {	/* Get the Titl
 	print $rtn;
 }
 
+//
+// Retrieve the record count and last update (record or structure, depending on which is newer)
+//  for each provided database
+//
+function getDatabaseDetails($mysqli, $db_list){
+
+	//global $mysqli;
+	$details = array();
+
+	// Retrieve record count and last update (record or structure)
+	foreach ($db_list as $database) {
+			
+		$db_data = array('name' => $database, 'rec_count' => 0, 'last_update' => null);
+
+		// Get record count
+		$cnt_query = 'SELECT COUNT(*) FROM ' . $database . '.Records WHERE rec_FlagTemporary != 1';
+		$res = $mysqli->query($cnt_query);
+		if(!$res){
+			$db_data['rec_count'] = 0;
+		}else{
+			while($row = $res->fetch_row()){
+				$db_data['rec_count'] = $row[0];	
+			}
+		}
+
+		$last_recent = null;
+		$last_struct = null;
+
+		$last_rec_query = 'SELECT MAX(rec_Modified) FROM ' . $database . '.Records WHERE rec_FlagTemporary != 1';
+		$res = $mysqli->query($last_rec_query);
+		if($res){
+			while($row = $res->fetch_row()){
+				$last_recent = date_create($row[0]);
+			}
+		} // else keep $last_rec null
+
+		$last_struct_query = 'SELECT MAX(rst_Modified) FROM ' . $database . 'defRecStructure';
+		$res = $mysqli->query($last_struct_query);
+		if($res){
+			while($row = $res->fetch_row()){
+				$last_struct = date_create($row[0]);
+
+				if(!$last_recent || $last_struct > $last_recent){
+					$last_recent = $last_struct;
+				}
+			}
+		} // else keep $last_struct null
+
+		if($last_recent){
+			$db_data['last_update'] = $last_recent->format('Y-m-d');
+		}
+
+		$details[] = $db_data;
+	}
+
+	return $details;
+}
 ?>
