@@ -82,10 +82,14 @@ $.widget( "heurist.searchRecUploadedFiles", $.heurist.searchEntity, {
                     that._trigger('onremovedups')
                 });
 
-            this.btn_remove_unused.button({label: window.hWin.HR("Delete unused files"), icons: {primary: "ui-icon-trash"} })
-                .click(function(e) {
-                    that._trigger('onremoveunused');
-                }); 
+
+// Removed by Ian 12 May 2023
+// TODO: WARNING: This button only recognises use in a File field, it does nto see use in web pages 
+// or within text files. It is therefore exceedingly dangerous. Also operates instantly without warning.
+//            this.btn_remove_unused.button({label: window.hWin.HR("Delete unused files"), icons: {primary: "ui-icon-trash"} })
+//                .click(function(e) {
+//                    that._trigger('onremoveunused');
+//                }); 
 
             this.btn_create_records.button({label: window.hWin.HR("Create multimedia records for selected")})
                 .click(function() {
