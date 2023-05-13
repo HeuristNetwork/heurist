@@ -1469,20 +1469,84 @@ window.hWin.HAPI4.baseURL+'?db=' + window.hWin.HAPI4.database  //(needplayer?'&p
         var request = {
             'a': 'batch',
             'entity': that.options.entity.entityName,
-            'delete_unused': 'all' // ids
+            'delete_unused': 'all', // ids
+            'operate': 'get'
         };
 
         window.hWin.HAPI4.EntityMgr.doRequest(request, 
         function(response){
             if(response.status == window.hWin.ResponseStatus.OK){
 
+                const files = response.data;
                 let text = 'No files to delete';
-                if(response.data > 0){
-                    text = response.data + ' file' + (response.data > 1 ? 's' : '') + ' deleted';
-                }
+                if(Object.keys(files).length > 0){
 
-                window.hWin.HEURIST4.msg.showMsgFlash(text, 3000);
-                that.searchForm.searchRecUploadedFiles('searchRecent', null); // refresh
+                    const keys = Object.keys(files);
+                    let $dlg;
+                    text = keys.length + ' file(s) found unused: <br>';
+
+                    let del_func = function() {
+
+                        var req = {
+                            'a': 'batch',
+                            'entity': that.options.entity.entityName,
+                            'delete_unused': keys.join(','),
+                            'operate': 'delete'
+                        };
+
+                        window.hWin.HAPI4.EntityMgr.doRequest(req, function(res){
+                            if(res.status == window.hWin.ResponseStatus.OK){
+                                if(res.data > 0){
+                                    text = res.data + ' file' + (res.data > 1 ? 's' : '') + ' deleted';
+                                }
+                
+                                window.hWin.HEURIST4.msg.showMsgFlash(text, 3000);
+                                that.searchForm.searchRecUploadedFiles('searchRecent', null); // refresh
+                            }else{
+                                window.hWin.HEURIST4.msg.showMsgErr(res);
+                            }
+                        });
+                    };
+
+                    for (const ulf_ID in files) {
+                        if (Object.hasOwnProperty.call(files, ulf_ID)) {
+
+                            const file = files[ulf_ID];
+                            let name = file['filename'];
+                            let extra = '';
+
+                            if(name == '_remote'){
+                                name = file['url'];
+                                extra = '<a href="'+ name +'" target="_blank"><span class="ui-icon ui-icon-extlink"></span></a>';
+                            }
+
+                            text += '<br><span class="file-line" data-fid="'+ ulf_ID +'">'+ name +'</span> ' + extra;
+                        }
+                    }
+
+                    text += '<br><br>The above files will be <strong>deleted and unavailable for use</strong> unless it is re-uploaded to Heurist.<br>Do you wish to proceed?';
+
+                    $dlg = window.hWin.HEURIST4.msg.showMsgDlg(text, del_func, {title: 'Deleting unused files'}, {default_palette_class: 'ui-heurist-admin'});
+
+                    $dlg.parent().css('min-width', '250px');
+                    $dlg.find('span.file-line').css({'display': 'inline-block', 'margin-bottom': '5px', 'text-decoration': 'underline', 'cursor': 'pointer'}).on('click', function(event){
+                        let id = $(this).attr('data-fid');
+
+                        let popup_opts = {
+                            isdialog: true, 
+                            select_mode: 'manager',
+                            edit_mode: 'editonly',
+                            rec_ID: id,
+                            default_palette_class: 'ui-heurist-populate',
+                            width: 950,
+                            onClose: () => {}
+                        };
+
+                        let $m_dlg = window.hWin.HEURIST4.ui.showEntityDialog('recUploadedFiles', popup_opts);
+                    });
+                }else{
+                    window.hWin.HEURIST4.msg.showMsgFlash('No unused files detected', 3000);
+                }
             }else{
                 window.hWin.HEURIST4.msg.showMsgErr(response);
             }

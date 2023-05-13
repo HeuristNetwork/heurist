@@ -831,6 +831,8 @@ When we open "iiif_image" in mirador viewer we generate manifest dynamically.
         else if(@$this->data['delete_unused']){ // delete file records not in use
 
             $ids = $this->data['delete_unused'];
+            $operate = $this->data['operate'];
+
             $where_clause = 'WHERE dtl_ID IS NULL';
             if(is_array($ids) && count($ids) > 0){ // multiple
                 $where_clause .= ' AND ulf_ID IN (' . implode(',', $ids) . ')';
@@ -838,38 +840,39 @@ When we open "iiif_image" in mirador viewer we generate manifest dynamically.
                 $where_clause .= ' AND ulf_ID = ' . $ids;
             }// else use all
 
-            $query = 'SELECT ulf_ID FROM ' . $this->config['tableName'] . ' LEFT JOIN recDetails ON ulf_ID = dtl_UploadedFileID ' . $where_clause;
-            $to_delete = mysql__select_list2($mysqli, $query);
+            $query = 'SELECT DISTINCT ulf_ID, ulf_OrigFileName as filename, ulf_ExternalFileReference as url FROM ' . $this->config['tableName'] . ' LEFT JOIN recDetails ON ulf_ID = dtl_UploadedFileID ' . $where_clause;
+            $to_delete = mysql__select_assoc($mysqli, $query);
 
             if(count($to_delete) > 0){
 
                 // Check if Obfuscated ID is referenced in values
-                $to_remove = array();
-                foreach ($to_delete as $ulf_ID) {
+                foreach ($to_delete as $ulf_ID => $details) {
                     
                     $ulf_ObfuscatedFileID = mysql__select_value($mysqli, 'SELECT ulf_ObfuscatedFileID FROM ' . $this->config['tableName'] . ' WHERE ulf_ID = ' . $ulf_ID);
                     if(!$ulf_ObfuscatedFileID){ // missing ulf_ObfuscatedFileID
-                        $to_remove[] = $ulf_ID;
+                        unset($to_delete[$ulf_ID]);
                         continue;
                     }
 
                     $is_used = mysql__select_value($mysqli, "SELECT dtl_ID FROM recDetails WHERE dtl_Value LIKE '%". $ulf_ObfuscatedFileID ."%'");
                     if($is_used){
-                        $to_remove[] = $ulf_ID;
+                        unset($to_delete[$ulf_ID]);
+                        continue;
                     }
                 }
 
-                if(!count($to_remove) > 0){
-                    $to_delete = array_diff($to_delete, $to_remove);
-                }
+                if($operate == 'delete' && count($to_delete) > 0){ // delete files
 
-                if(count($to_delete) > 0){
+                    $to_delete = array_keys($to_delete);
+
                     $this->data[$this->primaryField] = $to_delete;
                     $res = $this->delete();
     
                     if($res === true){
                         $ret = count($to_delete);
                     }
+                }else{ // return file details
+                    $ret = $to_delete;
                 }
             }
         }
