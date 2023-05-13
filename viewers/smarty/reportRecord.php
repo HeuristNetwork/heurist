@@ -73,6 +73,34 @@ class ReportRecord {
     public function baseURL(){
         return HEURIST_BASE_URL;
     }
+
+    //
+    //
+    //
+    public function getSysInfo($param){
+        
+        $res = null;
+        $mysqli = $this->system->get_mysqli();
+        
+        if($param=='db_total_records'){
+            
+            $res = mysql__select_value($mysqli, 'SELECT count(*) FROM Records WHERE not rec_FlagTemporary');
+
+        }else if($param=='db_rty_counts'){
+
+            $res = mysql__select_assoc2($mysqli, 'SELECT rec_RecTypeID, count(*) FROM Records WHERE not rec_FlagTemporary GROUP BY rec_RecTypeID');
+        }
+        
+        return $res;
+    }
+    
+    //
+    //
+    //
+    public function rty_Name($rty_ID){
+        return  $this->rty_Names[$rty_ID];
+    }
+
     
     //
     // Returns local code for given concept code
