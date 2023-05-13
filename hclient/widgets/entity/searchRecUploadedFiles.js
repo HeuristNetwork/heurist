@@ -94,11 +94,12 @@ $.widget( "heurist.searchRecUploadedFiles", $.heurist.searchEntity, {
             this.btn_create_records.button({label: window.hWin.HR("Create multimedia records for selected")})
                 .click(function() {
                     that._trigger('onfilerecs')
-                }).position({
+                });
+                /*.position({
                     my: 'right top+5',
                     at: 'right bottom',
                     of: this.btn_remove_unused
-                });
+                });*/
 
             this.btn_refresh_index.button({label: window.hWin.HR("Refresh index")})
                 .click(function() {
