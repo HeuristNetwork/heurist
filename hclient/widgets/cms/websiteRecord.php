@@ -196,8 +196,13 @@ exit();
 */
 
 if(!$hasAccess){
-//@todo The Heurist website at this address is not yet publicly accessible.        
-    $message = 'The Heurist website at this address is not yet publicly accessible.';
+
+    $try_login = $system->getCurrentUser() == null;
+
+//@todo The Heurist website at this address is not yet publicly accessible.
+    $message = 'The Heurist website at this address is not yet publicly accessible. ' 
+        . ($try_login ? '<br>Try <span class="login-link">logging in</span> to view this website.' : '');
+
     include ERROR_REDIR;
     exit();
 } 
