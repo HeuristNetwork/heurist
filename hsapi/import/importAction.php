@@ -156,7 +156,8 @@ private static function findRecordIds($imp_session, $params){
     }    
     
     if(count($mapped_fields)==0){
-        return 'No mapping defined';
+        self::$system->addError(HEURIST_ACTION_BLOCKED, 'Import CSV. Matching step failed. No mapping defined');
+        return false;
     }
     
     //keep mapping   field_XXX => dty_ID
@@ -461,7 +462,8 @@ private static function findRecordIds($imp_session, $params){
 
     }
     else{
-        return $mysqli->error;
+        self::$system->addError(HEURIST_DB_ERROR, 'Can not query import table '.$import_table, $mysqli->error);
+        return false;
     }
 
     // result of work - counts of records to be inserted, updated
@@ -533,7 +535,6 @@ public static function assignRecordIds($params){
             $disambiguation = $imp_session['validation']['disambiguation'];
         }else{
             mysql__update_progress(null, $progress_session_id, false, 'REMOVE');    
-            self::$system->addError(HEURIST_ERROR, $imp_session);
             return false; //error
         }
         
