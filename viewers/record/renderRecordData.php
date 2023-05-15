@@ -363,10 +363,10 @@ if(!($is_map_popup || $without_header)){
             }
 
             //
-            // Move related record details to corresponding field location
+            // Move related record details without particular relmarker field to the separated section
             //
             function moveRelatedDetails(related_records){
-
+                
                 var $rel_section = $('div.relatedSection');
 
                 var $public_fields = $('div#div_public_data').find('fieldset[id], div[data-order]');
@@ -1766,7 +1766,7 @@ function print_relation_details($bib) {
         print '<div class="detailType fieldRow" style="display:none;line-height:21px">Related</div>';
         print '<div class="map_popup">';
     }else{
-        print '<div class="detailRowHeader relatedSection" style="float:left">Related'; 
+        print '<div class="detailRowHeader relatedSection" Xstyle="float:left">Related'; 
     }
 
     $accessCondition = '(rec_OwnerUGrpID in ('.join(',', $ACCESSABLE_OWNER_IDS).') OR '.
@@ -1961,6 +1961,7 @@ function print_relation_details($bib) {
 
     print '</div>';
 
+    //$move_details - array of related records without particular relmarker field
     if(is_array($move_details) && count($move_details) > 0){
         echo '<script>moveRelatedDetails(', json_encode($move_details, JSON_FORCE_OBJECT), ');</script>';
     }
