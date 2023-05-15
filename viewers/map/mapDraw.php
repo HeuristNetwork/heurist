@@ -153,17 +153,22 @@ console.log('load google map api')
                     var $dlg;
 
                     buttons[titleYes] = function() {
+                        
+                        let geodata = $dlg.find('#geodata_textarea').val();
+                        
+                        if(!window.hWin.HEURIST4.util.isJSON(geodata)){
 
-                        let geodata = $dlg.find('#geodata_textarea').val().toUpperCase(); // ensure captialised
-                        geodata = geodata.replace(/\s\s+/g, ' ').trim(); // remove double spacing
-                        geodata = geodata.replace(/\s*\(\s*/g, '('); // remove space before+after left bracket
-                        geodata = geodata.replace(/\s*\)/g, ')'); // remove space before right bracket
+                            geodata = geodata.toUpperCase(); // ensure captialised
+                            geodata = geodata.replace(/\s\s+/g, ' ').trim(); // remove double spacing
+                            geodata = geodata.replace(/\s*\(\s*/g, '('); // remove space before+after left bracket
+                            geodata = geodata.replace(/\s*\)/g, ')'); // remove space before right bracket
 
-                        if(geodata.indexOf('POINT') !== false){
-                            geodata = geodata.replace(/\,\s*/g, ' '); // replace comma | comma+space with a single space
+                            if(geodata.indexOf('POINT') !== false){
+                                geodata = geodata.replace(/\,\s*/g, ' '); // replace comma | comma+space with a single space
+                            }
+
+                            $dlg.find('#geodata_textarea').val(geodata);
                         }
-
-                        $dlg.find('#geodata_textarea').val(geodata);
 
                         mapping.mapping( 'drawLoadGeometry', geodata);
                         $dlg.dialog( "close" );
