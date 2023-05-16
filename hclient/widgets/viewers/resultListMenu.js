@@ -149,9 +149,32 @@ $.widget( "heurist.resultListMenu", {
             this.btn_Recode.show();
             this.btn_Shared.show();
             this.btn_Reorder.show();
+            
+            
 
             this['menu_Recode'].find('.logged-in-only:not([data-user-experience-level])').show();
             //$(this.element).find('.logged-in-only').show();//.css('visibility','visible');
+            
+            function ___set_menu_item_visibility(i,item){
+                item = $(item);
+                let lvl_user =  item.attr('data-user-admin-status');
+                let is_visible = window.hWin.HAPI4.has_access(lvl_user);
+                var elink = item.find('a');
+                if(is_visible){
+                    window.hWin.HEURIST4.util.setDisabled(elink, false);
+                    item.attr('title', '');
+                }else{
+                    window.hWin.HEURIST4.util.setDisabled(elink, true);
+                    
+                    item.attr('title', 'Only for '
+                    + (item.attr('data-user-admin-status')==2?'the database owner':'database managers')
+                    + ' allowed');
+                }
+            }
+            
+            this['menu_Recode'].find('li[data-user-admin-status]').each(___set_menu_item_visibility);
+            this['menu_Shared'].find('li[data-user-admin-status]').each(___set_menu_item_visibility);
+            
         }else{
             //$(this.element).find('.logged-in-only').hide();//.css('visibility','hidden');
             this.menu_Selected.find('.logged-in-only').hide();
