@@ -942,7 +942,7 @@ function recordSave($system, $record, $use_transaction=true, $suppress_parent_ch
 function recordDelete($system, $recids, $need_transaction=true, 
     $check_source_links=false, $filterByRectype=0, $progress_session_id=null){
 
-    // Check that the user is allowed to create records
+    // Check that the user is allowed to delete records
     $is_allowed = checkUserPermissions($system, 'delete');
     if($is_allowed !== true){
         return $is_allowed;
@@ -3438,22 +3438,30 @@ function checkUserPermissions($system, $action){
 
     $mysqli = $system->get_mysqli();
 
-    $response = checkUserStatusColumn($system); // update enum values for ugr_Enabled
+    /* update enum values for ugr_Enabled  - moved to updateDatabseToLatest
+    $response = checkUserStatusColumn($system); 
     if(is_array($response)){
         return false;
     }
+    */
 
     $user_query = "SELECT ugr_Enabled FROM sysUGrps WHERE ugr_ID = " . $system->get_user_id();
     $res = $mysqli->query($user_query);
     if(!$res){
-        $system->addError(HEURIST_DB_ERROR, 'Cannot check available user permissions.<br>Please contact the Heurist team, if this persists.');
+        $system->addError(HEURIST_DB_ERROR, 
+                'Cannot check available user permissions.<br>Please contact the Heurist team, if this persists.',
+                $mysqli->error);
         return false;
     }
 
     $results = $res->fetch_row();
 
     $permissions = $results[0];
-    $block_msg = 'Database owner has blocked ' . ($permissions == 'y_no_add' ? 'addition' : ($permissions == 'y_no_delete' ? 'deletion' : 'addition and deletion')) . ' of records for your profile.';
+    $block_msg = 'Database owner has blocked ' . 
+            ($permissions == 'y_no_add' 
+                ? 'addition' 
+                : ($permissions == 'y_no_delete' ? 'deletion' : 'addition and deletion')) 
+                . ' of records for your profile.';
 
     if($permissions == 'n'){
         $system->addError(HEURIST_ACTION_BLOCKED, 'Only accounts that are enabled can create records.');

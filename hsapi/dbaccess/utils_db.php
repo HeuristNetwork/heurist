@@ -33,7 +33,7 @@
     *  checkMaxLength - check max length for TEXT field
     *  extractLangPrefix - splits and extract language code and value from string code:value
     * 
-    *  updateDatabseToLatest4 - make changes in database structure according to the latest version
+    *  updateDatabseToLatest - make changes in database structure according to the latest version
     * 
     * @package     Heurist academic knowledge management system
     * @link        https://HeuristNetwork.org
@@ -1274,9 +1274,9 @@ error_log('UPDATED '.$session_id.'  '.$value);
     // 
     // For Sybversion update see DBUpgrade_1.2.0_to_1.3.0.php
     //
-    // This method updates from 1.3.0 to 1.3.10
+    // This method updates from 1.3.0 to 1.3.12
     //
-    function updateDatabseToLatest4($system){
+    function updateDatabseToLatest($system){
         //update sysIdentification set sys_dbVersion=1, sys_dbSubVersion=3, sys_dbSubSubVersion=4 where sys_ID=1
        
         $sysValues = $system->get_system();        
@@ -1517,10 +1517,16 @@ UNIQUE KEY swf_StageKey (swf_RecTypeID, swf_Stage)
                     }
                 }
             }
+
+            if($dbVerSubSub<12){
+                if(!checkUserStatusColumn($system)){
+                    return false;
+                }
+            }
             
             //update version
-            if($dbVerSubSub<11){
-                $mysqli->query('UPDATE sysIdentification SET sys_dbVersion=1, sys_dbSubVersion=3, sys_dbSubSubVersion=11 WHERE 1');
+            if($dbVerSubSub<12){
+                $mysqli->query('UPDATE sysIdentification SET sys_dbVersion=1, sys_dbSubVersion=3, sys_dbSubSubVersion=12 WHERE 1');
             }
 
             

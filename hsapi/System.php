@@ -1033,7 +1033,7 @@ error_log(print_r($_REQUEST, true));
         $db_workset_count = 0;
         
         if( $this->mysqli ){
-             $db_total_records = mysql__select_value($this->mysqli, 'select count(*) from Records');
+             $db_total_records = mysql__select_value($this->mysqli, 'SELECT count(*) FROM Records WHERE not rec_FlagTemporary');
              $db_total_records = ($db_total_records>0)?$db_total_records:0;
 
              if($this->has_access()){
@@ -1672,7 +1672,6 @@ error_log('CANNOT UPDATE COOKIE '.$session_id);
 
         if($username && $password){
             
-            //if(false)
             if($skip_pwd_check)            
             {
                 $user_id = is_numeric($username)?$username:2;
@@ -1853,7 +1852,7 @@ error_log('CANNOT UPDATE COOKIE '.$session_id);
             }
             
             if($check_updates){
-                updateDatabseToLatest4($this);    
+                updateDatabseToLatest($this);    
             }
             
             // it is required for main page only - so call this request on index.php

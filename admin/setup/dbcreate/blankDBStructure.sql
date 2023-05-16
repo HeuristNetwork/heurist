@@ -714,7 +714,7 @@ CREATE TABLE sysUGrps (
   ugr_State varchar(40) default NULL,
   ugr_Postcode varchar(20) default NULL,
   ugr_Interests varchar(255) default NULL COMMENT 'List of research interests, only for Users, not Workgroups',
-  ugr_Enabled enum('y','n') NOT NULL default 'y' COMMENT 'Flags if user can use Heurist, normally needs authorising by admin',
+  ugr_Enabled ENUM('y','n','y_no_add','y_no_delete','y_no_add_delete') NOT NULL default 'y' COMMENT 'Flags if user can use Heurist, normally needs authorising by admin',
   ugr_LastLoginTime datetime default NULL COMMENT 'Date and time of last login (but user may stay logged in)',
   ugr_MinHyperlinkWords tinyint(3) unsigned NOT NULL default '3' COMMENT 'Filter hyperlink strings with less than this word count on hyperlink import ',
   ugr_LoginCount int(10) unsigned NOT NULL default '0' COMMENT 'Number of times user haslogged in',
