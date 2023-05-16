@@ -204,6 +204,7 @@ $.widget( "heurist.app_storymap", {
         //add end page panel
         this.pnlEndPage = this.element.find('#pnlEndPage');
 
+        this._resultList.resultList('option', 'allow_record_content_view', true);
         this._resultList.resultList('applyViewMode', 'record_content', true);
 
         this._tabs = this.element.find('.ui-tabs:first');
