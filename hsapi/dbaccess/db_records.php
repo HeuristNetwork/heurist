@@ -39,6 +39,7 @@ require_once (dirname(__FILE__).'/../System.php');
 require_once (dirname(__FILE__).'/db_users.php');
 require_once (dirname(__FILE__).'/db_structure.php');
 require_once (dirname(__FILE__).'/db_recsearch.php');
+require_once (dirname(__FILE__).'/utils_db.php');
 require_once (dirname(__FILE__).'/../entity/dbRecUploadedFiles.php');
 require_once (dirname(__FILE__).'/../entity/dbDefRecTypes.php');
 require_once (dirname(__FILE__).'/../utilities/titleMask.php');
@@ -166,6 +167,12 @@ function recordAdd($system, $record, $return_id_only=false){
 
     if ( $system->get_user_id()<1 ) {
         return $system->addError(HEURIST_REQUEST_DENIED, 'User should be looged in to add the record');
+    }
+
+    // Check that the user is allowed to create records
+    $is_allowed = checkUserPermissions($system, 'add');
+    if(!$is_allowed){
+        return false;
     }
     
     $mysqli = $system->get_mysqli();
@@ -934,6 +941,12 @@ function recordSave($system, $record, $use_transaction=true, $suppress_parent_ch
 */
 function recordDelete($system, $recids, $need_transaction=true, 
     $check_source_links=false, $filterByRectype=0, $progress_session_id=null){
+
+    // Check that the user is allowed to create records
+    $is_allowed = checkUserPermissions($system, 'delete');
+    if($is_allowed !== true){
+        return $is_allowed;
+    }
 
     $recids = prepareIds($recids);
     if(count($recids)>0){
@@ -3419,6 +3432,38 @@ function recordWorkFlowStage($system, &$record, $new_value, $is_insert){
     }
     
     return array('new_value'=>$new_value, 'curr_value'=>$current_value, 'emails'=>$emails);
+}
+
+function checkUserPermissions($system, $action){
+
+    $mysqli = $system->get_mysqli();
+
+    $response = checkUserStatusColumn($system); // update enum values for ugr_Enabled
+    if(is_array($response)){
+        return false;
+    }
+
+    $user_query = "SELECT ugr_Enabled FROM sysUGrps WHERE ugr_ID = " . $system->get_user_id();
+    $res = $mysqli->query($user_query);
+    if(!$res){
+        $system->addError(HEURIST_DB_ERROR, 'Cannot check available user permissions.<br>Please contact the Heurist team, if this persists.');
+        return false;
+    }
+
+    $results = $res->fetch_row();
+
+    $permissions = $results[0];
+    $block_msg = 'Database owner has blocked ' . ($permissions == 'y_no_add' ? 'addition' : ($permissions == 'y_no_delete' ? 'deletion' : 'addition and deletion')) . ' of records for your profile.';
+
+    if($permissions == 'n'){
+        $system->addError(HEURIST_ACTION_BLOCKED, 'Only accounts that are enabled can create records.');
+        return false;
+    }else if(($action == 'add' && strpos($permissions, 'add') !== false) || ($action == 'delete' && strpos($permissions, 'delete') !== false)){
+        $system->addError(HEURIST_ACTION_BLOCKED, $block_msg);
+        return false;
+    }
+
+    return true;
 }
 
 ?>

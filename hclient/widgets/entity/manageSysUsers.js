@@ -280,7 +280,7 @@ $.widget( "heurist.manageSysUsers", $.heurist.manageEntity, {
                     var user_ID = $(event.target).parents('.recordDiv').attr('recid');
                     var enabled = $(event.target).parents('.recordDiv').attr('usr_status');
                     
-                    if (enabled!='y')
+                    if (enabled=='n')
                     {
                         window.hWin.HEURIST4.msg.showMsgDlg('You need to enable the user before assigning them a group');
                         return;                        
@@ -365,7 +365,7 @@ $.widget( "heurist.manageSysUsers", $.heurist.manageEntity, {
                     + '<div class="item" style="width:  15em">'+fld('ugr_FirstName')+' '+fld('ugr_LastName')+'</div>'
                     + '<div class="item" style="width:14em;position: absolute;right: 2px;">'+fld('ugr_Organisation')+'</div>';
         
-        var recOpacity = (fld('ugr_Enabled')=='y')?1:0.3;
+        var recOpacity = (fld('ugr_Enabled')!='n')?1:0.3;
         
         var rtIcon = window.hWin.HAPI4.getImageUrl(this._entityName, 0, 'icon');
         //var rtThumb = window.hWin.HAPI4.getImageUrl(this._entityName, 0, 'thumb');

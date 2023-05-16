@@ -116,6 +116,9 @@
                         "rst_DefaultValue": "y",
                         "rst_FieldConfig":[
                             {"key":"y","title":"Yes"},
+                            {"key":"y_no_add","title":"Yes, cannot create records"},
+                            {"key":"y_no_delete","title":"Yes, cannot delete records"},
+                            {"key":"y_no_add_delete","title":"Yes, cannot create or delete records"},
                             {"key":"n","title":"No"}
                         ]
                     }

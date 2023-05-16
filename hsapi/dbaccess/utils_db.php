@@ -1599,4 +1599,38 @@ UNIQUE KEY swf_StageKey (swf_RecTypeID, swf_Stage)
         return ($row_cnt>0);
     }
 
+    function checkUserStatusColumn($system, $db_source = ''){
+
+        if(empty($db_source) && defined(HEURIST_DBNAME_FULL)){
+            $db_source = HEURIST_DBNAME_FULL;
+        }
+
+        $mysqli = $system->get_mysqli();
+        
+        // Check that sysUGrps.ugr_Enabled has y_no_add, y_no_delete, y_no_add_delete
+        $validate_query = "SELECT COLUMN_TYPE FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = '". $db_source ."' AND TABLE_NAME = 'sysUGrps' AND COLUMN_NAME = 'ugr_Enabled'";
+
+        $res = $mysqli->query($validate_query);
+
+        if(!$res){
+            $system->addError(HEURIST_DB_ERROR, 'Cannot check available user permissions.<br>Please contact the Heurist team, if this persists.');
+            return false;
+        }
+
+        $result = $res->fetch_row()[0];
+        if(strpos($result, "'y','n','y_no_add','y_no_delete','y_no_add_delete'") === false){ // check if all values are accounted for
+
+            // Update enum values
+            $update_query = "ALTER TABLE sysUGrps MODIFY COLUMN ugr_Enabled ENUM('y','n','y_no_add','y_no_delete','y_no_add_delete')";
+            $res = $mysqli->query($update_query);
+
+            if(!$res){
+                $system->addError(HEURIST_DB_ERROR, 'Unable to update user permissions column.<br>Please contact the Heurist team, if this persists.');
+                return false;
+            }
+        }
+
+        return true;
+    }
+
 ?>
