@@ -698,6 +698,32 @@ $.widget( "heurist.search_faceted", {
     //
     ,doReset: function(){
 
+        var that = this;
+
+        let primary_rt = this.options.params.rectypes[0];
+        let need_linked_rectypes = !window.hWin.HEURIST4.util.isempty(this.options.params.spatial_filter) 
+                                    && !window.hWin.HEURIST4.dbs.hasFields(primary_rt, 'geo', null);
+
+        if(need_linked_rectypes && !window.hWin.HEURIST4.rectypes?.typedefs?.[primary_rt]){
+
+            let request = {
+                rectypes: primary_rt, 
+                mode: 2, 
+                db: window.hWin.HAPI4.database
+            };
+
+            window.hWin.HAPI4.SystemMgr.get_defs(request, function(response){
+                if(response.status == window.hWin.ResponseStatus.OK){
+                    window.hWin.HEURIST4 = $.extend(window.hWin.HEURIST4, response.data);
+                    that.doReset();
+                }else{
+                    window.hWin.HEURIST4.msg.showMsgErr(response);
+                }
+            });
+
+            return;
+        }
+
         $(this.document).trigger(window.hWin.HAPI4.Event.ON_REC_SEARCHSTART, [ 
             {reset:true, 
              search_realm:this.options.search_realm, 
