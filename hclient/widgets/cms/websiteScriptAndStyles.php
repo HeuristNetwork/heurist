@@ -990,7 +990,22 @@ $title_alt -> #main-title-alt
 $title_alt2 -> #main-title-alt2 
 */
 
-var setup_title_adjust = false;
+    // Load and Add banner image
+    <?php if($image_banner){ ?>
+
+        // Load image
+        let banner_img = new Image();
+        banner_img.onload = function(){
+            // Load background image and remove background: none
+            let styles = $('#main-header').attr('style');
+            styles = styles.replace('background: none !important;', '');
+            $('#main-header').attr('style', 'background-image: url(\'<?php print $image_banner; ?>\') !important;' + styles);
+        };
+        banner_img.src = '<?php print $image_banner; ?>';
+
+    <?php } ?>
+
+    var setup_title_adjust = false;
     //main logo image
     if($('#main-logo').length>0){
         $('#main-logo').empty();
@@ -1038,7 +1053,7 @@ var setup_title_adjust = false;
   
   var ele = $('#main-title');
   if(ele.length>0 && ele.children().length==0){
-      //ele.empty().hide();
+    ele.hide();
   <?php       
   print '$(\'<h2 '.($image_banner?' style="text-shadow: 3px 3px 5px black"':'').'>'
         . str_replace("'",'&#039;',strip_tags($website_title,'<i><b><u><em><strong><sup><sub><small><br>'))
@@ -1050,12 +1065,21 @@ var setup_title_adjust = false;
         }
 
         let $img = $('#main-logo img');
-        if($img.length > 0 && $img[0].complete){ // already loaded logo
+        if($img.length < 1){ // logo element missing, show title
+            ele.show();
+        }else if($img[0].complete){ // already loaded logo
+
             ele.css({left:$('#main-logo').width()+10 });
             ele.fadeIn(500);
-        }else if(!setup_title_adjust){ // add timeout
-            setTimeout(function(){ ele.css({left:$('#main-logo').width()+10 });ele.fadeIn(500); },3000);
+        }else if(!setup_title_adjust){ // add onload for logo
+
+            $img.on('load', () => {
+                ele.css({ left:$('#main-logo').width()+10 });
+                ele.fadeIn(500);
+            });
         }
+    }else{
+        ele.show();
     }
 
   }else{
