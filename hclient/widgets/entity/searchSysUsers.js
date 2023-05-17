@@ -155,7 +155,7 @@ $.widget( "heurist.searchSysUsers", $.heurist.searchEntity, {
 
             if(this.options.ugl_GroupID < 0)
             {
-                request['ugr_Enabled'] = 'y';
+                request['ugr_Enabled'] = '-n';
                 this.input_search_inactive.prop('disabled', true);
             }       
             

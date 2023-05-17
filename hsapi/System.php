@@ -1643,7 +1643,7 @@ error_log('CANNOT UPDATE COOKIE '.$session_id);
                             //5. find user by email in this database
                             if($userEmail_in_linkedDB){
                                 $user = user_getByField($this->get_mysqli(), 'ugr_eMail', $userEmail_in_linkedDB);       
-                                if(null != $user && $user['ugr_Type']=='user' && $user['ugr_Enabled']=='y') {
+                                if(null != $user && $user['ugr_Type']=='user' && $user['ugr_Enabled']!='n') {
                                     //6. success - establed new session
                                     $this->doLoginSession($user['ugr_ID'], 'public');
                                     return $user['ugr_ID'];
