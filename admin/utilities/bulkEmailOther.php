@@ -236,17 +236,17 @@ if(isset($_REQUEST['get_email']) && isset($_REQUEST['recid'])) {	/* Get the Titl
 			$where_clause = "WHERE ugr.ugr_ID = 2";
 		}else if($user_request == "manager"){ // Admins of Database Managers Workgroup
 
-			$where_clause = "WHERE ugl.ugl_Role = 'admin' AND ugr.ugr_Enabled = 'y' AND ugl.ugl_GroupID = 1";
+			$where_clause = "WHERE ugl.ugl_Role = 'admin' AND ugr.ugr_Enabled != 'n' AND ugl.ugl_GroupID = 1";
 
 			}else if($user_request == "admin"){ // Admins for ALL workgroups
 
-				$where_clause = "WHERE ugl.ugl_Role = 'admin' AND ugr.ugr_Enabled = 'y' AND ugl.ugl_GroupID IN 
+				$where_clause = "WHERE ugl.ugl_Role = 'admin' AND ugr.ugr_Enabled != 'n' AND ugl.ugl_GroupID IN 
 		  		 (SELECT ugr_ID 
 			   		  FROM " . $db . ".sysUGrps 
-			   		  WHERE ugr_Type = 'workgroup' AND ugr_Enabled = 'y')";
+			   		  WHERE ugr_Type = 'workgroup' AND ugr_Enabled != 'n')";
 
 		}else if($user_request == "user"){ // ALL users
-			$where_clause = "WHERE ugr.ugr_Type = 'user' AND ugr.ugr_Enabled = 'y'";
+			$where_clause = "WHERE ugr.ugr_Type = 'user' AND ugr.ugr_Enabled != 'n'";
 		}else{
 
 			$response = array("status"=>HEURIST_INVALID_REQUEST, "message"=>"Invalid user choice", "request"=>$user_request);
