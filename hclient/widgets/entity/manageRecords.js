@@ -3648,6 +3648,21 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
             }
             
             //
+            let rec_URL = fields['rec_URL'],
+                rec_OwnerUGrpID = fields['rec_OwnerUGrpID'],
+                rec_NonOwnerVisibility = fields['rec_NonOwnerVisibility'],
+                rec_NonOwnerVisibilityGroups = fields['rec_NonOwnerVisibilityGroups'],
+                rec_ScratchPad = fields['rec_ScratchPad'];
+            //unset header fields                
+            for (var key in fields){
+                if( (!(parseInt(key)>0)) && (key.indexOf('rec_')==0) )
+                {
+                    fields[key] = null;
+                    delete fields[key];
+                }
+            }
+            
+            //
             // get individual visibility setting per field 
             // See rst_NonOwnerVisibility=pending and dtl_HideFromPublic=1
             //
@@ -3655,14 +3670,14 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
             
             var request = {ID: this._currentEditID, 
                            RecTypeID: this._currentEditRecTypeID, 
-                           URL: fields['rec_URL'],
-                           OwnerUGrpID: fields['rec_OwnerUGrpID'],
-                           NonOwnerVisibility: fields['rec_NonOwnerVisibility'],
-                           NonOwnerVisibilityGroups: fields['rec_NonOwnerVisibilityGroups'],
-                           ScratchPad: fields['rec_ScratchPad'],
-                           'details': fields,   //it will be encoded in encodeRequest
-                           'details_visibility': fields_visibility}; //{dty_ID:[1,1,0,0,1],.....  } 
-        
+                           URL: rec_URL,
+                           OwnerUGrpID: rec_OwnerUGrpID,
+                           NonOwnerVisibility: rec_NonOwnerVisibility,
+                           NonOwnerVisibilityGroups: rec_NonOwnerVisibilityGroups,
+                           ScratchPad: rec_ScratchPad,
+                           details: fields, //it will be encoded in encodeRequest
+                           details_visibility: fields_visibility}; //{dty_ID:[1,1,0,0,1],.....  } 
+            
             if(fields['no_validation']){
                 request['no_validation'] = 1;
             }
@@ -3674,7 +3689,7 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
             
             var dlged = that._getEditDialog();
             if(dlged) window.hWin.HEURIST4.msg.bringCoverallToFront(dlged);
-            
+    
             window.hWin.HAPI4.RecordMgr.saveRecord(request, 
                     function(response){
                         

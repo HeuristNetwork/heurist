@@ -483,11 +483,17 @@ function recordSave($system, $record, $use_transaction=true, $suppress_parent_ch
         
         if(@$record['details_encoded']==1){
             $record['details'] = json_decode(str_replace( ' xxx_style=', ' style=', 
-                        str_replace( '^^/', '../', urldecode($record['details']))));
+                        str_replace( '^^/', '../', urldecode($record['details']))), true);
         }else if(@$record['details_encoded']==2){
             $record['details'] = json_decode(urldecode($record['details']), true);
         }else if(@$record['details_encoded']==3){
             $record['details'] = json_decode($record['details'], true);
+        }
+        
+        if(@$record['details_encoded']==1 || @$record['details_encoded']==2){
+            $record['details_visibility'] = json_decode(urldecode($record['details_visibility']), true);
+        }else if(@$record['details_encoded']==3){
+            $record['details_visibility'] = json_decode($record['details_visibility'], true);    
         }
         
         $detailValues = _prepareDetails($system, $rectype, $record, $validation_mode, $recID, $modeImport);
@@ -2377,7 +2383,7 @@ function _prepareDetails($system, $rectype, $record, $validation_mode, $recID, $
         if(preg_match("/^t:\\d+$/", $dtyID)){ //old format with t:NNN
             $dtyID = substr($dtyID, 2);
         }
-        if(is_numeric($dtyID) && $dtyID>0){
+        if(is_numeric($dtyID) && $dtyID>0){  //ignore header and supplementary fields
             $details2[$dtyID] = is_array($pairs)?$pairs:array($pairs);    
         }
     }

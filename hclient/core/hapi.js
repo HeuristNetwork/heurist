@@ -1444,8 +1444,8 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
                 var encode_type = window.hWin.HAPI4.sysinfo['need_encode'];
                 if(!(encode_type>0)) encode_type = 3;
 
-                window.hWin.HEURIST4.util.encodeRequest(request, ['details'], encode_type);
-
+                window.hWin.HEURIST4.util.encodeRequest(request, ['details','details_visibility'], encode_type);
+                
                 _callserver('record_edit', request, function (response) { _triggerRecordUpdateEvent(response, callback); });
             },
 
