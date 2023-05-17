@@ -5631,7 +5631,7 @@ console.log('onpaste');
                     'a': 'search',
                     'entity': 'defTerms',
                     'details': 'list',
-                    'trm_ID': this.child_terms,
+                    'trm_ID': this.child_terms.join(','),
                     'withimages': 1,
                     'request_id': window.hWin.HEURIST4.util.random()
                 };
