@@ -535,13 +535,14 @@ XML;
         $need_tags = false;
         $retrieve_detail_fields = array();
         $retrieve_header_fields = array(); //header fields
+        $retrieve_relmarker_fields = array();
         
         if(is_array($params['columns'])){
             foreach($params['columns'] as $idx=>$column){
                 $col_name = $column['data'];
 
                 if(strpos($col_name,'.')>0){
-                    list($rt_id,$col_name) = explode('.',$col_name);
+                    list($rt_id, $col_name) = explode('.',$col_name);    
                     
                     if(!@$row_placeholder[$rt_id]) $row_placeholder[$rt_id] = array();
                     $row_placeholder[$rt_id][$col_name] = '';
@@ -739,16 +740,17 @@ XML;
         }else if($params['format']=='json'){ 
             
             if(@$params['datatable']>0){
-
+                
+                recordSearchDetailsRelations(self::$system, $record, $retrieve_detail_fields);
+/*
                 if($need_rec_type && $rty_ID>0){ // Add record type to details
-
                    $query = 'select rty_Name from defRecTypes where rty_ID = ' . $rty_ID . ' LIMIT 1';
-
                    $type = mysql__select_value(self::$system->get_mysqli(), $query);
                    $record['typename'] = $type;
                 }
-
+*/
                 $feature = self::_getJsonFlat( $record, $columns, $row_placeholder );
+                
                 fwrite($fd, $comma.json_encode($feature));
                 
             }else if(@$params['extended']>0 && @$params['extended']<3){ //with concept codes and labels
@@ -1672,7 +1674,7 @@ private static function _getJsonFlat( $record, $columns, $row_placeholder, $leve
     if($level==0){
         $rt_id = 0;
     }else{
-        $rt_id = $record['rec_RecTypeID'];
+        $rt_id = 't'.$record['rec_RecTypeID'];
     }
 
     if(self::$defTerms==null) {
@@ -1686,13 +1688,33 @@ private static function _getJsonFlat( $record, $columns, $row_placeholder, $leve
 
         $col_name = $column; //($rt_id>0 ?$rt_id.'.':'').   
 
-        if ($column=='rec_Tags'){
+        //HEADER FIELDS
+        if ($column=='tags' || $column=='rec_Tags'){
             $value = recordSearchPersonalTags(self::$system, $record['rec_ID']);
             $res[$col_name] = ($value==null)?'':implode(' | ', $value);
         }else if(strpos($column,'rec_')===0){
             $res[$col_name] = $record[$column];
-        }else if(strpos($column, 'typename')===0){
-            $res[$col_name] = $record[$column];
+        }else if($column=='ids'){
+            $res[$col_name] = $record['rec_ID'];
+        }else if($column=='typeid'){
+            $res[$col_name] = $record['rec_RecTypeID'];
+        }else if($column=='typename'){
+            if(self::$defRecTypes==null) self::$defRecTypes = dbs_GetRectypeStructures(self::$system, null, 0);            
+            $res[$col_name] = self::$defRecTypes['names'][$record['rec_RecTypeID']];    
+        }else if($column=='added'){
+            $res[$col_name] = $record['rec_Added'];
+        }else if($column=='modified'){
+            $res[$col_name] = $record['rec_Modified'];
+        }else if($column=='addedby'){
+            $res[$col_name] = $record['rec_AddedBy'];
+        }else if($column=='url'){
+            $res[$col_name] = $record['rec_URL'];
+        }else if($column=='notes'){
+            $res[$col_name] = $record['rec_ScratchPad'];
+        }else if($column=='owner'){
+            $res[$col_name] = $record['rec_OwnerUGrpID'];
+        }else if($column=='visibility'){
+            $res[$col_name] = $record['rec_NonOwnerVisibility'];
         }else{
             $res[$col_name] = ''; //placeholder
         }
@@ -1722,16 +1744,17 @@ private static function _getJsonFlat( $record, $columns, $row_placeholder, $leve
 
             foreach($field_details as $dtl_ID=>$field_value){ //for detail multivalues
 
-                if($field_type=='resource'){
-
+                if($field_type=='resource' || $field_type=='relmarker'){
+                    //continue;
                     //if multi constraints - search all details
                     $link_rec_Id =  $field_value['id'];
+                    $relation_id =  @$field_value['relation_id'];
                     $record = recordSearchByID(self::$system, $link_rec_Id, true, null );
                     $field_value = self::_getJsonFlat( $record, $columns, null, $level+1 );
 
                     if($field_value!=null){
-                        $rt_id_link = $record['rec_RecTypeID'];
-                        if(@$res[$rt_id_link]){
+                        $rt_id_link = 't'.$record['rec_RecTypeID'];
+                        if(@$res[$rt_id_link]){ //such record type already exists in flat array - create multiple values
                             foreach($field_value as $col=>$field){
                                 if(@$res[$rt_id_link][$col]==null || $res[$rt_id_link][$col]==''){
                                     $res[$rt_id_link][$col] = $field;
@@ -1744,6 +1767,29 @@ private static function _getJsonFlat( $record, $columns, $row_placeholder, $leve
                             }
                         }else{
                             $res[$rt_id_link] = $field_value;    
+                        }
+                        if($field_type=='relmarker' && $relation_id>0){
+                            
+                            $record2 = recordSearchByID(self::$system, $relation_id, true, null );
+                            $field_value2 = self::_getJsonFlat( $record2, $columns, null, $level+1 );
+                            if($field_value2!=null){
+                                $rt_id_link = 't'.$record2['rec_RecTypeID']; //t1
+                                if(@$res[$rt_id_link]){
+                                    foreach($field_value2 as $col=>$field){
+                                        //$col = 'r.'.$col;
+                                        if(@$res[$rt_id_link][$col]==null || $res[$rt_id_link][$col]==''){
+                                            $res[$rt_id_link][$col] = $field;
+                                        }else{
+                                            if(!is_array($res[$rt_id_link][$col])){
+                                                $res[$rt_id_link][$col] = array($res[$rt_id_link][$col]);
+                                            }
+                                            array_push($res[$rt_id_link][$col], $field);
+                                        }    
+                                    }
+                                }else{
+                                    $res[$rt_id_link] = $field_value2;    
+                                }
+                            }
                         }
                     }
                     $field_value = $record['rec_Title']; //$link_rec_Id Record ID replaced with Record Title
@@ -1759,9 +1805,8 @@ private static function _getJsonFlat( $record, $columns, $row_placeholder, $leve
                 }else if (($field_type=='enum' || $field_type=='relationtype')){
 
                     $field_value = self::$defTerms->getTermLabel($field_value, true);
-
                 }
-
+                
                 if($field_value!=null){
                     array_push($res[$col_name], $field_value);
                 }

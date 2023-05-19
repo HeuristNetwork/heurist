@@ -316,7 +316,7 @@ $.widget( "heurist.recordDataTable", $.heurist.recordAction, {
     },
             
     //
-    // 0 - download, 1 - open in new window
+    // getSettings, saveSetting and close with settings as context
     //
     doAction: function(mode){
 
@@ -347,6 +347,9 @@ $.widget( "heurist.recordDataTable", $.heurist.recordAction, {
     // FROM UI
     // mode_action true - returns columns for DataTable, false - returns codes of selected nodes
     //
+    // 1) need to add "t" prefix for record types 10.1 will be t10.1 (to avoid mix with field id)
+    // 2) remove "r" for relationship fields  r.6 will be 6
+    //
     getSettings: function( mode_action ){
 
         //get selected fields from treeview
@@ -376,16 +379,24 @@ $.widget( "heurist.recordDataTable", $.heurist.recordAction, {
 
 			var $item = $(item);
             var isVisible = $item.find('input.columnVisibility').is(':checked');
-            var data_type = $item.attr('data-key');
+            var colName = $item.attr('data-key');
 
-            if(data_type == 'ids'){
-                data_type = 'rec_ID';
-            }else if(data_type == 'typeid'){
-                data_type = 'rec_RecTypeID';
+            if(colName == 'ids'){
+                colName = 'rec_ID';
+            }else if(colName == 'typeid'){
+                colName = 'rec_RecTypeID';
+            }else if(colName.indexOf('.')>0){
+                //add "t" prefix
+                var codes = colName.split('.');
+                if(codes[1]=='r'){
+                    colName = 't'+ codes[0] + '.' + codes[2];
+                }else{
+                    colName = 't'+colName;
+                }
             }
 
             var colopts = {
-                data: data_type,                 
+                data: colName,                 
                 title: $item.find('span').text(), 
                 visible:  isVisible
             };
@@ -395,8 +406,8 @@ $.widget( "heurist.recordDataTable", $.heurist.recordAction, {
             }
 
             selectedCols.push(colopts);
-            if(need_id && data_type == 'rec_ID') need_id = false;
-            if(need_type && (data_type=='rec_RecTypeID' || data_type=='typename')) need_type = false;
+            if(need_id && colName == 'rec_ID') need_id = false;
+            if(need_type && (colName=='rec_RecTypeID' || colName=='typename')) need_type = false;
         });
 
         if(need_id){

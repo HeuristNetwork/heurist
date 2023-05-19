@@ -1027,9 +1027,11 @@ function recordSearchRelated($system, $ids, $direction=0, $need_headers=true, $l
     if(!@$ids){
         return $system->addError(HEURIST_INVALID_REQUEST, 'Invalid search request');
     }
-    if(is_array($ids)){
-        $ids = implode(",", $ids);
-    }
+    
+    $ids = prepareIds($ids);
+    
+    if(count($ids)==0) return array("status"=>HEURIST_OK, 'data'=>array()); //returns empty array
+    
     if(!($direction==1||$direction==-1)){
         $direction = 0;
     }
@@ -1037,9 +1039,9 @@ function recordSearchRelated($system, $ids, $direction=0, $need_headers=true, $l
         $link_type = 0;
     }
     if($link_type==2){ //relations only
-        $sRelCond  = 'AND (rl_RelationID IS NOT NULL)';
+        $sRelCond  = ' AND (rl_RelationID IS NOT NULL)';
     }else if($link_type==1){ //links only
-        $sRelCond  = 'AND (rl_RelationID IS NULL)';
+        $sRelCond  = ' AND (rl_RelationID IS NULL)';
     }else{
         $sRelCond = '';
     }
@@ -1063,12 +1065,18 @@ function recordSearchRelated($system, $ids, $direction=0, $need_headers=true, $l
     .' WHERE rec_ID=';
 
 
-
+    $swhere = '';
+    if(count($ids)==1){
+        $swhere = '='.$ids[0];
+    }else{
+        $swhere = ' IN ('.implode(',', $ids).')';
+    }
+    
     if($direction>=0){
-
+    
         //find all target related records
         $query = 'SELECT rl_SourceID, rl_TargetID, rl_RelationTypeID, rl_DetailTypeID, rl_RelationID FROM recLinks '
-        .'where rl_SourceID in ('.$ids.') '.$sRelCond.' order by rl_SourceID';
+        .'where rl_SourceID'.$swhere.$sRelCond.' order by rl_SourceID';
 
         $res = $mysqli->query($query);
         if (!$res){
@@ -1078,11 +1086,12 @@ function recordSearchRelated($system, $ids, $direction=0, $need_headers=true, $l
                 $relation = new stdClass();
                 $relation->recID = intval($row[0]);
                 $relation->targetID = intval($row[1]);
-                $relation->trmID = intval($row[2]);
-                $relation->dtID  = intval($row[3]);
-                $relation->relationID  = intval($row[4]);
+                $relation->trmID = intval($row[2]); // rl_RelationTypeID
+                $relation->dtID  = intval($row[3]); // rl_DetailTypeID
+                $relation->relationID  = intval($row[4]);  //rl_RelationID
 
                 if($relation->relationID>0) {
+                    
                     $vals = mysql__select_row($mysqli, $query_rel.$relation->relationID);
                     if($vals!=null){
                         $relation->dtl_StartDate = $vals[1];
@@ -1105,7 +1114,7 @@ function recordSearchRelated($system, $ids, $direction=0, $need_headers=true, $l
 
         //find all reverse related records
         $query = 'SELECT rl_TargetID, rl_SourceID, rl_RelationTypeID, rl_DetailTypeID, rl_RelationID FROM recLinks '
-        .'where rl_TargetID in ('.$ids.') '.$sRelCond.' order by rl_TargetID';
+        .'where rl_TargetID'.$swhere.$sRelCond.' order by rl_TargetID';
 
 
         $res = $mysqli->query($query);
@@ -1140,9 +1149,6 @@ function recordSearchRelated($system, $ids, $direction=0, $need_headers=true, $l
     //find all rectitles and record types for main recordset AND all related records
     if($need_headers===true){
 
-        if(!is_array($ids)){
-            $ids = explode(',',$ids);
-        }
         $ids = array_merge($ids, $rel_ids);  
 
         $query = 'SELECT rec_ID, rec_Title, rec_RecTypeID, rec_OwnerUGrpID, rec_NonOwnerVisibility from Records '
@@ -2985,7 +2991,7 @@ function recordSearchByID($system, $id, $need_details = true, $fields = null)
 }
 
 //
-//
+// Returns value for given field
 //
 function recordGetField($record, $field_id){
 
@@ -3021,6 +3027,8 @@ for geo   geo => array(type=> , wkt=> )
 */
 function recordSearchDetails($system, &$record, $detail_types) {
 
+    $mysqli = $system->get_mysqli();
+
     $recID = $record['rec_ID'];
     
     $squery =
@@ -3040,14 +3048,23 @@ function recordSearchDetails($system, &$record, $detail_types) {
     
     $swhere = " WHERE dtl_RecID = $recID";
 
+    $relmarker_fields = array();
+    
     if(is_array($detail_types) && count($detail_types)>0 ){
 
         if(is_numeric($detail_types[0]) && $detail_types[0]>0){ //by id
             if(count($detail_types)==1){
-                $swhere .= ' AND dtl_DetailTypeID = '.$detail_types[0];
+                $sw = ' AND dtl_DetailTypeID = '.$detail_types[0];
+                $sw2 = ' AND dty_ID = '.$detail_types[0];
             }else{
-                $swhere .= ' AND dtl_DetailTypeID in ('.implode(',',$detail_types).')';    
+                $sw = ' AND dtl_DetailTypeID in ('.implode(',',$detail_types).')';    
+                $sw2 = ' AND dty_ID in ('.implode(',',$detail_types).')'; 
             }
+            $swhere .= $sw;
+            
+            $qr = 'SELECT dty_ID, dty_JsonTermIDTree, dty_PtrTargetRectypeIDs '
+            .'FROM defDetailTypes WHERE dty_Type = "relmarker" '.$sw2;
+            $relmarker_fields =  mysql__select_all($mysqli, $qr);
 
         }else{ //by type
             $swhere .= ' AND dty_Type in ("'.implode('","',$detail_types).'")';
@@ -3086,7 +3103,7 @@ function recordSearchDetails($system, &$record, $detail_types) {
     
     $squery .= $swhere;
 
-    $mysqli = $system->get_mysqli();
+    //main query for details
     $res = $mysqli->query($squery);
 
     $details = array();
@@ -3175,7 +3192,93 @@ function recordSearchDetails($system, &$record, $detail_types) {
 
         $res->close();
     }
+    
+
+    
     $record["details"] = $details;
+}
+
+//
+// Add inofrmation about relationship records int details section of record
+//
+function recordSearchDetailsRelations($system, &$record, $detail_types) {
+
+    $mysqli = $system->get_mysqli();
+
+    $recID = $record['rec_ID'];
+
+    $relmarker_fields = array();
+    
+    if(is_array($detail_types) && count($detail_types)>0 ){
+
+        if(is_numeric($detail_types[0]) && $detail_types[0]>0){ //by id
+            if(count($detail_types)==1){
+                $sw2 = ' AND dty_ID = '.$detail_types[0];
+            }else{
+                $sw2 = ' AND dty_ID in ('.implode(',',$detail_types).')'; 
+            }
+            
+            $qr = 'SELECT dty_ID, dty_JsonTermIDTree, dty_PtrTargetRectypeIDs '
+            .'FROM defDetailTypes WHERE dty_Type = "relmarker" '.$sw2;
+
+        }else{ //by type
+        
+            $qr = 'SELECT dty_ID, dty_JsonTermIDTree, dty_PtrTargetRectypeIDs '
+            .' FROM defDetailTypes, defRecStructure, Records'
+                 .' WHERE rec_ID='.$recID
+                 .' AND dty_ID=rst_DetailTypeID AND rst_RecTypeID=rec_RecTypeID AND dty_Type = "relmarker"';
+        }
+        
+        $relmarker_fields =  mysql__select_all($mysqli, $qr);
+    }    
+    
+    //query for relmarkers
+    if(is_array($relmarker_fields) && count($relmarker_fields)>0){
+        $terms = new DbsTerms($system, dbs_GetTerms($system));
+        
+        // both directions (0), need headers 
+        $related_recs = recordSearchRelated($system, $recID, 0, true, 2);
+        // filter out by allowed relation type and constrained record type
+        
+        foreach ($relmarker_fields as $dty_ID=>$constraints) {
+            
+            $allowed_terms = null; //$terms->treeData($constraints[1], 'set');
+            $constr_rty_ids = explode(',', $constraints[2]);
+            if(count($constr_rty_ids)==0) $constr_rty_ids = false;
+        
+            //find among related record that satisfy contraints
+            foreach ($related_recs['data']['direct'] as $relation){
+                
+                if(!$allowed_terms || in_array($relation->trmID, $allowed_terms)){
+                    
+                    $rty_ID = $related_recs['data']['headers'][$relation->targetID][1]; //rectype id
+                    if(!$constr_rty_ids || in_array($rty_ID, $constr_rty_ids) ){
+                        if(!@$record["details"][$constraints[0]]) $record["details"][$constraints[0]] = array();
+                        $record["details"][$constraints[0]][] = array('id'=>$relation->targetID, 
+                                    'type'=>$rty_ID, 
+                                    'title'=>$related_recs['data']['headers'][$relation->targetID][0],
+                                    'relation_id'=>$relation->relationID);
+                    }
+                }
+            }    
+            foreach ($related_recs['data']['reverse'] as $relation){
+                
+                if(!$allowed_terms || in_array($relation->trmID, $allowed_terms)){
+                    
+                    $rty_ID = $related_recs['data']['headers'][$relation->sourceID][1]; //rectype id
+                    if(!$constr_rty_ids || in_array($rty_ID, $constr_rty_ids) ){
+                        if(!@$record["details"][$constraints[0]]) $record["details"][$constraints[0]] = array();
+                        $record["details"][$constraints[0]][] = array('id'=>$relation->sourceID, 
+                                    'type'=>$rty_ID, 
+                                    'title'=>$related_recs['data']['headers'][$relation->sourceID][0],
+                                    'relation_id'=>$relation->relationID);
+                    }
+                }
+                
+            }    
+        }
+    }    
+    
 }
 
 //
