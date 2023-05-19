@@ -1211,7 +1211,7 @@ function print_public_details($bib) {
                     //ignore empty date
                     continue;
                 }else{
-                    $bd['val'] = temporalToHumanReadableString($bd['val'], true);
+                    $bd['val'] = temporalToHumanReadableString($bd['val'], false);
                     $bd['val'] = output_chunker($bd['val']);
                 }
 
