@@ -167,9 +167,9 @@ define("HEURIST_UNITED_TERMS", true);
 
 $glb_lang_codes = null;
 
-//common languages for translation database definitions (ISO639-2 codes)
+//common languages for translation database definitions (ISO639-2codes)
 if(!isset($common_languages_for_translation)){
-    $common_languages_for_translation = array('ENG','FRE','CHI','SPA','ARA','GER','POR');    
+    $common_languages_for_translation = array('ENG','FRE','CHI','SPA','ARA','GER','POR','LAT','GRE','GRC');    
 }
 
 //---------------------------------
