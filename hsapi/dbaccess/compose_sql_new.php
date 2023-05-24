@@ -807,8 +807,11 @@ class HQuery {
                                       . 'ifnull((select trm_Label from recDetails left join defTerms on trm_ID=dtl_Value where dtl_RecID=r'
                                         .$this->level.'.rec_ID and dtl_DetailTypeID='.$dty_ID
                                         .' ORDER BY trm_Label limit 1), "~~")) '; // then by term label
-                            }else{                            
-                                $sortby = 'ifnull((select dtl_Value from recDetails where dtl_RecID=r'
+                            }else{
+
+                                $fld = $field_type != 'date' ? 'dtl_Value' : 'getTemporalDateString(dtl_Value)';
+
+                                $sortby = 'ifnull((select '.$fld.' from recDetails where dtl_RecID=r'
                                         .$this->level.'.rec_ID and dtl_DetailTypeID='.$dty_ID
                                         .' ORDER BY dtl_Value limit 1), "~~") ';
                             }
