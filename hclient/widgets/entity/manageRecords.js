@@ -4662,11 +4662,11 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
         if(this._as_dialog){
             this._as_dialog.dialog('option', 'width', width);
             this._as_dialog.dialog('option', 'height', height);
-            this._as_dialog.dialog('option', 'position', this._as_dialog.dialog('option', 'position'));
+            this._as_dialog.dialog('option', 'position', {my: 'center', at: 'center', of: window.hWin});
         }else if(this._edit_dialog){
             this._edit_dialog.dialog('option', 'width', width);
             this._edit_dialog.dialog('option', 'height', height);
-            this._edit_dialog.dialog('option', 'position', this._edit_dialog.dialog('option', 'position'));
+            this._edit_dialog.dialog('option', 'position', {my: 'center', at: 'center', of: window.hWin});
         }else{
             return;
         }
