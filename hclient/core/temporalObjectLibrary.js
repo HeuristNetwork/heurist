@@ -353,6 +353,8 @@ Temporal.fieldsDict = {	"VER"	:	"Version Number",
     "EGP"	:	"Egyptian Date",
     "CLD"   :   "Calendar",
     "CL2"   :   "Non-gregorian value",  //value in calendar value
+    "CIR"   :   "Circa or approximate",
+    "SRN"   :   "Simple range"
 };
 
 Temporal.determination = {	0	:	"Unknown",
@@ -388,7 +390,7 @@ Temporal.tDurationDict = {	"DUR"	:	"Simple Duration",
 Temporal._typeFieldMap = {	s : {
         req : [["DAT"]],
         //											[]],		// empty date allows to capture ill-formed date strings
-        opt : ["COM","DET","CLD","CL2"],
+        opt : ["COM","DET","CLD","CL2","CIR"],
         hdr : ["DAT"]
     },
     c :	{
@@ -401,12 +403,12 @@ Temporal._typeFieldMap = {	s : {
     },
     p :	{
         req : [["PDB","PDE","TPQ","TAQ"],["TPQ","TAQ"]],
-        opt : ["DET","SPF","EPF","COM","SRT","CLD","CL2"],
+        opt : ["DET","SPF","EPF","COM","SRT","CLD","CL2","SRN"],
         hdr : ["PDB","PDE","TPQ","TAQ"]
     },
     f :	{
         req : [["DAT","RNG"]],
-        opt : ["DET","PRF","COM","SRT","CLD","CL2"],
+        opt : ["DET","PRF","COM","SRT","CLD","CL2","TPQ","TAQ"],
         hdr : ["DAT","RNG"]
     },
     d :	{
@@ -1808,6 +1810,10 @@ function temporalToHumanReadableString(inputStr) {
         if (str.search(/SRT/) != -1 && str.match(/SRT=([^\|]+)/)) { //Sortby Date
             str = formatGregJulian(str.match(/SRT=([^\|]+)/)[1], isgj);
         }else if (str.search(/TYP=s/) != -1 ) {  //simple
+            let is_approx = false;
+            if (str.search(/CIR=1/) != -1){
+                is_approx = true;
+            }
             if (str.match(/DAT=([^\|]+)/)) {
                 if (str.search(/COM=[^\|]+/) == -1) {
                 }
@@ -1815,6 +1821,8 @@ function temporalToHumanReadableString(inputStr) {
             }else if (str.search(/COM=[^\|]+/) != -1) {
                 str = str.match(/COM=([^\|]+)/)[1];
             }
+
+            str = str + (is_approx ? ' circa' : '');
         }else if (str.search(/TYP=c/) != -1 ) { //c14 date
             var bce = str.match(/BCE=([^\|]+)/);
             bce = bce ? bce[1]: null;

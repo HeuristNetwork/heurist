@@ -40,6 +40,8 @@ TYP - type: s (simple), f (fuzzy), c (carbon), p (probability range)
 DAT  - date for s,f,c
 RNG  - range for f
 
+CIR  - circa/approximate
+
 for carbon
 BPD, BCE - 
 DEV, DVP, DVN
@@ -135,6 +137,9 @@ function temporalToHumanReadableString($value, $showoriginal_temporal=false){
 				}
 				break;
 		}
+        if(@$tDate["TYP"] == 's' && array_key_exists("CIR", $tDate) && boolval($tDate["CIR"])){
+            $value = $value . ' circa';
+        }
         if(@$tDate["CLD"] && !$is_greg_or_julian){
             $value = (@$tDate["CL2"]?($tDate["CL2"].' '):'').$tDate["CLD"].' (Gregorian '.$value.')';
         }            

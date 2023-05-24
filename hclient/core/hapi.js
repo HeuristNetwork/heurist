@@ -1131,6 +1131,27 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
             },
 
             /**
+             * Calculate and return the numbers of days, months, and years between two dates
+             * @param data - object containing earliest and latest dates
+             * @param {callserverCallback} callback
+             */
+            get_time_diffs: function(data, callback){
+
+                if(!data || !data.early_date || !data.latest_date){
+                    window.hWin.HEURIST4.msg.showMsgErr('Both an earliest and latest date are required.');
+                    return false;
+                }
+
+                let request = {
+                    a: 'get_time_diffs',
+                    data: JSON.stringify(data),
+                    db: window.hWin.HAPI4.database
+                };
+
+                _callserver('usr_info', request, callback);
+            },
+
+            /**
              * Manipulate folders within HEURIST_FILESTORE_DIR on the server
              * @param {Request} [request] 
              * @param {string} [request.operation] - 'list', 'rename' or 'delete'; defaults to 'list'

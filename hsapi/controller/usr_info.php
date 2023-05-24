@@ -146,6 +146,61 @@
             }
         }
 
+    }else if($action == 'get_time_diffs'){
+
+        $data = $_REQUEST['data'];
+        if(!is_array($data)){
+            $data = json_decode($data);
+        }
+
+        $early_org = @$data->early_date;
+        $latest_org = @$data->latest_date;
+
+        if(empty($early_org) || empty($latest_org)){
+            $err = empty($early_org) && empty($latest_org) ? 'Both earliest and latest are ' : (empty($early_org) ? 'Earliest is ' : 'Latest is ');
+            $system->addError(HEURIST_ACTION_BLOCKED, $err . 'required');
+        }else{
+
+            $err_msg = array();
+            $res = true;
+
+            $early = null;
+            $latest = null;
+
+            try{
+                $early = new DateTime($early_org);
+                $early->setTime(0, 0);
+            }catch(Exception $e){
+
+                $err_msg[] = 'Invalid earliest date provided, ' . $e->errorMessage();
+                $res = false;
+            }
+
+            try{
+                $latest = new DateTime($latest_org);
+                $latest->setTime(0, 0);
+            }catch(Exception $e){
+
+                $err_msg[] = 'Invalid latest date provided, ' . $e->errorMessage();
+                $res = false;
+            }
+
+            if(!$early || !$latest){
+                $system->addError(HEURIST_REQUEST_DENIED, );
+                $res = false;
+            }else if($res !== false){
+
+                $diff = $early->diff($latest, true);
+
+                $middle_day = date('Y-m-d', (strtotime($early_org) + strtotime($latest_org)) / 2);
+
+                $res = array("days" => $diff->format('%d'), "months" => $diff->format('%M'), "years" => $diff->format('%y'), "middle" => $middle_day);
+            }else{
+                $system->addError(HEURIST_INVALID_REQUEST, implode('<br><br>', $err_msg));
+            }
+        }
+
+
     }else if( !$system->init( @$_REQUEST['db'] ) ){ 
         
 //        error_log('FAILED INIT SYSTEM');        

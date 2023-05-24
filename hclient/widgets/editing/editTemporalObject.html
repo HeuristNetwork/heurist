@@ -94,6 +94,12 @@
         <script src="../../../external/jquery.calendars-1.2.1/jquery.calendars.coptic.js"></script>
         <script src="../../../external/jquery.calendars-1.2.1/jquery.calendars.nepali.js"></script>
         <script src="../../../external/jquery.calendars-1.2.1/jquery.calendars.mayan.js"></script>
+
+        <style type="text/css">
+        	.display-tab{
+        		padding-top: 10px !important;
+        	}
+        </style>
 	</head>
     
 	<body style="background-color:rgb(240,240,240);" width=440 height=420 >
@@ -101,66 +107,146 @@
 		<div id="display-div">
 			<ul>
 				<li><a href="#s"><em>Simple Date</em></a></li>
-				<li><a href="#p"><em>Fuzzy Range</em></a></li>
 				<li><a href="#f"><em>Simple Range</em></a></li>
+				<li><a href="#p"><em>Fuzzy Range</em></a></li>
 				<li><a href="#c"><em>Radiometric</em></a></li>
 
 			</ul>
             
 			<div id="s" class="display-tab">
-					<div style="margin: 20px  0px 0px 50px">
-						<div>
+
+				<span id="tab_note" class="heurist-helper3" style="padding-left: 10px;">
+					Note: Date fields record a single date estimation. They do NOT record a date range. For that you should use Start date and End date fields
+				</span>
+
+				<div style="margin: 15px 0px 0px 50px">
+					<div>
+						<span title="Enter date in  y-m-d">
+						    Date:&nbsp;<input type=text id="simpleDate" style="width:100px;" class="withCalendarsPicker" />
+						    <label style="font-size:8pt; color:grey;padding-left: 20px;"><input type="checkbox" id="CIR"> Circa / approximate</label>
+						</span>
+					</div>
+					<div style="margin:5px 0px 15px 35px; font-size:8pt; color:grey;"  >
+						<span >Year (eg.1624) or ISO date (yyyy-mm or yyyy-mm-dd)</span><br/>
+						<span >Use minus (-) for BCE dates (eg. -375 for 375 BCE)</span>
+					</div>
+				</div>
+                
+				<div style="border-top:1px solid lightgrey; margin :0px 10px"></div>
+                
+				<div style="margin: 15px  0px 0px 50px">
+					<div>
+						<span title="Enter time in  h:m:s">
+							Time:&nbsp;<input type=text id="simpleTime" style="width:80px;" />
+							<span style="font-size:8pt; color:grey;">&nbsp;(optional)</span>
+						</span>
+                        
+						<span title="Enter Time Zone offset starting with hours only enter minute for non-zero" style="margin:0px 30px">
+							Time Zone:&nbsp;<u>+</u>
+							<input type=text id="tzone" title="Time Zone Adjust hours (-12 to +12)" style="width:60px;" />
+							<span style="font-size:8pt; color:grey;">&nbsp;(optional)</span>
+						</span>
+					</div>
+                    
+					<div style="margin:5px 0px 15px 35px; font-size:8pt; color:grey;"  >
+						<span>hh or hh:mm or hh:mm:ss</span>
+						<span style="margin: 0px 120px;">+ for east (Europe,Africa,Asia)</span><br/>
+						<span style="margin: 0px 0px 0px 245px;">- for west (N &amp; S America)</span>
+					</div>
+				</div>
+                
+				<div style="border-top:1px solid lightgrey; margin :0px 10px"></div>
+                
+				<div id="deterDiv" style="float:left;margin:10px 0px 0px 57px;">
+					Type of Determination<br/>
+                    
+					<span style="font-size:8pt; color:grey;">
+					    How were the dates arrived at?
+					</span>
+                    
+					<div style="margin:10px 25px;">
+						<input type="radio" name="sDET"  value="0" checked="checked" />Unknown<br/>
+						<input type="radio" name="sDET" value="1"/>Attested<br/>
+						<input type="radio" name="sDET"  value="2"/>Conjecture<br/>
+						<input type="radio" name="sDET"  value="3"/>Measurement
+					</div>
+				</div>
+			</div>
+
+			<div id="f" class="display-tab">
+				<div style="margin:15px 0px 20px 50px; ">
+					<div style="float:left; width:430px;">
+						<div style="display: inline-block">
 							<span title="Enter date in  y-m-d">
-							    Date:&nbsp;<input type=text id="simpleDate" style="width:150px;" class="withCalendarsPicker" />
-							    <!-- <input type=button class="date-button" id="calendar" onclick="calendarPopup(this);" /> -->
+							    Earliest estimate&nbsp;<input type=text id="fTPQ" style="width:100px;" class="withCalendarsPicker"/>
 							</span>
 						</div>
-						<div style="margin:5px 0px 15px 35px; font-size:8pt; color:grey;"  >
+						<div style="display: inline-block;margin-left: 10px;">
+							<span title="Enter date in  y-m-d">
+							    Latest estimate&nbsp;<input type=text id="fTAQ" style="width:100px;" class="withCalendarsPicker"/>
+							</span>
+						</div>
+                        
+						<div style="font-size:8pt; color:grey; margin:5px 0px 15px 90px;">
 							<span >Year (eg.1624) or ISO date (yyyy-mm or yyyy-mm-dd)</span><br/>
 							<span >Use minus (-) for BCE dates (eg. -375 for 375 BCE)</span>
 						</div>
-					</div>
-                    
-					<div style="border-top:1px solid lightgrey; margin :0px 10px"></div>
-                    
-					<div style="margin: 15px  0px 0px 50px">
-						<div>
-							<span title="Enter time in  h:m:s">
-								Time:&nbsp;<input type=text id="simpleTime" style="width:80px;" />
-								<span style="font-size:8pt; color:grey;">&nbsp;(optional)</span>
-							</span>
-                            
-							<span title="Enter Time Zone offset starting with hours only enter minute for non-zero" style="margin:0px 30px">
-								Time Zone:&nbsp;<u>+</u>
-								<input type=text id="tzone" title="Time Zone Adjust hours (-12 to +12)" style="width:60px;" />
-								<span style="font-size:8pt; color:grey;">&nbsp;(optional)</span>
-							</span>
+                        
+						<div id="fRange" style="display: none;margin-bottom: 15px;"> <!--visibility: hidden;-->
+							<div>
+								<span style="margin-right:50px">Range</span>
+								<div style="display:inline-block; width:250px; margin-right:5px;">
+									<span id="fYears">0</span> Years 
+									<span id="fMonths">0</span> Months 
+									<span id="fDays">0</span> Days apart
+								</div>
+							</div>
+							<div style="font-size:8pt; color:grey; margin:5px 0px 15px 90px;">
+								<span >Note: This is based off of the Gregorian dates of both earliest and latest</span><br/>
+							</div>
+							<!--<div title="Enter duration in  PnYnMnDTnHnMnS format">
+								<span style="margin-right:50px">Range</span>
+								<u>+</u>&nbsp;&nbsp;<input type=text id="fRNG" style="width:50px; margin-right:5px" />
+								<select id="level">
+									<option label="Year"  selected value="Y">Year</option>
+									<option label="Month" value="M">Month</option>
+									<option label="Day" value="D">Day</option>
+								</select><br/>
+							</div>
+							<div style="font-size:8pt; color:grey; margin: 5px 0px 15px 105px;">
+								Actual date is assumed to lie within this range.
+							</div>-->
 						</div>
                         
-						<div style="margin:5px 0px 15px 35px; font-size:8pt; color:grey;"  >
-							<span>hh or hh:mm or hh:mm:ss</span>
-							<span style="margin: 0px 120px;">+ for east (Europe,Africa,Asia)</span><br/>
-							<span style="margin: 0px 0px 0px 245px;">- for west (N &amp; S America)</span>
+						<div id="fProfDiv" >
+							<label for="fPRF" title="Select the profile">Probability curve &nbsp;</label>
+							<select id="fPRF">
+								<option label="Flat"  selected value=0>Flat</option>
+								<option label="Central" value=1>Central Tendancy</option>
+								<option label="Slow Start" value=2>Slow Start</option>
+								<option label="Slow Finish" value=3>Slow Finish</option>
+							</select><br/>
+							<div style="font-size:8pt; color:grey; margin: 5px 0px 0px 90px;">
+								Distribution of the likelihood of the date between the limits set by the range.
+							</div>
 						</div>
 					</div>
                     
-					<div style="border-top:1px solid lightgrey; margin :0px 10px"></div>
-                    
-					<div id="deterDiv" style="float:left;margin:0px 0px 0px 57px;">
-						Type of Determination<br/>
-                        
+					<div id="fdeterDiv" style="float:left;margin:0px 0px 0px 57px;">
+						Source of the estimate<br/>
 						<span style="font-size:8pt; color:grey;">
-						    How were the dates arrived at?
+						    How the dates arrived at?
 						</span>
                         
 						<div style="margin:10px 25px;">
-							<input type="radio" name="sDET"  value="0" checked="checked" />Unknown<br/>
-							<input type="radio" name="sDET" value="1"/>Attested<br/>
-							<input type="radio" name="sDET"  value="2"/>Conjecture<br/>
-							<input type="radio" name="sDET"  value="3"/>Measurement
+							<input type="radio" name="fDET"  value="0" checked="checked" />Unknown<br/>
+							<input type="radio" name="fDET" value="1"/>Attested<br/>
+							<input type="radio" name="fDET"  value="2"/>Conjecture<br/>
+							<input type="radio" name="fDET"  value="3"/>Measurement
 						</div>
 					</div>
 				</div>
+			</div>
 
 			<div id="p" class="display-tab">
 					<div style="text-align: center;height:108px">
@@ -234,8 +320,10 @@
 					<div style="margin:10px 20px; ">
 						<div style="border: 1px solid grey; float:left; width:300px; padding:10px;" >
 							<b>Entering dates</b><br/>
-							<span style="font-size:8pt; color:grey;">Year(eg.1624) of calendar date (yyyy-mm or yyyy-mm-dd)<br/>
-							use minus(-) for BCE dates(eg. -375 for 375 BCE)</span><br/><br/>
+							<span style="font-size:8pt; color:grey;">
+								Year (eg.1624) or ISO date (yyyy-mm or yyyy-mm-dd)<br/>
+								Use minus (-) for BCE dates (eg. -375 for 375 BCE)
+							</span><br/><br/>
 							<b>Start &amp; End profile</b><br/>
 							<span style="font-size:8pt; color:grey;">What is the distribution of the likelihood of the date<br/>
 							between the terminus date and the probable date<br/>
@@ -252,65 +340,6 @@
 								<input type="radio" name="pDET" value="1"/>Attested<br/>
 								<input type="radio" name="pDET"  value="2"/>Conjecture<br/>
 								<input type="radio" name="pDET"  value="3"/>Measurement
-							</div>
-						</div>
-					</div>
-				</div>
-
-			<div id="f" class="display-tab">
-					<div style="margin:20px 0px 20px 50px; ">
-						<div style="float:left; width:430px;">
-							<div>
-								<span title="Enter date in  y-m-d">
-								    Approximate date&nbsp;<input type=text id="fDAT" style="width:150px;" class="withCalendarsPicker"/>
-								</span>
-							</div>
-                            
-							<div style="font-size:8pt; color:grey; margin:5px 0px 15px 105px;">
-								<span >Year(eg.1624) of calendar date (yyyy-mm or yyyy-mm-dd)</span><br/>
-								<span >use minus(-) for BCE dates(eg. -375 for 375 BCE)</span>
-							</div>
-                            
-							<div>
-								<div title="Enter duration in  PnYnMnDTnHnMnS format">
-									<span style="margin-right:50px">Range</span>
-									<u>+</u>&nbsp;&nbsp;<input type=text id="fRNG" style="width:50px; margin-right:5px" />
-									<select id="level">
-										<option label="Year"  selected value="Y">Year</option>
-										<option label="Month" value="M">Month</option>
-										<option label="Day" value="D">Day</option>
-									</select><br/>
-								</div>
-								<div style="font-size:8pt; color:grey; margin: 5px 0px 15px 105px;">
-									Actual date is assumed to lie within this range.
-								</div>
-							</div>
-                            
-							<div id="fProfDiv" >
-								<label for="fPRF" title="Select the profile">Probability curve &nbsp;</label>
-								<select id="fPRF">
-									<option label="Flat"  selected value=0>Flat</option>
-									<option label="Central" value=1>Central Tendancy</option>
-									<option label="Slow Start" value=2>Slow Start</option>
-									<option label="Slow Finish" value=3>Slow Finish</option>
-								</select><br/>
-								<div style="font-size:8pt; color:grey; margin: 5px 0px 0px 105px;">
-									Distribution of the likelihood of the date between the limits set by the range.
-								</div>
-							</div>
-						</div>
-                        
-						<div id="fdeterDiv" style="float:left;margin:0px 0px 0px 57px;">
-							Source of the estimate<br/>
-							<span style="font-size:8pt; color:grey;">
-							    How the dates arrived at?
-							</span>
-                            
-							<div style="margin:10px 25px;">
-								<input type="radio" name="fDET"  value="0" checked="checked" />Unknown<br/>
-								<input type="radio" name="fDET" value="1"/>Attested<br/>
-								<input type="radio" name="fDET"  value="2"/>Conjecture<br/>
-								<input type="radio" name="fDET"  value="3"/>Measurement
 							</div>
 						</div>
 					</div>

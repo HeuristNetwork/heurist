@@ -195,6 +195,8 @@ var TemporalPopup = (function () {
 	var _className = "Applet";  // I know this is a singleton and the application object, but hey it matches the pattern.
 	var _type2TabIndexMap = {};
 
+	var _change_tab_only = false;
+
 	function _init () {
 		if (location.search.length > 1) {		// the calling app passed a parameter string - save it
 			that.originalInputString = unescape(location.search.substring(1));
@@ -233,22 +235,47 @@ var TemporalPopup = (function () {
 			that.curTemporal.setField("COM",that.originalInputString);
 		}
 		// set display
-        $('#display-div').tabs({beforeActivate: function( event, ui ) {
-            
-            var curType = ui.oldPanel.attr('id'),
-                newType = ui.newPanel.attr('id');
-            // grab all the data from the current tab using the
-            _updateTemporalFromUI(that.curTemporal, false);
-            that.curTemporal.setType(newType);
-            _updateUIFromTemporal(that.curTemporal, false); //do not dates
-            _updateGeorgianDate();
-            
-        }});
+        $('#display-div').tabs({
+        	beforeActivate: function( event, ui ) {
+
+	            var curType = ui.oldPanel.attr('id'),
+	                newType = ui.newPanel.attr('id');
+
+	            _updateUIFromTemporal(that.curTemporal, false); //do not dates
+	            _updateGeorgianDate();
+
+	            if(!_change_tab_only){
+		            // grab all the data from the current tab using the
+		            _updateTemporalFromUI(that.curTemporal, false);
+		            that.curTemporal.setType(newType);
+	            }else{
+					_change_tab_only = false;
+					return false;
+
+				}
+
+	            //move tab_note to new tab
+	            ui.newPanel.prepend($('#tab_note'));
+	        },
+	        activate: function(event, ui){
+	        	let newType = ui.newPanel.attr('id');
+	        	if(newType === "f"){
+	        		_updateSimpleRange();
+	        	}
+	        }
+    	});
         
         // set up temporal type to tab index mapping
         $.each($('#display-div').find('.display-tab'), function(i,item){
             _type2TabIndexMap[$(item).attr('id')] = i;
         });
+
+        if(that.curTemporal.getType() === "p" && 
+			window.hWin.HEURIST4.util.isempty(that.curTemporal.getStringForCode('PDB')) && window.hWin.HEURIST4.util.isempty(that.curTemporal.getStringForCode('PDE')) && 
+			!window.hWin.HEURIST4.util.isempty(that.curTemporal.getStringForCode('TPQ')) && !window.hWin.HEURIST4.util.isempty(that.curTemporal.getStringForCode('TAQ'))){
+
+			that.curTemporal.setType("f");	
+		}
 
 		// select the tab for the initial temporal's type and change the label to show the user this is where things started
         _updateUIFromTemporal(that.curTemporal, true);
@@ -267,7 +294,76 @@ var TemporalPopup = (function () {
         $('input[value="Cancel"]').button();
         
 
+        $('#fTPQ, #fTAQ').blur(_updateSimpleRange).change(function(){
+        	const tpq = $('#fTPQ').val();
+        	const taq = $('#fTAQ').val();
+        	if(!window.hWin.HEURIST4.util.isempty(tpq) && !window.hWin.HEURIST4.util.isempty(taq)){
+        		setTimeout(function(){
+        			const T_tpq = $('#fTPQ').val();
+        			const T_taq = $('#fTAQ').val();
+        			if(T_tpq == tpq && T_taq == taq){ // unchanged
+        				_updateSimpleRange();
+        			}
+        		}, 3000);
+        	}
+        });
 	};
+
+	function _updateSimpleRange(is_selection=false){
+
+		let $range_cont = $('#fRange');
+
+		if($('#display-div').tabs('option', 'active') != _type2TabIndexMap["f"] || ($('.calendars-popup').is(':visible') && !is_selection)){
+			$range_cont.hide();
+			return;
+		}
+
+		let $early = $('#fTPQ');
+		let $latest = $('#fTAQ');
+
+		let $range_amount = $('#fRNG');
+		let $range_level = $('#level');
+
+		if($early.val() == '' || $latest.val() == ''){
+			$range_cont.hide();
+			return;
+		}
+
+		let early_date = $early.val();
+		let late_date = $latest.val();
+
+		let is_greg = $('#selectCLD').val() == 'gregorian';
+
+		// Get values as gregorian, then send across
+		if(!is_greg){
+			early_date = convert($early, false);
+			late_date = convert($latest, false);
+		}
+
+		if(new Date(early_date).getTime() >= new Date(late_date).getTime()){
+
+			$range_cont.hide();
+			window.hWin.HEURIST4.msg.showMsgFlash('Earliest estimate needs to be before latest date', 3000);
+			return;
+		}
+
+		window.hWin.HAPI4.SystemMgr.get_time_diffs({'early_date': early_date, 'latest_date': late_date}, function(response){
+			if(response.status == window.hWin.ResponseStatus.OK){
+
+				const data = response.data;
+
+				$('#fYears').text(parseInt(data.years));
+				$('#fMonths').text(parseInt(data.months));
+				$('#fDays').text(parseInt(data.days));
+
+				$range_cont.show();
+
+			}else{
+				$range_cont.hide();
+				window.hWin.HEURIST4.msg.showMsgErr(response);
+			}
+		});
+	}
 
     function _updateGeorgianDate(){
         var type = that.curTemporal.getType();
@@ -277,7 +373,7 @@ var TemporalPopup = (function () {
             if (type === "s") {
                 value = convert($("#simpleDate"), true);
             }else if (type === "f") {
-                value = convert($("#fDAT"), true);
+                value = convert($("#fTPQ"), true) + " " + convert($("#fTAQ"), true);
             }else  if (type === "p") {
                 value = convert($("#TPQ"), true) + " " + convert($("#TAQ"), true);
                 //PDB  PDE
@@ -370,7 +466,7 @@ var TemporalPopup = (function () {
                 if (type === "s") {
                     value = formatGregJulian($("#simpleDate").val(), isj);
                 }else if (type === "f") {
-                    value = formatGregJulian($("#fDAT").val(), isj);
+                    value = formatGregJulian($("#fTPQ").val(), isj) + " to " + formatGregJulian($("#fTAQ").val(), isj);
                 }else  if (type === "p") {
                     if($("#TPQ").val()!='' && $("#TAQ").val()!=''){
                         value = formatGregJulian($("#TPQ").val(), isj) + " to " + formatGregJulian($("#TAQ").val(), isj);
@@ -398,7 +494,7 @@ var TemporalPopup = (function () {
 			if (elem.length != 0) {
 				switch (elem[0].type) {
 					case "checkbox" :
-						if (elem.attr("checked")) {
+						if (elem.is(":checked")) {
 							temporal.addObjForString(code, "1");
 						}else {
 							temporal.removeObjForCode(code);
@@ -451,6 +547,25 @@ var TemporalPopup = (function () {
 			if (strDate) temporal.addObjForString("DAT", strDate);
 		}
 
+		if(togregorian && type === "f"){ // check earliest and latest estimates
+
+			let tpq = temporal.getStringForCode('TPQ');
+			let taq = temporal.getStringForCode('TAQ')
+			if(window.hWin.HEURIST4.util.isempty(tpq) || window.hWin.HEURIST4.util.isempty(taq)){
+				throw 'Both earliest and latest estimates are required';
+			}
+
+			if(new Date(tpq).getTime() >= new Date(taq).getTime()){
+				throw 'Earliest estimate needs to be before latest estimate';
+			}
+		}
+		if(togregorian && type === "f" && // change to date range format and add simple range flag
+			!window.hWin.HEURIST4.util.isempty(temporal.getStringForCode('TPQ')) && !window.hWin.HEURIST4.util.isempty(temporal.getStringForCode('TAQ'))){
+
+        	temporal.setType("p");
+        	temporal.addObjForString("SRN", "1");
+        }
+
         if(calendar && calendar.name!='gregorian'){
             temporal.addObjForString("CLD", calendar.name);
         }else{
@@ -482,7 +597,10 @@ var TemporalPopup = (function () {
             dateFormat: 'yyyy-mm-dd',
             pickerClass: 'calendars-jumps',
             onSelect: function(dates){ 
-                    _updateGeorgianDate(); 
+				_updateGeorgianDate(); 
+                if($('#display-div').tabs('option', 'active') == _type2TabIndexMap["f"]){
+	                _updateSimpleRange(true);
+                }
             },
             renderer: $.extend({}, $.calendars.picker.defaultRenderer,
                     {picker: $.calendars.picker.defaultRenderer.picker.
@@ -508,21 +626,6 @@ var TemporalPopup = (function () {
                 $(this).calendarsPicker('option', {calendar: calendar,
                         defaultDate: dd
                 });
-
-
-                /*
-                var current = $(this).calendarsPicker('option');
-                $(this).calendarsPicker('option', {calendar: calendar,
-                        onSelect: null, onChangeMonthYear: null,
-                        defaultDate: convert(defaultDate)
-                        //dateFormat: 'yyyy-mm-dd', //calendar.ISO_8601,
-                        //minDate: convert(current.minDate),
-                        //maxDate: convert(current.maxDate)
-                        }).
-                    calendarsPicker('option',
-                        {onSelect: current.onSelect,
-                        onChangeMonthYear: current.onChangeMonthYear});
-                        */
             });
         }); //end change calendar
 
