@@ -440,7 +440,7 @@ $mysqli = $system->get_mysqli();
     // $reg_info - global array to be filled in doHarvest
     $reg_info = array('reg'=>array(), 'nonreg'=>array());
     $dirs_and_exts = getMediaFolders( $mysqli );
-    doHarvest($dirs_and_exts, false, 1);
+    doHarvest($system, $dirs_and_exts, false, 1);
     
     $files_notreg = $reg_info['nonreg'];
     

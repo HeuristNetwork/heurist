@@ -104,7 +104,7 @@ $.widget( "heurist.searchRecUploadedFiles", $.heurist.searchEntity, {
             this.btn_refresh_index.button({label: window.hWin.HR("Refresh index")})
                 .click(function() {
                     that._trigger('onrefreshindex')
-                }).hide();
+                });
 
             this.element.find('#select_all')
                 .change(function() {

@@ -25,6 +25,7 @@ require_once (dirname(__FILE__).'/dbEntityBase.php');
 require_once (dirname(__FILE__).'/dbEntitySearch.php');
 require_once (dirname(__FILE__).'/../dbaccess/db_files.php');
 require_once (dirname(__FILE__).'/../dbaccess/db_records.php');
+require_once(dirname(__FILE__).'/../../import/fieldhelper/harvestLib.php');
 
 /**
 * some public methods
@@ -779,7 +780,7 @@ When we open "iiif_image" in mirador viewer we generate manifest dynamically.
                     }else{
 
                         $k = strpos($url,'uploaded_files/');
-                        if($k===false) $k ==strpos($url,'file_uploads/');
+                        if($k===false) $k = strpos($url,'file_uploads/');
 
                         if($k===0 || $k===1){
                             //relative path in database folder
@@ -1320,6 +1321,112 @@ When we open "iiif_image" in mirador viewer we generate manifest dynamically.
 
                 $this->system->addError(HEURIST_ACTION_BLOCKED, 'Unable to proceed with Media record creations, due to ' . $extra);
             }
+        }
+        else if(@$this->data['bulk_reg_filestore']){ // create new file entires 
+
+            $error = array(); // file missing or other errors
+            $skipped = array(); // already registered
+            $created = array(); // total ulf records created
+            $exists = 0; // count of files that already exists
+
+            $files = array();
+
+            $dirs_and_exts = getMediaFolders($mysqli);
+
+            if(array_key_exists('files', $this->data) && !empty($this->data['files'])){ // manageFilesUploaded.php
+                $files = json_decode($this->data['files']);
+            }else{ // manageRecUploadedFiles.js
+
+                // Get non-registered files 
+                doHarvest($this->system, $dirs_and_exts, false, 1);
+                $files = getRegInfoResult()['nonreg'];
+            }
+
+            // Add filestore path
+            $dirs_and_exts['dirs'] = array_map(function($dir){
+                if(strpos($dir, HEURIST_FILESTORE_DIR) === false){
+                    $dir = HEURIST_FILESTORE_DIR . ltrim($dir, '/');
+                }
+                return rtrim($dir, '/');
+            }, $dirs_and_exts['dirs']);
+
+            $system_folders = $this->system->getSystemFolders();
+            foreach ($files as $file_details) {
+
+                $file = $file_details;
+                if(is_object($file_details)){ // from decoded JS stringified
+                    if(property_exists($file_details, 'file_path')){
+                        $file = $file_details->file_path;
+                    }else{ // not handled
+                        $skipped[] = implode(',', $file) . ' => File data is not in valid format';
+                        continue;
+                    }
+                }
+
+                $provided_file = $file;
+                if(strpos($file, HEURIST_FILESTORE_DIR) === false){
+                    $file = HEURIST_FILESTORE_DIR . $file;
+                }
+
+                if(!file_exists($file)){ // not found, or not in file store
+                    $error[] = $provided_file . ' => File does not exist';
+                    continue;
+                }
+
+                $fileinfo = pathinfo($file);
+                $path = $fileinfo['dirname'];
+                $name = $fileinfo['basename'];
+                $valid_dir = false;
+
+                // Check file directory against set 'upload file' directories
+                foreach ($dirs_and_exts['dirs'] as $file_dir) {
+                    if(strpos($path, $file_dir) !== false){
+                        $valid_dir = true;
+                        break;
+                    }
+                }
+                if(!$valid_dir){
+                    $skipped[] = $name . ' => File is not located within any set upload directories';
+                    continue;
+                }
+
+                // Check extension
+                if(!in_array(strtolower($fileinfo['extension']), $dirs_and_exts['exts'])){
+                    $skipped[] = $name . ' => File extension is not allowed';
+                    continue;   
+                }
+
+                // Check if file is already registered
+                if(fileGetByFileName($this->system, $file) > 0){
+                    $exists ++;
+                    continue;
+                }
+
+                $ulf_ID = fileRegister($this->system, $file);
+                if($ulf_ID > 0){
+                    $created[] = $name . ' => Registered file as #' . $ulf_ID;
+                }else{
+                    $msg = $this->system->getError();
+                    $error[] = $name . ' => Unable to register file' . (is_array($msg) && array_key_exists('message', $msg) ? ', <br>' . $msg['message'] : '');
+                }
+            }
+
+            $ret = array();
+
+            if(count($created) > 0){
+                $ret[] = 'Created:<br>' . implode('<br>', $created);
+            }
+            if($exists > 0){
+                $ret[] = 'Already registered: ' . $exists;
+            }
+            if(count($skipped) > 0){
+                $ret[] = 'Skipped:<br>' . implode('<br>', $skipped);
+            }
+            if(count($error) > 0){
+                $ret[] = 'Errors:<br>' . implode('<br>', $error);
+            }
+
+            $ret = implode('<br><br>', $ret);
         }
 
         if($ret===false){
