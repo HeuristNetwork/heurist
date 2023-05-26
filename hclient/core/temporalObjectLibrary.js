@@ -353,8 +353,7 @@ Temporal.fieldsDict = {	"VER"	:	"Version Number",
     "EGP"	:	"Egyptian Date",
     "CLD"   :   "Calendar",
     "CL2"   :   "Non-gregorian value",  //value in calendar value
-    "CIR"   :   "Circa or approximate",
-    "SRN"   :   "Simple range"
+    "CIR"   :   "Circa or approximate"
 };
 
 Temporal.determination = {	0	:	"Unknown",
@@ -403,7 +402,7 @@ Temporal._typeFieldMap = {	s : {
     },
     p :	{
         req : [["PDB","PDE","TPQ","TAQ"],["TPQ","TAQ"]],
-        opt : ["DET","SPF","EPF","COM","SRT","CLD","CL2","SRN"],
+        opt : ["DET","SPF","EPF","COM","SRT","CLD","CL2"],
         hdr : ["PDB","PDE","TPQ","TAQ"]
     },
     f :	{

@@ -270,7 +270,7 @@ var TemporalPopup = (function () {
             _type2TabIndexMap[$(item).attr('id')] = i;
         });
 
-        if(that.curTemporal.getType() === "p" && 
+        if(that.curTemporal.getType() === "p" && // if only earliest and latest estimates exist, treat as simple range instead of fuzzy range
 			window.hWin.HEURIST4.util.isempty(that.curTemporal.getStringForCode('PDB')) && window.hWin.HEURIST4.util.isempty(that.curTemporal.getStringForCode('PDE')) && 
 			!window.hWin.HEURIST4.util.isempty(that.curTemporal.getStringForCode('TPQ')) && !window.hWin.HEURIST4.util.isempty(that.curTemporal.getStringForCode('TAQ'))){
 
@@ -563,7 +563,6 @@ var TemporalPopup = (function () {
 			!window.hWin.HEURIST4.util.isempty(temporal.getStringForCode('TPQ')) && !window.hWin.HEURIST4.util.isempty(temporal.getStringForCode('TAQ'))){
 
         	temporal.setType("p");
-        	temporal.addObjForString("SRN", "1");
         }
 
         if(calendar && calendar.name!='gregorian'){
