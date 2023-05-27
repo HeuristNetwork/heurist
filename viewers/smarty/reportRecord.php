@@ -254,10 +254,10 @@ class ReportRecord {
                                     $record["recRelationNotes"] = $value['Notes'];
                                 }
                                 if(array_key_exists('StartDate', $value)){
-                                    $record["recRelationStartDate"] = temporalToHumanReadableString($value['StartDate']);
+                                    $record["recRelationStartDate"] = Temporal::toHumanReadable($value['StartDate']);
                                 }
                                 if(array_key_exists('EndDate', $value)){
-                                    $record["recRelationEndDate"] = temporalToHumanReadableString($value['EndDate']);
+                                    $record["recRelationEndDate"] = Temporal::toHumanReadable($value['EndDate']);
                                 }
                                 
                                 array_push($res, $record);
@@ -523,8 +523,8 @@ class ReportRecord {
                             $origvalues = array();
                             foreach ($dtValue as $key => $value){
                                 if(strlen($res)>0) $res = $res.", ";
-                                $res = $res.temporalToHumanReadableString($value);
-                                array_push($origvalues, temporalToHumanReadableString($value));
+                                $res = $res.Temporal::toHumanReadable($value);
+                                array_push($origvalues, Temporal::toHumanReadable($value));
                             }
                             if(strlen($res)==0){ //no valid terms
                                 $res = null;

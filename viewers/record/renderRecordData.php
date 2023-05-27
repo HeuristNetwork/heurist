@@ -1211,7 +1211,7 @@ function print_public_details($bib) {
                     //ignore empty date
                     continue;
                 }else{
-                    $bd['val'] = temporalToHumanReadableString($bd['val'], false);
+                    $bd['val'] = Temporal::toHumanReadable($bd['val']);
                     $bd['val'] = output_chunker($bd['val']);
                 }
 
@@ -1869,8 +1869,8 @@ function print_relation_details($bib) {
 					print strip_tags($bd['Title'],ALLOWED_TAGS);
 				}
 				print '&nbsp;&nbsp;';
-				if (@$bd['StartDate']) print htmlspecialchars(temporalToHumanReadableString($bd['StartDate']));
-				if (@$bd['EndDate']) print ' until ' . htmlspecialchars(temporalToHumanReadableString($bd['EndDate']));
+				if (@$bd['StartDate']) print htmlspecialchars(Temporal::toHumanReadable($bd['StartDate']));
+				if (@$bd['EndDate']) print ' until ' . htmlspecialchars(Temporal::toHumanReadable($bd['EndDate']));
 			print '</div></div>';
 		}
 		$from_res->close();

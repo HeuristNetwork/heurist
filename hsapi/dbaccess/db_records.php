@@ -2333,7 +2333,6 @@ function prepareRecordForUpdate($system, $record, $detailValuesNew, $update_mode
     }//for
 
     return $detailValues;
-
 }
 
 //function doDetailInsertion($recID, $details, $rectype, $wg, &$nonces, &$retitleRecs, $modeImport)
@@ -2504,6 +2503,22 @@ function _prepareDetails($system, $rectype, $record, $validation_mode, $recID, $
                     if(!$isValid ){
                         $err_msg = 'Value is empty';  
                     }else{
+                        
+                        //$preparedDate = Temporal::dateToISO($dtl_Value, 2, true, 'now');
+                        
+                        $preparedDate = new Temporal( $dtl_Value );
+                        
+                        if($preparedDate && $preparedDate->isValid()){
+                            
+                            // saves as usual date
+                            // if date is Simple, 0<year>9999 (CE) and has both month and day 
+                            if($preparedDate->isValidSimple()){
+                                $dtl_Value = $preparedDate->getValue(true); //returns simple yyyy-mm-dd
+                            }else{
+                                $dtl_Value = $preparedDate->toJSON(); //json encoded string
+                            }
+                        }
+                        /* TEMP to remove
                         //yesterday, today, tomorrow, now
                         $sdate = strtolower(super_trim($dtl_Value));
                         if($sdate=='today'){
@@ -2531,12 +2546,11 @@ function _prepareDetails($system, $rectype, $record, $validation_mode, $recID, $
                                 $dtl_Value = $t2->format($format);
                                 
                             }catch(Exception  $e){
-                                //skip converion
+                                //skip conversion
                                 
                             }
-                            
-                            //$dtl_Value = validateAndConvertToISO($dtl_Value);
                         }
+                        */
                     }
                     break;
                 case "float":
@@ -2872,7 +2886,11 @@ function prepareGeoValue($mysqli, $dtl_Value){
     }
 
     if(preg_match('/\d/', $geoValue) && $hasGeoType){ // check that the value has ANY numbers (coordinates) and has an identified geo type
-        $res = mysql__select_value($mysqli, "select ST_asWKT(ST_GeomFromText('".addslashes($geoValue)."'))");
+        try{
+            $res = mysql__select_value($mysqli, "select ST_asWKT(ST_GeomFromText('".addslashes($geoValue)."'))");    
+        } catch (Exception $e) {
+            return array(false, 'Geo WKT value '.substr(htmlspecialchars($geoValue),0,15).'... is not valid');
+        }
     }
 
     if($res){

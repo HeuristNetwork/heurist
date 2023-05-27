@@ -1231,7 +1231,7 @@ function createResourceRecord($mysqli, $record_type, $recdetails, $missing_point
             $value = $recdata;
             if($dt_id==DT_DATE){
                 
-                $value = validateAndConvertToISO($value, null, 1); 
+                $value = Temporal::dateToISO($value, 1); 
                 /*
                 try{
                     $t2 = new DateTime($value);

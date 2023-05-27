@@ -1215,11 +1215,15 @@ if($active_all || in_array('date_values', $active)) {
                 }
                 
                 if($row['is_ambig']===true){
-                    //parse and validate value   order 2 (mm/dd), don't add day  if it is not defined
-                    $row['new_value'] = validateAndConvertToISO($row['dtl_Value'], $row['rec_Added'], 2, false);
-                    if($row['new_value']=='Temporal'){
+                    
+                    //check if dtl_Value is old plain string temporal object ot new json object
+                    if(strpos($row['dtl_Value'],"|")!==false || strpos($row['dtl_Value'],'estMinDate')!==false){
                         continue;
-                    }else if($row['new_value']==$row['dtl_Value']){ //nothing to correct - result is the same
+                    }
+                    
+                    //parse and validate value order 2 (mm/dd), don't add day if it is not defined
+                    $row['new_value'] = Temporal::dateToISO($row['dtl_Value'], 2, false, $row['rec_Added']);
+                    if($row['new_value']==$row['dtl_Value']){ //nothing to correct - result is the same
 
                         if(strlen($row['dtl_Value'])>=8 && strpos($row['dtl_Value'],'-')==false){ // try automatic convert to ISO format
                             
@@ -1243,7 +1247,7 @@ if($active_all || in_array('date_values', $active)) {
                         continue;
                     }
                     if($row['new_value']!=null && $row['new_value']!=''){
-                        $row['is_ambig'] = correctDMYorder($row['dtl_Value'], true);
+                        $row['is_ambig'] = Temporal::correctDMYorder($row['dtl_Value'], true);
                         $autofix = ($row['is_ambig']===false);
                     }
                 }

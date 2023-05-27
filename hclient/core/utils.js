@@ -346,10 +346,13 @@ window.hWin.HEURIST4.util = {
      * @return {Object}     The URL parameters
      */
     getUrlParams: function (url) {
-        var params = {};
+        
         var parser = document.createElement('a');
         parser.href = url;
         var query = parser.search.substring(1);
+        
+        var params = window.hWin.HEURIST4.util.getParamsFromString(query, '&', true);
+        
         var vars = query.split('&');
         for (var i = 0; i < vars.length; i++) {
             var pair = vars[i].split('=');
@@ -358,6 +361,21 @@ window.hWin.HEURIST4.util = {
         return params;
     },
 
+    getParamsFromString: function (url, sep='&', decode=true) {
+        var params = {};
+        var vars = url.split(sep);
+        for (var i = 0; i < vars.length; i++) {
+            var pair = vars[i].split('=');
+            if(decode){
+                params[pair[0]] = decodeURIComponent(pair[1]);    
+            }else{
+                params[pair[0]] = pair[1];
+            }
+        }
+        return params;
+    },
+    
+    
     isArrayNotEmpty: function (a){
         return (window.hWin.HEURIST4.util.isArray(a) && a.length>0);
     },
@@ -628,12 +646,12 @@ window.hWin.HEURIST4.util = {
                     if(start.search(/VER=/)!==-1){
                         temporal = new Temporal(start);
                         if(temporal){
-                            var dt = temporal.getTDate('PDB');  //probable begin
-                            if(!dt) dt = temporal.getTDate('TPQ');
+                            var dt = temporal.getTDate('TPQ');  
+                            if(!dt) dt = temporal.getTDate('PDB'); //probable begin
 
                             if(dt){ //this is range - find end date
-                                var dt2 = temporal.getTDate('PDE'); //probable end
-                                if(!dt2) dt2 = temporal.getTDate('TAQ');
+                                var dt2 = temporal.getTDate('TAQ'); 
+                                if(!dt2) dt2 = temporal.getTDate('PDE'); //probable end
                                 end = __forVis(dt2);
                             }else{
                                 dt = temporal.getTDate('DAT');  //simple date
@@ -654,8 +672,8 @@ window.hWin.HEURIST4.util = {
                     if(end.search(/VER=/)!==-1){
                         temporal = new Temporal(end);
                         if(temporal){
-                            var dt = temporal.getTDate('PDE'); //probable end
-                            if(!dt) dt = temporal.getTDate('TAQ');
+                            var dt = temporal.getTDate('TAQ'); 
+                            if(!dt) dt = temporal.getTDate('PDE');//probable end
                             if(!dt) dt = temporal.getTDate('DAT');
                             end = __forVis(dt);
                         }

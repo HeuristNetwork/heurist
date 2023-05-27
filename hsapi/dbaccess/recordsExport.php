@@ -1387,15 +1387,13 @@ private static function _getGeoJsonFeature($record, $extended=false, $simplify=f
             }else{
                 if($field_type=='date' || $field_type=='year'){
                     if($dty_ID==DT_START_DATE){
-                        $date_start = temporalToSimple($value);
-                        if(strpos($date_start,'unknown')!==false) $date_start = null;
+                        $date_start = $value;
                     }else if($dty_ID==DT_END_DATE){
-                        $date_end = temporalToSimple($value);
-                        if(strpos($date_end,'unknown')!==false) $date_end = null;
+                        $date_end = $value;
                     }else if($value!=null){
                         //parse temporal
-                        $ta = temporalToSimpleRange($value);
-                        if($ta!=null) $timevalues[] = $ta;
+                        $ta = new Temporal($value);
+                        if($ta->isValid()) $timevalues[] = $ta->getOldTimespan();//getValue();  //temporal json array for geojson
                     }
                 }else if(defined('DT_SYMBOLOGY') && $dty_ID==DT_SYMBOLOGY){
                     $symbology = json_decode($value,true);                    
@@ -1591,17 +1589,18 @@ private static function _getGeoJsonFeature($record, $extended=false, $simplify=f
         }
     }
 
-    if($date_start!=null || $date_end!=null){
-        if($date_start==null){
+    //if data_start and date_end are temporal objects - take action    
+    if($date_start || $date_end){
+
+        if(!$date_start){
             $date_start = $date_end;
         }
-        if($date_start) $date_start = removeLeadingYearZeroes($date_start,true,true);
-        if($date_end) $date_end = removeLeadingYearZeroes($date_end,true,true);
         
-        if($date_start!=null)
+        $dt = Temporal::mergeTemporals($date_start, $date_end);
+        
+        if($dt && $dt->isValid())
         {
-            if($date_end==null) $date_end = '';
-            $timevalues[] = array($date_start, '', '', $date_end, '');
+            $timevalues[] = $dt->getOldTimespan();//getValue(); //array($date_start, '', '', $date_end, '');
         }
     }
 

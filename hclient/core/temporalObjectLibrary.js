@@ -78,6 +78,265 @@ function Temporal (strInitTemporal) {
             }
             return temp;
         },
+        
+        getAllFields: function(){
+            var res = {VER:_ver, TYP:_type};
+            var i;
+            for ( i in _dates) {
+                res[i] = _dates[i].toString();
+            }
+            for ( i in _durations) {
+                res[i] = _durations[i].toString();
+            }
+            for ( i in _fields) {
+                res[i] = _fields[i].toString();
+            }
+            return res;
+        },
+
+        //
+        //
+        //        
+        toJSON: function () {
+
+            var $tDate = that.getAllFields();
+            var $timespan= {};
+            
+                    if ($tDate["CLD"] && $tDate["CL2"] && (tDate["CLD"].toLowerCase()!='gregorian')) {
+                            let $cld = $tDate["CL2"]+" "+$tDate["CLD"];
+                            if($cld.indexOf('null')>=0) $tDate["CLD"] = $cld.substr(4); //some dates were saved in wrong format - fix it
+                    }        
+                    
+                    switch ($tDate["TYP"]) {
+                        case 's'://simple
+                            $timespan = {timestamp:{in:$tDate['DAT'], type:'s'}};
+                            
+                            if($tDate['CIR']){  //circa or aproximate
+                                $timespan['timestamp']['circa'] = true;
+                            }
+                        break;    
+                        case 'f'://fuzzy
+                            $timespan = {timestamp:{in:$tDate['DAT'], type:'f', deviation:$tDate['RNG']}};
+                        break;    
+                        case 'c'://carbon
+
+                            //BPD - before present date
+                            if($tDate['BPD']){
+                                $date = 1950 - parseInt($tDate['BPD']); //(new Date().getFullYear()) 
+                            }else{
+                                $date = -parseInt($tDate['BCE']);
+                            }
+
+                            $timespan = {timestamp:{in:(''+$date), type:'c', bp:($tDate['BPD']>0),
+                                native: ($tDate['BPD']>0
+                                    ? ($tDate['BPD']+' BP')
+                                    : ($tDate['BCE']?  $tDate['BCE'] + ' BCE': '')) }};
+
+
+                            if($tDate['DEV']){
+                                $timespan['timestamp']['deviation'] = $tDate['DEV'];
+                            }else{
+                                if ($tDate['DVN']){
+                                    $timespan['timestamp']['deviation_negative'] = $tDate['DVN'];
+                                }
+                                if ($tDate['DVP']){
+                                    $timespan['timestamp']['deviation_positive'] = $tDate['DVP'];
+                                }
+                            }
+                        break;
+                        case 'p'://probability range
+                        
+                            $timespan = {start:{earliest:$tDate['TPQ']},
+                                            end:{latest:$tDate['TAQ']}};
+                        
+                            if ($tDate['PDB']){
+                                $timespan['start']['latest'] = $tDate['PDB'];
+                            } 
+                            if($tDate['PDE']){
+                                $timespan['end']['earliest'] = $tDate['PDE'];
+                            }
+                            
+                            if($tDate['SPF']) $timespan['start']['profile'] = $tDate['SPF'];
+                            if($tDate['EPF']) $timespan['end']['profile'] = $tDate['EPF'];
+                            if($tDate['PRF']) $timespan['profile'] = $tDate['PRF'];
+                                                       
+                        break;
+                    }//end case
+            
+            
+                    if($tDate['DET']) $timespan['determination'] = $tDate['DET'];
+                    if($tDate['CLD']) $timespan['calendar'] = $tDate['CLD'];
+                    if($tDate['COM']) $timespan['comment'] = $tDate['COM'];
+                    //labaratory code for C14
+                    if($tDate['COD']) $timespan['labcode'] = $tDate['COD'];
+                    //human readable in native calendar
+                    if($tDate['CL2']) $timespan['native'] = $tDate['CL2'];
+            
+            return $timespan;
+        },
+        
+    //
+    // Outputs humand readable representation of temporal object
+    //    
+        _deviationToText: function ($value, $prefix){
+        
+            if($value){
+                var dvp = $value.match(/(\d+)Y/);
+                if(dvp && dvp[1])
+                    return $prefix + dvp[1]+' years';
+            }
+            return '';
+        },
+    
+        _deviationSuffix: function( $timestamp ){
+            
+            var $res = '';
+            if($timestamp['deviation']){
+                $res = that._deviationToText($timestamp['deviation'], ' ±');
+            }else{
+                if($timestamp['deviation_negative']){
+                    $res = that._deviationToText($timestamp['deviation_negative'], ' -');
+                }
+                if($timestamp['deviation_positive']){
+                    $res = ($res+' '+that._deviationToText($timestamp['deviation_positive'], ' +')).trim();
+                }
+            }
+            return $res;        
+            
+        },
+    
+        toReadableExt: function($separator){
+
+            try{
+            
+            var $date = that.toJSON();
+
+            $calendar = $date['calendar'];
+            var isgj = (!$calendar || $calendar=='gregorian' || $calendar=='julian');
+            $res = {};
+
+            $res['Type'] = '';
+
+            if($date['timestamp']){
+
+                $res['Type'] = ($date['timestamp']['type'] == 'c')?'Radiometric'
+                                :($date['timestamp']['type'] == 'f'?'Fuzzy date'
+                                :'Simple');
+                                
+                //one date value with possible deviation
+                
+                $timestamp = formatGregJulian($date['timestamp']['in'], isgj);
+
+                if($timestamp){
+                    
+                    $timestamp = $timestamp+that._deviationSuffix( $date['timestamp'] );
+                }
+
+                if($date['timestamp']['circa']){
+                    $res['Date'] = 'circa '+$timestamp;
+                }
+
+                $res['Date']  = $timestamp;
+
+            }else if($date['start'] && $date['type']=='r'){  //simple range - NOT USED
+
+                $res['Type'] = 'Simple Range';
+
+                $res['Earliest estimate'] = formatGregJulian($date['start']['earliest'], isgj);
+                $res['Latest estimate'] = formatGregJulian($date['end']['latest'], isgj); 
+
+                if($date['profile']){
+                    $res['Probability curve'] = Temporal.profiles[parseInt($date['profile'])];
+                }
+
+            }else{ //timespan - range
+
+
+                var $from = '',
+                    $to = '',
+                    $is_simple = true;
+
+                if($date['start'] && $date['start']['in']){ //not used
+                    $from = formatGregJulian($date['start']['in'], isgj);
+                    if($from){
+                        $from = $from + that._deviationSuffix( $date['start'] );
+                    }
+                    if($date['start']['profile']){
+                        $res['Start probability curve'] = Temporal.profiles[parseInt($date['start']['profile'])];
+                    }
+                }else if($date['start']['earliest']){
+                    $from = formatGregJulian($date['start']['earliest'], isgj);
+
+                    var $dt = null;
+                    if($date['start']['latest']){
+                        $dt = formatGregJulian($date['start']['latest'], isgj);
+                        if($dt){
+                            $is_simple = false;
+                        }
+                    }
+
+                    $res[$is_simple?'Earliest estimate':'Terminus Post Quem'] = $from;
+                    if(!$is_simple) $res['Probable Begin'] = $dt;
+                    if($date['start']['profile']){
+                        $res['Start Profile'] = Temporal.profiles[parseInt($date['start']['profile'])];
+                    }
+                }
+
+                if($date['end'] && $date['end']['in']){  //not used
+                    $to = formatGregJulian($date['end']['in'], isgj);
+                    if($to){
+                        $to = $to +  + that._deviationSuffix( $date['end'] );
+                    }
+
+                    if($date['end']['profile']){
+                        $res['End probability curve'] = Temporal.profiles[parseInt($date['end']['profile'])];
+                    }
+                }else if($date['end']['latest']){
+
+                    if($date['end']['earliest']){
+                        $dt = formatGregJulian($date['end']['earliest'], isgj);
+                        if($dt){
+                            $res['Probable End'] = $dt;
+                            $is_simple = false;
+                        }
+                    }
+
+                    $to = formatGregJulian($date['end']['latest'], isgj);
+                    $res[$is_simple?'Latest estimate':'Terminus Ante Quem'] = $to;
+
+                    if($date['start']['profile']){
+                        $res['End Profile'] = Temporal.profiles[parseInt($date['end']['profile'])];
+                    }
+                }
+
+                $res['Type'] = ($is_simple)?'Simple Range':'Approximate Range';
+            }
+
+            //add native decription as prefix
+            if($calendar && $date['native'] && !isgj){
+                $res[''] = $date['native'];
+            }            
+
+
+            if($date['calendar']) $res['Calendar'] = $date['calendar'];
+            if($date['comment']) $res['Comment'] = $date['comment'];
+            if($date['determination']) $res['Determination'] = Temporal.determination[parseInt($date['determination'])];
+            //labaratory code for C14
+            if($date['labcode']) $res['Labaratory Code'] = $date['labcode'];
+
+            var $res2 = '';
+            for(var $key in $res){
+                var $val = $res[$key];   
+                $res2 = $res2+$key+': '+$val+$separator;
+            }
+
+            return $res2;
+            
+            }catch(e){
+                  return 'Error pasring temporal '+_strTemporal;
+            }
+
+        },
 
         getField: function (code) {
             if ( _fields[code] ) {
@@ -335,7 +594,7 @@ Temporal.parse = function () {
 
 
 Temporal.typeDict = {"s" :	"Simple Date",
-    "c"	:	"C14 Date",
+    "c"	:	"Radiometric",
     "f"	:	"Approximate Date",
     "p"	:	"Probability Date Range",
     "d"	:	"Duration"
@@ -1846,7 +2105,7 @@ function temporalToHumanReadableString(inputStr) {
             pdb = pdb ? pdb[1]: (tpq ? tpq:"");
             var pde = str.match(/PDE=([^\|]+)/);
             pde = pde ? pde[1]: (taq ? taq:"");
-            str = formatGregJulian(pdb, isgj) + " to " + formatGregJulian(pde, isgj);
+            str = formatGregJulian(tpq, isgj) + " to " + formatGregJulian(taq, isgj);
         }else if (str.search(/TYP=f/) != -1 ) {//fuzzy date
             var dat = str.match(/DAT=([^\|]+)/);
             dat = dat ? formatGregJulian(dat[1], isgj): "";

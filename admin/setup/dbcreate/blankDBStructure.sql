@@ -502,6 +502,27 @@ CREATE TABLE recLinks (
   KEY rl_DetailKey (rl_DetailID)
 ) ENGINE=InnoDB COMMENT='A cache for links between records (both record pointer fields and relationship records) to speed access';
 
+-- --------------------------------------------------------
+
+--
+-- Table structure for table 'recDetailsDateIndex'
+--
+
+CREATE TABLE recDetailsDateIndex (
+  rdi_ID   int unsigned NOT NULL auto_increment COMMENT 'Primary key',
+  rdi_RecID int unsigned NOT NULL COMMENT 'Record ID',
+  rdi_DetailTypeID int unsigned NOT NULL COMMENT 'Detail type ID',
+  rdi_DetailID int unsigned NOT NULL COMMENT 'Detail ID',
+  rdi_estMinDate DECIMAL(15,4) NOT NULL COMMENT '',
+  rdi_estMaxDate DECIMAL(15,4) NOT NULL COMMENT '',
+  PRIMARY KEY  (rdi_ID),
+  KEY rdi_RecIDKey (rdi_RecID),
+  KEY rdi_DetailTypeKey (rdi_DetailTypeID),
+  KEY rdi_DetailIDKey (rdi_DetailID),
+  KEY rdi_MinDateKey (rdi_estMinDate),
+  KEY rdi_MaxDateKey (rdi_estMaxDate)
+) ENGINE=InnoDB COMMENT='A cache for date fields to speed access';
+
 
 -- --------------------------------------------------------
 
@@ -1017,7 +1038,7 @@ CREATE TABLE usrWorkingSubsets (
   sys_dbSubSubVersion,sys_eMailImapServer,sys_eMailImapPort,
   sys_eMailImapProtocol,sys_eMailImapUsername,sys_eMailImapPassword,
   sys_UGrpsdatabase,sys_OwnerGroupID,sys_ConstraintDefaultBehavior,sys_MediaFolders)
-  VALUES (1,0,1,3,9,NULL,NULL,NULL,NULL,NULL,NULL,1,'locktypetotype','uploaded_files');
+  VALUES (1,0,1,3,13,NULL,NULL,NULL,NULL,NULL,NULL,1,'locktypetotype','uploaded_files');
 
   -- Note: database sub version updated manually to '1' at 6pm 22/8/12
   -- 0 is everyone, 1 is the owning admins group, 2 is default dbAdmin user

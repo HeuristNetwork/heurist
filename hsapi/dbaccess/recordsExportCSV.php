@@ -638,7 +638,7 @@ public static function output($data, $params){
                             }                        
                         }else if($dt_type=='date'){
                             foreach($values as $val){
-                                $vals[] = temporalToHumanReadableString(trim($val));
+                                $vals[] = Temporal::toHumanReadable(trim($val));
                             }                        
                         }else if($dt_type=='enum' || $dt_type=='relationtype'){
 

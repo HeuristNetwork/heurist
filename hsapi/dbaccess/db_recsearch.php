@@ -239,7 +239,8 @@ function recordSearchFacets($system, $params){
 
             $select_field  = "dt0.dtl_Value";
             $detail_link   = ", recDetails dt0 ";
-            $details_where = " AND (dt0.dtl_RecID=r0.rec_ID and dt0.dtl_DetailTypeID $compare_field) AND (NULLIF(dt0.dtl_Value, '') is not null)";
+            $details_where = " AND (dt0.dtl_RecID=r0.rec_ID and dt0.dtl_DetailTypeID $compare_field) "
+                            ." AND (NULLIF(dt0.dtl_Value, '') is not null)";
             //$detail_link   = " LEFT JOIN recDetails dt0 ON (dt0.dtl_RecID=r0.rec_ID and dt0.dtl_DetailTypeID=".$fieldid.")";
             //$details_where = " and (dt0.dtl_Value is not null)";
         }
@@ -247,7 +248,7 @@ function recordSearchFacets($system, $params){
         $select_clause = "";
         $grouporder_clause = "";
 
-        if($dt_type=="date"){
+        if($dt_type=='date'){
 
             $details_where = $details_where.' AND (cast(getTemporalDateString('.$select_field.') as DATETIME) is not null '
             .'OR (cast(getTemporalDateString('.$select_field.') as SIGNED) is not null  AND '
@@ -442,8 +443,8 @@ function recordSearchFacets($system, $params){
 
             while ( $row = $res->fetch_row() ) {
 
-                if((($dt_type=="integer" || $dt_type=="float") && $facet_type==_FT_SELECT)  || 
-                (($dt_type=="year" || $dt_type=="date") && $facet_groupby==null)  ){
+                if((($dt_type=='integer' || $dt_type=='float') && $facet_type==_FT_SELECT)  || 
+                (($dt_type=='year' || $dt_type=='date') && $facet_groupby==null)  ){
                     $third_element = $row[2];          // slider - third parameter is COUNT for range
 					
                     if(!$missingIds && 
@@ -2474,6 +2475,8 @@ function recordSearch($system, $params)
                         $ruf_entity = new DbRecUploadedFiles($system, null);
                     }
 
+                    $datetime_field_types = mysql__select_list2($mysqli,'select dty_ID from defDetailTypes where dty_Type="date"');
+
                     $loop_cnt=1;                            
                     while ($offset<$res_count){   
 
@@ -2604,7 +2607,17 @@ function recordSearch($system, $params)
                                     }else{
                                         $val = array($row[5], $row[6]); //obfuscated value for fileid and parameters
                                     }
+                                    
+                                }else if(in_array($dtyID, $datetime_field_types) && @$row[1]!=null) { 
+                                    //convert date to old plan string temporal object
 
+                                    $dt = new Temporal($row[1]);
+                                    if($dt->isValidSimple()){
+                                        $val = $dt->getValue(true); //returns simple yyyy-mm-dd
+                                    }else{
+                                        $val = $dt->toPlain(); 
+                                    }
+                                
                                 }else if(@$row[1]!=null) {
                                     $val = $row[1]; //dtl_Value
                                 }

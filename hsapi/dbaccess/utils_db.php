@@ -34,6 +34,8 @@
     *  extractLangPrefix - splits and extract language code and value from string code:value
     * 
     *  updateDatabseToLatest - make changes in database structure according to the latest version
+    *  recreateRecLinks
+    *  recreateRecDetailsDateIndex
     * 
     * @package     Heurist academic knowledge management system
     * @link        https://HeuristNetwork.org
@@ -768,7 +770,7 @@
 
             $res = false;
 
-            if(!isFunctionExists($mysqli, 'getTemporalDateString')){ //need drop old functions
+            if(!isFunctionExists($mysqli, 'getEstDate')){ //getTemporalDateString need drop old functions
                 include(dirname(__FILE__).'/../utilities/utils_db_load_script.php'); // used to load procedures/triggers
                 if(db_script(HEURIST_DBNAME_FULL, dirname(__FILE__).'/../../admin/setup/dbcreate/addProceduresTriggers.sql', false)){
                     $res = true;
@@ -848,8 +850,167 @@
         }
         return $isok;
     }
-
     
+    //
+    //
+    //
+    function recreateRecDetailsDateIndex($system){
+        
+        $mysqli = $system->get_mysqli();
+        
+        $isok = false;
+        $is_table_exist = hasTable($mysqli, 'recDetailsDateIndex');    
+        
+        $err_prefix = 'Update date index: ';
+        $cnt = 0;
+        
+        $log_file = $system->getSysDir().'recDetailsDateIndex.log';
+        
+        $mysqli->query('DROP TABLE IF EXISTS recDetailsDateIndex;');
+        $res = $mysqli->query("CREATE TABLE recDetailsDateIndex (
+              rdi_ID   int unsigned NOT NULL auto_increment COMMENT 'Primary key',
+              rdi_RecID int unsigned NOT NULL COMMENT 'Record ID',
+              rdi_DetailTypeID int unsigned NOT NULL COMMENT 'Detail type ID',
+              rdi_DetailID int unsigned NOT NULL COMMENT 'Detail ID',
+              rdi_estMinDate DECIMAL(15,4) NOT NULL COMMENT '',
+              rdi_estMaxDate DECIMAL(15,4) NOT NULL COMMENT '',
+              PRIMARY KEY  (rdi_ID),
+              KEY rdi_RecIDKey (rdi_RecID),
+              KEY rdi_DetailTypeKey (rdi_DetailTypeID),
+              KEY rdi_DetailIDKey (rdi_DetailID),
+              KEY rdi_MinDateKey (rdi_estMinDate),
+              KEY rdi_MaxDateKey (rdi_estMaxDate)
+            ) ENGINE=InnoDB COMMENT='A cache for date fields to speed access';");
+
+        if(!$res){
+            $system->addError(HEURIST_DB_ERROR, 'Cannot create recDetailsDateIndex', $mysqli->error);
+            
+        }else{
+            //recreate triggers
+            include(dirname(__FILE__).'/../utilities/utils_db_load_script.php'); // used to load procedures/triggers
+            if(!db_script(HEURIST_DBNAME_FULL, dirname(__FILE__).'/../../admin/setup/dbcreate/addProceduresTriggers.sql', false)){
+                    $system->addError(HEURIST_DB_ERROR, $err_prefix.'Cannot recreate database triggers', $mysqli->error);
+                    return false;
+            }
+            
+            //fill database with min/max date values
+            //1. find all date values in recDetails
+            $query = 'SELECT dtl_ID,dtl_RecID,dtl_DetailTypeID,dtl_Value FROM recDetails, defDetailTypes WHERE dtl_DetailTypeID=dty_ID AND dty_Type="date"';
+            $res = $mysqli->query($query);
+            
+            if ($res){
+
+                $mysqli->query('DROP TABLE IF EXISTS bkpDetailsDateIndex');
+                $res3 = $mysqli->query('CREATE TABLE bkpDetailsDateIndex (
+                     bkp_ID int unsigned NOT NULL auto_increment,
+                     dtl_ID int unsigned NOT NULL,
+                     dtl_Value VARCHAR( 250 ),
+                     PRIMARY KEY (bkp_ID))');
+                
+                $keep_autocommit = mysql__begin_transaction($mysqli);
+            
+                while ($row = $res->fetch_row()){
+                    $dtl_ID = $row[0];
+                    $dtl_RecID = $row[1];
+                    $dtl_DetailTypeID = $row[2];
+                    $dtl_Value = $row[3];
+                    
+            //2. Create temporal object
+                    $preparedDate = new Temporal( $dtl_Value );
+                        
+                    if($preparedDate && $preparedDate->isValid()){
+                            
+                            // saves as usual date
+                            // if date is Simple, 0<year>9999 (CE) and has both month and day 
+                            if($preparedDate->isValidSimple()){
+                                $dtl_NewValue = $preparedDate->getValue(true); //returns simple yyyy-mm-dd
+                            }else{
+                                $dtl_NewValue = $preparedDate->toJSON(); //json encoded string
+                            }
+                            
+            //3. Validate estMin and estMax from JSON
+                            $query = "SELECT getEstDate('$dtl_NewValue',0) as minD, getEstDate('$dtl_NewValue',1) as maxD";  
+                            $res2 = $mysqli->query($query);
+                            if($res2){
+                                $row2 = $res2->fetch_row();
+                                if($row2[0]!='' && $row2[1]!=''){
+            //4. Keep old plain string temporal object in backup table - TODO!!!
+                                    $query = 'INSERT INTO bkpDetailsDateIndex(dtl_ID,dtl_Value) VALUES('.$dtl_ID.',\''
+                                        .$mysqli->real_escape_string($dtl_Value).'\')';
+                                    $res4 = $mysqli->query($query);
+                                    if(!$res4){
+                                        //fails update recDetails
+                                        $system->addError(HEURIST_DB_ERROR, $err_prefix.'Error on backup for query:'.$query, $mysqli->error);
+                                        break;
+                                    }
+                                    
+            //5A. If simple date - retain value in recDetails                                    
+            //5B. If temporal object it saves JSON in recDetails
+                                    $query = 'UPDATE recDetails SET dtl_Value="'.
+                                            $mysqli->real_escape_string($dtl_NewValue).'" WHERE dtl_ID='.$dtl_ID;
+                                    $mysqli->query($query);
+                                    if($mysqli->affected_rows>=0){
+            //6. update recDetailsDateIndex should be updated by trigger
+                                        $mysqli->query('delete ignore from recDetailsDateIndex where rdi_DetailID='.$dtl_ID); 
+                
+                                        $res5 = $mysqli->query('insert into recDetailsDateIndex (rdi_RecID, rdi_DetailTypeID, rdi_DetailID, rdi_estMinDate, rdi_estMaxDate)'
+            ." values ($dtl_RecID, $dtl_DetailTypeID, $dtl_ID, getEstDate('$dtl_NewValue',0), getEstDate('$dtl_NewValue',1))");
+
+                                        if(!$res5){
+                                            //fails update recDetails
+                                            $system->addError(HEURIST_DB_ERROR, $err_prefix.'Error on index insert query:'.$query, $mysqli->error);
+                                            break;
+                                        }
+                
+                                        //keep log
+                                        file_put_contents($log_file, $dtl_ID.'  '.$dtl_Value.',  '.$dtl_NewValue."\n", FILE_APPEND );
+                                        
+                                        $cnt++;
+                                    }else{
+                                        //fails update recDetails
+                                        $system->addError(HEURIST_DB_ERROR, $err_prefix.'Error on recDetails update query:'.$query, $mysqli->error);
+                                        break;
+                                    }
+                                    
+                                }else{
+                                    //fails extraction estMinDate, estMaxDate
+                                    $system->addError(HEURIST_ERROR, $err_prefix.'Empty min,max dates. Min:"'.$min.'" Max:"'.$max.'". Query:'.$query);
+                                    break;
+                                }
+                                
+                            }else{
+                                //fails request 
+                                $system->addError(HEURIST_DB_ERROR, $err_prefix.'Error on retrieve min and max dates. Query:'.$query, $mysqli->error);
+                                break;
+                            }
+                            
+                            
+                    }else{
+                        //fails temporal parsing - wrong date
+                        $system->addError(HEURIST_ERROR, $err_prefix.'Cannot parse temporal "'.$dtl_Value);
+                        break;
+                    }
+                    
+                    $isok = true;            
+                }
+                $res->close();
+                
+                if($isok){
+                    $mysqli->commit();  
+                }else{
+                    $mysqli->rollback();
+                }
+                if($keep_autocommit===true) $mysqli->autocommit(TRUE);
+                
+            }
+        }
+        
+        if(!$isok){
+            file_put_contents($log_file, json_encode( $system->getError() ));
+        }
+        
+        return $isok;
+    }
     
     
     //
@@ -1274,7 +1435,7 @@ error_log('UPDATED '.$session_id.'  '.$value);
     // 
     // For Sybversion update see DBUpgrade_1.2.0_to_1.3.0.php
     //
-    // This method updates from 1.3.0 to 1.3.12
+    // This method updates from 1.3.0 to 1.3.13
     //
     function updateDatabseToLatest($system){
         //update sysIdentification set sys_dbVersion=1, sys_dbSubVersion=3, sys_dbSubSubVersion=4 where sys_ID=1
@@ -1523,10 +1684,16 @@ UNIQUE KEY swf_StageKey (swf_RecTypeID, swf_Stage)
                     return false;
                 }
             }
+
+            if($dbVerSubSub<13){
+                if(!recreateRecDetailsDateIndex( $system )){
+                    return false;
+                }
+            }
             
             //update version
-            if($dbVerSubSub<12){
-                $mysqli->query('UPDATE sysIdentification SET sys_dbVersion=1, sys_dbSubVersion=3, sys_dbSubSubVersion=12 WHERE 1');
+            if($dbVerSubSub<13){
+                $mysqli->query('UPDATE sysIdentification SET sys_dbVersion=1, sys_dbSubVersion=3, sys_dbSubSubVersion=13 WHERE 1');
             }
 
             

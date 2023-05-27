@@ -596,7 +596,7 @@ function hSearchMinimalDigitalHarlem() {
             if(r2end){
                 return (r1start == r2start) || (r1start > r2start ? r1start <= r2end : r2start <= r1end);
             }else{
-                if(!r1end || r1end == r1start){
+                if(!r1end || r1end == r1start){ //timestamp
                     r1end = r1start + ' 24:00';
                     r1start = r1start + ' 00:00';
                 }

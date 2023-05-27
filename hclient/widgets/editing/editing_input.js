@@ -459,6 +459,22 @@ $.widget( "heurist.editing_input", {
             this._refresh();    
         }
     },
+    
+    //
+    //
+    //
+    _removeTooltip: function(id){
+
+        if(this.tooltips && this.tooltips[id]){
+            var tooltip = this.tooltips[id];
+            if($tooltip && $tooltip.tooltip('instance') != undefined){
+                $tooltip.tooltip('destroy');
+                $tooltip = null;
+            }
+            this.tooltips[id] = null;
+            delete this.tooltips[id];
+        }
+    },
 
     // events bound via _on are removed automatically
     // revert other modifications here
@@ -482,6 +498,8 @@ $.widget( "heurist.editing_input", {
         if(this.inputs){
             $.each(this.inputs, function(index, input){ 
 
+                    that._removeTooltip(input.attr('id'));
+
                     if(that.detailType=='blocktext'){
                         var eid = '#'+input.attr('id')+'_editor';
                         //tinymce.remove('#'+input.attr('id')); 
@@ -498,9 +516,12 @@ $.widget( "heurist.editing_input", {
                     that.element.find('#'+$(input).attr('id')+'-2').remove();
                     
                     input.remove();
+                    
+                    
             } );
             this.input_cell.remove();
         }
+        this.tooltips = {};
     },
 
     /**
@@ -570,6 +591,8 @@ $.widget( "heurist.editing_input", {
     _removeInput: function(input_id){
 
         var that = this;
+        
+        this._removeTooltip(input_id);        
 
         if(this.inputs.length>1 && this.enum_buttons == null){
 
@@ -5095,18 +5118,49 @@ console.log('onpaste');
         var that = this;
 
         function __onDateChange(){
+
             var value = $input.val();
             
             that.newvalues[$input.attr('id')] = value; 
             
             if(that.options.dtID>0){
+                
                 var isTemporalValue = value && value.search(/\|VER/) != -1; 
                 if(isTemporalValue) {
                     window.hWin.HEURIST4.ui.setValueAndWidth($input, temporalToHumanReadableString(value));    
+
+                    var temporal = new Temporal(value);
+                    var content = '<p>'+temporal.toReadableExt('<br>')+'</p>';
+                    
+                    var $tooltip = $input.tooltip({
+                        items: "input.ui-widget-content",
+                        position: { // Post it to the right of $input
+                            my: "left+20 center",
+                            at: "right center",
+                            collision: "none"
+                        },
+                        show: { // Add slight delay to show
+                            delay: 500,
+                            duration: 0
+                        },
+                        content: function(){ // Provide text
+                            return content;
+                        },
+                        open: function(event, ui){ // Add custom CSS + class
+                            ui.tooltip.css({
+                                "width": "200px",
+                                "background": "rgb(209, 231, 231)",
+                                "font-size": "1.1em"
+                            })//.addClass('ui-heurist-populate');
+                        }
+                    });
+                    if(!that.tooltips) that.tooltips = {};
+                    that.tooltips[$input.attr('id')] = $tooltip; 
                     
                     $input.addClass('Temporal').removeClass('text').attr('readonly','readonly');
                 }else{
                     $input.removeClass('Temporal').addClass('text').removeAttr("readonly").css('width','20ex');
+                    that._removeTooltip($input.attr('id'));
                 }
             }
             

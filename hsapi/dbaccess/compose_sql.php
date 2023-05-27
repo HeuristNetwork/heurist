@@ -1173,14 +1173,14 @@ class Predicate {
         if (strpos($this->value,"<>")) {
 
             $vals = explode("<>", $this->value);
-            $datestamp0 = validateAndConvertToISO($vals[0]);
-            $datestamp1 = validateAndConvertToISO($vals[1]);
+            $datestamp0 = Temporal::dateToISO($vals[0]);
+            $datestamp1 = Temporal::dateToISO($vals[1]);
 
             return "between '$datestamp0' and '$datestamp1'";
 
         }else{
 
-            $datestamp = validateAndConvertToISO($this->value);
+            $datestamp = Temporal::dateToISO($this->value);
 
             if ($this->parent->exact) {
                 return "= '$datestamp'";

@@ -56,8 +56,49 @@ DROP TRIGGER IF EXISTS defDetailTypeGroups_delete;
 DELIMITER $$
 
 
-DROP function IF EXISTS `getTemporalDateString`$$
+DROP function IF EXISTS `getEstDate`$$
 
+-- extract estMinDate or estMaxDate from json string
+CREATE DEFINER=CURRENT_USER FUNCTION `getEstDate`(sTemporal varchar(4095), typeDate tinyint) RETURNS decimal(15,4)
+    DETERMINISTIC
+    begin
+            declare iBegin integer;
+            declare iEnd integer;
+            declare nameDate varchar(20) default '';
+            declare strDate varchar(15) default '';
+            declare estDate decimal(15,4);
+-- find the temporal type might not be a temporal format, see else below
+            IF (TRIM(sTemporal) REGEXP '^-?[0-9]+$') THEN
+                RETURN CAST(TRIM(sTemporal) AS DECIMAL(15,4));
+            END IF;
+
+            IF (typeDate = 0) THEN
+                set nameDate = '"estMinDate":';
+            ELSE
+                set nameDate = '"estMaxDate":';
+            END IF;
+
+            set iBegin = LOCATE(nameDate,sTemporal);
+            if iBegin = 0 THEN
+-- it will work for valid CE dates only, dates without days or month will fail
+                RETURN CAST(CONCAT(YEAR(sTemporal),'.',LPAD(MONTH(sTemporal),2,'0'),LPAD(DAY(sTemporal),2,'0')) AS DECIMAL(15,4));
+            else
+                set iBegin = iBegin + 13;
+                set iEnd = LOCATE(',', sTemporal, iBegin);
+                if iEnd = 0 THEN
+                    set iEnd = LOCATE('}', sTemporal, iBegin);
+                END IF;
+                if iEnd > 0 THEN
+                    set strDate =  substring(sTemporal, iBegin, iEnd - iBegin);
+                    RETURN CAST(TRIM(strDate) AS DECIMAL(15,4));
+                END IF;
+                RETURN 0;    
+            end if;
+    end$$
+    
+
+DROP function IF EXISTS `getTemporalDateString`$$
+    
 CREATE DEFINER=CURRENT_USER FUNCTION `getTemporalDateString`(strDate varchar(4095)) RETURNS varchar(4095) CHARSET utf8mb4
 	DETERMINISTIC
 	begin
@@ -240,6 +281,10 @@ CREATE DEFINER=CURRENT_USER FUNCTION `getTemporalDateString`(strDate varchar(409
         elseif dtType='resource' then
             insert into recLinks (rl_SourceID, rl_TargetID, rl_DetailTypeID, rl_DetailID)
             values (NEW.dtl_RecID, NEW.dtl_Value, NEW.dtl_DetailTypeID, NEW.dtl_ID);
+        elseif dtType='date' then
+            insert into recDetailsDateIndex (rdi_RecID, rdi_DetailTypeID, rdi_DetailID, rdi_estMinDate, rdi_estMaxDate)
+            values (NEW.dtl_RecID, NEW.dtl_DetailTypeID, NEW.dtl_ID, getEstDate(NEW.dtl_Value,0), getEstDate(NEW.dtl_Value,1)) ;
+        
         end if;
 -- legacy databases: need to add update for 200 to save the termID to help with constraint checking
 -- new databases: need to add update for detail 200, now 5, to save the termID
@@ -306,6 +351,12 @@ FROM recDetails where dtl_ID=OLD.dtl_ID INTO @raw_detail;
         elseif dtType='resource' then
             update recLinks set rl_TargetID=NEW.dtl_Value, rl_DetailTypeID=NEW.dtl_DetailTypeID
             where rl_DetailID=NEW.dtl_ID;
+            
+        elseif dtType='date' then
+                update recDetailsDateIndex set rdi_estMinDate=getEstDate(NEW.dtl_Value,0),
+                                                rdi_estMaxDate=getEstDate(NEW.dtl_Value,1),
+                                                rdi_DetailTypeID = NEW.dtl_DetailTypeID  
+                                                where rdi_DetailID=NEW.dtl_ID;
         end if;
 -- need to add update for detail 200, now 5, to save the termID
 	end$$
@@ -330,6 +381,8 @@ FROM recDetails where dtl_ID=OLD.dtl_ID INTO @raw_detail;
         end if;
     
         delete ignore from recLinks where rl_DetailID=OLD.dtl_ID;
+        
+        delete ignore from recDetailsDateIndex where rdi_DetailID=OLD.dtl_ID; 
     end$$
 
 -- ------------------------------------------------------------------------------
@@ -472,6 +525,9 @@ FROM recDetails where dtl_ID=OLD.dtl_ID INTO @raw_detail;
       end if;  
         
       delete ignore from recLinks where rl_RelationID=OLD.rec_ID or rl_SourceID=OLD.rec_ID or rl_TargetID=OLD.rec_ID;
+      
+      delete ignore from recDetailsDateIndex where rdi_RecID=OLD.rec_ID; 
+
 	end$$
 
 -- ------------------------------------------------------------------------------

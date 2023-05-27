@@ -809,7 +809,7 @@ class HQuery {
                                         .' ORDER BY trm_Label limit 1), "~~")) '; // then by term label
                             }else{
 
-                                $fld = $field_type != 'date' ? 'dtl_Value' : 'getTemporalDateString(dtl_Value)';
+                                $fld = $field_type != 'date' ? 'dtl_Value' : 'getEstDate(dtl_Value,0)'; //for sort
 
                                 $sortby = 'ifnull((select '.$fld.' from recDetails where dtl_RecID=r'
                                         .$this->level.'.rec_ID and dtl_DetailTypeID='.$dty_ID
@@ -1576,10 +1576,12 @@ class HPredicate {
         }else{
             
             if($this->field_type=='date' && trim($this->value)!='') { //false && $this->isDateTime()){
-                $field_name = 'CAST( IF( CAST( CONCAT("00",getTemporalDateString( '.$p.'dtl_Value )) as DATETIME) is null, '
-                    . 'CONCAT("00",CAST(getTemporalDateString( '.$p.'dtl_Value ) as SIGNED),"-1-1"), '
-                    . 'CONCAT("00",getTemporalDateString( '.$p.'dtl_Value ))) as DATETIME) ';
-                //'getTemporalDateString('.$p.'dtl_Value) ';
+                //OUTDATED - REMOVE
+                //returns full datetime from Temporal
+                //$field_name = 'CAST( IF( CAST( CONCAT("00",getTemporalDateString( '.$p.'dtl_Value )) as DATETIME) is null, '
+                //    . 'CONCAT("00",CAST(getTemporalDateString( '.$p.'dtl_Value ) as SIGNED),"-1-1"), '
+                //    . 'CONCAT("00",getTemporalDateString( '.$p.'dtl_Value ))) as DATETIME) ';
+                
             }else if($this->field_type=='file'){
                 $field_name = $p."dtl_UploadedFileID ";  //only for search non empty values
             }else{
@@ -1599,8 +1601,16 @@ class HPredicate {
 
             
             if($this->field_id>0){ //field id defined (for example "f:25")
-                
-                if($this->fulltext){
+            
+                if($this->field_type=='date'){
+
+                    $res = "EXISTS (SELECT rdi_DetailID FROM recDetailsDateIndex WHERE $recordID=rdi_RecID AND "
+                    .'rdi_DetailTypeID';
+                    
+                    $field_name = '';
+                    //$val = $this->getFieldValue();
+                    
+                }else if($this->fulltext){
                     $res = 'SELECT dtl_RecID FROM recDetails WHERE dtl_DetailTypeID';
                 }else{
                     $res = "EXISTS (SELECT dtl_ID FROM recDetails ".$p." WHERE $recordID=".$p."dtl_RecID AND "
@@ -2435,13 +2445,13 @@ class HPredicate {
         return ($timestamp0  &&  $timestamp1);
     }
 
-    function makeDateClause() {
+    function makeDateClause_old_to_remove() {
 
         if (strpos($this->value,"<>")) {
 
             $vals = explode("<>", $this->value);
-            $datestamp0 = validateAndConvertToISO($vals[0]);
-            $datestamp1 = validateAndConvertToISO($vals[1]);
+            $datestamp0 = Temporal::dateToISO($vals[0]);
+            $datestamp1 = Temporal::dateToISO($vals[1]);
 
             return ($this->negate?'not ':'')."between '$datestamp0' and '$datestamp1'";
 
@@ -2449,7 +2459,7 @@ class HPredicate {
             return 'NULL';
         }else{
 
-            $datestamp = validateAndConvertToISO($this->value);
+            $datestamp = Temporal::dateToISO($this->value);
             
             if($datestamp==null){
                 return null;
@@ -2484,6 +2494,69 @@ class HPredicate {
         }
     }
 
+    
+    function makeDateClause() {
+        
+        //???? if($this->isEmptyValue()){ // {"f:10":"NULL"}
+
+        if (strpos($this->value,"<>")) {
+
+            $vals = explode("<>", $this->value);
+            
+            $temporal1 = new Temporal($vals[0]);
+            $temporal2 = new Temporal($vals[1]);
+            
+            if(!$temporal1->isValid() || !$temporal2->isValid()){
+                return null;
+            }
+            
+            $timespan = $temporal1->getMinMax();
+            $min = $timespan[0];
+            
+            $timespan = $temporal2->getMinMax();
+            $max = $timespan[1];
+            
+            $timespan = array($min, $max);
+            
+        }else{
+            $temporal = new Temporal($this->value);
+            if(!$temporal->isValid()){
+                return null;
+            }
+            
+            $timespan = $temporal->getMinMax();
+        }
+            
+        $res = '';
+                
+        if ($this->exact) {
+            //timespan within interval
+            $res = "(rdi_estMinDate <= {$timespan[0]} AND {$timespan[1]} <= rdi_estMaxDate)";
+        }
+        else if ($this->lessthan) {
+            
+            //timespan max < rdi_estMinDate
+            $res = "({$timespan[1]} < rdi_estMinDate)";
+        }
+        else if ($this->greaterthan) {
+            
+            //timespan min > rdi_estMaxDate
+            $res = "(rdi_estMaxDate > {$timespan[1]})";
+        }
+        else {
+            //overlaps/intersects with interval
+            // @End >= tbl.start AND @Start <= tbl.end
+            $res = "(rdi_estMaxDate>={$timespan[0]} AND rdi_estMinDate<={$timespan[1]})";
+        }
+        
+        if($this->negate){
+            $res = ' NOT '.$res;
+        }
+        
+        return $res;
+    }
+    
+    
     /*
       is search for empty or null value
     */

@@ -362,7 +362,7 @@ private static function __get_forempty($rec_id, $rt){
     $rdr = self::__get_rec_detail_types($rt);
     //$rec_values = self::__get_record_value($rec_id);
 
-    $allowed = array("freetext", "enum", "float", "date", "relmarker", "integer", "year", "boolean");
+    $allowed = array('freetext', 'enum', 'float', 'date', 'relmarker', 'integer', 'year', 'boolean');
     $cnt = 0;
     $title = array();
     foreach($rdr as $dt_id => $detail){
@@ -718,8 +718,8 @@ private static function __get_field_value( $rdt_id, $rt, $mode, $rec_id, $enum_p
                     $found = true;
                     if($dt_type=="enum" || $dt_type=="relationtype"){
                         $value = self::__get_enum_value($detail['dtl_Value'], $enum_param_name);
-                    }else if($dt_type=="date"){
-                        $value = temporalToHumanReadableString(trim($detail['dtl_Value']));
+                    }else if($dt_type=='date'){
+                        $value = Temporal::toHumanReadable(trim($detail['dtl_Value']));
                     }else if($dt_type=="file"){
                         $value = self::__get_file_name($detail['dtl_UploadedFileID']);
                     }else{

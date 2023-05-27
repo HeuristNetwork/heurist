@@ -363,18 +363,19 @@ function isDateInRange( $records, $recID, $min, $max) {
 function composeDates( $records, $recID, $prefix='') {
      $date_out = '';
      $date_start = getFieldValue($records, $recID, DT_START_DATE);
-     if($date_start){
+     $date_end = getFieldValue($records, $recID, DT_END_DATE);
+     
+     if($date_start || $date_end){
          
-        if(strpos($date_start,"|")!==false){  
-          return $prefix.temporalToHumanReadableString($date_start);
-        }
-        
-        $date_out = $prefix.$date_start;
-
-        $date_end = getFieldValue($records, $recID, DT_END_DATE);
-        if($date_end && $date_end!=$date_start){
-            $date_out = $date_out.('&nbsp;to&nbsp;'.$date_end);
-        }
+         if(!$date_start) $date_start = $date_end;
+         
+         if($date_end!=$date_start){
+            $dt = Temporal::mergeTemporals($date_start, $date_end);    
+         }else{
+            $dt = new Temporal($date_start);
+         }   
+         
+         return $dt?$prefix.$dt->toReadble():'';
      }
      return $date_out;
 }
