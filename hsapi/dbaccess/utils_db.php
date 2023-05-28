@@ -858,7 +858,7 @@
         
         $mysqli = $system->get_mysqli();
         
-        $isok = false;
+        $isok = true;
         $is_table_exist = hasTable($mysqli, 'recDetailsDateIndex');    
         
         $err_prefix = 'Update date index: ';
@@ -908,12 +908,15 @@
                      PRIMARY KEY (bkp_ID))');
                 
                 $keep_autocommit = mysql__begin_transaction($mysqli);
+                
+                $errors = array();
             
                 while ($row = $res->fetch_row()){
                     $dtl_ID = $row[0];
                     $dtl_RecID = $row[1];
                     $dtl_DetailTypeID = $row[2];
                     $dtl_Value = $row[3];
+                    $dtl_NewValue = '';
                     
             //2. Create temporal object
                     $preparedDate = new Temporal( $dtl_Value );
@@ -939,7 +942,7 @@
                                         .$mysqli->real_escape_string($dtl_Value).'\')';
                                     $res4 = $mysqli->query($query);
                                     if(!$res4){
-                                        //fails update recDetails
+                                        $isok = false;
                                         $system->addError(HEURIST_DB_ERROR, $err_prefix.'Error on backup for query:'.$query, $mysqli->error);
                                         break;
                                     }
@@ -958,41 +961,47 @@
 
                                         if(!$res5){
                                             //fails update recDetails
-                                            $system->addError(HEURIST_DB_ERROR, $err_prefix.'Error on index insert query:'.$query, $mysqli->error);
-                                            break;
+                                            $errors[] = $dtl_ID.';Error on index insert query:'.$query.' '.$mysqli->error;
+                                            //$system->addError(HEURIST_DB_ERROR, $err_prefix.'Error on index insert query:'.$query, $mysqli->error);
+                                            //break;
                                         }
                 
-                                        //keep log
-                                        file_put_contents($log_file, $dtl_ID.'  '.$dtl_Value.',  '.$dtl_NewValue."\n", FILE_APPEND );
-                                        
-                                        $cnt++;
                                     }else{
                                         //fails update recDetails
-                                        $system->addError(HEURIST_DB_ERROR, $err_prefix.'Error on recDetails update query:'.$query, $mysqli->error);
-                                        break;
+                                        $errors[] = $dtl_ID.';Error on recDetails update query:'.$query.' '.$mysqli->error;
+                                        //$system->addError(HEURIST_DB_ERROR, $err_prefix.'Error on recDetails update query:'.$query, $mysqli->error);
+                                        //break;
                                     }
                                     
                                 }else{
                                     //fails extraction estMinDate, estMaxDate
-                                    $system->addError(HEURIST_ERROR, $err_prefix.'Empty min,max dates. Min:"'.$min.'" Max:"'.$max.'". Query:'.$query);
-                                    break;
+                                    $errors[] = $dtl_ID.';Empty min,max dates. Min:"'.$min.'" Max:"'.$max.'". Query:'.$query;
+                                    //$system->addError(HEURIST_ERROR, $err_prefix.'Empty min,max dates. Min:"'.$min.'" Max:"'.$max.'". Query:'.$query);
+                                    //break;
                                 }
                                 
                             }else{
                                 //fails request 
-                                $system->addError(HEURIST_DB_ERROR, $err_prefix.'Error on retrieve min and max dates. Query:'.$query, $mysqli->error);
-                                break;
+                                $errors[] = $dtl_ID.';Error on retrieve min and max dates. Query:'.$query.' '.$mysqli->error;
+                                //$system->addError(HEURIST_DB_ERROR, $err_prefix.'Error on retrieve min and max dates. Query:'.$query, $mysqli->error);
+                                //break;
                             }
                             
                             
                     }else{
+                        //unchange 
+                        
                         //fails temporal parsing - wrong date
-                        $system->addError(HEURIST_ERROR, $err_prefix.'Cannot parse temporal "'.$dtl_Value);
-                        break;
+                        //$system->addError(HEURIST_ERROR, $err_prefix.'Cannot parse temporal "'.$dtl_Value);
+                        $errors[] = $dtl_ID.';'.'Cannot parse temporal "'.$dtl_Value;
                     }
                     
-                    $isok = true;            
-                }
+                    //keep log
+                    file_put_contents($log_file, $dtl_ID.';'.$dtl_Value.';'.$dtl_NewValue."\n", FILE_APPEND );
+                    $cnt++;
+                 
+                    
+                }//while
                 $res->close();
                 
                 if($isok){
@@ -1001,6 +1010,10 @@
                     $mysqli->rollback();
                 }
                 if($keep_autocommit===true) $mysqli->autocommit(TRUE);
+
+                if(count($errors)>0){
+                    file_put_contents($log_file, implode("\n", $errors), FILE_APPEND );
+                }
                 
             }
         }
