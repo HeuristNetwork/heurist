@@ -479,22 +479,34 @@ $.widget( "heurist.lookupConfig", {
                         delete n_fields[obj_key];
 
                         hasFieldChanges = true;
-                    }else if(obj_key == 'contributor'){
-
-                        if(!n_fields.hasOwnProperty('author')){
-                            val = n_fields[obj_key];
-                            n_fields['author'] = val;
-                        }
-
-                        delete n_fields[obj_key];
-
-                        hasFieldChanges = true;
                     }
+                }
+
+                if(!Object.hasOwn(n_fields, 'contributor')){
+                    n_fields['contributor'] = '';
+                    hasFieldChanges = true;
                 }
 
                 if(hasFieldChanges){
                     that.options.service_config[key]['fields'] = n_fields;
 
+                    has_changes = true;
+                }
+
+                if(!Object.hasOwn(that.options.service_config[key], 'options')){ // add default options
+                    that.options.service_config[key]['options'] = {
+                        'author_codes': '', //'contributor_codes': ''
+                        'dump_receord': true,
+                        'dump_field': 'rec_ScratchPad'
+                    };
+                    has_changes = true;
+                }
+            }else if(that.options.service_config[key]['service'] == "bnfLibraryAut"){
+                if(!Object.hasOwn(that.options.service_config[key], 'options')){ // add default options
+                    that.options.service_config[key]['options'] = {
+                        'dump_receord': true,
+                        'dump_field': 'rec_ScratchPad'
+                    };
                     has_changes = true;
                 }
             }else if(that.options.service_config[key]['service'] == 'nakala'){

@@ -5231,7 +5231,7 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
                                 edit_record: this._currentEditRecordset,
                                 path: 'widgets/lookup/',
                                 onClose:function(recset){
-                                    that._handleLookupResponse(recset);
+                                    that._handleLookupResponse(recset, srvname);
                                 }
                             };
 
@@ -5268,9 +5268,10 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
     //
     //
     //
-    _handleLookupResponse: function(recset){
+    _handleLookupResponse: function(recset, service){
 
         var that = this;
+        const cfg = window.hWin.HAPI4.sysinfo['service_config'][service];
 
         if(!recset || window.hWin.HEURIST4.util.isempty(recset)){
             return;
@@ -5304,11 +5305,11 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
             that.resource_values = []; // list of search values for recpointer fields
 
             if(!window.hWin.HEURIST4.util.isempty(recset['ext_url'])){
-                that.resource_values.push([recset['ext_url'], 'ext']);
+                that.resource_values.push({url: recset['ext_url'], type: 'ext'});
             }else if(!window.hWin.HEURIST4.util.isempty(recset['heurist_url'])){
-                that.resource_values.push([recset['heurist_url'], 'heurist']);
+                that.resource_values.push({url: recset['heurist_url'], type: 'heurist'});
             }else{
-                that.resource_values.push(['']);
+                that.resource_values.push({});
             }
 
             for(var k=0; k<dtyIds.length; k++){
@@ -5335,7 +5336,7 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
 
                                 // needs additional handling
                                 if(type == 'resource'){
-                                    that.resource_values.push([dt_id, newval[i]]);
+                                    that.resource_values.push({fld_id: dt_id, values: newval[i]});
                                 }else{
 
                                     var vocab_id = $Db.dty(dt_id, 'dty_JsonTermIDTree');
@@ -5369,7 +5370,7 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
                             }else{
 
                                 if(type == 'resource'){
-                                    that.resource_values.push([dt_id, newval]);
+                                    that.resource_values.push({fld_id: dt_id, values: newval});
                                 }else{
                                     
                                     var vocab_id = $Db.dty(dt_id, 'dty_JsonTermIDTree');
@@ -5411,7 +5412,7 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
                         var fieldname = $Db.rst(that._currentEditRecTypeID, dt_id, 'rst_DisplayName');
                         if(!assigned_fields.includes(fieldname)) { assigned_fields.push(fieldname); }
                     } 
-                }else if(dt_id == 'BnF_ID'){ // retrieve record from BnF and place in record scratch pad
+                }else if(dt_id == 'BnF_ID' && cfg.options.dump_record == true){ // retrieve record from BnF and place in record scratch pad
 
                     let value = recset['BnF_ID'];
 
@@ -5435,18 +5436,35 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
                             if(response.record != null){
 
                                 let scratchpad_txt = response.record + '\r\n\r\n';//JSON.stringify(response.record, null, 4);
-                                let $fld = that._editing.getFieldByName('rec_ScratchPad');
 
-                                if(!window.hWin.HEURIST4.util.isempty($fld.text())){ // if content exists; prepend and add breaks before existing content
-                                    scratchpad_txt += '\r\n\r\n' + $fld.text();
+                                let fld_id = cfg.options.dump_field;
+                                if(parseInt(fld_id) == NaN || fld_id < 1 || !$Db.rst(that._currentEditRecTypeID, fld_id) || $Db.dty(fld_id, 'dty_Type') != 'blocktext'){
+                                    fld_id = 'rec_ScratchPad';   
                                 }
+                                let $fld = that._editing.getFieldByName(fld_id);
 
-                                $fld.editing_input('setValue',[scratchpad_txt]);
-                                $fld.editing_input('isChanged', true);
+                                if(fld_id == 'rec_ScratchPad'){
 
-                                that.editFormPopup.layout().open("east"); // expand panel
-                                if($fld.parents('.summary-accordion.ui-accordion').accordion('instance') != undefined){ // expand accordion
-                                    $fld.parents('.summary-accordion.ui-accordion').accordion('option', 'active', 0);
+                                    if(!window.hWin.HEURIST4.util.isempty($fld.text())){ // if content exists; prepend and add breaks before existing content
+                                        scratchpad_txt += '\r\n\r\n' + $fld.text();
+                                    }
+    
+                                    $fld.editing_input('setValue',[scratchpad_txt]);
+                                    $fld.editing_input('isChanged', true);
+
+                                    that.editFormPopup.layout().open("east"); // expand panel
+                                    
+                                    let $acc_ele = $(that.editFormSummary.find('.summary-accordion').get(4));
+                                    if($acc_ele.accordion('instance') != undefined){ // expand accordion
+                                        $acc_ele.accordion('option', 'active', 0);
+                                    }
+                                }else{
+
+                                    let existing_vals = $fld.editing_input('getValues');
+                                    if(existing_vals[0] != ''){
+                                        existing_vals.push([scratchpad_txt]);
+                                    }
+                                    $fld.editing_input('setValue',[scratchpad_txt]);
                                 }
                             }
                         }
@@ -5694,9 +5712,9 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
 
         var hasValue = (that.resource_values != null && that.resource_values.length > 1);
 
-        if(hasValue && that.resource_values[0].length == 2){ // contains only the external record link
-            if(that.resource_values[0][1] == 'ext'){ // external link
-                url = '<a href="' + that.resource_values[0][0] + '" target="_blank">View external record <span style="font-size:10px;" class="ui-icon ui-icon-extlink" /></a><br><br>';
+        if(hasValue && Object.keys(that.resource_values[0]).length == 2){ // contains only the external record link
+            if(that.resource_values[0]['type'] == 'ext'){ // external link
+                url = '<a href="' + that.resource_values[0]['url'] + '" target="_blank">View external record <span style="font-size:10px;" class="ui-icon ui-icon-extlink" /></a><br><br>';
             }
         }
 
@@ -5732,17 +5750,24 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
             for(var i = 1; i < that.resource_values.length; i++){
 
                 var cur_details = that.resource_values[i];
+                let fld_id = cur_details['fld_id'];
+                let value = cur_details['values'];
+                let search = value;
+                if(window.hWin.HEURIST4.util.isObject(value)){
+                    search = value['search'];
+                    value = value['value'];
+                }
 
-                var field_name = $Db.rst(this._currentEditRecTypeID, cur_details[0], 'rst_DisplayName');
+                var field_name = $Db.rst(this._currentEditRecTypeID, fld_id, 'rst_DisplayName');
 
                 msg += '<div style="display: table-row;color: black;opacity: 1;" class="recordDiv" data-value="" '
-                            +'data-dtid="'+ cur_details[0] +'" data-index="'+ todo_count +'">'
+                            +'data-dtid="'+ fld_id +'" data-index="'+ todo_count +'" data-search="'+ search +'">'
                         + '<div style="'+ field_style +'" class="truncate" title="'+ field_name +'">'+ field_name +'</div>'
-                        + '<div style="'+ val_style +'" class="truncate" title="'+ cur_details[1] +'">'+ cur_details[1] +'</div>'
+                        + '<div style="'+ val_style +'" class="truncate" title="'+ value +'">'+ value +'</div>'
                     + '</div>';
 
-                var existing_val = this._editing.getValue(cur_details[0]);
-                field_values[cur_details[0]] = (existing_val == null || window.hWin.HEURIST4.util.isempty(existing_val[0])) ? [] : existing_val;
+                var existing_val = this._editing.getValue(fld_id);
+                field_values[fld_id] = (existing_val == null || window.hWin.HEURIST4.util.isempty(existing_val[0])) ? [] : existing_val;
 
                 todo_count ++;
             }
@@ -5783,6 +5808,7 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
 
                 // Retrieve important details
                 var dt_id = $ele.attr('data-dtid');
+                var search = $ele.attr('data-search');
                 var ptr_rectypes = $Db.dty(dt_id, 'dty_PtrTargetRectypeIDs');
                 var index = Number($ele.attr('data-index'));
 
@@ -5800,7 +5826,8 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
                     pointer_filter: null, // Heurist query for initial search
                     parententity: 0,
 
-                    init_filter: init_value,
+                    init_filter: search,
+                    fill_data: init_value,
 
                     height: 700,
                     width: 600,
