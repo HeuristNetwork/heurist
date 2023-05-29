@@ -11,7 +11,7 @@
 *
 * @package     Heurist academic knowledge management system
 * @link        https://HeuristNetwork.org
-* @copyright   (C) 2005-2021 University of Sydney
+* @copyright   (C) 2005-2023 University of Sydney
 * @author      Brandon McKay   <blmckay13@gmail.com>
 * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
 * @version     6.0
@@ -40,7 +40,7 @@ $.widget( "heurist.lookupBnFLibrary_bib", $.heurist.recordAction, {
         helpContent: null, //in context_help folder
 
         mapping: null, //configuration from record_lookup_config.json
-               
+
         add_new_record: false, //if true it creates new record on selection
         
         pagesize: 20 // result list's number of records per page
@@ -51,6 +51,8 @@ $.widget( "heurist.lookupBnFLibrary_bib", $.heurist.recordAction, {
     action_timeout: null, // timeout for processing doAction
 
     tabs_container: null, // tabs container
+
+    _forceClose: false, // skip saving additional mapping and close dialog
 
     //  
     // invoked from _init after loading of html content
@@ -120,10 +122,182 @@ $.widget( "heurist.lookupBnFLibrary_bib", $.heurist.recordAction, {
             'keypress':this.startSearchOnEnterPress
         });
 
+        let $select = this.element.find('#rty_flds');
+        let top_opt = [{key: '', title: 'select a field...', disabled: true, selected: true, hidden: true}];
+        let sel_options = {
+            'useHtmlSelect': false
+        };
+        window.hWin.HEURIST4.ui.createRectypeDetailSelect($select[0], this.options.mapping.rty_ID, ['blocktext'], top_opt, sel_options);
+
+        this._on(this.element.find('input[name="dump_field"]'), {
+            'change': function(){
+                let opt = this.element.find('input[name="dump_field"]:checked').val();
+                window.hWin.HEURIST4.util.setDisabled(this.element.find('#rty_flds'), opt == 'rec_ScratchPad');
+            }
+        });
+
+        this._on(this.element.find('#save-settings').button(), {
+            'click': this._saveExtraSettings
+        });
+
+        // Setup settings tab
+        this._setupSettings();
+
+        this._as_dialog.on('dialogbeforeclose', function(e){
+            if(!that._forceClose){
+                that._forceClose = true;
+                that._saveExtraSettings(true);
+                return false;
+            }
+        });
+
         this.tabs_container = this.element.find('#tabs-cont').tabs();
         this.element.find('#inpt_any').focus();
 
         return this._super();
+    },
+
+    /**
+     * Set up additional settings tab
+     */
+    _setupSettings: function(){
+
+        let options = this.options.mapping?.options;
+        let need_save = false;
+
+        if(!options || window.hWin.HEURIST4.util.isempty(options)){
+            options = {
+                'author_codes': '',
+                'dump_record': true,
+                'dump_field': 'rec_ScratchPad'
+            };
+
+            need_save = true;
+        }
+
+        if(!window.hWin.HEURIST4.util.isempty(options['author_codes'])){
+            this.element.find('#author-codes').text(options['author_codes']);
+            //this.element.find('#contributor-codes').text(options['contributor_codes']);
+        }
+
+        if(!window.hWin.HEURIST4.util.isempty(options['dump_record'])){
+            this.element.find('input[name="dump_record"]').prop('checked', options['dump_field']);
+        }
+
+        if(!window.hWin.HEURIST4.util.isempty(options['dump_field'])){
+            const selected = options['dump_field'];
+
+            if(selected === 'rec_ScratchPad'){
+                this.element.find('input[name="dump_field"][value="rec_ScratchPad"]').prop('checked', true);
+            }else{
+                this.element.find('input[name="dump_field"][value="dty_ID"]').prop('checked', true);
+                this.element.find('#rty_flds').val(selected);
+
+                if(this.element.find('#rty_flds').hSelect('instance') !== undefined){
+                    this.element.find('#rty_flds').hSelect('refresh');
+                }
+            }
+
+            window.hWin.HEURIST4.util.setDisabled(this.element.find('#rty_flds'), selected == 'rec_ScratchPad');
+        }
+
+        if(need_save){
+            this._saveExtraSettings();
+        }
+    },
+
+    /**
+     * Get listed author codes
+     */
+    _getRoleCodes: function(){
+
+        let author_codes = this.element.find('#author-codes').text();
+        let contributor_codes = '';//this.element.find('#contributor-codes').text()
+        const regex = /\d+/g;
+
+        if(regex.test(author_codes)){
+            let parts = author_codes.match(regex);
+            author_codes = parts.join(',');
+        }else{
+            author_codes = '';
+        }
+
+        if(regex.test(contributor_codes)){
+            let parts = contributor_codes.match(regex);
+            contributor_codes = parts.join(',');
+        }else{
+            contributor_codes = '';
+        }
+
+        return [ author_codes, contributor_codes ];
+    },
+
+    /**
+     * Get record dump settings
+     */
+    _getRecDumpSetting: function(){
+
+        const get_recdump = this.element.find('input[name="dump_record"]').is(':checked');
+        let recdump_fld = '';
+        
+        if(get_recdump){
+
+            recdump_fld = this.element.find('input[name="dump_field"]:checked').val();
+            if(recdump_fld === 'dty_ID'){
+                recdump_fld = this.element.find('#rty_flds').val();
+            }
+        }
+
+        return [ get_recdump, recdump_fld ];
+    },
+
+    /**
+     * Save extra settings
+     * @param {boolean} close_dlg - whether to close the dialog after saving 
+     */
+    _saveExtraSettings: function(close_dlg = false){
+
+        var that = this;
+        let services = window.hWin.HEURIST4.util.isJSON(window.hWin.HAPI4.sysinfo['service_config']);
+        const codes = this._getRoleCodes();
+        const rec_dump_settings = this._getRecDumpSetting();
+
+        if(services !== false){
+            services[this.options.mapping.service_id]['options'] = { 
+                'author_codes': codes[0], //'contributor_codes': codes[1]
+                'dump_record': rec_dump_settings[0],
+                'dump_field': rec_dump_settings[1]
+            };
+
+            var fields = {
+                'sys_ID': 1,
+                'sys_ExternalReferenceLookups': JSON.stringify(services)
+            };
+    
+            // Update sysIdentification record
+            var request = {
+                'a': 'save',
+                'entity': 'sysIdentification',
+                'request_id': window.hWin.HEURIST4.util.random(),
+                'isfull': 0,
+                'fields': fields
+            };
+    
+            window.hWin.HAPI4.EntityMgr.doRequest(request, function(response){
+    
+                if(response.status == window.hWin.ResponseStatus.OK){
+                    window.hWin.HAPI4.sysinfo['service_config'] = window.hWin.HEURIST4.util.cloneJSON(services); // update global copy
+                    if(close_dlg === true){
+                        that._as_dialog.dialog('close');
+                    }else{
+                        that.options.mapping = window.hWin.HEURIST4.util.cloneJSON(services[that.options.mapping.service_id]);
+                        window.hWin.HEURIST4.msg.showMsgFlash('Extra lookup settings saved...', 3000);
+                    }
+                }else{
+                    window.hWin.HEURIST4.msg.showMsgErr(response);
+                }
+            });
+        }
     },
     
     /**
@@ -169,6 +343,11 @@ $.widget( "heurist.lookupBnFLibrary_bib", $.heurist.recordAction, {
 
             if(fldname == 'author'){
 
+                let contributor = recordset.fld(record, 'contributor');
+                if(contributor !== undefined){
+                    s = !s ? contributor : {...contributor, ...s};
+                }
+
                 if(!s || s == ''){ 
                     return '<div style="display:inline-block;width:'+width+'ex" class="truncate"">No provided creator</div>';
                 }
@@ -206,6 +385,42 @@ $.widget( "heurist.lookupBnFLibrary_bib", $.heurist.recordAction, {
                 }
 
                 s = creator_val;
+            }else if(fldname == 'publisher'){
+
+                if(!s || s == ''){ 
+                    return '<div style="display:inline-block;width:'+width+'ex" class="truncate"">No provided publisher</div>';
+                }
+
+                var pub_val = '';
+
+                for(var idx in s){
+
+                    var cur_string = '';
+                    var cur_obj = s[idx];
+
+                    if($.isPlainObject(cur_obj)){
+                        if(cur_obj.hasOwnProperty('name') && cur_obj['name'] != ''){
+                            cur_string = cur_obj['name'];
+                        }
+                        if(cur_obj.hasOwnProperty('location') && cur_obj['location'] != '' && cur_string == ''){
+                            cur_string = cur_obj['location'];
+                        }
+
+                        if(cur_string == ''){
+                            Object.values(cur_obj);
+                        }
+                    }else{
+                        cur_string = cur_obj;
+                    }
+
+                    if(!cur_string || $.isArray(cur_string) || $.isPlainObject(cur_string)){
+                        pub_val += 'Missing publisher; ';
+                    }else{
+                        pub_val += cur_string + '; ';
+                    }
+                }
+
+                s = pub_val;
             }else if(window.hWin.HEURIST4.util.isArray(s) && s.length > 1){
                 s = window.hWin.HEURIST4.util.htmlEscape(s.join('; '));
             }else if(window.hWin.HEURIST4.util.isArray(s) && s.length == 1){
@@ -233,7 +448,7 @@ $.widget( "heurist.lookupBnFLibrary_bib", $.heurist.recordAction, {
         var recIcon = window.hWin.HAPI4.iconBaseURL + rectypeID;
         var html_thumb = '<div class="recTypeThumb" style="background-image: url(&quot;' + window.hWin.HAPI4.iconBaseURL + rectypeID + '&version=thumb&quot;);"></div>';
 
-        var recTitle = fld('author', 50) + fld('date', 7) + fld('title', 75) + fld('biburl', 12); 
+        var recTitle = fld('author', 25) + fld('publisher', 20) + fld('date', 10) + fld('title', 70) + fld('biburl', 12); 
 
         var html = '<div class="recordDiv" id="rd'+recID+'" recid="'+recID+'" rectype="'+rectypeID+'">'
             + html_thumb
@@ -269,14 +484,14 @@ $.widget( "heurist.lookupBnFLibrary_bib", $.heurist.recordAction, {
      */
     doAction: function(){
 
-        this.toggleCover('Processing Selection...');
+        window.hWin.HEURIST4.msg.bringCoverallToFront(this.element);
 
         var that = this;
         var field_name, val; // in case timeout completes 
 
         this.action_timeout = setTimeout(function(){
 
-            that.toggleCover('');
+            window.hWin.HEURIST4.msg.sendCoverallToBack();
 
             var dty_id = that.options.mapping.fields[field_name];
 
@@ -305,7 +520,9 @@ $.widget( "heurist.lookupBnFLibrary_bib", $.heurist.recordAction, {
 
             var map_flds = Object.keys(this.options.mapping.fields); // mapped fields names, to access fields of rec
 
-            res['BnF_ID'] = recset.fld(rec, 'BnF_ID'); // add BnF ID
+            if(this.options.mapping.options.dump_record == true){
+                res['BnF_ID'] = recset.fld(rec, 'BnF_ID'); // add BnF ID
+            }
             res['ext_url'] = recset.fld(rec, 'biburl'); // add BnF URL
 
             // Assign individual field values, here you would perform any additional processing for selected values (example. get ids for vocabulrary/terms and record pointers)
@@ -328,32 +545,76 @@ $.widget( "heurist.lookupBnFLibrary_bib", $.heurist.recordAction, {
                         val = [val];
                     }
 
-                    if(field_name == 'author'){ // special treatment for author field
+                    if(field_name == 'author' || field_name == 'contributor'){ // special treatment for author field
 
                         for(var i = 0; i < val.length; i++){
 
-                            var completed_val = '';
+                            let value = '';
+                            let search = '';
                             var cur_val = val[i];
 
                             if($.isPlainObject(cur_val)){
                                 if(cur_val['firstname']){
-                                    completed_val = cur_val['firstname'];
+                                    value = cur_val['firstname'];
+                                    search = value;
                                 }
                                 if(cur_val['surname']){
-                                    completed_val = (completed_val != '') ? completed_val + ' ' + cur_val['surname'] : cur_val['surname'];
+                                    value = (value != '') ? value + ' ' + cur_val['surname'] : cur_val['surname'];
+                                    search = value;
                                 }
                                 if(cur_val['active']){
-                                    completed_val = (completed_val != '') ? completed_val + ' [' + cur_val['active'] + ']' : 'No Name, years active: ' + cur_val['active'];
+                                    value = (value != '') ? value + ' [' + cur_val['active'] + ']' : 'No Name, years active: ' + cur_val['active'];
                                 }
                                 if(obj_keys[k]){
-                                    completed_val = (completed_val != '') ? completed_val + ' (id: ' + obj_keys[k] + ')' : 'No Name, id: ' + obj_keys[k];
+                                    value = (value != '') ? value + ' (id: ' + obj_keys[k] + ')' : 'No Name, id: ' + obj_keys[k];
+                                }
+                            }else{
+                                value = cur_val;
+                            }
+
+                            if(value != '' && !$.isArray(value) && !$.isPlainObject(value)){
+                                if(field_type == 'resource'){
+                                    val[i] = {'value': value, 'search': search};
+                                }else{
+                                    val[i] = value;
+                                }
+                            }
+                        }
+
+                        if(!res[dty_ID]){
+                            res[dty_ID] = [];
+                        }
+                        res[dty_ID] = res[dty_ID].concat(val);
+
+                        continue;
+                    }else if(field_name == 'publisher'){
+
+                        for(var i = 0; i < val.length; i++){
+
+                            let value = '';
+                            let search = '';
+                            var cur_val = val[i];
+
+                            if($.isPlainObject(cur_val)){
+                                if(cur_val['name']){
+                                    value = cur_val['name'];
+                                    search = value;
+                                }
+                                if(cur_val['location']){
+                                    value = (value != '') ? value + ' ' + cur_val['location'] : cur_val['location'];
+                                    search = (search != '') ? search : value;
                                 }
                             }else{
                                 completed_val = cur_val;
                             }
 
-                            if(completed_val != '' && !$.isArray(completed_val) && !$.isPlainObject(completed_val)){
-                                val[i] = completed_val;
+                            if(value != '' && !$.isArray(value) && !$.isPlainObject(value)){
+
+                                if(field_type == 'resource'){
+                                    val[i] = {'value': value, 'search': search};
+                                }else{
+                                    val[i] = value;
+                                }
                             }
                         }
 
@@ -370,11 +631,13 @@ $.widget( "heurist.lookupBnFLibrary_bib", $.heurist.recordAction, {
                                 val[i] = 'unknown';
                             }
                         }
-                    }else if(field_type == 'enum'){ // Match term labels with val, need to return the term's id to properly save its value
+                    }
 
-                        if(val_isObject){ 
+                    if(field_type == 'enum'){ // Match term labels with val, need to return the term's id to properly save its value
+
+                        if(window.hWin.HEURIST4.util.isObject(val)){ 
                             val = Object.values(val);
-                        }else if(!val_isArray){
+                        }else if(!window.hWin.HEURIST4.util.isArray(val)){
                             val = [val];
                         }
 
@@ -394,11 +657,6 @@ $.widget( "heurist.lookupBnFLibrary_bib", $.heurist.recordAction, {
                                     break;
                                 }
                             }
-                        }
-
-                        // Check if a value was found, if not prepare for creating new term
-                        if(!term_found){
-                            new_terms.push(val);
                         }
                     }
                 }
@@ -439,7 +697,7 @@ $.widget( "heurist.lookupBnFLibrary_bib", $.heurist.recordAction, {
             dlg_response = {};
         }
 
-        this.toggleCover('');
+        window.hWin.HEURIST4.msg.sendCoverallToBack();
 
         // Pass mapped values back and close dialog
         this._context_on_close = dlg_response;
@@ -464,7 +722,7 @@ $.widget( "heurist.lookupBnFLibrary_bib", $.heurist.recordAction, {
          */
 
         //var recordType = $('#inpt_doctype').val(); // which record type is requested
-        var maxRecords = $('#rec_limit').val(); // limit number of returned records
+        var maxRecords = this.element.find('#rec_limit').val(); // limit number of returned records
         maxRecords = (!maxRecords || maxRecords <= 0) ? 20 : maxRecords;
 
         var sURL = 'http://catalogue.bnf.fr/api/SRU?version=1.2&operation=searchRetrieve&maximumRecords='+maxRecords+'&startRecord=1&recordSchema=unimarcxchange'; // base URL
@@ -546,18 +804,22 @@ $.widget( "heurist.lookupBnFLibrary_bib", $.heurist.recordAction, {
             sURL += '&query=' + query;
         }
 
-        this.toggleCover('Searching...'); // show loading cover
+        window.hWin.HEURIST4.msg.bringCoverallToFront(this.element); // show loading cover
+
+        const codes = this._getRoleCodes();
 
         // for record_lookup.php
         var request = {
             service: sURL, // request url
-            serviceType: 'bnflibrary_bib' // requesting service, otherwise no
+            serviceType: 'bnflibrary_bib', // requesting service, otherwise no
+            author_codes: codes[0]
+            //, contributor_codes: codes[1]
         };
 
         // calls /heurist/hsapi/controller/record_lookup.php
         window.hWin.HAPI4.RecordMgr.lookup_external_service(request, function(response){
 
-            that.toggleCover(''); // hide loading cover
+            window.hWin.HEURIST4.msg.sendCoverallToBack(); // hide loading cover
 
             if(window.hWin.HEURIST4.util.isJSON(response)){ 
 
@@ -585,7 +847,7 @@ $.widget( "heurist.lookupBnFLibrary_bib", $.heurist.recordAction, {
 
         var is_wrong_data = true;
 
-        var maxRecords = $('#rec_limit').val(); // limit number of returned records
+        var maxRecords = this.element.find('#rec_limit').val(); // limit number of returned records
         maxRecords = (!maxRecords || maxRecords <= 0) ? 20 : maxRecords;
 
         json_data = window.hWin.HEURIST4.util.isJSON(json_data);
@@ -600,8 +862,11 @@ $.widget( "heurist.lookupBnFLibrary_bib", $.heurist.recordAction, {
             // the fields used here are defined within /heurist/hsapi/controller/record_lookup_config.json where "service" = bnfLibrary
             var fields = ['rec_ID', 'rec_RecTypeID']; // added for record set
             var map_flds = Object.keys(this.options.mapping.fields);
-            fields = fields.concat(map_flds);            
-            fields = fields.concat('BnF_ID');
+            fields = fields.concat(map_flds);
+
+            if(this.options.mapping.options.dump_record == true){
+                fields = fields.concat('BnF_ID');
+            }
             
             // Parse json to Record Set
             var i=0;
@@ -622,7 +887,9 @@ $.widget( "heurist.lookupBnFLibrary_bib", $.heurist.recordAction, {
                     }
                 }
 
-                values.push(record['BnF_ID']);
+                if(this.options.mapping.options.dump_record == true){
+                    values.push(record['BnF_ID']);
+                }
 
                 res_orders.push(recID);
                 res_records[recID] = values;
@@ -689,32 +956,5 @@ $.widget( "heurist.lookupBnFLibrary_bib", $.heurist.recordAction, {
         }
 
         return records;
-    },
-
-    // Simple coverall used during API search request, covers entire dialog
-    toggleCover: function(text=''){
-
-        var ele = this._as_dialog.parent().find('div.coverall-div');
-
-        if(ele.length > 0){
-
-            if(ele.is(':visible') && window.hWin.HEURIST4.util.isempty(text)){
-                ele.hide();
-            }else{
-
-                if(text != ''){
-                    ele.find('span').text(text);
-                }
-
-                ele.show();
-            }
-        }else{
-            var ele_parent = this._as_dialog.parent();
-
-            ele = $('<div>').addClass('coverall-div').css('zIndex', 60000)
-                            .append('<span style="left:30px;top:45px;position:absolute;color:white;font-size:20px;">'+ text +'</span>')
-                            .appendTo(ele_parent);
-        }
-
     }
 });

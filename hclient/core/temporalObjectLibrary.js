@@ -973,6 +973,10 @@ var TDate = function (strDate) {
             return "" + _tzOffset ;
         },
 
+        getDateFormat: function() {
+            return _dateFormat;
+        },
+
         toString : function (format) {
             var frmPart = function (s,fillLength) {
                 if (!s) {
@@ -1704,6 +1708,9 @@ TDate.parse = function () {
     }
     if (_tzOffset) {
         tDate.setTimezoneOffset(_tzOffset);
+    }
+    if (_dateFormat) {
+        tDate.setTDateFormat(_dateFormat);
     }
 
     return tDate;

@@ -143,12 +143,18 @@
         "publisher": "",
         "date": "",
         "author": "",
+        "contributor": "",
         "biburl": "",
         "description": "",
         "ext_description": "",
         "language": "",
         "type": "",
         "isbn": ""
+    },
+    "options": {
+        "author_codes": "",
+        "dump_receord": true,
+        "dump_field": "rec_ScratchPad"
     }
 },
 {
@@ -160,6 +166,10 @@
     "fields": {
         "name": "",
         "auturl": ""
+    },
+    "options": {
+        "dump_receord": true,
+        "dump_field": "rec_ScratchPad"
     }
 },
 {

@@ -20,7 +20,8 @@
 $.widget( "heurist.searchRecords", $.heurist.searchEntity, {
 
     options:{
-        init_filter: ''
+        init_filter: '',
+        fill_data: ''
     },
 
     _select_mode: 1, //0 - add, 1 - search
@@ -325,7 +326,8 @@ $.widget( "heurist.searchRecords", $.heurist.searchEntity, {
         //this.searchForm.find('#input_search').focus();
         this.input_search.focus();
 
-        if(!window.hWin.HEURIST4.util.isempty(this.options.init_filter)){
+        if(!window.hWin.HEURIST4.util.isempty(this.options.fill_data) || !window.hWin.HEURIST4.util.isempty(this.options.init_filter)){
+
             this.input_search.val(this.options.init_filter).css({'max-width': '20em', 'width': '20em'}); // enter value
 
             //move search box
@@ -336,7 +338,8 @@ $.widget( "heurist.searchRecords", $.heurist.searchEntity, {
                 'text-align': ''
             });
 
-            this.element.find('#fill_in_data').val(this.options.init_filter).css({'max-width': '20em', 'width': '20em'}).parent().show();
+            let fill_in = !window.hWin.HEURIST4.util.isempty(this.options.fill_data) ? this.options.fill_data : this.options.init_filter;
+            this.element.find('#fill_in_data').val(fill_in).css({'max-width': '20em', 'width': '20em'}).parent().show();
         }else{
             this.element.find('#fill_in_data').parent().hide();
         }
