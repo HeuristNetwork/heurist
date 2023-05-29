@@ -949,10 +949,10 @@
                                     
             //5A. If simple date - retain value in recDetails                                    
             //5B. If temporal object it saves JSON in recDetails
-                                    $query = 'UPDATE recDetails SET dtl_Value="'.
-                                            $mysqli->real_escape_string($dtl_NewValue).'" WHERE dtl_ID='.$dtl_ID;
-                                    $mysqli->query($query);
-                                    if($mysqli->affected_rows>=0){
+                                    //$query = 'UPDATE recDetails SET dtl_Value="'.
+                                    //        $mysqli->real_escape_string($dtl_NewValue).'" WHERE dtl_ID='.$dtl_ID;
+                                    //$mysqli->query($query);
+                                    if(true){ // $mysqli->affected_rows>=0
             //6. update recDetailsDateIndex should be updated by trigger
                                         $mysqli->query('delete ignore from recDetailsDateIndex where rdi_DetailID='.$dtl_ID); 
                 
