@@ -466,7 +466,7 @@ $.widget( "heurist.editing_input", {
     _removeTooltip: function(id){
 
         if(this.tooltips && this.tooltips[id]){
-            var tooltip = this.tooltips[id];
+            var $tooltip = this.tooltips[id];
             if($tooltip && $tooltip.tooltip('instance') != undefined){
                 $tooltip.tooltip('destroy');
                 $tooltip = null;

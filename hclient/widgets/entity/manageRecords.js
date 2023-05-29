@@ -3460,10 +3460,13 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
                 }
 
                 var hasValue = false, hasDtlField = false, hasScript = false;
+                var ambig_dates = [];
 
                 let rty_ConceptCode = $Db.getConceptID('rty', this._currentEditRecTypeID);
                 //verify max lengtn in 64kB per value
                 for (var dtyID in fields){
+
+                    let updated_values = false;
                     if(parseInt(dtyID)>0){
                         
                         let dty_ConceptCode = $Db.getConceptID('dty', dtyID);
@@ -3534,6 +3537,168 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
                                     hasScript = true;
                                 }
                             }
+
+                            if(fields['no_validation'] == 1){
+                                continue;
+                            }
+
+                            if(dt == 'date'){
+
+                                if(Temporal.isValidFormat(values[k])){ // check if valid temporal string
+                                    continue; // is valid, skip
+                                }
+
+                                const value_spaceless = values[k].replaceAll(/\s+/g, ''); // remove all whitespaces
+
+                                const approx_regex = /circa.?|ca.?|approx.?|~/; // circa 1995, ca. 1995, approx 1995, ~1995
+                                const has_range = /[à|.|to|\-|,]/; // range separators
+                                const range_regex = /\d+|[à|.|to|\-|,]+/g; // 1990-1995, 1990to1995, 1990..1995, 1990,1995 (spaces removed first)
+                                const has_named_month = /(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)/ig; // e.g. 12Jan1995
+
+                                let matches = values[k].match(approx_regex);
+                                if(!window.hWin.HEURIST4.util.isempty(matches) && matches.length > 0){ // approx value, setup simple date with circa value
+
+                                    let date_val = values[k].replace(approx_regex, '');
+
+                                    try{
+
+                                        let t_date = new Temporal();
+                                        date_val = TDate.parse(date_val);
+
+                                        date_val = date_val.toString('yyyy-MM-dd');
+
+                                        t_date.setType('s');
+                                        t_date.addObjForString('DAT', date_val);
+                                        t_date.addObjForString("CIR", "1");
+                                        values[k] = t_date.toString();
+
+                                        updated_values = true;
+
+                                        continue; // done next value
+                                    } catch(e) {
+                                        if(e.indexOf('ambiguous') >= 0){
+                                            ambig_dates.push({dtyid: dtyID, org_value: values[k], index: k, type: 'approx'});
+                                            continue;
+                                        }
+                                    }
+
+                                    continue;
+                                }
+
+                                matches = [...value_spaceless.matchAll(range_regex)];
+                                if(!window.hWin.HEURIST4.util.isempty(matches) && matches.length > 0 && has_range.test(value_spaceless)){
+
+                                    is_ambig = false;
+
+                                    const sep_match_index = Math.floor(matches.length / 2);
+                                    const sep = matches[sep_match_index][0];
+                                    const sep_index = matches[sep_match_index]['index'];
+                                    
+                                    let TPQ = value_spaceless.slice(0, sep_index);
+                                    let TAQ = value_spaceless.slice(sep_index + sep.length);
+
+                                    if(TPQ.length >= 4 && TAQ.length >= 4 && has_range.test(sep)){ // quick conversion to range needs same length dates, and at least full years
+
+                                        try {
+                                            
+                                            let t_TPQ = TDate.parse(TPQ);
+                                            TPQ = t_TPQ.toString('yyyy-MM-dd');
+                                        } catch(e) {
+                                            if(e.indexOf('ambiguous') > 0){
+                                                is_ambig = true;
+                                            }
+                                        }
+
+                                        try {
+                                            
+                                            let t_TAQ = TDate.parse(TAQ);
+                                            TAQ = t_TAQ.toString('yyyy-MM-dd');
+                                        } catch(e) {
+                                            if(e.indexOf('ambiguous') >= 0){
+                                                is_ambig = true;
+                                            }
+                                        }
+
+                                        if(is_ambig){
+                                            ambig_dates.push({dtyid: dtyID, org_value: values[k], value: {'TPQ': TPQ, 'TAQ': TAQ}, index: k, type: 'range'});
+                                            continue;
+                                        }
+
+                                        if(new Date(TPQ).getTime() >= new Date(TAQ).getTime()){
+                                            let temp = TPQ;
+                                            TPQ = TAQ;
+                                            TAQ = temp;
+                                        }                                
+
+                                        let temporal = new Temporal();
+                                        temporal.setType('p');
+                                        temporal.addObjForString("TPQ", TPQ); // Earliest value
+                                        temporal.addObjForString("TAQ", TAQ); // Latest value
+                                        temporal.addObjForString("COM", values[k]); // Insert original value as comment
+
+                                        let results = Temporal.checkValidity(temporal);
+                                        if(results[0]){ // is valid
+                                            values[k] = temporal.toString();
+                                            updated_values = true;
+                                        } // else, not handled
+
+                                        continue;
+                                    }
+                                }
+
+                                matches = [...values[k].matchAll(has_named_month)];
+                                if(!window.hWin.HEURIST4.util.isempty(matches) && matches.length == 1){
+
+                                    let month = matches[0][0];
+                                    let month_index = matches[0]['index'];
+                                    let date_val = values[k].slice(0, month_index) + ' ' + month + ' ' + values[k].slice(month_index+month.length);
+
+                                    try {
+                                        date_val = TDate.parse(date_val).toString('yyyy-MM-dd');
+
+                                        if(date_val.length == 4){ // unknown
+                                            continue;
+                                        }
+
+                                        values[k] = date_val;
+                                        updated_values = true;
+                                    } catch(e) {
+                                        if(e.indexOf('ambiguous') > 0){
+                                            ambig_dates.push({dtyid: dtyID, org_value: values[k], index: k, type: 'simple'});
+                                            continue;
+                                        }
+                                    }
+                                }
+
+                                // Check for initial ambiguity
+                                try {
+                                    let tDate = TDate.parse(values[k]);
+                                    let date_val = tDate.toString('yyyy-MM-dd');
+                                    let format = tDate.getDateFormat();
+
+                                    if((date_val.length == 4 && values[k].length <= 4) || date_val.length == values[k].length){
+                                        
+                                        if(format == 'dmy' && tDate.getDay() < 13 && tDate.getMonth() < 13){ // only uses 'mdy' when first number has to be month
+                                            throw 'ambiguous date';
+                                        }
+
+                                        continue;
+                                    }
+                                } catch(e) {
+                                    if(e.indexOf('ambiguous') >= 0){
+                                        ambig_dates.push({dtyid: dtyID, org_value: values[k], index: k, type: 'simple'});
+                                        continue;
+                                    }
+                                }
+                            }
+                        }
+
+                        // Update values
+                        if(updated_values){
+                            fields[dtyID] = values; // update field value
+
+                            let $ele = that._editing.getFieldByName(dtyID);
+                            if($ele && $ele.length > 0) $ele.editing_input('setValue', values); // update field element editing_inputs
                         }
                     }
                 }//verify max size
@@ -3546,6 +3711,9 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
                     return;
                 }else if(fields != null && hasScript){
                     window.hWin.HEURIST4.msg.showMsgFlash("Some fields have &lt;sctipt&gt; tag. It is not allowed in database", 1500);
+                    return;
+                }else if(fields != null && ambig_dates.length > 0){
+                    that._handleAmbiguousDates(ambig_dates);
                     return;
                 }
                 
@@ -4812,6 +4980,173 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
             // Append to top
             top_fieldset.append(url_field);
         }
+    },
+	
+    //
+    // Popup that requests user to replace ambiguous dates 
+    //
+    _handleAmbiguousDates: function(ambiguous_dates){
+
+        var that = this;
+
+        if(!ambiguous_dates || ambiguous_dates.length == 0){
+
+            // Run save again
+            //that._saveEditAndClose(null, 'close');
+
+            return;
+        }
+
+        let $dlg = null;
+        let cur_date = ambiguous_dates.splice(0, 1)[0]; //unshift()
+
+        let btns = {};
+        btns[window.HR('Save')] = function(){
+
+            let value = '';
+            let cmt = $dlg.find('#CMT').val();
+            let t_date = new Temporal();
+            let is_temporal = false;
+
+            if(!window.hWin.HEURIST4.util.isempty(cmt)){
+                t_date.addObjForString("CMT", cmt);
+                is_temporal = true;
+            }
+
+            switch (cur_date.type) {
+                case 'simple':
+                case 'approx':
+                    
+                    let date = $dlg.find('#DAT').val();
+                    let approx = $dlg.find('#CIR').is(':checked');
+
+                    if(window.hWin.HEURIST4.util.isempty(date)){
+                        value = '';
+                    }else if(approx){
+
+                        t_date.setType('s');
+                        t_date.addObjForString('DAT', date);
+                        t_date.addObjForString("CIR", "1");
+
+                        value = t_date.toString();
+                    }else{
+
+                        if(is_temporal){
+                            t_date.setType('s');
+                            t_date.addObjForString('DAT', date);
+
+                            value = t_date.toString();
+                        }else{
+                            value = date;
+                        }
+                    }
+                    break;
+
+                case 'range':
+
+                    let early = $dlg.find('#TPQ');
+                    let late = $dlg.find('#TAQ');
+
+                    if(window.hWin.HEURIST4.util.isempty(early) && window.hWin.HEURIST4.util.isempty(late)){
+                        value = '';
+                    }else if(!window.hWin.HEURIST4.util.isempty(early) && !window.hWin.HEURIST4.util.isempty(late)){
+
+                        t_date.setType('p');
+                        t_date.addObjForString('TPQ', early);
+                        t_date.addObjForString('TAQ', late);
+
+                        value = t_date.toString();
+                    }else{ // treat as simple date
+
+                        let date = !window.hWin.HEURIST4.util.isempty(early) ? early : late;
+                        if(is_temporal){
+                            t_date.setType('s');
+                            t_date.addObjForString('DAT', date);
+
+                            value = t_date.toString();
+                        }else{
+                            value = date;
+                        }
+                    }
+                    break;
+                default:
+                    value = '';
+                    break;
+            }
+
+            let $ele = that._editing.getFieldByName(cur_date.dtyid);
+            if($ele.length > 0){
+
+                let vals = $ele.editing_input('getValues');
+
+                if(!window.hWin.HEURIST4.util.isempty(value)){
+                    vals[cur_date.index] = value;
+                }else if(vals.length > 1){ // remove
+                    vals.splice(cur_date.index, 1);
+                }else{
+                    vals = [''];
+                }
+
+                $ele.editing_input('setValue', vals);
+            }
+
+            $dlg.dialog('close');
+
+            that._handleAmbiguousDates(ambiguous_dates);
+        };
+        btns[window.HR('Close')] = function(){
+            $dlg.dialog('close');
+        }
+
+        let labels = {
+            title: window.HR('Fix ambiguous dates'),
+            yes: window.HR('Close'),
+            no: window.HR('Save')
+        };
+
+        let options = {
+            'default_palette_class': 'ui-heurist-explore',
+            'dialogId': 'fixing_ambig_dates'
+        };
+
+        let fld_name = $Db.rst(that._currentEditRecTypeID, cur_date.dtyid, 'rst_DisplayName');
+
+        let content = '<div>'
+                        + '<span>'
+                            + 'For the field <strong>' + fld_name + '</strong><br>'
+                            + 'We cannot unambiguously interpret what you mean by <strong>' + cur_date.org_value + '</strong>'
+                        + '</span><br><br>';
+
+        if(cur_date.type){
+
+            switch (cur_date.type) {
+                case 'simple':
+                case 'approx':
+
+                    let is_checked = cur_date.type == 'approx' ? 'checked="checked"' : '';
+                    content += '<label> Please re-type as year only, yyyy-mm or yyyy-mm-dd <input type="text" id="DAT"></label><br>';
+                    content += '<label> Is approximate? <input type="checkbox" id="CIR" ' + is_checked + '></label><br>';
+
+                    break;
+                case 'range':
+
+                    let early = cur_date.value.TPQ ? cur_date.value.TPQ : '';
+                    let late = cur_date.value.TAQ ? cur_date.value.TAQ : '';
+                    content += '<span>Please re-type all dates as year only, yyyy-mm or yyyy-mm-dd</span><br>';
+                    content += '<span>This date was determined to be a simple range. However, if this is an error leave either field empty</span><br><br>';
+                    content += '<span style="display:inline-block; min-widht:100px;">Earliest estimate</span> <input type="text" id="TPQ" value="' + early + '"></label><br><br>';
+                    content += '<label><span style="display:inline-block; min-widht:100px;">Latest estimate</span> <input type="text" id="TAQ" value="' + late + '"></label>';
+                default:
+                    that._handleAmbiguousDates(ambiguous_dates);
+                    break;
+            }
+        }
+
+        content += '<br><br><span style="vertical-align: top;">If you wish to qualify the date with a short note, enter it here </span>'
+                +  '<textarea cols="30" rows="5" id="CMT" style="resize: none"></textarea>';
+                +  '</div>';
+
+        $dlg = window.hWin.HEURIST4.msg.showMsgDlg(content, btns, labels, options);
     },
 	
     //
