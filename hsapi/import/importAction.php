@@ -1423,7 +1423,7 @@ them to incoming data before you can import new records:<br><br>'.implode(",", $
 
             $idx = array_search($field, $sel_query)+1;
 
-            $wrong_records = self::validateNumericField($query, $imp_session, $field, $idx, 'warning', $progress_session_id);
+            $wrong_records = self::validateNumericField($mysqli, $query, $imp_session, $field, $idx, 'warning', $progress_session_id);
 
         }else{
             $query = "select imp_id, ".implode(",",$sel_query)
