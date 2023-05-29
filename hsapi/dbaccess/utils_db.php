@@ -852,17 +852,20 @@
     }
     
     //
+    // $need_populate - adds entries to recDetailsDateIndex
+    // $json_for_record_details - update recDetails - change Plain string temporals to JSON 
     //
-    //
-    function recreateRecDetailsDateIndex($system){
+    function recreateRecDetailsDateIndex($system, $need_populate, $json_for_record_details){
         
         $mysqli = $system->get_mysqli();
         
         $isok = true;
         $is_table_exist = hasTable($mysqli, 'recDetailsDateIndex');    
         
-        $err_prefix = 'Update date index: ';
+        $err_prefix = '';//'Update date index: ';
         $cnt = 0;
+        $cnt_to_json = 0;
+        $cnt_err = 0;
         
         $log_file = $system->getSysDir().'recDetailsDateIndex.log';
         
@@ -893,6 +896,8 @@
                     return false;
             }
             
+        if($need_populate){
+            
             //fill database with min/max date values
             //1. find all date values in recDetails
             $query = 'SELECT dtl_ID,dtl_RecID,dtl_DetailTypeID,dtl_Value FROM recDetails, defDetailTypes WHERE dtl_DetailTypeID=dty_ID AND dty_Type="date"';
@@ -900,23 +905,24 @@
             
             if ($res){
 
-                $mysqli->query('DROP TABLE IF EXISTS bkpDetailsDateIndex');
-                $res3 = $mysqli->query('CREATE TABLE bkpDetailsDateIndex (
-                     bkp_ID int unsigned NOT NULL auto_increment,
-                     dtl_ID int unsigned NOT NULL,
-                     dtl_Value VARCHAR( 250 ),
-                     PRIMARY KEY (bkp_ID))');
+                if($json_for_record_details){
+                    $mysqli->query('DROP TABLE IF EXISTS bkpDetailsDateIndex');
+                    $res3 = $mysqli->query('CREATE TABLE bkpDetailsDateIndex (
+                         bkp_ID int unsigned NOT NULL auto_increment,
+                         dtl_ID int unsigned NOT NULL,
+                         dtl_Value TEXT,
+                         PRIMARY KEY (bkp_ID))');
+                }
                 
                 $keep_autocommit = mysql__begin_transaction($mysqli);
                 
-                $errors = array();
-            
                 while ($row = $res->fetch_row()){
                     $dtl_ID = $row[0];
                     $dtl_RecID = $row[1];
                     $dtl_DetailTypeID = $row[2];
                     $dtl_Value = $row[3];
                     $dtl_NewValue = '';
+                    $error = '';
                     
             //2. Create temporal object
                     $preparedDate = new Temporal( $dtl_Value );
@@ -925,7 +931,8 @@
                             
                             // saves as usual date
                             // if date is Simple, 0<year>9999 (CE) and has both month and day 
-                            if($preparedDate->isValidSimple()){
+                            $is_date_simple = $preparedDate->isValidSimple();
+                            if($is_date_simple){
                                 $dtl_NewValue = $preparedDate->getValue(true); //returns simple yyyy-mm-dd
                             }else{
                                 $dtl_NewValue = $preparedDate->toJSON(); //json encoded string
@@ -938,53 +945,50 @@
                                 $row2 = $res2->fetch_row();
                                 if($row2[0]!='' && $row2[1]!=''){
             //4. Keep old plain string temporal object in backup table - TODO!!!
-                                    $query = 'INSERT INTO bkpDetailsDateIndex(dtl_ID,dtl_Value) VALUES('.$dtl_ID.',\''
-                                        .$mysqli->real_escape_string($dtl_Value).'\')';
-                                    $res4 = $mysqli->query($query);
-                                    if(!$res4){
-                                        $isok = false;
-                                        $system->addError(HEURIST_DB_ERROR, $err_prefix.'Error on backup for query:'.$query, $mysqli->error);
-                                        break;
-                                    }
+                                    if($json_for_record_details && !$is_date_simple){
+                                        $query = 'INSERT INTO bkpDetailsDateIndex(dtl_ID,dtl_Value) VALUES('.$dtl_ID.',\''
+                                            .$mysqli->real_escape_string($dtl_Value).'\')';
+                                        $res4 = $mysqli->query($query);
+                                        if(!$res4){
+                                            $system->addError(HEURIST_DB_ERROR, $err_prefix.'Error on backup for query:'.$query, $mysqli->error);
+                                            $isok = false;
+                                            break;
+                                        }
                                     
             //5A. If simple date - retain value in recDetails                                    
             //5B. If temporal object it saves JSON in recDetails
-                                    //$query = 'UPDATE recDetails SET dtl_Value="'.
-                                    //        $mysqli->real_escape_string($dtl_NewValue).'" WHERE dtl_ID='.$dtl_ID;
-                                    //$mysqli->query($query);
-                                    if(true){ // $mysqli->affected_rows>=0
-            //6. update recDetailsDateIndex should be updated by trigger
-                                        $mysqli->query('delete ignore from recDetailsDateIndex where rdi_DetailID='.$dtl_ID); 
-                
-                                        $res5 = $mysqli->query('insert into recDetailsDateIndex (rdi_RecID, rdi_DetailTypeID, rdi_DetailID, rdi_estMinDate, rdi_estMaxDate)'
-            ." values ($dtl_RecID, $dtl_DetailTypeID, $dtl_ID, getEstDate('$dtl_NewValue',0), getEstDate('$dtl_NewValue',1))");
-
-                                        if(!$res5){
+                                        $query = 'UPDATE recDetails SET dtl_Value="'.
+                                                $mysqli->real_escape_string($dtl_NewValue).'" WHERE dtl_ID='.$dtl_ID;
+                                        $mysqli->query($query);
+                                        if(!($mysqli->affected_rows>=0)){
                                             //fails update recDetails
-                                            $errors[] = $dtl_ID.';Error on index insert query:'.$query.' '.$mysqli->error;
-                                            //$system->addError(HEURIST_DB_ERROR, $err_prefix.'Error on index insert query:'.$query, $mysqli->error);
-                                            //break;
+                                            $system->addError(HEURIST_DB_ERROR, $err_prefix.'Error on recDetails update query:'.$query, $mysqli->error);
+                                            $isok = false;
+                                            break;
                                         }
-                
-                                    }else{
-                                        //fails update recDetails
-                                        $errors[] = $dtl_ID.';Error on recDetails update query:'.$query.' '.$mysqli->error;
-                                        //$system->addError(HEURIST_DB_ERROR, $err_prefix.'Error on recDetails update query:'.$query, $mysqli->error);
-                                        //break;
+                                    }
+                                    
+            //6. update recDetailsDateIndex should be updated by trigger
+                                    $mysqli->query('delete ignore from recDetailsDateIndex where rdi_DetailID='.$dtl_ID); 
+            
+                                    $res5 = $mysqli->query('insert into recDetailsDateIndex (rdi_RecID, rdi_DetailTypeID, rdi_DetailID, rdi_estMinDate, rdi_estMaxDate)'
+        ." values ($dtl_RecID, $dtl_DetailTypeID, $dtl_ID, getEstDate('$dtl_NewValue',0), getEstDate('$dtl_NewValue',1))");
+
+                                    if(!$res5){
+                                        //fails insert into recDetailsDateIndex
+                                        $system->addError(HEURIST_DB_ERROR, $err_prefix.'Error on index insert query:'.$query, $mysqli->error);
+                                        $isok = false;
+                                        break;
                                     }
                                     
                                 }else{
                                     //fails extraction estMinDate, estMaxDate
-                                    $errors[] = $dtl_ID.';Empty min,max dates. Min:"'.$min.'" Max:"'.$max.'". Query:'.$query;
-                                    //$system->addError(HEURIST_ERROR, $err_prefix.'Empty min,max dates. Min:"'.$min.'" Max:"'.$max.'". Query:'.$query);
-                                    //break;
+                                    $error = 'Empty min,max dates. Min:"'.$min.'" Max:"'.$max.'". Query:'.$query;
                                 }
                                 
                             }else{
                                 //fails request 
-                                $errors[] = $dtl_ID.';Error on retrieve min and max dates. Query:'.$query.' '.$mysqli->error;
-                                //$system->addError(HEURIST_DB_ERROR, $err_prefix.'Error on retrieve min and max dates. Query:'.$query, $mysqli->error);
-                                //break;
+                                $error = 'Error on retrieve min and max dates. Query:'.$query.' '.$mysqli->error;
                             }
                             
                             
@@ -993,12 +997,21 @@
                         
                         //fails temporal parsing - wrong date
                         //$system->addError(HEURIST_ERROR, $err_prefix.'Cannot parse temporal "'.$dtl_Value);
-                        $errors[] = $dtl_ID.';'.'Cannot parse temporal "'.$dtl_Value;
+                        $error = 'Cannot parse temporal';
                     }
                     
                     //keep log
-                    file_put_contents($log_file, $dtl_ID.';'.$dtl_Value.';'.$dtl_NewValue."\n", FILE_APPEND );
-                    $cnt++;
+                    if(!$is_date_simple || $error){
+                        file_put_contents($log_file, $dtl_ID.';'.$dtl_Value.';'.$dtl_NewValue.';'.$error."\n", FILE_APPEND );    
+                        if(!$is_date_simple) $cnt_to_json++;
+                        if($error) $cnt_err++;
+                        
+                        if($need_populate){ //verbose output
+                            print $dtl_ID.'  '.$dtl_Value.' '.(($dtl_Value!=$dtl_NewValue)?$dtl_NewValue:'').' '.$error.'<br>';
+                        }
+                        
+                    }
+                    if(!$error) $cnt++;
                  
                     
                 }//while
@@ -1011,15 +1024,17 @@
                 }
                 if($keep_autocommit===true) $mysqli->autocommit(TRUE);
 
-                if(count($errors)>0){
-                    file_put_contents($log_file, implode("\n", $errors), FILE_APPEND );
-                }
-                
             }
         }
+        }
         
-        if(!$isok){
-            file_put_contents($log_file, json_encode( $system->getError() ));
+        //if(!$isok){
+        //    file_put_contents($log_file, json_encode( $system->getError() ));
+        //        }
+        if($need_populate){ //verbose output
+            print '<p><ul><li>Added into index: '.$cnt.'</li>';
+            print '<li>Errors date pasring: '.$cnt_err.'</li>';
+            print '<li>Complex temporals: '.$cnt_to_json.'</li></ul></p>';
         }
         
         return $isok;
@@ -1699,7 +1714,7 @@ UNIQUE KEY swf_StageKey (swf_RecTypeID, swf_Stage)
             }
 
             if($dbVerSubSub<13){
-                if(!recreateRecDetailsDateIndex( $system )){
+                if(!recreateRecDetailsDateIndex( $system, false, false )){
                     return false;
                 }
             }

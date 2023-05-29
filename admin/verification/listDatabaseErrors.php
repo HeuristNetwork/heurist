@@ -46,7 +46,7 @@ $system->defineConstant('DT_RELATION_TYPE');
 
 //use these two vars to disable any part of verification
 $active_all = true; //all part are active
-$active = array('relationship_cache','defgroups'); //if $active_all=false, active are included in this list
+$active = array('relationship_cache','defgroups','dateindex'); //if $active_all=false, active are included in this list
 
 if(@$_REQUEST['data']){
     $lists = json_decode($_REQUEST['data'], true);
@@ -2133,6 +2133,23 @@ if($active_all || in_array('relationship_cache', $active)) {
         
 } //END relationship_cache
 
+if($active_all || in_array('dateindex', $active)) { 
+        
+        ?>
+
+        <div id="dateindex" style="top:110px"> <!-- Start of Date Index -->
+        
+        <script>
+            $('#links').append('<li class="dateindex"><a href="#dateindex" style="white-space: nowrap;padding-right:10px;color:black;">Date Index</a></li>');
+            tabs_obj.tabs('refresh');
+        </script>
+
+        <?php
+        include(dirname(__FILE__).'/checkDateIndex.php');
+        print '<br /><br /></div>';     /* End of Date Indexe */
+        
+} //END dateindex
+
 if($active_all || in_array('defgroups', $active)) { 
         ?>
 
@@ -2588,7 +2605,7 @@ if($active_all || in_array('fld_spacing', $active)){ // Check spacing in freetex
                 $row['dtl_Value'] = $new_val;
                 $bibs2[] = $row;
     
-                if(!in_array($ids2, $rec_id)){
+                if(!in_array($rec_id, $ids2)){
                     $ids2[] = $rec_id;
                 }
             }
@@ -2599,9 +2616,9 @@ if($active_all || in_array('fld_spacing', $active)){ // Check spacing in freetex
             $upd_query = 'UPDATE recDetails SET dtl_Value = "' . $new_val . '" WHERE dtl_ID = ' . $row['dtl_ID'];
             $mysqli->query($upd_query);
 
-            if($fixed_multi && !in_array($fixed2, $rec_id)){
+            if($fixed_multi && !in_array($rec_id, $fixed2)){
                 $fixed2[] = $rec_id;
-            }else if(!in_array($ids1, $rec_id)){
+            }else if(!in_array($rec_id, $ids1)){
                 $ids1[] = $rec_id;
             }
         }
