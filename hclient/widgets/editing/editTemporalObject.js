@@ -403,7 +403,8 @@ var TemporalPopup = (function () {
 				$("#simpleTime").val(tDate.toString("HH:mm:ss"));
 				$("#tzone").val(tDate.toString("z"));
 			}
-		}
+
+        }
 
 		var fields = Temporal.getFieldsForType(type);
 		for(var i =0; i< fields.length; i++) {
@@ -429,14 +430,14 @@ var TemporalPopup = (function () {
 				switch (elem[0].type) {
 					case "checkbox" :
 						if (val) {
-							elem.attr("checked","checked");
+							elem.prop("checked","checked");
 						}
 						break;
 					case "radio" :
 						if (val) {
-							elem.attr("checked","");
+							elem.prop("checked","");
 							elem = $("input[name=" + type + code + "][value=" + val + "]");
-							elem.attr("checked","checked");
+							elem.prop("checked","checked");
 						}
 						break;
 					case "select-one" :
@@ -545,7 +546,14 @@ var TemporalPopup = (function () {
 			}else{
 				strDate = dt;
 			}
-			if (strDate) temporal.addObjForString("DAT", strDate);
+			if (strDate) {
+                temporal.addObjForString("DAT", strDate);   
+                if($("#CIR").prop('checked')){
+                    temporal.addObjForString("CIR",'1');    
+                }else{
+                    temporal.removeObjForCode("CIR");    
+                }
+            }
 		}
 
 		if(togregorian && type === "f"){ // check earliest and latest estimates

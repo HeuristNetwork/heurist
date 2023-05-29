@@ -1127,6 +1127,7 @@ class Temporal {
                         if(@$date['timestamp']['profile']) $res['PRF'] = $date['timestamp']['profile'];
                     }else{
                         $res['TYP'] = 's';
+                        if(@$date['timestamp']['circa']) $res['CIR'] = '1';
                     }
                 }
                 
