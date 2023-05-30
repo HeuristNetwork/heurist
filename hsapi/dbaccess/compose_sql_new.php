@@ -784,7 +784,8 @@ class HQuery {
 
                     if(!in_array('hie', $sort_fields)) {
                         $sort_expr[] = 
-    '(select GREATEST(getTemporalDateString(ifnull(sd2.dtl_Value,\'0\')), getTemporalDateString(ifnull(sd3.dtl_Value,\'0\')))' 
+//OLD    '(select GREATEST(getTemporalDateString(ifnull(sd2.dtl_Value,\'0\')), getTemporalDateString(ifnull(sd3.dtl_Value,\'0\')))' 
+    '(select GREATEST(getEstDate(sd2.dtl_Value,0), getEstDate(sd3.dtl_Value,0))' 
                         .' from recDetails sd1'
                         .' left join recDetails sd2 on sd1.dtl_Value=sd2.dtl_RecID and sd2.dtl_DetailTypeID=9'
                         .' left join recDetails sd3 on sd1.dtl_Value=sd3.dtl_RecID and sd3.dtl_DetailTypeID=10'
@@ -1577,10 +1578,6 @@ class HPredicate {
             
             if($this->field_type=='date' && trim($this->value)!='') { //false && $this->isDateTime()){
                 //OUTDATED - REMOVE
-                //returns full datetime from Temporal
-                //$field_name = 'CAST( IF( CAST( CONCAT("00",getTemporalDateString( '.$p.'dtl_Value )) as DATETIME) is null, '
-                //    . 'CONCAT("00",CAST(getTemporalDateString( '.$p.'dtl_Value ) as SIGNED),"-1-1"), '
-                //    . 'CONCAT("00",getTemporalDateString( '.$p.'dtl_Value ))) as DATETIME) ';
                 
             }else if($this->field_type=='file'){
                 $field_name = $p."dtl_UploadedFileID ";  //only for search non empty values

@@ -250,17 +250,24 @@ function recordSearchFacets($system, $params){
 
         if($dt_type=='date'){
 
-            $details_where = $details_where.' AND (cast(getTemporalDateString('.$select_field.') as DATETIME) is not null '
-            .'OR (cast(getTemporalDateString('.$select_field.') as SIGNED) is not null  AND '
-            .'cast(getTemporalDateString('.$select_field.') as SIGNED) !=0) )';
+            //select valid dates
+            $select_field = 'dt0.rdi_estMinDate';
+            $detail_link = ', recDetailsDateIndex dt0';
+            $details_where = " AND (dt0.rdi_RecID=r0.rec_ID and dt0.rdi_DetailTypeID $compare_field) ";
+
+            //OLD ' AND (cast(getTemporalDateString('.$select_field.') as DATETIME) is not null ';
+            //OLD .'OR (cast(getTemporalDateString('.$select_field.') as SIGNED) is not null  AND '
+            //OLD .'cast(getTemporalDateString('.$select_field.') as SIGNED) !=0) )';
 
             //for dates we search min and max values to provide data to slider
             //facet_groupby   by year, day, month, decade, century
             if ($facet_groupby=='month') {
+
+
+                $select_field = 'ROUND(dt0.rdi_estMinDate ,2)';
                 
-                $select_field = 'LAST_DAY(cast(getTemporalDateString('.$select_field.') as DATE))';
-                //"DATE_SUB(d,INTERVAL DAYOFMONTH(d)-1 DAY) "; first day
-                //date_add(date_add(LAST_DAY(@date),interval 1 DAY),interval -1 MONTH) AS first_day
+                //OLD $select_field = 'LAST_DAY(cast(getTemporalDateString('.$select_field.') as DATE))';
+
                 $select_clause = "SELECT $select_field as rng, count(*) as cnt ";
                 if($grouporder_clause==''){
                     $grouporder_clause = ' GROUP BY rng ORDER BY rng';
@@ -268,8 +275,8 @@ function recordSearchFacets($system, $params){
                 
             }else if ($facet_groupby=='year' || $facet_groupby=='decade' || $facet_groupby=='century') {
 
-                $select_field = '(cast(getTemporalDateString('.$select_field.') as SIGNED))';
-                //'YEAR(cast(getTemporalDateString('.$select_field.') as DATE))';
+                $select_field = 'ROUND(dt0.rdi_estMinDate ,0)';
+
                 if($facet_groupby=='decade'){
                     $select_field = $select_field.' DIV 10 * 10';
                 }else if($facet_groupby=='century'){
@@ -285,11 +292,11 @@ function recordSearchFacets($system, $params){
             }else{    
 
                 //concat('00',
-                $select_field = "cast(if(cast(getTemporalDateString( $select_field ) as DATETIME) is null,"
-                ."concat('00',cast(getTemporalDateString( $select_field ) as SIGNED),'-1-1'),"  //year
-                ."concat('00',getTemporalDateString( $select_field ))) as DATETIME)";
+                //OLD $select_field = "cast(if(cast(getTemporalDateString( $select_field ) as DATETIME) is null,"
+                //OLD ."concat('00',cast(getTemporalDateString( $select_field ) as SIGNED),'-1-1'),"  //year
+                //OLD ."concat('00',getTemporalDateString( $select_field ))) as DATETIME)";
 
-                $select_clause = "SELECT min($select_field) as min, max($select_field) as max, count(distinct r0.rec_ID) as cnt ";
+                $select_clause = "SELECT min(dt0.rdi_estMinDate) as min, max(dt0.rdi_estMaxDate) as max, count(distinct r0.rec_ID) as cnt ";
 
             }
 
@@ -749,10 +756,18 @@ function getDateHistogramData($system, $range, $interval, $rec_ids, $dty_id, $fo
     }
 
     // Get record dates
-    $sql = "SELECT cast(if(cast(concat('00',getTemporalDateString(dtl_Value)) as DATETIME) is null, concat('00',cast(getTemporalDateString(dtl_Value) as SIGNED), '-1-1'), concat('00',getTemporalDateString(dtl_Value))) as DATETIME)
-            FROM recDetails
-            WHERE dtl_RecID IN (".implode(',', $rec_ids).") AND dtl_DetailTypeID = ".$dty_id." AND (NULLIF(dtl_Value, '') is not null) AND (cast(getTemporalDateString(dtl_Value) as DATETIME) is not null OR (cast(getTemporalDateString(dtl_Value) as SIGNED) is not null AND cast(getTemporalDateString(dtl_Value) as SIGNED) != 0))";
+    //OLD $sql = "SELECT cast(if(cast(concat('00',getTemporalDateString(dtl_Value)) as DATETIME) is null, "
+    //OLD                 ."concat('00',cast(getTemporalDateString(dtl_Value) as SIGNED), '-1-1'), concat('00',getTemporalDateString(dtl_Value))) as DATETIME)"
+            //OLD .' FROM recDetails'
+            //OLD .' WHERE dtl_RecID IN ('
+            //OLD .implode(',', $rec_ids).") AND dtl_DetailTypeID = ".$dty_id
+            //OLD ." AND (NULLIF(dtl_Value, '') is not null) AND (cast(getTemporalDateString(dtl_Value) as DATETIME) is not null OR (cast(getTemporalDateString(dtl_Value) as SIGNED) is not null AND cast(getTemporalDateString(dtl_Value) as SIGNED) != 0))";
 
+    $sql = 'SELECT rdi_estMinDate '  //', rdi_estMaxDate'
+            .' FROM recDetailsDateIndex'
+            .' WHERE rdi_RecID IN ('
+                .implode(',', $rec_ids).") AND rdi_DetailTypeID = ".$dty_id; 
+                
     $res = $mysqli->query($sql);
 
     if(!$res){
@@ -760,8 +775,18 @@ function getDateHistogramData($system, $range, $interval, $rec_ids, $dty_id, $fo
     }else{
 
         while($row = $res->fetch_row()){ // cycle through all records
+        
+            //convert from decimal to yyyy-01-01
+            if(round($row[0])==$row[0]){
+                $dt = round($row[0]).'-01-01';
+            }else{
+                $month = substr($row[0],5,2);
+                $day = substr($row[0],7);
+                $dt = round($row[0]).'-'.(($month==0)?'01':str_pad($month,2,'0',STR_PAD_LEFT))
+                                    .'-'.(($day==0)?'01':str_pad($day,2,'0',STR_PAD_LEFT));
+            }    
 
-            $detail_date = new DateTime($row[0]);
+            $detail_date = new DateTime($dt);
             $detail_date->setTime(0,0);
 
             for($k = 0; $k < count($intervals); $k++){ // cycle through classes, add to required count

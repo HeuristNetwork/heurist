@@ -962,7 +962,9 @@ class AndLimb {
     }
 }
 
-
+//
+//
+//
 class SortPhrase {
     var $value;
 
@@ -1055,9 +1057,11 @@ class SortPhrase {
                         return array(" cast(dtl_Value as decimal)".$scending,"dtl_Value is decimal",
                             "left join recDetails dtlInt on dtlInt.dtl_RecID=rec_ID and dtlInt.dtl_DetailTypeID=$field_id ");
                     } else {
-                        // have to introduce a defDetailTypes join to ensure that we only use the linked resource's title if this is in fact a resource type (previously any integer, e.g. a date, could potentially index another records record)
+                        // have to introduce a defDetailTypes join to ensure that we only use the linked resource's 
+                        // title if this is in fact a resource type (previously any integer, e.g. a date, could potentially 
+                        // index another records record)
                         return array(" ifnull((select if(dty_Type='resource', link.rec_Title, ".
-                            "if(dty_Type='date',getTemporalDateString(dtl_Value),dtl_Value)) ".
+                            "if(dty_Type='date',getEstDate(dtl_Value,0),dtl_Value)) ".
                             "from recDetails left join defDetailTypes on dty_ID=dtl_DetailTypeID left join Records link on dtl_Value=link.rec_ID ".
                             "where dtl_RecID=TOPBIBLIO.rec_ID and dtl_DetailTypeID=$field_id ".
                             "order by if($field_id=$CREATOR, dtl_ID, link.rec_Title) limit 1), '~~') ".$scending,
@@ -1084,7 +1088,7 @@ class SortPhrase {
                             ."left join recDetails dtlInt on dtlInt.dtl_RecID=rec_ID and dtlInt.dtl_DetailTypeID=bdtInt.dty_ID ");
                     } else {
                         return array(" ifnull((select if(dty_Type='resource', link.rec_Title, ".
-                            "if(dty_Type='date',getTemporalDateString(dtl_Value),dtl_Value)) ".
+                            "if(dty_Type='date',getEstDate(dtl_Value,0),dtl_Value)) ".
                             "from defDetailTypes, recDetails left join Records link on dtl_Value=link.rec_ID ".
                             "where dty_Name='".$mysqli->real_escape_string($field_name)."' and dtl_RecID=TOPBIBLIO.rec_ID and dtl_DetailTypeID=dty_ID ".
                             "order by if(dty_ID=$CREATOR,dtl_ID,link.rec_Title) limit 1), '~~') ".$scending,
@@ -1168,7 +1172,7 @@ class Predicate {
         return ($timestamp0  &&  $timestamp1);
     }
 
-    function makeDateClause() {
+    function makeDateClause_old() {
 
         if (strpos($this->value,"<>")) {
 
@@ -1210,6 +1214,69 @@ class Predicate {
             }
         }
     }
+    
+    function makeDateClause() {
+        
+        //???? if($this->isEmptyValue()){ // {"f:10":"NULL"}
+
+        if (strpos($this->value,"<>")) {
+
+            $vals = explode("<>", $this->value);
+            
+            $temporal1 = new Temporal($vals[0]);
+            $temporal2 = new Temporal($vals[1]);
+            
+            if(!$temporal1->isValid() || !$temporal2->isValid()){
+                return null;
+            }
+            
+            $timespan = $temporal1->getMinMax();
+            $min = $timespan[0];
+            
+            $timespan = $temporal2->getMinMax();
+            $max = $timespan[1];
+            
+            $timespan = array($min, $max);
+            
+        }else{
+            $temporal = new Temporal($this->value);
+            if(!$temporal->isValid()){
+                return null;
+            }
+            
+            $timespan = $temporal->getMinMax();
+        }
+            
+        $res = '';
+                
+        if ($this->parent->exact) {
+            //timespan within interval
+            $res = "(rdi_estMinDate <= {$timespan[0]} AND {$timespan[1]} <= rdi_estMaxDate)";
+        }
+        else if ($this->parent->lessthan) {
+            
+            //timespan max < rdi_estMinDate
+            $res = "({$timespan[1]} < rdi_estMinDate)";
+        }
+        else if ($this->parent->greaterthan) {
+            
+            //timespan min > rdi_estMaxDate
+            $res = "(rdi_estMaxDate > {$timespan[1]})";
+        }
+        else {
+            //overlaps/intersects with interval
+            // @End >= tbl.start AND @Start <= tbl.end
+            $res = "(rdi_estMaxDate>={$timespan[0]} AND rdi_estMinDate<={$timespan[1]})";
+        }
+        
+        //if($this->negate){
+        //    $res = ' NOT '.$res;
+        //}
+        
+        return $res;
+    }
+    
+    
 }
 
 
@@ -1707,7 +1774,7 @@ class FieldPredicate extends Predicate {
             $match_pred_for_term = " = trm.trm_ID";
         }*/
         
-        $timestamp = $isin?false:true; //$this->isDateTime();
+        $timestamp = $isin?false:true; //numeric values $this->isDateTime();
 
         if($this->field_type_value=='resource'){ //field type is found - search for specific detailtype
             return '('.$not . 'exists (select rd.dtl_ID from recDetails rd '
@@ -1724,22 +1791,18 @@ class FieldPredicate extends Predicate {
             . ' and rd.dtl_Value '.$match_pred. '))';
 
         }else if($this->field_type_value=='date'){ 
-
-            $res = '('.$not . 'exists (select rd.dtl_ID from recDetails rd '
-            . ' where rd.dtl_RecID=TOPBIBLIO.rec_ID '
-            . ' and rd.dtl_DetailTypeID=' . intval($this->field_type);
-            if(trim($this->value)==''){
-                $res = $res. " and rd.dtl_Value !='' ))";
+            
+            
+            $res = '('.$not.'EXISTS (SELECT rdi_DetailID FROM recDetailsDateIndex WHERE TOPBIBLIO.rec_ID=rdi_RecID AND '
+                    .'rdi_DetailTypeID='. intval($this->field_type);
+            
+            $dateindex_clause = $this->makeDateClause();
+            if($dateindex_clause){
+                $res = $res.' AND '.$dateindex_clause.'))';    
             }else{
-                
-                if ($timestamp) {
-                    $date_match_pred = $this->makeDateClause();
-                }else{
-                    $date_match_pred = $match_pred;
-                }
-                
-                $res = $res. ' and getTemporalDateString(rd.dtl_Value) ' . $date_match_pred. '))';
+                $res = '';
             }
+
             return $res;
             
         }else if($this->field_type_value){ 
@@ -1825,24 +1888,18 @@ class FieldPredicate extends Predicate {
             }
             
         
-            if ($timestamp) {
-                $date_match_pred = $this->makeDateClause();
-            }else{
-                $date_match_pred = $match_pred;
-            }
-            
+            $dateindex_clause = $this->makeDateClause();
 
             return '('.$not . 'exists (select rd.dtl_ID from recDetails rd '
             . 'left join defDetailTypes rdt on rdt.dty_ID=rd.dtl_DetailTypeID '
             . 'left join Records link on rd.dtl_Value=link.rec_ID '
+            .' left join recDetailsDateIndex on rd.dtl_ID=rdi_DetailID '
 //. (($isnumericvalue || $isin)?'':'left join defTerms trm on trm.trm_Label '. $match_pred ). " "
             . 'where rd.dtl_RecID=TOPBIBLIO.rec_ID '
             . ' and if(rdt.dty_Type = "resource" AND '.($isnumericvalue?'0':'1').', '
-            .'link.rec_Title ' . $match_pred . ', '
+            .'link.rec_Title ' . $match_pred . ', '     //THEN
 //see 1377            .'if(rdt.dty_Type in ("enum","relationtype"), rd.dtl_Value '.$match_pred_for_term.', '
-            . ($timestamp ? 'if(rdt.dty_Type = "date", '
-                .'getTemporalDateString(rd.dtl_Value) ' . $date_match_pred . ', '
-                //.'str_to_date(getTemporalDateString(rd.dtl_Value), "%Y-%m-%d %H:%i:%s") ' . $date_match_pred . ', '
+            . ($dateindex_clause!=null ? 'if(rdt.dty_Type = "date", (rdi_DetailTypeID=rd.dtl_DetailTypeID AND '.$dateindex_clause.') , '
                 .'rd.dtl_Value ' . $match_pred . ')'
                 : 'rd.dtl_Value ' . $match_pred ) . ')'
             . $rd_type_clause . '))';

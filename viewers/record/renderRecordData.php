@@ -1248,19 +1248,15 @@ function print_public_details($bib) {
                     }
 
                     //find dates
-                    $row = mysql__select_row($mysqli, 
-                        'select cast(getTemporalDateString(dtl_Value) as DATETIME), dtl_Value '
-                        .'from recDetails where dtl_DetailTypeID in ('
-                        .DT_DATE.','.$startDT.') and dtl_RecID='.$rec_id );
-                        
+                    $row = mysql__select_row('SELECT rdi_estMinDate ' 
+                            .' FROM recDetailsDateIndex'
+                            .' WHERE rdi_RecID=$rec_id AND rdi_DetailTypeID IN ('.DT_DATE.','.$startDT.')'); 
+
                     if($row){
-                        if($row[0]==null){//year
-                            $bd['order_by_date'] = $row[1];
-                        }else{
-                            $bd['order_by_date'] = $row[0];    
-                        }
+                        $bd['order_by_date'] = $row[0];
                     }
-					
+                        
+                    
 					array_push($already_linked_ids, $rec_id);
                 }
 
