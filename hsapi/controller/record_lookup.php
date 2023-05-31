@@ -536,7 +536,7 @@ if($is_debug) print print_r($response, true).'!!!!!<br>';
                         $sf_code = @$sf_ele->attributes()['code'];
 
                         switch ($df_tag) {
-                            case '200': // MISSING - $c $d
+                            case '200': // Person MISSING - $d
 
                                 if($sf_code == 'a'){ // Surname
                                     $formatted_array['name'] = (string)$sf_ele[0];
@@ -547,37 +547,36 @@ if($is_debug) print print_r($response, true).'!!!!!<br>';
                                     }else{
                                         $formatted_array['name'] = (string)$sf_ele[0];
                                     }
-                                }else if($sf_code == 'f'){ // Years active
-    
-                                    if( array_key_exists('name', $formatted_array)){
+                                }else if($sf_code == 'f' && array_key_exists('name', $formatted_array)){ // Years active
+                                    $formatted_array['name'] .= ' (' . (string)$sf_ele[0] . ')';
+                                }else if($sf_code == 'c' && array_key_exists('name', $formatted_array)){ // Role/Job
+
+                                    if(substr($formatted_array['name'], -1) == ')'){ // has date
+                                        $formatted_array['name'] = substr($formatted_array['name'], 0, -1) . ' ; ' . (string)$sf_ele[0] . ')';
+                                    }else{ // no date
                                         $formatted_array['name'] .= ' (' . (string)$sf_ele[0] . ')';
-                                    }else{
-                                        $formatted_array['name'] = 'No Name Provided';
                                     }
                                 }
 
                                 break;
 
-                            case '210': // MISSING - $b
+                            case '210': // Collective
 
                                 if($sf_code == 'a'){ // Name
                                     $formatted_array['name'] = (string)$sf_ele[0];
-                                }else if($sf_code == 'c'){ // Location
-    
-                                    if( array_key_exists('name', $formatted_array)){
-                                        $formatted_array['name'] .= ' (' . (string)$sf_ele[0] . ')';
-                                    }else{
-                                        $formatted_array['name'] = 'No Name Provided';
-                                    }
+                                }else if($sf_code == 'c' && array_key_exists('name', $formatted_array)){ // Location
+                                    $formatted_array['name'] .= ' (' . (string)$sf_ele[0] . ')';    
+                                }else if($sf_code == 'b' && array_key_exists('name', $formatted_array)){ // Type
+                                    $formatted_array['name'] .= '. ' . (string)$sf_ele[0];
                                 }
 
                                 break;
 
-                            case '240':
+                            case '240': // Conventional Title
 
-                                if($sf_code == 'a'){ // Surname
+                                if($sf_code == 'a'){ // Name
                                     $formatted_array['name'] = (string)$sf_ele[0];
-                                }else if($sf_code == 'b'){ // First name
+                                /*}else if($sf_code == 'b'){ // First name? Other name?
     
                                     if( array_key_exists('name', $formatted_array)){
                                         $formatted_array['name'] .= ', ' . (string)$sf_ele[0];
@@ -585,7 +584,7 @@ if($is_debug) print print_r($response, true).'!!!!!<br>';
                                         $formatted_array['name'] = (string)$sf_ele[0];
                                     }
     
-                                /*}else if($sf_code == 'f'){ // Years active
+                                }else if($sf_code == 'f'){ // Years active
                                     if( array_key_exists('name', $formatted_array)){
                                         $formatted_array['name'] .= ' (' . (string)$sf_ele[0] . ')';
                                     }else{
@@ -604,7 +603,7 @@ if($is_debug) print print_r($response, true).'!!!!!<br>';
                             
                             case '230': // MISSING - $b $h $k $m
 
-                                if($sf_code != 'a' || $sf_code != 'i'){
+                                if($sf_code != 'a' && $sf_code != 'i'){
                                     break;
                                 }
 
@@ -617,9 +616,9 @@ if($is_debug) print print_r($response, true).'!!!!!<br>';
 
                                 break;
 
-                            case '215':
+                            case '215': // Geographical name
 
-                                if($sf_code == 'a' || $sf_code == 'x'){
+                                if($sf_code != 'a'){ // && $sf_code != 'x'
                                     break;
                                 }
 
@@ -632,10 +631,10 @@ if($is_debug) print print_r($response, true).'!!!!!<br>';
 
                                 break;
 
-                            case '216':
-                            case '250':
+                            case '216': // Marque
+                            case '250': // 
 
-                                if($sf_code == 'a'){
+                                if($sf_code != 'a'){
                                     break;
                                 }
 
@@ -648,17 +647,12 @@ if($is_debug) print print_r($response, true).'!!!!!<br>';
 
                                 break;
 
-                            case '220':
+                            case '220': // Family
 
                                 if($sf_code == 'a'){ // Name
                                     $formatted_array['name'] = (string)$sf_ele[0];
-                                }else if($sf_code == 'c'){
-    
-                                    if( array_key_exists('name', $formatted_array)){
-                                        $formatted_array['name'] .= ' (' . (string)$sf_ele[0] . ')';
-                                    }else{
-                                        $formatted_array['name'] = 'No Name Provided';
-                                    }
+                                }else if($sf_code == 'c' && array_key_exists('name', $formatted_array)){ // Type
+                                    $formatted_array['name'] .= ' (' . (string)$sf_ele[0] . ')';
                                 }
 
                                 break;
@@ -672,7 +666,7 @@ if($is_debug) print print_r($response, true).'!!!!!<br>';
                 }
             }
 
-            if(count($formatted_array) > 0){
+            if(count($formatted_array) > 0 && array_key_exists('name', $formatted_array) && !empty($formatted_array['name'])){
                 $results['result'][] = $formatted_array;
             }
         }
