@@ -39,7 +39,7 @@ if($is_included){
     $is_ok = true;
     if(@$_REQUEST['fixdateindex']=='1'){
         
-        if(recreateRecDetailsDateIndex($system, true, @$_REQUEST['details']=='1')){
+        if(recreateRecDetailsDateIndex($system, true, @$_REQUEST['convert_dates']=='1')){
             print '<div><h3 class="res-valid">Record Details Date Index has been successfully recreated</h3></div>';
         }else{
             $response = $system->getError();    
@@ -64,13 +64,20 @@ if($is_included){
             //count of missed relations in recLinks                    
             $query = 'SELECT count(dtl_ID) FROM recDetails, defDetailTypes  WHERE dtl_DetailTypeID=dty_ID AND dty_Type="date"';
             $cnt_dates = mysql__select_value($mysqli, $query);
-            
+
+            $query = 'SELECT count(rdi_DetailID) FROM recDetailsDateIndex WHERE rdi_estMinDate=0 AND rdi_estMaxDate=0';
+            $cnt_empty = mysql__select_value($mysqli, $query);
 
             print '<div style="padding:5px">Total count of date fields:&nbsp;<b>'.$cnt_dates.'</b>'
-                    .($cnt_dates==$cnt_index?'':'&nbsp;&nbsp;&nbsp;&nbsp;All relationships are in cache. Cache is OK.').'</div>';
+                    .($cnt_dates==$cnt_index && $cnt_empty==0?'&nbsp;&nbsp;&nbsp;&nbsp;All date entries are in index. Index values are OK.':'').'</div>';
             
-            if($cnt_dates > $cnt_index){
-                print '<div style="padding:5px;color:red">Missed dates in index:&nbsp;<b>'.($cnt_dates - $cnt_index).'</b></div>';
+            if($cnt_dates > $cnt_index || $cnt_empty>0){
+                if($cnt_dates > $cnt_index){
+                    print '<div style="padding:5px;color:red">Missed entries in index:&nbsp;<b>'.($cnt_dates - $cnt_index).'</b></div>';
+                }
+                if($cnt_empty > 0){
+                    print '<div style="padding:5px;color:red">Empty dates in index:&nbsp;<b>'.($cnt_empty).'</b></div>';
+                }
 
                 echo '<div><h3 class="error">Recreate Relationship cache to restore missing entries</h3></div>';        
                 
@@ -80,12 +87,22 @@ if($is_included){
             }
 
         }else{
-                echo '<div><h3 class="res-valid">Record Details Date Index tabale does not exist</h3></div>';        
+                echo '<div><h3 class="res-valid">Record Details Date Index table does not exist</h3></div>';        
         }
-    
+        
+        if($system->get_system('sys_dbSubSubVersion')<14){
+?>            
+            <label>
+                <input type="checkbox" id="convert_dates"/>
+                Converts old Plain String temporals to new JSON format in record details. (DB version will be upgraded to 1.3.14 and some search function will stop working for code version older than 6.3.16)
+            </label>                    
+<?php                         
+        }else{
+            print '<input type="hidden" id="convert_dates"/>';            
+        }
 ?>        
         <div><br><br>
-                <button onclick="{window.open('listDatabaseErrors.php?db=<?php echo HEURIST_DBNAME;?>&fixdateindex=1','_self')}">Recreate date index</button>
+                <button onclick="{var ischk=document.getElementById('convert_dates').checked?'1':'0';alert(ischk);window.open('listDatabaseErrors.php?db=<?php echo HEURIST_DBNAME;?>&fixdateindex=1&convert_dates='+ischk,'_self')}">Recreate date index</button>
         </div>        
 <?php    
     }//isok            

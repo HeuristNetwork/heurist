@@ -54,6 +54,7 @@ require_once(dirname(__FILE__).'/../../viewers/smarty/reportRecord.php');
 $recstructures = array();
 $detailtypes   = array();
 $terms         = null;
+$useNewTemporalFormatInRecDetails = false;
 
 $block_swf_email = false;
 
@@ -453,6 +454,9 @@ function recordSave($system, $record, $use_transaction=true, $suppress_parent_ch
         }
     }        
 
+    $useNewTemporalFormatInRecDetails = ($system->get_system('sys_dbSubSubVersion')>=14);
+
+    
     //0 normal, 1 import, 2 - faims or zotero import (add without recstructure check)
     $modeImport = @$record['AddedByImport']?intval($record['AddedByImport']):0;
 
@@ -755,7 +759,7 @@ function recordSave($system, $record, $use_transaction=true, $suppress_parent_ch
                     .print_r($values,true));
                 **/
                 
-                return $system->addError(HEURIST_DB_ERROR, 'Cannot save value - possibly bad encoding.', $syserror);
+                return $system->addError(HEURIST_DB_ERROR, 'Cannot save value - possibly bad encoding or invalid date format (System error: '.$syserror.').', $syserror);
 
             }
 
@@ -2352,7 +2356,7 @@ function prepareRecordForUpdate($system, $record, $detailValuesNew, $update_mode
 */
 function _prepareDetails($system, $rectype, $record, $validation_mode, $recID, $modeImport)
 {
-    global $terms;
+    global $terms, $useNewTemporalFormatInRecDetails;
 
     $details = $record['details'];
 
@@ -2504,53 +2508,56 @@ function _prepareDetails($system, $rectype, $record, $validation_mode, $recID, $
                         $err_msg = 'Value is empty';  
                     }else{
                         
-                        //$preparedDate = Temporal::dateToISO($dtl_Value, 2, true, 'now');
+                        if($useNewTemporalFormatInRecDetails){
                         
-                        $preparedDate = new Temporal( $dtl_Value );
+                            $preparedDate = new Temporal( $dtl_Value );
                         
-                        if($preparedDate && $preparedDate->isValid()){
-                            
-                            // saves as usual date
-                            // if date is Simple, 0<year>9999 (CE) and has both month and day 
-                            if($preparedDate->isValidSimple()){
-                                $dtl_Value = $preparedDate->getValue(true); //returns simple yyyy-mm-dd
-                            }else{
-                                $dtl_Value = $preparedDate->toJSON(); //json encoded string
-                            }
-                        }
-                        /* TEMP to remove
-                        //yesterday, today, tomorrow, now
-                        $sdate = strtolower(super_trim($dtl_Value));
-                        if($sdate=='today'){
-                            $dtl_Value = date('Y-m-d');
-                        }else if($sdate=='now'){
-                            $dtl_Value = date('Y-m-d H:i:s');
-                        }else if($sdate=='yesterday'){
-                            $dtl_Value = date('Y-m-d',strtotime("-1 days"));
-                        }else if($sdate=='tomorrow'){
-                            $dtl_Value = date('Y-m-d',strtotime("+1 days"));
-                        }else if(strlen($dtl_Value)>=8 && strpos($dtl_Value,'-')==false){
-                            
-                            try{
-                                $t2 = new DateTime($dtl_Value);
+                            if($preparedDate && $preparedDate->isValid()){
                                 
-                                $format = 'Y-m-d';
-                                if($t2->format('H')>0 || $t2->format('i')>0 || $t2->format('s')>0){
-                                //strlen($dtl_Value)>=12 || strpos($dtl_Value,'T')>7 || strpos($dtl_Value,' ')>7){
-                                    if($t2->format('s')>0){
-                                        $format .= ' H:i:s';
-                                    }else{
-                                        $format .= ' H:i';
-                                    }
+                                // saves as usual date
+                                // if date is Simple, 0<year>9999 (CE) and has both month and day 
+                                if($preparedDate->isValidSimple()){
+                                    $dtl_Value = $preparedDate->getValue(true); //returns simple yyyy-mm-dd
+                                }else{
+                                    $dtl_Value = $preparedDate->toJSON(); //json encoded string
                                 }
-                                $dtl_Value = $t2->format($format);
+                            }
+                        
+                        }else{
+                            // Use old plain temporals
+                            
+                            //yesterday, today, tomorrow, now
+                            $sdate = strtolower(super_trim($dtl_Value));
+                            if($sdate=='today'){
+                                $dtl_Value = date('Y-m-d');
+                            }else if($sdate=='now'){
+                                $dtl_Value = date('Y-m-d H:i:s');
+                            }else if($sdate=='yesterday'){
+                                $dtl_Value = date('Y-m-d',strtotime("-1 days"));
+                            }else if($sdate=='tomorrow'){
+                                $dtl_Value = date('Y-m-d',strtotime("+1 days"));
+                            }else if(strlen($dtl_Value)>=8 && strpos($dtl_Value,'-')==false){
                                 
-                            }catch(Exception  $e){
-                                //skip conversion
-                                
+                                try{
+                                    $t2 = new DateTime($dtl_Value);
+                                    
+                                    $format = 'Y-m-d';
+                                    if($t2->format('H')>0 || $t2->format('i')>0 || $t2->format('s')>0){
+                                    //strlen($dtl_Value)>=12 || strpos($dtl_Value,'T')>7 || strpos($dtl_Value,' ')>7){
+                                        if($t2->format('s')>0){
+                                            $format .= ' H:i:s';
+                                        }else{
+                                            $format .= ' H:i';
+                                        }
+                                    }
+                                    $dtl_Value = $t2->format($format);
+                                    
+                                }catch(Exception  $e){
+                                    //skip conversion
+                                    
+                                }
                             }
                         }
-                        */
                     }
                     break;
                 case "float":

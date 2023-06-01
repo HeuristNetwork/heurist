@@ -14,13 +14,8 @@
     */
 
     /**
-    * 1) __updateDatabase - adds new field rst_SemanticReferenceURL
     * 
-    * 2) findMissedTermLinks
-    * Find db v1.2 with existing defTermLinks
-    *      and v1.3 with individual selection of terms
-    * 
-    * 3) Find non UTF-9 characters in rty_TitleMask
+    * Various actions to check/correct data and db structure per all databases on server
     *
     * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
     * @copyright   (C) 2005-2023 University of Sydney
@@ -112,8 +107,9 @@ if(false){
     __addOtherSources();
 }else  if(false){
     __renameField39();
+}else  if(true){
+    __correctGetEstDate_and_ConvertTemporals_JSON_to_Plain();
 }
-
 //
 // Report database versions
 //
@@ -838,5 +834,68 @@ function __renameField39(){
     
 }
 
+//
+//
+//
+function __correctGetEstDate_and_ConvertTemporals_JSON_to_Plain(){
+    
+    global $mysqli, $databases; 
 
+
+    foreach ($databases as $idx=>$db_name){
+
+        mysql__usedatabase($mysqli, $db_name);
+
+        //get version of database        
+        $query = 'SELECT sys_dbSubVersion, sys_dbSubSubVersion from sysIdentification';
+        $ver = mysql__select_row_assoc($mysqli, $query);
+        if($ver['sys_dbSubSubVersion']==13){
+        
+            print '<br>'.$db_name;
+        
+            // recreate getEstDate function
+            if(db_script('hdb_'.$db_name, dirname(__FILE__).'/../setup/dbcreate/getEstDate.sql', false)){
+
+                $cnt = 0;    
+                //converts back to plain  
+                $query = 'SELECT dtl_ID,dtl_RecID,dtl_DetailTypeID,dtl_Value FROM recDetails, defDetailTypes '
+                .'WHERE dtl_DetailTypeID=dty_ID AND dty_Type="date" AND dtl_Value LIKE "%\"estMinDate\":%"';
+                $res = $mysqli->query($query);
+            
+                if ($res){
+
+                    while ($row = $res->fetch_row()){
+                        $dtl_ID = $row[0];
+                        $dtl_RecID = $row[1];
+                        $dtl_DetailTypeID = $row[2];
+                        $dtl_Value = $row[3];
+                        $dtl_NewValue = '';
+                        $error = '';
+                        
+                        $value = json_decode($dtl_Value,true);
+                        
+                        if(is_array($value)){
+
+                            $preparedDate = new Temporal( $dtl_Value );
+                            if($preparedDate && $preparedDate->isValid()){
+                                $dtl_NewValue = $preparedDate->toPlain();
+                                
+                                $query = 'UPDATE recDetails SET dtl_Value="'.
+                                                $mysqli->real_escape_string($dtl_NewValue).'" WHERE dtl_ID='.$dtl_ID;
+                                $mysqli->query($query);
+                                
+                                $cnt++;
+                            }
+                        }
+                        
+
+                    }//while  
+                    
+                    print ' '.$cnt;
+                }
+            }
+        }
+    }
+    
+}
 ?>

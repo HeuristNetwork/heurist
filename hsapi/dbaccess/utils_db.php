@@ -859,6 +859,8 @@
         
         $mysqli = $system->get_mysqli();
         
+        $dbVerSubSub = $system->get_system('sys_dbSubSubVersion');        
+        
         $isok = true;
         $is_table_exist = hasTable($mysqli, 'recDetailsDateIndex');    
         
@@ -943,9 +945,12 @@
                             $res2 = $mysqli->query($query);
                             if($res2){
                                 $row2 = $res2->fetch_row();
-                                if($row2[0]!='' && $row2[1]!=''){
+                                if(($row2[0]=='' && $row2[1]=='') || ($row2[0]=='0' && $row2[1]=='0')){
+                                    //fails extraction estMinDate, estMaxDate
+                                    $error = 'Empty min, max dates. Min:"'.$min.'" Max:"'.$max.'". Query:'.$query;
+                                }else{
             //4. Keep old plain string temporal object in backup table - TODO!!!
-                                    if($json_for_record_details && !$is_date_simple){
+                                    if($json_for_record_details && strpos($dtl_Value,'|VER=1|')===0){ // !$is_date_simple
                                         $query = 'INSERT INTO bkpDetailsDateIndex(dtl_ID,dtl_Value) VALUES('.$dtl_ID.',\''
                                             .$mysqli->real_escape_string($dtl_Value).'\')';
                                         $res4 = $mysqli->query($query);
@@ -981,9 +986,6 @@
                                         break;
                                     }
                                     
-                                }else{
-                                    //fails extraction estMinDate, estMaxDate
-                                    $error = 'Empty min,max dates. Min:"'.$min.'" Max:"'.$max.'". Query:'.$query;
                                 }
                                 
                             }else{
@@ -1018,6 +1020,12 @@
                 $res->close();
                 
                 if($isok){
+                    
+                    if($json_for_record_details && $dbVerSubSub<14){
+                        $mysqli->query('UPDATE sysIdentification SET sys_dbVersion=1, sys_dbSubVersion=3, sys_dbSubSubVersion=14 WHERE 1');
+                    }
+                    
+                    
                     $mysqli->commit();  
                 }else{
                     $mysqli->rollback();

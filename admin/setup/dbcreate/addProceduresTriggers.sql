@@ -58,44 +58,65 @@ DELIMITER $$
 
 DROP function IF EXISTS `getEstDate`$$
 
--- extract estMinDate or estMaxDate from json string
-CREATE DEFINER=CURRENT_USER FUNCTION `getEstDate`(sTemporal varchar(4095), typeDate tinyint) RETURNS decimal(15,4)
+--
+-- extract estMinDate or estMaxDate for triggers to populate recDetailsDateIndex.
+-- sTemporal can be in old temporal format, standard date or json string.
+-- typeDate = 0 - for min date, 1 - for max date
+--
+CREATE DEFINER=CURRENT_USER FUNCTION `getEstDate`(sTemporal varchar(4095), typeDate tinyint) RETURNS DECIMAL(15,4)
     DETERMINISTIC
-    begin
+    BEGIN
+    
             declare iBegin integer;
             declare iEnd integer;
             declare nameDate varchar(20) default '';
             declare strDate varchar(15) default '';
             declare estDate decimal(15,4);
+
+-- error handler for date conversion            
+            DECLARE EXIT HANDLER FOR 1292
+            BEGIN
+                RETURN 0;
+            END;
+            
 -- find the temporal type might not be a temporal format, see else below
             IF (TRIM(sTemporal) REGEXP '^-?[0-9]+$') THEN
                 RETURN CAST(TRIM(sTemporal) AS DECIMAL(15,4));
             END IF;
 
+            SET iBegin = LOCATE('|VER=1|',sTemporal);
+            if iBegin = 1 THEN
+                SET sTemporal = getTemporalDateString(sTemporal);
+            END IF;
+            
             IF (typeDate = 0) THEN
                 set nameDate = '"estMinDate":';
             ELSE
                 set nameDate = '"estMaxDate":';
             END IF;
 
-            set iBegin = LOCATE(nameDate,sTemporal);
-            if iBegin = 0 THEN
+            SET iBegin = LOCATE(nameDate,sTemporal);
+            IF iBegin = 0 THEN
 -- it will work for valid CE dates only, dates without days or month will fail
-                RETURN CAST(CONCAT(YEAR(sTemporal),'.',LPAD(MONTH(sTemporal),2,'0'),LPAD(DAY(sTemporal),2,'0')) AS DECIMAL(15,4));
-            else
-                set iBegin = iBegin + 13;
-                set iEnd = LOCATE(',', sTemporal, iBegin);
-                if iEnd = 0 THEN
-                    set iEnd = LOCATE('}', sTemporal, iBegin);
+                IF DATE(sTemporal) IS NULL THEN 
+                    RETURN 0;
+                ELSE    
+                    RETURN CAST(CONCAT(YEAR(sTemporal),'.',LPAD(MONTH(sTemporal),2,'0'),LPAD(DAY(sTemporal),2,'0')) AS DECIMAL(15,4));
+                END IF; 
+                 
+            ELSE
+                SET iBegin = iBegin + 13;
+                SET iEnd = LOCATE(',', sTemporal, iBegin);
+                IF iEnd = 0 THEN
+                    SET iEnd = LOCATE('}', sTemporal, iBegin);
                 END IF;
-                if iEnd > 0 THEN
-                    set strDate =  substring(sTemporal, iBegin, iEnd - iBegin);
+                IF iEnd > 0 THEN
+                    SET strDate =  substring(sTemporal, iBegin, iEnd - iBegin);
                     RETURN CAST(TRIM(strDate) AS DECIMAL(15,4));
                 END IF;
                 RETURN 0;    
-            end if;
-    end$$
-    
+            END IF;
+    END$$
 
 DROP function IF EXISTS `getTemporalDateString`$$
     
@@ -354,9 +375,9 @@ FROM recDetails where dtl_ID=OLD.dtl_ID INTO @raw_detail;
             
         elseif dtType='date' then
                 update recDetailsDateIndex set rdi_estMinDate=getEstDate(NEW.dtl_Value,0),
-                                                rdi_estMaxDate=getEstDate(NEW.dtl_Value,1),
-                                                rdi_DetailTypeID = NEW.dtl_DetailTypeID  
-                                                where rdi_DetailID=NEW.dtl_ID;
+                                               rdi_estMaxDate=getEstDate(NEW.dtl_Value,1),
+                                               rdi_DetailTypeID = NEW.dtl_DetailTypeID  
+                                               where rdi_DetailID=NEW.dtl_ID;
         end if;
 -- need to add update for detail 200, now 5, to save the termID
 	end$$

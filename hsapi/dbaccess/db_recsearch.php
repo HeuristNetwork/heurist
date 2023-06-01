@@ -1702,6 +1702,7 @@ function recordSearch($system, $params)
     $system->defineConstant('RT_CMS_MENU');
     $system->defineConstant('DT_EXTENDED_DESCRIPTION');
 
+    $useNewTemporalFormatInRecDetails = ($system->get_system('sys_dbSubSubVersion')>=14);
 
     $fieldtypes_in_res = null;
     //search for geo and time fields and remove non timemap records - for rules we need all records
@@ -2633,9 +2634,8 @@ function recordSearch($system, $params)
                                         $val = array($row[5], $row[6]); //obfuscated value for fileid and parameters
                                     }
                                     
-                                }else if(in_array($dtyID, $datetime_field_types) && @$row[1]!=null) { 
+                                }else if($useNewTemporalFormatInRecDetails && in_array($dtyID, $datetime_field_types) && @$row[1]!=null) { 
                                     //convert date to old plan string temporal object
-
                                     $dt = new Temporal($row[1]);
                                     if($dt->isValidSimple()){
                                         $val = $dt->getValue(true); //returns simple yyyy-mm-dd
