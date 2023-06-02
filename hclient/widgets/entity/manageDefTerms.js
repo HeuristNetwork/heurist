@@ -1288,10 +1288,13 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
                 dlg.dialog('option', 'title', s);
             }
 
-            ele = this._editing.getFieldByName('trm_ParentTermID');
-            ele.editing_input('setValue', this.options.trm_ParentTermID>0
-                ?this.options.trm_ParentTermID
-                :this.options.trm_VocabularyID, true);
+            if(this._currentEditID<0){
+                //assign vocabulary or parent id for new term only
+                ele = this._editing.getFieldByName('trm_ParentTermID');
+                ele.editing_input('setValue', this.options.trm_ParentTermID>0
+                    ?this.options.trm_ParentTermID
+                    :this.options.trm_VocabularyID, true);
+            }
             this.options.trm_ParentTermID = -1;
 
             this._editing.getFieldByName('trm_VocabularyGroupID').hide();
