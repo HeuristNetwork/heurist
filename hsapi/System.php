@@ -553,9 +553,9 @@ error_log(print_r($_REQUEST, true));
         $folders['settings']      = array('SETTING','', false, true);
         $folders['uploaded_tilestacks'] = array('TILESTACKS','used to store uploaded map tiles', true, false);
         
-        // do not create (if name is empty)
+        // do not create constant (if name is empty)
         $folders['xsl-templates'] = array('XSL_TEMPLATES','', false, true);
-        $folders['documentation_and_templates'] = array('','', false, true);
+        //since 2023-06-02 $folders['documentation_and_templates'] = array('','', false, false);
         $folders['term-images']    = array('TERM_ICON','', true, true); //for digital harlem
         $folders['faims']    = array('',''); 
         

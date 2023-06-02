@@ -918,21 +918,24 @@ function folderSubs($src, $exclude=null) {
 
     $src =  $src . ((substr($src,-1)=='/')?'':'/');
 
-    $dir = opendir($src);
-    if($dir!==false){
+    if(file_exists($src)){
+    
+        $dir = opendir($src);
+        if($dir!==false){
 
 
-            while(false !== ( $file = readdir($dir)) ) {
-                if (( $file != '.' ) && ( $file != '..' ) && is_dir($src . $file)) {
+                while(false !== ( $file = readdir($dir)) ) {
+                    if (( $file != '.' ) && ( $file != '..' ) && is_dir($src . $file)) {
 
-                        if(is_array($exclude) && in_array($file, $exclude)){
-                            continue;
-                        }
-                        
-                        $res[] = $src.$file.'/';
+                            if(is_array($exclude) && in_array($file, $exclude)){
+                                continue;
+                            }
+                            
+                            $res[] = $src.$file.'/';
+                    }
                 }
-            }
-        closedir($dir);
+            closedir($dir);
+        }
     }
 
     return $res;

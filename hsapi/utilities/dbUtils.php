@@ -1089,12 +1089,14 @@ class DbUtils {
             $warnings[] = "Unable to create/copy xsl-templates folder to $database_folder";
         }
 */
+    if(false){ //since 2023-06-02 this folder is not created
         if(folderRecurseCopy( HEURIST_DIR."documentation_and_templates", $database_folder."documentation_and_templates" )){
             
             folderAddIndexHTML($database_folder."documentation_and_templates"); // index file to block directory browsing
         }else{
             $warnings[] = "Unable to create/copy documentation folder to $database_folder";
         }
+    }
 
         // Create all the other standard folders required for the database
         // index.html files are added by createFolder to block index browsing

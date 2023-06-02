@@ -189,7 +189,7 @@ if(($_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0.0.1'))
                     
                     $('#showConditions').on({click: function(){ 
                         if($('#divConditions').is(':empty')){
-                            $('#divConditions').load(baseURL+'documentation_and_templates/terms_and_conditions.html #content');
+                            $('#divConditions').load('../documentation_and_templates/terms_and_conditions.html #content');
                         }
                         _showStep(7);
                         return false;
