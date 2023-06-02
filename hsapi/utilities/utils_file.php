@@ -420,15 +420,16 @@
     // get list of files in folder as search result (record list)
     // It is used to get 1) all cfg files for entity configuration
     //                   2) browse for available icons in iconLibrary   
+    // @todo , $is_reqursive=false
     //
-    function folderContent($dirs, $exts) {
+    function folderContent($dirs, $exts=null) {
         
         $records = array();
         $order = array();
-        $fields = array('file_id', 'file_name', 'file_dir', 'file_url');
+        $fields = array('file_id', 'file_name', 'file_dir', 'file_url', 'file_size');
         $idx = 1;
         if(!is_array($dirs)) $dirs = array($dirs);
-        if(!is_array($exts)) $exts = array($exts);
+        if($exts!=null && !is_array($exts)) $exts = array($exts);
 
         foreach ($dirs as $dir) {
             
@@ -436,17 +437,30 @@
                 //for browse available icons (see use_assets in entity config file)
                 $folder = str_replace('HEURIST_ICON_DIR/', HEURIST_ICON_DIR, $dir);
                 $url = str_replace('HEURIST_ICON_DIR/', HEURIST_ICON_URL, $dir);
-            }else if (strpos($dir, HEURIST_FILESTORE_DIR)!==false) {    
+            }else if (!defined('HEURIST_FILESTORE_DIR') || strpos($dir, HEURIST_FILESTORE_DIR)!==false) {    
                 
                 $folder =  $dir;
                 $url = null;
                 
             }else{
+                //relative to heurist folder
                 $folder =  HEURIST_DIR.$dir;
                 $url = HEURIST_BASE_URL.$dir;
             }
             
             if (!(file_exists($folder) && is_dir($folder))) continue;
+            
+            /*
+            if(is_dir($folder)){
+                continue;
+                if($is_reqursive){
+                    //$subcontent = folderContent($folder, $exts, true);
+                    //$records
+                }else{
+                    continue;
+                }
+            }
+            */
             
             $files = scandir($folder);
             foreach ($files as $filename) {
@@ -456,9 +470,11 @@
                     if(array_key_exists('extension', $path_parts))
                     {
                         $ext = strtolower($path_parts['extension']);
-                        if(file_exists($folder.$filename) && in_array($ext, $exts))
+                        if(file_exists($folder.$filename) && ($exts==null || in_array($ext, $exts)))
                         {
-                            $records[$idx] = array($idx, $filename, $folder, $url);
+                            $fsize = (is_file($folder.$filename))?filesize($folder.$filename):0;
+                            
+                            $records[$idx] = array($idx, $filename, $folder, $url, $fsize);
                             $order[] = $idx;
                             $idx++;
                         }

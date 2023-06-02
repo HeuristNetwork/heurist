@@ -1004,7 +1004,7 @@
                     
                     //keep log
                     if(!$is_date_simple || $error){
-                        file_put_contents($log_file, $dtl_ID.';'.$dtl_Value.';'.$dtl_NewValue.';'.$error."\n", FILE_APPEND );    
+//file_put_contents($log_file, $dtl_ID.';'.$dtl_Value.';'.$dtl_NewValue.';'.$error."\n", FILE_APPEND );    
                         if(!$is_date_simple) $cnt_to_json++;
                         if($error) $cnt_err++;
                         
