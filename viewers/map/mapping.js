@@ -263,6 +263,13 @@ $.widget( "heurist.mapping", {
     {name:'Esri.NatGeoWorldMap'},
     {name:'Esri.WorldGrayCanvas'},
     {name:'MapTilesAPI.OSMEnglish', options:{accessToken: '4b2ce9cc3dmshb0ed4b109c9e660p1f9a50jsne0544286f8bb'}}, 
+    {name:'DARE.RomanEmpire', url: 'https://dh.gu.se/tiles/imperium/{z}/{x}/{y}.png', options:{
+        attribution: '&copy; <a href="https://dh.gu.se/dare/" target="_blank">Digital Atlas of the Roman Empire (DARE)</a> '
+            + 'by <a href="https://www.gu.se/digital-humaniora" target="_blank"> Johan Åhlfeldt, Centre for Digital Humanities, University of Gothenburg</a> '
+            + '(Licensed under <a href="https://creativecommons.org/licenses/by/4.0/">CC-BY-4.0</a>)',
+        minZoom: 4,
+        maxZoom: 11
+    }},
     {name:'None'}
     ],
 
@@ -655,8 +662,37 @@ $.widget( "heurist.mapping", {
             }
 
             if(provider['name']!=='None'){
-                this.basemaplayer = L.tileLayer.provider(provider['name'], provider['options'] || {})
-                    .addTo(this.nativemap);        
+
+                try{ // use leaflet-provider
+
+                    this.basemaplayer = L.tileLayer.provider(provider['name'], provider['options'] || {})
+                        .addTo(this.nativemap);
+
+                }catch(e){
+
+                    try{ // attempt without leaflet-provider
+
+                        if(provider && !window.hWin.HEURIST4.util.isempty(provider['url'])){
+                            this.basemaplayer = L.tileLayer(provider['url'], provider['options']).addTo(this.nativemap);
+                        }else{
+                            throw e;
+                        }
+
+                    }catch(e){
+                        // display error
+                        window.hWin.HEURIST4.msg.showMsgErr(
+                            'We were unable to load your selected base map.<br>'
+                          + 'If this problem persists, please report this through the bug reporter under Help at the top right of the main screen or,<br>'
+                          + 'via email directly to support@heuristnetwork.org so we can fix this quickly.<br><br>'
+                          + 'Base map values:<br>'
+                          + 'Base map id: ' + basemap_id + '<br>'
+                          + 'Base map name: ' + (provider['name'] != '' ? provider['name'] : 'missing'));
+                          //+ 'Base map url (if found): ' + provider['url'] + '<br><br>'
+                          //+ 'Error thrown: ' + e + '<br>'
+                        return;
+                    }
+
+                }
 
                 this.basemaplayer.bringToBack(); // ensure basemap is below all map documents
 
