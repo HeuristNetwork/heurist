@@ -1,0 +1,16 @@
+
+Directory:	/server_scripts/prerequisites
+
+Overview:	These scripts are rather old and retained mainly jsut for reference
+            or later revamp
+
+Created: 	24th Feb 2016, Mostly work in progress @ oct 2022
+
+---------------------------------------------------------------------
+
+* @package     Heurist academic knowledge management system
+* @link        http://HeuristNetwork.org
+* @copyright   (C) 2005-2022 University of Sydney
+* @author      Ian Johnson     <ian.johnson@sydney.edu.au>
+* @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
+* @version     6
