@@ -2338,6 +2338,9 @@ $.widget( "heurist.editing_input", {
                         window.hWin.HEURIST4.ui.showEntityDialog('recUploadedFiles', popup_opts);
                     }
                 });
+                if(!f_id || f_id < 0){
+                    $edit_details.hide();
+                }
                 
                 /* Change Handler */
                 $input.change(function(event){
@@ -2361,6 +2364,7 @@ $.widget( "heurist.editing_input", {
                             $dwnld = $($container.find('a#dwn'+f_id)[0]);
                             $player = $($container.find('div#player'+f_id)[0]);
                             $thumbnail = $($container.find('img#img'+f_id)[0]);
+                            $edit_metadata = $($container.find('.edit_metadata')[0]);
 
                             $show.attr({'id':'lnk'+n_id});
 
@@ -2374,6 +2378,12 @@ $.widget( "heurist.editing_input", {
                             f_nonce = n_nonce;
                             dwnld_link = n_dwnld_link;
                             url = n_url;
+
+                            if(!n_id || n_id < 1){
+                                $edit_metadata.hide();
+                            }else{
+                                $edit_metadata.show();
+                            }
                         }
                         
                     }
