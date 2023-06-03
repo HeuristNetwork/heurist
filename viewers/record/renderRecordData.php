@@ -517,6 +517,33 @@ if(!($is_map_popup || $without_header)){
                 
             }
 
+            //
+            // Show/Hide media and linked media
+            // @param {show_all_images} Boolean - was call triggered by clicking 'show all images'
+            //
+            function displayImages(show_all_images = false){
+
+                let hide_images = 0; // 0 - show all (default), 1 - hide linked, 2 - hide all
+                if(show_all_images && window.hWin && window.hWin.HAPI4){
+                    hide_images = window.hWin.HAPI4.get_prefs_def('recordData_Images', 0);
+                }else if(!show_all_images){
+                    hide_images = $('#show-linked-media').is(':checked') ? 0 : 1;
+                }
+
+                if(hide_images == 2){
+                    $('.media-content').hide();
+                    return;
+                }
+
+                $('.media-content').show();
+                if(hide_images == 1){ // hide linked media
+                    $('.linked-media').hide();
+                }
+
+                if(!show_all_images && window.hWin && window.hWin.HAPI4){
+                    window.hWin.HAPI4.save_pref('recordData_Images', hide_images);
+                }
+            }
             
             $(document).ready(function() {
                 showHidePrivateInfo(null);
@@ -524,6 +551,8 @@ if(!($is_map_popup || $without_header)){
                 initMediaViewer();
                 
                 showMediaViewer(); //init thumbs for iiif
+
+                displayImages(false);
             });
             
             /*NOT USED
@@ -638,6 +667,16 @@ if(!($is_map_popup || $without_header)){
         .detail span.value:nth-last-child(n+2){
             display: block;
             padding-bottom: 5px;
+        }
+
+        .media-control {
+            font-weight: normal;
+            font-size: 11px;
+            margin-left: 15px;
+        }
+        .media-control input {
+            margin: 0;
+            vertical-align: -2px;
         }
 <?php if($is_production){
     print '.detailType {width:160px;}';
@@ -1453,6 +1492,7 @@ function print_public_details($bib) {
         $has_thumbs = (count($thumbs)>0);        
       
     $several_media = count($thumbs);
+    $hide_images = $system->user_GetPreference('recordData_Images', 0);
         
     if($hide_images != 2) // use/hide old thumbnails   
         foreach ($thumbs as $k => $thumb) {
@@ -1469,8 +1509,13 @@ function print_public_details($bib) {
                     .($is_production?'margin-left:100px':'')
                     .($k>0?'display:none;':'').'">';
             }else{
-                print '<div class="thumb_image media-content"  style="'.($isImageOrPdf?'':'cursor:default;')
+                print '<div class="thumb_image media-content'. ($thumb['linked'] == true ? ' linked-media' : '') .'"  style="'.($isImageOrPdf?'':'cursor:default;')
                     .($k>0?'display:none;':'').'">';
+            }
+
+            $media_control_chkbx = '';
+            if($k == 0 && $thumb['linked'] != true && !$is_production && !$is_map_popup){
+                $media_control_chkbx = ' <label class="media-control"><input type="checkbox" id="show-linked-media" onchange="displayImages(false);" '. ($hide_images == 0 ? ' checked="checked"' : '') .'> show linked media</label>';
             }
 
             $url = (@$thumb['external_url'] && strpos($thumb['external_url'],'http://')!==0) 
@@ -1483,7 +1528,7 @@ function print_public_details($bib) {
             if(!$is_map_popup){
             
                 if($k==0 && $several_media>1){
-                    print '<a href="#" onclick="$(\'.media-content\').show()">'
+                    print '<a href="#" onclick="displayImages(true);">'
                     .'<span class="ui-icon ui-icon-menu" style="font-size:1.2em;display:inline-block;vertical-align: middle;"></span>&nbsp;all images</a><br><br>';
                 }
                 if(count($thumbs)>0 && !$isAudioVideo){
@@ -1506,12 +1551,12 @@ function print_public_details($bib) {
             if(@$thumb['external_url']){
                 print '<a href="' . htmlspecialchars($thumb['external_url']) 
                                 . '" class="external-link" target=_blank>open in new tab'
-                                . (@$thumb['linked']?' (linked media)':'').'</a>';
+                                . (@$thumb['linked']?'<br>(linked media)':'').'</a>';
             }else{
                 print '<a href="' . htmlspecialchars($download_url) 
                                 . '" class=" image_tool" target="_surf">'
                                 . '<span class="ui-icon ui-icon-download" style="font-size:1.2em;display:inline-block;vertical-align: middle;"></span>&nbsp;'
-                                . 'download' . (@$thumb['linked']?' (linked media)':'').'</a>';
+                                . 'download' . (@$thumb['linked']?'<br>(linked media)':'').'</a>';
             }
             print '<br><br>';
 
@@ -1529,6 +1574,9 @@ function print_public_details($bib) {
                         foreach($url_matches[0] as $url){
                             if(mb_strpos($url, '<br>')){ // remove from first br onwards, in case
                                 $url = explode('<br>', $url)[0];
+                            }
+                            if(strpos($file_desc, 'href=\'' . $url)!==false || strpos($file_desc, 'href="' . $url)!==false || strpos($file_desc, 'href=`' . $url)!==false){ // check if already part of element
+                                continue;
                             }
                             if(ctype_punct(mb_substr($url, -1))){ // ensure last character isn't punctuation
                                 $url = mb_substr($url, 0, -1);
@@ -1559,14 +1607,14 @@ function print_public_details($bib) {
                     .($is_production?'margin-left:100px':'')
                     .($k>0?'display:none;':'').'">';
             }else{
-                print '<div class="thumb_image media-content"  style="'.($isImageOrPdf?'':'cursor:default;')
+                print '<div class="thumb_image media-content'. ($thumb['linked'] == true ? ' linked-media' : '') .'"  style="'.($isImageOrPdf?'':'cursor:default;')
                     .($k>0?'display:none;':'').'">';
             }
 
             if($thumb['linked'] == true){
-                print '<h5 style="margin-block:0.5em;">LINKED MEDIA</h5>';
+                print "<h5 style='margin-block:0.5em;'>LINKED MEDIA</h5>";
             }else{
-                print '<h5 style="margin-block:0.5em;">MEDIA</h5>';
+                print "<h5 style='margin-block:0.5em;'>MEDIA $media_control_chkbx</h5>";
             }
 
             if($thumb['player'] && !$is_map_popup){
