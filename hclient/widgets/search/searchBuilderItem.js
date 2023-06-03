@@ -207,6 +207,10 @@ $.widget( "heurist.searchBuilderItem", {
     //
     changeOptions: function(ext_options){
 
+        if(ext_options.enum_field == 'term'){ // for term labels, default comparison to equals //ext_options.code != this.options.code && 
+            this.select_comparison.val('=');
+        }
+
         this.options = $.extend(this.options, ext_options);
         
         this._refresh();
@@ -569,15 +573,13 @@ Whole value = EQUAL
 
                 // Field count filtering
                 eqopts.push({key:'count', title:'count of values'});
-                eqopts.push({key:'', title:'Use n <n >n n1<>n2,', disabled: true});
-                eqopts.push({key:'', title:'where n is the count', disabled: true});
             }
         }
 
         this._off( this.select_conjunction, 'change');
         this._off( this.select_comparison, 'change');
         
-        var prev_opt = this.select_comparison.val()
+        var prev_opt = this.select_comparison.val();
 
         window.hWin.HEURIST4.ui.createSelector(this.select_comparison.get(0), eqopts);
         
@@ -627,6 +629,13 @@ Whole value = EQUAL
 
                     this._onSelectField(); //this._refresh();
                 }
+            }
+            
+            // Add help text
+            if(cval == 'count'){
+                this._predicate_input_ele.find('.heurist-helper1').text('Use n <n >n n1<>n2, where n is the count');
+            }else{
+                this._predicate_input_ele.find('.heurist-helper1').text('');
             }
             
             if($.isFunction(this.options.onchange)){

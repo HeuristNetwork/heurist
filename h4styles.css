@@ -1479,6 +1479,7 @@ Allow use of icon-large to be properly aligned
     margin-top: -0.75em;
 }
 
+/* FancyTree */
 .fancytree-container{
     overflow:hidden !important;
 }
@@ -1508,7 +1509,40 @@ span.fancytree-checkbox{
     color: black !important;
 }
 
-/* FancyTree */
+/* JQuery UI Menu within fancytree node */
+.fancytree-submenu.horizontalmenu{
+    display: inline-block;
+
+    vertical-align: middle;
+
+    font-size: 0.7em;
+
+    margin-left: 5px !important;
+    padding-left: 0px !important;
+}
+.fancytree-submenu ul{
+    min-width: 60px;
+
+    padding: 0px !important;
+
+    box-shadow: 0px 2px 5px 2px #333;
+}
+.fancytree-submenu .ui-menu-item-wrapper{
+    padding-right: 15px;
+    padding-left: 0px !important;
+}
+.fancytree-submenu .ui-menu-item .ui-menu .ui-menu-item{
+    padding: 5px;
+}
+.fancytree-submenu .ui-menu-item .ui-menu .ui-menu-item:hover{
+    background: #95A7B7;
+}
+.fancytree-submenu .ui-menu-icon{
+    font-size: 0.9em;
+
+    top: 2px;
+}
+
 /* Map */
 .tree-map{
     padding:0px;
