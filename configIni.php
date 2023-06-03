@@ -68,12 +68,13 @@ of the codebase and rename it to index.html
 
 // *** DO NOT CHANGE VERSION NUMBER, THIS IS SET BY THE HEURIST DEVELOPMENT TEAM ***
 
-$version = "6.3.16"; // sets current program version number, determined by Heurist development lead
+$version = "6.3.17"; // sets current program version number, determined by Heurist development lead
 
 // dates below are the date of release of the given version, and list changes since last release
 
+// 6.3.17 03 June 2023 changes tbc
 // 6.3.15 9 April 2023 changes tbc
-// 6.3.14  25 Jan 2023 changes tbc
+// 6.3.14  25 Jan 2023 changes tbc 
 // 6.3.13 16 Jan 2023 changes tbc
 // 6.3.12 7 Jan 2023 changes tbc
 // 6.3.11 17 Dec 2022 Nakala upload of database archive, search all available record types, accordion mode in facets, switchable alphabetic ordering option on fields tree, combine duplicate images in file manage, better error report on CSV import of pointer field codes, improved child record search and add, lookups show compact representation of the search applied and better layout, BnF lookups changed to Unimarc, database download archive switched from zip to bzip for compatibility with deletion and auto archiving 
