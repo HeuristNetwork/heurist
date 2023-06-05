@@ -5090,7 +5090,30 @@ console.log('onpaste');
 
                         var playerTag = recordset.fld(record,'ulf_PlayerTag');
 
-                        tinymce.activeEditor.insertContent( playerTag );
+                        let $dlg;
+                        let msg = 'Enter a caption below (optional):<br><br>'
+                            + '<textarea rows="6" cols="65" id="figcap"></textarea>';
+                        
+                        let btns = {};
+                        btns[window.HR('Add caption')] = () => {
+                            let caption = $dlg.find('#figcap').val();
+
+                            if(!window.hWin.HEURIST4.util.isempty(caption)){
+                                playerTag = '<figure>'+ playerTag +'<figcaption>'+ caption +'</figcaption></figure>';   
+                            }
+
+                            tinymce.activeEditor.insertContent( playerTag );
+                            $dlg.dialog('close');
+                        };
+                        btns[window.HR('No caption')] = () => {
+                            tinymce.activeEditor.insertContent( playerTag );
+                            $dlg.dialog('close');
+                        };
+
+                        $dlg = window.hWin.HEURIST4.msg.showMsgDlg(msg, btns, 
+                            {title: 'Adding caption to media', yes: window.HR('Add caption'), no: window.HR('No caption')}, 
+                            {default_palette_class: 'ui-heurist-populate'}
+                        );
                     }
 
                 }//data

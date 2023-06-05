@@ -842,7 +842,30 @@ var sMsg = '<p>Heurist\'s CMS editor has been upgraded to a new system which is 
 
                         var playerTag = recordset.fld(record,'ulf_PlayerTag');
 
-                        tinymce.activeEditor.insertContent( playerTag );
+                        let $dlg;
+                        let msg = 'Enter a caption below (optional):<br><br>'
+                            + '<textarea rows="6" cols="65" id="figcap"></textarea>';
+                        
+                        let btns = {};
+                        btns['Add caption'] = () => {
+                            let caption = $dlg.find('#figcap').val();
+
+                            if(!window.hWin.HEURIST4.util.isempty(caption)){
+                                playerTag = '<figure>'+ playerTag +'<figcaption>'+ caption +'</figcaption></figure>';   
+                            }
+
+                            tinymce.activeEditor.insertContent( playerTag );
+                            $dlg.dialog('close');
+                        };
+                        btns['No caption'] = () => {
+                            tinymce.activeEditor.insertContent( playerTag );
+                            $dlg.dialog('close');
+                        };
+
+                        $dlg = window.hWin.HEURIST4.msg.showMsgDlg(msg, btns, 
+                            {title: 'Adding caption to media', yes: 'Add caption', no: 'No caption'}, 
+                            {default_palette_class: 'ui-heurist-populate'}
+                        );
                     }
 
                 }//data
