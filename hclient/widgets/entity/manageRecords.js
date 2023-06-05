@@ -5004,12 +5004,12 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
         btns[window.HR('Save')] = function(){
 
             let value = '';
-            let cmt = $dlg.find('#CMT').val();
+            let com = $dlg.find('#COM').val();
             let t_date = new Temporal();
             let is_temporal = false;
 
-            if(!window.hWin.HEURIST4.util.isempty(cmt)){
-                t_date.addObjForString("CMT", cmt);
+            if(!window.hWin.HEURIST4.util.isempty(com)){
+                t_date.addObjForString("COM", com);
                 is_temporal = true;
             }
 
@@ -5143,7 +5143,7 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
         }
 
         content += '<br><br><span style="vertical-align: top;">If you wish to qualify the date with a short note, enter it here </span>'
-                +  '<textarea cols="30" rows="5" id="CMT" style="resize: none"></textarea>';
+                +  '<textarea cols="30" rows="5" id="COM" style="resize: none"></textarea>';
                 +  '</div>';
 
         $dlg = window.hWin.HEURIST4.msg.showMsgDlg(content, btns, labels, options);
