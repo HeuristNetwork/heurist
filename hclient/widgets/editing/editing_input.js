@@ -913,6 +913,32 @@ $.widget( "heurist.editing_input", {
                                         that._addHeuristMedia();
                                     }
                                 });                                        
+                                editor.ui.registry.addButton('customAddFigCaption', {
+                                    text: 'Add caption',
+                                    tooltip: 'Add caption to current image',
+                                    onAction: function (_) {
+                                        that._addMediaCaption();
+                                    },
+                                    onSetup: function (button) {
+
+                                        const activateButton = function(e){
+
+                                            let is_disabled = e.element.nodeName.toLowerCase() !== 'img'; // is image element
+                                            let parent = e.element.parentNode;
+
+                                            if(!is_disabled && (parent.nodeName.toLowerCase() != 'figure' || parent.getElementsByTagName('figcaption') == 0)){ // check for figcaption element
+                                                is_disabled = false;
+                                            }
+
+                                            button.setDisabled(is_disabled);
+                                        };
+
+                                        editor.on('NodeChange', activateButton);
+                                        return function(button){
+                                            editor.off('NodeChange', activateButton);
+                                        }
+                                    }
+                                });
                             }else{
                                 editor.addButton('customHeuristMedia', {
                                     icon: 'image',
@@ -991,7 +1017,7 @@ $.widget( "heurist.editing_input", {
                             'media table paste help autoresize'  //insertdatetime  wordcount
                         ],      
                         //undo redo | code insert  |  fontselect fontsizeselect |  forecolor backcolor | media image link | alignleft aligncenter alignright alignjustify | fullscreen            
-                        toolbar: ['formatselect | bold italic forecolor blockquote | customHeuristMedia link | align | bullist numlist outdent indent | table | removeformat | help'],
+                        toolbar: ['formatselect | bold italic forecolor blockquote | customHeuristMedia customAddFigCaption link | align | bullist numlist outdent indent | table | removeformat | help'],
                         /*formats: { q: {block: 'q'} },
                         style_formats: [ {title: 'Quotation', format: 'q'} ],*/
                         block_formats: 'Paragraph=p;Heading 1=h1;Heading 2=h2;Heading 3=h3;Heading 4=h4;Heading 5=h5;Heading 6=h6;Preformatted=pre;Quotation=blockquote',
@@ -5069,6 +5095,8 @@ console.log('onpaste');
     //         
     _addHeuristMedia: function(){
 
+        var that = this;
+
         var popup_options = {
             isdialog: true,
             select_mode: 'select_single',
@@ -5090,30 +5118,8 @@ console.log('onpaste');
 
                         var playerTag = recordset.fld(record,'ulf_PlayerTag');
 
-                        let $dlg;
-                        let msg = 'Enter a caption below (optional):<br><br>'
-                            + '<textarea rows="6" cols="65" id="figcap"></textarea>';
-                        
-                        let btns = {};
-                        btns[window.HR('Add caption')] = () => {
-                            let caption = $dlg.find('#figcap').val();
+                        that._addMediaCaption(playerTag);
 
-                            if(!window.hWin.HEURIST4.util.isempty(caption)){
-                                playerTag = '<figure>'+ playerTag +'<figcaption>'+ caption +'</figcaption></figure>';   
-                            }
-
-                            tinymce.activeEditor.insertContent( playerTag );
-                            $dlg.dialog('close');
-                        };
-                        btns[window.HR('No caption')] = () => {
-                            tinymce.activeEditor.insertContent( playerTag );
-                            $dlg.dialog('close');
-                        };
-
-                        $dlg = window.hWin.HEURIST4.msg.showMsgDlg(msg, btns, 
-                            {title: 'Adding caption to media', yes: window.HR('Add caption'), no: window.HR('No caption')}, 
-                            {default_palette_class: 'ui-heurist-populate'}
-                        );
                     }
 
                 }//data
@@ -5124,6 +5130,65 @@ console.log('onpaste');
         window.hWin.HEURIST4.ui.showEntityDialog('recUploadedFiles', popup_options);
     },
 
+    //
+    // Add caption to media
+    //
+    _addMediaCaption: function(content = null){
+
+        let is_insert = false;
+        let node = null;
+
+        if(content){
+            is_insert = true;
+        }else{
+
+            node = tinymce.activeEditor.selection.getNode();
+            if(node.parentNode.getElementsByTagName('figure').length > 0){
+                node = node.parentNode.getElementsByTagName('figure');
+            }else{
+                node = null;
+            }
+
+            content = tinymce.activeEditor.selection.getContent();
+        }
+
+        let $dlg;
+        let msg = 'Enter a caption below, if you want one:<br><br>'
+            + '<textarea rows="6" cols="65" id="figcap"></textarea>';
+        
+        let btns = {};
+        btns[window.HR('Add caption')] = () => {
+            let caption = $dlg.find('#figcap').val();
+
+            if(caption){
+
+                if(node != null){
+                    node[0].innerText = caption;
+                    return;
+                }
+                content = '<figure>'+ content +'<figcaption>'+ caption +'</figcaption></figure>';
+
+                if(is_insert){
+                    tinymce.activeEditor.insertContent( content );
+                }else{
+                    tinymce.activeEditor.selection.setContent( content );
+                }
+            }
+
+            $dlg.dialog('close');
+        };
+        btns[window.HR('No caption')] = () => {
+            if(is_insert){
+                tinymce.activeEditor.insertContent( content );
+            }
+            $dlg.dialog('close');
+        };
+
+        $dlg = window.hWin.HEURIST4.msg.showMsgDlg(msg, btns, 
+            {title: 'Adding caption to media', yes: window.HR('Add caption'), no: window.HR('No caption')}, 
+            {default_palette_class: 'ui-heurist-populate'}
+        );
+    },
 
     //
     //
