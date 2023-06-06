@@ -915,7 +915,7 @@ $.widget( "heurist.editing_input", {
                                 });                                        
                                 editor.ui.registry.addButton('customAddFigCaption', {
                                     text: 'Add caption',
-                                    tooltip: 'Add caption to current image',
+                                    tooltip: 'Add caption to current media',
                                     onAction: function (_) {
                                         that._addMediaCaption();
                                     },
@@ -923,14 +923,8 @@ $.widget( "heurist.editing_input", {
 
                                         const activateButton = function(e){
 
-                                            let is_disabled = e.element.nodeName.toLowerCase() !== 'img'; // is image element
-                                            let parent = e.element.parentNode;
-
-                                            if(!is_disabled && (parent.nodeName.toLowerCase() != 'figure' || parent.getElementsByTagName('figcaption') == 0)){ // check for figcaption element
-                                                is_disabled = false;
-                                            }
-
-                                            button.setDisabled(is_disabled);
+                                            //let is_disabled = e.element.nodeName.toLowerCase() !== 'img'; // is image element
+                                            button.setDisabled(e.element.nodeName.toLowerCase() !== 'img');
                                         };
 
                                         editor.on('NodeChange', activateButton);
@@ -5143,9 +5137,10 @@ console.log('onpaste');
         }else{
 
             node = tinymce.activeEditor.selection.getNode();
-            if(node.parentNode.getElementsByTagName('figure').length > 0){
-                node = node.parentNode.getElementsByTagName('figure');
-            }else{
+            if(node.parentNode.nodeName.toLowerCase() == 'figure'){ // insert new figcaption
+                node = document.createElement('figcaption');
+                tinymce.activeEditor.selection.getNode().parentNode.appendChild(node);
+            }else{ // replace selected content with new wrapper
                 node = null;
             }
 
@@ -5163,7 +5158,7 @@ console.log('onpaste');
             if(caption){
 
                 if(node != null){
-                    node[0].innerText = caption;
+                    node.innerText = caption;
                     return;
                 }
                 content = '<figure>'+ content +'<figcaption>'+ caption +'</figcaption></figure>';
