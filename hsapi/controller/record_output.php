@@ -18,7 +18,17 @@
                 csv_linebreak :'nix',
                 csv_header    :true
                 csv_headeronly:false
-    *           fields        : {rtid:[dtid1, dtid3, dtid2]}
+                fields        : {rtid:[dtid1, dtid3, dtid2]}
+                include_term_ids
+                include_term_codes
+                include_file_url
+                include_record_url_html
+                include_record_url_xml
+                include_term_hierarchy
+                include_resource_titles
+                include_temporals
+    * 
+    * 
     * 
     * prefs for json,xml
     *           zip  : 0|1  compress

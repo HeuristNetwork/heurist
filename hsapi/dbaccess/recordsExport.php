@@ -43,6 +43,7 @@ class RecordsExport {
     private static $defRecTypes = null;
     private static $defDetailtypes = null;
     private static $defTerms = null;
+    private static $datetime_field_types = null;
     
 //
 //
@@ -1836,6 +1837,10 @@ private static function _getJsonFeature($record, $mode){
     $res = $record;
     $res['details'] = array();
     
+    if(self::$defDetailtypes==null){
+        self::$defDetailtypes = dbs_GetDetailTypes(self::$system, null, 2);   
+    }
+    $idx_dtype = self::$defDetailtypes['typedefs']['fieldNamesToIndex']['dty_Type'];
     
     if($mode==2){ //extended - with concept codes and names/labels
     
@@ -1846,14 +1851,9 @@ private static function _getJsonFeature($record, $mode){
             self::$defTerms = dbs_GetTerms(self::$system);
             self::$defTerms = new DbsTerms(self::$system, self::$defTerms);
         }
-        if(self::$defDetailtypes==null){
-            self::$defDetailtypes = dbs_GetDetailTypes(self::$system, null, 2);   
-        }
-
         $idx_name = self::$defRecTypes['typedefs']['dtFieldNamesToIndex']['rst_DisplayName'];
         
         $idx_dname = self::$defDetailtypes['typedefs']['fieldNamesToIndex']['dty_Name'];
-        $idx_dtype = self::$defDetailtypes['typedefs']['fieldNamesToIndex']['dty_Type'];
         $idx_ccode = self::$defDetailtypes['typedefs']['fieldNamesToIndex']['dty_ConceptID'];
         
         
@@ -1865,16 +1865,16 @@ private static function _getJsonFeature($record, $mode){
         
     }
 
-
     //convert details to proper JSON format, extract geo fields and convert WKT to geojson geometry
     foreach ($record['details'] as $dty_ID=>$field_details) {
 
         foreach($field_details as $dtl_ID=>$value){ //for detail multivalues
         
             $val = array('dty_ID'=>$dty_ID,'value'=>$value);
+            $field_type = self::$defDetailtypes['typedefs'][$dty_ID]['commonFields'][$idx_dtype];
 
             if($mode==2){ //extended - with concept codes and names/labels
-                $field_type = self::$defDetailtypes['typedefs'][$dty_ID]['commonFields'][$idx_dtype];
+                
                 //It needs to include the field name and term label and term standard code.
                 if($field_type=='enum' || $field_type=='relationtype'){
                     $val['termLabel'] = self::$defTerms->getTermLabel($value, true);
@@ -1893,6 +1893,12 @@ private static function _getJsonFeature($record, $mode){
 
                 $val['fieldType'] = $field_type;
                 $val['conceptID'] = self::$defDetailtypes['typedefs'][$dty_ID]['commonFields'][$idx_ccode];
+            }
+            if($field_type=='date'){ //decode json temporal
+                $temporal = json_decode($val['value']);
+                if($temporal!=null){
+                    $val['value'] = $temporal;
+                }
             }
 
             $res['details'][] = $val;

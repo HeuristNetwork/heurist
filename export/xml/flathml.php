@@ -1568,6 +1568,32 @@ function outputDetail($dt, $value, $rt, $depth = 0, $outputStub) {
             closeTag('detail');
         }
     } else if ($DTT[$dt] === 'date') {
+        
+
+            $dt = new Temporal($value);
+            if($dt->isValidSimple()){
+
+                if($rectype_templates){
+                    makeTag('detail', $attrs, $value);
+                }else{
+                    openTag('detail', $attrs);
+                    outputDateDetail($attrs, $value);
+                    closeTag('detail');
+                }
+                
+            }else{
+                $temporalStr = $dt->toPlain(); 
+
+                openTag('detail', $attrs);
+                    openTag('raw');
+                    output( $value );
+                    closeTag('raw');
+                    outputTemporalDetail($attrs, $temporalStr);
+                closeTag('detail');
+                
+            }
+        
+/* OLD VERSION
         if (strpos($value, "|") === false) {
             if($rectype_templates){
                 makeTag('detail', $attrs, $value);
@@ -1581,7 +1607,8 @@ function outputDetail($dt, $value, $rt, $depth = 0, $outputStub) {
             outputTemporalDetail($attrs, $value);
             closeTag('detail');
         }
-
+*/
+        
     } else if ($DTT[$dt] === 'resource') {
         $attrs['isRecordPointer'] = "true";
         if ($MAX_DEPTH == 0 && $outputStub) {
@@ -1622,48 +1649,46 @@ $tDurationDict = array("DUR" => "Simple Duration", "RNG" => "Range", "DEV" => "S
 
 function outputTemporalDetail($attrs, $value) {
     global $typeDict, $fieldsDict, $determinationCodes, $profileCodes, $tDateDict, $tDurationDict;
-    $temporalStr = substr_replace($value, "", 0, 1); // remove first verticle bar
-    $props = explode("|", $temporalStr);
-    $properties = array();
-    foreach ($props as $prop) {
-        list($tag, $val) = explode("=", $prop);
-        $properties[$tag] = $val;
-    }
 
-    openTag('raw');
-    output( $temporalStr );
-    closeTag('raw');
-    
-    openTag('temporal', array("version" => $properties['VER'], "type" => $typeDict[$properties['TYP']]));
-    unset($properties['VER']);
-    unset($properties['TYP']);
-    foreach ($properties as $tag => $val) {
-        if (array_key_exists($tag, $fieldsDict)) { //simple property
-            openTag('property', array('type' => $tag, 'name' => $fieldsDict[$tag]));
-            switch ($tag) {
-                case "DET":
-                    output( $determinationCodes[$val] );
-                    break;
-                case "PRF":
-                case "SPF":
-                case "EPF":
-                    output( $profileCodes[$val] );
-                    break;
-                default:
-                    output( $val );
-            }
-            closeTag('property');
-        } else if (array_key_exists($tag, $tDateDict)) {
-            openTag('date', array('type' => $tag, 'name' => $tDateDict[$tag]));
-            outputTDateDetail(null, $val);
-            closeTag('date');
-        } else if (array_key_exists($tag, $tDurationDict)) {
-            openTag('duration', array('type' => $tag, 'name' => $tDurationDict[$tag]));
-            outputDurationDetail(null, $val);
-            closeTag('duration');
+        $temporalStr = substr_replace($value, "", 0, 1); // remove first verticle bar
+        $props = explode("|", $temporalStr);
+        $properties = array();
+        foreach ($props as $prop) {
+            list($tag, $val) = explode("=", $prop);
+            $properties[$tag] = $val;
         }
-    }
-    closeTag('temporal');
+    
+        openTag('temporal', array("version" => $properties['VER'], "type" => $typeDict[$properties['TYP']]));
+        unset($properties['VER']);
+        unset($properties['TYP']);
+        foreach ($properties as $tag => $val) {
+            if (array_key_exists($tag, $fieldsDict)) { //simple property
+                openTag('property', array('type' => $tag, 'name' => $fieldsDict[$tag]));
+                switch ($tag) {
+                    case "DET":
+                        output( $determinationCodes[$val] );
+                        break;
+                    case "PRF":
+                    case "SPF":
+                    case "EPF":
+                        output( $profileCodes[$val] );
+                        break;
+                    default:
+                        output( $val );
+                }
+                closeTag('property');
+            } else if (array_key_exists($tag, $tDateDict)) {
+                openTag('date', array('type' => $tag, 'name' => $tDateDict[$tag]));
+                outputTDateDetail(null, $val);
+                closeTag('date');
+            } else if (array_key_exists($tag, $tDurationDict)) {
+                openTag('duration', array('type' => $tag, 'name' => $tDurationDict[$tag]));
+                outputDurationDetail(null, $val);
+                closeTag('duration');
+            }
+        }
+        closeTag('temporal');
+    
 }
 
 

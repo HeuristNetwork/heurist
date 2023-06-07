@@ -125,6 +125,7 @@ public static function output($data, $params){
     $include_file_url = (@$params['prefs']['include_file_url']==1);
     $include_record_url_html = (@$params['prefs']['include_record_url_html']==1);
     $include_record_url_xml = (@$params['prefs']['include_record_url_xml']==1);
+    $include_temporals = (@$params['prefs']['include_temporals']==1);
 
     $fields = @$params['prefs']['fields'];
     $details = array();  //array of detail fields included into output
@@ -307,6 +308,16 @@ public static function output($data, $params){
                         'type' => 'value',
                         'field_id' => $fieldFullID,
                     ];
+                    
+                    if($include_temporals && $field_type=='date'){
+                        array_push($headers[$rt], $field_name.'(temporal)');                
+                        $csvColIndex = count($headers[$rt]) - 1;
+                        $columnInfo[$rt][] = [
+                            'index' => $csvColIndex,
+                            'type' => 'value',
+                            'field_id' => $fieldFullID,
+                        ];
+                    }
                 }
 
                 if($dt_id == 'rec_ID'){
@@ -495,6 +506,7 @@ public static function output($data, $params){
         foreach($fields[$rty_ID] as $dt_id){
 
             //suppl.fields for enum and resource fields
+            $date_temporals = array();
             $enum_label = array();
             $enum_code = array();
             $resource_titles = array();
@@ -639,6 +651,9 @@ public static function output($data, $params){
                         }else if($dt_type=='date'){
                             foreach($values as $val){
                                 $vals[] = Temporal::toHumanReadable(trim($val));
+                                if($include_temporals){
+                                    $date_temporals[] = trim($val);
+                                }
                             }                        
                         }else if($dt_type=='enum' || $dt_type=='relationtype'){
 
@@ -685,6 +700,8 @@ public static function output($data, $params){
                             if($include_file_url){
                                 $file_urls[] = '';
                             }
+                        }else if($dt_type=='date' && $include_temporals){
+                            $date_temporals[] = '';
                         }
                     }
 
@@ -719,6 +736,11 @@ public static function output($data, $params){
             }else {
                 $record_row[] = $value;
 
+                // Additional Date Field
+                if(count($date_temporals)>0){
+                    $record_row[] = implode($csv_mvsep, $date_temporals);    
+                }
+                
                 // Additional File Fields
                 if (count($file_ids)>0){
                     $record_row[] = implode($csv_mvsep,$file_ids);
@@ -864,6 +886,7 @@ public static function output_header($data, $params)
     $include_file_url = (@$params['prefs']['include_file_url']==1);
     $include_record_url_html = (@$params['prefs']['include_record_url_html']==1);
     $include_record_url_xml = (@$params['prefs']['include_record_url_xml']==1);
+    $include_temporals = (@$params['prefs']['include_temporals']==1);
     
     $fields = @$params['prefs']['fields'];
     $details = array();  //array of detail fields included into output
@@ -988,6 +1011,9 @@ public static function output_header($data, $params)
                     
                 }else{
                     array_push($headers[$rt], $field_name);                
+                    if($include_temporals && $field_type=='date'){
+                        array_push($headers[$rt], $field_name.'(temporal)');                
+                    }
                 }
                 
                 //add title for resource fields
