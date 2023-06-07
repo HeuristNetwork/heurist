@@ -39,7 +39,7 @@ if (@$argv) {
     
 // example:
 //  sudo php -f /var/www/html/h6-alpha/admin/utilities/cleanupFoldersDBs.php -- -purge
-//  sudo php -f cleanupFoldersDBs.php -- -purge  -  action, otherwise only report 
+//  sudo php -f cleanupFoldersDBs.php -- -purge  -  action,  -report - report only
 
     // handle command-line queries
     $ARGV = array();
@@ -51,6 +51,8 @@ if (@$argv) {
             } else {
                 if(strpos($argv[$i],'-purge')===0){
                     $ARGV['-purge'] = true;
+                }else if(strpos($argv[$i],'-report')===0){
+                    $ARGV['-report'] = true;
                 }else{
                     $ARGV[$argv[$i]] = true;    
                 }
@@ -62,9 +64,9 @@ if (@$argv) {
         }
     }
     
-    if (@$ARGV['-purge']) $arg_need_action = true;
+    if (@$ARGV['-purge']) $arg_need_action = true;   
+    if (@$ARGV['-report']) $arg_need_report = true;
 
-    $arg_need_report = false;
     $is_command_line = true;
     
 }else{
@@ -136,6 +138,8 @@ $email_list = array();
 $email_list_deleted = array();
 $tot_size = 0;
 
+//$databases = array('falk_playspace');
+
 foreach ($databases as $idx=>$db_name){
 
     $dir_root = HEURIST_FILESTORE_ROOT.$db_name.'/';
@@ -149,37 +153,24 @@ foreach ($databases as $idx=>$db_name){
         $report = '';
         $db_size = 0;
         
-        if($arg_need_report){
-            //only list with size summary
-            $res = listFolderContent($dir_root);
-            $db_size = $db_size + $res[0];
-            //$report .= $res[1];
-            $report .= $tabs0.'..  '.$res[0].$eol;
+        //only list with size summary
+        $res = listFolderContent($dir_root);
+        $db_size = $db_size + $res[0];
+        $report .= $tabs0.'..  '.$res[0].$eol;
 
-            $sz = folderSize2($dir_backup);
-            $report .= $tabs0.substr($dir_backup, strrpos($dir_backup, '/',-2)+1, -1).'  '.$sz.$eol;
+        $sz = folderSize2($dir_backup);
+        $report .= $tabs0.substr($dir_backup, strrpos($dir_backup, '/',-2)+1, -1).'  '.$sz.$eol;
+        $db_size = $db_size + $sz;
+
+        $sz = folderSize2($dir_scratch);
+        $report .= $tabs0.substr($dir_scratch, strrpos($dir_scratch, '/',-2)+1, -1).'  '.$sz.$eol;
+        $db_size = $db_size + $sz;
+
+        if(file_exists($dir_docs)){
+            $sz = folderSize2($dir_docs);
+            $report .= $tabs0.substr($dir_docs, strrpos($dir_docs, '/',-2)+1, -1).'  '.$sz.$eol;
             $db_size = $db_size + $sz;
-            //$res = listFolderContent($dir_backup);
-            //$db_size = $db_size + $res[0];
-            //$report .= $res[1];
-
-            $sz = folderSize2($dir_scratch);
-            $report .= $tabs0.substr($dir_scratch, strrpos($dir_scratch, '/',-2)+1, -1).'  '.$sz.$eol;
-            $db_size = $db_size + $sz;
-            //$res = listFolderContent($dir_scratch);
-            //$db_size = $db_size + $res[0];
-            //$report .= $res[1];
-
-            if(file_exists($dir_docs)){
-                $sz = folderSize2($dir_docs);
-                $report .= $tabs0.substr($dir_docs, strrpos($dir_docs, '/',-2)+1, -1).'  '.$sz.$eol;
-                $db_size = $db_size + $sz;
-                //$res = listFolderContent($dir_docs);
-                //$db_size = $db_size + $res[0];
-                //$report .= $res[1];
-            }
-            
-        }     
+        }
             
         if($arg_need_action){
             
@@ -206,14 +197,16 @@ foreach ($databases as $idx=>$db_name){
         
         }
     
-        if($report!=''){
-            echo $tabs0.'---'.$eol;
-            echo $tabs0.$db_name.$eol;
-            echo $tabs0.$report.$eol;
-        }
+        if($arg_need_report){
+            if($report!=''){
+                echo $tabs0.'---'.$eol;
+                echo $tabs0.$db_name.$eol;
+                echo $tabs0.$report.$eol;
+            }
+        }     
         
         $cnt_archived++;
-        $tot_size =+ $db_size; 
+        $tot_size = $tot_size + $db_size; 
     }else{
         //database folder is missed   
         echo $tabs0.$db_name.' file folder not found'.$eol;
