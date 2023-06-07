@@ -163,7 +163,8 @@ class Temporal {
             
         }else if ($value) {
             
-            if(!is_numeric($value)){
+            //if(!is_numeric($value)){
+            if( !preg_match('/^-?\d+$/', $value) ){
                 $timespan = json_decode($value, true);
             }    
             if($timespan!=null){
@@ -374,7 +375,7 @@ class Temporal {
 
     //
     // Validates and sanitizes string date value 
-    // Returns date array 
+    // Returns date array (year, month, day...)
     //
     private static function _datePrepare($value, $month_day_order=2){
     
@@ -408,7 +409,8 @@ class Temporal {
             }
         }
 
-        if( preg_match('/^-?\d+$/', $value) ){ //this is YEAR - only digits with possible minus
+        if( preg_match('/^-?\d+$/', $value) ){ //this is YEAR - only digits with possible minus and spaces for milles
+            $value = preg_replace('/\s+/', '', $value);
             $date = array('year'=>$value);
         }else{
             
@@ -467,7 +469,7 @@ class Temporal {
         if(!is_array($date)){
 
             //check for textual values
-            if (strpos($date,"|")!==false) {// temporal encoded date - this is for check in import and validation only
+            if (strpos($date,'|')!==false || strpos($date,'{"')!==false) {// temporal encoded date - this is for check in import and validation only
                 return 'Temporal';
             }else{
                 if($today_date!=null){

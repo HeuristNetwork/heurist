@@ -2634,7 +2634,8 @@ function recordSearch($system, $params)
                                         $val = array($row[5], $row[6]); //obfuscated value for fileid and parameters
                                     }
                                     
-                                }else if($useNewTemporalFormatInRecDetails && in_array($dtyID, $datetime_field_types) && @$row[1]!=null) { 
+                                }else if(in_array($dtyID, $datetime_field_types) && @$row[1]!=null) { 
+                                    //!$useNewTemporalFormatInRecDetails &&     
                                     //convert date to old plan string temporal object
                                     $dt = new Temporal($row[1]);
                                     if($dt->isValidSimple()){

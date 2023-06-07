@@ -1953,18 +1953,25 @@ private static function validateDateField($query, $imp_session, $fields_checked,
                 if($r_value!=null && super_trim($r_value)!='' && super_trim($r_value)!='NULL'){
 
 
-                    if( is_numeric($r_value) && ($r_value=='0' || intval($r_value)) ){
+                    if( preg_match('/^-?\d+$/', $value) ){ //this is year only
                         array_push($newvalue, $r_value);
                     }else{
+                        
+                         $temporal = new Temporal($r_value);
+                         if($temporal->isValid()){
+                             array_push($newvalue, $r_value);     
+                         }else{
+                             
+                             try{   
+                                $t2 = new DateTime($r_value);
+                                $value = $t2->format('Y-m-d H:i:s');
+                                array_push($newvalue, $value);
+                             } catch (Exception  $e){
+                                $is_error = true;
+                                array_push($newvalue, "<font color='red'>".$r_value."</font>");
+                             }                            
+                         }
 
-                         try{   
-                            $t2 = new DateTime($r_value);
-                            $value = $t2->format('Y-m-d H:i:s');
-                            array_push($newvalue, $value);
-                         } catch (Exception  $e){
-                            $is_error = true;
-                            array_push($newvalue, "<font color='red'>".$r_value."</font>");
-                         }                            
                         /* OLD VERSION - strtotime doesn't work for dates prior 1901
                         $date = date_parse($r_value);
                         if ($date["error_count"] == 0 && checkdate($date["month"], $date["day"], $date["year"]))
@@ -1994,7 +2001,7 @@ private static function validateDateField($query, $imp_session, $fields_checked,
             $error["count_".$type] = $cnt_error;
             $error["recs_error"] = array_slice($wrong_records,0,1000);
             $error["field_checked"] = $fields_checked;
-            $error["err_message"] = "Date values must be in dd-mm-yyyy, mm/dd/yyyy or yyyy-mm-dd formats";
+            $error["err_message"] = "Date values must be in dd-mm-yyyy, mm/dd/yyyy or yyyy-mm-dd formats. Or it should be valid Temporal object.";
             $error["short_message"] = "Invalid Dates";
             $imp_session['validation']['count_'.$type] = $imp_session['validation']['count_'.$type]+$cnt_error;
             array_push($imp_session['validation'][$type], $error);

@@ -408,7 +408,7 @@ Replace existing values with new values, retain existing value if no new value s
 */
 function recordSave($system, $record, $use_transaction=true, $suppress_parent_child=false, $update_mode=0, $total_record_count=1){
 
-    global $block_swf_email;
+    global $block_swf_email, $useNewTemporalFormatInRecDetails;
 
     //check capture for newsletter subscription
     if (@$record['Captcha'] && @$_SESSION["captcha_code"]){
