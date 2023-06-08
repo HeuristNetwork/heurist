@@ -21,8 +21,8 @@
 */
 
 // example:
-//  sudo php -f /var/www/html/h6-alpha/admin/utilities/writeIndexablePagePerDB.php -- -db=database_1,database_2
-//  sudo php -f writeIndexablePagePerDB.php -- -db=database_1,database_2 
+//  sudo php -f /var/www/html/heurist/admin/utilities/writeIndexablePagePerDB.php -- -db=database_1,database_2
+//  If dbs are not specified, all dbs are processed 
 
 /*
  This routine:
@@ -117,7 +117,8 @@ if(strpos($base_url, '/heurist/') === false){
 $mysqli = $system->get_mysqli();
 $databases = mysql__getdatabases4($mysqli, false);
 
-$index_dir = dirname(__FILE__)."/../../../DatabasePages";
+// TODO: Should be using setting for web root in configIni.php 
+$index_dir = dirname(__FILE__)."/../../../HarvestableDatabaseDescriptions";
 
 $is_dir_writable = folderExists($index_dir, true);
 
@@ -235,7 +236,7 @@ $template_page = '<html>'
         . '</div>'
 
         . '<div class="dtl_row">'
-            . '<span class="dtl_head">Record types:</span>'
+            . '<span class="dtl_head">Entity types / Record types:</span>'
             . '<span class="dtl_value">{struct_names}</span>'
         . '</div>'
     . '</body>'
@@ -369,13 +370,14 @@ foreach ($databases as $idx=>$db_name){
 
     //list of all rectype names
 
-    $vals = mysql__select_list2($mysqli, 'SELECT rty_Name FROM defRecTypes WHERE rty_ShowInLists = 1');
+    // This currently sorts alphabetically within groups, but could later use rty_OrderInGroup if it is ever set
+    $vals = mysql__select_list2($mysqli, 'SELECT rty_Name FROM defRecTypes,defRecTypeGroups WHERE rty_ShowInLists = 1 AND rty_RecTypeGroupID=rtg_ID ORDER BY rtg_Order,rty_Name');
     if($vals==null){
         echo $tabs0.$db_name.' cannot execute query for defRecTypes table'.$eol;
         continue;
     }
 
-    $values[17] = implode(',', $vals);
+    $values[17] = implode('<br>', $vals); // produce concatenated string or record types
 
     // Setup content
     $content = str_replace($value_to_replace, $values, $template_page);
