@@ -1,0 +1,37 @@
+# Typical apache /etc/httpd/conf/httpd.conf additions for a Heurist server - modify appropriately
+
+# TODO: This was cobbled together 7/6/23 from existing rewrite rules on a couple of servers
+# it needs cleaning up and addition of other apache settings
+
+# Replace myserver.net below with appropriate server name/alias
+
+NameVirtualHost *:80
+
+<VirtualHost *:80>
+    ServerAlias myserver.net
+    DocumentRoot /var/www/html
+    ServerName myserver.net
+
+RewriteEngine on
+RewriteCond %{SERVER_NAME} =myserver.net
+RewriteRule ^ https://%{SERVER_NAME}%{REQUEST_URI} [END,NE,R=permanent]
+RewriteRule (.+)/$ /$1 [L,R=301]
+
+# These rewrite rules allow clean, short URLs of the form myserver.net/mydatabase/web 
+# rather than the use of the long parameterised URLs used by Heurist internally
+ 
+#if URI starts with api/ redirect it to controller/api.php
+    RewriteRule ^heurist/api/(.*)$ /heurist/hsapi/controller/api.php
+    RewriteRule ^h6-alpha/api/(.*)$ /h6-alpha/hsapi/controller/api.php
+
+#if URI starts with web, tpl, hml, view etc. redirect it to redirects/resolver.php
+RewriteRule ^h6-alpha/([A-Za-z0-9_]+)/(web|tpl|hml|view)/(.*)$ /h6-alpha/redirects/resolver.php
+RewriteRule ^([A-Za-z0-9_]+)/(web|tpl|hml|view)/(.*)$ /h6-alpha/redirects/resolver.php
+RewriteRule ^h6-alpha/([A-Za-z0-9_]+)/web(.*)$ /h6-alpha/redirects/resolver.php
+RewriteRule ^([A-Za-z0-9_]+)/web(.*)$ /h6-alpha/redirects/resolver.php
+
+#RewriteRule ^h6-alpha/web/(.*)$ /h6-alpha/redirects/resolver.php
+#RewriteRule ^heurist/web/(.*)$ /heurist/redirects/resolver.php
+#RewriteRule ^web/(.*)$ /heurist/redirects/resolver.php
+
+</VirtualHost>

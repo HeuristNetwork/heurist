@@ -1,0 +1,65 @@
+# CRON JOBS TO BUILD INSTALLATION PACKAGE
+
+# Install this with:  sudo crontab -e  (vim editor: A for add/edit mode, Esc to exit, then :wq to write and quit)
+
+MAILTO=<replace with email address of server manager>
+
+# ----------------------------------------------------------------------------------
+
+# This section is only for the master HeuristRef.net server where development work is carried out
+# based on the setup as at June 2023 and h6-ao version of Heurist as the alpha development version
+# Script timing is based on Sydney early morning times and minimisation of disruption elsewhere
+
+# The following creates a distribution h6-beta-in-wating on Monday morning, and the following week moves this to h6-beta
+# Update h6-beta from h6-beta-in-waiting weekly at 5am Monday Sydney time
+57 04 * * 1 cd /var/www/html/HEURIST/DISTRIBUTION/;rm h6-beta.tar.bz2;mv h6-beta-in-waiting.tar.bz2  h6-beta.tar.bz2
+# Update h6-beta-in-waiting from Artem's development directory: build runs weekly at 7.30am Monday Sydney time
+0 05 * * 1 cd /var/www/html/HEURIST/h6-ao/;./copy_distribution_files.sh h6-beta-in-waiting
+
+# Update current heurist from /heurist/ version: build runs daily at ~5am Sydney time
+15 05 * * * cd /var/www/html/HEURIST/heurist/;./copy_distribution_files.sh heurist
+
+# Update h6-alpha from Artem's development directory: build runs daily at ~5am Sydney time
+25 05 * * * cd /var/www/html/HEURIST/h6-ao/;./copy_distribution_files.sh h6-alpha
+
+
+# ----------------------------------------------------------------------------------
+
+# SERVER MONITORING
+
+# Monitor sever metrics every 5 minutes
+# 5 * * * * /srv/scripts/alert_server.sh >/dev/null 2>&1
+
+# --------------------------------------------------------------
+
+# SEARCH ENGINE HARVESTABLE REFERENCES
+
+# Update harvestable static HTML descriptive pages for each database on the server - very quick
+00 00 * * * php -f /var/www/html/heurist/admin/utilities/writeIndexablePagePerDB.php -- -db=
+
+# Note: this writes to .../HEURIST/HarvestableDatabaseDescriptions
+#       This directory should be simlinked in /var/www/html to allow short path access
+
+# --------------------------------------------------------------
+
+# DATABASE MONITORING
+
+# Local backups for all databases
+
+# mins hour  day  month  weekday  command   * indicates any, weekdays 0 - 6
+
+# BACKUPS - early morning = late evening in Europe, afternoon in USA
+#  Runs on the database server, slowish for backups compared with single tier
+
+#Ansible: Local backups for all databases 1am
+00 01 * * * /srv/scripts/backup_all_dbs.sh
+
+# Creates archive copy of the database dump when bz2 file has changed 3am daily
+00 03 * * * /srv/scripts/archive_bzip_dbs.sh >/dev/null 2>&1
+
+# Email reminders and update scheduled smarty reports    at 4am daily
+0 04 * * *  php -f /var/www/html/h6-alpha/admin/setup/dboperations/dailyCronJobs.php
+
+# Cleanup database folders (root, backup and scratch) 4:30am on Monday
+30 04 * * 1  php -f /var/www/html/h6-alpha/admin/utilities/cleanupFoldersDBs.php -- -purge
+
