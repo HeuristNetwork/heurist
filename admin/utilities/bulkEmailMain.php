@@ -660,7 +660,7 @@ if(!$has_emails || empty($emails)) {
                                 if(response.status == "ok"){
                                     setupDBSelection(response.data);
                                     applyDBSort($('input[name="dbSortBy"]:checked').attr('id'));
-                                    displayRecordCount(database_details);
+                                    //displayRecordCount();
                                 } else {
 
                                     if(window.hWin.HEURIST4.util.isempty(response.message)){
@@ -727,7 +727,7 @@ if(!$has_emails || empty($emails)) {
                             database_details = response.data.details;
                             setupDBSelection(response.data.list);
                             //applyDBSort('name'); already in alphabetic order by default
-                            displayRecordCount(database_details);
+                            //displayRecordCount();
                         } else {
 
                             if(window.hWin.HEURIST4.util.isempty(response.message)){
@@ -831,15 +831,13 @@ if(!$has_emails || empty($emails)) {
             //
             function getRecordCount() {
 
-                if(!window.hWin.HEURIST4.util.isempty(database_details)){
-                    displayRecordCount(database_details);
+                if(getting_databases){
+                    window.hWin.HEURIST4.msg.showMsgFlash('Please wait for the database list to update...', 3000);
                     return;
                 }
 
-                return;
-
-                if(getting_databases){
-                    window.hWin.HEURIST4.msg.showMsgFlash('Please wait for the database list to update...', 3000);
+                if(window.hWin.HEURIST4.util.isArrayNotEmpty(database_details) && Object.hasOwn(database_details[0], 'rec_count')){
+                    displayRecordCount();
                     return;
                 }
 
@@ -1029,7 +1027,7 @@ if(!$has_emails || empty($emails)) {
 
                 set_element_position();
 
-                //$("#btnCalRecCount").click(getRecordCount);
+                $("#btnCalRecCount").click(getRecordCount);
 
                 getInitDbList();
             });
@@ -1117,7 +1115,7 @@ if(!$has_emails || empty($emails)) {
                     <div style="margin-bottom: 20px;">
                         Send email to: <span id="userSelection"></span> &nbsp;&nbsp;&nbsp; 
                         Count of distinct users: <span id="userCount">0</span> 
-                        <!--<button id="btnCalRecCount" style="margin-left: 10px;" onclick="return false;">Count total DB records (slow)</button>-->
+                        <button id="btnCalRecCount" style="margin-left: 10px;" onclick="return false;">Count total DB records</button>
                         <span style="float: right; margin-left: 50px;">Number of databases selected: <span id="dbCount">0</span></span>
                         <br>
                         <span style="float: right;">Total count of records (selected databases): <span id="recCount">0</span></span>

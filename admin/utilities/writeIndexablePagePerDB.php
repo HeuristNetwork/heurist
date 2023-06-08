@@ -68,7 +68,9 @@ if (@$argv) {
     $tabs0 = '<div style="min-width:300px;display:inline-block;">';
     $tabs = "</div>".$tabs0;
 
-    $arg_database = explode(',',$_REQUEST['db']);*/
+    if(array_key_exists('db', $_REQUEST)){
+        $arg_database = explode(',',$_REQUEST['db']);
+    }*/
 
     exit('This function is for command line execution');
 }
@@ -137,6 +139,51 @@ $value_to_replace = array('{db_name}','{db_desc}','{db_url}','{db_website}','{db
                           '{server_host}','{server_url}','{owner_name}','{owner_email}',
                           '{rec_count}','{file_count}','{rec_last}','{struct_last}','{struct_names}','{date_now}');
 
+//
+// File content for (HarvestableDatabaseDescriptions/index.html)
+//
+$index_page = '<html>'
+
+    . '<head>'
+        . '<meta charset="UTF-8">'
+        . '<meta name="viewport" content="width=device-width, initial-scale=1.0">'
+        . '<meta name="keywords" content="Heurist, Heurist database">' //{sys_kywds}
+        . '<title>Index of Heurist Databases</title>'
+
+        . '<style>'
+            . '.desc{display: inline-block; max-width: 800px; text-align: justify;}'
+            . '.heurist_logo{object-fit: cover;object-position: 5% 0;width: 40px;height: 38px;vertical-align: -12px;}'
+        . '</style>'
+    . '</head>'
+
+    . '<body>'
+        . '<div style="margin: 10px 0px;">'
+            . ' <img src="'.$base_url.'hclient/assets/branding/h4logo_small.png" alt="Heurist logo" class="heurist_logo">'
+            . ' <strong>Heurist database builder for Humanities research </strong>'
+            . ' (<a href="https://HeuristNetwork.org" target=_blank>https://HeuristNetwork.org</a>)'
+        . '</div>'
+
+        . '<div style="margin: 10px 5px 15px;">'
+            . 'Databases and websites on this server (<a href="'.$base_url.'" target=_blank>'.$base_url.'</a>)'
+        . '</div>'
+
+        . '<div style="margin-left: 10px;">'
+            . '{databases}'
+        . '</div>'
+    . '</body>'
+
+. '</html>';
+//
+// Format for each row of database details within index.html
+//
+$index_row = '<strong>{db_name}</strong><br>' // <strong>{db_dname} ({db_name})</strong>
+            . '{website_url}<br>'
+            . '<span class="desc">{db_desc}</span>';
+$index_row_replace = array('{db_name}', '{website_url}', '{db_desc}');
+
+//
+// File content for each database file (HarvestableDatabaseDescriptions/{database_name}.html)
+//
 $template_page = '<html>'
 
     . '<head>'
@@ -249,6 +296,8 @@ ini_set('memory_limit','1024M');
 $today = date('Y-m-d'); //'d-M-Y'
 $pages_made = 0;
 $list_is_array = is_array($arg_database);
+
+$index_databases = array(); // array of databases with websites (is inserted, with links, into index.html)
 
 foreach ($databases as $idx=>$db_name){
 
@@ -377,7 +426,7 @@ foreach ($databases as $idx=>$db_name){
         continue;
     }
 
-    $values[17] = implode('<br>', $vals); // produce concatenated string or record types
+    $values[17] = implode('<br>', $vals); // produce concatenated string of record types
 
     // Setup content
     $content = str_replace($value_to_replace, $values, $template_page);
@@ -392,7 +441,26 @@ foreach ($databases as $idx=>$db_name){
         continue;
     }
 
+    // $db_name => Name, [1] => Description, [3] => Websites
+    if($values[3] !== 'None'){ // only databases with websites are listed in index.html
+
+        $index_details = str_replace($index_row_replace, array($db_name, $values[3], $values[1]), $index_row);
+
+        array_push($index_databases, $index_details);
+    }
+
     echo $tabs0.$db_name.' Completed, saved to '.$fname.$eol;
 }//for
 
+// Update index.html
+$index_file = $index_dir . '/index.html';
+
+$index_page = str_replace('{databases}', implode('<br><br><br>', $index_databases), $index_page);
+
+$res = fileSave($index_page, $index_file);
+if($res <= 0){
+    echo $tabs0.' We were unable to update index.html'.$eol;
+}else{
+    echo $tabs0.' Updated index.html'.$eol;
+}
 ?>
