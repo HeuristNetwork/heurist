@@ -292,6 +292,7 @@ $dtDefines = array('DT_NAME' => array(2, 1),
     'DT_ORIGINAL_RECORD_ID' => array(2, 36),
     'DT_FILE_RESOURCE' => array(2, 38),
     'DT_THUMBNAIL' => array(2, 39),
+    'DT_ANNOTATION_INFO' => array(2, 1098), //for iiif and map annotations
     //xslt not used
     'DT_FILTER_STRING' => array(2, 40),
     'DT_FILE_TYPE' => array(2, 41),
