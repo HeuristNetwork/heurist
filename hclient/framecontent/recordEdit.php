@@ -32,6 +32,26 @@
    
     $params = array();
     
+if(@$_REQUEST['annotationId'] || @$_REQUEST['a']){     
+
+    $system->defineConstant('DT_ORIGINAL_RECORD_ID');
+    
+    $uuid = (@$_REQUEST['annotationId'])?$_REQUEST['annotationId']:$_REQUEST['a'];
+    
+    $mysqli = $system->get_mysqli();
+    
+    $res = mysql__select_row($mysqli, 'select dtl_RecID from recDetails '
+        .' WHERE dtl_DetailTypeID='.DT_ORIGINAL_RECORD_ID .' AND dtl_Value="'.$uuid.'"');
+
+    if ($res && $res[0] > 0) {
+        $params = array('recID'=>$res[0]);
+    }else{
+        //annotation not found
+        //exit();
+    }
+    
+    
+}else
 //this is an addition/bookmark of URL - at the moment from bookmarklet only
 if(@$_REQUEST['u']){ 
     
@@ -51,8 +71,9 @@ if(@$_REQUEST['u']){
                 .'where bkm_UGrpID="'.$system->get_user_id().'" '
                 .' and (rec_URL="'.$mysqli->real_escape_string($url).'" or rec_URL="'.$mysqli->real_escape_string($url).'/")');
                 
-    if ($res[0] > 0) { //already bookmarked
-        print '<script>var prepared_params = {recID:'.$res[1].'};</script>';
+    if ($res && $res[1] > 0) { //already bookmarked
+        $params = array('recID'=>$res[1]);
+        //print '<script>var prepared_params = {recID:'.$res[1].'};</script>';
     }else if (false && exist_similar($mysqli, $url)) {  //@todo implement disambiguation dialog
 //----- 2. find similar url - show disambiguation dialog -----------------------------------------
 
@@ -251,7 +272,7 @@ if($_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0.0.1'){
                     var isPopup = (window.hWin.HEURIST4.util.getUrlParameter('popup', window.location.search)==1);
                     
                     function __param(pname){
-                        //in case of bookmarklet addition url parameters may be parsed and prepared 
+                        //in case of bookmarklet or annotation addition url parameters may be parsed and prepared 
                         if($.isEmptyObject(prepared_params) || 
                            window.hWin.HEURIST4.util.isempty(prepared_params[pname]))
                         {
@@ -286,6 +307,8 @@ if($_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0.0.1'){
                         
                     }
 
+                    console.log(prepared_params);
+                    
 //todo use ui.openRecordEdit                    
                     //hidden result list, inline edit form
                     var options = {

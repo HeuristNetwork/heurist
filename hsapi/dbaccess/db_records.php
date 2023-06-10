@@ -2502,13 +2502,19 @@ function _prepareDetails($system, $rectype, $record, $validation_mode, $recID, $
                     break;
 
                 case "date":
-                    $len  = strlen(super_trim($dtl_Value));
-                    $isValid = ($len > 0); //preg_match("/\\S/", $dtl_Value);
+                
+                    if(is_array($dtl_Value)){ //date is temporal json array
+                        $isValid = count($dtl_Value)>1 && (@$dtl_Value['timestamp'] || @$dtl_Value['start']);
+                    }else{
+                        $len  = strlen(super_trim($dtl_Value));
+                        $isValid = ($len > 0); //preg_match("/\\S/", $dtl_Value);
+                    }
+                
                     if(!$isValid ){
                         $err_msg = 'Value is empty';  
                     }else{
                         
-                        if($useNewTemporalFormatInRecDetails){
+                        if(true){ 
                         
                             $preparedDate = new Temporal( $dtl_Value );
                         
@@ -2519,7 +2525,11 @@ function _prepareDetails($system, $rectype, $record, $validation_mode, $recID, $
                                 if($preparedDate->isValidSimple()){
                                     $dtl_Value = $preparedDate->getValue(true); //returns simple yyyy-mm-dd
                                 }else{
-                                    $dtl_Value = $preparedDate->toJSON(); //json encoded string
+                                    if($useNewTemporalFormatInRecDetails){
+                                        $dtl_Value = $preparedDate->toJSON(); //json encoded string
+                                    }else{
+                                        $dtl_Value = $preparedDate->toPlain(); //json encoded string
+                                    }
                                 }
                             }
                         

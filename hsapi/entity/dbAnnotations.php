@@ -25,6 +25,8 @@ require_once (dirname(__FILE__).'/dbEntityBase.php');
 
 class DbAnnotations extends DbEntityBase 
 {
+    private $dty_Annotation_Info;
+    
     
     function __construct( $system, $data ) {
         $this->system = $system;
@@ -37,8 +39,13 @@ class DbAnnotations extends DbEntityBase
         $this->system->defineConstant('DT_NAME');
         $this->system->defineConstant('DT_URL');
         $this->system->defineConstant('DT_ORIGINAL_RECORD_ID');
+        $this->system->defineConstant('DT_ANNOTATION_INFO');
         $this->system->defineConstant('DT_EXTENDED_DESCRIPTION');
-        $this->system->defineConstant('DT_SHORT_SUMMARY');
+                
+                        
+        $this->dty_Annotation_Info = (defined('DT_ANNOTATION_INFO'))
+                ? DT_ANNOTATION_INFO
+                : DT_EXTENDED_DESCRIPTION; 
 
         $this->init();
     }
@@ -79,6 +86,15 @@ class DbAnnotations extends DbEntityBase
             }else{
                 $sjson['items'] = array(); 
             }
+        }
+        else if($this->data['recID']=='edit'){
+            
+            $recordId = $this->findRecID_by_UUID($this->data['uuid']);
+           
+            $redirect = HEURIST_BASE_URL.'/hclient/framecontent/recordEdit.php?db='.HEURIST_DBNAME.'&fmt=edit&recID='.$recordId;
+           
+            header('Location: '.$redirect);  
+            exit();
             
         }else{
             $item = $this->findItem_by_UUID($this->data['recID']);
@@ -96,33 +112,45 @@ class DbAnnotations extends DbEntityBase
     //
     //    
     private function findItems_by_Canvas($canvasUri){
-        $query = 'SELECT d2.dtl_Value FROM recDetails d1, recDetails d2 WHERE '
-        .'d1.dtl_DetailTypeID='.DT_URL .' AND d1.dtl_Value="'.$canvasUri.'"'
-        .' AND d1.dtl_RecID=d2.dtl_RecID'
-        .' AND d2.dtl_DetailTypeID='.DT_EXTENDED_DESCRIPTION;
-        $items = mysql__select_list2($this->system->get_mysqli(), $query);
-        return $items;
+        if($this->dty_Annotation_Info>0 && defined('DT_URL')){
+            $query = 'SELECT d2.dtl_Value FROM recDetails d1, recDetails d2 WHERE '
+            .'d1.dtl_DetailTypeID='.DT_URL .' AND d1.dtl_Value="'.$canvasUri.'"'
+            .' AND d1.dtl_RecID=d2.dtl_RecID'
+            .' AND d2.dtl_DetailTypeID='.$this->dty_Annotation_Info;
+            $items = mysql__select_list2($this->system->get_mysqli(), $query);
+            return $items;
+        }else{
+            return array();
+        }
     }
 
     //
     //
     //    
     private function findItem_by_UUID($uuid){
-        $query = 'SELECT d2.dtl_Value FROM recDetails d1, recDetails d2 WHERE '
-        .'d1.dtl_DetailTypeID='.DT_ORIGINAL_RECORD_ID .' AND d1.dtl_Value="'.$uuid.'"'
-        .' AND d1.dtl_RecID=d2.dtl_RecID'
-        .' AND d2.dtl_DetailTypeID='.DT_EXTENDED_DESCRIPTION;
-        $item = mysql__select_value($this->system->get_mysqli(), $query);
-        return $item;
+        if($this->dty_Annotation_Info>0 && defined('DT_ORIGINAL_RECORD_ID')){
+            $query = 'SELECT d2.dtl_Value FROM recDetails d1, recDetails d2 WHERE '
+            .'d1.dtl_DetailTypeID='.DT_ORIGINAL_RECORD_ID .' AND d1.dtl_Value="'.$uuid.'"'
+            .' AND d1.dtl_RecID=d2.dtl_RecID'
+            .' AND d2.dtl_DetailTypeID='.$this->dty_Annotation_Info;
+            $item = mysql__select_value($this->system->get_mysqli(), $query);
+            return $item;
+        }else{
+            return array();
+        }
     }
     
     //
     //
     //    
     private function findRecID_by_UUID($uuid){
-        $query = 'SELECT dtl_RecID FROM recDetails WHERE dtl_DetailTypeID='.DT_ORIGINAL_RECORD_ID.' AND dtl_Value="'.$uuid.'"';
-        $recordId = mysql__select_value($this->system->get_mysqli(), $query);
-        return $recordId;
+        if(defined('DT_ORIGINAL_RECORD_ID')){
+            $query = 'SELECT dtl_RecID FROM recDetails WHERE dtl_DetailTypeID='.DT_ORIGINAL_RECORD_ID.' AND dtl_Value="'.$uuid.'"';
+            $recordId = mysql__select_value($this->system->get_mysqli(), $query);
+            return $recordId;
+        }else{
+            return 0;
+        }
     }
     
     //
@@ -171,7 +199,17 @@ class DbAnnotations extends DbEntityBase
                     .'Import required record type');
             return false;
         }
-
+        /* 
+        if( !defined('DT_ANNOTATION_INFO') || !defined('DT_URL') || !defined('DT_ORIGINAL_RECORD_ID')){
+            $this->system->addError(HEURIST_ACTION_BLOCKED, 
+                    'Can not add annotation. This database does not have "Annotation" (2-1098) or "Original ID" fields (2-36). '
+                    .'Import record type "Map/Image Annotation" to get this field');
+            return false;
+        }
+        */
+        
+        $this->system->defineConstant('DT_SHORT_SUMMARY');
+        $this->system->defineConstant('DT_THUMBNAIL');
 
         $anno = $this->data['fields']['annotation'];
 //error_log(print_r($anno, true));  
@@ -209,16 +247,60 @@ class DbAnnotations extends DbEntityBase
         }
         //"body":{"type":"TextualBody","value":"<p>VOKZAL</p>"},
         $anno_dec = json_decode($anno['data'], true);
-        if(is_array($anno_dec) && @$anno_dec['body']['type']=='TextualBody'){
-            $details[DT_NAME][] = substr(strip_tags($anno_dec['body']['value']),0,50);
-            $details[DT_SHORT_SUMMARY][] = $anno_dec['body']['value'];
+        if(is_array($anno_dec)){
+        
+            if(@$anno_dec['body']['type']=='TextualBody'){
+                $details[DT_NAME][] = substr(strip_tags($anno_dec['body']['value']),0,50);
+                if(defined('DT_SHORT_SUMMARY')) $details[DT_SHORT_SUMMARY][] = $anno_dec['body']['value'];
+            }
+
+            //thumbnail
+            // "selector":[{"type":"FragmentSelector","value":"xywh=524,358,396,445"}
+            if(@$anno_dec['target']['selector'] && defined('DT_THUMBNAIL')){
+                foreach ($anno_dec['target']['selector'] as $selector){
+                    if(@$selector['type']=='FragmentSelector'){
+                        $region = @$selector['value'];
+                        if($region){
+                            $region = substr($region, 5);
+                            
+                            // {scheme}://{server}{/prefix}/{identifier}/{region}/{size}/{rotation}/{quality}.{format}
+                            $url = $anno['canvas'].'/'.$region.'/!200,200/0/default.jpg';
+                            
+                            $tmp_file = HEURIST_SCRATCH_DIR.'/iiif_thumb.jpg';
+                            //tempnam(HEURIST_SCRATCH_DIR,'iiif_thumb');
+                            
+                            $res = saveURLasFile($url, $tmp_file);
+
+                            if($res>0){
+                                $entity = new DbRecUploadedFiles($this->system, null);
+
+                                $dtl_UploadedFileID = $entity->registerFile($tmp_file, null); //it returns ulf_ID
+
+                                if($dtl_UploadedFileID===false){
+                                    $err_msg = $system->getError();
+                                    $err_msg = $err_msg['message'];
+                                    $system->clearError();  
+                                }else{
+                                    $details[DT_THUMBNAIL][] = $dtl_UploadedFileID[0];
+                                }
+                            }
+                            
+                            
+                            break;   
+                        }
+                    }
+                }
+            }
         }
+        
         if(@$anno['canvas']){
             $details[DT_URL][] = $anno['canvas'];
         }
-        $details[DT_EXTENDED_DESCRIPTION][] = $anno['data'];
+        $details[$this->dty_Annotation_Info][] = $anno['data'];
         $details[DT_ORIGINAL_RECORD_ID][] = $anno['uuid'];
         
+        
+        //record header
         $record = array();
         $record['ID'] = $recordId;
         $record['RecTypeID'] = defined('RT_MAP_ANNOTATION')?RT_MAP_ANNOTATION:RT_ANNOTATION;
@@ -228,7 +310,7 @@ class DbAnnotations extends DbEntityBase
         $out = recordSave($this->system, $record, false, true);
 //error_log(print_r($record, true));        
 //error_log(print_r($out, true));        
-        return true;
+        return $out;
     }
 }
 ?>
