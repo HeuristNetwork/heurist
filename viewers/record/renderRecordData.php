@@ -1289,7 +1289,7 @@ function print_public_details($bib) {
                     //find dates
                     $row = mysql__select_row($mysqli, 'SELECT rdi_estMinDate ' 
                             .' FROM recDetailsDateIndex'
-                            .' WHERE rdi_RecID='.$rec_id .'AND rdi_DetailTypeID IN ('.DT_DATE.','.$startDT.')'); 
+                            .' WHERE rdi_RecID='.$rec_id .' AND rdi_DetailTypeID IN ('.DT_DATE.','.$startDT.')'); 
 
                     if($row){
                         $bd['order_by_date'] = $row[0];
