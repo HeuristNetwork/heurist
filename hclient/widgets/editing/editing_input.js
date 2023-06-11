@@ -2576,6 +2576,7 @@ $.widget( "heurist.editing_input", {
                     var url =  window.hWin.HAPI4.baseURL
                     + 'hclient/widgets/viewers/miradorViewer.php?db=' 
                     +  window.hWin.HAPI4.database
+                    + '&recID=' + that.options.recID
                     + '&' + (is_manifest?'iiif':'iiif_image') + '=' + obf_recID;
 
                     if(true){

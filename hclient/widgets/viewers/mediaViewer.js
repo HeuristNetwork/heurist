@@ -272,6 +272,10 @@ $.widget( "heurist.mediaViewer", {
                                      + 'hclient/widgets/viewers/miradorViewer.php?db='
                                      +  this.options.database
                                      + '&'+filename.substring(1)+'='+obf_recID;  //either iiif or iiif_image
+                                     
+                            if(rec_ID>0){
+                                external_url =  external_url + '&recID='+rec_ID;    
+                            }
                         }                
                        
                         $('<a href="'+external_url+'" target="_blank">'
@@ -398,6 +402,11 @@ $.widget( "heurist.mediaViewer", {
                                      + 'hclient/widgets/viewers/miradorViewer.php?db='
                                      +  that.options.database
                                      + '&' + param; // + '='+obf_recID;
+                                     
+                            if(rec_ID>0){
+                                external_url =  external_url + '&recID='+rec_ID;    
+                            }
+                                     
 //    console.log(external_url);                        
                             //on thumbnail click
                             that._on($alink, {click:function(e){
@@ -415,6 +424,9 @@ $.widget( "heurist.mediaViewer", {
                                         +  that.options.database
                                         + '&' + param;// + '='+obf_recID;
                                      
+                                  if(rec_ID>0){
+                                        url =  url + '&recID='+rec_ID;    
+                                  }
                                     
                                   if(window.hWin && window.hWin.HEURIST4){
                                         //borderless:true, 

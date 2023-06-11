@@ -105,6 +105,7 @@ if($use_custom_mirador){
     window.endpointURL = "<?php echo $baseUrl.'/h6-alpha/api/'.$_REQUEST['db'].'/annotations';?>";
     window.manifestUrl = "<?php echo $manifest_url;?>";
     window.hideThumbs = <?php echo (@$_REQUEST['iiif_image']?'true':'false');?>; 
+    window.sourceRecordId = <?php echo (@$_REQUEST['recID']>0?$_REQUEST['recID']:0);?>; 
 </script>
 <?php
 if($use_custom_mirador){

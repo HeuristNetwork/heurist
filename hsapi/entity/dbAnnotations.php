@@ -258,22 +258,79 @@ class DbAnnotations extends DbEntityBase
             // "selector":[{"type":"FragmentSelector","value":"xywh=524,358,396,445"}
             if(@$anno['canvas']){
                 if(@$anno_dec['target']['selector'] && defined('DT_THUMBNAIL')){
+                    
                     foreach ($anno_dec['target']['selector'] as $selector){
                         if(@$selector['type']=='FragmentSelector'){
                             $region = @$selector['value'];
                             if($region){
                                 $region = substr($region, 5);
                                 
-                                //remove /canvas to get image url
+                                
                                 // https://gallica.bnf.fr/iiif/ark:/12148/bpt6k9604118j/canvas/f11/ 
+                                $url2 = $anno['canvas'];
                                 $url = $anno['canvas'];
-                                if(strpos($url, '/canvas/')>0){
-                                    $url = str_replace('/canvas/','/',$url);
+                                
+                                if(@$anno['manifestUrl']){ //sourceRecordId
+                                    //find image service uri by canvas in manifest
+                                    $iiif_manifest = loadRemoteURLContent($anno['manifestUrl']); //retrieve iiif manifest into manifest
+                                    $iiif_manifest = json_decode($iiif_manifest, true);
+                                    if($iiif_manifest!==false && is_array($iiif_manifest)){
+
+                                    //"@context": "http://iiif.io/api/presentation/2/context.json"    
+                                    //sequences->canvases->images->resource->service->@id
+                                    if(@$iiif_manifest['@context']=='http://iiif.io/api/presentation/2/context.json'){
+                                        if(is_array(@$iiif_manifest['sequences']))
+                                        foreach($iiif_manifest['sequences'] as $seq){
+                                            if(is_array(@$seq['canvases']))
+                                            foreach($seq['canvases'] as $canvas){
+                                                if($canvas['@id']==$url && is_array(@$canvas['images'])){
+                                                    foreach($canvas['images'] as $image){
+                                                        $url2 = @$image['resource']['service']['@id'];
+                                                        if($url2!=null) {
+                                                            $url = $url2;
+                                                            break 3;
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        }
+                                        
+                                    }else{ //version 3
+                                    //"@context": "http://iiif.io/api/presentation/3/context.json" 
+                                    //items(type:Canvas)->items[AnnotationPage]->items[Annotation]->body->service[0]->id
+                                        
+                                        if(is_array(@$iiif_manifest['items']))
+                                        foreach($iiif_manifest['items'] as $canvas){
+                                            if(@$canvas['type']=='Canvas' && $canvas['id']==$url && is_array(@$canvas['items'])){
+                                                foreach($canvas['items'] as $annot_page){
+                                                    if(@$annot_page['type']=='AnnotationPage' && is_array(@$annot_page['items']))
+                                                    foreach($annot_page['items'] as $annot){
+                                                        if(@$annot['type']=='Annotation')
+                                                        if(@$annot['body']['type']=='Image'){
+                                                            $url2 = @$annot['body']['service']['id'];
+                                                            if($url2!=null) {
+                                                                $url = $url2;
+                                                                break 3;
+                                                            }
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        }
+                                        
+                                        
+                                    }
+                                        
+                                    }
                                 }
                                 
+                                if(strpos($url, '/canvas/')>0){
+                                    //remove /canvas to get image url
+                                    $url = str_replace('/canvas/','/',$url);
+                                }
                                 // {scheme}://{server}{/prefix}/{identifier}/{region}/{size}/{rotation}/{quality}.{format}
                                 $url = $url.'/'.$region.'/!200,200/0/default.jpg';
-                                
+
                                 $tmp_file = HEURIST_SCRATCH_DIR.'/'.$anno['uuid'].'.jpg';
                                 //tempnam(HEURIST_SCRATCH_DIR,'iiif_thumb');
                                 //tempnam()

@@ -492,6 +492,7 @@ if(!($is_map_popup || $without_header)){
                     var url =  baseURL
                     + 'hclient/widgets/viewers/miradorViewer.php?db=' 
                     +  database
+                    + '&recID='<?php echo $bib['rec_ID']; ?>
                     + '&iiif_image=' + obf_recID;
 
                     if(false && window.hWin && window.hWin.HEURIST4){
