@@ -1,4 +1,4 @@
--- Heurist Definitions Exchange File generated: 10 Jun 2023 @ 21:37
+-- Heurist Definitions Exchange File generated: 11 Jun 2023 @ 06:40
 -- Installation = https://heuristref.net/h6-alpha/
 -- Database = Heurist_Core_Definitions
 -- Program Version: 6.3.17
@@ -5933,6 +5933,115 @@
 
 -- Definitions translations
 
--- ``
+-- `trn_ID`,`trn_Source`,`trn_Code`,`trn_LanguageCode`,`trn_Translation`,`trn_Modified`
 
->>StartData>>
+>>StartData>> >>EndData>>
+
+ 
+
+ 
+
+-- SAVED SEARCHES
+
+-- `svs_ID`,`svs_Name`,`svs_Added`,`svs_Modified`,`svs_Query`,`svs_UGrpID`,`svs_ExclusiveXSL`
+
+>>StartData>> >>EndData>>
+
+ 
+
+ 
+
+-- Dashboard entries
+
+-- `dsh_ID`,`dsh_Order`,`dsh_Label`,`dsh_Description`,`dsh_Enabled`,`dsh_ShowIfNoRecords`,`dsh_CommandToRun`,`dsh_Parameters`
+
+>>StartData>> ('1','6','Add Person','Adds a Person record, editable and viewable by any logged in user.','y','y','action-AddRecord','{\"RecTypeID\":\"10\",\"OwnerUGrpID\":\"0\",\"NonOwnerVisibility\":\"viewable\",\"NonOwnerVisibilityGroups\":\"\",\"RecTags\":\"\"}'),
+('5','4','Preferences','Set your preferences for experience level, page length, startup filter, map clustering and other behaviours.','y','y','menu-profile-preferences',''),
+('7','7','Browse templates','Save a heap of time (and promote compatibility) by borrowing structure definitions selectively from other users, then customise them to your needs with the structure editor.','y','y','menu-structure-import',''),
+('11','5','Add record','Add a new record selecting record (entity) type and access rights. The record opens in the editor.','y','y','menu-import-add-record',''),
+('14','2','Edit website','Create/edit a CMS website. The website is an integral part of the database. Database content can be filtered and visualised using Heurist display methods.','y','y','menu-cms-edit',''),
+('15','1','Report a Bug','Use the bug reporter to report a bug or feature request','y','y','menu-help-bugreport',''),
+('16','3','Refresh memory','Clears browser memory - apply before reloading the page to ensure all old values are cleared out','y','y','menu-structure-refresh',''),
+>>EndData>>
+
+ 
+
+ 
+
+-- DEF CALC FUNCTIONS
+
+-- `cfn_ID`,`cfn_Name`,`cfn_Domain`,`cfn_FunctionSpecification`,`cfn_Modified`,`cfn_RecTypeIDs`
+
+>>StartData>> >>EndData>>
+
+ 
+
+ 
+
+-- DEF CROSSWALK
+
+-- `crw_ID`,`crw_SourcedbID`,`crw_SourceCode`,`crw_DefType`,`crw_LocalCode`,`crw_Modified`
+
+>>StartData>> >>EndData>>
+
+ 
+
+ 
+
+-- DEF URL PREFIXES
+
+-- `urp_ID`,`urp_Prefix`,`urp_Modified`
+
+>>StartData>> >>EndData>>
+
+ 
+
+ 
+
+-- DEF LANGUAGE
+
+-- `lng_NISOZ3953`,`lng_ISO639`,`lng_Name`,`lng_Notes`,`lng_Modified`
+
+>>StartData>> ('ARA','AR','Arabic','','0000-00-00 00:00:00'),
+('CAM','KM','Khmer','','0000-00-00 00:00:00'),
+('CHI','ZH','Chinese','','0000-00-00 00:00:00'),
+('CZE','CS','Czech','','0000-00-00 00:00:00'),
+('DAN','DA','Danish','','0000-00-00 00:00:00'),
+('DUT','NL','Dutch','','0000-00-00 00:00:00'),
+('ENG','EN','English','','0000-00-00 00:00:00'),
+('EST','ET','Estonian','','0000-00-00 00:00:00'),
+('FIN','FI','Finish','','0000-00-00 00:00:00'),
+('FRE','FR','French','','0000-00-00 00:00:00'),
+('GER','DE','German','','0000-00-00 00:00:00'),
+('GRE','EL','Greek','','0000-00-00 00:00:00'),
+('HEB','HE','Hebrew','','0000-00-00 00:00:00'),
+('HIN','HI','Hindi','','0000-00-00 00:00:00'),
+('HUN','HU','Hungarian','','0000-00-00 00:00:00'),
+('IND','ID','Indonesian','','0000-00-00 00:00:00'),
+('ITA','IT','Italian','','0000-00-00 00:00:00'),
+('JPN','JA','Japanese','','0000-00-00 00:00:00'),
+('KOR','KO','Korean','','0000-00-00 00:00:00'),
+('LAV','LV','Latvian','','0000-00-00 00:00:00'),
+('MAL','MS','Malay','','0000-00-00 00:00:00'),
+('NOR','NO','Norwegian','','0000-00-00 00:00:00'),
+('POL','PL','Polish','','0000-00-00 00:00:00'),
+('POR','PT','Portuguese','','0000-00-00 00:00:00'),
+('RUS','RU','Russian','','0000-00-00 00:00:00'),
+('SCC','HR','Croatian','','0000-00-00 00:00:00'),
+('SCR','SR','Serbian','','0000-00-00 00:00:00'),
+('SLO','SK','Slovak','','0000-00-00 00:00:00'),
+('SPA','ES','Spanish','','0000-00-00 00:00:00'),
+('SWA','SW','Swahili','','0000-00-00 00:00:00'),
+('SWE','SV','Swedish','','0000-00-00 00:00:00'),
+('THA','TH','Thai','','0000-00-00 00:00:00'),
+('TUR','TR','Turkish','','0000-00-00 00:00:00'),
+('UKR','UK','Ukranian','','0000-00-00 00:00:00'),
+('VIE','VI','Vietnamese','','0000-00-00 00:00:00'),
+('YID','YI','Yiddish','','0000-00-00 00:00:00'),
+>>EndData>>
+
+ 
+
+ 
+
+>>EndOfFile>>
