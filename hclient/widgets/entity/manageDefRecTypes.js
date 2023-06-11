@@ -326,7 +326,7 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
             }
 
             
-            var iheight = that.options.import_structure?40:80;
+            var iheight = that.options.import_structure?0:80;
             that.searchForm.css({'height':iheight});
             that.recordList.css({'top':iheight});     
             //!!!! that.changeUI(null, that.options.ui_params);    
@@ -424,17 +424,23 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
                         
                             if(response.status == window.hWin.ResponseStatus.OK){
                                 
-                                window.hWin.HEURIST4.remote = {};
+                                if(!window.hWin.HEURIST4.remote){
+                                    window.hWin.HEURIST4.remote = {};
+                                }
+
                                 window.hWin.HEURIST4.remote.rectypes = response.data.rectypes;
                                 
                                 that._cachedRecordset = that.getRecordsetFromStructure( response.data.rectypes, true ); //change to true to hide where rty_ShowInList=0
 
-                                window.hWin.HAPI4.SystemMgr.get_defs( //only basefield names
-                                    {detailtypes:'all', mode:0, remote:that.options.import_structure.database_url}, function(response){
-                                        if(response.status == window.hWin.ResponseStatus.OK){
-                                            window.hWin.HEURIST4.remote.detailtypes = response.data.detailtypes;
+                                if(that.options.import_structure.load_detailstypes){ // retrieve base fields
+                                    window.hWin.HAPI4.SystemMgr.get_defs( //only basefield names
+                                        {detailtypes:'all', mode:0, remote:that.options.import_structure.database_url}, function(response){
+                                            if(response.status == window.hWin.ResponseStatus.OK){
+                                                window.hWin.HEURIST4.remote.detailtypes = response.data.detailtypes;
+                                            }
                                         }
-                                    });
+                                    );
+                                }
                                 
                             }else{
                                 window.hWin.HEURIST4.msg.showMsgErr(response);

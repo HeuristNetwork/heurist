@@ -2521,3 +2521,11 @@ li.edit-form-tab > a{
 .tox-tinymce-aux {
     z-index: 999999!important;
 }
+
+.fake_link::first-line {
+    color: blue;
+
+    text-decoration: underline;
+
+    cursor: pointer;
+}

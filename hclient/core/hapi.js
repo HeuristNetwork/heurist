@@ -1200,7 +1200,7 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
 
                 if (message == false) {
 
-                    window.hWin.HAPI4.SystemMgr.import_definitions(databaseID, missed, false, callback);
+                    window.hWin.HAPI4.SystemMgr.import_definitions(databaseID, missed, false, 'rectype', callback);
 
                 } else {
 
@@ -1216,7 +1216,7 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
                                 window.hWin.HEURIST4.msg.showMsgFlash(window.hWin.HR('Import definitions'), 10000);
 
                                 //import missed record types
-                                window.hWin.HAPI4.SystemMgr.import_definitions(databaseID, missed, false,
+                                window.hWin.HAPI4.SystemMgr.import_definitions(databaseID, missed, false, 'rectype', 
                                     function (response) {
                                         window.hWin.HEURIST4.msg.sendCoverallToBack();
                                         var $dlg2 = window.hWin.HEURIST4.msg.getMsgFlashDlg();
@@ -1246,16 +1246,17 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
              * @param {number} databaseID - source database 
              * @param {Array.<string|number>} definitionID - array of Rectype ids or Concept Codes to be imported
              * @param {boolean} is_rename_target - should rectype/concept labels be overwritten with labels imported from the source database?
+             * @param {string} entity - what is being imported? {rectype|detailtype|term}
              * @param {callserverCallback} callback - applied to response after entity definitions are updated
              */
-            import_definitions: function (databaseID, definitionID, is_rename_target, callback) {
+            import_definitions: function (databaseID, definitionID, is_rename_target, entity, callback) {
 
                 /** @type {Request} */
                 var request = {
                     databaseID: databaseID,
                     definitionID: definitionID,
                     is_rename_target: is_rename_target ? 1 : 0,
-                    db: window.hWin.HAPI4.database, import: 'rectype'
+                    db: window.hWin.HAPI4.database, import: entity
                 };
 
                 _callserver('sys_structure', request, function (response) {

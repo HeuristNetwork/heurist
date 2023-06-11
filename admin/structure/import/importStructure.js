@@ -70,6 +70,8 @@ $.widget( "heurist.importStructure", {
     _is_rename_target: false,
     _selectedDB:null, //regid of currently selected database
     _selectedRtyID:null,
+    _selectedDtyID:null,
+    _selectedTrmID:null,
 
     _init_local_rty_once:true,
 
@@ -110,12 +112,12 @@ $.widget( "heurist.importStructure", {
         +'</div>'
         
         //2. List of record types to be imported
-        +'<div class="ent_wrapper" id="panel_rty" style="display:none">'
+        +'<div class="ent_wrapper" id="panel_rty" style="display:none;margin-left:15px;">'
 
         +'<div class="ent_header" style="padding:4px;">'
         +'<div style="position:absolute;right:225px;left:0">' //450px
-        +'<h4  style="margin:0;padding:4 0 0 4" id="h_source_rty"></h4>'     
-        +'<div id="btn_back_to_databases" style="position:absolute;right:104px;top:40px;z-index:10"/>'
+        +'<h4  style="margin:0;padding:4 0 0 4" id="h_source"></h4>'     
+        +'<div id="btn_back_to_databases" style="position:absolute;right:30px;top:0px;z-index:10"/>'
         +'</div>'
 
         //+'<div style="border-left:1px solid lightgray;position:absolute;right:225px;width:224px;height:2.8em">'
@@ -127,13 +129,29 @@ $.widget( "heurist.importStructure", {
         +'</div>'
 
         //left - source                                
-        +'<div class="ent_wrapper" id="panel_rty_list" style="top:2.8em;right:225px;border-right:1px solid lightgray;">' //450px
+        +'<div class="ent_wrapper" id="entity_wrapper" style="top:2.8em;right:225px;border-right:1px solid lightgray;">' //450px
+            + '<h3 class="fake_link" style="padding-left:10px;">Download individual vocabularies</h3>'
+                + '<div id="trm_container" style="background:transparent;">'
+                    + '<div class="ent_content_full" id="panel_trm_list" style="position:relative;top:0px;height:100%;"></div>'
+                + '</div>'
+            + '<h3 class="fake_link" style="padding-left:10px;">Download individual field definitions</h3>'
+                + '<div id="dty_container" style="background:transparent;">'
+                    + '<div class="ent_content_full" id="panel_dty_list" style="position:relative;top:0px;height:100%;"></div>'
+                + '</div>'
+            + '<h3 class="fake_link" style="padding-left:10px;">Download complete record types</h3>'
+                + '<div id="rty_container"style="background:transparent;">'
+                    + '<div class="ent_content_full" id="panel_rty_list" style="position:relative;top:0px;height:100%;"></div>'
+                + '</div>'
         +'</div>'
 
         //target
         +'<div id="panel_rty_list_target" '
         +'style="position:absolute; top:2.8em;bottom:0;right:0px; overflow:hidden;width:225px;">'
         +'<select id="select_rty_list_target" size="500" style="width:100%;height:100%;border:lightgray 1px solid"/>'
+        +'<select id="select_dty_list_target" size="500" style="width:100%;height:100%;border:lightgray 1px solid;display:none;"/>'
+        +'<div id="select_trm_list_target" style="width:100%;height:100%;border:lightgray 1px solid;display:none;">' // TODO: Only list vocabulary, instead of ALL terms
+            + 'Due to the potentially numerous amount of vocabulary and terms,<br>existing local vocabulary and terms are not displayed here'
+        +'</div>'
         +'</div>'
 
         +'</div>'
@@ -149,10 +167,18 @@ $.widget( "heurist.importStructure", {
         $(layout).appendTo(this.element);
 
         this.panel_report = this.element.find('#panel_report');
-        this.panel_rty = this.element.find('#panel_rty');
+        this.entity_wrapper = this.element.find('#entity_wrapper');
+
         this.panel_rty_list = this.element.find('#panel_rty_list');
+        this.panel_dty_list = this.element.find('#panel_dty_list');
+        this.panel_trm_list = this.element.find('#panel_trm_list');
+
+        this.panel_rty = this.element.find('#panel_rty');
         this.panel_rty_list_target = this.element.find('#panel_rty_list_target');
+
         this.select_rty_list_target = this.element.find('#select_rty_list_target');
+        this.select_dty_list_target = this.element.find('#select_dty_list_target');
+        this.select_trm_list_target = this.element.find('#select_trm_list_target');
         
         this.panel_report.find('#btn_close_panel_report')
         .button({icon: 'ui-icon-carat-1-w', iconPosition:'right', label:'Back to Record Type List'})
@@ -164,8 +190,40 @@ $.widget( "heurist.importStructure", {
             that.panel_rty_list.manageDefRecTypes('getRecordsetFromStructure', window.hWin.HEURIST4.remote.rectypes );
             //refresh target
             window.hWin.HEURIST4.ui.createRectypeSelect(that.select_rty_list_target[0],null,null,true);
+            window.hWin.HEURIST4.ui.createRectypeDetailSelect(that.select_dty_list_target[0], null, null, null, {useHtmlSelect: true});
+            //window.hWin.HEURIST4.ui.createTermSelect(that.select_trm_list_target[0], {useHtmlSelect: true, vocab_id: 'all'});
         });
 
+        this.entity_wrapper.accordion({
+            collapsible: true,
+            beforeActivate: function(event, ui){ // correct panel height
+                let container_size = that.panel_rty.height();
+                let panel = ui.newPanel;
+
+                panel.height(container_size - 150);
+            },
+            activate: function(event, ui){
+
+                let panel = ui.newPanel;
+                let entity = panel.attr('id');
+
+                let $resList = panel.find('.ent_content_full.recordList');
+                if($resList.length > 0 && $resList.resultList('instance') !== undefined){
+                    $resList.resultList('refreshPage');
+                }
+
+                that.panel_rty_list_target.find('select').hide();
+                if(entity == 'dty_container'){
+                    that.select_dty_list_target.show();
+                }else if(entity == 'trm_container'){
+                    that.select_trm_list_target.show();
+                }else{
+                    that.select_rty_list_target.show();
+                }
+            }
+        });
+
+        this.entity_wrapper.accordion('option', 'active', 2); // open rectype accordion, to trigger beforeActivate event
 
         var ele = this.element.find('#btn_back_to_databases')
         .button({label:'Back to Databases'});
@@ -450,9 +508,9 @@ $.widget( "heurist.importStructure", {
 
             this._selectedDB = sDB_ID;
 
-            this.element.find('#h_source_rty').text('Entities available in '+sDB_ID+':'+sDB);
+            this.element.find('#h_source').text('Entities available in '+sDB_ID+':'+sDB);
 
-            var options = {
+            var rty_options = {
                 isdialog: false,
                 container: '#panel_rty_list',
                 select_mode: 'select_single',
@@ -464,7 +522,7 @@ $.widget( "heurist.importStructure", {
                     database: sDB,      //database name
                     databaseURL: sURL,
                     database_url:  (sURL+'?db='+sDB),
-                    load_detailstypes: true
+                    load_detailstypes: false  // will be loaded later
                 },
 
                 onselect:function(event, data){
@@ -516,7 +574,11 @@ $.widget( "heurist.importStructure", {
                                     btn2['Yes, overwrite'] = function(){
                                         $dlg2.dialog('close');
                                         $dlg.dialog('close');
+
                                         that._selectedRtyID = recID;
+                                        that._selectedDtyID = null;
+                                        that._selectedTrmID = null;
+
                                         that.startImport();
                                     };
                                     btn2['Get me out of here'] = function(){
@@ -533,11 +595,13 @@ $.widget( "heurist.importStructure", {
                                                 );
                                 }else{
                                     $dlg.dialog('close');
+
                                     that._selectedRtyID = recID;
+                                    that._selectedDtyID = null;
+                                    that._selectedTrmID = null;
+
                                     that.startImport();
                                 }
-                           //[  Yes, overwrite ]  [ Get me out of here ]
-
                                 
                             };
                             btns['Cancel'] = function(){
@@ -562,16 +626,14 @@ $.widget( "heurist.importStructure", {
                     groupByField:'rty_RecTypeGroupID',
                     groupOnlyOneVisible: true,
                     groupByCss:'0 1.5em',
-                    rendererGroupHeader: function(grp_val, grp_keep_status){
+                    rendererGroupHeader: function(grp_val, is_expanded){
 
                         var rectypes = window.hWin.HEURIST4.remote.rectypes;
                         var idx = rectypes.groups.groupIDToIndex[grp_val];
 
-                        var is_expanded = (grp_keep_status[grp_val]!=0);
-
                         return rectypes.groups[idx]?('<div data-grp="'+grp_val
                             +'" style="font-size:0.9em;padding:14px 0 4px 0px;border-bottom:1px solid lightgray">'
-                            +'<span style="display:inline-block;vertical-align:top;padding-top:10px;" '
+                            +'<span style="display:inline-block;vertical-align:top;padding-top:15px;font-size:20px;" '
                             +'class="expand_button ui-icon ui-icon-triangle-1-'+(is_expanded?'s':'e')+'"></span>'
                             +'<div style="display:inline-block;width:70%">'
                             +'<h2 style="margin:0">'+grp_val+'  '+rectypes.groups[idx].name+'</h2>' //+grp_val+' '
@@ -584,7 +646,7 @@ $.widget( "heurist.importStructure", {
             this.panel_rty_list.empty();
             
             //open list of record types from other database
-            window.hWin.HEURIST4.ui.showEntityDialog('defRecTypes', options);
+            window.hWin.HEURIST4.ui.showEntityDialog('defRecTypes', rty_options);
 
         }
         panel_dbs.hide();
@@ -596,6 +658,7 @@ $.widget( "heurist.importStructure", {
             this._init_local_rty_once = false;
 
             window.hWin.HEURIST4.ui.createRectypeSelect(this.select_rty_list_target[0],null,null,true);
+            window.hWin.HEURIST4.ui.createRectypeDetailSelect(that.select_dty_list_target[0], null, null, null, {useHtmlSelect: true});
         }
         
 
@@ -606,6 +669,8 @@ $.widget( "heurist.importStructure", {
         this.element.find('#panel_dbs').show();
 
         this._selectedRtyID = null;
+        this._selectedDtyID = null;
+        this._selectedTrmID = null;
     },
 
 
@@ -865,17 +930,40 @@ $.widget( "heurist.importStructure", {
     startImport: function(){
 
         var style = {'font-size': '16px', 'background-color': '#FFF', 'opacity': 1};
-        var msg = 'Downloading structure...<br><br>'
-                + 'This may take a couple of minutes if there are a number of record type linked to the one requested.<br>'
-                + 'This is a very complex procedure and sensitive to errors in the configuration of the source database.<br><br>'
-                + 'Please report a bug if it fails (either with or without a message)<br>'
-                + 'including the database and record type you are trying to download, so that we can investigate and fix.';
+        var msg = '';
 
         window.hWin.HEURIST4.msg.bringCoverallToFront(this.element, style, msg);
 
         var that = this;
+        let id = null;
+        if(this._selectedRtyID){
+            id = this._selectedRtyID;
+            type = 'rectype';
+
+            msg = 'Downloading structure...<br><br>'
+                + 'This may take a couple of minutes if there are a number of record type linked to the one requested.<br>';
+        }else if(this._selectedDtyID){
+            id = this._selectedDtyID;
+            type = 'detailtype';
+
+            msg = 'Downloading base field...<br><br>'
+                + 'This may take a couple of minutes if there are a number of record type linked to the requested field.<br>';
+        }else if(this._selectedTrmID){
+            id = this._selectedTrmID;
+            type = 'term';
+
+            msg = 'Downloading vocabulary...<br><br>';
+        }
+
+        if(!id || id < 1){
+            return;
+        }
+
+        msg += 'This is a very complex procedure and sensitive to errors in the configuration of the source database.<br><br>'
+                + 'Please report a bug if it fails (either with or without a message)<br>'
+                + 'including the database and record type you are trying to download, so that we can investigate and fix.';
         
-        window.hWin.HAPI4.SystemMgr.import_definitions(this._selectedDB, this._selectedRtyID, this._is_rename_target,
+        window.hWin.HAPI4.SystemMgr.import_definitions(this._selectedDB, id, this._is_rename_target, type,
             function(response){    
 
             window.hWin.HEURIST4.msg.sendCoverallToBack(); 
@@ -884,9 +972,7 @@ $.widget( "heurist.importStructure", {
 
                 that.panel_report.find('#btn_close_panel_report').click();
 
-                var report = ''
-               
-//DEBUG console.log( response.report );               
+                var report = '';
                 
                 if(response.report){
                 
