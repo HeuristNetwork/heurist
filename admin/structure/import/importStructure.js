@@ -648,6 +648,161 @@ $.widget( "heurist.importStructure", {
             //open list of record types from other database
             window.hWin.HEURIST4.ui.showEntityDialog('defRecTypes', rty_options);
 
+            var dty_options = {
+                isdialog: false,
+                container: '#panel_dty_list',
+                select_mode: 'select_single',
+                groupsPresentation: 'none',
+
+                simpleSearch: true,
+
+                import_structure:{
+                    database: sDB,      //database name
+                    databaseURL: sURL,
+                    database_url:  (sURL+'?db='+sDB)
+                },
+
+                onselect:function(event, data){
+                    //show treeview
+                },
+                onaction:function(event, action){
+
+                    var recID;     
+                    if(action && action.action){
+                        recID =  action.recID;
+                        action = action.action;
+                    }
+                    if(recID>0){
+                        if(action=='expand'){
+                            window.hWin.HEURIST4.remote._selectedDtyID
+                            = (window.hWin.HEURIST4.remote._selectedDtyID == recID)?null:recID;
+                            that.panel_dty_list.manageDefDetailTypes('refreshRecordList');                     
+                        }else if(action=='import'){
+
+                            let idx_Type = window.hWin.HEURIST4.remote.detailtypes.typedefs.fieldNamesToIndex.dty_Type;
+                            let record = window.hWin.HEURIST4.remote.detailtypes.typedefs[recID]['commonFields'];
+
+                            var msg = '<p style="font-size:smaller">'
+                                +'<label><input type="checkbox" id="rename_target_entities"/>&nbsp;Check this box</label> '
+                                +' if you wish the field names and description '
+                                +' to be replaced by the names being imported. Use with care as this can overwrite existing '
+                                +'customisation with names which may be quite different and out-of-context with existing data. '
+                                +'If this is not a new database, we suggest cancelling and making a clone first (please' 
+                                +' delete the clone once you are happy with the result of the import).</p>';
+
+                            if(record[idx_Type] == 'resource' || record[idx_Type] == 'enum' || record[idx_Type] == 'relmarker'){
+
+                                let extra = record[idx_Type] == 'resource' ? 'record type(s)' : (record[idx_Type] == 'enum' ? 'term(s)' : 'term(s) and record type(s)')
+                                msg = "If you proceed with the download, Heurist will also download missing related " + extra + " for the selected field.<br>" + msg;
+                            }
+
+                            var $dlg;
+
+                            var btns = {};
+
+                            btns['Proceed'] = function(){
+                                
+                                var is_rename = $dlg.find('#rename_target_entities').is(':checked');
+                                that._is_rename_target = is_rename;
+                                if(is_rename){
+                                                            
+                                    var $dlg2, btn2 = {};
+                                    btn2['Yes, overwrite'] = function(){
+                                        $dlg2.dialog('close');
+                                        $dlg.dialog('close');
+                                        that._selectedDtyID = recID;
+                                        that._selectedRtyID = null;
+                                        that._selectedTrmID = null;
+                                        that.startImport();
+                                    };
+                                    btn2['Get me out of here'] = function(){
+                                        $dlg2.dialog('close');
+                                    };
+                                                            
+                                                            
+                                    $dlg2 = window.hWin.HEURIST4.msg.showMsgDlg(
+                                        'Are you sure you want to overwrite existing field names?', 
+                                        btn2, {title: 'Warning'},
+                                        {default_palette_class: 'ui-heurist-design'}
+                                    );
+                                }else{
+                                    $dlg.dialog('close');
+                                    that._selectedDtyID = recID;
+                                    that._selectedRtyID = null;
+                                    that._selectedTrmID = null;
+                                    that.startImport();
+                                }
+                                
+                            };
+                            btns['Cancel'] = function(){
+                                $dlg.dialog('close');
+                            }
+
+                            $dlg = window.hWin.HEURIST4.msg.showMsgDlg(msg, btns, 
+                                {title: 'Downloading base field', yes:'Proceed', no:'Cancel'}, 
+                                {default_palette_class: 'ui-heurist-design'}
+                            );  
+                            
+                        }
+                    }
+
+                },
+
+                recordList:{
+                    show_toolbar: false,
+                    pagesize: 4999, 
+                    view_mode:'list',
+                    simpleSearch:true,
+                    groupByField:'dty_DetailTypeGroupID',
+                    groupOnlyOneVisible: true,
+                    groupByCss:'0 1.5em',
+                    rendererGroupHeader: function(grp_val, is_expanded){
+
+                        if(!that.panel_dty_list.is(':visible')){
+                            is_expanded = false;
+                        }
+
+                        var detailtypes = window.hWin.HEURIST4.remote.detailtypes;
+                        var idx = detailtypes.groups.groupIDToIndex[grp_val];
+                        var idx_ccode = detailtypes.typedefs.fieldNamesToIndex.dty_ConceptID;
+
+                        var output = '';
+                        let has_values = false;
+
+                        if(detailtypes.groups[idx]){
+
+                            for(let i = 0; i < detailtypes.groups[idx].showTypes.length; i ++){
+                                const dty_id = detailtypes.groups[idx].showTypes[i];
+                                let concept_code = detailtypes.typedefs[dty_id]['commonFields'][idx_ccode];
+    
+                                if($Db.getLocalID('dty', concept_code) == 0){
+                                    has_values = true;
+                                    break;
+                                }
+                            }
+                        }
+
+                        if(has_values){
+                            output = '<div data-grp="'+grp_val
+                            +'" style="font-size:0.9em;padding:14px 0 4px 0px;border-bottom:1px solid lightgray">'
+                            +'<span style="display:inline-block;vertical-align:top;padding-top:15px;font-size:20px;" '
+                            +'class="expand_button ui-icon ui-icon-triangle-1-'+(is_expanded?'s':'e')+'"></span>'
+                            +'<div style="display:inline-block;width:70%">'
+                            +'<h2 style="margin:0">'+grp_val+'  '+detailtypes.groups[idx].name+'</h2>' //+grp_val+' '
+                            +'<div style="padding-top:4px;"><i>'+detailtypes.groups[idx].description+'</i></div></div></div>';
+                        }
+
+                        return output;
+                    },
+                    renderer: this._detailtypeListItemRenderer
+                }
+            };
+
+            this.panel_dty_list.empty();
+            
+            //open list of record types from other database
+            window.hWin.HEURIST4.ui.showEntityDialog('defDetailTypes', dty_options);
+
         }
         panel_dbs.hide();
         this.panel_rty.show();
@@ -1177,9 +1332,74 @@ $.widget( "heurist.importStructure", {
         + '</div>';
 
         return html;
-
-
     },
+
+    _detailtypeListItemRenderer: function(recordset, record){
+
+        function fld(fldname){
+            return window.hWin.HEURIST4.util.htmlEscape(recordset.fld(record, fldname));
+        }
+        function fld2(fldname, col_width){
+            swidth = '';
+            if(!window.hWin.HEURIST4.util.isempty(col_width)){
+                swidth = ' style="width:'+col_width+'"';
+            }
+            return '<div class="item" '+swidth+'>'+window.hWin.HEURIST4.util.htmlEscape(recordset.fld(record, fldname))+'</div>';
+        }
+
+        var dbs = window.hWin.HEURIST4.remote;
+        var recID = fld('dty_ID');
+        var dty_ccode = fld('dty_ConceptID');
+
+        //find in local defintions by concept code - if found - it is already imported
+        var local_id = $Db.getLocalID( 'dty', dty_ccode);
+        if(local_id > 0){
+            return '';
+        }
+
+        var btn_actions = '<div style="width:60px;">'
+        + '<div title="Click to show details" Xclass="ui-button ui-widget ui-state-default ui-corner-all ui-button-icon-only" role="button" aria-disabled="false" data-key="expand" '
+        + ' style="display:inline-block;height:16px;">'
+        +     '<span style="padding-top: 6px;" class="ui-button-icon-primary ui-icon ui-icon-carat-'
+        + ((dbs._selectedDtyID==recID)?'d':'r')+'"></span><span class="ui-button-text"></span>'
+        + '</div>'
+        + '<div title="Click to import this base field" Xclass="ui-button ui-widget ui-state-default ui-corner-all ui-button-icon-only" role="button" aria-disabled="false" data-key="import" '
+        + ' style="display:inline-block;height:16px;vertical-align:bottom;font-size:1.4em;padding-left:20px">'
+        +     '<span class="ui-button-icon-primary ui-icon ui-icon-arrowthick-1-s" style="cursor:pointer"></span><span class="ui-button-text"></span>'
+        + '</div></div>';
+
+        var info = '';
+        if(dbs._selectedDtyID==recID){
+
+            info = '<table style="text-align: left;font-size:0.9em; margin: 10px 0px;width:100%">';
+
+            var dty_Doc  = fld('dty_Documentation');
+            var dty_Help  = fld('dty_HelpText');
+            var dty_Type  = fld('dty_Type');
+
+            info += '<tr><th style="width: 90px;">Type</th><td>'+ $Db.baseFieldType[dty_Type] +'</td></tr>'
+                 +  '<tr><th style="width: 90px;">Description</th><td>'+ dty_Help +'</td></tr>'
+                 +  '<tr><th style="width: 90px;">Documentation</th><td>'+ dty_Doc +'</td></tr>'
+                 +  '<tr><th style="width: 90px;">Concept Code</th><td>'+ dty_ccode +'</td></tr>'
+                 +  '<tr><th style="width: 90px;">Already in DB?</th><td>'+ (local_id > 0 ? 'yes' : 'no') +'</td></tr>'
+
+            info += "</table></div>";
+        }    
+
+        var recTitle = fld2('dty_Name','15em');
+
+        var html = '<div class="recordDiv" style="min-height:16px"'
+        +' id="rd'+recID+'" recid="'+recID+'">'
+        + btn_actions
+        + '<div class="recordTitle recordTitle2" title="'+fld('dty_HelpText')
+        +'" style="right:10px;left:94px">'
+        +     recTitle
+        + '</div>'
+        + info
+        + '</div>';
+
+        return html;
+    }
 
 });
    

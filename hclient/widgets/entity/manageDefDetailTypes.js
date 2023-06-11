@@ -30,6 +30,8 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
 
     updatedRstField: null,
     
+    use_remote: false,
+    
     //
     //
     //    
@@ -46,6 +48,11 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
         
         this.options.layout_mode = 'short';
         this.options.use_cache = true;
+
+        if(this.options.import_structure){
+            this.options.use_cache = true;
+            this.use_remote = true; //use HEURIST4.remote.detailtypes for import structures
+        }
 
         //this.options.edit_mode = 'popup';
         
@@ -260,6 +267,15 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
             that._loadData(true);
         }
         
+        if(this.use_remote){
+
+            this.recordList.resultList( this.options.recordList );
+
+            that._loadData(true);
+
+            that.searchForm.css({'height':0});
+            that.recordList.css({'top':0});
+        }
         
         // init search header
         this.searchForm.searchDefDetailTypes(this.options);
@@ -294,7 +310,24 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
     _loadData: function(is_first){
         
         var that = this;
-      
+        if(this.use_remote && this.options.import_structure){
+            window.hWin.HAPI4.SystemMgr.get_defs( //only basefield names
+                {detailtypes:'all', mode:2, remote:that.options.import_structure.database_url}, function(response){ console.log(response);
+                    if(response.status == window.hWin.ResponseStatus.OK){
+
+                        if(!window.hWin.HEURIST4.remote){
+                            window.hWin.HEURIST4.remote = {};
+                        }
+
+                        window.hWin.HEURIST4.remote.detailtypes = response.data.detailtypes;
+
+                        that._cachedRecordset = that.getRecordsetFromRemote(response.data.detailtypes, true);
+                    }else{
+                        window.hWin.HEURIST4.msg.showMsgErr(response);
+                    }
+                }
+            );
+        }else
         if(this.options.use_cache){
                 this.updateRecordList(null, {recordset:$Db.dty()});
                 if(is_first!==true)this.searchForm.searchDefDetailTypes('startSearch');
@@ -2160,6 +2193,84 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
             }
         
             return btn_array;
+    },
+
+    getRecordsetFromRemote: function( detailtypes, hideDisabled ){
+
+        var rdata = { 
+            entityName:'defDetailTypes',
+            total_count: 0,
+            fields:[],
+            records:{},
+            order:[] };
+
+        detailtypes = window.hWin.HEURIST4.util.cloneJSON(detailtypes);
+
+        rdata.fields = detailtypes.typedefs.commonFieldNames; console.log();
+        rdata.fields.unshift('dty_ID');
+        
+        var idx_ccode = 0;
+        if(this.options.import_structure){
+            rdata.fields.push('dty_ID_local');
+            idx_ccode = detailtypes.typedefs.fieldNamesToIndex.dty_ConceptID;
+        }
+
+        var idx_visibility = detailtypes.typedefs.fieldNamesToIndex.dty_ShowInLists;
+        var idx_groupid = detailtypes.typedefs.fieldNamesToIndex.dty_DetailTypeGroupID;
+        var hasFieldToImport = false;
+        var trash_id = -1;
+
+        for (var key in detailtypes.groups){
+            if(detailtypes.groups[key].name == 'Trash'){
+                trash_id = detailtypes.groups[key].id;
+                break;
+            }
+        }
+
+        for (var r_id in detailtypes.typedefs)
+        {
+            if(r_id>0){
+                var detailtype = detailtypes.typedefs[r_id].commonFields;
+                var isHidden = (detailtype[idx_visibility] == '0' || detailtype[idx_groupid] == trash_id);
+
+                if(hideDisabled && isHidden){
+                    continue;
+                }
+                
+                if(this.options.import_structure){
+                    var concept_code =  detailtype[ idx_ccode ];
+                    var local_rtyID = $Db.getLocalID( 'dty', concept_code );
+                    detailtype.push( local_rtyID );
+                    hasFieldToImport = hasFieldToImport || !(local_rtyID>0);
+                }
+                
+                detailtype.unshift(r_id);
+                
+                if(detailtypes.counts) detailtype.push(detailtypes.counts[r_id]);
+                
+                rdata.records[r_id] = detailtype;
+                rdata.order.push( r_id );
+                
+            }
+        }
+        rdata.count = rdata.order.length;
+        
+        
+        if(this.options.import_structure){
+            this.recordList.resultList('option', 'empty_remark',
+                                        '<div style="padding:1em 0 1em 0">'+
+                                        (hasFieldToImport
+                                        ?this.options.entity.empty_remark
+                                        :'Your database already has all the fields available in this source'
+                                        )+'</div>');
+        }
+        
+        this._cachedRecordset = new hRecordSet(rdata);
+        this.recordList.resultList('updateResultSet', this._cachedRecordset);
+        
+        this.searchForm.searchDefDetailTypes('startSearch');
+        
+        return this._cachedRecordset;
     }    
 
 });
