@@ -256,44 +256,51 @@ class DbAnnotations extends DbEntityBase
 
             //thumbnail
             // "selector":[{"type":"FragmentSelector","value":"xywh=524,358,396,445"}
-            if(@$anno_dec['target']['selector'] && defined('DT_THUMBNAIL')){
-                foreach ($anno_dec['target']['selector'] as $selector){
-                    if(@$selector['type']=='FragmentSelector'){
-                        $region = @$selector['value'];
-                        if($region){
-                            $region = substr($region, 5);
-                            
-                            // {scheme}://{server}{/prefix}/{identifier}/{region}/{size}/{rotation}/{quality}.{format}
-                            $url = $anno['canvas'].'/'.$region.'/!200,200/0/default.jpg';
-                            
-                            $tmp_file = HEURIST_SCRATCH_DIR.'/iiif_thumb.jpg';
-                            //tempnam(HEURIST_SCRATCH_DIR,'iiif_thumb');
-                            
-                            $res = saveURLasFile($url, $tmp_file);
-
-                            if($res>0){
-                                $entity = new DbRecUploadedFiles($this->system, null);
-
-                                $dtl_UploadedFileID = $entity->registerFile($tmp_file, null); //it returns ulf_ID
-
-                                if($dtl_UploadedFileID===false){
-                                    $err_msg = $system->getError();
-                                    $err_msg = $err_msg['message'];
-                                    $system->clearError();  
-                                }else{
-                                    $details[DT_THUMBNAIL][] = $dtl_UploadedFileID[0];
+            if(@$anno['canvas']){
+                if(@$anno_dec['target']['selector'] && defined('DT_THUMBNAIL')){
+                    foreach ($anno_dec['target']['selector'] as $selector){
+                        if(@$selector['type']=='FragmentSelector'){
+                            $region = @$selector['value'];
+                            if($region){
+                                $region = substr($region, 5);
+                                
+                                //remove /canvas to get image url
+                                // https://gallica.bnf.fr/iiif/ark:/12148/bpt6k9604118j/canvas/f11/ 
+                                $url = $anno['canvas'];
+                                if(strpos($url, '/canvas/')>0){
+                                    $url = str_replace('/canvas/','/',$url);
                                 }
+                                
+                                // {scheme}://{server}{/prefix}/{identifier}/{region}/{size}/{rotation}/{quality}.{format}
+                                $url = $url.'/'.$region.'/!200,200/0/default.jpg';
+                                
+                                $tmp_file = HEURIST_SCRATCH_DIR.'/'.$anno['uuid'].'.jpg';
+                                //tempnam(HEURIST_SCRATCH_DIR,'iiif_thumb');
+                                //tempnam()
+                                $res = saveURLasFile($url, $tmp_file);
+
+                                if($res>0){
+                                    $entity = new DbRecUploadedFiles($this->system, null);
+
+                                    $dtl_UploadedFileID = $entity->registerFile($tmp_file, null); //it returns ulf_ID
+
+                                    if($dtl_UploadedFileID===false){
+                                        $err_msg = $system->getError();
+                                        $err_msg = $err_msg['message'];
+                                        $system->clearError();  
+                                    }else{
+                                        $details[DT_THUMBNAIL][] = $dtl_UploadedFileID[0];
+                                    }
+                                }
+                                
+                                
+                                break;   
                             }
-                            
-                            
-                            break;   
                         }
                     }
                 }
             }
-        }
         
-        if(@$anno['canvas']){
             $details[DT_URL][] = $anno['canvas'];
         }
         $details[$this->dty_Annotation_Info][] = $anno['data'];

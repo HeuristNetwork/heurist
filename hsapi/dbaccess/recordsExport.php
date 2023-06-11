@@ -1992,7 +1992,7 @@ public static function getIiifResource($record, $ulf_ObfuscatedFileID, $type_res
     $info = array();
     
     if($record==null){
-        //find file infor by obfuscation id
+        //find file info by obfuscation id
         $info = fileGetFullInfo(self::$system, $ulf_ObfuscatedFileID);
         
         if(count($info)>0){
@@ -2093,7 +2093,8 @@ public static function getIiifResource($record, $ulf_ObfuscatedFileID, $type_res
             $tumbnail_url = HEURIST_ICON_URL.$rectypeID.'&version=thumb';
         }
         
-        $service = '';        
+        $service = '';   
+        $resource_id = '';     
         
         //get iiif image parameters
         if($fileinfo['ulf_OrigFileName']=='_iiif_image'){ //this is image info - it gets all required info from json
@@ -2125,7 +2126,7 @@ public static function getIiifResource($record, $ulf_ObfuscatedFileID, $type_res
                         $quality = 'default';
                     }
                     $resource_url = $iiif_manifest['@id'].'/full/full/0/'.$quality.'.jpg';                    
-                    
+                    $resource_id = $iiif_manifest['@id'];
                     
                     if(self::$version==2){
 $service = <<<SERVICE2
@@ -2200,11 +2201,29 @@ CANVAS2;
 //        "width": $width
 
 // Returns json
-$root_uri = HEURIST_BASE_URL_PRO.'api/'.HEURIST_DBNAME.'/iiif/';
-$canvas_uri = $root_uri.'canvas/'.$fileid;
-$annopage_uri = $root_uri.'page/'.$fileid;
-$annotation_uri = $root_uri.'annotation/'.$fileid;
-$image_uri = $root_uri.'image/'.$fileid.'/info.json';
+if($resource_id){ //this is iiif image
+    
+    //last section
+    $parts = explode('/',$resource_id);
+    $cnt = count($parts)-1;
+    array_splice( $parts, $cnt, 0, 'canvas');
+    $canvas_uri = implode('/',$parts);
+    $parts[$cnt] = 'page';
+    $annopage_uri = implode('/',$parts);
+    $parts[$cnt] = 'annotation';
+    $annotation_uri = implode('/',$parts);
+    $image_uri = $resource_id.'/info.json';
+                    
+    
+}else{
+    $root_uri = HEURIST_BASE_URL_PRO.'api/'.HEURIST_DBNAME.'/iiif/';
+    $canvas_uri = $root_uri.'canvas/'.$fileid;
+    $annopage_uri = $root_uri.'page/'.$fileid;
+    $annotation_uri = $root_uri.'annotation/'.$fileid;
+    $image_uri = $root_uri.'image/'.$fileid.'/info.json';
+}
+
+
 
 $annotation = <<<ANNOTATION3
             {
