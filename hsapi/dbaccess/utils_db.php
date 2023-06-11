@@ -1695,7 +1695,7 @@ UNIQUE KEY swf_StageKey (swf_RecTypeID, swf_Stage)
   trn_Source varchar(64) NOT NULL COMMENT 'The column to be translated (unique names identify source)',
   trn_Code int unsigned NOT NULL COMMENT 'The primary key / ID in the table containing the text to be translated',
   trn_LanguageCode char(3) NOT NULL COMMENT 'The translation language code ISO639',
-  trn_Translation varchar(20000) NOT NULL COMMENT 'The translation of the text in this location (table/field/id)',
+  trn_Translation text NOT NULL COMMENT 'The translation of the text in this location (table/field/id)',
   trn_Modified timestamp NOT NULL default CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP COMMENT 'Date of last modification of this record, used to get last updated date for table',
   PRIMARY KEY  (trn_ID),
   UNIQUE KEY trn_composite (trn_Source,trn_Code,trn_LanguageCode),

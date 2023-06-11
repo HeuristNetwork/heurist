@@ -236,45 +236,48 @@ function do_print_table($desc, $tname, $where=null)
     }
     
     $res = $mysqli->query($query);
-    if($isHTML) print "<p>";
+    if($res){
 
-    print "\n$startToken\n";
+        if($isHTML) print "<p>";
+        print "\n$startToken\n";
 
-    //get table prefix             
-    $id_field = $flds_names[0];
-    $prefix = substr($id_field,0,3);
-    
-    while ($row = $res->fetch_assoc()) { 
-        
-        $vals = array();
-        foreach($flds_list as $fld => $type){
+        //get table prefix             
+        $id_field = $flds_names[0];
+        $prefix = substr($id_field,0,3);
+        while ($row = $res->fetch_assoc()) { 
+            
+            $vals = array();
+            foreach($flds_list as $fld => $type){
 
-            if($prefix=='rty' && !($row[$id_field]>0)) continue;
+                if($prefix=='rty' && !($row[$id_field]>0)) continue;
 
-            $val = $row[$fld];
-            if(strpos($type,'text')!==false || strpos($type,'varchar')!==false){
-                $val = htmlspecialchars($mysqli->real_escape_string($val));
-            }else if(strpos($fld,'OriginatingDBID')!==false){
-                if(!($val>0)){
-                    $val = HEURIST_DBID; //if local - show this db reg id
+                $val = $row[$fld];
+                if(strpos($type,'text')!==false || strpos($type,'varchar')!==false){
+                    $val = htmlspecialchars($mysqli->real_escape_string($val));
+                }else if(strpos($fld,'OriginatingDBID')!==false){
+                    if(!($val>0)){
+                        $val = HEURIST_DBID; //if local - show this db reg id
+                    }
+                }else if(strpos($fld,'IDInOriginatingDB')!==false){
+                    if(HEURIST_DBID>0 && !($val>0)){
+                        $val = $row[$id_field];
+                    }
                 }
-            }else if(strpos($fld,'IDInOriginatingDB')!==false){
-                if(HEURIST_DBID>0 && !($val>0)){
-                    $val = $row[$id_field];
-                }
+                $vals[] = $val;   
+            }   
+            print "('".implode("','",$vals)."'),"; 
+
+            if ($_REQUEST['pretty']) {
+                print"<br>";
             }
-            $vals[] = $val;   
-        }   
-        print "('".implode("','",$vals)."'),"; 
-
-        if ($_REQUEST['pretty']) {
-            print"<br>";
-        }
-                //print_row($row, $tname); 
+                    //print_row($row, $tname); 
+        }//while
+        $res->close();
+        print "$endToken\n";
+    }else{
+        print '-- '.$mysqli->error;
     }
-    
-    $res->close();
-    print "$endToken\n";
+   
 
     if($isHTML) print "<p>&nbsp;<p>&nbsp;<p>";
 }
