@@ -2019,7 +2019,7 @@ this_id       : "term"
     }
     
     //
-    // save current output to file
+    // save current output to file (not used)
     //            
     function _saveOutput(){
         if( _currentQuery )
