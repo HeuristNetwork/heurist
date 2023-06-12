@@ -46,7 +46,7 @@ $entities = array(
 'reminders'=>'DbUsrReminders',
 'users'=>'SysUsers',
 'groups'=>'SysGroups',
-'records'=>'Records',
+'records'=>'Records', //only search allowed
 'login'=>'System',
 'logout'=>'System',
 

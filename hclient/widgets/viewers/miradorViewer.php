@@ -72,7 +72,7 @@ if q only defined all images linked to record(s) will be included
         
     
     //$_SERVER['QUERY_STRING'];
-        $manifest_url = $url;
+        $manifest_url = str_replace('&amp;','&',htmlentities($url));
         
         $use_custom_mirador = file_exists(dirname(__FILE__).'/../../../external/mirador3/dist/main.js');
 ?>
@@ -102,8 +102,15 @@ if($use_custom_mirador){
 <body>
 <div id="demo"></div>
 <script>
-    window.endpointURL = "<?php echo $baseUrl.'/h6-alpha/api/'.$_REQUEST['db'].'/annotations';?>";
+<?php
+    $dbname = @$_REQUEST['db'];
+    if (!preg_match('[\W]', $dbname)){
+?>      
+    window.endpointURL = "<?php echo $baseUrl.'/h6-alpha/api/'.$dbname.'/annotations';?>";
     window.manifestUrl = "<?php echo $manifest_url;?>";
+<?php    
+    }
+?>
     window.hideThumbs = <?php echo (@$_REQUEST['iiif_image']?'true':'false');?>; 
     window.sourceRecordId = <?php echo (@$_REQUEST['recID']>0?$_REQUEST['recID']:0);?>; 
 </script>

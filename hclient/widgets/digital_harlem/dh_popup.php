@@ -106,8 +106,10 @@
     $recTypeID = getFieldValue($records, $recID, 'rec_RecTypeID');
 
 
+    $uri_self = str_replace('&amp;','&',htmlentities($_SERVER['REQUEST_URI']));
+    
     $moredetailLink =  '<p><a href="javascript:void(0)" class="moredetail" '.
-        'onClick="window.hWin.HEURIST4.msg.showDialog(\''.$_SERVER['REQUEST_URI'].'&full=1\');">More Detail</a></p>';
+        'onClick="window.hWin.HEURIST4.msg.showDialog(\''.$uri_self.'&full=1\');">More Detail</a></p>';
 
         
     if($recTypeID==RT_ADDRESS){
