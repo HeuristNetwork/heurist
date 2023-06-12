@@ -763,10 +763,10 @@ if ($bkm_ID>0 || $rec_id>0) {
                     
                     $bibInfo = mysql__select_row_assoc($system->get_mysqli(),
                             'select * from Records left join defRecTypes on rec_RecTypeID=rty_ID'
-                            .' where rec_ID='.$id.' and not rec_FlagTemporary');
+                            .' where rec_ID='.intval($id).' and not rec_FlagTemporary');
                 
                     if($id!=$rec_id){  //print details for linked records - hidden
-                        print '<div data-recid="'.$id.'" style="display:none">'; //font-size:0.8em;
+                        print '<div data-recid="'.intval($id).'" style="display:none">'; //font-size:0.8em;
                         print_details($bibInfo);
                         print '</div>';
                     }
@@ -1006,8 +1006,7 @@ function print_private_details($bib) {
         ?>
         <div class="detailRow fieldRow"<?php echo $is_map_popup?' style="display:none"':''?>>
             <div class=detailType>Added</div><div class=detail>
-                <?php print $add_date.'  '
-                .' '.$add_date_local; ?>
+                <?php print htmlspecialchars($add_date.'  '.$add_date_local); ?>
             </div>
         </div>
         <?php
@@ -1016,8 +1015,7 @@ function print_private_details($bib) {
         ?>
         <div class="detailRow fieldRow"<?php echo $is_map_popup?' style="display:none"':''?>>
             <div class=detailType>Updated</div><div class=detail>
-                <?php print $mod_date
-                .' '.$mod_date_local; ?>
+                <?php print htmlspecialchars($mod_date.' '.$mod_date_local); ?>
             </div>
         </div>
         <?php

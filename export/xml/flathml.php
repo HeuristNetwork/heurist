@@ -1908,7 +1908,7 @@ $limit = 1000;
 if($intofile){ // flags HuNI manifest + separate files per record
 
     if ($error_msg) {
-        print "Error: ".$error_msg;
+        print "Error: ".htmlspecialchars($error_msg);
     }else{
 
         ?>

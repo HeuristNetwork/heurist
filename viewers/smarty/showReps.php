@@ -230,7 +230,7 @@ function executeSmartyTemplate($system, $params){
     if( !$qresult ||  !array_key_exists('records', $qresult) || !(intval(@$qresult['reccount'])>0) ){
     
         if($publishmode==4){ //from string var
-            echo ($emptysetmessage && $emptysetmessage != 'def') ? $emptysetmessage : '';
+            echo htmlspecialchars(($emptysetmessage && $emptysetmessage != 'def') ? $emptysetmessage : '');
         }else{
             
             if ($emptysetmessage && $emptysetmessage != 'def') {

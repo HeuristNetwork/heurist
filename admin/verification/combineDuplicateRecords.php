@@ -416,7 +416,7 @@ $reference_bdts = mysql__select_assoc2($mysqli,'select dty_ID, dty_Name from def
                                 if ($is_master) print '<td><div><b>MASTER</b></div></td>';
                                 else print '<td><div><b>Duplicate</b></div></td>';
                                 print '<td style="width: 500px;">';
-                                print '<div style="font-size: 120%;"><a target="edit" href="'.HEURIST_BASE_URL.'?fmt=edit&db='.HEURIST_DBNAME.'&recID='.$rec_ID.'">'.$rec_ID. ' ' . '<b>'.htmlspecialchars($record['rec_Title']).'</b></a> - <span style="background-color: #EEE;">'. $rtyNameLookup[$record['rec_RecTypeID']].'</span></div>';
+                                print '<div style="font-size: 120%;"><a target="edit" href="'.HEURIST_BASE_URL.'?fmt=edit&db='.HEURIST_DBNAME.'&recID='.intval($rec_ID).'">'.intval($rec_ID). ' ' . '<b>'.htmlspecialchars($record['rec_Title']).'</b></a> - <span style="background-color: #EEE;">'. htmlspecialchars($rtyNameLookup[$record['rec_RecTypeID']]).'</span></div>';
                                 print '<table>';
                                 if ($is_master) {
                                     $master_details = $record['details'];
