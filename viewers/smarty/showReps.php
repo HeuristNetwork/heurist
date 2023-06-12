@@ -483,7 +483,7 @@ function executeSmartyTemplate($system, $params){
     }
     
     if($publishmode==0 && $params["limit"] < count($recIDs)){
-        echo '<div><b>Report preview has been truncated to '.$params["limit"].' records.<br>'
+        echo '<div><b>Report preview has been truncated to '.intval($params["limit"]).' records.<br>'
         .'Please use publish or print to get full set of records.<br Or increase the limit in preferences</b></div>';
     }
     
@@ -863,7 +863,7 @@ function save_report_into_file($tpl_source){
         }
         
         if($gparams['void'] && $errors!=null){
-            echo $errors."\n";        
+            echo htmlspecialchars($errors)."\n";        
         }
     }
     
@@ -900,7 +900,7 @@ function save_report_into_file($tpl_source){
         
         if($errors!=null){
             header("Content-type: text/html;charset=UTF-8");
-            echo $errors;
+            echo htmlspecialchars($errors);
         }else{
             ?>
             <html>
@@ -910,13 +910,13 @@ function save_report_into_file($tpl_source){
             </head>
             <body style="margin: 25px;">
             <h3>
-                The following file has been updated:  <?=$res_file?></h3><br />
+                The following file has been updated:  <?php echo htmlspecialchars($res_file);></h3><br />
 
             <?php
             $rps_recid = @$gparams['rps_id'];
             if($rps_recid){
 
-                $link = HEURIST_BASE_URL."viewers/smarty/updateReportOutput.php?db=".$system->dbname()."&publish=3&id=".$rps_recid;
+                $link = str_replace('&amp;','&',htmlspecialchars(HEURIST_BASE_URL."viewers/smarty/updateReportOutput.php?db=".$system->dbname()."&publish=3&id=".$rps_recid));
                 ?>
 
                 <p style="font-size: 14px;">View the generated files by clicking the links below:<br /><br />
@@ -938,19 +938,20 @@ function save_report_into_file($tpl_source){
                 $surl = $surl."&h4=".$gparams['h4'];
             }
 
-
+            $surl = str_replace('&amp;','&',htmlspecialchars($url, ENT_QUOTES));
+            
             ?><br />
             To publish the report as dynamic (generated on-the-fly) output, use the code below.
             <br /><br />
             URL:<br />
             <textarea readonly style="border: 1px dotted gray; padding: 3px; margin: 2; font-family: times; font-size: 10px; width: 70%; height: 60px;"
-                id="code-textbox1" onClick="select(); if (window.clipboardData) clipboardData.setData('Text', value);"><?=$surl?></textarea>
+                id="code-textbox1" onClick="select(); if (window.clipboardData) clipboardData.setData('Text', value);"><?php echo $surl;?></textarea>
 
             <br />
             Javascript wrap:<br />
             <textarea readonly style="border: 1px dotted gray; padding: 3px; margin: 2; font-family: times; font-size: 10px; width: 70%; height: 100px;"
                 id="code-textbox2" onClick="select(); if (window.clipboardData) clipboardData.setData('Text', value);">
-                <script type="text/javascript" src="<?=$surl?>&mode=js"></script><noscript><iframe width="80%" height="70%" frameborder="0" src="<?=$surl?>"></iframe></noscript>
+                <script type="text/javascript" src="<?php echo $surl;?>&mode=js"></script><noscript><iframe width="80%" height="70%" frameborder="0" src="<?php echo $surl;?>"></iframe></noscript>
             </textarea>
             <?php
             echo "</p></body></html>";
@@ -1225,7 +1226,7 @@ function smarty_error_output($system, $error_msg){
     if($publishmode>0 && $publishmode<4 && $outputfile!=null){ //save empty output into file
         save_report_into_file($error_msg."<div style=\"padding:20px;font-size:110%\">Currently there are no results</div>");
     }else{
-        echo $error_msg;    
+        echo htmlspecialchars($error_msg);    
     }
 }
 

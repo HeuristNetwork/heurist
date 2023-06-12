@@ -170,6 +170,8 @@ if($is_not_inited){
 //$url = 'https://mbh.huma-num.fr/sites/default/files/mbh-3d/alcazar_ms_11_reliure.fbx';
 //$url = EDIR."models/alcazar_ms_11_reliure.fbx"; 
 
+$url = str_replace('&amp;','&',htmlspecialchars($url));
+
 ?>
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
