@@ -43,8 +43,8 @@ if($error){
             if(!@$_REQUEST['auth']){
                     ?>
                     <html>
-                        <?php  echo $_SERVER['PHP_SELF']; ?><br>
-                        <a href="<?php echo $_SERVER['PHP_SELF'].'?a=login&auth=1&db='.$_REQUEST['db']; ?>">LOGIN</a></html>
+                        <?php  echo htmlspecialchars($_SERVER['PHP_SELF']); ?><br>
+                        <a href="<?php echo htmlspecialchars($_SERVER['PHP_SELF']).'?a=login&auth=1&db='.$_REQUEST['db']; ?>">LOGIN</a></html>
                     <?php
                     exit();
             }

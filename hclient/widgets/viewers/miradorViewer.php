@@ -72,7 +72,7 @@ if q only defined all images linked to record(s) will be included
         
     
     //$_SERVER['QUERY_STRING'];
-        $manifest_url = str_replace('&amp;','&',htmlentities($url));
+        $manifest_url = str_replace('&amp;','&',htmlspecialchars($url));
         
         $use_custom_mirador = file_exists(dirname(__FILE__).'/../../../external/mirador3/dist/main.js');
 ?>
@@ -112,7 +112,7 @@ if($use_custom_mirador){
     }
 ?>
     window.hideThumbs = <?php echo (@$_REQUEST['iiif_image']?'true':'false');?>; 
-    window.sourceRecordId = <?php echo (@$_REQUEST['recID']>0?$_REQUEST['recID']:0);?>; 
+    window.sourceRecordId = <?php echo (@$_REQUEST['recID']>0?intval($_REQUEST['recID']):0);?>; 
 </script>
 <?php
 if($use_custom_mirador){

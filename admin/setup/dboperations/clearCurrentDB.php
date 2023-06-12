@@ -64,12 +64,15 @@ require_once(dirname(__FILE__).'/../../../records/index/elasticSearch.php');
     <div class='banner'><h3>Clear Records from Current Heurist database</h3></div>
     <div id='page-inner' style='overflow:auto'>
 <?php
+    $dbname = $_REQUEST['db'];
+    $is_db_valid = mysql__check_dbname($dbname);
+    
     //owner can delete without password
-    if(!$system->is_dbowner() && $system->verifyActionPassword(@$_REQUEST['pwd'], $passwordForDatabaseDeletion) ){
+    if ($is_db_valid!==true){
+        print '<div class="ui-state-error">'.$is_db_valid[1].'</div>';
+    }else if(!$system->is_dbowner() && $system->verifyActionPassword(@$_REQUEST['pwd'], $passwordForDatabaseDeletion) ){
             print '<div class="ui-state-error">'.$response = $system->getError()['message'].'</div>';
     }else{
-
-    $dbname = $_REQUEST['db'];
 
     if(!@$_REQUEST['mode']) {        //dialog if mode set this is action
 ?>
@@ -91,7 +94,7 @@ require_once(dirname(__FILE__).'/../../../records/index/elasticSearch.php');
         <p>Enter the words CLEAR ALL RECORDS in ALL-CAPITALS to confirm that you want to clear all records from the current database
         <p>Type the words above to confirm deletion of records: <input type='input' maxlength='20' size='20' name='del' id='del'>
         &nbsp;&nbsp;&nbsp;&nbsp;<input type='submit' value='OK to Clear' class="h3button" style='font-weight: bold;' >
-        <input name="pwd" value"<?php echo @$_REQUEST['pwd'];?>" type="hidden">
+        <input name="pwd" value"<?php echo htmlentities(@$_REQUEST['pwd']);?>" type="hidden">
         <input name='mode' value='2' type='hidden'>
         <input name='db' value='<?=$dbname?>' type='hidden'>
     </form>

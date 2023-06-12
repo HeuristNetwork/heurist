@@ -56,7 +56,7 @@ if( $system->verifyActionPassword($_REQUEST['pwd'], $passwordForServerFunctions)
 */
 ?>            
 
-<script>window.history.pushState({}, '', '<?php echo $_SERVER['PHP_SELF']; ?>')</script>  
+<script>window.history.pushState({}, '', '<?php echo htmlspecialchars($_SERVER['PHP_SELF']); ?>')</script>  
          
 <div style="font-family:Arial,Helvetica;font-size:12px">
             <p>This report shows </p>
