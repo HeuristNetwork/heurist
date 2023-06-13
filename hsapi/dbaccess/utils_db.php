@@ -1687,7 +1687,7 @@ UNIQUE KEY swf_StageKey (swf_RecTypeID, swf_Stage)
                     }                    
             }
             
-            if($dbVerSubSub<10){
+            if($dbVerSubSub<10 || !hasTable($mysqli, 'defTranslations')){
                 
                 $mysqli->query('DROP TABLE IF EXISTS defTranslations;');
                 $mysqli->query("CREATE TABLE defTranslations (
