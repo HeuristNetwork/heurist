@@ -63,6 +63,9 @@ if(!isset($message)){
         }
     }
 }
+
+    $dbname = $_REQUEST['db'];
+    $dbname = (preg_match('[\W]', $dbname))?'':$dbname;
 ?>
 <html>
     <head>
@@ -129,7 +132,7 @@ if(!isset($message)){
             }
 
             $(document).ready(() => {
-                window.hWin.HAPI4 = new hAPI('<?php echo $_REQUEST['db']?>', onHapiInit);
+                window.hWin.HAPI4 = new hAPI('<?php echo $dbname;?>', onHapiInit);
             });
         </script>
     <?php
@@ -145,7 +148,7 @@ if(!isset($message)){
                 style="width:90%;margin:auto;margin-top:10px;padding:10px;">
                 <span class="ui-icon <?php echo ($is_error)?'ui-icon-alert':'ui-icon-info'; ?>" 
                       style="float: left; margin-right:.3em;font-weight:bold"></span>
-                <?php echo $message;?>
+                <?php echo strip_tags($message,'<a><u><i><em><b><strong><sup><sub><small><br><h1><h2><h3><h4><p><ul><li><img>');?>
             </div>
         </div>
     </body>

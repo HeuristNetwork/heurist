@@ -21,6 +21,12 @@
 
 require_once(dirname(__FILE__).'/initPageMin.php'); //without client hapi
 
+if(!@$_REQUEST['db']){
+    $message = '<b>Required</b> database parameter >>> is not defined';
+    include ERROR_REDIR;
+    exit();
+}
+
 /*
 Workflow:
 loads main page for logo, icon, banner, style
@@ -61,10 +67,14 @@ if (($_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0.0.1')
     <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/profile/profile_edit.js"></script>   
 <?php
     include dirname(__FILE__).'/initPageCss.php'; 
+    
+    $dbname = @$_REQUEST['db'];
+    $dbname = (preg_match('[\W]', $dbname))?'':$dbname;
 ?>    
 <script>  
 var login_warning = ''
 var requiredLevel = 0; //1-admin, 2-owner, 0 logged in
+var database = '<?php echo $dbname;?>';
 //
 //
 //
@@ -72,7 +82,7 @@ function onHapiInit(success){
     
     if(!success){    
         window.hWin.HEURIST4.msg.showMsgErr('Cannot initialize system on client side. '
-            +'Database <?php echo $_REQUEST['db']?>, please consult Heurist developers');
+            +'Database '+database+', please consult Heurist developers');
             return;
     }
     
@@ -137,7 +147,7 @@ function verify_credentials( show_warning ){
 //init hapi    
 //
 $(document).ready(function() {
-    window.hWin.HAPI4 = new hAPI('<?php echo $_REQUEST['db']?>', onHapiInit);
+    window.hWin.HAPI4 = new hAPI(database, onHapiInit);    
 });    
 </script>    
 </head>

@@ -478,23 +478,9 @@ if($isLocalHost){
         }
 
 
-        //perform search in the case that parameter "q" is defined
-        /*  see mainMenu.js function _performInitialSearch
-        var qsearch = '<?php echo trim(str_replace("'","\'",@$_REQUEST['q'])); ?>';
-        console.log('initial in index.php '+qsearch);                
-
-        if(window.hWin.HAPI4.sysinfo.db_total_records>0 && !window.hWin.HEURIST4.util.isempty(qsearch)){
-
-        var qdomain = '<?=@$_REQUEST['w']?>';
-        var rules = '<?=@$_REQUEST['rules']?>';
-        if(window.hWin.HEURIST4.util.isempty(qdomain)) qdomain = 'a';
-        var request = {q: qsearch, w: qdomain, f: 'map', rules: rules, source:'init' };
-        //window.hWin.HEURIST4.query_request = request;
-        setTimeout(function(){
-        window.hWin.HAPI4.RecordSearch.doSearch(document, request);
-        }, 3000);
-        }
-        */                
+        //perform search in the case that parameter "q" is defined - see mainMenu.js function _performInitialSearch
+        
+        
         //if database is empty show welcome screen
         //if(!(window.hWin.HAPI4.sysinfo.db_total_records>0)){
         //    showTipOfTheDay(false);
@@ -502,7 +488,7 @@ if($isLocalHost){
 
         var lt = window.hWin.HAPI4.sysinfo['layout'];
         if(lt=='WebSearch'){
-            var active_tab = '<?php echo str_replace("'","\'",@$_REQUEST['views']);?>';
+            var active_tab = '<?php echo htmlspecialchars(str_replace("'","\'",@$_REQUEST['views']),ENT_NOQUOTES);?>';
             if(active_tab){
 
                 active_tab = active_tab.split(',')
