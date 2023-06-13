@@ -910,7 +910,7 @@ function save_report_into_file($tpl_source){
             </head>
             <body style="margin: 25px;">
             <h3>
-                The following file has been updated:  <?php echo htmlspecialchars($res_file);></h3><br />
+                The following file has been updated:  <?php echo htmlspecialchars($res_file);?></h3><br />
 
             <?php
             $rps_recid = @$gparams['rps_id'];
