@@ -758,31 +758,12 @@ $.widget( "heurist.importStructure", {
                     groupByCss:'0 1.5em',
                     rendererGroupHeader: function(grp_val, is_expanded){
 
-                        if(!that.panel_dty_list.is(':visible')){
-                            is_expanded = false;
-                        }
-
                         var detailtypes = window.hWin.HEURIST4.remote.detailtypes;
                         var idx = detailtypes.groups.groupIDToIndex[grp_val];
-                        var idx_ccode = detailtypes.typedefs.fieldNamesToIndex.dty_ConceptID;
 
                         var output = '';
-                        let has_values = false;
 
                         if(detailtypes.groups[idx]){
-
-                            for(let i = 0; i < detailtypes.groups[idx].showTypes.length; i ++){
-                                const dty_id = detailtypes.groups[idx].showTypes[i];
-                                let concept_code = detailtypes.typedefs[dty_id]['commonFields'][idx_ccode];
-    
-                                if($Db.getLocalID('dty', concept_code) == 0){
-                                    has_values = true;
-                                    break;
-                                }
-                            }
-                        }
-
-                        if(has_values){
                             output = '<div data-grp="'+grp_val
                             +'" style="font-size:0.9em;padding:14px 0 4px 0px;border-bottom:1px solid lightgray">'
                             +'<span style="display:inline-block;vertical-align:top;padding-top:15px;font-size:20px;" '
@@ -1383,7 +1364,7 @@ $.widget( "heurist.importStructure", {
                  +  '<tr><th style="width: 90px;">Concept Code</th><td>'+ dty_ccode +'</td></tr>'
                  +  '<tr><th style="width: 90px;">Already in DB?</th><td>'+ (local_id > 0 ? 'yes' : 'no') +'</td></tr>'
 
-            info += "</table></div>";
+            info += "</table>";
         }    
 
         var recTitle = fld2('dty_Name','15em');

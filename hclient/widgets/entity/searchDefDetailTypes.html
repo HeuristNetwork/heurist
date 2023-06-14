@@ -16,7 +16,7 @@
 
         <div id="btn_search_start" style="display:none;"></div>   
         
-        <div style="display:inline-block;padding:0.2em">
+        <div style="display:inline-block;padding:0.2em" id="input_field_type_div">
             <div class="header4" style="display: inline-block;text-align:right;">
                 <label for="input_search_type" accesskey="T"><U>T</U>ype</label></div>
             <select id="input_search_type" class="text ui-widget-content ui-corner-all" 
@@ -47,6 +47,12 @@
                 </select>
         </div>
     </div>    
+
+    <div style="display:inline-block;padding:0.2em" id="div_show_already_in_db">
+        <label for="chb_show_already_in_db" title="Show all record types (including that are already in database: allows updating of field list)" accesskey="A">Show All&nbsp;
+        <input id="chb_show_already_in_db" class="text ui-widget-content ui-corner-all" 
+            style="margin-right:0.2em" type="checkbox"/></label>
+    </div>
 
     <div id="div_group_information" style="padding-top: 4px;width:100%;min-height:3em;clear:both"></div>
     

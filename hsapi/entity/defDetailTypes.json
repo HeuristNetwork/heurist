@@ -289,6 +289,14 @@
                     }
                 },
                 {
+                    "dtID": "dty_ID_local",
+                    "dtFields":{
+                        "dty_Type":"integer",
+                        "dty_Role":"virtual",
+                        "rst_Display":"hidden"  
+                    }
+                },
+                {
                     "groupHeader": "Additional",
                     "groupType": "accordion",
                     "groupHelpText":"",

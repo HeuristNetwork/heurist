@@ -61,7 +61,7 @@ $.widget( "heurist.searchDefDetailTypes", $.heurist.searchEntity, {
         this.btn_add_record = this.element.find('#btn_add_record');
         this.btn_find_record = this.element.find('#btn_find_record');
 
-        if(this.options.edit_mode=='none'){
+        if(this.options.edit_mode=='none' || this.options.import_structure){
             this.btn_add_record.hide();
             this.btn_find_record.hide();
         }else{
@@ -100,6 +100,16 @@ $.widget( "heurist.searchDefDetailTypes", $.heurist.searchEntity, {
             this.btn_find_record.hide();
         }
              
+        if(this.options.import_structure){
+            this.chb_show_already_in_db = this.element.find('#chb_show_already_in_db');
+            this._on(this.chb_show_already_in_db,  { change:this.startSearch });
+            this.element.find('#div_group_information').hide();
+            
+            this.options.simpleSearch = true;
+        }else{
+            this.element.find('#div_show_already_in_db').hide();
+        }
+             
         this.input_sort_type = this.element.find('#input_sort_type');
         this._on(this.input_sort_type,  { change:this.startSearch });
         
@@ -108,7 +118,10 @@ $.widget( "heurist.searchDefDetailTypes", $.heurist.searchEntity, {
                                             ?'any':this.options.dtg_ID).change();
         }});
         
-                      
+        if(this.options.simpleSearch){
+            this.element.find('#input_field_type_div').hide();
+            this.element.find('#input_sort_type_div').hide();
+        }
         if($.isFunction(this.options.onInitCompleted)){
             this.options.onInitCompleted.call();
         }else{
@@ -166,7 +179,11 @@ $.widget( "heurist.searchDefDetailTypes", $.heurist.searchEntity, {
             
             
             var sGroupTitle = '';
-            if( this.options.dtg_ID<0 ){
+            if(this.options.import_structure){
+                if(this.chb_show_already_in_db && !this.chb_show_already_in_db.is(':checked')){
+                    request['dty_ID_local'] = '=0';
+                }
+            }else if( this.options.dtg_ID<0 ){
                 //find not in given group
                 request['not:dty_DetailTypeGroupID'] = Math.abs(this.options.dtg_ID);
             }else{

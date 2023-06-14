@@ -2239,14 +2239,12 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
                 
                 if(this.options.import_structure){
                     var concept_code =  detailtype[ idx_ccode ];
-                    var local_rtyID = $Db.getLocalID( 'dty', concept_code );
-                    detailtype.push( local_rtyID );
-                    hasFieldToImport = hasFieldToImport || !(local_rtyID>0);
+                    var local_dtyID = $Db.getLocalID( 'dty', concept_code );
+                    detailtype.push( local_dtyID );
+                    hasFieldToImport = hasFieldToImport || !(local_dtyID>0);
                 }
                 
                 detailtype.unshift(r_id);
-                
-                if(detailtypes.counts) detailtype.push(detailtypes.counts[r_id]);
                 
                 rdata.records[r_id] = detailtype;
                 rdata.order.push( r_id );
