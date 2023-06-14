@@ -676,7 +676,7 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
             this._on(this.searchForm.find('#input_search, #chb_show_already_in_db'), {
                 change: function(){
                     let req = {};
-                    if(this.searchForm.find('#chb_show_already_in_db').is(':checked')){
+                    if(!this.searchForm.find('#chb_show_already_in_db').is(':checked')){
                         req['trm_ID_local'] = '=0';
                     }
                     if(this.searchForm.find('#input_search').val() != ''){
