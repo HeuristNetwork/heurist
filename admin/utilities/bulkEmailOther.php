@@ -54,14 +54,14 @@ if(isset($_REQUEST['get_email']) && isset($_REQUEST['recid'])) {	/* Get the Titl
 	$id = $_REQUEST['recid'];
 
 	// Validate ID
-	if(!is_numeric($id)){
+	if(!is_numeric($id) || intval($id) < 1){
 
-    $response = array("status"=>HEURIST_ERROR, "message"=>"An invalid record id was provided.<br>The Heurist team has been notified.", "request"=>$id);
-    $system->addError(HEURIST_ERROR, "Bulk Email Other: The record IDs for the Email selector are invalid or are not being retrieved correctly. ");
-    $rtn = json_encode($response);
+		$response = array("status"=>HEURIST_ACTION_BLOCKED, "message"=>"An invalid Email record id was provided.", "request"=>htmlspecialchars($id));
+		$system->addError(HEURIST_ERROR, "Bulk Email Other: The record IDs used for the Email selector are invalid or have not been retrieved correctly. Invalid ID => " . htmlspecialchars($id));
+		$rtn = json_encode($response);
 
-    print $rtn;
-    exit();
+		print $rtn;
+		exit();
 	}
 
 	// Get title/name and short summary detail type ids
@@ -70,18 +70,18 @@ if(isset($_REQUEST['get_email']) && isset($_REQUEST['recid'])) {	/* Get the Titl
 	if (empty($title_detailtype_id) || empty($shortsum_detiltype_id)) {
 		$missing = "";
 
-		if(empty($title_detailtype_id) || empty($shortsum_detiltype_id)){
+		if(empty($title_detailtype_id) && empty($shortsum_detiltype_id)){
 			$missing = "for both title and short summary detail types.";
 		}else{
 			$missing = empty($title_detailtype_id) ? "for the title detail type." : "for the short summary detail type.";
 		}
 
-    $response = array("status"=>HEURIST_ERROR, "message"=>"Unable to retrieve the local id $missing <br>The Heurist team has been notified.");
-    $system->addError(HEURIST_ERROR, "Bulk Email Other: Unable to retrieve the local id ". $missing);
-    $rtn = json_encode($response);
+		$response = array("status"=>HEURIST_ACTION_BLOCKED, "message"=>"Unable to retrieve the local id $missing <br>If this problem persists, please notify the Heurist team.");
+		//$system->addError(HEURIST_ERROR, "Bulk Email Other: Unable to retrieve the local id ". $missing);
+		$rtn = json_encode($response);
 
-    print $rtn;
-    exit();
+		print $rtn;
+		exit();
 	}
 
   $query = "SELECT dtl_Value, dtl_DetailTypeID
@@ -91,7 +91,7 @@ if(isset($_REQUEST['get_email']) && isset($_REQUEST['recid'])) {	/* Get the Titl
   $detail_rtn = $mysqli->query($query);
   if(!$detail_rtn){
 
-    $response = array("status"=>HEURIST_ERROR, "message"=>"Unable to retrieve the details of the Email record ID => $id.<br>", "error_msg"=>$mysqli->error, "request"=>$id);
+    $response = array("status"=>HEURIST_ACTION_BLOCKED, "message"=>"Unable to retrieve the details of Email record ID => $id.<br>If this persists, please notify the Heurist team.<br>", "error_msg"=>$mysqli->error, "request"=>$id);
     $rtn = json_encode($response);
 
     print $rtn;
@@ -126,7 +126,7 @@ if(isset($_REQUEST['get_email']) && isset($_REQUEST['recid'])) {	/* Get the Titl
 	$db_list = $mysqli->query($query);
 	if (!$db_list) {
 
-	    $response = array("status"=>HEURIST_ERROR, "message"=>"Unable to retrieve a list of Heurist databases.<br>", "error_msg"=>$mysqli->error, "request"=>$db_request);
+	    $response = array("status"=>HEURIST_ACTION_BLOCKED, "message"=>"Unable to retrieve a list of Heurist databases.<br>", "error_msg"=>$mysqli->error, "request"=>$db_request);
 	    $rtn = json_encode($response);
 
 	    print $rtn;
