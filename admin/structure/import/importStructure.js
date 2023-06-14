@@ -784,6 +784,100 @@ $.widget( "heurist.importStructure", {
             //open list of record types from other database
             window.hWin.HEURIST4.ui.showEntityDialog('defDetailTypes', dty_options);
 
+            var trm_options = {
+                isdialog: false,
+                container: '#panel_trm_list',
+                select_mode: 'select_single',
+                groupsPresentation: 'none',
+                hide_searchForm: true,
+
+                simpleSearch: true,
+
+                import_structure:{
+                    database: sDB,      //database name
+                    databaseURL: sURL,
+                    database_url:  (sURL+'?db='+sDB)
+                },
+
+                onselect:function(event, data){
+                    //show treeview
+                },
+                onaction:function(event, action){
+
+                    var recID;     
+                    if(action && action.action){
+                        recID =  action.recID;
+                        action = action.action;
+                    }
+                    if(recID>0){
+                        if(action=='expand'){
+                            window.hWin.HEURIST4.remote._selectedTrmID
+                            = (window.hWin.HEURIST4.remote._selectedTrmID == recID)?null:recID;
+                            that.panel_trm_list.manageDefTerms('refreshRecordList');                     
+                        }else if(action=='import'){
+
+                            var $dlg;
+                            var msg = "If you proceed with the download, Heurist will download the selected vocabulary and any child terms within<br>"
+                                + "Do you wish to continue?"
+
+                            var btns = {};
+
+                            btns['Proceed'] = function(){
+
+                                that._is_rename_target = false;
+
+                                $dlg.dialog('close');
+
+                                that._selectedTrmID = recID;
+                                that._selectedDtyID = null;
+                                that._selectedRtyID = null;
+
+                                that.startImport();
+                                
+                            };
+                            btns['Cancel'] = function(){
+                                $dlg.dialog('close');
+                            }
+
+                            $dlg = window.hWin.HEURIST4.msg.showMsgDlg(msg, btns, 
+                                {title: 'Downloading vocabulary', yes:'Proceed', no:'Cancel'}, 
+                                {default_palette_class: 'ui-heurist-design'}
+                            );  
+                            
+                        }
+                    }
+
+                },
+
+                recordList:{
+                    show_toolbar: false,
+                    pagesize: 4999, 
+                    view_mode:'list',
+                    simpleSearch:true,
+                    groupByField:'trm_VocabularyGroupID',
+                    groupOnlyOneVisible: true,
+                    groupByCss:'0 1.5em',
+                    rendererGroupHeader: function(grp_val, is_expanded){
+
+                        var terms = window.hWin.HEURIST4.remote.terms;
+
+                        return terms.groups[grp_val]?('<div data-grp="'+grp_val
+                            +'" style="font-size:0.9em;padding:14px 0 4px 0px;border-bottom:1px solid lightgray">'
+                            +'<span style="display:inline-block;vertical-align:top;padding-top:15px;font-size:20px;" '
+                            +'class="expand_button ui-icon ui-icon-triangle-1-'+(is_expanded?'s':'e')+'"></span>'
+                            +'<div style="display:inline-block;width:70%">'
+                            +'<h2 style="margin:0">'+grp_val+'  '+terms.groups[grp_val].vcg_Name+'</h2>' //+grp_val+' '
+                            +'<div style="padding-top:4px;"><i>'+terms.groups[grp_val].vcg_Description+'</i></div></div></div>'):'';
+                    },
+                    renderer: this._termsListItemRenderer
+                }
+            };
+
+            this.panel_trm_list.empty();
+            
+            //open list of record types from other database
+            window.hWin.HEURIST4.ui.showEntityDialog('defTerms', trm_options);
+
         }
         panel_dbs.hide();
         this.panel_rty.show();
@@ -1368,6 +1462,116 @@ $.widget( "heurist.importStructure", {
         }    
 
         var recTitle = fld2('dty_Name','15em');
+
+        var html = '<div class="recordDiv" style="min-height:16px"'
+        +' id="rd'+recID+'" recid="'+recID+'">'
+        + btn_actions
+        + '<div class="recordTitle recordTitle2" title="'+fld('dty_HelpText')
+        +'" style="right:10px;left:94px">'
+        +     recTitle
+        + '</div>'
+        + info
+        + '</div>';
+
+        return html;
+    },
+
+    _termsListItemRenderer: function(recordset, record){
+
+        function fld(fldname){
+            return window.hWin.HEURIST4.util.htmlEscape(recordset.fld(record, fldname));
+        }
+        function fld2(fldname, col_width){
+            swidth = '';
+            if(!window.hWin.HEURIST4.util.isempty(col_width)){
+                swidth = ' style="width:'+col_width+'"';
+            }
+            return '<div class="item" '+swidth+'>'+window.hWin.HEURIST4.util.htmlEscape(recordset.fld(record, fldname))+'</div>';
+        }
+
+        var dbs = window.hWin.HEURIST4.remote;
+        var recID = fld('trm_ID');
+        var trm_ccode = fld('trm_ConceptID');
+
+        //find in local defintions by concept code - if found - it is already imported
+        var local_id = $Db.getLocalID( 'trm', trm_ccode);
+        if(local_id > 0){
+            return '';
+        }
+
+        var btn_actions = '<div style="width:60px;">'
+        + '<div title="Click to show details" Xclass="ui-button ui-widget ui-state-default ui-corner-all ui-button-icon-only" role="button" aria-disabled="false" data-key="expand" '
+        + ' style="display:inline-block;height:16px;">'
+        +     '<span style="padding-top: 6px;" class="ui-button-icon-primary ui-icon ui-icon-carat-'
+        + ((dbs._selectedTrmID==recID)?'d':'r')+'"></span><span class="ui-button-text"></span>'
+        + '</div>'
+        + '<div title="Click to import this base field" Xclass="ui-button ui-widget ui-state-default ui-corner-all ui-button-icon-only" role="button" aria-disabled="false" data-key="import" '
+        + ' style="display:inline-block;height:16px;vertical-align:bottom;font-size:1.4em;padding-left:20px">'
+        +     '<span class="ui-button-icon-primary ui-icon ui-icon-arrowthick-1-s" style="cursor:pointer"></span><span class="ui-button-text"></span>'
+        + '</div></div>';
+
+        var info = '';
+        if(dbs._selectedTrmID==recID){
+
+            info = '<table style="text-align: left;font-size:0.9em; margin: 10px 0px;width:100%">';
+
+            var trm_Domain = fld('trm_Domain');
+            var trm_Description = fld('trm_Description');
+            var trm_SemanticReferenceURL = fld('trm_SemanticReferenceURL');
+            var trm_Code = fld('trm_Code');
+
+            info += '<tr><th style="width: 90px;">Is relations type?</th><td>'+ (trm_Domain == 'relation' ? 'yes' : 'no') +'</td></tr>'
+                 +  '<tr><th style="width: 90px;">Description</th><td>'+ trm_Description +'</td></tr>'
+                 +  '<tr><th style="width: 90px;">Term Code</th><td>'+ trm_Code +'</td></tr>'
+                 +  '<tr><th style="width: 90px;">Documentation</th><td>'+ trm_SemanticReferenceURL +'</td></tr>'
+                 +  '<tr><th style="width: 90px;">Concept Code</th><td>'+ trm_ccode +'</td></tr>'
+                 +  '<tr><th style="width: 90px;">Already in DB?</th><td>'+ (local_id > 0 ? 'yes' : 'no') +'</td></tr>'
+
+            info += "</table>";
+
+            var child_terms = '';
+
+            var idx_label = dbs.terms.fieldNamesToIndex.trm_Label;
+            var idx_parent_terms = dbs.terms.fieldNamesToIndex.trm_ParentTermID;
+            var idx_desc = dbs.terms.fieldNamesToIndex.trm_Description;
+            var idx_code = dbs.terms.fieldNamesToIndex.trm_Code;
+            var idx_ccode = dbs.terms.fieldNamesToIndex.trm_ConceptID;
+
+            // list child terms (labels + decription)
+            for(var id in dbs.terms.termsByDomainLookup.enum){
+                if(id <= 0 || !dbs.terms.termsByDomainLookup.enum[id]){
+                    continue;
+                }
+
+                let parent_terms = dbs.terms.termsByDomainLookup.enum[id][idx_parent_terms];
+                if(parent_terms == null || parent_terms == '0'){
+                    continue;
+                }
+
+                parent_terms = parent_terms.split(',');
+                if(parent_terms.indexOf(recID) < 0){
+                    continue;
+                }
+
+                var child_Label = dbs.terms.termsByDomainLookup.enum[id][idx_label];
+                var child_Description = dbs.terms.termsByDomainLookup.enum[id][idx_desc];
+                var child_Code = dbs.terms.termsByDomainLookup.enum[id][idx_code];
+                var child_ccode = dbs.terms.termsByDomainLookup.enum[id][idx_ccode];
+                var child_local_id = $Db.getLocalID( 'trm', child_ccode);
+
+                child_terms += '<div>'+ child_Label +'</div>'
+                +  '<table style="text-align: left;font-size:0.9em; margin: 10px 0px 15px;width:100%">'
+                    +  '<tr><th style="width: 90px;">Description</th><td>'+ child_Description +'</td></tr>'
+                    +  '<tr><th style="width: 90px;">Term Code</th><td>'+ child_Code +'</td></tr>'
+                    +  '<tr><th style="width: 90px;">Concept Code</th><td>'+ child_ccode +'</td></tr>'
+                    +  '<tr><th style="width: 90px;">Already in DB?</th><td>'+ (child_local_id > 0 ? 'yes' : 'no') +'</td></tr>'
+                +  '</table>';
+            }
+
+            info += (child_terms == '') ? '' : ('<hr><div style="max-height: 250px; overflow-y: auto;"><h4 style="margin: 5px 0px 10px;">Child terms</h4>' + child_terms + '</div>');
+        }    
+
+        var recTitle = fld2('trm_Label','15em');
 
         var html = '<div class="recordDiv" style="min-height:16px"'
         +' id="rd'+recID+'" recid="'+recID+'">'

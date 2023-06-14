@@ -53,6 +53,8 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
         edit_need_load_fullrecord: true
     },
 
+    use_remote: false,
+
     //
     //                                                  
     //    
@@ -68,6 +70,13 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
 
         this.options.use_cache = true;
         this.options.use_structure = false
+
+        if(this.options.import_structure){
+            if(this.options.select_mode=='manager') this.options.select_mode='select_single';
+            this.options.use_cache = true;
+            this.use_remote = true; //use HEURIST4.remote.detailtypes for import structures
+            this.options.auxilary = 'vocabulary';
+        }
 
         if(!this.options.layout_mode) this.options.layout_mode = 'short';
         if(this.options.auxilary!='vocabulary') this.options.auxilary='term';
@@ -648,6 +657,35 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
             }//aux=term
 
 
+        }else 
+        if(this.use_remote){ // add show all and search field
+            var c1 = this.searchForm;
+
+            let $show_all = $('<div style="display:inline-block;padding:0.2em" id="div_show_already_in_db">'
+                + '<div class="header4" style="display: inline-block;text-align:right;">'
+                    + '<label for="input_search" accesskey="F" class="slocale">All Find</label>'
+                + '</div>'
+                + '<input id="input_search" class="text ui-widget-content ui-corner-all" slocale-title="Find by name, ID or concept code" style="width: 250px; margin-right:0.2em"/>'
+
+                + '<label for="chb_show_already_in_db" title="Show all record types (including that are already in database: allows updating of field list)" accesskey="A">Show All&nbsp;'
+                + '<input id="chb_show_already_in_db" class="text ui-widget-content ui-corner-all" style="margin-right:0.2em" type="checkbox"/></label>'
+            + '</div>');
+
+            this.searchForm.append($show_all);
+
+            this._on(this.searchForm.find('#input_search, #chb_show_already_in_db'), {
+                change: function(){
+                    let req = {};
+                    if(this.searchForm.find('#chb_show_already_in_db').is(':checked')){
+                        req['trm_ID_local'] = '=0';
+                    }
+                    if(this.searchForm.find('#input_search').val() != ''){
+                        req['trm_Label'] = this.searchForm.find('#input_search');
+                    }
+
+                    this.filterRecordList(null, req);
+                }
+            });
         }
         else { //if(this.options.select_mode=='select_single' || this.options.select_mode=='select_multi'){
            //SELECT MODE
@@ -756,7 +794,25 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
     //
     _loadData: function( is_first_call ){
 
-        if(this.options.auxilary=='vocabulary'){
+        var that = this;
+
+        if(this.use_remote && this.options.import_structure){
+            window.hWin.HAPI4.SystemMgr.get_defs(
+                {terms:'all', mode: 0, remote: that.options.import_structure.database_url}, function(response){
+                    if(response.status == window.hWin.ResponseStatus.OK){
+                        window.hWin.HEURIST4.remote.terms = response.data.terms;
+
+                        that._cachedRecordset = that.getRecordsetFromRemote(response.data.terms, true, true);
+
+                        //this._filterByVocabulary();
+                    }else{
+                        window.hWin.HEURIST4.msg.showMsgErr(response);
+                    }
+                }
+            );
+
+            return;
+        }else if(this.options.auxilary=='vocabulary'){
             //show vocabs only
             var recset = $Db.trm()
                     .getSubSetByRequest({'trm_ParentTermID':'=0', 'sort:trm_Label':1},
@@ -2977,6 +3033,83 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
             placeholder: 'ui-drag-drop',
             cursor: 'grabbing'
         });
+    },
+
+    getRecordsetFromRemote: function( terms, hideDisabled, vocab_only ){
+        
+        var rdata = { 
+            entityName:'defTerms',
+            total_count: 0,
+            fields:[],
+            records:{},
+            order:[] };
+
+        terms = window.hWin.HEURIST4.util.cloneJSON(terms);
+
+        rdata.fields = terms.commonFieldNames;
+        rdata.fields.unshift('trm_ID');
+        
+        var idx_ccode = 0;
+        var idx_parent_terms = 0;
+        if(this.options.import_structure){
+            rdata.fields.push('trm_ID_local');
+            idx_ccode = terms.fieldNamesToIndex.trm_ConceptID;
+            idx_parent_terms = terms.fieldNamesToIndex.trm_ParentTermID;
+        }
+
+        var idx_groupid = terms.fieldNamesToIndex.trm_VocabularyGroupID;
+        var hasFieldToImport = false;
+        var trash_id = -1;
+
+        for (var key in terms.groups){
+            if(terms.groups[key].name == 'Trash'){
+                trash_id = terms.groups[key].id;
+                break;
+            }
+        }
+
+        for (var r_id in terms.termsByDomainLookup.enum)
+        {
+            if(r_id>0){
+                var term = terms.termsByDomainLookup.enum[r_id];
+                var isHidden = (term[idx_groupid] == trash_id || (vocab_only && term[idx_parent_terms] != null));
+
+                if(hideDisabled && isHidden){
+                    continue;
+                }
+                
+                if(this.options.import_structure){
+                    var concept_code =  term[ idx_ccode ];
+                    var local_trmID = $Db.getLocalID( 'trm', concept_code );
+                    term.push( local_trmID );
+                    hasFieldToImport = hasFieldToImport || !(local_trmID>0);
+                }
+                
+                term.unshift(r_id);
+
+                rdata.records[r_id] = term;
+                rdata.order.push( r_id );
+                
+            }
+        }
+        rdata.count = rdata.order.length;
+        
+        
+        if(this.options.import_structure){
+            this.recordList.resultList('option', 'empty_remark',
+                                        '<div style="padding:1em 0 1em 0">'+
+                                        (hasFieldToImport
+                                        ?this.options.entity.empty_remark
+                                        :'Your database already has all the vocabularies available in this source'
+                                        )+'</div>');
+        }
+        
+        this._cachedRecordset = new hRecordSet(rdata);
+        this.recordList.resultList('updateResultSet', this._cachedRecordset);
+        
+        this.filterRecordList(null, {'trm_ID_local': '=0'});
+        
+        return this._cachedRecordset;
     }
 
 });
