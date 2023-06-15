@@ -195,8 +195,8 @@ $.widget( "heurist.importStructure", {
             that.panel_rty.show();
             //refresh source
             that.panel_rty_list.manageDefRecTypes('getRecordsetFromStructure', window.hWin.HEURIST4.remote.rectypes );
-            that.panel_dty_list.manageDefDetailTypes('getRecordsetFromStructure', window.hWin.HEURIST4.remote.detailtypes );
-            that.panel_trm_list.manageDefTerms('getRecordsetFromStructure', window.hWin.HEURIST4.remote.terms );
+            that.panel_dty_list.manageDefDetailTypes('getRecordsetFromRemote', window.hWin.HEURIST4.remote.detailtypes );
+            that.panel_trm_list.manageDefTerms('getRecordsetFromRemote', window.hWin.HEURIST4.remote.terms );
             //refresh target
             window.hWin.HEURIST4.ui.createRectypeSelect(that.select_rty_list_target[0],null,null,true);
             window.hWin.HEURIST4.ui.createRectypeDetailSelect(that.select_dty_list_target[0], null, null, null, {useHtmlSelect: true});
@@ -1005,14 +1005,6 @@ $.widget( "heurist.importStructure", {
         var recAllowClone = fld('rec_AllowClone');
         var recTitle = window.hWin.HEURIST4.util.htmlEscape(fld('rec_ScratchPad'));
 
-        /*var splittedURL = recURL.split('?');
-        var dbURL = splittedURL[0];
-        var matches = recURL.match(/db=([^&]*).*$/);
-        var dbName = (matches && matches.length>1)?matches[1]:'';
-        //get database and server url
-        var recTitle = window.hWin.HEURIST4.util.htmlEscape(fld('rec_Title'));
-        */
-
         var rtIcon = window.hWin.HAPI4.getImageUrl('sysDatabases', 0, 'icon');
         var recThumb = window.hWin.HAPI4.getImageUrl('sysDatabases', recID, 'thumb');
 
@@ -1039,15 +1031,6 @@ $.widget( "heurist.importStructure", {
         +((recID<1000 && recAllowClone==1)?'<span data-key="clone" style="cursor:pointer;text-decoration:underline">clone</span>'
             :'')+'</div>'
         +'<div class="item" style="width:'+w+'px"  title="'+recTitle+'">'+recTitle+'</div>';  //  description
-        /*+'<div class="item" style="width:2em;padding-left:4px"><a href="'
-        +recURL+'?db='+dbName+'" target="_blank" title="'
-        +window.hWin.HEURIST4.util.htmlEscape(recURL)+'">'
-        +'<span class="ui-icon yunui-icon-extlink" style="font-size:0.9em">'
-        +'</span></a></div>';
-        recTitle = recTitle 
-        +'<div class="item" style="width:2em;padding-left:4px">'
-        +'<span class="ui-icon ui-icon-copy" style="font-size:0.9em">'
-        +'</span></div>';*/
 
         var html = '<div class="recordDiv" id="rd'+recID+'" recid="'+recID+'">'
         + html_thumb
@@ -1179,8 +1162,6 @@ $.widget( "heurist.importStructure", {
         var style = {'font-size': '16px', 'background-color': '#FFF', 'opacity': 1};
         var msg = '';
 
-        window.hWin.HEURIST4.msg.bringCoverallToFront(this.element, style, msg);
-
         var that = this;
         let id = null;
         if(this._selectedRtyID){
@@ -1210,123 +1191,116 @@ $.widget( "heurist.importStructure", {
                 + 'Please report a bug if it fails (either with or without a message)<br>'
                 + 'including the database and record type you are trying to download, so that we can investigate and fix.';
         
+        window.hWin.HEURIST4.msg.bringCoverallToFront(this.element, style, msg);
+
         window.hWin.HAPI4.SystemMgr.import_definitions(this._selectedDB, id, this._is_rename_target, type,
             function(response){    
 
-            window.hWin.HEURIST4.msg.sendCoverallToBack(); 
+                window.hWin.HEURIST4.msg.sendCoverallToBack(); 
 
-            if(response.status == window.hWin.ResponseStatus.OK){
+                if(response.status == window.hWin.ResponseStatus.OK){
 
-                that.panel_report.find('#btn_close_panel_report').click();
+                    that.panel_report.find('#btn_close_panel_report').click();
 
-                var report = '';
-                
-                if(response.report){
-                
-                    if( window.hWin.HEURIST4.util.isArrayNotEmpty(response.report.added) ){
-                        report = 'Added: ';
-                        for(idx in response.report.added){
-                            report += ($Db.rty(response.report.added[idx],'rty_Name')+', ');    
-                        }
-                        report = report.substr(0,report.length-2)+'<br>';
-                    }
-                    if( window.hWin.HEURIST4.util.isArrayNotEmpty(response.report.updated) ){
-                        report += '<br>Updated: ';
-                        for(idx in response.report.updated){
-                            report += ($Db.rty(response.report.updated[idx],'rty_Name')+', ');    
-                        }
-                        report = report.substr(0,report.length-2);
-                    }
-                    if( window.hWin.HEURIST4.util.isArrayNotEmpty(response.report.broken_terms) ){
-                        
-                        report += ('<p>'+response.report.broken_terms.length
-                            +' terms were not properly imported.'
-                            +' Error report has been sent to Heurist support.<ul>');
-                        
-                        for(var i=0; i<response.report.broken_terms.length; i++){
-                            report += ('<li>'+response.report.broken_terms[i][0]+'</li>');    
-                            if(i>10){
-                                report += '...';
-                                break;
+                    var report = '';
+                    
+                    if(response.report){
+                    
+                        if( window.hWin.HEURIST4.util.isArrayNotEmpty(response.report.added) ){
+                            report = 'Added: ';
+                            for(idx in response.report.added){
+
+                                let label = '';
+                                if(type == 'detailtype'){
+                                    label = $Db.dty(response.report.added[idx],'dty_Name');
+                                }else if(type = 'term'){
+                                    label = $Db.trm(response.report.added[idx],'trm_Label');
+                                }else{
+                                    label = $Db.rty(response.report.added[idx],'rty_Name');
+                                }
+                                report += (label+', ');    
                             }
+                            report = report.substr(0,report.length-2)+'<br>';
                         }
-                        
-                        report += ('</ul></p>');
+                        if( window.hWin.HEURIST4.util.isArrayNotEmpty(response.report.updated) ){
+                            report += '<br>Updated: ';
+                            for(idx in response.report.updated){
+
+                                let label = '';
+                                if(type == 'detailtype'){
+                                    label = $Db.dty(response.report.added[idx],'dty_Name');
+                                }else if(type = 'term'){
+                                    label = $Db.trm(response.report.added[idx],'trm_Label');
+                                }else{
+                                    label = $Db.rty(response.report.added[idx],'rty_Name');
+                                }
+                                report += (label+', ');    
+                            }
+                            report = report.substr(0,report.length-2);
+                        }
+                        if( window.hWin.HEURIST4.util.isArrayNotEmpty(response.report.broken_terms) ){
+                            
+                            report += ('<p>'+response.report.broken_terms.length
+                                +' terms were not properly imported.'
+                                +' Error report has been sent to Heurist support.<ul>');
+                            
+                            for(var i=0; i<response.report.broken_terms.length; i++){
+                                report += ('<li>'+response.report.broken_terms[i][0]+'</li>');    
+                                if(i>10){
+                                    report += '...';
+                                    break;
+                                }
+                            }
+                            
+                            report += ('</ul></p>');
+                        }
                     }
-                }
-                
-                /* Detail report
-                var theader = '<table style="padding: 5px;font-size: 1em;">'
-                +'<tr><th colspan="2">Source</th><th>Concept ID</th><th colspan="3">Target</th></tr>'
-                +'<tr><th>ID</th><th>Name</th><th>&nbsp;</th><th>ID</th><th>Name</th><th></th></tr>';
-
-                if(response.report.rectypes) {
-                    report = report + '<h3 style="margin:0;">Record types</h3>'+theader
-                    + response.report.rectypes
-                    + '</table>';
-                }
-
-                if(false && response.report.detailtypes) {
-                    report = report + '<h3 style="margin:0;">Field types</h3>'+theader
-                    + response.report.detailtypes
-                    + '</table>';
-                }
-
-                if(false && response.report.terms) {
-                    report = report + '<h3 style="margin:0;">Terms</h3>'+theader
-                    + response.report.terms
-                    + '</table>';
-                }
-                */
-
-                if(report!=''){ 
-
-                    //report = 'Added';
-                    //FLASH window.hWin.HEURIST4.msg.showMsgFlash(report, 2000);
                     
-                    //modal report
-                    window.hWin.HEURIST4.msg.showMsgDlg('<br>'+report,null,
-                            {title:'Import templates report'},
-                            {default_palette_class:'ui-heurist-design'});        
+                    /* Detail report
+                    var theader = '<table style="padding: 5px;font-size: 1em;">'
+                    +'<tr><th colspan="2">Source</th><th>Concept ID</th><th colspan="3">Target</th></tr>'
+                    +'<tr><th>ID</th><th>Name</th><th>&nbsp;</th><th>ID</th><th>Name</th><th></th></tr>';
 
+                    if(response.report.rectypes) {
+                        report = report + '<h3 style="margin:0;">Record types</h3>'+theader
+                        + response.report.rectypes
+                        + '</table>';
+                    }
 
-                    /*                    
-                    report = '<div style="font-size:0.9em;"><h2>Record type and associated structures imported</h2>'
-                    +report
-                    +'</div>'
-                    +'<div id="btn_back_to_rty"></div>';
+                    if(false && response.report.detailtypes) {
+                        report = report + '<h3 style="margin:0;">Field types</h3>'+theader
+                        + response.report.detailtypes
+                        + '</table>';
+                    }
 
-                    that.panel_rty.hide();
-                    that.panel_report.find('.ent_content_full').html(report);
-                    that.panel_report.show();
+                    if(false && response.report.terms) {
+                        report = report + '<h3 style="margin:0;">Terms</h3>'+theader
+                        + response.report.terms
+                        + '</table>';
+                    }
                     */
-                    
+
+                    if(report!=''){ 
+
+                        //modal report
+                        window.hWin.HEURIST4.msg.showMsgDlg('<br>'+report,null,
+                                {title:'Import templates report'},
+                                {default_palette_class:'ui-heurist-design'});        
+                        
+                    }else{
+                        report = 'Nothing imported. '+
+                        'Record types (and associated strucures) you selected to be imported are in this database already';
+
+                        window.hWin.HEURIST4.msg.showMsgDlg(report);
+                    }
 
                 }else{
-                    report = 'Nothing imported. '+
-                    'Record types (and associated strucures) you selected to be imported are in this database already';
-
-                    window.hWin.HEURIST4.msg.showMsgDlg(report);
+                    window.hWin.HEURIST4.msg.showMsgErr(response);
                 }
 
-            }else{
-                window.hWin.HEURIST4.msg.showMsgErr(response);
             }
-
-        }        
         );
         
-        /*
-        var request = {databaseID:this._selectedDB, 
-            definitionID:this._selectedRtyID,
-            db:window.hWin.HAPI4.database, import:'rectype'};
-            
-
-        var url = window.hWin.HAPI4.baseURL + 'hsapi/controller/sys_structure.php';
-
-        window.hWin.HEURIST4.util.sendRequest(url, request, null, );
-        */
-
     },
 
     _recordtypeListItemRenderer: function( recordset, record ){
