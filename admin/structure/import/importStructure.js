@@ -128,8 +128,13 @@ $.widget( "heurist.importStructure", {
         +'</div>'
         +'</div>'
 
+        +'<div class="ent_wrapper" id="search_elements" style="top:2.8em;right:225px;border-right:1px solid lightgray;">'
+            +'<label> All Find<input id="search_names" class="text ui-widget-content ui-corner-all" style="width: 250px; margin-right:15px;margin-left:10px;"></label>' // general search
+            +'<label> Show All<input id="show_all" class="text ui-widget-content ui-corner-all" style="margin-left:10px;vertical-align:-2px;" type="checkbox"></label>' // show all
+        +'</div>'
+
         //left - source                                
-        +'<div class="ent_wrapper" id="entity_wrapper" style="top:2.8em;right:225px;border-right:1px solid lightgray;">' //450px
+        +'<div class="ent_wrapper" id="entity_wrapper" style="top:6.8em;right:225px;border-right:1px solid lightgray;">' //450px
             + '<h3 class="fake_link" style="padding-left:10px;">Download individual vocabularies</h3>'
                 + '<div id="trm_container" style="background:transparent;">'
                     + '<div class="ent_content_full" id="panel_trm_list" style="position:relative;top:0px;height:100%;"></div>'
@@ -168,6 +173,8 @@ $.widget( "heurist.importStructure", {
 
         this.panel_report = this.element.find('#panel_report');
         this.entity_wrapper = this.element.find('#entity_wrapper');
+        this.general_search = this.element.find('#search_names');
+        this.show_all = this.element.find('#show_all')
 
         this.panel_rty_list = this.element.find('#panel_rty_list');
         this.panel_dty_list = this.element.find('#panel_dty_list');
@@ -188,6 +195,8 @@ $.widget( "heurist.importStructure", {
             that.panel_rty.show();
             //refresh source
             that.panel_rty_list.manageDefRecTypes('getRecordsetFromStructure', window.hWin.HEURIST4.remote.rectypes );
+            that.panel_dty_list.manageDefDetailTypes('getRecordsetFromStructure', window.hWin.HEURIST4.remote.detailtypes );
+            that.panel_trm_list.manageDefTerms('getRecordsetFromStructure', window.hWin.HEURIST4.remote.terms );
             //refresh target
             window.hWin.HEURIST4.ui.createRectypeSelect(that.select_rty_list_target[0],null,null,true);
             window.hWin.HEURIST4.ui.createRectypeDetailSelect(that.select_dty_list_target[0], null, null, null, {useHtmlSelect: true});
@@ -200,7 +209,7 @@ $.widget( "heurist.importStructure", {
                 let container_size = that.panel_rty.height();
                 let panel = ui.newPanel;
 
-                panel.height(container_size - 150);
+                panel.height(container_size - 200);
             },
             activate: function(event, ui){
 
@@ -220,6 +229,8 @@ $.widget( "heurist.importStructure", {
                 }else{
                     that.select_rty_list_target.show();
                 }
+
+                that._filterEntities();
             }
         });
 
@@ -233,6 +244,12 @@ $.widget( "heurist.importStructure", {
             this._on( ele, {'click':this._backToDatabases} );    
         }
 
+        this._on(this.element.find('#show_all'), {
+            change: this._filterEntities
+        });
+        this._on(this.element.find('#search_names'), {
+            keyup: this._filterEntities
+        })
 
         //find 3 elements searchForm, recordList+recordList_toolbar, editForm+editForm_toolbar
         this.recordList_dbs = this.element.find('#panel_dbs .recordList');
@@ -1584,6 +1601,26 @@ $.widget( "heurist.importStructure", {
         + '</div>';
 
         return html;
+    },
+
+    // Apply filter values
+    _filterEntities: function(){
+
+        let cur_acc = this.entity_wrapper.accordion('option', 'active');
+
+        let state = this.show_all.is(':checked');
+        let search = this.general_search.val();
+
+        if(cur_acc == 0){ // trm
+            this.panel_trm_list.find('.searchForm #input_search').val(search);
+            this.panel_trm_list.find('.searchForm #chb_show_already_in_db').prop('checked', state).change();
+        }else if(cur_acc == 1){ // dty
+            this.panel_dty_list.find('.searchForm #input_search').val(search);
+            this.panel_dty_list.find('.searchForm #chb_show_already_in_db').prop('checked', state).change();
+        }else{ // rty
+            this.panel_rty_list.find('.searchForm #input_search').val(search);
+            this.panel_rty_list.find('.searchForm #chb_show_already_in_db').prop('checked', state).change();
+        }
     }
 
 });
