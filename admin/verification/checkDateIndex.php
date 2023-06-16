@@ -62,7 +62,7 @@ if($is_included){
             $cnt_index = mysql__select_value($mysqli, $query);
 
             //count of missed relations in recLinks                    
-            $query = 'SELECT count(dtl_ID) FROM recDetails, defDetailTypes  WHERE dtl_DetailTypeID=dty_ID AND dty_Type="date"';
+            $query = 'SELECT count(dtl_ID) FROM recDetails, defDetailTypes  WHERE dtl_DetailTypeID=dty_ID AND dty_Type="date" AND dtl_Value!=""';
             $cnt_dates = mysql__select_value($mysqli, $query);
 
             $query = 'SELECT count(rdi_DetailID) FROM recDetailsDateIndex WHERE rdi_estMinDate=0 AND rdi_estMaxDate=0';
@@ -102,7 +102,7 @@ if($is_included){
         }
 ?>        
         <div><br><br>
-                <button onclick="{var ischk=document.getElementById('convert_dates').checked?'1':'0';alert(ischk);window.open('listDatabaseErrors.php?db=<?php echo HEURIST_DBNAME;?>&fixdateindex=1&convert_dates='+ischk,'_self')}">Recreate date index</button>
+                <button onclick="{var ischk=document.getElementById('convert_dates').checked?'1':'0';window.open('listDatabaseErrors.php?db=<?php echo HEURIST_DBNAME;?>&fixdateindex=1&convert_dates='+ischk,'_self')}">Recreate date index</button>
         </div>        
 <?php    
     }//isok            

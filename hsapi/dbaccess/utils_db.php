@@ -926,6 +926,8 @@
                     $dtl_NewValue = '';
                     $error = '';
                     
+                    if(trim($dtl_Value)=='') continue;
+                    
             //2. Create temporal object
                     $preparedDate = new Temporal( $dtl_Value );
                         
@@ -1006,10 +1008,13 @@
                     if(!$is_date_simple || $error){
 //file_put_contents($log_file, $dtl_ID.';'.$dtl_Value.';'.$dtl_NewValue.';'.$error."\n", FILE_APPEND );    
                         if(!$is_date_simple) $cnt_to_json++;
-                        if($error) $cnt_err++;
+                        if($error){
+                            $error = '<span style="color:red">'.$error.'</span>';
+                            $cnt_err++;
+                        } 
                         
                         if($need_populate){ //verbose output
-                            print $dtl_ID.'  '.$dtl_Value.' '.(($dtl_Value!=$dtl_NewValue)?$dtl_NewValue:'').' '.$error.'<br>';
+                            print $dtl_RecID.' '.$dtl_ID.'  '.$dtl_Value.' '.(($dtl_Value!=$dtl_NewValue)?$dtl_NewValue:'').' '.$error.'<br>';
                         }
                         
                     }

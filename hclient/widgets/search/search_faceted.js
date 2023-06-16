@@ -2440,28 +2440,47 @@ $.widget( "heurist.search_faceted", {
                                     }
                                     mmax = mmax.replace(' ','T');
                                 }
-console.log(mmin+'   '+mmax);                                
-                                
-                                mmin = Date.parse(mmin); 
-                                mmax = Date.parse(mmax); 
-
-                                if(field.history.length == 0){ // Account for possible loss of a day
-                                    mmax += 1000 * 60 * 60 * 24;
+console.log(mmin+'   '+mmax);       
+                                var date_min, date_max;
+                                try{
+                                    date_min = TDate.parse(mmin);
+                                } catch(e) {
+                                    mmin = NaN;
                                 }
-
-                                //find date interval for proper formating
-                                var delta = mmax-mmin;
-                                var date_format = "dd MMM yyyy HH:mm"; //"YYYY-MM-DD hh:mm:ss";
+                                try{
+                                    date_max = TDate.parse(mmax);
+                                } catch(e) {
+                                    mmax = NaN;
+                                }
                                 
-                                if(delta>3*365*daymsec){ //3 years
+                                if(date_min && date_max && (date_max.getYear()-date_min.getYear())>3){
+                                    mmin = Number(date_min.getYear());
+                                    mmax = Number(date_max.getYear());
                                     date_format = "yyyy";
                                     date_type = "year";
-                                }else if(delta>365*daymsec){ //6 month
-                                    date_format = "MMM yyyy";
-                                    date_type = "month";
-                                }else if(delta>daymsec){ //1 day
-                                    date_format = "dd MMM yyyy";
-                                    date_type = "day";
+                                }else{
+                                
+                                    mmin = Date.parse(mmin); 
+                                    mmax = Date.parse(mmax); 
+
+                                    if(field.history.length == 0){ // Account for possible loss of a day
+                                        mmax += 1000 * 60 * 60 * 24;
+                                    }
+
+                                    //find date interval for proper formating
+                                    var delta = mmax-mmin;
+                                    var date_format = "dd MMM yyyy HH:mm"; //"YYYY-MM-DD hh:mm:ss";
+                                    
+                                    if(delta>3*365*daymsec){ //3 years
+                                        date_format = "yyyy";
+                                        date_type = "year";
+                                    }else if(delta>365*daymsec){ //6 month
+                                        date_format = "MMM yyyy";
+                                        date_type = "month";
+                                    }else if(delta>daymsec){ //1 day
+                                        date_format = "dd MMM yyyy";
+                                        date_type = "day";
+                                    }
                                 }
                                 
                             }else{
@@ -2549,8 +2568,8 @@ console.log(mmin+'   '+mmax);
                             function setupDateHistogram(lower, higher) {
 
                                 // Get dates in ms
-                                var t_min = new Date(lower);
-                                var t_max = new Date(higher);
+                                var t_min = new Date(''+lower);
+                                var t_max = new Date(''+higher);
 
                                 var ids = response.q.ids; // ids of all relavent records, string separated by commas
 
@@ -2711,7 +2730,7 @@ console.log(mmin+'   '+mmax);
                             
                             function __dateToString(val){
                                 try{
-                                   var tDate = new TDate((new Date(val)).toISOString());
+                                   var tDate = new TDate((new Date(''+val)).toISOString());
                                    val = tDate.toString(date_format);
                                    //val = (new Date(val)).format(date_format);
                                    //val = moment(val).format(date_format);
@@ -2757,10 +2776,10 @@ console.log(mmin+'   '+mmax);
                                         //min = (new TDate(min)).toString();
                                         //max = (new TDate(max)).toString(); 
                                         
-                                        var tDate = new TDate((new Date(min)).toISOString());
+                                        var tDate = new TDate((new Date(''+min)).toISOString());
                                         min = tDate.toString();
                                         
-                                        tDate = new TDate((new Date(max)).toISOString());
+                                        tDate = new TDate((new Date(''+max)).toISOString());
                                         max = tDate.toString();
                                         
                                         //min = (new Date(min)).toISOString();
@@ -3166,7 +3185,7 @@ console.log(mmin+'   '+mmax);
                     title = $Db.getTermValue(value[0], false);    
                 }else if( field['type']=='date' && field['groupby']=='month' ){
                     
-                    var tDate = new TDate((new Date(value[0])).toISOString());
+                    var tDate = new TDate((new Date(''+value[0])).toISOString());
                     title = tDate.toString('MMM yyyy');
                 }
 
