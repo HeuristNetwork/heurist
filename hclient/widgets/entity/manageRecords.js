@@ -3586,7 +3586,8 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
                                 }
 
                                 matches = [...value_spaceless.matchAll(range_regex)];
-                                if(!window.hWin.HEURIST4.util.isempty(matches) && matches.length > 0 && has_range.test(value_spaceless)){
+                                if(!window.hWin.HEURIST4.util.isempty(matches) && matches.length > 0 
+                                        && has_range.test(value_spaceless) && (value_spaceless.split('-')<3) ){
 
                                     is_ambig = false;
 

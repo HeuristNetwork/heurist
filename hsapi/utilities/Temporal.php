@@ -163,12 +163,74 @@ class Temporal {
             
         }else if ($value) {
             
+            //at first - detect time interval in format start/end start/duration duration/end
+            $values = explode('/',$value);
+            if(is_array($values) && count($values)==2){
+                
+                if(strlen($values[0])>2 && strlen($values[1])>2) {
+                    $tStart = null;
+                    $tEnd = null;
+                    
+                    if(strcasecmp(substr($values[0], 0, 1),'P')==0){
+                        // duration/end
+
+                        $dt = Temporal::dateToISO($values[1]);    
+                        $dt = new DateTime($dt);
+                        $values[0] = strtoupper($values[0]);
+                        $i = null;
+                        try{
+                            $i = new DateInterval($values[0]);    
+                        } catch (Exception  $e){
+                        }
+                        
+                        if($dt!=null && $i!=null){
+                            $dt = $dt->sub($i);
+                            
+                            $format = preg_match('/^P\d+Y$/',$values[0]) && preg_match('/^-?\d+$/', $values[1])?'Y':'Y-m-d H:i:s';
+                            $tStart = Temporal::dateToISO($dt->format($format), 2, false);
+                            $tEnd = Temporal::dateToISO($values[1], 2, false, 'now');
+                        }
+
+                        
+                    }else if(strcasecmp(substr($values[1], 0, 1),'P')==0){
+                        // start/duration
+                        $dt = Temporal::dateToISO($values[0]);    
+                        $dt = new DateTime($dt);
+                        $values[1] = strtoupper($values[1]);
+                        $i = null;
+                        try{
+                            $i = new DateInterval($values[1]);    
+                        } catch (Exception  $e){
+                        }
+                        
+                        if($dt!=null && $i!=null){
+                            $dt = $dt->add($i);
+                            
+                            $format = preg_match('/^P\d+Y$/',$values[1]) && preg_match('/^-?\d+$/', $values[0])?'Y':'Y-m-d H:i:s';
+                            $tEnd = Temporal::dateToISO($dt->format($format), 2, false);
+                            $tStart = Temporal::dateToISO($values[0], 2, false, 'now');
+                        }
+                        
+                    }else{
+                        // start/end
+                        $tStart = Temporal::dateToISO($values[0], 2, false, 'now');
+                        $tEnd = Temporal::dateToISO($values[1], 2, false, 'now');
+                    }
+                    
+                    if($tStart && $tEnd){
+                        $timespan = array('start'=>array('earliest'=>$tStart ),
+                                            'end'=>array('latest'=>$tEnd ));
+                    }
+                }
+                
+            }
+            
             //if(!is_numeric($value)){
-            if( !preg_match('/^-?\d+$/', $value) ){
+            if($timespan==null && !preg_match('/^-?\d+$/', $value) ){
                 $timespan = json_decode($value, true);
             }    
             if($timespan!=null){
-            
+                //json object
                 if(@$timespan[0]){
                     $timespan = $timespan[0]; //in case [{}]
                 }    
@@ -317,8 +379,11 @@ class Temporal {
                     
                     $res = intval($date['in']);
                     if($deviation!=null){
-                        $i = new DateInterval($deviation);
-                        $res = strval($res + $direction * $i->y);
+                        try{                        
+                            $i = new DateInterval($deviation);
+                            $res = strval($res + $direction * $i->y);
+                        } catch (Exception  $e){
+                        }
                     }
                     
                 }else{
@@ -326,8 +391,11 @@ class Temporal {
                     
                     if($deviation!=null){
                         $dt = new DateTime($dt);
-                        $i = new DateInterval($deviation);
-                        $dt = ($direction>0) ?$dt->add($i) :$dt->sub($i);
+                        try{
+                            $i = new DateInterval($deviation);
+                            $dt = ($direction>0) ?$dt->add($i) :$dt->sub($i);
+                        } catch (Exception  $e){
+                        }
                         $res = Temporal::dateToISO($dt->format('Y-m-d H:i:s'));
                     }else{
                         $res = $dt;            
@@ -884,11 +952,14 @@ class Temporal {
     private static function _deviationToText($value, $prefix){
         
         if($value){
-            $i = new DateInterval($value);
-            if($i){
-                return ($i->y ? ("$prefix{$i->y} years") :
-                        ($i->m ? ("$prefix{$i->m} months") :
-                        ($i->d ? ("$prefix{$i->d} days") :'' )));
+            try{
+                $i = new DateInterval($value);
+                if($i){
+                    return ($i->y ? ("$prefix{$i->y} years") :
+                            ($i->m ? ("$prefix{$i->m} months") :
+                            ($i->d ? ("$prefix{$i->d} days") :'' )));
+                }
+            } catch (Exception  $e){
             }
         }
         return '';
