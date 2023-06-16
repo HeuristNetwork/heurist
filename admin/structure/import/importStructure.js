@@ -112,7 +112,7 @@ $.widget( "heurist.importStructure", {
         +'</div>'
         
         //2. List of record types to be imported
-        +'<div class="ent_wrapper" id="panel_rty" style="display:none;margin-left:15px;">'
+        +'<div class="ent_wrapper" id="panel_defs" style="display:none;margin-left:15px;">'
 
         +'<div class="ent_header" style="padding:4px;">'
         +'<div style="position:absolute;right:225px;left:0">' //450px
@@ -150,7 +150,7 @@ $.widget( "heurist.importStructure", {
         +'</div>'
 
         //target
-        +'<div id="panel_rty_list_target" '
+        +'<div id="panel_def_list_target" '
         +'style="position:absolute; top:2.8em;bottom:0;right:0px; overflow:hidden;width:225px;">'
         +'<select id="select_rty_list_target" size="500" style="width:100%;height:100%;border:lightgray 1px solid"/>'
         +'<select id="select_dty_list_target" size="500" style="width:100%;height:100%;border:lightgray 1px solid;display:none;"/>'
@@ -171,6 +171,9 @@ $.widget( "heurist.importStructure", {
         
         $(layout).appendTo(this.element);
 
+        this.panel_defs = this.element.find('#panel_defs');
+        this.panel_def_list_target = this.element.find('#panel_def_list_target');
+
         this.panel_report = this.element.find('#panel_report');
         this.entity_wrapper = this.element.find('#entity_wrapper');
         this.general_search = this.element.find('#search_names');
@@ -179,9 +182,6 @@ $.widget( "heurist.importStructure", {
         this.panel_rty_list = this.element.find('#panel_rty_list');
         this.panel_dty_list = this.element.find('#panel_dty_list');
         this.panel_trm_list = this.element.find('#panel_trm_list');
-
-        this.panel_rty = this.element.find('#panel_rty');
-        this.panel_rty_list_target = this.element.find('#panel_rty_list_target');
 
         this.select_rty_list_target = this.element.find('#select_rty_list_target');
         this.select_dty_list_target = this.element.find('#select_dty_list_target');
@@ -192,7 +192,7 @@ $.widget( "heurist.importStructure", {
         //.css({'line-height': '0.9em'})
         .click(function(){
             that.panel_report.hide();
-            that.panel_rty.show();
+            that.panel_defs.show();
             //refresh source
             that.panel_rty_list.manageDefRecTypes('getRecordsetFromStructure', window.hWin.HEURIST4.remote.rectypes );
             that.panel_dty_list.manageDefDetailTypes('getRecordsetFromRemote', window.hWin.HEURIST4.remote.detailtypes );
@@ -206,7 +206,7 @@ $.widget( "heurist.importStructure", {
         this.entity_wrapper.accordion({
             collapsible: true,
             beforeActivate: function(event, ui){ // correct panel height
-                let container_size = that.panel_rty.height();
+                let container_size = that.panel_defs.height();
                 let panel = ui.newPanel;
 
                 panel.height(container_size - 200);
@@ -221,7 +221,7 @@ $.widget( "heurist.importStructure", {
                     $resList.resultList('refreshPage');
                 }
 
-                that.panel_rty_list_target.find('select').hide();
+                that.panel_def_list_target.find('select').hide();
                 if(entity == 'dty_container'){
                     that.select_dty_list_target.show();
                 }else if(entity == 'trm_container'){
@@ -304,7 +304,7 @@ $.widget( "heurist.importStructure", {
         this._on( this.recordList_dbs, {
             "resultlistonselect": function(event, selected_recs){
                 // show list of record types for selected database
-                that._loadRecordTypesForDb( selected_recs );
+                that._loadDefinitionsForDb( selected_recs );
 
             },
             "resultlistonaction": this._onActionListener        
@@ -424,7 +424,7 @@ $.widget( "heurist.importStructure", {
 
                                 if(that.options.source_database_id>0){
                                     var selected_recs = that._cachedRecordset_dbs.getSubSetByIds( [that.options.source_database_id] );
-                                    that._loadRecordTypesForDb( selected_recs );
+                                    that._loadDefinitionsForDb( selected_recs );
                                 }else{
                                     that.startSearch_dbs(); //filterRecordList_dbs({}); 
                                 }
@@ -499,9 +499,9 @@ $.widget( "heurist.importStructure", {
     },
 
     //
-    // init manageDefRecTypes widget on panel_rty
+    // init manageDefRecTypes, manageDefDetailTypes, and manageDefTerms widgets on individual panels
     //
-    _loadRecordTypesForDb: function(db_ids, skip_pass){
+    _loadDefinitionsForDb: function(db_ids, skip_pass){
 
         var that = this;
         var panel_dbs = this.element.find('#panel_dbs');
@@ -518,7 +518,7 @@ $.widget( "heurist.importStructure", {
             
             if(sDB_ID==99 && skip_pass!==true){ //special case - password protect db 99 - heurist construction site
                 window.hWin.HAPI4.SystemMgr.verify_credentials( 
-                    function(){that._loadRecordTypesForDb( db_ids, true )},1,'ServerFunctions'); //db admin and pwd protected
+                    function(){that._loadDefinitionsForDb( db_ids, true )},1,'ServerFunctions'); //db admin and pwd protected
                return;     
             }
             
@@ -897,7 +897,7 @@ $.widget( "heurist.importStructure", {
 
         }
         panel_dbs.hide();
-        this.panel_rty.show();
+        this.panel_defs.show();
 
 
         if( this._init_local_rty_once ){
@@ -912,7 +912,7 @@ $.widget( "heurist.importStructure", {
     },
 
     _backToDatabases: function(){
-        this.panel_rty.hide();
+        this.panel_defs.hide();
         this.element.find('#panel_dbs').show();
 
         this._selectedRtyID = null;
@@ -1419,9 +1419,6 @@ $.widget( "heurist.importStructure", {
 
         //find in local defintions by concept code - if found - it is already imported
         var local_id = $Db.getLocalID( 'dty', dty_ccode);
-        if(local_id > 0){
-            return '';
-        }
 
         var btn_actions = '<div style="width:60px;">'
         + '<div title="Click to show details" Xclass="ui-button ui-widget ui-state-default ui-corner-all ui-button-icon-only" role="button" aria-disabled="false" data-key="expand" '
@@ -1452,7 +1449,7 @@ $.widget( "heurist.importStructure", {
             info += "</table>";
         }    
 
-        var recTitle = fld2('dty_Name','15em');
+        var recTitle = fld2('dty_Name','30em');
 
         var html = '<div class="recordDiv" style="min-height:16px"'
         +' id="rd'+recID+'" recid="'+recID+'">'
@@ -1486,9 +1483,6 @@ $.widget( "heurist.importStructure", {
 
         //find in local defintions by concept code - if found - it is already imported
         var local_id = $Db.getLocalID( 'trm', trm_ccode);
-        if(local_id > 0){
-            return '';
-        }
 
         var btn_actions = '<div style="width:60px;">'
         + '<div title="Click to show details" Xclass="ui-button ui-widget ui-state-default ui-corner-all ui-button-icon-only" role="button" aria-disabled="false" data-key="expand" '
@@ -1562,7 +1556,7 @@ $.widget( "heurist.importStructure", {
             info += (child_terms == '') ? '' : ('<hr><div style="max-height: 250px; overflow-y: auto;"><h4 style="margin: 5px 0px 10px;">Child terms</h4>' + child_terms + '</div>');
         }    
 
-        var recTitle = fld2('trm_Label','15em');
+        var recTitle = fld2('trm_Label','30em');
 
         var html = '<div class="recordDiv" style="min-height:16px"'
         +' id="rd'+recID+'" recid="'+recID+'">'
