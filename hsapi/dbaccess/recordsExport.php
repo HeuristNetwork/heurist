@@ -1174,8 +1174,6 @@ private static function _composeGephiLinks(&$records, &$links, &$links_cnt, $dir
                 }
 
                 $relationName  = htmlspecialchars($relationName);                               
-                //$image = htmlspecialchars(HEURIST_TERM_URL.$trmID.'.png');
-                //<attvalue for="2" value="{$image}"/>
                 $links_cnt++; 
 
                 $edges = $edges.<<<XML
@@ -2088,9 +2086,10 @@ public static function getIiifResource($record, $ulf_ObfuscatedFileID, $type_res
         
         $thumbfile = HEURIST_THUMB_DIR.'ulf_'.$fileid.'.png';
         if(file_exists($thumbfile)){
-            $tumbnail_url = HEURIST_BASE_URL_PRO."?db=".HEURIST_DBNAME."&thumb=".$fileid;
+            $tumbnail_url = HEURIST_BASE_URL_PRO.'?db='.HEURIST_DBNAME.'&thumb='.$fileid;
         }else{
-            $tumbnail_url = HEURIST_ICON_URL.$rectypeID.'&version=thumb';
+            //if thumb not exists - rectype thumb (HEURIST_RTY_ICON)
+            $tumbnail_url = HEURIST_BASE_URL_PRO.'?db='.HEURIST_DBNAME.'&version=thumb&icon='.$rectypeID;
         }
         
         $service = '';   

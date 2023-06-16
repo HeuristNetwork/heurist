@@ -1,4 +1,5 @@
 <?php
+//@todo OUTDATED, TO REMOVE - used on lookupLRC18C.js, rectypeTitleMask and dbsImport only
 /*
 * Copyright (C) 2005-2023 University of Sydney
 *

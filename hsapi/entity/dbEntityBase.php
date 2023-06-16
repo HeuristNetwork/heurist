@@ -901,6 +901,10 @@ class DbEntityBase
             
             $entity_name = $this->config['entityName'];
             
+            list($filename, $content_type) = resolveEntityFilename($entity_name, $verions, $recID, $db_name, $extension);
+            
+            return $filename;
+/*            
             if($entity_name=='sysDatabases'){
                 
                 $db_name = $recID;
@@ -942,6 +946,7 @@ class DbEntityBase
             }else{
                 return null;                     
             }
+*/            
     }
     
     //

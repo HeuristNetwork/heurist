@@ -132,5 +132,72 @@
             
             return $entity_name;
     }
+    
+    //
+    // Returns filename and content type by entity name, view version (icon,thumb) and entity id;
+    //
+    function resolveEntityFilename($entity_name, $rec_id, $version, $db_name=null, $extension=null){
+        
+        $entity_name = entityResolveName($entity_name); 
+
+        if($entity_name=='sysDatabases' && $rec_id){
+            
+            $db_name = $rec_id;
+            if(strpos($rec_id, 'hdb_')===0){
+                $db_name = substr($rec_id,4);    
+            }
+            $rec_id = 1;    
+            $path = HEURIST_FILESTORE_ROOT . $db_name . '/entity/sysIdentification/';    
+        }else{
+            if($entity_name=='term' || $entity_name=='trm'){
+                $entity_name = 'defTerms';
+            }
+            if($db_name==null){
+                if(defined('HEURIST_DBNAME')){
+                    $path = HEURIST_FILESTORE_ROOT.HEURIST_DBNAME.'/';
+                }else{
+                    $path = HEURIST_FILESTORE_DIR;
+                }
+            } 
+            $path = $path .'entity/'.$entity_name.'/';    
+            
+        } 
+
+        if(!$version){
+            $version = ($entity_name=='defRecTypes')?'icon':'thumbnail';   
+        }else if($version=='thumb'){ 
+            $version='thumbnail';
+        }
+        
+        if($version!='full' && !($entity_name!='defRecTypes' && $version=='icon'))
+        {
+            $path = $path.$version.'/';
+        }
+        
+        $filename = null;
+        $content_type = null;
+
+        if($rec_id>0){
+        
+            $fname = $path.$rec_id;
+            
+            $exts = $extension?array($extension):array('png','jpg','svg','jpeg','jpe','jfif','gif');
+            foreach ($exts as $ext){
+                if(file_exists($fname.'.'.$ext)){
+                    if($ext=='jpg' || $ext=='jfif' || $ext=='jpe'){
+                        $content_type = 'image/jpeg';
+                    }else if($ext=='svg'){
+                        $content_type = 'image/svg+xml';
+                    }else{
+                        $content_type = 'image/'.$ext;    
+                    }
+                    $filename = $fname.'.'.$ext;
+                    break;
+                }
+            }
+        }
+        return array($filename, $content_type);
+    }
+    
 
 ?>

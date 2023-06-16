@@ -1048,24 +1048,7 @@ class DbUtils {
 
         $warnings = array();
 
-        //backward capability
-        if (folderCreate($database_folder."rectype-icons", true)){
-            folderRecurseCopy( HEURIST_DIR."admin/setup/dbcreate/icons/defRecTypes/thumbnail", 
-                               $database_folder."rectype-icons/thumb", null, null, true,'th_' );
-            folderRecurseCopy( HEURIST_DIR."admin/setup/dbcreate/icons/defRecTypes/icon", $database_folder."rectype-icons" );
-            folderAddIndexHTML($database_folder."rectype-icons"); // index file to block directory browsing
-        }else{
-            $warnings[] = "Unable to create/copy record type icons folder rectype-icons to $database_folder";
-        }
-            
 
-/*        
-        if(folderRecurseCopy( HEURIST_DIR."admin/setup/rectype-icons", $database_folder."rectype-icons" )){//todo move to entity
-            folderAddIndexHTML($database_folder."rectype-icons"); // index file to block directory browsing
-        }else{
-            $warnings[] = "Unable to create/copy record type icons folder rectype-icons to $database_folder";
-        }
-*/        
         if(folderRecurseCopy( HEURIST_DIR."admin/setup/dbcreate/icons", $database_folder."entity" )){
             
             folderAddIndexHTML($database_folder."entity"); // index file to block directory browsing

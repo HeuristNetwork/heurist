@@ -87,11 +87,6 @@ if( $system->init(@$_REQUEST['db']) ){
 
         $res = $mysqli->query($query);
             
-        //remove icon if exists
-        $filename = HEURIST_ICON_DIR . $new_rt_id . '.png';
-        if(file_exists($filename)) unlink($filename);
-        $filename = HEURIST_THUMB_DIR . 'th_' . $new_rt_id . '.png';
-        if(file_exists($filename)) unlink($filename);
     }
 }
     

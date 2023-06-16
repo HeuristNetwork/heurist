@@ -433,11 +433,7 @@
 
         foreach ($dirs as $dir) {
             
-            if(strpos($dir, 'HEURIST_ICON_DIR')!==false){
-                //for browse available icons (see use_assets in entity config file)
-                $folder = str_replace('HEURIST_ICON_DIR/', HEURIST_ICON_DIR, $dir);
-                $url = str_replace('HEURIST_ICON_DIR/', HEURIST_ICON_URL, $dir);
-            }else if (!defined('HEURIST_FILESTORE_DIR') || strpos($dir, HEURIST_FILESTORE_DIR)!==false) {    
+            if (!defined('HEURIST_FILESTORE_ROOT') || strpos($dir, HEURIST_FILESTORE_ROOT)!==false) {    
                 
                 $folder =  $dir;
                 $url = null;

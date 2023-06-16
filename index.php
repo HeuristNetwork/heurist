@@ -86,7 +86,7 @@ if( @$_REQUEST['recID'] || @$_REQUEST['recid'] || array_key_exists('website', $_
     //download file, thumb or remote url
     header( 'Location: hsapi/controller/file_download.php?'.$_SERVER['QUERY_STRING'] );
     return;
-}else if (array_key_exists('icon',$_REQUEST)){ 
+}else if (array_key_exists('icon',$_REQUEST)){ //another params entity (default rty), version
     //download entity icon or thumbnail
     header( 'Location: hsapi/controller/fileGet.php?'.$_SERVER['QUERY_STRING'] );
     return;

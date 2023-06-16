@@ -494,8 +494,6 @@ function cloneDatabase($targetdbname, $nodata=false, $templateddb, $user_id) {
                     HEURIST_FILESTORE_ROOT.$targetdbname."/smarty-templates" );
         folderRecurseCopy( HEURIST_FILESTORE_ROOT.$source_database."/xsl-templates", 
                     HEURIST_FILESTORE_ROOT.$targetdbname."/xsl-templates" );
-        folderRecurseCopy( HEURIST_FILESTORE_ROOT.$source_database."/rectype-icons", 
-                    HEURIST_FILESTORE_ROOT.$targetdbname."/rectype-icons" );
         folderRecurseCopy( HEURIST_FILESTORE_ROOT.$source_database."/entity", 
                     HEURIST_FILESTORE_ROOT.$targetdbname."/entity" );
         

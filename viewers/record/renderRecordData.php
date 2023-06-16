@@ -48,6 +48,7 @@ require_once(dirname(__FILE__).'/../../hsapi/dbaccess/db_users.php');
 require_once(dirname(__FILE__).'/../../hsapi/dbaccess/db_rel_details_temp.php');
 
 define('ALLOWED_TAGS', '<i><b><u><em><strong><sup><sub><small><br>'); //for record title see output_chunker for other fields
+//'<a><u><i><em><b><strong><sup><sub><small><br><h1><h2><h3><h4><p><ul><li><img>'
 
 $noclutter = array_key_exists('noclutter', $_REQUEST);
 $is_map_popup = array_key_exists('mapPopup', $_REQUEST) && ($_REQUEST['mapPopup']==1);

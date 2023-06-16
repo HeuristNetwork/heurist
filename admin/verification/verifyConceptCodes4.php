@@ -25,8 +25,8 @@
     * @package     Heurist academic knowledge management system
     * @subpackage  !!!subpackagename for file such as Administration, Search, Edit, Application, Library
     */
-print 'disabled'; 
-exit(); 
+//print 'disabled'; 
+//exit(); 
  
 //define('OWNER_REQUIRED', 1);   
 define('PDIR','../../');  //need for proper path to js and css    
@@ -107,8 +107,10 @@ if(false){
     __addOtherSources();
 }else  if(false){
     __renameField39();
-}else  if(true){
+}else  if(false){
     __correctGetEstDate_and_ConvertTemporals_JSON_to_Plain();
+}else  if(true){
+    __copy_RecType_And_Term_Icons_To_EntityFolder();
 }
 //
 // Report database versions
@@ -897,5 +899,111 @@ function __correctGetEstDate_and_ConvertTemporals_JSON_to_Plain(){
         }
     }
     
+}
+
+//
+//
+//
+function __copy_RecType_And_Term_Icons_To_EntityFolder(){
+    global $mysqli, $databases; 
+
+
+    foreach ($databases as $idx=>$db_name){
+
+        //mysql__usedatabase($mysqli, $db_name);
+        
+        $old_path = HEURIST_FILESTORE_ROOT . $db_name . '/rectype-icons/';
+        
+        $path = HEURIST_FILESTORE_ROOT . $db_name . '/entity/defRecTypes/';
+
+        folderCreate($path, false);
+        folderCreate($path.'icon/', false);
+        folderCreate($path.'thumbnail/', false);
+        
+        $content = folderContent($old_path);
+        
+        $cnt = 0;
+        
+        foreach ($content['records'] as $object) {
+            if ($object[1] != '.' && $object[1] != '..') {
+                
+                $rty_id = substr($object[1],0,-4);
+                
+                if(intval($rty_id)>=0){
+                    $old_icon = $old_path.$object[1];
+                    
+                    if(file_exists($old_icon)){
+                    
+                        //if icon exists skip
+                        list($fname, $ctype) = resolveEntityFilename('defRecTypes', 'icon', $rty_id);
+                        if($fname!=null) continue;
+                        
+                        //copy icon
+                        $new_icon = $path.'icon/'.$rty_id.'.png';
+                        copy($old_icon, $new_icon);
+                        
+                        //copy thumb
+                        $old_thumb = $old_path.'thumb/th_'.$rty_id.'.png';
+                        if(file_exists($old_thumb)){
+                            copy($old_thumb, $path.'thumbnail/'.$rty_id.'.png');
+                        }
+                        $cnt++;
+                    }       
+                }
+            }
+        }
+if($cnt>0) echo $db_name.'  '.$cnt.'<br>';
+        //remove old folder
+        //folderDelete($old_path, true);
+        
+        //thumbnails
+        $old_path = HEURIST_FILESTORE_ROOT . $db_name . '/term-images/';
+        
+        $path = HEURIST_FILESTORE_ROOT . $db_name . '/entity/defTerms/';
+        
+        $content = folderContent($old_path);
+
+        folderCreate($path, false);
+        folderCreate($path.'thumbnail/', false);
+        $cnt = 0;
+        
+        foreach ($content['records'] as $object) {
+            if ($object[1] != '.' && $object[1] != '..') {
+        
+                $trm_id = substr($object[1],0,-4);
+                
+                if(intval($trm_id)>0){
+                    $old_icon = $old_path.$object[1];
+                    
+                    if(file_exists($old_icon)){
+                    
+                        //if icon exist skip
+                        list($fname, $ctype) = resolveEntityFilename('defTerms', 'icon', $rty_id);
+                        if($fname!=null) continue;
+                        
+                        $new_icon = $path.$object[1];
+                        if(file_exists($new_icon)){
+                            continue;
+                        }
+                        //copy icon
+                        copy($old_icon, $new_icon);
+                        
+                        //copy thumb
+                        copy($old_icon, $path.'thumbnail/'.$object[1]);
+                        
+                        $cnt++;
+                    }       
+                }
+            }
+        }        
+
+if($cnt>0) echo '   terms:'.$cnt.'<br>';
+        
+        //remove old folder
+        //folderDelete($old_path, true);
+        
+        
+
+    }        
 }
 ?>
