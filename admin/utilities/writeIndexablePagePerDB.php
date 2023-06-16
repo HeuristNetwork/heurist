@@ -142,12 +142,15 @@ $value_to_replace = array('{db_name}','{db_desc}','{db_url}','{db_website}','{db
 //
 // File content for (HarvestableDatabaseDescriptions/index.html)
 //
-$index_page = '<html>'
+$index_page = '<!DOCTYPE html>'
+. '<html>'
 
     . '<head>'
         . '<meta charset="UTF-8">'
         . '<meta name="viewport" content="width=device-width, initial-scale=1.0">'
-        . '<meta name="keywords" content="Heurist, Heurist database">' //{sys_kywds}
+        . '<meta name=”generator” content=”Heurist”>'
+        . '<meta name="keywords" content="Heurist, Heurist databases, Digital Humanitites, Database management">' //{sys_kywds}
+        . '<meta http-equiv="content-type" content="text/html; charset=UTF-8">'
         . '<title>Index of Heurist Databases</title>'
 
         . '<style>'
@@ -176,22 +179,25 @@ $index_page = '<html>'
 //
 // Format for each row of database details within index.html
 //
-$index_row = '<strong>{db_name}</strong><br>' // <strong>{db_dname} ({db_name})</strong>
+$index_row = '<strong>{db_name}</strong> (<a href="{db_page_link}" target=_blank>database page</a>)<br>' // <strong>{db_dname} ({db_name})</strong>
             . '{website_url}<br>'
             . '<span class="desc">{db_desc}</span>';
-$index_row_replace = array('{db_name}', '{website_url}', '{db_desc}');
+$index_row_replace = array('{db_name}', '{db_page_link}', '{website_url}', '{db_desc}');
 
 //
 // File content for each database file (HarvestableDatabaseDescriptions/{database_name}.html)
 //
-$template_page = '<html>'
+$template_page = '<!DOCTYPE html>'
+. '<html>'
 
     . '<head>'
         . '<meta charset="UTF-8">'
         . '<meta name="viewport" content="width=device-width, initial-scale=1.0">'
+        . '<meta name=”generator” content=”Heurist”>'
         . '<meta name="description" content="{db_desc}">'
-        . '<meta name="keywords" content="Heurist, Heurist database, {db_name}, {db_dname}, {db_owner}">' //{sys_kywds}
+        . '<meta name="keywords" content="Heurist, Heurist database, Digital Humanitites, Database management, {db_name}, {db_dname}, {db_owner}">' //{sys_kywds}
         . '<meta name="author" content="{db_owner}">' //{owner_name}
+        . '<meta http-equiv="content-type" content="text/html; charset=UTF-8">'
         . '<title>Heurist DB {db_name} on {server_host} updated {date_now}</title>'
 
         . '<style>'
@@ -341,6 +347,7 @@ foreach ($databases as $idx=>$db_name){
     $values[6] = $vals['db_id'];
     $values[8] = $vals['db_dname'];
 
+    // Replace missing/placeholder values
     if(empty($values[8]) || $values[8] == 'Please enter a DB name ...'){
         $values[8] = $db_name;
     }
@@ -383,6 +390,10 @@ foreach ($databases as $idx=>$db_name){
 
     $values[11] = $vals['owner_name'];
     $values[12] = $vals['owner_email'];
+
+    if(empty($values[5])){ // check if db owner is blank, if so use user 2
+        $values[5] = $vals['owner_name'];
+    }
 
     // Record and Structure details
 
@@ -444,7 +455,7 @@ foreach ($databases as $idx=>$db_name){
     // $db_name => Name, [1] => Description, [3] => Websites
     if($values[3] !== 'None'){ // only databases with websites are listed in index.html
 
-        $index_details = str_replace($index_row_replace, array($db_name, $values[3], $values[1]), $index_row);
+        $index_details = str_replace($index_row_replace, array($db_name, $db_name.'.html', $values[3], $values[1]), $index_row);
 
         array_push($index_databases, $index_details);
     }
