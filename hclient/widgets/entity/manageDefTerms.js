@@ -797,6 +797,9 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
         var that = this;
 
         if(this.use_remote && this.options.import_structure){
+
+            this.recordList.resultList('resetGroups');
+
             window.hWin.HAPI4.SystemMgr.get_defs(
                 {terms:'all', mode: 0, remote: that.options.import_structure.database_url}, function(response){
                     if(response.status == window.hWin.ResponseStatus.OK){

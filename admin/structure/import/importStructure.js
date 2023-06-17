@@ -216,11 +216,6 @@ $.widget( "heurist.importStructure", {
                 let panel = ui.newPanel;
                 let entity = panel.attr('id');
 
-                let $resList = panel.find('.ent_content_full.recordList');
-                if($resList.length > 0 && $resList.resultList('instance') !== undefined){
-                    $resList.resultList('refreshPage');
-                }
-
                 that.panel_def_list_target.find('select').hide();
                 if(entity == 'dty_container'){
                     that.select_dty_list_target.show();
@@ -997,7 +992,6 @@ $.widget( "heurist.importStructure", {
         function fld(fldname){
             return recordset.fld(record, fldname);
         }
-
 
         var recID = fld('rec_ID');
         var recURL = fld('rec_URL');

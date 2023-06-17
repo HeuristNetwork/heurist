@@ -311,8 +311,11 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
         
         var that = this;
         if(this.use_remote && this.options.import_structure){
+
+            this.recordList.resultList('resetGroups');
+
             window.hWin.HAPI4.SystemMgr.get_defs( //only basefield names
-                {detailtypes:'all', mode:2, remote:that.options.import_structure.database_url}, function(response){ console.log(response);
+                {detailtypes:'all', mode:2, remote:that.options.import_structure.database_url}, function(response){
                     if(response.status == window.hWin.ResponseStatus.OK){
 
                         if(!window.hWin.HEURIST4.remote){
