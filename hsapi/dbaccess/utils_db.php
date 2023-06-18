@@ -939,12 +939,14 @@
                             if($is_date_simple){
                                 $dtl_NewValue = $preparedDate->getValue(true); //returns simple yyyy-mm-dd
                             }else{
-                                $dtl_NewValue = $preparedDate->toJSON(); //json encoded string
+                                $v_json = $preparedDate->getValue();
+                                $v_json['comment'] = '';
+                                $dtl_NewValue = json_encode($v_json); //$preparedDate->toJSON(); //json encoded string
                             }
                             
             //3. Validate estMin and estMax from JSON
-                            $query = 'SELECT getEstDate(\''.$mysqli->real_escape_string($dtl_NewValue)
-                                    .'\',0) as minD, getEstDate(\''.$mysqli->real_escape_string($dtl_NewValue).'\',1) as maxD';  
+                            $query = 'SELECT getEstDate(\''.$dtl_NewValue  //$mysqli->real_escape_string(
+                                    .'\',0) as minD, getEstDate(\''.$dtl_NewValue.'\',1) as maxD'; //$mysqli->real_escape_string(
                             $res2 = $mysqli->query($query);
                             if($res2){
                                 $row2 = $res2->fetch_row();
