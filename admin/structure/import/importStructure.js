@@ -759,7 +759,8 @@ $.widget( "heurist.importStructure", {
             + '</div>';
         }
 
-        if(false && recID<1000){
+/*        
+        if(recID<1000){
             html = html
             + '<div title="Click to clone curated template" '
             + 'class="rec_view_link ui-button  action-button ui-widget ui-state-default ui-corner-all ui-button-icon-only" '
@@ -767,7 +768,7 @@ $.widget( "heurist.importStructure", {
             + '<span class="ui-button-icon-primary ui-icon ui-icon-copy"/><span class="ui-button-text"/>'
             + '</div>';
         }                                                         
-
+*/
         html = html + '</div></div>';
 
         return html;

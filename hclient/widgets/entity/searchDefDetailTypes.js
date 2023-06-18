@@ -196,9 +196,7 @@ $.widget( "heurist.searchDefDetailTypes", $.heurist.searchEntity, {
             if(this.options.use_cache){
             
                 this._trigger( "onfilter", null, request);            
-            }else
-            if(false && $.isEmptyObject(request)){
-                this._trigger( "onresult", null, {recordset:new hRecordSet()} );
+                
             }else{
                 this._trigger( "onstart" );
         
