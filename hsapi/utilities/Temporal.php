@@ -164,8 +164,14 @@ class Temporal {
         }else if ($value) {
             
             //at first - detect time interval in format start/end start/duration duration/end
-            $values = explode('/',$value);
-            if(is_array($values) && count($values)==2){
+            //$values = explode('/',$value);
+            $seps = array('à','.','/','to','-',',');
+            
+            preg_match_all('/\w+|[à|.|\/|to|\-|,]+/i', $value, $matches);
+            
+            if(is_array(@$matches[0]) && count($matches[0])==3 && in_array($matches[0][1],$seps) ){
+                
+                $values = array($matches[0][0],$matches[0][2]);
                 
                 if(strlen($values[0])>2 && strlen($values[1])>2) {
                     $tStart = null;
@@ -173,57 +179,40 @@ class Temporal {
                     
                     if(strcasecmp(substr($values[0], 0, 1),'P')==0){
                         // duration/end
-
-                        $dt = Temporal::dateToISO($values[1]);    
-                        $dt = new DateTime($dt);
-                        $values[0] = strtoupper($values[0]);
-                        $i = null;
-                        try{
-                            $i = new DateInterval($values[0]);    
-                        } catch (Exception  $e){
-                        }
-                        
-                        if($dt!=null && $i!=null){
-                            $dt = $dt->sub($i);
-                            
-                            $format = preg_match('/^P\d+Y$/',$values[0]) && preg_match('/^-?\d+$/', $values[1])?'Y':'Y-m-d H:i:s';
-                            $tStart = Temporal::dateToISO($dt->format($format), 2, false);
-                            $tEnd = Temporal::dateToISO($values[1], 2, false, 'now');
-                        }
-
-                        
+                        $timespan = Temporal::_getInterval($values[1], $values[0], -1);
+                       
                     }else if(strcasecmp(substr($values[1], 0, 1),'P')==0){
                         // start/duration
-                        $dt = Temporal::dateToISO($values[0]);    
-                        $dt = new DateTime($dt);
-                        $values[1] = strtoupper($values[1]);
-                        $i = null;
-                        try{
-                            $i = new DateInterval($values[1]);    
-                        } catch (Exception  $e){
-                        }
-                        
-                        if($dt!=null && $i!=null){
-                            $dt = $dt->add($i);
-                            
-                            $format = preg_match('/^P\d+Y$/',$values[1]) && preg_match('/^-?\d+$/', $values[0])?'Y':'Y-m-d H:i:s';
-                            $tEnd = Temporal::dateToISO($dt->format($format), 2, false);
-                            $tStart = Temporal::dateToISO($values[0], 2, false, 'now');
-                        }
+                        $timespan = Temporal::_getInterval($values[0], $values[1], 1);
                         
                     }else{
                         // start/end
                         $tStart = Temporal::dateToISO($values[0], 2, false, 'now');
                         $tEnd = Temporal::dateToISO($values[1], 2, false, 'now');
-                    }
                     
-                    if($tStart && $tEnd){
-                        $timespan = array('start'=>array('earliest'=>$tStart ),
+                        if($tStart && $tEnd){    
+                            $timespan = array('start'=>array('earliest'=>$tStart ),
                                             'end'=>array('latest'=>$tEnd ));
+                        }
                     }
                 }
                 
+            }else if(strpos($value,'±')!==false){
+
+                $values = explode('±', $value);
+                $period = $values[1];
+                $period = str_replace('years','Y',$period);
+                $period = str_replace('months','M',$period);
+                $period = str_replace('days','D',$period);
+                $period = preg_replace('/\s+/', '', $period); //remove spaces
+                $period = 'P'.$period;
+                if(!preg_match('/Y|M|D$/i',$period)){
+                    $period = $period.'Y'; //year by default
+                }
+                $timespan = Temporal::_getInterval(trim($values[0]), $period, 0);
+             
             }
+
             
             //if(!is_numeric($value)){
             if($timespan==null && !preg_match('/^-?\d+$/', $value) ){
@@ -330,6 +319,77 @@ class Temporal {
     }
     
     //
+    // $direction -1 (sub) 0 (both) +1 (add)
+    //
+    private static function _getInterval($timestamp, $deviation, $direction=0){
+        
+        $is_year_only = ($deviation==null || preg_match('/^P\d+Y$/',$deviation)) && preg_match('/^-?\d+$/',$timestamp);
+        
+        $dt = Temporal::dateToISO($timestamp, 2, !$is_year_only);    
+        
+        if($is_year_only){
+            
+            $tStart = $dt;
+            $tEnd = $dt;
+            if($deviation!=null){
+                $years = intval(substr($deviation,1,-1)); //remove P and Y
+
+                if($direction>=0){
+                    $tEnd = strval(intval($dt)+$years);    
+                }
+                if($direction<=0){
+                    $tStart = strval(intval($dt)-$years);    
+                }
+            }
+            
+        }else{
+            
+            $tStart = null;
+            $tEnd = null;
+            
+            if($deviation!=null){
+                $dt = Temporal::dateToISO($timestamp);    
+                try{
+                    $tStart = new DateTime($dt);
+                    $tEnd = new DateTime($dt);
+                } catch (Exception  $e){
+                }
+                $deviation = strtoupper($deviation);
+                $i = null;
+                try{
+                    $i = new DateInterval($deviation);    
+                } catch (Exception  $e){
+                }
+                
+                if($tStart!=null && $i!=null){
+                    if($direction>=0){
+                        $tEnd->add($i);    
+                    }
+                    if($direction<=0){
+                        $tStart->sub($i);    
+                    }
+                    
+                    $format = 'Y-m-d H:i:s';
+                    $tEnd = Temporal::dateToISO($tEnd->format($format), 2, false);
+                    $tStart = Temporal::dateToISO($tStart->format($format), 2, false);
+                }
+            }else{
+                $tEnd = $dt;
+                $tStart = $dt;
+            }
+        }
+    
+        if($tStart && $tEnd){
+            return array('start'=>array('earliest'=>$tStart ),
+                                'end'=>array('latest'=>$tEnd ));
+        }else{
+            return null;
+        }
+        
+    
+    }
+    
+    //
     // Calculates and returns min max dates as iso strings
     //
     public function calcMinMax(){
@@ -369,6 +429,7 @@ class Temporal {
     //
     private static function _getLimitDate($date, $direction){
         
+        $res = null;
         if(@$date['in']){
             
                 $deviation = @$date['deviation']?$date['deviation']
@@ -387,19 +448,32 @@ class Temporal {
                     }
                     
                 }else{
+                    
+                    $timestamp = Temporal::_getInterval($date['in'], $deviation, $direction);
+                    if($timestamp!=null){
+                        $res = $direction<0?$timestamp['start']['earliest']:$timestamp['end']['latest'];
+                    }
+/*                    
                     $dt = Temporal::dateToISO($date['in'],2,false);    
                     
                     if($deviation!=null){
-                        $dt = new DateTime($dt);
                         try{
-                            $i = new DateInterval($deviation);
-                            $dt = ($direction>0) ?$dt->add($i) :$dt->sub($i);
+                            $dt = new DateTime($dt);
                         } catch (Exception  $e){
+                            $dt = null;
                         }
-                        $res = Temporal::dateToISO($dt->format('Y-m-d H:i:s'));
+                        if($dt!=null){
+                            try{
+                                $i = new DateInterval($deviation);
+                                $dt = ($direction>0) ?$dt->add($i) :$dt->sub($i);
+                            } catch (Exception  $e){
+                            }
+                            $res = Temporal::dateToISO($dt->format('Y-m-d H:i:s'));
+                        }
                     }else{
                         $res = $dt;            
                     }
+*/                    
                 }
             
         }else{
@@ -446,6 +520,8 @@ class Temporal {
     // Returns date array (year, month, day...)
     //
     private static function _datePrepare($value, $month_day_order=2){
+        
+        if($value==null) return null;
     
         //1. Preparation of sting value - trim, remove "?", remove padding zeroes for year, 
         $origHasDays = false;

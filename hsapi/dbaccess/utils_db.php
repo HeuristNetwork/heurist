@@ -902,7 +902,7 @@
             
             //fill database with min/max date values
             //1. find all date values in recDetails
-            $query = 'SELECT dtl_ID,dtl_RecID,dtl_DetailTypeID,dtl_Value FROM recDetails, defDetailTypes WHERE dtl_DetailTypeID=dty_ID AND dty_Type="date"';
+            $query = 'SELECT dtl_ID,dtl_RecID,dtl_DetailTypeID,dtl_Value FROM recDetails, defDetailTypes WHERE dtl_DetailTypeID=dty_ID AND dty_Type="date" AND dtl_Value!=""';
             $res = $mysqli->query($query);
             
             if ($res){
@@ -943,7 +943,8 @@
                             }
                             
             //3. Validate estMin and estMax from JSON
-                            $query = "SELECT getEstDate('$dtl_NewValue',0) as minD, getEstDate('$dtl_NewValue',1) as maxD";  
+                            $query = 'SELECT getEstDate(\''.$mysqli->real_escape_string($dtl_NewValue)
+                                    .'\',0) as minD, getEstDate(\''.$mysqli->real_escape_string($dtl_NewValue).'\',1) as maxD';  
                             $res2 = $mysqli->query($query);
                             if($res2){
                                 $row2 = $res2->fetch_row();
@@ -1013,7 +1014,7 @@
                             $cnt_err++;
                         } 
                         
-                        if($need_populate){ //verbose output
+                        if($need_populate && $error){ //verbose output
                             print $dtl_RecID.' '.$dtl_ID.'  '.$dtl_Value.' '.(($dtl_Value!=$dtl_NewValue)?$dtl_NewValue:'').' '.$error.'<br>';
                         }
                         

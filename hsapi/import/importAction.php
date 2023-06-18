@@ -1953,7 +1953,7 @@ private static function validateDateField($query, $imp_session, $fields_checked,
                 if($r_value!=null && super_trim($r_value)!='' && super_trim($r_value)!='NULL'){
 
 
-                    if( preg_match('/^-?\d+$/', $value) ){ //this is year only
+                    if( preg_match('/^-?\d+$/', $r_value) ){ //this is year only
                         array_push($newvalue, $r_value);
                     }else{
                         
