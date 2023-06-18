@@ -310,7 +310,13 @@ class Temporal {
             }  else {
                 $value = Temporal::dateToISO($value, 2, false, 'now');  //standard order, days not need
                 if($value){
-                    $timespan = array('timestamp'=>array('in'=>$value, 'type'=>'s'));
+                    if(substr_count($value,'-')==1){
+                        //year and month only
+                        $timespan = array('start'=>array('earliest'=>$value.'-01' ),
+                                            'end'=>array('latest'=>date("Y-m-t", strtotime($value.'-01')) ));
+                    }else{
+                        $timespan = array('timestamp'=>array('in'=>$value, 'type'=>'s'));    
+                    }
                 }
             } 
         }
