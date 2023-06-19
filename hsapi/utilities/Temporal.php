@@ -140,6 +140,11 @@ class Temporal {
                 //[start, latest-start, earliest-end, end, label]
                 
                 $minmax = $this->calcMinMax();
+                
+                if(intval($minmax[0])<-250000){
+                    return [];
+                }
+                
                 return array($minmax[0],'','',$minmax[1],'');
         }    
         return [];
@@ -169,62 +174,66 @@ class Temporal {
             //separator with - will work only for years - otherwise it is very difficult ot detect
             //$values = explode('-',$value);
             //$value2 = preg_replace('/\s+/', '', $value);
-            preg_match_all('/^-?\d+|-|-?\d+$/', $value, $matches);
             
-            if(is_array(@$matches[0]) && (count($matches[0])==3 || count($matches[0])==4) && $matches[0][1]=='-' ){
-                if(count($matches[0])==4){
-                    $matches[0][2] = ('-'.$matches[0][3]);
-                    $matches[0] = array_splice($matches[0],0,3);
+            if(!(strpos($value,"|")!==false || strpos($value,'timestamp')!==false || strpos($value,'start')!==false)){
+            
+                preg_match_all('/^-?\d+|-|-?\d+$/', $value, $matches);
+                
+                if(is_array(@$matches[0]) && (count($matches[0])==3 || count($matches[0])==4) && $matches[0][1]=='-' ){
+                    if(count($matches[0])==4){
+                        $matches[0][2] = ('-'.$matches[0][3]);
+                        $matches[0] = array_splice($matches[0],0,3);
+                    }
+                    
+                }else{
+                    preg_match_all('/\w+|[à|.|\/|to|,]+/i', $value, $matches);
                 }
                 
-            }else{
-                preg_match_all('/\w+|[à|.|\/|to|,]+/i', $value, $matches);
-            }
-            
-            $seps = array('à','.','/','to','-',',');
-            
-            if(is_array(@$matches[0]) && count($matches[0])==3 && in_array($matches[0][1],$seps) ){
+                $seps = array('à','.','/','to','-',',');
                 
-                $values = array($matches[0][0],$matches[0][2]);
-                
-                if(s(strlen($values[0])>2 || abs($values[0])>12) && (strlen($values[1])>2 || abs($values[1])>12) ) {
-                    $tStart = null;
-                    $tEnd = null;
+                if(is_array(@$matches[0]) && count($matches[0])==3 && in_array($matches[0][1],$seps) ){
                     
-                    if(strcasecmp(substr($values[0], 0, 1),'P')==0){
-                        // duration/end
-                        $timespan = Temporal::_getInterval($values[1], $values[0], -1);
-                       
-                    }else if(strcasecmp(substr($values[1], 0, 1),'P')==0){
-                        // start/duration
-                        $timespan = Temporal::_getInterval($values[0], $values[1], 1);
+                    $values = array($matches[0][0],$matches[0][2]);
+                    
+                    if( (strlen($values[0])>2 || abs(intval($values[0]))>12) && (strlen($values[1])>2 || abs(intval($values[1]))>12) ) {
+                        $tStart = null;
+                        $tEnd = null;
                         
-                    }else{
-                        // start/end
-                        $tStart = Temporal::dateToISO($values[0], 2, false, 'now');
-                        $tEnd = Temporal::dateToISO($values[1], 2, false, 'now');
-                    
-                        if($tStart && $tEnd){    
-                            $timespan = array('start'=>array('earliest'=>$tStart ),
-                                            'end'=>array('latest'=>$tEnd ));
+                        if(strcasecmp(substr($values[0], 0, 1),'P')==0){
+                            // duration/end
+                            $timespan = Temporal::_getInterval($values[1], $values[0], -1);
+                           
+                        }else if(strcasecmp(substr($values[1], 0, 1),'P')==0){
+                            // start/duration
+                            $timespan = Temporal::_getInterval($values[0], $values[1], 1);
+                            
+                        }else{
+                            // start/end
+                            $tStart = Temporal::dateToISO($values[0], 2, false, 'now');
+                            $tEnd = Temporal::dateToISO($values[1], 2, false, 'now');
+                        
+                            if($tStart && $tEnd){    
+                                $timespan = array('start'=>array('earliest'=>$tStart ),
+                                                'end'=>array('latest'=>$tEnd ));
+                            }
                         }
                     }
-                }
-                
-            }else if(strpos($value,'±')!==false){
+                    
+                }else if(strpos($value,'±')!==false){
 
-                $values = explode('±', $value);
-                $period = $values[1];
-                $period = str_replace('years','Y',$period);
-                $period = str_replace('months','M',$period);
-                $period = str_replace('days','D',$period);
-                $period = preg_replace('/\s+/', '', $period); //remove spaces
-                $period = 'P'.$period;
-                if(!preg_match('/Y|M|D$/i',$period)){
-                    $period = $period.'Y'; //year by default
+                    $values = explode('±', $value);
+                    $period = $values[1];
+                    $period = str_replace('years','Y',$period);
+                    $period = str_replace('months','M',$period);
+                    $period = str_replace('days','D',$period);
+                    $period = preg_replace('/\s+/', '', $period); //remove spaces
+                    $period = 'P'.$period;
+                    if(!preg_match('/Y|M|D$/i',$period)){
+                        $period = $period.'Y'; //year by default
+                    }
+                    $timespan = Temporal::_getInterval(trim($values[0]), $period, 0);
+                 
                 }
-                $timespan = Temporal::_getInterval(trim($values[0]), $period, 0);
-             
             }
 
             
