@@ -1007,7 +1007,7 @@ function print_private_details($bib) {
         ?>
         <div class="detailRow fieldRow"<?php echo $is_map_popup?' style="display:none"':''?>>
             <div class=detailType>Added</div><div class=detail>
-                <?php print htmlspecialchars($add_date.'  '.$add_date_local); ?>
+                <?php print $add_date.'  '.$add_date_local; ?>
             </div>
         </div>
         <?php
@@ -1016,7 +1016,7 @@ function print_private_details($bib) {
         ?>
         <div class="detailRow fieldRow"<?php echo $is_map_popup?' style="display:none"':''?>>
             <div class=detailType>Updated</div><div class=detail>
-                <?php print htmlspecialchars($mod_date.' '.$mod_date_local); ?>
+                <?php print $mod_date.' '.$mod_date_local; ?>
             </div>
         </div>
         <?php
