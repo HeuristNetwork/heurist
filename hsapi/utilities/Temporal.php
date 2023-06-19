@@ -133,11 +133,12 @@ class Temporal {
     }
     
     //
-    //
+    // For geojson
     //
     public function getOldTimespan(){
         if($this->isValid()){
                 //[start, latest-start, earliest-end, end, label]
+                
                 $minmax = $this->calcMinMax();
                 return array($minmax[0],'','',$minmax[1],'');
         }    
@@ -164,16 +165,29 @@ class Temporal {
         }else if ($value) {
             
             //at first - detect time interval in format start/end start/duration duration/end
-            //$values = explode('/',$value);
-            $seps = array('à','.','/','to','-',',');
             
-            preg_match_all('/\w+|[à|.|\/|to|\-|,]+/i', $value, $matches);
+            //separator with - will work only for years - otherwise it is very difficult ot detect
+            //$values = explode('-',$value);
+            //$value2 = preg_replace('/\s+/', '', $value);
+            preg_match_all('/^-?\d+|-|-?\d+$/', $value, $matches);
+            
+            if(is_array(@$matches[0]) && (count($matches[0])==3 || count($matches[0])==4) && $matches[0][1]=='-' ){
+                if(count($matches[0])==4){
+                    $matches[0][2] = ('-'.$matches[0][3]);
+                    $matches[0] = array_splice($matches[0],0,3);
+                }
+                
+            }else{
+                preg_match_all('/\w+|[à|.|\/|to|,]+/i', $value, $matches);
+            }
+            
+            $seps = array('à','.','/','to','-',',');
             
             if(is_array(@$matches[0]) && count($matches[0])==3 && in_array($matches[0][1],$seps) ){
                 
                 $values = array($matches[0][0],$matches[0][2]);
                 
-                if(strlen($values[0])>2 && strlen($values[1])>2) {
+                if(s(strlen($values[0])>2 || abs($values[0])>12) && (strlen($values[1])>2 || abs($values[1])>12) ) {
                     $tStart = null;
                     $tEnd = null;
                     
@@ -257,7 +271,7 @@ class Temporal {
                         
                             $timespan = Temporal::_getIntervalForMonth(@$tDate['DAT']);
                             
-                            if(is_array($timestamp) && $timestamp['timestamp'] && @$tDate['CIR']) //circa or aproximate
+                            if(is_array($timespan) && $timespan['timestamp'] && @$tDate['CIR']) //circa or aproximate
                             {
                                 $timespan['timestamp']['circa'] = true;
                             }
@@ -475,7 +489,12 @@ class Temporal {
                     if($deviation!=null){
                         try{                        
                             $i = new DateInterval($deviation);
-                            $res = strval($res + $direction * $i->y);
+                            $res = $res + $direction * $i->y;
+                            if($res<0){
+                                $res = '-'.str_pad(substr(strval($res),1),6,'0',STR_PAD_LEFT);
+                            }else{
+                                $res = str_pad($res,4,'0',STR_PAD_LEFT);
+                            }
                         } catch (Exception  $e){
                         }
                     }
@@ -685,7 +704,7 @@ class Temporal {
 
                 //year must be four digit for CE and 6 for BCE
                 if($isbce){
-                    $res = str_pad($res,4,'0',STR_PAD_LEFT); //WAS 6
+                    $res = str_pad($res,6,'0',STR_PAD_LEFT); //WAS 6
                 }else if(abs($date['year'])<10000){
                     $res = str_pad($res,4,'0',STR_PAD_LEFT);
 
