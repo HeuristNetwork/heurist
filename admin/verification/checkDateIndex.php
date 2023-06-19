@@ -79,7 +79,7 @@ if($is_included){
                     print '<div style="padding:5px;color:red">Empty dates in index:&nbsp;<b>'.($cnt_empty).'</b></div>';
                 }
 
-                echo '<div><h3 class="error">Recreate Relationship cache to restore missing entries</h3></div>';        
+                echo '<div><h3 class="error">Recreate Details Date Index table to restore missing entries</h3></div>';        
                 
                 $index_outdated = true;
             }else{

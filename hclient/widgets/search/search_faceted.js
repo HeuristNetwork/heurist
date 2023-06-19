@@ -2422,7 +2422,7 @@ $.widget( "heurist.search_faceted", {
                                     return val;
                                 }
                                 
-                                if(mmin.indexOf('-')<0){
+                                if(mmin.indexOf('-')<1){
                                     mmin = __toDt(mmin);    
                                 }else{
                                     if(mmin.indexOf("-00")>0){
@@ -2431,7 +2431,7 @@ $.widget( "heurist.search_faceted", {
                                     mmin = mmin.replace(' ','T');                                                                     
                                 }
                                 
-                                if(mmax.indexOf('-')<0){
+                                if(mmax.indexOf('-')<1){
                                     mmax = __toDt(mmax);
                                 }else{
                                     if(mmax.indexOf("-00")>0){ //|| mmax.indexOf("-01-01")>0
@@ -2440,7 +2440,7 @@ $.widget( "heurist.search_faceted", {
                                     }
                                     mmax = mmax.replace(' ','T');
                                 }
-console.log(mmin+'   '+mmax);       
+//DEBUG console.log(mmin+'   '+mmax);       
                                 var date_min, date_max;
                                 try{
                                     date_min = TDate.parse(mmin);
@@ -2566,7 +2566,7 @@ console.log(mmin+'   '+mmax);
                             // lower -> min value, higher -> max value
                             //
                             function setupDateHistogram(lower, higher) {
-
+return;
                                 // Get dates in ms
                                 var t_min = new Date(''+lower);
                                 var t_max = new Date(''+higher);
@@ -2730,8 +2730,13 @@ console.log(mmin+'   '+mmax);
                             
                             function __dateToString(val){
                                 try{
-                                   var tDate = new TDate((new Date(''+val)).toISOString());
-                                   val = tDate.toString(date_format);
+                                    let sval = ''+val;
+                                    if(!sval.match(/^-?\d+/)){
+                                        var tDate = new TDate((new Date(sval)).toISOString());
+                                        val = tDate.toString(date_format);
+                                    }else if(val<0){
+                                        val = sval.substr(1)+' bce';
+                                    }
                                    //val = (new Date(val)).format(date_format);
                                    //val = moment(val).format(date_format);
                                 }catch(err) {
@@ -2775,13 +2780,17 @@ console.log(mmin+'   '+mmax);
                                         //year must be four digit
                                         //min = (new TDate(min)).toString();
                                         //max = (new TDate(max)).toString(); 
-                                        
-                                        var tDate = new TDate((new Date(''+min)).toISOString());
-                                        min = tDate.toString();
-                                        
-                                        tDate = new TDate((new Date(''+max)).toISOString());
-                                        max = tDate.toString();
-                                        
+                                        min = ''+min;
+                                        max = ''+max;
+                                        let tDate;
+                                        if(!min.match(/^-?\d+/)){
+                                            tDate = new TDate((new Date(min)).toISOString());
+                                            min = tDate.toString();
+                                        }
+                                        if(!max.match(/^-?\d+/)){
+                                            tDate = new TDate((new Date(max)).toISOString());
+                                            max = tDate.toString();
+                                        }
                                         //min = (new Date(min)).toISOString();
                                         //max = (new Date(max)).toISOString(); 
                                     }catch(err) {

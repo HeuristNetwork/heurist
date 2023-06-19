@@ -109,14 +109,14 @@ function Temporal (strInitTemporal) {
                     
                     switch ($tDate["TYP"]) {
                         case 's'://simple
-                            $timespan = {timestamp:{in:$tDate['DAT'], type:'s'}};
+                            $timespan = {"timestamp":{"in":$tDate['DAT'], "type":'s'}};
                             
                             if($tDate['CIR']){  //circa or aproximate
                                 $timespan['timestamp']['circa'] = true;
                             }
                         break;    
                         case 'f'://fuzzy
-                            $timespan = {timestamp:{in:$tDate['DAT'], type:'f', deviation:$tDate['RNG']}};
+                            $timespan = {"timestamp":{"in":$tDate['DAT'], "type":'f', "deviation":$tDate['RNG']}};
                         break;    
                         case 'c'://carbon
 
@@ -127,7 +127,7 @@ function Temporal (strInitTemporal) {
                                 $date = -parseInt($tDate['BCE']);
                             }
 
-                            $timespan = {timestamp:{in:(''+$date), type:'c', bp:($tDate['BPD']>0),
+                            $timespan = {"timestamp":{"in":(''+$date), "type":'c', "bp":($tDate['BPD']>0),
                                 native: ($tDate['BPD']>0
                                     ? ($tDate['BPD']+' BP')
                                     : ($tDate['BCE']?  $tDate['BCE'] + ' BCE': '')) }};

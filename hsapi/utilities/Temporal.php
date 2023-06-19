@@ -217,8 +217,13 @@ class Temporal {
             //if(!is_numeric($value)){
             if($timespan==null && !preg_match('/^-?\d+$/', $value) ){
                 $timespan = json_decode($value, true);
+                
+                if($timespan && is_double($timespan)){ //200.15
+                    $value = strval(intval($timespan));
+                }
+                
             }    
-            if($timespan!=null){
+            if($timespan!=null && is_array($timespan)){
                 //json object
                 if(@$timespan[0]){
                     $timespan = $timespan[0]; //in case [{}]
@@ -310,7 +315,7 @@ class Temporal {
             }  else {
                 $value = Temporal::dateToISO($value, 2, false, 'now');  //standard order, days not need
                 if($value){
-                    if(substr_count($value,'-')==1){
+                    if(strpos($value,'-')>0 && substr_count($value,'-')==1){
                         //year and month only
                         $timespan = array('start'=>array('earliest'=>$value.'-01' ),
                                             'end'=>array('latest'=>date("Y-m-t", strtotime($value.'-01')) ));

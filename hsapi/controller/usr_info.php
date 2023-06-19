@@ -172,7 +172,7 @@
                 $early->setTime(0, 0);
             }catch(Exception $e){
 
-                $err_msg[] = 'Invalid earliest date provided, ' . $e->errorMessage();
+                $err_msg[] = 'Invalid earliest date provided, ' . $e->getMessage();
                 $res = false;
             }
 
@@ -181,12 +181,12 @@
                 $latest->setTime(0, 0);
             }catch(Exception $e){
 
-                $err_msg[] = 'Invalid latest date provided, ' . $e->errorMessage();
+                $err_msg[] = 'Invalid latest date provided, ' . $e->getMessage();
                 $res = false;
             }
 
             if(!$early || !$latest){
-                $system->addError(HEURIST_REQUEST_DENIED, );
+                $system->addError(HEURIST_INVALID_REQUEST, implode('<br><br>', $err_msg));
                 $res = false;
             }else if($res !== false){
 
