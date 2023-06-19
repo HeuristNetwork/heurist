@@ -2533,12 +2533,12 @@ class HPredicate {
         else if ($this->lessthan) {
             
             //timespan max < rdi_estMinDate
-            $res = "({$timespan[1]} < rdi_estMinDate)";
+            $res = "({$timespan[1]} {$this->lessthan} rdi_estMinDate)";
         }
         else if ($this->greaterthan) {
             
             //timespan min > rdi_estMaxDate
-            $res = "(rdi_estMaxDate > {$timespan[1]})";
+            $res = "({$timespan[0]} {$this->greaterthan} rdi_estMaxDate)";
         }
         else {
             //overlaps/intersects with interval

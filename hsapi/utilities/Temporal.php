@@ -218,8 +218,16 @@ class Temporal {
             if($timespan==null && !preg_match('/^-?\d+$/', $value) ){
                 $timespan = json_decode($value, true);
                 
-                if($timespan && is_double($timespan)){ //200.15
-                    $value = strval(intval($timespan));
+                if($timespan){
+                    if(is_double($timespan)){ //200.15
+                        $value = strval(intval($timespan));
+                        $timespan = null;
+                    }else if(is_array($timespan) && count($timespan)>0 && is_numeric(@$timespan[0])){
+                        if(count($timespan)==1){
+                            $value = strval(intval($timespan[0]));
+                            $timespan = null;
+                        }
+                    }
                 }
                 
             }    
@@ -246,9 +254,11 @@ class Temporal {
                     
                     switch ($tDate["TYP"]){
                         case 's'://simple
-                            $timespan = array('timestamp'=>array('in'=>@$tDate['DAT'], 'type'=>'s'));
+                        
+                            $timespan = Temporal::_getIntervalForMonth(@$tDate['DAT']);
                             
-                            if(@$tDate['CIR']){  //circa or aproximate
+                            if(is_array($timestamp) && $timestamp['timestamp'] && @$tDate['CIR']) //circa or aproximate
+                            {
                                 $timespan['timestamp']['circa'] = true;
                             }
                             
@@ -313,20 +323,32 @@ class Temporal {
                     if(@$tDate['CL2']) $timespan['native'] = $tDate['CL2'];
                     
             }  else {
-                $value = Temporal::dateToISO($value, 2, false, 'now');  //standard order, days not need
-                if($value){
-                    if(strpos($value,'-')>0 && substr_count($value,'-')==1){
-                        //year and month only
-                        $timespan = array('start'=>array('earliest'=>$value.'-01' ),
-                                            'end'=>array('latest'=>date("Y-m-t", strtotime($value.'-01')) ));
-                    }else{
-                        $timespan = array('timestamp'=>array('in'=>$value, 'type'=>'s'));    
-                    }
-                }
+                    $timespan = Temporal::_getIntervalForMonth($value);
             } 
         }
 
         return $timespan; 
+    }
+    
+    //
+    // Converts dates like 2005-05 to interval 2005-05-01/2005-05-31
+    //
+    private static function _getIntervalForMonth($value){
+
+        $value = Temporal::dateToISO($value, 2, false, 'now');  //standard order, days not need
+        $timespan = null;
+        
+        if($value){
+            
+            if(strpos($value,'-')>0 && substr_count($value,'-')==1){
+                //year and month only
+                $timespan = array('start'=>array('earliest'=>$value.'-01' ),
+                                    'end'=>array('latest'=>date("Y-m-t", strtotime($value.'-01')) ));
+            }else{
+                $timespan = array('timestamp'=>array('in'=>$value, 'type'=>'s'));    
+            }
+        }
+        return $timespan;
     }
     
     //
@@ -621,7 +643,7 @@ class Temporal {
 
         $res = null;
 
-        if(!is_array($date)){
+        if(!is_array($date) && $date!=null){
 
             //check for textual values
             if (strpos($date,'|')!==false || strpos($date,'{"')!==false) {// temporal encoded date - this is for check in import and validation only

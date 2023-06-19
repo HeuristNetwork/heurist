@@ -1191,26 +1191,33 @@ $.widget( "heurist.mapping", {
                     for(k=0; k<tdata.when.length; k++){
                         ts = tdata.when[k];
                         
-                        titem = {
-                            id: layer_id+'-'+tdata.rec_ID+'-'+k, //unique id
-                            group: layer_id,
-                            content: '<img src="'+iconImg 
-                            + '"  align="absmiddle" style="padding-right:3px;" width="12" height="12"/>&nbsp;<span>'
-                            + tdata.rec_Title+'</span>',
-                            //'<span>'+recName+'</span>',
-                            title: tdata.rec_Title,
-                            start: ts[0],
-                            recID: tdata.rec_ID
-                        };
-
-                        if(ts[3] && ts[0]!=ts[3]){
-                            titem['end'] = ts[3];
+                        if(!ts[0]){
+console.log('Start date not defined ',tdata.when,tdata.rec_ID);                            
+                            
                         }else{
-                            titem['type'] = 'point';
-                            //titem['title'] = singleFieldName+': '+ dres[0] + '. ' + titem['title'];
-                        }
+                            
+                            titem = {
+                                id: layer_id+'-'+tdata.rec_ID+'-'+k, //unique id
+                                group: layer_id,
+                                content: '<img src="'+iconImg 
+                                + '"  align="absmiddle" style="padding-right:3px;" width="12" height="12"/>&nbsp;<span>'
+                                + tdata.rec_Title+'</span>',
+                                //'<span>'+recName+'</span>',
+                                title: tdata.rec_Title,
+                                start: ts[0],
+                                recID: tdata.rec_ID
+                            };
 
-                        that.timeline_items[layer_id].push(titem); 
+                            if(ts[3] && ts[0]!=ts[3]){
+                                titem['end'] = ts[3];
+                            }else{
+                                titem['type'] = 'point';
+                                //titem['title'] = singleFieldName+': '+ dres[0] + '. ' + titem['title'];
+                            }
+
+                            that.timeline_items[layer_id].push(titem); 
+                        }
+                        
                     }//for timespans
 
                 });

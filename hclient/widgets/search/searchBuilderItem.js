@@ -505,11 +505,11 @@ $.widget( "heurist.searchBuilderItem", {
                 {key:'',title:'like'},
                 {key:'=',title:'equals'},
                 {key:'-',title:'not equals'},
+                {key:'>',title:'greater than'},
                 {key:'>=',title:'>='},
+                {key:'<',title:'less than'},
                 {key:'<=',title:'<='}];
 /*                
-                {key:'>',title:'greater than'},
-                {key:'<',title:'less than'},
                 {key:'<>',title:'between'}
 */
             

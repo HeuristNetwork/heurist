@@ -1261,7 +1261,7 @@ class Predicate {
         else if ($this->parent->greaterthan) {
             
             //timespan min > rdi_estMaxDate
-            $res = "(rdi_estMaxDate > {$timespan[1]})";
+            $res = "(rdi_estMaxDate < {$timespan[0]})";
         }
         else {
             //overlaps/intersects with interval

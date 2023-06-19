@@ -2640,8 +2640,10 @@ function recordSearch($system, $params)
                                     $dt = new Temporal($row[1]);
                                     if($dt->isValidSimple()){
                                         $val = $dt->getValue(true); //returns simple yyyy-mm-dd
-                                    }else{
+                                    }else if($dt->isValid()){
                                         $val = $dt->toPlain(); 
+                                    }else{
+                                        $val = $row[1];
                                     }
                                 
                                 }else if(@$row[1]!=null) {
