@@ -442,7 +442,15 @@ function executeSmartyTemplate($system, $params){
             if($outputmode=='js'){
                 header("Content-type: text/javascript");
             }else if($publishmode>0 && $publishmode<4){ 
-                $mimetype = $outputmode=='txt'?'plain/text':"text/$outputmode";
+                
+                if($outputmode=='txt'){
+                    $mimetype = 'plain/text';
+                }else if($outputmode=='json'){
+                    $mimetype = 'application/json';
+                }else{
+                    $mimetype = "text/$outputmode";    
+                }
+                
                 if(!$is_headless && $outputmode!='html'){
                     header("Content-type: $mimetype;charset=UTF-8");
                 }
@@ -883,7 +891,15 @@ function save_report_into_file($tpl_source){
             header("Content-type: text/javascript");
             $tpl_res = add_javascript_wrap4($tpl_source);
         }else{
-            $mimetype = $outputmode=='txt'?'plain/text':"text/$outputmode";
+            
+            if($outputmode=='txt'){
+                $mimetype = 'plain/text';
+            }else if($outputmode=='json'){
+                $mimetype = 'application/json';
+            }else{
+                $mimetype = "text/$outputmode";    
+            }
+
             header("Content-type: $mimetype;charset=UTF-8");
             $tpl_res = $tpl_source;
         }

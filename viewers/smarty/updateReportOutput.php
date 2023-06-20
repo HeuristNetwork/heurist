@@ -64,7 +64,11 @@ if(isset($_REQUEST) && count($_REQUEST)>0){ //if set it is included in dailyCron
     }else{
 	    $update_mode = 1;
     }
-    $format = (array_key_exists('mode',$_REQUEST) && $_REQUEST['mode']=="js") ?"js":"html";
+    
+    $format = null;
+    if(array_key_exists('mode',$_REQUEST)){
+        $format = $_REQUEST['mode'];
+    }
 
     $mysqli = $system->get_mysqli();
 
@@ -124,6 +128,18 @@ function doReport($system, $update_mode, $format, $row){
             die('Failed to create folder for generated reports');
         }   
 	}
+    
+    if($format==null){
+        $format = $row['rps_URL'];
+        if(strpos($format,'&mode=')!==false){
+            $params = array();
+            parse_str($format, $params);
+            $format = $params['mode'];
+        }
+    }
+    if(!preg_match('/html|js|txt|csv|xml|json|css/',$format)){
+        $format = 'html'; //default
+    }
 
 	$filename = ($row['rps_FileName']!=null)?$row['rps_FileName']:$row['rps_Template'];
 
@@ -134,16 +150,16 @@ function doReport($system, $update_mode, $format, $row){
 		$path_parts = pathinfo($outputfile);
 		$ext = array_key_exists('extension',$path_parts)?$path_parts['extension']:null;
 
-		if ($ext == null) { 
+		if ($ext == null) {
             //add extension
-			$filename2 = $outputfile.".".$format;
+			$filename2 = $outputfile.'.'.$format;
 			if(file_exists($filename2)){
 				$outputfile = $filename2;
-				$ext = $format;
+			
 			}else{ // if ($format=="js")
-				$outputfile = $outputfile.".html";
-				$ext = "html";
+				$outputfile = $outputfile.'.'.$format;
 			}
+            $ext = $format;
 		}
         
 		if(file_exists($outputfile)){
@@ -162,8 +178,31 @@ function doReport($system, $update_mode, $format, $row){
             }
             if($res == 1){ //request for current files (without smarty execution)
                 if($update_mode==3){
+                    
+                    if($ext=='js'){
+                        header("Content-type: text/javascript");
+                    }else{ 
+                        
+                        if($ext=='txt'){
+                            $mimetype = 'plain/text';
+                        }else if($ext=='json'){
+                            $mimetype = 'application/json';
+                        }else{
+                            $mimetype = "text/$ext";    
+                        }
+                        
+                        if($ext!='html'){
+                            header("Content-type: $mimetype;charset=UTF-8");
+                        }
+                        
+                        if($ext!='html'){
+                            header('Pragma: public');
+                            header('Content-Disposition: attachment; filename="'.$outputfile.'"'); 
+                        }
+                    }
+                    
 			        $content = file_get_contents($outputfile);
-			        if($format=="js" && $ext != $format){
+			        if($ext=="js"){
 				        $content = str_replace("\n","",$content);
 				        $content = str_replace("\r","",$content);
 				        $content = str_replace("'","&#039;",$content);

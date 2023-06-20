@@ -187,7 +187,7 @@ function ReportManager(_isFilterMode, _isWindowMode) {
                             return '';
                         }else{
                             return '<a href="../../viewers/smarty/updateReportOutput.php?db='
-                            +window.hWin.HAPI4.database+'&publish=3&id='
+                            +window.hWin.HAPI4.database+'&publish=3&mode=html&id='
                             +data
                             +'" target="_blank">'
                             +'<img src="../../hclient/assets/external_link_16x16.gif" width="16" height="16" border="0" title="HTML link">'
@@ -197,17 +197,18 @@ function ReportManager(_isFilterMode, _isWindowMode) {
                         return '';    
             }}},
             
-            { data: 'rps_ID', title: "<div style='font-size:10;'>JS</div>", sortable:false, width:16,  //resizeable:false,width:7,
-                render: function(data, type) {
+            { data: 'rps_URL', title: "<div style='font-size:10;'>Raw</div>", sortable:false, width:16,  //resizeable:false,width:7,
+                render: function(data, type, row) {
                     if (type === 'display') {
                         var status = 0; //@todo Number(oRecord.getData('status'));
                         if(status==1){
                             return '';
                         }else{
+                            let outputmode = data?data:'txt';
                             return '<a href="../../viewers/smarty/updateReportOutput.php?db='
-                            +window.hWin.HAPI4.database+'&publish=3&mode=js&id='
-                            +data+'" target="_blank">'
-                            +'<img src="../../hclient/assets/external_link_16x16.gif" width="16" height="16" border="0" title="JavaScript link"></a>';
+                            +window.hWin.HAPI4.database+'&publish=3&mode='+outputmode+'&id='
+                            +row.rps_ID+'" target="_blank">'+outputmode.toUpperCase()
+                            +'&nbsp;<img src="../../hclient/assets/external_link_16x16.gif" width="16" height="16" border="0" title="JavaScript link"></a>';
                         }
                     }else{
                         return '';    
@@ -259,7 +260,7 @@ return '<div align="center" data-id="'+data+'">'
 		window.hWin.HEURIST4.msg.showDialog( url, {
 		    "close-on-blur": false,
 			"no-resize": false,
-			height: 400,
+			height: 440,
 			width: 620,
 			callback: function(context) {
 				if(!window.hWin.HEURIST4.util.isnull(context)){
