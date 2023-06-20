@@ -1454,22 +1454,21 @@ $.widget( "heurist.importStructure", {
         function fld(fldname){
             return window.hWin.HEURIST4.util.htmlEscape(recordset.fld(record, fldname));
         }
-        function fld2(fldname, col_width){
-            swidth = '';
-            if(!window.hWin.HEURIST4.util.isempty(col_width)){
-                swidth = ' style="width:'+col_width+'"';
-            }
-            return '<div class="item" '+swidth+'>'+window.hWin.HEURIST4.util.htmlEscape(recordset.fld(record, fldname))+'</div>';
+        function fld2(fldname, col_width, left_padding){
+
+            let value = window.hWin.HEURIST4.util.htmlEscape(recordset.fld(record, fldname));
+
+            let swidth = !window.hWin.HEURIST4.util.isempty(col_width) ? 'width:' + col_width + ';' : '';
+            let spadding = !window.hWin.HEURIST4.util.isempty(left_padding) ? 'padding-left:' + left_padding + ';' : '';
+            let styling = !window.hWin.HEURIST4.util.isempty(swidth) || !window.hWin.HEURIST4.util.isempty(spadding) ? 'style="' + swidth + spadding + '"' : '';
+
+            return '<div class="item" title="'+ value +'" '+styling+'>'+ value +'</div>';
         }
 
-        var dbs = window.hWin.HEURIST4.remote;
-        var recID = fld('trm_ID');
-        var trm_ccode = fld('trm_ConceptID');
+        let dbs = window.hWin.HEURIST4.remote;
+        let recID = fld('trm_ID');
 
-        //find in local defintions by concept code - if found - it is already imported
-        var local_id = $Db.getLocalID( 'trm', trm_ccode);
-
-        var btn_actions = '<div style="width:60px;">'
+        let btn_actions = '<div style="width:60px;">'
         + '<div title="Click to show details" Xclass="ui-button ui-widget ui-state-default ui-corner-all ui-button-icon-only" role="button" aria-disabled="false" data-key="expand" '
         + ' style="display:inline-block;height:16px;">'
         +     '<span style="padding-top: 6px;" class="ui-button-icon-primary ui-icon ui-icon-carat-'
@@ -1480,35 +1479,26 @@ $.widget( "heurist.importStructure", {
         +     '<span class="ui-button-icon-primary ui-icon ui-icon-arrowthick-1-s" style="cursor:pointer"></span><span class="ui-button-text"></span>'
         + '</div></div>';
 
-        var info = '';
+        let info = '';
         if(dbs._selectedTrmID==recID){
 
-            info = '<table style="text-align: left;font-size:0.9em; margin: 10px 0px;width:100%">';
+            let child_terms = '<table style="text-align: left;font-size:0.9em; margin: 10px 0px 15px 25px;width:95%">'
+                + '<colgroup>'
+                    + '<col style="width: 150px;max-width: 150px;"><col style="width: 15px;"><col style="width: 50px;"><col style="width: 600px;">'
+                + '</colgroup>';
 
-            var trm_Domain = fld('trm_Domain');
-            var trm_Description = fld('trm_Description');
-            var trm_SemanticReferenceURL = fld('trm_SemanticReferenceURL');
-            var trm_Code = fld('trm_Code');
+            let child_count = 0;
 
-            info += '<tr><th style="width: 90px;">Is relations type?</th><td>'+ (trm_Domain == 'relation' ? 'yes' : 'no') +'</td></tr>'
-                 +  '<tr><th style="width: 90px;">Description</th><td>'+ trm_Description +'</td></tr>'
-                 +  '<tr><th style="width: 90px;">Term Code</th><td>'+ trm_Code +'</td></tr>'
-                 +  '<tr><th style="width: 90px;">Documentation</th><td>'+ trm_SemanticReferenceURL +'</td></tr>'
-                 +  '<tr><th style="width: 90px;">Concept Code</th><td>'+ trm_ccode +'</td></tr>'
-                 +  '<tr><th style="width: 90px;">Already in DB?</th><td>'+ (local_id > 0 ? 'yes' : 'no') +'</td></tr>'
-
-            info += "</table>";
-
-            var child_terms = '';
-
-            var idx_label = dbs.terms.fieldNamesToIndex.trm_Label;
-            var idx_parent_terms = dbs.terms.fieldNamesToIndex.trm_ParentTermID;
-            var idx_desc = dbs.terms.fieldNamesToIndex.trm_Description;
-            var idx_code = dbs.terms.fieldNamesToIndex.trm_Code;
-            var idx_ccode = dbs.terms.fieldNamesToIndex.trm_ConceptID;
+            let idx_label = dbs.terms.fieldNamesToIndex.trm_Label;
+            let idx_parent_terms = dbs.terms.fieldNamesToIndex.trm_ParentTermID;
+            let idx_desc = dbs.terms.fieldNamesToIndex.trm_Description;
+            let idx_code = dbs.terms.fieldNamesToIndex.trm_Code;
+            let idx_ccode = dbs.terms.fieldNamesToIndex.trm_ConceptID;
+            let idx_semantic = dbs.terms.fieldNamesToIndex.trm_SemanticReferenceURL;
 
             // list child terms (labels + decription)
             for(var id in dbs.terms.termsByDomainLookup.enum){
+
                 if(id <= 0 || !dbs.terms.termsByDomainLookup.enum[id]){
                     continue;
                 }
@@ -1523,32 +1513,53 @@ $.widget( "heurist.importStructure", {
                     continue;
                 }
 
-                var child_Label = dbs.terms.termsByDomainLookup.enum[id][idx_label];
-                var child_Description = dbs.terms.termsByDomainLookup.enum[id][idx_desc];
-                var child_Code = dbs.terms.termsByDomainLookup.enum[id][idx_code];
-                var child_ccode = dbs.terms.termsByDomainLookup.enum[id][idx_ccode];
-                var child_local_id = $Db.getLocalID( 'trm', child_ccode);
+                if(child_count == 40){
+                    child_terms += '<tr><td>...</td></tr>';
+                    break;
+                }
 
-                child_terms += '<div>'+ child_Label +'</div>'
-                +  '<table style="text-align: left;font-size:0.9em; margin: 10px 0px 15px;width:100%">'
-                    +  '<tr><th style="width: 90px;">Description</th><td>'+ child_Description +'</td></tr>'
-                    +  '<tr><th style="width: 90px;">Term Code</th><td>'+ child_Code +'</td></tr>'
-                    +  '<tr><th style="width: 90px;">Concept Code</th><td>'+ child_ccode +'</td></tr>'
-                    +  '<tr><th style="width: 90px;">Already in DB?</th><td>'+ (child_local_id > 0 ? 'yes' : 'no') +'</td></tr>'
-                +  '</table>';
+                let child_Label = dbs.terms.termsByDomainLookup.enum[id][idx_label];
+                let child_Description = dbs.terms.termsByDomainLookup.enum[id][idx_desc];
+                let child_Code = dbs.terms.termsByDomainLookup.enum[id][idx_code];
+                let child_ccode = dbs.terms.termsByDomainLookup.enum[id][idx_ccode];
+                let child_semanticuri = dbs.terms.termsByDomainLookup.enum[id][idx_semantic];
+                let has_term = ($Db.getLocalID('trm', child_ccode) > 0) ? '&#10003;' : '&#10005;';
+
+                let extra_dtls = '';
+                if(!window.hWin.HEURIST4.util.isempty(child_Description) || !window.hWin.HEURIST4.util.isempty(child_Code)){
+                    extra_dtls = window.hWin.HEURIST4.util.isempty(child_Description) ? child_Code : 
+                        (window.hWin.HEURIST4.util.isempty(child_Code) ? child_Description : child_Code +' : '+ child_Description);
+                }
+
+                child_terms += '<tr>'
+                    + '<td class="truncate" style="max-width: 150px;padding-top: 5px;" title="'+ child_Label +'">'+ child_Label +'</td>'
+                    + '<td style="padding:0px 5px;">'+ has_term +'</td>'
+                    + '<td>'+ child_ccode +'</td>'
+                    + '<td class="truncate" style="max-width: 600px;" title="'+ extra_dtls +'">'+ extra_dtls +'</td>'
+                + '</tr>';
+
+                if(!window.hWin.HEURIST4.util.isempty(child_semanticuri)){
+                    child_terms += '<tr><td colspan=4>'+child_semanticuri+'</td></tr>';
+                }
+
+                child_count++;
             }
 
-            info += (child_terms == '') ? '' : ('<hr><div style="max-height: 250px; overflow-y: auto;"><h4 style="margin: 5px 0px 10px;">Child terms</h4>' + child_terms + '</div>');
+            info += (child_terms == '') ? '' : (child_terms + '</table>');
         }    
 
-        var recTitle = fld2('trm_Label','30em');
+        let label = fld2('trm_Label', '10em');
+        let concept_code = fld2('trm_ConceptID', '60px', '15px');
+        let domain = fld('trm_Domain') == 'relation' ? '<div class="item" style="width: 100px;">Can use for relations</div>' : '';
 
-        var html = '<div class="recordDiv" style="min-height:16px"'
+        let html = '<div class="recordDiv" style="min-height:16px"'
         +' id="rd'+recID+'" recid="'+recID+'">'
         + btn_actions
         + '<div class="recordTitle recordTitle2" title="'+fld('dty_HelpText')
-        +'" style="right:10px;left:94px">'
-        +     recTitle
+        +'" style="right:10px;left:75px">'
+        +     label
+        +     concept_code
+        +     domain
         + '</div>'
         + info
         + '</div>';
