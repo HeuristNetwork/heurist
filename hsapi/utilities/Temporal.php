@@ -175,23 +175,30 @@ class Temporal {
             //$values = explode('-',$value);
             //$value2 = preg_replace('/\s+/', '', $value);
             
-            if(!(strpos($value,"|")!==false || strpos($value,'timestamp')!==false || strpos($value,'start')!==false)){
+            if(!preg_match('/\||timestamp|start/',$value)){
             
-                preg_match_all('/^-?\d+|-|-?\d+$/', $value, $matches);
-                
-                if(is_array(@$matches[0]) && (count($matches[0])==3 || count($matches[0])==4) && $matches[0][1]=='-' ){
-                    if(count($matches[0])==4){
-                        $matches[0][2] = ('-'.$matches[0][3]);
-                        $matches[0] = array_splice($matches[0],0,3);
-                    }
+                if(preg_match('/à|\.|\/|to|,/i', $value)){
+                    
+                   preg_match_all('/[-|\w+]+|[à|\.|\/|to|,]+/i', $value, $matches);
                     
                 }else{
-                    preg_match_all('/\w+|[à|.|\/|to|,]+/i', $value, $matches);
+                    
+                    preg_match_all('/-?\d+|-/', $value, $matches);
+                
+                    if(is_array(@$matches[0]) && (count($matches[0])==2 || (count($matches[0])==3 && $matches[0][1]=='-'))) 
+                    {
+                        if(count($matches)==2){
+                            $matches[0][2] = substr($matches[0][1],1);
+                            $matches[0][1] = '-';
+                        }
+                    }else{
+                        $matches = null;
+                    }
                 }
                 
                 $seps = array('à','.','/','to','-',',');
                 
-                if(is_array(@$matches[0]) && count($matches[0])==3 && in_array($matches[0][1],$seps) ){
+                if($matches && is_array(@$matches[0]) && count($matches[0])==3 && in_array($matches[0][1],$seps) ){
                     
                     $values = array($matches[0][0],$matches[0][2]);
                     
