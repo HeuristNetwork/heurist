@@ -152,13 +152,17 @@
             if($entity_name=='term' || $entity_name=='trm'){
                 $entity_name = 'defTerms';
             }
+
             if($db_name==null){
-                if(defined('HEURIST_DBNAME')){
-                    $path = HEURIST_FILESTORE_ROOT.HEURIST_DBNAME.'/';
-                }else{
+                if(defined('HEURIST_FILESTORE_DIR')){
                     $path = HEURIST_FILESTORE_DIR;
+                }else{
+                    return array(null,null);
                 }
-            } 
+            }else{
+                $path = HEURIST_FILESTORE_ROOT.$db_name.'/';
+            }
+            
             $path = $path .'entity/'.$entity_name.'/';    
             
         } 
