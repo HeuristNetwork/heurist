@@ -1408,61 +1408,43 @@ $.widget( "heurist.importStructure", {
         function fld(fldname){
             return window.hWin.HEURIST4.util.htmlEscape(recordset.fld(record, fldname));
         }
-        function fld2(fldname, col_width){
-            swidth = '';
-            if(!window.hWin.HEURIST4.util.isempty(col_width)){
-                swidth = ' style="width:'+col_width+'"';
-            }
-            return '<div class="item" '+swidth+'>'+window.hWin.HEURIST4.util.htmlEscape(recordset.fld(record, fldname))+'</div>';
+        function fld2(fldname, col_width, left_padding){
+
+            let value = window.hWin.HEURIST4.util.htmlEscape(recordset.fld(record, fldname));
+
+            let swidth = !window.hWin.HEURIST4.util.isempty(col_width) ? 'width:auto;max-width:' + col_width + ';' : '';
+            let spadding = !window.hWin.HEURIST4.util.isempty(left_padding) ? 'padding-left:' + left_padding + ';' : '';
+            let styling = !window.hWin.HEURIST4.util.isempty(swidth) || !window.hWin.HEURIST4.util.isempty(spadding) ? 'style="' + swidth + spadding + '"' : '';
+
+            return '<div class="item" title="'+ value +'" '+styling+'>'+ value +'</div>';
         }
 
-        var dbs = window.hWin.HEURIST4.remote;
-        var recID = fld('dty_ID');
-        var dty_ccode = fld('dty_ConceptID');
+        let recID = fld('dty_ID');
 
-        //find in local defintions by concept code - if found - it is already imported
-        var local_id = $Db.getLocalID( 'dty', dty_ccode);
-
-        var btn_actions = '<div style="width:60px;">'
+        let btn_actions = '<div style="width:30px;">'
         + '<div title="Click to show details" Xclass="ui-button ui-widget ui-state-default ui-corner-all ui-button-icon-only" role="button" aria-disabled="false" data-key="expand" '
-        + ' style="display:inline-block;height:16px;">'
-        +     '<span style="padding-top: 6px;" class="ui-button-icon-primary ui-icon ui-icon-carat-'
-        + ((dbs._selectedDtyID==recID)?'d':'r')+'"></span><span class="ui-button-text"></span>'
+        + ' style="display:inline-block;height:16px;"><span class="ui-button-text"></span>'
         + '</div>'
         + '<div title="Click to import this base field" Xclass="ui-button ui-widget ui-state-default ui-corner-all ui-button-icon-only" role="button" aria-disabled="false" data-key="import" '
-        + ' style="display:inline-block;height:16px;vertical-align:bottom;font-size:1.4em;padding-left:20px">'
+        + ' style="display:inline-block;height:16px;vertical-align:bottom;font-size:1.4em;">'
         +     '<span class="ui-button-icon-primary ui-icon ui-icon-arrowthick-1-s" style="cursor:pointer"></span><span class="ui-button-text"></span>'
         + '</div></div>';
 
-        var info = '';
-        if(dbs._selectedDtyID==recID){
+        let name = fld2('dty_Name', '20em', '');
+        let concept_code = fld2('dty_ConceptID', '60px', '15px');
+        let type = fld2('dty_Type', '60px', '10px');
+        let help_text = fld2('dty_HelpText', '50em', '10px');
 
-            info = '<table style="text-align: left;font-size:0.9em; margin: 10px 0px;width:100%">';
-
-            var dty_Doc  = fld('dty_Documentation');
-            var dty_Help  = fld('dty_HelpText');
-            var dty_Type  = fld('dty_Type');
-
-            info += '<tr><th style="width: 90px;">Type</th><td>'+ $Db.baseFieldType[dty_Type] +'</td></tr>'
-                 +  '<tr><th style="width: 90px;">Description</th><td>'+ dty_Help +'</td></tr>'
-                 +  '<tr><th style="width: 90px;">Documentation</th><td>'+ dty_Doc +'</td></tr>'
-                 +  '<tr><th style="width: 90px;">Concept Code</th><td>'+ dty_ccode +'</td></tr>'
-                 +  '<tr><th style="width: 90px;">Already in DB?</th><td>'+ (local_id > 0 ? 'yes' : 'no') +'</td></tr>'
-
-            info += "</table>";
-        }    
-
-        var recTitle = fld2('dty_Name','30em');
-
-        var html = '<div class="recordDiv" style="min-height:16px"'
+        let html = '<div class="recordDiv" style="min-height:16px"'
         +' id="rd'+recID+'" recid="'+recID+'">'
         + btn_actions
         + '<div class="recordTitle recordTitle2" title="'+fld('dty_HelpText')
-        +'" style="right:10px;left:94px">'
-        +     recTitle
-        + '</div>'
-        + info
-        + '</div>';
+        +'" style="right:10px;left:35px;">'
+        +     name
+        +     concept_code
+        +     type
+        +     help_text
+        + '</div></div>';
 
         return html;
     },
