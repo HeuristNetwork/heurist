@@ -55,7 +55,7 @@ $.widget( "heurist.importStructure", {
         height: 600,
         width:  1100,
         modal:  true,
-        title:  'Import structural definitions into current database',
+        title:  'Import definitions into current database',
         source_database_id: 0,  //predefined database id ( skip database list selection )
 
         //LIST section 
@@ -135,18 +135,21 @@ $.widget( "heurist.importStructure", {
 
         //left - source                                
         +'<div class="ent_wrapper" id="entity_wrapper" style="top:6.8em;right:225px;border-right:1px solid lightgray;">' //450px
-            + '<h3 class="fake_link" style="padding-left:10px;">Download individual vocabularies</h3>'
-                + '<div id="trm_container" style="background:transparent;">'
-                    + '<div class="ent_content_full" id="panel_trm_list" style="position:relative;top:0px;height:100%;"></div>'
-                + '</div>'
-            + '<h3 class="fake_link" style="padding-left:10px;">Download individual field definitions</h3>'
-                + '<div id="dty_container" style="background:transparent;">'
-                    + '<div class="ent_content_full" id="panel_dty_list" style="position:relative;top:0px;height:100%;"></div>'
-                + '</div>'
-            + '<h3 class="fake_link" style="padding-left:10px;">Download complete record types</h3>'
-                + '<div id="rty_container"style="background:transparent;">'
-                    + '<div class="ent_content_full" id="panel_rty_list" style="position:relative;top:0px;height:100%;"></div>'
-                + '</div>'
+            + '<ul>'
+                + '<li><a href="#rty_container">Record / entity types</a></li>'
+                + '<li><a href="#dty_container">Individual fields</a></li>'
+                + '<li><a href="#trm_container">Individual vocabularies</a></li>'
+            + '</ul>'
+            + '<div id="trm_container" style="background:transparent;">'
+                + '<div class="ui-heurist-bg-light" style="padding:5px 0px 0px 15px;">&#10003; shows terms already in database</div>'
+                + '<div class="ent_content_full" id="panel_trm_list" style="position:relative;top:0px;height:97.25%;"></div>'
+            + '</div>'
+            + '<div id="dty_container" style="background:transparent;">'
+                + '<div class="ent_content_full" id="panel_dty_list" style="position:relative;top:0px;height:100%;"></div>'
+            + '</div>'
+            + '<div id="rty_container"style="background:transparent;">'
+                + '<div class="ent_content_full" id="panel_rty_list" style="position:relative;top:0px;height:100%;"></div>'
+            + '</div>'
         +'</div>'
 
         //target
@@ -203,13 +206,13 @@ $.widget( "heurist.importStructure", {
             //window.hWin.HEURIST4.ui.createTermSelect(that.select_trm_list_target[0], {useHtmlSelect: true, vocab_id: 'all'});
         });
 
-        this.entity_wrapper.accordion({
-            collapsible: true,
+        this.entity_wrapper.tabs({
+            heightStyle: 'fill',
             beforeActivate: function(event, ui){ // correct panel height
-                let container_size = that.panel_defs.height();
-                let panel = ui.newPanel;
 
-                panel.height(container_size - 200);
+                let panel = ui.newPanel;
+                let parent_height = panel.parent().height();
+                panel.height(parent_height - 31);
             },
             activate: function(event, ui){
 
@@ -217,10 +220,18 @@ $.widget( "heurist.importStructure", {
                 let entity = panel.attr('id');
 
                 that.panel_def_list_target.find('select').hide();
+                window.hWin.HEURIST4.util.setDisabled(that.show_all, false);
+
                 if(entity == 'dty_container'){
                     that.select_dty_list_target.show();
+
+                    that.show_all.prop('checked', false);
+                    window.hWin.HEURIST4.util.setDisabled(that.show_all, true);
                 }else if(entity == 'trm_container'){
                     that.select_trm_list_target.show();
+
+                    that.show_all.prop('checked', true);
+                    window.hWin.HEURIST4.util.setDisabled(that.show_all, true);
                 }else{
                     that.select_rty_list_target.show();
                 }
@@ -228,8 +239,6 @@ $.widget( "heurist.importStructure", {
                 that._filterEntities();
             }
         });
-
-        this.entity_wrapper.accordion('option', 'active', 2); // open rectype accordion, to trigger beforeActivate event
 
         var ele = this.element.find('#btn_back_to_databases')
         .button({label:'Back to Databases'});
@@ -1568,17 +1577,17 @@ $.widget( "heurist.importStructure", {
     // Apply filter values
     _filterEntities: function(){
 
-        let cur_acc = this.entity_wrapper.accordion('option', 'active');
+        let cur_acc = this.entity_wrapper.tabs('option', 'active');
 
         let state = this.show_all.is(':checked');
         let search = this.general_search.val();
 
-        if(cur_acc == 0){ // trm
+        if(cur_acc == 2){ // trm
             this.panel_trm_list.find('.searchForm #input_search').val(search);
-            this.panel_trm_list.find('.searchForm #chb_show_already_in_db').prop('checked', state).change();
+            this.panel_trm_list.find('.searchForm #chb_show_already_in_db').prop('checked', true).change(); // always show all
         }else if(cur_acc == 1){ // dty
             this.panel_dty_list.find('.searchForm #input_search').val(search);
-            this.panel_dty_list.find('.searchForm #chb_show_already_in_db').prop('checked', state).change();
+            this.panel_dty_list.find('.searchForm #chb_show_already_in_db').prop('checked', false).change(); // always hide those already in db
         }else{ // rty
             this.panel_rty_list.find('.searchForm #input_search').val(search);
             this.panel_rty_list.find('.searchForm #chb_show_already_in_db').prop('checked', state).change();
