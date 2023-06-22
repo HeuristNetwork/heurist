@@ -340,8 +340,12 @@ var TemporalPopup = (function () {
 			early_date = convert($early, false);
 			late_date = convert($latest, false);
 		}
+        
+        var tDate1 = TDate.parse(early_date);
+        var tDate2 = TDate.parse(late_date);
+        //if(tDate1.getYear()>tDate2.getYear())
 
-		if(new Date(early_date).getTime() >= new Date(late_date).getTime()){
+		if( tDate1.compare(tDate2) >= 0 ){ //new Date(early_date).getTime() >= new Date(late_date).getTime()){
 
 			$range_cont.hide();
 			window.hWin.HEURIST4.msg.showMsgFlash('Earliest estimate needs to be before latest date', 3000);

@@ -163,40 +163,11 @@
 
             $err_msg = array();
             $res = true;
+            
+            $res = Temporal::getPeriod($early_org, $latest_org);
 
-            $early = null;
-            $latest = null;
-
-            try{
-                $early = new DateTime($early_org);
-                $early->setTime(0, 0);
-            }catch(Exception $e){
-
-                $err_msg[] = 'Invalid earliest date provided, ' . $e->getMessage();
-                $res = false;
-            }
-
-            try{
-                $latest = new DateTime($latest_org);
-                $latest->setTime(0, 0);
-            }catch(Exception $e){
-
-                $err_msg[] = 'Invalid latest date provided, ' . $e->getMessage();
-                $res = false;
-            }
-
-            if(!$early || !$latest){
-                $system->addError(HEURIST_INVALID_REQUEST, implode('<br><br>', $err_msg));
-                $res = false;
-            }else if($res !== false){
-
-                $diff = $early->diff($latest, true);
-
-                $middle_day = date('Y-m-d', (strtotime($early_org) + strtotime($latest_org)) / 2);
-
-                $res = array("days" => $diff->format('%d'), "months" => $diff->format('%M'), "years" => $diff->format('%y'), "middle" => $middle_day);
-            }else{
-                $system->addError(HEURIST_INVALID_REQUEST, implode('<br><br>', $err_msg));
+            if($res === false){
+                $system->addError(HEURIST_INVALID_REQUEST, 'Invalid earliest or latest date provided. Impossible to get difference');
             }
         }
 

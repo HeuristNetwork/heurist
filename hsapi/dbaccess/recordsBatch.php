@@ -470,6 +470,7 @@ error_log('count '.count($childNotFound).'  '.count($toProcess).'  '.print_r(  $
                         .implode(',', $this->rtyIDs).')';
         $rtyLimits = mysql__select_assoc2($mysqli, $query);
 
+        $basetype = null;
         if(@$this->data['geo']==null){
             $basetype = mysql__select_value($mysqli, 'select dty_Type from defDetailTypes where dty_ID = '.$dtyID);
             if($basetype=='geo'){
@@ -495,8 +496,14 @@ error_log('count '.count($childNotFound).'  '.count($toProcess).'  '.print_r(  $
             $dtl['dtl_Value'] = $geoType;
             $dtl['dtl_Geo'] = $geoValue;
             //$dtl['dtl_Geo'] = array("ST_GeomFromText(\"" . $this->data['geo'] . "\")");  
+        }else if($basetype=='date'){
             
-        }else if(@$this->data['val']!=null){
+            $useNewTemporalFormatInRecDetails = ($this->system->get_system('sys_dbSubSubVersion')>=14);
+            
+            $dtl['dtl_Value'] = Temporal::getValueForRecDetails( $this->data['val'], $useNewTemporalFormatInRecDetails );
+            
+            
+        }else if(@$this->data['val']!=null){ //sanitize new value
             
             $this->_initPutifier();
             if(!in_array($dtyID, $this->not_purify)){
@@ -644,6 +651,9 @@ error_log('count '.count($childNotFound).'  '.count($toProcess).'  '.print_r(  $
             return false;
         }
         
+        $useNewTemporalFormatInRecDetails = ($this->system->get_system('sys_dbSubSubVersion')>=14);
+
+        
         if(@$this->data['rVal']!=null){
             if(@$this->data['encoded']==1){
                 $this->data['rVal'] = urldecode( $this->data['rVal'] );
@@ -737,8 +747,14 @@ error_log('count '.count($childNotFound).'  '.count($toProcess).'  '.print_r(  $
                 case "float":
                 case "integer":
                 case "resource":
-                case "date":
                     $searchClause = "dtl_Value = \"".$mysqli->real_escape_string(@$this->data['sVal'])."\"";
+                    $partialReplace = false;
+                    break;
+                case "date":
+                
+                    $dtl_Value = Temporal::getValueForRecDetails( @$this->data['sVal'], $useNewTemporalFormatInRecDetails );
+                
+                    $searchClause = "dtl_Value = \"".$mysqli->real_escape_string($dtl_Value)."\"";
                     $partialReplace = false;
                     break;
                 case "relmarker":
@@ -905,6 +921,10 @@ error_log('count '.count($childNotFound).'  '.count($toProcess).'  '.print_r(  $
                         
                         $dtl['dtl_Value'] = $geoType;        
                         $dtl['dtl_Geo'] = $geoValue;             
+                        
+                    }else  if($basetype=='date'){
+                        
+                        $dtl['dtl_Value'] = Temporal::getValueForRecDetails( $newVal, $useNewTemporalFormatInRecDetails );
                         
                     }else{
                         $dtl['dtl_Value'] = $newVal;        

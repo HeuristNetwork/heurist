@@ -2515,23 +2515,9 @@ function _prepareDetails($system, $rectype, $record, $validation_mode, $recID, $
                     }else{
                         
                         if(true){ 
+                            
+                            $dtl_Value = Temporal::getValueForRecDetails( $dtl_Value, $useNewTemporalFormatInRecDetails );
                         
-                            $preparedDate = new Temporal( $dtl_Value );
-                        
-                            if($preparedDate && $preparedDate->isValid()){
-                                
-                                // saves as usual date
-                                // if date is Simple, 0<year>9999 (CE) and has both month and day 
-                                if($preparedDate->isValidSimple()){
-                                    $dtl_Value = $preparedDate->getValue(true); //returns simple yyyy-mm-dd
-                                }else{
-                                    if($useNewTemporalFormatInRecDetails){
-                                        $dtl_Value = $preparedDate->toJSON(); //json encoded string
-                                    }else{
-                                        $dtl_Value = $preparedDate->toPlain(); //json encoded string
-                                    }
-                                }
-                            }
                         
                         }else{
                             // Use old plain temporals

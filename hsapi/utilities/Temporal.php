@@ -54,12 +54,14 @@
 *       _parseTemporal - parses json or plain string to array of values
 *       _datePrepare     - Validates and sanitizes string date value - returns date array 
 *       _dateDecimal    - Converts string date yyyy-mm-dd  to decimal yyyy.mmdd 
-
+*      (not implemented _decimalToYMD   - Converts string yyyy.mmdd to yyyy-mm-dd)
+*
 *       dateToISO       - Converts date array to ISO8601 string
 *       dateToString    - Converts to human readable string
 *       correctDMYorder - Replaces slashes or dots "/." to dashes "-", Reorders month and day
 *       mergeTemporals  - merge two temporals (it lost fields comment,determination,calendar) 
 *       toHumanReadable
+*       getPeriod       - finds difference between two temporals in years, month, days
 *
 * 3. Export function
 *       toKML           - xml snippet for kml
@@ -380,8 +382,9 @@ class Temporal {
         }
         return $timespan;
     }
-    
+
     //
+    // get timespan from timestamp and deviation
     // $direction -1 (sub) 0 (both) +1 (add)
     //
     private static function _getInterval($timestamp, $deviation, $direction=0){
@@ -582,7 +585,7 @@ class Temporal {
         
         return $res;
     }
-
+    
     //
     // Validates and sanitizes string date value 
     // Returns date array (year, month, day...)
@@ -774,7 +777,7 @@ class Temporal {
 
         return $res;        
     }
-
+    
     //
     // Converts date array to human readable string:  day Month year + suffix (BCE)
     // $value - string or date array (date_parse)
@@ -982,6 +985,67 @@ class Temporal {
     }
     
     //
+    // Finds difference between two dates in years, month, days
+    //
+    public static function getPeriod($date1, $date2){
+        
+        $dt1 = Temporal::_datePrepare($date1);        
+        $dt2 = Temporal::_datePrepare($date2);        
+            
+        if(intval($dt1['year'])<-10000 || intval($dt2['year'])<-10000){
+                //years only
+                $res = array('years'=>intval($dt2['year']) - intval($dt1['year']));
+        }else{
+
+            if(count($dt1) == 1){ // only year, add -01-01 for ISO format
+                $dt1['month'] = 1;
+                $dt1['day'] = 1;
+            }
+            if(count($dt2) == 1){ // only year, add -01-01 for ISO format
+                $dt2['month'] = 1;
+                $dt2['day'] = 1;
+            }
+
+            
+            $early = null;
+            $latest = null;
+            $err_msg = array();
+            $res = true;
+            
+            try{
+                $dt1 = Temporal::dateToISO($dt1);
+                $early = new DateTime($dt1);
+                $early->setTime(0, 0);
+            }catch(Exception $e){
+                $err_msg[] = 'Invalid earliest date provided, ' . $e->getMessage();
+            }
+            try{
+                $dt2 = Temporal::dateToISO($dt2);
+                $latest = new DateTime($dt2);
+                $latest->setTime(0, 0);
+            }catch(Exception $e){
+                $err_msg[] = 'Invalid latest date provided, ' . $e->getMessage();
+            }
+            
+            if(!$early || !$latest){
+                $res = false;
+            }else if($res !== false){
+
+                $diff = $early->diff($latest, true);
+
+                $middle_day = date('Y-m-d', (strtotime($dt2) + strtotime($dt1)) / 2);
+
+                $res = array("days" => $diff->format('%d'), "months" => $diff->format('%M'), "years" => $diff->format('%y'), "middle" => $middle_day);
+            }else{
+                $res = false;
+            }
+        }
+        
+        return $res;
+        
+    }
+
+    //
     //
     //
     public static function mergeTemporals($dt1, $dt2){
@@ -1110,7 +1174,7 @@ class Temporal {
     }
     
     //
-    // Outputs humand readable representation of temporal object
+    // Outputs human readable representation of temporal object
     //    
     public function toReadable(){
         if($this->tDate){
@@ -1173,7 +1237,7 @@ class Temporal {
 
 
     //
-    // Outputs humand readable representation of temporal object
+    // Outputs human readable representation of temporal object
     //    
     public function toReadableExt($separator){
         if($this->tDate){
@@ -1400,6 +1464,30 @@ class Temporal {
         }
         
     } //toPlain
+    
+    //
+    //
+    //
+    public static function getValueForRecDetails( $dtl_Value, $useNewTemporalFormatInRecDetails ){
+        
+        $preparedDate = new Temporal( $dtl_Value );
+        if($preparedDate && $preparedDate->isValid()){
+            
+            // saves as usual date
+            // if date is Simple, 0<year>9999 (CE) and has both month and day 
+            if($preparedDate->isValidSimple()){
+                $dtl_Value = $preparedDate->getValue(true); //returns simple yyyy-mm-dd
+            }else{
+                if($useNewTemporalFormatInRecDetails){
+                    $dtl_Value = $preparedDate->toJSON(); //json encoded string
+                }else{
+                    $dtl_Value = $preparedDate->toPlain(); //Plain string (|VER=1|DAT=....)
+                }
+            }
+        }
+        
+        return $dtl_Value;
+    }
     
     
 } // end Temporal class

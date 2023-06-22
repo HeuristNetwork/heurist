@@ -32,6 +32,24 @@
     //Ga, Gya, bya - gigaannus
     //Ma or Mya, mya (million years ago).  megaannus
     //ka, kya  = kylo annum 
+    $tranges = array(
+        '-500','-300',
+        '1980-05','1987-01',
+        '1500-05-02','2004/10/01',
+        '-199-02-03','-50-05',
+        '-12000','-9000',
+        'yesterday','tomorrow'
+    );
+        
+    $k = 0;
+    while ($k<count($tranges)){
+        $diff = Temporal::getPeriod($tranges[$k], $tranges[$k+1]);
+        
+        echo $tranges[$k].'  '.$tranges[$k+1].'  '.print_r($diff, true).'<br>';
+        
+        $k = $k + 2;
+    }
+    exit();
     
     $tvals = array(
     //'10000-05-01',

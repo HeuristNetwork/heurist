@@ -2636,15 +2636,8 @@ function recordSearch($system, $params)
                                     
                                 }else if(in_array($dtyID, $datetime_field_types) && @$row[1]!=null) { 
                                     //!$useNewTemporalFormatInRecDetails &&     
-                                    //convert date to old plan string temporal object
-                                    $dt = new Temporal($row[1]);
-                                    if($dt->isValidSimple()){
-                                        $val = $dt->getValue(true); //returns simple yyyy-mm-dd
-                                    }else if($dt->isValid()){
-                                        $val = $dt->toPlain(); 
-                                    }else{
-                                        $val = $row[1];
-                                    }
+                                    //convert date to old plain string temporal object to return to client side
+                                    $val = Temporal::getValueForRecDetails( $row[1], false );
                                 
                                 }else if(@$row[1]!=null) {
                                     $val = $row[1]; //dtl_Value
