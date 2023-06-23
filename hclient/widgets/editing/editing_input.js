@@ -140,7 +140,7 @@ $.widget( "heurist.editing_input", {
         var that = this;
 
         var required = "";
-        if(this.options.readonly || this.f('rst_Display')=='readonly') {
+        if(this.isReadonly()) {
             required = "readonly";
         }else{
             if(!this.options.suppress_prompts && this.f('rst_Display')!='hidden'){
@@ -170,7 +170,7 @@ $.widget( "heurist.editing_input", {
         this.is_sortable = false;
        
         //repeat button        
-        if(this.options.readonly || this.f('rst_Display')=='readonly') {
+        if(this.isReadonly()) {
 
             //spacer
             $( "<span>")
@@ -4563,7 +4563,7 @@ console.log('onpaste');
         
         if(!$.isArray(values)) values = [values];
 
-        var isReadOnly = (this.options.readonly || this.f('rst_Display')=='readonly');
+        var isReadOnly = this.isReadonly();
         
         var i;
         for (i=0; i<values.length; i++){
@@ -4656,7 +4656,7 @@ console.log('onpaste');
         
         this.btn_cancel_reorder.hide();
         
-        if(this.options.readonly || this.f('rst_Display')=='readonly') return;
+        if(this.isReadonly()) return;
         var idx, ele_after = this.firstdiv; //this.error_message;
         for (idx in this.inputs) {
             var ele = this.inputs[idx].parents('.input-div');
@@ -4744,11 +4744,18 @@ console.log('onpaste');
     },
     
     //
+    //
+    //
+    isReadonly: function(){
+        return this.options.readonly || this.f('rst_Display')=='readonly' || this.f('rst_MayModify')=='locked';
+    },
+    
+    //
     // get all values (order is respected)
     //
     getValues: function( ){
 
-        if(this.options.readonly || this.f('rst_Display')=='readonly'){
+        if(this.isReadonly()){
             return this.options.values;
         }else{
             var idx;
@@ -4802,7 +4809,7 @@ console.log('onpaste');
     //
     setDisabled: function(is_disabled){
         //return;
-        if(!(this.options.readonly || this.f('rst_Display')=='readonly')){
+        if(!this.isReadonly()){
             var idx;
             for (idx in this.inputs) {
                 if(!this.isFileForRecord) {  //this.detailType=='file'
@@ -4830,7 +4837,7 @@ console.log('onpaste');
             return true;
         }else{
 
-            if(this.options.readonly || this.f('rst_Display')=='readonly'){
+            if(this.isReadonly()){
                 return false;
             }else{
                 if(this.options.values.length!=this.inputs.length){
@@ -4878,7 +4885,7 @@ console.log('onpaste');
     //
     validate: function(){
 
-        if (this.f('rst_Display')=='hidden' || this.f('rst_Display')=='readonly') return true;
+        if (this.f('rst_Display')=='hidden' || this.isReadonly()) return true;
         
         var req_type = this.f('rst_RequirementType');
         var max_length = this.f('dty_Size');
@@ -4979,7 +4986,7 @@ console.log('onpaste');
     //
     //
     focus: function(){
-        if(!this.options.readonly && this.inputs && this.inputs.length>0 
+        if(!this.isReadonly() && this.inputs && this.inputs.length>0 
             && $(this.inputs[0]).is(':visible') 
             && !$(this.inputs[0]).hasClass('ui-state-disabled') )
         {

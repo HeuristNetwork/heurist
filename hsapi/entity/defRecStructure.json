@@ -384,6 +384,23 @@
                                 {"key":"hidden", "title":"visible to owner only "}]
                         }
                     },
+                    {
+                        "dtID": "rst_MayModify",
+                        "dtFields":{
+                            "dty_Type":"enum",
+                            "rst_DisplayName":"May modify:",
+                            "rst_DisplayHelpText": "Extent to which detail may be modified within this record structure", 
+                            "rst_DisplayExtendedDescription":"viewable",
+                            "rst_DisplayWidth":25,
+                            "rst_DefaultValue":"open",
+                            "rst_RequirementType":"optional",
+                            "rst_MaxValues":1,
+                            "rst_FieldConfig":[
+                                {"key":"open", "title":"Editable"},
+                                {"key":"discouraged", "title":"Edit discouraged"},
+                                {"key":"locked", "title":"Readonly/locked"}]
+                        }
+                    },
                     {  "dtID": "rst_LocallyModified",
                         "dtFields":{
                             "dty_Type":"integer",
