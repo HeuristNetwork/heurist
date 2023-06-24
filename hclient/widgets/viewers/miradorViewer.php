@@ -4,6 +4,19 @@
     * If it is missed, it uses latest mirador distribution from unpkg.com
     * 
     * For annotations, heurist database must have either RT_MAP_ANNOTATION or RT_ANNOTATION
+    * 
+    * As a mirador viewer with annotation tool we use customized https://github.com/ProjectMirador/mirador-integration
+    * Modified files are in mirador-integration-changes.zip in external5/mirador3 folder
+    * To perform further customizations download mirador-integration repository
+    * Install dependencies (use node.js v 16.20) including mirador-annotations 0.4.0
+    * Apply changes from mirador-integration-changes.zip
+    * To build webpack: npm run webpack
+    * 
+    * 
+    * We pass to mirador-integration application 
+    * endpointURL - url to heurist api that pass all requests to dbAnnotation.php
+    * manifestUrl - url of iiif image (it needs for thumbnail creation for annotated area)
+    * sourceRecordId - heurist record id - reference to image to be annotated 
     *
     * @package     Heurist academic knowledge management system
     * @link        https://HeuristNetwork.org
@@ -100,7 +113,7 @@ if($use_custom_mirador){
 ?> 
 </head>
 <body>
-<div id="demo"></div>
+<div id="mirador_container"></div>
 <script>
 <?php
     $dbname = @$_REQUEST['db'];
@@ -121,7 +134,7 @@ if($use_custom_mirador){
 ?>
 <script type="text/javascript">
 var mirador = Mirador.viewer({
-  "id": "demo",
+  "id": "mirador_container",
   "windows": [
     {
       "loadedManifest": "<?php echo $manifest_url;?>"
