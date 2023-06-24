@@ -2743,9 +2743,13 @@ class HPredicate {
                     {
                         //search in translation table first
                         $query_tran = 'SELECT trn_Code FROM defTranslations WHERE '
-                                  .'trn_Source="'.$trm_Field.'" AND '
-                                  .'trn_LanguageCode="'.$lang.'" AND '
-                                  .'trn_Translation';
+                                  .'trn_Source="'.$trm_Field.'" AND ';
+                                  
+                        if(strcasecmp($lang,'ALL')!==0){
+                            $query_tran = $query_tran.'trn_LanguageCode="'.$lang.'" AND ';
+                        }
+                                  
+                        $query_tran = $query_tran.'trn_Translation';
                         
                         if($this->exact){
                             $query_tran  =  $query_tran.' ="'.$value.'"'; 

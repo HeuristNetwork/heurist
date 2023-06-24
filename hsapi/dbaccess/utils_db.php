@@ -1323,30 +1323,37 @@ if($i<5){
     
         if(is_string($val) && mb_strlen($val)>4){
             
-            $lang = null;
-            $pos = 3;
             
-            if($val[2]==':'){
-                $lang = strtolower(substr($val,0,2));
-                //find 3 chars code
-                if(!isset($glb_lang_codes)){
-                    $glb_lang_codes = json_decode(file_get_contents('../../hclient/assets/language-codes-3b2.json'),true);
-                }
-                foreach($glb_lang_codes as $codes){
-                    if($codes['a2']==$lang){
-                        $lang = $codes['a3'];
-                        break;
-                    }
-                }
+            if(substr($val,0,2)=='*:'){
+                $lang = 'ALL';
+                $pos = 2;
+            }else{
+            
+                $lang = null;
+                $pos = 3;
                 
-            }else if($val[3]==':'){
-                $lang = substr($val,0,3);
-                $pos = 4;
+                if($val[2]==':'){
+                    $lang = strtolower(substr($val,0,2));
+                    //find 3 chars code
+                    if(!isset($glb_lang_codes)){
+                        $glb_lang_codes = json_decode(file_get_contents('../../hclient/assets/language-codes-3b2.json'),true);
+                    }
+                    foreach($glb_lang_codes as $codes){
+                        if($codes['a2']==$lang){
+                            $lang = $codes['a3'];
+                            break;
+                        }
+                    }
+                    
+                }else if($val[3]==':'){
+                    $lang = substr($val,0,3);
+                    $pos = 4;
+                }
             }
 
             if($lang){
                 $lang = strtoupper($lang);
-                if (in_array($lang, $common_languages_for_translation)){
+                if (strcasecmp($lang,'ALL')===0 || in_array($lang, $common_languages_for_translation)){
                     return array($lang, substr($val, $pos));
                 }
             }
