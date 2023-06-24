@@ -41,6 +41,7 @@ class DbAnnotations extends DbEntityBase
         $this->system->defineConstant('DT_ORIGINAL_RECORD_ID');
         $this->system->defineConstant('DT_ANNOTATION_INFO');
         $this->system->defineConstant('DT_EXTENDED_DESCRIPTION');
+        $this->system->defineConstant('DT_MEDIA_RESOURCE');
                 
                         
         $this->dty_Annotation_Info = (defined('DT_ANNOTATION_INFO'))
@@ -363,6 +364,10 @@ class DbAnnotations extends DbEntityBase
         $details[$this->dty_Annotation_Info][] = $anno['data'];
         $details[DT_ORIGINAL_RECORD_ID][] = $anno['uuid'];
         
+        if($anno['sourceRecordId']>0 && defined('DT_MEDIA_RESOURCE')){
+            //link referenced image record with annotation record
+            $details[DT_MEDIA_RESOURCE][] = $anno['sourceRecordId'];
+        }
         
         //record header
         $record = array();

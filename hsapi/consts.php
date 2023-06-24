@@ -313,6 +313,7 @@ $dtDefines = array('DT_NAME' => array(2, 1),
     'DT_COLOUR' => array(2, 56),
     'DT_DRAWING' => array(2, 59),
     'DT_COUNTER' => array(2, 60),
+    'DT_MEDIA_RESOURCE' => array(2, 61), //refetence to media record
     //xslt not used
     'DT_FILE_NAME' => array(2, 62),
     'DT_FILE_FOLDER' => array(2, 63),
