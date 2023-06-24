@@ -71,14 +71,12 @@ class DbDefTerms extends DbEntityBase
         if(@$this->data['withimages']==1){
 
              $ids = $this->data['trm_ID'];
-             $old_lib_dir = HEURIST_FILESTORE_DIR . 'term-images/'; // For backwards compatibility
              $new_lib_dir = HEURIST_FILESTORE_DIR . 'entity/defTerms/thumbnail/';
              $files = array();
 
              foreach ($ids as $id){
-                $old_filename = $old_lib_dir.$id.'.png'; // For backwards compatibility
                 $new_filename = $new_lib_dir.$id.'.png';
-                if(file_exists($old_filename) || file_exists($new_filename)){
+                if(file_exists($new_filename)){
                     array_push($files, $id);
                 }
              }

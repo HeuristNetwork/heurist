@@ -25,8 +25,10 @@
     * @package     Heurist academic knowledge management system
     * @subpackage  !!!subpackagename for file such as Administration, Search, Edit, Application, Library
     */
-//print 'disabled'; 
-//exit(); 
+print 'disabled'; 
+exit(); 
+
+ini_set('max_execution_time', '0');
  
 //define('OWNER_REQUIRED', 1);   
 define('PDIR','../../');  //need for proper path to js and css    
@@ -107,10 +109,12 @@ if(false){
     __addOtherSources();
 }else  if(false){
     __renameField39();
-}else  if(false){
+}else if(false){
     __correctGetEstDate_and_ConvertTemporals_JSON_to_Plain();
-}else  if(true){
+}else if(false ){
     __copy_RecType_And_Term_Icons_To_EntityFolder();
+}else  if(true){
+    __delete_OLD_RecType_And_Term_Icons_Folders();
 }
 //
 // Report database versions
@@ -901,11 +905,52 @@ function __correctGetEstDate_and_ConvertTemporals_JSON_to_Plain(){
     
 }
 
+
+function __delete_OLD_RecType_And_Term_Icons_Folders(){
+    global $mysqli, $databases; 
+    
+    echo '__delete_OLD_RecType_And_Term_Icons_Folders<br>';
+
+    foreach ($databases as $idx=>$db_name){
+
+        $cnt = 0;
+        
+        $old_path = HEURIST_FILESTORE_ROOT . $db_name . '/rectype-icons/';
+        if(file_exists($old_path)){
+            folderDelete($old_path, true);    
+            $cnt++;
+        }
+        
+
+        $old_path = HEURIST_FILESTORE_ROOT . $db_name . '/term-images/';
+        if(file_exists($old_path) && $db_name!='digital_harlem'){
+            folderDelete($old_path, true);    
+            $cnt++;
+        }
+        
+
+        $old_path = HEURIST_FILESTORE_ROOT . $db_name . '/term-icons/';
+        if(file_exists($old_path)){
+            folderDelete($old_path, true);    
+            $cnt++;
+        }
+        
+
+        echo $db_name.'  '.$cnt.'<br>';
+    }
+    
+}
+
 //
 //
 //
 function __copy_RecType_And_Term_Icons_To_EntityFolder(){
     global $mysqli, $databases; 
+    
+    echo '__copy_RecType_And_Term_Icons_To_EntityFolder<br>';
+    
+    return;
+
     
     if(!defined('HEURIST_FILESTORE_ROOT')) return;
 
@@ -925,6 +970,7 @@ function __copy_RecType_And_Term_Icons_To_EntityFolder(){
         $content = folderContent($old_path);
         
         $cnt = 0;
+        $cnt2 = 0;
         
         foreach ($content['records'] as $object) {
             if ($object[1] != '.' && $object[1] != '..') {
@@ -940,23 +986,31 @@ function __copy_RecType_And_Term_Icons_To_EntityFolder(){
                     
                         //if icon exists skip
                         list($fname, $ctype) = resolveEntityFilename('defRecTypes', $rty_id, 'icon', $db_name, $ext);
-                        if($fname!=null) continue;
+                        if($fname==null){
                         
-                        //copy icon
-                        $new_icon = $path.'icon/'.$object[1];
-                        copy($old_icon, $new_icon);
-                        
-                        //copy thumb
-                        $old_thumb = $old_path.'thumb/th_'.$object[1];
-                        if(file_exists($old_thumb)){
-                            copy($old_thumb, $path.'thumbnail/'.$object[1]); //$rty_id.'.'.$ext);
+                            //copy icon
+                            $new_icon = $path.'icon/'.$object[1];
+                            copy($old_icon, $new_icon);
+                            
+                            $cnt++;
                         }
-                        $cnt++;
                     }       
+                    
+                    //copy thumb
+                    $old_thumb = $old_path.'thumb/th_'.$object[1];
+                    if(file_exists($old_thumb)){
+                        $new_thumb = $path.'thumbnail/'.$object[1];
+                        if(!file_exists($new_thumb)){
+                            copy($old_thumb, $new_thumb);
+                            $cnt2++;
+                        }
+                    }
+                    
                 }
             }
         }
-if($cnt>0) echo $db_name.'  '.$cnt.'<br>';
+
+        echo $db_name.'  '.$cnt.'  '.$cnt2.'<br>';
         //remove old folder
         //folderDelete($old_path, true);
         

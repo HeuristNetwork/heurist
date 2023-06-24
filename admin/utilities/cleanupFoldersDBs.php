@@ -177,7 +177,7 @@ foreach ($databases as $idx=>$db_name){
             //1 root 
             $content = folderContent($dir_root);
             foreach ($content['records'] as $object) {
-                if ($object[1] != '.' && $object[1] != '..') {
+                if ($object[1] != '.' && $object[1] != '..' && strpos($object[1],'ulf_')===false) {
                     unlink($object[2].'/'.$object[1]);
                 }
             }

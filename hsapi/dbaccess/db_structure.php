@@ -557,17 +557,11 @@ function dbs_GetRectypeConstraint($system) {
             'commonFieldNames' => array_slice(__getTermColNames(), 1),
             'fieldNamesToIndex' => __getColumnNameToIndex(array_slice(__getTermColNames(), 1)));
         
-        //add special field - flag - has image    
-        $terms['fieldNamesToIndex']['trm_HasImage'] = count($terms['commonFieldNames']);
-        array_push($terms['commonFieldNames'],'trm_HasImage');        
-        
         if($res){
-            $lib_dir = $system->getSysDir('term-images');  //HEURIST_FILESTORE_DIR . 'term-images/';
             
             while ($row = $res->fetch_row()) {
-                $hasImage = file_exists($lib_dir.$row[0].'.png');
                 $domain = $row[9];
-                array_push($row, $hasImage);
+                //array_push($row, false);
                 
                 if($domain=='relation' && HEURIST_UNITED_TERMS){
                     $terms['termsByDomainLookup']['enum'][$row[0]] = array_slice($row, 1);
