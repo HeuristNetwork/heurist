@@ -23,7 +23,8 @@
     */
     
     /*
-    sanitizeRequest   - removes all tags fro request variables
+    sanitizeRequest   - removes all tags from request variables
+    sanitizeFolderName
     stripScriptTagInRequest - removes only script tags
     getHTMLPurifier
     purifyHTML - clean html with HTMLPurifier
@@ -111,7 +112,22 @@
         
     }
 
-
+    //
+    // 
+    //
+    function sanitizeFolderName($folder) 
+    {
+        $folder = str_replace("\0", '', $folder);
+        $folder = str_replace('\\', '/', $folder);
+        if( substr($folder, -1, 1) != '/' )  {
+            $folder = $folder.'/';
+        }
+        return $folder;
+    }
+    
+    //
+    //
+    //
     function stripScriptTagInRequest(&$params){
 
         foreach($params as $k => $v)

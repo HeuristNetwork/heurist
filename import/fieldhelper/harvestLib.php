@@ -49,19 +49,6 @@ function getMediaFolders($mysqli) {
 
 }
 
-
-//
-//
-//
-function sanitizeFolderName($folder) {
-    $folder = str_replace("\0", '', $folder);
-    $folder = str_replace('\\', '/', $folder);
-    if( substr($folder, -1, 1) != '/' )  {
-        $folder = $folder.'/';
-    }
-    return $folder;
-}
-
 //
 // $imode - 0 - registration
 //          1 - get registered and nonreg files
@@ -168,11 +155,11 @@ function doHarvest($system, $dirs_and_exts, $is_report, $imode) {
 
 //
 // @todo - move code here from syncWithFieldHelper
-//
+/*
 function doHarvestInDir($dir) {
     
 }
-
+*/
 //
 // remove all files from given array
 //
