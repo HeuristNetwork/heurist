@@ -5539,9 +5539,10 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
         var $dlg;
 
         // Term Dlg - Content
-        var msg = 'You are creating a new term for the <strong>' + field_name + '</strong> field.<br><br>'
+        var msg = 'You can create a new term for the <strong>' + field_name + '</strong> field below.<br><br>'
                 + 'New Term: <input type="text" id="new_term_label" value="'+ cur_term[1] +'"> <br><br>'
-                + 'Please correct the term above, as required, before clicking Insert term<br>(you can type an existing term or a correction)';
+                + 'Please correct the term above, as required, before clicking Insert term, or <br><br>'
+                + 'Select an existing term: <select id="existing_term"></select>';
 
         // Term Dlg - Button
         var btn = {};
@@ -5603,7 +5604,24 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
         };
 
         // Create dlg
-        $dlg = window.hWin.HEURIST4.msg.showMsgDlg(msg, btn, {title: 'Unknown term', yes: 'Insert term', no: 'Skip'}, {default_palette_class: 'ui-heurist-design'});
+        $dlg = window.hWin.HEURIST4.msg.showMsgDlg(msg, btn, {title: 'Unknown term', yes: 'Insert term', no: 'Skip'}, {default_palette_class: 'ui-heurist-design', dialogId: 'handle-terms'});
+
+        window.hWin.HEURIST4.ui.createTermSelect($dlg.find('#existing_term')[0], {vocab_id: vocab_id, topOptions: 'select a term...', useHtmlSelect: false, eventHandlers: {
+            onSelectMenu: function(){
+                let $sel = $dlg.find('#existing_term');
+
+                if($sel.val() !== ''){
+
+                    let trm_label = $Db.trm($sel.val(), 'trm_Label');
+
+                    window.hWin.HEURIST4.msg.showMsgDlg('Are you sure you wish to use '+ trm_label +' in place of '+ cur_term[1] +'?', function(){
+                        new_terms[cur_term[0]].push($sel.val());
+                        $dlg.dialog('close');
+                        that.processTermFields(completed_fields, new_terms);
+                    }, {title: 'Use existing term'}, {default_palette_class: 'ui-heurist-design'});
+                }
+            }
+        }});
     },
 
 	//
