@@ -72,6 +72,9 @@ class DbsImport {
 
     private $rename_target_entities = false;    
     
+    private $def_translations;
+    private $translations_report;
+
     //  $data = 
     function __construct( $system ) {
         $this->system = $system;
@@ -323,6 +326,16 @@ $time_debug = microtime(true);
         $this->terms_updated = array();
         $this->terms_added = array();
 
+        $this->def_translations = array(
+            'terms' => array(),
+            'detailtypes' => array(),
+            'recordtypes' => array()
+        ); // Get translated names from source
+        $this->translations_report = array(
+            'terms' => array(),
+            'detailtypes' => array(),
+            'recordtypes' => array()
+        );
         
         //target(local) definitions
         $this->target_defs = array();
@@ -483,6 +496,8 @@ $time_debug2 = $time_debug;
             $mysqli->rollback();
             $mysqli->close();
             return false;                
+        }else if(count($this->def_translations['terms']) > 0){
+            $this->_importTranslations('terms');
         }
         
         if(count($this->imp_recordtypes)==0 && count($this->imp_fieldtypes)==0){
@@ -663,6 +678,9 @@ foreach ($this->imp_recordtypes as $rtyID){
         
     }
     
+    if($new_rtyID > 0 && !array_key_exists($new_rtyID, $this->def_translations['recordtypes'])){
+        $this->def_translations['recordtypes'][$new_rtyID] = array('trn_Source' => 'rty_', 'trn_Code' => $rtyID);
+    }
     
 }//for
 
@@ -744,6 +762,10 @@ if($this->rename_target_entities){
 
             if(!in_array($trg_ID, $this->detailtypes_updated)) $this->detailtypes_updated[] = $trg_ID;
         }
+
+        if(!array_key_exists($trg_ID, $this->def_translations['detailtypes'])){
+            $this->def_translations['detailtypes'][$trg_ID] = array('trn_Source' => 'dty_', 'trn_Code' => $src_ID);
+        }
     }
 }
 
@@ -794,10 +816,16 @@ foreach ($this->imp_fieldtypes as $ftId){
     $res = createDetailTypes($columnNames, array("common"=>$def_field));
 
     if(is_numeric($res)){
-        $this->fields_correspondence[$ftId] = abs($res);
-        $trg_detailtypes['names'][abs($res)] = $def_field[$idx_name-1]; //new name
-        
-        $this->detailtypes_added[] = abs($res);
+        $new_dtyID = abs($res);
+
+        $this->fields_correspondence[$ftId] = $new_dtyID;
+        $trg_detailtypes['names'][$new_dtyID] = $def_field[$idx_name-1]; //new name
+
+        $this->detailtypes_added[] = $new_dtyID;
+
+        if(!array_key_exists($new_dtyID, $this->def_translations['detailtypes'])){
+            $this->def_translations['detailtypes'][$new_dtyID] = array('trn_Source' => 'dty_', 'trn_Code' => $ftId);
+        }
         
     }else{
         //$ftId
@@ -1033,6 +1061,13 @@ foreach($cfn_tobeimported as $cfn_ID => $rty_IDs){ //$rty_IDs $rty_ID=>$dty_ID
         }
     
 }//foreach calc fields
+}
+
+// VIII. Import translations (term translations are handled earlier)
+if(count($this->def_translations['detailtypes']) > 0 || count($this->def_translations['recordtypes']) > 0){
+
+    $this->_importTranslations('detailtypes');
+    $this->_importTranslations('recordtypes');
 }
 
 $mysqli->commit();   
@@ -1720,6 +1755,10 @@ if($new_term_id==5039){
                 }
             }
 
+            if($new_term_id > 0 && !array_key_exists($new_term_id, $this->def_translations['terms'])){
+                $this->def_translations['terms'][$new_term_id] = array('trn_Source' => 'trm_Label', 'trn_Code' => $term_import[$idx_origin_id]);
+            }
+
             //fill $terms_correspondence
             $this->terms_correspondence[$term_id] = abs($new_term_id);
 
@@ -2090,7 +2129,7 @@ if($new_term_id==5039){
             .$trg_terms['termsByDomainLookup'][$domain][$trg_id][$idx_name]."</td></tr>";
         }
 
-        $resp =  array( 'report'=>array('rectypes'=>$sRectypes,'detailtypes'=>$sFields,'terms'=>$sTerms) );
+        $resp =  array( 'report'=>array('rectypes'=>$sRectypes,'detailtypes'=>$sFields,'terms'=>$sTerms,'translations'=>$this->translations_report) );
 
         // Add updated and added values
         if($this->prime_defType == 'term'){
@@ -2245,6 +2284,99 @@ if($new_term_id==5039){
         $this->source_defs['terms']['trm_Links'] = $links;
     }
     
-    
+    private function _importTranslations($def){
+
+        if(count($this->def_translations[$def]) < 0){ // no definitions to retrieve
+            return;
+        }
+
+        $reg_url = explode("?",$this->source_defs['databaseURL']);
+        $remote_url = @$reg_url[0];
+
+        preg_match("/db=([^&]*).*$/", $this->source_defs['databaseURL'], $match);
+        $remote_dbname = $match[1];
+
+        if(!$remote_dbname || !$remote_url){
+            // Invalid source, unable to retrieve translations
+            $this->translations_report = 'We were unable to determine the registered database and url.';
+            $this->def_translations = array();
+
+            return;
+        }
+
+        if(strpos($remote_url, HEURIST_SERVER_URL)===0){ //same server
+
+            $defs = array();  
+          
+            $system2 = new System();
+            if(!$system2->init($remote_dbname, true, false)){ //init without paths and consts
+                // Invalid source, unable to retrieve translations
+                $this->translations_report = 'We were unable to connect to the registered database located on this server.';
+                $this->def_translations = array();
+
+                return;
+            }
+
+            $translations = dbs_GetTranslations($system2, $this->def_translations[$def]);
+        }else{ // remote server
+
+            $remoteURL = $remote_url.'hsapi/controller/sys_structure.php?db='.$remote_dbname.'&' . http_build_query(array('translations' => $this->def_translations[$def]));
+
+            $defs = loadRemoteURLContent($remoteURL);
+            if(!$defs){ // unable to connect to remote server
+                global $glb_curl_error;
+                $error_code = (!empty($glb_curl_error)) ? $glb_curl_error : 'Error code: 500 Heurist Error';
+
+                $this->translations_report = "Unable to connect remote server containing the registered database, possibly due to timeout or proxy setting<br>"
+                    . $error_code . "<br>"
+                    ."URL requested: " . $remoteURL . "<br><br>";
+
+                return;
+            }
+
+            $translations = json_decode(gzdecode($defs), true);
+            if(!$translations || @$translations['status']!=HEURIST_OK){
+                // Invalid source, unable to retrieve translations
+                $this->translations_report = 'Invalid translation data was retrieved from remote registered database.';
+                $this->def_translations = array();
+
+                return;
+            }
+            $translations = $translations['data'];
+        }
+        
+        if(count($translations['translations']) > 0){
+            $this->_handleTranslations($def, $translations);
+        }else{
+            $this->translations_report[$def] = 'No translations found';
+        }
+
+        return true;
+    }
+
+    private function _handleTranslations($def, $translations){
+
+        $mysqli = $this->system->get_mysqli();
+
+        foreach ($translations['key_mapping'] as $local_id => $remote_ids) {
+            
+            foreach ($remote_ids as $id) {
+                
+                $translation = $translations['translations'][$id];
+
+                $mysqli->query('DELETE FROM defTranslations where trn_Source="'.$translation['trn_Source'].'" AND trn_Code='.$local_id);
+
+                $translation['trn_ID'] = 0;
+                $translation['trn_Code'] = $local_id;
+
+                $res = mysql__insertupdate($mysqli, 'defTranslations', 'trn', $translation);
+
+                if($res > 0 && in_array($local_id, $this->translations_report[$def])){
+                    $this->translations_report[$def][] = $local_id;
+                }
+            }
+        }
+
+    }    
 }
 ?>
