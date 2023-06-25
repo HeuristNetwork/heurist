@@ -157,7 +157,7 @@ $.widget( "heurist.importStructure", {
         +'style="position:absolute; top:2.8em;bottom:0;right:0px; overflow:hidden;width:225px;">'
         +'<select id="select_rty_list_target" size="500" style="width:100%;height:100%;border:lightgray 1px solid"/>'
         +'<select id="select_dty_list_target" size="500" style="width:100%;height:100%;border:lightgray 1px solid;display:none;"/>'
-        +'<div id="select_trm_list_target" style="width:100%;height:100%;border:lightgray 1px solid;display:none;">' // TODO: Only list vocabulary, instead of ALL terms
+        +'<div id="select_trm_list_target" style="width:100%;height:100%;border:lightgray 1px solid;display:none;">'
             + 'Due to the potentially numerous amount of vocabulary and terms,<br>existing local vocabulary and terms are not displayed here'
         +'</div>'
         +'</div>'
@@ -196,14 +196,18 @@ $.widget( "heurist.importStructure", {
         .click(function(){
             that.panel_report.hide();
             that.panel_defs.show();
+
             //refresh source
             that.panel_rty_list.manageDefRecTypes('getRecordsetFromStructure', window.hWin.HEURIST4.remote.rectypes );
             that.panel_dty_list.manageDefDetailTypes('getRecordsetFromRemote', window.hWin.HEURIST4.remote.detailtypes );
             that.panel_trm_list.manageDefTerms('getRecordsetFromRemote', window.hWin.HEURIST4.remote.terms );
+
             //refresh target
             window.hWin.HEURIST4.ui.createRectypeSelect(that.select_rty_list_target[0],null,null,true);
             window.hWin.HEURIST4.ui.createRectypeDetailSelect(that.select_dty_list_target[0], null, null, null, {useHtmlSelect: true});
-            //window.hWin.HEURIST4.ui.createTermSelect(that.select_trm_list_target[0], {useHtmlSelect: true, vocab_id: 'all'});
+
+            // refresh filter
+            that._filterEntities();
         });
 
         this.entity_wrapper.tabs({
@@ -293,7 +297,7 @@ $.widget( "heurist.importStructure", {
             },
 
             rendererHeader:  function(){
-                sHeader = '<div style="width:62px">Reg#</div><div style="width:23em">Database Name</div>'
+                let sHeader = '<div style="width:62px">Reg#</div><div style="width:23em">Database Name</div>'
                 +'<div style="width:2em">&nbsp;</div>'
                 +'<div style="width:52em">Description</div>';
                 //+'<div style="width:3em">URL</div>';
@@ -1057,15 +1061,6 @@ $.widget( "heurist.importStructure", {
             + '</div>';
         }
 
-        if(false && recID<1000){
-            html = html
-            + '<div title="Click to clone curated template" '
-            + 'class="rec_view_link ui-button  action-button ui-widget ui-state-default ui-corner-all ui-button-icon-only" '
-            + 'role="button" aria-disabled="false" data-key="clone">'
-            + '<span class="ui-button-icon-primary ui-icon ui-icon-copy"/><span class="ui-button-text"/>'
-            + '</div>';
-        }                                                         
-
         html = html + '</div></div>';
 
         return html;
@@ -1205,41 +1200,49 @@ $.widget( "heurist.importStructure", {
 
                     that.panel_report.find('#btn_close_panel_report').click();
 
-                    var report = '';
-                    
+                    let report = '';
+
                     if(response.report){
                     
                         if( window.hWin.HEURIST4.util.isArrayNotEmpty(response.report.added) ){
                             report = 'Added: ';
-                            for(idx in response.report.added){
+                            for(const idx in response.report.added){
 
+                                const id = response.report.added[idx];
                                 let label = '';
+
                                 if(type == 'detailtype'){
-                                    label = $Db.dty(response.report.added[idx],'dty_Name');
-                                }else if(type = 'term'){
-                                    label = $Db.trm(response.report.added[idx],'trm_Label');
+                                    label = $Db.dty(id,'dty_Name');
+                                }else if(type == 'term'){
+                                    label = $Db.trm(id,'trm_Label');
                                 }else{
-                                    label = $Db.rty(response.report.added[idx],'rty_Name');
+                                    label = $Db.rty(id,'rty_Name');
                                 }
+
+                                label += response.report.translations[type].indexOf(id) !== false ? ' (translations retrieved)' : '';
                                 report += (label+', ');    
                             }
-                            report = report.substr(0,report.length-2)+'<br>';
+                            report = report.slice(0, -2)+'<br>';
                         }
                         if( window.hWin.HEURIST4.util.isArrayNotEmpty(response.report.updated) ){
                             report += '<br>Updated: ';
-                            for(idx in response.report.updated){
+                            for(const idx in response.report.updated){
 
+                                const id = response.report.updated[idx];
                                 let label = '';
+
                                 if(type == 'detailtype'){
-                                    label = $Db.dty(response.report.added[idx],'dty_Name');
-                                }else if(type = 'term'){
-                                    label = $Db.trm(response.report.added[idx],'trm_Label');
+                                    label = $Db.dty(id,'dty_Name');
+                                }else if(type == 'term'){
+                                    label = $Db.trm(id,'trm_Label');
                                 }else{
-                                    label = $Db.rty(response.report.added[idx],'rty_Name');
+                                    label = $Db.rty(id,'rty_Name');
                                 }
+
+                                label += response.report.translations[type].indexOf(id) !== false ? ' (translations retrieved)' : '';
                                 report += (label+', ');    
                             }
-                            report = report.substr(0,report.length-2);
+                            report = report.slice(0, -2);
                         }
                         if( window.hWin.HEURIST4.util.isArrayNotEmpty(response.report.broken_terms) ){
                             
@@ -1258,41 +1261,17 @@ $.widget( "heurist.importStructure", {
                             report += ('</ul></p>');
                         }
                     }
-                    
-                    /* Detail report
-                    var theader = '<table style="padding: 5px;font-size: 1em;">'
-                    +'<tr><th colspan="2">Source</th><th>Concept ID</th><th colspan="3">Target</th></tr>'
-                    +'<tr><th>ID</th><th>Name</th><th>&nbsp;</th><th>ID</th><th>Name</th><th></th></tr>';
-
-                    if(response.report.rectypes) {
-                        report = report + '<h3 style="margin:0;">Record types</h3>'+theader
-                        + response.report.rectypes
-                        + '</table>';
-                    }
-
-                    if(false && response.report.detailtypes) {
-                        report = report + '<h3 style="margin:0;">Field types</h3>'+theader
-                        + response.report.detailtypes
-                        + '</table>';
-                    }
-
-                    if(false && response.report.terms) {
-                        report = report + '<h3 style="margin:0;">Terms</h3>'+theader
-                        + response.report.terms
-                        + '</table>';
-                    }
-                    */
 
                     if(report!=''){ 
 
                         //modal report
                         window.hWin.HEURIST4.msg.showMsgDlg('<br>'+report,null,
                                 {title:'Import templates report'},
-                                {default_palette_class:'ui-heurist-design'});        
-                        
+                                {default_palette_class:'ui-heurist-design'});
+
                     }else{
                         report = 'Nothing imported. '+
-                        'Record types (and associated strucures) you selected to be imported are in this database already';
+                        'The definition you selected to be imported is already in this database';
 
                         window.hWin.HEURIST4.msg.showMsgDlg(report);
                     }
@@ -1497,7 +1476,7 @@ $.widget( "heurist.importStructure", {
             let idx_semantic = dbs.terms.fieldNamesToIndex.trm_SemanticReferenceURL;
 
             // list child terms (labels + decription)
-            for(var id in dbs.terms.termsByDomainLookup.enum){
+            for(const id in dbs.terms.termsByDomainLookup.enum){
 
                 if(id <= 0 || !dbs.terms.termsByDomainLookup.enum[id]){
                     continue;
