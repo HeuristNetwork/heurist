@@ -164,7 +164,11 @@
     "dialog": "lookupBnFLibrary_aut",
     "description": "A proof of concept for searching via the BnF Library API for Authoritative Records (under development)",
     "fields": {
+        "authority_type": "",
         "name": "",
+        "years_active": "",
+        "role": "",
+        "location": "",
         "auturl": ""
     },
     "options": {
