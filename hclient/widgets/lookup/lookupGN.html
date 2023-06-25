@@ -1,39 +1,48 @@
-<div id="ent_header" style="height:6em; padding: 0.2em; width: 100%;">
-    <fieldset style="display:inline-block; float: left;" id="search_container">
-        
-        <!--
-        Name,  (fuzzyname)
-        anps_id
-        lga
-        state
+<div id="tabs-cont">
 
-        format=json
-        paging=500
-        bbox - todo
-        -->
+    <ul>
+        <li><a href="#frm-search">Search</a></li>
+        <li><a href="#frm-results">Results</a></li>
+    </ul>
 
-        <div style="padding: 0.2em; width: 100%;" class="input">
+    <div id="frm-search" style="overflow-y: auto; padding: 1em 0 !important;">
 
-            <div>
-                <div class="header required" style="padding: 0px 16px 0px 5px;">
-                    <label for="inpt_placename">Geoname:</label>
+        <fieldset style="display:inline-block;" id="search_container">
+
+            <div style="padding: 0.2em; width: 100%;" class="input">
+
+                <div>
+                    <div class="header required" style="display:inline-block;width:90px;min-width:90px;padding: 0px 16px 0px 5px;">
+                        <label for="inpt_id">Geoname ID:</label>
+                    </div>
+                    <input id="inpt_id" class="text ui-widget-content ui-corner-all" style="max-width: 30em;"/>
                 </div>
-                <input id="inpt_placename" class="text ui-widget-content ui-corner-all" style="max-width: 30em;"/>
 
-                <div class="header optional" style="padding: 0px 16px 0px 5px;">
-                    <label for="inpt_country">Country:</label>
+                <div style="padding: 5px 5px;">OR</div>
+
+                <div>
+                    <div class="header required" style="display:inline-block;width:90px;min-width:90px;padding: 0px 16px 0px 5px;">
+                        <label for="inpt_query">Search:</label>
+                    </div>
+                    <input id="inpt_query" class="text ui-widget-content ui-corner-all" style="max-width: 30em;"/>
+
+                    <div class="header optional" style="display:inline-block;width:70px;min-width:70px;padding: 0px 16px 0px 10px;">
+                        <label for="inpt_country">Country:</label>
+                    </div>
+                    <select id="inpt_country" class="text ui-widget-content ui-corner-all" style="max-width:30em"/>
                 </div>
-                <select id="inpt_country" class="text ui-widget-content ui-corner-all" style="max-width:30em"/>
+
             </div>
 
-        </div>
+        </fieldset>
 
-    </fieldset>
+        <button id="btnStartSearch" style="position:relative;top:-30px;left:20px;">Search</button>
 
-    <div style="display: inline-block;" id="btn_container">
-        <button id="btnStartSearch">Search</button>
     </div>
-</div>
-<div id="div_result" class="ent_content_full" style="display: none;top:7em">
-</div>
 
+    <div id="frm-results" style="display: none;">
+        <div id="div_result" class="ent_content_full" style="height: 380px;">
+        </div>
+    </div>
+
+</div>

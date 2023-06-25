@@ -220,6 +220,10 @@ if($is_debug) print print_r($response, true).'!!!!!<br>';
 
         json_decode($remote_data);
         if(json_last_error() == JSON_ERROR_NONE){
+        }else if(@$_REQUEST['is_XML'] == 1){
+            // XML to JSON (no attributes/namespace handling required)
+            $xml_obj = simplexml_load_string($remote_data, null, LIBXML_PARSEHUGE);
+            $remote_data = json_encode($xml_obj);
         }else{
 
             $hasGeo = false;
