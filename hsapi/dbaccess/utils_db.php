@@ -907,6 +907,8 @@
             
             if ($res){
 
+                
+                
                 if($json_for_record_details){
                     $mysqli->query('DROP TABLE IF EXISTS bkpDetailsDateIndex');
                     $res3 = $mysqli->query('CREATE TABLE bkpDetailsDateIndex (
@@ -915,6 +917,7 @@
                          dtl_Value TEXT,
                          PRIMARY KEY (bkp_ID))');
                 }
+                
                 
                 $keep_autocommit = mysql__begin_transaction($mysqli);
                 
@@ -936,11 +939,13 @@
                             // saves as usual date
                             // if date is Simple, 0<year>9999 (CE) and has both month and day 
                             $is_date_simple = $preparedDate->isValidSimple();
+                            $dtl_NewValue_with_comment = null;
                             if($is_date_simple){
                                 $dtl_NewValue = $preparedDate->getValue(true); //returns simple yyyy-mm-dd
                             }else{
                                 $v_json = $preparedDate->getValue();
-                                $v_json['comment'] = '';
+                                $dtl_NewValue_with_comment = json_encode($v_json);
+                                $v_json['comment'] = ''; //to avoid issue with special charss
                                 $dtl_NewValue = json_encode($v_json); //$preparedDate->toJSON(); //json encoded string
                             }
                             
@@ -954,7 +959,7 @@
                                     //fails extraction estMinDate, estMaxDate
                                     $error = 'Empty min, max dates. Min:"'.$min.'" Max:"'.$max.'". Query:'.$query;
                                 }else{
-            //4. Keep old plain string temporal object in backup table - TODO!!!
+            //4. Keep old plain string temporal object in backup table 
                                     if($json_for_record_details && strpos($dtl_Value,'|VER=1|')===0){ // !$is_date_simple
                                         $query = 'INSERT INTO bkpDetailsDateIndex(dtl_ID,dtl_Value) VALUES('.$dtl_ID.',\''
                                             .$mysqli->real_escape_string($dtl_Value).'\')';
@@ -967,22 +972,26 @@
                                     
             //5A. If simple date - retain value in recDetails                                    
             //5B. If temporal object it saves JSON in recDetails
-                                        $query = 'UPDATE recDetails SET dtl_Value="'.
-                                                $mysqli->real_escape_string($dtl_NewValue).'" WHERE dtl_ID='.$dtl_ID;
-                                        $mysqli->query($query);
-                                        if(!($mysqli->affected_rows>=0)){
-                                            //fails update recDetails
-                                            $system->addError(HEURIST_DB_ERROR, $err_prefix.'Error on recDetails update query:'.$query, $mysqli->error);
-                                            $isok = false;
-                                            break;
+                                        if(!$is_date_simple && $dtl_NewValue_with_comment){
+                                            $query = 'UPDATE recDetails SET dtl_Value="'.
+                                                    $mysqli->real_escape_string($dtl_NewValue_with_comment).'" WHERE dtl_ID='.$dtl_ID;
+                                            $mysqli->query($query);
+                                            if(!($mysqli->affected_rows>=0)){
+                                                //fails update recDetails
+                                                $system->addError(HEURIST_DB_ERROR, $err_prefix.'Error on recDetails update query:'.$query, $mysqli->error);
+                                                $isok = false;
+                                                break;
+                                            }
                                         }
                                     }
                                     
             //6. update recDetailsDateIndex should be updated by trigger
                                     $mysqli->query('delete ignore from recDetailsDateIndex where rdi_DetailID='.$dtl_ID); 
             
-                                    $res5 = $mysqli->query('insert into recDetailsDateIndex (rdi_RecID, rdi_DetailTypeID, rdi_DetailID, rdi_estMinDate, rdi_estMaxDate)'
-        ." values ($dtl_RecID, $dtl_DetailTypeID, $dtl_ID, getEstDate('$dtl_NewValue',0), getEstDate('$dtl_NewValue',1))");
+                                    $query = 'insert into recDetailsDateIndex (rdi_RecID, rdi_DetailTypeID, rdi_DetailID, rdi_estMinDate, rdi_estMaxDate)'
+        ." values ($dtl_RecID, $dtl_DetailTypeID, $dtl_ID, {$row2[0]}, {$row2[1]})";
+                                    $res5 = $mysqli->query($query);
+        //getEstDate('$dtl_NewValue',0), getEstDate('$dtl_NewValue',1)
 
                                     if(!$res5){
                                         //fails insert into recDetailsDateIndex
@@ -1017,7 +1026,7 @@
                         } 
                         
                         if($need_populate && $error){ //verbose output
-                            print $dtl_RecID.' '.$dtl_ID.'  '.$dtl_Value.' '.(($dtl_Value!=$dtl_NewValue)?$dtl_NewValue:'').' '.$error.'<br>';
+                            print 'Rec# '.$dtl_RecID.' '.$dtl_ID.'  '.$dtl_Value.' '.(($dtl_Value!=$dtl_NewValue)?$dtl_NewValue:'').' '.$error.'<br>';
                         }
                         
                     }
@@ -1736,15 +1745,18 @@ UNIQUE KEY swf_StageKey (swf_RecTypeID, swf_Stage)
                 }
             }
 
+            
+            /*
             if($dbVerSubSub<13){
                 if(!recreateRecDetailsDateIndex( $system, false, false )){
                     return false;
                 }
             }
+            */
             
             //update version
-            if($dbVerSubSub<13){
-                $mysqli->query('UPDATE sysIdentification SET sys_dbVersion=1, sys_dbSubVersion=3, sys_dbSubSubVersion=13 WHERE 1');
+            if($dbVerSubSub<12){
+                $mysqli->query('UPDATE sysIdentification SET sys_dbVersion=1, sys_dbSubVersion=3, sys_dbSubSubVersion=12 WHERE 1');
             }
 
             
