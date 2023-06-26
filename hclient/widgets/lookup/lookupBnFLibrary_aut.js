@@ -304,6 +304,7 @@ $.widget( "heurist.lookupBnFLibrary_aut", $.heurist.recordAction, {
         function fld(fldname, width){
 
             var s = recordset.fld(record, fldname);
+            var authority_type = recordset.fld(record, 'authority_type');
 
             s = window.hWin.HEURIST4.util.htmlEscape(s?s:'');
 
@@ -314,9 +315,26 @@ $.widget( "heurist.lookupBnFLibrary_aut", $.heurist.recordAction, {
                 title = 'View authoritative record';
             }
             
+            if(authority_type == '215' || authority_type == '216' || authority_type == '240' || authority_type == '250'){ // name only
+                width = (fldname == 'name') ? 75 : 0;
+            }else if(authority_type == '200'){
+                width = (fldname == 'location') ? 0 : (fldname == 'name' ? 50 : width);
+            }else if(authority_type == '210'){
+                width = (fldname == 'years_active') ? 0 : (fldname == 'name' ? 40 : (fldname == 'location' ? 20 : width));
+            }
+
+            if(s != ''){
+                if(fldname == 'years_active' || fldname == 'location'){
+                    s = '( ' + s + ' )';
+                }else if(fldname == 'role'){
+                    s = '[ ' + s + ' ]';
+                }
+            }
+
             if(width>0){
                 s = '<div style="display:inline-block;width:'+width+'ex" class="truncate" title="'+title+'">'+s+'</div>';
             }
+
             return s;
         }
 
@@ -326,7 +344,7 @@ $.widget( "heurist.lookupBnFLibrary_aut", $.heurist.recordAction, {
         var recIcon = window.hWin.HAPI4.iconBaseURL + rectypeID;
         var html_thumb = '<div class="recTypeThumb" style="background-image: url(&quot;' + window.hWin.HAPI4.iconBaseURL + rectypeID + '&version=thumb&quot;);"></div>';
 
-        var recTitle = fld('name', 75) + fld('auturl', 12); 
+        var recTitle = fld('name', 35) + fld('location', 15) + fld('years_active', 10) + fld('role', 15) + fld('auturl', 10); 
 
         var html = '<div class="recordDiv" id="rd'+recID+'" recid="'+recID+'" rectype="'+rectypeID+'">'
             + html_thumb

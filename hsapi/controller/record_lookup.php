@@ -220,6 +220,10 @@ if($is_debug) print print_r($response, true).'!!!!!<br>';
 
         json_decode($remote_data);
         if(json_last_error() == JSON_ERROR_NONE){
+        }else if(@$_REQUEST['is_XML'] == 1){
+            // XML to JSON (no attributes/namespace handling required)
+            $xml_obj = simplexml_load_string($remote_data, null, LIBXML_PARSEHUGE);
+            $remote_data = json_encode($xml_obj);
         }else{
 
             $hasGeo = false;
@@ -547,15 +551,10 @@ if($is_debug) print print_r($response, true).'!!!!!<br>';
                                     }else{
                                         $formatted_array['name'] = (string)$sf_ele[0];
                                     }
-                                }else if($sf_code == 'f' && array_key_exists('name', $formatted_array)){ // Years active
-                                    $formatted_array['name'] .= ' (' . (string)$sf_ele[0] . ')';
-                                }else if($sf_code == 'c' && array_key_exists('name', $formatted_array)){ // Role/Job
-
-                                    if(substr($formatted_array['name'], -1) == ')'){ // has date
-                                        $formatted_array['name'] = substr($formatted_array['name'], 0, -1) . ' ; ' . (string)$sf_ele[0] . ')';
-                                    }else{ // no date
-                                        $formatted_array['name'] .= ' (' . (string)$sf_ele[0] . ')';
-                                    }
+                                }else if($sf_code == 'f'){ // Years active
+                                    $formatted_array['years_active'] = (string)$sf_ele[0];
+                                }else if($sf_code == 'c'){ // Role/Job
+                                    $formatted_array['role'] = (string)$sf_ele[0];
                                 }
 
                                 break;
@@ -564,10 +563,10 @@ if($is_debug) print print_r($response, true).'!!!!!<br>';
 
                                 if($sf_code == 'a'){ // Name
                                     $formatted_array['name'] = (string)$sf_ele[0];
-                                }else if($sf_code == 'c' && array_key_exists('name', $formatted_array)){ // Location
-                                    $formatted_array['name'] .= ' (' . (string)$sf_ele[0] . ')';    
-                                }else if($sf_code == 'b' && array_key_exists('name', $formatted_array)){ // Type
-                                    $formatted_array['name'] .= '. ' . (string)$sf_ele[0];
+                                }else if($sf_code == 'c'){ // Location
+                                    $formatted_array['location'] = (string)$sf_ele[0];    
+                                }else if($sf_code == 'b'){ // Type
+                                    $formatted_array['role'] = (string)$sf_ele[0];
                                 }
 
                                 break;
@@ -576,21 +575,7 @@ if($is_debug) print print_r($response, true).'!!!!!<br>';
 
                                 if($sf_code == 'a'){ // Name
                                     $formatted_array['name'] = (string)$sf_ele[0];
-                                /*}else if($sf_code == 'b'){ // First name? Other name?
-    
-                                    if( array_key_exists('name', $formatted_array)){
-                                        $formatted_array['name'] .= ', ' . (string)$sf_ele[0];
-                                    }else{
-                                        $formatted_array['name'] = (string)$sf_ele[0];
-                                    }
-    
-                                }else if($sf_code == 'f'){ // Years active
-                                    if( array_key_exists('name', $formatted_array)){
-                                        $formatted_array['name'] .= ' (' . (string)$sf_ele[0] . ')';
-                                    }else{
-                                        $formatted_array['name'] = 'No Name Provided';
-                                    } */
-                                }else if($sf_code == 't'){
+                                }else if($sf_code == 't'){ // title
                                     
                                     if( array_key_exists('name', $formatted_array)){
                                         $formatted_array['name'] .= ' [' . (string)$sf_ele[0] . ']';
@@ -651,8 +636,8 @@ if($is_debug) print print_r($response, true).'!!!!!<br>';
 
                                 if($sf_code == 'a'){ // Name
                                     $formatted_array['name'] = (string)$sf_ele[0];
-                                }else if($sf_code == 'c' && array_key_exists('name', $formatted_array)){ // Type
-                                    $formatted_array['name'] .= ' (' . (string)$sf_ele[0] . ')';
+                                }else if($sf_code == 'c'){ // Type
+                                    $formatted_array['role'] = (string)$sf_ele[0];
                                 }
 
                                 break;
@@ -660,6 +645,10 @@ if($is_debug) print print_r($response, true).'!!!!!<br>';
                             default:
                                 break;
                         }
+                    }
+
+                    if(array_key_exists('name', $formatted_array) && !empty($formatted_array['name'])){ // add authority type
+                        $formatted_array['authority_type'] = (string)$df_tag[0];
                     }
 
                     break;

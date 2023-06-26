@@ -452,10 +452,11 @@ $.widget( "heurist.lookupConfig", {
                 has_changes = true;
             }
 
-            // Update BnF Config
+            // Update configurations (Add missing fields, additional options, remove fields no longer handled)
+            var n_fields = that.options.service_config[key]['fields'];
+
             if(that.options.service_config[key]['service'] == 'bnfLibrary'){
 
-                var n_fields = that.options.service_config[key]['fields'];
                 var hasFieldChanges = false;
                 for(var obj_key in n_fields){
 
@@ -494,6 +495,7 @@ $.widget( "heurist.lookupConfig", {
                 }
 
                 if(!Object.hasOwn(that.options.service_config[key], 'options')){ // add default options
+
                     that.options.service_config[key]['options'] = {
                         'author_codes': '', //'contributor_codes': ''
                         'dump_receord': true,
@@ -502,6 +504,30 @@ $.widget( "heurist.lookupConfig", {
                     has_changes = true;
                 }
             }else if(that.options.service_config[key]['service'] == "bnfLibraryAut"){
+
+                if(!Object.hasOwn(n_fields, 'authority_type')){
+                    n_fields['authority_type'] = '';
+                    hasFieldChanges = true;
+                }
+                if(!Object.hasOwn(n_fields, 'years_active')){
+                    n_fields['years_active'] = '';
+                    hasFieldChanges = true;
+                }
+                if(!Object.hasOwn(n_fields, 'role')){
+                    n_fields['role'] = '';
+                    hasFieldChanges = true;
+                }
+                if(!Object.hasOwn(n_fields, 'location')){
+                    n_fields['location'] = '';
+                    hasFieldChanges = true;
+                }
+
+                if(hasFieldChanges){
+                    that.options.service_config[key]['fields'] = n_fields;
+
+                    has_changes = true;
+                }
+
                 if(!Object.hasOwn(that.options.service_config[key], 'options')){ // add default options
                     that.options.service_config[key]['options'] = {
                         'dump_receord': true,
@@ -511,7 +537,6 @@ $.widget( "heurist.lookupConfig", {
                 }
             }else if(that.options.service_config[key]['service'] == 'nakala'){
                 
-                var n_fields = that.options.service_config[key]['fields'];
                 var hasFieldChanges = false;
 
                 if(!n_fields.hasOwnProperty('rec_url')){
