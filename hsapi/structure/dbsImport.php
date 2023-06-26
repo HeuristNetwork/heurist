@@ -2286,7 +2286,7 @@ if($new_term_id==5039){
     
     private function _importTranslations($def){
 
-        if(count($this->def_translations[$def]) < 0){ // no definitions to retrieve
+        if(count($this->def_translations[$def]) == 0){ // no definitions to retrieve
             return;
         }
 
