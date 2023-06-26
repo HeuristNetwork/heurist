@@ -1499,16 +1499,21 @@ $.widget( "heurist.search_faceted", {
                                 
                                 if(selval && !window.hWin.HEURIST4.util.isempty(selval.value)){
                                     
-                                    if(facets[facet_index].groupby=='month'){
-                                        var y_m = selval.value.split('-');
-                                        selval.value = y_m[0]+'-'+y_m[1]+'-01 00:00<>'+selval.value+' 23:59';
+                                    if(selval.value.indexOf('<>')<0){
+                                        if(facets[facet_index].groupby=='month'){
+                                            var y_m = selval.value.split('-');
+                                            selval.value = y_m[0]+'-'+y_m[1]+'-01<>'+y_m[0]+'-'+y_m[1]+'-31';
+
+                                        }else if(facets[facet_index].groupby=='year'){
+                                            selval.value = selval.value + '<>' +(Number(selval.value)+'-12-31');
+                                            
+                                        }else if(facets[facet_index].groupby=='decade'){
+                                            selval.value = selval.value + '<>' +((Number(selval.value)+10)+'-12-31');
+                                        }else if(facets[facet_index].groupby=='century'){
+                                            selval.value = selval.value + '<>' +((Number(selval.value)+100)+'-12-31');
+                                        }
                                         
-                                    }else if(facets[facet_index].groupby=='decade'){
-                                        selval.value = selval.value + '<>' +(Number(selval.value)+10+'-01-01 00:00');
-                                    }else if(facets[facet_index].groupby=='century'){
-                                        selval.value = selval.value + '<>' +(Number(selval.value)+100+'-01-01 00:00');
                                     }
-                                    
                                     predicate[key] = selval.value;
                                     isbranch_empty = false;
                                 }else{
@@ -2405,10 +2410,10 @@ $.widget( "heurist.search_faceted", {
                             
                             if(field['type']=="date"){
                                 
-                                function __toDt(val){ //from decimal to datetime
+                                function __toDt(val, is_max){ //from decimal to datetime
                                     
                                     if(Math.round(val) == val){ //years
-                                        val = Math.round(val)+'-01-01';
+                                        val = Math.round(val)+(is_max?'-12-31':'-01-01');
                                     }else{
                                         //
                                         var month = val.substr(5,2);
@@ -2422,8 +2427,11 @@ $.widget( "heurist.search_faceted", {
                                     return val;
                                 }
                                 
+                                
+//console.log('ret', mmin+'   '+mmax);
+                                
                                 if(mmin.indexOf('-')<1){
-                                    mmin = __toDt(mmin);    
+                                    mmin = __toDt(mmin, false);    
                                 }else{
                                     if(mmin.indexOf("-00")>0){
                                         mmin = mmin.replaceAll("-00","-01");
@@ -2432,7 +2440,7 @@ $.widget( "heurist.search_faceted", {
                                 }
                                 
                                 if(mmax.indexOf('-')<1){
-                                    mmax = __toDt(mmax);
+                                    mmax = __toDt(mmax, true);
                                 }else{
                                     if(mmax.indexOf("-00")>0){ //|| mmax.indexOf("-01-01")>0
                                         let to_replace = mmax.indexOf("-00-00")>0 ? "-00-00" : "-01-01";
@@ -2440,7 +2448,7 @@ $.widget( "heurist.search_faceted", {
                                     }
                                     mmax = mmax.replace(' ','T');
                                 }
-//DEBUG console.log(mmin+'   '+mmax);       
+//DEBUG  console.log('prep', mmin+'   '+mmax);       
                                 var date_min, date_max;
                                 try{
                                     date_min = TDate.parse(mmin);
@@ -2452,13 +2460,16 @@ $.widget( "heurist.search_faceted", {
                                 } catch(e) {
                                     mmax = NaN;
                                 }
-                                
-                                if(date_min && date_max && (date_max.getYear()-date_min.getYear())>3){
+                                /*
+                                if(isNaN(mmin) || isNaN(mmax)){ // date_min && date_max && (date_max.getYear()-date_min.getYear())>3){
+                                    
                                     mmin = Number(date_min.getYear());
                                     mmax = Number(date_max.getYear());
+                                    
                                     date_format = "yyyy";
                                     date_type = "year";
-                                }else{
+                                */    
+                                if(date_min && date_max){
                                 
                                     mmin = Date.parse(mmin); 
                                     mmax = Date.parse(mmax); 
@@ -2731,12 +2742,13 @@ return;
                             function __dateToString(val){
                                 try{
                                     let sval = ''+val;
-                                    if(!sval.match(/^-?\d+/)){
-                                        var tDate = new TDate((new Date(sval)).toISOString());
+                                    if(!sval.match(/^-?\d+/) || Math.abs(val)>2200){
+                                        var tDate = new TDate((new Date(val)).toISOString());
                                         val = tDate.toString(date_format);
                                     }else if(val<0){
                                         val = sval.substr(1)+' bce';
                                     }
+//DEBUG console.log('lbl', sval, val);
                                    //val = (new Date(val)).format(date_format);
                                    //val = moment(val).format(date_format);
                                 }catch(err) {
@@ -2773,6 +2785,8 @@ return;
                             //
                             function __onSlideStartSearch( min, max ){
                                 
+//DEBUG console.log('__onSlideStartSearch',min, max);                                
+                                
                                 var field = that.options.params.facets[facet_index];
                                 
                                 if(field['type']=="date"){
@@ -2780,16 +2794,19 @@ return;
                                         //year must be four digit
                                         //min = (new TDate(min)).toString();
                                         //max = (new TDate(max)).toString(); 
-                                        min = ''+min;
-                                        max = ''+max;
+                                        var smin = ''+min;
+                                        var smax = ''+max;
                                         let tDate;
-                                        if(!min.match(/^-?\d+/)){
+                                        if(!smin.match(/^-?\d+/) || Math.abs(min)>2200){
+                                        
                                             tDate = new TDate((new Date(min)).toISOString());
                                             min = tDate.toString();
                                         }
-                                        if(!max.match(/^-?\d+/)){
+                                        if(!smax.match(/^-?\d+/) || Math.abs(max)>2200){
                                             tDate = new TDate((new Date(max)).toISOString());
                                             max = tDate.toString();
+                                        }else if(smax.match(/^-?\d+/)){ //year
+                                            max = smax+'-12-31';
                                         }
                                         //min = (new Date(min)).toISOString();
                                         //max = (new Date(max)).toISOString(); 
@@ -2799,6 +2816,8 @@ return;
                                 }
 
                                 var value = (min==max)?min :min + '<>' + max; //search in between                            
+                             
+//DEBUG console.log('search:',value); 
                                 
                                 if(window.hWin.HEURIST4.util.isempty(value)){
                                     value = '';
