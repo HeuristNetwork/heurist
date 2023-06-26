@@ -2721,7 +2721,7 @@ class HPredicate {
                     
             }else{
             //search for trm_Label or trm_Code
-                $res  = ' in (select trm_ID from defTerms where ';
+                $res  = 'select trm_ID from defTerms where ';
                 
                 if($this->field_term!=null){
                     //'term', 'label', 'concept', 'conceptid', 'desc', 'code'
@@ -2731,6 +2731,8 @@ class HPredicate {
                 }
 
                 $value = $mysqli->real_escape_string($this->value);
+                $ids = null;
+                $need_search_in_defTerms = true;
                 
                 if($trm_Field == 'trm_ConceptId'){
                     $res = $res.' "'.$value
@@ -2739,13 +2741,15 @@ class HPredicate {
                     //check language prefix in $value
                     list($lang, $value) = extractLangPrefix($value);
                     
-                    if($lang!=null)
+                    if($lang!=null && $trm_Field=='trm_Label')
                     {
+                        $need_search_in_defTerms = (strcasecmp($lang,'ALL')==0);
+                        
                         //search in translation table first
                         $query_tran = 'SELECT trn_Code FROM defTranslations WHERE '
                                   .'trn_Source="'.$trm_Field.'" AND ';
                                   
-                        if(strcasecmp($lang,'ALL')!==0){
+                        if(!$need_search_in_defTerms){
                             $query_tran = $query_tran.'trn_LanguageCode="'.$lang.'" AND ';
                         }
                                   
@@ -2759,31 +2763,34 @@ class HPredicate {
                         
                         $ids = mysql__select_list2($mysqli, $query_tran); 
                         
-                        if(count($ids)==0){
-                            $res = ($this->negate?'>0':'=0');
-                        }else if(count($ids)==1){
-                            $res = ($this->negate?'<>':'=').$ids[0];
-                        }else{
-                            $res = ($this->negate?' NOT':'').' IN ('.implode(',',$ids).')';    
-                        }
-                        
-                        
-                    }else{
+                    }
                     
-                        $res = $res.$trm_Field;
-                        if($this->exact){
-                            $res  =  $res.' ="'.$value.'"'; 
-                        } else {
-                            $res  =  $res.' LIKE "%'.$value.'%"';
-                        }
-                        if($this->field_term==null){
-                            $res  =  $res.' or trm_Code="'.$value.'"';
-                        }
-                        
-                        $res  =  $res.')';
+                    $res = $res.$trm_Field;
+                    if($this->exact){
+                        $res  =  $res.' ="'.$value.'"'; 
+                    } else {
+                        $res  =  $res.' LIKE "%'.$value.'%"';
+                    }
+                    if($this->field_term==null){
+                        $res  =  $res.' or trm_Code="'.$value.'"';
                     }
                     
                 }
+                
+                //find trm_IDs
+                if($ids===null || $need_search_in_defTerms){
+                    $ids2 = mysql__select_list2($mysqli, $res); 
+                    $ids = ($ids==null)?$ids2:array_unique(array_merge($ids2, $ids));
+                }
+                if(count($ids)==0){
+                    $res = ($this->negate?'>0':'=0');
+                }else if(count($ids)==1){
+                    $res = ($this->negate?'<>':'=').$ids[0];
+                }else{
+                    $res = ($this->negate?' NOT':'').' IN ('.implode(',',$ids).')';    
+                }
+                
+                
             }
             //if put negate here is will accept any multivalue enum field
             //see negate for enum on level above $res = (($this->negate)?' not':'').$res;
