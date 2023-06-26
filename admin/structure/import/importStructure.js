@@ -69,11 +69,8 @@ $.widget( "heurist.importStructure", {
 
     _is_rename_target: false,
     _selectedDB:null, //regid of currently selected database
-    _selectedRtyID:null,
-    _selectedDtyID:null,
-    _selectedTrmID:null,
 
-    _init_local_rty_once:true,
+    _init_local_defs_once:true,
 
     // the widget's constructor
     _create: function() {
@@ -99,7 +96,7 @@ $.widget( "heurist.importStructure", {
         }
         
         this._selectedDB = null;
-        this._init_local_rty_once = true;
+        this._init_local_defs_once = true;
         
         //init layout
         layout = layout + 
@@ -529,7 +526,6 @@ $.widget( "heurist.importStructure", {
                     function(){that._loadDefinitionsForDb( db_ids, true )},1,'ServerFunctions'); //db admin and pwd protected
                return;     
             }
-            
 
             this._selectedDB = sDB_ID;
 
@@ -550,9 +546,6 @@ $.widget( "heurist.importStructure", {
                     load_detailstypes: false  // will be loaded later
                 },
 
-                onselect:function(event, data){
-                    //show treeview
-                },
                 onaction:function(event, action){
 
                     var recID;     
@@ -600,11 +593,7 @@ $.widget( "heurist.importStructure", {
                                         $dlg2.dialog('close');
                                         $dlg.dialog('close');
 
-                                        that._selectedRtyID = recID;
-                                        that._selectedDtyID = null;
-                                        that._selectedTrmID = null;
-
-                                        that.startImport();
+                                        that.startImport(recID, 'rectype');
                                     };
                                     btn2['Get me out of here'] = function(){
                                         $dlg2.dialog('close');
@@ -621,11 +610,7 @@ $.widget( "heurist.importStructure", {
                                 }else{
                                     $dlg.dialog('close');
 
-                                    that._selectedRtyID = recID;
-                                    that._selectedDtyID = null;
-                                    that._selectedTrmID = null;
-
-                                    that.startImport();
+                                    that.startImport(recID, 'rectype');
                                 }
                                 
                             };
@@ -670,7 +655,7 @@ $.widget( "heurist.importStructure", {
 
             this.panel_rty_list.empty();
             
-            //open list of record types from other database
+            //open list of record types from the remote database
             window.hWin.HEURIST4.ui.showEntityDialog('defRecTypes', rty_options);
 
             var dty_options = {
@@ -735,10 +720,8 @@ $.widget( "heurist.importStructure", {
                                     btn2['Yes, overwrite'] = function(){
                                         $dlg2.dialog('close');
                                         $dlg.dialog('close');
-                                        that._selectedDtyID = recID;
-                                        that._selectedRtyID = null;
-                                        that._selectedTrmID = null;
-                                        that.startImport();
+
+                                        that.startImport(recID, 'detailtype');
                                     };
                                     btn2['Get me out of here'] = function(){
                                         $dlg2.dialog('close');
@@ -752,10 +735,8 @@ $.widget( "heurist.importStructure", {
                                     );
                                 }else{
                                     $dlg.dialog('close');
-                                    that._selectedDtyID = recID;
-                                    that._selectedRtyID = null;
-                                    that._selectedTrmID = null;
-                                    that.startImport();
+
+                                    that.startImport(recID, 'detailtype');
                                 }
                                 
                             };
@@ -794,7 +775,7 @@ $.widget( "heurist.importStructure", {
                             +'<span style="display:inline-block;vertical-align:top;padding-top:15px;font-size:20px;" '
                             +'class="expand_button ui-icon ui-icon-triangle-1-'+(is_expanded?'s':'e')+'"></span>'
                             +'<div style="display:inline-block;width:70%">'
-                            +'<h2 style="margin:0">'+grp_val+'  '+detailtypes.groups[idx].name+'</h2>' //+grp_val+' '
+                            +'<h2 style="margin:0">'+grp_val+' '+detailtypes.groups[idx].name+'</h2>'
                             +'<div style="padding-top:4px;"><i>'+detailtypes.groups[idx].description+'</i></div></div></div>';
                         }
 
@@ -806,7 +787,7 @@ $.widget( "heurist.importStructure", {
 
             this.panel_dty_list.empty();
             
-            //open list of record types from other database
+            //open list of detail types from the remote database
             window.hWin.HEURIST4.ui.showEntityDialog('defDetailTypes', dty_options);
 
             var trm_options = {
@@ -853,11 +834,7 @@ $.widget( "heurist.importStructure", {
 
                                 $dlg.dialog('close');
 
-                                that._selectedTrmID = recID;
-                                that._selectedDtyID = null;
-                                that._selectedRtyID = null;
-
-                                that.startImport();
+                                that.startImport(recID, 'term');
                                 
                             };
                             btns['Cancel'] = function(){
@@ -900,7 +877,7 @@ $.widget( "heurist.importStructure", {
 
             this.panel_trm_list.empty();
             
-            //open list of record types from other database
+            //open list of vocabularies from the remote database
             window.hWin.HEURIST4.ui.showEntityDialog('defTerms', trm_options);
 
         }
@@ -922,10 +899,6 @@ $.widget( "heurist.importStructure", {
     _backToDatabases: function(){
         this.panel_defs.hide();
         this.element.find('#panel_dbs').show();
-
-        this._selectedRtyID = null;
-        this._selectedDtyID = null;
-        this._selectedTrmID = null;
     },
 
 
@@ -1155,40 +1128,31 @@ $.widget( "heurist.importStructure", {
     //
     //  MAIN METHOD
     //
-    startImport: function(){
+    startImport: function(id, type){
 
-        var style = {'font-size': '16px', 'background-color': '#FFF', 'opacity': 1};
-        var msg = '';
+        if(!id || id < 1 || !type){
+            return;
+        }
 
         var that = this;
-        let id = null;
-        if(this._selectedRtyID){
-            id = this._selectedRtyID;
-            type = 'rectype';
 
-            msg = 'Downloading structure...<br><br>'
-                + 'This may take a couple of minutes if there are a number of record type linked to the one requested.<br>';
-        }else if(this._selectedDtyID){
-            id = this._selectedDtyID;
-            type = 'detailtype';
+        const style = {'font-size': '16px', 'background-color': '#FFF', 'opacity': 1};
+        let msg = 'Downloading structure...<br><br>'
+                + 'This may take a couple of minutes if there are a number of record type linked to the one requested.<br>';;
+
+        if(type == 'detailtype'){
 
             msg = 'Downloading base field...<br><br>'
                 + 'This may take a couple of minutes if there are a number of record type linked to the requested field.<br>';
-        }else if(this._selectedTrmID){
-            id = this._selectedTrmID;
-            type = 'term';
+        }else if(type == 'term'){
 
             msg = 'Downloading vocabulary...<br><br>';
         }
 
-        if(!id || id < 1){
-            return;
-        }
-
         msg += 'This is a very complex procedure and sensitive to errors in the configuration of the source database.<br><br>'
                 + 'Please report a bug if it fails (either with or without a message)<br>'
-                + 'including the database and record type you are trying to download, so that we can investigate and fix.';
-        
+                + 'including the database and the definition you are trying to download, so that we can investigate and fix.';
+
         window.hWin.HEURIST4.msg.bringCoverallToFront(this.element, style, msg);
 
         window.hWin.HAPI4.SystemMgr.import_definitions(this._selectedDB, id, this._is_rename_target, type,
@@ -1299,9 +1263,7 @@ $.widget( "heurist.importStructure", {
         }
 
         var dbs = window.hWin.HEURIST4.remote;
-        //ugr_ID,ugr_Type,ugr_Name,ugr_Description, ugr_eMail,ugr_FirstName,ugr_LastName,ugr_Enabled,ugl_Role
-
-        var recID   = fld('rty_ID');
+        var recID = fld('rty_ID');
 
         var btn_actions = '<div style="width:60px;">'
         + '<div title="Click to show details" Xclass="ui-button ui-widget ui-state-default ui-corner-all ui-button-icon-only" role="button" aria-disabled="false" data-key="expand" '
@@ -1351,12 +1313,10 @@ $.widget( "heurist.importStructure", {
 
         var recTitle = fld2('rty_Name','15em');
 
-        //           + ' X <div class="item" style="font-style:italic;width:45em">'
-        // + window.hWin.HEURIST4.util.htmlEscape(recordset.fld(record, 'rty_Description'))+'</div>'
-
         //find all dependent record types on first level
-        var linked_rts = getLinkedRecordTypes(recID, dbs);
-        //console.log(linked_rts);        
+
+        let linked_rts = $Db.getLinkedRecordTypes(recID, dbs);
+
         var name_rts = [];
         for(var i=0;i<linked_rts.length;i++){
             name_rts.push(dbs.rectypes.names[linked_rts[i]]);
@@ -1567,125 +1527,3 @@ $.widget( "heurist.importStructure", {
     }
 
 });
-   
-    //
-    // returns array of record types that are resources for given record type
-    // need_separate - returns separate array for linked and related 
-    //
-function getLinkedRecordTypes($rt_ID, db_structure, need_separate){
-        
-        if(!db_structure){
-            db_structure = window.hWin.HEURIST4;
-        }
-        
-        var $dbs_rtStructs = db_structure.rectypes;
-        //find all DIREreverse links (pointers and relation that point to selected rt_ID)
-        var $alldetails = $dbs_rtStructs['typedefs'];
-        var $fi_type = $alldetails['dtFieldNamesToIndex']['dty_Type'];
-        var $fi_rectypes = $alldetails['dtFieldNamesToIndex']['rst_PtrFilteredIDs'];
-        
-        var $arr_rectypes = [];
-        var res = {'linkedto':[],'relatedto':[]};
-        
-        var $details = $dbs_rtStructs['typedefs'][$rt_ID]['dtFields'];
-        if($details) {
-            for (var $dtID in $details) {
-                
-                var $dtValue = $details[$dtID];
-        
-                if(($dtValue[$fi_type]=='resource' || $dtValue[$fi_type]=='relmarker')){
-
-                        //find constraints
-                        var $constraints = $dtValue[$fi_rectypes];
-                        if(!window.hWin.HEURIST4.util.isempty($constraints)){
-                            $constraints = $constraints.split(",");
-                            //verify record type exists
-                            if($constraints.length>0){
-                                for (var i=0; i<$constraints.length; i++) {
-                                    var $recTypeId = $constraints[i];
-                                    if( !$arr_rectypes[$recTypeId] && 
-                                        $dbs_rtStructs['typedefs'][$recTypeId]){
-                                            
-                                            $arr_rectypes.push( $recTypeId );
-                                            
-                                            if(need_separate){
-                                                var t1 = ($dtValue[$fi_type]=='resource')?'linkedto':'relatedto';
-                                                res[t1].push( $recTypeId );
-                                            }
-                                    }
-                                }                            
-                            } 
-                        }
-                }
-            }
-        }
-        
-        return  need_separate ?res :$arr_rectypes;
-        
-}
-    
-    //
-    // returns array of record types that points to given record type
-    // rt_id => field id
-    //
-function getLinkedRecordTypesReverse($rt_ID, db_structure, parent_child_only){
-        
-        if(!db_structure){
-            db_structure = window.hWin.HEURIST4;
-        }
-        
-        if(parent_child_only!==true) parent_child_only = false;
-        
-        var $dbs_rtStructs = db_structure.rectypes;
-        //find all DIREreverse links (pointers and relation that point to selected rt_ID)
-        var $alldetails = $dbs_rtStructs['typedefs'];
-        var $fi_type = $alldetails['dtFieldNamesToIndex']['dty_Type'];
-        var $fi_rectypes = $alldetails['dtFieldNamesToIndex']['rst_PtrFilteredIDs'];
-        var $fi_req_type = $alldetails['dtFieldNamesToIndex']['rst_RequirementType'];
-        var $fi_parent_child_flag = $alldetails['dtFieldNamesToIndex']['rst_CreateChildIfRecPtr'];
-        
-        var $arr_rectypes = {};
-        
-        for (var $recTypeId in $alldetails) {
-        
-            if($recTypeId>0 && $recTypeId!=$rt_ID){ //not itself
-            
-                var $details = $alldetails[$recTypeId];
-                
-                $details = $dbs_rtStructs['typedefs'][$recTypeId]['dtFields'];
-                if(!$details) continue;
-                
-                for (var $dtID in $details) {
-                    
-                    var $dtValue = $details[$dtID];
-                    
-                    if($dtValue[$fi_req_type]=='forbidden') continue;
-                    
-                    if ((parent_child_only && $dtValue[$fi_type]=='resource' && $dtValue[$fi_parent_child_flag]==1)
-                        ||
-                       (!parent_child_only && ($dtValue[$fi_type]=='resource' || $dtValue[$fi_type]=='relmarker')))
-                    {
-                            //find constraints
-                            var $constraints = $dtValue[$fi_rectypes];  //rst_PtrFilteredIDs
-                            $constraints = $constraints.split(",");
-                            //verify that selected record type is in this constaint
-                            if($constraints.length>0 && 
-                                window.hWin.HEURIST4.util.findArrayIndex($rt_ID, $constraints)>=0 &&
-                                !$arr_rectypes[$recTypeId] )
-                            {
-                                $arr_rectypes[$recTypeId] = $dtID;
-                            }
-                    }
-                    
-                    
-                }
-            }
-        }
-        
-        return  $arr_rectypes;
-        
-}
-
-
-
-
