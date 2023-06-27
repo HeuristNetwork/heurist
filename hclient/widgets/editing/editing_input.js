@@ -654,6 +654,10 @@ $.widget( "heurist.editing_input", {
             that.onChange();
         }else{  //and clear last one
             this._clearValue(input_id, '');
+            if(this.options.is_between_mode){
+                this.newvalues[input_id+'-2'] = '';
+                this.element.find('#'+input_id+'-2').val('');
+            }
         }
         
     },
@@ -3553,6 +3557,7 @@ console.log('onpaste');
                             that._removeInput( input_id );
                         }
                         
+                        
                         that.onChange(); 
                     }
                 });
@@ -4778,9 +4783,13 @@ console.log('onpaste');
                             res2 = this.element.find('#'+$input.attr('id')+'-2').val();
                         }
                         if(window.hWin.HEURIST4.util.isempty( res2 )){ 
-                            res = '';
+                            if(this.detailType!='date') res = '';
                         }else{
-                            res  = res+'<>'+res2;
+                            if(this.detailType=='date'){
+                                res  = res+'/'+res2;
+                            }else{
+                                res  = res+'<>'+res2;   
+                            }
                         }
                     }
                                     
@@ -5626,7 +5635,7 @@ console.log('onpaste');
                             })
                             .insertAfter(edash);
                             
-                    window.hWin.HEURIST4.ui.disableAutoFill( $inpt2 );
+                    window.hWin.HEURIST4.ui.disableAutoFill( inpt2 );
                             
                     that._createDateInput(inpt2, $inputdiv);
             

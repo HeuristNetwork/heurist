@@ -502,15 +502,13 @@ $.widget( "heurist.searchBuilderItem", {
         }else if(field_type=='date'){
             //
             eqopts = [
-                {key:'',title:'like'},
-                {key:'=',title:'equals'},
-                {key:'-',title:'not equals'},
-                {key:'>',title:'greater than'},
-                {key:'>=',title:'>='},
-                {key:'<',title:'less than'},
-                {key:'<=',title:'<='}];
+                {key:'<>',title:'fall in/overlaps'}, //<> overlaps for range only
+                {key:'><',title:'between'},  //for range only
+                {key:'=',title:'exact'},     //either start or end exact to specified date
+                {key:'>=',title:'after than'},
+                {key:'<=',title:'before than'}];
 /*                
-                {key:'<>',title:'between'}
+                {key:'-',title:'not equals'},
 */
             
         }else if(field_type=='tag'){
@@ -616,7 +614,7 @@ Whole value = EQUAL
                 this.cb_negate.hide();
             }
             
-            if(cval=='<>' || cval=='-<>'){
+            if(cval=='<>' || cval=='-<>' || cval=='><'){
                 this._predicate_input_ele.editing_input('setBetweenMode', true);        
             }else{
                 this._predicate_input_ele.editing_input('setBetweenMode', false);        

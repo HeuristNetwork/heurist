@@ -2491,59 +2491,83 @@ class HPredicate {
         }
     }
 
-    
+    /*
+        It is possible to specify the following queries against dates:
+        FOR OVERLAPS: {"f:1113":"1400/1500"}   or  {"f:1113":"1400<>1500"}  or {"f:1113":"<>1400,1500"} the search range overlaps the specified interval (1400-1500)
+        
+        BETWEEN: {"f:1113":"1400><1500"}  or {"f:1113":"><1400/1500"}  the search range is between the specified interval
+        
+        if operator <> or >< is in the beginning of search string, interval can be specified as "1440 to 1500",  "1440/1500",  "1440,1500", "1440-1500", "1440 à 1500",  "1400/P100Y" or "P100Y/1500"
+
+        FALL IN:{"f:1113":"1450"}  1450 should fall between range in database    1400<=1450<=1500
+        AFTER:  {"f:1113":">=1300"} 1400>=1300  (start of range is after the specified date)
+        BEFORE: {"f:1113":"<=1600"} 1500<=1600  (end of range is before the specified date)
+        EXACT:  {"f:1113":"=1400"}  either start or end of range in db equals the specified date  
+                {"f:1113":"=1400,1500"}  start of range in db is 1400 and end of range in db equals to 1500
+        FALL IN/OVERLAP is default comparison.    
+    */
     function makeDateClause() {
         
-        //???? if($this->isEmptyValue()){ // {"f:10":"NULL"}
+        $is_overlap = strpos($this->value,'<>')!==false; // falls in/overlaps
+        $is_within = strpos($this->value,'><')!==false;  // between
+        
+        if ($is_overlap || $is_within) { 
 
-        if (strpos($this->value,"<>")) {
-
-            $vals = explode("<>", $this->value);
+            $vals = explode($is_within?'><':'<>', $this->value);
             
-            $temporal1 = new Temporal($vals[0]);
-            $temporal2 = new Temporal($vals[1]);
-            
-            if(!$temporal1->isValid() || !$temporal2->isValid()){
-                return null;
+            if($vals[0]==''){
+                // <>500/P10Y  or ><1400-1550
+                $temporal = new Temporal($vals[1]);
+                if(!$temporal->isValid()){
+                    return null;
+                }
+                $timespan = $temporal->getMinMax();
+            }else{
+                //  200<>500
+                $temporal1 = new Temporal($vals[0]);
+                $temporal2 = new Temporal($vals[1]);
+                
+                if(!$temporal1->isValid() || !$temporal2->isValid()){
+                    return null;
+                }
+                $timespan = array($temporal1->getMinMax()[0], $temporal2->getMinMax()[1]);
             }
-            
-            $timespan = $temporal1->getMinMax();
-            $min = $timespan[0];
-            
-            $timespan = $temporal2->getMinMax();
-            $max = $timespan[1];
-            
-            $timespan = array($min, $max);
             
         }else{
             $temporal = new Temporal($this->value);
             if(!$temporal->isValid()){
                 return null;
             }
-            
             $timespan = $temporal->getMinMax();
         }
             
         $res = '';
-                
+        
+        if($is_within){  // min<=t1 && t2<=max
+
+            //search dates are comletely within the specified interval
+            $res = "({$timespan[0]} <= rdi_estMinDate  AND rdi_estMaxDate <= {$timespan[1]})";
+        
+        }else
         if ($this->exact) {
-            //timespan within interval
-            $res = "(rdi_estMinDate <= {$timespan[0]} AND {$timespan[1]} <= rdi_estMaxDate)";
+            //either begin or end of date range is exact to specified interval
+            $res = "(rdi_estMinDate = {$timespan[0]} OR rdi_estMaxDate = {$timespan[1]})";
         }
-        else if ($this->lessthan) {
+        else if ($this->lessthan) {  //search dates before the specified 
             
-            //timespan max < rdi_estMinDate
-            $res = "({$timespan[1]} {$this->lessthan} rdi_estMinDate)";
+            //timespan rdi_estMaxDate < max 
+            $res = "(rdi_estMaxDate {$this->lessthan} {$timespan[1]})";
         }
-        else if ($this->greaterthan) {
+        else if ($this->greaterthan) { //search dates after the specified 
             
             //timespan min > rdi_estMaxDate
-            $res = "({$timespan[0]} {$this->greaterthan} rdi_estMaxDate)";
+            $res = "(rdi_estMinDate {$this->greaterthan} {$timespan[0]})";
         }
-        else {
-            //overlaps/intersects with interval
-            // @End >= tbl.start AND @Start <= tbl.end
+        else { // max>=t1 && min<=t2
+
+            //search range overlaps/intersects with interval
             $res = "(rdi_estMaxDate>={$timespan[0]} AND rdi_estMinDate<={$timespan[1]})";
+            
         }
         
         if($this->negate){
@@ -2636,7 +2660,7 @@ class HPredicate {
             $this->value = substr($this->value, 1);
         }
                 
-        if (strpos($this->value,"<>")===false) {
+        if (strpos($this->value,'<>')===false && strpos($this->value,'><')===false) { //except "overlaps" and "between" operators
             
             if(strpos($this->value, '==')===0){
                 $this->case_sensitive = true;
