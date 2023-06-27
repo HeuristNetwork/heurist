@@ -1499,7 +1499,7 @@ $.widget( "heurist.search_faceted", {
                                 
                                 if(selval && !window.hWin.HEURIST4.util.isempty(selval.value)){
                                     
-                                    if(selval.value.indexOf('<>')<0){
+                                    if(selval.value.indexOf('<>')<0 && selval.value.indexOf('><')<0){
                                         if(facets[facet_index].groupby=='month'){
                                             var y_m = selval.value.split('-');
                                             selval.value = y_m[0]+'-'+y_m[1]+'-01<>'+y_m[0]+'-'+y_m[1]+'-31';
@@ -1508,9 +1508,10 @@ $.widget( "heurist.search_faceted", {
                                             selval.value = selval.value + '<>' +(Number(selval.value)+'-12-31');
                                             
                                         }else if(facets[facet_index].groupby=='decade'){
-                                            selval.value = selval.value + '<>' +((Number(selval.value)+10)+'-12-31');
+                                            selval.value = selval.value + '<>' +((Number(selval.value)+9)+'-12-31');
                                         }else if(facets[facet_index].groupby=='century'){
-                                            selval.value = selval.value + '<>' +((Number(selval.value)+100)+'-12-31');
+                                            selval.value = selval.value + '<>' +((Number(selval.value)+99)+'-12-31');
+//console.log(selval.value);                                            
                                         }
                                         
                                     }
@@ -2416,10 +2417,13 @@ $.widget( "heurist.search_faceted", {
                                         val = Math.round(val)+(is_max?'-12-31':'-01-01');
                                     }else{
                                         //
-                                        var month = val.substr(5,2);
-                                        var day = val.substr(7);
+                                        //var parts = val.split('.');
+                                        var parts = val.split('.');
+                                        var year = parts[0];
+                                        var month = parts[1].substr(0,2);
+                                        var day = parts[1].substr(3);
                                         
-                                        val = Math.round(val)
+                                        val = year.lpad('0',parseInt(year)<0?6:4)
                                             +'-'+((month==0)?'01':month.lpad('0',2))
                                             +'-'+((day==0)?'01':day.lpad('0',2))
                                     }
@@ -2448,7 +2452,7 @@ $.widget( "heurist.search_faceted", {
                                     }
                                     mmax = mmax.replace(' ','T');
                                 }
-//DEBUG  console.log('prep', mmin+'   '+mmax);       
+//DEBUG console.log('prep', mmin+'   '+mmax);       
                                 var date_min, date_max;
                                 try{
                                     date_min = TDate.parse(mmin);

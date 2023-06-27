@@ -2493,7 +2493,7 @@ class HPredicate {
 
     /*
         It is possible to specify the following queries against dates:
-        FOR OVERLAPS: {"f:1113":"1400/1500"}   or  {"f:1113":"1400<>1500"}  or {"f:1113":"<>1400,1500"} the search range overlaps the specified interval (1400-1500)
+        FOR OVERLAPS: {"f:1113":"1400/1500"}   or  {"f:1113":"1400<>1500"}  or {"f:1113":"<>    1400,1500"} the search range overlaps the specified interval (1400-1500)
         
         BETWEEN: {"f:1113":"1400><1500"}  or {"f:1113":"><1400/1500"}  the search range is between the specified interval
         
