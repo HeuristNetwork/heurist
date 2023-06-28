@@ -2699,9 +2699,7 @@ class HPredicate {
             $parent_ids = null;
             
             if (preg_match('/^\d+(?:,\d*)+$/', $this->value) || intval($this->value)){   //numeric comma separated
-            
                 $parent_ids = prepareIds($this->value);
-                
             }
             
             

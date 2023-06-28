@@ -468,7 +468,7 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
                                     //    console.log(bot);
                                     //    console.log(ui.position.top+'  '+ui.position.left);
                                     that.scrollInterval = setInterval(function(){ if(!that._dropped) ele[0].scrollTop += 20}, 50); 
-                                }else if(ui.offset.top<ele.offset().top+(that.space_for_drop.is(':visible')?-60:-20)) {
+                                }else if(ui.offset.top<ele.offset().top+((that.space_for_drop && that.space_for_drop.is(':visible'))?-60:-20)) {
                                     that.scrollInterval = setInterval(function(){ if(!that._dropped) ele[0].scrollTop -= 20}, 50); 
                                 }
 

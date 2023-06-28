@@ -76,6 +76,7 @@ levels: []
 search: [t:10 f:1] 
 orderby: count|null
 groupby
+multisel
 ],
 //multi field facet ???
 [
@@ -1381,10 +1382,17 @@ $.widget( "heurist.search_faceted", {
         var _inputs = this._input_fields;
         var that = this;
         var isbranch_empty = true;
+        
             
-        $(q).each(function(idx, predicate){ //loop through all predicates of main query 
+        //$(q).each(function(idx, predicate){ 
         // [{"f:1":$X680},....]
+        
+        //loop through all predicates of main query 
+        var  idx = 0
+        while (idx<q.length){
             
+            var predicate = q[idx];
+        
             $.each(predicate, function(key,val)
             {
                 if( $.isArray(val) ) { //|| $.isPlainObject(val) ){
@@ -1498,24 +1506,38 @@ $.widget( "heurist.search_faceted", {
                                 var selval = facets[facet_index].selectedvalue;
                                 
                                 if(selval && !window.hWin.HEURIST4.util.isempty(selval.value)){
-                                    
-                                    if(selval.value.indexOf('<>')<0 && selval.value.indexOf('><')<0){
-                                        if(facets[facet_index].groupby=='month'){
-                                            var y_m = selval.value.split('-');
-                                            selval.value = y_m[0]+'-'+y_m[1]+'-01<>'+y_m[0]+'-'+y_m[1]+'-31';
-
-                                        }else if(facets[facet_index].groupby=='year'){
-                                            selval.value = selval.value + '<>' +(Number(selval.value)+'-12-31');
+console.log(key, selval.value);                   
+                                    if(facets[facet_index].multisel){
+                                        let vals = selval.value.split(',');
+                                        for(let k=0;k<vals.length; k++){
+                                            if(k==0){
+                                                predicate[key] = vals[k];
+                                            }else{
+                                                let new_pred = {};
+                                                new_pred[key] = vals[k];
+                                                q.splice(idx,k==0?1:0,new_pred);
+                                                idx++;
+                                            }
                                             
-                                        }else if(facets[facet_index].groupby=='decade'){
-                                            selval.value = selval.value + '<>' +((Number(selval.value)+9)+'-12-31');
-                                        }else if(facets[facet_index].groupby=='century'){
-                                            selval.value = selval.value + '<>' +((Number(selval.value)+99)+'-12-31');
-//console.log(selval.value);                                            
                                         }
-                                        
+                                    }else{
+                                        if(selval.value.indexOf('<>')<0 && selval.value.indexOf('><')<0){
+                                            if(facets[facet_index].groupby=='month'){
+                                                var y_m = selval.value.split('-');
+                                                selval.value = y_m[0]+'-'+y_m[1]+'-01<>'+y_m[0]+'-'+y_m[1]+'-31';
+
+                                            }else if(facets[facet_index].groupby=='year'){
+                                                selval.value = selval.value + '<>' +(Number(selval.value)+'-12-31');
+                                                
+                                            }else if(facets[facet_index].groupby=='decade'){
+                                                selval.value = selval.value + '<>' +((Number(selval.value)+9)+'-12-31');
+                                            }else if(facets[facet_index].groupby=='century'){
+                                                selval.value = selval.value + '<>' +((Number(selval.value)+99)+'-12-31');
+                                            }
+                                            
+                                        }
+                                        predicate[key] = selval.value;
                                     }
-                                    predicate[key] = selval.value;
                                     isbranch_empty = false;
                                 }else{
                                     delete predicate[key];  
@@ -1527,9 +1549,10 @@ $.widget( "heurist.search_faceted", {
 
                     }
                 }
-            });
-            
-        });
+            });//each
+
+            idx++;    
+        }//while
 
         /*$(q).each(function(idx, predicate){
             if(Object.keys(predicate).length==0){
