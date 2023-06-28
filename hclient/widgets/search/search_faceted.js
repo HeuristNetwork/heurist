@@ -1426,14 +1426,15 @@ $.widget( "heurist.search_faceted", {
                                             if(val.length>2 && val[0]=='"' && val[val.length-1]=='"'){
                                                 val = val.substring(1,val.length-1);
                                             }else if(!window.hWin.HEURIST4.util.isempty(val) && (val.indexOf(' ')>0 || sel.length > 0)){
-                                                search_all_words = true;
+                                                search_all_words = false; //true;  Artem: 2023-06-28 it does not work properly
                                             }
                                             
                                             facets[facet_index].selectedvalue = {value:val}; // TODO - Handle multivalue, store in selectedvalue.value as comma list
     
                                             //search for words, ANDed by default check for OR and handle as needed
-                                            if(search_all_words){
-                                                let values = val.split(' ');
+                                            let values = val.split(' ');
+                                            if(search_all_words && values.length>1){
+                                                
                                                 let predicates = [];
                                                 for (var i=0; i<values.length; i++){
                                                     let pred_parts = {};
@@ -1506,7 +1507,7 @@ $.widget( "heurist.search_faceted", {
                                 var selval = facets[facet_index].selectedvalue;
                                 
                                 if(selval && !window.hWin.HEURIST4.util.isempty(selval.value)){
-console.log(key, selval.value);                   
+//console.log(key, selval.value);                   
                                     if(facets[facet_index].multisel){
                                         let vals = selval.value.split(',');
                                         for(let k=0;k<vals.length; k++){
@@ -1560,6 +1561,7 @@ console.log(key, selval.value);
             }
         });*/
         
+//DEBUG console.log(q);        
         var  idx = 0
         while (idx<q.length){
             if(Object.keys(q[idx]).length==0){
@@ -1893,6 +1895,8 @@ console.log(key, selval.value);
                 }else if(fieldid==1  && that._use_multifield){
                     fieldid = '1,18,231,304';
                 }
+                
+//DEBUG console.log(field);                
 
                 var request = {q: query, count_query:count_query, w: 'a', a:'getfacets',
                                      facet_index: i, 
