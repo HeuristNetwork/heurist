@@ -1599,7 +1599,7 @@ class HPredicate {
             
             if($this->field_id>0){ //field id defined (for example "f:25")
             
-                if($this->field_type=='date'){
+                if($this->field_type=='date' && trim($this->value)!=''){
 
                     $res = "EXISTS (SELECT rdi_DetailID FROM recDetailsDateIndex WHERE $recordID=rdi_RecID AND "
                     .'rdi_DetailTypeID';
@@ -2508,6 +2508,11 @@ class HPredicate {
     */
     function makeDateClause() {
         
+        if($this->isEmptyValue()){ // {"f:10":"NULL"}
+            return 'NULL';
+        }
+        
+        
         $is_overlap = strpos($this->value,'<>')!==false; // falls in/overlaps
         $is_within = strpos($this->value,'><')!==false;  // between
         
@@ -2621,7 +2626,6 @@ class HPredicate {
         
         $this->case_sensitive = false;
 
-        //@todo between , datetime, terms
         if(is_array($this->value)){
             if(count($this->value)>0){
                 $cs_ids = getCommaSepIds($this->value);
@@ -2639,7 +2643,7 @@ class HPredicate {
         }
 
         // -   negate value
-        // <> between 
+        // <> between  >< overlaps
         
         // then it analize for
         // == case sensetive
