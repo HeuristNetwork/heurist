@@ -643,12 +643,14 @@ if($mode>1){
                             print "The repository " . $repo . " is not supported please " . CONTACT_HEURIST_TEAM;
                             break;
                     }
+                    
+                    //cleanup backup after upload to reporsitory
+                    folderDelete2(HEURIST_FILESTORE_DIR.'backup/', false);
+            
+                    
                 }
                 print '</div><script>document.getElementById("divProgress").style.display="none";</script>';
                 if(file_exists($progress_flag)) unlink($progress_flag);
-            
-                //cleanup
-                folderDelete2(HEURIST_FILESTORE_DIR.'backup/', false);
             
             }else
             {
