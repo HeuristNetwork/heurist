@@ -2659,7 +2659,7 @@ class HPredicate {
         $this->greaterthan = false;
         
         //
-        if(strpos($this->value, '-')===0){
+        if(strpos($this->value, '-')===0 && $this->field_type!='date'){
             $this->negate = true;
             $this->value = substr($this->value, 1);
         }
