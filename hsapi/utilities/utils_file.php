@@ -413,23 +413,25 @@
     // remove folder and all its content
     //
     function folderDelete2($dir, $rmdir) {
+        
+        if(file_exists($dir)){
 
-        $files = new RecursiveIteratorIterator(
-                    new RecursiveDirectoryIterator($dir, RecursiveDirectoryIterator::SKIP_DOTS),
-                    RecursiveIteratorIterator::CHILD_FIRST
-        );
+            $files = new RecursiveIteratorIterator(
+                        new RecursiveDirectoryIterator($dir, RecursiveDirectoryIterator::SKIP_DOTS),
+                        RecursiveIteratorIterator::CHILD_FIRST
+            );
 
-        foreach ($files as $fileinfo) {
-            $todo = ($fileinfo->isDir() ? 'rmdir' : 'unlink');
-            $todo($fileinfo->getRealPath());
+            foreach ($files as $fileinfo) {
+                $todo = ($fileinfo->isDir() ? 'rmdir' : 'unlink');
+                $todo($fileinfo->getRealPath());
+            }
+
+            if($rmdir){
+                $res = rmdir($dir);
+                return $res;
+            }
         }
-
-        if($rmdir){
-            $res = rmdir($dir);
-            return $res;
-        }else{
-            return true;
-        }
+        return true;
     }
     
     //

@@ -611,7 +611,7 @@ function downloadViaProxy($filename, $mimeType, $url, $bypassProxy = true, $orig
 }
 
 /** 
-* Direct file download - move to utils_file
+* Direct file download - @todo move to utils_file
 * 
 * Usage in 2 cases only
 * 1) Download database backup (exportMyDataPopup)

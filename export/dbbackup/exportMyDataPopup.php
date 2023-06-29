@@ -37,19 +37,24 @@ $folder = HEURIST_FILESTORE_DIR.'backup/'.HEURIST_DBNAME;
 $folder_sql = HEURIST_FILESTORE_DIR.'backup/'.HEURIST_DBNAME.'_sql';
 $progress_flag = HEURIST_FILESTORE_DIR.'backup/inprogress.info';
 
-$mode = @$_REQUEST['mode'];
+$mode = @$_REQUEST['mode']; // mode=2 - entire archived folder,  mode=3 - sql dump only
 $format = array_key_exists('is_zip', $_REQUEST) && $_REQUEST['is_zip'] == 1 ? 'zip' : 'tar';
 $mime = $format == 'tar' ? 'application/x-bzip2' : 'application/zip';
 
 // Download the dumped data as a zip file
-if(($mode == '2' || $mode == '3') && $format == 'tar'){
-    $format = 'tar.bz2';
-}
-if($mode=='2' && file_exists($folder.".".$format) ){
-    downloadFile($mime, $folder.".".$format); //see db_files.php
-    exit();
-}else if($mode=='3' && file_exists($folder_sql.".".$format)){
-    downloadFile($mime, $folder_sql.".".$format, HEURIST_DBNAME.".".$format);
+if($mode>1){
+    
+    if($format == 'tar'){
+        $format = 'tar.bz2';
+    }
+
+    if($mode=='2' && file_exists($folder.'.'.$format) ){ //archived entire folder
+        downloadFile($mime, $folder.'.'.$format); //see db_files.php
+    }else if($mode=='3' && file_exists($folder_sql.'.'.$format)){  //archived sql dump
+        downloadFile($mime, $folder_sql.'.'.$format);
+    }else if($mode=='4'){  //cleanup backup folder
+        folderDelete2(HEURIST_FILESTORE_DIR.'backup/', false);
+    }
     exit();
 }
 
@@ -75,7 +80,16 @@ if($mode=='2' && file_exists($folder.".".$format) ){
                 if($('#sel_repository').length > 0){
                     initRepositorySelector();
                 }
+                
             });
+            
+            //
+            // cleanup backup folder on exit
+            //
+            function closeArchiveWindow(){
+                <?php print '$.ajax("'.HEURIST_BASE_URL.'/export/dbbackup/exportMyDataPopup.php?mode=4&db='.HEURIST_DBNAME.'");'; ?>
+                window.close();
+            }
 
             function initRepositorySelector(){
 
@@ -268,10 +282,10 @@ if($mode=='2' && file_exists($folder.".".$format) ){
         <?php } ?>
 
                 <div id="buttons" class="actionButtons" style="padding-top:10px;text-align:left">
-                    <input type="button" value="<?php echo (array_key_exists('repository', $_REQUEST) ? 'Export & Upload' : 'Download'); ?>" 
+                    <input type="button" value="<?php echo (array_key_exists('repository', $_REQUEST) ? 'Export & Upload' : 'Create Archive'); ?>" 
                         style="margin-right: 20px;" class="ui-button-action" onClick="{ exportArchive(); }">
 <?php if(@$_REQUEST['inframe']!=1) { ?>                    
-                    <input type="button" value="Cancel" onClick="window.close();">
+                    <input type="button" value="Cancel" onClick="closeArchiveWindow();">
 <?php } ?>
 
                 </div>
@@ -299,7 +313,7 @@ if($mode=='2' && file_exists($folder.".".$format) ){
             fclose($fp);            
             */
             
-            $separate_sql_zip = true;
+            $separate_sql_zip = !array_key_exists('repository', $_REQUEST);
 
             // 
             if(file_exists($folder)){
@@ -329,7 +343,7 @@ if($mode=='2' && file_exists($folder.".".$format) ){
                     exit();
                 }
             }
-            if(!folderCreate($folder_sql, true)){
+            if($separate_sql_zip && !folderCreate($folder_sql, true)){
                 $separate_sql_zip = false; // hide option
             }
 
@@ -343,7 +357,7 @@ if($mode=='2' && file_exists($folder.".".$format) ){
             //copy resource folders
             if(@$_REQUEST['include_docs']=='1'){
                 $folders_to_copy = folderSubs(HEURIST_FILESTORE_DIR, 
-                    array('backup', 'scratch', 'file_uploads', 'filethumbs', 'uploaded_files', 'uploaded_tilestacks'));
+                    array('backup', 'scratch', 'file_uploads', 'filethumbs', 'uploaded_files', 'uploaded_tilestacks', 'rectype-icons', 'term-images'));
                 
                 //limited set
                 //$folders_to_copy = $system->getSystemFolders( 1 );
@@ -351,7 +365,7 @@ if($mode=='2' && file_exists($folder.".".$format) ){
                 echo_flush2("<br><br>Exporting system folders<br>");
             }
             
-            if(@$_REQUEST['includeresources']=='1'){
+            if(@$_REQUEST['includeresources']=='1'){ //uploaded images
                 if($folders_to_copy==null) $folders_to_copy = array();    
                 $folders_to_copy[] = HEURIST_FILES_DIR;
                 $folders_to_copy[] = HEURIST_THUMB_DIR;
@@ -377,29 +391,29 @@ if($mode=='2' && file_exists($folder.".".$format) ){
 
             if(@$_REQUEST['include_hml']=='1'){
             
-            //load hml output into string file and save it
-            if(@$_REQUEST['allrecs']!="1"){
-                $userid = get_user_id();
-                $q = "owner:$userid"; //user:$userid OR
-                $_REQUEST['depth'] = '5';
-            }else{
-                $q = "sortby:-m";
-                $_REQUEST['depth'] = '0';
-            }
+                //load hml output into string file and save it
+                if(@$_REQUEST['allrecs']!="1"){
+                    $userid = get_user_id();
+                    $q = "owner:$userid"; //user:$userid OR
+                    $_REQUEST['depth'] = '5';
+                }else{
+                    $q = "sortby:-m";
+                    $_REQUEST['depth'] = '0';
+                }
 
 
-            $_REQUEST['w'] = 'all';
-            $_REQUEST['a'] = '1';
-            $_REQUEST['q'] = $q;
-            $_REQUEST['rev'] = 'no'; //do not include reverse pointers
-            $_REQUEST['filename'] = $folder."/".HEURIST_DBNAME.".xml";
+                $_REQUEST['w'] = 'all';
+                $_REQUEST['a'] = '1';
+                $_REQUEST['q'] = $q;
+                $_REQUEST['rev'] = 'no'; //do not include reverse pointers
+                $_REQUEST['filename'] = $folder."/".HEURIST_DBNAME.".xml";
 
-            echo_flush2("Exporting database as HML (Heurist Markup Language = XML)<br>(may take several minutes for large databases)<br>");
+                echo_flush2("Exporting database as HML (Heurist Markup Language = XML)<br>(may take several minutes for large databases)<br>");
 
-            $to_include = dirname(__FILE__).'/../../export/xml/flathml.php';
-            if (is_file($to_include)) {
-                include $to_include;
-            }
+                $to_include = dirname(__FILE__).'/../../export/xml/flathml.php';
+                if (is_file($to_include)) {
+                    include $to_include;
+                }
             
             /* OLD WAY. It works but leads to memory overflow for large database
             $content = "";
@@ -483,149 +497,168 @@ if($mode=='2' && file_exists($folder.".".$format) ){
             }else{
                 $res = createBz2Archive($folder, null, $destination, true);
             }
+            
+            if($res){
 
-            $res_sql = false;
-            if($separate_sql_zip){
+                $res_sql = false;
+                if($separate_sql_zip){
 
-                $destination_sql = $folder.'_sql.'.$format; // SQL dump only
-                if(file_exists($destination_sql)){
-                    unlink($destination_sql);
-                }
-                if($format == 'tar' && file_exists($folder.'_sql.tar.bz2')){
-                    unlink($folder.'_sql.tar.bz2');
-                }
+                    $destination_sql = $folder.'_sql.'.$format; // SQL dump only
+                    if(file_exists($destination_sql)){
+                        unlink($destination_sql);
+                    }
+                    if($format == 'tar' && file_exists($folder.'_sql.tar.bz2')){
+                        unlink($folder.'_sql.tar.bz2');
+                    }
 
-                if($format == 'zip'){
-                    $res_sql = createZipArchive($folder.'_sql', null, $destination_sql, true);   
-                }else{
-                    $res_sql = createBz2Archive($folder.'_sql', null, $destination_sql, true);
+                    if($format == 'zip'){
+                        $res_sql = createZipArchive($folder.'_sql', null, $destination_sql, true);   
+                    }else{
+                        $res_sql = createBz2Archive($folder.'_sql', null, $destination_sql, true);
+                    }
+                    
                 }
+            
+                if(!array_key_exists('repository', $_REQUEST)) {
+    //&format=<?php echo ($format == 'zip' ? 1 : 0);                 
+    $is_zip = '&is_zip='.($format == 'zip' ? 1 : 0); 
+    ?>                
+    <p>Your data have been backed up in <?php echo $folder;?></p>
+    <br><br><div class='lbl_form'></div>
+        <a href="exportMyDataPopup.php/<?php echo HEURIST_DBNAME;?>.<?php echo $format; ?>?mode=2&db=<?php echo HEURIST_DBNAME.$is_zip;?>"
+            target="_blank" style="color:blue; font-size:1.2em">Click here to download your data as a <?php echo $format;?> archive</a>
+
+    <?php 
+    if($separate_sql_zip){
+        if($res_sql){ ?>
+        <br><br>
+        <a href="exportMyDataPopup.php/<?php echo HEURIST_DBNAME;?>_sql.<?php echo $format; ?>?mode=3&db=<?php echo HEURIST_DBNAME.$is_zip;?>"
+            target="_blank" style="color:blue; font-size:1.2em">Click here to download the SQL <?php echo $format;?> file only</a> 
+        <span class="heurist-helper1">(for db transfer on tiered servers)</span>
+    <?php }else{ ?>
+        <br><br>
+        <div>Failed to create standalone SQL dump</div>
+    <?php 
+        } 
+    }
+    ?>
+    <p class="heurist-helper1">
+    Note: If this file fails to download properly (eg. "Failed … file incomplete") the file is too large to download. Please ask your system administrator (<?php echo HEURIST_MAIL_TO_ADMIN; ?>) to send it to you via a large file transfer service
+    </p>        
+    <?php                
+                    if(@$_REQUEST['inframe']!=1) {
+                        print '<br><input type="button" class="ui-button-action" value="Close" onClick="closeArchiveWindow();">';
+                    }
+                
+                }
+                else if(array_key_exists('repository', $_REQUEST)){
+                    //upload archive to repository
+
+                    $repo = $_REQUEST['repository'];
+                    if($format == 'tar'){
+                        $format = 'tar.bz2';
+                    }
+
+                    echo_flush2('<hr><br>Uploading archive to ' . $repo . '...');
+
+                    // Prepare metadata
+                    switch ($repo) {
+                        case 'Nakala':
+                            // Title, Type, Alt Author, License, Created
+
+                            $date = date('Y-m-d');
+
+                            $params = array();
+                            $params['file'] = array(
+                                'path' => $folder . '.' . $format,
+                                'type' => $mime,
+                                'name' => HEURIST_DBNAME . '.' . $format
+                            );
+
+                            $params['meta']['title'] = array(
+                                'value' => 'Archive of ' . HEURIST_DBNAME . ' on ' . $date,
+                                'lang' => null,
+                                'typeUri' => 'http://www.w3.org/2001/XMLSchema#string',
+                                'propertyUri' => 'http://nakala.fr/terms#title'
+                            );
+
+                            $usr = $system->getCurrentUser();
+                            if(is_array($usr) && count($usr) > 0){
+                                $params['meta']['creator'] = array(
+                                    'value' => $usr['ugr_FullName'],
+                                    'lang' => null,
+                                    'typeUri' => 'http://www.w3.org/2001/XMLSchema#string',
+                                    'propertyUri' => 'http://purl.org/dc/terms/creator'
+                                );
+                            }
+
+                            $params['meta']['created'] = array(
+                                'value' => $date,
+                                'lang' => null,
+                                'typeUri' => 'http://www.w3.org/2001/XMLSchema#string',
+                                'propertyUri' => 'http://nakala.fr/terms#created'
+                            );
+
+                            $params['meta']['type'] = array(
+                                'value' => 'http://purl.org/coar/resource_type/c_ddb1',
+                                'lang' => null,
+                                'typeUri' => 'http://www.w3.org/2001/XMLSchema#anyURI',
+                                'propertyUri' => 'http://nakala.fr/terms#type'
+                            );
+
+                            if(array_key_exists('license', $_REQUEST) && !empty($_REQUEST['license'])){
+                                $params['meta']['license'] = array(
+                                    'value' => $_REQUEST['license'],
+                                    'lang' => null,
+                                    'typeUri' => 'http://www.w3.org/2001/XMLSchema#string',
+                                    'propertyUri' => 'http://nakala.fr/terms#license'
+                                );
+                            }
+
+                            if($system->get_system('sys_NakalaKey')){
+                                $params['api_key'] = $system->get_system('sys_NakalaKey');
+
+                                $params['status'] = 'pending'; // keep new record private, so it can be deleted
+                                $params['return_type'] = 'editor'; // return link to private record, will require login
+        
+                                $rtn = uploadFileToNakala($system, $params);
+        
+                                if($rtn === false){
+                                    $rtn = $system->getError()['message'];
+                                    echo_flush2('failed<br>');
+                                }else{
+                                    echo_flush2('finished<br>');
+                                    $rtn = 'The uploaded archive is at <a href="' . $rtn . '" target="_blank">' . $rtn . '&nbsp;<span class="ui-icon ui-icon-extlink" /> </a>';
+                                }
+        
+                                echo_flush2('<br>'. $rtn .'<br>');
+                            }else{
+                                echo_flush('failed<br>Your Nakala API key cannot be retrieved, '
+                                .'please ensure it has been entered into Design > Setup > Properties > Personal Nakala API Key');
+                            }
+                            
+                            break;
+                        
+                        default:
+                            print "The repository " . $repo . " is not supported please " . CONTACT_HEURIST_TEAM;
+                            break;
+                    }
+                }
+                print '</div><script>document.getElementById("divProgress").style.display="none";</script>';
+                if(file_exists($progress_flag)) unlink($progress_flag);
+            
+                //cleanup
+                folderDelete2(HEURIST_FILESTORE_DIR.'backup/', false);
+            
+            }else
+            {
+                print "<br>Directory may be non-writeable or archive function is not installed on server (error code 127) - please consult system adminstrator";
+
             }
             
-            /* command line version
-            $cmdline = "zip -r ".$folder.".zip *"; //archive everything within folder, keep folder strcuture
-            $res1 = 0;
-            $output1 = exec($cmdline, $output, $res1);
-            if ($res1 != 0 ) {
-                print  ("<p class='error'>Exec error code $res1: Unable to create zip file $folder.zip>&nbsp;$please_advise<br>");
-                print  print_r($output,true).'</p>';
-            */
-            if(!$res){
-                print "<br>Directory may be non-writeable or zip function is not installed on server (error code 127) - please consult system adminstrator";
-
-            } else if(!array_key_exists('repository', $_REQUEST)) {
-?>                
-<p>Your data have been backed up in <?php echo $folder;?></p>
-<br><br><div class='lbl_form'></div>
-    <a href="exportMyDataPopup.php/<?php echo HEURIST_DBNAME;?>.<?php echo $format; ?>?db=<?php echo HEURIST_DBNAME;?>&mode=2&is_zip=<?php echo ($format == 'zip' ? 1 : 0); ?>"
-        target="_blank" style="color:blue; font-size:1.2em">Click here to download your data as a zip archive</a>
-
-<?php if($res_sql){ ?>
-    <br><br>
-    <a href="exportMyDataPopup.php/<?php echo HEURIST_DBNAME;?>.<?php echo $format; ?>?db=<?php echo HEURIST_DBNAME;?>&mode=3&format=<?php echo ($format == 'zip' ? 1 : 0); ?>"
-        target="_blank" style="color:blue; font-size:1.2em">Click here to download the SQL zip file only</a> 
-    <span class="heurist-helper1">(for db transfer on tiered servers)</span>
-<?php }else{ ?>
-    <br><br>
-    <div>Failed to create standalone SQL dump</div>
-<?php } ?>
-<span class="heurist-helper1">
-<br><br>Note: If this file fails to download properly (eg. "Failed … file incomplete") the file is too large to download. Please ask your system administrator (<?php echo HEURIST_MAIL_TO_ADMIN; ?>) to send it to you via a large file transfer service</span>        
-<?php                
-            }else if(array_key_exists('repository', $_REQUEST)){
-
-                $repo = $_REQUEST['repository'];
-                if($format == 'tar'){
-                    $format = 'tar.bz2';
-                }
-
-                echo_flush2('<hr><br>Uploading archive to ' . $repo . '...');
-
-                // Prepare metadata
-                switch ($repo) {
-                    case 'Nakala':
-                        // Title, Type, Alt Author, License, Created
-
-                        $date = date('Y-m-d');
-
-                        $params = array();
-                        $params['file'] = array(
-                            'path' => $folder . '.' . $format,
-                            'type' => $mime,
-                            'name' => HEURIST_DBNAME . '.' . $format
-                        );
-
-                        $params['meta']['title'] = array(
-                            'value' => 'Archive of ' . HEURIST_DBNAME . ' on ' . $date,
-                            'lang' => null,
-                            'typeUri' => 'http://www.w3.org/2001/XMLSchema#string',
-                            'propertyUri' => 'http://nakala.fr/terms#title'
-                        );
-
-                        $usr = $system->getCurrentUser();
-                        if(is_array($usr) && count($usr) > 0){
-                            $params['meta']['creator'] = array(
-                                'value' => $usr['ugr_FullName'],
-                                'lang' => null,
-                                'typeUri' => 'http://www.w3.org/2001/XMLSchema#string',
-                                'propertyUri' => 'http://purl.org/dc/terms/creator'
-                            );
-                        }
-
-                        $params['meta']['created'] = array(
-                            'value' => $date,
-                            'lang' => null,
-                            'typeUri' => 'http://www.w3.org/2001/XMLSchema#string',
-                            'propertyUri' => 'http://nakala.fr/terms#created'
-                        );
-
-                        $params['meta']['type'] = array(
-                            'value' => 'http://purl.org/coar/resource_type/c_ddb1',
-                            'lang' => null,
-                            'typeUri' => 'http://www.w3.org/2001/XMLSchema#anyURI',
-                            'propertyUri' => 'http://nakala.fr/terms#type'
-                        );
-
-                        if(array_key_exists('license', $_REQUEST) && !empty($_REQUEST['license'])){
-                            $params['meta']['license'] = array(
-                                'value' => $_REQUEST['license'],
-                                'lang' => null,
-                                'typeUri' => 'http://www.w3.org/2001/XMLSchema#string',
-                                'propertyUri' => 'http://nakala.fr/terms#license'
-                            );
-                        }
-
-                        if($system->get_system('sys_NakalaKey')){
-                            $params['api_key'] = $system->get_system('sys_NakalaKey');
-
-                            $params['status'] = 'pending'; // keep new record private, so it can be deleted
-                            $params['return_type'] = 'editor'; // return link to private record, will require login
-    
-                            $rtn = uploadFileToNakala($system, $params);
-    
-                            if($rtn === false){
-                                $rtn = $system->getError()['message'];
-                                echo_flush2('failed<br>');
-                            }else{
-                                echo_flush2('finished<br>');
-                                $rtn = 'The uploaded archive is at <a href="' . $rtn . '" target="_blank">' . $rtn . '&nbsp;<span class="ui-icon ui-icon-extlink" /> </a>';
-                            }
-    
-                            echo_flush2('<br>'. $rtn .'<br>');
-                        }else{
-                            echo_flush('failed<br>Your Nakala API key cannot be retrieved, '
-                            .'please ensure it has been entered into Design > Setup > Properties > Personal Nakala API Key');
-                        }
-
-                        break;
-                    
-                    default:
-                        print "The repository " . $repo . " is not supported please " . CONTACT_HEURIST_TEAM;
-                        break;
-                }
-            }
-            print '</div><script>document.getElementById("divProgress").style.display="none";</script>';
-            if(file_exists($progress_flag)) unlink($progress_flag);
+            //cleanup temp folders
+            folderDelete2($folder, true);
+            folderDelete2($folder_sql, true);
         }
         ?>
 
