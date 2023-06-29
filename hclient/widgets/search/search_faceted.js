@@ -2402,7 +2402,7 @@ $.widget( "heurist.search_faceted", {
 
                     }else 
                     if ((field['type']=="float" || field['type']=="integer" 
-                        || field['type']=="date" || field['type']=="year") && field['isfacet']==this._FT_SELECT)
+                        || field['type']=='date' || field['type']=="year") && field['isfacet']==this._FT_SELECT)
                     {  //add slider
                     
                         $input_div.find('.input-cell').css({'padding-bottom': '25px', 'padding-left': '10px'});
@@ -2436,7 +2436,7 @@ $.widget( "heurist.search_faceted", {
                         
                         if(!(window.hWin.HEURIST4.util.isempty(mmin) || window.hWin.HEURIST4.util.isempty(mmax))){
                             
-                            if(field['type']=="date"){
+                            if(field['type']=='date'){
                                 
                                 function __toDt(val, is_max){ //from decimal to datetime
                                     
@@ -2448,7 +2448,7 @@ $.widget( "heurist.search_faceted", {
                                         var parts = val.split('.');
                                         var year = parts[0];
                                         var month = parts[1].substr(0,2);
-                                        var day = parts[1].substr(3);
+                                        var day = parts[1].substr(2);
                                         
                                         val = year.lpad('0',parseInt(year)<0?6:4)
                                             +'-'+((month==0)?'01':month.lpad('0',2))
@@ -2459,7 +2459,11 @@ $.widget( "heurist.search_faceted", {
                                 }
                                 
                                 
-//console.log('ret', mmin+'   '+mmax);
+//DEBUG console.log('ret', mmin+'   '+mmax);
+                                if(field.date_type=='years_only'){
+                                    mmin = ''+Math.round(mmin);
+                                    mmax = ''+Math.round(mmax);
+                                }
                                 
                                 if(mmin.indexOf('-')<1){
                                     mmin = __toDt(mmin, false);    
@@ -2479,6 +2483,7 @@ $.widget( "heurist.search_faceted", {
                                     }
                                     mmax = mmax.replace(' ','T');
                                 }
+                                
 //DEBUG console.log('prep', mmin+'   '+mmax);       
                                 var date_min, date_max;
                                 try{
@@ -2501,27 +2506,36 @@ $.widget( "heurist.search_faceted", {
                                     date_type = "year";
                                 */    
                                 if(date_min && date_max){
-                                
-                                    mmin = Date.parse(mmin); 
-                                    mmax = Date.parse(mmax); 
-
-                                    if(field.history.length == 0){ // Account for possible loss of a day
-                                        mmax += 1000 * 60 * 60 * 24;
-                                    }
-
-                                    //find date interval for proper formating
-                                    var delta = mmax-mmin;
-                                    var date_format = "dd MMM yyyy HH:mm"; //"YYYY-MM-DD hh:mm:ss";
                                     
-                                    if(delta>3*365*daymsec){ //3 years
+                                    if(field.date_type=='years_only' || date_min.getYear()<-2500 || date_max.getYear()<-2500){
                                         date_format = "yyyy";
-                                        date_type = "year";
-                                    }else if(delta>365*daymsec){ //6 month
-                                        date_format = "MMM yyyy";
-                                        date_type = "month";
-                                    }else if(delta>daymsec){ //1 day
-                                        date_format = "dd MMM yyyy";
-                                        date_type = "day";
+                                        date_type = 'years_only';
+                                        mmin = parseInt(date_min.getYear());
+                                        mmax = parseInt(date_max.getYear());
+                                    }else{
+                                
+                                        mmin = Date.parse(mmin); 
+                                        mmax = Date.parse(mmax); 
+
+                                        if(field.history.length == 0){ // Account for possible loss of a day
+                                            mmax += 1000 * 60 * 60 * 24;
+                                        }
+
+                                        //find date interval for proper formating
+                                        var delta = mmax-mmin;
+                                        var date_format = "dd MMM yyyy HH:mm"; //"YYYY-MM-DD hh:mm:ss";
+                                        
+                                        if(delta>3*365*daymsec){ //3 years
+                                            date_format = "yyyy";
+                                            date_type = "year";
+                                        }else if(delta>365*daymsec){ //6 month
+                                            date_format = "MMM yyyy";
+                                            date_type = "month";
+                                        }else if(delta>daymsec){ //1 day
+                                            date_format = "dd MMM yyyy";
+                                            date_type = "day";
+                                        }
+                                        
                                     }
                                 }
                                 
@@ -2530,9 +2544,9 @@ $.widget( "heurist.search_faceted", {
                                 mmax = Number(mmax);
                             }
                             
-                            var delta = window.hWin.HEURIST4.util.isArrayNotEmpty(field.history)?(mmax-mmin)/2:0;
+                            var delta = window.hWin.HEURIST4.util.isArrayNotEmpty(field.history)?(mmax-mmin)/2:0; //not used
                             
-                            if(field['type']=="date" && mmax-mmin<daymsec){
+                            if(field['type']=='date' && mmax-mmin<daymsec){
                                 delta = daymsec;
                             }else if(mmin==mmax){ //years
                                 delta = 10;
@@ -2569,6 +2583,7 @@ $.widget( "heurist.search_faceted", {
                                 //on first request set limits
                                 field.mmin0 = mmin;
                                 field.mmax0 = mmax;
+                                field.date_type = date_type;
                             }
                             
                             function __roundNumericLabel(val) {
@@ -2630,7 +2645,7 @@ return;
                                         recids: ids,            // record/s of interest
                                         dtyid: dty_ID,     // detail type id
                                         range: [t_min.toISOString(), t_max.toISOString()], // lowest and highest values in ISO format
-                                        format: date_type,        // year, month, day
+                                        format: date_type,      // year, month, day
                                         interval: 25            // interval size
                                     };
 
@@ -2773,11 +2788,18 @@ return;
                             function __dateToString(val){
                                 try{
                                     let sval = ''+val;
-                                    if(!sval.match(/^-?\d+/) || Math.abs(val)>2200){
+                                    //if(sval.match(/^-?\d+/) && val<-2500){
+                                    //    val = sval.substr(1)+' bce';
+                                    //}else
+                                    if(field.date_type=='years_only'){
+                                        if(val<0){
+                                            val = sval.substr(1)+' bce';
+                                        }
+                                    }else
+                                    //if(!sval.match(/^-?\d+/) || Math.abs(val)>2200)
+                                    {
                                         var tDate = new TDate((new Date(val)).toISOString());
                                         val = tDate.toString(date_format);
-                                    }else if(val<0){
-                                        val = sval.substr(1)+' bce';
                                     }
 //DEBUG console.log('lbl', sval, val);
                                    //val = (new Date(val)).format(date_format);
@@ -2828,16 +2850,21 @@ return;
                                         var smin = ''+min;
                                         var smax = ''+max;
                                         let tDate;
-                                        if(!smin.match(/^-?\d+/) || Math.abs(min)>2200){
                                         
-                                            tDate = new TDate((new Date(min)).toISOString());
-                                            min = tDate.toString();
-                                        }
-                                        if(!smax.match(/^-?\d+/) || Math.abs(max)>2200){
-                                            tDate = new TDate((new Date(max)).toISOString());
-                                            max = tDate.toString();
-                                        }else if(smax.match(/^-?\d+/)){ //year
-                                            max = smax+'-12-31';
+                                        if(field.date_type=='years_only'){
+                                            //
+                                        
+                                        }else{
+                                            if(!smin.match(/^-?\d+/) || Math.abs(min)>2200){
+                                                tDate = new TDate((new Date(min)).toISOString());
+                                                min = tDate.toString();
+                                            }
+                                            if(!smax.match(/^-?\d+/) || Math.abs(max)>2200){
+                                                tDate = new TDate((new Date(max)).toISOString());
+                                                max = tDate.toString();
+                                            }else if(smax.match(/^-?\d+/)){ //year
+                                                max = smax+'-12-31';
+                                            }
                                         }
                                         //min = (new Date(min)).toISOString();
                                         //max = (new Date(max)).toISOString(); 
