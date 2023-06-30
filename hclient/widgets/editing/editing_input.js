@@ -75,6 +75,8 @@ $.widget( "heurist.editing_input", {
     
     is_sortable: false, // values are sortable
 
+    block_editing: false,
+
     // the constructor
     _create: function() {
 
@@ -404,6 +406,52 @@ $.widget( "heurist.editing_input", {
         this.setValue(values_to_set);
         this.options.values = this.getValues();
         this._refresh();
+
+        if(this.f('rst_MayModify') == 'discouraged'){ // && !window.hWin.HAPI4.is_admin()
+
+            this.block_editing = true;
+
+            that.setDisabled(true);
+
+            this.input_cell.find('.ui-state-disabled').removeClass('ui-state-disabled'); // remove gray 'cover'
+
+            if(this.input_cell.sortable('instance') !== undefined){ // disable sorting, if sortable
+                this.input_cell.sortable('disable');
+            }
+
+            let $eles = this.element.find('.input-cell, .editint-inout-repeat-button');
+            this._on($eles, {
+                click: function(event){
+
+                    if(!that.block_editing || $(event.target).hasClass('ui-icon-extlink')){
+                        return;
+                    }
+
+                    window.hWin.HEURIST4.util.stopEvent(event);
+                    event.preventDefault();
+
+                    let msg = 'The designer of this database suggests that you do not edit the value in this field (<strong>'+ lblTitle +'</strong>)<br>'
+                        + 'unless you are very sure of what you are doing.<br><br>'
+                        + '<label><input type="checkbox" id="allow_edit"> Let me edit this value</label>';
+
+                    let $dlg = window.hWin.HEURIST4.msg.showMsgDlg(msg, function(){
+
+                        that.block_editing = false;
+                        //that._off($eles, 'click'); - Also removes click from repeat button
+
+                        that.setDisabled(false);
+                        if(that.input_cell.sortable('instance') !== undefined){ // re-enable sorting inputs
+                            that.input_cell.sortable('enable');
+                        }
+                    }, {title: 'Editing is discouraged', yes: 'Proceed', no: 'Cancel'}, {default_palette_class: 'ui-heurist-populate'});
+
+                    window.hWin.HEURIST4.util.setDisabled($dlg.parent().find('.ui-dialog-buttonpane button:first-child'), true);
+                    $dlg.find('#allow_edit').on('change', function(){
+                        window.hWin.HEURIST4.util.setDisabled($dlg.parent().find('.ui-dialog-buttonpane button:first-child'), !$dlg.find('#allow_edit').is(':checked'));
+                    });
+                }
+            });
+        }
     }, //end _create
 
     /* private function */
