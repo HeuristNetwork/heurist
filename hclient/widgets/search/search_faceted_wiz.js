@@ -1677,6 +1677,8 @@ $.widget( "heurist.search_faceted_wiz", {
                     sContent = sContent + '<button label="tree" class="btnset_radio" data-idx="'+idd+'" data-value="tree" data-type="tree"/>';
                 }
 
+                let show_hide_accord = this.options.params.accordion_view==true;
+
                 sContent = sContent        
                         +'<button label="search" class="btnset_radio" data-idx="'+idd+'" data-value="0"/>'
                 + '</span>'+sMultiSel+'</div></div>' 
@@ -1692,7 +1694,7 @@ $.widget( "heurist.search_faceted_wiz", {
                 +'</div>'
                 
                 + '<div style="display:inline-block;font-size:smaller;">'
-                +'<label><input name="facet_AccordHide'+idd+'" id="facet_AccordHide'+idd+'" type="checkbox" '
+                +'<label ' + (!show_hide_accord ? 'style="display: none;"' : '') + '><input name="facet_AccordHide'+idd+'" id="facet_AccordHide'+idd+'" type="checkbox" '
                 +' style="vertical-align: middle;" />Accordion closed</label>'
                 + sGroupBy 
                 +'<label><input type="checkbox" data-sort="count" data-id="'
@@ -1871,8 +1873,10 @@ $.widget( "heurist.search_faceted_wiz", {
             this._on( $(this.step3).find('#cbAccordionView'), {change: () => { 
                 if($(this.step3).find('#cbAccordionView').is(':checked')){
                     $(this.step3).find('#cbShowAccordIcons').prop('checked', true).parent().show();
+                    listdiv.find('input[id^="facet_AccordHide"]').parent().show();
                 }else{
                     $(this.step3).find('#cbShowAccordIcons').parent().hide();
+                    listdiv.find('input[id^="facet_AccordHide"]').parent().hide();
                 }
                 this._refresh_FacetsPreview(); 
             }});
