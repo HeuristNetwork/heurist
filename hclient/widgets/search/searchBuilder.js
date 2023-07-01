@@ -813,7 +813,7 @@ $.widget( "heurist.searchBuilder", {
                       
                 var treedata = window.hWin.HEURIST4.dbs.createRectypeStructureTree_new( 
                                 {
-                                    mode:5, rectypeids:rectype, fieldtypes:allowed_fieldtypes, field_order:node_order//, enum_mode:'expanded' 
+                                    mode:5, rectypeids:rectype, fieldtypes:allowed_fieldtypes, field_order:node_order //, enum_mode:'expanded' 
                                 } );
 
                             treedata[0].expanded = true; //first expanded

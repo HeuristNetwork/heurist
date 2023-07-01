@@ -33,7 +33,7 @@
     *  checkMaxLength - check max length for TEXT field
     *  extractLangPrefix - splits and extract language code and value from string code:value
     * 
-    *  updateDatabseToLatest - make changes in database structure according to the latest version
+    *  updateDatabaseToLatest - make changes in database structure according to the latest version
     *  recreateRecLinks
     *  recreateRecDetailsDateIndex
     * 
@@ -771,7 +771,9 @@
             $res = false;
 
             if(!isFunctionExists($mysqli, 'getEstDate')){ //getTemporalDateString need drop old functions
-                include(dirname(__FILE__).'/../utilities/utils_db_load_script.php'); // used to load procedures/triggers
+                if(!function_exists('execute_db_script')){
+                    include(dirname(__FILE__).'/../utilities/utils_db_load_script.php'); // used to load procedures/triggers
+                }
                 if(db_script(HEURIST_DBNAME_FULL, dirname(__FILE__).'/../../admin/setup/dbcreate/addProceduresTriggers.sql', false)){
                     $res = true;
                 }
@@ -788,7 +790,9 @@
     function checkDatabaseFunctionsForDuplications($mysqli){
         
          if(!isFunctionExists($mysqli, 'NEW_LIPOSUCTION_255')){
-                include(dirname(__FILE__).'/../utilities/utils_db_load_script.php'); // used to load procedures/triggers
+                if(!function_exists('execute_db_script')){
+                    include(dirname(__FILE__).'/../utilities/utils_db_load_script.php'); // used to load procedures/triggers
+                }
                 if(db_script(HEURIST_DBNAME_FULL, dirname(__FILE__).'/../../admin/setup/dbcreate/addFunctions.sql', false)){
                     $res = true;
                 }else{
@@ -816,8 +820,9 @@
             
         if($is_forced || !$is_table_exist){
                 //recreate cache
-                
-                include(dirname(__FILE__).'/../utilities/utils_db_load_script.php'); // used to execute SQL script
+                if(!function_exists('execute_db_script')){
+                    include(dirname(__FILE__).'/../utilities/utils_db_load_script.php'); // used to execute SQL script
+                }
 
                 if($is_table_exist){
                     
@@ -892,8 +897,10 @@
             
         }else{
             //recreate triggers
-            include(dirname(__FILE__).'/../utilities/utils_db_load_script.php'); // used to load procedures/triggers
-            if(!db_script(HEURIST_DBNAME_FULL, dirname(__FILE__).'/../../admin/setup/dbcreate/addProceduresTriggers.sql', false)){
+            if(!function_exists('execute_db_script')){
+                include(dirname(__FILE__).'/../utilities/utils_db_load_script.php'); // used to load procedures/triggers
+            }
+            if(!db_script($system->dbname_full(), dirname(__FILE__).'/../../admin/setup/dbcreate/addProceduresTriggers.sql', false)){
                     $system->addError(HEURIST_DB_ERROR, $err_prefix.'Cannot recreate database triggers', $mysqli->error);
                     return false;
             }
@@ -1497,10 +1504,10 @@ error_log('UPDATED '.$session_id.'  '.$value);
     //
     // This method updates from 1.3.0 to 1.3.13
     //
-    function updateDatabseToLatest($system){
+    function updateDatabaseToLatest($system){
         //update sysIdentification set sys_dbVersion=1, sys_dbSubVersion=3, sys_dbSubSubVersion=4 where sys_ID=1
        
-        $sysValues = $system->get_system();        
+        $sysValues = $system->get_system(null, true);        
         $dbVer = $system->get_system('sys_dbVersion');
         $dbVerSub = $system->get_system('sys_dbSubVersion');
         $dbVerSubSub = 0;
@@ -1696,19 +1703,21 @@ UNIQUE KEY swf_StageKey (swf_RecTypeID, swf_Stage)
             
             if(!array_key_exists('sys_NakalaKey', $sysValues)){ //$dbVerSubSub<9 && 
                 
-                    $query = "ALTER TABLE `sysIdentification` ADD COLUMN `sys_NakalaKey` TEXT default NULL COMMENT 'Nakala API key. Retrieved from Nakala website'";
-                    $res = $mysqli->query($query);
-                    if($res){
-                        $usr_prefs = user_getPreferences($system);
-                        if(array_key_exists('nakala_api_key', $usr_prefs)){
-                            $query = "UPDATE `sysIdentification` SET sys_NakalaKey='"
-                                    .$mysqli->real_escape_string($usr_prefs['nakala_api_key'])."' WHERE 1";
-                            $res = $mysqli->query($query);
-                        }
-                    }else{
-                        $system->addError(HEURIST_DB_ERROR, 'Cannot modify sysIdentification to add sys_NakalaKey', $mysqli->error);
-                        return false;
-                    }                    
+                    if(!hasColumn($mysqli, 'sysIdentification', 'sys_NakalaKey')){
+                        $query = "ALTER TABLE `sysIdentification` ADD COLUMN `sys_NakalaKey` TEXT default NULL COMMENT 'Nakala API key. Retrieved from Nakala website'";
+                        $res = $mysqli->query($query);
+                        if($res){
+                            $usr_prefs = user_getPreferences($system);
+                            if(array_key_exists('nakala_api_key', $usr_prefs)){
+                                $query = "UPDATE `sysIdentification` SET sys_NakalaKey='"
+                                        .$mysqli->real_escape_string($usr_prefs['nakala_api_key'])."' WHERE 1";
+                                $res = $mysqli->query($query);
+                            }
+                        }else{
+                            $system->addError(HEURIST_DB_ERROR, 'Cannot modify sysIdentification to add sys_NakalaKey', $mysqli->error);
+                            return false;
+                        }                    
+                    }
             }
             
             if($dbVerSubSub<10 || !hasTable($mysqli, 'defTranslations')){
@@ -1773,6 +1782,7 @@ UNIQUE KEY swf_StageKey (swf_RecTypeID, swf_Stage)
             }
             
         }
+        return true;
     }  
     
     /**

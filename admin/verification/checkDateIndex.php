@@ -52,9 +52,6 @@ if(!$is_included){
         $query = 'SELECT count(dtl_ID) FROM recDetails, defDetailTypes  WHERE dtl_DetailTypeID=dty_ID AND dty_Type="date" AND dtl_Value!=""';
         $cnt_dates = mysql__select_value($mysqli, $query);
 
-        $query = 'SELECT count(dtl_ID) FROM recDetails, defDetailTypes  WHERE dtl_DetailTypeID=dty_ID AND dty_Type="date" AND dtl_Value LIKE "|VER=1%"';
-        $cnt_fuzzy_dates = mysql__select_value($mysqli, $query);
-        
         if($is_upgrade){
             
             $query = 'SELECT count(dtl_ID) FROM recDetails, defDetailTypes  WHERE dtl_DetailTypeID=dty_ID AND dty_Type="date" AND dtl_Value LIKE "|VER=1%"';

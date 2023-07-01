@@ -266,6 +266,7 @@ var TemporalPopup = (function () {
 	        }
     	});
         
+        
         // set up temporal type to tab index mapping
         $.each($('#display-div').find('.display-tab'), function(i,item){
             _type2TabIndexMap[$(item).attr('id')] = i;
@@ -407,7 +408,12 @@ var TemporalPopup = (function () {
 				$("#simpleTime").val(tDate.toString("HH:mm:ss"));
 				$("#tzone").val(tDate.toString("z"));
 			}
-
+            
+            $( 'input[name="CIR"]').prop('checked', false);
+            var val = temporal.getStringForCode('CIR');
+            if(!(val>0)) val = 0;
+            $( "#CIR" + val).prop('checked', true);
+            
         }
 
 		var fields = Temporal.getFieldsForType(type);
@@ -552,8 +558,12 @@ var TemporalPopup = (function () {
 			}
 			if (strDate) {
                 temporal.addObjForString("DAT", strDate);   
-                if($("#CIR").prop('checked')){
+                if($("#CIR1").prop('checked')){
                     temporal.addObjForString("CIR",'1');    
+                }else if($("#CIR2").prop('checked')){
+                    temporal.addObjForString("CIR",'2');    
+                }else if($("#CIR3").prop('checked')){
+                    temporal.addObjForString("CIR",'3');    
                 }else{
                     temporal.removeObjForCode("CIR");    
                 }

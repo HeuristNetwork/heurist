@@ -170,7 +170,9 @@ error_log(print_r($_REQUEST, true));
             return false;
         }else{
             $this->mysqli = $res;
-
+        }
+            
+        if($this->mysqli){
             if($this->dbname_full)  //database is defined
             {
                 $res = mysql__usedatabase($this->mysqli, $this->dbname_full);
@@ -1850,7 +1852,7 @@ error_log('CANNOT UPDATE COOKIE '.$session_id);
             }
             
             if($check_updates){
-                updateDatabseToLatest($this);    
+                updateDatabaseToLatest($this);    
             }
             
             // it is required for main page only - so call this request on index.php

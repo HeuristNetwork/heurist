@@ -120,7 +120,7 @@ class Temporal {
         
         if($this->isValid() 
              && @$this->tDate['timestamp']   //not range
-             && count($this->tDate)==3 //does not have aux fields: comment, calendar etc
+             && count($this->tDate['timestamp'])==2 //does not have aux fields: comment, calendar etc
              && $this->tDate['estMinDate']==$this->tDate['estMaxDate'])
         {
             $after_digit = substr(strrchr(strval($this->tDate['estMinDate']), '.'), 1);
@@ -178,70 +178,151 @@ class Temporal {
             //$value2 = preg_replace('/\s+/', '', $value);
             
             if(!preg_match('/\||timestamp|start/',$value)){
-            
-                if(preg_match('/à|\.|\/|to|,/i', $value)){
-                    
-                   preg_match_all('/[-|\w+]+|[à|\.|\/|to|,]+/i', $value, $matches);
-                    
-                }else{
-                    
-                    preg_match_all('/-?\d+|-/', $value, $matches);
                 
-                    if(is_array(@$matches[0]) && (count($matches[0])==2 || (count($matches[0])==3 && $matches[0][1]=='-'))) 
-                    {
-                        if(count($matches)==2){
-                            $matches[0][2] = substr($matches[0][1],1);
-                            $matches[0][1] = '-';
-                        }
-                    }else{
-                        $matches = null;
-                    }
-                }
-                
-                $seps = array('à','.','/','to','-',',');
-                
-                if($matches && is_array(@$matches[0]) && count($matches[0])==3 && in_array($matches[0][1],$seps) ){
-                    
-                    $values = array($matches[0][0],$matches[0][2]);
-                    
-                    if( (strlen($values[0])>2 || abs(intval($values[0]))>12) && (strlen($values[1])>2 || abs(intval($values[1]))>12) ) {
-                        $tStart = null;
-                        $tEnd = null;
-                        
-                        if(strcasecmp(substr($values[0], 0, 1),'P')==0){
-                            // duration/end
-                            $timespan = Temporal::_getInterval($values[1], $values[0], -1);
+                if(preg_match('/fl|abt\.|abt|about|c|ca|circa/i',$value)){
+                   
+                   preg_match_all('/fl|abt\.|abt|about|c|ca|circa\s+|[-|\w+|\s]+$/i', $value, $matches); 
+                   
+                   if(@$matches[0][1]){
+                   
+                        $timespan = Temporal::_getIntervalForMonth($matches[0][1]);
+                   
+                       if($timespan){
+                           if(@$timespan['timestamp']){
+                                $timespan['timestamp']['circa'] = true;     
+                           }else if(@$timespan['start']){
+                                $timespan = array('timestamp' => array('in'=>$timespan['start']['earliest'],'type'=>'s', 'circa'=>true));
+                           }
+                       }
+                   }
+                }else if(preg_match('/before|after|avant|après/i',$value)){
+                   
+                   preg_match_all('/before|after|avant|après\s+|[-|\w+|\s]+$/i', $value, $matches); 
+                   
+                   if(@$matches[0][1]){
+                   
+                        $timespan = Temporal::_getIntervalForMonth($matches[0][1]);
+                   
+                       if($timespan){
                            
-                        }else if(strcasecmp(substr($values[1], 0, 1),'P')==0){
-                            // start/duration
-                            $timespan = Temporal::_getInterval($values[0], $values[1], 1);
-                            
-                        }else{
-                            // start/end
-                            $tStart = Temporal::dateToISO($values[0], 2, false, 'now');
-                            $tEnd = Temporal::dateToISO($values[1], 2, false, 'now');
+                           $is_before = (strtolower($matches[0][0])=='before' || strtolower($matches[0][0])=='avant');
+                           
+                           if(@$timespan['start']){
+                               $timespan = array('timestamp' => array('in'=>$is_before?$timespan['start']['earliest']:$timespan['end']['latest']
+                                    ,'type'=>'s'));
+                           }
+                           
+                           if(@$timespan['timestamp']){
+                                if($is_before){
+                                    $timespan['timestamp']['before'] = true;    
+                                }else{
+                                    $timespan['timestamp']['after'] = true;
+                                }
+                           }
+                       }
+                   }
+                }
+
+                
+                
+                if(!$timespan){
+
+                    $seps = array('à','.','/','to',',');
+                
+                    if(preg_match('/à|\.|\/|to|,/i', $value)){
                         
-                            if($tStart && $tEnd){    
-                                $timespan = array('start'=>array('earliest'=>$tStart ),
-                                                'end'=>array('latest'=>$tEnd ));
+                       preg_match_all('/[-|\s|\w+]+|[à|\.|\/|to|,]+/i', $value, $matches);
+                       
+                       if($matches && is_array(@$matches[0])){
+                           $values = array();
+                           $values[0] = '';
+                           $k = 0;
+                           foreach($matches[0] as $val){
+                               if(in_array($val,$seps)){
+                                   $values[$k+1] = $val;       
+                                   $k = $k + 2;
+                                   $values[$k] = '';
+                               }else{
+                                   $values[$k] = trim($values[$k].' '.$val);
+                               }
+                           }
+                           if(count($values)==3){
+                               $matches[0] = $values;
+                           }
+                       }
+                        
+                    }else{
+                        
+                        preg_match_all('/-?\d+|-/', $value, $matches);
+                    
+                        if(is_array(@$matches[0]) && (count($matches[0])==2 || (count($matches[0])==3 && $matches[0][1]=='-'))) 
+                        {
+                            if(count($matches[0])==2){
+                                if(substr($matches[0][1],1)=='-'){
+                                    $matches[0][2] = substr($matches[0][1],1);
+                                    $matches[0][1] = '-';
+                                }else{
+                                    $matches = null;
+                                }
+                            }
+                        }else{
+                            $matches = null;
+                        }
+                    }
+                    
+                    $seps = array('à','.','/','to','-',',');
+                    
+                    if($matches && is_array(@$matches[0]) && count($matches[0])==3 && in_array($matches[0][1],$seps) ){
+                        
+                        $values = array($matches[0][0],$matches[0][2]);
+                        
+                        if( (strlen($values[0])>2 || abs(intval($values[0]))>12) && (strlen($values[1])>2 || abs(intval($values[1]))>12) ) {
+                            $tStart = null;
+                            $tEnd = null;
+                            
+                            if(strcasecmp(substr($values[0], 0, 1),'P')==0){
+                                // duration/end
+                                $timespan = Temporal::_getInterval($values[1], $values[0], -1);
+                               
+                            }else if(strcasecmp(substr($values[1], 0, 1),'P')==0){
+                                // start/duration
+                                $timespan = Temporal::_getInterval($values[0], $values[1], 1);
+                                
+                            }else{
+                                // start/end
+                                $tStart = Temporal::dateToISO($values[0], 2, false, 'now');
+                                $tEnd = Temporal::dateToISO($values[1], 2, false, 'now');
+                            
+                                if($tStart && $tEnd){    
+                                    $timespan = array('start'=>array('earliest'=>$tStart ),
+                                                    'end'=>array('latest'=>$tEnd ));
+                                }
                             }
                         }
-                    }
-                    
-                }else if(strpos($value,'±')!==false){
+                        
+                    }else if(strpos($value,'±')!==false){
 
-                    $values = explode('±', $value);
-                    $period = $values[1];
-                    $period = str_replace('years','Y',$period);
-                    $period = str_replace('months','M',$period);
-                    $period = str_replace('days','D',$period);
-                    $period = preg_replace('/\s+/', '', $period); //remove spaces
-                    $period = 'P'.$period;
-                    if(!preg_match('/Y|M|D$/i',$period)){
-                        $period = $period.'Y'; //year by default
+                        $values = explode('±', $value);
+                        $period = $values[1];
+                        if(preg_match('/years|months|days/',$period)){
+                            $period = str_replace('years','Y',$period);
+                            $period = str_replace('months','M',$period);
+                            $period = str_replace('days','D',$period);
+                            $period = preg_replace('/\s+/', '', $period); //remove spaces
+                            $period = 'P'.$period;
+                        }else if(strpos($period,'year')!==false){
+                            $period = 'P1Y';
+                        }else if(strpos($period,'month')!==false){
+                            $period = 'P1M';
+                        }else if(strpos($period,'day')!==false){
+                            $period = 'P1D';
+                        }
+                        if(!preg_match('/Y|M|D$/i',$period)){
+                            $period = $period.'Y'; //year by default
+                        }
+                        $timespan = Temporal::_getInterval(trim($values[0]), $period, 0);
+                     
                     }
-                    $timespan = Temporal::_getInterval(trim($values[0]), $period, 0);
-                 
                 }
             }
 
@@ -291,7 +372,14 @@ class Temporal {
                             
                             if(is_array($timespan) && $timespan['timestamp'] && @$tDate['CIR']) //circa or aproximate
                             {
-                                $timespan['timestamp']['circa'] = true;
+                                if(@$tDate['CIR']==1){
+                                    $timespan['timestamp']['circa'] = true;    
+                                }else if(@$tDate['CIR']==2){
+                                    $timespan['timestamp']['before'] = true;    
+                                }else if(@$tDate['CIR']==3){
+                                    $timespan['timestamp']['after'] = true;    
+                                }
+                                
                             }
                             
                             break;
@@ -599,7 +687,7 @@ class Temporal {
         $origHasSeconds = false;
         $date = null;
         
-        //trim ? 
+        $value = str_replace('??-','',$value);
         $value = str_replace('?','',$value);
         $is_bce = false;
         
@@ -687,10 +775,12 @@ class Temporal {
             if (strpos($date,'|')!==false || strpos($date,'{"')!==false) {// temporal encoded date - this is for check in import and validation only
                 return 'Temporal';
             }else{
-                if($today_date!=null){
+                $date = trim($date);
+                
+                if($today_date!=null && preg_match('/^today|now|yesterday|tomorrow|-1 day|+1 day$/i',$date)){
                     $t2 = new DateTime($today_date);
 
-                    $sdate = strtolower(trim($date));
+                    $sdate = strtolower($date);
                     if($sdate=='today'){
                         $date = $t2->format('Y-m-d');
                     }else if($sdate=='now'){
@@ -897,7 +987,8 @@ class Temporal {
             $cnt_slash = substr_count($value,'/');  //try to convert from format with / separator
             if( $cnt_slash>0){  // 6/2006  =  1-6-2006
                 $value = str_replace('/','-',$value);
-            }else if( $cnt_dots>0){  // 4.3.2006  =  4-3-2006
+            }else if($cnt_dots>0 && preg_match('/\d{1,4}\.\d{1,4}/', $value)){  // 4.3.2006  =  4-3-2006   exclude Mar.2, 2021
+                
                 $value = str_replace('.','-',$value);
             }
             $is_dots_slash = ($cnt_dots>0 || $cnt_slash>0);
@@ -1193,6 +1284,10 @@ class Temporal {
                 
                 if(@$date['timestamp']['circa']){
                     $res = 'circa '.$res;
+                }else if(@$date['timestamp']['before']){
+                    $res = 'before '.$res;
+                }else if(@$date['timestamp']['after']){
+                    $res = 'after '.$res;
                 }
                 
             }else{
@@ -1262,7 +1357,12 @@ class Temporal {
                 
                 if(@$date['timestamp']['circa']){
                     $res['Date'] = 'circa '.$timestamp;
+                }else if(@$date['timestamp']['before']){
+                    $res['Date'] = 'before '.$timestamp;
+                }else if(@$date['timestamp']['after']){
+                    $res['Date'] = 'after '.$timestamp;
                 }
+                
                 
                 $res['Date']  = $timestamp;
                 
@@ -1408,7 +1508,13 @@ class Temporal {
                         if(@$date['timestamp']['profile']) $res['PRF'] = $date['timestamp']['profile'];
                     }else{
                         $res['TYP'] = 's';
-                        if(@$date['timestamp']['circa']) $res['CIR'] = '1';
+                        if(@$date['timestamp']['circa']){
+                            $res['CIR'] = '1';  
+                        }else if(@$date['timestamp']['before']){
+                            $res['CIR'] = '2';  
+                        }else if(@$date['timestamp']['after']){
+                            $res['CIR'] = '3';  
+                        }
                     }
                 }
                 

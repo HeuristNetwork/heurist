@@ -84,14 +84,26 @@ if(defined('LOGIN_REQUIRED') && !$system->has_access()){
 
 //verify database version against minimal required
 if(defined('IS_INDEX_PAGE')){
+    
+    $susubVer = $system->get_system('sys_dbSubSubVersion');
+    
     if(HEURIST_MIN_DBVERSION>
     $system->get_system('sys_dbVersion').'.'
     .$system->get_system('sys_dbSubVersion').'.'
-    .$system->get_system('sys_dbSubSubVersion')){
+    .$susubVer){
 
         //header('Location: '.dirname(__FILE__).'/../../admin/setup/dbupgrade/upgradeDatabase.php');
         include 'admin/setup/dbupgrade/upgradeDatabase.php';
         exit();
+    }
+    if($system->is_admin() && 
+        $system->get_system('sys_dbVersion')==1 && 
+        $system->get_system('sys_dbSubVersion')==3 &&
+        $susubVer<14){
+            
+            $_REQUEST['upgrade']=1;
+            //include 'admin/verification/checkDateIndex.php';
+            //exit();
     }
 }
 

@@ -111,9 +111,15 @@ function Temporal (strInitTemporal) {
                         case 's'://simple
                             $timespan = {"timestamp":{"in":$tDate['DAT'], "type":'s'}};
                             
-                            if($tDate['CIR']){  //circa or aproximate
+                            //1 circa, 2 before, 3 after
+                            if($tDate['CIR']==1){  //circa or aproximate
                                 $timespan['timestamp']['circa'] = true;
+                            }else if($tDate['CIR']==2){
+                                $timespan['timestamp']['before'] = true;
+                            }else if($tDate['CIR']==3){
+                                $timespan['timestamp']['after'] = true;
                             }
+                            
                         break;    
                         case 'f'://fuzzy
                             $timespan = {"timestamp":{"in":$tDate['DAT'], "type":'f', "deviation":$tDate['RNG']}};
@@ -234,8 +240,11 @@ function Temporal (strInitTemporal) {
 
                 if($date['timestamp']['circa']){
                     $res['Date'] = 'circa '+$timestamp;
+                }else if($date['timestamp']['before']){
+                    $res['Date'] = 'before '+$timestamp;
+                }else if($date['timestamp']['after']){
+                    $res['Date'] = 'after '+$timestamp;
                 }
-
                 $res['Date']  = $timestamp;
 
             }else if($date['start'] && $date['type']=='r'){  //simple range - NOT USED
@@ -2075,10 +2084,15 @@ function temporalToHumanReadableString(inputStr) {
         if (str.search(/SRT/) != -1 && str.match(/SRT=([^\|]+)/)) { //Sortby Date
             str = formatGregJulian(str.match(/SRT=([^\|]+)/)[1], isgj);
         }else if (str.search(/TYP=s/) != -1 ) {  //simple
-            let is_approx = false;
+            let s_approx = '';
             if (str.search(/CIR=1/) != -1){
-                is_approx = true;
+                s_approx = 'circa';
+            }else if (str.search(/CIR=2/) != -1){
+                s_approx = 'before';
+            }else if (str.search(/CIR=3/) != -1){
+                s_approx = 'after';
             }
+            
             if (str.match(/DAT=([^\|]+)/)) {
                 if (str.search(/COM=[^\|]+/) == -1) {
                 }
@@ -2087,7 +2101,7 @@ function temporalToHumanReadableString(inputStr) {
                 str = str.match(/COM=([^\|]+)/)[1];
             }
 
-            str = str + (is_approx ? ' circa' : '');
+            str = (s_approx+' '+ str).trim();
         }else if (str.search(/TYP=c/) != -1 ) { //c14 date
             var bce = str.match(/BCE=([^\|]+)/);
             bce = bce ? bce[1]: null;

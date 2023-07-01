@@ -25,8 +25,8 @@
     * @package     Heurist academic knowledge management system
     * @subpackage  !!!subpackagename for file such as Administration, Search, Edit, Application, Library
     */
-print 'disabled'; 
-exit(); 
+//print 'disabled'; 
+//exit(); 
 
 ini_set('max_execution_time', '0');
  
@@ -109,12 +109,14 @@ if(false){
     __addOtherSources();
 }else  if(false){
     __renameField39();
-}else if(false){
-    __correctGetEstDate_and_ConvertTemporals_JSON_to_Plain();
 }else if(false ){
     __copy_RecType_And_Term_Icons_To_EntityFolder();
-}else  if(true){
+}else  if(false){
     __delete_OLD_RecType_And_Term_Icons_Folders();
+}else if(false){
+    __correctGetEstDate_and_ConvertTemporals_JSON_to_Plain();
+}else if(true){
+    __updateDatabases_To_V14();
 }
 //
 // Report database versions
@@ -841,12 +843,11 @@ function __renameField39(){
 }
 
 //
-//
+// converts back to plain
 //
 function __correctGetEstDate_and_ConvertTemporals_JSON_to_Plain(){
     
     global $mysqli, $databases; 
-
 
     foreach ($databases as $idx=>$db_name){
 
@@ -905,7 +906,9 @@ function __correctGetEstDate_and_ConvertTemporals_JSON_to_Plain(){
     
 }
 
-
+//
+//
+//
 function __delete_OLD_RecType_And_Term_Icons_Folders(){
     global $mysqli, $databases; 
     
@@ -1065,5 +1068,89 @@ if($cnt>0) echo $db_name.'   terms:'.$cnt.'<br>';
         
 
     }        
+}
+
+
+//
+//
+//
+function __updateDatabases_To_V14(){
+    
+    global $system, $mysqli, $databases; 
+    
+    $cnt_db = 0;
+    $cnt_db_old = 0;
+
+    foreach ($databases as $idx=>$db_name){
+
+        if( !$system->set_dbname_full($db_name, true) ){
+                $response = $system->getError();    
+                print '<div><h3 class="error">'.$response['message'].'</h3></div>';
+                break;
+        }
+        
+        mysql__usedatabase($mysqli, $db_name);
+
+        //get version of database        
+        $query = 'SELECT sys_dbSubVersion, sys_dbSubSubVersion from sysIdentification';
+        $ver = mysql__select_row_assoc($mysqli, $query);
+        
+
+        //statistics
+        $query = 'SELECT count(dtl_ID) FROM recDetails, defDetailTypes  WHERE dtl_DetailTypeID=dty_ID AND dty_Type="date" AND dtl_Value!=""';
+        $cnt_dates = mysql__select_value($mysqli, $query);
+
+        $query = 'SELECT count(dtl_ID) FROM recDetails, defDetailTypes  WHERE dtl_DetailTypeID=dty_ID AND dty_Type="date" AND dtl_Value LIKE "|VER=1%"';
+        $cnt_fuzzy_dates = mysql__select_value($mysqli, $query);
+        
+        $cnt_index = 0;
+        $cnt_fuzzy_dates2 = 0;
+        
+        $is_big = ($cnt_dates>5000);
+        
+        if($is_big){
+            $cnt_dates = '<b>'.$cnt_dates.'</b>';
+        }
+        
+        if($ver['sys_dbSubSubVersion']>12){
+            $query = 'SELECT count(rdi_DetailID) FROM recDetailsDateIndex';
+            $cnt_index = mysql__select_value($mysqli, $query);
+
+            $query = 'SELECT count(dtl_ID) FROM recDetails, defDetailTypes  WHERE dtl_DetailTypeID=dty_ID AND dty_Type="date" AND dtl_Value LIKE "%estMinDate%"';
+            $cnt_fuzzy_dates2 = mysql__select_value($mysqli, $query);
+            
+            print '<br>'.$db_name.'  v.'.$ver['sys_dbSubSubVersion'].'  '.$cnt_dates
+                .($cnt_dates<>$cnt_index?'<span style="color:red">':'<span>')
+                .'  index='.$cnt_index.' ( '.$cnt_fuzzy_dates.','.$cnt_fuzzy_dates2.' )</span>';
+        }else{
+            $cnt_db_old++;
+            print '<br>'.$db_name.'  v'.($ver['sys_dbSubVersion']<3?'<b>'.$ver['sys_dbSubVersion'].'</b>':'')
+            .'.'.$ver['sys_dbSubSubVersion'].'  '.$cnt_dates.'  ( '.$cnt_fuzzy_dates.' )';
+            
+            if(!updateDatabaseToLatest($system)){
+                $response = $system->getError();    
+                print '<div><h3 class="error">'.$response['message'].'</h3></div>';
+                break;
+            }
+        }
+        
+        if(!$is_big && ($ver['sys_dbSubSubVersion']<=13 || ($cnt_dates>0 && $cnt_index*100/$cnt_dates<94) )){
+            print '<br>';
+            if(recreateRecDetailsDateIndex($system, true, true)){
+            
+            }else{
+                $response = $system->getError();    
+                print '<div><h3 class="error">'.$response['message'].'</h3></div>';
+                break;
+            }
+        }
+        
+        $cnt_db++;
+        
+        //if($db_name=='bnf_lab_musrdm_test') break;
+    }    
+    
+    print '<br><br>'.$cnt_db_old.'  '.$cnt_db;
+    
 }
 ?>
