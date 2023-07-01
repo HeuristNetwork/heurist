@@ -144,14 +144,34 @@ function recordSearchFacets($system, $params){
     define('_FT_LIST', 2);
     define('_FT_COLUMN', 3);
 
-    //for error message
-    $savedSearchName = @$params['qname']?"Saved search: ".$params['qname']."<br>":"";
+    $mysqli = $system->get_mysqli();
+
+    //set savedSearchName for error messages
+    $savedSearchName = '';
+    if(is_numeric(@$params['qname']) && $params['qname'] > 0){ // retrieve extra details
+
+        $query = 'SELECT svs_ID AS qID, svs_Name AS qName, svs_UGrpID as uID, ugr_Name as uName '
+            . 'FROM usrSavedSearches '
+            . 'INNER JOIN sysUGrps ON ugr_ID = svs_UGrpID '
+            . 'WHERE svs_ID = ' . $params['qname'];
+
+        $saved_search = mysql__select_row_assoc($mysqli, $query);
+
+        if($saved_search !== null){
+            $name = empty($saved_search['qName']) ? $saved_search['qID'] : $saved_search['qName'] . ' (# '. $saved_search['qID'] .')';
+            $workgroup = $saved_search['uName'] . ' (# '. $saved_search['uID'] .')'; //empty($saved_search['uName']) ? $saved_search['uID'] : 
+            $savedSearchName = '<br>Saved search: ' . $name . '<br>Workgroup: ' . $workgroup . '<br>';
+        }else{
+            $savedSearchName = 'Saved search: '.$params['qname'].'<br>';
+        }
+    }else{
+        $savedSearchName = @$params['qname'] ? 'Saved search: '. $params['qname'] .'<br>' : '';
+    }
+    $savedSearchName .= empty($savedSearchName) ? '' : 'It is probably best to delete this saved filter and re-create it.<br>';
 
     $missingIds = false;
 
     if(@$params['q'] && @$params['field']){
-
-        $mysqli = $system->get_mysqli();
 
         $currentUser = $system->getCurrentUser();
         $dt_type     = @$params['type'];
@@ -1647,6 +1667,9 @@ function recordSearch($system, $params)
 {
     //if $params['q'] has svsID it means search by saved filter - all parameters will be taken from saved filter
     // {"svs":5}
+
+    $mysqli = $system->get_mysqli();
+
     if(@$params['q']){
 
         $svsID = null;
@@ -1661,7 +1684,6 @@ function recordSearch($system, $params)
         }
         if($svsID>0){
 
-            $mysqli = $system->get_mysqli();
             $vals = mysql__select_row($mysqli,
                 'SELECT svs_Name, svs_Query FROM usrSavedSearches WHERE svs_ID='.$mysqli->real_escape_string( $svsID ));        
 
@@ -1692,8 +1714,28 @@ function recordSearch($system, $params)
 
     $memory_limit = get_php_bytes('memory_limit');
 
-    //for error message
-    $savedSearchName = @$params['qname']?"Saved search: ".$params['qname']."<br>":"";
+    //set savedSearchName for error messages
+    $savedSearchName = '';
+    if(is_numeric(@$params['qname']) && $params['qname'] > 0){ // retrieve extra details
+
+        $query = 'SELECT svs_ID AS qID, svs_Name AS qName, svs_UGrpID as uID, ugr_Name as uName '
+            . 'FROM usrSavedSearches '
+            . 'INNER JOIN sysUGrps ON ugr_ID = svs_UGrpID '
+            . 'WHERE svs_ID = ' . $params['qname'];
+
+        $saved_search = mysql__select_row_assoc($mysqli, $query);
+
+        if($saved_search !== null){
+            $name = empty($saved_search['qName']) ? $saved_search['qID'] : $saved_search['qName'] . ' (# '. $saved_search['qID'] .')';
+            $workgroup = empty($saved_search['uName']) ? $saved_search['uID'] : $saved_search['uName'] . ' (# '. $saved_search['uID'] .')';
+            $savedSearchName = '<br>Saved search: ' . $name . '<br>Workgroup: ' . $workgroup . '<br>';
+        }else{
+            $savedSearchName = 'Saved search: '.$params['qname'].'<br>';
+        }
+    }else{
+        $savedSearchName = @$params['qname']? 'Saved search: '. $params['qname'] .'<br>' : '';
+    }
+    $savedSearchName .= empty($savedSearchName) ? '' : 'It is probably best to delete this saved filter and re-create it.<br>';
 
     if(!@$params['detail']){// list of rec_XXX and field ids, if rec_XXX is missed all header fields are included
         $params['detail'] = @$params['f']; //backward capability
@@ -1846,8 +1888,6 @@ function recordSearch($system, $params)
         }
     }
 
-
-    $mysqli = $system->get_mysqli();
     $currentUser = $system->getCurrentUser();
 
     if ( $system->get_user_id()<1 ) {

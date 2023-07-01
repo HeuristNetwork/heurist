@@ -873,6 +873,11 @@ $.widget( "heurist.searchBuilder", {
                                         $ele.menu({
                                             icons: { submenu: "ui-icon-triangle-1-s" },
                                             select: function(e, ui){
+
+                                                if($(ui.item).children('ul').length == 1){ // 'option' clicked
+                                                    return;
+                                                }
+
                                                 window.hWin.HEURIST4.util.stopEvent(e);
 
                                                 let code = $ele.attr('data-code');
@@ -1019,6 +1024,12 @@ $.widget( "heurist.searchBuilder", {
                                         var code = data.node.data.code;
                                         if(code){
                                             var codes = code.split(':');
+
+                                            if(codes.length == 2 && $Db.dty(codes[1], 'dty_Type') == 'enum'){
+                                                // by default, handle as term label
+                                                code += ':term';
+                                                codes.push('term');
+                                            }
 
                                             var codes2 = code.split(':');
                                             codes2[0] = 'any';

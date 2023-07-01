@@ -270,6 +270,12 @@ if(!($max_size>0)) $max_size = 0;
                 </label>
                 <label style="font-size:smaller;font-style:italic"> To maintain the directory structure, you should use Chrome or FireFox</label>
                  
+                <br>
+
+                <label><input type="checkbox" checked=checked name="registerFiles">
+                    Register file after upload (missed indexed files can be registered in Admin > Manage files)
+                </label>
+                 
                 <br><br> 
                 <label><input type="radio" checked=checked name="replace_edited_file" value="1">
                     Replace existing file if file has been modified
@@ -483,6 +489,70 @@ if(!($max_size>0)) $max_size = 0;
             var max_file_size_msg = 'File size exceeds allowed upload_max_filesize or post_max_size '
                                         +window.hWin.HEURIST4.util.formatFileSize(max_file_size);
 
+            var files_to_register = [];
+            var to_reg_count = 1;
+
+            function registerFile(files, do_register){
+
+                let prepare_file = $('input[name="registerFiles"]').is(':checked');
+
+                if(!prepare_file){
+                    to_reg_count = 1;
+                    return;
+                }
+
+                const base_path = $('#upload_folder').val();
+                let base_folder = base_path.split('/');
+                base_folder = base_folder[base_folder.length-1];
+
+                if(files && files.length > 0){
+
+                    for(let i = 0; i < files.length; i++){
+
+                        const file_dtls = files[i];
+                        let path = file_dtls['url'];
+                        if(window.hWin.HEURIST4.util.isempty(path)){
+                            -- to_reg_count;
+                            continue;
+                        }
+
+                        let index = path.indexOf(base_folder);
+
+                        if(index > -1){
+                            files_to_register.push({'file_path': path.substr(index)});
+                        }
+                    }
+
+                    to_reg_count = (to_reg_count < 1) ? 1 : to_reg_count;
+                }
+
+                if(do_register && files_to_register.length == to_reg_count && files_to_register.length > 0){
+
+                    var request = {
+                        'a'          : 'batch',
+                        'entity'     : 'recUploadedFiles',
+                        'request_id' : window.hWin.HEURIST4.util.random(),
+                        'files'      : JSON.stringify(files_to_register),
+                        'bulk_reg_filestore' : 1
+                    };
+
+                    window.hWin.HEURIST4.msg.bringCoverallToFront($('body'));
+                    files_to_register = [];
+                    to_reg_count = 1;
+
+                    window.hWin.HAPI4.EntityMgr.doRequest(request, function(response){
+
+                        window.hWin.HEURIST4.msg.sendCoverallToBack();
+
+                        if(response.status == window.hWin.ResponseStatus.OK){                                      
+                            window.hWin.HEURIST4.msg.showMsgDlg(response.data, null, {title: 'Registering files'}, {default_palette_class: 'ui-heurist-admin'});
+                        }else{
+                            window.hWin.HEURIST4.msg.showMsgErr(response);
+                        }
+                    });
+                }
+            }
+
             $(function () {
                 'use strict';
                 
@@ -592,9 +662,18 @@ if(!($max_size>0)) $max_size = 0;
                         swarns = swarns_exists + swarns_memtypes + swarns;
                         
                         if(cntAlreadyExists>0 || cntWarnMemtypes>0){
-                            window.hWin.HEURIST4.msg.showMsgDlg(swarns);    
+
+                            let $dlg = window.hWin.HEURIST4.msg.showMsgDlg(swarns, {'OK': function(){
+                                $dlg.dialog('close');
+                                registerFile(null, true);
+                            }}, {'yes': 'OK', 'title': 'File upload warnings'});
+
                         }else if (swarns!='') {
                             window.hWin.HEURIST4.msg.showMsgErr(swarns);    
+                        }
+
+                        if(e.originalEvent.type != 'done' && data.result?.files){
+                            registerFile(data.result?.files, !(cntAlreadyExists>0 || cntWarnMemtypes>0));
                         }
 
                     }
@@ -628,6 +707,8 @@ if(!($max_size>0)) $max_size = 0;
                     window.hWin.HEURIST4.util.setDisabled($('#btnFinished'), true);                    
                     $('#btnStart').button('option','label','Start uploads');
                     $('#btnCancel').button('option','label','Cancel uploads');
+
+                    to_reg_count = $('input[name="registerFiles"]').is(':checked') ? $('.template-upload').length : 1;
                 });
                 
                 //cancel and close window

@@ -1333,7 +1333,7 @@ When we open "iiif_image" in mirador viewer we generate manifest dynamically.
 
             $dirs_and_exts = getMediaFolders($mysqli);
 
-            if(array_key_exists('files', $this->data) && !empty($this->data['files'])){ // manageFilesUploaded.php
+            if(array_key_exists('files', $this->data) && !empty($this->data['files'])){ // manageFilesUpload.php
                 $files = json_decode($this->data['files']);
             }else{ // manageRecUploadedFiles.js
 
