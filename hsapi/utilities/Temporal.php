@@ -195,9 +195,16 @@ class Temporal {
                            }
                        }
                    }
-                }else if(preg_match('/before|after|avant|après/i',$value)){
+                }else if(preg_match('/before|after|avant|après/i',$value) || preg_match('/^\d{4}-$/i', $value)){
                    
-                   preg_match_all('/before|after|avant|après\s+|[-|\w+|\s]+$/i', $value, $matches); 
+                   if(preg_match('/^\d{4}-$/i', $value)){
+                        preg_match_all('/^\d{4}-$/i', $value, $matches);     
+                        $matches[0][1] = substr($matches[0][0],0,4);
+                        $matches[0][0] = 'after';
+                   }else{
+                        preg_match_all('/before|after|avant|après\s+|[-|\w+|\s]+$/i', $value, $matches);     
+                   }
+                   
                    
                    if(@$matches[0][1]){
                    
@@ -258,7 +265,7 @@ class Temporal {
                         if(is_array(@$matches[0]) && (count($matches[0])==2 || (count($matches[0])==3 && $matches[0][1]=='-'))) 
                         {
                             if(count($matches[0])==2){
-                                if(substr($matches[0][1],1)=='-'){
+                                if(substr($matches[0][1],0,1)=='-'){
                                     $matches[0][2] = substr($matches[0][1],1);
                                     $matches[0][1] = '-';
                                 }else{
