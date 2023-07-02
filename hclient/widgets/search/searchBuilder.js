@@ -861,7 +861,7 @@ $.widget( "heurist.searchBuilder", {
 
                                         let $ele = $('<ul>', {class: 'horizontalmenu fancytree-submenu'})
                                             .attr('data-type', 'enum').attr('data-code', data.node.data.code)
-                                            .html('<li><span>option</span><ul>'
+                                            .html('<li data-id="term"><span>option</span><ul>'
                                                      + '<li data-id="term">Term</li>'
                                                      + '<li data-id="code">Code</li>'
                                                      + '<li data-id="conceptid">Concept ID</li>'
@@ -873,10 +873,6 @@ $.widget( "heurist.searchBuilder", {
                                         $ele.menu({
                                             icons: { submenu: "ui-icon-triangle-1-s" },
                                             select: function(e, ui){
-
-                                                if($(ui.item).children('ul').length == 1){ // 'option' clicked
-                                                    return;
-                                                }
 
                                                 window.hWin.HEURIST4.util.stopEvent(e);
 
@@ -893,7 +889,7 @@ $.widget( "heurist.searchBuilder", {
                                                 that.select_field_for_id = null;
                                                 that.pnl_Tree.hide();
 
-                                                if(treediv.fancytree('instance') != undefined){
+                                                if(treediv.fancytree('instance') !== undefined){
                                                     const tree = treediv.fancytree('getTree');
                                                     const node = tree.getNodeByKey(key);
 
