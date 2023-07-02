@@ -54,7 +54,7 @@
 *       _parseTemporal - parses json or plain string to array of values
 *       _datePrepare     - Validates and sanitizes string date value - returns date array 
 *       _dateDecimal    - Converts string date yyyy-mm-dd  to decimal yyyy.mmdd 
-*      (not implemented _decimalToYMD   - Converts string yyyy.mmdd to yyyy-mm-dd)
+*       _decimalToYMD   - Converts string yyyy.mmdd to yyyy-mm-dd
 *
 *       dateToISO       - Converts date array to ISO8601 string
 *       dateToString    - Converts to human readable string
@@ -682,6 +682,33 @@ class Temporal {
         }
         
         return $res;
+    }
+    
+    //
+    //
+    //
+    private static function _decimalToYMD($date){
+        
+        $date = strval($date);
+        $k = strpos($date,'.');
+        if($k>0){
+            $res = substr($date,0,$k);
+            $mmdd = substr($date,$k+1); 
+            if(strlen($mmdd)<3){
+                $month = str_pad($mmdd,2,'0',STR_PAD_RIGHT); 
+            }else{
+                $month = substr($mmdd,0,2); 
+                if(substr($mmdd,2)==0){
+                    $day = '01';
+                }else{
+                    $day = str_pad(substr($mmdd,2), 2,'0',STR_PAD_RIGHT);     
+                }
+            }
+            $res = $res.'-'.$month.'-'.$day;
+        }else{
+            $res = $date;
+        }
+        return $res;        
     }
     
     //
@@ -1383,7 +1410,7 @@ class Temporal {
                 
                 $res['Date']  = $timestamp;
                 
-            }else if(@$date['start'] && $date['type']=='r'){  //simple range - NOT USED
+            }else if(@$date['start'] && $date['type']=='r'){  //simple range
 
                 $res['Type'] = 'Simple Range';
             
@@ -1521,8 +1548,14 @@ class Temporal {
                 
                     if(@$date['timestamp']['deviation']){
                         $res['TYP'] = 'f';
+                        
+                        //convert floating to range
+                        $res['TPQ'] = Temporal::_decimalToYMD($date['estMinDate']);
+                        $res['TAQ'] = Temporal::_decimalToYMD($date['estMaxDate']);
+                        
                         $res['RNG'] = $date['timestamp']['deviation'];    
                         if(@$date['timestamp']['profile']) $res['PRF'] = $date['timestamp']['profile'];
+                        
                     }else{
                         $res['TYP'] = 's';
                         if(@$date['timestamp']['circa']){
