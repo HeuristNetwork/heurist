@@ -120,9 +120,10 @@ class Temporal {
         
         if($this->isValid() 
              && @$this->tDate['timestamp']   //not range
-             && count($this->tDate['timestamp'])==2 //does not have aux fields: comment, calendar etc
+             && count($this->tDate)==3 && count($this->tDate['timestamp'])==2 //does not have aux fields: comment, calendar etc
              && $this->tDate['estMinDate']==$this->tDate['estMaxDate'])
         {
+            
             $after_digit = substr(strrchr(strval($this->tDate['estMinDate']), '.'), 1);
             //has both month and day and CE   
             if (($this->tDate['estMinDate']>=0 && $this->tDate['estMinDate']<10000 
@@ -179,9 +180,9 @@ class Temporal {
             
             if(!preg_match('/\||timestamp|start/',$value)){
                 
-                if(preg_match('/fl|abt\.|abt|about|c|ca|circa/i',$value)){
+                if(preg_match('/fl|abt\.|abt|about|vers|^c\s|ca|circa|~/i',$value)){
                    
-                   preg_match_all('/fl|abt\.|abt|about|c|ca|circa\s+|[-|\w+|\s]+$/i', $value, $matches); 
+                   preg_match_all('/fl|abt\.|abt|about|vers|ca\.|ca|circa|^c|~\s*|[-|\w+|\s]+$/i', $value, $matches); 
                    
                    if(@$matches[0][1]){
                    
@@ -195,14 +196,14 @@ class Temporal {
                            }
                        }
                    }
-                }else if(preg_match('/before|after|avant|après/i',$value) || preg_match('/^\d{4}-$/i', $value)){
+                }else if(preg_match('/post|before|bef\.|bef|after|aft\.|aft|avant|après/i',$value) || preg_match('/^\d{4}-$/i', $value)){
                    
                    if(preg_match('/^\d{4}-$/i', $value)){
                         preg_match_all('/^\d{4}-$/i', $value, $matches);     
                         $matches[0][1] = substr($matches[0][0],0,4);
                         $matches[0][0] = 'after';
                    }else{
-                        preg_match_all('/before|after|avant|après\s+|[-|\w+|\s]+$/i', $value, $matches);     
+                        preg_match_all('/post|before|bef\.|bef|after|aft\.|aft|avant|après\s+|[-|\w+|\s]+$/i', $value, $matches);     
                    }
                    
                    
@@ -212,7 +213,9 @@ class Temporal {
                    
                        if($timespan){
                            
-                           $is_before = (strtolower($matches[0][0])=='before' || strtolower($matches[0][0])=='avant');
+                           $is_before = (strtolower($matches[0][0])=='before' 
+                                         || strtolower($matches[0][0])=='bef' || strtolower($matches[0][0])=='bef.'
+                                         || strtolower($matches[0][0])=='avant');
                            
                            if(@$timespan['start']){
                                $timespan = array('timestamp' => array('in'=>$is_before?$timespan['start']['earliest']:$timespan['end']['latest']
@@ -238,7 +241,7 @@ class Temporal {
                 
                     if(preg_match('/à|\.|\/|to|,/i', $value)){
                         
-                       preg_match_all('/[-|\s|\w+]+|[à|\.|\/|to|,]+/i', $value, $matches);
+                       preg_match_all('/[-|\w+]+|[à|\.|\/|to|,]+/i', $value, $matches);
                        
                        if($matches && is_array(@$matches[0])){
                            $values = array();
@@ -442,8 +445,8 @@ class Temporal {
             
             
                     if(@$tDate['DET']) $timespan['determination'] = $tDate['DET'];
-                    if(@$tDate['CLD']) $timespan['calendar'] = $tDate['CLD'];
-                    if(@$tDate['COM']) $timespan['comment'] = $tDate['COM'];
+                    if(@$tDate['CLD'] && $tDate['CLD']!='Gregorian') $timespan['calendar'] = $tDate['CLD'];
+                    if(@$tDate['COM'] && $tDate['COM']!='') $timespan['comment'] = $tDate['COM'];
                     //labaratory code for C14
                     if(@$tDate['COD']) $timespan['labcode'] = $tDate['COD'];
                     //human readable in native calendar
@@ -718,11 +721,18 @@ class Temporal {
                 }
             }
         }
-
+        
         if( preg_match('/^-?\d+$/', $value) ){ //this is YEAR - only digits with possible minus and spaces for milles
-            $value = preg_replace('/\s+/', '', $value);
-            $date = array('year'=>$value);
-        }else{
+        
+            if(strlen($value)==14){ //20090410000000
+                $value = substr($value,0,4).'-'.substr($value,4,2).'-'.substr($value,6,2)
+                        .' '.substr($value,8,2).':'.substr($value,10,2).':'.substr($value,12,2);
+            }else{
+                $value = preg_replace('/\s+/', '', $value); //remove spaces
+                $date = array('year'=>$value);
+            }
+        }
+        if($date==null){
             
             if(strpos($value,'XX')>0){
                 $date = null;
@@ -784,7 +794,7 @@ class Temporal {
             }else{
                 $date = trim($date);
                 
-                if($today_date!=null && preg_match('/^today|now|yesterday|tomorrow|-1 day|+1 day$/i',$date)){
+                if($today_date!=null){ // && preg_match('/^today|now|yesterday|tomorrow|-1 day|+1 day$/i',$date)){
                     $t2 = new DateTime($today_date);
 
                     $sdate = strtolower($date);

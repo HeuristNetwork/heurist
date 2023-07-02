@@ -29,6 +29,8 @@
 //exit(); 
 
 ini_set('max_execution_time', '0');
+
+print $_REQUEST['db'].'<br>';
  
 //define('OWNER_REQUIRED', 1);   
 define('PDIR','../../');  //need for proper path to js and css    
@@ -55,10 +57,10 @@ if( $system->verifyActionPassword($_REQUEST['pwd'], $passwordForServerFunctions)
     <?php
     exit();
 }
+<script>window.history.pushState({}, '', '<?php echo htmlspecialchars($_SERVER['PHP_SELF']); ?>')</script>  
 */
 ?>            
 
-<script>window.history.pushState({}, '', '<?php echo htmlspecialchars($_SERVER['PHP_SELF']); ?>')</script>  
          
 <div style="font-family:Arial,Helvetica;font-size:12px">
             <p>This report shows </p>
@@ -69,6 +71,7 @@ $mysqli = $system->get_mysqli();
     
 //find all database
 $databases = mysql__getdatabases4($mysqli, false);   
+
 /*    
     $query = 'show databases';
     $res = $mysqli->query($query);
@@ -116,7 +119,8 @@ if(false){
 }else if(false){
     __correctGetEstDate_and_ConvertTemporals_JSON_to_Plain();
 }else if(true){
-    __updateDatabases_To_V14();
+    
+    __updateDatabases_To_V14( @$_REQUEST['process']);
 }
 //
 // Report database versions
@@ -1074,14 +1078,37 @@ if($cnt>0) echo $db_name.'   terms:'.$cnt.'<br>';
 //
 //
 //
-function __updateDatabases_To_V14(){
+function __updateDatabases_To_V14($db_process){
     
     global $system, $mysqli, $databases; 
     
     $cnt_db = 0;
     $cnt_db_old = 0;
+    $skip_work = true;
+  
+    /*
+    $is_action = ($db_process!=null);
+    
+    if($db_process=='all'){
+        $db_process = null;
+    }
+    
+    */
 
     foreach ($databases as $idx=>$db_name){
+        
+        if($db_name=='') continue;
+        
+        if($db_process!=null){
+            $db_name = $db_process;
+        }
+        /*
+        if($db_name=='misha_cruches_gallo_romaines'){
+            $skip_work = false;
+            //continue;
+        }else if($skip_work){
+            continue;
+        }*/
 
         if( !$system->set_dbname_full($db_name, true) ){
                 $response = $system->getError();    
@@ -1106,7 +1133,7 @@ function __updateDatabases_To_V14(){
         $cnt_index = 0;
         $cnt_fuzzy_dates2 = 0;
         
-        $is_big = ($cnt_dates>5000);
+        $is_big = ($cnt_dates>100000);
         
         if($is_big){
             $cnt_dates = '<b>'.$cnt_dates.'</b>';
@@ -1121,7 +1148,7 @@ function __updateDatabases_To_V14(){
             
             print '<br>'.$db_name.'  v.'.$ver['sys_dbSubSubVersion'].'  '.$cnt_dates
                 .($cnt_dates<>$cnt_index?'<span style="color:red">':'<span>')
-                .'  index='.$cnt_index.' ( '.$cnt_fuzzy_dates.','.$cnt_fuzzy_dates2.' )</span>';
+                .'  index='.$cnt_index.' ( '.($cnt_fuzzy_dates>0?'<b>'.$cnt_fuzzy_dates.'</b>':'0').','.$cnt_fuzzy_dates2.' )</span>';
         }else{
             $cnt_db_old++;
             print '<br>'.$db_name.'  v'.($ver['sys_dbSubVersion']<3?'<b>'.$ver['sys_dbSubVersion'].'</b>':'')
@@ -1134,7 +1161,7 @@ function __updateDatabases_To_V14(){
             }
         }
         
-        if(!$is_big && ($ver['sys_dbSubSubVersion']<=13 || ($cnt_dates>0 && $cnt_index*100/$cnt_dates<94) )){
+        if(true && ($db_process!=null || (!$is_big && ($ver['sys_dbSubSubVersion']<=13 || ($cnt_dates>0 && $cnt_index*100/$cnt_dates<94) )))){
             print '<br>';
             if(recreateRecDetailsDateIndex($system, true, true)){
             
@@ -1148,6 +1175,9 @@ function __updateDatabases_To_V14(){
         $cnt_db++;
         
         //if($db_name=='bnf_lab_musrdm_test') break;
+        if($db_process!=null){
+            break;   
+        }
     }    
     
     print '<br><br>'.$cnt_db_old.'  '.$cnt_db;

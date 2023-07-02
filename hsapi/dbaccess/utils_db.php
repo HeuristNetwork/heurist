@@ -894,7 +894,7 @@
 
         if(!$res){
             $system->addError(HEURIST_DB_ERROR, 'Cannot create recDetailsDateIndex', $mysqli->error);
-            
+            $isok = false;
         }else{
             //recreate triggers
             if(!function_exists('execute_db_script')){
@@ -909,6 +909,9 @@
             
             //fill database with min/max date values
             //1. find all date values in recDetails
+            $query = 'SELECT count(dtl_ID) FROM recDetails, defDetailTypes  WHERE dtl_DetailTypeID=dty_ID AND dty_Type="date" AND dtl_Value!=""';
+            $cnt_dates = mysql__select_value($mysqli, $query);
+            
             $query = 'SELECT dtl_ID,dtl_RecID,dtl_DetailTypeID,dtl_Value FROM recDetails, defDetailTypes WHERE dtl_DetailTypeID=dty_ID AND dty_Type="date" AND dtl_Value!=""';
             $res = $mysqli->query($query);
             
@@ -925,8 +928,9 @@
                          PRIMARY KEY (bkp_ID))');
                 }
                 
-                
-                $keep_autocommit = mysql__begin_transaction($mysqli);
+                if($cnt_dates<150000){
+                    $keep_autocommit = mysql__begin_transaction($mysqli);
+                }
                 
                 while ($row = $res->fetch_row()){
                     $dtl_ID = $row[0];
@@ -946,20 +950,29 @@
                             // saves as usual date
                             // if date is Simple, 0<year>9999 (CE) and has both month and day 
                             $is_date_simple = $preparedDate->isValidSimple();
-                            $dtl_NewValue_with_comment = null;
+                            $dtl_NewValue_for_update = null;
                             if($is_date_simple){
                                 $dtl_NewValue = $preparedDate->getValue(true); //returns simple yyyy-mm-dd
+                                $dtl_NewValue_for_update = $dtl_NewValue;
                             }else{
                                 $v_json = $preparedDate->getValue();
-                                $dtl_NewValue_with_comment = json_encode($v_json);
+                                $dtl_NewValue_for_update = json_encode($v_json);
                                 $v_json['comment'] = ''; //to avoid issue with special charss
                                 $dtl_NewValue = json_encode($v_json); //$preparedDate->toJSON(); //json encoded string
                             }
+                            if($dtl_NewValue==null || $dtl_NewValue=='' || $dtl_NewValue=='null'){
+                                $error = 'Not valid date: '.$dtl_Value;
+                            }else{
                             
             //3. Validate estMin and estMax from JSON
                             $query = 'SELECT getEstDate(\''.$dtl_NewValue  //$mysqli->real_escape_string(
                                     .'\',0) as minD, getEstDate(\''.$dtl_NewValue.'\',1) as maxD'; //$mysqli->real_escape_string(
-                            $res2 = $mysqli->query($query);
+                            try{
+                                $res2 = $mysqli->query($query);            
+                            }catch(Exception $e){
+                                $res2 = false;
+                            }
+                            
                             if($res2){
                                 $row2 = $res2->fetch_row();
                                 if(($row2[0]=='' && $row2[1]=='') || ($row2[0]=='0' && $row2[1]=='0')){
@@ -976,21 +989,21 @@
                                             $isok = false;
                                             break;
                                         }
-                                    
+                                    }
             //5A. If simple date - retain value in recDetails                                    
             //5B. If temporal object it saves JSON in recDetails
-                                        if(!$is_date_simple && $dtl_NewValue_with_comment){
-                                            $query = 'UPDATE recDetails SET dtl_Value="'.
-                                                    $mysqli->real_escape_string($dtl_NewValue_with_comment).'" WHERE dtl_ID='.$dtl_ID;
-                                            $mysqli->query($query);
-                                            if(!($mysqli->affected_rows>=0)){
-                                                //fails update recDetails
-                                                $system->addError(HEURIST_DB_ERROR, $err_prefix.'Error on recDetails update query:'.$query, $mysqli->error);
-                                                $isok = false;
-                                                break;
-                                            }
+                                    if($dtl_Value != $dtl_NewValue_for_update){
+                                        $query = 'UPDATE recDetails SET dtl_Value="'.
+                                                $mysqli->real_escape_string($dtl_NewValue_for_update).'" WHERE dtl_ID='.$dtl_ID;
+                                        $mysqli->query($query);
+                                        if(!($mysqli->affected_rows>=0)){
+                                            //fails update recDetails
+                                            $system->addError(HEURIST_DB_ERROR, $err_prefix.'Error on recDetails update query:'.$query, $mysqli->error);
+                                            $isok = false;
+                                            break;
                                         }
                                     }
+                                    
                                     
             //6. update recDetailsDateIndex should be updated by trigger
                                     $mysqli->query('delete ignore from recDetailsDateIndex where rdi_DetailID='.$dtl_ID); 
@@ -1014,7 +1027,7 @@
                                 $error = 'Error on retrieve min and max dates. Query:'.$query.' '.$mysqli->error;
                             }
                             
-                            
+                            }
                     }else{
                         //unchange 
                         
@@ -1050,11 +1063,15 @@
                     }
                     
                     
-                    $mysqli->commit();  
+                    if($cnt_dates<150000){
+                        $mysqli->commit();  
+                    }
                 }else{
-                    $mysqli->rollback();
+                    if($cnt_dates<150000){
+                        $mysqli->rollback();
+                    }
                 }
-                if($keep_autocommit===true) $mysqli->autocommit(TRUE);
+                if( $cnt_dates<150000 && $keep_autocommit===true) $mysqli->autocommit(TRUE);
 
             }
         }
@@ -1063,7 +1080,7 @@
         //if(!$isok){
         //    file_put_contents($log_file, json_encode( $system->getError() ));
         //        }
-        if($need_populate){ //verbose output
+        if($isok && $need_populate){ //verbose output
             print '<p><ul><li>Added into index: '.$cnt.'</li>';
             print '<li>Errors date pasring: '.$cnt_err.'</li>';
             print '<li>Complex temporals: '.$cnt_to_json.'</li></ul></p>';
