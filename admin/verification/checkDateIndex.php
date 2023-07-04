@@ -25,7 +25,12 @@ if(!$is_included){
     $is_ok = true;
     if(@$_REQUEST['fixdateindex']=='1'){
         
-        if(recreateRecDetailsDateIndex($system, true, @$_REQUEST['convert_dates']=='1')){
+        $rep = recreateRecDetailsDateIndex($system, true, @$_REQUEST['convert_dates']=='1');
+        if($rep){
+            foreach($rep as $msg){
+                print $msg.'<br>';
+            }
+            
             if($is_upgrade){
 ?>                
                 <div><h3 class="res-valid">Record Details Date Index has been successfully created</h3></div>

@@ -1154,14 +1154,20 @@ function __updateDatabases_To_V14($db_process){
             print '<br>'.$db_name.'  v'.($ver['sys_dbSubVersion']<3?'<b>'.$ver['sys_dbSubVersion'].'</b>':'')
             .'.'.$ver['sys_dbSubSubVersion'].'  '.$cnt_dates.'  ( '.$cnt_fuzzy_dates.' )';
             
-            if(!updateDatabaseToLatest($system)){
+            if($ver['sys_dbSubVersion']<3){
+                continue;   
+            }
+            
+            if(!updateDatabseTo_v1_3_12($system)){
                 $response = $system->getError();    
                 print '<div><h3 class="error">'.$response['message'].'</h3></div>';
                 break;
             }
         }
         
-        if(true && ($db_process!=null || (!$is_big && ($ver['sys_dbSubSubVersion']<=13 || ($cnt_dates>0 && $cnt_index*100/$cnt_dates<94) )))){
+        if(true && ($db_process!=null || 
+            (!$is_big && ($ver['sys_dbSubSubVersion']<=13 || ($cnt_dates>0 && $cnt_index*100/$cnt_dates<94) ))))
+        {
             print '<br>';
             if(recreateRecDetailsDateIndex($system, true, true)){
             

@@ -27,7 +27,7 @@
 require_once (dirname(__FILE__).'/utilities/utils_host.php');
 
 define('HEURIST_VERSION', $version);  //code version is defined congigIni.php
-define('HEURIST_MIN_DBVERSION', "1.3.0"); //minimal version of db for current version of code
+define('HEURIST_MIN_DBVERSION', "1.3.14"); //minimal version of db for current version of code
 
 // The reference server is the location of the Heurist Reference Index database (HEURIST_INDEX_DATABASE), the Heurist_Help database, 
 
