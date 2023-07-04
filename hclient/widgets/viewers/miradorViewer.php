@@ -113,7 +113,7 @@ if($use_custom_mirador){
 ?> 
 </head>
 <body>
-<div id="mirador_container"></div>
+<div id="demo"></div>
 <script>
 <?php
     $dbname = @$_REQUEST['db'];
@@ -134,7 +134,7 @@ if($use_custom_mirador){
 ?>
 <script type="text/javascript">
 var mirador = Mirador.viewer({
-  "id": "mirador_container",
+  "id": "demo",
   "windows": [
     {
       "loadedManifest": "<?php echo $manifest_url;?>"
