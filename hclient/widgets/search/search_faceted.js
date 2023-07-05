@@ -3122,6 +3122,7 @@ return;
                         var display_mode = (field['isfacet']==this._FT_LIST || field['isfacet']==this._FT_SELECT || (field['groupby']=='firstchar' && field['isfacet']==this._FT_LIST))
                                                         ?'inline-block':'block';
                         
+                        needsDropdown = false;
                         if(field['isfacet']==this._FT_COLUMN || field['isfacet']==this._FT_LIST){ // Listed/Wrapped
                             
                             var display_mode = (field['isfacet'] == this._FT_COLUMN) ? 'block' : 'inline-block';
@@ -3133,7 +3134,7 @@ return;
                                 var diff = response.data.length - this.options.params.viewport;
                                 __drawToggler($facet_values, display_mode);
 
-                                needsDropdown = field['isfacet'];
+                                needsDropdown = true;
                             }
 
                         }else{
@@ -3146,16 +3147,19 @@ return;
                             var w = that.element.width();
                             if(!(w>0) || w<200) w = 200;
 
-                            var $sel = $('<select style="font-size: 1.1em !important;">'); // was 30
+                            var $sel = $('<select style="font-size: 0.6em !important;">').css('width', (w-45)+'px'); // was 30
 
-                            if(needsDropdown !== true && $facet_values.find('span.bor-toggle-show-off').length > 0){
-                                $sel.appendTo( $("<div>").css({"display":"inline-block","padding":"0 5px"}).appendTo($facet_values.find('span.bor-toggle-show-off')) );
-                                w = w-66;
+                            needsDropdown = (field['isfacet'] != this._FT_SELECT);
+
+                            if(needsDropdown && $facet_values.find('span.bor-toggle-show-off').length > 0){
+                                
+                                $sel.appendTo( $("<div>").css({"display":"inline-block","padding":"0px"})
+                                .appendTo($facet_values.find('span.bor-toggle-show-off')) );
+                                $sel.css('width', ((w - 66) * 0.8)+'px');
 
                                 $facet_values.css('margin-bottom', '15px');
                             }else{
-                                $sel.appendTo( $("<div>").css({"display":"inline-block","padding":"0 5px"}).appendTo($facet_values) );
-                                w = w-45;
+                                $sel.appendTo( $("<div>").css({"display":"inline-block","padding":"0"}).appendTo($facet_values) );
                             }
 
                             this._createOption( facet_index, 0, {title:window.hWin.HR('select...'), value:null, count:0} ).appendTo($sel);
@@ -3166,26 +3170,22 @@ return;
                                 $opt.attr('selected',true);
                             }
 
-                            needsDropdown = true;
-                            selObj = window.hWin.HEURIST4.ui.initHSelect($sel, needsDropdown !== true ? true : false);
-                            if(needsDropdown === true){
-                                //selObj.hSelect( "widget" ).css({"font-size": "0.9em", "min-width": "8em", "width": w+"px"});
-                                selObj.hSelect( "menuWidget" ).css({'font-size':'0.9em'});
-                                
-                                var btn_dropdown = selObj.hSelect( "widget" );
-                                    btn_dropdown.css({"font-size": "0.96em", width: 'auto', color:"#999999", 
-                                        'min-width':'', background: 'none'});
-                                    btn_dropdown.addClass('borderless');
-                                    btn_dropdown.find('.ui-selectmenu-text').html('dropdown')
-                                        .css({'min-height':'', padding:'', 'padding-right':'16px'});
-                                
-                                
+                            //needsDropdown = true;
+                            selObj = window.hWin.HEURIST4.ui.initHSelect($sel, false);
+                            selObj.hSelect( "menuWidget" ).css({'font-size':'0.9em'});
+
+                            var btn_dropdown = selObj.hSelect( "widget" );
+                            //change appearance for dropdown button
+                            if(needsDropdown){
+                                btn_dropdown.css({"font-size": "0.96em", width: 'auto', color:"#999999", 
+                                    'min-width':'', background: 'none'});
+                                btn_dropdown.addClass('borderless');
+                                btn_dropdown.find('.ui-selectmenu-text').html('dropdown')
+                                    .css({'min-height':'', padding:'', 'padding-right':'16px'});
                             }else{
-                                var sel_w = $sel.css('width', 'auto').width();
-                                if(sel_w > w){
-                                    $sel.css('width', w+'px');
-                                    }
-                            }
+                                btn_dropdown.css({"font-size": "0.9em", "min-width": "8em"});
+                            }                            
+                            
 
                             $sel.change(function(event){ that._onDropdownSelect(event); });
                         }
