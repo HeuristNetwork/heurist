@@ -50,7 +50,9 @@ $.widget( "heurist.editing_input", {
         is_insert_mode:false,
         
         is_faceted_search:false, //is input used in faceted search or filter builder
-        is_between_mode:false    //duplicate input for freetext and dates for search mode 
+        is_between_mode:false,    //duplicate input for freetext and dates for search mode 
+
+        language: null // language for term values (3 character ISO639-2 code)
     },
 
     //newvalues:{},  //keep actual value for resource (recid) and file (ulfID)
