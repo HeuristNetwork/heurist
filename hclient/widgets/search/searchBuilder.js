@@ -49,6 +49,7 @@ $.widget( "heurist.searchBuilder", {
     select_additional_rectypes: null,
     svs_MultiRtSearch: null,
     //field_selector: null,
+    select_language: null,
 
     current_tree_rectype_ids:null, //to avoid reload
     
@@ -169,6 +170,14 @@ $.widget( "heurist.searchBuilder", {
             
             this.select_additional_rectypes.remove();   
             this.select_additional_rectypes = null;
+        }
+        
+        if(this.select_language){
+            if(this.select_language.hSelect('instance') !== undefined){
+                this.select_language.hSelect('destroy');
+            }
+            this.select_language.remove();
+            this.select_language = null;
         }
         
         
@@ -370,6 +379,7 @@ $.widget( "heurist.searchBuilder", {
                 var rty_ID = codes[codes.length-2];
                 var dty_ID = codes[codes.length-1];
                 var top_rty_ID = codes[0];
+                let lang = this.select_language.val();
 
                 if(!(top_rty_ID>0)) top_rty_ID = 0;
                 if(!(rty_ID>0)) rty_ID = 0;
@@ -384,7 +394,9 @@ $.widget( "heurist.searchBuilder", {
                             top_rty_ID: top_rty_ID, 
                             rty_ID: rty_ID,
                             dty_ID: dty_ID,
-                            enum_field:enum_field});
+                            enum_field:enum_field,
+                            language: lang
+                        });
 
                 }else{
                     var ele = $('<div>').uniqueId().attr('data-code',code).insertBefore(this.btnAddFieldItem);
@@ -399,6 +411,7 @@ $.widget( "heurist.searchBuilder", {
                             rty_ID: rty_ID,
                             dty_ID: dty_ID,
                             enum_field: enum_field,
+                            language: lang,
                             onremove: function(){
                                 var id = this.element.attr('id');
                                 $.each(that.field_array,function(k,item){
@@ -612,6 +625,37 @@ $.widget( "heurist.searchBuilder", {
             
             if(this.select_main_rectype==null || this.options.rty_ID>0){            
                 this.refreshRectypeMenu();
+            }
+            
+            if(this.select_language == null){
+
+                this.select_language = this.element.find('#opt_language');
+                let options = [{title: 'ANY', key: 'ALL', selected: true}, {title: 'Default', key: ''}];
+                window.hWin.HEURIST4.ui.createLanguageSelect(this.select_language, options, 'ALL', false);
+
+                this._on(this.select_language, {
+                    change: function(){
+                        // Update language of dropdowns
+                        let lang = that.select_language.val();
+                        $.each(this.field_array, function(i, ele){
+
+                            let code = ele.searchBuilderItem('getCodes');
+                            let codes = code.split(':');
+
+                            if($Db.dty(codes[codes.length-1], 'dty_Type') == 'enum'){
+                                ele.searchBuilderItem('changeOptions',{
+                                    language: lang
+                                });
+                            }
+                        });
+                    }
+                });
+
+                this.select_language.hSelect('widget').css({width: '100px', 'min-width': '100px'});
+
+                this.element.find('.filter-language').attr('title', 'Specify the language of the values dropdown and of the search. &#010; '
+                    + 'ANY will search across the default language and all translated terms or texts. &#010; '
+                    + 'Default is the default language used in construction of the database.');
             }
             
             /*                    

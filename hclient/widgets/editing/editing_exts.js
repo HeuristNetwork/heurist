@@ -1497,10 +1497,20 @@ function browseTerms(_editing_input, $input, value){
         
     function __recreateTrmLabel($input, trm_ID){
 
+        let lang_code = that.options.language;
+        if(!window.hWin.HEURIST4.util.isempty(lang_code) && lang_code != 'ALL' && !window.hWin.HAPI4.EntityMgr.getEntityData2('trm_Translation')){ // retrieve translations
+
+            window.hWin.HAPI4.EntityMgr.getTranslations('defTerms', 'trm', null, function(){
+                __recreateTrmLabel($input, trm_ID);
+            });
+            lang_code = '';
+            //return;
+        }
+
         $input.empty();
         if(window.hWin.HEURIST4.util.isNumber(trm_ID) && trm_ID>0){
             
-            var trm_Label = $Db.trm(trm_ID, 'trm_Label');
+            var trm_Label = $Db.trm_getLabel(trm_ID, lang_code);
             var trm_info = $Db.trm(trm_ID);
 
             if(trm_info && trm_info.trm_ParentTermID != 0){
@@ -1508,11 +1518,12 @@ function browseTerms(_editing_input, $input, value){
                 while(1){
 
                     trm_info = $Db.trm(trm_info.trm_ParentTermID);
+                    let label = $Db.trm_getLabel(trm_info.trm_ParentTermID, lang_code);
 
                     if(trm_info.trm_ParentTermID == 0){
                         break;
                     }else{
-                        trm_Label = trm_info.trm_Label + '.' +  trm_Label;
+                        trm_Label = label + '.' +  trm_Label;
                     }
                 }
             }
@@ -1615,6 +1626,7 @@ function browseTerms(_editing_input, $input, value){
         var allTerms = that.f('rst_FilteredJsonTermIDTree');        
         //headerTerms - disabled terms
         var headerTerms = that.f('rst_TermIDTreeNonSelectableIDs') || that.f('dty_TermIDTreeNonSelectableIDs');
+        let lang_code = that.options.language;
 
         if(window.hWin.HEURIST4.util.isempty(allTerms) &&
             that.options.dtID==window.hWin.HAPI4.sysinfo['dbconst']['DT_RELATION_TYPE'])
@@ -1622,6 +1634,10 @@ function browseTerms(_editing_input, $input, value){
             allTerms = 'relation'; //show all possible relations
         }else if(typeof allTerms == 'string' && allTerms.indexOf('-')>0){ //vocabulary concept code
             allTerms = $Db.getLocalID('trm', allTerms);
+        }else if(!window.hWin.HEURIST4.util.isempty(lang_code) && lang_code != 'ALL'
+            && !window.hWin.HAPI4.EntityMgr.getEntityData2('trm_Translation')){
+            window.hWin.HAPI4.EntityMgr.getTranslations('defTerms', 'trm', null, __recreateSelector);
+            return;
         }
 
 
@@ -1684,7 +1700,7 @@ function browseTerms(_editing_input, $input, value){
         that.selObj = window.hWin.HEURIST4.ui.createTermSelect(that.selObj,
             {vocab_id:allTerms, //headerTermIDsList:headerTerms,
                 defaultTermID:$input.val(), topOptions:topOptions, supressTermCode:true, 
-                useHtmlSelect:false, eventHandlers:events});                
+                useHtmlSelect:false, eventHandlers:events, language_code: lang_code});
 
         $(that.selObj).hide(); //button will be hidden        
     }

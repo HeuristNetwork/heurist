@@ -66,7 +66,9 @@ $.widget( "heurist.searchBuilderItem", {
         onremove: null,
         onchange: null,
         
-        onselect_field: null  //callback to select field from treeview
+        onselect_field: null,  //callback to select field from treeview
+
+        language: null // selected language (3 character ISO639-2 code)
     },
 
     _current_field_type:null, // type of input field
@@ -418,6 +420,8 @@ $.widget( "heurist.searchBuilderItem", {
             ed_options['detailtype'] = (field_type=='blocktext' || field_type=='file')?'freetext':field_type;
             ed_options['dtID'] = dty_ID;
             
+            ed_options['language'] = (field_type=='enum') ? this.options.language : ''; // show translated terms
+
             if(field_type=='enum' && this.options.enum_field!=null && 
                 !(this.options.enum_field=='term' && this.select_comparison.val() != '')){
 
@@ -741,6 +745,8 @@ Whole value = EQUAL
                             this.cb_negate.find('input').is(':checked');
             var op = this.select_comparison.val();
 
+            let lang_code = this.options.language;
+
             if(this._current_field_type=='relmarker'){
                 relatype_vals = $(this._predicate_reltype_ele).editing_input('getValues');
                 has_relatype_value = (relatype_vals.length>1 ||!window.hWin.HEURIST4.util.isempty(relatype_vals[0]));
@@ -755,7 +761,12 @@ Whole value = EQUAL
                 this._predicate_input_ele.find('.input-div > select').length > 0){ // change from ids to label
 
                 for (let i = 0; i < vals.length; i++) {
-                    vals[i] = $Db.trm(vals[i], 'trm_Label');
+                    let def_label = $Db.trm(vals[i], 'trm_Label');
+                    vals[i] = $Db.trm_getLabel(vals[i], this.options.language);
+
+                    if(lang_code == 'ALL' || vals[i] != def_label){ // prepend language code
+                        vals[i] = lang_code + ':' + vals[i];
+                    }
                 }
             }
 
@@ -810,6 +821,9 @@ Whole value = EQUAL
                 
                 if(op!=''){
                     $.each(vals,function(i,val){vals[i]=op+vals[i]});        
+                }else if(this._current_field_type=='enum' && this.options.enum_field == 'term' && lang_code != ''){
+                    // prepend language code
+                    $.each(vals,function(i,val){vals[i]=lang_code+':'+vals[i]});
                 }
             }
 

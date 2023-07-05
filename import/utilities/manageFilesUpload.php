@@ -374,7 +374,7 @@ if(!($max_size>0)) $max_size = 0;
             <a href="{%=file.url%}" title="{%=file.name%}" download="{%=file.name%}" {%=file.thumbnailUrl?'data-gallery':''%}>{%=file.name%}</a>
             </p>
               {% if (file.error) { %}
-                <div><span class="error">Upload cancelled</span> {%=file.error%}</div>
+                <div>{%=file.error%} <span>Upload cancelled</span></div>
                 <span class="error_for_msg" style="display:none">{%=file.name%} {%=file.error%}</span>
               {% } %}
                 </td>
@@ -642,24 +642,31 @@ if(!($max_size>0)) $max_size = 0;
                             if(s.indexOf('uploaded file exceeds') < 0){ // ignore msg about exceeding upload max
                                 swarns = swarns + '<br>'+s;    
                                 cntOtherErrors++;
+
+                                let $prev_ele = $(item).prev();
+                                if($prev_ele.length > 0 && $prev_ele.find('span').length == 1){ // redify 'Upload cancelled'
+                                    $prev_ele.find('span').addClass('error');
+                                }
                             }
                         });
 
                         if(cntAlreadyExists>0){            
                             swarns_exists = '<h4 style="margin-bottom:0px">Already uploaded files: '+cntAlreadyExists+'</h4>'
-                                    +'<div style="line-height:0.8;max-height:100px;overflow-y:auto">'+swarns_exists+'</div>';
+                                    +'<div style="line-height:0.8;">'+swarns_exists+'</div>';
                         }
                         if(cntWarnMemtypes>0){
-                            swarns_memtypes = '<h4 style="margin-bottom:0px">The following files were not uploaded as the mime type was not recognised (please contact us for an update). Count = '+cntWarnMemtypes+'</h4>'
-                                    +'<div style="line-height:0.8;max-height:100px;overflow-y:auto">'+swarns_memtypes+'</div>';
+                            swarns_memtypes = '<h4 style="margin-bottom:0px">The following files were not uploaded as the mime type was not recognised (please contact us for an update).<br>Count = '+cntWarnMemtypes+'</h4>'
+                                    +'<div style="line-height:0.8;">'+swarns_memtypes+'</div>';
                         }
                         if(cntOtherErrors>0){
                             swarns = '<h4 style="margin-bottom:0px">Attention. '
                                       +(cntOtherErrors==1?'File was not':(cntOtherErrors+' files were not'))
-                                      +' uploaded.</h4><div style="line-height:1;max-height:100px;overflow-y:auto">'+swarns+'</div>';
+                                      +' uploaded.</h4><div style="line-height:0.9;">'+swarns+'</div>';
                         }
 
                         swarns = swarns_exists + swarns_memtypes + swarns;
+                        swarns = window.hWin.HEURIST4.util.isempty(swarns) ? '' :
+                                    '<div style="max-height: 500px; overflow-y: auto; padding-right: 5px;">' + swarns + '</div>';
                         
                         if(cntAlreadyExists>0 || cntWarnMemtypes>0){
 
@@ -673,7 +680,7 @@ if(!($max_size>0)) $max_size = 0;
                         }
 
                         if(e.originalEvent.type != 'done' && data.result?.files){
-                            registerFile(data.result?.files, !(cntAlreadyExists>0 || cntWarnMemtypes>0));
+                            registerFile(data.result?.files, swarns == '');
                         }
 
                     }
@@ -705,7 +712,7 @@ if(!($max_size>0)) $max_size = 0;
                 $('#btnStart').click(function(e){ 
                     window.hWin.HEURIST4.util.setDisabled($('#btnStart'), true);                    
                     window.hWin.HEURIST4.util.setDisabled($('#btnFinished'), true);                    
-                    $('#btnStart').button('option','label','Start uploads');
+                    $('#btnStart').button('option','label','uploading...');
                     $('#btnCancel').button('option','label','Cancel uploads');
 
                     to_reg_count = $('input[name="registerFiles"]').is(':checked') ? $('.template-upload').length : 1;
