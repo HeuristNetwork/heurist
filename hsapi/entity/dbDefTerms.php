@@ -432,7 +432,7 @@ class DbDefTerms extends DbEntityBase
 					
                     if(@$this->records[$idx]['trm_Label'] || @$this->records[$idx]['trm_Code']){
                     
-                        $labels = $this->getLabelsAndCodes( $parent_id );
+                        $labels = $this->getLabelsAndCodes( $parent_id, false );
                         
                         if(is_array($labels)){
                                 foreach($labels as $id=>$vals){

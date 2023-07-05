@@ -1938,7 +1938,7 @@ window.hWin.HEURIST4.dbs = {
     //
     // Check first level (direct children) only
     //
-    trm_HasChildWithLabel: function(parent_id, trm_label){
+    trm_HasChildWithLabel: function(parent_id, trm_label, ignored_trm_id = null){
 
         var t_idx = window.hWin.HAPI4.EntityMgr.getEntityData('trm_Links'); 
         var children = t_idx[parent_id] ?t_idx[parent_id]:[];
@@ -1950,8 +1950,33 @@ window.hWin.HEURIST4.dbs = {
            
            for(var i=0; i<children.length;i++){  
                 var recID = children[i];
-                if(recset.fld(recID, 'trm_Label').toLowerCase()==trm_label)
+                let check_id = ignored_trm_id != recID;
+                if(check_id && recset.fld(recID, 'trm_Label').toLowerCase()==trm_label)
                 {
+                   return true; 
+                }
+           }
+        }
+        
+        return false;
+    },
+    
+    //
+    // Check direct children for privded trm_Code
+    //
+    trm_HasChildWithCode: function(parent_id, trm_code, ignored_trm_id = null){
+
+        const t_idx = window.hWin.HAPI4.EntityMgr.getEntityData('trm_Links'); 
+        const children = t_idx[parent_id] ?t_idx[parent_id]:[];
+
+        if(!window.hWin.HEURIST4.util.isempty(trm_code)){
+
+           var recset = window.hWin.HAPI4.EntityMgr.getEntityData('defTerms');
+           
+           for(var i=0; i<children.length;i++){  
+                var recID = children[i];
+                let check_id = ignored_trm_id != recID;
+                if(check_id && recset.fld(recID, 'trm_Code')==trm_code){
                    return true; 
                 }
            }
