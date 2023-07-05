@@ -1420,7 +1420,7 @@ $.widget( "heurist.manageEntity", {
         if(this._editing.validate()){
             return this._editing.getValues(false);    
         }else{
-            var eles = this.editForm.find('.text.ui-state-error');
+            var eles = this.editForm.find('.ui-state-error:not(:empty)');
             
             window.hWin.HEURIST4.msg.showMsgFlash('Missing or invalid data entered'
                 +((eles.length>1)?(' for '+eles.length+' fields.'):'')
@@ -1450,14 +1450,23 @@ $.widget( "heurist.manageEntity", {
 
             $first_ele.focus();
 
-            this.editForm.find('.ui-tabs-anchor.ui-state-error').removeClass('ui-state-error');
+            this.editForm.find('.ui-tabs-anchor.ui-state-error, .input-div.ui-state-error').removeClass('ui-state-error');
             $.each(eles, (idx, ele) => {
 
                 let $ele = $(ele);
 
+                // Highlight tab
                 if($ele.parents('fieldset.ui-tabs-panel').length > 0){
                     let tab_id = $ele.parents('fieldset.ui-tabs-panel').attr('id');
                     that.editForm.find('a[href="#'+ tab_id +'"]').addClass('ui-state-error');
+                }
+
+                // Highlight field
+                if($ele.parent().hasClass('input-cell')){
+                    $ele.parent().addClass('ui-state-error').css('border', 'none');
+                    $ele.css('border', '');
+                }else{
+                    $ele.css('border', '0px');
                 }
             });
             
