@@ -1539,6 +1539,7 @@ $.widget( "heurist.search_faceted_wiz", {
                             multisel: old_facet.multisel,
                             groupby: old_facet.groupby,
                             orderby: old_facet.orderby,
+                            srange: old_facet.srange,
                             type: node.data.type,
                             order: old_facet.order>=0?old_facet.order:order_for_new,
                             trm_tree: (old_facet.trm_tree && old_facet.trm_tree === true)
@@ -1554,6 +1555,7 @@ $.widget( "heurist.search_faceted_wiz", {
                             title:'{NEW}', //(node.data.name?node.data.name:node.title),
                             groupby: null,
                             orderby: null,
+                            srange: null,
                             type:node.data.type,
                             order: order_for_new
                         } );
@@ -1647,9 +1649,19 @@ $.widget( "heurist.search_faceted_wiz", {
                         +'</label></span>';
                         
                     sGroupBy = sGroupBy
+                        +'<span id="facet_SearchMode'+idd+'">&nbsp;Search ranges:<label><input type="radio" data-search="overlap" data-id="'
+                        + idd+'" style="vertical-align: middle;margin-left:16px" checked name="smode'+idd+'">'
+                        + window.hWin.HR("Overlap")+'</label>'
+                        + '<label><input type="radio" data-search="between" data-id="'
+                        + idd+'" style="vertical-align: middle;margin-left:16px" name="smode'+idd+'">'
+                        + window.hWin.HR("Between")+'</label>'
+                        +'</span>';
+
+                    sGroupBy = sGroupBy
                         +'<label><input type="checkbox" data-sort="desc" data-id="'
                         + idd+'" style="vertical-align: middle;margin-left:16px">'
                         + window.hWin.HR("Order descending")+"</label>";
+
 						
                     includeDropdown = false;
                    
@@ -1755,6 +1767,7 @@ $.widget( "heurist.search_faceted_wiz", {
                 
                 listdiv.find('input[data-sort="count"][data-id="'+idd+'"]').prop('checked', (facets[k].orderby=='count'));
                 listdiv.find('input[data-sort="desc"][data-id="'+idd+'"]').prop('checked', (facets[k].orderby=='desc'));
+                listdiv.find('input[data-search="between"][data-id="'+idd+'"]').prop('checked', (facets[k].srange=='between'));
 
                 //listdiv.find('input:radio[name="facet_Type'+idd+'"][value="'+facets[k].isfacet+'"]').attr('checked', true);
                 listdiv.find('button.btnset_radio[data-idx="'+idd+'"]').removeClass('ui-heurist-btn-header1');
@@ -1895,6 +1908,9 @@ $.widget( "heurist.search_faceted_wiz", {
                 this._refresh_FacetsPreview();   
             }});
             
+            this._on( listdiv.find('input[data-searc]'), {change: function(e){
+                this._assignFacetParams();
+            }});
             
             return true;
         }else{
@@ -1942,6 +1958,11 @@ $.widget( "heurist.search_faceted_wiz", {
                     this.options.params.facets[k].orderby = 'desc';    
                 }
                     
+                this.options.params.facets[k].srange = null;    
+                if(listdiv.find('input[data-search="between"][data-id="'+idd+'"]').is(':checked'))
+                {
+                    this.options.params.facets[k].srange = 'between';    
+                }
                 
                 if(this.options.params.facets[k].type=='date' 
                   || this.options.params.facets[k].type=='year'){

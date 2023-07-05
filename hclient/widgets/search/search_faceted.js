@@ -1522,18 +1522,25 @@ $.widget( "heurist.search_faceted", {
                                             
                                         }
                                     }else{
+                                        
+                                        //search for dates grouped by
+                
                                         if(selval.value.indexOf('<>')<0 && selval.value.indexOf('><')<0){
+                                            // <> - range in database overlaps the specified interval
+                                            // >< - range in database between/within the specified interval
+                                            let op_compare = facets[facet_index].srange=='between'?'><':'<>';
+                                            
                                             if(facets[facet_index].groupby=='month'){
                                                 var y_m = selval.value.split('-');
-                                                selval.value = y_m[0]+'-'+y_m[1]+'-01<>'+y_m[0]+'-'+y_m[1]+'-31';
+                                                selval.value = y_m[0]+'-'+y_m[1]+'-01'+op_compare+y_m[0]+'-'+y_m[1]+'-31';
 
                                             }else if(facets[facet_index].groupby=='year'){
-                                                selval.value = selval.value + '<>' +(Number(selval.value)+'-12-31');
+                                                selval.value = selval.value + op_compare +(Number(selval.value)+'-12-31');
                                                 
                                             }else if(facets[facet_index].groupby=='decade'){
-                                                selval.value = selval.value + '<>' +((Number(selval.value)+9)+'-12-31');
+                                                selval.value = selval.value + op_compare +((Number(selval.value)+9)+'-12-31');
                                             }else if(facets[facet_index].groupby=='century'){
-                                                selval.value = selval.value + '<>' +((Number(selval.value)+99)+'-12-31');
+                                                selval.value = selval.value + op_compare +((Number(selval.value)+99)+'-12-31');
                                             }
                                             
                                         }
@@ -2873,7 +2880,9 @@ return;
                                     }
                                 }
 
-                                var value = (min==max)?min :min + '<>' + max; //search in between                            
+                                let op_compare = field.srange=='between'?'><':'<>' //between or overlap
+                                
+                                var value = (min==max)?min :(min + op_compare + max);                            
                              
 //DEBUG console.log('search:',value); 
                                 
@@ -3116,7 +3125,14 @@ return;
                         if(field['orderby']=='count'){
                             response.data.sort(function(a, b){ return (Number(a[1])>Number(b[1]))?-1:1;});
                         }else if(field['orderby']=='desc'){
-                            response.data.sort(function(a, b){ return (a[0]>b[0]?-1:1);});
+                            
+                            if(field['type']=="float" || field['type']=="integer" || field['type']=="year"
+                              || (field['type']=="date" && field['groupby']!='month')) {
+                                 
+                                response.data.sort(function(a, b){ return (parseFloat(a[0])>parseFloat(b[0])?-1:1);}); 
+                            }else{
+                                response.data.sort(function(a, b){ return (a[0]>b[0]?-1:1);});    
+                            }
                         }
                         
                         var display_mode = (field['isfacet']==this._FT_LIST || field['isfacet']==this._FT_SELECT || (field['groupby']=='firstchar' && field['isfacet']==this._FT_LIST))
