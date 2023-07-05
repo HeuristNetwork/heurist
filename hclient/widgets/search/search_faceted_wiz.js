@@ -1908,7 +1908,7 @@ $.widget( "heurist.search_faceted_wiz", {
                 this._refresh_FacetsPreview();   
             }});
             
-            this._on( listdiv.find('input[data-searc]'), {change: function(e){
+            this._on( listdiv.find('input[data-search]'), {change: function(e){
                 this._assignFacetParams();
             }});
             

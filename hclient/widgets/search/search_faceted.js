@@ -2428,10 +2428,13 @@ $.widget( "heurist.search_faceted", {
                         var sl_count = (cterm && cterm.length==3)?cterm[2]:0;
                         
                         if(field.selectedvalue){ //currently selected value - some range was already set
-                                if($.isNumeric(field.selectedvalue.value) ||  field.selectedvalue.value.indexOf('<>')<0  ){
+                                if($.isNumeric(field.selectedvalue.value) ||  
+                                        (field.selectedvalue.value.indexOf('<>')<0 && 
+                                         field.selectedvalue.value.indexOf('><')<0) ){
                                     cterm = [field.selectedvalue.value, field.selectedvalue.value];
                                 }else{
-                                    cterm = field.selectedvalue.value.split('<>');
+                                    let s_op = field.selectedvalue.value.indexOf('><')<0?'<>':'><';
+                                    cterm = field.selectedvalue.value.split(s_op);
                                 }
                         }
                         
