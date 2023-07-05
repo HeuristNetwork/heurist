@@ -2078,6 +2078,40 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
                     );
 
                 }
+            },
+
+            //
+            // Retrieve translations stored within defTranslations
+            //
+            getTranslations: function(entityName, key, recIDs, callback){
+
+                if(key.indexOf('_Translation') == -1){
+                    key += '_Translation';
+                }
+
+                if(entity_data[key] && window.hWin.HEURIST4.util.isRecordSet(entity_data[key])){ // already in cache
+                    callback.call(this, entity_data[key]);
+                    return;
+                }
+
+                let request = {
+                    'a': 'batch',
+                    'entity': entityName,
+                    'get_translations': window.hWin.HEURIST4.util.isempty(recIDs) ? 'all': recIDs,
+                    'request_id': window.hWin.HEURIST4.util.random()
+                };
+
+                window.hWin.HAPI4.EntityMgr.doRequest(request, function(response){ console.log(response);
+                    if(response.status == window.hWin.ResponseStatus.OK){
+
+                        let recordset = new hRecordSet(response.data);
+                        window.hWin.HAPI4.EntityMgr.setEntityData(key, recordset); // save to local cache
+
+                        callback.call(this, recordset);
+                    }else{
+                        callback.call(this, null);
+                    }
+                });
             }
 
         }

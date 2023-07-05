@@ -1799,13 +1799,14 @@ window.hWin.HEURIST4.dbs = {
     //        3, set  - array of ids 
     //        4, labels - flat array of labels in lower case 
     //
-    trm_TreeData: function(vocab_id, mode, without_refs){
+    trm_TreeData: function(vocab_id, mode, without_refs = false, language = ''){
         
         var recset = window.hWin.HAPI4.EntityMgr.getEntityData('defTerms');
         //parent:[children]
         var t_idx = window.hWin.HAPI4.EntityMgr.getEntityData('trm_Links'); 
         var trm_ids = [];
         var res = {};
+        let translated_labels = null;
         
         if(window.hWin.HEURIST4.util.isNumber(mode)){
             if(mode==1) mode='tree'
@@ -1815,6 +1816,9 @@ window.hWin.HEURIST4.dbs = {
             else mode='flat';
         }
         
+        if(mode == 'tree' || mode == 'select'){ // get translated labels
+            translated_labels = $Db.trm_getTranslatedLabels(vocab_id, language);
+        }        
 
         function __addChilds(recID, lvl_parents, include_vocab){
         
@@ -1858,7 +1862,9 @@ window.hWin.HEURIST4.dbs = {
 
                     for(var i=0; i<children.length;i++){ 
                         recID = children[i];
-                        trm_ids.push({title: recset.fld(recID, 'trm_Label'), 
+                        label = translated_labels ? translated_labels[recID] : recset.fld(recID, 'trm_Label');
+
+                        trm_ids.push({title: label, 
                                       code: recset.fld(recID, 'trm_Code'),
                                       key: recID, 
                                       depth: lvl_parents});
@@ -2063,6 +2069,45 @@ window.hWin.HEURIST4.dbs = {
             }
         }
         return res;
+    },
+
+    /**
+     * Creates array of objects where, key => term id & value => default/translated label
+     * If a term label doesn't have a translation for the provided language,
+     *  than the original label is used
+     */
+    trm_getTranslatedLabels: function(vocab_id, language){
+
+        let term_ids = [];
+        if(!window.hWin.HEURIST4.util.isArray(vocab_id)){
+            term_ids = $Db.trm_TreeData(vocab_id, 'set');
+            if(term_ids.length == 0){ // vocab id is term id(s)
+                term_ids = [vocab_id];
+            }else if(term_ids.indexOf(vocab_id) == -1){ // add vocab id, if missing
+                term_ids.push(vocab_id);
+            }
+        }else{
+            term_ids = vocab_id;
+        }
+
+        let translated_list = {};
+        for(const id of term_ids){
+            translated_list[id] = $Db.trm_getLabel(id, language);
+        }
+
+        return translated_list;
+    },
+
+    trm_getLabel: function(term_id, language = null){
+
+        let translations = window.hWin.HAPI4.EntityMgr.getEntityData2('trm_Translation');
+        const def_label = $Db.trm(term_id, 'trm_Label');
+        if(!translations || window.hWin.HEURIST4.util.isempty(language) || language == 'ALL'){
+            return def_label;
+        }
+
+        let rec = translations.getSubSetByRequest({trn_LanguageCode: language, trn_Source: 'trm_Label', trn_Code: term_id}).getFirstRecord();
+        return !rec || Object.keys(rec).length == 0 ? def_label : translations.fld(rec, 'trn_Translation');
     },
     
     //

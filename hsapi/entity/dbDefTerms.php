@@ -226,6 +226,56 @@ class DbDefTerms extends DbEntityBase
     }
 
     //
+    // Retrieve and create a recordset of term translations
+    //
+    public function getTermTranslations($label_only = true, $trm_ids = null){
+
+        $mysqli = $this->system->get_mysqli();
+
+        $fields = array('trn_ID', 'trn_Code', 'trn_Source', 'trn_LanguageCode', 'trn_Translation');
+        $records = array();
+        //$order = array();
+
+        $where_clause = $label_only ? 'trn_Source = "trm_Label"' : 'trn_Source LIKE "trm_%"';
+
+        if(!empty($trm_ids)){ // add term id filter
+
+            $code_clause = '';
+            if(is_array($trm_ids)){
+                $trm_ids = array_filter($trm_ids, function($id){
+                    return is_int($id) && $id > 0;
+                });
+                $code_clause = !empty($trm_ids) ? 'trn_Code IN (' . implode(',', $trm_ids) . ')' : '';
+            }else if(is_int($trm_ids) && $trm_ids > 0){
+                $code_clause = 'trn_Code = ' . $trm_ids;
+            }
+
+            $where_clause .= empty($code_clause) ? '' : ' AND ' . $code_clause; 
+        }
+
+        $query = 'SELECT trn_ID, trn_Code, trn_Source, trn_LanguageCode, trn_Translation '
+                . 'FROM defTranslations '
+                . 'WHERE ' . $where_clause;
+
+        $res = $mysqli->query($query);
+        if($res){
+
+            while($row = $res->fetch_row()){
+                $records[$row[0]] = $row;
+                //$order[] = $row[0];
+            }
+        }
+
+        return array(
+            'reccount'=>count($records),
+            'fields'=>$fields,
+            'records'=>$records,
+            'order'=>array_keys($records),
+            'entityName'=>$this->config['entityName']
+        );
+    }
+
+    //
     // trm_Label may have periods. Periods are taken as indicators of hierarchy.
     //
     private function _importTerms(){
@@ -849,6 +899,23 @@ class DbDefTerms extends DbEntityBase
                     
                 }
                 
+            }else if(@$this->data['get_translations']){
+
+                $field = array_key_exists('search_by', $this->data) ? $this->data['search_by'] : 'trm_ID';
+                $field = $field != 'trm_ParentTermID' && $field != 'trm_ID' ? 'trm_ID' : $field;
+
+                $ids = $this->data['get_translations'];
+                if($field == 'trm_ParentTermID'){
+                    $ids = mysql__select_list2($mysqli, 'SELECT trm_ID FROM defTerms WHERE trm_ParentTermID=' . $ids[0]);
+                }
+                if(is_array($ids)){
+                    $ids = implode(',', $ids);
+                }else if(!is_int($ids) || $ids < 0){
+                    $ids = '';
+                }
+
+                return $this->getTermTranslations(false, $ids);
+
             }else{
                 //import terms (from csv)
                 $ret = $this->_importTerms();
