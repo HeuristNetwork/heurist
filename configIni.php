@@ -216,6 +216,9 @@ $absolutePathsToRemoveFromWebPages = null;
 //array - pairs: "sp id"=>"Service Provide Name"
 $saml_service_provides = null;
 
+// if it is 1, hide standard heurist login and show SAML auth only ($saml_service_provides must be defined)
+$hideStandardLogin = 0;
+
 // system default file - if a heuristConfigIni.php file exists in the parent directory of the installation,
 // the configIni.php in the installation does not need to be configured. This allows unconfigured ConfigIni.php files
 // to exist in multiple experimental codebases on a single server and avoids accidental distribution of passwords etc.

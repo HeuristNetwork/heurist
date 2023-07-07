@@ -65,6 +65,22 @@ function showLoginDialog(isforsed, callback, parentwin, dialog_id){
             $dlg.remove();
     }
     
+    //
+    //
+    //
+    function __onSamlLogin(){
+        $dlg.dialog('option','close',function(){ 
+                $dlg.remove(); 
+        });;
+        var sel = $dlg.find('#saml_sp');
+        if(sel.val()){
+            $dlg.dialog('close');
+            doSamlLogin(callback, parentwin, sel.val());
+        }
+    }
+
+    
+    
 
     if(login_dialog.length<1)  // login_dialog.is(':empty') )
     {
@@ -85,21 +101,26 @@ function showLoginDialog(isforsed, callback, parentwin, dialog_id){
             if($.isPlainObject(window.hWin.HAPI4.sysinfo.saml_service_provides)){
                 var sp_keys = Object.keys(window.hWin.HAPI4.sysinfo.saml_service_provides);
                 if(sp_keys.length>0){
+                    
+                    //hide standard login
+                    if(window.hWin.HAPI4.sysinfo.hideStandardLogin==1){
+                        $dlg.find('#login_standard').hide();    
+                        $dlg.find('#login_forgot').hide();
+                        $dlg.find('#login_saml > label:first').html('Select: ');
+                        $dlg.find('#login_saml').css({'margin-left':'14%'});
+                    }else{
+                        iWidth = 700;    
+                        $dlg.find('#login_standard').css({'width':'370px','display':'inline-block'});
+                    }
+                    
                     var sel = $dlg.find('#saml_sp');
                     for(let id of sp_keys){
                         window.hWin.HEURIST4.ui.addoption(sel[0],id,window.hWin.HAPI4.sysinfo.saml_service_provides[id]);
                     }
-                    iWidth = 700;
-                    $dlg.find('#fld_login > fieldset').css({'width':'370px','display':'inline-block'});
-                    $dlg.find('#fld_saml').css({'display':'inline-block'});
-                    $dlg.find('#btn_saml_auth').button().click(function(){
-                        
-                        $dlg.dialog('option','close',function(){ 
-                                $dlg.remove(); 
-                        });;
-                        $dlg.dialog('close');
-                        doSamlLogin(callback, parentwin, sel.val());
-                    });
+                    
+                    $dlg.find('#login_saml').css({'display':'inline-block'});
+                    $dlg.find('#btn_saml_auth').button().click( __onSamlLogin );
+                    
                 }
             }
             
@@ -167,6 +188,16 @@ function showLoginDialog(isforsed, callback, parentwin, dialog_id){
             var isreset = false;
 
             function __doLogin(){
+                
+                if(window.hWin.HAPI4.sysinfo.hideStandardLogin==1 && 
+                    $.isPlainObject(window.hWin.HAPI4.sysinfo.saml_service_provides)){
+                        var sp_keys = Object.keys(window.hWin.HAPI4.sysinfo.saml_service_provides);
+                        if(sp_keys.length>0){
+                            __onSamlLogin();
+                            return;
+                        }
+                }
+                    
 
                 allFields.removeClass( "ui-state-error" );
                 var message = login_dialog.find('.messages');
@@ -372,9 +403,10 @@ function doSamlLogin(callback, parentwin, sp_entity){
         height: 420,
         //noClose: true,
         
-        afterclose: function() {
-            $(window.hWin.document).trigger(window.hWin.HAPI4.Event.ON_CREDENTIALS, 
-                                                            [window.hWin.HAPI4.currentUser]);
+        afterclose: function(context) {
+console.log('afterclose', context, window.hWin.HAPI4.currentUser);            
+            //$(window.hWin.document).trigger(window.hWin.HAPI4.Event.ON_CREDENTIALS, 
+            //                                                [window.hWin.HAPI4.currentUser]);
             /*
             if(!window.hWin.HAPI4.has_access() ){
                 //redirects to startup page - list of all databases
@@ -383,10 +415,24 @@ function doSamlLogin(callback, parentwin, sp_entity){
             */
         },
         callback:function(context){
+console.log('callback', context);            
                 if(context){
+                    
+                        if(context>0){
+                            window.hWin.HAPI4.setCurrentUser(context);
+                            //window.hWin.HAPI4.sysinfo = response.data.sysinfo;
+                        }
+                        
+                        //update window.hWin.HAPI4.sysinfo
                         window.hWin.HAPI4.SystemMgr.sys_info(function (success) {
 
                             if (success) {
+
+console.log('sys_info', success); 
+                                
+                                $(window.hWin.document).trigger(window.hWin.HAPI4.Event.ON_CREDENTIALS, 
+                                                            [window.hWin.HAPI4.currentUser]);
+
                                 
                                 if( window.hWin.HAPI4.SystemMgr.versionCheck() ) {
                                     //version is old 
@@ -395,6 +441,8 @@ function doSamlLogin(callback, parentwin, sp_entity){
 
                             }
                         });            
+                        
+
 //}
                     return true;
                 }else{

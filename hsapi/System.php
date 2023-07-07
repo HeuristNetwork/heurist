@@ -1066,7 +1066,8 @@ error_log(print_r($_REQUEST, true));
         global $passwordForDatabaseCreation, $passwordForDatabaseDeletion,
                $passwordForReservedChanges, $passwordForServerFunctions,
                $needEncodeRecordDetails, 
-               $common_languages_for_translation, $glb_lang_codes, $saml_service_provides;
+               $common_languages_for_translation, $glb_lang_codes, 
+               $saml_service_provides, $hideStandardLogin;
    
         if(!isset($needEncodeRecordDetails)){
             $needEncodeRecordDetails = 0;
@@ -1175,6 +1176,7 @@ error_log(print_r($_REQUEST, true));
                     'common_languages'=>$common_languages,
                     
                     'saml_service_provides'=>$saml_service_provides,
+                    'hideStandardLogin' => $hideStandardLogin,
                     
                     'nakala_api_key'=>$this->get_system('sys_NakalaKey'),
                     
@@ -1207,6 +1209,7 @@ error_log(print_r($_REQUEST, true));
                     'host_logo'=>$host_logo,
                     'host_url'=>$host_url,
                     'saml_service_provides'=>$saml_service_provides,
+                    'hideStandardLogin' => $hideStandardLogin,
                     'common_languages'=>$common_languages
             );
 
