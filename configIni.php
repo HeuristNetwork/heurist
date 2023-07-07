@@ -216,7 +216,7 @@ $absolutePathsToRemoveFromWebPages = null;
 //array - pairs: "sp id"=>"Service Provide Name"
 $saml_service_provides = null;
 
-// if it is 1, hide standard heurist login and show SAML auth only ($saml_service_provides must be defined)
+// if value is 1, it hides the standard heurist login and show SAML auth only ($saml_service_provides must be defined)
 $hideStandardLogin = 0;
 
 // system default file - if a heuristConfigIni.php file exists in the parent directory of the installation,
