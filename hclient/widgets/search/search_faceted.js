@@ -2753,9 +2753,12 @@ return;
                                                 }).appendTo($diagram);
                                             }
 
-                                            var $slide_handles = $slide_range.parent().find('.ui-slider-handle');
-                                            $facet_values.find('.ui-icon-triangle-1-w').position({my: 'right-6 center+5', at: 'right bottom', of: $($slide_handles[0])});
-                                            $facet_values.find('.ui-icon-triangle-1-e').position({my: 'left+6 center+5', at: 'left bottom', of: $($slide_handles[1])});
+                                            //var $slide_handles = $slide_range.parent().find('.ui-slider-handle');
+                                            var $slide_handle = $slide_range.parent().find('.ui-icon-triangle-1-w-stop');
+                                            $facet_values.find('.ui-icon-triangle-1-w').position({my: 'right-6 center+5', at: 'right bottom', of: $($slide_handle)});
+                                            
+                                            $slide_handle = $slide_range.parent().find('.ui-icon-triangle-1-e-stop');
+                                            $facet_values.find('.ui-icon-triangle-1-e').position({my: 'left+6 center+5', at: 'left bottom', of: $($slide_handle)});
                                         }else if(window.hWin.HAPI4.has_access()){ //display error message, only if the user is logged in
                                             response.message = 'An error occurred with generating the time graph data<br>' + response.message;
                                             window.hWin.HEURIST4.msg.showMsgErr(response);
@@ -3043,7 +3046,7 @@ return;
                                             top: '10px',
                                             left: '-20px'
                                         }).text(lbl_min);
-                                        ele2.find('.max-val').position({my: 'left top+10', at: 'left bottom', of: ele2.find('span.ui-icon-triangle-1-e-stop')}).text(lbl_max);
+                                        ele2.find('.max-val').text(lbl_max).position({my: 'right top+10', at: 'right bottom', of: ele2.find('span.ui-icon-triangle-1-e-stop')});
                                         /*setTimeout( () => {
                                             ele2.find('.min-val').position({my: 'right top', at: 'right bottom', of: ele2.find('span.ui-icon-triangle-1-w-stop')}).text(lbl_min);
                                             ele2.find('.max-val').position({my: 'left top', at: 'left bottom', of: ele2.find('span.ui-icon-triangle-1-e-stop')}).text(lbl_max);
