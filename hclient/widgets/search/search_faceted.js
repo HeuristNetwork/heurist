@@ -189,6 +189,8 @@ $.widget( "heurist.search_faceted", {
     
     no_value_facets: [], // {facet_id: facet_name}, for facets with no values
     
+    _last_active_facet: -1,
+    
     // the widget's constructor
     _create: function() {
         
@@ -700,6 +702,8 @@ $.widget( "heurist.search_faceted", {
     ,doReset: function(){
 
         var that = this;
+        
+        this._last_active_facet = -1;
 
         let primary_rt = this.options.params.rectypes[0];
         let need_linked_rectypes = !window.hWin.HEURIST4.util.isempty(this.options.params.spatial_filter) 
@@ -1507,7 +1511,7 @@ $.widget( "heurist.search_faceted", {
                                 var selval = facets[facet_index].selectedvalue;
                                 
                                 if(selval && !window.hWin.HEURIST4.util.isempty(selval.value)){
-//console.log(key, selval.value);                   
+//DEBUG console.log(key, selval.value);                   
                                     if(facets[facet_index].multisel){
                                         let vals = selval.value.split(',');
                                         for(let k=0;k<vals.length; k++){
@@ -1524,25 +1528,25 @@ $.widget( "heurist.search_faceted", {
                                     }else{
                                         
                                         //search for dates grouped by
-                
-                                        if(selval.value.indexOf('<>')<0 && selval.value.indexOf('><')<0){
-                                            // <> - range in database overlaps the specified interval
-                                            // >< - range in database between/within the specified interval
-                                            let op_compare = facets[facet_index].srange=='between'?'><':'<>';
-                                            
-                                            if(facets[facet_index].groupby=='month'){
-                                                var y_m = selval.value.split('-');
-                                                selval.value = y_m[0]+'-'+y_m[1]+'-01'+op_compare+y_m[0]+'-'+y_m[1]+'-31';
-
-                                            }else if(facets[facet_index].groupby=='year'){
-                                                selval.value = selval.value + op_compare +(Number(selval.value)+'-12-31');
+                                        if(facets[facet_index].type=='date' && facets[facet_index].groupby){
+                                            if(selval.value.indexOf('<>')<0 && selval.value.indexOf('><')<0){
+                                                // <> - range in database overlaps the specified interval
+                                                // >< - range in database between/within the specified interval
+                                                let op_compare = facets[facet_index].srange=='between'?'><':'<>';
                                                 
-                                            }else if(facets[facet_index].groupby=='decade'){
-                                                selval.value = selval.value + op_compare +((Number(selval.value)+9)+'-12-31');
-                                            }else if(facets[facet_index].groupby=='century'){
-                                                selval.value = selval.value + op_compare +((Number(selval.value)+99)+'-12-31');
+                                                if(facets[facet_index].groupby=='month'){
+                                                    var y_m = selval.value.split('-');
+                                                    selval.value = y_m[0]+'-'+y_m[1]+'-01'+op_compare+y_m[0]+'-'+y_m[1]+'-31';
+
+                                                }else if(facets[facet_index].groupby=='year'){
+                                                    selval.value = selval.value + op_compare +(Number(selval.value)+'-12-31');
+                                                    
+                                                }else if(facets[facet_index].groupby=='decade'){
+                                                    selval.value = selval.value + op_compare +((Number(selval.value)+9)+'-12-31');
+                                                }else if(facets[facet_index].groupby=='century'){
+                                                    selval.value = selval.value + op_compare +((Number(selval.value)+99)+'-12-31');
+                                                }
                                             }
-                                            
                                         }
                                         predicate[key] = selval.value;
                                     }
@@ -1703,6 +1707,7 @@ $.widget( "heurist.search_faceted", {
         // this._currentquery
         // this._resultset
         if(isNaN(field_index) || field_index<0){
+            //first call
             field_index = -1;  
             
             this._request_id =  Math.round(new Date().getTime() + (Math.random() * 100));
@@ -1734,6 +1739,19 @@ $.widget( "heurist.search_faceted", {
             var field = this.options.params.facets[i];
             
             if(i>field_index && field['isfacet']!=that._FT_INPUT && field['facet']){
+                
+                
+                if(i===this._last_active_facet && field['last_count_query']){
+                    var hashQuery = field['last_count_query'];
+                    var stored_counts = this._getCachedCounts( hashQuery, i );
+                    
+//DEBUG console.log(this._last_active_facet, stored_counts);                    
+                    this._last_active_facet = -1;
+                    if(stored_counts){
+                        that._redrawFacets(stored_counts, false);
+                        return;
+                    }
+                }
                 
                 if(field['type']=='enum' && field['groupby']=='firstlevel' && 
                                 !window.hWin.HEURIST4.util.isnull(field['selectedvalue'])){
@@ -1855,7 +1873,7 @@ $.widget( "heurist.search_faceted", {
 
                 
                 //var count_query = window.hWin.HEURIST4.util.cloneJSON( this.options.params.q );
-                this._fillQueryWithValues( count_query, i );
+                this._fillQueryWithValues( count_query, field['multisel']?-1:i );
                         
                 /* alas, ian want to get count on every step
                 if( (!window.hWin.HEURIST4.util.isnull(field['selectedvalue'])) 
@@ -1903,7 +1921,7 @@ $.widget( "heurist.search_faceted", {
                     fieldid = '1,18,231,304';
                 }
                 
-//DEBUG console.log(field);                
+//DEBUG console.log(count_query);                
 
                 var request = {q: query, count_query:count_query, w: 'a', a:'getfacets',
                                      facet_index: i, 
@@ -1925,15 +1943,12 @@ $.widget( "heurist.search_faceted", {
                 // try to find in cache by facet index and query string
                 
                 var hashQuery = window.hWin.HEURIST4.util.hashString(JSON.stringify(request.count_query));
-                for (var k=0; k<this.cached_counts.length; k++){
-                    if( parseInt(this.cached_counts[k].facet_index) == request.facet_index && 
-                        this.cached_counts[k].count_query == hashQuery) // && this.cached_counts[k].dt == request.dt)
-                    {
-                        that._redrawFacets(this.cached_counts[k], false);
-                        return;
-                    }
+                var stored_counts = this._getCachedCounts( hashQuery, i );
+                if(stored_counts){
+                    that._redrawFacets(stored_counts, false);
+                    return;
                 }
-                
+                field.last_count_query = hashQuery;
 
                 window.HAPI4.RecordMgr.get_facets(request, function(response){ 
                     
@@ -2006,6 +2021,20 @@ $.widget( "heurist.search_faceted", {
         }
     }
     
+    //
+    //
+    //
+    , _getCachedCounts: function(hashQuery, facet_index){
+        
+                for (var k=0; k<this.cached_counts.length; k++){
+                    if( parseInt(this.cached_counts[k].facet_index) == facet_index && 
+                        this.cached_counts[k].count_query == hashQuery) // && this.cached_counts[k].dt == dt)
+                    {
+                        return this.cached_counts[k];
+                    }
+                }        
+                return null;
+    }
  
     //
     // draw facet values
@@ -2142,7 +2171,8 @@ $.widget( "heurist.search_faceted", {
                                     return;
                                 }
                             
-                        }else if(dty_ID=='access'){
+                        }
+                        else if(dty_ID=='access'){
                             
                             term = {key: null, title: "all",
                                     children:[{title:'viewable', key:'viewable'},
@@ -3037,8 +3067,15 @@ return;
                                         ele2.find('span.ui-icon-triangle-1-w').position({my: 'right-6 center+5', at: 'right bottom', of: $($(this).find('.ui-slider-handle')[0])});
                                         ele2.find('span.ui-icon-triangle-1-e').position({my: 'left+6 center+5', at: 'left bottom', of: $($(this).find('.ui-slider-handle')[1])});
 
-                                        let lbl_min = __dateToString(field.mmin0);
-                                        let lbl_max = __dateToString(field.mmax0);
+                                        let lbl_min, lbl_max;
+                                        if(field['type']=="date"){
+                                            lbl_min = __dateToString(field.mmin0);
+                                            lbl_max = __dateToString(field.mmax0);
+                                        }else{
+                                            lbl_max = __roundNumericLabel(field.mmin0);
+                                            lbl_max = __roundNumericLabel(field.mmax0);
+                                        }
+                                        
 
                                         //ele2.find('.min-val').position({my: 'right top', at: 'right bottom', of: ele2.find('span.ui-icon-triangle-1-w-stop')}).text(lbl_min);
                                         ele2.find('.min-val').css({
@@ -3436,6 +3473,7 @@ return;
                             field.selectedvalue = {title:label, value:value, step:step};                    
                         }
 
+                        that._last_active_facet = facet_index;
                         that.doSearch();
                         
                         return false;
@@ -3487,6 +3525,7 @@ return;
         }
         
         if(prevvalue!=value){
+            this._last_active_facet = facet_index;
             this.doSearch();
         }
     }
@@ -3606,6 +3645,8 @@ return;
                     
                     var field = this.options.params.facets[facet_index];
                     
+                    if(!field) return;
+                    
                     if(window.hWin.HEURIST4.util.isempty(value)){
                         value = '';
                         field.selectedvalue = null;
@@ -3627,6 +3668,9 @@ return;
                         field.selectedvalue = {title:label, value:value, step:step};                    
                     }
 
+                    if(!(field.multisel || cterm.count=='reset')){
+                        that._last_active_facet = facet_index;
+                    } 
                     that.doSearch();
                     
                     return false;
