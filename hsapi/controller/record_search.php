@@ -126,7 +126,8 @@
 
     }else if(@$_REQUEST['a'] == 'gethistogramdata'){ // returns array of lower and upper limit plus a count for each interval
 
-        $response = getDateHistogramData($system, $_REQUEST['range'], $_REQUEST['interval'], @$_REQUEST['recids'], @$_REQUEST['dtyid'], @$_REQUEST['format']);
+        $response = getDateHistogramData($system, $_REQUEST['range'], $_REQUEST['interval'], 
+                    @$_REQUEST['recids'], @$_REQUEST['dtyid'], @$_REQUEST['format'], @$_REQUEST['is_between']==1);
 
     }else if(@$_REQUEST['a'] == 'related'){
 

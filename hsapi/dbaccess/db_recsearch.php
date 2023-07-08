@@ -567,7 +567,7 @@ function __assignFacetValue($params, $subs){
 // @return:
 //   Array => each index is the lower and upper limits for the interval plus the number of records that fit this interval
 //
-function getDateHistogramData($system, $range, $interval, $rec_ids, $dty_id, $format="year"){
+function getDateHistogramData($system, $range, $interval, $rec_ids, $dty_id, $format="year", $is_between){
 
     $mysqli = $system->get_mysqli();
 
@@ -575,6 +575,8 @@ function getDateHistogramData($system, $range, $interval, $rec_ids, $dty_id, $fo
     $intervals = array();
     $count = 0;
     $add_day = new DateInterval('P1D'); // Keep the class limits inclusive
+    $is_years_only = ($format=='years_only');
+    if($is_years_only) $format='year';
 
     // Validate Input
     if($rec_ids == null){
@@ -594,7 +596,22 @@ function getDateHistogramData($system, $range, $interval, $rec_ids, $dty_id, $fo
     if(is_array($interval) || intval($interval) == 0){
         return $system->addError(HEURIST_INVALID_REQUEST, "An invalid interval has been provided");
     }
-
+    
+    $period = Temporal::getPeriod($range[0], $range[1]);
+    if(!$period){
+        return false;
+    }
+        
+    $years = $period['years'];
+    $months = @$period['months'];
+    $days = @$period['days'];
+    
+    //$s_date = Temporal::dateToISO($range[0], 2, false);
+    //$e_date = Temporal::dateToISO($range[1], 2, false);
+    $s_date = new Temporal($range[0]);
+    $e_date = new Temporal($range[1]);
+    
+/*    
     // Process End Date
     try{
         $e_date = new DateTime($range[1]);
@@ -616,7 +633,7 @@ function getDateHistogramData($system, $range, $interval, $rec_ids, $dty_id, $fo
     $years = $diff->format('%y');
     $months = $diff->format('%M');
     $days = $diff->format('%d');
-
+*/
     // Control variables
     $org_interval = $interval;
     $lower_level = false;
@@ -646,7 +663,7 @@ function getDateHistogramData($system, $range, $interval, $rec_ids, $dty_id, $fo
             }
 
             if($lower_level){
-                return getDateHistogramData($system, $range, $org_interval, $rec_ids, $dty_id, 'month'); 
+                return getDateHistogramData($system, $range, $org_interval, $rec_ids, $dty_id, 'month', $is_between); 
             }
         }else if($count > $interval){ // increase internal size
 
@@ -658,7 +675,8 @@ function getDateHistogramData($system, $range, $interval, $rec_ids, $dty_id, $fo
         }
 
         if($count <= 1){
-            array_push($intervals, array($s_date->format($format), $e_date->format($format), count($rec_ids)));
+            //$s_date->format($format), $e_date->format($format)
+            array_push($intervals, array($s_date->getMinMax()[0], $e_date->getMinMax()[1], count($rec_ids)));
             return array("status"=>HEURIST_OK, "data"=>$intervals);
         }
 
@@ -693,7 +711,7 @@ function getDateHistogramData($system, $range, $interval, $rec_ids, $dty_id, $fo
             }
 
             if($lower_level){
-                return getDateHistogramData($system, $range, $org_interval, $rec_ids, $dty_id, 'day'); 
+                return getDateHistogramData($system, $range, $org_interval, $rec_ids, $dty_id, 'day', $is_between); 
             }
         }else if($count > $interval){ // increase internal size
    
@@ -705,19 +723,21 @@ function getDateHistogramData($system, $range, $interval, $rec_ids, $dty_id, $fo
             }
 
             if($in_count >= 15){
-                return getDateHistogramData($system, $range, $org_interval, $rec_ids, $dty_id, 'year'); 
+                return getDateHistogramData($system, $range, $org_interval, $rec_ids, $dty_id, 'year', $is_between); 
             }
         }
 
         if($count <= 1){
-            array_push($intervals, array($s_date->format($format), $e_date->format($format), count($rec_ids)));
+            //$s_date->format($format), $e_date->format($format)
+            array_push($intervals, array($s_date->getMinMax()[0], $e_date->getMinMax()[1], count($rec_ids)));
             return array("status"=>HEURIST_OK, "data"=>$intervals);
         }
 
         $date_int = new DateInterval('P'.$interval.'M');
         $count = ceil($count);
 
-    }else{
+    }
+    else{  //DAYS
 
         $days = $diff->days; // get the difference purely in days
 
@@ -735,7 +755,7 @@ function getDateHistogramData($system, $range, $interval, $rec_ids, $dty_id, $fo
             }
 
             if($in_count >= 12){
-                return getDateHistogramData($system, $range, $org_interval, $rec_ids, $dty_id, 'month');
+                return getDateHistogramData($system, $range, $org_interval, $rec_ids, $dty_id, 'month', $is_between);
             }
         }else if($count < 15){ // decrease interval size
    
@@ -751,7 +771,8 @@ function getDateHistogramData($system, $range, $interval, $rec_ids, $dty_id, $fo
         }
 
         if($count <= 1){
-            array_push($intervals, array($s_date->format($format), $e_date->format($format), count($rec_ids)));
+            //$s_date->format($format), $e_date->format($format)
+            array_push($intervals, array($s_date->getMinMax()[0], $e_date->getMinMax()[1], count($rec_ids)));
             return array("status"=>HEURIST_OK, "data"=>$intervals);
         }
 
@@ -761,20 +782,42 @@ function getDateHistogramData($system, $range, $interval, $rec_ids, $dty_id, $fo
     }
 
     // Create date intervals (class limits)
-    for($i = 0; $i < $count; $i++){
-        $lower = new DateTime($s_date->format('d M Y'));
-        $upper = new DateTime($s_date->add($date_int)->format('d M Y'));
-
-        if($upper > $e_date){ // last class
-            array_push($intervals, array($lower->format($format), $e_date->format($format), 0));
-            break;
-        }else{ // add class
-            array_push($intervals, array($lower->format($format), $upper->format($format), 0));
+    if($is_years_only){
+        $lower = $s_date->getMinMax()[0]; //in decimal
+        $end_year = $e_date->getMinMax()[1];
+        for($i = 0; $i < $count; $i++){
+            
+            $upper = $lower +  $interval;
+            
+            if($upper > $end_year){ // last class
+                array_push($intervals, array($lower, ($end_year>0?($end_year+0.1231):$end_year), 0));
+                break;
+            }else{ // add class
+                array_push($intervals, array($lower, $upper, 0));
+            }
+            
+            $lower = $upper;
         }
+    }else{
+        $start_interval = new DateTime(Temporal::decimalToYMD($s_date->getMinMax()[0]));
+        $end_date = new DateTime(Temporal::decimalToYMD($e_date->getMinMax()[1]));
+    
+        for($i = 0; $i < $count; $i++){
+            
+            $lower = floatval($start_interval->format('Y.md'));
+            $upper = new DateTime($start_interval->add($date_int)->format('Y-m-d'));
 
-        $s_date->add($add_day);
+            if($upper > $end_date){ // last class
+                array_push($intervals, array($lower, $e_date->getMinMax()[1], 0));
+                break;
+            }else{ // add class
+                array_push($intervals, array($lower, floatval($upper->format('Y.md')), 0));
+            }
+
+            $start_interval->add($add_day);
+        }
     }
-
+    
     // Get record dates
     //OLD $sql = "SELECT cast(if(cast(concat('00',getTemporalDateString(dtl_Value)) as DATETIME) is null, "
     //OLD                 ."concat('00',cast(getTemporalDateString(dtl_Value) as SIGNED), '-1-1'), concat('00',getTemporalDateString(dtl_Value))) as DATETIME)"
@@ -783,7 +826,7 @@ function getDateHistogramData($system, $range, $interval, $rec_ids, $dty_id, $fo
             //OLD .implode(',', $rec_ids).") AND dtl_DetailTypeID = ".$dty_id
             //OLD ." AND (NULLIF(dtl_Value, '') is not null) AND (cast(getTemporalDateString(dtl_Value) as DATETIME) is not null OR (cast(getTemporalDateString(dtl_Value) as SIGNED) is not null AND cast(getTemporalDateString(dtl_Value) as SIGNED) != 0))";
 
-    $sql = 'SELECT rdi_estMinDate '  //', rdi_estMaxDate'
+    $sql = 'SELECT rdi_estMinDate, rdi_estMaxDate '  //', rdi_estMaxDate'
             .' FROM recDetailsDateIndex'
             .' WHERE rdi_RecID IN ('
                 .implode(',', $rec_ids).") AND rdi_DetailTypeID = ".$dty_id; 
@@ -795,7 +838,7 @@ function getDateHistogramData($system, $range, $interval, $rec_ids, $dty_id, $fo
     }else{
 
         while($row = $res->fetch_row()){ // cycle through all records
-        
+/*        
             //convert from decimal to yyyy-01-01
             if(round($row[0])==$row[0]){
                 $dt = round($row[0]).'-01-01';
@@ -808,9 +851,13 @@ function getDateHistogramData($system, $range, $interval, $rec_ids, $dty_id, $fo
 
             $detail_date = new DateTime($dt);
             $detail_date->setTime(0,0);
+*/            
+            $dt0 = $row[0];
+            $dt1 = $row[1];
 
             for($k = 0; $k < count($intervals); $k++){ // cycle through classes, add to required count
 
+/*            
                 if($format == 'Y'){ // need separate handle for years
 
                     $lower = $intervals[$k][0];
@@ -833,6 +880,21 @@ function getDateHistogramData($system, $range, $interval, $rec_ids, $dty_id, $fo
                         break;
                     }
                 }
+*/
+                $lower = $intervals[$k][0];
+                $upper = $intervals[$k][1];
+                if($is_between){
+                    if($lower <= $dt0 && $dt1 <= $upper){ //within
+                            $intervals[$k][2] += 1;
+                            break;
+                    }
+                }else{ //overlap
+                    if($dt0>=$lower && $dt1<=$upper){
+                            $intervals[$k][2] += 1;
+                            //break;
+                    }
+                }
+
             }
         }
 

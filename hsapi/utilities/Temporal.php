@@ -54,7 +54,7 @@
 *       _parseTemporal - parses json or plain string to array of values
 *       _datePrepare     - Validates and sanitizes string date value - returns date array 
 *       _dateDecimal    - Converts string date yyyy-mm-dd  to decimal yyyy.mmdd 
-*       _decimalToYMD   - Converts string yyyy.mmdd to yyyy-mm-dd
+*       decimalToYMD   - Converts string yyyy.mmdd to yyyy-mm-dd
 *
 *       dateToISO       - Converts date array to ISO8601 string
 *       dateToString    - Converts to human readable string
@@ -687,7 +687,7 @@ class Temporal {
     //
     //
     //
-    private static function _decimalToYMD($date){
+    public static function decimalToYMD($date){
         
         $date = strval($date);
         $k = strpos($date,'.');
@@ -1152,14 +1152,14 @@ class Temporal {
                 $early = new DateTime($dt1);
                 $early->setTime(0, 0);
             }catch(Exception $e){
-                $err_msg[] = 'Invalid earliest date provided, ' . $e->getMessage();
+                $system->addError(HEURIST_INVALID_REQUEST, "An invalid starting date has been provided, " . $e->errorMessage());
             }
             try{
                 $dt2 = Temporal::dateToISO($dt2);
                 $latest = new DateTime($dt2);
                 $latest->setTime(0, 0);
             }catch(Exception $e){
-                $err_msg[] = 'Invalid latest date provided, ' . $e->getMessage();
+                $system->addError(HEURIST_INVALID_REQUEST, "An invalid latest date has been provided, " . $e->errorMessage());
             }
             
             if(!$early || !$latest){
@@ -1550,8 +1550,8 @@ class Temporal {
                         $res['TYP'] = 'f';
                         
                         //convert floating to range
-                        $res['TPQ'] = Temporal::_decimalToYMD($date['estMinDate']);
-                        $res['TAQ'] = Temporal::_decimalToYMD($date['estMaxDate']);
+                        $res['TPQ'] = Temporal::decimalToYMD($date['estMinDate']);
+                        $res['TAQ'] = Temporal::decimalToYMD($date['estMaxDate']);
                         
                         $res['RNG'] = $date['timestamp']['deviation'];    
                         if(@$date['timestamp']['profile']) $res['PRF'] = $date['timestamp']['profile'];

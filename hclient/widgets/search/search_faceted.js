@@ -1534,17 +1534,26 @@ $.widget( "heurist.search_faceted", {
                                                 // >< - range in database between/within the specified interval
                                                 let op_compare = facets[facet_index].srange=='between'?'><':'<>';
                                                 
+                                                let nyear = Number(selval.value);
+                                                
                                                 if(facets[facet_index].groupby=='month'){
                                                     var y_m = selval.value.split('-');
                                                     selval.value = y_m[0]+'-'+y_m[1]+'-01'+op_compare+y_m[0]+'-'+y_m[1]+'-31';
 
                                                 }else if(facets[facet_index].groupby=='year'){
-                                                    selval.value = selval.value + op_compare +(Number(selval.value)+'-12-31');
+                                                    
+                                                    if(nyear>0) nyear = (nyear+'-12-31');
+                                                    selval.value = selval.value + op_compare + nyear;
                                                     
                                                 }else if(facets[facet_index].groupby=='decade'){
-                                                    selval.value = selval.value + op_compare +((Number(selval.value)+9)+'-12-31');
+                                                    nyear = nyear+9;
+                                                    if(nyear>0) nyear = (nyear+'-12-31');
+                                                    selval.value = selval.value + op_compare + nyear;
+
                                                 }else if(facets[facet_index].groupby=='century'){
-                                                    selval.value = selval.value + op_compare +((Number(selval.value)+99)+'-12-31');
+                                                    nyear = nyear+99;
+                                                    if(nyear>0) nyear = (nyear+'-12-31');
+                                                    selval.value = selval.value + op_compare + nyear;
                                                 }
                                             }
                                         }
@@ -2501,7 +2510,13 @@ $.widget( "heurist.search_faceted", {
                                 
 //DEBUG console.log('ret', mmin+'   '+mmax);
                                 if(field.date_type=='years_only'){
-                                    mmin = ''+Math.round(mmin);
+                                    if(typeof mmin==='string' && mmin.indexOf('-12-31')>0){
+                                        mmin = mmin.substr(0, mmin.indexOf('-12-31')); 
+                                    }
+                                    if(typeof mmax==='string' && mmax.indexOf('-12-31')>0){
+                                        mmax = mmax.substr(0, mmax.indexOf('-12-31')); 
+                                    }
+                                    mmin = ''+Math.round(mmin);    
                                     mmax = ''+Math.round(mmax);
                                 }
                                 
@@ -2660,13 +2675,20 @@ $.widget( "heurist.search_faceted", {
 
                             //
                             // Create histogram above date slider, calls getDateHistogramData() in db_recsearch.php
-                            // lower -> min value, higher -> max value
+                            // lower -> min value, higher -> ma x value
                             //
                             function setupDateHistogram(lower, higher) {
-return;
+//console.log(lower, higher);
                                 // Get dates in ms
-                                var t_min = new Date(''+lower);
-                                var t_max = new Date(''+higher);
+                                if(date_type=='years_only'){
+                                    lower = Math.round(lower);
+                                    higher = Math.round(higher);
+                                }else{
+                                    var t_min = new Date(lower);
+                                    var t_max = new Date(higher);
+                                    lower = t_min.toISOString();
+                                    higher = t_max.toISOString();
+                                }
 
                                 var ids = response.q.ids; // ids of all relavent records, string separated by commas
 
@@ -2684,9 +2706,10 @@ return;
                                         db: window.hWin.HAPI4.database, // database
                                         recids: ids,            // record/s of interest
                                         dtyid: dty_ID,     // detail type id
-                                        range: [t_min.toISOString(), t_max.toISOString()], // lowest and highest values in ISO format
+                                        range: [lower, higher], 
                                         format: date_type,      // year, month, day
-                                        interval: 25            // interval size
+                                        interval: 25,            // interval size
+                                        is_between: (field.srange=='between')?1:0
                                     };
 
                                     var $slide_range = $facet_values.find('div.ui-slider-range');
@@ -2785,9 +2808,11 @@ return;
 
                                             //var $slide_handles = $slide_range.parent().find('.ui-slider-handle');
                                             var $slide_handle = $slide_range.parent().find('.ui-icon-triangle-1-w-stop');
+                                            if($slide_handle.length>0)
                                             $facet_values.find('.ui-icon-triangle-1-w').position({my: 'right-6 center+5', at: 'right bottom', of: $($slide_handle)});
                                             
                                             $slide_handle = $slide_range.parent().find('.ui-icon-triangle-1-e-stop');
+                                            if($slide_handle.length>0)
                                             $facet_values.find('.ui-icon-triangle-1-e').position({my: 'left+6 center+5', at: 'left bottom', of: $($slide_handle)});
                                         }else if(window.hWin.HAPI4.has_access()){ //display error message, only if the user is logged in
                                             response.message = 'An error occurred with generating the time graph data<br>' + response.message;
@@ -2896,6 +2921,7 @@ return;
                                         
                                         if(field.date_type=='years_only'){
                                             //
+                                            if(max>0) max = (Math.round(max)+'-12-31');
                                         
                                         }else{
                                             if(!smin.match(/^-?\d+/) || Math.abs(min)>2200){
@@ -2906,7 +2932,7 @@ return;
                                                 tDate = new TDate((new Date(max)).toISOString());
                                                 max = tDate.toString();
                                             }else if(smax.match(/^-?\d+/)){ //year
-                                                max = smax+'-12-31';
+                                                max = (max>0?(smax+'-12-31'):smax);
                                             }
                                         }
                                         //min = (new Date(min)).toISOString();
@@ -3110,6 +3136,7 @@ return;
                                     __onSlideStartSearch(mmin, field.mmax0);
                                 }});
 
+                            
                                  
                             if(mmin==field.mmin0){
                                 ele2.find('span.ui-icon-triangle-1-w-stop, span.ui-icon-triangle-1-w').css('visibility','hidden');
