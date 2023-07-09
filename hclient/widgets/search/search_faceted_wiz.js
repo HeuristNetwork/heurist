@@ -260,18 +260,27 @@ $.widget( "heurist.search_faceted_wiz", {
         header.html("<label>"+window.hWin.HR("Define titles, help tips and facet type")+"</label>"
         +'<br><br><label><input type="checkbox" id="cbShowHierarchy" style="vertical-align: middle;">'
             +window.hWin.HR("Show entity hierarchy above facet label")+"</label>"
-            +'<label style="margin-left:16px" for="selViewportLimit">'+window.hWin.HR("Limit lists initially to")+'</label>'
-            +'&nbsp;<select id="selViewportLimit"><option value=0>All</option><option value=5>5</option><option value=10>10</option>'
-            +'<option value=20>20</option><option value=50>50</option></select>'
-            
+            +'<div style="display:inline-block;margin-left:15px;">'
+                +'<label><input type="checkbox" id="cbAccordionView" style="vetical-align: middle;">'+window.hWin.HR("Accordion view")+'</label>'
+                +'<label style="display:none;margin-left:10px;"><input type="checkbox" id="cbShowAccordIcons" style="vetical-align: middle;" checked>'+window.hWin.HR("Show accordion arrows")+'</label>'
+            +'</div>'
             +'<span style="float:right; margin-left:10px;display:none;" id="btnUpdatePreview">Update Preview</span>'
             +'<div style="float:right"><label><input type="checkbox" id="cbShowAdvanced" style="vertical-align: middle;">'
-            +window.hWin.HR("All options ")+'</label></div>'
-            +'<label style="margin-left:16px;"><input type="checkbox" id="cbAccordionView" style="vetical-align: middle;">'+window.hWin.HR("Accordion view")+'</label>'
-            +'<label style="display:none;margin-left:16px;"><input type="checkbox" id="cbShowAccordIcons" style="vetical-align: middle;" checked>'+window.hWin.HR("Show accordion arrows")+'</label>'
-            );
+            +window.hWin.HR("All options ")+'</label></div><br>'
+
+            +'<div style="display:inline-block;margin:5px 0px 0px 5px;">'
+                +'<label for="selViewportLimit">'+window.hWin.HR("Limit lists initially to")+'</label>'
+                +'&nbsp;<select id="selViewportLimit"><option value=0>All</option><option value=5>5</option><option value=10>10</option>'
+                +'<option value=20>20</option><option value=50>50</option></select>'
+            +'</div>'
+            +'<div style="display:inline-block;margin: 0px 15px;">'
+                +'<label for="selLanguage">'+window.hWin.HR('Dropdown language')+'</label>'
+                +'&nbsp;<select id="selLanguage"></select>'
+            +'</div>'
+
+        );
             
-        $("<div>",{id:'facets_list'}).css({'overflow-y':'auto','padding':'10px 10px 10px 0px',
+        $("<div>",{id:'facets_list'}).css({'overflow-y':'auto','padding':'5px 10px 10px 0px',
                 'min-width':'670px',width:'100%'}).appendTo(div_leftside); //fieldset
         
         $("<div>",{id:'facets_preview2'})
@@ -304,6 +313,15 @@ $.widget( "heurist.search_faceted_wiz", {
             }
         });
         
+        let $langSel = $(this.step3).find('#selLanguage');
+        window.hWin.HEURIST4.ui.createLanguageSelect($langSel, 
+            [{key: '', title: 'Default language', selected: true}, {key: 'users_choice', title: 'Choose language in filter', disabled: true}]);
+
+        if($langSel.hSelect('instance') != undefined){
+            $langSel.hSelect('destroy');
+        }
+        $langSel.find('option[value="users_choice"]').attr('title', window.hWin.HR('feature_request'));
+
         this._refresh();
 
     }, //end _create
@@ -1577,6 +1595,7 @@ $.widget( "heurist.search_faceted_wiz", {
             //-----------------------------------------------------------
             $(this.step3).find("#cbShowHierarchy").attr('checked', this.options.params.title_hierarchy==true);
             $(this.step3).find("#selViewportLimit").val(this.options.params.viewport);
+            $(this.step3).find("#selLanguage").val(this.options.params.language);
             $(this.step3).find("#cbAccordionView").prop('checked', this.options.params.accordion_view==true);
             $(this.step3).find("#cbShowAccordIcons").prop('checked', this.options.params.show_accordion_icons==true);
             
@@ -1894,6 +1913,7 @@ $.widget( "heurist.search_faceted_wiz", {
                 this._refresh_FacetsPreview(); 
             }});
             this._on( $(this.step3).find('#cbShowAccordIcons'), {change: this._refresh_FacetsPreview});
+            this._on( $(this.step3).find('#selLanguage'), {change: this._refresh_FacetsPreview});
 
             this._on( listdiv.find('input[data-sort]'), {change: function(e){
                 
@@ -1927,6 +1947,7 @@ $.widget( "heurist.search_faceted_wiz", {
 
             this.options.params.title_hierarchy  = $(this.step3).find("#cbShowHierarchy").is(':checked');
             this.options.params.viewport  = $(this.step3).find("#selViewportLimit").val();
+            this.options.params.language  = $(this.step3).find("#selLanguage").val();
             this.options.params.accordion_view = $(this.step3).find("#cbAccordionView").is(':checked');
             this.options.params.show_accordion_icons = $(this.step3).find("#cbShowAccordIcons").is(':checked');
             

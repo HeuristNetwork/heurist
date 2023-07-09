@@ -729,6 +729,13 @@ console.log('get defintion in OLD format!!!!');
             return;
         }
 
+        if(!window.hWin.HEURIST4.util.isempty(this.options.params.language) && !window.hWin.HAPI4.EntityMgr.getEntityData2('trm_Translation')){ // retrieve translations
+            window.hWin.HAPI4.EntityMgr.getTranslations('defTerms', 'trm', null, function(){
+                that.doReset();
+            });
+            return;
+        }
+
         $(this.document).trigger(window.hWin.HAPI4.Event.ON_REC_SEARCHSTART, [ 
             {reset:true, 
              search_realm:this.options.search_realm, 
@@ -2200,7 +2207,7 @@ console.log('get defintion in OLD format!!!!');
         this._recalculateFacets( facet_index );
         return;
     }
-                            term = $Db.trm_TreeData(vocab_id, 'tree');                     
+                            term = $Db.trm_TreeData(vocab_id, 'tree', false, this.options.params.language);
                             term = {key: null, title: "all", children: term};
                             //field.selectedvalue = {title:label, value:value, step:step};                    
                             
