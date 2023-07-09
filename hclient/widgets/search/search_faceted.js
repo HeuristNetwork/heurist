@@ -701,12 +701,11 @@ $.widget( "heurist.search_faceted", {
     //
     ,doReset: function(){
 
-        var that = this;
-        
+        var that= this; 
         this._last_active_facet = -1;
 
         let primary_rt = this.options.params.rectypes[0];
-        let need_linked_rectypes = !window.hWin.HEURIST4.util.isempty(this.options.params.spatial_filter) 
+        let need_linked_rectypes = this.options.params.ui_spatial_filter  //!window.hWin.HEURIST4.util.isempty( 
                                     && !window.hWin.HEURIST4.dbs.hasFields(primary_rt, 'geo', null);
 
         if(need_linked_rectypes && !window.hWin.HEURIST4.rectypes?.typedefs?.[primary_rt]){
@@ -716,7 +715,8 @@ $.widget( "heurist.search_faceted", {
                 mode: 2, 
                 db: window.hWin.HAPI4.database
             };
-
+            //!!!!!!!!!  alsow rewrite getLinkedRecordTypes
+console.log('get defintion in OLD format!!!!');            
             window.hWin.HAPI4.SystemMgr.get_defs(request, function(response){
                 if(response.status == window.hWin.ResponseStatus.OK){
                     window.hWin.HEURIST4 = $.extend(window.hWin.HEURIST4, response.data);

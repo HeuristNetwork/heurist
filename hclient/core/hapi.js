@@ -1025,7 +1025,8 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
 
                 var that = this;
 
-                window.hWin.HAPI4.EntityMgr.refreshEntityData('all', function (success) {
+                //hard reload of database definitions
+                window.hWin.HAPI4.EntityMgr.refreshEntityData('force_all', function (success) {
 
                     if (success) {
 
@@ -1907,19 +1908,32 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
             //
             // refresh several entity data at once
             // 
-            refreshEntityData: function (entityNames, callback) {
+            refreshEntityData: function (entityName, callback) {
 
-                //var s_time = new Date().getTime() / 1000;
+                var params = { a: 'structure', 'details': 'full'};
+                params['entity'] = entityName
+                
+                /*
+                if($.isPlainObject(opts) && opts['recID']>0){ 
+                    //special case - loads defs for particular record only
+                    params['entity'] = 'all';
+                    params['recID'] = opts['recID'];
+                }else{
+                    params['entity'] = opts; //entityName
+                }*/
+                
+                var s_time = new Date().getTime() / 1000;
                 //'multi':1,   
-                _callserver('entityScrud', { a: 'structure', 'entity': entityNames, 'details': 'full' },
+                _callserver('entityScrud', params,
                     function (response) {
-                        if (response.status == window.hWin.ResponseStatus.OK) {
+                        if (response.status == window.hWin.ResponseStatus.OK || response['defRecTypes']) {
 
-                            //var fin_time = new Date().getTime() / 1000;
-                            //console.log('DEBUG refreshEntityData '+response.data+'  '+(fin_time-s_time));                    
+var fin_time = new Date().getTime() / 1000;
+console.log('DEBUG refreshEntityData '+(fin_time-s_time));  //response.data+'  '+                  
+                            var dbdefs = (response['defRecTypes']?response:response['data']);
 
-                            for (var entityName in response.data) {
-                                window.hWin.HAPI4.EntityMgr.setEntityData(entityName, response.data)
+                            for (var entityName in dbdefs) {
+                                window.hWin.HAPI4.EntityMgr.setEntityData(entityName, dbdefs)
                             }
 
                             if ($.isFunction(callback)) callback(this, true);
@@ -2454,16 +2468,16 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
             
             region = that.getLangCode3(region, 'ENG'); //English is default
             
-            if (_regional && _regional[region]) {
-                //already loaded - switch region
-                _region = region;
-                _regional = regional[_region];
-            } else {
+            if (typeof regional === 'undefined' || regional === null  || !regional[region]) {
                 $.getScript(that.baseURL + 'hclient/core/localization'
                     + (region == 'ENG' ? '' : ('_' + region.toLowerCase())) + '.js', function () {
                         _region = region;
                         _regional = regional[_region];
                     });
+            } else {
+                //already loaded - switch region
+                _region = region;
+                _regional = regional[_region];
             }
 
             // function that returns string resouce according to current region setting

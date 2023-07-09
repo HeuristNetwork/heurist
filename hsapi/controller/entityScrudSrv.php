@@ -79,12 +79,48 @@
     //
     //
     //    
-    function entityRefreshDefs( $system, $entities, $need_config ){
+    function entityRefreshDefs( $system, $entities, $need_config, $search_params=null){
         
+        $search_criteria = array();
+        
+        if($search_params!=null){
+            
+            if(!is_array($search_params) && intval($search_params)>0){
+                $search_params = array('recID'=>$search_params);
+            }
+            
+            //load definitions for particular record type only
+            $mysqli = $system->get_mysqli();
+            if(@$search_params['recID']>0 || @$search_params['rty_ID']){
+                $rec_ID = @$search_params['recID'];
+                
+                if($rec_ID>0){
+                    $rty_ID = mysql__select_value($mysqli, 'select rec_RecTypeID from Records where rec_ID='.$rec_ID); 
+                    $search_criteria['defRecTypes'] = array('ID'=>$rty_ID);
+                }else{
+                    $rty_ID = $search_params['rty_ID'];
+                }
+                
+                if($rty_ID>0){
+                    $dty_IDs = mysql__select_list2($mysqli, 'SELECT rst_DetailTypeID FROM defRecStructure where rst_RecTypeID='.$rty_ID);
+                    $search_criteria['defRecStructure'] = array('rst_RecTypeID'=>$rty_ID, 'rst_DetailTypeID'=>$dty_IDs);
+                    $search_criteria['defDetailTypes'] = array('dty_ID'=>$dty_IDs);
+
+                    $trm_IDs = mysql__select_list2($mysqli, 'SELECT dty_JsonTermIDTree FROM defDetailTypes where dty_ID in ('.implode(',',$dty_IDs).') AND dty_Type="enum"');
+                
+                    $entities = array('rty','dty','rst','swf');
+                }
+            }else{
+                $entities = array_keys($search_params);
+                $search_criteria = $search_params;
+            }
+            
+        }else 
         if($entities=='all' || $entities==null){
             
             //set_time_limit(120);
-            $entities = array('rty','dty','rst','trm','rtg','dtg','vcg','swf');  //
+            $entities = array('rty','dty','rst','trm','rtg','dtg','vcg','swf');  
+            
         }else if(!is_array($entities)){
             $entities = explode(',',$entities);
         }
@@ -100,9 +136,14 @@
             if($entity_name == 'defRecStructure'){
                 $details = 'list';
             }
+            $params = array('entity'=>$entity_name,'details'=>$details);
+            
+            if(@$search_criteria[$entity_name]){
+                $params = array_merge($params, $search_criteria[$entity_name]);
+            }
 
             $classname = 'Db'.ucfirst($entity_name);
-            $entity = new $classname($system, array('entity'=>$entity_name,'details'=>$details));
+            $entity = new $classname($system, $params);
             
             $res[$entity_name] = $entity->search();
             if($need_config!==false && $res[$entity_name]!==false){

@@ -1084,6 +1084,7 @@ window.hWin.HEURIST4.dbs = {
     
     
     /**
+     * @todo - IT USES OLD STRUCTURE FORMAT!!! REWRITE asap!!!
      * @function getLinkedRecordTypes
      * use in search_faceted.js 
      * returns array of record types that are resources for given record type
