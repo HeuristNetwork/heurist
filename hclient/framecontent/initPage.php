@@ -169,8 +169,6 @@ if($allowGoogleAnalytics && !$isLocalHost) {
     //console.log('ipage start');
 </script>
 
-<script type="text/javascript" src="<?php echo PDIR;?>hclient/core/detectHeurist.js"></script>
-
 <?php
 if($isLocalHost){
     ?>
@@ -194,24 +192,27 @@ if($isLocalHost){
 }
 ?>
 
-<!-- script type="text/javascript" src="<?php echo PDIR;?>hclient/core.min.js"></script -->
-
 <link rel="stylesheet" type="text/css" href="<?php echo PDIR;?>external/jquery-ui-iconfont-master/jquery-ui.icon-font.css" />
-
 
 <script type="text/javascript" src="<?php echo PDIR;?>external/js/wellknown.js"></script>
 
+<!--
+<script type="text/javascript" src="<?php echo PDIR;?>hclient/core.min.js"></script>
+ -->
+
+<script type="text/javascript" src="<?php echo PDIR;?>hclient/core/detectHeurist.js"></script>
+<script type="text/javascript" src="<?php echo PDIR;?>hclient/core/temporalObjectLibrary.js"></script>
 <script type="text/javascript" src="<?php echo PDIR;?>hclient/core/utils.js"></script>
 <script type="text/javascript" src="<?php echo PDIR;?>hclient/core/utils_ui.js"></script>
 <script type="text/javascript" src="<?php echo PDIR;?>hclient/core/utils_dbs.js"></script>
 <script type="text/javascript" src="<?php echo PDIR;?>hclient/core/hapi.js"></script>
+<script type="text/javascript" src="<?php echo PDIR;?>hclient/core/layout.js"></script>
 <script type="text/javascript" src="<?php echo PDIR;?>hclient/core/hRecordSearch.js"></script>
 <script type="text/javascript" src="<?php echo PDIR;?>hclient/core/recordset.js"></script>
 <script type="text/javascript" src="<?php echo PDIR;?>hclient/core/utils_query.js"></script>
 <script type="text/javascript" src="<?php echo PDIR;?>hclient/core/utils_msg.js"></script>
 <script type="text/javascript" src="<?php echo PDIR;?>hclient/core/utils_geo.js"></script>
 <script type="text/javascript" src="<?php echo PDIR;?>hclient/core/utils_collection.js"></script>
-
 
 <?php if(@$_REQUEST['ll']=='DigitalHarlem' || @$_REQUEST['ll']=='DigitalHarlem1935'){ ?>
     <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/digital_harlem/dh_search_minimal.js"></script>
@@ -361,19 +362,21 @@ console.log('initPage');
                 //params = {recID:recID} or {rty_ID:rty_ID} - to load defs for particular record or rectype
                 var entities = (params)?params:'all'; //'rty,dty,rst,swf';
 
-                window.hWin.HAPI4.EntityMgr.refreshEntityData(entities, function(success){
-                    if(success){
+                window.hWin.HAPI4.EntityMgr.refreshEntityData(entities, function(){
+                    if(arguments){                    
+                    if(arguments[1]){
 
                         _dout('init page db struct  '+(new Date().getTime() / 1000 - _time_debug));
                         _time_debug = new Date().getTime() / 1000;
 
 
                         if(!window.hWin.HEURIST4.util.isnull(callback) && $.isFunction(callback)){
-                            callback(success);
+                            callback(true);
                         }
                     }else{
                         window.hWin.HEURIST4.msg.showMsgErr(sMsg);
-                        if($.isFunction(callback)){ callback(success); }
+                        if($.isFunction(callback)){ callback(false); }
+                    }
                     }
                 });
                 return;

@@ -1346,7 +1346,7 @@ TDate.parse = function () {
     }
 
     var periodDesignator = "";
-    var BCE = false;
+    var BCE = false,
     p = temp.match(/(?:\b|\d)(bce|ce|bc|ad)\b/i);
     if (p){
         temp = temp.replace(p[1], '');

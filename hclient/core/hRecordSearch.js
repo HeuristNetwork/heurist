@@ -35,13 +35,9 @@
 
 function hRecordSearch() {
      var _className = "hRecordSearch",
-         _version   = "0.4";
-
-
-        _query_request = null,
-        _owner_doc = null; //to trigger ON_REC_SEARCHSTART and ON_REC_SEARCHFINISH
-         
-         
+         _version   = "0.4",
+         _query_request = null,
+         _owner_doc = null; //to trigger ON_REC_SEARCHSTART and ON_REC_SEARCHFINISH
          
     /**
     * Initialization

@@ -131,7 +131,9 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
             that.fancybox = $.fn.fancybox; //to call from iframes
         }
 
-        if (typeof hLayout !== 'undefined' && $.isFunction(hLayout)) {
+        // layout and configuration arrays are defined (from layout_default.js)    
+        if (typeof hLayout !== 'undefined' && $.isFunction(hLayout)
+            && typeof cfg_widgets !== 'undefined' && typeof cfg_layouts !== 'undefined') {
             that.LayoutMgr = new hLayout();
         }
         if (typeof hRecordSearch !== 'undefined' && $.isFunction(hRecordSearch)) {
