@@ -111,7 +111,7 @@ if (!@$websiteThumbnailYsize) $websiteThumbnailYsize = 300; // required
 // $ESTC_UserName = "????"; // User name and password for access to the database
 // $ESTC_Password = "????";
 // $ESTC_PermittedDBs=""; // comma-separated list of database names on the server
-// $ESTC_ServerURL = "https://int-heuristweb-prod.intersect.org.au";
+// $ESTC_ServerURL = "https://HeuristRef.Net";
 
 // Add paths to any servers previously used (since 2020), in the form https://server.domain,http://server.domain, … 
 // which may have been incorporated in web pages and which should be replaced by local relative paths
