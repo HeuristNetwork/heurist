@@ -1211,9 +1211,10 @@ function ShowReps( is_snippet_editor ) {
     //
     // NEW
     //    
-    function _addIfOperator2(_nodep, varname){
+    function _addIfOperator2(_nodep, varname, language_handle){
         var _remark = '{* ' + _getRemark(_nodep) + ' *}';
-        return "\n{if ($"+varname+")}"+_remark+"\n\n   {$"+varname+"} \n\n{/if}\n"+_remark+" {* you can also add {/else} before {/if}} *}\n";
+        let inner_val = language_handle !== '' ? language_handle : varname;
+        return "\n{if ($"+varname+")}"+_remark+"\n\n   {$"+inner_val+"} \n\n{/if}\n"+_remark+" {* you can also add {/else} before {/if}} *}\n";
     }
     //
     // NEW
@@ -1263,7 +1264,7 @@ function ShowReps( is_snippet_editor ) {
     //
     // NEW
     //
-    function _addVariable2(_nodep, varname, insertMode){
+    function _addVariable2(_nodep, varname, insertMode, language_handle){
         
         var res= '';
         
@@ -1271,7 +1272,8 @@ function ShowReps( is_snippet_editor ) {
 
         if(insertMode==0){ //variable only
 
-            res = "{$"+varname+"}{*" +  remark + "*}";
+            let inner_val = language_handle !== '' ? language_handle : varname;
+            res = "{$" + inner_val + "}{*" +  remark + "*}";
 
         }else if (insertMode==1){ //label+field
 
@@ -1429,11 +1431,12 @@ function ShowReps( is_snippet_editor ) {
 
         // show hide         
         var no_loop = (_nodep.data.type=='enum' || _nodep.key.indexOf('rec_')==0 || 
-                    (_nodep.data.code && _nodep.data.code.indexOf('Relationship')==0))
+                    (_nodep.data.code && _nodep.data.code.indexOf('Relationship')==0));
+        let show_languages = _nodep.key=='term'; console.log(_nodep);
         if(no_loop){
-            h = 250;
+            h = 255;
         }else{
-            h = 350;
+            h = 355;
         }
         
         if(_add_variable_dlg && _add_variable_dlg.dialog('instance')){
@@ -1443,12 +1446,13 @@ function ShowReps( is_snippet_editor ) {
         function __on_add(event){
             var $dlg2 = $(event.target).parents('.ui-dialog-content');
             var insertMode = $dlg2.find("#selInsertMode").val();
+            let language = $dlg2.find('#selLanguage').val();
             
             var bid = $(event.target).attr('id');
             
             var inloop = (bid=='btn_insert_loop')?1:(bid.indexOf('_loop')>0?2:0);
             
-            _insertSelectedVars2(_nodep, inloop, bid.indexOf('_if')>0, insertMode);
+            _insertSelectedVars2(_nodep, inloop, bid.indexOf('_if')>0, insertMode, language);
             //_add_variable_dlg.dialog('close');
         }
         
@@ -1457,6 +1461,9 @@ function ShowReps( is_snippet_editor ) {
             .off('click')
             .click(__on_add);
         $ele_popup.find('#btn_insert_if').attr('onclick',null).button()
+            .off('click')
+            .click(__on_add);
+        $ele_popup.find('#btn_insert_lang').attr('onclick', null).button()
             .off('click')
             .click(__on_add);
             
@@ -1481,6 +1488,19 @@ function ShowReps( is_snippet_editor ) {
                 insertAtCursor("|"+modname);        
             });
         
+        let $langSel = $ele_popup.find('#selLanguage');
+        if($langSel.find('option').length == 1){ // fill select with available languages
+
+            let lang_opts = window.hWin.HEURIST4.ui.createLanguageSelect();
+            $langSel.html($langSel.html() + lang_opts);
+        }
+        $langSel.val(''); // reset
+        if(!show_languages){
+            $langSel.parent().parent().hide();
+            h -= 5;
+        }else{
+            $langSel.parent().parent().show();
+        }
         
         _add_variable_dlg = window.hWin.HEURIST4.msg.showElementAsDialog(   
             {element: $ele_popup[0],
@@ -1511,7 +1531,7 @@ function ShowReps( is_snippet_editor ) {
     //
     // NEW
     //
-    function _insertSelectedVars2( _nodep, inloop, isif, _insertMode ){
+    function _insertSelectedVars2( _nodep, inloop, isif, _insertMode, language_code ){
 
         var textedit = document.getElementById('edTemplateBody'),
         _text = "",
@@ -1519,7 +1539,8 @@ function ShowReps( is_snippet_editor ) {
         _varname = '',
         rectypeId = 0,
         key = '',
-        _getrec = '';
+        _getrec = '',
+        language_handle = '';
         
         if(_nodep){
             
@@ -1663,6 +1684,11 @@ this_id       : "term"
                     // 2 - in loop
                     if( inloop<2 ){
                         _varname = prefix + ((prefix && _varname)?'.':'') + _varname;
+
+                        if(language_code && language_code != '' && key == 'term'){
+                            let id_fld = _varname.replace('.term', '.id');
+                            language_handle = `heurist->getTranslation("trm", $${id_fld}, "label", "${language_code}")`;
+                        }
                     }
                     
                     _nodep.data.varname = _varname;
@@ -1685,12 +1711,12 @@ this_id       : "term"
                     _text = _insertRectypeIf2(_nodep, _varname, rectypeId);
                     cursorIndent = -7;
                 }else{
-                    _text = _addIfOperator2(_nodep, _varname);    
+                    _text = _addIfOperator2(_nodep, _varname, language_handle);    
                 }
                 
                 
             }else{
-                _text = _addVariable2(_nodep, _varname, _insertMode);
+                _text = _addVariable2(_nodep, _varname, _insertMode, language_handle);
             }
         
         

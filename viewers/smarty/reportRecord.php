@@ -31,6 +31,8 @@ public methods
    getRecords - returns records ids for given query 
    getRecordsAggr - returns aggregation values
    
+   getTranslation - returns translation for given entity + id
+   
 */
 class ReportRecord {
     
@@ -805,6 +807,55 @@ class ReportRecord {
         }
         return null;    
         
+    }
+
+    public function getTranslation($entity, $id, $field, $language_code, $def_value = null){
+
+        $res = empty($def_value) ? '' : $def_value;
+        $query_ready = false;
+        $id_clause = '';
+
+        if($entity == 'trm'){
+
+            $id_is_array = false;
+            if(is_array($id) && count($id) > 0){
+                $id_clause = ' IN (' .implode(',', $id). ')';
+                $id_is_array = true;
+            }else if(!is_array($id) && intval($id) > 0){
+                $id_clause = ' = ' .intval($id);
+            }
+
+            $field = (strpos(strtolower($field), 'desc') === false) ? 'trm_Label' : 'trm_Description'; // grab label by default
+
+            if(!$def_value){ // retrieve original term
+                $idx = $this->dtTerms['fieldNamesToIndex'];
+
+                if($id_is_array){
+                    $def_value = array();
+                    foreach ($id as $trm_id) {
+                        $term = $this->dbsTerms->getTerm($trm_id);
+                        array_push($def_value, !empty($term[$idx[$field]]) ? $term[$idx[$field]] : '');
+                    }
+                }else{
+                    $term = $this->dbsTerms->getTerm($id);
+                    $def_value = !empty($term[$idx[$field]]) ? $term[$idx[$field]] : '';
+                }
+            }
+
+            $query_ready = true;
+        }
+
+        if($query_ready && $id_clause != ''){
+
+            $query = "SELECT trn_Translation FROM defTranslations WHERE trn_Code $id_clause AND trn_Source = '$field' AND trn_LanguageCode = '$language_code'";
+
+            $res = mysql__select_list2($this->system->get_mysqli(), $query);
+        }
+
+        $res = empty($res) && $def_value !== null ? $def_value : $res;
+        $res = is_array($res) && count($res) == 1 ? $res[0] : $res;
+
+        return $res;
     }
     
 }
