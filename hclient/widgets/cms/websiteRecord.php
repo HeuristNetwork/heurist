@@ -306,10 +306,13 @@ $image_logo = $image_logo?'<img style="max-height:80px;max-width:270px;" src="'.
 $meta_keywords = htmlspecialchars(__getValue($rec, DT_CMS_KEYWORDS));
 $meta_description = htmlspecialchars(__getValue($rec, DT_SHORT_SUMMARY));
 
-$show_login_button = __getValue($rec, '2-1095'); // by default, show login button
-if(!$isWebPage && !empty($show_login_button)){
-    $show_login_button = (($show_login_button == $TRM_NO) || 
-                          ($show_login_button == $TRM_NO_OLD)) ? false : true;
+$show_login_button = true; // by default, show login button
+if(!$isWebPage){
+    $show_login_button = __getValue($rec, '2-1095'); 
+    
+    $show_login_button = empty($show_login_button) ||
+                            ((($show_login_button == $TRM_NO) || 
+                          ($show_login_button == $TRM_NO_OLD)) ? false : true);
 }
 
 //2-532 - YES   2-531 - NO

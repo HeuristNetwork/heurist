@@ -164,12 +164,17 @@ default content consists of
             if ($showWarnAboutPublic) {
                 print '<div style="top:0;height:20px;position:absolute;text-align:center;width:100%;color:red;">Web page record is not public. It will not be visible to the public</div>';
             }
-            if (!$edit_OldEditor && $system->is_member(1)) {
-                print '<a href="' . HEURIST_BASE_URL . '?db=' . $system->dbname() . '" id="btn_editor" target="_blank" '
+            if (!$edit_OldEditor){
+                if($system->is_member(1)) {
+                    print '<a href="' . HEURIST_BASE_URL . '?db=' . $system->dbname() . '" id="btn_editor" target="_blank" '
                     . 'style="position:absolute;left:95px; top:5px;color:blue !important;z-index:1;" class="cms-button">database</a>'
                     . '<a href="#" id="btnOpenCMSeditor" onclick="_openCMSeditor(event); return false;" '
                     . 'style="position:absolute;left:5px;top:5px;color:blue !important;z-index:1;" class="cms-button">website editor</a>';
+                }else if($system->get_user_id() == 0 && $show_login_button){
+                    print '<a href="#" id="btn_signin" style="position:absolute;right:5px; top:5px;color:blue !important;" class="cms-button">login</a>'; // login link
+                }
             }
+            
             ?>
             <div class="ent_content_full ui-heurist-bg-light" style="top:<?php echo ($showWarnAboutPublic) ? 20 : 0; ?>px" id="main-content-container">
                 <div id="main-content" data-homepageid="<?php print $home_page_record_id; ?>" data-viewonly="<?php print ($hasAccess) ? 0 : 1; ?>">
@@ -212,6 +217,9 @@ default content consists of
                         . 'style="position:absolute;left:95px; top:5px;color:blue !important;" class="cms-button">database</a>'
                         . '<a href="#" id="btnOpenCMSeditor" onclick="_openCMSeditor(event); return false;" '
                         . 'style="position:absolute;left:5px;top:5px;color:blue !important;" class="cms-button">website editor</a>';
+                }
+                if(!$edit_OldEditor && $system->get_user_id() == 0 && $show_login_button){
+                    print '<a href="#" id="btn_signin" style="position:absolute;right:5px; top:5px;color:blue !important;" class="cms-button">login</a>'; // login link
                 }
                 ?>
                 <div id="main-pagetitle" class="ui-heurist-bg-light"></div>
