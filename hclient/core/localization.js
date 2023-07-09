@@ -591,6 +591,8 @@ regional['ENG'] = {
     'Collected':'Collect',
     'Shared':'Share',
 
+    'feature_request': 'Please request from Heurist team if needed or add to code and do a pull request'
+
 };
 
 // TODO: messages above, particularly the default startup message, have been substnatially modified/improved 6/11/17, 
