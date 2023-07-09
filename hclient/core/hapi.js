@@ -2469,7 +2469,7 @@ console.log('DEBUG refreshEntityData '+(fin_time-s_time));  //response.data+'  '
             region = that.getLangCode3(region, 'ENG'); //English is default
             
             if (typeof regional === 'undefined' || regional === null  || !regional[region]) {
-                $.getScript(that.baseURL + 'hclient/core/localization'
+                $.getScript(that.baseURL + 'hclient/assets/localization/localization'
                     + (region == 'ENG' ? '' : ('_' + region.toLowerCase())) + '.js', function () {
                         _region = region;
                         _regional = regional[_region];

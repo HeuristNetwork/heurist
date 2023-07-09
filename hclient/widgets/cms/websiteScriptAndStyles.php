@@ -90,9 +90,8 @@ if (($_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0.0.1')
     var is_execute_homepage_custom_javascript = false;
     var first_not_empty_page = 0;
 </script>
-    
-<script type="text/javascript" src="<?php echo PDIR;?>hclient/core/detectHeurist.js"></script>
 
+<script type="text/javascript" src="<?php echo PDIR;?>hclient/core/detectHeurist.js"></script>
 <script type="text/javascript" src="<?php echo PDIR;?>hclient/core/hapi.js"></script>
 <script type="text/javascript" src="<?php echo PDIR;?>hclient/core/utils.js"></script>
 <script type="text/javascript" src="<?php echo PDIR;?>hclient/core/utils_query.js"></script>
@@ -102,7 +101,6 @@ if (($_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0.0.1')
 <script type="text/javascript" src="<?php echo PDIR;?>hclient/core/utils_collection.js"></script>
 <script type="text/javascript" src="<?php echo PDIR;?>hclient/core/hRecordSearch.js"></script>
 <script type="text/javascript" src="<?php echo PDIR;?>hclient/core/recordset.js"></script>
-<script type="text/javascript" src="<?php echo PDIR;?>hclient/core/localization.js"></script>
 <script type="text/javascript" src="<?php echo PDIR;?>hclient/core/layout.js"></script>
 <script type="text/javascript" src="<?php echo PDIR;?>hclient/core/temporalObjectLibrary.js"></script>
 
@@ -969,9 +967,7 @@ if(isset($customTemplateNotFound)){
         }
     }
 
-    //window.hWin.HAPI4.EntityMgr.refreshEntityData('rty,dty,rtg,dtg,vcg', __init_completed);
     window.hWin.HAPI4.EntityMgr.refreshEntityData('all', __init_completed);
-
 }
 
 //
