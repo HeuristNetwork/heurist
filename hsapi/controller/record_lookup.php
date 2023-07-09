@@ -96,11 +96,11 @@ if($is_debug) print HEURIST_BASE_URL.'  '.HEURIST_MAIN_SERVER.'<br>';
             }
         }else if(isset($ESTC_ServerURL)){ // external server
 
-            $base_url = $ESTC_ServerURL . '/h6-alpha/hsapi/controller/record_lookup.php?';
+            $base_url = $ESTC_ServerURL . '/heurist/hsapi/controller/record_lookup.php?';
 
             if(array_key_exists('action', $params) && @$params['action'] == 'import_records'){
                 
-                $base_url = $ESTC_ServerURL . '/h6-alpha/hsapi/controller/record_lookup.php?';  //record_output
+                $base_url = $ESTC_ServerURL . '/heurist/hsapi/controller/record_lookup.php?';  //record_output
                 $params2 = array();
                 $params2['action'] = 'record_output';
                 $params2['serviceType'] = 'ESTC';
