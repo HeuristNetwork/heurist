@@ -139,7 +139,7 @@ if($system->init($db, true, false)){
                 //$url_mtl = 'http://127.0.0.1/HEURIST_FILESTORE/osmak_9b/file_uploads/ulf_128_Ms 1 ouvert 2.mtl';
                 //$url_texture = 'http://127.0.0.1/HEURIST_FILESTORE/osmak_9b/file_uploads/ulf_127_Ms1ouvert2.jpg';
                 
-                //'http://127.0.0.1/h6-alpha/?db=osmak_9b&file=2eb0b92c4d6a7792646b255bee7f124b3a7b5500';
+                //'http://127.0.0.1/heurist/?db=osmak_9b&file=2eb0b92c4d6a7792646b255bee7f124b3a7b5500';
                 //$url = HEURIST_BASE_URL.'?db='.$db.'&file='.$fileid;
                 $is_not_inited = false;    
                 

@@ -220,7 +220,7 @@ if($isWebPage){ //set in websiteRecord.php
                     <div class="container">
                         <div class="row">
                             <div class="col-md-2"><img class="logo"
-                                    src="https://heurist.huma-num.fr/h6-alpha/?db=MBH_Manuscripta_Bibliae_Hebraicae&file=791d3bd1e6a1bce0dd6292610c1c1bde4882d637"
+                                    src="https://heurist.huma-num.fr/heurist/?db=MBH_Manuscripta_Bibliae_Hebraicae&file=791d3bd1e6a1bce0dd6292610c1c1bde4882d637"
                                     alt="Manuscripta Bibliae Hebraicae"></div>
                             <div class="col-md-6">
                                 <div class="row">
@@ -240,11 +240,11 @@ if($isWebPage){ //set in websiteRecord.php
                             </div>
                             <div class="col-md-3 social-networks">Suivez-nous sur les réseaux sociaux<br><br><a
                                     href="https://twitter.com/projetMBH" class="tw" target="_blank"><img
-                                        src="https://heurist.huma-num.fr/h6-alpha/?db=MBH_Manuscripta_Bibliae_Hebraicae&file=1be81f1bc799e511f9f766da4119a297c0383240"
+                                        src="https://heurist.huma-num.fr/heurist/?db=MBH_Manuscripta_Bibliae_Hebraicae&file=1be81f1bc799e511f9f766da4119a297c0383240"
                                         width="32" alt="Twitter"></a>&nbsp;<a
                                     href="https://www.facebook.com/manuscriptabibliaehebraicae/" class="fb"
                                     target="_blank"><img
-                                        src="https://heurist.huma-num.fr/h6-alpha/?db=MBH_Manuscripta_Bibliae_Hebraicae&file=082682853f46e477acd87c3c8e55cabd1aeb9bbc"
+                                        src="https://heurist.huma-num.fr/heurist/?db=MBH_Manuscripta_Bibliae_Hebraicae&file=082682853f46e477acd87c3c8e55cabd1aeb9bbc"
                                         width="32" alt="Facebook"></a></div>
                         </div>
                     </div>
@@ -281,8 +281,8 @@ if($isWebPage){ //set in websiteRecord.php
              -->
         <div id="wrapper-video" onclick="{$('#wrapper-video').fadeOut(4000);}">
           <video autoplay="" loop="" muted="" 
-          poster="https://heurist.huma-num.fr/h6-alpha/?db=MBH_Manuscripta_Bibliae_Hebraicae&file=62c18d37f7d63b7777e5dc0add9c5ea669d78ec7" id="video-background">
-            <source src="https://heurist.huma-num.fr/h6-alpha/?db=MBH_Manuscripta_Bibliae_Hebraicae&file=d6d20c9e1243394fe13cbf427a11143a480f3fa5" type="video/mp4">
+          poster="https://heurist.huma-num.fr/heurist/?db=MBH_Manuscripta_Bibliae_Hebraicae&file=62c18d37f7d63b7777e5dc0add9c5ea669d78ec7" id="video-background">
+            <source src="https://heurist.huma-num.fr/heurist/?db=MBH_Manuscripta_Bibliae_Hebraicae&file=d6d20c9e1243394fe13cbf427a11143a480f3fa5" type="video/mp4">
           </video>
           <h1>Manuscripta Bibliae Hebraicae</h1>
           <p class="subtitle">Les manuscrits de la Bible hébraïque en Europe occidentale (Angleterre, France, Allemagne, Italie du Nord) au XIIe et XIIIe siècle&nbsp;: une approche matérielle, culturelle et sociale</p>

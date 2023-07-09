@@ -134,7 +134,7 @@ if(defined('IS_INDEX_PAGE')){
 <?php 
 // Do not use google analytics unless requested in heuristConfigIni.php
 if($allowGoogleAnalytics && !$isLocalHost) {
-    if (strpos('int-heuristweb-prod.intersect.org.au', $_SERVER["SERVER_NAME"]===0) 
+    if (strpos('HeuristRef.Net', $_SERVER["SERVER_NAME"]===0) 
         || strpos('heuristref', $_SERVER["SERVER_NAME"])===0) {// Operating on Heurist reference server
         ?>     
         <!-- Heurist Reference Server, Global site tag (gtag.js) - Google Analytics -->

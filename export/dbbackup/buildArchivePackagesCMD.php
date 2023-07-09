@@ -37,7 +37,7 @@ if (@$argv) {
 // example:
 //  sudo php -f /var/www/html/heurist/export/dbbackup/buildArchivePackagesCMD.php -- -db=database_1,database_2
 //  sudo php -f buildArchivePackagesCMD.php -- -db=osmak_9,osmak_9c,osmak_9d
-//  sudo php -f /var/www/html/h6-alpha/export/dbbackup/buildArchivePackagesCMD.php -- -db=all -nofiles -nodocs
+//  sudo php -f /var/www/html/heurist/export/dbbackup/buildArchivePackagesCMD.php -- -db=all -nofiles -nodocs
 
 // TODO: It would be good if this had a parameter option to also delete the database for use when transferring to a new server
 // TODO: WARNING: AT THIS TIME (21 May 2022) IT DOES NOT REPORT AN ERROR IF THERE IS NO FILESTORE FOLDER

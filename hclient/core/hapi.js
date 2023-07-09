@@ -93,7 +93,7 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
         //actions for redirection https://hist/heurist/[dbname]/web/
         if(script_name.search(/\/([A-Za-z0-9_]+)\/(web|hml|tpl|view)\/.*/)>=0){
             installDir = script_name.replace(/\/([A-Za-z0-9_]+)\/(web|hml|tpl|view)\/.*/, '')+'/';
-            if(installDir=='/') installDir = '/h6-alpha/';
+            if(installDir=='/') installDir = '/heurist/';
         }else{
             installDir = script_name.replace(/(((\?|admin|applications|common|context_help|export|hapi|hclient|hsapi|import|startup|records|redirects|search|viewers|help|ext|external)\/.*)|(index.*|test.php))/, ""); // Upddate in utils_host.php also
         }

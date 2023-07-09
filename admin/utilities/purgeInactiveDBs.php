@@ -60,7 +60,7 @@ $tabs0 = '';
 if (@$argv) {
     
 // example:
-//  sudo php -f /var/www/html/h6-alpha/admin/utilities/purgeInactiveDBs.php -- -purge
+//  sudo php -f /var/www/html/heurist/admin/utilities/purgeInactiveDBs.php -- -purge
 //  sudo php -f purgeInactiveDBs.php -- -purge  -  action, otherwise only report 
 
 // TODO: It would be good if this had a parameter option to also delete the database 

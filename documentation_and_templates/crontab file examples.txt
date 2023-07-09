@@ -25,10 +25,10 @@ MAILTO=ian.johnson@sydney.edu.au
 5 * * * * /srv/scripts/alert_server.sh >/dev/null 2>&1
 
 # Update h6-alpha at 1am from reference server - build runs daily at 8am or later Sydney time
-0 01 * * * curl -lk https://int-heuristweb-prod.intersect.org.au/HEURIST/DISTRIBUTION/update_heurist.sh | bash -s h6-alpha
+0 01 * * * curl -lk https://HeuristRef.Net/HEURIST/DISTRIBUTION/update_heurist.sh | bash -s h6-alpha
 
 # Update h6-beta at 1.15am from reference server - build runs daily at 8.15am or later Sydney time
-15 01 * * * curl -lk https://int-heuristweb-prod.intersect.org.au/HEURIST/DISTRIBUTION/update_heurist.sh | bash -s h6-beta
+15 01 * * * curl -lk https://HeuristRef.Net/HEURIST/DISTRIBUTION/update_heurist.sh | bash -s h6-beta
 
 
 # LOCAL BACKUPS
