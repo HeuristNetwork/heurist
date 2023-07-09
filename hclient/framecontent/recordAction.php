@@ -139,7 +139,7 @@ if(!in_array($action_type, $allowed_actions)){
 <!-- HTML -->
 <body style="overflow:hidden;" class="ui-heurist-explore">
 
-    <div id="div_parameters" class="popup_content_div">
+    <div id="div_parameters" class="popup_content_div" style="overflow:auto;">
 
         <div id="div_header" style="padding: 0.2em; min-width: 600px;">
 

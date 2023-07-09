@@ -455,6 +455,7 @@ function hRecordAction(_action_type, _scope_type, _field_type, _field_value) {
 			// check that the select is supposed to be a hSelect/selectmenu
             if(ele.find('select').hSelect('instance') != undefined){ 
 
+                var selObj = ele.find('select');
                 widget_ele = selObj.hSelect('widget');
                 menu_parent = selObj.hSelect('menuWidget').parent();
             }else if($('#'+id+'-button').length > 0){ // .hSelect('instance') and .selectmenu both return undefined, despite the select being a hSelect instance

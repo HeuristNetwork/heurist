@@ -331,9 +331,9 @@ console.log('initPage');
 
             _dout('ipage hapi inited  '+(new Date().getTime() / 1000 - _time_debug));
             
-            initialLoadDatabaseDefintions(null, onPageInit);
-            
-            return;
+            if(initialLoadDatabaseDefintions(null, onPageInit)){
+                return;                
+            }
 
         }else{
             window.hWin.HEURIST4.msg.showMsgErr('Cannot initialize system on client side, please consult Heurist developers');
@@ -379,8 +379,9 @@ console.log('initPage');
                     }
                     }
                 });
-                return;
+                return true;
             }
+            return false;
         
     }
     
