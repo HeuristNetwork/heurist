@@ -1054,7 +1054,16 @@ function smarty_function_out($params, &$smarty)
 
 //
 // smarty plugin function
-// {wrap var=$s.f8_originalvalue dt="file" width="100" height="auto"}
+// {wrap var=$s.f8_originalvalue dt="file" width="100" height="auto" mode=""}
+//
+// $params - array of 
+// var - value
+// dt - detail type: url, file, geo
+// mode - for dt=file only:   thumbnail, link or player by default
+// lbl - description
+// fancybox - fills rec_Files with file info, rec_Files will be data source for fancybox viewer
+// style or width,height
+// limit - limits output for multivalue fields
 //
 function smarty_function_wrap($params, &$smarty)
 {
@@ -1158,7 +1167,11 @@ function smarty_function_wrap($params, &$smarty)
                     $sname = (!$originalFileName || $originalFileName=='_remote' || strpos($originalFileName,'_iiif')===0)
                         ?$external_url:$originalFileName;
                         
-                    $sres = $sres."<a href='".$file_URL."' target='_blank' title='".$file_desc."' $style>".$sname."</a>";
+                    if(@$params['fancybox']){
+                        $sres = $sres."<a class=\"fancybox-thumb\" data-id=\"$file_nonce\" href='".$file_URL."' target='_blank' title='".$file_desc."' $style>".$sname."</a>";
+                    }else{
+                        $sres = $sres."<a href='".$file_URL."' target='_blank' title='".$file_desc."' $style>".$sname."</a>";
+                    }
                     
                 }else 
                 if($mode=="thumbnail"){
