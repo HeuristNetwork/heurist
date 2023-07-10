@@ -87,7 +87,13 @@ $.widget( "heurist.editing_input", {
         {
             this.options.dtFields = window.hWin.HEURIST4.util.cloneJSON($Db.rst(this.options.rectypeID, this.options.dtID));
         
+            //field can be removed from rst - however it is still in faceted search
+            if(this.options.dtFields==null){
+               this.options.dtFields = {}; 
+            }
+            
             if(this.options.is_faceted_search){
+                
                 if(window.hWin.HEURIST4.util.isempty(this.options['dtFields']['rst_FilteredJsonTermIDTree'])){
                     this.options['dtFields']['rst_FilteredJsonTermIDTree'] = $Db.dty(this.options.dtID,'dty_JsonTermIDTree');
                 } 
