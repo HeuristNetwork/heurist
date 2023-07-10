@@ -17,7 +17,7 @@
 
 # installation source: Heurist reference server
 
-ref_server=https://int-heuristweb-prod.intersect.org.au
+ref_server=https://HeuristRef.Net
 base_dir="/var/www/html"
 
 # -------------PRELIMINARIES ---------------------------------------------------------------------------------------------

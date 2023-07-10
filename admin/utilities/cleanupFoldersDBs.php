@@ -38,7 +38,7 @@ $is_command_line = false;
 if (@$argv) {
     
 // example:
-//  sudo php -f /var/www/html/h6-alpha/admin/utilities/cleanupFoldersDBs.php -- -purge
+//  sudo php -f /var/www/html/heurist/admin/utilities/cleanupFoldersDBs.php -- -purge
 //  sudo php -f cleanupFoldersDBs.php -- -purge  -  action,  -report - report only
 
     // handle command-line queries

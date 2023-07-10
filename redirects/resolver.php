@@ -58,7 +58,7 @@ if(count($requestUri)==1){
        array_push($requestUri, 'web');
    }
 }
-http://127.0.0.1/h6-ao/MBH
+http://127.0.0.1/heurist/MBH
 */
 if(count($requestUri)==1 && (@$requestUri[0]=='MBH' || @$requestUri[0]=='johns_test_BnF')){
     
@@ -154,7 +154,7 @@ $requestUri:
 
         }else if($action=='hml'){
       
-    // http://127.0.0.1/h6-ao/osmak_9c/hml/18/1
+    // http://127.0.0.1/heurist/osmak_9c/hml/18/1
 
             if(@$requestUri[3]){
                 $redirect .= ('export/xml/flathml.php?db='.$database.'&w=a&q=');
@@ -180,7 +180,7 @@ $requestUri:
             
         }else if($action=='tpl'){
             
-    //http://127.0.0.1/h6-ao/osmak_9c/tpl/Basic%20(initial%20record%20types)/t:10        
+    //http://127.0.0.1/heurist/osmak_9c/tpl/Basic%20(initial%20record%20types)/t:10        
             if(@$requestUri[3]){
             
                 if(@$requestUri[4]){ 

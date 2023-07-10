@@ -68,10 +68,15 @@ of the codebase and rename it to index.html
 
 // *** DO NOT CHANGE VERSION NUMBER, THIS IS SET BY THE HEURIST DEVELOPMENT TEAM ***
 
+<<<<<<< Updated upstream
 $version = "6.3.18"; // sets current program version number, determined by Heurist development lead
+=======
+$version = "6.3.19"; // sets current program version number, determined by Heurist development lead
+>>>>>>> Stashed changes
 
 // dates below are the date of release of the given version, and list changes since last release
 
+// 6.3.19  9 July 2023
 // 6.3.17 03 June 2023 changes tbc
 // 6.3.15 9 April 2023 changes tbc
 // 6.3.14  25 Jan 2023 changes tbc 

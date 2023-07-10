@@ -34,7 +34,7 @@ define('HEURIST_MIN_DBVERSION', "1.3.14"); //minimal version of db for current v
 // curated template databases and also code updates
 if(!@$heuristReferenceServer){
     $heuristReferenceServer = 'https://heuristref.net';  //default value
-    //$heuristReferenceServer = 'https://int-heuristweb-prod.intersect.org.au';
+    //$heuristReferenceServer = 'https://HeuristRef.Net';
 }
 
 define('HEURIST_MAIN_SERVER', $heuristReferenceServer);

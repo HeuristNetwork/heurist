@@ -133,7 +133,7 @@ $.widget( "heurist.searchRecords", $.heurist.searchEntity, {
             var groupTabHeader = $('<ul>').appendTo(cont);
             
             if(rt_list.length > 1){
-                    $('<li>').html('<a href="#rty'+ rt_list.join(',') +'"><span style="font-weight:bold">All types</span></a>')
+                    $('<li>').html('<a href="#rty'+ rt_list.join(',') +'"><span style="font-weight:bold">All valid types</span></a>')
                         .appendTo(groupTabHeader);
                     $('<div id="rty'+ rt_list.join(',') +'">').appendTo(cont);
             }
