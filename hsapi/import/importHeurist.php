@@ -722,7 +722,8 @@ EOD;
         }else{
             
             if(!$dbsource_is_registered){
-                $dbsource_is_same = false; //even definitions with conceptcodes 0000-xx will be imported
+                //if source is not smae, definitions with conceptcodes 0000-xx will be imported with concept codes 9999-xxx
+                $dbsource_is_same = ($params['same_source']==1); 
             }else{
                 //if source is registered - source is different
                 $dbsource_is_same = !$dbsource_is_registered;
@@ -850,7 +851,7 @@ EOD;
             $target_RecID = 0;
             
             if($dbsource_is_same){
-                $recTypeID = DbsImport::getLocalCode('rectypes', $defs, 
+                    $recTypeID = DbsImport::getLocalCode('rectypes', $defs, 
                     $record_src['rec_RecTypeID']>0
                         ?$record_src['rec_RecTypeID']
                         :$record_src['rec_RecTypeConceptID'], false);

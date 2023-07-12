@@ -1336,9 +1336,8 @@ $mysqli->commit();
         list($db, $id) = explode('-', $conceptCode); 
         if(ctype_digit($db) && $db==0 && ctype_digit($id) && $id>0){
              $conceptCode = '9999-'.$id;          
-        }else{
-            return $conceptCode;
         }
+        return $conceptCode;
     }
     
     //
