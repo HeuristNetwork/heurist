@@ -605,7 +605,8 @@ function smarty_output_filter_strip_js($tpl_source, Smarty_Internal_Template $te
                     .'$("body").mediaViewer({rec_Files:rec_Files, showLink:false, selector:".fancybox-thumb", '
                     .'database:"'.$system->dbname().'", baseURL:"'.HEURIST_BASE_URL.'"});'    
                   .'});'
-                .'</script>');
+                .'</script>'
+                .'<style>.fancybox-toolbar{visibility: visible !important; opacity: 1 !important;}</style>');
             }
 
             
@@ -644,7 +645,8 @@ function smarty_output_filter_strip_js($tpl_source, Smarty_Internal_Template $te
                         .'$("body").mediaViewer({rec_Files:rec_Files, showLink:false, selector:".fancybox-thumb", '
                         .'database:"'.$system->dbname().'", baseURL:"'.HEURIST_BASE_URL.'"});'    
                       .'});'
-                    .'</script>');
+                    .'</script>'
+                    .'<style>.fancybox-toolbar{visibility: visible !important; opacity: 1 !important;}</style>');
             }
             
             //add custom css and external links from CMS_HOME  DT_CMS_CSS and DT_CMS_EXTFILES
@@ -1168,7 +1170,8 @@ function smarty_function_wrap($params, &$smarty)
                         ?$external_url:$originalFileName;
                         
                     if(@$params['fancybox']){
-                        $sres = $sres."<a class=\"fancybox-thumb\" data-id=\"$file_nonce\" href='".$file_URL."' target='_blank' title='".$file_desc."' $style>".$sname."</a>";
+                        $sres = $sres."<a class=\"fancybox-thumb\" data-id=\"$file_nonce\" href='"
+                            .$file_URL."' target='_blank' title='".$file_desc."' $style>".$sname."</a>";
                     }else{
                         $sres = $sres."<a href='".$file_URL."' target='_blank' title='".$file_desc."' $style>".$sname."</a>";
                     }
