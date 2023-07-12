@@ -73,7 +73,7 @@
 class Temporal {
 
     protected $tDate = null;
-
+    
     private $dictDetermination = array(
         0=>"Unknown",
         1=>"Attested",
@@ -89,12 +89,12 @@ class Temporal {
         );
 
     
-    function __construct( $date ) {
-        $this->setValue($date);
+    function __construct( $date, $is_for_search=false ) {
+        $this->setValue($date, $is_for_search);
     }    
     
-    public function setValue( $date ){
-        $this->tDate = Temporal::_parseTemporal( $date );
+    public function setValue( $date, $is_for_search=false ){
+        $this->tDate = Temporal::_parseTemporal( $date, $is_for_search );
         
         // Calculate and assign estMinDate and estMaxDate (decimal values)
         if($this->tDate){
@@ -162,7 +162,7 @@ class Temporal {
     // parses json or plain string to array of values
     // dates are not validated
     //
-    private static function _parseTemporal( $value ){
+    private static function _parseTemporal( $value, $is_for_search=false ){
         
         $timespan = null;
         
@@ -171,6 +171,11 @@ class Temporal {
             $timespan = $value;
             
         }else if ($value) {
+            
+            if(strpos($value,'><')===0 || strpos($value,'<>')===0){
+                $is_for_search = true;    
+                $value = substr($value,2);
+            }
             
             //at first - detect time interval in format start/end start/duration duration/end
             
@@ -286,7 +291,8 @@ class Temporal {
                         
                         $values = array($matches[0][0],$matches[0][2]);
                         
-                        if( (strlen($values[0])>2 || abs(intval($values[0]))>12) && (strlen($values[1])>2 || abs(intval($values[1]))>12) ) {
+                        if( (strlen($values[0])>2 && strlen($values[1])>2)
+                            || $is_for_search ) {
                             $tStart = null;
                             $tEnd = null;
                             

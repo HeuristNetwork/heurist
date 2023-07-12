@@ -2513,21 +2513,20 @@ class HPredicate {
         }
         
         
-        $is_overlap = strpos($this->value,'<>')!==false; // falls in/overlaps
+        $is_overlap = strpos($this->value,'<>')!==false; // falls in/overlaps  - DEFAULT
         $is_within = strpos($this->value,'><')!==false;  // between
         
         if ($is_overlap || $is_within) { 
 
-            $vals = explode($is_within?'><':'<>', $this->value);
-            
-            if($vals[0]==''){
+            if(strpos($this->value,'><')===0 || strpos($this->value,'<>')===0){
                 // <>500/P10Y  or ><1400-1550
-                $temporal = new Temporal($vals[1]);
+                $temporal = new Temporal($this->value);
                 if(!$temporal->isValid()){
                     return null;
                 }
                 $timespan = $temporal->getMinMax();
             }else{
+                $vals = explode($is_within?'><':'<>', $this->value);
                 //  200<>500
                 $temporal1 = new Temporal($vals[0]);
                 $temporal2 = new Temporal($vals[1]);
@@ -2539,7 +2538,7 @@ class HPredicate {
             }
             
         }else{
-            $temporal = new Temporal($this->value);
+            $temporal = new Temporal($this->value, true);
             if(!$temporal->isValid()){
                 return null;
             }
@@ -2570,7 +2569,7 @@ class HPredicate {
         }
         else { // max>=t1 && min<=t2
 
-            //search range overlaps/intersects with interval
+            //search range overlaps/intersects within interval
             $res = "(rdi_estMaxDate>={$timespan[0]} AND rdi_estMinDate<={$timespan[1]})";
             
         }
