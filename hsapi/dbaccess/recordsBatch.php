@@ -901,7 +901,7 @@ error_log('count '.count($childNotFound).'  '.count($toProcess).'  '.print_r(  $
                         
                     }else
                     if (!$replace_all_occurences && $partialReplace) {// need to replace sVal with rVal
-                        $newVal = preg_replace("/".$this->data['sVal']."/i",$this->data['rVal'],$dtlVal);
+                        $newVal = preg_replace("/".preg_quote($this->data['sVal'], "/")."/i",$this->data['rVal'],$dtlVal);
                     }else{
                         $newVal = $this->data['rVal'];
                     }

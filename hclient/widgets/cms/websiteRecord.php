@@ -144,7 +144,7 @@ if(!($rec_id>0))
 
             $try_login = $system->getCurrentUser() == null;
             $message = 'Sorry, there are no publicly accessible websites defined for this database. '
-            .'Please ' . ($try_login ? '<span class="login-link">login</span> or' : '') . ' ask the owner to publish their website(s).';
+            .'Please ' . ($try_login ? '<a class="login-link">login</a> or' : '') . ' ask the owner to publish their website(s).';
 
             include ERROR_REDIR;
             exit();
@@ -201,7 +201,7 @@ if(!$hasAccess){
 
 //@todo The Heurist website at this address is not yet publicly accessible.
     $message = 'The Heurist website at this address is not yet publicly accessible. ' 
-        . ($try_login ? '<br>Try <span class="login-link">logging in</span> to view this website.' : '');
+        . ($try_login ? '<br>Try <a class="login-link">logging in</a> to view this website.' : '');
 
     include ERROR_REDIR;
     exit();

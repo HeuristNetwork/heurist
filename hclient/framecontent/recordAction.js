@@ -439,8 +439,9 @@ function hRecordAction(_action_type, _scope_type, _field_type, _field_value) {
             readonly: false,
 
             showclear_button: false,
-            dtFields:dtFields
+            dtFields:dtFields,
 
+            force_displayheight: (field_type=='blocktext') ? 2 : null
         };
 
         var ele = $("<div>").attr('id',input_id).appendTo($fieldset);

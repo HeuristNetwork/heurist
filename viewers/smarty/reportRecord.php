@@ -44,6 +44,8 @@ class ReportRecord {
        protected $dbsTerms;
        protected $system;
     
+       protected $translations;
+    
     function __construct() {
        global $system; 
        
@@ -55,6 +57,10 @@ class ReportRecord {
        $this->dbsTerms = new DbsTerms($system, $this->dtTerms);
        */
        $this->loaded_recs = array(); //cache
+
+        $this->translations = array(
+            'trm' => array()
+        );
     }    
 
     //
@@ -809,53 +815,75 @@ class ReportRecord {
         
     }
 
-    public function getTranslation($entity, $id, $field, $language_code, $def_value = null){
+    public function getTranslation($entity, $ids, $field, $language_code){
 
-        $res = empty($def_value) ? '' : $def_value;
-        $query_ready = false;
+        $rtn = array();
+        $def_values = array();
+
         $id_clause = '';
+
+        if(!is_array($ids)){
+            $ids = explode(',', $ids);
+        }
+
+        if(!array_key_exists($language_code, $this->translations[$entity])){
+            $this->translations[$entity][$language_code] = array();
+        }
+
+        $cache = $this->translations[$entity][$language_code];
+
+        if(count($cache) > 0){ // check cache first
+            foreach ($ids as $idx => $id) {
+                if(array_key_exists($id, $cache)){
+                    $rtn[$id] = $cache[$id];
+                    unset($ids[$idx]);
+                }
+            }
+        }
+
+        if(count($ids) == 0){
+            return count($rtn) == 1 ? array_shift($rtn) : $rtn;
+        }
+
+        $id_clause = ' IN (' .implode(',', $ids). ')';
 
         if($entity == 'trm'){
 
-            $id_is_array = false;
-            if(is_array($id) && count($id) > 0){
-                $id_clause = ' IN (' .implode(',', $id). ')';
-                $id_is_array = true;
-            }else if(!is_array($id) && intval($id) > 0){
-                $id_clause = ' = ' .intval($id);
-            }
-
             $field = (strpos(strtolower($field), 'desc') === false) ? 'trm_Label' : 'trm_Description'; // grab label by default
 
-            if(!$def_value){ // retrieve original term
-                $idx = $this->dtTerms['fieldNamesToIndex'];
+            // retrieve original term
+            $idx = $this->dtTerms['fieldNamesToIndex'];
+            $term = null;
 
-                if($id_is_array){
-                    $def_value = array();
-                    foreach ($id as $trm_id) {
-                        $term = $this->dbsTerms->getTerm($trm_id);
-                        array_push($def_value, !empty($term[$idx[$field]]) ? $term[$idx[$field]] : '');
-                    }
-                }else{
-                    $term = $this->dbsTerms->getTerm($id);
-                    $def_value = !empty($term[$idx[$field]]) ? $term[$idx[$field]] : '';
-                }
+            foreach ($ids as $trm_id) {
+                $term = $this->dbsTerms->getTerm($trm_id);
+                $def_values[$trm_id] = !empty($term[$idx[$field]]) ? $term[$idx[$field]] : '';
             }
-
-            $query_ready = true;
         }
 
-        if($query_ready && $id_clause != ''){
+        if($id_clause != ''){
 
-            $query = "SELECT trn_Translation FROM defTranslations WHERE trn_Code $id_clause AND trn_Source = '$field' AND trn_LanguageCode = '$language_code'";
+            $query = "SELECT trn_Code, trn_Translation FROM defTranslations WHERE trn_Code $id_clause AND trn_Source = '$field' AND trn_LanguageCode = '$language_code'";
 
-            $res = mysql__select_list2($this->system->get_mysqli(), $query);
+            $res = mysql__select_assoc2($this->system->get_mysqli(), $query);
+
+            foreach ($ids as $id) {
+                    
+                if(array_key_exists($id, $res) && !empty($res[$id])){
+                    $rtn[$id] = $res[$id];
+                }else if(array_key_exists($id, $def_values) && !empty($def_values[$id])){
+                    $rtn[$id] = $def_values[$id];
+                }else{
+                    $rtn[$id] = '';
+                }
+
+                $cache[$id] = $rtn[$id];
+            }
         }
 
-        $res = empty($res) && $def_value !== null ? $def_value : $res;
-        $res = is_array($res) && count($res) == 1 ? $res[0] : $res;
+        $this->translations[$entity][$language_code] = $cache; //array_replace($this->translations[$entity][$language_code], $cache)
 
-        return $res;
+        return count($rtn) == 1 ? array_shift($rtn) : $rtn;
     }
     
 }
