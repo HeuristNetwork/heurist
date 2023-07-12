@@ -1464,6 +1464,10 @@ window.hWin.HAPI4.baseURL+'?db=' + window.hWin.HAPI4.database  //(needplayer?'&p
 
         var that = this;
 
+        if(!this._checkUserPermissions(1)){
+            return;
+        }
+
         var ids = this.recordList ? this.recordList.resultList('getSelected', true) : 'all';
 
         var request = {
@@ -1560,6 +1564,10 @@ window.hWin.HAPI4.baseURL+'?db=' + window.hWin.HAPI4.database  //(needplayer?'&p
 
         var that = this;
 
+        if(!this._checkUserPermissions(1)){
+            return;
+        }
+
         var ids = this.recordList ? this.recordList.resultList('getSelected', true) : 'all';
 
         var request = {
@@ -1598,6 +1606,11 @@ window.hWin.HAPI4.baseURL+'?db=' + window.hWin.HAPI4.database  //(needplayer?'&p
     _refreshIndex: function(){
 
         var that = this;
+
+        if(!this._checkUserPermissions(1)){
+            return;
+        }
+
         var request = {
             'a': 'batch',
             'entity': that.options.entity.entityName,
@@ -1632,6 +1645,11 @@ window.hWin.HAPI4.baseURL+'?db=' + window.hWin.HAPI4.database  //(needplayer?'&p
     _createMediaRecords: function(){
 
         var that = this;
+
+        if(!this._checkUserPermissions(1)){
+            return;
+        }
+
         var ids = this.recordList ? this.recordList.resultList('getSelected', true) : [];
 
         if(!window.hWin.HEURIST4.util.isArrayNotEmpty(ids)){
@@ -1668,6 +1686,19 @@ window.hWin.HAPI4.baseURL+'?db=' + window.hWin.HAPI4.database  //(needplayer?'&p
                 window.hWin.HEURIST4.msg.showMsgErr(response);
             }
         });
+    },
+
+    _checkUserPermissions: function(level){
+
+        if(!window.hWin.HAPI4.has_access(level)){
+
+            let msg = 'You do not have permission to perform this action';
+            msg = level == 1 ? 'You must be an administrator of the database managers group to use this feature' : msg;
+            window.hWin.HEURIST4.msg.showMsgErr(msg);
+            return false;
+        }
+
+        return true;
     }
     
 });
