@@ -54,7 +54,7 @@ if (@$argv) {
     $dbdef_cache = $db_defs = $system->getFileStoreRootFolder().@$_REQUEST['db'].'/entity/db.json';
 
     if(@$_REQUEST['a']=='structure' && @$_REQUEST['entity']=='all'){
-        if(file_exists($dbdef_cache)){
+        if(file_exists($dbdef_cache) && $defaultRootFileUploadURL){
             $url = $defaultRootFileUploadURL . $_REQUEST['db'].'/entity/db.json';
             header('Location: '.$url);
             //downloadFile(null,$db_defs);
