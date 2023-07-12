@@ -34,6 +34,7 @@
     onHapiInit  - loads defintions and calls initHeaderElements and onPageInit
 
     initHeaderElements - substitute elements in header with values from CMS_HOME record
+    initLinksAndImages - add listeners for internal links and images 
     onPageInit      - 
     initMainMenu    - Inits main menu widget
     loadPageContent - Loads content of specified record to #main-content and inits all widgets   

@@ -470,7 +470,16 @@ if($template!==false){
     include ($template);
 }else{
     //use default template for this folder
-    include 'cmsTemplate.php';
+    $template = HEURIST_DIR.'hclient/widgets/cms/cmsTemplate.php';
+    if(!file_exists($template)){
+            $message = 'Sorry, it is not possible to load default cms template. '
+            .'Please ask the owner to verify server configuration.';
+
+            include ERROR_REDIR;
+            exit();
+    }else{
+        include 'cmsTemplate.php';    
+    }
 } 
 
 //
