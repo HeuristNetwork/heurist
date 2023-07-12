@@ -419,7 +419,7 @@ function executeSmartyTemplate($system, $params){
         $smarty->registerFilter('output', 'smarty_output_filter_strip_js');
     }
     
-    //$smarty->registerFilter('pre','smarty_pre_filter'); //before compilation: remove script tags
+    $smarty->registerFilter('pre', 'smarty_pre_filter'); //before compilation: handle short form term translations
     if($publishmode==0 && $session_id>0)
     {
         $smarty->registerFilter('post','smarty_post_filter'); //after compilation: to add progress support
@@ -499,12 +499,60 @@ function executeSmartyTemplate($system, $params){
     
 } //END executeSmartyTemplate
 
-//
-// remove all <script> tags from template
+//Performs the following, before Smarty processes the report:
+// Convert short form term translations
 //
 function smarty_pre_filter($tpl_source, Smarty_Internal_Template $template){
+    /* Original pre filter - remove all <script> tags from template
     $s = preg_replace("/<!--#.*-->/U",'',$tpl_source);
-    return preg_replace('#<script(.*?)>(.*?)</script>#is', '', $s);    
+    return preg_replace('#<script(.*?)>(.*?)</script>#is', '', $s);
+    */
+
+    global $system;
+    $mysqli = $system->get_mysqli();
+    $matches = array();
+
+    // Handle shorthand term translations {trm_id \Language_1 \Language_2 ...}
+    if(preg_match_all('/{\\d*\\s*(?:\\\\\\w{3}\\s*)+}/', $tpl_source, $matches)){
+
+        $query = "SELECT trn_Translation FROM defTranslations WHERE trn_Code={id} AND trn_Source='trm_Label' AND trn_LanguageCode='{lang}'";
+        $to_replace = array('{id}', '{lang}');
+        $done = array();
+
+        foreach ($matches[0] as $match) {
+
+            if(in_array($match, $done)){ // already replaced
+                continue;
+            }
+
+            $parts = explode('\\', trim($match, ' {}'));
+            $str_replace = '';
+
+            if(count($parts) == 0 || intval($parts[0]) < 1){ // ignore
+                continue;
+            }
+
+            $id = intval(array_shift($parts));
+
+            foreach ($parts as $lang) {
+                $str_replace = mysql__select_value($mysqli, str_replace($to_replace, array($id, $lang), $query));
+
+                if(!empty($str_replace)){
+                    break;
+                }
+            }
+
+            if(empty($str_replace)){
+                $str_replace = mysql__select_value($mysqli, "SELECT trm_Label FROM defTerms WHERE trm_ID=$id");
+                $str_replace = $str_replace;
+            }
+
+            $tpl_source = str_replace($match, $str_replace, $tpl_source);
+            array_push($done, $match);
+        }
+    }
+
+    return $tpl_source;
 }
 
 //
