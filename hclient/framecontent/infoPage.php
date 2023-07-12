@@ -79,7 +79,7 @@ if(!isset($message)){
         <link rel="stylesheet" type="text/css" href="<?php echo PDIR;?>external/jquery-ui-iconfont-master/jquery-ui.icon-font.css" />
 
         <style>
-            span.login-link{
+            a.login-link{
                 text-decoration: underline;
                 color: blue;
                 cursor: pointer;
