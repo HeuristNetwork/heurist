@@ -735,7 +735,7 @@ console.log(menu.find('.ui-menu-item').css('padding'));
         var url = window.hWin.HAPI4.baseURL + 'hclient/framecontent/'+script_name+'.php?'
                 +'db='+window.hWin.HAPI4.database+'&action='+action_type;
                 
-        window.hWin.HEURIST4.msg.showDialog(url, {height:450, width:750,
+        window.hWin.HEURIST4.msg.showDialog(url, {height:510, width:750,
             padding: '0px',
             title: window.hWin.HR(action_type),
             callback: callback,

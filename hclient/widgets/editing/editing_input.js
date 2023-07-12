@@ -52,7 +52,9 @@ $.widget( "heurist.editing_input", {
         is_faceted_search:false, //is input used in faceted search or filter builder
         is_between_mode:false,    //duplicate input for freetext and dates for search mode 
 
-        language: null // language for term values (3 character ISO639-2 code)
+        language: null, // language for term values (3 character ISO639-2 code)
+
+        force_displayheight: null // for textareas
     },
 
     //newvalues:{},  //keep actual value for resource (recid) and file (ulfID)
@@ -844,8 +846,11 @@ $.widget( "heurist.editing_input", {
             }
             
             //count number of lines
-            setTimeout(__adjustTextareaHeight, 1000);
-            
+            if(!this.options.force_displayheight){
+                setTimeout(__adjustTextareaHeight, 1000);
+            }else{
+                $input.attr('rows', this.options.force_displayheight);
+            }
             
             if(this.configMode && this.configMode['thematicmap']){ //-----------------------------------------------
 
