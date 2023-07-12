@@ -217,8 +217,10 @@ private static function hmlToJson($filename){
 			
 			if($db_url==null){
 				$db_url = ''.$xml_rec->citeAs; 
-				if($db_url!='') $db_url = substr($db_url,0,strpos($db_url,'?'));
-                $db_url = $db_url.'?db='.$xml_doc->database;
+				if($db_url!=''){ 
+                    $db_url = substr($db_url,0,strpos($db_url,'?'));
+                    $db_url = $db_url.'?db='.$xml_doc->database;
+                }
 			}
 			
 			foreach($xml_rec->children() as $xml_det){
