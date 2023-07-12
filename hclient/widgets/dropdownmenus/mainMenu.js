@@ -675,13 +675,11 @@ console.log('>>>>'+that.divProfileItems.find('.ui-menu-item').css('padding-left'
                     if(title) item.attr('title', title );
                 }
             });
-            
-            
-//            that._refresh();
-            
-         
+
+            if(name == 'Help'){ // update sysadmin email
+                that.menues[section].find('a#menu-help-emailadmin').attr('href', `mailto:${window.hWin.HAPI4.sysinfo.sysadmin_email}`);
+            }
         })
-        //.position({my: "left top", at: "left bottom", of: this['btn_'+name] })
         .hide();
 
 
