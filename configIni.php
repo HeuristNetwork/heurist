@@ -232,4 +232,6 @@ if (is_file($parentIni)){
     include_once($parentIni);
 }
 
+// use [base_url]/[database]/view/[rec_id] links
+$useShortRecordLink = true;
 ?>

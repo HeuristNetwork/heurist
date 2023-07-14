@@ -273,7 +273,6 @@ this._dout('onLoadComplete refresh again');
             if(this._is_publication && $.isFunction(initLinksAndImages))
             {
                 //init "a href" for CMS pages
-                
                 if(!window.hWin.HEURIST4){
                     var script = document.createElement('script');
                     script.type = 'text/javascript';

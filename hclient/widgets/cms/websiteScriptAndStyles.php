@@ -834,7 +834,12 @@ function initLinksAndImages($container, search_data){
                     query = window.hWin.HEURIST4.util.getUrlParameter('q', href);
 
                 }else if(href.indexOf(window.hWin.HAPI4.baseURL)===0){ //starts with 
-                    pageid = href.substr(window.hWin.HAPI4.baseURL.length);
+                    pageid = href.split('/');
+                    if(window.hWin.HEURIST4.util.isArrayNotEmpty(pageid)){
+                        pageid = pageid[pageid.length-1];
+                    }else{
+                        pageid = 0;
+                    }
                 }else if(href.indexOf('./')===0){
                     href = href.substring(2);
                     pageid = href;                                  
@@ -844,21 +849,32 @@ function initLinksAndImages($container, search_data){
             }
             
             if(window.hWin.HEURIST4.util.isNumber(pageid) && pageid>0){
-                
-                $(link).attr('data-pageid', pageid);
-                
-                var eventdata = null;
-                //if(query!=null){
-                //    eventdata = {event_type: window.hWin.HAPI4.Event.ON_REC_SEARCHSTART, q:query};
-                //}
-                
-                $(link).click(function(event){
-                    window.hWin.loadPageContent(pageid, eventdata);
-                    window.hWin.HEURIST4.util.stopEvent(event);
-                    return false;
-                });
-                //var scr = 'javascript:{}';
-                //attr('href',scr);
+
+                    $(link).attr('data-pageid', pageid);
+                    
+                    var eventdata = null;
+                    //if(query!=null){
+                    //    eventdata = {event_type: window.hWin.HAPI4.Event.ON_REC_SEARCHSTART, q:query};
+                    //}
+                    
+                    $(link).click(function(event){
+                        
+                        var pageid = $(event.target).attr('data-pageid');
+                        var topmenu = $('#main-menu').find('div[widgetid="heurist_Navigation"]');
+                        
+                        if(topmenu && topmenu.navigation('instance') && topmenu.navigation('isMenuItem',pageid)){
+                            window.hWin.loadPageContent(pageid, eventdata);
+                            window.hWin.HEURIST4.util.stopEvent(event);
+                            return false;
+                        }else{
+                            var url = window.hWin.HAPI4.baseURL+window.hWin.HAPI4.database+'/view/'+pageid;
+                            $(link).attr('href', url);
+                            window.hWin.HEURIST4.msg.showDialog(url, { title:'.', width: 600, height: 500, modal:false });
+                            return false;
+                        }
+                        
+                    });
+                    
                 
             }else if(href.indexOf('q=')===0 || $(link).attr('data-query') ){ //special case for links in smarty reports
             

@@ -118,7 +118,7 @@ executeSmartyTemplate - main routine
 smarty_post_filter - SMARTY callback: adds a small piece of code in main loop with function smarty_function_progress - need to    
                         maintain progress
 smarty_output_filter - SMARTY callback:  calls save_report_into_file
-smarty_output_filter_strip_js  - purify html and strip js
+smarty_output_filter_strip_js  - purify html and strip js - this is last filter
 
 save_report_into_file  - save report output as file (if there is parameter "output")
 */
@@ -830,6 +830,15 @@ function smarty_output_filter_strip_js($tpl_source, Smarty_Internal_Template $te
         //other than html or js output - it removes html and body tags
         $tpl_source = removeHeadAndBodyTags($tpl_source);
     }
+    
+    $onclick = '';
+    if($publishmode==0){
+        $onclick = 'onclick="{try{var h=window.hWin?window.hWin.HEURIST4:window.parent.hWin.HEURIST4;h.msg.showDialog(event.target.href,{title:\'.\',width: 600,height:500,modal:false});return false}catch(e){return true}}" ';
+    }
+    
+    $tpl_source = preg_replace('/href=["|\']?(\d+)["|\']?/',
+        $onclick.'href="'.HEURIST_BASE_URL.HEURIST_DBNAME.'/view/$1"',
+        $tpl_source);
     
     return $tpl_source;
     

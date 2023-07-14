@@ -202,7 +202,6 @@ class Temporal {
                        }
                    }
                 }else if(preg_match('/before|bef\.|bef|avant|after|post|aft\.|aft|après/i',$value) || preg_match('/^\d{4}-$/i', $value)){
-                   
                    if(preg_match('/^\d{4}-$/i', $value)){
                         preg_match_all('/^\d{4}-$/i', $value, $matches);     
                         $matches[0][1] = substr($matches[0][0],0,4);

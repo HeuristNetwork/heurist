@@ -50,7 +50,7 @@ require_once(dirname(__FILE__).'/../../hsapi/dbaccess/db_rel_details_temp.php');
 define('ALLOWED_TAGS', '<i><b><u><em><strong><sup><sub><small><br>'); //for record title see output_chunker for other fields
 //'<a><u><i><em><b><strong><sup><sub><small><br><h1><h2><h3><h4><p><ul><li><img>'
 
-$noclutter = array_key_exists('noclutter', $_REQUEST);
+$noclutter = array_key_exists('noclutter', $_REQUEST); //NOT USED
 $is_map_popup = array_key_exists('mapPopup', $_REQUEST) && ($_REQUEST['mapPopup']==1);
 $without_header = array_key_exists('noheader', $_REQUEST) && ($_REQUEST['noheader']==1);
 $layout_name = @$_REQUEST['ll'];
@@ -196,6 +196,9 @@ if(!($is_map_popup || $without_header)){
                 }
             }
 
+            //
+            // for edit link
+            //
             function sane_link_opener(link) {
                 if (window.frameElement  &&  window.frameElement.name == 'viewer') {
                     top.location.href = link.href;
@@ -218,7 +221,7 @@ if(!($is_map_popup || $without_header)){
             }
             
             //
-            //
+            // not used
             //
             function show_record(event, rec_id) 
             {
@@ -226,7 +229,7 @@ if(!($is_map_popup || $without_header)){
                 return false
             }
             //
-            // catch click on a href and opens it in popup dialog
+            // catch click on a href and opens it in popup dialog for ADMIN UI
             //
             function link_open(link) {
                 <?php if($is_reloadPopup){ ?>
@@ -235,7 +238,7 @@ if(!($is_map_popup || $without_header)){
                 <?php 
                 }else{
                 ?>    
-                if(window.hWin && window.hWin.HEURIST4){
+                if(window.hWin && window.hWin.HEURIST4 && window.hWin.HEURIST4.msg){
                     try{
                        window.hWin.HEURIST4.msg.showDialog(link.href, { title:'.', width: 600, height: 500, modal:false });
                        return false;
@@ -249,7 +252,7 @@ if(!($is_map_popup || $without_header)){
                 } 
                 ?>
             }
-
+            
             //
             // Display cms content within popup, when link clicked
             //
@@ -979,7 +982,7 @@ function print_private_details($bib) {
             </a>
             &nbsp;&nbsp;
             <a target=_blank class="external-link" 
-            href="<?= HEURIST_SERVER_URL ?>/heurist/?recID=<?= $bib['rec_ID']."&fmt=html&db=".HEURIST_DBNAME ?>">HTML</a><?php echo ($is_map_popup?'':'<span class="prompt" style="padding-left:10px">Right click to copy URL</span>');?></div>    
+            href="<?php echo _recordLink($bib['rec_ID']); ?>">HTML</a><?php echo ($is_map_popup?'':'<span class="prompt" style="padding-left:10px">Right click to copy URL</span>');?></div>    
     </div>
     <?php
     
@@ -1257,6 +1260,14 @@ function print_public_details($bib) {
             }else if ($bd['dty_Type'] == 'blocktext') {
 
                 $bd['val'] = nl2br(str_replace('  ', '&nbsp; ', output_chunker($bd['val'])));
+                //replace link <a href="[numeric]"> to record view links
+                
+                $bd['val'] = preg_replace('/href=["|\']?(\d+)["|\']?/',
+                        'onclick="return link_open(this);" href="'
+                        .HEURIST_BASE_URL.HEURIST_DBNAME.'/view/$1"',
+                        $bd['val']);
+                // _recordLink
+                
 
             }else if ($bd['dty_Type'] == 'resource') {
 
@@ -1273,9 +1284,8 @@ function print_public_details($bib) {
                                     in_array($rec_owner, $ACCESSABLE_OWNER_IDS);
                     
                     if($hasAccess){
-                                                       
-                        $bd['val'] = '<a target="_new" href="'.HEURIST_BASE_URL.'viewers/record/renderRecordData.php?db='
-                            .HEURIST_DBNAME.'&recID='.$rec_id.(defined('use_alt_db')? '&alt' : '')
+                        
+                        $bd['val'] = '<a target="_new" href="'._recordLink($rec_id)
                             .'" onclick="return link_open(this);">'
                             .strip_tags($rec_title,ALLOWED_TAGS).'</a>';
                         
@@ -1907,7 +1917,8 @@ function print_relation_details($bib) {
 
 					print '<img class="rft" style="vertical-align: top;background-image:url('.HEURIST_RTY_ICON.$bd['RelatedRecID']['rec_RecTypeID'].')" title="'.$rectypesStructure['names'][$bd['RelatedRecID']['rec_RecTypeID']].'" src="'.HEURIST_BASE_URL.'hclient/assets/16x16.gif">&nbsp;';
 
-					print '<a target=_new href="'.HEURIST_BASE_URL.'viewers/record/renderRecordData.php?db='.HEURIST_DBNAME.'&recID='.$bd['RelatedRecID']['rec_ID'].(defined('use_alt_db')? '&alt' : '').'" onclick="return link_open(this);">'
+					print '<a target=_new href="'._recordLink($bd['RelatedRecID']['rec_ID'])
+                            .'" onclick="return link_open(this);">'
 							.strip_tags($recTitle,ALLOWED_TAGS).'</a>';
 				} else {
 					print strip_tags($bd['Title'],ALLOWED_TAGS);
@@ -1990,7 +2001,8 @@ function print_relation_details($bib) {
 
 					print '<img class="rft" style="background-image:url('.HEURIST_RTY_ICON.$bd['RelatedRecID']['rec_RecTypeID'].')" title="'.$rectypesStructure['names'][$bd['RelatedRecID']['rec_RecTypeID']].'" src="'.HEURIST_BASE_URL.'hclient/assets/16x16.gif">&nbsp;';
 
-					print '<a target=_new href="'.HEURIST_BASE_URL.'viewers/record/renderRecordData.php?db='.HEURIST_DBNAME.'&recID='.$bd['RelatedRecID']['rec_ID'].(defined('use_alt_db')? '&alt' : '').'" onclick="return link_open(this);">'
+					print '<a target=_new href="'._recordLink($bd['RelatedRecID']['rec_ID'])
+                        .'" onclick="return link_open(this);">'
 						.strip_tags($recTitle,ALLOWED_TAGS).'</a>';
 				} else {
 					print strip_tags($bd['Title'],ALLOWED_TAGS);
@@ -2088,7 +2100,9 @@ function print_linked_details($bib, $link_cnt)
                     .'<img class="rft" style="background-image:url('.HEURIST_RTY_ICON.$row['rec_RecTypeID'].')" title="'.$rectypesStructure['names'][$row['rec_RecTypeID']].'" src="'.HEURIST_BASE_URL.'hclient/assets/16x16.gif"></div>';
 
             print '<div style="display: table-cell;vertical-align:top;'
-            .($is_map_popup?'max-width:250px;':'').'" class="truncate"><a target=_new href="'.HEURIST_BASE_URL.'viewers/record/renderRecordData.php?db='.HEURIST_DBNAME.'&recID='.$row['rec_ID'].(defined('use_alt_db')? '&alt' : '').'" onclick="return link_open(this);">'
+            .($is_map_popup?'max-width:250px;':'').'" class="truncate"><a target=_new href="'
+                            ._recordLink($row['rec_ID'])
+                            .'" onclick="return link_open(this);">'
                 .strip_tags($row['rec_Title'],ALLOWED_TAGS).'</a></div>';
             
         print '</div>';
@@ -2300,5 +2314,20 @@ function __sortResourcesByDate($a, $b)
     }else {
         return (@$a['rst_DisplayOrder']==null || $a['rst_DisplayOrder'] > $b['rst_DisplayOrder'])?1:-1;
     }
-}            
+} 
+
+//
+//
+//
+function _recordLink($rec_id){
+    global $useShortRecordLink;
+    
+    if(isset($useShortRecordLink) && $useShortRecordLink){
+        return HEURIST_BASE_URL.HEURIST_DBNAME.'/view/'.$rec_id;
+    }else{
+        return HEURIST_BASE_URL.'viewers/record/renderRecordData.php?db='
+                .HEURIST_DBNAME.'&recID='.$rec_id
+                .(defined('use_alt_db')? '&alt' : '');              
+    }
+}                        
 ?>

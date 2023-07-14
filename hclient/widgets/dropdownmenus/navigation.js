@@ -155,6 +155,19 @@ $.widget( "heurist.navigation", {
         });
     },
     
+    //
+    //
+    //
+    isMenuItem: function(rec_id){
+
+        if(this.menuData && rec_id){
+            return !window.hWin.HEURIST4.util.isnull(this.menuData.getById(rec_id));
+        }else{
+            return false;
+        }
+        
+    },
+    
     // recursive function
     // resdata - result of request to server side
     // orientation - treeview, horizontal, vertical, list
