@@ -963,6 +963,9 @@ class HLimb {
 
             //IMPORTANT!!!!!!!!
             if(is_array($wheres) && count($wheres)>0){  //@TODO!  this is temporal solution!!!!!
+//if cnj is OR (any) need to execute each OR section separately - otherwise it kills server (at least for old mySQL versions (5.7))           
+            
+            
                 $where = implode($cnj, $wheres);
                 
 //DEBUG error_log("TEST $cnj >>> ".$where);

@@ -1692,17 +1692,20 @@ function recordSearchMenuItems($system, $menuitems, &$result, $find_root_menu=fa
 *       rulesonly - return rules only (without original query)
 *       getrelrecs (=1) - search relationship records (along with related) on server side
 *       topids - list of records ids, it is used to compose 'parentquery' parameter to use in rules (@todo - replace with new rules algorithm)
+*       queryset - array of queries that will be executed one by one and result will be merged according to intersect param
+*                  queryset will be created implicitely of first key of json query is "all" or "any" 
+*       intersect (=1) AND/conjunction or (=0) OR/disjunction
 *
 *       INTERNAL/recursive
 *       parentquery - sql expression to substiture in rule query
 *       sql - sql expression to execute (used as recursive parameters to search relationship records)
-*
+* 
 *       SEARCH parameters that are used to compose sql expression
 *       q - query string (old mode) or json array (new mode)
 *       w (=all|bookmark a|b) - search among all or bookmarked records
 *       limit  - limit for sql query is set explicitely on client side
 *       offset - offset parameter value for sql query
-*       s - sort order - if defined it overwrites sortby in q param
+*       s - sort order - if defined it overwrites sortby in q json param
 *
 *       OUTPUT parameters
 *       vo (=h3) - output format in h3 for backward capability (for detail=ids only)
@@ -1738,13 +1741,23 @@ function recordSearch($system, $params)
         $query_json = is_array(@$params['q']) ?$params['q'] :json_decode(@$params['q'], true);
         if(is_array($query_json) && count($query_json)>0){
             $svsID = @$query_json['svs'];
+            
+            if(@$query_json['any'] || @$query_json['all']){
+                //first level is defined explicitely as "any" ot "all" - we will execute it separately - to avoid complex nested queries
+                $params['queryset'] = @$query_json['any']?$query_json['any']:$query_json['all'];
+                $params['intersect'] = @$query_json['all']?1:0;
+                $params['sortby'] = @$query_json['sortby']?$query_json['sortby']
+                                         :(@$query_json['sort']?$query_json['sort']
+                                            :(@$query_json['s']?$query_json['s']:null));
+            }
+            
         }else if(@$params['q'] && strpos($params['q'],':')>0){
             list($predicate, $svsID) = explode(':', $params['q']);
             if(!($predicate=='svs' && $svsID>0)){
                 $svsID = null;
             }
         }
-        if($svsID>0){
+        if($svsID>0){ //saved search id
 
             $vals = mysql__select_row($mysqli,
                 'SELECT svs_Name, svs_Query FROM usrSavedSearches WHERE svs_ID='.$mysqli->real_escape_string( $svsID ));        
@@ -1799,10 +1812,6 @@ function recordSearch($system, $params)
     }
     $savedSearchName .= empty($savedSearchName) ? '' : 'It is probably best to delete this saved filter and re-create it.<br>';
 
-    if(!@$params['detail']){// list of rec_XXX and field ids, if rec_XXX is missed all header fields are included
-        $params['detail'] = @$params['f']; //backward capability
-    }
-
     $system->defineConstant('RT_CMS_MENU');
     $system->defineConstant('DT_EXTENDED_DESCRIPTION');
 
@@ -1821,14 +1830,27 @@ function recordSearch($system, $params)
     $relations = null;
     $permissions = null;
 
-    if(@$params['detail']=='complete'){
+    if(!@$params['detail']){// list of rec_XXX and field ids, if rec_XXX is missed all header fields are included
+        $params['detail'] = @$params['f']; //backward capability
+        if(!@$params['detail']){
+            $params['detail'] = 'ids';
+        }
+    }
+    if($params['detail']=='complete'){
         $params['detail'] = 'detail';
         $needCompleteInformation = true; //all header fields, relations, full file info
     }
     
     $header_fields = null;
     $fieldtypes_ids = null;
-    if(@$params['detail']=='timemap'){ //($istimemap_request){
+
+    $is_count_only = ('count'==$params['detail']);
+    $is_count_by_rty = ('count_by_rty'==$params['detail']);
+    if($is_count_by_rty) $is_count_only = true;
+    $is_ids_only = ('ids'==$params['detail']);
+    $return_h3_format = (@$params['vo']=='h3' &&  $is_ids_only); //deprecated - to remove
+    
+    if($params['detail']=='timemap'){ //($istimemap_request){
         $params['detail']=='detail';
 
         $system->defineConstant('DT_START_DATE');
@@ -1877,7 +1899,7 @@ function recordSearch($system, $params)
         }
 
     }else 
-        if(  !in_array(@$params['detail'], array('header','timemap','detail','structure')) ){ //list of specific detailtypes
+    if(  !in_array($params['detail'], array('count','count_by_rty','ids','header','timemap','detail','structure')) ){ //list of specific detailtypes
             //specific set of detail fields and header fields
             if(is_array($params['detail'])){
                 $fieldtypes_ids = $params['detail'];
@@ -1931,13 +1953,6 @@ function recordSearch($system, $params)
 
     //specific for USyd Book of Remembrance parameters - returns prevail bg color for thumbnail image
     $needThumbBackground = $needThumbBackground || (@$params['thumb_bg']==1); 
-
-
-    $is_count_only = ('count'==$params['detail']);
-    $is_count_by_rty = ('count_by_rty'==$params['detail']);
-    if($is_count_by_rty) $is_count_only = true;
-    $is_ids_only = ('ids'==$params['detail']);
-    $return_h3_format = (@$params['vo']=='h3' &&  $is_ids_only);
 
     if(null==$system){
         $system = new System();
@@ -2038,11 +2053,11 @@ function recordSearch($system, $params)
         }
 
     }
-    else if( @$params['rules'] ){ //special case - server side operation
+    else if( @$params['rules'] ){ //set of consequent queries that depend on main query
 
         // rules - JSON array the same as stored in saved searches table
 
-        if(is_array(@$params['rules'])){
+        if(is_array($params['rules'])){
             $rules_tree = $params['rules'];
         }else{
             $rules_tree = json_decode($params['rules'], true);
@@ -2075,8 +2090,9 @@ function recordSearch($system, $params)
             //find main query results
             $fin_result = $resSearch;
             //main result set
-            $flat_rules[0]['results'] = $is_ids_only ?$fin_result['data']['records'] 
-            :array_keys($fin_result['data']['records']); //get ids
+            $flat_rules[0]['results'] = $is_ids_only 
+                                ?$fin_result['data']['records'] 
+                                :array_keys($fin_result['data']['records']); //get ids
         }else{
             //remove from $fin_result! but keep in $flat_rules[0]['results']?
             $flat_rules[0]['results'] = $is_ids_only ?$resSearch['data']['records'] 
@@ -2274,6 +2290,78 @@ function recordSearch($system, $params)
 
         return $fin_result;
     }//END RULES ------------------------------------------
+    else if( @$params['queryset'] ){ //list of queries with OR (default) or AND operators
+        // to facilitate database server workload. Old versions of mySQL (5.7) fail to execute 
+        // complex nested queries. Especailly with OR operators
+    
+        if(is_array($params['queryset'])){
+            $queryset = $params['queryset'];
+        }else{
+            $queryset = json_decode($params['queryset'], true);
+        }
+        
+        $is_or_conjunction = (@$params['intersect']!=1); //intersect or merge = AND or OR
+        $details = @$params['detail'];
+        $limit = @$params['limit'];
+        $sortby = @$params['sortby'];
+    
+        unset($params['queryset']);
+        unset($params['all']);
+        if(@$params['limit']) unset($params['limit']);
+        if(@$params['offset']) unset($params['offset']);
+        if(@$params['sortby']) unset($params['sortby']);
+        
+        $params['detail'] = 'ids';
+        $params['needall'] = 1;
+        $fin_result = null;
+        foreach($queryset as $idx => $query){ //loop for all queries
+        
+            $params['q'] = $query;
+        
+            $resSearch = recordSearch($system, $params); //search for main set
+            if(is_array($resSearch) && $resSearch['status']!=HEURIST_OK){  //error
+                return $resSearch;
+            }
+            if($fin_result==null){
+                $fin_result = $resSearch;    
+            }else{
+                //if OR - merge unique
+                if($is_or_conjunction){
+                    $fin_result['data']['records'] = array_merge_unique(
+                                                $fin_result['data']['records'], 
+                                                $resSearch['data']['records']);
+                }else{
+                    //if AND - intersect
+                    $fin_result['data']['records'] = array_intersect(
+                                                $fin_result['data']['records'], 
+                                                $resSearch['data']['records']);
+                }
+            }
+        }//foreach
+        
+        if(@$fin_result['data']['records']){
+            $total_count = count($fin_result['data']['records']);
+            if($limit>0 && $limit<$total_count){
+                $fin_result['data']['records'] = array_slice($fin_result['data']['records'],0,$limit);
+            }
+
+            if(($details=='ids' || $details==null) && $sortby==null){
+                $fin_result['data']['offset'] = 0;
+                $fin_result['data']['reccount'] = count($fin_result['data']['records']);
+            }else{
+                $params['details'] = $details;
+                $params['q'] = array('ids'=>$fin_result['data']['records']);
+                $params['q']['sortby'] = $sortby;
+                $fin_result = recordSearch($system, $params); //search for main set
+            }
+            
+            if($fin_result['status']==HEURIST_OK){
+                $fin_result['data']['count'] = $total_count; //total count    
+            }
+        }
+        
+        return $fin_result;
+    }
     else if( $currUserID>0 ) {
         //find user work susbset (except EVERYTHING search)
         $params['use_user_wss'] = (@$params['w']!='e'); //(strcasecmp(@$params['w'],'E') == 0); 
@@ -2298,7 +2386,7 @@ function recordSearch($system, $params)
             }else{
                 $query_json = json_decode($q, true);
                 
-                //try to pare plain string
+                //try to parse plain string
                 if( strpos($q,'*')===0 && !(is_array($query_json) && count($query_json)>0)){
                     $q = substr($q, 1);
                     $query_json = parse_query_to_json( $q );
