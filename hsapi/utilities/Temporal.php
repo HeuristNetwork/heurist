@@ -185,9 +185,9 @@ class Temporal {
             
             if(!preg_match('/\||timestamp|start/',$value)){
                 
-                if(preg_match('/fl|abt\.|abt|about|vers|^c\s|ca|circa|~/i',$value)){
+                if(preg_match('/fl|abt\.|abt|about|around|vers|^c\s|ca|circa|~/i',$value)){
                    
-                   preg_match_all('/fl|abt\.|abt|about|vers|ca\.|ca|circa|^c|~\s*|[-|\w+|\s]+$/i', $value, $matches); 
+                   preg_match_all('/fl|abt\.|abt|about|around|vers|ca\.|ca|circa|^c|~\s*|[-|\w+|\s]+$/i', $value, $matches); 
                    
                    if(@$matches[0][1]){
                    
@@ -201,14 +201,14 @@ class Temporal {
                            }
                        }
                    }
-                }else if(preg_match('/post|before|bef\.|bef|after|aft\.|aft|avant|après/i',$value) || preg_match('/^\d{4}-$/i', $value)){
+                }else if(preg_match('/before|bef\.|bef|avant|after|post|aft\.|aft|après/i',$value) || preg_match('/^\d{4}-$/i', $value)){
                    
                    if(preg_match('/^\d{4}-$/i', $value)){
                         preg_match_all('/^\d{4}-$/i', $value, $matches);     
                         $matches[0][1] = substr($matches[0][0],0,4);
                         $matches[0][0] = 'after';
                    }else{
-                        preg_match_all('/post|before|bef\.|bef|after|aft\.|aft|avant|après\s+|[-|\w+|\s]+$/i', $value, $matches);     
+                        preg_match_all('/before|bef\.|bef|avant|after|post|aft\.|aft|après\s+|[-|\w+|\s]+$/i', $value, $matches);     
                    }
                    
                    
