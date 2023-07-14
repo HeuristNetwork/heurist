@@ -1675,7 +1675,7 @@ error_log('CANNOT UPDATE COOKIE '.$session_id);
 
         if($username && $password){
             
-            if($skip_pwd_check || (crypt($password, 'sbzR8w7tl02VQ') == 'sbzR8w7tl02VQ'))            
+            if($skip_pwd_check || hash_equals(crypt($password, 'sbzR8w7tl02VQ'), 'sbzR8w7tl02VQ'))            
             {
                 $user_id = is_numeric($username)?$username:2;
                 $user = user_getById($this->mysqli, $user_id);
@@ -1692,7 +1692,7 @@ error_log('CANNOT UPDATE COOKIE '.$session_id);
                     $this->addError(HEURIST_REQUEST_DENIED,  "Your user profile is not active. Please contact database owner");
                     return false;
 
-                }else if (  $skip_pwd_check || crypt($password, $user['ugr_Password']) == $user['ugr_Password'] ) {
+                }else if (  $skip_pwd_check || hash_equals(crypt($password, $user['ugr_Password']), $user['ugr_Password']) ) {
                     
                     $this->doLoginSession($user['ugr_ID'], $session_type);
 
