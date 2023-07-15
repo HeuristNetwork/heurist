@@ -1002,6 +1002,7 @@ $.widget( "heurist.editing_input", {
                                 editor.ui.registry.addButton('customHeuristLink', {
                                     icon: 'link',
                                     text: 'Heurist',
+                                    tooltip: 'Add link to Heurist record',
                                     onAction: function (_) {  //since v5 onAction in v4 onclick
                                         selectRecord(null, function(recordset){
                                             
