@@ -979,7 +979,8 @@ $.widget( "heurist.editing_input", {
                                     }
                                 });                                        
                                 editor.ui.registry.addButton('customAddFigCaption', {
-                                    text: 'Add caption',
+                                    icon: 'comment',
+                                    //text: 'Add caption',
                                     tooltip: 'Add caption to current media',
                                     onAction: function (_) {
                                         that._addMediaCaption();
@@ -998,6 +999,19 @@ $.widget( "heurist.editing_input", {
                                         }
                                     }
                                 });
+                                editor.ui.registry.addButton('customHeuristLink', {
+                                    icon: 'link',
+                                    text: 'Heurist',
+                                    onAction: function (_) {  //since v5 onAction in v4 onclick
+                                        selectRecord(null, function(recordset){
+                                            
+                                                var record = recordset.getFirstRecord();
+                                                var record_id = recordset.fld(record,'rec_ID');
+                                                tinymce.activeEditor.execCommand('mceInsertLink', false, record_id);
+                                            
+                                        });
+                                    }
+                                });                                        
                             }else{
                                 editor.addButton('customHeuristMedia', {
                                     icon: 'image',
@@ -1076,7 +1090,7 @@ $.widget( "heurist.editing_input", {
                             'media table paste help autoresize'  //insertdatetime  wordcount
                         ],      
                         //undo redo | code insert  |  fontselect fontsizeselect |  forecolor backcolor | media image link | alignleft aligncenter alignright alignjustify | fullscreen            
-                        toolbar: ['formatselect | bold italic forecolor blockquote | customHeuristMedia customAddFigCaption link | align | bullist numlist outdent indent | table | removeformat | help'],
+                        toolbar: ['formatselect | bold italic forecolor blockquote | customHeuristMedia customAddFigCaption | customHeuristLink link | align | bullist numlist outdent indent | table | removeformat | help'],
                         /*formats: { q: {block: 'q'} },
                         style_formats: [ {title: 'Quotation', format: 'q'} ],*/
                         block_formats: 'Paragraph=p;Heading 1=h1;Heading 2=h2;Heading 3=h3;Heading 4=h4;Heading 5=h5;Heading 6=h6;Preformatted=pre;Quotation=blockquote',

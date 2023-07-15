@@ -2028,3 +2028,45 @@ function translationToUI(params, $container, keyname, name, is_text_area){
     def_ele.attr('title',sTitle);
 
 }
+
+//
+// Select arbitrary Heurist record 
+//
+function selectRecord(options, callback)
+{
+        var popup_options = {
+            select_mode: 'select_single', //select_multi
+            select_return_mode: 'recordset', //or ids
+            edit_mode: 'popup',//'none'
+            selectOnSave: true, //it means that select popup will be closed after add/edit is completed
+            title: window.hWin.HR('Select record'),
+            rectype_set: null,
+            parententity: 0,
+            default_palette_class: 'ui-heurist-populate',
+            onselect:function(event, data){
+                //if( window.hWin.HEURIST4.util.isArrayNotEmpty(data.selection) ){
+                //    callback(data.selection[0]);
+                //}
+                
+                if( window.hWin.HEURIST4.util.isRecordSet(data.selection) ){
+                    var recordset = data.selection;
+                    //var record = recordset.getFirstRecord();
+                    //var record_id = recordset.fld(record,'rec_ID');
+                    callback(data.selection);
+                }
+            }
+        };//popup_options
+        
+        var usrPreferences = window.hWin.HAPI4.get_prefs_def('select_dialog_records', 
+            {width: null,  //null triggers default width within particular widget
+                height: (window.hWin?window.hWin.innerHeight:window.innerHeight)*0.95 });
+
+        popup_options.width = Math.max(usrPreferences.width,710);
+        popup_options.height = usrPreferences.height;
+
+        if(options){
+            popup_options = $.extend(popup_options,options);
+        }
+        
+        window.hWin.HEURIST4.ui.showEntityDialog('records', popup_options);
+}
