@@ -118,9 +118,11 @@ if(false){
     __delete_OLD_RecType_And_Term_Icons_Folders();
 }else if(false){
     __correctGetEstDate_and_ConvertTemporals_JSON_to_Plain();
-}else if(true){
+}else if(false){
     
     __updateDatabases_To_V14( @$_REQUEST['process']);
+}else if(true){
+    __correctGetEstDate();
 }
 //
 // Report database versions
@@ -844,6 +846,57 @@ function __renameField39(){
         
     }
     
+}
+
+//
+//
+//
+function __correctGetEstDate(){
+
+    global $mysqli, $databases; 
+    
+    //$databases = array('hdb_MPCE_Mapping_Print_Charting_Enlightenment');
+    print '__correctGetEstDate<br>';    
+    
+    foreach ($databases as $idx=>$db_name){
+
+        mysql__usedatabase($mysqli, $db_name);
+        
+
+        $query = 'SELECT dtl_ID, dtl_Value, dtl_RecID FROM recDetails, recDetailsDateIndex where rdi_DetailID=dtl_ID AND rdi_estMaxDate>2100'; //' and rdi_DetailTypeID=1151';
+        $res = $mysqli->query($query);
+        if ($res){
+            $cnt=0;
+            $is_invalid = false;
+            while ($row = $res->fetch_row()){
+                $dtl_ID = $row[0];
+                $dtl_Value = $row[1];
+                $rec_ID = $row[2];
+                
+                $preparedDate = new Temporal( $dtl_Value );
+                if($preparedDate && $preparedDate->isValidSimple()){
+                    
+                    $dtl_NewValue = $preparedDate->getValue(true);
+                    
+                    $query = 'UPDATE recDetails SET dtl_Value="'.
+                                                    $mysqli->real_escape_string($dtl_NewValue).'" WHERE dtl_ID='.$dtl_ID;
+                    //$mysqli->query($query);
+                    print $rec_ID.'  '.$dtl_Value.'  '.$dtl_NewValue.'<br>';
+                                    
+                    $cnt++;
+                    if($cnt>10) break;
+                }else{
+                    print $rec_ID.'  '.$dtl_Value.'<br>';
+                    $is_invalid = true;
+                }
+                
+            }
+            
+            if($cnt>0 || $is_invalid)
+                print $db_name.'  '.$cnt.'<br>';
+        }
+        
+    }//for
 }
 
 //

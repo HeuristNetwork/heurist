@@ -2483,12 +2483,13 @@ console.log('get defintion in OLD format!!!!');
                                     cterm = field.selectedvalue.value.split(s_op);
                                 }
                         }
-                        
                         var mmin  = cterm[0];
                         var mmax  = cterm[1];
                         var daymsec = 86400000; //24*60*60*1000;   1day
 
                         var date_type = '';
+
+//DEBUG console.log('ret', mmin+'   '+mmax);
                         
                         if(!(window.hWin.HEURIST4.util.isempty(mmin) || window.hWin.HEURIST4.util.isempty(mmax))){
                             
@@ -2515,7 +2516,7 @@ console.log('get defintion in OLD format!!!!');
                                 }
                                 
                                 
-//DEBUG console.log('ret', mmin+'   '+mmax);
+
                                 if(field.date_type=='years_only'){
                                     if(typeof mmin==='string' && mmin.indexOf('-12-31')>0){
                                         mmin = mmin.substr(0, mmin.indexOf('-12-31')); 

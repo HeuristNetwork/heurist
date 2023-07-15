@@ -273,7 +273,7 @@ function recordSearchFacets($system, $params){
             //select valid dates
             $select_field = 'dt0.rdi_estMinDate';
             $detail_link = ', recDetailsDateIndex dt0';
-            $details_where = " AND (dt0.rdi_RecID=r0.rec_ID and dt0.rdi_DetailTypeID $compare_field) ";
+            $details_where = " AND (dt0.rdi_estMinDate<2100 and dt0.rdi_RecID=r0.rec_ID and dt0.rdi_DetailTypeID $compare_field) ";
 
             //OLD ' AND (cast(getTemporalDateString('.$select_field.') as DATETIME) is not null ';
             //OLD .'OR (cast(getTemporalDateString('.$select_field.') as SIGNED) is not null  AND '
@@ -828,7 +828,7 @@ function getDateHistogramData($system, $range, $interval, $rec_ids, $dty_id, $fo
 
     $sql = 'SELECT rdi_estMinDate, rdi_estMaxDate '  //', rdi_estMaxDate'
             .' FROM recDetailsDateIndex'
-            .' WHERE rdi_RecID IN ('
+            .' WHERE rdi_estMaxDate<2100 AND rdi_RecID IN ('
                 .implode(',', $rec_ids).") AND rdi_DetailTypeID = ".$dty_id; 
                 
     $res = $mysqli->query($sql);

@@ -759,6 +759,11 @@ class Temporal {
             if(strlen($value)==14){ //20090410000000
                 $value = substr($value,0,4).'-'.substr($value,4,2).'-'.substr($value,6,2)
                         .' '.substr($value,8,2).':'.substr($value,10,2).':'.substr($value,12,2);
+            }else if(intval($value)>9999){ //20090410 
+                $nval = substr($value,0,4);
+                if(strlen($value)>4) $nval = $nval.'-'.substr($value,4,2);
+                if(strlen($value)>6) $nval = $nval.'-'.substr($value,6,2);
+                $value = $nval;
             }else{
                 $value = preg_replace('/\s+/', '', $value); //remove spaces
                 $date = array('year'=>$value);
