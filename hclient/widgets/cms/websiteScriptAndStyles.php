@@ -834,11 +834,15 @@ function initLinksAndImages($container, search_data){
                     query = window.hWin.HEURIST4.util.getUrlParameter('q', href);
 
                 }else if(href.indexOf(window.hWin.HAPI4.baseURL)===0){ //starts with 
-                    pageid = href.split('/');
-                    if(window.hWin.HEURIST4.util.isArrayNotEmpty(pageid)){
-                        pageid = pageid[pageid.length-1];
-                    }else{
-                        pageid = 0;
+                
+                    pageid = window.hWin.HEURIST4.util.getUrlParameter('recID',href);
+                    if(!(pageid>0)){
+                        pageid = href.split('/');
+                        if(window.hWin.HEURIST4.util.isArrayNotEmpty(pageid)){
+                            pageid = pageid[pageid.length-1];
+                        }else{
+                            pageid = 0;
+                        }
                     }
                 }else if(href.indexOf('./')===0){
                     href = href.substring(2);
@@ -867,7 +871,8 @@ function initLinksAndImages($container, search_data){
                             window.hWin.HEURIST4.util.stopEvent(event);
                             return false;
                         }else{
-                            var url = window.hWin.HAPI4.baseURL+window.hWin.HAPI4.database+'/view/'+pageid;
+                            //var url = window.hWin.HAPI4.baseURL+window.hWin.HAPI4.database+'/view/'+pageid;
+                            var url = window.hWin.HAPI4.baseURL+'?recID='+pageid+'&fmt=html&db='+window.hWin.HAPI4.database;
                             $(link).attr('href', url);
                             window.hWin.HEURIST4.msg.showDialog(url, { title:'.', width: 600, height: 500, modal:false });
                             return false;

@@ -232,6 +232,6 @@ if (is_file($parentIni)){
     include_once($parentIni);
 }
 
-// use [base_url]/[database]/view/[rec_id] links
-$useShortRecordLink = true;
+// use [base_url]/[database]/view/[rec_id] links - Need to define RewriteRule in httpd.conf
+$useShortRecordLink = false;
 ?>

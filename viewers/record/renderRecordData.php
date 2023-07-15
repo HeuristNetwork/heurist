@@ -982,7 +982,7 @@ function print_private_details($bib) {
             </a>
             &nbsp;&nbsp;
             <a target=_blank class="external-link" 
-            href="<?php echo _recordLink($bib['rec_ID']); ?>">HTML</a><?php echo ($is_map_popup?'':'<span class="prompt" style="padding-left:10px">Right click to copy URL</span>');?></div>    
+            href="<?php echo $system->recordLink($bib['rec_ID']); ?>">HTML</a><?php echo ($is_map_popup?'':'<span class="prompt" style="padding-left:10px">Right click to copy URL</span>');?></div>    
     </div>
     <?php
     
@@ -1264,9 +1264,8 @@ function print_public_details($bib) {
                 
                 $bd['val'] = preg_replace('/href=["|\']?(\d+)["|\']?/',
                         'onclick="return link_open(this);" href="'
-                        .HEURIST_BASE_URL.HEURIST_DBNAME.'/view/$1"',
+                        .$system->recordLink('$1').'"',
                         $bd['val']);
-                // _recordLink
                 
 
             }else if ($bd['dty_Type'] == 'resource') {
@@ -1285,7 +1284,7 @@ function print_public_details($bib) {
                     
                     if($hasAccess){
                         
-                        $bd['val'] = '<a target="_new" href="'._recordLink($rec_id)
+                        $bd['val'] = '<a target="_new" href="'.$system->recordLink($rec_id)
                             .'" onclick="return link_open(this);">'
                             .strip_tags($rec_title,ALLOWED_TAGS).'</a>';
                         
@@ -1917,7 +1916,7 @@ function print_relation_details($bib) {
 
 					print '<img class="rft" style="vertical-align: top;background-image:url('.HEURIST_RTY_ICON.$bd['RelatedRecID']['rec_RecTypeID'].')" title="'.$rectypesStructure['names'][$bd['RelatedRecID']['rec_RecTypeID']].'" src="'.HEURIST_BASE_URL.'hclient/assets/16x16.gif">&nbsp;';
 
-					print '<a target=_new href="'._recordLink($bd['RelatedRecID']['rec_ID'])
+					print '<a target=_new href="'.$system->recordLink($bd['RelatedRecID']['rec_ID'])
                             .'" onclick="return link_open(this);">'
 							.strip_tags($recTitle,ALLOWED_TAGS).'</a>';
 				} else {
@@ -2001,7 +2000,7 @@ function print_relation_details($bib) {
 
 					print '<img class="rft" style="background-image:url('.HEURIST_RTY_ICON.$bd['RelatedRecID']['rec_RecTypeID'].')" title="'.$rectypesStructure['names'][$bd['RelatedRecID']['rec_RecTypeID']].'" src="'.HEURIST_BASE_URL.'hclient/assets/16x16.gif">&nbsp;';
 
-					print '<a target=_new href="'._recordLink($bd['RelatedRecID']['rec_ID'])
+					print '<a target=_new href="'.$system->recordLink($bd['RelatedRecID']['rec_ID'])
                         .'" onclick="return link_open(this);">'
 						.strip_tags($recTitle,ALLOWED_TAGS).'</a>';
 				} else {
@@ -2101,7 +2100,7 @@ function print_linked_details($bib, $link_cnt)
 
             print '<div style="display: table-cell;vertical-align:top;'
             .($is_map_popup?'max-width:250px;':'').'" class="truncate"><a target=_new href="'
-                            ._recordLink($row['rec_ID'])
+                            .$system->recordLink($row['rec_ID'])
                             .'" onclick="return link_open(this);">'
                 .strip_tags($row['rec_Title'],ALLOWED_TAGS).'</a></div>';
             
@@ -2316,18 +2315,4 @@ function __sortResourcesByDate($a, $b)
     }
 } 
 
-//
-//
-//
-function _recordLink($rec_id){
-    global $useShortRecordLink;
-    
-    if(isset($useShortRecordLink) && $useShortRecordLink){
-        return HEURIST_BASE_URL.HEURIST_DBNAME.'/view/'.$rec_id;
-    }else{
-        return HEURIST_BASE_URL.'viewers/record/renderRecordData.php?db='
-                .HEURIST_DBNAME.'&recID='.$rec_id
-                .(defined('use_alt_db')? '&alt' : '');              
-    }
-}                        
 ?>

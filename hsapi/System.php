@@ -1890,6 +1890,26 @@ error_log('CANNOT UPDATE COOKIE '.$session_id);
         }
         return $is_allowed;
     }
+    
+    //
+    //
+    //
+    public function recordLink($rec_id){
+        global $useShortRecordLink;
+        
+        if(isset($useShortRecordLink) && $useShortRecordLink){
+            return HEURIST_BASE_URL.$this->dbname.'/view/'.$rec_id;
+        }else{
+            // HEURIST_SERVER_URL.'heurist/'
+            if(true){
+                return HEURIST_BASE_URL.'?recID='.$rec_id.'&fmt=html&db='.$this->dbname;
+            }else{
+                return HEURIST_BASE_URL.'viewers/record/renderRecordData.php?db='
+                    .$this->dbname.'&recID='.$rec_id;
+            }
+        }
+    }                        
+
 
     //
     // check database version 

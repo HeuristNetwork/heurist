@@ -837,7 +837,7 @@ function smarty_output_filter_strip_js($tpl_source, Smarty_Internal_Template $te
     }
     
     $tpl_source = preg_replace('/href=["|\']?(\d+)["|\']?/',
-        $onclick.'href="'.HEURIST_BASE_URL.HEURIST_DBNAME.'/view/$1"',
+        $onclick.'href="'.$system->recordLink('$1').'"', 
         $tpl_source);
     
     return $tpl_source;
