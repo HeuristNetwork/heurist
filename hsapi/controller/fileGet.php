@@ -140,7 +140,7 @@ if($filename){ //download from scratch (for csv import)
             //$path = HEURIST_TERM_ICON_DIR;
         }
         
-        list($filename, $content_type) = resolveEntityFilename($entity_name, $rec_id, $viewmode);
+        list($filename, $content_type, $file_url) = resolveEntityFilename($entity_name, $rec_id, $viewmode, $db);
         
         
         //entity id either not defined or requested file doesn't exist
@@ -169,7 +169,11 @@ if($filename){ //download from scratch (for csv import)
                 if(@$_REQUEST['color'] && $ext!='svg'){
                     UtilsImage::changeImageColor($filename, null, @$_REQUEST['color'], @$_REQUEST['circle'], @$_REQUEST['bg']);    
                 }else{
-                    _download_file($filename, $content_type);    
+                    if($allowWebAccessEntityFiles){
+                        header('Location:'.$file_url);    
+                    }else{
+                        _download_file($filename, $content_type);        
+                    }
                 }
             }
 
@@ -232,4 +236,3 @@ function _download_file($filename, $content_type){
         readfile($filename);
 }    
 ?>
-

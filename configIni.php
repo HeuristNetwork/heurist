@@ -195,7 +195,6 @@ $passwordForDatabaseDeletion=''; // if less than 15 characters no one can delete
 $passwordForReservedChanges=''; // if blank, no-one can modify reserved fields, otherwise challenge
 $passwordForServerFunctions=''; // if blank, no-one can run server analysis functions - risk of overload - otherwise challenge
 
-$allowThumbnailsWebAccessdefault = true;
 $allowGoogleAnalytics = true;
 
 $defaultRootFileUploadPath ='';
@@ -232,6 +231,12 @@ if (is_file($parentIni)){
     include_once($parentIni);
 }
 
+// use webserver to fasten access to thumbnail images and uploaded files
+// otherwise images will be accessed via php
+$allowWebAccessThumbnails = true;
+$allowWebAccessUploadedFiles = false;
+$allowWebAccessEntityFiles = false;
+
 // use [base_url]/[database]/view/[rec_id] links - Need to define RewriteRule in httpd.conf
-$useShortRecordLink = false;
+$useRewrtieRulesForRecordLink = false;
 ?>

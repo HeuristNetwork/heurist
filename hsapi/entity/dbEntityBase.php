@@ -920,7 +920,7 @@ class DbEntityBase
             
             $entity_name = $this->config['entityName'];
             
-            list($filename, $content_type) = resolveEntityFilename($entity_name, $recID, $verions, $db_name, $extension);
+            list($filename, $content_type, $url) = resolveEntityFilename($entity_name, $recID, $verions, $db_name, $extension);
             
             return $filename;
 /*            

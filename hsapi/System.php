@@ -537,11 +537,11 @@ error_log(print_r($_REQUEST, true));
     */
     public function getArrayOfSystemFolders(){
         
-        global $allowThumbnailsWebAccessdefault;
+        global $allowWebAccessThumbnails, $allowWebAccessUploadedFiles, $allowWebAccessEntityFiles;
         
         //const name, description, allow webaccess, for backup
         $folders = array();
-        $folders['filethumbs']   = array('THUMB','used to store thumbnails for uploaded files', $allowThumbnailsWebAccessdefault, true);
+        $folders['filethumbs']   = array('THUMB','used to store thumbnails for uploaded files', $allowWebAccessThumbnails, true);
         $folders['file_uploads'] = array('FILES','used to store uploaded files by default');
         //besides we have HEURIST_SCRATCHSPACE_DIR == sys temp dir
         $folders['scratch']      = array('SCRATCH','used to store temporary files', false); 
@@ -549,7 +549,7 @@ error_log(print_r($_REQUEST, true));
         $folders['html-output']  = array('HTML','used to write published records as generic html files', true);
         $folders['generated-reports'] = array(null,'used to write generated reports');
         $folders['smarty-templates']  = array('SMARTY_TEMPLATES','', false, true);
-        $folders['entity']        = array(null,'used to store icons and images for record types users,groups,terms');
+        $folders['entity']        = array(null,'used to store icons and images for record types users,groups,terms', $allowWebAccessEntityFiles);
         $folders['backup']        = array(null,'used to write files for user data dump');
         $folders['settings']      = array('SETTING','', false, true);
         $folders['uploaded_tilestacks'] = array('TILESTACKS','used to store uploaded map tiles', true, false);
@@ -732,6 +732,7 @@ error_log(print_r($_REQUEST, true));
                 if($warn!=''){ //can't creat or not writeable
                     $warnings[] = $warn;
                 }else{
+                    //it defines constants HEURIST_[FOLDER]_DIR and HEURIST_[FOLDER]_URL
                     if($folder[0]!=null){
                         define('HEURIST_'.$folder[0].'_DIR', $dir);
                         if($allowWebAccess){
@@ -1895,18 +1896,17 @@ error_log('CANNOT UPDATE COOKIE '.$session_id);
     //
     //
     public function recordLink($rec_id){
-        global $useShortRecordLink;
+        global $useRewrtieRulesForRecordLink;
         
-        if(isset($useShortRecordLink) && $useShortRecordLink){
+        if(isset($useRewrtieRulesForRecordLink) && $useRewrtieRulesForRecordLink){
             return HEURIST_BASE_URL.$this->dbname.'/view/'.$rec_id;
         }else{
             // HEURIST_SERVER_URL.'heurist/'
-            if(true){
-                return HEURIST_BASE_URL.'?recID='.$rec_id.'&fmt=html&db='.$this->dbname;
-            }else{
-                return HEURIST_BASE_URL.'viewers/record/renderRecordData.php?db='
+            return HEURIST_BASE_URL.'?recID='.$rec_id.'&fmt=html&db='.$this->dbname;
+            /* it will be redirected
+                HEURIST_BASE_URL.'viewers/record/renderRecordData.php?db='
                     .$this->dbname.'&recID='.$rec_id;
-            }
+            */
         }
     }                        
 

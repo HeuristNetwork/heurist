@@ -57,7 +57,7 @@ define('HEURIST_TERM_ICON_URL', HEURIST_BASE_URL.'?db='.HEURIST_DBNAME.'&entity=
             $query = 'SELECT trm_ID, trm_Label, trm_Code from defTerms where trm_ParentTermID='.EVENT_TYPE.' ORDER BY trm_Label';
             $res = $system->get_mysqli()->query($query);
             while($row = $res->fetch_assoc()) {
-                list($filename, $ctype) = resolveEntityFilename('trm', $row['trm_ID'], 'icon');
+                list($filename, $ctype, $url) = resolveEntityFilename('trm', $row['trm_ID'], 'icon');
                 if($filename && file_exists($filename)){
                     print '<tr><td class="legend_icon"><img src="'.HEURIST_TERM_ICON_URL.$row['trm_ID'].'"></td>';
                     print '<td class="legend_text">'.$row['trm_Label'].'</td></tr>';
@@ -76,7 +76,7 @@ define('HEURIST_TERM_ICON_URL', HEURIST_BASE_URL.'?db='.HEURIST_DBNAME.'&entity=
             $res = $system->get_mysqli()->query($query);
             while($row = $res->fetch_assoc()) {
 
-                list($filename, $ctype) = resolveEntityFilename('trm', $row['trm_ID'], 'icon');
+                list($filename, $ctype, $url) = resolveEntityFilename('trm', $row['trm_ID'], 'icon');
                 if($filename && file_exists($filename)){
                 // TODO: Remove, enable or explain
                 // print $filename.'<br>';

@@ -376,7 +376,7 @@
     
    
     //
-    //
+    // It copies .htaccess_via_url that allow access (not index/listing view) to destination folder
     //
     function allowWebAccessForForlder($folder){
         $res = true;

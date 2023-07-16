@@ -14,5 +14,5 @@
 # @version     4
 
 # Allow listing and access to this folder's files
-Options +Indexes
+Options -Indexes
 Allow from all

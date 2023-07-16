@@ -175,9 +175,10 @@
     }
     
     //
-    // Returns filename and content type by entity name, view version (icon,thumb) and entity id;
+    // Returns full path, content type and url by entity name, view version (icon,thumb) and entity id;
     //
     function resolveEntityFilename($entity_name, $rec_id, $version, $db_name=null, $extension=null){
+        global $defaultRootFileUploadURL;
         
         $entity_name = entityResolveName($entity_name); 
 
@@ -188,24 +189,21 @@
                 $db_name = substr($rec_id,4);    
             }
             $rec_id = 1;    
-            $path = HEURIST_FILESTORE_ROOT . $db_name . '/entity/sysIdentification/';    
+            $path = '/entity/sysIdentification/';    
+
         }else{
             if($entity_name=='term' || $entity_name=='trm'){
                 $entity_name = 'defTerms';
             }
 
             if($db_name==null){
-                if(defined('HEURIST_FILESTORE_DIR')){
-                    $path = HEURIST_FILESTORE_DIR;
+                if(defined('HEURIST_DBNAME')){
+                    $db_name = HEURIST_DBNAME;
                 }else{
-                    return array(null,null);
+                    return array(null,null,null);
                 }
-            }else{
-                $path = HEURIST_FILESTORE_ROOT.$db_name.'/';
             }
-            
-            $path = $path .'entity/'.$entity_name.'/';    
-            
+            $path = '/entity/'.$entity_name.'/';    
         } 
 
         if(!$version){
@@ -221,10 +219,11 @@
         
         $filename = null;
         $content_type = null;
+        $url = null;
 
         if($rec_id>0){
-        
-            $fname = $path.$rec_id;
+
+            $fname = HEURIST_FILESTORE_ROOT.$db_name.$path.$rec_id;
             
             $exts = $extension?array($extension):array('png','jpg','svg','jpeg','jpe','jfif','gif');
             foreach ($exts as $ext){
@@ -237,11 +236,13 @@
                         $content_type = 'image/'.$ext;    
                     }
                     $filename = $fname.'.'.$ext;
+                    $url =  $defaultRootFileUploadURL.$db_name.$path.$rec_id.'.'.$ext;
                     break;
                 }
             }
         }
-        return array($filename, $content_type);
+        
+        return array($filename, $content_type, $url);
     }
     
 

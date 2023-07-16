@@ -1045,7 +1045,7 @@ function __copy_RecType_And_Term_Icons_To_EntityFolder(){
                         $ext = substr($object[1],-3);
                     
                         //if icon exists skip
-                        list($fname, $ctype) = resolveEntityFilename('defRecTypes', $rty_id, 'icon', $db_name, $ext);
+                        list($fname, $ctype,$url) = resolveEntityFilename('defRecTypes', $rty_id, 'icon', $db_name, $ext);
                         if($fname==null){
                         
                             //copy icon
@@ -1098,7 +1098,7 @@ function __copy_RecType_And_Term_Icons_To_EntityFolder(){
                         $ext = substr($object[1],-3);
                     
                         //if icon exist skip
-                        list($fname, $ctype) = resolveEntityFilename('defTerms', $trm_id, 'icon', $db_name, $ext);
+                        list($fname, $ctype,$url) = resolveEntityFilename('defTerms', $trm_id, 'icon', $db_name, $ext);
                         if($fname!=null) continue;
                         
                         $new_icon = $path.$object[1];
