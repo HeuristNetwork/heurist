@@ -219,17 +219,7 @@ $saml_service_provides = null;
 // if value is 1, it hides the standard heurist login and show SAML auth only ($saml_service_provides must be defined)
 $hideStandardLogin = 0;
 
-// system default file - if a heuristConfigIni.php file exists in the parent directory of the installation,
-// the configIni.php in the installation does not need to be configured. This allows unconfigured ConfigIni.php files
-// to exist in multiple experimental codebases on a single server and avoids accidental distribution of passwords etc.
-$parentIni = dirname(__FILE__)."/../heuristConfigIni.php";
-
 $defaultFaimsModulesPath = ""; // FAIMS only: the location where FAIMS module files will be written
-
-// parent directory configuration file is optional, hence include not require
-if (is_file($parentIni)){
-    include_once($parentIni);
-}
 
 // use webserver to fasten access to thumbnail images and uploaded files
 // otherwise images will be accessed via php
@@ -239,4 +229,14 @@ $allowWebAccessEntityFiles = false;
 
 // use [base_url]/[database]/view/[rec_id] links - Need to define RewriteRule in httpd.conf
 $useRewrtieRulesForRecordLink = false;
+
+// system default file - if a heuristConfigIni.php file exists in the parent directory of the installation,
+// the configIni.php in the installation does not need to be configured. This allows unconfigured ConfigIni.php files
+// to exist in multiple experimental codebases on a single server and avoids accidental distribution of passwords etc.
+$parentIni = dirname(__FILE__)."/../heuristConfigIni.php";
+
+// parent directory configuration file is optional, hence include not require
+if (is_file($parentIni)){
+    include_once($parentIni);
+}
 ?>
