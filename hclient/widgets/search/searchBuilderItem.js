@@ -422,8 +422,10 @@ $.widget( "heurist.searchBuilderItem", {
             
             ed_options['language'] = (field_type=='enum') ? this.options.language : ''; // show translated terms
 
-            if(field_type=='enum' && this.options.enum_field!=null && 
-                !(this.options.enum_field=='term' && this.select_comparison.val() != '')){
+            let compare = this.select_comparison.val();
+            
+            if(field_type=='enum' && (this.options.enum_field!=null ||
+                (this.options.enum_field==null && !(compare=='' || compare=='=' || compare=='-') ))){
 
                 ed_options['detailtype'] = 'freetext';
             }
@@ -567,7 +569,9 @@ Whole value = EQUAL
             }
         }
 
-        if((dty_ID>0 || dty_ID=='notes' || dty_ID=='url')){  // && field_type!='relmarker'
+        if( dty_ID=='notes' || dty_ID=='url'
+            || (dty_ID>0 && (field_type!='enum' || this.options.enum_field==null)))
+        {  // && field_type!='relmarker'
             eqopts.push({key:'', title:'──────────', disabled:true});
             eqopts.push({key:'any', title:'any value (exists)'});
             if(field_type!='relationtype'){
@@ -624,10 +628,14 @@ Whole value = EQUAL
                 this._predicate_input_ele.editing_input('setBetweenMode', false);        
             }
             
-            if(field_type=='enum' && this.options.enum_field=='term' && cval != 'any' && cval != 'NULL'){
+            if(field_type=='enum' && this.options.enum_field==null && cval != 'any' && cval != 'NULL'){
+                //this.options.enum_field=='term' && cval != 'any' && cval != 'NULL'  &&
+                
+                let need_select = (cval=='=' || cval=='-' || cval=='');
 
-                if((cval=='' && this._predicate_input_ele.find('.input-div > input').length == 0) ||
-                    cval!='' && this._predicate_input_ele.find('.input-div > select').length == 0){ // check that input is correct version (text input or dropdown)
+                if(( (!need_select) && this._predicate_input_ele.find('.input-div > input').length == 0) ||
+                    need_select && this._predicate_input_ele.find('.input-div > select').length == 0){ 
+                    // check that input is correct version (text input or dropdown)
 
                     this._onSelectField(); //this._refresh();
                 }
@@ -757,6 +765,8 @@ Whole value = EQUAL
                 return null;
             }            
 
+// 2023-07-16 dropdown is not used for trm_Label            
+/*
             if(this._current_field_type=='enum' && this.options.enum_field=='term' && 
                 this._predicate_input_ele.find('.input-div > select').length > 0){ // change from ids to label
 
@@ -769,6 +779,7 @@ Whole value = EQUAL
                     }
                 }
             }
+*/
 
             if(op=='any'){
                     op = '';
@@ -818,13 +829,15 @@ Whole value = EQUAL
                 //if(isnegate){
                 //    op = '-'+op;
                 //}
-                
-                if(op!=''){
-                    $.each(vals,function(i,val){vals[i]=op+vals[i]});        
-                }else if(this._current_field_type=='enum' && this.options.enum_field == 'term' && lang_code != ''){
+                if(this._current_field_type=='enum'
+                    && (this.options.enum_field == 'term' || this.options.enum_field == 'desc') 
+                    && lang_code != ''){
                     // prepend language code
-                    $.each(vals,function(i,val){vals[i]=lang_code+':'+vals[i]});
+                    $.each(vals,function(i,val){vals[i]=op+lang_code+':'+vals[i]});
+                }else if(op!=''){
+                    $.each(vals,function(i,val){vals[i]=op+vals[i]});        
                 }
+
             }
 
             var key;

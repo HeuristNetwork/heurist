@@ -905,12 +905,12 @@ $.widget( "heurist.searchBuilder", {
 
                                         let $ele = $('<ul>', {class: 'horizontalmenu fancytree-submenu'})
                                             .attr('data-type', 'enum').attr('data-code', data.node.data.code)
-                                            .html('<li data-id="term"><span>option</span><ul>'
+                                            .html('<li data-id="internalid"><span>option</span><ul>' //default is internalid = trm_ID
+                                                     + '<li data-id="internalid">Internal ID</li>'
                                                      + '<li data-id="term">Term</li>'
                                                      + '<li data-id="code">Code</li>'
                                                      + '<li data-id="conceptid">Concept ID</li>'
                                                      + '<li data-id="desc">Description</li>'
-                                                     + '<li data-id="internalid">Internal ID</li>'
                                                 + '</ul></li>')
                                             .appendTo($(data.node.span.childNodes[3]));
 
@@ -1066,9 +1066,9 @@ $.widget( "heurist.searchBuilder", {
                                             var codes = code.split(':');
 
                                             if(codes.length == 2 && $Db.dty(codes[1], 'dty_Type') == 'enum'){
-                                                // by default, handle as term label
-                                                code += ':term';
-                                                codes.push('term');
+                                                // by default, handle as internal id
+                                                //code += ':term';
+                                                //codes.push('term');
                                             }
 
                                             var codes2 = code.split(':');
