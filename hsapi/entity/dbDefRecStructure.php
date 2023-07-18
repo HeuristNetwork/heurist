@@ -541,6 +541,34 @@ class DbDefRecStructure extends DbEntityBase
                     return false;
                 }
 
+                if(@$this->data['get_meta_counts'] == 1){ // Include count of rec_ field counts
+
+                    // Get number of records
+                    $query = "SELECT count(rec_ID) "
+                        . "FROM Records "
+                        . "WHERE rec_RecTypeID = $rty_ID AND rec_FlagTemporary = 0";
+
+                    $rec_counts = mysql__select_value($mysqli, $query);
+                    $res['rec_ID'] = !$rec_counts ? 0 : $rec_counts;
+
+                    // Get number of rec URLs
+                    $query = "SELECT count(rec_URL) "
+                        . "FROM Records "
+                        . "WHERE rec_RecTypeID = $rty_ID AND rec_FlagTemporary = 0";
+
+                    $url_counts = mysql__select_value($mysqli, $query);
+                    $res['rec_URL'] = !$url_counts ? 0 : $url_counts;
+
+                    // Get number of records with tags
+                    $query = "SELECT DISTINCT count(rtl_RecID)"
+                        . "FROM usrRecTagLinks "
+                        . "INNER JOIN Records ON rec_ID = rtl_ID "
+                        . "WHERE rec_RecTypeID = $rty_ID AND rec_FlagTemporary = 0";
+
+                    $tag_count = mysql__select_value($mysqli, $query);
+                    $res['rec_Tags'] = !$tag_count ? 0 : $tag_count;
+                }
+
                 if(!$res || count($res) == 0){
                     $res = [0];
                 }
