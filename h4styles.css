@@ -1430,6 +1430,7 @@ div.saved-search > .edit-delete-buttons, .recordDiv > .edit-delete-buttons {
     overflow: hidden;
     text-overflow: ellipsis;
 }
+.width5{width:5px;max-width:5px;}
 .width10{width:10px;max-width:10px;}
 .width20{width:20px;max-width:20px;}
 .width50{width:50px;max-width:50px;}
