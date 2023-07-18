@@ -1282,6 +1282,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                         width: '32px',
                         position: 'absolute',
                         top: '13px',
+                        left: '0px',
                         'font-size': '32px',
                         cursor: 'pointer',
                         'z-index': 1000 // above first accordion container
@@ -2866,6 +2867,11 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
             {
                     field_in_recset.push(DT_PARENT_ENTITY);
             }
+            if(window.hWin.HEURIST4.util.findArrayIndex(DT_WORKFLOW_STAGE, field_in_recset)<0 &&
+                $Db.getSwfByRectype(this._currentEditRecTypeID).length > 0){
+
+                field_in_recset.push(DT_WORKFLOW_STAGE);
+            }
             
             //Disabled 2018-05-17
             //reasons:
@@ -2938,6 +2944,7 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
                 //field in recset is not in structure
                 if( window.hWin.HEURIST4.util.findArrayIndex(field_in_recset[k],fields_ids)<0)
                 { 
+                    let record = that._currentEditRecordset.getById(that._currentEditID);
                     if(field_in_recset[k]==DT_PARENT_ENTITY){
 
                         var rfr = that._getFakeRectypeField(DT_PARENT_ENTITY);
@@ -2955,7 +2962,6 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
                            
                            //readonly - if the only value 
                            if(!that._isInsert){
-                                record = that._currentEditRecordset.getById(that._currentEditID);
                                 var values = that._currentEditRecordset.values(record, DT_PARENT_ENTITY);
                                 if(values && values.length==1){
                                     rfr['rst_Display'] = 'readonly';   
@@ -2989,7 +2995,13 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
                         var rfr = that._getFakeRectypeField(field_in_recset[k], 1100+addhead);
                         
                         if(field_in_recset[k]==DT_WORKFLOW_STAGE){
-                            rfr['rst_Display'] = 'hidden';
+                            rfr['rst_Display'] = 'readonly';
+                            rfr['rst_DisplayOrder'] = 0; // will be moved to bottom of record editor
+
+                            if(that._currentEditRecordset.values(record, DT_WORKFLOW_STAGE) == null){
+                                let first_stage = [ '' ];
+                                that._currentEditRecordset.setFld(record, DT_WORKFLOW_STAGE, first_stage);
+                            }
                         }
                         
                         s_fields.push(rfr);
@@ -3228,16 +3240,21 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
                 }
             }
 
-            // display record title field and move child record field (if present) to the top of form
-            if(!that.options.edit_structure && !window.hWin.HEURIST4.util.isempty(that._getField('rec_Title'))){
+            // display record title field, move child record field (if present) to the top of form and move non-standard workflow stage field to end of popup
+            let handle_swf = this._swf_rules.length > 0 && $Db.rst(this._currentEditRecTypeID, DT_WORKFLOW_STAGE) === null;
+            if(!that.options.edit_structure && (!window.hWin.HEURIST4.util.isempty(that._getField('rec_Title')) || handle_swf)){
                 that.showExtraRecordInfo();
             }
 
             // Add a divider between the popup controls and the first set of input, 
             // if the first set is not contained within a group and there are groups below these loose inputs
-            var first_child = $(this.editForm[0].childNodes[0]);
-            if (this.editForm[0].childNodes.length > 2 && first_child.is("fieldset") && first_child.children("div:visible").length != 0){
+            let first_child = this.editForm.children('fieldset#receditor-top');
+            let last_fieldset = this.editForm.children('fieldset#receditor-bottom');
+            if (this.editForm[0].childNodes.length > 2 && first_child.length > 0 && first_child.children("div:visible").length > 0){
                 first_child.css('border-top', '1px solid #A4B4CB');
+            }
+            if (last_fieldset.length > 0 && last_fieldset.children("div:visible").length > 0){
+                last_fieldset.css('border-bottom', '1px solid #A4B4CB');
             }
             
             //special case for bookmarklet addition - some values are already assigned 
@@ -3723,71 +3740,7 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
                     var swf_mode = this.element.find('.sel_workflow_stages').val();
                     if(swf_mode=='on' || (swf_mode=='new' && this._isInsert)){
                         
-                        var opts_swf_stages = '';
-                        var dtyID = window.hWin.HAPI4.sysinfo['dbconst']['DT_WORKFLOW_STAGE']; //$Db.getLocalID('dty', '2-1080'); //workflow stage field
-                        var curr_stage = fields[dtyID];
-                        
-                        //TRM_SWF_IMPORT should we disable it?
-
-                        for (var i=0; i<this._swf_rules.length; i++){
-                            var is_disabled = '';
-                            if(this._swf_rules[i]['swf_StageRestrictedTo']){
-                                var grps = this._swf_rules[i]['swf_StageRestrictedTo'];
-                                if(!window.hWin.HAPI4.is_member(grps)){
-                                    is_disabled = ' disabled';
-                                }
-                            }
-                            var is_selected = (this._swf_rules[i]['swf_Stage']==curr_stage)?' selected':'';
-                            
-                            opts_swf_stages = opts_swf_stages 
-                                + '<option value="'+this._swf_rules[i]['swf_Stage']+'"'
-                                +is_disabled+is_selected+'>'
-                                +window.hWin.HEURIST4.util.htmlEscape($Db.trm(this._swf_rules[i]['swf_Stage'],'trm_Label'))
-                                +'</option>';
-                        }
-                        
-                        var $dlg;
-                        var btns = {};
-
-                        btns[window.hWin.HR('Save')] = function(){
-                            fields[dtyID] = $dlg.find('#dlg-prompt-value').val();
-                            that._saveEditAndClose( fields, afterAction );
-
-                            $dlg.dialog('close');
-                        };
-                        btns[window.hWin.HR('Cancel')] = function(){
-                            swf_mode = $dlg.find('.sel_workflow_stages').val();
-                            that.element.find('.sel_workflow_stages').val(swf_mode);
-
-                            $dlg.dialog('close');
-                        };
-
-                        $dlg = window.hWin.HEURIST4.msg.showMsgDlg(
-                        '<div class="heurist-helper3">This setting will determine actions to be taken such as visibility settings, marking for publication or email notifications</div>'
-                        +'<p><label>Workflow stage: </label><select id="dlg-prompt-value" class="text ui-corner-all">'
-                            + opts_swf_stages
-                        +'</select>&nbsp;&nbsp;<button id="btn_advance">Advance</button></p><br><br>', btns, 
-                        {title: window.hWin.HR('Set workflow stage'), yes: window.hWin.HR('Save'), no: window.hWin.HR('Cancel')},
-                        {default_palette_class: this.options.default_palette_class}); //'ui-heurist-populate'
-
-                        var $ele = this.element.find('.div_workflow_stages');
-
-                        if($ele.length == 1){
-                            $ele.clone(true, true)
-                                .appendTo($dlg);
-
-                            $dlg.find('.sel_workflow_stages').val(swf_mode);
-                        }
-
-                        $dlg.find('#btn_advance').button({icon:'ui-icon-caret-1-e',iconPosition:'end'})
-                                .css('font-size','0.9em')
-                        .click(function(){  //select next
-                                $dlg.find('#dlg-prompt-value')[0].selectedIndex++;    
-                                if($dlg.find('#dlg-prompt-value')[0].selectedIndex<0){
-                                      $dlg.find('#dlg-prompt-value')[0].selectedIndex=0;            
-                                }
-                        });
-
+                        this._showSwfPopup(fields);
                         return;
                     }
                 } //END assign workflow stage field 2-9453
@@ -4198,10 +4151,13 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
                         +(isfields_on?'checked':'')+'/>Optional fields</label>'
                     +'<span style="display:inline-block;width:40px"></span>'
                     +'<span class="div_workflow_stages"><label>Workflow stage popup: </label>'
-                    +'<select class="sel_workflow_stages">'
-                        +'<option value="new">New records only</option>'
-                        +'<option value="on">New and existing records</option>'
-                        +'<option value="off">OFF</option></select></span>'
+                        +'<select class="sel_workflow_stages">'
+                            +'<option value="new">New records only</option>'
+                            +'<option value="on">New and existing records</option>'
+                            +'<option value="off">OFF</option>'
+                        +'</select>'
+                        +'<button id="show_workflow_stages">show</button>'
+                    +'</span>'
                 +'</div>'
 
                 +'<div style="padding:10px 50px 0px 0px;float:right">'
@@ -4315,6 +4271,10 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
                 .change(function( event ){
                     if(!that.usrPreferences['swf_rules_mode']) that.usrPreferences['swf_rules_mode'] = {};
                     that.usrPreferences['swf_rules_mode'][that._currentEditRecTypeID] = $(event.target).val();
+                });
+            
+                this.element.find('#show_workflow_stages').button().css('margin-left', '5px').click(function(){
+                    that._showSwfPopup();
                 });
             
             }else{
@@ -4908,10 +4868,24 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
     showExtraRecordInfo: function(){
 
         var that = this;
-        var parententity = Number(window.hWin.HAPI4.sysinfo['dbconst']['DT_PARENT_ENTITY']);
+        const parententity = Number(window.hWin.HAPI4.sysinfo['dbconst']['DT_PARENT_ENTITY']);
+        const workflow_stage = Number(window.hWin.HAPI4.sysinfo['dbconst']['DT_WORKFLOW_STAGE']);
+
+        // Move workflow stage dropdown to end of container (above 'Missing fields' help text)
+        if(this._swf_rules.length > 0 && $Db.rst(this._currentEditRecTypeID, workflow_stage) === null){
+            let $ele = this._editing.getFieldByName(workflow_stage);
+            let $bottom_fieldset = $('<fieldset>', {id: 'receditor-bottom'}).insertBefore(this.editForm.find('.optional_hint').prev());
+
+            $bottom_fieldset.append($ele);
+        }
+
+        // Skip remaining if no title has been set
+        if(window.hWin.HEURIST4.util.isempty(that._getField('rec_Title'))){
+            return;
+        }
 
         // add new separate fieldset at the start
-        var top_fieldset = $('<fieldset>').insertBefore(this.editForm.find('fieldset:first')); //.css({'background-color': '#d1e7e7', 'margin-bottom': '10px', 'padding-left': '10px'})
+        var top_fieldset = $('<fieldset>', {id: 'receditor-top'}).insertBefore(this.editForm.find('fieldset:first')); //.css({'background-color': '#d1e7e7', 'margin-bottom': '10px', 'padding-left': '10px'})
 
         var admin_override = window.hWin.HAPI4.is_admin() && !window.hWin.HAPI4.is_member(that._getField('rec_OwnerUGrpID'));
 
@@ -5148,6 +5122,86 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
                 +  '</div>';
 
         $dlg = window.hWin.HEURIST4.msg.showMsgDlg(content, btns, labels, options);
+    },
+
+    _showSwfPopup: function(fields, _callback){
+
+        var that = this;
+
+        let swf_mode = this.element.find('.sel_workflow_stages').val();
+        let opts_swf_stages = '';
+        const dtyID = window.hWin.HAPI4.sysinfo['dbconst']['DT_WORKFLOW_STAGE']; //$Db.getLocalID('dty', '2-1080'); //workflow stage field
+        let save_lbl = $.isFunction(_callback) ? 'Save' : 'Update';
+
+        if(!fields){
+            fields = this._editing.getValues(false);
+            //fields = {'rec_ID': this._currentEditID, 'rec_RecTypeID': this._currentEditRecTypeID};
+        }
+
+        let curr_stage = fields[dtyID];
+        
+        //TRM_SWF_IMPORT should we disable it?
+
+        for (var i=0; i<this._swf_rules.length; i++){
+            let is_disabled = '';
+            if(this._swf_rules[i]['swf_StageRestrictedTo']){
+                const grps = this._swf_rules[i]['swf_StageRestrictedTo'];
+                if(!window.hWin.HAPI4.is_member(grps)){
+                    is_disabled = ' disabled';
+                }
+            }
+            const is_selected = (this._swf_rules[i]['swf_Stage']==curr_stage)?' selected':'';
+            
+            opts_swf_stages = opts_swf_stages 
+                + '<option value="'+this._swf_rules[i]['swf_Stage']+'"'
+                +is_disabled+is_selected+'>'
+                +window.hWin.HEURIST4.util.htmlEscape($Db.trm(this._swf_rules[i]['swf_Stage'],'trm_Label'))
+                +'</option>';
+        }
+        
+        var $dlg;
+        var btns = {};
+
+        btns[window.hWin.HR(save_lbl)] = function(){
+            fields[dtyID] = $dlg.find('#dlg-prompt-value').val();
+            that._saveEditAndClose( fields, _callback );
+
+            $dlg.dialog('close');
+        };
+        btns[window.hWin.HR('Cancel')] = function(){
+            swf_mode = $dlg.find('.sel_workflow_stages').val();
+            that.element.find('.sel_workflow_stages').val(swf_mode);
+
+            $dlg.dialog('close');
+        };
+
+        $dlg = window.hWin.HEURIST4.msg.showMsgDlg(
+        '<div class="heurist-helper3">This setting will determine actions to be taken such as visibility settings, marking for publication or email notifications</div>'
+        +'<p><label>Workflow stage: </label><select id="dlg-prompt-value" class="text ui-corner-all">'
+            + opts_swf_stages
+        +'</select>&nbsp;&nbsp;<button id="btn_advance">Advance</button></p><br><br>', btns, 
+        {title: window.hWin.HR('Set workflow stage'), yes: window.hWin.HR(save_lbl), no: window.hWin.HR('Cancel')},
+        {default_palette_class: this.options.default_palette_class}); //'ui-heurist-populate'
+
+        var $ele = this.element.find('.div_workflow_stages');
+
+        if($ele.length == 1){
+            $ele.clone(true, true)
+                .appendTo($dlg);
+
+            $dlg.find('button#show_workflow_stages').remove(); // remove button to open popup
+
+            $dlg.find('.sel_workflow_stages').val(swf_mode);
+        }
+
+        $dlg.find('#btn_advance').button({icon:'ui-icon-caret-1-e',iconPosition:'end'})
+                .css('font-size','0.9em')
+        .click(function(){  //select next
+                $dlg.find('#dlg-prompt-value')[0].selectedIndex++;    
+                if($dlg.find('#dlg-prompt-value')[0].selectedIndex<0){
+                        $dlg.find('#dlg-prompt-value')[0].selectedIndex=0;            
+                }
+        });
     },
 	
     //

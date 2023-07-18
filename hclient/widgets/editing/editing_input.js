@@ -461,6 +461,8 @@ $.widget( "heurist.editing_input", {
                     });
                 }
             });
+        }else if(this.isReadonly()){
+            this.input_cell.attr('title', 'This field has been marked as non-editable');
         }
     }, //end _create
 
@@ -5109,7 +5111,7 @@ console.log('onpaste');
             disp_value = $Db.getTermValue(value);
 
             if(window.hWin.HEURIST4.util.isempty(value)) {
-                disp_value = 'term missing. id '+value;
+                disp_value = 'No value'; //'term missing. id '+value
             }
         } else if(this.detailType=='file'){
 
