@@ -429,6 +429,9 @@ function initMainMenu( afterInitMainMenu ){
 function loadPageContent(pageid, eventdata){
     _dout('loadPageContent '+pageid);
 
+    $('#main-recordview').hide();
+    $('#main-content').show();
+    
     if(pageid>0){
         
         var page_target = $('#main-content');
@@ -808,6 +811,7 @@ function afterPageLoad(document, pageid, eventdata){
 //
 // Adds listeners for all "a" elements with href="pageid" for inter page website links (converts links)
 // this is global function - see recordListExt
+//  search_data - parameters from recordListExt with target page
 //
 function initLinksAndImages($container, search_data){   
 
@@ -815,73 +819,40 @@ function initLinksAndImages($container, search_data){
         $container = $('body');
     }
     
+    
+    /*
+    
+    1) attribute "data-query" - execute search with parameters where to show the result
+    2) database/tpl/template/recid - to recordview
+    
+    3) recid - either popup or if pageid it loads the specified page
+    
+    to popup:
+    database/view/recid
+    ?recID=123&fmt=html&db=db  
+    renderRecordData
+    
+    to _blank 
+    all external links
+    
+    
+    */
+console.log('-------------', $container.attr('id'));    
+    
     // create internal links 
     //find all link elements for loading another page and define onclick handler - loadPageContent
     $container.find('a').each(function(i,link){
         
         var href = $(link).attr('href');
-        if ((href && href!='#' && $(link).attr('target')!='_blank') || $(link).attr('data-query')) 
-        {
-            var pageid = 0, query=null;
-            
-            if(!$(link).attr('data-query')){
-                if(  (href.indexOf(window.hWin.HAPI4.baseURL)===0 || href[0] == '?' 
-                    || href.indexOf('../heurist/?')===0  || href.indexOf('./?')===0)
-                    && window.hWin.HEURIST4.util.getUrlParameter('db',href) == window.hWin.HAPI4.database
-                    && window.hWin.HEURIST4.util.getUrlParameter('id',href) == home_page_record_id)
-                {
-                    pageid = window.hWin.HEURIST4.util.getUrlParameter('pageid',href);
-                    query = window.hWin.HEURIST4.util.getUrlParameter('q', href);
-
-                }else if(href.indexOf(window.hWin.HAPI4.baseURL)===0){ //starts with 
-                
-                    pageid = window.hWin.HEURIST4.util.getUrlParameter('recID',href);
-                    if(!(pageid>0)){
-                        pageid = href.split('/');
-                        if(window.hWin.HEURIST4.util.isArrayNotEmpty(pageid)){
-                            pageid = pageid[pageid.length-1];
-                        }else{
-                            pageid = 0;
-                        }
-                    }
-                }else if(href.indexOf('./')===0){
-                    href = href.substring(2);
-                    pageid = href;                                  
-                }else if(!isNaN(parseInt(href)) && href>0){ //integer
-                    pageid = href;
-                }
-            }
-            
-            if(window.hWin.HEURIST4.util.isNumber(pageid) && pageid>0){
-
-                    $(link).attr('data-pageid', pageid);
-                    
-                    var eventdata = null;
-                    //if(query!=null){
-                    //    eventdata = {event_type: window.hWin.HAPI4.Event.ON_REC_SEARCHSTART, q:query};
-                    //}
-                    
-                    $(link).click(function(event){
-                        
-                        var pageid = $(event.target).attr('data-pageid');
-                        var topmenu = $('#main-menu').find('div[widgetid="heurist_Navigation"]');
-                        
-                        if(topmenu && topmenu.navigation('instance') && topmenu.navigation('isMenuItem',pageid)){
-                            window.hWin.loadPageContent(pageid, eventdata);
-                            window.hWin.HEURIST4.util.stopEvent(event);
-                            return false;
-                        }else{
-                            //var url = window.hWin.HAPI4.baseURL+window.hWin.HAPI4.database+'/view/'+pageid;
-                            var url = window.hWin.HAPI4.baseURL+'?recID='+pageid+'&fmt=html&db='+window.hWin.HAPI4.database;
-                            $(link).attr('href', url);
-                            window.hWin.HEURIST4.msg.showDialog(url, { title:'.', width: 600, height: 500, modal:false });
-                            return false;
-                        }
-                        
-                    });
-                    
-                
-            }else if(href.indexOf('q=')===0 || $(link).attr('data-query') ){ //special case for links in smarty reports
+        var parts = href?href.split('/'):null;
+    
+console.log(href);    
+if(href=='judaism_and_rome/view/2989'){
+    console.log('!!!!!');    
+}
+        
+        //1. special case for search links in smarty reports 
+        if(href && href.indexOf('q=')===0 || $(link).attr('data-query') ){ //
             
                 var query = $(link).attr('data-query')
                         ? $(link).attr('data-query')
@@ -895,7 +866,7 @@ function initLinksAndImages($container, search_data){
                         if(search_data.smarty_template) current_template = search_data.smarty_template;
                 }
                 if(!href || href=='#' || href.indexOf('q=')===0){
-                    //need for right click - open link in new tab
+                    //change href for right click - open link in new tab
                     href = '/' + window.hWin.HAPI4.database+'/tpl/'+current_template+'/'+encodeURIComponent(query);
                 }
                             
@@ -905,7 +876,117 @@ function initLinksAndImages($container, search_data){
                     return false;
                 });
                 
+        }else
+        //2. Open template links in main-recordview div. If this div is missed in popup
+        //       tpl/template/recid
+        if((window.hWin.HEURIST4.util.isArrayNotEmpty(parts) 
+            && parts.length>3 && parts[parts.length-3]=='tpl')
+            ||
+            (href && href.indexOf('showReps.php')>0)
+           )
+        {
+console.log('case 2');
+
+                $(link).click(function(event){
+                    var container = $('#main-recordview');
+                    var url = $(event.target).attr('href');
+                    if(container.length>0 && window.hWin.HAPI4.database=='judaism_and_rome'){
+                        
+                        var main_content = $('#main-content')
+                        main_content.show();
+                        container.fadeOut(500);
+                        window.hWin.HEURIST4.msg.bringCoverallToFront(main_content);
+                        container.load(url, function(){
+                           
+                           let btn = $('<button class="keywords" style="position:fixed;">Back</button>').click(function(){
+                                $('#main-recordview').hide();
+                                $('#main-content').show();
+                                
+                           });
+                           
+                           var pos = document.getElementById('main-content').getBoundingClientRect();
+                           var h = $('#main-header').height();                 
+                           var stop = document.getElementById('main-content').scrollTop;
+    // console.log(pos, h, stop, pos.y+stop);              
+                           btn.css({top:h+5, left:5});
+                           container.prepend(btn);
+                           container.show(); 
+                           container.parent()[0].scrollTop = 0;
+                           main_content.hide();
+                           window.hWin.HEURIST4.msg.sendCoverallToBack(true);
+                           
+                           initLinksAndImages(container);
+                        });
+                    }else{
+                        var width = (window.hWin?window.hWin.innerWidth:window.innerWidth)*0.8;
+                        var height = (window.hWin?window.hWin.innerHeight:window.innerHeight)*0.8;
+                        window.hWin.HEURIST4.msg.showDialog(url, { title:'.', width: width, height: height, modal:false });
+                    }
+                    window.hWin.HEURIST4.util.stopEvent(event);
+                    return false;
+                });
+                
+        }else
+        
+        // 3. link to website page or heurist record in this database
+        //
+        if (href && href!='#')    //$(link).attr('target')!='_blank'
+        {
+            var rec_id = 0;
+        
+            if(window.hWin.HEURIST4.util.isArrayNotEmpty(parts) 
+                && parts.length>2 && parts[parts.length-2]=='view'){
+
+                rec_id = parts[parts.length-1];        
+            }else if(  (href.indexOf(window.hWin.HAPI4.baseURL)===0 || href[0] == '?' 
+                || href.indexOf('../heurist/?')===0  || href.indexOf('./?')===0)
+                && window.hWin.HEURIST4.util.getUrlParameter('db',href) == window.hWin.HAPI4.database )
+            {
+                    rec_id = window.hWin.HEURIST4.util.getUrlParameter('pageid',href);
+                    if(!(rec_id>0)){
+                        rec_id  = window.hWin.HEURIST4.util.getUrlParameter('recID',href);
+                    }
+            }else if(href.indexOf('./')===0){
+                    href = href.substring(2);
+                    rec_id = href;                                  
+            }else if(!isNaN(parseInt(href)) && href>0){ //integer
+                    rec_id = href;
             }
+            
+            if(!isNaN(parseInt(rec_id)) && rec_id>0){
+
+console.log('case 3', rec_id);
+                
+                $(link).attr('data-pageid', rec_id);
+                
+                var eventdata = null;
+                //if(query!=null){
+                //    eventdata = {event_type: window.hWin.HAPI4.Event.ON_REC_SEARCHSTART, q:query};
+                //}
+                
+                $(link).click(function(event){
+                    
+                    var pageid = $(event.target).attr('data-pageid');
+                    var topmenu = $('#main-menu').find('div[widgetid="heurist_Navigation"]');
+                    
+                    if(topmenu && topmenu.navigation('instance') && topmenu.navigation('isMenuItem',pageid)){
+                        window.hWin.loadPageContent(pageid, eventdata);
+                        window.hWin.HEURIST4.util.stopEvent(event);
+                        return false;
+                    }else{
+                        //var url = window.hWin.HAPI4.baseURL+window.hWin.HAPI4.database+'/view/'+pageid;
+
+                        var url = window.hWin.HAPI4.baseURL+'?recID='+pageid+'&fmt=html&db='+window.hWin.HAPI4.database;
+                        $(link).attr('href', url);
+
+                        window.hWin.HEURIST4.msg.showDialog(url, { title:'.', width: 600, height: 500, modal:false });
+                        return false;
+                    }
+                    
+                });
+            }
+                    
+                
         }
         if (!window.hWin.HEURIST4.util.isempty(href) && href!='#' && (href.indexOf('./')==0 || href.indexOf('/')==0)){ //relative path
               href = window.hWin.HAPI4.baseURL + href.substring(href.indexOf('/')==0?1:2);
@@ -1154,6 +1235,8 @@ function _openCMSeditor(event){
         editCMS_instance2.closeCMS();
         //btn.show();
     }else{
+        $('#main-recordview').hide();
+        $('#main-content').show();
 
         isCMS_active = true;
         if(!editCMS_instance2) editCMS_instance2 = editCMS2(this.document); //editCMS_Init

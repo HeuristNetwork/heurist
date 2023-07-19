@@ -28,10 +28,13 @@
                     data-viewonly="<?php print ($hasAccess)?0:1;?>">
                 </div>
     *  
-    * besides main-menu main-header may have main-logo, main-logo-alt, main-host, main-pagetitle divs
+    * besides it may have main-menu main-header may have main-logo, main-logo-alt, main-host, main-pagetitle, main-recordview divs
     * These divs will be filled with images and text defined in website home record.
     * 
     * main-content - is the target div for content of particular page to be loaded  
+    * 
+    * main-recordview - is the target div for record view. It will be filled with link if target is _recordview
+    *                   if this div is not found in the template, content will be opened in popup
     * 
     * The top most div/container must have class heurist-website. It is required for proper work of CMS editor
     * 
@@ -91,7 +94,7 @@
     margin: 0;
     width:auto;
 }
-#main-content{
+#main-content, #main-recordview{
     display:none;
     position:absolute;
     left:0;right:0;top:0;bottom:0;
@@ -229,6 +232,7 @@ if($isWebPage){ //set in websiteRecord.php
             data-viewonly="<?php print ($hasAccess)?0:1;?>" 
             style="<?php echo (!$is_page_footer_fixed && $page_footer?'position:static;':'');?>">
         </div>
+        <div id="main-recordview" style="<?php echo (!$is_page_footer_fixed && $page_footer?'position:static;':'');?>"></div>
 <?php
         if(!$is_page_footer_fixed && $page_footer) print $page_footer;
 ?>        

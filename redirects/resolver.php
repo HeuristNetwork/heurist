@@ -288,7 +288,14 @@ if($database_url!=null){ //redirect to resolver for another database
     $redirect = '../admin/describe/getDBStructureAsXML.php?db='.$_REQUEST['db'].'&'.$entity.'='.$recid;
     
 }else if($format=='html'){
-    $redirect = '../viewers/record/viewRecord.php?db='.$_REQUEST['db'].'&recID='.$recid;
+    
+    if(@$_REQUEST['noheader']){
+        $redirect = '../viewers/record/renderRecordData.php?db='
+            .$_REQUEST['db'].'&noheader=1&recID='.$recid;    
+    }else{
+        $redirect = '../viewers/record/viewRecord.php?db='.$_REQUEST['db'].'&recID='.$recid;    
+    }
+    
     
 }else if($format=='web' || $format=='website'){
     
