@@ -993,10 +993,12 @@ function initLinksAndImages($container, search_data){
         }else
         //2. Open template links in main-recordview div. If this div is missed in popup
         //       tpl/template/recid
-        if((window.hWin.HEURIST4.util.isArrayNotEmpty(parts) 
+        if( ((window.hWin.HEURIST4.util.isArrayNotEmpty(parts) 
             && parts.length>3 && parts[parts.length-3]=='tpl')
             ||
-            (href && href.indexOf('showReps.php')>0)
+            (href && href.indexOf('showReps.php')>0))
+            &&
+            ($(link).attr('target')!='_blank' || window.hWin.HAPI4.database=='judaism_and_rome')
            )
         {
 //console.log('case 2');
@@ -1033,7 +1035,11 @@ function initLinksAndImages($container, search_data){
                 && window.hWin.HEURIST4.util.getUrlParameter('db',href) == window.hWin.HAPI4.database )
             {
                     rec_id = window.hWin.HEURIST4.util.getUrlParameter('pageid',href);
-                    if(!(rec_id>0)){
+                    if(rec_id>0){
+                        if($(link).attr('target')!='_blank'){
+                            return;
+                        }
+                    }else{
                         rec_id  = window.hWin.HEURIST4.util.getUrlParameter('recID',href);
                     }
             }else if(href.indexOf('./')===0){
