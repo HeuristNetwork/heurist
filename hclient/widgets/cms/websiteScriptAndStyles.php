@@ -556,6 +556,10 @@ if($website_custom_css!=null){
 function loadRecordContent(url_or_record_id){
     
 //console.log(url_or_record_id);
+    if(!url_or_record_id){
+        console.log('url_or_record_id not defined');
+        return;
+    }
 
     var url, is_smarty = false; 
     if(!isNaN(parseInt(url_or_record_id)) && url_or_record_id>0){
@@ -873,26 +877,37 @@ function afterPageLoad(document, pageid, eventdata){
                 
                 
 
-                if(eventdata && eventdata.search_page>0 && eventdata.search_page!=current_page_id){
+                if(eventdata && eventdata.search_page>0){
+                
+                    if(eventdata.search_page!=current_page_id){
                     
-                    var new_pageid = eventdata.search_page;
-                    eventdata.search_page = null
-                    
-                    if(e.type==window.hWin.HAPI4.Event.ON_REC_SELECT){
-                        if($.isArray(eventdata.selection) && eventdata.selection.length>0){
-                            //convert SELECT to SEARCHSTART
-                            eventdata = {detail:'ids', neadall:1, w:'a',
-                                 q:'ids:'+eventdata.selection.join(','),
-                                 source: 'search_on_page_load',
-                                 search_realm: eventdata.search_realm};
-                            
-                        }else{
-                            return; //ignore empty selection
+                        var new_pageid = eventdata.search_page;
+                        eventdata.search_page = null
+                        
+                        if(e.type==window.hWin.HAPI4.Event.ON_REC_SELECT){
+                            if($.isArray(eventdata.selection) && eventdata.selection.length>0){
+                                //convert SELECT to SEARCHSTART
+                                eventdata = {detail:'ids', neadall:1, w:'a',
+                                     q:'ids:'+eventdata.selection.join(','),
+                                     source: 'search_on_page_load',
+                                     search_realm: eventdata.search_realm};
+                                
+                            }else{
+                                return; //ignore empty selection
+                            }
                         }
-                    }
 
-                    eventdata.event_type = window.hWin.HAPI4.Event.ON_REC_SEARCHSTART; //e.type;
-                    loadPageContent(new_pageid, eventdata); //on link or selection - execute search on different page
+                        eventdata.event_type = window.hWin.HAPI4.Event.ON_REC_SEARCHSTART; //e.type;
+                        loadPageContent(new_pageid, eventdata); //on link or selection - execute search on different page
+                        
+                    }else{
+                        
+                        eventdata.search_page = 0;
+                        $('#main-recordview').hide();
+                        $('#main-content').show();
+                        window.hWin.HAPI4.RecordSearch.doSearch( this, eventdata );  
+                        
+                    }
                 }
                 
             });
@@ -950,17 +965,23 @@ function initLinksAndImages($container, search_data){
                 
                 var current_template = '__def';
                 var request = {detail:'ids', neadall:1, w:'a', q:query};
+
                 if(search_data){
                         if(search_data.search_page) request['search_page'] = search_data.search_page;
                         if(search_data.search_realm) request['search_realm'] = search_data.search_realm;
                         if(search_data.smarty_template) current_template = search_data.smarty_template;
+                }else{
+                    if($(link).attr('data-search-page'))  request['search_page'] = $(link).attr('data-search-page');
+                    if($(link).attr('data-search-realm'))  request['search_realm'] = $(link).attr('data-search-realm');
                 }
+                
                 if(!href || href=='#' || href.indexOf('q=')===0){
                     //change href for right click - to open this link in new tab
                     //href = '/' + window.hWin.HAPI4.database+'/tpl/'+current_template+'/'+encodeURIComponent(query);
                     href = [window.hWin.HAPI4.baseURL,window.hWin.HAPI4.database,'web',
                             home_page_record_id, current_page_id,encodeURIComponent(query)];
                     href = href.join('/');
+                    $(link).attr('href', href);
                 }
                             
                 $(link).click(function(event){
@@ -982,8 +1003,14 @@ function initLinksAndImages($container, search_data){
 
                 $(link).click(function(event){
                     
-                    var url = $(event.target).attr('href');
+                    var link;
+                    if($(event.target).is('a')){
+                       link = $(event.target);
+                    }else{
+                       link = $(event.target).parents('a');
+                    }
                     
+                    var url = link.attr('href');
                     window.hWin.loadRecordContent(url);
                     window.hWin.HEURIST4.util.stopEvent(event);
                     return false;
@@ -1277,7 +1304,6 @@ function performCaptcha(){
 //  opens/hides side panel with NEW CMS editor controls  (see link #btnOpenCMSeditor in cmsTemplate.php)
 //
 function _openCMSeditor(event){
-    
     var btn = $(event.target);
     
     if(isCMS_active){
