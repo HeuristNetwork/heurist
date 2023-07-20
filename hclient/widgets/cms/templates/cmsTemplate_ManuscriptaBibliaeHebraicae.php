@@ -23,7 +23,7 @@
 </div>
 </div>
 <div id="main-content" data-homepageid="<?php print $home_page_record_id;?>"
-    <?php print ($open_page_on_init>0)?' data-initid="'.$open_page_on_init.'"':''; ?>
+    <?php print ($open_page_or_record_on_init>0)?' data-initid="'.$open_page_or_record_on_init.'"':''; ?>
     data-viewonly="<?php print ($hasAccess)?0:1;?>">
 </div>
 *
@@ -40,7 +40,7 @@
 *
 * Other variables are
 * $home_page_record_id - record id of website home page
-* $open_page_on_init - record id for cms menu/page to be loaded on init
+* $open_page_or_record_on_init - record id for cms menu/page to be loaded on init
 *
 * $image_banner - header background banner image
 * $page_header_menu - code to define main menu widget, leave it unchanged as content of main-menu div
@@ -204,7 +204,7 @@ if($isWebPage){ //set in websiteRecord.php
         </div>
         <div class="ent_content_full  ui-heurist-bg-light" id="main-content-container">
             <div id="main-content" data-homepageid="<?php print $home_page_record_id;?>"
-                <?php print ($open_page_on_init>0)?'data-initid="'.$open_page_on_init.'"':''; ?>
+                <?php print ($open_page_or_record_on_init>0)?'data-initid="'.$open_page_or_record_on_init.'"':''; ?>
                 data-viewonly="<?php print ($hasAccess)?0:1;?>">
             </div>
             <footer class="footer">

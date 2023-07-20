@@ -682,8 +682,8 @@ function smarty_output_filter_strip_js($tpl_source, Smarty_Internal_Template $te
                         .'<script type="text/javascript" src="'.HEURIST_BASE_URL.'external/jquery.fancybox/jquery.fancybox.js"></script>'
                         .'<script type="text/javascript" src="'.HEURIST_BASE_URL.'hclient/core/detectHeurist.js"></script>'
                         .'<script type="text/javascript" src="'.HEURIST_BASE_URL.'hclient/widgets/viewers/mediaViewer.js"></script>'
-    .'<script>'
-    .'var rec_Files=[];</script>';
+                        .'<script>'
+                        .'var rec_Files=[];</script>';
                 
                 $head .= (
                     '<script>$(document).ready(function() {'
@@ -1126,7 +1126,8 @@ function smarty_function_out($params, &$smarty)
 //
 function smarty_function_wrap($params, &$smarty)
 {
-    global $system;
+    global $system, $is_jsallowed;    
+
 
     if($params['var']){
 
@@ -1249,11 +1250,11 @@ function smarty_function_wrap($params, &$smarty)
                     
                 }
                 
-                if(@$params['fancybox']){
+                if(@$params['fancybox'] && $is_jsallowed){
                     
                     $mode_3d_viewer = detect3D_byExt($file_Ext);
                     
-                    $sres .= ('<script>rec_Files.push({'
+                    $sres .= ('<script>if(rec_Files)rec_Files.push({'
                             .'rec_ID:'.$fileinfo['rec_ID']
                             .',id:"'.$file_nonce
                             .'",mimeType:"'.$mimeType

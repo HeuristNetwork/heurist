@@ -80,7 +80,7 @@ if (($_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0.0.1')
     var _time_debug = new Date().getTime() / 1000;
     var page_first_not_empty = 0;
     var home_page_record_id=<?php echo $home_page_on_init; ?>;
-    var init_page_record_id=<?php echo $open_page_on_init; ?>;
+    var init_page_record_id=<?php echo $open_page_or_record_on_init; ?>;
     var isWebPage = <?php echo ($isWebPage ?'true':'false');?>;
     var current_page_id = 0;
     var is_show_pagetitle_main = <?php echo $show_pagetitle?'true':'false'; ?>;  //is show page title per website 
@@ -428,6 +428,17 @@ function initMainMenu( afterInitMainMenu ){
 //
 function loadPageContent(pageid, eventdata){
     _dout('loadPageContent '+pageid);
+    
+    
+    var topmenu = $('#main-menu').find('div[widgetid="heurist_Navigation"]');
+
+    // this is not website page, this is ordinary record - show it in main-recordview or popup                    
+    if(window.hWin.HEURIST4.util.isNumber(pageid) &&
+       !(topmenu &&  topmenu.navigation('instance') && topmenu.navigation('isMenuItem',pageid))){ 
+
+        loadRecordContent(pageid);
+    }
+    
 
     $('#main-recordview').hide();
     $('#main-content').show();
@@ -538,6 +549,87 @@ if($website_custom_css!=null){
 
     }
 } // loadPageContent
+
+//
+// loads record view template into #main-recordview or popup dialog
+// 
+function loadRecordContent(url_or_record_id){
+    
+//console.log(url_or_record_id);
+
+    var url, is_smarty = false; 
+    if(!isNaN(parseInt(url_or_record_id)) && url_or_record_id>0){
+
+        var record_id = url_or_record_id;
+        
+        if(window.hWin.HAPI4.database=='judaism_and_rome'){ //(default_record_view_template!=null){
+        
+            let default_record_view_template = 'public-record';
+
+            url = window.hWin.HAPI4.baseURL+window.hWin.HAPI4.database+'/tpl/'+default_record_view_template+'/'+record_id;
+            
+            is_smarty = true;
+        }else{
+            url = window.hWin.HAPI4.baseURL+'?recID='+record_id+'&fmt=html&db='+window.hWin.HAPI4.database;
+        }
+        
+    }else{
+        url = url_or_record_id;
+        var parts = url.split('/');
+        is_smarty = ((window.hWin.HEURIST4.util.isArrayNotEmpty(parts) 
+            && parts.length>3 && parts[parts.length-3]=='tpl')
+            ||
+            (url.indexOf('showReps.php')>0)
+           );
+        
+    }
+    
+    var container = $('#main-recordview');
+    if(is_smarty && container.length>0 && window.hWin.HAPI4.database=='judaism_and_rome'){
+            
+            var main_content = $('#main-content')
+            container.fadeOut(500);
+            container.parent()[0].scrollTop = 0;
+            main_content.show();
+            window.hWin.HEURIST4.msg.bringCoverallToFront(main_content.parent());
+            var frm = container.find('iframe')
+            frm.attr('src',url);
+            frm.off('load');
+            frm.on('load', function(){
+               container.show(); 
+               main_content.hide();
+               window.hWin.HEURIST4.msg.sendCoverallToBack(true);
+               
+               frm = frm[0];
+               container.height(frm.contentWindow.document.body.scrollHeight);               
+               initLinksAndImages($(frm.contentWindow.document.body));
+               
+               container.find('button.keywords').click(function(){
+                    $('#main-recordview').hide();
+                    $('#main-content').show();
+               });
+            });
+
+/*
+               let btn = $('<button class="keywords" style="position:fixed;">Back</button>').click(function(){
+                    $('#main-recordview').hide();
+                    $('#main-content').show();
+                    
+               });
+               var pos = document.getElementById('main-content').getBoundingClientRect();
+               var h = $('#main-header').height();                 
+               var stop = document.getElementById('main-content').scrollTop;
+// console.log(pos, h, stop, pos.y+stop);              
+               btn.css({top:h+5, left:5});
+               container.prepend(btn);
+*/            
+    }else{
+            var width = is_smarty?(window.hWin?window.hWin.innerWidth:window.innerWidth)*0.8:600;
+            var height = is_smarty?(window.hWin?window.hWin.innerHeight:window.innerHeight)*0.8:500;
+            window.hWin.HEURIST4.msg.showDialog(url, { title:'.', width: width, height: height, modal:false });
+    }
+    
+} //loadRecordContent
 
 var page_cache = {};
 var previous_page_id = -1;
@@ -837,7 +929,6 @@ function initLinksAndImages($container, search_data){
     
     
     */
-console.log('-------------', $container.attr('id'));    
     
     // create internal links 
     //find all link elements for loading another page and define onclick handler - loadPageContent
@@ -846,17 +937,16 @@ console.log('-------------', $container.attr('id'));
         var href = $(link).attr('href');
         var parts = href?href.split('/'):null;
     
-console.log(href);    
-if(href=='judaism_and_rome/view/2989'){
-    console.log('!!!!!');    
-}
+//console.log(href);    
+//if(href=='judaism_and_rome/view/2989'){
+//    console.log('!!!!!');    
+//}
         
         //1. special case for search links in smarty reports 
-        if(href && href.indexOf('q=')===0 || $(link).attr('data-query') ){ //
+        if($(link).attr('data-query') ){ //href && href.indexOf('q=')===0 || 
             
-                var query = $(link).attr('data-query')
-                        ? $(link).attr('data-query')
-                        : href.substring(2);
+                var query = $(link).attr('data-query');
+                        //? $(link).attr('data-query'): href.substring(2);
                 
                 var current_template = '__def';
                 var request = {detail:'ids', neadall:1, w:'a', q:query};
@@ -866,8 +956,11 @@ if(href=='judaism_and_rome/view/2989'){
                         if(search_data.smarty_template) current_template = search_data.smarty_template;
                 }
                 if(!href || href=='#' || href.indexOf('q=')===0){
-                    //change href for right click - open link in new tab
-                    href = '/' + window.hWin.HAPI4.database+'/tpl/'+current_template+'/'+encodeURIComponent(query);
+                    //change href for right click - to open this link in new tab
+                    //href = '/' + window.hWin.HAPI4.database+'/tpl/'+current_template+'/'+encodeURIComponent(query);
+                    href = [window.hWin.HAPI4.baseURL,window.hWin.HAPI4.database,'web',
+                            home_page_record_id, current_page_id,encodeURIComponent(query)];
+                    href = href.join('/');
                 }
                             
                 $(link).click(function(event){
@@ -885,43 +978,13 @@ if(href=='judaism_and_rome/view/2989'){
             (href && href.indexOf('showReps.php')>0)
            )
         {
-console.log('case 2');
+//console.log('case 2');
 
                 $(link).click(function(event){
-                    var container = $('#main-recordview');
+                    
                     var url = $(event.target).attr('href');
-                    if(container.length>0 && window.hWin.HAPI4.database=='judaism_and_rome'){
-                        
-                        var main_content = $('#main-content')
-                        main_content.show();
-                        container.fadeOut(500);
-                        window.hWin.HEURIST4.msg.bringCoverallToFront(main_content);
-                        container.load(url, function(){
-                           
-                           let btn = $('<button class="keywords" style="position:fixed;">Back</button>').click(function(){
-                                $('#main-recordview').hide();
-                                $('#main-content').show();
-                                
-                           });
-                           
-                           var pos = document.getElementById('main-content').getBoundingClientRect();
-                           var h = $('#main-header').height();                 
-                           var stop = document.getElementById('main-content').scrollTop;
-    // console.log(pos, h, stop, pos.y+stop);              
-                           btn.css({top:h+5, left:5});
-                           container.prepend(btn);
-                           container.show(); 
-                           container.parent()[0].scrollTop = 0;
-                           main_content.hide();
-                           window.hWin.HEURIST4.msg.sendCoverallToBack(true);
-                           
-                           initLinksAndImages(container);
-                        });
-                    }else{
-                        var width = (window.hWin?window.hWin.innerWidth:window.innerWidth)*0.8;
-                        var height = (window.hWin?window.hWin.innerHeight:window.innerHeight)*0.8;
-                        window.hWin.HEURIST4.msg.showDialog(url, { title:'.', width: width, height: height, modal:false });
-                    }
+                    
+                    window.hWin.loadRecordContent(url);
                     window.hWin.HEURIST4.util.stopEvent(event);
                     return false;
                 });
@@ -955,7 +1018,7 @@ console.log('case 2');
             
             if(!isNaN(parseInt(rec_id)) && rec_id>0){
 
-console.log('case 3', rec_id);
+//console.log('case 3', rec_id);
                 
                 $(link).attr('data-pageid', rec_id);
                 
@@ -967,21 +1030,9 @@ console.log('case 3', rec_id);
                 $(link).click(function(event){
                     
                     var pageid = $(event.target).attr('data-pageid');
-                    var topmenu = $('#main-menu').find('div[widgetid="heurist_Navigation"]');
-                    
-                    if(topmenu && topmenu.navigation('instance') && topmenu.navigation('isMenuItem',pageid)){
-                        window.hWin.loadPageContent(pageid, eventdata);
-                        window.hWin.HEURIST4.util.stopEvent(event);
-                        return false;
-                    }else{
-                        //var url = window.hWin.HAPI4.baseURL+window.hWin.HAPI4.database+'/view/'+pageid;
-
-                        var url = window.hWin.HAPI4.baseURL+'?recID='+pageid+'&fmt=html&db='+window.hWin.HAPI4.database;
-                        $(link).attr('href', url);
-
-                        window.hWin.HEURIST4.msg.showDialog(url, { title:'.', width: 600, height: 500, modal:false });
-                        return false;
-                    }
+                    window.hWin.loadPageContent(pageid, eventdata);
+                    window.hWin.HEURIST4.util.stopEvent(event);
+                    return false;
                     
                 });
             }

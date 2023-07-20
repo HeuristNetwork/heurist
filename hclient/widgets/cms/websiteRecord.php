@@ -126,9 +126,9 @@ $system->defineConstants();
 $mysqli = $system->get_mysqli();
 
 $isEmptyHomePage = false;
-$open_page_on_init = @$_REQUEST['initid'];
-if(!($open_page_on_init>0)) $open_page_on_init = @$_REQUEST['pageid'];
-if(!($open_page_on_init>0)) $open_page_on_init = 0;
+$open_page_or_record_on_init = @$_REQUEST['initid'];
+if(!($open_page_or_record_on_init>0)) $open_page_or_record_on_init = @$_REQUEST['pageid'];
+if(!($open_page_or_record_on_init>0)) $open_page_or_record_on_init = 0;
 
 $rec_id = @$_REQUEST['recID'];
 if(!($rec_id>0)) $rec_id = @$_REQUEST['recid'];
