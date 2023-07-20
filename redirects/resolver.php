@@ -115,7 +115,7 @@ $requestUri:
 //print $_SERVER["SCRIPT_NAME"].'<br>';
 //print print_r($host_params,true);        
     
-    if($action=='web'){
+    if($action=='web' || $action=='website'){
         
         $redirect .= '?db='.$database.'&website';
                     //substr($_SERVER['SCRIPT_URI'],0,strpos($_SERVER['SCRIPT_URI'],$requestUri[0]))
@@ -126,7 +126,7 @@ $requestUri:
             $redirect .= '&id='.$requestUri[3];    
             $params['id'] = $requestUri[3];
         } 
-        if(@$requestUri[4]>0) {
+        if(@$requestUri[4]>0) { //it may be both website pageid and record id
             $redirect .= '&pageid='.$requestUri[4];    
             $params['pageid'] = $requestUri[4];
         }
