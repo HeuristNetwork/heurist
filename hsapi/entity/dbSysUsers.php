@@ -310,12 +310,6 @@ class DbSysUsers extends DbEntityBase
     //
     public function save(){
 
-/* update enum values for ugr_Enabled  - moved to updateDatabaseToLatest
-        $response = checkUserStatusColumn($this->system); // update enum values for ugr_Enabled
-        if(!$response){
-            return false;
-        }
-*/
         $ret = parent::save();
 
        

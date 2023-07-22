@@ -1523,12 +1523,56 @@ error_log('UPDATED '.$session_id.'  '.$value);
     // This method updates from 1.3.14 to 1.3.xxxx
     //
     function updateDatabaseToLatest($system){
-/*       
+       
         $sysValues = $system->get_system(null, true);        
         $dbVer = $system->get_system('sys_dbVersion');
         $dbVerSub = $system->get_system('sys_dbSubVersion');
-        $dbVerSubSub = 0;
-*/
+        $dbVerSubSub = $system->get_system('sys_dbSubSubVersion');
+        
+        if($dbVer==1 && $dbVerSub==3 && $dbVerSubSub>13){
+            
+            $report = array();
+
+            if($dbVerSubSub<15){
+            
+                // import IIIF Annonation field
+                if(!(ConceptCode::getDetailTypeLocalID('2-1098')>0)){
+                    $importDef = new DbsImport( $system );
+                    if($importDef->doPrepare(  array(
+                    'defType'=>'detailtype', 
+                    'databaseID'=>2, 
+                    'conceptCode'=>'2-1098')))
+                    {
+                        $res = $importDef->doImport();
+                    }
+                    if($res){
+                        $report[] = 'Field 2-1098 "IIIF Annonation imported';    
+                    }
+                }
+                
+                $mysqli = $system->get_mysqli();
+                
+                //add new columns for 
+                if(!hasColumn($mysqli, 'recUploadedFiles', 'ulf_Caption', null, 'varchar(255)')){
+                    
+                    $query = 'ALTER TABLE `recUploadedFiles` '
+."ADD `ulf_Caption` varchar(255) COMMENT 'A user-entered textual name of the file or image' AFTER `ulf_Thumbnail`,"
+."ADD `ulf_Copyright` varchar(255) COMMENT 'Copyright statement or a URI leading to a copyright statement. Consider using Creative Commons categories.' AFTER `ulf_Description`,"
+."ADD `ulf_Copyowner` varchar(255) COMMENT 'The owner of the copyright in the file ir image (person or organisation)'  AFTER `ulf_Copyright`";
+                    $res = $mysqli->query($query);
+                    if(!$res){
+                        $system->addError(HEURIST_DB_ERROR, 'Cannot modify recUploadedFiles to add ulf_Caption, ulf_Copyright and ulf_Copyowner', $mysqli->error);
+                        return false;
+                    }
+                    $report[] = 'recUploadedFiles:ulf_Caption, ulf_Copyright and ulf_Copyowner added';
+                } else {
+                    $report[] = 'defTrecUploadedFileserms:ulf_Caption, ulf_Copyright and ulf_Copyowner already exist';
+                } 
+                
+                $mysqli->query('UPDATE sysIdentification SET sys_dbVersion=1, sys_dbSubVersion=3, sys_dbSubSubVersion=15 WHERE 1');
+            }
+
+        }
         return true;
     }  
     

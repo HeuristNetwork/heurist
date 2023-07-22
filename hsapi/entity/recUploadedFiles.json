@@ -88,6 +88,16 @@
                     }
                 },
                 {
+                    "dtID": "ulf_Caption",
+                    "dtFields":{
+                        "dty_Type":"freetext",
+                        "rst_DisplayName":"Name/caption:",
+                        "dty_Size":255,
+                        "rst_DisplayWidth":40,
+                        "rst_DisplayHelpText": "A user-entered textual name of the file or image."
+                    }
+                },
+                {
                     "dtID": "ulf_Description",
                     "dtFields":{
                         "dty_Type":"blocktext",
@@ -95,6 +105,26 @@
                         "dty_Size":65535,
                         "rst_DisplayWidth":"70",
                         "rst_DisplayHelpText": "A user-entered copyright noticve and/or textual description of the file or image contents. URLs are recognised."
+                    }
+                },
+                {
+                    "dtID": "ulf_Copyright",
+                    "dtFields":{
+                        "dty_Type":"freetext",
+                        "rst_DisplayName":"Copyright:",
+                        "dty_Size":255,
+                        "rst_DisplayWidth":40,
+                        "rst_DisplayHelpText": "Copyright statement or a URI leading to a copyright statement. Consider using Creative Commons categories."
+                    }
+                },
+                {
+                    "dtID": "ulf_Copyowner",
+                    "dtFields":{
+                        "dty_Type":"freetext",
+                        "rst_DisplayName":"Copyright owner:",
+                        "dty_Size":255,
+                        "rst_DisplayWidth":40,
+                        "rst_DisplayHelpText": "The owner of the copyright in the file ir image (person or organisation)"
                     }
                 },
                 {

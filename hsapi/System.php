@@ -1133,7 +1133,7 @@ error_log(print_r($_REQUEST, true));
             
             //retrieve lastest code version (cached in localfile and refreshed from main index server daily)
             $lastCode_VersionOnServer = $this->get_last_code_and_db_version($this->version_release == "alpha" ? true : false);
-
+            
             $res = array(
                 "currentUser"=>$this->current_User,
                 "sysinfo"=>array(
@@ -1856,7 +1856,7 @@ error_log('CANNOT UPDATE COOKIE '.$session_id);
             }
             
             if($check_updates){
-                updateDatabaseToLatest($this);    
+                updateDatabaseToLatest($this);
             }
             
             // it is required for main page only - so call this request on index.php
