@@ -566,7 +566,7 @@ function loadRecordContent(url_or_record_id){
 
         var record_id = url_or_record_id;
         
-        if(window.hWin.HAPI4.database=='judaism_and_rome'){ //(default_record_view_template!=null){
+        if(window.hWin.HAPI4.database=='judaism_and_rome'){ //@todo default_record_view_template from CMS Home record
         
             let default_record_view_template = 'public-record';
 
@@ -589,7 +589,7 @@ function loadRecordContent(url_or_record_id){
     }
     
     var container = $('#main-recordview');
-    if(is_smarty && container.length>0 && window.hWin.HAPI4.database=='judaism_and_rome'){
+    if(is_smarty && container.length>0 && window.hWin.HAPI4.database=='judaism_and_rome'){ //@todo default_record_view_target from CMS Home record
             
             var main_content = $('#main-content')
             container.fadeOut(500);
@@ -953,9 +953,6 @@ function initLinksAndImages($container, search_data){
         var parts = href?href.split('/'):null;
     
 //console.log(href);    
-//if(href=='judaism_and_rome/view/2989'){
-//    console.log('!!!!!');    
-//}
         
         //1. special case for search links in smarty reports 
         if($(link).attr('data-query') ){ //href && href.indexOf('q=')===0 || 
@@ -998,7 +995,7 @@ function initLinksAndImages($container, search_data){
             ||
             (href && href.indexOf('showReps.php')>0))
             &&
-            ($(link).attr('target')!='_blank' || window.hWin.HAPI4.database=='judaism_and_rome')
+            ($(link).attr('target')!='_blank' || window.hWin.HAPI4.database=='judaism_and_rome') //@todo default_record_view_target from CMS Home record
            )
         {
 //console.log('case 2');
@@ -1034,8 +1031,10 @@ function initLinksAndImages($container, search_data){
                 || href.indexOf('../heurist/?')===0  || href.indexOf('./?')===0)
                 && window.hWin.HEURIST4.util.getUrlParameter('db',href) == window.hWin.HAPI4.database )
             {
+                    //internal website navigation
                     rec_id = window.hWin.HEURIST4.util.getUrlParameter('pageid',href);
                     if(rec_id>0){
+                        //@todo: if more than 2 parameters (pageid and database) reload the page entirely
                         if($(link).attr('target')!='_blank'){
                             return;
                         }
@@ -1043,9 +1042,11 @@ function initLinksAndImages($container, search_data){
                         rec_id  = window.hWin.HEURIST4.util.getUrlParameter('recID',href);
                     }
             }else if(href.indexOf('./')===0){
+                    //
                     href = href.substring(2);
                     rec_id = href;                                  
             }else if(!isNaN(parseInt(href)) && href>0){ //integer
+                    // href="123" - it can be record or page id
                     rec_id = href;
             }
             
