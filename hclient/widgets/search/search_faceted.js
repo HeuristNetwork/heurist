@@ -955,9 +955,7 @@ console.log('get defintion in OLD format!!!!');
            if(!lbl) lbl = window.hWin.HR('Search everything'); 
                         
                         
-           var w = that.element.width();
-           if(!(w>0) || w<200) w = 200;
-           w = {'width':(w-65)+'px','max-width':(w-65)+'px','min-width':'auto'};
+           //w = {'width':(w-65)+'px','max-width':(w-65)+'px','min-width':'auto'};
            
            var ele = $("<div>").html(
            '<div class="header" title="" style="vertical-align: top; display: block; width: 100%; padding: 5px;">'
@@ -969,7 +967,14 @@ console.log('get defintion in OLD format!!!!');
                         +'<span class="ui-button-icon ui-icon ui-icon-search"></span><span class="ui-button-icon-space"> </span></button>'
                     +'</div>').css({'border-bottom': '1px solid lightgray','margin-bottom':'10px'}).appendTo($fieldset);
            
-           ele.find('input').css(w);             
+           var w = that.element.width();
+           if(!(w>0) || w<200) w = 200;
+           ele.find('input').removeClass('textarea, ui-widget-content')
+                        .addClass('ui-selectmenu-button') //thin border
+                        .css({'background':'none',
+                              'width':'auto',
+                              'max-width': (w-90)+'px',
+                              'min-width':'100px'});
                         
            /*ele.find(".start-search") class="input-cell"
                         .button({icons: {primary: "ui-icon-search"}, text:false})
@@ -2450,6 +2455,8 @@ console.log('get defintion in OLD format!!!!');
                                                                 'width':'auto',
                                                                 'min-width':'100px',
                                                                 'max-width':(w-65)+'px'});
+                            var ele = selObj.hSelect( "widget" ).find('.ui-selectmenu-text');
+                            ele.css({'min-height':'','padding-right':'0px','margin-right':'12px'});
                             
                             //change appearance for dropdown button
                             var btn_dropdown = selObj.hSelect( "widget" );//.css({"font-size": "0.9em", "min-width": "8em"});
@@ -3305,6 +3312,8 @@ console.log('get defintion in OLD format!!!!');
                                                                 'width':'auto',
                                                                 'min-width':'100px',
                                                                 'max-width':(w-65)+'px'});
+                            var ele = selObj.hSelect( "widget" ).find('.ui-selectmenu-text');
+                            ele.css({'min-height':'','padding-right':'0px','margin-right':'12px'});
 
                             var btn_dropdown = selObj.hSelect( "widget" );
                             //change appearance for dropdown button
