@@ -2395,7 +2395,7 @@ input[type="file"] {
     line-height: 1em;
 }
 .ui-selectmenu-button span.ui-selectmenu-text{
-    padding: 0.1em 2.1em 0.2em 0.2em;
+    padding: 0.1em 1.1em 0.2em 0.2em;
 }
 .ui-front{
     z-index: 59999; /*999999;*/

@@ -1188,6 +1188,17 @@ console.log('get defintion in OLD format!!!!');
                     }
            
                     that._handleNewInput(inpt.find('input,select'));
+                    
+                    
+                    var w = that.element.width();
+                    if(!(w>0) || w<200) w = 200;
+                    
+                    inpt.find('input,select,span[role="combobox"]').removeClass('textarea, ui-widget-content')
+                        .addClass('ui-selectmenu-button') //thin border
+                        .css({'background':'none',
+                              'width':'auto',
+                              'max-width': (w-90)+'px',
+                              'min-width':'100px'});
 
                     var btn_add = $( "<button>",{title:'To clear previous search click the RESET button'})
                         .addClass("smallbutton")
@@ -1301,10 +1312,10 @@ console.log('get defintion in OLD format!!!!');
 
         $input.removeClass('text').css(input_style);
 
-        var btn_clear = $( "<span>")
+        var btn_clear = $( "<span>")  //for direct input
             .insertBefore( $input_div )
             .addClass("ui-icon ui-icon-arrowreturnthick-1-w resetbutton")
-            .css({'display':'inline-block', 'visibility':'hidden', 'font-size':'0.9em', 'vertical-align':'middle'});
+            .css({'display':'inline-block', 'visibility':'hidden', 'font-size':'11px', 'vertical-align':'middle'});//1.2em
 
         that._on( btn_clear, { click: function(){
             $input.val('');
@@ -2393,10 +2404,13 @@ console.log('get defintion in OLD format!!!!');
                         // Add dropdown 
                         if(needsDropdown){
                             
+                            var need_small_dropdown = false;
                             var w = that.element.width();
                             if(!(w>0) || w<200) w = 200;
 
-                            var $sel = $('<select style="font-size: 0.6em !important;">').css('width', (w-45)+'px'); // was 30
+                            var $sel = $('<select>') // style="font-size: 0.6em !important;"
+                                    .css({'width':(w-65)+'px',
+                                          'max-width':(w-65)+'px'}); // was 30
 
                             if(needsDropdown !== true && $facet_values.find('span.bor-toggle-show-off').length > 0){
                                 $sel.appendTo( $("<div>").css({"display":"inline-block","padding":"0px"}).appendTo($facet_values.find('span.bor-toggle-show-off')) );
@@ -2404,7 +2418,16 @@ console.log('get defintion in OLD format!!!!');
 
                                 $facet_values.css('margin-bottom', '15px');
                             }else{
-                                $sel.appendTo( $("<div>").css({"display":"inline-block","padding":"0px"}).appendTo($facet_values) );
+                                //add placeholder in place of reset button
+                                if(!window.hWin.HEURIST4.util.isArrayNotEmpty(field.history)){
+                                    $('<span style="display: inline-block; width:18px"/>')
+                                                            .appendTo($facet_values);
+                                }
+                                
+                                $sel.appendTo( $("<div>").css({"display":"inline-block","padding":"0px"})
+                                    .appendTo($facet_values) );
+                                    
+                                need_small_dropdown = false; //!(field.selectedvalue && field.selectedvalue.value);
                             }
 
                             if(term && term.hasOwnProperty('count') && term.count == 0){
@@ -2423,13 +2446,18 @@ console.log('get defintion in OLD format!!!!');
                             //convert to jquery selectmenu
                             selObj = window.hWin.HEURIST4.ui.initHSelect($sel, false);
                             selObj.hSelect( "menuWidget" ).css({'font-size':'0.9em'});
+                            selObj.hSelect( "widget" ).css({'background':'none',
+                                                                'width':'auto',
+                                                                'min-width':'100px',
+                                                                'max-width':(w-65)+'px'});
+                            
                             //change appearance for dropdown button
                             var btn_dropdown = selObj.hSelect( "widget" );//.css({"font-size": "0.9em", "min-width": "8em"});
-                            if(this.options.params.viewport < this.terms_drawn){
+                            if(need_small_dropdown || this.options.params.viewport < this.terms_drawn){
                                 btn_dropdown.css({"font-size": "0.96em", width: 'auto', color:"#999999", 
                                     'min-width':'', background: 'none'});
                                 btn_dropdown.addClass('borderless');
-                                btn_dropdown.find('.ui-selectmenu-text').html('dropdown')
+                                btn_dropdown.find('.ui-selectmenu-text').html(window.hWin.HR(need_small_dropdown?'select':'dropdown'))
                                     .css({'min-height':'', padding:'', 'padding-right':'16px'});
                             }else{
                                 btn_dropdown.css({"font-size": "0.9em", "min-width": "8em"});
@@ -3241,7 +3269,7 @@ console.log('get defintion in OLD format!!!!');
                             var w = that.element.width();
                             if(!(w>0) || w<200) w = 200;
 
-                            var $sel = $('<select style="font-size: 0.6em !important;">').css('width', (w-45)+'px'); // was 30
+                            var $sel = $('<select>').css('width', (w-65)+'px'); // was 30  style="font-size: 0.6em !important;"
 
                             needsDropdown = (field['isfacet'] != this._FT_SELECT);
 
@@ -3253,6 +3281,12 @@ console.log('get defintion in OLD format!!!!');
 
                                 $facet_values.css('margin-bottom', '15px');
                             }else{
+                                //add placeholder in place of reset button
+                                if(!window.hWin.HEURIST4.util.isArrayNotEmpty(field.history)){
+                                    $('<span style="display: inline-block; width:18px"/>')
+                                                            .appendTo($facet_values);
+                                }
+                                
                                 $sel.appendTo( $("<div>").css({"display":"inline-block","padding":"0"}).appendTo($facet_values) );
                             }
 
@@ -3267,6 +3301,10 @@ console.log('get defintion in OLD format!!!!');
                             //needsDropdown = true;
                             selObj = window.hWin.HEURIST4.ui.initHSelect($sel, false);
                             selObj.hSelect( "menuWidget" ).css({'font-size':'0.9em'});
+                            selObj.hSelect( "widget" ).css({'background':'none',
+                                                                'width':'auto',
+                                                                'min-width':'100px',
+                                                                'max-width':(w-65)+'px'});
 
                             var btn_dropdown = selObj.hSelect( "widget" );
                             //change appearance for dropdown button
@@ -3594,7 +3632,11 @@ console.log('get defintion in OLD format!!!!');
         
         if(window.hWin.HEURIST4.util.isempty(cterm.value)){
             f_link_content = $("<span>").addClass("ui-icon ui-icon-arrowreturnthick-1-w")
-                .css({'font-size':'0.9em','height':'10px'}); //AAA ,'margin-left':'-15px'    
+                .css({'font-size':'11px','font-style':'normal'}); //1.2em
+            //            .insertBefore( $input_div )
+            //.addClass("ui-icon ui-icon-arrowreturnthick-1-w resetbutton")
+            //.css({'display':'inline-block', 'visibility':'hidden', 'font-size':'0.9em', 'vertical-align':'middle'});
+
         }else{
             f_link_content = $("<span>").text(cterm.title);
             
