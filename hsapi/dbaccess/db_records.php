@@ -2834,7 +2834,8 @@ function _prepareDetails($system, $rectype, $record, $validation_mode, $recID, $
             $sMsg = implode(' ',$errorValues);   
         }else{
             $sMsg = 'Encountered invalid value'.$ss
-            .' for Record#'.$recID.'<br>'.implode(' ',$errorValues);
+            .' for Record# '.$recID.'<br>'.implode(' ',$errorValues)
+            .'<br> This may be due to your browser cache being out-of-date (use Ctrl-F5 to reload the page)';
         }
 
         $system->addError(HEURIST_ACTION_BLOCKED, $sMsg, null);
