@@ -180,6 +180,7 @@ $.widget( "heurist.search_faceted", {
     
     ui_spatial_filter_image:null,
     
+    _warned_missing_fields: false, // warn user about fields no longer within record structure, but still in facet
     _terminateFacetCalculation: false, //stop flag
 
     _date_range_dialog: null,
@@ -747,6 +748,9 @@ console.log('get defintion in OLD format!!!!');
 
         if(window.hWin.HEURIST4.util.isArrayNotEmpty(facets)){
             var facet_index, len = facets.length;
+            let invalid_fields = [];
+            let check_fields = !this._warned_missing_fields && !this.options.ispreview && 
+                (!this.options.is_publication || window.hWin.HAPI4.currentUser.ugr_ID !== 0);
 
             for (facet_index=0;facet_index<len;facet_index++){
                 facets[facet_index].history = [];
@@ -758,8 +762,35 @@ console.log('get defintion in OLD format!!!!');
                 }else if (facets[facet_index].isfacet==false){
                             facets[facet_index].isfacet = this._FT_INPUT;
                 }
+
+                if(check_fields){
+                    let codes = facets[facet_index]['code'].split(':');
+                    let rtyid = codes[codes.length-2];
+                    let dtyid = codes[codes.length-1];
+                    if(!$Db.rst(rtyid, dtyid)){
+                        invalid_fields.push(facets['title']);
+                    }
+                }
                 
                 //facets[facet_index].isfacet = facets[facet_index].isfacet || window.hWin.HEURIST4.util.isnull(facets[facet_index].isfacet);
+            }
+
+            if(Object.keys(invalid_fields).length > 0 && check_fields){
+
+                let several_fields = invalid_fields.length > 1;
+
+                let msg = '';
+                let fld_name = invalid_fields[0];
+                if(several_fields){
+                    msg = 'Several fields referenced by this facet filter are no longer part of their respective record type(s).';
+                }else{
+                    msg = `The field ${fld_name} referenced in this facet filter is no longer part of the record type on which this filter is based.`;
+                }
+                msg += '<br>Please edit the facet search and remove the field (this will occurr automatically if you open the facet filter for editing and save)';
+
+                window.hWin.HEURIST4.msg.showMsgDlg(msg, null, {title: 'Missing field(s) referenced in facet filter'}, {default_palette_class: 'ui-heurist-explore'});
+
+                this._warned_missing_fields = true;
             }
         }
         
