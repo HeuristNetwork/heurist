@@ -475,7 +475,7 @@ class ReportRecord {
                         
                             if($this->dtTerms==null){
                                 $this->dtTerms = dbs_GetTerms($this->system);
-                                $this->dbsTerms = new DbsTerms($this->$system, $this->dtTerms);
+                                $this->dbsTerms = new DbsTerms($this->system, $this->dtTerms);
                             }
 
                             $domain = ($detailType=="enum")?"enum":"relation";
@@ -848,6 +848,13 @@ class ReportRecord {
         $id_clause = ' IN (' .implode(',', $ids). ')';
 
         if($entity == 'trm'){
+
+            if($this->dtTerms==null){
+                $this->dtTerms = dbs_GetTerms($this->system);
+            }
+            if($this->dbsTerms==null){
+                $this->dbsTerms = new DbsTerms($this->system, $this->dtTerms);
+            }
 
             $field = (strpos(strtolower($field), 'desc') === false) ? 'trm_Label' : 'trm_Description'; // grab label by default
 
