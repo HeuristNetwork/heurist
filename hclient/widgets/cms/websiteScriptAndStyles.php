@@ -90,6 +90,9 @@ if (($_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0.0.1')
     var is_embed =<?php echo array_key_exists('embed', $_REQUEST)?'true':'false'; ?>;
     var is_execute_homepage_custom_javascript = false;
     var first_not_empty_page = 0;
+    
+    var record_view_smarty_template = '<?php echo ($record_view_smarty_template!=null?$record_view_smarty_template:'');?>';
+    var record_view_target = '<?php echo ($record_view_target!=null?$record_view_target:'');?>';
 </script>
 
 <script type="text/javascript" src="<?php echo PDIR;?>hclient/core/detectHeurist.js"></script>
@@ -553,7 +556,7 @@ if($website_custom_css!=null){
 //
 // loads record view template into #main-recordview or popup dialog
 // 
-function loadRecordContent(url_or_record_id){
+function loadRecordContent(url_or_record_id, target){
     
 //console.log(url_or_record_id);
     if(!url_or_record_id){
@@ -566,14 +569,13 @@ function loadRecordContent(url_or_record_id){
 
         var record_id = url_or_record_id;
         
-        if(window.hWin.HAPI4.database=='judaism_and_rome'){ //@todo default_record_view_template from CMS Home record
+        if(record_view_smarty_template!=null && record_view_smarty_template!=''){
         
-            let default_record_view_template = 'public-record';
-
-            url = window.hWin.HAPI4.baseURL+window.hWin.HAPI4.database+'/tpl/'+default_record_view_template+'/'+record_id;
+            url = window.hWin.HAPI4.baseURL+window.hWin.HAPI4.database+'/tpl/'+record_view_smarty_template+'/'+record_id;
             
             is_smarty = true;
         }else{
+            //default renderRecordData.php
             url = window.hWin.HAPI4.baseURL+'?recID='+record_id+'&fmt=html&db='+window.hWin.HAPI4.database;
         }
         
@@ -588,49 +590,49 @@ function loadRecordContent(url_or_record_id){
         
     }
     
-    var container = $('#main-recordview');
-    if(is_smarty && container.length>0 && window.hWin.HAPI4.database=='judaism_and_rome'){ //@todo default_record_view_target from CMS Home record
-            
-            var main_content = $('#main-content')
-            container.fadeOut(500);
-            container.parent()[0].scrollTop = 0;
-            main_content.show();
-            window.hWin.HEURIST4.msg.bringCoverallToFront(main_content.parent());
-            var frm = container.find('iframe')
-            frm.attr('src',url);
-            frm.off('load');
-            frm.on('load', function(){
-               container.show(); 
-               main_content.hide();
-               window.hWin.HEURIST4.msg.sendCoverallToBack(true);
-               
-               frm = frm[0];
-               container.height(frm.contentWindow.document.body.scrollHeight);               
-               initLinksAndImages($(frm.contentWindow.document.body));
-               
-               container.find('button.keywords').click(function(){
-                    $('#main-recordview').hide();
-                    $('#main-content').show();
-               });
-            });
-
-/*
-               let btn = $('<button class="keywords" style="position:fixed;">Back</button>').click(function(){
-                    $('#main-recordview').hide();
-                    $('#main-content').show();
-                    
-               });
-               var pos = document.getElementById('main-content').getBoundingClientRect();
-               var h = $('#main-header').height();                 
-               var stop = document.getElementById('main-content').scrollTop;
-// console.log(pos, h, stop, pos.y+stop);              
-               btn.css({top:h+5, left:5});
-               container.prepend(btn);
-*/            
-    }else{
-            var width = is_smarty?(window.hWin?window.hWin.innerWidth:window.innerWidth)*0.8:600;
-            var height = is_smarty?(window.hWin?window.hWin.innerHeight:window.innerHeight)*0.8:500;
-            window.hWin.HEURIST4.msg.showDialog(url, { title:'.', width: width, height: height, modal:false });
+//console.log(record_view_target, url);    
+    
+    if(record_view_target=='popup'){
+        //in popup
+        var width = is_smarty?(window.hWin?window.hWin.innerWidth:window.innerWidth)*0.8:600;
+        var height = is_smarty?(window.hWin?window.hWin.innerHeight:window.innerHeight)*0.8:500;
+        window.hWin.HEURIST4.msg.showDialog(url, { title:'.', width: width, height: height, modal:false });
+        
+    }else {
+        
+        if(is_smarty && record_view_target!=''){
+            var container = $('#'+record_view_target);
+            if(container.length>0){
+                
+                var main_content = $('#main-content')
+                container.fadeOut(500);
+                container.parent()[0].scrollTop = 0;
+                main_content.show();
+                window.hWin.HEURIST4.msg.bringCoverallToFront(main_content.parent());
+                var frm = container.find('iframe')
+                frm.attr('src',url);
+                frm.off('load');
+                frm.on('load', function(){
+                   container.show(); 
+                   main_content.hide();
+                   window.hWin.HEURIST4.msg.sendCoverallToBack(true);
+                   
+                   frm = frm[0];
+                   container.height(frm.contentWindow.document.body.scrollHeight);               
+                   initLinksAndImages($(frm.contentWindow.document.body));
+                   
+                   container.find('button.keywords').click(function(){
+                        $('#main-recordview').hide();
+                        $('#main-content').show();
+                   });
+                });
+                return;
+            }
+        }
+    
+        //default case
+        if(!target) target = '_blank';
+        window.open(url, target);
     }
     
 } //loadRecordContent
@@ -995,7 +997,7 @@ function initLinksAndImages($container, search_data){
             ||
             (href && href.indexOf('showReps.php')>0))
             &&
-            ($(link).attr('target')!='_blank' || window.hWin.HAPI4.database=='judaism_and_rome') //@todo default_record_view_target from CMS Home record
+            ($(link).attr('target')!='_blank' || record_view_target!='')
            )
         {
 //console.log('case 2');
@@ -1010,7 +1012,7 @@ function initLinksAndImages($container, search_data){
                     }
                     
                     var url = link.attr('href');
-                    window.hWin.loadRecordContent(url);
+                    window.hWin.loadRecordContent(url, $(link).attr('target'));
                     window.hWin.HEURIST4.util.stopEvent(event);
                     return false;
                 });

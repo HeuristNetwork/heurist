@@ -355,7 +355,7 @@ $dtDefines = array('DT_NAME' => array(2, 1),
     'DT_SYMBOLOGY_POINTMARKER' => array(3, 1091),  //outdated
     'DT_SYMBOLOGY' => array(3, 1092),  //MAIN field that stores ALL styles for map symbology (including themtic maps)
     'DT_ZOOM_KM_POINT' => array(2, 925), //area to zoom in on point selection (per map space document)
-    'DT_POPUP_TEMPLATE' => array(2, 922),  // smarty template to produce popup info 
+    'DT_SMARTY_TEMPLATE' => array(2, 922),  // smarty template to produce popup info per layer
     'DT_SYMBOLOGY_COLOR' => array(3, 1037), // outdated
     'DT_BG_COLOR' => array(2, 551),         // outdated
     'DT_OPACITY' => array(3, 1090),         // outdated
@@ -375,6 +375,7 @@ $dtDefines = array('DT_NAME' => array(2, 1),
     'DT_CMS_TOP_MENU' => array(99, 742),  //pointer  to top level menues in home page
     'DT_CMS_MENU' => array(99, 761),  //pointer to sub menu
     'DT_CMS_KEYWORDS' => array(99, 948),
+    'DT_CMS_TEMPLATE' => array(2, 1099),
     'DT_CMS_TARGET' => array(99, 949),
     'DT_CMS_HEADER' => array(2, 929),
     'DT_CMS_CSS' => array(99, 946),

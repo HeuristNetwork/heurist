@@ -426,7 +426,7 @@ function hMapLayer2( _options ) {
     function _addQueryLayer(){
 
         var layer_popup_template = _recordset.fld(options.rec_layer || _record, 
-                                    window.hWin.HAPI4.sysinfo['dbconst']['DT_POPUP_TEMPLATE']);
+                                    window.hWin.HAPI4.sysinfo['dbconst']['DT_SMARTY_TEMPLATE']);
         
         var layer_geofields = []
         var layer_default_style = null;
@@ -625,7 +625,7 @@ function hMapLayer2( _options ) {
         var layer_style = _recordset.fld(options.rec_layer || _record, 
                     window.hWin.HAPI4.sysinfo['dbconst']['DT_SYMBOLOGY']);
         var layer_popup_template = _recordset.fld(options.rec_layer || _record, 
-                    window.hWin.HAPI4.sysinfo['dbconst']['DT_POPUP_TEMPLATE']);
+                    window.hWin.HAPI4.sysinfo['dbconst']['DT_SMARTY_TEMPLATE']);
                     
         var MAXITEMS = window.hWin.HAPI4.get_prefs('search_detail_limit');    
         
