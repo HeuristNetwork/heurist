@@ -179,7 +179,7 @@ window.hWin.HEURIST4.util = {
               
               //if(mode !== (ele.prop('disabled')=='disabled')){
               
-              if($(ele).hSelect("instance")!=undefined){              
+              if( (typeof hSelect!=="undefined") && $.isFunction(hSelect) && $(ele).hSelect("instance")!=undefined){              
                   
                   if (mode) {
                     $(ele).hSelect( "disable" );

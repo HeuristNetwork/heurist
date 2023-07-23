@@ -982,7 +982,7 @@ function hLayoutMgr(){
             $.each(widgets, function(i, item){
                 var widgetname = $(item).attr('data-widgetname');
                 if(widgetname){
-                    var is_inited = $(item)[widgetname]('option', 'init_completed');
+                    var is_inited = $(item)[widgetname]('instance') && $(item)[widgetname]('option', 'init_completed');
                     if(is_inited===false){
                         are_all_widgets_inited = false;
                         return false;

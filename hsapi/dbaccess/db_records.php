@@ -3466,13 +3466,6 @@ function checkUserPermissions($system, $action){
 
     $mysqli = $system->get_mysqli();
 
-    /* update enum values for ugr_Enabled  - moved to updateDatabaseToLatest
-    $response = checkUserStatusColumn($system); 
-    if(is_array($response)){
-        return false;
-    }
-    */
-
     $user_query = "SELECT ugr_Enabled FROM sysUGrps WHERE ugr_ID = " . $system->get_user_id();
     $res = $mysqli->query($user_query);
     if(!$res){

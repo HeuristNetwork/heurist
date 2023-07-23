@@ -65,7 +65,7 @@ class DbSysBugreport extends DbEntityBase
         }
 
         if(is_array($this->records) && count($this->records)==1){
-            //SPECIAL CASE - this is response to emailForm widget 
+            //SPECIAL CASE - this is response to emailForm widget (from CMS website page)
             // it sends email to owner of database or to email specified in website_id record
             $fields = $this->records[0];
             if(@$fields['email'] && @$fields['content']){
@@ -227,6 +227,7 @@ class DbSysBugreport extends DbEntityBase
             if($record){
                 $email_title = 'From website '.recordGetField($record, DT_NAME).'.';
                 $email_to = recordGetField($record, DT_EMAIL);
+                if($email_to) $email_to = explode(';', $email_to);
             }
             $email_from_name = 'Website contact';
         }else{

@@ -1213,13 +1213,13 @@ function ShowReps( is_snippet_editor ) {
     //    
     function _addIfOperator2(_nodep, varname, language_handle){
         var _remark = '{* ' + _getRemark(_nodep) + ' *}';
-        let inner_val = language_handle !== '' ? language_handle : varname;
-        return "\n{if ($"+varname+")}"+_remark+"\n\n   {$"+inner_val+"} \n\n{/if}\n"+_remark+" {* you can also add {/else} before {/if}} *}\n";
+        let inner_val = language_handle !== '' ? language_handle : "{$"+varname+"}";
+        return "\n{if ($"+varname+")}"+_remark+"\n\n   "+inner_val+" \n\n{/if}\n"+_remark+" {* you can also add {/else} before {/if}} *}\n";
     }
     //
     // NEW
     //
-    function _addMagicLoopOperator2(_nodep, varname){
+    function _addMagicLoopOperator2(_nodep, varname, language_handle = ''){
         
             var _remark = '{* ' + _getRemark(_nodep) + ' *}';
             
@@ -1229,6 +1229,10 @@ function ShowReps( is_snippet_editor ) {
             
             var loopname = (_nodep.data.type=='enum')?'ptrloop':'valueloop';
             var getrecord = (_nodep.data.type=='resource')? ('{$'+field+'=$heurist->getRecord($'+field+')}') :'';
+
+            if(!window.hWin.HEURIST4.util.isempty(language_handle)){
+                language_handle = '\n\t' + language_handle.replace('replace_id', field) + '\n';
+            }
             
             if(codes[1]=='Relationship'){
                 insertGetRelatedRecords();
@@ -1238,6 +1242,7 @@ function ShowReps( is_snippet_editor ) {
             }else{
                 return '{foreach $'+varname+'s as $'+field+' name='+loopname+'}'+_remark
                         +'\n\t'+getrecord+'\n'  //' {* '+_remark + '*}'
+                        + language_handle
                         +'\n{/foreach} '+_remark;
             }
             
@@ -1272,8 +1277,8 @@ function ShowReps( is_snippet_editor ) {
 
         if(insertMode==0){ //variable only
 
-            let inner_val = language_handle !== '' ? language_handle : varname;
-            res = "{$" + inner_val + "}{*" +  remark + "*}";
+            let inner_val = language_handle !== '' ? language_handle : "{$"+varname+"}";
+            res = inner_val + " {*" +  remark + "*}";
 
         }else if (insertMode==1){ //label+field
 
@@ -1425,18 +1430,30 @@ function ShowReps( is_snippet_editor ) {
     // NEW
     //
     function _showInsertPopup2( _nodep, elt ){
-        
-        // init buttons
-        
 
         // show hide         
         var no_loop = (_nodep.data.type=='enum' || _nodep.key.indexOf('rec_')==0 || 
                     (_nodep.data.code && _nodep.data.code.indexOf('Relationship')==0));
-        let show_languages = _nodep.key=='term'; console.log(_nodep);
+        let show_languages = _nodep.key=='term';
         if(no_loop){
-            h = 255;
+            h = 260;
         }else{
-            h = 355;
+            h = 360;
+        }
+
+        let field_name = _nodep.data.name;
+        if(window.hWin.HEURIST4.util.isempty(field_name)){
+            let codes = _nodep.data.code.split(':');
+
+            if(codes.length >= 3){
+                let rtyid = codes[codes.length-3];
+                let dtyid = codes[codes.length-2];
+
+                field_name = $Db.rst(rtyid, dtyid, 'rst_DisplayName');
+            }
+        }
+        if(window.hWin.HEURIST4.util.isempty(field_name)){
+            field_name = 'field';
         }
         
         if(_add_variable_dlg && _add_variable_dlg.dialog('instance')){
@@ -1456,14 +1473,12 @@ function ShowReps( is_snippet_editor ) {
             //_add_variable_dlg.dialog('close');
         }
         
+        // init buttons
         $ele_popup = $('#insert-popup');
         $ele_popup.find('#btn_insert_var').attr('onclick',null).button()
             .off('click')
             .click(__on_add);
         $ele_popup.find('#btn_insert_if').attr('onclick',null).button()
-            .off('click')
-            .click(__on_add);
-        $ele_popup.find('#btn_insert_lang').attr('onclick', null).button()
             .off('click')
             .click(__on_add);
             
@@ -1487,7 +1502,7 @@ function ShowReps( is_snippet_editor ) {
                 sel.val('');
                 insertAtCursor("|"+modname);        
             });
-        
+
         let $langSel = $ele_popup.find('#selLanguage');
         if($langSel.find('option').length == 1){ // fill select with available languages
 
@@ -1495,12 +1510,7 @@ function ShowReps( is_snippet_editor ) {
             $langSel.html($langSel.html() + lang_opts);
         }
         $langSel.val(''); // reset
-        if(!show_languages){
-            $langSel.parent().parent().hide();
-            h -= 5;
-        }else{
-            $langSel.parent().parent().show();
-        }
+        h = !show_languages ? h - 10 : h;
         
         _add_variable_dlg = window.hWin.HEURIST4.msg.showElementAsDialog(   
             {element: $ele_popup[0],
@@ -1508,7 +1518,7 @@ function ShowReps( is_snippet_editor ) {
             width:450,
             height:h,
             resizable: false,
-            title:'Insert field',
+            title:`Insert ${field_name}`,
             buttons:null,
             open: null,
             beforeClose:null,
@@ -1518,15 +1528,35 @@ function ShowReps( is_snippet_editor ) {
             position:{my:'top left',at:'bottom left', of: elt},
             borderless: false,
             default_palette_class:null});
-    
+
+        let grid_temp_cols = (!show_languages ? '' : '75px ') + '130px 180px'
+
+        _add_variable_dlg.find('.insert-field-grid').css({'display': 'grid', 'grid-template-columns': '100%'});
+        _add_variable_dlg.find('.insert-field-grid > div:not(.header)').css({'display': 'grid', 'grid-template-columns': grid_temp_cols, 'margin': '5px 0'});
+        _add_variable_dlg.find('.insert-field-grid > div.header').css({'display': 'grid', 'grid-template-columns': grid_temp_cols, 'margin': '15px 0 5px'});
+
+        _add_variable_dlg.find('button').css({
+            'padding': '0px', 
+            'width': '100px', 
+            'height': '25px'
+        });
+        _add_variable_dlg.find('button').not('#btn_insert_var, #btn_insert_loop_var').css('margin-left', '10px');
+        _add_variable_dlg.find('#btn_insert_var, #btn_insert_loop_var').css('width', '110px');
+
         if(no_loop){
-                _add_variable_dlg.find('.ins_isloop').hide();
+            _add_variable_dlg.find('.ins_isloop').hide();
         }else{
-                _add_variable_dlg.find('.ins_isloop').show();
+            _add_variable_dlg.find('.ins_isloop').show();
+        }
+
+        if(!show_languages){
+            _add_variable_dlg.find('.language_row').hide();
+            _add_variable_dlg.find('.empty_ele').hide();
+        }else{
+            _add_variable_dlg.find('.language_row').show();
+            _add_variable_dlg.find('.empty_ele').show();
         }
     }
-    
-    
     
     //
     // NEW
@@ -1687,7 +1717,9 @@ this_id       : "term"
 
                         if(language_code && language_code != '' && key == 'term'){
                             let id_fld = _varname.replace('.term', '.id');
-                            language_handle = `heurist->getTranslation("trm", $${id_fld}, "label", "${language_code}")`;
+                            let fld = (inloop==1) ? 'replace_id.id' : id_fld;
+                            language_handle = `{$translated_label = $heurist->getTranslation("trm", $${fld}, "label", "${language_code}")} {* Get translated label *}\n\n`
+                                + (inloop==1 ? '\n\t' : '') + `{$translated_label} {* Print translated label *}`;
                         }
                     }
                     
@@ -1703,7 +1735,7 @@ this_id       : "term"
             if( inloop==1 ){
                 
                 //** _getrec = '';
-                _text = _addMagicLoopOperator2(_nodep, _varname);
+                _text = _addMagicLoopOperator2(_nodep, _varname, language_handle);
                 
             }else if(isif){
                 

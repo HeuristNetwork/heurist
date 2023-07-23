@@ -46,7 +46,7 @@ class DbAnnotations extends DbEntityBase
                         
         $this->dty_Annotation_Info = (defined('DT_ANNOTATION_INFO'))
                 ? DT_ANNOTATION_INFO
-                : DT_EXTENDED_DESCRIPTION; 
+                : 0; 
 
         $this->init();
     }
@@ -200,14 +200,14 @@ class DbAnnotations extends DbEntityBase
                     .'Import required record type');
             return false;
         }
-        /* 
-        if( !defined('DT_ANNOTATION_INFO') || !defined('DT_URL') || !defined('DT_ORIGINAL_RECORD_ID')){
+         
+        if( !defined('DT_ANNOTATION_INFO') || !defined('DT_ORIGINAL_RECORD_ID')){
             $this->system->addError(HEURIST_ACTION_BLOCKED, 
                     'Can not add annotation. This database does not have "Annotation" (2-1098) or "Original ID" fields (2-36). '
                     .'Import record type "Map/Image Annotation" to get this field');
             return false;
         }
-        */
+        
         
         $this->system->defineConstant('DT_SHORT_SUMMARY');
         $this->system->defineConstant('DT_THUMBNAIL');
@@ -372,7 +372,7 @@ class DbAnnotations extends DbEntityBase
         //record header
         $record = array();
         $record['ID'] = $recordId;
-        $record['RecTypeID'] = defined('RT_MAP_ANNOTATION')?RT_MAP_ANNOTATION:RT_ANNOTATION;
+        $record['RecTypeID'] = RT_MAP_ANNOTATION;
         $record['no_validation'] = true;
         $record['details'] = $details;
         

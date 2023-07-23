@@ -1228,14 +1228,15 @@ class Temporal {
     //
     // $dt - string
     //
-    public static function toHumanReadable($dt){
+    public static function toHumanReadable($dt, $print_invalid_str = false){
         
         if($dt){
             $dt = new Temporal($dt);
             if($dt && $dt->isValid()) {
                return $dt->toReadable();   
             }else{
-               return 'invalid temporal object'; 
+                $dt = $print_invalid_str && is_string($dt) && !empty($dt) ? '('. $dt .')' : '';
+                return 'invalid temporal object'. $dt; 
             }
         }else{
             return '';

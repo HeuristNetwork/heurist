@@ -330,6 +330,7 @@ if(!($is_map_popup || $without_header)){
                         var next_order = (key == null) ? null : next_group[1];
                         var sep_type = (key == null) ? null : next_group[2];
                         var $field_container = $('<fieldset>').attr('id', order);
+                        let inner_group = sep_type == 'group' || sep_type == 'accordion_inner' || sep_type == 'expanded_inner';
 
                         $.each($data, function(idx, detail){
 
@@ -345,10 +346,10 @@ if(!($is_map_popup || $without_header)){
                         });
 
                         if(group_name != '-'){
-                            if(sep_type == 'group' || sep_type == 'accordion_inner' || sep_type == 'expanded_inner'){
-                                $('<h5>').attr('data-order', order).css({'margin': '5px 5px 2px', 'font-size': '1em', 'font-style': 'italic'}).text(group_name).appendTo($group_container);
+                            if(inner_group){
+                                $('<h5>').attr('data-order', order).css({'margin': '5px 15px 2px', 'font-size': '1em', 'font-style': 'italic'}).text(group_name).appendTo($group_container);
                             }else{
-                                $('<h4>').attr('data-order', order).css({'margin': '5px 0px 2px', 'font-size': '1.1em'}).text(group_name).appendTo($group_container);
+                                $('<h4>').attr('data-order', order).css({'margin': '5px 0px 2px', 'font-size': '1.1em', 'text-transform': 'uppercase'}).text(group_name).appendTo($group_container);
                             }
                         }else{
                             $('<hr>').attr('data-order', order).css({'margin': '5px 0px 5px', 'border-top': '1px solid black'}).appendTo($group_container);
@@ -360,7 +361,7 @@ if(!($is_map_popup || $without_header)){
                     $.each($group_container.find('fieldset'), function(idx, fieldset){
                         if($(fieldset).find('div').length == 0){
                             $(fieldset).hide();
-                            $group_container.find('h4[data-order="'+ $(fieldset).attr('id') +'"]').hide();
+                            $group_container.find('h4[data-order="'+ $(fieldset).attr('id') +'"], h5[data-order="'+ $(fieldset).attr('id') +'"]').hide();
                         }
                     });
                 }
@@ -1253,7 +1254,7 @@ function print_public_details($bib) {
                     //ignore empty date
                     continue;
                 }else{
-                    $bd['val'] = Temporal::toHumanReadable($bd['val']);
+                    $bd['val'] = Temporal::toHumanReadable($bd['val'], true);
                     $bd['val'] = output_chunker($bd['val']);
                 }
 
@@ -1923,8 +1924,8 @@ function print_relation_details($bib) {
 					print strip_tags($bd['Title'],ALLOWED_TAGS);
 				}
 				print '&nbsp;&nbsp;';
-				if (@$bd['StartDate']) print htmlspecialchars(Temporal::toHumanReadable($bd['StartDate']));
-				if (@$bd['EndDate']) print ' until ' . htmlspecialchars(Temporal::toHumanReadable($bd['EndDate']));
+				if (@$bd['StartDate']) print htmlspecialchars(Temporal::toHumanReadable($bd['StartDate'], true));
+				if (@$bd['EndDate']) print ' until ' . htmlspecialchars(Temporal::toHumanReadable($bd['EndDate'], true));
 			print '</div></div>';
 		}
 		$from_res->close();

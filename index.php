@@ -63,7 +63,8 @@ if( @$_REQUEST['recID'] || @$_REQUEST['recid'] || array_key_exists('website', $_
         $format = 'xml';
     }
 
-    header('Location: redirects/resolver.php?db='.@$_REQUEST['db'].'&recID='.$recid.'&fmt='.$format);
+    header('Location: redirects/resolver.php?db='.@$_REQUEST['db'].'&recID='.$recid.'&fmt='.$format
+            .(@$_REQUEST['noheader']?'&noheader=1':''));
     return;
 
 }else if (@$_REQUEST['ent']){

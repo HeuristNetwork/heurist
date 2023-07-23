@@ -24,7 +24,7 @@
                 </div>
                 <div id="main-content" 
                     data-homepageid="<?php print $home_page_record_id;?>" 
-                    <?php print ($open_page_on_init>0)?' data-initid="'.$open_page_on_init.'"':''; ?> 
+                    <?php print ($open_page_or_record_on_init>0)?' data-initid="'.$open_page_or_record_on_init.'"':''; ?> 
                     data-viewonly="<?php print ($hasAccess)?0:1;?>">
                 </div>
  *  
@@ -41,7 +41,7 @@
  * 
  * Other variables are 
  * $home_page_record_id  - record id of website home page 
- * $open_page_on_init - record id for cms menu/page to be loaded on init
+ * $open_page_or_record_on_init - record id for cms menu/page to be loaded on init
  * 
  * $image_banner - header background banner image 
  * $page_header_menu - code to define main menu widget, leave it unchanged as content of main-menu div
@@ -238,7 +238,7 @@ default content consists of
                     <a href="5935">Sarcophagii</a>
                     <a href="5936">Texts</a>
                 </div>
-                <div id="main-content" data-homepageid="<?php print $home_page_record_id; ?>" <?php print ($open_page_on_init > 0) ? 'data-initid="' . $open_page_on_init . '"' : ''; ?> data-viewonly="<?php print ($hasAccess) ? 0 : 1; ?>" style="<?php echo (!$is_page_footer_fixed ? 'padding-bottom:' . $page_footer_height . 'px;position:relative' : ''); ?>">
+                <div id="main-content" data-homepageid="<?php print $home_page_record_id; ?>" <?php print ($open_page_or_record_on_init > 0) ? 'data-initid="' . $open_page_or_record_on_init . '"' : ''; ?> data-viewonly="<?php print ($hasAccess) ? 0 : 1; ?>" style="<?php echo (!$is_page_footer_fixed ? 'padding-bottom:' . $page_footer_height . 'px;position:relative' : ''); ?>">
                 </div>
                 <?php
                 if (!$is_page_footer_fixed) print $page_footer;

@@ -88,6 +88,7 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
                         +'Double click or <span class="ui-icon ui-icon-gear" style="font-size: small;"/> to modify</span>&nbsp;&nbsp;&nbsp;'
                         //+'<button style="vertical-align:top;margin-top:4px;" class="closeRtsEditor"/>'
                         +'<span style="position:absolute; right:4px;width:32px;top:26px;height:32px;font-size:32px;cursor:pointer" class="closeTreePanel ui-icon ui-icon-carat-2-w"/>'
+                        +'<button id="download_structure">Export fields as CSV</button>'
                         +'<button id="field_usage">Calculate usage</button>'
                     +'</div>'
                     +'<span id="field_ttl_usage" title="Count of values in each field for this record type (n = '+ $Db.rty(this.options.rty_ID, 'rty_RecCount') +')"'
@@ -272,7 +273,7 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
         }});
 
         // Field data count
-        this.element.find('#field_usage').button().css({'padding': '3px', 'margin': '3px 0'});
+        this.element.find('#field_usage').button().css({'padding': '3px', 'margin': '1px 0 3px'});
         this._on(this.element.find('#field_usage, #field_ttl_usage'), {click: function(){
             var req = {
                 'rtyID': this.options.rty_ID,
@@ -291,6 +292,38 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
                 }
             });
         }});
+
+        // Download field details as CSV
+        this.element.find('#download_structure').button().css({padding: '3px', margin: '3px 0px 1px'});
+        this._on(this.element.find('#download_structure'), {
+            click: function(){
+
+                let rtyid = this.options.rty_ID;
+                let flds = {};
+                flds[rtyid] = ['rec_ID', 'rec_URL', 'rec_Tags', ...$Db.rst(rtyid).getIds()];
+
+                let req = {
+                    'request_id' : window.hWin.HEURIST4.util.random(),
+                    'rec_RecTypeID': rtyid,
+                    'db': window.hWin.HAPI4.database,
+                    'q': 't:'+rtyid,
+                    'format': 'csv',
+                    'prefs':{
+                        'fields': flds,
+                        'csv_delimiter': ',',
+                        'csv_enclosure': '"',
+                        'csv_mvsep': '|',
+                        'csv_linebreak': 'nix',
+                        'csv_header': true,
+                        'csv_headeronly': true,
+                        'output_rows': 1
+                    }
+                };
+
+                let url = window.hWin.HAPI4.baseURL + 'hsapi/controller/record_output.php?';
+                window.open(url+$.param(req), '_blank');
+            }
+        });
 
         return true;
     },            
@@ -373,9 +406,11 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
                     inner_group = {};
                 }else if(!$.isEmptyObject(inner_group)) { // another group within a tabs
                     outer_group['children'].push(inner_group);
+                    node.data.inner_group = true;
                     inner_group = $.extend({}, node);
                     inner_group['children'] = [];
                 }else if(outer_group.data && available_outer_groups.includes(outer_group.data.type)){ // new group within tabs
+                    node.data.inner_group = true;
                     inner_group = $.extend({}, node);
                     inner_group['children'] = [];
                 }else{ // first non-tabs group
@@ -475,6 +510,11 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
             beforeExpand: function(event, data) {
                 if(available_outer_groups.includes(data.node.data.type) && data.node.isExpanded()){
                     return false;
+                }
+            },
+            renderNode: function(event, data){
+                if(data.node.data.inner_group){
+                    $(data.node.span.childNodes[2]).css('text-transform', 'none');
                 }
             }
         };

@@ -1430,6 +1430,7 @@ div.saved-search > .edit-delete-buttons, .recordDiv > .edit-delete-buttons {
     overflow: hidden;
     text-overflow: ellipsis;
 }
+.width5{width:5px;max-width:5px;}
 .width10{width:10px;max-width:10px;}
 .width20{width:20px;max-width:20px;}
 .width50{width:50px;max-width:50px;}
@@ -2394,7 +2395,7 @@ input[type="file"] {
     line-height: 1em;
 }
 .ui-selectmenu-button span.ui-selectmenu-text{
-    padding: 0.1em 2.1em 0.2em 0.2em;
+    padding: 0.1em 1em 0.2em 0.2em;
 }
 .ui-front{
     z-index: 59999; /*999999;*/

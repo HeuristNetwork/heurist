@@ -202,8 +202,12 @@ $.widget( "heurist.configEntity", {
                         showLabel:showLabel}).css({'margin-left':10}).show();
                 
                         this._on(ele, { click: this.options.openEditAction });
-            }else{
-                //this.element.find('.btn-action').css({padding:10});
+            }else if(this.options.buttons['openedit'] === false){
+                ele.parent().hide();
+            }
+
+            if(this.options.configName == "datatable"){
+                ele.css('font-weight', 'bold');
             }
             
             //

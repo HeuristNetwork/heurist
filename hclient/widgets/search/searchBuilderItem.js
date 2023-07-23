@@ -75,6 +75,8 @@ $.widget( "heurist.searchBuilderItem", {
     _predicate_input_ele:null,     // reference to editing_input
     _predicate_reltype_ele:null,     // reference to relation type selector
 
+    _all_fields: null, // field cache for any record type
+
     // the widget's constructor
     _create: function() {
 
@@ -255,21 +257,22 @@ $.widget( "heurist.searchBuilderItem", {
                 this.select_fields.hide();
 
             }else{
-
                 var allowed_fieldtypes = ['enum','freetext','blocktext',
                     'geo','year','date','integer','float','resource','relmarker'];
 
                 this.select_fields_btn.hide();
-                
-                //show field selector
-                window.hWin.HEURIST4.ui.createRectypeDetailSelect(this.select_fields.get(0), this.options.top_rty_ID, 
-                    allowed_fieldtypes, topOptions2, 
-                    {show_parent_rt:true, show_latlong:true, bottom_options:bottomOptions, 
-                        selectedValue:(this.options.dty_ID ?this.options.dty_ID:'anyfield'), //initally selected
-                        useIds: true, useHtmlSelect:false});                
+                this.select_fields.show();
+
+                if(!this._all_fields){
+                    this._all_fields = $Db.getBaseFieldInstances(null, 1, allowed_fieldtypes, []);
+                }
+                window.hWin.HEURIST4.ui.createSelector(this.select_fields[0], [...topOptions2, ...this._all_fields]);
+
+                this.select_fields.val( this.options.dty_ID ? this.options.dty_ID : 'anyfield' );
+
+                window.hWin.HEURIST4.ui.initHSelect(this.select_fields[0], false);
 
                 this._on( this.select_fields, { change: this._onSelectField });
-                
             }
             this._onSelectField();
 

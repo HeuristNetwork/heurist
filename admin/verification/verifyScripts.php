@@ -25,8 +25,8 @@
     * @package     Heurist academic knowledge management system
     * @subpackage  !!!subpackagename for file such as Administration, Search, Edit, Application, Library
     */
-//print 'disabled'; 
-//exit(); 
+print 'disabled'; 
+exit(); 
 
 ini_set('max_execution_time', '0');
 
@@ -121,8 +121,10 @@ if(false){
 }else if(false){
     
     __updateDatabases_To_V14( @$_REQUEST['process']);
-}else if(true){
+}else if(false){
     __correctGetEstDate();
+}else if(true){
+    __removeDuplicationValues();
 }
 //
 // Report database versions
@@ -1241,5 +1243,43 @@ function __updateDatabases_To_V14($db_process){
     
     print '<br><br>'.$cnt_db_old.'  '.$cnt_db;
     
+}
+
+//
+//
+//
+function __removeDuplicationValues(){
+
+    global $system, $mysqli, $databases; 
+    
+    $cnt = 0;
+    /*
+    foreach ($databases as $idx=>$db_name){
+        if($db_name=='') continue;
+    }
+    */
+    
+    //mysql__usedatabase($mysqli, 'MBH_Manuscripta_Bibliae_Hebraicae');
+    //mysql__usedatabase($mysqli, 'osmak_9c');
+    
+    $query = 'SELECT dtl_RecID, dtl_DetailTypeID, dtl_Value, count(dtl_Value) as cnt '.
+    'FROM recDetails WHERE dtl_Geo IS NULL AND dtl_UploadedFileID IS NULL '.
+    'GROUP BY dtl_RecID, dtl_DetailTypeID, dtl_Value HAVING cnt>1';
+
+    $res = $mysqli->query($query);
+    
+    if (!$res) {  print $query.'  '.$mysqli->error;  return; }
+    
+    while (($row = $res->fetch_row())) {
+        
+        $q = 'DELETE FROM recDetails WHERE dtl_RecID='.$row[0].' AND dtl_DetailTypeID='.$row[1]
+            .' AND dtl_Value="'.$mysqli->real_escape_string($row[2])
+            .'" LIMIT '.($row[3]-1);
+        $mysqli->query($q);
+        $cnt = $cnt + $mysqli->affected_rows;  
+    }
+    $res->close();    
+    
+    print 'DONE. Removed '.$cnt.' duplications';
 }
 ?>

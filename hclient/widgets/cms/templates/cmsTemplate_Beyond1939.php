@@ -17,7 +17,7 @@
     * $image_icon
     
     * $home_page_record_id - record id of website home page
-    * $open_page_on_init - record id for cms menu/page to be loaded on init
+    * $open_page_or_record_on_init - record id for cms menu/page to be loaded on init
     
     * $image_banner - header background banner image
     * $page_header_menu - code to define main menu widget, leave it unchanged as content of main-menu div

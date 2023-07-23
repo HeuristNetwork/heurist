@@ -473,6 +473,7 @@ function editCMS_ElementCfg( element_cfg, _layout_content, _layout_container, $c
 
         if(l_cfg.css){
             var old_css = l_cfg.css;
+            //remove these parameters from css and assign from form
             var params = ['display','width','height',
                 'padding','padding-left','padding-top','padding-bottom','padding-right',
                 'margin','margin-left','margin-top','margin-bottom','margin-right',
@@ -480,7 +481,7 @@ function editCMS_ElementCfg( element_cfg, _layout_content, _layout_container, $c
                 'flex-direction','flex-wrap','justify-content','align-items','align-content'];
             for(var i=0; i<params.length; i++){
                 var prm = params[i];
-                if (old_css[prm]){ //drop old value
+                if (old_css[prm] && (prm.indexOf('margin')<0 || old_css[prm]!='auto')){ //drop old value
                     old_css[prm] = null;
                     delete old_css[prm];
                 };

@@ -24,14 +24,17 @@
                 </div>
                 <div id="main-content" 
                     data-homepageid="<?php print $home_page_record_id;?>" 
-                    <?php print ($open_page_on_init>0)?' data-initid="'.$open_page_on_init.'"':''; ?> 
+                    <?php print ($open_page_or_record_on_init>0)?' data-initid="'.$open_page_or_record_on_init.'"':''; ?> 
                     data-viewonly="<?php print ($hasAccess)?0:1;?>">
                 </div>
     *  
-    * besides main-menu main-header may have main-logo, main-logo-alt, main-host, main-pagetitle divs
+    * besides it may have main-menu main-header may have main-logo, main-logo-alt, main-host, main-pagetitle, main-recordview divs
     * These divs will be filled with images and text defined in website home record.
     * 
     * main-content - is the target div for content of particular page to be loaded  
+    * 
+    * main-recordview - is the target div for record view. It will be filled with link if target is _recordview
+    *                   if this div is not found in the template, content will be opened in popup
     * 
     * The top most div/container must have class heurist-website. It is required for proper work of CMS editor
     * 
@@ -43,7 +46,7 @@
     * 
     * Other variables are 
     * $home_page_record_id  - record id of website home page 
-    * $open_page_on_init - record id for cms menu/page to be loaded on init
+    * $open_page_or_record_on_init - record id for cms menu/page to be loaded on init
     * 
     * $image_banner - header background banner image 
     * $page_header_menu - code to define main menu widget, leave it unchanged as content of main-menu div
@@ -91,7 +94,7 @@
     margin: 0;
     width:auto;
 }
-#main-content{
+#main-content, #main-recordview{
     display:none;
     position:absolute;
     left:0;right:0;top:0;bottom:0;
@@ -225,9 +228,13 @@ if($isWebPage){ //set in websiteRecord.php
     <div class="ent_content_full  ui-heurist-bg-light"  id="main-content-container"
             style="top:152px;<?php echo ($is_page_footer_fixed && $page_footer?'margin-bottom: 48px;':''); ?>padding: 5px;">
         <div id="main-content" data-homepageid="<?php print $home_page_record_id;?>" 
-            <?php print ($open_page_on_init>0)?'data-initid="'.$open_page_on_init.'"':''; ?> 
+            <?php print ($open_page_or_record_on_init>0)?'data-initid="'.$open_page_or_record_on_init.'"':''; ?> 
             data-viewonly="<?php print ($hasAccess)?0:1;?>" 
             style="<?php echo (!$is_page_footer_fixed && $page_footer?'position:static;':'');?>">
+        </div>
+        <div id="main-recordview" style="height:100%;<?php echo (!$is_page_footer_fixed && $page_footer?'position:static;':'');?>">
+                <iframe style=""overflow:none !important;width:100% !important;"></iframe>
+                <button class="keywords" style="position:fixed;top:160px;left:5px;">Back</button>
         </div>
 <?php
         if(!$is_page_footer_fixed && $page_footer) print $page_footer;

@@ -1823,12 +1823,14 @@ window.hWin.HEURIST4.dbs = {
 
         function __addChilds(recID, lvl_parents, include_vocab){
         
+            let label = translated_labels ? translated_labels[recID] : recset.fld(recID, 'trm_Label');
+        
             //recID = parseInt(recID);
-            var node = {title: recset.fld(recID, 'trm_Label'), key: recID};
+            var node = {title: label, key: recID};
             
             if(include_vocab && lvl_parents==0){
                 node.is_vocab = true;
-                trm_ids.push({title: recset.fld(recID, 'trm_Label'), 
+                trm_ids.push({title: label, 
                                 is_vocab: true,
                                 key: recID, depth:lvl_parents});
             }
@@ -1876,7 +1878,9 @@ window.hWin.HEURIST4.dbs = {
                     
                     for(var i=0; i<children.length;i++){  
                         recID = children[i];
-                        trm_ids.push(mode=='labels'?recset.fld(recID, 'trm_Label').toLowerCase() 
+                        label = translated_labels ? translated_labels[recID] : recset.fld(recID, 'trm_Label');
+
+                        trm_ids.push(mode=='labels'?label.toLowerCase() 
                                                    :recID);
                         __addChilds(recID);
                     }
@@ -2772,6 +2776,127 @@ window.hWin.HEURIST4.dbs = {
             return {harchy:harchy, harchy_fields:harchy_fields};
         }         
 
+    },
+
+    /**
+     * Retrieve each base field and each instance of the base field
+     * @param {number|Array} rty_IDs - Single (or array) of record type ids
+     * @param {number} mode - 
+     *        0: flat data; [ [dty id, dty label, [ rst label 1, rst label 2, ... ], show_in_lists ], ... ]
+     *        1: for dropdowns [ {key: dty id, title: dty label, show_in_lists: true|false}, {key: dty id, title: rst label 1, depth: 2}, ... ]
+     * @param {string|Array} allowed_types - array of allowed detail types | 'all'
+     * @param {int|Array} ignored_dty_id - base fields to ignore
+     * @returns {Array} field data or dropdown options or fanctree nodes
+     */
+    getBaseFieldInstances: function(rty_IDs, mode = 0, allowed_types = 'all', ignored_dty_id = [], list_all_fields = true){
+
+        let fields = [];
+
+        if(!rty_IDs || rty_IDs == 'all'){ // get all ids
+            rty_IDs = $Db.rty().getIds();
+        }
+
+        if(!window.hWin.HEURIST4.util.isArray(rty_IDs) && rty_IDs > 0){
+            rty_IDs = [ rty_IDs ];
+        }
+        if(!window.hWin.HEURIST4.util.isArray(ignored_dty_id) && ignored_dty_id > 0){
+            ignored_dty_id = [ ignored_dty_id ];
+        }
+
+        if(!rty_IDs || !window.hWin.HEURIST4.util.isArrayNotEmpty(rty_IDs)){
+            return results;
+        }
+
+        let last_idx = 0; // current index count
+        let arr_idx = {}; // id to array idx
+        for(const rty_id of rty_IDs){ // Get base fields and instances for each rectype
+
+			//const rty_id = rty_IDs[idx];
+			const rty_name = $Db.rty(rty_id, 'rty_Name');
+
+			const recset = $Db.rst(rty_id);
+
+			if(window.hWin.HEURIST4.util.isempty(recset)) { continue; }
+
+			recset.each2(function(dty_id, details){
+
+                if(dty_id == ignored_dty_id || ignored_dty_id.indexOf(dty_id) >= 0){
+                    return;
+                }
+
+				const dty = $Db.dty(dty_id);
+                const dty_name = dty['dty_Name'];
+
+                if(allowed_types != 'all' && allowed_types.indexOf(dty['dty_Type']) < 0){
+                    return;
+                }
+
+				if(!Object.hasOwn(arr_idx, dty_id)) {
+                    /*if(dty_id == 1){
+                        console.log(JSON.stringify(arr_idx), dty_id, last_idx);
+                    }*/
+                    let list_fld = !list_all_fields && $Db.dty(dty_id, 'dty_ShowInLists') == 0;
+                    arr_idx[dty_id] = last_idx;
+                    last_idx ++;
+					fields.push( [ dty_id, dty_name, [], list_fld ] );
+				}
+
+                const dty_idx = arr_idx[dty_id];
+				const rst_name = rty_name + "." + details["rst_DisplayName"];
+
+				fields[dty_idx][2].push(rst_name);
+			});
+		}
+
+        // sort base field names
+        fields.sort((arr1, arr2) => arr1[1].localeCompare(arr2[1]));
+
+        let processed_fields = [];
+
+		for(const field of fields){ // sort rst field names + additional processing for different modes
+
+			field[2].sort();
+
+            const dty_id = field[0];
+            const dty_title = field[1];
+            const rst_titles = field[2];
+            const show_in_list = field[3];
+
+            if(mode == 1){
+                //let title = dty_title + '<div style="padding-left: 10px;">' + rst_titles.join('<br>') + '</div>';
+                processed_fields.push({key: dty_id, title: dty_title, hidden: show_in_list});
+
+                for(const rst_title of rst_titles){
+                    processed_fields.push({key: dty_id, title: rst_title, depth: 1, hidden: show_in_list});
+                }
+            }else if(false && mode == 2){ // needs testing
+
+                let node = {
+                    'title': dty_title,
+                    'key': dty_id,
+                    'code': dty_id,
+                    'children': []
+                };
+
+                let sub_node = {
+                    'key': dty_id,
+                    'code': dty_id
+                };
+
+                for(const rst_title of rst_titles){
+                    sub_node['title'] = rst_title;
+                    node['children'].push(sub_node);
+                }
+
+                processed_fields.push(node);
+            }
+		}
+
+        if(mode == 0 || mode == 2){
+            return fields;
+        }else{
+            return processed_fields;
+        }
     }
 
 }//end dbs

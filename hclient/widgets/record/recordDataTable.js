@@ -66,9 +66,9 @@ $.widget( "heurist.recordDataTable", $.heurist.recordAction, {
             buttons: {rename:false, remove:'delete'}, //hide rename button
             saveOnExit: true  //auto save on exit
 
-        });
+        }).css('display', 'inline-block');
 
-        $(this.element.find('#divLoadSettings').find('div')[0]).addClass('header').css('padding', '0px 16px 0px 16px');
+        $(this.element.find('#divLoadSettings').find('div')[0]).css({padding: '0px 16px', width: '510px'});
 
         this.element.find('#divLoadSettings').configEntity( 'updateList', this.selectRecordScope.val(), 
             this.options.initial_cfg?this.options.initial_cfg.cfg_name:null );    
@@ -97,6 +97,28 @@ $.widget( "heurist.recordDataTable", $.heurist.recordAction, {
             }
         });
         this.element.find('#selectAll_container').hide();
+
+        this._on(this.element.find('#uncheckAll'), { //.button()
+            click: function(e){
+
+                let treediv = that.element.find('.rtt-tree');
+                if(!treediv.is(':empty') && treediv.fancytree("instance")){
+                    const tree = treediv.fancytree('getTree');
+                    const selected = tree.getSelectedNodes();
+
+                    for(const node of selected){
+                        node.setSelected(false);
+                        //node.setActive(false);
+                    }
+                }
+            }
+        });
+
+        let $ele = $(this.element.find('#divLoadSettings').find('div')[0]).children();
+        $($ele[0]).css('flex', '0 0 70px');
+        $($ele[2]).css('flex', '0 0 70px');
+        $($ele[1]).css('flex', '0 0 350px');
+        this.element.find('label[for="sel_saved_settings"]').css('margin-right', '17px');
     },
 
     //
@@ -231,10 +253,24 @@ $.widget( "heurist.recordDataTable", $.heurist.recordAction, {
                     +'<input type="checkbox" class="columnVisibility" title="Visibility in DataTable" checked>&nbsp;<span style="cursor:ns-resize">'
                     +title+'</span>'
                     +'<select class="columnWidth" title="Column width" style="width:50px;margin-left:10px;font-size:smaller;">'
-                    +'<option></option><option>10</option><option selected>20</option><option>50</option><option>100</option>'
+                    +'<option></option><option>5</option><option>10</option><option selected>20</option><option>50</option><option>100</option>'
                     +'<option>200</option><option>300</option><option>400</option><option>500</option></select>'
                     +'</div>').appendTo(container);
                 container.sortable();
+
+                let $select = container.find('div[data-key="'+dtid+'"] select');
+
+                let type = $Db.dty(dtid, 'dty_Type');
+                let is_number = dtid == 'ids' || dtid == 'typeid' || type == 'float';
+                let is_date = dtid == 'added' || dtid == 'modified' || type == 'date';
+                let is_term = dtid == 'access' || dtid == 'tag' || type == 'enum';
+                if(is_number || is_date){
+                    $select.val(5);
+                }else if(is_term){
+                    $select.val(20);
+                }else{
+                    $select.val(100);
+                }console.log($select, dtid, type, is_number, is_date, is_term);
             }
     },
   

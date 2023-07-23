@@ -94,7 +94,16 @@ class DbRecUploadedFiles extends DbEntityBase
 
         $pred = $this->searchMgr->getPredicate('ulf_OrigFileName');
         if($pred!=null) array_push($where, $pred);
+        
+        $pred = $this->searchMgr->getPredicate('ulf_Caption');
+        if($pred!=null) array_push($where, $pred);
 
+        $pred = $this->searchMgr->getPredicate('ulf_Copyright');
+        if($pred!=null) array_push($where, $pred);
+
+        $pred = $this->searchMgr->getPredicate('ulf_Copyowner');
+        if($pred!=null) array_push($where, $pred);
+        
         $pred = $this->searchMgr->getPredicate('ulf_ExternalFileReference');
         if($pred!=null) array_push($where, $pred);
         
@@ -159,7 +168,7 @@ class DbRecUploadedFiles extends DbEntityBase
             
         }else if(@$this->data['details']=='full'){
 
-            $this->data['details'] = 'ulf_ID,ulf_OrigFileName,ulf_ExternalFileReference,ulf_ObfuscatedFileID,ulf_Description,ulf_FileSizeKB,ulf_MimeExt,ulf_Added,ulf_UploaderUGrpID,fxm_MimeType,ulf_PreferredSource';
+            $this->data['details'] = 'ulf_ID,ulf_OrigFileName,ulf_ExternalFileReference,ulf_ObfuscatedFileID,ulf_Caption,ulf_Description,ulf_Copyright,ulf_Copyowner,ulf_FileSizeKB,ulf_MimeExt,ulf_Added,ulf_UploaderUGrpID,fxm_MimeType,ulf_PreferredSource';
             //$this->data['details'] = implode(',', $this->fields );
             $needRelations = true;
             $needCalcFields = true;
@@ -770,6 +779,9 @@ When we open "iiif_image" in mirador viewer we generate manifest dynamically.
                     //url or relative path
                     $url = trim($record['ulf_ExternalFileReference']);
                     $description = @$record['ulf_Description'];                    
+                    $caption = @$record['ulf_Caption'];                    
+                    $copyright = @$record['ulf_Copyright'];                    
+                    $copyowner = @$record['ulf_Copyowner'];                    
                     
                     if(strpos($url,'http')===0){
                         //find if url is already registered
@@ -806,7 +818,10 @@ When we open "iiif_image" in mirador viewer we generate manifest dynamically.
                                 }else if($is_url) {
 
                                     $fields = array(
-                                        'ulf_Description'=>$description, 
+                                        'ulf_Caption'=>$caption,
+                                        'ulf_Copyright'=>$copyright, 
+                                        'ulf_Copyowner'=>$copyowner, 
+                                        'ulf_Description'=>$description,  
                                         'ulf_MimeExt'=>getURLExtension($url));
                     
                                     if($is_download){
@@ -1239,7 +1254,7 @@ When we open "iiif_image" in mirador viewer we generate manifest dynamically.
                             . 'WHERE rec_FlagTemporary!=1 AND rec_RecTypeID='.$rty_id
                             . ' AND dtl_DetailTypeID='.$dty_file.' AND dtl_UploadedFileID=';
 
-                $file_search = 'SELECT ulf_OrigFileName, ulf_Description, ulf_FileName, ulf_FilePath, ulf_MimeExt, ulf_FileSizeKB, ulf_ExternalFileReference '
+                $file_search = 'SELECT ulf_OrigFileName, ulf_Caption, ulf_Description, ulf_FileName, ulf_FilePath, ulf_MimeExt, ulf_FileSizeKB, ulf_ExternalFileReference '
                             .  'FROM recUploadedFiles '
                             .  'WHERE ulf_ID=';
 
@@ -1271,7 +1286,8 @@ When we open "iiif_image" in mirador viewer we generate manifest dynamically.
 
                     $details = array(
                         $dty_file => $ulf_id,
-                        $dty_title => $file_details['ulf_OrigFileName']
+                        $dty_title => $file_details['ulf_Caption']
+                            ?$file_details['ulf_Caption']:$file_details['ulf_OrigFileName']
                     );
 
                     if($file_details['ulf_OrigFileName'] == '_remote'){

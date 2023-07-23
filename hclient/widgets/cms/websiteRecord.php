@@ -126,9 +126,9 @@ $system->defineConstants();
 $mysqli = $system->get_mysqli();
 
 $isEmptyHomePage = false;
-$open_page_on_init = @$_REQUEST['initid'];
-if(!($open_page_on_init>0)) $open_page_on_init = @$_REQUEST['pageid'];
-if(!($open_page_on_init>0)) $open_page_on_init = 0;
+$open_page_or_record_on_init = @$_REQUEST['initid'];
+if(!($open_page_or_record_on_init>0)) $open_page_or_record_on_init = @$_REQUEST['pageid'];
+if(!($open_page_or_record_on_init>0)) $open_page_or_record_on_init = 0;
 
 $rec_id = @$_REQUEST['recID'];
 if(!($rec_id>0)) $rec_id = @$_REQUEST['recid'];
@@ -387,7 +387,9 @@ function __getValue(&$menu_rec, $id){
 }
 
 
-$custom_template = null;
+$custom_website_php_template = null;
+$record_view_smarty_template = null;
+$record_view_target = null; //blank(_blank),popup,recordview(main-recordview)
 
 $page_header = null;
 $page_header_menu = null;
@@ -405,8 +407,18 @@ if(!$isWebPage){  //not standalone web page
             .'<span class="widget-options" style="font-style: italic; display: none;">{"menu_recIDs":"'.$rec_id
             .'","use_next_level":true,"orientation":"horizontal","init_at_once":true}</span>';
     
-    $custom_template = defined('DT_POPUP_TEMPLATE')?__getValue($rec, DT_POPUP_TEMPLATE, null):null; 
+    $custom_website_php_template = defined('DT_CMS_TEMPLATE')?__getValue($rec, DT_CMS_TEMPLATE, null):null; 
 
+    $record_view_smarty_template = defined('DT_SMARTY_TEMPLATE')?__getValue($rec, DT_SMARTY_TEMPLATE, null):null; 
+    $record_view_target = defined('DT_CMS_TARGET')?__getValue($rec, DT_CMS_TARGET, null):null; 
+    if($record_view_target=='recordview') $record_view_target='main-recordview';
+    
+    //backward capability 
+    if($custom_website_php_template==null && strpos($record_view_smarty_template, 'cmsTemplate')===0){
+        $custom_website_php_template = $record_view_smarty_template;
+        $record_view_smarty_template = null;
+    }
+    
     $page_header = defined('DT_CMS_HEADER')?__getValue($rec, DT_CMS_HEADER, null):null; 
 
     $page_footer_type = defined('DT_CMS_FOOTER_FIXED')?__getValue($rec, DT_CMS_FOOTER_FIXED, null):null; 
@@ -459,8 +471,7 @@ $home_page_record_id = $rec_id;
 
 $websiteScriptAndStyles_php = HEURIST_DIR.'hclient/widgets/cms/websiteScriptAndStyles.php';
 
-
-$template = __getTemplate($custom_template);
+$template = __getTemplate($custom_website_php_template);
 if(!$template && $default_CMS_Template){
     $template = __getTemplate($default_CMS_Template);    
 }
