@@ -1246,12 +1246,12 @@ window.hWin.HEURIST4.ui = {
                     wmenu_div.css('zIndex',69999);
 
                     if(onOpenMenu && $.isFunction(onOpenMenu)){
-                        onOpenMenu.call(this);
+                        onOpenMenu.call(this, event);
                     }
                 },
                 close: function(event, ui){
                     if(onCloseMenu && $.isFunction(onCloseMenu)){
-                        onCloseMenu.call(this);
+                        onCloseMenu.call(this, event);
                     }
                 }
             });

@@ -1397,7 +1397,7 @@ $.widget( "heurist.editing_input", {
                 {
                     browseTerms(this, $input, value);
 
-                    window.hWin.HEURIST4.ui.initHSelect($input, false);
+                    //window.hWin.HEURIST4.ui.initHSelect($input, false);
                     
                     $input.hSelect({
                         'open': (e) => {

@@ -1773,7 +1773,7 @@ function browseTerms(_editing_input, $input, value){
         var dty_ID = that.f('rst_DetailTypeID');
         
         //recreate dropdown if not inited
-        if(!that.selObj || !$(that.selObj).hSelect('instance')){
+        if(!that.selObj || !that.selObj.hSelect('instance')){
 
             __recreateSelector();
                 
