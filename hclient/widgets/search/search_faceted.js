@@ -3682,13 +3682,8 @@ console.log('get defintion in OLD format!!!!');
             
             if(display_mode=='block'){         
 
-                var top_parent = this.element.parents('.mceNonEditable');
-                if(this.options.is_publication){ //this is web publication  top_parent.length>0
-                    f_link_content.css('width', content_max_width*0.6).addClass('truncate');
-                }else{
-                    f_link_content.css('width', content_max_width-70).addClass('truncate');    //this.facets_list_container.width()*0.6
-                }
-            
+                let width = content_max_width < 200 ? content_max_width * 0.6 : content_max_width - 80;
+                f_link_content.css('max-width', width).addClass('truncate');
             
                 f_link_content.attr('title', cterm.title);
             }
@@ -3731,6 +3726,11 @@ console.log('get defintion in OLD format!!!!');
                     dcount.appendTo(f_link);
                     dcount.appendTo(f_link_content);
                 }else{
+                    if(this.options.params.ui_counts_mode!='bracket'){
+                        dcount.addClass('truncate')
+                              .css('max-width', '45px')
+                              .attr('title', dcount.text());
+                    }
                     dcount.appendTo(f_link);    
                 }
                 
