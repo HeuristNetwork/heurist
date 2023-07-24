@@ -1461,11 +1461,17 @@ function ShowReps( is_snippet_editor ) {
         }
         
         function __on_add(event){
-            var $dlg2 = $(event.target).parents('.ui-dialog-content');
+
+            let $ele = $(event.target);
+            if($ele.is('strong')){
+                $ele = $ele.parent();
+            }
+
+            var $dlg2 = $ele.parents('.ui-dialog-content');
             var insertMode = $dlg2.find("#selInsertMode").val();
             let language = $dlg2.find('#selLanguage').val();
             
-            var bid = $(event.target).attr('id');
+            var bid = $ele.attr('id');
             
             var inloop = (bid=='btn_insert_loop')?1:(bid.indexOf('_loop')>0?2:0);
             
