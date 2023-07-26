@@ -55,10 +55,22 @@ if (@$argv) {
 
     if(@$_REQUEST['a']=='structure' && @$_REQUEST['entity']=='all'){
         if(file_exists($dbdef_cache)){
+            
+            
             if(isset($defaultRootFileUploadURL) && 
                isset($allowWebAccessEntityFiles) && $allowWebAccessEntityFiles)
             {
-                $url = $defaultRootFileUploadURL . $_REQUEST['db'].'/entity/db.json';
+                $host_params = getHostParams();
+                // 
+                if(strpos($defaultRootFileUploadURL, $host_params['server_url'])===0){
+                    $url = $defaultRootFileUploadURL;
+                }else{
+                    //replace server name to avoid CORS issues
+                    $parts = explode('/',$defaultRootFileUploadURL);
+                    $url = $host_params['server_url'] . '/' . implode('/',array_slice($parts,3));
+                }
+                
+                $url = $url . $_REQUEST['db'].'/entity/db.json';
                 header('Location: '.$url);
             }else{
                 downloadFile(null,$db_defs);

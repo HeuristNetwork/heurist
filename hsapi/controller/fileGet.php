@@ -169,7 +169,7 @@ if($filename){ //download from scratch (for csv import)
                 if(@$_REQUEST['color'] && $ext!='svg'){
                     UtilsImage::changeImageColor($filename, null, @$_REQUEST['color'], @$_REQUEST['circle'], @$_REQUEST['bg']);    
                 }else{
-                    if($allowWebAccessEntityFiles){
+                    if($file_url!=null && isset($allowWebAccessEntityFiles) && $allowWebAccessEntityFiles){
                         header('Location:'.$file_url);    
                     }else{
                         _download_file($filename, $content_type);        
