@@ -1681,6 +1681,10 @@ $.widget( "heurist.search_faceted_wiz", {
                         + idd+'" style="vertical-align: middle;margin-left:16px">'
                         + window.hWin.HR("Order descending")+"</label>";
 
+                    sMultiSel = '<label title="calculate and display the time distribution graph above the date range" style="font-size: smaller;">'
+                                + '<input type="checkbox" name="facet_HideHistogram'
+                                + idd+'" />hide time graph</label>';
+
 						
                     includeDropdown = false;
                    
@@ -1809,9 +1813,11 @@ $.widget( "heurist.search_faceted_wiz", {
                             }
                             if(idx>=0){
                                 if(facets[idx].type=='date' || facets[idx].type=='year'){
-                                    var is_allowed = (listdiv.find('button.ui-heurist-btn-header1[data-idx="'+idd+'"]').attr('data-value')>1);
+                                    let cur_mode = listdiv.find('button.ui-heurist-btn-header1[data-idx="'+idd+'"]').attr('data-value');
+                                    var is_allowed = (cur_mode>1);
                                                     //(listdiv.find('input:radio[name="facet_Type'+idd+'"]:checked').val()>1);
                                     listdiv.find('#facet_DateGroup'+idd).css({'display':is_allowed?'inline':'none'});        
+                                    listdiv.find('input:checkbox[name="facet_HideHistogram'+idd+'"]').css({'display': cur_mode==1?'inline':'none'});
                                     if(is_allowed){
                                         if(Hul.isempty(facets[idx].groupby)){
                                             facets[idx].groupby = 'year';
@@ -1848,10 +1854,13 @@ $.widget( "heurist.search_faceted_wiz", {
                 
                 if(facets[k].type=='date' || facets[k].type=='year'){
                     __dateGrouping(idd);
+                    if(facets[k].hide_histogram){
+                        listdiv.find('input:checkbox[name="facet_HideHistogram'+idd+'"]').prop('checked', true);
+                    }
                 }else{
-                    listdiv.find('input:checkbox[name="facet_Group'+idd+'"][value="'+facets[k].groupby+'"]').attr('checked', true);
+                    listdiv.find('input:checkbox[name="facet_Group'+idd+'"][value="'+facets[k].groupby+'"]').prop('checked', true);
                     if(facets[k].multisel){
-                        listdiv.find('input:checkbox[name="facet_MultiSel'+idd+'"]').attr('checked', true);    
+                        listdiv.find('input:checkbox[name="facet_MultiSel'+idd+'"]').prop('checked', true);    
                     }
                 }
                 
@@ -1899,7 +1908,7 @@ $.widget( "heurist.search_faceted_wiz", {
             this._on( listdiv.find('input[id^="facet_Help"]'), {change: this._refresh_FacetsPreview});
             this._on( listdiv.find('input[id^="facet_AccordHide"]'), {change: this._refresh_FacetsPreview});
             this._on( listdiv.find('select[name^="facet_Group"]'), {change: this._refresh_FacetsPreview});
-            this._on( listdiv.find('input[name^="facet_MultiSel"]'), {change: this._refresh_FacetsPreview});
+            this._on( listdiv.find('input[name^="facet_MultiSel"], input[name^="facet_HideHistogram"]'), {change: this._refresh_FacetsPreview});
             this._on( listdiv.find('input[name^="facet_Group"]'), {change: this._refresh_FacetsPreview});
             this._on( $(this.step3).find('#cbShowHierarchy'), {change: this._refresh_FacetsPreview});
             this._on( $(this.step3).find('#cbAccordionView'), {change: () => { 
@@ -1992,6 +2001,8 @@ $.widget( "heurist.search_faceted_wiz", {
                     }else{
                         this.options.params.facets[k].groupby = null;    
                     }
+                    
+                    this.options.params.facets[k].hide_histogram = listdiv.find('input:checkbox[name="facet_HideHistogram'+idd+'"]').is(':checked');
                     
                 }else{
                     this.options.params.facets[k].groupby = listdiv.find('input:checkbox[name="facet_Group'+idd+'"]:checked').val();    
