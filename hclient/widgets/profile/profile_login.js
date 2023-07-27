@@ -216,7 +216,7 @@ function showLoginDialog(isforsed, callback, parentwin, dialog_id){
                                     //that._refresh();
                                 }else if(response.status == window.hWin.ResponseStatus.REQUEST_DENIED){
                                     updateStatus($dlg, false, response.message);
-                                    setTimeout(function(){ updateStatus(); }, 2000);
+                                    setTimeout(function(){ updateStatus($dlg); }, 2000);
                                 }else {
                                     window.hWin.HEURIST4.msg.showMsgErr(response);
                                 }
@@ -311,7 +311,7 @@ function showLoginDialog(isforsed, callback, parentwin, dialog_id){
  * @param {int} new_mode - current mode, passed to changeDisplay, false will only update error message
  * @param {string} error - error message to display, empty to remove error message 
  */
-function updateStatus($dlg, new_mode, error = ''){
+function updateStatus($dlg, new_mode = false, error = ''){
 
     let $err_msg = $dlg.find('.messages');
     if(window.hWin.HEURIST4.util.isempty(error)){
