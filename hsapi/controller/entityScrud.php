@@ -53,12 +53,13 @@ if (@$argv) {
     
     $dbdef_cache = $db_defs = $system->getFileStoreRootFolder().@$_REQUEST['db'].'/entity/db.json';
 
-    if(@$_REQUEST['a']=='structure' && @$_REQUEST['entity']=='all'){
-        if(file_exists($dbdef_cache)){
+    if(isset($defaultRootFileUploadURL)
+        && @$_REQUEST['a']=='structure' && @$_REQUEST['entity']=='all' 
+        && file_exists($dbdef_cache)
+        && strpos($defaultRootFileUploadURL,'sydney.edu.au')===false
+        ){
             
-            
-            if(isset($defaultRootFileUploadURL) && 
-               isset($allowWebAccessEntityFiles) && $allowWebAccessEntityFiles)
+            if(isset($allowWebAccessEntityFiles) && $allowWebAccessEntityFiles)
             {
                 $host_params = getHostParams();
                 // 
@@ -76,7 +77,6 @@ if (@$argv) {
                 downloadFile(null,$db_defs);
             }
             exit();
-        }
     }
     
     $response = array();
