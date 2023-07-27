@@ -26,14 +26,10 @@
     </div>
 
     <div id="fld_login" style="padding-top: 40px;">    
-    
+
         <h2 id="span-database" style="margin-top: 0px;">Database</h2>
         <fieldset id="login_standard" style="padding-top: 0px;">
         
-        <div style="display:none;">
-            <div class="header"><label for="captcha_code">Answer question below to prove you are human</label></div>
-            <input type="text" name="captcha_code" id="captcha_code" class="text ui-widget-content ui-corner-all" />
-        </div>
         <div>
             <div class="header"><label for="username">Username</label></div>
             <input type="text" name="username" id="username" class="text ui-widget-content ui-corner-all" />
@@ -65,9 +61,9 @@
             <button id="btn_saml_auth" style="width: 85px;margin-left: 10px">Authenticate</button>
             <span class="heurist-helper2" style="display:block;padding:5px 0px 0px 15px;">generally requires specific institutional authorisation and/or VPN</span>
         </div>
-
+    
         <p id="login_forgot">
-            <br /><label>Forgotten your password?</label>&nbsp;<a href="#" id="link_restore"><label>Click here to reset it</label></a>
+            <br /><label>Forgotten your password?</label>&nbsp;<a href="#" id="link_restore">Click here to reset it</a>
         </p>
         <br/><br/>
         <div class="heurist-helper1">All Heurist databases require a login. If you wish to access the data 
@@ -78,17 +74,41 @@
         </div>
     </div>    
     
-    
-    <fieldset id="fld_reset" style="display: none;">
-        <label>Enter your username OR email address below and a new password will be emailed to you.</label><br /><br />
+    <fieldset id="fld_request_pin" style="display: none;">
+        <label>Enter your username OR email address below and a reset pin will be emailed to you.</label><br /><br />
         <div>
             <div class="header"><label for="reset_username">Username</label></div>
             <input type="text" name="reset_username" id="reset_username" class="text ui-widget-content ui-corner-all" />
+        </div>
+        <span style="display: block; margin: 10px 0px 0px 15px;">
+            <div class="header"><label for="captcha_code">Answer question below to prove you are human</label></div>
+            <div id="captcha_code" class="text ui-widget-content ui-corner-all" style="height: 25px; margin-top: 5px; background: transparent; border: none;"></div>
+        </span>
+    </fieldset>
+
+    <fieldset id="fld_validate_pin" style="display: none;">
+        <label>An email has been sent to your email account containing a reset pin, please enter it below.</label><br /><br />
+        <div>
+            <div class="header"><label for="reset_pin">Reset pin</label></div>
+            <input type="text" name="reset_pin" id="reset_pin" class="text ui-widget-content ui-corner-all" />
+        </div>
+
+        <br><a href="#" class="link_resend"><label>Resend reset pin</label></a>
+    </fieldset>
+
+    <fieldset id="fld_reset_password" style="display: none;">
+        <label>Enter your new password below.</label><br /><br />
+        <div>
+            <div class="header"><label for="new_password">New password</label></div>
+            <input type="password" name="new_password" id="new_password" class="text ui-widget-content ui-corner-all" />
+        </div>
+        <div>
+            <div class="header"><label for="dup_new_password">Re-enter new password</label></div>
+            <input type="password" name="dup_new_password" id="dup_new_password" class="text ui-widget-content ui-corner-all" />
         </div>
     </fieldset>
 
     <div id="imgdiv" style="float:left;display:inline-block;display:none;"></div>
     <div id="btnCptRefresh" style="display:none;">Refresh</div>
-
   
   <div class="messages">1</div>

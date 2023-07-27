@@ -112,7 +112,7 @@
     * @param mixed $system
     * @param mixed $ugr_Name
     */
-    function user_ResetPassword($system, $username){
+    function user_ResetPasswordRandom($system, $username){
         if($username){
             $mysqli = $system->get_mysqli();
             $user = user_getByField($mysqli, 'ugr_Name', $username);
@@ -165,6 +165,212 @@
             $system->addError(HEURIST_INVALID_REQUEST, "Username / email not defined"); //INVALID_REQUEST
         }
         return false;
+    }
+
+    function user_HandleResetPin($system, $username, $pin = '', $captcha = ''){
+
+        $mysqli = $system->get_mysqli();
+        $now = strtotime('now');
+        $an_hour = 60 * 60;
+
+        if($pin == 1) $pin = ''; // requesting new/re-send
+
+        if(session_status() == PHP_SESSION_ACTIVE){
+
+            $db = $system->dbname_full(); //dbname()
+
+            // Check for user
+            $user = user_getByField($mysqli, 'ugr_Name', $username);
+            if($user == null) {
+                $user = user_getByField($mysqli, 'ugr_eMail', $username);   
+            }
+            if($user == null) {
+                $system->addError(HEURIST_NOT_FOUND, 'Cannot send reset pin. Unable to find specified username / email');
+                return false;
+            }
+
+            $user_id = $user['ugr_ID'];
+
+            if(!array_key_exists('reset_pins', $_SESSION[$db])){
+                $_SESSION[$db]['reset_pins'] = array(
+                    $user_id => array(
+                        'pin' => '',
+                        'resends' => 1,
+                        'attempts' => 0,
+                        'expire' => null,
+                        'redeemed' => false
+                    ),
+                    'blocked' => 0,
+                    'last_block' => null
+                );
+            }else if(!array_key_exists($user_id, $_SESSION[$db]['reset_pins'])){
+                $_SESSION[$db]['reset_pins'][$user_id] = array(
+                    'pin' => '',
+                    'resends' => 1,
+                    'attempts' => 0,
+                    'expire' => null,
+                    'redeemed' => false
+                );
+            }
+
+            if($_SESSION[$db]['reset_pins']['last_block'] !== null && $_SESSION[$db]['reset_pins']['last_block'] + (60 * 60) < $now){
+                $_SESSION[$db]['reset_pins']['blocked'] = 0;
+                $_SESSION[$db]['reset_pins']['last_block'] = null;
+            }else if($_SESSION[$db]['reset_pins']['blocked'] == 3){
+
+                $system->addError(HEURIST_ACTION_BLOCKED, 'We are unable to send a reset pin at this time.<br>Please try again later');
+                return false;
+            }
+
+            $check_pin = !empty($pin) && !empty($_SESSION[$db]['reset_pins'][$user_id]['pin']);
+
+            if($check_pin && $_SESSION[$db]['reset_pins'][$user_id]['expire'] > $now){ // pin check requested, and valid pin in session
+
+                if($_SESSION[$db]['reset_pins'][$user_id]['pin'] != $pin){
+                    $system->addError(HEURIST_ACTION_BLOCKED, 'Invalid pin provided');
+                    return false;
+                }
+
+                $_SESSION[$db]['reset_pins'][$user_id]['redeemed'] = true; // set redeemed flag for pin
+
+                return true;
+            }
+            
+            // create/re-send pin, save in session
+            $new_pin = generate_passwd();
+            $has_pin = !empty(@$_SESSION[$db]['reset_pins'][$user_id]['pin']);
+            $response = true;
+            $test_captcha = true;
+            $resends = $_SESSION[$db]['reset_pins'][$user_id]['resends'] < 1 ? 1 : $_SESSION[$db]['reset_pins'][$user_id]['resends'];
+
+            if($has_pin){
+                if($now > ($_SESSION[$db]['reset_pins'][$user_id]['expire'] + $an_hour)){ // old pin, reset resends
+                    $resends = 1;
+                }else{ // requesting re-send
+
+                    $test_captcha = false;
+                    $resends ++;
+                    $expired = $_SESSION[$db]['reset_pins'][$user_id]['expire'] < $now;
+
+                    if($resends > 5){
+
+                        $_SESSION[$db]['reset_pins']['blocked'] ++;
+                        $_SESSION[$db]['reset_pins']['last_blocked'] = strtotime('now');
+
+                        $msg = ($expired ? 'Your pin has expired.<br> However, we' : 'We')
+                            . ' are unable to send another reset pin at this moment, plase contact the Heurist team or try again at a later time';
+
+                        $system->addError(HEURIST_ACTION_BLOCKED, $msg);
+                        return false;
+                    }else if($expired && $check_pin){
+                        $response = 'Your current reset pin has expired.<br>A new one has been sent to your email';
+                    }else{
+                        $response = 'A new pin has been sent';
+                    }
+                }
+            }
+
+            if($test_captcha){
+                if(!array_key_exists('captcha_code', $_SESSION)){
+                    $system->addError(HEURIST_ERROR, 'An error has occurred with testing the captcha code');
+                    return false;
+                }
+                if(empty($captcha) || $captcha != $_SESSION["captcha_code"]){
+                    $system->addError(HEURIST_ACTION_BLOCKED, 'Are you a bot? Please enter the correct answer to the challenge question');
+                    return false;
+                }
+            }
+
+            $dbowner_Email = user_getDbOwner($mysqli, 'ugr_eMail');
+
+            $email_body = "Dear ".$user['ugr_FirstName'].",\n\n".
+            "A reset pin was requested for your account on database ". $db .".\n\n".
+            "Your username is: ".$user['ugr_Name']."\n".
+            "Your reset pin is: ".$new_pin."\n\n".
+            "This pin will expire in 5 minutes. Please enter it in the popup to reset your password.\n\n"
+            ."Database Owner: ".$dbowner_Email;
+            $email_title = "Forgot password";
+
+            $res = sendEmail($user['ugr_eMail'], $email_title, $email_body);
+            if($res){
+
+                $_SESSION[$db]['reset_pins'][$user_id] = array( 
+                    'pin' => $new_pin,
+                    'expire' => strtotime('+5 minutes'),
+                    'resends' => $resends,
+                    'user' => $user_id,
+                    'redeemed' => false
+                );
+
+                return $response;
+            }else{
+                $msg = $system->getError();
+                $system->addError(HEURIST_SYSTEM_CONFIG, 'We were unable to send you a reset pin', $msg?@$msg['message']:null);
+                return false;
+            }
+
+        }else{
+            
+            $system->addError(HEURIST_ERROR, 'We were unable to send your reset pin, as an error occurred with retrieving your current session');
+            return false;
+        }
+    }
+
+    function user_ResetPassword($system, $username, $password, $pin){
+
+        $mysqli = $system->get_mysqli();
+
+        if(empty($username) || empty($password) || empty($pin)){
+            $system->addError(HEURIST_ACTION_BLOCKED, 'Required variable missing');
+            return false;
+        }
+
+        if(session_status() == PHP_SESSION_ACTIVE){
+
+            $db = $system->dbname_full();
+
+            // Check for user
+            $user = user_getByField($mysqli, 'ugr_Name', $username);
+            if($user == null) {
+                $user = user_getByField($mysqli, 'ugr_eMail', $username);   
+            }
+            if($user == null) {
+                $system->addError(HEURIST_NOT_FOUND,  'Cannot set new password. Unable to find specified username / email.');
+                return false;
+            }
+
+            $user_id = $user['ugr_ID'];
+
+            if(!array_key_exists('reset_pins', $_SESSION[$db]) || !array_key_exists($user_id, $_SESSION[$db]['reset_pins'])){
+                $system->addError(HEURIST_ERROR, 'An error has occurred with changing your password using a reset pin.<br>Please contact the Heurist team');
+                return false;
+            }
+            if($_SESSION[$db]['reset_pins'][$user_id]['pin'] != $pin){
+                $system->addError(HEURIST_ACTION_BLOCKED, 'Invalid reset pin');
+                return false;
+            }
+            if($_SESSION[$db]['reset_pins'][$user_id]['redeemed'] !== true){
+                $system->addError(HEURIST_ERROR, 'We were unable to verify the reset pin');
+                return false;
+            }
+
+            $record = array("ugr_ID"=>$user['ugr_ID'], "ugr_Password"=>hash_it($password));
+            $res = mysql__insertupdate($mysqli, "sysUGrps", "ugr_", $record);
+
+            if(is_numeric($res) > 0){
+
+                unset($_SESSION[$db]['reset_pins'][$user_id]); // remove
+
+                return true;
+            }else{
+                $system->addError(HEURIST_ERROR, 'We were unable to reset your password, an error occurred while updating database records');
+                return false;
+            }
+        }else{
+            
+            $system->addError(HEURIST_ERROR, 'We were unable to reset your password via the pin system, as an error occurred with retrieving your current session');
+            return false;
+        }
     }
 
     /**

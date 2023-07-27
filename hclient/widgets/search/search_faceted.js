@@ -767,8 +767,9 @@ console.log('get defintion in OLD format!!!!');
                     let codes = facets[facet_index]['code'].split(':');
                     let rtyid = codes[codes.length-2];
                     let dtyid = codes[codes.length-1];
-                    if(!$Db.rst(rtyid, dtyid)){
-                        invalid_fields.push(facets['title']);
+                    if(rtyid && dtyid && !$Db.rst(rtyid, dtyid)){
+                        let fld_name = !window.hWin.HEURIST4.util.isempty(facets['title']) ? facets['title'] : null;//$Db.dty(dtyid, 'dty_Name');
+                        invalid_fields.push(fld_name);
                     }
                 }
                 
@@ -784,11 +785,13 @@ console.log('get defintion in OLD format!!!!');
                 if(several_fields){
                     msg = 'Several fields referenced by this facet filter are no longer part of their respective record type(s).';
                 }else{
-                    msg = `The field ${fld_name} referenced in this facet filter is no longer part of the record type on which this filter is based.`;
+                    msg = (window.hWin.HEURIST4.util.isempty(fld_name) ? 'A field' : `The field ${fld_name}`)+ ' referenced in this facet filter is no longer part of the record type on which this filter is based.';
                 }
-                msg += '<br>Please edit the facet search and remove the field (this will occurr automatically if you open the facet filter for editing and save)';
 
-                window.hWin.HEURIST4.msg.showMsgDlg(msg, null, {title: 'Missing field(s) referenced in facet filter'}, {default_palette_class: 'ui-heurist-explore'});
+                if(msg !== ''){
+                    msg += '<br>Please edit the facet search and remove the field (this will occurr automatically if you open the facet filter for editing and save)';
+                    window.hWin.HEURIST4.msg.showMsgDlg(msg, null, {title: 'Missing field(s) referenced in facet filter'}, {default_palette_class: this.options.is_publication ? 'ui-heurist-publish' : 'ui-heurist-explore'});
+                }
 
                 this._warned_missing_fields = true;
             }
@@ -2524,7 +2527,7 @@ console.log('get defintion in OLD format!!!!');
                         || field['type']=='date' || field['type']=="year") && field['isfacet']==this._FT_SELECT)
                     {  //add slider
                     
-                        $input_div.find('.input-cell').css({'padding-bottom': '25px', 'padding-left': '10px'});
+                        $input_div.find('.input-cell').css({'padding-bottom': '25px', 'padding-left': '0px'});
                     
                         $facet_values.parent().css({'display':'block'});
                         //AAA strange padding ,'padding-left':'1em','padding-right':'2em'
@@ -2554,6 +2557,10 @@ console.log('get defintion in OLD format!!!!');
                         var daymsec = 86400000; //24*60*60*1000;   1day
 
                         var date_type = '';
+
+                        const w = that.element.width();
+                        const tiny_ui = w <= 100;
+                        const small_ui = !tiny_ui && w < 200;
 
 //DEBUG console.log('ret', mmin+'   '+mmax);
                         
@@ -2585,10 +2592,10 @@ console.log('get defintion in OLD format!!!!');
 
                                 if(field.date_type=='years_only'){
                                     if(typeof mmin==='string' && mmin.indexOf('-12-31')>0){
-                                        mmin = mmin.substr(0, mmin.indexOf('-12-31')); 
+                                        mmin = mmin.substring(0, mmin.indexOf('-12-31')); 
                                     }
                                     if(typeof mmax==='string' && mmax.indexOf('-12-31')>0){
-                                        mmax = mmax.substr(0, mmax.indexOf('-12-31')); 
+                                        mmax = mmax.substring(0, mmax.indexOf('-12-31')); 
                                     }
                                     mmin = ''+Math.round(mmin);    
                                     mmax = ''+Math.round(mmax);
@@ -2881,13 +2888,16 @@ console.log('get defintion in OLD format!!!!');
                                             }
 
                                             //var $slide_handles = $slide_range.parent().find('.ui-slider-handle');
-                                            var $slide_handle = $slide_range.parent().find('.ui-icon-triangle-1-w-stop');
-                                            if($slide_handle.length>0)
-                                            $facet_values.find('.ui-icon-triangle-1-w').position({my: 'right-6 center+5', at: 'right bottom', of: $($slide_handle)});
-                                            
-                                            $slide_handle = $slide_range.parent().find('.ui-icon-triangle-1-e-stop');
-                                            if($slide_handle.length>0)
-                                            $facet_values.find('.ui-icon-triangle-1-e').position({my: 'left+6 center+5', at: 'left bottom', of: $($slide_handle)});
+                                            if(small_ui){
+
+                                                var $slide_handle = $slide_range.parent().find('.ui-icon-triangle-1-w-stop');
+                                                if($slide_handle.length>0)
+                                                $facet_values.find('.ui-icon-triangle-1-w').position({my: 'right-6 center+5', at: 'right bottom', of: $($slide_handle)});
+                                                
+                                                $slide_handle = $slide_range.parent().find('.ui-icon-triangle-1-e-stop');
+                                                if($slide_handle.length>0)
+                                                $facet_values.find('.ui-icon-triangle-1-e').position({my: 'left+6 center+5', at: 'left bottom', of: $($slide_handle)});
+                                            }
                                         }else if(window.hWin.HAPI4.has_access()){ //display error message, only if the user is logged in
                                             response.message = 'An error occurred with generating the time graph data<br>' + response.message;
                                             window.hWin.HEURIST4.msg.showMsgErr(response);
@@ -2909,6 +2919,14 @@ console.log('get defintion in OLD format!!!!');
                                         max = arguments[1];
                                         cnt = arguments[2];
                                     }
+
+                                    if(min<field.mmin0) {
+                                        min = field.mmin0;
+                                    }
+                                    if(max>field.mmax0) {
+                                        max = field.mmax0;
+                                    }
+
                                     if(field['type']=="date"){
                                         min = __dateToString(min);
                                         max = __dateToString(max);
@@ -2925,6 +2943,20 @@ console.log('get defintion in OLD format!!!!');
                                         $(sl_count).insertAfter(range_ele);
                                     }
                                 }
+
+                                // Show handle's value while dragging
+                                let have_handle = isNaN(arguments[0]) && arguments[1].handle instanceof HTMLElement && arguments[1].handle.classList.contains('ui-slider-handle');
+                                if(have_handle){
+
+                                    let handle = $(arguments[1].handle);
+                                    let is_max = arguments[1].handleIndex == 1;
+
+                                    that.element.find(`#facet_tracker${facet_index}`).text(is_max ? max : min).position({
+                                        my: 'center top+10', // +10 so the cursor doesn't cover the value
+                                        at: 'center bottom',
+                                        of: handle
+                                    }).show();
+                                }
                             }
                             
                             function __dateToString(val){
@@ -2935,7 +2967,7 @@ console.log('get defintion in OLD format!!!!');
                                     //}else
                                     if(field.date_type=='years_only'){
                                         if(val<0){
-                                            val = sval.substr(1)+' bce';
+                                            val = sval.substring(1)+' bce';
                                         }
                                     }else
                                     //if(!sval.match(/^-?\d+/) || Math.abs(val)>2200)
@@ -2969,7 +3001,7 @@ console.log('get defintion in OLD format!!!!');
                                     slider.slider( "values", 1, max);
                                 }
 
-                                if(field['type'] == 'date'){
+                                if(field['type'] == 'date' && !field.hide_histogram){
 
                                     setupDateHistogram(min, max);
                                 }
@@ -3107,46 +3139,69 @@ console.log('get defintion in OLD format!!!!');
                                    position:{my:'bottom left',at:'top left',of:$(event.target)} 
                                 });
                             }
-                        
-                            var w = that.element.width();
+
+                            if(w > 200 && (mmin != field.mmin0 || mmax != field.mmax0)){
+
+                                let min = field.mmin0;
+                                let max = field.mmax0;
+
+                                if(field['type']=="date"){
+                                    min = __dateToString(min);
+                                    max = __dateToString(max);
+                                }else{
+                                    min = __roundNumericLabel(min);
+                                    max = __roundNumericLabel(max);
+                                }
+
+                                $("<span>", {class: 'heurist-helper2'})
+                                    .css({'font-size': '10px', color: 'gray'})
+                                    .text(`${min} - ${max}`)
+                                    .appendTo($facet_values);
+                            }
+
                             var flbl = $("<div>",{id:"facet_range"+facet_index})
-                                        .css({display: 'inline-block', 'padding': '0 0 1em 16px'}) //, width:(w-40)
+                                        .css({display: 'inline-block', 'padding-bottom': '1em', position: 'relative', left: '15px'})
                                         .appendTo($facet_values);
+
+                            $("<span>", {id: `facet_tracker${facet_index}`, class: 'heurist-helper2'})
+                                .css({display: 'none', 'font-size': '10px', color: 'gray', position: 'absolute'})
+                                .appendTo($facet_values);
                                         
                             if(field['type']=="date"){
                                 flbl.css({cursor:'pointer'});
                                 that._on(flbl,{click: __showDateRangeDialog});
                             }
 
+                            let rwidth = 70;
+                            rwidth = (small_ui ? 60 : 70);
+                            rwidth = (tiny_ui ? 10 : rwidth);
+
+                            let btn_w = 10; //12
                             var ele2 = $('<div>'
                                 +'<span class="ui-icon ui-icon-triangle-1-w-stop" title="Reset to minimum date"'
-                                    +'style="cursor:pointer;font-size:smaller;float:left;color:gray"/>'
-                                +'<div style="height:0.4em;margin:2px 0px 0px 2px;float:left;width:'+(w-60)+'px"/>'
-                                +'<span class="ui-icon ui-icon-triangle-1-e-stop" title="Reset to maximum date"'
-                                    +'style="cursor:pointer;font-size:smaller;float:left;color:gray"/>'
+                                    +'style="cursor:pointer;font-size:smaller;float:left;color:gray;width:'+btn_w+'px;"/>'
                                 +'<span class="ui-icon ui-icon-triangle-1-w" title="Half step"'
-                                    +'style="cursor:pointer;font-size:smaller;float:left;color:gray;"/>'
+                                    +'style="cursor:pointer;font-size:smaller;float:left;color:gray;width:'+btn_w+'px;"/>'
+                                +'<div style="height:0.4em;margin:2px 2px 0px 2px;float:left;width:'+(w - rwidth)+'px"/>'
                                 +'<span class="ui-icon ui-icon-triangle-1-e" title="Half step"'
-                                    +'style="cursor:pointer;font-size:smaller;float:right;color:gray;"/>'
-                                +'<span class="heurist-helper1 min-val" title="Original minimum value" style="font-size:smaller;cursor:default;" />'
-                                +'<span class="heurist-helper1 max-val" title="Original maximum value" style="font-size:smaller;cursor:default;" />'
+                                    +'style="cursor:pointer;font-size:smaller;float:left;color:gray;width:'+btn_w+'px;"/>'
+                                +'<span class="ui-icon ui-icon-triangle-1-e-stop" title="Reset to maximum date"'
+                                    +'style="cursor:pointer;font-size:smaller;float:left;color:gray;width:'+btn_w+'px;"/>'
+                                //+'<span class="heurist-helper1 min-val" title="Original minimum value" style="font-size:smaller;cursor:default;" />'
+                                //+'<span class="heurist-helper1 max-val" title="Original maximum value" style="font-size:smaller;cursor:default;" />'
                             +'</div>'
                             ).appendTo($facet_values);
                                         
                             let range_min = field.mmin0;
                             let range_max = field.mmax0;
-                            let min_label = false;
-                            let max_label = false;
 
                             if(mmin != range_min){
-                                let ten_percent = mmin * 0.05; //0.1
-                                range_min = (mmin - ten_percent > range_min) ? mmin - ten_percent : range_min;
-                                min_label = true;
+                                let ten_percent = Math.abs(range_min) * 0.05; //0.1
+                                range_min = mmin - ten_percent;
                             }
                             if(mmax != range_max){
-                                let ten_percent = mmax * 0.05; //0.1
-                                range_max = (mmax + ten_percent < range_max) ? mmax + ten_percent : range_max;
-                                max_label = true;
+                                let ten_percent = Math.abs(range_max) * 0.05; //0.1
+                                range_max = mmax + ten_percent;
                             }
 
                             var slider = ele2.find('div')
@@ -3159,35 +3214,15 @@ console.log('get defintion in OLD format!!!!');
                                     slide: __updateSliderLabel,
                                     stop: __onSlideStop,
                                     start: function(){
-                                        ele2.find('.ui-icon-triangle-1-w, .ui-icon-triangle-1-e, .min-val, .max-val').css('visibility', 'hidden');
+                                        ele2.find('.ui-icon-triangle-1-w, .ui-icon-triangle-1-e').css('visibility', 'hidden'); //, .min-val, .max-val
                                     },
                                     create: function(){
                                         $(this).find('.ui-slider-handle').css({width:'4px',background:'black'});
 
-                                        ele2.find('span.ui-icon-triangle-1-w').position({my: 'right-6 center+5', at: 'right bottom', of: $($(this).find('.ui-slider-handle')[0])});
-                                        ele2.find('span.ui-icon-triangle-1-e').position({my: 'left+6 center+5', at: 'left bottom', of: $($(this).find('.ui-slider-handle')[1])});
-
-                                        let lbl_min, lbl_max;
-                                        if(field['type']=="date"){
-                                            lbl_min = __dateToString(field.mmin0);
-                                            lbl_max = __dateToString(field.mmax0);
-                                        }else{
-                                            lbl_max = __roundNumericLabel(field.mmin0);
-                                            lbl_max = __roundNumericLabel(field.mmax0);
+                                        if(small_ui){
+                                            ele2.find('span.ui-icon-triangle-1-w').position({my: 'right-6 center+5', at: 'right bottom', of: $($(this).find('.ui-slider-handle')[0])});
+                                            ele2.find('span.ui-icon-triangle-1-e').position({my: 'left+6 center+5', at: 'left bottom', of: $($(this).find('.ui-slider-handle')[1])});
                                         }
-                                        
-
-                                        //ele2.find('.min-val').position({my: 'right top', at: 'right bottom', of: ele2.find('span.ui-icon-triangle-1-w-stop')}).text(lbl_min);
-                                        ele2.find('.min-val').css({
-                                            position: 'relative',
-                                            top: '10px',
-                                            left: '-20px'
-                                        }).text(lbl_min);
-                                        ele2.find('.max-val').text(lbl_max).position({my: 'right top+10', at: 'right bottom', of: ele2.find('span.ui-icon-triangle-1-e-stop')});
-                                        /*setTimeout( () => {
-                                            ele2.find('.min-val').position({my: 'right top', at: 'right bottom', of: ele2.find('span.ui-icon-triangle-1-w-stop')}).text(lbl_min);
-                                            ele2.find('.max-val').position({my: 'left top', at: 'left bottom', of: ele2.find('span.ui-icon-triangle-1-e-stop')}).text(lbl_max);
-                                        }, 1000);*/
                                     }
                                 });
                                     
@@ -3214,17 +3249,20 @@ console.log('get defintion in OLD format!!!!');
                                  
                             if(mmin==field.mmin0){
                                 ele2.find('span.ui-icon-triangle-1-w-stop, span.ui-icon-triangle-1-w').css('visibility','hidden');
-                                ele2.find('span.min-val').hide();
+                                //ele2.find('span.min-val').hide();
                             }
                             if(mmax==field.mmax0){
                                 ele2.find('span.ui-icon-triangle-1-e-stop, span.ui-icon-triangle-1-e').css('visibility','hidden');
-                                ele2.find('span.max-val').hide();
+                                //ele2.find('span.max-val').hide();
+                            }
+                            if(tiny_ui){ // hide skip and step buttons
+                                ele2.find('[class="ui-icon-triangle-1-"]').css('display', 'none');
                             }
                                  
                             //show initial values
                             __updateSliderLabel(mmin, mmax, sl_count);
 
-                            if(field['type'] == 'date'){
+                            if(field['type'] == 'date' && !field.hide_histogram){
                                 //build histogram
                                 setupDateHistogram(mmin, mmax);
                             }
@@ -3678,7 +3716,7 @@ console.log('get defintion in OLD format!!!!');
             //.css({'display':'inline-block', 'visibility':'hidden', 'font-size':'0.9em', 'vertical-align':'middle'});
 
         }else{
-            f_link_content = $("<span>").text(cterm.title);
+            f_link_content = $("<span>").html(cterm.title);
             
             if(display_mode=='block'){         
 
