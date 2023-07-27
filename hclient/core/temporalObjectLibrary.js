@@ -102,7 +102,7 @@ function Temporal (strInitTemporal) {
             var $tDate = that.getAllFields();
             var $timespan= {};
             
-                    if ($tDate["CLD"] && $tDate["CL2"] && (tDate["CLD"].toLowerCase()!='gregorian')) {
+                    if ($tDate["CLD"] && $tDate["CL2"] && ($tDate["CLD"].toLowerCase()!='gregorian')) {
                             let $cld = $tDate["CL2"]+" "+$tDate["CLD"];
                             if($cld.indexOf('null')>=0) $tDate["CLD"] = $cld.substr(4); //some dates were saved in wrong format - fix it
                     }        
@@ -175,6 +175,7 @@ function Temporal (strInitTemporal) {
                     if($tDate['COM']) $timespan['comment'] = $tDate['COM'];
                     //labaratory code for C14
                     if($tDate['COD']) $timespan['labcode'] = $tDate['COD'];
+                    if($tDate['CAL']) $timespan['calibrated'] = 1;
                     //human readable in native calendar
                     if($tDate['CL2']) $timespan['native'] = $tDate['CL2'];
             
@@ -182,7 +183,7 @@ function Temporal (strInitTemporal) {
         },
         
     //
-    // Outputs humand readable representation of temporal object
+    // Outputs human readable representation of temporal object
     //    
         _deviationToText: function ($value, $prefix){
         
@@ -211,17 +212,19 @@ function Temporal (strInitTemporal) {
             
         },
     
-        toReadableExt: function($separator){
+        toReadableExt: function($separator, $is_compact){
 
             try{
             
             var $date = that.toJSON();
-
+            
             $calendar = $date['calendar'];
-            var isgj = (!$calendar || $calendar=='gregorian' || $calendar=='julian');
+            var isgj = (!$calendar || $calendar.toLowerCase()=='gregorian' || $calendar.toLowerCase()=='julian');
             $res = {};
 
             $res['Type'] = '';
+            
+            var $is_simple_range = true; 
 
             if($date['timestamp']){
 
@@ -246,10 +249,12 @@ function Temporal (strInitTemporal) {
                     $res['Date'] = 'after '+$timestamp;
                 }
                 $res['Date']  = $timestamp;
-
+                
             }else if($date['start'] && $date['type']=='r'){  //simple range - NOT USED
 
                 $res['Type'] = 'Simple Range';
+                
+                $is_simple_range = true;
 
                 $res['Earliest estimate'] = formatGregJulian($date['start']['earliest'], isgj);
                 $res['Latest estimate'] = formatGregJulian($date['end']['latest'], isgj); 
@@ -262,8 +267,9 @@ function Temporal (strInitTemporal) {
 
 
                 var $from = '',
-                    $to = '',
-                    $is_simple = true;
+                    $to = '';
+                
+                $is_simple_range = true;
 
                 if($date['start'] && $date['start']['in']){ //not used
                     $from = formatGregJulian($date['start']['in'], isgj);
@@ -280,12 +286,12 @@ function Temporal (strInitTemporal) {
                     if($date['start']['latest']){
                         $dt = formatGregJulian($date['start']['latest'], isgj);
                         if($dt){
-                            $is_simple = false;
+                            $is_simple_range = false;
                         }
                     }
 
-                    $res[$is_simple?'Earliest estimate':'Terminus Post Quem'] = $from;
-                    if(!$is_simple) $res['Probable Begin'] = $dt;
+                    $res[$is_simple_range?'Earliest estimate':'Terminus Post Quem'] = $from;
+                    if(!$is_simple_range) $res['Probable Begin'] = $dt;
                     if($date['start']['profile']){
                         $res['Start Profile'] = Temporal.profiles[parseInt($date['start']['profile'])];
                     }
@@ -306,39 +312,69 @@ function Temporal (strInitTemporal) {
                         $dt = formatGregJulian($date['end']['earliest'], isgj);
                         if($dt){
                             $res['Probable End'] = $dt;
-                            $is_simple = false;
+                            $is_simple_range = false;
                         }
                     }
 
                     $to = formatGregJulian($date['end']['latest'], isgj);
-                    $res[$is_simple?'Latest estimate':'Terminus Ante Quem'] = $to;
+                    $res[$is_simple_range?'Latest estimate':'Terminus Ante Quem'] = $to;
 
                     if($date['start']['profile']){
                         $res['End Profile'] = Temporal.profiles[parseInt($date['end']['profile'])];
                     }
                 }
 
-                $res['Type'] = ($is_simple)?'Simple Range':'Approximate Range';
+                $res['Type'] = ($is_simple_range)?'Simple Range':'Fuzzy Range';
             }
 
-            //add native decription as prefix
-            if($calendar && $date['native'] && !isgj){
-                $res[''] = $date['native'];
-            }            
-
-
-            if($date['calendar']) $res['Calendar'] = $date['calendar'];
+            
+            if(!isgj){
+                //add native decription as prefix
+                $res['Calendar'] = $date['calendar'] + ' ' + ($date['native']?$date['native']:'');  
+            } 
             if($date['comment']) $res['Comment'] = $date['comment'];
             if($date['determination']) $res['Determination'] = Temporal.determination[parseInt($date['determination'])];
             //labaratory code for C14
             if($date['labcode']) $res['Labaratory Code'] = $date['labcode'];
+            if($date['calibarated']) $res['Calibarated'] = 'yes';
 
             var $res2 = '';
-            for(var $key in $res){
-                var $val = $res[$key];   
-                $res2 = $res2+$key+': '+$val+$separator;
+            
+            if($is_compact){
+                
+                if($res['Type']!='Simple' && $res['Type']!='Simple Range'){
+                    $res2 = $res['Type'] + ' ';    
+                }
+                
+                if($res['Date']){
+                    $res2 = $res2 + $res['Date'];
+                }else if($is_simple_range){
+                    
+                    $res2 = $res2 + $res['Earliest estimate']+' .. '+$res['Latest estimate'];
+                }else {
+                    
+                    $res2 = $res2 + '>'+$res['Terminus Post Quem']+':'+$res['Probable Begin']
+                                    +' .. '+
+                                    $res['Probable End']+':<'+$res['Terminus Ante Quem'];
+                }
+                
+                var supinfo = [];
+                if($res['Determination']) supinfo.push($res['Determination']);
+                if($date['calibrated']) supinfo.push('Calibarated');
+                if(!isgj) {
+                    supinfo.push($res['Calendar']);
+                }
+                if(supinfo.length>0){
+                    $res2 = $res2 + ' (' + supinfo.join(', ') + ')';
+                }
+                
+            }else{
+                for(var $key in $res){
+                    var $val = $res[$key];   
+                    $res2 = $res2+$key+': '+$val+$separator;
+                }
             }
-
+            
             return $res2;
             
             }catch(e){
@@ -590,7 +626,8 @@ Temporal.parse = function () {
         throw "Temporal parse exception - no Temporal Type code ";
     }
 
-    var fields = Temporal.getFieldsForString(type,str);  // get the list of field headers for this type
+    var fields = Temporal.getFieldsForString(type, str);  // get the list of field headers for this type
+    
     var val,i;
     for (i=0; i < fields.length; i++) {
         val = str.match(new RegExp("\\|?" + fields[i] + "=([^\\|]+)","i"));
@@ -874,7 +911,7 @@ Temporal.getFieldsForString = function (type,str) {
     if ( type && typeof type === "string" && typeof Temporal.typeFieldMap(type) === "object") {
         var fields;
         var map = Temporal.typeFieldMap(type);
-        var headers = str.match(/[A-Za-z][A-Za-z][A-Za-z]=/g).join("");
+        var headers = str.match(/[A-Za-z][A-Za-z][A-Za-z|2]=/g).join("");
         if (!headers) {  // no valid headers - requires 3 letter
             return "";
         }
@@ -1299,7 +1336,7 @@ TDate.parse = function () {
     }
 
     // if a null string passed in then return an empty TDate or the passed in TDate object.
-    if (!str || str === "") {
+    if (typeof str!=='string' || str === "") {
         return tDate;
     }
 

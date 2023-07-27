@@ -454,6 +454,7 @@ class Temporal {
                     if(@$tDate['COM'] && $tDate['COM']!='') $timespan['comment'] = $tDate['COM'];
                     //labaratory code for C14
                     if(@$tDate['COD']) $timespan['labcode'] = $tDate['COD'];
+                    if(@$tDate['CAL']) $timespan['calibrated'] = 1;
                     //human readable in native calendar
                     if(@$tDate['CL2']) $timespan['native'] = $tDate['CL2'];
                     
@@ -1227,13 +1228,21 @@ class Temporal {
     
     //
     // $dt - string
+    // $mode - 0  simple
+    //         1  compact
+    //         2  extended
+    
     //
-    public static function toHumanReadable($dt, $print_invalid_str = false){
-        
+    public static function toHumanReadable($dt, $print_invalid_str = false, $mode=0, $sep='|'){
+
         if($dt){
-            $dt = new Temporal($dt);
-            if($dt && $dt->isValid()) {
-               return $dt->toReadable();   
+            $dt2 = new Temporal($dt);
+            if($dt2 && $dt2->isValid()) {
+                if($mode>0){
+                    return $dt2->toReadableExt($sep, ($mode==1));
+                }else{
+                    return $dt2->toReadable();       
+                }            
             }else{
                 $dt = $print_invalid_str && is_string($dt) && !empty($dt) ? '('. $dt .')' : '';
                 return 'invalid temporal object'. $dt; 
@@ -1242,7 +1251,7 @@ class Temporal {
             return '';
         }
     }
-    
+
 
 // 3. Export functions
 /*    
@@ -1389,13 +1398,15 @@ class Temporal {
     //
     // Outputs human readable representation of temporal object
     //    
-    public function toReadableExt($separator){
+    public function toReadableExt($separator, $is_compact=false){
+        
         if($this->tDate){
             
             $date = $this->tDate;
             
             $calendar = @$date['calendar'];
             $res = array();
+            $is_simple = false;
             
             $res['Type'] = '';
 
@@ -1492,27 +1503,59 @@ class Temporal {
                     }
                 }
                 
-                $res['Type'] = ($is_simple)?'Simple Range':'Approximate Range';
+                $res['Type'] = ($is_simple)?'Simple Range':'Fuzzy Range';
             }
             
             //add native decription as prefix
             $is_greg_or_julian = (!$calendar || 
                             strtolower($calendar)=='gregorian' || strtolower($calendar)=='julian');
             
-            if($calendar && @$date['native'] && !$is_greg_or_julian){
-                $res[''] = $date['native'];
-            }            
+            if(!$is_greg_or_julian){
+                //add native decription as suffux
+                $res['Calendar'] = $date['calendar'].' '.($date['native']?$date['native']:'');  
+            } 
             
             
-            if(@$date['calendar']) $res['Calendar'] = $date['calendar'];
+            
             if(@$date['comment']) $res['Comment'] = $date['comment'];
             if(@$date['determination']) $res['Determination'] = $this->dictDetermination[intval($date['determination'])];
             //labaratory code for C14
             if(@$date['labcode']) $res['Labaratory Code'] = $date['labcode'];
+            if(@$date['calibrated']) $res['Calibarated'] = 'yes';
             
             $res2 = '';
-            foreach($res as $key=>$val){
-                $res2 = $res2.$key.': '.$val.$separator;
+            if($is_compact){
+                
+                if($res['Type']!='Simple' && $res['Type']!='Simple Range'){
+                    $res2 = $res['Type'].' ';    
+                }
+                
+                if($res['Date']){
+                    $res2 = $res2 . $res['Date'];
+                }else if($is_simple){
+                    
+                    $res2 = $res2 . $res['Earliest estimate'] . ' .. ' . $res['Latest estimate'];
+                }else {
+                    
+                    $res2 = $res2 . '>' .$res['Terminus Post Quem'] . ':' .$res['Probable Begin']
+                                    .' .. '.
+                                    $res['Probable End'].':<'.$res['Terminus Ante Quem'];
+                }
+                
+                $supinfo = array();
+                if($res['Determination']) $supinfo[] = $res['Determination'];
+                if($date['calibrated']) $supinfo[] = 'Calibarated';
+                if(!$is_greg_or_julian) {
+                    $supinfo[] = $res['Calendar'];
+                }
+                if(count($supinfo)>0){
+                    $res2 = $res2 . ' (' . implode(', ', $supinfo) . ')';
+                }
+                
+            }else{
+                foreach($res as $key=>$val){
+                    $res2 = $res2.$key.': '.$val.$separator;
+                }
             }
             
             return $res2;
@@ -1617,6 +1660,7 @@ class Temporal {
             if(@$date['comment']) $res['COM'] = $date['comment'];
             //labaratory code for C14
             if(@$date['labcode']) $res['COD'] = $date['labcode'];
+            if(@$date['calibrated']) $res['CAL'] = '1';
             //human readable in native calendar
             if(@$date['native']) $res['CL2'] = $date['native'];
             

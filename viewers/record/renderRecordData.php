@@ -1221,9 +1221,13 @@ function print_public_details($bib) {
                 }
                 $bds_res->close();
             }
-        }        
+        }  
+        
+        
         
         foreach ($bds_temp as $bd) {
+            
+            $rollover = '';
 
             if ($bd['dty_Type'] == 'enum' || $bd['dty_Type'] == 'relationtype') {
                 
@@ -1254,7 +1258,8 @@ function print_public_details($bib) {
                     //ignore empty date
                     continue;
                 }else{
-                    $bd['val'] = Temporal::toHumanReadable($bd['val'], true);
+                    //$rollover = htmlspecialchars(Temporal::toHumanReadable($bd['val'], true, 2, ''));
+                    $bd['val'] = htmlspecialchars(Temporal::toHumanReadable($bd['val'], true, 1));
                     $bd['val'] = output_chunker($bd['val']);
                 }
 
@@ -1924,8 +1929,8 @@ function print_relation_details($bib) {
 					print strip_tags($bd['Title'],ALLOWED_TAGS);
 				}
 				print '&nbsp;&nbsp;';
-				if (@$bd['StartDate']) print htmlspecialchars(Temporal::toHumanReadable($bd['StartDate'], true));
-				if (@$bd['EndDate']) print ' until ' . htmlspecialchars(Temporal::toHumanReadable($bd['EndDate'], true));
+				if (@$bd['StartDate']) print htmlspecialchars(Temporal::toHumanReadable($bd['StartDate'], true, 1));
+				if (@$bd['EndDate']) print ' until ' . htmlspecialchars(Temporal::toHumanReadable($bd['EndDate'], true, 1));
 			print '</div></div>';
 		}
 		$from_res->close();

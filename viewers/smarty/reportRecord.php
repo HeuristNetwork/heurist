@@ -531,8 +531,8 @@ class ReportRecord {
                             $origvalues = array();
                             foreach ($dtValue as $key => $value){
                                 if(strlen($res)>0) $res = $res.", ";
-                                $res = $res.Temporal::toHumanReadable($value);
-                                array_push($origvalues, Temporal::toHumanReadable($value));
+                                $res = $res.Temporal::toHumanReadable($value, true, 1);
+                                array_push($origvalues, $value);
                             }
                             if(strlen($res)==0){ //no valid terms
                                 $res = null;
