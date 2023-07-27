@@ -378,9 +378,19 @@
 
                 $system->user_LogActivity('ResetPassword');
                 
-                if(user_ResetPassword($system, @$_REQUEST['username'])){
+                if($_REQUEST['pin'] && $_REQUEST['username'] && $_REQUEST['new_password']){ // update password w/ pin
+                    $res = user_ResetPassword($system, $_REQUEST['username'], $_REQUEST['new_password'], $_REQUEST['pin']);
+                }else if($_REQUEST['pin']){ // get reset pin
+                    $res = user_HandleResetPin($system, @$_REQUEST['username'], @$_REQUEST['pin'], @$_REQUEST['captcha']);
+                }else{
+                    $res = $system->addError(HEURIST_ERROR, 'Invalid request made to password reset system');
+                }
+
+                /* original method - Lets random people reset passwords for random accounts
+                if(user_ResetPasswordRandom($system, @$_REQUEST['username'])){
                     $res = true;
                 }
+                */
 
             } else  if ($action=="action_password") { //special passwords for some admin actions - defined in configIni.php
             
