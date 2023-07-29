@@ -707,7 +707,7 @@ Temporal._typeFieldMap = {	s : {
     },
     p :	{
         req : [["PDB","PDE","TPQ","TAQ"],["TPQ","TAQ"]],
-        opt : ["DET","SPF","EPF","COM","SRT","CLD","CL2"],
+        opt : ["PRF","DET","SPF","EPF","COM","SRT","CLD","CL2"],
         hdr : ["PDB","PDE","TPQ","TAQ"]
     },
     f :	{
@@ -2146,12 +2146,20 @@ function temporalToHumanReadableString(inputStr) {
             c14 = c14 ? c14[1]: (bce ? bce:" c14 temporal");
             var suff = str.match(/CAL=([^\|]+)/) ? " Cal" : "";
             suff += bce ? " BCE" : " BP";
-            var dvp = str.match(/DVP=P(\d+)Y/);
-            dvp = dvp ? dvp[1]: null;
+            
             var dev = str.match(/DEV=P(\d+)Y/);
-            dev = dev ? " ±" + dev[1] + " yr" + (dev[1]>1?"s":""):(dvp ? " +" + dvp + " yr" + (dvp>1?"s":""):" + ??");
-            var dvn = str.match(/DVN=P(\d+)Y/);
-            dev += dvp ? (dvn[1] ? " -" + dvn[1] + " yr" + (dvn[1]>1?"s":""): " - ??") : "";
+            if(dev){
+                dev = " ±" + dev[1] + " yr" + (dev[1]>1?"s":"");    
+            }else{
+                var dvp = str.match(/DVP=P(\d+)Y/); //positive
+            
+                var dvn = str.match(/DVN=P(\d+)Y/); //negative
+
+                dev = (dvp?" +" + dvp[1] + " yr" + (dvp[1]>1?"s":""):'')
+                       +
+                      (dvn?" -" + dvn[1] + " yr" + (dvn[1]>1?"s":""):'')
+            }
+            
             str = c14 + dev + suff;
         }else if (str.search(/TYP=p/) != -1 ) {// probable date
             var tpq = str.match(/TPQ=([^\|]+)/);

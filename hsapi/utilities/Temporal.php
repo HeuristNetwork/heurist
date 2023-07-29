@@ -158,7 +158,18 @@ class Temporal {
                 if(@$date['timestamp']){
                 
                     $profile = 0;    
-                    if(@$date['timestamp']['circa']){
+                    
+                    if($date['timestamp']['type']=='c'){ //radiometric/carbon
+                    
+                        if(@$timespan['timestamp']['deviation_negative'] && !@$timespan['timestamp']['deviation_positive']){
+                            $profile = 2; //slow start
+                        }else if(!@$timespan['timestamp']['deviation_negative'] && @$timespan['timestamp']['deviation_positive']){
+                            $profile = 3; //slow finish    
+                        }else{
+                            $profile = 1; //central
+                        }
+                        
+                    }else if(@$date['timestamp']['circa']){
                         $profile = 1; //central
                     }else if(@$date['timestamp']['before']){
                         $profile = 2; //slow start
@@ -172,8 +183,14 @@ class Temporal {
                     $res[1] = Temporal::dateToISO($date['start']['latest'],2,false);
                     $res[2] = Temporal::dateToISO($date['end']['earliest'],2,false);
                     
-                    if(@$date['start']['profile']>0) $res[5] = $date['start']['profile'];
-                    if(@$date['end']['profile']>0) $res[6] = $date['end']['profile'];
+                    if(@$date['profile']){
+                        //simple range
+                        $res[5] = $date['profile'];
+                    }else{
+                        //fuzzy range
+                        if(@$date['start']['profile']>0) $res[5] = $date['start']['profile'];
+                        if(@$date['end']['profile']>0) $res[6] = $date['end']['profile'];
+                    }
                 }
                 
 //profile: Flat(0), Central(1) (circa), Slow Start(2) (before), Slow Finish(3) (after) - responsible for gradient

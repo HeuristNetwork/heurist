@@ -323,11 +323,14 @@ $.widget( "heurist.timeline", {
             var yearmax = (new Date(range.max)).getFullYear();
             var dt = range['omax'];
             var dta = [];
-            if(dt!=undefined){
+            if(typeof dt==='string'){
                 dta = dt.split('-');
                 if(dta.length>0)
                     yearmax = Number(dta[0]);
+            }else if(!isNaN(parseInt(dt))){
+                yearmax = Number(dt);
             }
+            
 
 
             if(interval < 1000){ //single date
