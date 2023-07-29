@@ -108,9 +108,9 @@ if($_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0.0.1'){
 // WARNING: CHANGES MADE TO vis.js
 // These changes are not in our repository
 // line:285 remove margin for item's label
-// line:345,15753, 15860, 16108 correct orientation for bottom order
-// line: 13607 getDataRangeHeurist function
-// line: 13594 catch exception of datetime convertation
+// line:345,15758, 15865, 16113 correct orientation for bottom order
+// line: 13612 getDataRangeHeurist function
+// line: 13598 catch exception of datetime convertation
 //
 -->
 
@@ -171,8 +171,9 @@ if (!(@$_REQUEST['notimeline']=='true' || @$_REQUEST['notimeline']=='1')) { ?>
         overflow: hidden;
         text-overflow: ellipsis;
     }
-    .vis-item-bbox{
-        background-color:rgb(142, 169, 185);
+    /* was rgb(142, 169, 185) */
+    .vis-item-bbox, .vis-item-bbox-start, .vis-item-bbox-end{
+        background-color: #5e7fe4;
     }
     
     #term_tree{

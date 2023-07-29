@@ -1203,13 +1203,17 @@ console.log('Start date not defined ',tdata.when,tdata.rec_ID);
                                 + '"  align="absmiddle" style="padding-right:3px;" width="12" height="12"/>&nbsp;<span>'
                                 + tdata.rec_Title+'</span>',
                                 //'<span>'+recName+'</span>',
-                                title: tdata.rec_Title,
+                                title: ts[4], //tdata.rec_Title,
                                 start: ts[0],
+                                profile_start: ts[5],
+                                profile_end: ts[6], 
                                 recID: tdata.rec_ID
                             };
 
                             if(ts[3] && ts[0]!=ts[3]){
                                 titem['end'] = ts[3];
+                                if(ts[1]) titem['start0'] = ts[1];
+                                if(ts[2]) titem['end0'] = ts[2];
                             }else{
                                 titem['type'] = 'point';
                                 //titem['title'] = singleFieldName+': '+ dres[0] + '. ' + titem['title'];

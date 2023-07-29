@@ -49,6 +49,8 @@
 *       isValidSimple 
 *       getMinMax - pairs of min max values in decimal format to store in recDetailsDateIndex
 *       calcMinMax - calculates and returns min max dates as iso strings
+*       getTimespan - returns temporal as array 
+*                     [start, latest-start, earliest-end, end, label, profile-start, profile-end, determination]
 * 2. Static parse and formatting functions
 *       _getLimitDate  - find earliest and latest dates for timespan
 *       _parseTemporal - parses json or plain string to array of values
@@ -138,22 +140,54 @@ class Temporal {
     //
     // For geojson
     //
-    public function getOldTimespan(){
+    public function getTimespan($plain_array=false){
+        $res = null;
         if($this->isValid()){
-                //[start, latest-start, earliest-end, end, label]
+                //[start, latest-start, earliest-end, end, label, profile-start, profile-end, determination]
                 
                 $minmax = $this->calcMinMax();
                 
                 if(intval($minmax[0])<-250000){
-                    return [];
+                    return null;
                 }
                 
-                return array($minmax[0],'','',$minmax[1],'');
+                $res = array($minmax[0],'','',$minmax[1],$this->toReadableExt('',true), 0, 0, 0);
+                
+                $date = $this->tDate;
+                
+                if(@$date['timestamp']){
+                
+                    $profile = 0;    
+                    if(@$date['timestamp']['circa']){
+                        $profile = 1; //central
+                    }else if(@$date['timestamp']['before']){
+                        $profile = 2; //slow start
+                    }else if(@$date['timestamp']['after']){
+                        $profile = 3; //slow finish
+                    }
+
+                    $res[5] = $profile;
+                    
+                }else{
+                    $res[1] = Temporal::dateToISO($date['start']['latest'],2,false);
+                    $res[2] = Temporal::dateToISO($date['end']['earliest'],2,false);
+                    
+                    if(@$date['start']['profile']>0) $res[5] = $date['start']['profile'];
+                    if(@$date['end']['profile']>0) $res[6] = $date['end']['profile'];
+                }
+                
+//profile: Flat(0), Central(1) (circa), Slow Start(2) (before), Slow Finish(3) (after) - responsible for gradient
+//determination: Unknown(0), Conjecture(2), Measurment(3), Attested(1)  - color depth
+                if(@$date['determination']){
+                    $res[7] = $date['determination'];
+                }
         }    
-        return [];
+        return $res;
     }
     
-    
+    //
+    //
+    //
     public function isValid(){
         return ($this->tDate!=null);   
     }
@@ -600,7 +634,7 @@ class Temporal {
     private static function _getLimitDate($date, $direction){
         
         $res = null;
-        if(@$date['in']){
+        if(@$date['in']){ //timestamp
             
                 $deviation = @$date['deviation']?$date['deviation']
                     :@$date[$direction>1?'deviation_positive':'deviation_negative'];

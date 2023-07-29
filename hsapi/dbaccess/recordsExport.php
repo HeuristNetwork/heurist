@@ -1392,7 +1392,10 @@ private static function _getGeoJsonFeature($record, $extended=false, $simplify=f
                     }else if($value!=null){
                         //parse temporal
                         $ta = new Temporal($value);
-                        if($ta->isValid()) $timevalues[] = $ta->getOldTimespan();//getValue();  //temporal json array for geojson
+                        $ta = $ta->getTimespan(true);
+                        if($ta!=null){
+                            $timevalues[] = $ta;  //temporal json array for geojson
+                        }
                     }
                 }else if(defined('DT_SYMBOLOGY') && $dty_ID==DT_SYMBOLOGY){
                     $symbology = json_decode($value,true);                    
@@ -1599,14 +1602,26 @@ private static function _getGeoJsonFeature($record, $extended=false, $simplify=f
         
         if($dt && $dt->isValid())
         {
-            $timevalues[] = $dt->getOldTimespan();//getValue(); //array($date_start, '', '', $date_end, '');
+            $ta = $ta->getTimespan(true);
+            if($ta!=null){
+                //array($date_start, '', '', $date_end, '');
+                $timevalues[] = $ta;  //temporal json array for geojson
+            }
         }
     }
 
     if(count($timevalues)>0){
-        //https://github.com/kgeographer/topotime/wiki/GeoJSON%E2%80%90T
-        // "timespans": [["-323-01-01 ","","","-101-12-31","Hellenistic period"]],  [start, latest-start, earliest-end, end, label]
-        $res['when'] = array('timespans'=>$timevalues);
+        
+//profile: Flat(0), Central(1) (circa), Slow Start(2) (before), Slow Finish(3) (after) - responsible for gradient
+//determination: Unknown(0), Conjecture(2), Measurment(3), Attested(1)  - color depth
+// start.earliest - end.latest => vis-item-bbox
+// start.earlist~latest => vis-item-bbox-start 
+// end.earlist~latest => vis-item-bbox-end
+            
+            //https://github.com/kgeographer/topotime/wiki/GeoJSON%E2%80%90T
+            // "timespans": [["-323-01-01 ","","","-101-12-31","Hellenistic period"]],  
+            // [start, latest-start, earliest-end, end, label, profile-start, profile-end, determination]
+            $res['when'] = array('timespans'=>$timevalues);
     }
     if($symbology){
         $res['style'] = $symbology; //individual symbology per feature

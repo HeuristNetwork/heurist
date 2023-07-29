@@ -424,7 +424,9 @@ $.widget( "heurist.timeline", {
         return val;     
     },*/
 
+    //
     // filter items on map based on timeline range 
+    //
     _timelineApplyRangeOnMap: function(params)
     {
         var that = this;
@@ -481,7 +483,9 @@ $.widget( "heurist.timeline", {
         }
     },
     
+    //
     // button initialization (called once on first init)
+    //
     _timelineInitToolbar: function(){
         
         var that = this;
@@ -674,7 +678,8 @@ $.widget( "heurist.timeline", {
 
     
     //
-    // 0 - full, 1 - truncate, 2- fixed width, 3 - hide
+    // mode: 0 - full, 1 - truncate, 2- fixed width, 3 - hide
+    // labelpos 2 - above, 1 - within the bar
     //
     _timelineApplyLabelSettings: function(mode, labelpos){
         
