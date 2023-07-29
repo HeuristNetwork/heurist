@@ -1027,7 +1027,7 @@ function browseRecords(_editing_input, $input){
 
 /*
 $inputdiv.uniqueId();                                
-console.log('BEFORE');
+console.log('BEFORE', __current_input_id);
 console.log('input', $input.attr('id'),$input.parents('fieldset').attr('id'));
 console.log('inputdiv',$inputdiv.attr('id'),$inputdiv.parents('fieldset').attr('id'));
 */
@@ -1111,10 +1111,9 @@ console.log('inputdiv',$inputdiv.attr('id'),$inputdiv.parents('fieldset').attr('
                                 var targetID = recordset.fld(record,'rec_ID');
                                 var rec_Title = recordset.fld(record,'rec_Title');
                                 var rec_RecType = recordset.fld(record,'rec_RecTypeID');
-                                var is_new = Object.keys(that.newvalues).length==1;
-                                that.newvalues[$input.attr('id')] = targetID;
                                 
-                                //window.hWin.HEURIST4.ui.setValueAndWidth($input, rec_Title);
+                                that.newvalues[$input.attr('id')] = targetID;
+                                $input.attr('data-value', targetID); //that's more reliable
                                 
                                 //save last 25 selected records
                                 var now_selected = data.selection.getIds(25);
@@ -1128,7 +1127,7 @@ console.log('inputdiv',$inputdiv.attr('id'),$inputdiv.parents('fieldset').attr('
                                      rec_RecTypeID: rec_RecType,
                                      rec_IsChildRecord:isparententity
                                     }, __show_select_dialog);
-                                //if(is_new) ele.appendTo($inputdiv);
+                                
                                 that.onChange();
                                 ele.css({margin:'4px', 'border':'2px red solid !important'});
                                 $inputdiv.css('border','4px green solid !important');
@@ -1451,6 +1450,7 @@ console.log('inputdiv',$inputdiv.attr('id'),$inputdiv.parents('fieldset').attr('
                             var rec_Title = opt.text();
                             var rec_RecType = opt.attr('data-rty');
                             that.newvalues[$input.attr('id')] = targetID;
+                            $input.attr('data-value', targetID); //that's more reliable
                             
                             $input.empty();
                             var ele = window.hWin.HEURIST4.ui.createRecordLinkInfo($input, 
@@ -1705,6 +1705,7 @@ function browseTerms(_editing_input, $input, value){
             //var $inputdiv = $('#'+ref_id).parent();
             //var opt = $(that.selObj).find('option:selected');
             that.newvalues[$input.attr('id')] = trm_ID;
+            $input.attr('data-value', targetID); //that's more reliable
 
             __recreateTrmLabel($input, trm_ID);
             /*

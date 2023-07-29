@@ -1978,7 +1978,10 @@ $.widget( "heurist.editing_input", {
             
             that._findAndAssignTitle($input, value, __show_select_function);
             
-            this.newvalues[$input.attr('id')] = value;  //for this type assign value at init  
+            if(value){
+                this.newvalues[$input.attr('id')] = value;  //for this type assign value at init    
+                $input.attr('data-value', value);
+            } 
         } 
         
         else if(this.detailType=='resource' && this.configMode.entity=='DefRecTypes'){ //-----------
@@ -2049,7 +2052,10 @@ $.widget( "heurist.editing_input", {
             this._on( $gicon, { click: __show_select_dialog } );
             this._on( $inputdiv.find('.sel_link2'), { click: __show_select_dialog } );
             
-            this.newvalues[$input.attr('id')] = value;  //for this type assign value at init  
+            if(value){
+                this.newvalues[$input.attr('id')] = value;  //for this type assign value at init  
+                $input.attr('data-value', value);
+            }
         
         }
         else if(this.detailType=='resource') //----------------------------------------------------
@@ -2111,7 +2117,10 @@ $.widget( "heurist.editing_input", {
 
                             //config and data are loaded already, since dialog was opened
                             that._findAndAssignTitle($input, newsel);
-                            that.newvalues[$input.attr('id')] = newsel.join(',');
+                            newsel = newsel.join(',')
+                            that.newvalues[$input.attr('id')] = newsel;
+                            $input.attr('data-value', newsel);
+
                             that.onChange();
 
                         }else if( window.hWin.HEURIST4.util.isRecordSet(data.selection) ){
@@ -2170,7 +2179,10 @@ $.widget( "heurist.editing_input", {
             this._on( $gicon, { click: __show_select_dialog } );
             this._on( $inputdiv.find('.sel_link2'), { click: __show_select_dialog } );
             
-            this.newvalues[$input.attr('id')] = value;  //for this type assign value at init  
+            if(value){
+                this.newvalues[$input.attr('id')] = value;  //for this type assign value at init  
+                $input.attr('data-value', value);
+            }
 
         }
         else{              //----------------------------------------------------
@@ -4239,8 +4251,6 @@ console.log('onpaste');
     _onTermChange: function( orig, data ){
         
         var $input = (orig.target)? $(orig.target): orig;
-         
-//console.log('_onTermChange');
                 
                 if(! $input.attr('radiogroup')){
                 
@@ -4589,6 +4599,7 @@ console.log('onpaste');
                 if(that.newvalues[input_id]){
                     that.newvalues[input_id] = '';
                 }
+                $input.removeAttr('data-value');
                 
                 if(that.detailType=='file'){
                     that.input_cell.find('img.image_input').prop('src','');
@@ -4596,6 +4607,7 @@ console.log('onpaste');
                     if(that.linkedImgInput !== null){
                         that.linkedImgInput.val('');
                         that.newvalues[that.linkedImgInput.attr('id')] = '';
+                        that.linkedImgInput.removeAttr('data-value');
                     }
                     if(that.linkedImgContainer !== null){
                         that.linkedImgContainer.find('img').prop('src', '');
@@ -4714,7 +4726,10 @@ console.log('onpaste');
                 res = res.trim();
             }
         }else {
-            res = this.newvalues[$input.attr('id')];
+            res = this.newvalues[$input.attr('id')];    
+            if(!res && $input.attr('data-value')){
+                res = $input.attr('data-value');
+            }
         }
 
         return res;
