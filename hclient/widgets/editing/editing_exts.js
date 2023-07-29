@@ -1705,7 +1705,7 @@ function browseTerms(_editing_input, $input, value){
             //var $inputdiv = $('#'+ref_id).parent();
             //var opt = $(that.selObj).find('option:selected');
             that.newvalues[$input.attr('id')] = trm_ID;
-            $input.attr('data-value', targetID); //that's more reliable
+            $input.attr('data-value', trm_ID); //that's more reliable
 
             __recreateTrmLabel($input, trm_ID);
             /*
