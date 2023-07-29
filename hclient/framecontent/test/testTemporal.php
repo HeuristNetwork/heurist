@@ -88,7 +88,8 @@
 '{"start":{"earliest":"-000099","latest":"0001","profile":"2"},"end":{"latest":"0100-09-01","earliest":"0010","profile":"1"},"determination":"2","calendar":"Gregorian","estMinDate":-99,"estMaxDate":100.0901}',
 '{"timestamp":{"in":-950,"type":"c","bp":true,"deviation_negative":"P50Y","deviation_positive":"P100Y"},"native":"2900 BP","labcode":"A12","calibrated":1,"estMinDate":-1000,"estMaxDate":-900}',
 '{"timestamp":{"in":"1980-01-18","type":"s","circa":true},"determination":"3","calendar":"Thai","native":"2523-01-18","estMinDate":1980.0118,"estMaxDate":1980.0118}',
-'{"start":{"earliest":"2023-07-01"},"end":{"latest":"2023-07-26"},"determination":"1","calendar":"Islamic","native":"1444-12-12 to 1445-01-08","estMinDate":2023.0701,"estMaxDate":2023.0726}'
+'{"start":{"earliest":"2023-07-01"},"end":{"latest":"2023-07-26"},"determination":"1","calendar":"Islamic","native":"1444-12-12 to 1445-01-08","estMinDate":2023.0701,"estMaxDate":2023.0726}',
+'{"timestamp":{"in":1948,"type":"c","bp":true,"deviation_negative":"P8Y","deviation_positive":"P10Y"},"native":"0002 BP","labcode":"A123","estMinDate":1940,"estMaxDate":1956}'
     );
     
     foreach ($tvals as $val) {

@@ -1633,7 +1633,7 @@ class Temporal {
                 
                 if($res['TYP']=='c'){
                     if($date['timestamp']['bp']){
-                        $res['BPD'] = ''.(abs(intval(@$date['timestamp']['in'])+1950));
+                        $res['BPD'] = ''.(abs(intval(@$date['timestamp']['in'])-1950));
                     }else{
                         $res['BCE'] = ''.abs(intval(@$date['timestamp']['in']));
                     }
