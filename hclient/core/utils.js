@@ -256,10 +256,9 @@ window.hWin.HEURIST4.util = {
         if(need_encode>0){
             var f_encode = null;
             
-            if(need_encode==2){
+            if(need_encode==2 || need_encode==1){
                 f_encode = encodeURIComponent;
-            }else  if(need_encode==1){
-                f_encode = window.hWin.HEURIST4.util.encodeSuspectedSequences;
+                //f_encode = window.hWin.HEURIST4.util.encodeSuspectedSequences;
             }else if(need_encode==3){
                 f_encode = JSON.stringify;
             }
@@ -277,7 +276,7 @@ window.hWin.HEURIST4.util = {
     },
     
     //
-    // Replace ../  to ^^/
+    // NOT USED. Replace ../  to ^^/     style= to xxx_style=
     //
     encodeSuspectedSequences: function (val) {
         
@@ -287,12 +286,6 @@ window.hWin.HEURIST4.util = {
         return encodeURIComponent(val.replace(/(\.\.\/)/g, '^^/').replace(/( style=)/g,' xxx_style='));
     },
     
-    fixedEncodeURIComponent: function (str) {
-      return encodeURIComponent(str).replace(/[.!'()*]/g, function(c) {
-            return '%' + c.charCodeAt(0).toString(16).toUpperCase();
-      });
-    },    
-
     //
     // returns json or false
     //
@@ -1088,8 +1081,36 @@ window.hWin.HEURIST4.util = {
               src = window.hWin.HAPI4.baseURL + src.substring(src.indexOf('/')==0?1:2);
               ele.setAttribute('src', src);
         }        
-    }
+    },
     
+    base64ToBytes: function(base64) {
+        const binString = atob(base64);
+        return Uint8Array.from(binString, (m) => m.codePointAt(0));
+    },
+
+    bytesToBase64: function(bytes) {
+        const binString = Array.from(bytes, (x) => String.fromCodePoint(x)).join("");
+        return btoa(binString);
+    },
+    
+    
+    isBase64: function(str) {
+          const notBase64 = /[^A-Z0-9+\/=]/i;
+          
+          if(typeof str === 'string'){
+              const len = str.length;
+              if (!len || len % 4 !== 0 || notBase64.test(str)) {
+                return false;
+              }
+              const firstPaddingChar = str.indexOf('=');
+              return firstPaddingChar === -1 ||
+                firstPaddingChar === len - 1 ||
+                (firstPaddingChar === len - 2 && str[len - 1] === '=');
+          }else{
+              return false;
+          }
+    }    
+        
     
 }//end util
 

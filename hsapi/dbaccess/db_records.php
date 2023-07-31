@@ -485,18 +485,13 @@ function recordSave($system, $record, $use_transaction=true, $suppress_parent_ch
     // recDetails data
     if ( @$record['details'] ) {
         
-        if(@$record['details_encoded']==1){
-            $record['details'] = json_decode(str_replace( ' xxx_style=', ' style=', 
-                        str_replace( '^^/', '../', urldecode($record['details']))), true);
-        }else if(@$record['details_encoded']==2){
-            $record['details'] = json_decode(urldecode($record['details']), true);
-        }else if(@$record['details_encoded']==3){
-            $record['details'] = json_decode($record['details'], true);
-        }
-        
         if(@$record['details_encoded']==1 || @$record['details_encoded']==2){
+            //$record['details'] = json_decode(str_replace( ' xxx_style=', ' style=', 
+            //            str_replace( '^^/', '../', urldecode($record['details']))), true);
+            $record['details'] = json_decode(urldecode($record['details']), true);
             $record['details_visibility'] = json_decode(urldecode($record['details_visibility']), true);
         }else if(@$record['details_encoded']==3){
+            $record['details'] = json_decode($record['details'], true);
             $record['details_visibility'] = json_decode($record['details_visibility'], true);    
         }
         

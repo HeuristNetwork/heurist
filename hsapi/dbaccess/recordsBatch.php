@@ -446,10 +446,11 @@ error_log('count '.count($childNotFound).'  '.count($toProcess).'  '.print_r(  $
         }
         
         if(@$this->data['val']!=null){
-            if(@$this->data['details_encoded']==1){
-                $this->data['val'] = json_decode(str_replace( ' xxx_style=', ' style=', 
-                        str_replace( '^^/', '../', urldecode($this->data['val']))));
-            }else if(@$this->data['details_encoded']==2){
+            //attempt to pass server filters against malicious code
+            if(@$this->data['details_encoded']==1 || @$this->data['details_encoded']==2){
+                //$this->data['val'] = json_decode(str_replace( ' xxx_style=', ' style=', 
+                //        str_replace( '^^/', '../', urldecode($this->data['val']))));
+                //}else if(@$this->data['details_encoded']==2){
                 $this->data['val'] = urldecode( $this->data['val'] );
             }
         }
@@ -612,6 +613,14 @@ error_log('count '.count($childNotFound).'  '.count($toProcess).'  '.print_r(  $
             
                 $res = $this->detailsReplace();
 
+            }else if(@$this->data['a'] == 'addreplace'){
+                
+                $res = $this->detailsReplace();
+                if(is_array($res) && @$res['passed']==1 && @$res['undefined']==1){
+                    //detail not found - add new one
+                    $res = $this->detailsAdd();
+                }
+                
             }else if(@$this->data['a'] == 'delete'){
                 
                 $res = $this->detailsDelete(true);
@@ -654,12 +663,12 @@ error_log('count '.count($childNotFound).'  '.count($toProcess).'  '.print_r(  $
         $useNewTemporalFormatInRecDetails = ($this->system->get_system('sys_dbSubSubVersion')>=14);
 
         
-        if(@$this->data['rVal']!=null){
+        if(@$this->data['rVal']!=null || @$this->data['encoded']==2){
             if(@$this->data['encoded']==1){
                 $this->data['rVal'] = urldecode( $this->data['rVal'] );
-            }else if(@$this->data['encoded']==2){
-                $this->data['rVal'] = str_replace( ' xxx_style=', ' style=', 
-                                str_replace( '^^/', '../', $this->data['rVal'] ));
+                //}else if(@$this->data['encoded']==2){
+                //$this->data['rVal'] = str_replace( ' xxx_style=', ' style=', 
+                //                str_replace( '^^/', '../', $this->data['rVal'] ));
             }
         }
         
