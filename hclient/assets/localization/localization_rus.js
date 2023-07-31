@@ -228,7 +228,7 @@ regional['RUS'] = {
     'Build': 'Создать',
     'Filter builder': 'Условия поиска',
     'Facets builder': 'Многогранный поиск',
-    'Save filter': 'Добавить фильтр',
+    'Save filter': 'Сохранить фильтр',
     'Advanced': 'Дополнительно',
     'Rules': 'Каскадный поиск',
     'Favourites': '',
@@ -498,12 +498,6 @@ regional['RUS'] = {
     resultList_reorder_list_changed: 'Список был изменен',
     //END resultList
 
-    //search - filters
-    'Filter': 'Поиск',
-    'Filtered Result': 'Результаты поиска',
-    'Save Filter': 'Сохранить фильтр',
-    save_filter_hint: 'Сохранить текущий поиск как фильтр доступный для постоянного использования через меню',
-
     //edit 
     Warn_Lost_Data: 'Вы изменили данные. Нажмите "Сохранить", иначе потеряете все изменения.',     
     Warn_Lost_Data_On_Structure_Edit: 'Нажмите "Сохранить данные" чтобы сохранить запись, "Отменить изменения" чтобы отказаться.<br>Изменения в структуре типа данных будут сохраняться автоматически - это не зависит от Вышего выбора.',
@@ -613,6 +607,23 @@ regional['RUS'] = {
     Error_Json_Parse: 'Невозможно разобрать ответ сервера',
 
 //---------------------- END OF TRANSLATION 2021-10-19
+
+    // Search (fimple filter) WIDGET --------------------
+    'Filter': 'Поиск',
+    filter_start_hint: 'Применить условия поиска',
+    'Filtered Result': 'Результаты поиска',
+    'Save Filter': 'Сохранить фильтр',
+    'Filter help': 'Помощь',
+    filter_help_hint: 'Правила и примеры языка запросов Heurist',
+    save_filter_hint: 'Сохранить текущий поиск как фильтр доступный для постоянного использования через меню',
+    search_filter_hint: 'определите условия поиска или используйте "Составить запрос"',
+    'Filter builder': 'Составить запрос',
+    filter_builder_hint: 'Создайте условия поиска с помощью специалльной формы',
+    'Facet builder': 'Многогранный поиск',
+    filter_facetbuilder_hint: 'Создайте новый Многогранный поиск',
+    filter_save_hint: 'Сохранить текущий фильтр',
+    //END Search (fimple filter) WIDGET
+
 
 
             'Upload/register new file': 'Загрузить или зарегистрировать файл',
