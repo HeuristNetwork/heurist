@@ -83,7 +83,7 @@ if (($_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0.0.1')
     var init_page_record_id=<?php echo $open_page_or_record_on_init; ?>;
     var isWebPage = <?php echo ($isWebPage ?'true':'false');?>;
     var current_page_id = 0;
-    var current_language = '';
+    var current_language = 'xx';
     var default_language = '<?php echo $website_language_def; ?>';
     var website_languages = '<?php echo $website_languages?implode(',',$website_languages):''; ?>';
     var is_show_pagetitle_main = <?php echo $show_pagetitle?'true':'false'; ?>;  //is show page title per website 
@@ -433,8 +433,8 @@ function initMainMenu( afterInitMainMenu ){
 function switchLanguage(event){
     
     var lang_code = $(event.target).attr('data-lang');
-console.log(lang_code);    
-    if(lang_code){
+
+    if(lang_code && current_language != lang_code){
         //add url parameter
         current_language = lang_code;
         loadPageContent(current_page_id);
@@ -554,7 +554,8 @@ if($website_custom_css!=null){
                                         //the size content can be big so it stores in db as 64K chunks 
                                         //implode all parts of page 
                                         res[key] = Object.values(res[key]).join('');
-                                    }else{
+                                    }else if(key != DT_NAME){
+                                        //takes only first value
                                         res[key] = res[key][ Object.keys(res[key])[0] ];
                                     }
                                }
@@ -675,7 +676,10 @@ var datatable_custom_render = null;
 //
 function assignPageTitle(pageid){
     
-    var pagetitle = window.hWin.HEURIST4.util.stripTags(page_cache[pageid][DT_NAME],'i,b,u,em,strong,sup,sub,small'); //<br>
+    var pagetitle = window.hWin.HAPI4.getTanslation(page_cache[pageid][DT_NAME], current_language);
+    
+    pagetitle = window.hWin.HEURIST4.util.stripTags(pagetitle,'i,b,u,em,strong,sup,sub,small'); //<br>
+    
     var is_show_pagetitle = (is_show_pagetitle_main || 
          (!window.hWin.HEURIST4.util.isempty(page_cache[pageid][DT_CMS_PAGETITLE]) && 
           page_cache[pageid][DT_CMS_PAGETITLE]!=TRM_NO && page_cache[pageid][DT_CMS_PAGETITLE]!=TRM_NO_OLD));

@@ -2456,6 +2456,51 @@ console.log('DEBUG refreshEntityData '+(fin_time-s_time));  //response.data+'  '
             //not found - English is default
             return (def ?def:(_region?_region:'ENG'));
         },
+        
+        //
+        // values - array of strings
+        //
+        getTanslation: function(values, lang){
+            
+            //"xx" means take current system language
+            if(lang){
+                lang = window.hWin.HAPI4.getLangCode3(lang);
+                
+                var def_val = '';
+                var is_object = $.isPlainObject(val);
+                
+                for (var key in values) {
+                    if (!is_object || val.hasOwnProperty(key)) {
+
+                    var val = values[key];
+                    
+                    if(val.length>4 && val.substr(3,1)==':'){ //has lang prefix
+                        if(val.substr(0,3)==lang){
+                            def_val = val.substr(4).trim();
+                            break;
+                        }
+                    }else {
+                        //without prefix
+                        def_val = val;
+                        if(lang=='xx'){ //take first without prefix
+                            break;
+                        }
+                    }
+                    
+                    }
+                }//for
+                
+                //for(var i=0; i<values.length; i++){
+                //    var val = values[i];
+                    
+                
+                return def_val;
+            }else{
+                return $.isPlainObject(values)?values[Object.keys(values)[0]]:values[0];
+            }
+            
+        },
+
 
         //
         // returns current locale - language code

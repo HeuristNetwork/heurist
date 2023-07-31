@@ -194,7 +194,8 @@ $.widget( "heurist.editing_input", {
 
             //hardcoded list of fields and record types where multivalues mean translation (multilang support)
             var is_translation = this.f('rst_MultiLang') || 
-               (that.options.rectypeID==window.hWin.HAPI4.sysinfo['dbconst']['RT_CMS_MENU']
+               ((that.options.rectypeID==window.hWin.HAPI4.sysinfo['dbconst']['RT_CMS_MENU'] ||
+                that.options.rectypeID==window.hWin.HAPI4.sysinfo['dbconst']['RT_CMS_HOME'])
                 && that.options.dtID == window.hWin.HAPI4.sysinfo['dbconst']['DT_NAME']);
             
             //saw TODO this really needs to check many exist

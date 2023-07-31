@@ -214,7 +214,7 @@ $.widget( "heurist.navigation", {
                  this.options.selectable_if_submenu = (selectable!==TERM_NO && selectable!==TERM_NO_old);
             }
         }
-    
+
         for(var i=0; i<menuitems.length; i++)
         {
             
