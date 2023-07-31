@@ -54,6 +54,7 @@
     * getTermFullLabel
     * getTermListAll - get tree for domain
     * getTermLabels
+    * getTermCodes
     *
     * INTERNAL FUNCTIONS
     * __getRectypeColNames
@@ -843,6 +844,18 @@ function dbs_GetRectypeConstraint($system) {
         if ($termIDs) {
             $labels = mysql__select_assoc2($mysqli, 
             'select trm_ID, LOWER(trm_Label) from defTerms where trm_ID in ('.implode(',', $termIDs).')');
+        }
+        return $labels;
+    }    
+
+    //
+    //
+    //
+    function getTermCodes($mysqli, $termIDs) {
+        $labels = array();
+        if ($termIDs) {
+            $labels = mysql__select_assoc2($mysqli, 
+            'select trm_ID, LOWER(trm_Code) from defTerms where trm_ID in ('.implode(',', $termIDs).')');
         }
         return $labels;
     }    

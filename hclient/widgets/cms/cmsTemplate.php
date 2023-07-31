@@ -119,7 +119,7 @@
 }
 #main-pagetitle{
     position: absolute;
-    padding: 15px 0 5px 10px;
+    padding: 2px 0 5px 10px;
     bottom: 0;
     left: 0;
     right: 0;
@@ -202,9 +202,11 @@ if($isWebPage){ //set in websiteRecord.php
 ?>                        
         <div id="main-logo" class="mceNonEditable header-element" style="position:absolute;top:20px;left:10px;max-height:90px;max-width:270px;border:2px none red;"></div>
         
-        <div id="main-logo-alt" class="mceNonEditable header-element" style="position:absolute;top:20px;right:10px;height:70px;width:270px;border:2px none red;"></div>
+        <div id="main-logo-alt" class="mceNonEditable header-element" style="position:absolute;top:20px;right:30px;height:70px;width:270px;border:2px none red;"></div>
         
         <div id="main-title" class="mceNonEditable header-element" style="position:absolute;top:20px;left:280px;right:280px;max-height:90px;"></div>
+
+        <div id="main-languages" class="mceNonEditable header-element" style="position:absolute;top:20px;right:10px;max-height:90px;"></div>
         
         <div id="main-menu" class="mceNonEditable header-element" style="position:absolute;top:110px;width:100%;min-height:40px;border:2px none yellow;color:black;font-size:1.1em;" data-heurist-app-id="heurist_Navigation" data-generated="1">
             <?php print $page_header_menu; ?>

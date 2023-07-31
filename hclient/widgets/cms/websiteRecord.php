@@ -71,6 +71,7 @@ HEADER:
     #main-host      - information about host and heurist. Content defined in Heurist settings
     #main-menu      - generated based on linked Menu/Page records (99-52)
     #main-pagetitle>.webpageheading - loaded Page title "Menu label" (99-52.2-1) hidden if 99-952
+    #main-languages - localization links
     
 If your write your own cms template you have to define only 2 mandatory elements 
 #main-menu and #main-content
@@ -305,6 +306,25 @@ $image_logo = $image_logo?'<img style="max-height:80px;max-width:270px;" src="'.
 
 $meta_keywords = htmlspecialchars(__getValue($rec, DT_CMS_KEYWORDS));
 $meta_description = htmlspecialchars(__getValue($rec, DT_SHORT_SUMMARY));
+
+$website_language_def = '';
+$website_languages_links = '';
+$website_languages = @$rec['details'][DT_LANGUAGES];
+if(is_array($website_languages) && count($website_languages)>0){
+    $website_languages = getTermCodes($mysqli, $website_languages);
+    $res = '';
+    foreach($website_languages as $lang_code){
+        if($lang_code){
+            $lang_code = strtoupper($lang_code);
+            if($website_language_def=='') $website_language_def = $lang_code;
+            $res = $res.'<a href="#" data-lang="'.$lang_code.'" onclick="switchLanguage(event)">'.$lang_code.'</a><br>';
+        } 
+    }
+    $website_languages_links = $res;
+}else{
+    $website_languages = null;
+}
+
 
 $show_login_button = true; // by default, show login button
 if(!$isWebPage){

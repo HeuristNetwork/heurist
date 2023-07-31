@@ -36,6 +36,7 @@ var editCMS_instance2 = null;
 //  window.hWin.layoutMgr - global variable defined in hLayoutMgr
 //  page_cache
 //  home_page_record_id
+//  website_languages
 //  isWebPage
 //  current_page_id
 //  isCMS_InHeuristUI, isCMS_NewWebsite
@@ -81,6 +82,7 @@ function editCMS2(website_document){
     DT_NAME       = window.hWin.HAPI4.sysinfo['dbconst']['DT_NAME'],
     DT_CMS_HEADER = window.hWin.HAPI4.sysinfo['dbconst']['DT_CMS_HEADER'],
     DT_EXTENDED_DESCRIPTION = window.hWin.HAPI4.sysinfo['dbconst']['DT_EXTENDED_DESCRIPTION'],
+    DT_CMS_LANGUAGES = window.hWin.HAPI4.sysinfo['dbconst']['DT_CMS_LANGUAGES'],
     DT_CMS_PAGETITLE = window.hWin.HAPI4.sysinfo['dbconst']['DT_CMS_PAGETITLE'],
     TRM_NO = window.hWin.HAPI4.sysinfo['dbconst']['TRM_NO'];
 
@@ -551,7 +553,7 @@ function editCMS2(website_document){
         
         //2. reload content
         window.hWin.layoutMgr.setEditMode(false);
-        window.hWin.layoutMgr.layoutInit(_layout_content, _layout_container, {rec_ID:home_page_record_id});
+        window.hWin.layoutMgr.layoutInit(_layout_content, _layout_container, {rec_ID:home_page_record_id, lang:current_language});
 
         // Display cms editor button
         _ws_body.find('#btnOpenCMSeditor').show().html('website editor');
@@ -636,6 +638,7 @@ var sMsg = '<p>Heurist\'s CMS editor has been upgraded to a new system which is 
         }
         
         opts.keep_top_config = true;
+        opts.lang = current_language;
         var res = window.hWin.layoutMgr.layoutInit(_layout_content, _layout_container, opts);
         
         if(res===false){
@@ -716,7 +719,14 @@ var sMsg = '<p>Heurist\'s CMS editor has been upgraded to a new system which is 
                             var new_content = tinymce.activeEditor.getContent();
                             page_was_modified = (page_was_modified || l_cfg.content!=new_content);
                             _onPageChange();
-                            l_cfg.content = new_content;
+                            
+                            var lang = $(tinymce.activeEditor.targetElm).attr('data-lang');
+                            if(lang==default_language){
+                                l_cfg.content = new_content;    
+                            }else{
+                                l_cfg['content'+lang] = new_content;    
+                            }
+                            
                         }else{
                             page_was_modified = false;
                         }
@@ -1166,10 +1176,6 @@ var sMsg = '<p>Heurist\'s CMS editor has been upgraded to a new system which is 
             + '<span data-action="edit" style="display:block;padding:4px" title="Edit style and properties 3">'
             +'<span class="ui-icon ui-icon-pencil"/>Style</span>';               
             
-            if(node.data.type=='text'){
-                actionspan += '<span data-action="translate" style="display:block;padding:4px"><span class="ui-icon ui-icon-translate" title="Add a new translation"/>Translate</span>';
-            }
-
             //hide element for cardinal and delete for its panes                     
             if(node.data.type!='cardinal'){
                 actionspan += '<span data-action="element" style="display:block;padding:4px"><span class="ui-icon ui-icon-plus" title="Add a new element/widget"/>Insert</span>';
@@ -1179,6 +1185,26 @@ var sMsg = '<p>Heurist\'s CMS editor has been upgraded to a new system which is 
                     +'Remove element from layout"/>Delete</span>');
             }
 
+            if(node.data.type=='text'){
+                let stitle = 'To enable multilanguage support define more than one language for web home parameter "Languages"';
+                let codes = '';
+                if(website_languages!=''){
+                    var langs = website_languages.split(',');
+                    if(langs.length>0){
+                        stitle = 'Define translation for this text element';
+                        for(var i=0;i<langs.length;i++){
+                            codes = codes
+                            +'<span data-action="translate" data-lang="'+langs[i]
+                                    +'" style="display:block;padding:4px;text-align:right">'
+                            +langs[i]+'</span>';
+                        }
+                    }
+                }
+                actionspan = actionspan + '<span data-action="translate_header" style="display:block;padding:4px" title="'
+                        +stitle+'"><span class="ui-icon ui-icon-translate" />Translate</span>'
+                        +codes;
+                        
+            }
 
             actionspan += '</div>';
             actionspan = $( actionspan );
@@ -1247,14 +1273,19 @@ var sMsg = '<p>Heurist\'s CMS editor has been upgraded to a new system which is 
                         })
 
                     }else if(action=='translate'){
+                       
+                       //reload the only text element in different language
+                       var lang = ele.attr('data-lang');
                         
+                       //change or add content of specified language
+                       _layoutTranslateElement(ele_ID, lang)
+                       
+/*                        
                         //define new translation - show popup to select language
                         window.hWin.HEURIST4.msg.showPrompt('<p>Select language to translate content: '
 +"<select id=\'dlg-prompt-value\' class=\'text ui-corner-all\'"
 +" style=\'max-width: 250px; min-width: 10em; width: 250px; margin-left:0.2em\' autocomplete=\'off\'>"
 + window.hWin.HEURIST4.ui.createLanguageSelect() //returns content for language selector
-//+        
-//"<option value=\'en\'>English</option><option value=\'fr\'>French</option><option value=\'de\'>German</option><option value=\'zh\'>Mandarin</option><option value=\'es\'>Spanish</option><option value=\'ar\'>Arabic</option><option value=\'\'>Armenian</option><option value=\'sr\'>Bosnian</option><option value=\'id\'>Bahasa-Indonesian</option><option value=\'\'>Bengali</option><option value=\'\'>Bulgarian</option><option value=\'\'>Burmese</option><option value=\'\'>Cantonese</option><option value=\'\'>Croatian</option><option value=\'\'>Czech</option><option value=\'\'>Danish</option><option value=\'\'>Dutch</option><option value=\'\'>Estonian</option><option value=\'\'>Farsi</option><option value=\'\'>Finnish</option><option value=\'\'>Greek</option><option value=\'\'>Hebrew</option><option value=\'\'>Hindi</option><option value=\'\'>Hungarian</option><option value=\'\'>Italian</option><option value=\'\'>Japanese</option><option value=\'\'>Khmer</option><option value=\'\'>Korean</option><option value=\'\'>Latvian</option><option value=\'\'>Lithuanian</option><option value=\'\'>Malay</option><option value=\'\'>Norwegian</option><option value=\'\'>Polish</option><option value=\'\'>Portuguese</option><option value=\'\'>Romanian</option><option value=\'\'>Russian</option><option value=\'\'>Slovak</option><option value=\'\'>Slovenian</option><option value=\'\'>Swahili Swedish</option><option value=\'\'>Tagalog</option><option value=\'\'>Taiwanese</option><option value=\'\'>Thai</option><option value=\'\'>Turkish</option><option value=\'\'>Ukrainian</option><option value=\'\'>Urdu</option><option value=\'\'>Vietnamese</option>"
 +"</select></p>",
 function(value){
     if(value){
@@ -1263,7 +1294,7 @@ function(value){
     }            
 },
 'Select language for content',{default_palette_class: default_palette_class});
-                        
+*/                        
                         
                     }else if(action=='edit'){
 
@@ -1568,13 +1599,13 @@ function(value){
         //from tree
         node.remove();
         
-        //recreate
+        //recreate parent element
         if(parent_element && parent_element.type=='accordion'){
             window.hWin.layoutMgr.layoutInitAccordion(parent_element, parent_container)
         }else if(parent_element && parent_element.type=='tabs'){
             window.hWin.layoutMgr.layoutInitTabs(parent_element, parent_container)
         }else{
-            window.hWin.layoutMgr.layoutInit(parent_children, parent_container, {rec_ID:home_page_record_id}); 
+            window.hWin.layoutMgr.layoutInit(parent_children, parent_container, {rec_ID:home_page_record_id, lang:current_language}); 
         }
         
         page_was_modified = true;
@@ -1638,7 +1669,7 @@ function(value){
         }
         
         //redraw page
-        window.hWin.layoutMgr.layoutInit(_layout_content, _layout_container, {rec_ID:home_page_record_id});
+        window.hWin.layoutMgr.layoutInit(_layout_content, _layout_container, {rec_ID:home_page_record_id, lang:current_language});
         _updateActionIcons(200); //it inits tinyMCE also
         
         page_was_modified = true;
@@ -1661,6 +1692,28 @@ function(value){
             */
         }     
         
+        var affected_ele = _layout_container.find('div[data-hid="'+ele_id+'"]');
+        var lang = window.hWin.HAPI4.getLangCode3(lang_id,'xx');
+        
+        //need switch
+        if(affected_ele.attr('data-lang')==lang || (current_language==lang && !affected_ele.attr('data-lang'))){
+            return;
+        }
+
+        var affected_cfg = window.hWin.layoutMgr.layoutContentFindElement(_layout_content, ele_id);
+
+        var content = 'content';
+        if(default_language!=lang){
+            content = content + lang;
+            if(!affected_cfg[content]){ //if not found -  add new content
+                affected_cfg[content] = 'Translate content to '+lang+'!';
+            }
+        }
+                       
+        affected_ele.html(affected_cfg[content]);
+        affected_ele.attr('data-lang', lang);
+                       
+        //_ws_body.layout().open(options.editor_pos);    
     }
 
     
@@ -2054,7 +2107,7 @@ function(value){
             window.hWin.layoutMgr.layoutInitTabs(parent_element, parent_container)
             //window.hWin.layoutMgr.layoutInit(_layout_content, _layout_container);    
         }else{
-            window.hWin.layoutMgr.layoutInit(parent_children, parent_container, {rec_ID:home_page_record_id});
+            window.hWin.layoutMgr.layoutInit(parent_children, parent_container, {rec_ID:home_page_record_id, lang:current_language});
         }   
 
 
@@ -2155,8 +2208,10 @@ function(value){
         window.hWin.HEURIST4.msg.bringCoverallToFront();
         
         var newval = window.hWin.HEURIST4.util.cloneJSON(_layout_content);
+        var contents = [];
         
-        //remove keys and titles
+        //remove keys and titles,  extract "content" into separate set of values
+        // each content:lang value will be saved in separate detail
         function __cleanLayout(items){
             
             for(var i=0; i<items.length; i++){
@@ -2164,6 +2219,11 @@ function(value){
                 delete items[i].key;
                 items[i].title = null;
                 delete items[i].title;
+                
+                //if(items[i].content && items[i].dom_id){
+                //    contents.push({id:items[i].dom_id,lang:'',content:items[i].content});        
+                //}
+                
                 if(items[i].children){
                     __cleanLayout(items[i].children);    
                 }
@@ -2180,8 +2240,14 @@ function(value){
         }else{
             newval = JSON.stringify(newval);    
         }*/
-        newval = JSON.stringify(newval);    
+        //var configuration = JSON.stringify(newval);    
+        //for(var i=0;i<contents.length-1;i++){
+        //}
         
+        newval = JSON.stringify(newval);
+        if(false){ //need encoding
+            newval = window.hWin.HEURIST4.util.bytesToBase64(new TextEncoder().encode(newval));    
+        }
         var request = {a: 'addreplace',
                         recIDs: options.record_id,
                         dtyID: DT_EXTENDED_DESCRIPTION,

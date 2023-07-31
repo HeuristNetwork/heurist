@@ -83,6 +83,9 @@ if (($_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0.0.1')
     var init_page_record_id=<?php echo $open_page_or_record_on_init; ?>;
     var isWebPage = <?php echo ($isWebPage ?'true':'false');?>;
     var current_page_id = 0;
+    var current_language = '';
+    var default_language = '<?php echo $website_language_def; ?>';
+    var website_languages = '<?php echo $website_languages?implode(',',$website_languages):''; ?>';
     var is_show_pagetitle_main = <?php echo $show_pagetitle?'true':'false'; ?>;  //is show page title per website 
     var isCMS_active = <?php echo (@$_REQUEST['edit']?'true':'false'); ?>; //use new CMS editor and init it once
     var isCMS_InHeuristUI = <?php echo (@$_REQUEST['edit']==4 ?'true':'false'); ?>;
@@ -425,6 +428,22 @@ function initMainMenu( afterInitMainMenu ){
 }
 
 //
+// Global reload of page with new language
+//
+function switchLanguage(event){
+    
+    var lang_code = $(event.target).attr('data-lang');
+console.log(lang_code);    
+    if(lang_code){
+        //add url parameter
+        current_language = lang_code;
+        loadPageContent(current_page_id);
+    }
+    window.hWin.HEURIST4.util.stopEvent(event);
+    return false;
+}
+
+//
 // Loads content of specified record to #main-content and inits all widgets 
 // pageid    - record id to be loaded 
 // eventdata - data to be passed to afterPageLoad (to perform intial search) - it may be call from another page
@@ -453,7 +472,8 @@ function loadPageContent(pageid, eventdata){
         
         var supp_options = {heurist_emailForm: {website_record_id: home_page_record_id},
             heurist_resultListExt: {record_with_custom_styles: home_page_record_id},
-            heurist_Navigation: {aftermenuselect: initLinksAndImages}
+            heurist_Navigation: {aftermenuselect: initLinksAndImages},
+            lang: current_language
         };
         if(eventdata && (eventdata.event_type == window.hWin.HAPI4.Event.ON_REC_SEARCHSTART 
             || eventdata.event_type == window.hWin.HAPI4.Event.ON_REC_SELECT)){
@@ -527,15 +547,22 @@ if($website_custom_css!=null){
                            if(response['records'] && response['records'].length>0){
                                var res = response['records'][0]['details'];
                                var keys = Object.keys(res);
-                                for(var idx in keys){
+                               for(var idx in keys){
                                     var key = keys[idx];
 
                                     if(key == DT_EXTENDED_DESCRIPTION){
+                                        //the size content can be big so it stores in db as 64K chunks 
+                                        //implode all parts of page 
                                         res[key] = Object.values(res[key]).join('');
                                     }else{
                                         res[key] = res[key][ Object.keys(res[key])[0] ];
                                     }
-                                }
+                               }
+                               if(window.hWin.HEURIST4.util.isBase64(res[DT_EXTENDED_DESCRIPTION])){
+                                    res[DT_EXTENDED_DESCRIPTION] = new TextDecoder().decode(
+                                            window.hWin.HEURIST4.util.base64ToBytes(res[DT_EXTENDED_DESCRIPTION]));
+                               }
+                               
                                page_cache[pageid] = res;
                                __loadPageContent();
                            }else if(pageid!=home_page_record_id){ //load home page by default
@@ -818,6 +845,10 @@ function afterPageLoad(document, pageid, eventdata){
                 eventdata.q){
                 surl =  surl + '/?q=' + eventdata.q;
             }
+
+            if(current_language){ //!= current_language_def
+                surl =  surl + (surl.indexOf('/?q')<0?'/?':'&')+'lang='+current_language;    
+            }
             
         }else{
             //usual url parameters
@@ -827,6 +858,9 @@ function afterPageLoad(document, pageid, eventdata){
             params['db'] = window.hWin.HAPI4.database;
             params['website'] = '';
             params['id'] = home_page_record_id;
+            if(current_language){ //!= current_language_def
+                params['lang'] = current_language;    
+            }
       
             /* IJ Oct 2021 - Hide page id in URL, and cause reloads to move back to website homepage */
             if(pageid!=home_page_record_id){
@@ -1174,6 +1208,7 @@ $image_altlogo -> #main-logo-alt
 $website_title -> #main-title>h2
 $title_alt -> #main-title-alt 
 $title_alt2 -> #main-title-alt2 
+$website_languages_links ->#main-languages 
 */
 
     // Load and Add banner image
@@ -1228,6 +1263,10 @@ $title_alt2 -> #main-title-alt2
         $('#main-title-alt2').html('<?php print str_replace("'",'&#039;', $title_alt2);?>');
     }
 
+    if($('#main-languages').length>0){
+        $('#main-languages').html('<?php print str_replace("'",'&#039;', $website_languages_links);?>');
+    }
+    
     // Setup login button, if needed
     if($('#btn_signin').length>0){
         $('#btn_signin').on('click', () => {

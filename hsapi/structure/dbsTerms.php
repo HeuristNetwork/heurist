@@ -1,6 +1,6 @@
 <?php
    /**
-    * Manipulation with defTerms 
+    * Manipulations with defTerms 
     * 
     *
     * @package     Heurist academic knowledge management system

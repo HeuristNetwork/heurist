@@ -390,6 +390,7 @@ $dtDefines = array('DT_NAME' => array(2, 1),
     'DT_CMS_EXTFILES' => array(2, 939), //external links and scripts
     'DT_CMS_FOOTER' => array(2, 940),
     'DT_CMS_FOOTER_FIXED' => array(2, 941),    //fixed 2-532
+    'DT_LANGUAGES' => array(2, 967),
     
     'DT_WORKFLOW_STAGE' => array(2, 1080)
 
