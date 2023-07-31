@@ -1602,7 +1602,7 @@ private static function _getGeoJsonFeature($record, $extended=false, $simplify=f
         
         if($dt && $dt->isValid())
         {
-            $ta = $ta->getTimespan(true);
+            $ta = $dt->getTimespan(true);
             if($ta!=null){
                 //array($date_start, '', '', $date_end, '');
                 $timevalues[] = $ta;  //temporal json array for geojson

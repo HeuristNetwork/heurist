@@ -1466,7 +1466,7 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
                 if (request) request.a = 's';
                 
                 var encode_type = window.hWin.HAPI4.sysinfo['need_encode'];
-                if(!(encode_type>0)) encode_type = 3;
+                if(!(encode_type>0)) encode_type = 3; //json by default
 
                 window.hWin.HEURIST4.util.encodeRequest(request, ['details','details_visibility'], encode_type);
                 
