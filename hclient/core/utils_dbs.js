@@ -828,15 +828,13 @@ window.hWin.HEURIST4.dbs = {
                         {key:'internalid',title: 'Internal ID',code: 'internalid'}
                     ];
                     
-                    //title mask (3) or smarty (7)
-                    if($mode==3 || $mode == 7){ // title mask
-                    
-                        if($mode==3){
-                            $res['children'][2]['title'] = 'Con-ID';
-                            $res['children'][4]['title'] = 'Int-ID';
-                        }
-                    
-                        $res['children'].splice(3,1);
+                    //title mask (3)
+                    if($mode==3){
+
+                        $res['children'][2]['title'] = 'Con-ID';
+                        $res['children'][4]['title'] = 'Int-ID';
+
+                        $res['children'].splice(3,1); // remove description option
                     }
                 }
                 

@@ -1255,7 +1255,7 @@ function ShowReps( is_snippet_editor ) {
         var s = _nodep.title;
         var key = _nodep.key;
 
-        if(key=='label' || key=='term' || key=='code' || key=='conceptid' || key=='internalid'){
+        if(key=='label' || key=='term' || key=='code' || key=='conceptid' || key=='internalid' || key=='desc'){
             s = _nodep.parent.title + '.' + s;
         }
 
@@ -1434,7 +1434,7 @@ function ShowReps( is_snippet_editor ) {
         // show hide         
         var no_loop = (_nodep.data.type=='enum' || _nodep.key.indexOf('rec_')==0 || 
                     (_nodep.data.code && _nodep.data.code.indexOf('Relationship')==0));
-        let show_languages = _nodep.key=='term';
+        let show_languages = _nodep.key=='term' || _nodep.key=='desc';
         if(no_loop){
             h = 260;
         }else{
@@ -1644,7 +1644,7 @@ this_id       : "term"
                                 _varname = '';
                             }else if(key.indexOf('rec_')!==0)
                             {
-                                if(key=='label' || key=='term' || key=='code' || key=='conceptid' || key=='internalid'){ //terms
+                                if(key=='label' || key=='term' || key=='code' || key=='conceptid' || key=='internalid' || key=='desc'){ //terms
                                     if( inloop!=1 ){
                                         _varname = ('.'+key);
                                     }
@@ -1721,10 +1721,13 @@ this_id       : "term"
                     if( inloop<2 ){
                         _varname = prefix + ((prefix && _varname)?'.':'') + _varname;
 
-                        if(language_code && language_code != '' && key == 'term'){
-                            let id_fld = _varname.replace('.term', '.id');
+                        if(language_code && language_code != '' && (key == 'term' || key == 'desc')){
+
+                            let id_fld = _varname.replace(`.${key}`, '.id');
                             let fld = (inloop==1) ? 'replace_id.id' : id_fld;
-                            language_handle = `{$translated_label = $heurist->getTranslation("trm", $${fld}, "label", "${language_code}")} {* Get translated label *}\n\n`
+                            let trm_fld = key == 'term' ? 'label' : 'desc';
+
+                            language_handle = `{$translated_label = $heurist->getTranslation("trm", $${fld}, "${trm_fld}", "${language_code}")} {* Get translated label *}\n\n`
                                 + (inloop==1 ? '\n\t' : '') + `{$translated_label} {* Print translated label *}`;
                         }
                     }

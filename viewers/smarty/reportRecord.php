@@ -487,6 +487,7 @@ class ReportRecord {
                             $res_code = "";
                             $res_label = "";
                             $res_label_full = '';
+                            $res_desc = "";
                             $res = array();
 
 
@@ -503,17 +504,21 @@ class ReportRecord {
                                     $res_code = $this->_add_term_val($res_code, $term[ $fi['trm_Code'] ]);
                                     $res_label_full = $this->_add_term_val($res_label_full, $term_full);
                                     $res_label = $this->_add_term_val($res_label, $term[ $fi['trm_Label'] ]);
+                                    $res_desc = $this->_add_term_val($res_desc, $term[ $fi['trm_Description'] ]);
 
                                     //NOTE id and label are for backward
                                     array_push($res, array("id"=>$value, "internalid"=>$value, 
                                         "code"=>$term[ $fi['trm_Code'] ], 
                                         "label"=>$term[ $fi['trm_Label'] ], 
                                         "term"=>$term_full, 
-                                        "conceptid"=>$term[ $fi['trm_ConceptID'] ]));
+                                        "conceptid"=>$term[ $fi['trm_ConceptID'] ],
+                                        "desc"=>$term[ $fi['trm_Description'] ]
+                                    ));
                                 }
                             }
                             $res_united = array("id"=>$res_id, "internalid"=>$res_id, "code"=>$res_code, 
-                                "term"=>$res_label_full, "label"=>$res_label, "conceptid"=>$res_cid);
+                                "term"=>$res_label_full, "label"=>$res_label, "conceptid"=>$res_cid, "desc"=>$res_desc
+                            );
 
                             if(count($res)>0){
                                 if($issingle){
