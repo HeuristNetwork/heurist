@@ -1815,13 +1815,14 @@ window.hWin.HEURIST4.dbs = {
             else mode='flat';
         }
         
-        if(mode == 'tree' || mode == 'select'){ // get translated labels
-            translated_labels = $Db.trm_getTranslatedLabels(vocab_id, language);
-        }        
+        //if(mode == 'tree' || mode == 'select'){ // get translated labels for particular language
+        //    translated_labels = $Db.trm_getTranslatedLabels(vocab_id, language);
+        //}        
 
         function __addChilds(recID, lvl_parents, include_vocab){
         
-            let label = translated_labels ? translated_labels[recID] : recset.fld(recID, 'trm_Label');
+            let label = $Db.trm_getLabel(recID, language);
+            //translated_labels ? translated_labels[recID] : recset.fld(recID, 'trm_Label');
         
             //recID = parseInt(recID);
             var node = {title: label, key: recID};
@@ -2101,16 +2102,29 @@ window.hWin.HEURIST4.dbs = {
         return translated_list;
     },
 
+    //
+    //
+    //
     trm_getLabel: function(term_id, language = null){
 
-        let translations = window.hWin.HAPI4.EntityMgr.getEntityData2('trm_Translation');
-        const def_label = $Db.trm(term_id, 'trm_Label');
-        if(!translations || window.hWin.HEURIST4.util.isempty(language) || language == 'ALL'){
-            return def_label;
+
+        if(!window.hWin.HEURIST4.util.isempty(language)){
+            language = window.hWin.HAPI4.getLangCode3(language);    
+            if(language!='ENG' && language!='ALL'){
+                let translations = window.hWin.HAPI4.EntityMgr.getEntityData2('trm_Translation');
+
+                if(translations){   
+                    let rec = translations.getSubSetByRequest({trn_LanguageCode: language, 
+                        trn_Source: 'trm_Label', 
+                        trn_Code: term_id}).getFirstRecord();
+                    if(rec && Object.keys(rec).length > 0){
+                        return  translations.fld(rec, 'trn_Translation');
+                    }
+                }
+            }
         }
 
-        let rec = translations.getSubSetByRequest({trn_LanguageCode: language, trn_Source: 'trm_Label', trn_Code: term_id}).getFirstRecord();
-        return !rec || Object.keys(rec).length == 0 ? def_label : translations.fld(rec, 'trn_Translation');
+        return $Db.trm(term_id, 'trm_Label');
     },
     
     //

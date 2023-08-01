@@ -1530,7 +1530,7 @@ function browseTerms(_editing_input, $input, value){
         let lang_code = that.options.language;
         if(!window.hWin.HEURIST4.util.isempty(lang_code) && lang_code != 'ALL' && !window.hWin.HAPI4.EntityMgr.getEntityData2('trm_Translation')){ // retrieve translations
 
-            window.hWin.HAPI4.EntityMgr.getTranslations('defTerms', 'trm', null, function(){
+            window.hWin.HAPI4.EntityMgr.getTranslatedDefs('defTerms', 'trm', null, function(){
                 __recreateTrmLabel($input, trm_ID);
             });
             lang_code = '';
@@ -1666,7 +1666,7 @@ function browseTerms(_editing_input, $input, value){
             allTerms = $Db.getLocalID('trm', allTerms);
         }else if(!window.hWin.HEURIST4.util.isempty(lang_code) && lang_code != 'ALL'
             && !window.hWin.HAPI4.EntityMgr.getEntityData2('trm_Translation')){
-            window.hWin.HAPI4.EntityMgr.getTranslations('defTerms', 'trm', null, __recreateSelector);
+            window.hWin.HAPI4.EntityMgr.getTranslatedDefs('defTerms', 'trm', null, __recreateSelector);
             return;
         }
 

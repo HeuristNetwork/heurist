@@ -388,9 +388,9 @@ $.widget( "heurist.search_faceted", {
         }
         
         setTimeout(function(){that._adjustSearchDivTop();},500);
-        
-        //this._refresh();
-        this.doReset();
+
+        this.doReset();            
+
     }, //end _create
 
     //
@@ -704,6 +704,17 @@ $.widget( "heurist.search_faceted", {
     ,doReset: function(){
 
         var that= this; 
+        
+        if(!this.options.language) this.options.language = 'xx'; //"xx" means use current language
+        if(!window.hWin.HAPI4.EntityMgr.getEntityData2('trm_Translation')){ 
+            // retrieve translations
+            window.hWin.HAPI4.EntityMgr.getTranslatedDefs('defTerms', 'trm', null, function(){
+                that.doReset();
+            });
+            return;
+        }
+        
+        
         this._last_active_facet = -1;
 
         let primary_rt = this.options.params.rectypes[0];
@@ -728,13 +739,6 @@ console.log('get defintion in OLD format!!!!');
                 }
             });
 
-            return;
-        }
-
-        if(!window.hWin.HEURIST4.util.isempty(this.options.params.language) && !window.hWin.HAPI4.EntityMgr.getEntityData2('trm_Translation')){ // retrieve translations
-            window.hWin.HAPI4.EntityMgr.getTranslations('defTerms', 'trm', null, function(){
-                that.doReset();
-            });
             return;
         }
 
@@ -2261,10 +2265,10 @@ console.log('get defintion in OLD format!!!!');
         this._recalculateFacets( facet_index );
         return;
     }
-                            term = $Db.trm_TreeData(vocab_id, 'tree', false, this.options.params.language);
+                            term = $Db.trm_TreeData(vocab_id, 'tree', false, this.options.language);
                             term = {key: null, title: "all", children: term};
                             //field.selectedvalue = {title:label, value:value, step:step};                    
-                            
+                        
                         }
                         
                         //

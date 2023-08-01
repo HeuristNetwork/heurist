@@ -676,7 +676,7 @@ var datatable_custom_render = null;
 //
 function assignPageTitle(pageid){
     
-    var pagetitle = window.hWin.HAPI4.getTanslation(page_cache[pageid][DT_NAME], current_language);
+    var pagetitle = window.hWin.HAPI4.getTranslation(page_cache[pageid][DT_NAME], current_language);
     
     pagetitle = window.hWin.HEURIST4.util.stripTags(pagetitle,'i,b,u,em,strong,sup,sub,small'); //<br>
     
@@ -850,7 +850,7 @@ function afterPageLoad(document, pageid, eventdata){
                 surl =  surl + '/?q=' + eventdata.q;
             }
 
-            if(current_language){ //!= current_language_def
+            if(current_language && current_language!='xx'){ //!= current_language_def
                 surl =  surl + (surl.indexOf('/?q')<0?'/?':'&')+'lang='+current_language;    
             }
             
@@ -862,7 +862,7 @@ function afterPageLoad(document, pageid, eventdata){
             params['db'] = window.hWin.HAPI4.database;
             params['website'] = '';
             params['id'] = home_page_record_id;
-            if(current_language){ //!= current_language_def
+            if(current_language && current_language!='xx'){ //!= current_language_def
                 params['lang'] = current_language;    
             }
       

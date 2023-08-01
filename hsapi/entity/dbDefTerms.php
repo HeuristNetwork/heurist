@@ -656,6 +656,7 @@ class DbDefTerms extends DbEntityBase
     //   1) reference=1 - add/move/remove terms by reference      
     //   2) merge_id>0 retain_id>0 - merge terms within vocabulary
     //   3) import terms from csv
+    //   4) get_translations - from defTranslations    
     //    
     public function batch_action(){
 

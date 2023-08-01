@@ -1092,7 +1092,7 @@ mapDraw.js initial_wkt -> parseWKT -> GeoJSON -> _loadGeoJSON (as set of separat
                         }
                         */
                         //"xx" means take current system language
-                        return window.hWin.HAPI4.getTanslation(d[fldname], lang);
+                        return window.hWin.HAPI4.getTranslation(d[fldname], lang);
 
                     }
                 }else if(fldname=="dtl_StartDate"){

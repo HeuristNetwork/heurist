@@ -2099,7 +2099,7 @@ console.log('DEBUG refreshEntityData '+(fin_time-s_time));  //response.data+'  '
             //
             // Retrieve translations stored within defTranslations
             //
-            getTranslations: function(entityName, key, recIDs, callback){
+            getTranslatedDefs: function(entityName, key, recIDs, callback){
 
                 if(key.indexOf('_Translation') == -1){
                     key += '_Translation';
@@ -2460,7 +2460,7 @@ console.log('DEBUG refreshEntityData '+(fin_time-s_time));  //response.data+'  '
         //
         // values - array of strings
         //
-        getTanslation: function(values, lang){
+        getTranslation: function(values, lang){
             
             //"xx" means take current system language
             if(lang){
