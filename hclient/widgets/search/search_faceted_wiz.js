@@ -177,7 +177,7 @@ $.widget( "heurist.search_faceted_wiz", {
                 if(event && event.currentTarget){
                     var that_dlg = this;
                     if($( that_dlg ).dialog( 'option', 'modal' )){
-                        window.hWin.HEURIST4.msg.showMsgDlg(window.hWin.HR("Discard changes?"),
+                        window.hWin.HEURIST4.msg.showMsgDlg(window.hWin.HR('Discard changes?'),
                             function(){ $( that_dlg ).dialog( "close" ); });
                         return false;
                     }
@@ -232,7 +232,7 @@ $.widget( "heurist.search_faceted_wiz", {
 
         var header = $("<div>").css({'font-size':'0.8em', 'padding-bottom':'10px'}).appendTo(this.step2);
 
-        header.html("<label>"+window.hWin.HR("Select fields that act as facet")+
+        header.html("<label>"+window.hWin.HR('facet_wizard_select_field')+
             "</label><br><br><label for='fsw_showreverse'><input type='checkbox' id='fsw_showreverse' style='vertical-align: middle;' />&nbsp;"+
             window.hWin.HR("Show linked-from record types (reverse pointers, indicated as &lt;&lt;)")+"</label>"+
             // Get usages
@@ -257,7 +257,7 @@ $.widget( "heurist.search_faceted_wiz", {
         var div_leftside = $("<div>").css({position:'absolute',top:0,bottom:0,left:0,right:'301px',overflow:'hidden auto'}).appendTo(this.step3);
         
         var header = $("<div>").css({'font-size':'0.8em','padding':'4px 10px'}).appendTo(div_leftside);
-        header.html("<label>"+window.hWin.HR("Define titles, help tips and facet type")+"</label>"
+        header.html("<label>"+window.hWin.HR('facet_wizard_define_field')+"</label>"
         +'<br><br><label><input type="checkbox" id="cbShowHierarchy" style="vertical-align: middle;">'
             +window.hWin.HR("Show entity hierarchy above facet label")+"</label>"
             +'<div style="display:inline-block;margin-left:15px;">'
@@ -472,6 +472,7 @@ $.widget( "heurist.search_faceted_wiz", {
         }else if(newstep>3){ //was 4
             if(newstep==4){
                 //save into database
+                this._assignFacetParams();
                 this._doSaveSearch();
                 return;
             }
@@ -764,6 +765,7 @@ $.widget( "heurist.search_faceted_wiz", {
 
         if(this.step==2 && newstep==3){
             
+            this._assignFacetParams();
             this._doSaveSearch( true );//from ui to options.params
 
             this.facetPreview_reccount = 0; //first time it always refresh preview
@@ -1011,16 +1013,16 @@ $.widget( "heurist.search_faceted_wiz", {
                 
                 $dlg.find('#svs_SpatialFilter').prop('checked', false);
                 $dlg.find('#svs_SpatialFilterInit').prop('checked', false);
-                $dlg.find('#svs_SpatialFilterLabel').val(window.hWin.HR('Map Search'));                
+                $dlg.find('#svs_SpatialFilterLabel').val(window.hWin.HR('filter_facet_mapsearch'));                
                 $dlg.find('#svs_SpatialFilterInitial').val('');                
                 $dlg.find('#svs_TempInitSearch').val('');
 
                 $dlg.find('#svs_AdditionalFilter').prop('checked', false);
-                $dlg.find('#svs_AdditionalFilterLabel').val(window.hWin.HR('Search everything'));
+                $dlg.find('#svs_AdditionalFilterLabel').val(window.hWin.HR('filter_facet_general_search'));
                 
                 $dlg.find('#svs_PrelimFilterToggle').prop('checked', true);
                 $dlg.find('#svs_PrelimFilterToggleMode0').prop('checked', true);
-                $dlg.find('#svs_PrelimFilterToggleLabel').val(window.hWin.HR('Apply preliminary filter'));
+                $dlg.find('#svs_PrelimFilterToggleLabel').val(window.hWin.HR('filter_facet_apply_preliminary'));
                 
                 $dlg.find('#svs_ExitButton').prop('checked', true);
                 $dlg.find('#svs_ExitButtonLabel').val('');
@@ -1048,6 +1050,7 @@ $.widget( "heurist.search_faceted_wiz", {
             translationToUI(this.options.params, $dlg, 'ui_additional_filter_label', 'svs_AdditionalFilterLabel', false);
             translationToUI(this.options.params, $dlg, 'ui_spatial_filter_label', 'svs_SpatialFilterLabel', false);
             translationToUI(this.options.params, $dlg, 'ui_exit_button_label', 'svs_ExitButtonLabel', false);
+            translationToUI(this.options.params, $dlg, 'ui_prelim_filter_toggle_label', 'svs_PrelimFilterToggleLabel', false);
             
             if(sa_order.hSelect("instance")!=undefined){
                 sa_order.hSelect("refresh"); 
@@ -1548,7 +1551,7 @@ $.widget( "heurist.search_faceted_wiz", {
                     var old_facet = this._findFacetByCode(node.data.code);
                     if(old_facet!=null){
 
-                        facets.push( {
+                        var new_facet = {
                             'var': __getRandomInt(), //unique identificator
                             code:node.data.code,
                             title: old_facet.title,
@@ -1561,10 +1564,19 @@ $.widget( "heurist.search_faceted_wiz", {
                             type: node.data.type,
                             order: old_facet.order>=0?old_facet.order:order_for_new,
                             trm_tree: (old_facet.trm_tree && old_facet.trm_tree === true)
-                        } );
+                        };
+
+                        //copy translations
+                        for(var key in old_facet){
+                            if(old_facet.hasOwnProperty(key) && key.indexOf(':')==key.length-4 ){ //translation
+                                new_facet[key] = old_facet[key]
+                            }
+                        }
+                        facets.push( new_facet );
+
 
                         if(!(old_facet.order>=0)) order_for_new++;
-                        
+
                     }else{
 
                         facets.push( {
@@ -1967,6 +1979,7 @@ $.widget( "heurist.search_faceted_wiz", {
                 var idd = this.options.params.facets[k]['var'];
                 
                 var keep_title = this.options.params.facets[k].title;
+                
                 translationFromUI(this.options.params.facets[k], listdiv, 'title', 'facet_Title'+idd, false);
                 translationFromUI(this.options.params.facets[k], listdiv, 'help', 'facet_Help'+idd, false);
                 if(this.options.params.facets[k].title=='') this.options.params.facets[k].title=keep_title;

@@ -93,6 +93,7 @@ regional['RUS'] = {
     'tags': 'ярлыки',
     'share': 'доступ',
     'more': 'ещё',
+    'less': 'скрыть',
     'edit': 'править',
     'options': 'опции',
 
@@ -123,8 +124,6 @@ regional['RUS'] = {
     'Assign selected tags': 'Присвоить отмеченные ярлыки',
     'Personal Tags':'Личные ярлыки',
     'Delete selected tags': 'Удалить отмеченные ярлыки',
-
-
 
     'Preferences' : 'Настройки',
     'Layout configuration file': 'Файл конфигурации интерфейса',
@@ -203,6 +202,10 @@ regional['RUS'] = {
     'Manage': 'Управление',
     'Select': 'Выбор',
     'Configure': 'Конфигурация',
+    'all': 'все',
+    'Discard changes?': 'Отменить изменения',
+    'Back': 'Назад',
+    'Next': 'Вперед',
     
     'Show context help': 'Контекстная помощь',
     'Heurist context help': 'Контекстная помощь',
@@ -624,6 +627,30 @@ regional['RUS'] = {
     filter_save_hint: 'Сохранить текущий фильтр',
     //END Search (fimple filter) WIDGET
 
+    // Faceted Search WIDGET --------------------
+    filter_facet_processing: 'поиск и расчет...',
+    filter_facet_submit: 'Применить',
+    filter_facet_interrupt: 'Прервать',
+    filter_facet_exit: 'Выйти',
+    filter_facet_exit_hint: 'Выйти из этого многогранного поиска - вернуться к списку фильтров',
+    filter_facet_resetall: 'Очистить все',
+    filter_facet_resetall_hint: 'Очистить все поля/Сбросить все условия до начальных',
+    filter_facet_reset: 'Для сброса пердыдущего поиска нажмите "Очистить"',
+    filter_facet_savestate: 'Сохранить',
+    filter_facet_titleprefix: 'фильтр : ',
+    filter_facet_apply_preliminary: 'Применить дополнительные условия',
+    filter_facet_mapsearch: 'Поиск на карте',
+    filter_facet_mapsearch_hint: 'Нажмите чтобы определеить пространственные условия поиска',
+    filter_facet_general_search: 'Общий поиск',
+
+    filter_facet_spatial_search: 'Поиск на карте',
+    facet_search_no_values: 'нет значений',
+    facet_search_select: 'выбрать...',
+    facet_search_expand_dropdown:  'выбрать',
+    
+    // Faceted Search wizard WIDGET --------------------
+    facet_wizard_select_field: 'Select fields that act as facet',    
+    facet_wizard_define_field: 'Define titles, help tips and facet type',
 
 
             'Upload/register new file': 'Загрузить или зарегистрировать файл',

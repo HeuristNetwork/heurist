@@ -249,24 +249,24 @@ $.widget( "heurist.search_faceted", {
                 .appendTo( this.div_header );
 
                 
-        this.btn_submit = $( "<button>", { text: window.hWin.HR("Submit") })
+        this.btn_submit = $( "<button>", { text: window.hWin.HR('filter_facet_submit') })
         .appendTo( this.div_toolbar )
         .button();
         
-        this.btn_reset = $( "<button>", {title:window.hWin.HR("Clear all fields / Reset all the filters to their initial states") })
+        this.btn_reset = $( "<button>", {title:window.hWin.HR('filter_facet_resetall_hint') })
         .appendTo( this.div_toolbar )
-        .button({label: window.hWin.HR("Reset all"), icon: 'ui-icon-arrowreturnthick-1-w', iconPosition:'end' }).hide();
+        .button({label: window.hWin.HR('filter_facet_resetall'), icon: 'ui-icon-arrowreturnthick-1-w', iconPosition:'end' }).hide();
         
-        this.btn_save = $( "<button>", { text: window.hWin.HR("Save state") })
+        this.btn_save = $( "<button>", { text: window.hWin.HR('filter_facet_savestate') })
         .appendTo( this.div_toolbar )
         .button().hide(); //@todo
 
         
         var lbl = window.hWin.HRJ('ui_exit_button_label', this.options.params, this.options.language);
-        if(!lbl) lbl = (window.hWin.HR(this.options.is_h6style?'Close':'Show all available searches'));
+        if(!lbl) lbl = window.hWin.HR('filter_facet_exit');
         
         this.btn_close = $( "<button>", { 
-                    title:window.hWin.HR("Close this facet search and return to the list of saved searches") })
+                    title:window.hWin.HR('filter_facet_exit_hint') })
         .css({"z-index":"100"})
         .appendTo( this.div_toolbar )
         .button({icon: "ui-icon-close", iconPosition:'end', label:lbl}); //was Close
@@ -276,10 +276,10 @@ $.widget( "heurist.search_faceted", {
         if(this.options.params.ui_exit_button===false) this.options.showclosebutton = false;
         
         this.btn_terminate = $( "<button>").appendTo( this.div_toolbar )
-        .button({icon: "ui-icon-cancel", iconPosition:'end', label:'Interrupt'}).hide();
+        .button({icon: "ui-icon-cancel", iconPosition:'end', label:window.hWin.HR('filter_facet_interrupt')}).hide();
         
         $('<span>', {id: 'facet_process_msg', class: 'heurist-helper2', 'data-interrupt': 0})
-            .text('processing facets...')
+            .text(window.hWin.HR('filter_facet_processing'))
             .css({display: 'inline-block', 'padding-right': '10px'})
             .insertBefore(this.btn_terminate).hide();
         
@@ -467,8 +467,9 @@ $.widget( "heurist.search_faceted", {
             if(window.hWin.HEURIST4.util.isnull(new_title)) new_title='';
             else if(this.options.is_h6style && !this.options.is_publication){
                 new_title = '<span style="font-size:smaller">'
-                +'<span class="ui-icon ui-icon-filter" style="width:16px;height:16px;background-size:contain;"/>filter: </span>'
-                +new_title;
+                +'<span class="ui-icon ui-icon-filter" style="width:16px;height:16px;background-size:contain;"/>'
+                + window.hWin.HR('filter_facet_titleprefix') + '</span>'
+                + new_title;
             }
             
 
@@ -841,9 +842,8 @@ console.log('get defintion in OLD format!!!!');
                     this._use_sup_filter = (that.options.params.ui_prelim_filter_toggle_mode==0);
                }
                
-               var lbl = that.options.params.ui_prelim_filter_toggle_label
-                            ?that.options.params.ui_prelim_filter_toggle_label
-                            :window.hWin.HR('Apply preliminary filter');
+               var lbl = window.hWin.HRJ('ui_prelim_filter_toggle_label', this.options.params, this.options.language);
+               if(!lbl) lbl = window.hWin.HR('filter_facet_apply_preliminary');
                
                var ele = $("<div>").html(
                             '<h4 style="margin:0;"><div class="input-cell" style="display:block;">'
@@ -872,7 +872,7 @@ console.log('get defintion in OLD format!!!!');
        if(this.options.params.ui_spatial_filter){
            
            var lbl = window.hWin.HRJ('ui_spatial_filter_label', this.options.params, this.options.language);
-           if(!lbl) lbl = window.hWin.HR('Map Search'); 
+           if(!lbl) lbl = window.hWin.HR('filter_facet_mapsearch');
                         
            var ele = $("<div>").html(
            '<div class="header" title="" style="vertical-align: top; display: block; width: 100%; padding: 5px;">'
@@ -882,9 +882,11 @@ console.log('get defintion in OLD format!!!!');
                     +'<img class="map_snapshot" style="display:none;width:150px"/>'
                     +'</div>'
                     +'<div style="display:inline-block;">'
-                        +'<button title="Click this button to set and apply spatial search limits" class="ui-button ui-corner-all ui-widget define_spatial" style="height:20px">'
+                        +'<button title="'+ window.hWin.HR('filter_facet_mapsearch_hint')
+                        +'" class="ui-button ui-corner-all ui-widget define_spatial" style="height:20px">'
                             +'<span class="ui-button-icon ui-icon ui-icon-globe"></span>'
-                            +'&nbsp;<span class="ui-button-text" style="font-size:11px">Define</span></button>'
+                            +'&nbsp;<span class="ui-button-text" style="font-size:11px">'
+                            +window.hWin.HR('Define')+'</span></button>'
                         +'<button title="Click this button to reset spatial search limits" class="smallbutton ui-button ui-corner-all ui-widget reset_spatial  ui-button-icon-only" style="display:none;">' // float: right;margin-right: 40px;
                             +'<span class="ui-button-icon ui-icon ui-icon-arrowreturnthick-1-w"></span>'
                             +'<span class="ui-button-text"> </span></button>'                    
@@ -892,10 +894,10 @@ console.log('get defintion in OLD format!!!!');
                     +'</div>').css({'border-bottom': '1px solid lightgray','margin-right':'10px',
                                     'margin-bottom':'25px', 'padding-bottom':'5px'}).appendTo($fieldset);
                     
-           var btn_reset2 = $( "<button>", {title:window.hWin.HR("Clear all fields / Reset all the filters to their initial states") })
+           var btn_reset2 = $( "<button>", {title:window.hWin.HR('filter_facet_resetall_hint') })
            .css({float:'right','margin-top':'10px','margin-right':'2px'})
            .appendTo( ele )
-           .button({label: window.hWin.HR("Reset all"), icon: 'ui-icon-arrowreturnthick-1-w', iconPosition:'end' });
+           .button({label: window.hWin.HR('filter_facet_resetall'), icon: 'ui-icon-arrowreturnthick-1-w', iconPosition:'end' });
            this._on( btn_reset2, { click: "doResetAll" });
 
            if(this.btn_reset){
@@ -963,7 +965,7 @@ console.log('get defintion in OLD format!!!!');
                     window: window.hWin,  //opener is top most heurist window
                     dialogid: 'map_digitizer_filter_dialog',
                     params: wkt_params,
-                    title: window.hWin.HR('Heurist spatial search'),
+                    title: window.hWin.HR('filter_facet_spatial_search'),
                     class:'ui-heurist-bg-light',
                     callback: function(location){
                         if( !window.hWin.HEURIST4.util.isempty(location) ){
@@ -986,7 +988,7 @@ console.log('get defintion in OLD format!!!!');
        if(this.options.params.ui_additional_filter){
            
            var lbl = window.hWin.HRJ('ui_additional_filter_label', this.options.params, this.options.language);
-           if(!lbl) lbl = window.hWin.HR('Search everything'); 
+           if(!lbl) lbl = window.hWin.HR('filter_facet_general_search'); 
                         
                         
            //w = {'width':(w-65)+'px','max-width':(w-65)+'px','min-width':'auto'};
@@ -997,7 +999,9 @@ console.log('get defintion in OLD format!!!!');
                 +'<div style=" padding:5px 0 20px 21px;display: block;">'
                     +'<div class="input-div" style="display: inline-block;padding:0px">'
                     +'<input class="ui-widget-content ui-corner-all" style="width: 150px;">'
-                    +'</div><button title="To clear previous search click the RESET button" class="smallbutton ui-button ui-corner-all ui-widget ui-button-icon-only">'
+                    +'</div><button title="'
+                    + window.hWin.HR('filter_facet_reset')
+                    + '" class="smallbutton ui-button ui-corner-all ui-widget ui-button-icon-only">'
                         +'<span class="ui-button-icon ui-icon ui-icon-search"></span><span class="ui-button-icon-space"> </span></button>'
                     +'</div>').css({'border-bottom': '1px solid lightgray','margin-bottom':'10px'}).appendTo($fieldset);
            
@@ -1239,7 +1243,7 @@ console.log('get defintion in OLD format!!!!');
                               'max-width': (w-90)+'px',
                               'min-width':'100px'});
 
-                    var btn_add = $( "<button>",{title:'To clear previous search click the RESET button'})
+                    var btn_add = $( "<button>",{title:window.hWin.HR('filter_facet_resetall_hint')})
                         .addClass("smallbutton")
                         .insertBefore( inpt.find('.input-cell .heurist-helper1') )
                         .button({icons:{primary: "ui-icon-search"}, text:false});
@@ -2470,10 +2474,10 @@ console.log('get defintion in OLD format!!!!');
                             }
 
                             if(term && term.hasOwnProperty('count') && term.count == 0){
-                                this._createOption( facet_index, 0, {title:window.hWin.HR('no values'), value:null, count:0} ).appendTo($sel);
+                                this._createOption( facet_index, 0, {title:window.hWin.HR('facet_search_no_values'), value:null, count:0} ).appendTo($sel);
                                 this.no_value_facets.push(facet_index);
                             }else{
-                                this._createOption( facet_index, 0, {title:window.hWin.HR('select...'), value:null, count:0} ).appendTo($sel);
+                                this._createOption( facet_index, 0, {title:window.hWin.HR('facet_search_select'), value:null, count:0} ).appendTo($sel);
                             }
                             this.__drawData(term, 0, $sel, facet_index, field);
 
@@ -2498,7 +2502,9 @@ console.log('get defintion in OLD format!!!!');
                                 btn_dropdown.css({"font-size": "0.96em", width: 'auto', color:"#999999", 
                                     'min-width':'', background: 'none'});
                                 btn_dropdown.addClass('borderless');
-                                btn_dropdown.find('.ui-selectmenu-text').html(window.hWin.HR(need_small_dropdown?'select':'dropdown'))
+                                btn_dropdown.find('.ui-selectmenu-text').html(window.hWin.HR(need_small_dropdown
+                                    ?'facet_search_expand_select'
+                                    :'facet_search_expand_dropdown'))
                                     .css({'min-height':'', padding:'', 'padding-right':'16px'});
                             }else{
                                 btn_dropdown.css({"font-size": "0.9em", "min-width": "8em"});
@@ -3366,7 +3372,7 @@ console.log('get defintion in OLD format!!!!');
                                 $sel.appendTo( $("<div>").css({"display":"inline-block","padding":"0"}).appendTo($facet_values) );
                             }
 
-                            this._createOption( facet_index, 0, {title:window.hWin.HR('select...'), value:null, count:0} ).appendTo($sel);
+                            this._createOption( facet_index, 0, {title:window.hWin.HR('facet_search_select'), value:null, count:0} ).appendTo($sel);
                             this.__drawData(response.data, 0, $sel, facet_index, field);
 
                             if(field.selectedvalue && field.selectedvalue.value){
@@ -3402,7 +3408,7 @@ console.log('get defintion in OLD format!!!!');
                     }
 
                     if($facet_values.is(':empty')){
-                        $("<span>").text(window.hWin.HR('no values')).css({'font-style':'italic', 'padding-left':'10px'}).appendTo($facet_values);
+                        $("<span>").text(window.hWin.HR('facet_search_no_values')).css({'font-style':'italic', 'padding-left':'10px'}).appendTo($facet_values);
                         this.no_value_facets.push(facet_index);
                     }
 

@@ -1878,7 +1878,7 @@ function translationSupport(_input_or_values, is_text_area, callback){
 //
 // obtains values from input and textarea elements with data-lang attribute
 // and assigns them to json params with key+language suffix
-// data-lang='xx' means default languge - key will be without suffix
+// data-lang='xxx' means default languge - key will be without suffix
 // 
 // params - json array to be modified
 // $container - container element
@@ -1891,8 +1891,8 @@ function translationFromUI(params, $container, keyname, name, is_text_area){
     $(Object.keys(params)).each(function(i, key){
 
         var key2 = key;        
-        if(key.indexOf(':')==key.length-3){
-            key2 = key.substring(0, key.length-3);
+        if(key.length>5 && key.indexOf(':')==key.length-4){
+            key2 = key.substring(0, key.length-4);
             if(key2 == keyname){
                 delete params[key];
             }
@@ -1905,7 +1905,7 @@ function translationFromUI(params, $container, keyname, name, is_text_area){
     $container.find(ele_type+'[name="'+name+'"]').each(function(i,item){
         item = $(item);
         var lang = item.attr('data-lang');
-        if(lang=='xx') lang = ''
+        if(lang=='xxx') lang = ''
         else lang = ':'+lang;
         
         var value = item.val().trim();
@@ -1917,6 +1917,7 @@ function translationFromUI(params, $container, keyname, name, is_text_area){
 
 //
 //  Assign values from params to UI and initialize "translation" button
+// params= [{keyname:value},...]
 //
 function translationToUI(params, $container, keyname, name, is_text_area){
     
@@ -1925,10 +1926,10 @@ function translationToUI(params, $container, keyname, name, is_text_area){
     var ele_type = is_text_area?'textarea':'input';
     
     //find element assign data-lang for default, remove others
-    //remove all except default
+    //1. Removes all except default (first one)
     $container.find(ele_type+'[name="'+name+'"]').each(function(i,item){
         var lang  = $(item).attr('data-lang');
-        if(lang=='xx' || !lang){
+        if(lang=='xxx' || !lang){
             def_ele = $(item);
         }else{
             $(item).remove(); //remove non-default
@@ -1945,12 +1946,14 @@ function translationToUI(params, $container, keyname, name, is_text_area){
     var sTitle = '';
     
     //init input element for default value and button
-    def_ele.attr('data-lang','xx').val(params[keyname]);
+    def_ele.attr('data-lang','xxx').val(params[keyname]);
     
-    if($container.find('span[name="'+name+'"]').length==0){//button
-    
+    //2. Add translation button    
+    if($container.find('span[name="'+name+'"]').length==0){
+
+        //translation button    
         var btn_add = $( "<span>")
-            .attr('data-lang','xx')
+            .attr('data-lang','xxx')
             .attr('name',name)
             .addClass('smallbutton editint-inout-repeat-button ui-icon ui-icon-translate')
             .insertAfter( def_ele )
@@ -1966,28 +1969,31 @@ function translationToUI(params, $container, keyname, name, is_text_area){
             btn_add.css({'vertical-align':'top'});    
         }
         
-        btn_add.on({click: function(e){
+        btn_add.on({click: function(e){//--------------------------
             
             var values = [];
             //$(e.target).attr('data-lang')
+            
+            //gather the list of values from input elements
             $container.find(ele_type+'[name="'+name+'"]').each(function(i,item){
                 var lang  = $(item).attr('data-lang');
-                if(lang=='xx' || !lang){
+                if(lang=='xxx' || !lang){
                     values.push($(item).val())
                 }else{
                     values.push(lang+':'+$(item).val());
                 }
             });
             
-            translationSupport( values, is_text_area, function(res){
+            //open dialog
+            translationSupport( values, is_text_area, function(newvalues){
                 
                 var res2 = {};
-                for(var i=0; i<res.length; i++){
-                    var keyname2=keyname, value = res[i];
+                for(var i=0; i<newvalues.length; i++){
+                    var keyname2=keyname, value = newvalues[i];
                     
-                    if(!window.hWin.HEURIST4.util.isempty(value) && value.substr(2,1)==':'){
-                        keyname2 = keyname2+':'+value.substr(0,2);
-                        value = value.substr(3).trim();
+                    if(!window.hWin.HEURIST4.util.isempty(value) && value.substr(3,1)==':'){
+                        keyname2 = keyname2+':'+value.substr(0,3);
+                        value = value.substr(4).trim();
                     }else{
                         value = value.trim();
                     }
@@ -1995,21 +2001,23 @@ function translationToUI(params, $container, keyname, name, is_text_area){
                         res2[keyname2] = value;
                     }
                 }
-                if(!res2[keyname]) res2[keyname] = '';
-                
+                if(!res2[keyname]){
+                    res2[keyname] = '';  
+                } 
+
                 translationToUI(res2, $container, keyname, name, is_text_area);
             });
             
         }});
-    }
+    }//end add translation button
     
     
-    //add new hidden lang elements
+    //3. add new hidden lang elements
     $(Object.keys(params)).each(function(i, key){
         if(key==keyname){
             
-        }else if(keyname==key.substring(0,key.length-3)){ // key.indexOf(keyname+':')===0){
-            var lang = key.substring(key.length-2);
+        }else if(keyname==key.substring(0,key.length-4)){ // key.indexOf(keyname+':')===0){
+            var lang = key.substring(key.length-3);
             
             var ele = $('<'+ele_type+'>')
                 .attr('name',name).attr('data-lang',lang)
@@ -2019,7 +2027,7 @@ function translationToUI(params, $container, keyname, name, is_text_area){
             if(is_text_area){
                 ele.css('display','none');
             }else{
-                ele.attr('type','hidden');
+                //ele.attr('type','hidden');
             }
                 
             sTitle += (lang+':'+params[key]+'\n');

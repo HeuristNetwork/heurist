@@ -76,6 +76,10 @@ regional['ENG'] = {
     'Manage': '',
     'Select': '',
     'Configure': '',
+    'all': '',
+    'Discard changes?': '',
+    'Back': '',
+    'Next': '',
     
     'Show context help': '',
     'Heurist context help': '',
@@ -488,7 +492,7 @@ regional['ENG'] = {
     
 //---------------------- END OF TRANSLATION 2021-10-19
 
-    // Search (fimple filter) WIDGET --------------------
+    // Search (simple filter) WIDGET --------------------
     'Filter': '',
     filter_start_hint: 'Apply the filter/search in the search field and display results in the central panel below',
     'Filtered Result': '',
@@ -502,10 +506,32 @@ regional['ENG'] = {
     'Facet builder': '',
     filter_facetbuilder_hint: 'Build new faceted search',
     filter_save_hint: 'Save current filter',
-    //END Search (fimple filter) WIDGET
+    //END Search (simple filter) WIDGET
      
+    // Faceted Search WIDGET --------------------
+    filter_facet_processing: 'processing facets...',
+    filter_facet_submit: 'Submit',
+    filter_facet_interrupt: 'Interrupt',
+    filter_facet_exit: 'Close',
+    filter_facet_exit_hint: 'Close this facet search and return to the list of saved searches',
+    filter_facet_resetall: 'Reset all',
+    filter_facet_resetall_hint: 'Clear all fields / Reset all the filters to their initial states',
+    filter_facet_reset: 'To clear previous search click the RESET button',
+    filter_facet_savestate: 'Save state',
+    filter_facet_titleprefix: 'filter : ',
+    filter_facet_apply_preliminary: 'Apply preliminary filter',
+    filter_facet_mapsearch: 'Map Search',
+    filter_facet_mapsearch_hint: 'Click this button to set and apply spatial search limits',
+    filter_facet_general_search: 'Search everything',
 
-
+    filter_facet_spatial_search: 'Heurist spatial search',
+    facet_search_no_values: 'no values',
+    facet_search_select: 'select...',
+    facet_search_expand_dropdown:  'dropdown',
+    
+    // Faceted Search wizard WIDGET --------------------
+    facet_wizard_select_field: 'Select fields that act as facet',    
+    facet_wizard_define_field: 'Define titles, help tips and facet type',
 
 //===================    
     
