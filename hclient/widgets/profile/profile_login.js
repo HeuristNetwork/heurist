@@ -248,9 +248,15 @@ function showLoginDialog(isforsed, callback, parentwin, dialog_id){
                 setupResetPin($dlg);
             });
 
-            var arr_buttons = [{html:('<b>'+window.hWin.HR('Login')+'</b>'), click: __doLogin, id:'btn_login2'}];
-            //!is_secondary_parent && 
-            if(window.hWin.HAPI4.sysinfo.registration_allowed==1 && !saml_login_only){ //isforsed && 
+            var arr_buttons = [];
+            let reg_status = window.hWin.HAPI4.sysinfo.registration_allowed;
+            if(2 & reg_status){
+                arr_buttons.push({text:window.hWin.HR('Import profile from another DB'), click: function(){
+                    doImport();   
+                }, id:'btn_import'});
+            }
+            arr_buttons.push({html:('<b>'+window.hWin.HR('Login')+'</b>'), click: __doLogin, id:'btn_login2'});
+            if(1 & reg_status){
                 arr_buttons.push({text:window.hWin.HR('Register'), click: function(){
                     doRegister( parentwin );   
                 }, id:'btn_register'});
@@ -259,7 +265,7 @@ function showLoginDialog(isforsed, callback, parentwin, dialog_id){
 
                 let mode = $dlg.find('data-mode');
                 if(mode == 0){
-                    $( this ).dialog( "close" );
+                    $dlg.dialog( "close" );
                 }else{
                     updateStatus($dlg, 0, '');
                 }
@@ -575,6 +581,116 @@ function doRegister( parentwin ){
             }
         });
     }
+
+}
+
+function doImport(){
+
+    let reg_status = window.hWin.HAPI4.sysinfo.registration_allowed;
+    if(!(2 & reg_status)){
+        return;
+    }
+
+    let selected_database = null;
+    let selected_user = null;
+
+    function _prepareImport(){
+
+        let request = {
+            'a': 'action',
+            'entity': 'sysUsers',
+            'userIDs': selected_user,
+            'sourceDB': selected_database,
+            'request_id': window.hWin.HEURIST4.util.random(),
+            'exit_if_exists': 1
+        };
+        let $dlg;
+
+        let msg = 'Please enter the password for the selected account: <input type="password" />';
+        let btns = {};
+
+        btns[window.HR('Proceed')] = function(){
+
+            let pwd = $dlg.find('input').val();
+            request['check_password'] = pwd;
+
+            window.hWin.HAPI4.EntityMgr.doRequest(request, 
+                function(response){
+                    if(response.status == window.hWin.ResponseStatus.OK){
+                        $dlg.dialog('close');
+                        window.hWin.HEURIST4.msg.showMsgDlg('You account has been imported');
+                    }else{
+                        window.hWin.HEURIST4.msg.showMsgErr(response);
+                    }
+            });
+        }
+
+        btns[window.HR('Back')] = function(){
+            $dlg.dialog('close');
+            _showUsers();
+        };
+
+        // Request password for selected account - ensure it is the actual owner
+        $dlg = window.hWin.HEURIST4.msg.showMsgDlg(msg, btns, {title: window.HR('Confirm password'), no: window.HR('Cancel'), yes: window.HR('Proceed')}, 
+            {dialogId: 'import-user', default_palette_class: 'ui-heurist-admin'});
+    }
+
+    function _showUsers(){
+
+        let options = {
+            subtitle: 'Step 2. Select your account in '+selected_database+' to be imported',
+            title: 'Import users', 
+            database: selected_database,
+            select_mode: 'select_single',
+            edit_mode: 'none',
+            keep_visible_on_selection: true,
+            onInitFinished: function(){
+                selected_user = null;
+            },
+            onClose: function(){
+                if(!selected_user){
+                    _showDatabases();
+                }
+            },
+            onselect:function(event, data){
+                if(data && data.selection &&  data.selection.length>0){
+
+                    selected_user = data.selection;
+                    _prepareImport();
+                }
+            }
+        };
+
+        usr_dialog = window.hWin.HEURIST4.ui.showEntityDialog('sysUsers', options);
+    }
+
+    function _showDatabases(){
+
+        let options = {
+            subtitle: 'Step 1. Select the database with your existing account',
+            title: 'Import users', 
+            select_mode: 'select_single',
+            pagesize: 300,
+            edit_mode: 'none',
+            use_cache: true,
+            except_current: true,
+            keep_visible_on_selection: true,
+            onInitFinished: function(){
+                selected_database = null;
+            },
+            onselect:function(event, data){
+                if(data && data.selection && data.selection.length>0){
+
+                    selected_database = data.selection[0].substring(4);
+                    _showUsers();
+                }
+            }
+        };    
+    
+        db_dialog = window.hWin.HEURIST4.ui.showEntityDialog('sysDatabases', options);
+    }
+
+    _showDatabases();
 
 }
 

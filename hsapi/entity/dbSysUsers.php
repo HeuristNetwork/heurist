@@ -574,7 +574,10 @@ class DbSysUsers extends DbEntityBase
     //
     public function batch_action($ignore_permissions=false){
 
-        if(!$ignore_permissions && !$this->system->is_admin()){ 
+        $provided_pwd = $this->data['check_password'];
+        $import_from_login = !empty($provided_pwd);
+
+        if(!$import_from_login && !$ignore_permissions && !$this->system->is_admin()){ 
             $this->system->addError(HEURIST_REQUEST_DENIED, 
                 'You are not admin and can\'t add/edit other users. Insufficient rights (logout/in to refresh) for this operation');
             return false;
@@ -608,8 +611,13 @@ class DbSysUsers extends DbEntityBase
         }
         //group roles 
         $roles = @$this->data['roles'];
-        if(!is_array($roles) || count($roles)==0){             
+        if(!$import_from_login && (!is_array($roles) || count($roles)==0)){             
             $this->system->addError(HEURIST_INVALID_REQUEST, 'Group roles for import users are not defined');
+            return false;
+        }
+
+        if($import_from_login && count($userIDs) !== 1){ // check if request is importing user from login popup, requires password for checking
+            $this->system->addError(HEURIST_INVALID_REQUEST, 'Invalid request made for importing users');
             return false;
         }
         
@@ -635,6 +643,26 @@ class DbSysUsers extends DbEntityBase
         
         $keep_autocommit = mysql__begin_transaction($mysqli);
 
+        $overwrite_status = null;
+        if($import_from_login && count($userIDs) == 1){
+
+            $usr_id = $userIDs[0];
+
+            $usr_pwd = mysql__select_value($sytem_source->get_mysqli(), "SELECT ugr_Password FROM sysUGrps WHERE ugr_ID = $usr_id");
+
+            if(!$usr_pwd || !hash_equals(crypt($provided_pwd, $usr_pwd), $usr_pwd)){
+
+                $src_db = $sytem_source->dbname();
+                $err_type = !$usr_pwd ? HEURIST_DB_ERROR : HEURIST_ACTION_BLOCKED;
+                $err_msg = !$usr_pwd ? "An error ocurred while attempting to retrieve the password for your account on $src_db" : "Password is incorrect";
+
+                $this->system->addError($err_type, $err_msg);
+                return false;
+            }
+
+            $overwrite_status = 'y_no_delete'; //y_no_add_delete
+        }
+
         //1. import users from another database
         $fields = "ugr_Type,ugr_Name,ugr_LongName,ugr_Description,ugr_Password,ugr_eMail,".
                     "ugr_FirstName,ugr_LastName,ugr_Department,ugr_Organisation,ugr_City,".
@@ -653,8 +681,14 @@ class DbSysUsers extends DbEntityBase
         foreach($userIDs as $userID){
             $res = $mysqli->query($query1.$userID);
             if($res){
-                 $userID_new = $mysqli->insert_id;    
-                 $newUserIDs[] = $userID_new;
+                $userID_new = $mysqli->insert_id;    
+                $newUserIDs[] = $userID_new;
+
+                if(!empty($overwrite_status)){
+
+                    mysql__insertupdate($mysqli, 'sysUGrps', 'ugr', array('ugr_ID' => $userID_new, 'ugr_Enabled' => $overwrite_status));
+                    $overwrite_status = null;
+                }
 
                 //copy user image 
                 $user_image = parent::getEntityImagePath($userID, null, $this->data['sourceDB']); //in source db
@@ -681,7 +715,7 @@ class DbSysUsers extends DbEntityBase
         }
                     
         //2. apply roles 
-        if($ret){
+        if($ret && !$import_from_login){
 
             foreach ($roles as $groupID=>$role){
                 $values = array();
@@ -728,12 +762,16 @@ class DbSysUsers extends DbEntityBase
             if (count($userIDs_already_exists)>0){
                 $ret = $ret.'. Users already exists: '.count($userIDs_already_exists);
             }
+
+            if(count($newUserIDs) == 1 && $import_from_login){ // email DB Owner
+                user_EmailAboutNewUser($this->system, $newUserIDs[0], true);
+            }
         }else{
             $mysqli->rollback();
         }
         if($keep_autocommit===true) $mysqli->autocommit(TRUE);
 
         return $ret;
-    }    
+    }
 }
 ?>

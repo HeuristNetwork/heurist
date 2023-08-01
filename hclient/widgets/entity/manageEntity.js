@@ -423,7 +423,8 @@ $.widget( "heurist.manageEntity", {
                     } : null,
                     onPageRender: this._onPageRender ? function(){
                         that._onPageRender(); //event on loading record list/page
-                    } : null
+                    } : null,
+                    field_for_ext_classes: 0
                 });                
 
                 //init record list

@@ -861,7 +861,7 @@
     /**
     * Send emails to DB Onwer and  System admin about new user
     */
-    function user_EmailAboutNewUser($system, $recID){
+    function user_EmailAboutNewUser($system, $recID, $fromImport = false){
 
         $mysqli = $system->get_mysqli();
         
@@ -878,13 +878,15 @@
 
             //create email text for admin
             $email_text =
-            "There is a Heurist user registration awaiting approval.\n".
-            "The user details submitted are:\n".
+            ($fromImport ? "A new Heurist user has been imported from another local database.\nPlease note that this new user's account will be enabled by default but they can only create new records.\n" : 
+                "There is a Heurist user registration awaiting approval.\n") .
+            "The user details ". ($fromImport ? "imported" : "submitted") ." are:\n".
             "Database name: ".HEURIST_DBNAME."\n".
             "Full name:    ".$ugr_FullName."\n".
             "Email address: ".$ugr_eMail."\n".
             "Organisation:  ".$ugr_Organisation."\n".
-            "Go to the address below and navigate in menu Admin > Manage Users to review further details and approve the registration:\n".
+            "Go to the address below and navigate in menu Admin > Manage Users to review further details". 
+            ($fromImport ? "" : " and approve the registration") .":\n".
             HEURIST_BASE_URL."?db=".HEURIST_DBNAME; //."&recID=$recID&mode=users";
 
             $email_title = 'User Registration: '.$ugr_FullName.' ['.$ugr_eMail.']';
