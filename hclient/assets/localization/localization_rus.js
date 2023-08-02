@@ -614,6 +614,7 @@ regional['RUS'] = {
     // Search (fimple filter) WIDGET --------------------
     'Filter': 'Поиск',
     filter_start_hint: 'Применить условия поиска',
+    filter_placeholder: 'определите условия',
     'Filtered Result': 'Результаты поиска',
     'Save Filter': 'Сохранить фильтр',
     'Filter help': 'Помощь',

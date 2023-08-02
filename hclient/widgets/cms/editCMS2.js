@@ -1693,7 +1693,7 @@ function(value){
         }     
         
         var affected_ele = _layout_container.find('div[data-hid="'+ele_id+'"]');
-        var lang = window.hWin.HAPI4.getLangCode3(lang_id,'xx');
+        var lang = window.hWin.HAPI4.getLangCode3(lang_id,'def');
         
         //need switch
         if(affected_ele.attr('data-lang')==lang || (current_language==lang && !affected_ele.attr('data-lang'))){

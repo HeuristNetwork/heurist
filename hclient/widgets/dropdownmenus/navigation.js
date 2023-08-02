@@ -32,7 +32,7 @@ $.widget( "heurist.navigation", {
        toplevel_css:null,  //css for top level items
        expand_levels:0,  //expand levels for treeview
        onInitComplete: null,
-       language: 'xx'   //"xx" means take default - without code: prefix
+       language: 'def'   //"xx" means take default - without code: prefix
     },
     
     menuData: null, //hRecordSet
@@ -54,7 +54,7 @@ $.widget( "heurist.navigation", {
 
         var that = this;
         
-        if(!this.options.language) this.options.language = 'xx'; //"xx" means use current language
+        if(!this.options.language) this.options.language = 'def'; //"xx" means use current language
 
         if(this.element.parent().attr('data-heurist-app-id') || this.element.attr('data-heurist-app-id')){
             //this is CMS publication - take bg from parent

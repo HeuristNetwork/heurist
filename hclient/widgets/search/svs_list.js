@@ -50,7 +50,7 @@ $.widget( "heurist.svs_list", {
         simple_search_header: 'Simple search', // header text for 'search everything' filter
         simple_search_text: 'Search everything:', // field label for the simple search filter
         
-        language: 'xx',  //use default
+        language: 'def',  //use default
         
         suppress_default_search: false, //if true prevents default search (init_svsID) execution - useful in cms
 
@@ -84,7 +84,7 @@ $.widget( "heurist.svs_list", {
             $(tab_td[0]).css('height','1px');
         }
         
-        if(!this.options.language) this.options.language = 'xx'; //"xx" means use current language
+        if(!this.options.language) this.options.language = 'def'; //"xx" means use current language
         
         if(this.options.allowed_svsIDs && !$.isArray(this.options.allowed_svsIDs)){
             if($.isNumeric(this.options.allowed_svsIDs)){

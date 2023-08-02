@@ -495,6 +495,7 @@ regional['ENG'] = {
     // Search (simple filter) WIDGET --------------------
     'Filter': '',
     filter_start_hint: 'Apply the filter/search in the search field and display results in the central panel below',
+    filter_placeholder: 'define filter',
     'Filtered Result': '',
     'Save Filter': '',
     'Filter help': '',

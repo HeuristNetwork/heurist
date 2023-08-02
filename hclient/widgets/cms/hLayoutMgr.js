@@ -289,7 +289,7 @@ function hLayoutMgr(){
         var content = 'content'; //default name of attribute
         
         if(_supp_options['lang']){
-            var lang = window.hWin.HAPI4.getLangCode3(_supp_options['lang'],'xx');
+            var lang = window.hWin.HAPI4.getLangCode3(_supp_options['lang'],'def');
             if(layout[content+lang]){ //if not found use the default
                 content = content+lang;
             }
@@ -407,7 +407,7 @@ function hLayoutMgr(){
         //var weblang = window.hWin.HEURIST4.util.getUrlParameter('weblang');
         if(_supp_options['lang']){
             // xx - means it will use current language
-            layout.options['language'] = window.hWin.HAPI4.getLangCode3(_supp_options['lang'],'xx');    
+            layout.options['language'] = window.hWin.HAPI4.getLangCode3(_supp_options['lang'],'def');    
         }
         
         

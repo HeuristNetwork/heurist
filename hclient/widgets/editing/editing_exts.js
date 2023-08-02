@@ -1878,7 +1878,7 @@ function translationSupport(_input_or_values, is_text_area, callback){
 //
 // obtains values from input and textarea elements with data-lang attribute
 // and assigns them to json params with key+language suffix
-// data-lang='xxx' means default languge - key will be without suffix
+// data-lang='def' means default languge - key will be without suffix
 // 
 // params - json array to be modified
 // $container - container element
@@ -1905,7 +1905,7 @@ function translationFromUI(params, $container, keyname, name, is_text_area){
     $container.find(ele_type+'[name="'+name+'"]').each(function(i,item){
         item = $(item);
         var lang = item.attr('data-lang');
-        if(lang=='xxx') lang = ''
+        if(lang=='def') lang = ''
         else lang = ':'+lang;
         
         var value = item.val().trim();
@@ -1929,7 +1929,7 @@ function translationToUI(params, $container, keyname, name, is_text_area){
     //1. Removes all except default (first one)
     $container.find(ele_type+'[name="'+name+'"]').each(function(i,item){
         var lang  = $(item).attr('data-lang');
-        if(lang=='xxx' || !lang){
+        if(lang=='def' || !lang){
             def_ele = $(item);
         }else{
             $(item).remove(); //remove non-default
@@ -1946,14 +1946,14 @@ function translationToUI(params, $container, keyname, name, is_text_area){
     var sTitle = '';
     
     //init input element for default value and button
-    def_ele.attr('data-lang','xxx').val(params[keyname]);
+    def_ele.attr('data-lang','def').val(params[keyname]);
     
     //2. Add translation button    
     if($container.find('span[name="'+name+'"]').length==0){
 
         //translation button    
         var btn_add = $( "<span>")
-            .attr('data-lang','xxx')
+            .attr('data-lang','def')
             .attr('name',name)
             .addClass('smallbutton editint-inout-repeat-button ui-icon ui-icon-translate')
             .insertAfter( def_ele )
@@ -1977,7 +1977,7 @@ function translationToUI(params, $container, keyname, name, is_text_area){
             //gather the list of values from input elements
             $container.find(ele_type+'[name="'+name+'"]').each(function(i,item){
                 var lang  = $(item).attr('data-lang');
-                if(lang=='xxx' || !lang){
+                if(lang=='def' || !lang){
                     values.push($(item).val())
                 }else{
                     values.push(lang+':'+$(item).val());

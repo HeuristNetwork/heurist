@@ -38,6 +38,8 @@ $.widget( "heurist.search", {
         search_input_label: '',
 
         button_class: 'ui-heurist-btn-header1',
+        
+        language: 'def',
 
         // callbacks
         onsearch: null,  //on start search
@@ -114,7 +116,6 @@ $.widget( "heurist.search", {
         this.div_search   = $('<div>').css({ 'width':'100%', display:'table' }).appendTo( this.element ); //was table-row
 
 
-
         //header-label
         this.div_search_header = $('<div>')
         .css({'width':'auto','text-align':'right','line-height':'31px','padding-left':sz_search_padding}) //'height':'6.88em',
@@ -122,7 +123,8 @@ $.widget( "heurist.search", {
         .appendTo( this.div_search );
 
         if(this.options.search_input_label){
-            this.div_search_header.text( this.options.search_input_label ).css({'padding-right':'4px'});     
+            var lbl = window.hWin.HRJ('search_input_label', this.options, this.options.language);
+            this.div_search_header.text( lbl ).css({'padding-right':'4px'});     
         }
 
 

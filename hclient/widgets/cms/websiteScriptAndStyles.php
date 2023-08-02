@@ -83,7 +83,7 @@ if (($_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0.0.1')
     var init_page_record_id=<?php echo $open_page_or_record_on_init; ?>;
     var isWebPage = <?php echo ($isWebPage ?'true':'false');?>;
     var current_page_id = 0;
-    var current_language = 'xx';
+    var current_language = 'def';
     var default_language = '<?php echo $website_language_def; ?>';
     var website_languages = '<?php echo $website_languages?implode(',',$website_languages):''; ?>';
     var is_show_pagetitle_main = <?php echo $show_pagetitle?'true':'false'; ?>;  //is show page title per website 
@@ -401,7 +401,7 @@ function initMainMenu( afterInitMainMenu ){
     var weblang = window.hWin.HEURIST4.util.getUrlParameter('weblang');
     if(weblang){
         // xx - means it will use current language
-        weblang = window.hWin.HAPI4.getLangCode3(weblang, 'xx');    
+        weblang = window.hWin.HAPI4.getLangCode3(weblang, 'def');    
     } 
 
 //console.log(weblang);
@@ -850,7 +850,7 @@ function afterPageLoad(document, pageid, eventdata){
                 surl =  surl + '/?q=' + eventdata.q;
             }
 
-            if(current_language && current_language!='xx'){ //!= current_language_def
+            if(current_language && current_language!='def'){ //!= current_language_def
                 surl =  surl + (surl.indexOf('/?q')<0?'/?':'&')+'lang='+current_language;    
             }
             
@@ -862,7 +862,7 @@ function afterPageLoad(document, pageid, eventdata){
             params['db'] = window.hWin.HAPI4.database;
             params['website'] = '';
             params['id'] = home_page_record_id;
-            if(current_language && current_language!='xx'){ //!= current_language_def
+            if(current_language && current_language!='def'){ //!= current_language_def
                 params['lang'] = current_language;    
             }
       

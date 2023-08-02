@@ -157,7 +157,7 @@ $.widget( "heurist.search_faceted", {
         onclose: null,// callback
         is_publication: false,
         respect_relation_direction: false,
-        language: 'xx',  //use default
+        language: 'def',  //use default
 
         hide_no_value_facets: true // hide facets with no values, default true
     },
@@ -195,7 +195,7 @@ $.widget( "heurist.search_faceted", {
     // the widget's constructor
     _create: function() {
         
-        if(!this.options.language) this.options.language = 'xx'; //"xx" means use current language
+        if(!this.options.language) this.options.language = 'def'; //"xx" means use current language
         
         if(this.element.parents('.mceNonEditable').length>0 
         || this.element.parent().attr('data-heurist-app-id') || this.element.hasClass('cms-element'))
@@ -705,7 +705,7 @@ $.widget( "heurist.search_faceted", {
 
         var that= this; 
         
-        if(!this.options.language) this.options.language = 'xx'; //"xx" means use current language
+        if(!this.options.language) this.options.language = 'def'; //"xx" means use current language
         if(!window.hWin.HAPI4.EntityMgr.getEntityData2('trm_Translation')){ 
             // retrieve translations
             window.hWin.HAPI4.EntityMgr.getTranslatedDefs('defTerms', 'trm', null, function(){

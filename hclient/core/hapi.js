@@ -2117,7 +2117,8 @@ console.log('DEBUG refreshEntityData '+(fin_time-s_time));  //response.data+'  '
                     'request_id': window.hWin.HEURIST4.util.random()
                 };
 
-                window.hWin.HAPI4.EntityMgr.doRequest(request, function(response){ console.log(response);
+                window.hWin.HAPI4.EntityMgr.doRequest(request, function(response){ 
+//DEBUG console.log(response);
                     if(response.status == window.hWin.ResponseStatus.OK){
 
                         let recordset = new hRecordSet(response.data);
@@ -2437,7 +2438,7 @@ console.log('DEBUG refreshEntityData '+(fin_time-s_time));  //response.data+'  '
         //
         getLangCode3: function(lang, def){
 
-            if(lang && lang != 'xx'){
+            if(lang && lang != 'def'){
                 if(lang.length==2){
                     lang = lang.toLowerCase();
                     for(var code3 in that.sysinfo.common_languages){
@@ -2482,7 +2483,7 @@ console.log('DEBUG refreshEntityData '+(fin_time-s_time));  //response.data+'  '
                     }else {
                         //without prefix
                         def_val = val;
-                        if(lang=='xx'){ //take first without prefix
+                        if(lang=='def'){ //take first without prefix
                             break;
                         }
                     }
