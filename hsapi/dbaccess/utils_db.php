@@ -31,7 +31,6 @@
     *  stripAccents
     *  prepareIds
     *  checkMaxLength - check max length for TEXT field
-    *  extractLangPrefix - splits and extract language code and value from string code:value
     * 
     *  updateDatabaseToLatest - make changes in database structure according to the latest version
     *  recreateRecLinks
@@ -1347,56 +1346,7 @@ if($i<5){
         
     }
 
-    //
-    //  splits and extract language code and value from string code:value
-    //  if $val is 2 chars code ISO639-1 - it will be converted to 3 chars ISO639-2
-    //    
-    function extractLangPrefix($val){
-        
-        global $glb_lang_codes, $common_languages_for_translation;
-    
-        if(is_string($val) && mb_strlen($val)>4){
-            
-            
-            if(substr($val,0,2)=='*:'){
-                $lang = 'ALL';
-                $pos = 2;
-            }else{
-            
-                $lang = null;
-                $pos = 3;
-                
-                if($val[2]==':'){
-                    $lang = strtolower(substr($val,0,2));
-                    //find 3 chars code
-                    if(!isset($glb_lang_codes)){
-                        $glb_lang_codes = json_decode(file_get_contents('../../hclient/assets/language-codes-3b2.json'),true);
-                    }
-                    foreach($glb_lang_codes as $codes){
-                        if($codes['a2']==$lang){
-                            $lang = $codes['a3'];
-                            break;
-                        }
-                    }
-                    
-                }else if($val[3]==':'){
-                    $lang = substr($val,0,3);
-                    $pos = 4;
-                }
-            }
 
-            if($lang){
-                $lang = strtoupper($lang);
-                if (strcasecmp($lang,'ALL')===0 || in_array($lang, $common_languages_for_translation)){
-                    return array($lang, substr($val, $pos));
-                }
-            }
-
-            
-        } 
-        
-        return array(null, $val);    
-    }
     
     //
     //

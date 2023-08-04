@@ -847,7 +847,7 @@ function dbs_GetRectypeConstraint($system) {
         }
         return $labels;
     }    
-
+    
     //
     //
     //

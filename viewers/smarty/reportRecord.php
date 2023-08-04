@@ -31,7 +31,7 @@ public methods
    getRecords - returns records ids for given query 
    getRecordsAggr - returns aggregation values
    
-   getTranslation - returns translation for given entity + id
+   _getTranslation - returns translation for given entity + id
    
 */
 class ReportRecord {
@@ -44,7 +44,7 @@ class ReportRecord {
        protected $dbsTerms;
        protected $system;
     
-       protected $translations;
+       protected $translations; //cache for translated db definitions (terms,...)
     
     function __construct() {
        global $system; 
@@ -97,7 +97,17 @@ class ReportRecord {
         }else if($param=='db_rty_counts'){
 
             $res = mysql__select_assoc2($mysqli, 'SELECT rec_RecTypeID, count(*) FROM Records WHERE not rec_FlagTemporary GROUP BY rec_RecTypeID');
+            
+        }else if($param=='lang'){
+            
+            $res = $_REQUEST['lang'];
+            if (!$res) {
+                $res = $this->system->user_GetPreference('layout_language', '');
+            }
+
+            $res = getLangCode3($res);
         }
+
         
         return $res;
     }
@@ -359,6 +369,8 @@ class ReportRecord {
             
             $record = array();
             $recTypeID = null;
+            
+            $lang = $this->getSysInfo('lang');
 
             //$record["recOrder"] = $order;
 
@@ -394,7 +406,7 @@ class ReportRecord {
 
                     $details = array();
                     foreach ($value as $dtKey => $dtValue){
-                        $dt = $this->getDetailForSmarty($dtKey, $dtValue, $recTypeID, $recordID); //$record['recID']);
+                        $dt = $this->getDetailForSmarty($dtKey, $dtValue, $recTypeID, $recordID, $lang); //$record['recID']);
                         if($dt){
                             $record = array_merge($record, $dt);
                         }
@@ -432,7 +444,7 @@ class ReportRecord {
     // convert details to array to be assigned to smarty variable
     // $dtKey - detailtype ID, if <1 this dummy relationship detail
     //
-    private function getDetailForSmarty($dtKey, $dtValue, $recTypeID, $recID){
+    private function getDetailForSmarty($dtKey, $dtValue, $recTypeID, $recID, $lang){
 
         $issingle = false;
 
@@ -498,21 +510,26 @@ class ReportRecord {
 
                                     //IJ wants to show terms for all parents
                                     $term_full = $this->dbsTerms->getTermLabel($value, true);
+
+                                    $term_label = $this->getTranslation('trm', $value, 'trm_Label', $lang);
+                                    $term_desc = $this->getTranslation('trm', $value, 'trm_Description', $lang);
                                     
                                     $res_id = $this->_add_term_val($res_id, $value);
                                     $res_cid = $this->_add_term_val($res_cid, $term[ $fi['trm_ConceptID'] ]);
                                     $res_code = $this->_add_term_val($res_code, $term[ $fi['trm_Code'] ]);
+                                    
                                     $res_label_full = $this->_add_term_val($res_label_full, $term_full);
-                                    $res_label = $this->_add_term_val($res_label, $term[ $fi['trm_Label'] ]);
-                                    $res_desc = $this->_add_term_val($res_desc, $term[ $fi['trm_Description'] ]);
+                                    $res_label = $this->_add_term_val($res_label, $term_label); //$term[ $fi['trm_Label'] ]);
+                                    $res_desc = $this->_add_term_val($res_desc, $term_desc); //$term[ $fi['trm_Description'] ]);
 
                                     //NOTE id and label are for backward
+                                    //original value
                                     array_push($res, array("id"=>$value, "internalid"=>$value, 
                                         "code"=>$term[ $fi['trm_Code'] ], 
-                                        "label"=>$term[ $fi['trm_Label'] ], 
+                                        "label"=>$term_label, 
                                         "term"=>$term_full, 
                                         "conceptid"=>$term[ $fi['trm_ConceptID'] ],
-                                        "desc"=>$term[ $fi['trm_Description'] ]
+                                        "desc"=>$term_desc 
                                     ));
                                 }
                             }
@@ -521,7 +538,7 @@ class ReportRecord {
                             );
 
                             if(count($res)>0){
-                                if($issingle){
+                                if($issingle){//no used
                                     $res = array( $dtname =>$res_united );
                                 }else{
                                     $res = array( $dtname =>$res[0], $dtname."s" =>$res );
@@ -652,7 +669,15 @@ class ReportRecord {
                                 $res = $res.$value;
                                 array_push($origvalues, $value);
                             }
-                            if(strlen($res)==0){ //no valid terms
+                            
+                            if(count($dtValue)>1 && ($detailType=='freetext' || $detailType=='blocktext')){
+                                $translated_value = getCurrentTranslation($dtValue, $lang);
+                                if($translated_value!=null){
+                                    $res = $translated_value;   
+                                }
+                            }
+                            
+                            if(strlen($res)==0){ //no valid value
                                 $res = null;
                             }else{
                                 $res = array( $dtname=>$res, $dtname."s" =>$origvalues, $dtname."_originalvalue"=>$origvalues);
@@ -820,7 +845,12 @@ class ReportRecord {
         
     }
 
+    // 
+    // returns translation for given entity + id
+    //
     public function getTranslation($entity, $ids, $field, $language_code){
+        
+        $language_code = getLangCode3($language_code);
 
         $rtn = array();
         $def_values = array();
@@ -837,10 +867,16 @@ class ReportRecord {
 
         $cache = $this->translations[$entity][$language_code];
 
+        
+        if($entity == 'trm'){
+            $field = (strpos(strtolower($field), 'desc') === false) ? 'trm_Label' : 'trm_Description'; // grab label by default
+        }
+        
+        
         if(count($cache) > 0){ // check cache first
             foreach ($ids as $idx => $id) {
-                if(array_key_exists($id, $cache)){
-                    $rtn[$id] = $cache[$id];
+                if(array_key_exists($id, $cache) && @$cache[$id][$field]){
+                    $rtn[$id] = $cache[$id][$field];
                     unset($ids[$idx]);
                 }
             }
@@ -848,9 +884,11 @@ class ReportRecord {
 
         if(count($ids) == 0){
             return count($rtn) == 1 ? array_shift($rtn) : $rtn;
+        }else if(count($ids) == 1){
+            $id_clause = ' ='.$ids[0];
+        }else{
+            $id_clause = ' IN (' .implode(',', $ids). ')';    
         }
-
-        $id_clause = ' IN (' .implode(',', $ids). ')';
 
         if($entity == 'trm'){
 
@@ -860,8 +898,6 @@ class ReportRecord {
             if($this->dbsTerms==null){
                 $this->dbsTerms = new DbsTerms($this->system, $this->dtTerms);
             }
-
-            $field = (strpos(strtolower($field), 'desc') === false) ? 'trm_Label' : 'trm_Description'; // grab label by default
 
             // retrieve original term
             $idx = $this->dtTerms['fieldNamesToIndex'];
@@ -889,7 +925,7 @@ class ReportRecord {
                     $rtn[$id] = '';
                 }
 
-                $cache[$id] = $rtn[$id];
+                $cache[$id] = array($field => $rtn[$id]);
             }
         }
 

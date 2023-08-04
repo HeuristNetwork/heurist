@@ -29,6 +29,7 @@ require_once (dirname(__FILE__).'/dbaccess/utils_db.php');
 require_once (dirname(__FILE__).'/dbaccess/db_users.php');
 require_once (dirname(__FILE__).'/utilities/utils_file.php');
 require_once (dirname(__FILE__).'/utilities/utils_mail.php');
+require_once (dirname(__FILE__).'/utilities/utils_locale.php');
 require_once (dirname(__FILE__).'/structure/dbsImport.php');
 
 set_error_handler('boot_error_handler');    
@@ -1085,9 +1086,6 @@ error_log(print_r($_REQUEST, true));
                 $common_languages[$lang] = $codes;
             }
         }
-            
-            
-        
         
         try{
             
