@@ -281,7 +281,7 @@ function _dout(msg){
 }
 
 // global 
-var DT_NAME, DT_EXTENDED_DESCRIPTION, DT_CMS_SCRIPT, DT_CMS_CSS, DT_CMS_PAGETITLE, DT_CMS_TOPMENUSELECTABLE, TRM_NO, TRM_NO_OLD;
+var RT_CMS_MENU, DT_NAME, DT_EXTENDED_DESCRIPTION, DT_CMS_SCRIPT, DT_CMS_CSS, DT_CMS_PAGETITLE, DT_CMS_TOPMENUSELECTABLE, TRM_NO, TRM_NO_OLD;
 var timeout_count = 0;
 
 //
@@ -301,6 +301,7 @@ function onPageInit(success)
         
     }
     
+    RT_CMS_MENU = window.hWin.HAPI4.sysinfo['dbconst']['RT_CMS_MENU'];
     DT_NAME = window.hWin.HAPI4.sysinfo['dbconst']['DT_NAME'];
     DT_EXTENDED_DESCRIPTION = window.hWin.HAPI4.sysinfo['dbconst']['DT_EXTENDED_DESCRIPTION'];
     DT_CMS_SCRIPT = window.hWin.HAPI4.sysinfo['dbconst']['DT_CMS_SCRIPT'];
@@ -455,10 +456,46 @@ function loadPageContent(pageid, eventdata){
     var topmenu = $('#main-menu').find('div[widgetid="heurist_Navigation"]');
 
     // this is not website page, this is ordinary record - show it in main-recordview or popup                    
-    if(window.hWin.HEURIST4.util.isNumber(pageid) &&
-       !(topmenu &&  topmenu.navigation('instance') && topmenu.navigation('isMenuItem',pageid))){ 
-
-        loadRecordContent(pageid);
+    if(window.hWin.HEURIST4.util.isNumber(pageid) &&  !page_cache[pageid]){
+           
+       if (! ((topmenu &&  topmenu.navigation('instance') && topmenu.navigation('isMenuItem',pageid))
+              ||
+              (eventdata && eventdata['isMenuItem'])) )
+       {
+       
+           //check that pageid is cms page
+           if(!usual_heurist_records[pageid]){
+           
+                var server_request = {
+                    q: 'ids:'+pageid,
+                    restapi: 1,
+                    columns: 
+                    ['rec_ID', 'rec_RecTypeID'],
+                    zip: 1,
+                    format:'json'};
+           
+                window.hWin.HAPI4.RecordMgr.search_new(server_request,
+                        function(response){
+                          
+                           if(window.hWin.HEURIST4.util.isJSON(response)) {
+                               if(response['records'] && response['records'].length>0){
+                                   var res = response['records'][0]['rec_RecTypeID'];
+                                   if(res == RT_CMS_MENU){
+                                       if(!eventdata) eventdata = {};
+                                       eventdata['isMenuItem'] = true;
+                                       loadPageContent(pageid, eventdata);
+                                   }else{
+                                       usual_heurist_records.push(pageid);
+                                       loadRecordContent(pageid);
+                                   } 
+                               }
+                           }
+                });
+                return;
+           }
+           loadRecordContent(pageid);
+           return;
+       }
     }
     
 
@@ -586,7 +623,6 @@ if($website_custom_css!=null){
 // 
 function loadRecordContent(url_or_record_id, target){
     
-//console.log(url_or_record_id);
     if(!url_or_record_id){
         console.log('url_or_record_id not defined');
         return;
@@ -666,6 +702,8 @@ function loadRecordContent(url_or_record_id, target){
 } //loadRecordContent
 
 var page_cache = {};
+var usual_heurist_records = []; //record ids that are not CMS_PAGE - see loadPageContent
+
 var previous_page_id = -1;
 
 var datatable_custom_render = null;
@@ -916,9 +954,8 @@ function afterPageLoad(document, pageid, eventdata){
             +' '+window.hWin.HAPI4.Event.ON_REC_SELECT, function(e, eventdata) {        
                 
                 
-
                 if(eventdata && eventdata.search_page>0){
-                
+
                     if(eventdata.search_page!=current_page_id){
                     
                         var new_pageid = eventdata.search_page;

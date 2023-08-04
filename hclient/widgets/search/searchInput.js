@@ -44,7 +44,7 @@ $.widget( "heurist.searchInput", {
         onsearch: null,  //on start search
         onresult: null,   //on search result
         
-        search_page: null, //target page (for CMS)
+        search_page: null, //target page (for CMS) - it will navigate to this page and pass search results to search_realm group
         search_realm:  null,  //accepts search/selection events from elements of the same realm only
 
         update_on_external_search: false // update search box value on ON_REC_SEARCHSTART from facet/other filters
