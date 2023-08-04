@@ -197,7 +197,10 @@
                     $fnd = $val;
                 }else if($lang_==null){
                     $def = $val;
+                }else{
+                    $cnt++;
                 }
+                
             }
             if($cnt==count($input)-1){
                 $res = $fnd?$fnd:$def;                
