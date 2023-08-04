@@ -91,9 +91,9 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
         if(script_name.endsWith('/web')) script_name = script_name + '/'; //add last slash
 
         //actions for redirection https://hist/heurist/[dbname]/web/
-        if(script_name.search(/\/([A-Za-z0-9_]+)\/(web|hml|tpl|view)\/.*/)>=0){
-            installDir = script_name.replace(/\/([A-Za-z0-9_]+)\/(web|hml|tpl|view)\/.*/, '')+'/';
-            if(installDir=='/') installDir = '/heurist/';
+        if(script_name.search(/\/([A-Za-z0-9_]+)\/(website|web|hml|tpl|view)\/.*/)>=0){
+            installDir = script_name.replace(/\/([A-Za-z0-9_]+)\/(website|web|hml|tpl|view)\/.*/, '')+'/';
+            if(installDir=='/') installDir = '/h6-alpha/';//'/heurist/';
         }else{
             installDir = script_name.replace(/(((\?|admin|applications|common|context_help|export|hapi|hclient|hsapi|import|startup|records|redirects|search|viewers|help|ext|external)\/.*)|(index.*|test.php))/, ""); // Upddate in utils_host.php also
         }
@@ -103,6 +103,8 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
         if (!_baseURL) _baseURL = window.hWin.location.protocol + '//' + window.hWin.location.host + installDir;
         that.baseURL = _baseURL;
 
+//console.log('1.>>>', that.baseURL);        
+        
         //detect production version
         if (installDir && !installDir.endsWith('/heurist/')) {
             installDir = installDir.split('/');
@@ -159,6 +161,9 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
         if (that.database) {
             that.SystemMgr.sys_info(function (success) {
                 if (success) {
+                    that.baseURL = window.hWin.HAPI4.sysinfo['baseURL'];
+//console.log('2.>>>', that.baseURL);        
+                    
                     var lang = window.hWin.HEURIST4.util.getUrlParameter('lang');
                     if (lang) {
                         //save in preferences
@@ -170,6 +175,7 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
                     window.hWin.HRA = that.HRA; //localize all elements with class slocale for given element
                     window.hWin.HRes = that.HRes; //returns url or content for localized resource (help, documentation)
                     window.hWin.HRJ = that.HRJ; // returns localized value for json (options in widget)
+                    
                 }
                 _oninit(success);
             });

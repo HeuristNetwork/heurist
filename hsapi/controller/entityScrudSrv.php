@@ -146,11 +146,15 @@
             $entity = new $classname($system, $params);
             
             $res[$entity_name] = $entity->search();
-            if($need_config!==false && $res[$entity_name]!==false){
-                $need_config[$entity_name]['config'] = $entity->config();    
-            }
-            if($entity_name == 'defTerms'){
-                $res[$entity_name]['trm_Links'] = $entity->getTermLinks();
+            if($res[$entity_name]===false){
+                return false;   
+            }else{
+                if($need_config!==false){
+                    $need_config[$entity_name]['config'] = $entity->config();    
+                }
+                if($entity_name == 'defTerms'){
+                    $res[$entity_name]['trm_Links'] = $entity->getTermLinks();
+                }
             }
         }
         return $res;

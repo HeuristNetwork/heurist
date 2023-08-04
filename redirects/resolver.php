@@ -108,13 +108,10 @@ $requestUri:
 
     $params = array();
     $params['db'] = $database;
-
+    
     require_once ('../hsapi/utilities/utils_host.php');
     $host_params = getHostParams();
 
-//print $_SERVER["SCRIPT_NAME"].'<br>';
-//print print_r($host_params,true);        
-    
     if($action=='web' || $action=='website'){
         
         $redirect .= '?db='.$database.'&website';

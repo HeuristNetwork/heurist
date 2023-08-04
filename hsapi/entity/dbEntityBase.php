@@ -1069,16 +1069,20 @@ class DbEntityBase
     //
     public function search(){
         
-        $this->searchMgr = new DbEntitySearch( $this->system, $this->fields);
+        if($this->isvalid()){
+            $this->searchMgr = new DbEntitySearch( $this->system, $this->fields);
 
-        $res = $this->searchMgr->validateParams( $this->data );
-        if(!is_bool($res)){
-            $this->data = $res;
+            $res = $this->searchMgr->validateParams( $this->data );
+            if(!is_bool($res)){
+                $this->data = $res;
+            }else{
+                if(!$res) return false;        
+            }        
+
+            return true;        
         }else{
-            if(!$res) return false;        
-        }        
-
-        return true;        
+            return false;
+        }
     }
     
 }  
