@@ -508,6 +508,81 @@ function dbs_GetRectypeConstraint($system) {
    
 
     /**
+     * Get translation records for given values
+     *
+     * @param   array $fields array of objects containing details about what translations to retrieve
+     * @return  array record rows from defTranslations
+     */
+    function dbs_GetTranslations($system, $fields){
+
+        if(empty($fields) || !is_array($fields)){
+            return array('response' => 'data is in wrong format');
+        }
+
+        $mysqli = $system->get_mysqli();
+        $search_query = 'SELECT trn_ID, trn_Source, trn_Code, trn_LanguageCode, trn_Translation, trn_Modified '
+            . 'FROM defTranslations '
+            . 'WHERE trn_Source {def_source} AND trn_Code={def_id}';
+
+        $to_replace = array('{def_source}', '{def_id}');
+
+        $results = array(
+            'translations' => array(),
+            'key_mapping' => array()
+            //'commonFieldNames' => array_slice(__getTranslationColName(), 1),
+            //'fieldNamesToIndex' => __getColumnNameToIndex(array_slice(__getTranslationColName(), 1))
+        );
+
+        // array( [local_id] => array(
+        //  trn_Source, trn_Code
+        // ))
+        $translations = array();
+        $translations_id_mapping = array();
+
+        foreach ($fields as $key => $field) {
+            
+            if(!array_key_exists('trn_Source', $field) || empty($field['trn_Source']) 
+                || !array_key_exists('trn_Code', $field) || empty($field['trn_Code'])){
+                continue;
+            }
+
+            $trn_Code = @$field['trn_Code'];
+            $trn_Source = @$field['trn_Source'];
+
+            if(substr($trn_Source, -1) == '_'){ // for all translations of a definition, {trm_, dty_, rty_}
+                $trn_Source = 'LIKE "'. htmlspecialchars($trn_Source) .'%"';
+            }else{
+                $trn_Source = '= "'. htmlspecialchars($trn_Source) .'"';
+            }
+
+            if(strpos($trn_Code, '-')){ // concept code
+                $trn_Code = explode('-', $trn_Code)[1];
+            }
+            $trn_Code = intval($trn_Code);
+
+            if($trn_Code < 1){
+                continue;
+            }
+
+            $query = str_replace($to_replace, array($trn_Source, $trn_Code), $search_query);
+
+            $records = mysql__select_assoc($mysqli, $query);
+            if(!$records || empty($records)){ // no translations found
+                continue;
+            }
+            $translations = array_replace($translations, $records); // $translations + $records
+            $translations_id_mapping[$key] = array_keys($records);
+        }
+
+        if(count($translations) > 0){
+            $results['translations'] = $translations;
+            $results['key_mapping'] = $translations_id_mapping;
+        }
+
+        return $results;
+    }
+
+    /**
     * Get term structure with trees from relation and enum domains
     *
     * @param     boolean $useCachedData whether to use cached data (default = false)

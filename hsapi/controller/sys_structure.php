@@ -61,6 +61,8 @@
 
                     if (@$_REQUEST['rectypes']) $remoteURL = $remoteURL.'&rectypes='.$_REQUEST['rectypes'];
                     if (@$_REQUEST['detailtypes']) $remoteURL = $remoteURL.'&detailtypes='.$_REQUEST['detailtypes'];
+                    if (@$_REQUEST['terms']) $remoteURL = $remoteURL.'&terms='.$_REQUEST['terms'];
+                    if (@$_REQUEST['translations']) $remoteURL = $remoteURL.'&translations='.$_REQUEST['translations'];
                     if (@$_REQUEST['mode']) $remoteURL = $remoteURL.'&mode='.$_REQUEST['mode'];
 
                     $data = loadRemoteURLContent($remoteURL); //load defitions from remote database
@@ -169,6 +171,10 @@ ini_set('max_execution_time', 0);
 
             //$currentUser = $system->getCurrentUser();
             $data = array();
+
+            if (@$_REQUEST['translations']){
+                $data['translations'] = dbs_GetTranslations($system, $_REQUEST['translations']);
+            }
 
             if (@$_REQUEST['terms']) {
                 $data["terms"] = dbs_GetTerms($system);
