@@ -356,7 +356,7 @@ function hImportDefDetailTypes() {
                     record['dty_Name'] = name;
                     
                     if(field_desc>-1 && field_desc<_parseddata[i].length){
-                        record['dty_Description'] = _parseddata[i][field_desc];
+                        record['dty_HelpText'] = _parseddata[i][field_desc];
                     }
                     if(field_type>-1 && field_type<_parseddata[i].length){
                         record['dty_Type'] = _parseddata[i][field_type];
@@ -461,10 +461,10 @@ function hImportDefDetailTypes() {
                         }
                     }
 
+                    let entities_refresh = 'dty,rst' + (results['refresh_terms'] == true ? ',trm' : '');
+
                     if(update_cache){
-                        window.hWin.HAPI4.EntityMgr.refreshEntityData('dty', function(){
-                            window.hWin.HAPI4.EntityMgr.refreshEntityData('rst', null);
-                        }); // update cache
+                        window.hWin.HAPI4.EntityMgr.refreshEntityData(entities_refresh, jQuery.noop); // update cache
                     }
                 }else{
                     window.hWin.HEURIST4.msg.showMsgErr(response);

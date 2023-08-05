@@ -92,9 +92,9 @@
     				<p><b>Step 1</b></p>
     				<p>
     					Paste content in area below (one name, description and type per line, may optionally be followed by semantic URI), with usual delimiters (eg. commas) and enclosing (e.g. double quotes).<br><br>
-    					The type must be one of the following: Text / freetext, Memo / blocktext, Date, Numeric / integer / float, Terms / enum, Recpointer / resource, Relmarker<br>
-    					The Target(s) column (a list of comma separated record type ids) is needed for both Recpointer and Relmarker type fields<br>
-    					The Vocabulary column (just the vocabulary id) needs to be provided for both Terms and Relmarker type fields, please ensure that the provided vocabulary is set for 'relation' when used for Relmarkers.
+    					The type must be one of the following: Text, Memo, Date, Numeric, Terms, Record pointer and Relationship marker<br>
+    					The Target column may contain a comma-separated list of record type IDs for record pointer and relationship marker fields or may be left blank<br>
+    					The Vocabulary column may contain a vocabulary ID or may be le blank for both term and relaonship marker fields, in which case a new vocabulary is created with the name of the field
     				</p>
     				<input type="file" id="uploadFile" style="display:none">
     				<div style="padding-top:4px">
