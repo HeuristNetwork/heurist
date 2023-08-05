@@ -497,9 +497,10 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
              *  - `2`: db owner
              * @param {string} password_protected - name of password
              * @param {string} password_entered - password entered by the user on the client
+             * @param {string} requiredPermission - required permissions; 'add', 'delete', 'add delete'
              * 
              */
-            verify_credentials: function (callback, requiredLevel, password_protected, password_entered) {
+            verify_credentials: function (callback, requiredLevel, password_protected, password_entered, requiredPermission) {
 
                 var requiredMembership = 0;
 
@@ -589,6 +590,21 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
                             response.message += ' as administrator of group #' + requiredLevel + sGrpName;
                         } else if (requiredLevel == 0 && is_expired) {
                             response.message = '';
+                        }
+
+                        if(window.hWin.HEURIST4.util.isempty(response.message) && requiredPermission){
+
+                            let required = '';
+                            let cur_permissions = window.hWin.HAPI4.currentUser.ugr_Permissions;
+
+                            if(requiredPermission.indexOf('add') !== -1 && !cur_permissions?.add){
+                                required = 'create'
+                            }
+                            if(requiredPermission.indexOf('delete') !== -1 && !cur_permissions?.delete){
+                                required += (required !== '' ? ' and ' : '') + 'delete';
+                            }
+
+                            response.message = required === '' ? '' : `To perform this operation you need permission to ${required} records`;
                         }
 
                         if (response.message) {
