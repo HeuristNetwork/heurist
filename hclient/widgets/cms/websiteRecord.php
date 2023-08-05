@@ -1,7 +1,5 @@
 <?php
-if(!@$_REQUEST['field']){ 
-    print '<!DOCTYPE html>';
-}
+print '<!DOCTYPE html>';
     /**
     *  Website generator based on CMS records 99-51,52,53
     * 
@@ -11,8 +9,6 @@ if(!@$_REQUEST['field']){
     *  Parameters
     *  recID - home page record (99-51) or web page (99-53)
     *          if is is not defined it takes first record of type 'Home page'
-    *  field - if defined it is assumed web page and it returns value of specified 
-    *          field (by default DT_EXTENDED_DESCRIPTION)
     * 
     * if home page has defined as template file it is loaded as body, otherwise default template
     * that includes header with main-logo, main-title, main-menu and 
@@ -71,7 +67,7 @@ HEADER:
     #main-host      - information about host and heurist. Content defined in Heurist settings
     #main-menu      - generated based on linked Menu/Page records (99-52)
     #main-pagetitle>.webpageheading - loaded Page title "Menu label" (99-52.2-1) hidden if 99-952
-    #main-languages - localization links
+    #main-languages - link to swtich current language (list of languages is defined in field 99-51.2-967
     
 If your write your own cms template you have to define only 2 mandatory elements 
 #main-menu and #main-content
@@ -96,6 +92,9 @@ CONTENT:
     for future use. At the moment page content is always loaded into #main-content and applied 
     general Heurist color scheme unless the style is overdefined for particular 
     widget.
+    
+#main-recordview - container to load content of particular heurist record. Usually this is smarty report.
+    Alternatively record view can be in popup or in new browser tab. The target is defined in field 99-51.2-949
         
 Content of website can be defined as custom smarty template in field 99-51.2-922.
 In this case website designer has to define at least one element with id #main-content.
@@ -127,13 +126,22 @@ $system->defineConstants();
 $mysqli = $system->get_mysqli();
 
 $isEmptyHomePage = false;
-$open_page_or_record_on_init = @$_REQUEST['initid'];
-if(!($open_page_or_record_on_init>0)) $open_page_or_record_on_init = @$_REQUEST['pageid'];
-if(!($open_page_or_record_on_init>0)) $open_page_or_record_on_init = 0;
+$open_page_or_record_on_init = 0;
+if(_isPositiveInt(@$_REQUEST['initid'])) {
+    $open_page_or_record_on_init = @$_REQUEST['initid'];
+}else if(_isPositiveInt(@$_REQUEST['pageid'])) {
+    $open_page_or_record_on_init = @$_REQUEST['pageid'];
+}
 
-$rec_id = @$_REQUEST['recID'];
-if(!($rec_id>0)) $rec_id = @$_REQUEST['recid'];
-if(!($rec_id>0)) $rec_id = @$_REQUEST['id'];
+$rec_id = 0;
+if(_isPositiveInt(@$_REQUEST['recID'])) {
+    $rec_id = @$_REQUEST['recID'];
+}else if(_isPositiveInt(@$_REQUEST['recid'])) {
+    $rec_id = @$_REQUEST['recid'];
+}else if(_isPositiveInt(@$_REQUEST['id'])) {
+    $rec_id = @$_REQUEST['id'];
+}
+
 if(!($rec_id>0))
 {
     //if recID is not defined - find fist available "CMS home" record
@@ -221,67 +229,19 @@ $isWebPage = false;
 $TRM_NO = ConceptCode::getTermLocalID('2-531'); //TRM_NO
 $TRM_NO_OLD = ConceptCode::getTermLocalID('99-5447'); //TRM_NO_OLD
 
-if(!(@$_REQUEST['field']>1)){
     
-    $website_title = __getValue($rec, DT_NAME);
-    $isWebPage = ($rec['rec_RecTypeID']==RT_CMS_MENU && 
-                defined('DT_CMS_PAGETYPE') &&
-                __getValue($rec, DT_CMS_PAGETYPE)==ConceptCode::getTermLocalID('2-6254')); //TRM_PAGETYPE_WEBPAGE 
- 
-//$website_title  = $rec['rec_RecTypeID'].'  '.TRM_PAGETYPE_WEBPAGE.'=='.__getValue($rec, DT_CMS_PAGETYPE).' => '.$isWebPage;
-//    $isWebPage = true;
-    
-    if(!$isWebPage){ //for standalone webpage always without title
-        $show_pagetitle = __getValue($rec, DT_CMS_PAGETITLE);
-        $show_pagetitle = ($show_pagetitle!== $TRM_NO && //TRM_NO
-                           $show_pagetitle!== $TRM_NO_OLD); //TRM_NO_OLD
-    }
-    
+$website_title = __getValueAsJSON($rec, DT_NAME);
+$isWebPage = ($rec['rec_RecTypeID']==RT_CMS_MENU && 
+            defined('DT_CMS_PAGETYPE') &&
+            __getValue($rec, DT_CMS_PAGETYPE)==ConceptCode::getTermLocalID('2-6254')); //TRM_PAGETYPE_WEBPAGE 
+
+if(!$isWebPage){ //for standalone webpage always without title
+    $show_pagetitle = __getValue($rec, DT_CMS_PAGETITLE);
+    $show_pagetitle = ($show_pagetitle!== $TRM_NO && //TRM_NO
+                       $show_pagetitle!== $TRM_NO_OLD); //TRM_NO_OLD
 }
 
 
-//-----------------------------------------------
-// if REQUEST has parameter "field" - this is special request for content of particular field 
-// by default it returns value of DT_EXTENDED_DESCRIPTION - content of web page
-// @todo - remove this section - it is not USED anymore
-if(@$_REQUEST['field']){ 
-        
-//error_log('set respone header in redirect '.$_REQUEST['field'].'  '.$_SERVER['REQUEST_URI']);
-//error_log(' orig:'.@$_SERVER['HTTP_ORIGIN'].'  ref:'.@$_SERVER['HTTP_REFERER']);    
-    
-    $system->setResponseHeader('text/html');
-    
-    if($_REQUEST['field']>1){
-        
-        $field_content = __getValue($rec, $_REQUEST['field']);
-        
-        if (trim($field_content)!='' && $_REQUEST['field']==DT_CMS_SCRIPT && !$system->is_js_acript_allowed()) {
-/*
-window.hWin.HEURIST4.msg.showMsgDlg(
-'<p>This website contains javascript in the custom javascript field of the home page record.' 
-+'Execution of custom javascript is only permitted in specifically authorised databases.</p> '
-+'<p>Please ask the database owner either to edit the CMS HomePage and MenuPage records and clear the custom javascript fields, or to ask their ' 
-+'system administrator to add this database to js_in_database_authorised.txt</p>',null,'Warning');
-*/
-        }else{
-            print $field_content;
-        }
-    }else{
-        //default value - content of page
-        $content = __getValue($rec, DT_EXTENDED_DESCRIPTION);
-        
-        /* 2022-02-17
-        $empty_mark = (trim($content)=='')?' date-empty="1"':'';
-        $hide_mark = ($show_pagetitle) ?'' :' style="display:none;"';
-        
-        print '<h2 class="webpageheading" '.$empty_mark.$hide_mark.'>' 
-            .strip_tags($website_title,'<i><b><u><em><strong><sup><sub><small><br>')
-            .'</h2>';    
-        */
-        print $content;
-    }
-    exit();
-}
 //-----------------------
 
 if(!($rec['rec_RecTypeID']==RT_CMS_HOME || $isWebPage)){
@@ -387,15 +347,15 @@ function __getFile(&$rec, $id, $def){
 }
 
 //
-// returns first value
+// returns first value for given field
 //
-function __getValue(&$menu_rec, $id){
+function __getValue(&$page_record, $id){
     
     if(is_string($id) && strpos($id,'-')){
         $id = ConceptCode::getDetailTypeLocalID($id);
     }
     
-    $val = @$menu_rec['details'][$id];
+    $val = @$page_record['details'][$id];
     
     if(is_array($val)){
         return array_shift($val);
@@ -404,6 +364,23 @@ function __getValue(&$menu_rec, $id){
     }else{
         return $val;    
     }
+}
+
+//
+// returns all values as JSON array
+//
+function __getValueAsJSON(&$page_record, $id){
+    
+    if(is_string($id) && strpos($id,'-')){
+        $id = ConceptCode::getDetailTypeLocalID($id);
+    }
+
+    $val = @$page_record['details'][$id];
+    
+    if(!is_array($val)){
+        $val = array($val);
+    }
+    return json_encode($val);
 }
 
 
@@ -529,5 +506,12 @@ function __getTemplate($template){
         return $template;
     }
     return false;
+}
+
+//
+//
+//
+function _isPositiveInt($val){
+    return (is_numeric($val) && (int)$val>0);
 }
 ?>

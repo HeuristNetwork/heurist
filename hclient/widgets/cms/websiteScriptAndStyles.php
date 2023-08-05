@@ -93,6 +93,8 @@ if (($_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0.0.1')
     var is_embed =<?php echo array_key_exists('embed', $_REQUEST)?'true':'false'; ?>;
     var is_execute_homepage_custom_javascript = false;
     var first_not_empty_page = 0;
+    var website_title = <?php echo $website_title; ?>; 
+    
     
     var record_view_smarty_template = '<?php echo ($record_view_smarty_template!=null?$record_view_smarty_template:'');?>';
     var record_view_target = '<?php echo ($record_view_target!=null?$record_view_target:'');?>';
@@ -399,14 +401,6 @@ function initMainMenu( afterInitMainMenu ){
     
     _dout('initMainMenu');
     
-    var weblang = window.hWin.HEURIST4.util.getUrlParameter('weblang');
-    if(weblang){
-        // xx - means it will use current language
-        weblang = window.hWin.HAPI4.getLangCode3(weblang, 'def');    
-    } 
-
-//console.log(weblang);
-
     var topmenu = $('#main-menu');
 
     var lopts = {  
@@ -417,7 +411,7 @@ function initMainMenu( afterInitMainMenu ){
                 toplevel_css: {background:'none'}, //bg_color 'rgba(112,146,190,0.7)'
                 onInitComplete: afterInitMainMenu,
                 onmenuselect: loadPageContent,  //on main menu select
-                language: weblang
+                language: current_language
                 };
     
     lopts = {heurist_Navigation:lopts};
@@ -438,6 +432,7 @@ function switchLanguage(event){
     if(lang_code && current_language != lang_code){
         //add url parameter
         current_language = lang_code;
+        initHeaderTitle();
         loadPageContent(current_page_id);
     }
     window.hWin.HEURIST4.util.stopEvent(event);
@@ -473,7 +468,7 @@ function loadPageContent(pageid, eventdata){
                     ['rec_ID', 'rec_RecTypeID'],
                     zip: 1,
                     format:'json'};
-           
+                //search for record type               
                 window.hWin.HAPI4.RecordMgr.search_new(server_request,
                         function(response){
                           
@@ -567,6 +562,8 @@ if($website_custom_css!=null){
             if(page_cache[pageid]){ //this page has been already loaded
                 __loadPageContent();
             }else{
+                
+console.log('load page', pageid);
                 
                 var server_request = {
                     q: 'ids:'+pageid,
@@ -1267,7 +1264,6 @@ $website_languages_links ->#main-languages
 
     <?php } ?>
 
-    var setup_title_adjust = false;
     //main logo image
     if($('#main-logo').length>0){
         $('#main-logo').empty();
@@ -1279,9 +1275,8 @@ $website_languages_links ->#main-languages
             $img.on('load', () => {
                 $('#main-title').css({ left:$('#main-logo').width()+10 });
                 $('#main-title').fadeIn(500);
+                $('#main-title').attr('data-adjusted',1)
             });
-
-            setup_title_adjust = true;
         }
     }
   
@@ -1315,47 +1310,65 @@ $website_languages_links ->#main-languages
         });
     }
   
-  <?php if($website_title){  ?>
-  
-  var ele = $('#main-title');
-  if(ele.length>0 && ele.children().length==0){
-    ele.hide();
-  <?php       
-  print '$(\'<h2 '.($image_banner?' style="text-shadow: 3px 3px 5px black"':'').'>'
-        . str_replace("'",'&#039;',strip_tags($website_title,'<i><b><u><em><strong><sup><sub><small><br>'))
-        .'</h2>\').appendTo(ele);';
-  ?>
-    if(ele.parent().is('#main-header')) {
-        if(!$('#main-logo-alt').is(':visible')){
-            ele.css({right:10}); 
-        }
-
-        let $img = $('#main-logo img');
-        if($img.length < 1){ // logo element missing, show title
-            ele.show();
-        }else if($img[0].complete){ // already loaded logo
-
-            ele.css({left:$('#main-logo').width()+10 });
-            ele.fadeIn(500);
-        }else if(!setup_title_adjust){ // add onload for logo
-
-            $img.on('load', () => {
-                ele.css({ left:$('#main-logo').width()+10 });
-                ele.fadeIn(500);
-            });
-        }
-    }else{
-        ele.show();
-    }
-
-  }else{
-      ele.show();
-  }
-  <?php } ?>
+    initHeaderTitle(website_title);
+ 
 
   $('.header-element').css({'border':'none'});
   
 } //initHeaderElements
+
+//
+// uses global var website_title 
+//
+function initHeaderTitle(){
+
+    if(website_title){
+        
+console.log(website_title);        
+
+        var pagetitle = window.hWin.HAPI4.getTranslation(website_title, current_language);
+
+        document.title = window.hWin.HEURIST4.util.stripTags(pagetitle);
+        
+        pagetitle = window.hWin.HEURIST4.util.stripTags(pagetitle,'i,b,u,em,strong,sup,sub,small'); //<br>
+        
+
+        var ele = $('#main-title');
+        var isFirstInit = (ele.length>0 && ele.children().length==0);
+        
+        //'.($image_banner?' 
+        ele.empty().append('<h2 style="text-shadow: 3px 3px 5px black">'
+                + pagetitle
+                + '</h2>');
+            
+        if(isFirstInit && ele.parent().is('#main-header')){
+            ele.hide();
+            if(!$('#main-logo-alt').is(':visible')){
+                ele.css({right:10}); 
+            }
+
+            let $img = $('#main-logo img');
+            if($img.length < 1){ // logo element missing, show title
+                ele.show();
+                
+            //show in the same time with logo image    
+            }else if($img[0].complete){ // already loaded logo
+
+                ele.css({left:$('#main-logo').width()+10 });
+                ele.fadeIn(500);
+            }else if(ele.attr('data-adjusted')!=1){ // add onload for logo
+
+                $img.on('load', () => {
+                    ele.css({ left:$('#main-logo').width()+10 });
+                    ele.fadeIn(500);
+                });
+            }
+            return;
+        }
+        ele.show();
+    }
+    
+}
 
 //
 // load popup with simple math problem, success leads to the creation of the report email
