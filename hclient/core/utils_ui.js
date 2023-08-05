@@ -755,17 +755,9 @@ window.hWin.HEURIST4.ui = {
                 
                 //sort by name - case insensitive
                 dtyNames.sort(function(a, b) {
-                    var nameA = a.toUpperCase(); // ignore upper and lowercase
-                    var nameB = b.toUpperCase(); // ignore upper and lowercase
-                    if (nameA < nameB) {
-                        return -1;
-                    }
-                    if (nameA > nameB) {
-                        return 1;
-                    }
-
-                    // names must be equal
-                    return 0;
+                    var nameA = a.toLocaleUpperCase(); // ignore upper and lowercase
+                    var nameB = b.toLocaleUpperCase(); // ignore upper and lowercase
+                    return nameA.localeCompare(nameB);
                 });
                 //add option for DetailType enabled followed by all Rectype.Fieldname options disabled
                 for (i in dtyNames) {
@@ -779,7 +771,11 @@ window.hWin.HEURIST4.ui = {
                   }
                   
                   //sort RectypeName.FieldName
-                  dtys[dtyName].sort();
+                    dtys[dtyName].sort(function(a, b){
+                        var nameA = a.toLocaleUpperCase(); // ignore upper and lowercase
+                        var nameB = b.toLocaleUpperCase(); // ignore upper and lowercase
+                        return nameA.localeCompare(nameB);
+                    });
                   
                   for (j in dtys[dtyName]){
                     fieldName = dtys[dtyName][j];
@@ -876,17 +872,9 @@ window.hWin.HEURIST4.ui = {
 
             //sort by name
             arrterm.sort(function(a, b) {
-                    var nameA = a[1].toUpperCase(); // ignore upper and lowercase
-                    var nameB = b[1].toUpperCase(); // ignore upper and lowercase
-                    if (nameA < nameB) {
-                        return -1;
-                    }
-                    if (nameA > nameB) {
-                        return 1;
-                    }
-
-                    // names must be equal
-                    return 0;
+                var nameA = a[1].toLocaleUpperCase(); // ignore upper and lowercase
+                var nameB = b[1].toLocaleUpperCase(); // ignore upper and lowercase
+                return nameA.localeCompare(nameB);
             });
             
             
@@ -937,16 +925,9 @@ window.hWin.HEURIST4.ui = {
 
                     //sort by name
                     arrterm.sort(function(a, b) {
-                            var nameA = a[1].toUpperCase(); // ignore upper and lowercase
-                            var nameB = b[1].toUpperCase(); // ignore upper and lowercase
-                            if (nameA < nameB) {
-                                return -1;
-                            }
-                            if (nameA > nameB) {
-                                return 1;
-                            }
-                            // names must be equal
-                            return 0;
+                        var nameA = a[1].toLocaleUpperCase(); // ignore upper and lowercase
+                        var nameB = b[1].toLocaleUpperCase(); // ignore upper and lowercase
+                        return nameA.localeCompare(nameB);
                     });
                     
                     //add to select
