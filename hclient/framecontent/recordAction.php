@@ -95,6 +95,7 @@ if(!in_array($action_type, $allowed_actions)){
 -->        
 
 <script type="text/javascript" src="recordAction.js"></script>
+<script type="text/javascript" src="<?php echo PDIR;?>hclient/core/temporalObjectLibrary.js"></script>
 <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/editing/editing_input.js"></script>
 <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/editing/editing_exts.js"></script>
 
@@ -138,7 +139,7 @@ if(!in_array($action_type, $allowed_actions)){
 <!-- HTML -->
 <body style="overflow:hidden;" class="ui-heurist-explore">
 
-    <div id="div_parameters" class="popup_content_div">
+    <div id="div_parameters" class="popup_content_div" style="overflow:auto;">
 
         <div id="div_header" style="padding: 0.2em; min-width: 600px;">
 

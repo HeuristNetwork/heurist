@@ -43,8 +43,8 @@ if($error){
             if(!@$_REQUEST['auth']){
                     ?>
                     <html>
-                        <?php  echo $_SERVER['PHP_SELF']; ?><br>
-                        <a href="<?php echo $_SERVER['PHP_SELF'].'?a=login&auth=1&db='.$_REQUEST['db']; ?>">LOGIN</a></html>
+                        <?php  echo htmlspecialchars($_SERVER['PHP_SELF']); ?><br>
+                        <a href="<?php echo htmlspecialchars($_SERVER['PHP_SELF']).'?a=login&auth=1&db='.$_REQUEST['db']; ?>">LOGIN</a></html>
                     <?php
                     exit();
             }
@@ -143,7 +143,8 @@ $query = 'SELECT ugr_ID FROM sysUGrps where usr_ExternalAuthentication is not nu
                         <body>
                         <script>
                             window.onload = function(){
-                                setTimeout(function(){window.close('ok'); }, 500);    
+console.log('Authentification completed ','<?php echo $user_id;?>');                                
+                                setTimeout(function(){window.close('<?php echo $user_id;?>'); }, 500);    
                             }                 
                         </script>
                         Authentification completed

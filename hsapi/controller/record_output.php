@@ -18,7 +18,17 @@
                 csv_linebreak :'nix',
                 csv_header    :true
                 csv_headeronly:false
-    *           fields        : {rtid:[dtid1, dtid3, dtid2]}
+                fields        : {rtid:[dtid1, dtid3, dtid2]}
+                include_term_ids
+                include_term_codes
+                include_file_url
+                include_record_url_html
+                include_record_url_xml
+                include_term_hierarchy
+                include_resource_titles
+                include_temporals
+    * 
+    * 
     * 
     * prefs for json,xml
     *           zip  : 0|1  compress
@@ -60,6 +70,7 @@
     require_once (dirname(__FILE__).'/../System.php');
     require_once (dirname(__FILE__).'/../dbaccess/db_recsearch.php');
     require_once (dirname(__FILE__).'/../dbaccess/utils_db.php');
+    require_once (dirname(__FILE__).'/../dbaccess/db_files.php');
     require_once (dirname(__FILE__).'/../structure/dbsTerms.php');
     require_once (dirname(__FILE__).'/../utilities/Temporal.php');
     require_once (dirname(__FILE__).'/../../admin/verification/verifyValue.php');
@@ -298,8 +309,8 @@ function downloadFileReferences($system, $ids){
 
     // retrieve file details
     $mysqli = $system->get_mysqli();
-    $file_query = 'SELECT ulf_ID, ulf_FileName, ulf_ExternalFileReference, ulf_ObfuscatedFileID, ulf_FilePath, ulf_Description, ulf_MimeExt, ulf_FileSizeKB, ugr_Name, ulf_Added, ulf_Modified,
-    ulf_OrigFileName    
+    $file_query = 'SELECT ulf_ID, ulf_FileName, ulf_ExternalFileReference, ulf_ObfuscatedFileID, ulf_FilePath, ulf_Description, ulf_MimeExt, ulf_FileSizeKB, 
+                    ugr_Name, ulf_Added, ulf_Modified, ulf_OrigFileName, ulf_Caption, ulf_Copyright, ulf_Copyowner 
                    FROM recUploadedFiles 
                    LEFT JOIN sysUGrps ON ulf_UploaderUGrpID = ugr_ID
                    WHERE ulf_ID IN ('. $ids .')';
@@ -322,7 +333,7 @@ function downloadFileReferences($system, $ids){
     header('Expires: ' . gmdate("D, d M Y H:i:s", time() - 3600));
 
     // write results
-    fputcsv($fd, array("ID", "Name", "Path", "Obfuscated URL", "Description", "File Type", "File Size (in KB)", "Uploaded By", "Added On", "Last Modified", "Original file name" , "Record Usage"));
+    fputcsv($fd, array("ID", "Name", "Path", "Obfuscated URL", "Description", "Caption", "Copyright", "Copy Owner", "File Type", "File Size (in KB)", "Checksum", "Uploaded By", "Added On", "Last Modified", "Original file name" , "Record Usage"));
 
     /*
         [0] => File Name
@@ -336,6 +347,9 @@ function downloadFileReferences($system, $ids){
         [8] => Added On
         [9] => Last Modified
         [10] => Original file name
+        [11] => Caption
+        [12] => Copyright
+        [13] => Copyowner
     */
     foreach ($file_refs as $id => $details) {
 
@@ -344,13 +358,15 @@ function downloadFileReferences($system, $ids){
         $obf_url = empty($details[2]) ? 'missing' : HEURIST_BASE_URL . '?db=' . HEURIST_DBNAME . '&file=' . $details[2];
         $file_size = $details[6] == 0 ? 'remote' : $details[6];
 
+        $fullpath = !empty($details[0]) ? resolveFilePath( $details[3].$details[0] ) : '';
+        $checksum = empty($fullpath) ? 'remote' : md5_file($fullpath);
+
         $usage_query = 'SELECT dtl_RecID FROM recDetails WHERE dtl_UploadedFileID = ' . $id;
         $recs = mysql__select_list2($mysqli, $usage_query);
         if(!$recs || count($recs) == 0){
-            fputcsv($fd, array($id, $name, $path, $obf_url, $details[4], $details[5], $file_size, $details[7], $details[8], $details[9], $details[10], 0));
-        }else{
-            fputcsv($fd, array($id, $name, $path, $obf_url, $details[4], $details[5], $file_size, $details[7], $details[8], $details[9], $details[10], implode('|', $recs)));
+            $recs = array(0);
         }
+        fputcsv($fd, array($id, $name, $path, $obf_url, $details[4], $details[11], $details[12], $details[13], $details[5], $file_size, $checksum, $details[7], $details[8], $details[9], $details[10], implode('|', $recs)));
     }
 
     rewind($fd);

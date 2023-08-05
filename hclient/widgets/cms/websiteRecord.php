@@ -71,6 +71,7 @@ HEADER:
     #main-host      - information about host and heurist. Content defined in Heurist settings
     #main-menu      - generated based on linked Menu/Page records (99-52)
     #main-pagetitle>.webpageheading - loaded Page title "Menu label" (99-52.2-1) hidden if 99-952
+    #main-languages - localization links
     
 If your write your own cms template you have to define only 2 mandatory elements 
 #main-menu and #main-content
@@ -126,9 +127,9 @@ $system->defineConstants();
 $mysqli = $system->get_mysqli();
 
 $isEmptyHomePage = false;
-$open_page_on_init = @$_REQUEST['initid'];
-if(!($open_page_on_init>0)) $open_page_on_init = @$_REQUEST['pageid'];
-if(!($open_page_on_init>0)) $open_page_on_init = 0;
+$open_page_or_record_on_init = @$_REQUEST['initid'];
+if(!($open_page_or_record_on_init>0)) $open_page_or_record_on_init = @$_REQUEST['pageid'];
+if(!($open_page_or_record_on_init>0)) $open_page_or_record_on_init = 0;
 
 $rec_id = @$_REQUEST['recID'];
 if(!($rec_id>0)) $rec_id = @$_REQUEST['recid'];
@@ -144,7 +145,7 @@ if(!($rec_id>0))
 
             $try_login = $system->getCurrentUser() == null;
             $message = 'Sorry, there are no publicly accessible websites defined for this database. '
-            .'Please ' . ($try_login ? '<span class="login-link">login</span> or' : '') . ' ask the owner to publish their website(s).';
+            .'Please ' . ($try_login ? '<a class="login-link">login</a> or' : '') . ' ask the owner to publish their website(s).';
 
             include ERROR_REDIR;
             exit();
@@ -196,8 +197,13 @@ exit();
 */
 
 if(!$hasAccess){
-//@todo The Heurist website at this address is not yet publicly accessible.        
-    $message = 'The Heurist website at this address is not yet publicly accessible.';
+
+    $try_login = $system->getCurrentUser() == null;
+
+//@todo The Heurist website at this address is not yet publicly accessible.
+    $message = 'The Heurist website at this address is not yet publicly accessible. ' 
+        . ($try_login ? '<br>Try <a class="login-link">logging in</a> to view this website.' : '');
+
     include ERROR_REDIR;
     exit();
 } 
@@ -301,10 +307,32 @@ $image_logo = $image_logo?'<img style="max-height:80px;max-width:270px;" src="'.
 $meta_keywords = htmlspecialchars(__getValue($rec, DT_CMS_KEYWORDS));
 $meta_description = htmlspecialchars(__getValue($rec, DT_SHORT_SUMMARY));
 
-$show_login_button = __getValue($rec, '2-1095'); // by default, show login button
-if(!$isWebPage && !empty($show_login_button)){
-    $show_login_button = (($show_login_button == $TRM_NO) || 
-                          ($show_login_button == $TRM_NO_OLD)) ? false : true;
+$website_language_def = '';
+$website_languages_links = '';
+$website_languages = @$rec['details'][DT_LANGUAGES];
+if(is_array($website_languages) && count($website_languages)>0){
+    $website_languages = getTermCodes($mysqli, $website_languages);
+    $res = '';
+    foreach($website_languages as $lang_code){
+        if($lang_code){
+            $lang_code = strtoupper($lang_code);
+            if($website_language_def=='') $website_language_def = $lang_code;
+            $res = $res.'<a href="#" data-lang="'.$lang_code.'" onclick="switchLanguage(event)">'.$lang_code.'</a><br>';
+        } 
+    }
+    $website_languages_links = $res;
+}else{
+    $website_languages = null;
+}
+
+
+$show_login_button = true; // by default, show login button
+if(!$isWebPage){
+    $show_login_button = __getValue($rec, '2-1095'); 
+    
+    $show_login_button = empty($show_login_button) ||
+                            ((($show_login_button == $TRM_NO) || 
+                          ($show_login_button == $TRM_NO_OLD)) ? false : true);
 }
 
 //2-532 - YES   2-531 - NO
@@ -379,7 +407,9 @@ function __getValue(&$menu_rec, $id){
 }
 
 
-$custom_template = null;
+$custom_website_php_template = null;
+$record_view_smarty_template = null;
+$record_view_target = null; //blank(_blank),popup,recordview(main-recordview)
 
 $page_header = null;
 $page_header_menu = null;
@@ -397,8 +427,18 @@ if(!$isWebPage){  //not standalone web page
             .'<span class="widget-options" style="font-style: italic; display: none;">{"menu_recIDs":"'.$rec_id
             .'","use_next_level":true,"orientation":"horizontal","init_at_once":true}</span>';
     
-    $custom_template = defined('DT_POPUP_TEMPLATE')?__getValue($rec, DT_POPUP_TEMPLATE, null):null; 
+    $custom_website_php_template = defined('DT_CMS_TEMPLATE')?__getValue($rec, DT_CMS_TEMPLATE, null):null; 
 
+    $record_view_smarty_template = defined('DT_SMARTY_TEMPLATE')?__getValue($rec, DT_SMARTY_TEMPLATE, null):null; 
+    $record_view_target = defined('DT_CMS_TARGET')?__getValue($rec, DT_CMS_TARGET, null):null; 
+    if($record_view_target=='recordview') $record_view_target='main-recordview';
+    
+    //backward capability 
+    if($custom_website_php_template==null && strpos($record_view_smarty_template, 'cmsTemplate')===0){
+        $custom_website_php_template = $record_view_smarty_template;
+        $record_view_smarty_template = null;
+    }
+    
     $page_header = defined('DT_CMS_HEADER')?__getValue($rec, DT_CMS_HEADER, null):null; 
 
     $page_footer_type = defined('DT_CMS_FOOTER_FIXED')?__getValue($rec, DT_CMS_FOOTER_FIXED, null):null; 
@@ -451,8 +491,7 @@ $home_page_record_id = $rec_id;
 
 $websiteScriptAndStyles_php = HEURIST_DIR.'hclient/widgets/cms/websiteScriptAndStyles.php';
 
-
-$template = __getTemplate($custom_template);
+$template = __getTemplate($custom_website_php_template);
 if(!$template && $default_CMS_Template){
     $template = __getTemplate($default_CMS_Template);    
 }
@@ -462,7 +501,16 @@ if($template!==false){
     include ($template);
 }else{
     //use default template for this folder
-    include 'cmsTemplate.php';
+    $template = HEURIST_DIR.'hclient/widgets/cms/cmsTemplate.php';
+    if(!file_exists($template)){
+            $message = 'Sorry, it is not possible to load default cms template. '
+            .'Please ask the owner to verify server configuration.';
+
+            include ERROR_REDIR;
+            exit();
+    }else{
+        include 'cmsTemplate.php';    
+    }
 } 
 
 //

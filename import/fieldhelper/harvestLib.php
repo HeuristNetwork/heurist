@@ -49,26 +49,13 @@ function getMediaFolders($mysqli) {
 
 }
 
-
-//
-//
-//
-function sanitizeFolderName($folder) {
-    $folder = str_replace("\0", '', $folder);
-    $folder = str_replace('\\', '/', $folder);
-    if( substr($folder, -1, 1) != '/' )  {
-        $folder = $folder.'/';
-    }
-    return $folder;
-}
-
 //
 // $imode - 0 - registration
 //          1 - get registered and nonreg files
 //
-function doHarvest($dirs_and_exts, $is_report, $imode) {
+function doHarvest($system, $dirs_and_exts, $is_report, $imode) {
 
-    global $system, $rep_counter, $rep_issues;
+    global $rep_counter, $rep_issues;
     
     $system_folders = $system->getSystemFolders();
     
@@ -146,7 +133,7 @@ function doHarvest($dirs_and_exts, $is_report, $imode) {
                                     print "<div style=\"color:red\">Files are not scanned in root upload folder $dir</div>";
                                 }
                             }else{
-                                getFilesInDir($dir, $mediaExts, $imode);
+                                getFilesInDir($system, $dir, $mediaExts, $imode);
                             }
                         }
                     }
@@ -154,7 +141,7 @@ function doHarvest($dirs_and_exts, $is_report, $imode) {
 
                 if(count($subdirs)>0){
  
-                    doHarvest(array("dirs"=>$subdirs, "exts"=>$mediaExts), $is_report, $imode);
+                    doHarvest($system, array("dirs"=>$subdirs, "exts"=>$mediaExts), $is_report, $imode);
                     if($is_report) flush();
                 }
             }
@@ -168,11 +155,11 @@ function doHarvest($dirs_and_exts, $is_report, $imode) {
 
 //
 // @todo - move code here from syncWithFieldHelper
-//
+/*
 function doHarvestInDir($dir) {
     
 }
-
+*/
 //
 // remove all files from given array
 //
@@ -191,9 +178,9 @@ function getRegInfoResult(){
 // 0 - all
 // 1 - reg and unreg separately
 //
-function getFilesInDir($dir, $mediaExts, $imode) {
+function getFilesInDir($system, $dir, $mediaExts, $imode) {
     
-    global $system, $reg_info;
+    global $reg_info;
     
     $all_files = scandir($dir);
     $registered = array();

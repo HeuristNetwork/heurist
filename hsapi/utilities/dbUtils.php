@@ -1048,24 +1048,7 @@ class DbUtils {
 
         $warnings = array();
 
-        //backward capability
-        if (folderCreate($database_folder."rectype-icons", true)){
-            folderRecurseCopy( HEURIST_DIR."admin/setup/dbcreate/icons/defRecTypes/thumbnail", 
-                               $database_folder."rectype-icons/thumb", null, null, true,'th_' );
-            folderRecurseCopy( HEURIST_DIR."admin/setup/dbcreate/icons/defRecTypes/icon", $database_folder."rectype-icons" );
-            folderAddIndexHTML($database_folder."rectype-icons"); // index file to block directory browsing
-        }else{
-            $warnings[] = "Unable to create/copy record type icons folder rectype-icons to $database_folder";
-        }
-            
 
-/*        
-        if(folderRecurseCopy( HEURIST_DIR."admin/setup/rectype-icons", $database_folder."rectype-icons" )){//todo move to entity
-            folderAddIndexHTML($database_folder."rectype-icons"); // index file to block directory browsing
-        }else{
-            $warnings[] = "Unable to create/copy record type icons folder rectype-icons to $database_folder";
-        }
-*/        
         if(folderRecurseCopy( HEURIST_DIR."admin/setup/dbcreate/icons", $database_folder."entity" )){
             
             folderAddIndexHTML($database_folder."entity"); // index file to block directory browsing
@@ -1089,12 +1072,14 @@ class DbUtils {
             $warnings[] = "Unable to create/copy xsl-templates folder to $database_folder";
         }
 */
+    if(false){ //since 2023-06-02 this folder is not created
         if(folderRecurseCopy( HEURIST_DIR."documentation_and_templates", $database_folder."documentation_and_templates" )){
             
             folderAddIndexHTML($database_folder."documentation_and_templates"); // index file to block directory browsing
         }else{
             $warnings[] = "Unable to create/copy documentation folder to $database_folder";
         }
+    }
 
         // Create all the other standard folders required for the database
         // index.html files are added by createFolder to block index browsing
@@ -1105,7 +1090,6 @@ class DbUtils {
         $warnings[] = folderCreate2($database_folder. '/html-output', 'used to write published records as generic html files', true);
         $warnings[] = folderCreate2($database_folder. '/generated-reports', 'used to write generated reports');
         $warnings[] = folderCreate2($database_folder. '/backup', 'used to write files for user data dump');
-        $warnings[] = folderCreate2($database_folder. '/term-images', 'used for images illustrating terms'); //Digital Harlem only, todo move to entity
         
         //remove empty warns
         $warnings = array_filter($warnings, function($value) { return $value !== ''; });

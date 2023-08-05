@@ -106,8 +106,10 @@
     $recTypeID = getFieldValue($records, $recID, 'rec_RecTypeID');
 
 
+    $uri_self = str_replace('&amp;','&',htmlspecialchars($_SERVER['REQUEST_URI']));
+    
     $moredetailLink =  '<p><a href="javascript:void(0)" class="moredetail" '.
-        'onClick="window.hWin.HEURIST4.msg.showDialog(\''.$_SERVER['REQUEST_URI'].'&full=1\');">More Detail</a></p>';
+        'onClick="window.hWin.HEURIST4.msg.showDialog(\''.$uri_self.'&full=1\');">More Detail</a></p>';
 
         
     if($recTypeID==RT_ADDRESS){
@@ -363,18 +365,19 @@ function isDateInRange( $records, $recID, $min, $max) {
 function composeDates( $records, $recID, $prefix='') {
      $date_out = '';
      $date_start = getFieldValue($records, $recID, DT_START_DATE);
-     if($date_start){
+     $date_end = getFieldValue($records, $recID, DT_END_DATE);
+     
+     if($date_start || $date_end){
          
-        if(strpos($date_start,"|")!==false){  
-          return $prefix.temporalToHumanReadableString($date_start);
-        }
-        
-        $date_out = $prefix.$date_start;
-
-        $date_end = getFieldValue($records, $recID, DT_END_DATE);
-        if($date_end && $date_end!=$date_start){
-            $date_out = $date_out.('&nbsp;to&nbsp;'.$date_end);
-        }
+         if(!$date_start) $date_start = $date_end;
+         
+         if($date_end!=$date_start){
+            $dt = Temporal::mergeTemporals($date_start, $date_end);    
+         }else{
+            $dt = new Temporal($date_start);
+         }   
+         
+         return $dt?$prefix.$dt->toReadble():'';
      }
      return $date_out;
 }

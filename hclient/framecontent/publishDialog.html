@@ -66,12 +66,23 @@
         
         <label style="font-size:0.9em"><input type="radio" name="mode" value="embed" checked/><span id="lbl_mode1">embed</span></label>
         <label style="font-size:0.9em"><input type="radio" name="mode" value="websafe"/><span id="lbl_mode2">web safe code</span></label>
-        <label style="font-size:0.9em"><input type="radio" name="mode" value="rawtext"/><span id="lbl_mode3">raw text</span></label>
         
         <textarea id="code-textbox-embed" onclick="select(); if (window.clipboardData) clipboardData.setData('Text', value);" style="border: 1px dotted gray; padding: 3px; margin: 2; font-family: times; width: 100%; height: 60px;" readonly=""></textarea>
         <textarea id="code-textbox-websafe" onclick="select(); if (window.clipboardData) clipboardData.setData('Text', value);" style="border: 1px dotted gray; padding: 3px; margin: 2; font-family: times; width: 100%; height: 60px;display:none" readonly=""></textarea>
         
         <div style="padding-top:10px">
+        <span id="div-content-type" style="display:none">
+            <label>Content-type: </label>
+            <select id="select-content-type">
+                <option value="html">html</option>
+                <option value="js">javasctipt</option>
+                <option value="txt">text</option>
+                <option>csv</option>
+                <option>xml</option>
+                <option>json</option>
+                <option>css</option>
+            </select>
+        </span>
         <a href="#" id="link-url" style="outline:0" target="_blank" onclick="setTimeout(window.hWin.HEURIST4.ui.publishDlg.closePublishDialog(), 200);">
             Open in new window<span class="ui-icon ui-icon-extlink"></span>
         </a>

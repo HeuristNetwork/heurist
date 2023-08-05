@@ -23,7 +23,8 @@
     */
     
     /*
-    sanitizeRequest   - removes all tags fro request variables
+    sanitizeRequest   - removes all tags from request variables
+    sanitizeFolderName
     stripScriptTagInRequest - removes only script tags
     getHTMLPurifier
     purifyHTML - clean html with HTMLPurifier
@@ -111,7 +112,22 @@
         
     }
 
-
+    //
+    // 
+    //
+    function sanitizeFolderName($folder) 
+    {
+        $folder = str_replace("\0", '', $folder);
+        $folder = str_replace('\\', '/', $folder);
+        if( substr($folder, -1, 1) != '/' )  {
+            $folder = $folder.'/';
+        }
+        return $folder;
+    }
+    
+    //
+    //
+    //
     function stripScriptTagInRequest(&$params){
 
         foreach($params as $k => $v)
@@ -360,7 +376,7 @@
     
    
     //
-    //
+    // It copies .htaccess_via_url that allow access (not index/listing view) to destination folder
     //
     function allowWebAccessForForlder($folder){
         $res = true;
@@ -397,56 +413,68 @@
     // remove folder and all its content
     //
     function folderDelete2($dir, $rmdir) {
+        
+        if(file_exists($dir)){
 
-        $files = new RecursiveIteratorIterator(
-                    new RecursiveDirectoryIterator($dir, RecursiveDirectoryIterator::SKIP_DOTS),
-                    RecursiveIteratorIterator::CHILD_FIRST
-        );
+            $files = new RecursiveIteratorIterator(
+                        new RecursiveDirectoryIterator($dir, RecursiveDirectoryIterator::SKIP_DOTS),
+                        RecursiveIteratorIterator::CHILD_FIRST
+            );
 
-        foreach ($files as $fileinfo) {
-            $todo = ($fileinfo->isDir() ? 'rmdir' : 'unlink');
-            $todo($fileinfo->getRealPath());
+            foreach ($files as $fileinfo) {
+                $todo = ($fileinfo->isDir() ? 'rmdir' : 'unlink');
+                $todo($fileinfo->getRealPath());
+            }
+
+            if($rmdir){
+                $res = rmdir($dir);
+                return $res;
+            }
         }
-
-        if($rmdir){
-            $res = rmdir($dir);
-            return $res;
-        }else{
-            return true;
-        }
+        return true;
     }
     
     //
     // get list of files in folder as search result (record list)
     // It is used to get 1) all cfg files for entity configuration
     //                   2) browse for available icons in iconLibrary   
+    // @todo , $is_reqursive=false
     //
-    function folderContent($dirs, $exts) {
+    function folderContent($dirs, $exts=null) {
         
         $records = array();
         $order = array();
-        $fields = array('file_id', 'file_name', 'file_dir', 'file_url');
+        $fields = array('file_id', 'file_name', 'file_dir', 'file_url', 'file_size');
         $idx = 1;
         if(!is_array($dirs)) $dirs = array($dirs);
-        if(!is_array($exts)) $exts = array($exts);
+        if($exts!=null && !is_array($exts)) $exts = array($exts);
 
         foreach ($dirs as $dir) {
             
-            if(strpos($dir, 'HEURIST_ICON_DIR')!==false){
-                //for browse available icons (see use_assets in entity config file)
-                $folder = str_replace('HEURIST_ICON_DIR/', HEURIST_ICON_DIR, $dir);
-                $url = str_replace('HEURIST_ICON_DIR/', HEURIST_ICON_URL, $dir);
-            }else if (strpos($dir, HEURIST_FILESTORE_DIR)!==false) {    
+            if (!defined('HEURIST_FILESTORE_ROOT') || strpos($dir, HEURIST_FILESTORE_ROOT)!==false) {    
                 
                 $folder =  $dir;
                 $url = null;
                 
             }else{
+                //relative to heurist folder
                 $folder =  HEURIST_DIR.$dir;
                 $url = HEURIST_BASE_URL.$dir;
             }
             
             if (!(file_exists($folder) && is_dir($folder))) continue;
+            
+            /*
+            if(is_dir($folder)){
+                continue;
+                if($is_reqursive){
+                    //$subcontent = folderContent($folder, $exts, true);
+                    //$records
+                }else{
+                    continue;
+                }
+            }
+            */
             
             $files = scandir($folder);
             foreach ($files as $filename) {
@@ -456,9 +484,11 @@
                     if(array_key_exists('extension', $path_parts))
                     {
                         $ext = strtolower($path_parts['extension']);
-                        if(file_exists($folder.$filename) && in_array($ext, $exts))
+                        if(file_exists($folder.$filename) && ($exts==null || in_array($ext, $exts)))
                         {
-                            $records[$idx] = array($idx, $filename, $folder, $url);
+                            $fsize = (is_file($folder.$filename))?filesize($folder.$filename):0;
+                            
+                            $records[$idx] = array($idx, $filename, $folder, $url, $fsize);
                             $order[] = $idx;
                             $idx++;
                         }
@@ -902,21 +932,24 @@ function folderSubs($src, $exclude=null) {
 
     $src =  $src . ((substr($src,-1)=='/')?'':'/');
 
-    $dir = opendir($src);
-    if($dir!==false){
+    if(file_exists($src)){
+    
+        $dir = opendir($src);
+        if($dir!==false){
 
 
-            while(false !== ( $file = readdir($dir)) ) {
-                if (( $file != '.' ) && ( $file != '..' ) && is_dir($src . $file)) {
+                while(false !== ( $file = readdir($dir)) ) {
+                    if (( $file != '.' ) && ( $file != '..' ) && is_dir($src . $file)) {
 
-                        if(is_array($exclude) && in_array($file, $exclude)){
-                            continue;
-                        }
-                        
-                        $res[] = $src.$file.'/';
+                            if(is_array($exclude) && in_array($file, $exclude)){
+                                continue;
+                            }
+                            
+                            $res[] = $src.$file.'/';
+                    }
                 }
-            }
-        closedir($dir);
+            closedir($dir);
+        }
     }
 
     return $res;

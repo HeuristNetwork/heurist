@@ -2,7 +2,7 @@
 * lookupBnFLibrary_aut.html: used by lookupBnFLibrary_aut.js
 *
 * @author      Brandon McKay   <blmckay13@gmail.com>
-* @copyright   (C) 2005-2021 University of Sydney
+* @copyright   (C) 2005-2023 University of Sydney
 * @link        https://HeuristNetwork.org
 * @version     6
 * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
@@ -12,8 +12,9 @@
 <div id="tabs-cont">
 
     <ul>
-        <li><a href="#frm-search">Search Form</a></li>
+        <li><a href="#frm-search">Search</a></li>
         <li><a href="#frm-results">Results</a></li>
+        <li><a href="#frm-settings">Options</a></li>
     </ul>
 
     <!-- Search Container -->
@@ -183,6 +184,39 @@
     <!-- Result List Container -->
     <div id="frm-results" style="display: none;">
         <div class="div_result ent_content_full" style="height: 600px;"></div>
+    </div>
+
+    <!-- Additional settings for role code fields -->
+    <div id="frm-settings" style="display: none;">
+        <div style="padding: 10px 5px;">
+
+            <div style="display: table; margin: 10px 0px;">
+                <div class="header optional" style="width: 150px; display: table-cell; vertical-align: top; text-align: right;">
+                    <label>Retrieve full record: </label>
+                </div>
+
+                <div div class="input-cell" style="margin-left: 15px;">
+                    <input type="checkbox" name="dump_record" checked="checked" style="margin-top: 0;">
+                    <span class="heurist-helper1" style="display: block;">Retrieve the complete BnF record on selection</span>
+                </div>
+            </div>
+
+            <div style="display: table; margin: 10px 0px;">
+                <div class="header optional" style="width: 150px; display: table-cell; vertical-align: top; text-align: right;">
+                    <label>Dump record to: </label>
+                </div>
+
+                <div div class="input-cell" style="margin-left: 15px;">
+                    <label><input type="radio" name="dump_field" value="rec_ScratchPad" checked="checked"> Record scratch pad</label><br><br>
+                    <label><input type="radio" name="dump_field" value="dty_ID"> Record field (blocktext fields only)</label><br><br>
+                    <select id="rty_flds">
+                    </select>
+                    <span class="heurist-helper1" style="display: block;">Where will the record dump be placed</span>
+                </div>
+            </div>
+
+            <button id="save-settings" class="ui-button-action">Save options</button>
+        </div>
     </div>
 
 </div>

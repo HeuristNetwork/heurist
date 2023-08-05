@@ -58,7 +58,7 @@ if(count($requestUri)==1){
        array_push($requestUri, 'web');
    }
 }
-http://127.0.0.1/h6-ao/MBH
+http://127.0.0.1/heurist/MBH
 */
 if(count($requestUri)==1 && (@$requestUri[0]=='MBH' || @$requestUri[0]=='johns_test_BnF')){
     
@@ -108,14 +108,11 @@ $requestUri:
 
     $params = array();
     $params['db'] = $database;
-
+    
     require_once ('../hsapi/utilities/utils_host.php');
     $host_params = getHostParams();
 
-//print $_SERVER["SCRIPT_NAME"].'<br>';
-//print print_r($host_params,true);        
-    
-    if($action=='web'){
+    if($action=='web' || $action=='website'){
         
         $redirect .= '?db='.$database.'&website';
                     //substr($_SERVER['SCRIPT_URI'],0,strpos($_SERVER['SCRIPT_URI'],$requestUri[0]))
@@ -126,7 +123,7 @@ $requestUri:
             $redirect .= '&id='.$requestUri[3];    
             $params['id'] = $requestUri[3];
         } 
-        if(@$requestUri[4]>0) {
+        if(@$requestUri[4]>0) { //it may be both website pageid and record id
             $redirect .= '&pageid='.$requestUri[4];    
             $params['pageid'] = $requestUri[4];
         }
@@ -154,7 +151,7 @@ $requestUri:
 
         }else if($action=='hml'){
       
-    // http://127.0.0.1/h6-ao/osmak_9c/hml/18/1
+    // http://127.0.0.1/heurist/osmak_9c/hml/18/1
 
             if(@$requestUri[3]){
                 $redirect .= ('export/xml/flathml.php?db='.$database.'&w=a&q=');
@@ -180,7 +177,7 @@ $requestUri:
             
         }else if($action=='tpl'){
             
-    //http://127.0.0.1/h6-ao/osmak_9c/tpl/Basic%20(initial%20record%20types)/t:10        
+    //http://127.0.0.1/heurist/osmak_9c/tpl/Basic%20(initial%20record%20types)/t:10        
             if(@$requestUri[3]){
             
                 if(@$requestUri[4]){ 
@@ -288,7 +285,14 @@ if($database_url!=null){ //redirect to resolver for another database
     $redirect = '../admin/describe/getDBStructureAsXML.php?db='.$_REQUEST['db'].'&'.$entity.'='.$recid;
     
 }else if($format=='html'){
-    $redirect = '../viewers/record/viewRecord.php?db='.$_REQUEST['db'].'&recID='.$recid;
+    
+    if(@$_REQUEST['noheader']){
+        $redirect = '../viewers/record/renderRecordData.php?db='
+            .$_REQUEST['db'].'&noheader=1&recID='.$recid;    
+    }else{
+        $redirect = '../viewers/record/viewRecord.php?db='.$_REQUEST['db'].'&recID='.$recid;    
+    }
+    
     
 }else if($format=='web' || $format=='website'){
     

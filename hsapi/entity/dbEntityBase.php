@@ -82,7 +82,7 @@ class DbEntityBase
     protected $recordIDs = array();
 
     //
-    // constructor - load configuration from json file
+    // constructor - loads configuration from json file
     //    
     function __construct( $system, $data ) {
        $this->system = $system;
@@ -92,7 +92,7 @@ class DbEntityBase
        $this->init();
        
        
-       //rename generic ID or recID to primary field name for particular entity
+       //rename generic ID or recID to valid primary field name for particular entity
        if(@$this->data[$this->primaryField]==null){
             if(@$this->data['ID']>0) {
                 $this->data[$this->primaryField] = $this->data['ID'];
@@ -103,7 +103,7 @@ class DbEntityBase
     }
 
     //
-    // verify that entity is valid 
+    // verifies that entity is valid 
     // configuration is loaded
     // fields is not empty array
     //
@@ -357,6 +357,9 @@ class DbEntityBase
             }else if(@$this->data['a'] == 'action' || @$this->data['a'] == 'batch'){ 
                 //special and batch action. see details of operaion for method of particular class
                 $res = $this->batch_action();
+                if($res){
+                    $this->_cleanDbDefCache();
+                }
             }else {
                 $this->system->addError(HEURIST_INVALID_REQUEST, "Type of request not defined or not allowed");
             }
@@ -364,6 +367,18 @@ class DbEntityBase
         
         return $res;
         
+    }
+    
+    //
+    //
+    //
+    private function _cleanDbDefCache(){
+        
+        if(is_array($this->config) && 
+            in_array($this->config['tablePrefix'], array('rty','dty','rst','trm','rtg','dtg','vcg','swf')))
+        { //affected entity
+            fileDelete($this->system->getFileStoreRootFolder().$this->system->dbname().'/entity/db.json');
+        }
     }
     
     //
@@ -492,6 +507,8 @@ class DbEntityBase
             //commit
             $mysqli->commit();
             if($keep_autocommit===true) $mysqli->autocommit(TRUE);
+            
+            $this->_cleanDbDefCache();
         }
         return $results;
     }
@@ -552,6 +569,8 @@ class DbEntityBase
             $this->system->addError(HEURIST_NOT_FOUND, 'Cannot delete. No entries found');
             return false;
         }
+        
+        $this->_cleanDbDefCache();
                 
         return true;
     }
@@ -901,6 +920,10 @@ class DbEntityBase
             
             $entity_name = $this->config['entityName'];
             
+            list($filename, $content_type, $url) = resolveEntityFilename($entity_name, $recID, $verions, $db_name, $extension);
+            
+            return $filename;
+/*            
             if($entity_name=='sysDatabases'){
                 
                 $db_name = $recID;
@@ -942,6 +965,7 @@ class DbEntityBase
             }else{
                 return null;                     
             }
+*/            
     }
     
     //
@@ -1045,16 +1069,20 @@ class DbEntityBase
     //
     public function search(){
         
-        $this->searchMgr = new DbEntitySearch( $this->system, $this->fields);
+        if($this->isvalid()){
+            $this->searchMgr = new DbEntitySearch( $this->system, $this->fields);
 
-        $res = $this->searchMgr->validateParams( $this->data );
-        if(!is_bool($res)){
-            $this->data = $res;
+            $res = $this->searchMgr->validateParams( $this->data );
+            if(!is_bool($res)){
+                $this->data = $res;
+            }else{
+                if(!$res) return false;        
+            }        
+
+            return true;        
         }else{
-            if(!$res) return false;        
-        }        
-
-        return true;        
+            return false;
+        }
     }
     
 }  

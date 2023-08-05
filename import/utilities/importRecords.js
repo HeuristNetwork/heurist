@@ -256,21 +256,23 @@ function hImportRecords(_max_upload_size) {
             if(!rectype_source){
                 rectype_source = '<span style="color:red">missing</span>';
                 sourceMissed++;
-            }else if(rectype_source.indexOf('-')<0 || rectype_source.indexOf('0000-')==0 ){
+            }else if(rectype_source.indexOf('-')<0 || parseInt(rectype_source.split('-')[0])==0 ){
                 cnt_local_rt++;
+            }
+
+            if(afterSync && rectype['code'] &&!(rectype['target_RecTypeID']>0)){
+                //try to find again
+                rectype['target_RecTypeID'] = $Db.getLocalID( 'rty', rectype['code'] );
             }
 
             s = s + '<tr><td>'
                 + rectype_source+ '</td><td>'
                 + rectype['count']+ '</td><td>'
                 + rectype['name']+ '</td><td>'
-                + rectype_source+'</td></tr>';
+                + rectype_source+ '</td><td>'
+                + rectype['target_RecTypeID']
+                +'</td></tr>';
             
-            if(afterSync && rectype['code'] &&!(rectype['target_RecTypeID']>0)){
-                //try to find again
-                rectype['target_RecTypeID'] = $Db.getLocalID( 'rty', rectype['code'] );
-            }
-
             var target_id;
             if(rectype['target_RecTypeID']>0){
                 target_id = rectype['target_RecTypeID']+'\t'+
@@ -307,7 +309,7 @@ function hImportRecords(_max_upload_size) {
                     sourceDtMissed++;
                 }else {
                     
-                    if(dt_source.indexOf('-')<0 || dt_source.indexOf('0000-')==0 ){
+                    if(dt_source.indexOf('-')<0 || parseInt(dt_source.split('-')[0])==0 ){
                         cnt_local_dt++;
                     }
                  
@@ -446,6 +448,13 @@ function hImportRecords(_max_upload_size) {
                 }
             }
             
+            if(source_db==0 && window.hWin.HAPI4.sysinfo.db_registeredid==0){
+                $('#btn_SameStructure').parent().show();
+            }else{
+                $('#btn_SameStructure').parent().hide();
+                $('#btn_SameStructure').prop('checked', false);
+            }
+
         }
 
         $('#spanRecCount').text(recCount);
@@ -541,6 +550,10 @@ function hImportRecords(_max_upload_size) {
                 session: session_id,
                 id: window.hWin.HEURIST4.util.random()
             };
+            
+            if($('#btn_SameStructure').is(':checked')){
+                request['same_source'] = 1;
+            }
 
             if(!window.hWin.HEURIST4.util.isempty($('#sel_UniqueIdField').val())){
             

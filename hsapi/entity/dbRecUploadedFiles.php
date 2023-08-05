@@ -25,6 +25,7 @@ require_once (dirname(__FILE__).'/dbEntityBase.php');
 require_once (dirname(__FILE__).'/dbEntitySearch.php');
 require_once (dirname(__FILE__).'/../dbaccess/db_files.php');
 require_once (dirname(__FILE__).'/../dbaccess/db_records.php');
+require_once(dirname(__FILE__).'/../../import/fieldhelper/harvestLib.php');
 
 /**
 * some public methods
@@ -93,7 +94,16 @@ class DbRecUploadedFiles extends DbEntityBase
 
         $pred = $this->searchMgr->getPredicate('ulf_OrigFileName');
         if($pred!=null) array_push($where, $pred);
+        
+        $pred = $this->searchMgr->getPredicate('ulf_Caption');
+        if($pred!=null) array_push($where, $pred);
 
+        $pred = $this->searchMgr->getPredicate('ulf_Copyright');
+        if($pred!=null) array_push($where, $pred);
+
+        $pred = $this->searchMgr->getPredicate('ulf_Copyowner');
+        if($pred!=null) array_push($where, $pred);
+        
         $pred = $this->searchMgr->getPredicate('ulf_ExternalFileReference');
         if($pred!=null) array_push($where, $pred);
         
@@ -158,7 +168,7 @@ class DbRecUploadedFiles extends DbEntityBase
             
         }else if(@$this->data['details']=='full'){
 
-            $this->data['details'] = 'ulf_ID,ulf_OrigFileName,ulf_ExternalFileReference,ulf_ObfuscatedFileID,ulf_Description,ulf_FileSizeKB,ulf_MimeExt,ulf_Added,ulf_UploaderUGrpID,fxm_MimeType,ulf_PreferredSource';
+            $this->data['details'] = 'ulf_ID,ulf_OrigFileName,ulf_ExternalFileReference,ulf_ObfuscatedFileID,ulf_Caption,ulf_Description,ulf_Copyright,ulf_Copyowner,ulf_FileSizeKB,ulf_MimeExt,ulf_Added,ulf_UploaderUGrpID,fxm_MimeType,ulf_PreferredSource';
             //$this->data['details'] = implode(',', $this->fields );
             $needRelations = true;
             $needCalcFields = true;
@@ -769,6 +779,9 @@ When we open "iiif_image" in mirador viewer we generate manifest dynamically.
                     //url or relative path
                     $url = trim($record['ulf_ExternalFileReference']);
                     $description = @$record['ulf_Description'];                    
+                    $caption = @$record['ulf_Caption'];                    
+                    $copyright = @$record['ulf_Copyright'];                    
+                    $copyowner = @$record['ulf_Copyowner'];                    
                     
                     if(strpos($url,'http')===0){
                         //find if url is already registered
@@ -779,7 +792,7 @@ When we open "iiif_image" in mirador viewer we generate manifest dynamically.
                     }else{
 
                         $k = strpos($url,'uploaded_files/');
-                        if($k===false) $k ==strpos($url,'file_uploads/');
+                        if($k===false) $k = strpos($url,'file_uploads/');
 
                         if($k===0 || $k===1){
                             //relative path in database folder
@@ -805,7 +818,10 @@ When we open "iiif_image" in mirador viewer we generate manifest dynamically.
                                 }else if($is_url) {
 
                                     $fields = array(
-                                        'ulf_Description'=>$description, 
+                                        'ulf_Caption'=>$caption,
+                                        'ulf_Copyright'=>$copyright, 
+                                        'ulf_Copyowner'=>$copyowner, 
+                                        'ulf_Description'=>$description,  
                                         'ulf_MimeExt'=>getURLExtension($url));
                     
                                     if($is_download){
@@ -831,6 +847,8 @@ When we open "iiif_image" in mirador viewer we generate manifest dynamically.
         else if(@$this->data['delete_unused']){ // delete file records not in use
 
             $ids = $this->data['delete_unused'];
+            $operate = $this->data['operate'];
+
             $where_clause = 'WHERE dtl_ID IS NULL';
             if(is_array($ids) && count($ids) > 0){ // multiple
                 $where_clause .= ' AND ulf_ID IN (' . implode(',', $ids) . ')';
@@ -838,38 +856,39 @@ When we open "iiif_image" in mirador viewer we generate manifest dynamically.
                 $where_clause .= ' AND ulf_ID = ' . $ids;
             }// else use all
 
-            $query = 'SELECT ulf_ID FROM ' . $this->config['tableName'] . ' LEFT JOIN recDetails ON ulf_ID = dtl_UploadedFileID ' . $where_clause;
-            $to_delete = mysql__select_list2($mysqli, $query);
+            $query = 'SELECT DISTINCT ulf_ID, ulf_OrigFileName as filename, ulf_ExternalFileReference as url FROM ' . $this->config['tableName'] . ' LEFT JOIN recDetails ON ulf_ID = dtl_UploadedFileID ' . $where_clause;
+            $to_delete = mysql__select_assoc($mysqli, $query);
 
             if(count($to_delete) > 0){
 
                 // Check if Obfuscated ID is referenced in values
-                $to_remove = array();
-                foreach ($to_delete as $ulf_ID) {
+                foreach ($to_delete as $ulf_ID => $details) {
                     
                     $ulf_ObfuscatedFileID = mysql__select_value($mysqli, 'SELECT ulf_ObfuscatedFileID FROM ' . $this->config['tableName'] . ' WHERE ulf_ID = ' . $ulf_ID);
                     if(!$ulf_ObfuscatedFileID){ // missing ulf_ObfuscatedFileID
-                        $to_remove[] = $ulf_ID;
+                        unset($to_delete[$ulf_ID]);
                         continue;
                     }
 
                     $is_used = mysql__select_value($mysqli, "SELECT dtl_ID FROM recDetails WHERE dtl_Value LIKE '%". $ulf_ObfuscatedFileID ."%'");
                     if($is_used){
-                        $to_remove[] = $ulf_ID;
+                        unset($to_delete[$ulf_ID]);
+                        continue;
                     }
                 }
 
-                if(!count($to_remove) > 0){
-                    $to_delete = array_diff($to_delete, $to_remove);
-                }
+                if($operate == 'delete' && count($to_delete) > 0){ // delete files
 
-                if(count($to_delete) > 0){
+                    $to_delete = array_keys($to_delete);
+
                     $this->data[$this->primaryField] = $to_delete;
                     $res = $this->delete();
     
                     if($res === true){
                         $ret = count($to_delete);
                     }
+                }else{ // return file details
+                    $ret = $to_delete;
                 }
             }
         }
@@ -1235,7 +1254,7 @@ When we open "iiif_image" in mirador viewer we generate manifest dynamically.
                             . 'WHERE rec_FlagTemporary!=1 AND rec_RecTypeID='.$rty_id
                             . ' AND dtl_DetailTypeID='.$dty_file.' AND dtl_UploadedFileID=';
 
-                $file_search = 'SELECT ulf_OrigFileName, ulf_Description, ulf_FileName, ulf_FilePath, ulf_MimeExt, ulf_FileSizeKB, ulf_ExternalFileReference '
+                $file_search = 'SELECT ulf_OrigFileName, ulf_Caption, ulf_Description, ulf_FileName, ulf_FilePath, ulf_MimeExt, ulf_FileSizeKB, ulf_ExternalFileReference '
                             .  'FROM recUploadedFiles '
                             .  'WHERE ulf_ID=';
 
@@ -1267,7 +1286,8 @@ When we open "iiif_image" in mirador viewer we generate manifest dynamically.
 
                     $details = array(
                         $dty_file => $ulf_id,
-                        $dty_title => $file_details['ulf_OrigFileName']
+                        $dty_title => $file_details['ulf_Caption']
+                            ?$file_details['ulf_Caption']:$file_details['ulf_OrigFileName']
                     );
 
                     if($file_details['ulf_OrigFileName'] == '_remote'){
@@ -1317,6 +1337,112 @@ When we open "iiif_image" in mirador viewer we generate manifest dynamically.
 
                 $this->system->addError(HEURIST_ACTION_BLOCKED, 'Unable to proceed with Media record creations, due to ' . $extra);
             }
+        }
+        else if(@$this->data['bulk_reg_filestore']){ // create new file entires 
+
+            $error = array(); // file missing or other errors
+            $skipped = array(); // already registered
+            $created = array(); // total ulf records created
+            $exists = 0; // count of files that already exists
+
+            $files = array();
+
+            $dirs_and_exts = getMediaFolders($mysqli);
+
+            if(array_key_exists('files', $this->data) && !empty($this->data['files'])){ // manageFilesUpload.php
+                $files = json_decode($this->data['files']);
+            }else{ // manageRecUploadedFiles.js
+
+                // Get non-registered files 
+                doHarvest($this->system, $dirs_and_exts, false, 1);
+                $files = getRegInfoResult()['nonreg'];
+            }
+
+            // Add filestore path
+            $dirs_and_exts['dirs'] = array_map(function($dir){
+                if(strpos($dir, HEURIST_FILESTORE_DIR) === false){
+                    $dir = HEURIST_FILESTORE_DIR . ltrim($dir, '/');
+                }
+                return rtrim($dir, '/');
+            }, $dirs_and_exts['dirs']);
+
+            $system_folders = $this->system->getSystemFolders();
+            foreach ($files as $file_details) {
+
+                $file = $file_details;
+                if(is_object($file_details)){ // from decoded JS stringified
+                    if(property_exists($file_details, 'file_path')){
+                        $file = $file_details->file_path;
+                    }else{ // not handled
+                        $skipped[] = implode(',', $file) . ' => File data is not in valid format';
+                        continue;
+                    }
+                }
+
+                $provided_file = $file;
+                if(strpos($file, HEURIST_FILESTORE_DIR) === false){
+                    $file = HEURIST_FILESTORE_DIR . $file;
+                }
+
+                if(!file_exists($file)){ // not found, or not in file store
+                    $error[] = $provided_file . ' => File does not exist';
+                    continue;
+                }
+
+                $fileinfo = pathinfo($file);
+                $path = $fileinfo['dirname'];
+                $name = $fileinfo['basename'];
+                $valid_dir = false;
+
+                // Check file directory against set 'upload file' directories
+                foreach ($dirs_and_exts['dirs'] as $file_dir) {
+                    if(strpos($path, $file_dir) !== false){
+                        $valid_dir = true;
+                        break;
+                    }
+                }
+                if(!$valid_dir){
+                    $skipped[] = $name . ' => File is not located within any set upload directories';
+                    continue;
+                }
+
+                // Check extension
+                if(!in_array(strtolower($fileinfo['extension']), $dirs_and_exts['exts'])){
+                    $skipped[] = $name . ' => File extension is not allowed';
+                    continue;   
+                }
+
+                // Check if file is already registered
+                if(fileGetByFileName($this->system, $file) > 0){
+                    $exists ++;
+                    continue;
+                }
+
+                $ulf_ID = fileRegister($this->system, $file);
+                if($ulf_ID > 0){
+                    $created[] = $name . ' => Registered file as #' . $ulf_ID;
+                }else{
+                    $msg = $this->system->getError();
+                    $error[] = $name . ' => Unable to register file' . (is_array($msg) && array_key_exists('message', $msg) ? ', <br>' . $msg['message'] : '');
+                }
+            }
+
+            $ret = array();
+
+            if(count($created) > 0){
+                $ret[] = 'Created:<br>' . implode('<br>', $created);
+            }
+            if($exists > 0){
+                $ret[] = 'Already registered: ' . $exists;
+            }
+            if(count($skipped) > 0){
+                $ret[] = 'Skipped:<br>' . implode('<br>', $skipped);
+            }
+            if(count($error) > 0){
+                $ret[] = 'Errors:<br>' . implode('<br>', $error);
+            }
+
+            $ret = implode('<br><br>', $ret);
         }
 
         if($ret===false){

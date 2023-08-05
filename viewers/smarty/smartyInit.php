@@ -62,6 +62,14 @@ function initSmarty($smarty_templates_dir=null){
             "str_get_timestamp",
             "str_get_secure",
             "str_get_trusted"));
+
+        //$smarty->register_modifier('translate', 'getTranslation'); it does not work for standarad smarty distribution
+        $smarty_plugin_dir = HEURIST_DIR.'/vendor/smarty/smarty/libs/plugins/';
+        $modifier_translate = 'modifier.translate.php';
+        //add new modifier - if it does not exist
+        if(!file_exists($smarty_plugin_dir.$modifier_translate) && file_exists($smarty_plugin_dir)){
+            copy($modifier_translate,$smarty_plugin_dir.$modifier_translate);
+        }
             
     }
 }

@@ -216,6 +216,19 @@
                     }
                 }, 
                 {
+                    "dtID": "sys_AllowUserImportAtLogin",
+                    "dtFields":{
+                        "dty_Type":"enum",
+                        "rst_DisplayName": "Allow user's to import their account from another Heurist database on this server",
+                        "rst_DisplayHelpText": "User's imported this way are set to enabled but cannot create records",
+                        "rst_FieldConfig":{"type":"radio","hideclear":"1","values":[
+                            {"key":"0","title":"No"},
+                            {"key":"2","title":"Yes"}
+                        ]},
+                        "dty_Role":"virtual"
+                    }
+                }, 
+                {
                     "dtID": "sys_URLCheckFlag",
                     "dtFields":{
                         "dty_Type":"enum",

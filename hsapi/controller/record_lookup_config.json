@@ -143,12 +143,18 @@
         "publisher": "",
         "date": "",
         "author": "",
+        "contributor": "",
         "biburl": "",
         "description": "",
         "ext_description": "",
         "language": "",
         "type": "",
         "isbn": ""
+    },
+    "options": {
+        "author_codes": "",
+        "dump_receord": true,
+        "dump_field": "rec_ScratchPad"
     }
 },
 {
@@ -158,8 +164,16 @@
     "dialog": "lookupBnFLibrary_aut",
     "description": "A proof of concept for searching via the BnF Library API for Authoritative Records (under development)",
     "fields": {
+        "authority_type": "",
         "name": "",
+        "years_active": "",
+        "role": "",
+        "location": "",
         "auturl": ""
+    },
+    "options": {
+        "dump_receord": true,
+        "dump_field": "rec_ScratchPad"
     }
 },
 {

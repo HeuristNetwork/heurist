@@ -374,7 +374,7 @@ function hMapDocument( _options )
     //
     //
     function _loadBaseMap( mapdoc_id ){
-        var basemap_name = 0;
+        var basemap_name = null;
         if(mapdoc_id=='None'){
             basemap_name = 'None';
         }else
@@ -385,9 +385,12 @@ function hMapDocument( _options )
                 basemap_name = $Db.trm(basemap_name, 'trm_Label');
             }
         }
-
-        var mapManager = options.mapwidget.mapping('getMapManager');            
-        mapManager.loadBaseMap(basemap_name);
+        //todo: fix restore basemap to default (0) if current basemap 'None'
+        
+        if(basemap_name!=null){
+            var mapManager = options.mapwidget.mapping('getMapManager');            
+            mapManager.loadBaseMap(basemap_name);
+        }
     }
 
     //

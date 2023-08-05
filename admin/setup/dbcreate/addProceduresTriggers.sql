@@ -56,8 +56,70 @@ DROP TRIGGER IF EXISTS defDetailTypeGroups_delete;
 DELIMITER $$
 
 
-DROP function IF EXISTS `getTemporalDateString`$$
+DROP function IF EXISTS `getEstDate`$$
 
+--
+-- extract estMinDate or estMaxDate for triggers to populate recDetailsDateIndex.
+-- sTemporal can be in old temporal format, standard date or json string.
+-- typeDate = 0 - for min date, 1 - for max date
+--
+CREATE DEFINER=CURRENT_USER FUNCTION `getEstDate`(sTemporal varchar(4095), typeDate tinyint) RETURNS DECIMAL(15,4)
+    DETERMINISTIC
+    BEGIN
+    
+            declare iBegin integer;
+            declare iEnd integer;
+            declare nameDate varchar(20) default '';
+            declare strDate varchar(15) default '';
+            declare estDate decimal(15,4);
+
+-- error handler for date conversion            
+            DECLARE EXIT HANDLER FOR 1292
+            BEGIN
+                RETURN 0;
+            END;
+            
+-- find the temporal type might not be a temporal format, see else below
+            IF (TRIM(sTemporal) REGEXP '^-?[0-9]+$') THEN
+                RETURN CAST(TRIM(sTemporal) AS DECIMAL(15,4));
+            END IF;
+
+            SET iBegin = LOCATE('|VER=1|',sTemporal);
+            if iBegin = 1 THEN
+                SET sTemporal = getTemporalDateString(sTemporal);
+            END IF;
+            
+            IF (typeDate = 0) THEN
+                set nameDate = '"estMinDate":';
+            ELSE
+                set nameDate = '"estMaxDate":';
+            END IF;
+
+            SET iBegin = LOCATE(nameDate,sTemporal);
+            IF iBegin = 0 THEN
+-- it will work for valid CE dates only, dates without days or month will fail
+                IF DATE(sTemporal) IS NULL THEN 
+                    RETURN 0;
+                ELSE    
+                    RETURN CAST(CONCAT(YEAR(sTemporal),'.',LPAD(MONTH(sTemporal),2,'0'),LPAD(DAY(sTemporal),2,'0')) AS DECIMAL(15,4));
+                END IF; 
+                 
+            ELSE
+                SET iBegin = iBegin + 13;
+                SET iEnd = LOCATE(',', sTemporal, iBegin);
+                IF iEnd = 0 THEN
+                    SET iEnd = LOCATE('}', sTemporal, iBegin);
+                END IF;
+                IF iEnd > 0 THEN
+                    SET strDate =  substring(sTemporal, iBegin, iEnd - iBegin);
+                    RETURN CAST(TRIM(strDate) AS DECIMAL(15,4));
+                END IF;
+                RETURN 0;    
+            END IF;
+    END$$
+
+DROP function IF EXISTS `getTemporalDateString`$$
+    
 CREATE DEFINER=CURRENT_USER FUNCTION `getTemporalDateString`(strDate varchar(4095)) RETURNS varchar(4095) CHARSET utf8mb4
 	DETERMINISTIC
 	begin
@@ -240,6 +302,10 @@ CREATE DEFINER=CURRENT_USER FUNCTION `getTemporalDateString`(strDate varchar(409
         elseif dtType='resource' then
             insert into recLinks (rl_SourceID, rl_TargetID, rl_DetailTypeID, rl_DetailID)
             values (NEW.dtl_RecID, NEW.dtl_Value, NEW.dtl_DetailTypeID, NEW.dtl_ID);
+        elseif dtType='date' then
+            insert into recDetailsDateIndex (rdi_RecID, rdi_DetailTypeID, rdi_DetailID, rdi_estMinDate, rdi_estMaxDate)
+            values (NEW.dtl_RecID, NEW.dtl_DetailTypeID, NEW.dtl_ID, getEstDate(NEW.dtl_Value,0), getEstDate(NEW.dtl_Value,1)) ;
+        
         end if;
 -- legacy databases: need to add update for 200 to save the termID to help with constraint checking
 -- new databases: need to add update for detail 200, now 5, to save the termID
@@ -306,6 +372,12 @@ FROM recDetails where dtl_ID=OLD.dtl_ID INTO @raw_detail;
         elseif dtType='resource' then
             update recLinks set rl_TargetID=NEW.dtl_Value, rl_DetailTypeID=NEW.dtl_DetailTypeID
             where rl_DetailID=NEW.dtl_ID;
+            
+        elseif dtType='date' then
+                update recDetailsDateIndex set rdi_estMinDate=getEstDate(NEW.dtl_Value,0),
+                                               rdi_estMaxDate=getEstDate(NEW.dtl_Value,1),
+                                               rdi_DetailTypeID = NEW.dtl_DetailTypeID  
+                                               where rdi_DetailID=NEW.dtl_ID;
         end if;
 -- need to add update for detail 200, now 5, to save the termID
 	end$$
@@ -330,6 +402,8 @@ FROM recDetails where dtl_ID=OLD.dtl_ID INTO @raw_detail;
         end if;
     
         delete ignore from recLinks where rl_DetailID=OLD.dtl_ID;
+        
+        delete ignore from recDetailsDateIndex where rdi_DetailID=OLD.dtl_ID; 
     end$$
 
 -- ------------------------------------------------------------------------------
@@ -472,6 +546,9 @@ FROM recDetails where dtl_ID=OLD.dtl_ID INTO @raw_detail;
       end if;  
         
       delete ignore from recLinks where rl_RelationID=OLD.rec_ID or rl_SourceID=OLD.rec_ID or rl_TargetID=OLD.rec_ID;
+      
+      delete ignore from recDetailsDateIndex where rdi_RecID=OLD.rec_ID; 
+
 	end$$
 
 -- ------------------------------------------------------------------------------

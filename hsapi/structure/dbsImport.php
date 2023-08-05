@@ -658,7 +658,7 @@ foreach ($this->imp_recordtypes as $rtyID){
             $def_rectype[$idx_origin_name] = $def_rectype[$idx_name];
         }
         
-        $res = createRectypes($columnNames, array("0"=>array("common"=>$def_rectype)), false, false, null);
+        $res = createRectypes($columnNames, array("0"=>array("common"=>$def_rectype)), false, false, null); //from saveStructure.php
     //if(_DBG) error_log('rt '.$rtyID);
         if(is_numeric($res)){
 
@@ -1387,9 +1387,8 @@ $mysqli->commit();
         list($db, $id) = explode('-', $conceptCode); 
         if(ctype_digit($db) && $db==0 && ctype_digit($id) && $id>0){
              $conceptCode = '9999-'.$id;          
-        }else{
-            return $conceptCode;
         }
+        return $conceptCode;
     }
     
     //
@@ -1895,37 +1894,9 @@ if($new_term_id==5039){
     //
     private function copyRectypeIcon($source_RtyID, $target_RtyID, $thumb=""){
 
-        //backward capabilities - rectype-icons        
-        $targetPath = HEURIST_ICON_DIR.$thumb.$target_RtyID.'.png';
-
-        //check if the same server with target
-        if(strpos($this->sourceIconURL, HEURIST_SERVER_URL)===0){ 
-            
-            $filename = HEURIST_FILESTORE_ROOT.$this->source_db_name.'/rectype-icons/'.$thumb.$source_RtyID.'.png';
-            if(file_exists($filename)){
-                
-                if(file_exists($targetPath)){
-                    unlink($targetPath);
-                }
-
-                if (!copy($filename, $targetPath)) {
-                    //makeLogEntry("<b>Warning</b> Importing Record-type", $importRtyID, " Can't copy ".(($thumb=="")?"icon":"thumbnail")." ".$filename." to ".$target_filename);
-                }
-            }else{
-                //makeLogEntry("<b>Warning</b> Importing Record-type", $importRtyID, " ".(($thumb=="")?"icon":"thumbnail")." does not exist");
-            }
-        
-
-        }else{
-            $sourceURL = $this->sourceIconURL.$thumb.$source_RtyID.'.png';
-
-            //print "<br>sourcce=".$sourceURL;
-            //print "<br>path=".$targetPath;
-
-            saveURLasFile($sourceURL, $targetPath); //save rty icon on import
-        }
-
         //new  entity/defRecTypes/  --------------------------------------------
+        
+        //@todo SVG ext support
         $targetFolder = HEURIST_FILESTORE_DIR.'/entity/defRecTypes/';
         $targetPath = $targetFolder.($thumb==''?'/icon/':'/thumbnail/').$target_RtyID.'.png';
         

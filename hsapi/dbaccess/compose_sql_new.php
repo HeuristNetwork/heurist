@@ -784,7 +784,8 @@ class HQuery {
 
                     if(!in_array('hie', $sort_fields)) {
                         $sort_expr[] = 
-    '(select GREATEST(getTemporalDateString(ifnull(sd2.dtl_Value,\'0\')), getTemporalDateString(ifnull(sd3.dtl_Value,\'0\')))' 
+//OLD    '(select GREATEST(getTemporalDateString(ifnull(sd2.dtl_Value,\'0\')), getTemporalDateString(ifnull(sd3.dtl_Value,\'0\')))' 
+    '(select GREATEST(getEstDate(sd2.dtl_Value,0), getEstDate(sd3.dtl_Value,0))' 
                         .' from recDetails sd1'
                         .' left join recDetails sd2 on sd1.dtl_Value=sd2.dtl_RecID and sd2.dtl_DetailTypeID=9'
                         .' left join recDetails sd3 on sd1.dtl_Value=sd3.dtl_RecID and sd3.dtl_DetailTypeID=10'
@@ -807,8 +808,11 @@ class HQuery {
                                       . 'ifnull((select trm_Label from recDetails left join defTerms on trm_ID=dtl_Value where dtl_RecID=r'
                                         .$this->level.'.rec_ID and dtl_DetailTypeID='.$dty_ID
                                         .' ORDER BY trm_Label limit 1), "~~")) '; // then by term label
-                            }else{                            
-                                $sortby = 'ifnull((select dtl_Value from recDetails where dtl_RecID=r'
+                            }else{
+
+                                $fld = $field_type != 'date' ? 'dtl_Value' : 'getEstDate(dtl_Value,0)'; //for sort
+
+                                $sortby = 'ifnull((select '.$fld.' from recDetails where dtl_RecID=r'
                                         .$this->level.'.rec_ID and dtl_DetailTypeID='.$dty_ID
                                         .' ORDER BY dtl_Value limit 1), "~~") ';
                             }
@@ -959,6 +963,9 @@ class HLimb {
 
             //IMPORTANT!!!!!!!!
             if(is_array($wheres) && count($wheres)>0){  //@TODO!  this is temporal solution!!!!!
+//if cnj is OR (any) need to execute each OR section separately - otherwise it kills server (at least for old mySQL versions (5.7))           
+            
+            
                 $where = implode($cnj, $wheres);
                 
 //DEBUG error_log("TEST $cnj >>> ".$where);
@@ -1573,10 +1580,8 @@ class HPredicate {
         }else{
             
             if($this->field_type=='date' && trim($this->value)!='') { //false && $this->isDateTime()){
-                $field_name = 'CAST( IF( CAST( CONCAT("00",getTemporalDateString( '.$p.'dtl_Value )) as DATETIME) is null, '
-                    . 'CONCAT("00",CAST(getTemporalDateString( '.$p.'dtl_Value ) as SIGNED),"-1-1"), '
-                    . 'CONCAT("00",getTemporalDateString( '.$p.'dtl_Value ))) as DATETIME) ';
-                //'getTemporalDateString('.$p.'dtl_Value) ';
+                //OUTDATED - REMOVE
+                
             }else if($this->field_type=='file'){
                 $field_name = $p."dtl_UploadedFileID ";  //only for search non empty values
             }else{
@@ -1596,8 +1601,16 @@ class HPredicate {
 
             
             if($this->field_id>0){ //field id defined (for example "f:25")
-                
-                if($this->fulltext){
+            
+                if($this->field_type=='date' && trim($this->value)!=''){
+
+                    $res = "EXISTS (SELECT rdi_DetailID FROM recDetailsDateIndex WHERE $recordID=rdi_RecID AND "
+                    .'rdi_DetailTypeID';
+                    
+                    $field_name = '';
+                    //$val = $this->getFieldValue();
+                    
+                }else if($this->fulltext){
                     $res = 'SELECT dtl_RecID FROM recDetails WHERE dtl_DetailTypeID';
                 }else{
                     $res = "EXISTS (SELECT dtl_ID FROM recDetails ".$p." WHERE $recordID=".$p."dtl_RecID AND "
@@ -2432,13 +2445,13 @@ class HPredicate {
         return ($timestamp0  &&  $timestamp1);
     }
 
-    function makeDateClause() {
+    function makeDateClause_old_to_remove() {
 
         if (strpos($this->value,"<>")) {
 
             $vals = explode("<>", $this->value);
-            $datestamp0 = validateAndConvertToISO($vals[0]);
-            $datestamp1 = validateAndConvertToISO($vals[1]);
+            $datestamp0 = Temporal::dateToISO($vals[0]);
+            $datestamp1 = Temporal::dateToISO($vals[1]);
 
             return ($this->negate?'not ':'')."between '$datestamp0' and '$datestamp1'";
 
@@ -2446,7 +2459,7 @@ class HPredicate {
             return 'NULL';
         }else{
 
-            $datestamp = validateAndConvertToISO($this->value);
+            $datestamp = Temporal::dateToISO($this->value);
             
             if($datestamp==null){
                 return null;
@@ -2481,6 +2494,97 @@ class HPredicate {
         }
     }
 
+    /*
+        It is possible to specify the following queries against dates:
+        FOR OVERLAPS: {"f:1113":"1400/1500"}   or  {"f:1113":"1400<>1500"}  or {"f:1113":"<>    1400,1500"} the search range overlaps the specified interval (1400-1500)
+        
+        BETWEEN: {"f:1113":"1400><1500"}  or {"f:1113":"><1400/1500"}  the search range is between the specified interval
+        
+        if operator <> or >< is in the beginning of search string, interval can be specified as "1440 to 1500",  "1440/1500",  "1440,1500", "1440-1500", "1440 à 1500",  "1400/P100Y" or "P100Y/1500"
+
+        FALL IN:{"f:1113":"1450"}  1450 should fall between range in database    1400<=1450<=1500
+        AFTER:  {"f:1113":">=1300"} 1400>=1300  (start of range is after the specified date)
+        BEFORE: {"f:1113":"<=1600"} 1500<=1600  (end of range is before the specified date)
+        EXACT:  {"f:1113":"=1400"}  either start or end of range in db equals the specified date  
+                {"f:1113":"=1400,1500"}  start of range in db is 1400 and end of range in db equals to 1500
+        FALL IN/OVERLAP is default comparison.    
+    */
+    function makeDateClause() {
+        
+        if($this->isEmptyValue()){ // {"f:10":"NULL"}
+            return 'NULL';
+        }
+        
+        
+        $is_overlap = strpos($this->value,'<>')!==false; // falls in/overlaps  - DEFAULT
+        $is_within = strpos($this->value,'><')!==false;  // between
+        
+        if ($is_overlap || $is_within) { 
+
+            if(strpos($this->value,'><')===0 || strpos($this->value,'<>')===0){
+                // <>500/P10Y  or ><1400-1550
+                $temporal = new Temporal($this->value);
+                if(!$temporal->isValid()){
+                    return null;
+                }
+                $timespan = $temporal->getMinMax();
+            }else{
+                $vals = explode($is_within?'><':'<>', $this->value);
+                //  200<>500
+                $temporal1 = new Temporal($vals[0]);
+                $temporal2 = new Temporal($vals[1]);
+                
+                if(!$temporal1->isValid() || !$temporal2->isValid()){
+                    return null;
+                }
+                $timespan = array($temporal1->getMinMax()[0], $temporal2->getMinMax()[1]);
+            }
+            
+        }else{
+            $temporal = new Temporal($this->value, true);
+            if(!$temporal->isValid()){
+                return null;
+            }
+            $timespan = $temporal->getMinMax();
+        }
+            
+        $res = '';
+        
+        if($is_within){  // min<=t1 && t2<=max
+
+            //search dates are comletely within the specified interval
+            $res = "({$timespan[0]} <= rdi_estMinDate  AND rdi_estMaxDate <= {$timespan[1]})";
+        
+        }else
+        if ($this->exact) {
+            //either begin or end of date range is exact to specified interval
+            $res = "(rdi_estMinDate = {$timespan[0]} OR rdi_estMaxDate = {$timespan[1]})";
+        }
+        else if ($this->lessthan) {  //search dates before the specified 
+            
+            //timespan rdi_estMaxDate < max 
+            $res = "(rdi_estMaxDate {$this->lessthan} {$timespan[1]})";
+        }
+        else if ($this->greaterthan) { //search dates after the specified 
+            
+            //timespan min > rdi_estMaxDate
+            $res = "(rdi_estMinDate {$this->greaterthan} {$timespan[0]})";
+        }
+        else { // max>=t1 && min<=t2
+
+            //search range overlaps/intersects within interval
+            $res = "(rdi_estMaxDate>={$timespan[0]} AND rdi_estMinDate<={$timespan[1]})";
+            
+        }
+        
+        if($this->negate){
+            $res = ' NOT '.$res;
+        }
+        
+        return $res;
+    }
+    
+    
     /*
       is search for empty or null value
     */
@@ -2524,7 +2628,6 @@ class HPredicate {
         
         $this->case_sensitive = false;
 
-        //@todo between , datetime, terms
         if(is_array($this->value)){
             if(count($this->value)>0){
                 $cs_ids = getCommaSepIds($this->value);
@@ -2542,7 +2645,7 @@ class HPredicate {
         }
 
         // -   negate value
-        // <> between 
+        // <> between  >< overlaps
         
         // then it analize for
         // == case sensetive
@@ -2558,12 +2661,12 @@ class HPredicate {
         $this->greaterthan = false;
         
         //
-        if(strpos($this->value, '-')===0){
+        if(strpos($this->value, '-')===0 && $this->field_type!='date'){
             $this->negate = true;
             $this->value = substr($this->value, 1);
         }
                 
-        if (strpos($this->value,"<>")===false) {
+        if (strpos($this->value,'<>')===false && strpos($this->value,'><')===false) { //except "overlaps" and "between" operators
             
             if(strpos($this->value, '==')===0){
                 $this->case_sensitive = true;
@@ -2602,9 +2705,7 @@ class HPredicate {
             $parent_ids = null;
             
             if (preg_match('/^\d+(?:,\d*)+$/', $this->value) || intval($this->value)){   //numeric comma separated
-            
                 $parent_ids = prepareIds($this->value);
-                
             }
             
             
@@ -2648,7 +2749,7 @@ class HPredicate {
                     
             }else{
             //search for trm_Label or trm_Code
-                $res  = ' in (select trm_ID from defTerms where ';
+                $res  = 'select trm_ID from defTerms where ';
                 
                 if($this->field_term!=null){
                     //'term', 'label', 'concept', 'conceptid', 'desc', 'code'
@@ -2658,6 +2759,8 @@ class HPredicate {
                 }
 
                 $value = $mysqli->real_escape_string($this->value);
+                $ids = null;
+                $need_search_in_defTerms = true;
                 
                 if($trm_Field == 'trm_ConceptId'){
                     $res = $res.' "'.$value
@@ -2666,13 +2769,19 @@ class HPredicate {
                     //check language prefix in $value
                     list($lang, $value) = extractLangPrefix($value);
                     
-                    if($lang!=null)
+                    if($lang!=null && $trm_Field=='trm_Label')
                     {
+                        $need_search_in_defTerms = (strcasecmp($lang,'ALL')==0);
+                        
                         //search in translation table first
                         $query_tran = 'SELECT trn_Code FROM defTranslations WHERE '
-                                  .'trn_Source="'.$trm_Field.'" AND '
-                                  .'trn_LanguageCode="'.$lang.'" AND '
-                                  .'trn_Translation';
+                                  .'trn_Source="'.$trm_Field.'" AND ';
+                                  
+                        if(!$need_search_in_defTerms){
+                            $query_tran = $query_tran.'trn_LanguageCode="'.$lang.'" AND ';
+                        }
+                                  
+                        $query_tran = $query_tran.'trn_Translation';
                         
                         if($this->exact){
                             $query_tran  =  $query_tran.' ="'.$value.'"'; 
@@ -2682,31 +2791,34 @@ class HPredicate {
                         
                         $ids = mysql__select_list2($mysqli, $query_tran); 
                         
-                        if(count($ids)==0){
-                            $res = ($this->negate?'>0':'=0');
-                        }else if(count($ids)==1){
-                            $res = ($this->negate?'<>':'=').$ids[0];
-                        }else{
-                            $res = ($this->negate?' NOT':'').' IN ('.implode(',',$ids).')';    
-                        }
-                        
-                        
-                    }else{
+                    }
                     
-                        $res = $res.$trm_Field;
-                        if($this->exact){
-                            $res  =  $res.' ="'.$value.'"'; 
-                        } else {
-                            $res  =  $res.' LIKE "%'.$value.'%"';
-                        }
-                        if($this->field_term==null){
-                            $res  =  $res.' or trm_Code="'.$value.'"';
-                        }
-                        
-                        $res  =  $res.')';
+                    $res = $res.$trm_Field;
+                    if($this->exact){
+                        $res  =  $res.' ="'.$value.'"'; 
+                    } else {
+                        $res  =  $res.' LIKE "%'.$value.'%"';
+                    }
+                    if($this->field_term==null){
+                        $res  =  $res.' or trm_Code="'.$value.'"';
                     }
                     
                 }
+                
+                //find trm_IDs
+                if($ids===null || $need_search_in_defTerms){
+                    $ids2 = mysql__select_list2($mysqli, $res); 
+                    $ids = ($ids==null)?$ids2:array_unique(array_merge($ids2, $ids));
+                }
+                if(count($ids)==0){
+                    $res = ($this->negate?'>0':'=0');
+                }else if(count($ids)==1){
+                    $res = ($this->negate?'<>':'=').$ids[0];
+                }else{
+                    $res = ($this->negate?' NOT':'').' IN ('.implode(',',$ids).')';    
+                }
+                
+                
             }
             //if put negate here is will accept any multivalue enum field
             //see negate for enum on level above $res = (($this->negate)?' not':'').$res;

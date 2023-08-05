@@ -44,19 +44,17 @@ require_once(dirname(__FILE__).'/../../hsapi/utilities/titleMask.php');
 
 $init_client = (@$_REQUEST['verbose']!=1);
 
+$rty_ids_list = null;
+//sanitize
+if(@$_REQUEST['recTypeIDs']){
+    $rty_ids = explode(',',$_REQUEST['recTypeIDs']);
+    $mysqli = $system->get_mysqli();
+    $rty_ids = array_map(array($mysqli,'real_escape_string'), $rty_ids);
+    $rty_ids_list = implode(',', $rty_ids);
+}
+
 if(!$init_client || @$_REQUEST['session']>0){ //2a. init operation on client side
 
-    $rty_ids_list = null;
-    //sanitize
-    if(@$_REQUEST['recTypeIDs']){
-        $rty_ids = explode(',',$_REQUEST['recTypeIDs']);
-        $mysqli = $system->get_mysqli();
-        $rty_ids = array_map(array($mysqli,'real_escape_string'), $rty_ids);
-        $rty_ids_list = implode(',', $rty_ids);
-    }
-
-
-    
     $res = doRecTitleUpdate($system, @$_REQUEST['session'],  $rty_ids_list);
     
     if(@$_REQUEST['session']>0)
@@ -108,8 +106,8 @@ if(!$init_client || @$_REQUEST['session']>0){ //2a. init operation on client sid
             'session': session_id
         };
 <?php        
-        if(@$_REQUEST['recTypeIDs']){
-            print "request['recTypeIDs'] = '".$_REQUEST['recTypeIDs']."';";
+        if($rty_ids_list){
+            print "request['recTypeIDs'] = '".$rty_ids_list."';";
         }
 ?>        
 
@@ -213,17 +211,17 @@ if(count($blanks)>0){
         print '<div><span style="color:red">'.$system->getError()['message'].'</span> are updated</div>';
         
     }else{
-        print '<div><span id=total_count>'.$res['total_count'].'</span> records in total</div>';
-        print '<div><span id=changed_count>'.$res['changed_count'].'</span> are updated</div>';
-        print '<div><span id=same_count>'.$res['same_count'].'</span> are unchanged</div>';
-        print '<div><span id=blank_count>'.$res['blank_count'].'</span> are left as-is (missing fields etc)</div>';
+        print '<div><span id=total_count>'.intval($res['total_count']).'</span> records in total</div>';
+        print '<div><span id=changed_count>'.intval($res['changed_count']).'</span> are updated</div>';
+        print '<div><span id=same_count>'.intval($res['same_count']).'</span> are unchanged</div>';
+        print '<div><span id=blank_count>'.intval($res['blank_count']).'</span> are left as-is (missing fields etc)</div>';
         
         if($res['q_updates']){        
-            print '<a target=_blank href="'.HEURIST_BASE_URL.'?w=all&q='.$res['q_updates']
+            print '<a target=_blank href="'.HEURIST_BASE_URL.'?w=all&q='.htmlspecialchars($res['q_updates'])
                 .'&db='.HEURIST_DBNAME.'&nometadatadisplay=true">Click to view updated records</a><br/>&nbsp;<br/>';
         }
         if($res['q_blanks']){
-            print '<a target=_blank href="'.HEURIST_BASE_URL.'?w=all&q='.$res['q_blanks'].'&db='.HEURIST_DBNAME.
+            print '<a target=_blank href="'.HEURIST_BASE_URL.'?w=all&q='.htmlspecialchars($res['q_blanks']).'&db='.HEURIST_DBNAME.
                 '&nometadatadisplay=true">Click to view records for which the data would create a blank title</a>'.
                 '<br/>This is generally due to a faulty title mask (verify with Check Title Masks)'.
                 '<br/>or faulty data in individual records. These titles have not been changed.';

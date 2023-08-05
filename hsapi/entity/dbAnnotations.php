@@ -25,6 +25,8 @@ require_once (dirname(__FILE__).'/dbEntityBase.php');
 
 class DbAnnotations extends DbEntityBase 
 {
+    private $dty_Annotation_Info;
+    
     
     function __construct( $system, $data ) {
         $this->system = $system;
@@ -37,8 +39,14 @@ class DbAnnotations extends DbEntityBase
         $this->system->defineConstant('DT_NAME');
         $this->system->defineConstant('DT_URL');
         $this->system->defineConstant('DT_ORIGINAL_RECORD_ID');
+        $this->system->defineConstant('DT_ANNOTATION_INFO');
         $this->system->defineConstant('DT_EXTENDED_DESCRIPTION');
-        $this->system->defineConstant('DT_SHORT_SUMMARY');
+        $this->system->defineConstant('DT_MEDIA_RESOURCE');
+                
+                        
+        $this->dty_Annotation_Info = (defined('DT_ANNOTATION_INFO'))
+                ? DT_ANNOTATION_INFO
+                : 0; 
 
         $this->init();
     }
@@ -79,6 +87,15 @@ class DbAnnotations extends DbEntityBase
             }else{
                 $sjson['items'] = array(); 
             }
+        }
+        else if($this->data['recID']=='edit'){
+            
+            $recordId = $this->findRecID_by_UUID($this->data['uuid']);
+           
+            $redirect = HEURIST_BASE_URL.'/hclient/framecontent/recordEdit.php?db='.HEURIST_DBNAME.'&fmt=edit&recID='.$recordId;
+           
+            header('Location: '.$redirect);  
+            exit();
             
         }else{
             $item = $this->findItem_by_UUID($this->data['recID']);
@@ -96,33 +113,45 @@ class DbAnnotations extends DbEntityBase
     //
     //    
     private function findItems_by_Canvas($canvasUri){
-        $query = 'SELECT d2.dtl_Value FROM recDetails d1, recDetails d2 WHERE '
-        .'d1.dtl_DetailTypeID='.DT_URL .' AND d1.dtl_Value="'.$canvasUri.'"'
-        .' AND d1.dtl_RecID=d2.dtl_RecID'
-        .' AND d2.dtl_DetailTypeID='.DT_EXTENDED_DESCRIPTION;
-        $items = mysql__select_list2($this->system->get_mysqli(), $query);
-        return $items;
+        if($this->dty_Annotation_Info>0 && defined('DT_URL')){
+            $query = 'SELECT d2.dtl_Value FROM recDetails d1, recDetails d2 WHERE '
+            .'d1.dtl_DetailTypeID='.DT_URL .' AND d1.dtl_Value="'.$canvasUri.'"'
+            .' AND d1.dtl_RecID=d2.dtl_RecID'
+            .' AND d2.dtl_DetailTypeID='.$this->dty_Annotation_Info;
+            $items = mysql__select_list2($this->system->get_mysqli(), $query);
+            return $items;
+        }else{
+            return array();
+        }
     }
 
     //
     //
     //    
     private function findItem_by_UUID($uuid){
-        $query = 'SELECT d2.dtl_Value FROM recDetails d1, recDetails d2 WHERE '
-        .'d1.dtl_DetailTypeID='.DT_ORIGINAL_RECORD_ID .' AND d1.dtl_Value="'.$uuid.'"'
-        .' AND d1.dtl_RecID=d2.dtl_RecID'
-        .' AND d2.dtl_DetailTypeID='.DT_EXTENDED_DESCRIPTION;
-        $item = mysql__select_value($this->system->get_mysqli(), $query);
-        return $item;
+        if($this->dty_Annotation_Info>0 && defined('DT_ORIGINAL_RECORD_ID')){
+            $query = 'SELECT d2.dtl_Value FROM recDetails d1, recDetails d2 WHERE '
+            .'d1.dtl_DetailTypeID='.DT_ORIGINAL_RECORD_ID .' AND d1.dtl_Value="'.$uuid.'"'
+            .' AND d1.dtl_RecID=d2.dtl_RecID'
+            .' AND d2.dtl_DetailTypeID='.$this->dty_Annotation_Info;
+            $item = mysql__select_value($this->system->get_mysqli(), $query);
+            return $item;
+        }else{
+            return array();
+        }
     }
     
     //
     //
     //    
     private function findRecID_by_UUID($uuid){
-        $query = 'SELECT dtl_RecID FROM recDetails WHERE dtl_DetailTypeID='.DT_ORIGINAL_RECORD_ID.' AND dtl_Value="'.$uuid.'"';
-        $recordId = mysql__select_value($this->system->get_mysqli(), $query);
-        return $recordId;
+        if(defined('DT_ORIGINAL_RECORD_ID')){
+            $query = 'SELECT dtl_RecID FROM recDetails WHERE dtl_DetailTypeID='.DT_ORIGINAL_RECORD_ID.' AND dtl_Value="'.$uuid.'"';
+            $recordId = mysql__select_value($this->system->get_mysqli(), $query);
+            return $recordId;
+        }else{
+            return 0;
+        }
     }
     
     //
@@ -171,7 +200,17 @@ class DbAnnotations extends DbEntityBase
                     .'Import required record type');
             return false;
         }
-
+         
+        if( !defined('DT_ANNOTATION_INFO') || !defined('DT_ORIGINAL_RECORD_ID')){
+            $this->system->addError(HEURIST_ACTION_BLOCKED, 
+                    'Can not add annotation. This database does not have "Annotation" (2-1098) or "Original ID" fields (2-36). '
+                    .'Import record type "Map/Image Annotation" to get this field');
+            return false;
+        }
+        
+        
+        $this->system->defineConstant('DT_SHORT_SUMMARY');
+        $this->system->defineConstant('DT_THUMBNAIL');
 
         $anno = $this->data['fields']['annotation'];
 //error_log(print_r($anno, true));  
@@ -209,26 +248,138 @@ class DbAnnotations extends DbEntityBase
         }
         //"body":{"type":"TextualBody","value":"<p>VOKZAL</p>"},
         $anno_dec = json_decode($anno['data'], true);
-        if(is_array($anno_dec) && @$anno_dec['body']['type']=='TextualBody'){
-            $details[DT_NAME][] = substr(strip_tags($anno_dec['body']['value']),0,50);
-            $details[DT_SHORT_SUMMARY][] = $anno_dec['body']['value'];
-        }
-        if(@$anno['canvas']){
+        if(is_array($anno_dec)){
+        
+            if(@$anno_dec['body']['type']=='TextualBody'){
+                $details[DT_NAME][] = substr(strip_tags($anno_dec['body']['value']),0,50);
+                if(defined('DT_SHORT_SUMMARY')) $details[DT_SHORT_SUMMARY][] = $anno_dec['body']['value'];
+            }
+
+            //thumbnail
+            // "selector":[{"type":"FragmentSelector","value":"xywh=524,358,396,445"}
+            if(@$anno['canvas']){
+                if(@$anno_dec['target']['selector'] && defined('DT_THUMBNAIL')){
+                    
+                    foreach ($anno_dec['target']['selector'] as $selector){
+                        if(@$selector['type']=='FragmentSelector'){
+                            $region = @$selector['value'];
+                            if($region){
+                                $region = substr($region, 5);
+                                
+                                
+                                // https://gallica.bnf.fr/iiif/ark:/12148/bpt6k9604118j/canvas/f11/ 
+                                $url2 = $anno['canvas'];
+                                $url = $anno['canvas'];
+                                
+                                if(@$anno['manifestUrl']){ //sourceRecordId
+                                    //find image service uri by canvas in manifest
+                                    $iiif_manifest = loadRemoteURLContent($anno['manifestUrl']); //retrieve iiif manifest into manifest
+                                    $iiif_manifest = json_decode($iiif_manifest, true);
+                                    if($iiif_manifest!==false && is_array($iiif_manifest)){
+
+                                    //"@context": "http://iiif.io/api/presentation/2/context.json"    
+                                    //sequences->canvases->images->resource->service->@id
+                                    if(@$iiif_manifest['@context']=='http://iiif.io/api/presentation/2/context.json'){
+                                        if(is_array(@$iiif_manifest['sequences']))
+                                        foreach($iiif_manifest['sequences'] as $seq){
+                                            if(is_array(@$seq['canvases']))
+                                            foreach($seq['canvases'] as $canvas){
+                                                if($canvas['@id']==$url && is_array(@$canvas['images'])){
+                                                    foreach($canvas['images'] as $image){
+                                                        $url2 = @$image['resource']['service']['@id'];
+                                                        if($url2!=null) {
+                                                            $url = $url2;
+                                                            break 3;
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        }
+                                        
+                                    }else{ //version 3
+                                    //"@context": "http://iiif.io/api/presentation/3/context.json" 
+                                    //items(type:Canvas)->items[AnnotationPage]->items[Annotation]->body->service[0]->id
+                                        
+                                        if(is_array(@$iiif_manifest['items']))
+                                        foreach($iiif_manifest['items'] as $canvas){
+                                            if(@$canvas['type']=='Canvas' && $canvas['id']==$url && is_array(@$canvas['items'])){
+                                                foreach($canvas['items'] as $annot_page){
+                                                    if(@$annot_page['type']=='AnnotationPage' && is_array(@$annot_page['items']))
+                                                    foreach($annot_page['items'] as $annot){
+                                                        if(@$annot['type']=='Annotation')
+                                                        if(@$annot['body']['type']=='Image'){
+                                                            $url2 = @$annot['body']['service']['id'];
+                                                            if($url2!=null) {
+                                                                $url = $url2;
+                                                                break 3;
+                                                            }
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        }
+                                        
+                                        
+                                    }
+                                        
+                                    }
+                                }
+                                
+                                if(strpos($url, '/canvas/')>0){
+                                    //remove /canvas to get image url
+                                    $url = str_replace('/canvas/','/',$url);
+                                }
+                                // {scheme}://{server}{/prefix}/{identifier}/{region}/{size}/{rotation}/{quality}.{format}
+                                $url = $url.'/'.$region.'/!200,200/0/default.jpg';
+
+                                $tmp_file = HEURIST_SCRATCH_DIR.'/'.$anno['uuid'].'.jpg';
+                                //tempnam(HEURIST_SCRATCH_DIR,'iiif_thumb');
+                                //tempnam()
+                                $res = saveURLasFile($url, $tmp_file);
+
+                                if($res>0){
+                                    $entity = new DbRecUploadedFiles($this->system, null);
+
+                                    $dtl_UploadedFileID = $entity->registerFile($tmp_file, null); //it returns ulf_ID
+
+                                    if($dtl_UploadedFileID===false){
+                                        $err_msg = $system->getError();
+                                        $err_msg = $err_msg['message'];
+                                        $system->clearError();  
+                                    }else{
+                                        $details[DT_THUMBNAIL][] = $dtl_UploadedFileID[0];
+                                    }
+                                }
+                                
+                                
+                                break;   
+                            }
+                        }
+                    }
+                }
+            }
+        
             $details[DT_URL][] = $anno['canvas'];
         }
-        $details[DT_EXTENDED_DESCRIPTION][] = $anno['data'];
+        $details[$this->dty_Annotation_Info][] = $anno['data'];
         $details[DT_ORIGINAL_RECORD_ID][] = $anno['uuid'];
         
+        if($anno['sourceRecordId']>0 && defined('DT_MEDIA_RESOURCE')){
+            //link referenced image record with annotation record
+            $details[DT_MEDIA_RESOURCE][] = $anno['sourceRecordId'];
+        }
+        
+        //record header
         $record = array();
         $record['ID'] = $recordId;
-        $record['RecTypeID'] = defined('RT_MAP_ANNOTATION')?RT_MAP_ANNOTATION:RT_ANNOTATION;
+        $record['RecTypeID'] = RT_MAP_ANNOTATION;
         $record['no_validation'] = true;
         $record['details'] = $details;
         
         $out = recordSave($this->system, $record, false, true);
 //error_log(print_r($record, true));        
 //error_log(print_r($out, true));        
-        return true;
+        return $out;
     }
 }
 ?>

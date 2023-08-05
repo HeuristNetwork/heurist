@@ -11,7 +11,7 @@
 *
 * @package     Heurist academic knowledge management system
 * @link        https://HeuristNetwork.org
-* @copyright   (C) 2005-2021 University of Sydney
+* @copyright   (C) 2005-2023 University of Sydney
 * @author      Brandon McKay   <blmckay13@gmail.com>
 * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
 * @version     6.0
@@ -49,6 +49,8 @@ $.widget( "heurist.lookupBnFLibrary_aut", $.heurist.recordAction, {
     recordList: null,
 
     tabs_container: null,
+
+    _forceClose: false, // skip saving additional mapping and close dialog
 
     //  
     // invoked from _init after loading of html content
@@ -118,10 +120,148 @@ $.widget( "heurist.lookupBnFLibrary_aut", $.heurist.recordAction, {
             'keypress':this.startSearchOnEnterPress
         });
 
+        let $select = this.element.find('#rty_flds');
+        let top_opt = [{key: '', title: 'select a field...', disabled: true, selected: true, hidden: true}];
+        let sel_options = {
+            'useHtmlSelect': false
+        };
+        window.hWin.HEURIST4.ui.createRectypeDetailSelect($select[0], this.options.mapping.rty_ID, ['blocktext'], top_opt, sel_options);
+
+        this._on(this.element.find('input[name="dump_field"]'), {
+            'change': function(){
+                let opt = this.element.find('input[name="dump_field"]:checked').val();
+                window.hWin.HEURIST4.util.setDisabled(this.element.find('#rty_flds'), opt == 'rec_ScratchPad');
+            }
+        });
+
+        this._on(this.element.find('#save-settings').button(), {
+            'click': this._saveExtraSettings
+        });
+
+        // Setup settings tab
+        this._setupSettings();
+
+        this._as_dialog.on('dialogbeforeclose', function(e){
+            if(!that._forceClose){
+                that._forceClose = true;
+                that._saveExtraSettings(true);
+                return false;
+            }
+        });
+
         this.tabs_container = this.element.find('#tabs-cont').tabs();
         this.element.find('#inpt_any').focus();
 
         return this._super();
+    },
+    
+    /**
+     * Set up additional settings tab
+     */
+    _setupSettings: function(){
+
+        let options = this.options.mapping?.options;
+        let need_save = false;
+
+        if(!options || window.hWin.HEURIST4.util.isempty(options)){
+            options = {
+                'dump_record': true,
+                'dump_field': 'rec_ScratchPad'
+            };
+
+            need_save = true;
+        }
+
+        if(!window.hWin.HEURIST4.util.isempty(options['dump_record'])){
+            this.element.find('input[name="dump_record"]').prop('checked', options['dump_field']);
+        }
+
+        if(!window.hWin.HEURIST4.util.isempty(options['dump_field'])){
+            const selected = options['dump_field'];
+
+            if(selected === 'rec_ScratchPad'){
+                this.element.find('input[name="dump_field"][value="rec_ScratchPad"]').prop('checked', true);
+            }else{
+                this.element.find('input[name="dump_field"][value="dty_ID"]').prop('checked', true);
+                this.element.find('#rty_flds').val(selected);
+
+                if(this.element.find('#rty_flds').hSelect('instance') !== undefined){
+                    this.element.find('#rty_flds').hSelect('refresh');
+                }
+            }
+
+            window.hWin.HEURIST4.util.setDisabled(this.element.find('#rty_flds'), selected == 'rec_ScratchPad');
+        }
+
+        if(need_save){
+            this._saveExtraSettings();
+        }
+    },
+
+    /**
+     * Get record dump settings
+     */
+    _getRecDumpSetting: function(){
+
+        const get_recdump = this.element.find('input[name="dump_record"]').is(':checked');
+        let recdump_fld = '';
+        
+        if(get_recdump){
+
+            recdump_fld = this.element.find('input[name="dump_field"]:checked').val();
+            if(recdump_fld === 'dty_ID'){
+                recdump_fld = this.element.find('#rty_flds').val();
+            }
+        }
+
+        return [ get_recdump, recdump_fld ];
+    },
+
+    /**
+     * Save extra settings
+     * @param {boolean} close_dlg - whether to close the dialog after saving 
+     */
+    _saveExtraSettings: function(close_dlg = false){
+
+        var that = this;
+        let services = window.hWin.HEURIST4.util.isJSON(window.hWin.HAPI4.sysinfo['service_config']);
+        const rec_dump_settings = this._getRecDumpSetting();
+
+        if(services !== false){
+            services[this.options.mapping.service_id]['options'] = { 
+                'dump_record': rec_dump_settings[0],
+                'dump_field': rec_dump_settings[1]
+            };
+
+            var fields = {
+                'sys_ID': 1,
+                'sys_ExternalReferenceLookups': JSON.stringify(services)
+            };
+    
+            // Update sysIdentification record
+            var request = {
+                'a': 'save',
+                'entity': 'sysIdentification',
+                'request_id': window.hWin.HEURIST4.util.random(),
+                'isfull': 0,
+                'fields': fields
+            };
+
+            window.hWin.HAPI4.EntityMgr.doRequest(request, function(response){
+    
+                if(response.status == window.hWin.ResponseStatus.OK){
+                    window.hWin.HAPI4.sysinfo['service_config'] = window.hWin.HEURIST4.util.cloneJSON(services); // update global copy
+                    if(close_dlg === true){
+                        that._as_dialog.dialog('close');
+                    }else{
+                        that.options.mapping = window.hWin.HEURIST4.util.cloneJSON(services[that.options.mapping.service_id]);
+                        window.hWin.HEURIST4.msg.showMsgFlash('Extra lookup settings saved...', 3000);
+                    }
+                }else{
+                    window.hWin.HEURIST4.msg.showMsgErr(response);
+                }
+            });
+        }
     },
     
     /**
@@ -164,6 +304,7 @@ $.widget( "heurist.lookupBnFLibrary_aut", $.heurist.recordAction, {
         function fld(fldname, width){
 
             var s = recordset.fld(record, fldname);
+            var authority_type = recordset.fld(record, 'authority_type');
 
             s = window.hWin.HEURIST4.util.htmlEscape(s?s:'');
 
@@ -174,9 +315,26 @@ $.widget( "heurist.lookupBnFLibrary_aut", $.heurist.recordAction, {
                 title = 'View authoritative record';
             }
             
+            if(authority_type == '215' || authority_type == '216' || authority_type == '240' || authority_type == '250'){ // name only
+                width = (fldname == 'name') ? 75 : 0;
+            }else if(authority_type == '200'){
+                width = (fldname == 'location') ? 0 : (fldname == 'name' ? 50 : width);
+            }else if(authority_type == '210'){
+                width = (fldname == 'years_active') ? 0 : (fldname == 'name' ? 40 : (fldname == 'location' ? 20 : width));
+            }
+
+            if(s != ''){
+                if(fldname == 'years_active' || fldname == 'location'){
+                    s = '( ' + s + ' )';
+                }else if(fldname == 'role'){
+                    s = '[ ' + s + ' ]';
+                }
+            }
+
             if(width>0){
                 s = '<div style="display:inline-block;width:'+width+'ex" class="truncate" title="'+title+'">'+s+'</div>';
             }
+
             return s;
         }
 
@@ -186,7 +344,7 @@ $.widget( "heurist.lookupBnFLibrary_aut", $.heurist.recordAction, {
         var recIcon = window.hWin.HAPI4.iconBaseURL + rectypeID;
         var html_thumb = '<div class="recTypeThumb" style="background-image: url(&quot;' + window.hWin.HAPI4.iconBaseURL + rectypeID + '&version=thumb&quot;);"></div>';
 
-        var recTitle = fld('name', 75) + fld('auturl', 12); 
+        var recTitle = fld('name', 35) + fld('location', 15) + fld('years_active', 10) + fld('role', 15) + fld('auturl', 10); 
 
         var html = '<div class="recordDiv" id="rd'+recID+'" recid="'+recID+'" rectype="'+rectypeID+'">'
             + html_thumb

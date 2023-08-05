@@ -24,14 +24,17 @@
                 </div>
                 <div id="main-content" 
                     data-homepageid="<?php print $home_page_record_id;?>" 
-                    <?php print ($open_page_on_init>0)?' data-initid="'.$open_page_on_init.'"':''; ?> 
+                    <?php print ($open_page_or_record_on_init>0)?' data-initid="'.$open_page_or_record_on_init.'"':''; ?> 
                     data-viewonly="<?php print ($hasAccess)?0:1;?>">
                 </div>
     *  
-    * besides main-menu main-header may have main-logo, main-logo-alt, main-host, main-pagetitle divs
+    * besides it may have main-menu main-header may have main-logo, main-logo-alt, main-host, main-pagetitle, main-recordview divs
     * These divs will be filled with images and text defined in website home record.
     * 
     * main-content - is the target div for content of particular page to be loaded  
+    * 
+    * main-recordview - is the target div for record view. It will be filled with link if target is _recordview
+    *                   if this div is not found in the template, content will be opened in popup
     * 
     * The top most div/container must have class heurist-website. It is required for proper work of CMS editor
     * 
@@ -43,7 +46,7 @@
     * 
     * Other variables are 
     * $home_page_record_id  - record id of website home page 
-    * $open_page_on_init - record id for cms menu/page to be loaded on init
+    * $open_page_or_record_on_init - record id for cms menu/page to be loaded on init
     * 
     * $image_banner - header background banner image 
     * $page_header_menu - code to define main menu widget, leave it unchanged as content of main-menu div
@@ -91,7 +94,7 @@
     margin: 0;
     width:auto;
 }
-#main-content{
+#main-content, #main-recordview{
     display:none;
     position:absolute;
     left:0;right:0;top:0;bottom:0;
@@ -116,7 +119,7 @@
 }
 #main-pagetitle{
     position: absolute;
-    padding: 15px 0 5px 10px;
+    padding: 2px 0 5px 10px;
     bottom: 0;
     left: 0;
     right: 0;
@@ -186,7 +189,7 @@ if($isWebPage){ //set in websiteRecord.php
 ?>
 
     <div class="ent_wrapper heurist-website selectmenu-parent">
-    <div id="main-header" class="ent_header ui-heurist-header2" <?php print $image_banner?'style="background-image:url(\''.$image_banner.'\') !important;background-repeat: repeat-x !important;background-size:auto 170px !important;"':'' ?>>
+    <div id="main-header" class="ent_header ui-heurist-header2" <?php print $image_banner?'style="background-repeat: repeat-x !important;background-size:auto 170px !important;background: none !important;"':'' ?>>
     
 <?php
     if($showWarnAboutPublic){
@@ -199,9 +202,11 @@ if($isWebPage){ //set in websiteRecord.php
 ?>                        
         <div id="main-logo" class="mceNonEditable header-element" style="position:absolute;top:20px;left:10px;max-height:90px;max-width:270px;border:2px none red;"></div>
         
-        <div id="main-logo-alt" class="mceNonEditable header-element" style="position:absolute;top:20px;right:10px;height:70px;width:270px;border:2px none red;"></div>
+        <div id="main-logo-alt" class="mceNonEditable header-element" style="position:absolute;top:20px;right:30px;height:70px;width:270px;border:2px none red;"></div>
         
         <div id="main-title" class="mceNonEditable header-element" style="position:absolute;top:20px;left:280px;right:280px;max-height:90px;"></div>
+
+        <div id="main-languages" class="mceNonEditable header-element" style="position:absolute;top:20px;right:10px;max-height:90px;"></div>
         
         <div id="main-menu" class="mceNonEditable header-element" style="position:absolute;top:110px;width:100%;min-height:40px;border:2px none yellow;color:black;font-size:1.1em;" data-heurist-app-id="heurist_Navigation" data-generated="1">
             <?php print $page_header_menu; ?>
@@ -225,9 +230,13 @@ if($isWebPage){ //set in websiteRecord.php
     <div class="ent_content_full  ui-heurist-bg-light"  id="main-content-container"
             style="top:152px;<?php echo ($is_page_footer_fixed && $page_footer?'margin-bottom: 48px;':''); ?>padding: 5px;">
         <div id="main-content" data-homepageid="<?php print $home_page_record_id;?>" 
-            <?php print ($open_page_on_init>0)?'data-initid="'.$open_page_on_init.'"':''; ?> 
+            <?php print ($open_page_or_record_on_init>0)?'data-initid="'.$open_page_or_record_on_init.'"':''; ?> 
             data-viewonly="<?php print ($hasAccess)?0:1;?>" 
             style="<?php echo (!$is_page_footer_fixed && $page_footer?'position:static;':'');?>">
+        </div>
+        <div id="main-recordview" style="height:100%;<?php echo (!$is_page_footer_fixed && $page_footer?'position:static;':'');?>">
+                <iframe style=""overflow:none !important;width:100% !important;"></iframe>
+                <button class="keywords" style="position:fixed;top:160px;left:5px;">Back</button>
         </div>
 <?php
         if(!$is_page_footer_fixed && $page_footer) print $page_footer;

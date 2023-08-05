@@ -32,12 +32,14 @@ if(!defined('PDIR')){
     }*/
     $src_maj = intval( $system->get_system('sys_dbVersion') );
     $src_min = intval( $system->get_system('sys_dbSubVersion') );
+    $src_sub = intval( $system->get_system('sys_dbSubSubVersion') );
     
     $trg_ver = explode(".", HEURIST_MIN_DBVERSION);
     $trg_maj = intval($trg_ver[0]);
     $trg_min = intval($trg_ver[1]);
+    $trg_sub = intval($trg_ver[2]);
                                    
-    if( $src_maj==$trg_maj && $src_min == $trg_min ){ //versions are ok redirect to main page
+    if( $src_maj==$trg_maj && $src_min == $trg_min && $src_sub==$trg_sub){ //versions are ok redirect to main page
         header('Location: ' . HEURIST_BASE_URL . '?db=' . $_REQUEST['db']);
         exit();
     }
@@ -60,7 +62,7 @@ if(!defined('PDIR')){
 
         <script type="text/javascript" src="<?php echo PDIR;?>hclient/core/utils.js"></script>
         <script type="text/javascript" src="<?php echo PDIR;?>hclient/core/utils_msg.js"></script>
-        <script type="text/javascript" src="<?php echo PDIR;?>hclient/core/localization.js"></script>
+        <script type="text/javascript" src="<?php echo PDIR;?>hclient/core/utils_ui.js"></script>
         <script type="text/javascript" src="<?php echo PDIR;?>hclient/core/hapi.js"></script>
 
         <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/profile/profile_login.js"></script>
@@ -115,11 +117,13 @@ if(!defined('PDIR')){
                         $upgrade_success = true;
                         $keep_minver = $src_min;
                         $dir = HEURIST_DIR.'admin/setup/dbupgrade/';
-                        while ($src_min<$trg_min) {
+                        while ( $src_min<$trg_min || ($src_min==3 && $src_sub<$trg_sub) ) {
                             $filename = "DBUpgrade_$src_maj.$src_min.0_to_$trg_maj.".($src_min+1).'.0';
                             
                             if($trg_maj==1 && $src_min==2){
                                 $filename = $filename.'.php';    
+                            }else if ($src_min==3 && $trg_sub==14){
+                                $filename = 'DBUpgrade_1.3.0_to_1.3.14.php';
                             }else{
                                 $filename = $filename.'.sql';    
                             }
@@ -129,6 +133,20 @@ if(!defined('PDIR')){
                                 if($trg_maj==1 && $src_min==2){
                                     include($filename);
                                     $rep = updateDatabseTo_v3($system);    //PHP
+                                }else if($src_min==3 && $src_sub<$trg_sub){
+                                    if($src_sub<13){
+                                        include($filename);
+                                        $rep = updateDatabseTo_v1_3_12($system);
+                                    }else{
+                                        $rep = array('');
+                                    }
+                                    if($rep!==false){ //for db_utils.php
+                                        $rep2 = recreateRecDetailsDateIndex($system, true, true);
+                                        if($rep2){
+                                            $rep = array_merge($rep, $rep2);
+                                        }
+                                    }
+                                    
                                 }else{
                                     $rep = executeScript($dir.$filename);  //SQL
                                 }
@@ -141,7 +159,12 @@ if(!defined('PDIR')){
                                             print '<p>'.$msg.'</p>';
                                         }    
                                     }
-                                    print "<p>Upgraded to ".$src_maj.".".$src_min.".0</p>";
+                                    if($trg_min==3 && $trg_sub==14){ //to 1.3.14
+                                        print "<p>Upgraded to $trg_maj.$trg_min.$trg_sub</p>";    
+                                    }else{
+                                        print "<p>Upgraded to $src_maj.$src_min.0</p>";    
+                                    }
+                                    
                                 }else{
                                     $error = $system->getError();
                                     if($error){
@@ -162,7 +185,7 @@ if(!defined('PDIR')){
                             }
                         }
 
-                        if($src_min>$keep_minver){ //update database - set version up to date
+                        if( (!($trg_min==3 && $trg_sub==14)) && $src_min>$keep_minver){ //update database - set version up to date
                             $mysqli = $system->get_mysqli();
                             mysql__usedatabase($mysqli, HEURIST_DBNAME);
                             $query1 = "update sysIdentification set sys_dbSubVersion=$src_min, sys_dbSubSubVersion=0 where 1";
@@ -247,6 +270,15 @@ if(!defined('PDIR')){
                                         $is_allfind = false;
                                         break;
                                     }
+                                }
+                                //special case
+                                if($trg_min==3 && $trg_sub==14){
+                                    
+$description = 'Modify tables:  defRecStructure(rst_SemanticReferenceURL,rst_TermsAsButtons,rst_PointerMode,rst_NonOwnerVisibility),   recUploadedFiles(ulf_PreferredSource), defTerms (trm_OrderInBranch), recDetails(dtl_HideFromPublic),sysIdentification(sys_NakalaKey), sysUGrps(usr_ExternalAuthentication)   Add tables:sysWorkflowRules,defTranslations,recDetailsDateIndex';
+                                    
+                                    $scripts_info  = $scripts_info
+                                        .'<tr><td width="130">1.3.0 to 1.3.14</td><td> SAFE '
+                                        ." <i>".$description."</i></td></tr>";
                                 }
 
                                 if($is_allfind)    {

@@ -177,6 +177,8 @@ $.widget( "heurist.recordExportCSV", $.heurist.recordAction, {
             that.element.find('#cbIncludeMediaURL').prop('checked',(settings.include_file_url==1));
             that.element.find('#cbIncludeRecURLHTML').prop('checked',(settings.include_record_url_html==1));
             that.element.find('#cbIncludeRecURLXML').prop('checked',(settings.include_record_url_xml==1));
+            that.element.find('#cbIncludeTemporals').prop('checked',(settings.include_temporals==1));
+
         }
     },
 
@@ -493,7 +495,9 @@ $.widget( "heurist.recordExportCSV", $.heurist.recordAction, {
             'include_record_url_html': this.element.find('#cbIncludeRecURLHTML').is(':checked')?1:0,
             'include_record_url_xml': this.element.find('#cbIncludeRecURLXML').is(':checked')?1:0,
             'include_term_hierarchy': this.element.find('#cbIncludeTermHierarchy').is(':checked')?1:0,
-            'include_resource_titles': this.element.find('#cbIncludeResourceTitles').is(':checked')?1:0
+            'include_resource_titles': this.element.find('#cbIncludeResourceTitles').is(':checked')?1:0,
+            'include_temporals':  this.element.find('#cbIncludeTemporals').is(':checked')?1:0
+
         };
         
     },

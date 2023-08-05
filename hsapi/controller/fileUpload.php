@@ -110,27 +110,7 @@ if($response!=null){
         //$response = $system->addError(HEURIST_INVALID_REQUEST, "'entity' parameter is not defined");
             
     }else
-    if($entity_name=="terms"){//DEPRECATED - for terms from old term management - upload term image
-
-        $options = array(
-                'upload_dir' => HEURIST_FILESTORE_DIR.'term-images/',
-                'upload_url' => HEURIST_FILESTORE_URL.'term-images/',
-                'unique_filename' => false,
-                'newfilename' => @$_REQUEST['newfilename'],
-                'correct_image_extensions' => true,
-                'image_versions' => array(
-                    ''=>array(
-                        'auto_orient' => true,
-                        'max_width' => 400,
-                        'max_height' => 400,
-                        'scale_to_png' => true    
-                    )
-                )
-        );
-
-        allowWebAccessForForlder(HEURIST_FILESTORE_DIR.'term-images/');
-    
-    }else if($entity_name=="temp"){//redirect uploaded content back to client side after some processing
+    if($entity_name=="temp"){//redirect uploaded content back to client side after some processing
                                    // for example in term list import 
            
         $max_file_size = @$_REQUEST['max_file_size'];                           

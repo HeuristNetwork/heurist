@@ -374,7 +374,13 @@ $.widget( "heurist.lookupConfig", {
 
                 let idx = that.element.find('#tbl_matches').attr('data-idx');
                 let service = that.selectServiceType.val();
-                let max = that.example_results[service] ? that.example_results[service].length - 1 : 0;
+                let max = 0;
+
+                if(window.hWin.HEURIST4.util.isArray(that.example_results[service])){
+                    max = that.example_results[service].length - 1;
+                }else if(window.hWin.HEURIST4.util.isPlainObject(that.example_results[service])){
+                    max = Object.keys(that.example_results[service]).length - 1;
+                }
 
                 if($(event.target).hasClass('ui-icon-arrowthick-1-e')){
                     idx = idx == max ? 0 : parseInt(idx) + 1;
@@ -452,10 +458,11 @@ $.widget( "heurist.lookupConfig", {
                 has_changes = true;
             }
 
-            // Update BnF Config
+            // Update configurations (Add missing fields, additional options, remove fields no longer handled)
+            var n_fields = that.options.service_config[key]['fields'];
+
             if(that.options.service_config[key]['service'] == 'bnfLibrary'){
 
-                var n_fields = that.options.service_config[key]['fields'];
                 var hasFieldChanges = false;
                 for(var obj_key in n_fields){
 
@@ -479,17 +486,12 @@ $.widget( "heurist.lookupConfig", {
                         delete n_fields[obj_key];
 
                         hasFieldChanges = true;
-                    }else if(obj_key == 'contributor'){
-
-                        if(!n_fields.hasOwnProperty('author')){
-                            val = n_fields[obj_key];
-                            n_fields['author'] = val;
-                        }
-
-                        delete n_fields[obj_key];
-
-                        hasFieldChanges = true;
                     }
+                }
+
+                if(!Object.hasOwn(n_fields, 'contributor')){
+                    n_fields['contributor'] = '';
+                    hasFieldChanges = true;
                 }
 
                 if(hasFieldChanges){
@@ -497,9 +499,50 @@ $.widget( "heurist.lookupConfig", {
 
                     has_changes = true;
                 }
+
+                if(!Object.hasOwn(that.options.service_config[key], 'options')){ // add default options
+
+                    that.options.service_config[key]['options'] = {
+                        'author_codes': '', //'contributor_codes': ''
+                        'dump_receord': true,
+                        'dump_field': 'rec_ScratchPad'
+                    };
+                    has_changes = true;
+                }
+            }else if(that.options.service_config[key]['service'] == "bnfLibraryAut"){
+
+                if(!Object.hasOwn(n_fields, 'authority_type')){
+                    n_fields['authority_type'] = '';
+                    hasFieldChanges = true;
+                }
+                if(!Object.hasOwn(n_fields, 'years_active')){
+                    n_fields['years_active'] = '';
+                    hasFieldChanges = true;
+                }
+                if(!Object.hasOwn(n_fields, 'role')){
+                    n_fields['role'] = '';
+                    hasFieldChanges = true;
+                }
+                if(!Object.hasOwn(n_fields, 'location')){
+                    n_fields['location'] = '';
+                    hasFieldChanges = true;
+                }
+
+                if(hasFieldChanges){
+                    that.options.service_config[key]['fields'] = n_fields;
+
+                    has_changes = true;
+                }
+
+                if(!Object.hasOwn(that.options.service_config[key], 'options')){ // add default options
+                    that.options.service_config[key]['options'] = {
+                        'dump_receord': true,
+                        'dump_field': 'rec_ScratchPad'
+                    };
+                    has_changes = true;
+                }
             }else if(that.options.service_config[key]['service'] == 'nakala'){
                 
-                var n_fields = that.options.service_config[key]['fields'];
                 var hasFieldChanges = false;
 
                 if(!n_fields.hasOwnProperty('rec_url')){
@@ -852,7 +895,7 @@ $.widget( "heurist.lookupConfig", {
                     serviceType = 'bnflibrary_bib';
                     break;
                 case 'bnfLibraryAut':
-                    url = 'http://catalogue.bnf.fr/api/SRU?version=1.2&operation=searchRetrieve&recordSchema=intermarcxchange&maximumRecords=10&startRecord=1&query='+encodeURIComponent('(aut.anywhere any "Vincent")');
+                    url = 'http://catalogue.bnf.fr/api/SRU?version=1.2&operation=searchRetrieve&recordSchema=unimarcxchange&maximumRecords=10&startRecord=1&query='+encodeURIComponent('(aut.anywhere any "Vincent")');
                     serviceType = 'bnflibrary_aut';
                     break;
                 case 'nomisma':
@@ -964,56 +1007,75 @@ $.widget( "heurist.lookupConfig", {
 
                 if(value){
 
-                    if(service_name.indexOf('bnfLibrary') != -1){
+                    if(service_name == 'bnfLibrary'){
 
-                        if(field == 'author' || field == 'publisher'){
+                        if(field == 'author'){
 
-                            var main_str = '';
-
+                            var creator_val = '';
+            
                             for(var idx in value){
-
+            
                                 var cur_string = '';
                                 var cur_obj = value[idx];
-
-                                if(cur_obj.hasOwnProperty('firstname') && cur_obj['firstname'] != ''){
-                                    cur_string = cur_obj['firstname'];
-                                }
-                                if(cur_obj.hasOwnProperty('surname') && cur_obj['surname'] != ''){
-                                    cur_string = (cur_string != '') ? cur_obj['surname'] + ', ' + cur_string : cur_obj['surname'];
-                                }
-                                if(cur_obj.hasOwnProperty('active') && cur_obj['active'] != ''){
-                                    cur_string += ' (' + cur_obj['active'] + ')';
-                                }
-
-                                if(cur_obj.hasOwnProperty('location') && cur_obj['location'] != ''){
-                                    cur_string = cur_obj['location'];
-                                }
-                                if(cur_obj.hasOwnProperty('name') && cur_obj['name'] != ''){
-                                    if(!cur_string){
-                                        cur_string = cur_obj['name'];
-                                    }else{
-
-                                        var pub_name_length = cur_obj['name'].length;
-                                        for(var j = 0; j < completed_val.length; j++){
-
-                                            if(j < pub_name_length){ // use current name
-                                                cur_string = cur_obj['name'][j] + ' [' + cur_string + ']';
-                                            }else{ // use last available
-                                                cur_string = cur_obj['name'][pub_name_length-1] + ' [' + cur_string + ']';
-                                            }
-                                        }
+            
+                                if($.isPlainObject(cur_obj)){
+                                    if(cur_obj.hasOwnProperty('firstname') && cur_obj['firstname'] != ''){
+                                        cur_string = cur_obj['firstname'];
                                     }
-                                    cur_string = (cur_string != '') ? cur_obj['name'] + ', ' + cur_string : cur_obj['name'];
-                                }
-
-                                if(!cur_string){
-                                    main_str += 'Missing '+field+'; ';
+                                    if(cur_obj.hasOwnProperty('surname') && cur_obj['surname'] != ''){
+                                        cur_string = (cur_string != '') ? cur_obj['surname'] + ', ' + cur_string : cur_obj['surname'];
+                                    }
+                                    if(cur_obj.hasOwnProperty('active') && cur_obj['active'] != ''){
+                                        cur_string += ' (' + cur_obj['active'] + ')';
+                                    }
+            
+                                    if(cur_string == ''){
+                                        Object.values(cur_obj);
+                                    }
                                 }else{
-                                    main_str += cur_string + '; ';
+                                    cur_string = cur_obj;
+                                }
+            
+                                if(!cur_string || $.isArray(cur_string) || $.isPlainObject(cur_string)){
+                                    creator_val += 'Missing author; ';
+                                }else{
+                                    creator_val += cur_string + '; ';
                                 }
                             }
+            
+                            value = creator_val;
+                        }else if(field == 'publisher'){
 
-                            value = main_str;
+                            var pub_val = '';
+            
+                            for(var idx in value){
+            
+                                var cur_string = '';
+                                var cur_obj = value[idx];
+            
+                                if($.isPlainObject(cur_obj)){
+                                    if(cur_obj.hasOwnProperty('name') && cur_obj['name'] != ''){
+                                        cur_string = cur_obj['name'];
+                                    }
+                                    if(cur_obj.hasOwnProperty('location') && cur_obj['location'] != '' && cur_string == ''){
+                                        cur_string = cur_obj['location'];
+                                    }
+            
+                                    if(cur_string == ''){
+                                        Object.values(cur_obj);
+                                    }
+                                }else{
+                                    cur_string = cur_obj;
+                                }
+            
+                                if(!cur_string || $.isArray(cur_string) || $.isPlainObject(cur_string)){
+                                    pub_val += 'Missing publisher; ';
+                                }else{
+                                    pub_val += cur_string + '; ';
+                                }
+                            }
+            
+                            value = pub_val;
                         }
                     }else if(service_name == 'tlcmap' || service_name == 'nomisma'){
 
@@ -1040,7 +1102,7 @@ $.widget( "heurist.lookupConfig", {
                     }
 
                     if($.isPlainObject(value)){
-                        value = window.hWin.HEURIST4.util.htmlEscape(Object.values(isPlainObject).join(' '));
+                        value = window.hWin.HEURIST4.util.htmlEscape(Object.values(value).join(' '));
                     }else if(window.hWin.HEURIST4.util.isArray(value) && value.length >= 1){
                         value = window.hWin.HEURIST4.util.htmlEscape(value.join('; '));
                     }else{
@@ -1050,16 +1112,19 @@ $.widget( "heurist.lookupConfig", {
                     if(!window.hWin.HEURIST4.util.isempty(value)){
                         $cell.html('<span style="display: inline-block; padding-left: 10px">&lArr;</span><span title="'+value+'" class="truncate">'+value+'</span>');
                     }
+                }else{
+                    $cell.html('');
                 }
             });
 
             if(service_name == 'nomisma'){
                 let type = this.example_results[service_name][idx]['properties']['type'];
-                this.element.find('#example_fluff').html('Search example records: (currently: <strong>'+ type +'</strong>');
+                this.element.find('#extra_fluff').html('Currently showing a <strong>'+ type +'</strong> record');
             }else{
-                this.element.find('#example_fluff').text('Search example records: ');
+                this.element.find('#extra_fluff').html('');
             }
 
+            this.element.find('#example_fluff').text('Search example records: ');
             this.element.find('#example_records').show();
         }
     },

@@ -23,7 +23,7 @@
 </div>
 </div>
 <div id="main-content" data-homepageid="<?php print $home_page_record_id;?>"
-    <?php print ($open_page_on_init>0)?' data-initid="'.$open_page_on_init.'"':''; ?>
+    <?php print ($open_page_or_record_on_init>0)?' data-initid="'.$open_page_or_record_on_init.'"':''; ?>
     data-viewonly="<?php print ($hasAccess)?0:1;?>">
 </div>
 *
@@ -40,7 +40,7 @@
 *
 * Other variables are
 * $home_page_record_id - record id of website home page
-* $open_page_on_init - record id for cms menu/page to be loaded on init
+* $open_page_or_record_on_init - record id for cms menu/page to be loaded on init
 *
 * $image_banner - header background banner image
 * $page_header_menu - code to define main menu widget, leave it unchanged as content of main-menu div
@@ -70,7 +70,7 @@
         <meta http-equiv="content-type" content="text/html; charset=utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <meta name="keywords"
-            content="Heurist, Digital Humanities, Humanities Data, Research Data, Database Management, Academic data, Open Source, Free software, FOSS, University of Sydney,<?php echo $meta_keywords;?>">
+            content="Hebrew Bibles, Medieval, Ashkenazi, Heurist, Digital Humanities, Humanities Data, Research Data, Database Management, Academic data, Open Source, Free software, FOSS, University of Sydney,<?php echo $meta_keywords;?>">
         <meta name="description" content="<?php echo $meta_description;?>">
         <link rel="icon" href="<?php echo $image_icon;?>"> <!--  type="image/x-icon" -->
         <link rel="shortcut icon" href="<?php echo $image_icon;?>">
@@ -166,8 +166,7 @@ if($isWebPage){ //set in websiteRecord.php
                                 alt="Manuscripta Bibliae Hebraicae">
                         </a></div>
                     <div class="navbar-slogan">
-                        Les manuscrits de la Bible hébraïque en Europe occidentale (Angleterre, France, Allemagne,
-                        Italie du Nord) au XIIe et XIIIe siècle&nbsp;: une approche matérielle, culturelle et sociale
+                        The Medieval Hebrew Bible Manuscripts in Western Europe: A Material, Cultural and Social Approach
                     </div>
                     <div class="navbar-social-network">
                         <a href="https://twitter.com/projetMBH" class="tw" target="_blank"><img
@@ -204,7 +203,7 @@ if($isWebPage){ //set in websiteRecord.php
         </div>
         <div class="ent_content_full  ui-heurist-bg-light" id="main-content-container">
             <div id="main-content" data-homepageid="<?php print $home_page_record_id;?>"
-                <?php print ($open_page_on_init>0)?'data-initid="'.$open_page_on_init.'"':''; ?>
+                <?php print ($open_page_or_record_on_init>0)?'data-initid="'.$open_page_or_record_on_init.'"':''; ?>
                 data-viewonly="<?php print ($hasAccess)?0:1;?>">
             </div>
             <footer class="footer">
@@ -220,7 +219,7 @@ if($isWebPage){ //set in websiteRecord.php
                     <div class="container">
                         <div class="row">
                             <div class="col-md-2"><img class="logo"
-                                    src="https://heurist.huma-num.fr/h6-alpha/?db=MBH_Manuscripta_Bibliae_Hebraicae&file=791d3bd1e6a1bce0dd6292610c1c1bde4882d637"
+                                    src="https://heurist.huma-num.fr/heurist/?db=MBH_Manuscripta_Bibliae_Hebraicae&file=791d3bd1e6a1bce0dd6292610c1c1bde4882d637"
                                     alt="Manuscripta Bibliae Hebraicae"></div>
                             <div class="col-md-6">
                                 <div class="row">
@@ -238,13 +237,13 @@ if($isWebPage){ //set in websiteRecord.php
                             <div class="col-md-1">
 
                             </div>
-                            <div class="col-md-3 social-networks">Suivez-nous sur les réseaux sociaux<br><br><a
+                            <div class="col-md-3 social-networks">Follow us on the social media networks<br><br><a
                                     href="https://twitter.com/projetMBH" class="tw" target="_blank"><img
-                                        src="https://heurist.huma-num.fr/h6-alpha/?db=MBH_Manuscripta_Bibliae_Hebraicae&file=1be81f1bc799e511f9f766da4119a297c0383240"
+                                        src="https://heurist.huma-num.fr/heurist/?db=MBH_Manuscripta_Bibliae_Hebraicae&file=1be81f1bc799e511f9f766da4119a297c0383240"
                                         width="32" alt="Twitter"></a>&nbsp;<a
                                     href="https://www.facebook.com/manuscriptabibliaehebraicae/" class="fb"
                                     target="_blank"><img
-                                        src="https://heurist.huma-num.fr/h6-alpha/?db=MBH_Manuscripta_Bibliae_Hebraicae&file=082682853f46e477acd87c3c8e55cabd1aeb9bbc"
+                                        src="https://heurist.huma-num.fr/heurist/?db=MBH_Manuscripta_Bibliae_Hebraicae&file=082682853f46e477acd87c3c8e55cabd1aeb9bbc"
                                         width="32" alt="Facebook"></a></div>
                         </div>
                     </div>
@@ -258,13 +257,10 @@ if($isWebPage){ //set in websiteRecord.php
                                     style="font-size: 13.008px;">&nbsp;</span>MBH 2022 -
                                 Tous droits réservés&nbsp;-&nbsp;<a
                                     href="/heurist/?db=MBH_Manuscripta_Bibliae_Hebraicae&website&id=1408&pageid=1414"
-                                    title="Mentions légales">Mentions
-                                    légales</a> - <a
-                                    href="//heurist/?db=MBH_Manuscripta_Bibliae_Hebraicae&website&id=1408&pageid=1415">Conditions
-                                    Générales
-                                    d'Utilisation</a>&nbsp;-&nbsp;<a
+                                    title="Mentions légales">Legal information</a> - <a
+                                    href="//heurist/?db=MBH_Manuscripta_Bibliae_Hebraicae&website&id=1408&pageid=1415">General conditions of use</a>&nbsp;-&nbsp;<a
                                     href="/heurist/?db=MBH_Manuscripta_Bibliae_Hebraicae&website&id=1408&pageid=1413">Contact</a> - 
-                                Fièrement alimenté par <a href="https://heuristnetwork.org/">Heurist</a> @
+                                Proudly served by <a href="https://heuristnetwork.org/">Heurist</a> @
                                 <a href="https://huma-num.fr">Huma-Num</a>
                             </p>
                         </section>
@@ -281,11 +277,11 @@ if($isWebPage){ //set in websiteRecord.php
              -->
         <div id="wrapper-video" onclick="{$('#wrapper-video').fadeOut(4000);}">
           <video autoplay="" loop="" muted="" 
-          poster="https://heurist.huma-num.fr/h6-alpha/?db=MBH_Manuscripta_Bibliae_Hebraicae&file=62c18d37f7d63b7777e5dc0add9c5ea669d78ec7" id="video-background">
-            <source src="https://heurist.huma-num.fr/h6-alpha/?db=MBH_Manuscripta_Bibliae_Hebraicae&file=d6d20c9e1243394fe13cbf427a11143a480f3fa5" type="video/mp4">
+          poster="https://heurist.huma-num.fr/heurist/?db=MBH_Manuscripta_Bibliae_Hebraicae&file=62c18d37f7d63b7777e5dc0add9c5ea669d78ec7" id="video-background">
+            <source src="https://heurist.huma-num.fr/heurist/?db=MBH_Manuscripta_Bibliae_Hebraicae&file=d6d20c9e1243394fe13cbf427a11143a480f3fa5" type="video/mp4">
           </video>
           <h1>Manuscripta Bibliae Hebraicae</h1>
-          <p class="subtitle">Les manuscrits de la Bible hébraïque en Europe occidentale (Angleterre, France, Allemagne, Italie du Nord) au XIIe et XIIIe siècle&nbsp;: une approche matérielle, culturelle et sociale</p>
+          <p class="subtitle">The Medieval Hebrew Bible Manuscripts in Western Europe: A Material, Cultural and Social Approach</p>
             <span class="logo-mbh-mini">
                 <span class="b"></span>
                 <span class="b"></span>
@@ -295,7 +291,7 @@ if($isWebPage){ //set in websiteRecord.php
                 <span class="b"></span>
               </span>
           <h1>Enter site &gt;&gt;</h1>
-          <p class="slogan">La base de données dédiée aux bibles médiévales hébraïques</p>
+          <p class="slogan">The database dedicated to Hebrew Bible Manuscripts</p>
         </div>        
     </body>
 

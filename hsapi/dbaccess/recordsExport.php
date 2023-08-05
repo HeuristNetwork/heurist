@@ -43,6 +43,7 @@ class RecordsExport {
     private static $defRecTypes = null;
     private static $defDetailtypes = null;
     private static $defTerms = null;
+    private static $datetime_field_types = null;
     
 //
 //
@@ -535,13 +536,14 @@ XML;
         $need_tags = false;
         $retrieve_detail_fields = array();
         $retrieve_header_fields = array(); //header fields
+        $retrieve_relmarker_fields = array();
         
         if(is_array($params['columns'])){
             foreach($params['columns'] as $idx=>$column){
                 $col_name = $column['data'];
 
                 if(strpos($col_name,'.')>0){
-                    list($rt_id,$col_name) = explode('.',$col_name);
+                    list($rt_id, $col_name) = explode('.',$col_name);    
                     
                     if(!@$row_placeholder[$rt_id]) $row_placeholder[$rt_id] = array();
                     $row_placeholder[$rt_id][$col_name] = '';
@@ -739,16 +741,17 @@ XML;
         }else if($params['format']=='json'){ 
             
             if(@$params['datatable']>0){
-
+                
+                recordSearchDetailsRelations(self::$system, $record, $retrieve_detail_fields);
+/*
                 if($need_rec_type && $rty_ID>0){ // Add record type to details
-
                    $query = 'select rty_Name from defRecTypes where rty_ID = ' . $rty_ID . ' LIMIT 1';
-
                    $type = mysql__select_value(self::$system->get_mysqli(), $query);
                    $record['typename'] = $type;
                 }
-
+*/
                 $feature = self::_getJsonFlat( $record, $columns, $row_placeholder );
+                
                 fwrite($fd, $comma.json_encode($feature));
                 
             }else if(@$params['extended']>0 && @$params['extended']<3){ //with concept codes and labels
@@ -1171,8 +1174,6 @@ private static function _composeGephiLinks(&$records, &$links, &$links_cnt, $dir
                 }
 
                 $relationName  = htmlspecialchars($relationName);                               
-                //$image = htmlspecialchars(HEURIST_TERM_URL.$trmID.'.png');
-                //<attvalue for="2" value="{$image}"/>
                 $links_cnt++; 
 
                 $edges = $edges.<<<XML
@@ -1385,15 +1386,16 @@ private static function _getGeoJsonFeature($record, $extended=false, $simplify=f
             }else{
                 if($field_type=='date' || $field_type=='year'){
                     if($dty_ID==DT_START_DATE){
-                        $date_start = temporalToSimple($value);
-                        if(strpos($date_start,'unknown')!==false) $date_start = null;
+                        $date_start = $value;
                     }else if($dty_ID==DT_END_DATE){
-                        $date_end = temporalToSimple($value);
-                        if(strpos($date_end,'unknown')!==false) $date_end = null;
+                        $date_end = $value;
                     }else if($value!=null){
                         //parse temporal
-                        $ta = temporalToSimpleRange($value);
-                        if($ta!=null) $timevalues[] = $ta;
+                        $ta = new Temporal($value);
+                        $ta = $ta->getTimespan(true);
+                        if($ta!=null){
+                            $timevalues[] = $ta;  //temporal json array for geojson
+                        }
                     }
                 }else if(defined('DT_SYMBOLOGY') && $dty_ID==DT_SYMBOLOGY){
                     $symbology = json_decode($value,true);                    
@@ -1589,24 +1591,37 @@ private static function _getGeoJsonFeature($record, $extended=false, $simplify=f
         }
     }
 
-    if($date_start!=null || $date_end!=null){
-        if($date_start==null){
+    //if data_start and date_end are temporal objects - take action    
+    if($date_start || $date_end){
+
+        if(!$date_start){
             $date_start = $date_end;
         }
-        if($date_start) $date_start = removeLeadingYearZeroes($date_start,true,true);
-        if($date_end) $date_end = removeLeadingYearZeroes($date_end,true,true);
         
-        if($date_start!=null)
+        $dt = Temporal::mergeTemporals($date_start, $date_end);
+        
+        if($dt && $dt->isValid())
         {
-            if($date_end==null) $date_end = '';
-            $timevalues[] = array($date_start, '', '', $date_end, '');
+            $ta = $dt->getTimespan(true);
+            if($ta!=null){
+                //array($date_start, '', '', $date_end, '');
+                $timevalues[] = $ta;  //temporal json array for geojson
+            }
         }
     }
 
     if(count($timevalues)>0){
-        //https://github.com/kgeographer/topotime/wiki/GeoJSON%E2%80%90T
-        // "timespans": [["-323-01-01 ","","","-101-12-31","Hellenistic period"]],  [start, latest-start, earliest-end, end, label]
-        $res['when'] = array('timespans'=>$timevalues);
+        
+//profile: Flat(0), Central(1) (circa), Slow Start(2) (before), Slow Finish(3) (after) - responsible for gradient
+//determination: Unknown(0), Conjecture(2), Measurment(3), Attested(1)  - color depth
+// start.earliest - end.latest => vis-item-bbox
+// start.earlist~latest => vis-item-bbox-start 
+// end.earlist~latest => vis-item-bbox-end
+            
+            //https://github.com/kgeographer/topotime/wiki/GeoJSON%E2%80%90T
+            // "timespans": [["-323-01-01 ","","","-101-12-31","Hellenistic period"]],  
+            // [start, latest-start, earliest-end, end, label, profile-start, profile-end, determination]
+            $res['when'] = array('timespans'=>$timevalues);
     }
     if($symbology){
         $res['style'] = $symbology; //individual symbology per feature
@@ -1672,7 +1687,7 @@ private static function _getJsonFlat( $record, $columns, $row_placeholder, $leve
     if($level==0){
         $rt_id = 0;
     }else{
-        $rt_id = $record['rec_RecTypeID'];
+        $rt_id = 't'.$record['rec_RecTypeID'];
     }
 
     if(self::$defTerms==null) {
@@ -1686,13 +1701,33 @@ private static function _getJsonFlat( $record, $columns, $row_placeholder, $leve
 
         $col_name = $column; //($rt_id>0 ?$rt_id.'.':'').   
 
-        if ($column=='rec_Tags'){
+        //HEADER FIELDS
+        if ($column=='tags' || $column=='rec_Tags'){
             $value = recordSearchPersonalTags(self::$system, $record['rec_ID']);
             $res[$col_name] = ($value==null)?'':implode(' | ', $value);
         }else if(strpos($column,'rec_')===0){
             $res[$col_name] = $record[$column];
-        }else if(strpos($column, 'typename')===0){
-            $res[$col_name] = $record[$column];
+        }else if($column=='ids'){
+            $res[$col_name] = $record['rec_ID'];
+        }else if($column=='typeid'){
+            $res[$col_name] = $record['rec_RecTypeID'];
+        }else if($column=='typename'){
+            if(self::$defRecTypes==null) self::$defRecTypes = dbs_GetRectypeStructures(self::$system, null, 0);            
+            $res[$col_name] = self::$defRecTypes['names'][$record['rec_RecTypeID']];    
+        }else if($column=='added'){
+            $res[$col_name] = $record['rec_Added'];
+        }else if($column=='modified'){
+            $res[$col_name] = $record['rec_Modified'];
+        }else if($column=='addedby'){
+            $res[$col_name] = $record['rec_AddedBy'];
+        }else if($column=='url'){
+            $res[$col_name] = $record['rec_URL'];
+        }else if($column=='notes'){
+            $res[$col_name] = $record['rec_ScratchPad'];
+        }else if($column=='owner'){
+            $res[$col_name] = $record['rec_OwnerUGrpID'];
+        }else if($column=='visibility'){
+            $res[$col_name] = $record['rec_NonOwnerVisibility'];
         }else{
             $res[$col_name] = ''; //placeholder
         }
@@ -1722,16 +1757,17 @@ private static function _getJsonFlat( $record, $columns, $row_placeholder, $leve
 
             foreach($field_details as $dtl_ID=>$field_value){ //for detail multivalues
 
-                if($field_type=='resource'){
-
+                if($field_type=='resource' || $field_type=='relmarker'){
+                    //continue;
                     //if multi constraints - search all details
                     $link_rec_Id =  $field_value['id'];
+                    $relation_id =  @$field_value['relation_id'];
                     $record = recordSearchByID(self::$system, $link_rec_Id, true, null );
                     $field_value = self::_getJsonFlat( $record, $columns, null, $level+1 );
 
                     if($field_value!=null){
-                        $rt_id_link = $record['rec_RecTypeID'];
-                        if(@$res[$rt_id_link]){
+                        $rt_id_link = 't'.$record['rec_RecTypeID'];
+                        if(@$res[$rt_id_link]){ //such record type already exists in flat array - create multiple values
                             foreach($field_value as $col=>$field){
                                 if(@$res[$rt_id_link][$col]==null || $res[$rt_id_link][$col]==''){
                                     $res[$rt_id_link][$col] = $field;
@@ -1744,6 +1780,29 @@ private static function _getJsonFlat( $record, $columns, $row_placeholder, $leve
                             }
                         }else{
                             $res[$rt_id_link] = $field_value;    
+                        }
+                        if($field_type=='relmarker' && $relation_id>0){
+                            
+                            $record2 = recordSearchByID(self::$system, $relation_id, true, null );
+                            $field_value2 = self::_getJsonFlat( $record2, $columns, null, $level+1 );
+                            if($field_value2!=null){
+                                $rt_id_link = 't'.$record2['rec_RecTypeID']; //t1
+                                if(@$res[$rt_id_link]){
+                                    foreach($field_value2 as $col=>$field){
+                                        //$col = 'r.'.$col;
+                                        if(@$res[$rt_id_link][$col]==null || $res[$rt_id_link][$col]==''){
+                                            $res[$rt_id_link][$col] = $field;
+                                        }else{
+                                            if(!is_array($res[$rt_id_link][$col])){
+                                                $res[$rt_id_link][$col] = array($res[$rt_id_link][$col]);
+                                            }
+                                            array_push($res[$rt_id_link][$col], $field);
+                                        }    
+                                    }
+                                }else{
+                                    $res[$rt_id_link] = $field_value2;    
+                                }
+                            }
                         }
                     }
                     $field_value = $record['rec_Title']; //$link_rec_Id Record ID replaced with Record Title
@@ -1759,9 +1818,8 @@ private static function _getJsonFlat( $record, $columns, $row_placeholder, $leve
                 }else if (($field_type=='enum' || $field_type=='relationtype')){
 
                     $field_value = self::$defTerms->getTermLabel($field_value, true);
-
                 }
-
+                
                 if($field_value!=null){
                     array_push($res[$col_name], $field_value);
                 }
@@ -1792,6 +1850,10 @@ private static function _getJsonFeature($record, $mode){
     $res = $record;
     $res['details'] = array();
     
+    if(self::$defDetailtypes==null){
+        self::$defDetailtypes = dbs_GetDetailTypes(self::$system, null, 2);   
+    }
+    $idx_dtype = self::$defDetailtypes['typedefs']['fieldNamesToIndex']['dty_Type'];
     
     if($mode==2){ //extended - with concept codes and names/labels
     
@@ -1802,14 +1864,9 @@ private static function _getJsonFeature($record, $mode){
             self::$defTerms = dbs_GetTerms(self::$system);
             self::$defTerms = new DbsTerms(self::$system, self::$defTerms);
         }
-        if(self::$defDetailtypes==null){
-            self::$defDetailtypes = dbs_GetDetailTypes(self::$system, null, 2);   
-        }
-
         $idx_name = self::$defRecTypes['typedefs']['dtFieldNamesToIndex']['rst_DisplayName'];
         
         $idx_dname = self::$defDetailtypes['typedefs']['fieldNamesToIndex']['dty_Name'];
-        $idx_dtype = self::$defDetailtypes['typedefs']['fieldNamesToIndex']['dty_Type'];
         $idx_ccode = self::$defDetailtypes['typedefs']['fieldNamesToIndex']['dty_ConceptID'];
         
         
@@ -1821,16 +1878,16 @@ private static function _getJsonFeature($record, $mode){
         
     }
 
-
     //convert details to proper JSON format, extract geo fields and convert WKT to geojson geometry
     foreach ($record['details'] as $dty_ID=>$field_details) {
 
         foreach($field_details as $dtl_ID=>$value){ //for detail multivalues
         
             $val = array('dty_ID'=>$dty_ID,'value'=>$value);
+            $field_type = self::$defDetailtypes['typedefs'][$dty_ID]['commonFields'][$idx_dtype];
 
             if($mode==2){ //extended - with concept codes and names/labels
-                $field_type = self::$defDetailtypes['typedefs'][$dty_ID]['commonFields'][$idx_dtype];
+                
                 //It needs to include the field name and term label and term standard code.
                 if($field_type=='enum' || $field_type=='relationtype'){
                     $val['termLabel'] = self::$defTerms->getTermLabel($value, true);
@@ -1849,6 +1906,12 @@ private static function _getJsonFeature($record, $mode){
 
                 $val['fieldType'] = $field_type;
                 $val['conceptID'] = self::$defDetailtypes['typedefs'][$dty_ID]['commonFields'][$idx_ccode];
+            }
+            if($field_type=='date'){ //decode json temporal
+                $temporal = json_decode($val['value']);
+                if($temporal!=null){
+                    $val['value'] = $temporal;
+                }
             }
 
             $res['details'][] = $val;
@@ -1942,7 +2005,7 @@ public static function getIiifResource($record, $ulf_ObfuscatedFileID, $type_res
     $info = array();
     
     if($record==null){
-        //find file infor by obfuscation id
+        //find file info by obfuscation id
         $info = fileGetFullInfo(self::$system, $ulf_ObfuscatedFileID);
         
         if(count($info)>0){
@@ -2038,12 +2101,14 @@ public static function getIiifResource($record, $ulf_ObfuscatedFileID, $type_res
         
         $thumbfile = HEURIST_THUMB_DIR.'ulf_'.$fileid.'.png';
         if(file_exists($thumbfile)){
-            $tumbnail_url = HEURIST_BASE_URL_PRO."?db=".HEURIST_DBNAME."&thumb=".$fileid;
+            $tumbnail_url = HEURIST_BASE_URL_PRO.'?db='.HEURIST_DBNAME.'&thumb='.$fileid;
         }else{
-            $tumbnail_url = HEURIST_ICON_URL.$rectypeID.'&version=thumb';
+            //if thumb not exists - rectype thumb (HEURIST_RTY_ICON)
+            $tumbnail_url = HEURIST_BASE_URL_PRO.'?db='.HEURIST_DBNAME.'&version=thumb&icon='.$rectypeID;
         }
         
-        $service = '';        
+        $service = '';   
+        $resource_id = '';     
         
         //get iiif image parameters
         if($fileinfo['ulf_OrigFileName']=='_iiif_image'){ //this is image info - it gets all required info from json
@@ -2075,7 +2140,7 @@ public static function getIiifResource($record, $ulf_ObfuscatedFileID, $type_res
                         $quality = 'default';
                     }
                     $resource_url = $iiif_manifest['@id'].'/full/full/0/'.$quality.'.jpg';                    
-                    
+                    $resource_id = $iiif_manifest['@id'];
                     
                     if(self::$version==2){
 $service = <<<SERVICE2
@@ -2150,11 +2215,29 @@ CANVAS2;
 //        "width": $width
 
 // Returns json
-$root_uri = HEURIST_BASE_URL_PRO.'api/'.HEURIST_DBNAME.'/iiif/';
-$canvas_uri = $root_uri.'canvas/'.$fileid;
-$annopage_uri = $root_uri.'page/'.$fileid;
-$annotation_uri = $root_uri.'annotation/'.$fileid;
-$image_uri = $root_uri.'image/'.$fileid.'/info.json';
+if($resource_id){ //this is iiif image
+    
+    //last section
+    $parts = explode('/',$resource_id);
+    $cnt = count($parts)-1;
+    array_splice( $parts, $cnt, 0, 'canvas');
+    $canvas_uri = implode('/',$parts);
+    $parts[$cnt] = 'page';
+    $annopage_uri = implode('/',$parts);
+    $parts[$cnt] = 'annotation';
+    $annotation_uri = implode('/',$parts);
+    $image_uri = $resource_id.'/info.json';
+                    
+    
+}else{
+    $root_uri = HEURIST_BASE_URL_PRO.'api/'.HEURIST_DBNAME.'/iiif/';
+    $canvas_uri = $root_uri.'canvas/'.$fileid;
+    $annopage_uri = $root_uri.'page/'.$fileid;
+    $annotation_uri = $root_uri.'annotation/'.$fileid;
+    $image_uri = $root_uri.'image/'.$fileid.'/info.json';
+}
+
+
 
 $annotation = <<<ANNOTATION3
             {

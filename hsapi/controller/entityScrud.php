@@ -49,11 +49,39 @@ if (@$argv) {
     require_once (dirname(__FILE__).'/../System.php');
     require_once ('entityScrudSrv.php');
 
+    $system = new System();
+    
+    $dbdef_cache = $db_defs = $system->getFileStoreRootFolder().@$_REQUEST['db'].'/entity/db.json';
+
+    if(isset($defaultRootFileUploadURL)
+        && @$_REQUEST['a']=='structure' && @$_REQUEST['entity']=='all' 
+        && file_exists($dbdef_cache)
+        && strpos($defaultRootFileUploadURL,'sydney.edu.au')===false
+        ){
+            
+            if(isset($allowWebAccessEntityFiles) && $allowWebAccessEntityFiles)
+            {
+                $host_params = getHostParams();
+                // 
+                if(strpos($defaultRootFileUploadURL, $host_params['server_url'])===0){
+                    $url = $defaultRootFileUploadURL;
+                }else{
+                    //replace server name to avoid CORS issues
+                    $parts = explode('/',$defaultRootFileUploadURL);
+                    $url = $host_params['server_url'] . '/' . implode('/',array_slice($parts,3));
+                }
+                
+                $url = $url . $_REQUEST['db'].'/entity/db.json';
+                header('Location: '.$url);
+            }else{
+                downloadFile(null,$db_defs);
+            }
+            exit();
+    }
     
     $response = array();
     $res = false;
 
-    $system = new System();
     $entity = null;
     
     $need_config = false;
@@ -68,7 +96,18 @@ if (@$argv) {
         
         if(@$_REQUEST['a']=='structure'){ 
             // see HAPI4.refreshEntityData
-            $res = entityRefreshDefs($system, $_REQUEST['entity'], true);
+            if(@$_REQUEST['entity']=='force_all'){
+                //remove cache
+                fileDelete($dbdef_cache);
+                $_REQUEST['entity']='all';
+            }
+            $res = entityRefreshDefs($system, @$_REQUEST['entity'], true); //, @$_REQUEST['recID']);
+            
+            //update dbdef cache
+            if(@$_REQUEST['entity']=='all' && $res!==false){
+                file_put_contents($dbdef_cache, json_encode($res));
+            }
+            
         }else {
             $res = entityExecute($system, $_REQUEST);
         }

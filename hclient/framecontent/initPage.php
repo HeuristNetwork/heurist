@@ -84,12 +84,14 @@ if(defined('LOGIN_REQUIRED') && !$system->has_access()){
 
 //verify database version against minimal required
 if(defined('IS_INDEX_PAGE')){
+    
+    $subsubVer = $system->get_system('sys_dbSubSubVersion');
+    
     if(HEURIST_MIN_DBVERSION>
     $system->get_system('sys_dbVersion').'.'
     .$system->get_system('sys_dbSubVersion').'.'
-    .$system->get_system('sys_dbSubSubVersion')){
+    .$subsubVer){
 
-        //header('Location: '.dirname(__FILE__).'/../../admin/setup/dbupgrade/upgradeDatabase.php');
         include 'admin/setup/dbupgrade/upgradeDatabase.php';
         exit();
     }
@@ -132,7 +134,7 @@ if(defined('IS_INDEX_PAGE')){
 <?php 
 // Do not use google analytics unless requested in heuristConfigIni.php
 if($allowGoogleAnalytics && !$isLocalHost) {
-    if (strpos('int-heuristweb-prod.intersect.org.au', $_SERVER["SERVER_NAME"]===0) 
+    if (strpos('HeuristRef.Net', $_SERVER["SERVER_NAME"]===0) 
         || strpos('heuristref', $_SERVER["SERVER_NAME"])===0) {// Operating on Heurist reference server
         ?>     
         <!-- Heurist Reference Server, Global site tag (gtag.js) - Google Analytics -->
@@ -167,7 +169,6 @@ if($allowGoogleAnalytics && !$isLocalHost) {
     //console.log('ipage start');
 </script>
 
-<script type="text/javascript" src="<?php echo PDIR;?>hclient/core/detectHeurist.js"></script>
 <?php
 if($isLocalHost){
     ?>
@@ -193,14 +194,19 @@ if($isLocalHost){
 
 <link rel="stylesheet" type="text/css" href="<?php echo PDIR;?>external/jquery-ui-iconfont-master/jquery-ui.icon-font.css" />
 
-
 <script type="text/javascript" src="<?php echo PDIR;?>external/js/wellknown.js"></script>
-<script type="text/javascript" src="<?php echo PDIR;?>hclient/core/utils.js"></script>
 
-<!-- for debug  remark it and use getMultiScripts for production -->
+<!--
+<script type="text/javascript" src="<?php echo PDIR;?>hclient/core.min.js"></script>
+ -->
+
+<script type="text/javascript" src="<?php echo PDIR;?>hclient/core/detectHeurist.js"></script>
+<script type="text/javascript" src="<?php echo PDIR;?>hclient/core/temporalObjectLibrary.js"></script>
+<script type="text/javascript" src="<?php echo PDIR;?>hclient/core/utils.js"></script>
 <script type="text/javascript" src="<?php echo PDIR;?>hclient/core/utils_ui.js"></script>
 <script type="text/javascript" src="<?php echo PDIR;?>hclient/core/utils_dbs.js"></script>
 <script type="text/javascript" src="<?php echo PDIR;?>hclient/core/hapi.js"></script>
+<script type="text/javascript" src="<?php echo PDIR;?>hclient/core/layout.js"></script>
 <script type="text/javascript" src="<?php echo PDIR;?>hclient/core/hRecordSearch.js"></script>
 <script type="text/javascript" src="<?php echo PDIR;?>hclient/core/recordset.js"></script>
 <script type="text/javascript" src="<?php echo PDIR;?>hclient/core/utils_query.js"></script>
@@ -268,10 +274,13 @@ if($isLocalHost){
 
         // Standalone check
         if(!window.hWin.HAPI4){
+            window.hWin.HAPI4 = new hAPI('<?php echo $_REQUEST['db']?>', onHapiInit);
+/*            
             // In case of standalone page
             //load minimum set of required scripts
-            $.getMultiScripts(['localization.js'/*, , 'utils_msg.js'
-                'utils_ui.js', 'hRecordSearch.js', 'recordset.js', 'hapi.js'*/], '<?php echo PDIR;?>hclient/core/')
+console.log('initPage');                            
+            $.getMultiScripts(['localization.js' //, 'utils_msg.js','utils_ui.js', 'hRecordSearch.js', 'recordset.js', 'hapi.js'
+                ], '<?php echo PDIR;?>hclient/core/')
             .done(function() {
                 // all done
                 window.hWin.HAPI4 = new hAPI('<?php echo $_REQUEST['db']?>', onHapiInit);
@@ -284,7 +293,7 @@ if($isLocalHost){
             }).always(function() {
                 // always called, both on success and error
             });
-
+*/
         }else{
             // Not standalone, use HAPI from parent window
             onHapiInit( true );
@@ -315,37 +324,15 @@ if($isLocalHost){
         {
             applyTheme();
 
+            if(!window.hWin.HEURIST4.util.isnull(onAboutInit) && $.isFunction(onAboutInit)){
+                if(window.hWin.HAPI4.sysinfo['layout']!='WebSearch')
+                    onAboutInit(); //init about dialog
+            }
+
             _dout('ipage hapi inited  '+(new Date().getTime() / 1000 - _time_debug));
-            _time_debug = new Date().getTime() / 1000;
-
-            if($.isEmptyObject(window.hWin.HAPI4.EntityMgr.getEntityData2('defRecTypes'))){
-
-                if(!window.hWin.HEURIST4.util.isnull(onAboutInit) && $.isFunction(onAboutInit)){
-                    if(window.hWin.HAPI4.sysinfo['layout']!='WebSearch')
-                        onAboutInit();
-                }
-
-                var sMsg = 'Cannot obtain database definitions (get_defs function). '
-                +'This is probably due to a network timeout. However, if the problem '
-                +'persists please report to Heurist developers as it could indicate '
-                +'corruption of the database.';                            
-
-                window.hWin.HAPI4.EntityMgr.refreshEntityData('all', function(success){
-                    if(success){
-
-                        _dout('ipage db struct  '+(new Date().getTime() / 1000 - _time_debug));
-                        _time_debug = new Date().getTime() / 1000;
-
-
-                        if(!window.hWin.HEURIST4.util.isnull(onPageInit) && $.isFunction(onPageInit)){
-                            onPageInit(success);
-                        }
-                    }else{
-                        window.hWin.HEURIST4.msg.showMsgErr(sMsg);
-                        if($.isFunction(onPageInit)){ onPageInit(success); }
-                    }
-                });
-                return;
+            
+            if(initialLoadDatabaseDefintions(null, onPageInit)){
+                return;                
             }
 
         }else{
@@ -358,6 +345,46 @@ if($isLocalHost){
         }
     }
 
+    //
+    //
+    //
+    function initialLoadDatabaseDefintions(params, callback){
+    
+            var _time_debug = new Date().getTime() / 1000;
+
+            if($.isEmptyObject(window.hWin.HAPI4.EntityMgr.getEntityData2('defRecTypes'))){ //defintions are not loaded
+
+                var sMsg = 'Cannot obtain database definitions (refreshEntityData function). '
+                +'This is probably due to a network timeout. However, if the problem '
+                +'persists please report to Heurist developers as it could indicate '
+                +'corruption of the database.';                            
+                
+                //params = {recID:recID} or {rty_ID:rty_ID} - to load defs for particular record or rectype
+                var entities = (params)?params:'all'; //'rty,dty,rst,swf';
+
+                window.hWin.HAPI4.EntityMgr.refreshEntityData(entities, function(){
+                    if(arguments){                    
+                    if(arguments[1]){
+
+                        _dout('init page db struct  '+(new Date().getTime() / 1000 - _time_debug));
+                        _time_debug = new Date().getTime() / 1000;
+
+
+                        if(!window.hWin.HEURIST4.util.isnull(callback) && $.isFunction(callback)){
+                            callback(true);
+                        }
+                    }else{
+                        window.hWin.HEURIST4.msg.showMsgErr(sMsg);
+                        if($.isFunction(callback)){ callback(false); }
+                    }
+                    }
+                });
+                return true;
+            }
+            return false;
+        
+    }
+    
     //
     // it itakes name of theme from preferences , oherwise default theme is heurist
     //

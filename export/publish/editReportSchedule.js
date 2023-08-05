@@ -197,6 +197,7 @@ function ReportScheduleEditor() {
             document.getElementById("rps_IntervalMinutes").value = 1440;            
         }
 
+        
     }
 
 

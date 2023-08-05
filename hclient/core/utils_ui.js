@@ -300,12 +300,13 @@ window.hWin.HEURIST4.ui = {
             topOptions =  options.topOptions,
             supressTermCode = options.supressTermCode,
             useHtmlSelect  = (options.useHtmlSelect===true),
-            eventHandlers = options.eventHandlers;
+            eventHandlers = options.eventHandlers,
+            lang_code = options.language_code;
         
         //create selector 
         selObj = window.hWin.HEURIST4.ui.createSelector(selObj, topOptions);
             
-        var data = $Db.trm_TreeData(vocab_id, 'select');                
+        var data = $Db.trm_TreeData(vocab_id, 'select', false, lang_code);                
         var termCode;
        
         //add optgroups and options
@@ -1245,12 +1246,12 @@ window.hWin.HEURIST4.ui = {
                     wmenu_div.css('zIndex',69999);
 
                     if(onOpenMenu && $.isFunction(onOpenMenu)){
-                        onOpenMenu.call(this);
+                        onOpenMenu.call(this, event);
                     }
                 },
                 close: function(event, ui){
                     if(onCloseMenu && $.isFunction(onCloseMenu)){
-                        onCloseMenu.call(this);
+                        onCloseMenu.call(this, event);
                     }
                 }
             });

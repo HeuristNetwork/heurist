@@ -66,12 +66,16 @@ $.widget( "heurist.searchBuilderItem", {
         onremove: null,
         onchange: null,
         
-        onselect_field: null  //callback to select field from treeview
+        onselect_field: null,  //callback to select field from treeview
+
+        language: null // selected language (3 character ISO639-2 code)
     },
 
     _current_field_type:null, // type of input field
     _predicate_input_ele:null,     // reference to editing_input
     _predicate_reltype_ele:null,     // reference to relation type selector
+
+    _all_fields: null, // field cache for any record type
 
     // the widget's constructor
     _create: function() {
@@ -207,6 +211,10 @@ $.widget( "heurist.searchBuilderItem", {
     //
     changeOptions: function(ext_options){
 
+        if(ext_options.enum_field == 'term'){ // for term labels, default comparison to equals //ext_options.code != this.options.code && 
+            this.select_comparison.val('=');
+        }
+
         this.options = $.extend(this.options, ext_options);
         
         this._refresh();
@@ -249,21 +257,22 @@ $.widget( "heurist.searchBuilderItem", {
                 this.select_fields.hide();
 
             }else{
-
                 var allowed_fieldtypes = ['enum','freetext','blocktext',
                     'geo','year','date','integer','float','resource','relmarker'];
 
                 this.select_fields_btn.hide();
-                
-                //show field selector
-                window.hWin.HEURIST4.ui.createRectypeDetailSelect(this.select_fields.get(0), this.options.top_rty_ID, 
-                    allowed_fieldtypes, topOptions2, 
-                    {show_parent_rt:true, show_latlong:true, bottom_options:bottomOptions, 
-                        selectedValue:(this.options.dty_ID ?this.options.dty_ID:'anyfield'), //initally selected
-                        useIds: true, useHtmlSelect:false});                
+                this.select_fields.show();
+
+                if(!this._all_fields){
+                    this._all_fields = $Db.getBaseFieldInstances(null, 1, allowed_fieldtypes, []);
+                }
+                window.hWin.HEURIST4.ui.createSelector(this.select_fields[0], [...topOptions2, ...this._all_fields]);
+
+                this.select_fields.val( this.options.dty_ID ? this.options.dty_ID : 'anyfield' );
+
+                window.hWin.HEURIST4.ui.initHSelect(this.select_fields[0], false);
 
                 this._on( this.select_fields, { change: this._onSelectField });
-                
             }
             this._onSelectField();
 
@@ -414,8 +423,12 @@ $.widget( "heurist.searchBuilderItem", {
             ed_options['detailtype'] = (field_type=='blocktext' || field_type=='file')?'freetext':field_type;
             ed_options['dtID'] = dty_ID;
             
-            if(field_type=='enum' && this.options.enum_field!=null && 
-                !(this.options.enum_field=='term' && this.select_comparison.val() != '')){
+            ed_options['language'] = (field_type=='enum') ? this.options.language : ''; // show translated terms
+
+            let compare = this.select_comparison.val();
+            
+            if(field_type=='enum' && (this.options.enum_field!=null ||
+                (this.options.enum_field==null && !(compare=='' || compare=='=' || compare=='-') ))){
 
                 ed_options['detailtype'] = 'freetext';
             }
@@ -498,15 +511,13 @@ $.widget( "heurist.searchBuilderItem", {
         }else if(field_type=='date'){
             //
             eqopts = [
-                {key:'',title:'like'},
-                {key:'=',title:'equals'},
-                {key:'-',title:'not equals'},
-                {key:'>=',title:'>='},
-                {key:'<=',title:'<='}];
+                {key:'<>',title:'fall in/overlaps'}, //<> overlaps for range only
+                {key:'><',title:'between'},  //for range only
+                {key:'=',title:'exact'},     //either start or end exact to specified date
+                {key:'>=',title:'after than'},
+                {key:'<=',title:'before than'}];
 /*                
-                {key:'>',title:'greater than'},
-                {key:'<',title:'less than'},
-                {key:'<>',title:'between'}
+                {key:'-',title:'not equals'},
 */
             
         }else if(field_type=='tag'){
@@ -561,7 +572,9 @@ Whole value = EQUAL
             }
         }
 
-        if((dty_ID>0 || dty_ID=='notes' || dty_ID=='url')){  // && field_type!='relmarker'
+        if( dty_ID=='notes' || dty_ID=='url'
+            || (dty_ID>0 && (field_type!='enum' || this.options.enum_field==null)))
+        {  // && field_type!='relmarker'
             eqopts.push({key:'', title:'──────────', disabled:true});
             eqopts.push({key:'any', title:'any value (exists)'});
             if(field_type!='relationtype'){
@@ -569,15 +582,13 @@ Whole value = EQUAL
 
                 // Field count filtering
                 eqopts.push({key:'count', title:'count of values'});
-                eqopts.push({key:'', title:'Use n <n >n n1<>n2,', disabled: true});
-                eqopts.push({key:'', title:'where n is the count', disabled: true});
             }
         }
 
         this._off( this.select_conjunction, 'change');
         this._off( this.select_comparison, 'change');
         
-        var prev_opt = this.select_comparison.val()
+        var prev_opt = this.select_comparison.val();
 
         window.hWin.HEURIST4.ui.createSelector(this.select_comparison.get(0), eqopts);
         
@@ -614,19 +625,30 @@ Whole value = EQUAL
                 this.cb_negate.hide();
             }
             
-            if(cval=='<>' || cval=='-<>'){
+            if(cval=='<>' || cval=='-<>' || cval=='><'){
                 this._predicate_input_ele.editing_input('setBetweenMode', true);        
             }else{
                 this._predicate_input_ele.editing_input('setBetweenMode', false);        
             }
             
-            if(field_type=='enum' && this.options.enum_field=='term' && cval != 'any' && cval != 'NULL'){
+            if(field_type=='enum' && this.options.enum_field==null && cval != 'any' && cval != 'NULL'){
+                //this.options.enum_field=='term' && cval != 'any' && cval != 'NULL'  &&
+                
+                let need_select = (cval=='=' || cval=='-' || cval=='');
 
-                if((cval=='' && this._predicate_input_ele.find('.input-div > input').length == 0) ||
-                    cval!='' && this._predicate_input_ele.find('.input-div > select').length == 0){ // check that input is correct version (text input or dropdown)
+                if(( (!need_select) && this._predicate_input_ele.find('.input-div > input').length == 0) ||
+                    need_select && this._predicate_input_ele.find('.input-div > select').length == 0){ 
+                    // check that input is correct version (text input or dropdown)
 
                     this._onSelectField(); //this._refresh();
                 }
+            }
+            
+            // Add help text
+            if(cval == 'count'){
+                this._predicate_input_ele.find('.heurist-helper1').text('Use n <n >n n1<>n2, where n is the count');
+            }else{
+                this._predicate_input_ele.find('.heurist-helper1').text('');
             }
             
             if($.isFunction(this.options.onchange)){
@@ -734,6 +756,8 @@ Whole value = EQUAL
                             this.cb_negate.find('input').is(':checked');
             var op = this.select_comparison.val();
 
+            let lang_code = this.options.language;
+
             if(this._current_field_type=='relmarker'){
                 relatype_vals = $(this._predicate_reltype_ele).editing_input('getValues');
                 has_relatype_value = (relatype_vals.length>1 ||!window.hWin.HEURIST4.util.isempty(relatype_vals[0]));
@@ -744,13 +768,21 @@ Whole value = EQUAL
                 return null;
             }            
 
+// 2023-07-16 dropdown is not used for trm_Label            
+/*
             if(this._current_field_type=='enum' && this.options.enum_field=='term' && 
                 this._predicate_input_ele.find('.input-div > select').length > 0){ // change from ids to label
 
                 for (let i = 0; i < vals.length; i++) {
-                    vals[i] = $Db.trm(vals[i], 'trm_Label');
+                    let def_label = $Db.trm(vals[i], 'trm_Label');
+                    vals[i] = $Db.trm_getLabel(vals[i], this.options.language);
+
+                    if(lang_code == 'ALL' || vals[i] != def_label){ // prepend language code
+                        vals[i] = lang_code + ':' + vals[i];
+                    }
                 }
             }
+*/
 
             if(op=='any'){
                     op = '';
@@ -800,10 +832,15 @@ Whole value = EQUAL
                 //if(isnegate){
                 //    op = '-'+op;
                 //}
-                
-                if(op!=''){
+                if(this._current_field_type=='enum'
+                    && (this.options.enum_field == 'term' || this.options.enum_field == 'desc') 
+                    && lang_code != ''){
+                    // prepend language code
+                    $.each(vals,function(i,val){vals[i]=op+lang_code+':'+vals[i]});
+                }else if(op!=''){
                     $.each(vals,function(i,val){vals[i]=op+vals[i]});        
                 }
+
             }
 
             var key;

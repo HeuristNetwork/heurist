@@ -1289,56 +1289,19 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
             
             this.enum_container = ele;
             
-            if(true ||  !(this._currentEditID>0) && (full_mode!==true) ){ //insert
-            
-                $('<div style="line-height:2ex;padding-top:4px">'
-                        +'<div id="enumVocabulary" style="display:inline-block;">' //padding-left:4px;
-                            +'<select id="selVocab" class="sel_width"></select>'
-                            +'<a href="#" id="add_vocabulary_2" style="padding-left:10px">'
-                                +'<span class="ui-icon ui-icon-plus"/>add vocabulary</a>'
-                            +'<a href="#" id="show_terms_1" style="padding-left:10px">'
-                                +'<span class="ui-icon ui-icon-pencil"/>vocabularies editor</a>'
-                            +'<br><span id="termsPreview1" style="display:none;padding:10px 0px">'
-                                +'<label style="width:60px;min-width:60px">Preview:&nbsp;</label><select id="selPreview"></select>'
-                            +'</span>'
-                        +'</div>'
-                +'</div>').appendTo(this.enum_container);
-/*            
-                            +'<div style="padding:5px 3px">'
-                                //+'<a href="#" id="add_advanced">advanced</a>&nbsp;'  style="margin-left:90px;"
-                                +'<a href="#" id="add_vocabulary">add a vocabulary</a>&nbsp;'
-                                +'<a href="#" id="add_terms" style="padding-left:10px">add terms to vocabulary</a>&nbsp;'
-                                +'<a href="#" id="show_terms_1" style="padding-left:10px">edit terms tree</a>'
-                            +'</div>'
-*/            
-            
-            }else{     //@todo remove   Individidual selection - not used anymore
-            
-                $('<div style="line-height:2ex;padding-top:4px">'
-                        +'<label style="text-align:left;line-height:19px;vertical-align:top">'
-                        +'<input type="radio" value="vocabulary" name="enumType" style="vertical-align: top;">&nbsp;Use a vocabulary</label> '
-                        +'<div id="enumVocabulary" style="display:inline-block;padding-left:4px;">'
-                            +'<select id="selVocab" class="sel_width"></select>'
-                            +'<span id="termsPreview1"></span>'
-                            +'<div style="font-size:smaller">'
-                                +'<a href="#" id="add_vocabulary">add a vocabulary</a>&nbsp;'
-                                +'<a href="#" id="add_terms" style="padding-left:10px">add terms to vocabulary</a>&nbsp;'
-                                +'<a href="#" id="show_terms_1" style="padding-left:10px">edit terms tree</a>'
-                            +'</div>'
-                        +'</div>'
-                +'</div><div style="padding-top:4px">'
-                        +'<label style="text-align:left;line-height: 12px;">'
-                        +'<input type="radio" value="individual" name="enumType" style="margin-top:0px">&nbsp;Select terms individually</label> '
-                        +'<div  id="enumIndividual" style="display:none;padding-left:4px;">'
-                            +'<input type="button" value="Select terms" id="btnSelectTerms" style="margin-right:4px"/>'                    
-                            +'<span id="termsPreview2"></span>'
-                            +'<a href="#" id="show_terms_2">edit terms tree</a>'
-                        +'</div>'
-                        +'<div style="font-style:italic;padding: 4px 0px">'
-                            +'Warning: Advanced users only - list must be updated manually if relevant new terms added</div>'
-                +'</div>').appendTo(this.enum_container);
-                
-            }
+            $('<div style="line-height:2ex;padding-top:4px">'
+                    +'<div id="enumVocabulary" style="display:inline-block;">' //padding-left:4px;
+                        +'<select id="selVocab" class="sel_width"></select>'
+                        +'<a href="#" id="add_vocabulary_2" style="padding-left:10px">'
+                            +'<span class="ui-icon ui-icon-plus"/>add vocabulary</a>'
+                        +'<a href="#" id="show_terms_1" style="padding-left:10px">'
+                            +'<span class="ui-icon ui-icon-pencil"/>vocabularies editor</a>'
+                        +'<br><span id="termsPreview1" style="display:none;padding:10px 0px">'
+                            +'<label style="width:60px;min-width:60px">Preview:&nbsp;</label><select id="selPreview"></select>'
+                        +'</span>'
+                    +'</div>'
+            +'</div>').appendTo(this.enum_container);
+
                 
             //create event listeneres
             this._on(this.enum_container.find('input[name="enumType"]'),{change:
@@ -1862,7 +1825,7 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
                 
                 window.hWin.HEURIST4.msg.showMsgDlg(sMsg, null, {title:'Vocabulary in use'},
                     {default_palette_class:this.options.default_palette_class});
-            }else if(this._currentEditID = -1 && res.dty_id){ // attempted to create new field, name is already used
+            }else if(this._currentEditID == -1 && res.dty_id){ // attempted to create new field, name is already used
 
                 var cannotEdit = $Db.dty(res.dty_id, 'dty_Status') == 'reserved' && !window.hWin.HAPI4.sysinfo['pwd_ReservedChanges'];
                 var exist_name = $Db.dty(res.dty_id, 'dty_Name');
@@ -2062,12 +2025,6 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
                 window.hWin.HEURIST4.msg.sendCoverallToBack();
                 that.searchForm.searchDefDetailTypes('startSearch');
                 that._triggerRefresh('dty');
-                /*
-                window.hWin.HAPI4.EntityMgr.refreshEntityData('dtg',
-                    function(){
-                        that._triggerRefresh('dtg');
-                    }
-                )*/
         });
     },                                    
     

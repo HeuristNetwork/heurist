@@ -16,7 +16,6 @@
 * distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
 * See the License for the specific language governing permissions and limitations under the License.
 */
-//"use_assets":["admin/setup/iconLibrary/64px/","HEURIST_ICON_DIR/thumb/"],
 
 /*
 we may take data from 
@@ -478,7 +477,7 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
                                     //    console.log(bot);
                                     //    console.log(ui.position.top+'  '+ui.position.left);
                                     that.scrollInterval = setInterval(function(){ if(!that._dropped) ele[0].scrollTop += 20}, 50); 
-                                }else if(ui.offset.top<ele.offset().top+(that.space_for_drop.is(':visible')?-60:-20)) {
+                                }else if(ui.offset.top<ele.offset().top+((that.space_for_drop && that.space_for_drop.is(':visible'))?-60:-20)) {
                                     that.scrollInterval = setInterval(function(){ if(!that._dropped) ele[0].scrollTop -= 20}, 50); 
                                 }
 
@@ -1347,10 +1346,13 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
                 dlg.dialog('option', 'title', s);
             }
 
-            ele = this._editing.getFieldByName('trm_ParentTermID');
-            ele.editing_input('setValue', this.options.trm_ParentTermID>0
-                ?this.options.trm_ParentTermID
-                :this.options.trm_VocabularyID, true);
+            if(this._currentEditID<0){
+                //assign vocabulary or parent id for new term only
+                ele = this._editing.getFieldByName('trm_ParentTermID');
+                ele.editing_input('setValue', this.options.trm_ParentTermID>0
+                    ?this.options.trm_ParentTermID
+                    :this.options.trm_VocabularyID, true);
+            }
             this.options.trm_ParentTermID = -1;
 
             this._editing.getFieldByName('trm_VocabularyGroupID').hide();
@@ -1761,7 +1763,7 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
         
         var lbl = $.isArray(fields['trm_Label'])?fields['trm_Label'][0]:fields['trm_Label'];
 
-        if(this._currentEditID == -1 && this.options.auxilary == 'vocabulary' && !lbl.search(/vocab/i) == -1){ // add 'vocab' to the end of new vocabulary
+        if(this._currentEditID == -1 && this.options.auxilary == 'vocabulary' && lbl.search(/vocab/i) == -1){ // add 'vocab' to the end of new vocabulary
             lbl += ' vocab';
             if($.isArray(fields['trm_Label'])){
                 fields['trm_Label'][0] = lbl;
@@ -2735,34 +2737,26 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
 
         var fields = this._super();  
         if(fields!==null){
-            var is_already_exists = false;
-            var vocab_id = fields['trm_ParentTermID'];
+
+            let trm_id = fields['trm_ID'];
+            let vocab_id = fields['trm_ParentTermID'];
             if(vocab_id>0){
-                //vocab_id = $Db.getTermVocab(vocab_id);   
-                var trm_id = fields['trm_ID'];
-                var lbl_orig = $.isArray(fields['trm_Label'])?fields['trm_Label'][0]:fields['trm_Label'];
-                var lbl = lbl_orig.toLowerCase();
 
-                if(trm_id<0 || window.hWin.HEURIST4.util.isempty(trm_id)){ //new one
-                    var all_labels = $Db.trm_TreeData(vocab_id, 'labels');
-                    is_already_exists = (all_labels.indexOf(lbl)>=0);
-                }else{ //existed one
-                    
-                    var parents = fields['trm_Parents'].split(','); // Need to get actual parent id, which will be the last id in the array of parents
-                    vocab_id = parents[parents.length - 1];
+                let lbl_orig = $.isArray(fields['trm_Label'])?fields['trm_Label'][0]:fields['trm_Label'];
+                let lbl = lbl_orig.toLowerCase();
+                let code = $.isArray(fields['trm_Code'])?fields['trm_Code'][0]:fields['trm_Code'];
 
-                    var all_labels = $Db.trm_TreeData(vocab_id, 'select');
-                    for(var i=0; i<all_labels.length; i++){
-                        if(all_labels[i].title.toLowerCase()==lbl && all_labels[i].key!=trm_id){
-                            is_already_exists = true;
-                            break;
-                        }
-                    }
+                // check if parent term has child with same label
+                if($Db.trm_HasChildWithLabel(vocab_id, lbl, trm_id)){ console.log(vocab_id, lbl, fields);
+                    window.hWin.HEURIST4.msg.showMsgFlash('Term with label "'
+                        +lbl_orig+'" already exists in parent ' + $Db.trm(vocab_id, 'trm_Label'),1500);
+                    return null;
                 }
 
-                if(is_already_exists){    
-                    window.hWin.HEURIST4.msg.showMsgFlash('Term with label "'
-                        +lbl_orig+'" already exists in vocabulary',1500);
+                // check if parent term has child with same code
+                if(!window.hWin.HEURIST4.util.isempty(code) && $Db.trm_HasChildWithCode(vocab_id, code, trm_id)){
+                    window.hWin.HEURIST4.msg.showMsgFlash('Term with code "'
+                        +code+'" already exists in parent ' + $Db.trm(vocab_id, 'trm_Label'),1500);
                     return null;
                 }
             }

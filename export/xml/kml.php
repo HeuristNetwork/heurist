@@ -197,19 +197,19 @@ if($islist || (array_key_exists("id", $_REQUEST) && $_REQUEST["id"]!="")){
 
                         //timestap or timespan
                         if($row[6] || $row[7] || $row[8]){
-                            $d1 = temporalToSimple($row[6]);
-                            $d2 = temporalToSimple($row[7]); //start
-                            $d3 = temporalToSimple($row[8]); //end date
-                            if($d1 || ($d2 && $d3==null)){
-                                if($d1==null){
-                                    $d1 = $d2;
-                                }
-                                print "<TimeStamp><when> $d1 </when></TimeStamp>";
-
-                            }else{
-                                if($d2 && $d3){
-                                    print "<TimeSpan><begin> $d2 </begin><end> $d3 </end></TimeSpan>";
-                                }
+                            
+                            if($row[7] || $row[8]){
+                                
+                                if(!$row[7]) $row[7] = $row[8];
+                                
+                                //create timespan from two temporal objects
+                                $dt = Temporal::mergeTemporals($row[7], $row[8]);
+                                
+                            }else if($row[6]){
+                                $dt = new Temporal($row[6]);
+                            }
+                            if($dt && $dt->isValid()){
+                                print $dt->toKML();
                             }
                         }
 

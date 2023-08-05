@@ -4,6 +4,19 @@
     * If it is missed, it uses latest mirador distribution from unpkg.com
     * 
     * For annotations, heurist database must have either RT_MAP_ANNOTATION or RT_ANNOTATION
+    * 
+    * As a mirador viewer with annotation tool we use customized https://github.com/ProjectMirador/mirador-integration
+    * Modified files are in mirador-integration-changes.zip in external5/mirador3 folder
+    * To perform further customizations download mirador-integration repository
+    * Install dependencies (use node.js v 16.20) including mirador-annotations 0.4.0
+    * Apply changes from mirador-integration-changes.zip
+    * To build webpack: npm run webpack
+    * 
+    * 
+    * We pass to mirador-integration application 
+    * endpointURL - url to heurist api that pass all requests to dbAnnotation.php
+    * manifestUrl - url of iiif image (it needs for thumbnail creation for annotated area)
+    * sourceRecordId - heurist record id - reference to image to be annotated 
     *
     * @package     Heurist academic knowledge management system
     * @link        https://HeuristNetwork.org
@@ -72,7 +85,7 @@ if q only defined all images linked to record(s) will be included
         
     
     //$_SERVER['QUERY_STRING'];
-        $manifest_url = $url;
+        $manifest_url = str_replace('&amp;','&',htmlspecialchars($url));
         
         $use_custom_mirador = file_exists(dirname(__FILE__).'/../../../external/mirador3/dist/main.js');
 ?>
@@ -102,9 +115,17 @@ if($use_custom_mirador){
 <body>
 <div id="demo"></div>
 <script>
-    window.endpointURL = "<?php echo $baseUrl.'/h6-alpha/api/'.$_REQUEST['db'].'/annotations';?>";
+<?php
+    $dbname = @$_REQUEST['db'];
+    if (!preg_match('[\W]', $dbname)){
+?>      
+    window.endpointURL = "<?php echo $baseUrl.'/heurist/api/'.$dbname.'/annotations';?>";
     window.manifestUrl = "<?php echo $manifest_url;?>";
+<?php    
+    }
+?>
     window.hideThumbs = <?php echo (@$_REQUEST['iiif_image']?'true':'false');?>; 
+    window.sourceRecordId = <?php echo (@$_REQUEST['recID']>0?intval($_REQUEST['recID']):0);?>; 
 </script>
 <?php
 if($use_custom_mirador){

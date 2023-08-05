@@ -54,6 +54,7 @@ require_once(dirname(__FILE__).'/../../viewers/smarty/reportRecord.php');
 $recstructures = array();
 $detailtypes   = array();
 $terms         = null;
+$useNewTemporalFormatInRecDetails = false;
 
 $block_swf_email = false;
 
@@ -407,7 +408,7 @@ Replace existing values with new values, retain existing value if no new value s
 */
 function recordSave($system, $record, $use_transaction=true, $suppress_parent_child=false, $update_mode=0, $total_record_count=1){
 
-    global $block_swf_email;
+    global $block_swf_email, $useNewTemporalFormatInRecDetails;
 
     //check capture for newsletter subscription
     if (@$record['Captcha'] && @$_SESSION["captcha_code"]){
@@ -453,6 +454,9 @@ function recordSave($system, $record, $use_transaction=true, $suppress_parent_ch
         }
     }        
 
+    $useNewTemporalFormatInRecDetails = ($system->get_system('sys_dbSubSubVersion')>=14);
+
+    
     //0 normal, 1 import, 2 - faims or zotero import (add without recstructure check)
     $modeImport = @$record['AddedByImport']?intval($record['AddedByImport']):0;
 
@@ -481,13 +485,14 @@ function recordSave($system, $record, $use_transaction=true, $suppress_parent_ch
     // recDetails data
     if ( @$record['details'] ) {
         
-        if(@$record['details_encoded']==1){
-            $record['details'] = json_decode(str_replace( ' xxx_style=', ' style=', 
-                        str_replace( '^^/', '../', urldecode($record['details']))));
-        }else if(@$record['details_encoded']==2){
+        if(@$record['details_encoded']==1 || @$record['details_encoded']==2){
+            //$record['details'] = json_decode(str_replace( ' xxx_style=', ' style=', 
+            //            str_replace( '^^/', '../', urldecode($record['details']))), true);
             $record['details'] = json_decode(urldecode($record['details']), true);
+            $record['details_visibility'] = json_decode(urldecode($record['details_visibility']), true);
         }else if(@$record['details_encoded']==3){
             $record['details'] = json_decode($record['details'], true);
+            $record['details_visibility'] = json_decode($record['details_visibility'], true);    
         }
         
         $detailValues = _prepareDetails($system, $rectype, $record, $validation_mode, $recID, $modeImport);
@@ -749,7 +754,7 @@ function recordSave($system, $record, $use_transaction=true, $suppress_parent_ch
                     .print_r($values,true));
                 **/
                 
-                return $system->addError(HEURIST_DB_ERROR, 'Cannot save value - possibly bad encoding.', $syserror);
+                return $system->addError(HEURIST_DB_ERROR, 'Cannot save value - possibly bad encoding or invalid date format (System error: '.$syserror.').', $syserror);
 
             }
 
@@ -942,7 +947,7 @@ function recordSave($system, $record, $use_transaction=true, $suppress_parent_ch
 function recordDelete($system, $recids, $need_transaction=true, 
     $check_source_links=false, $filterByRectype=0, $progress_session_id=null){
 
-    // Check that the user is allowed to create records
+    // Check that the user is allowed to delete records
     $is_allowed = checkUserPermissions($system, 'delete');
     if($is_allowed !== true){
         return $is_allowed;
@@ -2327,7 +2332,6 @@ function prepareRecordForUpdate($system, $record, $detailValuesNew, $update_mode
     }//for
 
     return $detailValues;
-
 }
 
 //function doDetailInsertion($recID, $details, $rectype, $wg, &$nonces, &$retitleRecs, $modeImport)
@@ -2347,7 +2351,7 @@ function prepareRecordForUpdate($system, $record, $detailValuesNew, $update_mode
 */
 function _prepareDetails($system, $rectype, $record, $validation_mode, $recID, $modeImport)
 {
-    global $terms;
+    global $terms, $useNewTemporalFormatInRecDetails;
 
     $details = $record['details'];
 
@@ -2377,7 +2381,7 @@ function _prepareDetails($system, $rectype, $record, $validation_mode, $recID, $
         if(preg_match("/^t:\\d+$/", $dtyID)){ //old format with t:NNN
             $dtyID = substr($dtyID, 2);
         }
-        if(is_numeric($dtyID) && $dtyID>0){
+        if(is_numeric($dtyID) && $dtyID>0){  //ignore header and supplementary fields
             $details2[$dtyID] = is_array($pairs)?$pairs:array($pairs);    
         }
     }
@@ -2493,43 +2497,57 @@ function _prepareDetails($system, $rectype, $record, $validation_mode, $recID, $
                     break;
 
                 case "date":
-                    $len  = strlen(super_trim($dtl_Value));
-                    $isValid = ($len > 0); //preg_match("/\\S/", $dtl_Value);
+                
+                    if(is_array($dtl_Value)){ //date is temporal json array
+                        $isValid = count($dtl_Value)>1 && (@$dtl_Value['timestamp'] || @$dtl_Value['start']);
+                    }else{
+                        $len  = strlen(super_trim($dtl_Value));
+                        $isValid = ($len > 0); //preg_match("/\\S/", $dtl_Value);
+                    }
+                
                     if(!$isValid ){
                         $err_msg = 'Value is empty';  
                     }else{
-                        //yesterday, today, tomorrow, now
-                        $sdate = strtolower(super_trim($dtl_Value));
-                        if($sdate=='today'){
-                            $dtl_Value = date('Y-m-d');
-                        }else if($sdate=='now'){
-                            $dtl_Value = date('Y-m-d H:i:s');
-                        }else if($sdate=='yesterday'){
-                            $dtl_Value = date('Y-m-d',strtotime("-1 days"));
-                        }else if($sdate=='tomorrow'){
-                            $dtl_Value = date('Y-m-d',strtotime("+1 days"));
-                        }else if(strlen($dtl_Value)>=8 && strpos($dtl_Value,'-')==false){
+                        
+                        if(true){ 
                             
-                            try{
-                                $t2 = new DateTime($dtl_Value);
+                            $dtl_Value = Temporal::getValueForRecDetails( $dtl_Value, $useNewTemporalFormatInRecDetails );
+                        
+                        
+                        }else{
+                            // Use old plain temporals
+                            
+                            //yesterday, today, tomorrow, now
+                            $sdate = strtolower(super_trim($dtl_Value));
+                            if($sdate=='today'){
+                                $dtl_Value = date('Y-m-d');
+                            }else if($sdate=='now'){
+                                $dtl_Value = date('Y-m-d H:i:s');
+                            }else if($sdate=='yesterday'){
+                                $dtl_Value = date('Y-m-d',strtotime("-1 days"));
+                            }else if($sdate=='tomorrow'){
+                                $dtl_Value = date('Y-m-d',strtotime("+1 days"));
+                            }else if(strlen($dtl_Value)>=8 && strpos($dtl_Value,'-')==false){
                                 
-                                $format = 'Y-m-d';
-                                if($t2->format('H')>0 || $t2->format('i')>0 || $t2->format('s')>0){
-                                //strlen($dtl_Value)>=12 || strpos($dtl_Value,'T')>7 || strpos($dtl_Value,' ')>7){
-                                    if($t2->format('s')>0){
-                                        $format .= ' H:i:s';
-                                    }else{
-                                        $format .= ' H:i';
+                                try{
+                                    $t2 = new DateTime($dtl_Value);
+                                    
+                                    $format = 'Y-m-d';
+                                    if($t2->format('H')>0 || $t2->format('i')>0 || $t2->format('s')>0){
+                                    //strlen($dtl_Value)>=12 || strpos($dtl_Value,'T')>7 || strpos($dtl_Value,' ')>7){
+                                        if($t2->format('s')>0){
+                                            $format .= ' H:i:s';
+                                        }else{
+                                            $format .= ' H:i';
+                                        }
                                     }
+                                    $dtl_Value = $t2->format($format);
+                                    
+                                }catch(Exception  $e){
+                                    //skip conversion
+                                    
                                 }
-                                $dtl_Value = $t2->format($format);
-                                
-                            }catch(Exception  $e){
-                                //skip converion
-                                
                             }
-                            
-                            //$dtl_Value = validateAndConvertToISO($dtl_Value);
                         }
                     }
                     break;
@@ -2811,7 +2829,8 @@ function _prepareDetails($system, $rectype, $record, $validation_mode, $recID, $
             $sMsg = implode(' ',$errorValues);   
         }else{
             $sMsg = 'Encountered invalid value'.$ss
-            .' for Record#'.$recID.'<br>'.implode(' ',$errorValues);
+            .' for Record# '.$recID.'<br>'.implode(' ',$errorValues)
+            .'<br> This may be due to your browser cache being out-of-date (use Ctrl-F5 to reload the page)';
         }
 
         $system->addError(HEURIST_ACTION_BLOCKED, $sMsg, null);
@@ -2866,7 +2885,11 @@ function prepareGeoValue($mysqli, $dtl_Value){
     }
 
     if(preg_match('/\d/', $geoValue) && $hasGeoType){ // check that the value has ANY numbers (coordinates) and has an identified geo type
-        $res = mysql__select_value($mysqli, "select ST_asWKT(ST_GeomFromText('".addslashes($geoValue)."'))");
+        try{
+            $res = mysql__select_value($mysqli, "select ST_asWKT(ST_GeomFromText('".addslashes($geoValue)."'))");    
+        } catch (Exception $e) {
+            return array(false, 'Geo WKT value '.substr(htmlspecialchars($geoValue),0,15).'... is not valid');
+        }
     }
 
     if($res){
@@ -3438,22 +3461,23 @@ function checkUserPermissions($system, $action){
 
     $mysqli = $system->get_mysqli();
 
-    $response = checkUserStatusColumn($system); // update enum values for ugr_Enabled
-    if(is_array($response)){
-        return false;
-    }
-
     $user_query = "SELECT ugr_Enabled FROM sysUGrps WHERE ugr_ID = " . $system->get_user_id();
     $res = $mysqli->query($user_query);
     if(!$res){
-        $system->addError(HEURIST_DB_ERROR, 'Cannot check available user permissions.<br>Please contact the Heurist team, if this persists.');
+        $system->addError(HEURIST_DB_ERROR, 
+                'Cannot check available user permissions.<br>Please contact the Heurist team, if this persists.',
+                $mysqli->error);
         return false;
     }
 
     $results = $res->fetch_row();
 
     $permissions = $results[0];
-    $block_msg = 'Database owner has blocked ' . ($permissions == 'y_no_add' ? 'addition' : ($permissions == 'y_no_delete' ? 'deletion' : 'addition and deletion')) . ' of records for your profile.';
+    $block_msg = 'Database owner has blocked ' . 
+            ($permissions == 'y_no_add' 
+                ? 'addition' 
+                : ($permissions == 'y_no_delete' ? 'deletion' : 'addition and deletion')) 
+                . ' of records for your profile.';
 
     if($permissions == 'n'){
         $system->addError(HEURIST_ACTION_BLOCKED, 'Only accounts that are enabled can create records.');

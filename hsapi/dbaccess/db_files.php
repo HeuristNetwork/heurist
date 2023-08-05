@@ -334,7 +334,7 @@ function fileGetThumbnailURL($system, $recID, $get_bgcolor){
     
     if($fileid){
 
-        $thumbfile = 'ulf_'.$fileid.'.png';
+        $thumbfile = 'ulf_'.$fileid.'.png'; // ulf_[obfuscation].png
 
         if(defined('HEURIST_THUMB_URL') && file_exists(HEURIST_THUMB_DIR . $thumbfile)){
             $thumb_url = HEURIST_THUMB_URL.$thumbfile;
@@ -611,7 +611,7 @@ function downloadViaProxy($filename, $mimeType, $url, $bypassProxy = true, $orig
 }
 
 /** 
-* Direct file download - move to utils_file
+* Direct file download - @todo move to utils_file
 * 
 * Usage in 2 cases only
 * 1) Download database backup (exportMyDataPopup)

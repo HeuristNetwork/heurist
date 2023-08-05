@@ -29,7 +29,7 @@ function hLayoutMgr(){
     
     var isEditMode = false;
     
-    var _supp_options = null; //defined in layoutInit dynamic options with current status params
+    var _supp_options = {}; //defined in layoutInit dynamic options with current status params
     
     var _main_layout_cfg = null;
 
@@ -50,7 +50,7 @@ function hLayoutMgr(){
     
     //---------------------------------------
     //
-    // layout - JSON
+    // layout - JSON config
     // container - id or element
     //
     function _layoutInit(layout, container, isFirstLevel){
@@ -98,7 +98,7 @@ function hLayoutMgr(){
             layout = [layout];    
         }
 
-        if(isFirstLevel===true && _supp_options){
+        if(isFirstLevel===true){
             
             if(_supp_options.page_name){
                 layout[0].name  = 'Page'; //_supp_options.page_name;
@@ -266,6 +266,11 @@ function hLayoutMgr(){
         _layoutInit(layout.children, $d);
         
     }
+    
+    //
+    // layout - JSON config
+    // container - parent element
+    // 
     function _layoutInitText(layout, container){
         
         var $d = _layoutCreateDiv(layout, 'editable tinymce-body cms-element brick');
@@ -280,8 +285,18 @@ function hLayoutMgr(){
         if(layout.css && !$.isEmptyObject(layout)){
             $d.css( layout.css );    
         }
+        
+        var content = 'content'; //default name of attribute
+        
+        if(_supp_options['lang']){
+            var lang = window.hWin.HAPI4.getLangCode3(_supp_options['lang'],'def');
+            if(layout[content+lang]){ //if not found use the default
+                content = content+lang;
+            }
+            $d.attr('data-lang', lang);
+        }
 
-        $d.html(layout.content);
+        $d.html(layout[content]);
     }
     
     //
@@ -385,19 +400,17 @@ function hLayoutMgr(){
             layout.options['init_at_once'] = true;
         }
         
-        if(_supp_options){
-
-            if(_supp_options[layout.appid]){
-                layout.options = $.extend(layout.options, _supp_options[layout.appid]);        
-            }
+        if(_supp_options[layout.appid]){
+            layout.options = $.extend(layout.options, _supp_options[layout.appid]);        
         }
         
-        var weblang = window.hWin.HEURIST4.util.getUrlParameter('weblang');
-        if(weblang){
+        //var weblang = window.hWin.HEURIST4.util.getUrlParameter('weblang');
+        if(_supp_options['lang']){
             // xx - means it will use current language
-            layout.options['language'] = window.hWin.HAPI4.getLangCode3(weblang,'xx');    
-        } 
-
+            layout.options['language'] = window.hWin.HAPI4.getLangCode3(_supp_options['lang'],'def');    
+        }
+        
+        
         if (app && app.script && app.widgetname) { //widgetname - function name to init widget
 
             if($.isFunction($('body')[app.widgetname])){ //OK! widget script js has been loaded            
@@ -612,7 +625,7 @@ function hLayoutMgr(){
     }
     
     //
-    // Find element in array by internal key property
+    // Find configuration for element in array by internal key property
     //
     function _layoutContentFindElement(content, ele_key){
 
@@ -912,10 +925,10 @@ function hLayoutMgr(){
         },
         
         //
-        // supp_options - parameters that refelect current status - for example page record id
+        // supp_options - additional parameters that refelect current status - for example page record id, current language
         //
         layoutInit: function(layout, container, supp_options){
-            _supp_options = supp_options;
+            _supp_options = supp_options?supp_options:{};
             return _layoutInit(layout, container, true);
         },
         
@@ -982,7 +995,7 @@ function hLayoutMgr(){
             $.each(widgets, function(i, item){
                 var widgetname = $(item).attr('data-widgetname');
                 if(widgetname){
-                    var is_inited = $(item)[widgetname]('option', 'init_completed');
+                    var is_inited = $(item)[widgetname]('instance') && $(item)[widgetname]('option', 'init_completed');
                     if(is_inited===false){
                         are_all_widgets_inited = false;
                         return false;

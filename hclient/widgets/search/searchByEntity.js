@@ -242,6 +242,8 @@ console.log(data);
     //
     _redraw_buttons_by_entity: function(is_init){
         
+        let needs_saving = false;
+
         if(is_init===true){
             //get selected from preferences
             this.selected_rty_ids = window.hWin.HAPI4.get_prefs_def('entity_filter_btns','');
@@ -275,6 +277,14 @@ console.log(data);
                 }
             }else{
                 this.selected_rty_ids = this.selected_rty_ids.split(',');    
+
+                for (let i = 0; i < this.selected_rty_ids.length; i++) {
+                    const rty_ID = this.selected_rty_ids[i];
+                    if(rty_ID <= 0 || $Db.rty(rty_ID) == null){ // invalid rectype, or has been deleted
+                        this.selected_rty_ids.splice(i, 1);
+                        needs_saving = true;
+                    }
+                }
             }
             
         }
@@ -405,7 +415,7 @@ console.log(data);
         }
         
         
-        if(is_init!==true){
+        if(is_init!==true || needs_saving){
             //save in user preferences
             window.hWin.HAPI4.save_pref('entity_filter_btns', this.selected_rty_ids.join(','));
         }

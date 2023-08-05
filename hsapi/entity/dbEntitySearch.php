@@ -311,7 +311,7 @@ class DbEntitySearch
             }
             else if ($data_type == 'date') {    
 
-                //$datestamp = validateAndConvertToISO($this->value);
+                //$datestamp = Temporal::dateToISO($this->value);
                 
                 if($between){
                     $res = $between." '".$values[0]."' and '".$values[1]."'";

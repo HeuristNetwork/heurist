@@ -446,10 +446,11 @@ error_log('count '.count($childNotFound).'  '.count($toProcess).'  '.print_r(  $
         }
         
         if(@$this->data['val']!=null){
-            if(@$this->data['details_encoded']==1){
-                $this->data['val'] = json_decode(str_replace( ' xxx_style=', ' style=', 
-                        str_replace( '^^/', '../', urldecode($this->data['val']))));
-            }else if(@$this->data['details_encoded']==2){
+            //attempt to pass server filters against malicious code
+            if(@$this->data['details_encoded']==1 || @$this->data['details_encoded']==2){
+                //$this->data['val'] = json_decode(str_replace( ' xxx_style=', ' style=', 
+                //        str_replace( '^^/', '../', urldecode($this->data['val']))));
+                //}else if(@$this->data['details_encoded']==2){
                 $this->data['val'] = urldecode( $this->data['val'] );
             }
         }
@@ -470,6 +471,7 @@ error_log('count '.count($childNotFound).'  '.count($toProcess).'  '.print_r(  $
                         .implode(',', $this->rtyIDs).')';
         $rtyLimits = mysql__select_assoc2($mysqli, $query);
 
+        $basetype = null;
         if(@$this->data['geo']==null){
             $basetype = mysql__select_value($mysqli, 'select dty_Type from defDetailTypes where dty_ID = '.$dtyID);
             if($basetype=='geo'){
@@ -495,8 +497,14 @@ error_log('count '.count($childNotFound).'  '.count($toProcess).'  '.print_r(  $
             $dtl['dtl_Value'] = $geoType;
             $dtl['dtl_Geo'] = $geoValue;
             //$dtl['dtl_Geo'] = array("ST_GeomFromText(\"" . $this->data['geo'] . "\")");  
+        }else if($basetype=='date'){
             
-        }else if(@$this->data['val']!=null){
+            $useNewTemporalFormatInRecDetails = ($this->system->get_system('sys_dbSubSubVersion')>=14);
+            
+            $dtl['dtl_Value'] = Temporal::getValueForRecDetails( $this->data['val'], $useNewTemporalFormatInRecDetails );
+            
+            
+        }else if(@$this->data['val']!=null){ //sanitize new value
             
             $this->_initPutifier();
             if(!in_array($dtyID, $this->not_purify)){
@@ -605,6 +613,14 @@ error_log('count '.count($childNotFound).'  '.count($toProcess).'  '.print_r(  $
             
                 $res = $this->detailsReplace();
 
+            }else if(@$this->data['a'] == 'addreplace'){
+                
+                $res = $this->detailsReplace();
+                if(is_array($res) && @$res['passed']==1 && @$res['undefined']==1){
+                    //detail not found - add new one
+                    $res = $this->detailsAdd();
+                }
+                
             }else if(@$this->data['a'] == 'delete'){
                 
                 $res = $this->detailsDelete(true);
@@ -644,12 +660,15 @@ error_log('count '.count($childNotFound).'  '.count($toProcess).'  '.print_r(  $
             return false;
         }
         
-        if(@$this->data['rVal']!=null){
+        $useNewTemporalFormatInRecDetails = ($this->system->get_system('sys_dbSubSubVersion')>=14);
+
+        
+        if(@$this->data['rVal']!=null || @$this->data['encoded']==2){
             if(@$this->data['encoded']==1){
                 $this->data['rVal'] = urldecode( $this->data['rVal'] );
-            }else if(@$this->data['encoded']==2){
-                $this->data['rVal'] = str_replace( ' xxx_style=', ' style=', 
-                                str_replace( '^^/', '../', $this->data['rVal'] ));
+                //}else if(@$this->data['encoded']==2){
+                //$this->data['rVal'] = str_replace( ' xxx_style=', ' style=', 
+                //                str_replace( '^^/', '../', $this->data['rVal'] ));
             }
         }
         
@@ -737,8 +756,14 @@ error_log('count '.count($childNotFound).'  '.count($toProcess).'  '.print_r(  $
                 case "float":
                 case "integer":
                 case "resource":
-                case "date":
                     $searchClause = "dtl_Value = \"".$mysqli->real_escape_string(@$this->data['sVal'])."\"";
+                    $partialReplace = false;
+                    break;
+                case "date":
+                
+                    $dtl_Value = Temporal::getValueForRecDetails( @$this->data['sVal'], $useNewTemporalFormatInRecDetails );
+                
+                    $searchClause = "dtl_Value = \"".$mysqli->real_escape_string($dtl_Value)."\"";
                     $partialReplace = false;
                     break;
                 case "relmarker":
@@ -885,7 +910,7 @@ error_log('count '.count($childNotFound).'  '.count($toProcess).'  '.print_r(  $
                         
                     }else
                     if (!$replace_all_occurences && $partialReplace) {// need to replace sVal with rVal
-                        $newVal = preg_replace("/".$this->data['sVal']."/i",$this->data['rVal'],$dtlVal);
+                        $newVal = preg_replace("/".preg_quote($this->data['sVal'], "/")."/i",$this->data['rVal'],$dtlVal);
                     }else{
                         $newVal = $this->data['rVal'];
                     }
@@ -905,6 +930,10 @@ error_log('count '.count($childNotFound).'  '.count($toProcess).'  '.print_r(  $
                         
                         $dtl['dtl_Value'] = $geoType;        
                         $dtl['dtl_Geo'] = $geoValue;             
+                        
+                    }else  if($basetype=='date'){
+                        
+                        $dtl['dtl_Value'] = Temporal::getValueForRecDetails( $newVal, $useNewTemporalFormatInRecDetails );
                         
                     }else{
                         $dtl['dtl_Value'] = $newVal;        

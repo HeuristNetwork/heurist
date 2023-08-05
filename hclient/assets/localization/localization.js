@@ -76,6 +76,10 @@ regional['ENG'] = {
     'Manage': '',
     'Select': '',
     'Configure': '',
+    'all': '',
+    'Discard changes?': '',
+    'Back': '',
+    'Next': '',
     
     'Show context help': '',
     'Heurist context help': '',
@@ -280,7 +284,7 @@ regional['ENG'] = {
     
     //END main menu
     
-    //resultList --------------------
+    //resultList WIDGET --------------------
     
     'Selected': '',
         'menu-selected-select-all': 'Select all',
@@ -379,12 +383,6 @@ regional['ENG'] = {
     resultList_reorder_list_changed: 'Reorder list has been changed.',
     //END resultList
     
-    //search - filters
-    'Filter': '',
-    'Filtered Result': '',
-    'Save Filter': '',
-    save_filter_hint: 'Save the current filter and rules as a link in the navigation tree',
-     
     //edit 
     Warn_Lost_Data: 'You have made changes to the data. Click "Save" otherwise all changes will be lost.',     
     Warn_Lost_Data_On_Structure_Edit: 'Click "Save data" to save the data entered, "Drop data changes" to abandon modifications.<br>Structure changes are saved automatically - they are not affected by your choice.',
@@ -493,6 +491,49 @@ regional['ENG'] = {
     Error_Json_Parse: 'Cannot parse server response',
     
 //---------------------- END OF TRANSLATION 2021-10-19
+
+    // Search (simple filter) WIDGET --------------------
+    'Filter': '',
+    filter_start_hint: 'Apply the filter/search in the search field and display results in the central panel below',
+    filter_placeholder: 'define filter',
+    'Filtered Result': '',
+    'Save Filter': '',
+    'Filter help': '',
+    filter_help_hint: 'Show syntax and examples of the Heurist query/filter language',
+    save_filter_hint: 'Save the current filter and rules as a link in the navigation tree',
+    search_filter_hint: 'enter search/filter or use "Filter builder"',
+    'Filter builder': '',
+    filter_builder_hint: 'Build a filter expression using a form-driven approach',
+    'Facet builder': '',
+    filter_facetbuilder_hint: 'Build new faceted search',
+    filter_save_hint: 'Save current filter',
+    //END Search (simple filter) WIDGET
+     
+    // Faceted Search WIDGET --------------------
+    filter_facet_processing: 'processing facets...',
+    filter_facet_submit: 'Submit',
+    filter_facet_interrupt: 'Interrupt',
+    filter_facet_exit: 'Close',
+    filter_facet_exit_hint: 'Close this facet search and return to the list of saved searches',
+    filter_facet_resetall: 'Reset all',
+    filter_facet_resetall_hint: 'Clear all fields / Reset all the filters to their initial states',
+    filter_facet_reset: 'To clear previous search click the RESET button',
+    filter_facet_savestate: 'Save state',
+    filter_facet_titleprefix: 'filter : ',
+    filter_facet_apply_preliminary: 'Apply preliminary filter',
+    filter_facet_mapsearch: 'Map Search',
+    filter_facet_mapsearch_hint: 'Click this button to set and apply spatial search limits',
+    filter_facet_general_search: 'Search everything',
+
+    filter_facet_spatial_search: 'Heurist spatial search',
+    facet_search_no_values: 'no values',
+    facet_search_select: 'select...',
+    facet_search_expand_dropdown:  'dropdown',
+    
+    // Faceted Search wizard WIDGET --------------------
+    facet_wizard_select_field: 'Select fields that act as facet',    
+    facet_wizard_define_field: 'Define titles, help tips and facet type',
+
 //===================    
     
     'Design database': 'Design database',
@@ -590,6 +631,8 @@ regional['ENG'] = {
     
     'Collected':'Collect',
     'Shared':'Share',
+
+    'feature_request': 'Please request from Heurist team if needed or add to code and do a pull request'
 
 };
 

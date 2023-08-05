@@ -156,7 +156,8 @@ private static function findRecordIds($imp_session, $params){
     }    
     
     if(count($mapped_fields)==0){
-        return 'No mapping defined';
+        self::$system->addError(HEURIST_ACTION_BLOCKED, 'Import CSV. Matching step failed. No mapping defined');
+        return false;
     }
     
     //keep mapping   field_XXX => dty_ID
@@ -461,7 +462,8 @@ private static function findRecordIds($imp_session, $params){
 
     }
     else{
-        return $mysqli->error;
+        self::$system->addError(HEURIST_DB_ERROR, 'Can not query import table '.$import_table, $mysqli->error);
+        return false;
     }
 
     // result of work - counts of records to be inserted, updated
@@ -533,7 +535,6 @@ public static function assignRecordIds($params){
             $disambiguation = $imp_session['validation']['disambiguation'];
         }else{
             mysql__update_progress(null, $progress_session_id, false, 'REMOVE');    
-            self::$system->addError(HEURIST_ERROR, $imp_session);
             return false; //error
         }
         
@@ -1422,7 +1423,7 @@ them to incoming data before you can import new records:<br><br>'.implode(",", $
 
             $idx = array_search($field, $sel_query)+1;
 
-            $wrong_records = self::validateNumericField($query, $imp_session, $field, $idx, 'warning', $progress_session_id);
+            $wrong_records = self::validateNumericField($mysqli, $query, $imp_session, $field, $idx, 'warning', $progress_session_id);
 
         }else{
             $query = "select imp_id, ".implode(",",$sel_query)
@@ -1952,18 +1953,25 @@ private static function validateDateField($query, $imp_session, $fields_checked,
                 if($r_value!=null && super_trim($r_value)!='' && super_trim($r_value)!='NULL'){
 
 
-                    if( is_numeric($r_value) && ($r_value=='0' || intval($r_value)) ){
+                    if( preg_match('/^-?\d+$/', $r_value) ){ //this is year only
                         array_push($newvalue, $r_value);
                     }else{
+                        
+                         $temporal = new Temporal($r_value);
+                         if($temporal->isValid()){
+                             array_push($newvalue, $r_value);     
+                         }else{
+                             
+                             try{   
+                                $t2 = new DateTime($r_value);
+                                $value = $t2->format('Y-m-d H:i:s');
+                                array_push($newvalue, $value);
+                             } catch (Exception  $e){
+                                $is_error = true;
+                                array_push($newvalue, "<font color='red'>".$r_value."</font>");
+                             }                            
+                         }
 
-                         try{   
-                            $t2 = new DateTime($r_value);
-                            $value = $t2->format('Y-m-d H:i:s');
-                            array_push($newvalue, $value);
-                         } catch (Exception  $e){
-                            $is_error = true;
-                            array_push($newvalue, "<font color='red'>".$r_value."</font>");
-                         }                            
                         /* OLD VERSION - strtotime doesn't work for dates prior 1901
                         $date = date_parse($r_value);
                         if ($date["error_count"] == 0 && checkdate($date["month"], $date["day"], $date["year"]))
@@ -1993,7 +2001,7 @@ private static function validateDateField($query, $imp_session, $fields_checked,
             $error["count_".$type] = $cnt_error;
             $error["recs_error"] = array_slice($wrong_records,0,1000);
             $error["field_checked"] = $fields_checked;
-            $error["err_message"] = "Date values must be in dd-mm-yyyy, mm/dd/yyyy or yyyy-mm-dd formats";
+            $error["err_message"] = "Date values must be in dd-mm-yyyy, mm/dd/yyyy or yyyy-mm-dd formats. Or it should be valid Temporal object.";
             $error["short_message"] = "Invalid Dates";
             $imp_session['validation']['count_'.$type] = $imp_session['validation']['count_'.$type]+$cnt_error;
             array_push($imp_session['validation'][$type], $error);

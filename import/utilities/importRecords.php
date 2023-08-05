@@ -185,6 +185,10 @@ $s_max_size = round($max_size/1024/1024).' MBytes';
 
             <br>
             <button id="btn_ImportRt" class="import-rem">Download listed entity types</button>
+            
+            <label style="display:none">
+                <input type="checkbox" id="btn_SameStructure"/>Source database has the same structure as target (this) one
+            </label>
         </div>
 
         <!-- STEP 2  - start donwload -->

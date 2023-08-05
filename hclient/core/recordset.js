@@ -1092,31 +1092,8 @@ mapDraw.js initial_wkt -> parseWKT -> GeoJSON -> _loadGeoJSON (as set of separat
                         }
                         */
                         //"xx" means take current system language
-                        if(lang){
-                            lang = window.hWin.HAPI4.getLangCode3(lang);
-                            
-                            var def_val = '';
-                            for(var i=0; i<d[fldname].length; i++){
-                                var val = d[fldname][i];
-                                
-                                if(val.length>4 && val.substr(3,1)==':'){
-                                    if(val.substr(0,3)==lang){
-                                        def_val = val.substr(4).trim();
-                                        break;
-                                    }
-                                }else if(lang=='xx'){
-                                    //without prefix
-                                    def_val = val;
-                                    break;
-                                }
-                            }
-                            return def_val?def_val:d[fldname][0];
-                        }else{
-                            return d[fldname][0];    
-                        }
-                        
-                        
-                        
+                        return window.hWin.HAPI4.getTranslation(d[fldname], lang);
+
                     }
                 }else if(fldname=="dtl_StartDate"){
                     if(d[DT_START_DATE] && d[DT_START_DATE][0]){

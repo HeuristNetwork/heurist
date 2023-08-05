@@ -45,6 +45,8 @@ $.widget( "heurist.lookupGN", $.heurist.recordAction, {
     recordList:null,
     _country_vocab_id: 0,
 
+    tabs_container: null,
+
     //  
     // invoked from _init after loading of html content
     //
@@ -61,10 +63,6 @@ $.widget( "heurist.lookupGN", $.heurist.recordAction, {
             ele.hSelect('widget').css({'max-width':'30em'});
         }
         
-        this.element.find('#search_container > div > div > .header').css({width:'70px','min-width':'70px', display: 'inline-block'});
-
-        this.element.find('#btn_container').position({my: 'left center', at: 'right center', of: '#search_container'});
-
         this.options.resultList = $.extend(this.options.resultList, 
         {
                recordDivEvenClass: 'recordDiv_blue',
@@ -114,6 +112,7 @@ $.widget( "heurist.lookupGN", $.heurist.recordAction, {
             'keypress':this.startSearchOnEnterPress
         });
         
+        this.tabs_container = this.element.find('#tabs-cont').tabs();
         
         return this._super();
     },
@@ -247,62 +246,73 @@ $.widget( "heurist.lookupGN", $.heurist.recordAction, {
      */
     _doSearch: function(){
         
-        if(this.element.find('#inpt_placename').val()==''){
-            window.hWin.HEURIST4.msg.showMsgFlash('Please enter a geoname to perform search', 1000);
+        if(this.element.find('#inpt_query').val()=='' && this.element.find('#inpt_id').val()==''){
+            window.hWin.HEURIST4.msg.showMsgFlash('Please enter a geoname id or a search term to perform a search', 1000);
             return;
         }
 
-        var sURL = 'http://api.geonames.org/searchJSON?username=osmakov';
+        let sURL = 'http://api.geonames.org/';
+        let xml_response = 0;
 
-        if(this.element.find('#inpt_placename').val()!=''){
-            sURL += '&name=' + encodeURIComponent(this.element.find('#inpt_placename').val());
-        }
-        if(this.element.find('#inpt_country').val()!=''){
+        if(this.element.find('#inpt_id').val()!=''){
+            sURL += 'get?geonameId=' + encodeURIComponent(this.element.find('#inpt_id').val());
+            xml_response = 1;
+        }else{
 
-            var term_label = $Db.trm(this.element.find('#inpt_country').val(), 'trm_Label');
-            var _countryCode = $Db.trm(this.element.find('#inpt_country').val(), 'trm_Code');
+            sURL += 'searchJSON?';
 
-            if(_countryCode == ''){
-                
-                switch (term_label) {
-                    case 'Iran':
-                        _countryCode = 'IR';
-                        break;
-                    case 'Kyrgistan': // Kyrgzstan
-                        _countryCode = 'KG';
-                        break;
-                    case 'Syria':
-                        _countryCode = 'SY';
-                        break;
-                    case 'Taiwan':
-                        _countryCode = 'TW';
-                        break;
-                    case 'UAE':
-                        _countryCode = 'AE';
-                        break;
-                    case 'UK':
-                        _countryCode = 'GB';
-                        break;
-                    case 'USA':
-                        _countryCode = 'US';
-                        break;
-                    case 'Vietnam':
-                        _countryCode = 'VN';
-                        break;
-                    default:
-                        break;
+            if(this.element.find('#inpt_query').val()!=''){
+                sURL += '&q=' + encodeURIComponent(this.element.find('#inpt_query').val());
+            }
+            if(this.element.find('#inpt_country').val()!=''){
+    
+                var term_label = $Db.trm(this.element.find('#inpt_country').val(), 'trm_Label');
+                var _countryCode = $Db.trm(this.element.find('#inpt_country').val(), 'trm_Code');
+    
+                if(_countryCode == ''){
+                    
+                    switch (term_label) {
+                        case 'Iran':
+                            _countryCode = 'IR';
+                            break;
+                        case 'Kyrgistan': // Kyrgzstan
+                            _countryCode = 'KG';
+                            break;
+                        case 'Syria':
+                            _countryCode = 'SY';
+                            break;
+                        case 'Taiwan':
+                            _countryCode = 'TW';
+                            break;
+                        case 'UAE':
+                            _countryCode = 'AE';
+                            break;
+                        case 'UK':
+                            _countryCode = 'GB';
+                            break;
+                        case 'USA':
+                            _countryCode = 'US';
+                            break;
+                        case 'Vietnam':
+                            _countryCode = 'VN';
+                            break;
+                        default:
+                            break;
+                    }
+                }
+    
+                if(_countryCode != ''){
+                    sURL += '&country=' + _countryCode; 
                 }
             }
-
-            if(_countryCode != ''){
-                sURL += '&country=' + _countryCode; 
-            }
         }
+
+        sURL += '&username=osmakov';
 
         window.hWin.HEURIST4.msg.bringCoverallToFront(this._as_dialog.parent());
 
         var that = this;
-        var request = {service:sURL, serviceType:'geonames'};             
+        var request = {service:sURL, serviceType:'geonames', is_XML: xml_response};             
         //loading as geojson  - see controller record_lookup.php
         window.hWin.HAPI4.RecordMgr.lookup_external_service(request,
             function(response){
@@ -352,7 +362,12 @@ $.widget( "heurist.lookupGN", $.heurist.recordAction, {
             
             //parse json
             var i=0;
-            var data = json_data.geonames; console.log(data);
+            var data = json_data.geonames;
+
+            if(!window.hWin.HEURIST4.util.isArray(data)){
+                data = [data];
+            }
+
             for(;i<data.length;i++){
                 var feature = data[i];
                 
@@ -403,6 +418,8 @@ $.widget( "heurist.lookupGN", $.heurist.recordAction, {
 
             this.recordList.resultList('updateResultSet', null);
             window.hWin.HEURIST4.msg.showMsgErr('Service did not return data in an appropriate format');
+        }else{
+            this.tabs_container.tabs('option', 'active', 1); // switch to results tab
         }
     }
 });

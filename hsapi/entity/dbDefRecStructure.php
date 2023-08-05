@@ -112,7 +112,7 @@ class DbDefRecStructure extends DbEntityBase
             .',if(rst_DisplayHelpText is not null and (dty_Type=\'separator\' OR CHAR_LENGTH(rst_DisplayHelpText)>0),rst_DisplayHelpText,dty_HelpText) as rst_DisplayHelpText'
             .',if(rst_DisplayExtendedDescription is not null and CHAR_LENGTH(rst_DisplayExtendedDescription)>0,rst_DisplayExtendedDescription,dty_ExtendedDescription) as rst_DisplayExtendedDescription'
 			.',rst_RequirementType, rst_DisplayOrder, rst_DisplayWidth, rst_DisplayHeight, rst_DefaultValue, rst_MaxValues'
-            .',rst_CreateChildIfRecPtr, rst_PointerMode, rst_PointerBrowseFilter, rst_NonOwnerVisibility, rst_Status,rst_SemanticReferenceURL, rst_TermsAsButtons, rst_CalcFunctionID ';
+            .',rst_CreateChildIfRecPtr, rst_PointerMode, rst_PointerBrowseFilter, rst_NonOwnerVisibility, rst_Status, rst_MayModify, rst_SemanticReferenceURL, rst_TermsAsButtons, rst_CalcFunctionID ';
             //dty_Type, rst_FilteredJsonTermIDTree/dty_JsonTermIDTree, rst_PtrFilteredIDs/dty_PtrTargetRectypeIDs 
         
         }else if(@$this->data['details']=='full'){
@@ -136,7 +136,7 @@ class DbDefRecStructure extends DbEntityBase
             "rst_DisplayOrder", "rst_DisplayWidth", "rst_DisplayHeight", "rst_DefaultValue","rst_CalcFunctionID", 
             //XXX "rst_RecordMatchOrder"
             
-            "rst_NonOwnerVisibility", "rst_Status", "rst_OriginatingDBID", "rst_MaxValues", "rst_MinValues",
+            "rst_NonOwnerVisibility", "rst_Status", "rst_MayModify", "rst_OriginatingDBID", "rst_MaxValues", "rst_MinValues",
             //here we check for an override in the recTypeStrucutre for displayGroup
             //XXX "dty_DetailTypeGroupID as rst_DisplayDetailTypeGroupID",
             //here we check for an override in the recTypeStrucutre for TermIDTree which is a subset of the detailType dty_JsonTermIDTree
@@ -539,6 +539,34 @@ class DbDefRecStructure extends DbEntityBase
                 }else if(!empty($mysqli->error)){
                     $this->system->addError(HEURIST_DB_ERROR, 'Cannot check record type #'.$rty_ID.' for relationship marker fields', $mysqli->error);
                     return false;
+                }
+
+                if(@$this->data['get_meta_counts'] == 1){ // Include count of rec_ field counts
+
+                    // Get number of records
+                    $query = "SELECT count(rec_ID) "
+                        . "FROM Records "
+                        . "WHERE rec_RecTypeID = $rty_ID AND rec_FlagTemporary = 0";
+
+                    $rec_counts = mysql__select_value($mysqli, $query);
+                    $res['rec_ID'] = !$rec_counts ? 0 : $rec_counts;
+
+                    // Get number of rec URLs
+                    $query = "SELECT count(rec_URL) "
+                        . "FROM Records "
+                        . "WHERE rec_RecTypeID = $rty_ID AND rec_FlagTemporary = 0";
+
+                    $url_counts = mysql__select_value($mysqli, $query);
+                    $res['rec_URL'] = !$url_counts ? 0 : $url_counts;
+
+                    // Get number of records with tags
+                    $query = "SELECT DISTINCT count(rtl_RecID)"
+                        . "FROM usrRecTagLinks "
+                        . "INNER JOIN Records ON rec_ID = rtl_ID "
+                        . "WHERE rec_RecTypeID = $rty_ID AND rec_FlagTemporary = 0";
+
+                    $tag_count = mysql__select_value($mysqli, $query);
+                    $res['rec_Tags'] = !$tag_count ? 0 : $tag_count;
                 }
 
                 if(!$res || count($res) == 0){

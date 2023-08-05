@@ -287,6 +287,7 @@ that._dout('myOnShowEvent');
                         }
                         
                     }
+                    
 
                     var cols = this.options.dataTableParams['columns'];
                     hidden_cols = [];
@@ -316,14 +317,13 @@ this._dout('reload datatable '+this.options.serverSide);
                         //this.options.dataTableParams['dataSrc'] = function(json) { console.log(json); }; //server call response DEBUGGING
                         
                         var datatable_id = window.hWin.HEURIST4.util.random();
-                        
+                   
                         //to avoid passs thousands of recids for each page request 
                         //pass and save query on server side 
                         window.hWin.HEURIST4.util.sendRequest(queryURL,
                             {q:queryStr, datatable:datatable_id}, null, 
                             function(response){
                                 if(response.status == window.hWin.ResponseStatus.OK){
-                                    
                                     that.options.dataTableParams['ajax'] = queryURL 
                                         + '&recordsTotal='+rec_total_count
                                         + '&datatable='+datatable_id;
@@ -524,6 +524,9 @@ this._dout('reload datatable '+this.options.serverSide);
         }
     },
     
+    //
+    // Assign column definitions for datatable
+    //
     _onApplyColumnDefinition: function(config){
         
        window.hWin.HAPI4.save_pref('columns_datatable', config);        
@@ -550,7 +553,7 @@ this._dout('reload datatable '+this.options.serverSide);
                 }
             }
         };
-    
+        //see widgets/record/recordDataTable.js                                                                                 
         window.hWin.HEURIST4.ui.showRecordActionDialog('recordDataTable', opts);        
         
     }

@@ -2,53 +2,50 @@
 <hml xmlns="http://heuristnetwork.org" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://heuristnetwork.org/documentation_and_templates/scheme_hml.xsd">
 <database id="2">Heurist_Core_Definitions</database>
 <query q="ids:318,342,313,314,315,316,317,397,312" db="Heurist_Core_Definitions" depth="all"/>
-<dateStamp>2022-07-20T18:41:31+00:00</dateStamp>
+<dateStamp>2023-07-24T07:48:00+00:00</dateStamp>
 <resultCount>9</resultCount>
 <records>
-
-<record visibility="public" visnote="no login required" selected="no" depth="0">
+<record visibility="viewable" visnote="logged in users" selected="no" depth="0">
 <id>312</id>
 <type id="52" conceptID="99-52">CMS Menu-Page</type>
-<citeAs>https://int-heuristweb-prod.intersect.org.au/heurist/?recID=312&amp;db=Heurist_Core_Definitions</citeAs>
-<title>&lt;i&gt;webpage:&lt;/i&gt;  &lt;b&gt;Contacts&lt;/b&gt;   &lt;i&gt; &lt;/i&gt;</title>
+<citeAs>https://heuristref.net/h6-alpha/?recID=312&amp;db=Heurist_Core_Definitions</citeAs>
+<title>&lt;i&gt;webpage:&lt;/i&gt;  &lt;b&gt;Contacts&lt;/b&gt;   &lt;i&gt; &lt;/i&gt;</title>
 <added>2021-12-19 17:17:16</added>
-<modified>2021-12-20 04:17:16</modified>
-<workgroup id="1">Database owners</workgroup>
+<modified>2023-02-03 22:55:26</modified>
+<workgroup id="7">DO NOT DELETE THESE RECORDS</workgroup>
 <detail conceptID="2-1" name="Menu label / page name" id="1" basename="Name or Title (please rename appropriately)">Contacts</detail>
 <detail conceptID="2-3" name="Menu rollover description (optional)" id="3" basename="Short summary">A page of contact information and location</detail>
 <detail conceptID="2-4" name="Page content" id="4" basename="Extended description">&lt;p&gt;Use this page to provide contact and location information for the project.&lt;/p&gt;
-&lt;p&gt; &lt;/p&gt;</detail>
+&lt;p&gt; &lt;/p&gt;</detail>
 <detail conceptID="99-949" name="Target element" id="918" basename="Target element">main-content</detail>
 <detail conceptID="99-952" name="Show page title (override global setting)" id="920" basename="Show page title" termID="5444" termConceptID="2-532" ParentTerm="Flag (yes, no, unknown)">Yes</detail>
 <detail conceptID="2-928" name="Type of page" id="928" basename="Type of page" termID="6253" termConceptID="2-6253" ParentTerm="Type of web page /menu">Menu + page in Heurist CMS</detail>
 <detail conceptID="2-36" name="Original ID" id="36" basename="Original ID">2-118</detail>
 </record>
-
-<record visibility="public" visnote="no login required" selected="no" depth="0">
+<record visibility="viewable" visnote="logged in users" selected="no" depth="0">
 <id>313</id>
 <type id="52" conceptID="99-52">CMS Menu-Page</type>
-<citeAs>https://int-heuristweb-prod.intersect.org.au/heurist/?recID=313&amp;db=Heurist_Core_Definitions</citeAs>
-<title>&lt;i&gt;webpage:&lt;/i&gt;  &lt;b&gt;Discover&lt;/b&gt;   &lt;i&gt; &lt;/i&gt;</title>
+<citeAs>https://heuristref.net/h6-alpha/?recID=313&amp;db=Heurist_Core_Definitions</citeAs>
+<title>&lt;i&gt;webpage:&lt;/i&gt;  &lt;b&gt;Discover&lt;/b&gt;   &lt;i&gt; &lt;/i&gt;</title>
 <added>2021-12-19 17:17:16</added>
-<modified>2022-01-09 22:31:46</modified>
-<workgroup id="1">Database owners</workgroup>
+<modified>2023-06-23 06:55:31</modified>
+<workgroup id="7">DO NOT DELETE THESE RECORDS</workgroup>
 <detail conceptID="2-1" name="Menu label / page name" id="1" basename="Name or Title (please rename appropriately)">Discover</detail>
 <detail conceptID="2-3" name="Menu rollover description (optional)" id="3" basename="Short summary">Search functions to search and display contents of the database represented by/in this website</detail>
-<detail conceptID="2-4" name="Page content" id="4" basename="Extended description">[{&quot;name&quot;:&quot;Page&quot;,&quot;type&quot;:&quot;group&quot;,&quot;folder&quot;:true,&quot;children&quot;:[{&quot;name&quot;:&quot;Header&quot;,&quot;type&quot;:&quot;text&quot;,&quot;content&quot;:&quot;&lt;p&gt;This is an unconfigured page. Remove &lt;strong&gt; these instructions &lt;/strong&gt;, or replace them with your instructions for users.&lt;/p&gt;\n&lt;p&gt;This page is set up as a container for database searches. Select [Insert] in menu (gear icon or context menu in tree on the left) to add text elements and widgets: search, results list and visualisation (map, timeline, network diagram, report etc.). &lt;/p&gt;\n&lt;p&gt;Click on [Style] in this menu to modify appearance and configure parameters for each of the components.&lt;/p&gt;&quot;,&quot;css&quot;:{&quot;display&quot;:&quot;block&quot;,&quot;border-style&quot;:&quot;none&quot;}},{&quot;name&quot;:&quot;Discover&quot;,&quot;type&quot;:&quot;group&quot;,&quot;children&quot;:[{&quot;appid&quot;:&quot;heurist_SearchTree&quot;,&quot;name&quot;:&quot;Saved filters&quot;,&quot;css&quot;:{&quot;position&quot;:&quot;relative&quot;,&quot;minWidth&quot;:200,&quot;minHeight&quot;:300,&quot;flex&quot;:&quot; 1 150px&quot;},&quot;options&quot;:{&quot;allowed_UGrpID&quot;:&quot;4&quot;,&quot;searchTreeMode&quot;:&quot;1&quot;,&quot;init_at_once&quot;:true,&quot;search_realm&quot;:&quot;sr3&quot;,&quot;rec_ID&quot;:528}},{&quot;appid&quot;:&quot;heurist_Map&quot;,&quot;name&quot;:&quot;Map and timeline&quot;,&quot;css&quot;:{&quot;position&quot;:&quot;relative&quot;,&quot;height&quot;:&quot;100&#37;&quot;,&quot;flex&quot;:&quot;2 1 300px&quot;},&quot;options&quot;:{&quot;leaflet&quot;:true,&quot;init_at_once&quot;:true,&quot;layout_params&quot;:{&quot;notimeline&quot;:false,&quot;nocluster&quot;:false,&quot;editstyle&quot;:true,&quot;map_rollover&quot;:true,&quot;controls&quot;:&quot;legend&quot;,&quot;legend&quot;:&quot;off&quot;,&quot;published&quot;:1,&quot;template&quot;:&quot;&quot;,&quot;basemap&quot;:&quot;&quot;},&quot;search_realm&quot;:&quot;sr3&quot;,&quot;rec_ID&quot;:528}},{&quot;appid&quot;:&quot;heurist_resultList&quot;,&quot;name&quot;:&quot;Standard filter result&quot;,&quot;css&quot;:{&quot;position&quot;:&quot;relative&quot;,&quot;minWidth&quot;:150,&quot;minHeight&quot;:300,&quot;flex&quot;:&quot;2 1 300px&quot;},&quot;options&quot;:{&quot;search_realm&quot;:&quot;sr3&quot;,&quot;rec_ID&quot;:528}}],&quot;folder&quot;:true,&quot;css&quot;:{&quot;border-style&quot;:&quot;none&quot;,&quot;display&quot;:&quot;flex&quot;,&quot;width&quot;:&quot;100&#37;&quot;,&quot;height&quot;:&quot;100%&quot;}}],&quot;css&quot;:{}}]</detail>
+<detail conceptID="2-4" name="Page content" id="4" basename="Extended description">[{&quot;name&quot;:&quot;Page&quot;,&quot;type&quot;:&quot;group&quot;,&quot;folder&quot;:true,&quot;children&quot;:[{&quot;name&quot;:&quot;Header&quot;,&quot;type&quot;:&quot;text&quot;,&quot;content&quot;:&quot;&lt;p&gt;This is an unconfigured page. Remove &lt;strong&gt; these instructions &lt;/strong&gt;, or replace them with your instructions for users.&lt;/p&gt;\n&lt;p&gt;This page is set up as a container for database searches. Select [Insert] in menu (gear icon or context menu in tree on the left) to add text elements and widgets: search, results list and visualisation (map, timeline, network diagram, report etc.). &lt;/p&gt;\n&lt;p&gt;Click on [Style] in this menu to modify appearance and configure parameters for each of the components.&lt;/p&gt;&quot;,&quot;css&quot;:{&quot;display&quot;:&quot;block&quot;,&quot;border-style&quot;:&quot;none&quot;},&quot;dom_id&quot;:&quot;cms-content-8&quot;},{&quot;name&quot;:&quot;Discover&quot;,&quot;type&quot;:&quot;group&quot;,&quot;children&quot;:[{&quot;appid&quot;:&quot;heurist_SearchTree&quot;,&quot;name&quot;:&quot;Saved filters&quot;,&quot;css&quot;:{&quot;position&quot;:&quot;relative&quot;,&quot;minWidth&quot;:200,&quot;minHeight&quot;:300,&quot;flex&quot;:&quot; 1 150px&quot;},&quot;options&quot;:{&quot;allowed_UGrpID&quot;:&quot;4&quot;,&quot;searchTreeMode&quot;:&quot;1&quot;,&quot;init_at_once&quot;:true,&quot;search_realm&quot;:&quot;sr3&quot;,&quot;rec_ID&quot;:528},&quot;dom_id&quot;:&quot;cms-widget-10&quot;},{&quot;appid&quot;:&quot;heurist_Map&quot;,&quot;name&quot;:&quot;Map and timeline&quot;,&quot;css&quot;:{&quot;position&quot;:&quot;relative&quot;,&quot;height&quot;:&quot;100&#37;&quot;,&quot;flex&quot;:&quot;2 1 300px&quot;},&quot;options&quot;:{&quot;leaflet&quot;:true,&quot;init_at_once&quot;:true,&quot;layout_params&quot;:{&quot;notimeline&quot;:false,&quot;nocluster&quot;:false,&quot;editstyle&quot;:true,&quot;map_rollover&quot;:true,&quot;controls&quot;:&quot;legend&quot;,&quot;legend&quot;:&quot;off&quot;,&quot;published&quot;:1,&quot;template&quot;:&quot;&quot;,&quot;basemap&quot;:&quot;&quot;},&quot;search_realm&quot;:&quot;sr3&quot;,&quot;rec_ID&quot;:528},&quot;dom_id&quot;:&quot;cms-widget-11&quot;},{&quot;appid&quot;:&quot;heurist_resultList&quot;,&quot;name&quot;:&quot;Standard filter result&quot;,&quot;css&quot;:{&quot;position&quot;:&quot;relative&quot;,&quot;minWidth&quot;:150,&quot;minHeight&quot;:300,&quot;flex&quot;:&quot;2 1 300px&quot;},&quot;options&quot;:{&quot;search_realm&quot;:&quot;sr3&quot;,&quot;rec_ID&quot;:528},&quot;dom_id&quot;:&quot;cms-widget-12&quot;}],&quot;folder&quot;:true,&quot;css&quot;:{&quot;border-style&quot;:&quot;none&quot;,&quot;display&quot;:&quot;flex&quot;,&quot;width&quot;:&quot;100&#37;&quot;,&quot;height&quot;:&quot;100&#37;&quot;,&quot;flex&quot;:&quot;1 1 auto&quot;},&quot;dom_id&quot;:&quot;cms-content-9&quot;}],&quot;css&quot;:{&quot;border-style&quot;:&quot;none&quot;,&quot;display&quot;:&quot;flex&quot;,&quot;flex-direction&quot;:&quot;column&quot;,&quot;width&quot;:&quot;100&#37;&quot;,&quot;height&quot;:&quot;100&#37;&quot;},&quot;dom_id&quot;:&quot;cms-content-7&quot;}]</detail>
 <detail conceptID="2-36" name="Original ID" id="36" basename="Original ID">2-65</detail>
 <detail conceptID="99-948" name="Keywords" id="914" basename="CMS Keywords">Search, Filter, Facets, Facet search, Advanced search, Dynamic search</detail>
 <detail conceptID="99-952" name="Show page title (override global setting)" id="920" basename="Show page title" termID="5444" termConceptID="2-532" ParentTerm="Flag (yes, no, unknown)">Yes</detail>
 <detail conceptID="2-928" name="Type of page" id="928" basename="Type of page" termID="6253" termConceptID="2-6253" ParentTerm="Type of web page /menu">Menu + page in Heurist CMS</detail>
 </record>
-
-<record visibility="public" visnote="no login required" selected="no" depth="0">
+<record visibility="viewable" visnote="logged in users" selected="no" depth="0">
 <id>314</id>
 <type id="52" conceptID="99-52">CMS Menu-Page</type>
-<citeAs>https://int-heuristweb-prod.intersect.org.au/heurist/?recID=314&amp;db=Heurist_Core_Definitions</citeAs>
-<title>&lt;i&gt;webpage:&lt;/i&gt;  &lt;b&gt;Overview&lt;/b&gt;   &lt;i&gt; [Project background, Project aims, Project blog]&lt;/i&gt;</title>
+<citeAs>https://heuristref.net/h6-alpha/?recID=314&amp;db=Heurist_Core_Definitions</citeAs>
+<title>&lt;i&gt;webpage:&lt;/i&gt;  &lt;b&gt;Overview&lt;/b&gt;   &lt;i&gt; [Project background, Project aims, Project blog]&lt;/i&gt;</title>
 <added>2021-12-19 17:17:16</added>
-<modified>2021-12-20 15:17:16</modified>
-<workgroup id="1">Database owners</workgroup>
+<modified>2023-02-03 22:55:26</modified>
+<workgroup id="7">DO NOT DELETE THESE RECORDS</workgroup>
 <detail conceptID="2-1" name="Menu label / page name" id="1" basename="Name or Title (please rename appropriately)">Overview</detail>
 <detail conceptID="2-3" name="Menu rollover description (optional)" id="3" basename="Short summary">This menu contains a summary of the project background, aims, theory, methods and results</detail>
 <detail conceptID="99-948" name="Keywords" id="914" basename="CMS Keywords">Research project, project description, overview, summary, aims, methods, theory, methodology, results</detail>
@@ -59,101 +56,96 @@
 <detail conceptID="2-928" name="Type of page" id="928" basename="Type of page" termID="6253" termConceptID="2-6253" ParentTerm="Type of web page /menu">Menu + page in Heurist CMS</detail>
 <detail conceptID="2-36" name="Original ID" id="36" basename="Original ID">2-192</detail>
 </record>
-
-<record visibility="public" visnote="no login required" selected="no" depth="0">
+<record visibility="viewable" visnote="logged in users" selected="no" depth="0">
 <id>315</id>
 <type id="52" conceptID="99-52">CMS Menu-Page</type>
-<citeAs>https://int-heuristweb-prod.intersect.org.au/heurist/?recID=315&amp;db=Heurist_Core_Definitions</citeAs>
-<title>&lt;i&gt;webpage:&lt;/i&gt;  &lt;b&gt;Project aims&lt;/b&gt;   &lt;i&gt; &lt;/i&gt;</title>
+<citeAs>https://heuristref.net/h6-alpha/?recID=315&amp;db=Heurist_Core_Definitions</citeAs>
+<title>&lt;i&gt;webpage:&lt;/i&gt;  &lt;b&gt;Project aims&lt;/b&gt;   &lt;i&gt; &lt;/i&gt;</title>
 <added>2021-12-19 17:17:16</added>
-<modified>2021-12-20 04:17:16</modified>
-<workgroup id="1">Database owners</workgroup>
+<modified>2023-02-03 22:55:26</modified>
+<workgroup id="7">DO NOT DELETE THESE RECORDS</workgroup>
 <detail conceptID="2-1" name="Menu label / page name" id="1" basename="Name or Title (please rename appropriately)">Project aims</detail>
 <detail conceptID="2-3" name="Menu rollover description (optional)" id="3" basename="Short summary">A page describing the aims of the project</detail>
 <detail conceptID="2-4" name="Page content" id="4" basename="Extended description">&lt;p&gt;Use this page to describe the aims and intended outcomes of the project.&lt;/p&gt;
-&lt;p&gt; &lt;/p&gt;</detail>
+&lt;p&gt; &lt;/p&gt;</detail>
 <detail conceptID="99-949" name="Target element" id="918" basename="Target element">main-content</detail>
 <detail conceptID="99-952" name="Show page title (override global setting)" id="920" basename="Show page title" termID="5444" termConceptID="2-532" ParentTerm="Flag (yes, no, unknown)">Yes</detail>
 <detail conceptID="2-928" name="Type of page" id="928" basename="Type of page" termID="6253" termConceptID="2-6253" ParentTerm="Type of web page /menu">Menu + page in Heurist CMS</detail>
 <detail conceptID="2-36" name="Original ID" id="36" basename="Original ID">2-114</detail>
 </record>
-
-<record visibility="public" visnote="no login required" selected="no" depth="0">
+<record visibility="viewable" visnote="logged in users" selected="no" depth="0">
 <id>316</id>
 <type id="52" conceptID="99-52">CMS Menu-Page</type>
-<citeAs>https://int-heuristweb-prod.intersect.org.au/heurist/?recID=316&amp;db=Heurist_Core_Definitions</citeAs>
-<title>&lt;i&gt;webpage:&lt;/i&gt;  &lt;b&gt;Project background&lt;/b&gt;   &lt;i&gt; &lt;/i&gt;</title>
+<citeAs>https://heuristref.net/h6-alpha/?recID=316&amp;db=Heurist_Core_Definitions</citeAs>
+<title>&lt;i&gt;webpage:&lt;/i&gt;  &lt;b&gt;Project background&lt;/b&gt;   &lt;i&gt; &lt;/i&gt;</title>
 <added>2021-12-19 17:17:16</added>
-<modified>2021-12-20 04:17:16</modified>
-<workgroup id="1">Database owners</workgroup>
+<modified>2023-02-03 22:55:26</modified>
+<workgroup id="7">DO NOT DELETE THESE RECORDS</workgroup>
 <detail conceptID="2-1" name="Menu label / page name" id="1" basename="Name or Title (please rename appropriately)">Project background</detail>
 <detail conceptID="2-3" name="Menu rollover description (optional)" id="3" basename="Short summary">A page describing the background of the project</detail>
 <detail conceptID="2-4" name="Page content" id="4" basename="Extended description">&lt;p&gt;Use this page for a description of the background of the project itself.&lt;/p&gt;
-&lt;p&gt; &lt;/p&gt;</detail>
+&lt;p&gt; &lt;/p&gt;</detail>
 <detail conceptID="99-949" name="Target element" id="918" basename="Target element">main-content</detail>
 <detail conceptID="99-952" name="Show page title (override global setting)" id="920" basename="Show page title" termID="5444" termConceptID="2-532" ParentTerm="Flag (yes, no, unknown)">Yes</detail>
 <detail conceptID="2-928" name="Type of page" id="928" basename="Type of page" termID="6253" termConceptID="2-6253" ParentTerm="Type of web page /menu">Menu + page in Heurist CMS</detail>
 <detail conceptID="2-36" name="Original ID" id="36" basename="Original ID">2-110</detail>
 </record>
-
-<record visibility="public" visnote="no login required" selected="no" depth="0">
+<record visibility="viewable" visnote="logged in users" selected="no" depth="0">
 <id>317</id>
 <type id="52" conceptID="99-52">CMS Menu-Page</type>
-<citeAs>https://int-heuristweb-prod.intersect.org.au/heurist/?recID=317&amp;db=Heurist_Core_Definitions</citeAs>
-<title>&lt;i&gt;webpage:&lt;/i&gt;  &lt;b&gt;Project blog&lt;/b&gt;   &lt;i&gt; &lt;/i&gt;</title>
+<citeAs>https://heuristref.net/h6-alpha/?recID=317&amp;db=Heurist_Core_Definitions</citeAs>
+<title>&lt;i&gt;webpage:&lt;/i&gt;  &lt;b&gt;Project blog&lt;/b&gt;   &lt;i&gt; &lt;/i&gt;</title>
 <added>2021-12-19 17:17:16</added>
-<modified>2021-12-20 04:17:16</modified>
-<workgroup id="1">Database owners</workgroup>
+<modified>2023-02-03 22:55:26</modified>
+<workgroup id="7">DO NOT DELETE THESE RECORDS</workgroup>
 <detail conceptID="2-1" name="Menu label / page name" id="1" basename="Name or Title (please rename appropriately)">Project blog</detail>
 <detail conceptID="2-4" name="Page content" id="4" basename="Extended description">BLOG TEMPLATE</detail>
 <detail conceptID="99-949" name="Target element" id="918" basename="Target element">main-content</detail>
 <detail conceptID="2-928" name="Type of page" id="928" basename="Type of page" termID="6253" termConceptID="2-6253" ParentTerm="Type of web page /menu">Menu + page in Heurist CMS</detail>
 <detail conceptID="2-36" name="Original ID" id="36" basename="Original ID">2-271</detail>
 </record>
-
-<record visibility="public" visnote="no login required" selected="no" depth="0">
+<record visibility="viewable" visnote="logged in users" selected="no" depth="0">
 <id>397</id>
 <type id="52" conceptID="99-52">CMS Menu-Page</type>
-<citeAs>https://int-heuristweb-prod.intersect.org.au/heurist/?recID=397&amp;db=Heurist_Core_Definitions</citeAs>
-<title>&lt;i&gt;webpage:&lt;/i&gt;  &lt;b&gt;The database&lt;/b&gt;   &lt;i&gt; &lt;/i&gt;</title>
+<citeAs>https://heuristref.net/h6-alpha/?recID=397&amp;db=Heurist_Core_Definitions</citeAs>
+<title>&lt;i&gt;webpage:&lt;/i&gt;  &lt;b&gt;The database&lt;/b&gt;   &lt;i&gt; &lt;/i&gt;</title>
 <added>2022-07-20 17:20:18</added>
-<modified>2022-07-20 18:01:45</modified>
-<workgroup id="1">Database owners</workgroup>
+<modified>2023-07-24 07:32:07</modified>
+<workgroup id="7">DO NOT DELETE THESE RECORDS</workgroup>
 <detail conceptID="2-1" name="Menu label / page name" id="1" basename="Name or Title (please rename appropriately)">The database</detail>
 <detail conceptID="2-928" name="Type of page" id="928" basename="Type of page" termID="6253" termConceptID="2-6253" ParentTerm="Type of web page /menu">Menu + page in Heurist CMS</detail>
-<detail conceptID="2-4" name="Page content" id="4" basename="Extended description">[{&quot;name&quot;:&quot;Page&quot;,&quot;type&quot;:&quot;group&quot;,&quot;children&quot;:[{&quot;name&quot;:&quot;Default Text&quot;,&quot;type&quot;:&quot;text&quot;,&quot;content&quot;:&quot;&lt;h3&gt; &lt;/h3&gt;\n&lt;h3&gt;&lt;span style=\&quot;color: #e67e23;\&quot;&gt;&lt;span style=\&quot;text-decoration: underline;\&quot;&gt;Please retain this page in your website&lt;/span&gt;, modified as required&lt;/span&gt;&lt;/h3&gt;\n&lt;p&gt;&lt;span style=\&quot;color: #e67e23;\&quot;&gt;Visitors need to know how Heurist has helped this project so that they are encouraged to try it. Otherwise the infrastructure goes unnoticed. &lt;/span&gt;&lt;span style=\&quot;color: #e67e23;\&quot;&gt;By all means reorganise the page's position, but please give it some prominence.&lt;/span&gt;&lt;/p&gt;\n&lt;p&gt;&lt;span style=\&quot;color: #e67e23;\&quot;&gt;By helping grow the user base you help guarantee Heurist's healthy future, for you and for everyone (including the reader). &lt;/span&gt;&lt;/p&gt;\n&lt;p&gt;&lt;strong&gt;-------------------------------------------&lt;/strong&gt;&lt;/p&gt;\n&lt;h3&gt;History of development&lt;/h3&gt;\n&lt;p&gt;&lt;span style=\&quot;color: #e67e23;\&quot;&gt;&amp;lt;You can use this section to describe how you went about building the database (including sources of data, antecedent versions, conversion to Heurist, and the reasons for choosing Heurist), and how Heurist, and/or the team, have helped you achieve your results.&amp;gt;&lt;/span&gt;&lt;/p&gt;\n&lt;p&gt;...&lt;/p&gt;\n&lt;h3&gt;Collaboration with Heurist team&lt;/h3&gt;\n&lt;p&gt;The Heurist team provides support to all Heurist users, including free email support and bug fixing for unfunded projects through to database modelling, construction, code development and website construction for funded projects able to help support the team. Between us we have over 75 years of Humanities database development experience and bring far more than just technical skills to the development of projects. The work is entirely non-profit - all funding goes back into supporting and developing the service.&lt;/p&gt;\n&lt;p&gt;&lt;span style=\&quot;color: #e67e23;\&quot;&gt;&amp;lt;Please enter here details of the collaboration and support provided by the Heurist team&amp;gt;&lt;/span&gt;&lt;/p&gt;\n&lt;p&gt;&lt;span style=\&quot;color: #000000;\&quot;&gt;...&lt;/span&gt;&lt;/p&gt;\n&lt;h3&gt;The website&lt;/h3&gt;\n&lt;p&gt;This website / data portal is built from, and in, a Heurist database of research data developed by the project. &lt;/p&gt;\n&lt;p&gt;Heurist provides a flexible CMS capability which can generate a 'vanilla' website with interactive data components in minutes, through to sophisticated websites conceived by a graphic designer.&lt;/p&gt;\n&lt;p&gt;The website is edited through the Heurist website editor and is stored as an integral part of the database and generated directly by the Heurist software. This allows for reliability and sustainability, and for optimal interaction with the data including images, and the use of Heurist's interface components (widgets such as facet searches, result lists, maps, timelines, custom reports and network diagrams) directly in the website. &lt;/p&gt;\n&lt;h3&gt;About Heurist&lt;/h3&gt;\n&lt;p&gt;Heurist (&lt;a title=\&quot;Heurist Academic Knowledge Management System\&quot; href=\&quot;http://HeuristNetwork.org\&quot; target=\&quot;_blank\&quot; rel=\&quot;noopener\&quot;&gt;HeuristNetwork.org&lt;/a&gt;) is a free, flexible, open-source data management application and website builder developed specifically for researchers in the Humanities.&lt;/p&gt;\n&lt;p&gt;Heurist allows researchers to design, build, analyse, visualise, publish (via the web) and archive their own databases without coding or technical support.&lt;/p&gt;\n&lt;p&gt;Heurist is available as free, non-commercial web services available to researchers worldwide. Please visit the website to find a service in your region.&lt;/p&gt;\n&lt;p&gt;Heurist has been developed at the University of Sydney, Australia since 2005 in collaboration with dozens of research projects, and is actively developed and supported. The source is available on gitHub.&lt;/p&gt;&quot;,&quot;dom_id&quot;:&quot;cms-content-18&quot;,&quot;css&quot;:{}}],&quot;folder&quot;:true,&quot;dom_id&quot;:&quot;cms-content-17&quot;,&quot;css&quot;:{}}]</detail>
+<detail conceptID="2-4" name="Page content" id="4" basename="Extended description">[{&quot;name&quot;:&quot;Page&quot;,&quot;type&quot;:&quot;group&quot;,&quot;children&quot;:[{&quot;name&quot;:&quot;Default Text&quot;,&quot;type&quot;:&quot;text&quot;,&quot;content&quot;:&quot;&lt;h3&gt;&lt;span style=\&quot;color: #e67e23;\&quot;&gt;&lt;span style=\&quot;text-decoration: underline;\&quot;&gt;Please retain this page in your website&lt;/span&gt;&lt;/span&gt;&lt;/h3&gt;\n&lt;p&gt;&lt;span style=\&quot;color: #e67e23;\&quot;&gt;This page is a placeholder - flesh out as needed.&lt;br /&gt;Please tell visitors how Heurist has helped this project so that they are encouraged to try it. Otherwise the infrastructure goes unnoticed. &lt;br /&gt;&lt;/span&gt;&lt;span style=\&quot;color: #e67e23;\&quot;&gt;By all means reorganise the page's position, but please give it some prominence.&lt;/span&gt;&lt;/p&gt;\n&lt;p&gt;&lt;span style=\&quot;color: #e67e23;\&quot;&gt;By helping grow the user base you help guarantee Heurist's healthy future, for you and for everyone (including the reader). &lt;/span&gt;&lt;/p&gt;\n&lt;p&gt;&lt;strong&gt;-------------------------------------------&lt;/strong&gt;&lt;/p&gt;\n&lt;h3&gt;History of development&lt;/h3&gt;\n&lt;p&gt;&lt;span style=\&quot;font-weight: 400;\&quot;&gt;This website is built from, and in, a Heurist database (see information below).&lt;/span&gt;&lt;/p&gt;\n&lt;p&gt;&lt;span style=\&quot;font-weight: 400; color: #e67e23;\&quot;&gt;** Please describe the creation of the database and the website, acknowledging the Heurist team members individually for their help and for any work done on either component, as appropriate **&lt;/span&gt;&lt;/p&gt;\n&lt;h3&gt;About Heurist&lt;/h3&gt;\n&lt;p&gt;&lt;span style=\&quot;font-weight: 400;\&quot;&gt;Heurist is a free, flexible, open-source (on gitHub) data management application and website builder specifically designed for researchers in the Humanities. It has been developed at the University of Sydney since 2005 under the direction of Dr Ian Johnson, and has been informed by the needs of hundreds of research projects.&lt;/span&gt;&lt;/p&gt;\n&lt;p&gt;&lt;span style=\&quot;font-weight: 400;\&quot;&gt;Heurist is available as free, non-commercial web services available to researchers worldwide. Please visit &lt;/span&gt;&lt;a href=\&quot;https://heuristnetwork.org/\&quot;&gt;&lt;span style=\&quot;font-weight: 400;\&quot;&gt;HeuristNetwork.org&lt;/span&gt;&lt;/a&gt;&lt;span style=\&quot;font-weight: 400;\&quot;&gt; to find a service in your region.&lt;/span&gt;&lt;/p&gt;\n&lt;p&gt;&lt;span style=\&quot;font-weight: 400;\&quot;&gt;Heurist allows researchers to design, build, analyse, visualise, publish (via the web) and archive their own databases without coding or technical support, including the automatic generation of a 'vanilla' website which can be used as-is or customised extensively to fit a specific graphic design. Websites are edited through the Heurist website editor, stored as an integral part of the database and generated directly by the Heurist software. This allows for reliability and sustainability, and for optimal interaction with the data including images, and the use of Heurist's interface components (widgets such as facet searches, result lists, maps, timelines, custom reports and network diagrams) directly in the website. &lt;/span&gt;&lt;/p&gt;\n&lt;p&gt;&lt;span style=\&quot;font-weight: 400;\&quot;&gt;The development team provides support to all Heurist users, including free email support and bug fixing for unfunded projects and consultancy services for database modelling, database construction, conversion of existing databases and websites, code development, website construction and training. Heurist is entirely non-profit; consultancy work provides the funding required to run the project.&lt;/span&gt;&lt;/p&gt;&quot;,&quot;dom_id&quot;:&quot;cms-content-18&quot;,&quot;css&quot;:{}}],&quot;folder&quot;:true,&quot;dom_id&quot;:&quot;cms-content-17&quot;,&quot;css&quot;:{}}]</detail>
 </record>
-
-<record visibility="public" visnote="no login required" selected="no" depth="0">
+<record visibility="viewable" visnote="logged in users" selected="no" depth="0">
 <id>342</id>
 <type id="52" conceptID="99-52">CMS Menu-Page</type>
-<citeAs>https://int-heuristweb-prod.intersect.org.au/heurist/?recID=342&amp;db=Heurist_Core_Definitions</citeAs>
-<title>&lt;i&gt;webpage:&lt;/i&gt;  &lt;b&gt;Webpage sample&lt;/b&gt;   &lt;i&gt; &lt;/i&gt;</title>
+<citeAs>https://heuristref.net/h6-alpha/?recID=342&amp;db=Heurist_Core_Definitions</citeAs>
+<title>&lt;i&gt;webpage:&lt;/i&gt;  &lt;b&gt;Webpage sample&lt;/b&gt;   &lt;i&gt; &lt;/i&gt;</title>
 <added>2022-01-09 11:17:05</added>
-<modified>2022-01-10 09:17:06</modified>
-<workgroup id="1">Database owners</workgroup>
+<modified>2023-02-03 22:55:26</modified>
+<workgroup id="7">DO NOT DELETE THESE RECORDS</workgroup>
 <detail conceptID="2-1" name="Menu label / page name" id="1" basename="Name or Title (please rename appropriately)">Webpage sample</detail>
 <detail conceptID="2-3" name="Menu rollover description (optional)" id="3" basename="Short summary">Search functions to search and display contents of the database represented by/in this website</detail>
-<detail conceptID="2-4" name="Page content" id="4" basename="Extended description">[{&quot;name&quot;:&quot;Page&quot;,&quot;type&quot;:&quot;group&quot;,&quot;folder&quot;:true,&quot;children&quot;:[{&quot;name&quot;:&quot;Header&quot;,&quot;type&quot;:&quot;text&quot;,&quot;content&quot;:&quot;&lt;p&gt;This is an unconfigured page. Remove &lt;strong&gt; these instructions &lt;/strong&gt;, or replace them with your instructions for users.&lt;/p&gt;\n&lt;p&gt;This page is set up as a container for database searches. Select [Insert] in menu (gear icon or context menu in tree on the left) to add text elements and widgets: search, results list and visualisation (map, timeline, network diagram, report etc.). &lt;/p&gt;\n&lt;p&gt;Click on [Style] in this menu to modify appearance and configure parameters for each of the components.&lt;/p&gt;&quot;,&quot;css&quot;:{&quot;display&quot;:&quot;block&quot;,&quot;border-style&quot;:&quot;none&quot;}},{&quot;name&quot;:&quot;Discover&quot;,&quot;type&quot;:&quot;group&quot;,&quot;children&quot;:[{&quot;appid&quot;:&quot;heurist_SearchTree&quot;,&quot;name&quot;:&quot;Saved filters&quot;,&quot;css&quot;:{&quot;position&quot;:&quot;relative&quot;,&quot;minWidth&quot;:200,&quot;minHeight&quot;:300,&quot;flex&quot;:&quot; 1 150px&quot;},&quot;options&quot;:{&quot;allowed_UGrpID&quot;:&quot;4&quot;,&quot;searchTreeMode&quot;:&quot;1&quot;,&quot;init_at_once&quot;:true,&quot;search_realm&quot;:&quot;sr3&quot;,&quot;rec_ID&quot;:528}},{&quot;appid&quot;:&quot;heurist_Map&quot;,&quot;name&quot;:&quot;Map and timeline&quot;,&quot;css&quot;:{&quot;position&quot;:&quot;relative&quot;,&quot;height&quot;:&quot;100&#37;&quot;,&quot;flex&quot;:&quot;2 1 300px&quot;},&quot;options&quot;:{&quot;leaflet&quot;:true,&quot;init_at_once&quot;:true,&quot;layout_params&quot;:{&quot;notimeline&quot;:false,&quot;nocluster&quot;:false,&quot;editstyle&quot;:true,&quot;map_rollover&quot;:true,&quot;controls&quot;:&quot;legend&quot;,&quot;legend&quot;:&quot;off&quot;,&quot;published&quot;:1,&quot;template&quot;:&quot;&quot;,&quot;basemap&quot;:&quot;&quot;},&quot;search_realm&quot;:&quot;sr3&quot;,&quot;rec_ID&quot;:528}},{&quot;appid&quot;:&quot;heurist_resultList&quot;,&quot;name&quot;:&quot;Standard filter result&quot;,&quot;css&quot;:{&quot;position&quot;:&quot;relative&quot;,&quot;minWidth&quot;:150,&quot;minHeight&quot;:300,&quot;flex&quot;:&quot;2 1 300px&quot;},&quot;options&quot;:{&quot;search_realm&quot;:&quot;sr3&quot;,&quot;rec_ID&quot;:528}}],&quot;folder&quot;:true,&quot;css&quot;:{&quot;border-style&quot;:&quot;none&quot;,&quot;display&quot;:&quot;flex&quot;,&quot;width&quot;:&quot;100&#37;&quot;,&quot;height&quot;:&quot;100%&quot;}}],&quot;css&quot;:{}}]</detail>
+<detail conceptID="2-4" name="Page content" id="4" basename="Extended description">[{&quot;name&quot;:&quot;Page&quot;,&quot;type&quot;:&quot;group&quot;,&quot;folder&quot;:true,&quot;children&quot;:[{&quot;name&quot;:&quot;Header&quot;,&quot;type&quot;:&quot;text&quot;,&quot;content&quot;:&quot;&lt;p&gt;This is an unconfigured page. Remove &lt;strong&gt; these instructions &lt;/strong&gt;, or replace them with your instructions for users.&lt;/p&gt;\n&lt;p&gt;This page is set up as a container for database searches. Select [Insert] in menu (gear icon or context menu in tree on the left) to add text elements and widgets: search, results list and visualisation (map, timeline, network diagram, report etc.). &lt;/p&gt;\n&lt;p&gt;Click on [Style] in this menu to modify appearance and configure parameters for each of the components.&lt;/p&gt;&quot;,&quot;css&quot;:{&quot;display&quot;:&quot;block&quot;,&quot;border-style&quot;:&quot;none&quot;}},{&quot;name&quot;:&quot;Discover&quot;,&quot;type&quot;:&quot;group&quot;,&quot;children&quot;:[{&quot;appid&quot;:&quot;heurist_SearchTree&quot;,&quot;name&quot;:&quot;Saved filters&quot;,&quot;css&quot;:{&quot;position&quot;:&quot;relative&quot;,&quot;minWidth&quot;:200,&quot;minHeight&quot;:300,&quot;flex&quot;:&quot; 1 150px&quot;},&quot;options&quot;:{&quot;allowed_UGrpID&quot;:&quot;4&quot;,&quot;searchTreeMode&quot;:&quot;1&quot;,&quot;init_at_once&quot;:true,&quot;search_realm&quot;:&quot;sr3&quot;,&quot;rec_ID&quot;:528}},{&quot;appid&quot;:&quot;heurist_Map&quot;,&quot;name&quot;:&quot;Map and timeline&quot;,&quot;css&quot;:{&quot;position&quot;:&quot;relative&quot;,&quot;height&quot;:&quot;100&#37;&quot;,&quot;flex&quot;:&quot;2 1 300px&quot;},&quot;options&quot;:{&quot;leaflet&quot;:true,&quot;init_at_once&quot;:true,&quot;layout_params&quot;:{&quot;notimeline&quot;:false,&quot;nocluster&quot;:false,&quot;editstyle&quot;:true,&quot;map_rollover&quot;:true,&quot;controls&quot;:&quot;legend&quot;,&quot;legend&quot;:&quot;off&quot;,&quot;published&quot;:1,&quot;template&quot;:&quot;&quot;,&quot;basemap&quot;:&quot;&quot;},&quot;search_realm&quot;:&quot;sr3&quot;,&quot;rec_ID&quot;:528}},{&quot;appid&quot;:&quot;heurist_resultList&quot;,&quot;name&quot;:&quot;Standard filter result&quot;,&quot;css&quot;:{&quot;position&quot;:&quot;relative&quot;,&quot;minWidth&quot;:150,&quot;minHeight&quot;:300,&quot;flex&quot;:&quot;2 1 300px&quot;},&quot;options&quot;:{&quot;search_realm&quot;:&quot;sr3&quot;,&quot;rec_ID&quot;:528}}],&quot;folder&quot;:true,&quot;css&quot;:{&quot;border-style&quot;:&quot;none&quot;,&quot;display&quot;:&quot;flex&quot;,&quot;width&quot;:&quot;100&#37;&quot;,&quot;height&quot;:&quot;500px&quot;}}],&quot;css&quot;:{}}]</detail>
 <detail conceptID="99-948" name="Keywords" id="914" basename="CMS Keywords">Search, Filter, Facets, Facet search, Advanced search, Dynamic search</detail>
 <detail conceptID="99-952" name="Show page title (override global setting)" id="920" basename="Show page title" termID="5444" termConceptID="2-532" ParentTerm="Flag (yes, no, unknown)">Yes</detail>
 <detail conceptID="2-928" name="Type of page" id="928" basename="Type of page" termID="6254" termConceptID="2-6254" ParentTerm="Type of web page /menu">Standalone web page</detail>
 <detail conceptID="2-36" name="Original ID" id="36" basename="Original ID">2-65</detail>
 </record>
-
-<record visibility="public" visnote="no login required" selected="no" depth="0">
+<record visibility="viewable" visnote="logged in users" selected="no" depth="0">
 <id>318</id>
 <type id="51" conceptID="99-51">CMS_Home</type>
-<citeAs>https://int-heuristweb-prod.intersect.org.au/heurist/?recID=318&amp;db=Heurist_Core_Definitions</citeAs>
-<title>&lt;i&gt;WEBSITE&lt;/i&gt; &lt;b&gt;&lt;b&gt;UNCONFIGURED SITE TITLE&lt;/b&gt; &lt;br&gt;&lt;i&gt;Use website editor to set title&lt;/i&gt;&lt;/b&gt; [ Menus: Overview, The database, Discover, Contacts ]</title>
+<citeAs>https://heuristref.net/h6-alpha/?recID=318&amp;db=Heurist_Core_Definitions</citeAs>
+<title>&lt;i&gt;WEBSITE&lt;/i&gt; &lt;b&gt;fr: &lt;b&gt;TITRE NON-CONFIGURÉ&lt;/b&gt; &lt;br&gt;&lt;i&gt;Utiliser Website Editor pour configurer&lt;/i&gt;,&lt;b&gt;UNCONFIGURED TITLE&lt;/b&gt; &lt;br&gt;&lt;i&gt;Use website editor to set title&lt;/i&gt; {R1}&lt;/b&gt; [ Menus: Contacts, The database, Discover, Overview ]</title>
 <added>2021-12-19 17:17:16</added>
-<modified>2022-07-21 04:12:35</modified>
-<workgroup id="1">Database owners</workgroup>
-<detail conceptID="2-1" name="Website title" id="1" basename="Name or Title (please rename appropriately)">&lt;b&gt;UNCONFIGURED SITE TITLE&lt;/b&gt; &lt;br&gt;&lt;i&gt;Use website editor to set title&lt;/i&gt;</detail>
+<modified>2023-07-05 17:20:46</modified>
+<workgroup id="7">DO NOT DELETE THESE RECORDS</workgroup>
+<detail conceptID="2-1" name="Website title" id="1" basename="Name or Title (please rename appropriately)">&lt;b&gt;UNCONFIGURED TITLE&lt;/b&gt; &lt;br&gt;&lt;i&gt;Use website editor to set title&lt;/i&gt;</detail>
+<detail conceptID="2-1" name="Website title" id="1" basename="Name or Title (please rename appropriately)">fr: &lt;b&gt;TITRE NON-CONFIGURÉ&lt;/b&gt; &lt;br&gt;&lt;i&gt;Utiliser Website Editor pour configurer&lt;/i&gt;</detail>
 <detail conceptID="2-3" name="Website summary" id="3" basename="Short summary">Enter a concise description of the Heurist database / website here, which will be used eg. in lists of websites and in search engine discovery. 
 
 Remember to indicate the institution and/or project, target audience and nature of the content.</detail>
-<detail conceptID="2-4" name="Website home page content" id="4" basename="Extended description">[{&quot;name&quot;:&quot;Page&quot;,&quot;type&quot;:&quot;group&quot;,&quot;children&quot;:[{&quot;name&quot;:&quot;Content&quot;,&quot;type&quot;:&quot;text&quot;,&quot;css&quot;:{},&quot;content&quot;:&quot;&lt;p&gt; &lt;/p&gt;\n&lt;p&gt;This is default content generated by the Heurist CMS function. Please edit the web pages in this site to create appropriate content.&lt;/p&gt;\n&lt;p&gt;The pages may embed images and dynamic components such as facet searches, maps, network diagrams and reports using buttons at the end of the toolbar (when viewed in the website editor).&lt;/p&gt;\n&lt;p&gt;Please visit The database to read more about Heurist, or visit the &lt;a title=\&quot;Heurist Network website\&quot; href=\&quot;http://HeuristNetwork.org\&quot; target=\&quot;_blank\&quot; rel=\&quot;noopener\&quot;&gt;Heurist Project website&lt;/a&gt; or &lt;a href=\&quot;https://heuristref.net/heurist/?db=Heurist_Help_System&amp;amp;website\&quot; target=\&quot;_blank\&quot; rel=\&quot;noopener\&quot;&gt;Heurist Help pages&lt;/a&gt; for further information.&lt;/p&gt;\n&lt;p&gt; &lt;/p&gt;\n&lt;table style=\&quot;border-collapse: collapse;\&quot; border=\&quot;1\&quot;&gt;\n&lt;tbody&gt;\n&lt;tr&gt;\n&lt;td style=\&quot;width: 100&#37;; padding-left: 30px; padding-right: 30px;\&quot;&gt;\n&lt;p&gt;&lt;strong&gt;&lt;span style=\&quot;color: #ff0000;\&quot;&gt;If you come across this page with default content (these instructions), please email the website owner &lt;/span&gt;&lt;/strong&gt;&lt;/p&gt;\n&lt;p&gt;&lt;strong&gt;&lt;span style=\&quot;color: #ff0000;\&quot;&gt;(link below) and ask them to update or delete the page.&lt;/span&gt;&lt;/strong&gt;&lt;/p&gt;\n&lt;/td&gt;\n&lt;/tr&gt;\n&lt;/tbody&gt;\n&lt;/table&gt;\n&lt;p&gt; &lt;/p&gt;\n&lt;p&gt; &lt;/p&gt;\n&lt;p&gt; &lt;/p&gt;&quot;,&quot;dom_id&quot;:&quot;cms-content-16&quot;}],&quot;folder&quot;:true,&quot;dom_id&quot;:&quot;cms-content-15&quot;,&quot;css&quot;:{}}]</detail>
+<detail conceptID="2-4" name="Website home page content" id="4" basename="Extended description">[{&quot;name&quot;:&quot;Page&quot;,&quot;type&quot;:&quot;group&quot;,&quot;children&quot;:[{&quot;name&quot;:&quot;Content&quot;,&quot;type&quot;:&quot;text&quot;,&quot;css&quot;:{},&quot;content&quot;:&quot;&lt;p&gt; &lt;/p&gt;\n&lt;p&gt;This is default content generated by the Heurist CMS function. Please edit the web pages in this site to create appropriate content.&lt;/p&gt;\n&lt;p&gt;The pages may embed images and dynamic components such as facet searches, maps, network diagrams and reports using buttons at the end of the toolbar (when viewed in the website editor).&lt;/p&gt;\n&lt;p&gt;Please visit The database to read more about Heurist, or visit the &lt;a title=\&quot;Heurist Network website\&quot; href=\&quot;http://HeuristNetwork.org\&quot; target=\&quot;_blank\&quot; rel=\&quot;noopener\&quot;&gt;Heurist Project website&lt;/a&gt; or &lt;a href=\&quot;https://heuristref.net/heurist/?db=Heurist_Help_System&amp;amp;website\&quot; target=\&quot;_blank\&quot; rel=\&quot;noopener\&quot;&gt;Heurist Help pages&lt;/a&gt; for further information.&lt;/p&gt;\n&lt;p&gt; &lt;/p&gt;\n&lt;table style=\&quot;border-collapse: collapse;\&quot; border=\&quot;1\&quot;&gt;\n&lt;tbody&gt;\n&lt;tr&gt;\n&lt;td style=\&quot;width: 100&#37;; padding-left: 30px; padding-right: 30px;\&quot;&gt;\n&lt;p&gt;&lt;strong&gt;&lt;span style=\&quot;color: #ff0000;\&quot;&gt;If you come across this page with default content (these instructions), please email the website owner &lt;/span&gt;&lt;/strong&gt;&lt;/p&gt;\n&lt;p&gt;&lt;strong&gt;&lt;span style=\&quot;color: #ff0000;\&quot;&gt;(link below) and ask them to update or delete the page.&lt;/span&gt;&lt;/strong&gt;&lt;/p&gt;\n&lt;/td&gt;\n&lt;/tr&gt;\n&lt;/tbody&gt;\n&lt;/table&gt;\n&lt;p&gt; &lt;/p&gt;\n&lt;p&gt; &lt;/p&gt;\n&lt;p&gt; &lt;/p&gt;&quot;,&quot;dom_id&quot;:&quot;cms-content-16&quot;}],&quot;folder&quot;:true,&quot;dom_id&quot;:&quot;cms-content-15&quot;,&quot;css&quot;:{}}]</detail>
 <detail conceptID="2-36" name="Original ID" id="36" basename="Original ID">2-190</detail>
 <detail conceptID="2-38" name="Logo image" id="38" basename="File(s) - uploaded or remote">
 <file>
@@ -163,10 +155,10 @@ Remember to indicate the institution and/or project, target audience and nature 
 <mimeType>image/png</mimeType>
 <fileSize units="kB">12</fileSize>
 <date>2022-03-16 23:10:37</date>
-<url>https://int-heuristweb-prod.intersect.org.au/heurist/?db=Heurist_Core_Definitions&amp;file=e6a2092b5d598d261b8f1ce62a84c9fe591025d0</url>
+<url>https://heuristref.net/h6-alpha/?db=Heurist_Core_Definitions&amp;file=e6a2092b5d598d261b8f1ce62a84c9fe591025d0</url>
 </file>
 </detail>
-<detail conceptID="2-39" name="Website icon" id="39" basename="Representative image or thumbnail">
+<detail conceptID="2-39" name="Website icon" id="39" basename="Primary / preferred image">
 <file>
 <id>18</id>
 <nonce>68340b50eadbc527a054473b44462de5e4a439a2</nonce>
@@ -174,20 +166,20 @@ Remember to indicate the institution and/or project, target audience and nature 
 <mimeType>image/png</mimeType>
 <fileSize units="kB">2</fileSize>
 <date>2019-07-21 21:54:06</date>
-<url>https://int-heuristweb-prod.intersect.org.au/heurist/?db=Heurist_Core_Definitions&amp;file=68340b50eadbc527a054473b44462de5e4a439a2</url>
+<url>https://heuristref.net/h6-alpha/?db=Heurist_Core_Definitions&amp;file=68340b50eadbc527a054473b44462de5e4a439a2</url>
 </file>
 </detail>
-<detail conceptID="99-742" name="Top level menus" id="912" basename="CMS Menus" isRecordPointer="true">314</detail>
-<detail conceptID="99-742" name="Top level menus" id="912" basename="CMS Menus" isRecordPointer="true">397</detail>
-<detail conceptID="99-742" name="Top level menus" id="912" basename="CMS Menus" isRecordPointer="true">313</detail>
-<detail conceptID="99-742" name="Top level menus" id="912" basename="CMS Menus" isRecordPointer="true">312</detail>
+<detail conceptID="3-1092" name="Custom website colour scheme" id="177" basename="Symbology">{&quot;cd_bg&quot;:&quot;#e0dfe0&quot;,&quot;cl_bg&quot;:&quot;#ffffff&quot;,&quot;cd_color&quot;:&quot;#333333&quot;,&quot;cd_input&quot;:&quot;#F4F2F4&quot;,&quot;cd_border&quot;:&quot;#95A7B7&quot;,&quot;cd_corner&quot;:&quot;0&quot;,&quot;ca_bg&quot;:&quot;#ffffff&quot;,&quot;ca_color&quot;:&quot;#8064a2&quot;,&quot;ca_input&quot;:&quot;#536077&quot;,&quot;ce_bg&quot;:&quot;#ECF1FB&quot;,&quot;ce_color&quot;:&quot;#6A7C99&quot;,&quot;ce_input&quot;:&quot;#ffffff&quot;,&quot;ce_readonly&quot;:&quot;#999999&quot;,&quot;ce_mandatory&quot;:&quot;#CC0000&quot;,&quot;ce_helper&quot;:&quot;#999999&quot;,&quot;sd_bg&quot;:&quot;#f2f2f2&quot;,&quot;sd_color&quot;:&quot;#555555&quot;,&quot;sh_bg&quot;:&quot;#f2f2f2&quot;,&quot;sh_color&quot;:&quot;#2b2b2b&quot;,&quot;sh_border&quot;:&quot;#999999&quot;,&quot;sa_bg&quot;:&quot;#95A7B7&quot;,&quot;sa_color&quot;:&quot;#212121&quot;,&quot;sa_border&quot;:&quot;#aaaaaa&quot;,&quot;sp_bg&quot;:&quot;#9CC4D9&quot;,&quot;sp_color&quot;:&quot;#ffffff&quot;,&quot;sp_border&quot;:&quot;#003eff&quot;}</detail>
 <detail conceptID="99-948" name="Keywords" id="914" basename="CMS Keywords">Digital Humanities, Heurist, Research, Database, Open Data</detail>
 <detail conceptID="99-952" name="Show menu label as title at top of the page" id="920" basename="Show page title" termID="5442" termConceptID="2-531" ParentTerm="Flag (yes, no, unknown)">No</detail>
 <detail conceptID="2-923" name="Main menu location" id="923" basename="Main menu location" termID="6251" termConceptID="2-6251" ParentTerm="Website main menu location">Top of page, horizontal (default)</detail>
 <detail conceptID="2-938" name="Selectable if submenu present" id="938" basename="Selectable if submenu present" termID="5442" termConceptID="2-531" ParentTerm="Flag (yes, no, unknown)">No</detail>
 <detail conceptID="2-941" name="Footer position fixed" id="941" basename="Footer fixed position" termID="5444" termConceptID="2-532" ParentTerm="Flag (yes, no, unknown)">Yes</detail>
+<detail conceptID="99-742" name="Top level menus" id="912" basename="CMS Menus" isRecordPointer="true">314</detail>
+<detail conceptID="99-742" name="Top level menus" id="912" basename="CMS Menus" isRecordPointer="true">313</detail>
+<detail conceptID="99-742" name="Top level menus" id="912" basename="CMS Menus" isRecordPointer="true">397</detail>
+<detail conceptID="99-742" name="Top level menus" id="912" basename="CMS Menus" isRecordPointer="true">312</detail>
 </record>
-
 </records>
 <recordCount>9</recordCount>
 </hml>

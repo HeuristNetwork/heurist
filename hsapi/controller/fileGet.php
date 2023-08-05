@@ -127,75 +127,22 @@ if($filename){ //download from scratch (for csv import)
         //default - defRecTypes
         $entity_name = @$_REQUEST['entity'];
         if(!$entity_name) $entity_name = 'rty';
-        $entity_name = entityResolveName($entity_name);
         
         //icon, thumb, full
         $viewmode = @$_REQUEST['version']; 
-        if(!$viewmode){
-            $viewmode = ($entity_name=='defRecTypes')?'icon':'thumbnail';   
-        }
-        if($viewmode=='thumb') $viewmode='thumbnail';
+
         
         if($rec_id && substr($rec_id,0,4)=='term'){
             //backward support - icons for Digital Harlem
             $rec_id = substr($rec_id, 4);
             $entity_name  = 'trm';
-            $viewmode = 'full';
-            $path = HEURIST_TERM_ICON_DIR;
-        }else
-        if($entity_name=='sysDatabases' && $rec_id){
-            
-            $db_name = $rec_id;
-            if(strpos($rec_id,'hdb_')===0){
-                $db_name = substr($rec_id,4);    
-            }
-            $rec_id = 1;    
-            $path = HEURIST_FILESTORE_ROOT . $db_name . '/entity/sysIdentification/';    
-        }else{
-            
-            $path = HEURIST_FILESTORE_DIR . 'entity/'.$entity_name.'/';
-        } 
-        
-        if($viewmode!='full'){
-            $path = $path.$viewmode.'/';
-        }
-        $filename = $path.$rec_id;
-        
-        //if file does not exist in entity folder
-        //backward capability - copy from old rectype-icons to new location - entity folder
-        if($entity_name=='defRecTypes' && !(file_exists($filename.'.png') || file_exists($filename.'.svg'))){
-            
-            if($viewmode=='thumbnail'){
-                $old_filename = HEURIST_ICON_DIR . 'thumb/th_' . $rec_id . '.png';
-            }else{
-                $old_filename = HEURIST_ICON_DIR . $rec_id .'.png';
-            }
-            if(file_exists($old_filename)){
-                
-                //recreate entity folder
-                if(file_exists($path) || folderCreate($path, true)){
-                    copy($old_filename, $filename.'.png');
-                }else{
-                    //error_log('CANT CREATE FOLDER '.$path);
-                }
-            }
+            $viewmode = 'icon';
+            //$path = HEURIST_TERM_ICON_DIR;
         }
         
-        $exts = array('png','jpg','svg','jpeg','jpe','jfif','gif');
-        foreach ($exts as $ext){
-            if(file_exists($filename.'.'.$ext)){
-                if($ext=='jpg' || $ext=='jfif' || $ext=='jpe'){
-                    $content_type = 'image/jpeg';
-                }else if($ext=='svg'){
-                    $content_type = 'image/svg+xml';
-                }else{
-                    $content_type = 'image/'.$ext;    
-                }
-                $filename = $filename.'.'.$ext;
-                break;
-            }
-        }
-            
+        list($filename, $content_type, $file_url) = resolveEntityFilename($entity_name, $rec_id, $viewmode, $db);
+        
+        
         //entity id either not defined or requested file doesn't exist
         //editmode: empty gif (0) or add image gif (1) or default icon/thumb for entity (2), or (check)  'ok' if it exists or '' missing
         
@@ -222,7 +169,11 @@ if($filename){ //download from scratch (for csv import)
                 if(@$_REQUEST['color'] && $ext!='svg'){
                     UtilsImage::changeImageColor($filename, null, @$_REQUEST['color'], @$_REQUEST['circle'], @$_REQUEST['bg']);    
                 }else{
-                    _download_file($filename, $content_type);    
+                    if($file_url!=null && isset($allowWebAccessEntityFiles) && $allowWebAccessEntityFiles){
+                        header('Location:'.$file_url);    
+                    }else{
+                        _download_file($filename, $content_type);        
+                    }
                 }
             }
 
@@ -270,6 +221,7 @@ if($filename){ //download from scratch (for csv import)
     }
 }
 
+
 //
 //
 // 
@@ -284,4 +236,3 @@ function _download_file($filename, $content_type){
         readfile($filename);
 }    
 ?>
-

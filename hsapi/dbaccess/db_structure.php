@@ -54,6 +54,7 @@
     * getTermFullLabel
     * getTermListAll - get tree for domain
     * getTermLabels
+    * getTermCodes
     *
     * INTERNAL FUNCTIONS
     * __getRectypeColNames
@@ -632,17 +633,11 @@ function dbs_GetRectypeConstraint($system) {
             'commonFieldNames' => array_slice(__getTermColNames(), 1),
             'fieldNamesToIndex' => __getColumnNameToIndex(array_slice(__getTermColNames(), 1)));
         
-        //add special field - flag - has image    
-        $terms['fieldNamesToIndex']['trm_HasImage'] = count($terms['commonFieldNames']);
-        array_push($terms['commonFieldNames'],'trm_HasImage');        
-        
         if($res){
-            $lib_dir = $system->getSysDir('term-images');  //HEURIST_FILESTORE_DIR . 'term-images/';
             
             while ($row = $res->fetch_row()) {
-                $hasImage = file_exists($lib_dir.$row[0].'.png');
                 $domain = $row[9];
-                array_push($row, $hasImage);
+                //array_push($row, false);
                 
                 if($domain=='relation' && HEURIST_UNITED_TERMS){
                     $terms['termsByDomainLookup']['enum'][$row[0]] = array_slice($row, 1);
@@ -924,6 +919,18 @@ function dbs_GetRectypeConstraint($system) {
         if ($termIDs) {
             $labels = mysql__select_assoc2($mysqli, 
             'select trm_ID, LOWER(trm_Label) from defTerms where trm_ID in ('.implode(',', $termIDs).')');
+        }
+        return $labels;
+    }    
+    
+    //
+    //
+    //
+    function getTermCodes($mysqli, $termIDs) {
+        $labels = array();
+        if ($termIDs) {
+            $labels = mysql__select_assoc2($mysqli, 
+            'select trm_ID, LOWER(trm_Code) from defTerms where trm_ID in ('.implode(',', $termIDs).')');
         }
         return $labels;
     }    

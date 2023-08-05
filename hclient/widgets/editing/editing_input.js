@@ -50,7 +50,11 @@ $.widget( "heurist.editing_input", {
         is_insert_mode:false,
         
         is_faceted_search:false, //is input used in faceted search or filter builder
-        is_between_mode:false    //duplicate input for freetext and dates for search mode 
+        is_between_mode:false,    //duplicate input for freetext and dates for search mode 
+
+        language: null, // language for term values (3 character ISO639-2 code)
+
+        force_displayheight: null // for textareas
     },
 
     //newvalues:{},  //keep actual value for resource (recid) and file (ulfID)
@@ -75,6 +79,8 @@ $.widget( "heurist.editing_input", {
     
     is_sortable: false, // values are sortable
 
+    block_editing: false,
+
     // the constructor
     _create: function() {
 
@@ -83,7 +89,13 @@ $.widget( "heurist.editing_input", {
         {
             this.options.dtFields = window.hWin.HEURIST4.util.cloneJSON($Db.rst(this.options.rectypeID, this.options.dtID));
         
+            //field can be removed from rst - however it is still in faceted search
+            if(this.options.dtFields==null){
+               this.options.dtFields = {}; 
+            }
+            
             if(this.options.is_faceted_search){
+                
                 if(window.hWin.HEURIST4.util.isempty(this.options['dtFields']['rst_FilteredJsonTermIDTree'])){
                     this.options['dtFields']['rst_FilteredJsonTermIDTree'] = $Db.dty(this.options.dtID,'dty_JsonTermIDTree');
                 } 
@@ -140,7 +152,7 @@ $.widget( "heurist.editing_input", {
         var that = this;
 
         var required = "";
-        if(this.options.readonly || this.f('rst_Display')=='readonly') {
+        if(this.isReadonly()) {
             required = "readonly";
         }else{
             if(!this.options.suppress_prompts && this.f('rst_Display')!='hidden'){
@@ -170,7 +182,7 @@ $.widget( "heurist.editing_input", {
         this.is_sortable = false;
        
         //repeat button        
-        if(this.options.readonly || this.f('rst_Display')=='readonly') {
+        if(this.isReadonly()) {
 
             //spacer
             $( "<span>")
@@ -182,7 +194,8 @@ $.widget( "heurist.editing_input", {
 
             //hardcoded list of fields and record types where multivalues mean translation (multilang support)
             var is_translation = this.f('rst_MultiLang') || 
-               (that.options.rectypeID==window.hWin.HAPI4.sysinfo['dbconst']['RT_CMS_MENU']
+               ((that.options.rectypeID==window.hWin.HAPI4.sysinfo['dbconst']['RT_CMS_MENU'] ||
+                that.options.rectypeID==window.hWin.HAPI4.sysinfo['dbconst']['RT_CMS_HOME'])
                 && that.options.dtID == window.hWin.HAPI4.sysinfo['dbconst']['DT_NAME']);
             
             //saw TODO this really needs to check many exist
@@ -404,6 +417,54 @@ $.widget( "heurist.editing_input", {
         this.setValue(values_to_set);
         this.options.values = this.getValues();
         this._refresh();
+
+        if(this.f('rst_MayModify') == 'discouraged'){ // && !window.hWin.HAPI4.is_admin()
+
+            this.block_editing = true;
+
+            that.setDisabled(true);
+
+            this.input_cell.find('.ui-state-disabled').removeClass('ui-state-disabled'); // remove gray 'cover'
+
+            if(this.input_cell.sortable('instance') !== undefined){ // disable sorting, if sortable
+                this.input_cell.sortable('disable');
+            }
+
+            let $eles = this.element.find('.input-cell, .editint-inout-repeat-button');
+            this._on($eles, {
+                click: function(event){
+
+                    if(!that.block_editing || $(event.target).hasClass('ui-icon-extlink')){
+                        return;
+                    }
+
+                    window.hWin.HEURIST4.util.stopEvent(event);
+                    event.preventDefault();
+
+                    let msg = 'The designer of this database suggests that you do not edit the value in this field (<strong>'+ lblTitle +'</strong>)<br>'
+                        + 'unless you are very sure of what you are doing.<br><br>'
+                        + '<label><input type="checkbox" id="allow_edit"> Let me edit this value</label>';
+
+                    let $dlg = window.hWin.HEURIST4.msg.showMsgDlg(msg, function(){
+
+                        that.block_editing = false;
+                        //that._off($eles, 'click'); - Also removes click from repeat button
+
+                        that.setDisabled(false);
+                        if(that.input_cell.sortable('instance') !== undefined){ // re-enable sorting inputs
+                            that.input_cell.sortable('enable');
+                        }
+                    }, {title: 'Editing is discouraged', yes: 'Proceed', no: 'Cancel'}, {default_palette_class: 'ui-heurist-populate'});
+
+                    window.hWin.HEURIST4.util.setDisabled($dlg.parent().find('.ui-dialog-buttonpane button:first-child'), true);
+                    $dlg.find('#allow_edit').on('change', function(){
+                        window.hWin.HEURIST4.util.setDisabled($dlg.parent().find('.ui-dialog-buttonpane button:first-child'), !$dlg.find('#allow_edit').is(':checked'));
+                    });
+                }
+            });
+        }else if(this.isReadonly()){
+            this.input_cell.attr('title', 'This field has been marked as non-editable');
+        }
     }, //end _create
 
     /* private function */
@@ -459,6 +520,22 @@ $.widget( "heurist.editing_input", {
             this._refresh();    
         }
     },
+    
+    //
+    //
+    //
+    _removeTooltip: function(id){
+
+        if(this.tooltips && this.tooltips[id]){
+            var $tooltip = this.tooltips[id];
+            if($tooltip && $tooltip.tooltip('instance') != undefined){
+                $tooltip.tooltip('destroy');
+                $tooltip = null;
+            }
+            this.tooltips[id] = null;
+            delete this.tooltips[id];
+        }
+    },
 
     // events bound via _on are removed automatically
     // revert other modifications here
@@ -482,6 +559,8 @@ $.widget( "heurist.editing_input", {
         if(this.inputs){
             $.each(this.inputs, function(index, input){ 
 
+                    that._removeTooltip(input.attr('id'));
+
                     if(that.detailType=='blocktext'){
                         var eid = '#'+input.attr('id')+'_editor';
                         //tinymce.remove('#'+input.attr('id')); 
@@ -498,9 +577,12 @@ $.widget( "heurist.editing_input", {
                     that.element.find('#'+$(input).attr('id')+'-2').remove();
                     
                     input.remove();
+                    
+                    
             } );
             this.input_cell.remove();
         }
+        this.tooltips = {};
     },
 
     /**
@@ -570,6 +652,8 @@ $.widget( "heurist.editing_input", {
     _removeInput: function(input_id){
 
         var that = this;
+        
+        this._removeTooltip(input_id);        
 
         if(this.inputs.length>1 && this.enum_buttons == null){
 
@@ -631,6 +715,10 @@ $.widget( "heurist.editing_input", {
             that.onChange();
         }else{  //and clear last one
             this._clearValue(input_id, '');
+            if(this.options.is_between_mode){
+                this.newvalues[input_id+'-2'] = '';
+                this.element.find('#'+input_id+'-2').val('');
+            }
         }
         
     },
@@ -761,8 +849,11 @@ $.widget( "heurist.editing_input", {
             }
             
             //count number of lines
-            setTimeout(__adjustTextareaHeight, 1000);
-            
+            if(!this.options.force_displayheight){
+                setTimeout(__adjustTextareaHeight, 1000);
+            }else{
+                $input.attr('rows', this.options.force_displayheight);
+            }
             
             if(this.configMode && this.configMode['thematicmap']){ //-----------------------------------------------
 
@@ -890,6 +981,41 @@ $.widget( "heurist.editing_input", {
                                         that._addHeuristMedia();
                                     }
                                 });                                        
+                                editor.ui.registry.addButton('customAddFigCaption', {
+                                    icon: 'comment',
+                                    //text: 'Add caption',
+                                    tooltip: 'Add caption to current media',
+                                    onAction: function (_) {
+                                        that._addMediaCaption();
+                                    },
+                                    onSetup: function (button) {
+
+                                        const activateButton = function(e){
+
+                                            //let is_disabled = e.element.nodeName.toLowerCase() !== 'img'; // is image element
+                                            button.setDisabled(e.element.nodeName.toLowerCase() !== 'img');
+                                        };
+
+                                        editor.on('NodeChange', activateButton);
+                                        return function(button){
+                                            editor.off('NodeChange', activateButton);
+                                        }
+                                    }
+                                });
+                                editor.ui.registry.addButton('customHeuristLink', {
+                                    icon: 'link',
+                                    text: 'Heurist',
+                                    tooltip: 'Add link to Heurist record',
+                                    onAction: function (_) {  //since v5 onAction in v4 onclick
+                                        selectRecord(null, function(recordset){
+                                            
+                                                var record = recordset.getFirstRecord();
+                                                var record_id = recordset.fld(record,'rec_ID');
+                                                tinymce.activeEditor.execCommand('mceInsertLink', false, record_id);
+                                            
+                                        });
+                                    }
+                                });                                        
                             }else{
                                 editor.addButton('customHeuristMedia', {
                                     icon: 'image',
@@ -968,7 +1094,7 @@ $.widget( "heurist.editing_input", {
                             'media table paste help autoresize'  //insertdatetime  wordcount
                         ],      
                         //undo redo | code insert  |  fontselect fontsizeselect |  forecolor backcolor | media image link | alignleft aligncenter alignright alignjustify | fullscreen            
-                        toolbar: ['formatselect | bold italic forecolor blockquote | customHeuristMedia link | align | bullist numlist outdent indent | table | removeformat | help'],
+                        toolbar: ['formatselect | bold italic forecolor blockquote | customHeuristMedia customAddFigCaption | customHeuristLink link | align | bullist numlist outdent indent | table | removeformat | help'],
                         /*formats: { q: {block: 'q'} },
                         style_formats: [ {title: 'Quotation', format: 'q'} ],*/
                         block_formats: 'Paragraph=p;Heading 1=h1;Heading 2=h2;Heading 3=h3;Heading 4=h4;Heading 5=h5;Heading 6=h6;Preformatted=pre;Quotation=blockquote',
@@ -1272,7 +1398,7 @@ $.widget( "heurist.editing_input", {
                 {
                     browseTerms(this, $input, value);
 
-                    window.hWin.HEURIST4.ui.initHSelect($input, false);
+                    //window.hWin.HEURIST4.ui.initHSelect($input, false);
                     
                     $input.hSelect({
                         'open': (e) => {
@@ -1853,7 +1979,10 @@ $.widget( "heurist.editing_input", {
             
             that._findAndAssignTitle($input, value, __show_select_function);
             
-            this.newvalues[$input.attr('id')] = value;  //for this type assign value at init  
+            if(value){
+                this.newvalues[$input.attr('id')] = value;  //for this type assign value at init    
+                $input.attr('data-value', value);
+            } 
         } 
         
         else if(this.detailType=='resource' && this.configMode.entity=='DefRecTypes'){ //-----------
@@ -1924,7 +2053,10 @@ $.widget( "heurist.editing_input", {
             this._on( $gicon, { click: __show_select_dialog } );
             this._on( $inputdiv.find('.sel_link2'), { click: __show_select_dialog } );
             
-            this.newvalues[$input.attr('id')] = value;  //for this type assign value at init  
+            if(value){
+                this.newvalues[$input.attr('id')] = value;  //for this type assign value at init  
+                $input.attr('data-value', value);
+            }
         
         }
         else if(this.detailType=='resource') //----------------------------------------------------
@@ -1986,7 +2118,10 @@ $.widget( "heurist.editing_input", {
 
                             //config and data are loaded already, since dialog was opened
                             that._findAndAssignTitle($input, newsel);
-                            that.newvalues[$input.attr('id')] = newsel.join(',');
+                            newsel = newsel.join(',')
+                            that.newvalues[$input.attr('id')] = newsel;
+                            $input.attr('data-value', newsel);
+
                             that.onChange();
 
                         }else if( window.hWin.HEURIST4.util.isRecordSet(data.selection) ){
@@ -2045,7 +2180,10 @@ $.widget( "heurist.editing_input", {
             this._on( $gicon, { click: __show_select_dialog } );
             this._on( $inputdiv.find('.sel_link2'), { click: __show_select_dialog } );
             
-            this.newvalues[$input.attr('id')] = value;  //for this type assign value at init  
+            if(value){
+                this.newvalues[$input.attr('id')] = value;  //for this type assign value at init  
+                $input.attr('data-value', value);
+            }
 
         }
         else{              //----------------------------------------------------
@@ -2315,6 +2453,9 @@ $.widget( "heurist.editing_input", {
                         window.hWin.HEURIST4.ui.showEntityDialog('recUploadedFiles', popup_opts);
                     }
                 });
+                if(!f_id || f_id < 0){
+                    $edit_details.hide();
+                }
                 
                 /* Change Handler */
                 $input.change(function(event){
@@ -2338,6 +2479,7 @@ $.widget( "heurist.editing_input", {
                             $dwnld = $($container.find('a#dwn'+f_id)[0]);
                             $player = $($container.find('div#player'+f_id)[0]);
                             $thumbnail = $($container.find('img#img'+f_id)[0]);
+                            $edit_metadata = $($container.find('.edit_metadata')[0]);
 
                             $show.attr({'id':'lnk'+n_id});
 
@@ -2351,6 +2493,12 @@ $.widget( "heurist.editing_input", {
                             f_nonce = n_nonce;
                             dwnld_link = n_dwnld_link;
                             url = n_url;
+
+                            if(!n_id || n_id < 1){
+                                $edit_metadata.hide();
+                            }else{
+                                $edit_metadata.show();
+                            }
                         }
                         
                     }
@@ -2523,6 +2671,7 @@ $.widget( "heurist.editing_input", {
                     var url =  window.hWin.HAPI4.baseURL
                     + 'hclient/widgets/viewers/miradorViewer.php?db=' 
                     +  window.hWin.HAPI4.database
+                    + '&recID=' + that.options.recID
                     + '&' + (is_manifest?'iiif':'iiif_image') + '=' + obf_recID;
 
                     if(true){
@@ -3499,6 +3648,7 @@ console.log('onpaste');
                             that._removeInput( input_id );
                         }
                         
+                        
                         that.onChange(); 
                     }
                 });
@@ -4102,8 +4252,6 @@ console.log('onpaste');
     _onTermChange: function( orig, data ){
         
         var $input = (orig.target)? $(orig.target): orig;
-         
-//console.log('_onTermChange');
                 
                 if(! $input.attr('radiogroup')){
                 
@@ -4452,6 +4600,7 @@ console.log('onpaste');
                 if(that.newvalues[input_id]){
                     that.newvalues[input_id] = '';
                 }
+                $input.removeAttr('data-value');
                 
                 if(that.detailType=='file'){
                     that.input_cell.find('img.image_input').prop('src','');
@@ -4459,6 +4608,7 @@ console.log('onpaste');
                     if(that.linkedImgInput !== null){
                         that.linkedImgInput.val('');
                         that.newvalues[that.linkedImgInput.attr('id')] = '';
+                        that.linkedImgInput.removeAttr('data-value');
                     }
                     if(that.linkedImgContainer !== null){
                         that.linkedImgContainer.find('img').prop('src', '');
@@ -4509,7 +4659,7 @@ console.log('onpaste');
         
         if(!$.isArray(values)) values = [values];
 
-        var isReadOnly = (this.options.readonly || this.f('rst_Display')=='readonly');
+        var isReadOnly = this.isReadonly();
         
         var i;
         for (i=0; i<values.length; i++){
@@ -4577,7 +4727,10 @@ console.log('onpaste');
                 res = res.trim();
             }
         }else {
-            res = this.newvalues[$input.attr('id')];
+            res = this.newvalues[$input.attr('id')];    
+            if(!res && $input.attr('data-value')){
+                res = $input.attr('data-value');
+            }
         }
 
         return res;
@@ -4602,7 +4755,7 @@ console.log('onpaste');
         
         this.btn_cancel_reorder.hide();
         
-        if(this.options.readonly || this.f('rst_Display')=='readonly') return;
+        if(this.isReadonly()) return;
         var idx, ele_after = this.firstdiv; //this.error_message;
         for (idx in this.inputs) {
             var ele = this.inputs[idx].parents('.input-div');
@@ -4690,11 +4843,18 @@ console.log('onpaste');
     },
     
     //
+    //
+    //
+    isReadonly: function(){
+        return this.options.readonly || this.f('rst_Display')=='readonly' || this.f('rst_MayModify')=='locked';
+    },
+    
+    //
     // get all values (order is respected)
     //
     getValues: function( ){
 
-        if(this.options.readonly || this.f('rst_Display')=='readonly'){
+        if(this.isReadonly()){
             return this.options.values;
         }else{
             var idx;
@@ -4717,9 +4877,13 @@ console.log('onpaste');
                             res2 = this.element.find('#'+$input.attr('id')+'-2').val();
                         }
                         if(window.hWin.HEURIST4.util.isempty( res2 )){ 
-                            res = '';
+                            if(this.detailType!='date') res = '';
                         }else{
-                            res  = res+'<>'+res2;
+                            if(this.detailType=='date'){
+                                res  = res+'/'+res2;
+                            }else{
+                                res  = res+'<>'+res2;   
+                            }
                         }
                     }
                                     
@@ -4748,7 +4912,7 @@ console.log('onpaste');
     //
     setDisabled: function(is_disabled){
         //return;
-        if(!(this.options.readonly || this.f('rst_Display')=='readonly')){
+        if(!this.isReadonly()){
             var idx;
             for (idx in this.inputs) {
                 if(!this.isFileForRecord) {  //this.detailType=='file'
@@ -4776,7 +4940,7 @@ console.log('onpaste');
             return true;
         }else{
 
-            if(this.options.readonly || this.f('rst_Display')=='readonly'){
+            if(this.isReadonly()){
                 return false;
             }else{
                 if(this.options.values.length!=this.inputs.length){
@@ -4824,7 +4988,7 @@ console.log('onpaste');
     //
     validate: function(){
 
-        if (this.f('rst_Display')=='hidden' || this.f('rst_Display')=='readonly') return true;
+        if (this.f('rst_Display')=='hidden' || this.isReadonly()) return true;
         
         var req_type = this.f('rst_RequirementType');
         var max_length = this.f('dty_Size');
@@ -4925,7 +5089,7 @@ console.log('onpaste');
     //
     //
     focus: function(){
-        if(!this.options.readonly && this.inputs && this.inputs.length>0 
+        if(!this.isReadonly() && this.inputs && this.inputs.length>0 
             && $(this.inputs[0]).is(':visible') 
             && !$(this.inputs[0]).hasClass('ui-state-disabled') )
         {
@@ -4963,7 +5127,7 @@ console.log('onpaste');
             disp_value = $Db.getTermValue(value);
 
             if(window.hWin.HEURIST4.util.isempty(value)) {
-                disp_value = 'term missing. id '+value;
+                disp_value = 'No value'; //'term missing. id '+value
             }
         } else if(this.detailType=='file'){
 
@@ -5036,6 +5200,8 @@ console.log('onpaste');
     //         
     _addHeuristMedia: function(){
 
+        var that = this;
+
         var popup_options = {
             isdialog: true,
             select_mode: 'select_single',
@@ -5057,7 +5223,8 @@ console.log('onpaste');
 
                         var playerTag = recordset.fld(record,'ulf_PlayerTag');
 
-                        tinymce.activeEditor.insertContent( playerTag );
+                        that._addMediaCaption(playerTag);
+
                     }
 
                 }//data
@@ -5068,6 +5235,66 @@ console.log('onpaste');
         window.hWin.HEURIST4.ui.showEntityDialog('recUploadedFiles', popup_options);
     },
 
+    //
+    // Add caption to media
+    //
+    _addMediaCaption: function(content = null){
+
+        let is_insert = false;
+        let node = null;
+
+        if(content){
+            is_insert = true;
+        }else{
+
+            node = tinymce.activeEditor.selection.getNode();
+            if(node.parentNode.nodeName.toLowerCase() == 'figure'){ // insert new figcaption
+                node = document.createElement('figcaption');
+                tinymce.activeEditor.selection.getNode().parentNode.appendChild(node);
+            }else{ // replace selected content with new wrapper
+                node = null;
+            }
+
+            content = tinymce.activeEditor.selection.getContent();
+        }
+
+        let $dlg;
+        let msg = 'Enter a caption below, if you want one:<br><br>'
+            + '<textarea rows="6" cols="65" id="figcap"></textarea>';
+        
+        let btns = {};
+        btns[window.HR('Add caption')] = () => {
+            let caption = $dlg.find('#figcap').val();
+
+            if(caption){
+
+                if(node != null){
+                    node.innerText = caption;
+                    return;
+                }
+                content = '<figure>'+ content +'<figcaption>'+ caption +'</figcaption></figure>';
+
+                if(is_insert){
+                    tinymce.activeEditor.insertContent( content );
+                }else{
+                    tinymce.activeEditor.selection.setContent( content );
+                }
+            }
+
+            $dlg.dialog('close');
+        };
+        btns[window.HR('No caption')] = () => {
+            if(is_insert){
+                tinymce.activeEditor.insertContent( content );
+            }
+            $dlg.dialog('close');
+        };
+
+        $dlg = window.hWin.HEURIST4.msg.showMsgDlg(msg, btns, 
+            {title: 'Adding caption to media', yes: window.HR('Add caption'), no: window.HR('No caption')}, 
+            {default_palette_class: 'ui-heurist-populate'}
+        );
+    },
 
     //
     //
@@ -5095,18 +5322,49 @@ console.log('onpaste');
         var that = this;
 
         function __onDateChange(){
+
             var value = $input.val();
             
             that.newvalues[$input.attr('id')] = value; 
             
             if(that.options.dtID>0){
+                
                 var isTemporalValue = value && value.search(/\|VER/) != -1; 
                 if(isTemporalValue) {
                     window.hWin.HEURIST4.ui.setValueAndWidth($input, temporalToHumanReadableString(value));    
+
+                    var temporal = new Temporal(value);
+                    var content = '<p>'+temporal.toReadableExt('<br>')+'</p>';
+                    
+                    var $tooltip = $input.tooltip({
+                        items: "input.ui-widget-content",
+                        position: { // Post it to the right of $input
+                            my: "left+20 center",
+                            at: "right center",
+                            collision: "none"
+                        },
+                        show: { // Add slight delay to show
+                            delay: 500,
+                            duration: 0
+                        },
+                        content: function(){ // Provide text
+                            return content;
+                        },
+                        open: function(event, ui){ // Add custom CSS + class
+                            ui.tooltip.css({
+                                "width": "200px",
+                                "background": "rgb(209, 231, 231)",
+                                "font-size": "1.1em"
+                            })//.addClass('ui-heurist-populate');
+                        }
+                    });
+                    if(!that.tooltips) that.tooltips = {};
+                    that.tooltips[$input.attr('id')] = $tooltip; 
                     
                     $input.addClass('Temporal').removeClass('text').attr('readonly','readonly');
                 }else{
                     $input.removeClass('Temporal').addClass('text').removeAttr("readonly").css('width','20ex');
+                    that._removeTooltip($input.attr('id'));
                 }
             }
             
@@ -5471,7 +5729,7 @@ console.log('onpaste');
                             })
                             .insertAfter(edash);
                             
-                    window.hWin.HEURIST4.ui.disableAutoFill( $inpt2 );
+                    window.hWin.HEURIST4.ui.disableAutoFill( inpt2 );
                             
                     that._createDateInput(inpt2, $inputdiv);
             
@@ -5631,7 +5889,7 @@ console.log('onpaste');
                     'a': 'search',
                     'entity': 'defTerms',
                     'details': 'list',
-                    'trm_ID': this.child_terms,
+                    'trm_ID': this.child_terms.join(','),
                     'withimages': 1,
                     'request_id': window.hWin.HEURIST4.util.random()
                 };

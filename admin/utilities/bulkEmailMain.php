@@ -252,6 +252,10 @@ if(!$has_emails || empty($emails)) {
             var all_emails = <?php echo json_encode($emails)?>; // Object of Email records id->title
             
             var current_db = "<?php echo $current_db ?>";
+            var getting_databases = false; // Flag for database retrieval operation in progress
+
+            const handled_sort = ['name', 'rec_count', 'last_update'];
+            var database_details = null; // [{name: db_name, rec_count: db_rec_count, last_update: db_last_update}, ...]
             
             //
             // Get list of currently selected databases
@@ -393,7 +397,7 @@ if(!$has_emails || empty($emails)) {
 
                 if(window.hWin.HEURIST4.util.isempty(dbs)){
                     window.hWin.HEURIST4.msg.showMsgFlash("There are no databases based on the filters");
-                    $("#filterMsg").hide().text("Filtering Databases...");
+                    $("#filterMsg").hide();
                     return;
                 }
 
@@ -425,14 +429,97 @@ if(!$has_emails || empty($emails)) {
 
                         $db_selection.find(".dbListCB").prop("checked", is_checked);
 
+                        getDBCount();
                         getUserCount();
                     })
                     .css("vertical-align", "middle");
 
-                $db_selection.find(".dbListCB").on("change", getUserCount);
+                $db_selection.find(".dbListCB").on("change", () => {
+                    getDBCount();
+                    getUserCount();
+                });
 
+                $("#dbCount").text("0");
                 $("#userCount").text("0");
-                $("#filterMsg").hide().text("Filtering Databases...");
+                $("#filterMsg").hide();
+            }
+
+            //
+            // Sort database list
+            //
+            function applyDBSort(order = 'name') {
+
+                if(getting_databases){
+                    setTimeout(() => {
+                        applyDBSort(order);
+                    }, 2000);
+                    return;
+                }
+
+                let $db_list = $('#dbSelection');
+
+                if(!database_details || database_details.length == 0){ // TODO: attempt another retrieval
+                    window.hWin.HEURIST4.msg.showMsgErr('Unable to apply sort to database list');
+                    return;
+                }
+
+                if(!order){
+                    order = $('input[name="dbSortBy"]:checked').attr('id');
+                }
+                if(!order || window.hWin.HEURIST4.util.isempty(order) || !handled_sort.includes(order)){
+                    order = 'name';
+                }
+
+                if($db_list.attr('data-order') == order){
+                    return;
+                }
+
+                $db_list.attr('data-order', order);
+
+                // Sort database_details
+                database_details.sort((a, b) => {
+
+                    let a_item = a[order];
+                    let b_item = b[order];
+
+                    if(order == 'name'){ // to lower case first
+                        a_item = a_item.toLowerCase();
+                        b_item = b_item.toLowerCase();
+                    }
+
+                    if(order == 'rec_count'){
+                        return a_item - b_item;
+                    }/*else{
+                        return a_item < b_item;
+                    }*/
+                    if(a_item < b_item){
+                        return -1;
+                    }else if(a_item > b_item){
+                        return 1;
+                    }
+                    return 0;
+                });
+
+                let $prev_child = null;
+
+                for(let i = 0; i < database_details.length; i++){
+
+                    const name = database_details[i]['name'];
+                    let $ele = $db_list.find('input[id="'+ name +'"]');
+
+                    if($ele.length == 0){
+                        continue;
+                    }
+
+                    $ele = $ele.parent().parent();
+                    if($prev_child){
+                        $ele.insertAfter($prev_child);
+                        $prev_child = $ele;
+                    }else{
+                        $ele.prependTo($db_list);
+                        $prev_child = $ele;
+                    }
+                }
             }
 
             //
@@ -529,10 +616,17 @@ if(!$has_emails || empty($emails)) {
                 $("#btnApply").on({
                     click: function(event, data) {
 
+                        if(getting_databases){
+                            window.hWin.HEURIST4.msg.showMsgFlash('Please wait for the database list to update...', 3000);
+                            return;
+                        }
+
+                        getting_databases = true;
+
                         $("#dbSelection").find(".dbListCB").off("change");
                         $("#dbSelection").empty();
 
-                        $("#filterMsg").show();
+                        $("#filterMsg").show().text("Filtering Databases...");
 
                         var data = {
                             db: current_db,
@@ -565,6 +659,8 @@ if(!$has_emails || empty($emails)) {
 
                                 if(response.status == "ok"){
                                     setupDBSelection(response.data);
+                                    applyDBSort($('input[name="dbSortBy"]:checked').attr('id'));
+                                    //displayRecordCount();
                                 } else {
 
                                     if(window.hWin.HEURIST4.util.isempty(response.message)){
@@ -577,6 +673,7 @@ if(!$has_emails || empty($emails)) {
                             },
                             //always:
                             complete: function(jqXHR, textStatus){
+                                getting_databases = false;
                                 if(textStatus == 'success'){
                                     $("#filterMsg").text('Database Filtering is Completed, Loading List');
                                 }else{
@@ -591,12 +688,21 @@ if(!$has_emails || empty($emails)) {
 
                     validateForm(event);
                 });
+
+                $('.dbSort').on('change', function(event){
+                    let order = $('input[name="dbSortBy"]:checked').attr('id');
+                    applyDBSort(order);
+                });
+
+                $('input[id="name"]').prop('checked', true);
             }
 
             //
             // Get complete list of databases on current server
             //
             function getInitDbList() {
+
+                getting_databases = true;
 
                 $.ajax({
                     url: 'bulkEmailOther.php',
@@ -618,7 +724,10 @@ if(!$has_emails || empty($emails)) {
                     success: function(response, textStatus, jqXHR){
 
                         if(response.status == "ok"){
-                            setupDBSelection(response.data);
+                            database_details = response.data.details;
+                            setupDBSelection(response.data.list);
+                            //applyDBSort('name'); already in alphabetic order by default
+                            //displayRecordCount();
                         } else {
 
                             if(window.hWin.HEURIST4.util.isempty(response.message)){
@@ -628,6 +737,9 @@ if(!$has_emails || empty($emails)) {
                                 window.hWin.HEURIST4.msg.showMsgErr({message: msg, title: "Heurist"});
                             }
                         }
+                    },
+                    complete: function(jqXHR, textStatus){
+                        getting_databases = false;
                     }
                 });
             }
@@ -675,6 +787,13 @@ if(!$has_emails || empty($emails)) {
             //
             function displayRecordCount(data) {
 
+                if(window.hWin.HEURIST4.util.isempty(data)){
+                    data = database_details;
+                }
+                if(window.hWin.HEURIST4.util.isempty(data)){
+                    return;
+                }
+
                 // Update individual record counts + update total record count for selected databases
                 let $db_list = $("#dbSelection");
 
@@ -682,17 +801,22 @@ if(!$has_emails || empty($emails)) {
                 let total = 0;
 
                 $.each(data, (db, count) => {
+
+                    if($.isPlainObject(count)){
+                        db = count['name'];
+                        count = count['rec_count'];
+                    }
+
                     let $ele = $db_list.find('[data-id="'+ db +'"]');
 
                     if($ele.length > 0){
 
                         let max_width = $ele.parent().width() - 30;
-
                         $ele.text('[' + count + ']').css({'float': 'right', 'padding-left': '5px'});
-                    }
 
-                    if(count > 0 && selected_dbs.indexOf(db) >= 0){
-                        total += parseInt(count, 10);
+                        if(count > 0 && selected_dbs.indexOf(db) >= 0){
+                            total += parseInt(count, 10);
+                        }
                     }
                 });
 
@@ -706,6 +830,16 @@ if(!$has_emails || empty($emails)) {
             // Retrieve record count for list of databases
             //
             function getRecordCount() {
+
+                if(getting_databases){
+                    window.hWin.HEURIST4.msg.showMsgFlash('Please wait for the database list to update...', 3000);
+                    return;
+                }
+
+                if(window.hWin.HEURIST4.util.isArrayNotEmpty(database_details) && Object.hasOwn(database_details[0], 'rec_count')){
+                    displayRecordCount();
+                    return;
+                }
 
                 let dbs = getAllDbs();
 
@@ -752,9 +886,23 @@ if(!$has_emails || empty($emails)) {
             }
 
             //
+            // Count number of databases selected and update label
+            //
+            function getDBCount() {
+
+                const $sel_dbs = $("#dbSelection").find(".dbListCB:checked");
+                $("#dbCount").text($sel_dbs.length);
+            }
+
+            //
             // Get distinct user count for selected databases
             //
             function getUserCount() {
+
+                if(getting_databases){
+                    window.hWin.HEURIST4.msg.showMsgFlash('Please wait for the database list to update...', 3000);
+                    return;
+                }
 
                 var dbs = getDbList();
 
@@ -942,12 +1090,20 @@ if(!$has_emails || empty($emails)) {
 
                     <div id="dbArea">
 
-                        <div style="margin-bottom: 15px;">Get users from these databases:</div>
+                        <div>Get users from these databases:</div>
+
+                        <div style="margin: 10px 0px;">
+                            Sort by: 
+                            <label><input type="radio" name="dbSortBy" class="dbSort" id="name"> Name</label>
+                            <label><input type="radio" name="dbSortBy" class="dbSort" id="rec_count"> Record count</label>
+                            <label><input type="radio" name="dbSortBy" class="dbSort" id="last_update"> Last updated</label>
+                        </div>
+
                         <div class="non-selectable" style="margin: 0px 0px 10px 5px;">
                             <label><input type="checkbox" id="allDBs"> Select All</label> 
                             <span style="float: right; display: none; margin-right: 10px;">Record count:</span>
                         </div>
-                        <div id="dbSelection">
+                        <div id="dbSelection" data-order="name">
                         </div>
 
                     </div>
@@ -959,8 +1115,10 @@ if(!$has_emails || empty($emails)) {
                     <div style="margin-bottom: 20px;">
                         Send email to: <span id="userSelection"></span> &nbsp;&nbsp;&nbsp; 
                         Count of distinct users: <span id="userCount">0</span> 
-                        <button id="btnCalRecCount" style="margin-left: 10px;" onclick="return false;">Count total DB records (slow)</button> 
-                        Total count of records (selected databases): <span id="recCount">0</span> 
+                        <button id="btnCalRecCount" style="margin-left: 10px;" onclick="return false;">Count total DB records</button>
+                        <span style="float: right; margin-left: 50px;">Number of databases selected: <span id="dbCount">0</span></span>
+                        <br>
+                        <span style="float: right;">Total count of records (selected databases): <span id="recCount">0</span></span>
                     </div>
 
                     <div class="non-selectable" style="margin-bottom: 20px;"> 
@@ -983,7 +1141,7 @@ if(!$has_emails || empty($emails)) {
 
                             <div style="margin-bottom: 10px;">Placeholders that will be replaced with proper values (case insensitive): </div>
 
-                            <div style="display: inline-block;float: left;margin: 0px 20px 35px 0px;">
+                            <div style="float: left;margin: 0px 20px 35px 0px;">
                                 ##firstname## &rarr; User's First Name, <br/>
                                 ##lastname## &rarr; User's Last Name, <br/>
                                 ##email## &rarr; User's Email, <br/>

@@ -37,6 +37,8 @@ function hPublishDialog( _options )
         
         popupelement.find('.modes').hide();
         
+        popupelement.find('#div-content-type').hide();
+        
         popupelement.find('.'+options.mode).show();    
         
         if(options.mode=='mapspace' || options.mode=='mapquery')
@@ -58,8 +60,11 @@ function hPublishDialog( _options )
         }else{
             if(options.mode=='smarty'){
                 popupelement.find("#btnScheduleSmarty").button().click(_scheduleSmarty);
-                popupelement.find("#lbl_mode2").text('javascript wrap');
-                popupelement.find("#lbl_mode3").text('raw text');
+                popupelement.find("#lbl_mode2").text(window.hWin.HR('javascript wrap'));
+                
+                popupelement.find('#div-content-type').show();
+                
+                popupelement.find('#select-content-type').change(_fillUrls);
             }
             
             _fillUrls();      
@@ -81,11 +86,13 @@ function hPublishDialog( _options )
     function _fillUrls(){
         //URL
         $(popupelement).find("#code-url").val(options.url); 
-        $(popupelement).find("#link-url").attr('href', options.url); 
-
         
         if(options.mode=='smarty'){
 
+            var content_type = $(popupelement).find('#select-content-type').val();
+        
+            $(popupelement).find("#link-url").attr('href', options.url+'&mode='+content_type); 
+            
             $(popupelement).find("#code-textbox-embed").val('<iframe src=\'' + options.url +
                 '\' width="80%" height="70%" frameborder="0"></iframe>');
 
@@ -97,6 +104,8 @@ function hPublishDialog( _options )
                 '</noscript>');            
             
         }else{
+            $(popupelement).find("#link-url").attr('href', options.url); 
+
             
             //readable code        
             $(popupelement).find("#code-textbox-embed").val('<iframe src=\'' + options.url +

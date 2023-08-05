@@ -59,7 +59,13 @@ if(!$error){
         $thumbfile = HEURIST_THUMB_DIR.'ulf_'.$fileid.'.png';
         
         if(!$force_recreate && file_exists($thumbfile)){
-            downloadFile('image/png', $thumbfile);
+            
+            if(defined('HEURIST_THUMB_URL')){
+                header('Location: '.HEURIST_THUMB_URL.'ulf_'.$fileid.'.png');    
+            }else{
+                downloadFile('image/png', $thumbfile);    
+            }
+            
         }else{
             //recreate thumbnail and output it
             $system->init($db);
@@ -128,7 +134,7 @@ if(!$error){
             }else    
             if( @$_REQUEST['mode']=='tag'){
 
-                //rquest may have special parameters for audio/video players
+                //request may have special parameters for audio/video players
                 if(@$_REQUEST['fancybox']){
                     $params = $_REQUEST['fancybox']; //returns player in wrapper
                 }else{
@@ -168,12 +174,18 @@ if(!$error){
                         }    
                     }
                     
-                    if($_SERVER["SERVER_NAME"]=='127.0.0.1' &&  @$_REQUEST['fancybox']==1 && strpos($fileinfo['fullPath'],'file_uploads/')===0){
-                        //show in viewer directly - for localhost only!!!
+                    $is_download = (@$_REQUEST['download']==1); 
+                    
+                    //if($_SERVER["SERVER_NAME"]=='127.0.0.1' &&  @$_REQUEST['fancybox']==1 
+                    if(!$is_download && isset($allowWebAccessUploadedFiles) && $allowWebAccessUploadedFiles
+                                        && strpos($fileinfo['fullPath'],'file_uploads/')===0){
+                        //show in viewer directly
                         $direct_url = HEURIST_FILESTORE_URL.$fileinfo['fullPath'];
                         header('Location: '.$direct_url);
                         
-                    }else if($fileExt=='nxz' || $fileExt=='nxs' || $fileExt=='ply' || $fileExt=='fbx' || $fileExt=='obj'){
+                    }else if(!$is_download 
+                        && ($fileExt=='nxz' || $fileExt=='nxs' || $fileExt=='ply' || $fileExt=='fbx' || $fileExt=='obj'))
+                    {
                         
                         //for 3D viewer - direct url to file
                         $direct_url = HEURIST_FILESTORE_URL.$fileinfo['fullPath'];
@@ -219,11 +231,15 @@ if(!$error){
                 }else{
 //DEBUG
                     error_log('File not found '.print_r($filepath,true));
+                    $placeholder = '../../hclient/assets/200x200-missed2.png';
+                    header('Location: '.$placeholder);
                 }
             }
         }else{
 //DEBUG
             error_log('Filedata not found '.$fileid);
+            $placeholder = '../../hclient/assets/200x200-missed.png';
+            header('Location: '.$placeholder);
         }
         
         $system->dbclose();

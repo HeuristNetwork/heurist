@@ -729,8 +729,9 @@ public static function parseAndValidate($encoded_filename, $original_filename, $
 //
 private static function prepareDateField($field, $csv_dateformat){
     
-    $t3 = validateAndConvertToISO($field, null, $csv_dateformat);
-    if($t3!='Temporal' && $t3!=null){
+    $t3 = Temporal::dateToISO($field, $csv_dateformat); //@todo - parse simple range
+    
+    if($t3!='Temporal' && $t3!=null){ //do not change if temporal
         $field = $t3;
     }
     /*

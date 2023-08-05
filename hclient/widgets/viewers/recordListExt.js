@@ -273,7 +273,6 @@ this._dout('onLoadComplete refresh again');
             if(this._is_publication && $.isFunction(initLinksAndImages))
             {
                 //init "a href" for CMS pages
-                
                 if(!window.hWin.HEURIST4){
                     var script = document.createElement('script');
                     script.type = 'text/javascript';
@@ -452,7 +451,9 @@ this._dout('refresh vis='+this.element.is(':visible'));
                 this._current_url = null;
                 
                 if(!window.hWin.HEURIST4.util.isempty(this.options.placeholder_text)){
-                    this.placeholder_ele.html(this.options.placeholder_text).show();
+                    if(this.placeholder_ele != null) {
+                        this.placeholder_ele.html(this.options.placeholder_text).show();   
+                    }
                     if(this.options.is_frame_based){
                         this.dosframe.attr('src', null);
                     }else{
@@ -525,7 +526,9 @@ this._dout('refresh vis='+this.element.is(':visible'));
                 if ((this.options.recordset==null || this.options.recordset.length()==0) &&
                     !window.hWin.HEURIST4.util.isempty(this.options.empty_remark)) 
                 {
-                    this.placeholder_ele.html(this.options.empty_remark).show();
+                    if(this.placeholder_ele!=null){
+                        this.placeholder_ele.html(this.options.empty_remark).show();
+                    }
                 }else{
 
                     var showReps = this.dosframe[0].contentWindow.showReps;

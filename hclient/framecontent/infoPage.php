@@ -63,6 +63,9 @@ if(!isset($message)){
         }
     }
 }
+
+    $dbname = $_REQUEST['db'];
+    $dbname = (preg_match('[\W]', $dbname))?'':$dbname;
 ?>
 <html>
     <head>
@@ -76,7 +79,7 @@ if(!isset($message)){
         <link rel="stylesheet" type="text/css" href="<?php echo PDIR;?>external/jquery-ui-iconfont-master/jquery-ui.icon-font.css" />
 
         <style>
-            span.login-link{
+            a.login-link{
                 text-decoration: underline;
                 color: blue;
                 cursor: pointer;
@@ -109,7 +112,6 @@ if(!isset($message)){
         <script type="text/javascript" src="<?php echo PDIR;?>hclient/core/utils.js"></script>
         <script type="text/javascript" src="<?php echo PDIR;?>hclient/core/utils_ui.js"></script>
         <script type="text/javascript" src="<?php echo PDIR;?>hclient/core/utils_msg.js"></script>
-        <script type="text/javascript" src="<?php echo PDIR;?>hclient/core/localization.js"></script>
         <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/profile/profile_login.js"></script>   
         <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/profile/profile_edit.js"></script>
 
@@ -129,7 +131,7 @@ if(!isset($message)){
             }
 
             $(document).ready(() => {
-                window.hWin.HAPI4 = new hAPI('<?php echo $_REQUEST['db']?>', onHapiInit);
+                window.hWin.HAPI4 = new hAPI('<?php echo $dbname;?>', onHapiInit);
             });
         </script>
     <?php
@@ -145,7 +147,7 @@ if(!isset($message)){
                 style="width:90%;margin:auto;margin-top:10px;padding:10px;">
                 <span class="ui-icon <?php echo ($is_error)?'ui-icon-alert':'ui-icon-info'; ?>" 
                       style="float: left; margin-right:.3em;font-weight:bold"></span>
-                <?php echo $message;?>
+                <?php echo strip_tags($message,'<a><u><i><em><b><strong><sup><sub><small><br><h1><h2><h3><h4><p><ul><li><img>');?>
             </div>
         </div>
     </body>

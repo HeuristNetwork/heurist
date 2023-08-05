@@ -31,9 +31,10 @@
     *  stripAccents
     *  prepareIds
     *  checkMaxLength - check max length for TEXT field
-    *  extractLangPrefix - splits and extract language code and value from string code:value
     * 
-    *  updateDatabseToLatest4 - make changes in database structure according to the latest version
+    *  updateDatabaseToLatest - make changes in database structure according to the latest version
+    *  recreateRecLinks
+    *  recreateRecDetailsDateIndex
     * 
     * @package     Heurist academic knowledge management system
     * @link        https://HeuristNetwork.org
@@ -768,8 +769,10 @@
 
             $res = false;
 
-            if(!isFunctionExists($mysqli, 'getTemporalDateString')){ //need drop old functions
-                include(dirname(__FILE__).'/../utilities/utils_db_load_script.php'); // used to load procedures/triggers
+            if(!isFunctionExists($mysqli, 'getEstDate')){ //getTemporalDateString need drop old functions
+                if(!function_exists('execute_db_script')){
+                    include(dirname(__FILE__).'/../utilities/utils_db_load_script.php'); // used to load procedures/triggers
+                }
                 if(db_script(HEURIST_DBNAME_FULL, dirname(__FILE__).'/../../admin/setup/dbcreate/addProceduresTriggers.sql', false)){
                     $res = true;
                 }
@@ -786,7 +789,9 @@
     function checkDatabaseFunctionsForDuplications($mysqli){
         
          if(!isFunctionExists($mysqli, 'NEW_LIPOSUCTION_255')){
-                include(dirname(__FILE__).'/../utilities/utils_db_load_script.php'); // used to load procedures/triggers
+                if(!function_exists('execute_db_script')){
+                    include(dirname(__FILE__).'/../utilities/utils_db_load_script.php'); // used to load procedures/triggers
+                }
                 if(db_script(HEURIST_DBNAME_FULL, dirname(__FILE__).'/../../admin/setup/dbcreate/addFunctions.sql', false)){
                     $res = true;
                 }else{
@@ -814,8 +819,9 @@
             
         if($is_forced || !$is_table_exist){
                 //recreate cache
-                
-                include(dirname(__FILE__).'/../utilities/utils_db_load_script.php'); // used to execute SQL script
+                if(!function_exists('execute_db_script')){
+                    include(dirname(__FILE__).'/../utilities/utils_db_load_script.php'); // used to execute SQL script
+                }
 
                 if($is_table_exist){
                     
@@ -848,8 +854,240 @@
         }
         return $isok;
     }
-
     
+    //
+    // $need_populate - adds entries to recDetailsDateIndex
+    // $json_for_record_details - update recDetails - change Plain string temporals to JSON 
+    //
+    function recreateRecDetailsDateIndex($system, $need_populate, $json_for_record_details){
+        
+        $mysqli = $system->get_mysqli();
+        
+        $dbVerSubSub = $system->get_system('sys_dbSubSubVersion');        
+        
+        $isok = true;
+        $is_table_exist = hasTable($mysqli, 'recDetailsDateIndex');    
+        
+        $err_prefix = '';//'Update date index: ';
+        $cnt = 0;
+        $cnt_to_json = 0;
+        $cnt_err = 0;
+        $report = array();
+        
+        $log_file = $system->getSysDir().'recDetailsDateIndex.log';
+        
+        $mysqli->query('DROP TABLE IF EXISTS recDetailsDateIndex;');
+        $res = $mysqli->query("CREATE TABLE recDetailsDateIndex (
+              rdi_ID   int unsigned NOT NULL auto_increment COMMENT 'Primary key',
+              rdi_RecID int unsigned NOT NULL COMMENT 'Record ID',
+              rdi_DetailTypeID int unsigned NOT NULL COMMENT 'Detail type ID',
+              rdi_DetailID int unsigned NOT NULL COMMENT 'Detail ID',
+              rdi_estMinDate DECIMAL(15,4) NOT NULL COMMENT '',
+              rdi_estMaxDate DECIMAL(15,4) NOT NULL COMMENT '',
+              PRIMARY KEY  (rdi_ID),
+              KEY rdi_RecIDKey (rdi_RecID),
+              KEY rdi_DetailTypeKey (rdi_DetailTypeID),
+              KEY rdi_DetailIDKey (rdi_DetailID),
+              KEY rdi_MinDateKey (rdi_estMinDate),
+              KEY rdi_MaxDateKey (rdi_estMaxDate)
+            ) ENGINE=InnoDB COMMENT='A cache for date fields to speed access';");
+
+        if(!$res){
+            $system->addError(HEURIST_DB_ERROR, 'Cannot create recDetailsDateIndex', $mysqli->error);
+            return false;
+        }else{
+            $report[] = 'recDetailsDateIndex created';
+            //recreate triggers
+            if(!function_exists('execute_db_script')){
+                include(dirname(__FILE__).'/../utilities/utils_db_load_script.php'); // used to load procedures/triggers
+            }
+            if(!db_script($system->dbname_full(), dirname(__FILE__).'/../../admin/setup/dbcreate/addProceduresTriggers.sql', false)){
+                    $system->addError(HEURIST_DB_ERROR, $err_prefix.'Cannot recreate database triggers', $mysqli->error);
+                    return false;
+            }
+            $report[] = 'Triggers to populate recDetailsDateIndex created';
+            
+            if($need_populate){
+            
+            //fill database with min/max date values
+            //1. find all date values in recDetails
+            $query = 'SELECT count(dtl_ID) FROM recDetails, defDetailTypes  WHERE dtl_DetailTypeID=dty_ID AND dty_Type="date" AND dtl_Value!=""';
+            $cnt_dates = mysql__select_value($mysqli, $query);
+            
+            $query = 'SELECT dtl_ID,dtl_RecID,dtl_DetailTypeID,dtl_Value FROM recDetails, defDetailTypes WHERE dtl_DetailTypeID=dty_ID AND dty_Type="date" AND dtl_Value!=""';
+            $res = $mysqli->query($query);
+            
+            if ($res){
+                
+                if($json_for_record_details){
+                    $mysqli->query('DROP TABLE IF EXISTS bkpDetailsDateIndex');
+                    $res3 = $mysqli->query('CREATE TABLE bkpDetailsDateIndex (
+                         bkp_ID int unsigned NOT NULL auto_increment,
+                         dtl_ID int unsigned NOT NULL,
+                         dtl_Value TEXT,
+                         PRIMARY KEY (bkp_ID))');
+                }
+                
+                if($cnt_dates<150000){
+                    $keep_autocommit = mysql__begin_transaction($mysqli);
+                }
+                
+                while ($row = $res->fetch_row()){
+                    $dtl_ID = $row[0];
+                    $dtl_RecID = $row[1];
+                    $dtl_DetailTypeID = $row[2];
+                    $dtl_Value = $row[3];
+                    $dtl_NewValue = '';
+                    $error = '';
+                    
+                    if(trim($dtl_Value)=='') continue;
+                    
+            //2. Create temporal object
+                    $preparedDate = new Temporal( $dtl_Value );
+                        
+                    if($preparedDate && $preparedDate->isValid()){
+                            
+                            // saves as usual date
+                            // if date is Simple, 0<year>9999 (CE) and has both month and day 
+                            $is_date_simple = $preparedDate->isValidSimple();
+                            $dtl_NewValue_for_update = null;
+                            if($is_date_simple){
+                                $dtl_NewValue = $preparedDate->getValue(true); //returns simple yyyy-mm-dd
+                                $dtl_NewValue_for_update = $dtl_NewValue;
+                            }else{
+                                $v_json = $preparedDate->getValue();
+                                $dtl_NewValue_for_update = json_encode($v_json);
+                                $v_json['comment'] = ''; //to avoid issue with special charss
+                                $dtl_NewValue = json_encode($v_json); //$preparedDate->toJSON(); //json encoded string
+                            }
+                            if($dtl_NewValue==null || $dtl_NewValue=='' || $dtl_NewValue=='null'){
+                                $error = 'Not valid date: '.$dtl_Value;
+                            }else{
+                            
+            //3. Validate estMin and estMax from JSON
+                            $query = 'SELECT getEstDate(\''.$dtl_NewValue  //$mysqli->real_escape_string(
+                                    .'\',0) as minD, getEstDate(\''.$dtl_NewValue.'\',1) as maxD'; //$mysqli->real_escape_string(
+                            try{
+                                $res2 = $mysqli->query($query);            
+                            }catch(Exception $e){
+                                $res2 = false;
+                            }
+                            
+                            if($res2){
+                                $row2 = $res2->fetch_row();
+                                if(($row2[0]=='' && $row2[1]=='') || ($row2[0]=='0' && $row2[1]=='0')){
+                                    //fails extraction estMinDate, estMaxDate
+                                    $error = 'Empty min, max dates. Min:"'.$min.'" Max:"'.$max.'". Query:'.$query;
+                                }else{
+            //4. Keep old plain string temporal object in backup table 
+                                    if($json_for_record_details && strpos($dtl_Value,'|VER=1|')===0){ // !$is_date_simple
+                                        $query = 'INSERT INTO bkpDetailsDateIndex(dtl_ID,dtl_Value) VALUES('.$dtl_ID.',\''
+                                            .$mysqli->real_escape_string($dtl_Value).'\')';
+                                        $res4 = $mysqli->query($query);
+                                        if(!$res4){
+                                            $system->addError(HEURIST_DB_ERROR, $err_prefix.'Error on backup for query:'.$query, $mysqli->error);
+                                            $isok = false;
+                                            break;
+                                        }
+                                    }
+            //5A. If simple date - retain value in recDetails                                    
+            //5B. If temporal object it saves JSON in recDetails
+                                    if($dtl_Value != $dtl_NewValue_for_update){
+                                        $query = 'UPDATE recDetails SET dtl_Value="'.
+                                                $mysqli->real_escape_string($dtl_NewValue_for_update).'" WHERE dtl_ID='.$dtl_ID;
+                                        $mysqli->query($query);
+                                        if(!($mysqli->affected_rows>=0)){
+                                            //fails update recDetails
+                                            $system->addError(HEURIST_DB_ERROR, $err_prefix.'Error on recDetails update query:'.$query, $mysqli->error);
+                                            $isok = false;
+                                            break;
+                                        }
+                                    }
+                                    
+                                    
+            //6. update recDetailsDateIndex should be updated by trigger
+                                    $mysqli->query('delete ignore from recDetailsDateIndex where rdi_DetailID='.$dtl_ID); 
+            
+                                    $query = 'insert into recDetailsDateIndex (rdi_RecID, rdi_DetailTypeID, rdi_DetailID, rdi_estMinDate, rdi_estMaxDate)'
+        ." values ($dtl_RecID, $dtl_DetailTypeID, $dtl_ID, {$row2[0]}, {$row2[1]})";
+                                    $res5 = $mysqli->query($query);
+        //getEstDate('$dtl_NewValue',0), getEstDate('$dtl_NewValue',1)
+
+                                    if(!$res5){
+                                        //fails insert into recDetailsDateIndex
+                                        $system->addError(HEURIST_DB_ERROR, $err_prefix.'Error on index insert query:'.$query, $mysqli->error);
+                                        $isok = false;
+                                        break;
+                                    }
+                                    
+                                }
+                                
+                            }else{
+                                //fails request 
+                                $error = 'Error on retrieve min and max dates. Query:'.$query.' '.$mysqli->error;
+                            }
+                            
+                            }
+                    }else{
+                        //unchange 
+                        
+                        //fails temporal parsing - wrong date
+                        //$system->addError(HEURIST_ERROR, $err_prefix.'Cannot parse temporal "'.$dtl_Value);
+                        $error = 'Cannot parse temporal';
+                    }
+                    
+                    //keep log
+                    if(!$is_date_simple || $error){
+//file_put_contents($log_file, $dtl_ID.';'.$dtl_Value.';'.$dtl_NewValue.';'.$error."\n", FILE_APPEND );    
+                        if(!$is_date_simple) $cnt_to_json++;
+                        if($error){
+                            $error = '<span style="color:red">'.$error.'</span>';
+                            $cnt_err++;
+                        } 
+                        
+                        if($need_populate && $error){ //verbose output
+                            $report[] = 'Rec# '.$dtl_RecID.'  '.$dtl_Value.' '.(($dtl_Value!=$dtl_NewValue)?$dtl_NewValue:'').' '.$error;
+                        }
+                        
+                    }
+                    if(!$error) $cnt++;
+                 
+                    
+                }//while
+                $res->close();
+                
+                if($isok){
+                    
+                    if($json_for_record_details && $dbVerSubSub<14){
+                        $mysqli->query('UPDATE sysIdentification SET sys_dbVersion=1, sys_dbSubVersion=3, sys_dbSubSubVersion=14 WHERE 1');
+                    }
+                    
+                    
+                    if($cnt_dates<150000){
+                        $mysqli->commit();  
+                    }
+                }else{
+                    if($cnt_dates<150000){
+                        $mysqli->rollback();
+                    }
+                }
+                if( $cnt_dates<150000 && $keep_autocommit===true) $mysqli->autocommit(TRUE);
+
+            }
+        }
+        }
+        
+        //if(!$isok){
+        //    file_put_contents($log_file, json_encode( $system->getError() ));
+        //        }
+        if($isok && $need_populate){ //verbose output
+            $report[] = '<ul><li>Added into date index: '.$cnt.'</li>'
+                        .'<li>Errors date pasring: '.$cnt_err.'</li>'
+                        .'<li>Complex temporals: '.$cnt_to_json.'</li></ul>';
+        }
+        
+        return $isok?$report:false;
+    }
     
     
     //
@@ -1108,49 +1346,7 @@ if($i<5){
         
     }
 
-    //
-    //  splits and extract language code and value from string code:value
-    //  if $val is 2 chars code ISO639-1 - it will be converted to 3 chars ISO639-2
-    //    
-    function extractLangPrefix($val){
-        
-        global $glb_lang_codes, $common_languages_for_translation;
-    
-        if(is_string($val) && mb_strlen($val)>4){
-            
-            $lang = null;
-            $pos = 3;
-            
-            if($val[2]==':'){
-                $lang = strtolower(substr($val,0,2));
-                //find 3 chars code
-                if(!isset($glb_lang_codes)){
-                    $glb_lang_codes = json_decode(file_get_contents('../../hclient/assets/language-codes-3b2.json'),true);
-                }
-                foreach($glb_lang_codes as $codes){
-                    if($codes['a2']==$lang){
-                        $lang = $codes['a3'];
-                        break;
-                    }
-                }
-                
-            }else if($val[3]==':'){
-                $lang = substr($val,0,3);
-                $pos = 4;
-            }
 
-            if($lang){
-                $lang = strtoupper($lang);
-                if (in_array($lang, $common_languages_for_translation)){
-                    return array($lang, substr($val, $pos));
-                }
-            }
-
-            
-        } 
-        
-        return array(null, $val);    
-    }
     
     //
     //
@@ -1274,269 +1470,60 @@ error_log('UPDATED '.$session_id.'  '.$value);
     // 
     // For Sybversion update see DBUpgrade_1.2.0_to_1.3.0.php
     //
-    // This method updates from 1.3.0 to 1.3.10
+    // This method updates from 1.3.14 to 1.3.xxxx
     //
-    function updateDatabseToLatest4($system){
-        //update sysIdentification set sys_dbVersion=1, sys_dbSubVersion=3, sys_dbSubSubVersion=4 where sys_ID=1
+    function updateDatabaseToLatest($system){
        
-        $sysValues = $system->get_system();        
+        $sysValues = $system->get_system(null, true);        
         $dbVer = $system->get_system('sys_dbVersion');
         $dbVerSub = $system->get_system('sys_dbSubVersion');
-        $dbVerSubSub = 0;
-
-        if($dbVer==1 && $dbVerSub==3){
+        $dbVerSubSub = $system->get_system('sys_dbSubSubVersion');
         
-            $mysqli = $system->get_mysqli();
+        if($dbVer==1 && $dbVerSub==3 && $dbVerSubSub>13){
             
-            if($dbVerSub<3){//not used
+            $report = array();
+
+            if($dbVerSubSub<15){
             
-            //adds trash groups if they are missed
-            if(!(mysql__select_value($mysqli, 'select rtg_ID FROM defRecTypeGroups WHERE rtg_Name="Trash"')>0)){
-    $query = 'INSERT INTO defRecTypeGroups (rtg_Name,rtg_Order,rtg_Description) '
-    .'VALUES ("Trash",255,"Drag record types here to hide them, use dustbin icon on a record type to delete permanently")';
-                $mysqli->query($query);
-            }
-
-            if(!(mysql__select_value($mysqli, 'select vcg_ID FROM defVocabularyGroups WHERE vcg_Name="Trash"')>0)){
-    $query = 'INSERT INTO defVocabularyGroups (vcg_Name,vcg_Order,vcg_Description) '
-    .'VALUES ("Trash",255,"Drag vocabularies here to hide them, use dustbin icon on a vocabulary to delete permanently")';
-                $mysqli->query($query);
-            }
-
-            if(!(mysql__select_value($mysqli, 'select dtg_ID FROM defDetailTypeGroups WHERE dtg_Name="Trash"')>0)){
-    $query = 'INSERT INTO defDetailTypeGroups (dtg_Name,dtg_Order,dtg_Description) '
-    .'VALUES ("Trash",255,"Drag base fields here to hide them, use dustbin icon on a field to delete permanently")';        
-                $mysqli->query($query);
-            }
-            
-            if(!array_key_exists('sys_ExternalReferenceLookups', $sysValues))
-            {
-                $query = "ALTER TABLE `sysIdentification` ADD COLUMN `sys_ExternalReferenceLookups` TEXT default NULL COMMENT 'Record type-function-field specifications for lookup to external reference sources such as GeoNames'";
-                $res = $mysqli->query($query);
-            }
-
-            }//for v2
-
-            $dbVerSubSub = $system->get_system('sys_dbSubSubVersion');
-
-            if($dbVerSubSub<1){
-            
-                if(!hasColumn($mysqli, 'defRecStructure', 'rst_SemanticReferenceURL')){
-                    //alter table
-                    $query = "ALTER TABLE `defRecStructure` ADD `rst_SemanticReferenceURL` VARCHAR( 250 ) NULL "
-                    ." COMMENT 'The URI to a semantic definition or web page describing this field used within this record type' "
-                    .' AFTER `rst_LocallyModified`';
-                    $res = $mysqli->query($query);
-                    if(!$res){
-                        $system->addError(HEURIST_DB_ERROR, 'Cannot modify defRecStructure to add rst_SemanticReferenceURL', $mysqli->error);
-                        return false;
+                // import IIIF Annonation field
+                if(!(ConceptCode::getDetailTypeLocalID('2-1098')>0)){
+                    $importDef = new DbsImport( $system );
+                    if($importDef->doPrepare(  array(
+                    'defType'=>'detailtype', 
+                    'databaseID'=>2, 
+                    'conceptCode'=>'2-1098')))
+                    {
+                        $res = $importDef->doImport();
                     }
-                }  
-
-                if(!hasColumn($mysqli, 'defRecStructure', 'rst_TermsAsButtons')){
-                    //alter table
-                    $query = "ALTER TABLE `defRecStructure` ADD `rst_TermsAsButtons` TinyInt( 1 ) DEFAULT '0' "
-                    ." COMMENT 'If 1, term list fields are represented as buttons (if single value) or checkboxes (if repeat values)' "
-                    .' AFTER `rst_SemanticReferenceURL`';
-                    $res = $mysqli->query($query);
-                    if(!$res){
-                        $system->addError(HEURIST_DB_ERROR, 'Cannot modify defRecStructure to add rst_TermsAsButtons', $mysqli->error);
-                        return false;
-                    }
-                }    
-                
-                if(!hasColumn($mysqli, 'defTerms', 'trm_Label', null, 'varchar(250)')){
-                    
-                    $mysqli->query('update defTerms set trm_Label = substr(trm_Label,1,250)');
-
-                    $query = "ALTER TABLE `defTerms` "
-                    ."CHANGE COLUMN `trm_Label` `trm_Label` VARCHAR(250) NOT NULL COMMENT 'Human readable term used in the interface, cannot be blank' ,"
-                    ."CHANGE COLUMN `trm_NameInOriginatingDB` `trm_NameInOriginatingDB` VARCHAR(250) NULL DEFAULT NULL COMMENT 'Name (label) for this term in originating database'" ;
-
-                    $res = $mysqli->query($query);
-                    if(!$res){
-                        $system->addError(HEURIST_DB_ERROR, 'Cannot modify defTerms to change trm_Label and trm_NameInOriginatingDB', $mysqli->error);
-                        return false;
-                    }
-                }        
-            }
-            if($dbVerSubSub<2){
-            
-                    $query = "ALTER TABLE `defRecStructure` "
-                    ."CHANGE COLUMN `rst_PointerMode` `rst_PointerMode` enum('dropdown_add','dropdown','addorbrowse','addonly','browseonly') DEFAULT 'dropdown_add' COMMENT 'When adding record pointer values, default or null = show both add and browse, otherwise only allow add or only allow browse-for-existing'";
-                    $res = $mysqli->query($query);
-                    if(!$res){
-                        $system->addError(HEURIST_DB_ERROR, 'Cannot modify defRecStructure to change rst_PointerMode', $mysqli->error);
-                        return false;
-                    }
-                
-            }
-            
-            if($dbVerSubSub<4){
-                if(hasTable($mysqli, 'sysWorkflowRules')){
-                    $query = 'DROP TABLE IF EXISTS sysWorkflowRules';
-                    $res = $mysqli->query($query);
-                }
-                $query = "CREATE TABLE sysWorkflowRules  (
-  swf_ID int unsigned NOT NULL auto_increment COMMENT 'Primary key',
-  swf_RecTypeID  smallint unsigned NOT NULL COMMENT 'Record type, foreign key to defRecTypes table',
-  swf_Stage int unsigned NOT NULL default '0' COMMENT 'trm_ID from vocabulary \"Workflow stage\" 2-9453',
-  swf_Order tinyint(3) unsigned zerofill NOT NULL default '000' COMMENT 'Ordering of stage per record type',
-  swf_StageRestrictedTo varchar(255) default NULL Comment 'Comma separated list of ugr_ID who are allowed to set workgroup stage to this value. Null = anyone',
-  swf_SetOwnership smallint NULL default NULL COMMENT 'Workgroup to be set as the owner group, Null = No change, 0=everyone',
-  swf_SetVisibility  varchar(255) default NULL COMMENT 'public=anyone, viewable=all logged in, hidden = private, hidden may be followed by comma separated list of ugr_ID that should be set to have view permission',
-  swf_SendEmail  varchar(255) default NULL COMMENT 'Comma separated list of ugr_ID that will be emailed on stage change',
-PRIMARY KEY (swf_ID),
-UNIQUE KEY swf_StageKey (swf_RecTypeID, swf_Stage)
-) ENGINE=InnoDB COMMENT='Describes the rules to be applied when the value of the Workflow stage field is changed to this value'";
-                    $res = $mysqli->query($query);
-                    if(!$res){
-                        $system->addError(HEURIST_DB_ERROR, 'Cannot create sysWorkflowRules table', $mysqli->error);
-                        return false;
-                    }
-                    
-            }
-
-            if($dbVerSubSub<5){
-                
-                $query = "ALTER TABLE `recUploadedFiles` "
-                ."CHANGE COLUMN `ulf_PreferredSource` `ulf_PreferredSource` enum('local','external','iiif','iiif_image','tiled') "
-                ."NOT NULL default 'local' COMMENT 'Preferred source of file if both local file and external reference set'";
-
-                $res = $mysqli->query($query);
-                if(!$res){
-                    $system->addError(HEURIST_DB_ERROR, 'Cannot modify recUploadedFiles to change ulf_PreferredSource', $mysqli->error);
-                    return false;
-                }
-                
-                if(hasTable($mysqli, 'defCalcFunctions')){
-                    $query = 'DROP TABLE IF EXISTS defCalcFunctions';
-                    $res = $mysqli->query($query);
-                }
-                
-                $query = "CREATE TABLE defCalcFunctions (
-                  cfn_ID smallint(3) unsigned NOT NULL auto_increment COMMENT 'Primary key of defCalcFunctions table',
-                  cfn_Name varchar(63) NOT NULL COMMENT 'Descriptive name for function',
-                  cfn_Domain enum('calcfieldstring','pluginphp') NOT NULL default 'calcfieldstring' COMMENT 'Domain of application of this function specification',
-                  cfn_FunctionSpecification text COMMENT 'A function or chain of functions, or some PHP plugin code',
-                  cfn_Modified timestamp NOT NULL default CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP COMMENT 'Date of last modification of this record, used to get last updated date for table',
-                  cfn_RecTypeIDs varchar(250) default NULL COMMENT 'CSV list of Rectype IDs that participate in formula',
-                  PRIMARY KEY  (cfn_ID)
-                ) ENGINE=InnoDB COMMENT='Specifications for generating calculated fields, plugins and'";
-
-                $res = $mysqli->query($query);
-                if(!$res){
-                    $system->addError(HEURIST_DB_ERROR, 'Cannot create defCalcFunctions table', $mysqli->error);
-                    return false;
-                }
-            }
-            
-            if($dbVerSubSub<6){
-                
-                if(!hasColumn($mysqli, 'defTerms', 'trm_OrderInBranch')){
-                    //alter table
-                    $query = "ALTER TABLE `defTerms` ADD `trm_OrderInBranch`  smallint(5) NULL Comment 'Defines sorting order of terms if non-alphabetic. Operates only within a single branch, including root' ";
-                    $res = $mysqli->query($query);
-                    if(!$res){
-                        $system->addError(HEURIST_DB_ERROR, 'Cannot modify defTerms to add trm_OrderInBranch', $mysqli->error);
-                        return false;
-                    }
-                }  
-            }
-
-            if($dbVerSubSub<7){
-                
-                if(!hasColumn($mysqli, 'recDetails', 'dtl_HideFromPublic')){
-                    //alter table
-                    $query = "ALTER TABLE `recDetails` ADD `dtl_HideFromPublic` tinyint(1) unsigned default null Comment 'If set, the value is not shown in Record View, column lists, custom reports or anywhere the value is displayed. It may still be used in filter or analysis'";
-                    
-                    $res = $mysqli->query($query);
-                    if(!$res){
-                        $system->addError(HEURIST_DB_ERROR, 'Cannot modify recDetals to add dtl_HideFromPublic', $mysqli->error);
-                        return false;
-                    }
-                    
-                    //set default value for rst_NonOwnerVisibility as public
-                    $query = "ALTER TABLE `defRecStructure` "
-                    ."CHANGE COLUMN `rst_NonOwnerVisibility` `rst_NonOwnerVisibility` enum('hidden','viewable','public','pending') NOT NULL default 'public' COMMENT 'Allows restriction of visibility of a particular field in a specified record type'";
-                    $res = $mysqli->query($query);
-                    if(!$res){
-                        $system->addError(HEURIST_DB_ERROR, 'Cannot modify defRecStructure to change rst_NonOwnerVisibility', $mysqli->error);
-                        return false;
-                    }
-                    $query = "UPDATE `defRecStructure` SET `rst_NonOwnerVisibility`='public' WHERE rst_ID>0";
-                    $res = $mysqli->query($query);
-                    if(!$res){
-                        $system->addError(HEURIST_DB_ERROR, 'Cannot modify defRecStructure to set rst_NonOwnerVisibility=public', $mysqli->error);
-                        return false;
-                    }
-                }  
-            }
-            
-            if(!array_key_exists('sys_NakalaKey', $sysValues)){ //$dbVerSubSub<9 && 
-                
-                    $query = "ALTER TABLE `sysIdentification` ADD COLUMN `sys_NakalaKey` TEXT default NULL COMMENT 'Nakala API key. Retrieved from Nakala website'";
-                    $res = $mysqli->query($query);
                     if($res){
-                        $usr_prefs = user_getPreferences($system);
-                        if(array_key_exists('nakala_api_key', $usr_prefs)){
-                            $query = "UPDATE `sysIdentification` SET sys_NakalaKey='"
-                                    .$mysqli->real_escape_string($usr_prefs['nakala_api_key'])."' WHERE 1";
-                            $res = $mysqli->query($query);
-                        }
-                    }else{
-                        $system->addError(HEURIST_DB_ERROR, 'Cannot modify sysIdentification to add sys_NakalaKey', $mysqli->error);
-                        return false;
-                    }                    
-            }
-            
-            if($dbVerSubSub<10){
-                
-                $mysqli->query('DROP TABLE IF EXISTS defTranslations;');
-                $mysqli->query("CREATE TABLE defTranslations (
-  trn_ID int unsigned NOT NULL auto_increment COMMENT 'Primary key of defTranslations table',
-  trn_Source varchar(64) NOT NULL COMMENT 'The column to be translated (unique names identify source)',
-  trn_Code int unsigned NOT NULL COMMENT 'The primary key / ID in the table containing the text to be translated',
-  trn_LanguageCode char(3) NOT NULL COMMENT 'The translation language code ISO639',
-  trn_Translation varchar(20000) NOT NULL COMMENT 'The translation of the text in this location (table/field/id)',
-  trn_Modified timestamp NOT NULL default CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP COMMENT 'Date of last modification of this record, used to get last updated date for table',
-  PRIMARY KEY  (trn_ID),
-  UNIQUE KEY trn_composite (trn_Source,trn_Code,trn_LanguageCode),
-  KEY trn_LanguageCode (trn_LanguageCode)
-) ENGINE=InnoDB COMMENT='Translation table into multiple languages for all translatab';");
-            }
-        
-            if($dbVerSubSub<11){
-                if(!hasColumn($mysqli, 'sysUGrps', 'usr_ExternalAuthentication')){
-                    //alter table
-                    $query = "ALTER TABLE `sysUGrps` ADD `usr_ExternalAuthentication` varchar(1000) default NULL COMMENT 'JSON array with external authentication preferences'";
-                    $res = $mysqli->query($query);
-                    if(!$res){
-                        $system->addError(HEURIST_DB_ERROR, 'Cannot modify sysUGrps to add usr_ExternalAuthentication', $mysqli->error);
-                        return false;
+                        $report[] = 'Field 2-1098 "IIIF Annonation imported';    
                     }
                 }
-            }
-            
-            //update version
-            if($dbVerSubSub<11){
-                $mysqli->query('UPDATE sysIdentification SET sys_dbVersion=1, sys_dbSubVersion=3, sys_dbSubSubVersion=11 WHERE 1');
+                
+                $mysqli = $system->get_mysqli();
+                
+                //add new columns for 
+                if(!hasColumn($mysqli, 'recUploadedFiles', 'ulf_Caption', null, 'varchar(255)')){
+                    
+                    $query = 'ALTER TABLE `recUploadedFiles` '
+."ADD `ulf_Caption` varchar(255) COMMENT 'A user-entered textual name of the file or image' AFTER `ulf_Thumbnail`,"
+."ADD `ulf_Copyright` varchar(255) COMMENT 'Copyright statement or a URI leading to a copyright statement. Consider using Creative Commons categories.' AFTER `ulf_Description`,"
+."ADD `ulf_Copyowner` varchar(255) COMMENT 'The owner of the copyright in the file ir image (person or organisation)'  AFTER `ulf_Copyright`";
+                    $res = $mysqli->query($query);
+                    if(!$res){
+                        $system->addError(HEURIST_DB_ERROR, 'Cannot modify recUploadedFiles to add ulf_Caption, ulf_Copyright and ulf_Copyowner', $mysqli->error);
+                        return false;
+                    }
+                    $report[] = 'recUploadedFiles:ulf_Caption, ulf_Copyright and ulf_Copyowner added';
+                } else {
+                    $report[] = 'defTrecUploadedFileserms:ulf_Caption, ulf_Copyright and ulf_Copyowner already exist';
+                } 
+                
+                $mysqli->query('UPDATE sysIdentification SET sys_dbVersion=1, sys_dbSubVersion=3, sys_dbSubSubVersion=15 WHERE 1');
             }
 
-            
-            //import field 2-1080 Workflowstages
-            if($dbVerSubSub<4 && !(ConceptCode::getDetailTypeLocalID('2-1080')>0)){
-                $importDef = new DbsImport( $system );
-                if($importDef->doPrepare(  array(
-                            'defType'=>'detailtype', 
-                            'databaseID'=>2, 
-                            'conceptCode'=>'2-1080')))
-                {
-                    $res = $importDef->doImport();
-                }
-            }
-            
         }
+        return true;
     }  
     
     /**

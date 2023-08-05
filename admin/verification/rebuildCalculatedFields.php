@@ -215,14 +215,14 @@ if($init_client){
             
             <div class="progress_div" style="background:white;min-height:40px;width:100%"></div>
 
-            <div class="result_div" style="display:<?php echo $init_client?'none':'block'?>;">
-                <div><span id=rec_total><?php echo @$res['rec_total']?></span> records in total</div>
-                <div><span id=rec_processed><?php echo @$res['rec_processed']?></span> records processed</div>
-                <div><span id=fld_changed><?php echo @$res['fld_changed']?></span> fields updated in 
-                                <span id=rec_updates><?php echo @$res['rec_updates']?></span> records</div>
-                <div><span id=fld_cleared><?php echo @$res['fld_cleared']?></span> fields cleared in 
-                                <span id=rec_cleared><?php echo @$res['rec_cleared']?></span> records</div>
-                <div><span id=fld_same><?php echo @$res['fld_same']?></span> fields unchanged</div>
+            <div class="result_div" style="display:<?php echo $init_client?'none':'block';?>;">
+                <div><span id=rec_total><?php echo intval(@$res['rec_total']);?></span> records in total</div>
+                <div><span id=rec_processed><?php echo intval(@$res['rec_processed']);?></span> records processed</div>
+                <div><span id=fld_changed><?php echo intval(@$res['fld_changed']);?></span> fields updated in 
+                                <span id=rec_updates><?php echo intval(@$res['rec_updates']);?></span> records</div>
+                <div><span id=fld_cleared><?php echo intval(@$res['fld_cleared']);?></span> fields cleared in 
+                                <span id=rec_cleared><?php echo intval(@$res['rec_cleared']);?></span> records</div>
+                <div><span id=fld_same><?php echo intval(@$res['fld_same']);?></span> fields unchanged</div>
                 
                 <br/>
 
@@ -242,7 +242,7 @@ if($init_client){
                         <br/>or faulty data in individual records. Affected fields have not been changed.
                         </p>
                         <span id="formulae_errors_info">
-                        <?php echo $q_errors;?>
+                        <?php echo htmlspecialchars($q_errors);?>
                         </span>
                     </span>
                 <?php

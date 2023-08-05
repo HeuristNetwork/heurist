@@ -46,7 +46,7 @@ $func_return = 1; // for checkRecURL.php
 if (@$argv) {
     
 // example:
-//  sudo php -f /var/www/html/h6-alpha/setup/dboperations/dailyCronJobs.php -- reminder report
+//  sudo php -f /var/www/html/heurist/setup/dboperations/dailyCronJobs.php -- reminder report
 
     $ARGV = array();
     for ($i = 0;$i < count($argv);++$i) {

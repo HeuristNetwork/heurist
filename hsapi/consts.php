@@ -27,14 +27,14 @@
 require_once (dirname(__FILE__).'/utilities/utils_host.php');
 
 define('HEURIST_VERSION', $version);  //code version is defined congigIni.php
-define('HEURIST_MIN_DBVERSION', "1.3.0"); //minimal version of db for current version of code
+define('HEURIST_MIN_DBVERSION', "1.3.14"); //minimal version of db for current version of code
 
 // The reference server is the location of the Heurist Reference Index database (HEURIST_INDEX_DATABASE), the Heurist_Help database, 
 
 // curated template databases and also code updates
 if(!@$heuristReferenceServer){
     $heuristReferenceServer = 'https://heuristref.net';  //default value
-    //$heuristReferenceServer = 'https://int-heuristweb-prod.intersect.org.au';
+    //$heuristReferenceServer = 'https://HeuristRef.Net';
 }
 
 define('HEURIST_MAIN_SERVER', $heuristReferenceServer);
@@ -66,9 +66,11 @@ define('HEURIST_SERVER_URL', $host_params['server_url']);
 define('HEURIST_SERVER_NAME', @$serverName); // server host name for the configured name, eg. myheurist.net
 
 if(@$_SERVER["REQUEST_URI"]) define('HEURIST_CURRENT_URL', $host_params['server_url'] . $_SERVER["REQUEST_URI"]); //NOT USED
-if(!defined('HEURIST_DIR')) define('HEURIST_DIR', 
+if(!defined('HEURIST_DIR')){
+  define('HEURIST_DIR', 
     (@$host_params['heurist_dir']? $host_params['heurist_dir'] :@$_SERVER["DOCUMENT_ROOT"]) 
-    . $host_params['install_dir']); //  eg. /var/www/html/HEURIST @todo - read simlink (realpath)
+    . $host_params['install_dir']); //  eg. /var/www/html/HEURIST @todo - read simlink (realpath)  
+} 
 
 define('HEURIST_BASE_URL', $host_params['server_url'] . $host_params['install_dir']  ); // eg. https://myheurist.net/heurist/
 
@@ -169,7 +171,7 @@ $glb_lang_codes = null;
 
 //common languages for translation database definitions (ISO639-2 codes)
 if(!isset($common_languages_for_translation)){
-    $common_languages_for_translation = array('ENG','FRE','CHI','SPA','ARA','GER','POR');    
+    $common_languages_for_translation = array('ENG','FRE','CHI','SPA','ARA','GER','POR','LAT','GRE','GRC');    
 }
 
 //---------------------------------
@@ -292,6 +294,8 @@ $dtDefines = array('DT_NAME' => array(2, 1),
     'DT_ORIGINAL_RECORD_ID' => array(2, 36),
     'DT_FILE_RESOURCE' => array(2, 38),
     'DT_THUMBNAIL' => array(2, 39),
+    'DT_ANNOTATION_INFO' => array(2, 1098), //for iiif and map annotations
+    
     //xslt not used
     'DT_FILTER_STRING' => array(2, 40),
     'DT_FILE_TYPE' => array(2, 41),
@@ -311,6 +315,7 @@ $dtDefines = array('DT_NAME' => array(2, 1),
     'DT_COLOUR' => array(2, 56),
     'DT_DRAWING' => array(2, 59),
     'DT_COUNTER' => array(2, 60),
+    'DT_MEDIA_RESOURCE' => array(2, 61), //refetence to media record
     //xslt not used
     'DT_FILE_NAME' => array(2, 62),
     'DT_FILE_FOLDER' => array(2, 63),
@@ -352,7 +357,7 @@ $dtDefines = array('DT_NAME' => array(2, 1),
     'DT_SYMBOLOGY_POINTMARKER' => array(3, 1091),  //outdated
     'DT_SYMBOLOGY' => array(3, 1092),  //MAIN field that stores ALL styles for map symbology (including themtic maps)
     'DT_ZOOM_KM_POINT' => array(2, 925), //area to zoom in on point selection (per map space document)
-    'DT_POPUP_TEMPLATE' => array(2, 922),  // smarty template to produce popup info 
+    'DT_SMARTY_TEMPLATE' => array(2, 922),  // smarty template to produce popup info per layer
     'DT_SYMBOLOGY_COLOR' => array(3, 1037), // outdated
     'DT_BG_COLOR' => array(2, 551),         // outdated
     'DT_OPACITY' => array(3, 1090),         // outdated
@@ -372,6 +377,7 @@ $dtDefines = array('DT_NAME' => array(2, 1),
     'DT_CMS_TOP_MENU' => array(99, 742),  //pointer  to top level menues in home page
     'DT_CMS_MENU' => array(99, 761),  //pointer to sub menu
     'DT_CMS_KEYWORDS' => array(99, 948),
+    'DT_CMS_TEMPLATE' => array(2, 1099),
     'DT_CMS_TARGET' => array(99, 949),
     'DT_CMS_HEADER' => array(2, 929),
     'DT_CMS_CSS' => array(99, 946),
@@ -386,6 +392,7 @@ $dtDefines = array('DT_NAME' => array(2, 1),
     'DT_CMS_EXTFILES' => array(2, 939), //external links and scripts
     'DT_CMS_FOOTER' => array(2, 940),
     'DT_CMS_FOOTER_FIXED' => array(2, 941),    //fixed 2-532
+    'DT_LANGUAGES' => array(2, 967),
     
     'DT_WORKFLOW_STAGE' => array(2, 1080)
 

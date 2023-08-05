@@ -79,12 +79,48 @@
     //
     //
     //    
-    function entityRefreshDefs( $system, $entities, $need_config ){
+    function entityRefreshDefs( $system, $entities, $need_config, $search_params=null){
         
+        $search_criteria = array();
+        
+        if($search_params!=null){
+            
+            if(!is_array($search_params) && intval($search_params)>0){
+                $search_params = array('recID'=>$search_params);
+            }
+            
+            //load definitions for particular record type only
+            $mysqli = $system->get_mysqli();
+            if(@$search_params['recID']>0 || @$search_params['rty_ID']){
+                $rec_ID = @$search_params['recID'];
+                
+                if($rec_ID>0){
+                    $rty_ID = mysql__select_value($mysqli, 'select rec_RecTypeID from Records where rec_ID='.$rec_ID); 
+                    $search_criteria['defRecTypes'] = array('ID'=>$rty_ID);
+                }else{
+                    $rty_ID = $search_params['rty_ID'];
+                }
+                
+                if($rty_ID>0){
+                    $dty_IDs = mysql__select_list2($mysqli, 'SELECT rst_DetailTypeID FROM defRecStructure where rst_RecTypeID='.$rty_ID);
+                    $search_criteria['defRecStructure'] = array('rst_RecTypeID'=>$rty_ID, 'rst_DetailTypeID'=>$dty_IDs);
+                    $search_criteria['defDetailTypes'] = array('dty_ID'=>$dty_IDs);
+
+                    $trm_IDs = mysql__select_list2($mysqli, 'SELECT dty_JsonTermIDTree FROM defDetailTypes where dty_ID in ('.implode(',',$dty_IDs).') AND dty_Type="enum"');
+                
+                    $entities = array('rty','dty','rst','swf');
+                }
+            }else{
+                $entities = array_keys($search_params);
+                $search_criteria = $search_params;
+            }
+            
+        }else 
         if($entities=='all' || $entities==null){
             
             //set_time_limit(120);
-            $entities = array('rty','dty','rst','trm','rtg','dtg','vcg','swf');  //
+            $entities = array('rty','dty','rst','trm','rtg','dtg','vcg','swf');  
+            
         }else if(!is_array($entities)){
             $entities = explode(',',$entities);
         }
@@ -100,16 +136,25 @@
             if($entity_name == 'defRecStructure'){
                 $details = 'list';
             }
+            $params = array('entity'=>$entity_name,'details'=>$details);
+            
+            if(@$search_criteria[$entity_name]){
+                $params = array_merge($params, $search_criteria[$entity_name]);
+            }
 
             $classname = 'Db'.ucfirst($entity_name);
-            $entity = new $classname($system, array('entity'=>$entity_name,'details'=>$details));
+            $entity = new $classname($system, $params);
             
             $res[$entity_name] = $entity->search();
-            if($need_config!==false && $res[$entity_name]!==false){
-                $need_config[$entity_name]['config'] = $entity->config();    
-            }
-            if($entity_name == 'defTerms'){
-                $res[$entity_name]['trm_Links'] = $entity->getTermLinks();
+            if($res[$entity_name]===false){
+                return false;   
+            }else{
+                if($need_config!==false){
+                    $need_config[$entity_name]['config'] = $entity->config();    
+                }
+                if($entity_name == 'defTerms'){
+                    $res[$entity_name]['trm_Links'] = $entity->getTermLinks();
+                }
             }
         }
         return $res;
@@ -132,5 +177,77 @@
             
             return $entity_name;
     }
+    
+    //
+    // Returns full path, content type and url by entity name, view version (icon,thumb) and entity id;
+    //
+    function resolveEntityFilename($entity_name, $rec_id, $version, $db_name=null, $extension=null){
+        global $defaultRootFileUploadURL;
+        
+        $entity_name = entityResolveName($entity_name); 
+
+        if($entity_name=='sysDatabases' && $rec_id){
+            
+            $db_name = $rec_id;
+            if(strpos($rec_id, 'hdb_')===0){
+                $db_name = substr($rec_id,4);    
+            }
+            $rec_id = 1;    
+            $path = '/entity/sysIdentification/';    
+
+        }else{
+            if($entity_name=='term' || $entity_name=='trm'){
+                $entity_name = 'defTerms';
+            }
+
+            if($db_name==null){
+                if(defined('HEURIST_DBNAME')){
+                    $db_name = HEURIST_DBNAME;
+                }else{
+                    return array(null,null,null);
+                }
+            }
+            $path = '/entity/'.$entity_name.'/';    
+        } 
+
+        if(!$version){
+            $version = ($entity_name=='defRecTypes')?'icon':'thumbnail';   
+        }else if($version=='thumb'){ 
+            $version='thumbnail';
+        }
+        
+        if($version!='full' && !($entity_name!='defRecTypes' && $version=='icon'))
+        {
+            $path = $path.$version.'/';
+        }
+        
+        $filename = null;
+        $content_type = null;
+        $url = null;
+
+        if($rec_id>0){
+
+            $fname = HEURIST_FILESTORE_ROOT.$db_name.$path.$rec_id;
+            
+            $exts = $extension?array($extension):array('png','jpg','svg','jpeg','jpe','jfif','gif');
+            foreach ($exts as $ext){
+                if(file_exists($fname.'.'.$ext)){
+                    if($ext=='jpg' || $ext=='jfif' || $ext=='jpe'){
+                        $content_type = 'image/jpeg';
+                    }else if($ext=='svg'){
+                        $content_type = 'image/svg+xml';
+                    }else{
+                        $content_type = 'image/'.$ext;    
+                    }
+                    $filename = $fname.'.'.$ext;
+                    $url =  $defaultRootFileUploadURL.$db_name.$path.$rec_id.'.'.$ext;
+                    break;
+                }
+            }
+        }
+        
+        return array($filename, $content_type, $url);
+    }
+    
 
 ?>

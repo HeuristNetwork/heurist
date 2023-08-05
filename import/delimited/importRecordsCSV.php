@@ -437,6 +437,14 @@ if(!$format) $format='csv';
     
         </div>
 
+        <div style="position: absolute;right: 81px;top: 50px;padding-left:50px;font-size:0.8em">
+                <input type="checkbox" name="ignore_rectype" id="ignore_rectype" value="1" class="text"
+                            onchange="{importRecordsCSV.onIgnoreRectype();}">&nbsp;
+                <label for="ignore_rectype" style="display:inline-flex;">
+                    Check this box to ignore record type. Target record type on the left is then only specified to allow selection of fields.
+                    <br>Matching and updates will be applied across all record types for which the base field(s) apply.</label>
+        </div>
+        
         <fieldset style="position: absolute;left: 0;right: 0;top:80px;">
         <div>
             <div class="header optional" style="min-width: 80px; width: 80px;">
@@ -451,7 +459,7 @@ if(!$format) $format='csv';
                 <!-- div class="heurist-helper1" style="display: block;">
                     If a record type is not shown in the pulldown, check the 'Show' column in Database > Manage Structure
                 </div -->
-            </div>        
+            </div> 
         </div>                    
         </fieldset>
         
@@ -524,13 +532,6 @@ if(!$format) $format='csv';
             <input type="radio" name="sa_match" id="sa_match2" value="2" class="text" 
                         onchange="{importRecordsCSV.onMatchModeSet();importRecordsCSV.doMatchingInit();}">&nbsp;
             <label for="sa_match2">Skip matching (all new records)</label>
-
-            <span style="display:inline-block;padding-left:50px;">
-                <input type="checkbox" name="ignore_rectype" id="ignore_rectype" value="1" class="text"
-                            onchange="{importRecordsCSV.onIgnoreRectype();}">&nbsp;
-                <label for="ignore_rectype" style="display:inline-flex;">Target record type is only specified to allow selection of fields.
-                    <br>Matching and updates will be applied across all record types for which the base field(s) apply.</label>
-            </span>
 
             <div class="heurist-helper1" id="divMatchingSettingHelp" style="display:block;padding-top:1em;padding-bottom:3px;">
             </div>

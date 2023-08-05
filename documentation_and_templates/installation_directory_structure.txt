@@ -64,7 +64,7 @@ SUMMARY:
 Heurist instances:      .../HEURIST/heurist
                         .../HEURIST/h6-beta
                         .../HEURIST/h6-alpha
-                        .../HEURIST/h5-ij
+                        .../HEURIST/h6-ij
 
             These are normally database-compatible, allowing switch between instances eg. to access
             a new feature or where a bug is encountered in an old feature. Exceptionally there will

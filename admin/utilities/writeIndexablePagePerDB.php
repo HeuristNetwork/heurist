@@ -21,8 +21,8 @@
 */
 
 // example:
-//  sudo php -f /var/www/html/h6-alpha/admin/utilities/writeIndexablePagePerDB.php -- -db=database_1,database_2
-//  sudo php -f writeIndexablePagePerDB.php -- -db=database_1,database_2 
+//  sudo php -f /var/www/html/heurist/admin/utilities/writeIndexablePagePerDB.php -- -db=database_1,database_2
+//  If dbs are not specified, all dbs are processed 
 
 /*
  This routine:
@@ -68,7 +68,9 @@ if (@$argv) {
     $tabs0 = '<div style="min-width:300px;display:inline-block;">';
     $tabs = "</div>".$tabs0;
 
-    $arg_database = explode(',',$_REQUEST['db']);*/
+    if(array_key_exists('db', $_REQUEST)){
+        $arg_database = explode(',',$_REQUEST['db']);
+    }*/
 
     exit('This function is for command line execution');
 }
@@ -117,7 +119,8 @@ if(strpos($base_url, '/heurist/') === false){
 $mysqli = $system->get_mysqli();
 $databases = mysql__getdatabases4($mysqli, false);
 
-$index_dir = dirname(__FILE__)."/../../../DatabasePages";
+// TODO: Should be using setting for web root in configIni.php 
+$index_dir = dirname(__FILE__)."/../../../HarvestableDatabaseDescriptions";
 
 $is_dir_writable = folderExists($index_dir, true);
 
@@ -136,14 +139,65 @@ $value_to_replace = array('{db_name}','{db_desc}','{db_url}','{db_website}','{db
                           '{server_host}','{server_url}','{owner_name}','{owner_email}',
                           '{rec_count}','{file_count}','{rec_last}','{struct_last}','{struct_names}','{date_now}');
 
-$template_page = '<html>'
+//
+// File content for (HarvestableDatabaseDescriptions/index.html)
+//
+$index_page = '<!DOCTYPE html>'
+. '<html>'
 
     . '<head>'
         . '<meta charset="UTF-8">'
         . '<meta name="viewport" content="width=device-width, initial-scale=1.0">'
+        . '<meta name=”generator” content=”Heurist”>'
+        . '<meta name="keywords" content="Heurist, Heurist databases, Digital Humanitites, Database management">' //{sys_kywds}
+        . '<meta http-equiv="content-type" content="text/html; charset=UTF-8">'
+        . '<title>Index of Heurist Databases</title>'
+
+        . '<style>'
+            . '.desc{display: inline-block; max-width: 800px; text-align: justify;}'
+            . '.heurist_logo{object-fit: cover;object-position: 5% 0;width: 40px;height: 38px;vertical-align: -12px;}'
+        . '</style>'
+    . '</head>'
+
+    . '<body>'
+        . '<div style="margin: 10px 0px;">'
+            . ' <img src="'.$base_url.'hclient/assets/branding/h4logo_small.png" alt="Heurist logo" class="heurist_logo">'
+            . ' <strong>Heurist database builder for Humanities research </strong>'
+            . ' (<a href="https://HeuristNetwork.org" target=_blank>https://HeuristNetwork.org</a>)'
+        . '</div>'
+
+        . '<div style="margin: 10px 5px 15px;">'
+            . 'Databases and websites on this server (<a href="'.$base_url.'" target=_blank>'.$base_url.'</a>)'
+        . '</div>'
+
+        . '<div style="margin-left: 10px;">'
+            . '{databases}'
+        . '</div>'
+    . '</body>'
+
+. '</html>';
+//
+// Format for each row of database details within index.html
+//
+$index_row = '<strong>{db_name}</strong> (<a href="{db_page_link}" target=_blank>database page</a>)<br>' // <strong>{db_dname} ({db_name})</strong>
+            . '{website_url}<br>'
+            . '<span class="desc">{db_desc}</span>';
+$index_row_replace = array('{db_name}', '{db_page_link}', '{website_url}', '{db_desc}');
+
+//
+// File content for each database file (HarvestableDatabaseDescriptions/{database_name}.html)
+//
+$template_page = '<!DOCTYPE html>'
+. '<html>'
+
+    . '<head>'
+        . '<meta charset="UTF-8">'
+        . '<meta name="viewport" content="width=device-width, initial-scale=1.0">'
+        . '<meta name=”generator” content=”Heurist”>'
         . '<meta name="description" content="{db_desc}">'
-        . '<meta name="keywords" content="Heurist, Heurist database, {db_name}, {db_dname}, {db_owner}">' //{sys_kywds}
+        . '<meta name="keywords" content="Heurist, Heurist database, Digital Humanitites, Database management, {db_name}, {db_dname}, {db_owner}">' //{sys_kywds}
         . '<meta name="author" content="{db_owner}">' //{owner_name}
+        . '<meta http-equiv="content-type" content="text/html; charset=UTF-8">'
         . '<title>Heurist DB {db_name} on {server_host} updated {date_now}</title>'
 
         . '<style>'
@@ -235,7 +289,7 @@ $template_page = '<html>'
         . '</div>'
 
         . '<div class="dtl_row">'
-            . '<span class="dtl_head">Record types:</span>'
+            . '<span class="dtl_head">Entity types / Record types:</span>'
             . '<span class="dtl_value">{struct_names}</span>'
         . '</div>'
     . '</body>'
@@ -248,6 +302,8 @@ ini_set('memory_limit','1024M');
 $today = date('Y-m-d'); //'d-M-Y'
 $pages_made = 0;
 $list_is_array = is_array($arg_database);
+
+$index_databases = array(); // array of databases with websites (is inserted, with links, into index.html)
 
 foreach ($databases as $idx=>$db_name){
 
@@ -291,6 +347,7 @@ foreach ($databases as $idx=>$db_name){
     $values[6] = $vals['db_id'];
     $values[8] = $vals['db_dname'];
 
+    // Replace missing/placeholder values
     if(empty($values[8]) || $values[8] == 'Please enter a DB name ...'){
         $values[8] = $db_name;
     }
@@ -334,6 +391,10 @@ foreach ($databases as $idx=>$db_name){
     $values[11] = $vals['owner_name'];
     $values[12] = $vals['owner_email'];
 
+    if(empty($values[5])){ // check if db owner is blank, if so use user 2
+        $values[5] = $vals['owner_name'];
+    }
+
     // Record and Structure details
 
     //find number of records and date of last update
@@ -369,13 +430,14 @@ foreach ($databases as $idx=>$db_name){
 
     //list of all rectype names
 
-    $vals = mysql__select_list2($mysqli, 'SELECT rty_Name FROM defRecTypes WHERE rty_ShowInLists = 1');
+    // This currently sorts alphabetically within groups, but could later use rty_OrderInGroup if it is ever set
+    $vals = mysql__select_list2($mysqli, 'SELECT rty_Name FROM defRecTypes,defRecTypeGroups WHERE rty_ShowInLists = 1 AND rty_RecTypeGroupID=rtg_ID ORDER BY rtg_Order,rty_Name');
     if($vals==null){
         echo $tabs0.$db_name.' cannot execute query for defRecTypes table'.$eol;
         continue;
     }
 
-    $values[17] = implode(',', $vals);
+    $values[17] = implode('<br>', $vals); // produce concatenated string of record types
 
     // Setup content
     $content = str_replace($value_to_replace, $values, $template_page);
@@ -390,7 +452,26 @@ foreach ($databases as $idx=>$db_name){
         continue;
     }
 
+    // $db_name => Name, [1] => Description, [3] => Websites
+    if($values[3] !== 'None'){ // only databases with websites are listed in index.html
+
+        $index_details = str_replace($index_row_replace, array($db_name, $db_name.'.html', $values[3], $values[1]), $index_row);
+
+        array_push($index_databases, $index_details);
+    }
+
     echo $tabs0.$db_name.' Completed, saved to '.$fname.$eol;
 }//for
 
+// Update index.html
+$index_file = $index_dir . '/index.html';
+
+$index_page = str_replace('{databases}', implode('<br><br><br>', $index_databases), $index_page);
+
+$res = fileSave($index_page, $index_file);
+if($res <= 0){
+    echo $tabs0.' We were unable to update index.html'.$eol;
+}else{
+    echo $tabs0.' Updated index.html'.$eol;
+}
 ?>

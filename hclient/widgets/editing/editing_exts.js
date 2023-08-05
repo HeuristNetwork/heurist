@@ -835,9 +835,9 @@ function calculateImageExtentFromWorldFile(_editing){
 // Opening menuWidget's with searching capabilities
 // that => context
 // $select => jQuery select with hSelect init'd
-// disableClick => disable click on search option, to avoid selecting it as the value
+// has_filter => disable click on search option, to avoid selecting it as the value
 //
-function openSearchMenu(that, $select, disableClick=true){
+function openSearchMenu(that, $select, has_filter=true){
 
     var $menu = $select.hSelect('menuWidget');
     var $inpt = $menu.find('input.input_menu_filter'); //filter input
@@ -874,48 +874,78 @@ function openSearchMenu(that, $select, disableClick=true){
                 return false;                       
             },
             keyup:function(event){
-            var val = $(event.target).val().toLowerCase();
-            window.hWin.HEURIST4.util.stopEvent(event);                       
-            var $mnu = $select.hSelect('menuWidget');
-            if(val.length<2){
-                $mnu.find('li').css('display','list-item');
-                $mnu.find('div.not-found').hide();
-            }else{
-                if(_timeout==0){
-                    $mnu.find('.ui-menu-item-wrapper').css('cursor','progress');
-                }
-
-                let key = that.f('rst_RecTypeID')+'-'+that.f('rst_DetailTypeID');
-                $.each($mnu.find('.ui-menu-item-wrapper'), function(i,item){
-
-                    let title = $(item).text().toLowerCase();
-                    if($select.attr('rectype-select') == 1 && window.hWin.HEURIST4.browseRecordCache.hasOwnProperty(key)){
-                        title = window.hWin.HEURIST4.browseRecordCache[key][i]['rec_Title'].toLowerCase();
-                        title = title.replace(/[\r\n]+/g, ' ');
+                var val = $(event.target).val().toLowerCase();
+                window.hWin.HEURIST4.util.stopEvent(event);                       
+                var $mnu = $select.hSelect('menuWidget');
+                if(val.length<2){
+                    $mnu.find('li').css('display','list-item');
+                    $mnu.find('div.not-found').hide();
+                }else{
+                    if(_timeout==0){
+                        $mnu.find('.ui-menu-item-wrapper').css('cursor','progress');
                     }
 
-                    if(title.indexOf(val)>=0){
-                        $(item).parent().css('display','list-item');
-                    }else{
-                        $(item).parent().css('display','none');
-                    }
-                });
-                $mnu.find('div.not-found').css('display',
-                    $mnu.find('.ui-menu-item-wrapper:visible').length==0?'block':'none');
-                _timeout = setTimeout(function(){$mnu.find('.ui-menu-item-wrapper').css('cursor','default');_timeout=0;},500);
-            }                                    
-            
-        }});
+                    let key = that.f('rst_RecTypeID')+'-'+that.f('rst_DetailTypeID');
+                        let showing_option = false;
+                    $.each($mnu.find('.ui-menu-item-wrapper'), function(i,item){
 
-		if(disableClick){			
-			//stop click for menu filter option
+                        let title = $(item).text().toLowerCase();
+                        if($select.attr('rectype-select') == 1 && window.hWin.HEURIST4.browseRecordCache.hasOwnProperty(key)){
+                            title = window.hWin.HEURIST4.browseRecordCache[key][i]['rec_Title'].toLowerCase();
+                            title = title.replace(/[\r\n]+/g, ' ');
+                        }
+
+                        if(title.indexOf(val)>=0){
+                            $(item).parent().css('display','list-item');
+                                showing_option = true;
+                        }else{
+                            $(item).parent().css('display','none');
+                        }
+                    });
+                    $mnu.find('div.not-found').css('display',
+                            !showing_option?'block':'none');
+                    _timeout = setTimeout(function(){$mnu.find('.ui-menu-item-wrapper').css('cursor','default');_timeout=0;},500);
+                }                                    
+            }
+        });
+
+		if(has_filter){			
+ 
 			that._on($menu.find('li.ui-menu-item:first'), {
-				click: function(event){
+				click: function(event){ // stop click for menu filter option
                     if ($(event.target).parents('.show-select-dialog').length==0){
 					    window.hWin.HEURIST4.util.stopEvent(event);
 					    return false;
                     }
-				}
+				},
+                keydown: function(event){ // allow spaces for filter, enter selects only option (if allowed), and tab focuses first option
+
+                    let code = event.keyCode || event.which;
+                    let is_enter = event.key == "Enter" || code == 13;
+                    let is_tab = event.key == "Tab" || code == 9;
+                    let add_space = event.key == " " || code == 32 || (is_enter && (event.shiftKey || event.ctrlKey || event.metaKey));
+
+                    let cur_val = $menu.find('.input_menu_filter').val();
+
+                    if(add_space){
+                        window.hWin.HEURIST4.util.stopEvent(event);
+                        event.stopImmediatePropagation();
+
+                        $menu.find('.input_menu_filter').val(cur_val + ' ');
+                    }else if(is_enter && $menu.find('.ui-menu-item:visible').length == 2){ // auto select only result
+
+                        window.hWin.HEURIST4.util.stopEvent(event);
+                        event.stopImmediatePropagation();
+
+                        $($menu.find('.ui-menu-item:visible')[1]).click();
+                    }else if(is_tab && $menu.find('.ui-menu-item:visible').length > 1){ // focus first item
+
+                        window.hWin.HEURIST4.util.stopEvent(event);
+                        event.stopImmediatePropagation();
+
+                        $($menu.find('.ui-menu-item:visible')[1]).mouseover();
+                    }
+                }
 			});
 		}
         
@@ -997,7 +1027,7 @@ function browseRecords(_editing_input, $input){
 
 /*
 $inputdiv.uniqueId();                                
-console.log('BEFORE');
+console.log('BEFORE', __current_input_id);
 console.log('input', $input.attr('id'),$input.parents('fieldset').attr('id'));
 console.log('inputdiv',$inputdiv.attr('id'),$inputdiv.parents('fieldset').attr('id'));
 */
@@ -1081,10 +1111,9 @@ console.log('inputdiv',$inputdiv.attr('id'),$inputdiv.parents('fieldset').attr('
                                 var targetID = recordset.fld(record,'rec_ID');
                                 var rec_Title = recordset.fld(record,'rec_Title');
                                 var rec_RecType = recordset.fld(record,'rec_RecTypeID');
-                                var is_new = Object.keys(that.newvalues).length==1;
-                                that.newvalues[$input.attr('id')] = targetID;
                                 
-                                //window.hWin.HEURIST4.ui.setValueAndWidth($input, rec_Title);
+                                that.newvalues[$input.attr('id')] = targetID;
+                                $input.attr('data-value', targetID); //that's more reliable
                                 
                                 //save last 25 selected records
                                 var now_selected = data.selection.getIds(25);
@@ -1098,7 +1127,7 @@ console.log('inputdiv',$inputdiv.attr('id'),$inputdiv.parents('fieldset').attr('
                                      rec_RecTypeID: rec_RecType,
                                      rec_IsChildRecord:isparententity
                                     }, __show_select_dialog);
-                                //if(is_new) ele.appendTo($inputdiv);
+                                
                                 that.onChange();
                                 ele.css({margin:'4px', 'border':'2px red solid !important'});
                                 $inputdiv.css('border','4px green solid !important');
@@ -1421,6 +1450,7 @@ console.log('inputdiv',$inputdiv.attr('id'),$inputdiv.parents('fieldset').attr('
                             var rec_Title = opt.text();
                             var rec_RecType = opt.attr('data-rty');
                             that.newvalues[$input.attr('id')] = targetID;
+                            $input.attr('data-value', targetID); //that's more reliable
                             
                             $input.empty();
                             var ele = window.hWin.HEURIST4.ui.createRecordLinkInfo($input, 
@@ -1497,10 +1527,20 @@ function browseTerms(_editing_input, $input, value){
         
     function __recreateTrmLabel($input, trm_ID){
 
+        let lang_code = that.options.language;
+        if(!window.hWin.HEURIST4.util.isempty(lang_code) && lang_code != 'ALL' && !window.hWin.HAPI4.EntityMgr.getEntityData2('trm_Translation')){ // retrieve translations
+
+            window.hWin.HAPI4.EntityMgr.getTranslatedDefs('defTerms', 'trm', null, function(){
+                __recreateTrmLabel($input, trm_ID);
+            });
+            lang_code = '';
+            //return;
+        }
+
         $input.empty();
         if(window.hWin.HEURIST4.util.isNumber(trm_ID) && trm_ID>0){
             
-            var trm_Label = $Db.trm(trm_ID, 'trm_Label');
+            var trm_Label = $Db.trm_getLabel(trm_ID, lang_code);
             var trm_info = $Db.trm(trm_ID);
 
             if(trm_info && trm_info.trm_ParentTermID != 0){
@@ -1508,11 +1548,12 @@ function browseTerms(_editing_input, $input, value){
                 while(1){
 
                     trm_info = $Db.trm(trm_info.trm_ParentTermID);
+                    let label = $Db.trm_getLabel(trm_info.trm_ParentTermID, lang_code);
 
                     if(trm_info.trm_ParentTermID == 0){
                         break;
                     }else{
-                        trm_Label = trm_info.trm_Label + '.' +  trm_Label;
+                        trm_Label = label + '.' +  trm_Label;
                     }
                 }
             }
@@ -1615,6 +1656,7 @@ function browseTerms(_editing_input, $input, value){
         var allTerms = that.f('rst_FilteredJsonTermIDTree');        
         //headerTerms - disabled terms
         var headerTerms = that.f('rst_TermIDTreeNonSelectableIDs') || that.f('dty_TermIDTreeNonSelectableIDs');
+        let lang_code = that.options.language;
 
         if(window.hWin.HEURIST4.util.isempty(allTerms) &&
             that.options.dtID==window.hWin.HAPI4.sysinfo['dbconst']['DT_RELATION_TYPE'])
@@ -1622,6 +1664,10 @@ function browseTerms(_editing_input, $input, value){
             allTerms = 'relation'; //show all possible relations
         }else if(typeof allTerms == 'string' && allTerms.indexOf('-')>0){ //vocabulary concept code
             allTerms = $Db.getLocalID('trm', allTerms);
+        }else if(!window.hWin.HEURIST4.util.isempty(lang_code) && lang_code != 'ALL'
+            && !window.hWin.HAPI4.EntityMgr.getEntityData2('trm_Translation')){
+            window.hWin.HAPI4.EntityMgr.getTranslatedDefs('defTerms', 'trm', null, __recreateSelector);
+            return;
         }
 
 
@@ -1659,6 +1705,7 @@ function browseTerms(_editing_input, $input, value){
             //var $inputdiv = $('#'+ref_id).parent();
             //var opt = $(that.selObj).find('option:selected');
             that.newvalues[$input.attr('id')] = trm_ID;
+            $input.attr('data-value', trm_ID); //that's more reliable
 
             __recreateTrmLabel($input, trm_ID);
             /*
@@ -1671,8 +1718,16 @@ function browseTerms(_editing_input, $input, value){
             */
             that.onChange();
 
-        }
+        };
 
+        events['onCloseMenu'] = function (event){
+
+            let $menu = that.selObj.hSelect('menuWidget');
+
+            // Reset filter input
+            $menu.find('.input_menu_filter').val('');
+            $menu.find('li').css('display','list-item');
+        };
 
         $inputdiv.addClass('selectmenu-parent');
 
@@ -1684,7 +1739,7 @@ function browseTerms(_editing_input, $input, value){
         that.selObj = window.hWin.HEURIST4.ui.createTermSelect(that.selObj,
             {vocab_id:allTerms, //headerTermIDsList:headerTerms,
                 defaultTermID:$input.val(), topOptions:topOptions, supressTermCode:true, 
-                useHtmlSelect:false, eventHandlers:events});                
+                useHtmlSelect:false, eventHandlers:events, language_code: lang_code});
 
         $(that.selObj).hide(); //button will be hidden        
     }
@@ -1719,7 +1774,7 @@ function browseTerms(_editing_input, $input, value){
         var dty_ID = that.f('rst_DetailTypeID');
         
         //recreate dropdown if not inited
-        if(!that.selObj || !$(that.selObj).hSelect('instance')){
+        if(!that.selObj || !that.selObj.hSelect('instance')){
 
             __recreateSelector();
                 
@@ -1823,7 +1878,7 @@ function translationSupport(_input_or_values, is_text_area, callback){
 //
 // obtains values from input and textarea elements with data-lang attribute
 // and assigns them to json params with key+language suffix
-// data-lang='xx' means default languge - key will be without suffix
+// data-lang='def' means default languge - key will be without suffix
 // 
 // params - json array to be modified
 // $container - container element
@@ -1836,8 +1891,8 @@ function translationFromUI(params, $container, keyname, name, is_text_area){
     $(Object.keys(params)).each(function(i, key){
 
         var key2 = key;        
-        if(key.indexOf(':')==key.length-3){
-            key2 = key.substring(0, key.length-3);
+        if(key.length>5 && key.indexOf(':')==key.length-4){
+            key2 = key.substring(0, key.length-4);
             if(key2 == keyname){
                 delete params[key];
             }
@@ -1850,7 +1905,7 @@ function translationFromUI(params, $container, keyname, name, is_text_area){
     $container.find(ele_type+'[name="'+name+'"]').each(function(i,item){
         item = $(item);
         var lang = item.attr('data-lang');
-        if(lang=='xx') lang = ''
+        if(lang=='def') lang = ''
         else lang = ':'+lang;
         
         var value = item.val().trim();
@@ -1862,6 +1917,7 @@ function translationFromUI(params, $container, keyname, name, is_text_area){
 
 //
 //  Assign values from params to UI and initialize "translation" button
+// params= [{keyname:value},...]
 //
 function translationToUI(params, $container, keyname, name, is_text_area){
     
@@ -1870,10 +1926,10 @@ function translationToUI(params, $container, keyname, name, is_text_area){
     var ele_type = is_text_area?'textarea':'input';
     
     //find element assign data-lang for default, remove others
-    //remove all except default
+    //1. Removes all except default (first one)
     $container.find(ele_type+'[name="'+name+'"]').each(function(i,item){
         var lang  = $(item).attr('data-lang');
-        if(lang=='xx' || !lang){
+        if(lang=='def' || !lang){
             def_ele = $(item);
         }else{
             $(item).remove(); //remove non-default
@@ -1890,12 +1946,14 @@ function translationToUI(params, $container, keyname, name, is_text_area){
     var sTitle = '';
     
     //init input element for default value and button
-    def_ele.attr('data-lang','xx').val(params[keyname]);
+    def_ele.attr('data-lang','def').val(params[keyname]);
     
-    if($container.find('span[name="'+name+'"]').length==0){//button
-    
+    //2. Add translation button    
+    if($container.find('span[name="'+name+'"]').length==0){
+
+        //translation button    
         var btn_add = $( "<span>")
-            .attr('data-lang','xx')
+            .attr('data-lang','def')
             .attr('name',name)
             .addClass('smallbutton editint-inout-repeat-button ui-icon ui-icon-translate')
             .insertAfter( def_ele )
@@ -1911,28 +1969,31 @@ function translationToUI(params, $container, keyname, name, is_text_area){
             btn_add.css({'vertical-align':'top'});    
         }
         
-        btn_add.on({click: function(e){
+        btn_add.on({click: function(e){//--------------------------
             
             var values = [];
             //$(e.target).attr('data-lang')
+            
+            //gather the list of values from input elements
             $container.find(ele_type+'[name="'+name+'"]').each(function(i,item){
                 var lang  = $(item).attr('data-lang');
-                if(lang=='xx' || !lang){
+                if(lang=='def' || !lang){
                     values.push($(item).val())
                 }else{
                     values.push(lang+':'+$(item).val());
                 }
             });
             
-            translationSupport( values, is_text_area, function(res){
+            //open dialog
+            translationSupport( values, is_text_area, function(newvalues){
                 
                 var res2 = {};
-                for(var i=0; i<res.length; i++){
-                    var keyname2=keyname, value = res[i];
+                for(var i=0; i<newvalues.length; i++){
+                    var keyname2=keyname, value = newvalues[i];
                     
-                    if(!window.hWin.HEURIST4.util.isempty(value) && value.substr(2,1)==':'){
-                        keyname2 = keyname2+':'+value.substr(0,2);
-                        value = value.substr(3).trim();
+                    if(!window.hWin.HEURIST4.util.isempty(value) && value.substr(3,1)==':'){
+                        keyname2 = keyname2+':'+value.substr(0,3);
+                        value = value.substr(4).trim();
                     }else{
                         value = value.trim();
                     }
@@ -1940,21 +2001,23 @@ function translationToUI(params, $container, keyname, name, is_text_area){
                         res2[keyname2] = value;
                     }
                 }
-                if(!res2[keyname]) res2[keyname] = '';
-                
+                if(!res2[keyname]){
+                    res2[keyname] = '';  
+                } 
+
                 translationToUI(res2, $container, keyname, name, is_text_area);
             });
             
         }});
-    }
+    }//end add translation button
     
     
-    //add new hidden lang elements
+    //3. add new hidden lang elements
     $(Object.keys(params)).each(function(i, key){
         if(key==keyname){
             
-        }else if(keyname==key.substring(0,key.length-3)){ // key.indexOf(keyname+':')===0){
-            var lang = key.substring(key.length-2);
+        }else if(keyname==key.substring(0,key.length-4)){ // key.indexOf(keyname+':')===0){
+            var lang = key.substring(key.length-3);
             
             var ele = $('<'+ele_type+'>')
                 .attr('name',name).attr('data-lang',lang)
@@ -1964,7 +2027,7 @@ function translationToUI(params, $container, keyname, name, is_text_area){
             if(is_text_area){
                 ele.css('display','none');
             }else{
-                ele.attr('type','hidden');
+                //ele.attr('type','hidden');
             }
                 
             sTitle += (lang+':'+params[key]+'\n');
@@ -1973,4 +2036,46 @@ function translationToUI(params, $container, keyname, name, is_text_area){
     
     def_ele.attr('title',sTitle);
 
+}
+
+//
+// Select arbitrary Heurist record 
+//
+function selectRecord(options, callback)
+{
+        var popup_options = {
+            select_mode: 'select_single', //select_multi
+            select_return_mode: 'recordset', //or ids
+            edit_mode: 'popup',//'none'
+            selectOnSave: true, //it means that select popup will be closed after add/edit is completed
+            title: window.hWin.HR('Select record'),
+            rectype_set: null,
+            parententity: 0,
+            default_palette_class: 'ui-heurist-populate',
+            onselect:function(event, data){
+                //if( window.hWin.HEURIST4.util.isArrayNotEmpty(data.selection) ){
+                //    callback(data.selection[0]);
+                //}
+                
+                if( window.hWin.HEURIST4.util.isRecordSet(data.selection) ){
+                    var recordset = data.selection;
+                    //var record = recordset.getFirstRecord();
+                    //var record_id = recordset.fld(record,'rec_ID');
+                    callback(data.selection);
+                }
+            }
+        };//popup_options
+        
+        var usrPreferences = window.hWin.HAPI4.get_prefs_def('select_dialog_records', 
+            {width: null,  //null triggers default width within particular widget
+                height: (window.hWin?window.hWin.innerHeight:window.innerHeight)*0.95 });
+
+        popup_options.width = Math.max(usrPreferences.width,710);
+        popup_options.height = usrPreferences.height;
+
+        if(options){
+            popup_options = $.extend(popup_options,options);
+        }
+        
+        window.hWin.HEURIST4.ui.showEntityDialog('records', popup_options);
 }

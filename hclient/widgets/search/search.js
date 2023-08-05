@@ -38,6 +38,8 @@ $.widget( "heurist.search", {
         search_input_label: '',
 
         button_class: 'ui-heurist-btn-header1',
+        
+        language: 'def',
 
         // callbacks
         onsearch: null,  //on start search
@@ -114,7 +116,6 @@ $.widget( "heurist.search", {
         this.div_search   = $('<div>').css({ 'width':'100%', display:'table' }).appendTo( this.element ); //was table-row
 
 
-
         //header-label
         this.div_search_header = $('<div>')
         .css({'width':'auto','text-align':'right','line-height':'31px','padding-left':sz_search_padding}) //'height':'6.88em',
@@ -122,7 +123,8 @@ $.widget( "heurist.search", {
         .appendTo( this.div_search );
 
         if(this.options.search_input_label){
-            this.div_search_header.text( this.options.search_input_label ).css({'padding-right':'4px'});     
+            var lbl = window.hWin.HRJ('search_input_label', this.options, this.options.language);
+            this.div_search_header.text( lbl ).css({'padding-right':'4px'});     
         }
 
 
@@ -139,7 +141,7 @@ $.widget( "heurist.search", {
 
         //promt to be shown when input is empty        
         this.input_search_prompt = $( "<span>" )
-        .text(this._is_publication?'':window.hWin.HR("enter search/filter or use filter builder at right"))
+        .text(this._is_publication?'':window.hWin.HR('search_filter_hint'))
         .addClass('graytext')
         .css({'font-size':'0.8em', 'margin': '18px 0 0 0.5em','position': 'absolute'})
         .appendTo( this.div_search_input );
@@ -220,8 +222,9 @@ $.widget( "heurist.search", {
             .css({position: 'absolute',top:'85px','font-size':'10px',display:'inline-block'})
             .appendTo(this.div_search_input);
 
-            var link = $('<span title="Show syntax and examples of the Heurist query/filter language">'
-                +'Filter help <span class="ui-icon ui-icon-info" style="font-size:0.8em"></span></span>')
+            var link = $('<span title="'+window.hWin.HR('filter_help_hint')+'">'
+                + window.hWin.HR('Filter help')
+                + ' <span class="ui-icon ui-icon-info" style="font-size:0.8em"></span></span>')
             .attr('id', 'search_help_link')
             .addClass('graytext')
             .css({'text-decoration':'none','outline':0, cursor:'pointer'})
@@ -325,21 +328,24 @@ $.widget( "heurist.search", {
 
             // Filter builder button
             this.btn_filter_wiz = $('<a>',{href:'#',
-                title:window.hWin.HR('Build a filter expression using a form-driven approach')})
-            .css({display:'inline-block',width:90,position:'relative',top:'-3px'})
+                title:window.hWin.HR('filter_builder_hint')})
+            .css({display:'inline-block',position:'relative',top:'-10px','padding-right':'5px'}) //,top:'-3px'
             .addClass('ui-main-color btn-aux')
             .append('<span class="ui-icon ui-icon-magnify-explore" style="height:15px;font-size:larger;" />')
-            .append('<span style="display:inline-block; text-decoration: none; font-size: smaller; margin-left: 5px">'+ window.hWin.HR('Filter builder') +'</span>')
+            .append('<span style="display:inline-block; text-decoration: none; font-size: smaller; margin-left: 5px">'
+            + window.hWin.HR('Filter builder') 
+            +'</span>')
             .appendTo(this.div_buttons);
             this._on( this.btn_filter_wiz, {  click: this.showSearchAssistant });
 
             // Facet builder button
             this.btn_faceted_wiz = $('<a>',{href:'#', 
-                title:window.hWin.HR('Build new faceted search')})
-            .css({display:'inline-block',width:90,position:'relative',top:'-3px'})
+                title:window.hWin.HR('filter_facetbuilder_hint')})
+            .css({display:'inline-block',position:'relative',top:'-10px','padding-right':'5px'}) //width:90,,top:'-3px'
             .addClass('ui-main-color btn-aux')
             .append('<span class="ui-icon ui-icon-box" style="font-size: larger;" />')
-            .append('<span style="display:inline-block; text-decoration: none; font-size: smaller; margin-left: 5px">'+ window.hWin.HR('Facet builder') +'</span>')
+            .append('<span style="display:inline-block; text-decoration: none; font-size: smaller; margin-left: 5px">'
+            + window.hWin.HR('Facet builder') +'</span>')
             .appendTo(this.div_buttons);
             this._on( this.btn_faceted_wiz, {  click: function(){
 
@@ -352,11 +358,12 @@ $.widget( "heurist.search", {
             }});
 
             // Save filter button
-            this.btn_save_filter = $('<a>', {href: '#', title: window.hWin.HR('Save current filter')})
+            this.btn_save_filter = $('<a>', {href: '#', title: window.hWin.HR('filter_save_hint')})
             .addClass('ui-main-color btn-aux logged-in-only')
-            .css({display:'inline-block',width:'70px',position:'absolute'})
+            .css({display:'inline-block',position:'relative',top:'-10px'})  //width:'70px',
             .append('<span class="ui-icon ui-icon-save" />')
-            .append('<span style="display: inline-block; text-decoration: none; font-size: smaller; margin-left: 5px">'+ window.hWin.HR('Save filter') +'</span>')
+            .append('<span style="display: inline-block; text-decoration: none; font-size: smaller; margin-left: 5px">'
+            + window.hWin.HR('Save filter') +'</span>')
             .appendTo(this.div_buttons); // div_save_filter
             this._on(this.btn_save_filter, {click: function(){
                 var widget = window.hWin.HAPI4.LayoutMgr.getWidgetByName('mainMenu6');
@@ -369,7 +376,7 @@ $.widget( "heurist.search", {
             }});
 
             this.div_search_input.find('#search_help_link').parent()
-            .css({position:'relative',top:'-3px','margin-left':'10px'})
+            .css({position:'relative',top:'-10px','margin-left':'-10px'})
             .appendTo(this.div_buttons);
         }
 
@@ -382,7 +389,7 @@ $.widget( "heurist.search", {
 
         this.btn_search_as_user = $( "<button>", {
             label: window.hWin.HR(this.options.search_button_label), 
-            title: "Apply the filter/search in the search field and display results in the central panel below"
+            title: window.hWin.HR('filter_start_hint')
         })
         .css({'min-height':'30px','min-width':'90px'})
         .appendTo( this.div_search_as_user )
@@ -788,9 +795,10 @@ $.widget( "heurist.search", {
                 }else{
                     //this.div_buttons.css('min-width',70);
                     this.div_buttons.find('.btn-aux :nth-child(2)').show();
-                    this.btn_save_filter.width(70);
-                    this.btn_faceted_wiz.width(90);
-                    this.btn_filter_wiz.width(90);
+                    this.div_buttons.find('.btn-aux').width('auto');
+                    //this.btn_save_filter.width(70);
+                    //this.btn_faceted_wiz.width(90);
+                    //this.btn_filter_wiz.width(90);
                     this.btn_search_as_user.button('option','showLabel',true);
                     this.btn_search_as_user.css('min-width',90);
                 }

@@ -48,6 +48,7 @@ $mysqli  = $system->get_mysqli();
 
 $templateddb = @$_REQUEST['templatedb'];
 $isCloneTemplate = ($templateddb!=null);
+if($isCloneTemplate) $templateddb = htmlspecialchars($templateddb);
 $sErrorMsg = null;
 $sHasNewDefsWarning = false;
 
@@ -105,7 +106,7 @@ if(@$_REQUEST['mode']=='2'){
                     .$system->getError()['message'].'<br/></div>';
     }else{
 
-        $targetdbname = $_REQUEST['targetdbname'];
+        $targetdbname = htmlspecialchars($_REQUEST['targetdbname']);
 
         if(strlen($targetdbname)>64){
                 $sErrorMsg = 'Database name '.$targetdbname.' is too long. Max 64 characters allowed';
@@ -247,8 +248,9 @@ if(@$_REQUEST['mode']=='2'){
 <?php    
 if(@$_REQUEST['mode']=='2'){
     
-    $targetdbname = $_REQUEST['targetdbname'];
+    $targetdbname = @$_REQUEST['targetdbname'];
     $nodata = (@$_REQUEST['nodata']==1);
+    if($targetdbname!=null) $targetdbname = htmlspecialchars($targetdbname);
 
     //$res = false;
     //sleep(15);
@@ -306,7 +308,7 @@ if(@$_REQUEST['mode']=='2'){
         <input name='db' value='<?=HEURIST_DBNAME?>' type='hidden'>
         <?php
         if($isCloneTemplate){
-            print '<input name="templatedb" value="'.$_REQUEST['templatedb'].'" type="hidden">';
+            print '<input name="templatedb" value="'.$templateddb.'" type="hidden">';
         }
         ?>
         <p>The database will be created with the prefix <b><?=HEURIST_DB_PREFIX?></b>
@@ -318,7 +320,7 @@ if(@$_REQUEST['mode']=='2'){
         <div style="margin-left: 40px;">
             <input type='text' name='targetdbname' id='targetdbname' size="40" maxlength="64" onkeypress="{onKeyPress(event)}"/>
             <input type='submit' id='submitBtn' 
-                value='Clone "<?=($isCloneTemplate)?$_REQUEST['templatedb']:HEURIST_DBNAME?>"'
+                value='Clone "<?=($isCloneTemplate)?$templateddb:HEURIST_DBNAME?>"'
                 class="ui-button-action"/>
         </div>
 
@@ -492,8 +494,6 @@ function cloneDatabase($targetdbname, $nodata=false, $templateddb, $user_id) {
                     HEURIST_FILESTORE_ROOT.$targetdbname."/smarty-templates" );
         folderRecurseCopy( HEURIST_FILESTORE_ROOT.$source_database."/xsl-templates", 
                     HEURIST_FILESTORE_ROOT.$targetdbname."/xsl-templates" );
-        folderRecurseCopy( HEURIST_FILESTORE_ROOT.$source_database."/rectype-icons", 
-                    HEURIST_FILESTORE_ROOT.$targetdbname."/rectype-icons" );
         folderRecurseCopy( HEURIST_FILESTORE_ROOT.$source_database."/entity", 
                     HEURIST_FILESTORE_ROOT.$targetdbname."/entity" );
         

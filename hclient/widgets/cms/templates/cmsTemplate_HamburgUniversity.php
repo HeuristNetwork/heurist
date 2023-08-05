@@ -122,7 +122,7 @@ body{
             <div id="main-content" 
                 style="padding:0 10px;"    
                 data-homepageid="<?php print $home_page_record_id;?>" 
-                <?php print ($open_page_on_init>0)?' data-initid="'.$open_page_on_init.'"':''; ?> 
+                <?php print ($open_page_or_record_on_init>0)?' data-initid="'.$open_page_or_record_on_init.'"':''; ?> 
                 data-viewonly="<?php print ($hasAccess)?0:1;?>">
             </div>
         </div>

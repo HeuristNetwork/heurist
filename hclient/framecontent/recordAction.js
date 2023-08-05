@@ -429,6 +429,10 @@ function hRecordAction(_action_type, _scope_type, _field_type, _field_value) {
         
         //@todo set 50 for freetext and resource
         //dtFields[fi['rst_DisplayWidth']] = 50;
+
+        // Allow DB Admins to modify readonly fields
+        let update_maymodify = dtFields['rst_MayModify'] == 'locked' && window.hWin.HAPI4.is_admin();
+        dtFields['rst_MayModify'] = (update_maymodify) ? 'open' : dtFields['rst_MayModify'];
         
         if(window.hWin.HEURIST4.util.isnull(init_value)) init_value = '';
 
@@ -439,8 +443,9 @@ function hRecordAction(_action_type, _scope_type, _field_type, _field_value) {
             readonly: false,
 
             showclear_button: false,
-            dtFields:dtFields
+            dtFields:dtFields,
 
+            force_displayheight: (field_type=='blocktext') ? 2 : null
         };
 
         var ele = $("<div>").attr('id',input_id).appendTo($fieldset);
@@ -455,9 +460,10 @@ function hRecordAction(_action_type, _scope_type, _field_type, _field_value) {
 			// check that the select is supposed to be a hSelect/selectmenu
             if(ele.find('select').hSelect('instance') != undefined){ 
 
+                var selObj = ele.find('select');
                 widget_ele = selObj.hSelect('widget');
                 menu_parent = selObj.hSelect('menuWidget').parent();
-            }else if($('#'+id+'-button').length > 0){ // .hSelect('instance') and .selectmenu both return undefined, despite the select being a hSelect instance
+            }else if($('#'+id+'-button').length > 0){ // widget exists in current document
 
 				if(parent.document && $('#'+id+'-menu', parent.document).length > 0){ // check if current menuWidget can be accessed
 
@@ -478,6 +484,8 @@ function hRecordAction(_action_type, _scope_type, _field_type, _field_value) {
 				widget_ele.on("click", function(e){
                     menu_parent.css('top', widget_ele.offset().top + 54);
                 });
+
+                widget_ele.css({'font-size': '1em'}); //'width': 'auto', 'max-width': '30em'
             }
         }
     }

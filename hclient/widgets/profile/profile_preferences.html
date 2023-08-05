@@ -347,6 +347,15 @@
         <input id="custom_theme" name="custom_theme" class="text ui-widget-content ui-corner-all"/>
     </div>
 	
+    <div>
+        <div class="header"><label for="recordData_Images">What type of images to display in record viewer:</label></div>
+        <select name="recordData_Images" id="recordData_Images" class="text ui-widget-content ui-corner-all" style="min-width: 175px;">
+            <option value="0">Show all images</option>
+            <option value="1">Hide linked images</option>
+            <!-- <option value="2">Hide all images</option> -->
+        </select>
+    </div>
+
 	<div>
         <div class="header"><label for="imageRecordEditor">Display images inline by default in the record editor</label></div>
         <input type="checkbox" name="imageRecordEditor" id="imageRecordEditor" class="text ui-widget-content ui-corner-all"/>
@@ -361,7 +370,7 @@
             <option value="pt">Portuguese</option>
         </select>
     </div>
-    
+
 
 <!-- 14/4/18: This does not appear to do anything, besides it should really be replaced by proper indexing using Elastic and specification of composite key for each record type 
     <div>

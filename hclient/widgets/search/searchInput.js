@@ -44,7 +44,7 @@ $.widget( "heurist.searchInput", {
         onsearch: null,  //on start search
         onresult: null,   //on search result
         
-        search_page: null, //target page (for CMS)
+        search_page: null, //target page (for CMS) - it will navigate to this page and pass search results to search_realm group
         search_realm:  null,  //accepts search/selection events from elements of the same realm only
 
         update_on_external_search: false // update search box value on ON_REC_SEARCHSTART from facet/other filters
@@ -81,7 +81,7 @@ $.widget( "heurist.searchInput", {
         
         //header-label
         this.div_search_header = $('<div>')
-        .css({'width':'auto', flex: '1 1 50px', 'text-align':'right'})
+        .css({'width':'auto', flex: '0 1 50px', 'text-align':'right'})
         .appendTo( this.div_search );
         
         // Search field
@@ -96,7 +96,7 @@ $.widget( "heurist.searchInput", {
 			'resize':'none', 
             'min-height':'27px', 'line-height': '14px', 
             'min-width':'80px' }) 
-        .attr('placeholder','define filter')   
+        .attr('placeholder',window.hWin.HR('define filter'))   
         .addClass("text ui-widget-content ui-corner-all")
         .appendTo(  this.div_search_input );
         
@@ -108,7 +108,7 @@ $.widget( "heurist.searchInput", {
             .appendTo( this.div_search );
         
         var linkGear = $('<a>',{href:'#', 
-            title:window.hWin.HR('Build a filter expression using a form-driven approach')})
+            title:window.hWin.HR('filter_builder_hint')})
             .css({'display':'inline-block','opacity':'0.5','margin-top': '0.6em', width:'20px'})
             .addClass('ui-icon ui-icon-magnify-explore') //was ui-icon-gear was ui-icon-filter-form
             .appendTo(this.div_buttons);
@@ -118,12 +118,12 @@ $.widget( "heurist.searchInput", {
         // search/filter buttons - may be Search or Bookmarks according to settings and whether logged in
         //
         this.div_search_as_user = $('<div>') //.css({'min-width':'18em','padding-right': '10px'})
-        .css({flex: '0 1 90px','text-align':'right','min-width':'40px'}) 
+        .css({'text-align':'right','min-width':'40px'})  //flex: '0 1 90px',
         .appendTo( this.div_search );
 
         this.btn_start_search = $( "<button>", {
-            label: window.hWin.HR(this.options.search_button_label), 
-            title: "Apply the filter/search in the search field and display results in the central panel below"
+            label: window.hWin.HRJ('search_button_label', this.options, this.options.language), 
+            title: window.hWin.HR('filter_start_hint')
         })
         .css({'min-height':'30px','width':'100%'})
         .appendTo( this.div_search_as_user )
@@ -169,14 +169,19 @@ $.widget( "heurist.searchInput", {
    /* private function */
    _refresh: function(){
        
-       this.btn_start_search.button('option','label', window.hWin.HR(this.options.search_button_label)); 
-       
+       this.btn_start_search.button('option','label', window.hWin.HRJ('search_button_label', this.options, this.options.language));
+
+       var lbl = null;
        if(this.options.search_input_label){
+            lbl = window.hWin.HRJ('search_input_label', this.options, this.options.language);
+       }
+       if(lbl) {
             this.div_search_header.show();
-            this.div_search_header.text( this.options.search_input_label ).css({'padding-right':'4px'});     
+            this.div_search_header.text( lbl ).css({'padding-right':'4px'});     
        }else{
             this.div_search_header.hide();
        }
+       
         
        if(this.options.show_search_assistant) {
             this.div_buttons.show();

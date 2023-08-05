@@ -478,7 +478,7 @@ if($step=="1"){  //first step - info about current status
     //$tmp_destination = HEURIST_SCRATCH_DIR.'zotero.xml';
     //$fd = fopen($tmp_destination, 'w');  //less than 1MB in memory otherwise as temp file 
 
-    print '<br>Starting Zotero Library Sync for '. $totalitems .' records...<br>';
+    print '<br>Starting Zotero Library Sync for '. intval($totalitems) .' records...<br>';
 
     while ($start<$totalitems){
 
@@ -495,21 +495,21 @@ if($step=="1"){  //first step - info about current status
         $zdata = simplexml_load_string($items);
 
         if($zdata===false){
-            print "<div style='color:red'>Error: zotero returns non valid xml response for range $start ~ ".($start+$fetch)." </div>";
+            print "<div style='color:red'>Error: zotero returns non valid xml response for range $start ~ ".intval($start+$fetch)." </div>";
             $isFailure = true;
 
             $system->addError(HEURIST_ERROR, 'Zotero Synchronisation, Invalid XML Response', 
                     'Zotero Synchronisation has Encountered an Invalid XML Response',
-                    "Error: zotero returns non valid xml response for range $start ~ ".($start+$fetch));
+                    "Error: zotero returns non valid xml response for range $start ~ ".intval($start+$fetch));
 
             break;
         }else if(count($zdata->children())<1){
-            print "<div style='color:red'>Error: zotero returns empty response for range $start ~ ".($start+$fetch)." </div>";
+            print "<div style='color:red'>Error: zotero returns empty response for range $start ~ ".intval($start+$fetch)." </div>";
             $isFailure = true;
 
             $system->addError(HEURIST_ERROR, 'Zotero Synchronisation, Empty Response', 
                     'Zotero Synchronisation has encountered an Empty Response',
-                    "Error: zotero returns empty response for range $start ~ ".($start+$fetch));
+                    "Error: zotero returns empty response for range $start ~ ".intval($start+$fetch));
 
             break;
         }
@@ -531,7 +531,7 @@ if($step=="1"){  //first step - info about current status
 
                 if(!array_key_exists($itemtype, $mapping_rt)){ //this type is not mapped
 
-                    print "<br>Undefined Record type ".$itemtype."  ".$itemtitle."<br>";
+                    print "<br>Undefined Record type ".htmlspecialchars($itemtype.' '.$itemtitle)."<br>";
 				
                     #print " <br/> Undefined Record type".$itemtype."  ".$itemtitle."<br/>";
                     array_push($arr_ignored, $itemtype.':  '.$itemtitle);
@@ -543,7 +543,7 @@ if($step=="1"){  //first step - info about current status
                 else
                 {
                     if($is_echo){
-                        print $itemtype.": ".$itemtitle."&nbsp;";    
+                        print htmlspecialchars($itemtype.": ".$itemtitle)."&nbsp;";    
                     }
                 }
 
@@ -747,7 +747,8 @@ if($step=="1"){  //first step - info about current status
                 
                 if($is_empty_zotero_entry){
                     
-                    print "<div style='color:red'>Warning: zotero id $zotero_itemid: no data recorded in Zotero for this entry</div>";
+                    print '<div style="color:red">Warning: zotero id '.htmlspecialchars($zotero_itemid)
+                        .': no data recorded in Zotero for this entry</div>';
                     
                 }else if(count($details)<1){
                     //no one zotero key has proper mapping to heurist fields
@@ -785,22 +786,26 @@ if($step=="1"){  //first step - info about current status
 //fclose($fd);        
     print '<table><tr><td>&nbsp;</td><td>added</td><td>updated</td></tr>';
     foreach ($cnt_report as $rty_ID=>$cnt){
-        print '<tr><td>'.$rectypes['names'][$rty_ID]
+        print '<tr><td>'.htmlspecialchars($rectypes['names'][$rty_ID])
             .'</td><td align="center">'.(count($cnt['added'])>0?'<a target="_blank" href="'
-                            .HEURIST_BASE_URL.'?db='.HEURIST_DBNAME.'&q=ids:'.implode(',',$cnt['added']).'&nometadatadisplay=true">'
+                            .HEURIST_BASE_URL.'?db='.HEURIST_DBNAME.'&q=ids:'
+                            .htmlspecialchars(implode(',',$cnt['added'])).'&nometadatadisplay=true">'
                     .count($cnt['added']).'</a>':'0')
             .'</td><td align="center">'.(count($cnt['updated'])>0?'<a target="_blank" href="'
-                            .HEURIST_BASE_URL.'?db='.HEURIST_DBNAME.'&q=ids:'.implode(',',$cnt['updated']).'&nometadatadisplay=true">'
+                            .HEURIST_BASE_URL.'?db='.HEURIST_DBNAME.'&q=ids:'
+                            .htmlspecialchars(implode(',',$cnt['updated'])).'&nometadatadisplay=true">'
                     .count($cnt['updated']).'</a>':'0').'</td></tr>';
                     
             
     }
     
     print '</table><div><br>Records added : '.(count($cnt_added)>0?'<a  target="_blank" href="'
-                            .HEURIST_BASE_URL.'?db='.HEURIST_DBNAME.'&q=ids:'.implode(',',$cnt_added).'&nometadatadisplay=true">'
+                            .HEURIST_BASE_URL.'?db='.HEURIST_DBNAME.'&q=ids:'
+                            .htmlspecialchars(implode(',',$cnt_added)).'&nometadatadisplay=true">'
                     .count($cnt_added).'</a>':'0').'</div>';
     print '<div>Records updated : '.(count($cnt_updated)>0?'<a  target="_blank" href="'
-                            .HEURIST_BASE_URL.'?db='.HEURIST_DBNAME.'&q=ids:'.implode(',',$cnt_updated).'&nometadatadisplay=true">'
+                            .HEURIST_BASE_URL.'?db='.HEURIST_DBNAME.'&q=ids:'
+                            .htmlspecialchars(implode(',',$cnt_updated)).'&nometadatadisplay=true">'
                     .count($cnt_updated).'</a>':'0').'</div>';
     
     $tot_erros = $cnt_ignored + $cnt_notmapped + $cnt_empty + $cnt_notfound;
@@ -810,7 +815,7 @@ if($step=="1"){  //first step - info about current status
     if($tot_erros>0){
         print '<div style="color:red">';
         if($cnt_ignored>0){
-            print '<br>Zotero entries that are not mapped to Heurist record types: '.$cnt_ignored.'<table>';
+            print '<br>Zotero entries that are not mapped to Heurist record types: '.intval($cnt_ignored).'<table>';
             foreach ($arr_ignored_by_type as $itemtype => $cnt){
                 print '<tr><td>'.$itemtype.'</td><td>'.$cnt.'</td></tr>';
             }
@@ -1231,7 +1236,7 @@ function createResourceRecord($mysqli, $record_type, $recdetails, $missing_point
             $value = $recdata;
             if($dt_id==DT_DATE){
                 
-                $value = validateAndConvertToISO($value, null, 1); 
+                $value = Temporal::dateToISO($value, 1); 
                 /*
                 try{
                     $t2 = new DateTime($value);
@@ -1393,7 +1398,7 @@ function addRecordFromZotero($recId, $recordType, $rec_URL, $details, $zotero_it
         $out = recordSave($system, $record, true, false, 0, $record_count);  //see db_records.php
         
     if ( @$out['status'] != HEURIST_OK ) {
-           print "<div style='color:red'> Error: ".$out["message"]."</div>";
+           print "<div style='color:red'> Error: ".htmlspecialchars($out["message"])."</div>";
     }else{
 
             $new_recid = intval($out['data']);
@@ -1405,7 +1410,7 @@ function addRecordFromZotero($recId, $recordType, $rec_URL, $details, $zotero_it
 
             if(!$rep_errors_only){
                 if (@$out['warning']) {
-                    print "<div style='color:red'>Warning: ".implode("; ",$out["warning"])."</div>";
+                    print "<div style='color:red'>Warning: ".htmlspecialchars(implode("; ",$out["warning"]))."</div>";
                 }
             }
 

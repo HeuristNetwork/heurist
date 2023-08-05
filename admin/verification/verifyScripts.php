@@ -14,13 +14,8 @@
     */
 
     /**
-    * 1) __updateDatabase - adds new field rst_SemanticReferenceURL
     * 
-    * 2) findMissedTermLinks
-    * Find db v1.2 with existing defTermLinks
-    *      and v1.3 with individual selection of terms
-    * 
-    * 3) Find non UTF-9 characters in rty_TitleMask
+    * Various actions to check/correct data and db structure per all databases on server
     *
     * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
     * @copyright   (C) 2005-2023 University of Sydney
@@ -32,6 +27,10 @@
     */
 print 'disabled'; 
 exit(); 
+
+ini_set('max_execution_time', '0');
+
+print $_REQUEST['db'].'<br>';
  
 //define('OWNER_REQUIRED', 1);   
 define('PDIR','../../');  //need for proper path to js and css    
@@ -58,10 +57,10 @@ if( $system->verifyActionPassword($_REQUEST['pwd'], $passwordForServerFunctions)
     <?php
     exit();
 }
+<script>window.history.pushState({}, '', '<?php echo htmlspecialchars($_SERVER['PHP_SELF']); ?>')</script>  
 */
 ?>            
 
-<script>window.history.pushState({}, '', '<?php echo $_SERVER['PHP_SELF']; ?>')</script>  
          
 <div style="font-family:Arial,Helvetica;font-size:12px">
             <p>This report shows </p>
@@ -72,6 +71,7 @@ $mysqli = $system->get_mysqli();
     
 //find all database
 $databases = mysql__getdatabases4($mysqli, false);   
+
 /*    
     $query = 'show databases';
     $res = $mysqli->query($query);
@@ -112,8 +112,20 @@ if(false){
     __addOtherSources();
 }else  if(false){
     __renameField39();
+}else if(false ){
+    __copy_RecType_And_Term_Icons_To_EntityFolder();
+}else  if(false){
+    __delete_OLD_RecType_And_Term_Icons_Folders();
+}else if(false){
+    __correctGetEstDate_and_ConvertTemporals_JSON_to_Plain();
+}else if(false){
+    
+    __updateDatabases_To_V14( @$_REQUEST['process']);
+}else if(false){
+    __correctGetEstDate();
+}else if(true){
+    __removeDuplicationValues();
 }
-
 //
 // Report database versions
 //
@@ -838,5 +850,436 @@ function __renameField39(){
     
 }
 
+//
+//
+//
+function __correctGetEstDate(){
 
+    global $mysqli, $databases; 
+    
+    //$databases = array('hdb_MPCE_Mapping_Print_Charting_Enlightenment');
+    print '__correctGetEstDate<br>';    
+    
+    foreach ($databases as $idx=>$db_name){
+
+        mysql__usedatabase($mysqli, $db_name);
+        
+
+        $query = 'SELECT dtl_ID, dtl_Value, dtl_RecID FROM recDetails, recDetailsDateIndex where rdi_DetailID=dtl_ID AND rdi_estMaxDate>2100'; //' and rdi_DetailTypeID=1151';
+        $res = $mysqli->query($query);
+        if ($res){
+            $cnt=0;
+            $is_invalid = false;
+            while ($row = $res->fetch_row()){
+                $dtl_ID = $row[0];
+                $dtl_Value = $row[1];
+                $rec_ID = $row[2];
+                
+                $preparedDate = new Temporal( $dtl_Value );
+                if($preparedDate && $preparedDate->isValidSimple()){
+                    
+                    $dtl_NewValue = $preparedDate->getValue(true);
+                    
+                    $query = 'UPDATE recDetails SET dtl_Value="'.
+                                                    $mysqli->real_escape_string($dtl_NewValue).'" WHERE dtl_ID='.$dtl_ID;
+                    //$mysqli->query($query);
+                    print $rec_ID.'  '.$dtl_Value.'  '.$dtl_NewValue.'<br>';
+                                    
+                    $cnt++;
+                    if($cnt>10) break;
+                }else{
+                    print $rec_ID.'  '.$dtl_Value.'<br>';
+                    $is_invalid = true;
+                }
+                
+            }
+            
+            if($cnt>0 || $is_invalid)
+                print $db_name.'  '.$cnt.'<br>';
+        }
+        
+    }//for
+}
+
+//
+// converts back to plain
+//
+function __correctGetEstDate_and_ConvertTemporals_JSON_to_Plain(){
+    
+    global $mysqli, $databases; 
+
+    foreach ($databases as $idx=>$db_name){
+
+        mysql__usedatabase($mysqli, $db_name);
+
+        //get version of database        
+        $query = 'SELECT sys_dbSubVersion, sys_dbSubSubVersion from sysIdentification';
+        $ver = mysql__select_row_assoc($mysqli, $query);
+        if($ver['sys_dbSubSubVersion']==13){
+        
+            print '<br>'.$db_name;
+        
+            // recreate getEstDate function
+            if(db_script('hdb_'.$db_name, dirname(__FILE__).'/../setup/dbcreate/getEstDate.sql', false)){
+
+                $cnt = 0;    
+                //converts back to plain  
+                $query = 'SELECT dtl_ID,dtl_RecID,dtl_DetailTypeID,dtl_Value FROM recDetails, defDetailTypes '
+                .'WHERE dtl_DetailTypeID=dty_ID AND dty_Type="date" AND dtl_Value LIKE "%\"estMinDate\":%"';
+                $res = $mysqli->query($query);
+            
+                if ($res){
+
+                    while ($row = $res->fetch_row()){
+                        $dtl_ID = $row[0];
+                        $dtl_RecID = $row[1];
+                        $dtl_DetailTypeID = $row[2];
+                        $dtl_Value = $row[3];
+                        $dtl_NewValue = '';
+                        $error = '';
+                        
+                        $value = json_decode($dtl_Value,true);
+                        
+                        if(is_array($value)){
+
+                            $preparedDate = new Temporal( $dtl_Value );
+                            if($preparedDate && $preparedDate->isValid()){
+                                $dtl_NewValue = $preparedDate->toPlain();
+                                
+                                $query = 'UPDATE recDetails SET dtl_Value="'.
+                                                $mysqli->real_escape_string($dtl_NewValue).'" WHERE dtl_ID='.$dtl_ID;
+                                $mysqli->query($query);
+                                
+                                $cnt++;
+                            }
+                        }
+                        
+
+                    }//while  
+                    
+                    print ' '.$cnt;
+                }
+            }
+        }
+    }
+    
+}
+
+//
+//
+//
+function __delete_OLD_RecType_And_Term_Icons_Folders(){
+    global $mysqli, $databases; 
+    
+    echo '__delete_OLD_RecType_And_Term_Icons_Folders<br>';
+
+    foreach ($databases as $idx=>$db_name){
+
+        $cnt = 0;
+        
+        $old_path = HEURIST_FILESTORE_ROOT . $db_name . '/rectype-icons/';
+        if(file_exists($old_path)){
+            folderDelete($old_path, true);    
+            $cnt++;
+        }
+        
+
+        $old_path = HEURIST_FILESTORE_ROOT . $db_name . '/term-images/';
+        if(file_exists($old_path) && $db_name!='digital_harlem'){
+            folderDelete($old_path, true);    
+            $cnt++;
+        }
+        
+
+        $old_path = HEURIST_FILESTORE_ROOT . $db_name . '/term-icons/';
+        if(file_exists($old_path)){
+            folderDelete($old_path, true);    
+            $cnt++;
+        }
+        
+
+        echo $db_name.'  '.$cnt.'<br>';
+    }
+    
+}
+
+//
+//
+//
+function __copy_RecType_And_Term_Icons_To_EntityFolder(){
+    global $mysqli, $databases; 
+    
+    echo '__copy_RecType_And_Term_Icons_To_EntityFolder<br>';
+    
+    return;
+
+    
+    if(!defined('HEURIST_FILESTORE_ROOT')) return;
+
+
+    foreach ($databases as $idx=>$db_name){
+
+        //mysql__usedatabase($mysqli, $db_name);
+        
+        $old_path = HEURIST_FILESTORE_ROOT . $db_name . '/rectype-icons/';
+        
+        $path = HEURIST_FILESTORE_ROOT . $db_name . '/entity/defRecTypes/';
+
+        folderCreate($path, false);
+        folderCreate($path.'icon/', false);
+        folderCreate($path.'thumbnail/', false);
+        
+        $content = folderContent($old_path);
+        
+        $cnt = 0;
+        $cnt2 = 0;
+        
+        foreach ($content['records'] as $object) {
+            if ($object[1] != '.' && $object[1] != '..') {
+                
+                $rty_id = substr($object[1],0,-4);
+                
+                if(intval($rty_id)>0 || $rty_id=='0'){
+                    $old_icon = $old_path.$object[1];
+                    
+                    if(file_exists($old_icon)){
+                        
+                        $ext = substr($object[1],-3);
+                    
+                        //if icon exists skip
+                        list($fname, $ctype,$url) = resolveEntityFilename('defRecTypes', $rty_id, 'icon', $db_name, $ext);
+                        if($fname==null){
+                        
+                            //copy icon
+                            $new_icon = $path.'icon/'.$object[1];
+                            copy($old_icon, $new_icon);
+                            
+                            $cnt++;
+                        }
+                    }       
+                    
+                    //copy thumb
+                    $old_thumb = $old_path.'thumb/th_'.$object[1];
+                    if(file_exists($old_thumb)){
+                        $new_thumb = $path.'thumbnail/'.$object[1];
+                        if(!file_exists($new_thumb)){
+                            copy($old_thumb, $new_thumb);
+                            $cnt2++;
+                        }
+                    }
+                    
+                }
+            }
+        }
+
+        echo $db_name.'  '.$cnt.'  '.$cnt2.'<br>';
+        //remove old folder
+        //folderDelete($old_path, true);
+        
+        //thumbnails
+        $old_path = HEURIST_FILESTORE_ROOT . $db_name . '/term-images/';
+        
+        $path = HEURIST_FILESTORE_ROOT . $db_name . '/entity/defTerms/';
+        
+        $content = folderContent($old_path);
+
+        folderCreate($path, false);
+        folderCreate($path.'thumbnail/', false);
+        $cnt = 0;
+        
+        foreach ($content['records'] as $object) {
+            if ($object[1] != '.' && $object[1] != '..') {
+        
+                $trm_id = substr($object[1],0,-4);
+                
+                if(intval($trm_id)>0 || $trm_id=='0'){
+                    $old_icon = $old_path.$object[1];
+                    
+                    if(file_exists($old_icon)){
+                        
+                        $ext = substr($object[1],-3);
+                    
+                        //if icon exist skip
+                        list($fname, $ctype,$url) = resolveEntityFilename('defTerms', $trm_id, 'icon', $db_name, $ext);
+                        if($fname!=null) continue;
+                        
+                        $new_icon = $path.$object[1];
+                        if(file_exists($new_icon)){
+                            continue;
+                        }
+                        //copy icon
+                        copy($old_icon, $new_icon);
+                        
+                        //copy thumb
+                        copy($old_icon, $path.'thumbnail/'.$object[1]);
+                        
+                        $cnt++;
+                    }       
+                }
+            }
+        }        
+
+if($cnt>0) echo $db_name.'   terms:'.$cnt.'<br>';
+        
+        //remove old folder
+        //folderDelete($old_path, true);
+        
+        
+
+    }        
+}
+
+
+//
+//
+//
+function __updateDatabases_To_V14($db_process){
+    
+    global $system, $mysqli, $databases; 
+    
+    $cnt_db = 0;
+    $cnt_db_old = 0;
+    $skip_work = true;
+  
+    /*
+    $is_action = ($db_process!=null);
+    
+    if($db_process=='all'){
+        $db_process = null;
+    }
+    
+    */
+
+    foreach ($databases as $idx=>$db_name){
+        
+        if($db_name=='') continue;
+        
+        if($db_process!=null){
+            $db_name = $db_process;
+        }
+        /*
+        if($db_name=='misha_cruches_gallo_romaines'){
+            $skip_work = false;
+            //continue;
+        }else if($skip_work){
+            continue;
+        }*/
+
+        if( !$system->set_dbname_full($db_name, true) ){
+                $response = $system->getError();    
+                print '<div><h3 class="error">'.$response['message'].'</h3></div>';
+                break;
+        }
+        
+        mysql__usedatabase($mysqli, $db_name);
+
+        //get version of database        
+        $query = 'SELECT sys_dbSubVersion, sys_dbSubSubVersion from sysIdentification';
+        $ver = mysql__select_row_assoc($mysqli, $query);
+        
+
+        //statistics
+        $query = 'SELECT count(dtl_ID) FROM recDetails, defDetailTypes  WHERE dtl_DetailTypeID=dty_ID AND dty_Type="date" AND dtl_Value!=""';
+        $cnt_dates = mysql__select_value($mysqli, $query);
+
+        $query = 'SELECT count(dtl_ID) FROM recDetails, defDetailTypes  WHERE dtl_DetailTypeID=dty_ID AND dty_Type="date" AND dtl_Value LIKE "|VER=1%"';
+        $cnt_fuzzy_dates = mysql__select_value($mysqli, $query);
+        
+        $cnt_index = 0;
+        $cnt_fuzzy_dates2 = 0;
+        
+        $is_big = ($cnt_dates>100000);
+        
+        if($is_big){
+            $cnt_dates = '<b>'.$cnt_dates.'</b>';
+        }
+        
+        if($ver['sys_dbSubSubVersion']>12){
+            $query = 'SELECT count(rdi_DetailID) FROM recDetailsDateIndex';
+            $cnt_index = mysql__select_value($mysqli, $query);
+
+            $query = 'SELECT count(dtl_ID) FROM recDetails, defDetailTypes  WHERE dtl_DetailTypeID=dty_ID AND dty_Type="date" AND dtl_Value LIKE "%estMinDate%"';
+            $cnt_fuzzy_dates2 = mysql__select_value($mysqli, $query);
+            
+            print '<br>'.$db_name.'  v.'.$ver['sys_dbSubSubVersion'].'  '.$cnt_dates
+                .($cnt_dates<>$cnt_index?'<span style="color:red">':'<span>')
+                .'  index='.$cnt_index.' ( '.($cnt_fuzzy_dates>0?'<b>'.$cnt_fuzzy_dates.'</b>':'0').','.$cnt_fuzzy_dates2.' )</span>';
+        }else{
+            $cnt_db_old++;
+            print '<br>'.$db_name.'  v'.($ver['sys_dbSubVersion']<3?'<b>'.$ver['sys_dbSubVersion'].'</b>':'')
+            .'.'.$ver['sys_dbSubSubVersion'].'  '.$cnt_dates.'  ( '.$cnt_fuzzy_dates.' )';
+            
+            if($ver['sys_dbSubVersion']<3){
+                continue;   
+            }
+            
+            if(!updateDatabseTo_v1_3_12($system)){
+                $response = $system->getError();    
+                print '<div><h3 class="error">'.$response['message'].'</h3></div>';
+                break;
+            }
+        }
+        
+        if(true && ($db_process!=null || 
+            (!$is_big && ($ver['sys_dbSubSubVersion']<=13 || ($cnt_dates>0 && $cnt_index*100/$cnt_dates<94) ))))
+        {
+            print '<br>';
+            if(recreateRecDetailsDateIndex($system, true, true)){
+            
+            }else{
+                $response = $system->getError();    
+                print '<div><h3 class="error">'.$response['message'].'</h3></div>';
+                break;
+            }
+        }
+        
+        $cnt_db++;
+        
+        //if($db_name=='bnf_lab_musrdm_test') break;
+        if($db_process!=null){
+            break;   
+        }
+    }    
+    
+    print '<br><br>'.$cnt_db_old.'  '.$cnt_db;
+    
+}
+
+//
+//
+//
+function __removeDuplicationValues(){
+
+    global $system, $mysqli, $databases; 
+    
+    $cnt = 0;
+    /*
+    foreach ($databases as $idx=>$db_name){
+        if($db_name=='') continue;
+    }
+    */
+    
+    //mysql__usedatabase($mysqli, 'MBH_Manuscripta_Bibliae_Hebraicae');
+    //mysql__usedatabase($mysqli, 'osmak_9c');
+    
+    $query = 'SELECT dtl_RecID, dtl_DetailTypeID, dtl_Value, count(dtl_Value) as cnt '.
+    'FROM recDetails WHERE dtl_Geo IS NULL AND dtl_UploadedFileID IS NULL '.
+    'GROUP BY dtl_RecID, dtl_DetailTypeID, dtl_Value HAVING cnt>1';
+
+    $res = $mysqli->query($query);
+    
+    if (!$res) {  print $query.'  '.$mysqli->error;  return; }
+    
+    while (($row = $res->fetch_row())) {
+        
+        $q = 'DELETE FROM recDetails WHERE dtl_RecID='.$row[0].' AND dtl_DetailTypeID='.$row[1]
+            .' AND dtl_Value="'.$mysqli->real_escape_string($row[2])
+            .'" LIMIT '.($row[3]-1);
+        $mysqli->query($q);
+        $cnt = $cnt + $mysqli->affected_rows;  
+    }
+    $res->close();    
+    
+    print 'DONE. Removed '.$cnt.' duplications';
+}
 ?>

@@ -1464,25 +1464,93 @@ window.hWin.HAPI4.baseURL+'?db=' + window.hWin.HAPI4.database  //(needplayer?'&p
 
         var that = this;
 
+        if(!this._checkUserPermissions(1)){
+            return;
+        }
+
         var ids = this.recordList ? this.recordList.resultList('getSelected', true) : 'all';
 
         var request = {
             'a': 'batch',
             'entity': that.options.entity.entityName,
-            'delete_unused': 'all' // ids
+            'delete_unused': 'all', // ids
+            'operate': 'get'
         };
 
         window.hWin.HAPI4.EntityMgr.doRequest(request, 
         function(response){
             if(response.status == window.hWin.ResponseStatus.OK){
 
+                const files = response.data;
                 let text = 'No files to delete';
-                if(response.data > 0){
-                    text = response.data + ' file' + (response.data > 1 ? 's' : '') + ' deleted';
-                }
+                if(Object.keys(files).length > 0){
 
-                window.hWin.HEURIST4.msg.showMsgFlash(text, 3000);
-                that.searchForm.searchRecUploadedFiles('searchRecent', null); // refresh
+                    const keys = Object.keys(files);
+                    let $dlg;
+                    text = keys.length + ' file(s) found unused: <br>';
+
+                    let del_func = function() {
+
+                        var req = {
+                            'a': 'batch',
+                            'entity': that.options.entity.entityName,
+                            'delete_unused': keys.join(','),
+                            'operate': 'delete'
+                        };
+
+                        window.hWin.HAPI4.EntityMgr.doRequest(req, function(res){
+                            if(res.status == window.hWin.ResponseStatus.OK){
+                                if(res.data > 0){
+                                    text = res.data + ' file' + (res.data > 1 ? 's' : '') + ' deleted';
+                                }
+                
+                                window.hWin.HEURIST4.msg.showMsgFlash(text, 3000);
+                                that.searchForm.searchRecUploadedFiles('searchRecent', null); // refresh
+                            }else{
+                                window.hWin.HEURIST4.msg.showMsgErr(res);
+                            }
+                        });
+                    };
+
+                    for (const ulf_ID in files) {
+                        if (Object.hasOwnProperty.call(files, ulf_ID)) {
+
+                            const file = files[ulf_ID];
+                            let name = file['filename'];
+                            let extra = '';
+
+                            if(name == '_remote'){
+                                name = file['url'];
+                                extra = '<a href="'+ name +'" target="_blank"><span class="ui-icon ui-icon-extlink"></span></a>';
+                            }
+
+                            text += '<br><span class="file-line" data-fid="'+ ulf_ID +'">'+ name +'</span> ' + extra;
+                        }
+                    }
+
+                    text += '<br><br>The above files will be <strong>deleted and unavailable for use</strong> unless it is re-uploaded to Heurist.<br>Do you wish to proceed?';
+
+                    $dlg = window.hWin.HEURIST4.msg.showMsgDlg(text, del_func, {title: 'Deleting unused files'}, {default_palette_class: 'ui-heurist-admin'});
+
+                    $dlg.parent().css('min-width', '250px');
+                    $dlg.find('span.file-line').css({'display': 'inline-block', 'margin-bottom': '5px', 'text-decoration': 'underline', 'cursor': 'pointer'}).on('click', function(event){
+                        let id = $(this).attr('data-fid');
+
+                        let popup_opts = {
+                            isdialog: true, 
+                            select_mode: 'manager',
+                            edit_mode: 'editonly',
+                            rec_ID: id,
+                            default_palette_class: 'ui-heurist-populate',
+                            width: 950,
+                            onClose: () => {}
+                        };
+
+                        let $m_dlg = window.hWin.HEURIST4.ui.showEntityDialog('recUploadedFiles', popup_opts);
+                    });
+                }else{
+                    window.hWin.HEURIST4.msg.showMsgFlash('No unused files detected', 3000);
+                }
             }else{
                 window.hWin.HEURIST4.msg.showMsgErr(response);
             }
@@ -1495,6 +1563,10 @@ window.hWin.HAPI4.baseURL+'?db=' + window.hWin.HAPI4.database  //(needplayer?'&p
     _combineDups: function(){
 
         var that = this;
+
+        if(!this._checkUserPermissions(1)){
+            return;
+        }
 
         var ids = this.recordList ? this.recordList.resultList('getSelected', true) : 'all';
 
@@ -1533,25 +1605,37 @@ window.hWin.HAPI4.baseURL+'?db=' + window.hWin.HAPI4.database  //(needplayer?'&p
 
     _refreshIndex: function(){
 
-        window.hWin.HEURIST4.msg.showMsgFlash('Currently in development', 3000);
-        return;
         var that = this;
+
+        if(!this._checkUserPermissions(1)){
+            return;
+        }
+
         var request = {
             'a': 'batch',
             'entity': that.options.entity.entityName,
-            'refresh_indexes': 1
+            'request_id': window.hWin.HEURIST4.util.random(),
+            'bulk_reg_filestore': 1
         };
 
+        window.hWin.HEURIST4.msg.bringCoverallToFront($('body'));
+
         window.hWin.HAPI4.EntityMgr.doRequest(request, 
-        function(response){ console.log(response);
+        function(response){
+
+            window.hWin.HEURIST4.msg.sendCoverallToBack();
 
             if(response.status == window.hWin.ResponseStatus.OK){
 
-                let count = response.data;
-                let msg = count + ' new indexes created';
+                if(window.hWin.HEURIST4.util.isempty(response.data)){
+                    window.hWin.HEURIST4.msg.showMsgFlash('No files to index', 3000);
+                }else{
 
-                window.hWin.HEURIST4.msg.showMsgFlash(msg, 3000);
-                that.searchForm.searchRecUploadedFiles('searchRecent', null); // refresh
+                    var $dlg = window.hWin.HEURIST4.msg.showMsgDlg(response.data, {'OK': function(){
+                        $dlg.dialog('close');
+                        that.searchForm.searchRecUploadedFiles('searchRecent', null); // refresh
+                    }}, {title: 'Refresh indexes results', 'OK': window.HR('OK')}, {default_palette_class: 'ui-heurist-admin'});
+                }
             }else{
                 window.hWin.HEURIST4.msg.showMsgErr(response);
             }
@@ -1561,6 +1645,11 @@ window.hWin.HAPI4.baseURL+'?db=' + window.hWin.HAPI4.database  //(needplayer?'&p
     _createMediaRecords: function(){
 
         var that = this;
+
+        if(!this._checkUserPermissions(1)){
+            return;
+        }
+
         var ids = this.recordList ? this.recordList.resultList('getSelected', true) : [];
 
         if(!window.hWin.HEURIST4.util.isArrayNotEmpty(ids)){
@@ -1597,6 +1686,19 @@ window.hWin.HAPI4.baseURL+'?db=' + window.hWin.HAPI4.database  //(needplayer?'&p
                 window.hWin.HEURIST4.msg.showMsgErr(response);
             }
         });
+    },
+
+    _checkUserPermissions: function(level){
+
+        if(!window.hWin.HAPI4.has_access(level)){
+
+            let msg = 'You do not have permission to perform this action';
+            msg = level == 1 ? 'You must be an administrator of the database managers group to use this feature' : msg;
+            window.hWin.HEURIST4.msg.showMsgErr(msg);
+            return false;
+        }
+
+        return true;
     }
     
 });

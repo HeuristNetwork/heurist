@@ -64,7 +64,7 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
         _listeners = [],
         _is_callserver_in_progress = false,
 
-        _use_debug = false;
+        _use_debug = true;
         
 
     /**
@@ -91,9 +91,9 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
         if(script_name.endsWith('/web')) script_name = script_name + '/'; //add last slash
 
         //actions for redirection https://hist/heurist/[dbname]/web/
-        if(script_name.search(/\/([A-Za-z0-9_]+)\/(web|hml|tpl|view)\/.*/)>=0){
-            installDir = script_name.replace(/\/([A-Za-z0-9_]+)\/(web|hml|tpl|view)\/.*/, '')+'/';
-            if(installDir=='/') installDir = '/h6-alpha/';
+        if(script_name.search(/\/([A-Za-z0-9_]+)\/(website|web|hml|tpl|view)\/.*/)>=0){
+            installDir = script_name.replace(/\/([A-Za-z0-9_]+)\/(website|web|hml|tpl|view)\/.*/, '')+'/';
+            if(installDir=='/') installDir = '/h6-alpha/';//'/heurist/';
         }else{
             installDir = script_name.replace(/(((\?|admin|applications|common|context_help|export|hapi|hclient|hsapi|import|startup|records|redirects|search|viewers|help|ext|external)\/.*)|(index.*|test.php))/, ""); // Upddate in utils_host.php also
         }
@@ -103,6 +103,8 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
         if (!_baseURL) _baseURL = window.hWin.location.protocol + '//' + window.hWin.location.host + installDir;
         that.baseURL = _baseURL;
 
+//console.log('1.>>>', that.baseURL);        
+        
         //detect production version
         if (installDir && !installDir.endsWith('/heurist/')) {
             installDir = installDir.split('/');
@@ -131,7 +133,9 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
             that.fancybox = $.fn.fancybox; //to call from iframes
         }
 
-        if (typeof hLayout !== 'undefined' && $.isFunction(hLayout)) {
+        // layout and configuration arrays are defined (from layout_default.js)    
+        if (typeof hLayout !== 'undefined' && $.isFunction(hLayout)
+            && typeof cfg_widgets !== 'undefined' && typeof cfg_layouts !== 'undefined') {
             that.LayoutMgr = new hLayout();
         }
         if (typeof hRecordSearch !== 'undefined' && $.isFunction(hRecordSearch)) {
@@ -157,6 +161,9 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
         if (that.database) {
             that.SystemMgr.sys_info(function (success) {
                 if (success) {
+                    that.baseURL = window.hWin.HAPI4.sysinfo['baseURL'];
+//console.log('2.>>>', that.baseURL);        
+                    
                     var lang = window.hWin.HEURIST4.util.getUrlParameter('lang');
                     if (lang) {
                         //save in preferences
@@ -168,6 +175,7 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
                     window.hWin.HRA = that.HRA; //localize all elements with class slocale for given element
                     window.hWin.HRes = that.HRes; //returns url or content for localized resource (help, documentation)
                     window.hWin.HRJ = that.HRJ; // returns localized value for json (options in widget)
+                    
                 }
                 _oninit(success);
             });
@@ -1025,7 +1033,8 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
 
                 var that = this;
 
-                window.hWin.HAPI4.EntityMgr.refreshEntityData('all', function (success) {
+                //hard reload of database definitions
+                window.hWin.HAPI4.EntityMgr.refreshEntityData('force_all', function (success) {
 
                     if (success) {
 
@@ -1127,6 +1136,27 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
                     db: window.hWin.HAPI4.database
                 };
                 
+                _callserver('usr_info', request, callback);
+            },
+
+            /**
+             * Calculate and return the numbers of days, months, and years between two dates
+             * @param data - object containing earliest and latest dates
+             * @param {callserverCallback} callback
+             */
+            get_time_diffs: function(data, callback){
+
+                if(!data || !data.early_date || !data.latest_date){
+                    window.hWin.HEURIST4.msg.showMsgErr('Both an earliest and latest date are required.');
+                    return false;
+                }
+
+                let request = {
+                    a: 'get_time_diffs',
+                    data: JSON.stringify(data),
+                    db: window.hWin.HAPI4.database
+                };
+
                 _callserver('usr_info', request, callback);
             },
 
@@ -1443,10 +1473,10 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
                 if (request) request.a = 's';
                 
                 var encode_type = window.hWin.HAPI4.sysinfo['need_encode'];
-                if(!(encode_type>0)) encode_type = 3;
+                if(!(encode_type>0)) encode_type = 3; //json by default
 
-                window.hWin.HEURIST4.util.encodeRequest(request, ['details'], encode_type);
-
+                window.hWin.HEURIST4.util.encodeRequest(request, ['details','details_visibility'], encode_type);
+                
                 _callserver('record_edit', request, function (response) { _triggerRecordUpdateEvent(response, callback); });
             },
 
@@ -1887,19 +1917,32 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
             //
             // refresh several entity data at once
             // 
-            refreshEntityData: function (entityNames, callback) {
+            refreshEntityData: function (entityName, callback) {
 
-                //var s_time = new Date().getTime() / 1000;
+                var params = { a: 'structure', 'details': 'full'};
+                params['entity'] = entityName
+                
+                /*
+                if($.isPlainObject(opts) && opts['recID']>0){ 
+                    //special case - loads defs for particular record only
+                    params['entity'] = 'all';
+                    params['recID'] = opts['recID'];
+                }else{
+                    params['entity'] = opts; //entityName
+                }*/
+                
+                var s_time = new Date().getTime() / 1000;
                 //'multi':1,   
-                _callserver('entityScrud', { a: 'structure', 'entity': entityNames, 'details': 'full' },
+                _callserver('entityScrud', params,
                     function (response) {
-                        if (response.status == window.hWin.ResponseStatus.OK) {
+                        if (response.status == window.hWin.ResponseStatus.OK || response['defRecTypes']) {
 
-                            //var fin_time = new Date().getTime() / 1000;
-                            //console.log('DEBUG refreshEntityData '+response.data+'  '+(fin_time-s_time));                    
+var fin_time = new Date().getTime() / 1000;
+console.log('DEBUG refreshEntityData '+(fin_time-s_time));  //response.data+'  '+                  
+                            var dbdefs = (response['defRecTypes']?response:response['data']);
 
-                            for (var entityName in response.data) {
-                                window.hWin.HAPI4.EntityMgr.setEntityData(entityName, response.data)
+                            for (var entityName in dbdefs) {
+                                window.hWin.HAPI4.EntityMgr.setEntityData(entityName, dbdefs)
                             }
 
                             if ($.isFunction(callback)) callback(this, true);
@@ -2058,6 +2101,41 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
                     );
 
                 }
+            },
+
+            //
+            // Retrieve translations stored within defTranslations
+            //
+            getTranslatedDefs: function(entityName, key, recIDs, callback){
+
+                if(key.indexOf('_Translation') == -1){
+                    key += '_Translation';
+                }
+
+                if(entity_data[key] && window.hWin.HEURIST4.util.isRecordSet(entity_data[key])){ // already in cache
+                    callback.call(this, entity_data[key]);
+                    return;
+                }
+
+                let request = {
+                    'a': 'batch',
+                    'entity': entityName,
+                    'get_translations': window.hWin.HEURIST4.util.isempty(recIDs) ? 'all': recIDs,
+                    'request_id': window.hWin.HEURIST4.util.random()
+                };
+
+                window.hWin.HAPI4.EntityMgr.doRequest(request, function(response){ 
+//DEBUG console.log(response);
+                    if(response.status == window.hWin.ResponseStatus.OK){
+
+                        let recordset = new hRecordSet(response.data);
+                        window.hWin.HAPI4.EntityMgr.setEntityData(key, recordset); // save to local cache
+
+                        callback.call(this, recordset);
+                    }else{
+                        callback.call(this, null);
+                    }
+                });
             }
 
         }
@@ -2367,7 +2445,7 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
         //
         getLangCode3: function(lang, def){
 
-            if(lang && lang != 'xx'){
+            if(lang && lang != 'def'){
                 if(lang.length==2){
                     lang = lang.toLowerCase();
                     for(var code3 in that.sysinfo.common_languages){
@@ -2386,6 +2464,51 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
             //not found - English is default
             return (def ?def:(_region?_region:'ENG'));
         },
+        
+        //
+        // values - array of strings
+        //
+        getTranslation: function(values, lang){
+            
+            //"xx" means take current system language
+            if(lang){
+                lang = window.hWin.HAPI4.getLangCode3(lang);
+                
+                var def_val = '';
+                var is_object = $.isPlainObject(val);
+                
+                for (var key in values) {
+                    if (!is_object || val.hasOwnProperty(key)) {
+
+                    var val = values[key];
+                    
+                    if(val.length>4 && val.substr(3,1)==':'){ //has lang prefix
+                        if(val.substr(0,3)==lang){
+                            def_val = val.substr(4).trim();
+                            break;
+                        }
+                    }else {
+                        //without prefix
+                        def_val = val;
+                        if(lang=='def'){ //take first without prefix
+                            break;
+                        }
+                    }
+                    
+                    }
+                }//for
+                
+                //for(var i=0; i<values.length; i++){
+                //    var val = values[i];
+                    
+                
+                return def_val;
+            }else{
+                return $.isPlainObject(values)?values[Object.keys(values)[0]]:values[0];
+            }
+            
+        },
+
 
         //
         // returns current locale - language code
@@ -2400,16 +2523,16 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
             
             region = that.getLangCode3(region, 'ENG'); //English is default
             
-            if (_regional && _regional[region]) {
-                //already loaded - switch region
-                _region = region;
-                _regional = regional[_region];
-            } else {
-                $.getScript(that.baseURL + 'hclient/core/localization'
+            if (typeof regional === 'undefined' || regional === null  || !regional[region]) {
+                $.getScript(that.baseURL + 'hclient/assets/localization/localization'
                     + (region == 'ENG' ? '' : ('_' + region.toLowerCase())) + '.js', function () {
                         _region = region;
                         _regional = regional[_region];
                     });
+            } else {
+                //already loaded - switch region
+                _region = region;
+                _regional = regional[_region];
             }
 
             // function that returns string resouce according to current region setting

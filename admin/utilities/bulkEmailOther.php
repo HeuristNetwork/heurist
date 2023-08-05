@@ -54,14 +54,14 @@ if(isset($_REQUEST['get_email']) && isset($_REQUEST['recid'])) {	/* Get the Titl
 	$id = $_REQUEST['recid'];
 
 	// Validate ID
-	if(!is_numeric($id)){
+	if(!is_numeric($id) || intval($id) < 1){
 
-    $response = array("status"=>HEURIST_ERROR, "message"=>"An invalid record id was provided.<br>The Heurist team has been notified.", "request"=>$id);
-    $system->addError(HEURIST_ERROR, "Bulk Email Other: The record IDs for the Email selector are invalid or are not being retrieved correctly. ");
-    $rtn = json_encode($response);
+		$response = array("status"=>HEURIST_ACTION_BLOCKED, "message"=>"An invalid Email record id was provided.", "request"=>htmlspecialchars($id));
+		$system->addError(HEURIST_ERROR, "Bulk Email Other: The record IDs used for the Email selector are invalid or have not been retrieved correctly. Invalid ID => " . htmlspecialchars($id));
+		$rtn = json_encode($response);
 
-    print $rtn;
-    exit();
+		print $rtn;
+		exit();
 	}
 
 	// Get title/name and short summary detail type ids
@@ -70,18 +70,18 @@ if(isset($_REQUEST['get_email']) && isset($_REQUEST['recid'])) {	/* Get the Titl
 	if (empty($title_detailtype_id) || empty($shortsum_detiltype_id)) {
 		$missing = "";
 
-		if(empty($title_detailtype_id) || empty($shortsum_detiltype_id)){
+		if(empty($title_detailtype_id) && empty($shortsum_detiltype_id)){
 			$missing = "for both title and short summary detail types.";
 		}else{
 			$missing = empty($title_detailtype_id) ? "for the title detail type." : "for the short summary detail type.";
 		}
 
-    $response = array("status"=>HEURIST_ERROR, "message"=>"Unable to retrieve the local id $missing <br>The Heurist team has been notified.");
-    $system->addError(HEURIST_ERROR, "Bulk Email Other: Unable to retrieve the local id ". $missing);
-    $rtn = json_encode($response);
+		$response = array("status"=>HEURIST_ACTION_BLOCKED, "message"=>"Unable to retrieve the local id $missing <br>If this problem persists, please notify the Heurist team.");
+		//$system->addError(HEURIST_ERROR, "Bulk Email Other: Unable to retrieve the local id ". $missing);
+		$rtn = json_encode($response);
 
-    print $rtn;
-    exit();
+		print $rtn;
+		exit();
 	}
 
   $query = "SELECT dtl_Value, dtl_DetailTypeID
@@ -91,7 +91,7 @@ if(isset($_REQUEST['get_email']) && isset($_REQUEST['recid'])) {	/* Get the Titl
   $detail_rtn = $mysqli->query($query);
   if(!$detail_rtn){
 
-    $response = array("status"=>HEURIST_ERROR, "message"=>"Unable to retrieve the details of the Email record ID => $id.<br>", "error_msg"=>$mysqli->error, "request"=>$id);
+    $response = array("status"=>HEURIST_ACTION_BLOCKED, "message"=>"Unable to retrieve the details of Email record ID => $id.<br>If this persists, please notify the Heurist team.<br>", "error_msg"=>$mysqli->error, "request"=>$id);
     $rtn = json_encode($response);
 
     print $rtn;
@@ -116,7 +116,8 @@ if(isset($_REQUEST['get_email']) && isset($_REQUEST['recid'])) {	/* Get the Titl
 } else if(isset($_REQUEST['db_filtering'])) { /* Get a list of DBs based on the list of provided filters, first search gets all dbs */
 
 	$db_request = $_REQUEST['db_filtering'];
-	$dbs = array();
+	$dbs = array(); // list of databases
+	$databases = array(); // array of database details
 	$invalid_dbs = array();
 
 	// Get all dbs that start with the Heurist prefix
@@ -125,7 +126,7 @@ if(isset($_REQUEST['get_email']) && isset($_REQUEST['recid'])) {	/* Get the Titl
 	$db_list = $mysqli->query($query);
 	if (!$db_list) {
 
-	    $response = array("status"=>HEURIST_ERROR, "message"=>"Unable to retrieve a list of Heurist databases.<br>", "error_msg"=>$mysqli->error, "request"=>$db_request);
+	    $response = array("status"=>HEURIST_ACTION_BLOCKED, "message"=>"Unable to retrieve a list of Heurist databases.<br>", "error_msg"=>$mysqli->error, "request"=>$db_request);
 	    $rtn = json_encode($response);
 
 	    print $rtn;
@@ -163,7 +164,11 @@ if(isset($_REQUEST['get_email']) && isset($_REQUEST['recid'])) {	/* Get the Titl
 	}//while
 
 	if($db_request == "all"){ // No additional filtering needed
-		$data = $dbs;
+
+		$data = array('list' => $dbs, 'details' => array());
+		$details = getDatabaseDetails($mysqli, $dbs);
+		$data['details'] = $details;
+
 	} else if(is_array($db_request) && count($db_request)==4){ // Do filtering, record count and last modified
 
 		$count = $db_request['count'];
@@ -231,17 +236,17 @@ if(isset($_REQUEST['get_email']) && isset($_REQUEST['recid'])) {	/* Get the Titl
 			$where_clause = "WHERE ugr.ugr_ID = 2";
 		}else if($user_request == "manager"){ // Admins of Database Managers Workgroup
 
-			$where_clause = "WHERE ugl.ugl_Role = 'admin' AND ugr.ugr_Enabled = 'y' AND ugl.ugl_GroupID = 1";
+			$where_clause = "WHERE ugl.ugl_Role = 'admin' AND ugr.ugr_Enabled != 'n' AND ugl.ugl_GroupID = 1";
 
 			}else if($user_request == "admin"){ // Admins for ALL workgroups
 
-				$where_clause = "WHERE ugl.ugl_Role = 'admin' AND ugr.ugr_Enabled = 'y' AND ugl.ugl_GroupID IN 
+				$where_clause = "WHERE ugl.ugl_Role = 'admin' AND ugr.ugr_Enabled != 'n' AND ugl.ugl_GroupID IN 
 		  		 (SELECT ugr_ID 
 			   		  FROM " . $db . ".sysUGrps 
-			   		  WHERE ugr_Type = 'workgroup' AND ugr_Enabled = 'y')";
+			   		  WHERE ugr_Type = 'workgroup' AND ugr_Enabled != 'n')";
 
 		}else if($user_request == "user"){ // ALL users
-			$where_clause = "WHERE ugr.ugr_Type = 'user' AND ugr.ugr_Enabled = 'y'";
+			$where_clause = "WHERE ugr.ugr_Type = 'user' AND ugr.ugr_Enabled != 'n'";
 		}else{
 
 			$response = array("status"=>HEURIST_INVALID_REQUEST, "message"=>"Invalid user choice", "request"=>$user_request);
@@ -330,4 +335,61 @@ if(isset($_REQUEST['get_email']) && isset($_REQUEST['recid'])) {	/* Get the Titl
 	print $rtn;
 }
 
+//
+// Retrieve the record count and last update (record or structure, depending on which is newer)
+//  for each provided database
+//
+function getDatabaseDetails($mysqli, $db_list){
+
+	//global $mysqli;
+	$details = array();
+
+	// Retrieve record count and last update (record or structure)
+	foreach ($db_list as $database) {
+			
+		$db_data = array('name' => $database, 'rec_count' => 0, 'last_update' => null);
+
+		// Get record count
+		$cnt_query = 'SELECT COUNT(*) FROM ' . $database . '.Records WHERE rec_FlagTemporary != 1';
+		$res = $mysqli->query($cnt_query);
+		if(!$res){
+			$db_data['rec_count'] = 0;
+		}else{
+			while($row = $res->fetch_row()){
+				$db_data['rec_count'] = $row[0];	
+			}
+		}
+
+		$last_recent = null;
+		$last_struct = null;
+
+		$last_rec_query = 'SELECT MAX(rec_Modified) FROM ' . $database . '.Records WHERE rec_FlagTemporary != 1';
+		$res = $mysqli->query($last_rec_query);
+		if($res){
+			while($row = $res->fetch_row()){
+				$last_recent = date_create($row[0]);
+			}
+		} // else keep $last_rec null
+
+		$last_struct_query = 'SELECT MAX(rst_Modified) FROM ' . $database . 'defRecStructure';
+		$res = $mysqli->query($last_struct_query);
+		if($res){
+			while($row = $res->fetch_row()){
+				$last_struct = date_create($row[0]);
+
+				if(!$last_recent || $last_struct > $last_recent){
+					$last_recent = $last_struct;
+				}
+			}
+		} // else keep $last_struct null
+
+		if($last_recent){
+			$db_data['last_update'] = $last_recent->format('Y-m-d');
+		}
+
+		$details[] = $db_data;
+	}
+
+	return $details;
+}
 ?>

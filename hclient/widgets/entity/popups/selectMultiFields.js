@@ -24,11 +24,7 @@ function hMultiSelect(){
 	var assigned_fields = [];	// List of newly assigned fields
 	var selected_fields = [];	// List of checked options
 
-	var rectypes = [];	// List of Record Type, idx => (id, name)
-
-	var fields = [];		// Base Field Names
-	var fieldnames = {};	// Customised Names for each base field
-	var field_ids = {};		// IDs for the above
+	var all_fields = [];	// Base Fields [ [ dty id, dty name, [rst name 1, rst name 2, ...] ], ... ]
 	
 	/*
 	 * Assign more standard names to dty_Types
@@ -102,7 +98,7 @@ function hMultiSelect(){
 		if(a.constructor === Array && b.constructor === Array) {
 			a = a[1];
 			b = b[1];
-		} else if(a.constructor === Array || b.constructor === Array) {
+		}else if(a.constructor === Array || b.constructor === Array) {
 			return 0;
 		}
 
@@ -248,7 +244,7 @@ function hMultiSelect(){
 			        tab_page = tab_page + '<input type="checkbox" data-id="'+ arr[i][0] +'">';
 		        }
 		        else{
-		        	tab_page = tab_page + '<input type="checkbox" data-id="'+ arr[i][0] +'" disabled>';		        	
+		        	tab_page = tab_page + '<input type="checkbox" data-id="'+ arr[i][0] +'" disabled checked="checked">';		        	
 		        }
 
 		        tab_page = tab_page 
@@ -288,7 +284,7 @@ function hMultiSelect(){
 	function getCheckedFields(){
 		var tabs_container = $('.tabs');
 
-		var checked_opts = tabs_container.find('input:checked');
+		var checked_opts = tabs_container.find('input:checked').not(':disabled');
 		var cnt = checked_opts.length;
 
 		for(var i = 0; i < cnt; i++){
@@ -338,17 +334,17 @@ function hMultiSelect(){
 			var first_entry = $('<div class="no-overflow-item">').appendTo(result_container);
 
 			// Ensure there are fields to compare against
-			if(fields.length > 0) {
+			if(all_fields.length > 0) {
 
-				for(i in fields){
+				for(const dty_field of all_fields){
 
-					var name = fields[i];
-					var id = field_ids[name];
+					const name = dty_field[1];
+					const id = dty_field[0];
 
 					// Check if there is a customised instance with the search string
-					var in_other_array = isInArray(searched, fieldnames[name]);
+					const in_other_array = isInArray(searched, dty_field[2]);
 
-					if((name.toLowerCase().indexOf(searched) >= 0 || in_other_array) && $Db.getConceptID('dty', id) != '2-247') {
+					if(!isInArray(id, assigned_fields) && (name.toLowerCase().indexOf(searched) >= 0 || in_other_array) && $Db.getConceptID('dty', id) != '2-247') {
 
 						var main_ele;
 
@@ -383,16 +379,14 @@ function hMultiSelect(){
 							result_container.hide();
 						});
 
-						for(j in fieldnames[name]) {
-
-							var fieldname = fieldnames[name][j];
+						for(const rst_name of dty_field[2]) {
 
 							var sub_ele = $('<div class="no-overflow-item sub-text">').appendTo(result_container);
 
 							// Add customised version of base field
 							sub_ele
-							.attr({'d-id': id, 'title': name + '(' + fieldname + ')', 'd-name': name})
-							.html('&nbsp;' + fieldname)
+							.attr({'d-id': id, 'title': name + '(' + rst_name + ')', 'd-name': name})
+							.html('&nbsp;' + rst_name)
 							.click(function(e){
 
 								let id = $(e.target).attr('d-id');
@@ -443,59 +437,20 @@ function hMultiSelect(){
 
 	function setupVariables() {
 
-		$Db.rty().each2(function(rty_id, details){ // Get rectypes
-			
-			if (rtyID == rty_id) { return true; }
+		rectypes = $Db.rty().getIds();
+		let idx = rectypes.indexOf(rtyID);
 
-			rectypes.push([rty_id, details["rty_Name"]]);
+		if(idx >= 0) { rectypes.splice(idx, 1); }
+
+		rectypes.sort((a, b) => {
+
+			a = $Db.rty(a, 'rty_Name');
+			b = $Db.rty(b, 'rty_Name');
+
+			return alphabetic_sort(a, b);
 		});
 
-		rectypes.sort(alphabetic_sort);
-
-		for(i in rectypes){ // Get base fields and instances for each rectype
-
-			var rty = rectypes[i][0];
-			var rtyName = rectypes[i][1];
-
-			var recset = $Db.rst(rty);
-
-			if(window.hWin.HEURIST4.util.isempty(recset)) { continue; }
-
-			recset.each2(function(dty_id, details){
-				var dtyName = $Db.dty(dty_id, "dty_Name");
-
-				if(!fieldnames[dtyName]) {
-					fieldnames[dtyName] = [];
-					field_ids[dtyName] = dty_id;
-					fields.push(dtyName);
-				}
-
-				var fieldname = rtyName + "." + details["rst_DisplayName"];
-				fieldnames[dtyName].push(fieldname);
-			});
-		}
-
-		fields.sort();
-
-		for(j in fields){
-
-			var name = fields[j];
-
-			fieldnames[name].sort();
-		}
-
-		$Db.dty().each2(function(dty_id, details){
-
-			var name = details['dty_Name'];
-
-			if(!isInArray(name, fields)) {
-				fields.push(name);
-				fieldnames[name] = [];
-				field_ids[name] = dty_id;
-			}
-		});
-
-		fields.sort();
+		all_fields = $Db.getBaseFieldInstances(rectypes, 0, 'all', []);
 	}
 
 	function _setupElements() {

@@ -31,6 +31,8 @@ public methods
    getRecords - returns records ids for given query 
    getRecordsAggr - returns aggregation values
    
+   _getTranslation - returns translation for given entity + id
+   
 */
 class ReportRecord {
     
@@ -41,6 +43,8 @@ class ReportRecord {
        protected $dtTerms = null;
        protected $dbsTerms;
        protected $system;
+    
+       protected $translations; //cache for translated db definitions (terms,...)
     
     function __construct() {
        global $system; 
@@ -53,6 +57,10 @@ class ReportRecord {
        $this->dbsTerms = new DbsTerms($system, $this->dtTerms);
        */
        $this->loaded_recs = array(); //cache
+
+        $this->translations = array(
+            'trm' => array()
+        );
     }    
 
     //
@@ -73,6 +81,44 @@ class ReportRecord {
     public function baseURL(){
         return HEURIST_BASE_URL;
     }
+
+    //
+    //
+    //
+    public function getSysInfo($param){
+        
+        $res = null;
+        $mysqli = $this->system->get_mysqli();
+        
+        if($param=='db_total_records'){
+            
+            $res = mysql__select_value($mysqli, 'SELECT count(*) FROM Records WHERE not rec_FlagTemporary');
+
+        }else if($param=='db_rty_counts'){
+
+            $res = mysql__select_assoc2($mysqli, 'SELECT rec_RecTypeID, count(*) FROM Records WHERE not rec_FlagTemporary GROUP BY rec_RecTypeID');
+            
+        }else if($param=='lang'){
+            
+            $res = $_REQUEST['lang'];
+            if (!$res) {
+                $res = $this->system->user_GetPreference('layout_language', '');
+            }
+
+            $res = getLangCode3($res);
+        }
+
+        
+        return $res;
+    }
+    
+    //
+    //
+    //
+    public function rty_Name($rty_ID){
+        return  $this->rty_Names[$rty_ID];
+    }
+
     
     //
     // Returns local code for given concept code
@@ -226,10 +272,10 @@ class ReportRecord {
                                     $record["recRelationNotes"] = $value['Notes'];
                                 }
                                 if(array_key_exists('StartDate', $value)){
-                                    $record["recRelationStartDate"] = temporalToHumanReadableString($value['StartDate']);
+                                    $record["recRelationStartDate"] = Temporal::toHumanReadable($value['StartDate']);
                                 }
                                 if(array_key_exists('EndDate', $value)){
-                                    $record["recRelationEndDate"] = temporalToHumanReadableString($value['EndDate']);
+                                    $record["recRelationEndDate"] = Temporal::toHumanReadable($value['EndDate']);
                                 }
                                 
                                 array_push($res, $record);
@@ -323,6 +369,8 @@ class ReportRecord {
             
             $record = array();
             $recTypeID = null;
+            
+            $lang = $this->getSysInfo('lang');
 
             //$record["recOrder"] = $order;
 
@@ -358,7 +406,7 @@ class ReportRecord {
 
                     $details = array();
                     foreach ($value as $dtKey => $dtValue){
-                        $dt = $this->getDetailForSmarty($dtKey, $dtValue, $recTypeID, $recordID); //$record['recID']);
+                        $dt = $this->getDetailForSmarty($dtKey, $dtValue, $recTypeID, $recordID, $lang); //$record['recID']);
                         if($dt){
                             $record = array_merge($record, $dt);
                         }
@@ -396,7 +444,7 @@ class ReportRecord {
     // convert details to array to be assigned to smarty variable
     // $dtKey - detailtype ID, if <1 this dummy relationship detail
     //
-    private function getDetailForSmarty($dtKey, $dtValue, $recTypeID, $recID){
+    private function getDetailForSmarty($dtKey, $dtValue, $recTypeID, $recID, $lang){
 
         $issingle = false;
 
@@ -439,7 +487,7 @@ class ReportRecord {
                         
                             if($this->dtTerms==null){
                                 $this->dtTerms = dbs_GetTerms($this->system);
-                                $this->dbsTerms = new DbsTerms($this->$system, $this->dtTerms);
+                                $this->dbsTerms = new DbsTerms($this->system, $this->dtTerms);
                             }
 
                             $domain = ($detailType=="enum")?"enum":"relation";
@@ -451,6 +499,7 @@ class ReportRecord {
                             $res_code = "";
                             $res_label = "";
                             $res_label_full = '';
+                            $res_desc = "";
                             $res = array();
 
 
@@ -461,26 +510,35 @@ class ReportRecord {
 
                                     //IJ wants to show terms for all parents
                                     $term_full = $this->dbsTerms->getTermLabel($value, true);
+
+                                    $term_label = $this->getTranslation('trm', $value, 'trm_Label', $lang);
+                                    $term_desc = $this->getTranslation('trm', $value, 'trm_Description', $lang);
                                     
                                     $res_id = $this->_add_term_val($res_id, $value);
                                     $res_cid = $this->_add_term_val($res_cid, $term[ $fi['trm_ConceptID'] ]);
                                     $res_code = $this->_add_term_val($res_code, $term[ $fi['trm_Code'] ]);
+                                    
                                     $res_label_full = $this->_add_term_val($res_label_full, $term_full);
-                                    $res_label = $this->_add_term_val($res_label, $term[ $fi['trm_Label'] ]);
+                                    $res_label = $this->_add_term_val($res_label, $term_label); //$term[ $fi['trm_Label'] ]);
+                                    $res_desc = $this->_add_term_val($res_desc, $term_desc); //$term[ $fi['trm_Description'] ]);
 
                                     //NOTE id and label are for backward
+                                    //original value
                                     array_push($res, array("id"=>$value, "internalid"=>$value, 
                                         "code"=>$term[ $fi['trm_Code'] ], 
-                                        "label"=>$term[ $fi['trm_Label'] ], 
+                                        "label"=>$term_label, 
                                         "term"=>$term_full, 
-                                        "conceptid"=>$term[ $fi['trm_ConceptID'] ]));
+                                        "conceptid"=>$term[ $fi['trm_ConceptID'] ],
+                                        "desc"=>$term_desc 
+                                    ));
                                 }
                             }
                             $res_united = array("id"=>$res_id, "internalid"=>$res_id, "code"=>$res_code, 
-                                "term"=>$res_label_full, "label"=>$res_label, "conceptid"=>$res_cid);
+                                "term"=>$res_label_full, "label"=>$res_label, "conceptid"=>$res_cid, "desc"=>$res_desc
+                            );
 
                             if(count($res)>0){
-                                if($issingle){
+                                if($issingle){//no used
                                     $res = array( $dtname =>$res_united );
                                 }else{
                                     $res = array( $dtname =>$res[0], $dtname."s" =>$res );
@@ -495,8 +553,8 @@ class ReportRecord {
                             $origvalues = array();
                             foreach ($dtValue as $key => $value){
                                 if(strlen($res)>0) $res = $res.", ";
-                                $res = $res.temporalToHumanReadableString($value);
-                                array_push($origvalues, temporalToHumanReadableString($value));
+                                $res = $res.Temporal::toHumanReadable($value, true, 1);
+                                array_push($origvalues, $value);
                             }
                             if(strlen($res)==0){ //no valid terms
                                 $res = null;
@@ -611,7 +669,15 @@ class ReportRecord {
                                 $res = $res.$value;
                                 array_push($origvalues, $value);
                             }
-                            if(strlen($res)==0){ //no valid terms
+                            
+                            if(count($dtValue)>1 && ($detailType=='freetext' || $detailType=='blocktext')){
+                                $translated_value = getCurrentTranslation($dtValue, $lang);
+                                if($translated_value!=null){
+                                    $res = $translated_value;   
+                                }
+                            }
+                            
+                            if(strlen($res)==0){ //no valid value
                                 $res = null;
                             }else{
                                 $res = array( $dtname=>$res, $dtname."s" =>$origvalues, $dtname."_originalvalue"=>$origvalues);
@@ -777,6 +843,95 @@ class ReportRecord {
         }
         return null;    
         
+    }
+
+    // 
+    // returns translation for given entity + id
+    //
+    public function getTranslation($entity, $ids, $field, $language_code){
+        
+        $language_code = getLangCode3($language_code);
+
+        $rtn = array();
+        $def_values = array();
+
+        $id_clause = '';
+
+        if(!is_array($ids)){
+            $ids = explode(',', $ids);
+        }
+
+        if(!array_key_exists($language_code, $this->translations[$entity])){
+            $this->translations[$entity][$language_code] = array();
+        }
+
+        $cache = $this->translations[$entity][$language_code];
+
+        
+        if($entity == 'trm'){
+            $field = (strpos(strtolower($field), 'desc') === false) ? 'trm_Label' : 'trm_Description'; // grab label by default
+        }
+        
+        
+        if(count($cache) > 0){ // check cache first
+            foreach ($ids as $idx => $id) {
+                if(array_key_exists($id, $cache) && @$cache[$id][$field]){
+                    $rtn[$id] = $cache[$id][$field];
+                    unset($ids[$idx]);
+                }
+            }
+        }
+
+        if(count($ids) == 0){
+            return count($rtn) == 1 ? array_shift($rtn) : $rtn;
+        }else if(count($ids) == 1){
+            $id_clause = ' ='.$ids[0];
+        }else{
+            $id_clause = ' IN (' .implode(',', $ids). ')';    
+        }
+
+        if($entity == 'trm'){
+
+            if($this->dtTerms==null){
+                $this->dtTerms = dbs_GetTerms($this->system);
+            }
+            if($this->dbsTerms==null){
+                $this->dbsTerms = new DbsTerms($this->system, $this->dtTerms);
+            }
+
+            // retrieve original term
+            $idx = $this->dtTerms['fieldNamesToIndex'];
+            $term = null;
+
+            foreach ($ids as $trm_id) {
+                $term = $this->dbsTerms->getTerm($trm_id);
+                $def_values[$trm_id] = !empty($term[$idx[$field]]) ? $term[$idx[$field]] : '';
+            }
+        }
+
+        if($id_clause != ''){
+
+            $query = "SELECT trn_Code, trn_Translation FROM defTranslations WHERE trn_Code $id_clause AND trn_Source = '$field' AND trn_LanguageCode = '$language_code'";
+
+            $res = mysql__select_assoc2($this->system->get_mysqli(), $query);
+
+            foreach ($ids as $id) {
+                    
+                if(array_key_exists($id, $res) && !empty($res[$id])){
+                    $rtn[$id] = $res[$id];
+                }else if(array_key_exists($id, $def_values) && !empty($def_values[$id])){
+                    $rtn[$id] = $def_values[$id];
+                }else{
+                    $rtn[$id] = '';
+                }
+
+                $cache[$id] = array($field => $rtn[$id]);
+            }
+        }
+
+        $this->translations[$entity][$language_code] = $cache; //array_replace($this->translations[$entity][$language_code], $cache)
+
+        return count($rtn) == 1 ? array_shift($rtn) : $rtn;
     }
     
 }

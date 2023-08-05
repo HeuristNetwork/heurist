@@ -1,0 +1,8 @@
+# This is the suggested robots.txt file for a Heurist server
+
+User-agent: *
+Disallow: /
+
+User-agent: *
+Allow: /HEURIST/HarvestableDatabaseDescriptions/
+

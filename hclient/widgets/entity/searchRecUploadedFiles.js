@@ -79,27 +79,32 @@ $.widget( "heurist.searchRecUploadedFiles", $.heurist.searchEntity, {
 
             this.btn_remove_dups.button({label: window.hWin.HR("Combine duplicates")})
                 .click(function(e) {
-                    that._trigger('onremovedups')
+                    that._checkUserPermissions(1, 'onremovedups');
                 });
 
-            this.btn_remove_unused.button({label: window.hWin.HR("Delete unused files"), icons: {primary: "ui-icon-trash"} })
-                .click(function(e) {
-                    that._trigger('onremoveunused');
-                }); 
+
+// Removed by Ian 12 May 2023
+// TODO: WARNING: This button only recognises use in a File field, it does nto see use in web pages 
+// or within text files. It is therefore exceedingly dangerous. Also operates instantly without warning.
+//            this.btn_remove_unused.button({label: window.hWin.HR("Delete unused files"), icons: {primary: "ui-icon-trash"} })
+//                .click(function(e) {
+//                    that._checkUserPermissions(1, 'onremoveunused');
+//                }); 
 
             this.btn_create_records.button({label: window.hWin.HR("Create multimedia records for selected")})
                 .click(function() {
-                    that._trigger('onfilerecs')
-                }).position({
+                    that._checkUserPermissions(1, 'onfilerecs')
+                });
+                /*.position({
                     my: 'right top+5',
                     at: 'right bottom',
                     of: this.btn_remove_unused
-                });
+                });*/
 
             this.btn_refresh_index.button({label: window.hWin.HR("Refresh index")})
                 .click(function() {
-                    that._trigger('onrefreshindex')
-                }).hide();
+                    that._checkUserPermissions(1, 'onrefreshindex')
+                });
 
             this.element.find('#select_all')
                 .change(function() {
@@ -149,13 +154,19 @@ $.widget( "heurist.searchRecUploadedFiles", $.heurist.searchEntity, {
         }        
         
         if(this.options.select_mode=='manager'){
-            this.element.find('#input_search_type_div').css('float','left');
-        }
-        
-        //this.btn_search_start.removeClass('ui-button-icon-only').css('margin-left','4em');
 
-        if(this.options.select_mode=='manager'){
+            this.element.find('#input_search_type_div').css('float','left');
+
             this._on(this.element.find('#dwnld_refs'), { click: function(){ this._trigger("ondownload"); } });
+
+            if(!window.hWin.HAPI4.is_admin()){
+                this.element.find('.admin-only').hide();
+                this.input_search_my.hide().prop('checked', true);
+            }else{
+                this.element.find('.admin-only').show();
+                this.input_search_my.show();
+            }
+
         }else{
             this.element.find('#dwnld_refs').hide();
         }
@@ -243,7 +254,7 @@ $.widget( "heurist.searchRecUploadedFiles", $.heurist.searchEntity, {
                     request['fxm_MimeType'] = this.input_search_type.val();  
             }
             
-            if(this.input_search_my.is(':checked')){
+            if(this.input_search_my.is(':checked') || !window.hWin.HAPI4.is_admin()){
                 request['ulf_UploaderUGrpID'] = window.hWin.HAPI4.currentUser.ugr_ID; 
             }
             
@@ -290,7 +301,21 @@ $.widget( "heurist.searchRecUploadedFiles", $.heurist.searchEntity, {
     
     getUploadContainer:function(){
         return this.btn_add_record_inline; //element.find('#btn_add_record_loc');
+    },
+
+    _checkUserPermissions: function(level, event){
+
+        if(!window.hWin.HAPI4.has_access(level)){
+            window.hWin.HEURIST4.msg.showMsgErr('You must be an administrator of the database managers group to use this feature');
+            return;
+        }
+
+        /*if(event == 'defineMimeType'){
+            window.hWin.HEURIST4.ui.showEntityDialog('defFileExtToMimetype', {edit_mode:'inline', width:900});
+            return;
+        }*/
+
+        this._trigger(event);
     }
-    
 
 });

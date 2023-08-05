@@ -87,6 +87,8 @@ $.widget( "heurist.manageSysIdentification", $.heurist.manageEntity, {
     
     _afterInitEditForm: function(){
 
+        const record = this._cachedRecordset.getFirstRecord();
+
         //make labels in edit form wider
         this.editForm.find('.header').css({'min-width':'250px','width':'250px', 'font-size': '0.9em'});
         
@@ -101,6 +103,16 @@ $.widget( "heurist.manageSysIdentification", $.heurist.manageEntity, {
         if(!window.hWin.HAPI4.has_access(2)){
             this._editing.getFieldByName('sys_URLCheckFlag').hide();
         }
+
+        // Set allow registration and allow import user
+        let status = this._cachedRecordset.fld(record, 'sys_AllowRegistration');
+        let $ele = this._editing.getFieldByName('sys_AllowRegistration');
+        $ele.editing_input('setValue', [1 & status]);
+        
+        $ele = this._editing.getFieldByName('sys_AllowUserImportAtLogin');
+        $ele.editing_input('setValue', [2 & status]);
+
+        this._editing.setModified(0);
     },
 	
     _saveEditAndClose: function( fields, afterAction, onErrorAction ){
@@ -118,6 +130,12 @@ $.widget( "heurist.manageSysIdentification", $.heurist.manageEntity, {
 
         if(!window.hWin.HAPI4.has_access(2)){ // reset value, just in case
             that._cachedRecordset.each2((i, values) => { fields['sys_URLCheckFlag'] = values['sys_URLCheckFlag'] });
+        }
+
+        if(Object.hasOwn(fields, 'sys_AllowUserImportAtLogin')){
+            let allow_reg = Object.hasOwn(fields, 'sys_AllowRegistration') ? fields['sys_AllowRegistration'] : 0;
+            fields['sys_AllowRegistration'] = allow_reg | fields['sys_AllowUserImportAtLogin'];console.log(fields['sys_AllowRegistration']);
+            delete fields['sys_AllowUserImportAtLogin'];
         }
 
         if(!window.hWin.HEURIST4.util.isempty(fields['sys_SyncDefsWithDB'])){

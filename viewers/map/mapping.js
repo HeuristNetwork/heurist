@@ -263,6 +263,13 @@ $.widget( "heurist.mapping", {
     {name:'Esri.NatGeoWorldMap'},
     {name:'Esri.WorldGrayCanvas'},
     {name:'MapTilesAPI.OSMEnglish', options:{accessToken: '4b2ce9cc3dmshb0ed4b109c9e660p1f9a50jsne0544286f8bb'}}, 
+    {name:'DARE.RomanEmpire', url: 'https://dh.gu.se/tiles/imperium/{z}/{x}/{y}.png', options:{
+        attribution: '&copy; <a href="https://dh.gu.se/dare/" target="_blank">Digital Atlas of the Roman Empire (DARE)</a> '
+            + 'by <a href="https://www.gu.se/digital-humaniora" target="_blank"> Johan Åhlfeldt, Centre for Digital Humanities, University of Gothenburg</a> '
+            + '(Licensed under <a href="https://creativecommons.org/licenses/by/4.0/">CC-BY-4.0</a>)',
+        minZoom: 4,
+        maxZoom: 11
+    }},
     {name:'None'}
     ],
 
@@ -655,8 +662,37 @@ $.widget( "heurist.mapping", {
             }
 
             if(provider['name']!=='None'){
-                this.basemaplayer = L.tileLayer.provider(provider['name'], provider['options'] || {})
-                    .addTo(this.nativemap);        
+
+                try{ // use leaflet-provider
+
+                    this.basemaplayer = L.tileLayer.provider(provider['name'], provider['options'] || {})
+                        .addTo(this.nativemap);
+
+                }catch(e){
+
+                    try{ // attempt without leaflet-provider
+
+                        if(provider && !window.hWin.HEURIST4.util.isempty(provider['url'])){
+                            this.basemaplayer = L.tileLayer(provider['url'], provider['options']).addTo(this.nativemap);
+                        }else{
+                            throw e;
+                        }
+
+                    }catch(e){
+                        // display error
+                        window.hWin.HEURIST4.msg.showMsgErr(
+                            'We were unable to load your selected base map.<br>'
+                          + 'If this problem persists, please report this through the bug reporter under Help at the top right of the main screen or,<br>'
+                          + 'via email directly to support@heuristnetwork.org so we can fix this quickly.<br><br>'
+                          + 'Base map values:<br>'
+                          + 'Base map id: ' + basemap_id + '<br>'
+                          + 'Base map name: ' + (provider['name'] != '' ? provider['name'] : 'missing'));
+                          //+ 'Base map url (if found): ' + provider['url'] + '<br><br>'
+                          //+ 'Error thrown: ' + e + '<br>'
+                        return;
+                    }
+
+                }
 
                 this.basemaplayer.bringToBack(); // ensure basemap is below all map documents
 
@@ -1155,26 +1191,37 @@ $.widget( "heurist.mapping", {
                     for(k=0; k<tdata.when.length; k++){
                         ts = tdata.when[k];
                         
-                        titem = {
-                            id: layer_id+'-'+tdata.rec_ID+'-'+k, //unique id
-                            group: layer_id,
-                            content: '<img src="'+iconImg 
-                            + '"  align="absmiddle" style="padding-right:3px;" width="12" height="12"/>&nbsp;<span>'
-                            + tdata.rec_Title+'</span>',
-                            //'<span>'+recName+'</span>',
-                            title: tdata.rec_Title,
-                            start: ts[0],
-                            recID: tdata.rec_ID
-                        };
-
-                        if(ts[3] && ts[0]!=ts[3]){
-                            titem['end'] = ts[3];
+                        if(!ts[0]){
+console.log('Start date not defined ',tdata.when,tdata.rec_ID);                            
+                            
                         }else{
-                            titem['type'] = 'point';
-                            //titem['title'] = singleFieldName+': '+ dres[0] + '. ' + titem['title'];
-                        }
+                            
+                            titem = {
+                                id: layer_id+'-'+tdata.rec_ID+'-'+k, //unique id
+                                group: layer_id,
+                                content: '<img src="'+iconImg 
+                                + '"  align="absmiddle" style="padding-right:3px;" width="12" height="12"/>&nbsp;<span>'
+                                + tdata.rec_Title+'</span>',
+                                //'<span>'+recName+'</span>',
+                                title: ts[4], //tdata.rec_Title,
+                                start: ts[0],
+                                profile_start: ts[5],
+                                profile_end: ts[6], 
+                                recID: tdata.rec_ID
+                            };
 
-                        that.timeline_items[layer_id].push(titem); 
+                            if(ts[3] && ts[0]!=ts[3]){
+                                titem['end'] = ts[3];
+                                if(ts[1]) titem['start0'] = ts[1];
+                                if(ts[2]) titem['end0'] = ts[2];
+                            }else{
+                                titem['type'] = 'point';
+                                //titem['title'] = singleFieldName+': '+ dres[0] + '. ' + titem['title'];
+                            }
+
+                            that.timeline_items[layer_id].push(titem); 
+                        }
+                        
                     }//for timespans
 
                 });

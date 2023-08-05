@@ -242,7 +242,7 @@ public static function execute($mask, $rt, $mode, $rec_id=null, $rep_mode=_ERR_R
          * New format: The conditional field/s are placed with the output string, e.g. {\Full name: [Given name] [Last name] \...}, 
          *              all fields needs to have a value to print out that string, a section without a field (except the first section) will be printed out if reached
          */
-        if(preg_match_all("/(?:\[[^\[\]]+?\])?\s?{\d*\s?(?:\\\\[^\\\\\}]*\s?)+}/", $mask, $conditions_mask)){ // get all conditional strings
+        if(preg_match_all("/(?:\[[^\[\]]+?\])?\s?{\d*\s?(?:\\\\[^\\\\\}]*\s?)*}/", $mask, $conditions_mask)){ // get all conditional strings
 
             foreach ($conditions_mask[0] as $key => $cond_str) {
 
@@ -252,11 +252,11 @@ public static function execute($mask, $rt, $mode, $rec_id=null, $rep_mode=_ERR_R
                 $str_maxlen = 0;
 
                 // retrieve conditional sections
-                preg_match("/{\d*\s?(?:\\\\[^\\\\]*\s?)+}/", $cond_str, $cond_mask);
+                preg_match("/{\d*\s?(?:\\\\[^\\\\]*\s?)*}/", $cond_str, $cond_mask);
 
                 $cond_mask[0] = trim($cond_mask[0], ' {}'); // remove curly brackets
 
-                $cond_parts = explode("\\", $cond_mask[0]); //@todo mb_split apart
+                $cond_parts = mb_split("\\\\", $cond_mask[0]); //@todo mb_split apart
                 if(is_numeric(trim($cond_parts[0])) || empty($cond_parts[0])){
                     $str_maxlen = intval($cond_parts[0]);
                     array_shift($cond_parts);
@@ -274,8 +274,8 @@ public static function execute($mask, $rt, $mode, $rec_id=null, $rep_mode=_ERR_R
                                 break;
                             }
 
-                            $new_str = ($str_maxlen > 0 && mb_strlen($replacements[$cond_field]) > $str_maxlen ? mb_substr($replacements[$cond_field], 0, $str_maxlen) . '...' : $new_str);
-                            $con_part = str_ireplace($cond_field, $new_str, $con_part); //@todo mb_eregi_replace
+                            $new_str = ($str_maxlen > 0 && mb_strlen($replacements[$cond_field]) > $str_maxlen ? mb_substr($replacements[$cond_field], 0, $str_maxlen) . '...' : $replacements[$cond_field]);
+                            $cond_part = mb_eregi_replace(preg_quote($cond_str, "/"), $new_str, $cond_part); //@todo mb_eregi_replace
                         }
 
                         if($is_valid){
@@ -287,7 +287,7 @@ public static function execute($mask, $rt, $mode, $rec_id=null, $rep_mode=_ERR_R
                     if($cond_replace === null){ // default, replace with empty
                         $cond_replace = '';
                     }
-                }else if(count($cond_parts) == 2){ // original method
+                }else if(count($cond_parts) == 1 || count($cond_parts) == 2){ // original method
 
                     // retrieve proceeding field
                     preg_match("/\[[^\[\]]+?\]/", $cond_str, $cond_field);
@@ -300,10 +300,17 @@ public static function execute($mask, $rt, $mode, $rec_id=null, $rep_mode=_ERR_R
                     }else{
                         $cond_replace = $cond_parts[1];
                     }
+                }else if(count($cond_parts) == 0 && $str_maxlen > 0){
+
+                    // retrieve proceeding field
+                    preg_match("/\[[^\[\]]+?\]/", $cond_str, $cond_field);
+                    $new_str = array_key_exists($cond_field[0], $replacements) ? $replacements[$cond_field[0]] : '';
+
+                    $cond_replace = !empty($new_str) && mb_strlen($new_str) > $str_maxlen ? mb_substr($new_str, 0, $str_maxlen) . '...' : $new_str;
                 }
 
                 if($cond_replace !== null){ // replace part 
-                    $mask = str_ireplace($cond_str, $cond_replace, $mask);  //@todo mb_eregi_replace
+                    $mask = mb_eregi_replace(preg_quote($cond_str, "/"), $cond_replace, $mask);  //@todo mb_eregi_replace
                 }
             }
         }
@@ -362,7 +369,7 @@ private static function __get_forempty($rec_id, $rt){
     $rdr = self::__get_rec_detail_types($rt);
     //$rec_values = self::__get_record_value($rec_id);
 
-    $allowed = array("freetext", "enum", "float", "date", "relmarker", "integer", "year", "boolean");
+    $allowed = array('freetext', 'enum', 'float', 'date', 'relmarker', 'integer', 'year', 'boolean');
     $cnt = 0;
     $title = array();
     foreach($rdr as $dt_id => $detail){
@@ -718,8 +725,8 @@ private static function __get_field_value( $rdt_id, $rt, $mode, $rec_id, $enum_p
                     $found = true;
                     if($dt_type=="enum" || $dt_type=="relationtype"){
                         $value = self::__get_enum_value($detail['dtl_Value'], $enum_param_name);
-                    }else if($dt_type=="date"){
-                        $value = temporalToHumanReadableString(trim($detail['dtl_Value']));
+                    }else if($dt_type=='date'){
+                        $value = Temporal::toHumanReadable(trim($detail['dtl_Value']));
                     }else if($dt_type=="file"){
                         $value = self::__get_file_name($detail['dtl_UploadedFileID']);
                     }else{

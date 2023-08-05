@@ -49,6 +49,7 @@ $.widget( "heurist.searchBuilder", {
     select_additional_rectypes: null,
     svs_MultiRtSearch: null,
     //field_selector: null,
+    select_language: null,
 
     current_tree_rectype_ids:null, //to avoid reload
     
@@ -171,6 +172,14 @@ $.widget( "heurist.searchBuilder", {
             this.select_additional_rectypes = null;
         }
         
+        if(this.select_language){
+            if(this.select_language.hSelect('instance') !== undefined){
+                this.select_language.hSelect('destroy');
+            }
+            this.select_language.remove();
+            this.select_language = null;
+        }
+        
         
         // remove generated elements
     }
@@ -248,11 +257,17 @@ $.widget( "heurist.searchBuilder", {
         }else{
             this.select_field_for_id = ele_id;
             
+            // Close all option menus
+            $.each(this.pnl_Tree.find('.fancytree-submenu'), function(idx, ele){
+                ele = $(ele);
+
+                if(ele.menu('instance') !== undefined){
+                    ele.menu('collapseAll');
+                }
+            });
+
             this.pnl_Tree.show();
-
-        }
-
-        
+        }        
     }
 
     //
@@ -364,6 +379,7 @@ $.widget( "heurist.searchBuilder", {
                 var rty_ID = codes[codes.length-2];
                 var dty_ID = codes[codes.length-1];
                 var top_rty_ID = codes[0];
+                let lang = this.select_language.val();
 
                 if(!(top_rty_ID>0)) top_rty_ID = 0;
                 if(!(rty_ID>0)) rty_ID = 0;
@@ -378,7 +394,9 @@ $.widget( "heurist.searchBuilder", {
                             top_rty_ID: top_rty_ID, 
                             rty_ID: rty_ID,
                             dty_ID: dty_ID,
-                            enum_field:enum_field});
+                            enum_field:enum_field,
+                            language: lang
+                        });
 
                 }else{
                     var ele = $('<div>').uniqueId().attr('data-code',code).insertBefore(this.btnAddFieldItem);
@@ -393,6 +411,7 @@ $.widget( "heurist.searchBuilder", {
                             rty_ID: rty_ID,
                             dty_ID: dty_ID,
                             enum_field: enum_field,
+                            language: lang,
                             onremove: function(){
                                 var id = this.element.attr('id');
                                 $.each(that.field_array,function(k,item){
@@ -608,6 +627,37 @@ $.widget( "heurist.searchBuilder", {
                 this.refreshRectypeMenu();
             }
             
+            if(this.select_language == null){
+
+                this.select_language = this.element.find('#opt_language');
+                let options = [{title: 'ANY', key: 'ALL', selected: true}, {title: 'Default', key: ''}];
+                window.hWin.HEURIST4.ui.createLanguageSelect(this.select_language, options, 'ALL', false);
+
+                this._on(this.select_language, {
+                    change: function(){
+                        // Update language of dropdowns
+                        let lang = that.select_language.val();
+                        $.each(this.field_array, function(i, ele){
+
+                            let code = ele.searchBuilderItem('getCodes');
+                            let codes = code.split(':');
+
+                            if($Db.dty(codes[codes.length-1], 'dty_Type') == 'enum'){
+                                ele.searchBuilderItem('changeOptions',{
+                                    language: lang
+                                });
+                            }
+                        });
+                    }
+                });
+
+                this.select_language.hSelect('widget').css({width: '100px', 'min-width': '100px'});
+
+                this.element.find('.filter-language').attr('title', 'Specify the language of the values dropdown and of the search. &#010; '
+                    + 'ANY will search across the default language and all translated terms or texts. &#010; '
+                    + 'Default is the default language used in construction of the database.');
+            }
+            
             /*                    
                 var rectypeIds = [this.select_main_rectype.val()];
                 if(this.select_additional_rectypes && this.select_additional_rectypes.editing_input('instance')){
@@ -807,7 +857,7 @@ $.widget( "heurist.searchBuilder", {
                       
                 var treedata = window.hWin.HEURIST4.dbs.createRectypeStructureTree_new( 
                                 {
-                                    mode:5, rectypeids:rectype, fieldtypes:allowed_fieldtypes, field_order:node_order, enum_mode:'expanded' 
+                                    mode:5, rectypeids:rectype, fieldtypes:allowed_fieldtypes, field_order:node_order //, enum_mode:'expanded' 
                                 } );
 
                             treedata[0].expanded = true; //first expanded
@@ -849,6 +899,88 @@ $.widget( "heurist.searchBuilder", {
                                         if(order == 1){
                                             $(data.node.li).addClass('fancytree-hidden');
                                         }
+                                    }else if(data.node.data.type == 'enum'){ // add options dropdown menu
+
+                                        const key = data.node.key;
+
+                                        let $ele = $('<ul>', {class: 'horizontalmenu fancytree-submenu'})
+                                            .attr('data-type', 'enum').attr('data-code', data.node.data.code)
+                                            .html('<li data-id="internalid"><span>option</span><ul>' //default is internalid = trm_ID
+                                                     + '<li data-id="internalid">Internal ID</li>'
+                                                     + '<li data-id="term">Term</li>'
+                                                     + '<li data-id="code">Code</li>'
+                                                     + '<li data-id="conceptid">Concept ID</li>'
+                                                     + '<li data-id="desc">Description</li>'
+                                                + '</ul></li>')
+                                            .appendTo($(data.node.span.childNodes[3]));
+
+                                        $ele.menu({
+                                            icons: { submenu: "ui-icon-triangle-1-s" },
+                                            select: function(e, ui){
+
+                                                window.hWin.HEURIST4.util.stopEvent(e);
+
+                                                let code = $ele.attr('data-code');
+                                                code += ':' + ui.item.attr('data-id');
+                                                let codes = code.split(':');
+                                                let codes2 = code.split(':');
+
+                                                codes2[0] = 'any';
+                                                code = codes2.join(':');
+
+                                                //add or replace field in builderItem
+                                                that.addFieldItem( code, codes, that.select_field_for_id);
+                                                that.select_field_for_id = null;
+                                                that.pnl_Tree.hide();
+
+                                                if(treediv.fancytree('instance') !== undefined){
+                                                    const tree = treediv.fancytree('getTree');
+                                                    const node = tree.getNodeByKey(key);
+
+                                                    node.setActive(true);
+
+                                                    $ele.menu('collapseAll');
+                                                }
+                                            },
+                                            focus: function(e, ui){
+
+                                                if(!ui.item.parent().is('ul.horizontalmenu')){
+                                                    return;
+                                                }
+
+                                                let code = $ele.attr('data-code');
+                                                $.each(that.pnl_Tree.find('.fancytree-submenu'), function(idx, ele){
+                                                    ele = $(ele);
+
+                                                    if(ele.attr('data-code') == code){
+                                                        return;
+                                                    }
+
+                                                    if(ele.menu('instance') !== undefined){
+                                                        ele.menu('collapseAll');
+                                                    }
+                                                });
+
+                                                let $parent = that.element.find('#field_treeview').children();
+
+                                                // getComputedStyle(ele) | getBoundingClientRect()
+                                                let cont_rect = $parent[0].getBoundingClientRect();
+                                                let ele_rect = $ele[0].getBoundingClientRect();
+
+                                                let bottom_val = ele_rect.bottom + 110;
+
+                                                if(bottom_val > cont_rect.bottom){
+                                                    $ele.menu('option', 'position', {my: 'left bottom-5', at: 'left top'});
+                                                }else{
+                                                    $ele.menu('option', 'position', {my: 'left top+5', at: 'left bottom'});
+                                                }
+
+                                            },
+                                            position: {
+                                                my: 'left top+5',
+                                                at: 'left bottom'
+                                            }
+                                        });
                                     }
                                 },
                                 lazyLoad: function(event, data){
@@ -865,7 +997,7 @@ $.widget( "heurist.searchBuilder", {
                                     {
                                         mode:5, rectypeids:rectypes, fieldtypes:allowed_fieldtypes, 
                                         parentcode: parentcode,
-                                        field_order:node_order, enum_mode:'expanded' 
+                                        field_order:node_order//, enum_mode:'expanded' 
                                     } );
                                                                                             
                                                                                             
@@ -932,6 +1064,12 @@ $.widget( "heurist.searchBuilder", {
                                         var code = data.node.data.code;
                                         if(code){
                                             var codes = code.split(':');
+
+                                            if(codes.length == 2 && $Db.dty(codes[1], 'dty_Type') == 'enum'){
+                                                // by default, handle as internal id
+                                                //code += ':term';
+                                                //codes.push('term');
+                                            }
 
                                             var codes2 = code.split(':');
                                             codes2[0] = 'any';

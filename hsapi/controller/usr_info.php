@@ -146,6 +146,32 @@
             }
         }
 
+    }else if($action == 'get_time_diffs'){
+
+        $data = $_REQUEST['data'];
+        if(!is_array($data)){
+            $data = json_decode($data);
+        }
+
+        $early_org = @$data->early_date;
+        $latest_org = @$data->latest_date;
+
+        if(empty($early_org) || empty($latest_org)){
+            $err = empty($early_org) && empty($latest_org) ? 'Both earliest and latest are ' : (empty($early_org) ? 'Earliest is ' : 'Latest is ');
+            $system->addError(HEURIST_ACTION_BLOCKED, $err . 'required');
+        }else{
+
+            $err_msg = array();
+            $res = true;
+            
+            $res = Temporal::getPeriod($early_org, $latest_org);
+
+            if($res === false){
+                $system->addError(HEURIST_INVALID_REQUEST, 'Invalid earliest or latest date provided. Impossible to get difference');
+            }
+        }
+
+
     }else if( !$system->init( @$_REQUEST['db'] ) ){ 
         
 //        error_log('FAILED INIT SYSTEM');        
@@ -352,9 +378,19 @@
 
                 $system->user_LogActivity('ResetPassword');
                 
-                if(user_ResetPassword($system, @$_REQUEST['username'])){
+                if($_REQUEST['pin'] && $_REQUEST['username'] && $_REQUEST['new_password']){ // update password w/ pin
+                    $res = user_ResetPassword($system, $_REQUEST['username'], $_REQUEST['new_password'], $_REQUEST['pin']);
+                }else if($_REQUEST['pin']){ // get reset pin
+                    $res = user_HandleResetPin($system, @$_REQUEST['username'], @$_REQUEST['pin'], @$_REQUEST['captcha']);
+                }else{
+                    $res = $system->addError(HEURIST_ERROR, 'Invalid request made to password reset system');
+                }
+
+                /* original method - Lets random people reset passwords for random accounts
+                if(user_ResetPasswordRandom($system, @$_REQUEST['username'])){
                     $res = true;
                 }
+                */
 
             } else  if ($action=="action_password") { //special passwords for some admin actions - defined in configIni.php
             

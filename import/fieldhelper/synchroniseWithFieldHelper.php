@@ -242,7 +242,7 @@ $failed_exts = array();
 
             set_time_limit(0); //no limit
 
-            doHarvest($dirs);
+            doHarvestFieldHelper($dirs);
 			
             if(count($failed_exts) > 0) {
     
@@ -264,16 +264,8 @@ $failed_exts = array();
         }
 
         // ---- HARVESTING AND OTHER FUNCTIONS -----------------------------------------------------------------
-        function sanitizeFolderName($folder) {
-            $folder = str_replace("\0", '', $folder);
-            $folder = str_replace('\\', '/', $folder);
-            if( substr($folder, -1, 1) != '/' )  {
-                $folder = $folder.'/';
-            }
-            return $folder;
-        }
 
-        function doHarvest($dirs) {
+        function doHarvestFieldHelper($dirs) {
 
             global $rep_counter, $rep_issues, $system_folders;
 
@@ -363,7 +355,7 @@ $failed_exts = array();
                         }
 
                         if(count($subdirs)>0){
-                            doHarvest($subdirs);
+                            doHarvestFieldHelper($subdirs);
                             flush();
                         }
                     }

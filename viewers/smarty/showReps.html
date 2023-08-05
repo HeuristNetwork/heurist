@@ -213,114 +213,103 @@ ul#rep_list.menu li ul {
         <div id="insert-popup" style="display:none;overflow:hidden;">
             <div style="position:absolute;left:0;right:0;top:0px;bottom:0;padding:15px;overflow:auto;">
 
-                <table style="border: 0px;font-size:1em">
+                <div class="insert-field-grid">
+                    <div class="language_row">
+                        <span>Language</span>
 
-                    <tr>
-                        <td colspan='2'>
-                            <span id='insert-popup-header'></span>
-                        </td>
-                    </tr>
+                        <select id="selLanguage" style="width:110px;height:18px;"
+                            title="Retrieve the translated version of the provided term\'s label">
+                            <option value="">Default language</option>
+                        </select>
 
-                    <tr>
-                        <td></td>
-                        <td><b>Normal</b></td>
-                    </tr>
+                        <span class='heurist-helper2'>
+                            If language is not chosen,<br> the current system language is used<br>
+                            As another option use "translate" modifier
+                        </span>
+                    </div>
 
-                    <tr>
-                        <td>
-                            <select id="selInsertMode" style="width:200px"
-                                title="Choose options for insertion - use fucntion wrapper to format multimedia (images, sound, video) for display">
-                                <option value="0">Field only</option>
-                                <option value="2">Field + function wrapper</option>
-                            </select>
-                        </td>
-                        <td><button id="btn_insert_var"
+                    <div>
+                        <span class="empty_ele"></span>
+
+                        <select id="selInsertMode" style="width:110px"
+                            title="Choose options for insertion - use fucntion wrapper to format multimedia (images, sound, video) for display">
+                            <option value="0">Field only</option>
+                            <option value="2">Field + function wrapper</option>
+                        </select>
+
+                        <select id="selInsertModifiers" style="width:110px"
+                            title="Smarty functions which can reformat the data value (see Smarty documentation for additional functions)">
+                            <option>Value as-is</option>
+                            <option>capitalize</option>
+                            <option>cat</option>
+                            <option>count_characters</option>
+                            <option>count_paragraphs</option>
+                            <option>count_sentences</option>
+                            <option>count_words</option>
+                            <option>date_format</option>
+                            <option>default</option>
+                            <option>escape</option>
+                            <option>indent</option>
+                            <option>lower</option>
+                            <option>nl2br</option>
+                            <option>regex_replace</option>
+                            <option>replace</option>
+                            <option>spacify</option>
+                            <option>string_format</option>
+                            <option>strip</option>
+                            <option>strip_tags</option>
+                            <option>truncate</option>
+                            <option>translate:ENG:term</option>
+                            <option>upper</option>
+                            <option>wordwrap</option>
+                        </select>
+                    </div>
+
+                    <div class="header">
+                        <span class="empty_ele"></span>
+                        <strong>Normal</strong>
+                    </div>
+
+                    <div>
+                        <span class="empty_ele"></span>
+
+                        <button id="btn_insert_if"
+                            title="Inserts a test of whether the field is blank (or a specific value).">
+                            Test value (If ...)</button>
+
+                        <button id="btn_insert_var"
                             title="Inserts the value of the field in the output. Customise using the dropdowns.">
-                            Insert field value</button>
-                        </td>
-                    </tr>
+                            <strong>Insert field value</strong>
+                        </button>
+                    </div>
 
-                    <tr style="margin-top: 20px;">
-                        <td>
-                            <select id="selInsertModifiers" style="width:200px"
-                                title="Smarty functions which can reformat the data value (see Smarty documentation for additional functions)">
-                                <option>choose function ...</option>
-                                <option>capitalize</option>
-                                <option>cat</option>
-                                <option>count_characters</option>
-                                <option>count_paragraphs</option>
-                                <option>count_sentences</option>
-                                <option>count_words</option>
-                                <option>date_format</option>
-                                <option>default</option>
-                                <option>escape</option>
-                                <option>indent</option>
-                                <option>lower</option>
-                                <option>nl2br</option>
-                                <option>regex_replace</option>
-                                <option>replace</option>
-                                <option>spacify</option>
-                                <option>string_format</option>
-                                <option>strip</option>
-                                <option>strip_tags</option>
-                                <option>truncate</option>
-                                <option>upper</option>
-                                <option>wordwrap</option>
-                            </select>
-                        </td>
-                        <td>
-                            <button id="btn_insert_if"
-                                title="Inserts a test of whether the field is blank (or a specific value).">
-                                Test value (If ...)</button>
-                        </td>
-                    </tr>
+                    <div class="header ins_isloop">
+                        <span class="empty_ele"></span>
 
-                    <!-- only shows if there is a within-loop option -->
+                        <strong>Within repeat loop</strong>
+                        <span class="heurist-helper2">
+                            Use these buttons to insert field or test within a repeat loop
+                        </span>
+                    </div>
 
-                    <tr class="ins_isloop">
-                        <td></td>
-                        <td>
-                            <br/><b>Within repeat loop</b>
-                        </td>
-                    </tr>
+                    <div class="ins_isloop">
+                        <span class="empty_ele"></span>
 
-                    <tr class="ins_isloop" >
-                        <td >
-                            <div class="ins_isloop">Use these buttons to insert field<br/> or test within a repeat loop</div>
-                        </td>
-                        <td><div class="ins_isloop"><button id="btn_insert_loop">Insert repeat</button></div>
-                        </td>
-                    </tr>
+                        <button id="btn_insert_loop">
+                            Insert repeat</button>
+                    </div>
 
-                    <tr class="ins_isloop">
-                        <td></td>
-                        <td><div class="ins_isloop"><button id="btn_insert_loop_var">
-                            Insert field value</button></div>
-                        </td>
-                    </tr>
+                    <div class="ins_isloop">
+                        <span class="empty_ele"></span>
 
-                    <tr class="ins_isloop">
-                        <td></td>
-                        <td><div class="ins_isloop"><button id="btn_insert_loop_if">
-                            Test value (If ...)</button></div>
-                        </td>
-                    </tr>
+                        <button id="btn_insert_loop_if">
+                            Test value (If ...)</button>
 
-
-                    <!--<tr style="margin-top: 20px;">
-                    <td colspan="2">
-                    <div class="ins_isloop"><br/>Use buttons on the right to insert field<br/> or test within a repeat loop</div>
-                    </td>
-                    </tr> -->
-
-
-                    <tr>
-                        <td colspan="2">
-                            <hr>
-                        </td>
-                    </tr>
-
-                </table>
+                        <button id="btn_insert_loop_var">
+                            <strong>Insert field value</strong>
+                        </button>
+                    </div>
+                </div>
 
                 <br />
                 <b>Note</b> For repeating value fields (including pointers) you should first insert a repeat loop
