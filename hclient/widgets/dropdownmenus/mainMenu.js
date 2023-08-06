@@ -427,6 +427,8 @@ console.log('>>>>'+that.divProfileItems.find('.ui-menu-item').css('padding-left'
         function ___set_menu_item_visibility(idx, item, is_showhide){
 
                 var lvl_user = $(item).attr('data-user-admin-status'); //level of access by workgroup membership
+
+                let user_req_permissions = $(item).attr('data-user-permissions');
                 
                 var lvl_exp = $(item).attr('data-user-experience-level');  //level by ui experience
                 
@@ -438,14 +440,7 @@ console.log('>>>>'+that.divProfileItems.find('.ui-menu-item').css('padding-left'
                     //@todo lvl_user=1 is_admin
                     is_visible = (lvl_exp!=3) && window.hWin.HAPI4.has_access(lvl_user);
                     var elink = $(item).find('a');
-                    if(is_showhide){
-                        if(is_visible){
-                            item.show();  
-                        }else{
-                            item.hide();  
-                        }
-                        
-                    }else
+
                     if(is_visible){
                         window.hWin.HEURIST4.util.setDisabled(elink, false);
                         item.attr('title', '');
@@ -456,7 +451,37 @@ console.log('>>>>'+that.divProfileItems.find('.ui-menu-item').css('padding-left'
                         + (item.attr('data-user-admin-status')==2?'the database owner':'database managers')
                         + ' can delete all records / the database');
                     }
-                }   
+                }
+
+                if(!window.hWin.HEURIST4.util.isempty(user_req_permissions) && is_visible){
+
+                    let required = '';
+                    let cur_permissions = window.hWin.HAPI4.currentUser.ugr_Permissions;
+
+                    if(user_req_permissions.indexOf('add') !== -1 && !cur_permissions?.add){
+                        required = 'create'
+                    }
+                    if(user_req_permissions.indexOf('delete') !== -1 && !cur_permissions?.delete){
+                        required += (required !== '' ? ' and ' : '') + 'delete';
+                    }
+
+                    if(required !== ''){
+
+                        window.hWin.HEURIST4.util.setDisabled(elink, true);
+                        item.attr('title', `You do not have permission to ${required} records`);
+
+                        is_visible = false;
+                    }else{
+                        window.hWin.HEURIST4.util.setDisabled(elink, false);
+                        item.attr('title', '');
+                    }
+                }
+
+                if(is_showhide && !is_visible){
+                    item.hide();  
+                }else{
+                    item.show();  
+                }
                 
                 //0 advance, 1-experienced, 2-beginner
                 if(lvl_exp>=0 && is_visible){
@@ -567,8 +592,9 @@ console.log('>>>>'+that.divProfileItems.find('.ui-menu-item').css('padding-left'
         //  2 - db owner
     //
     // exp_level = 3 hidden, 0 expert, 1 advance, 2 begginner
+    // user_permissions = 'add' can create records, 'delete' can delete records, 'add delete' can do both
     //
-    _initMenu: function(name, access_level, parentdiv, exp_level){
+    _initMenu: function(name, access_level, parentdiv, exp_level, user_permissions){
 
         var that = this;
         var myTimeoutId = -1;
@@ -634,6 +660,9 @@ console.log('>>>>'+that.divProfileItems.find('.ui-menu-item').css('padding-left'
         }    
         if(exp_level>=0){
             this.menues['btn_'+name].attr('data-user-experience-level', exp_level);
+        }
+        if(!window.hWin.HEURIST4.util.isempty(user_permissions)){
+            this.menues['btn_'+name].attr('data-user-permissions', user_permissions);
         }
         
         // Load content for all menus except Database when user is logged out
@@ -768,6 +797,7 @@ console.log('>>>>'+that.divProfileItems.find('.ui-menu-item').css('padding-left'
         var action_member_level = item.attr('data-user-member-status');
         var action_passworded = item.attr('data-pwd');
         var action_container = item.attr('data-container');
+        let action_user_permissions = item.attr('data-user-permissions')
         
         if(!action_passworded && !window.hWin.HAPI4.has_access(2)) action_passworded = item.attr('data-pwd-nonowner');
         var href = item.attr('data-link');
@@ -1381,7 +1411,9 @@ console.log('>>>>'+that.divProfileItems.find('.ui-menu-item').css('padding-left'
         
         },
             requiredLevel, //needed level of credentials any, logged (by default), admin of group, db admin, db owner
-            action_passworded    //this is type of password, if it is not set action is to allowed - otherwise need to enter password
+            action_passworded,    //this is type of password, if it is not set action is to allowed - otherwise need to enter password
+            null,
+            action_user_permissions
         );
 
         if(event) window.hWin.HEURIST4.util.stopEvent(event);

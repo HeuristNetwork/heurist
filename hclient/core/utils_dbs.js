@@ -588,7 +588,9 @@ window.hWin.HEURIST4.dbs = {
 
                     $dtl_fields.sort(function(a,b){
                         if(field_order == 1){
-                            return (a['name'].toLowerCase()<b['name'].toLowerCase())?-1:1;
+                            let nameA = a['name'].toLocaleUpperCase();
+                            let nameB = b['name'].toLocaleUpperCase();
+                            return nameA.localeCompare(nameB);
                         }else{
                             return (a['display_order']<b['display_order'])?-1:1;
                         }
@@ -1769,22 +1771,22 @@ window.hWin.HEURIST4.dbs = {
     //
     trm_SortingById: function(a, b){
 
-        var recset = window.hWin.HAPI4.EntityMgr.getEntityData('defTerms');
+        //var recset = window.hWin.HAPI4.EntityMgr.getEntityData('defTerms');
 
-        let a_name = recset.fld(a,'trm_Label').toLowerCase();
-        let b_name = recset.fld(b,'trm_Label').toLowerCase();
-        let a_order = parseInt(recset.fld(a,'trm_OrderInBranch'), 10);
-        let b_order = parseInt(recset.fld(b,'trm_OrderInBranch'), 10);
+        let a_name = $Db.trm(a,'trm_Label').toLocaleUpperCase();
+        let b_name = $Db.trm(b,'trm_Label').toLocaleUpperCase();
+        let a_order = parseInt($Db.trm(a,'trm_OrderInBranch'), 10);
+        let b_order = parseInt($Db.trm(b,'trm_OrderInBranch'), 10);
 
         a_order = (!a_order || a_order < 1 || isNaN(a_order)) ? null : a_order;
         b_order = (!b_order || b_order < 1 || isNaN(b_order)) ? null : b_order;
 
         if(a_order == null && b_order == null){ // alphabetic
-            return a_name < b_name;
+            return a_name.localeCompare(b_name);
         }else if(a_order == null || b_order == null){ // null is first
             return a_order == null;
         }else{ // branch order
-            return a_order < b_order;
+            return eval(a_order - b_order);
         }
     },
 
@@ -1848,8 +1850,8 @@ window.hWin.HEURIST4.dbs = {
                 }
 
                 //sort children by name
-                children = window.hWin.HEURIST4.util.merge_sort(children, $Db.trm_SortingById);
-                //children.sort($Db.trm_SortingById);
+                //children = window.hWin.HEURIST4.util.merge_sort(children, $Db.trm_SortingById);
+                children.sort($Db.trm_SortingById);
                 
                 if(mode=='tree'){
 
@@ -2861,13 +2863,21 @@ window.hWin.HEURIST4.dbs = {
 		}
 
         // sort base field names
-        fields.sort((arr1, arr2) => arr1[1].localeCompare(arr2[1]));
+        fields.sort((arr1, arr2) => {
+            let a = arr1[1].toLocaleUpperCase();
+            let b = arr2[1].toLocaleUpperCase();
+            return a.localeCompare(b);
+        });
 
         let processed_fields = [];
 
 		for(const field of fields){ // sort rst field names + additional processing for different modes
 
-			field[2].sort();
+			field[2].sort((a, b) => {
+                a = a.toLocaleUpperCase();
+                b = b.toLocaleUpperCase();
+                return a.localeCompare(b);
+            });
 
             const dty_id = field[0];
             const dty_title = field[1];

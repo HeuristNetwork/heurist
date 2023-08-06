@@ -1557,7 +1557,8 @@ error_log(print_r($_REQUEST, true));
             $this->current_User = array('ugr_ID'=>intval($userID),
                             'ugr_Name'        => @$_SESSION[$this->dbname_full]['ugr_Name'],
                             'ugr_FullName'    => $_SESSION[$this->dbname_full]['ugr_FullName'],
-                            'ugr_Groups'      => $_SESSION[$this->dbname_full]['ugr_Groups']);
+                            'ugr_Groups'      => $_SESSION[$this->dbname_full]['ugr_Groups'],
+                            'ugr_Permissions' => $_SESSION[$this->dbname_full]['ugr_Permissions']);
 
             if(true || !@$_SESSION[$this->dbname_full]['ugr_Preferences']){ //always restore from db
                 $_SESSION[$this->dbname_full]['ugr_Preferences'] = user_getPreferences( $this );
@@ -1598,6 +1599,10 @@ error_log('CANNOT UPDATE COOKIE '.$session_id);
         $_SESSION[$this->dbname_full]['ugr_Groups']   = user_getWorkgroups( $this->mysqli, $userID );
         $_SESSION[$this->dbname_full]['ugr_Name']     = $user['ugr_Name'];
         $_SESSION[$this->dbname_full]['ugr_FullName'] = $user['ugr_FirstName'] . ' ' . $user['ugr_LastName'];
+        
+        $is_disabled = $user['ugr_Enabled'] == 'n';
+        $_SESSION[$this->dbname_full]['ugr_Permissions'] = array('add' => strpos($user['ugr_Enabled'], 'add') === false && !$is_disabled, 
+                                                                'delete' => strpos($user['ugr_Enabled'], 'del') === false && !$is_disabled);
         
         return true;
     }

@@ -3688,14 +3688,35 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
                                     }
                                 }
 
-                                // Check for initial ambiguity
+                                // Check for simple ambiguity or carbon year
+                                let ttype = 'simple';
                                 try {
-                                    let tDate = TDate.parse(values[k]);
+
+                                    let value = values[k];
+                                    ttype = value.slice(-2).toLowerCase() == 'bp' ? 'carbon' : ttype;
+                                    value = ttype == 'carbon' ? value.slice(0, -2) : value;
+
+                                    let tDate = TDate.parse(value);
                                     let date_val = tDate.toString('yyyy-MM-dd');
                                     let format = tDate.getDateFormat();
 
-                                    if((date_val.length == 4 && values[k].length <= 4) || date_val.length == values[k].length){
-                                        
+                                    if(ttype == 'carbon'){
+
+                                        if(date_val.length == 4 && value.length <= 4){
+
+                                            let t_date = new Temporal();
+                                            date_val = TDate.parse(date_val);
+
+                                            date_val = date_val.toString('yyyy-MM-dd');
+
+                                            t_date.setType('c');
+                                            t_date.addObjForString('BPD', date_val);
+
+                                            values[k] = t_date.toString(); // toJSON()
+                                            updated_values = true;
+                                        }
+                                    }else if((date_val.length == 4 && values[k].length <= 4) || date_val.length == values[k].length){
+
                                         if(format == 'dmy' && tDate.getDay() < 13 && tDate.getMonth() < 13){ // only uses 'mdy' when first number has to be month
                                             throw 'ambiguous date';
                                         }
@@ -3704,7 +3725,7 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
                                     }
                                 } catch(e) {
                                     if(e.indexOf('ambiguous') >= 0){
-                                        ambig_dates.push({dtyid: dtyID, org_value: values[k], index: k, type: 'simple'});
+                                        ambig_dates.push({dtyid: dtyID, org_value: values[k], index: k, type: ttype});
                                         continue;
                                     }
                                 }
@@ -4991,9 +5012,11 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
             switch (cur_date.type) {
                 case 'simple':
                 case 'approx':
+                case 'carbon':
                     
                     let date = $dlg.find('#DAT').val();
                     let approx = $dlg.find('#CIR').is(':checked');
+                    let is_carbon = $dlg.find('#BP').is(':checked');
 
                     if(window.hWin.HEURIST4.util.isempty(date)){
                         value = '';
@@ -5004,6 +5027,12 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
                         t_date.addObjForString("CIR", "1");
 
                         value = t_date.toString();
+                    }else if(is_carbon){
+
+                        t_date.setType('c');
+                        t_date.addObjForString('BPD', date);
+
+                        value = t_date.toString(); // toJSON
                     }else{
 
                         if(is_temporal){
@@ -5044,6 +5073,7 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
                         }
                     }
                     break;
+
                 default:
                     value = '';
                     break;
@@ -5094,23 +5124,42 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
 
         if(cur_date.type){
 
-            switch (cur_date.type) {
+            let ttype = cur_date.type;
+            let date_help = 'Please re-type '+ (ttype == 'range' ? 'all dates' : '') +'as year only, yyyy-mm or yyyy-mm-dd ';
+
+            switch (ttype) {
                 case 'simple':
                 case 'approx':
+                case 'carbon':
 
-                    let is_checked = cur_date.type == 'approx' ? 'checked="checked"' : '';
-                    content += '<label> Please re-type as year only, yyyy-mm or yyyy-mm-dd <input type="text" id="DAT"></label><br>';
-                    content += '<label> Is approximate? <input type="checkbox" id="CIR" ' + is_checked + '></label><br>';
+                    let is_checked = ttype == 'approx' ? 'checked="checked"' : '';
+                    //let fld_name = ttype == 'carbon' ? 'BPD' : 'DAT';
+
+                    content += `<label> ${date_help} <input type="text" id="DAT"></label><br>`;
+
+                    if(ttype == 'carbon'){
+                        content += '<label> Is a radiometric date? (Before Present (1950) Date) <input type="checkbox" id="BP" checked="checked"></label><br>';
+                    }else{
+                        content += '<label> Is approximate? <input type="checkbox" id="CIR" '+ is_checked +'></label><br>';
+                    }
 
                     break;
+                
+                case 'carbon':
+
+                    content += `<label> ${date_help} <input type="text" id="BPD"></label>`
+                    break;
+
                 case 'range':
 
                     let early = cur_date.value.TPQ ? cur_date.value.TPQ : '';
                     let late = cur_date.value.TAQ ? cur_date.value.TAQ : '';
-                    content += '<span>Please re-type all dates as year only, yyyy-mm or yyyy-mm-dd</span><br>';
+                    content += `<span> ${date_help} </span><br>`;
                     content += '<span>This date was determined to be a simple range. However, if this is an error leave either field empty</span><br><br>';
                     content += '<span style="display:inline-block; min-widht:100px;">Earliest estimate</span> <input type="text" id="TPQ" value="' + early + '"></label><br><br>';
                     content += '<label><span style="display:inline-block; min-widht:100px;">Latest estimate</span> <input type="text" id="TAQ" value="' + late + '"></label>';
+
+                    break;
                 default:
                     that._handleAmbiguousDates(ambiguous_dates);
                     break;

@@ -45,6 +45,7 @@ if(!$isSystemInited){
 }
 
 $login_warning = 'To perform this action you must be logged in';
+$invalid_access = true;
 
 //
 // to limit access to particular page
@@ -56,7 +57,26 @@ if(defined('LOGIN_REQUIRED') && !$system->has_access()){
     $message = $login_warning.' as Administrator of group \'Database Managers\'';
 }else if(defined('OWNER_REQUIRED') && !$system->is_dbowner()){
     $message = $login_warning.' as Database Owner';
+}else{
+    $invalid_access = false;
 }
+
+// Check if current user has the necessary permissions
+if(!$invalid_access && (defined('CREATE_RECORDS') || defined('DELETE_RECORDS'))){
+
+    $required = '';
+    $user_permissions = $system->getCurrentUser()['ugr_Status'];
+
+    if(defined('CREATE_RECORDS') && !$user['add']){
+        $required = 'create';
+    }
+    if(defined('DELETE_RECORDS') && !$user['delete']){
+        $required .=  $required === '' ? 'delete' : ' and delete';
+    }
+
+    if($required !== ''){ $message = "To perform this action you need permission to $required records"; }
+}
+
 if(isset($message)){
     include ERROR_REDIR;
     exit();

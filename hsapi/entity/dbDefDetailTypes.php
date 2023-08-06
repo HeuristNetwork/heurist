@@ -23,7 +23,7 @@
 require_once (dirname(__FILE__).'/../System.php');
 require_once (dirname(__FILE__).'/dbEntityBase.php');
 require_once (dirname(__FILE__).'/dbEntitySearch.php');
-
+require_once (dirname(__FILE__).'/dbDefTerms.php');
 
 class DbDefDetailTypes extends DbEntityBase
 {
@@ -383,7 +383,7 @@ class DbDefDetailTypes extends DbEntityBase
 
     //
     // batch action for rectypes
-    // 1) import rectype from another db
+    // 1) import detailtypes from another db
     //
     public function batch_action(){
          
@@ -400,21 +400,31 @@ class DbDefDetailTypes extends DbEntityBase
                 $this->data['fields'] = json_decode($this->data['fields'], true);
             }
 
+            $defTerms = new DbDefTerms($this->system, array('entity'=>'defTerms')); // to create new vocabs
+            $new_vocabs = array();
+
+            $vcg_query = 'SELECT vcg_ID FROM defVocabularyGroups WHERE vcg_Domain = "enum" ORDER BY vcg_Order';
+            $vcg_enum = mysql__select_value($mysqli, $vcg_query);
+
+            $vcg_query = 'SELECT vcg_ID FROM defVocabularyGroups WHERE vcg_Domain = "relation" ORDER BY vcg_Order';
+            $vcg_rel = mysql__select_value($mysqli, $vcg_query);
+
             if(count($this->data['fields'])>0){
 
                 $ret = array();
+
                 foreach($this->data['fields'] as $idx => $record){
 
                     $ret[$idx] = array();
                     if(empty(@$record['dty_Name'])){ // check that a name has been provided
                         $ret[$idx][] = 'A name is required';
                     }else{ // check that the name hasn't been used yet
-                        $exists = mysql__select_value($mysqli, 'SELECT dty_ID FROM defDetailTypes WHERE dty_Name="'. $record['rty_Name'] .'"');
+                        $exists = mysql__select_value($mysqli, 'SELECT dty_ID FROM defDetailTypes WHERE dty_Name="'. $record['dty_Name'] .'"');
                         if($exists){
-                            $ret[$idx][] = $record['rty_Name'] . ' is already in use by record type ID#' . $exists;
+                            $ret[$idx][] = $record['dty_Name'] . ' already exists as ID#' . $exists;
                         }
                     }
-                    if(empty(@$record['dty_Description'])){ // check that a description has been provided
+                    if(empty(@$record['dty_HelpText'])){ // check that a description has been provided
                         $ret[$idx][] = 'A description is required';
                     }
                     if(empty(@$record['dty_Type'])){ // check that a type has been provided
@@ -422,29 +432,50 @@ class DbDefDetailTypes extends DbEntityBase
                     }else{
                         $record['dty_Type'] = strtolower($record['dty_Type']);
                         switch ($record['dty_Type']) {
+
                             case 'text':
                             case 'freetext':
                                 $this->data['fields'][$idx]['dty_Type'] = 'freetext';
+                                $record['dty_Type'] = 'freetext';
                                 break;
+
                             case 'memo':
                             case 'blocktext':
                                 $this->data['fields'][$idx]['dty_Type'] = 'blocktext';
+                                $record['dty_Type'] = 'blocktext';
                                 break;
+
                             case 'date':
                                 $this->data['fields'][$idx]['dty_Type'] = 'date';
+                                $record['dty_Type'] = 'date';
                                 break;
+
+                            case 'numeric':
+                            case 'float':
+                                $this->data['fields'][$idx]['dty_Type'] = 'float';
+                                $record['dty_Type'] = 'float';
+                                break;
+
                             case 'terms':
                             case 'term':
                             case 'enum':
                                 $this->data['fields'][$idx]['dty_Type'] = 'enum';
+                                $record['dty_Type'] = 'enum';
                                 break;
+
+                            case 'record pointer':
                             case 'recpointer':
                             case 'resource':
                                 $this->data['fields'][$idx]['dty_Type'] = 'resource';
+                                $record['dty_Type'] = 'resource';
                                 break;
+
+                            case 'relationship marker':
                             case 'relmarker':
                                 $this->data['fields'][$idx]['dty_Type'] = 'relmarker';
+                                $record['dty_Type'] = 'relmarker';
                                 break;
+
                             default:
                                 $ret[$idx][] = $record['dty_Type'] . ' type is not handled';
                                 break;
@@ -452,8 +483,43 @@ class DbDefDetailTypes extends DbEntityBase
 
                         if($record['dty_Type'] == 'enum' || $record['dty_Type'] == 'relmarker'){
                             if(empty(@$record['dty_JsonTermIDTree'])){
-                                $ret[$idx][] = 'A Vocabulary ID is needed for this field';
+
+                                $vcb_query = 'SELECT trm_ID FROM defTerms WHERE trm_ParentTermID = 0 AND trm_Label = "'. $record['dty_Name'] .'"'; // Check for existing vocab with field name
+
+                                $vcb_id = mysql__select_value($mysqli, $vcb_query);
+
+                                if($vcb_id){
+
+                                    $this->data['fields'][$idx]['dty_JsonTermIDTree'] = $vcb_id;
+                                    $record['dty_JsonTermIDTree'] = $vcb_id;
+                                }else{
+
+                                    $defTerms_data = array(
+                                        'entity' => 'defTerms',
+                                        'fields' => array(
+                                            'trm_ID' => -1,
+                                            'trm_Label' => $record['dty_Name'],
+                                            'trm_Domain' => $record['dty_Type'] == 'relmarker' ? 'relation' : 'enum',
+                                            'trm_VocabularyGroupID' => $record['dty_Type'] == 'relmarker' && $vcg_rel ? $vcg_rel : $vcg_enum
+                                        )
+                                    );
+                                    $defTerms->setData($defTerms_data);
+    
+                                    $save_res = $defTerms->save();
+                                    if($save_res !== false){
+
+                                        $rec = $defTerms->records();
+                                        $new_id = $rec[0]['trm_ID'];
+    
+                                        $this->data['fields'][$idx]['dty_JsonTermIDTree'] = $new_id;
+                                        $record['dty_JsonTermIDTree'] = $new_id;
+                                        $new_vocabs[$idx] = $new_id;
+                                    }else{
+                                        $ret[$idx][] = 'Unable to create vocabulary for field \n Unable to retrieve existing vocabulary with matching name';
+                                    }
+                                }
                             }else{
+
                                 $trm_query = 'SELECT trm_ID, trm_Domain, trm_Label FROM defTerms WHERE trm_ID = ' . $record['dty_JsonTermIDTree'];
                                 $trm_res = mysql__select_value($mysqli, $trm_query);
 
@@ -467,7 +533,7 @@ class DbDefDetailTypes extends DbEntityBase
 
                         if($record['dty_Type'] == 'resource' || $record['dty_Type'] == 'relmarker'){
                             if(empty(@$record['dty_PtrTargetRectypeIDs'])){
-                                $ret[$idx][] = 'A Record Type target is needed for this field';
+                                // $ret[$idx][] = 'A Record Type target is needed for this field';
                             }else{
                                 $rty_query = 'SELECT rty_ID FROM defRecTypes WHERE rty_ID = ' . $record['dty_PtrTargetRectypeIDs'];
                                 $rty_res = mysql__select_value($mysqli, $rty_query);
@@ -509,7 +575,7 @@ class DbDefDetailTypes extends DbEntityBase
                 $this->data['fields'] = array_values($this->data['fields']); // re-write indexes
 
                 $result = true;
-                if(count($this->data['fields']) > 0){ // ensure there are still rectypes to define
+                if(count($this->data['fields']) > 0){ // ensure there are still base fields to define
                     $result = $this->save();
                 }
 
@@ -524,6 +590,10 @@ class DbDefDetailTypes extends DbEntityBase
                         }
 
                         $ret[$idx] = 'Created ID#'.$this->records[$i]['dty_ID'];
+                        if(array_key_exists($idx, $new_vocabs)){
+                            $ret[$idx] .= '\n New vocabulary created ID#' . $new_vocabs[$idx];
+                            $ret['refresh_terms'] = true;
+                        }
                         $i++;
                     }
                 }
