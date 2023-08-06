@@ -128,7 +128,7 @@ if(!$system->init(@$_REQUEST['db'])){
             }
             
             //encode and invoke parse_prepare with limit
-            $res = ImportParser::encodeAndGetPreview( @$_REQUEST["upload_file_name"], $_REQUEST);  
+            $res = ImportParser::encodeAndGetPreview( $upload_file_name, $_REQUEST);  
             
         }else if($action=='step2'){
             

@@ -47,9 +47,9 @@ if (@$_REQUEST['finished_merge']==1){
 }
 //store the master record id
 if (@$_REQUEST['keep'])  {
-    $master_rec_id = $mysqli->real_escape_string($_REQUEST['keep']);   
+    $master_rec_id = intval($_REQUEST['keep']);   
 }else{
-    $master_rec_id = $mysqli->real_escape_string(@$_REQUEST['master_rec_id']); 
+    $master_rec_id = intval(@$_REQUEST['master_rec_id']); 
 }
 
 //get all enumeration fields - global
@@ -291,7 +291,7 @@ $reference_bdts = mysql__select_assoc2($mysqli,'select dty_ID, dty_Name from def
                                     '" title="Click to select this record as the Master record"'.
                                     ' id="keep'.$rec_ID.
                                     '" onclick="keep_bib('.$rec_ID.');">';
-                                print '<span style="font-size: 120%;"><a target="edit" href="'.HEURIST_BASE_URL.'?fmt=edit&db='.HEURIST_DBNAME.'&recID='.$rec_ID.'">'.$rec_ID . ' ' . '<b>'.$record['rec_Title'].'</b></a> - <span style="background-color: #EEE;">'. $rtyNameLookup[$record['rec_RecTypeID']].'</span></span>';
+                                print '<span style="font-size: 120%;"><a target="edit" href="'.HEURIST_BASE_URL.'?fmt=edit&db='.HEURIST_DBNAME.'&recID='.rec_ID.'">'.$rec_ID . ' ' . '<b>'.htmlspecialchars($record['rec_Title']).'</b></a> - <span style="background-color: #EEE;">'. $rtyNameLookup[$record['rec_RecTypeID']].'</span></span>';
                                 print '<table>';
                                 foreach ($record['details'] as $rd_type => $detail) {
                                     if (! $detail) continue;    //FIXME  check if required and mark it as missing and required
@@ -347,10 +347,10 @@ $reference_bdts = mysql__select_assoc2($mysqli,'select dty_ID, dty_Name from def
                                     print '</td>';
                                 }
 
-                                if ($record['rec_URL']) print '<tr><td>URL</td><td><a href="'.$record['rec_URL'].'">'.$record['rec_URL'].'</a></td></tr>';
+                                if ($record['rec_URL']) print '<tr><td>URL</td><td><a href="'.$record['rec_URL'].'">'.htmlspecialchars($record['rec_URL']).'</a></td></tr>';
 
-                                if ($record['rec_Added']) print '<tr><td>Added</td><td style="padding-left:10px;">'.substr($record['rec_Added'], 0, 10).'</td></tr>';
-                                if ($record['rec_Modified']) print '<tr><td>Modifed</td><td style="padding-left:10px;">'.substr($record['rec_Modified'], 0, 10).'</td></tr>';
+                                if ($record['rec_Added']) print '<tr><td>Added</td><td style="padding-left:10px;">'.htmlspecialchars(substr($record['rec_Added'], 0, 10)).'</td></tr>';
+                                if ($record['rec_Modified']) print '<tr><td>Modifed</td><td style="padding-left:10px;">'.htmlspecialchars(substr($record['rec_Modified'], 0, 10)).'</td></tr>';
 
 
                                 print '</table></td><td>';
@@ -361,7 +361,7 @@ $reference_bdts = mysql__select_assoc2($mysqli,'select dty_ID, dty_Name from def
                                     print '<tr><td>References</td><td>';
                                     $i = 1;
                                     foreach ($record["refs"] as $ref) {  //FIXME  check for reference to be a valid record else mark detail for delete and don't print
-                                        print '<a target="edit" href="'.HEURIST_BASE_URL.'?fmt=edit&db='.HEURIST_DBNAME.'&recID='.$ref.'">'.$i++.'</a> ';
+                                        print '<a target="edit" href="'.HEURIST_BASE_URL.'?fmt=edit&db='.HEURIST_DBNAME.'&recID='.intval($ref).'">'.($i++).'</a> ';
                                     }
                                     print '</td></tr>';
                                 }
@@ -383,8 +383,8 @@ $reference_bdts = mysql__select_assoc2($mysqli,'select dty_ID, dty_Name from def
                                 
                                 $rems = array();
                                 while ($rem = $res2->fetch_assoc()){
-                                    $rems[] = $rem['name'].' '.$rem['rem_Freq']
-                                                .($rem['rem_Freq']=='once' ? ' on ' : ' from ').$rem['rem_StartDate'];
+                                    $rems[] = htmlspecialchars($rem['name'].' '.$rem['rem_Freq']
+                                                .($rem['rem_Freq']=='once' ? ' on ' : ' from ').$rem['rem_StartDate']);
                                 }
                                 $res2->close();
                                                 
@@ -412,7 +412,7 @@ $reference_bdts = mysql__select_assoc2($mysqli,'select dty_ID, dty_Name from def
                                 $record = $records[$index];
                                 $rec_ID = intval($record['rec_ID']);
                                 $is_master = ($rec_ID== $master_rec_id);
-                                print '<tr id="row'.$record['rec_ID'].'">';
+                                print '<tr id="row'.intval($record['rec_ID']).'">';
                                 if ($is_master) print '<td><div><b>MASTER</b></div></td>';
                                 else print '<td><div><b>Duplicate</b></div></td>';
                                 print '<td style="width: 500px;">';
@@ -487,8 +487,8 @@ $reference_bdts = mysql__select_assoc2($mysqli,'select dty_ID, dty_Name from def
                                     '" id="URL'.$record['rec_ID'].
                                     '"><a href="'.$record['rec_URL'].'">'.$record['rec_URL'].'</a></td></tr>';
 
-                                if ($record['rec_Added']) print '<tr><td>Add &nbsp;&nbsp;&nbsp;'.substr($record['rec_Added'], 0, 10).'</td></tr>';
-                                if ($record['rec_Modified']) print '<tr><td>Mod &nbsp;&nbsp;&nbsp;'.substr($record['rec_Modified'], 0, 10).'</td></tr>';
+                                if ($record['rec_Added']) print '<tr><td>Add &nbsp;&nbsp;&nbsp;'.htmlspecialchars(substr($record['rec_Added'], 0, 10)).'</td></tr>';
+                                if ($record['rec_Modified']) print '<tr><td>Mod &nbsp;&nbsp;&nbsp;'.htmlspecialchars(substr($record['rec_Modified'], 0, 10)).'</td></tr>';
 
 
                                 print '</table></td><td>';
@@ -499,7 +499,7 @@ $reference_bdts = mysql__select_assoc2($mysqli,'select dty_ID, dty_Name from def
                                     print '<tr><td>References</td><td>';
                                     $i = 1;
                                     foreach ($record["refs"] as $ref) {
-                                        print '<a target="edit" href="'.HEURIST_BASE_URL.'?fmt=edit&db='.HEURIST_DBNAME.'&recID='.$ref.'">'.$i++.'</a> ';
+                                        print '<a target="edit" href="'.HEURIST_BASE_URL.'?fmt=edit&db='.HEURIST_DBNAME.'&recID='.intval($ref).'">'.$i++.'</a> ';
                                     }
                                     print '</td></tr>';
                                 }
@@ -520,8 +520,8 @@ $reference_bdts = mysql__select_assoc2($mysqli,'select dty_ID, dty_Name from def
                                 
                                 $rems = array();
                                 while ($rem = $res2->fetch_assoc()){
-                                    $rems[] = $rem['name'].' '.$rem['rem_Freq']
-                                        .($rem['rem_Freq']=='once' ? ' on ' : ' from ').$rem['rem_StartDate'];
+                                    $rems[] = htmlspecialchars($rem['name'].' '.$rem['rem_Freq']
+                                        .($rem['rem_Freq']=='once' ? ' on ' : ' from ').$rem['rem_StartDate']);
                                 }
                                 $res2->close();
                                 if (count($rems))
@@ -697,17 +697,19 @@ function do_fix_dupe()
     foreach($_REQUEST as $key => $value){
         preg_match('/(add|update|keep)(\d+)/',$key,$matches);
         if (! $matches) continue;
-
-        switch (strtolower($matches[1])){
-            case 'add':
-                $add_dt_ids[$matches[2]] = $value;
-                break;
-            case 'update':
-                if ($value != "master")$update_dt_ids[$matches[2]] = $value;
-                break;
-            case 'keep':
-                $keep_dt_ids[$matches[2]] = $value;
-                break;
+        $value = intval($value);
+        if($value>0){
+            switch (strtolower($matches[1])){
+                case 'add':
+                    $add_dt_ids[$matches[2]] = $value;
+                    break;
+                case 'update':
+                    if ($value != "master")$update_dt_ids[$matches[2]] = $value;
+                    break;
+                case 'keep':
+                    $keep_dt_ids[$matches[2]] = $value;
+                    break;
+            }
         }
     }
 

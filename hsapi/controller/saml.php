@@ -11,8 +11,8 @@ require_once (dirname(__FILE__).'/../dbaccess/db_users.php');
 $action = @$_REQUEST['a']; //$system->getError();
 
 $system = new System();
-
-$error = $system->dbname_check(@$_REQUEST['db']);
+$dbname = @$_REQUEST['db'];
+$error = System::dbname_check($dbname);
 
 if($error){
     $system->addError(HEURIST_INVALID_REQUEST, $error);
@@ -22,13 +22,13 @@ if($error){
     if(!$sp) $sp = 'default-sp';
     
     if(!$sp){
-        $system->addError(HEURIST_INVALID_REQUEST, 'Database '.$_REQUEST['db'].' does not support SAML authorisation');
+        $system->addError(HEURIST_INVALID_REQUEST, 'Database '.$dbname.' does not support SAML authorisation');
     }else
     if ($action == "logout"){ //save preferences into session
 
-        if($system->set_dbname_full(@$_REQUEST['db'])){
+        if($system->set_dbname_full($dbname)){
 
-            $system->initPathConstants(@$_REQUEST['db']);
+            $system->initPathConstants($dbname);
             $system->user_LogActivity('Logout');
 
             if($system->doLogout()){ //destroy session
@@ -44,7 +44,7 @@ if($error){
                     ?>
                     <html>
                         <?php  echo htmlspecialchars($_SERVER['PHP_SELF']); ?><br>
-                        <a href="<?php echo htmlspecialchars($_SERVER['PHP_SELF']).'?a=login&auth=1&db='.$_REQUEST['db']; ?>">LOGIN</a></html>
+                        <a href="<?php echo htmlspecialchars($_SERVER['PHP_SELF']).'?a=login&auth=1&db='.$dbname; ?>">LOGIN</a></html>
                     <?php
                     exit();
             }
@@ -71,7 +71,7 @@ if($error){
             //$nameId = $as->getAuthData('saml:sp:NameID')['Value'];
 
             //find user in sysUGrps by email, if not found add new one
-            if(count($attr)>0 && $system->init( @$_REQUEST['db'] ) ){
+            if(count($attr)>0 && $system->init( $dbname ) ){
             
                 $user_id = 0;
                 $mysqli = $system->get_mysqli();
@@ -104,7 +104,7 @@ $query = 'SELECT ugr_ID FROM sysUGrps where usr_ExternalAuthentication is not nu
 
                 if(!($user_id>0)){
                     //show error
-                    $system->addError(HEURIST_ACTION_BLOCKED, 'Heurist Database '.$_REQUEST['db'].' does not have an user with provided attributes');
+                    $system->addError(HEURIST_ACTION_BLOCKED, 'Heurist Database '.$dbname.' does not have an user with provided attributes');
                 }
                 /*
                 $user_id = mysql__select_value($system->get_mysqli(),'SELECT ugr_ID FROM sysUGrps WHERE ugr_eMail="'

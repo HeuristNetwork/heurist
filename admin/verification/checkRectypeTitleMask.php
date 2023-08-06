@@ -25,7 +25,7 @@ if($is_included){
    
    $mode = 1; 
 
-   $rectypeID = null;
+   $rectypeID = 0;
    $mask = null;
    $coMask = null; //deprecated - not used
    $recID = null;
@@ -50,7 +50,7 @@ $mysqli = $system->get_mysqli();
     // 2,3 not used at the moment
     $mode = @$_REQUEST['check'] ? intval($_REQUEST['check']):0;
 
-    $rectypeID = @$_REQUEST['rty_id'] ? $_REQUEST['rty_id'] : null;
+    $rectypeID = intval(@$_REQUEST['rty_id']);
     $mask = @$_REQUEST['mask'] ? $_REQUEST['mask'] : null;
     $coMask = @$_REQUEST['coMask'] ? $_REQUEST['coMask'] : null; //deprecated - not used
     $recID = @$_REQUEST['rec_id']? $_REQUEST['rec_id'] : null;
@@ -130,13 +130,13 @@ if($mode!=3){
 
                 }else{
 
-                    if (!$rectypeID){
+                    if ($rectypeID>0 && $rtIDs[$rectypeID]){
+                        checkRectypeMask($rectypeID, $rtIDs[$rectypeID], $mask, $coMask, $recID, $mode);
+                    }else{
                         //check all rectypes
                         foreach ($rtIDs as $rtID => $rtName) {
                             $is_not_found = checkRectypeMask($rtID, $rtName, null, null, null, $mode) && $is_not_found;
                         }
-                    }else{
-                        checkRectypeMask($rectypeID, $rtIDs[$rectypeID], $mask, $coMask, $recID, $mode);
                     }
 
                     if($is_included){

@@ -48,35 +48,45 @@ if (@$argv) {
     
     require_once (dirname(__FILE__).'/../System.php');
     require_once ('entityScrudSrv.php');
+    
+    $dbname = @$_REQUEST['db'];
 
     $system = new System();
     
-    $dbdef_cache = $db_defs = $system->getFileStoreRootFolder().@$_REQUEST['db'].'/entity/db.json';
-
+    $dbdef_cache = null;
+    
     if(isset($defaultRootFileUploadURL)
+        && $error==null
         && @$_REQUEST['a']=='structure' && @$_REQUEST['entity']=='all' 
-        && file_exists($dbdef_cache)
         && strpos($defaultRootFileUploadURL,'sydney.edu.au')===false
         ){
             
-            if(isset($allowWebAccessEntityFiles) && $allowWebAccessEntityFiles)
-            {
-                $host_params = getHostParams();
-                // 
-                if(strpos($defaultRootFileUploadURL, $host_params['server_url'])===0){
-                    $url = $defaultRootFileUploadURL;
-                }else{
-                    //replace server name to avoid CORS issues
-                    $parts = explode('/',$defaultRootFileUploadURL);
-                    $url = $host_params['server_url'] . '/' . implode('/',array_slice($parts,3));
-                }
-                
-                $url = $url . $_REQUEST['db'].'/entity/db.json';
-                header('Location: '.$url);
-            }else{
-                downloadFile(null,$db_defs);
+            $error = System::dbname_check($dbname);
+            if($error!=null){
+                $dbdef_cache = $system->getFileStoreRootFolder().$dbname.'/entity/db.json';    
             }
-            exit();
+            if($dbdef_cache!=null && file_exists($dbdef_cache)){
+            
+                if(isset($allowWebAccessEntityFiles) && $allowWebAccessEntityFiles)
+                {
+                    $host_params = getHostParams();
+                    // 
+                    if(strpos($defaultRootFileUploadURL, $host_params['server_url'])===0){
+                        $url = $defaultRootFileUploadURL;
+                    }else{
+                        //replace server name to avoid CORS issues
+                        $parts = explode('/',$defaultRootFileUploadURL);
+                        $url = $host_params['server_url'] . '/' . implode('/',array_slice($parts,3));
+                    }
+                    
+                    $url = $url.$dbname.'/entity/db.json';
+                    header('Location: '.$url);
+                }else{
+                    downloadFile(null, $dbdef_cache);
+                }
+                exit();
+                
+            }
     }
     
     $response = array();
@@ -89,14 +99,14 @@ if (@$argv) {
     //sanitizeRequest($_REQUEST);  it brokes json strings
     stripScriptTagInRequest($_REQUEST);
     
-    if($system->init(@$_REQUEST['db'])){
+    if($system->init($dbname)){
 
         $res = array();        
         $entities = array();
         
         if(@$_REQUEST['a']=='structure'){ 
             // see HAPI4.refreshEntityData
-            if(@$_REQUEST['entity']=='force_all'){
+            if(@$_REQUEST['entity']=='force_all' && $dbdef_cache!=null){
                 //remove cache
                 fileDelete($dbdef_cache);
                 $_REQUEST['entity']='all';
@@ -104,7 +114,7 @@ if (@$argv) {
             $res = entityRefreshDefs($system, @$_REQUEST['entity'], true); //, @$_REQUEST['recID']);
             
             //update dbdef cache
-            if(@$_REQUEST['entity']=='all' && $res!==false){
+            if(@$_REQUEST['entity']=='all' && $res!==false && $dbdef_cache!=null){
                 file_put_contents($dbdef_cache, json_encode($res));
             }
             

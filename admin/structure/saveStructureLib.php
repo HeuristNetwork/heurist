@@ -210,7 +210,7 @@ function handleError($msg, $query, $sqlerror=null){
 * @author Stephen White
 * @param $rtyID rectype ID to delete
 * @return $ret an array of return values for the various data elements created or errors if they occurred
-**/
+**///NOT USED
 function deleteRecType($rtyID) {
     global $system, $mysqli;
 
@@ -460,10 +460,10 @@ function createRectypes($commonNames, $rt, $isAddDefaultSetOfFields, $convertTit
             $dbID = $system->get_system('sys_dbRegisteredID');
             if(!($dbID>0)) $dbID = 0;
             
-            $query= 'UPDATE defRecTypes SET rty_OriginatingDBID='.$dbID
+            $query= 'UPDATE defRecTypes SET rty_OriginatingDBID='.intval($dbID)
                 .', rty_NameInOriginatingDB=rty_Name'
-                .', rty_IDInOriginatingDB='.$rtyID
-                .' WHERE (NOT rty_OriginatingDBID>0 OR rty_OriginatingDBID IS NULL) AND rty_ID='.$rtyID;
+                .', rty_IDInOriginatingDB='.intval($rtyID)
+                .' WHERE (NOT rty_OriginatingDBID>0 OR rty_OriginatingDBID IS NULL) AND rty_ID='.intval($rtyID);
             $mysqli->query($query);
 
             $ret = -$rtyID;

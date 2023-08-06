@@ -188,7 +188,7 @@ class DbUtils {
         $usrName = $params["usrName"];
         $usrFirstName = $params["usrFirstName"];
         $usrLastName = $params["usrLastName"];
-        $newid = @$params["newid"];
+        $newid = intval(@$params["newid"]);
 
         // $var is null, blank, 0 or false --> false
         if (!$serverURL || !$dbReg || !$dbTitle || !$usrEmail || !$usrName || !$usrFirstName || !$usrLastName || !$usrPassword) { // error in one or more parameters
@@ -232,12 +232,14 @@ class DbUtils {
         // Find the registering user in the index database, make them the owner of the new record
         $usrEmail = strtolower(trim($usrEmail));
 
-        $indexdb_user_id = mysql__select_value($mysqli, 'select ugr_ID from sysUGrps where lower(ugr_eMail)="'.$mysqli->real_escape_string($usrEmail).'"');
+        $indexdb_user_id = mysql__select_value($mysqli, 'select ugr_ID from sysUGrps where lower(ugr_eMail)="'
+                .$mysqli->real_escape_string($usrEmail).'"');
 
         // Check if the email address is recognised as a user name
         // Added 19 Jan 2012: we also use email for ugr_Name and it must be unique, so check it has not been used
         if(!($indexdb_user_id>0)) { // no user found on email, try querying on user name
-            $indexdb_user_id = mysql__select_value($mysqli, 'select ugr_ID from sysUGrps where lower(ugr_Name)="'.$mysqli->real_escape_string($usrEmail).'"');
+            $indexdb_user_id = mysql__select_value($mysqli, 'select ugr_ID from sysUGrps where lower(ugr_Name)="'
+                .$mysqli->real_escape_string($usrEmail).'"');
         }
 
         if(!($indexdb_user_id>0)) { // did not find the user, create a new one and pass back login info
@@ -270,7 +272,8 @@ class DbUtils {
         // TODO: Would be good to have a recaptcha style challenge otherwise can be called repeatedly
         // with slight URL variations to spawn multiple registrations of dummy databases
 
-        $dbID = mysql__select_value($mysqli, "select rec_ID from Records where lower(rec_URL)='$serverURL_lc'");
+        $dbID = mysql__select_value($mysqli, "select rec_ID from Records where lower(rec_URL)='".
+                        $mysqli->real_escape_string($serverURL_lc)."'");
 
         if($dbID>0) { 
             
@@ -396,10 +399,10 @@ class DbUtils {
         $dbTitle = $params["dbTitle"]; // Database description
         $usrEmail = $params["usrEmail"];
         $usrPassword = $params["usrPassword"];
-        $dbID = @$params["dbID"];
+        $dbID = intval(@$params["dbID"]);
 
         // $var is null, blank, 0 or false --> false
-        if (!$dbID || (!$serverURL && !$dbReg && !$dbTitle)) { // error in one or more parameters
+        if ( (!($dbID>0)) || (!$serverURL && !$dbReg && !$dbTitle)) { // error in one or more parameters
             $returnData = 'Bad parameters passed';
             return $returnData;
         }
@@ -422,11 +425,13 @@ class DbUtils {
         $user_id = 0; // existing record owner
         // Retrieve user - OWNER CAN BE CHANGED + DETAILS CAN BE CHANGED
         $usrEmail = strtolower(trim($usrEmail));
-        $user_id = mysql__select_value($mysqli, 'select ugr_ID from sysUGrps where lower(ugr_eMail)="'.$mysqli->real_escape_string($usrEmail).'"');
+        $user_id = mysql__select_value($mysqli, 'select ugr_ID from sysUGrps where lower(ugr_eMail)="'
+                    .$mysqli->real_escape_string($usrEmail).'"');
 
         // Check if the email address is recognised as a user name
         if($user_id <= 0){
-            $user_id = mysql__select_value($mysqli, 'select ugr_ID from sysUGrps where lower(ugr_Name)="'.$mysqli->real_escape_string($usrEmail).'"');
+            $user_id = mysql__select_value($mysqli, 'select ugr_ID from sysUGrps where lower(ugr_Name)="'
+                    .$mysqli->real_escape_string($usrEmail).'"');
         }
 
         // Unable to retrieve existing user

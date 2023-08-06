@@ -34,8 +34,8 @@
     $action = @$_REQUEST['a']; //$system->getError();
     
     $system = new System();
-    
-    $error = $system->dbname_check(@$_REQUEST['db']);
+    $dbname = @$_REQUEST['db'];
+    $error = System::dbname_check($dbname);
 
     if($error){
         $system->addError(HEURIST_INVALID_REQUEST, $error);
@@ -44,7 +44,7 @@
     }else
     if($action=='verify_credentials'){ //just check only if logged in (db connection not required)
         
-        $res = $system->verify_credentials(@$_REQUEST['db']);
+        $res = $system->verify_credentials($dbname);
         
         if( $res>0 ){ //if logged id verify that session info (especially groups) is up to date
             //if exists file with userid it means need to reload system info
@@ -53,13 +53,13 @@
             $const_toinit = true;
             if(!$reload_user_from_db){ //check for flag file to force update user (user rights can be changed by admin)
                 $const_toinit = false;
-                $system->initPathConstants(@$_REQUEST['db']);  
+                $system->initPathConstants($dbname);  
                 $fname = HEURIST_FILESTORE_DIR.$res;
                 $reload_user_from_db = file_exists($fname);
             }
             
             if($reload_user_from_db){
-                $system->init(@$_REQUEST['db'], false, $const_toinit); //session and constant are defined already
+                $system->init($dbname, false, $const_toinit); //session and constant are defined already
                 $res = $system->getCurrentUserAndSysInfo();
             }else{
                 $res = true;
@@ -72,28 +72,28 @@
     }
     else if($action=='usr_log'){
         
-        $system->initPathConstants(@$_REQUEST['db']);                                
+        $system->initPathConstants($dbname);                                
         $system->user_LogActivity(@$_REQUEST['activity'], @$_REQUEST['suplementary'], @$_REQUEST['user']);
         $res = true;
         
         if(@$_REQUEST['activity']=='impEmails'){
-            $msg = 'Click on "Harvest EMail" in menu. DATABASE: '.@$_REQUEST['db'];
+            $msg = 'Click on "Harvest EMail" in menu. DATABASE: '.$dbname;
             $rv = sendEmail(HEURIST_MAIL_TO_ADMIN, $msg, $msg);
         }
         
         
     } else if (false && $action == "save_prefs"){ //NOT USED save preferences into session (without db)
 
-        if($system->verify_credentials(@$_REQUEST['db'])>0){
+        if($system->verify_credentials($dbname)>0){
             user_setPreferences($system, $_REQUEST);
             $res = true;
         }
 
     } else if ($action == "logout"){ //save preferences into session
     
-        if($system->set_dbname_full(@$_REQUEST['db'])){
+        if($system->set_dbname_full($dbname)){
             
-                $system->initPathConstants(@$_REQUEST['db']);
+                $system->initPathConstants($dbname);
                 $system->user_LogActivity('Logout');
 
                 if($system->doLogout()){
@@ -109,8 +109,8 @@
         if(!$is_alpha){
             
             if(!defined('HEURIST_FILESTORE_ROOT')){
-                if($system->set_dbname_full(@$_REQUEST['db'])){
-                    $system->initPathConstants(@$_REQUEST['db']);
+                if($system->set_dbname_full($dbname)){
+                    $system->initPathConstants($dbname);
                 }
             }
 
@@ -172,7 +172,7 @@
         }
 
 
-    }else if( !$system->init( @$_REQUEST['db'] ) ){ 
+    }else if( !$system->init( $dbname ) ){ 
         
 //        error_log('FAILED INIT SYSTEM');        
         
@@ -232,7 +232,7 @@
             
         }else if ($action == "save_prefs"){
            
-            if($system->verify_credentials(@$_REQUEST['db'])>0){
+            if($system->verify_credentials($dbname)>0){
                 user_setPreferences($system, $_REQUEST);
                 $res = true;
                 //session_write_close();
@@ -319,10 +319,10 @@
 
             $msg = '';
 
-            if(isset($ESTC_PermittedDBs) && strpos($ESTC_PermittedDBs, @$_REQUEST['db']) !== false){
+            if(isset($ESTC_PermittedDBs) && strpos($ESTC_PermittedDBs, $dbname) !== false){
                 if(@$_REQUEST['ver'] == 'ESTC'){ // is original LRC18C lookup, both ESTC and LRC18C DBs need to be on the same server
 
-                    if(@$_REQUEST['db'] == 'Libraries_Readers_Culture_18C_Atlantic'){ // check if current db is the LRC18C DB
+                    if($dbname == 'Libraries_Readers_Culture_18C_Atlantic'){ // check if current db is the LRC18C DB
 
                         $query = "SHOW DATABASES WHERE `database` = '". HEURIST_DB_PREFIX ."ESTC_Helsinki_Bibliographic_Metadata'";
                         $res = $mysqli->query($query);
@@ -398,7 +398,7 @@
                     $password = @$_REQUEST['password'];
                     if($action && $password){
                         $varname = 'passwordFor'.$action;
-                        $res = (@$$varname==$password)?'ok':'wrong';
+                        $res = (@$varname==$password)?'ok':'wrong';
                     }
 
             }

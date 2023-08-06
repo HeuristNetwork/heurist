@@ -187,10 +187,10 @@ $system->defineConstants();
         mapping = new hMapping("map", "timeline", _options, mylayout);
 
         //take from frame
-        var mapdocument = window.hWin.HEURIST4.util.getUrlParameter('mapdocument', location.search);
+        var mapdocument = parseInt(window.hWin.HEURIST4.util.getUrlParameter('mapdocument', location.search));
         //take from top most
         if(!(mapdocument>0)){
-            mapdocument = window.hWin.HEURIST4.util.getUrlParameter('mapdocument', window.hWin.location.search);
+            mapdocument = parseInt(window.hWin.HEURIST4.util.getUrlParameter('mapdocument', window.hWin.location.search));
             if(!(mapdocument>0)){
                 mapdocument = null;
             }

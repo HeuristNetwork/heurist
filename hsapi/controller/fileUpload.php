@@ -38,23 +38,36 @@ if ($post_max_size && ($content_length > $post_max_size)) {
 if($system->init(@$_REQUEST['db'])){
 
     //define upload folder   HEURIST_FILESTORE_DIR/ $_REQUEST['entity'] /
-    $entity_name = @$_REQUEST['entity'];
+    $entity_name = null;
     $is_autodect_csv = (@$_REQUEST['autodect']==1);
     $recID = @$_REQUEST['recID'];
     $registerAtOnce = (@$_REQUEST['registerAtOnce']==1);
     $tiledImageStack = (@$_REQUEST['tiledImageStack']==1); //unzip archive and copy to uploaded_tilestacks
     
-    if ( !$system->has_access() ) { //not logged in
-            $response = $system->addError(HEURIST_REQUEST_DENIED);
-    }else if ($entity_name=='sysGroups' || $entity_name=='sysUsers') {
-            if(!$system->has_access($recID)){ //only user or group admin
-              $response = $system->addError(HEURIST_REQUEST_DENIED);
-            }
-    }else if(!($entity_name=='recUploadedFiles' || $entity_name=='sysBugreport'))
-    { //for all other entities other than recUploadedFile must be admin of dbowners group
-            if(!$system->is_admin()){
-              $response = $system->addError(HEURIST_REQUEST_DENIED);
-            }
+    $new_file_name = @$_REQUEST['newfilename'];
+    if($new_file_name) $new_file_name = fileNameRemoveSlashes($new_file_name);
+        
+    
+    
+    if(@$_REQUEST['entity']){
+        $entity_name = entityResolveName($_REQUEST['entity']);
+        if(!$entity_name){
+            $response = $system->addError(HEURIST_INVALID_REQUEST,'Wrong entity parameter');
+        }
+    }
+    if($response==null){
+        if ( !$system->has_access() ) { //not logged in
+                $response = $system->addError(HEURIST_REQUEST_DENIED);
+        }else if ($entity_name=='sysGroups' || $entity_name=='sysUsers') {
+                if(!$system->has_access($recID)){ //only user or group admin
+                  $response = $system->addError(HEURIST_REQUEST_DENIED);
+                }
+        }else if(!($entity_name=='recUploadedFiles' || $entity_name=='sysBugreport'))
+        { //for all other entities other than recUploadedFile must be admin of dbowners group
+                if(!$system->is_admin()){
+                  $response = $system->addError(HEURIST_REQUEST_DENIED);
+                }
+        }
     }
     
 }else{
@@ -80,7 +93,7 @@ if($response!=null){
 
 //define options for upload handler    
     
-    if(!$entity_name){
+    if($entity_name==null){
         
         //direct upload from manageFileUpload
         $options = array(
@@ -113,7 +126,7 @@ if($response!=null){
     if($entity_name=="temp"){//redirect uploaded content back to client side after some processing
                                    // for example in term list import 
            
-        $max_file_size = @$_REQUEST['max_file_size'];                           
+        $max_file_size = intval(@$_REQUEST['max_file_size']);                           
         if($max_file_size>0){
 // it does not work             
 //            file_put_contents(HEURIST_FILESTORE_DIR.'scratch/.htaccess', 
@@ -136,7 +149,7 @@ if($response!=null){
                 'upload_dir' => HEURIST_SCRATCH_DIR,
                 'upload_url' => HEURIST_FILESTORE_URL.'scratch/', //file_uploads/
                 'unique_filename' => false,
-                'newfilename' => @$_REQUEST['newfilename'],
+                'newfilename' => $new_file_name,
                 'correct_image_extensions' => true,
                 'image_versions' => array(
                     ''=>array(
@@ -159,19 +172,16 @@ if($response!=null){
     
     }else{
         
-        //sanitize $entity_name
-        $entity_name = fileNameSanitize($entity_name, false);
-        
         $entityDir = HEURIST_FILESTORE_DIR.'entity/'.$entity_name.'/';
         
         $version = @$_REQUEST['version']!='icon'?'thumbnail':'icon';
-        $maxsize = @$_REQUEST['maxsize']>0?$_REQUEST['maxsize']:120;
+        $maxsize = intval(@$_REQUEST['maxsize'])>0?intval($_REQUEST['maxsize']):120;
 
         $options = array(
                 'upload_dir' => $entityDir,
                 'upload_url' => HEURIST_FILESTORE_URL.'entity/'.$entity_name.'/',
                 'unique_filename' => false,
-                'newfilename' => @$_REQUEST['newfilename'],
+                'newfilename' => $new_file_name,
                 'correct_image_extensions' => true,
                 'image_versions' => array(
                     ''=>array(
@@ -252,15 +262,14 @@ if($response!=null){
                 }
             }else if(!@$file->thumbnailUrl){ //if UploadHandler does not create thumb - creates it as image with text (file extension)
                 
-                $thumb_file = HEURIST_SCRATCH_DIR.'thumbs/'.@$_REQUEST['newfilename'];
+                $thumb_file = HEURIST_SCRATCH_DIR.'thumbs/'.$new_file_name;
                 $img = UtilsImage::createFromString($file->type?$file->type:'XXX!');
                 imagepng($img, $thumb_file);//save into file
                 imagedestroy($img);
-                $res['files'][$idx] ->thumbnailUrl = HEURIST_FILESTORE_URL.'scratch/thumbs/'.@$_REQUEST['newfilename'];
+                $res['files'][$idx] ->thumbnailUrl = HEURIST_FILESTORE_URL.'scratch/thumbs/'.$new_file_name;
             }
                 
         }else if($entity_name=="temp" && $is_autodect_csv) {
-            
             
             $filename = HEURIST_FILESTORE_DIR.'scratch/'.$file->original_name;
             

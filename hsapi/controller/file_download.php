@@ -43,36 +43,40 @@
 require_once (dirname(__FILE__).'/../System.php');
 require_once (dirname(__FILE__).'/../dbaccess/db_files.php');
 
-$system = new System(); //without connection
 $db = @$_REQUEST['db'];
 
-$error = $system->dbname_check($db);
+$error = System::dbname_check($db);
 
 if(!$error){
     
+    $system = new System(); //without connection
     $fileid = @$_REQUEST['thumb'];
     if($fileid){ 
-        $force_recreate = (@$_REQUEST['refresh']==1);
-
-        $system->initPathConstants($db);
-
-        $thumbfile = HEURIST_THUMB_DIR.'ulf_'.$fileid.'.png';
         
-        if(!$force_recreate && file_exists($thumbfile)){
-            
-            if(defined('HEURIST_THUMB_URL')){
-                header('Location: '.HEURIST_THUMB_URL.'ulf_'.$fileid.'.png');    
-            }else{
-                downloadFile('image/png', $thumbfile);    
-            }
-            
-        }else{
-            //recreate thumbnail and output it
-            $system->init($db);
-            fileCreateThumbnail( $system, $fileid, true );
-            $system->dbclose();
-        }
+        if(!preg_match('/[^a-z0-9\$]/', $fileid)){ //validatate obfuscation id
+        
+            $force_recreate = (@$_REQUEST['refresh']==1);
 
+            if($system->initPathConstants($db)){
+
+                $thumbfile = HEURIST_THUMB_DIR.'ulf_'.$fileid.'.png';
+                
+                if(!$force_recreate && file_exists($thumbfile)){
+                    
+                    if(defined('HEURIST_THUMB_URL')){
+                        header('Location: '.HEURIST_THUMB_URL.'ulf_'.$fileid.'.png');    
+                    }else{
+                        downloadFile('image/png', $thumbfile);    
+                    }
+                    
+                }else{
+                    //recreate thumbnail and output it
+                    $system->init($db);
+                    fileCreateThumbnail( $system, $fileid, true );
+                    $system->dbclose();
+                }
+            }
+        }
     }
     else if(@$_REQUEST['file'] || @$_REQUEST['ulf_ID']) { //ulf_ID is obfuscation id here
 
@@ -81,6 +85,10 @@ if(!$error){
         
         if(is_numeric($fileid)){
             error_log('Obfuscated id is allowed only. Query: '.@$_SERVER['QUERY_STRING']);
+            exit;
+        }
+
+        if(!preg_match('/[^a-z0-9\$]/', $fileid)){ //validatate obfuscation id
             exit;
         }
         

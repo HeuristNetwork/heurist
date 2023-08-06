@@ -29,11 +29,12 @@ require_once(dirname(__FILE__)."/../System.php");
 
 if(@$_REQUEST['db']){
     $system = new System(); //to init folder const without actual coonection to db
-    $error = $system->dbname_check(@$_REQUEST['db']);
+    $dbname = @$_REQUEST['db'];
+    $error = System::dbname_check($dbname);
     if($error){
         exit();
     }else{
-        $system->initPathConstants(@$_REQUEST['db']);
+        $system->initPathConstants($dbname);
     }
 }
 

@@ -169,11 +169,15 @@
             else if($entity_name=='dtg') $entity_name = 'defDetailTypeGroups';
             else if($entity_name=='rty') $entity_name = 'defRecTypes';
             else if($entity_name=='dty') $entity_name = 'defDetailTypes';
-            else if($entity_name=='trm') $entity_name = 'defTerms';
+            else if($entity_name=='trm' || $entity_name=='term') $entity_name = 'defTerms';
             else if($entity_name=='vcg') $entity_name = 'defVocabularyGroups';
             else if($entity_name=='rst') $entity_name = 'defRecStructure';   
             else if($entity_name=='rem') $entity_name = 'dbUsrReminders';   
             else if($entity_name=='swf') $entity_name = 'sysWorkflowRules';   
+            
+            if(preg_match('/[^A-Za-z\$]/', $entity_name)){ //validatate entity name
+                return null;
+            }
             
             return $entity_name;
     }
@@ -196,9 +200,6 @@
             $path = '/entity/sysIdentification/';    
 
         }else{
-            if($entity_name=='term' || $entity_name=='trm'){
-                $entity_name = 'defTerms';
-            }
 
             if($db_name==null){
                 if(defined('HEURIST_DBNAME')){
@@ -207,6 +208,7 @@
                     return array(null,null,null);
                 }
             }
+            
             $path = '/entity/'.$entity_name.'/';    
         } 
 
@@ -225,9 +227,9 @@
         $content_type = null;
         $url = null;
 
-        if($rec_id>0){
+        if(intval($rec_id)>0 && !System::dbname_check($db_name)){
 
-            $fname = HEURIST_FILESTORE_ROOT.$db_name.$path.$rec_id;
+            $fname = HEURIST_FILESTORE_ROOT.$db_name.$path.intval($rec_id);
             
             $exts = $extension?array($extension):array('png','jpg','svg','jpeg','jpe','jfif','gif');
             foreach ($exts as $ext){

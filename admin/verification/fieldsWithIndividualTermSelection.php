@@ -43,7 +43,7 @@ $is_csv = (@$_REQUEST['html']!=1);
     while (($row = $res->fetch_row())) {
         if( strpos($row[0], 'hdb_')===0 ){
             //if($row[0]>'hdb_Masterclass_Cookbook')
-                $databases[] = $row[0];
+                $databases[] = htmlspecialchars($row[0]);
         }
     }
 
@@ -137,8 +137,8 @@ $is_csv = (@$_REQUEST['html']!=1);
             }
             
             if(!$is_csv){
-                print '<tr><td>'.$row[0].'</td><td>'.$row[3].'</td><td>'.$row[4].'</td>'
-                    .'<td>'.$vocab_count.'</td><td>'.count($terms).'</td><td>'.($is_idis?count($nonTerms):'').'</td><td>'.$rec_usage.'</td></tr>';
+                print '<tr><td>'.htmlspecialchars($row[0]).'</td><td>'.htmlspecialchars($row[3]).'</td><td>'.htmlspecialchars($row[4]).'</td>'
+                    .'<td>'.$vocab_count.'</td><td>'.count($terms).'</td><td>'.($is_idis?count($nonTerms):'').'</td><td>'.intval($rec_usage).'</td></tr>';
             }else {
                 //'",'.$row[3]. ($is_vocab?'1':'').','.($is_vocab?'':'1').
                 //print $db_name.',"'.$row[0].'",'.$row[3].','.($is_idis?'1':'').PHP_EOL;

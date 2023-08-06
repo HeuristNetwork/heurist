@@ -39,13 +39,13 @@ $rty_ID = @$_REQUEST["rty"];
 $dty_ID = @$_REQUEST["dty"];
 $trm_ID = @$_REQUEST["trm"];
 if($rty_ID){
-    $rty_ID = ConceptCode::getRecTypeLocalID($rty_ID);    
+    $rty_ID = intval(ConceptCode::getRecTypeLocalID($rty_ID));    
 }
 if($dty_ID){
-    $dty_ID = ConceptCode::getDetailTypeLocalID($dty_ID);    
+    $dty_ID = intval(ConceptCode::getDetailTypeLocalID($dty_ID));    
 }
 if($trm_ID){
-    $trm_ID = ConceptCode::getTermLocalID($trm_ID);    
+    $trm_ID = intval(ConceptCode::getTermLocalID($trm_ID));    
 }
 $is_subset = ($rty_ID>0 || $dty_ID>0 || $trm_ID>0);
 

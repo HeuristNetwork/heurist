@@ -68,6 +68,8 @@ if( $system->verifyActionPassword($_REQUEST['pwd'], $passwordForServerFunctions)
         exit();
     }
     list($orig_db_id, $orig_id) = explode('-',$ccode);
+    $orig_db_id = intval($orig_db_id);
+    $orig_id = intval($orig_id);
     if(!($orig_db_id>0 && $orig_id>0)){
         print 'conceptid is not wrong';
         exit();
@@ -146,14 +148,14 @@ if( $system->verifyActionPassword($_REQUEST['pwd'], $passwordForServerFunctions)
                     $k++;
                     $m++;
                 }else{
-                    print 'Cannot register url '.$url.' for detail id '.$dtl_ID;
+                    print 'Cannot register url '.htmlspecialchars($url).' for detail id '.intval($dtl_ID);
                     exit();
                 }
                 
             }//while recDeetails
             
             if($m>0){
-                print $db_name.'  dty_ID='.$dty_ID.'  count='.$m.'<br>';    
+                print $db_name.'  dty_ID='.intval($dty_ID).'  count='.$m.'<br>';    
             }
             
         }        

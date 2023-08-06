@@ -40,23 +40,21 @@ $db = @$_REQUEST['db'];
 $filename = @$_REQUEST['file'];
 $entity_name = @$_REQUEST['entity'];
 
-$error = null;
-
-$system = new System(); //without db connection and session - just paths
-$error = $system->dbname_check($db);
+$error = System::dbname_check($db);
 
 if(!$error){
 
+$system = new System(); //without db connection and session - just paths
 $system->initPathConstants($db);
     
 if($filename){ //download from scratch (for csv import)
 
         //remove slashes - prevents Local file disclosure
-        //$filename = fileNameSanitize($filename, false);
+        $filename = fileNameRemoveSlashes($filename, false);
 
         $file_read = HEURIST_FILESTORE_DIR.'scratch/'.$filename;
         
-        if(!isPathInHeuristUploadFolder( $file_read ))        
+        if(!isPathInHeuristUploadFolder( $file_read ) || is_dir($file_read))        
         {
             print 'Temporary file (uploaded csv data) '.$filename. ' not found';                
             exit();
@@ -124,13 +122,8 @@ if($filename){ //download from scratch (for csv import)
         $rec_id = @$_REQUEST['icon'];  
         if($rec_id==null) $rec_id = @$_REQUEST['id'];  
         
-        //default - defRecTypes
-        $entity_name = @$_REQUEST['entity'];
-        if(!$entity_name) $entity_name = 'rty';
-        
         //icon, thumb, full
         $viewmode = @$_REQUEST['version']; 
-
         
         if($rec_id && substr($rec_id,0,4)=='term'){
             //backward support - icons for Digital Harlem
@@ -138,6 +131,14 @@ if($filename){ //download from scratch (for csv import)
             $entity_name  = 'trm';
             $viewmode = 'icon';
             //$path = HEURIST_TERM_ICON_DIR;
+        }else if(!$entity_name) {
+            $entity_name = 'rty'; //default - defRecTypes   
+        }
+
+        $entity_name = entityResolveName($entity_name);
+        
+        if(!$entity_name){
+            exit();
         }
         
         list($filename, $content_type, $file_url) = resolveEntityFilename($entity_name, $rec_id, $viewmode, $db);
@@ -185,11 +186,11 @@ if($filename){ //download from scratch (for csv import)
         
         }else{
         
-            if(@$_REQUEST['entity'] && ($default_mode=='view' || $default_mode==2)) //get entity default icon or thumb
+            if($entity_name && ($default_mode=='view' || $default_mode==2)) //get entity default icon or thumb
             {
                 //at the moment we don't have full images that describe entity - only icons and thumbs
                 $filename = dirname(__FILE__).'/../../hclient/assets/'
-                                .$_REQUEST['entity'].(($viewmode=='icon')?'':'_thumb').'.png';    
+                                .$entity_name.(($viewmode=='icon')?'':'_thumb').'.png';    
                 //$filename = dirname(__FILE__).'/../../hclient/assets/cross-red.png';
                                 
                 if(file_exists($filename) && !is_dir($filename)){
@@ -216,8 +217,8 @@ if($filename){ //download from scratch (for csv import)
 }else {
     if(!$entity_name){ //print error as text
         print $error;
-    }else{ //@todo return error image
-    
+    }else{
+        _download_file(dirname(__FILE__).'/../../hclient/assets/100x100.gif', 'image/gif');
     }
 }
 

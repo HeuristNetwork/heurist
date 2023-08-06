@@ -658,7 +658,9 @@ foreach ($this->imp_recordtypes as $rtyID){
             $def_rectype[$idx_origin_name] = $def_rectype[$idx_name];
         }
         
-        $res = createRectypes($columnNames, array("0"=>array("common"=>$def_rectype)), false, false, null); //from saveStructure.php
+        //from saveStructureLib.php
+        $res = createRectypes($columnNames, array("0"=>array("common"=>$def_rectype)), false, false, null); 
+        
     //if(_DBG) error_log('rt '.$rtyID);
         if(is_numeric($res)){
 

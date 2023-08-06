@@ -106,7 +106,12 @@ if( isset($passwordForDatabaseCreation) && $passwordForDatabaseCreation!='' &&
                 exit();
             }
             
-            $user_record = $_REQUEST;
+            $user_record = array();
+            foreach($_REQUEST as $name=>$val){
+                if(strpos($name,'urg_')===0){
+                    $user_record = getUsrField($name);    
+                }
+            }
             
             $user_record['ugr_Password'] = hash_it( $user_record['ugr_Password'] );
             

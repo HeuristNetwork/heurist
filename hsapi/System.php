@@ -644,13 +644,12 @@ error_log(print_r($_REQUEST, true));
         global $defaultRootFileUploadPath, $defaultRootFileUploadURL;
 
         if(defined('HEURIST_FILESTORE_URL')){
-            return; //already defined
+            return true; //already defined
         }
         
         list($database_name_full, $dbname) = mysql__get_names($dbname);
-        
-        
-        if(!$dbname) return;
+        $error = System::dbname_check($dbname);
+        if($error!=null || !$dbname) return false;
         
         $upload_root = $this->getFileStoreRootFolder();
 
@@ -848,7 +847,7 @@ error_log(print_r($_REQUEST, true));
     }
 
 
-    public function dbname_check($db){
+    public static function dbname_check($db){
         
         $error = null;
 
@@ -869,7 +868,7 @@ error_log(print_r($_REQUEST, true));
     */
     public function set_dbname_full($db, $dbrequired=true){
         
-        $error = $this->dbname_check($db);
+        $error = System::dbname_check($db);
         
         if($error){
             $this->dbname = null;

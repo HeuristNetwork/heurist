@@ -131,13 +131,15 @@ private static function getLocalID($conceptID, $tableName, $fieldNamePrefix) {
             $res_id = $ids[0];
         }
         
-        $query = "select " . $fieldNamePrefix . "ID from $tableName where " . $fieldNamePrefix . "ID=" . $res_id;
+        $query = "select " . $fieldNamePrefix . "ID from $tableName where " . $fieldNamePrefix . "ID=" . intval($res_id);
         
         $res_id = mysql__select_value(self::$system->get_mysqli(), $query);
         
 
     } else if (is_array($ids) && count($ids) == 2 && is_numeric($ids[0]) && is_numeric($ids[1])) {
- $query = "select " . $fieldNamePrefix . "ID from $tableName where " . $fieldNamePrefix . "OriginatingDBID=" . $ids[0] . " and " . $fieldNamePrefix . "IDInOriginatingDB=" . $ids[1];
+ $query = "select " . $fieldNamePrefix . "ID from $tableName where " . $fieldNamePrefix 
+                . "OriginatingDBID=" . intval($ids[0]) . " and " 
+                . $fieldNamePrefix . "IDInOriginatingDB=" . intval($ids[1]);
                 
         $res_id = mysql__select_value(self::$system->get_mysqli(), $query);    
     }

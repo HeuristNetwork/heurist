@@ -131,6 +131,8 @@ if(!$dbowner['ugr_eMail'] || !$dbowner['ugr_FirstName'] || !$dbowner['ugr_LastNa
                 }
                 
                 if($dbNewID!=null && $dbNewID!=''){
+                    
+                    $dbNewID = intval($dbNewID);
                                             
                     if($dbNewID>0 && $dbNewID<4294967295) {
                         

@@ -6,13 +6,14 @@
     if(@$_REQUEST['db'] && @$_REQUEST['session']){
         
         $system = new System();
-        $error = $system->dbname_check(@$_REQUEST['db']);
+        $dbname = @$_REQUEST['db'];
+        $error = System::dbname_check($dbname);
         if(!$error){
         
             if(!defined('HEURIST_SCRATCH_DIR')){
-                //$system->initPathConstants($_REQUEST['db']);
+                //$system->initPathConstants($dbname);
                 $upload_root = $system->getFileStoreRootFolder();
-                $filestore_dir = $upload_root . $_REQUEST['db'] . '/';
+                $filestore_dir = $upload_root . $dbname . '/';
                 if(file_exists($filestore_dir)){
                     $dir = $filestore_dir.'scratch/';
                     $warn = folderCreate2($dir, '', false);
@@ -36,7 +37,7 @@
         
 
 /*        
-        if($system->init($_REQUEST['db'], true, false)){
+        if($system->init($dbname, true, false)){
         
             $mysqli = $system->get_mysqli();
             

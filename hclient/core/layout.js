@@ -622,7 +622,7 @@ function hLayout(args) {
                         // in design mode - it called from iframe and baseURL is different 
                         // to fix this mess
                         var rhash = /#.*$/;
-                        var locationUrl = location.href.replace( rhash, "" );
+                        var locationUrl = window.location.href.replace( rhash, "" ); //Client_DOM_Code_Injection
                         $pane.find('li > a').each(function(idx, item){
                            var href = $(item).attr('href');
                            href = href.substr(href.indexOf('#'));           
