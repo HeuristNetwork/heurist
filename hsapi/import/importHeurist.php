@@ -69,7 +69,8 @@ private static function initialize($fields_correspondence=null)
 * detect format
 * if xml coverts to json
 * 
-* @param mixed $filename - archive or temp  import file
+* @param mixed $filename - archive or temp  import file - 
+*               this is either websiteStarterRecords or file in scratch folder
 * @param mixed $type - type of file manifest of record data
 */
 private static function _readDataFile($filename, $type=null, $validate=true){

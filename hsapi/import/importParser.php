@@ -100,9 +100,12 @@ public static function encodeAndGetPreview($upload_file_name, $params){
     $upload_file_name = HEURIST_FILESTORE_DIR.'scratch/'.$upload_file_name;
     
     $s = null;
-    if (! file_exists($upload_file_name)) $s = ' does not exist.<br><br>'
-    .'Please clear your browser cache and try again. '
-    .' If problem persists please '.CONTACT_HEURIST_TEAM.' immediately';
+    if($upload_file_name==null){
+        $s = 'File parameter is not defined<br><br>'
+        .' If problem persists please '.CONTACT_HEURIST_TEAM.' immediately';
+    }else if (! file_exists($upload_file_name)) $s = ' does not exist.<br><br>'
+        .'Please clear your browser cache and try again. '
+        .' If problem persists please '.CONTACT_HEURIST_TEAM.' immediately';
     else if (! is_readable($upload_file_name)) $s = ' is not readable';
         
     if($s){

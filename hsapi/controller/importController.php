@@ -122,13 +122,12 @@ if(!$system->init(@$_REQUEST['db'])){
             
         }else if($action=='step1'){   
             //file is uploaded with help fileupload widget and controller/fileUpload.php
-            $upload_file_name = null; 
-            if(@$_REQUEST["upload_file_name"]){
-                $upload_file_name = fileNameSanitize(basename($_REQUEST["upload_file_name"]), false); //snyk SSRF
+            $upload_file_name = @$_REQUEST["upload_file_name"]; 
+            if($upload_file_name!=null){
+                $upload_file_name = fileNameSanitize(basename($upload_file_name), false); //snyk SSRF
+                //encode and invoke parse_prepare with limit
+                $res = ImportParser::encodeAndGetPreview( $upload_file_name, $_REQUEST);  
             }
-            
-            //encode and invoke parse_prepare with limit
-            $res = ImportParser::encodeAndGetPreview( $upload_file_name, $_REQUEST);  
             
         }else if($action=='step2'){
             

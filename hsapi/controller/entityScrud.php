@@ -54,39 +54,36 @@ if (@$argv) {
     $system = new System();
     
     $dbdef_cache = null;
+    $error = System::dbname_check($dbname);
+    if($error==null 
+        && isset($defaultRootFileUploadURL)
+        && strpos($defaultRootFileUploadURL,'sydney.edu.au')===false )
+    {
+        $dbdef_cache = $system->getFileStoreRootFolder().$dbname.'/entity/db.json';    
+    }
     
-    if(isset($defaultRootFileUploadURL)
-        && $error==null
-        && @$_REQUEST['a']=='structure' && @$_REQUEST['entity']=='all' 
-        && strpos($defaultRootFileUploadURL,'sydney.edu.au')===false
+    if( @$_REQUEST['a']=='structure' && @$_REQUEST['entity']=='all' 
+        && $dbdef_cache!=null && file_exists($dbdef_cache)
         ){
             
-            $error = System::dbname_check($dbname);
-            if($error!=null){
-                $dbdef_cache = $system->getFileStoreRootFolder().$dbname.'/entity/db.json';    
-            }
-            if($dbdef_cache!=null && file_exists($dbdef_cache)){
-            
-                if(isset($allowWebAccessEntityFiles) && $allowWebAccessEntityFiles)
-                {
-                    $host_params = getHostParams();
-                    // 
-                    if(strpos($defaultRootFileUploadURL, $host_params['server_url'])===0){
-                        $url = $defaultRootFileUploadURL;
-                    }else{
-                        //replace server name to avoid CORS issues
-                        $parts = explode('/',$defaultRootFileUploadURL);
-                        $url = $host_params['server_url'] . '/' . implode('/',array_slice($parts,3));
-                    }
-                    
-                    $url = $url.$dbname.'/entity/db.json';
-                    header('Location: '.$url);
+            if(isset($allowWebAccessEntityFiles) && $allowWebAccessEntityFiles)
+            {
+                $host_params = getHostParams();
+                // 
+                if(strpos($defaultRootFileUploadURL, $host_params['server_url'])===0){
+                    $url = $defaultRootFileUploadURL;
                 }else{
-                    downloadFile(null, $dbdef_cache);
+                    //replace server name to avoid CORS issues
+                    $parts = explode('/',$defaultRootFileUploadURL);
+                    $url = $host_params['server_url'] . '/' . implode('/',array_slice($parts,3));
                 }
-                exit();
                 
+                $url = $url.$dbname.'/entity/db.json';
+                header('Location: '.$url);
+            }else{
+                downloadFile(null, $dbdef_cache);
             }
+            exit();
     }
     
     $response = array();

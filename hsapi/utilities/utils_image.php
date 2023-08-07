@@ -123,7 +123,7 @@ class UtilsImage {
 
                 //call Google PageSpeed Insights API
                 $googlePagespeedData = file_get_contents(
-                "https://www.googleapis.com/pagespeedonline/v5/runPagespeed?url=$siteURL&screenshot=true");
+                'https://www.googleapis.com/pagespeedonline/v5/runPagespeed?url='.$siteURL.'&screenshot=true');
 
                 //decode json data
                 $googlePagespeedData = json_decode($googlePagespeedData, true);
