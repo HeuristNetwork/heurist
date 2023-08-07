@@ -57,6 +57,8 @@ class ImportAction {
 
     private static $invalid_geo = 0;
     
+    private static $increment_fields = array(); // array(rty_ID => array(dty_ID1, dty_ID2, ...))
+    
 private static function initialize($fields_correspondence=null)
 {
     if (self::$initialized)
@@ -2211,6 +2213,60 @@ private static function doInsertUpdateRecord($recordId, $import_table, $recordTy
     if(@$details['URL']) $record['URL'] = @$details['URL'];
     if(@$details['ScratchPad']) $record['ScratchPad'] = @$details['ScratchPad'];
     $record['details'] = $details;
+
+    $ignore_dtys = array();
+
+    foreach(array_keys($record['details']) as $dty){
+        if(preg_match("/^t:\\d+$/", $dty) !== 1){
+            continue;
+        }
+
+        $dty = substr($dty, 2);
+        if($dty > 0){
+            array_push($ignore_dtys, $dty);
+        }
+    }
+
+    $cached_increments = array_key_exists($recordType, self::$increment_fields) ? self::$increment_fields[$recordType] : array();
+
+    foreach($cached_increments as $dty => $value){
+
+        if(in_array($dty, $ignore_dtys)){
+            continue;
+        }
+
+        $matches = array();
+        if (preg_match('/(\d+)$/', $value, $matches)){
+            $digits = $matches[1];
+            $increment_digit = str_pad(intval($digits) + 1, strlen($digits), '0', STR_PAD_LEFT);
+
+            $value = substr($value,0,-strlen($digits)).($increment_digit);
+        }else{ // shouldn't happen here, but just in case
+            $value = $value.'1';
+        }
+
+        $cached_increments[$dty] = $value; // update cache
+        $record['details'][$dty] = $value;
+
+        array_push($ignore_dtys, $dty);
+    }
+
+    // Get missing auto increment values
+    $auto_increment_params = array(
+        'rtyID' => $recordType,
+        'ignore_dtys' => $ignore_dtys
+    );
+
+    $auto_increment = recordGetAllIncremenetedValues(self::$system, $auto_increment_params); 
+
+    if(count($auto_increment) > 0){
+        $record['details'] = array_replace($details, $auto_increment);
+
+        $cached_increments = array_replace($cached_increments, $auto_increment);
+    }
+    if(count($cached_increments) > 0){
+        self::$increment_fields[$recordType] = $cached_increments;
+    }
     
     //DEBUG 
     $out = recordSave(self::$system, $record, false, false, 0, $record_count);  //see db_records.php
