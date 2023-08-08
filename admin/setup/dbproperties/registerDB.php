@@ -112,7 +112,7 @@ if(!$dbowner['ugr_eMail'] || !$dbowner['ugr_FirstName'] || !$dbowner['ugr_LastNa
             $dbName = $sysinfo['sys_dbName'];
             $dbDescription = $sysinfo['sys_dbDescription'];
             $ownerGrpID = $sysinfo['sys_dbOwner'];
-            $dbNewID = @$_POST['dbNewID'];
+            $dbNewID = intval(@$_POST['dbNewID']);
 
             $isAlreadyRegistred = isset($dbID) && ($dbID > 0);
             $isRegistrationInProgress = isset($_POST['dbDescription']);
@@ -130,10 +130,8 @@ if(!$dbowner['ugr_eMail'] || !$dbowner['ugr_FirstName'] || !$dbowner['ugr_LastNa
                     $isRegistrationInProgress = false;
                 }
                 
-                if($dbNewID!=null && $dbNewID!=''){
+                if($dbNewID>0){
                     
-                    $dbNewID = intval($dbNewID);
-                                            
                     if($dbNewID>0 && $dbNewID<4294967295) {
                         
                         if($system->verifyActionPassword(@$_REQUEST['dbNewID_pwd'], $passwordForServerFunctions)){

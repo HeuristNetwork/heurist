@@ -128,18 +128,18 @@ $mysqli = $system->get_mysqli();
 $isEmptyHomePage = false;
 $open_page_or_record_on_init = 0;
 if(_isPositiveInt(@$_REQUEST['initid'])) {
-    $open_page_or_record_on_init = @$_REQUEST['initid'];
+    $open_page_or_record_on_init = intval(@$_REQUEST['initid']);
 }else if(_isPositiveInt(@$_REQUEST['pageid'])) {
-    $open_page_or_record_on_init = @$_REQUEST['pageid'];
+    $open_page_or_record_on_init = intval(@$_REQUEST['pageid']);
 }
 
 $rec_id = 0;
 if(_isPositiveInt(@$_REQUEST['recID'])) {
-    $rec_id = @$_REQUEST['recID'];
+    $rec_id = intval(@$_REQUEST['recID']);
 }else if(_isPositiveInt(@$_REQUEST['recid'])) {
-    $rec_id = @$_REQUEST['recid'];
+    $rec_id = intval(@$_REQUEST['recid']);
 }else if(_isPositiveInt(@$_REQUEST['id'])) {
-    $rec_id = @$_REQUEST['id'];
+    $rec_id = intval(@$_REQUEST['id']);
 }
 
 if(!($rec_id>0))

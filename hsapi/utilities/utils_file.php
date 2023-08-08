@@ -970,7 +970,7 @@ function createZipArchive($source, $only_these_folders, $destination, $verbose=t
         return false;
     }
     if (!file_exists($source)) {
-        echo "<br/>".$source." was not found";
+        echo "<br/>".htmlspecialchars($source)." was not found";
         return false;
     }
 
@@ -978,7 +978,7 @@ function createZipArchive($source, $only_these_folders, $destination, $verbose=t
 
     $zip = new ZipArchive();
     if (!$zip->open($destination, ZIPARCHIVE::CREATE)) {
-        if($verbose) echo "<br/>Failed to create zip file at ".$destination;
+        if($verbose) echo "<br/>Failed to create zip file at ".htmlspecialchars($destination);
         return false;
     }
 
@@ -987,7 +987,7 @@ function createZipArchive($source, $only_these_folders, $destination, $verbose=t
         $src = realpath($source);
         if(!$src) {
             if($verbose) {
-                echo '<br/>Cannot create zip archive '.$source.' is not a folder';
+                echo '<br/>Cannot create zip archive '.htmlspecialchars($source).' is not a folder';
             }
             return false;
         }
@@ -1081,7 +1081,7 @@ function createZipArchive($source, $only_these_folders, $destination, $verbose=t
         $size = filesize($destination) / pow(1024, 2);
 
         if($verbose) {
-            echo "<br/>Successfully dumped data from ". $source ." to ".$destination;
+            echo "<br/>Successfully dumped data from ". htmlspecialchars($source) ." to ".htmlspecialchars($destination);
             echo "<br/>The zip file contains ".htmlspecialchars($numFiles." files and is ".sprintf("%.2f", $size))."MB";
         }
     }else{
@@ -1092,7 +1092,7 @@ function createZipArchive($source, $only_these_folders, $destination, $verbose=t
     } catch (Exception  $e){
         error_log( Exception::getMessage() );
         if($verbose) {
-            echo "<br/>Cannot create zip archive ".$destination.' '.Exception::getMessage();
+            echo "<br/>Cannot create zip archive ".htmlspecialchars($destination).' '.Exception::getMessage();
         }
         return false;
     }                            
@@ -1189,7 +1189,7 @@ function createBz2Archive($source, $only_these_folders, $destination, $verbose=t
         return false;
     }
     if (!file_exists($source)) {
-        echo "<br/>".$source." was not found";
+        echo "<br/>".htmlspecialchars($source)." was not found";
         return false;
     }else 
     
@@ -1198,7 +1198,7 @@ function createBz2Archive($source, $only_these_folders, $destination, $verbose=t
     $phar = new PharData($destination);
 
     if (false === $phar) {
-        if($verbose) echo "<br/>Failed to create bz2 file at ".$destination;
+        if($verbose) echo "<br/>Failed to create bz2 file at ".htmlspecialchars($destination);
         return false;
     }
 
@@ -1208,7 +1208,7 @@ function createBz2Archive($source, $only_these_folders, $destination, $verbose=t
         
         if(!$src) {
             if($verbose) {
-                echo '<br/>Cannot create bz2 archive '.$source.' is not a folder';
+                echo '<br/>Cannot create bz2 archive '.htmlspecialchars($source).' is not a folder';
             }
             return false;
         }
@@ -1322,7 +1322,7 @@ function createBz2Archive($source, $only_these_folders, $destination, $verbose=t
             $size = filesize($destination.'.bz2') / pow(1024, 2);
             
             if($verbose) {
-                echo "<br/>Successfully dumped data from ". $source ." to ".$destination;
+                echo "<br/>Successfully dumped data from ". htmlspecialchars($source) ." to ".htmlspecialchars($destination);
                 echo "<br/>The archive file contains ".$numFiles." files and is ".sprintf("%.2f", $size)."MB";
             }
         }else{
@@ -1335,7 +1335,7 @@ function createBz2Archive($source, $only_these_folders, $destination, $verbose=t
     } catch (Exception  $e){
         error_log( $e->getMessage() );
         if($verbose) {
-            echo "<br/>Cannot create archive ".$destination.' '.$e->getMessage();
+            echo "<br/>Cannot create archive ".htmlspecialchars($destination).' '.$e->getMessage();
         }
         return false;
     }                            

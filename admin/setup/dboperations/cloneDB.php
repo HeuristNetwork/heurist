@@ -100,7 +100,7 @@ if($isCloneTemplate){ //template db must be registered with id less than 21
 if(@$_REQUEST['mode']=='2'){
 
     if($sHasNewDefsWarning &&
-    $system->verifyActionPassword(@$_REQUEST['pwd'], $passwordForServerFunctions) ){
+       $system->verifyActionPassword(@$_REQUEST['pwd'], $passwordForServerFunctions) ){
 
         $sErrorMsg = '<div class="ui-state-error">'
                     .$system->getError()['message'].'<br/></div>';
@@ -112,9 +112,9 @@ if(@$_REQUEST['mode']=='2'){
                 $sErrorMsg = 'Database name '.$targetdbname.' is too long. Max 64 characters allowed';
         }else{
             // Avoid illegal chars in db name
-            $hasInvalid = preg_match('[\W]', $targetdbname);
-            if ($hasInvalid) {
-                $sErrorMsg = "<p><hr></p><p>&nbsp;</p><p>Requested database copy name: <b>$targetdbname</b></p>".
+            $invalidDbName = System::dbname_check($targetdbname);
+            if ($invalidDbName) {
+                $sErrorMsg = "<p><hr></p><p>&nbsp;</p><p>Requested database copy name: <b>$targetdbname</b> is invalid</p>".
                 "<p>Sorry, only letters, numbers and underscores (_) are allowed in the database name</p>";
             } // rejecting illegal characters in db name
             else{
@@ -134,6 +134,7 @@ if(@$_REQUEST['mode']=='2'){
         $_REQUEST['mode'] = 0;
         $_REQUEST['targetdbname'] = null;
         unset($_REQUEST['targetdbname']);
+        $targetdbname = null;
     }
 }
 ?>
@@ -246,15 +247,10 @@ if(@$_REQUEST['mode']=='2'){
             </div>
       
 <?php    
-if(@$_REQUEST['mode']=='2'){
+if(@$_REQUEST['mode']=='2' && $targetdbname!=null){
     
-    $targetdbname = @$_REQUEST['targetdbname'];
     $nodata = (@$_REQUEST['nodata']==1);
-    if($targetdbname!=null) $targetdbname = htmlspecialchars($targetdbname);
 
-    //$res = false;
-    //sleep(15);
-    
     $res = cloneDatabase($targetdbname, $nodata, $templateddb, $user_id);
     if(!$res){
         echo_flush ('<p style="padding-left:20px;"><h2 style="color:red">WARNING: Your database has not been cloned.</h2>'

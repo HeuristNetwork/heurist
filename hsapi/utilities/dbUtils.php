@@ -549,7 +549,8 @@ class DbUtils {
 
         
         if(!$connected){
-            $msg = $msg_prefix.'Failed to connect to database '.$database_name.'  '.$createArchive;
+            $msg = $msg_prefix.'Failed to connect to database '
+                    .htmlspecialchars($database_name).'  '.htmlspecialchars($createArchive);
             $system->addError(HEURIST_DB_ERROR, $msg, $mysqli->error);
             if($verbose) echo '<br>'.$msg;
             self::$db_del_in_progress = null;
@@ -605,7 +606,8 @@ class DbUtils {
             }
             
             if(!$archOK){
-                $msg = $msg_prefix."Cannot create archive with database folder. Failed to archive $source to $destination";
+                $msg = $msg_prefix.'Cannot create archive with database folder. Failed to archive '
+                        .htmlspecialchars($source).' to '.htmlspecialchars($destination);
                 self::$system->addError(HEURIST_SYSTEM_CONFIG, $msg);                
                 if($verbose) echo '<br/>'.$msg;
                 self::$db_del_in_progress = null;
@@ -630,7 +632,7 @@ class DbUtils {
                 }
 
                 if($verbose) {
-                    echo "<br/>Database ".$database_name." has been dropped";
+                    echo "<br/>Database ".htmlspecialchars($database_name)." has been dropped";
                 }
                 
                 // Delete $source folder
@@ -638,7 +640,7 @@ class DbUtils {
                 //change current folder
                 chdir(HEURIST_FILESTORE_ROOT);
                 if($verbose) {
-                    echo "<br/>Folder ".$source." has been deleted";   
+                    echo "<br/>Folder ".htmlspecialchars($source)." has been deleted";   
                 }
 
                 //add to log file
@@ -757,7 +759,8 @@ class DbUtils {
                 if($return !== 0) {
                     self::$system->addError(HEURIST_SYSTEM_CONFIG, $msg);
                     
-                    $msg = "mysqldump for {$database_name_full} failed with a return code of {$return}";
+                    $msg = "mysqldump for ".htmlspecialchars($database_name_full)
+                                ." failed with a return code of {$return}";
                     if($verbose) echo '<br>'.$msg;
                     /*
                     echo "Error message was:\n";
@@ -786,7 +789,7 @@ class DbUtils {
                 //create dump manually - all tables without triggers
                 $file = fopen($database_dumpfile, "a+");
                 if(!$file){
-                    $msg = 'Unable to open dump file '.$file;
+                    $msg = 'Unable to open dump file '.htmlspecialchars($file);
                     self::$system->addError(HEURIST_SYSTEM_CONFIG, $msg);
                     if($verbose) echo '<br>'.$msg;
                     return false;
@@ -867,14 +870,15 @@ class DbUtils {
             // Echo output
             if($verbose) {
                 $size = filesize($database_dumpfile) / pow(1024,2);
-                echo "<br/>Successfully dumped ".$database_name." to ".$database_dumpfile;
+                echo "<br/>Successfully dumped "
+                    .htmlspecialchars($database_name)." to ".htmlspecialchars($database_dumpfile);
                 echo "<br/>Size of SQL dump: ".sprintf("%.2f", $size)." MB";
             }
 
             return $database_dumpfile;
             
         }else{
-            $msg = 'Failed to connect to database '.$database_name_full;
+            $msg = 'Failed to connect to database '.htmlspecialchars($database_name_full);
             self::$system->addError(HEURIST_DB_ERROR, $msg, $mysqli->error);
             if($verbose) echo '<br>'.$msg;
             return false;
@@ -1110,11 +1114,11 @@ class DbUtils {
 
         $mysqli = self::$mysqli;
         
-        if($verbose) echo ("Deleting ".$remark."</br>");
+        if($verbose) echo ("Deleting ".htmlspecialchars($remark)."</br>");
 
         if(!$mysqli->query("delete from $name where 1")){
             if($verbose) {
-                echo ("<br/><p>Warning: Unable to clean ".$remark
+                echo ("<br/><p>Warning: Unable to clean ".htmlspecialchars($remark)
                     ." - SQL error: ".$mysqli->error."</p>");
             }
             return false;
@@ -1145,7 +1149,7 @@ class DbUtils {
            $connected = true;
         }
         if(!$connected){
-            $msg = 'Failed to connect to database '.$database_name;
+            $msg = 'Failed to connect to database '.htmlspecialchars($database_name);
             $system->addError(HEURIST_DB_ERROR, $msg, $mysqli->error);
             if($verbose) echo '<br><p>'.$msg.'</p>';
             return false;

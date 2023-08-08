@@ -41,20 +41,21 @@ if($_REQUEST['mode'] == 2){ // verify the new name is unique
 	$targetdbname = $_REQUEST['targetdbname'];
 
     if(strlen($targetdbname)>64){ // validate length
-        $sErrorMsg = 'Database name <b>'.$targetdbname.'</b> is too long. Max 64 characters allowed';
+        $sErrorMsg = 'Database name <b>'.htmlspecialchars($targetdbname).'</b> is too long. Max 64 characters allowed';
     }else{
         // Avoid illegal chars in db name
-        $hasInvalid = preg_match('[\W]', $targetdbname);
-        if ($hasInvalid) {
-            $sErrorMsg = "<p><hr></p><p>&nbsp;</p><p>Requested database rename: <b>$targetdbname</b></p>".
-            "<p>Sorry, only letters, numbers and underscores (_) are allowed in the database name</p>";
+        $invalidDbName = System::dbname_check($targetdbname);
+        if ($invalidDbName) {
+            $sErrorMsg =  '<p><hr></p><p>&nbsp;</p><p>Requested database rename: "'.htmlspecialchars($targetdbname)
+                    .'" is invalid. Only letters, numbers and underscores (_) are allowed in the database name</p>';
         } // rejecting illegal characters in db name
         else{
             list($targetdbname, $dbname) = mysql__get_names( $targetdbname );
 
             $dblist = mysql__select_list2($mysqli, 'show databases');
             if (array_search(strtolower($targetdbname), array_map('strtolower', $dblist)) !== false ){
-                $sErrorMsg = "<div class='ui-state-error'>Warning: database '".$targetdbname
+                $sErrorMsg = "<div class='ui-state-error'>Warning: database '".
+                htmlspecialchars($targetdbname)
                 ."' already exists. Please choose a different name<br/></div>";
             }else{
                 ob_start();
@@ -63,6 +64,7 @@ if($_REQUEST['mode'] == 2){ // verify the new name is unique
     }
 
     if($sErrorMsg !== null){
+        $targetdbname = null;
         $_REQUEST['mode'] = 0;
         $_REQUEST['targetdbname'] = null;
         unset($_REQUEST['targetdbname']);
@@ -169,9 +171,8 @@ if($_REQUEST['mode'] == 2){ // verify the new name is unique
             </div>
 <?php
 
-if(@$_REQUEST['mode']=='2'){
+if(@$_REQUEST['mode']=='2' && $targetdbname!=null){
     
-    $targetdbname = $_REQUEST['targetdbname'];
     $nodata = (@$_REQUEST['nodata']==1);
     
     $res = perform_rename($targetdbname);

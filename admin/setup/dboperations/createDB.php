@@ -134,14 +134,14 @@ if( isset($passwordForDatabaseCreation) && $passwordForDatabaseCreation!='' &&
         
         if(strlen($database_name_full)>64){
                 $system->addError(HEURIST_ACTION_BLOCKED, 
-                        'Database name '.$database_name_full.' is too long. Max 64 characters allowed');
+                        'Database name '.htmlspecialchars($database_name_full).' is too long. Max 64 characters allowed');
                 print json_encode($system->getError());
                 exit();
         }
-        $hasInvalid = preg_match('[\W]', $database_name_full);
-        if ($hasInvalid) {
+        $invalidDbName = System::dbname_check($database_name_full);
+        if ($invalidDbName) {
                 $system->addError(HEURIST_ACTION_BLOCKED, 
-                        'Database name '.$database_name_full
+                        'Database name '.htmlspecialchars($database_name_full)
                         .' is invalid. Only letters, numbers and underscores (_) are allowed in the database name');
                 print json_encode($system->getError());
                 exit();

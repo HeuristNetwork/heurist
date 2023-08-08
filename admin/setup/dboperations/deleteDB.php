@@ -29,14 +29,22 @@ $res = false;
 
 $system = new System();
 
-$database_to_delete = @$_REQUEST['database'];
-$create_arc = ( (@$_REQUEST['create_archive']===true)
-        || (@$_REQUEST['create_archive']==='true') 
-        || (@$_REQUEST['create_archive']==1));
-
 if(!@$_REQUEST['pwd']){
     $system->addError(HEURIST_INVALID_REQUEST, 'Password parameter is not defined');
 }else{
+    
+    $database_to_delete = @$_REQUEST['database'];
+    $invalidDbName = System::dbname_check($database_to_delete);
+    if ($invalidDbName) {
+        $system->addError(HEURIST_ACTION_BLOCKED, 
+                    'Database name "'.htmlspecialchars($database_to_delete)
+                    .'" is invalid. Only letters, numbers and underscores (_) are allowed in the database name');
+    }else{
+
+
+    $create_arc = ( (@$_REQUEST['create_archive']===true)
+            || (@$_REQUEST['create_archive']==='true') 
+            || (@$_REQUEST['create_archive']==1));
 
 //if user deletes its own database
     $is_delete_current_db = (@$_REQUEST['db']==$database_to_delete && @$_REQUEST['pwd']=='DELETE MY DATABASE');
@@ -139,7 +147,7 @@ sendEmail(array($usr_owner['ugr_eMail'],HEURIST_MAIL_TO_ADMIN), $email_title, $e
     else{
         $system->addError(HEURIST_REQUEST_DENIED, 'Wrong password');
     }
-
+}
 }
 
 if(is_bool($res) && !$res){
