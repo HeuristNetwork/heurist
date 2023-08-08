@@ -1528,7 +1528,7 @@ class HPredicate {
                     
                     if($sHeaderField=='rec_Title'){
                         //execute fulltext search query
-                        $res = $res.'(MATCH(r'.$this->qlevel.'.'.$sHeaderField.') '.$val.')';
+                        $res = $res.'('. ($this->negate ? 'NOT ' : '') .'MATCH(r'.$this->qlevel.'.'.$sHeaderField.') '.$val.')';
                     }else{
                         $this->error_message = 'Full text search is allowed for rec_Title only';
                         return null;
@@ -1633,7 +1633,7 @@ class HPredicate {
                 
                 if($this->fulltext){
                     //execute fulltext search query
-                    $res = $res.' AND MATCH(dtl_Value) '.$val;
+                    $res = $res.' AND'. ($this->negate ? ' NOT ' : ' ') .'MATCH(dtl_Value) '.$val;
                     $list_ids = mysql__select_list2($mysqli, $res);
                     
                     if(is_array($list_ids) && count($list_ids)>0){
@@ -1708,7 +1708,7 @@ class HPredicate {
                 . ' left join Records link on dtl_Value=link.rec_ID '
                 .' where if(dty_Type != "resource", '
                     .' if(dty_Type="enum", dtl_Value'.$val_enum 
-                       .', MATCH(dtl_Value) '.$val
+                       .', '. ($this->negate ? 'NOT ' : '') .'MATCH(dtl_Value) '.$val
                        .'), '.$field_name2.' LIKE "%'.$val_wo_prefixes.'%")'; 
                 
                 $list_ids = mysql__select_list2($mysqli, $res);
@@ -2950,6 +2950,7 @@ class HPredicate {
                     if(strpos($this->value, '++')===0 || strpos($this->value, '--')===0){
                        
                         $op = (strpos($this->value, '+')===0)?' +':' -';
+                        $this->negate = ($op==' -'); 
                         
                         //get all words
                         $pattern = "/(\w+)/";
@@ -2965,12 +2966,12 @@ $stopwords = array('a','about','an','are','as','at','be','by','com','de','en','f
                                     }
                                 }
                                 if(count($words)>0){
-                                    $this->value = trim($op).implode($op, $words);
+                                    $t_op = $op == ' -' ? ' ' : $op;
+                                    $this->value = trim($t_op).implode($t_op, $words);
                                 }else{
                                     //search phrase has only very short or long words
                                     $this->fulltext = false;
                                     $this->exact = false;
-                                    $this->negate = ($op==' -'); 
                                     $this->value = implode(' ', $matches[0]);
                                 }
                         }

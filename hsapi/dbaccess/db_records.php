@@ -1160,6 +1160,59 @@ function recordGetIncrementedValue($system, $params){
 
 }
 
+/**
+* get all incremeneted value for given record type
+* 
+* @param mixed $system
+* @param mixed $params
+*/
+function recordGetAllIncremenetedValues($system, $params){
+
+    $ret = array();
+    $rty_ID = @$params['rtyID'];
+    $ignore_dtys = @$params['ignore_dtys'];
+
+    if($rty_ID > 0){
+
+        if(!empty($ignore_dtys) && !is_array($ignore_dtys)){
+            $ignore_dtys = explode(',', $ignore_dtys);
+        }
+        if(!empty($ignore_dtys)){
+            $ignore_dtys = array_filter($ignore_dtys, function($id){
+                return intval($id) > 0;
+            });
+        }
+
+        $mysqli = $system->get_mysqli();
+        $rst_dty_filter = '';
+
+        if(!empty($ignore_dtys)){
+            $rst_dty_filter = 'AND rst_DetailTypeID ' . (count($ignore_dtys) > 1 ? ' NOT IN ('. explode($ignore_dtys, ',') .')' : ' != ' . $ignore_dtys[0]);
+        }
+
+        $query = "SELECT rst_DetailTypeID FROM defRecStructure WHERE rst_DefaultValue = 'increment_new_values_by_1' AND rst_RecTypeID = $rty_ID $rst_dty_filter";
+
+        $dty_IDs = mysql__select_list2($mysqli, $query);
+
+        foreach ($dty_IDs as $dty_ID) {
+
+            $result = recordGetIncrementedValue($system, array('rtyID' => $rty_ID, 'dtyID' => $dty_ID));
+
+            if($result['status'] === HEURIST_OK){
+                $ret[$dty_ID] = $result['result'];
+            }
+        }
+    }else{
+        return $system->addError(HEURIST_INVALID_REQUEST, 'Get all ] incremented values. Record type is missing');
+    }
+/*
+    if(!$ret_as_details){
+        $ret = array('status' => HEURIST_OK, 'result' => $ret);
+    }
+*/
+
+    return $ret;
+}
 
 /**
 * update ownership and access for set of records
