@@ -440,14 +440,19 @@ class DbEntityBase
                     $primary_field_type = $field_config['dty_Type']; 
                 }*/
             }
-            
-            //save data
-            $ret = mysql__insertupdate($mysqli, 
-                                    $this->config['tableName'], $this->fields,
-                                    $values );
 
             $isinsert = (intval(@$record[$this->primaryField])<1);
-                                    
+            
+            if(!$isinsert && count($values)<2){
+                //no fields except id - skip this record
+                $ret = $record[$this->primaryField];
+            }else{
+                //save data
+                $ret = mysql__insertupdate($mysqli, 
+                                        $this->config['tableName'], $this->fields,
+                                        $values );
+            }
+
             if($ret===true || $ret==null){ //it returns true for non-numeric primary field
                    $results[] = $record[$this->primaryField];
             }else if(is_numeric($ret)){

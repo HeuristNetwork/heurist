@@ -314,7 +314,7 @@ $.widget( "heurist.rectypeTitleMask", $.heurist.recordAction, {
 
                 window.hWin.HEURIST4.dbs.rty(this.options.rty_ID, 'rty_TitleMask', newvalue); //update in cache
                 
-                /* NEW - @todo
+                // NEW - @todo
                 var fields = {rty_ID:this.options.rty_ID, rty_TitleMask:newvalue};
                 
                 var request = {
@@ -335,8 +335,8 @@ $.widget( "heurist.rectypeTitleMask", $.heurist.recordAction, {
                             that.action_in_progress = false;
                         }
                     });                
-                */
                 
+                /*
                 var _defs = {};
                 _defs[this.options.rty_ID] = [{common:[newvalue],dtFields:[]}];
                 var oRectype = {rectype:{colNames:{common:['rty_TitleMask'],dtFields:[]},
@@ -356,6 +356,7 @@ $.widget( "heurist.rectypeTitleMask", $.heurist.recordAction, {
                         }
                     }                
                 );
+                */
                 
             }else{
                 this.action_in_progress = false;
