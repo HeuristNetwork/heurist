@@ -326,7 +326,7 @@ $siz = get_php_bytes('upload_max_filesize');
         } else {
             $version_dir = @$this->options['image_versions'][$version]['upload_dir'];
             if ($version_dir) {
-                return $version_dir.$this->get_user_path().$file_name;
+                return ($version_dir.$this->get_user_path()).$file_name; //realpath
             }
             $version_path = $version.'/';
         }
@@ -337,8 +337,8 @@ $siz = get_php_bytes('upload_max_filesize');
             $subfolder = $subfolder.'/';
         }
         
-        return $this->options['upload_dir'].$this->get_user_path()
-            .$subfolder.$version_path.$file_name;
+        return ($this->options['upload_dir'].$this->get_user_path()
+            .$subfolder.$version_path).$file_name;  //realpath
     }
 
     protected function get_query_separator($url) {
@@ -458,6 +458,7 @@ $siz = get_php_bytes('upload_max_filesize');
         if (!is_dir($upload_dir)) {
             return array();
         }
+        //$upload_dir = realpath($upload_dir);
         return array_values(array_filter(array_map(
             array($this, $iteration_method),
             scandir($upload_dir)
@@ -489,6 +490,24 @@ $siz = get_php_bytes('upload_max_filesize');
         }
         return $this->fix_integer_overflow($val);
     }
+    
+    protected function safe_copy($from, $to) {
+
+        $from = realpath($from);
+        $filename = basename($to);
+        $to = realpath(dirname($to));
+        $heurist_dir = realpath(HEURIST_FILESTORE_ROOT);
+        if(!(strpos($from, $heurist_dir)===0)){
+            $file->error = $this->get_error_message('only_heurist');
+            return false;
+        }
+        if(!(strpos($to, $heurist_dir)===0)){
+            $file->error = $this->get_error_message('only_heurist');
+            return false;
+        }
+        copy($from, $to.DIRECTORY_SEPARATOR.$filename);
+        
+    }
 
     protected function validate($uploaded_file, $file, $error, $index) {
         if ($error) {
@@ -498,7 +517,7 @@ $siz = get_php_bytes('upload_max_filesize');
         
         //Artem Osmakov - limited to heurist file storage
         $upload_path = $this->get_upload_path($file->name, $file->subfolder);
-        if(!(strpos($upload_path, HEURIST_FILESTORE_ROOT)===0))
+        if(!(strpos($upload_path, HEURIST_FILESTORE_ROOT)===0))  //realpath
         //if(!(strpos($upload_path,'/var/www/html/HEURIST/HEURIST_FILESTORE')===0 || 
         //     strpos($upload_path,'C:/xampp/htdocs/HEURIST_FILESTORE')===0))
         {
@@ -720,7 +739,8 @@ $siz = get_php_bytes('upload_max_filesize');
             
             if(!file_exists($version_dir.'/.htaccess') && file_exists($access_file)){
                 //ARTEM: copy .htaccess file into thumbnail folder
-                copy($access_file, $version_dir.'/.htaccess');
+                $this->safe_copy($access_file, $version_dir.'/.htaccess');
+                //copy($access_file, $version_dir.'/.htaccess');
             }
             
             $new_file_path = $version_dir.'/'.$file_name;
@@ -870,7 +890,7 @@ $siz = get_php_bytes('upload_max_filesize');
                 //do not read image 
                 if ($file_path !== $new_file_path) { //no resize
                     //return 
-                    copy($file_path, $new_file_path);
+                    $this->safe_copy($file_path, $new_file_path);
                 }
                 //return true;
             }else{
@@ -980,7 +1000,7 @@ $siz = get_php_bytes('upload_max_filesize');
                 return ($write_func!=null)?$write_func($src_img, $new_file_path, $image_quality):false;
             }
             if ($file_path !== $new_file_path) { //no resize
-                return copy($file_path, $new_file_path);
+                return $this->safe_copy($file_path, $new_file_path);
             }
             return true;
         }
@@ -1147,7 +1167,7 @@ $siz = get_php_bytes('upload_max_filesize');
         if (!($image_oriented || $max_width < $img_width || $max_height < $img_height)) {
             if ($file_path !== $new_file_path) {
                 
-                return copy($file_path, $new_file_path);
+                return $this->safe_copy($file_path, $new_file_path);
             }
             return true;
         }
@@ -1207,7 +1227,7 @@ $siz = get_php_bytes('upload_max_filesize');
         if (!$resize && empty($options['auto_orient'])) {
             if ($file_path !== $new_file_path) {
                 
-                return copy($file_path, $new_file_path);
+                return $this->safe_copy($file_path, $new_file_path);
             }
             return true;
         }
@@ -1443,6 +1463,7 @@ $siz = get_php_bytes('upload_max_filesize');
                         FILE_APPEND
                     );
                 } else {
+                    $uploaded_file = realpath($uploaded_file);
                     $res = move_uploaded_file($uploaded_file, $file_path);
                 }
             } else {

@@ -66,7 +66,7 @@ if($system->init($db, true, false)){
                 
                 //find related mtl and texture files by original file name
                 if($fileExt=='obj'){
-                    $file_obj = HEURIST_FILESTORE_DIR.$fileinfo['fullPath'];
+                    $file_obj = realpath(HEURIST_FILESTORE_DIR.$fileinfo['fullPath']);
                     $file_mtl = null;
                     //find mtl file name  'mtllib name_of_file.mtl'
                     $handle = @fopen($file_obj, 'r');

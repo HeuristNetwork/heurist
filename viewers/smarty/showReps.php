@@ -251,7 +251,7 @@ function executeSmartyTemplate($system, $params){
     }
 
     //get name of template file
-    $template_file = (array_key_exists('template',$params)?htmlspecialchars($params['template']):null);
+    $template_file = (array_key_exists('template',$params)?basename($params['template']):null);
 
     //get template body from request (for execution from editor)
     $template_body = (array_key_exists('template_body',$params)?$params['template_body']:null);

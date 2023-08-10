@@ -141,7 +141,7 @@ function doReport($system, $update_mode, $format, $row){
         $format = 'html'; //default
     }
 
-	$filename = ($row['rps_FileName']!=null)?$row['rps_FileName']:$row['rps_Template'];
+	$filename = basename(($row['rps_FileName']!=null)?$row['rps_FileName']:$row['rps_Template']);
 
 	$outputfile = $dir.$filename;
 
