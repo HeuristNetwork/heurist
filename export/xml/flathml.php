@@ -428,7 +428,7 @@ if (array_key_exists('q', $_REQUEST)) {
         //@todo check if (!session_id()) session_start();
         $collection =  &$_SESSION[HEURIST_DBNAME_FULL]['record-collection'];
         if (count($collection) > 0) {
-            $_REQUEST['q'] = 'ids:' . join(',', array_keys($collection));
+            $_REQUEST['q'] = 'ids:' . join(',', prepareIds(array_keys($collection)));
         } else {
             $_REQUEST['q'] = '';
         }
@@ -436,7 +436,7 @@ if (array_key_exists('q', $_REQUEST)) {
 } else if (array_key_exists('recID', $_REQUEST)) { //record IDs to use as a query
     //check for expansion of query records.
     $recIDs = explode(",", $_REQUEST['recID']);
-    $_REQUEST['q'] = 'ids:' . join(',', $recIDs);
+    $_REQUEST['q'] = 'ids:' . join(',', prepareIds($recIDs));
 }
 
 //----------------------------------------------------------------------------//
@@ -483,12 +483,12 @@ function findPointers($qrec_ids, &$recSet, $depth, $rtyIDs, $dtyIDs) {
     'FROM recDetails LEFT JOIN defDetailTypes on dtl_DetailTypeID = dty_ID ' .
     'LEFT JOIN Records src on src.rec_ID = dtl_RecID ' .
     'LEFT JOIN Records trg on trg.rec_ID = dtl_Value ' .
-    'WHERE dtl_RecID in (' . join(',', $qrec_ids) . ') AND (trg.rec_FlagTemporary=0) ' .
-    ($rtyIDs && count($rtyIDs) > 0 ? 'AND trg.rec_RecTypeID in (' . join(',', $rtyIDs) . ') ' : '') .
-    ($dtyIDs && count($dtyIDs) > 0 ? 'AND dty_ID in (' . join(',', $dtyIDs) . ') ' : '')
+    'WHERE dtl_RecID in (' . join(',', prepareIds($qrec_ids)) . ') AND (trg.rec_FlagTemporary=0) ' .
+    ($rtyIDs && count($rtyIDs) > 0 ? 'AND trg.rec_RecTypeID in (' . join(',', prepareIds($rtyIDs)) . ') ' : '') .
+    ($dtyIDs && count($dtyIDs) > 0 ? 'AND dty_ID in (' . join(',', prepareIds($dtyIDs)) . ') ' : '')
     . 'AND dty_Type = "resource" AND ' 
         . (count($ACCESSABLE_OWNER_IDS) > 0 && !$PUBONLY 
-            ? '(trg.rec_OwnerUGrpID in (' .join(',', $ACCESSABLE_OWNER_IDS) . ') OR ' 
+            ? '(trg.rec_OwnerUGrpID in (' .join(',', prepareIds($ACCESSABLE_OWNER_IDS, true)) . ') OR ' 
             : '(') .
     (($system->has_access() && !$PUBONLY) ? 'NOT trg.rec_NonOwnerVisibility = "hidden")' : 'trg.rec_NonOwnerVisibility = "public")');
 
@@ -569,12 +569,12 @@ function findReversePointers($qrec_ids, &$recSet, $depth, $rtyIDs, $dtyIDs) {
     .' LEFT JOIN Records trg on trg.rec_ID = dtl_RecID ' 
     .' LEFT JOIN Records src on src.rec_ID = dtl_Value ' 
     .' WHERE dty_Type = "resource" ' . 'AND dtl_Value IN (' .
-        join(',', $qrec_ids) . ') ) AND (trg.rec_FlagTemporary=0) ' 
+        join(',', prepareIds($qrec_ids)) . ') ) AND (trg.rec_FlagTemporary=0) ' 
     . ($rtyIDs && count($rtyIDs) > 0 ? 'AND trg.rec_RecTypeID in (' .
-        join(',', $rtyIDs) . ') ' : '') . ($dtyIDs && count($dtyIDs) > 0 ? 'AND dty_ID in (' .
-        join(',', $dtyIDs) . ') ' : '') . "AND trg.rec_RecTypeID != $relRT AND " .
+        join(',', prepareIds($rtyIDs)) . ') ' : '') . ($dtyIDs && count($dtyIDs) > 0 ? 'AND dty_ID in (' .
+        join(',', prepareIds($dtyIDs)) . ') ' : '') . "AND trg.rec_RecTypeID != $relRT AND " .
     (count($ACCESSABLE_OWNER_IDS) > 0 && !$PUBONLY 
-            ? '(trg.rec_OwnerUGrpID in (' .join(',', $ACCESSABLE_OWNER_IDS) . ') OR ' 
+            ? '(trg.rec_OwnerUGrpID in (' .join(',', prepareIds($ACCESSABLE_OWNER_IDS, true)) . ') OR ' 
             : '(') .
     ($system->has_access() && !$PUBONLY ? 'NOT trg.rec_NonOwnerVisibility = "hidden")' : 'trg.rec_NonOwnerVisibility = "public")');
 
@@ -646,28 +646,28 @@ function findRelatedRecords($qrec_ids, &$recSet, $depth, $rtyIDs, $relTermIDs) {
     global $system, $mysqli, $REVERSE, $ACCESSABLE_OWNER_IDS, $relRT, $relTrgDT, $relTypDT, $relSrcDT, $PUBONLY;
     $nlrIDs = array();
     $query = 'SELECT f.dtl_Value as srcRecID, rel.rec_ID as relID, ' . // from detail
-    'IF( f.dtl_Value IN (' . join(',', $qrec_ids) . '),1,0) as srcIsFrom, ' .
+    'IF( f.dtl_Value IN (' . join(',', prepareIds($qrec_ids)) . '),1,0) as srcIsFrom, ' .
     't.dtl_Value as trgRecID, trm.trm_ID as relType, trm.trm_InverseTermId as invRelType ' .
     ', src.rec_NonOwnerVisibility , trg.rec_NonOwnerVisibility ' . 'FROM recDetails f ' .
-    'LEFT JOIN Records rel ON rel.rec_ID = f.dtl_RecID and f.dtl_DetailTypeID = ' . $relSrcDT . ' ' .
-    'LEFT JOIN recDetails t ON t.dtl_RecID = rel.rec_ID and t.dtl_DetailTypeID = ' . $relTrgDT . ' ' .
-    'LEFT JOIN recDetails r ON r.dtl_RecID = rel.rec_ID and r.dtl_DetailTypeID = ' . $relTypDT . ' ' .
+    'LEFT JOIN Records rel ON rel.rec_ID = f.dtl_RecID and f.dtl_DetailTypeID = ' . intval($relSrcDT) . ' ' .
+    'LEFT JOIN recDetails t ON t.dtl_RecID = rel.rec_ID and t.dtl_DetailTypeID = ' . intval($relTrgDT) . ' ' .
+    'LEFT JOIN recDetails r ON r.dtl_RecID = rel.rec_ID and r.dtl_DetailTypeID = ' . intval($relTypDT) . ' ' .
     'LEFT JOIN defTerms trm ON trm.trm_ID = r.dtl_Value ' . 'LEFT JOIN Records trg ON trg.rec_ID = t.dtl_Value ' .
     'LEFT JOIN Records src ON src.rec_ID = f.dtl_Value ' .
-    'WHERE rel.rec_RecTypeID = ' . $relRT . ' AND (rel.rec_FlagTemporary=0) ' 
-        . 'AND (f.dtl_Value IN (' . join(',', $qrec_ids) . ') '.
-    ($rtyIDs && count($rtyIDs) > 0 ? 'AND trg.rec_RecTypeID in (' . join(',', $rtyIDs) . ') ' : '') .
-    ($REVERSE ? 'OR t.dtl_Value IN (' . join(',', $qrec_ids) . ') ' .
+    'WHERE rel.rec_RecTypeID = ' . intval($relRT) . ' AND (rel.rec_FlagTemporary=0) ' 
+        . 'AND (f.dtl_Value IN (' . join(',', prepareIds($qrec_ids)) . ') '.
+    ($rtyIDs && count($rtyIDs) > 0 ? 'AND trg.rec_RecTypeID in (' . join(',', prepareIds($rtyIDs)) . ') ' : '') .
+    ($REVERSE ? 'OR t.dtl_Value IN (' . join(',', prepareIds($qrec_ids)) . ') ' .
         ($rtyIDs && count($rtyIDs) > 0 ? 'AND src.rec_RecTypeID in (' .
-            join(',', $rtyIDs) . ') ' : '') : '') . ')' .
+            join(',', prepareIds($rtyIDs)) . ') ' : '') : '') . ')' .
     (count($ACCESSABLE_OWNER_IDS) > 0 && !$PUBONLY ? 'AND (src.rec_OwnerUGrpID in (' .
-        join(',', $ACCESSABLE_OWNER_IDS) . ') OR ' : 'AND (') .
+        join(',', prepareIds($ACCESSABLE_OWNER_IDS, true)) . ') OR ' : 'AND (') .
     (($system->has_access() && !$PUBONLY) ? 'NOT src.rec_NonOwnerVisibility = "hidden")' : 'src.rec_NonOwnerVisibility = "public")') .
     (count($ACCESSABLE_OWNER_IDS) > 0 && !$PUBONLY ? 'AND (trg.rec_OwnerUGrpID in (' .
-        join(',', $ACCESSABLE_OWNER_IDS) . ') OR ' : 'AND (').
+        join(',', prepareIds($ACCESSABLE_OWNER_IDS, true)) . ') OR ' : 'AND (').
     ($system->has_access() && !$PUBONLY ? 'NOT trg.rec_NonOwnerVisibility = "hidden")' : 'trg.rec_NonOwnerVisibility = "public")').
     ($relTermIDs && count($relTermIDs) > 0 ? 'AND (trm.trm_ID in (' .
-        join(',', $relTermIDs) . ') OR trm.trm_InverseTermID in (' . join(',', $relTermIDs) . ')) ' : '');
+        join(',', prepareIds($relTermIDs)) . ') OR trm.trm_InverseTermID in (' . join(',', prepareIds($relTermIDs)) . ')) ' : '');
         
     $res = $mysqli->query($query);
     if($res){ 
@@ -756,8 +756,8 @@ function buildGraphStructure($rec_ids, &$recSet) {
     $rtfilter = (array_key_exists($depth, $RECTYPE_FILTERS) ? $RECTYPE_FILTERS[$depth] : null);
     if ($rtfilter) {
         $query = 'SELECT rec_ID from Records ' .
-        'WHERE rec_ID in (' . join(",", $rec_ids) . ') ' .
-        'AND rec_RecTypeID in (' . join(",", $rtfilter) . ')';
+        'WHERE rec_ID in (' . join(",", prepareIds($rec_ids)) . ') ' .
+        'AND rec_RecTypeID in (' . join(",", prepareIds($rtfilter)) . ')';
         $filteredIDs = array();
 
         $res = $mysqli->query($query);
@@ -802,10 +802,10 @@ function _getReversePointers($rec_id, $depth){
     $query = 'SELECT rl_SourceID, rl_TargetID, src.rec_RecTypeID, rl_DetailTypeID FROM recLinks, Records src '
     .' where rl_TargetID='.$rec_id.' and rl_DetailTypeID>0 '
     .'  and (src.rec_ID = rl_SourceID) and (src.rec_FlagTemporary=0) '
-    . ($rtfilter && count($rtfilter) > 0 ? ' and src.rec_RecTypeID in (' . join(',', $rtfilter) . ') ' : '') 
-    . ($ptrfilter && count($ptrfilter) > 0 ? ' and rl_DetailTypeID in (' . join(',', $ptrfilter) . ') ' : '') 
+    . ($rtfilter && count($rtfilter) > 0 ? ' and src.rec_RecTypeID in (' . join(',', prepareIds($rtfilter)) . ') ' : '') 
+    . ($ptrfilter && count($ptrfilter) > 0 ? ' and rl_DetailTypeID in (' . join(',', prepareIds($ptrfilter)) . ') ' : '') 
     .' AND ('.(count($ACCESSABLE_OWNER_IDS) > 0 && !$PUBONLY 
-                    ? 'src.rec_OwnerUGrpID in (' .join(',', $ACCESSABLE_OWNER_IDS) . ') OR ' 
+                    ? 'src.rec_OwnerUGrpID in (' .join(',', prepareIds($ACCESSABLE_OWNER_IDS, true)) . ') OR ' 
                     : '') .
     ($system->has_access() && !$PUBONLY ? 'NOT src.rec_NonOwnerVisibility = "hidden")' : 'src.rec_NonOwnerVisibility = "public")');
 
@@ -839,12 +839,12 @@ function _getForwardPointers_for_relRT($rec_id, $depth){
     $ptrfilter = (@$PTRTYPE_FILTERS && array_key_exists($depth, $PTRTYPE_FILTERS) ? $PTRTYPE_FILTERS[$depth] : null);
 
     $query = 'SELECT dtl_RecID, dtl_Value, trg.rec_RecTypeID, dtl_DetailTypeID FROM recDetails, Records trg '
-    .' where dtl_RecID='.$rec_id.' and (dtl_DetailTypeID='.$relSrcDT.' OR dtl_DetailTypeID='.$relTrgDT.') '
+    .' where dtl_RecID='.intval($rec_id).' and (dtl_DetailTypeID='.intval($relSrcDT).' OR dtl_DetailTypeID='.intval($relTrgDT).') '
     .'  and (trg.rec_ID = dtl_Value)  and (trg.rec_FlagTemporary=0) '
-    . ($rtfilter && count($rtfilter) > 0 ? ' and trg.rec_RecTypeID in (' . join(',', $rtfilter) . ') ' : '') 
-    . ($ptrfilter && count($ptrfilter) > 0 ? ' and dtl_DetailTypeID in (' . join(',', $ptrfilter) . ') ' : '') 
+    . ($rtfilter && count($rtfilter) > 0 ? ' and trg.rec_RecTypeID in (' . join(',', prepareIds($rtfilter)) . ') ' : '') 
+    . ($ptrfilter && count($ptrfilter) > 0 ? ' and dtl_DetailTypeID in (' . join(',', prepareIds($ptrfilter)) . ') ' : '') 
     .'AND ('.(count($ACCESSABLE_OWNER_IDS) > 0 && !$PUBONLY 
-                    ? 'trg.rec_OwnerUGrpID in (' .join(',', $ACCESSABLE_OWNER_IDS) . ') OR ' 
+                    ? 'trg.rec_OwnerUGrpID in (' .join(',', prepareIds($ACCESSABLE_OWNER_IDS,true)) . ') OR ' 
                     : '') .
     ($system->has_access() && !$PUBONLY ? 'NOT trg.rec_NonOwnerVisibility = "hidden")' : 'trg.rec_NonOwnerVisibility = "public")');
 
@@ -883,10 +883,10 @@ function _getForwardPointers($rec_id, $depth){
     $query = 'SELECT rl_SourceID, rl_TargetID, trg.rec_RecTypeID, rl_DetailTypeID FROM recLinks, Records trg '
     .' where rl_SourceID='.$rec_id.' and rl_DetailTypeID>0 '
     .'  and (trg.rec_ID = rl_TargetID)  and (trg.rec_FlagTemporary=0) '
-    . ($rtfilter && count($rtfilter) > 0 ? ' and trg.rec_RecTypeID in (' . join(',', $rtfilter) . ') ' : '') 
-    . ($ptrfilter && count($ptrfilter) > 0 ? ' and rl_DetailTypeID in (' . join(',', $ptrfilter) . ') ' : '') 
+    . ($rtfilter && count($rtfilter) > 0 ? ' and trg.rec_RecTypeID in (' . join(',', prepareIds($rtfilter)) . ') ' : '') 
+    . ($ptrfilter && count($ptrfilter) > 0 ? ' and rl_DetailTypeID in (' . join(',', prepareIds($ptrfilter)) . ') ' : '') 
     .'AND ('.(count($ACCESSABLE_OWNER_IDS) > 0 && !$PUBONLY 
-                    ? 'trg.rec_OwnerUGrpID in (' .join(',', $ACCESSABLE_OWNER_IDS) . ') OR ' 
+                    ? 'trg.rec_OwnerUGrpID in (' .join(',', prepareIds($ACCESSABLE_OWNER_IDS, true)) . ') OR ' 
                     : '') .
     ($system->has_access() && !$PUBONLY ? 'NOT trg.rec_NonOwnerVisibility = "hidden")' : 'trg.rec_NonOwnerVisibility = "public")');
 
@@ -926,12 +926,12 @@ function _getRelations($rec_id, $depth){
     //
     $query = 'SELECT rl_SourceID, rl_TargetID, rl_RelationID, rl_RelationTypeID FROM Records trg, recLinks '
     .' left join Records rel on rel.rec_ID=rl_RelationID'
-    .' where rl_SourceID='.$rec_id.' and rl_RelationTypeID>0 '
+    .' where rl_SourceID='.intval($rec_id).' and rl_RelationTypeID>0 '
     .'  and trg.rec_ID = rl_TargetID  and (trg.rec_FlagTemporary=0) and (rel.rec_FlagTemporary=0) '
-    . ($rtfilter && count($rtfilter) > 0 ? ' and trg.rec_RecTypeID in (' . join(',', $rtfilter) . ') ' : '') 
-    . ($relfilter && count($relfilter) > 0 ? ' and rl_RelationTypeID in (' . join(',', $relfilter) . ') ' : '') 
+    . ($rtfilter && count($rtfilter) > 0 ? ' and trg.rec_RecTypeID in (' . join(',', prepareIds($rtfilter)) . ') ' : '') 
+    . ($relfilter && count($relfilter) > 0 ? ' and rl_RelationTypeID in (' . join(',', prepareIds($relfilter)) . ') ' : '') 
     .'AND ('.(count($ACCESSABLE_OWNER_IDS) > 0 && !$PUBONLY 
-                ? 'trg.rec_OwnerUGrpID in (' .join(',', $ACCESSABLE_OWNER_IDS) . ') OR ' 
+                ? 'trg.rec_OwnerUGrpID in (' .join(',', prepareIds($ACCESSABLE_OWNER_IDS, true)) . ') OR ' 
                 : '') .
     ($system->has_access() && !$PUBONLY ? 'NOT trg.rec_NonOwnerVisibility = "hidden")' : 'trg.rec_NonOwnerVisibility = "public")');
 
@@ -951,12 +951,12 @@ function _getRelations($rec_id, $depth){
     //
     $query = 'SELECT rl_SourceID, rl_TargetID, rl_RelationID, rl_RelationTypeID FROM Records src, recLinks '
     .' left join Records rel on rel.rec_ID=rl_RelationID'
-    .' where rl_TargetID='.$rec_id.' and rl_RelationTypeID>0 '
+    .' where rl_TargetID='.intval($rec_id).' and rl_RelationTypeID>0 '
     .'  and src.rec_ID = rl_SourceID  and (src.rec_FlagTemporary=0)  and (rel.rec_FlagTemporary=0) '
-    . ($rtfilter && count($rtfilter) > 0 ? ' and src.rec_RecTypeID in (' . join(',', $rtfilter) . ') ' : '') 
-    . ($relfilter && count($relfilter) > 0 ? ' and rl_RelationTypeID in (' . join(',', $relfilter) . ') ' : '') 
+    . ($rtfilter && count($rtfilter) > 0 ? ' and src.rec_RecTypeID in (' . join(',', prepareIds($rtfilter)) . ') ' : '') 
+    . ($relfilter && count($relfilter) > 0 ? ' and rl_RelationTypeID in (' . join(',', prepareIds($relfilter)) . ') ' : '') 
     .'AND ('.(count($ACCESSABLE_OWNER_IDS) > 0 && !$PUBONLY 
-            ? 'src.rec_OwnerUGrpID in (' .join(',', $ACCESSABLE_OWNER_IDS) . ') OR ' 
+            ? 'src.rec_OwnerUGrpID in (' .join(',', prepareIds($ACCESSABLE_OWNER_IDS, true)) . ') OR ' 
             : '') .
     ($system->has_access() && !$PUBONLY ? 'NOT src.rec_NonOwnerVisibility = "hidden")' : 'src.rec_NonOwnerVisibility = "public")');
 

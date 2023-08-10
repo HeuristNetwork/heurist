@@ -47,10 +47,10 @@ $init_client = (@$_REQUEST['verbose']!=1);
 $rty_ids_list = null;
 //sanitize
 if(@$_REQUEST['recTypeIDs']){
-    $rty_ids = explode(',',$_REQUEST['recTypeIDs']);
+    $rty_ids = prepareIds($_REQUEST['recTypeIDs']);
     $mysqli = $system->get_mysqli();
-    $rty_ids = array_map(array($mysqli,'real_escape_string'), $rty_ids);
-    $rty_ids_list = implode(',', $rty_ids);
+    //$rty_ids = array_map(array($mysqli,'real_escape_string'), $rty_ids);
+    if(count($rty_ids)>0) $rty_ids_list = implode(',', $rty_ids);
 }
 
 if(!$init_client || @$_REQUEST['session']>0){ //2a. init operation on client side
@@ -294,6 +294,7 @@ function doRecTitleUpdate( $system, $progress_session_id, $recTypeIDs ){
         
         $processed_count++;
         
+        $rec_id = intval($rec_id);
         $rec_title = trim($rec['rec_Title']);
         if ($new_title && $rec_title && $new_title == $rec_title && strstr($new_title, $rec_title) ){
             //not changed
@@ -307,6 +308,7 @@ function doRecTitleUpdate( $system, $progress_session_id, $recTypeIDs ){
             
         }else {
             if ( $rec['rec_RecTypeID'] == 1 && $rec['rec_Title']) {
+                $titleDT = intval($titleDT);
                 
                 $has_detail_160 = mysql__select_value($mysqli, 
                     "select dtl_ID from recDetails where dtl_DetailTypeID = $titleDT and dtl_RecID =". $rec_id);
@@ -317,7 +319,7 @@ function doRecTitleUpdate( $system, $progress_session_id, $recTypeIDs ){
                         $rec['rec_Title'] . "\" where dtl_DetailTypeID = $titleDT and dtl_RecID=".$rec_id);
                 }else{
                     $mysqli->query('insert into recDetails (dtl_RecID, dtl_DetailTypeID, dtl_Value) VALUES(' 
-                        .$rec_id . ','. $titleDT  .',"'.$rec['rec_Title'] . '")');
+                        .$rec_id . ','. $titleDT  .',"'.$mysqli->real_escape_string($rec['rec_Title']) . '")');
                 }
                 
                 

@@ -115,19 +115,19 @@ if($islist || (array_key_exists("id", $_REQUEST) && $_REQUEST["id"]!="")){
     // for wkt
     $squery = "select rec_ID, rec_URL, rec_Title, d0.dtl_DetailTypeID, d0.dtl_Value, if(d0.dtl_Geo is null, null, ST_asWKT(d0.dtl_Geo)) as dtl_Geo, ".
     "d1.dtl_Value as Date0, d2.dtl_Value as DateStart, d3.dtl_Value as DateEnd ";
-    $ourwhere = " and (d0.dtl_RecID=rec_ID) and (d0.dtl_Geo is not null ".($dtKML>0?" or d0.dtl_DetailTypeID=".$dtKML:"").")";
+    $ourwhere = " and (d0.dtl_RecID=rec_ID) and (d0.dtl_Geo is not null ".($dtKML>0?" or d0.dtl_DetailTypeID=".intval($dtKML):"").")";
 
     $detTable =
-    " left join recDetails d1 on d1.dtl_RecID=rec_ID and d1.dtl_DetailTypeID=".$dtDate.
-    " left join recDetails d2 on d2.dtl_RecID=rec_ID and d2.dtl_DetailTypeID=".$dtDateStart.
-    " left join recDetails d3 on d3.dtl_RecID=rec_ID and d3.dtl_DetailTypeID=".$dtDateEnd.
+    " left join recDetails d1 on d1.dtl_RecID=rec_ID and d1.dtl_DetailTypeID=".intval($dtDate).
+    " left join recDetails d2 on d2.dtl_RecID=rec_ID and d2.dtl_DetailTypeID=".intval($dtDateStart).
+    " left join recDetails d3 on d3.dtl_RecID=rec_ID and d3.dtl_DetailTypeID=".intval($dtDateEnd).
     ", recDetails d0";
 
     //for kml
     $squery2 = "select  rec_ID, rec_URL, rec_Title, ulf_ID, ulf_FilePath, ulf_FileName ";
     
-    $ourwhere2 = " and (dtl_RecID=rec_ID) and (dtl_DetailTypeID=".$dtKMLfile
-            .($dtFile>0?" or (dtl_DetailTypeID = ".$dtFile." AND ulf_MimeExt='kml'))":")");
+    $ourwhere2 = " and (dtl_RecID=rec_ID) and (dtl_DetailTypeID=".intval($dtKMLfile)
+            .($dtFile>0?" or (dtl_DetailTypeID = ".intval($dtFile)." AND ulf_MimeExt='kml'))":")");
             
     $detTable2 = ", recDetails left join recUploadedFiles on ulf_ID = dtl_UploadedFileID";
 
@@ -152,12 +152,12 @@ if($islist || (array_key_exists("id", $_REQUEST) && $_REQUEST["id"]!="")){
                 $rec_ids = array_slice($rec_ids,0,@$_REQUEST['limit']);    
             }
 
-            $squery = $squery." from Records ".$detTable." where rec_ID in (".implode(",", $rec_ids).") ".$ourwhere;
-            $squery2 = $squery2." from Records ".$detTable2." where rec_ID in (".implode(",", $rec_ids).") ".$ourwhere2;
+            $squery = $squery." from Records ".$detTable." where rec_ID in (".implode(",", prepareIds($rec_ids)).") ".$ourwhere;
+            $squery2 = $squery2." from Records ".$detTable2." where rec_ID in (".implode(",", prepareIds($rec_ids)).") ".$ourwhere2;
 
     }else{
-        $squery = $squery." from Records ".$detTable." where rec_ID=".$mysqli->real_escape_string($_REQUEST["id"]).$ourwhere;
-        $squery2 = $squery2." from Records ".$detTable2." where rec_ID=".$mysqli->real_escape_string($_REQUEST["id"]).$ourwhere2;
+        $squery = $squery." from Records ".$detTable." where rec_ID=".intval($_REQUEST["id"]).$ourwhere;
+        $squery2 = $squery2." from Records ".$detTable2." where rec_ID=".intval($_REQUEST["id"]).$ourwhere2;
     }
 
     $wkt_reccount=0;

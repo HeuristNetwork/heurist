@@ -555,7 +555,9 @@ if($step=="1"){  //first step - info about current status
                 //}                
                 // 3) try to search record in database by zotero id
                 $query = "select r.rec_ID, r.rec_Modified from Records r, recDetails d  ".
-                "where  r.rec_Id=d.dtl_recId and d.dtl_DetailTypeID=".$dt_SourceRecordID." and d.dtl_Value='".$zotero_itemid."'";
+                "where  r.rec_Id=d.dtl_recId and d.dtl_DetailTypeID="
+                        .intval($dt_SourceRecordID)." and d.dtl_Value='"
+                        .$mysqli->real_escape_string($zotero_itemid)."'";
                 $res = $mysqli->query($query);
                 if($res){
                     $row = $res->fetch_row();
@@ -1257,7 +1259,7 @@ function createResourceRecord($mysqli, $record_type, $recdetails, $missing_point
 
             $details['t:'.$dt_id] = $value;
             foreach($value as $idx=>$val){
-                $query = $query." and r.rec_Id=d$dcnt.dtl_recId and d$dcnt.dtl_DetailTypeID=".$dt_id.
+                $query = $query." and r.rec_Id=d$dcnt.dtl_recId and d$dcnt.dtl_DetailTypeID=".intval($dt_id).
                 " and d$dcnt.dtl_Value='".$mysqli->real_escape_string($val)."'";
                 $dcnt++;
             }
@@ -1272,7 +1274,7 @@ function createResourceRecord($mysqli, $record_type, $recdetails, $missing_point
         }
 
         //find resouce record , if not found create new one
-        $query = "select r.rec_ID from Records r $qd where r.rec_RecTypeID=".$record_type.$query;
+        $query = "select r.rec_ID from Records r $qd where r.rec_RecTypeID=".intval($record_type).$query;
 
         $res = $mysqli->query($query);
         if($res){

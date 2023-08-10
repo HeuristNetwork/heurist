@@ -271,7 +271,7 @@ $reference_bdts = mysql__select_assoc2($mysqli,'select dty_ID, dty_Name from def
                         $rec_keys = array_keys($records);
                         if (! @$master_rec_id){
                             array_multisort($counts, SORT_NUMERIC, SORT_DESC, $rec_keys );
-                            $master_rec_id = $rec_keys[0];
+                            $master_rec_id = intval($rec_keys[0]);
                         }
                         if (! @$do_merge_details){  // display a page to user for selecting which record should be the master record
                             //    foreach($records as $index) {
@@ -687,13 +687,12 @@ function do_fix_dupe()
     
     $master_rectype_id = mysql__select_value($mysqli, 'SELECT rec_RecTypeID FROM Records where rec_ID='.$master_rec_id);
 
-    
     $dup_rec_ids=array();
     if(in_array($master_rec_id, $bib_ids )){
         $dup_rec_ids = array_diff($bib_ids, array($master_rec_id) );
     }
 
-    $dup_rec_list = '(' . join(',', $dup_rec_ids) . ')';
+    $dup_rec_list = '(' . join(',', prepareIds($dup_rec_ids)) . ')';
     $add_dt_ids = array();   // array of detail ids to insert for the master record grouped by detail type is
     $update_dt_ids = array(); // array of detail ids to get value for updating the master record
     $keep_dt_ids = array();   // array of master record repeatable detail ids to keep grouped by detail type id- used to find master details to remove
@@ -802,9 +801,11 @@ function do_fix_dupe()
     foreach ($dup_rec_ids as $dup_rec_id) {
         //saw FIXME we should be updating the chain of links
         //find all references to $dup_rec_id that will be removed
-        $mysqli->query('update recForwarding set rfw_NewRecID='.$master_rec_id.' where rfw_NewRecID='.$dup_rec_id);
-        
-        $mysqli->query('insert into recForwarding (rfw_OldRecID, rfw_NewRecID) values ('.$dup_rec_id.', '.$master_rec_id.')');
+        $dup_rec_id = intval($dup_rec_id);
+        if($dup_rec_id>0){
+            $mysqli->query('update recForwarding set rfw_NewRecID='.$master_rec_id.' where rfw_NewRecID='.$dup_rec_id);
+            $mysqli->query('insert into recForwarding (rfw_OldRecID, rfw_NewRecID) values ('.$dup_rec_id.', '.$master_rec_id.')');
+        }
         //saw FIXME  we should update the relationship table on both rr_rec_idxxx  fields
     }
 

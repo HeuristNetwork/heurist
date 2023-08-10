@@ -1239,7 +1239,7 @@ if($i<5){
             $res = array();
             foreach($ids as $v){
                 if (is_numeric($v) && ($v > 0 || ($can_be_zero && $v==0))){
-                    $res[] = $v;
+                    $res[] = intval($v);
                 }
             }
             return $res;

@@ -153,7 +153,7 @@ if( isset($passwordForDatabaseCreation) && $passwordForDatabaseCreation!='' &&
         if (array_search(strtolower($database_name_full), array_map('strtolower', $dblist)) !== false ){
             //$mysqli->query('drop database '.$database_name_full);
                 $system->addError(HEURIST_ACTION_BLOCKED, 
-                        'Database with name '.$database_name_full.' aready exists. Try different name');
+                        'Database with name '.htmlspecialchars($database_name_full).' aready exists. Try different name');
                 print json_encode($system->getError());
                 exit();
         }
@@ -226,7 +226,7 @@ if( isset($passwordForDatabaseCreation) && $passwordForDatabaseCreation!='' &&
             $dty_CCode = 'SELECT dty_ID FROM defDetailTypes INNER JOIN defRecStructure ON rst_DetailTypeID = dty_ID WHERE dty_OriginatingDBID = DB_ID AND dty_IDInOriginatingDB = DTY_ID AND rst_RecTypeID = RTY_ID';
 
             // GeoNames
-            $rty_query = 'SELECT rty_ID FROM '. $database_name_full .'.defRecTypes WHERE rty_OriginatingDBID = 3 AND rty_IDInOriginatingDB = 1009';
+            $rty_query = 'SELECT rty_ID FROM `'.$database_name_full.'`.defRecTypes WHERE rty_OriginatingDBID = 3 AND rty_IDInOriginatingDB = 1009';
             $rty_id = mysql__select_value($mysqli, $rty_query);
             if(!empty($rty_id)){
 
@@ -251,7 +251,7 @@ if( isset($passwordForDatabaseCreation) && $passwordForDatabaseCreation!='' &&
             }
 
             // Nakala
-            $rty_query = 'SELECT rty_ID FROM '. $database_name_full .'.defRecTypes WHERE rty_OriginatingDBID = 2 AND rty_IDInOriginatingDB = 5';
+            $rty_query = 'SELECT rty_ID FROM `'. $database_name_full .'`.defRecTypes WHERE rty_OriginatingDBID = 2 AND rty_IDInOriginatingDB = 5';
             $rty_id = mysql__select_value($mysqli, $rty_query);
             if(!empty($rty_id)){
 
@@ -287,7 +287,7 @@ if( isset($passwordForDatabaseCreation) && $passwordForDatabaseCreation!='' &&
             if(!empty($def_lookups)){
 
                 $lookup_str = json_encode($def_lookups);
-                $upd_query = "UPDATE ". $database_name_full .".sysIdentification SET sys_ExternalReferenceLookups = '" . $lookup_str . "' WHERE sys_ID = 1";
+                $upd_query = "UPDATE `". $database_name_full ."`.sysIdentification SET sys_ExternalReferenceLookups = '" . $lookup_str . "' WHERE sys_ID = 1";
                 $mysqli->query($upd_query);
             }else{
                 //$warnings.push('Unable to setup default lookup services.');
