@@ -2318,7 +2318,7 @@ if($new_term_id==5039){
             $translations = $translations['data'];
         }
         
-        if(count($translations['translations']) > 0){
+        if(is_array(@$translations['translations']) && count($translations['translations']) > 0){
             $this->_handleTranslations($def, $translations);
         }else{
             $this->translations_report[$def] = 'No translations found';
