@@ -152,14 +152,16 @@ $.widget( "heurist.search_faceted", {
         ispreview: false,
         showclosebutton: true,
         showresetbutton: true,
-        search_realm: null,
         svs_ID: null,
         onclose: null,// callback
         is_publication: false,
         respect_relation_direction: false,
         language: 'def',  //use default
 
-        hide_no_value_facets: true // hide facets with no values, default true
+        hide_no_value_facets: true, // hide facets with no values, default true
+        
+        search_page: null, //target page (for CMS) - it will navigate to this page and pass search results to search_realm group
+        search_realm:  null  //accepts search/selection events from elements of the same realm only
     },
     
     _current_query_request_id:null,
@@ -1752,7 +1754,8 @@ console.log('get defintion in OLD format!!!!');
                             //to keep info what is primary record type in final recordset
                             primary_rt: this.options.params.rectypes[0],
                             ispreview: this.options.ispreview,
-                            search_realm: this.options.search_realm
+                            search_realm: this.options.search_realm,
+                            search_page: this.options.search_page
                             }; //, facets: facets
                             
             if(this.options.ispreview){

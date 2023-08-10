@@ -54,7 +54,11 @@ $.widget( "heurist.svs_list", {
         
         suppress_default_search: false, //if true prevents default search (init_svsID) execution - useful in cms
 
-        hide_no_value_facets: true // for facet searches, hide facets that have no available values
+        hide_no_value_facets: true, // for facet searches, hide facets that have no available values
+        
+        search_page: null, //target page (for CMS) - it will navigate to this page and pass search results to search_realm group
+        search_realm:  null  //accepts search/selection events from elements of the same realm only
+        
     },
 
     isPublished: false,
@@ -2205,18 +2209,19 @@ console.log('refresh '+(window.hWin.HAPI4.currentUser.usr_SavedSearch==null));
                     if(that.options.sup_filter){
                         params.sup_filter = that.options.sup_filter;
                     }
-
+                    
+                    //options for faceted search
                     var noptions = { 
                         svs_ID: svs_ID,
                         query_name:qname, 
                         params:params, 
                         showclosebutton: this.showclosebutton,
                         showresetbutton: (this.options.showresetbutton!==false),
-                        search_realm:this.options.search_realm,
+                        search_realm: this.options.search_realm,
+                        search_page: this.options.search_page,
                         language: this.options.language,
                         hide_no_value_facets: this.options.hide_no_value_facets
                     };
-                    
                     
                     if(that.options.is_h6style){
                         context_on_exit = noptions;
@@ -2316,6 +2321,7 @@ console.log('refresh '+(window.hWin.HAPI4.currentUser.usr_SavedSearch==null));
                     request.source = this.element.attr('id');
                     request.qname = qname;
                     request.search_realm = this.options.search_realm;
+                    request.search_page = this.options.search_page;
                     
                     window.hWin.HAPI4.SystemMgr.user_log('search_Record_savedfilter');
                     
