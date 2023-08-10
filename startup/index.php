@@ -62,7 +62,7 @@ if(($_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0.0.1'))
 <script>
     window.hWin = window;
      //stub
-    window.hWin.HR = function(res){ return regional['en'][res]?regional['en'][res]:res; } 
+    window.hWin.HR = function(res){ return regional['ENG'][res]?regional['ENG'][res]:res; } 
 </script>
 <script type="text/javascript" src="<?php echo PDIR;?>hclient/core/detectHeurist.js"></script>
 <script type="text/javascript" src="<?php echo PDIR;?>hclient/core/utils.js"></script>
@@ -464,6 +464,10 @@ if(($_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0.0.1'))
     // init db lookup - open dropdown list on keypress in search database input
     //
     function _initControls(){
+
+        if(!window.hWin.HR){
+            window.hWin.HR = window.hWin.HAPI4.setLocale('ENG');
+        }
         
         $('.button-registration').button().on({click:_showRegistration}); //goto step2
         
