@@ -396,7 +396,7 @@ if($isLocalHost){
             //switch to FAP tab if q parameter is defined
             window.hWin.HAPI4.LayoutMgr.putAppOnTopById('FAP');
 
-            var active_tab = '<?php echo str_replace("'","\'",@$_REQUEST['tab']);?>';
+            var active_tab = '<?php echo addslashes(htmlspecialchars(@$_REQUEST['tab'], ENT_NOQUOTES));?>';
             if(active_tab){
                 window.hWin.HAPI4.LayoutMgr.putAppOnTop(active_tab);
             }

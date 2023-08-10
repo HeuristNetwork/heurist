@@ -70,9 +70,9 @@
         $system->error_exit_api('Database '.$params['db'].' does not have field definitions for KML/CSV snipppet and file'); //exit from script
     }*/
     
-    $record = array("rec_ID"=>$params['recID']);
+    $record = array("rec_ID"=>intval($params['recID']));
     //load record with details and 2 header fields
-    $record = recordSearchByID($system, $params['recID'], true, "rec_ID, rec_RecTypeID");
+    $record = recordSearchByID($system, intval($params['recID']), true, "rec_ID, rec_RecTypeID");
     //array(DT_KML, DT_KML_FILE, DT_FILE_RESOURCE));
     
     if (@$record['details'] &&
@@ -365,7 +365,9 @@
                 
             }
     }else{
-        $system->error_exit_api('Database '.$params['db'].'. Record '.$params['recID'].' does not have data for KML/CSV snipppet or file');
+        $system->error_exit_api('Database '
+                .htmlspecialchars($params['db']).'. Record '
+                .intval($params['recID']).' does not have data for KML/CSV snipppet or file');
     }
     
     $system->dbclose();

@@ -63,7 +63,14 @@ if(!$init_client || @$_REQUEST['session']>0){ //2a. init operation on client sid
         print json_encode($response);
         exit();
     }else{
-        $res = recordUpdateCalcFields($system, null, @$_REQUEST['recTypeIDs']);
+        
+        if(@$_REQUEST['recTypeIDs']){
+            $rty_IDs = prepareIds($_REQUEST['recTypeIDs']);
+        }else{
+            $rty_IDs = null;
+        }
+        
+        $res = recordUpdateCalcFields($system, null, $rty_IDs);
     }
 }
 

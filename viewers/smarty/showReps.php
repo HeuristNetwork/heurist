@@ -136,7 +136,7 @@ function executeSmartyTemplate($system, $params){
            $record_with_custom_styles, $is_headless;
 
            
-    $outputfile  = (array_key_exists("output", $params)) ? $params["output"] :null;
+    $outputfile  = (array_key_exists("output", $params)) ? htmlspecialchars($params["output"]) :null;
     $publishmode = (array_key_exists("publish", $params))? intval($params['publish']):0;
     $emptysetmessage = (array_key_exists("emptysetmessage", $params))? $params['emptysetmessage']:null;
     $record_with_custom_styles = (array_key_exists("cssid", $params))? $params['cssid']:null;
@@ -251,7 +251,7 @@ function executeSmartyTemplate($system, $params){
     }
 
     //get name of template file
-    $template_file = (array_key_exists('template',$params)?$params['template']:null);
+    $template_file = (array_key_exists('template',$params)?htmlspecialchars($params['template']):null);
 
     //get template body from request (for execution from editor)
     $template_body = (array_key_exists('template_body',$params)?$params['template_body']:null);

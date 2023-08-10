@@ -67,7 +67,7 @@ if(isset($_REQUEST) && count($_REQUEST)>0){ //if set it is included in dailyCron
     
     $format = null;
     if(array_key_exists('mode',$_REQUEST)){
-        $format = $_REQUEST['mode'];
+        $format = htmlspecialchars($_REQUEST['mode']);
     }
 
     $mysqli = $system->get_mysqli();
@@ -246,7 +246,7 @@ function doReport($system, $update_mode, $format, $row){
     if(!$success) $res = 0;
 
     if($update_mode==4){
-        echo $outputfile.'  '.($res==0?'error':($res==1?'created':'updated'))."\n";                
+        echo htmlspecialchars($outputfile.'  '.($res==0?'error':($res==1?'created':'updated')))."\n";                
     }
     
     return $res;

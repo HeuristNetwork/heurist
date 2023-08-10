@@ -44,7 +44,7 @@ if($error){
                     ?>
                     <html>
                         <?php  echo htmlspecialchars($_SERVER['PHP_SELF']); ?><br>
-                        <a href="<?php echo htmlspecialchars($_SERVER['PHP_SELF']).'?a=login&auth=1&db='.$dbname; ?>">LOGIN</a></html>
+                        <a href="<?php echo htmlspecialchars($_SERVER['PHP_SELF']).'?a=login&auth=1&db='.htmlspecialchars($dbname); ?>">LOGIN</a></html>
                     <?php
                     exit();
             }

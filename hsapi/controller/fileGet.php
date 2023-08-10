@@ -37,7 +37,7 @@ version - thumb or thumbnail|icon|full (thumb is default)
 
 //main purpose - download entity images
 $db = @$_REQUEST['db'];
-$filename = @$_REQUEST['file'];
+$filename = $filename(@$_REQUEST['file']);
 $entity_name = @$_REQUEST['entity'];
 
 $error = System::dbname_check($db);

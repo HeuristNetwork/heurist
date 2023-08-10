@@ -119,7 +119,7 @@ function getWhereRecordIds($params){
             $recids = json_decode($params['recordset'], true);    
         }
         //$recIDs = explode(',',$recids['recIDs']);
-        $recIDs = $recids['recIDs'];
+        $recIDs = prepareIds($recids['recIDs']);
     }
     return $recIDs;
 }

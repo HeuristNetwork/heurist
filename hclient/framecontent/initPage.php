@@ -133,7 +133,7 @@ if(defined('IS_INDEX_PAGE')){
 <html>
 <head>
 
-<title><?=(@$_REQUEST['db']?$_REQUEST['db']:'').'. '.HEURIST_TITLE ?></title>
+<title><?=(@$_REQUEST['db']?htmlspecialchars($_REQUEST['db']):'').'. '.HEURIST_TITLE ?></title>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 
 <meta name="SKYPE_TOOLBAR" content="SKYPE_TOOLBAR_PARSER_COMPATIBLE" />
@@ -293,7 +293,7 @@ if($isLocalHost){
 
         // Standalone check
         if(!window.hWin.HAPI4){
-            window.hWin.HAPI4 = new hAPI('<?php echo $_REQUEST['db']?>', onHapiInit);
+            window.hWin.HAPI4 = new hAPI('<?php echo htmlspecialchars($_REQUEST['db'])?>', onHapiInit);
 /*            
             // In case of standalone page
             //load minimum set of required scripts
@@ -302,7 +302,7 @@ console.log('initPage');
                 ], '<?php echo PDIR;?>hclient/core/')
             .done(function() {
                 // all done
-                window.hWin.HAPI4 = new hAPI('<?php echo $_REQUEST['db']?>', onHapiInit);
+                window.hWin.HAPI4 = new hAPI('<?php echo htmlspecialchars($_REQUEST['db'])?>', onHapiInit);
 
             }).fail(function(error) {
                 // one or more scripts failed to load
@@ -435,7 +435,7 @@ console.log('initPage');
         $("head").append(cssLink);
         $("head").append($('<link rel="stylesheet" type="text/css" href="h4styles.css?t='+(new Date().getTime())+'">'));
         */
-        var layoutid = '<?=@$_REQUEST['ll']?>';
+        var layoutid = '<?php echo htmlspecialchars(@$_REQUEST['ll']);?>';
 
         if(window.hWin.HEURIST4.util.isempty(layoutid)){
             layoutid = "H6Default";

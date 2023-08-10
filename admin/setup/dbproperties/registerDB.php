@@ -31,7 +31,7 @@ define('PDIR','../../../');  //need for proper path to js and css
 require_once(dirname(__FILE__).'/../../../hclient/framecontent/initPageMin.php');
 require_once(dirname(__FILE__).'/../../../hsapi/utilities/dbUtils.php');
 
-$sysadmin_pwd = @$_REQUEST['pwd'];
+$sysadmin_pwd = htmlspecialchars(@$_REQUEST['pwd']);
 
 if(!$system->is_dbowner() && $system->verifyActionPassword($sysadmin_pwd, $passwordForServerFunctions) ){
     $err = $response = $system->getError();
@@ -120,7 +120,7 @@ if(!$dbowner['ugr_eMail'] || !$dbowner['ugr_FirstName'] || !$dbowner['ugr_LastNa
             // Do the work of registering the database if a suitable title is set
             if( $isRegistrationInProgress ) {
                 
-                $dbDescription = $_POST['dbDescription'];
+                $dbDescription = htmlspecialchars($_POST['dbDescription']);
                 
                 if(strlen($dbDescription) > 39 && strlen($dbDescription) < 1000) {
                     
@@ -368,7 +368,7 @@ function registerDatabase() {
                         echo '<p class="ui-state-error">'
                             .'Unable to connect Heurist master index, possibly due to timeout or proxy setting<br><br>'
                             . $error_code . '<br>'
-                            ."URL requested: $reg_url</p><br>";
+                            ."URL requested: ".str_replace('&amp;','&',htmlspecialchars($reg_url))."</p><br>";
                         return false;
                     }
                     
@@ -399,7 +399,8 @@ function registerDatabase() {
                         "returned the following instead of a registration number:\n" . substr($data, 0, 25) .
                         " ... \nPlease ".CONTACT_HEURIST_TEAM." for advice";
                     }
-                    echo '<p class="ui-state-error">'. $msg . "</p><br />";
+                    
+                    echo '<p class="ui-state-error">'. htmlspecialchars($msg) . "</p><br />";
                     return false;
                 }
                 else if($dbID == -1)

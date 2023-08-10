@@ -181,13 +181,13 @@ if($mode!=3){
                             echo "<div class='resultsRow'><div class='statusCell ".
                                         ($is_invalid? "invalid'>in":"valid'>")."valid</div>";
                                         
-                            echo "<div class='maskCell'>Mask: <i>$mask</i></div>";
+                            echo "<div class='maskCell'>Mask: <i>".htmlspecialchars($mask)."</i></div>";
                             if(is_array($res)){
-                                echo "<div class='errorCell'><b>< < < < < ".$res[0]."</b></div>";
+                                echo "<div class='errorCell'><b>< < < < < ".htmlspecialchars($res[0])."</b></div>";
                             }else if ($mask == "") {
                                 echo "<div class='errorCell'><b>< < < < < EMPTY TITLE MASK</b></div>";
                             }else if(strcasecmp($res,$mask)!=0){
-                                echo "<div><br/>&nbsp;Decoded Mask: $res</div>";
+                                echo "<div><br/>&nbsp;Decoded Mask: ".htmlspecialchars($res)."</div>";
                             }
                             echo "</div>";
 
@@ -198,8 +198,8 @@ if($mode!=3){
                         return !$is_invalid;
                         
                     }else{
-                        echo "Checking title mask $mask for record type $rtID and record $recID <br/>";
-                        echo TitleMask::fill($recID, $mask);
+                        echo "Checking title mask ".htmlspecialchars($mask)." for record type $rtID and record $recID <br/>";
+                        echo htmlspecialchars(TitleMask::fill($recID, $mask));
                     }
                     
                     return true;
