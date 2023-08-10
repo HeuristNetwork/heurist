@@ -54,7 +54,7 @@ if(!$format) $format='csv';
                     
                     importRecordsCSV = new hImportRecordsCSV(
                                 window.hWin.HEURIST4.util.getUrlParameter('imp_ID', window.location.search), 
-                                <?php echo $max_size; ?>, "<?php echo $format;?>" );
+                                <?php echo $max_size; ?>, "<?php echo htmlspecialchars($format);?>" );
                 }
             }
         

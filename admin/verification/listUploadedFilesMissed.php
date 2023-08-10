@@ -89,7 +89,7 @@ if(@$_REQUEST['all']==1){
     $is_all_databases = true;
     $databases = mysql__getdatabases4($mysqli, false);   
 }else{
-    $databases = array($_REQUEST['db']);
+    $databases = array($mysqli->real_escape_string($_REQUEST['db']));
 }
 
 $total_count = 0;

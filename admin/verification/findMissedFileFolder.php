@@ -59,8 +59,8 @@ if(!@$_REQUEST['mail']){
         <link rel="stylesheet" type="text/css" href="<?php echo PDIR;?>h4styles.css" />
     </head>
     <body class="popup">
-
-        <script>window.history.pushState({}, '', '<?php echo $_SERVER['PHP_SELF']; ?>')</script>  
+            
+        <script>window.history.pushState({}, '', '<?php echo htmlspecialchars($_SERVER['PHP_SELF']); ?>')</script>  
         <div style="font-family:Arial,Helvetica;font-size:12px">
                 <h2>List of databases with missing or non-writeable folders</h2>
 <?php            

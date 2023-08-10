@@ -424,8 +424,8 @@
         }
 
         if(@$_REQUEST['debug']){
-            print '<div>'.strlen($url)."</div>";
-            print $url;
+            //print '<div>'.strlen($url)."</div>";
+            //print $url;
         }else{
 		    header('Location: '.$url);
         }

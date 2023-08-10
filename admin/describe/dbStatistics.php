@@ -318,7 +318,7 @@ if($is_csv){
             var dataSet = [
                 <?php
                     foreach ($arr_databases as $db) {
-                        print '['.$db.'],'.PHP_EOL;
+                        print '['.htmlspecialchars($db).'],'.PHP_EOL;
                     }
                 ?>
             ];

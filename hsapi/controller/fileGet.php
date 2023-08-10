@@ -56,7 +56,7 @@ if($filename){ //download from scratch (for csv import)
         
         if(!isPathInHeuristUploadFolder( $file_read ) || is_dir($file_read))        
         {
-            print 'Temporary file (uploaded csv data) '.$filename. ' not found';                
+            print 'Temporary file (uploaded csv data) '.htmlspecialchars($filename). ' not found';                
             exit();
         }
 
@@ -216,7 +216,7 @@ if($filename){ //download from scratch (for csv import)
 
 }else {
     if(!$entity_name){ //print error as text
-        print $error;
+        print htmlspecialchars($error);
     }else{
         _download_file(dirname(__FILE__).'/../../hclient/assets/100x100.gif', 'image/gif');
     }

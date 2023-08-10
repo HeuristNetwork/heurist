@@ -45,8 +45,13 @@ if(!$init_client || @$_REQUEST['session']>0){ //2a. init operation on client sid
     
     if(@$_REQUEST['session']>0)
     {
+        $rty_IDs = null;
+        if(@$_REQUEST['recTypeIDs']){
+            $rty_IDs = prepareIds($_REQUEST['recTypeIDs']);
+        }
+        
         $system->setResponseHeader();
-        $res = recordUpdateCalcFields($system, null, @$_REQUEST['recTypeIDs'], @$_REQUEST['session']);
+        $res = recordUpdateCalcFields($system, null, $rty_IDs, @$_REQUEST['session']);
         
         //2b. response to client side
         if( is_bool($res) && !$res ){
@@ -97,7 +102,7 @@ if(!$init_client || @$_REQUEST['session']>0){ //2a. init operation on client sid
         };
 <?php        
         if(@$_REQUEST['recTypeIDs']){
-            print "request['recTypeIDs'] = '".$_REQUEST['recTypeIDs']."';"; //js output
+            print "request['recTypeIDs'] = '".htmlspecialchars($_REQUEST['recTypeIDs'])."';"; //js output
         }
 ?>        
         //url to show affected records
@@ -181,11 +186,11 @@ if($init_client){
     }
 }else{
     if( is_bool($res) && !$res ){
-        print '<div><span style="color:red">'.$system->getError()['message'].'</span></div>';
+        print '<div><span style="color:red">'.htmlspecialchars($system->getError()['message']).'</span></div>';
         print '</div></body></html>';
         exit();
     }else if($res['message']){
-        print '<div><span style="color:red">'.$res['message'].'</span></div>';
+        print '<div><span style="color:red">'.htmlspecialchars($res['message']).'</span></div>';
     }
     
     if($res['q_updates']){        

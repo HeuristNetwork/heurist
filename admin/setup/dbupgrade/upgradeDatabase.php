@@ -70,7 +70,7 @@ if(!defined('PDIR')){
             $(document).ready(function() {
                 
                 if(!window.hWin.HAPI4){
-                    window.hWin.HAPI4 = new hAPI('<?php echo $_REQUEST['db']?>', onHapiInit);
+                    window.hWin.HAPI4 = new hAPI('<?php echo htmlspecialchars($_REQUEST['db'])?>', onHapiInit);
                 }else{
                     onHapiInit(true);
                 }

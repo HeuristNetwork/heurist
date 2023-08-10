@@ -543,7 +543,7 @@ function records_check($url, $title, $notes, $user_rec_id) {
 
 	if ($user_rec_id > 0) {
         $res = mysql__select_value($mysqli, 'select rec_ID from Records where rec_ID = "'
-                .$mysqli->real_escape_string($user_rec_id)
+                .intval($user_rec_id)
                 .'" and (rec_OwnerUGrpID=0 or not rec_NonOwnerVisibility="hidden")');
         if ($res>0) {
             return $res;
@@ -635,9 +635,10 @@ function print_link($url, $title) {
       <small class="words">
 <?php
 	if (@$_REQUEST['notes'][$linkno])
-		$word_count = str_word_count($_REQUEST['notes'][$linkno]);
+		$word_count = intval(str_word_count($_REQUEST['notes'][$linkno]));
 	else
 		$word_count = str_word_count($notes[$url]);
+        
 	if ($word_count == 1) {
 		print '1 word';
 	} else if ($word_count > 1) {
@@ -671,9 +672,9 @@ function print_link($url, $title) {
 		</span>&nbsp;&nbsp;
 		<a style ="font-size: 80%; text-decoration:none;" target="_testwindow" href="<?= htmlspecialchars($row[1]) ?>"><?php
 				if (strlen($row[1]) < 100) //'rec_URL'
-					print (common_substring($row[1], $url));
+					print htmlspecialchars(common_substring($row[1], $url));
 				else
-					print (common_substring(substr($row[1], 0, 90) . '...', $url));
+					print htmlspecialchars(common_substring(substr($row[1], 0, 90) . '...', $url));
 		?></a><br>
 	</div>
 

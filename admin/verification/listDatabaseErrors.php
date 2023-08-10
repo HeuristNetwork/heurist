@@ -75,13 +75,13 @@ if(count($recids)>0){
 
 //see getInvalidFieldTypes in verifyFieldTypes.php
 $dtysWithInvalidTerms = @$lists["terms"];
-$dtysWithInvalidNonSelectableTerms = @$lists["terms_nonselectable"];
-$dtysWithInvalidRectypeConstraint = @$lists["rt_contraints"];
+$dtysWithInvalidNonSelectableTerms = prepareIds(@$lists["terms_nonselectable"]);
+$dtysWithInvalidRectypeConstraint = prepareIds(@$lists["rt_contraints"]);
 
 $rtysWithInvalidDefaultValues = @$lists["rt_defvalues"];
 
-$trmWithWrongParents = @$lists2["trm_missed_parents"];
-$trmWithWrongInverse = @$lists2["trm_missed_inverse"];
+$trmWithWrongParents = prepareIds(@$lists2["trm_missed_parents"]);
+$trmWithWrongInverse = prepareIds(@$lists2["trm_missed_inverse"]);
 $trmDuplicates = @$lists2["trm_dupes"];
 
 ?>

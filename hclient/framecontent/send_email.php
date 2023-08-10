@@ -54,7 +54,7 @@ if(isset($_POST['data'])) {
         }
     }
 
-    echo $response;
+    echo htmlentities($response);
     exit();
 }
 

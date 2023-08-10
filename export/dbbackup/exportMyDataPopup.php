@@ -554,7 +554,7 @@ if($mode>1){
                 else if(array_key_exists('repository', $_REQUEST)){
                     //upload archive to repository
 
-                    $repo = $_REQUEST['repository'];
+                    $repo = htmlspecialchars($_REQUEST['repository']);
                     if($format == 'tar'){
                         $format = 'tar.bz2';
                     }

@@ -52,8 +52,8 @@ $mysqli = $system->get_mysqli();
 //3, 134
 
 $query = 'SELECT dtl_ID, r1.rec_ID, dtl_Value, r2.rec_Title FROM recDetails, Records r1, Records r2 '
-.' where r1.rec_ID=dtl_RecID and r1.rec_RecTypeID='.$_REQUEST['rty_ID'].' and dtl_DetailTypeID='.$_REQUEST['dty_ID']
-.' and dtl_Value=r2.rec_ID order by r1.rec_ID, r2.rec_Title ';
+.' where r1.rec_ID=dtl_RecID and r1.rec_RecTypeID='.intval($_REQUEST['rty_ID']).' and dtl_DetailTypeID='.intval($_REQUEST['dty_ID']
+).' and dtl_Value=r2.rec_ID order by r1.rec_ID, r2.rec_Title ';
 // and r1.rec_ID=494461    
 $res = $mysqli->query($query);
 

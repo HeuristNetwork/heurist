@@ -156,7 +156,7 @@ function recordSearchDistinctPointers( $params ){
     }
     
     $query = "select distinct dtl_Value as id, rec_Title as text from Records, recDetails where rec_ID=dtl_Value and dtl_DetailTypeID="
-                        .$params['dt']." and dtl_RecID in ".$where;
+                        .intval($params['dt'])." and dtl_RecID in ".$where;
         
 //DEBUG error_log($query);        
         
@@ -213,7 +213,7 @@ function getCrossTab( $params){
     }
 
     $mode = @$params['agg_mode'];
-    $issum = (($mode=="avg" || $mode=="sum") && @$params['agg_field']);
+    $issum = (($mode=="avg" || $mode=="sum") && intval(@$params['agg_field'])>0);
 
     if ($issum){
         $mode = $mode."(cast(d3.dtl_Value as decimal(20,2)))";  //.$params['agg_field'].")";
@@ -241,18 +241,18 @@ function getCrossTab( $params){
 
 $query = "select d2.dtl_Value as rws, ".$columnfld.$mode." as cnt ".$pagefld." ".$from;
 
-$query = $query." left join recDetails d2 on d2.dtl_RecID=TOPBIBLIO.rec_ID and d2.dtl_DetailTypeID=".$params['dt_row'];
-if($dt_col){
-    $query = $query." left join recDetails d1 on d1.dtl_RecID=TOPBIBLIO.rec_ID and d1.dtl_DetailTypeID=".$dt_col;
+$query = $query." left join recDetails d2 on d2.dtl_RecID=TOPBIBLIO.rec_ID and d2.dtl_DetailTypeID=".intval($params['dt_row']);
+if($dt_col>0){
+    $query = $query." left join recDetails d1 on d1.dtl_RecID=TOPBIBLIO.rec_ID and d1.dtl_DetailTypeID=".intval($dt_col);
 }
-if($dt_page){
-    $query = $query." left join recDetails d4 on d4.dtl_RecID=TOPBIBLIO.rec_ID and d4.dtl_DetailTypeID=".$dt_page;
+if($dt_page>0){
+    $query = $query." left join recDetails d4 on d4.dtl_RecID=TOPBIBLIO.rec_ID and d4.dtl_DetailTypeID=".intval($dt_page);
 }
 if($issum){
     $query = $query
      ." ,recDetails d3 "
     //20130517 ." where rec_RectypeID=".$params['rt']
-    ." where d3.dtl_RecID=TOPBIBLIO.rec_ID and d3.dtl_Value is not null && d3.dtl_DetailTypeID=".$params['agg_field']
+    ." where d3.dtl_RecID=TOPBIBLIO.rec_ID and d3.dtl_Value is not null && d3.dtl_DetailTypeID=".intval($params['agg_field'])
     ." and ".$where;
 
 }else{

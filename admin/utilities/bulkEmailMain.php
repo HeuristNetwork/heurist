@@ -1175,7 +1175,7 @@ if(!$has_emails || empty($emails)) {
 
                 </div>
 
-                <input name="db" value="<?php echo $_REQUEST['db']; ?>" style="display: none;" readonly />
+                <input name="db" value="htmlspecialchars(<?php echo $_REQUEST['db']); ?>" style="display: none;" readonly />
 
                 <input id="db_list" name="databases" type="hidden" />
                 <input name="exportCSV" value="false" style="display: none;" readonly />

@@ -38,13 +38,13 @@ $mysqli = $system->get_mysqli();
 $rty_ID = @$_REQUEST["rty"];
 $dty_ID = @$_REQUEST["dty"];
 $trm_ID = @$_REQUEST["trm"];
-if($rty_ID){
+if($rty_ID!=null){
     $rty_ID = intval(ConceptCode::getRecTypeLocalID($rty_ID));    
 }
-if($dty_ID){
+if($dty_ID!=null){
     $dty_ID = intval(ConceptCode::getDetailTypeLocalID($dty_ID));    
 }
-if($trm_ID){
+if($trm_ID!=null){
     $trm_ID = intval(ConceptCode::getTermLocalID($trm_ID));    
 }
 $is_subset = ($rty_ID>0 || $dty_ID>0 || $trm_ID>0);
@@ -239,9 +239,9 @@ function do_print_table( $tname, $id=0 )
     
     if($id>0){
         if($prefix=='rst'){
-            $where = ' where rst_RecTypeID='.$id;       
+            $where = ' where rst_RecTypeID='.intval($id);       
         }else{
-            $where = " where $id_field=$id";       
+            $where = " where $id_field=".intval($id);       
         }
     }
     

@@ -136,6 +136,10 @@ if(!isset($message)){
         </script>
     <?php
     }
+    
+    $message = htmlspecialchars(strip_tags($message,'<a><u><i><em><b><strong><sup><sub><small><br><h1><h2><h3><h4><p><ul><li><img>'));
+    $message = preg_replace("/&lt;/", '<', $message);
+    $message = preg_replace("/&gt;/", '>', $message);
     ?>
     </head>
     <body style="padding:44px;" class="ui-heurist-header1">
@@ -147,7 +151,7 @@ if(!isset($message)){
                 style="width:90%;margin:auto;margin-top:10px;padding:10px;">
                 <span class="ui-icon <?php echo ($is_error)?'ui-icon-alert':'ui-icon-info'; ?>" 
                       style="float: left; margin-right:.3em;font-weight:bold"></span>
-                <?php echo strip_tags($message,'<a><u><i><em><b><strong><sup><sub><small><br><h1><h2><h3><h4><p><ul><li><img>');?>
+                <?php echo $message;?>
             </div>
         </div>
     </body>

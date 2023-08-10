@@ -118,7 +118,7 @@ if(!$system->init(@$_REQUEST['db'])){
         $res = false;        
         
         if($action=='step0'){   
-            $res = ImportParser::saveToTempFile( @$_REQUEST['data'] );  //save csv data in temp file
+            $res = ImportParser::saveToTempFile( @$_REQUEST['data'] );  //it saves csv data in temp file  -returns array(filename)
             
         }else if($action=='step1'){   
             //file is uploaded with help fileupload widget and controller/fileUpload.php
@@ -268,8 +268,8 @@ if(@$_REQUEST['output']=='csv'){
         print $response['data'];
         
     }else{
-        print $response['message'].'. ';
-        print 'status: '.$response['status'];
+        print htmlspecialchars($response['message']).'. ';
+        print 'status: '.htmlspecialchars($response['status']);
     }
     
                 

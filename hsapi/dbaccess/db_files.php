@@ -891,7 +891,7 @@ function fileGetPlayerTag($system, $fileid, $mimeType, $params, $external_url, $
                     .$system->dbname();
         if(($iiif_type=='_iiif_image' || $params['var'][0]['ulf_PreferredSource']=='iiif_image')
             && @$params['var'][0]['rec_ID']>0){
-            $miradorViewer = $miradorViewer.'&q=ids:'.$params['var'][0]['rec_ID'];
+            $miradorViewer = $miradorViewer.'&q=ids:'.intval($params['var'][0]['rec_ID']);
         }else{
             $miradorViewer = $miradorViewer.'&'.substr($iiif_type,1).'='.$fileid;
         }

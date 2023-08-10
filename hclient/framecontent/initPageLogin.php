@@ -73,7 +73,7 @@ if (($_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0.0.1')
 <script>  
 var login_warning = ''
 var requiredLevel = 0; //1-admin, 2-owner, 0 logged in
-var database = '<?php echo $dbname;?>';
+var database = '<?php echo htmlspecialchars($dbname);?>';
 //
 //
 //

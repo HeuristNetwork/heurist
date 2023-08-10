@@ -30,7 +30,7 @@ exit();
 
 ini_set('max_execution_time', '0');
 
-print $_REQUEST['db'].'<br>';
+print htmlspecialchars($_REQUEST['db']).'<br>';
  
 //define('OWNER_REQUIRED', 1);   
 define('PDIR','../../');  //need for proper path to js and css    
@@ -1201,12 +1201,12 @@ function __updateDatabases_To_V14($db_process){
             $query = 'SELECT count(dtl_ID) FROM recDetails, defDetailTypes  WHERE dtl_DetailTypeID=dty_ID AND dty_Type="date" AND dtl_Value LIKE "%estMinDate%"';
             $cnt_fuzzy_dates2 = mysql__select_value($mysqli, $query);
             
-            print '<br>'.$db_name.'  v.'.$ver['sys_dbSubSubVersion'].'  '.$cnt_dates
+            print '<br>'.htmlspecialchars($db_name).'  v.'.$ver['sys_dbSubSubVersion'].'  '.$cnt_dates
                 .($cnt_dates<>$cnt_index?'<span style="color:red">':'<span>')
                 .'  index='.$cnt_index.' ( '.($cnt_fuzzy_dates>0?'<b>'.$cnt_fuzzy_dates.'</b>':'0').','.$cnt_fuzzy_dates2.' )</span>';
         }else{
             $cnt_db_old++;
-            print '<br>'.$db_name.'  v'.($ver['sys_dbSubVersion']<3?'<b>'.$ver['sys_dbSubVersion'].'</b>':'')
+            print '<br>'.htmlspecialchars($db_name).'  v'.($ver['sys_dbSubVersion']<3?'<b>'.$ver['sys_dbSubVersion'].'</b>':'')
             .'.'.$ver['sys_dbSubSubVersion'].'  '.$cnt_dates.'  ( '.$cnt_fuzzy_dates.' )';
             
             if($ver['sys_dbSubVersion']<3){

@@ -1455,7 +1455,7 @@ _dout('webpage doc ready ');
     
         // Standalone check
         if(!window.hWin.HAPI4){
-            window.hWin.HAPI4 = new hAPI('<?php echo $_REQUEST['db']?>', onHapiInit<?php print (array_key_exists('embed', $_REQUEST)?",'".PDIR."'":'');?>);
+            window.hWin.HAPI4 = new hAPI('<?php echo htmlspecialchars($_REQUEST['db'])?>', onHapiInit<?php print (array_key_exists('embed', $_REQUEST)?",'".PDIR."'":'');?>);
         }else{
             // Not standalone, use HAPI from parent window
             initHeaderElements();

@@ -66,7 +66,7 @@ $mysqli = $system->get_mysqli();
         $query = "select rps_ID, rps_Type, rps_Title, rps_FilePath, rps_URL, rps_FileName, rps_HQuery, rps_Template, rps_IntervalMinutes, 0 as selection, 0 as status from usrReportSchedule";
 
         if($f_name && $f_name!=""){
-            $query = $query." where rps_Title like '%".$f_name."%'";
+            $query = $query." where rps_Title like '%".$mysqli->real_escape_string($f_name)."%'";
         }
 
         $res = $mysqli->query($query);
@@ -98,7 +98,7 @@ $mysqli = $system->get_mysqli();
         $query = "select ".join(",", $colNames)." from usrReportSchedule ";
 
         if($recID>0){
-            $query = $query." where rps_ID=".$recID;
+            $query = $query." where rps_ID=".intval($recID);
             $res = $mysqli->query($query);
             while ($row = $res->fetch_row()) {
                 $records['records'][$row[0]] = $row;
@@ -200,7 +200,7 @@ exit();
         $ret = array();
 
         //delete references from user-group link table
-        $query = "delete from usrReportSchedule where rps_ID=$recID";
+        $query = 'delete from usrReportSchedule where rps_ID='.intval($recID);
         $res = $mysqli->query($query);
         if ( $mysqli->error ) {
             $ret['error'] = 'Db error deleting record from report schedules';

@@ -107,7 +107,7 @@ if ($rec_id>0 && !@$_REQUEST['bkmk_id'])
 }
 $sel_ids = array();
 if(@$_REQUEST['ids']){
-	$sel_ids = explode(',',$_REQUEST['ids']);
+	$sel_ids = prepareIds($_REQUEST['ids']);
     $sel_ids = array_unique($sel_ids);
 }
 if(!($is_map_popup || $without_header)){
@@ -766,9 +766,12 @@ if ($bkm_ID>0 || $rec_id>0) {
                 
                 foreach($sel_ids as $id){
                     
+                    $id = intval($id);
+                    if(!($id>0)) continue;
+                    
                     $bibInfo = mysql__select_row_assoc($system->get_mysqli(),
                             'select * from Records left join defRecTypes on rec_RecTypeID=rty_ID'
-                            .' where rec_ID='.intval($id).' and not rec_FlagTemporary');
+                            .' where rec_ID='.$id.' and not rec_FlagTemporary');
                 
                     if($id!=$rec_id){  //print details for linked records - hidden
                         print '<div data-recid="'.intval($id).'" style="display:none">'; //font-size:0.8em;
@@ -780,7 +783,8 @@ if ($bkm_ID>0 || $rec_id>0) {
                     $list = $list  //$id==$rec_id || $cnt>3
                         .'<div class="detailRow placeRow"'.($cnt>2?' style="display:none"':'').'>'
                             .'<div style="display:table-cell;padding-right:4px">'
-                                .'<img class="rft" style="background-image:url('.HEURIST_RTY_ICON.$bibInfo['rec_RecTypeID'].')" title="'.$rectypesStructure['names'][$bibInfo['rec_RecTypeID']].'" src="'.HEURIST_BASE_URL.'hclient/assets/16x16.gif"></div>'
+                                .'<img class="rft" style="background-image:url('.HEURIST_RTY_ICON.$bibInfo['rec_RecTypeID'].')" title="'.strip_tags($rectypesStructure['names'][$bibInfo['rec_RecTypeID']])
+                                .'" src="'.HEURIST_BASE_URL.'hclient/assets/16x16.gif"></div>'
                         .'<div style="display: table-cell;vertical-align:top;max-width:490px;" class="truncate"><a href="#" '   
 .'oncontextmenu="return false;" onclick="$(\'div[data-recid]\').hide();$(\'div[data-recid='.$id.']\').show();'
 .'$(\'.gm-style-iw\').find(\'div:first\').scrollTop(0)">'

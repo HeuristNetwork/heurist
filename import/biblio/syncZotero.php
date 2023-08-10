@@ -466,8 +466,8 @@ if($step=="1"){  //first step - info about current status
 
 
     $start = 0;
-    $fetch = min($_REQUEST['cnt'],100);
-    $totalitems = $_REQUEST['cnt'];
+    $fetch = min(intval($_REQUEST['cnt']),100);
+    $totalitems = intval($_REQUEST['cnt']);
     $new_recid = 0;
     $isFailure = false;
     

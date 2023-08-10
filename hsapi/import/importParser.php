@@ -79,6 +79,7 @@ public static function saveToTempFile($content, $extension='csv'){
     }
     
     $path_parts = pathinfo($upload_file_name);
+
     //$extension = strtolower(pathinfo($upload_file_name, PATHINFO_EXTENSION));
     //, 'isKML'=>($extension=='kml') 
     

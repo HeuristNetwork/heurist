@@ -144,7 +144,7 @@ if(!$error){
 
                 //request may have special parameters for audio/video players
                 if(@$_REQUEST['fancybox']){
-                    $params = $_REQUEST['fancybox']; //returns player in wrapper
+                    $params = array('fancybox'=>1); //returns player in wrapper
                 }else{
                     $params = null;
                 }

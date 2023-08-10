@@ -115,11 +115,6 @@ if($_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0.0.1'){
 -->
 
 <?php 
-print '<!--';
-print @$_REQUEST['notimeline'];
-print '<br>';
-print !@$_REQUEST['notimeline'];
-print '-->';
 if (!(@$_REQUEST['notimeline']=='true' || @$_REQUEST['notimeline']=='1')) { ?>
 <script type="text/javascript" src="<?php echo PDIR;?>external/vis/dist/vis.js"></script>
 <link rel="stylesheet" type="text/css" href="<?php echo PDIR;?>external/vis/dist/vis.css" />

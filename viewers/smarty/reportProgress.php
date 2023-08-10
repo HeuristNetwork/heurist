@@ -27,10 +27,10 @@
             //keep progress value in HEURIST_SCRATCH_DIR
             if(@$_REQUEST['terminate']==1){
                 $res = 'terminate';
-                mysql__update_progress($mysqli, $_REQUEST['session'], false, $res);
+                mysql__update_progress($mysqli, intval($_REQUEST['session']), false, $res);
             }else{
                 //retrieve current status
-                $res = mysql__update_progress($mysqli, $_REQUEST['session'], false, null);
+                $res = mysql__update_progress($mysqli, intval($_REQUEST['session']), false, null);
             }
         }
         if($res==null) $res = '';

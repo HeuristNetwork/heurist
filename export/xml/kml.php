@@ -148,8 +148,9 @@ if($islist || (array_key_exists("id", $_REQUEST) && $_REQUEST["id"]!="")){
             }
             $result = $result['data'];
             $rec_ids = $result['records'];
-            if(@$_REQUEST['limit']>0){
-                $rec_ids = array_slice($rec_ids,0,@$_REQUEST['limit']);    
+            $limit = intval(@$_REQUEST['limit']);
+            if($limit>0){
+                $rec_ids = array_slice($rec_ids,0,$limit);    
             }
 
             $squery = $squery." from Records ".$detTable." where rec_ID in (".implode(",", prepareIds($rec_ids)).") ".$ourwhere;

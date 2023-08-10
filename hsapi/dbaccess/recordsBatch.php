@@ -1656,7 +1656,7 @@ error_log('count '.count($childNotFound).'  '.count($toProcess).'  '.print_r(  $
             $mysqli = $this->system->get_mysqli();
             //6. Replace ulf_ID in dtl_UploadedFileID
             $query2 = 'UPDATE recDetails SET dtl_Modified="'.$date_mode
-                .'", dtl_UploadedFileID='.$ulf_ID_new.' WHERE dtl_ID in ('.implode(',',$dtl_IDs).')';
+                .'", dtl_UploadedFileID='.intval($ulf_ID_new).' WHERE dtl_ID in ('.implode(',',$dtl_IDs).')';
             $res2 = $mysqli->query($query2);
 
             if(!$res2){

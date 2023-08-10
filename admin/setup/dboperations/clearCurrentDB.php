@@ -86,7 +86,7 @@ require_once(dirname(__FILE__).'/../../../records/index/elasticSearch.php');
     <h1 style='display:inline-block;font-size: 16px;'>CLEAR ALL RECORDS FROM CURRENT DATABASE</h1><br>
 
     <h3>This will clear (delete) all records and reset counter to 1 for the current database: </h3>
-    <h2>Clear database: <?php echo $dbname;?></h2>
+    <h2>Clear database: <?php echo htmlspecialchars($dbname);?></h2>
     <form name='deletion' action='clearCurrentDB.php' method='post'>
         <p>Database definitions - record types, fields, terms, tags, users etc. - are not affected.
         Uploaded files are not deleted. Bookmarks and tags on specific records are deleted.<p>

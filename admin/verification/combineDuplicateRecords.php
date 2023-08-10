@@ -66,11 +66,11 @@ if (@$_REQUEST['keep']  &&  @$_REQUEST['duplicate']){  //user has select master 
 
 }
 
-$bib_ids = explode(',',$_REQUEST['bib_ids']);
+$bib_ids = prepareIds($_REQUEST['bib_ids']);
 $bib_ids = array_map(array($mysqli,'real_escape_string'), $bib_ids);
 $bib_ids_list = implode(',', $bib_ids);
 
-if (! @$_REQUEST['bib_ids']){
+if ( count($bib_ids)==0 ){
     header('Location: '.ERROR_REDIR.'&msg='.rawurlencode('Wrong parameter. List of record ids is not defined'));
     exit();
 } 
@@ -295,7 +295,7 @@ $reference_bdts = mysql__select_assoc2($mysqli,'select dty_ID, dty_Name from def
                                     '" title="Click to select this record as the Master record"'.
                                     ' id="keep'.$rec_ID.
                                     '" onclick="keep_bib('.$rec_ID.');">';
-                                print '<span style="font-size: 120%;"><a target="edit" href="'.HEURIST_BASE_URL.'?fmt=edit&db='.HEURIST_DBNAME.'&recID='.rec_ID.'">'.$rec_ID . ' ' . '<b>'.htmlspecialchars($record['rec_Title']).'</b></a> - <span style="background-color: #EEE;">'. $rtyNameLookup[$record['rec_RecTypeID']].'</span></span>';
+                                print '<span style="font-size: 120%;"><a target="edit" href="'.HEURIST_BASE_URL.'?fmt=edit&db='.HEURIST_DBNAME.'&recID='.rec_ID.'">'.$rec_ID . ' ' . '<b>'.htmlspecialchars($record['rec_Title']).'</b></a> - <span style="background-color: #EEE;">'. htmlspecialchars($rtyNameLookup[$record['rec_RecTypeID']]).'</span></span>';
                                 print '<table>';
                                 foreach ($record['details'] as $rd_type => $detail) {
                                     if (! $detail) continue;    //FIXME  check if required and mark it as missing and required

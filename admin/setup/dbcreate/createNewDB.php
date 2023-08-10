@@ -101,7 +101,7 @@ if(@$_REQUEST['db']){
     foreach ($_REQUEST as $param_name => $param_value){
         if(strpos($param_name,'ugr_')===0){ //&& $param_name!='ugr_Password' keep password
             //print '<input id="'.$param_name.'" name="'.$param_name.'" value="'.$param_value.'">';
-            print "edit_data['$param_name'] = '$param_value';";
+            print "edit_data['$param_name'] = '{htmlspecialchars($param_value)}';";
         }
     }
 ?>

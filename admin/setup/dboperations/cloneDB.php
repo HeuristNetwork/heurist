@@ -280,7 +280,7 @@ if(@$_REQUEST['mode']=='2' && $targetdbname!=null){
                     Because this database contains new structural elements, you must register it before you can clone it.
                 </p>
                 <p>     
-                    This database contains new definitions: <?php print $sHasNewDefsWarning; ?> which are local to the database.<br>
+                    This database contains new definitions: <?php print htmlspecialchars($sHasNewDefsWarning;) ?> which are local to the database.<br>
                     Before they can be cloned they must be attributed a unique global ID known as a Concept Code.<br>
                     This is done by registering the database. Please use Design > Setup > Register before cloning.<br><br>                 
                 </p>         
@@ -316,7 +316,7 @@ if(@$_REQUEST['mode']=='2' && $targetdbname!=null){
         <div style="margin-left: 40px;">
             <input type='text' name='targetdbname' id='targetdbname' size="40" maxlength="64" onkeypress="{onKeyPress(event)}"/>
             <input type='submit' id='submitBtn' 
-                value='Clone "<?=($isCloneTemplate)?$templateddb:HEURIST_DBNAME?>"'
+                value='Clone "<?=($isCloneTemplate)?htmlspecialchars($templateddb):HEURIST_DBNAME?>"'
                 class="ui-button-action"/>
         </div>
 
