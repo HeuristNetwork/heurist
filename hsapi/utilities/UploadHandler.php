@@ -458,7 +458,7 @@ $siz = get_php_bytes('upload_max_filesize');
         if (!is_dir($upload_dir)) {
             return array();
         }
-        //$upload_dir = realpath($upload_dir);
+        $upload_dir = realpath($upload_dir);
         return array_values(array_filter(array_map(
             array($this, $iteration_method),
             scandir($upload_dir)

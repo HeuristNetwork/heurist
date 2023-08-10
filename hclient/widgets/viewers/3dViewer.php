@@ -66,7 +66,9 @@ if($system->init($db, true, false)){
                 
                 //find related mtl and texture files by original file name
                 if($fileExt=='obj'){
-                    $file_obj = realpath(HEURIST_FILESTORE_DIR.$fileinfo['fullPath']);
+                    $folder = normalisePath(dirname(HEURIST_FILESTORE_DIR.$fileinfo['fullPath']));
+                    $filename = basename($fileinfo['fullPath']);
+                    $file_obj = realpath($folder.'/'.$filename); //HEURIST_FILESTORE_DIR.$fileinfo['fullPath']);
                     $file_mtl = null;
                     //find mtl file name  'mtllib name_of_file.mtl'
                     $handle = @fopen($file_obj, 'r');
@@ -161,6 +163,43 @@ if($is_not_inited){
     exit();
 }
 
+}
+
+
+function normalisePath($path) {
+  // Skip invalid input.
+  if (!isset($path)) {
+    return FALSE;
+  }
+  if ($path === '') {
+    return '';
+  }
+
+  // Attempt to avoid path encoding problems.
+  $path = preg_replace("/[^\x20-\x7E]/", '', $path);
+  $path = str_replace('\\', '/', $path);
+
+  // Remember path root.
+  $prefix = substr($path, 0, 1) === '/' ? '/' : '';
+
+  // Process path components
+  $stack = array();
+  $parts = explode('/', $path);
+  foreach ($parts as $part) {
+    if ($part === '' || $part === '.') {
+      // No-op: skip empty part.
+    } elseif ($part !== '..') {
+      array_push($stack, $part);
+    } elseif (!empty($stack)) {
+      array_pop($stack);
+    } else {
+      return FALSE; // Out of the root.
+    }
+  }
+
+  // Return the "clean" path
+  $path = $prefix . implode('/', $stack);
+  return $path;
 }
 
 
