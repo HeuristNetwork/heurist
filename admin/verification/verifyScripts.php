@@ -947,7 +947,7 @@ function __correctGetEstDate_and_ConvertTemporals_JSON_to_Plain(){
                                 $dtl_NewValue = $preparedDate->toPlain();
                                 
                                 $query = 'UPDATE recDetails SET dtl_Value="'.
-                                                $mysqli->real_escape_string($dtl_NewValue).'" WHERE dtl_ID='.$dtl_ID;
+                                                $mysqli->real_escape_string($dtl_NewValue).'" WHERE dtl_ID='.intval($dtl_ID);
                                 $mysqli->query($query);
                                 
                                 $cnt++;

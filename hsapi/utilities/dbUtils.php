@@ -1267,7 +1267,7 @@ class DbUtils {
                         echo ("<b>Adding records to tables: </b>");
                     }
                     while ($table = $tables->fetch_row()) { //loop for all tables
-                        $table = $table[0];
+                        $table = htmlspecialchars($table[0]);
                         
                         if($nodata && in_array(strtolower($table), $data_tables)){
                             continue;
@@ -1292,7 +1292,7 @@ class DbUtils {
 
                         if($res){
                                 if($verbose) {
-                                    echo (" > " . htmlspecialchars($table) . ": ".$mysqli->affected_rows . "  ");
+                                    echo (" > " . $table . ": ".$mysqli->affected_rows . "  ");
                                 }
                         }else{
                                 if($table=='usrReportSchedule'){

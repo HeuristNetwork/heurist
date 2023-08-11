@@ -981,7 +981,7 @@ When we open "iiif_image" in mirador viewer we generate manifest dynamically.
         }
         else if(@$this->data['merge_duplicates']){ // merge duplicate local + remote files
 
-            $ids = $this->data['merge_duplicates'];
+            $ids = prepareIds(filter_var($this->data['merge_duplicates'], FILTER_SANITIZE_STRING));
             $where_ids = '';
 
             $local_fixes = 0;
@@ -992,7 +992,7 @@ When we open "iiif_image" in mirador viewer we generate manifest dynamically.
             if(is_array($ids) && count($ids) > 0){ // multiple
                 $where_ids .= ' AND ulf_ID IN (' . implode(',', $ids) . ')';
             }else if(is_int($ids) && $ids > 0){ // single
-                $where_ids .= ' AND ulf_ID = ' . $ids;
+                $where_ids .= ' AND ulf_ID = ' . intval($ids);
             }// else use all
 
             //search for duplicated local files
@@ -1005,8 +1005,9 @@ When we open "iiif_image" in mirador viewer we generate manifest dynamically.
                 while($local_file = $local_dups->fetch_row()){
 
                     $query = 'SELECT ulf_ID FROM recUploadedFiles WHERE ulf_FilePath' 
-                        . ( @$local_file[0]!=null ? '="' . $mysqli->real_escape_string($local_file[0]) . '"' : ' IS NULL' ) .' AND ulf_FileName="'
-                        .$mysqli->real_escape_string($local_file[1]).'"' . $where_ids;
+                        . ( @$local_file[0]!=null ? ('="' . $mysqli->real_escape_string($local_file[0]) . '"') : ' IS NULL' ) 
+                        .' AND ulf_FileName="'.$mysqli->real_escape_string($local_file[1]).'"' 
+                        . $where_ids;
                     $res = $mysqli->query($query);
 
                     $dups_ids = array();
@@ -1045,7 +1046,8 @@ When we open "iiif_image" in mirador viewer we generate manifest dynamically.
                 //find id with duplicated url 
                 while ($res = $remote_dups->fetch_row()) {
 
-                    $query = 'SELECT ulf_ID FROM recUploadedFiles WHERE ulf_ExternalFileReference="'.$mysqli->real_escape_string($res[0]).'"' . $where_ids;
+                    $query = 'SELECT ulf_ID FROM recUploadedFiles WHERE ulf_ExternalFileReference="'.$mysqli->real_escape_string($res[0]).'"'
+                             .$where_ids;
                     $res = $mysqli->query($query);
 
                     $dups_ids = array();
@@ -1180,7 +1182,9 @@ When we open "iiif_image" in mirador viewer we generate manifest dynamically.
                     }
 
                     if(!empty($extra_desc)){
-                        $upd_query = 'UPDATE recUploadedFiles SET ulf_Description ="'. $extra_desc .'" WHERE ulf_ID=' . $ulf_ID;
+                        $upd_query = 'UPDATE recUploadedFiles SET ulf_Description ="'
+                                . $mysqli->real_escape_string($extra_desc) 
+                                .'" WHERE ulf_ID=' . intval($ulf_ID);
                         $mysqli->query($upd_query);
                     }
                 }

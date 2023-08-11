@@ -735,7 +735,7 @@ class DbDefTerms extends DbEntityBase
                             {
                                 $ret = $mysqli->query(
                                         'insert into defTermsLinks (trl_ParentID,trl_TermID)'
-                                            .'values ('.$new_parent.','.$trm_ID.')');
+                                            .'values ('.intval($new_parent).','.intval($trm_ID).')');
                                 if(!$ret){
                                     $this->system->addError(HEURIST_DB_ERROR, 
                                         'Cannot insert to defTermsLinks table', $mysqli->error);
@@ -747,7 +747,7 @@ class DbDefTerms extends DbEntityBase
                             {
                                     $ret = $mysqli->query(
                                         'delete from defTermsLinks where trl_ParentID='
-                                        .$old_parent.' AND trl_TermID='.$trm_ID);
+                                        .intval($old_parent).' AND trl_TermID='.intval($trm_ID));
 
                                     if(!$ret){
                                         $this->system->addError(HEURIST_DB_ERROR, 
@@ -792,7 +792,7 @@ class DbDefTerms extends DbEntityBase
                     
                 if($ret){
                     //1. change parent id for all children terms
-                    $query = "update defTerms set trm_ParentTermID = $retain_id where trm_ParentTermID = $merge_id";
+                    $query = 'update defTerms set trm_ParentTermID='.intval($retain_id).' where trm_ParentTermID = '.intval($merge_id);
                     $res = $mysqli->query($query);
                     if ($mysqli->error) {
                         $this->system->addError(HEURIST_DB_ERROR,
@@ -804,10 +804,10 @@ class DbDefTerms extends DbEntityBase
                     $mysqli->query('set @suppress_update_trigger=1');
 
                     //2. update entries in recDetails for all detail type enum or reltype
-                    $query = "update recDetails, defDetailTypes set dtl_Value=".$retain_id
+                    $query = "update recDetails, defDetailTypes set dtl_Value=".intval($retain_id)
                     ." where (dty_ID = dtl_DetailTypeID ) and "
                     ." (dty_Type='enum' or dty_Type='relationtype') and "
-                    ." (dtl_Value=".$merge_id.")";
+                    ." (dtl_Value=".intval($merge_id).")";
 
                     $res = $mysqli->query($query);
                     if ($mysqli->error) {
@@ -819,7 +819,7 @@ class DbDefTerms extends DbEntityBase
                 }
                 if($ret){
                     //3. delete term $merge_id
-                    $query = "delete from defTerms where trm_ID = $merge_id";
+                    $query = 'delete from defTerms where trm_ID = '.intval($merge_id);
                     $res = $mysqli->query($query);
                     if ($mysqli->error) {
                         $this->system->addError(HEURIST_DB_ERROR,
@@ -1069,9 +1069,10 @@ class DbDefTerms extends DbEntityBase
 
         if(is_array($children) && count($children)>0){
                 $children[] = $trm_ID;  //itself
+                $children = prepareIds($children);
                 $s = 'in ('.implode(',',$children).')';
         }else{
-                $s = '= '.$trm_ID;
+                $s = '= '.intval($trm_ID);
         }
         
         $mysqli = $this->system->get_mysqli();

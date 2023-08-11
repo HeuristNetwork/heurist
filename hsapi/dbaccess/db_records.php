@@ -1440,6 +1440,8 @@ function deleteOneRecord($system, $id, $rectype){
 
     while(true){
         $mysqli->query('SET foreign_key_checks = 0');
+        
+        $id = intval($id);
         //
         $mysqli->query('delete from recDetails where dtl_RecID = ' . $id);
         if ($mysqli->error) break;
@@ -1452,8 +1454,8 @@ function deleteOneRecord($system, $id, $rectype){
         //remove pointer fields
         if($links){
             foreach ($links as $relation) {
-                $mysqli->query('delete from recDetails where dtl_RecID = ' . $relation->sourceID
-                    .' and dtl_DetailTypeID = '.$relation->dtID.' and dtl_Value='.$id);
+                $mysqli->query('delete from recDetails where dtl_RecID = ' . intval($relation->sourceID)
+                    .' and dtl_DetailTypeID = '.intval($relation->dtID).' and dtl_Value='.$id);
                 if ($mysqli->error) break;
             }
         }
@@ -1582,7 +1584,7 @@ function addReverseChildToParentPointer($mysqli, $child_id, $parent_id, $addedBy
 
         if($dtl_ID>0 && !$allow_multi_parent){ //pointer already exists
             $mysqli->query('UPDATE recDetails '.
-                "SET dtl_Value=$parent_id WHERE dtl_ID=$dtl_ID");                    
+                'SET dtl_Value='.intval($parent_id).' WHERE dtl_ID='.intval($dtl_ID));                    
             //error_log('upd '.$dtl_ID);                        
             if($mysqli->error) $res = -1; //($mysqli->affected_rows>0);
         }else{
@@ -1717,6 +1719,7 @@ function recordCanChangeOwnerwhipAndAccess($system, $recID, &$owner_grps, &$acce
 {
 
     $mysqli = $system->get_mysqli();
+    $recID = intval($recID);
     //get current values
     $query = 'select rec_OwnerUGrpID, rec_NonOwnerVisibility, rec_RecTypeID from Records where rec_ID = '.$recID;
     $res = $mysqli->query($query);

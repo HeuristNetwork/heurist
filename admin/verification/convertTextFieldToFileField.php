@@ -137,12 +137,12 @@ if( $system->verifyActionPassword($_REQUEST['pwd'], $passwordForServerFunctions)
                 
                 $query = 'insert into '.$db_name.'.recUploadedFiles '
                 .'(ulf_OrigFileName,ulf_ObfuscatedFileID,ulf_UploaderUGrpID,ulf_ExternalFileReference,ulf_MimeExt,ulf_PreferredSource) '
-                .' values ("'.$type_.'","'.$nonce.'",2,"'.$url.'","'.$ext.'","'.$type_2.'")';
+                .' values ("'.$type_.'","'.$nonce.'",2,"'.$mysqli->real_escape_string($url).'","'.$ext.'","'.$type_2.'")';
                 $mysqli->query($query);
                 $ulf_ID = $mysqli->insert_id;
                 
                 if($ulf_ID>0){
-                    $query = 'update '.$db_name.'.recDetails set dtl_Value=null, `dtl_UploadedFileID`='.$ulf_ID.' where dtl_ID='.$dtl_ID;
+                    $query = 'update '.$db_name.'.recDetails set dtl_Value=null, `dtl_UploadedFileID`='.intval($ulf_ID).' where dtl_ID='.intval($dtl_ID);
                     $mysqli->query($query);
                     
                     $k++;

@@ -546,12 +546,12 @@ function fillTermsLinks( $mysqli ){
                     $terms_links = _prepare_terms($vocab_id, $terms);
                     
                     foreach ($terms_links as $line){
-                        $mysqli->query('INSERT INTO defTermsLinks(trl_ParentID, trl_TermID) VALUES('.$line[0].','.$line[1].')');    
+                        $mysqli->query('INSERT INTO defTermsLinks(trl_ParentID, trl_TermID) VALUES('.intval($line[0]).','.intval($line[1]).')');    
                     }
 
                     //dty_TermIDTreeNonSelectableIDs=dty_JsonTermIDTree, 
                     $query = 'UPDATE defDetailTypes SET dty_JsonTermIDTree='
-                                .$vocab_id.' WHERE dty_ID='.$row[3];
+                                .intval($vocab_id).' WHERE dty_ID='.intval($row[3]);
                     $mysqli->query($query);
 
                 }else{

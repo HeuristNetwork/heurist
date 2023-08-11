@@ -55,7 +55,7 @@ $mysqli = $system->get_mysqli();
 
         //search the list of users by specified parameters
         $f_id     = @$_REQUEST['recID'];
-        $f_name = urldecode(@$_REQUEST['name']);
+        $f_name = $mysqli->real_escape_string(@$_REQUEST['name']);
         $f_userid = @$_REQUEST['usrID']; //@todo
 
         $records = array();
@@ -66,7 +66,7 @@ $mysqli = $system->get_mysqli();
         $query = "select rps_ID, rps_Type, rps_Title, rps_FilePath, rps_URL, rps_FileName, rps_HQuery, rps_Template, rps_IntervalMinutes, 0 as selection, 0 as status from usrReportSchedule";
 
         if($f_name && $f_name!=""){
-            $query = $query." where rps_Title like '%".$mysqli->real_escape_string($f_name)."%'";
+            $query = $query." where rps_Title like '%".$f_name."%'";
         }
 
         $res = $mysqli->query($query);

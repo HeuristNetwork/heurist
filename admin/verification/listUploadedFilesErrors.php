@@ -114,7 +114,7 @@ $mysqli = $system->get_mysqli();
                 
                 $query3 = 'SELECT ulf_ID FROM recUploadedFiles '
                     .'where ulf_FilePath'.(@$res['ulf_FilePath']!=null 
-                            ?'="'.$mysqli->real_escape_string($res['ulf_FilePath']).'"'
+                            ?('="'.$mysqli->real_escape_string($res['ulf_FilePath']).'"')
                             :' IS NULL ') 
                     .' and ulf_FileName="'.$mysqli->real_escape_string($res['ulf_FileName']).'" ORDER BY ulf_ID DESC';
                 $res3 = $mysqli->query($query3);
@@ -307,7 +307,7 @@ $mysqli = $system->get_mysqli();
             }
             
             //missed link from recDetails - orphaned files - file is not used in heurist records      
-            $query2 = "SELECT dtl_RecID from recDetails where dtl_UploadedFileID=".$res['ulf_ID'];
+            $query2 = "SELECT dtl_RecID from recDetails where dtl_UploadedFileID=".intval($res['ulf_ID']);
             $res2 = $mysqli->query($query2);
             $currentRecID = null;
             if ($res2) {
@@ -424,7 +424,7 @@ $mysqli = $system->get_mysqli();
                     $query = 'update recUploadedFiles set ulf_FilePath="'
                                     .$mysqli->real_escape_string($row['res_relative'])
                                     .'", ulf_FileName="'
-                                    .$mysqli->real_escape_string($row['filename']).'" where ulf_ID = '.$ulf_ID;
+                                    .$mysqli->real_escape_string($row['filename']).'" where ulf_ID = '.intval($ulf_ID);
         }
        $mysqli->query($query);            
 //DEBUG       print '<div>'.$ulf_ID.'  rem '.@$row['clear_remote'].'   path='.$row['res_relative'].'  file='.$row['filename'].'</div>';
