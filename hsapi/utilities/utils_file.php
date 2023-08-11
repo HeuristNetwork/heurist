@@ -28,6 +28,8 @@
     sanitizeURL
     sanitizeString - strip_tags (except allowed) and htmlspecialchars
     
+    isPathInHeuristUploadFolder - checks that path is HEURIST_FILESTORE_DIR
+    
     stripScriptTagInRequest - removes only script tags
     getHTMLPurifier
     purifyHTML - clean html with HTMLPurifier

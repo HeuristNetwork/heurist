@@ -138,8 +138,8 @@ function executeSmartyTemplate($system, $params){
            
     $outputfile  = (array_key_exists("output", $params)) ? htmlspecialchars($params["output"]) :null;
     $publishmode = (array_key_exists("publish", $params))? intval($params['publish']):0;
-    $emptysetmessage = (array_key_exists("emptysetmessage", $params))? $params['emptysetmessage']:null;
-    $record_with_custom_styles = (array_key_exists("cssid", $params))? $params['cssid']:null;
+    $emptysetmessage = (array_key_exists("emptysetmessage", $params))? $params['emptysetmessage'] :null;
+    $record_with_custom_styles = (array_key_exists("cssid", $params))? intval($params['cssid']) :null;
     
 // text or text/plain - without header and body tags  $is_headless=true
 // html or text/html  - usual mode
@@ -230,7 +230,7 @@ function executeSmartyTemplate($system, $params){
     if( !$qresult ||  !array_key_exists('records', $qresult) || !(intval(@$qresult['reccount'])>0) ){
     
         if($publishmode==4){ //from string var
-            echo htmlspecialchars(($emptysetmessage && $emptysetmessage != 'def') ? $emptysetmessage : '');
+            echo sanitizeString(($emptysetmessage && $emptysetmessage != 'def') ? $emptysetmessage : '');
         }else{
             
             if ($emptysetmessage && $emptysetmessage != 'def') {
@@ -892,7 +892,11 @@ function save_report_into_file($tpl_source){
         try{
 
             $path_parts = pathinfo($outputfile);
-            $dirname = (array_key_exists('dirname',$path_parts))?$path_parts['dirname']:'';
+            $dirname = sanitizePath((array_key_exists('dirname',$path_parts))?$path_parts['dirname']:'');
+            
+            if($dirname && isPathInHeuristUploadFolder($dirname)===false){
+                $dirname = null;
+            }
             
             //if folder is not defined - output into generated-reports
             if(!$dirname){

@@ -268,7 +268,11 @@
                   
                   $res = false;
                   
-                  $dir_name = @$_REQUEST['name'];
+                  $dir_name = sanitizePath(@$_REQUEST['name']);
+                  
+                  if($dir_name==''){
+                      $response = $system->addError(HEURIST_ACTION_BLOCKED, 'Folder name is not defined or out of the root');
+                  }else{
                   
                   $folder_name = HEURIST_FILESTORE_DIR.$dir_name;
                   
@@ -277,8 +281,10 @@
                   }else
                   if($op=='rename'){
                       
-                      $new_name = @$_REQUEST['newname'];
-                      if($folders[strtolower($new_name)]){
+                      $new_name = sanitizePath(@$_REQUEST['newname']);
+                      if($new_name==''){
+                          $response = $system->addError(HEURIST_ACTION_BLOCKED, 'New folder name is not defined or out of the root');
+                      }else if($folders[strtolower($new_name)]){
                           $response = $system->addError(HEURIST_ACTION_BLOCKED, 'Name "'.$new_name.'" is reserved for system folder');
                       }else if(file_exists(HEURIST_FILESTORE_DIR.$new_name)){
                           $response = $system->addError(HEURIST_ACTION_BLOCKED, 'Folder with name "'.$new_name.'" already exists');
@@ -313,6 +319,8 @@
                               $response = $system->addError(HEURIST_ACTION_BLOCKED, 'Folder "'.$dir_name.'" cannot be created');
                          }
                       }
+                  }
+                  
                   }
               }
         }else if($action == 'check_allow_estc'){ // check if the ESTC or LRC18C lookups are allowed for current server+database

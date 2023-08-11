@@ -24,30 +24,33 @@
 * See the License for the specific language governing permissions and limitations under the License.
 */
 set_time_limit(0);
+
+$recTypeIDs = (@$_REQUEST['recTypeIDs']!=null)?htmlspecialchars($_REQUEST['recTypeIDs']):null;
+$dbname = htmlspecialchars($_REQUEST['db']);
             
  if(@$_REQUEST['type']=='titles'){
-    if(@$_REQUEST['recTypeIDs']){
-        $srcURL = 'rebuildRecordTitles.php?recTypeIDs='.htmlspecialchars($_REQUEST['recTypeIDs']).'&db='.$_REQUEST['db'];    
+    if($recTypeIDs){
+        $srcURL = 'rebuildRecordTitles.php?recTypeIDs='.$recTypeIDs.'&db='.$dbname;    
     }else{
-        $srcURL = 'rebuildRecordTitles.php?db='.$_REQUEST['db'];    
+        $srcURL = 'rebuildRecordTitles.php?db='.$dbname;    
     }
     $sTitle = 'Recalculation of composite record titles';
  
  }else
  if(@$_REQUEST['type']=='calcfields'){
-    if(@$_REQUEST['recTypeIDs']){
-        $srcURL = 'rebuildCalculatedFields.php?recTypeIDs='.htmlspecialchars($_REQUEST['recTypeIDs']).'&db='.$_REQUEST['db'];    
+    if($recTypeIDs){
+        $srcURL = 'rebuildCalculatedFields.php?recTypeIDs='.$recTypeIDs.'&db='.$dbname;    
     }else{
-        $srcURL = 'rebuildCalculatedFields.php?db='.$_REQUEST['db'];    
+        $srcURL = 'rebuildCalculatedFields.php?db='.$dbname;    
     }
     $sTitle = 'Recalculation of calculated fields';
  
  }else
  if(@$_REQUEST['type']=='files'){
-    $srcURL = 'listUploadedFilesErrors.php?db='.$_REQUEST['db'];
+    $srcURL = 'listUploadedFilesErrors.php?db='.$dbname;
     $sTitle = 'Verifying files';
  }else{
-    $srcURL = 'listDatabaseErrors.php?db='.$_REQUEST['db'];
+    $srcURL = 'listDatabaseErrors.php?db='.$dbname;
     $sTitle = 'Verifying database';
  }
 
