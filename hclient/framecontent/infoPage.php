@@ -35,15 +35,15 @@ $is_error_unknown = false;
 //variable message can be defined as global
 if(!isset($message)){
     if( @$_REQUEST['error'] ){
-        $message = sanitizeString($_REQUEST['error']);
+        $message = $_REQUEST['error'];
     }else if( @$_REQUEST['message'] ){
-        $message = sanitizeString($_REQUEST['message']);
+        $message = $_REQUEST['message'];
         $is_error = false;
     }else{ 
         //take error message from system
         if(isset($system)){
             $err = $system->getError();
-            $message = sanitizeString(@$err['message']);
+            $message = @$err['message'];
         }else{
             $message = 'Heurist core engine is not initialized.';
             $is_error_unknown = true;
@@ -148,7 +148,7 @@ if(!isset($message)){
                 style="width:90%;margin:auto;margin-top:10px;padding:10px;">
                 <span class="ui-icon <?php echo ($is_error)?'ui-icon-alert':'ui-icon-info'; ?>" 
                       style="float: left; margin-right:.3em;font-weight:bold"></span>
-                <?php echo $message;?>
+                <?php echo sanitizeString($message);?>
             </div>
         </div>
     </body>

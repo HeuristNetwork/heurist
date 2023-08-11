@@ -302,8 +302,10 @@
                       //if (is_dir($dir))
                       
                       if(!file_exists($folder_name)){
-                          $response = $system->addError(HEURIST_ACTION_BLOCKED, 'Folder with name "'.$dir_name.'" does not exist');                          }else if (count(scandir($folder_name))>2){
-                          $response = $system->addError(HEURIST_ACTION_BLOCKED, 'Non empty folder "'.$dir_name.'" cannot be removed');                      }else{
+                          $response = $system->addError(HEURIST_ACTION_BLOCKED, 'Folder with name "'.$dir_name.'" does not exist');             
+                      }else if (count(scandir($folder_name))>2){
+                          $response = $system->addError(HEURIST_ACTION_BLOCKED, 'Non empty folder "'.$dir_name.'" cannot be removed');          
+                      }else{
                           $res = folderDelete2($folder_name, true);        
                           if(!$res){
                               $response = $system->addError(HEURIST_ACTION_BLOCKED, 'Folder "'.$dir_name.'" cannot be removed');

@@ -59,7 +59,10 @@ if (@$argv) {
         && isset($defaultRootFileUploadURL)
         && strpos($defaultRootFileUploadURL,'sydney.edu.au')===false )
     {
-        $dbdef_cache = $system->getFileStoreRootFolder().$dbname.'/entity/db.json';    
+        $path = $system->getFileStoreRootFolder().htmlspecialchars($dbname).'/entity/';
+        if(is_dir($path) && file_exists($path)){
+            $dbdef_cache = $path.'db.json';    
+        }
     }
     
     if( @$_REQUEST['a']=='structure' && @$_REQUEST['entity']=='all' 

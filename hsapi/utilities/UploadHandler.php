@@ -326,7 +326,7 @@ $siz = get_php_bytes('upload_max_filesize');
         } else {
             $version_dir = @$this->options['image_versions'][$version]['upload_dir'];
             if ($version_dir) {
-                return ($version_dir.$this->get_user_path()).$file_name; //realpath
+                return sanitizePath($version_dir.$this->get_user_path()).$file_name; //realpath
             }
             $version_path = $version.'/';
         }
@@ -337,7 +337,7 @@ $siz = get_php_bytes('upload_max_filesize');
             $subfolder = $subfolder.'/';
         }
         
-        return ($this->options['upload_dir'].$this->get_user_path()
+        return sanitizePath($this->options['upload_dir'].$this->get_user_path()
             .$subfolder.$version_path).$file_name;  //realpath
     }
 
@@ -491,6 +491,9 @@ $siz = get_php_bytes('upload_max_filesize');
         return $this->fix_integer_overflow($val);
     }
     
+    //
+    //
+    //
     protected function safe_copy($from, $to) {
 /*
         $from = realpath($from);
@@ -507,7 +510,13 @@ $siz = get_php_bytes('upload_max_filesize');
         }
         copy($from, $to.DIRECTORY_SEPARATOR.$filename);
 */        
-        copy($from, $to);
+        $from = sanitizePath($from);
+        $to = sanitizePath($from);
+        if(isPathInHeuristUploadFolder($to)===false){
+            $file->error = $this->get_error_message('only_heurist');
+            return false;
+        }
+        return copy($from, $to);
     }
 
     protected function validate($uploaded_file, $file, $error, $index) {
