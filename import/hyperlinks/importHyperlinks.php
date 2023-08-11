@@ -667,7 +667,7 @@ function print_link($url, $title) {
 ?>
 	<div class="similar_bm">
 		<span>
-			<input type="radio" name="rec_ID[<?= $linkno ?>]" value="<?= $rec_id ?>" onClick="selectExistingLink(<?= $linkno ?>);">
+			<input type="radio" name="rec_ID[<?= $linkno ?>]" value="<?php echo intval($rec_id); ?>" onClick="selectExistingLink(<?= $linkno ?>);">
 			<?php echo htmlspecialchars($row[0]); //'rec_Title' ?>
 		</span>&nbsp;&nbsp;
 		<a style ="font-size: 80%; text-decoration:none;" target="_testwindow" href="<?= htmlspecialchars($row[1]) ?>"><?php

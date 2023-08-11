@@ -198,7 +198,8 @@ if($mode!=3){
                         return !$is_invalid;
                         
                     }else{
-                        echo "Checking title mask ".htmlspecialchars($mask)." for record type $rtID and record $recID <br/>";
+                        echo "Checking title mask ".htmlspecialchars($mask)
+                            .' for record type '.intval($rtID).' and record '.intval($recID).' <br/>';
                         echo htmlspecialchars(TitleMask::fill($recID, $mask));
                     }
                     

@@ -27,7 +27,7 @@ set_time_limit(0);
             
  if(@$_REQUEST['type']=='titles'){
     if(@$_REQUEST['recTypeIDs']){
-        $srcURL = 'rebuildRecordTitles.php?recTypeIDs='.$_REQUEST['recTypeIDs'].'&db='.$_REQUEST['db'];    
+        $srcURL = 'rebuildRecordTitles.php?recTypeIDs='.htmlspecialchars($_REQUEST['recTypeIDs']).'&db='.$_REQUEST['db'];    
     }else{
         $srcURL = 'rebuildRecordTitles.php?db='.$_REQUEST['db'];    
     }
@@ -36,7 +36,7 @@ set_time_limit(0);
  }else
  if(@$_REQUEST['type']=='calcfields'){
     if(@$_REQUEST['recTypeIDs']){
-        $srcURL = 'rebuildCalculatedFields.php?recTypeIDs='.$_REQUEST['recTypeIDs'].'&db='.$_REQUEST['db'];    
+        $srcURL = 'rebuildCalculatedFields.php?recTypeIDs='.htmlspecialchars($_REQUEST['recTypeIDs']).'&db='.$_REQUEST['db'];    
     }else{
         $srcURL = 'rebuildCalculatedFields.php?db='.$_REQUEST['db'];    
     }

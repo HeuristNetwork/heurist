@@ -25,7 +25,7 @@ if(!$is_included){
     $is_ok = true;
     if(@$_REQUEST['fixdateindex']=='1'){
         
-        $need_convert_dates = (@$_REQUEST['convert_dates']=='1');
+        $need_convert_dates = (intval(@$_REQUEST['convert_dates'])=='1');
         $rep = recreateRecDetailsDateIndex($system, true, $need_convert_dates);
         if($rep){
             foreach($rep as $msg){

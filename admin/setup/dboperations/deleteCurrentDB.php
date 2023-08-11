@@ -88,7 +88,7 @@ require_once(dirname(__FILE__).'/../../../records/index/elasticSearch.php');
                 </div>
                 <h1 style='display:inline-block;font-size: 16px;'>DELETION OF CURRENT DATABASE</h1><br>
                 <h3>This will PERMANENTLY AND IRREVOCABLY delete the current database: </h3>
-                <h2>About to delete database: <?=$dbname?></h2>
+                <h2>About to delete database: <?php echo htmlspecialchars($dbname);?></h2>
 
                 <label><input type='checkbox' checked id='db-archive'>Archive all database files</label><br>
                 

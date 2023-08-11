@@ -123,9 +123,13 @@ class ReportActions {
     */
     public function getTemplate($filename){
 
-        if($filename && file_exists($this->dir.$filename)){
+        if($filename) {
+            $filename = $this->dir.basename($filename);   
+        }
+        
+        if($filename && file_exists($filename)){
             header('Content-type: text/html; charset=utf-8');
-            print file_get_contents($this->dir.$filename);
+            print file_get_contents($filename);
         }else{
             header("Content-type: text/javascript");
             print json_encode(array("error"=>"file not found"));

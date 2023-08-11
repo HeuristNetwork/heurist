@@ -241,7 +241,7 @@ function executeSmartyTemplate($system, $params){
                     $error = "<b><font color='#ff0000'>Note: There are no records in this view. The URL will only show records to which the viewer has access. Unless you are logged in to the database, you can only see records which are marked as Public visibility</font></b>";
                 }else{
                     //message for UI
-                    $error = "<b><font color='#ff0000'>Search or Select records to see template output</font></b>";
+                    $error = '<b><font color="#ff0000">Search or Select records to see template output</font></b>';
                 }
             }
             
@@ -1316,7 +1316,7 @@ function smarty_error_output($system, $error_msg){
     if($publishmode>0 && $publishmode<4 && $outputfile!=null){ //save empty output into file
         save_report_into_file($error_msg."<div style=\"padding:20px;font-size:110%\">Currently there are no results</div>");
     }else{
-        echo htmlspecialchars($error_msg);    
+        echo sanitizeString($error_msg);    
     }
 }
 

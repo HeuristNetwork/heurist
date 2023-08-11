@@ -181,11 +181,11 @@
             $message = '';
         }else{
             if($allowed_tags==null) {
-                $allowed_tags = '<a><u><i><em><b><strong><sup><sub><small><br><h1><h2><h3><h4><p><ul><li><img>';   
+                $allowed_tags = '<a><u><i><em><b><strong><sup><sub><small><br><h1><h2><h3><h4><p><ul><li><img><font>';   
             }else if($allowed_tags===false){
                 $allowed_tags = null;
             }
-            $message = htmlspecialchars(strip_tags($message, $allowed_tags));
+            $message = htmlspecialchars(strip_tags($message, $allowed_tags), ENT_NOQUOTES);
             $message = preg_replace("/&lt;/", '<', $message);
             $message = preg_replace("/&gt;/", '>', $message);
         }
