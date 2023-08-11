@@ -137,9 +137,8 @@ if(!isset($message)){
     <?php
     }
     
-    $message = htmlspecialchars(strip_tags($message,'<a><u><i><em><b><strong><sup><sub><small><br><h1><h2><h3><h4><p><ul><li><img>'));
-    $message = preg_replace("/&lt;/", '<', $message);
-    $message = preg_replace("/&gt;/", '>', $message);
+    $message = sanitizeString($message);
+    
     ?>
     </head>
     <body style="padding:44px;" class="ui-heurist-header1">

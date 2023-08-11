@@ -789,7 +789,7 @@ if ($bkm_ID>0 || $rec_id>0) {
 .'oncontextmenu="return false;" onclick="$(\'div[data-recid]\').hide();$(\'div[data-recid='.$id.']\').show();'
 .'$(\'.gm-style-iw\').find(\'div:first\').scrollTop(0)">'
 //.'$(event.traget).parents(\'.gm-style-iw\').children()[0].scrollTop()">'
-.strip_tags($bibInfo['rec_Title'],ALLOWED_TAGS).'</a></div></div>';  //htmlspecialchars
+.sanitizeString($bibInfo['rec_Title'],ALLOWED_TAGS).'</a></div></div>';  //htmlspecialchars
                    
                     $cnt++;
                 }
@@ -904,7 +904,7 @@ function print_header_line($bib) {
 
     <div class=HeaderRow style="margin-bottom:<?php echo $is_map_popup?5:15?>px;min-height:0px;">
         <h2 style="text-transform:none;line-height:16px;font-size:1.4em;margin-bottom:0;<?php echo ($is_map_popup)?'max-width: 380px;':'';?>">
-                <?php echo (strip_tags($bib['rec_Title'],ALLOWED_TAGS)); ?>
+                <?php echo (sanitizeString($bib['rec_Title'],ALLOWED_TAGS)); ?>
         </h2>
 
         <div <?="style='padding:0 10px 0 22px;margin:10px 0 0;height:20px;background-repeat: no-repeat;background-image:url("
@@ -1296,12 +1296,12 @@ function print_public_details($bib) {
                         
                         $bd['val'] = '<a target="_new" href="'.$system->recordLink($rec_id)
                             .'" onclick="return link_open(this);">'
-                            .strip_tags($rec_title,ALLOWED_TAGS).'</a>';
+                            .sanitizeString($rec_title,ALLOWED_TAGS).'</a>';
                         
                     }else{
                         
                         $bd['val'] = '<a href="#" oncontextmenu="return false;" onclick="return no_access_message(this);">'
-                            .strip_tags($rec_title,ALLOWED_TAGS).'</a>';
+                            .sanitizeString($rec_title,ALLOWED_TAGS).'</a>';
                         
                     }
 
@@ -1928,9 +1928,9 @@ function print_relation_details($bib) {
 
 					print '<a target=_new href="'.$system->recordLink($bd['RelatedRecID']['rec_ID'])
                             .'" onclick="return link_open(this);">'
-							.strip_tags($recTitle,ALLOWED_TAGS).'</a>';
+							.sanitizeString($recTitle,ALLOWED_TAGS).'</a>';
 				} else {
-					print strip_tags($bd['Title'],ALLOWED_TAGS);
+					print sanitizeString($bd['Title'],ALLOWED_TAGS);
 				}
 				print '&nbsp;&nbsp;';
 				if (@$bd['StartDate']) print htmlspecialchars(Temporal::toHumanReadable($bd['StartDate'], true, 1));
@@ -2012,9 +2012,9 @@ function print_relation_details($bib) {
 
 					print '<a target=_new href="'.$system->recordLink($bd['RelatedRecID']['rec_ID'])
                         .'" onclick="return link_open(this);">'
-						.strip_tags($recTitle,ALLOWED_TAGS).'</a>';
+						.sanitizeString($recTitle,ALLOWED_TAGS).'</a>';
 				} else {
-					print strip_tags($bd['Title'],ALLOWED_TAGS);
+					print sanitizeString($bd['Title'],ALLOWED_TAGS);
 				}
 				print '&nbsp;&nbsp;';
 				if (@$bd['StartDate']) print htmlspecialchars($bd['StartDate']);
@@ -2112,7 +2112,7 @@ function print_linked_details($bib, $link_cnt)
             .($is_map_popup?'max-width:250px;':'').'" class="truncate"><a target=_new href="'
                             .$system->recordLink($row['rec_ID'])
                             .'" onclick="return link_open(this);">'
-                .strip_tags($row['rec_Title'],ALLOWED_TAGS).'</a></div>';
+                .sanitizeString($row['rec_Title'],ALLOWED_TAGS).'</a></div>';
             
         print '</div>';
     }
@@ -2147,8 +2147,7 @@ function print_text_details($bib) {
 
 function output_chunker($val) {
     // chunk up the value so that it will be able to line-break if necessary
-    //$val = htmlspecialchars($val);    The tags listed are the tags allowed.
-    $val = strip_tags($val,'<a><u><i><em><b><strong><sup><sub><small><br><h1><h2><h3><h4><p><ul><li><img>');
+    $val = sanitizeString($val); 
     return $val;
     /* it adds word breaker incorrectly, so Arabic words are displayed incorrecly
     return preg_replace('/(\\b.{15,20}\\b|.{20}.*?(?=[\x0-\x7F\xC2-\xF4]))/', '\\1<wbr>', $val);

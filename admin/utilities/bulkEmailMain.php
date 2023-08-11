@@ -247,7 +247,7 @@ if(!$has_emails || empty($emails)) {
 
         <script type="text/javascript">
 
-            window.history.pushState({}, '', '<?php echo urlencode($_SERVER['PHP_SELF']); ?>');
+            window.history.pushState({}, '', '<?php echo sanitizeURL($_SERVER['PHP_SELF']); ?>');
 
             var all_emails = <?php echo json_encode($emails)?>; // Object of Email records id->title
             

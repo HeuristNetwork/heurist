@@ -50,7 +50,7 @@ $system->initPathConstants($db);
 if($filename){ //download from scratch (for csv import)
 
         //remove slashes - prevents Local file disclosure
-        $filename = fileNameRemoveSlashes($filename, false);
+        $filename = fileNameSanitize($filename, false);
 
         $file_read = HEURIST_FILESTORE_DIR.'scratch/'.$filename;
         

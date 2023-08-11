@@ -212,7 +212,7 @@ function getCrossTab( $params){
         $columnfld = "0, ";
     }
 
-    $mode = @$params['agg_mode'];
+    $mode = filter_var(@$params['agg_mode'], FILTER_SANITIZE_STRING);
     $issum = (($mode=="avg" || $mode=="sum") && intval(@$params['agg_field'])>0);
 
     if ($issum){

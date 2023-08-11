@@ -66,8 +66,7 @@ if (@$_REQUEST['keep']  &&  @$_REQUEST['duplicate']){  //user has select master 
 
 }
 
-$bib_ids = prepareIds($_REQUEST['bib_ids']);
-$bib_ids = array_map(array($mysqli,'real_escape_string'), $bib_ids);
+$bib_ids = prepareIds(filter_var(@$_REQUEST['bib_ids'], FILTER_SANITIZE_STRING));
 $bib_ids_list = implode(',', $bib_ids);
 
 if ( count($bib_ids)==0 ){

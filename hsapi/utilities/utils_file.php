@@ -23,8 +23,11 @@
     */
     
     /*
-    sanitizeRequest   - removes all tags from request variables
-    sanitizeFolderName
+    sanitizeRequest - removes all tags from request variables
+    sanitizePath - removes /../
+    sanitizeURL
+    sanitizeString - strip_tags (except allowed) and htmlspecialchars
+    
     stripScriptTagInRequest - removes only script tags
     getHTMLPurifier
     purifyHTML - clean html with HTMLPurifier
@@ -115,14 +118,78 @@
     //
     // 
     //
-    function sanitizeFolderName($folder) 
-    {
-        $folder = str_replace("\0", '', $folder);
-        $folder = str_replace('\\', '/', $folder);
-        if( substr($folder, -1, 1) != '/' )  {
-            $folder = $folder.'/';
+    function sanitizePath($path) {
+        // Skip invalid input.
+        if (!isset($path)) {
+            return '';
         }
-        return $folder;
+        if ($path === '') {
+            return '';
+        }
+
+        // Attempt to avoid path encoding problems.
+        $path = preg_replace("/[^\x20-\x7E]/", '', $path);
+        $path = str_replace("\0", '', $path);
+        $path = str_replace('\\', '/', $path);
+
+        // Remember path root.
+        $prefix = substr($path, 0, 1) === '/' ? '/' : '';
+
+        // Process path components
+        $stack = array();
+        $parts = explode('/', $path);
+        foreach ($parts as $part) {
+            if ($part === '' || $part === '.') {
+                // No-op: skip empty part.
+            } elseif ($part !== '..') {
+                array_push($stack, $part);
+            } elseif (!empty($stack)) {
+                array_pop($stack);
+            } else {
+                return ''; // Out of the root.
+            }
+        }
+
+        // Return the "clean" path
+        $path = $prefix . implode('/', $stack);
+        if( is_dir($path) && substr($path, -1, 1) != '/' )  {
+            $path = $path.'/';
+        }
+        return $path;
+    }
+    
+    
+    
+    //
+    //
+    //
+    function sanitizeURL($url){
+        if($url!=null && trim($url)!=''){
+            $url = filter_var($url, FILTER_SANITIZE_URL);
+            if(filter_var($url, FILTER_VALIDATE_URL)){
+                return $url;
+            }
+        }
+        return null;
+    }
+    
+    //
+    //
+    //
+    function sanitizeString($message, $allowed_tags){
+        if($message==null){
+            $message = '';
+        }else{
+            if($allowed_tags==null) {
+                $allowed_tags = '<a><u><i><em><b><strong><sup><sub><small><br><h1><h2><h3><h4><p><ul><li><img>';   
+            }else if($allowed_tags===false){
+                $allowed_tags = null;
+            }
+            $message = htmlspecialchars(strip_tags($message, $allowed_tags));
+            $message = preg_replace("/&lt;/", '<', $message);
+            $message = preg_replace("/&gt;/", '>', $message);
+        }
+        return $message;
     }
     
     //
@@ -1349,9 +1416,10 @@ function createBz2Archive($source, $only_these_folders, $destination, $verbose=t
 function isPathInHeuristUploadFolder($path){
   
     chdir(HEURIST_FILESTORE_DIR);  // relatively db root  or HEURIST_FILES_DIR??        
+    $heurist_dir = realpath(HEURIST_FILESTORE_DIR);
     $path = realpath($path);
     
-    if(!$path) return false;
+    if(!$path) return false; //does not exist
     
     $path = str_replace('\\','/',$path);
 
@@ -1359,7 +1427,7 @@ function isPathInHeuristUploadFolder($path){
     if(strpos($path, '/srv/HEURIST_FILESTORE/')===0 || 
        strpos($path, '/misc/heur-filestore/')===0 ||     //heurx
        strpos($path, '/data/HEURIST_FILESTORE/')===0 ||  //huma-num
-       strpos($path, HEURIST_FILESTORE_DIR)===0){
+       strpos($path, $heurist_dir)===0){
            return $path;
        }else{
            return false;
@@ -1910,18 +1978,6 @@ function fileNameSanitize($filename, $beautify=true) {
     return $filename;
 }
 
-//
-// 
-//
-function fileNameRemoveSlashes($filename) {
-    if($filename!=null){
-        $filename = preg_replace(
-        '~[\x00-\x1F]|[<>:"/\\|?*]~x',
-        '', $filename);
-    }
-    return $filename;
-}
-    
 //
 //
 //

@@ -458,7 +458,7 @@ $siz = get_php_bytes('upload_max_filesize');
         if (!is_dir($upload_dir)) {
             return array();
         }
-        $upload_dir = realpath($upload_dir);
+        //$upload_dir = realpath($upload_dir);
         return array_values(array_filter(array_map(
             array($this, $iteration_method),
             scandir($upload_dir)
@@ -492,7 +492,7 @@ $siz = get_php_bytes('upload_max_filesize');
     }
     
     protected function safe_copy($from, $to) {
-
+/*
         $from = realpath($from);
         $filename = basename($to);
         $to = realpath(dirname($to));
@@ -506,7 +506,8 @@ $siz = get_php_bytes('upload_max_filesize');
             return false;
         }
         copy($from, $to.DIRECTORY_SEPARATOR.$filename);
-        
+*/        
+        copy($from, $to);
     }
 
     protected function validate($uploaded_file, $file, $error, $index) {

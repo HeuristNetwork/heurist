@@ -47,7 +47,7 @@ if(!$init_client || @$_REQUEST['session']>0){ //2a. init operation on client sid
     {
         $rty_IDs = null;
         if(@$_REQUEST['recTypeIDs']){
-            $rty_IDs = prepareIds($_REQUEST['recTypeIDs']);
+            $rty_IDs = prepareIds(filter_var($_REQUEST['recTypeIDs'], FILTER_SANITIZE_STRING));
         }
         
         $system->setResponseHeader();

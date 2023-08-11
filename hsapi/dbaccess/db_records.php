@@ -3277,20 +3277,6 @@ function _getRtConstraintNames($system, $dtyID, $rectype)
     return '';
 }
 
-
-
-//
-//
-//
-function sanitizeURL($url){
-    if($url!=null && trim($url)!=''){
-        $url = filter_var($url, FILTER_SANITIZE_URL);
-        if(filter_var($url, FILTER_VALIDATE_URL)){
-            return $url;
-        }
-    }
-    return null;
-}
 /*   
 // @todo use DbsTerms
 // @todo REMOVE - all these functions are duplicated in DbsTerms and db_structure
