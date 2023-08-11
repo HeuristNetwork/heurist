@@ -176,7 +176,7 @@
     //
     //
     //
-    function sanitizeString($message, $allowed_tags){
+    function sanitizeString($message, $allowed_tags=null){
         if($message==null){
             $message = '';
         }else{
