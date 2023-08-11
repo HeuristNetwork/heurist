@@ -131,13 +131,11 @@ if(!isset($message)){
             }
 
             $(document).ready(() => {
-                window.hWin.HAPI4 = new hAPI('<?php echo $dbname;?>', onHapiInit);
+                window.hWin.HAPI4 = new hAPI('<?php echo htmlspecialchars($dbname);?>', onHapiInit);
             });
         </script>
     <?php
     }
-    
-    $message = sanitizeString($message);
     
     ?>
     </head>
@@ -150,7 +148,7 @@ if(!isset($message)){
                 style="width:90%;margin:auto;margin-top:10px;padding:10px;">
                 <span class="ui-icon <?php echo ($is_error)?'ui-icon-alert':'ui-icon-info'; ?>" 
                       style="float: left; margin-right:.3em;font-weight:bold"></span>
-                <?php echo $message;?>
+                <?php echo sanitizeString($message);?>
             </div>
         </div>
     </body>

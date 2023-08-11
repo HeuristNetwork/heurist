@@ -247,7 +247,7 @@ if(!$has_emails || empty($emails)) {
 
         <script type="text/javascript">
 
-            window.history.pushState({}, '', '<?php echo sanitizeURL($_SERVER['PHP_SELF']); ?>');
+            window.history.pushState({}, '', '<?php echo htmlspecialchars($_SERVER['PHP_SELF']); ?>');
 
             var all_emails = <?php echo json_encode($emails)?>; // Object of Email records id->title
             
@@ -1175,7 +1175,7 @@ if(!$has_emails || empty($emails)) {
 
                 </div>
 
-                <input name="db" value="htmlspecialchars(<?php echo $_REQUEST['db']); ?>" style="display: none;" readonly />
+                <input name="db" value="<?php echo htmlspecialchars($_REQUEST['db']); ?>" style="display: none;" readonly />
 
                 <input id="db_list" name="databases" type="hidden" />
                 <input name="exportCSV" value="false" style="display: none;" readonly />
