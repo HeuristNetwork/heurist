@@ -171,13 +171,13 @@ if(isset($_REQUEST['get_email']) && isset($_REQUEST['recid'])) {	/* Get the Titl
 
 	} else if(is_array($db_request) && count($db_request)==4){ // Do filtering, record count and last modified
 
-		$count = $db_request['count'];
+		$count = intval($db_request['count']);
 
-		$lastmod_logic = $db_request['lastmod_logic'];
-		$lastmod_period = $db_request['lastmod_period'];
-		$lastmod_unit = $db_request['lastmod_unit'];
+		$lastmod_logic = filter_var($db_request['lastmod_logic'],FILTER_SANITIZE_STRING);
+		$lastmod_period = intval($db_request['lastmod_period']);
+		$lastmod_unit = filter_var($db_request['lastmod_unit'],FILTER_SANITIZE_STRING);
 
-		$lastmod_where = ($lastmod_unit!="ALL") ? "AND rec_Modified " . $lastmod_logic . " date_format(curdate(), '%Y-%m-%d') - INTERVAL " . $lastmod_period . " " . $lastmod_unit . " " : "";
+		$lastmod_where = ($lastmod_unit!="ALL") ? "AND rec_Modified " . $lastmod_logic . " date_format(curdate(), '%Y-%m-%d') - \ " . $lastmod_period . " " . $lastmod_unit . " " : "";
 
 		foreach ($dbs as $db) {
 	

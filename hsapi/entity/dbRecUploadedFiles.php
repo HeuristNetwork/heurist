@@ -253,43 +253,49 @@ class DbRecUploadedFiles extends DbEntityBase
     private function _getRelatedRecords($ulf_IDs, $ids_only){
         
             $ulf_IDs = prepareIds($ulf_IDs);
-        
-            if(count($ulf_IDs)>1){
-                $s = ' in ('.implode(',',$ulf_IDs).')';
+            
+            if(count($ulf_IDs)==0){
+                $res = false;   
+                $query = ': file ids are not defined';
             }else{
-                $s = '='.$ulf_IDs[0];
-            }
-     
-            $mysqli = $this->system->get_mysqli();
-            $s = $mysqli->real_escape_string($s);
         
-            //find all related records (that refer to this file)
-            if($ids_only){
-                $query = 'SELECT dtl_RecID FROM recDetails WHERE dtl_UploadedFileID '.$s;                
-                
-                $res = mysql__select_list2($mysqli, $query);
-                
-            }else{
-                $query = 'SELECT dtl_UploadedFileID, dtl_RecID, dtl_ID, rec_Title, rec_RecTypeID '
-                        .'FROM recDetails, Records WHERE dtl_UploadedFileID '.$s.' and dtl_RecID=rec_ID';
-                $direct = array();
-                $headers = array();
-                
-                $res = $mysqli->query($query);
-                if ($res){
-                        while ($row = $res->fetch_row()) {
-                            $relation = new stdClass();
-                            $relation->recID = intval($row[0]);  //file id 
-                            $relation->targetID = intval($row[1]);  //record id
-                            $relation->dtID  = intval($row[2]);
-                            array_push($direct, $relation);
-                            $headers[$row[1]] = array($row[3], $row[4]);   
-                        }
-                        $res->close();
-                        
-                        $res = array("direct"=>$direct, "headers"=>$headers);
-                }            
+                if(count($ulf_IDs)>1){
+                    $s = ' in ('.implode(',',$ulf_IDs).')';
+                }else{
+                    $s = '='.intval($ulf_IDs[0]);
+                }
+         
+                $mysqli = $this->system->get_mysqli();
+            
+                //find all related records (that refer to this file)
+                if($ids_only){
+                    $query = 'SELECT dtl_RecID FROM recDetails WHERE dtl_UploadedFileID '.$s;                
+                    
+                    $res = mysql__select_list2($mysqli, $query);
+                    
+                }else{
+                    $query = 'SELECT dtl_UploadedFileID, dtl_RecID, dtl_ID, rec_Title, rec_RecTypeID '
+                            .'FROM recDetails, Records WHERE dtl_UploadedFileID '.$s.' and dtl_RecID=rec_ID';
+                    $direct = array();
+                    $headers = array();
+                    
+                    $res = $mysqli->query($query);
+                    if ($res){
+                            while ($row = $res->fetch_row()) {
+                                $relation = new stdClass();
+                                $relation->recID = intval($row[0]);  //file id 
+                                $relation->targetID = intval($row[1]);  //record id
+                                $relation->dtID  = intval($row[2]);
+                                array_push($direct, $relation);
+                                $headers[$row[1]] = array($row[3], $row[4]);   
+                            }
+                            $res->close();
+                            
+                            $res = array("direct"=>$direct, "headers"=>$headers);
+                    }      
+                }
             }
+            
             if($res===null || $res===false){
                     $this->system->addError(HEURIST_DB_ERROR, 
                         'Search query error for records that use files. Query '.$query,
@@ -846,7 +852,7 @@ When we open "iiif_image" in mirador viewer we generate manifest dynamically.
         }
         else if(@$this->data['delete_unused']){ // delete file records not in use
 
-            $ids = $this->data['delete_unused'];
+            $ids = prepareIds($this->data['delete_unused']);
             $operate = $this->data['operate'];
 
             $where_clause = 'WHERE dtl_ID IS NULL';
@@ -981,7 +987,7 @@ When we open "iiif_image" in mirador viewer we generate manifest dynamically.
         }
         else if(@$this->data['merge_duplicates']){ // merge duplicate local + remote files
 
-            $ids = prepareIds(filter_var($this->data['merge_duplicates'], FILTER_SANITIZE_STRING));
+            $ids = prepareIds($this->data['merge_duplicates']);
             $where_ids = '';
 
             $local_fixes = 0;
@@ -1003,10 +1009,13 @@ When we open "iiif_image" in mirador viewer we generate manifest dynamically.
 
                 //find id with duplicated path+name
                 while($local_file = $local_dups->fetch_row()){
+                    
+                    $path = (@$local_file[0]!=null) ? ('="' . $mysqli->real_escape_string($local_file[0]) . '"') : ' IS NULL';
+                    $fname = (@$local_file[1]!=null) ? ('="' . $mysqli->real_escape_string($local_file[1]) . '"') : ' IS NULL';
 
                     $query = 'SELECT ulf_ID FROM recUploadedFiles WHERE ulf_FilePath' 
-                        . ( @$local_file[0]!=null ? ('="' . $mysqli->real_escape_string($local_file[0]) . '"') : ' IS NULL' ) 
-                        .' AND ulf_FileName="'.$mysqli->real_escape_string($local_file[1]).'"' 
+                        .  $path
+                        .' AND ulf_FileName '.$fname 
                         . $where_ids;
                     $res = $mysqli->query($query);
 
@@ -1017,7 +1026,8 @@ When we open "iiif_image" in mirador viewer we generate manifest dynamically.
                     $res->close();
 
                     $new_ulf_id = array_shift($dups_ids);
-                    $upd_query = 'UPDATE recDetails set dtl_UploadedFileID='.$new_ulf_id.' WHERE dtl_UploadedFileID in ('.implode(',',$dups_ids).')';
+                    $upd_query = 'UPDATE recDetails set dtl_UploadedFileID='.intval($new_ulf_id)
+                        .' WHERE dtl_UploadedFileID in ('.implode(',',$dups_ids).')';
                     $mysqli->query($upd_query);
 
                     if($mysqli->error !== ''){
@@ -1046,7 +1056,8 @@ When we open "iiif_image" in mirador viewer we generate manifest dynamically.
                 //find id with duplicated url 
                 while ($res = $remote_dups->fetch_row()) {
 
-                    $query = 'SELECT ulf_ID FROM recUploadedFiles WHERE ulf_ExternalFileReference="'.$mysqli->real_escape_string($res[0]).'"'
+                    $query = 'SELECT ulf_ID FROM recUploadedFiles WHERE ulf_ExternalFileReference="'
+                             .$mysqli->real_escape_string($res[0]).'"'
                              .$where_ids;
                     $res = $mysqli->query($query);
 
@@ -1089,7 +1100,9 @@ When we open "iiif_image" in mirador viewer we generate manifest dynamically.
 
                 while($local_file = $local_dups->fetch_row()){
 
-                    $dup_query = 'SELECT ulf_ID, ulf_FilePath, ulf_FileName FROM recUploadedFiles WHERE ulf_OrigFileName="'.$mysqli->real_escape_string($local_file[0]).'"';
+                    $fname = (@$local_file[0]!=null)?$mysqli->real_escape_string($local_file[0]):'';
+                    
+                    $dup_query = 'SELECT ulf_ID, ulf_FilePath, ulf_FileName FROM recUploadedFiles WHERE ulf_OrigFileName="'.$fname.'"';
                     $dup_local_files = $mysqli->query($dup_query);
             
                     $dups_files = array(); //ulf_ID => path, size, md, array(dup_ulf_ids)

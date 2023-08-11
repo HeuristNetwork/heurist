@@ -100,7 +100,7 @@ foreach ($databases as $idx=>$db_name){
 
     //mysql__usedatabase($mysqli, $db_name);
 
-    $query2 = 'SELECT ulf_FilePath, ulf_FileName FROM `hdb_'.$db_name.'`.recUploadedFiles '
+    $query2 = 'SELECT ulf_FilePath, ulf_FileName FROM `hdb_'.$mysqli->real_escape_string($db_name).'`.recUploadedFiles '
                     .'WHERE ulf_FileName is not null ORDER BY ulf_FilePath';
                     
     $res2 = $mysqli->query($query2);

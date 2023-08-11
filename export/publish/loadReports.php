@@ -55,7 +55,7 @@ $mysqli = $system->get_mysqli();
 
         //search the list of users by specified parameters
         $f_id     = @$_REQUEST['recID'];
-        $f_name = $mysqli->real_escape_string(@$_REQUEST['name']);
+        $f_name = $mysqli->real_escape_string(filter_var(@$_REQUEST['name'], FILTER_SANITIZE_STRING));
         $f_userid = @$_REQUEST['usrID']; //@todo
 
         $records = array();
