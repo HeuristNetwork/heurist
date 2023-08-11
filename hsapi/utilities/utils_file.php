@@ -1961,12 +1961,14 @@ function fileNameSanitize($filename, $beautify=true) {
     // sanitize filename
     if($filename!=null){
 //            [\x7F\xA0\xAD]|          # non-printing characters DEL, NO-BREAK SPACE, SOFT HYPHEN - removed since it brokes utf-8 characters
+
+//            [#\[\]@!$&\'+,;=()]|     # URI reserved https://tools.ietf.org/html/rfc3986#section-2.2
+//            [{}^\~`]                 # URL unsafe characters https://www.ietf.org/rfc/rfc1738.txt
+
         $filename = preg_replace(
             '~
             [\x00-\x1F]|             # control characters http://msdn.microsoft.com/en-us/library/windows/desktop/aa365247%28v=vs.85%29.aspx
-            [<>:"/\\|?*]|            # file system reserved https://en.wikipedia.org/wiki/Filename#Reserved_characters_and_words
-            [#\[\]@!$&\'+,;=()]|     # URI reserved https://tools.ietf.org/html/rfc3986#section-2.2
-            [{}^\~`]                 # URL unsafe characters https://www.ietf.org/rfc/rfc1738.txt
+            [<>:"/\\|?*]             # file system reserved https://en.wikipedia.org/wiki/Filename#Reserved_characters_and_words
             ~x',
             '-', $filename);
         // avoids ".", ".." or ".hiddenFiles"

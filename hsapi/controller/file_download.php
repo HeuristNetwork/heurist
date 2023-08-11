@@ -80,7 +80,7 @@ if(!$error){
     }
     else if(@$_REQUEST['file'] || @$_REQUEST['ulf_ID']) { //ulf_ID is obfuscation id here
 
-        $fileid = @$_REQUEST['file']? $_REQUEST['file'] :@$_REQUEST['ulf_ID'];
+        $fileid = @$_REQUEST['file']? $_REQUEST['file'] :intval(@$_REQUEST['ulf_ID']);
         $size = @$_REQUEST['size'];
         
         if(is_numeric($fileid)){
@@ -122,7 +122,7 @@ if(!$error){
                     header('Location: '.$url);
                     
                 }else{
-                    $url = HEURIST_BASE_URL.'?mode=tag&db='.$db.'&file='.$fileid.'&size='.$size;
+                    $url = HEURIST_BASE_URL.'?mode=tag&db='.htmlspecialchars($db).'&file='.$fileid.'&size='.$size;
                 
                     ?>
                     <html xmlns="http://www.w3.org/1999/xhtml">
