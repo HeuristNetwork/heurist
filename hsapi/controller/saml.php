@@ -143,8 +143,8 @@ $query = 'SELECT ugr_ID FROM sysUGrps where usr_ExternalAuthentication is not nu
                         <body>
                         <script>
                             window.onload = function(){
-console.log('Authentification completed ','<?php echo $user_id;?>');                                
-                                setTimeout(function(){window.close('<?php echo $user_id;?>'); }, 500);    
+console.log('Authentification completed ','<?php echo intval($user_id);?>');                                
+                                setTimeout(function(){window.close('<?php echo intval($user_id);?>'); }, 500);    
                             }                 
                         </script>
                         Authentification completed

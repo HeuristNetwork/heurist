@@ -570,8 +570,8 @@ if($step=="1"){  //first step - info about current status
                         $t_updated = strtotime(strval(findXMLelement($entry, null, "updated")));
 
                         if(false && $t_updated && $rec_modified>$t_updated){
-                            print "Rec# $recId entry was not changed since last sync.  ".
-                            date("Y-m-d", $t_updated)." ".date("Y-m-d",$rec_modified )."  <br/>";
+                            print 'Rec#'.intval($recId).'entry was not changed since last sync.  '.
+                            date("Y-m-d", $t_updated).' '.date("Y-m-d",$rec_modified ).'  <br/>';
                             continue;
                         }
                     }
@@ -819,7 +819,7 @@ if($step=="1"){  //first step - info about current status
         if($cnt_ignored>0){
             print '<br>Zotero entries that are not mapped to Heurist record types: '.intval($cnt_ignored).'<table>';
             foreach ($arr_ignored_by_type as $itemtype => $cnt){
-                print '<tr><td>'.$itemtype.'</td><td>'.$cnt.'</td></tr>';
+                print '<tr><td>'.htmlspecialchars($itemtype).'</td><td>'.intval($cnt).'</td></tr>';
             }
             print '</table>';
             

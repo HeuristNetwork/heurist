@@ -54,7 +54,7 @@ while ( $row = $res->fetch_row() ) {
     
     if($name!=$row[1] || $gov_id != $row[2]){
         //take first on and replace in towns 
-        if(count($ids)>1) print '<br>'.$name.' '.count($ids);
+        if(count($ids)>1) print '<br>'.htmlspecialchars($name).' '.count($ids);
 
         removeDuplicates($ids); 
         $name   = $row[1];
@@ -65,7 +65,7 @@ while ( $row = $res->fetch_row() ) {
     array_push($ids, $row[0]);
 }
         if(count($ids)>1){
-            print '<br>'.$name.' '.count($ids);
+            print '<br>'.htmlspecialchars($name).' '.count($ids);
         }
 removeDuplicates($ids);
 

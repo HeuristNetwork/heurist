@@ -475,7 +475,7 @@ $mysqli = $system->get_mysqli();
                             
                             $pref = '';
                             foreach ($files_orphaned as $row) { //to remove
-                                print $pref.'['.$row['ulf_ID'].','.$row['isfound'].']';
+                                print $pref.'['.intval($row['ulf_ID']).','.intval($row['isfound']).']';
                                 $pref = ',';
                             }
                             
@@ -483,14 +483,14 @@ $mysqli = $system->get_mysqli();
                             $pref = '';
                             //to remove from recDetails and recUplodedFiles
                             foreach ($files_notfound as $row) { 
-                                print $pref.$row['ulf_ID'];
+                                print $pref.intval($row['ulf_ID']);
                                 $pref = ',';
                             }
                             print '],"fixpath":[';
                             $pref = '';
                             
                             foreach ($files_path_to_correct as $row) {
-                                print $pref.$row['ulf_ID'];
+                                print $pref.intval($row['ulf_ID']);
                                 $pref = ',';
                             }
                         ?>]};
@@ -697,8 +697,8 @@ $mysqli = $system->get_mysqli();
                     <br>
                 <?php
                 foreach ($files_unused_local as $row) {
-                    print '<div class="msgline"><label><input type=checkbox class="unused_file_local" data-id="'.$row['ulf_ID'].'">&nbsp;'
-                            .'<b>'.$row['ulf_ID'].'</b> '.$row['res_fullpath'].( $row['isfound']?'':' ( file not found )' ).'</label></div>';
+                    print '<div class="msgline"><label><input type=checkbox class="unused_file_local" data-id="'.intval($row['ulf_ID']).'">&nbsp;'
+                            .'<b>'.intval($row['ulf_ID']).'</b> '.htmlspecialchars($row['res_fullpath']).( $row['isfound']?'':' ( file not found )' ).'</label></div>';
                                     //@$row['ulf_ExternalFileReference'];
                 }//for
                 if(is_array($files_unused_local) && count($files_unused_local)>10){
@@ -725,8 +725,8 @@ $mysqli = $system->get_mysqli();
                     <br>
                 <?php
                 foreach ($files_unused_remote as $row) {
-                    print '<div class="msgline"><label><input type=checkbox class="unused_file_remote" data-id="'.$row['ulf_ID'].'">&nbsp;'
-                            .'<b>'.$row['ulf_ID'].'</b> '.$row['ulf_ExternalFileReference'].'</label></div>';
+                    print '<div class="msgline"><label><input type=checkbox class="unused_file_remote" data-id="'.intval($row['ulf_ID']).'">&nbsp;'
+                            .'<b>'.intval($row['ulf_ID']).'</b> '.filter_var($row['ulf_ExternalFileReference'],FILTER_SANITIZE_URL).'</label></div>';
                 }//for
                 if(is_array($files_unused_remote) && count($files_unused_remote)>10){
                     print '<div><br><button onclick="doRepairAction(\'unused_file_remote\')">Remove selected unused URLs</button></div>';
@@ -753,8 +753,8 @@ $mysqli = $system->get_mysqli();
                     <br>
                 <?php
                 foreach ($files_notfound as $row) {
-                    print '<div class="msgline"><label><input type=checkbox class="files_notfound" data-id="'.$row['ulf_ID'].'">&nbsp;'
-                            .'<b>'.$row['ulf_ID'].'</b> '.$row['db_fullpath'].'</label></div>';
+                    print '<div class="msgline"><label><input type=checkbox class="files_notfound" data-id="'.intval($row['ulf_ID']).'">&nbsp;'
+                            .'<b>'.intval($row['ulf_ID']).'</b> '.htmlspecialchars($row['db_fullpath']).'</label></div>';
                 }//for
                 if(count($files_notfound)>10){
                     print '<div><br><button onclick="doRepairAction(\'files_notfound\')">Remove entries for missing files</button></div>';
@@ -781,9 +781,9 @@ $mysqli = $system->get_mysqli();
                     <br>
                     <br>
                 <?php
-                foreach ($files_notreg as $row) {
-                    print '<div class="msgline"><label><input type=checkbox class="files_notreg" data-id="'.$row.'">&nbsp;'
-                            .$row.'</label></div>';
+                foreach ($files_notreg as $row) { //filenames
+                    print '<div class="msgline"><label><input type=checkbox class="files_notreg" data-id="'.htmlspecialchars($row).'">&nbsp;'
+                            .htmlspecialchars($row).'</label></div>';
                 }//for
                 if(count($files_notreg)>10){
                     print '<div><br><button onclick="doRepairAction(\'files_notreg\')">Remove non-registered files</button></div>';

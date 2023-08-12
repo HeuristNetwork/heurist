@@ -102,8 +102,8 @@ $mysqli = $system->get_mysqli();
         if (!$res) {  print $query.'  '.$mysqli->error;  return; }
         
         while (($row = $res->fetch_row())) {
-               $is_found = true;
-               array_push($rec_types, $row);
+               $is_found = true;  
+               array_push($rec_types, array_map('htmlspecialchars',$row));
         }
 
         if($need_Details){
@@ -119,7 +119,7 @@ $mysqli = $system->get_mysqli();
         
         while (($row = $res->fetch_row())) {
                $is_found = true;
-               array_push($det_types, $row);
+               array_push($det_types, array_map('htmlspecialchars',$row));
    /*
                $query = 'update '.$db_name.'.defDetailTypes set dty_OriginatingDBID=2,'
 .'dty_NameInOriginatingDB="Related Person(s)", dty_IDInOriginatingDB = 235 '
@@ -139,7 +139,7 @@ $mysqli = $system->get_mysqli();
         
         while (($row = $res->fetch_row())) {
                $is_found = true;
-               array_push($terms, $row);
+               array_push($terms, array_map('htmlspecialchars',$row));
         }
         
         }

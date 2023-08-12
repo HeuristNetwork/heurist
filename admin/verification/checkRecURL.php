@@ -140,7 +140,7 @@ function checkURLs($system, $return_output){
                         array('ss', date('Y-m-d H:i:s'), substr($glb_curl_error,0,255)), true);
 
                 if(!$return_output){
-                    print '<div>'.$rec_id.' : '.$rec_url.'  '.$glb_curl_error.'</div>';
+                    print '<div>'.intval($rec_id).' : '.filter_var($rec_url,FILTER_SANITIZE_URL).'  '.$glb_curl_error.'</div>';
                 }else{
                     $results[0][0][] = $rec_id;
                 }

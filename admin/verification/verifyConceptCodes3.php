@@ -143,7 +143,7 @@ if($mysqli->error){print $query.'  '.$mysqli->error; break;}
         
         while (($row = $res->fetch_row())) {
                $is_found = true;
-               array_push($rec_types, $row);
+               array_push($rec_types, array_map('htmlspecialchars',$row));
         }
         
         
@@ -190,7 +190,7 @@ if($mysqli->error){print $query.'  '.$mysqli->error; break;}
         
         while (($row = $res->fetch_row())) {
                $is_found = true;
-               array_push($det_types, $row);
+               array_push($det_types, array_map('htmlspecialchars',$row));
         }
         
         if(count($det_types)>0){
@@ -222,7 +222,7 @@ $mysqli->query($query);
             
             while (($row = $res->fetch_row())) {
                    $is_found = true;
-                   array_push($terms, $row);
+                   array_push($terms, array_map('htmlspecialchars',$row));
             }
           
           /*  

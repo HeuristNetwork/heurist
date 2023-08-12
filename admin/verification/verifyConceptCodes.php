@@ -99,7 +99,7 @@ $mysqli = $system->get_mysqli();
                $res2 = $mysqli->query($query);               
                if (!$res2) {  print $query.'  '.$mysqli->error;  return; }
                while (($row2 = $res2->fetch_row())) {
-                      array_push($rec_types, $row2);
+                      array_push($rec_types, array_map('htmlspecialchars',$row2));
                }
         }
 
@@ -124,7 +124,7 @@ $mysqli = $system->get_mysqli();
                $res2 = $mysqli->query($query);               
                if (!$res2) {  print $query.'  '.$mysqli->error;  return; }
                while (($row2 = $res2->fetch_row())) {
-                      array_push($det_types, $row2);
+                      array_push($det_types, array_map('htmlspecialchars',$row2));
                }
         }
         
@@ -148,7 +148,7 @@ $mysqli = $system->get_mysqli();
                $res2 = $mysqli->query($query);               
                if (!$res2) {  print $query.'  '.$mysqli->error;  return; }
                while (($row2 = $res2->fetch_row())) {
-                      array_push($terms, $row2);
+                      array_push($terms, array_map('htmlspecialchars',$row2));
                }
         }
         

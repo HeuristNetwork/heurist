@@ -188,7 +188,7 @@ if($islist || (array_key_exists("id", $_REQUEST) && $_REQUEST["id"]!="")){
         if($wkt_reccount>0){
             while ($row = $res->fetch_row()) {
                 $kml = null;
-                $dt = $row[3];
+                
                 if($row[5]){
                     $wkt = $row[5];
                     $geom = geoPHP::load($wkt,'wkt');
@@ -217,7 +217,7 @@ if($islist || (array_key_exists("id", $_REQUEST) && $_REQUEST["id"]!="")){
                         print '<id>'.htmlspecialchars($row[0]).'</id>';
                         print '<name>'.htmlspecialchars ($row[2]).'</name>';
                         if($row[1]){
-                            print '<description><![CDATA[ <a href="'.$row[1].'">link</a>]]></description>'; 										}
+                            print '<description><![CDATA[ <a href="'.filter_var($row[1],FILTER_SANITIZE_URL).'">link</a>]]></description>'; 										}
                         print $kml;
                         print '</Placemark>';
                     }
@@ -240,14 +240,14 @@ if($islist || (array_key_exists("id", $_REQUEST) && $_REQUEST["id"]!="")){
             while ($file_data = $res2->fetch_row()) {
                 if ($file_data[3]) {
                     
-                    $file_id = $file_data[0];
+                    $file_id = intval($file_data[0]);
 
-                    print "<NetworkLink>";
-                    print "<name>".htmlspecialchars($file_data[2])."</name>";
-                    print "<Link id=\"$file_id\">";
-                    print "<href>".HEURIST_BASE_URL."export/xml/kml.php?id=$file_id</href>";
-                    print "</Link>";
-                    print "</NetworkLink>";
+                    print '<NetworkLink>';
+                    print '<name>'.htmlspecialchars($file_data[2]).'</name>';
+                    print '<Link id="'.$file_id.'">';
+                    print '<href>'.HEURIST_BASE_URL.'export/xml/kml.php?id='.$file_id.'</href>';
+                    print '</Link>';
+                    print '</NetworkLink>';
                 }
             }//while kml records
         }

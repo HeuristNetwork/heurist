@@ -726,6 +726,7 @@ function getDtyLocalCode($db_id, $id){
 
 //---------------
 function __addOtherSources(){
+/*    
     global $mysqli;
     mysql__usedatabase($mysqli, 'hdb_judaism_and_rome');
     
@@ -753,7 +754,7 @@ function __addOtherSources(){
             $rec_ID = mysql__select_value($mysqli, $query_match.$nid);        
             
             if($rec_ID>0){
-print '<br>'.$row[3];            
+print '<br>'.htmlspecialchars($row[3]);            
                 $nids = explode('|',$row[3]);
                 if(count($nids)>0){
                     $values = array();
@@ -795,7 +796,7 @@ print '<br>&nbsp;&nbsp;&nbsp;'.$val;
     }
     
     
-    
+*/    
 }
 
 function __renameField39(){
@@ -883,12 +884,12 @@ function __correctGetEstDate(){
                     $query = 'UPDATE recDetails SET dtl_Value="'.
                                                     $mysqli->real_escape_string($dtl_NewValue).'" WHERE dtl_ID='.$dtl_ID;
                     //$mysqli->query($query);
-                    print $rec_ID.'  '.$dtl_Value.'  '.$dtl_NewValue.'<br>';
+                    print htmlspecialchars($rec_ID.'  '.$dtl_Value.'  '.$dtl_NewValue).'<br>';
                                     
                     $cnt++;
                     if($cnt>10) break;
                 }else{
-                    print $rec_ID.'  '.$dtl_Value.'<br>';
+                    print htmlspecialchars($rec_ID.'  '.$dtl_Value).'<br>';
                     $is_invalid = true;
                 }
                 
