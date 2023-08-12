@@ -494,28 +494,16 @@ $siz = get_php_bytes('upload_max_filesize');
     //
     //
     protected function safe_copy($from, $to) {
-/*
-        $from = realpath($from);
-        $filename = basename($to);
-        $to = realpath(dirname($to));
-        $heurist_dir = realpath(HEURIST_FILESTORE_ROOT);
-        if(!(strpos($from, $heurist_dir)===0)){
-            $file->error = $this->get_error_message('only_heurist');
-            return false;
-        }
-        if(!(strpos($to, $heurist_dir)===0)){
-            $file->error = $this->get_error_message('only_heurist');
-            return false;
-        }
-        copy($from, $to.DIRECTORY_SEPARATOR.$filename);
-*/        
+       
         $from = sanitizePath($from);
+        $filename = basename($to);
+        $to = dirname($to);
         $to = sanitizePath($to);
         if(isPathInHeuristUploadFolder($to)===false){
             $file->error = $this->get_error_message('only_heurist');
             return false;
         }
-        return copy($from, $to);
+        return copy($from, $to.$filename);
     }
 
     protected function validate($uploaded_file, $file, $error, $index) {
@@ -524,11 +512,13 @@ $siz = get_php_bytes('upload_max_filesize');
             return false;
         }
         
-        //Artem Osmakov - limited to heurist file storage
+        //Artem Osmakov -  destination is limited to heurist file storage
         $upload_path = $this->get_upload_path($file->name, $file->subfolder);
-        if(!(strpos($upload_path, HEURIST_FILESTORE_ROOT)===0))  //realpath
-        //if(!(strpos($upload_path,'/var/www/html/HEURIST/HEURIST_FILESTORE')===0 || 
-        //     strpos($upload_path,'C:/xampp/htdocs/HEURIST_FILESTORE')===0))
+
+        $filename = basename($upload_path);
+        $upload_path = dirname($upload_path);
+        if(isPathInHeuristUploadFolder($upload_path)===false)
+        //if(!(strpos($upload_path, HEURIST_FILESTORE_ROOT)===0))
         {
             $file->error = $this->get_error_message('only_heurist');
             return false;
@@ -1772,7 +1762,7 @@ $siz = get_php_bytes('upload_max_filesize');
                     $files[] = $this->handle_file_upload(
                         $upload['tmp_name'][$index],
                         $file_name,
-                        $upload['name'][$index],
+                        $upload['name'][$index], //original name
                         $subfolder_name,
                         $size ? $size : $upload['size'][$index],
                         $upload['type'][$index],
@@ -1788,7 +1778,7 @@ $siz = get_php_bytes('upload_max_filesize');
                 $files[] = $this->handle_file_upload(
                     isset($upload['tmp_name']) ? $upload['tmp_name'] : null,
                     $prefix.fileNameSanitize($file_name ? $file_name : (isset($upload['name']) ?$upload['name'] : null), false),
-                    (isset($upload['name']) ? $upload['name'] : null),
+                    (isset($upload['name']) ? $upload['name'] : null), //original name
                     '',        
                     $size ? $size : (isset($upload['size']) ?
                             $upload['size'] : $this->get_server_var('CONTENT_LENGTH')),

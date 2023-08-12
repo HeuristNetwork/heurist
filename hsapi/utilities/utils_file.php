@@ -1424,6 +1424,7 @@ function isPathInHeuristUploadFolder($path){
     if(!$path) return false; //does not exist
     
     $path = str_replace('\\','/',$path);
+    $heurist_dir = str_replace('\\','/',$heurist_dir);
 
     //realpath gives real path on remote file server
     if(strpos($path, '/srv/HEURIST_FILESTORE/')===0 || 
