@@ -721,7 +721,8 @@ var sMsg = '<p>Heurist\'s CMS editor has been upgraded to a new system which is 
                             _onPageChange();
                             
                             var lang = $(tinymce.activeEditor.targetElm).attr('data-lang');
-                            if(lang==default_language){
+//console.log('_initTinyMCE',lang,default_language);
+                            if(lang==default_language || lang=='def' || lang==''){
                                 l_cfg.content = new_content;    
                             }else{
                                 l_cfg['content'+lang] = new_content;    
@@ -1693,7 +1694,7 @@ function(value){
         }     
         
         var affected_ele = _layout_container.find('div[data-hid="'+ele_id+'"]');
-        var lang = window.hWin.HAPI4.getLangCode3(lang_id,'def');
+        var lang = window.hWin.HAPI4.getLangCode3(lang_id, 'def');
         
         //need switch
         if(affected_ele.attr('data-lang')==lang || (current_language==lang && !affected_ele.attr('data-lang'))){
@@ -1703,7 +1704,8 @@ function(value){
         var affected_cfg = window.hWin.layoutMgr.layoutContentFindElement(_layout_content, ele_id);
 
         var content = 'content';
-        if(default_language!=lang){
+//console.log('_layoutTranslateElement',default_language,lang);
+        if(default_language!=lang && lang!='def'){
             content = content + lang;
             if(!affected_cfg[content]){ //if not found -  add new content
                 affected_cfg[content] = 'Translate content to '+lang+'!';

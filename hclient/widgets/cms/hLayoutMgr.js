@@ -289,7 +289,7 @@ function hLayoutMgr(){
         var content = 'content'; //default name of attribute
         
         if(_supp_options['lang']){
-            var lang = window.hWin.HAPI4.getLangCode3(_supp_options['lang'],'def');
+            var lang = window.hWin.HAPI4.getLangCode3(_supp_options['lang'], 'def'); //returns 'def' if not found
             if(layout[content+lang]){ //if not found use the default
                 content = content+lang;
             }
