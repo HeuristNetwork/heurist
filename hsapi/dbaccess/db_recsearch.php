@@ -1826,6 +1826,7 @@ function recordSearch($system, $params)
     $needThumbBackground = false;
     $needCompleteInformation = false; //if true - get all header fields, relations, full file info
     $needTags = (@$params['tags']>0)?$system->get_user_id():0;
+    $checkFields = (@$params['checkFields'] == 1); // check validity of certain field types
 
     $relations = null;
     $permissions = null;
@@ -2796,6 +2797,7 @@ function recordSearch($system, $params)
                                 }
                                                                 
                                 $val = null;
+                                $field_error = null;
 
                                 if($row[2]){ //GEO
                                     //dtl_Geo @todo convert to JSON
@@ -2829,6 +2831,23 @@ function recordSearch($system, $params)
                                     //convert date to old plain string temporal object to return to client side
                                     $val = Temporal::getValueForRecDetails( $row[1], false );
                                 
+                                    if($checkFields){ // check if this date has been indexed and interpreted
+
+                                        $check_query = "SELECT rdi_estMinDate, rdi_estMaxDate FROM recDetailsDateIndex WHERE rdi_DetailID = $dtl_ID"; // AND rdi_estMinDate != 0 AND rdi_estMaxDate != 0
+                                        $check_res = $mysqli->query($check_query);
+
+                                        if($check_res){
+
+                                            $field_error = $check_res->num_rows == 0 ? 'This date has not been indexed' : null;
+
+                                            if(!$field_error){ // has been indexed
+                                                $row = $check_res->fetch_row();
+                                                $field_error = intval($row[0]) === 0 && intval($row[1]) === 0 ? 'This date has been indexed, but it couldn\'t be interpreted' : null;
+                                            }
+
+                                        } // else mysql error
+                                    }
+                                
                                 }else if(@$row[1]!=null) {
                                     $val = $row[1]; //dtl_Value
                                 }
@@ -2838,12 +2857,16 @@ function recordSearch($system, $params)
                                     if( !array_key_exists($dtyID, $records[$recID]['d']) ){
                                         $records[$recID]['d'][$dtyID] = array();
                                         $records[$recID]['v'][$dtyID] = array();
+
+                                        if($checkFields) { $records[$recID]['errors'][$dtyID] = array(); }
                                     }
                                     array_push($records[$recID]['d'][$dtyID], $val);
                                     
                                     //individual field visibility
                                     array_push($records[$recID]['v'][$dtyID], $row[4]); //dtl_HideFromPublic
                                     
+                                    // if checked, return any errors found with the field
+                                    if($checkFields) { array_push($records[$recID]['errors'][$dtyID], $field_error); }
                                 }
                             }//while
                             $res_det->close();

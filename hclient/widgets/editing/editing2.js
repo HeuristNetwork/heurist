@@ -851,6 +851,26 @@ function hEditing(_options) {
         }
     }
 
+    //
+    // Add extra field value errors
+    //
+    function _displayValueErrors(fieldNames){
+
+        if(!window.hWin.HEURIST4.util.isArray(fieldNames)){
+            fieldNames = fieldNames.split(',');
+        }
+
+        for(const fieldName of fieldNames){
+
+            let ele = _getFieldByName(fieldName);
+            let record = recdata.getFirstRecord();
+
+            if(ele && ele.length > 0 && record?.errors?.[fieldName]){
+                ele.editing_input('showValueErrors', record.errors[fieldName]);
+            }
+        }
+    }
+
 
     //public members
     var that = {
@@ -1029,6 +1049,10 @@ function hEditing(_options) {
         
         getOptions: function (){
             return options;
+        },
+
+        displayValueErrors: function(fieldNames){
+            _displayValueErrors(fieldNames);
         }
     }
 

@@ -2323,7 +2323,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                 that._initEditForm_step4(record_stub);
                 
             }else{
-                window.hWin.HAPI4.RecordMgr.search({q: 'ids:'+recID, w: "e", f:"complete", l:1}, 
+                window.hWin.HAPI4.RecordMgr.search({q: 'ids:'+recID, w: "e", f:"complete", l:1, checkFields: 1}, 
                             function(response){ response.is_insert = (is_insert==true); 
                                                 that._initEditForm_step4(response); });
                 
@@ -3021,6 +3021,7 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
             var temp_group_details = [], hasTabs = false; // check if any groupings are set to tabs
             var max_length_fields = []; // freetext, blobktext, and float fields that are set to max width
             var terms_as_buttons = []; // enum fields, for adjusting each button+label's width
+            let check_for_errors = []; // fields that could have additional errors (e.g. date fields that haven't been indexed into recDetailsDateIndex) 
             var available_groups = ['group', 'group_break', 'tabs', 'tabs_new', 'accordion', 'accordion_inner', 'expanded', 'expanded_inner'];
 
             var has_rec_access = window.hWin.HAPI4.has_access(this._getField('rec_OwnerUGrpID'));
@@ -3097,6 +3098,10 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
                         if(fld_value != null && fld_value.length > 1){
                             that._currentEditRecordset.setFld(cur_record, dtFields['dt_ID'], fld_value.join('')); 
                         }
+                    }
+
+                    if(dtFields['dty_Type'] == 'date'){
+                        check_for_errors.push(dtFields['dt_ID']);
                     }
                 }
             }//for s_fields
@@ -3426,7 +3431,8 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
 
                     field.find('input, textarea').css({'width': width, 'max-width': width});
                 }
-            }else if(terms_as_buttons && terms_as_buttons.length > 0){ // Set terms as button fields, if more than one line, set width 
+            }
+            if(terms_as_buttons && terms_as_buttons.length > 0){ // Set terms as button fields, if more than one line, set width 
 
                 for(var j = 0; j < terms_as_buttons.length; j++){
 
@@ -3442,6 +3448,9 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
                         }
                     }
                 }
+            }
+            if(check_for_errors.length > 0){ // Add extra error details about field values
+                that._editing.displayValueErrors(check_for_errors);
             }
 
             if(this.options.fill_in_data){ // force ismodified
