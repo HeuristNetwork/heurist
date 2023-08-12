@@ -1312,7 +1312,8 @@ console.log(aCodes);
                        
                 var key;     
                 var dtid = code;
-                var linktype = dtid.substr(0,2);
+                let is_fc = dtid.substring(0, 3) == 'fc:';
+                var linktype = is_fc ? dtid.substring(3,5) : dtid.substring(0,2);
                 var slink = '';
                 
                 if(linktype=='rt'){
@@ -1327,14 +1328,9 @@ console.log(aCodes);
                     slink = "linkedfrom:";
                 }
                 if(slink!=''){
-                    dtid = dtid.substr(2);
-                    key = slink+dtid;    
+                    dtid = dtid.substring(is_fc ? 5 : 2);
+                    key = (is_fc?'fc:':'')+slink+dtid;    
                 }else{
-                    /*if($Db.dty(dtid,'rty_Type')=='relmarker'){
-                        key = 'related_to:'+dtid;
-                    }else{
-                        key = 'f:'+dtid;    
-                    }*/
                     key = 'f:'+dtid;    
                 } 
                 
@@ -1489,7 +1485,8 @@ console.log(aCodes);
                 
                 var old_key = Object.keys(value)[0];
                 var key = __convertLink(old_key); 
-                if(key.indexOf('linked_to')==0 || key.indexOf('linkedfrom')==0){
+                let idx = key.indexOf('fc:')==0 ? 3 : 0;
+                if(key.indexOf('linked_to')==idx || key.indexOf('linkedfrom')==idx){
                    var newvalue = {};
                    newvalue[key] = value[old_key]; 
                    value = newvalue;

@@ -404,9 +404,11 @@ $.widget( "heurist.searchBuilderItem", {
         
         if(dty_ID>0){ //numeric - base field
 
+            let compare = this.select_comparison.val();
+
             //console.log(this.options.rty_ID+'  '+dty_ID);            
             field_type = $Db.dty(dty_ID,'dty_Type');
-            if(field_type=='blocktext') field_type = 'freetext';
+            if(field_type=='blocktext' || compare == 'count') field_type = 'freetext';
 
             if(this.options.rty_ID>0){
                 ed_options['rectypeID'] = this.options.rty_ID;
@@ -424,8 +426,6 @@ $.widget( "heurist.searchBuilderItem", {
             ed_options['dtID'] = dty_ID;
             
             ed_options['language'] = (field_type=='enum') ? this.options.language : ''; // show translated terms
-
-            let compare = this.select_comparison.val();
             
             if(field_type=='enum' && (this.options.enum_field!=null ||
                 (this.options.enum_field==null && !(compare=='' || compare=='=' || compare=='-') ))){
@@ -631,7 +631,11 @@ Whole value = EQUAL
                 this._predicate_input_ele.editing_input('setBetweenMode', false);        
             }
             
-            if(field_type=='enum' && this.options.enum_field==null && cval != 'any' && cval != 'NULL'){
+            if(cval == 'count'){ // force freetext field on field count
+                if(this._predicate_input_ele.find('.input-div > input').length == 0){
+                    this._onSelectField();
+                }
+            }else if(field_type=='enum' && this.options.enum_field==null && cval != 'any' && cval != 'NULL'){
                 //this.options.enum_field=='term' && cval != 'any' && cval != 'NULL'  &&
                 
                 let need_select = (cval=='=' || cval=='-' || cval=='');
@@ -844,6 +848,7 @@ Whole value = EQUAL
             }
 
             var key;
+            let org_op = this.select_comparison.val();
             
             if (this._current_field_type=='geo') {
                 key = 'geo';    
@@ -852,7 +857,6 @@ Whole value = EQUAL
                 key = 'r:'+this.options.dty_ID.substr(2); 
             }else    
             if(this.options.dty_ID>0){
-                let org_op = this.select_comparison.val();
                 key = (org_op!='count' ? 'f:' : 'fc:') + this.options.dty_ID;
                 
                 if(this.options.enum_field!=null){
@@ -866,7 +870,7 @@ Whole value = EQUAL
             if(this.options.dty_ID=='typeid' || this.options.dty_ID=='typename'){
                 key = 't';
             }else {
-                key = this.options.dty_ID;
+                key = (org_op != 'count' ? '' : 'fc:') + this.options.dty_ID;
             }
             
             var res = {};
