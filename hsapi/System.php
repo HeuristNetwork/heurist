@@ -1735,7 +1735,7 @@ error_log('CANNOT UPDATE COOKIE '.$session_id);
     
         //update cookie expire time
         $is_https = (@$_SERVER['HTTPS']!=null && $_SERVER['HTTPS']!='');
-        $session_id = session_id();
+        $session_id = session_id();  //session_regenerate_id()
         
         if (strnatcmp(phpversion(), '7.3') >= 0) {
             $cres = setcookie('heurist-sessionid', $session_id, [

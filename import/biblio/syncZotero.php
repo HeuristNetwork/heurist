@@ -1280,17 +1280,17 @@ function createResourceRecord($mysqli, $record_type, $recdetails, $missing_point
         if($res){
             $row = $res->fetch_row();
             if($row){
-                $recource_recid = $row[0];
+                $recource_recid = intval($row[0]);
             }
         }
     }
 
-    if($recource_recid==null){
+    if(!($recource_recid>0)){
         //such record not found - create new one
         $recource_recid = addRecordFromZotero(null, $record_type, null, $details, null, false, $missing_pointers_count);
     }
 
-    return $recource_recid;
+    return intval($recource_recid);
 }
 
 /**
@@ -1419,7 +1419,7 @@ function addRecordFromZotero($recId, $recordType, $rec_URL, $details, $zotero_it
         }
 
     }
-    return $new_recid;
+    return intval($new_recid);
 }
 
 //isNullOrEmptyString

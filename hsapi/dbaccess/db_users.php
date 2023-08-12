@@ -167,6 +167,9 @@
         return false;
     }
 
+    //
+    //
+    //
     function user_HandleResetPin($system, $username, $pin = '', $captcha = ''){
 
         $mysqli = $system->get_mysqli();
@@ -315,7 +318,10 @@
             return false;
         }
     }
-
+    
+    //
+    // Returns true is password has been reset
+    //
     function user_ResetPassword($system, $username, $password, $pin){
 
         $mysqli = $system->get_mysqli();
