@@ -4586,6 +4586,31 @@ console.log('onpaste');
             
         }
     },
+
+    showValueErrors: function(errors){
+
+        if(!window.hWin.HEURIST4.util.isArrayNotEmpty(errors)){
+            return;
+        }
+
+        $.each(this.inputs, (idx, ele) => {
+
+            if(idx >= errors.length){
+                return false;
+            }
+
+            const err = errors[idx];
+            if(window.hWin.HEURIST4.util.isempty(err)){
+                return;
+            }
+
+            ele = $(ele).parents('.input-div');
+
+            $('<div>', {class: `heurist-prompt ui-state-error`, style: 'margin-bottom: 0.2em; padding: 2px; width: fit-content;'})
+                .text(err)
+                .insertAfter(ele);
+        });
+    },
     
     //
     // internal - assign display value for specific input element

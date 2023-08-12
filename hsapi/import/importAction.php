@@ -2214,6 +2214,11 @@ private static function doInsertUpdateRecord($recordId, $import_table, $recordTy
     if(@$details['ScratchPad']) $record['ScratchPad'] = @$details['ScratchPad'];
     $record['details'] = $details;
 
+    $updating_record = $recordId != 0 && // Check that a record is actually being updated, for the final count
+                       (array_key_exists('URL', $record) && !empty($record['URL']) 
+                        || array_key_exists('ScratchPad', $record) && !empty($record['ScratchPad'])
+                        || is_array($details) && !empty($details));
+
     $ignore_dtys = array();
 
     foreach(array_keys($record['details']) as $dty){
@@ -2227,45 +2232,48 @@ private static function doInsertUpdateRecord($recordId, $import_table, $recordTy
         }
     }
 
-    $cached_increments = array_key_exists($recordType, self::$increment_fields) ? self::$increment_fields[$recordType] : array();
+    if($recordId == 0){ // New records only
 
-    foreach($cached_increments as $dty => $value){
+        $cached_increments = array_key_exists($recordType, self::$increment_fields) ? self::$increment_fields[$recordType] : array();
 
-        if(in_array($dty, $ignore_dtys)){
-            continue;
+        foreach($cached_increments as $dty => $value){
+
+            if(in_array($dty, $ignore_dtys)){
+                continue;
+            }
+
+            $matches = array();
+            if (preg_match('/(\d+)$/', $value, $matches)){
+                $digits = $matches[1];
+                $increment_digit = str_pad(intval($digits) + 1, strlen($digits), '0', STR_PAD_LEFT);
+
+                $value = substr($value,0,-strlen($digits)).($increment_digit);
+            }else{ // shouldn't happen here, but just in case
+                $value = $value.'1';
+            }
+
+            $cached_increments[$dty] = $value; // update cache
+            $record['details'][$dty] = $value;
+
+            array_push($ignore_dtys, $dty);
         }
 
-        $matches = array();
-        if (preg_match('/(\d+)$/', $value, $matches)){
-            $digits = $matches[1];
-            $increment_digit = str_pad(intval($digits) + 1, strlen($digits), '0', STR_PAD_LEFT);
+        // Get missing auto increment values
+        $auto_increment_params = array(
+            'rtyID' => $recordType,
+            'ignore_dtys' => $ignore_dtys
+        );
 
-            $value = substr($value,0,-strlen($digits)).($increment_digit);
-        }else{ // shouldn't happen here, but just in case
-            $value = $value.'1';
+        $auto_increment = recordGetAllIncremenetedValues(self::$system, $auto_increment_params); 
+
+        if(count($auto_increment) > 0){
+            $record['details'] = array_replace($details, $auto_increment);
+
+            $cached_increments = array_replace($cached_increments, $auto_increment);
         }
-
-        $cached_increments[$dty] = $value; // update cache
-        $record['details'][$dty] = $value;
-
-        array_push($ignore_dtys, $dty);
-    }
-
-    // Get missing auto increment values
-    $auto_increment_params = array(
-        'rtyID' => $recordType,
-        'ignore_dtys' => $ignore_dtys
-    );
-
-    $auto_increment = recordGetAllIncremenetedValues(self::$system, $auto_increment_params); 
-
-    if(count($auto_increment) > 0){
-        $record['details'] = array_replace($details, $auto_increment);
-
-        $cached_increments = array_replace($cached_increments, $auto_increment);
-    }
-    if(count($cached_increments) > 0){
-        self::$increment_fields[$recordType] = $cached_increments;
+        if(count($cached_increments) > 0){
+            self::$increment_fields[$recordType] = $cached_increments;
+        }
     }
     
     //DEBUG 
@@ -2326,7 +2334,7 @@ private static function doInsertUpdateRecord($recordId, $import_table, $recordTy
             self::$rep_unique_ids[] = $new_recordID;
         }else{
             //do not count updates if this record was already inserted before
-            if(!in_array($new_recordID, self::$rep_unique_ids)){
+            if($updating_record && !in_array($new_recordID, self::$rep_unique_ids)){
                 self::$rep_unique_ids[] = $new_recordID;
                 self::$rep_updated++;  
             }else if(is_numeric($new_recordID) && $new_recordID > 0){
