@@ -129,7 +129,7 @@ class ReportActions {
         
         if($filename && file_exists($filename)){
             header('Content-type: text/html; charset=utf-8');
-            print file_get_contents($filename);
+            readfile($filename);
         }else{
             header("Content-type: text/javascript");
             print json_encode(array("error"=>"file not found"));
