@@ -1197,6 +1197,8 @@ function onHapiInit(success){
         return;
     }
     
+    current_language = window.hWin.HEURIST4.util.getUrlParameter('lang');            
+    
     function __init_completed(success){
         if(success){
             
@@ -1324,8 +1326,6 @@ function initHeaderTitle(){
 
     if(website_title){
         
-console.log(website_title);        
-
         var pagetitle = window.hWin.HAPI4.getTranslation(website_title, current_language);
 
         document.title = window.hWin.HEURIST4.util.stripTags(pagetitle);
