@@ -120,6 +120,8 @@ function getWhereRecordIds($params){
         }
         //$recIDs = explode(',',$recids['recIDs']);
         $recIDs = prepareIds($recids['recIDs']);
+        
+        
     }
     return $recIDs;
 }
@@ -150,9 +152,10 @@ function recordSearchDistinctPointers( $params ){
         if($pos){
             $where = substr($where,0,$pos);
         }*/
-        $where = '(select rec_ID '.$where.' )';
+        $where = '(select rec_ID '.$where_clause.' )';
     }else{
-        $where = '('.$where.')';
+        
+        $where = '('.implode(',',$where).')';
     }
     
     $query = "select distinct dtl_Value as id, rec_Title as text from Records, recDetails where rec_ID=dtl_Value and dtl_DetailTypeID="
@@ -223,7 +226,7 @@ function getCrossTab( $params){
 
     $recIDs = getWhereRecordIds($params);
     if($recIDs!=null){
-        $params['q'] = 'ids:'.$recIDs;
+        $params['q'] = 'ids:'.implode(',',$recIDs);
     }
         
     $currentUser = $system->getCurrentUser();
