@@ -407,12 +407,12 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
                             _skipToNextRecordType();
                         });
 
+        window.hWin.HEURIST4.ui.createEncodingSelect($('#csv_encoding'), [{key: 'auto detect', title: 'auto detect'}]);
 
-          
-          $(window).resize( function(e)
-          {
-                _adjustTablePosition();
-          });          
+        $(window).resize( function(e)
+        {
+            _adjustTablePosition();
+        });
                        
                        
           //TEST            _doSetPrimaryRecType(); 

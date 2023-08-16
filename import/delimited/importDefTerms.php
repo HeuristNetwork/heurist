@@ -99,81 +99,8 @@ require_once(dirname(__FILE__)."/../../hclient/framecontent/initPage.php");
         <h2 style="display: inline-block;margin:0">or</h2>
         <div id="btnUploadFile">Upload File</div>
         <div style="float:right">encoding: 
-<select id="csv_encoding" class="text ui-widget-content ui-corner-all" style="width:120px;font-size:0.9em">
-<option>UTF-8</option>
-<option>UTF-16</option>
-<option>UTF-16BE</option>
-<option>UTF-16LE</option>
-<option>CP1251</option>
-<option>CP1252</option>
-<option>KOI8-R</option>
-<option>UCS-4</option>
-<option>UCS-4BE</option>
-<option>UCS-4LE</option>
-<option>UCS-2</option>
-<option>UCS-2BE</option>
-<option>UCS-2LE</option>
-<option>UTF-32</option>
-<option>UTF-32BE</option>
-<option>UTF-32LE</option>
-<option>UTF-7</option>
-<option>UTF7-IMAP</option>
-<option>ASCII</option>
-<option>EUC-JP</option>
-<option>SJIS</option>
-<option>eucJP-win</option>
-<option>SJIS-win</option>
-<option>ISO-2022-JP</option>
-<option>ISO-2022-JP-MS</option>
-<option>CP932</option>
-<option>CP51932</option>
-<option>MacJapanese</option>
-<option>SJIS-DOCOMO</option>
-<option>SJIS-KDDI</option>
-<option>SJIS-SOFTBANK</option>
-<option>UTF-8-DOCOMO</option>
-<option>UTF-8-KDDI</option>
-<option>UTF-8-SOFTBANK</option>
-<option>ISO-2022-JP-KDDI</option>
-<option>JIS</option>
-<option>JIS-ms</option>
-<option>CP50220</option>
-<option>CP50220raw</option>
-<option>CP50221</option>
-<option>CP50222</option>
-<option>ISO-8859-1</option>
-<option>ISO-8859-2</option>
-<option>ISO-8859-3</option>
-<option>ISO-8859-4</option>
-<option>ISO-8859-5</option>
-<option>ISO-8859-6</option>
-<option>ISO-8859-7</option>
-<option>ISO-8859-8</option>
-<option>ISO-8859-9</option>
-<option>ISO-8859-10</option>
-<option>ISO-8859-13</option>
-<option>ISO-8859-14</option>
-<option>ISO-8859-15</option>
-<option>byte2be</option>
-<option>byte2le</option>
-<option>byte4be</option>
-<option>byte4le</option>
-<option>BASE64</option>
-<option>HTML-ENTITIES</option>
-<option>7bit</option>
-<option>8bit</option>
-<option>EUC-CN</option>
-<option>CP936</option>
-<option>GB18030</option>
-<option>HZ</option>
-<option>EUC-TW</option>
-<option>CP950</option>
-<option>BIG-5</option>
-<option>EUC-KR</option>
-<option>UHC</option>
-<option>ISO-2022-KR</option>
-<option>CP866</option>
-                    </select>
+            <select id="csv_encoding" class="text ui-widget-content ui-corner-all" style="width:120px;font-size:0.9em">
+            </select>
        </div>
     </div>          
     <div class="heurist-helper1" style="padding-top: 9px;">

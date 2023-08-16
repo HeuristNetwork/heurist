@@ -2277,6 +2277,36 @@ window.hWin.HEURIST4.ui = {
             
     },
 
+    createEncodingSelect: function($select, topOptions, defValue, useHtmlSelect = true){
+
+        let encoding = [
+            "UTF-8", "UTF-16", "UTF-16BE", "UTF-16LE", "CP1251", "CP1252", "KOI8-R", "UCS-4", "UCS-4BE", "UCS-4LE", "UCS-2", "UCS-2BE", "UCS-2LE", "UTF-32", "UTF-32BE", "UTF-32LE", "UTF-7", "UTF7-IMAP",
+            "ASCII", "EUC-JP", "SJIS", "eucJP-win", "SJIS-win", "ISO-2022-JP", "ISO-2022-JP-MS", "CP932", "CP51932", "MacJapanese", "SJIS-DOCOMO", "SJIS-KDDI", "SJIS-SOFTBANK", "UTF-8-DOCOMO", "UTF-8-KDDI",
+            "UTF-8-SOFTBANK", "ISO-2022-JP-KDDI", "JIS", "JIS-ms", "CP50220", "CP50220raw", "CP50221", "CP50222", "ISO-8859-1", "ISO-8859-2", "ISO-8859-3", "ISO-8859-4", "ISO-8859-5", "ISO-8859-6", "ISO-8859-7",
+            "ISO-8859-8", "ISO-8859-9", "ISO-8859-10", "ISO-8859-13", "ISO-8859-14", "ISO-8859-15", "byte2be", "byte2le", "byte4be", "byte4le", "BASE64", "HTML-ENTITIES", "7bit", "8bit", "EUC-CN", "CP936", "GB18030", 
+            "HZ", "EUC-TW", "CP950", "BIG-5", "EUC-KR", "UHC", "ISO-2022-KR", "CP866"
+        ];
+        
+        let opts = topOptions ? topOptions : [];
+        let content = [];
+
+        for(const encode of encoding){
+            content.push(`<option value="${encode}">${encode}</option>`);
+            opts.push({key: encode, title: encode});
+        }
+
+        if($select == null){
+            return content.join('');
+        }else{
+            $select.empty();
+            window.hWin.HEURIST4.ui.fillSelector($select[0], opts);
+            if(defValue){
+                $select.val(defValue);
+            }
+            window.hWin.HEURIST4.ui.initHSelect($select[0], useHtmlSelect);
+        }
+    },
+
     //
     // $select jquery select
     //

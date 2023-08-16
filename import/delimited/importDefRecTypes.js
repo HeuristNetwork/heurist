@@ -128,6 +128,8 @@ function hImportDefRecTypes() {
             //form update array
             _doPrepare();
         });
+
+        window.hWin.HEURIST4.ui.createEncodingSelect($('#csv_encoding'));
     }
 
     

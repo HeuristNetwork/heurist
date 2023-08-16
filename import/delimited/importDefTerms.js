@@ -199,9 +199,9 @@ function hImportDefTerms(_trm_ParentTermID, _vcg_ID) {
                 //form update array
                 _doPrepare();
                 
-        });                                        
-                        
+        });
 
+        window.hWin.HEURIST4.ui.createEncodingSelect($('#csv_encoding'));
     }
 
     
