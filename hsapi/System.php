@@ -935,10 +935,10 @@ error_log(print_r($_REQUEST, true));
         
         $response = $this->getError();
         
-        header("Access-Control-Allow-Origin: *");
-        header('Content-type: application/json;charset=UTF-8');
 
         if($is_api){
+            header("Access-Control-Allow-Origin: *");
+            header('Content-type: application/json;charset=UTF-8');
             
             $status = @$response['status'];
             if($status==HEURIST_INVALID_REQUEST){
@@ -955,6 +955,8 @@ error_log(print_r($_REQUEST, true));
             }
             
             http_response_code($code);     
+        }else{
+            header('Content-type: application/json;charset=UTF-8');
         }
             
         print json_encode( $response );

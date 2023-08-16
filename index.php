@@ -85,7 +85,11 @@ if( @$_REQUEST['recID'] || @$_REQUEST['recid'] || array_key_exists('website', $_
 
 }else if (@$_REQUEST['file'] || @$_REQUEST['thumb']){
     //download file, thumb or remote url
-    header( 'Location: hsapi/controller/file_download.php?'.$_SERVER['QUERY_STRING'] );
+
+    parse_str($_SERVER['QUERY_STRING'], $vars);
+    $query = http_build_query($vars);
+    
+    header( 'Location: hsapi/controller/file_download.php?'.$query );
     return;
 }else if (array_key_exists('icon',$_REQUEST)){ //another params entity (default rty), version
     //download entity icon or thumbnail
@@ -94,15 +98,15 @@ if( @$_REQUEST['recID'] || @$_REQUEST['recid'] || array_key_exists('website', $_
 
 }else if (@$_REQUEST['asset']){ //only from context_help - download localized help or documentation
 
-    $name = $_REQUEST['asset'];
+    $name = basename($_REQUEST['asset']);
     //default ext is html
     $extension = strtolower(pathinfo($name, PATHINFO_EXTENSION));
     if(!$extension){
         $name = $name . '.html';
     }
 
-    $locale = @$_REQUEST['lang']; //locale
-    if($locale){
+    $locale = filter_var(@$_REQUEST['lang'], FILTER_SANITIZE_STRING); //locale
+    if($locale && preg_match('/^[A-Za-z]{3}$/', $locale)){
         $locale = strtolower($locale);
         $locale = ($locale=='eng')?'' :($locale.'/');
     }else{

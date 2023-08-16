@@ -125,15 +125,17 @@ if (@$argv) {
         $system->dbclose();
     }
 
-    header("Access-Control-Allow-Origin: *");
-    header('Content-type: application/json;charset=UTF-8');
     
     if(@$_REQUEST['restapi']==1){
+
         if( is_bool($res) && !$res ){
             
             $system->error_exit_api();
             
         }else{
+            header("Access-Control-Allow-Origin: *");
+            header('Content-type: application/json;charset=UTF-8');
+
             //$req = $entity->getData();
             $req = array();
             
@@ -149,6 +151,7 @@ if (@$argv) {
             print json_encode($res);
         }
     }else{
+        header('Content-type: application/json;charset=UTF-8');
         
         if( is_bool($res) && !$res ){
             $response = $system->getError();
