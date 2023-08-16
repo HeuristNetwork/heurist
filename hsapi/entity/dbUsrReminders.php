@@ -332,8 +332,8 @@ exit();
                 
                 $row = mysql__select_row($mysqli,
                     'select usr.ugr_FirstName,usr.ugr_LastName,usr.ugr_eMail FROM sysUGrps usr '
-                    .' left join usrRemindersBlockList on rbl_UGrpID=usr.ugr_ID and rbl_RemID = '.$record['rem_ID']
-                    .'WHERE usr.ugr_Type="user" and usr.ugr_ID='.$record['rem_ToUserID']).' and isnull(rbl_RemID)';
+                    .' left join usrRemindersBlockList on rbl_UGrpID=usr.ugr_ID and rbl_RemID = '.intval($record['rem_ID'])
+                    .'WHERE usr.ugr_Type="user" and usr.ugr_ID='.intval($record['rem_ToUserID']).' and isnull(rbl_RemID)');
                 if ($row) {
                     array_push($recipients, array(
                         "email" => $row[0].' '.$row[1].' <'.$row[2].'>', //username <email>
@@ -347,12 +347,12 @@ exit();
                     
                     $query = 'select usr.ugr_FirstName,usr.ugr_LastName,usr.ugr_eMail,usr.ugr_ID '
                                .' from sysUsrGrpLinks left join sysUGrps usr on ugl_UserID=usr.ugr_ID'
-                               .' left join usrRemindersBlockList on rbl_UGrpID=usr.ugr_ID and rbl_RemID = '.$record['rem_ID']
-                               .' where ugl_GroupID = '.$record['rem_ToWorkgroupID'].' and isnull(rbl_RemID)';
+                               .' left join usrRemindersBlockList on rbl_UGrpID=usr.ugr_ID and rbl_RemID = '.intval($record['rem_ID'])
+                               .' where ugl_GroupID = '.intval($record['rem_ToWorkgroupID']).' and isnull(rbl_RemID)';
                 }else{
                     $query = 'select usr.ugr_FirstName,usr.ugr_LastName,ugr_eMail,usr.ugr_ID'
                                        .' from sysUsrGrpLinks left join sysUGrps usr on ugl_UserID=usr.ugr_ID'
-                                       .' where ugl_GroupID='.$record['rem_ToWorkgroupID'];
+                                       .' where ugl_GroupID='.intval($record['rem_ToWorkgroupID']);
                 }
                 
                                 
@@ -377,7 +377,7 @@ exit();
             $owner = mysql__select_row($mysqli,
                 'select usr.ugr_FirstName,usr.ugr_LastName,usr.ugr_eMail '
                     .'FROM sysUGrps usr where usr.ugr_Type="user" and usr.ugr_ID='
-                    .$record['rem_OwnerUGrpID']);
+                    .intval($record['rem_OwnerUGrpID']));
             if ($owner) {
                 //from email
                 $email_owner = $owner[0].' '.$owner[1].' <'.$owner[2].'>';
@@ -404,7 +404,7 @@ exit();
                     $bib = mysql__select_row($mysqli,
                         'select rec_Title, rec_OwnerUGrpID, rec_NonOwnerVisibility, grp.ugr_Name from Records '.
                                         'left join sysUGrps grp on grp.ugr_ID=rec_OwnerUGrpID and grp.ugr_Type!="user" '.
-                                        'where rec_ID = '.$record['rem_RecID']);
+                                        'where rec_ID = '.intval($record['rem_RecID']));
                     
                     $email_title = '"'.$bib[0].'"'; //rec_Title    
                     if (@$record['rem_ToUserID'] != @$record['rem_OwnerUGrpID']){

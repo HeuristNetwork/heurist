@@ -38,7 +38,7 @@ if ($res){
         
         $query = 'insert into defRecTypes (rty_ID, rty_Name, rty_Description, rty_TitleMask,'
 .'rty_RecTypeGroupID, rty_ShowURLOnEditForm ) '
-.' values ('.intval($row[0]).',"'.$mysqli->real_escape_string($row[1]).'","'.$mysqli->real_escape_string($row[2]==null?'':$row[2]).'","[2-1]",9,0)'; 
+.' values ('.intval($row[0]).',"'.$mysqli->real_escape_string($row[1]).'","'.($row[2]==null?'':$mysqli->real_escape_string($row[2])).'","[2-1]",9,0)'; 
         $ret = $mysqli->query($query);
         if(!$ret){
             echo $mysqli->error;

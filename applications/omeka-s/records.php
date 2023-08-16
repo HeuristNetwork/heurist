@@ -264,7 +264,7 @@ if ($res){
             
     $query = 'insert into recDetails '
 .'(dtl_ID, dtl_RecID, dtl_DetailTypeID, dtl_Value, dtl_AddedByImport)'
-.' values ('.$det_ID.','.$rec_ID.','.intval($dty_ID).',"'.$mysqli->real_escape_string($value).'",1)';
+.' values ('.intval($det_ID).','.intval($rec_ID).','.intval($dty_ID).',"'.$mysqli->real_escape_string($value).'",1)';
 
             $res2 = $mysqli->query($query);
             if(!$res2){

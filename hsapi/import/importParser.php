@@ -923,7 +923,7 @@ private static function saveToDatabase($preproc){
            $row_size += 12;
            $fieldtype = 'mediumtext'; 
         }else {
-            //$size = 300;
+            $size = intval($size);
             if($size>0){
                $row_size += (2 + 4*$size);
                $fieldtype = 'varchar('.$size.')'; 

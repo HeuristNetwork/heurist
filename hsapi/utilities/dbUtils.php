@@ -1267,7 +1267,7 @@ class DbUtils {
                         echo ("<b>Adding records to tables: </b>");
                     }
                     while ($table = $tables->fetch_row()) { //loop for all tables
-                        $table = htmlspecialchars($table[0]);
+                        $table = $table[0];
                         
                         if($nodata && in_array(strtolower($table), $data_tables)){
                             continue;
