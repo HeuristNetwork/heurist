@@ -47,13 +47,15 @@ if(!$isSystemInited){
 $login_warning = 'To perform this action you must be logged in';
 $invalid_access = true;
 
+$is_admin = $system->is_admin();
+
 //
 // to limit access to particular page
 // define const in the very begining of your php code  just before require_once(dirname(__FILE__)."/initPage.php");
 //
 if(defined('LOGIN_REQUIRED') && !$system->has_access()){
     $message = $login_warning;
-}else if(defined('MANAGER_REQUIRED') && !$system->is_admin() ){ //A member should also be able to create and open database
+}else if(defined('MANAGER_REQUIRED') && !$is_admin ){ //A member should also be able to create and open database
     $message = $login_warning.' as Administrator of group \'Database Managers\'';
 }else if(defined('OWNER_REQUIRED') && !$system->is_dbowner()){
     $message = $login_warning.' as Database Owner';
@@ -65,12 +67,12 @@ if(defined('LOGIN_REQUIRED') && !$system->has_access()){
 if(!$invalid_access && (defined('CREATE_RECORDS') || defined('DELETE_RECORDS'))){
 
     $required = '';
-    $user_permissions = $system->getCurrentUser()['ugr_Status'];
+    $user_permissions = $system->getCurrentUser()['ugr_Permissions'];
 
-    if(defined('CREATE_RECORDS') && !$user['add']){
+    if(defined('CREATE_RECORDS') && !$user_permissions['add'] && !$is_admin){
         $required = 'create';
     }
-    if(defined('DELETE_RECORDS') && !$user['delete']){
+    if(defined('DELETE_RECORDS') && !$user_permissions['delete'] && !$is_admin){
         $required .=  $required === '' ? 'delete' : ' and delete';
     }
 
