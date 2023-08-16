@@ -27,16 +27,16 @@ if( @$_REQUEST['recID'] || @$_REQUEST['recid'] || array_key_exists('website', $_
 
     $recid = 0;
     if(@$_REQUEST['recID']){
-        $recid = $_REQUEST['recID'];    
+        $recid = intval($_REQUEST['recID']);    
     }elseif(@$_REQUEST['recid']){
-        $recid = $_REQUEST['recid'];        
+        $recid = intval($_REQUEST['recid']);        
     }elseif(@$_REQUEST['id']){
-        $recid = $_REQUEST['id'];                
+        $recid = intval($_REQUEST['id']);                
     }
     if(@$_REQUEST['fmt']){
-        $format = $_REQUEST['fmt'];    
+        $format = filter_var($_REQUEST['fmt'], FILTER_SANITIZE_STRING);    
     }elseif(@$_REQUEST['format']){
-        $format = $_REQUEST['format'];        
+        $format = filter_var($_REQUEST['format'], FILTER_SANITIZE_STRING);
     }else if (array_key_exists('website', $_REQUEST) || array_key_exists('embed', $_REQUEST)
     || (array_key_exists('field', $_REQUEST) && $_REQUEST['field']>0) ) 
     {
@@ -52,13 +52,13 @@ if( @$_REQUEST['recID'] || @$_REQUEST['recid'] || array_key_exists('website', $_
         include dirname(__FILE__).'/hclient/widgets/cms/websiteRecord.php';
         exit();
 
-        if(@$_REQUEST['field']>0){
-            $redirect = $redirect.'&field='.$_REQUEST['field'];    
+        if(intval(@$_REQUEST['field'])>0){
+            $redirect = $redirect.'&field='.intval($_REQUEST['field']);    
         }
 
 
-    }else if (array_key_exists('field', $_REQUEST) && $_REQUEST['field']>0) {
-        $format = 'web&field='.$_REQUEST['field'];
+    }else if (array_key_exists('field', $_REQUEST) && intval($_REQUEST['field'])>0) {
+        $format = 'web&field='.intval($_REQUEST['field']);
     }else{
         $format = 'xml';
     }
@@ -69,33 +69,47 @@ if( @$_REQUEST['recID'] || @$_REQUEST['recid'] || array_key_exists('website', $_
 
 }else if (@$_REQUEST['ent']){
 
-    header('Location: hsapi/controller/api.php?'.$_SERVER['QUERY_STRING']);
+    //to avoid "Open Redirect" security warning    
+    parse_str($_SERVER['QUERY_STRING'], $vars);
+    $query_string = http_build_query($vars);
+    
+    header('Location: hsapi/controller/api.php?'.$query_string);
     return;
     
 }else 
     if (@$_REQUEST['rty'] || @$_REQUEST['dty'] || @$_REQUEST['trm']){
         //download xml template for given db defintion
 
-        if(@$_REQUEST['rty']) $s = 'rty='.$_REQUEST['rty'];
-        else if(@$_REQUEST['dty']) $s = 'dty='.$_REQUEST['dty'];
-            else if(@$_REQUEST['trm']) $s = 'trm='.$_REQUEST['trm'];
+        if(@$_REQUEST['rty']) $s = 'rty='.intval($_REQUEST['rty']);
+        else if(@$_REQUEST['dty']) $s = 'dty='.intval($_REQUEST['dty']);
+            else if(@$_REQUEST['trm']) $s = 'trm='.intval($_REQUEST['trm']);
 
                 header('Location: redirects/resolver.php?db='.@$_REQUEST['db'].'&'.$s);
     return;
 
-}else if (@$_REQUEST['file'] || @$_REQUEST['thumb']){
-    //download file, thumb or remote url
-
+}else if (array_key_exists('file',$_REQUEST) || array_key_exists('thumb',$_REQUEST) ||
+          array_key_exists('icon',$_REQUEST) || array_key_exists('template',$_REQUEST)){
+              
+    if(array_key_exists('icon',$_REQUEST))
+    {
+        //download entity icon or thumbnail
+        $script_name = 'hsapi/controller/fileGet.php';        
+    }else if(array_key_exists('template',$_REQUEST))
+    {
+        //execute smarty template
+        $script_name = 'viewers/smarty/showReps.php';        
+    }else {
+        //download file, thumb or remote url
+        $script_name = 'hsapi/controller/file_download.php';        
+    }
+        
+    //to avoid "Open Redirect" security warning    
     parse_str($_SERVER['QUERY_STRING'], $vars);
-    $query = http_build_query($vars);
+    $query_string = http_build_query($vars);
     
-    header( 'Location: hsapi/controller/file_download.php?'.$query );
+    header( 'Location: '.$script_name.'?'.$query_string );
     return;
-}else if (array_key_exists('icon',$_REQUEST)){ //another params entity (default rty), version
-    //download entity icon or thumbnail
-    header( 'Location: hsapi/controller/fileGet.php?'.$_SERVER['QUERY_STRING'] );
-    return;
-
+    
 }else if (@$_REQUEST['asset']){ //only from context_help - download localized help or documentation
 
     $name = basename($_REQUEST['asset']);
@@ -126,12 +140,6 @@ if( @$_REQUEST['recID'] || @$_REQUEST['recid'] || array_key_exists('website', $_
     }else{
         exit('Asset not found: '.$name);
     }
-
-}else if (@$_REQUEST['template']){
-    //execute smarty template
-
-    header( 'Location: viewers/smarty/showReps.php?'.$_SERVER['QUERY_STRING'] );
-    return;    
 
 }else if (@$_REQUEST['logo']){
     $host_logo = realpath(dirname(__FILE__)."/../organisation_logo.jpg");

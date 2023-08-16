@@ -18,13 +18,25 @@
 * distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
 * See the License for the specific language governing permissions and limitations under the License.
 */
-if (@$_REQUEST['file'] || @$_REQUEST['thumb']){
-    //download file, thumb or remote url
-    header( 'Location: ../../hsapi/controller/file_download.php?'.$_SERVER['QUERY_STRING'] );
-    return;
-}else if (array_key_exists('icon',$_REQUEST)){ 
-    //download entity icon or thumbnail
-    header( 'Location: ../../hsapi/controller/fileGet.php?'.$_SERVER['QUERY_STRING'] );
+if (array_key_exists('file',$_REQUEST) || array_key_exists('thumb',$_REQUEST) ||
+    array_key_exists('icon',$_REQUEST)){
+              
+    if(array_key_exists('icon',$_REQUEST))
+    {
+        //download entity icon or thumbnail
+        $script_name = 'fileGet.php';        
+    }else {
+        //download file, thumb or remote url
+        $script_name = 'file_download.php';        
+    }
+        
+    //to avoid "Open Redirect" security warning    
+    parse_str($_SERVER['QUERY_STRING'], $vars);
+    $query_string = http_build_query($vars);
+    
+    header( 'Location: ../../hsapi/controller/'.$script_name.'?'.$query_string );
+    
     return;
 }
+
 
