@@ -285,8 +285,8 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
 
             window.hWin.HAPI4.EntityMgr.doRequest(req, function(response){
                 if(response.status == window.hWin.ResponseStatus.OK){
-                    that._calculated_usages = true;
-                    that.updateFieldUsage(response.data);
+                    that._calculated_usages = response.data;
+                    that.updateFieldUsage();
                 }else{
                     window.hWin.HEURIST4.msg.showMsgErr(response);
                 }
@@ -713,7 +713,7 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
 
                     // update button position based on existance of usage
                     let $ele_usage = node.find('.detail-count');
-                    let count = node.find('.detail-count span:first-child');
+                    let count = node.find('.detail-count span:first-child').text();
                     if($ele_usage.length == 0 || $ele_usage.attr('data-empty') == 1 || window.hWin.HEURIST4.util.isempty(count)){ // no usage
 
                         $ele_usage.hide();
@@ -732,7 +732,7 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
 
                         var code = 'ID: '+ dty_ID +' ('+ $Db.getConceptID('dty', dty_ID) +')';
                         var type = $Db.dty(dty_ID, 'dty_Type');
-                        type = 'Type - '+ type.charAt(0).toUpperCase() + type.slice(1);
+                        type = 'Type - '+ $Db.baseFieldType[type] ? $Db.baseFieldType[type] : type.charAt(0).toUpperCase() + type.slice(1);
                         var name = $Db.dty(dty_ID, 'dty_Name');
 
                         var tt_content = '<div>'+ name +'</div>'
@@ -2578,6 +2578,9 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
                     $(node.li).find('span.fancytree-node').addClass( isSep?'separator2':req );
                 }
                 this.__defineActionIcons( $(node.li).find('.fancytree-node') );
+
+                // Re-add usage calculation
+                if(this._calculated_usages && this._calculated_usages[recID]) { this.updateFieldUsage(recID); }
             }
         }
     },
@@ -3150,12 +3153,17 @@ console.log('_afterDeleteEvenHandler');
 
     //
     // Update field data count display within fancytree nodes (left panel of record editor)
+    //  If provided, update specific fields
     //
-    updateFieldUsage: function(field_usages){
+    updateFieldUsage: function(dty_IDs = null){
 
         var that = this;
-        if(window.hWin.HEURIST4.util.isempty(field_usages)){
+        if(!this._calculated_usages){
             return;
+        }
+
+        if(dty_IDs !== null && !window.hWin.HEURIST4.util.isArray(dty_IDs)){
+            dty_IDs = [ dty_IDs ];
         }
 
         var search_func = (fld_id, version) => {
@@ -3173,17 +3181,29 @@ console.log('_afterDeleteEvenHandler');
             window.open(window.hWin.HAPI4.baseURL + '?db=' + window.hWin.HAPI4.database + '&q=' + encodeURIComponent(query), '_blank');
         };
 
-        $.each(this.element.find('.treeView .detail-count'), function(idx, div){
+        let elements = this.element.find('.treeView .detail-count');
+        if(dty_IDs !== null && window.hWin.HEURIST4.util.isArrayNotEmpty(dty_IDs)){
+            elements.filter((idx, ele) => {
+                return dty_IDs.includes($(ele).attr('data-dtyid'));
+            });
+        }
+
+        if(elements.length == 0){
+            return;
+        }
+
+        $.each(elements, function(idx, div){
 
             let $div = $(div);
             let dtyid = $div.attr('data-dtyid');
 
-            if(dtyid && field_usages[dtyid]){
-                $div.find('span:first-child').text(field_usages[dtyid]);
+            if(dtyid && that._calculated_usages[dtyid]){
+                let count = that._calculated_usages[dtyid];
+                $div.find('span:first-child').text(count);
 
                 if($div.find('.ui-icon').length == 0){
-                    $div.append($('<span class="ui-icon ui-icon-check" title="Search for records WITH field" style="color:gray;margin-left:5px;font-size:12px;" />'))
-                        .append($('<span class="ui-icon ui-icon-close" title="Search for records WITHOUT field" style="color:gray;font-size:12px;" />'));
+                    $div.append($('<span class="ui-icon ui-icon-check" title="Find records WITH field" style="color:gray;margin-left:5px;font-size:12px;" />'))
+                        .append($('<span class="ui-icon ui-icon-close" title="Find records WITHOUT field" style="color:gray;font-size:12px;" />'));
 
                     $div.contextmenu({
                         delegate: 'span',
