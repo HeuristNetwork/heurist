@@ -410,6 +410,11 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
                                     click: function() { that._onActionListener(null, 'term-usages'); }};
                 this._defineActionButton2(cal_usage_btn, c1);
 
+                var del_multi_btn = {showText:true, text:window.hWin.HR('Delete selected'), //Delete selected terms
+                                    css:{'margin-left':'0.75em','display':'inline-block',padding:'2px'}, id:'btnDelMulti',
+                                    click: function() { that._onActionListener(null, 'term-delete-mutliple'); }};
+                this._defineActionButton2(del_multi_btn, c1);
+
                 //add input search
                 this._on(this.searchForm.find('.find-term'), {
                     //keypress: window.hWin.HEURIST4.ui.preventChars,
@@ -1184,47 +1189,81 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
     //
     //
     //
-    _deleteAndClose: function(unconditionally){
+    _deleteAndClose: function(unconditionally, recIDs = null){
+
+        var that = this;
+
+        recIDs = recIDs == null ? [ this._currentEditID ] : recIDs;
+        let is_multi = recIDs.length > 1;
 
         if(unconditionally===true){
 
             //this._super(); 
 
-            if(this._currentEditID==null || this._currentEditID<1) return;
+            if(recIDs==null || recIDs.length == 0) return;
 
             var request = {
                 'a'          : 'delete',
                 'entity'     : this.options.entity.entityName,
                 'request_id' : window.hWin.HEURIST4.util.random(),
-                'recID'      : this._currentEditID                     
+                'recID'      : recIDs
             };
 
-            var that = this;                        
-
-            var it_was_vocab = !($Db.trm(this._currentEditID, 'trm_ParentTermID')>0);
+            var it_was_vocab = recIDs.length == 1 && $Db.trm(recIDs[0], 'trm_ParentTermID') == 0;
 
             window.hWin.HAPI4.EntityMgr.doRequest(request, 
                 function(response){
-                    var recID = that._currentEditID;
+
                     if(response.status == window.hWin.ResponseStatus.OK){
 
-                        if(that.options.use_cache){
-                            that._cachedRecordset.removeRecord( recID );
-                        }
-                        that._afterDeleteEvenHandler( recID, it_was_vocab );
+                        for(const recID of recIDs){
 
+                            if(that.options.use_cache){
+                                that._cachedRecordset.removeRecord( recID );
+                            }
+
+                            that._afterDeleteEvenHandler( recID, it_was_vocab );
+                        }
+
+                        //that.refreshRecordList();
+                        that._triggerRefresh(that.options.auxilary);
                     }else{
                         onTermSaveError(response);
                     }
             });            
 
         }else{
-            var that = this;
-            window.hWin.HEURIST4.msg.showMsgDlg(
-                'Are you sure you wish to delete '
-                +this.options.auxilary+' <b>'+$Db.trm(this._currentEditID, 'trm_Label')
-                +'</b>?', 
-                function(){ that._deleteAndClose(true) }, 
+
+            let trm_labels = [];
+            let has_child = false;
+
+            recIDs = recIDs.filter((recID) => {
+
+                let trm = $Db.trm(recID);
+                let is_vocab = trm?.trm_ParentTermID == 0;
+
+                if(!trm || (recIDs.length > 1 && is_vocab)){
+                    return false;
+                }
+
+                has_child = has_child || $Db.trm_HasChildren(recID);
+
+                trm_labels.push(trm.trm_Label);
+
+                return true;
+            });
+
+            if(has_child){
+                trm_labels.push('And all child/nested terms');
+            }
+
+            let msg = 'Are you sure you wish to delete the ';
+            msg += is_multi ? 'following terms:<br>' : this.options.auxilary;
+            msg += ' <strong>' + (!is_multi ? trm_labels[0] : trm_labels.join('<br>')) + '</strong>' + (is_multi ? '' : '?');
+
+            window.hWin.HEURIST4.msg.showMsgDlg( 
+                msg, 
+                function(){ that._deleteAndClose(true, recIDs) }, 
                 {title:'Warning',yes:'Proceed',no:'Cancel'},
                 {default_palette_class:this.options.default_palette_class});        
         }
@@ -2556,6 +2595,14 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
                         window.hWin.HEURIST4.msg.showMsgErr(response);
                     }
                 });
+            }else if(action == 'term-delete-mutliple'){
+
+                let selected_recs = this.recordList.resultList('getSelected', true);
+                if(selected_recs.length == 0){
+                    return;
+                }
+
+                that._deleteAndClose(false, selected_recs);
             }
         }
     },
