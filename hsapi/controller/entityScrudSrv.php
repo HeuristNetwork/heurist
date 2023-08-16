@@ -63,13 +63,17 @@
     //
     function entityExecute($system, $params){
         
+        $entity = null;
+        
         $entity_name = entityResolveName(@$params['entity']);
         
-        $classname = 'Db'.ucfirst($entity_name);
-        $entity = new $classname($system, $params);
+        if($entity_name!=null){
+            $classname = 'Db'.ucfirst($entity_name);
+            $entity = new $classname($system, $params);
+        }
         
         if(!$entity){
-            $this->system->addError(HEURIST_INVALID_REQUEST, "Wrong entity parameter: $entity_name");
+            $this->system->addError(HEURIST_INVALID_REQUEST, 'Wrong entity parameter: '.htmlspecialchars(@$params['entity']));
             return false;
         }else{
             return $entity->run();    
@@ -175,7 +179,7 @@
             else if($entity_name=='rem') $entity_name = 'dbUsrReminders';   
             else if($entity_name=='swf') $entity_name = 'sysWorkflowRules';   
             
-            if(preg_match('/[^A-Za-z\$]/', $entity_name)){ //validatate entity name
+            if(!preg_match('/^[A-Za-z]+$/', $entity_name)){ //validatate entity name
                 return null;
             }
             

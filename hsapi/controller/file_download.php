@@ -53,7 +53,7 @@ if(!$error){
     $fileid = @$_REQUEST['thumb'];
     if($fileid){ 
         
-        if(preg_match('/[a-z0-9]/', $fileid)){ //validatate obfuscation id
+        if(preg_match('/^[a-z0-9]+$/', $fileid)){ //validatate obfuscation id
         
             $force_recreate = (@$_REQUEST['refresh']==1);
 
@@ -88,7 +88,7 @@ if(!$error){
             exit;
         }
 
-        if(!preg_match('/[a-z0-9]/', $fileid)){ //validatate obfuscation id
+        if(!preg_match('/^[a-z0-9]+$/', $fileid)){ //validatate obfuscation id
             error_log('Obfuscated id is allowed only. Query: '.@$_SERVER['QUERY_STRING']);
             exit;
         }
