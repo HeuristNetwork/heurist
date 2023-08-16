@@ -578,9 +578,9 @@ private static function __get_record_value($rec_id, $reset=false) {
                 //trim(substr(dtl_Value,0,300)) as 
                 $query = 'SELECT dtl_DetailTypeID, dtl_Value, dtl_UploadedFileID, rst_RequirementType '
                 .'FROM recDetails LEFT JOIN defRecStructure '
-                .'ON rst_RecTypeID='.$ret['rec_RecTypeID']
+                .'ON rst_RecTypeID='.intval($ret['rec_RecTypeID'])
                    .' AND rst_DetailTypeID=dtl_DetailTypeID ' 
-                   .' WHERE dtl_RecID='.$rec_id." order by dtl_DetailTypeID";
+                   .' WHERE dtl_RecID='.intval($rec_id)." order by dtl_DetailTypeID";
                 $res2 = self::$mysqli->query($query);
                 while ($row = $res2->fetch_assoc()){
                     if($row['rst_RequirementType']!='forbidden'){
@@ -628,7 +628,7 @@ private static function __get_enum_value($enum_id, $enum_param_name)
 
             while(1){
 
-                $parent_ress = self::$mysqli->query("select trm_label, trm_ParentTermID from defTerms where trm_ID = " . $trm_id);
+                $parent_ress = self::$mysqli->query("select trm_label, trm_ParentTermID from defTerms where trm_ID = " . intval($trm_id));
 
                 if($parent_ress){
 

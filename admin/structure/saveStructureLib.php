@@ -1721,7 +1721,7 @@ function getTermsChilds($ret, $trmID, $terms=null) {
     $query = "select trm_ID from defTerms where trm_ParentTermID = ".intval($trmID);
     $res = $mysqli->query($query);
     while ($row = $res->fetch_row()) {
-        $child_trmID = $row[0];
+        $child_trmID = intval($row[0]);
 
         if(in_array($child_trmID, $terms)){
             $ret = array($child_trmID);

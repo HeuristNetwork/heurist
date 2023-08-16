@@ -2833,7 +2833,7 @@ function recordSearch($system, $params)
                                 
                                     if($checkFields){ // check if this date has been indexed and interpreted
 
-                                        $check_query = "SELECT rdi_estMinDate, rdi_estMaxDate FROM recDetailsDateIndex WHERE rdi_DetailID = $dtl_ID"; // AND rdi_estMinDate != 0 AND rdi_estMaxDate != 0
+                                        $check_query = 'SELECT rdi_estMinDate, rdi_estMaxDate FROM recDetailsDateIndex WHERE rdi_DetailID = '.intval($dtl_ID); // AND rdi_estMinDate != 0 AND rdi_estMaxDate != 0
                                         $check_res = $mysqli->query($check_query);
 
                                         if($check_res){

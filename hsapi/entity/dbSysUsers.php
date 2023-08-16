@@ -499,7 +499,7 @@ class DbSysUsers extends DbEntityBase
             $this->system->addError(HEURIST_DB_ERROR, 'Unable to set MAXINT for sysUGrps.ugr_ID');
             return false;
         }
-        $MAXINT = $row[0];
+        $MAXINT = intval($row[0]);
 
         /* Start Transaction, allow for rollback incase of errors */
         $keep_autocommit = mysql__begin_transaction($mysqli);
@@ -542,7 +542,7 @@ class DbSysUsers extends DbEntityBase
         if($res->num_rows > 0){
             while($row = $res->fetch_assoc()){
                 if($row['ugr_ID'] == 0) continue;
-                $query = $query . "(2, 'admin', " . $row['ugr_ID'] . "), ";
+                $query = $query . "(2, 'admin', " . intval($row['ugr_ID']) . "), ";
             }
         }else{
             $this->system->addError(HEURIST_DB_ERROR, 'Cannot retrieve group ids');

@@ -225,11 +225,11 @@
                 if ($test === 0) {
                     if ($isFilter) {
                         if ($role == 'user') {
-                            $query = "select ugr_ID from " . $database . ".sysUGrps where ugr_eMail='" . addslashes($email) . "'";
+                            $query = "select ugr_ID from " . $database . ".sysUGrps where ugr_eMail='" . $mysqli->real_escape_string($email) . "'";
                         } else if ($role == 'admin') {
                             $query = "select ugr_ID from " . $database . ".sysUGrps, " . $database .".sysUsrGrpLinks".
                             " left join sysIdentification on ugl_GroupID = sys_OwnerGroupID".
-                            " where ugr_ID=ugl_UserID and ugl_Role='admin' and ugr_eMail='" . addslashes($email) . "'";
+                            " where ugr_ID=ugl_UserID and ugl_Role='admin' and ugr_eMail='" . $mysqli->real_escape_string($email) . "'";
                         }
                         if ($query) {
                             $res2 = $mysqli->query($query);
@@ -933,9 +933,9 @@
                 }
                 
                 while ($row = $res->fetch_row()){
-                    $dtl_ID = $row[0];
-                    $dtl_RecID = $row[1];
-                    $dtl_DetailTypeID = $row[2];
+                    $dtl_ID = intval($row[0]);
+                    $dtl_RecID = intval($row[1]);
+                    $dtl_DetailTypeID = intval($row[2]);
                     $dtl_Value = $row[3];
                     $dtl_NewValue = '';
                     $error = '';
