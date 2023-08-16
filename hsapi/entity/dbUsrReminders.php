@@ -482,7 +482,7 @@ exit();
             
             if(!$is_notification && $record['rem_Freq'] != "once"){
                 //update start date
-                $update = 'UPDATE '.$this->config['tableName'].' SET rem_StartDate=NOW() WHERE rem_ID='.$record['rem_ID'];
+                $update = 'UPDATE '.$this->config['tableName'].' SET rem_StartDate=NOW() WHERE rem_ID='.intval($record['rem_ID']);
                 $mysqli->query($update);
             }
             

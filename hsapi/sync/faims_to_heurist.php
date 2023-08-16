@@ -368,7 +368,7 @@ if(! $system->init(@$_REQUEST['db'], true) ){
                     $recID = 0;
                 }
 
-                $query2 =  "SELECT uuid, ValueTimestamp, VocabID, AttributeID, Measure, FreeText, Certainty FROM AEntValue where uuid=".intval($faims_id)." and ValueTimestamp='".$mysqli->real_escape_string($faims_time)."'";
+                $query2 =  "SELECT uuid, ValueTimestamp, VocabID, AttributeID, Measure, FreeText, Certainty FROM AEntValue where uuid=".intval($faims_id)." and ValueTimestamp='".$dbfaims->real_escape_string($faims_time)."'";
                 foreach ($dbfaims->query($query2) as $row2)
                 {
                     //attr id, freetext, measure, certainity, vocabid

@@ -1292,7 +1292,7 @@ class DbUtils {
 
                         if($res){
                                 if($verbose) {
-                                    echo (" > " . $table . ": ".$mysqli->affected_rows . "  ");
+                                    echo (" > " . htmlspecialchars($table) . ": ".intval($mysqli->affected_rows) . "  ");
                                 }
                         }else{
                                 if($table=='usrReportSchedule'){
