@@ -1461,6 +1461,121 @@ When we open "iiif_image" in mirador viewer we generate manifest dynamically.
 
             $ret = implode('<br><br>', $ret);
         }
+        else if(@$this->data['import_data']){ // importing file metadata
+
+            $import_type = intval($this->data['import_data']); // import type; 1 - keep existing, 2 - append, 3 - replace
+            $id_type = @$this->data['id_type'];
+            $handled_ids = array('ulf_ID', 'ulf_ObfuscatedFileID', 'ulf_FullPath'); // , 'ulf_Checksum'
+
+            if(empty($id_type) || !in_array($id_type, $handled_ids)){
+                $this->system->addError(HEURIST_INVALID_REQUEST, 'Invalid ID type provided, '. (empty($id_type) ? 'none provided' : 'provided type ' . $id_type));
+                return false;
+            }
+            if($import_type < 1 || $import_type > 3){
+                $this->system->addError(HEURIST_INVALID_REQUEST, 'An invalid import type has been provided');
+                return false;
+            }
+
+            if(@$this->data['fields'] && is_string($this->data['fields'])){ // new to perform extra validations first
+                $this->data['fields'] = json_decode($this->data['fields'], true);
+            }
+
+            if(is_array($this->data['fields']) && count($this->data['fields'])>0){
+
+                $ret = array();
+
+                foreach($this->data['fields'] as $file_details){
+
+                    if(!is_array($file_details) || count($file_details) < 2){ // invalid row | no details
+                        array_push($ret, (!is_array($file_details) ? 'Data is in invalid format' : 'No details provided'));
+                        continue;
+                    }
+
+                    $id = array_shift($file_details);
+
+                    if(empty($file_details)){ // nothing to process
+                        array_push($ret, 'No details to import');
+                        continue;
+                    }
+
+                    $where_clause = "";
+                    if($id_type == 'ulf_ID' || $id_type == 'ulf_ObfuscatedFileID'){
+
+                        if($id_type == 'ulf_ID' && (!is_numeric($id) || intval($id) <= 0)){
+                            array_push($ret, "Invalid File ID provided");
+                            continue;
+                        }else if($id_type == 'ulf_ObfuscatedFileID' && preg_match('/[a-z0-9]/', $id)){
+                            array_push($ret, "Invalid Obfuscated ID provided");
+                            continue;
+                        }
+
+                        $id = $id_type == 'ulf_ID' ? intval($id) : $mysqli->real_escape_string($id);
+                        $where_clause = "$id_type = '$id'";
+                    }else if($id_type == 'ulf_FullPath'){
+
+                        if(is_numeric($id)){
+                            array_push($ret, "Invalid path provided " . htmlspecialchars($id));
+                            continue;
+                        }
+
+                        $id = ltrim(str_replace(HEURIST_FILESTORE_DIR, '', $id), '\\');
+
+                        $id = $mysqli->real_escape_string($id);
+                        $where_clause = "CONCAT(ulf_FilePath, ulf_FileName) = $id";
+                    }
+
+                    if(empty($where_clause)){
+                        $this->system->addError(HEURIST_ERROR, 'An error occurred with preparing the file id being searched for, where the id is ' . htmlspecialchars($id) . ' typed ' . $id_type);
+                        $ret = false;
+                        break;
+                    }
+
+                    $file_query = "SELECT ulf_ID, ulf_Description, ulf_Caption, ulf_Copyright, ulf_Copyowner FROM recUploadedFiles WHERE $where_clause";
+                    $ulf_row = mysql__select_row_assoc($mysqli, $file_query);
+
+                    if(!$ulf_row){
+                        array_push($ret, 'An error occurred while trying to retrieve the existing file');
+                        continue;
+                    }
+
+                    if($import_type != 3){
+
+                        foreach($file_details as $field => $value){
+
+                            if(!empty($ulf_row[$field])){
+
+                                if($import_type == 1){ // retain existing value
+
+                                    unset($file_details[$field]);
+                                    continue;
+                                }else{ // 2 - append value
+
+                                    $file_details[$field] = $ulf_row[$field] . " ; " . $value;
+                                }
+                            }
+                        }
+                    } //else 3 - replace all values
+
+                    if(empty($file_details)){
+                        array_push($ret, 'No new details to import');
+                        continue;
+                    }
+
+                    $file_details['ulf_ID'] = $ulf_row['ulf_ID'];
+
+                    $res = mysql__insertupdate($this->system->get_mysqli(), 'recUploadedFiles', 'ulf', $file_details);
+
+                    if($res != $ulf_row['ulf_ID']){
+                        array_push($ret, 'An error occurred while attempting to update file record #' . $ulf_ID);
+                    }else{
+                        array_push($ret, 'File details updated');
+                    }
+                }
+            }else{
+                $this->system->addError(HEURIST_ERROR, 'Data is in invalid format, ' . json_last_error_msg());
+                $ret = false;
+            }
+        }
 
         if($ret===false){
             $mysqli->rollback();
