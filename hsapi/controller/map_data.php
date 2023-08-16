@@ -57,7 +57,7 @@ function _getTermByID($system, $id) {
     $term = new stdClass();
 
     // Select term
-    $query = "SELECT * FROM defTerms WHERE trm_ID=".$id;
+    $query = "SELECT * FROM defTerms WHERE trm_ID=".intval($id);
     $res = $system->get_mysqli()->query($query);
 
     if ($res) {
@@ -171,7 +171,7 @@ function getRecordDetails($system, $record) {
     //echo "Get record details of " . ($record->id);
 
     // Retrieve extended details
-    $query = $detailQuery . $record->id;
+    $query = $detailQuery . intval($record->id);
     $details = $system->get_mysqli()->query($query);
     if($details) {
 

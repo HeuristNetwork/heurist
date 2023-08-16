@@ -2075,7 +2075,7 @@ private static function validateGeoField($wkt, $rec_id, $table, $field){
                     $mysqli->query($update_col);
                 }
 
-                $update_table = "UPDATE $table SET ".$field." = '" . $constructed_geo . "' WHERE imp_ID = $rec_id";
+                $update_table = "UPDATE $table SET ".$field." = '" . $constructed_geo . "' WHERE imp_ID = ".intval($rec_id);
                 $update_table_res = $mysqli->query($update_table); error_log($update_table);
 
                 if($update_table_res){

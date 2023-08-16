@@ -108,7 +108,7 @@ $mysqli = $system->get_mysqli();
             }
             
             //missed link from recDetails - orphaned files       
-            $query2 = "SELECT dtl_RecID from ".$db.".recDetails where dtl_UploadedFileID=".$res['ulf_ID'];
+            $query2 = "SELECT dtl_RecID from ".$db.".recDetails where dtl_UploadedFileID=".intval($res['ulf_ID']);
             $res2 = $mysqli->query($query2);
             $currentRecID = null;
             if ($res2) {

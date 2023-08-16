@@ -289,7 +289,8 @@ if ($res){
             
     $query = 'insert into defRecStructure '
 .'(rst_RecTypeID, rst_DetailTypeID, rst_DisplayName, rst_DisplayHelpText, rst_DisplayOrder)'
-.' values ('.$rty_ID.','.$dty_ID.',"'.$om_property[0].'","'.(!$om_property[1]?'':$om_property[1]).'",'.$order.')';
+.' values ('.intval($rty_ID).','.intval($dty_ID).',"'.$mysqli->real_escape_string($om_property[0])
+        .'","'.$mysqli->real_escape_string(!$om_property[1]?'':$om_property[1]).'",'.$order.')';
 
             $res2 = $mysqli->query($query);
             if(!$res2){

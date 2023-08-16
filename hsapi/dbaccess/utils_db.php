@@ -305,15 +305,21 @@
     /**
     * returns array of FIRST column values
     */
-    function mysql__select_list2($mysqli, $query):array {
+    function mysql__select_list2($mysqli, $query, $functionName=null):array {
 
         $matches = array();
         if($mysqli && $query){
             $res = $mysqli->query($query);
 
             if ($res){
-                while ($row = $res->fetch_row()){
-                    array_push($matches, $row[0]);
+                if($functionName!=null){
+                    while ($row = $res->fetch_row()){
+                        array_push($matches, $functionName($row[0]));
+                    }
+                }else{
+                    while ($row = $res->fetch_row()){
+                        array_push($matches, $row[0]);
+                    }
                 }
                 $res->close();
             }
@@ -1007,9 +1013,12 @@
                                     
             //6. update recDetailsDateIndex should be updated by trigger
                                     $mysqli->query('delete ignore from recDetailsDateIndex where rdi_DetailID='.$dtl_ID); 
+                                    
+                                    $mindate = floatval($row2[0]);
+                                    $maxdate = floatval($row2[1]);
             
                                     $query = 'insert into recDetailsDateIndex (rdi_RecID, rdi_DetailTypeID, rdi_DetailID, rdi_estMinDate, rdi_estMaxDate)'
-        ." values ($dtl_RecID, $dtl_DetailTypeID, $dtl_ID, {$row2[0]}, {$row2[1]})";
+        ." values ($dtl_RecID, $dtl_DetailTypeID, $dtl_ID, $mindate, $maxdate)";
                                     $res5 = $mysqli->query($query);
         //getEstDate('$dtl_NewValue',0), getEstDate('$dtl_NewValue',1)
 

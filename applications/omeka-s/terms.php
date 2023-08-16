@@ -150,7 +150,7 @@ if ($res){
             $term_defs[$term_id] = array($val);
         }
         //6. save term id in uri field
-        $query = 'update '.O_DB.'.value set uri='.$term_id.' where id='.$vals[0];
+        $query = 'update '.O_DB.'.value set uri='.intval($term_id).' where id='.intval($vals[0]);
         $mysqli->query($query);    
     }//while
 }else{

@@ -220,11 +220,11 @@ if ($res){
     $currID = null;
     while ($vals = $res->fetch_row()){
 
-            $rty_ID = $vals[0];
+            $rty_ID = intval($vals[0]);
             $property_ID = $vals[1];
-            $rec_ID = $vals[2];
+            $rec_ID = intval($vals[2]);
             if($currID != $rec_ID){
-                $currID = $rec_ID;
+                $currID = intval($rec_ID);
                 //echo "add str ".$currID."</br>";
                 //add record
                 
@@ -252,9 +252,9 @@ if ($res){
             }
             
             $value = $vals[3];
-            $link_RecID = $vals[4];
-            $term_ID = $vals[5];
-            $det_ID = $vals[6];
+            $link_RecID = intval($vals[4]);
+            $term_ID = intval($vals[5]);
+            $det_ID = intval($vals[6]);
             
             if($term_ID>0){
                 $value = $term_ID;    
@@ -264,7 +264,7 @@ if ($res){
             
     $query = 'insert into recDetails '
 .'(dtl_ID, dtl_RecID, dtl_DetailTypeID, dtl_Value, dtl_AddedByImport)'
-.' values ('.$det_ID.','.$rec_ID.','.$dty_ID.',"'.$mysqli->real_escape_string($value).'",1)';
+.' values ('.$det_ID.','.$rec_ID.','.intval($dty_ID).',"'.$mysqli->real_escape_string($value).'",1)';
 
             $res2 = $mysqli->query($query);
             if(!$res2){

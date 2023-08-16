@@ -104,7 +104,7 @@ class ElasticSearch {
             // Retrieve record level data
             $query = "SELECT rec_URL,rec_Added,rec_Modified,rec_Title,rec_RecTypeID,rec_AddedByUGrpID,rec_AddedByImport,rec_Popularity,".
             "rec_FlagTemporary,rec_OwnerUGrpID,rec_NonOwnerVisibility,rec_URLLastVerified,rec_URLErrorMessage,rec_URLExtensionForMimeType ".
-            "from Records where rec_ID=$recID"; // omits scratchpad
+            "from Records where rec_ID=".intval($recID); // omits scratchpad
             $res = self::$mysqli->query($query);
 
             // Check if query has succeed
@@ -139,7 +139,7 @@ class ElasticSearch {
             }
 
             // Retrieve detail level data
-            $query = "SELECT dtl_DetailTypeID,dtl_Value,dtl_UploadedFileID,dtl_Geo from recDetails where dtl_RecID=$recID";
+            $query = "SELECT dtl_DetailTypeID,dtl_Value,dtl_UploadedFileID,dtl_Geo from recDetails where dtl_RecID=".intval($recID);
             $res = self::$mysqli->query($query);
 
             // Check if query has succeeded

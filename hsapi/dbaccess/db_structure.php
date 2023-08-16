@@ -837,7 +837,7 @@ function dbs_GetRectypeConstraint($system) {
             $query = $query . ' = '.$parent_ids;    
         }
         
-        $ids = mysql__select_list2($mysqli, $query);
+        $ids = mysql__select_list2($mysqli, $query, 'intval');
         if(!is_array($ids)){
             $ids = array();
         }

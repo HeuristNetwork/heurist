@@ -368,7 +368,7 @@ if(! $system->init(@$_REQUEST['db'], true) ){
                     $recID = 0;
                 }
 
-                $query2 =  "SELECT uuid, ValueTimestamp, VocabID, AttributeID, Measure, FreeText, Certainty FROM AEntValue where uuid=".$faims_id." and ValueTimestamp='".$faims_time."'";
+                $query2 =  "SELECT uuid, ValueTimestamp, VocabID, AttributeID, Measure, FreeText, Certainty FROM AEntValue where uuid=".intval($faims_id)." and ValueTimestamp='".$faims_time."'";
                 foreach ($dbfaims->query($query2) as $row2)
                 {
                     //attr id, freetext, measure, certainity, vocabid

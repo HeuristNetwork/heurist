@@ -419,7 +419,7 @@ $mysqli = $system->get_mysqli();
         if(@$row['clear_remote']){ //remove url from ulf_FilePath
                 $query = 'update recUploadedFiles set ulf_ExternalFileReference="'
                                 .$mysqli->real_escape_string($row['clear_remote'])
-                                .'", ulf_FilePath=NULL, ulf_FileName=NULL where ulf_ID = '.$ulf_ID;
+                                .'", ulf_FilePath=NULL, ulf_FileName=NULL where ulf_ID = '.intval($ulf_ID);
         }else{
                     $query = 'update recUploadedFiles set ulf_FilePath="'
                                     .$mysqli->real_escape_string($row['res_relative'])

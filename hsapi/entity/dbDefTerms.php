@@ -984,7 +984,7 @@ class DbDefTerms extends DbEntityBase
             $query = 'SELECT dty_ID FROM defDetailTypes WHERE '
                 .'(dty_JsonTermIDTree='.$trm_ID.') '
                 .'AND (dty_Type=\'enum\' or dty_Type=\'relmarker\')';
-            return mysql__select_list2($mysqli, $query);
+            return mysql__select_list2($mysqli, $query, 'intval');
         
     }
     
