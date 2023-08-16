@@ -4,7 +4,7 @@
 *   It consists of search form and result list to select one or several values of record
 * 
 *       descendants of this widget 
-*   1) perform search on external third-part web service
+*   1) perform search on external third-part web service (see manageRecords.js _setupExternalLookups)
 *   2) render result in our resultList (custom record renderer, found at hclient/widget/viewers/resultList.js)
 *   3) map external results with our field details (see options.mapping)
 *   4) either returns these mapped fields (to edit record form) 

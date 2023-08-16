@@ -242,11 +242,11 @@ $.widget( "heurist.mapping", {
     {name:'OpenStreetMap'},
     //{name:'OpenPtMap'},
     {name:'OpenTopoMap'},
-    {name:'MapBox.StreetMap', options:{accessToken: 'pk.eyJ1IjoibWFwYm94IiwiYSI6ImNpejY4NXVycTA2emYycXBndHRqcmZ3N3gifQ.rJcFIG214AriISLbB6B5aw'}}, //{name:'MapBox.StreetMap', options:{accessToken: 'pk.eyJ1Ijoib3NtYWtvdiIsImEiOiJja3dvaG80ZTYwMzA4Mm9vNGtxZzF2NnB2In0.mmkf1m5-Lr2RgUblOeVtmQ'}},
-    {name:'MapBox.Satellite', options:{accessToken: 'pk.eyJ1IjoibWFwYm94IiwiYSI6ImNpejY4NXVycTA2emYycXBndHRqcmZ3N3gifQ.rJcFIG214AriISLbB6B5aw'}},
-    {name:'MapBox.Combined', options:{accessToken: 'pk.eyJ1IjoibWFwYm94IiwiYSI6ImNpejY4NXVycTA2emYycXBndHRqcmZ3N3gifQ.rJcFIG214AriISLbB6B5aw'}},
-    {name:'MapBox.Relief', options:{accessToken: 'pk.eyJ1IjoibWFwYm94IiwiYSI6ImNpejY4NXVycTA2emYycXBndHRqcmZ3N3gifQ.rJcFIG214AriISLbB6B5aw'}},
-    //{name:'MapBox.AncientWorld', options:{accessToken: 'pk.eyJ1Ijoib3NtYWtvdiIsImEiOiJjanV2MWI0Y3Awb3NmM3lxaHI2NWNyYjM0In0.st2ucaGF132oehhrpHfYOw'}},
+    {name:'MapBox.StreetMap', options:{accessToken: accessToken_MapBox}},
+    {name:'MapBox.Satellite', options:{accessToken: accessToken_MapBox}},
+    {name:'MapBox.Combined', options:{accessToken: accessToken_MapBox}},
+    {name:'MapBox.Relief', options:{accessToken: accessToken_MapBox}},
+    //{name:'MapBox.AncientWorld', options:{accessToken: accessToken_MapBox}},
     {name:'Esri.WorldStreetMap'},
     {name:'Esri.WorldTopoMap'},
     {name:'Esri.WorldImagery'},
@@ -262,7 +262,7 @@ $.widget( "heurist.mapping", {
     //{name:'OpenWeatherMap'}
     {name:'Esri.NatGeoWorldMap'},
     {name:'Esri.WorldGrayCanvas'},
-    {name:'MapTilesAPI.OSMEnglish', options:{accessToken: '4b2ce9cc3dmshb0ed4b109c9e660p1f9a50jsne0544286f8bb'}}, 
+    {name:'MapTilesAPI.OSMEnglish', options:{accessToken: accessToken_MapTiles}}, 
     {name:'DARE.RomanEmpire', url: 'https://dh.gu.se/tiles/imperium/{z}/{x}/{y}.png', options:{
         attribution: '&copy; <a href="https://dh.gu.se/dare/" target="_blank">Digital Atlas of the Roman Empire (DARE)</a> '
             + 'by <a href="https://www.gu.se/digital-humaniora" target="_blank"> Johan Åhlfeldt, Centre for Digital Humanities, University of Gothenburg</a> '

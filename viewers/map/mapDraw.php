@@ -61,6 +61,7 @@ if(true || $_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0
 <link rel="stylesheet" type="text/css" href="<?php echo PDIR;?>external/jquery.fancytree/skin-themeroller/ui.fancytree.css" />
 
         
+        <script type="text/javascript" src="<?php echo PDIR;?>hclient/core/accessTokens.php"></script>
         <script type="text/javascript" src="<?php echo PDIR;?>viewers/map/mapping.js"></script>
         <script type="text/javascript" src="<?php echo PDIR;?>viewers/map/mapManager.js"></script>
         <script type="text/javascript" src="<?php echo PDIR;?>viewers/map/mapDocument.js"></script>

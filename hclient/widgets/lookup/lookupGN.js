@@ -306,8 +306,7 @@ $.widget( "heurist.lookupGN", $.heurist.recordAction, {
                 }
             }
         }
-
-        sURL += '&username=osmakov';
+        sURL += ('&username='+accessToken_GeonamesAPI);
 
         window.hWin.HEURIST4.msg.bringCoverallToFront(this._as_dialog.parent());
 

@@ -907,11 +907,11 @@ $.widget( "heurist.lookupConfig", {
                     url = 'http://tlcmap.org/ghap/search?format=csv&paging=10&fuzzyname=London';
                     break;
                 case 'geoName':
-                    url = 'http://api.geonames.org/searchJSON?username=osmakov&maxRows=10&name=London';
+                    url = 'http://api.geonames.org/searchJSON?username='+accessToken_GeonamesAPI+'&maxRows=10&name=London';
                     serviceType = 'geonames';
                     break;
                 case 'postalCodeSearch':
-                    url = 'http://api.geonames.org/postalCodeLookupJSON?username=osmakov&maxRows=10&placename=London';
+                    url = 'http://api.geonames.org/postalCodeLookupJSON?username='+accessToken_GeonamesAPI+'&maxRows=10&placename=London';
                     serviceType = 'geonames';
                     break;
                 case 'nakala':

@@ -5308,6 +5308,7 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
                 }
             });
 
+            //creates button for every lookup service    
             for(var srvname in service_config){
 
                 var cfg = service_config[srvname];    

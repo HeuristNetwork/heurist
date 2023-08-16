@@ -2658,9 +2658,11 @@ window.hWin.HEURIST4.ui = {
             
             var scripts = [ path+actionName+'.js'];
             if(actionName=='recordAdd'){
-                scripts= [path+'recordAccess.js', path+'recordAdd.js'];
+                scripts = [path+'recordAccess.js', path+'recordAdd.js'];
             }else if( actionName=='thematicMapping'){
-                scripts= [window.hWin.HAPI4.baseURL + 'hclient/widgets/entity/popups/'+actionName+'.js'];
+                scripts = [window.hWin.HAPI4.baseURL + 'hclient/widgets/entity/popups/'+actionName+'.js'];
+            }else if( actionName.indexOf('lookupGN')===0 || actionName=='lookupConfig'){
+                scripts.push( window.hWin.HAPI4.baseURL +'hclient/core/accessTokens.php' );
             }
             
             //load missed javascripts
