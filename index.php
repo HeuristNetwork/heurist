@@ -80,9 +80,9 @@ if( @$_REQUEST['recID'] || @$_REQUEST['recid'] || array_key_exists('website', $_
     if (@$_REQUEST['rty'] || @$_REQUEST['dty'] || @$_REQUEST['trm']){
         //download xml template for given db defintion
 
-        if(@$_REQUEST['rty']) $s = 'rty='.intval($_REQUEST['rty']);
-        else if(@$_REQUEST['dty']) $s = 'dty='.intval($_REQUEST['dty']);
-            else if(@$_REQUEST['trm']) $s = 'trm='.intval($_REQUEST['trm']);
+        if(@$_REQUEST['rty']) $s = 'rty='.$_REQUEST['rty'];
+        else if(@$_REQUEST['dty']) $s = 'dty='.$_REQUEST['dty'];
+            else if(@$_REQUEST['trm']) $s = 'trm='.$_REQUEST['trm'];
 
                 header('Location: redirects/resolver.php?db='.@$_REQUEST['db'].'&'.$s);
     return;

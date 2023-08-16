@@ -222,9 +222,9 @@ $requestUri:
 
 
 if(@$_REQUEST['fmt']){
-    $format = $_REQUEST['fmt'];    
+    $format = filter_var($_REQUEST['fmt'], FILTER_SANITIZE_STRING);    
 }elseif(@$_REQUEST['format']){
-    $format = $_REQUEST['format'];        
+    $format = filter_var($_REQUEST['format'], FILTER_SANITIZE_STRING);        
 }else{
     $format = 'xml';
 }
@@ -233,23 +233,23 @@ $recid = null;
 $database_id = 0;
 
 if(@$_REQUEST['recID']){
-    $recid = $_REQUEST['recID'];    
+    $recid = intval($_REQUEST['recID']);    
 }else if(@$_REQUEST['recid']){
-    $recid = $_REQUEST['recid'];        
+    $recid = intval($_REQUEST['recid']);        
 }else if (@$_REQUEST['rty'] || @$_REQUEST['dty'] || @$_REQUEST['trm']){
     
     if(@$_REQUEST['rty']) $entity = 'rty';
     else if(@$_REQUEST['dty']) $entity = 'dty';
     else if(@$_REQUEST['trm']) $entity = 'trm';
     
-    $recid = $_REQUEST[$entity];
+    $recid = filter_var($_REQUEST[$entity], FILTER_SANITIZE_STRING);
     $format = 'xml';
 
     if(strpos($recid, '-')>0){    
         $vals = explode('-', $recid);
         if(count($vals)==3){
-            $database_id = $vals[0];
-            $recid = $vals[1].'-'.$vals[2];
+            $database_id = intval($vals[0]);
+            $recid = intval($vals[1]).'-'.intval($vals[2]);
         }
     }
     
@@ -259,7 +259,7 @@ if(@$_REQUEST['recID']){
 if(!$entity && strpos($recid, '-')>0){
     list($database_id, $recid) = explode('-', $recid, 2);
 }else if (is_int(@$_REQUEST['db'])){
-    $database_id = $_REQUEST['db'];
+    $database_id = intval($_REQUEST['db']);
 }
 
 $database_url = null;    

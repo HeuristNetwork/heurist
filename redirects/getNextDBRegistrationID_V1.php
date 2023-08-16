@@ -21,6 +21,11 @@
 * distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
 * See the License for the specific language governing permissions and limitations under the License.
 */
-header('Location: ../admin/setup/dbproperties/getNextRegistrationID.php?'.$_SERVER['QUERY_STRING']);
+
+//to avoid "Open Redirect" security warning    
+parse_str($_SERVER['QUERY_STRING'], $vars);
+$query_string = http_build_query($vars);
+
+header('Location: ../admin/setup/dbproperties/getNextRegistrationID.php?'.$query_string);
 exit();
 ?>
