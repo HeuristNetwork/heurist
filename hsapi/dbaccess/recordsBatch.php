@@ -1694,7 +1694,7 @@ error_log('count '.count($childNotFound).'  '.count($toProcess).'  '.print_r(  $
         if ($res){
             
             while ($row = $res->fetch_row()){        
-                $thumbnail_file = HEURIST_THUMB_DIR.'ulf_'.$row[0].'.png'; //'ulf_ObfuscatedFileID'
+                $thumbnail_file = HEURIST_THUMB_DIR.'ulf_'.filter_var($row[0],FILTER_SANITIZE_STRING).'.png'; //'ulf_ObfuscatedFileID'
                 if(file_exists($thumbnail_file)){
                     unlink($thumbnail_file);
                     $cnt++;

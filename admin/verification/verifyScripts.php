@@ -1273,9 +1273,9 @@ function __removeDuplicationValues(){
     
     while (($row = $res->fetch_row())) {
         
-        $q = 'DELETE FROM recDetails WHERE dtl_RecID='.$row[0].' AND dtl_DetailTypeID='.$row[1]
+        $q = 'DELETE FROM recDetails WHERE dtl_RecID='.intval($row[0]).' AND dtl_DetailTypeID='.intval($row[1])
             .' AND dtl_Value="'.$mysqli->real_escape_string($row[2])
-            .'" LIMIT '.($row[3]-1);
+            .'" LIMIT '.(intval($row[3])-1);
         $mysqli->query($q);
         $cnt = $cnt + $mysqli->affected_rows;  
     }

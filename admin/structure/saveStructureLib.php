@@ -1671,17 +1671,17 @@ function mergeTerms($retain_id, $merge_id, $colNames, $dt){
         return false;   
     }
     //1. change parent id for all children terms
-    $query = "update defTerms set trm_ParentTermID = $retain_id where trm_ParentTermID = $merge_id";
+    $query = "update defTerms set trm_ParentTermID = $retain_id where trm_ParentTermID = ".intval($merge_id);
     $res = $mysqli->query($query);
     if ($mysqli->error) {
         return handleError("SQL error - cannot change parent term for $merge_id from defTerms table", $query);
     }
 
     //2. update entries in recDetails for all detail type enum or reltype
-    $query = "update recDetails, defDetailTypes set dtl_Value=".$retain_id
+    $query = "update recDetails, defDetailTypes set dtl_Value=".intval($retain_id)
     ." where (dty_ID = dtl_DetailTypeID ) and "
     ." (dty_Type='enum' or dty_Type='relationtype') and "
-    ." (dtl_Value=".$merge_id.")";
+    ." (dtl_Value=".intval($merge_id).")";
 
     $res = $mysqli->query($query);
     if ($mysqli->error) {
@@ -1689,7 +1689,7 @@ function mergeTerms($retain_id, $merge_id, $colNames, $dt){
     }
 
     //3. delete term $merge_id
-    $query = "delete from defTerms where trm_ID = $merge_id";
+    $query = "delete from defTerms where trm_ID = ".intval($merge_id);
     $res = $mysqli->query($query);
     if ($mysqli->error) {
         return handleError("SQL error deleting term $merge_id from defTerms table", $query);
@@ -1718,7 +1718,7 @@ function getTermsChilds($ret, $trmID, $terms=null) {
 
     if(!$terms) $terms = array($trmID); //to prevent recursion
 
-    $query = "select trm_ID from defTerms where trm_ParentTermID = $trmID";
+    $query = "select trm_ID from defTerms where trm_ParentTermID = ".intval($trmID);
     $res = $mysqli->query($query);
     while ($row = $res->fetch_row()) {
         $child_trmID = $row[0];
@@ -2134,21 +2134,22 @@ function deleteRelConstraint($srcID, $trgID, $trmID){
         $srcID = "null";
         $query = $query." rcs_SourceRectypeID is null";
     }else{
-        $query = $query." rcs_SourceRectypeID=".$srcID;
+        $query = $query." rcs_SourceRectypeID=".intval($srcID);
     }
     if(intval($trgID)<1){
         $trgID = "null";
         $query = $query." and rcs_TargetRectypeID is null";
     }else{
-        $query = $query." and rcs_TargetRectypeID=".$trgID;
+        $query = $query." and rcs_TargetRectypeID=".intval($trgID);
     }
 
-    if ( strpos($trmID,",")>0 ) {
-        $query = $query." and rcs_TermID in ($trmID)";
-    }else if(intval($trmID)<1){
+    $trmID = prepareIds($trmID);
+    if ( count($trmID)>1 ) {
+        $query = $query." and rcs_TermID in (".implode(',',$trmID).")";
+    }else if(count($trmID)==0){
         $query = $query." and rcs_TermID is null";
     }else{
-        $query = $query." and rcs_TermID=$trmID";
+        $query = $query." and rcs_TermID=".intval($trmID[0]);
     }
 
     $res = $mysqli->query($query);

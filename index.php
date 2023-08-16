@@ -112,7 +112,7 @@ if( @$_REQUEST['recID'] || @$_REQUEST['recid'] || array_key_exists('website', $_
     
 }else if (@$_REQUEST['asset']){ //only from context_help - download localized help or documentation
 
-    $name = basename($_REQUEST['asset']);
+    $name = basename(filter_var($_REQUEST['asset'], FILTER_SANITIZE_STRING));
     //default ext is html
     $extension = strtolower(pathinfo($name, PATHINFO_EXTENSION));
     if(!$extension){

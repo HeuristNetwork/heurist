@@ -740,7 +740,7 @@ function dbs_GetRectypeConstraint($system) {
         if ($termID) {
             $emailsent = false;
             
-            $res = $mysqli->query("select trm_ID from defTerms where trm_ParentTermID=$termID");
+            $res = $mysqli->query("select trm_ID from defTerms where trm_ParentTermID=".intval($termID));
             if ($res && $res->num_rows>0 ) { //child nodes exist
                 while ($row = $res->fetch_assoc()) { // for each child node
                 
@@ -806,7 +806,7 @@ function dbs_GetRectypeConstraint($system) {
         $mysqli = $system->get_mysqli();
         $children = array();
     
-        $query = 'select trm_ID from defTerms where trm_ParentTermID = ' . $parentID;
+        $query = 'select trm_ID from defTerms where trm_ParentTermID = ' . intval($parentID);
         $res = $mysqli->query($query);
         if ($res) {
             while ($row = $res->fetch_row()) {
