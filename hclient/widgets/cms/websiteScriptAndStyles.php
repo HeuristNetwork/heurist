@@ -283,7 +283,7 @@ function _dout(msg){
 }
 
 // global 
-var RT_CMS_MENU, DT_NAME, DT_EXTENDED_DESCRIPTION, DT_CMS_SCRIPT, DT_CMS_CSS, DT_CMS_PAGETITLE, DT_CMS_TOPMENUSELECTABLE, TRM_NO, TRM_NO_OLD;
+var RT_CMS_HOME, RT_CMS_MENU, DT_NAME, DT_EXTENDED_DESCRIPTION, DT_CMS_SCRIPT, DT_CMS_CSS, DT_CMS_PAGETITLE, DT_CMS_TOPMENUSELECTABLE, TRM_NO, TRM_NO_OLD;
 var timeout_count = 0;
 
 //
@@ -303,6 +303,7 @@ function onPageInit(success)
         
     }
     
+    RT_CMS_HOME = window.hWin.HAPI4.sysinfo['dbconst']['RT_CMS_HOME'];
     RT_CMS_MENU = window.hWin.HAPI4.sysinfo['dbconst']['RT_CMS_MENU'];
     DT_NAME = window.hWin.HAPI4.sysinfo['dbconst']['DT_NAME'];
     DT_EXTENDED_DESCRIPTION = window.hWin.HAPI4.sysinfo['dbconst']['DT_EXTENDED_DESCRIPTION'];
@@ -475,7 +476,7 @@ function loadPageContent(pageid, eventdata){
                            if(window.hWin.HEURIST4.util.isJSON(response)) {
                                if(response['records'] && response['records'].length>0){
                                    var res = response['records'][0]['rec_RecTypeID'];
-                                   if(res == RT_CMS_MENU){
+                                   if(res == RT_CMS_MENU || res == RT_CMS_HOME){
                                        if(!eventdata) eventdata = {};
                                        eventdata['isMenuItem'] = true;
                                        loadPageContent(pageid, eventdata);
@@ -624,7 +625,6 @@ function loadRecordContent(url_or_record_id, target){
         console.log('url_or_record_id not defined');
         return;
     }
-
     var url, is_smarty = false; 
     if(!isNaN(parseInt(url_or_record_id)) && url_or_record_id>0){
 
