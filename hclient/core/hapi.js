@@ -65,7 +65,7 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
         _is_callserver_in_progress = false,
 
         _use_debug = true;
-        
+                
 
     /**
     * initialization of hAPI object
@@ -1948,7 +1948,9 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
                 }*/
                 
                 var s_time = new Date().getTime() / 1000;
-                //'multi':1,   
+                //'multi':1,  
+//[domain]/h6-alpha/hsapi/controller/entityScrud.php?db=[database]&a=structure&entity=all                
+                 
                 _callserver('entityScrud', params,
                     function (response) {
                         if (response.status == window.hWin.ResponseStatus.OK || response['defRecTypes']) {
@@ -1964,6 +1966,7 @@ console.log('DEBUG refreshEntityData '+(fin_time-s_time));  //response.data+'  '
                             if ($.isFunction(callback)) callback(this, true);
 
                         } else {
+console.log('ERROR',response);                            
                             window.hWin.HEURIST4.msg.showMsgErr(response);
                         }
                     }

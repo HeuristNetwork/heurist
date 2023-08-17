@@ -325,8 +325,8 @@ console.log('initPage');
     //
     // debug output
     //
-    function _dout(msg){
-        //console.log(msg);        
+    function _dout(args){
+        //console.log(args);        
     }
 
     //
@@ -339,7 +339,8 @@ console.log('initPage');
         isHapiInited = true;
 
         _dout('onHapiInit '+success);        
-
+        _dout('window.hWin.HAPI4=');
+        _dout(window.hWin.HAPI4);        
 
         if(success) // Successfully initialized system
         {
@@ -371,7 +372,7 @@ console.log('initPage');
     //
     function initialLoadDatabaseDefintions(params, callback){
     
-            var _time_debug = new Date().getTime() / 1000;
+            _time_debug = new Date().getTime() / 1000;
 
             if($.isEmptyObject(window.hWin.HAPI4.EntityMgr.getEntityData2('defRecTypes'))){ //defintions are not loaded
 
@@ -382,12 +383,13 @@ console.log('initPage');
                 
                 //params = {recID:recID} or {rty_ID:rty_ID} - to load defs for particular record or rectype
                 var entities = (params)?params:'all'; //'rty,dty,rst,swf';
-
+_dout('initialLoadDatabaseDefintions');
                 window.hWin.HAPI4.EntityMgr.refreshEntityData(entities, function(){
                     if(arguments){                    
                     if(arguments[1]){
 
-                        _dout('init page db struct  '+(new Date().getTime() / 1000 - _time_debug));
+_dout('init page db structure  '+(new Date().getTime() / 1000 - _time_debug));
+_dout(arguments);
                         _time_debug = new Date().getTime() / 1000;
 
 
@@ -395,6 +397,7 @@ console.log('initPage');
                             callback(true);
                         }
                     }else{
+_dout('error: LoadDatabaseDefintions');
                         window.hWin.HEURIST4.msg.showMsgErr(sMsg);
                         if($.isFunction(callback)){ callback(false); }
                     }
@@ -402,6 +405,7 @@ console.log('initPage');
                 });
                 return true;
             }
+_dout('initialLoadDatabaseDefintions: already loaded');
             return false;
         
     }
