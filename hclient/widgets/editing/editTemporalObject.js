@@ -198,9 +198,8 @@ var TemporalPopup = (function () {
 	var _change_tab_only = false;
 
 	function _init () {
-        
-		if (location.search.length > 1) {		// the calling app passed a parameter string - save it
-			that.originalInputString = unescape(location.search.substring(1));
+		if (location.search.length > 1) {// the calling app passed a parameter string - save it
+			that.originalInputString = window.hWin.HEURIST4.util.getUrlParameter('toedit', location.search); //unescape(location.search.substring(1));
 		}
 		if ( Temporal.isValidFormat(that.originalInputString)) {
 			try {

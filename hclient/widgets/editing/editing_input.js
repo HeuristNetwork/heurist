@@ -5632,7 +5632,7 @@ console.log('onpaste');
                     if(that.is_disabled) return;
 
                     var url = window.hWin.HAPI4.baseURL 
-                        + 'hclient/widgets/editing/editTemporalObject.html?'
+                        + 'hclient/widgets/editing/editTemporalObject.html?toedit='
                         + encodeURIComponent(that.newvalues[$input.attr('id')]
                                     ?that.newvalues[$input.attr('id')]:$input.val());
                     

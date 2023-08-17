@@ -1646,45 +1646,43 @@ function inIframe() {
 
 //New graph refresh button - Created by Travis Doyle 24/9/2022
 function refreshButton() {
-
-    let query = window.location.search;
-
     if(window.location !== window.parent.location){ // handle iframe
-        query = window.hWin.HEURIST4.query.composeHeuristQuery2(window.hWin.HEURIST4.current_query_request, false);
+        let query = window.hWin.HEURIST4.query.composeHeuristQuery2(window.hWin.HEURIST4.current_query_request, false);
         query = query + ((query == '?') ? '' : '&') + 'db=' + window.hWin.HAPI4.database;
+        location.href = query;
+    }else{
+        location.reload();    
     }
-
-    location.href = query;
 }
 
 //refresh graph while in fullscreen mode - Travis Doyle 28/9
 function refreshButtonFullscreen() {
     return;
-    var url2 = window.hWin.HAPI4.baseURL + 'hclient/framecontent/visualize/springDiagram.php' + window.location.search;
-    location.href = url2;
+    //var url2 = window.hWin.HAPI4.baseURL + 'hclient/framecontent/visualize/springDiagram.php' + window.location.search;
+    //location.href = url2;
 }
 //Gravity Fullscreen Button Fix - Travis Doyle 6/10
 function refreshGravityOn() {
     return;
-    var gravitystat = getSetting(setting_gravity);
+    /*var gravitystat = getSetting(setting_gravity);
 
     var url2 = window.hWin.HAPI4.baseURL + 'hclient/framecontent/visualize/springDiagram.php' + window.location.search;
     location.href = url2;
 
     if (gravitystat == 'off') {
         setGravity('touch');
-    }
+    }*/
 }
 function refreshGravityOff() {
     return;
-    var gravitystat = getSetting(setting_gravity);
+    /*var gravitystat = getSetting(setting_gravity);
 
     var url2 = window.hWin.HAPI4.baseURL + 'hclient/framecontent/visualize/springDiagram.php' + window.location.search;
     location.href = url2;
 
     if (gravitystat == 'touch') {
         setGravity('off');
-    }
+    }*/
 }
 //open graph in fullscreen - Travis Doyle 28/9
 function openWin() {

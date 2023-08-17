@@ -145,7 +145,9 @@ $.widget( "heurist.mainMenu6", {
                     click: that._openSectionMenu
                 });
                 
-                if(window.hWin.HEURIST4.util.getUrlParameter('welcome', window.hWin.location.search)){
+                const urlParams = new URLSearchParams(window.hWin.location.search);
+                
+                if(urlParams.has('welcome')){ //window.hWin.HEURIST4.util.getUrlParameter('welcome', window.hWin.location.search)
                     //open explore by default, or "design" if db is empty
                     that._active_section = 'explore';
                     that.switchContainer( 'design' );
@@ -230,14 +232,13 @@ $.widget( "heurist.mainMenu6", {
                 //keep main menu open on document mouse leave
                 //that._on($(document),{mouseleave: that._resetCloseTimers });
                 
-                
-                var cms_record_id = window.hWin.HEURIST4.util.getUrlParameter('cms', window.hWin.location.search);
+                var cms_record_id = urlParams.get('cms'); //window.hWin.HEURIST4.util.getUrlParameter('cms', window.hWin.location.search);
                 if(cms_record_id>0){
                     var widget = window.hWin.HAPI4.LayoutMgr.getWidgetByName('mainMenu');
                     widget.mainMenu('menuActionById','menu-cms-edit',{record_id:cms_record_id});
                 }else{
                     //action 
-                    var cmd = window.hWin.HEURIST4.util.getUrlParameter('cmd', window.hWin.location.search);
+                    var cmd = urlParams.get('cmd'); //window.hWin.HEURIST4.util.getUrlParameter('cmd', window.hWin.location.search);
                     if(cmd){
                         var widget = window.hWin.HAPI4.LayoutMgr.getWidgetByName('mainMenu');
                         widget.mainMenu('menuActionById',cmd);
@@ -1924,8 +1925,10 @@ $.widget( "heurist.mainMenu6", {
                 
 		this._on(this.introductions[section].find('#menu-guide'),{click:this._loadIntroductoryGuide});  
 		this._on(this.introductions[section].find('#start-hints'),{click:this._loadStartHints});			
+        
+        const urlParams = new URLSearchParams(window.hWin.location.search);
                 
-            if(section=='design' && window.hWin.HEURIST4.util.getUrlParameter('welcome', window.hWin.location.search))
+            if(section=='design' && urlParams.has('welcome')) //window.hWin.HEURIST4.util.getUrlParameter('welcome', window.hWin.location.search)
             {
                 var ele = $('<div class="gs-box" style="margin:10px;width:500px;height:400px;">')
                     .appendTo(this.introductions[section]);

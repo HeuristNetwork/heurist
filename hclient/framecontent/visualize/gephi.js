@@ -20,11 +20,8 @@
 */
 
  // Functions to download the displayed nodes in GEPHI format.
- 
-/**
-* Returns a URL parameter
-* @param name Name of the parameter
-*/
+
+/*  to remove
 function getParameterByName(name) {
     name = name.replace(/[\[]/, "\\[").replace(/[\]]/, "\\]");
     var regex = new RegExp("[\\?&]" + name + "=([^&#]*)"),
@@ -32,12 +29,10 @@ function getParameterByName(name) {
     return results == null ? "" : decodeURIComponent(results[1].replace(/\+/g, " "));
 }
 
-/**
-* Returns the database name from the search query string
-*/
 function getDatabaseName() {
     return getParameterByName("db");
 }
+*/
 
 /** Transforms the visualisation into Gephi format */
 function getGephiFormat() {
@@ -131,7 +126,7 @@ gexf += ' version="1.2">';
     
     // DOWNLOAD 
     //that's duplication of  window.hWin.HEURIST4.util.downloadData(getDatabaseName()+".gexf", gexf);
-    var filename = getDatabaseName()+".gexf";
+    var filename = window.hWin.HAPI4.database+".gexf"; //getDatabaseName()
     var mimeType = 'text/plain';
     var  content = 'data:' + mimeType  +  ';charset=utf-8,' + encodeURIComponent(gexf);
 
