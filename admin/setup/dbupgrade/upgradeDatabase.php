@@ -144,6 +144,8 @@ if(!defined('PDIR')){
                                         $rep2 = recreateRecDetailsDateIndex($system, true, true);
                                         if($rep2){
                                             $rep = array_merge($rep, $rep2);
+                                        }else{
+                                            $rep = false;
                                         }
                                     }
                                     
@@ -169,8 +171,8 @@ if(!defined('PDIR')){
                                     $error = $system->getError();
                                     if($error){
                                         print '<p style="color:red">'
-                                            .$error[0]['message']
-                                            .'<br>'.@$error[0]['sysmsg'].'</p>';
+                                            .$error['message']
+                                            .'<br>'.@$error['sysmsg'].'</p>';
                                     }
                                     
                                     $upgrade_success = false;
