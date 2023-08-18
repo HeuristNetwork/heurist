@@ -187,7 +187,6 @@ where t1.trm_ParentTermID=507 order by t1.trm_Label;
     //
     //
     _initControls: function () {
-
         var that = this;
         this.element.find('fieldset > div > .header').css({width: '100px', 'min-width': '100px'})
         this.options.resultList = $.extend(this.options.resultList,

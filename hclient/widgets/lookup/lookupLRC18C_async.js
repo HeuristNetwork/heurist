@@ -50,7 +50,6 @@ $.widget("heurist.lookupLRC18C", $.heurist.recordAction, {
     recordList: null,
 
     _initControls: function () {
-
         var that = this;
         this.element.find('fieldset > div > .header').css({width: '80px', 'min-width': '80px'})
         this.options.resultList = $.extend(this.options.resultList,
@@ -218,7 +217,7 @@ _rendererResultList: function (recordset, record) {
         console.log("In XML Parse function and the Edition XML is: ")
         console.log(editionXML)
         records = editionXML.getElementsByTagName('records')[0].children
-        resultCount = editionXML.getElementsByTagName('resultCount')[0].innerHtml
+        resultCount = editionXML.getElementsByTagName('resultCount')[0].innerText
         ids_n_title['resultCount'] = resultCount;
 
         // Identify which record from the XML belong to Edition, Author, Place and Work;
@@ -243,7 +242,7 @@ _rendererResultList: function (recordset, record) {
         //Generic function to build Edition, Author, Place and Work XML
         function buildDict(i, j, records, dict_name) {
             if (records[i].children[j].nodeName == 'detail') {
-                dict_name[records[i].children[j].getAttribute('id')] = records[i].children[j].innerHTML
+                dict_name[records[i].children[j].getAttribute('id')] = records[i].children[j].innerText
             }
         }
 
@@ -251,36 +250,36 @@ _rendererResultList: function (recordset, record) {
             for (j = 0; j < records[i].children.length; j++) {
                 if (i == edition_xml_record) {
                     if (records[i].children[j].nodeName == 'id') {
-                        ids_n_title['editionID'] = records[i].children[j].innerHTML
+                        ids_n_title['editionID'] = records[i].children[j].innerText
                     }
                     if (records[i].children[j].nodeName == 'title') {
-                        ids_n_title['editionTitle'] = records[i].children[j].innerHTML
+                        ids_n_title['editionTitle'] = records[i].children[j].innerText
                     }
                     buildDict(i, j, records, estc_edition_dict)
 
                 } else if (i == author_xml_record) {
                     if (records[i].children[j].nodeName == 'id') {
-                        ids_n_title['authorID'] = records[i].children[j].innerHTML
+                        ids_n_title['authorID'] = records[i].children[j].innerText
                     }
                     if (records[i].children[j].nodeName == 'title') {
-                        ids_n_title['authorTitle'] = records[i].children[j].innerHTML
+                        ids_n_title['authorTitle'] = records[i].children[j].innerText
                     }
                     buildDict(i, j, records, author_dict)
 
                 } else if (i == place_xml_record) {
                     if (records[i].children[j].nodeName == 'id') {
-                        ids_n_title['placeID'] = records[i].children[j].innerHTML
+                        ids_n_title['placeID'] = records[i].children[j].innerText
                     }
                     if (records[i].children[j].nodeName == 'title') {
-                        ids_n_title['placeTitle'] = records[i].children[j].innerHTML
+                        ids_n_title['placeTitle'] = records[i].children[j].innerText
                     }
                     buildDict(i, j, records, place_dict)
                 } else if (i == work_xml_record) {
                     if (records[i].children[j].nodeName == 'id') {
-                        ids_n_title['workID'] = records[i].children[j].innerHTML
+                        ids_n_title['workID'] = records[i].children[j].innerText
                     }
                     if (records[i].children[j].nodeName == 'title') {
-                        ids_n_title['workTitle'] = records[i].children[j].innerHTML
+                        ids_n_title['workTitle'] = records[i].children[j].innerText
                     }
                     buildDict(i, j, records, work_dict)
                 }
@@ -439,7 +438,7 @@ _rendererResultList: function (recordset, record) {
         try{
             if(author_details[10].length > 5){
                 authorBirthDate = jQuery.parseHTML(String(author_details[10]))
-                authorDict[10] =authorBirthDate[3].innerHTML
+                authorDict[10] =authorBirthDate[3].innerText
             }
         }catch(e){
             authorDict[10] = ''
@@ -447,7 +446,7 @@ _rendererResultList: function (recordset, record) {
         try{
             if(author_details[11].length > 5){
                 authorDeathDate = jQuery.parseHTML(String(author_details[11]))
-                authorDict[11] =authorDeathDate[3].innerHTML
+                authorDict[11] =authorDeathDate[3].innerText
             }
         }catch(e){
             authorDict[11] = ''
@@ -674,7 +673,7 @@ _rendererResultList: function (recordset, record) {
             success: function (response) {
                 editionDetailsXML = $.parseXML(String(response));
 
-                if (editionDetailsXML.getElementsByTagName('resultCount')[0].innerHTML.trim() == "0") {
+                if (editionDetailsXML.getElementsByTagName('resultCount')[0].innerText.trim() == "0") {
 
                     edition_ids = ["1", "9", "15", "137", "254", "256", "257", "258", "259", "268", "270", "275","277", "284", "285","289" , "290", "955"];
                     if (parsedXML['placeDict'] == {}) {
@@ -694,10 +693,10 @@ _rendererResultList: function (recordset, record) {
                             },
                             success: function (response) {
                                 placeDetailsXML = $.parseXML(String(response));
-                                if (placeDetailsXML.getElementsByTagName('resultCount')[0].innerHTML.trim() == "0") {
+                                if (placeDetailsXML.getElementsByTagName('resultCount')[0].innerText.trim() == "0") {
                                     editionDict["268"] = ""
                                 } else {
-                                    editionDict["268"] = placeDetailsXML.getElementsByTagName('id')[0].innerHTML
+                                    editionDict["268"] = placeDetailsXML.getElementsByTagName('id')[0].innerText
                                 }
                             }
                         });
@@ -739,7 +738,7 @@ _rendererResultList: function (recordset, record) {
                     for (i = 0; i < editionPlaceRecords.length; i++) {
                         function checkIdInEditionPlaceDetails(value, index, array) {
                             if (editionPlaceRecords[i].getAttribute('id') == '268') {
-                                placeID = editionPlaceRecords[i].innerHTML;
+                                placeID = editionPlaceRecords[i].innerText;
                             }
                         }
 
@@ -750,7 +749,7 @@ _rendererResultList: function (recordset, record) {
                     try{
                         if(estc_edition_dict[9].length > 5){
                             yearOf1stVol = jQuery.parseHTML(String(estc_edition_dict['9']))
-                            buildEditionDict[9] =yearOf1stVol[3].innerHTML
+                            buildEditionDict[9] =yearOf1stVol[3].innerText
                         }
                     }catch(e){
                         buildEditionDict[9] = ''
@@ -758,7 +757,7 @@ _rendererResultList: function (recordset, record) {
                     try{
                         if(estc_edition_dict[275].length > 5){
                             yearOf1stVol = jQuery.parseHTML(String(estc_edition_dict['275']))
-                            buildEditionDict[275] =yearOf1stVol[3].innerHTML
+                            buildEditionDict[275] =yearOf1stVol[3].innerText
                         }
                     }catch(e){
                         buildEditionDict[275] = ''
@@ -827,7 +826,7 @@ _rendererResultList: function (recordset, record) {
 
                 } else {
 
-                    edition_id = editionDetailsXML.getElementsByTagName('id')[0].innerHTML
+                    edition_id = editionDetailsXML.getElementsByTagName('id')[0].innerText
                     window.hWin.HEURIST4.msg.showMsgDlg('Edition already exists in the Libraries database.');
                     mapDict[holdingKey] = edition_id
                     // Close the Lookup window and map the edition to base Holding record
@@ -867,11 +866,11 @@ _rendererResultList: function (recordset, record) {
             },
             success: function (response) {
                 workDetailsXML = $.parseXML(String(response));
-                if (workDetailsXML.getElementsByTagName('resultCount')[0].innerHTML.trim() == "0") {
+                if (workDetailsXML.getElementsByTagName('resultCount')[0].innerText.trim() == "0") {
                     window.hWin.HEURIST4.msg.showMsgDlg('Author has been identified/imported. Work does not exist, creating work now.');
                     that._createWorkRecord(parsedXML, author_id, estcRecordListWindow, mapToHoldingRecord);
                 } else {
-                    workID = workDetailsXML.getElementsByTagName('id')[0].innerHTML.trim()
+                    workID = workDetailsXML.getElementsByTagName('id')[0].innerText.trim()
                     window.hWin.HEURIST4.msg.showMsgDlg('Author has been identified/imported. Work for this Edition exists, creating Edition now.');
                     that._createEditionRecord(parsedXML, author_id, workID, estcRecordListWindow, mapToHoldingRecord)
                 }
@@ -936,7 +935,7 @@ _rendererResultList: function (recordset, record) {
                             success: function (response) {
                                 author_does_not_exist_in_libraries = false;
                                 authorDetailsXML = $.parseXML(String(response));
-                                if (authorDetailsXML.getElementsByTagName('resultCount')[0].innerHTML.trim() == "0") {
+                                if (authorDetailsXML.getElementsByTagName('resultCount')[0].innerText.trim() == "0") {
                                     author_does_not_exist_in_libraries = true;
                                 }
                                 // If author does not exists in Libraries database, then create it
@@ -946,7 +945,7 @@ _rendererResultList: function (recordset, record) {
                                     // If author exists in Libraries database, then call method _checkWorkRecordInLibraries
                                 } else {
                                     createAuthor = false;
-                                    author_id = authorDetailsXML.getElementsByTagName('id')[0].innerHTML.trim()
+                                    author_id = authorDetailsXML.getElementsByTagName('id')[0].innerText.trim()
                                     that._checkWorkRecordInLibraries(parsedXML, author_id, estcRecordListWindow, mapToHoldingRecord);
                                 }
                             }
