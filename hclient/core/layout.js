@@ -618,11 +618,12 @@ function hLayout(args) {
                         }
                     
                     }else{ //tabs by default
-                    
-                        // in design mode - it called from iframe and baseURL is different 
+                        // in design mode - it is called from iframe and baseURL is different 
                         // to fix this mess
-                        var rhash = /#.*$/;
-                        var locationUrl = window.location.href.replace( rhash, "" ); //Client_DOM_Code_Injection
+                        //var rhash = /#.*$/;
+                        //var locationUrl = window.location.href.replace( rhash, "" ); //Client_DOM_Code_Injection
+                        
+                        var locationUrl = window.hWin.HAPI4.baseURL;
                         $pane.find('li > a').each(function(idx, item){
                            var href = $(item).attr('href');
                            href = href.substr(href.indexOf('#'));           
