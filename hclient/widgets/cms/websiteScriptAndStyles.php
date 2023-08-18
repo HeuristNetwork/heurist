@@ -564,8 +564,6 @@ if($website_custom_css!=null){
                 __loadPageContent();
             }else{
                 
-console.log('load page', pageid);
-                
                 var server_request = {
                     q: 'ids:'+pageid,
                     restapi: 1,

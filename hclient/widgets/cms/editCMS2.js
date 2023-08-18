@@ -722,7 +722,7 @@ var sMsg = '<p>Heurist\'s CMS editor has been upgraded to a new system which is 
                             
                             var lang = $(tinymce.activeEditor.targetElm).attr('data-lang');
 //console.log('_initTinyMCE',lang,default_language);
-                            if(lang==default_language || lang=='def' || lang==''){
+                            if(lang==default_language || lang=='def' || window.hWin.HEURIST4.util.isempty(lang)){
                                 l_cfg.content = new_content;    
                             }else{
                                 l_cfg['content'+lang] = new_content;    
@@ -1705,7 +1705,7 @@ function(value){
 
         var content = 'content';
 //console.log('_layoutTranslateElement',default_language,lang);
-        if(default_language!=lang && lang!='def'){
+        if(default_language!=lang && lang!='def' && !window.hWin.HEURIST4.util.isempty(lang)){
             content = content + lang;
             if(!affected_cfg[content]){ //if not found -  add new content
                 affected_cfg[content] = 'Translate content to '+lang+'!';
