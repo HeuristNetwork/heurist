@@ -396,6 +396,7 @@ $.widget( "heurist.svs_list", {
                 }
             }
         }
+
     },
 
     _setOptionFromUrlParam: function( key, param_name, dtype ){

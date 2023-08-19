@@ -433,8 +433,10 @@ function switchLanguage(event){
     if(lang_code && current_language != lang_code){
         //add url parameter
         current_language = lang_code;
+        window.hWin.HR = window.hWin.HAPI4.setLocale(current_language);
         initHeaderTitle();
         loadPageContent(current_page_id);
+        initMainMenu();
     }
     window.hWin.HEURIST4.util.stopEvent(event);
     return false;
