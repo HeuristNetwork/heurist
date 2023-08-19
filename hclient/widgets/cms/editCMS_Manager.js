@@ -43,7 +43,8 @@ function editCMS_Manager( options ){
     DT_CMS_MENU  = window.hWin.HAPI4.sysinfo['dbconst']['DT_CMS_MENU'],
     //     DT_CMS_THEME = window.hWin.HAPI4.sysinfo['dbconst']['DT_CMS_THEME'],
     DT_NAME       = window.hWin.HAPI4.sysinfo['dbconst']['DT_NAME'],
-    DT_CMS_HEADER = window.hWin.HAPI4.sysinfo['dbconst']['DT_CMS_HEADER'];
+    DT_CMS_HEADER = window.hWin.HAPI4.sysinfo['dbconst']['DT_CMS_HEADER'],
+    DT_LANGUAGES = window.hWin.HAPI4.sysinfo['dbconst']['DT_LANGUAGES'];
 
     if(!(RT_CMS_HOME>0 && RT_CMS_MENU>0 && DT_CMS_TOP_MENU>0 && DT_CMS_MENU>0)){
         
@@ -56,6 +57,26 @@ function editCMS_Manager( options ){
             );
 
         return;
+    }else{
+        //check field
+        let is_missed = true;
+        if(DT_LANGUAGES>0 && !$Db.rst(DT_CMS_HOME,DT_LANGUAGES)){
+            is_missed = false;
+        }
+console.log(is_missed);        
+        if (is_missed) {
+        
+            window.hWin.HAPI4.SystemMgr.checkPresenceOfRectype('99-51',2,
+                'You will need record types '
+                +'99-51 (Web home) with field 2-967 (Languages) which are available as part of Heurist_Core_Definitions.',
+                    function(){
+                       editCMS_Manager( options ); //call itself again 
+                    },
+                true  //force import
+                );
+                
+            return;
+        }
     }
     
     options.is_open_in_new_tab = true;

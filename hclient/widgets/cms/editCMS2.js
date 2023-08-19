@@ -467,6 +467,8 @@ function editCMS2(website_document){
 
         if(_warningOnExit( _editHomePageRecord )) return;                           
         
+console.log('_editHomePageRecord');        
+        
         //edit menu item
         window.hWin.HEURIST4.ui.openRecordEdit(home_page_record_id, null,
             {selectOnSave:true, 

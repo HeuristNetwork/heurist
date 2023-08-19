@@ -1496,18 +1496,26 @@ error_log('UPDATED '.$session_id.'  '.$value);
 
             if($dbVerSubSub<15){
             
+                $to_be_imported = array();
                 // import IIIF Annonation field
                 if(!(ConceptCode::getDetailTypeLocalID('2-1098')>0)){
+                    $to_be_imported[] = '2-1098';
+                }
+                // import Languages field
+                if(!(ConceptCode::getDetailTypeLocalID('2-967')>0)){
+                    $to_be_imported[] = '2-967';
+                }
+                if(count($to_be_imported)>0){
                     $importDef = new DbsImport( $system );
                     if($importDef->doPrepare(  array(
                     'defType'=>'detailtype', 
                     'databaseID'=>2, 
-                    'conceptCode'=>'2-1098')))
+                    'definitionID'=>array('2-1098'))))
                     {
                         $res = $importDef->doImport();
                     }
                     if($res){
-                        $report[] = 'Field 2-1098 "IIIF Annonation imported';    
+                        $report[] = 'Field 2-1098 "IIIF Annonation and 2-967 "Languages" imported';    
                     }
                 }
                 
