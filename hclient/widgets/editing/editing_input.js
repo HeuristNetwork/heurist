@@ -1410,6 +1410,11 @@ $.widget( "heurist.editing_input", {
                         }
                     });
 
+                    $input.hSelect('widget').css({
+                        'width': 'auto',
+                        'min-width': '14em'
+                    });
+
                 }else{
                     $input = this._recreateSelector($input, value); //initial create
                 }
@@ -2388,7 +2393,6 @@ $.widget( "heurist.editing_input", {
                 
 				var $input_img, $gicon;
                 
-                var icon_for_button = 'ui-icon-folder-open';
                 var select_return_mode = 'recordset';
 
                 /* File IDs, needed for processes below */
@@ -2570,6 +2574,17 @@ $.widget( "heurist.editing_input", {
                 this._on($input, {mouseout:__hideImagePreview});
                 this._on($input_img, {mouseout:__hideImagePreview});
 
+                /* Source has loaded */
+                function __after_image_load(){
+                    setTimeout(() => {
+
+                        let $img = $input_img.find('img');
+                        let $close_icon = $inputdiv.find('.ui-icon-window-close');
+
+                        $close_icon.css('left', $img.outerWidth(true) + 10);
+                    }, 500);
+                };
+
                 /* Thumbnail's click handler */
                 $input_img.click(function(event){
 
@@ -2598,6 +2613,12 @@ $.widget( "heurist.editing_input", {
 
                         $input_img.css('cursor', 'zoom-in');
 
+                        if($input_img.find('img')[0].complete){
+                            __after_image_load();
+                        }else{
+                            $input_img.find('img')[0].addEventListener('load', __after_image_load);
+                        }
+
                         window.hWin.HAPI4.save_pref('imageRecordEditor', 1);
                     }
                     else if (isClicked==1) {
@@ -2625,7 +2646,7 @@ $.widget( "heurist.editing_input", {
                                 + 'close</span>').prependTo( $($dwnld_anchor[1]) ).show();
                 // Alternative button for closing inline image
                 var $alt_close = $('<span class="ui-icon ui-icon-window-close" title="Hide image display (image shows on rollover of the field)"'
-                    + ' style="display: none;cursor: pointer;float:right;">&nbsp;</span>').appendTo( $input_img );
+                    + ' style="display: none;cursor: pointer;">&nbsp;</span>').appendTo( $input_img[1] ); // .filter('div')
 
                 this._on($hide_thumb.add($alt_close), {
                     click:function(event){
@@ -2696,13 +2717,21 @@ $.widget( "heurist.editing_input", {
 
                 /* Check User Preferences, displays thumbnail inline by default if set */
                 if (window.hWin.HAPI4.get_prefs_def('imageRecordEditor', 0)!=0 && value.ulf_ID) {
+
                     $input_img.show();
                     $dwnld_anchor.show();
+
                     $inputdiv.find('.ui-icon-window-close').show();
 
                     $input_img.css('cursor', 'zoom-in');
 
                     $input.off("mouseout");
+
+                    if($input_img.find('img')[0].complete){
+                        __after_image_load();
+                    }else{
+                        $input_img.find('img')[0].addEventListener('load', __after_image_load);
+                    }
 
                     isClicked=1;
                 }

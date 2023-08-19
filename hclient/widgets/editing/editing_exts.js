@@ -911,6 +911,8 @@ function openSearchMenu(that, $select, has_filter=true){
 
 		if(has_filter){			
  
+            let start_pos = 0;
+
 			that._on($menu.find('li.ui-menu-item:first'), {
 				click: function(event){ // stop click for menu filter option
                     if ($(event.target).parents('.show-select-dialog').length==0){
@@ -918,20 +920,40 @@ function openSearchMenu(that, $select, has_filter=true){
 					    return false;
                     }
 				},
-                keydown: function(event){ // allow spaces for filter, enter selects only option (if allowed), and tab focuses first option
+                keydown: function(event){ // allow hotkeys for input filter
+
+                    /**
+                     * Allows:
+                     *  Space bar to add a space (default was select and close)
+                     *  Press Enter to auto select the only displayed option
+                     *  Press Tab to change focus to the dropdown's first item
+                     *  Control/Meta + 'A' to select all input, and
+                     *  Highlighting input via arrow keys, control/meta, and shift keys
+                     */
+
+                    let $input = $menu.find('.input_menu_filter');
+                    let cur_val = $input.val();
 
                     let code = event.keyCode || event.which;
+
+                    let ctrl_pressed = event.ctrlKey || event.metaKey;
+                    let shift_pressed = event.shiftKey;
+
                     let is_enter = event.key == "Enter" || code == 13;
                     let is_tab = event.key == "Tab" || code == 9;
-                    let add_space = event.key == " " || code == 32 || (is_enter && (event.shiftKey || event.ctrlKey || event.metaKey));
 
-                    let cur_val = $menu.find('.input_menu_filter').val();
+                    let left_arrow = event.key == "ArrowLeft" || code == 37;
+                    let right_arrow = event.key == "ArrowRight" || code == 39;
+
+                    let add_space = event.key == " " || code == 32 || (is_enter && (shift_pressed || ctrl_pressed));
 
                     if(add_space){
+
                         window.hWin.HEURIST4.util.stopEvent(event);
                         event.stopImmediatePropagation();
 
-                        $menu.find('.input_menu_filter').val(cur_val + ' ');
+                        $input.val(cur_val + ' ');
+                        start_pos = ++cur_val.length;
                     }else if(is_enter && $menu.find('.ui-menu-item:visible').length == 2){ // auto select only result
 
                         window.hWin.HEURIST4.util.stopEvent(event);
@@ -944,6 +966,83 @@ function openSearchMenu(that, $select, has_filter=true){
                         event.stopImmediatePropagation();
 
                         $($menu.find('.ui-menu-item:visible')[1]).mouseover();
+                    }else if((event.key == "A" || code == 13) && ctrl_pressed){
+
+                        window.hWin.HEURIST4.util.stopEvent(event);
+                        event.stopImmediatePropagation();
+
+                        $input[0].setSelectionRange(0, cur_val.length);
+                        start_pos = cur_val.length;
+                    }else if(left_arrow || right_arrow){
+
+                        // ensure start is within bounds
+                        start_pos = start_pos < 0 ? 0 : start_pos;
+                        start_pos = start_pos > cur_val.length ? cur_val.length : start_pos;
+
+                        let swap_start = false;
+                        let cur_start = $input[0].selectionStart;
+                        let end_pos = $input[0].selectionEnd;
+
+                        if(ctrl_pressed && shift_pressed){
+
+                            if(cur_start == end_pos){
+                                start_pos = right_arrow ? cur_start : 0;
+                                end_pos = right_arrow ? cur_val.length : end_pos;
+                                swap_start = right_arrow;
+                            }else if(start_pos == end_pos){ // already selected section
+                                start_pos = cur_start;
+                                end_pos = right_arrow ? cur_val.length : start_pos;
+                                swap_start = true;
+                            }else{
+                                end_pos = end_pos;
+                                start_pos = right_arrow ? end_pos : 0;
+                            }
+
+                        }else if(shift_pressed){
+
+                            if(cur_start == end_pos){
+                                start_pos = right_arrow ? cur_start : --cur_start;
+                                end_pos = right_arrow ? ++end_pos : end_pos;
+                                swap_start = right_arrow;
+                            }else if(start_pos == end_pos){ // already selected section
+                                start_pos = cur_start;
+                                end_pos = right_arrow ? ++end_pos : --end_pos;
+                                swap_start = true;
+                            }else{
+                                start_pos = right_arrow ? ++cur_start : --cur_start;
+                                end_pos = end_pos;
+                            }
+
+                        }else if(ctrl_pressed){
+
+                            start_pos = right_arrow ? cur_val.length : 0;
+                            end_pos = start_pos;
+
+                        }else{
+
+                            if(cur_start == end_pos){
+                                start_pos = right_arrow ? ++start_pos : --start_pos;
+                            }else if(start_pos == end_pos){
+                                start_pos = right_arrow ? start_pos : cur_start; 
+                            }else{
+                                start_pos = right_arrow ? end_pos : start_pos;
+                            }
+
+                            start_pos = start_pos < 0 ? 0 : start_pos;
+                            start_pos = start_pos > cur_val.length ? cur_val.length : start_pos;
+
+                            end_pos = start_pos;
+                        }
+
+                        $input[0].setSelectionRange(start_pos, end_pos);
+
+                        if(swap_start){ // replace start_pos w/ end_pos
+//console.log(start_pos, end_pos);
+                            start_pos = end_pos;
+                        }
+
+                    }else{
+                        ++start_pos
                     }
                 }
 			});
