@@ -1155,6 +1155,12 @@ $.widget( "heurist.importStructure", {
 
         window.hWin.HEURIST4.msg.bringCoverallToFront(this.element, style, msg);
 
+        /*
+             _selectedDB - source database 
+             id - array of Rectype ids or Concept Codes to be imported
+             _is_rename_target - should rectype/concept labels be overwritten with labels imported from the source database
+             type - entity - what is being imported? {rectype|detailtype|term}
+        */
         window.hWin.HAPI4.SystemMgr.import_definitions(this._selectedDB, id, this._is_rename_target, type,
             function(response){    
 

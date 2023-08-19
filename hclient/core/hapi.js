@@ -259,7 +259,7 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
             if(that.baseURL.indexOf('127.0.0.1')>0){
                 alert('Input variables exceeded 1000: '+cnt+' ,'+action);              
             }
-            console.log(request);              
+//remarked to avoid Client_Privacy_Violation            console.log(request);              
             console.error('Input variables exceeded 1000',cnt);
         }
 

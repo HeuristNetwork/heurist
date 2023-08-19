@@ -36,18 +36,19 @@ if(isset($_POST['data'])) {
     $data = json_decode($_POST['data']);
     $response = "";
 
-    $subject = $data->subject;  // Email subject
-    $header = $data->header;    // Email header
+    $subject = filter_var($data->subject);  // Email subject
+    $header = filter_var($data->header);    // Email header
     foreach($data->emails as $email) {
         // Determine message & recipients
-        $message = $email->message;       // Email message
+        $message = filter_var($email->message);       // Email message
         $recipients = $email->recipients; // One or more e-mail adresses
         foreach($recipients as $recipient) {
             // Check if the e-mail address is valid
-            if(filter_var($recipient, FILTER_VALIDATE_EMAIL)) {
+            $recipient_sanitized = filter_var($recipient, FILTER_VALIDATE_EMAIL);
+            if($recipient_sanitized) {
                 // Send e-mail
-                $result = sendEmail_native($recipient, $subject, $message, $header); // utils_mail.php
-                $response .= $recipient . " --> " . $result . "\n";
+                $result = sendEmail_native($recipient_sanitized, $subject, $message, $header); // utils_mail.php
+                $response .= $recipient_sanitized . " --> " . $result . "\n";
             }else{
                 $response .= $recipient . " --> invalid e-mail address\n";
             }

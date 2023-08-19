@@ -112,7 +112,7 @@ $mysqli = $system->get_mysqli();
     }else if($metod=="savereport"){ //-----------------
 
         $data  = @$_REQUEST['data'];
-        $recID  = @$_REQUEST['recID'];
+        //$recID  = @$_REQUEST['recID'];
 
         if (!array_key_exists('report',$data) ||
         !array_key_exists('colNames',$data['report']) ||
@@ -125,7 +125,7 @@ $mysqli = $system->get_mysqli();
         $rv = array(); //result
 
         foreach ($data['report']['defs'] as $recID => $rt) {
-            array_push($rv, updateReportSchedule($mysqli, $colNames, $recID, $rt));
+            array_push($rv, updateReportSchedule($mysqli, $colNames, intval($recID), $rt));
         }
         
         $response = array("status"=>HEURIST_OK, "data"=>$rv);

@@ -1,6 +1,6 @@
 <?php
 /**
-* record_template.php: Exports record structure templates in JSON format, 
+* recordTemplate.php: Exports record structure templates in JSON format, 
 *	or calls record_output.php to export actual records (if rectype_ids is not provided)
 *
 * @package     Heurist academic knowledge management system
@@ -36,18 +36,14 @@ if(!defined('PDIR')){
     }
 }
 
-$rectype_ids = $_REQUEST['rectype_ids'];
-
-if(!is_array($rectype_ids) && $rectype_ids != 'y'){
-    $rectype_ids = explode(',', $rectype_ids);
-}
-
 // Record type names
-$rst = dbs_GetRectypeStructures($system, null, 2);
+$rst = dbs_GetRectypeStructures($system, null, 0); //0 - only names and groupnames
 $rty_names = $rst['names'];
 
-if($rectype_ids == 'y'){
+if(@$_REQUEST['rectype_ids']=='y' || @$_REQUEST['rectype_ids']=='all'){ //all
     $rectype_ids = array_keys($rty_names);
+}else{
+    $rectype_ids = prepareIds(filter_var(@$_REQUEST['rectype_ids']));
 }
 
 print "REMOVE THIS HELP WHEN IMPORTING!!\nFor preparing an JSON file 

@@ -1667,12 +1667,12 @@ $.widget( "heurist.resultList", {
         }
         // Show a key icon and popup if there is a password reminder string
         var html_pwdrem = '';
-        var pwd = window.hWin.HEURIST4.util.htmlEscape(fld('bkm_PwdReminder'));
-        if(pwd){
+        var p_reminder = window.hWin.HEURIST4.util.htmlEscape(fld('bkm_PwdReminder'));
+        if(p_reminder){
             html_pwdrem =  '<span class="logged-in-only ui-icon ui-icon-key rec_pwdrem" style="display:inline;left:14px;font-size:0.99em"></span>';
-            pwd = ' pwd="'+pwd+'" ';
+            p_reminder = ' pwd="'+p_reminder+'" ';
         }else{
-            pwd = '';
+            p_reminder = '';
         }
 
         function __getOwnerName(ugr_id){ //we may use SystemMgr.usr_names however it calls server
@@ -1774,7 +1774,7 @@ $.widget( "heurist.resultList", {
 
         // construct the line or block
         var html = '<div class="recordDiv '+this.options.recordDivClass
-        +'" recid="'+recID+'" '+pwd+' rectype="'+rectypeID+'" bkmk_id="'+bkm_ID+'">' //id="rd'+recID+'" 
+        +'" recid="'+recID+'" '+p_reminder+' rectype="'+rectypeID+'" bkmk_id="'+bkm_ID+'">' //id="rd'+recID+'" 
         + html_thumb
         
         + '<div class="recordIcons">' //recid="'+recID+'" bkmk_id="'+bkm_ID+'">'

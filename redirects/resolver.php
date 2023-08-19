@@ -97,7 +97,11 @@ $requestUri:
        array_unshift($requestUri, 'heurist');//not used
     }                           
 
-    $error_msg = System::dbname_check($requestUri[1]);
+    $error_msg = null; //System::dbname_check($requestUri[1]);
+    if($requestUri[1]=='' || preg_match('/[^A-Za-z0-9_\$]/', $requestUri[1])){
+        $error_msg = 'Database parameter is wrong';
+    }
+        
     if($error_msg==null){
         
         $database = $requestUri[1];

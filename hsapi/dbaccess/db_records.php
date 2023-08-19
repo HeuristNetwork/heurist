@@ -1927,7 +1927,7 @@ function recordUpdateCalcFields($system, $recID, $rty_ID=null, $progress_session
         }
     }
     
-    if($progress_session_id && $rec_count>100){
+    if($progress_session_id>0 && $rec_count>100){
         mysql__update_progress(null, $progress_session_id, true, '0,'.$rec_count);    
     }else{
         $progress_session_id = 0;
@@ -2067,7 +2067,7 @@ function recordUpdateCalcFields($system, $recID, $rty_ID=null, $progress_session
                 }
                 $progress_count++;
                 
-                if($progress_session_id && ($progress_count % 100 == 0)){
+                if($progress_session_id>0 && ($progress_count % 100 == 0)){
                     $session_val = $progress_count.','.$rec_count;
                     $current_val = mysql__update_progress(null, $progress_session_id, false, $session_val);
                     if($current_val && $current_val=='terminate'){

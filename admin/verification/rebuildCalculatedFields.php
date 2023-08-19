@@ -46,12 +46,12 @@ if(!$init_client || @$_REQUEST['session']>0){ //2a. init operation on client sid
     if(@$_REQUEST['session']>0)
     {
         $rty_IDs = null;
-        if(@$_REQUEST['recTypeIDs']){
-            $rty_IDs = prepareIds(filter_var($_REQUEST['recTypeIDs'], FILTER_SANITIZE_STRING));
+        if(@$_REQUEST['recTypeIDs']!=null){
+            $rty_IDs = prepareIds(filter_var($_REQUEST['recTypeIDs']));
         }
         
         $system->setResponseHeader();
-        $res = recordUpdateCalcFields($system, null, $rty_IDs, @$_REQUEST['session']);
+        $res = recordUpdateCalcFields($system, null, $rty_IDs, intval(@$_REQUEST['session']));
         
         //2b. response to client side
         if( is_bool($res) && !$res ){
@@ -65,7 +65,7 @@ if(!$init_client || @$_REQUEST['session']>0){ //2a. init operation on client sid
     }else{
         
         if(@$_REQUEST['recTypeIDs']){
-            $rty_IDs = prepareIds(filter_var($_REQUEST['recTypeIDs'], FILTER_SANITIZE_STRING));
+            $rty_IDs = prepareIds(filter_var($_REQUEST['recTypeIDs']));
         }else{
             $rty_IDs = null;
         }

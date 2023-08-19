@@ -51,13 +51,13 @@ if(isset($_REQUEST['get_email']) && isset($_REQUEST['recid'])) {	/* Get the Titl
 
 	$email_title = "";
 	$email_body = "";
-	$id = $_REQUEST['recid'];
+	$id = intval($_REQUEST['recid']);
 
 	// Validate ID
 	if(!is_numeric($id) || intval($id) < 1){
 
 		$response = array("status"=>HEURIST_ACTION_BLOCKED, "message"=>"An invalid Email record id was provided.", "request"=>htmlspecialchars($id));
-		$system->addError(HEURIST_ERROR, "Bulk Email Other: The record IDs used for the Email selector are invalid or have not been retrieved correctly. Invalid ID => " . htmlspecialchars($id));
+		$system->addError(HEURIST_ERROR, "Bulk Email Other: The record IDs used for the Email selector are invalid or have not been retrieved correctly. Invalid ID => " . htmlspecialchars($_REQUEST['recid']));
 		$rtn = json_encode($response);
 
 		print $rtn;

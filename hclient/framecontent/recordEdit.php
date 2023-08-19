@@ -41,10 +41,10 @@ if(@$_REQUEST['annotationId'] || @$_REQUEST['a']){
     $mysqli = $system->get_mysqli();
     
     $res = mysql__select_row($mysqli, 'select dtl_RecID from recDetails '
-        .' WHERE dtl_DetailTypeID='.DT_ORIGINAL_RECORD_ID .' AND dtl_Value="'.$uuid.'"');
+        .' WHERE dtl_DetailTypeID='.DT_ORIGINAL_RECORD_ID .' AND dtl_Value="'.$mysqli->real_escape_string($uuid).'"');
 
     if ($res && $res[0] > 0) {
-        $params = array('recID'=>$res[0]);
+        $params = array('recID'=>intval($res[0]));
     }else{
         //annotation not found
         //exit();
@@ -55,7 +55,7 @@ if(@$_REQUEST['annotationId'] || @$_REQUEST['a']){
 //this is an addition/bookmark of URL - at the moment from bookmarklet only
 if(@$_REQUEST['u']){ 
     
-    $url = $_REQUEST['u'];
+    $url = filter_var($_REQUEST['u'],FILTER_SANITIZE_URL);
 
 // 1. check that this url already exists and bookmarked by current user  ------------------------
 //      (that's double precaution - it is already checked in bookmarkletPopup)    

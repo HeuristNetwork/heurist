@@ -28,7 +28,7 @@ $time_debug = microtime(true);
 print ('terms '.(microtime(true)-$time_debug));        
 */
     $params = null;
-    $recID = @$_REQUEST['recID'];
+    $recID = intval(@$_REQUEST['recID']);
     if($recID>0){
         $params = array('recID'=>$recID);
     }

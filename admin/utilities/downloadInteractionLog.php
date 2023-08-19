@@ -30,7 +30,7 @@ if(!file_exists($log_file)){
 	print '<h2>There is no interactions log file</h2>';
 	exit();
 }else if(!is_readable($log_file)){
-    $system->addError(HEURIST_ERROR, 'Unable to read the interaction log file for DB ' . $_REQUEST['db']);
+    $system->addError(HEURIST_ERROR, 'Unable to read the interaction log file for DB ' . htmlspecialchars($_REQUEST['db']));
     print '<h2>Unable to read User interactions file</h2>';
     exit();
 }
@@ -41,7 +41,7 @@ if(@$_REQUEST['actionType']){ // filter and download interaction log as CSV file
     $csv_fd = fopen('php://output', 'w');
 
     if(!$log_fd){ // Unable to open log
-        $system->addError(HEURIST_ERROR, 'Unable to open the interaction log file for DB ' . $_REQUEST['db']);
+        $system->addError(HEURIST_ERROR, 'Unable to open the interaction log file for DB ' . htmlspecialchars($_REQUEST['db']));
         print '<h2>An error has occurred while trying to open the Interaction log for this database</h2>';
         exit();
     }else if(!$csv_fd){

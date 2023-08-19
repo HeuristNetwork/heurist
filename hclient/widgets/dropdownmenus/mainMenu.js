@@ -2541,7 +2541,7 @@ console.log('>>>>'+that.divProfileItems.find('.ui-menu-item').css('padding-left'
             }else if(template_type == 'template-json'){
 
                 window.hWin.HEURIST4.util.downloadURL(window.hWin.HAPI4.baseURL
-                    +'export/json/record_template.php?'
+                    +'export/json/recordTemplate.php?'
                     +'rectype_ids='+ rectype_ids
                     +'&db='+window.hWin.HAPI4.database);
             }else{

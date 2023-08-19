@@ -63,7 +63,7 @@ function getInvalidFieldTypes($mysqli, $rectype_id){
     "dty_PtrTargetRectypeIDs".
     " FROM defDetailTypes";
 
-    if(null!=$rectype_id){ //detail types for given recordtype
+    if($rectype_id>0){ //detail types for given recordtype
         $query = $query.", defRecStructure WHERE rst_RecTypeID=".$rectype_id." and rst_DetailTypeID=dty_ID and ";
 
     }else{

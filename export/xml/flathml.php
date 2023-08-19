@@ -111,23 +111,22 @@ if(@$_REQUEST['postdata']){
     //all parameters can be sent as json array in postdata 
     $_REQUEST = json_decode($_REQUEST['postdata'], true);
 }
+foreach($_REQUEST as $key=>$value) { $_REQUEST[$key] = filter_var($value); }
 
 if(@$_REQUEST['rectype_templates']){ // output manifest + files ??
-    $rectype_templates = $_REQUEST['rectype_templates']; //flag to produce rectype templates instead of real records
+    $rectype_templates = $_REQUEST['rectype_templates']!=null && $_REQUEST['rectype_templates']!=0; //flag to produce rectype templates instead of real records
 }else{
     $rectype_templates = false;
 }
-
-
 if(@$_REQUEST['multifile']){ // output manifest + files ??
-    $intofile = true; //flag one-record-per-file mode for HuNI  
+    $intofile = $_REQUEST['multifile']!=null && $_REQUEST['multifile']!=0; //flag one-record-per-file mode for HuNI  
 }else{
     $intofile = false;
 }                                                 
 
 $output_file = null;
 $hunifile = null; //name of file-per-record for HuNI mode
-
+/* output to file is disabled
 if(@$_REQUEST['filename']){ //write the output into single file
     $output_file_name = $_REQUEST['filename'];
     $output_file = fopen ($output_file_name, "w");    
@@ -135,9 +134,8 @@ if(@$_REQUEST['filename']){ //write the output into single file
         die("Can't write ".$output_file." file. Please ask sysadmin to check permissions");
     }
     $_REQUEST['mode'] = 1;
-}else{
-    $output_file = null;     
 }
+*/
 
 if(!defined('PDIR')){
     $system = new System();

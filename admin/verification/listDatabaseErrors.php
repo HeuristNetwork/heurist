@@ -54,7 +54,7 @@ if(@$_REQUEST['data']){
     $lists2 = $lists;
     
 }else{
-    $lists = getInvalidFieldTypes($mysqli, @$_REQUEST['rt']); //in getFieldTypeDefinitionErrors.php
+    $lists = getInvalidFieldTypes($mysqli, intval(@$_REQUEST['rt'])); //in getFieldTypeDefinitionErrors.php
     if(!@$_REQUEST['show']){
         if(count($lists["terms"])==0 && count($lists["terms_nonselectable"])==0
         && count($lists["rt_contraints"])==0  && count($lists["rt_defvalues"])==0){

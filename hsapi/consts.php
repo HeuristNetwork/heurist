@@ -420,7 +420,7 @@ function boot_error_handler($errno, $errstr, $errfile, $errline){
             if(strpos($errstr,'Input variables')>0){
         
                 $message = "$errstr $errfile:$errline";
-                error_log('Large INPUT: '.$message);
+                error_log('Large INPUT: '.htmlspecialchars($message));
                 error_log(print_r(array_slice($_REQUEST, 0, 100),true));
                 error_log(print_r($_SERVER, true));
             /*

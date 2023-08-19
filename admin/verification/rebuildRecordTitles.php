@@ -47,15 +47,15 @@ $init_client = (@$_REQUEST['verbose']!=1);
 $rty_ids_list = null;
 //sanitize
 if(@$_REQUEST['recTypeIDs']){
-    $rty_ids = prepareIds($_REQUEST['recTypeIDs']);
+    $rty_ids = prepareIds(filter_var($_REQUEST['recTypeIDs']));
     $mysqli = $system->get_mysqli();
     //$rty_ids = array_map(array($mysqli,'real_escape_string'), $rty_ids);
     if(count($rty_ids)>0) $rty_ids_list = implode(',', $rty_ids);
 }
 
-if(!$init_client || @$_REQUEST['session']>0){ //2a. init operation on client side
+if(!$init_client || intval(@$_REQUEST['session'])>0){ //2a. init operation on client side
 
-    $res = doRecTitleUpdate($system, @$_REQUEST['session'],  $rty_ids_list);
+    $res = doRecTitleUpdate($system, intval(@$_REQUEST['session']),  $rty_ids_list);
     
     if(@$_REQUEST['session']>0)
     {
@@ -273,7 +273,7 @@ function doRecTitleUpdate( $system, $progress_session_id, $recTypeIDs ){
     //masks per record types    
     $masks = mysql__select_assoc2($mysqli, 'select rty_ID, rty_TitleMask from  defRecTypes');
 
-    if($progress_session_id && $rec_count>100){
+    if($progress_session_id>0 && $rec_count>100){
         mysql__update_progress(null, $progress_session_id, true, '0,'.$rec_count);    
     }
     
@@ -330,7 +330,7 @@ function doRecTitleUpdate( $system, $progress_session_id, $recTypeIDs ){
             }
         }
         
-        if($progress_session_id &&  $rec_count>100 && ($processed_count % 100 == 0)){
+        if($progress_session_id>0 &&  $rec_count>100 && ($processed_count % 100 == 0)){
             $session_val = $processed_count.','.$rec_count;
             $current_val = mysql__update_progress(null, $progress_session_id, false, $session_val);
             if($current_val && $current_val=='terminate'){
@@ -344,7 +344,7 @@ function doRecTitleUpdate( $system, $progress_session_id, $recTypeIDs ){
     $res->close();
     
     //remove session file
-    if($progress_session_id && $rec_count>100){
+    if($progress_session_id>0 && $rec_count>100){
         mysql__update_progress(null, $progress_session_id, false, 'REMOVE');    
     }
     

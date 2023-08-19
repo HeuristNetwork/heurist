@@ -59,7 +59,7 @@ function hLayoutMgr(){
         
         if(layout==null){
             //take layout from container
-            layout = container.html();
+            layout = container.text();
             var res = window.hWin.HEURIST4.util.isJSON(layout);
             if(res!==false){
                 layout = res;    
