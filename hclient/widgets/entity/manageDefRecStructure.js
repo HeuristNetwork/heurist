@@ -3203,7 +3203,7 @@ console.log('_afterDeleteEvenHandler');
 
                 if($div.find('.ui-icon').length == 0){
                     $div.append($('<span class="ui-icon ui-icon-check" title="Find records WITH field" style="color:gray;margin-left:5px;font-size:12px;" />'))
-                        .append($('<span class="ui-icon ui-icon-close" title="Find records WITHOUT field" style="color:gray;font-size:12px;" />'));
+                        .append($('<span class="ui-icon" title="Find records WITHOUT field" style="color:gray;font-size:2em;text-indent:6px;">\\</span>'));
 
                     $div.contextmenu({
                         delegate: 'span',

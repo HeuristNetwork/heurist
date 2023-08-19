@@ -135,6 +135,7 @@ if(!($is_map_popup || $without_header)){
         
             var rec_Files = [];
             var rec_Files_IIIF_and_3D = [];
+            var rec_Files_IIIF_and_3D_linked = [];
             var baseURL = '<?php echo HEURIST_BASE_URL;?>';                
             var database = '<?php echo HEURIST_DBNAME;?>';                
         
@@ -462,11 +463,23 @@ if(!($is_map_popup || $without_header)){
                 if(rec_Files_IIIF_and_3D.length>0){
 
                     if(window.hWin && window.hWin.HAPI4){
-                        $('.thumbnail2').mediaViewer({rec_Files:rec_Files_IIIF_and_3D, 
+                        $('.thumbnail2.main-media').mediaViewer({rec_Files:rec_Files_IIIF_and_3D, 
                                 showLink:true, database:database, baseURL:baseURL});    
                     }else{
                         $.getScript(baseURL+'external/jquery.fancybox/jquery.fancybox.js', function(){
-                            $('.thumbnail2').mediaViewer({rec_Files:rec_Files_IIIF_and_3D, 
+                            $('.thumbnail2.main-media').mediaViewer({rec_Files:rec_Files_IIIF_and_3D, 
+                                showLink:true, database:database, baseURL:baseURL});
+                        });
+                    }
+                }
+                if(rec_Files_IIIF_and_3D_linked.length>0){
+
+                    if(window.hWin && window.hWin.HAPI4){
+                        $('.thumbnail2.linked-media').mediaViewer({rec_Files:rec_Files_IIIF_and_3D_linked, 
+                                showLink:true, database:database, baseURL:baseURL});    
+                    }else{
+                        $.getScript(baseURL+'external/jquery.fancybox/jquery.fancybox.js', function(){
+                            $('.thumbnail2.linked-media').mediaViewer({rec_Files:rec_Files_IIIF_and_3D_linked, 
                                 showLink:true, database:database, baseURL:baseURL});
                         });
                     }
@@ -617,7 +630,6 @@ if(!($is_map_popup || $without_header)){
         
         div.thumbnail{
             margin-left: 0px;
-            margin-bottom: 25px;
         }
 
         div.thumbnail img {
@@ -1486,7 +1498,9 @@ function print_public_details($bib) {
         print '<script>';
         foreach ($thumbs as $thumb) {
             if(strpos($thumb['orig_name'], '_iiif')===0 || $thumb['mode_3d_viewer']!=''){
-                print 'rec_Files_IIIF_and_3D.push({rec_ID:'.$bib['rec_ID']
+
+                $to_array = 'rec_Files_IIIF_and_3D' . ($thumb['linked'] ? '_linked' : '');
+                print $to_array.'.push({rec_ID:'.$bib['rec_ID']
                                             .', id:"'.$thumb['nonce']
                                             .'",mimeType:"'.$thumb['mimeType']
                                             .'",mode_3d_viewer:"'.$thumb['mode_3d_viewer']
@@ -1499,8 +1513,7 @@ function print_public_details($bib) {
         }
         print '</script>';
     }
-    print '<div class="thumbnail2" style="text-align:center"></div>';
-
+    print '<div class="thumbnail2 main-media" style="text-align:center"></div>';
     
     $hasAudioVideo = '';
     if($is_production){
@@ -1512,12 +1525,20 @@ function print_public_details($bib) {
       
     $several_media = count($thumbs);
     $hide_images = $system->user_GetPreference('recordData_Images', 0);
+    $added_linked_media_cont = false;
         
-    if($hide_images != 2) // use/hide old thumbnails   
+    if($hide_images != 2) // use/hide all thumbnails   
         foreach ($thumbs as $k => $thumb) {
             
-            if(strpos($thumb['orig_name'],'_iiif')===0 || 
-                      $thumb['mode_3d_viewer'] != '' ) continue;
+            if(strpos($thumb['orig_name'],'_iiif')===0 || $thumb['mode_3d_viewer'] != '' ){
+
+                if($thumb['linked'] && !$added_linked_media_cont){
+                    print '<div class="thumbnail2 linked-media" style="text-align:center"></div>';
+                    $added_linked_media_cont = true;
+                }
+
+                continue;
+            }
             
             $isAudioVideo = (strpos($thumb['mimeType'],'audio/')===0 || strpos($thumb['mimeType'],'video/')===0);
             
@@ -1626,7 +1647,7 @@ function print_public_details($bib) {
                     .($is_production?'margin-left:100px':'')
                     .($k>0?'display:none;':'').'">';
             }else{
-                print '<div class="thumb_image media-content'. ($thumb['linked'] == true ? ' linked-media' : '') .'"  style="'.($isImageOrPdf?'':'cursor:default;')
+                print '<div class="thumb_image media-content'. ($thumb['linked'] == true ? ' linked-media' : '') .'"  style="min-height:140px;'.($isImageOrPdf?'':'cursor:default;')
                     .($k>0?'display:none;':'').'">';
             }
 
