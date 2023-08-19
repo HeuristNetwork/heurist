@@ -1502,9 +1502,9 @@ error_log('UPDATED '.$session_id.'  '.$value);
                     $to_be_imported[] = '2-1098';
                 }
                 // import Languages field
-                if(!(ConceptCode::getDetailTypeLocalID('2-967')>0)){
-                    $to_be_imported[] = '2-967';
-                }
+                //if(!(ConceptCode::getDetailTypeLocalID('2-967')>0)){
+                //    $to_be_imported[] = '2-967';
+                //}
                 if(count($to_be_imported)>0){
                     $importDef = new DbsImport( $system );
                     if($importDef->doPrepare(  array(

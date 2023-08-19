@@ -221,6 +221,7 @@ if(_DBG) error_log('get db url '.(microtime(true)-$time_debug));
 $time_debug = microtime(true);        
         
         if(!$database_url){
+            $this->system->addError(HEURIST_ERROR, "Can not obtain database url for database # ".$this->source_db_reg_id);
             return false; //see $system->getError
         }        
     

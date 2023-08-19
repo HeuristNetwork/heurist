@@ -60,10 +60,10 @@ function editCMS_Manager( options ){
     }else{
         //check field
         let is_missed = true;
-        if(DT_LANGUAGES>0 && !$Db.rst(DT_CMS_HOME,DT_LANGUAGES)){
+        if(DT_LANGUAGES>0 && !$Db.rst(RT_CMS_HOME,DT_LANGUAGES)){
             is_missed = false;
         }
-console.log(is_missed);        
+        
         if (is_missed) {
         
             window.hWin.HAPI4.SystemMgr.checkPresenceOfRectype('99-51',2,
