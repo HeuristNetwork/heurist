@@ -44,9 +44,11 @@
 // tpl - smarty
 // hml - xml output
 // view - record view
+// edit - record edit
+// adm - main admin ui
 //  heurist/database_name/action/param1/param2
 $requestUri = explode('/', trim($_SERVER['REQUEST_URI'],'/'));
-$allowedActions = array('web','hml','tpl','view');
+$allowedActions = array('web','hml','tpl','view','edit','adm');
 
 /*
 if(count($requestUri)==1){
@@ -60,10 +62,16 @@ if(count($requestUri)==1){
 }
 http://127.0.0.1/heurist/MBH
 */
-if(count($requestUri)==1 && (@$requestUri[0]=='MBH' || @$requestUri[0]=='johns_test_BnF')){
-    $dbname = ($requestUri[0]=='MBH')?'MBH':'johns_test_BnF'; //to avoid "Open redirect" security report
-    header('Location: /'.$dbname.'/web/');  
-    exit();
+if ((count($requestUri)==1 && !($requestUri[0]=='heurst' || $requestUri[0]=='h6-alpha'))
+     || 
+    (count($requestUri)==2 && !in_array($requestUri[1],$allowedActions))
+    )
+{ //&& (@$requestUri[0]=='MBH' || @$requestUri[0]=='johns_test_BnF')){
+    $dbname = filter_var((count($requestUri)==1)?$requestUri[0]:$requestUri[1]); //to avoid "Open redirect" security report
+    if(!preg_match('/[^A-Za-z0-9_\$]/', $dbname)){
+        header('Location: /'.$dbname.'/web/');  
+        exit();
+    }
 }
 
 
@@ -101,6 +109,7 @@ $requestUri:
     if($requestUri[1]=='' || preg_match('/[^A-Za-z0-9_\$]/', $requestUri[1])){
         $error_msg = 'Database parameter is wrong';
     }
+    $params = array();
         
     if($error_msg==null){
         
@@ -112,7 +121,6 @@ $requestUri:
             $database='MBH_Manuscripta_Bibliae_Hebraicae';
         }
 
-        $params = array();
         $params['db'] = $database;
         
         require_once ('../hsapi/utilities/utils_host.php');
@@ -135,22 +143,28 @@ $requestUri:
             }
             $_SERVER["REQUEST_URI"] = $host_params['install_dir']; //'/heurist/';
             
-            $_REQUEST = $params;
             define('PDIR', $host_params['server_url'] . $host_params['install_dir']);
             
-            
-            include '../index.php';
-            exit();
+            $rewrite_path = '../index.php';
 
         }else {
             require_once ('../hsapi/dbaccess/utils_db.php');
             
             $redirect = $host_params['server_url'] . $host_params['install_dir'];
         
-            if($action=='view'){
+            if($action=='view' || $action=='edit'){
             
                 if(@$requestUri[3] && ctype_digit($requestUri[3]) && $requestUri[3]>0){
-                    $redirect .= ('viewers/record/viewRecord.php?db='.$database.'&recID='.$requestUri[3]);
+                    $redirect .= ('viewers/record/viewRecord.php?db='.$database.'&recID='.intval($requestUri[3]));
+                    $params['recID'] = intval($requestUri[3]);
+                    
+                    if($action=='view'){
+                        $rewrite_path = '../viewers/record/viewRecord.php';    
+                    }else{
+                        define('PDIR', $host_params['server_url'] . $host_params['install_dir']);
+                        $rewrite_path = '../hclient/framecontent/recordEdit.php';
+                    }
+                    
                 }else{
                     $error_msg = 'Record ID is not defined';
                 }
@@ -180,10 +194,33 @@ $requestUri:
                 }else{
                     $error_msg = 'Query or Record ID is not defined';
                 }
+
+            }else if($action=='adm'){
+
+                $redirect = '../index.php?db='.$database;
+
+                $query = null;
+                if(@$requestUri[3]){
+                    $ids = prepareIds(@$requestUri[3]);
+                    //if(ctype_digit($requestUri[4]) && $requestUri[4]>0){
+                    if(count($ids)>0){
+                        $query = ('ids:'.$requestUri[3]);    
+                    }else{
+                        $query = urldecode($requestUri[3]);     
+                    }
+                    $params['w'] = 'a';
+                    $params['q'] = $query;
+                    
+                    $redirect = $redirect.'&q='.$query;
+                }
+                //define('PDIR', $host_params['server_url'] . $host_params['install_dir']);    
+                //$rewrite_path = '../index.php';
                 
             }else if($action=='tpl'){
                 
         //http://127.0.0.1/heurist/osmak_9c/tpl/Basic%20(initial%20record%20types)/t:10        
+                $query = null;
+        
                 if(@$requestUri[3]){
                 
                     if(@$requestUri[4]){ 
@@ -193,10 +230,17 @@ $requestUri:
                         $ids = prepareIds(@$requestUri[4]);
                         //if(ctype_digit($requestUri[4]) && $requestUri[4]>0){
                         if(count($ids)>0){
-                            $redirect .= ('ids:'.$requestUri[4]);    
+                            $query = ('ids:'.$requestUri[4]);    
                         }else{
-                            $redirect .= $requestUri[4];     
+                            $query = $requestUri[4];     
                         }
+                        $redirect .= $query;     
+
+                        $params['w'] = 'a';
+                        $params['q'] = urldecode($query);
+                        $params['template'] = urldecode($requestUri[3]);
+                        $rewrite_path = '../viewers/smarty/showReps.php';
+                        
                     }else{
                         $error_msg = 'Query or Record ID is not defined';
                     }
@@ -215,8 +259,10 @@ $requestUri:
     //DEBUG echo $redirect;
     if($error_msg){
        $redirect .= ('/hclient/framecontent/infoPage.php?error='.rawurlencode($error_msg)); 
-    }else{
-        //http_build_query
+    }else if($rewrite_path){
+        $_REQUEST = $params;
+        include $rewrite_path;
+        exit();
     }
     
     header('Location: '.$redirect);  

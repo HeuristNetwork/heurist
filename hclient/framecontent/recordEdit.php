@@ -172,6 +172,8 @@ else{
     if($rec_rectype!=null){
         $rec_rectype = ConceptCode::getRecTypeLocalID($rec_rectype);
         $params['rec_rectype'] = $rec_rectype;
+    }else if(intval(@$_REQUEST['recID'])>0){
+        $params['recID'] = intval($_REQUEST['recID']);
     }
 }   
 print '<script>var prepared_params = '.json_encode($params).';</script>';

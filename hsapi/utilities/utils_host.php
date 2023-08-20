@@ -93,7 +93,7 @@ function getHostParams( $argv=null )
             $isSecure = true;
         }
 
-        $rewrite_actions = 'website|web|hml|tpl|view'; //actions for redirection https://hist/heurist/[dbname]/web/
+        $rewrite_actions = 'website|web|hml|tpl|view|edit|adm'; //actions for redirection https://hist/heurist/[dbname]/web/
         
         if(@$_SERVER["SCRIPT_NAME"] && substr($_SERVER["SCRIPT_NAME"], -4 ) === '/web'){
             $_SERVER["SCRIPT_NAME"] .= '/';

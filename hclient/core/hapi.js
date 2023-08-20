@@ -91,8 +91,8 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
         if(script_name.endsWith('/web')) script_name = script_name + '/'; //add last slash
 
         //actions for redirection https://hist/heurist/[dbname]/web/
-        if(script_name.search(/\/([A-Za-z0-9_]+)\/(website|web|hml|tpl|view)\/.*/)>=0){
-            installDir = script_name.replace(/\/([A-Za-z0-9_]+)\/(website|web|hml|tpl|view)\/.*/, '')+'/';
+        if(script_name.search(/\/([A-Za-z0-9_]+)\/(website|web|hml|tpl|view|edit|adm)\/.*/)>=0){
+            installDir = script_name.replace(/\/([A-Za-z0-9_]+)\/(website|web|hml|tpl|view|edit|adm)\/.*/, '')+'/';
             if(installDir=='/') installDir = '/h6-alpha/';//'/heurist/';
         }else{
             installDir = script_name.replace(/(((\?|admin|applications|common|context_help|export|hapi|hclient|hsapi|import|startup|records|redirects|search|viewers|help|ext|external)\/.*)|(index.*|test.php))/, ""); // Upddate in utils_host.php also
@@ -2539,7 +2539,7 @@ console.log('ERROR',response);
         * Returns function to string resouce according to current region setting
         */
         setLocale: function (region) {
-            
+        
             region = that.getLangCode3(region, 'ENG'); //English is default
             
             if (typeof regional === 'undefined' || regional === null  || !regional[region]) {

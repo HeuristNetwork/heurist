@@ -157,7 +157,7 @@ if( @$_REQUEST['recID'] || @$_REQUEST['recid'] || array_key_exists('website', $_
 
 
 define('IS_INDEX_PAGE',true);
-define('PDIR','');
+if(!defined('PDIR')) define('PDIR','');
 
 require_once(dirname(__FILE__)."/hclient/framecontent/initPage.php");
 
