@@ -197,7 +197,7 @@ $requestUri:
 
             }else if($action=='adm'){
 
-                $redirect = '../index.php?db='.$database;
+                $redirect = $redirect.'?db='.$database;
 
                 $query = null;
                 if(@$requestUri[3]){
