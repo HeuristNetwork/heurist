@@ -1243,8 +1243,6 @@ function print_public_details($bib) {
         
         foreach ($bds_temp as $bd) {
             
-            $rollover = '';
-
             if ($bd['dty_Type'] == 'enum' || $bd['dty_Type'] == 'relationtype') {
                 
                 $bd['val'] = output_chunker($defTerms->getTermLabel($bd['val'], true));
@@ -1274,8 +1272,8 @@ function print_public_details($bib) {
                     //ignore empty date
                     continue;
                 }else{
-                    //$rollover = htmlspecialchars(Temporal::toHumanReadable($bd['val'], true, 2, ''));
-                    $bd['val'] = htmlspecialchars(Temporal::toHumanReadable($bd['val'], true, 1));
+                    $bd['rollover'] = Temporal::toHumanReadable($bd['val'], true, 2, "\n"); //extended
+                    $bd['val'] = Temporal::toHumanReadable($bd['val'], true, 1); //compact
                     $bd['val'] = output_chunker($bd['val']);
                 }
 
@@ -1769,7 +1767,10 @@ function print_public_details($bib) {
                 . '</div><div class="detail'.($is_map_popup && ($bd['dty_ID']!=DT_SHORT_SUMMARY)?' truncate':'').$is_cms_content.'">';
         }
 
-        print '<span class="value">' . $bd['val'] . '</span>'; // add value
+        
+        
+        print '<span class="value"'.(@$bd['rollover']?' title="'.$bd['rollover'].'"':'')
+                .'>' . $bd['val'] . '</span>'; // add value
         $prevLbl = $bd['name'];
     }
 
@@ -1954,8 +1955,8 @@ function print_relation_details($bib) {
 					print sanitizeString($bd['Title'],ALLOWED_TAGS);
 				}
 				print '&nbsp;&nbsp;';
-				if (@$bd['StartDate']) print htmlspecialchars(Temporal::toHumanReadable($bd['StartDate'], true, 1));
-				if (@$bd['EndDate']) print ' until ' . htmlspecialchars(Temporal::toHumanReadable($bd['EndDate'], true, 1));
+				if (@$bd['StartDate']) print Temporal::toHumanReadable($bd['StartDate'], true, 1); //compact
+				if (@$bd['EndDate']) print ' until ' . Temporal::toHumanReadable($bd['EndDate'], true, 1);
 			print '</div></div>';
 		}
 		$from_res->close();
