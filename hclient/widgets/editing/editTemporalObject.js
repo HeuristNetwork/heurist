@@ -259,9 +259,12 @@ var TemporalPopup = (function () {
 	        },
 	        activate: function(event, ui){
 	        	let newType = ui.newPanel.attr('id');
+                $('#selectCLD').parent().show()
 	        	if(newType === "f"){
 	        		_updateSimpleRange();
-	        	}
+	        	}else if(newType === "c"){
+                    $('#selectCLD').parent().hide()
+                }
 	        }
     	});
         
@@ -372,7 +375,7 @@ var TemporalPopup = (function () {
 
     function _updateGeorgianDate(){
         var type = that.curTemporal.getType();
-        if(calendar && calendar.name.toLowerCase()!='gregorian' && type){
+        if(calendar && calendar.name.toLowerCase()!='gregorian' && type && type!='c'){
 
             var value = '';
             if (type === "s") {
@@ -643,7 +646,12 @@ var TemporalPopup = (function () {
             //assign new calendar for all pickers
             $('.withCalendarsPicker').each(function() {
 
-                var dd = convert($(this), false);
+                var dd = '';
+                try{
+                    dd = convert($(this), false);
+                }catch(e){
+                    
+                }
                 $(this).calendarsPicker('option', {calendar: calendar,
                         defaultDate: dd
                 });
