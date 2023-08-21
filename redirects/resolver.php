@@ -50,6 +50,11 @@
 $requestUri = explode('/', trim($_SERVER['REQUEST_URI'],'/'));
 $allowedActions = array('web','hml','tpl','view','edit','adm');
 
+//print $_SERVER['REQUEST_URI'];
+//print print_r($requestUri,true);
+//exit();
+
+
 /*
 if(count($requestUri)==1){
    if($requestUri[0]==='heurist'){
@@ -62,12 +67,22 @@ if(count($requestUri)==1){
 }
 http://127.0.0.1/heurist/MBH
 */
-if ((count($requestUri)==1 && !($requestUri[0]=='heurst' || $requestUri[0]=='h6-alpha'))
+if(count($requestUri)==1 && ($requestUri[0]=='heurist' || $requestUri[0]=='h6-alpha')){
+
+    header('Location: /'.$requestUri[0].'/index.php');  
+    exit();
+    
+}else if ((count($requestUri)==1)
      || 
-    (count($requestUri)==2 && !in_array($requestUri[1],$allowedActions))
+    (count($requestUri)==2 && (!in_array($requestUri[1],$allowedActions) || $requestUri[1]=='startup'))
     )
 { //&& (@$requestUri[0]=='MBH' || @$requestUri[0]=='johns_test_BnF')){
     $dbname = filter_var((count($requestUri)==1)?$requestUri[0]:$requestUri[1]); //to avoid "Open redirect" security report
+    
+    if($dbname=='startup'){
+        header('Location: /'.$requestUri[0].'/startup/index.php');  
+        exit();
+    }else
     if(!preg_match('/[^A-Za-z0-9_\$]/', $dbname)){
         header('Location: /'.$dbname.'/web/');  
         exit();
@@ -119,13 +134,16 @@ $requestUri:
         
         if($database=='MBH'){
             $database='MBH_Manuscripta_Bibliae_Hebraicae';
+        }else if($database=='heurist' || $database=='h6-alpha'){
+            header('Location: /'.$requestUri[1].'/index.php');  
+            exit();
         }
 
         $params['db'] = $database;
         
         require_once ('../hsapi/utilities/utils_host.php');
         $host_params = getHostParams();
-
+        
         if($action=='web' || $action=='website'){
             
             $redirect .= '?db='.$database.'&website';
