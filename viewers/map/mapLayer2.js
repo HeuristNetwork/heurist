@@ -556,6 +556,10 @@ function hMapLayer2( _options ) {
                                 var title = [];                                
                                 if(dty_ID=='Path'){
                                     title = 'Path';                                   
+                                }else if (typeof dty_ID === 'string' && dty_ID.indexOf('relation:')===0){
+console.log(dty_ID);                                   
+                                    title = $Db.trm(dty_ID.substring(9),'trm_Label');
+                                    if(!title) title = dty_ID;
                                 }else{
                                     for(var j=0; j<_geojson_rty_ids.length; j++){
                                         let t1 = $Db.rst(_geojson_rty_ids[j], dty_ID, 'rst_DisplayName');
@@ -565,8 +569,10 @@ function hMapLayer2( _options ) {
                                         //let t1 = $Db.dty(dty_ID, 'dty_Name');
                                         //(window.hWin.HEURIST4.util.isempty(t1)?'':t1)
                                         title = title.join(' | ');
-                                    }else{
+                                    }else if (title.length==1){
                                         title = title[0];    
+                                    }else{
+                                        title = 'Field: '+_geojson_rty_ids[0]; //not found
                                     }
                                 }
                                 

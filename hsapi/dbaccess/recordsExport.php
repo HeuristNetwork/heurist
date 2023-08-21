@@ -1494,23 +1494,26 @@ private static function _getGeoJsonFeature($record, $extended=false, $simplify=f
                     $json = self::_getJsonFromWkt($wkt, $simplify);
                     if($json){
                        $geovalues[] = $json; 
-                       $geovalues_dty[] = $value['geo']['pointerDtyID']; 
-                       
-                       if($json['type']=='Point' && $find_geo_by_pointer_dty==null){
-                           $pointerDtyID =  @$value['geo']['pointerDtyID'];
+                       if($value['geo']['pointerDtyID']>0){
+                           $geovalues_dty[] = $value['geo']['pointerDtyID'];
                            
-                           if(defined('DT_PLACE_END') && $pointerDtyID==DT_PLACE_END){
-                                $point1[] = $json;            
-                           }else if(defined('DT_PLACE_START') && $pointerDtyID==DT_PLACE_START){
-                                $point0[] = $json;            
-                           }else if(defined('DT_PLACE_START') && $pointerDtyID==DT_PLACE_END2){
-                                $point1[] = $json;            
-                           }else if(defined('DT_PLACE_START') && $pointerDtyID==DT_PLACE_START2){
-                                $point0[] = $json;            
-                           }else if(defined('DT_PLACE_TRAN') && $pointerDtyID==DT_PLACE_TRAN){
-                                $points[] = $json;            
+                           if($json['type']=='Point' && $find_geo_by_pointer_dty==null){
+                               $pointerDtyID =  @$value['geo']['pointerDtyID'];
+                               
+                               if(defined('DT_PLACE_END') && $pointerDtyID==DT_PLACE_END){
+                                    $point1[] = $json;            
+                               }else if(defined('DT_PLACE_START') && $pointerDtyID==DT_PLACE_START){
+                                    $point0[] = $json;            
+                               }else if(defined('DT_PLACE_START') && $pointerDtyID==DT_PLACE_END2){
+                                    $point1[] = $json;            
+                               }else if(defined('DT_PLACE_START') && $pointerDtyID==DT_PLACE_START2){
+                                    $point0[] = $json;            
+                               }else if(defined('DT_PLACE_TRAN') && $pointerDtyID==DT_PLACE_TRAN){
+                                    $points[] = $json;            
+                               }
                            }
-                           
+                       }else if($value['geo']['relationID']>0){
+                           $geovalues_dty[] = 'relation:'.$value['geo']['relationID'];
                        }
                     }
             } //foreach

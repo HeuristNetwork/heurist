@@ -3581,7 +3581,7 @@ function recordSearchGeoDetails($system, $recID, $find_geo_by_linked_rty, $find_
 
             //$recID = $record["rec_ID"];     
             $squery = 'SELECT rl_SourceID,dtl_DetailTypeID,dtl_Value,ST_asWKT(dtl_Geo) as dtl_Geo, '
-            .'rl_TargetID,dtl_ID,rl_DetailTypeID'
+            .'rl_TargetID,dtl_ID,rl_DetailTypeID,rl_RelationTypeID'
             .' FROM recDetails, recLinks, Records '
             .' WHERE (dtl_Geo IS NOT NULL) '  //'dtl_DetailTypeID='. DT_GEO_OBJECT
             .' AND dtl_RecID=rl_TargetID AND rl_TargetID=rec_ID AND rec_RecTypeID'
@@ -3613,7 +3613,8 @@ function recordSearchGeoDetails($system, $recID, $find_geo_by_linked_rty, $find_
                                 "type" => $rd["dtl_Value"],
                                 "wkt" => $rd["dtl_Geo"],
                                 "placeID" => $rd["rl_TargetID"],
-                                "pointerDtyID" => $rd["rl_DetailTypeID"]
+                                "pointerDtyID" => $rd["rl_DetailTypeID"],
+                                "relationID" => $rd['rl_RelationTypeID']
                             )
                         );
                         $details[$rd["dtl_DetailTypeID"]][$rd["dtl_ID"]] = $detailValue;
