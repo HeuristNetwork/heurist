@@ -563,6 +563,62 @@ if(!($is_map_popup || $without_header)){
                     window.hWin.HAPI4.save_pref('recordData_Images', hide_images);
                 }
             }
+
+            function mediaTooltips(){
+
+                $('span.media-desc, span.media-right').tooltip({
+                    //item: '[data-value]',
+                    content: function(){
+                        return $(this).attr('data-value');
+                    },
+                    open: function(event, ui){
+
+                        ui.tooltip.css({
+                            background: '#D4DBEA',
+                            "font-size": '1em',
+                            padding: '5px',
+                            width: '85%',
+                            cursor: 'default'
+                        });
+
+                        let $ele = $(this);
+                        let $tooltip = ui.tooltip;
+
+                        $tooltip.off('mouseenter mouseleave');
+
+                        $tooltip.on('mouseleave', function(){
+                            $ele.attr('data-tooltip', 0);
+                            setTimeout(function(){
+                                if($ele.attr('data-tooltip') != 1){
+                                    $ele.tooltip('close');
+                                }
+                            }, 1000);
+                        }).on('mouseenter', function(){
+                            $ele.attr('data-tooltip', 1);
+                        });
+                    },
+                    position: {
+                        my: "left top+5", 
+                        at: "left bottom", 
+                        collision: "flipfit"
+                    }
+                }).on('mouseleave focusout', function(event){
+
+                    window.hWin.HEURIST4.util.stopEvent(event);
+                    event.stopImmediatePropagation();
+
+                    let $ele = $(event.target);
+
+                    let int_id = setInterval(function(){
+                        if($ele.attr('data-tooltip') != 1){
+                            $ele.tooltip('close');
+                        }
+                        clearInterval(int_id);
+                    }, 1000);
+                });
+
+                //$('a.img-desc, a.img-right').off('mouseleave focusout');
+            }
             
             $(document).ready(function() {
                 showHidePrivateInfo(null);
@@ -572,6 +628,9 @@ if(!($is_map_popup || $without_header)){
                 showMediaViewer(); //init thumbs for iiif
 
                 displayImages(false);
+
+                mediaTooltips();
+
             });
             
             /*NOT USED
@@ -1358,7 +1417,6 @@ function print_public_details($bib) {
                     $originalFileName = $fileinfo['ulf_OrigFileName'];
                     $fileSize = $fileinfo['ulf_FileSizeKB'];
                     $file_nonce = $fileinfo['ulf_ObfuscatedFileID'];
-                    $file_description = $fileinfo['ulf_Description'];
 
                     $file_playerURL = HEURIST_BASE_URL.'?db='.HEURIST_DBNAME.'&file='.$file_nonce.'&mode=tag';
                     $file_thumbURL  = HEURIST_BASE_URL.'?db='.HEURIST_DBNAME.'&offer_download=1&thumb='.$file_nonce;
@@ -1379,7 +1437,10 @@ function print_public_details($bib) {
                         'player' => $file_playerURL,
                         'nonce' => $file_nonce,
                         'linked' => ($bd['dtl_RecID'] != $bib['rec_ID']),
-                        'description' => $file_description
+                        'description' => $fileinfo['ulf_Description'],
+                        'caption' => $fileinfo['ulf_Caption'],
+                        'rights' => $fileinfo['ulf_Copyright'],
+                        'owner' => $fileinfo['ulf_Copyowner']
                     ));
                     
                      
@@ -1598,39 +1659,31 @@ function print_public_details($bib) {
             }
             print '<br><br>';
 
-            if(@$thumb['description'] != null && @$thumb['description'] != ''){
-                if(filter_var($thumb['description'], FILTER_VALIDATE_URL)){ // just a url
-                    print '<a href="'.htmlspecialchars($thumb['description']).'" target="_blank">&copy;&nbsp;credits</a>';
-                }else{ // check for possible urls and linkify valid ones
+            $caption = !empty(@$thumb['caption']) ? linkifyValue($thumb['caption']) : '';
+            $description = !empty(@$thumb['description']) ? linkifyValue($thumb['description']) : '';
+            $rights = !empty(@$thumb['rights']) ? linkifyValue($thumb['rights']) : '';
+            $owner = !empty(@$thumb['owner']) ? linkifyValue($thumb['owner']) : '';
 
-                    $file_desc = str_replace(array("\r\n", "\r", "\n"), '<br>', $thumb['description']);
+            if(!empty($caption) || !empty($description)){
 
-                    preg_match_all('/((?:https?|ftp|mailto))(\S)+/', $file_desc, $url_matches); // only urls that contain a protocol [http|https|ftp|mailto]
+                $val = !empty($caption) ? $caption : '';
+                $val = !empty($description) && !empty($val) ? $val . '<br><br>' . $description : $val;
+                $val = empty($val) ? $description : $val;
 
-                    if(is_array($url_matches) && count($url_matches[0]) > 0){
+                print '<span class="media-desc" style="cursor: pointer; color: #2080C0; padding-left: 7.5px;" '
+                        . 'data-value="'.addslashes(htmlspecialchars($val)).'" title=" ">'
+                        . 'description</span><br><br>';
+            }
 
-                        foreach($url_matches[0] as $url){
-                            if(mb_strpos($url, '<br>')){ // remove from first br onwards, in case
-                                $url = explode('<br>', $url)[0];
-                            }
-                            if(strpos($file_desc, 'href=\'' . $url)!==false || strpos($file_desc, 'href="' . $url)!==false || strpos($file_desc, 'href=`' . $url)!==false){ // check if already part of element
-                                continue;
-                            }
-                            if(ctype_punct(mb_substr($url, -1))){ // ensure last character isn't punctuation
-                                $url = mb_substr($url, 0, -1);
-                            }
+            if(!empty($rights) || !empty($owner)){
 
-                            if(!empty($url) && is_string($url) && filter_var($url, FILTER_VALIDATE_URL)){ // php validate url
-                                $linked_url = '<a href='. $url .' target="_blank">'. $url .'</a>';
-                                $file_desc = str_replace($url, $linked_url, $file_desc);
-                            }
-                        }
-                    }
+                $val = !empty($rights) ? $rights : '';
+                $val = !empty($owner) && !empty($val) ? $val . '<br><br>' . $owner : $val;
+                $val = empty($val) ? $owner : $val;
 
-                    print '<a href="#" style="cursor: pointer; color: #2080C0; padding-left: 7.5px;" '
-                        . 'onClick="window.hWin.HEURIST4.msg.showMsgDlg(\''.addslashes(htmlspecialchars($file_desc)).'\', null, \'Credits for '.htmlspecialchars($thumb['orig_name']).'\'); return false;">'
-                        . '&copy;&nbsp;credits</a><br><br>';
-                }
+                print '<span class="media-right" style="cursor: pointer; color: #2080C0; padding-left: 7.5px;" '
+                        . 'data-value="'.addslashes(htmlspecialchars($val)).'" title=" ">'
+                        . 'rights</span><br><br>';
             }
 
             if(!$is_map_popup && $thumb['player'] && !$without_header){
@@ -2345,5 +2398,34 @@ function __sortResourcesByDate($a, $b)
         return (@$a['rst_DisplayOrder']==null || $a['rst_DisplayOrder'] > $b['rst_DisplayOrder'])?1:-1;
     }
 } 
+
+function linkifyValue($value){
+
+    $new_value = str_replace(array("\r\n", "\n\r", "\r", "\n"), '<br>', $value); // "%0A", "%0D"
+
+    preg_match_all('/((?:https?|ftp|mailto))(\S)+/', $new_value, $url_matches); // only urls that contain a protocol [http|https|ftp|mailto]
+
+    if(is_array($url_matches) && count($url_matches[0]) > 0){
+
+        foreach($url_matches[0] as $url){
+            if(mb_strpos($url, '<br>')){ // remove from first br onwards, in case
+                $url = explode('<br>', $url)[0];
+            }
+            if(strpos($new_value, 'href=\'' . $url)!==false || strpos($new_value, 'href="' . $url)!==false || strpos($new_value, 'href=`' . $url)!==false){ // check if already part of element
+                continue;
+            }
+            if(ctype_punct(mb_substr($url, -1)) && mb_substr($url, -1) != ')'){ // ensure last character isn't punctuation or a closing bracket
+                $url = mb_substr($url, 0, -1);
+            }
+
+            if(!empty($url) && is_string($url) && filter_var($url, FILTER_VALIDATE_URL)){ // php validate url
+                $linked_url = '<a href='. $url .' target="_blank">'. $url .'</a>';
+                $new_value = str_replace($url, $linked_url, $new_value);
+            }
+        }
+    }
+
+    return $new_value;
+}
 
 ?>
