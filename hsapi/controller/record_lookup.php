@@ -29,6 +29,62 @@
     require_once (dirname(__FILE__).'/../System.php');
     require_once (dirname(__FILE__).'/../dbaccess/utils_db.php');
 
+    // allowed and handled services, 'serviceType' => 'service/url base'
+    $services_details = array(
+        'tlcmap' => array(
+            'http://tlcmap.org/ghap/search?', 
+            'http://tlcmap.australiasoutheast.cloudapp.azure.com/ws/ghap/search?'
+        ), 
+        'geonames' => array(
+            'http://api.geonames.org/searchJSON?', 
+            'http://api.geonames.org/postalCodeLookupJSON?'
+        ), 
+
+        'bnflibrary_bib' => 'http://catalogue.bnf.fr/api/SRU?', 
+        'bnflibrary_aut' => 'http://catalogue.bnf.fr/api/SRU?', 
+
+        'nomisma' => array(
+            'http://nomisma.org/apis/', 
+            'https://nomisma.org/feed/?q='
+        ), 
+
+        'nakala' => array(
+            'https://api.nakala.fr/search?q=', 
+            'nakala_get_metadata'
+        ), 
+        'nakala_author' => 'https://api.nakala.fr/authors/search?q=',
+
+        'ESTC' => array(
+            'db' => 'ESTC_Helsinki_Bibliographic_Metadata',
+            'action' => 'import_records' // 'record_output'
+        )
+    );
+
+    $is_estc = false;
+    $valid_service = false;
+    if(!empty(@$_REQUEST['serviceType']) && array_key_exists($_REQUEST['serviceType'], $services_details)){
+
+        $service_type = $_REQUEST['serviceType'];
+        $srv_details = $services_details[$service_type];
+
+        $url = empty(@$_REQUEST['service']) ? '' : $_REQUEST['service'];
+
+        if($service_type == 'ESTC'){
+            $action = @$_REQUEST['action'];
+            $valid_service = @$_REQUEST['db'] == $srv_details['db'] || $action == $srv_details['action'];
+            $is_estc = $valid_service;
+        }else if(!is_array($srv_details)){
+            $valid_service = strpos($srv_details, $url) == 0;
+        }else{
+            foreach ($srv_details as $srv_base) {
+                if($url == $srv_base || strpos($srv_base, $url) == 0){
+                    $valid_service = true;
+                    break;
+                }
+            }
+        }
+    }
+
     $response = array();
 
     $system = new System();
@@ -37,14 +93,8 @@
 
     $is_debug = (@$params['dbg']==1);
 
-    $is_estc = (@$params['serviceType'] == 'ESTC' && 
-                (@$params['db'] == 'ESTC_Helsinki_Bibliographic_Metadata'
-                ||
-                @$params['action'] == 'import_records')
-                );
-
-    if(!@$params['service'] && !$is_estc && @$params['serviceType'] != 'nakala_get_metadata'){
-        $system->error_exit_api('Service parameter is not defined or has wrong value'); //exit from script
+    if(!$valid_service){
+        $system->error_exit_api('The provided look up details are invalid', HEURIST_INVALID_REQUEST); //exit from script
     }
 
     $remote_data = false;
@@ -55,8 +105,6 @@
         
         $is_allowed = (isset($ESTC_PermittedDBs) && strpos($ESTC_PermittedDBs, @$_REQUEST['org_db']) !== false && isset($ESTC_UserName) && isset($ESTC_Password));
         $def_err_msg = 'For licensing reasons this function is only accessible to authorised projects.<br>Please contact the Heurist team if you wish to use this.';
-
-if($is_debug) print HEURIST_BASE_URL.'  '.HEURIST_MAIN_SERVER.'<br>';
 
         if(strpos(strtolower(HEURIST_BASE_URL), strtolower(HEURIST_MAIN_SERVER)) !== false){ // currently on server where ESTC DB is located
 
@@ -86,7 +134,7 @@ if($is_debug) print HEURIST_BASE_URL.'  '.HEURIST_MAIN_SERVER.'<br>';
                     }
     
                     require_once (dirname(__FILE__).'/../dbaccess/db_recsearch.php');
-//if($is_debug) print print_r($params['q'], true).'<br>';
+
                     $response = recordSearch($system, $params);
                 }else{ // unable to login, cannot access records
                     $response = array('status' => HEURIST_ERROR, 'message' => 'We are unable to access the records within the ESTC database at this moment.<br>Please contact the Heurist team. Query is: '.json_encode($params['q']));
@@ -111,8 +159,6 @@ if($is_debug) print HEURIST_BASE_URL.'  '.HEURIST_MAIN_SERVER.'<br>';
                 $params2['q'] = $params['q'];
                 $params2['rules'] = @$params['rules'];
                 $url = $base_url.http_build_query($params2); // forward request to ESTC server
-                
-if($is_debug) print 'record_output url: '.$url.'  <br>';                   
 
                 $is_inited = $system->init(@$params['db']);
                 
@@ -121,10 +167,6 @@ if($is_debug) print 'record_output url: '.$url.'  <br>';
                 
                 $filesize = saveURLasFile($url, $heurist_path); // perform external request and save results to temp file
 
-                
-if($is_debug)print 'CONTENT '.$filesize;
-
-                
                 if($filesize>0 && file_exists($heurist_path)){
                     //read temp file, import record
               
@@ -142,8 +184,6 @@ if($is_debug)print 'CONTENT '.$filesize;
                     }else{
                         $response = array("status"=>HEURIST_OK, "data"=> $res);
                     }
-
-if($is_debug) print print_r($response, true).'!!!!!<br>';
 
                     unlink($heurist_path);
                     
@@ -169,7 +209,7 @@ if($is_debug) print print_r($response, true).'!!!!!<br>';
                 $response = array('status' => HEURIST_ERROR, 'message' => $msg);
             }
         }else{ // no access
-            $response = array('status' => HEURIST_REQUEST_DENIED, 'message' => 'For licensing reasons this function is only accessible to authorised projects.<br>Please contact the Heurist team if you wish to use this.');
+            $response = array('status' => HEURIST_REQUEST_DENIED, 'message' => $def_err_msg);
         }
 
         $response = json_encode($response);
@@ -177,23 +217,20 @@ if($is_debug) print print_r($response, true).'!!!!!<br>';
         header('Content-Type: application/json');
         header('Content-Length: ' . strlen($response));
         exit($response);
-    }else{
-
-        if( !$system->init(@$params['db']) ){  //@todo - we don't need db connection here - it is enough check the session
-            //get error and response
-            $system->error_exit_api(); //exit from script
-        }else if ( $system->get_user_id()<1 ) {
-            $system->error_exit_api(null, HEURIST_REQUEST_DENIED); 
-            //$response = $system->addError(HEURIST_REQUEST_DENIED);
-        }
-
-        $system->dbclose();
-
-    	// Perform external lookup / API request
-        $url = $params['service'];
     }
 
-    if(@$params['serviceType'] == 'nakala_get_metadata'){
+    if( !$system->init(@$params['db']) ){  //@todo - we don't need db connection here - it is enough check the session
+        //get error and response
+        $system->error_exit_api(); //exit from script
+    }else if ( $system->get_user_id()<1 ) {
+        $system->error_exit_api('You must be logged in to use the external lookup services', HEURIST_REQUEST_DENIED); 
+        //$response = $system->addError(HEURIST_REQUEST_DENIED);
+    }
+
+    $system->dbclose();
+
+    if(@$params['service'] == 'nakala_get_metadata'){
+
         $response = getNakalaMetadata($system, @$params['type']);
         $response = json_encode($response);
 
@@ -202,6 +239,8 @@ if($is_debug) print print_r($response, true).'!!!!!<br>';
         exit($response);
     }
 
+    // Perform external lookup / API request
+    $url = $params['service'];
 
     $remote_data = loadRemoteURLContentWithRange($url, null, true, 30);
     if($remote_data===false){
@@ -683,13 +722,31 @@ if($is_debug) print print_r($response, true).'!!!!!<br>';
         }
 
         $remote_data = json_encode($results);
-    }else if(@$params['serviceType'] == 'nomisma_rdf'){
 
-        //error_log(print_r($remote_data, TRUE)); //DEBUGGING
-		//$remote_data = json_encode($remote_data); // getRdf currently returns an error, so this isn't used
-    }else if($is_estc){
-        $remote_data = json_encode($remote_data);
-    }else if(@$params['serviceType'] == 'nakala_search'){ // Retrieve basic details - Citation, ID, Name(s)
+    }else if(@$params['serviceType'] == 'nomisma' && @$params['search_type'] == 'xml'){
+
+		$xml_obj = new SimpleXMLElement($remote_data, LIBXML_PARSEHUGE);
+
+        $results = array();
+
+        $idx = 0;
+        foreach ($xml_obj->children()->entry as $record) {
+
+            $id = (string)$record->id[0];
+            $link = @$record->link;
+            if(empty($link) || $link->attributes()['rel'] != 'canonical'){
+                $link = 'http://nomisma.org/id/' . $id;
+            }else{
+                $link = (string)$link->attributes()['href'];
+            }
+
+            $results[$idx] = array('rec_ID' => $id, 'rec_Title' => (string)$record->title[0], 'rec_ScratchPad' => (string)$record->summary[0], 'rec_URL' => $link);
+            $idx ++;
+        }
+
+        $remote_data = json_encode(array("status" => HEURIST_OK, "entry" => $results));
+
+    }else if(@$params['serviceType'] == 'nakala'){ // Retrieve basic details - Citation, ID, Name(s)
 
         $remote_data = json_decode($remote_data, TRUE);
         if(json_last_error() == JSON_ERROR_NONE){
@@ -787,10 +844,8 @@ if($is_debug) print print_r($response, true).'!!!!!<br>';
 
 	// Return response
     header('Content-Type: application/json');
-    //$json = json_encode($json);
-    //header('Content-Type: application/vnd.geo+json');
-    //header('Content-Disposition: attachment; filename=output.json');
     header('Content-Length: ' . strlen($remote_data));
+
     exit($remote_data);
 
     function getNakalaMetadata($system, $type){
@@ -848,6 +903,7 @@ if($is_debug) print print_r($response, true).'!!!!!<br>';
             return $data_rtn;
         }
     }
+
     function updateNakalaMetadata($system){
         // update NAKALA_metadata_values.json
         $nakala_file = HEURIST_FILESTORE_ROOT . 'NAKALA_metadata_values.json';
@@ -871,8 +927,6 @@ if($is_debug) print print_r($response, true).'!!!!!<br>';
 
             $results = json_decode($results, TRUE);
             if(json_last_error() == JSON_ERROR_NONE){
-
-                //$totalPages = ceil($results['totalResults'] / 1000); Can only retrieve first ~10,000 records
 
                 if($results['totalResults'] > 0 && count($results['datas']) > 0){
 

@@ -1332,7 +1332,8 @@ window.hWin.HAPI4.baseURL+'?db=' + window.hWin.HAPI4.database  //(needplayer?'&p
                 $dlg.find('#lcreator').val((fullname.length == 2) ? fullname[1] : '');
 
                 var request = {
-                    serviceType: 'nakala_get_metadata' // file types used by Nakala
+                    serviceType: 'nakala',
+                    service: 'nakala_get_metadata' // file types used by Nakala
                 };
                 window.hWin.HAPI4.RecordMgr.lookup_external_service(request, (data) => {
 

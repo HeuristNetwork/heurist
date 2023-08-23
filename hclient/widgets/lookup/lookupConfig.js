@@ -916,11 +916,9 @@ $.widget( "heurist.lookupConfig", {
                     break;
                 case 'nakala':
                     url = 'https://api.nakala.fr/search?q=Literature&fq=scope%3Ddatas&order=relevance&page=1&size=15';
-                    serviceType = 'nakala_search';
                     break;
                 case 'nakala_author':
                     url = 'https://api.nakala.fr/authors/search?q=John&order=asc&page=1&limit=15';
-                    serviceType = 'nakala_search_author';
                     break;
                 default:
                     break;

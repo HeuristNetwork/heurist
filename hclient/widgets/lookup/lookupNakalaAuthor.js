@@ -316,7 +316,7 @@ $.widget( "heurist.lookupNakalaAuthor", $.heurist.recordAction, {
         // for record_lookup.php
         var request = {
             service: sURL, // request url
-            serviceType: 'nakala_search_author' // requesting service, otherwise the request will result in an error
+            serviceType: 'nakala_author' // requesting service, otherwise the request will result in an error
         };
 
         // calls /heurist/hsapi/controller/record_lookup.php

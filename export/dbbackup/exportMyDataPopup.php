@@ -152,7 +152,8 @@ if($mode>1){
                 }
 
                 let request = {
-                    serviceType: 'nakala_get_metadata',
+                    serviceType: 'nakala',
+                    service: 'nakala_get_metadata',
                     type: 'licenses'
                 };
 

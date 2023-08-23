@@ -109,7 +109,8 @@ $.widget( "heurist.lookupNakala", $.heurist.recordAction, {
         });
 
         var request = {
-            serviceType: 'nakala_get_metadata' // file types used by Nakala
+            serviceType: 'nakala',
+            service: 'nakala_get_metadata' // file types used by Nakala
         };
         window.hWin.HAPI4.RecordMgr.lookup_external_service(request, (data) => {
 
@@ -434,7 +435,7 @@ $.widget( "heurist.lookupNakala", $.heurist.recordAction, {
         // for record_lookup.php
         var request = {
             service: sURL, // request url
-            serviceType: 'nakala_search' // requesting service, otherwise the request will result in an error
+            serviceType: 'nakala' // requesting service, otherwise the request will result in an error
         };
 
         // calls /heurist/hsapi/controller/record_lookup.php
