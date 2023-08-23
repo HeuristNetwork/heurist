@@ -128,14 +128,14 @@ $requestUri:
         
     if($error_msg==null){
         
-        $database = $requestUri[1];
-        $action = $requestUri[2];
+        $database = filter_var($requestUri[1]);
+        $action = filter_var($requestUri[2]);
         $redirect = '';
         
         if($database=='MBH'){
             $database='MBH_Manuscripta_Bibliae_Hebraicae';
         }else if($database=='heurist' || $database=='h6-alpha'){
-            header('Location: /'.$requestUri[1].'/index.php');  
+            header('Location: /'.$database.'/index.php');  
             exit();
         }
 
@@ -151,13 +151,13 @@ $requestUri:
                         //.$requestUri[0].'/?website&db='.$requestUri[2];
             $params['website'] = 1;
                         
-            if(@$requestUri[3]>0){
-                $redirect .= '&id='.$requestUri[3];    
-                $params['id'] = $requestUri[3];
+            if(intval(@$requestUri[3])>0){
+                $redirect .= '&id='.intval($requestUri[3]);    
+                $params['id'] = intval($requestUri[3]);
             } 
-            if(@$requestUri[4]>0) { //it may be both website pageid and record id
-                $redirect .= '&pageid='.$requestUri[4];    
-                $params['pageid'] = $requestUri[4];
+            if(intval(@$requestUri[4])>0) { //it may be both website pageid and record id
+                $redirect .= '&pageid='.intval($requestUri[4]);    
+                $params['pageid'] = intval($requestUri[4]);
             }
             $_SERVER["REQUEST_URI"] = $host_params['install_dir']; //'/heurist/';
             
@@ -204,7 +204,7 @@ $requestUri:
                     }
                     
                     if(@$requestUri[4]!=null && ctype_digit($requestUri[4]) && $requestUri[4]>=0){
-                        $redirect .= ('&depth='.$requestUri[4]);         
+                        $redirect .= ('&depth='.intval($requestUri[4]));         
                     }else{
                         $redirect .= '&depth=1';     
                     }
