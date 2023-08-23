@@ -50,6 +50,8 @@ $.widget( "heurist.timeline", {
         
     _keepLastTimeLineRange: null,
     selected_rec_ids:[],
+    
+    visible_fields: null,
 
     // the widget's constructor
     _create: function() {
@@ -234,6 +236,11 @@ $.widget( "heurist.timeline", {
 
         if(timeline_data){
             
+            this.visible_fields = null;
+
+            
+            this._off($(this.timeline_ele).find('input[type="checkbox"][data-dty_id]'),'click');
+            
             var tdata = [];
             if($.isPlainObject(timeline_data)){
 
@@ -250,18 +257,32 @@ $.widget( "heurist.timeline", {
             var groups = new vis.DataSet( timeline_groups );
             var items = new vis.DataSet( tdata ); //options.items );
             
-            
             this.vis_timeline_range = null; //reset
             
             var timeline_content = $(this.timeline_ele).find('.vis-itemset');
             timeline_content.hide();
             window.hWin.HEURIST4.msg.bringCoverallToFront($(this.timeline_ele), {'background-color': "#000", opacity: '0.6', color: 'white', 'font-size': '16px'}, 'loading dates ...');
             
-            this.vis_timeline.itemSet.setOptions({groupOrder:function (a, b) {
+            var that = this;
+            
+            this.vis_timeline.itemSet.setOptions({
+                    onDisplay: function(item, callback){
+                        //returns true if visible
+                        var res = true;
+                        if(that.visible_fields 
+                            && that.visible_fields[item.data.group] 
+                            && that.visible_fields[item.data.group].length>0)
+                        {
+//console.log(that.visible_fields[item.data.group], item.data.dtyID);                            
+                            res = (that.visible_fields[item.data.group].indexOf(item.data.dtyID)>=0);
+                        }
+                        return res;
+                    },
+                    groupOrder:function (a, b) {
                     var av = a['content'];
                     var bv = b['content'];
-                    if(av=='Current results') return -1;
-                    if(bv=='Current results') return 1;
+                    if(av.indexOf('Current query')==0) return -1;
+                    if(bv.indexOf('Current query')==0) return 1;
                     return av > bv ? 1 : av < bv ? -1 : 0;
                 }});
             this.vis_timeline.setGroups(groups);
@@ -271,8 +292,7 @@ $.widget( "heurist.timeline", {
                 console.log(items);
                 console.log(err);
             }
-            
-            
+
             //apply label settings
             this._timelineApplyLabelSettings(this.vis_timeline_label_mode, 0);
             
@@ -284,6 +304,24 @@ $.widget( "heurist.timeline", {
             this._timelineZoomToAll();
             window.hWin.HEURIST4.msg.sendCoverallToBack($(this.timeline_ele));
             timeline_content.show();
+            
+            //add listener
+            this._on($(this.timeline_ele).find('input[type="checkbox"][data-dty_id]'),{click:function(event){
+                //console.log($(event.target).attr('data-dty_id'));
+                var group_id = $(event.target).attr('data-layer_id');
+                if(!this.visible_fields) this.visible_fields = {};
+                if(!this.visible_fields[group_id]) this.visible_fields[group_id] = [];
+                this.visible_fields[group_id] = [];
+                var that = this;
+                $(this.timeline_ele).find('input[type="checkbox"][data-layer_id="'+group_id+'"]').each(function(i,item){
+                    if($(item).prop('checked')){
+                        that.visible_fields[group_id].push(parseInt($(item).attr('data-dty_id')));
+                    }
+                });
+                
+                this.vis_timeline.redraw();
+            }});
+            
         }
         
     },
@@ -426,7 +464,7 @@ $.widget( "heurist.timeline", {
         }  
         return val;     
     },*/
-
+    
     //
     // filter items on map based on timeline range 
     //

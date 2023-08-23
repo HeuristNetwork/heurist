@@ -168,8 +168,9 @@ public static function output($data, $params){
     
     $find_geo_by_pointer_rty = false;
     $geojson_ids = array(); //simplify array('all'=>array());
-    $geojson_dty_ids = array();
+    $geojson_dty_ids = array(); //unique list of all geofields 
     $geojson_rty_ids = array();
+    $timeline_dty_ids = array(); //unique list of all date fields 
     
     //
     // HEADER ------------------------------------------------------------
@@ -684,8 +685,17 @@ XML;
                 if(@$feature['when']){
                     $timeline_data[] = array('rec_ID'=>$recID, 'when'=>$feature['when']['timespans'], 
                         'rec_RecTypeID'=>$rty_ID, "rec_Title"=>$record['rec_Title']);
+                    
+                    foreach($feature['timevalues_dty'] as $dty_ID){
+                        if(!in_array($dty_ID, $timeline_dty_ids)){
+                            $timeline_dty_ids[] = $dty_ID;  //unique list of all date fields 
+                        } 
+                    }
+                    
                     $feature['when'] = null;
                     unset($feature['when']);
+                    $feature['timevalues_dty'] = null;
+                    unset($feature['timevalues_dty']);
                 }
 
                 if( (defined('RT_TLCMAP_DATASET') && $rty_ID==RT_TLCMAP_DATASET) || 
@@ -722,12 +732,12 @@ XML;
                 
                 foreach ($geoms as $idx=>$geom){
                         $feature['geometry'] = $geom;
-                        $feature['properties']['rec_GeoField'] = $geoms_dty[$idx];
+                        $feature['properties']['rec_GeoField'] = $geoms_dty[$idx]; //dty_ID
                         fwrite($fd, $comma.json_encode($feature));
                         $comma = ',';
                         
                         if(!in_array($geoms_dty[$idx], $geojson_dty_ids)){
-                            $geojson_dty_ids[] = $geoms_dty[$idx];  
+                            $geojson_dty_ids[] = $geoms_dty[$idx];  //unique list of all geofields 
                         } 
                 }
                 $geojson_rty_ids = array_keys($rt_counts);
@@ -845,8 +855,9 @@ XML;
         if(@$params['leaflet']){ //return 2 array - pure geojson and timeline items
         
            fwrite($fd, ',"timeline":'.json_encode($timeline_data));
+           fwrite($fd, ',"timeline_dty_ids":'.json_encode($timeline_dty_ids)); //unique list of all date fields 
            fwrite($fd, ',"geojson_ids":'.json_encode($geojson_ids));
-           fwrite($fd, ',"geojson_dty_ids":'.json_encode($geojson_dty_ids));
+           fwrite($fd, ',"geojson_dty_ids":'.json_encode($geojson_dty_ids)); //unique list of all geofields 
            fwrite($fd, ',"geojson_rty_ids":'.json_encode($geojson_rty_ids));
            fwrite($fd, ',"layers_ids":'.json_encode($layers_record_ids).'}');
         }else{
@@ -1336,6 +1347,7 @@ private static function _getGeoJsonFeature($record, $extended=false, $simplify=f
     $geovalues = array();
     $geovalues_dty = array();
     $timevalues = array();
+    $timevalues_dty = array();
     $date_start = null;
     $date_end = null;
     $symbology = null;
@@ -1394,7 +1406,9 @@ private static function _getGeoJsonFeature($record, $extended=false, $simplify=f
                         $ta = new Temporal($value);
                         $ta = $ta->getTimespan(true);
                         if($ta!=null){
+                            $ta[] = $dty_ID;
                             $timevalues[] = $ta;  //temporal json array for geojson
+                            $timevalues_dty[] = $dty_ID;
                         }
                     }
                 }else if(defined('DT_SYMBOLOGY') && $dty_ID==DT_SYMBOLOGY){
@@ -1582,6 +1596,9 @@ private static function _getGeoJsonFeature($record, $extended=false, $simplify=f
         }
     }//if search for linked values
 
+    // $res['geometry'] - merged GeometryCollection
+    // $res['geometries'] - separated by fields  $res['geometries_dty']  
+    // $res['geometries_dty'] - dty_IDs
     if(is_array($geovalues)){
         if(count($geovalues)>1){
             $res['geometry'] = array('type'=>'GeometryCollection','geometries'=>$geovalues);
@@ -1597,18 +1614,26 @@ private static function _getGeoJsonFeature($record, $extended=false, $simplify=f
     //if data_start and date_end are temporal objects - take action    
     if($date_start || $date_end){
 
-        if(!$date_start){
-            $date_start = $date_end;
-        }
+        $dty_ID = intval(DT_START_DATE);
         
-        $dt = Temporal::mergeTemporals($date_start, $date_end);
+        if($date_start && $date_end){ //both are defined
+            $dt = Temporal::mergeTemporals($date_start, $date_end);
+        }else{
+            if(!$date_start){
+                $date_start = $date_end;
+                $dty_ID = intval(DT_END_DATE);
+            }
+            $dt = new Temporal($date_start);
+        }
         
         if($dt && $dt->isValid())
         {
             $ta = $dt->getTimespan(true);
             if($ta!=null){
                 //array($date_start, '', '', $date_end, '');
+                $ta[] = $dty_ID;
                 $timevalues[] = $ta;  //temporal json array for geojson
+                $timevalues_dty[] = $dty_ID;
             }
         }
     }
@@ -1625,6 +1650,7 @@ private static function _getGeoJsonFeature($record, $extended=false, $simplify=f
             // "timespans": [["-323-01-01 ","","","-101-12-31","Hellenistic period"]],  
             // [start, latest-start, earliest-end, end, label, profile-start, profile-end, determination]
             $res['when'] = array('timespans'=>$timevalues);
+            $res['timevalues_dty'] = $timevalues_dty;
     }
     if($symbology){
         $res['style'] = $symbology; //individual symbology per feature

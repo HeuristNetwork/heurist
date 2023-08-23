@@ -1002,6 +1002,7 @@ $.widget( "heurist.mapping", {
     // options:
     //      geojson_data
     //      timeline_data
+    //      timeline_dty_ids
     //      dataset_name
     //      dataset_type: db|shp|kml
     //      preserveViewport
@@ -1113,7 +1114,7 @@ $.widget( "heurist.mapping", {
             
                 
             if(!this.notimeline){
-                this.updateTimelineData(new_layer._leaflet_id, timeline_data, dataset_name);
+                this.updateTimelineData(new_layer._leaflet_id, timeline_data, options.timeline_dty_ids, dataset_name);
             }
             
             this._updatePanels();
@@ -1157,7 +1158,7 @@ $.widget( "heurist.mapping", {
     //  layer_id - leaflet id
     //  layer_data - timeline data from server
     //
-    updateTimelineData: function(layer_id, layer_data, dataset_name){
+    updateTimelineData: function(layer_id, layer_data, timeline_dty_ids, dataset_name){
         
             if(this.notimeline) return;
       
@@ -1165,12 +1166,29 @@ $.widget( "heurist.mapping", {
 
             if(window.hWin.HEURIST4.util.isArrayNotEmpty(layer_data) ){
 
+                
+                //list of fields - filter by date field
+                if(timeline_dty_ids && timeline_dty_ids.length>1){
+                    sfields = '<span style="font-size:0.9em">'
+                    for(var i=0;i<timeline_dty_ids.length;i++){  
+                        var id = timeline_dty_ids[i];
+                        var lbl = (id==10)?'Start/end dates':$Db.dty(id,'dty_Name');
+                        
+                        sfields = sfields
+                        + '<br><label><input type="checkbox" data-layer_id="'+layer_id+'" data-dty_id="'+id+'" checked/>'     
+                        + lbl + '</label>';
+                    } 
+                    sfields = sfields + '</span>'
+                    dataset_name = dataset_name + sfields;
+                }
+                
                 var group_idx = this.getTimelineGroup(layer_id);
                 if(group_idx<0){
                     this.timeline_groups.push({ id:layer_id, content:dataset_name });        
                     group_idx = this.timeline_groups.length-1;
                 }else{
                     this.timeline_groups[group_idx].content = dataset_name;
+                    //this.timeline_groups[group_idx].field_ids = timeline_dty_ids;
                 }
                 /*if(dataset_name=='Current query' && group_idx>0){ //swap
                     var swap = this.timeline_groups[0];
@@ -1178,7 +1196,7 @@ $.widget( "heurist.mapping", {
                     this.timeline_groups[group_idx] = swap;
                 }*/
                 
-                this.timeline_items[layer_id] = []; //remove/rest previous data
+                this.timeline_items[layer_id] = []; //remove/reset previous data
                 
                 var that = this;
 
@@ -1207,7 +1225,8 @@ console.log('Start date not defined ',tdata.when,tdata.rec_ID);
                                 start: ts[0],
                                 profile_start: ts[5],
                                 profile_end: ts[6], 
-                                recID: tdata.rec_ID
+                                recID: tdata.rec_ID,
+                                dtyID: ts[8]
                             };
 
                             if(ts[3] && ts[0]!=ts[3]){

@@ -530,14 +530,17 @@ function hMapLayer2( _options ) {
                     var geojson_data = null;
                     var timeline_data = [];
                     var layers_ids = [];
+                    var timeline_dty_ids = [];
                     if(response['geojson'] && response['timeline']){
                         geojson_data = response['geojson'];
                         timeline_data = response['timeline'];   
+                        
+                        if(response['timeline_dty_ids']) timeline_dty_ids = response['timeline_dty_ids'];
                         if(response['layers_ids']) layers_ids = response['layers_ids']; //layers records from clearinghouse  
                     }else{
                         geojson_data = response;
                     }
-
+                    
                     if( window.hWin.HEURIST4.util.isGeoJSON(geojson_data, true) 
                         || window.hWin.HEURIST4.util.isArrayNotEmpty(timeline_data) )
                     {
@@ -557,7 +560,6 @@ function hMapLayer2( _options ) {
                                 if(dty_ID=='Path'){
                                     title = 'Path';                                   
                                 }else if (typeof dty_ID === 'string' && dty_ID.indexOf('relation:')===0){
-console.log(dty_ID);                                   
                                     title = $Db.trm(dty_ID.substring(9),'trm_Label');
                                     if(!title) title = dty_ID;
                                 }else{
@@ -576,6 +578,7 @@ console.log(dty_ID);
                                     }
                                 }
                                 
+                                //special thematic map - filter by geo fields
                                 thematic_map.push(
                                 {
                                     "title": title,
@@ -596,6 +599,7 @@ console.log(dty_ID);
                         _nativelayer_id = options.mapwidget.mapping('addGeoJson', 
                                     {geojson_data: geojson_data,
                                     timeline_data: timeline_data,
+                                    timeline_dty_ids: timeline_dty_ids,
                                     layer_style: layer_default_style,
                                     popup_template: layer_popup_template,
                                     origination_db: origination_db,
@@ -644,11 +648,16 @@ console.log(dty_ID);
             || window.hWin.HEURIST4.util.isArrayNotEmpty(timeline_data) )
         {
                          
-            _geojson_ids = data['geojson_ids']; //simpify {all: data['geojson_ids']}; //all record ids to be plotted on map                    
+            _geojson_ids = data['geojson_ids']; //simpify {all: data['geojson_ids']}; //all record ids to be plotted on map
+            var timeline_dty_ids = window.hWin.HEURIST4.util.isArrayNotEmpty(data['timeline_dty_ids'])
+                                    ?data['timeline_dty_ids']
+                                    :[];                    
+            
             _dataset_type = 'db';
             _nativelayer_id = options.mapwidget.mapping('addGeoJson', 
                         {geojson_data: geojson_data,
                         timeline_data: timeline_data,
+                        timeline_dty_ids: timeline_dty_ids,
                         layer_style: layer_style,
                         popup_template: layer_popup_template,
                         dataset_name:_recordset.fld(options.rec_layer || _record, 'rec_Title'),  //name for timeline
