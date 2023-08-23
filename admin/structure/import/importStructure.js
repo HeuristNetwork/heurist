@@ -1212,7 +1212,10 @@ $.widget( "heurist.importStructure", {
                                     label = $Db.rty(id,'rty_Name');
                                 }
 
-                                label += response.report.translations[type].indexOf(id) !== false ? ' (translations retrieved)' : '';
+                                if(response.report.translations && response.report.translations[type]){
+                                    label += (response.report.translations[type].indexOf(id) !== false) 
+                                                ? ' (translations retrieved)' : '';
+                                }
                                 report += (label+', ');    
                             }
                             report = report.slice(0, -2);

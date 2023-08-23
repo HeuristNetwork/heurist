@@ -1504,7 +1504,7 @@ When we open "iiif_image" in mirador viewer we generate manifest dynamically.
                         if($id_type == 'ulf_ID' && (!is_numeric($id) || intval($id) <= 0)){
                             array_push($ret, "Invalid File ID provided");
                             continue;
-                        }else if($id_type == 'ulf_ObfuscatedFileID' && preg_match('/[a-z0-9]/', $id)){
+                        }else if($id_type == 'ulf_ObfuscatedFileID' && preg_match('/^[a-z0-9]+$/', $id)){
                             array_push($ret, "Invalid Obfuscated ID provided");
                             continue;
                         }
