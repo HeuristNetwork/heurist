@@ -126,9 +126,9 @@ default content consists of
 */
 if(!$edit_OldEditor && $system->is_member(1)){
         print '<a href="'.HEURIST_BASE_URL.'?db='.$system->dbname().'&cms='.$home_page_record_id.'" id="btn_editor" target="_blank" '
-        .'style="position:absolute;right:70px; top:5px; z-index: 9999;" class="cms-button">Heurist interface</a>'
+        .'style="position:absolute;right:70px; top:5px; z-index: 9999;" class="cms-button">DB</a>'
         .'<a href="#" id="btnOpenCMSeditor" onclick="_openCMSeditor(event); return false;" '
-        .'style="position:absolute;right:10px; top:5px; z-index: 9999;" class="cms-button">Website editor</a>';
+        .'style="position:absolute;right:10px; top:5px; z-index: 9999;" class="cms-button">Editor</a>';
     
     }
 
@@ -255,9 +255,9 @@ if($isWebPage){ //set in websiteRecord.php
 
                             <p><span style="font-size: 13.008px;">©</span><span
                                     style="font-size: 13.008px;">&nbsp;</span>MBH 2022 -
-                                Tous droits réservés&nbsp;-&nbsp;<a
+                                All rights reserved&nbsp;-&nbsp;<a
                                     href="/heurist/?db=MBH_Manuscripta_Bibliae_Hebraicae&website&id=1408&pageid=1414"
-                                    title="Mentions légales">Legal information</a> - <a
+                                    title="Legal information">Legal information</a> - <a
                                     href="//heurist/?db=MBH_Manuscripta_Bibliae_Hebraicae&website&id=1408&pageid=1415">General conditions of use</a>&nbsp;-&nbsp;<a
                                     href="/heurist/?db=MBH_Manuscripta_Bibliae_Hebraicae&website&id=1408&pageid=1413">Contact</a> - 
                                 Proudly served by <a href="https://heuristnetwork.org/">Heurist</a> @
