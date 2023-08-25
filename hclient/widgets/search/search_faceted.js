@@ -2584,16 +2584,20 @@ console.log('get defintion in OLD format!!!!');
                                 function __toDt(val, is_max){ //from decimal to datetime
                                     
                                     if(Math.round(val) == val){ //years
-                                        val = Math.round(val)+(is_max?'-12-31':'-01-01');
+                                        if(typeof val === 'string'){
+                                            val = parseInt(val);
+                                        }
+                                        val = (val<0?'-':'')+(''+Math.abs(Math.round(val))).lpad('0',val<0?6:4)
+                                        val = val+(is_max?'-12-31':'-01-01');
                                     }else{
                                         //
                                         //var parts = val.split('.');
                                         var parts = val.split('.');
                                         var year = parts[0];
-                                        var month = parts[1].substr(0,2);
-                                        var day = parts[1].substr(2);
+                                        var month = parts[1]?parts[1].substr(0,2):0;
+                                        var day = parts[1]?parts[1].substr(2):0;
                                         
-                                        val = year.lpad('0',parseInt(year)<0?6:4)
+                                        val = (year<0?'-':'')+(''+Math.abs(year)).lpad('0',parseInt(year)<0?6:4)
                                             +'-'+((month==0)?'01':month.lpad('0',2))
                                             +'-'+((day==0)?'01':day.lpad('0',2))
                                     }
@@ -2614,7 +2618,8 @@ console.log('get defintion in OLD format!!!!');
                                     mmax = ''+Math.round(mmax);
                                 }
                                 
-                                if(mmin.indexOf('-')<1){
+                                if( (mmin.match(/-?(\d*[.])?\d+/g) || []).length==1 ) {
+                                    //mmin.indexOf('-')<1 && (mmin.match(/-/g) || []).length<2 ){
                                     mmin = __toDt(mmin, false);    
                                 }else{
                                     if(mmin.indexOf("-00")>0){
@@ -2623,7 +2628,8 @@ console.log('get defintion in OLD format!!!!');
                                     mmin = mmin.replace(' ','T');                                                                     
                                 }
                                 
-                                if(mmax.indexOf('-')<1){
+                                if( (mmax.match(/-?(\d*[.])?\d+/g) || []).length==1 ) {
+                                    //mmax.indexOf('-')<1 && (mmax.match(/-/g) || []).length<2 ){
                                     mmax = __toDt(mmax, true);
                                 }else{
                                     if(mmax.indexOf("-00")>0){ //|| mmax.indexOf("-01-01")>0
@@ -2722,6 +2728,10 @@ console.log('get defintion in OLD format!!!!');
                             //show the only date without slider
                             s = temporalSimplifyDate(cterm[0]);
                             
+                            if(s.match(/^-\d+/)){
+                                s = Math.abs(parseInt(s))+' bce';
+                            }
+                            
                             let s_counts = this._getCountSpan(sl_count); //for slider
                             
                             $("<span>").html(s + s_counts).appendTo($facet_values); 
@@ -2772,7 +2782,8 @@ console.log('get defintion in OLD format!!!!');
                             // lower -> min value, higher -> ma x value
                             //
                             function setupDateHistogram(lower, higher) {
-//console.log(lower, higher);
+//
+console.log(lower, higher);
                                 // Get dates in ms
                                 if(date_type=='years_only'){
                                     lower = Math.round(lower);
@@ -2987,6 +2998,10 @@ console.log('get defintion in OLD format!!!!');
                                     {
                                         var tDate = new TDate((new Date(val)).toISOString());
                                         val = tDate.toString(date_format);
+                                        
+                                        if(val.match(/^-\d+/)){
+                                            val = Math.abs(parseInt(val))+' bce';
+                                        }
                                     }
 //DEBUG console.log('lbl', sval, val);
                                    //val = (new Date(val)).format(date_format);

@@ -2193,17 +2193,47 @@ function temporalToHumanReadableString(inputStr) {
 function temporalSimplifyDate(sdate) {
     
     if(sdate){
-        var s = sdate;
-        if(s.indexOf("-00-00")>0){
-            s = s.replace("-00-00","-01-01");
+    
+        if( (sdate.match(/-?(\d*[.])?\d+/g) || []).length==1 ) {    
+            //decimal to YMD
+            
+            var val = sdate;
+
+            if(Math.round(val) == val){ //years
+                return ''+Math.round(val);
+            }else{
+                var parts = val.split('.');
+                var year = parts[0];
+                var month = parts[1]?parts[1].substr(0,2):0;
+                var day = parts[1]?parts[1].substr(2):0;
+
+                val = year;
+                if(month>0){
+                    val = val + '-' + month.lpad('0',2);      
+                    if(day>0){
+                        val = val + '-' + day.lpad('0',2);      
+                    }
+                }
+            }
+            
+            return val;
+            
+        }else{
+        
+        
+            var s = sdate;
+            if(s.indexOf("-00-00")>0){
+                s = s.replace("-00-00","-01-01");
+            }
+            if(s.indexOf("00:00:00")>0){
+                s = s.replace("-01-01 00:00:00"," ");
+                s = s.replace("00:00:00"," ");
+            }
+            s = s.trim();
+            
+            return s;
         }
-        if(s.indexOf("00:00:00")>0){
-            s = s.replace("-01-01 00:00:00"," ");
-            s = s.replace("00:00:00"," ");
-        }
-        s = s.trim();
                                 
-        return s;
     }else{
         return sdate;
     }

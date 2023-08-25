@@ -749,7 +749,7 @@ class Temporal {
         $date = strval($date);
         $k = strpos($date,'.');
         if($k>0){
-            $res = substr($date,0,$k);
+            $res = substr($date,0,$k); //year
             $mmdd = substr($date,$k+1); 
             if(strlen($mmdd)<3){
                 $month = str_pad($mmdd,2,'0',STR_PAD_RIGHT); 
@@ -761,6 +761,12 @@ class Temporal {
                     $day = str_pad(substr($mmdd,2), 2,'0',STR_PAD_RIGHT);     
                 }
             }
+            if(intval($res)<0){
+                $res = '-'.str_pad(substr($res,1), 6,'0',STR_PAD_LEFT);
+            }else{
+                $res = str_pad($res, 4,'0',STR_PAD_LEFT);
+            }
+            
             $res = $res.'-'.$month.'-'.$day;
         }else{
             $res = $date;
@@ -1478,10 +1484,9 @@ class Temporal {
                     $res['Date'] = 'before '.$timestamp;
                 }else if(@$date['timestamp']['after']){
                     $res['Date'] = 'after '.$timestamp;
+                }else {
+                    $res['Date']  = $timestamp;    
                 }
-                
-                
-                $res['Date']  = $timestamp;
                 
             }else if(@$date['start'] && $date['type']=='r'){  //simple range
 
