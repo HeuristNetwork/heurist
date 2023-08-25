@@ -69,7 +69,7 @@ http://127.0.0.1/heurist/MBH
 */
 if(count($requestUri)==1 && ($requestUri[0]=='heurist' || $requestUri[0]=='h6-alpha')){
 
-    header('Location: /'.$requestUri[0].'/index.php');  
+    header('Location: /'.filter_var($requestUri[0]).'/index.php');  
     exit();
     
 }else if ((count($requestUri)==1)
@@ -80,7 +80,7 @@ if(count($requestUri)==1 && ($requestUri[0]=='heurist' || $requestUri[0]=='h6-al
     $dbname = filter_var((count($requestUri)==1)?$requestUri[0]:$requestUri[1]); //to avoid "Open redirect" security report
     
     if($dbname=='startup'){
-        header('Location: /'.$requestUri[0].'/startup/index.php');  
+        header('Location: /'.filter_var($requestUri[0]).'/startup/index.php');  
         exit();
     }else
     if(!preg_match('/[^A-Za-z0-9_\$]/', $dbname)){
