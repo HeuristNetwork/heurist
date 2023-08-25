@@ -683,7 +683,8 @@ function getDateHistogramData($system, $range, $interval, $rec_ids, $dty_id, $fo
         $date_int = new DateInterval('P'.$interval.'Y');
         $count = ceil($count);
 
-    }else if($format == 'month'){
+    }else 
+    if($format == 'month'){
 
         // Round up, +1 for any days and +12 for any years
         if($days > 0){ 
@@ -799,14 +800,15 @@ function getDateHistogramData($system, $range, $interval, $rec_ids, $dty_id, $fo
             $lower = $upper;
         }
     }else{
-        $start_interval = new DateTime(Temporal::decimalToYMD($s_date->getMinMax()[0]));
+        $start_interval0 = Temporal::decimalToYMD($s_date->getMinMax()[0]);
+        $start_interval = new DateTime($start_interval0);
         $end_date = new DateTime(Temporal::decimalToYMD($e_date->getMinMax()[1]));
-    
+        
         for($i = 0; $i < $count; $i++){
             
             $lower = floatval($start_interval->format('Y.md'));
             $upper = new DateTime($start_interval->add($date_int)->format('Y-m-d'));
-
+            
             if($upper > $end_date){ // last class
                 array_push($intervals, array($lower, $e_date->getMinMax()[1], 0));
                 break;

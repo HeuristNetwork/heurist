@@ -744,7 +744,7 @@ class Temporal {
     //
     //
     //
-    public static function decimalToYMD($date){
+    public static function decimalToYMD($date, $lpad_years=false){
         
         $date = strval($date);
         $k = strpos($date,'.');
@@ -761,11 +761,13 @@ class Temporal {
                     $day = str_pad(substr($mmdd,2), 2,'0',STR_PAD_RIGHT);     
                 }
             }
-            if(intval($res)<0){
-                $res = '-'.str_pad(substr($res,1), 6,'0',STR_PAD_LEFT);
+
+            if(intval($res)<0 && strlen($res)<5){
+                    $res = '-'.str_pad(substr($res,1), 4,'0',STR_PAD_LEFT);
             }else{
-                $res = str_pad($res, 4,'0',STR_PAD_LEFT);
+                    //$res = str_pad($res, 4,'0',STR_PAD_LEFT);
             }
+            
             
             $res = $res.'-'.$month.'-'.$day;
         }else{
@@ -924,7 +926,7 @@ class Temporal {
                 $res = strval(abs($date['year']));
 
                 //year must be four digit for CE and 6 for BCE
-                if($isbce){
+                if(false && $isbce){
                     $res = str_pad($res,6,'0',STR_PAD_LEFT); //WAS 6
                 }else if(abs($date['year'])<10000){
                     $res = str_pad($res,4,'0',STR_PAD_LEFT);
@@ -1214,7 +1216,7 @@ class Temporal {
             $latest = null;
             $err_msg = array();
             $res = true;
-            
+        
             try{
                 $dt1 = Temporal::dateToISO($dt1);
                 $early = new DateTime($dt1);

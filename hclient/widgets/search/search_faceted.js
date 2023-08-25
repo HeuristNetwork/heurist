@@ -2782,8 +2782,7 @@ console.log('get defintion in OLD format!!!!');
                             // lower -> min value, higher -> ma x value
                             //
                             function setupDateHistogram(lower, higher) {
-//
-console.log(lower, higher);
+//console.log(lower, higher);
                                 // Get dates in ms
                                 if(date_type=='years_only'){
                                     lower = Math.round(lower);
