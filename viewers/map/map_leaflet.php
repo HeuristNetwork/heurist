@@ -68,6 +68,7 @@ if($_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0.0.1'){
 <link type="text/css" rel="stylesheet" href="<?php echo PDIR;?>external/leaflet/markercluster/MarkerCluster.Default.css">
 <script src="<?php echo PDIR;?>external/leaflet/markercluster/leaflet.markercluster.js"></script>
 <script src="<?php echo PDIR;?>external/leaflet/wise-leaflet-pip.js"></script>
+<script src="<?php echo PDIR;?>external/leaflet/leaflet.circle.topolygon-src.js"></script>
 
 <link type="text/css" rel="stylesheet" href="<?php echo PDIR;?>external/leaflet/bookmarks/leaflet.bookmarks.css">
 
