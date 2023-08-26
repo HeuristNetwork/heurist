@@ -1530,6 +1530,12 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                     });
                     
 
+           function __getEditFieldValue(sField){
+               var ele = that._editing.getFieldByName(sField);
+               var vals = ele.editing_input('getValues');
+               return vals[0];
+           }
+                    
            //
            //
            //   
@@ -1543,11 +1549,9 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                    sPanel = '#recOwner';
                }
                
-               var ele = that._editing.getFieldByName(sField);
-               var vals = ele.editing_input('getValues');
-               vals = vals[0];
-               
-               window.hWin.HAPI4.SystemMgr.usr_names({UGrpID:vals},
+               var vals = __getEditFieldValue(sField);
+
+               window.hWin.HAPI4.SystemMgr.usr_names({UGrpID:vals, context:sPanel},
                     function(response){
                         if(response.status == window.hWin.ResponseStatus.OK){
                             var txt = [], title = [], cnt = 0;
@@ -1562,6 +1566,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                             if(cnt>2){
                                txt = txt + '...'; 
                             }
+                            var sPanel = response.context;
                             panel.find(sPanel).text(txt).attr('title',title.join(', '));
                         }
                 });
@@ -1583,13 +1588,12 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
 
                if(context && context.NonOwnerVisibility){
                     
-                    var ele = that._editing.getFieldByName('rec_OwnerUGrpID');
-                    var vals = ele.editing_input('getValues');
-                    
-                    if(vals[0]!=context.OwnerUGrpID){
+                    var val = __getEditFieldValue('rec_OwnerUGrpID');
+                    if(val!=context.OwnerUGrpID){
                         if(context.OwnerUGrpID == 'current_user') 
                             context.OwnerUGrpID = window.hWin.HAPI4.user_id();
                         
+                        var ele = that._editing.getFieldByName('rec_OwnerUGrpID');
                         ele.editing_input('setValue',[context.OwnerUGrpID]);
                         ele.editing_input('isChanged', true);
                         
@@ -1597,19 +1601,20 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                         __getUserNames('owner');
                     }
 
-                    ele = that._editing.getFieldByName('rec_NonOwnerVisibility');
-                    vals = ele.editing_input('getValues');
-                    if(vals[0]!=context.NonOwnerVisibility){
+                    
+                    val = __getEditFieldValue('rec_NonOwnerVisibility');
+                    if(val!=context.NonOwnerVisibility){
+                        var ele = that._editing.getFieldByName('rec_NonOwnerVisibility');
                         ele.editing_input('setValue',[context.NonOwnerVisibility]);
                         ele.editing_input('isChanged', true);
                         panel.find('#recAccess').html(context.NonOwnerVisibility);
                     }
                     
                     //change visibility per group
-                    ele = that._editing.getFieldByName('rec_NonOwnerVisibilityGroups');
-                    vals = ele.editing_input('getValues');
-                    if(vals[0]!=context.NonOwnerVisibilityGroups){
+                    val = __getEditFieldValue('rec_NonOwnerVisibilityGroups');
+                    if(val!=context.NonOwnerVisibilityGroups){
                         //update usrRecPermissions
+                        var ele = that._editing.getFieldByName('rec_NonOwnerVisibilityGroups');
                         ele.editing_input('setValue',[context.NonOwnerVisibilityGroups]);
                         ele.editing_input('isChanged', true);
                         if(context.NonOwnerVisibility=='viewable') __getUserNames('access');
@@ -1622,9 +1627,9 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                         
         //show dialog that changes ownership and view access                   
         window.hWin.HEURIST4.ui.showRecordActionDialog('recordAccess', {
-               currentOwner:  that._getField('rec_OwnerUGrpID'),
-               currentAccess: that._getField('rec_NonOwnerVisibility'),
-               currentAccessGroups: that._getField('rec_NonOwnerVisibilityGroups'),
+               currentOwner:  __getEditFieldValue('rec_OwnerUGrpID'),
+               currentAccess: __getEditFieldValue('rec_NonOwnerVisibility'),
+               currentAccessGroups: __getEditFieldValue('rec_NonOwnerVisibilityGroups'),
                scope_types: 'none', onClose: __assignOwnerAccess,
                height:400,
                default_palette_class: 'ui-heurist-populate'

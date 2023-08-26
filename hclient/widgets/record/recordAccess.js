@@ -155,7 +155,7 @@ $.widget( "heurist.recordAccess", $.heurist.recordAction, {
                 if(that.options.currentAccess){
                     //fieldSelect.val(this.options.currentOwner);
                     
-                    if( that.options.currentAccess=='hidden'){
+                    if( that.options.currentAccess=='hidden' || that.options.currentAccessGroups){
                         //|| (this.options.currentAccess=='viewable' && this.options.currentAccessGroups)){
                         that.element.find('#rb_Access-hidden').prop('checked', true); //was viewable-group
                         that.element.find('#div_AccessGroups').show();//css({display:'table-row'});
@@ -294,8 +294,8 @@ $.widget( "heurist.recordAccess", $.heurist.recordAction, {
             var sel = this.element.find('#sel_AccessGroups').editing_input('getValues');
 
             if(sel && sel.length>0 && sel[0]!=''){
-                visibility='viewable';
-                visibility_groups = sel[0];
+                visibility = 'viewable';
+                visibility_groups = sel.join(',');
             }
         }
             

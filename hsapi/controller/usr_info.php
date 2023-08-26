@@ -604,7 +604,9 @@
         $response = $system->getError();
     }else{
         $response = array("status"=>HEURIST_OK, "data"=> $res);
-        
+        if(@$_REQUEST['context']){
+            $response['context'] = filter_var($_REQUEST['context']);
+        }
     }
     
 $system->setResponseHeader();    

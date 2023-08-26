@@ -1069,7 +1069,7 @@ window.hWin.HEURIST4.ui = {
                         name = window.hWin.HAPI4.sysinfo.db_usergroups[groupID];
                     }else if(window.hWin.HEURIST4.util.isObject(groupID) && Object.hasOwn(groupID, 'id')){ //case 2
                         name = groupID['name'];
-                        gorupID = groupID['id'];
+                        groupID = groupID['id'];
                     }else{ //case 3
                         groupID = idx;
                         name = groups[groupID];    

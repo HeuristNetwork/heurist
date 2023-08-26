@@ -805,7 +805,7 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
 
 
                 if (request.UGrpID.length == 0) { //all names are resolved on client side
-                    callback.call(this, { status: window.hWin.ResponseStatus.OK, data: sUserNames });
+                    callback.call(this, { status: window.hWin.ResponseStatus.OK, data: sUserNames, context: request.context });
                 } else {
                     //search on server
                     if (request) request.a = 'usr_names';
@@ -814,7 +814,7 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
 
                             sUserNames = $.extend(sUserNames, context.data);
 
-                            callback.call(this, { status: window.hWin.ResponseStatus.OK, data: sUserNames });
+                            callback.call(this, { status: window.hWin.ResponseStatus.OK, data: sUserNames, context: context.context });
                         } else {
                             callback.call(this, { status: context.status });
                         }
