@@ -1917,8 +1917,12 @@ console.log('get defintion in OLD format!!!!');
                         
                     }else{
                         
-                        //replace with list of ids
-                        query = {ids: this._currentRecordset.getMainSet().join(',')};
+                        //replace with list of ids, and add rectype id
+
+                        let rtyid = field?.rtyid !== undefined ? field.rtid : null;
+                        rtyid = !rtyid ? field.code.split(':')[0] : rtyid;
+
+                        query = {t: rtyid, ids: this._currentRecordset.getMainSet().join(',')};
                     }
                 
                     needcount = 1;
