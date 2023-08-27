@@ -133,6 +133,7 @@ $.widget( "heurist.search_faceted_wiz", {
     step: 0, //current step
     step_panels:[],
     current_tree_rectype_ids:null,
+    current_tree_mode: 0, // how the tree is displayed; 0 => Normal (each record type is separate, with all fields), 1 => Show all field that appear in each record type
     originalRectypeID:null, //flag that allows to save on first page for edit mode
     
     facetPreview_reccount:0, 
@@ -239,8 +240,9 @@ $.widget( "heurist.search_faceted_wiz", {
             "<span id='get_usages'></span><br>"+
             // Tree order options
             "<label for='order_alphabetic'><input type='radio' name='tree_order' id='order_alphabetic' style='vertical-align: middle;' value='1' />&nbsp;Alphabetic</label>"+
-            "<label for='order_default'><input type='radio' name='tree_order' id='order_default' style='vertical-align: middle;' value='0' checked />&nbsp;Form order</label>"+
-            "<br><br>"+
+            "<label for='order_default'><input type='radio' name='tree_order' id='order_default' style='vertical-align: middle;' value='0' checked />&nbsp;Form order</label><br>"+
+            "<label id='sharedFieldsOnly_container' style='font-size: 11px;position: relative;top: 10px;left: 20px;'>"+
+            "<input type='checkbox' id='sharedFieldsOnly'>Multiple record types - show shared fields only</label><br>"+
             // Check all visible options
             "<label id='selectAll_container' style='font-size: 11px;position: relative;top: 10px;left: 20px;'>"+
             "<input type='checkbox' id='selectAll'>Select All Visible Options</label>");
@@ -310,6 +312,13 @@ $.widget( "heurist.search_faceted_wiz", {
                         }
                     });
                 }
+            }
+        });
+
+        this._on($(this.step2).find('#sharedFieldsOnly'), {
+            change: function(e){
+                let check_status = $(e.target).is(":checked");
+                that._initStep2_FieldTreeView(that.options.params.rectypes, check_status ? 1 : 0);
             }
         });
         
@@ -633,26 +642,10 @@ $.widget( "heurist.search_faceted_wiz", {
                     this.step0.hide();
                 }
 
-                //load field types
-                /* ART20150810
-                allowed = ['enum','freetext'];
-                var $dlg = this.step0.find("#facets_options");
-                if($dlg.find("#opt_use_freetext").is(":checked")){
-                allowed.push('freetext');
-                }
-                if($dlg.find("#opt_use_date").is(":checked")){
-                allowed.push('year');
-                allowed.push('date');
-                }
-                if($dlg.find("#opt_use_numeric").is(":checked")){
-                allowed.push('integer');
-                allowed.push('float');
-                }
-                this.options.params.fieldtypes = allowed;
-                */
+                let tree_mode = this._isSharedFieldMode(rectypeIds);
 
                 //load list of field types
-                this._initStep2_FieldTreeView(rectypeIds);
+                this._initStep2_FieldTreeView(rectypeIds, tree_mode);
 
             }  if(this.step==2 && newstep==3){  //set individual facets
 
@@ -1187,236 +1180,283 @@ $.widget( "heurist.search_faceted_wiz", {
 
 
     // 2d step - init fieldtreeview
-    , _initStep2_FieldTreeView: function(rectypeIds){
+    , _initStep2_FieldTreeView: function(rectypeIds, tree_mode){
 
-        if(window.hWin.HEURIST4.util.isArrayNotEmpty(rectypeIds) && this.current_tree_rectype_ids != rectypeIds.join(',') ){
-            /*if(!this.options.params.rectypes ||
-            !($(rectypeIds).not(this.options.params.rectypes).length == 0 &&
-            $(this.options.params.rectypes).not(rectypeIds).length == 0))*/
-            {
+        if(window.hWin.HEURIST4.util.isArrayNotEmpty(rectypeIds) && (this.current_tree_rectype_ids != rectypeIds.join(',') || this.current_tree_mode != tree_mode)){
 
-                var that = this;
-                this.options.params.rectypes = rectypeIds;
-                var treediv = $(this.step2).find('#field_treeview');
-                var rectype;
+            var that = this;
+            this.options.params.rectypes = rectypeIds;
+            var treediv = $(this.step2).find('#field_treeview');
+            var rectype;
+            let dtys_to_keep = tree_mode == 1 ? window.hWin.HEURIST4.dbs.getSharedFields(this.options.params.rectypes) : 'all';
 
-                if(this.options.params.rectypes){
-                    rectype = this.options.params.rectypes.join(',');
+            if(!treediv.is(':empty')){
+                if(treediv.fancytree('instance') !== undefined){
+                    treediv.fancytree("destroy");
+                }else{
+                    treediv.empty();
                 }
-                
+            }
+
+            if(dtys_to_keep !== 'all' && dtys_to_keep.length == 0){ // no shared fields
+                dtys_to_keep = 'all';
+                tree_mode = 0;
+
+            }
+
+            if(tree_mode == 1){
+                rectype = this.options.params.rectypes[0]; // take first rectype only
+            }else
+            if(this.options.params.rectypes){
+                rectype = this.options.params.rectypes.join(',');
+            }
+
             let node_order = sessionStorage.getItem('heurist_ftorder_facetbuilder');
             if(window.hWin.HEURIST4.util.isempty(node_order) || !Number.isInteger(+node_order)){
                 node_order = 0; // default to form order
             }
+
             $(this.step2).find('[name="tree_order"]').filter('[value="'+ node_order +'"]').prop('checked', true);
 
-                var allowed_fieldtypes = ['header_ext',
-                'enum','freetext','blocktext',"year","date","integer","float","resource","relmarker",'separator'];
-                
-            var treedata = window.hWin.HEURIST4.dbs.createRectypeStructureTree( null, 5, rectype, allowed_fieldtypes, null, node_order );
+            var allowed_fieldtypes = ['header_ext',
+                'enum','freetext','blocktext',"year","date","integer","float","resource","relmarker"];
 
-                treedata[0].expanded = true; //first expanded
-                
-                if(!treediv.is(':empty')){
-                    treediv.fancytree("destroy");
-                }
-
-                //setTimeout(function(){
-                treediv.addClass('tree-facets').fancytree({
-                    //extensions: ["filter"],
-                    //            extensions: ["select"],
-                    checkbox: true,
-                    selectMode: 3,  // hierarchical multi-selection
-                    source: treedata,
-                    beforeSelect: function(event, data){
-                        // A node is about to be selected: prevent this, for folder-nodes:
-                        if( data.node.hasChildren() ){
-                            return false;
-                        }
-                    },
-                    renderNode: function(event, data){
-
-                        let order = $(that.step2).find('[name="tree_order"]:checked').val();
-
-                        if(data.node.data.dtyID_local && data.node.data.code.includes(rectype+':')!==false && data.node.data.type != 'separator'){ // top level only, add usage container
-                            $(data.node.span.childNodes[3]).append(
-                                '<span style="display:inline-block;margin-left: 10px;" data-dtid="'+ data.node.data.dtyID_local +'" class="usage_count">&nbsp;</span>');
-                        }
-
-                        if(data.node.data.is_generic_fields) { // hide blue arrow for generic fields
-                            $(data.node.span.childNodes[1]).hide();
-                        }else if(data.node.data.type == 'separator'){
-                            $(data.node.span).attr('style', 'background: none !important;color: black !important;'); //stop highlighting
-                            $(data.node.span.childNodes[1]).hide(); //checkbox for separators
-
-                            if(order == 1){
-                                $(data.node.li).addClass('fancytree-hidden');
-                            }
-                        }else if(data.node.data.type == 'enum'){ // TODO - Move to CSS for general use when field colours are set out
-                            $(data.node.span.childNodes[3]).css('color', '#871F78');
-                        }else if(data.node.data.type == 'date'){ // TODO - Move to CSS for general use when field colours are set out
-                            $(data.node.span.childNodes[3]).css('color', 'darkgreen');
-                        }
-                    },
-                    lazyLoad: function(event, data){
-                        
-                        var node = data.node;
-                        var parentcode = node.data.code; 
-                        var rectypes = node.data.rt_ids;
-                        
-                        if(parentcode.split(":").length<5){  //limit with 3 levels
-                        
-                            let node_order = $(that.step2).find('[name="tree_order"]:checked').val();
-
-                            var res = window.hWin.HEURIST4.dbs.createRectypeStructureTree( null, 5, rectypes, allowed_fieldtypes, parentcode, node_order );
-                            if(res.length>1){
-                                data.result = res;
-                            }else{
-                                data.result = res[0].children;
-                            }
-                        
-                        }else{
-                            data.result = [];
-                        }                            
-                        
-                        return data;                                                   
-                        /* from server
-                        var node = data.node;
-                        var sURL = window.hWin.HAPI4.baseURL + "hsapi/controller/sys_structure.php";
-                        data.result = {
-                            url: sURL,
-                            data: {db:window.hWin.HAPI4.database, mode:5, parentcode:node.data.code, 
-                                rectypes:node.data.rt_ids, fieldtypes:allowed_fieldtypes}
-                        } 
-                        */                                   
-                    },
-                    expand: function(e, data){
-                        that.showHideReverse();
-                    },
-                    loadChildren: function(e, data){
-                        setTimeout(function(){
-                            that.showHideReverse();   
-                            that._assignSelectedFacets();
-                        },500);
-                    },
-                    select: function(e, data) {
-                        /* Get a list of all selected nodes, and convert to a key array:
-                        var selKeys = $.map(data.tree.getSelectedNodes(), function(node){
-                        return node.key;
-                        });
-                        $("#echoSelection3").text(selKeys.join(", "));
-
-                        // Get a list of all selected TOP nodes
-                        var selRootNodes = data.tree.getSelectedNodes(true);
-                        // ... and convert to a key array:
-                        var selRootKeys = $.map(selRootNodes, function(node){
-                        return node.key;
-                        });
-                        $("#echoSelectionRootKeys3").text(selRootKeys.join(", "));
-                        $("#echoSelectionRoots3").text(selRootNodes.join(", "));
-                        */
-                    },
-                    click: function(e, data){
-
-                        if(data.node.data.type == 'separator'){
-                            return false;
-                        }
-
-                        var isExpander = $(e.originalEvent.target).hasClass('fancytree-expander');
-
-                        if(isExpander){
-                            return;
-                        }
-
-                        if($(e.originalEvent.target).is('span') && data.node.children && data.node.children.length>0){
-                            data.node.setExpanded(!data.node.isExpanded());
-                        }else if( data.node.lazy) {
-                            data.node.setExpanded( true );
-                        }
-                    },
-                    dblclick: function(e, data) {
-                        if(data.node.data.type == 'separator'){
-                            return false;
-                        }
-                        data.node.toggleSelected();
-                    },
-                    keydown: function(e, data) {
-                        if( e.which === 32 ) {
-                            data.node.toggleSelected();
-                            return false;
-                        }
-                    }
-                    // The following options are only required, if we have more than one tree on one page:
-                    //          initId: "treeData",
-                    //cookieId: "fancytree-Cb3",
-                    //idPrefix: "fancytree-Cb3-"
-                });
-                //},1000);
-
-                //restore selection
-                var facets;
-                if(that.options.params.facets_new){ //old version
-                    facets = JSON.parse(JSON.stringify(that.options.params.facets_new));
-                    for(var i=0; i<facets.length; i++){
-                        if(facets[i].code){ //change code to new format (with links direction)
-                            var codes = facets[i].code.split(':');
-                            if(codes.length>2){
-                                var k = 1;
-                                while(k<codes.length-2){
-                                    codes[k] = 'lt'+codes[k];
-                                    k = k+2;
-                                }
-                                facets[i].code = codes.join(':');
-                            }
-                        }
-                    }
-                    that.options.params.facets = that.options.params.facets_new;
-                }else{
-                    facets = that.options.params.facets;
-                }
-
-                that._assignSelectedFacets();
-
-                //hide all folder triangles
-                //treediv.find('.fancytree-expander').hide();
-
-                that.current_tree_rectype_ids = rectypeIds.join(',');
-
-                var ele = that.element.find("#fsw_showreverse");
-                that._on(ele,{change:function(event){
-
-                    that.showHideReverse();
-                }});
-
-                // Calculate field usage button
-                ele = that.element.find("#get_usages").button({showLabel: true, label: 'Calculate Usage'}).css('margin-left', '15px');
-                if(that.current_tree_rectype_ids.includes(',')===false){
-                    ele.show();
-                    that._on(ele, {click: function(){
-                        that.calculateFieldUsage();
-                    }});
-                }else{
-                    ele.hide();
-                }
-
-                // Reorder tree nodes
-                this._off($('[name="tree_order"]'), 'change');
-                this._on($('[name="tree_order"]'), {
-                    change: () => {
-                        let order = $('[name="tree_order"]:checked').val();
-                        sessionStorage.setItem('heurist_ftorder_facetbuilder', order);
-
-                        if(treediv.fancytree('instance')!==undefined){
-
-                            window.hWin.HEURIST4.ui.reorderFancytreeNodes_rst(treediv, order);
-                            that.showHideReverse();
-                        }
-                    }
-                });
-
-                ele.attr('checked', false);
-                ele.change();
+            if(tree_mode != 1){
+                allowed_fieldtypes.push('separator');
             }
+
+            var treedata = null;
+
+            treedata = window.hWin.HEURIST4.dbs.createRectypeStructureTree( null, 5, rectype, allowed_fieldtypes, null, node_order );   
+
+            if(dtys_to_keep !== 'all'){ // remove fields not in dtys_to_keep, also replace labels with dty_Name
+
+                //treedata[0]['children'][2]['children'] = treedata[0]['children'][2]['children'].filter(field => dtys_to_keep.includes(field.dtyID_local));
+                let fields = treedata[0]['children'][2]['children'];
+
+                for(let idx = 0; idx < fields.length; idx ++){
+                    /*
+                    if(fields[idx].type == 'separator'){ // remove separators
+                        fields.splice(idx, 1);
+                        --idx;
+                        continue;
+                    }
+                    */
+
+                    let dty_id = fields[idx].dtyID_local;
+                    if(!dtys_to_keep.includes(dty_id)){
+                        fields.splice(idx, 1);
+                        --idx;
+                        continue;
+                    }
+
+                    let org_name = fields[idx].name;
+                    let fld_name = $Db.dty(dty_id, 'dty_Name');
+                    fields[idx].name = fld_name;
+                    fields[idx].title = fields[idx].title.replace(org_name, fld_name);
+                }
+
+                treedata[0]['children'][2]['children'] = fields;
+                treedata[0].title = 'Shared fields only';
+            }
+
+            treedata[0].expanded = true; //first expanded
+
+            //setTimeout(function(){
+            treediv.addClass('tree-facets').fancytree({
+                //extensions: ["filter"],
+                //            extensions: ["select"],
+                checkbox: true,
+                selectMode: 3,  // hierarchical multi-selection
+                source: treedata,
+                beforeSelect: function(event, data){
+                    // A node is about to be selected: prevent this, for folder-nodes:
+                    if( data.node.hasChildren() ){
+                        return false;
+                    }
+                },
+                renderNode: function(event, data){
+
+                    let order = $(that.step2).find('[name="tree_order"]:checked').val();
+
+                    if(data.node.data.dtyID_local && data.node.data.code.includes(rectype+':')!==false && data.node.data.type != 'separator'){ // top level only, add usage container
+                        $(data.node.span.childNodes[3]).append(
+                            '<span style="display:inline-block;margin-left: 10px;" data-dtid="'+ data.node.data.dtyID_local +'" class="usage_count">&nbsp;</span>');
+                    }
+
+                    if(data.node.data.is_generic_fields) { // hide blue arrow for generic fields
+                        $(data.node.span.childNodes[1]).hide();
+                    }else if(data.node.data.type == 'separator'){
+                        $(data.node.span).attr('style', 'background: none !important;color: black !important;'); //stop highlighting
+                        $(data.node.span.childNodes[1]).hide(); //checkbox for separators
+
+                        if(order == 1){
+                            $(data.node.li).addClass('fancytree-hidden');
+                        }
+                    }else if(data.node.data.type == 'enum'){ // TODO - Move to CSS for general use when field colours are set out
+                        $(data.node.span.childNodes[3]).css('color', '#871F78');
+                    }else if(data.node.data.type == 'date'){ // TODO - Move to CSS for general use when field colours are set out
+                        $(data.node.span.childNodes[3]).css('color', 'darkgreen');
+                    }
+                },
+                lazyLoad: function(event, data){
+                    
+                    var node = data.node;
+                    var parentcode = node.data.code; 
+                    var rectypes = node.data.rt_ids;
+                    
+                    if(parentcode.split(":").length<5){  //limit with 3 levels
+                    
+                        let node_order = $(that.step2).find('[name="tree_order"]:checked').val();
+
+                        var res = window.hWin.HEURIST4.dbs.createRectypeStructureTree( null, 5, rectypes, allowed_fieldtypes, parentcode, node_order );
+                        if(res.length>1){
+                            data.result = res;
+                        }else{
+                            data.result = res[0].children;
+                        }
+                    
+                    }else{
+                        data.result = [];
+                    }                            
+                    
+                    return data;                                                   
+                    /* from server
+                    var node = data.node;
+                    var sURL = window.hWin.HAPI4.baseURL + "hsapi/controller/sys_structure.php";
+                    data.result = {
+                        url: sURL,
+                        data: {db:window.hWin.HAPI4.database, mode:5, parentcode:node.data.code, 
+                            rectypes:node.data.rt_ids, fieldtypes:allowed_fieldtypes}
+                    } 
+                    */                                   
+                },
+                expand: function(e, data){
+                    that.showHideReverse();
+                },
+                loadChildren: function(e, data){
+                    setTimeout(function(){
+                        that.showHideReverse();   
+                        that._assignSelectedFacets();
+                    },500);
+                },
+                select: function(e, data) {
+                    let is_disabled = treediv.fancytree('getTree').getSelectedNodes().length > 0;
+
+                    window.hWin.HEURIST4.util.setDisabled(that.step2.find('#sharedFieldsOnly'), is_disabled);
+
+                    if(is_disabled){ that.step2.find('#sharedFieldsOnly_container').attr('title', 'Cannot be toggled while nodes are selected'); }
+                    else { that.step2.find('#sharedFieldsOnly_container').attr('title', 'Show only fields shared between all selected record types'); }
+                },
+                click: function(e, data){
+
+                    if(data.node.data.type == 'separator'){
+                        return false;
+                    }
+
+                    var isExpander = $(e.originalEvent.target).hasClass('fancytree-expander');
+
+                    if(isExpander){
+                        return;
+                    }
+
+                    if($(e.originalEvent.target).is('span') && data.node.children && data.node.children.length>0){
+                        data.node.setExpanded(!data.node.isExpanded());
+                    }else if( data.node.lazy) {
+                        data.node.setExpanded( true );
+                    }
+                },
+                dblclick: function(e, data) {
+                    if(data.node.data.type == 'separator'){
+                        return false;
+                    }
+                    data.node.toggleSelected();
+                },
+                keydown: function(e, data) {
+                    if( e.which === 32 ) {
+                        data.node.toggleSelected();
+                        return false;
+                    }
+                }
+                // The following options are only required, if we have more than one tree on one page:
+                //          initId: "treeData",
+                //cookieId: "fancytree-Cb3",
+                //idPrefix: "fancytree-Cb3-"
+            });
+            //},1000);
+
+            //restore selection
+            var facets;
+            if(that.options.params.facets_new){ //old version
+                facets = JSON.parse(JSON.stringify(that.options.params.facets_new));
+                for(var i=0; i<facets.length; i++){
+                    if(facets[i].code){ //change code to new format (with links direction)
+                        var codes = facets[i].code.split(':');
+                        if(codes.length>2){
+                            var k = 1;
+                            while(k<codes.length-2){
+                                codes[k] = 'lt'+codes[k];
+                                k = k+2;
+                            }
+                            facets[i].code = codes.join(':');
+                        }
+                    }
+                } console.log('what even is this? ', that.options.params.facets_new, that.options.params);
+                that.options.params.facets = that.options.params.facets_new;
+            }else{
+                facets = that.options.params.facets;
+            }
+
+            that._assignSelectedFacets();
+
+            //hide all folder triangles
+            //treediv.find('.fancytree-expander').hide();
+
+            that.current_tree_rectype_ids = rectypeIds.join(',');
+            that.current_tree_mode = tree_mode;
+
+            var ele = that.element.find("#fsw_showreverse");
+            that._on(ele,{change:function(event){
+
+                that.showHideReverse();
+            }}); console.log(that.current_tree_mode, tree_mode);
+            if(tree_mode == 1){
+                window.hWin.HEURIST4.util.setDisabled(ele, true);
+                ele.prop('checked', false);
+                ele.parent().attr('title', 'Cannot be used while displaying shared fields only');
+            }else{
+                window.hWin.HEURIST4.util.setDisabled(ele, false);
+                ele.parent().attr('title', '');
+            }
+
+            // Calculate field usage button
+            ele = that.element.find("#get_usages").button({showLabel: true, label: 'Calculate Usage'}).css('margin-left', '15px');
+            if(that.current_tree_rectype_ids.includes(',')===false){
+                ele.show();
+                that._on(ele, {click: function(){
+                    that.calculateFieldUsage();
+                }});
+            }else{
+                ele.hide();
+            }
+
+            // Reorder tree nodes
+            this._off($('[name="tree_order"]'), 'change');
+            this._on($('[name="tree_order"]'), {
+                change: () => {
+                    let order = $('[name="tree_order"]:checked').val();
+                    sessionStorage.setItem('heurist_ftorder_facetbuilder', order);
+
+                    if(treediv.fancytree('instance')!==undefined){
+
+                        window.hWin.HEURIST4.ui.reorderFancytreeNodes_rst(treediv, order);
+                        that.showHideReverse();
+                    }
+                }
+            });
+
+            ele.attr('checked', false);
+            ele.change();
         }
     }
     
@@ -1444,29 +1484,92 @@ $.widget( "heurist.search_faceted_wiz", {
             });
         }
     }
+
+    , _isSharedFieldMode: function(rectypeIds){
+
+        let that = this;
+        let shared_fields = window.hWin.HEURIST4.dbs.getSharedFields(rectypeIds);
+        let facets = this.options.params.facets;
+
+        function _disable_sharedfield(){
+            that.step2.find('#sharedFieldsOnly').prop('checked', false);
+            window.hWin.HEURIST4.util.setDisabled(that.step2.find('#sharedFieldsOnly'), true);
+            that.step2.find('#sharedFieldsOnly_container').attr('title', 'Cannot be toggled while nodes are selected');
+            return 0;
+        }
+
+        if(rectypeIds.length == 1 || shared_fields.length == 0){ // hide 'show shared fields' checkbox
+            this.step2.find('#sharedFieldsOnly_container').hide();
+            return _disable_sharedfield();
+        }
+
+        this.step2.find('#sharedFieldsOnly_container').show();
+        window.hWin.HEURIST4.util.setDisabled(this.step2.find('#sharedFieldsOnly'), false);
+        this.step2.find('#sharedFieldsOnly_container').attr('title', 'Show only fields shared between all selected record types');
+
+        if(facets.length == 0){ // set to check by default for new facets w/ multiple rectypes
+            this.step2.find('#sharedFieldsOnly').prop('checked', true);
+            return 1;
+        }else if(facets.length == 1 || facets.length % rectypeIds.length != 0){
+            return _disable_sharedfield();
+        }
+        
+        let expected_len = rectypeIds.length;
+        let processed = {};
+        for(const facet of facets){
+
+            let codes = facet.code.split(':');
+            let c_len = codes.length;
+            let dty_id = codes[c_len-1];
+
+            if(!shared_fields.includes(dty_id)){ // not a shared field
+                return _disable_sharedfield();
+            }
+
+            if(!Object.hasOwn(processed, dty_id)){
+                processed[dty_id] = [];
+            }
+
+            processed[dty_id].push(1);
+
+            if(processed[dty_id].length > expected_len){
+                return _disable_sharedfield();
+            }
+        }
+
+        for(const dty_id in processed){ // check that every field 
+            if(processed[dty_id].length < expected_len){
+                return _disable_sharedfield();
+            }
+        }
+
+        window.hWin.HEURIST4.util.setDisabled(that.step2.find('#sharedFieldsOnly'), true);
+        that.step2.find('#sharedFieldsOnly_container').attr('title', 'Cannot be toggled while nodes are selected');
+
+        return 1;
+    }
     
     //restore selection in treeview
     , _assignSelectedFacets: function(){
-          
+
         var treediv = $(this.step2).find('#field_treeview');
         var facets = this.options.params.facets;
-       
-                            var tree = treediv.fancytree("getTree");
 
-                            if(facets && facets.length>0){
-                                tree.visit(function(node){
-                                    if(!window.hWin.HEURIST4.util.isArrayNotEmpty(node.children)){ //this is leaf
-                                        //find it among facets
-                                        for(var i=0; i<facets.length; i++){
-                                            if(facets[i].code && facets[i].code==node.data.code){
-                                                node.setSelected(true);
-                                                break;
-                                            }
-                                        }
-                                    }
-                                });
-                            }
-        
+        var tree = treediv.fancytree("getTree");
+
+        if(facets && facets.length>0){
+            tree.visit(function(node){
+                if(!window.hWin.HEURIST4.util.isArrayNotEmpty(node.children)){ //this is leaf
+                    //find it among facets
+                    for(var i=0; i<facets.length; i++){
+                        if(facets[i].code && facets[i].code==node.data.code){
+                            node.setSelected(true);
+                            break;
+                        }
+                    }
+                }
+            });
+        }
     }
 
     , _findFacetByCode: function(code){
@@ -1492,6 +1595,7 @@ $.widget( "heurist.search_faceted_wiz", {
         var facets_new = [];
         var k, len = this.options.params.rectypes.length;
         var isOneRoot = true;
+        let sharedFields = this.step2.find('#sharedFieldsOnly').is(':checked');
 
         // ------------------------------------------------------
         var tree = $(this.step2).find('#field_treeview').fancytree("getTree");
@@ -1499,18 +1603,44 @@ $.widget( "heurist.search_faceted_wiz", {
         len = fieldIds.length;
 
         facets = [];
-        
+
         function __getRandomInt() {
             var min = 0;
             var max =  100000;
             min = Math.ceil(min);
             max = Math.floor(max);
             return Math.floor(Math.random() * (max - min)) + min; //The maximum is exclusive and the minimum is inclusive
-        }        
-        
+        }
+
+        var old_facets = this.options.params.facets;
+
+        if(sharedFields){ // retrieve shared fields, replace record type id at start of code
+
+            let rectypes = this.options.params.rectypes;
+            let idx_replace = rectypes[0]?.length ? rectypes[0].length : rectypes[0].toString().length;
+            let final_list = [...fieldIds];
+
+            for(let i = 1; i < rectypes.length; i++){
+
+                for(let j = 0; j < fieldIds.length; j++){
+
+                    if(window.hWin.HEURIST4.util.isArrayNotEmpty(fieldIds[j].children)){ // skip
+                        continue;
+                    }
+
+                    let node = fieldIds[j].toDict();
+                    node.data.code = rectypes[i] + node.data.code.slice(idx_replace);
+
+                    final_list.push(node);
+                }
+            }
+
+            fieldIds = final_list;
+            len = fieldIds.length;
+        }
+
         //first scan current facets and add to selection fields that are not found in tree 
         // it means they are not loaded
-        var old_facets = this.options.params.facets;
         if(old_facets)
         for (k=0;k<old_facets.length;k++){
             
@@ -1521,14 +1651,26 @@ $.widget( "heurist.search_faceted_wiz", {
             var code = old_facets[k]['code'];
             
             var isfound = false;
-            tree.visit(function(node){
+            for(let i = 0; i < fieldIds.length; i++){
+
+                let node = fieldIds[i];
                 if(!window.hWin.HEURIST4.util.isArrayNotEmpty(node.children)){ //this is leaf
-                        if(code && code==node.data.code){
-                            isfound = true; //exists = loaded
-                            return false;
-                        }
+                    if(code && code==node.data.code){
+                        isfound = true; //exists = loaded
+                        break;
+                    }
                 }
-            });//visit
+            }
+            if(!isfound){
+                tree.visit(function(node){
+                    if(!window.hWin.HEURIST4.util.isArrayNotEmpty(node.children)){ //this is leaf
+                            if(code && code==node.data.code){
+                                isfound = true; //exists = loaded
+                                return false;
+                            }
+                    }
+                });//visit
+            }
             if(!isfound){ //assume that they not loaded with last load
                 facets.push(old_facets[k]); 
             }
@@ -1594,8 +1736,14 @@ $.widget( "heurist.search_faceted_wiz", {
                     }
                 }
             }
-            
-            
+
+            if(facets.length == 0){
+                if(fieldIds.length > 0){
+                    window.hWin.HEURIST4.msg.showMsgErr('An error occurred while preparing your selected facets.<br>Please report this bug to the Heurist team.');
+                }
+                return;
+            }
+
             facets.sort(function(a,b){
                 return a.order<b.order?-1:1;
             });

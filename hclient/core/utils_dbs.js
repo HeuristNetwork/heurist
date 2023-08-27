@@ -2818,7 +2818,7 @@ window.hWin.HEURIST4.dbs = {
         }
 
         if(!rty_IDs || !window.hWin.HEURIST4.util.isArrayNotEmpty(rty_IDs)){
-            return results;
+            return [];
         }
 
         let last_idx = 0; // current index count
@@ -2919,6 +2919,51 @@ window.hWin.HEURIST4.dbs = {
         }else{
             return processed_fields;
         }
+    },
+
+    /**
+     * Get detail types common to all provided record types
+     * 
+     * @param {number|Array} rty_IDs - array of record type ids to include
+     * @param {number|Array} ignored_dty_id - array of detail type ids to ignore/skip
+     * @returns {Array} - array of dty ids common to provided record types
+     */
+    getSharedFields: function(rty_IDs, ignored_dty_id = []){
+
+        let dty_IDs = [];
+
+        if(!rty_IDs){ // get all ids
+            return dty_IDs;
+        }
+
+        if(!window.hWin.HEURIST4.util.isArray(rty_IDs) && rty_IDs > 0){
+            rty_IDs = [ rty_IDs ];
+        }
+        if(!window.hWin.HEURIST4.util.isArray(ignored_dty_id) && ignored_dty_id > 0){
+            ignored_dty_id = [ ignored_dty_id ];
+        }
+
+        if(!rty_IDs || !window.hWin.HEURIST4.util.isArrayNotEmpty(rty_IDs)){
+            return dty_IDs;
+        }
+
+        for(const rty_ID of rty_IDs){
+
+            let fields = $Db.rst(rty_ID).getIds();
+            if(dty_IDs.length == 0){
+                dty_IDs = fields;
+                continue;
+            }
+
+            dty_IDs = dty_IDs.filter(fld_id => fields.includes(fld_id));
+        }
+
+        if(dty_IDs.length > 0 && ignored_dty_id.length > 0){
+            dty_IDs = dty_IDs.filter(fld_id => !ignored_dty_id.includes(fld_id));
+        }
+
+        return dty_IDs;
+
     }
 
 }//end dbs
