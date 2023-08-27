@@ -82,11 +82,12 @@ class DbSysImportFiles extends DbEntityBase
     public function search(){
         
         if(parent::search()===false){
-              return false;   
+            return false;   
         }
 
+        $orderBy = '';
         //compose WHERE 
-        $where = array();    
+        $where = array();
         
         $pred = $this->searchMgr->getPredicate('sif_ID');
         if($pred!=null) array_push($where, $pred);
@@ -119,6 +120,10 @@ class DbSysImportFiles extends DbEntityBase
         if(!is_array($this->data['details'])){ //specific list of fields
             $this->data['details'] = explode(',', $this->data['details']);
         }
+
+        if(count($where) == 0 && in_array('sif_ID', $this->data['details'])){
+            $orderBy = ' ORDER BY sif_ID DESC'; // newest to oldest
+        }
         
         //validate names of fields
         if($needCheck && !$this->_validateFieldsForSearch()){
@@ -134,7 +139,7 @@ class DbSysImportFiles extends DbEntityBase
          if(count($where)>0){
             $query = $query.' WHERE '.implode(' AND ',$where);
          }
-         $query = $query.$this->searchMgr->getLimit().$this->searchMgr->getOffset();
+         $query = $query.$orderBy.$this->searchMgr->getLimit().$this->searchMgr->getOffset();
         
 
         $res = $this->searchMgr->execute($query, $is_ids_only, $from_table);
