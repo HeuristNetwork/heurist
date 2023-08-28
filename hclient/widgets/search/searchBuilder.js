@@ -630,8 +630,8 @@ $.widget( "heurist.searchBuilder", {
             if(this.select_language == null){
 
                 this.select_language = this.element.find('#opt_language');
-                let options = [{title: 'ANY', key: 'ALL', selected: true}, {title: 'Default', key: ''}];
-                window.hWin.HEURIST4.ui.createLanguageSelect(this.select_language, options, 'ALL', false);
+                let options = [{title: 'ANY', key: '*', selected: true}, {title: 'Default', key: ''}];
+                window.hWin.HEURIST4.ui.createLanguageSelect(this.select_language, options, '*', false);
 
                 this._on(this.select_language, {
                     change: function(){
