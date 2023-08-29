@@ -434,11 +434,19 @@ class DbUtils {
                     .$mysqli->real_escape_string($usrEmail).'"');
         }
 
-        // Unable to retrieve existing user
-        if($user_id <= 0){
-            return 'Cannot retrieve your user account within the Heurist Index database.'
+        // Validate password
+        $valid_password = !empty($usrPassword);
+        if($valid_password && $user_id > 0){
+            $user_pwd = mysql__select_value($mysqli, 'select ugr_Password from sysUGrps where ugr_ID=' . intval($user_id));
+            $valid_password = hash_equals(crypt($usrPassword, $user_pwd), $user_pwd);
+        }
+
+        // Unable to retrieve existing user or provided password is wrong
+        if($user_id <= 0 || $valid_password){
+            return ($user_id <= 0 ? 'We were unable to retrieve your user account within the Heurist Index database.' 
+                    : 'We were unable to authenicate your account on the Heurist Index database')
                 . '<br>Please ensure that your email address and password on the Heurist Index database match your current email address and password.'
-                . '<br>Contact the Heurist team if you require help with updating your email address and password on the Index database.';
+                . '<br>Contact the Heurist team if you require help with updating your email address and password on the Heurist Index database.';
         }
 
         // Check user is owner of record
