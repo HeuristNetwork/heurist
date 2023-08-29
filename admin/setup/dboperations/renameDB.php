@@ -63,15 +63,31 @@ if($_REQUEST['mode'] == 2){ // verify the new name is unique
         }
     }
 
+    if($regID > 0){
+
+        if(array_key_exists('pwd', $_REQUEST)){
+
+            $user_pwd = user_getDbOwner($mysqli)['ugr_Password'];
+
+            $pwd = $_REQUEST['pwd'];
+            $sErrorMsg = hash_equals(crypt($pwd, $user_pwd), $user_pwd) ? null : 'Invalid password provided';
+        }else{
+            $sErrorMsg = 'Your password is required for validation';
+        }
+    }
+
     if($sErrorMsg !== null){
         $targetdbname = null;
         $_REQUEST['mode'] = 0;
         $_REQUEST['targetdbname'] = null;
         unset($_REQUEST['targetdbname']);
+
+        $sErrorMsg = "<span class='ui-state-error'>$sErrorMsg</span>";
     }
 }
 ?>
-<html>
+<!DOCTYPE html>
+<html lang="en">
     <head>
         <title>Rename Database</title>
         <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
@@ -191,20 +207,27 @@ if(@$_REQUEST['mode']=='2' && $targetdbname!=null){
                 </div>
                 <form name='selectdb' action='renameDB.php' method='post' onsubmit="{return onSubmit(event);}">
 
-                <?php
-                if($sErrorMsg){
-                    echo $sErrorMsg;
-                }
+                    <!-- SPECIFY THE TARGET DATABASE (first pass) -->
+                    <hr style="margin:20px 0;" />
 
-                // ---- SPECIFY THE TARGET DATABASE (first pass) -------------------------------------------------------------------
+                    <?php
+                    if($sErrorMsg){
+                        echo $sErrorMsg;
+                    }
+                    ?>
 
-                ?>
-                    <div class="separator_row" style="margin:20px 0;"></div>
                     <input name='mode' value='2' type='hidden'> <!-- calls the form to select mappings, step 2 -->
                     <input name='db' value='<?=HEURIST_DBNAME?>' type='hidden'>
 
                     <p>The database will be created with the prefix <b><?=HEURIST_DB_PREFIX?></b>
                         (this is for internal reference only, it need not concern you).</p>
+
+                    <?php
+                    if($regID > 0){ // password need for registered databases
+                        echo '<h3 class="ui-heurist-title" style="display: inline-block">Enter your password:</h3>';
+                        echo '<input type="password" name="pwd" id="usr_pwd" />';
+                    }
+                    ?>
 
                     <h3 class="ui-heurist-title">Enter a new name for your database:</h3>
                     <div style="margin-left: 40px;">
@@ -284,13 +307,12 @@ function perform_rename($new_name){
 
 function updateRegDetails($mysqli, $regID, $new_db_name, $new_dbname_full){
 
-    //$dbowner = user_getDbOwner($mysqli);
+    $dbowner = user_getDbOwner($mysqli);
     $serverURL = HEURIST_SERVER_URL . '/heurist/' . "?db=" . $new_db_name;
 
     $params = array(
         'db'=>HEURIST_INDEX_DATABASE,
         'dbID'=>$regID,
-        //'org_dbReg'=>$org_name,
         'dbReg'=>$new_db_name,
         'usrPassword'=>$dbowner['ugr_Password'],
         'usrEmail'=>$dbowner['ugr_eMail'],
@@ -329,6 +351,8 @@ function updateRegDetails($mysqli, $regID, $new_db_name, $new_dbname_full){
 }
 
 function perform_clone($mysqli, $targetdbname, $sourcedbname){
+
+    global $errorScriptExecution;
 
     list($targetdbname_full, $targetdbname) = mysql__get_names( $targetdbname );
 
