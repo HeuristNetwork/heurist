@@ -729,7 +729,7 @@ public static function parseAndValidate($encoded_filename, $original_filename, $
                 ImportParser::_deleteEncodedFilename($encoded_filename_id);
                 if(file_exists($encoded_filename)) unlink($encoded_filename);
                 //delete original
-                $upload_file_name = HEURIST_FILESTORE_DIR.'scratch/'.$original_filename;
+                $upload_file_name = HEURIST_FILESTORE_DIR.'scratch/'.basename($original_filename);
                 if(file_exists($upload_file_name)) unlink($upload_file_name);
             }
             return $res;

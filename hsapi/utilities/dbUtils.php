@@ -1377,7 +1377,7 @@ class DbUtils {
                     $res = false;
                     $message = 'Cannot get list of table in database '.$db_target;
                     if($verbose) {
-                        echo ("<br/><p class=\"error\">Error: $message</p>");
+                        echo ('<br/><p class=\"error\">Error: '.htmlspecialchars($message).'</p>');
                     }
                 }
 

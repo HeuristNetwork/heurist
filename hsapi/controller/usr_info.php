@@ -257,7 +257,7 @@
 
                   $root_dir = null;
                   if(@$_REQUEST['root_dir']){
-                      $root_dir = HEURIST_FILESTORE_DIR.@$_REQUEST['root_dir'];     
+                      $root_dir = sanitizePath(HEURIST_FILESTORE_DIR.@$_REQUEST['root_dir']);     
                   }
 
                   $res = folderTree($root_dir, 
