@@ -1189,10 +1189,10 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
             }
             
             var that = this;
-            var ele_mask = this._editing.getFieldByName('rty_TitleMask');
 
-            function __extendTitleMaskInput( ){
+            function __extendTitleMaskInput(){
                 
+                var ele_mask = that._editing.getFieldByName('rty_TitleMask');
                 var inputs = ele_mask.editing_input('getInputs');
                 var $input = inputs[0];
 
@@ -1224,8 +1224,9 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
             }
 
             // extent editing for record title
+            var ele_mask = that._editing.getFieldByName('rty_TitleMask');
             ele_mask.editing_input('option', 'onrecreate', __extendTitleMaskInput);
-            __extendTitleMaskInput(ele_mask);
+            __extendTitleMaskInput();
             
             //
             // add edit structure button
