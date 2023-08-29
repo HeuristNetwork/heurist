@@ -649,7 +649,7 @@ a{
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-    max-wdith:230px;
+    max-width:230px;
 }
 .logo_intro{
     background-image: url("<?php echo PDIR;?>hclient/assets/v6/h6logo_intro.png");

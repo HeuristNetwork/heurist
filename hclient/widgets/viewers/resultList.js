@@ -2981,7 +2981,7 @@ setTimeout("console.log('2. auto='+ele2.height());",1000);
                         }
                     }
                 }
-                for (i=start; i <= finish; ++i) {
+                for (var i=start; i <= finish; ++i) {
                     if(ismenu){
                         smenu = smenu + '<li id="page'+(i-1)+'"><a href="#">'+i+'</a></li>'
                     }else{

@@ -519,7 +519,7 @@ print $targetPath.'<br>';
                         <label id="curr_user"></label>
                 </div>
                 
-                <div style="padding:5px; xborder-bottom:1px solid lightgrey">
+                <div style="padding:5px;">
                     <label>Selection Mode</label>
                     <div style="padding-right:20px">
                         <label style="font-weight: bold;"><input type="radio" name="select_mode" value="manager" checked>Manager</label> as it currently implemented: records selected with shift, ctrl. Selection is not retained among pages and searches. Selected records are not returned from dialog

@@ -2848,7 +2848,8 @@ function CrosstabsAnalysis(_query, _query_domain) {
             }
             else if(!showPercentageRow && showPercentageColumn){ //If 'Column %' checkbox has been chosen only.
                 $rowPercentageHeader = $('<tr>');
-                for(t=0; t<clen;t++){
+                clen = columns.length;
+                for(var t=0; t<clen;t++){
                     if(supressBlankColumn && columns[t].isempty) continue;
                     $rowPercentageHeader.append('<th class="crosstab-header">'+aggregationMode+'</th><th class="percent">Col%</th>');
                 }
@@ -2859,7 +2860,8 @@ function CrosstabsAnalysis(_query, _query_domain) {
             }
             else if(showPercentageRow && showPercentageColumn){ //If both 'Column %' and 'Row %' have been chosen.
                 $rowPercentageHeader = $('<tr>');
-                for (j=0; j<clen; j++){
+                clen = columns.length;
+                for (var j=0; j<clen; j++){
                     if(supressBlankColumn && columns[j].isempty) continue;
                     $rowPercentageHeader.append('<th class="crosstab-header">'+aggregationMode+'</th><th class="percent">Row%</th><th class="percent">Col%</th>');
                 }
@@ -2920,7 +2922,7 @@ function CrosstabsAnalysis(_query, _query_domain) {
                         $row.append(s);
                     }else{
                         if(showPercentageRow || showPercentageColumn){
-                            for(k=0; k<colspan; k++){
+                            for(var k=0; k<colspan; k++){
                                 $row.append('<td colspan="'+1+'">&nbsp;</td>');
                             }
                         }
@@ -2941,7 +2943,7 @@ function CrosstabsAnalysis(_query, _query_domain) {
                         }
                         $row.append(s);
                     }else{
-                        for(n=0;n<colspan; n++){
+                        for(var n=0;n<colspan; n++){
                             $row.append('<td>&nbsp;</td>'); //(showPercentageRow?2:1) ART2
                         }
                     }

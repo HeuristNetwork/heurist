@@ -1901,7 +1901,7 @@ background: #8ea9b9
 }
 */
 .ent_select_multi{
-    x-width: 270px;
+    /*width: 270px;*/
     position: absolute;
     right: 11px;
     top: 0px;    

@@ -5267,19 +5267,20 @@ html, body {
   background-color: transparent; }
 
 html {
-  Xbackground: black url("assets/beyond1914/images/common/background.jpg") no-repeat center center;
+/*  background: black url("assets/beyond1914/images/common/background.jpg") no-repeat center center; */
   background-size: auto auto;
   background-size: cover;
   background-position: top center;
   background-attachment: fixed; }
   @media only screen and (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
     html {
-      Xbackground-image: url("assets/beyond1914/images/common/background@2x.jpg"); } }
+      /*background-image: url("assets/beyond1914/images/common/background@2x.jpg"); */
+    } }
 
 .container {
   margin-top: 122px;
   *margin-top: 140px;
-  margin-top: 140px\9; }
+  margin-top: 140px; }
 
 .bor-page {
   font-size: 14px;
@@ -6043,7 +6044,7 @@ h2 .bor-tooltip, .h2 .bor-tooltip {
     .bor-filter > li:hover .bor-filter-remove, .bor-filter > li:hover .badge {
       opacity: 1; }
   .bor-filter > :last-child {
-    marign-bottom: 10px; }
+    margin-bottom: 10px; }
   .bor-filter:after {
     box-shadow: 0 0 60px rgba(0, 0, 0, 0.6);
     width: 80%;

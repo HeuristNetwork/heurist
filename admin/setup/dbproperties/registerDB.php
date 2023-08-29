@@ -215,7 +215,7 @@ if(!$dbowner['ugr_eMail'] || !$dbowner['ugr_FirstName'] || !$dbowner['ugr_LastNa
 
     <div>
         <div class="header" style="vertical-align:top;min-width:100px"><label>Registration URL:</label></div>
-        <input readonly="readonly" style="backhround-color:lightgray;width: 520px;margin-bottom: 10px;"
+        <input readonly="readonly" style="background-color:lightgray;width: 520px;margin-bottom: 10px;"
             tabindex="-1"
             value="<?php echo HEURIST_SERVER_URL . '/heurist/' . "?db=" . HEURIST_DBNAME;?>"/>
     </div>

@@ -188,8 +188,9 @@ if (@$_REQUEST['mode'] == 'Analyse') {
 	$max_no = max(array_keys($_REQUEST['link']));
 
 	for ($i=1; $i <= $max_no; ++$i) {
-		if ($_REQUEST['link'][$i])
-			$urls[$_REQUEST['link'][$i]] = @$_REQUEST['title'][$i];
+		if ($_REQUEST['link'][$i] && filter_var($_REQUEST['link'][$i], FILTER_VALIDATE_URL)){
+                $urls[$_REQUEST['link'][$i]] = filter_var(@$_REQUEST['title'][$i]);
+        }
 	}
 
 	$nextmode = 'printurls';
