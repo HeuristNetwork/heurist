@@ -189,7 +189,7 @@ if (@$_REQUEST['mode'] == 'Analyse') {
 
 	for ($i=1; $i <= $max_no; ++$i) {
 		if ($_REQUEST['link'][$i] && filter_var($_REQUEST['link'][$i], FILTER_VALIDATE_URL)){
-                $urls[$_REQUEST['link'][$i]] = filter_var(@$_REQUEST['title'][$i]);
+                $urls[filter_var($_REQUEST['link'][$i],FILTER_SANITIZE_URL)] = filter_var(@$_REQUEST['title'][$i]);
         }
 	}
 

@@ -387,6 +387,8 @@ class ReportActions {
                 if($path!==false){ //does not exist
                     $filename = $path.DIRECTORY_SEPARATOR.basename(substr($filename,4));    
                 }
+            }else{
+               $filename = sanitizePath($filename); 
             }
             if(file_exists($filename)){
                 

@@ -1840,7 +1840,7 @@ error_log('CANNOT UPDATE COOKIE '.$session_id);
             array_push($info, $suplementary);
         }
 
-        $info = array_map('htmlspecialchars', $info);
+        //$info = array_map('htmlspecialchars', $info);
         file_put_contents ( $this->getSysDir().'userInteraction.log' , implode(',', $info)."\n", FILE_APPEND );
     }
 
