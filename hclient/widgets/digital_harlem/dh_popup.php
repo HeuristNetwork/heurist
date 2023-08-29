@@ -45,7 +45,7 @@
 
     //echo '>1>'.@$_REQUEST['recID'];
 
-    $recID = $_REQUEST['recID'];
+    $recID = filter_var($_REQUEST['recID']);
     $ids = explode(',',$recID);
     $need_cnt = count($ids);
     
@@ -55,9 +55,9 @@
     }
     
     
-    $eventID = @$_REQUEST['eventID'];
+    $eventID = filter_var(@$_REQUEST['eventID']);
     if($eventID) { array_push($ids, $eventID); $need_cnt++;}
-    $addrID = @$_REQUEST['addrID'];
+    $addrID = filter_var(@$_REQUEST['addrID']);
     if($addrID) { array_push($ids, $addrID);  $need_cnt++;}
     
     //find record and details

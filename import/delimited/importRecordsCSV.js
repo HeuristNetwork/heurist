@@ -38,7 +38,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
     currentStep, 
     currentId,  //currect record id in import tabel to PREVIEW data
     upload_file_name,  //file on server with original uploaded data
-    encoded_file_name, //file on server with UTF8 encoded data
+    encoded_file_name_id, //file on server with UTF8 encoded data
     
     exp_level = window.hWin.HAPI4.get_prefs_def('userCompetencyLevel', 2), //beginner default
     
@@ -2597,7 +2597,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
                 if(step==1){
                     request['upload_file_name'] = upload_file_name; //filename only
                     
-                    encoded_file_name = '';
+                    encoded_file_name_id = '';
                     
                     window.hWin.HEURIST4.util.setDisabled( $('#btnParseStep2'), true );
                     $('#divFieldRolesHeader').hide();
@@ -2606,7 +2606,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
                     container2.hide();
                     $('#lblParseStep2').hide();
                 }else{
-                    request['encoded_filename'] = encoded_file_name; //full path
+                    request['encoded_filename_id'] = encoded_file_name_id; //full path
                     request['original_filename'] = upload_file_name; //filename only
                     request['keyfield'] = {};
                     request['datefield'] = [];
@@ -2764,7 +2764,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
                         //preview parser
                         if(response.data.step==1 && response.data.values){
                                 
-                            encoded_file_name = response.data.encoded_filename;
+                            encoded_file_name_id = response.data.encoded_filename_id;
                                       
                             $('<h2 style="margin:10px">'+window.hWin.HR('Parse results.')
                                     +(response.data.values.length<1000?'':' First 1000 rows')

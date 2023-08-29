@@ -132,7 +132,8 @@ if(!$system->init(@$_REQUEST['db'])){
         }else if($action=='step2'){
             
             //vaidate values(dates,int) saves into import table
-            $res = ImportParser::parseAndValidate( @$_REQUEST["encoded_filename"], @$_REQUEST["original_filename"], 0, $_REQUEST);
+            $res = ImportParser::parseAndValidate( intval(@$_REQUEST["encoded_filename_id"]), 
+                                                   @$_REQUEST["original_filename"], 0, $_REQUEST);
             
         }else if($action=='step3'){ // matching - assign record ids
         

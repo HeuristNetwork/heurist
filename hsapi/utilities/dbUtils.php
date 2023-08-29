@@ -202,7 +202,7 @@ class DbUtils {
         }
 
         if(strpos($serverURL_lc, '//localhost')>0 ||  strpos($serverURL_lc, '//127.0.0.1')>0 || strpos($serverURL_lc, '//web.local')>0){
-            return '0,Impossible to register database from local server '.$serverURL;
+            return '0,Impossible to register database from local server '.htmlspecialchars($serverURL);
         }
 
         // the record type for database (collection) descriptor records - fixed for Master database

@@ -213,6 +213,11 @@ public static function parseAndValidate($encoded_filename, $original_filename, $
 
     self::initialize();
     
+    if(is_numeric($encoded_filename) && intval($encoded_filename)>0){
+        $id = intval($encoded_filename);
+        $encoded_filename = ImportParser::_getEncodedFilename( $id );
+    }
+    
     $is_kml_data = (@$params["kmldata"]===true);
     $is_csv_data = (@$params["csvdata"]===true);
     $extension = null;
@@ -664,9 +669,12 @@ public static function parseAndValidate($encoded_filename, $original_filename, $
     
 
     if($limit>0){
-        // returns encoded filename  and parsed values for given limit lines
+        
+        $encoded_filename_id = ImportParser::_saveEncodedFilename($encoded_filename);
+        
+        // returns reference to encoded filename  and parsed values for given limit lines
         return array( 
-                'encoded_filename'=>$encoded_filename,   //full path
+                'encoded_filename_id'=>$encoded_filename_id,   //full path
                 'original_filename'=>$original_filename, //filename only
                 'step'=>1, 'col_count'=>$len, 
                 'err_colnums'=>$err_colnums, 
@@ -699,10 +707,11 @@ public static function parseAndValidate($encoded_filename, $original_filename, $
                 'field_sizes'=>$field_sizes, 'multivals'=>$multivals, 'fields'=>$header );    
         }else{
             //everything ok - proceed to save into db
+            $encoded_filename_id = ImportParser::_saveEncodedFilename($encoded_filename);
             
             $preproc = array();
             $preproc['prepared_filename'] = $prepared_filename;
-            $preproc['encoded_filename']  = $encoded_filename;
+            $preproc['encoded_filename_id']  = $encoded_filename_id;
             $preproc['original_filename'] = $original_filename;  //filename only
             $preproc['fields'] = $header;
             $preproc['field_sizes']  = $field_sizes;
@@ -717,6 +726,7 @@ public static function parseAndValidate($encoded_filename, $original_filename, $
             unlink($prepared_filename);
             if($res!==false){
                 //delete encoded
+                ImportParser::_deleteEncodedFilename($encoded_filename_id);
                 if(file_exists($encoded_filename)) unlink($encoded_filename);
                 //delete original
                 $upload_file_name = HEURIST_FILESTORE_DIR.'scratch/'.$original_filename;
@@ -726,6 +736,59 @@ public static function parseAndValidate($encoded_filename, $original_filename, $
         }
     }
     
+}
+
+//
+// Keep encoded file name during import csv session
+//
+private static function _saveEncodedFilename($encoded_filename){
+    
+    $mysqli = self::$system->get_mysqli();
+    $is_exist = hasTable($mysqli, 'import_tmp_file');    
+    
+    if(!$is_exist){
+        $query = "CREATE TABLE `import_tmp_file` (`imp_ID` int(10) unsigned NOT NULL AUTO_INCREMENT, "
+        ."`imp_Date` timestamp NOT NULL default CURRENT_TIMESTAMP, "
+        ."`imp_filename` VARCHAR(500) NOT NULL, "
+        ." PRIMARY KEY (`imp_ID`)) ENGINE=InnoDB  DEFAULT CHARSET=utf8mb4;";
+        if (!$mysqli->query($query)) {
+            self::$system->addError(HEURIST_DB_ERROR, "Cannot create import session table", $mysqli->error);                
+            return false;
+        }
+    }else{
+        $filenames = mysql__select_list2($mysqli, 'SELECT imp_filename FROM `import_tmp_file` WHERE imp_Date <  NOW() - INTERVAL 2 DAY');
+        if(is_array($filenames) && count($filenames)>0){
+            foreach ($filenames as $fname){
+                if(file_exists($fname)){ //&& in HEURIST_SCRATCH_DIR
+                    unlink($fname);
+                 }
+            }
+            $query = 'DELETE FROM `import_tmp_file` WHERE imp_Date <  NOW() - INTERVAL 2 DAY';
+            $mysqli->query($query);
+        }
+    }
+    
+    $query = 'INSERT INTO `import_tmp_file` (imp_filename) VALUES ("'.$mysqli->real_escape_string($encoded_filename).'")';
+    $res = $mysqli->query($query);
+    if(!$res){
+            self::$system->addError(HEURIST_DB_ERROR, "Cannot add into import session table", $mysqli->error);                
+            return false;
+    }else{
+            return $mysqli->insert_id;
+    }
+            
+}
+        
+private static function _getEncodedFilename($encoded_filename_id){
+    $mysqli = self::$system->get_mysqli();
+    $encoded_filename = mysql__select_value($mysqli, 'SELECT imp_filename FROM `import_tmp_file` WHERE imp_ID='.intval($encoded_filename_id));
+    return $encoded_filename;
+}
+
+private static function _deleteEncodedFilename($encoded_filename_id){
+    $mysqli = self::$system->get_mysqli();
+    $query = 'DELETE FROM `import_tmp_file` WHERE imp_ID='.intval($encoded_filename_id);
+    $mysqli->query($query);
 }
 
 //
@@ -959,7 +1022,6 @@ private static function saveToDatabase($preproc){
         return false;
     }
 
-    
     //always " if($csv_enclosure=="'") $csv_enclosure = "\\".$csv_enclosure;
 
     if(strpos($filename,"\\")>0){
