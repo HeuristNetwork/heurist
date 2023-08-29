@@ -3332,12 +3332,12 @@ console.log('Start date not defined ',tdata.when,tdata.rec_ID);
                         that.map_geocoder = L.Control.geocoder({ position: 'topleft', 
                             geocoder: L.Control.Geocoder.nominatim()
                             //geocoder: L.Control.Geocoder.photon()
-                            //geocoder: new L.Control.Geocoder.Google('AIzaSyDtYPxWrA7CP50Gr9LKu_2F08M6eI8cVjk') 
+                            //geocoder: new L.Control.Geocoder.Google('key') 
                         });
                             
                             /*
                             'Bing': L.Control.Geocoder.bing({
-                                        apiKey: 'AlsFLEm5UIoF-8kfQdB-XlTCGU_pLLNliREprSZFOZfEr08UCqD0OCzhL5jWAwQn'}),
+                                        apiKey: ''}),
                             'Mapbox': L.Control.Geocoder.mapbox({ apiKey: LCG.apiToken }),
                             */
                             

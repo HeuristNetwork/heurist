@@ -24,8 +24,6 @@ require_once(dirname(__FILE__).'/../../hclient/framecontent/initPage.php');
 ?>
         <script type="text/javascript" src="<?php echo PDIR;?>external/layout/jquery.layout-latest.js"></script>
 
-        <!-- script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCan9ZqKPnKXuzdb2-pmES_FVW2XerN-eE&libraries=drawing,geometry"></script -->
-
         <script type="text/javascript" src="mapDraw2.js"></script>
         <script type="text/javascript" src="mapLayer.js"></script>
         
@@ -58,9 +56,8 @@ console.log('google map api: already loaded')
                     handleApiReady();
                 }else{                            
 console.log('load google map api')                    
-                    $.getScript('https://maps.googleapis.com/maps/api/js?key=AIzaSyDtYPxWrA7CP50Gr9LKu_2F08M6eI8cVjk'
+                    $.getScript('https://maps.googleapis.com/maps/api/js?key=<?php echo $accessToken_GoogleAPI;?>'
                     +'&libraries=drawing,geometry&callback=handleApiReady');                                           
-                    //AIzaSyCan9ZqKPnKXuzdb2-pmES_FVW2XerN-eE
                 }
 
             } //onPageInit

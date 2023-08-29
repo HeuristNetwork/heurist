@@ -2444,7 +2444,7 @@ function recordSearch($system, $params)
     //error_log($params['use_user_wss']);
     //error_log($query);
     if(@$_REQUEST['dbg']==1) {
-        print $query;
+        print htmlspecialchars($query);
         exit();
     }
         

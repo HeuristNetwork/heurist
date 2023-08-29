@@ -38,7 +38,7 @@ if($regID > 0 && $user_id != 2){
 
 if($_REQUEST['mode'] == 2){ // verify the new name is unique
 
-	$targetdbname = $_REQUEST['targetdbname'];
+	$targetdbname = filter_var($_REQUEST['targetdbname']);
 
     if(strlen($targetdbname)>64){ // validate length
         $sErrorMsg = 'Database name <b>'.htmlspecialchars($targetdbname).'</b> is too long. Max 64 characters allowed';
@@ -229,7 +229,7 @@ function perform_rename($new_name){
 	global $system, $mysqli;
     $org_name = HEURIST_DBNAME;
     list($new_dbname_full, $new_db_name) = mysql__get_names($new_name);
-    $new_url = HEURIST_BASE_URL."?db=".$new_db_name;
+    $new_url = HEURIST_BASE_URL."?db=".htmlspecialchars($new_db_name);
 
     if(!$system->is_admin()){
         print '<h4 style="margin-inline-start: 10px;margin-block-start: 20px;">Only database administrator may use this function!</h4>';
@@ -382,12 +382,12 @@ function perform_clone($mysqli, $targetdbname, $sourcedbname){
     $res = folderRecurseCopy( HEURIST_FILESTORE_ROOT.$source_database, HEURIST_FILESTORE_ROOT.$targetdbname );    
 
     // Update file path in target database  with absolute paths
-    $query1 = "update recUploadedFiles set ulf_FilePath='".HEURIST_FILESTORE_ROOT.$targetdbname.
-    "/' where ulf_FilePath='".HEURIST_FILESTORE_ROOT.$source_database."/' and ulf_ID>0";
+    $query1 = "update recUploadedFiles set ulf_FilePath='".$mysqli->real_escape_string(HEURIST_FILESTORE_ROOT.$targetdbname).
+    "/' where ulf_FilePath='".$mysqli->real_escape_string(HEURIST_FILESTORE_ROOT.$source_database)."/' and ulf_ID>0";
     $res1 = $mysqli->query($query1);
     if ($mysqli->error)  { //(mysql_num_rows($res1) == 0)
         print "<p><h4>Warning</h4><b>Unable to set database files path to new path</b>".
-        "<br>Query was:".$query1.
+        "<br>".htmlspecialchars(HEURIST_FILESTORE_ROOT.$source_database).
         "<br>Please get your system administrator to fix this problem BEFORE editing the database (your edits will affect the original database)</p>";
 
         DbUtils::databaseDrop( false, $targetdbname_full, false);

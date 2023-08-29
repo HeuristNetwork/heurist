@@ -99,7 +99,7 @@ $is_included = isset($system); //this script is included into other one
 
 if(!$is_included){
     $system = new System(); 
-    if(!$system->init(@$_REQUEST['db'])){
+    if(!$system->init(filter_var(@$_REQUEST['db']))){
         exit;
     }
 }

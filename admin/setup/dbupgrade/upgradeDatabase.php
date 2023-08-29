@@ -361,19 +361,5 @@ $description = 'Modify tables:  defRecStructure(rst_SemanticReferenceURL,rst_Ter
       
             return false;
         }
-
-/* OLD APPROACH
-        $cmdline="mysql -h".HEURIST_DBSERVER_NAME." --port=".HEURIST_DB_PORT." -u".ADMIN_DBUSERNAME." -p".ADMIN_DBUSERPSWD." -D".DATABASE." < ".$filename;
-        $output2 = exec($cmdline . ' 2>&1', $output, $res2);
-
-        if ($res2 != 0 ) {
-            echo ("<p class='error'>Error $res2 on MySQL exec: Unable to execute $filename for database ".HEURIST_DBNAME."<br>");
-            echo ("Please check whether this file is valid; ".CONTACT_HEURIST_TEAM." if needed<br>&nbsp;<br></p>");
-            echo($output2);
-            return false;
-        }else{
-            return true;
-        }
-*/
     }
 ?>

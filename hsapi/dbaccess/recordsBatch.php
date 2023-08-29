@@ -666,9 +666,6 @@ error_log('count '.count($childNotFound).'  '.count($toProcess).'  '.print_r(  $
         if(@$this->data['rVal']!=null || @$this->data['encoded']==2){
             if(@$this->data['encoded']==1){
                 $this->data['rVal'] = urldecode( $this->data['rVal'] );
-                //}else if(@$this->data['encoded']==2){
-                //$this->data['rVal'] = str_replace( ' xxx_style=', ' style=', 
-                //                str_replace( '^^/', '../', $this->data['rVal'] ));
             }
         }
         
@@ -906,7 +903,7 @@ error_log('count '.count($childNotFound).'  '.count($toProcess).'  '.print_r(  $
                     
                     if($this->data['rVal']=='replaceAbsPathinCMS'){
                         
-                        $newVal = $this->data['rVal']($recID, $dtlVal);
+                        $newVal = replaceAbsPathinCMS($recID, $dtlVal);
                         
                     }else
                     if (!$replace_all_occurences && $partialReplace) {// need to replace sVal with rVal
@@ -1153,10 +1150,11 @@ error_log('count '.count($childNotFound).'  '.count($toProcess).'  '.print_r(  $
                 $now = date('Y-m-d H:i:s');
                 $dtl = Array('dtl_Modified'  => $now);
                     
+                $sRegEx = "/".preg_quote($this->data['sVal'], "/")."/";
                 
                 foreach ($valuesToBeDeleted as $dtlID => $dtlVal) {
                 
-                    $newVal = preg_replace("/".$this->data['sVal']."/",'',$dtlVal);
+                    $newVal = preg_replace($sRegEx,'',$dtlVal);
                     
                     if(trim($newVal)==''){
                         $sql = 'delete from recDetails where dtl_ID = '.$dtlID;

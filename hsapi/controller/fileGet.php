@@ -75,7 +75,7 @@ if($filename){ //download from scratch (for csv import)
                 else $s = ' could not be read';        
                 
                 if($s){
-                    print 'Temporary file (uploaded csv data) '.$file_read. $s;                
+                    print 'Temporary file (uploaded csv data) '.htmlspecialchars($file_read). $s;                
                     exit();
                 }
             }
@@ -98,7 +98,7 @@ if($filename){ //download from scratch (for csv import)
             $content = file_get_contents($file_read);
             $content = mb_convert_encoding( $content, 'UTF-8', $csv_encoding);
             if(!$content){
-                print 'Temporary file (uploaded csv data) '.$file_read
+                print 'Temporary file (uploaded csv data) '.htmlspecialchars($file_read)
                 .' can\'t be converted to UTF-8. Please open it in any advanced editor and save with UTF-8 text encoding';
                 exit();
             } 
@@ -107,7 +107,7 @@ if($filename){ //download from scratch (for csv import)
             $res = file_put_contents($file_read, $content);
             unset($content);
             if(!$res){
-                print 'Cant save temporary file (with UTF-8 encoded csv data) '.$file_read;
+                print 'Cant save temporary file (with UTF-8 encoded csv data) '.htmlspecialchars($file_read);
                 exit();
             }
             

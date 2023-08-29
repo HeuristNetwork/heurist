@@ -21,10 +21,6 @@
 
 define('PDIR','../../');  //need for proper path to js and css    
 require_once(dirname(__FILE__).'/../../hclient/framecontent/initPage.php');
-?>
-        <!-- script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCan9ZqKPnKXuzdb2-pmES_FVW2XerN-eE&libraries=drawing,geometry"></script -->
-
-<?php
 if($_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0.0.1'){
 ?>
     <link rel="stylesheet" href="<?php echo PDIR;?>external/leaflet/leaflet.css"/>

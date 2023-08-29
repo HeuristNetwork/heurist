@@ -31,7 +31,7 @@ if(!array_key_exists('rectype_ids', $_REQUEST)){
 
 if(!defined('PDIR')){
     $system = new System();
-    if( !$system->init(@$_REQUEST['db']) ){
+    if( !$system->init(filter_var(@$_REQUEST['db'])) ){
         die("Cannot connect to database");
     }
 }

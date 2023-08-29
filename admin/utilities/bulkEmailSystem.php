@@ -902,7 +902,7 @@ function sendSystemEmail($data) {
 
 		echo "An error occurred with processing the form's data<br/>";
 		$output = $email_obj->get_error();
-		print $output;
+		print htmlspecialchars($output);
 		return -1;
 	}
 }
@@ -938,7 +938,7 @@ function getCSVDownload($data) {
 
 		echo "An error occurred with processing the form's data<br/>";
 		$output = $csv_obj->get_error();
-		print $output;
+		print htmlspecialchars($output);
 		return -1;
 	}	
 }

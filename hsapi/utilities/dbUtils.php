@@ -419,7 +419,7 @@ class DbUtils {
         }
 
         if(strpos($serverURL_lc, '//localhost')>0 ||  strpos($serverURL_lc, '//127.0.0.1')>0 || strpos($serverURL_lc, '//web.local')>0){
-            return 'Registered databases cannot be on local server '.$serverURL;
+            return 'Registered databases cannot be on local server '.htmlspecialchars($serverURL);
         }
 
         $user_id = 0; // existing record owner
@@ -550,9 +550,9 @@ class DbUtils {
         
         if(!$connected){
             $msg = $msg_prefix.'Failed to connect to database '
-                    .htmlspecialchars($database_name).'  '.htmlspecialchars($createArchive);
+                    .($database_name).'  '.($createArchive);
             $system->addError(HEURIST_DB_ERROR, $msg, $mysqli->error);
-            if($verbose) echo '<br>'.$msg;
+            if($verbose) echo '<br>'.htmlspecialchars($msg);
             self::$db_del_in_progress = null;
             return false;
         }else 
@@ -570,7 +570,7 @@ class DbUtils {
             if ($db_dump_file===false) {
                     $msg = $msg_prefix.'Failed to dump database to a .sql file';
                     self::$system->addError(HEURIST_SYSTEM_CONFIG, $msg);                
-                    if($verbose) echo '<br/>'.$msg;
+                    if($verbose) echo '<br/>'.htmlspecialchars($msg);
                     self::$db_del_in_progress = null;
                     return false;
             }
@@ -607,9 +607,9 @@ class DbUtils {
             
             if(!$archOK){
                 $msg = $msg_prefix.'Cannot create archive with database folder. Failed to archive '
-                        .htmlspecialchars($source).' to '.htmlspecialchars($destination);
+                        .($source).' to '.($destination);
                 self::$system->addError(HEURIST_SYSTEM_CONFIG, $msg);                
-                if($verbose) echo '<br/>'.$msg;
+                if($verbose) echo '<br/>'.htmlspecialchars($msg);
                 self::$db_del_in_progress = null;
                 return false;
             }
@@ -627,7 +627,7 @@ class DbUtils {
 
                     $msg = $msg_prefix.' Database error on sql drop operation. '.$mysqli->error;
                     self::$system->addError(HEURIST_DB_ERROR, $msg, $mysqli->error);
-                    if($verbose) echo '<br/>'.$msg;
+                    if($verbose) echo '<br/>'.htmlspecialchars($msg);
                     return false;
                 }
 

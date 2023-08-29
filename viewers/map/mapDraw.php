@@ -22,7 +22,6 @@
 define('PDIR','../../');  //need for proper path to js and css    
 require_once(dirname(__FILE__).'/../../hclient/framecontent/initPage.php');
 ?>
-        <!-- script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCan9ZqKPnKXuzdb2-pmES_FVW2XerN-eE&libraries=drawing,geometry"></script -->
 
 <link rel="stylesheet" href="<?php echo PDIR;?>external/leaflet/geocoder/Control.Geocoder.css" />
 <?php
@@ -95,17 +94,6 @@ if(true || $_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0
                 */            
 
                 handleApiReady();
-/*
-                if (typeof window.hWin.google === 'object' && typeof window.hWin.google.maps === 'object') {
-console.log('google map api: already loaded')                    
-                    handleApiReady();
-                }else{                            
-console.log('load google map api')                    
-                    $.getScript('https://maps.googleapis.com/maps/api/js?key=AIzaSyDtYPxWrA7CP50Gr9LKu_2F08M6eI8cVjk'
-                    +'&libraries=drawing,geometry&callback=handleApiReady');                                           
-                    //AIzaSyCan9ZqKPnKXuzdb2-pmES_FVW2XerN-eE
-                }
-*/
             } //onPageInit
             
             function handleApiReady(){

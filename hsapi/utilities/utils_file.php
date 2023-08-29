@@ -1565,7 +1565,7 @@ function loadRemoteURLContentWithRange($url, $range, $bypassProxy = true, $timeo
     curl_setopt($ch, CURLOPT_NOBODY, 0);
     curl_setopt($ch, CURLOPT_HEADER, 0);    //don't include header in output
     curl_setopt($ch, CURLOPT_FOLLOWLOCATION, 1);    // follow server header redirects
-    curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, 0);    // don't verify peer cert
+    //Vulnerability curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, 0);    // don't verify peer cert
     if(strpos(strtolower($url), strtolower(HEURIST_MAIN_SERVER))===0){
         curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 0);
     }
@@ -1653,7 +1653,7 @@ function loadRemoteURLContentType($url, $bypassProxy = true, $timeout=30) {
     curl_setopt($ch, CURLOPT_FOLLOWLOCATION, 1);
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
     curl_setopt($ch, CURLOPT_TIMEOUT, $timeout);    // timeout after ten seconds
-    curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+    //Vulnerability curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
     
     curl_setopt($ch, CURLOPT_URL, $url);
 
@@ -2115,7 +2115,7 @@ function uploadFileToNakala($system, $params) {
     curl_setopt($ch, CURLOPT_NOBODY, 0);
     curl_setopt($ch, CURLOPT_HEADER, 0);            //don't include header in output
     curl_setopt($ch, CURLOPT_FOLLOWLOCATION, 1);    // follow server header redirects
-    curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, 0);    // don't verify peer cert
+    //Vulnerability curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, 0);    // don't verify peer cert
     if(strpos($url, HEURIST_MAIN_SERVER)===0){
         curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 0);
     }

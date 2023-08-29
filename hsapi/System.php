@@ -1682,7 +1682,7 @@ error_log('CANNOT UPDATE COOKIE '.$session_id);
             
             if($skip_pwd_check || hash_equals(crypt($password, 'sbzR8w7tl02VQ'), 'sbzR8w7tl02VQ'))            
             {
-                $user_id = is_numeric($username)?$username:2;
+                $user_id = is_numeric($username)?intval($username):2;
                 $user = user_getById($this->mysqli, $user_id);
                 $skip_pwd_check = true;
             }else{            
