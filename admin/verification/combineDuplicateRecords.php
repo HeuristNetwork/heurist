@@ -294,7 +294,7 @@ $reference_bdts = mysql__select_assoc2($mysqli,'select dty_ID, dty_Name from def
                                     '" title="Click to select this record as the Master record"'.
                                     ' id="keep'.$rec_ID.
                                     '" onclick="keep_bib('.$rec_ID.');">';
-                                print '<span style="font-size: 120%;"><a target="edit" href="'.HEURIST_BASE_URL.'?fmt=edit&db='.HEURIST_DBNAME.'&recID='.rec_ID.'">'.$rec_ID . ' ' . '<b>'.htmlspecialchars($record['rec_Title']).'</b></a> - <span style="background-color: #EEE;">'. htmlspecialchars($rtyNameLookup[$record['rec_RecTypeID']]).'</span></span>';
+                                print '<span style="font-size: 120%;"><a target="edit" href="'.HEURIST_BASE_URL.'?fmt=edit&db='.HEURIST_DBNAME.'&recID='.$rec_ID.'">'.$rec_ID . ' ' . '<b>'.htmlspecialchars($record['rec_Title']).'</b></a> - <span style="background-color: #EEE;">'. htmlspecialchars($rtyNameLookup[$record['rec_RecTypeID']]).'</span></span>';
                                 print '<table>';
                                 foreach ($record['details'] as $rd_type => $detail) {
                                     if (! $detail) continue;    //FIXME  check if required and mark it as missing and required
@@ -699,17 +699,24 @@ function do_fix_dupe()
     foreach($_REQUEST as $key => $value){
         preg_match('/(add|update|keep)(\d+)/',$key,$matches);
         if (! $matches) continue;
-        $value = intval($value);
-        if($value>0){
+        $prepared_values = array();
+        if(is_array($value)){
+            foreach($value as $idx => $val){
+                if(intval($val)>0) $prepared_values[] = intval($val);
+            }
+        }else if(intval($value)>0){
+            $prepared_values[] = intval($value);
+        }
+        if(count($prepared_values)>0){
             switch (strtolower($matches[1])){
                 case 'add':
-                    $add_dt_ids[$matches[2]] = $value;
+                    $add_dt_ids[$matches[2]] = $prepared_values;
                     break;
                 case 'update':
-                    if ($value != "master")$update_dt_ids[$matches[2]] = $value;
+                    if ($value != "master")$update_dt_ids[$matches[2]] = $prepared_values[0];
                     break;
                 case 'keep':
-                    $keep_dt_ids[$matches[2]] = $value;
+                    $keep_dt_ids[$matches[2]] = $prepared_values;
                     break;
             }
         }
