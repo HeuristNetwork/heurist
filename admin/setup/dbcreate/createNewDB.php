@@ -53,7 +53,8 @@ if(@$_REQUEST['db']){
     $registrationRequired = true;
 }
 ?>
-<html>
+<!DOCTYPE html>
+<html lang="en" xml:lang="en">
     <head>
         <title>Create New Heurist Database</title>
         <meta http-equiv="Content-Type" content="text/html; charset=utf-8">

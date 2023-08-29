@@ -372,7 +372,7 @@ sendEmail(array($usr_owner['ugr_eMail']), $email_title, $email_text);
             //$sif_purge = array( 3 => 'import20210531163600');
             $arc_cnt = 0;
             $cnt_dumped = 0;
-            if(true){
+//DEBUG            if(true){
             
             foreach($sif_purge as  $sif_id => $sif_table){
                 
@@ -396,14 +396,14 @@ sendEmail(array($usr_owner['ugr_eMail']), $email_title, $email_text);
                                   'add-drop-trigger' => false);
                     
                     
-                    if(false){
+                    /*if(false){
                         $res = DbUtils::databaseDump($db_name, $dumpfile, $opts);    
                         if($res===false){
                             $report .= (" Error: unable to generate MySQL database dump for import table $sif_table in $db_name.\n");
                         }else{
                             $cnt_dumped++;
                         }
-                    }else{
+                    }else{*/
                         try{
                             //$dump = new Mysqldump( 'hdb_'.$db_name, ADMIN_DBUSERNAME, ADMIN_DBUSERPSWD, HEURIST_DBSERVER_NAME, 'mysql', $opts);
                                                                                                      
@@ -417,10 +417,10 @@ sendEmail(array($usr_owner['ugr_eMail']), $email_title, $email_text);
                            $report .= (" Error: unable to generate MySQL database dump for import table $sif_table in $db_name."
                                 .$e->getMessage()."\n");
                         }
-                    }
+                    
                 }
             }//foreach
-            }
+//DEBUG            }
             
             if($cnt_dumped>0)
             {
@@ -449,7 +449,9 @@ sendEmail(array($usr_owner['ugr_eMail']), $email_title, $email_text);
             }//cnt>0
         }//sif list
         
-        if(true){ //alow archive sysArchive
+        $allow_SysArchive = true;
+        
+        if($allow_SysArchive){ //alow archive sysArchive
         $arc_count = mysql__select_value($mysqli, 'SELECT count(arc_ID) FROM sysArchive'); //sif_TempDataTable, 
         if($arc_count>50000){
             

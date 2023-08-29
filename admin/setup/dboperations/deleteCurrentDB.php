@@ -27,7 +27,8 @@ require_once(dirname(__FILE__).'/../../../hclient/framecontent/initPageMin.php')
 require_once(dirname(__FILE__).'/../../../hsapi/utilities/dbUtils.php');
 require_once(dirname(__FILE__).'/../../../records/index/elasticSearch.php');
 ?>
-<html>
+<!DOCTYPE html>
+<html lang="en" xml:lang="en">
     <head>
         <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
         <title>Delete Current Heurist Database</title>

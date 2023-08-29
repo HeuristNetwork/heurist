@@ -191,7 +191,7 @@ if(@$_REQUEST['mode']=='2' && $targetdbname!=null){
     
     $nodata = (@$_REQUEST['nodata']==1);
     
-    $res = perform_rename($targetdbname);
+    $res = perform_rename($system, $targetdbname);
     if(!$res){
         echo_flush ('<p style="padding-left:20px;"><h2 style="color:red">Your database has not been renamed.</h2>'
         .'<p>Please run Verify &gt; Verify database integrity. If this does not find and fix the error, please send a bug report (Help &gt; Bug report) and we will investigate the problem.</p>');
@@ -247,9 +247,8 @@ if(@$_REQUEST['mode']=='2' && $targetdbname!=null){
 	exit();
 }
 
-function perform_rename($new_name){
+function perform_rename($system, $new_name){
 
-	global $system, $mysqli;
     $org_name = HEURIST_DBNAME;
     list($new_dbname_full, $new_db_name) = mysql__get_names($new_name);
     $new_url = HEURIST_BASE_URL."?db=".htmlspecialchars($new_db_name);
@@ -260,9 +259,10 @@ function perform_rename($new_name){
     }
 
 	// clone db
-    if(!perform_clone($mysqli, $new_db_name, $org_name)){
+    if(!perform_clone($system, $new_db_name, $org_name)){
         return false;
     }
+    $mysqli = $system->get_mysqli();
 
     print '<p><b>Cloning Completed</b></p><br>';
 
@@ -350,7 +350,7 @@ function updateRegDetails($mysqli, $regID, $new_db_name, $new_dbname_full){
     return true;
 }
 
-function perform_clone($mysqli, $targetdbname, $sourcedbname){
+function perform_clone($system, $targetdbname, $sourcedbname){
 
     global $errorScriptExecution;
 
@@ -373,6 +373,8 @@ function perform_clone($mysqli, $targetdbname, $sourcedbname){
     }else{
         echo_flush ('<script>document.getElementById("wait_p").style.display="none"</script><p style="padding-left:0px">Structure created OK</p>');
     }
+    
+    $mysqli = $system->get_mysqli();
 
     //current database
     list($source_database_full, $source_database) = mysql__get_names( $sourcedbname );

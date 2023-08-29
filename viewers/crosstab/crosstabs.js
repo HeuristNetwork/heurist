@@ -2993,7 +2993,7 @@ function CrosstabsAnalysis(_query, _query_domain) {
 
                         $rowFooter1.append(s);
                     }else{
-                        for(l=0;l<colspan;l++){
+                        for(var l=0;l<colspan;l++){
                             $rowFooter1.append('<td class="total-percent">&nbsp;</td>');
                         }
                     }

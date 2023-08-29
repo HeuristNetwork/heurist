@@ -111,8 +111,8 @@ if(!$has_emails || empty($emails)) {
     exit();
 }
 ?>  
-<html>
-    
+<!DOCTYPE html>
+<html lang="en" xml:lang="en">
     <head>
         <meta http-equiv="content-type" content="text/html; charset=utf-8">
         <title>Heurist System Email</title>
@@ -1038,7 +1038,7 @@ if(!$has_emails || empty($emails)) {
 
     <body style="margin: 10px 10px 10px 20px;">
         
-        <div style="font-family:Arial,Helvetica;">
+        <div style="font-family:Arial,Helvetica;sans-serif;">
             <h3>Heurist System Email</h3>
             
             <label class="instruction">

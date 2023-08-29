@@ -57,7 +57,8 @@ if(!$dbowner['ugr_eMail'] || !$dbowner['ugr_FirstName'] || !$dbowner['ugr_LastNa
     exit();
 }
 ?>
-<html>
+<!DOCTYPE html>
+<html lang="en" xml:lang="en">
 
     <head>
         <title>Register Database with Heurist Reference Index</title>

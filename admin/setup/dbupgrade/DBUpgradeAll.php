@@ -35,7 +35,7 @@ require_once(dirname(__FILE__).'/../../../hclient/framecontent/initPageMin.php')
 require_once(dirname(__FILE__).'/../../../admin/setup/dbupgrade/DBUpgrade.php');
 
 
-print '<div style="font-family:Arial,Helvetica;font-size:12px">';
+print '<div style="font-family:Arial,Helvetica;sans-serif;font-size:12px">';
 
 
 $mysqli = $system->get_mysqli();

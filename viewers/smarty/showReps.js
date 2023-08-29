@@ -1919,8 +1919,8 @@ this_id       : "term"
         
         //find main loop and {$r = $heurist->getRecord($r)}
         var l_count = codeEditor.lineCount();
-            l_no = 0, k = -1;
-            if(l_count<0) l_count = 0;
+        var l_no = 0, k = -1;
+            
         while (l_no<l_count){
             line = codeEditor.getLine(l_no);
             if(line.indexOf('$heurist->getRelatedRecords($r)}')>0){

@@ -708,7 +708,8 @@ function addDefaultFieldForNewRecordType($rtyID, $newfields)
     if(is_string($newfields)){
         $newfields = json_decode(urldecode($newfields), true);
     }
-
+    $order = 10;
+    
     if(is_array($newfields) && count($newfields)>0){
 
         //find two separators
@@ -726,7 +727,7 @@ function addDefaultFieldForNewRecordType($rtyID, $newfields)
         $data['dtFields'] = array();
 
         $need_sep = true;
-        $order = 10;
+        
         if(count($seps)==2){
             $data['dtFields'][$seps[0]] = getInitRty($ri, $di, $dt, $seps[0], array('optional',1,100,$order));
             $data['dtFields'][$seps[0]][$ri['rst_DisplayName']] = 'Identification';
@@ -2085,7 +2086,7 @@ function updateRelConstraint($srcID, $trgID, $terms){
     }
 
     if(intval($terms[0])<1){ // $terms[0]==null || $terms[0]==""){
-        $terms[0]=="null";
+        $terms[0] = "null";
         $where = $where." and rcs_TermID is null";
     }else{
         $where = $where." and rcs_TermID=".$terms[0];;

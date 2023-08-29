@@ -170,7 +170,7 @@ if( isset($passwordForDatabaseCreation) && $passwordForDatabaseCreation!='' &&
         }else if($reg_url){ //load db structure from registered database - NOT USED
             
             
-        }else if(true)  { //set to false to debug workflow without actual db creation
+        }else if(1==1)  { //set to false to debug workflow without actual db creation
 
             $res = DbUtils::databaseCreateFull($database_name_full, $user_record);
 
@@ -191,10 +191,16 @@ if( isset($passwordForDatabaseCreation) && $passwordForDatabaseCreation!='' &&
                         sendEmail(HEURIST_MAIL_TO_ADMIN, 'Unable to create database root folder', $warnings['message']);
                     }
                 }else{
+                    
+                    $sMsg = "Unable to create the sub directories within the database root directory,\nDatabase name: " 
+                            . $database_name    
+                            . ",\nServer url: " . HEURIST_BASE_URL . ",\nWarnings: " . implode(",\n", $warnings);
+                    $sTitle = 'Unable to create database sub directories';
 
-                    sendEmail(HEURIST_MAIL_TO_BUG, 'Unable to create database sub directories', "Unable to create the sub directories within the database root directory,\nDatabase name: " . $database_name . ",\nServer url: " . HEURIST_BASE_URL . ",\nWarnings: " . implode(",\n", $warnings));
+                    sendEmail(HEURIST_MAIL_TO_BUG, $sTitle, $sMsg);
+                            
                     if(HEURIST_MAIL_TO_BUG != HEURIST_MAIL_TO_ADMIN){
-                        sendEmail(HEURIST_MAIL_TO_ADMIN, "Unable to create the sub directories within the database root directory,\nDatabase name: " . $database_name . ",\nServer url: " . HEURIST_BASE_URL . ",\nWarnings:\n" . implode(",\n", $warnings));
+                        sendEmail(HEURIST_MAIL_TO_ADMIN,  $sTitle, $sMsg);
                     }
                 }
 

@@ -44,8 +44,8 @@ if(!defined('PDIR')){
         exit();
     }
 ?>
-
-<html>
+<!DOCTYPE html>
+<html lang="en" xml:lang="en">
     <head>
         <title>Heurist database version upgrade</title>
         <meta http-equiv="content-type" content="text/html; charset=utf-8">

@@ -138,7 +138,8 @@ if(@$_REQUEST['mode']=='2'){
     }
 }
 ?>
-<html>
+<!DOCTYPE html>
+<html lang="en" xml:lang="en">
     <head>
         <title>Clone Database</title>
         <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
