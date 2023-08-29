@@ -385,7 +385,7 @@ class ReportActions {
                 $path = dirname(__FILE__).'/../../hclient/widgets/cms/templates/snippets/';
                 $path = realpath($path);
                 if($path!==false){ //does not exist
-                    $filename = $path.DIRECTORY_SEPARATOR.substr($filename,4);    
+                    $filename = $path.DIRECTORY_SEPARATOR.basename(substr($filename,4));    
                 }
             }
             if(file_exists($filename)){

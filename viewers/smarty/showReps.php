@@ -264,7 +264,7 @@ function executeSmartyTemplate($system, $params){
         if(file_exists($system->getSysDir('smarty-templates').$template_file)){
             $content = file_get_contents($system->getSysDir('smarty-templates').$template_file);
         }else{
-            $error = "<b><font color='#ff0000'>Template file $template_file does not exist</font></b>";
+            $error = '<b><font color="#ff0000">Template file '.htmlspecialchars($template_file).' does not exist</font></b>';
             
             smarty_error_output($system, $error);
             return false; //exit();

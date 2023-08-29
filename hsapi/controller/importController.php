@@ -214,12 +214,15 @@ if(!$system->init(@$_REQUEST['db'])){
             
         }else if($action=='import_preview'){
             //reads import file and returns list of record types to be imported
-            $res = ImportHeurist::getDefintions(@$_REQUEST['filename']);
+            $filename = basename(@$_REQUEST['filename']);
+            
+            $res = ImportHeurist::getDefintions($filename);
             
         }else if($action=='import_definitions'){ //import defs before import records
             
             //update record types from remote database
-            $res = ImportHeurist::importDefintions(@$_REQUEST['filename'], @$_REQUEST['session']);
+            $filename = basename(@$_REQUEST['filename']);
+            $res = ImportHeurist::importDefintions($filename, @$_REQUEST['session']);
             //$need_compress = true;
             
         }else if($action=='import_records'){
@@ -227,7 +230,8 @@ if(!$system->init(@$_REQUEST['db'])){
             //returns count of imported records
             if(@$_REQUEST['filename']!=null){
                 //filename - source hml or json file (in scratch), session - unique id for progress
-                $res = ImportHeurist::importRecords(@$_REQUEST['filename'], @$_REQUEST);
+                $filename = basename(@$_REQUEST['filename']);
+                $res = ImportHeurist::importRecords($filename, @$_REQUEST);
 
             }else{
                 //direct import from another database (the same server)

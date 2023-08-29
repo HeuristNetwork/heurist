@@ -83,7 +83,7 @@ private static function _readDataFile($filename, $type=null, $validate=true){
         if(strpos($filename,'websiteStarterRecords')===0 || strpos($filename,'webpageStarterRecords')===0){
             $filename = HEURIST_DIR.'hclient/widgets/cms/'.$filename;
         }else if (!file_exists($filename)) {
-            $filename = HEURIST_SCRATCH_DIR.$filename;    
+            $filename = HEURIST_SCRATCH_DIR.basename($filename);    
         }
         
         if(!file_exists($filename)){
