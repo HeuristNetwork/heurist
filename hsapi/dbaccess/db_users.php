@@ -198,7 +198,7 @@
                 $user = user_getByField($mysqli, 'ugr_eMail', $username);   
             }
             if($user == null) {
-                $system->addError(HEURIST_NOT_FOUND, 'Cannot send reset pin. Unable to find specified username / email');
+                $system->addError(HEURIST_NOT_FOUND, 'Unable to find provided username / email');
                 return false;
             }
 
@@ -348,7 +348,7 @@
         $mysqli = $system->get_mysqli();
 
         if(empty($username) || empty($password) || empty($pin)){ // check required values
-            $system->addError(HEURIST_ACTION_BLOCKED, 'Required variable missing');
+            $system->addError(HEURIST_ACTION_BLOCKED, 'A username, the new password, and the reset pin are required for this function');
             return false;
         }
 

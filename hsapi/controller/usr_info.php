@@ -387,13 +387,16 @@
             } else if ($action=="reset_password") {
 
                 $system->user_LogActivity('ResetPassword');
-                
-                if($_REQUEST['pin'] && $_REQUEST['username'] && $_REQUEST['new_password']){ // update password w/ pin
-                    $res = user_ResetPassword($system, $_REQUEST['username'], $_REQUEST['new_password'], $_REQUEST['pin']);
-                }else if($_REQUEST['pin']){ // get reset pin
+
+                $password = array_key_exists('new_password', $_REQUEST) ? $_REQUEST['new_password'] : null;
+                if(array_key_exists('new_password', $_REQUEST)) unset($_REQUEST['new_password']); // remove from REQUEST
+
+                if($_REQUEST['pin'] && $_REQUEST['username'] && $password){ // update password w/ pin
+                    $res = user_ResetPassword($system, $_REQUEST['username'], $password, $_REQUEST['pin']);
+                }else if($_REQUEST['pin']){ // get/validate reset pin
                     $res = user_HandleResetPin($system, @$_REQUEST['username'], @$_REQUEST['pin'], @$_REQUEST['captcha']);
                 }else{
-                    $res = $system->addError(HEURIST_ERROR, 'Invalid request made to password reset system');
+                    $res = $system->addError(HEURIST_ERROR, 'An invalid request was made to the password reset system.<br>Please contact the Heurist team.');
                 }
 
                 /* original method - Lets random people reset passwords for random accounts
