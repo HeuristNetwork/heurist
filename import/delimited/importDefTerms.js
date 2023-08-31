@@ -35,7 +35,6 @@ function hImportDefTerms(_trm_ParentTermID, _vcg_ID) {
     
     function _init(_trm_ParentTermID, _vcg_ID){
                 
-                                           
         trm_ParentTermID = _trm_ParentTermID;
         trm_VocabularyID = 0;
         vcg_ID = _vcg_ID;

@@ -31,8 +31,9 @@ require_once(dirname(__FILE__)."/../../hclient/framecontent/initPage.php");
             // Callback function after initialization
             function onPageInit(success){
                 if(success){
-                    var trm_ID = window.hWin.HEURIST4.util.getUrlParameter('trm_ID');
-                    var vcg_ID = window.hWin.HEURIST4.util.getUrlParameter('vcg_ID');
+                    const urlParams = new URLSearchParams(window.location.search);
+                    var trm_ID = urlParams.get('trm_ID');
+                    var vcg_ID = urlParams.get('vcg_ID');
                     var importDefTerms = new hImportDefTerms(trm_ID, vcg_ID);
                 }
             }
