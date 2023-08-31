@@ -875,8 +875,8 @@ window.hWin.HEURIST4.geo = {
             return { type: "Path", summary: "X,Y ("+ X.shift().toFixed(5)+","+Y.shift().toFixed(5)+") - ("+X.pop().toFixed(5)+","+Y.pop().toFixed(5)+")" };
         }
         else {
-            X.sort();
-            Y.sort();
+            X.sort((a, b) => a - b);
+            Y.sort((a, b) => a - b);
 
             var type = "Unknown";
             if (typeCode == "pl") type = "Polygon";
