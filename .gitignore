@@ -219,6 +219,8 @@ external/
 ext/
 vendor/
 help/
+external/
+documentation_and_templates/api/
 
 #PHPStorm
 .idea/*
