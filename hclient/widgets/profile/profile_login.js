@@ -93,8 +93,6 @@ function showLoginDialog(isforsed, callback, parentwin, dialog_id){
                     
                     //hide standard login
                     if(window.hWin.HAPI4.sysinfo.hideStandardLogin==1){
-
-                        updateStatus($dlg, -1, '');
                         $dlg.find('#login_saml > label:first').html('Select: ');
                         $dlg.find('#login_saml').css({'margin-left':'14%'});
                     }else{
@@ -244,7 +242,6 @@ function showLoginDialog(isforsed, callback, parentwin, dialog_id){
             $dlg.find("#link_resend").on("click", function(){
 
                 updateStatus($dlg, 2, '');
-
                 setupResetPin($dlg);
             });
 
@@ -263,7 +260,7 @@ function showLoginDialog(isforsed, callback, parentwin, dialog_id){
             }
             arr_buttons.push({text:window.hWin.HR('Cancel'), click: function() {    //isforsed?'Change database':
 
-                let mode = $dlg.find('data-mode');
+                let mode = $dlg.attr('data-mode');
                 if(mode == 0){
                     $dlg.dialog( "close" );
                 }else{
@@ -298,6 +295,8 @@ function showLoginDialog(isforsed, callback, parentwin, dialog_id){
             }*/
             
             login_dialog.dialog('option','close', function(){__onDialogClose($dlg)});
+
+            updateStatus($dlg, saml_login_only ? -1 : 0, '');
 
         });//load html
     }else{
@@ -335,7 +334,8 @@ function updateStatus($dlg, new_mode = false, error = ''){
     $dlg.attr('data-mode', new_mode);
 
     if(new_mode == 0){
-        $dlg.find('#pin').val('');
+        $dlg.find('#reset_username').val('');
+        $dlg.find('#reset_pin').val('');
         $dlg.find('#new_password').val('');
         $dlg.find('#dup_new_password').val('');
     }
@@ -362,7 +362,7 @@ function changeDisplay(mode, $dlg){
 
     let title = '';
     let btn_label = '';
-    let btn_cancel = 'Cancel';
+    let btn_cancel = 'Back';
     let show_reg_btn = false;
 
     switch(mode){
@@ -371,7 +371,6 @@ function changeDisplay(mode, $dlg){
 
             title = window.hWin.HR('Reset password');
             btn_label = window.hWin.HR('Request pin');
-            btn_cancel = window.hWin.HR('Back');
 
             $dlg.find("#fld_request_pin").show();
             $dlg.find("#fld_login, #fld_validate_pin, #fld_reset_password").hide();
@@ -384,7 +383,6 @@ function changeDisplay(mode, $dlg){
 
             title = window.hWin.HR('Reset password');
             btn_label = window.hWin.HR('Validate pin');
-            btn_cancel = window.hWin.HR('Back');
 
             $dlg.find("#fld_validate_pin").show();
             $dlg.find("#fld_login, #fld_request_pin, #fld_reset_password").hide();
@@ -395,7 +393,6 @@ function changeDisplay(mode, $dlg){
 
             title = window.hWin.HR('Reset password');
             btn_label = window.hWin.HR('Change password');
-            btn_cancel = window.hWin.HR('Back');
 
             $dlg.find("#fld_reset_password").show();
             $dlg.find("#fld_login, #fld_request_pin, #fld_validate_pin").hide();
@@ -406,6 +403,7 @@ function changeDisplay(mode, $dlg){
 
             title = window.hWin.HR('Heurist Login');
             btn_label = '<b>'+window.hWin.HR('Login')+'</b>';
+            btn_cancel = window.hWin.HR('Cancel');
 
             $dlg.find("#fld_login").show();
             $dlg.find("#fld_request_pin, #fld_validate_pin, #fld_reset_password").hide();
@@ -453,7 +451,7 @@ function setupResetPin($dlg){
 
     window.hWin.HEURIST4.msg.bringCoverallToFront($dlg.parents('.ui-dialog'),null,'sending pin...');
 
-    window.hWin.HAPI4.SystemMgr.reset_password({username: username.val(), pin: 1, captcha: captcha_code}, function(response){ //console.log(response);
+    window.hWin.HAPI4.SystemMgr.reset_password({username: username.val(), pin: 1, captcha: captcha_code}, function(response){
 
         window.hWin.HEURIST4.msg.sendCoverallToBack();
 
@@ -478,15 +476,20 @@ function setupResetPin($dlg){
 function validateResetPin($dlg){
 
     let username = $dlg.find('#reset_username').val();
-    let pin = $dlg.find('#pin').val();
+    let pin = $dlg.find('#reset_pin').val();
 
     window.hWin.HEURIST4.msg.bringCoverallToFront($dlg.parents('.ui-dialog'),null,'validating pin...');
 
-    window.hWin.HAPI4.SystemMgr.reset_password({username: username, pin: pin}, function(response){ //console.log(response);
-            
+    window.hWin.HAPI4.SystemMgr.reset_password({username: username, pin: pin}, function(response){
+
         window.hWin.HEURIST4.msg.sendCoverallToBack();
 
         if(response.status == window.hWin.ResponseStatus.OK){
+
+            if(response.data !== true && typeof response.data === 'string'){
+                window.hWin.HEURIST4.msg.showMsgFlash(response.data, 3000);
+                return;
+            }
 
             updateStatus($dlg, 3, '');
             return;
@@ -503,7 +506,7 @@ function validateResetPin($dlg){
 function resetPassword($dlg){
 
     let username = $dlg.find('#reset_username').val();
-    let pin = $dlg.find('#pin').val();
+    let pin = $dlg.find('#reset_pin').val();
 
     let pwd = $dlg.find('#new_password').val();
     let dup_pwd = $dlg.find('#dup_new_password').val();
@@ -516,8 +519,8 @@ function resetPassword($dlg){
 
     window.hWin.HEURIST4.msg.bringCoverallToFront($dlg.parents('.ui-dialog'),null,'validating pin...');
 
-    window.hWin.HAPI4.SystemMgr.reset_password({username: username, pin: pin, new_password: pwd}, function(response){ //console.log(response);
-            
+    window.hWin.HAPI4.SystemMgr.reset_password({username: username, pin: pin, new_password: pwd}, function(response){
+
         window.hWin.HEURIST4.msg.sendCoverallToBack();
 
         if(response.status == window.hWin.ResponseStatus.OK){
