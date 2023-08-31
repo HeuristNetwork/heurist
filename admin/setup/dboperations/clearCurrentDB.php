@@ -45,7 +45,7 @@ require_once(dirname(__FILE__).'/../../../records/index/elasticSearch.php');
         -webkit-margin-end: 0px;
     }
     .gray-gradient {
-        background: -moz-linear-gradient(center top , rgba(100, 100, 100, 0.6), rgba(100, 100, 100, 0.9)) repeat scroll 0 0 transparent;
+        background: -moz-linear-gradient(top , rgba(100, 100, 100, 0.6), rgba(100, 100, 100, 0.9)) repeat scroll 0 0 transparent;
         background: -webkit-gradient(linear, left top, left bottom, from(rgba(100, 100, 100, 0.6)), to(rgba(100, 100, 100, 0.9)));
         background-color: rgba(100, 100, 100, 0.6);
         border: 1px solid #999;
