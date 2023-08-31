@@ -3809,8 +3809,8 @@ console.log('get defintion in OLD format!!!!');
                      //dcount.appendTo(f_link).css({float:'right'});
 
                      if(cterm.level > 1){
-                        let label_width = f_link_content.width() - 20;
-                        f_link_content.css('width', label_width + 'px');
+                        let label_width = this.facets_list_container.width() - 30;
+                        f_link_content.css('width', label_width>0?(label_width + 'px'):'auto');
                     }
                 }
             }
