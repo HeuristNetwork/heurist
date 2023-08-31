@@ -341,7 +341,7 @@ if (@$urls) {
             padding: 0 3px;
             height: 20px !important;
             line-height: 19px !important;
-            font: 10px arial,helvetica,clean,sans-serif;
+            font-family:arial,helvetica,clean,sans-serif;
         }
         .button, input[type="button"]:hover, input[type="submit"]:hover {
             background-color: RGBA(0,0,0,0.1) !important;

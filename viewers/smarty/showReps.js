@@ -571,7 +571,7 @@ function ShowReps( is_snippet_editor ) {
         }, 'auto'
         );
 
-        _generateTemplate(template_file, null, false);
+        _generateTemplate(template_file, null);
     }
 
 

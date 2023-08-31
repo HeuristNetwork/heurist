@@ -42,7 +42,7 @@ input[type="button"], input[type="submit"], select {
 	padding:0 3px !important;
 	height:20px !important;
 	line-height:19px !important;
-	font: 10px arial, helvetica, clean, sans-serif;
+	font-family:arial, helvetica, clean, sans-serif;
 }
 div.heurist option, div.heurist option:checked {
 	background:none repeat scroll 0 0 #FFF;
@@ -63,7 +63,6 @@ div.heurist {
 	width: 370px!important;
 	height: 240px!important;
 	border: 2px solid #FFF!important;
-	background-color: #fff!important;
 	z-index: 999999!important;
 	display: none;
 	-moz-border-radius: 6px!important;

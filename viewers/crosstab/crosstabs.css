@@ -66,7 +66,7 @@ h3 > #rec_add_link, div.intervalDiv > #rec_edit_link {
 }
 
 div .selected, div .selected:hover{
-    background: -moz-linear-gradient(center top , #E6F8FD, #BEE4F8) repeat scroll 0 0 transparent;
+    background: -moz-linear-gradient(top , #E6F8FD, #BEE4F8) repeat scroll 0 0 transparent;
     background: -webkit-gradient(linear, left top, left bottom, from(#E6F8FD), to(#BEE4F8));
     border-color: #62A7F8;
 }
@@ -195,9 +195,9 @@ button{
 
 div #inporgress{
     position:absolute; top:0;right:0;bottom:0;left:0;
-    background-color: rgba(150, 150, 150, 0.6);
-    background:-moz-linear-gradient(center top , rgba(150, 150, 150, 0.2), rgba(150, 150, 150, 0.5)) repeat scroll 0 0 transparent;
+    background:-moz-linear-gradient(top , rgba(150, 150, 150, 0.2), rgba(150, 150, 150, 0.5)) repeat scroll 0 0 transparent;
     background:-webkit-gradient(linear, left top, left bottom, from(rgba(150, 150, 150, 0.2)), to(rgba(150, 150, 150, 0.5)));
+    background-color: rgba(150, 150, 150, 0.6);
 }
 div #inporgress-loading{
     background-image: url('../../hclient/assets/loading-animation-white.gif');
