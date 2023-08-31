@@ -768,13 +768,14 @@ private static function _saveEncodedFilename($encoded_filename){
         }
     }
     
-    $query = 'INSERT INTO `import_tmp_file` (imp_filename) VALUES ("'.$mysqli->real_escape_string($encoded_filename).'")';
-    $res = $mysqli->query($query);
-    if(!$res){
-            self::$system->addError(HEURIST_DB_ERROR, "Cannot add into import session table", $mysqli->error);                
-            return false;
+    $res = mysql__insertupdate($mysqli, 'import_tmp_file', 'imp', array('imp_filename'=>$encoded_filename));
+    //$query = 'INSERT INTO `import_tmp_file` (imp_filename) VALUES ("'.$mysqli->real_escape_string($encoded_filename).'")';
+    //$res = $mysqli->query($query);
+    if(is_numeric($res) && intval($res)>0){
+            return $res; //$mysqli->insert_id;
     }else{
-            return $mysqli->insert_id;
+            self::$system->addError(HEURIST_DB_ERROR, "Cannot add into import session table", $res);                
+            return false;
     }
             
 }
