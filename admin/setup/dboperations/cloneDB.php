@@ -281,7 +281,7 @@ if(@$_REQUEST['mode']=='2' && $targetdbname!=null){
                     Because this database contains new structural elements, you must register it before you can clone it.
                 </p>
                 <p>     
-                    This database contains new definitions: <?php print htmlspecialchars($sHasNewDefsWarning;) ?> which are local to the database.<br>
+                    This database contains new definitions: <?php print htmlspecialchars($sHasNewDefsWarning); ?> which are local to the database.<br>
                     Before they can be cloned they must be attributed a unique global ID known as a Concept Code.<br>
                     This is done by registering the database. Please use Design > Setup > Register before cloning.<br><br>                 
                 </p>         
