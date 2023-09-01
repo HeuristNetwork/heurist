@@ -1838,7 +1838,7 @@ console.log('get defintion in OLD format!!!!');
                 
                 var subs_value = null; //either initial query OR rectype+current result set
                 
-                if(this.options.params.ui_temporal_filter_initial || this._isInited || (field.multisel && field.selectedvalue!=null)){
+                if(this.options.params.ui_temporal_filter_initial || this._isInited || (field.multisel && field.selectedvalue!=null)){ 
                     //replace with current query   - @todo check for empty 
                     subs_value = window.hWin.HEURIST4.query.mergeHeuristQuery(this._first_query, 
                                     (this._use_sup_filter)?this.options.params.sup_filter:'',
@@ -3854,7 +3854,7 @@ console.log('get defintion in OLD format!!!!');
                         field.selectedvalue = {title:label, value:value, step:step};                    
                     }
 
-                    if(!(field.multisel || cterm.count=='reset')){
+                    if(cterm.count=='reset'){  //field.multisel || 
                         that._last_active_facet = facet_index;
                     } 
                     that.doSearch();
