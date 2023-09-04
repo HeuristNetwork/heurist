@@ -2221,6 +2221,8 @@ function print_text_details($bib) {
 }
 
 function output_chunker($val) {
+
+    list(, $val) = extractLangPrefix($val); // remove possible language prefix
     // chunk up the value so that it will be able to line-break if necessary
     $val = sanitizeString($val); 
     return $val;

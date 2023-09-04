@@ -2927,6 +2927,8 @@ class HPredicate {
                     $this->fulltext = false;
                 }
 
+                list($lang, $this->value) = extractLangPrefix($this->value);
+
                 if (strpos($this->value,"<>")>0) {
                     $vals = explode("<>", $this->value);
 
@@ -2990,11 +2992,11 @@ $stopwords = array('a','about','an','are','as','at','be','by','com','de','en','f
                 if(!$this->fulltext){
 
                     if(!$this->exact){ //$eq=='=' && 
-                            $eq = ($this->negate?'NOT ':'').'LIKE';
-                            $k = strpos($this->value,"%"); //if begin or end
-                            if($k===false || ($k>0 && $k+1<strlen($this->value))){
-                                $this->value = '%'.$this->value.'%';
-                            }
+                        $eq = ($this->negate?'NOT ':'').'LIKE';
+                        $k = strpos($this->value,"%"); //if begin or end
+                        if($k===false || ($k>0 && $k+1<strlen($this->value))){
+                            $this->value = '%'.$this->value.'%';
+                        }
                     }else{
                         $eq = ($this->negate?'!=':'=');
                     }
@@ -3003,6 +3005,17 @@ $stopwords = array('a','about','an','are','as','at','be','by','com','de','en','f
                     }
 
                     $res = " $eq '" . $mysqli->real_escape_string($this->value) . "'";
+                }
+
+                if(($this->field_type == 'freetext' || $this->field_type == 'blocktext') && intval($this->field_id) > 0){ // filter language
+
+                    if(empty($lang)){ // default only
+                        $res = $res . " AND dtl_Value NOT REGEXP '^[\w]{3}:'";
+                    }else if($lang == 'ALL' && $this->exact && !$this->fulltext){ // any language, exact and not a fulltext search
+                        $res = $res . " OR SUBSTRING(dtl_Value, 0, 4) = '" . $mysqli->real_escape_string($this->value) . "'";
+                    }else if($lang != 'ALL' && !empty($lang)){ // specific language
+                        $res = $res . " AND LEFT(dtl_Value, 4) = '$lang:'";
+                    }
                 }
             }
             
