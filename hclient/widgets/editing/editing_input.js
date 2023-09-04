@@ -216,6 +216,19 @@ $.widget( "heurist.editing_input", {
                     .css({display:'table-cell', 'vertical-align':'top', //'padding-top':'2px',
                             'min-width':'22px',  'border-color':'transparent'})
                     .appendTo( this.element );
+
+                let rec_translate = this.options.recordset && this.options.recordset.entityName == 'Records' && !is_translation
+                                    && (this.detailType == 'freetext' || this.detailType == 'blocktext');
+
+                let styles = {
+                    display:'block', 
+                    'font-size': (is_translation?'1em':'1.9em'), cursor:'pointer', 
+                    //'vertical-align':'top', //'padding-top':'2px',
+                    'min-width':(rec_translate ? '16px' : '22px'),
+                    'margin-top': '5px',
+                    //outline_suppress does not work - so list all these props here explicitely
+                    outline: 'none','outline-style':'none', 'box-shadow':'none'
+                }
                     
                 this.btn_add = $( "<span>")
                     .addClass('smallbutton editint-inout-repeat-button ui-icon ui-icon-'
@@ -224,14 +237,23 @@ $.widget( "heurist.editing_input", {
                 //.button({icon:"ui-icon-circlesmall-plus", showLabel:false, label:'Add another ' + lblTitle +' value'})
                 .attr('tabindex', '-1')
                 .attr('title', 'Add another ' + window.hWin.HEURIST4.util.stripTags(lblTitle) +(is_translation?' translation':' value' ))                    
-                .css({display:'block', 
-                'font-size': (is_translation?'1em':'1.9em'), cursor:'pointer', 
-                //'vertical-align':'top', //'padding-top':'2px',
-                    'min-width':'22px','margin-top': '5px',
-//outline_suppress does not work - so list all these props here explicitely                
-                    outline: 'none','outline-style':'none', 'box-shadow':'none'
-                });
-                
+                .css(styles);
+
+                if(rec_translate){ // add translate icon
+
+                    styles['font-size'] = '1.1em';
+                    styles['float'] = 'left';
+
+                    $('<span>')
+                        .addClass('smallbutton editint-inout-repeat-button ui-icon ui-icon-translate')
+                        .attr('tabindex', '-1')
+                        .attr('title', 'Add another translation')
+                        .css(styles)
+                        .prependTo(btn_cont);
+
+                    this.btn_add = btn_cont.find('span');
+                }
+
                 if(this.detailType=="blocktext"){
                     this.btn_add.css({'margin-top':'3px'});    
                 }
@@ -240,16 +262,44 @@ $.widget( "heurist.editing_input", {
                 
                 // bind click events
                 this._on( this.btn_add, {
-                    click: function(){
+                    click: function(event){
 
                         if(this.is_disabled) return;
 
                         if(is_translation){
-                            
+
                             if(typeof translationSupport!=='undefined' && $.isFunction(translationSupport)){
                                 translationSupport(this); //see editing_exts
                             }
                             
+                        }else if($(event.target).hasClass('ui-icon-translate') && (that.detailType == 'freetext' || that.detailType == 'blocktext')){ // request language, then create new input with language prefix
+
+                            let $dlg;
+                            let msg = 'Language: <select id="selLang"></select>';
+
+                            let btns = {};
+                            btns[window.HR('Insert')] = function(){
+                                that.new_value = $dlg.find('#selLang').val() + ':';
+                                $dlg.dialog('close');
+                                $(that.btn_add[1]).click(); // 'click' normal repeat
+                            };
+                            btns[window.HR('Cancel')] = function(){
+                                $dlg.dialog('close');
+                            };
+
+                            let labels = {
+                                title: window.HR('Insert translated value'),
+                                yes: window.HR('Insert'),
+                                no: window.HR('Cancel')
+                            };
+
+                            $dlg = window.hWin.HEURIST4.msg.showMsgDlg(msg, btns, labels, {default_palette_class: 'ui-heurist-populate'});
+
+                            window.hWin.HEURIST4.ui.createLanguageSelect($dlg.find('#selLang'), null, null, true);
+
+                            //this.new_value = 'ENG:';
+                            //$(this.btn_add[1]).click();
+
                         }else{
                             
                             if(window.hWin.HEURIST4.util.isempty(this.new_value) && this.new_value != '') this.new_value = '';
@@ -284,8 +334,7 @@ $.widget( "heurist.editing_input", {
                         this.header.find('label').css({display:'inline-block', width: 135});
                 }
             }
-            
-        }        
+        }
 
 
         //input cell
@@ -1392,10 +1441,8 @@ $.widget( "heurist.editing_input", {
             }
             else{
                 
-                if(true //&& this.options.recordset && this.options.recordset.entityName == 'Records' 
-                    && window.hWin.HEURIST4.util.isempty(this.f('rst_FieldConfig')))
-        
-                {
+                if(window.hWin.HEURIST4.util.isempty(this.f('rst_FieldConfig'))){
+
                     browseTerms(this, $input, value);
 
                     //window.hWin.HEURIST4.ui.initHSelect($input, false);
@@ -5904,9 +5951,8 @@ console.log('onpaste');
 
                 $input.css('width','auto');
                 
-                if(true //&& that.options.recordset && that.options.recordset.entityName == 'Records' 
-                    && window.hWin.HEURIST4.util.isempty(that.f('rst_FieldConfig')))
-                {
+                if(window.hWin.HEURIST4.util.isempty(that.f('rst_FieldConfig'))) {
+
 
                     if(that.selObj) {
                         that.selObj.remove();    
