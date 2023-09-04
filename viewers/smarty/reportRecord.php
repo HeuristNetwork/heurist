@@ -214,6 +214,7 @@ class ReportRecord {
     
     //
     // retuns array of related record with additional header values
+    //                            recRelationID  
     //                            recRelationType
     //                            recRelationNotes
     //                            recRelationStartDate
@@ -262,10 +263,12 @@ class ReportRecord {
                             if(array_key_exists('RelatedRecID',$value) && array_key_exists('RelTerm',$value)){
                                 
                                 
-                                $record = $this->getRecord($value['RelatedRecID']['rec_ID']);
+                                $record = $this->getRecord($value['RelatedRecID']['rec_ID']); //related record
                                                             
                                 
-                                //add relationship specific variables
+                                //add specific variables from relationship record (rty_ID=1)
+                                $record["recRelationID"] = $value['recID'];
+                                
                                 $record["recRelationType"] = $value['RelTerm'];
 
                                 if(array_key_exists('Notes', $value)){
@@ -293,7 +296,7 @@ class ReportRecord {
     
     //
     // $rec - record id or record array - record to find records linked to or from this record
-    // $rtyt_ID - record type or array of record type to filter output
+    // $rty_ID - record type or array of record type to filter output
     // $direction - linkedfrom or linkedto or null to return  both directions
     // returns array of record IDs devided to 2 arrays "linkedto" and "linkedfrom"
     //
