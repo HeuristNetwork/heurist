@@ -406,13 +406,15 @@
                 */
 
             } else  if ($action=="action_password") { //special passwords for some admin actions - defined in configIni.php
-            
-                    $action = @$_REQUEST['action'];
-                    $password = @$_REQUEST['password'];
-                    if($action && $password){
-                        $varname = 'passwordFor'.$action;
-                        $res = (@$varname==$password)?'ok':'wrong';
-                    }
+
+                $actions = array('DatabaseCreation', 'DatabaseDeletion', 'ReservedChanges', 'ServerFunctions');
+                $action = @$_REQUEST['action'];
+                $password = @$_REQUEST['password'];
+
+                if($action && in_array($action, $actions) && !empty($password)){
+                    $varname = 'passwordFor'.$action;
+                    $res = (@$$varname==$password)?'ok':'wrong';
+                }
 
             }
               else if ($action=="sys_info_count") { 
