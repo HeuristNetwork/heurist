@@ -235,7 +235,7 @@ if($isWebPage){ //set in websiteRecord.php
             style="<?php echo (!$is_page_footer_fixed && $page_footer?'position:static;':'');?>">
         </div>
         <div id="main-recordview" style="height:100%;<?php echo (!$is_page_footer_fixed && $page_footer?'position:static;':'');?>">
-                <iframe style=""overflow:none !important;width:100% !important;"></iframe>
+                <iframe style="overflow:none !important;width:100% !important;"></iframe>
                 <button class="keywords" style="position:fixed;top:160px;left:5px;">Back</button>
         </div>
 <?php
