@@ -4897,8 +4897,9 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
     },
 	
     //
-	// Display the record title field (cannot be edited here),
-	// and, if applicable, the child record fields at the top of the form
+	// Display extra record details at the top and bottom of the editor
+    //  Details included at the top: Record title, Child record of (if applicable), and Record URL (if set to appear)
+    //  Details included at the bottom: Current workflow stage
 	//
     showExtraRecordInfo: function(){
 
@@ -4920,13 +4921,17 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
         }
 
         // add new separate fieldset at the start
-        var top_fieldset = $('<fieldset>', {id: 'receditor-top'}).insertBefore(this.editForm.find('fieldset:first')); //.css({'background-color': '#d1e7e7', 'margin-bottom': '10px', 'padding-left': '10px'})
+        let $top_fieldset = $('<fieldset>', {id: 'receditor-top'}).insertBefore(this.editForm.find('fieldset:first'));
+        let top_width = $top_fieldset.parent().width();
+        top_width -= 10;
 
-        var admin_override = window.hWin.HAPI4.is_admin() && !window.hWin.HAPI4.is_member(that._getField('rec_OwnerUGrpID'));
+        $top_fieldset.css('min-width', top_width + 'px');
+
+        const admin_override = window.hWin.HAPI4.is_admin() && !window.hWin.HAPI4.is_member(that._getField('rec_OwnerUGrpID'));
 
         if(admin_override){ // check if user is not owner, but is admin 
 
-            top_fieldset.append(
+            $top_fieldset.append(
                 '<div style="display: table; margin-bottom: 7px">'
                     + '<div class="header" style="vertical-align: top; display: table-cell; font-size: 1.3em; font-weight: bold; width: auto;">'
                         + '<span style="color: red; font-weight: bold;">You don\'t own this record</span> (you can edit it because you are a database administrator)'
@@ -4934,61 +4939,63 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
                 + '</div>');
         }
 
-        var title_maxwidth = (top_fieldset.width() != 0) ? top_fieldset.width() : top_fieldset.parent().width();
+        let title_maxwidth = ($top_fieldset.css('min-width') != 0) ? $top_fieldset.css('min-width') : $top_fieldset.parent().width();
         title_maxwidth = title_maxwidth * 0.85 - (this.options.rts_editor ? 45 : 17);
 
         // Display record title
-        var ele = this._editing.getFieldByName('rec_Title').show().editing_input('setDisabled', true);
+        let $title_field = this._editing.getFieldByName('rec_Title').show().editing_input('setDisabled', true);
 
         // remove opacity change and set background to lighter background
-        var cur_styling = ele.find('input').attr('style');
-        var cur_title = this._getField('rec_Title').replace(/[\r\n]+/g, ' ');
-        ele.find('input')
-            .replaceWith('<div style="'+cur_styling+'background-color:#e3f0f0!important;font-size:13px;padding:3px;max-width:'+title_maxwidth+'px;width:'+title_maxwidth+'px;" class="truncate"'
+        let cur_styling = $title_field.find('input').attr('style');
+        let cur_title = this._getField('rec_Title').replace(/[\r\n]+/g, ' ');
+        $title_field.find('input')
+                    .replaceWith('<div style="'+cur_styling+'background-color:#e3f0f0!important;font-size:13px;padding:3px;max-width:'+title_maxwidth+'px;width:'+title_maxwidth+'px;" class="truncate"'
                         + ' title="A title constructed from one or more fields, which is used to identify records when displayed in search results.">'+ cur_title +'</div>');
 
         // change label to required version, and add help icon
-        ele.find('div.header')
-            .attr('title', 'A title constructed from one or more fields, which is used to identify records when displayed in search results.')
-            .addClass('recommended')
-            .css('vertical-align', '');
+        $title_field.find('div.header')
+                    .attr('title', 'A title constructed from one or more fields, which is used to identify records when displayed in search results.')
+                    .addClass('recommended')
+                    .css('vertical-align', '');
 
-        ele.find('div.header > label').text('Constructed title');
+        $title_field.find('div.header > label').text('Constructed title');
 
         // add gear icon that opens title mask editor
         if(window.hWin.HAPI4.is_admin() && this.options.allowAdminToolbar!==false){
 
-            var $gear_icon = $('<span>')
+            let $gear_icon = $('<span>')
                               .addClass('ui-icon ui-icon-gear')
                               .css({'color': 'rgb(125, 154, 170)', 'min-width': '22px', 'cursor': 'pointer'})
                               .attr('title', 'Open Title Mask Editor')
                               .click(function(e) { that.editRecordTypeTitle(); });
 
-            ele.find('span.editint-inout-repeat-button').find('ui-icon').remove(); // remove repeat button
-            ele.find('span.editint-inout-repeat-button').append($gear_icon); // add gear icon (edit title mask)
-            ele.find('span.btn_input_clear').remove(); // remove clear button
+            $title_field.find('span.editint-inout-repeat-button').find('ui-icon').remove(); // remove repeat button
+            $title_field.find('span.editint-inout-repeat-button').append($gear_icon); // add gear icon (edit title mask)
+            $title_field.find('span.btn_input_clear').remove(); // remove clear button
         }
 
         // move rec_title field to new fieldset
-        top_fieldset.append(ele);
+        $top_fieldset.append($title_field);
 
         // check for child record field, move to new fieldset if any
-        var childrec_field = this.editForm.find('div[data-dtid="'+parententity+'"]');
-        if(childrec_field.length == 1){
+        let $childrec_field = this.editForm.find('div[data-dtid="'+parententity+'"]');
+        if($childrec_field.length == 1){
 
             // Header changes
-            childrec_field.find('div.header').css({'font-size': '12px'}).addClass('recommended');
+            $childrec_field.find('div.header').css({'font-size': '12px'}).addClass('recommended');
 
             // Append to top
-            top_fieldset.append(childrec_field);
+            $top_fieldset.append($childrec_field);
         }
 
-        var url_field = this._editing.getFieldByName('rec_URL');
-        if(url_field.length == 1){
-            url_field.find('div.header').css({'font-size': '12px'}).addClass('recommended');
+        // check for url field, move to new fieldset if set to display
+        let $url_field = this._editing.getFieldByName('rec_URL');
+        if($url_field.length == 1){
+
+            $url_field.find('div.header').css({'font-size': '12px'}).addClass('recommended');
 
             // Append to top
-            top_fieldset.append(url_field);
+            $top_fieldset.append($url_field);
         }
     },
 	
