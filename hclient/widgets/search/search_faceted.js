@@ -3713,7 +3713,21 @@ console.log('get defintion in OLD format!!!!');
     }
 
     // cterm - {title, value, count}
-    ,_createFacetLink: function(facet_index, cterm, display_mode){
+    ,_createFacetLink: function(facet_index, cterm, display_mode, content_max_width){
+        
+        if(content_max_width<10){
+            
+            if(this.element.is(':visible')){
+                content_max_width = this.options.is_publication 
+                        ? this.element.parents('.mceNonEditable').width() 
+                        : this.element.width();
+            }
+            if(content_max_width<10){
+                content_max_width = 250;
+            }
+
+//console.log('max2 ',content_max_width, this.element.is(':visible'));        
+        } 
 
         var field = this.options.params.facets[facet_index];
         //var step = cterm.step;
@@ -3737,7 +3751,7 @@ console.log('get defintion in OLD format!!!!');
         
         //----
         var f_link_content;
-        var content_max_width = this.options.is_publication ? this.element.parents('.mceNonEditable').width() : this.element.width();
+        
         
         if(window.hWin.HEURIST4.util.isempty(cterm.value)){
             f_link_content = $("<span>").addClass("ui-icon ui-icon-arrowreturnthick-1-w")
