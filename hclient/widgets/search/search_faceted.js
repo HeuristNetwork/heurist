@@ -730,7 +730,7 @@ $.widget( "heurist.search_faceted", {
                 mode: 2, 
                 db: window.hWin.HAPI4.database
             };
-            //!!!!!!!!!  alsow rewrite getLinkedRecordTypes
+            //!!!  alsow rewrite getLinkedRecordTypes
 console.log('get defintion in OLD format!!!!');            
             window.hWin.HAPI4.SystemMgr.get_defs(request, function(response){
                 if(response.status == window.hWin.ResponseStatus.OK){
@@ -762,6 +762,7 @@ console.log('get defintion in OLD format!!!!');
             for (facet_index=0;facet_index<len;facet_index++){
                 facets[facet_index].history = [];
                 facets[facet_index].selectedvalue = null;
+                facets[facet_index].last_count_query = null;
                 
                 //support old format
                 if(window.hWin.HEURIST4.util.isnull(facets[facet_index].isfacet) || facets[facet_index].isfacet==true){
@@ -1076,7 +1077,7 @@ console.log('get defintion in OLD format!!!!');
              if(field['isfacet']!=that._FT_INPUT){
 
                 let $container = $("<div>",{id: "fv_"+field['var'] }).html(      //!!!!
-                    '<div class="header" title="'+facet_rollover+'">'   // style="width: 100%; background-color: lightgray; padding: 5px; width:100%"
+                    '<div class="header" title="'+facet_rollover+'" data-index="'+idx+'">'   // style="width: 100%; background-color: lightgray; padding: 5px; width:100%"
                           +(that.options.params.title_hierarchy?harchy:'')
                           +'<h4 style="display:inline-block;margin:0;">'
                           + facet_title + '</h4>'+  //field['order']+'  '+
@@ -1091,6 +1092,22 @@ console.log('get defintion in OLD format!!!!');
                     $container.accordion({
                         collapsible: true,
                         heightStyle: 'content'
+/*                       , activate: function( event, ui ) {
+                            if(ui.newHeader && ui.newHeader[0]){
+                                let _facet_index = $(ui.newHeader[0]).attr('data-index');
+                                
+                                var field = that.options.params.facets[_facet_index];
+                                if(field['last_count_query']){
+                                    var hashQuery = field['last_count_query'];
+                                    field['last_count_query'] = null;
+                                    var stored_counts = that._getCachedCounts( hashQuery, _facet_index );
+                                    if(stored_counts){
+                                        that._redrawFacets(stored_counts, false);
+                                    }
+                                }
+                            }
+                        }
+*/                        
                     });
                     if(that.options.params.show_accordion_icons === false){ // hide expand/collapse icons
                         $container.accordion('option', 'icons', false);
@@ -1818,6 +1835,7 @@ console.log('get defintion in OLD format!!!!');
             if(i>field_index && field['isfacet']!=that._FT_INPUT && field['facet']){
                 
                 
+                /* temporary disabled
                 if(i===this._last_active_facet && field['last_count_query']){
                     var hashQuery = field['last_count_query'];
                     var stored_counts = this._getCachedCounts( hashQuery, i );
@@ -1828,7 +1846,7 @@ console.log('get defintion in OLD format!!!!');
                         that._redrawFacets(stored_counts, false);
                         return;
                     }
-                }
+                }*/
                 
                 if(field['type']=='enum' && field['groupby']=='firstlevel' && 
                                 !window.hWin.HEURIST4.util.isnull(field['selectedvalue'])){
@@ -2149,6 +2167,8 @@ console.log('get defintion in OLD format!!!!');
                         //'width':'inherit',
                         $facet_values = $('<div>').addClass('facets').appendTo( $(dd[0]) );
                         //AAA strange padding .css({'padding':'4px 0px 10px 5px'})
+                    }else{
+                        $facet_values.empty();
                     }
                     $facet_values.css('background','none');
                     
@@ -3713,20 +3733,19 @@ console.log('get defintion in OLD format!!!!');
     }
 
     // cterm - {title, value, count}
-    ,_createFacetLink: function(facet_index, cterm, display_mode, content_max_width){
+    ,_createFacetLink: function(facet_index, cterm, display_mode){
         
-        if(content_max_width<10){
+        var content_max_width = 0;
+        
+        if(isNaN(content_max_width) || content_max_width<10){
             
-            if(this.element.is(':visible')){
-                content_max_width = this.options.is_publication 
+            content_max_width = this.options.is_publication 
                         ? this.element.parents('.mceNonEditable').width() 
                         : this.element.width();
-            }
+            
             if(content_max_width<10){
                 content_max_width = 250;
             }
-
-//console.log('max2 ',content_max_width, this.element.is(':visible'));        
         } 
 
         var field = this.options.params.facets[facet_index];
@@ -3767,6 +3786,8 @@ console.log('get defintion in OLD format!!!!');
 
                 let width = content_max_width < 200 ? content_max_width * 0.6 : content_max_width - 80;
                 f_link_content.css('max-width', width).addClass('truncate');
+
+                //f_link_content.css('width', width);
             
                 f_link_content.attr('title', cterm.title);
             }
@@ -3821,10 +3842,11 @@ console.log('get defintion in OLD format!!!!');
                      //dcount.appendTo(f_link).appendTo(f_link_content);
                 }else{
                      //dcount.appendTo(f_link).css({float:'right'});
-
                      if(cterm.level > 1){
-                        let label_width = this.facets_list_container.width() - 30;
-                        f_link_content.css('width', label_width>0?(label_width + 'px'):'auto');
+                         let label_width = this.facets_list_container.width();
+                         if(label_width<10) label_width = content_max_width - 80;
+                         label_width = label_width - 30;
+                         f_link_content.css('width', label_width);
                     }
                 }
             }
