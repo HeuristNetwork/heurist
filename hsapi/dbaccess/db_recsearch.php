@@ -3654,6 +3654,8 @@ function __fillQuery(&$q, $recID){
                     }
             }
         }
+    }else if( is_string($q) && $q == '$IDS') {
+            $q = array('ids'=>$recID);
     }
 }  
 //

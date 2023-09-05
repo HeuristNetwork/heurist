@@ -220,7 +220,7 @@ public static function output($data, $params){
                                 if(!@$code['q']){
                                     array_push($find_by_geofields,$code['id']);
                                 }else{
-                                    array_push($find_by_geofields,$code);                    
+                                    array_push($find_by_geofields,$code); //with query to linked record                    
                                 }
                                 
                             }else{
@@ -1469,7 +1469,7 @@ private static function _getGeoJsonFeature($record, $extended=false, $simplify=f
     if(is_array($find_by_geofields) && count($find_by_geofields)>0){
         //find geo values in linked records 
         foreach ($find_by_geofields as $idx => $code){
-            if(@$code['id'] && @$code['q']){
+            if(is_array($code) && @$code['id'] && @$code['q']){
                 //@todo group details by same queries
                 $geodetails = recordSearchLinkedDetails(self::$system, $record['rec_ID'], $code['id'], $code['q']);
                 foreach ($geodetails as $dty_ID=>$field_details) {
@@ -1484,7 +1484,15 @@ private static function _getGeoJsonFeature($record, $extended=false, $simplify=f
                         }
                     }
                 }
-            }
+            }/*else if (is_numeric($code) && intval($code)>0){
+                if(@$record['details'][$code]['geo']){
+                            $wkt = $record['details'][$code]['geo']['wkt'];
+                            $json = self::_getJsonFromWkt($wkt, $simplify);
+                            if($json){
+                               $geovalues[] = $json; 
+                            }
+                }
+            }*/
         }
     
     }else

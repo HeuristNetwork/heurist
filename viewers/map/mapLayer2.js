@@ -467,18 +467,21 @@ function hMapLayer2( _options ) {
                         //geo field can be 2 types
                         //1. code request (rt:dt:rt:dt) that alows to drill for geo values in linked records
                         //2. dty_ID - pointer/resource field 
-                        
-                        if(item.geofield.indexOf(':')>0){
-                            //1. code request
-                            var field = window.hWin.HEURIST4.query.createFacetQuery(item.geofield, true, false);
-                            if(field['facet'] && Object.keys(field['facet']).length>1){
-                                layer_geofields.push({id:field['id'],q:field['facet']}); //in linked records
+                        var geofields = item.geofield.split(',');
+                        for(var k=0; k<geofields.length; k++){
+                            var geofield = geofields[k];
+                            if(geofield.indexOf(':')>0){
+                                //1. code request
+                                var field = window.hWin.HEURIST4.query.createFacetQuery(geofield, true, false);
+                                if(field['facet'] && field['facet']=='$IDS'){
+                                    layer_geofields.push({id:field['id']}); //in main record
+                                }else{
+                                    layer_geofields.push({id:field['id'],q:field['facet']}); //in linked records
+                                }
                             }else{
-                                layer_geofields.push({id:field['id']}); //in main record
+                                //2. pointer field
+                                layer_geofields.push(geofield);    
                             }
-                        }else{
-                            //2. pointer field
-                            layer_geofields.push(item.geofield);    
                         }
                         
                         layer_default_style = item.symbol?item.symbol:item;
