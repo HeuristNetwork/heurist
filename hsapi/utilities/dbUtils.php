@@ -736,8 +736,7 @@ class DbUtils {
             $dbScriptMode = 0; //disable all others
 
             
-            if($dbScriptMode==2)
-                    ){ // use mysql native mysqldump utility via shell
+            if($dbScriptMode==2){ // use mysql native mysqldump utility via shell
             
                 $tables = array();
                 $options = '';
@@ -762,15 +761,17 @@ class DbUtils {
                 //--log-error=mysqldump_error.log -h {$server_name}
                 //--hex-blob --routines --skip-lock-tables 
                 //-u ".ADMIN_DBUSERNAME." -p".ADMIN_DBUSERPSWD."
+                $return = null;
+                
+                /* remarked temporary to avoid security warnings
                 $cmd = escapeshellarg(HEURIST_DB_MYSQLDUMP)
                 ." --login-path=local {$database_name_full} {$options} {$tables} > " 
                 .$database_dumpfile;
 
-//echo $cmd."\n";                
                 $arr_out = array();
-                $return = null;
                 
                 exec($cmd, $arr_out, $return);
+                */
                 
 //echo 'return '.$return;                
 //echo print_r($arr_out,true)."\n\n";

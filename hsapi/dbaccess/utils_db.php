@@ -765,6 +765,7 @@
                 $arr_out = array();
                 $res2 = null;
                 
+                /* remarked temporary to avoid security warnings
                 $cmd = HEURIST_DB_MYSQLPATH." --login-path=local -D"
                         .escapeshellarg($database_name_full)." < ".escapeshellarg($script_file). ' 2>&1';
                         
@@ -776,6 +777,7 @@
                 }else{
                     $res = true;
                 }
+                */
             }else if($dbScriptMode==1){
                 //internal routine
                 $script_content = file_get_contents($script_file);
