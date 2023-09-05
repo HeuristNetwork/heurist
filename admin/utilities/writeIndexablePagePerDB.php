@@ -313,8 +313,9 @@ foreach ($databases as $idx=>$db_name){
 
     echo $tabs0.$db_name.' Starting'.$eol;
     
-    if(mysql__usedatabase($mysqli, $db_name) !== true){
-        echo $tabs0.$system->getError()['message'].$eol;
+    $res = mysql__usedatabase($mysqli, $db_name);
+    if(!$res){
+        echo $tabs0.@$res[1].$eol;
         continue;
     }
 

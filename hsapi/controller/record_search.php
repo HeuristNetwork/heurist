@@ -203,16 +203,8 @@
                 
             
         }else{
-
-            // moved to System
-            // TODO: temporary (for backward compatibility) should be part of all databases
-            // Check whether recLinks (relationships cache) table exists and create if not
-            // sqlCreateRecLinks.sql     moved to System
-            
             $response = recordSearch($system, $_REQUEST);
             $response['queryid'] = @$_REQUEST['id'];
-            
-        
         }
     }
     

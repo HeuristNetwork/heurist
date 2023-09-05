@@ -1,6 +1,7 @@
 -- Created by Steve White 2010-10-23
 -- Last updated 2 April 2011 Ian Johnson - removed deprecated archive triggers
 -- 2013-05-13 Arjen Lentz - added replacement functions for levenshtein.c and liposuction.c UDFs
+-- 2023-08  Artem Osmakov - added getEstDate
 
 
 -- This file contains the stored procedures and triggers for Heurist databases
@@ -66,7 +67,6 @@ DROP function IF EXISTS `getEstDate`$$
 CREATE DEFINER=CURRENT_USER FUNCTION `getEstDate`(sTemporal varchar(4095), typeDate tinyint) RETURNS DECIMAL(15,4)
     DETERMINISTIC
     BEGIN
-    
             declare iBegin integer;
             declare iEnd integer;
             declare nameDate varchar(20) default '';

@@ -26,6 +26,9 @@ require_once('welcomeEmail.php');
 
 header('Content-type: text/javascript');
 
+$_DEBUG_NOT_CREATE = false; //set to true to avoid db creation
+$_DEBUG_NOT_EMAIL = false; //set to true to avoid db creation
+
 $res = false;
 
 $system = new System();
@@ -170,7 +173,7 @@ if( isset($passwordForDatabaseCreation) && $passwordForDatabaseCreation!='' &&
         }else if($reg_url){ //load db structure from registered database - NOT USED
             
             
-        }else if(1==1)  { //set to false to debug workflow without actual db creation
+        }else if(!$_DEBUG)  { //set to false to debug workflow without actual db creation
 
             $res = DbUtils::databaseCreateFull($database_name_full, $user_record);
 
@@ -184,23 +187,25 @@ if( isset($passwordForDatabaseCreation) && $passwordForDatabaseCreation!='' &&
                 
                 mysql__drop_database($mysqli, $database_name_full);
 
-                if(is_array($warnings) && count($warnings) == 2 && $warnings['revert']){
+                if(!$_DEBUG_NOT_EMAIL){
+                    if(is_array($warnings) && count($warnings) == 2 && $warnings['revert']){
 
-                    sendEmail(HEURIST_MAIL_TO_BUG, 'Unable to create database root folder', $warnings['message']);
-                    if(HEURIST_MAIL_TO_BUG != HEURIST_MAIL_TO_ADMIN){
-                        sendEmail(HEURIST_MAIL_TO_ADMIN, 'Unable to create database root folder', $warnings['message']);
-                    }
-                }else{
-                    
-                    $sMsg = "Unable to create the sub directories within the database root directory,\nDatabase name: " 
-                            . $database_name    
-                            . ",\nServer url: " . HEURIST_BASE_URL . ",\nWarnings: " . implode(",\n", $warnings);
-                    $sTitle = 'Unable to create database sub directories';
+                        sendEmail(HEURIST_MAIL_TO_BUG, 'Unable to create database root folder', $warnings['message']);
+                        if(HEURIST_MAIL_TO_BUG != HEURIST_MAIL_TO_ADMIN){
+                            sendEmail(HEURIST_MAIL_TO_ADMIN, 'Unable to create database root folder', $warnings['message']);
+                        }
+                    }else{
+                        
+                        $sMsg = "Unable to create the sub directories within the database root directory,\nDatabase name: " 
+                                . $database_name    
+                                . ",\nServer url: " . HEURIST_BASE_URL . ",\nWarnings: " . implode(",\n", $warnings);
+                        $sTitle = 'Unable to create database sub directories';
 
-                    sendEmail(HEURIST_MAIL_TO_BUG, $sTitle, $sMsg);
-                            
-                    if(HEURIST_MAIL_TO_BUG != HEURIST_MAIL_TO_ADMIN){
-                        sendEmail(HEURIST_MAIL_TO_ADMIN,  $sTitle, $sMsg);
+                        sendEmail(HEURIST_MAIL_TO_BUG, $sTitle, $sMsg);
+                                
+                        if(HEURIST_MAIL_TO_BUG != HEURIST_MAIL_TO_ADMIN){
+                            sendEmail(HEURIST_MAIL_TO_ADMIN,  $sTitle, $sMsg);
+                        }
                     }
                 }
 
@@ -216,12 +221,15 @@ if( isset($passwordForDatabaseCreation) && $passwordForDatabaseCreation!='' &&
             $mysqli->query("insert into `Heurist_DBs_index`.`sysUsers` (sus_Email, sus_Database, sus_Role) "
                     .'values("'.$user_record['ugr_eMail'].'","'.$database_name_full.'","owner")');
 */            
-            sendEmail_NewDatabase($user_record, $database_name, null);
+            if(!$_DEBUG_NOT_EMAIL){
+                sendEmail_NewDatabase($user_record, $database_name, null);
+            }
             
             //add sample data
             if($dataInsertionSQLFile!=null && file_exists($dataInsertionSQLFile)){
-                if(!db_script($database_name_full, $dataInsertionSQLFile)){
-                    array_push($warnings, 'Error importing sample data from '.$dataInsertionSQLFile);                
+                $res = mysql__script($database_name_full, $dataInsertionSQLFile);
+                if($res!==true){
+                    array_push($warnings, 'Error importing sample data '.$res[1]);                
                 }
             }
 

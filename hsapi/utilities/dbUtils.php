@@ -35,8 +35,6 @@
 *   databaseEmpty    
 *   databaseClone
 * 
-* - db_script()  - see utils_db_load_script.php
-* 
 * - databaseRegister - set register ID to sysIdentification and rectype, detail and term defintions
 * - databaseNextRegisterID - get next registration ID from HEURIST_INDEX_DATABASE database
 */
@@ -169,7 +167,7 @@ class DbUtils {
         //switch to master index 
         $mysqli = self::$mysqli;
         
-        $connect_failure = (mysql__usedatabase($mysqli, HEURIST_INDEX_DATABASE)!=true);
+        $connect_failure = (mysql__usedatabase($mysqli, HEURIST_INDEX_DATABASE)!==true);
         if($connect_failure){
             return '0, Failed to connect to  Master Index database';
         }
@@ -387,7 +385,7 @@ class DbUtils {
         $mysqli = self::$mysqli;
         
         //switch to master index
-        $connect_failure = (mysql__usedatabase($mysqli, HEURIST_INDEX_DATABASE)!=true);
+        $connect_failure = (mysql__usedatabase($mysqli, HEURIST_INDEX_DATABASE)!==true);
         if($connect_failure){
             return 'Failed to connect to Master Index database';
         }
@@ -544,7 +542,7 @@ class DbUtils {
         $msg_prefix = "Unable to delete <b> $database_name </b>. ";
         
         if(defined('HEURIST_DBNAME') && $database_name!=HEURIST_DBNAME){ //switch to database
-           $connected = mysql__usedatabase($mysqli, $database_name_full);
+           $connected = (mysql__usedatabase($mysqli, $database_name_full)===true);
         }else{
            $connected = true;
         }
@@ -694,7 +692,7 @@ class DbUtils {
         $mysqli = self::$mysqli;
 
         if(defined('HEURIST_DBNAME') && $database_name!=HEURIST_DBNAME){ //switch to database
-           $connected = mysql__usedatabase($mysqli, $database_name_full);
+           $connected = (mysql__usedatabase($mysqli, $database_name_full)===true);
         }else{
            $connected = true;
         }
@@ -725,8 +723,21 @@ class DbUtils {
             }else{
                 //$dump_options = array('skip-triggers' => true,  'add-drop-trigger' => false);
             }
+
+            //0: use 3d party PDO mysqldump (default), 1:use internal routine, 2 - call mysql via shell
+            $dbScriptMode = defined('HEURIST_DB_MYSQL_DUMP_MODE')?HEURIST_DB_MYSQL_DUMP_MODE :0;
+
+            if($dbScriptMode==2 && !(defined('HEURIST_DB_MYSQLDUMP') && file_exists(HEURIST_DB_MYSQLDUMP))){
+                $dbScriptMode = 0;  
+            }else if($dbScriptMode==1){
+                $dbScriptMode = 0;
+            }
             
-            if(defined('HEURIST_DB_MYSQLDUMP')){ // use native mysqldump utility
+            $dbScriptMode = 0; //disable all others
+
+            
+            if($dbScriptMode==2)
+                    ){ // use mysql native mysqldump utility via shell
             
                 $tables = array();
                 $options = '';
@@ -780,20 +791,8 @@ class DbUtils {
                 }
                             
             
-            }else if(true){
-                
-                try{
-                    $pdo_dsn = 'mysql:host='.HEURIST_DBSERVER_NAME.';dbname='.$database_name_full.';charset=utf8mb4';
-                    $dump = new Mysqldump( $pdo_dsn, ADMIN_DBUSERNAME, ADMIN_DBUSERPSWD, $dump_options);
-                            
-                    $dump->start($database_dumpfile);
-                } catch (Exception $e) {
-                    self::$system->addError(HEURIST_SYSTEM_CONFIG, $e->getMessage());
-                    return false;
-                }            
-
-            }            
-            else{//NOT USED
+            }
+            else if($dbScriptMode==1){//NOT USED
                 //create dump manually - all tables without triggers
                 $file = fopen($database_dumpfile, "a+");
                 if(!$file){
@@ -870,7 +869,21 @@ class DbUtils {
                 
                 // Close file
                 fclose($file);
-            }
+            
+            }else{ //DEFAULT MODE - USE 3d Party php MySQLdump lib
+                
+                try{
+                    $pdo_dsn = 'mysql:host='.HEURIST_DBSERVER_NAME.';dbname='.$database_name_full.';charset=utf8mb4';
+                    $dump = new Mysqldump( $pdo_dsn, ADMIN_DBUSERNAME, ADMIN_DBUSERPSWD, $dump_options);
+                            
+                    $dump->start($database_dumpfile);
+                } catch (Exception $e) {
+                    self::$system->addError(HEURIST_SYSTEM_CONFIG, $e->getMessage());
+                    return false;
+                }            
+
+            }            
+            
             //$mysqli->close();
             
             chmod($database_dumpfile, 0777);    
@@ -995,7 +1008,7 @@ class DbUtils {
         }
         
         if($dumpfile==null){
-            $dumpfile = HEURIST_DIR."admin/setup/dbcreate/blankDBStructure.sql";
+            $dumpfile = 'blankDBStructure.sql';
         }
         
         $mysqli = self::$mysqli;
@@ -1003,13 +1016,17 @@ class DbUtils {
         $res = mysql__create_database($mysqli, $database_name_full);
         
         if (is_array($res)){
-            self::$system->addError($res[0], $res[1]); //can't create
+            self::$system->addErrorArr($res); //can't create
         }else
-        if($level<1 || execute_db_script(self::$system, $database_name_full, $dumpfile, 'Cannot create database tables')){
-
-            // echo_flush ('OK');
-            // echo_flush ("<p>Add Referential Constraints ");
-            if($level<2){
+        if($level<1){
+            return true; //create empty database
+            
+        }else{
+            $res = mysql__script($database_name_full, $dumpfile);
+            if($res!==true){
+                $res[1] = 'Cannot create database tables. '.$res[1];
+                self::$system->addErrorArr($res);
+            }else if($level<2){
                 return true;
             }else if(self::databaseCreateConstraintsAndTriggers($database_name)){
                 return true;    
@@ -1028,20 +1045,20 @@ class DbUtils {
 
         self::initialize();
         list($database_name_full, $database_name) = mysql__get_names( $database_name );
-
-        if(execute_db_script(self::$system, $database_name_full, 
-                HEURIST_DIR."admin/setup/dbcreate/addReferentialConstraints.sql",
-                'Cannot add referential constraints')){
-
-                if(execute_db_script(self::$system, $database_name_full, 
-                    HEURIST_DIR."admin/setup/dbcreate/addProceduresTriggers.sql",
-                    'Cannot create procedures and triggers')){
-
-                    // echo_flush ('OK');
-                    return true;
-                }
+        
+        $mysqli = self::$mysqli;
+        
+        $res = mysql__script($database_name_full, 'addReferentialConstraints.sql');
+        if($res===true){
+            $res = mysql__script($database_name_full, 'addProceduresTriggers.sql');
         }
-        return false;
+        
+        if($res!==true){
+            self::$system->addErrorArr($res);
+            $res = false;
+        }
+        
+        return $res;
         
     }
         
@@ -1152,7 +1169,7 @@ class DbUtils {
         $system  = self::$system;
         
         if($database_name!=HEURIST_DBNAME){ //switch to database
-           $connected = mysql__usedatabase($mysqli, $database_name_full);
+           $connected = (mysql__usedatabase($mysqli, $database_name_full)==true);
         }else{
            $connected = true;
         }
@@ -1227,7 +1244,7 @@ class DbUtils {
         $mysqli = self::$mysqli;
         $message = null;
         
-        if( !mysql__usedatabase($mysqli, $db_source) ){
+        if( mysql__usedatabase($mysqli, $db_source)!==true ){
             $message = 'Could not open source database '.$db_source;
             $res = false;
             if($verbose) {
@@ -1235,7 +1252,7 @@ class DbUtils {
             }
         }else{
             
-            if( !mysql__usedatabase($mysqli, $db_target) ){
+            if( mysql__usedatabase($mysqli, $db_target)!==true ){
                 $message = 'Could not open target database '.$db_target;
                 $res = false;
                 if($verbose) {

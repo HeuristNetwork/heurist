@@ -361,8 +361,6 @@ class UtilsImage {
             case 'image/png':
             case 'png':
             
-                $mem_limit = get_php_bytes('memory_limit');
-                
                 $imageInfo = getimagesize($filename); 
                 if(is_array($imageInfo)){
                     if(array_key_exists('channels', $imageInfo) && array_key_exists('bits', $imageInfo)){
@@ -370,13 +368,11 @@ class UtilsImage {
                     }else{ //width x height
                         $memoryNeeded = round($imageInfo[0] * $imageInfo[1]*3);  
                     } 
-                    $mem_usage = memory_get_usage();
-
-                    if ($mem_usage+$memoryNeeded > $mem_limit - 10485760){ // $mem_limit - 10485760){ // min($mem_limit, 41943040)){ //40M
                     
-                        $errorMsg = 'It requires '.((int)($memoryNeeded/1024/1024)).
-                            ' Mb to be resized.  Available '.((int)($mem_limit/1024/1024)).' Mb';
-                    }                
+                    $error_msg = is_memory_allowed( $memoryNeeded );
+                    if($error_msg!==true){
+                        $errorMsg = $error_msg;
+                    }
                 }
                 break;
             default:

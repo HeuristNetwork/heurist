@@ -85,9 +85,20 @@ if ($dbHost) {
 }
 //to use native mysqldump you have to specify file with mysql credentials
 //mysql_config_editor set --login-path=local --host=localhost --user={usename} --password
+
+//0: use 3d party PDO mysqldump (default), 1:use internal routine, 2 - call mysql via shell
+define('HEURIST_DB_MYSQL_SCRIPT_MODE', isset($dbScriptMode)?$dbScriptMode:0);
+define('HEURIST_DB_MYSQL_DUMP_MODE', isset($dbDumpMode)?$dbDumpMode:0);
+
+//path to mysqldump - it is required if $dbDumpMode==2
 if(isset($dbMySQLDump)){
-    define('HEURIST_DB_MYSQLDUMP', $dbMySQLDump);
+    define('HEURIST_DB_MYSQLDUMP', $dbMySQLDump);  
 }
+if(isset($dbMySQLpath)){
+    define('HEURIST_DB_MYSQLPATH', $dbMySQLpath);  
+}
+
+
 
 /*  @todo - redirect to system config error page
 

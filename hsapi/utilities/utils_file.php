@@ -273,6 +273,21 @@
         }//for
     }
 
+    //
+    //
+    //
+    function is_memory_allowed( $memoryNeeded ){
+        
+        $mem_limit = get_php_bytes('memory_limit');
+        $mem_usage = memory_get_usage();
+        
+        if ($mem_usage+$memoryNeeded > $mem_limit - 10485760){
+            return 'It requires '.((int)($memoryNeeded/1024/1024)).
+                            ' Mb.  Available '.((int)($mem_limit/1024/1024)).' Mb';           
+        }else{
+            return true;
+        }
+    }
     
     //
     // 

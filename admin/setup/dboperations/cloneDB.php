@@ -416,28 +416,6 @@ function cloneDatabase($targetdbname, $nodata=false, $templateddb, $user_id) {
          return false;
     }
     
-    /*
-    if(db_script($targetdbname_full, HEURIST_DIR."admin/setup/dbcreate/addReferentialConstraints.sql")){
-        echo_flush ('<p style="padding-left:20px">Referential constraints added OK</p>');
-    }else{
-        DbUtils::databaseDrop( false, $targetdbname_full, false);
-        print '<p><h4>Note: </h4>Cloning failed due to an SQL constraints problem (internal database inconsistency). Please '
-                .CONTACT_HEURIST_TEAM
-                .' and request a fix for this problem - it should be cleaned up even if you don\'t need to clone the database</p>'
-                .$errorScriptExecution;
-        return false;
-    }
-
-    echo_flush ("<p><b>Addition of Procedures and Triggers</b></p>");
-    if(db_script($targetdbname_full, HEURIST_DIR."admin/setup/dbcreate/addProceduresTriggers.sql")){
-        echo_flush ('<p style="padding-left:20px">Procedures and triggers added OK</p>');
-    }else{
-        DbUtils::databaseDrop( false, $targetdbname_full, false);
-        print $sHighLoadWarning.$errorScriptExecution;
-        return false;
-    } 
-    */   
-    
     // 5. remove registration info and assign originID for definitions
     $sourceRegID = mysql__select_value($mysqli, 'select sys_dbRegisteredID from sysIdentification where 1');
 

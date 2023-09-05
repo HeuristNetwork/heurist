@@ -214,8 +214,9 @@ foreach ($databases as $idx=>$db_name){
     //    continue;
     //}
     
-    if(!mysql__usedatabase($mysqli, $db_name)){
-        echo $system->getError()['message']."\n";
+    $res = mysql__usedatabase($mysqli, $db_name);
+    if($res!==true){
+        echo @$res[1]."\n";
         continue;
     }
 

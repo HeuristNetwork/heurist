@@ -177,9 +177,9 @@ error_log(print_r($_REQUEST, true));
             if($this->dbname_full)  //database is defined
             {
                 $res = mysql__usedatabase($this->mysqli, $this->dbname_full);
-                if ( is_array($res) ){
+                if ( $res!==true ){
                     //open of database failed
-                    $this->addError($res[0], $res[1]);
+                    $this->addErrorArr($res);
                     return false;
                 }
             }
@@ -980,6 +980,16 @@ error_log(print_r($_REQUEST, true));
         $this->send_email_on_error = $val;
     }
 
+    /**
+    * keep error message (for further use with getError)
+    */
+    public function addErrorArr($error) {
+        if(!is_array($error)){
+            $error = array(HEURIST_ERROR,$error);
+        }
+        return $this->addError($error[0],$error[1],@$error[2],@$error[3]);
+    }
+    
     /**
     * keep error message (for further use with getError)
     */
@@ -1958,7 +1968,7 @@ error_log('CANNOT UPDATE COOKIE '.$session_id);
             if(strpos(strtolower(HEURIST_INDEX_BASE_URL), strtolower(HEURIST_SERVER_URL))===0){ //same domain
        
                 $mysql_indexdb = mysql__connection(HEURIST_DBSERVER_NAME, ADMIN_DBUSERNAME, ADMIN_DBUSERPSWD, HEURIST_DB_PORT);
-                if ( !is_array($mysql_indexdb) && mysql__usedatabase($mysql_indexdb, HEURIST_INDEX_DATABASE)){
+                if ( !is_array($mysql_indexdb) && mysql__usedatabase($mysql_indexdb, HEURIST_INDEX_DATABASE)==true){
                     
                     $system_settings = getSysValues($mysql_indexdb);
                     if(is_array($system_settings)){

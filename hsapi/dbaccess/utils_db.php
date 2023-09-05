@@ -23,10 +23,12 @@
     *  mysql__exec_param_query
     *  mysql__delete
     *  mysql__begin_transaction
+    *  mysql__script - executes sql script file
     *
     *  getSysValues - Returns values from sysIdentification
     *  isFunctionExists - verifies that mysql stored function exists
     *  checkDatabaseFunctions - checks that all db functions reauired for H4 exists and recreates them if need it
+    *  checkDatabaseFunctionsForDuplications
     *  trim_item
     *  stripAccents
     *  prepareIds
@@ -35,6 +37,10 @@
     *  updateDatabaseToLatest - make changes in database structure according to the latest version
     *  recreateRecLinks
     *  recreateRecDetailsDateIndex
+    *  hasTable - Returns true if table exists in database
+    *  hasColumn - Returns true if column exists in given table
+    *  checkUserStatusColumn - Checks that sysUGrps.ugr_Enabled has proper set - @todo remove
+    * 
     * 
     * @package     Heurist academic knowledge management system
     * @link        https://HeuristNetwork.org
@@ -718,6 +724,117 @@
         }
         return $arr;
     }
+    
+    /**
+    * Execute mysql script file
+    * 
+    * @param mixed $database_name_full
+    * @param mixed $script_file
+    */
+    function mysql__script($database_name_full, $script_file) {
+        global $errorScriptExecution;
+        
+        $error = '';
+        $res = false;
+    
+        
+        //0: use 3d party PDO mysqldump (default), 1:use internal routine, 2 - call mysql via shell
+        $dbScriptMode = defined('HEURIST_DB_MYSQL_SCRIPT_MODE')?HEURIST_DB_MYSQL_SCRIPT_MODE :0;
+        
+        //all scripts are in admin/setup/dbcreate
+        if($script_file = basename($script_file)){
+            $script_file = HEURIST_DIR.'admin/setup/dbcreate/'.$script_file;
+        }
+        
+        if(!file_exists($script_file)){
+            $res = 'Unable to find sql script '.htmlspecialchars($script_file);
+        }else{
+            
+            if($dbScriptMode==2 && !(defined('HEURIST_DB_MYSQLPATH') && file_exists(HEURIST_DB_MYSQLPATH))){
+                $dbScriptMode = 0;  
+            }else if($dbScriptMode==1 && !is_memory_allowed(filesize($script_file))){
+                $dbScriptMode = 0;
+            }
+            
+            $dbScriptMode = 0; //disable all others
+            
+            if($dbScriptMode==2){
+                //shell script - server admin must specify "local" login-path with mysql_config_editor 
+                // mysql_config_editor set --login-path=local --host=127.0.0.1 --user=username --password
+            
+                $arr_out = array();
+                $res2 = null;
+                
+                $cmd = HEURIST_DB_MYSQLPATH." --login-path=local -D"
+                        .escapeshellarg($database_name_full)." < ".escapeshellarg($script_file). ' 2>&1';
+                        
+                $output2 = exec($cmd, $arr_out, $res2);
+
+                if ($res2 != 0 ) {
+                    $error = 'Error: '.print_r($arr_out, true);
+                    //echo($output2);
+                }else{
+                    $res = true;
+                }
+            }else if($dbScriptMode==1){
+                //internal routine
+                $script_content = file_get_contents($script_file);
+
+                //create separate connection
+                $mysqli2 = null;
+                $res2 = mysql__connection(HEURIST_DBSERVER_NAME, ADMIN_DBUSERNAME, ADMIN_DBUSERPSWD, HEURIST_DB_PORT);
+                if ( is_array($res2) ){
+                    $error = $res2[1];
+                }else{
+                    $mysqli2 = $res2;
+                }
+                
+                $connected = mysql__usedatabase($mysqli2, $database_name_full);
+                if($connected!==true){
+                    $error = $connected[1]; //error message
+                }
+                
+                if($error==''){
+                    // execute the SQL
+                    $res3 = mysqli_multi_query($mysqli2, $script_content);
+                    if (!$res3){
+                        $error = $mysqli2->error;
+                    }else{
+                        $res = true;
+                    }              
+                    //if (!$mysqli2->ping()) {
+                    //    $mysqli2=null;
+                    //}
+                }  
+                
+                //close connection
+                if($mysqli2!=null){
+                    $mysqli2->close();
+                }
+
+            }else{ //3d party function that uses PDO  - DEFAULT
+                
+                if(!function_exists('execute_db_script')){
+                        include(dirname(__FILE__).'/../utilities/utils_db_load_script.php'); // used to load procedures/triggers
+                }
+                if(db_script($database_name_full, $script_file, false)){
+                        $res = true;
+                }else{
+                        $error = $errorScriptExecution;
+                }
+            }
+            
+            if(!$res){
+                $res = 'Unable to execute script '.htmlspecialchars(basename($script_file)).' for database '.$database_name_full;
+            }
+        }
+        
+        if($res!==true){
+            $res = array(HEURIST_DB_ERROR, $res, $error);
+        }
+            
+        return $res;
+    }
 
     /**
     * Returns values from sysIdentification 
@@ -764,11 +881,11 @@
         }
         return $res;
     }
-
+    
 
     /**
     * This function is called on login
-    * Validate the presence of db functions. If one of functions does not exist - run admin/setup/dbcreate/addFunctions.sql
+    * Validate the presence of db functions. If one of functions does not exist - run admin/setup/dbcreate/addProceduresTriggers.sql
     *
     */
     function checkDatabaseFunctions($mysqli){
@@ -776,12 +893,7 @@
             $res = false;
 
             if(!isFunctionExists($mysqli, 'getEstDate')){ //getTemporalDateString need drop old functions
-                if(!function_exists('execute_db_script')){
-                    include(dirname(__FILE__).'/../utilities/utils_db_load_script.php'); // used to load procedures/triggers
-                }
-                if(db_script(HEURIST_DBNAME_FULL, dirname(__FILE__).'/../../admin/setup/dbcreate/addProceduresTriggers.sql', false)){
-                    $res = true;
-                }
+                $res = mysql__script(HEURIST_DBNAME_FULL, 'addProceduresTriggers.sql');
             }else{
                 $res = true;
             }
@@ -795,14 +907,7 @@
     function checkDatabaseFunctionsForDuplications($mysqli){
         
          if(!isFunctionExists($mysqli, 'NEW_LIPOSUCTION_255')){
-                if(!function_exists('execute_db_script')){
-                    include(dirname(__FILE__).'/../utilities/utils_db_load_script.php'); // used to load procedures/triggers
-                }
-                if(db_script(HEURIST_DBNAME_FULL, dirname(__FILE__).'/../../admin/setup/dbcreate/addFunctions.sql', false)){
-                    $res = true;
-                }else{
-                    $res = false;
-                }
+                $res = mysql__script(HEURIST_DBNAME_FULL, 'addFunctions.sql');
          }else{
                 $res = true;
          }
@@ -820,45 +925,37 @@
         
         $mysqli = $system->get_mysqli();
         
-        $isok = true;
+        $res = true;
         $is_table_exist = hasTable($mysqli, 'recLinks');    
             
         if($is_forced || !$is_table_exist){
                 //recreate cache
-                if(!function_exists('execute_db_script')){
-                    include(dirname(__FILE__).'/../utilities/utils_db_load_script.php'); // used to execute SQL script
-                }
-
                 if($is_table_exist){
                     
                     $query = "drop table IF EXISTS recLinks";
                     if (!$mysqli->query($query)) {
                         $system->addError(HEURIST_DB_ERROR, 'Cannot drop table cache table: ' . $mysqli->error);
-                        $isok = false;
+                        $res = false;
                     }
                     
                 }else{
                     //recreate triggers if recLinks does not exist
                 }
-                if($isok){
+                if($res){
                     
-                    if(!db_script(HEURIST_DBNAME_FULL, dirname(__FILE__).'/../../admin/setup/dbcreate/addProceduresTriggers.sql', false))
-                    {
-                        $system->addError(HEURIST_DB_ERROR, 'Cannot execute script addProceduresTriggers.sql');
-                        //$response = $system->getError();
-                        $isok = false;
-                    }
-                    if($isok){
-                        if(!db_script(HEURIST_DBNAME_FULL, dirname(__FILE__)."/sqlCreateRecLinks.sql"))
-                        {
-                            $system->addError(HEURIST_DB_ERROR, 'Cannot execute script sqlCreateRecLinks.sql');
-                            //$response = $system->getError();
-                            $isok = false;
-                        }
+                    $res = mysql__script(HEURIST_DBNAME_FULL, 'addProceduresTriggers.sql');
+                    if($res===true){
+                        $res = mysql__script(HEURIST_DBNAME_FULL, 'sqlCreateRecLinks.sql');
                     }
                 }
+                
+                if($res!==true){
+                    $system->addErrorArr($res);
+                    $res = false;
+                }
+
         }
-        return $isok;
+        return $res;
     }
     
     //
@@ -904,13 +1001,12 @@
         }else{
             $report[] = 'recDetailsDateIndex created';
             //recreate triggers
-            if(!function_exists('execute_db_script')){
-                include(dirname(__FILE__).'/../utilities/utils_db_load_script.php'); // used to load procedures/triggers
+            $res = mysql__script(HEURIST_DBNAME_FULL, 'addProceduresTriggers.sql');
+            if($res!==true){
+                $system->addErrorArr($res);
+                return false;
             }
-            if(!db_script($system->dbname_full(), dirname(__FILE__).'/../../admin/setup/dbcreate/addProceduresTriggers.sql', false)){
-                    $system->addError(HEURIST_DB_ERROR, $err_prefix.'Cannot recreate database triggers', $mysqli->error);
-                    return false;
-            }
+
             $report[] = 'Triggers to populate recDetailsDateIndex created';
             
             if($need_populate){
@@ -1605,6 +1701,11 @@ error_log('UPDATED '.$session_id.'  '.$value);
         return ($row_cnt>0);
     }
 
+    
+    //
+    // Checks that sysUGrps.ugr_Enabled has proper set ENUM('y','n','y_no_add','y_no_delete','y_no_add_delete')
+    // @todo - remove, it duplicates hasColumn
+    //
     function checkUserStatusColumn($system, $db_source = ''){
 
         if(empty($db_source) && defined(HEURIST_DBNAME_FULL)){
