@@ -152,7 +152,7 @@ if(true || $_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0
                             geodata = geodata.replace(/\s*\(\s*/g, '('); // remove space before+after left bracket
                             geodata = geodata.replace(/\s*\)/g, ')'); // remove space before right bracket
 
-                            if(geodata.indexOf('POINT') !== false){
+                            if(geodata.indexOf('POINT') >= 0){
                                 geodata = geodata.replace(/\,\s*/g, ' '); // replace comma | comma+space with a single space
                             }
 
@@ -202,7 +202,7 @@ if(true || $_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0
                         geodata = geodata.replace(/\s*\(\s*/g, '('); // remove space before+after left bracket
                         geodata = geodata.replace(/\s*\)/g, ')'); // remove space before right bracket
 
-                        if(geodata.indexOf('POINT') !== false){
+                        if(geodata.indexOf('POINT') >= 0){
                             geodata = geodata.replace(/\,\s*/g, ' '); // replace comma | comma+space with a single space
                         }
 
