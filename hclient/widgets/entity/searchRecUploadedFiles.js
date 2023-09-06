@@ -160,7 +160,7 @@ $.widget( "heurist.searchRecUploadedFiles", $.heurist.searchEntity, {
             this._on(this.element.find('#dwnld_refs'), { click: function(){ this._trigger("ondownload"); } });
 
             if(!window.hWin.HAPI4.is_admin()){
-                this.element.find('.admin-only').hide();
+                this.element.find('.admin-only').hide().off('click'); // hide and remove functions 
                 this.input_search_my.hide().prop('checked', true);
             }else{
                 this.element.find('.admin-only').show();
@@ -168,7 +168,7 @@ $.widget( "heurist.searchRecUploadedFiles", $.heurist.searchEntity, {
             }
 
         }else{
-            this.element.find('#dwnld_refs').hide();
+            this.element.find('.manager-only').hide().off('click'); // hide and remove functions
         }
 
         this.startSearch();   

@@ -80,17 +80,17 @@
         <div id="btn_edit_mimetypes" style="min-width:9em;z-index:2;float:right;margin-left:15px;"></div>
 
         <!--
-        <div id="btn_remove_unused" style="min-width:9em;z-index:2;float:right" class="admin-only"
+        <div id="btn_remove_unused" style="min-width:9em;z-index:2;float:right" class="admin-only manager-only"
             title="Deletes any files which are not referenced (through a File field or by embedding in a WYSIWYG text field)"></div>
         -->
         
-        <div id="btn_remove_dups" style="min-width:9em;z-index:2;float:right;margin: 0px 10px;" class="admin-only"
+        <div id="btn_remove_dups" style="min-width:9em;z-index:2;float:right;margin: 0px 10px;" class="admin-only manager-only"
             title="Removes extra identical copies of a file and connects all references to the remaining copy"></div>
         
-        <div id="btn_refresh_index" style="min-width:6em;z-index:2;float:right;" class="admin-only"
+        <div id="btn_refresh_index" style="min-width:6em;z-index:2;float:right;" class="admin-only manager-only"
             title="Indexes any files that have been uploaded but not indexed so that they appear in this view"></div>
 
-        <div id="btn_create_records" style="min-width:9em;z-index:2;float:right;" class="admin-only"
+        <div id="btn_create_records" style="min-width:9em;z-index:2;float:right;" class="admin-only manager-only"
             title="Removes extra identical copies of a file and connects all references to the remaining copy"></div>
 
         <label style="float: right;font-size: 12px;"><input type="checkbox" id="select_all" style="vertical-align: middle;"> select all</label>
@@ -110,6 +110,6 @@
     <div style="position:absolute;right:10px;bottom:3px;font-size:0.8em" class="heurist-helper1">
         <span class="local">Files which have been uploaded and stored in the database file space</span>
         <span class="external">Files which are referenced at an external URL rather than stored in the database</span>
-        <span id="dwnld_refs" style="display: inline-block;margin-left: 15px;"><a href="#" style="color: blue;">download CSV of file references</a></span>
+        <span id="dwnld_refs" class="manager-only" style="display: inline-block;margin-left: 15px;"><a href="#" style="color: blue;">download CSV of file references</a></span>
     </div>    
 </div>
