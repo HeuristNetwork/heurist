@@ -219,11 +219,11 @@ $.widget( "heurist.lookupNomisma", $.heurist.recordAction, {
         var sURL = '';
 
         if(search_type == 'mint'){
-            sURL = 'http://nomisma.org/apis/getMints?id=';
+            sURL = 'https://nomisma.org/apis/getMints?id=';
         }else if(search_type == 'hoard'){
-            sURL = 'http://nomisma.org/apis/getHoards?id=';
+            sURL = 'https://nomisma.org/apis/getHoards?id=';
         }else if(search_type == 'findspots'){
-            sURL = 'http://nomisma.org/apis/getFindspots?id=';
+            sURL = 'https://nomisma.org/apis/getFindspots?id=';
         }else{
             return;
         }

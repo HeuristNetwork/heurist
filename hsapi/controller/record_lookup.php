@@ -32,16 +32,16 @@
     // allowed and handled services, 'serviceType' => 'service/url base'
     $services_details = array(
         'tlcmap' => array(
-            'http://tlcmap.org/ghap/search?', 
-            'http://tlcmap.australiasoutheast.cloudapp.azure.com/ws/ghap/search?'
+            'https://tlcmap.org/ghap/search?', 
+            'https://tlcmap.australiasoutheast.cloudapp.azure.com/ws/ghap/search?'
         ), 
         'geonames' => array(
             'http://api.geonames.org/searchJSON?', 
             'http://api.geonames.org/postalCodeLookupJSON?'
         ), 
 
-        'bnflibrary_bib' => 'http://catalogue.bnf.fr/api/SRU?', 
-        'bnflibrary_aut' => 'http://catalogue.bnf.fr/api/SRU?', 
+        'bnflibrary_bib' => 'https://catalogue.bnf.fr/api/SRU?', 
+        'bnflibrary_aut' => 'https://catalogue.bnf.fr/api/SRU?', 
 
         'nomisma' => array(
             'http://nomisma.org/apis/', 
@@ -75,6 +75,8 @@
             $is_estc = $valid_service;
         }else if(!is_array($srv_details)){
             $valid_service = strpos($srv_details, $url) == 0;
+        }else if(in_array($url, $srv_details)){
+            $valid_service = true;
         }else{
             foreach ($srv_details as $srv_base) {
                 if($url == $srv_base || strpos($srv_base, $url) == 0){

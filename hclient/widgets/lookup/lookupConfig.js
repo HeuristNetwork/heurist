@@ -891,20 +891,18 @@ $.widget( "heurist.lookupConfig", {
             var request = {};
             switch (service_name) {
                 case 'bnfLibrary':
-                    url = 'http://catalogue.bnf.fr/api/SRU?version=1.2&operation=searchRetrieve&maximumRecords=10&startRecord=1&query='+encodeURIComponent('(bib.anywhere any "Vincent")');
+                    url = 'https://catalogue.bnf.fr/api/SRU?version=1.2&operation=searchRetrieve&maximumRecords=10&startRecord=1&query='+encodeURIComponent('(bib.anywhere any "Vincent")');
                     serviceType = 'bnflibrary_bib';
                     break;
                 case 'bnfLibraryAut':
-                    url = 'http://catalogue.bnf.fr/api/SRU?version=1.2&operation=searchRetrieve&recordSchema=unimarcxchange&maximumRecords=10&startRecord=1&query='+encodeURIComponent('(aut.anywhere any "Vincent")');
+                    url = 'https://catalogue.bnf.fr/api/SRU?version=1.2&operation=searchRetrieve&recordSchema=unimarcxchange&maximumRecords=10&startRecord=1&query='+encodeURIComponent('(aut.anywhere any "Vincent")');
                     serviceType = 'bnflibrary_aut';
                     break;
                 case 'nomisma':
                     this._runTestNomisma('getMints'); // run all nomisma services
-                    //url = 'http://nomisma.org/apis/getMints?id=denarius'; // getMints, getHoards, getFindspots
-                    //request['search_type'] = 'mint';
                     break;
                 case 'tlcmap':
-                    url = 'http://tlcmap.org/ghap/search?format=csv&paging=10&fuzzyname=London';
+                    url = 'https://tlcmap.org/ghap/search?format=csv&paging=10&fuzzyname=London';
                     break;
                 case 'geoName':
                     url = 'http://api.geonames.org/searchJSON?username='+accessToken_GeonamesAPI+'&maxRows=10&name=London';
@@ -1152,7 +1150,7 @@ $.widget( "heurist.lookupConfig", {
             return;
         }
 
-        let url = 'http://nomisma.org/apis/'+ type +'?id=denarius';
+        let url = 'https://nomisma.org/apis/'+ type +'?id=denarius';
 
         let request = {
             service: url,

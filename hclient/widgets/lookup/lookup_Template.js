@@ -474,7 +474,7 @@ $.widget( "heurist.lookup_Template", $.heurist.recordAction, {
         var that = this;
 
         // Construct base url for external request
-        var sURL = 'http://catalogue.bnf.fr/api/SRU?version=1.2&operation=searchRetrieve&recordSchema=intermarcxchange&maximumRecords=20&startRecord=1'; // base URL for BnF request
+        var sURL = 'https://catalogue.bnf.fr/api/SRU?version=1.2&operation=searchRetrieve&recordSchema=intermarcxchange&maximumRecords=20&startRecord=1'; // base URL for BnF request
 
         // Check that something has been entered
         if(this.element.find('#inpt_any').val()==''){

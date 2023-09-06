@@ -223,9 +223,9 @@ $.widget( "heurist.lookupTLC", $.heurist.recordAction, {
 
         // get base url
         if(this.options.mapping.service=='tlcmap'){
-            sURL = 'http://tlcmap.org/ghap/search?format=csv&paging=100';
+            sURL = 'https://tlcmap.org/ghap/search?format=csv&paging=100';
         }else if(this.options.mapping.service=='tlcmap_old'){
-            sURL = 'http://tlcmap.australiasoutheast.cloudapp.azure.com/ws/ghap/search?format=json&paging=100';  
+            sURL = 'https://tlcmap.australiasoutheast.cloudapp.azure.com/ws/ghap/search?format=json&paging=100';  
         }else{
             window.hWin.HEURIST4.msg.showMsgFlash('Name of service not defined...', 500);
             return;

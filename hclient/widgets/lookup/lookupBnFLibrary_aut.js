@@ -524,7 +524,7 @@ $.widget( "heurist.lookupBnFLibrary_aut", $.heurist.recordAction, {
         var maxRecords = $('#rec_limit').val(); // limit number of returned records
         maxRecords = (!maxRecords || maxRecords <= 0) ? 20 : maxRecords;
 
-        var sURL = 'http://catalogue.bnf.fr/api/SRU?version=1.2&operation=searchRetrieve&recordSchema=unimarcxchange&maximumRecords='+maxRecords+'&startRecord=1'; // base URL
+        var sURL = 'https://catalogue.bnf.fr/api/SRU?version=1.2&operation=searchRetrieve&recordSchema=unimarcxchange&maximumRecords='+maxRecords+'&startRecord=1'; // base URL
 
         var accesspointHasValue = this.element.find('#inpt_accesspoint').val() != '';
         var typeHasValue = this.element.find('#inpt_type').val() != '';

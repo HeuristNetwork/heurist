@@ -636,7 +636,7 @@ $.widget( "heurist.lookupMPCE", $.heurist.recordAction, {
      */
     lookupWorldCat: function(){
         var title = $($('#title_field')[0]).text();
-        var url = 'http://www.worldcat.org/search?q=ti%3A' + title;
+        var url = 'https://www.worldcat.org/search?q=ti%3A' + title;
 
         window.open(url, '_blank');
 
@@ -652,7 +652,7 @@ $.widget( "heurist.lookupMPCE", $.heurist.recordAction, {
      */
     lookupHathiTrust: function(){
         var title = $($('#title_field')[0]).text();
-        var url = 'http://catalog.hathitrust.org/Search/Advanced?adv=1&lookfor%5B%5D=' + title;
+        var url = 'https://catalog.hathitrust.org/Search/Advanced?adv=1&lookfor%5B%5D=' + title;
 
         window.open(url, '_blank');
 
@@ -668,7 +668,7 @@ $.widget( "heurist.lookupMPCE", $.heurist.recordAction, {
      */
     lookupKarlsruhePortal: function(){
         var title = $($('#title_field')[0]).text();
-        var url = 'http://kvk.bibliothek.kit.edu/index.html?lang=en&digitalOnly=0&embedFulltitle=0&newTab=0&TI=' + title;
+        var url = 'https://kvk.bibliothek.kit.edu/index.html?lang=en&digitalOnly=0&embedFulltitle=0&newTab=0&TI=' + title;
 
         window.open(url, '_blank');
 
