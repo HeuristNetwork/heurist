@@ -3495,31 +3495,33 @@ console.log('get defintion in OLD format!!!!');
         //draw itslef - draw children
         if(data.value){
             
-                if(isListOrColumn && $container.not('select').length > 0){ // LIST
+            if(isListOrColumn && $container.not('select').length > 0){ // LIST
 
-                    data.level = level;
-                    var f_link = this._createFacetLink( f_index, 
-                        data,
-                        display_mode );
-                    
+                data.level = level;
+                var f_link = this._createFacetLink( f_index, 
+                    data,
+                    display_mode );
+                
+                if(data.count > 0){ // check that facet link has been drawn
                     this.terms_drawn++;  //global
-                    
-                    var ditem = $("<div>").css({'display':(this.terms_drawn>this.options.params.viewport?'none':display_mode),
-                                    'padding':"0 0px 0 "+((level-1)*10)+"px"})
-                            .addClass('facet-item')        
-                            .append(f_link)
-                            .appendTo($container);
-                 
-                    if(this.terms_drawn>this.options.params.viewport){
-                         ditem.addClass('in-viewport');
-                    }                    
-                    
-                }else{
-                    // DROPDOWN
-                    this._createOption( f_index, level, {title:data.title, 
-                        value:data.value, 
-                        count:data.count} ).appendTo($container);
                 }
+                
+                var ditem = $("<div>").css({'display':(this.terms_drawn>this.options.params.viewport?'none':display_mode),
+                                'padding':"0 0px 0 "+((level-1)*10)+"px"})
+                        .addClass('facet-item')        
+                        .append(f_link)
+                        .appendTo($container);
+
+                if(this.terms_drawn>this.options.params.viewport){
+                        ditem.addClass('in-viewport');
+                }                    
+                
+            }else{
+                // DROPDOWN
+                this._createOption( f_index, level, {title:data.title, 
+                    value:data.value, 
+                    count:data.count} ).appendTo($container);
+            }
         }else if(window.hWin.HEURIST4.util.isArrayNotEmpty(data)){
 
             for(var i = 0; i < data.length; i++){
