@@ -1,0 +1,87 @@
+<!--
+* lookupOpentheso.html: used by lookupOpentheso.js
+*
+* @author      Brandon McKay   <blmckay13@gmail.com>
+* @copyright   (C) 2005-2023 University of Sydney
+* @link        https://HeuristNetwork.org
+* @version     6
+* @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
+* @package     Heurist academic knowledge management system
+-->
+
+<div id="tabs-cont">
+
+    <ul>
+        <li><a href="#frm-search">Search</a></li>
+        <li><a href="#frm-results">Results</a></li>
+    </ul>
+
+    <!-- Search Container -->
+    <div id="frm-search" style="overflow-y: auto; padding: 1em 0 !important;">
+
+        <fieldset style="display:inline-block;">
+
+            <!-- Service & Thesaurus -->
+            <div>
+
+                <div class="header required" style="text-align: right;">
+                    <label for="inpt_server">Opentheso Server:</label>
+                </div>
+
+                <select id="inpt_server">
+
+                </select>
+
+                <div class="header required" style="text-align: right;">
+                    <label for="inpt_theso">Thesaurus:</label>
+                </div>
+
+                <select id="inpt_theso">
+
+                </select>
+
+            </div>
+
+            <!-- Search -->
+            <div>
+
+                <div class="header required" style="text-align: right;">
+                    <label for="inpt_search">Search:</label>
+                </div>
+
+                <input id="inpt_search" class="text ui-widget-content ui-corner-all" style="min-width:35em;margin-bottom: 7px;"/>
+
+            </div>
+
+            <!-- Group & Language -->
+            <div>
+
+                <div class="header recommended" style="text-align: right;">
+                    <label for="inpt_lang">Language:</label>
+                </div>
+
+                <select id="inpt_lang">
+
+                </select>
+
+                <div class="header optional" style="text-align: right;">
+                    <label for="inpt_group">Group:</label>
+                </div>
+
+                <input id="inpt_group" class="text ui-widget-content ui-corner-all" style="max-width:30em;margin-bottom: 7px;"/>
+
+            </div>
+
+        </fieldset>
+
+        <div style="margin: 10px 0 0 10px;" id="btn_container">
+            <button id="btnStartSearch">Search</button>
+        </div>
+    </div>
+
+    <!-- Result List Container -->
+    <div id="frm-results" style="display: none;">
+        <div class="div_result ent_content_full" style="height: 600px;"></div>
+    </div>
+
+</div>

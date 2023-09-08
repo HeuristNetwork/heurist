@@ -226,5 +226,22 @@
         "authorId": "",
         "fullName": ""
     }
+},
+{
+    "service": "opentheso",
+    "rty_ID": "",
+    "label": "Opentheso Lookup",
+    "dialog": "lookupOpentheso",
+    "description": "Use Opentheso services hosted on external servers to retrieve thesaurus and create new terms",
+    "fields": {
+        "term_field": ""
+    },
+    "options": {
+        "create_type": "enum",
+        "label": "",
+        "desc": "",
+        "code": "",
+        "uri": ""
+    }
 }
 ]
