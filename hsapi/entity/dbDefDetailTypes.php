@@ -268,7 +268,7 @@ class DbDefDetailTypes extends DbEntityBase
                     $this->records[$idx]['dty_IDInOriginatingDB'] = 0;
                 }
             }else{
-                //if enum or relmarker prevents vocabulary changing if there are records with this fieldtype
+                //if enum or relmarker prevents vocabulary changing if there are records that use terms not in the new vocabulary
                 if(@$this->records[$idx]['dty_Type']=='enum' || @$this->records[$idx]['dty_Type']=='relmarker'){
                     
                     //get current vocabulary
@@ -278,6 +278,9 @@ class DbDefDetailTypes extends DbEntityBase
                     if($curr_vocab_id>0 && $curr_vocab_id!=$this->records[$idx]['dty_JsonTermIDTree']){
                         //is going to be changed
                         $children = getTermChildrenAll($mysqli, $curr_vocab_id, true);
+                        $new_children = getTermChildrenAll($mysqli, $this->records[$idx]['dty_JsonTermIDTree'], true);
+
+                        $children = array_filter($children, function($id) use ($new_children) { return !in_array($id, $new_children); });
 
                         if(count($children)>0){
                             if(count($children)>1){

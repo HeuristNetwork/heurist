@@ -1821,7 +1821,7 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
                 sMsg += '<p><a href="'+window.hWin.HAPI4.baseURL+'?db='
                             + window.hWin.HAPI4.database+'&q=ids:' + res['records'].join(',')
                             + '&nometadatadisplay=true" target="_blank">'
-                    +'List of '+res.reccount+' records which use this vocabulary</a></p>';
+                    +'List of '+res.reccount+' records which use terms missing in the new vocabulary</a></p>';
                 
                 window.hWin.HEURIST4.msg.showMsgDlg(sMsg, null, {title:'Vocabulary in use'},
                     {default_palette_class:this.options.default_palette_class});
