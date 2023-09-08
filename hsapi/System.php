@@ -1427,7 +1427,8 @@ error_log(print_r($_REQUEST, true));
             
             $is_https = (@$_SERVER['HTTPS']!=null && $_SERVER['HTTPS']!='');
             session_name('heurist-sessionid'); //set session name
-            //session_set_cookie_params ( 0, '/', '', $is_https);
+            //update cookie - to keep it alive for next 30 days
+            session_set_cookie_params(time() + 30*24*60*60);
             session_cache_limiter('none');
 
 //workaround for iframe - does not work            
@@ -1450,11 +1451,11 @@ error_log(print_r($_REQUEST, true));
             
             if (@$_SESSION[$this->dbname_full]['keepalive']) {
                 //update cookie - to keep it alive for next 30 days
-                $time = time() + 30*24*60*60;
+                $lifetime = time() + 30*24*60*60;
                 $session_id = $cookie_session_id;
                 if (strnatcmp(phpversion(), '7.3') >= 0) {
                     $cres = setcookie('heurist-sessionid', $session_id, [
-                        'expires' => $time,
+                        'expires' => $lifetime,
                         'path' => '/',
                         'domain' => '',
                         'secure' => $is_https,
@@ -1463,7 +1464,7 @@ error_log(print_r($_REQUEST, true));
                     ]);
                 }else{
                     //workaround: header("Set-Cookie: key=value; path=/; domain=example.org; HttpOnly; SameSite=Lax");
-                    $cres = setcookie('heurist-sessionid', $session_id, $time, '/', '', $is_https );    
+                    $cres = setcookie('heurist-sessionid', $session_id, $lifetime, '/', '', $is_https );    
                 }
                 
                 
@@ -1576,21 +1577,6 @@ error_log(print_r($_REQUEST, true));
                 $_SESSION[$this->dbname_full]['ugr_Preferences'] = user_getPreferences( $this );
             }
             $this->current_User['ugr_Preferences'] = $_SESSION[$this->dbname_full]['ugr_Preferences'];
-
-            /*
-//if(@$_SESSION[$this->dbname_full]['keepalive'])            
-//error_log('update session '.@$_SESSION[$this->dbname_full]['keepalive']);                
-            if (@$_SESSION[$this->dbname_full]['keepalive']) {
-                //update cookie - to keep it alive for next 30 days
-                $is_https = (@$_SERVER['HTTPS']!=null && $_SERVER['HTTPS']!='');
-                $time = time() + 30*24*60*60;
-                $session_id = session_id();
-                $cres = setcookie('heurist-sessionid', $session_id, $time, '/', '', $is_https );  - REM
-if($cres==false){                    
-error_log('CANNOT UPDATE COOKIE '.$session_id);                
-}
-            }*/
-            
         }
         return $islogged;
     }
@@ -1735,11 +1721,11 @@ error_log('CANNOT UPDATE COOKIE '.$session_id);
         
         $time = 0;
         if($session_type == 'public'){
-            $time = 0;
+            $lifetime = 0;
         }else if($session_type == 'shared'){
-            $time = time() + 24*60*60;     //day
+            $lifetime = time() + 24*60*60;     //day
         }else if ($session_type == 'remember') {
-            $time = time() + 30*24*60*60;  //30 days
+            $lifetime = time() + 30*24*60*60;  //30 days
             $_SESSION[$this->dbname_full]['keepalive'] = true; //refresh time on next entry
         }
         
@@ -1751,7 +1737,7 @@ error_log('CANNOT UPDATE COOKIE '.$session_id);
         
         if (strnatcmp(phpversion(), '7.3') >= 0) {
             $cres = setcookie('heurist-sessionid', $session_id, [
-                'expires' => $time,
+                'expires' => $lifetime,
                 'path' => '/',
                 'domain' => '',
                 'secure' => $is_https,
@@ -1759,7 +1745,7 @@ error_log('CANNOT UPDATE COOKIE '.$session_id);
                 'samesite' => 'Lax'
             ]);
         }else{
-            $cres = setcookie('heurist-sessionid', $session_id, $time, '/', '', $is_https );  //login
+            $cres = setcookie('heurist-sessionid', $session_id, $lifetime, '/', '', $is_https );  //login
         }
 
 //if($time==0)                    
