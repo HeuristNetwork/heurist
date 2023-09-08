@@ -577,7 +577,7 @@ function editCMS2(website_document){
         }
         var opts = {};
         if(page_cache[options.record_id]){
-            opts = {page_name:page_cache[options.record_id][DT_NAME]};  
+            opts = {page_name:window.hWin.HAPI4.getTranslation(page_cache[options.record_id][DT_NAME], current_language)};  
             //call global function from websiteScriptAndStyles
             window.hWin.assignPageTitle(options.record_id)
         } 
