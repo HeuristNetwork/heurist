@@ -556,19 +556,19 @@ class DbDefDetailTypes extends DbEntityBase
                     }else{
                         $ret[$idx] = '';
 
-                        if(!array_key_exists($this->data['fields'][$idx], 'dty_HelpText')){ // add help text
+                        if(!array_key_exists('dty_HelpText', $this->data['fields'][$idx])){ // add help text
                             $this->data['fields'][$idx]['dty_HelpText'] = 'Please provide a short explanation for the user ...';
                         }
-                        if(!array_key_exists($this->data['fields'][$idx], 'dty_Status')){ // add status
+                        if(!array_key_exists('dty_Status', $this->data['fields'][$idx])){ // add status
                             $this->data['fields'][$idx]['dty_Status'] = 'open';
                         }
-                        if(!array_key_exists($this->data['fields'][$idx], 'dty_ShowInLists')){ // add show in list
+                        if(!array_key_exists('dty_ShowInLists', $this->data['fields'][$idx])){ // add show in list
                             $this->data['fields'][$idx]['dty_ShowInLists'] = '1';
                         }
-                        if(!array_key_exists($this->data['fields'][$idx], 'dty_NonOwnerVisibility')){ // add field visibility
+                        if(!array_key_exists('dty_NonOwnerVisibility', $this->data['fields'][$idx])){ // add field visibility
                             $this->data['fields'][$idx]['dty_NonOwnerVisibility'] = 'viewable';
                         }
-                        if(!array_key_exists($this->data['fields'][$idx], 'dty_DetailTypeGroupID') && isset($this->data['dtg_ID'])){ // add detail type group 
+                        if(!array_key_exists('dty_DetailTypeGroupID', $this->data['fields'][$idx]) && isset($this->data['dtg_ID'])){ // add detail type group 
                             $this->data['fields'][$idx]['dty_DetailTypeGroupID'] = $this->data['dtg_ID'];
                         }
                     }
