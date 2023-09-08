@@ -5449,11 +5449,11 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
 
                     if(type == 'resource' || type == 'enum'){
 
-                        var completed = []; // completed recpointers/terms
+                        let completed = []; // completed recpointers/terms
 
                         if(window.hWin.HEURIST4.util.isArray(newval)){
 
-                            for(var i = 0; i < newval.length; i++){
+                            for(let i = 0; i < newval.length; i++){
 
                                 if(Number.isInteger(+newval[i])){ // is fine
                                     completed.push(newval[i]);
@@ -5465,12 +5465,13 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
                                     that.resource_values.push({fld_id: dt_id, values: newval[i]});
                                 }else{
 
-                                    var vocab_id = $Db.dty(dt_id, 'dty_JsonTermIDTree');
+                                    let vocab_id = $Db.dty(dt_id, 'dty_JsonTermIDTree');
 
                                     if(window.hWin.HEURIST4.util.isArray(newval[i])){
-                                        for(var j = 0; j < newval[i].length; j++){
+                                        for(let j = 0; j < newval[i].length; j++){
 
-                                            var trm_id = $Db.getTermByLabel(vocab_id, newval[i][j]);
+                                            let label = window.hWin.HEURIST4.util.isObject(newval[i][j]) ? newval[i][j]['label'] : newval[i][j];
+                                            let trm_id = $Db.getTermByLabel(vocab_id, label);
 
                                             if(trm_id == null){
                                                 that.term_values.push([dt_id, newval[i][j]]);
@@ -5479,7 +5480,9 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
                                             }
                                         }
                                     }else{
-                                        var trm_id = $Db.getTermByLabel(vocab_id, newval[i]);
+
+                                        let label = window.hWin.HEURIST4.util.isObject(newval[i]) ? newval[i]['label'] : newval[i];
+                                        let trm_id = $Db.getTermByLabel(vocab_id, label);
 
                                         if(trm_id == null){
                                             that.term_values.push([dt_id, newval[i]]);
@@ -5499,8 +5502,9 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
                                     that.resource_values.push({fld_id: dt_id, values: newval});
                                 }else{
                                     
-                                    var vocab_id = $Db.dty(dt_id, 'dty_JsonTermIDTree');
-                                    var trm_id = $Db.getTermByLabel(vocab_id, newval);
+                                    let vocab_id = $Db.dty(dt_id, 'dty_JsonTermIDTree');
+                                    let label = window.hWin.HEURIST4.util.isObject(newval) ? newval['label'] : newval;
+                                    let trm_id = $Db.getTermByLabel(vocab_id, label);
 
                                     if(trm_id == null){
                                         that.term_values.push([dt_id, newval]);
@@ -5651,9 +5655,24 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
 
             return;
         }
-        var cur_term = this.term_values.shift(); // 0 => dt_id, 1 => term label
-        var vocab_id = $Db.dty(cur_term[0], 'dty_JsonTermIDTree');
-        var field_name = $Db.rst(this._currentEditRecTypeID, cur_term[0], 'rst_DisplayName');
+
+        let cur_term = this.term_values.shift(); // 0 => dt_id, 1 => term label/term details
+
+        let trm_details = cur_term[1];
+        if(!window.hWin.HEURIST4.util.isObject(trm_details)){
+            trm_details = {
+                'label': cur_term[1],
+                'desc': '',
+                'code': '',
+                'uri': '',
+                'translations': []
+            };
+        }
+
+        let org_label = trm_details['label'];
+
+        let vocab_id = $Db.dty(cur_term[0], 'dty_JsonTermIDTree');
+        let field_name = $Db.rst(this._currentEditRecTypeID, cur_term[0], 'rst_DisplayName');
 
         // add current field (dt_id) to new_terms, and retain any existing values
         if(!new_terms.hasOwnProperty(cur_term[0])){
@@ -5664,61 +5683,83 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
         var $dlg;
 
         // Term Dlg - Content
-        var msg = 'You can create a new term for the <strong>' + field_name + '</strong> field below.<br><br>'
-                + 'New Term: <input type="text" id="new_term_label" value="'+ cur_term[1] +'"> <br><br>'
-                + 'Please correct the term above, as required, before clicking Insert term, or <br><br>'
-                + 'Select an existing term: <select id="existing_term"></select>';
+        let msg = 'You can create a new term for the <strong>' + field_name + '</strong> field below.<br><br>';
+
+        msg += 'New term details: <fieldset>'
+            + '<div>'
+                + '<div class="header"><label>Label: </label></div> <input type="text" id="new_term_label" value="'+ org_label +'">'
+            + '</div><br>'
+            + '<div>'
+                + '<div class="header" style="vertical-align: text-top;"><label>Description: </label></div> <textarea cols="50" rows="2" id="new_term_desc">'+ trm_details['desc'] +'</textarea>'
+            + '</div><br>'
+            + '<div>'
+                + '<div class="header"><label>Code: </label></div> <input type="text" id="new_term_code" value="'+ trm_details['code'] +'">'
+            + '</div><br>'
+            + '<div>'
+                + '<div class="header"><label>Scemantic URI: </label></div> <input type="text" id="new_term_uri" value="'+ trm_details['uri'] +'">'
+            + '</div>'
+        + '</fieldset>';
+
+        if(trm_details['translations'] && Object.keys(trm_details['translations']).length > 0){
+            msg += '<br><label>Import label translations from source? <input type="checkbox" id="import_translations" checked="checked"></label><br>';
+        }
+
+        msg += '<br>Please correct the above details, as required, before clicking Insert term, or <br><br>'
+            + 'Select an existing term: <select id="existing_term"></select>';
 
         // Term Dlg - Button
         var btn = {};
         btn['Insert term'] = function(){
 
-            var new_label = $dlg.find('input#new_term_label').val();
-            var term_Ids = $Db.trm_TreeData(vocab_id, 'set');
-            var savedTerm = false;
+            let new_label = $dlg.find('input#new_term_label').val();
+            let trm_ID = $Db.getTermByLabel(vocab_id, new_label);
 
-            // Check if entered term exists within vocab
-            for(var i=0; i<term_Ids.length; i++){
+            if(trm_ID > 0){
 
-                var trm_Label = $Db.trm(term_Ids[i], 'trm_Label').toLowerCase();
+                new_terms[cur_term[0]].push(trm_ID);
+                $dlg.dialog('close');
 
-                if(new_label.toLowerCase() == trm_Label){
+                return;
+            }
 
-                    new_terms[cur_term[0]].push(term_Ids[i]);
+            let new_record = {
+                'trm_ID': -1,
+                'trm_ParentTermID': vocab_id
+            };
+            let labels = new_label;
+
+            if(Object.keys(trm_details['translations']).length > 0 && $dlg.find('#import_translations').is(':checked')){
+                labels = [labels, ...Object.values(trm_details['translations'])];
+            }
+
+            new_record['trm_Label'] = labels;
+
+            new_record['trm_Description'] =  $dlg.find('#new_term_desc').text();
+            new_record['trm_Code'] =  $dlg.find('#new_term_code').val();
+            new_record['trm_URI'] =  $dlg.find('#new_term_uri').val();
+
+            let request = {
+                'a': 'save',
+                'entity': 'defTerms',
+                'request_id': window.hWin.HEURIST4.util.random(),
+                'fields': new_record,
+                'isfull': 0
+            };
+
+            window.hWin.HAPI4.EntityMgr.doRequest(request, function(response){
+
+                if(response.status == window.hWin.ResponseStatus.OK){
+
+                    new_terms[cur_term[0]].push(response.data[0]); // response.data[0] == new term id
 
                     $dlg.dialog('close');
 
-                    break;
+                    new_terms['refresh'] = true;
+                    that.processTermFields(completed_fields, new_terms);
+                }else{
+                    window.hWin.HEURIST4.msg.showMsgErr(response);
                 }
-            }
-
-            if(savedTerm){
-                that.processTermFields(completed_fields, new_terms);
-            }else{ // Create new term
-
-                var request = {
-                    'a': 'save',
-                    'entity': 'defTerms',
-                    'request_id': window.hWin.HEURIST4.util.random(),
-                    'fields': {'trm_ID': -1, 'trm_Label': new_label, 'trm_ParentTermID': vocab_id},
-                    'isfull': 0
-                };
-
-                window.hWin.HAPI4.EntityMgr.doRequest(request, function(response){
-
-                    if(response.status == window.hWin.ResponseStatus.OK){
-
-                        new_terms[cur_term[0]].push(response.data[0]); // response.data[0] == new term id
-
-                        $dlg.dialog('close');
-
-                        new_terms['refresh'] = true;
-                        that.processTermFields(completed_fields, new_terms);
-                    }else{
-                        window.hWin.HEURIST4.msg.showMsgErr(response);
-                    }
-                });
-            }
+            });
         };
         btn['Skip'] = function(){
 
@@ -5731,6 +5772,11 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
         // Create dlg
         $dlg = window.hWin.HEURIST4.msg.showMsgDlg(msg, btn, {title: 'Unknown term', yes: 'Insert term', no: 'Skip'}, {default_palette_class: 'ui-heurist-design', dialogId: 'handle-terms'});
 
+        $dlg.find('.header').css({
+            width: '85px', 
+            'min-width': '85px'
+        });
+
         window.hWin.HEURIST4.ui.createTermSelect($dlg.find('#existing_term')[0], {vocab_id: vocab_id, topOptions: 'select a term...', useHtmlSelect: false, eventHandlers: {
             onSelectMenu: function(){
                 let $sel = $dlg.find('#existing_term');
@@ -5739,7 +5785,7 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
 
                     let trm_label = $Db.trm($sel.val(), 'trm_Label');
 
-                    window.hWin.HEURIST4.msg.showMsgDlg('Are you sure you wish to use '+ trm_label +' in place of '+ cur_term[1] +'?', function(){
+                    window.hWin.HEURIST4.msg.showMsgDlg('Are you sure you wish to use '+ trm_label +' in place of '+ org_label +'?', function(){
                         new_terms[cur_term[0]].push($sel.val());
                         $dlg.dialog('close');
                         that.processTermFields(completed_fields, new_terms);

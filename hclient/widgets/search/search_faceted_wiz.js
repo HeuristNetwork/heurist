@@ -1676,6 +1676,10 @@ $.widget( "heurist.search_faceted_wiz", {
             }
         }
 
+        if(!(this.options.params.viewport>0)){ // set default viewport
+            this.options.params.viewport = 5;
+        }
+
         if(len>0 || facets.length>0){
             
             var order_for_new  = old_facets?old_facets.length:0;

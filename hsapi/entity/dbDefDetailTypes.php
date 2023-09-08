@@ -268,7 +268,7 @@ class DbDefDetailTypes extends DbEntityBase
                     $this->records[$idx]['dty_IDInOriginatingDB'] = 0;
                 }
             }else{
-                //if enum or relmarker prevents vocabulary changing if there are records with this fieldtype
+                //if enum or relmarker prevents vocabulary changing if there are records that use terms not in the new vocabulary
                 if(@$this->records[$idx]['dty_Type']=='enum' || @$this->records[$idx]['dty_Type']=='relmarker'){
                     
                     //get current vocabulary
@@ -278,6 +278,9 @@ class DbDefDetailTypes extends DbEntityBase
                     if($curr_vocab_id>0 && $curr_vocab_id!=$this->records[$idx]['dty_JsonTermIDTree']){
                         //is going to be changed
                         $children = getTermChildrenAll($mysqli, $curr_vocab_id, true);
+                        $new_children = getTermChildrenAll($mysqli, $this->records[$idx]['dty_JsonTermIDTree'], true);
+
+                        $children = array_filter($children, function($id) use ($new_children) { return !in_array($id, $new_children); });
 
                         if(count($children)>0){
                             if(count($children)>1){
@@ -553,19 +556,19 @@ class DbDefDetailTypes extends DbEntityBase
                     }else{
                         $ret[$idx] = '';
 
-                        if(!array_key_exists($this->data['fields'][$idx], 'dty_HelpText')){ // add help text
+                        if(!array_key_exists('dty_HelpText', $this->data['fields'][$idx])){ // add help text
                             $this->data['fields'][$idx]['dty_HelpText'] = 'Please provide a short explanation for the user ...';
                         }
-                        if(!array_key_exists($this->data['fields'][$idx], 'dty_Status')){ // add status
+                        if(!array_key_exists('dty_Status', $this->data['fields'][$idx])){ // add status
                             $this->data['fields'][$idx]['dty_Status'] = 'open';
                         }
-                        if(!array_key_exists($this->data['fields'][$idx], 'dty_ShowInLists')){ // add show in list
+                        if(!array_key_exists('dty_ShowInLists', $this->data['fields'][$idx])){ // add show in list
                             $this->data['fields'][$idx]['dty_ShowInLists'] = '1';
                         }
-                        if(!array_key_exists($this->data['fields'][$idx], 'dty_NonOwnerVisibility')){ // add field visibility
+                        if(!array_key_exists('dty_NonOwnerVisibility', $this->data['fields'][$idx])){ // add field visibility
                             $this->data['fields'][$idx]['dty_NonOwnerVisibility'] = 'viewable';
                         }
-                        if(!array_key_exists($this->data['fields'][$idx], 'dty_DetailTypeGroupID') && isset($this->data['dtg_ID'])){ // add detail type group 
+                        if(!array_key_exists('dty_DetailTypeGroupID', $this->data['fields'][$idx]) && isset($this->data['dtg_ID'])){ // add detail type group 
                             $this->data['fields'][$idx]['dty_DetailTypeGroupID'] = $this->data['dtg_ID'];
                         }
                     }
