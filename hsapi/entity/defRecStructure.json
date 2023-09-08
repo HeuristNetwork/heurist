@@ -378,10 +378,10 @@
                             "rst_RequirementType":"optional",
                             "rst_MaxValues":1,
                             "rst_FieldConfig":[
-                                {"key":"public", "title":"visible to all"},
-                                {"key":"viewable", "title":"visible to logged in"},
-                                {"key":"pending", "title":"per record visibility"},
-                                {"key":"hidden", "title":"visible to owner only "}]
+                                {"key":"public", "title":"visible to anyone who can view record"},
+                                {"key":"pending", "title":"visible to anyone + hide-from-public checkbox"},
+                                {"key":"viewable", "title":"visible to logged in users only"},
+                                {"key":"hidden", "title":"visible to owner/owner group only"}]
                         }
                     },
                     {
