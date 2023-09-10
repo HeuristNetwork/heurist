@@ -193,6 +193,10 @@ $.widget( "heurist.mapping", {
     main_popup: null,
     mapPopUpTemplate: null,  //name of popup template (from map params)
     
+    //addition and edit object on map
+    // full - full edit mode
+    // image - 
+    // filter - to define filter extent 
     currentDrawMode:'none',  //full,image,filter 
     
     //
@@ -537,6 +541,7 @@ $.widget( "heurist.mapping", {
     getBaseMapFilter: function(){
         return this.basemaplayer_filter;
     },
+
     
     //
     // loads as a base map Heurist Image Layer record (called from updateLayout)
@@ -557,7 +562,7 @@ $.widget( "heurist.mapping", {
             var id = that.basemap_layer.getNativeId();
             
             if(that.all_layers[id]){
-                
+
                 cnt = 50;
                 var bounds2 = that.basemap_layer.getBounds();
                 that.basemap_layer_maxzoom =  that.basemap_layer.getMaxZoomLevel();
@@ -617,6 +622,9 @@ $.widget( "heurist.mapping", {
                 this.nativemap.setMinZoom(0);
                 this.nativemap.setMaxZoom(7); //@todo - take from 
                 this.nativemap.worldCopyJump = true;
+                this.nativemap.options.maxBounds = null;
+                this.nativemap.options.maxBoundsViscosity = 0;
+                
                 this.is_crs_simple = true;
                 
                 $(this.map_scale._container).hide();
@@ -663,9 +671,17 @@ $.widget( "heurist.mapping", {
 
             if(provider['name']!=='None'){
 
+                var bm_opts = provider['options'] || {};
+                
+                //it prevents continous/repeatative world
+                let is_no_wrap = window.hWin.HAPI4.get_prefs('map_no_wrap');         
+                if(is_no_wrap==1){
+                    bm_opts.noWrap = true; 
+                }
+                
                 try{ // use leaflet-provider
 
-                    this.basemaplayer = L.tileLayer.provider(provider['name'], provider['options'] || {})
+                    this.basemaplayer = L.tileLayer.provider(provider['name'], bm_opts)
                         .addTo(this.nativemap);
 
                 }catch(e){
@@ -673,7 +689,8 @@ $.widget( "heurist.mapping", {
                     try{ // attempt without leaflet-provider
 
                         if(provider && !window.hWin.HEURIST4.util.isempty(provider['url'])){
-                            this.basemaplayer = L.tileLayer(provider['url'], provider['options']).addTo(this.nativemap);
+                            
+                            this.basemaplayer = L.tileLayer(provider['url'], bm_opts).addTo(this.nativemap);
                         }else{
                             throw e;
                         }
@@ -691,8 +708,18 @@ $.widget( "heurist.mapping", {
                           //+ 'Error thrown: ' + e + '<br>'
                         return;
                     }
-
                 }
+                
+                //to avoid pan out of extent
+                if(is_no_wrap){
+                    var sw = L.latLng(-100, -190),
+                        ne = L.latLng(100, 190);
+                    var bbox2 = L.latLngBounds(sw, ne);             
+                    
+                    this.nativemap.options.maxBounds = bbox2;
+                    this.nativemap.options.maxBoundsViscosity = 1;
+                }
+                
 
                 this.basemaplayer.bringToBack(); // ensure basemap is below all map documents
 
