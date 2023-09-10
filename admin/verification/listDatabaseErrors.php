@@ -35,6 +35,10 @@ require_once(dirname(__FILE__).'/../../hsapi/dbaccess/db_structure.php');
 require_once(dirname(__FILE__).'/../../hsapi/dbaccess/db_records.php');
 require_once(dirname(__FILE__).'/../../hsapi/structure/dbsTerms.php');
 require_once(dirname(__FILE__).'/../../hsapi/utilities/Temporal.php');
+require_once(dirname(__FILE__)."/../../hsapi/utilities/utils_geo.php");
+
+//require_once (dirname(__FILE__).'/../../vendor/autoload.php'); //for geoPHP
+
 
 $mysqli = $system->get_mysqli();
 
@@ -123,6 +127,19 @@ $trmDuplicates = @$lists2["trm_dupes"];
                 }
             }
 
+            function mark_all_by_class(ele,  sclassname){
+                var cbs = document.getElementsByClassName(sclassname);
+                if (!cbs  ||  ! cbs instanceof Array)
+                    return false;
+
+                var is_checked = $(ele).is(':checked');
+
+                for (var i = 0; i < cbs.length; i++) {
+                    cbs[i].checked = is_checked;
+                }
+            }
+            
+            
             function open_selected_by_name(sname) {
                 var ids = get_selected_by_name( sname );
                 //var link = document.getElementById('selected_link');
@@ -1722,10 +1739,11 @@ if($active_all || in_array('expected_terms', $active)) {
                             break;
                         }
                     }//for
-                    if($isOK){
+                    if($isOk){
                         $mysqli->commit();  
                     }
                     if($keep_autocommit===true) $mysqli->autocommit(TRUE);
+                    
                 }//correct
                 else{
 ?>             
@@ -2256,7 +2274,7 @@ if($active_all || in_array('geo_values', $active)){ // Check for geo fields that
 
     <?php
 
-    $query = 'SELECT rec_ID, rec_Title, rec_RecTypeID, dtl_Value, dtl_Geo, ST_asWKT(dtl_Geo) AS wkt, dty_Name, rty_Name  
+    $query = 'SELECT dtl_ID, rec_ID, rec_Title, rec_RecTypeID, dtl_Value, dtl_Geo, ST_asWKT(dtl_Geo) AS wkt, dty_Name, rty_Name  
               FROM Records 
               LEFT JOIN recDetails ON rec_ID = dtl_RecID 
               LEFT JOIN defDetailTypes ON dty_ID = dtl_DetailTypeID 
@@ -2268,12 +2286,26 @@ if($active_all || in_array('geo_values', $active)){ // Check for geo fields that
     // missing dtl_Geo value or values missing geoType
     $bibs1 = array();
     $ids1 = array();
-    // values that are out of bounds
+    // values that are out of bounds (out of bounds abs(lat)>90 abs(lng)>180)
     $bibs2 = array();
     $ids2 = array();
-    // invalid coordinates
+    $ids2_lng = array(); //with wrong longitudes - because wrong digitizing in continual word
+    // invalid coordinates 
     $bibs3 = array();
     $ids3 = array();
+    
+    $need_correct_long = (@$_REQUEST['fixlong']=="1");
+    $geojson_adapter = null;
+    $wkt_adapter = null;
+    $update_stmt = null;
+    $keep_autocommit = null;
+    if($need_correct_long){
+        $wkt_adapter = geoPHP::getAdapter('wkt');
+        $geojson_adapter = geoPHP::getAdapter('json');
+        $update_stmt = $mysqli->prepare('UPDATE recDetails SET dtl_Geo=ST_GeomFromText(?) WHERE dtl_ID=?');
+        $keep_autocommit = mysql__begin_transaction($mysqli);    
+    }
+    $isOk = true;
 
     while ($row = $res->fetch_assoc()){
 
@@ -2324,8 +2356,40 @@ if($active_all || in_array('geo_values', $active)){ // Check for geo fields that
                               && (abs($bbox['maxx'])<=180) && (abs($bbox['maxy'])<=90);
 
                 if (!$within_bounds){
-                    array_push($bibs2, $row);
-                    array_push($ids2, $row['rec_ID']);
+                    
+                    $is_wrong_long = abs($bbox['minx'])>180 && abs($bbox['maxx'])>180 
+                                        && abs($bbox['minx'])<1080 && abs($bbox['maxx'])<1080;
+                    
+                    if( $is_wrong_long && $need_correct_long){
+                        
+                            $json = $geojson_adapter->write($geom, true);
+                            $json = geo_CorrectLng_JSON($json);
+                            $r_value = $wkt_adapter->write($geojson_adapter->read(json_encode($json), true));
+                            list($r_type, $r_value) = prepareGeoValue($mysqli, $r_value);
+                            if($r_type===false){
+                                $isOk = false;
+                                print '<div class="error" style="color:red">Record #'.$row['rec_ID'].'. '.$r_value.'</div>';
+                                $mysqli->rollback();
+                                break;
+                            }
+                            
+                            $update_stmt->bind_param('si', $r_value, $row['dtl_ID']);
+                            $res33 = $update_stmt->execute();
+                            if(! $res33 )
+                            {
+                                $isOk = false;
+                                print '<div class="error" style="color:red">Record #'.$row['rec_ID'].'. Cannot replace geo in record details. SQL error: '.$mysqli->error.'</div>';
+                                $mysqli->rollback();
+                                break;
+                            }
+                    }else{
+                        array_push($bibs2, $row);
+                        array_push($ids2, $row['rec_ID']);
+                        if( $is_wrong_long ){
+                            array_push($ids2_lng, $row['rec_ID']);    
+                        }
+                    }
+                    
                     continue;
                 }
             }else{ // is invalid
@@ -2340,6 +2404,12 @@ if($active_all || in_array('geo_values', $active)){ // Check for geo fields that
         }
     }
     if($res) $res->close();
+    
+    if($isOk){
+        $mysqli->commit();  
+    }
+    if($keep_autocommit===true) $mysqli->autocommit(TRUE);
+
 
     $has_invalid_geo = false;
 
@@ -2490,6 +2560,20 @@ if($active_all || in_array('geo_values', $active)){ // Check for geo fields that
             <tr>
                 <td colspan="6">
                     <label><input type=checkbox onclick="{mark_all_by_name(event.target, 'invalid_geo');}">Mark all</label>
+                    
+<?php                    if(count($ids2_lng)>0){ ?>
+
+                    <label><input type=checkbox onclick="{mark_all_by_class(event.target, 'invalid_lng');}">Mark with wrong longitudes</label>
+                    &nbsp;&nbsp;
+                    <span style="font-size:0.9em">To fix longitudes (<-180 and >180 deg) click here:
+                        <button
+                            onclick="{document.getElementById('linkbar').style.display = 'none';window.open('listDatabaseErrors.php?db=<?= HEURIST_DBNAME?>&fixlong=1','_self')}">
+                            Fix longitudes</button>
+                    </span>
+                    
+<?php                    } ?>
+                    
+                    
                 </td>
             </tr>
 
@@ -2501,7 +2585,8 @@ if($active_all || in_array('geo_values', $active)){ // Check for geo fields that
                     ?>
                     <tr>
                         <td>
-                            <input type=checkbox name="invalid_geo" value=<?= $row['rec_ID'] ?>>
+                            <input type=checkbox name="invalid_geo" <?php 
+                                echo in_array($row['rec_ID'], $ids2_lng)?'class="invalid_lng"':''; echo 'value='.$row['rec_ID']; ?>>
                         </td>
                         <td style="white-space: nowrap;">
                             <a target=_new

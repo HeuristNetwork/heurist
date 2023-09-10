@@ -20,15 +20,6 @@
     */
     
     /*
-
-    */
-    function geo_CheckWGS($geom){
-        
-    }
-
-    
-    /*
-    
     Simplify and converts from UTM to WGS
     
     $utm_zone = number of zone + hemisphere  40N or 20S
@@ -123,5 +114,83 @@
             }
         }
     }
+    
+    
+    /*
+    * Correct wrong longitude values: abs(lng)>180
+    */
+    function geo_CorrectLng_JSON($json){
+        
+        if($json['type']=='GeometryCollection'){
+            
+            for($idx=0; $idx<count($json['geometries']); $idx++){
+                $json['geometries'][$idx] = geo_CorrectLng_JSON($json['geometries'][$idx]);
+            }
+            
+            return $json;
+            
+            
+        }else if(count($json['coordinates'])>0){
+
+            if($json['type']=='Point'){
+                
+                $pnt = array($json['coordinates']);
+                geo_CorrectLng($pnt);    
+                $json['coordinates'] = $pnt[0];
+                
+            }else if($json['type']=='MultiPoint'){
+                
+                geo_CorrectLng($json['coordinates']);    
+                
+            }else if($json['type']=='LineString'){
+
+                geo_CorrectLng($json['coordinates']);
+
+            } else if($json['type']=='Polygon'){
+                for($idx=0; $idx<count($json['coordinates']); $idx++){
+                    geo_CorrectLng($json['coordinates'][$idx]);
+                }
+            } else if ( $json['type']=='MultiPolygon' || $json['type']=='MultiLineString')
+            {
+                for($idx=0; $idx<count($json['coordinates']); $idx++) //shapes
+                    for($idx2=0; $idx2<count($json['coordinates'][$idx]); $idx2++) //points
+                        geo_CorrectLng($json['coordinates'][$idx][$idx2]);
+            }
+
+            return $json;
+        }else{
+            return array();
+        }
+        
+    }
+    
+    function geo_CorrectLng(&$orig_points){
+
+        //invert
+        $points = array();    
+        foreach ($orig_points as $idx => $point) {
+
+            $lng = $point[0];
+            $lng2 = $point[0];
+            
+            $k = intdiv($lng, 360);
+            
+            $lng = ($lng - $k*360);
+            
+            if(abs($lng)>180){
+                if($k==0) $k = ($lng<0)?-1:1;
+                $lng = $lng - $k*360;
+            }
+            
+            //-181 => 179
+            //182 => -178
+            //  -478.4214470 => -118.4215610,
+            //  491.8502830 => 131.8501210
+            //  204.6147740 => -155.4933140
+            // -574 => 145
+
+            $orig_points[$idx] = array($lng, $point['1']);
+        }
+    }    
     
 ?>
