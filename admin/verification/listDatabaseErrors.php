@@ -2300,8 +2300,13 @@ if($active_all || in_array('geo_values', $active)){ // Check for geo fields that
     $update_stmt = null;
     $keep_autocommit = null;
     if($need_correct_long){
-        $wkt_adapter = geoPHP::getAdapter('wkt');
-        $geojson_adapter = geoPHP::getAdapter('json');
+        if(method_exists('geoPHP','getAdapter')){
+            $wkt_adapter = geoPHP::getAdapter('wkt');
+            $geojson_adapter = geoPHP::getAdapter('json');
+        }else{
+            $wkt_adapter = new WKT();
+            $geojson_adapter = new GeoJSON();
+        }
         $update_stmt = $mysqli->prepare('UPDATE recDetails SET dtl_Geo=ST_GeomFromText(?) WHERE dtl_ID=?');
         $keep_autocommit = mysql__begin_transaction($mysqli);    
     }
