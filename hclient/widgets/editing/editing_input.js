@@ -3845,7 +3845,7 @@ console.log('onpaste');
         
         if(this.options.showedit_button && this.detailType!="relmarker" &&
            (this.options.recordset && this.options.recordset.entityName == 'Records') && 
-           (vis_mode=='public' || vis_mode=='pending'))
+           (vis_mode=='pending'))
         {
         
             var that = this;
@@ -3882,18 +3882,14 @@ console.log('onpaste');
                     }
                 }
 
-                if(vis_mode=='public'){
-                    chbox.hide();
-                }else{
-                    //pending
-                    chbox.show();
-                    btn.removeClass('show-onhover'); //show always for pending
-                    btn.css('display','inline-block');                        
-                }
+                chbox.show();
+                btn.removeClass('show-onhover'); //show always for pending
+                btn.css('display','inline-block');                        
 
             });//each
         
         }else{
+            //hide for all exept public status
             this.element.find('span.field-visibility').hide();
             this.element.find('div.field-visibility2').hide();
         }  
@@ -4883,9 +4879,11 @@ console.log('onpaste');
                 var val = this._getValue($input);
                 if(!window.hWin.HEURIST4.util.isempty( val )){                 
                 
-                    var ele = this.element.find('span.field-visibility[data-input-id="'+$input.attr('id')+'"]');
-                    
-                    res = (ele.attr('hide_field')=='1')?1:0; //hide this field from public
+                    let res = 0;
+                    if(this.f('rst_NonOwnerVisibility')=='pending'){
+                        var ele = this.element.find('span.field-visibility[data-input-id="'+$input.attr('id')+'"]');
+                        res = (ele.attr('hide_field')=='1')?1:0; //1: hide this field from public
+                    }
                                         
                     var ele = $input.parents('.input-div');
                     var k = ele.index();
@@ -4919,7 +4917,7 @@ console.log('onpaste');
                 var $input = this.inputs[idx];
                 var btn = this.element.find('span.field-visibility[data-input-id="'+$input.attr('id')+'"]');
                 
-                if(vals && k<vals.length && vals[k]==1){
+                if(vals && k<vals.length && vals[k]==1 && vis_mode!='piblic'){
                     btn.attr('hide_field',1);
                 }else{
                     btn.attr('hide_field',0);

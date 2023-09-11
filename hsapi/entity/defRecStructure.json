@@ -373,7 +373,7 @@
                             "rst_DisplayName":"Restrict visibility:",
                             "rst_DisplayHelpText": "Determines whether the field can be viewed by users other than the record owner/owner group", 
                             "rst_DisplayExtendedDescription":"viewable",
-                            "rst_DisplayWidth":25,
+                            "rst_DisplayWidth":45,
                             "rst_DefaultValue":"viewable",
                             "rst_RequirementType":"optional",
                             "rst_MaxValues":1,
