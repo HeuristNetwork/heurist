@@ -37,7 +37,6 @@ ext/js/evol.colorpicker.js  (378)  add palette div to document to guarantee topm
 
 ext/js/themeswitchcontrol.js - reimplementation of appearance (css)
 
-
 external/php/phpZotero.php (114-121) support proxy settings
                            (598) new property totalCount
 
@@ -95,6 +94,12 @@ external/php/phpZotero.php (114-121) support proxy settings
         Install dependencies (use node.js v 16.20) including mirador-annotations 0.4.0
         Apply changes from mirador-integration-changes.zip
         To build webpack: npm run webpack
+
+
+2023-08-23 external/vis/dist/vis.js - (236, 305, 609, 18760) timeline modification for fuzzy dates
+        
+2023-09-11 external/php/tileserver.php (32) allows simplified url if it goes from mbtiles.php
+
 
         
 -----------------------------------------------------------------------------------------------------------------------------------
