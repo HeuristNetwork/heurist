@@ -1020,6 +1020,8 @@ $.widget( "heurist.editing_input", {
                         max_height: ($input.height()+110),
                         autoresize_bottom_margin: 10,
                         autoresize_on_init: false,
+                        image_caption: true,
+
                         setup:function(editor) {
 
                             if(editor.ui){
@@ -1058,9 +1060,9 @@ $.widget( "heurist.editing_input", {
                                     onAction: function (_) {  //since v5 onAction in v4 onclick
                                         selectRecord(null, function(recordset){
                                             
-                                                var record = recordset.getFirstRecord();
-                                                var record_id = recordset.fld(record,'rec_ID');
-                                                tinymce.activeEditor.execCommand('mceInsertLink', false, record_id);
+                                            var record = recordset.getFirstRecord();
+                                            var record_id = recordset.fld(record,'rec_ID');
+                                            tinymce.activeEditor.execCommand('mceInsertLink', false, record_id);
                                             
                                         });
                                     }
@@ -1078,9 +1080,6 @@ $.widget( "heurist.editing_input", {
                             let has_initd = false, is_blur = false;
                             editor.on('init', function(e) {
                                 let $container = $(editor.editorContainer);
-                                setTimeout(function(){
-                                    $container.find('.tox-tbtn.tox-tbtn--select.tox-tbtn--bespoke').parent().addClass('tinymce_format_group');
-                                }, 2000);
 
                                 if($container.parents('.editForm').length == 1){
                                     let max_w = $container.parents('.editForm').width(); 
@@ -1136,6 +1135,37 @@ $.widget( "heurist.editing_input", {
                                 }
                             });
 
+                            editor.on('contextmenu', (e) => {
+                                setTimeout(() => {
+                                    $(document).find('.tox-menu [title="Open link"]').on('click', function(e){
+
+                                        let node = tinymce.activeEditor.selection.getNode();
+                                        const href = $(node).attr('href');
+
+                                        if(window.hWin.HEURIST4.util.isNumber(href) && href > 0){ // open new tab linked to record viewer
+
+                                            /* open new tab linked to record viewer
+                                            window.hWin.HEURIST4.util.stopEvent(e);
+                                            e.stopImmediatePropagation();
+
+                                            window.open(`${window.hWin.HAPI4.baseURL}?recID=${href}&fmt=html&db=${window.hWin.HAPI4.database}`, '_blank');
+
+                                            $(document).blur();
+                                            */
+
+                                            // replace simple rec ID with record link
+                                            $(node).attr('href', window.hWin.HAPI4.baseURL + '?recID=' + href + '&fmt=html&db=' + window.hWin.HAPI4.database);
+                                            setTimeout((ele, org_href) => { $(ele).attr('href', org_href); }, 500, node, href);
+                                        }
+                                    });
+                                }, 500);
+                            });
+                        },
+                        init_instance_callback: function(editor){
+                            let $container = $(editor.editorContainer);
+                            if($container.find('.tox-tbtn.tox-tbtn--select.tox-tbtn--bespoke').parent().length > 0){
+                                $container.find('.tox-tbtn.tox-tbtn--select.tox-tbtn--bespoke').parent().addClass('tinymce_format_group');
+                            }
                         },
                         plugins: [ //contextmenu, textcolor since v5 in core
                             'advlist autolink lists link image preview ', //anchor charmap print 
