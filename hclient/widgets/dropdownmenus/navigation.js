@@ -41,7 +41,8 @@ $.widget( "heurist.navigation", {
     pageStyles_original:{}, //keep to restore  element_id=>css
 
     //to avoid recusion
-    ids_was_added: [], 
+    ids_cached_entries: {}, 
+    ids_menu_entries: {},
     ids_recurred: [],
 
     
@@ -180,7 +181,8 @@ $.widget( "heurist.navigation", {
         if(!lvl>0){
             lvl = 0;
             //to avoid recursion
-            this.ids_was_added = [];
+            this.ids_menu_entries = {};
+            this.ids_cached_entries = {};
             this.ids_recurred = [];
         } 
         
@@ -218,11 +220,73 @@ $.widget( "heurist.navigation", {
         for(var i=0; i<menuitems.length; i++)
         {
             
-            var record = resdata.getById(menuitems[i])
+            var record = resdata.getById(menuitems[i]);
+            var page_id = menuitems[i]; //resdata.fld(record, 'rec_ID');
 
-            if(this.ids_was_added.indexOf(menuitems[i])>=0){
-                //already was included
-                this.ids_recurred.push(menuitems[i]);
+            if(Object.hasOwn(this.ids_menu_entries, page_id) && this.ids_menu_entries[page_id].length > 0){ // check recursive references
+
+                let parent_ids = parent_id.split(',');
+                /*if(parent_ids.length > 0){
+                    parent_ids.filter((id) => this.ids_menu_entries[page_id].indexOf(id));
+                }*/
+                if(parent_ids.indexOf(page_id) > 0){
+                    this.ids_recurred.push(page_id);
+                    continue;
+                }
+            }
+
+            if(Object.hasOwn(this.ids_cached_entries, page_id)){ // retrieve cached menu item, available
+
+                // first update parent
+                let menu_value = this.ids_cached_entries[page_id];
+
+                if(orientation == 'treeview'){
+
+                    function _updateChildNodes(menu_items, new_id){
+
+                        for(let i = 0; i < menu_items.length; i++){
+                            menu_items[i]['parent_id'] = new_id;
+                            menu_items[i]['key'] = new_id + ',' + menu_items[i]['page_id'];
+
+                            if(menu_items[i]['children'] && menu_items[i]['children'].length > 0){
+                                menu_items[i]['children'] = _updateChildNodes(menu_items[i]['children'], menu_items[i]['key']);
+                            }
+                        }
+
+                        return menu_items;
+                    }
+
+                    menu_value['parent_id'] = parent_id;
+                    menu_value['key'] = parent_id + ',' + page_id;
+
+                    if(menu_value['children'] && menu_value['children'].length > 0){
+                        menu_value['children'] = _updateChildNodes(menu_value['children'], menu_value['key']);
+                    }
+
+                    resitems.push(menu_value);
+                }else if(orientation != 'list'){
+
+                    let old_parents = menu_value.match(/data-parentid="([\d,]+)"/g);
+                    const parent_id_length = parent_id.split(',').length;
+                    for(let cur_parent of old_parents){
+
+                        let old_parent = cur_parent.match(/[\d,]+/)[0].split(',');
+                        let new_parent = parent_id;
+
+                        if(old_parent.length >= parent_id_length){
+                            old_parent = old_parent.slice(parent_id_length);
+                            new_parent += (old_parent.length > 0 ? ',' + old_parent.join(',') : '');
+                        }
+
+                        menu_value = menu_value.replace(cur_parent, `data-parentid="${new_parent}"`);
+                    }
+
+                    res = res + menu_value;
+                }else if(orientation == 'list'){
+                    //res.push(menu_value);
+                    continue;
+                }
+
             }else{
             
                 var menuName = resdata.fld(record, DT_NAME, this.options.language);
@@ -230,7 +294,6 @@ $.widget( "heurist.navigation", {
                 var menuIcon = resdata.fld(record, DT_THUMBNAIL);
 
                 var recType = resdata.fld(record, 'rec_RecTypeID');
-                var page_id = menuitems[i]; //resdata.fld(record, 'rec_ID');
                 
                 //target and position
                 var pageTarget = resdata.fld(record, DT_CMS_TARGET);
@@ -256,12 +319,12 @@ $.widget( "heurist.navigation", {
                     this.pageStyles[page_id] = window.hWin.HEURIST4.util.cssToJson(pageStyle);    
                 }
                  
-                this.ids_was_added.push(page_id);
-                    
+                this.ids_menu_entries[page_id] = [];
+                let $res = null;
 
                 if(orientation=='treeview'){
-                    var $res = {};  
-                    $res['key'] = page_id;
+                    $res = {};  
+                    $res['key'] = parent_id + ',' + page_id; // set unique key
                     $res['title'] = menuName;
                     $res['parent_id'] = parent_id; //reference to parent menu(or home)
                     $res['page_id'] = page_id;
@@ -275,23 +338,26 @@ $.widget( "heurist.navigation", {
 
                 }else if(orientation=='list'){
                     
-                    res.push({key:page_id, title:window.hWin.HEURIST4.util.htmlEscape(menuName) });
+                    $res = {key:page_id, title:window.hWin.HEURIST4.util.htmlEscape(menuName) };
+
+                    res.push($res);
                     
                 }else{
                 
-                    res = res + '<li><a href="#" style="padding:2px 1em;'
-                                    +(hasContent?'':'cursor:default;')
-                                    +'" data-pageid="'+ page_id + '"'
-                                    + (pageTarget?' data-target="' + pageTarget +'"':'')
-                                    + (showTitle?' data-showtitle="1"':'')
-                                    + (selectable?' data-checksubmenu="1"':'')
-                                    + (hasContent?' data-hascontent="1"':'')
-                                    + ' title="'+window.hWin.HEURIST4.util.htmlEscape(menuTitle)+'">'
-                                    
-                                    + (menuIcon?('<span><img src="'+window.hWin.HAPI4.baseURL+'?db='+window.hWin.HAPI4.database
-                                        +'&thumb='+menuIcon+'" '
-                                        +'style="height:16px;width:16px;padding-right:4px;vertical-align: text-bottom;"></span>'):'')
-                                    + window.hWin.HEURIST4.util.htmlEscape(menuName)+'</a>';
+                    $res = '<li><a href="#" style="padding:2px 1em;'
+                            +(hasContent?'':'cursor:default;')
+                            +'" data-pageid="'+ page_id + '" data-parentid="'+ parent_id +'"'
+                            + (pageTarget?' data-target="' + pageTarget +'"':'')
+                            + (showTitle?' data-showtitle="1"':'')
+                            + (selectable?' data-checksubmenu="1"':'')
+                            + (hasContent?' data-hascontent="1"':'')
+                            + ' title="'+window.hWin.HEURIST4.util.htmlEscape(menuTitle)+'">'
+                            
+                            + (menuIcon?('<span><img src="'+window.hWin.HAPI4.baseURL+'?db='+window.hWin.HAPI4.database
+                                +'&thumb='+menuIcon+'" '
+                                +'style="height:16px;width:16px;padding-right:4px;vertical-align: text-bottom;"></span>'):'')
+                            + window.hWin.HEURIST4.util.htmlEscape(menuName)+'</a>';
+                    res = res + $res;
                 }
                     
                 var subres = '';
@@ -304,8 +370,12 @@ $.widget( "heurist.navigation", {
                     if(!$.isArray(submenu)) submenu = submenu.split(',');
                     
                     if(submenu.length>0){ 
-                        //next level                         
-                        subres = this.getMenuContent(orientation, page_id, submenu, lvl+1);
+
+                        this.ids_menu_entries[page_id] = submenu;
+
+                        //next level
+                        let submenu_parent_id = parent_id != 0 ? parent_id + ',' + page_id : page_id;
+                        subres = this.getMenuContent(orientation, submenu_parent_id, submenu, lvl+1);
                         
                         if(orientation=='treeview'){
                             
@@ -318,6 +388,9 @@ $.widget( "heurist.navigation", {
                         } else if(subres!='') {
                             
                             res = res + '<ul style="min-width:200px"' 
+                                      + (lvl==0?' class="level-1"':'') + '>'+subres+'</ul>';
+
+                            $res = $res + '<ul style="min-width:200px"' 
                                         + (lvl==0?' class="level-1"':'') + '>'+subres+'</ul>';
                         }
                     }
@@ -326,6 +399,8 @@ $.widget( "heurist.navigation", {
                 if(orientation!='list' && orientation!='treeview'){
                     res = res + '</li>';
                 }
+
+                this.ids_cached_entries[page_id] = $res;
                 
                 //if parent has the only child use next level - (for top menu only)
                 if(lvl==0 && menuitems.length==1 && this.options.use_next_level){
@@ -347,7 +422,8 @@ $.widget( "heurist.navigation", {
     _onGetMenuData:function(){
             
         //reset
-        this.ids_was_added = []; 
+        this.ids_menu_entries = {}; 
+        this.ids_cached_entries = {};
         this.ids_recurred = [];
         this.first_not_empty_page_id = 0;
         
@@ -362,9 +438,9 @@ $.widget( "heurist.navigation", {
                     +this.menuData.fld(this.menuData.getById(this.ids_recurred[i]), DT_NAME));
             }
             window.hWin.HEURIST4.msg.showMsgDlg('Some menu items are recursive references to a menu containing themselves. <br>'
-            +'Such a structure is not permissible for obvious reasons. Ask website author to fix this issue. <p>'
+            +'Such a structure is not permissible for obvious reasons. Ask website author to fix this issue. <div style="margin: 10px 0px">'
             +(s.join('<br>'))
-            +'</p>If you are the author, simply edit the CMS Home record through the website editor (Site tab, then the Edit website layout/properties button), and delete duplicates (this will not delete the page content, only the extra reference to the menu entry)');
+            +'</div>If you are the author, simply edit the CMS Home record through the website editor (Site tab, then the Edit website layout/properties button), and delete duplicates (this will not delete the page content, only the extra reference to the menu entry)');
             /*+'<p>How to fix:<ul><li>Open in record editor</li>'
             +'<li>Find parent menu(s) in "Linked From" section</li>'
             +'<li>Open parent menu record and remove link to this record</li></ul>');*/
@@ -506,10 +582,15 @@ $.widget( "heurist.navigation", {
             
         }else if(data.page_id>0){
 
-            //highlight top most menu
-            this.highlightTopItem(data.page_id);
+            let page_id = data.page_id;
+            if($(event.target).attr('data-parentid')){
+                page_id = $(event.target).attr('data-parentid') + ',' + page_id;
+            }
 
-            this._onMenuItemAction(data);                
+            //highlight top most menu
+            this.highlightTopItem(page_id);
+
+            this._onMenuItemAction(data);
 
         }
 
@@ -519,18 +600,28 @@ $.widget( "heurist.navigation", {
     // highlight top most menu
     //
     highlightTopItem: function(page_id){
-        
+
         //dim all
-        this.divMainMenuItems.find('a').removeClass('selected');
-        
-        //find item
-        if(page_id>0){
-            var ele = this.element.find('a[data-pageid="'+page_id+'"]');
-            if(true || !ele.hasClass('.ui-menu-item')){
-                ele = ele.parents('.ui-menu-item');    
-            }
-            if(ele.length>0)
-                $(ele[ele.length-1].firstChild).addClass('selected');    
+        this.divMainMenuItems.find('a').mouseout().removeClass('selected');
+
+        // find item
+        let $ele = null;
+        if(typeof page_id === 'string' && page_id.indexOf(',') > 0){
+
+            let page_ids = page_id.split(',');
+            page_id = page_ids.pop();
+            let parent_id = page_ids.join(',');
+
+            $ele = this.element.find(`a[data-pageid="${page_id}"][data-parentid="${parent_id}"]`).parents('.ui-menu-item');
+        }else if(page_id>0){
+
+            $ele = this.element.find('a[data-pageid="'+page_id+'"]');
+            $ele = $ele.parents('.ui-menu-item');
+        }
+
+        if($ele && $ele.length>0){
+            $($ele[$ele.length-1].firstChild).addClass('selected');
+            setTimeout(() => {this.divMainMenuItems.menu('collapseAll');}, 1000);
         }
     },
     

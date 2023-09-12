@@ -170,37 +170,36 @@ window.hWin.HEURIST4.util = {
     // enable or disable element
     //
     setDisabled: function(element, mode){
-      if(element){
-          if(!$.isArray(element)){
+        if(element){
+            if(!$.isArray(element)){
                 element = [element];
-          }
-          $.each(element, function(idx, ele){
-              ele = $(ele);
-              
-              //if(mode !== (ele.prop('disabled')=='disabled')){
-              
-              if( (typeof hSelect!=="undefined") && $.isFunction(hSelect) && $(ele).hSelect("instance")!=undefined){              
-                  
-                  if (mode) {
-                    $(ele).hSelect( "disable" );
-                  }else{
-                    $(ele).hSelect( "enable" );    
-                  }
-                  
-                  
-              }else{
-                  if (mode) {
+            }
+            $.each(element, function(idx, ele){
+                ele = $(ele);
+                
+                //if(mode !== (ele.prop('disabled')=='disabled')){
+                
+                if( ($.heurist.hSelect !=="undefined") && $.isFunction($.heurist.hSelect) && ele.hSelect("instance")!=undefined){              
+
+                    if (mode) {
+                        ele.hSelect( "disable" );
+                    }else{
+                        ele.hSelect( "enable" );    
+                    }
+
+                }else{
+                    if (mode) {
                         ele.prop('disabled', 'disabled');
                         ele.addClass('ui-state-disabled');
-                  }else{
+                    }else{
                         ele.removeProp('disabled');
                         ele.removeClass('ui-state-disabled ui-button-disabled');
-                  }
-              }
-              
-              //}
-          });
-      }
+                    }
+                }
+                
+                //}
+            });
+        }
     },
     
     isIE: function () {
