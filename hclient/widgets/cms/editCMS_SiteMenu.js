@@ -199,13 +199,15 @@ title: "Overview"
                 },
                 activate: function(event, data) { 
                     //loads another page
-                    if(data.node.key>0){
-                          _refreshCurrentPage(data.node.key);
-                          data.node.setActive( false );                        
-                          
-                          editCMS2.switchMode('page');        
-                          
-                          $('#main-menu > div[widgetid="heurist_Navigation"]').navigation('highlightTopItem', data.node.key);
+                    let page_id = data.node.data.page_id;
+
+                    if(page_id>0){
+                        _refreshCurrentPage(page_id);
+                        data.node.setActive( false );
+
+                        editCMS2.switchMode('page');
+
+                        $('#main-menu > div[widgetid="heurist_Navigation"]').navigation('highlightTopItem', data.node.key);
                     }
                 },
                 edit:{
