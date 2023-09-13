@@ -135,14 +135,19 @@ function hMultiSelect(){
 	 *	Param:
 	 *		(string) needle => searching for
 	 *		(string) haystack => searching in
+	 *		(boolean) check_partial => whether to check for a partial check
 	 *
 	 *	Return:
 	 *		(boolean || int) whether the needle is in the haystack
 	 */
 
-	function isInArray(needle, haystack) {
+	function isInArray(needle, haystack, check_partial) {
 
 		var idx = haystack.indexOf(needle);
+
+		if(!check_partial){
+			return idx >= 0;
+		}
 
 		if(idx == -1){ // Check for partial match
 			for(i in haystack){
@@ -157,7 +162,19 @@ function hMultiSelect(){
 		}
 
 		return false;
-	}	
+	}
+
+	/* 
+	 *	Remove newline chars and br tags from string
+	 *	
+	 *	Param:
+	 *		(string) text => Text to be stripped of newline values
+	 *
+	 * 	Return: new string stripped of newlines
+	 */
+	function strip_newlines(text){
+		return text.replaceAll(/\n|\r|<br>/g, ' ');
+	}
 
 	/*
 	 * Retrieve dty_Type using it's ID before continuing
@@ -240,7 +257,7 @@ function hMultiSelect(){
 
 		        tab_page = tab_page + '<div class="field-container">';
 
-		        if(!isInArray(arr[i][0], assigned_fields)){
+		        if(!isInArray(arr[i][0], assigned_fields, false)){
 			        tab_page = tab_page + '<input type="checkbox" data-id="'+ arr[i][0] +'">';
 		        }
 		        else{
@@ -250,7 +267,7 @@ function hMultiSelect(){
 		        tab_page = tab_page 
 		        	+ '<div class="field-item no-overflow-item" title="'+ arr[i][1] +'">'+ arr[i][1] +'</div>'
 		        	+ '<div class="field-item no-overflow-item" title="'+ arr[i][2] +'">'+ arr[i][2] +'</div>'
-		        	+ '<div class="field-item no-overflow-item" title="'+ arr[i][3] +'">'+ arr[i][3] +'</div></div>';
+		        	+ '<div class="field-item no-overflow-item" title="'+ arr[i][3] +'">'+ strip_newlines(arr[i][3]) +'</div></div>';
 
 			}
 
@@ -342,9 +359,9 @@ function hMultiSelect(){
 					const id = dty_field[0];
 
 					// Check if there is a customised instance with the search string
-					const in_other_array = isInArray(searched, dty_field[2]);
+					const in_other_array = isInArray(searched, dty_field[2], true);
 
-					if(!isInArray(id, assigned_fields) && (name.toLowerCase().indexOf(searched) >= 0 || in_other_array) && $Db.getConceptID('dty', id) != '2-247') {
+					if(!isInArray(id, assigned_fields, false) && (name.toLowerCase().indexOf(searched) >= 0 || in_other_array) && $Db.getConceptID('dty', id) != '2-247') {
 
 						var main_ele;
 
