@@ -90,6 +90,8 @@
     =====
     
     autoDetectSeparators
+    
+    errorLog - wrap around error_log to prevent log injection
     */
     
     $glb_curl_code = null;
@@ -2449,5 +2451,24 @@ function uploadFileToNakala($system, $params) {
     }
 
     return $external_url;
+}
+
+
+//
+// wrap around error_log to prevent log injection
+// 
+function errorLog($message){
+
+/*
+    if(preg_match("/[^A-Za-z0-9-_]/", $message)){
+      $safe_message = '[' . base64_encode($message) . ']';
+    }else{
+      $safe_message = $message;
+    }
+*/
+    //$regex = '/\R/'; 
+    $regex = "/[\r\n]/";
+    $safe_message = preg_replace($regex, ' ', $message);
+    error_log($safe_message);
 }
 ?>

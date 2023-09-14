@@ -373,7 +373,7 @@
                 }
                 $res->close();
             }else{
-                error_log('Query: '.$query.'.  mySQL error: '.$mysqli->error);
+                errorLog('Query: '.$query.'.  mySQL error: '.$mysqli->error);
             }
         }
         return $result;

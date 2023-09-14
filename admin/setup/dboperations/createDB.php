@@ -132,7 +132,7 @@ if( isset($passwordForDatabaseCreation) && $passwordForDatabaseCreation!='' &&
             if ($uName == '_') {$uName='';}; // don't double up underscore if no user prefix
         }
         
-        $database_name = $uName . trim($_REQUEST['dbname']);
+        $database_name = $uName . trim(htmlspecialchars($_REQUEST['dbname']));
         $database_name_full = HEURIST_DB_PREFIX . $database_name; // all databases have common prefix then user prefix
         
         if(strlen($database_name_full)>64){

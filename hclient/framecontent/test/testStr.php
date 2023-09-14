@@ -2,7 +2,6 @@
     require_once (dirname(__FILE__).'/../../../hsapi/System.php');
     require_once (dirname(__FILE__).'/../../../hsapi/controller/entityScrudSrv.php');
 
-    
     $bib_ids = prepareIds(filter_var(@$_REQUEST['bib_ids'], FILTER_SANITIZE_STRING));
 
     print implode(',',$bib_ids);

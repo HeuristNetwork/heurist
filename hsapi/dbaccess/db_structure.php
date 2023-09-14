@@ -197,7 +197,7 @@
                 }
                 $res->close();
             }else{
-                error_log('DATABASE: '.$system->dbname().'. Error retrieving rectype structure '.$mysqli->error);
+                errorLog('DATABASE: '.$system->dbname().'. Error retrieving rectype structure '.$mysqli->error);
             }
 
 
@@ -283,7 +283,7 @@
             }
             $res->close();
         }else{
-            error_log('DATABASE: '.$system->dbname().'. Error retrieving rectype structure '.$mysqli->error);
+            errorLog('DATABASE: '.$system->dbname().'. Error retrieving rectype structure '.$mysqli->error);
         }
 
 
@@ -647,7 +647,7 @@ function dbs_GetRectypeConstraint($system) {
             
             $res->close();
         }else{
-            error_log('DATABASE: '.$system->dbname().'. Error retrieving terms '.$mysqli->error);
+            errorLog('DATABASE: '.$system->dbname().'. Error retrieving terms '.$mysqli->error);
         }
         $terms['treesByDomain'] = array(
                 'relation' => __getTermTree($system, "relation", "exact"), 
@@ -690,7 +690,7 @@ function dbs_GetRectypeConstraint($system) {
                 }                
                 $res->close();
             }else{
-                error_log('DATABASE: '.$system->dbname().'. Error retrieving vocabulary groups '.$mysqli->error);
+                errorLog('DATABASE: '.$system->dbname().'. Error retrieving vocabulary groups '.$mysqli->error);
             }
             
             
@@ -709,7 +709,7 @@ function dbs_GetRectypeConstraint($system) {
                 }
                 $res->close();
             }else{
-                error_log('DATABASE: '.$system->dbname().'. Error retrieving terms by reference '.$mysqli->error);
+                errorLog('DATABASE: '.$system->dbname().'. Error retrieving terms by reference '.$mysqli->error);
             }
             
         }//$dbVer==1 && $dbVerSub>2
@@ -1137,8 +1137,8 @@ function dbs_GetRectypeConstraint($system) {
                         }else{
                             $dbname = $system->dbname();
                             $sMsg = 'Recursion in '.$dbname.'.defTerms! Tree '.implode('>',$parents)
-                                    .'. Can\'t add term '.$gChildID;
-                            error_log($sMsg);        
+                                    .'. Cannot add term '.$gChildID;
+                            errorLog($sMsg);        
                             if(!$emailsent){
                                 $dbowner = user_getDbOwner($system->get_mysqli()); //info about user #2
                                 $emailsent = true;
@@ -1383,7 +1383,7 @@ function dbs_GetRectypeConstraint($system) {
         try{
             if(!$res){
                 error_log('FAILED QUERY: '.$mysqli->error);//$query);
-                error_log('Database: '.$system->dbname());
+                errorLog('Database: '.$system->dbname());
             }else{
                 while ($row = $res->fetch_row()) {
                     $dty_ID = $row[2];
@@ -1407,9 +1407,9 @@ function dbs_GetRectypeConstraint($system) {
             }
         }catch(Exception $e) {
             //trying to find weird error - missed trm_Modified column
-            error_log('Message: ' .$e->getMessage());
-            error_log('QUERY: '.$query);
-            error_log('Database: '.$system->dbname());
+            errorLog('Message: ' .$e->getMessage());
+            errorLog('QUERY: '.$query);
+            errorLog('Database: '.$system->dbname());
         }
         
         //SPECIAL CASE for relation type #6
