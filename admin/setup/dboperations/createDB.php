@@ -128,7 +128,7 @@ if( isset($passwordForDatabaseCreation) && $passwordForDatabaseCreation!='' &&
         //compose database name
         $uName = '';
         if(@$_REQUEST['uname']){
-            $uName = trim(@$_REQUEST['uname']).'_';
+            $uName = trim(htmlspecialchars(@$_REQUEST['uname'])).'_';
             if ($uName == '_') {$uName='';}; // don't double up underscore if no user prefix
         }
         

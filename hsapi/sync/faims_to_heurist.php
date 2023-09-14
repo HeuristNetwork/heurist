@@ -424,7 +424,8 @@ if(! $system->init(@$_REQUEST['db'], true) ){
                         print "INSERTED as #".$response['data']."<br/>";
                     }
                 }else{
-                    print print_r($response, true)."<br/>";
+                    print 'Error: '.htmlspecialchars(@$response['status'].'  '.@$response['message']);
+                    //print print_r($response, true)."<br/>";
                 }
 
 
