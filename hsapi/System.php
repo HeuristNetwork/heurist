@@ -1007,8 +1007,8 @@ error_log(print_r($_REQUEST, true));
             $curr_logfile = 'errors_'.$now->format('Y-m-d').'.log';
 
             //3. write error into current error log
-            $Title = 'db: '.$this->dbname()
-                    ."\nerr-type: ".$status
+            $Title = 'db: '.preg_replace("/[\r\n]/", ' ', $this->dbname())
+                    ."\nerr-type: ".preg_replace("/[\r\n]/", ' ', $status)
                     ."\nuser: ".$this->get_user_id()
                     .' '.@$this->current_User['ugr_FullName']
                     .' <'.@$this->current_User['ugr_eMail'].'>';
@@ -1470,7 +1470,7 @@ error_log(print_r($_REQUEST, true));
                 
                 
                 if($cres==false){                    
-                    error_log('CANNOT UPDATE COOKIE '.$session_id.'   '.$this->dbname_full);                
+                    errorLog('CANNOT UPDATE COOKIE '.$session_id.'   '.$this->dbname_full);                
                 }
             }
                 
