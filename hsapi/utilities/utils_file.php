@@ -888,7 +888,7 @@
                 }
             
             }catch(Exception  $e){
-                error_log( 'Cannot open file '.$filename.'  Error:'.Exception::getMessage() );
+                error_log( 'Cannot open file '.$filename.'  Error:'.$e->getMessage() );
             }
 
             return filesize($filename);
@@ -1174,7 +1174,7 @@ function createZipArchive($source, $only_these_folders, $destination, $verbose=t
     return true;
     
     } catch (Exception  $e){
-        error_log( Exception::getMessage() );
+        error_log( $e->getMessage() );
         if($verbose) {
             echo "<br/>Cannot create zip archive ".htmlspecialchars($destination).' '.Exception::getMessage();
         }
@@ -1182,6 +1182,7 @@ function createZipArchive($source, $only_these_folders, $destination, $verbose=t
     }                            
 }
 
+/* not secure
 function unzipArchive($zipfile, $destination, $entries=null){
 
     if(file_exists($zipfile) && filesize($zipfile)>0 &&  file_exists($destination)){
@@ -1198,11 +1199,6 @@ function unzipArchive($zipfile, $destination, $entries=null){
         $zip = new ZipArchive;
         if ($zip->open($zipfile) === TRUE) {
 
-            /*debug to find proper name in archive 
-            for($i = 0; $i < $zip->numFiles; $i++) { 
-            $entry = $zip->getNameIndex($i);
-            error_log( $entry );
-            }*/
             if($entries==null){
                 $zip->extractTo($dest);//, array()
             }else{
@@ -1217,6 +1213,92 @@ function unzipArchive($zipfile, $destination, $entries=null){
     }else{
         return false;
     }
+}
+*/
+
+define('MAX_FILES', 10000);
+define('MAX_SIZE', 1073741824); // 1 GB
+define('MAX_RATIO', 10);
+define('READ_LENGTH', 1024);
+
+function unzipArchive($system, $zipfile, $destination){
+    
+    if(!(file_exists($zipfile) && filesize($zipfile)>0 &&  file_exists($destination))){
+        throw new Exception('Archive file not found');
+    }
+    
+    //set current folder
+    chdir($destination);  // relatively db root  or HEURIST_FILES_DIR??        
+    $destination_dir = realpath($destination);
+    
+    if ($destination_dir !== false) {
+        if (strpos($destination_dir, '\\')!==false){
+            $destination_dir = str_replace('\\','/',$destination_dir);  
+        } 
+        if( substr($destination_dir, -1, 1) != '/' )  $destination_dir = $destination_dir.'/';
+        
+        if (strpos($destination_dir, $system->getFileStoreRootFolder()) !== 0) {
+        //HEURIST_SCRATCH_DIR
+        //HEURIST_TILESTACKS_DIR
+            throw new Exception('Destination folder must within database storage folder');
+        }
+    }
+
+    $fileCount = 0;
+    $totalSize = 0;
+
+    $zip = new ZipArchive();
+    if ($zip->open($zipfile) === true) {
+        for ($i = 0; $i < $zip->numFiles; $i++) {
+            $filename = $zip->getNameIndex($i);
+            $stats = $zip->statIndex($i);
+
+            if (strpos($filename, '../') !== false || substr($filename, 0, 1) === '/') {
+                throw new Exception('Archive contains unsecure entry '.$filename);
+            }
+
+            if (substr($filename, -1) !== '/') {
+                $fileCount++;
+                if ($fileCount > MAX_FILES) {
+                    // Reached max. number of files
+                    throw new Exception('Archive contains more than '.MAX_FILES.' entries');
+                }
+                
+                $destination_file = $destination_dir.$filename;
+
+                $fp = $zip->getStream($filename); // Compliant
+                $currentSize = 0;
+                while (!feof($fp)) {
+                    $currentSize += READ_LENGTH;
+                    $totalSize += READ_LENGTH;
+
+                    if ($totalSize > MAX_SIZE) {
+                        // Reached max. size
+                        throw new Exception('Maximum allowed extraction size achieved ('.MAX_SIZE.')');
+                    }
+
+                    // Additional protection: check compression ratio
+                    if ($stats['comp_size'] > 0  && $stats['comp_size']>READ_LENGTH) {
+                        $ratio = $currentSize / $stats['comp_size'];
+                        if ($ratio > MAX_RATIO) {
+                            // Reached max. compression ratio
+                            throw new Exception('Maximum allowed compression ration detected');
+                        }
+                    }
+
+                    file_put_contents($destination_file, fread($fp, READ_LENGTH), FILE_APPEND);
+                }
+
+                fclose($fp);
+            } else {
+                if (!mkdir($destination_dir.$filename, 0777, true)) {
+                    throw new Exception('Cannot create subfolder on unzip');
+                }
+            }
+        }
+        $zip->close();
+    }
+
 }
 
 //

@@ -672,7 +672,14 @@ When we open "iiif_image" in mirador viewer we generate manifest dynamically.
                         $warn = folderCreate2($dest, '');
                         
                         //unzip archive to HEURIST_TILESTACKS_DIR
-                        if(unzipArchive($tmp_name, $dest)){
+                        $unzip_error = null;
+                        try{
+                            unzipArchive($this->system, $tmp_name, $dest);    
+                        } catch (Exception  $e) {
+                            $unzip_error = $e->getMessage();
+                        }
+                        
+                        if($unzip_error==null){
                             //remove temp file
                             unlink($tmp_name);
 
@@ -702,10 +709,11 @@ When we open "iiif_image" in mirador viewer we generate manifest dynamically.
                             
                             
                         }else{
-                            $this->system->addError(HEURIST_INVALID_REQUEST,
+                            $this->system->addError(HEURIST_ERROR,
                                  'Can\'t extract tiled images stack. It couldn\'t be saved to upload path definied for db = '
                                 . $this->system->dbname().' ('.$dest
-                                .'). Please ask your system administrator to correct the path and/or permissions for this directory');
+                                .'). Please ask your system administrator to correct the path and/or permissions for this directory', $unzip_error);
+                            return false;
                         }
                         
                     }else{

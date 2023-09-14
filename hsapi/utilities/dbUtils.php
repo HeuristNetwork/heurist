@@ -958,7 +958,14 @@ class DbUtils {
             
             if(file_exists($templateFoldersContent) && filesize($templateFoldersContent)>0){ //override content of setting folders with template database files - rectype icons, dashboard icons, smarty templates etc
                 $upload_root = $system->getFileStoreRootFolder();
-                unzipArchive($templateFoldersContent, $upload_root.$database_name.'/');    
+                
+                $unzip_error = null;
+                try{
+                    unzipArchive($system, $templateFoldersContent, $upload_root.$database_name.'/');
+                }catch(Exceprion $e){
+                    array_push($warnings, 'Cannot extract template folders from archive '.$templateFoldersContent
+                                .' Error: '.Exception::getMessage());        
+                }
             }            
             
             //update owner in new database
