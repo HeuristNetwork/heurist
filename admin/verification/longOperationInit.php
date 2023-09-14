@@ -55,7 +55,8 @@ $dbname = htmlspecialchars($_REQUEST['db']);
  }
 
 ?>
-<html>
+<!DOCTYPE html>
+<html lang="en">
     <head>
         <title><?php echo $sTitle; ?></title>
         <meta http-equiv="content-type" content="text/html; charset=utf-8">

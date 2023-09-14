@@ -34,8 +34,10 @@
         require_once(dirname(__FILE__).'/../../hclient/framecontent/initPageMin.php');
         // <li>optrectypes=1    test for presence of missing record types not referenced by a pointer field</li>
 ?>  
-<html>
+<!DOCTYPE html>
+<html lang="en">
 <head>
+<title>Verify Origin</title>
 <style>
     p {padding:0;margin:0px;}
     * {font-size: medium;}

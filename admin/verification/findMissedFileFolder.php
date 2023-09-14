@@ -53,15 +53,17 @@ if( $system->verifyActionPassword($_REQUEST['pwd'], $passwordForServerFunctions)
 */
 if(!@$_REQUEST['mail']){
 ?>            
-<html>
+<!DOCTYPE html>
+<html lang="en">
     <head>
+        <title>List of databases with missing or non-writeable folders</title>
         <meta http-equiv="content-type" content="text/html; charset=utf-8">
         <link rel="stylesheet" type="text/css" href="<?php echo PDIR;?>h4styles.css" />
     </head>
     <body class="popup">
             
         <script>window.history.pushState({}, '', '<?php echo htmlspecialchars($_SERVER['PHP_SELF']); ?>')</script>  
-        <div style="font-family:Arial,Helvetica;font-size:12px">
+        <div style="font-family:Arial,Helvetica,sans-serif;font-size:12px">
                 <h2>List of databases with missing or non-writeable folders</h2>
 <?php            
 }

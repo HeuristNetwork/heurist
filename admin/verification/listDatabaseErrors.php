@@ -89,9 +89,11 @@ $trmWithWrongInverse = prepareIds(filter_var(@$lists2["trm_missed_inverse"], FIL
 $trmDuplicates = @$lists2["trm_dupes"];
 
 ?>
-<html>
+<!DOCTYPE html>
+<html lang="en">
     <head>
         <meta http-equiv="content-type" content="text/html; charset=utf-8">
+        <title>List of errors</title>
 
         <script type="text/javascript" src="<?php echo PDIR;?>external/jquery-ui-1.12.1/jquery-1.12.4.js"></script>
         <script type="text/javascript" src="<?php echo PDIR;?>external/jquery-ui-1.12.1/jquery-ui.js"></script>
@@ -732,7 +734,7 @@ if($active_all || in_array('pointer_targets', $active)) {
                         Delete ALL faulty pointers</button>
                 </div>
             </div>
-            <table>
+            <table role="none">
                 <tr>
                     <td colspan="6">
                         <label><input type=checkbox onclick="{mark_all_by_name(event.target, 'recCB');}">Mark all</label>
@@ -804,7 +806,7 @@ if($active_all || in_array('target_types', $active)) {
                 <h3>Records with record pointers to the wrong record type</h3>
                 <span><a target=_new href='<?=HEURIST_BASE_URL.'?db='.HEURIST_DBNAME?>&w=all&q=ids:<?= implode(',', array_keys($bibs)) ?>'>
                     (show results as search)</a></span>
-                <table>
+                <table role="none">
                     <?php
                     foreach ($bibs as $row) {
                         ?>
@@ -982,7 +984,7 @@ if($active_all || in_array('target_parent', $active)) {
                         Add missing parent record pointers to child records</button>
                 </div>
 
-                <table>
+                <table role="none">
                     <?php
                     foreach ($bibs1 as $row) {
                         ?>
@@ -1034,7 +1036,7 @@ if($active_all || in_array('target_parent', $active)) {
                 Delete broken parent-child fields in alleged children records</button>
                 </div>
                 -->                    
-                <table>
+                <table role="none">
                     <?php
                     foreach ($bibs2 as $row) {
                         ?>
@@ -1125,7 +1127,7 @@ if($active_all || in_array('empty_fields', $active)) {
                 </div>
             </div>
 
-            <table>
+            <table role="none">
             <tr>
                 <td colspan="5">
                     <label><input type=checkbox onclick="{mark_all_by_name(event.target, 'recCB6');}">Mark all</label>
@@ -1457,7 +1459,7 @@ if($active_all || in_array('date_values', $active)) {
 
             </div>
 
-            <table>
+            <table role="none">
             <tr style="display:<?php echo ($fix_as_suggested?'block':'none');?>;">
                 <td colspan="6">
                     <label><input type=checkbox 
@@ -1566,7 +1568,7 @@ if($active_all || in_array('term_values', $active)) {
                 </div>
             </div>
 
-            <table>
+            <table role="none">
             <tr>
                 <td colspan="5">
                     <label><input type=checkbox onclick="{mark_all_by_name(event.target, 'recCB1');}">Mark all</label>
@@ -1669,7 +1671,7 @@ if($active_all || in_array('expected_terms', $active)) {
                         ?>
                         <h3 style="padding-left:2px">Records with terms not in the list of terms specified for the field</h3>
                         <span><a target=_new href="javascript:void(0)" onclick="{document.getElementById('link_wrongterms').click(); return false;}">(show results as search)</a></span>
-                        <table>
+                        <table role="none">
                         <tr>
                             <th style="width: 30px;text-align:left">Record</th>
                             <th style="width: 45ex;text-align:left;">Field</th>
@@ -1752,7 +1754,7 @@ if($active_all || in_array('expected_terms', $active)) {
 <span style="font-size:0.9em;">Terms are referenced in a different vocabulary than that specified for the corresponding field, 
 <br>however the same term label exists in the vocabulary specified for the field.
 <br><button onclick="window.open('listDatabaseErrors.php?db=<?= HEURIST_DBNAME?>&fix_samename_terms=1','_self')">Click here to change these terms</button> to the ones in the vocabularies specified for each field,<br>otherwise they can be fixed for each term individually in record editing.</span><br><br>
-                        <table>
+                        <table role="none">
                         <tr>
                             <th style="width: 50px;text-align: left;">Field ID</th>
                             <th style="width: 45ex;text-align:left;">Field</th>
@@ -1831,7 +1833,7 @@ if($active_all || in_array('single_value', $active)) {
                 </span>
             </div>
 
-            <table>
+            <table role="none">
 
                 <tr>
                     <td colspan="5">
@@ -1932,7 +1934,7 @@ if($active_all || in_array('required_fields', $active)) {
                 </span>
             </div>
 
-            <table>
+            <table role="none">
                 <tr>
                     <td colspan="4">
                         <label><input type=checkbox onclick="{mark_all_by_name(event.target, 'recCB3');}">Mark all</label>
@@ -2031,7 +2033,7 @@ if($active_all || in_array('nonstandard_fields', $active)) {
                         (show results as search) <img src='<?php echo HEURIST_BASE_URL.'hclient/assets/external_link_16x16.gif'?>'></a>
                     <a target=_new href='#' id=selected_link4 onClick="return open_selected_by_name('recCB4');">(show selected as search) <img src='<?php echo HEURIST_BASE_URL.'hclient/assets/external_link_16x16.gif'?>'></a>
                 </span>
-                <table>
+                <table role="none">
 
                     <tr>
                         <td colspan="6">
@@ -2434,7 +2436,7 @@ if($active_all || in_array('geo_values', $active)){ // Check for geo fields that
             <a target=_new href='#' id=selected_link5 onClick="return open_selected_by_name('invalid_geo');">(show selected as search) <img src='<?php echo HEURIST_BASE_URL.'hclient/assets/external_link_16x16.gif'?>'></a>
         </span>
 
-        <table>
+        <table role="none">
 
             <tr>
                 <td colspan="6">
@@ -2497,7 +2499,7 @@ if($active_all || in_array('geo_values', $active)){ // Check for geo fields that
             <a target=_new href='#' id=selected_link5 onClick="return open_selected_by_name('invalid_geo');">(show selected as search) <img src='<?php echo HEURIST_BASE_URL.'hclient/assets/external_link_16x16.gif'?>'></a>
         </span>
 
-        <table>
+        <table role="none">
 
             <tr>
                 <td colspan="6">
@@ -2560,7 +2562,7 @@ if($active_all || in_array('geo_values', $active)){ // Check for geo fields that
             <a target=_new href='#' id=selected_link5 onClick="return open_selected_by_name('invalid_geo');">(show selected as search) <img src='<?php echo HEURIST_BASE_URL.'hclient/assets/external_link_16x16.gif'?>'></a>
         </span>
 
-        <table>
+        <table role="none">
 
             <tr>
                 <td colspan="6">
@@ -2760,7 +2762,7 @@ if($active_all || in_array('fld_spacing', $active)){ // Check spacing in freetex
             <button onclick="removeMultiSpacing()">Fix selected records</button>
         </span>
 
-        <table>
+        <table role="none">
 
             <tr>
                 <td colspan="6">

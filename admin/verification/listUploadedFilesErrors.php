@@ -32,9 +32,10 @@ require_once(dirname(__FILE__).'/../../import/fieldhelper/harvestLib.php');
 $mysqli = $system->get_mysqli();
 
 ?>
-<html>
+<!DOCTYPE html>
+<html lang="en">
     <head>
-
+        <title>Missing and orphaned files</title>
         <meta http-equiv="content-type" content="text/html; charset=utf-8">
 
         <script type="text/javascript" src="<?php echo PDIR;?>external/jquery-ui-1.12.1/jquery-1.12.4.js"></script>

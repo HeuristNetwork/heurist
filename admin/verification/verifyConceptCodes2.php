@@ -53,7 +53,7 @@ if( $system->verifyActionPassword($_REQUEST['pwd'], $passwordForServerFunctions)
 
 <script>window.history.pushState({}, '', '<?php echo htmlspecialchars($_SERVER['PHP_SELF']); ?>')</script>
           
-<div style="font-family:Arial,Helvetica;font-size:12px">
+<div style="font-family:Arial,Helvetica,sans-serif;font-size:12px">
             <p>Record and base field types with missing xxx_OriginatingDBID or xxx_IDinOriginatingDB fields</p>
 
 <?php            

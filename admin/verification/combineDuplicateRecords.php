@@ -83,7 +83,8 @@ $bdts = mysql__select_assoc2($mysqli,'select dty_ID, dty_Name from defDetailType
 $reference_bdts = mysql__select_assoc2($mysqli,'select dty_ID, dty_Name from defDetailTypes where dty_Type="resource"');
 
 ?>
-<html>
+<!DOCTYPE html>
+<html lang="en">
     <head>
         <meta http-equiv="content-type" content="text/html; charset=utf-8">
         <title>Merging records</title>
@@ -175,7 +176,7 @@ $reference_bdts = mysql__select_assoc2($mysqli,'select dty_ID, dty_Name from def
                     ?>
                 </div><br/><hr/>
 
-                <table><tbody id="tb">
+                <table role="none"><tbody id="tb">
                         <?php
                         
                         if($master_rec_id>0){
@@ -854,9 +855,9 @@ function do_fix_dupe()
         if(!($master_bkm_ID>0 && $delete_dup_bkm_ID>0)) continue;
         
         $master_pers_record = mysql__select_row_assoc($mysqli, 'select * from usrBookmarks where bkm_ID='.$master_bkm_ID);
-        $master_pers_record = mysql__select_row_assoc($mysqli, 'select * from usrBookmarks where bkm_ID='.$delete_dup_bkm_ID);
+        $delete_dup_pers_record = mysql__select_row_assoc($mysqli, 'select * from usrBookmarks where bkm_ID='.$delete_dup_bkm_ID);
         
-        if(!($master_pers_record && $master_pers_record)) continue;
+        if(!($master_pers_record && $delete_dup_pers_record)) continue;
         
         //        $master_pers_record['pers_notes'] .= $delete_dup_pers_record['pers_notes'];
         if(strlen(@$delete_dup_pers_record['bkm_PwdReminder'])>0){

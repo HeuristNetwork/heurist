@@ -26,9 +26,11 @@ require_once (dirname(__FILE__).'/../../hsapi/consts.php');
 require_once (dirname(__FILE__).'/../../hsapi/dbaccess/utils_db.php');
 
 ?>
-<html>
-
+<!DOCTYPE html>
+<html lang="en">
     <head>
+        <title>Verify Heurist installation</title>
+
         <meta http-equiv="content-type" content="text/html; charset=utf-8">
         
         <link rel="stylesheet" type="text/css" href="../../h4styles.css" />

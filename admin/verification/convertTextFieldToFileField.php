@@ -57,7 +57,7 @@ if( $system->verifyActionPassword($_REQUEST['pwd'], $passwordForServerFunctions)
 
 <script>window.history.pushState({}, '', '<?php echo htmlspecialchars($_SERVER['PHP_SELF']); ?>')</script>  
          
-<div style="font-family:Arial,Helvetica;font-size:12px">
+<div style="font-family:Arial,Helvetica,sans-serif;font-size:12px">
             <p>It converts specified text field to file field, registers url (from dtl_Value) and assign ulf_ID to recDetails</p>
 <?php            
 

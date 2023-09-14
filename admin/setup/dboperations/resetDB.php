@@ -21,6 +21,8 @@
 
 define('DEMO_DB', 'hdb_demo');
 define('DEMO_DB_TEMPLATE', 'hdb_demo_template');
+define('DEMO_DB_ONLY', false);
+
 
 require_once(dirname(__FILE__).'/../../../hsapi/System.php');
 require_once(dirname(__FILE__).'/../../../hsapi/utilities/dbUtils.php');
@@ -43,7 +45,10 @@ if($isSystemInited){
     if($res) { 
         
         //clone
-        if(true){
+        if(DEMO_DB_ONLY){
+            //new empty
+            $res = DbUtils::databaseCreateFull(DEMO_DB, $user_record);
+        }else{
             $res = false;
             if(DbUtils::databaseCreate(DEMO_DB, 1)){
                 if( DbUtils::databaseClone(DEMO_DB_TEMPLATE, DEMO_DB, false, false, false) ){
@@ -64,9 +69,6 @@ if($isSystemInited){
                     }
                 }
             }
-        }else{
-            //new empty
-            $res = DbUtils::databaseCreateFull(DEMO_DB, $user_record);
         }
     }
 }

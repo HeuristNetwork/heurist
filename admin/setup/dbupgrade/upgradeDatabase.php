@@ -300,7 +300,7 @@ $description = 'Modify tables:  defRecStructure(rst_SemanticReferenceURL,rst_Ter
                                     Specific changes in each version upgrade are listed below:
                                 </p>
 
-                                <table>
+                                <table role="none">
                                     <?php echo $scripts_info;?>
                                 </table>
                                 <br>

@@ -75,8 +75,10 @@ if(!$init_client || @$_REQUEST['session']>0){ //2a. init operation on client sid
 }
 
 ?>
-<html>
+<!DOCTYPE html>
+<html lang="en">
     <head>
+        <title>Rebuild Calculated Fields</title>
         <meta http-equiv="content-type" content="text/html; charset=utf-8">
         <link rel="stylesheet" type="text/css" href="<?php echo PDIR;?>h4styles.css" />
 

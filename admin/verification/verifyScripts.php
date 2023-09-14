@@ -62,7 +62,7 @@ if( $system->verifyActionPassword($_REQUEST['pwd'], $passwordForServerFunctions)
 ?>            
 
          
-<div style="font-family:Arial,Helvetica;font-size:12px">
+<div style="font-family:Arial,Helvetica,sans-serif;font-size:12px">
             <p>This report shows </p>
 <?php            
 
@@ -85,11 +85,10 @@ $databases = mysql__getdatabases4($mysqli, false);
     }
 */
 
+/*
 if(false){
     //find non UTF-8 in rty_TitleMask
-       
     __findWrongChars();   
-       
 }else if(false){
     
     __updateDatabase();
@@ -126,6 +125,9 @@ if(false){
 }else if(true){
     __removeDuplicationValues();
 }
+*/
+    __removeDuplicationValues();
+
 //
 // Report database versions
 //

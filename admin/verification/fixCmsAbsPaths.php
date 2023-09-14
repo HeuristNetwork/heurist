@@ -54,7 +54,7 @@ if( !isset($_REQUEST['db']) && $system->verifyActionPassword($_REQUEST['pwd'], $
 <script>window.history.pushState({}, '', '<?php echo htmlspecialchars($_SERVER['PHP_SELF']); ?>')</script>          
        
        
-<div style="font-family:Arial,Helvetica;font-size:12px">
+<div style="font-family:Arial,Helvetica,sans-serif;font-size:12px">
     <p>Fix absolute paths in web page content</p>
 <?php            
 
@@ -161,9 +161,7 @@ foreach ($servers as $srv) {
                     $cnt = $cnt + count($matches);
                 }
                 
-                if(true){
-                    foreach ($matches as $fnd) print $fnd.' &nbsp;&nbsp;&nbsp; ';
-                }
+                foreach ($matches as $fnd) print $fnd.' &nbsp;&nbsp;&nbsp; ';
             }
         }
     }

@@ -27,7 +27,8 @@
     require_once(dirname(__FILE__).'/../../hclient/framecontent/initPageMin.php');
     require_once(dirname(__FILE__).'/../../records/index/elasticSearch.php');
 ?>
-<html>
+<!DOCTYPE html>
+<html lang="en">
     <head>
         <meta http-equiv="content-type" content="text/html; charset=utf-8">
         <title>Check Invalid Characters</title>

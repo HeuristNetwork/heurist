@@ -46,7 +46,8 @@ $mysqli = $system->get_mysqli();
 
 
 ?>
-<html>
+<!DOCTYPE html>
+<html lang="en">
     <head>
         <meta http-equiv="content-type" content="text/html; charset=utf-8">
         <title>Check Invalid Characters</title>
@@ -63,7 +64,7 @@ $mysqli = $system->get_mysqli();
                 <br />&nbsp;<hr />
             </div>
 
-            <table>
+            <table role="none">
                 <?php
 
                 function check($text) {

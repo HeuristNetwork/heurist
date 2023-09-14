@@ -54,7 +54,8 @@ if($is_included){
 $is_not_found = true;
 }else{
 ?>
-<html>
+<!DOCTYPE html>
+<html lang="en">
     <head>
         <meta http-equiv="content-type" content="text/html; charset=utf-8">
         <title>Clean Invalid Characters</title>
@@ -67,7 +68,7 @@ $is_not_found = true;
 <?php
 }
 ?>
-            <table>
+            <table role="none">
                 <?php
                 $now = date('Y-m-d H:i:s');
                 $prevInvalidRecId = 0;

@@ -32,6 +32,8 @@ if(isset($func_return) && $func_return == 1){
     return;
 }
 
+global $glb_curl_error;
+
 if($is_included){
 
     print '<div style="padding:10px"><h3 id="records_url_msg">Check Records URL</h3><br>';
@@ -52,10 +54,12 @@ if($is_included){
         print '<span>You must be logged in as Database Administrator to perform this operation</span>';
     }
 ?>    
-<html>
+<!DOCTYPE html>
+<html lang="en">
     <head>
         <meta http-equiv="content-type" content="text/html; charset=utf-8">
         <link rel="stylesheet" type="text/css" href="<?php echo PDIR;?>h4styles.css" />
+        <title>Check Records URL</title>
     </head>
     <body class="popup">
         <div class="banner">

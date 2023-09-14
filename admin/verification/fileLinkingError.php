@@ -30,9 +30,10 @@ require_once(dirname(__FILE__).'/../../hclient/framecontent/initPageMin.php');
 
 $mysqli = $system->get_mysqli();
 ?>
-<html>
+<!DOCTYPE html>
+<html lang="en">
     <head>
-
+        <title>Check for missing and orphaned files and incorrect paths</title>
         <meta http-equiv="content-type" content="text/html; charset=utf-8">
 
         <link rel="stylesheet" type="text/css" href="<?php echo PDIR;?>h4styles.css" />

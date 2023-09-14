@@ -58,8 +58,10 @@ $mysqli = $system->get_mysqli();
     
 if($mode!=3){
 ?>
-<html>
+<!DOCTYPE html>
+<html lang="en">
     <head>
+        <title>Check Title Masks</title>
         <meta http-equiv="content-type" content="text/html; charset=utf-8">
         <link rel="stylesheet" type="text/css" href="<?php echo PDIR;?>h4styles.css" />
         <style type="text/css">

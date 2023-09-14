@@ -465,23 +465,18 @@ sendEmail(array($usr_owner['ugr_eMail']), $email_title, $email_text);
                                   'single-transaction' => false,
                                   'add-drop-trigger' => false);
                     
-                    if(false){
-                        $res = DbUtils::databaseDump($db_name, $dumpfile, $opts);
-                    }else{
-                        // old way
-                        try{
-                            //$dump = new Mysqldump( 'hdb_'.$db_name, ADMIN_DBUSERNAME, ADMIN_DBUSERPSWD, HEURIST_DBSERVER_NAME, 'mysql', $opts);
-                            $pdo_dsn = 'mysql:host='.HEURIST_DBSERVER_NAME.';dbname=hdb_'.$db_name.';charset=utf8mb4';
-                            $dump = new Mysqldump( $pdo_dsn, ADMIN_DBUSERNAME, ADMIN_DBUSERPSWD, $opts);
-                                
-                            //echo $db_name.' purge sysArchive to '.$dumpfile;
-                            $dump->start($dumpfile);
-                            //echo $db_name.' ... dumped ';
-                            $res = true;
-                        } catch (Exception $e) {
-                            $report .= ("Error: ".$e->getMessage()."\n");
-                            $res = false;
-                        }
+                    try{
+                        //$dump = new Mysqldump( 'hdb_'.$db_name, ADMIN_DBUSERNAME, ADMIN_DBUSERPSWD, HEURIST_DBSERVER_NAME, 'mysql', $opts);
+                        $pdo_dsn = 'mysql:host='.HEURIST_DBSERVER_NAME.';dbname=hdb_'.$db_name.';charset=utf8mb4';
+                        $dump = new Mysqldump( $pdo_dsn, ADMIN_DBUSERNAME, ADMIN_DBUSERPSWD, $opts);
+                            
+                        //echo $db_name.' purge sysArchive to '.$dumpfile;
+                        $dump->start($dumpfile);
+                        //echo $db_name.' ... dumped ';
+                        $res = true;
+                    } catch (Exception $e) {
+                        $report .= ("Error: ".$e->getMessage()."\n");
+                        $res = false;
                     }
                         
                     if($res===false){
