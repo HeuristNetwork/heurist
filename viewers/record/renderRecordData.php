@@ -58,7 +58,19 @@ $is_production = !$is_map_popup && $layout_name=='WebSearch';
 
 $is_reloadPopup = array_key_exists('reloadPopup', $_REQUEST) && ($_REQUEST['reloadPopup']==1);
 
-$hide_images = array_key_exists('hideImages', $_REQUEST) ? $_REQUEST['hideImages'] : 0; // 1 - No linked media, 2 - No images
+$hide_images = -1;
+
+if(array_key_exists('hideImages', $_REQUEST)){
+    $hide_images =  intval($_REQUEST['hideImages']);
+}
+// 1 - No linked media, 2 - No images at all
+if($hide_images<0 || $hide_images>2){
+    if($is_production){ //for production all images are allways visible
+        $hide_images = 0;
+    }else{    
+        $hide_images = $system->user_GetPreference('recordData_Images', 0);
+    }
+}
 
 $rectypesStructure = dbs_GetRectypeStructures($system); //getAllRectypeStructures(); //get all rectype names
 
@@ -538,30 +550,32 @@ if(!($is_map_popup || $without_header)){
 
             //
             // Show/Hide media and linked media
-            // @param {show_all_images} Boolean - was call triggered by clicking 'show all images'
+            // @param {force_all_images} Boolean - was call triggered by clicking 'show all images'
             //
-            function displayImages(show_all_images = false){
-
-                let hide_images = 0; // 0 - show all (default), 1 - hide linked, 2 - hide all
-                if(show_all_images && window.hWin && window.hWin.HAPI4){
+            function displayImages(force_all_images){
+                
+                // 0 - show all (default), 1 - hide linked, 2 - hide all
+                /*if(force_all_images && window.hWin && window.hWin.HAPI4
                     hide_images = window.hWin.HAPI4.get_prefs_def('recordData_Images', 0);
-                }else if(!show_all_images){
-                    hide_images = $('#show-linked-media').is(':checked') ? 0 : 1;
-                }
+                }else */
+                let hide_images = $('#show-linked-media').length==0 || $('#show-linked-media').is(':checked') ? 0 : 1;
 
-                if(hide_images == 2){
+                if(!force_all_images && hide_images == 2){ //hide all images
                     $('.media-content').hide();
-                    return;
+                    
+                }else{
+                    $('.media-content').show();
+                    if(hide_images == 1){ // hide linked media
+                        $('.linked-media').hide();
+                    }else{
+                        $('.linked-media').show();
+                        //$('#show-linked-media').attr('checked', true);
+                    }
                 }
 
-                $('.media-content').show();
-                if(hide_images == 1){ // hide linked media
-                    $('.linked-media').hide();
-                }
-
-                if(!show_all_images && window.hWin && window.hWin.HAPI4){
-                    window.hWin.HAPI4.save_pref('recordData_Images', hide_images);
-                }
+                //if(!force_all_images && window.hWin && window.hWin.HAPI4){
+                //    window.hWin.HAPI4.save_pref('recordData_Images', hide_images);
+                //}
             }
 
             function mediaTooltips(){
@@ -627,7 +641,7 @@ if(!($is_map_popup || $without_header)){
                 
                 showMediaViewer(); //init thumbs for iiif
 
-                displayImages(false);
+                //displayImages(false);
 
                 mediaTooltips();
 
@@ -718,6 +732,7 @@ if(!($is_map_popup || $without_header)){
             text-align: right;
             padding: 15px 10px;
             font-size: 9px;
+            min-width: 80px;
         }
         .prompt {
             color: #999999;
@@ -1212,7 +1227,7 @@ function print_public_details($bib) {
     global $system, $defTerms, $is_map_popup, $without_header, $is_production, $ACCESSABLE_OWNER_IDS, $relRT, $startDT, $already_linked_ids, $group_details, $hide_images;
     
     $has_thumbs = false;
-    
+
     $mysqli = $system->get_mysqli();
 
     $query = 'select rst_DisplayOrder, dtl_RecID, dtl_ID, dty_ID,
@@ -1392,7 +1407,8 @@ function print_public_details($bib) {
                 
                 $fileinfo = null;
                 
-                if($hide_images == 2 || ($hide_images == 1 && $bd['dtl_RecID'] != $bib['rec_ID'])){ // skip all images || skip linked media
+                //|| ($hide_images == 1 && $bd['dtl_RecID'] != $bib['rec_ID'])){ // skip linked media
+                if($hide_images == 2){ // skip all images 
                     continue;
                 }
 
@@ -1573,7 +1589,7 @@ function print_public_details($bib) {
         print '</script>';
     }
     print '<div class="thumbnail2 main-media" style="text-align:center"></div>';
-    
+
     $hasAudioVideo = '';
     if($is_production){
         print '<div class="thumbnail production">';
@@ -1583,7 +1599,6 @@ function print_public_details($bib) {
         $has_thumbs = (count($thumbs)>0);        
       
     $several_media = count($thumbs);
-    $hide_images = $system->user_GetPreference('recordData_Images', 0);
     $added_linked_media_cont = false;
         
     if($hide_images != 2) // use/hide all thumbnails   
@@ -1613,7 +1628,7 @@ function print_public_details($bib) {
             }
 
             $media_control_chkbx = '';
-            if($k == 0 && $thumb['linked'] != true && !$is_production && !$is_map_popup){
+            if($k == 0 && $thumb['linked'] != true && !$is_production && !$is_map_popup && $several_media>1){
                 $media_control_chkbx = ' <label class="media-control"><input type="checkbox" id="show-linked-media" onchange="displayImages(false);" '. ($hide_images == 0 ? ' checked="checked"' : '') .'> show linked media</label>';
             }
 
