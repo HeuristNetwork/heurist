@@ -38,7 +38,7 @@ if($regID > 0 && $user_id != 2){
 
 if($_REQUEST['mode'] == 2){ // verify the new name is unique
 
-	$targetdbname = filter_var($_REQUEST['targetdbname']);
+	$targetdbname = htmlspecialchars(filter_var($_REQUEST['targetdbname']));
 
     if(strlen($targetdbname)>64){ // validate length
         $sErrorMsg = 'Database name <b>'.htmlspecialchars($targetdbname).'</b> is too long. Max 64 characters allowed';
