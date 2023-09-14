@@ -31,9 +31,9 @@ define('PDIR','../../../');  //need for proper path to js and css
 require_once(dirname(__FILE__).'/../../../hclient/framecontent/initPageMin.php');
 require_once(dirname(__FILE__).'/../../../hsapi/utilities/dbUtils.php');
 
-$sysadmin_pwd = htmlspecialchars(@$_REQUEST['pwd']);
+$sysadmin_protection = htmlspecialchars(@$_REQUEST['sa_protected']);
 
-if(!$system->is_dbowner() && $system->verifyActionPassword($sysadmin_pwd, $passwordForServerFunctions) ){
+if(!$system->is_dbowner() && $system->verifyActionPassword($sysadmin_protection, $passwordForServerFunctions) ){
     $err = $response = $system->getError();
     print @$err['message'];
     exit();
@@ -210,7 +210,7 @@ if(!$dbowner['ugr_eMail'] || !$dbowner['ugr_FirstName'] || !$dbowner['ugr_LastNa
             <div id="registerDBForm" class="input-row" style="margin-top: 20px;">
                 <form action="registerDB.php" method="POST" name="NewDBRegistration">
 
-                   <input type="hidden" name="pwd" value="<?=$sysadmin_pwd?>">
+                   <input type="hidden" name="sa_protected" value="<?=$sysadmin_protection?>">
                    <input type="hidden" name="db" value="<?=HEURIST_DBNAME?>">
 <fieldset style="padding-right:30px">
 

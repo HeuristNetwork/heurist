@@ -68,10 +68,12 @@ require_once(dirname(__FILE__).'/../../../records/index/elasticSearch.php');
     $dbname = htmlspecialchars($_REQUEST['db']);
     $is_db_valid = mysql__check_dbname($dbname);
     
+    $sysadmin_protection = @$_REQUEST['sa_protect'];
+    
     //owner can delete without password
     if ($is_db_valid!==true){
         print '<div class="ui-state-error">'.$is_db_valid[1].'</div>';
-    }else if(!$system->is_dbowner() && $system->verifyActionPassword(@$_REQUEST['pwd'], $passwordForDatabaseDeletion) ){
+    }else if(!$system->is_dbowner() && $system->verifyActionPassword($sysadmin_protection, $passwordForDatabaseDeletion) ){
             print '<div class="ui-state-error">'.$response = $system->getError()['message'].'</div>';
     }else{
 
@@ -95,7 +97,7 @@ require_once(dirname(__FILE__).'/../../../records/index/elasticSearch.php');
         <p>Enter the words CLEAR ALL RECORDS in ALL-CAPITALS to confirm that you want to clear all records from the current database
         <p>Type the words above to confirm deletion of records: <input type='input' maxlength='20' size='20' name='del' id='del'>
         &nbsp;&nbsp;&nbsp;&nbsp;<input type='submit' value='OK to Clear' class="h3button" style='font-weight: bold;' >
-        <input name="pwd" value"<?php echo htmlspecialchars(@$_REQUEST['pwd']);?>" type="hidden">
+        <input name="sa_protect" value"<?php echo htmlspecialchars(@$_REQUEST['sa_protect']);?>" type="hidden">
         <input name='mode' value='2' type='hidden'>
         <input name='db' value='<?php echo $dbname;?>' type='hidden'>
     </form>

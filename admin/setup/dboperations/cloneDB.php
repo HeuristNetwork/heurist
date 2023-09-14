@@ -85,9 +85,9 @@ if($isCloneTemplate){ //template db must be registered with id less than 21
         
         if($rty>0 || $dty>0 || $trm>0){
             $s = array();
-            if($rty>0) $s[] = $rty.' record types';
-            if($dty>0) $s[] = $dty.' base fields';
-            if($trm>0) $s[] = $trm.' vocabularies or terms';
+            if($rty>0) $s[] = intval($rty).' record types';
+            if($dty>0) $s[] = intval($dty).' base fields';
+            if($trm>0) $s[] = intval($trm).' vocabularies or terms';
             $sHasNewDefsWarning = implode(', ',$s);
         }
     }
@@ -98,9 +98,11 @@ if($isCloneTemplate){ //template db must be registered with id less than 21
 
 //verify that name of database is unique
 if(@$_REQUEST['mode']=='2'){
+    
+    $sysadmin_protection = @$_REQUEST['sa_protect'];
 
     if($sHasNewDefsWarning &&
-       $system->verifyActionPassword(@$_REQUEST['pwd'], $passwordForServerFunctions) ){
+       $system->verifyActionPassword($sysadmin_protection, $passwordForServerFunctions) ){
 
         $sErrorMsg = '<div class="ui-state-error">'
                     .$system->getError()['message'].'<br/></div>';
@@ -287,7 +289,7 @@ if(@$_REQUEST['mode']=='2' && $targetdbname!=null){
                 </p>         
                     <hr>
                 <p style="font-size:smaller;padding:10px 0px">     
-                    Sysadmin bypass (testing only: do not register cloned database): <input name="pwd" type="password"/>
+                    Sysadmin bypass (testing only: do not register cloned database): <input name="sa_protect" type="password"/>
                 </p>         
 
         <?php        
