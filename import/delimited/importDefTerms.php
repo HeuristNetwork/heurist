@@ -34,7 +34,8 @@ require_once(dirname(__FILE__)."/../../hclient/framecontent/initPage.php");
                     const urlParams = new URLSearchParams(window.location.search);
                     var trm_ID = urlParams.get('trm_ID');
                     var vcg_ID = urlParams.get('vcg_ID');
-                    var importDefTerms = new hImportDefTerms(trm_ID, vcg_ID);
+                    var isTranslation = (urlParams.get('trn')==1);
+                    var importDefTerms = new hImportDefTerms(trm_ID, vcg_ID, isTranslation);
                 }
             }
         
@@ -157,7 +158,7 @@ separate term and each of these values with comma or tab.
                     -->
                 </select>
             </div>
-            <div>
+            <div class="trm_import">
                 <label for="term_separator">Sub-term separator:</label>
                 <input id="term_separator" class="text ui-widget-content ui-corner-all" style="width: 25px;margin-left: 8px;">
             </div>
@@ -168,7 +169,7 @@ separate term and each of these values with comma or tab.
         <p><b>Step 3</b></p>
         <p style="padding-top:0.4em; margin-bottom: 10px;">Select field assignment<br>(Term label is required)</p>
     </div>
-    <fieldset style="padding-top:1em;">
+    <fieldset style="padding-top:1em;" class="trm_import">
            
             <div>
                 <label style="color:red">Term (Label)</label><br>
@@ -190,9 +191,36 @@ separate term and each of these values with comma or tab.
                 <select id="field_uri" class="column_roles text ui-widget-content ui-corner-all" style="width:120px;margin-left:20px">
                 </select>
             </div>
-            
-            
     </fieldset> 
+
+    <fieldset style="padding-top:1em;display:none" class="trm_translation">
+           
+            <label>Define field for reference</label>
+            <div>
+                <label>Term (Label)</label><br>
+                <select id="field_ref_term" class="column_roles text ui-widget-content ui-corner-all" style="width:120px;margin-left:20px">
+                </select>
+            </div>
+            <div style="display:none">
+                <label>OR Term ID</label><br>
+                <select id="field_ref_id" class="column_roles text ui-widget-content ui-corner-all" style="width:120px;margin-left:20px">
+                </select>
+            </div>
+            
+            <br><label>Define fields with translated values</label>
+            <div>
+                <label>Term (Label)</label><br>
+                <select id="field_trn_term" class="column_roles text ui-widget-content ui-corner-all" style="width:120px;margin-left:20px">
+                </select>
+            </div>
+            <div>
+                <label>Description</label><br>
+                <select id="field_trn_desc" class="column_roles text ui-widget-content ui-corner-all" style="width:120px;margin-left:20px">
+                </select>
+            </div>
+    </fieldset> 
+    
+    
     <div style="padding-left:5px;height:5em">
         <div id="preparedInfo2" style="font-weight:bold;font-size:1.1em;padding:4px"></div>
         <div id="btnImportData">Import</div>

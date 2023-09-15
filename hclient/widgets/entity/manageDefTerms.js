@@ -352,7 +352,11 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
 
                     {showText:false, icons:{primary:'ui-icon-upload',padding:'2px'}, text:window.hWin.HR('Import Terms'), //ui-icon-arrowthick-1-w
                         css:{'margin-right':'0.5em','display':'inline-block',padding:'2px'}, id:'btnImportVocab',
-                        click: function() { that._onActionListener(null, 'term-import'); }}
+                        click: function() { that._onActionListener(null, 'term-import'); }},
+                        
+                    {showText:false, icons:{primary:'ui-icon-translate',padding:'2px'}, text:window.hWin.HR('Import Translations'),
+                        css:{'margin-right':'0.5em','display':'inline-block',padding:'2px'}, id:'btnImportTranslations',
+                        click: function() { that._onActionListener(null, 'term-import-translations'); }}
                 ];
 
                 var btn_array2 = [
@@ -1562,8 +1566,6 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
                     }}
                 );
 
-
-
             }else{
 
                 btns[0].text = 'Close';
@@ -2520,6 +2522,10 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
                     this.importTerms(this.options.trm_VocabularyID, false);    
                 }
 
+            }else if(action=='term-import-translations'){
+
+                this.importTermsTranslations(this.options.trm_VocabularyID);    
+                
             }else if(action=='term-export'){
 
                 if(this.options.auxilary=='vocabulary'){
@@ -2836,9 +2842,7 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
     //
     importTerms: function(parent_ID, isVocab) {
 
-
         if(isVocab){
-
             sTitle = 'Import vocabularies (excluding terms) for vocabulary group: '+
             window.hWin.HEURIST4.util.htmlEscape($Db.vcg(parent_ID,'vcg_Name'));                
         }else{
@@ -2887,6 +2891,49 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
 
     },
 
+    //
+    // invokes popup to import translations of terms from file
+    //
+    importTermsTranslations: function(parent_ID) {
+
+        var isTerm = ($Db.trm(parent_ID,'trm_ParentTermID')>0);
+        sTitle = 'Import terms translations for '+(isTerm?'children of term: ' :'vocabulary: ')+
+        window.hWin.HEURIST4.util.htmlEscape($Db.trm(parent_ID,'trm_Label'));                
+
+        var that = this;
+
+        var sURL = window.hWin.HAPI4.baseURL + "import/delimited/importDefTerms.php?trn=1&db="
+        + window.hWin.HAPI4.database + '&trm_ID=' +parent_ID;
+
+        window.hWin.HEURIST4.msg.showDialog(sURL, {
+            default_palette_class: 'ui-heurist-design',
+            "close-on-blur": false,
+            "no-resize": false,                  
+            title: sTitle,
+            height: 600,
+            width: 900,
+            'context_help':window.hWin.HAPI4.baseURL+'context_help/defTerms.html #import',
+            callback: function(context){ 
+
+                if(context && context.result)
+                {
+                    window.hWin.HEURIST4.msg.showMsgDlg(
+                    context.result.cnt_added+' translations added<br>'+
+                    context.result.cnt_updated+' translations updated<br>'+
+                    context.result.cnt_error+' errors on addition<br>'+
+                    context.result.cnt_lang_missed+' language not detected<br>'+
+                    context.result.cnt_not_found+' terms not found<br>',
+                         null, 'Terms translations imported',
+                        {default_palette_class:that.options.default_palette_class});
+
+                }
+
+
+            }
+        });
+
+    },
+    
     //
     // invokes popup to import list of terms from file
     //

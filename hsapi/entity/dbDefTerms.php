@@ -612,8 +612,10 @@ class DbDefTerms extends DbEntityBase
 
             $mysqli = $this->system->get_mysqli();        
 
-            $this->need_transaction = false;
-            $keep_autocommit = mysql__begin_transaction($mysqli);
+            if(!@$this->data['get_translations']){
+                $this->need_transaction = false;
+                $keep_autocommit = mysql__begin_transaction($mysqli);
+            }
 
             $ret = true;
             
@@ -850,7 +852,8 @@ class DbDefTerms extends DbEntityBase
                     
                 }
                 
-            }else if(@$this->data['get_translations']){
+            }
+            else if(@$this->data['get_translations']){
 
                 $field = array_key_exists('search_by', $this->data) ? $this->data['search_by'] : 'trm_ID';
                 $field = $field != 'trm_ParentTermID' && $field != 'trm_ID' ? 'trm_ID' : $field;
@@ -867,6 +870,12 @@ class DbDefTerms extends DbEntityBase
 
                 return $this->_getTermTranslations(false, $ids); //see db_structure
 
+            }    
+            else if(@$this->data['set_translations']){
+                //set_translations - is array of pairs (trm_ID or trm_Label=>translated label (with lang prefix))
+                $ret = $this->_setTermTranslations(intval($this->data['vcb_ID']), $this->data['set_translations']); //see db_structure
+                
+                
             }else{
                 //import terms (from csv)
                 $ret = $this->_importTerms();
@@ -932,6 +941,119 @@ class DbDefTerms extends DbEntityBase
             'order'=>array_keys($records),
             'entityName'=>$this->config['entityName']
         );
+    }
+    
+    //
+    //
+    //
+    private function _setTermTranslations($vcb_ID, $data){
+        if(!($vcb_ID>0)){
+            $this->system->addError(HEURIST_INVALID_REQUEST, 'Vocabulary not defined');
+            return false;
+        }
+
+        if(!is_array($data)){
+            $data = json_decode($data, true);
+        }
+        if(!is_array($data)){
+            $this->system->addError(HEURIST_INVALID_REQUEST, 'Data to be imported is not valid json');
+            $res = false;
+        }else{
+            
+            $cnt_lang_missed = 0;
+            $cnt_not_found = 0;
+            $cnt_added = 0;
+            $cnt_updated = 0;
+            $cnt_error = 0;
+            
+            $mysqli = $this->system->get_mysqli();        
+            
+            $stmt_select = $mysqli->prepare('SELECT trm_ID FROM defTerms WHERE trm_Label=?');
+            $stmt_update = $mysqli->prepare('UPDATE defTranslations SET trn_Translation=? WHERE trn_Code=? AND trn_Source=? AND trn_LanguageCode=?');
+            $stmt_insert = $mysqli->prepare('INSERT INTO defTranslations (trn_Code, trn_Source, trn_LanguageCode, trn_Translation) VALUES (?,?,?,?)');
+            $stmt_select2 = $mysqli->prepare('SELECT trn_Translation FROM defTranslations WHERE trn_Code=? AND trn_Source=? AND trn_LanguageCode=?');
+            
+            
+            $all_labels = $this->getLabelsAndCodes($vcb_ID);
+
+            
+            foreach($data as $translation){
+                
+                $ref_id = $translation['ref_id'];
+                
+                //find trm_ID
+                $trm_ID = -1;
+                foreach($all_labels as $id=>$val){
+                    if(strcasecmp($ref_id, $val['trm_Label'])==0){
+                        $trm_ID = $id;
+                        break;       
+                    }
+                    
+                }
+                //$trm_ID = array_search($ref_id, $all_labels, false);
+                /*
+                if(intval($id)>0){
+                    $trm_ID = $id;
+                }else{
+                    $stmt_select->bind_param('s', $ref_id);
+                    if($stmt_select->execute()){
+                        $result = $stmt_select->get_result();
+                        $row = $result->fetch_row();
+                        $trm_ID = $row[0];
+                    }
+                }*/
+                
+                if($trm_ID>0){
+                
+                    foreach($translation as $field_name=>$value){
+                        
+                        if($field_name=='ref_id') continue;
+                        
+                        list($lang_code, $value) = extractLangPrefix($value);
+                        
+                        if($lang_code!=null){
+                        
+                            $stmt_select2->bind_param('iss', $trm_ID, $field_name, $lang_code);
+                            if($stmt_select2->execute()){
+                                $result = $stmt_select2->get_result();
+                                $row = $result->fetch_row();
+                                if($row){
+                                    if($value==$row[0]){
+                                        continue; //already exist
+                                    }else{
+                                        $stmt_update->bind_param('siss', $value, $trm_ID, $field_name, $lang_code );
+                                        $stmt_update->execute();
+                                        if($mysqli->affected_rows>0){
+                                            $cnt_updated++;
+                                            continue;
+                                        }
+                                    }
+                                }
+                            }else{
+                                $cnt_error++;
+                                continue;
+                            }
+                            $stmt_insert->bind_param('isss', $trm_ID, $field_name, $lang_code, $value);
+                            $stmt_insert->execute();
+                            if($mysqli->insert_id>0){
+                                $cnt_added++;
+                            }else{
+                                $cnt_error++;
+                            }
+
+                        }else{
+                            $cnt_lang_missed++;
+                        }
+                    }
+                }else{
+                    $cnt_not_found++;
+                }
+            }
+            
+            return array('cnt_lang_missed'=>$cnt_lang_missed,'cnt_not_found'=>$cnt_not_found,
+                         'cnt_added'=>$cnt_added,'cnt_updated'=>$cnt_updated,'cnt_error'=>$cnt_error);
+        }
+
     }
     
     //
@@ -1035,7 +1157,7 @@ class DbDefTerms extends DbEntityBase
     }
     
     //
-    //
+    // get flat array of trm_ID=>trm_Label fro given parent
     //
     private function getLabelsAndCodes($parent_id, $all_levels=true){
     

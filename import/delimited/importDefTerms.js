@@ -20,21 +20,25 @@
 * See the License for the specific language governing permissions and limitations under the License.
 */
 
-function hImportDefTerms(_trm_ParentTermID, _vcg_ID) {
+function hImportDefTerms(_trm_ParentTermID, _vcg_ID, isImportTranslations) {
     var _className = "ImportDefTerms",
     _version   = "0.4",
     
     _parseddata = null,
     _prepareddata,
     
+    _isTranslation = false,
+    
     trm_ParentTermID, vcg_ID,
     trm_ParentDomain,
     trm_VocabularyID,
     vcg_ID,
-    trm_ParentChildren= [];
+    trm_ParentChildren= []; //flat list of children labels in lower case
     
-    function _init(_trm_ParentTermID, _vcg_ID){
+    function _init(_trm_ParentTermID, _vcg_ID, isImportTranslations){
                 
+        _isTranslation = isImportTranslations;
+
         trm_ParentTermID = _trm_ParentTermID;
         trm_VocabularyID = 0;
         vcg_ID = _vcg_ID;
@@ -196,11 +200,15 @@ function hImportDefTerms(_trm_ParentTermID, _vcg_ID) {
                 }       
                 
                 //form update array
-                _doPrepare();
-                
+                _doPrepare();    
         });
 
         window.hWin.HEURIST4.ui.createEncodingSelect($('#csv_encoding'));
+        
+        if(_isTranslation){
+            $('.trm_translation').show();
+            $('.trm_import').hide();
+        }
     }
 
     
@@ -281,6 +289,11 @@ function hImportDefTerms(_trm_ParentTermID, _vcg_ID) {
                 opt.clone().appendTo($('#field_code'));
                 opt.clone().appendTo($('#field_desc'));
                 opt.clone().appendTo($('#field_uri'));
+                
+                opt.clone().appendTo($('#field_ref_term'));
+                opt.clone().appendTo($('#field_ref_id'));
+                opt.clone().appendTo($('#field_trn_term'));
+                opt.clone().appendTo($('#field_trn_desc'));
             }
             if(maxcol>0){
                 $('#field_term').val(0);
@@ -385,10 +398,16 @@ function hImportDefTerms(_trm_ParentTermID, _vcg_ID) {
         }
     }
                                       
-                                      
+    //
     // prepare update array
     //
     function _doPrepare(){
+        
+        if(_isTranslation){
+            _doPrepareTranslation();
+            return;   
+        }
+        
         
         var msg = '';
         
@@ -427,6 +446,7 @@ function hImportDefTerms(_trm_ParentTermID, _vcg_ID) {
                     if(!window.hWin.HEURIST4.util.isempty(lbl)){
                         
                         //verify duplication in parent term and in already added
+                        // trm_ParentChildren - flat list of children labels in lower case
                         if(trm_ParentChildren.indexOf(lbl.toLowerCase())>=0 || 
                            labels.indexOf(lbl.toLowerCase())>=0)
                         {
@@ -492,6 +512,101 @@ function hImportDefTerms(_trm_ParentTermID, _vcg_ID) {
         
         $('#preparedInfo').html(msg);
     }
+
+
+    //
+    // prepare translation update array
+    //
+    function _doPrepareTranslation(){
+        
+        var msg = '';
+        
+        _prepareddata = [];
+        
+        if(!window.hWin.HEURIST4.util.isArrayNotEmpty(_parseddata)){
+            msg = '<i>No data. Upload and parse</i>';
+        }else{
+        
+            if($('#field_ref_term').val()==''){ // && $('#field_ref_id').val()<0
+                msg = '<span style="color:red">Reference Term(Label) must be always defined</span>';
+            }else{
+                
+                var field_ref_id = $('#field_ref_id').val();
+                var field_ref_term = $('#field_ref_term').val();
+            
+                var field_trn_term = $('#field_trn_term').val();
+                var field_trn_desc = $('#field_trn_desc').val();
+
+                var i, record, skip_na = 0, skip_not_found = 0, skip_long = 0;
+                        
+                var hasHeader = $('#csv_header').is(':checked');
+                i = hasHeader?1:0;        
+                        
+                for(;i<_parseddata.length;i++){
+                    
+                    if(field_ref_term>=0){
+                        if(field_ref_term>=_parseddata[i].length) continue; //out of row extent
+                        
+                        var lbl = null;
+                        
+                        if(!window.hWin.HEURIST4.util.isempty(_parseddata[i][field_ref_term])){
+                            lbl = _parseddata[i][field_ref_term].trim();
+                        }
+                        
+                        if(window.hWin.HEURIST4.util.isempty(lbl)){
+                                skip_na++;
+                        }else if(lbl.length>500){
+                                skip_long++;    
+                        }else
+                        if(trm_ParentChildren.indexOf(lbl.toLowerCase())<0){
+                                skip_not_found++;
+                        }else{
+                            
+                            record = {ref_id:lbl};
+                            
+                            if(field_trn_desc>-1 && field_trn_desc<_parseddata[i].length){
+                                record['trm_Description'] = _parseddata[i][field_trn_desc];
+                            }
+                            if(field_trn_term>-1 && field_trn_term<_parseddata[i].length){
+                                record['trm_Label'] = _parseddata[i][field_trn_term];
+                            }
+                            
+                            _prepareddata.push( record )
+                            
+                        }                        
+                    } 
+                }//for
+
+                $('#preparedInfo2').html('');
+                
+                if(_prepareddata.length==0){
+                    msg = '<span style="color:red">No valid data to import</span>';   
+                }else{
+                    //msg = 'Ready to import: n='+_prepareddata.length;//+' entr'+((_prepareddata.length>1)?'ies':'y');
+                    $('#preparedInfo2').html('n = '+_prepareddata.length);
+                }
+                if(skip_na>0 || skip_not_found>0 || skip_long>0){
+                    msg = msg + '&nbsp;&nbsp;Term (label) is';
+                }
+                if(skip_na>0){
+                    msg = msg + ' not defined for '+skip_na+' row'+((skip_na>1)?'s;':';');    
+                }
+                if(skip_not_found>0){
+                    msg = msg + ' not found for '+skip_not_found+' row'+((skip_not_found>1)?'s;':';');    
+                }
+                if(skip_long>0){
+                    msg = msg + ' very long (>500 chars) for '+skip_long+' row'+((skip_long>1)?'s':'');    
+                }
+                
+                
+            }
+        
+        }
+        
+        window.hWin.HEURIST4.util.setDisabled($('#btnImportData'), (_prepareddata.length<1));
+        
+        $('#preparedInfo').html(msg);
+    }
     
     
     //
@@ -506,10 +621,16 @@ function hImportDefTerms(_trm_ParentTermID, _vcg_ID) {
         var request = {
             'a'          : 'batch',
             'entity'     : 'defTerms',
-            'request_id' : window.hWin.HEURIST4.util.random(),
-            'fields'     : JSON.stringify(_prepareddata),
-            'term_separator': $('#term_separator').val()
+            'request_id' : window.hWin.HEURIST4.util.random()
         };
+        
+        if(_isTranslation){
+            request['set_translations'] = JSON.stringify(_prepareddata);
+            request['vcb_ID'] = trm_ParentTermID;
+        }else{
+            request['fields'] = JSON.stringify(_prepareddata);
+            request['term_separator'] = $('#term_separator').val();
+        }
     
         var that = this;
         //that.loadanimation(true);
@@ -518,14 +639,18 @@ function hImportDefTerms(_trm_ParentTermID, _vcg_ID) {
                 window.hWin.HEURIST4.msg.sendCoverallToBack();
                 
                 if(response.status == window.hWin.ResponseStatus.OK){
-
-                    var recIDs = response.data;
-                    //refresh local defintions
-                    window.hWin.HAPI4.EntityMgr.refreshEntityData('trm',
-                            function(){
-                                window.close( { result:recIDs } );            
-                            }
-                    );
+                
+                    if(_isTranslation){
+                        window.close( { result:response.data } );
+                    }else{
+                        var recIDs = response.data;
+                        //refresh local defintions
+                        window.hWin.HAPI4.EntityMgr.refreshEntityData('trm',
+                                function(){
+                                    window.close( { result:recIDs } );            
+                                }
+                        );
+                    }
                     
                 }else{
                     window.hWin.HEURIST4.msg.showMsgErr(response);
@@ -543,7 +668,7 @@ function hImportDefTerms(_trm_ParentTermID, _vcg_ID) {
 
     }
 
-    _init(_trm_ParentTermID, _vcg_ID);
+    _init(_trm_ParentTermID, _vcg_ID, isImportTranslations);
     return that;  //returns object
 }
     
