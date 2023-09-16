@@ -1060,10 +1060,51 @@ $.widget( "heurist.editing_input", {
                                     onAction: function (_) {  //since v5 onAction in v4 onclick
                                         selectRecord(null, function(recordset){
                                             
-                                            var record = recordset.getFirstRecord();
-                                            var record_id = recordset.fld(record,'rec_ID');
-                                            tinymce.activeEditor.execCommand('mceInsertLink', false, record_id);
+                                            let record = recordset.getFirstRecord();
+                                            const record_id = recordset.fld(record,'rec_ID');
+                                            let href = `${record_id}_${window.hWin.HEURIST4.util.random()}`;
+                                            tinymce.activeEditor.execCommand('mceInsertLink', false, href);
                                             
+                                            let $link = $(tinymce.activeEditor.selection.getNode());
+                                            if(!$link.is('a')){
+                                                $link = $link.find(`a[href="${href}"]`);
+                                            }
+                                            if($link.length == 0){
+                                                $link = $(tinymce.activeEditor.contentDocument).find(`a[href="${href}"]`);
+                                            }
+
+                                            $link.attr('href', record_id).attr('data-mce-href', record_id);
+
+                                            // Customise link's target and whether to open in default rec viewer or custom report
+                                            let $dlg;
+                                            let msg = `Inserting a link to ${recordset.fld(record,'rec_Title')}<br><br>`
+                                                    + 'Open record in: <select id="a_recview"></select><br><br>'
+                                                    + 'Open link as: <select id="a_target"><option value="_blank">New tab</option><option value="_self">Within window</option><option value="_popup">Within popup</option></select><br>';
+
+                                            let btns = {};
+                                            btns[window.HR('Insert')] = function(){
+
+                                                let target = $dlg.find('#a_target').val();
+                                                let template = $dlg.find('#a_recview').val();
+
+                                                $link.attr('target', target)
+
+                                                if(!window.hWin.HEURIST4.util.isempty(template)){
+
+                                                    let new_href = record_id + '/' + template;
+
+                                                    $link.attr('href', new_href).attr('data-mce-href', new_href);
+                                                }
+
+                                                $dlg.dialog('close');
+                                            };
+                                            btns[window.HR('Cancel')] = function(){ $dlg.dialog('close'); }
+
+                                            $dlg = window.hWin.HEURIST4.msg.showMsgDlg(msg, btns, {title: 'Inserting link to Heurist record', ok: window.HR('Insert link'), cancel: window.HR('Cancel')}, 
+                                                {default_palette_class: 'ui-heurist-populate'});
+
+                                            window.hWin.HEURIST4.ui.createTemplateSelector($dlg.find('#a_recview'), [{key: '', title: 'Default record viewer'}]);
+
                                         });
                                     }
                                 });                                        
@@ -1140,22 +1181,25 @@ $.widget( "heurist.editing_input", {
                                     $(document).find('.tox-menu [title="Open link"]').on('click', function(e){
 
                                         let node = tinymce.activeEditor.selection.getNode();
-                                        const href = $(node).attr('href');
+                                        const org_href = $(node).attr('href');
+                                        let href = '';
 
-                                        if(window.hWin.HEURIST4.util.isNumber(href) && href > 0){ // open new tab linked to record viewer
+                                        if(org_href.indexOf('/') !== -1){ // check if href is in the format of record_id/custom_report
 
-                                            /* open new tab linked to record viewer
-                                            window.hWin.HEURIST4.util.stopEvent(e);
-                                            e.stopImmediatePropagation();
+                                            let parts = org_href.split('/');
 
-                                            window.open(`${window.hWin.HAPI4.baseURL}?recID=${href}&fmt=html&db=${window.hWin.HAPI4.database}`, '_blank');
+                                            if(parts.length == 2 && window.hWin.HEURIST4.util.isNumber(parts[0]) && parts[0] > 0){
+                                                href = `${window.hWin.HAPI4.baseURL}viewers/smarty/showReps.php?publish=1&db=${window.hWin.HAPI4.database}&q=ids:${parts[0]}&template=${parts[1]}`
+                                            }
+                                        }else 
+                                        if(window.hWin.HEURIST4.util.isNumber(org_href) && org_href > 0){ // check if href is just the record id
 
-                                            $(document).blur();
-                                            */
+                                            href = `${window.hWin.HAPI4.baseURL}?recID=${href}&fmt=html&db=${window.hWin.HAPI4.database}`;
+                                        }
 
-                                            // replace simple rec ID with record link
-                                            $(node).attr('href', window.hWin.HAPI4.baseURL + '?recID=' + href + '&fmt=html&db=' + window.hWin.HAPI4.database);
-                                            setTimeout((ele, org_href) => { $(ele).attr('href', org_href); }, 500, node, href);
+                                        if(!window.hWin.HEURIST4.util.isempty(href)){ // use different url
+                                            $(node).attr('href', href);
+                                            setTimeout((ele, org_href) => { $(ele).attr('href', org_href); }, 500, node, org_href);
                                         }
                                     });
                                 }, 500);

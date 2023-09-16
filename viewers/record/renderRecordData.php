@@ -1356,9 +1356,13 @@ function print_public_details($bib) {
                 $bd['val'] = nl2br(str_replace('  ', '&nbsp; ', output_chunker($bd['val'])));
                 //replace link <a href="[numeric]"> to record view links
                 
-                $bd['val'] = preg_replace('/href=["|\']?(\d+)["|\']?/',
-                        'onclick="return link_open(this);" href="'
-                        .$system->recordLink('$1').'"',
+                $bd['val'] = preg_replace_callback('/href=["|\']?(\d+\/.+\.tpl|\d+)["|\']?/',
+                        function($matches){
+                            global $system;
+
+                            return 'onclick="return link_open(this);" href="'
+                                    .$system->recordLink($matches[1]).'"';
+                        },
                         $bd['val']);
                 
 

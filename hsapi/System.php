@@ -1897,19 +1897,40 @@ error_log(print_r($_REQUEST, true));
     //
     //
     public function recordLink($rec_id){
+
         global $useRewrtieRulesForRecordLink;
-        
+
+        $template = '';
+        if(preg_match('/(\d+)\/(.+\.tpl)/', $rec_id, $matches)){ //strpos($rec_id, "/") !== false
+
+            //$parts = explode("/", $rec_id);
+            $rec_id = intval($matches[1]);
+            $template = $matches[2];
+
+            // Check that the report exists
+            if(empty($template) || !file_exists($this->getSysDir('smarty-templates') . $template)){
+                $template = ''; // use standard record viewer
+            }else{
+                $template = urlencode($template);
+            }
+        }
+
         if(isset($useRewrtieRulesForRecordLink) && $useRewrtieRulesForRecordLink){
-            return HEURIST_BASE_URL.$this->dbname.'/view/'.$rec_id;
+            $url = empty($template) ? HEURIST_BASE_URL.$this->dbname.'/view/'.$rec_id 
+                        : HEURIST_BASE_URL.$this->dbname.'/tpl/'.$template.'/'.$rec_id;
+
+            return $url;
         }else{
-            // HEURIST_SERVER_URL.'heurist/'
-            return HEURIST_BASE_URL.'?recID='.$rec_id.'&fmt=html&db='.$this->dbname;
+            $url = empty($template) ? HEURIST_BASE_URL.'?recID='.$rec_id.'&fmt=html&db='.$this->dbname 
+                        : HEURIST_BASE_URL . 'viewers/smarty/showReps.php?publish=1&db='.$this->dbname.'&q=ids:'.$rec_id.'&template='.$template;
+
+            return $url;
             /* it will be redirected
                 HEURIST_BASE_URL.'viewers/record/renderRecordData.php?db='
                     .$this->dbname.'&recID='.$rec_id;
             */
         }
-    }                        
+    }
 
 
     //
