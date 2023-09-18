@@ -111,8 +111,8 @@ if( isset($passwordForDatabaseCreation) && $passwordForDatabaseCreation!='' &&
             
             $user_record = array();
             foreach($_REQUEST as $name=>$val){
-                if(strpos($name,'urg_')===0){
-                    $user_record = getUsrField($name);    
+                if(strpos($name,'ugr_')===0){
+                    $user_record[$name] = getUsrField($name);    
                 }
             }
             
