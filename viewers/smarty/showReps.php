@@ -582,7 +582,7 @@ function smarty_post_filter($tpl_source, Smarty_Internal_Template $template)
 //
 function smarty_output_filter_strip_js($tpl_source, Smarty_Internal_Template $template){
     
-    global $system, $is_jsallowed, $record_with_custom_styles, $is_headless, $outputmode;
+    global $system, $is_jsallowed, $record_with_custom_styles, $is_headless, $outputmode, $publishmode;
     
     if($outputmode=='js' || $outputmode=='html'){
     
@@ -832,12 +832,27 @@ function smarty_output_filter_strip_js($tpl_source, Smarty_Internal_Template $te
     }
     
     $onclick = '';
-    if($publishmode==0){
-        $onclick = 'onclick="{try{var h=window.hWin?window.hWin.HEURIST4:window.parent.hWin.HEURIST4;h.msg.showDialog(event.target.href,{title:\'.\',width: 600,height:500,modal:false});return false}catch(e){return true}}" ';
+    if($publishmode==0 || $publishmode==1){
+        $onclick = 'onclick="'
+            . '{try'
+                .'{'
+                    .'let event_target = event.target.getAttribute("target");'
+                    .'let def_targets = ["_self","_blank","_parent","_top"];'
+                    .'if(event_target && def_targets.indexOf(event_target) !== -1){ return true; }'
+                    .'var h=window.hWin?window.hWin.HEURIST4:window.parent.hWin.HEURIST4;'
+                    .'h.msg.showDialog(event.target.href,{title:\'.\',width: 600,height:500,modal:false});'
+                    .'return false'
+                .'}catch(e){'
+                    .'return true'
+                .'}'
+            .'}" ';
     }
     
-    $tpl_source = preg_replace('/href=["|\']?(\d+)["|\']?/',
-        $onclick.'href="'.$system->recordLink('$1').'"', 
+    $tpl_source = preg_replace_callback('/href=["|\']?(\d+\/.+\.tpl|\d+)["|\']?/',
+        function($matches) use ($onclick){
+            global $system;
+            return $onclick.'href="'.$system->recordLink($matches[1]).'"';
+        },
         $tpl_source);
     
     return $tpl_source;

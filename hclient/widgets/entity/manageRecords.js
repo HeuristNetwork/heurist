@@ -3586,6 +3586,7 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
                                 const range_regex = /\d+|[à|.|to|\-|,]+/g; // 1990-1995, 1990to1995, 1990..1995, 1990,1995 (spaces removed first)
                                 const has_named_month = /(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)/ig; // e.g. 12Jan1995
 
+                                // Approximate date
                                 let matches = values[k].match(approx_regex);
                                 if(!window.hWin.HEURIST4.util.isempty(matches) && matches.length > 0){ // approx value, setup simple date with circa value
 
@@ -3616,6 +3617,7 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
                                     continue;
                                 }
 
+                                // Ranged dates
                                 matches = [...value_spaceless.matchAll(range_regex)];
                                 if(!window.hWin.HEURIST4.util.isempty(matches) && matches.length > 0 
                                         && has_range.test(value_spaceless) && (value_spaceless.split('-')<3) ){
@@ -3678,6 +3680,7 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
                                     }
                                 }
 
+                                // Named month
                                 matches = [...values[k].matchAll(has_named_month)];
                                 if(!window.hWin.HEURIST4.util.isempty(matches) && matches.length == 1){
 
@@ -3700,6 +3703,18 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
                                             continue;
                                         }
                                     }
+                                }
+
+                                // Date + time value - replace '-' between date and time with ' T '
+                                matches = [...values[k].matchAll(/-\s?\d{1,2}:/g)];
+                                if(matches.length == 1){
+
+                                    let new_value = matches[0][0];
+                                    new_value = 'T' + new_value.substring(1);
+                                    values[k] = values[k].replace(matches[0][0], new_value);
+
+                                    updated_values = true;
+                                    continue;
                                 }
 
                                 // Check for simple ambiguity or carbon year
