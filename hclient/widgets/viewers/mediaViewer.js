@@ -95,8 +95,6 @@ $.widget( "heurist.mediaViewer", {
     // revert other modifications here
     _destroy: function() {
         this.mediacontent.empty();
-//        $(document).unbind('click.fb-start');
-//console.log('_destroy');
     }
 
     //
@@ -171,94 +169,6 @@ $.widget( "heurist.mediaViewer", {
                     $('<img>', {src: thumbURL, title:filetitle})
                             .css({border: '2px solid #FFF', margin:'5px', 'box-shadow': '0 2px 4px #bbb', width:'200px'})
                             .appendTo($alink);
-
-                    /*
-                    if(filename && filename.indexOf('_iiif') === 0){ //manifest
-
-                        var param = 'manifest';
-                        if(filename == '_iiif_image'){
-                            param = 'q'; //it adds format=iiif in miradorViewer.php
-                            obf_recID = 'ids:'+rec_ID;
-                            if(rec_ID>0) $alink.attr('data-id', obf_recID);
-                        }
-                        $alink.attr('data-iiif', param);
-                        
-                    
-                        //for link below thumb                        
-                        external_url =  this.options.baseURL 
-                                 + "hclient/widgets/viewers/miradorViewer.php?db=" 
-                                 +  this.options.database
-                                 + '&' + param + '='+obf_recID;
-//console.log(external_url);                        
-                        //on thumbnail click
-                        this._on($alink,{click:function(e){
-                            
-                              var ele = $(e.target)
-                              ele = ele.is('a')?ele:ele.parent();
-                              
-                              var param  = ele.attr('data-iiif');
-                              var obf_recID = ele.attr('data-id');
-                              
-                              var url =  this.options.baseURL 
-                                    + "hclient/widgets/viewers/miradorViewer.php?db=" 
-                                    +  this.options.database
-                                    + '&' + param + '='+obf_recID;
-                                 
-                                
-                              if(window.hWin && window.hWin.HEURIST4){
-                                    //borderless:true, 
-                                    window.hWin.HEURIST4.msg.showDialog(url, 
-                                        {dialogid:'mirador-viewer',
-                                         resizable:false, draggable: false, maximize:true, //width:'100%',height:'100%',
-                                         allowfullscreen:true,'padding-content':'0px'});   
-                              }else{
-                                    window.open(url, '_blank');        
-                              }
-      
-                        }});
-                        
-                    }else
-                    if(mimeType.indexOf('image')===0){
-                        
-                        $alink.attr('href',external_url?external_url:fileURL).attr('data-myfancybox','fb-images');
-                    }else 
-                    if(false && mimeType=='application/pdf'){
-
-                        var fileURL_forembed =  this.options.baseURL
-                                + 'hsapi/controller/file_download.php?db=' 
-                                +  this.options.database + '&embedplayer=1&file='+obf_recID;
-                                
-                        $('<div style="display:none;width:80%;height:90%" id="pdf-viewer">'
-                                + '<object width="100%" height="100%" name="plugin" data="'
-                                + fileURL_forembed
-                                + '" type="application/pdf"></object></div>').appendTo(this.mediacontent);
-
-                        $alink.attr('href','javascript:;').attr('data-src','#pdf-viewer').attr('data-myfancybox','fb-images');
-                    }
-                    else if(mimeType=='application/pdf' || mimeType.indexOf('audio/')===0 || mimeType.indexOf('video/')===0){
-
-                        external_url = fileURL  + '&mode=page';
-                        fileURL = fileURL  + '&mode=tag&fancybox=1';
-                        
-                        
-                        if(this.options.openInPopup && mimeType.indexOf('audio/')!==0){
-                            
-                            $alink.attr('href','javascript:;')
-                                .attr('data-src', fileURL)
-                                .attr('data-type', 'ajax')
-                                .attr('data-myfancybox','fb-images');
-                            
-                            
-                        }else{
-                            $alink.hide();
-                            var ele = $('<div>').css({width:'90%',height:'160px'}).load( fileURL );
-                            ele.appendTo(this.mediacontent);
-                        }
-                    }else{
-                        //just thumbnail
-                        $alink.css('cursor','default');
-                    }
-                    */
                 }
                 
                 if(this.options.showLink){
@@ -291,7 +201,7 @@ $.widget( "heurist.mediaViewer", {
                                 .appendTo(this.mediacontent);
                        */
                     }else{
-                        $('<a>', {href:(fileURL+'&download=1'), target:'_surf'})   //&debug=3
+                        $('<a>', {href:(fileURL+'&download=1'), target:'_surf'}) 
                                 .text('DOWNLOAD')
                                 .addClass('external-link image_tool')
                                 .appendTo(this.mediacontent);
@@ -407,7 +317,6 @@ $.widget( "heurist.mediaViewer", {
                                 external_url =  external_url + '&recID='+rec_ID;    
                             }
                                      
-//    console.log(external_url);                        
                             //on thumbnail click
                             that._on($alink, {click:function(e){
                                 

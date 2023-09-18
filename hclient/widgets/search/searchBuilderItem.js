@@ -406,7 +406,6 @@ $.widget( "heurist.searchBuilderItem", {
 
             let compare = this.select_comparison.val();
 
-            //console.log(this.options.rty_ID+'  '+dty_ID);            
             field_type = $Db.dty(dty_ID,'dty_Type');
             if(field_type=='blocktext' || compare == 'count') field_type = 'freetext';
 
@@ -948,7 +947,6 @@ Whole value = EQUAL
 
                 var mh = $(eles[0]).height();
 
-//console.log('changes '+vals.length+'  '+cnt+'  h='+mh);
                 cnt = cnt-2;
                 eles = [];
                 while(cnt--) eles.push('<div class="conj" style="line-height:'+(mh+1)+'px;padding:0px '

@@ -97,13 +97,8 @@ private static function _readDataFile($filename, $type=null, $validate=true){
         {     
             
             if(isXMLfile($filename)){
-
                 $data = self::hmlToJson($filename);
-                
-//debug error_log( json_encode($data) );
-                
             }else{
-                
                 $content = file_get_contents($filename);
                 $data = json_decode($content, true);
             }
@@ -431,12 +426,7 @@ public static function importDefintions($filename, $session_id){
         ini_set('max_execution_time', '0');
         $importDef = new DbsImport( self::$system );
 
-//$time_debug = microtime(true);        
-//    $allow_import_unregistered = (@$params['allow_unregistered']===true || @$params['allow_unregistered']==1);
-
         //special case - target is registered
-
-            
         if (false && !(@$data['heurist']['database']['id']>0)) {  //TT1 - todo use $allow_import_unregistered
             self::$system->addError(HEURIST_ERROR, '<b>Not possible to determine an origin database id (source of import).</b>'
 .'<br><br><div>Value read = 0 = non-Heurist source or unregistered Heurist database. This will only work if your database already'
@@ -461,10 +451,6 @@ public static function importDefintions($filename, $session_id){
             $res = $importDef->doImport();
         }
 
-//if(_DBG) 
-//error_log('prepare and import '.(microtime(true)-$time_debug));        
-//$time_debug = microtime(true);        
-        
         if(!$res){
             /*$err = self::$system->getError();
             if($err && $err['status']!=HEURIST_NOT_FOUND){
@@ -474,9 +460,6 @@ public static function importDefintions($filename, $session_id){
             //need to call refresh client side defintions
             $res = 'ok'; //$importDef->getReport(false);
         }
-
-//error_log('report '.(microtime(true)-$time_debug));        
-        
     }
     
     return $res;
@@ -999,7 +982,6 @@ EOD;
             
             if(@$record_src['details']==null){
                 array_push($rec_ids_details_empty, $record_src['rec_ID']); 
-                //error_log('Details not defefined for source record '.$record_src['rec_ID']);
                 continue;
             }
 
@@ -1195,7 +1177,6 @@ EOD;
                    }
                    $is_parent = false;
                    if(@$def_rst[$recTypeID]['dtFields'][$ftId]!=null){
-                       //error_log("Field $idx_parent not defined for rt $recTypeID dt $ftId");
                        $is_parent = ($def_rst[$recTypeID]['dtFields'][$ftId][$idx_parent]==1);
                    }
                    
@@ -1279,14 +1260,9 @@ EOD;
             // note: we need to suppress creation of reverse 247 pointer for parent-child links
             
             //no transaction, suppress parent-child
-            //DEBUG $out = array('status'=>HEURIST_OK, 'data'=>1);
             $out = recordSave(self::$system, $record, false, true, $update_mode, $record_count);  //see db_records.php
 
             if ( @$out['status'] != HEURIST_OK ) {
-//error_log(print_r($record,true));                
-                //$origninal_RecID = $record_src['rec_ID'];
-                //error_log('NOT SAVED');
-                //error_log(print_r($record, true));
                 $is_rollback = true;
                 break;
             }
@@ -1313,7 +1289,6 @@ EOD;
                 //check for termination and set new value
                 if ($execution_counter % 100 == 0) { //(intdiv($execution_counter,100) == $execution_counter/100){
                     $current_val = mysql__update_progress($mysqli, $session_id, false, $session_val);
-//error_log($session_id.'  '.$current_val);                    
                 }
                 
                 if($current_val && $current_val=='terminate'){ //session was terminated from client side
@@ -1491,8 +1466,6 @@ EOD;
             
     }//$data
 
-//if($is_debug) print print_r($res,true).'<br>';
-    
     //finish progress session
     mysql__update_progress($mysqli, $session_id, false, 'REMOVE');
         

@@ -210,8 +210,6 @@ if($response!=null){
     
     $options['print_response'] = false;
     
-//error_log(print_r($options,true));    
-    
     $upload_handler = new UploadHandler($options);  // from 3d party uploader
     
     //@todo set print_response=false
@@ -306,7 +304,6 @@ function postmode_file_selection() {
         if ($_FILES[$param_name]['size'] == 0) {
             $error = 'no file was uploaded';
         } else {
- //DEBUG print $_FILES['import_file']['error'];            
             switch ($_FILES[$param_name]['error']) {
                 case UPLOAD_ERR_OK:
                     break;

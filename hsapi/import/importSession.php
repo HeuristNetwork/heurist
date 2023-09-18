@@ -124,7 +124,6 @@ public static function setPrimaryRectype($imp_ID, $rty_ID, $sequence){
             return dbs_GetRectypeStructureTree(self::$system, $rty_ID, 6, 'resource');  //?? 6    
         }catch(Exception $e){
             $sMsg = $e->getCode().' ('.$e->getErrorType().'): '.$e->getMessage();
-error_log($sMsg);                    
             self::$system->addError(HEURIST_ERROR, 'Cannot generate structure tree for record type '.$rty_ID.' session #'.$imp_ID, $sMsg);
             return false;
         }

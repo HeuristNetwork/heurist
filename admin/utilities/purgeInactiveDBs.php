@@ -149,12 +149,6 @@ print 'Mail: '.HEURIST_MAIL_DOMAIN.'   Domain: '.HEURIST_SERVER_NAME."\n";
 
 $mysqli = $system->get_mysqli();
 $databases = mysql__getdatabases4($mysqli, false);   
-//DEBUG $databases = array('ACD_Basins','ACD_Candlesticks');
-//$databases = array('arche_proscrits_2019');
-// ARNP_COMET
-//$databases = array('vycao_iNprint_V3');
-    
-//Base_Demeter, efa_cid_vii
 
 $upload_root = $system->getFileStoreRootFolder();
 $backup_root = $upload_root.'DELETED_DATABASES/';

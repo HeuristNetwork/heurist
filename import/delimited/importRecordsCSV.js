@@ -491,7 +491,6 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
                             var resp = new hRecordSet( response.data );
                             var record = resp.getFirstRecord();
                             var ses = resp.fld(record, 'sif_ProcessingInfo');
-                            //DEBUG $('#divFieldMapping2').html( ses );
                             
                             imp_session = (typeof ses == "string") ? $.parseJSON(ses) : null;
                             
@@ -850,7 +849,6 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
              var field = fields[selected_fields[i]];
              
              if(!field){
-                 //console.log(i+'  '+selected_fields[i]);
                  continue;
              }
              
@@ -2116,7 +2114,6 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
 
         $.each(rec_results, function(opt_id, field_res){
             var result = Object.entries(field_res); 
-//console.log(opt_id, result);
             result.sort((a, b) => b[1] - a[1]);
 
             for (var i = 0; i < result.length; i++) {
@@ -2312,7 +2309,6 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
                     
             }
         });
-//console.log(exact_matches);        
         _performPartialMatching(imp_session['columns']);        
         
         //show counts
@@ -4189,7 +4185,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
                         var dt_id2 = (dt_id>0) ?dt_id :dt_id.substr(0,dt_id.indexOf('_'));
                         
                         if($Db.rst(rtyID, dt_id2)==null){
-                            console.log('ERROR: field '+dt_id2+' not found for '+rtyID);
+                            console.error('ERROR: field '+dt_id2+' not found for '+rtyID);
                         }else
                         if($Db.rst(rtyID, dt_id2, 'rst_RequirementType') == "required"){
                             colname = colname + "*";

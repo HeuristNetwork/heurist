@@ -520,8 +520,7 @@ function hMapManager( _options )
                                        
                                     },
                                     loadChildren: function(e, data){
-    //
-    //console.log('loaded '+data.node.title+'  '+data.node.children.length);
+    
                                         setTimeout(function(){
                                             
                                             if(data.node.data.type=='mapdocument'){

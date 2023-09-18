@@ -199,7 +199,6 @@ if(isset($_POST['data'])) {
             options.sort(function(a, b) {
                 return a.name.localeCompare(b.name);
             });
-            console.log("Determined options", options);
 
             // Generate HTML
             var html = "<option value=\"-1\" disabled=\"disabled\" selected=\"selected\">Select...</option>";
@@ -226,7 +225,6 @@ if(isset($_POST['data'])) {
             $(dropdowns[i]).change(function(e) {
                 var id = $(this).attr("id"); // Dropdown ID
                 var value = $(this).prop("selectedIndex"); // Selected dropdown index
-                ///console.log("Checkbox " + id + " changed to " + value);
                 putItem("#"+id, value); // Store data
                 redo(); // Message needs to be re-done
             });
@@ -241,7 +239,6 @@ if(isset($_POST['data'])) {
             //this.record = records.getFirstRecord(); // Reference to first record; 
             var rectype = recordset.fld(first_record, 'rec_RecTypeID'); // Record type of first record
             definitions = window.hWin.HEURIST4.rectypes.typedefs[rectype].dtFields; // Definitions for this record type
-//console.log("Rectype: " + rectype + ", definitions", this.definitions);
 
             // TEXT ONLY DROPDOWNS
             var text_options = determineOptions(text_types);
@@ -282,7 +279,6 @@ if(isset($_POST['data'])) {
 
          // Determines the actual record value at the given index
         function getValue(record, type, index) {
-            //console.log("Getting value for record", record);
 
             // Determine type
             if(type == "freetext" || type =="blocktext" || type == "date") {
@@ -347,7 +343,6 @@ if(isset($_POST['data'])) {
         function prepare() {
             // Raw message
             var rawMessage =  $("#message").val();
-            //console.log("Raw message: " + rawMessage);
 
             var buttonText = $("#prepare > span").text();// stupid check by button text!!!!!
 
@@ -373,7 +368,6 @@ if(isset($_POST['data'])) {
                 var message = prepareMessage(rawMessage, record, definitions);
 
                 // Show prepared message in new text area
-                //console.log("Prepared message: " + message);
                 $("#message").slideUp(500, "linear", function(e) {
                     $("#btn_redo").slideDown(500);
                     $("#message-prepared").val(message).slideDown(500);
@@ -412,9 +406,7 @@ if(isset($_POST['data'])) {
                 data.emails.push(owner);
 
                 // Send data to PHP file, everything is checked server-sided
-                console.log("Data to send", data);
                 $.post("send_email.php", {data: JSON.stringify(data)}, function(response) {
-                    console.log("Posted data, response: ", response);
                     window.hWin.HEURIST4.msg.showMsgDlg(response);
                 }).fail(function(jqXHR, textStatus, errorThrown) {
                     window.hWin.HEURIST4.msg.showMsgDlg(jqXHR.status + " --> " + jqXHR.responseText);

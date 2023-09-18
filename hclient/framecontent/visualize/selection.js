@@ -94,7 +94,6 @@ function updateRectangles(selector, colour) {
 * @param node  Clicked node
 */
 function onRecordNodeClick(event, data, node) {
-//console.log("On record selection click");
     var needSelect = true;
     var recID = ""+data.id;
     
@@ -150,7 +149,7 @@ function onRecordNodeClick(event, data, node) {
 * 
 * @param selectedNodeIds
 */
-function visualizeSelection(selectedNodeIds) { //console.log(settings.data);
+function visualizeSelection(selectedNodeIds) {
     settings.selectedNodeIds = selectedNodeIds; // Update settings object
 
     if(currentMode == 'icons'){
@@ -198,15 +197,12 @@ function closeRectypeSelector(){
 * 
 */
 function onMouseDown() {
-//console.log("Mouse down");
-
     closeRectypeSelector();
 
     rightClicked = (selectionMode=='multi');
     if(rightClicked) {
         d3.event.preventDefault();
         svg.on(".zoom", null);
-        console.log("Unbinded zoom");
 
         // X-position
         positions.x1 = d3.event.offsetX; 
@@ -228,7 +224,6 @@ function onMouseDown() {
 * 
 */
 function onMouseMove() {
-//console.log("Mouse moved");
     if(rightClicked) {
         // X-positions
         positions.x2 = d3.event.offsetX;
@@ -262,7 +257,6 @@ function onMouseMove() {
 * Selects the circles inside the selectionBox
 */
 function onMouseUp() {
-//console.log("Mouse up, rightClicked="+rightClicked);
     if(rightClicked) {
         rightClicked = false;
         selectionBox.style("display", "none"); 
@@ -279,7 +273,6 @@ function onMouseUp() {
                 if((nodePos.top >= positions.clickY1 && nodePos.top <= positions.clickY2) ||
                    (nodePos.top <= positions.clickY1 && nodePos.top >= positions.clickY2)) {    
                        // Node is in selection box
-//DEBUG console.log(d.name + " is in selection box!");
                        updateCircles(selector, selectionColor, selectionColor);      
                 }
             }

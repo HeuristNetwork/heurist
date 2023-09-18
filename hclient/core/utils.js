@@ -129,7 +129,7 @@ window.hWin.HEURIST4.util = {
         try{
             return JSON.parse(JSON.stringify(data));
         }catch (ex2){
-            console.log('cannot clone json array '+data);
+            //cannot clone json array
             return [];
         }
     },
@@ -325,7 +325,6 @@ window.hWin.HEURIST4.util = {
                 return decodeURIComponent(results[1]);
             }catch (ex){
                 return results[1];
-                //console.log('cant decode '+name+'='+results[1]);
             }
         }
     },
@@ -524,7 +523,6 @@ window.hWin.HEURIST4.util = {
             type: "POST",
             data: request,
             cache: false,
-/* DEPRECATED in v3 */
             error: function(jqXHR, textStatus, errorThrown ) {
                 if(callback){
                     
@@ -547,7 +545,6 @@ window.hWin.HEURIST4.util = {
                     }
                 }
             },
-                       
             success: function( response, textStatus, jqXHR ){
                 if(callback){
                     if(caller){

@@ -10,7 +10,6 @@
     * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
     * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
     * @version     4.0
-    * @deprecated  since Heurist 6.0
     */
 
     /*
@@ -27,11 +26,6 @@
     require_once (dirname(__FILE__).'/../dbaccess/db_structure_tree.php');
     require_once (dirname(__FILE__).'/../structure/dbsImport.php');
 
-    /* DEBUG
-    $_REQUEST['db'] = 'dos_3';
-    $_REQUEST['q'] = 'manly';
-    */
-    
     $response = array();
     $is_remote = false;
     $remoteURL = null;

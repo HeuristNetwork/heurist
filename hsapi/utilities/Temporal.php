@@ -953,7 +953,7 @@ class Temporal {
                         $res = $res.':'.str_pad(strval($date['second']),2,'0',STR_PAD_LEFT);
                     }
                 }
-            }else{   //debug
+            }else{   
                 $res = $res.' '.@$date['hour'].':'.@$date['minute'].':'.@$date['second'];
             }
 

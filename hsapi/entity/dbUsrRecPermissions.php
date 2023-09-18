@@ -45,7 +45,6 @@ class DbUsrRecPermissions extends DbEntityBase
             .") ENGINE=InnoDB COMMENT='Permissions for groups to records'";
         
             if (!$mysqli->query($query)) {
-                error_log($mysqli->error);
                 $this->is_table_exists = false;
             }else{
                 $this->is_table_exists = true;

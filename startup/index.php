@@ -491,7 +491,6 @@ if(($_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0.0.1'))
                             //navigate to database
                             $('#search_database').val($(e.target).text());
                             $('.list_div').hide();
-                            //console.log($(e.target).text());
                         }
                     }});
             
@@ -557,9 +556,6 @@ if(($_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0.0.1'))
         }
          
         _showStep(1);
-        
-        //DEBUG 
-        //_showGetStarted();
     }
     
     //

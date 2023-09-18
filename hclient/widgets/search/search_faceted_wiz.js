@@ -1401,7 +1401,7 @@ $.widget( "heurist.search_faceted_wiz", {
                             facets[i].code = codes.join(':');
                         }
                     }
-                } console.log('what even is this? ', that.options.params.facets_new, that.options.params);
+                }
                 that.options.params.facets = that.options.params.facets_new;
             }else{
                 facets = that.options.params.facets;
@@ -1419,7 +1419,7 @@ $.widget( "heurist.search_faceted_wiz", {
             that._on(ele,{change:function(event){
 
                 that.showHideReverse();
-            }}); console.log(that.current_tree_mode, tree_mode);
+            }});
             if(tree_mode == 1){
                 window.hWin.HEURIST4.util.setDisabled(ele, true);
                 ele.prop('checked', false);
@@ -1990,7 +1990,7 @@ $.widget( "heurist.search_faceted_wiz", {
                                     }
                                 }
                             }else{
-                                console.log('facet not found '+idd);
+                                console.error('Facet not found '+idd);
                             }
                     }
 

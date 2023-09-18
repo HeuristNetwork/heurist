@@ -136,8 +136,6 @@ $.widget( "heurist.editTranslations", {
 
             var ht = Math.min(ch, window.innerHeight-topPos);
 
-            //console.log(ch+'  new '+ht);                   
-            
             this._as_dialog.dialog('option', 'height', ht);    
         }else{
             topPos = this.element.parent().offset().top + 10;
@@ -191,8 +189,6 @@ $.widget( "heurist.editTranslations", {
                 
                 var _is_default = window.hWin.HEURIST4.util.isempty(lang);
             }
-//console.log('>>>'+value);            
-            
             
             if(this.options.fieldtype=='blocktext')
             {

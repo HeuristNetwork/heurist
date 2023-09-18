@@ -491,7 +491,6 @@ function editCMS_ElementCfg( element_cfg, _layout_content, _layout_container, $c
 
         l_cfg.css = css;
         _assignCssTextArea();
-        //console.log(css);  
         element.removeAttr('style');
         element.css(css);
 
@@ -622,7 +621,6 @@ function editCMS_ElementCfg( element_cfg, _layout_content, _layout_container, $c
                 }
             });
             margin_mode_full = true; //no_margin_values || mode_full;
-//console.log(no_margin_values +'  '+ mode_full);
             //init file picker
             cont.find('input[name="bg-image"]')
                     .click(_selecHeuristMedia);

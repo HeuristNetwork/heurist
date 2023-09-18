@@ -867,10 +867,6 @@ public static function output($data, $params){
     $error_log[] = print_r($rt_counts, true);
 
     self::writeResults( $streams, 'Export_'.self::$system->dbname(), $headers, $error_log );
-
-    //DEBUG error_log(print_r($error_log,true));
-
-
 } //output
 
 //

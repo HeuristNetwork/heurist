@@ -194,7 +194,6 @@ function determineMaxCount(data) {
     maxCountForLinks = 1;
     if(data && data.nodes.length > 0) {
         for(var i = 0; i < data.nodes.length; i++) {
-            //console.log(data.nodes[i]);
             if(data.nodes[i].count > maxCountForNodes) {
                 maxCountForNodes = data.nodes[i].count;
             } 
@@ -207,13 +206,11 @@ function determineMaxCount(data) {
             } 
         }
     }
-    //console.log("Max count: " + maxCount);
 }
 
 function getNodeDataById(id){
     if(data && data.nodes.length > 0) {
         for(var i = 0; i < data.nodes.length; i++) {
-            //console.log(data.nodes[i]);
             if(data.nodes[i].id==id) {
                 return data.nodes[i];
             } 
@@ -284,7 +281,6 @@ function executeFormula(count, maxCount, maxSize) {
         count = 1;
     }
     
-    //console.log("Count: " + count + ", max count: " + maxCount + ", max Size: " + maxSize);
     var formula = getSetting(setting_formula);
     if(formula == "logarithmic") { // Log                                                           
         return maxCount>1?(Math.log(count) / Math.log(maxCount)*maxSize):1;
@@ -298,7 +294,6 @@ function executeFormula(count, maxCount, maxSize) {
 
 /** Returns the line length */
 function getLineLength(record) {
-//console.log("Default line length function");
     return getSetting(setting_linelength,200);
 }
 
@@ -310,8 +305,6 @@ function getLineWidth(count) {
     
     if(maxWidth>maxLinkWidth) {maxSize = maxLinkWidth;}
     else if(maxWidth<1) {maxSize = 1;}
-    
-//console.log('cnt='+count);    
     
     if(count > maxCountForLinks) {
         maxCountForLinks = count;
@@ -916,7 +909,6 @@ function addLines(name, color, thickness) {
         lines.on("mouseover", function(d) {
             if(!(hide_empty && d.targetcount == 0)){
                 var selector = "s"+d.source.id+"r"+d.relation.id+"t"+d.target.id;
-                //console.log(d3.selectAll("."+name+".link."+selector));
                 createOverlay(d3.event.offsetX, d3.event.offsetY, "relation", selector, getRelationOverlayData(d));
             }
         })

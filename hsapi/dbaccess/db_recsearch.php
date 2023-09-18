@@ -455,11 +455,6 @@ function recordSearchFacets($system, $params){
         }
         */
 
-        //
-//if(HEURIST_DBNAME=='digital_harlem'){
-    //error_log($query);    
-//}        
-
         $res = $mysqli->query($query);
         if (!$res){
             $response = $system->addError(HEURIST_DB_ERROR, $savedSearchName
@@ -1653,13 +1648,6 @@ function recordSearchMenuItems($system, $menuitems, &$result, $find_root_menu=fa
 
         $menuitems2 = prepareIds( $menuitems2 );
 
-        /*
-        if(count($menuitems2)>10){
-        error_log($query);
-        return $system->addError(HEURIST_ERROR, 'Record '.implode(',',$rec_IDs).' produce '.count($menuitems2).' items '.$query);
-        }*/
-
-
         if(is_array($menuitems2) && count($menuitems2)>0){                          
             recordSearchMenuItems($system, $menuitems2, $result);
         }
@@ -1710,7 +1698,6 @@ function recordSearchMenuItems($system, $menuitems, &$result, $find_root_menu=fa
 *       s - sort order - if defined it overwrites sortby in q json param
 *
 *       OUTPUT parameters
-*       vo (=h3) - output format in h3 for backward capability (for detail=ids only)
 *       needall (=1) - by default it returns only first 3000, to return all set it to 1,
 *                      it is set to 1 for server-side rules searches
 *       publiconly (=1) - ignore current user and returns only public records
@@ -1851,7 +1838,6 @@ function recordSearch($system, $params)
     $is_count_by_rty = ('count_by_rty'==$params['detail']);
     if($is_count_by_rty) $is_count_only = true;
     $is_ids_only = ('ids'==$params['detail']);
-    $return_h3_format = (@$params['vo']=='h3' &&  $is_ids_only); //deprecated - to remove
     
     if($params['detail']=='timemap'){ //($istimemap_request){
         $params['detail']=='detail';
@@ -1893,7 +1879,6 @@ function recordSearch($system, $params)
 
         $fieldtypes_ids = implode(',', $fieldtypes_ids);
         $needThumbField = true;
-        //DEBUG error_log('timemap fields '.$fieldtypes_ids);
 
         //find places linked to result records for geo field
         if(@$params['suppres_derivemaplocation']!=1){ //for production sites - such as USyd Book of Remembrance Online or Digital Harlem
@@ -2076,7 +2061,6 @@ function recordSearch($system, $params)
         unset($params['rules']);
         if(@$params['limit']) unset($params['limit']);
         if(@$params['offset']) unset($params['offset']);
-        if(@$params['vo']) unset($params['vo']);
 
         $params['needall'] = 1; //return all records, otherwise dependent records could not be found
 
@@ -2149,7 +2133,6 @@ function recordSearch($system, $params)
                 if($needCompleteInformation){
                     $params3['detail'] = 'complete';
                 }                        
-                //DEBUg error_log(print_r($params3,true));                    
 
                 $response = recordSearch($system, $params3);
 
@@ -2385,7 +2368,6 @@ function recordSearch($system, $params)
 
             if(is_array($q)){
                 $query_json = $q;
-                //DEBUG error_log('Q='.print_r($params['q'],true));                
             }else{
                 $query_json = json_decode($q, true);
                 
@@ -2439,10 +2421,6 @@ function recordSearch($system, $params)
 
     }
 
-    //DEBUG
-    //if($is_ids_only && $system->dbname()=='ExpertNation') 
-    //error_log($params['use_user_wss']);
-    //error_log($query);
     if(@$_REQUEST['dbg']==1) {
         print htmlspecialchars($query);
         exit();
@@ -2510,8 +2488,6 @@ function recordSearch($system, $params)
             $fres->close();
 
             if($total_count_rows*10>$memory_limit){
-                //error_log($query);
-
                 return $system->addError(HEURIST_ACTION_BLOCKED, 
                     'Search query produces '.$total_count_rows
                     .' records. Memory limit does not allow to retrieve all of them.'
@@ -2530,51 +2506,45 @@ function recordSearch($system, $params)
                 }
                 $res->close();
 
-                if(@$params['vo']=='h3'){ //output version used in showReps.php (where else???)
-                    $response = array('resultCount' => $total_count_rows,
-                        'recordCount' => count($records),
-                        'recIDs' => implode(',', $records) );
-                }else{
+                $response = array('status'=>HEURIST_OK,
+                    'data'=> array(
+                        'queryid'=>@$params['id'],  //query unqiue id
+                        'entityName'=>'Records',
+                        'count'=>$total_count_rows,
+                        'offset'=>get_offset($params),
+                        'reccount'=>count($records),
+                        'records'=>$records));
 
-                    $response = array('status'=>HEURIST_OK,
-                        'data'=> array(
-                            'queryid'=>@$params['id'],  //query unqiue id
-                            'entityName'=>'Records',
-                            'count'=>$total_count_rows,
-                            'offset'=>get_offset($params),
-                            'reccount'=>count($records),
-                            'records'=>$records));
-
-                    if(@$params['links_count'] && count($records)>0){
+                if(@$params['links_count'] && count($records)>0){
+                    
+                    $links_counts = recordLinkedCount($system, 
+                                $params['links_count']['source'], 
+                                count($records)<500?$records:
+                                    $params['links_count']['target'], 
+                                @$params['links_count']['dty_ID']);
+                                
+                    if($links_counts['status']==HEURIST_OK && is_array(@$links_counts['data']) && count($links_counts['data'])>0){
                         
-                        $links_counts = recordLinkedCount($system, 
-                                    $params['links_count']['source'], 
-                                    count($records)<500?$records:
-                                        $params['links_count']['target'], 
-                                    @$params['links_count']['dty_ID']);
-                                    
-                        if($links_counts['status']==HEURIST_OK && is_array(@$links_counts['data']) && count($links_counts['data'])>0){
-                            
-                            //order output 
-                            $res = array_keys($links_counts['data']);
-                            if(count($res) < count($records)){
-                                foreach ($records as $id){
-                                    if(!in_array($id, $res)){
-                                        $res[] = $id;
-                                    }
+                        //order output 
+                        $res = array_keys($links_counts['data']);
+                        if(count($res) < count($records)){
+                            foreach ($records as $id){
+                                if(!in_array($id, $res)){
+                                    $res[] = $id;
                                 }
                             }
-                            $response['data']['records'] = $res;
-                            $response['data']['links_count'] = $links_counts['data'];    
-                            $response['data']['links_query'] = '{"t":"'
-                                    .$params['links_count']['source']
-                                    .'","linkedto'
-                                    .(@$params['links_count']['dty_ID']>0?(':'.$params['links_count']['dty_ID']):'')
-                                    .'":"[ID]"}';
                         }
+                        $response['data']['records'] = $res;
+                        $response['data']['links_count'] = $links_counts['data'];    
+                        $response['data']['links_query'] = '{"t":"'
+                                .$params['links_count']['source']
+                                .'","linkedto'
+                                .(@$params['links_count']['dty_ID']>0?(':'.$params['links_count']['dty_ID']):'')
+                                .'":"[ID]"}';
                     }
-                    
                 }
+                    
+                
 
             }else{ //----------------------------------
 
@@ -2655,8 +2625,6 @@ function recordSearch($system, $params)
                     if(count($order)>5000){
                         $mem_used = memory_get_usage();
                         if($mem_used>$memory_limit-104857600){ //100M
-                            //error_log($query);
-
                             return $system->addError(HEURIST_ACTION_BLOCKED, 
                                 'Search query produces '.$total_count_rows
                                 .' records. Memory limit does not allow to retrieve all of them.'
@@ -2730,9 +2698,6 @@ function recordSearch($system, $params)
                                 .' AND dtl_RecID=rl_TargetID AND rl_TargetID=rec_ID AND rec_RecTypeID in ('. join(',', $rectypes_as_place)
                                 .') AND rl_SourceID in (' . join(',', $chunk_rec_ids) . ')';
                             }
-
-//error_log($detail_query);
-
                         }else{
 
                             if($needCompleteInformation){

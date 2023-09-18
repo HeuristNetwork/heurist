@@ -77,7 +77,6 @@ if (($_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0.0.1')
     //init js variables from REQUEST
 ?>
 <script>
-    var _time_debug = new Date().getTime() / 1000;
     var page_first_not_empty = 0;
     var home_page_record_id=<?php echo $home_page_on_init; ?>;
     var init_page_record_id=<?php echo $open_page_or_record_on_init; ?>;
@@ -278,10 +277,6 @@ if($_is_new_cms_editor || $edit_OldEditor){ //$edit_OldEditor defined in website
 ?>    
 
 <script>
-function _dout(msg){      
-    //console.log(msg);
-}
-
 // global 
 var RT_CMS_HOME, RT_CMS_MENU, DT_NAME, DT_EXTENDED_DESCRIPTION, DT_CMS_SCRIPT, DT_CMS_CSS, DT_CMS_PAGETITLE, DT_CMS_TOPMENUSELECTABLE, TRM_NO, TRM_NO_OLD;
 var timeout_count = 0;
@@ -314,11 +309,6 @@ function onPageInit(success)
     TRM_NO = window.hWin.HAPI4.sysinfo['dbconst']['TRM_NO'],
     TRM_NO_OLD = window.hWin.HAPI4.sysinfo['dbconst']['TRM_NO_OLD'];
 
-    _dout('webpage onPageInit  '+(new Date().getTime() / 1000 - _time_debug));
-    _dout('webpage onPageInit  '+init_page_record_id);
-
-    _time_debug = new Date().getTime() / 1000;
-        
     if(!success) return;
     
     $('#main-menu').hide();
@@ -400,8 +390,6 @@ function onPageInit(success)
 //
 function initMainMenu( afterInitMainMenu ){
     
-    _dout('initMainMenu');
-    
     var topmenu = $('#main-menu');
 
     var lopts = {  
@@ -448,9 +436,6 @@ function switchLanguage(event){
 // eventdata - data to be passed to afterPageLoad (to perform intial search) - it may be call from another page
 //
 function loadPageContent(pageid, eventdata){
-    _dout('loadPageContent '+pageid);
-    
-    
     var topmenu = $('#main-menu').find('div[widgetid="heurist_Navigation"]');
 
     // this is not website page, this is ordinary record - show it in main-recordview or popup                    
@@ -503,7 +488,6 @@ function loadPageContent(pageid, eventdata){
     if(pageid>0){
         
         var page_target = $('#main-content');
-        //_dout('load page  '+pageid+'   '+page_footer.length);              
         
         var supp_options = {heurist_emailForm: {website_record_id: home_page_record_id},
             heurist_resultListExt: {record_with_custom_styles: home_page_record_id},
@@ -622,7 +606,7 @@ if($website_custom_css!=null){
 function loadRecordContent(url_or_record_id, target){
     
     if(!url_or_record_id){
-        console.log('url_or_record_id not defined');
+        console.error('url_or_record_id not defined');
         return;
     }
     var url, is_smarty = false; 
@@ -650,8 +634,6 @@ function loadRecordContent(url_or_record_id, target){
            );
         
     }
-    
-//console.log(record_view_target, url);    
     
     if(record_view_target=='popup'){
         //in popup
@@ -759,8 +741,6 @@ function afterPageLoad(document, pageid, eventdata){
         }
     }
     
-    _dout('afterPageLoad');
-
     assignPageTitle(pageid);
     
     if(typeof pageid==='undefined' || pageid==null ) return;
@@ -804,15 +784,6 @@ function afterPageLoad(document, pageid, eventdata){
     if(!eventdata) eventdata = {};
     eventdata['url_params'] = params;
     
-/* debug    
-    if(false && eventdata['url_params']['selected']>0){
-        $(document).trigger(window.hWin.HAPI4.Event.ON_REC_SELECT, 
-            {   selection:[eventdata['url_params']['selected']], 
-                source:'cms_page', 
-                search_realm:'search_group_1'});
-    }
-*/    
-    
     //execute custom javascript per loaded page =========================
     if(DT_CMS_SCRIPT>0){
         var func_name = 'afterPageLoad'+pageid;
@@ -827,8 +798,7 @@ function afterPageLoad(document, pageid, eventdata){
                 script.type = 'text/javascript';
                 script.innerHTML = 'function '+func_name 
                 +'(document, pageid, eventdata){\n'
-                //DEBUG +' console.log("run script for '+pageid+'");\n'
-                +'try{\n' + script_code + '\n}catch(e){console.log(e)}}';
+                +'try{\n' + script_code + '\n}catch(e){console.error(e)}}';
 
                 $("head").append(script);
                 
@@ -1026,8 +996,6 @@ function initLinksAndImages($container, search_data){
         var href = $(link).attr('href');
         var parts = href?href.split('/'):null;
     
-//console.log(href);    
-        
         //1. special case for search links in smarty reports 
         if($(link).attr('data-query') ){ //href && href.indexOf('q=')===0 || 
             
@@ -1072,8 +1040,6 @@ function initLinksAndImages($container, search_data){
             ($(link).attr('target')!='_blank' || record_view_target!='')
            )
         {
-//console.log('case 2');
-
                 $(link).click(function(event){
                     
                     var link;
@@ -1126,8 +1092,6 @@ function initLinksAndImages($container, search_data){
             
             if(!isNaN(parseInt(rec_id)) && rec_id>0){
 
-//console.log('case 3', rec_id);
-                
                 $(link).attr('data-pageid', rec_id);
                 
                 var eventdata = null;
@@ -1176,11 +1140,6 @@ function initLinksAndImages($container, search_data){
 //
 function onHapiInit(success){   
     
-    _dout('onHapiInit');
-    
-    //_dout('webpage hapi inited  '+ (new Date().getTime() / 1000 - _time_debug));
-    _time_debug = new Date().getTime() / 1000;
-    
     if(!success){    
             window.hWin.HEURIST4.msg.showMsgErr('Cannot initialize system on client side, please consult Heurist developers');
             window.hWin.HEURIST4.msg.sendCoverallToBack();            
@@ -1202,9 +1161,6 @@ function onHapiInit(success){
     function __init_completed(success){
         if(success){
             
-    _dout('get defs  '+ (new Date().getTime() / 1000 - _time_debug));
-    _time_debug = new Date().getTime() / 1000;
-
             //substitute values in header
             initHeaderElements();
             onPageInit(success);
@@ -1240,8 +1196,6 @@ if(isset($customTemplateNotFound)){
 //
 function initHeaderElements(){   
     
-    _dout('initHeaderElements');
-
 /*
 $image_logo  -> #main-logo
 $image_altlogo -> #main-logo-alt
@@ -1441,18 +1395,6 @@ $(document).ready(function() {
     
         $('body').find('#main-menu').hide(); //will be visible after menu init
                 
-/*          
-        if(is_show_pagetitle){
-            $('body').find('#main-pagetitle').show();
-        }else{
-            $('body').find('#main-pagetitle').hide();
-        }
-
-_dout('webpage doc ready ');
-*/
-
-        _time_debug = new Date().getTime() / 1000;
-    
         // Standalone check
         if(!window.hWin.HAPI4){
             window.hWin.HAPI4 = new hAPI('<?php echo htmlspecialchars($_REQUEST['db'])?>', onHapiInit<?php print (array_key_exists('embed', $_REQUEST)?",'".PDIR."'":'');?>);
@@ -1506,8 +1448,7 @@ if($website_custom_javascript!=null){
     //eventdata = {url_params:params};
     
     print '<script>function afterPageLoad'.$home_page_on_init.'(document, pageid){'."\n";
-    //print 'console.log("run script for HOME PAGE");'."\n";
-    print "try{\n".$website_custom_javascript."\n}catch(e){console.log(e)}}</script>";
+    print "try{\n".$website_custom_javascript."\n}catch(e){console.error(e)}}</script>";
 }
     
 //generate main menu on server side - for bootstrap menu     

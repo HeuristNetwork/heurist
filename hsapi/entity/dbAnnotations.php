@@ -31,9 +31,6 @@ class DbAnnotations extends DbEntityBase
     function __construct( $system, $data ) {
         $this->system = $system;
         $this->data = $data;
-
-        //error_log(print_r($data, true));  
-
         $this->system->defineConstant('RT_ANNOTATION');
         $this->system->defineConstant('RT_MAP_ANNOTATION');
         $this->system->defineConstant('DT_NAME');
@@ -103,8 +100,6 @@ class DbAnnotations extends DbEntityBase
                 $sjson['items'] = array(json_decode($item, true));     
             }
         }
-            
-//error_log(print_r($sjson, true));            
             
         return $sjson;
     }
@@ -213,7 +208,6 @@ class DbAnnotations extends DbEntityBase
         $this->system->defineConstant('DT_THUMBNAIL');
 
         $anno = $this->data['fields']['annotation'];
-//error_log(print_r($anno, true));  
         
         $details = array();
         
@@ -377,8 +371,6 @@ class DbAnnotations extends DbEntityBase
         $record['details'] = $details;
         
         $out = recordSave($this->system, $record, false, true);
-//error_log(print_r($record, true));        
-//error_log(print_r($out, true));        
         return $out;
     }
 }

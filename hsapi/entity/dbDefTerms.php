@@ -1086,9 +1086,6 @@ class DbDefTerms extends DbEntityBase
                 $children = array_merge($children, $children2);
             }
             $this->recordIDs = array_merge($this->recordIDs, $children); //delete children as well
-            
-            //$this->system->addError(HEURIST_ACTION_BLOCKED, 'Temp debug block');
-            //return false;
         }
         return true;
     }

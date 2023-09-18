@@ -174,8 +174,6 @@
 
     }else if( !$system->init( $dbname ) ){ 
         
-//        error_log('FAILED INIT SYSTEM');        
-        
     }else if($action == 'check_allow_cms'){ // check if CMS creation is allow on current server - $allowCMSCreation set in heuristConfigIni.php
 
         if(isset($allowCMSCreation) && $allowCMSCreation == -1){

@@ -165,11 +165,8 @@ $.widget( "heurist.connections", {
             // Content loaded already    
             }else{
                 // SPRING DIAGRAM CODE
-                // console.log("CONTENT LOADED ALREADY");  
-                // console.log(this.options);
                 
                 if(this.options.recordset !== null) {
-                    //console.log("Showing recordset connections");
                     
                     if(this.options.relations == null){ //relation not yet loaded
                         
@@ -236,8 +233,6 @@ $.widget( "heurist.connections", {
     * @param recordset
     */
     _getRelations: function( recordset ){
-        //console.log("getRelations CALLED");
-        //console.log(recordset);
         
         if(window.hWin.HEURIST4.util.isnull(recordset)) return;
 
@@ -251,7 +246,6 @@ $.widget( "heurist.connections", {
         //get first MAXITEMS records and send their IDS to server to get related record IDS
         var MAXITEMS = window.hWin.HAPI4.get_prefs('search_detail_limit');
         var records_ids = recordset.getIds(MAXITEMS);
-//console.log('was '+recordset.getIds().length+'  send for '+records_ids.length);        
         if(records_ids.length>0){
             
             window.hWin.HAPI4.RecordMgr.search_related({ids:records_ids.join(',')}, function(response)
@@ -259,7 +253,6 @@ $.widget( "heurist.connections", {
                 var resdata = null;
                 if(response.status == window.hWin.ResponseStatus.OK){
                     // Store relationships
-//console.log("Successfully retrieved relationship data!", response.data);
                     that2.option("relations", response.data);
                     
                     // Parse response to spring diagram format
@@ -368,7 +361,6 @@ $.widget( "heurist.connections", {
 
     /** Calls the visualisation plugin */
     , _doVisualize: function (data) {
-        //console.log("Visualize called in connections.js");
         
         if( !window.hWin.HEURIST4.util.isnull(this.graphframe) && this.graphframe.length > 0 ){
             var that = this;

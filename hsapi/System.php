@@ -139,15 +139,8 @@ class System {
                         //ONLY_FULL_GROUP_BY,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO
                         $this->mysqli->query('SET GLOBAL sql_mode = \'STRICT_TRANS_TABLES,NO_ENGINE_SUBSTITUTION\'');
                     }
-                    // consts
-                    // @todo constants inited once in initPage for index (main) page only
-                    // $this->defineConstants();    
                 }
        
-/*DEBUG            
-error_log('init systme '.$_SERVER['PHP_SELF']);
-error_log(print_r($_REQUEST, true));
-*/            
             $this->is_inited = true;
             
             
@@ -1027,7 +1020,6 @@ error_log(print_r($_REQUEST, true));
             $message = 'Heurist was unable to process this request. '.$message;
             $sysmsg = 'Although errors are emailed to the Heurist team (for servers maintained directly by the project), there are several thousand Heurist databases, so we are unable to review all automated reports. If this is the first time you have seen this error, please try again in a few minutes in case it is a temporary network outage. Please contact us if this error persists and is causing you a problem, as this will help us identify important issues. We apologise for any inconvenience';
 
-            //$root_folder.$curr_logfile."\n".
             error_log($Title.'  '.$sMsg);     
         }
 
@@ -1431,11 +1423,6 @@ error_log(print_r($_REQUEST, true));
             session_set_cookie_params(time() + 30*24*60*60);
             session_cache_limiter('none');
 
-//workaround for iframe - does not work            
-//error_log('SYSTEM NOT ACTVIE  cookie='.$cookie_session_id);                
-//ini_set('session.cookie_samesite', 'None');
-//ini_set('session.cookie_secure', 'true');            
-//header('P3P: CP="CAO PSA OUR"');
             if ($cookie_session_id) { //get session id from cookes 
                 session_id($cookie_session_id);
                 @session_start();
@@ -1748,8 +1735,6 @@ error_log(print_r($_REQUEST, true));
             $cres = setcookie('heurist-sessionid', $session_id, $lifetime, '/', '', $is_https );  //login
         }
 
-//if($time==0)                    
-//error_log('login '.$session_type.'  '.$session_id);                
         if(!$cres){
             
         }
@@ -1950,7 +1935,6 @@ error_log(print_r($_REQUEST, true));
             //last check and version
             list($date_last_check, $version_last_check, $release_last_check) = explode("|", file_get_contents($fname));
 
-            //debug  $date_last_check = "2013-02-10";
             if($release_last_check && strncmp($release_last_check, $release, strlen($release)) == 0){
 
                 if($date_last_check && strtotime($date_last_check)){

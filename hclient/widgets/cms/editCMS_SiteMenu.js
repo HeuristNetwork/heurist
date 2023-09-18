@@ -75,7 +75,6 @@ function editCMS_SiteMenu( $container, editCMS2 ){
         var treedata = $('#main-menu > div[widgetid="heurist_Navigation"]').navigation('getMenuContent','treeview');
         
         //add node for home page
-//console.log(treedata);
 /*
 0:
 children: (3) [{…}, {…}, {…}]
@@ -499,16 +498,6 @@ title: "Overview"
                     }
                 });            
         }
-        
-
-            /*
-            var node = tree.getNodeByKey(''+window.hWin.current_page_id);
-            if(node){
-console.log('!!! '+window.hWin.current_page_id);                
-               node.setSelected(true); 
-               $(node.li).css({'color':'red'});
-            }
-            */        
     }
 
     //
@@ -785,7 +774,7 @@ console.log('!!! '+window.hWin.current_page_id);
 
         if(page_node == null){
             tree.visit((node) => {
-                if(node.data.page_id == page_id){ console.log(node);
+                if(node.data.page_id == page_id){
                     parent_id = node.data.parent_id; //node.parent.data.page_id
                     return false;
                 }

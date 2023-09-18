@@ -534,7 +534,7 @@ class UtilsImage {
                 exec($cmd, $output, $error);
 
                 if ($error) {
-                    error_log ('ERROR on pdf thumbnail creation: '.$filename.'  '.$cmd.'   '.implode('\n', $output));
+                    errorLog('ERROR on pdf thumbnail creation: '.$filename.'  '.$cmd.'   '.implode('\n', $output));
                     return false;
                 }
                 
@@ -552,7 +552,7 @@ class UtilsImage {
                     $im->writeImage($thumbnail_file);
                     
                 } catch(ImagickException $e) {
-                    error_log($e . ', From Database: ' . HEURIST_DBNAME);
+                    errorLog($e . ', From Database: ' . HEURIST_DBNAME);
                     return false;
                 }
 
@@ -572,7 +572,7 @@ class UtilsImage {
     public static function resizeImageGD($src_img, $thumbnail_file=null, $max_width = 200, $max_height = 200){
         
         if (!function_exists('imagecreatetruecolor')) {
-            error_log('Function not found: imagecreatetruecolor');
+            errorLog('Function not found: imagecreatetruecolor');
             return false;
         }
         

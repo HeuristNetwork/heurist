@@ -482,9 +482,6 @@ function hEditing(_options) {
                                 val = recdata.values(record, fields[idx]['dtID']);
                             }
 
-//console.log( fields[idx]['dtID'] + '=>');
-//console.log(val);                            
-                            
                             if(!window.hWin.HEURIST4.util.isnull(val)){
                                 if(!window.hWin.HEURIST4.util.isArray(val)) val = [val];
                                 fields[idx].values = val;

@@ -116,7 +116,6 @@ $is_not_found = true;
                                 $is_not_found = false;
                             }
                         }//while
-//DEBUG error_log('offset '.$offset);                        
                     }
                 
                     if($is_finished){

@@ -840,12 +840,10 @@
         if(folderCreate($path['dirname'], true)){
             if (!copy($s1,$s2)) {
                 // "copy failed";
-                error_log( 'Cannot copy file '.$s1.'  to '.$s2 );    
                 return false;
             }
         }else{
            //can't create folder or it is not writeable 
-           error_log( 'Cannot create folder '.$path['dirname'] );    
            return false;
         }
         return true;
@@ -883,14 +881,14 @@
             try{
                 $fp = fopen($filename,'a'); //open for add
                 if($fp===false){
-                    error_log( 'Cannot open file '.$filename );    
+                    // 'Cannot open file '.$filename 
                 }else{
                     fwrite($fp, $rawdata);
                     fclose($fp);
                 }
             
             }catch(Exception  $e){
-                error_log( 'Cannot open file '.$filename.'  Error:'.$e->getMessage() );
+                // Cannot open file '.$filename.'  Error:'.$e->getMessage()
             }
 
             return filesize($filename);
@@ -1050,7 +1048,6 @@ function folderSubs($src, $exclude=null) {
 */
 function createZipArchive($source, $only_these_folders, $destination, $verbose=true) {
     
-//error_log('>>>>>createZipArchive '.$source.'  to '.$destination);    
     if (!extension_loaded('zip')) {
         echo "<br/>PHP Zip extension is not accessible";
         return false;
@@ -1092,7 +1089,6 @@ function createZipArchive($source, $only_these_folders, $destination, $verbose=t
                         $folder = $source."/".$folder;    
                     }
                     $only_these_folders[$idx] = $folder;
-    //error_log($folder);
                 }
             }
             
@@ -1114,7 +1110,6 @@ function createZipArchive($source, $only_these_folders, $destination, $verbose=t
                 $is_filtered = true;
                 if( is_array($only_these_folders) ){
                     $is_filtered = false;
-    //error_log($file);
                     foreach ($only_these_folders as $folder) {
                         if( strpos( $file, $folder )===0 ){
                             $is_filtered = true;
@@ -1124,8 +1119,6 @@ function createZipArchive($source, $only_these_folders, $destination, $verbose=t
                 }
 
                 if(!$is_filtered) continue; //exclude not in $only_these_folders
-
-    //error_log('OK '.$file);
 
                 // Determine real path
                 $file = realpath($file);
@@ -1137,15 +1130,13 @@ function createZipArchive($source, $only_these_folders, $destination, $verbose=t
                     if (is_dir($file) === true) { // Directory
                         //remove root path
                         $newdir = str_replace($source.'/', '', $file2.'/');
-        //error_log($newdir);                    
                         if(!$zip->addEmptyDir( $newdir )){
-                            //error_log($zip->getStatusString());
+                            //$zip->getStatusString()
                             return false;
                         }
                     }
                     else if (is_file($file) === true) { // File
                         $newfile = str_replace($source.'/', '', $file2); //without folder name
-        //error_log($file.'  >> '.$newfile);                    
                         if(!$zip->addFile($file, $newfile)){
                             return false;
                         }
@@ -1401,7 +1392,6 @@ function createBz2Archive($source, $only_these_folders, $destination, $verbose=t
                     $folder = $source."/".$folder;    
                 }
                 $only_these_folders[$idx] = $folder;
-//error_log($folder);
             }
         }
         
@@ -1423,7 +1413,6 @@ function createBz2Archive($source, $only_these_folders, $destination, $verbose=t
             $is_filtered = true;
             if( is_array($only_these_folders) ){
                 $is_filtered = false;
-//error_log($file);
                 foreach ($only_these_folders as $folder) {
                     if( strpos( $file, $folder )===0 ){
                         $is_filtered = true;
@@ -1433,8 +1422,6 @@ function createBz2Archive($source, $only_these_folders, $destination, $verbose=t
             }
 
             if(!$is_filtered) continue; //exclude not in $only_these_folders
-
-//error_log('OK '.$file);
 
             // Determine real path
             $file = realpath($file);
@@ -1446,12 +1433,10 @@ function createBz2Archive($source, $only_these_folders, $destination, $verbose=t
                 if (is_dir($file) === true) { // Directory
                     //remove root path
                     $newdir = str_replace($source.'/', '', $file2.'/');
-    //error_log($newdir);                    
                     $phar->addEmptyDir( $newdir );
                 }
                 else if (is_file($file) === true) { // File
                     $newfile = str_replace($source.'/', '', $file2); //without folder name
-    //error_log($file.'  >> '.$newfile);                    
 
                     $phar->addFile($file, $newfile);
                     
@@ -1773,7 +1758,7 @@ function loadRemoteURLContentType($url, $bypassProxy = true, $timeout=30) {
 
     if ($error) {
         $code = intval(curl_getinfo($ch, CURLINFO_HTTP_CODE));
-error_log('http code = '.$code.'  curl error='.$error);
+        errorLog('CURL ERROR: http code = '.$code.'  curl error='.$error);
     } else {
         //if(!$data){
             $content_type = curl_getinfo($ch, CURLINFO_CONTENT_TYPE);    

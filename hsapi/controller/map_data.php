@@ -1,6 +1,6 @@
 <?php
 
-//USED only in deprecated Gmap
+//USED only in Gmap
 //ARTEM:   @todo JJ made a lot of duplication - many methods already exist
 
 /**
@@ -226,10 +226,6 @@ function getRecordDetails($system, $record) {
 
 
                 /* MAP LAYERS */
-            }else if(defined('DT_TOP_MAP_LAYER') && $type == DT_TOP_MAP_LAYER) { // Recursive
-                // Top map layer
-                $record->toplayer = getDetailedRecord($system, $value);
-
             }else if(defined('DT_MAP_LAYER') && $type == DT_MAP_LAYER) {
                 // Map layer
                 if(!property_exists($record, "layers")) { // Recursive
@@ -242,15 +238,6 @@ function getRecordDetails($system, $record) {
                 array_push($record->bookmarks, explode(',', $value));
 
                 /* LOCATION */
-            }else  if(defined('DT_LONGITUDE_CENTREPOINT') && $type == DT_LONGITUDE_CENTREPOINT) {
-                // Longitude centrepoint
-                $record->long = floatval($value);
-
-            }else if(defined('DT_LATITUDE_CENTREPOINT') && $type == DT_LATITUDE_CENTREPOINT) {
-                // Latitude centrepoint
-                $record->lat = floatval($value);
-
-                
             }else if(defined('DT_SYMBOLOGY_POINTMARKER') && $type == DT_SYMBOLOGY_POINTMARKER) {
                 //marker icon url 
                 $record->iconMarker = $fileID; //getFileURL($system, $fileID);
@@ -283,12 +270,6 @@ function getRecordDetails($system, $record) {
                 $record->color = $color->label;   
                 }*/
 
-
-            }else if(defined('DT_MINOR_SPAN') && $type == DT_MINOR_SPAN) {
-                // Initial minor span
-                $record->minorSpan = floatval($value);
-
-                /* IMAGE INFO */
             } else if(defined('DT_THUMBNAIL') && $type == DT_THUMBNAIL) {
                 // Uploaded thumbnail
                 $record->thumbnail = getFileURL($system, $fileID);

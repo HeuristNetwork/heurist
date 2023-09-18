@@ -244,10 +244,6 @@ $rtDefines = array(
     'RT_ARCHIVAL_RECORD' => array(3, 1000),
     'RT_ARCHIVAL_SERIES' => array(3, 1001),
     
-    
-
-    'RT_AUTHOR_EDITOR' => array(3, 23), //Deprecated
-    'RT_FACTOID' => array(3, 22), // Deprecated
     // Spatial data
     'RT_PLACE' => array(3, 1009), 
     'RT_EN_PLACE' => array(1125, 25), //place for Expert Nation database
@@ -355,18 +351,12 @@ $dtDefines = array('DT_NAME' => array(2, 1),
     'DT_KML' => array(3, 1036), //snippet
     'DT_MAP_IMAGE_LAYER_REFERENCE' => array(3, 1043),
     'DT_MAP_IMAGE_WORLDFILE' => array(3, 1095),
-    'DT_SHOW_IN_MAP_BG_LIST' => array(3, 679), // DEPRECATED  show image layer or kml in map background list
     'DT_ALTERNATE_NAME' => array(3, 1009),
-    'DT_THUMB_IMAGE_URL' => array(70, 606), // deprecated
     // Map document
     'DT_MAP_LAYER' => array(3, 1081),
-    'DT_TOP_MAP_LAYER' => array(3, 1096),           //deprecated
-    'DT_LONGITUDE_CENTREPOINT' => array(3, 1074),   //deprecated
-    'DT_LATITUDE_CENTREPOINT' => array(3, 1075),    //deprecated
-    'DT_MINOR_SPAN' => array(3, 1076),              //deprecated
     'DT_MAP_BOOKMARK' => array(3, 1082),
     'DT_SYMBOLOGY_POINTMARKER' => array(3, 1091),  //outdated
-    'DT_SYMBOLOGY' => array(3, 1092),  //MAIN field that stores ALL styles for map symbology (including themtic maps)
+    'DT_SYMBOLOGY' => array(3, 1092),  //MAIN field that stores ALL styles for map symbology (including thematic maps)
     'DT_ZOOM_KM_POINT' => array(2, 925), //area to zoom in on point selection (per map space document)
     'DT_SMARTY_TEMPLATE' => array(2, 922),  // smarty template to produce popup info per layer
     'DT_SYMBOLOGY_COLOR' => array(3, 1037), // outdated

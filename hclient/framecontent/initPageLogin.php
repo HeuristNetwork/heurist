@@ -112,11 +112,6 @@ function verify_credentials( show_warning ){
         //   msg = ''; 
         }
         if(msg!=''){
-            /*
-            $(window).on("beforeunload",  function() { 
-                    console.log('beforeunload initPageLogin');
-            });
-            */
             var win_mappreview = window.parent.hWin;
             if(show_warning){
                 

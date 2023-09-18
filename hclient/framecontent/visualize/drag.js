@@ -35,7 +35,7 @@ function addNodes() {
                   .on("dblclick", (d) => {
                     if(!settings.isDatabaseStructure){ //Added Double Click to Edit Function - Travis Doyle 19/9
                         window.open(window.hWin.HAPI4.baseURL + '?fmt=edit&db=' + window.hWin.HAPI4.database + '&recID=' + d.id, '_blank');
-                    }else if(window.hWin.HAPI4.is_admin()){ console.log(d);
+                    }else if(window.hWin.HAPI4.is_admin()){
                         _editRecStructure(d.id);
                     }
                   });
@@ -53,7 +53,6 @@ function addNodes() {
         // Restore location data
         var record = getSetting(d.id);
         if(record) {
-//console.log('restore id '+d.id+'   '+record);            
             var obj = JSON.parse(record);
             if("x" in obj) {
                 d.x = obj.x;
@@ -257,24 +256,6 @@ function dragmove(d, i) {
             d.py += d3.event.dy;
             d.x += d3.event.dx;
             d.y += d3.event.dy;
-            
-            /* Update the location in localstorage
-            var record = getSetting(d.id); 
-            //console.log("Record", record);
-            var obj;
-            if(record === null) {
-                obj = {}; 
-            }else{
-                obj = JSON.parse(record);
-            }  
-            
-            // Set attributes 'x' and 'y' and store object
-            obj.px = d.px;
-            obj.py = d.py;
-            obj.x = d.x;
-            obj.y = d.y;
-            putSetting(d.id, JSON.stringify(obj));
-            */
         }   
     });
 

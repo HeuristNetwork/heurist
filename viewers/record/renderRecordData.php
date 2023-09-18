@@ -938,21 +938,8 @@ function print_details($bib) {
     
         print_public_details($bib);
         
-        
-//$_time_debug = new DateTime();
-        
         $link_cnt = print_relation_details($bib);
-/*        
-$_time_debug2 = new DateTime('now');
-print 'print_relation_details  '.($_time_debug2->getTimestamp() - $_time_debug->getTimestamp()).'<br>';
-$_time_debug = $_time_debug2;
-*/
         $link_cnt = print_linked_details($bib, $link_cnt); //links from
-/*
-$_time_debug2 = new DateTime('now');
-print 'print_linked_details  '.($_time_debug2->getTimestamp() - $_time_debug->getTimestamp()).'<br>';
-$_time_debug = $_time_debug2;
-*/
         if($is_map_popup){ // && $link_cnt>3 //linkRow
         ?>
         <div class="map_popup"><div class="detailRow moreRow"><div class=detailType>

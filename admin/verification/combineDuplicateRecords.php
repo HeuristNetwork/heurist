@@ -902,7 +902,6 @@ function do_fix_dupe()
 
     //delete dups
     $mysqli->query('delete from Records where rec_ID in '.$dup_rec_list);
-//DEBUG error_log('delete from Records where rec_ID in '.$dup_rec_list);
     
     //try to get the record to update title and hash
     // calculate title, do an update
@@ -915,8 +914,6 @@ function do_fix_dupe()
             $mysqli->query("update Records set rec_Title = '" . $mysqli->real_escape_string($new_title) . "' where rec_ID = $master_rec_id");
         }
     }
-    //2020-03-23 $mysqli->query('update Records set rec_Hash = hhash(rec_ID) where rec_ID='.$master_rec_id);
-
     //reload with flag that operation is completed
     header('Location: combineDuplicateRecords.php?db='.HEURIST_DBNAME.'&finished_merge=1&bib_ids='.$bib_ids_list);
 }

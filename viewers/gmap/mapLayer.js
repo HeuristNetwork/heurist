@@ -131,14 +131,10 @@ function hMapLayer( _options ) {
             }else{
 
                 tileUrlFunc = function(coord, zoom) {
-                    //console.log(coord);
-                    //console.log(zoom);
 
                     var bound = Math.pow(2, zoom);
                     var tile_url = layer_url + "/" + zoom + "/" + coord.x + "/" + (bound - coord.y - 1) 
                     + (ccode2=='2-540'? ".png" : ".gif");
-                    //console.log("URL: " + tile_url);
-               
                     return tile_url;
                 };
 
@@ -170,7 +166,6 @@ function hMapLayer( _options ) {
                 visible:true,
                 // Set visibility
                 setVisibility: function(isvisible) {
-                    console.log("Setting visibility to: " + isvisible);
                     this.visible = isvisible;
                     if(isvisible) {
                         options.gmap.overlayMapTypes.setAt(this.overlay_index, tileType);
@@ -217,8 +212,6 @@ function hMapLayer( _options ) {
             var fileURL = window.hWin.HAPI4.baseURL+'?db='+window.hWin.HAPI4.database+'&file='+fileID[0];
             
             // note google refuses kml from localhost
-            //console.log("KML file: " + fileURL);
-            
             // Display on Google Maps
             kmlLayer = new google.maps.KmlLayer({
                 url: fileURL,
@@ -226,7 +219,6 @@ function hMapLayer( _options ) {
                 preserveViewport: options.preserveViewport,
                 map: options.gmap,
                 status_changed: function(){
-                    //console.log('status: '+kmlLayer.getStatus());
                 }
             });
         }
@@ -234,7 +226,6 @@ function hMapLayer( _options ) {
         // KML snippet
         if(!window.hWin.HEURIST4.util.isnull(kmlSnippet)) {
             /** NOTE: Snippets do not seem to be supported by the Google Maps API straight away.. */
-            //console.log("KML snippet: " + kmlSnippet);
 
             // Display on Google Maps
             kmlLayer = new google.maps.KmlLayer(kmlSnippet, {
@@ -264,8 +255,8 @@ function hMapLayer( _options ) {
             };
             
             kmlLayer.zoomToOverlay = function(){
+                //to implement
                 //map.fitBounds(bounds);
-                console.log('to implement');
             };
         }
         

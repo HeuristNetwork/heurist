@@ -45,7 +45,6 @@ class DbSysImportFiles extends DbEntityBase
     
     
         if (!$mysqli->query($query)) {
-            error_log($mysqli->error);
             $this->is_table_exists = false;
         }
         

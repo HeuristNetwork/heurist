@@ -49,10 +49,6 @@ if(@$_REQUEST['db']){
     $isSystemInited = $system->init(@$_REQUEST['db']);
 }
 
-if(@$_REQUEST['debug_error']){
-    $system->addError(HEURIST_ERROR,'Test debug error message');
-}
-
 if(!$isSystemInited){
     if(count($system->getError()) > 0){
         $_REQUEST['error'] = $system->getError();
@@ -181,16 +177,7 @@ if($allowGoogleAnalytics && !$isLocalHost) {
 
     }
 }
-?>
 
-
-<script>
-    var _time_debug = new Date().getTime() / 1000;
-    var _time_start = _time_debug;
-    //console.log('ipage start');
-</script>
-
-<?php
 if($isLocalHost){
     ?>
     <script type="text/javascript" src="<?php echo PDIR;?>external/jquery-ui-1.12.1/jquery-1.12.4.js"></script>
@@ -290,44 +277,15 @@ if($isLocalHost){
     // if hAPI is not defined in parent(top most) window we have to create new instance
     $(document).ready(function() {
 
-        _dout('ipage doc ready '+(window.hWin.HAPI4)+'    '+(new Date().getTime() / 1000 - _time_debug));
-        _time_debug = new Date().getTime() / 1000;
-
         // Standalone check
         if(!window.hWin.HAPI4){
             window.hWin.HAPI4 = new hAPI('<?php echo htmlspecialchars($_REQUEST['db'])?>', onHapiInit);
-/*            
-            // In case of standalone page
-            //load minimum set of required scripts
-console.log('initPage');                            
-            $.getMultiScripts(['localization.js' //, 'utils_msg.js','utils_ui.js', 'hRecordSearch.js', 'recordset.js', 'hapi.js'
-                ], '<?php echo PDIR;?>hclient/core/')
-            .done(function() {
-                // all done
-                window.hWin.HAPI4 = new hAPI('<?php echo htmlspecialchars($_REQUEST['db'])?>', onHapiInit);
-
-            }).fail(function(error) {
-                // one or more scripts failed to load
-                console.log('Cannot load localization.js');
-                onHapiInit(false);
-
-            }).always(function() {
-                // always called, both on success and error
-            });
-*/
         }else{
             // Not standalone, use HAPI from parent window
             onHapiInit( true );
         }
 
     });
-
-    //
-    // debug output
-    //
-    function _dout(args){
-        //console.log(args);        
-    }
 
     //
     // Callback function on hAPI initialization
@@ -338,10 +296,6 @@ console.log('initPage');
 
         isHapiInited = true;
 
-        _dout('onHapiInit '+success);        
-        _dout('window.hWin.HAPI4=');
-        _dout(window.hWin.HAPI4);        
-
         if(success) // Successfully initialized system
         {
             applyTheme();
@@ -351,8 +305,6 @@ console.log('initPage');
                     onAboutInit(); //init about dialog
             }
 
-            _dout('ipage hapi inited  '+(new Date().getTime() / 1000 - _time_debug));
-            
             if(initialLoadDatabaseDefintions(null, onPageInit)){
                 return;                
             }
@@ -372,8 +324,6 @@ console.log('initPage');
     //
     function initialLoadDatabaseDefintions(params, callback){
     
-            _time_debug = new Date().getTime() / 1000;
-
             if($.isEmptyObject(window.hWin.HAPI4.EntityMgr.getEntityData2('defRecTypes'))){ //defintions are not loaded
 
                 var sMsg = 'Cannot obtain database definitions (refreshEntityData function). '
@@ -383,15 +333,10 @@ console.log('initPage');
                 
                 //params = {recID:recID} or {rty_ID:rty_ID} - to load defs for particular record or rectype
                 var entities = (params)?params:'all'; //'rty,dty,rst,swf';
-_dout('initialLoadDatabaseDefintions');
+
                 window.hWin.HAPI4.EntityMgr.refreshEntityData(entities, function(){
                     if(arguments){                    
                     if(arguments[1]){
-
-_dout('init page db structure  '+(new Date().getTime() / 1000 - _time_debug));
-_dout(arguments);
-                        _time_debug = new Date().getTime() / 1000;
-
 
                         if(!window.hWin.HEURIST4.util.isnull(callback) && $.isFunction(callback)){
                             callback(true);
@@ -416,17 +361,6 @@ _dout('initialLoadDatabaseDefintions: already loaded');
     function applyTheme(){
 
         var prefs = window.hWin.HAPI4.get_prefs();
-        /*DEBUG
-        console.log('>>>'+prefs['layout_language']);        
-        prefs['layout_language'] = 'ru';    
-        if(!window.hWin.HR){
-        //loads localization
-        window.hWin.HR = window.hWin.HAPI4.setLocale(prefs['layout_language']);
-        }
-        */
-        //DEBUG 
-        //window.hWin.HR = window.hWin.HAPI4.setLocale('RUS');
-
         /* unfortunately dynamic addition of theme and style is not applied properly.
         Browser takes some time on its parsing while we have already created some ui elements, need timeout.
         So, its better to detecct current theme on server side
@@ -471,7 +405,6 @@ _dout('initialLoadDatabaseDefintions: already loaded');
 
         //add version to title
         //window.document.title = window.document.title+' V'+window.hWin.HAPI4.sysinfo.version;
-
     }
 
 </script>

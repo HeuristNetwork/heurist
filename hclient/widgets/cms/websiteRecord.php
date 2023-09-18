@@ -118,7 +118,6 @@ loads main page for logo, icon, banner, style
 
 
 */
-//print 'SORRY DEBUG in PROGRESS<br>';
 $edit_OldEditor = (@$_REQUEST['edit']==1);
 
 $system->defineConstants();

@@ -186,14 +186,6 @@ $.widget( "heurist.searchByEntity", {
         //-----------------------
 
         //global listeners
-/*        
-        window.hWin.HAPI4.addEventListener(this, window.hWin.HAPI4.Event.ON_REC_UPDATE, 
-            function(data) { 
-console.log('ON_REC_UPDATE');
-console.log(data);
-                that.recreateRectypeSelectors();
-            });
-*/        
             
         window.hWin.HAPI4.addEventListener(this, window.hWin.HAPI4.Event.ON_STRUCTURE_CHANGE, 
             function(data) { 
@@ -494,7 +486,6 @@ console.log(data);
         
                 var select_rectype = opts['select_name'];
        
-//console.log(opts);        
                 var that = this;
                 function __openSelect(){
                     

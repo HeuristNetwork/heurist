@@ -330,12 +330,8 @@ $.widget( "heurist.manageEntity", {
         var that = this;
         if(!window.hWin.HEURIST4.util.isempty(this._entityName)){
             //entity should be loaded from server
-//this._time_debug = new Date().getTime() / 1000;
             window.hWin.HAPI4.EntityMgr.getEntityConfig(this._entityName, 
                     function(entity){
-//console.log( 'getEntityConfig  ' + (new Date().getTime() / 1000 - this._time_debug));
-//this._time_debug = new Date().getTime() / 1000;
-                        
                         that.options.entity = entity;
                         if(that._initControls()){
                             if($.isFunction(that.options.onInitFinished)){
@@ -1515,9 +1511,6 @@ $.widget( "heurist.manageEntity", {
             
     },
     
-//    
-    _time_debug:0,
-    
     //-----------------------------------------------------
     //
     // send update request and close popup if edit is in dialog
@@ -1565,15 +1558,6 @@ $.widget( "heurist.manageEntity", {
                 //that.loadanimation(true);
                 window.hWin.HAPI4.EntityMgr.doRequest(request, 
                     function(response){
-
-                        //if(that._toolbar) that._toolbar.css('visibility','visible');//.show();               
-                        
-/*                        
-var fin_time = new Date().getTime() / 1000;
-console.log('save '+(  fin_time - this._time_debug));
-this._time_debug = fin_time;
-*/
-                        
                         window.hWin.HEURIST4.msg.sendCoverallToBack();
                         
                         if(response.status == window.hWin.ResponseStatus.OK){
@@ -2100,7 +2084,6 @@ this._time_debug = fin_time;
             }   
         }
         if(this._keepPos>0){
-//console.log('scroll '+this._keepPos);            
             this.editForm.scrollTop(this._keepPos);  
         } 
     },
@@ -2134,12 +2117,8 @@ this._time_debug = fin_time;
     //
     //
     _triggerRefresh: function( type, recID ){
-//console.log($(this.document).find('body').text().trim().substring(1,20));        
-//$(this.document).trigger(window.hWin.HAPI4.Event.ON_STRUCTURE_CHANGE, { source:this.uuid, type:type, recID: recID });
-//console.log('refresh '+type+'  '+recID);                
         window.hWin.HAPI4.triggerEvent(window.hWin.HAPI4.Event.ON_STRUCTURE_CHANGE, 
             { source:this.uuid, type:type, recID: recID });    
-           
     }
 });
 

@@ -328,7 +328,6 @@ class DbDefDetailTypes extends DbEntityBase
                     }
                 }                
                 
-//error_log(print_r($this->records[$idx], true));                
                 if (array_key_exists('dty_IDInOriginatingDB',$this->records[$idx]) 
                      && $this->records[$idx]['dty_IDInOriginatingDB']==''){ 
                          

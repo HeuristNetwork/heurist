@@ -161,8 +161,6 @@ function recordSearchDistinctPointers( $params ){
     $query = "select distinct dtl_Value as id, rec_Title as text from Records, recDetails where rec_ID=dtl_Value and dtl_DetailTypeID="
                         .intval($params['dt'])." and dtl_RecID in ".$where;
         
-//DEBUG error_log($query);        
-        
         $res = $mysqli->query($query);
         if (!$res){
             $response = $system->addError(HEURIST_DB_ERROR, "Search query error on crosstabs distinct pointers", $mysqli->error);
@@ -296,7 +294,6 @@ if($dt_col){
     }
 }
 
-//error_log($query);
         $res = $mysqli->query($query);
         if (!$res){
             $response = $system->addError(HEURIST_DB_ERROR, "Search query error on crosstabs", $mysqli->error);

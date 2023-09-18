@@ -216,7 +216,6 @@ $.widget( "heurist.expertnation_results", $.heurist.resultList, {
 
                             var term_id = aval[0];
                             if(!$Db.trm(trmID,'trm_Label')){
-                                console.log('term '+term_id+' not found');
                                 return 'term#'+term_id;   
                             }else{
                                 return $Db.trm(trmID,'trm_Label');
@@ -306,14 +305,8 @@ $.widget( "heurist.expertnation_results", $.heurist.resultList, {
                             
                         }
                         
-                        //sinfo.push(code);
-                        //sinfo.push( values[idx].value+',');
-                        
-    //console.log(code+'='+values[idx].value);                    
                     }//for
                   
-//console.log('here');
-                    
                     sinfo.push(gender);
                     if(born!=''){
                         born = 'born'+born;

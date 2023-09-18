@@ -150,7 +150,6 @@ function hMappingControls( mapping, startup_mapdocument_id ) {
     //
     function _loadMapDocumentById() {
 
-//console.log('load '+current_map_document_id);    
         menu_mapdocuments.hide();
 
         // Clean old data
@@ -226,8 +225,6 @@ function hMappingControls( mapping, startup_mapdocument_id ) {
     //
     function _loadMapDocumentById_continue() {    
 
-//console.log('load documents continue');        
-        
         var mapdocument_id =  current_map_document_id;
 
         //find mapdoc data
@@ -385,8 +382,6 @@ function hMappingControls( mapping, startup_mapdocument_id ) {
 
             var map_container = mapping.getMapContainerDiv();
             if(!map_container.is(':visible')){
-                //console.log('!!!!container is not visible');
-                
                 var checkVisible = setInterval(function(){
 
                     if(!map_container.is(':visible')) return;
@@ -668,13 +663,9 @@ function hMappingControls( mapping, startup_mapdocument_id ) {
     * @param layer Layer object
     */
     function _addLayerOverlay(bounds, layer, index, is_mapdoc) {
-        //console.log("_addLayerOverlay");
-        //console.log(layer);
-
         // Determine way of displaying
         if(layer !== undefined && layer.dataSource !== undefined) {
             var source = layer.dataSource;
-//DEBUG console.log(source);
             source.title = layer.title;
             
             source.color = layer.color;
@@ -693,28 +684,23 @@ function hMappingControls( mapping, startup_mapdocument_id ) {
             
             /** MAP IMAGE FILE (TILED) */
             if(source.rectypeID == RT_TILED_IMAGE_SOURCE) {
-//DEBUG console.log("MAP IMAGE FILE (tiled)");
                 addTiledMapImageLayer(source, bounds, index);
 
                 /** MAP IMAGE FILE (NON-TILED) */
             }else if(source.rectypeID == RT_GEOTIFF_SOURCE) {
                 // Map image file (non-tiled)
-//DEBUG console.log("MAP IMAGE FILE (non-tiled)");
                 addUntiledMapImageLayer(source, bounds, index);
 
                 /** KML FILE OR SNIPPET */
             }else if(source.rectypeID == RT_KML_SOURCE) {
-//DEBUG console.log("KML FILE or SNIPPET");
                 addKMLLayer(source, index, is_mapdoc);
 
                 /** SHAPE FILE */
             }else if(source.rectypeID == RT_SHP_SOURCE) {
-//DEBUG console.log("SHAPE FILE");
                 addShapeLayer(source, index);
 
                 /* MAPPABLE QUERY */
             }else if(source.rectypeID == RT_MAPABLE_QUERY) {
-//DEBUG console.log("MAPPABLE QUERY");
                 _addQueryLayer(source, index);
             }
 
@@ -777,8 +763,6 @@ function hMappingControls( mapping, startup_mapdocument_id ) {
                 tileUrlFunc = function(coord, zoom) {
                     var tile_url = source.sourceURL + "/" + zoom + "/" + coord.x + "/" + coord.y
                     + (source.mimeType.label == "image/png" ? ".png" : ".gif");
-                    //console.log("URL: " + tile_url);
-               
                     return tile_url;
                 };
                 
@@ -788,14 +772,9 @@ function hMappingControls( mapping, startup_mapdocument_id ) {
  function lat2tile(lat,zoom)  { return (Math.floor((1-Math.log(Math.tan(lat*Math.PI/180) + 1/Math.cos(lat*Math.PI/180))/Math.PI)/2 *Math.pow(2,zoom))); }                
 */                
                 tileUrlFunc = function(coord, zoom) {
-                    //console.log(coord);
-                    //console.log(zoom);
-
                     var bound = Math.pow(2, zoom);
                     var tile_url = source.sourceURL + "/" + zoom + "/" + coord.x + "/" + (bound - coord.y - 1) 
                     + (source.mimeType.label == "image/png" ? ".png" : ".gif");
-                    //console.log("URL: " + tile_url);
-               
                     return tile_url;
                 };
 
@@ -819,7 +798,6 @@ function hMappingControls( mapping, startup_mapdocument_id ) {
                 visible:true,
                 // Set visibility
                 setVisibility: function(checked) {
-                    console.log("Setting visibility to: " + checked);
                     this.visible = checked;
                     if(checked) {
                         map.overlayMapTypes.setAt(overlay_index, tileType);
@@ -890,7 +868,7 @@ function hMappingControls( mapping, startup_mapdocument_id ) {
 
             // note google refuses kml from localhost
             if(fileURL.indexOf('://localhost')>0)
-                console.log("Note: KML file cannot be loaded from localhost: " + fileURL);
+                console.error("Error: KML file cannot be loaded from localhost: " + fileURL);
             // Display on Google Maps
             kmlLayer = new google.maps.KmlLayer({
                 url: fileURL,
@@ -898,8 +876,6 @@ function hMappingControls( mapping, startup_mapdocument_id ) {
                 preserveViewport: is_mapdoc,
                 map: map,
                 status_changed: function(){
-                    //console.log(fileURL);
-                    //console.log('status: '+kmlLayer.getStatus());
                 }
             });
         }
@@ -907,8 +883,6 @@ function hMappingControls( mapping, startup_mapdocument_id ) {
         // KML snippet
         if(source.kmlSnippet !== undefined) {
             /** NOTE: Snippets do not seem to be supported by the Google Maps API straight away.. */
-            //console.log("KML snippet: " + source.kmlSnippet);
-
             var fileURL = window.hWin.HAPI4.baseURL + 'hsapi/controller/record_map_source.php?db='
                     +window.hWin.HAPI4.database+'&recID='+source.id;
             
@@ -955,11 +929,6 @@ function hMappingControls( mapping, startup_mapdocument_id ) {
 
         overlays[index] = _getStubOverlay();
         // File check
-        if(false && source.zipFile !== undefined) {
-            // Zip file
-            console.log("Zip file: " + source.zipFile);
-        }else{
-
 
             // Individual components
             if(source.shpFile !== undefined && source.dbfFile !== undefined) {
@@ -968,7 +937,7 @@ function hMappingControls( mapping, startup_mapdocument_id ) {
                 function __getShapeData(index){
                     var deferred = $.Deferred();
                     setTimeout(function () { 
-                        console.log("Reading DATA:");
+
                         new Shapefile({
                             shp: source.shpFile,
                             dbf: source.dbfFile
@@ -983,8 +952,6 @@ function hMappingControls( mapping, startup_mapdocument_id ) {
 
                 $.when( __getShapeData(index) ).done(addGeoJsonToMap);
             }
-
-        }
     }
 
     /**
@@ -993,8 +960,6 @@ function hMappingControls( mapping, startup_mapdocument_id ) {
     */
     function addGeoJsonToMap(source, data, index) {
         // Add GeoJson to map
-        //console.log(data);
-
         var overlay = {
             visible:false,
             features: null,
@@ -1079,7 +1044,6 @@ map.data.addListener('mouseover', function(event) {
     function _addQueryLayer(source, index) {
         // Query
         if(source && !window.hWin.HEURIST4.util.isempty(source.query)) {
-            //console.log("Query: " + source.query);
             var request = window.hWin.HEURIST4.query.parseHeuristQuery(source.query);
             
             if(window.hWin.HEURIST4.util.isempty(request.q)){
@@ -1129,26 +1093,6 @@ map.data.addListener('mouseover', function(event) {
 
                     });
             
-            /*
-            window.hWin.HAPI4.RecordMgr.search(request,
-            function(response){
-            //console.log("QUERY RESPONSE:");
-            //console.log(response);
-
-            if(response.status == window.hWin.ResponseStatus.OK){
-
-            source.recordset = hRecordSet(response.data);
-            source.recordset.setMapEnabled( true );
-
-            _addRecordsetLayer(source, index);
-
-            }else{
-            window.hWin.HEURIST4.msg.showMsgErr(response);
-            }
-            }
-            );*/
-
-
         }else{
             $('#mapping').css('cursor','auto');
         }
@@ -1490,7 +1434,7 @@ map.data.addListener('mouseover', function(event) {
                     overlay.removeOverlay();
                 }
             } catch(err) {
-                console.log(err);
+                console.error(err);
             }
             if(ismapdoc){
                 delete overlays_not_in_doc[overlay_id];

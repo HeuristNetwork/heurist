@@ -27,9 +27,6 @@ $.widget( "heurist.ruleBuilder", {
         recordtypes: null,  //array or record types - list of source rt (from current main search result or from parent) - otherwise show all rectypes
         init_source_rt:null,
 
-        //debug is_search_allowed: false,
-        //debug query_request: {},   // keep current query request
-
         // callback
         onremove: null
     },
@@ -199,7 +196,6 @@ $.widget( "heurist.ruleBuilder", {
         this.select_reltype.remove();
         this.additional_filter.remove();
 
-        if(this.debug_label) this.debug_label.remove();
         this.div_btn2.remove();
         if(this.div_btn) his.div_btn.remove();
     },
@@ -464,18 +460,9 @@ $.widget( "heurist.ruleBuilder", {
         return rt_target;
     },
 
-    // TODO: remove big block of debug or old code
-    /*
-    [rt_source, dt_ID, rel_term_id, rt_target, filter, linktype]
-    Source rectype,
-    pointer or relation field id,
-    relation type (term) id,
-    Target rectype,
-    Filter ,
-    linktype  0 links (any), 1 linedfrom, 2 linkedto, 3 relationfrom, 4 relatedto
-
-
-    */
+    //
+    //
+    //   
     _getCodes: function(){
 
         var rt_source   = this.select_source_rectype.val();

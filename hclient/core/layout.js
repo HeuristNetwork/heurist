@@ -643,12 +643,10 @@ function hLayout(args) {
                     
                     //{"container":"cont","tabs":{"west":{"id":"west"},"center":{"id":"center"},"east":{"id":"east"}}}
                     if(!lpane.apps[0].options || !lpane.apps[0].options.tabs){
-console.log('Cardinal layout widget does not have proper options');
+console.error('Cardinal layout widget does not have proper options');
                         return;                        
                     }
                     var layout_opts = lpane.apps[0].options.tabs;
-//console.log('>>>>>');                                        
-//console.log(layout_opts);                    
                     var $cardinal_container;
                     if(lpane.apps[0].options.container){
                         $cardinal_container = $('#'+lpane.apps[0].options.container);   
@@ -978,53 +976,15 @@ console.log('Cardinal layout widget does not have proper options');
             
                 manage_dlg = $content[app.widgetname]( options );
             }else{
-                
-                
-/*            
-            if(app.widgetname=='resultList'){
-                //DEBUG
-                widget = $content.resultList( options );
-            }else if(app.widgetname=='recordListExt'){
-                //DEBUG
-                widget = $content.recordListExt( options );
-            }else if(app.widgetname=='app_timemap'){
-                //DEBUG
-                widget = $content.app_timemap( options );
-            }else if(app.widgetname=='mainMenu'){
-                //DEBUG
-                widget = $content.mainMenu( options );
-            }else if(app.widgetname=='svs_list'){
-                    //DEBUG
-                    widget = $content.svs_list( options ); //options
-            }else if(app.widgetname=='search'){
-
-                   widget = $content.search( options );
-
-            }else if(app.widgetname=='connections'){
-
-                   widget = $content.connections( options );
-                   
-            }else if(app.widgetname=='dh_search'){
-                   widget = $content.dh_search( options );
-            }else if(app.widgetname=='dh_maps'){
-                   widget = $content.dh_maps( options );
-            }else if(app.widgetname=='expertnation_place'){
-                   widget = $content.expertnation_place( options );
-            }else if(app.widgetname=='expertnation_nav'){
-                   widget = $content.expertnation_nav( options );
-            }else
-*/            
-                        //this is normal way of widget initialization
-                        // script is loaded dynamically and init function is widget name
-
-
-                        $.getScript( window.hWin.HAPI4.baseURL + app.script, function() {  //+'?t='+(new Date().getTime())
-                            if($.isFunction($content[app.widgetname])){
-                                $content[app.widgetname]( options );   //call function
-                            }else{
-                                window.hWin.HEURIST4.msg.showMsgErr('Widget '+app.widgetname+' not loaded. Verify your configuration');
-                            }
-                        });
+                //this is normal way of widget initialization
+                // script is loaded dynamically and init function is widget name
+                $.getScript( window.hWin.HAPI4.baseURL + app.script, function() {  //+'?t='+(new Date().getTime())
+                    if($.isFunction($content[app.widgetname])){
+                        $content[app.widgetname]( options );   //call function
+                    }else{
+                        window.hWin.HEURIST4.msg.showMsgErr('Widget '+app.widgetname+' not loaded. Verify your configuration');
+                    }
+                });
             }
 
 
@@ -1510,7 +1470,6 @@ console.log('Cardinal layout widget does not have proper options');
                 if($.isFunction(onInitComplete)){
                         onInitComplete.call();
                 }
-//                console.log('appInitFromContainer: layout not defined');
             }
             //
             _defineMediaSource($container); 

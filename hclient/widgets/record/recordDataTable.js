@@ -270,7 +270,7 @@ $.widget( "heurist.recordDataTable", $.heurist.recordAction, {
                     $select.val(20);
                 }else{
                     $select.val(100);
-                }console.log($select, dtid, type, is_number, is_date, is_term);
+                }
             }
     },
   

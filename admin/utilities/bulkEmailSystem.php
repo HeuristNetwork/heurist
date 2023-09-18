@@ -516,9 +516,6 @@ class systemEmailExt {
                     $this->set_error('Unknown error');
                     $email_rtn = -3;
                 }
-
-                //error_log('native mail : '.$email.'  '.$email_rtn);                    
-
             }else{
 
                 try {
@@ -527,7 +524,6 @@ class systemEmailExt {
                     $email_rtn = -2;
                     $status_msg = 'Failed, Error Message: Invalid email '.$email;
                     $this->set_error( $status_msg );
-                    error_log($status_msg.'  '.$db_listed);                        
                 }
                 if($email_rtn == 0){
 
@@ -552,10 +548,6 @@ class systemEmailExt {
             } else {
                 $status_msg = "Failed, Error Message: " . $this->get_error();
             }
-
-
-
-//error_log('mailer : '.$email.'  '.$email_rtn.' '.$email->ErrorInfo);    
             
 			$this->log .= "Values: {databases: {".$db_listed."}, email: $email, name: " .$details['first_name']. " " .$details["last_name"]
 					   .", record_count: {".$records_listed."}, last_modified: {".$lastmod_listed."} },"
@@ -691,7 +683,6 @@ class systemEmailExt {
 
 	public function set_error($msg) {
 		$this->error_msg = $msg;
-//error_log($msg);        
 	}
 
 	public function get_error() {

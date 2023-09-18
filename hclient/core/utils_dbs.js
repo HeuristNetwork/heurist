@@ -1017,8 +1017,6 @@ window.hWin.HEURIST4.dbs = {
                     $def['children'][$idx]['code'] = $def['code'];    
                 }
             }
-            //debug $def['children'][$idx]['title'] = $def['children'][$idx]['code'].$det['title']; 
-                 
             if($.isArray($det['children'])){
                    $def['children'][$idx] = __assignCodes($def['children'][$idx]);
             }
@@ -1060,7 +1058,6 @@ window.hWin.HEURIST4.dbs = {
                             def['code'] = parentcode;
                         }
                     }
-                    //debug $def['title'] = @$def['code'].$def['title'];   
                     //asign codes
                     if($.isArray(def['children'])){
                         //def['children'].unshift({});
@@ -2846,9 +2843,6 @@ window.hWin.HEURIST4.dbs = {
                 }
 
 				if(!Object.hasOwn(arr_idx, dty_id)) {
-                    /*if(dty_id == 1){
-                        console.log(JSON.stringify(arr_idx), dty_id, last_idx);
-                    }*/
                     let list_fld = !list_all_fields && $Db.dty(dty_id, 'dty_ShowInLists') == 0;
                     arr_idx[dty_id] = last_idx;
                     last_idx ++;

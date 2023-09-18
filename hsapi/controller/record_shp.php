@@ -292,11 +292,8 @@ use Shapefile\ShapefileReader;
 
                 } catch (ShapeFileException $e) {
                     // Print detailed error information
-error_log($e->getCode().' ('.$e->getErrorType().'): '.$e->getMessage());                    
-                    //.$e->getCode().' ('.$e->getErrorType().'): '
                     $system->error_exit_api('Cannot process shp file: '.$e->getMessage(), HEURIST_ERROR, $is_api);
                 } catch (Exception $e) {
-error_log($e->getCode().' ('.$e->getErrorType().'): '.$e->getMessage());                    
                     $system->error_exit_api('Cannot init ShapeFile library: '.$e->getMessage(), HEURIST_ERROR, $is_api);
                 }                
                 
@@ -359,16 +356,10 @@ function fileRetrievePath($fileinfo, $need_ext=null, $isArchive=false){
 
     $filepath = resolveFilePath($filepath);
 
-//DEBUG error_log($filepath.'  '.file_exists($filepath).'  '.$mimeType);  
     if(file_exists($filepath)){
         
     }else if($external_url){
-        //tempnam(HEURIST_SCRATCH_DIR, 'remote_shp.zip');
         $filepath = tempnam(HEURIST_SCRATCH_DIR, '_remote_');
-        /*if(!$isArchive && $need_ext!=null){
-            //change tmp to required extension
-            $filepath = substr($filepath,-3,3).$need_ext;    
-        }*/
         saveURLasFile($external_url, $filepath); //save remote shp to temp in scratch folder
     }    
     

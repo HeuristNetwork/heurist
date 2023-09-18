@@ -413,11 +413,8 @@ if($step=="1"){  //first step - info about current status
         }
     }else{
 
-        //DEBUG print '<xmp>'.$items.'</xmp>';
-        //it does not work anymore
-        //intval(substr($items,strpos($items, "<zapi:totalResults>") + 19,strpos($items, "</zapi:totalResults>") - strpos($items, "<zapi:totalResults>") - 19));
-        //Responses for multi-object read requests will include a custom HTTP header, Total-Results
 
+        //Responses for multi-object read requests will include a custom HTTP header, Total-Results
         $totalitems = $zotero->getTotalCount();
 
         //print $items;
@@ -735,8 +732,6 @@ if($step=="1"){  //first step - info about current status
                             $details["t:".$detail_id] = array("0"=>$value);
                         }
 
-                        //debug print $key."  ".$value."<br/>";
-
                     }else if(!($zkey == 'url' || $zkey=='key')){
                             if(!in_array($itemtype.'.'.$zkey, $arr_notmapped)){
                                 array_push($arr_notmapped, $itemtype.'.'.$zkey); 
@@ -757,7 +752,6 @@ if($step=="1"){  //first step - info about current status
                     array_push($arr_empty, $zotero_itemid);
                     $cnt_empty++;
                 }else{
-                    //DEBUG echo print_r($details, true);
                     $new_recid = addRecordFromZotero($recId, $recordType, $rec_URL, $details, $zotero_itemid, $is_echo, $totalitems);
                     if($new_recid){
                         if(count($unresolved_records)>0){
@@ -1130,7 +1124,6 @@ function getResourceMapping($dt_code, $rt_id, $arr=null, $extra_info=null){
             return $subres;
         }
     }else{
-        //if($extra_info == null) error_log(print_r(debug_backtrace(), TRUE));
         //pointer detail type and detail type in resource record
         printMappingReport_dt($resource_dt_id, $res_rt_id, $res_dt_id, $extra_info);
         $res = array($dt_id, $res_rt_id, $res_dt_id);

@@ -164,7 +164,6 @@ function editCMS_Manager( options ){
 
                         window.hWin.HEURIST4.msg.showMsgDlgUrl(window.hWin.HAPI4.baseURL
                             +'hclient/widgets/cms/editCMS_NewSiteMsg.html');
-//console.log(response.data);          
                         //add blog template
                         if(response.data.page_id_for_blog>0){
                             _addTemplate('blog', response.data.page_id_for_blog);
@@ -180,8 +179,6 @@ function editCMS_Manager( options ){
                     closeCMSEditor();
                 }
             };
-            
-            //__callback({status:'ok',data:{home_page_id:572}}); //DEBUG
             
             window.hWin.HAPI4.doImportAction(request, __callback);
 

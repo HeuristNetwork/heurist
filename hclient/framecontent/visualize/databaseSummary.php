@@ -269,7 +269,6 @@ A:link {
 
                 // VISUALISATION CALL
                 var url = window.hWin.HAPI4.baseURL+"hsapi/controller/rectype_relations.php" + window.location.search;
-//DEBUG                console.log("Loading data from: " + url);
                 d3.json(url, function(error, json_data) {
                     // Error check
                     if(error) {
@@ -277,9 +276,6 @@ A:link {
                     }
 
                     // Data loaded successfully!
-                    //console.log("JSON Loaded");
-                    //console.log(json_data);
-
                     /** RECORD FILTERING */
                     // Set filtering settings in UI
                     var isfirst_time = false;
@@ -409,8 +405,6 @@ A:link {
                     // Visualizes the data 
                     function initVisualizeData() {
                         // Call plugin
-                        //DEBUG 
-                        console.log("Calling plugin!");
                         var data_to_vis = getData(json_data);
                         
                         $("#visualisation").visualize({

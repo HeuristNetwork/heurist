@@ -196,8 +196,6 @@ $.widget( "heurist.recordFindDuplicates", $.heurist.recordAction, {
                         }
                         
                     }
-
-                    //console.log(response.data);                    
                 });
 
             }
@@ -278,11 +276,7 @@ $.widget( "heurist.recordFindDuplicates", $.heurist.recordAction, {
                 }else{
                     selectedFields.push(node.data.code);
                 }
-                
-                //DEBUG console.log( node.data.code );
             }
-            //DEBUG 
-        
         return {
                 fields: selectedFields,
                 distance: this.element.find('#distance').val(),

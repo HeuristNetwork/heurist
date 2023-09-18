@@ -134,7 +134,8 @@ $.widget( "heurist.manageSysIdentification", $.heurist.manageEntity, {
 
         if(Object.hasOwn(fields, 'sys_AllowUserImportAtLogin')){
             let allow_reg = Object.hasOwn(fields, 'sys_AllowRegistration') ? fields['sys_AllowRegistration'] : 0;
-            fields['sys_AllowRegistration'] = allow_reg | fields['sys_AllowUserImportAtLogin'];console.log(fields['sys_AllowRegistration']);
+            fields['sys_AllowRegistration'] = allow_reg | fields['sys_AllowUserImportAtLogin'];
+            
             delete fields['sys_AllowUserImportAtLogin'];
         }
 

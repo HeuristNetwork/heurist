@@ -119,12 +119,7 @@ $.widget( "heurist.recordTemplate", $.heurist.recordAction, {
                 var ids = node.data.code.split(":");
                 
                 __addSelectedField(ids, 1, 0);
-                
-                //DEBUG console.log( node.data.code );
             }
-            //DEBUG console.log( selectedFields );
-            
-            
             var request = {
                 'request_id' : window.hWin.HEURIST4.util.random(),
                 'rec_RecTypeID': this.options.recordType,

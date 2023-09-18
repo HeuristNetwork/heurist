@@ -119,7 +119,6 @@ function editCMS_WidgetCfg( widget_cfg, _layout_content, $dlg, main_callback ){
             if(widget_name=='heurist_StoryMap'){
                 if(!opts.map_widget_id){
                     var ele = layoutMgr.layoutContentFindWidget(_layout_content, 'heurist_Map');
-                    //if(ele) console.log(ele.options); //ele.options.widget_id ele.dom_id
                     
                     if(ele && ele.options.search_realm=='' && ele.dom_id){
                         opts.map_widget_id = ele.dom_id;
@@ -858,7 +857,7 @@ function editCMS_WidgetCfg( widget_cfg, _layout_content, $dlg, main_callback ){
 
                     $select3.on('change', () => {
 
-                        if($select3.val() == ''){ console.log('hiding checkbox at change');
+                        if($select3.val() == ''){ 
                             $dlg.find('input[name="is_single_selection"]').parent().hide();
                         }else{
                             $dlg.find('input[name="is_single_selection"]').parent().show();
@@ -1090,8 +1089,6 @@ function editCMS_WidgetCfg( widget_cfg, _layout_content, $dlg, main_callback ){
                         return false;
                     }
                 }
-
-//console.log(opts);          
 
         opts['init_at_once'] = true;
         opts['search_realm'] = $dlg.find('input[name="search_realm"]').val();

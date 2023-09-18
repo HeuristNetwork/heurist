@@ -79,12 +79,8 @@
             mysqli_report(MYSQLI_REPORT_STRICT); //MYSQLI_REPORT_ERROR | 
             $mysqli->options(MYSQLI_OPT_LOCAL_INFILE, 1);
             $mysqli->real_connect($dbHost, $dbUsername, $dbPassword, null, $dbPort);
-            //if (!$mysqli->set_charset("utf8mb4")) {
-            //    return array(HEURIST_SYSTEM_FATAL, 'Error loading character set utf8mb4', $mysqli->error);
-            //}       
             
         } catch (Exception $e)  {
-            //return array(HEURIST_SYSTEM_FATAL, "Could not connect to database server, MySQL error: " . mysqli_connect_error());
         }
         if(!$mysqli){
             return array(HEURIST_SYSTEM_FATAL, "Could not connect to database server, MySQL error: " . mysqli_connect_error());
@@ -682,15 +678,6 @@
 
             $stmt = $mysqli->prepare($query);
             if($stmt){
-
-//error_log($query);
-//error_log(print_r($params, true));
-/*  faster
-                $refArr = referenceValues($params); 
-                $ref    = new ReflectionClass('mysqli_stmt'); 
-                $method = $ref->getMethod("bind_param"); 
-                $method->invokeArgs($stmt, $refArr); 
-*/                
                 //Call the $stmt->bind_param() method with atrguments (string $types, mixed &...$vars)
                 call_user_func_array(array($stmt, 'bind_param'), referenceValues($params));
                 if(!$stmt->execute()){
@@ -700,8 +687,6 @@
                     //$result = $stmt->insert_id ?$stmt->insert_id :$mysqli->affected_rows;
                 }
                 $stmt->close();
-
-//error_log('pq res='.$result);                
             }else{
                 $result = $mysqli->error;
             }
@@ -1223,24 +1208,10 @@
 
         $translated = '';
         
-        //$inputStr = preg_replace("/\s+/u", ' ', $inputStr); //any spaces
-
-//error_log($inputStr.'  '.$inputStrLength);
-        
         for($i = 0; $i < $inputStrLength; $i++) {
             $currentChar = mb_substr($inputStr, $i, 1, $encoding);
-            /*
-            if(mb_ord($currentChar)==0xA0 || mb_ord($currentChar)==65279){ //non breaking space or BOM
-                $translatedCharPos = '';    
-            }else{
-                $translatedCharPos = mb_strpos($from, $currentChar, 0, $encoding);    
-            }*/
+
             $translatedCharPos = mb_strpos($from, $currentChar, 0, $encoding);    
-/*          
-if($i<5){
-    error_log ($i.'  >'.$currentChar.'<  ord='.mb_ord($currentChar).'  chr='.mb_chr(mb_ord($currentChar)));
-}*/
-            
             
             if($translatedCharPos === false) {
                 $translated .= $currentChar;
@@ -1512,16 +1483,14 @@ if($i<5){
                 $value = $mysqli->real_escape_string($value);
                 //write 
                 if($res==null){
-//error_log('INSERTED '.$session_id.'  '.$value);                                        
+
                     $query = "insert into sysSessionProgress values (".$session_id.",'".$value."')";
                 }else{
                     
                 list($execution_counter, $tot)  = explode(',',$value);
                 if ($execution_counter>0 && intdiv($execution_counter,500) == $execution_counter/500){
-//error_log('UPDATED '.$session_id.'  '.$value);                    
                 }
                     
-    //error_log('upd_prog '.$session_id.'  '.$value);                    
                     $query = "update sysSessionProgress set stp_Data='".$value."' where stp_ID=".$session_id;
                 }
                 $mysqli->query($query);
@@ -1531,10 +1500,6 @@ if($i<5){
         }
         if($need_close)  $mysqli->close();
    
-        if($value==null){
-//error_log('get_prog '.$session_id.'  '.$res);                    
-        }
-
         return $res;
     }    
     
@@ -1564,13 +1529,6 @@ if($i<5){
                 file_put_contents($session_file, $value);
                 $res = $value;
             }
-                        
-            /*            
-                list($execution_counter, $tot)  = explode(',',$value);
-                if ($execution_counter>0 && intdiv($execution_counter,500) == $execution_counter/500){
-error_log('UPDATED '.$session_id.'  '.$value);                    
-                }
-            */    
         }
    
         return $res;

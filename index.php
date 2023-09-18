@@ -192,8 +192,6 @@ number of widgets. Currently it is commented out of the code in layout_default.j
 <script type="text/javascript" src="hclient/widgets/record/recordExportCSV.js"></script>
 <script type="text/javascript" src="hclient/widgets/record/recordTemplate.js"></script>
 
-<!-- DOCUMENTATION TODO: explain this -->
-<!-- these scripts are loaded explicitely - for debug purposes -->
 <script type="text/javascript" src="hclient/widgets/viewers/recordListExt.js"></script>
 <script type="text/javascript" src="hclient/widgets/search/search_faceted.js"></script>
 <script type="text/javascript" src="hclient/widgets/search/search_faceted_wiz.js"></script>
@@ -222,19 +220,9 @@ number of widgets. Currently it is commented out of the code in layout_default.j
 <script type="text/javascript" src="hclient/widgets/expertnation/expertnation_nav.js"></script>
 <script type="text/javascript" src="hclient/widgets/viewers/connections.js"></script>
 
-<!-- DEBUG -->
-
 <script type="text/javascript" src="hclient/widgets/profile/profile_login.js"></script>
-<!-- todo: load dynamically
-<script type="text/javascript" src="hclient/widgets/editing/rec_search.js"></script>
-<script type="text/javascript" src="hclient/widgets/editing/rec_relation.js"></script>
--->
 
-<!-- move to profile.js dynamic load
-<script type="text/javascript" src="external/jquery-ui-themeswitcher/jquery.ui.themeswitcher.js"></script>
--->
-
-<!-- edit entity (load dynamically?) -->        
+<!-- edit entity -->        
 <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/editing/select_imagelib.js"></script>
 <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/editing/select_folders.js"></script>
 <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/editing/editing_input.js"></script>

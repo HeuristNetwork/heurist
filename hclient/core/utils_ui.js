@@ -602,7 +602,7 @@ window.hWin.HEURIST4.ui = {
                     if(groups[grp_id] && groups[grp_id]['rty']){
                         groups[grp_id]['rty'].push(rtyID);
                     }else{
-                        console.log('group ',grp_id,'not found for ',rtyID);
+                        console.error('Group ',grp_id,'not found for record type ',rtyID);
                     }
                         
                 }
@@ -1199,7 +1199,6 @@ window.hWin.HEURIST4.ui = {
                         }
                 },
                 open: function(event, ui){
-                    //console.log(menu.hSelect( "menuWidget" ).width());
                     //increase width of dropdown to avoid word wrap
                     var wmenu = $(event.target).hSelect( "menuWidget" );  //was menu
                     wmenu.width( wmenu.width()+20 ); 
@@ -2502,7 +2501,6 @@ window.hWin.HEURIST4.ui = {
                 // all done
                 window.hWin.HEURIST4.ui.showEntityDialog(entityName, options);
             }).fail(function(error) {
-                //console.log(error);                
                 // one or more scripts failed to load
                 window.hWin.HEURIST4.msg.showMsg_ScriptFail();
             }).always(function() {
@@ -2672,7 +2670,6 @@ window.hWin.HEURIST4.ui = {
                 window.hWin.HEURIST4.ui.showRecordActionDialog(actionName, options);
             }).fail(function(error) {
                 // one or more scripts failed to load
-                //console.log(error);                
                 window.hWin.HEURIST4.msg.showMsg_ScriptFail();
             }).always(function() {
                 // always called, both on success and error
@@ -3365,24 +3362,11 @@ $.widget( "heurist.hSelect", $.ui.selectmenu, {
           .appendTo( wrapper );    
     }
     
-/*    
-    if($(item.element).attr('depth')>0){
-        console.log($(item.element).attr('depth')+'   '+item.label);
-    }
-*/    
     var depth = parseInt($(item.element).attr('depth'));
     if(!(depth>0)) depth = 0;
     if(rt_checkbox>=0) depth = depth + 1;
     wrapper.css('padding-left',(depth+0.2)+'em');
     
-    /*icon
-    $( "<span>", {
-      style: item.element.attr( "data-style" ),
-      "class": "ui-icon " + item.element.attr( "data-class" )
-    })
-      .appendTo( wrapper );
-    */   
-
     return li.append( wrapper ).appendTo( ul );
   },
   

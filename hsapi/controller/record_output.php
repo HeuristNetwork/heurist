@@ -87,8 +87,6 @@
         $params = $_REQUEST;
     }
     
-    $is_debug = (@$params['dbg']==1);
-    
     if(!isset($system) || $system==null){
     
         $system = new System();
@@ -153,13 +151,6 @@
         $search_params['detail'] = 'ids';
     }
 
-/* DEBUG    
-    if(is_array($search_params['q'])){
-        error_log(json_encode($search_params['q']));    
-    }else{
-        error_log($search_params['q']);    
-    }
-*/
     if(@$params['prefs']['csv_headeronly']===true){
         $response = array('status'=>HEURIST_OK,'data'=>array());
         //$search_params['limit'] = 1;

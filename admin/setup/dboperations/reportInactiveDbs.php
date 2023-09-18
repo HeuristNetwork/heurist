@@ -137,12 +137,6 @@ print 'Mail: '.HEURIST_MAIL_DOMAIN.'   Domain: '.HEURIST_SERVER_NAME."\n";
 
 $mysqli = $system->get_mysqli();
 $databases = mysql__getdatabases4($mysqli, false);   
-//DEBUG $databases = array('ACD_Basins','ACD_Candlesticks');
-//$databases = array('arche_proscrits_2019');
-// ARNP_COMET
-//$databases = array('vycao_iNprint_V3');
-    
-//Base_Demeter, efa_cid_vii
 
 $upload_root = $system->getFileStoreRootFolder();
 $backup_root = $upload_root.'DELETED_DATABASES/';
@@ -372,21 +366,16 @@ sendEmail(array($usr_owner['ugr_eMail']), $email_title, $email_text);
             //$sif_purge = array( 3 => 'import20210531163600');
             $arc_cnt = 0;
             $cnt_dumped = 0;
-//DEBUG            if(true){
             
             foreach($sif_purge as  $sif_id => $sif_table){
                 
                 if(hasTable($mysqli,$sif_table)){
                     $file_name = fileNameSanitize($sif_list[$sif_id]);
                     
-//echo $file_name."\n";                    
-//echo strlen($file_name)."\n";                        
                     $len = strlen($file_name);
                     if($len>96){ //100 is max for tar file
                         $len = $len-100+26;
                         $file_name = substr($file_name,0,-$len).substr($file_name,-19);
-//echo $file_name."\n";                        
-//echo strlen($file_name)."\n";                        
                     }
                     
                     $dumpfile = $backup_imports2."/".$file_name.'.sql';
@@ -420,7 +409,6 @@ sendEmail(array($usr_owner['ugr_eMail']), $email_title, $email_text);
                     
                 }
             }//foreach
-//DEBUG            }
             
             if($cnt_dumped>0)
             {

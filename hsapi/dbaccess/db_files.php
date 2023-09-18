@@ -918,7 +918,6 @@ function fileGetPlayerTag($system, $fileid, $mimeType, $params, $external_url, $
                 
 
     }else if($mimeType=='application/pdf'){
-        //error_log($filepath);                 
         if(($size==null || $size=='') && $style==''){
             $size = '';
             $style = 'style="width:80% !important; height:90% !important"';
@@ -929,9 +928,6 @@ function fileGetPlayerTag($system, $fileid, $mimeType, $params, $external_url, $
         .'"'
         .($external_url?'':' data-id="'.$fileid.'"')
         .' type="application/pdf" internalinstanceid="9">';
-
-        
-//<object width="100%" height="100%" name="plugin" data="'+ fileURL_forembed+ '" type="application/pdf"></object>'        
         
     }else{
         //not media - show thumb with download link

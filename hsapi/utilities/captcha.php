@@ -25,8 +25,6 @@ if (session_status() != PHP_SESSION_ACTIVE) {
     session_name('heurist-sessionid');
     session_cache_limiter('none');
     
-    //error_log('NOT ACTVIE  cookie='.@$_COOKIE['heurist-sessionid']);    
-    
     if (@$_COOKIE['heurist-sessionid']) { //get session id from cookes 
         session_id($_COOKIE['heurist-sessionid']);
         @session_start();
@@ -36,8 +34,6 @@ if (session_status() != PHP_SESSION_ACTIVE) {
         //$session_id = session_id();
         setcookie('heurist-sessionid', session_id(), 0, '/', '', $is_https ); //create new session - REM
     }
-}else{
-    //error_log('ALREADy ACTVIE '.session_id().'  cookie='.@$_COOKIE['heurist-sessionid']);
 }
 
 if(@$_REQUEST['img']){ //IMAGE CAPTCHA
@@ -71,5 +67,4 @@ if(@$_REQUEST['img']){ //IMAGE CAPTCHA
         print $value;    
     }
 }
-//error_log('_capture: '.session_id().'   '.@$_SESSION["captcha_code"]);        
 ?>

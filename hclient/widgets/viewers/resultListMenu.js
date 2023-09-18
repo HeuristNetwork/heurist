@@ -233,13 +233,7 @@ $.widget( "heurist.resultListMenu", {
             .show()
             .position({my: "left top", at: "left bottom", of: parent, collision:'none' });
             //$( document ).one( "click", function() { menu.hide(); });
-/*
-console.log('padleft');            
-console.log(menu.find('.ui-menu-item').css('padding-left'));
-            menu.find('.ui-menu-item').css({'padding':'0 !important'});
-console.log('pad');            
-console.log(menu.find('.ui-menu-item').css('padding'));
-*/            
+
             return false;
         };
 

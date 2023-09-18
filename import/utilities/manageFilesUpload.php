@@ -79,11 +79,6 @@ if(!($max_size>0)) $max_size = 0;
                     //ele.prop('onchage',null);                    
                 }else{
                     ele.prop('webkitdirectory',true);
-                    /*ele.onchange = function(e) {
-                          var files = e.target.files; // FileList
-                          for (var i = 0, f; f = files[i]; ++i)
-                            console.log(files[i].webkitRelativePath);
-                    }*/
                 }
             }
             
@@ -456,7 +451,7 @@ if(!($max_size>0)) $max_size = 0;
                         // Close Upload media window
                         if($(event.target).is('button')) {
                             setTimeout(function(){ window.close(); }, 100);
-                        } else { console.log($(event.target)); }
+                        }
 
                         // Open Index media files window
                         setTimeout(function(){ $(parent.document).find('li[data-action="menu-files-index"]').click(); }, 500);
@@ -474,7 +469,7 @@ if(!($max_size>0)) $max_size = 0;
                         if($(event.target).is('button')) {
                             $('#btnCancel').click();  //reset form
                             setTimeout(function(){ window.close(); }, 100);
-                        } else { console.log($(event.target)); }
+                        }
                     }
 
                     window.hWin.HEURIST4.msg.showMsgDlg(msg, btns, {title:'Indexing Uploaded Media Files', 

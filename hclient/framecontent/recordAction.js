@@ -98,9 +98,7 @@ function hRecordAction(_action_type, _scope_type, _field_type, _field_value) {
         selectRecordScope.empty();
 
         if(!window.hWin.HAPI4.currentRecordset){
-            //debug
-            window.hWin.HAPI4.currentRecordset = new hRecordSet({count: "1",offset: 0,reccount: 1,records: [1069], rectypes:[25]});
-            //return;
+            window.hWin.HAPI4.currentRecordset = new hRecordSet({count:"0",offset: 0,reccount: 1,records:[], rectypes:[]});
         }
 
         var opt, selScope = selectRecordScope.get(0);
@@ -392,7 +390,6 @@ function hRecordAction(_action_type, _scope_type, _field_type, _field_value) {
             }
         }
    
-//console.log( $Db.dty(dtID, 'dty_Type') );        
         var field_type = $Db.dty(dtID, 'dty_Type');
         if(field_type=='geo'){
             

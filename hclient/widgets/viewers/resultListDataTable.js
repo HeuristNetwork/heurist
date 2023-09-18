@@ -314,8 +314,6 @@ this._dout('reload datatable '+this.options.serverSide);
                         this.options.dataTableParams['processing'] = true;
                         this.options.dataTableParams['serverSide'] = true;
                         
-                        //this.options.dataTableParams['dataSrc'] = function(json) { console.log(json); }; //server call response DEBUGGING
-                        
                         var datatable_id = window.hWin.HEURIST4.util.random();
                    
                         //to avoid passs thousands of recids for each page request 

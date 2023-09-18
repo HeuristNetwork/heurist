@@ -122,12 +122,7 @@ $broken_dbs = array();
 $i = 0;
 foreach ($dbs as $db){
     
-    //DEBUG 
-    //if(strpos($db, 'osmak')<0) continue;
-
     //ID  Records     Files(MB)    RecTypes     Fields    Terms     Groups    Users   Version   DB     Files     Modified    Access    Owner   Deleteable
-//error_log(substr($db, 4)); 
-    
     if(!hasTable($mysqli, 'sysIdentification',$db) || !hasTable($mysqli, 'Records',$db)){
       
       $broken_dbs[] = substr($db, 4);
@@ -532,34 +527,25 @@ if($is_csv){
                                            db: '<?php echo HEURIST_DBNAME;?>',
                                            database: databases[current_index]};
                         
-                            if(false){ //DEBUG
-                                
-                                    $("#authorized").append('<div class="reps">DEBUG: '+databases[current_index]
-                                    +'</div><div class="reps" style="margin-top: 5px; width: 100%; border-bottom: 1px solid black;"></div>');
-                                    updateProgress(current_index+1);
-                                    setTimeout(function(){postDeleteRequest(current_index+1)}, 5000);
-                                
-                            }else{
-                        
-                                window.hWin.HEURIST4.util.sendRequest(url, request, null,
-                                    function(response){
-                                        if(response.status == window.hWin.ResponseStatus.OK){
-                                            $("#authorized").append('<div class="reps">'+databases[current_index]
-                                            +'</div><div class="reps" style="margin-top: 5px; width: 100%; border-bottom: 1px solid black;"></div>');
-                                            postDeleteRequest(current_index+1);
-                                            updateProgress(current_index+1);
-                                        }else{
-                                            
-                                            var msg = window.hWin.HEURIST4.msg.showMsgErr(response, false,
-                                                {position: { my: "left top", at: "left+150 top+150", of: window }});
-                                            
-                                            $("#authorized").append('<div class="ui-state-error" style="padding:4px;">'
-                                                        +databases[current_index]+' '+msg +"</div>");
-                                            
-                                        }
+                            window.hWin.HEURIST4.util.sendRequest(url, request, null,
+                                function(response){
+                                    if(response.status == window.hWin.ResponseStatus.OK){
+                                        $("#authorized").append('<div class="reps">'+databases[current_index]
+                                        +'</div><div class="reps" style="margin-top: 5px; width: 100%; border-bottom: 1px solid black;"></div>');
+                                        postDeleteRequest(current_index+1);
+                                        updateProgress(current_index+1);
+                                    }else{
+                                        
+                                        var msg = window.hWin.HEURIST4.msg.showMsgErr(response, false,
+                                            {position: { my: "left top", at: "left+150 top+150", of: window }});
+                                        
+                                        $("#authorized").append('<div class="ui-state-error" style="padding:4px;">'
+                                                    +databases[current_index]+' '+msg +"</div>");
+                                        
                                     }
-                                );
-                            }
+                                }
+                            );
+                            
                         }
                         
                     }else{

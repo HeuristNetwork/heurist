@@ -45,7 +45,6 @@ $.widget( "heurist.resultList", {
         show_menu: false,       //@todo ? - replace to action_select and action_buttons
         support_collection: false,
         support_reorder: false,  // show separate reorder button
-        show_savefilter: false,
         show_counter: true,
         show_viewmode: true,
         show_inner_header: false, // show title of current search in header (above toolbar)
@@ -209,12 +208,6 @@ $.widget( "heurist.resultList", {
                 + ' ' + window.hWin.HAPI4.Event.ON_REC_COLLECT
                 + ' ' + window.hWin.HAPI4.Event.ON_REC_SEARCH_FINISH;
 
-            /*    
-            this.document[0].addEventListener('start_search', function(event) {
-                   console.log('CUSTOM EVENT!!!!');
-                });
-            */    
-                
             $(this.document).on(this._events, function(e, data) {
 
                 if(e.type == window.hWin.HAPI4.Event.ON_LAYOUT_RESIZE){
@@ -779,73 +772,7 @@ $.widget( "heurist.resultList", {
                     .appendTo(this.div_toolbar);
                 }
             }
-        }else{
-            
         }    
-        
-        //
-        // deprecated
-        if(this.options.show_savefilter){
-            //special feature to save current filter
-            //.css({position:'absolute',bottom:0,left:0,top:'2.8em'})
-            var btndiv = $('<div>').css({display:'block',height:'2.4em','padding-left':'5px'})
-                .appendTo(this.div_toolbar);
-            if(!this.options.is_h6style){
-                btndiv.addClass('ui-widget-content')
-            }else{
-                btndiv.css({'padding-left':'9px'})
-            }
-                
-            this.btn_search_save = $( "<button>", {
-                text: window.hWin.HR('Save Filter'),
-                title: window.hWin.HR('save_filter_hint')
-            })
-            .css({'min-width': '80px','font-size':'0.8em', 'height': '21px', background: 'none'})
-            .addClass(this.options.is_h6style?'ui-heurist-btn-header1':'ui-state-focus svs-header')
-            .appendTo( btndiv )
-            .button({icons: {
-                primary: 'ui-icon-arrowthick-1-w'
-            }}).hide();
-            
-            this.search_save_hint = $('<span style="padding-left:10px;font-size:0.8em">'
-            +'<span class="ui-icon ui-icon-arrow-1-w" style="font-size:0.9em"/>click me to save the current filter for future navigation &nbsp;</span>')
-                    .appendTo( btndiv ).hide();
-
-            this.btn_search_save.find('.ui-button-icon-primary').css({'left':'0.1em'});
-
-            this._on( this.btn_search_save, {  click: function(){
-                window.hWin.HAPI4.SystemMgr.verify_credentials(function(){
-                    
-                    var  app = window.hWin.HAPI4.LayoutMgr.appGetWidgetByName('svs_list');
-                    if(app && app.widget){
-                        $(app.widget).svs_list('editSavedSearch', 'saved'); //call public method
-                    }else{
-                        var widget = window.hWin.HAPI4.LayoutMgr.getWidgetByName('mainMenu6');
-                        if(widget){
-                            widget.mainMenu6('addSavedSearch', 'saved'); //call public method
-                        }
-                        
-                    } 
-                });
-            } });    
-            
-            //order manually and save as search filter
-            /*
-            this.btn_search_save_withorder = $( "<button>", {
-                text: window.hWin.HR('Re-order and Save'),
-                title: window.hWin.HR('Allows manual reordering of the current results and saving as a fixed list of ordered records')
-            })
-            .css({'min-width': '80px','font-size':'0.8em', 'height': '21px', background: 'none', float:'right'})
-            .addClass('ui-state-focus svs-header')
-            .appendTo( btndiv )
-            .button().hide();
-            
-            this._on( this.btn_search_save_withorder, {  click: this.setOrderAndSaveAsFilter });    
-            */
-            
-        }             
-        
-        
         
         if(this.options.header_class){
             this.div_header.addClass(this.options.header_class);
@@ -962,7 +889,7 @@ $.widget( "heurist.resultList", {
         }else{
             this.div_header.hide();
         }
-//console.log('1. '+top)
+
         if(this.options.show_toolbar){
             this.div_toolbar.css({'top':(top-1)+'px', height:'auto'});
             this.div_toolbar.show();
@@ -970,24 +897,7 @@ $.widget( "heurist.resultList", {
         }else{
             this.div_toolbar.hide();
         }
-//console.log('2. '+top)
 
-/*        
-        var top = 4;
-        if(this.options.show_inner_header){
-            this.div_header.show();
-            top = top + this.div_header.height()-5;
-        }else{
-            this.div_header.hide();
-        }
-        this.div_toolbar.css({'top':top+'px', height:'auto'});//this.options.show_savefilter?'4.9em':'2.5em'});
-        if(this.options.show_toolbar){
-            this.div_toolbar.show();
-            top = top + this.div_toolbar.height();
-        }else{
-            this.div_toolbar.hide();
-        }
-*/
         var has_content_header = this.div_content_header && this.div_content_header.is(':visible');
         //!window.hWin.HEURIST4.util.isempty(this.div_content_header.html());
 
@@ -2538,7 +2448,7 @@ $.widget( "heurist.resultList", {
                                     if(cw2){
                                         var bh = cw.body?cw.body.scrollHeight:0;
                                         var h = cw2.scrollHeight;                               
-        //console.log('scroll='+sh+'  h='+h+'  bh='+bh);
+
                                         if(bh>0 && h>0){
                                             h = Math.max(bh,h);
                                         }else{
@@ -2561,33 +2471,21 @@ $.widget( "heurist.resultList", {
                                 
                             }catch(e){
                                 ele2.removeClass('loading').height(400);    
-                                console.log(e);
+                                console.error(e);
                             }
-                            /*
-                            //ele2.removeClass('loading').height('auto');    
-                            if(that._expandAllDivs){
-                                ele2.removeClass('loading').height('auto');    
-                            }else{
-                                ele2.removeClass('loading').animate({height:h},300);    
-                            }
-                            */
+
                         });
                         
 
                     }else{
 
                         ele.addClass('loading').css({'overflow-y':'auto'}).load(infoURL, function(){ 
-//console.log('loaded in div');                            
+
                             var ele2 = $(this);
                             //var ele2 = that.div_content.find('.record-expand-info[data-recid='+recID+']');
                             var h = ele2[0].scrollHeight+10;
                             //h = Math.min(h+10, 600);
                             ele2.removeClass('loading').height('auto');    
-                            
-/*                            if(that._expandAllDivs){
-console.log('scroll h='+h+'  auto='+ele2.height());                                                            
-setTimeout("console.log('2. auto='+ele2.height());",1000);
-                            }*/
                             
                             /*
                             if(that._expandAllDivs){

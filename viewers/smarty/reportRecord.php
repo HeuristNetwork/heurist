@@ -162,8 +162,6 @@ class ReportRecord {
         
         $res1 = $this->getRecordForSmarty($rec); 
         
-        //debug $res1['original'] = $rec;
-        
         return $res1;
     }
     

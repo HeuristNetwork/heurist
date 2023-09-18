@@ -730,8 +730,8 @@ $.widget( "heurist.search_faceted", {
                 mode: 2, 
                 db: window.hWin.HAPI4.database
             };
-            //!!!  alsow rewrite getLinkedRecordTypes
-console.log('get defintion in OLD format!!!!');            
+            //!!!  allow rewrite getLinkedRecordTypes
+            //!!! get defintions in OLD format
             window.hWin.HAPI4.SystemMgr.get_defs(request, function(response){
                 if(response.status == window.hWin.ResponseStatus.OK){
                     window.hWin.HEURIST4 = $.extend(window.hWin.HEURIST4, response.data);
@@ -1595,7 +1595,6 @@ console.log('get defintion in OLD format!!!!');
                                 var selval = facets[facet_index].selectedvalue;
                                 
                                 if(selval && !window.hWin.HEURIST4.util.isempty(selval.value)){
-//DEBUG console.log(key, selval.value);                   
                                     if(facets[facet_index].multisel){
                                         let vals = selval.value.split(',');
                                         for(let k=0;k<vals.length; k++){
@@ -1664,8 +1663,6 @@ console.log('get defintion in OLD format!!!!');
                  q.splice(idx, 1)
             }
         });*/
-        
-//DEBUG console.log(q);        
         var  idx = 0
         while (idx<q.length){
             if(Object.keys(q[idx]).length==0){
@@ -1833,20 +1830,6 @@ console.log('get defintion in OLD format!!!!');
             var field = this.options.params.facets[i];
             
             if(i>field_index && field['isfacet']!=that._FT_INPUT && field['facet']){
-                
-                
-                /* temporary disabled
-                if(i===this._last_active_facet && field['last_count_query']){
-                    var hashQuery = field['last_count_query'];
-                    var stored_counts = this._getCachedCounts( hashQuery, i );
-                    
-//DEBUG console.log(this._last_active_facet, stored_counts);                    
-                    this._last_active_facet = -1;
-                    if(stored_counts){
-                        that._redrawFacets(stored_counts, false);
-                        return;
-                    }
-                }*/
                 
                 if(field['type']=='enum' && field['groupby']=='firstlevel' && 
                                 !window.hWin.HEURIST4.util.isnull(field['selectedvalue'])){
@@ -2020,8 +2003,6 @@ console.log('get defintion in OLD format!!!!');
                     fieldid = '1,18,231,304';
                 }
                 
-//DEBUG console.log(count_query);                
-
                 var request = {q: query, count_query:count_query, w: 'a', a:'getfacets',
                                      facet_index: i, 
                                      field:  fieldid,
@@ -2055,8 +2036,7 @@ console.log('get defintion in OLD format!!!!');
                     if(response.request_id != that._request_id){
                         
                         if(response.status != window.hWin.ResponseStatus.OK){
-                            console.log('ERROR in get_facets');
-                            console.log(response.message);
+                            console.error('ERROR: get_facets', response.message);
                         }
                         return;
                     }
@@ -2285,13 +2265,13 @@ console.log('get defintion in OLD format!!!!');
                             //enumeration
                             var vocab_id = (field['type']=='reltype')?'relation':$Db.dty(dty_ID, 'dty_JsonTermIDTree');    
                                                   
-    if(field['type']!='reltype' && !(vocab_id>0)){
-        console.log('Field '+dty_ID+' not found!!!!');
-        console.log(field);
-        //search next facet
-        this._recalculateFacets( facet_index );
-        return;
-    }
+                            if(field['type']!='reltype' && !(vocab_id>0)){
+                                console.error('ERROR: Field '+dty_ID+' not found');
+                                //search next facet
+                                this._recalculateFacets( facet_index );
+                                return;
+                            }
+                            
                             term = $Db.trm_TreeData(vocab_id, 'tree', false, this.options.language);
                             term = {key: null, title: "all", children: term};
                             //field.selectedvalue = {title:label, value:value, step:step};                    
@@ -2599,8 +2579,6 @@ console.log('get defintion in OLD format!!!!');
                         const tiny_ui = w <= 100;
                         const small_ui = !tiny_ui && w < 200;
 
-//DEBUG console.log('ret', mmin+'   '+mmax);
-                        
                         if(!(window.hWin.HEURIST4.util.isempty(mmin) || window.hWin.HEURIST4.util.isempty(mmax))){
                             
                             if(field['type']=='date'){
@@ -2663,7 +2641,6 @@ console.log('get defintion in OLD format!!!!');
                                     mmax = mmax.replace(' ','T');
                                 }
                                 
-//DEBUG console.log('prep', mmin+'   '+mmax);       
                                 var date_min, date_max;
                                 try{
                                     date_min = TDate.parse(mmin);
@@ -2806,7 +2783,6 @@ console.log('get defintion in OLD format!!!!');
                             // lower -> min value, higher -> ma x value
                             //
                             function setupDateHistogram(lower, higher) {
-//console.log(lower, higher);
                                 // Get dates in ms
                                 if(date_type=='years_only'){
                                     lower = Math.round(lower);
@@ -3026,9 +3002,6 @@ console.log('get defintion in OLD format!!!!');
                                             val = Math.abs(parseInt(val))+' bce';
                                         }
                                     }
-//DEBUG console.log('lbl', sval, val);
-                                   //val = (new Date(val)).format(date_format);
-                                   //val = moment(val).format(date_format);
                                 }catch(err) {
                                    val = ""; 
                                 }
@@ -3062,8 +3035,6 @@ console.log('get defintion in OLD format!!!!');
                             
                             //
                             function __onSlideStartSearch( min, max ){
-                                
-//DEBUG console.log('__onSlideStartSearch',min, max);                                
                                 
                                 var field = that.options.params.facets[facet_index];
                                 
@@ -3103,8 +3074,6 @@ console.log('get defintion in OLD format!!!!');
                                 
                                 var value = (min==max)?min :(min + op_compare + max);                            
                              
-//DEBUG console.log('search:',value); 
-                                
                                 if(window.hWin.HEURIST4.util.isempty(value)){
                                     value = '';
                                     field.selectedvalue = null;
@@ -3458,7 +3427,6 @@ console.log('get defintion in OLD format!!!!');
                     }
 
                     //search next facet
-                    /*console.log(facet_index);*/
                     this._recalculateFacets( facet_index );
 
                 }else{

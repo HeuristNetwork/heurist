@@ -125,7 +125,7 @@
                         
                         $ext = strtolower(substr($filepath,-4,4));
                     }else{
-                        error_log('Cannot load file '.$kml_file['fullPath']);                    
+                        // Cannot load kml file
                         exit(); //@todo error return
                     }
                     

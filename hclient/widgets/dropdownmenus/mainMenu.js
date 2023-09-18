@@ -168,13 +168,11 @@ $.widget( "heurist.mainMenu", {
                            'min-width':'150px', 'margin-left':'25px', })
             .click(function(event){
                 wasCtrl = event.shiftKey;
-//console.log('1'+wasCtrl+'  '+event.metaKey);                
             })
             .change(function(event){
                 if(window.hWin.HAPI4.database!=$(event.target).val()){
                     var url =  window.hWin.HAPI4.baseURL+'?db='+$(event.target).val();
                     $(event.target).val(window.hWin.HAPI4.database);
-    //console.log('2'+wasCtrl);
                     if(wasCtrl){
                         location.href = url;
                     }else{
@@ -254,12 +252,6 @@ $.widget( "heurist.mainMenu", {
         
         this.divMainMenuItems.menu();
         this.divProfileItems.menu().removeClass('ui-menu-icons');
-                        /*if(name=="Profile"){
-                    //.removeClass('ui-menu-item')
-                    that.divProfileItems.find('.ui-menu-item').css({'padding-left':'0px !important'});//'0em '});            
-console.log('>>>>'+that.divProfileItems.find('.ui-menu-item').css('padding-left')        );
-                }*/
-            
             
         // Dashboard - shortcuts ---------------------------------------
         if(this.options.is_h6style){
@@ -787,7 +779,6 @@ console.log('>>>>'+that.divProfileItems.find('.ui-menu-item').css('padding-left'
         var that = this;
         
         if($(item).attr('data-ext')==1){
-          console.log('EXIT')
           return;  
         } 
         
@@ -2318,7 +2309,6 @@ console.log('>>>>'+that.divProfileItems.find('.ui-menu-item').css('padding-left'
     _adjustHeight: function(){
 
         var ele = this.element.parents('#layout_panes');
-//console.log(' layout_panes '+ele.length+'  '+(this.divShortcuts==null));        
         if(ele){
             var h = 50; //3em;
             
@@ -2332,7 +2322,6 @@ console.log('>>>>'+that.divProfileItems.find('.ui-menu-item').css('padding-left'
             
             ele.children('#north_pane').height(h);
             ele.children('#center_pane').css({top: h});
-//console.log(' ui-layout-container '+$('.ui-layout-container').length);        
             
             if($('.ui-layout-container').length>0){
                 //$('.ui-layout-pane').css({'height':'auto'});

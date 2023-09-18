@@ -65,7 +65,6 @@ function getSetting(key, defvalue) {
         value = defvalue;
         putSetting(key, value);
     }
-//console.log(key+'  '+value+'  '+defvalue);    
     return value;
 }
 
@@ -73,10 +72,6 @@ function getSetting(key, defvalue) {
 * Stores a value in the localStorage
 */
 function putSetting(key, value) {
-//    if(key==setting_linecolor){
-//console.log('put '+key+'  '+value);        
-//    }
-
     localStorage.setItem(window.hWin.HAPI4.database+key, value);
 }
 

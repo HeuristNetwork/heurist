@@ -262,7 +262,7 @@ function editSymbology(current_value, mode_edit, callback){
                             maplayer_rty = Object.keys(response.data.recordtypes);
                         }
                     }else{
-                        console.log(response.message);
+                        console.error(response.message);
                     }
                 });
             
@@ -1037,7 +1037,6 @@ function openSearchMenu(that, $select, has_filter=true){
                         $input[0].setSelectionRange(start_pos, end_pos);
 
                         if(swap_start){ // replace start_pos w/ end_pos
-//console.log(start_pos, end_pos);
                             start_pos = end_pos;
                         }
 
@@ -1124,13 +1123,6 @@ function browseRecords(_editing_input, $input){
     var $inputdiv = $input.parent(); //div.input-div
     var __current_input_id = $input.attr('id');
 
-/*
-$inputdiv.uniqueId();                                
-console.log('BEFORE', __current_input_id);
-console.log('input', $input.attr('id'),$input.parents('fieldset').attr('id'));
-console.log('inputdiv',$inputdiv.attr('id'),$inputdiv.parents('fieldset').attr('id'));
-*/
-    
     if ($inputdiv.find('.sel_link2 > .ui-button-icon').hasClass('rotate')) return;
     
     var isparententity = (that.f('rst_CreateChildIfRecPtr')==1);

@@ -592,12 +592,6 @@ function updateTitleMask($rtyID, $mask) {
         $parameters = array("");
         $val = TitleMask::execute($mask, $rtyID, 1, null, _ERR_REP_SILENT);//convert from human to coded
         $parameters = addParam($parameters, "s", $val);
-        /* DEPRECATED
-        $colName = "rty_CanonicalTitleMask";
-        $parameters[0] = "ss";//$parameters[0].$rtyColumnNames[$colName];
-        array_push($parameters, $val);
-        rty_CanonicalTitleMask = ?,
-        */
 
         $query = "update defRecTypes set rty_TitleMask = ? where rty_ID = $rtyID";
 

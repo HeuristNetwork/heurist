@@ -103,8 +103,6 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
         if (!_baseURL) _baseURL = window.hWin.location.protocol + '//' + window.hWin.location.host + installDir;
         that.baseURL = _baseURL;
 
-//console.log('1.>>>', that.baseURL);        
-        
         //detect production version
         if (installDir && !installDir.endsWith('/heurist/')) {
             installDir = installDir.split('/');
@@ -162,8 +160,6 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
             that.SystemMgr.sys_info(function (success) {
                 if (success) {
                     that.baseURL = window.hWin.HAPI4.sysinfo['baseURL'];
-//console.log('2.>>>', that.baseURL);        
-                    
                     var lang = window.hWin.HEURIST4.util.getUrlParameter('lang');
                     if (lang) {
                         //save in preferences
@@ -259,7 +255,6 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
             if(that.baseURL.indexOf('127.0.0.1')>0){
                 alert('Input variables exceeded 1000: '+cnt+' ,'+action);              
             }
-//remarked to avoid Client_Privacy_Violation            console.log(request);              
             console.error('Input variables exceeded 1000',cnt);
         }
 
@@ -275,8 +270,6 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
                 withCredentials: true
             },
             //Content-type: application/json
-            /* DEPRECATED  */
-
             error: function (jqXHR, textStatus, errorThrown) {
 
                 _is_callserver_in_progress = false;
@@ -427,8 +420,8 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
     *   user_save
     *   user_wss  - working subset
     *   ------
-    *   get_defs     - get the desired database structure definition (used in import defs only)
-    *   get_defs_all - returns number of records in database, worksets and dashboard info (@todo remove)
+    *   get_defs     - get the desired database structure definition (used in import definitionss only)
+    *   get_defs_all - returns number of records in database, worksets and dashboard info
     * 
     *   ------ 
     *   get_url_content_type - resolve mimetype for given url
@@ -436,7 +429,7 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
     *   get_sysfolders
     *   checkPresenceOfRectype - check and download missed rectypes
     *   import_definitions
-    *   versionCheck  - checks client software version and db version check (move)
+    *   versionCheck  - checks client software version and db version check
     * 
     *
     * @returns {Object}
@@ -845,7 +838,7 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
             /**
              * Log activity of user in the system, using Google tags
              * @param {string} activity underscore-seperated string of actions to log
-             * @param {string} [suplementary] DEPRECATED
+             * @param {string} suplementary info 
              */
             user_log: function (activity, suplementary) {
 
@@ -1023,10 +1016,10 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
                 _callserver('usr_info', request, callback);
             },
             /**
-             * @deprecated
              * @todo replace with EntityMgr.refreshEntityData
              *  
              * Get the desired database structure definition in old format - used to get rectypes from REMOTE database ONLY
+             * 
              * @param {Request} request
              * @param {string} [request.terms] comma-seperated list of term ids, or 'all'
              * @param {string} [request.rectypes] comma-seperated list of rectype ids, or 'all'
@@ -1038,7 +1031,8 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
             },
 
             /**
-             * @deprecated wrapper for EntityMgr.refreshEntityData - to be replaced 
+             * Wrapper for EntityMgr.refreshEntityData 
+             * it shows loading veil and message on complete
              * @param {boolean} is_message - whether to show message to user after refresh
              * @param {any} document - unused
              * @param {Function} callback 
@@ -1191,9 +1185,6 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
             },
 
             /**
-             * @deprecated
-             * @todo - move
-             * 
              * 1. verifies that given rty_IDs (concept codes) exist in this database
              * 2. If rectype is missed - download from given db_ID (registration ID)
              * 3. Show warning of info report
@@ -1331,8 +1322,8 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
             },
 
             /** 
-             * @deprecated
-             * @todo move 
+             * Checks client software version and db version check
+             * @todo move to sys utility (?)
              * 1. Checks client software version and 
              * 2. Checks Database version and runs update script
              */
@@ -1375,7 +1366,6 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
                             window.hWin.HEURIST4.msg.showMsgDlgUrl(window.hWin.HAPI4.baseURL + 'hclient/widgets/dropdownmenus/versionDbCheckMsg.html',
                                 {
                                     'Upgrade': function () {
-                                        //console.log(window.hWin.HAPI4.baseURL+'admin/setup/dbupgrade/upgradeDatabase.php?db='+window.hWin.HAPI4.database);                                   
                                         top.location.href = (window.hWin.HAPI4.baseURL + 'admin/setup/dbupgrade/upgradeDatabase.php?db=' + window.hWin.HAPI4.database);
                                     }
                                 }, null,
@@ -1955,8 +1945,8 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
                     function (response) {
                         if (response.status == window.hWin.ResponseStatus.OK || response['defRecTypes']) {
 
-var fin_time = new Date().getTime() / 1000;
-console.log('DEBUG refreshEntityData '+(fin_time-s_time));  //response.data+'  '+                  
+                            var fin_time = new Date().getTime() / 1000;
+                            console.log('definitions are loaded: '+(fin_time-s_time).' sec');
                             var dbdefs = (response['defRecTypes']?response:response['data']);
 
                             for (var entityName in dbdefs) {
@@ -1966,7 +1956,7 @@ console.log('DEBUG refreshEntityData '+(fin_time-s_time));  //response.data+'  '
                             if ($.isFunction(callback)) callback(this, true);
 
                         } else {
-console.log('ERROR',response);                            
+                            console.log('ERROR: ',response);                            
                             window.hWin.HEURIST4.msg.showMsgErr(response);
                         }
                     }
@@ -1990,14 +1980,9 @@ console.log('ERROR',response);
                         det = 'full';
                     }
                     
-                    //var s_time = new Date().getTime() / 1000;
-
                     _callserver('entityScrud', { a: 'search', 'entity': entityName, 'details': det },
                         function (response) {
                             if (response.status == window.hWin.ResponseStatus.OK) {
-
-                                //var fin_time = new Date().getTime() / 1000;
-                                //console.log('DEBUG getEntityData '+response.data.entityName+'  '+(fin_time-s_time));                    
 
                                 entity_data[response.data.entityName] = new hRecordSet(response.data);
 
@@ -2048,7 +2033,6 @@ console.log('ERROR',response);
                     if (entityName == 'defRecStructure') {
                         window.hWin.HAPI4.EntityMgr.createRstIndex();
                     } else if (entityName == 'defTerms') {
-                        //console.log('HEREEE!!!!!');                                   
                         entity_data['trm_Links'] = data[entityName]['trm_Links'];
                     }
 
@@ -2144,7 +2128,6 @@ console.log('ERROR',response);
                 };
 
                 window.hWin.HAPI4.EntityMgr.doRequest(request, function(response){ 
-//DEBUG console.log(response);
                     if(response.status == window.hWin.ResponseStatus.OK){
 
                         let recordset = new hRecordSet(response.data);
@@ -2590,7 +2573,6 @@ console.log('ERROR',response);
             if (ele) {
                 $.each($(ele).find('.slocale'), function (i, item) {
                     var s = $(item).text();
-                    //console.log(s+"=>"+window.hWin.HR(s))
                     $(item).html(window.hWin.HR(s));
                 });
 

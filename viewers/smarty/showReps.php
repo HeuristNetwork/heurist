@@ -569,7 +569,6 @@ function smarty_post_filter($tpl_source, Smarty_Internal_Template $template)
         ."\n".'{ if(smarty_function_progress(array(), $_smarty_tpl)){ return; }'."\n"
         .substr($tpl_source,$pos+1);
 
-        //DEBUG error_log($res);
         return $res;
     }else{
         return $tpl_source;

@@ -70,13 +70,6 @@ if($_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0.0.1'){
 
         handleApiReady();
 
-        /*
-        $(window).on("beforeunload",  function() { 
-console.log('beforeunload MAPPEVIEW');
-            return;
-        });
-        */
-        
     } //onPageInit
     
     function handleApiReady(){

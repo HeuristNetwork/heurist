@@ -90,7 +90,6 @@
                             $def['code'] = $parentcode;
                         }
                     }
-                    //debug $def['title'] = @$def['code'].$def['title'];   
                     //asign codes
                     if(is_array(@$def['children'])){
                         $def = __assignCodes($def);
@@ -115,8 +114,6 @@
                                     $def['children'][$idx]['code'] = $def['code'];    
                                 }
                             }
-                            //debug $def['children'][$idx]['title'] = $def['children'][$idx]['code'].$det['title']; 
-                                 
                             if(is_array(@$det['children'])){
                                    $def['children'][$idx] = __assignCodes($def['children'][$idx]);
                             }

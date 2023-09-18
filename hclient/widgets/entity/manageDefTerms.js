@@ -483,8 +483,6 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
                                 that.scrollInterval = 0;
 
                                 if(ui.offset.top>bot-20){
-                                    //    console.log(bot);
-                                    //    console.log(ui.position.top+'  '+ui.position.left);
                                     that.scrollInterval = setInterval(function(){ if(!that._dropped) ele[0].scrollTop += 20}, 50); 
                                 }else if(ui.offset.top<ele.offset().top+((that.space_for_drop && that.space_for_drop.is(':visible'))?-60:-20)) {
                                     that.scrollInterval = setInterval(function(){ if(!that._dropped) ele[0].scrollTop -= 20}, 50); 
@@ -2004,13 +2002,12 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
             }
 
             if(old_parent_ids.length<1){
-                console.log('Error !!! Parent not found for '+trm_ID);
+                console.error('Error !!! Parent not found for '+trm_ID);
                 return;
             }
 
             //change parent within vocab
             if(window.hWin.HEURIST4.util.findArrayIndex(new_parent_id, old_parent_ids)>=0){ //the same
-                //console.log('same parent nothing to change');            
                 return;
             }
 
@@ -2222,7 +2219,6 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
                 this._saveEditAndClose( params ,  //change in defTerms
                     function(){  
                         if(params.trm_ParentTermID>0){
-                            //console.log('!!!!!! '+old_parent_ids[0]+' -> '+new_parent_id);                            
                             $Db.changeParentInIndex(new_parent_id, trm_ID, old_parent_id);
                             that._filterByVocabulary();
                         }
@@ -2800,7 +2796,7 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
                 let code = $.isArray(fields['trm_Code'])?fields['trm_Code'][0]:fields['trm_Code'];
 
                 // check if parent term has child with same label
-                if($Db.trm_HasChildWithLabel(vocab_id, lbl, trm_id)){ console.log(vocab_id, lbl, fields);
+                if($Db.trm_HasChildWithLabel(vocab_id, lbl, trm_id)){ 
                     window.hWin.HEURIST4.msg.showMsgFlash('Term with label "'
                         +lbl_orig+'" already exists in parent ' + $Db.trm(vocab_id, 'trm_Label'),1500);
                     return null;
@@ -2831,7 +2827,6 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
 
     //    
     saveUiPreferences:function(){
-        //console.log('save prefs '+'prefs_'+this._entityName);        
         window.hWin.HAPI4.save_pref('prefs_'+this._entityName, this.usrPreferences);
 
         return true;

@@ -121,33 +121,7 @@ function editCMS2(website_document){
             
             //add tinymce and codemirror
             if(typeof tinymce === 'undefined'){
-
                 _loadTinyMCE(function(){_startCMS(_options)});
-                //document.getElementsByTagName("head")[0].insertAdjacentHTML("beforeend",
-                //    '<script type="text/javascript" src="'+window.hWin.HAPI4.baseURL+'external/tinymce5/tinymce.min.js"></script>');   
-                /* 
-                $.getMultiScripts(['tinymce5/tinymce.min.js'
-                ,'codemirror-5.61.0/lib/codemirror.js',
-                'codemirror-5.61.0/lib/util/formatting.js',
-                'codemirror-5.61.0/mode/xml/xml.js',
-                'codemirror-5.61.0/mode/javascript/javascript.js',
-                'codemirror-5.61.0/mode/css/css.js',
-                'codemirror-5.61.0/mode/htmlmixed/htmlmixed.js'
-                ], window.hWin.HAPI4.baseURL+'external/')
-                .done(function() {
-                    // all done
-                    _startCMS(_options)
-
-                }).fail(function(error) {
-                    // one or more scripts failed to load
-                    window.hWin.HEURIST4.msg.showMsg_ScriptFail();
-                    //console.log('Cannot load tinyMCE and CodeMirror scripts');
-
-                }).always(function() {
-                    // always called, both on success and error
-                });                
-                */
-                
                 return;
             }
             
@@ -166,33 +140,16 @@ function editCMS2(website_document){
                             +'hclient/widgets/cms/editCMS_NewSiteMsg.html', button);
             }
             
-            /*window.onbeforeunload = _onbeforeunload;if(window.parent && window.parent.document.getElementById('web_preview')){
-                window.parent.document.getElementById('web_preview').contentWindow.onbeforeunload = _onbeforeunload;
-            }else{
-                window.onbeforeunload = _onbeforeunload;
-            }*/
             window.onbeforeunload = _onbeforeunload;
                 
             
                 var new_ele = $('<div class="ui-layout-center"></div>');//.prependTo(body);
                                              
-                //_ws_body.children().shift();
                 _ws_body.children().appendTo(new_ele);
                 
                 new_ele.appendTo(_ws_body);
                 
                 
-/*                
-                var editor_panel_layout = $('<div class="ui-layout-'+options.editor_pos
-                        +'"></div>').appendTo(_ws_body);
-                _editor_panel_frame = $( '<iframe class="editStructure">' )
-                        .css({overflow: 'none !important', width:'100%', height:'100%'})
-                        .appendTo(editor_panel_layout);
-                
-                _editor_panel_frame.on('load',_initEditControls);
-                _editor_panel_frame.attr('src', window.hWin.HAPI4.baseURL+'hclient/widgets/cms/editCMS.php');
- */    
-    
                 _editor_panel = $('<div class="ui-layout-'+options.editor_pos+'">'
                         +'<div style="margin: 10px;text-align: right;cursor: pointer;" id="closeCMS">close<span style="padding-left: 10px;" class="ui-icon ui-icon-close" /></div>'                
                         +'<div class="ent_wrapper editStructure" id="tabsEditCMS">' 
@@ -427,7 +384,7 @@ function editCMS2(website_document){
             //ui.newTab
         },
         beforeActivate: function( event, ui ){
-            //console.log(ui.newTab);                        
+
             if(current_edit_mode=='page' && _warningOnExit(function(){ _switchMode( 'website' ) })) {
                 return false;  
             }else{
@@ -721,7 +678,6 @@ var sMsg = '<p>Heurist\'s CMS editor has been upgraded to a new system which is 
                             _onPageChange();
                             
                             var lang = $(tinymce.activeEditor.targetElm).attr('data-lang');
-//console.log('_initTinyMCE',lang,default_language);
                             if(lang==default_language || lang=='def' || window.hWin.HEURIST4.util.isempty(lang)){
                                 l_cfg.content = new_content;    
                             }else{
@@ -764,8 +720,6 @@ var sMsg = '<p>Heurist\'s CMS editor has been upgraded to a new system which is 
 
                             _layout_container.find('.cms-element-overlay').css('visibility','hidden');
 
-//console.log(tinymce.activeEditor.id+'   '+$(tinymce.activeEditor.targetElm).attr('data-hid'));                            
-//tinymce.activeEditor.id.substr(3)                            
                             //highlight editing element in tree
                             var key = $(tinymce.activeEditor.targetElm).attr('data-hid');
                             var node = _panel_treePage.fancytree('getTree').getNodeByKey(key);
@@ -934,8 +888,6 @@ var sMsg = '<p>Heurist\'s CMS editor has been upgraded to a new system which is 
                 preventVoidMoves: true, // Prevent moving nodes 'before self', etc.
                 dragStart: function(node, data) {
 
-//console.log(node.data.type);
-                    
                     var is_root = node.getParent().isRootNode();
                     var is_cardinal = (node.data.type=='north' || node.data.type=='south' || 
                                node.data.type=='east' || node.data.type=='west' || node.data.type=='center');
@@ -943,7 +895,6 @@ var sMsg = '<p>Heurist\'s CMS editor has been upgraded to a new system which is 
                     return !(is_root || is_cardinal);
                 },
                 dragEnter: function(node, data) {
- //console.log('enter '+node.data.type);                   
                     if(node.data.type=='cardinal'){
                         return false;
                     }else{
@@ -1150,7 +1101,6 @@ var sMsg = '<p>Heurist\'s CMS editor has been upgraded to a new system which is 
             var node = _panel_treePage.fancytree('getTree').getNodeByKey(ele_ID);
 
             if(node==null){
-                console.log('DEBUG: ONLY '+ele_ID);
                 return;
             }
 
@@ -1407,10 +1357,8 @@ function(value){
                     if( is_in_page ){
                         //div.editable in container 
                         if($(event.target).hasClass('brick')){
-                            //console.log('itself');                              
                             node = $(event.target);
                         }else{
-                            //console.log('parent');                              
                             node = $(event.target).parents('div.brick:first');
                         } 
 
@@ -1428,38 +1376,12 @@ function(value){
                         if(parent.length==0 || parent.parents('div[data-hid]').length==0){
                             parent = _layout_container;  
                         }
-                        /*
-
-                        var pos = window.hWin.HEURIST4.ui.getMousePos(event);
-                        var x = pos[0] - parent.offset().left - parseInt(parent.css('padding'));
-                        var y = pos[1] - parent.offset().top - parseInt(parent.css('padding'));
-
-                        var r = parent.offset().left+parent.width();
-                        //console.log(x+'+'+ele.width()+' pos='+pos[0]+'   r='+r +'  left='+parent.offset().left);                          
-                        if(x+220>r){
-                        x = r - 220; //ele.width();
-                        }
-                        if(ele.is(':visible')){
-
-                        if(delay_onmove>0) clearTimeout(delay_onmove);
-                        delay_onmove = 0;
-                        delay_onmove = setTimeout(function(){
-                        ele.css({ top:y+'px', left:x+'px'});
-                        },500);
-
-                        }else{
-                        ele.css({ top:y+'px', left:x+'px'});    
-                        ele.show();      
-                        }
-                        */
-
                         var pos = node.position();
                         var margin_top = parseInt(node.css('margin-top'));
                         if(!(margin_top>0)) margin_top = 2;
                         var margin_left = parseInt(node.css('margin-left'));
                         if(!(margin_left>0)) margin_left = 2;
                         
-                        //console.log(pos.top + '  ' + (pos.top+parent.offset().top));                          
                         ele.find('span[data-action]').hide();  
                         ele.find('span.ui-icon-gear').show();  
                         ele.css({
@@ -1682,17 +1604,6 @@ function(value){
     //
     function _layoutTranslateElement(ele_id, lang_id){
         
-        if(_edit_Element){ //already opened - save previous
-            /*
-            if(_layout_container.find('div.cms-element-editing').attr('data-hid')==ele_id) return; //same
-            
-            //save previous element
-            if(_edit_Element.warningOnExit(function(){_layoutTranslateElement(ele_id, lang_id);})) return;
-            
-            _layout_container.find('div[data-hid]').removeClass('cms-element-editing headline marching-ants marching');                   
-            */
-        }     
-        
         var affected_ele = _layout_container.find('div[data-hid="'+ele_id+'"]');
         var lang = window.hWin.HAPI4.getLangCode3(lang_id, 'def');
         
@@ -1704,7 +1615,6 @@ function(value){
         var affected_cfg = window.hWin.layoutMgr.layoutContentFindElement(_layout_content, ele_id);
 
         var content = 'content';
-//console.log('_layoutTranslateElement',default_language,lang);
         if(default_language!=lang && lang!='def' && !window.hWin.HEURIST4.util.isempty(lang)){
             content = content + lang;
             if(!affected_cfg[content]){ //if not found -  add new content
@@ -1818,9 +1728,6 @@ function(value){
         //scroll tree that selected element will be visible
         var node = _panel_treePage.fancytree('getTree').getNodeByKey(ele_id);
         var top1 = $(node.li).position().top;
-        /*if(_panel_treePage[0].scrollTop+h<top1){
-            setTimeout(()=>{ _panel_treePage[0].scrollTop = top1; }, 500); console.log(_panel_treePage[0].scrollTop, top1);
-        }*/
         _panel_treePage.animate({scrollTop: $(node.li).offset().top}, 1);
         _panel_treePage.find('span.fancytree-title').css({'font-style':'normal','text-decoration':'none'});
         $(node.li).find('.fancytree-node').removeClass('fancytree-active');
@@ -2168,33 +2075,6 @@ function(value){
             }
             
             _layoutInsertElement_continue( ele_id, new_element_json );
-/*                        
-            if(template_name=='blog'){
-                
-                try{
-                
-                var sURL2 = window.hWin.HAPI4.baseURL+'hclient/widgets/cms/templates/snippets/'+template_name+'.js';
-                // 3. Execute template script to replace template variables, adds filters and smarty templates
-                    $.getScript(sURL2, function(data, textStatus, jqxhr){ //it will trigger oncomplete
-                          //console.log( data ); // Data returned
-                          //console.log( textStatus ); // Success
-                          //console.log( jqxhr.status ); // 200
-                          //console.log( "Load was performed." );
-                          _prepareTemplateBlog(ele_id, new_element_json, _layoutInsertElement_continue);
-                          
-                          
-                    }).fail(function( jqxhr, settings, exception ) {
-                        console.log( 'Error in template script: '+exception );
-                    });
-                    
-                }catch(e){
-                    alert('Error in blog template script');
-                }
-            }else{
-                
-                _layoutInsertElement_continue( ele_id, new_element_json );
-            }
-*/
         }); //on template json load
         
     }

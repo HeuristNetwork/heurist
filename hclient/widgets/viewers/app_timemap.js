@@ -131,22 +131,10 @@ $.widget( "heurist.app_timemap", {
                 }else if(e.type == window.hWin.HAPI4.Event.ON_REC_SEARCH_FINISH){
                     //accept events from the same realm only
                     if(!((data && data.search_realm=='mapping_recordset') || 
-                        that._isSameRealm(data))) return;
-                 
-/* DEBUG HIE
-if( data.search_realm=='mapping_recordset'){
-//console.log('listner '+data.search_realm);                    
-if(data.recordset=='show_all'){
-console.log('show all');        
-}else{
-var re = $.isArray(data.recordset)?data.recordset:data.recordset.getIds();
-console.log('got '+re.length);    
-console.log(re);    
-}
-}                        
-*/        
-                        
-                 
+                        that._isSameRealm(data))) {
+                         return;   
+                    }
+
                     that.recordset_changed = true;
                     that.map_curr_search_inited = false;
                     

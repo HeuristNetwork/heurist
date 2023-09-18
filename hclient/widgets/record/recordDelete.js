@@ -103,7 +103,6 @@ $.widget( "heurist.recordDelete", $.heurist.recordAction, {
                         //"resultlistonaction": this._onActionListener        
                         });
         
-//console.log(this.options.map_document_id);
         if(this.options.map_document_id>0){
             //find mapdocument content
             this._findMapDocumentContent();
@@ -306,7 +305,6 @@ $.widget( "heurist.recordDelete", $.heurist.recordAction, {
                 request['rec_RecTypeID'] = rec_RecTypeID;
             }
             
-//console.log(request);            
             this._showProgress( session_id, false, 1000 );
             
             //check source links   

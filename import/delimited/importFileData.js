@@ -289,7 +289,7 @@ function hImportFileData() {
             let file_desc = $('#file_desc').val();
             let file_cap = $('#file_cap').val();
             let file_rights = $('#file_rights').val();
-            let file_owner = $('#file_owner').val(); console.log(file_rights, file_owner);
+            let file_owner = $('#file_owner').val();
 
             if(file_id < 0 || (file_desc < 0 && file_cap < 0 && file_rights < 0 && file_owner < 0)){
                 msg = '<span style="color:red">' + (file_id < 0 ? 'The ID field must be defined' : 'A data field needs to be mapped') + '</span>';
@@ -373,7 +373,7 @@ function hImportFileData() {
                 
                 if(response.status == window.hWin.ResponseStatus.OK){
 
-                    var results = response.data; console.log(response);
+                    var results = response.data;
                     var $tbl = $('.tbmain');
                     var $rows = $tbl.find('tr');
                     var col_num = 0;

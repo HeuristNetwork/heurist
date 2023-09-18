@@ -231,21 +231,6 @@ if(@$_REQUEST['actionType']){ // filter and download interaction log as CSV file
 
                         window.hWin.HEURIST4.ui.showEntityDialog('sysGroups', popup_opts);
                     });
-                /*$('div#recType').click(function(){
-                    var popup_opts = {
-                        select_mode: 'select_multi',
-                        select_return_mode: 'recordset',
-                        edit_mode: 'popup',
-                        title: 'Filter by Record Type',
-                        beforeClose: function(response){
-                            console.log(response);
-                            // Worded list into span#workgroupList
-                            // Id'd list into input#workGroups
-                        }
-                    };
-
-                    window.hWin.HEURIST4.ui.showEntityDialog('defRecTypes', popup_opts);
-                });*/
 
                 $('button#exportForm').click(function(event){
                     var formData = $('input, select').serialize();

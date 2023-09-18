@@ -490,7 +490,6 @@ $.widget( "heurist.manageSysGroups", $.heurist.manageEntity, {
             window.hWin.HAPI4.sysinfo.db_usergroups[recID] = fieldvalues['ugr_Name'];
             $(window.hWin.document).trigger(window.hWin.HAPI4.Event.ON_CREDENTIALS); 
         }
-//console.log(fieldvalues);
         this._super( recID, fieldvalues );
 
         this.getRecordSet().setRecord(recID, fieldvalues);

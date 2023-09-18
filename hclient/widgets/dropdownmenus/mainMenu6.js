@@ -213,12 +213,10 @@ $.widget( "heurist.mainMenu6", {
                                 var x1 = $(ele).offset().left;
                                 var y1 = $(ele).offset().top;
                                 
-//console.log(x+'   '+x1);                                    
                                 if(x>0 && y>0){
                                 if(x<x1 || x>x1+$(ele).width() ||
                                    y<y1 || y>y1+$(ele).height())
                                 {
-//console.log('outside');                                    
                                    that._closeExploreMenuPopup();
                                 }
                                 }
@@ -460,11 +458,7 @@ $.widget( "heurist.mainMenu6", {
     //
     _isExplorerMenu_locked: function(){
         
-        //var isSvsEditVisible = ( this.edit_svs_dialog && this.edit_svs_dialog.isModified() );
-        //isSvsEditVisible = false;
-        //console.log('>>>'+isSvsEditVisible);        
-        
-        return (this._explorer_menu_locked    //isSvsEditVisible || 
+        return (this._explorer_menu_locked    
                 || this.element.find('.ui-selectmenu-open').length>0
                 || $('.list_div').is(':visible')      //tag selector dropdown      
                 || $('.ui-widget-overlay.ui-front').is(':visible')   //some modal dialog is open
@@ -944,7 +938,6 @@ $.widget( "heurist.mainMenu6", {
         $favourite_container.css('height', cont_height + 'px');
 
         if(this.menues.explore[0].clientHeight <= this.menues.explore[0].scrollHeight){ 
-//console.log(this.menues.explore[0].clientHeight, this.menues.explore[0].scrollHeight);
             cont_height -= (this.menues.explore[0].scrollHeight - this.menues.explore[0].clientHeight) + 40;
             $favourite_container.css('height', cont_height + 'px');
         }
@@ -1137,7 +1130,6 @@ $.widget( "heurist.mainMenu6", {
                         // remove from prefs
                         var idx = cur_favs.findIndex(filter => filter[0] == filter_id);
                         var removed = cur_favs.splice(idx, 1); 
-//console.log(cur_favs);
 
                         if(cur_favs.length == 0){
                             cur_favs = [''];
@@ -1537,7 +1529,7 @@ $.widget( "heurist.mainMenu6", {
                 if(btn.length>0) btn.click();
                 
             }});
-        }else  if (section=='populate'){ //DEBUG - open record types 
+        }else  if (section=='populate'){
         
                 this._updateDefaultAddRectype();
                 
@@ -1562,37 +1554,7 @@ $.widget( "heurist.mainMenu6", {
                                     },  this._delayOnCollapse_ExploreMenu); 
                      }
                 });         
-                
-                
-        
-        }else  if (section=='design'){ //DEBUG - open record types 
-        
-        
-            /* DEBUG    
-                this._active_section = 'explore';
-                this.switchContainer('design', true);
-                this.menues['design'].find('li[data-action="menu-structure-rectypes"]').click();
-            */
         }
-        
-        /*
-        if(section=='publish'){
-            var that = this;
-            var menu_container = this.menues[section].find('.heurist-export-menu6');
-            $.getScript( window.hWin.HAPI4.baseURL+'hclient/framecontent/exportMenu.js',
-            function() {
-                var exportMenu = new hexportMenu( menu_container );    
-                exportMenu.setDialogOptions({
-                        is_h6style: true,
-                        isdialog: false, 
-                        need_reload: true,
-                        onInitFinished: function(){
-                            that.switchContainer('publish');
-                        },
-                        onClose: function() { that.containers['publish'].hide() },
-                        container: that.containers['publish']});
-            });            
-        }*/
 
         if(this.menues[section].find('ul.accordionContainer').length > 0){ // check if current menu has any accordion groupings
 

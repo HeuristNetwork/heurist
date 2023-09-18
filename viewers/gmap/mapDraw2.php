@@ -52,10 +52,8 @@ require_once(dirname(__FILE__).'/../../hclient/framecontent/initPage.php');
 
 
                 if (typeof window.hWin.google === 'object' && typeof window.hWin.google.maps === 'object') {
-console.log('google map api: already loaded')                    
                     handleApiReady();
                 }else{                            
-console.log('load google map api')                    
                     $.getScript('https://maps.googleapis.com/maps/api/js?key=<?php echo $accessToken_GoogleAPI;?>'
                     +'&libraries=drawing,geometry&callback=handleApiReady');                                           
                 }

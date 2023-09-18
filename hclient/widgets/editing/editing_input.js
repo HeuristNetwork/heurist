@@ -888,7 +888,6 @@ $.widget( "heurist.editing_input", {
                 
                 var cnt = ($input.prop('scrollHeight') / lht).toFixed(); //visible number of lines
                 if(cnt>0){
-//console.log('lines count: '+$input.prop('scrollHeight')+'/'+lht+'='+cnt);                                   
                     if(cnt>dheight && dheight>2){
                         $input.attr('rows', dheight);    
                     }else{
@@ -3176,29 +3175,6 @@ $.widget( "heurist.editing_input", {
                             }else{
                             }
                         }});
-                        /*focus: function(){
-                             $input_img.css({border:'dashed green 2px'});
-                        },
-                        blur: function(){
-                             $input_img.css({border:'none'});
-                        }});*
-/*                        
-                        paste:function(e){
-console.log('onpaste');                            
-
-    var items = e.originalEvent.clipboardData.items;
-    for (var i = 0 ; i < items.length ; i++) {
-        var item = items[i];
-        if (item.type.indexOf("image") >=0) {
-            console.log("FILE!");
-        } else {
-            console.log("Ignoring non-image.");
-        }
-    }
-                        }});
-*/                        
-                        
-                        
             }
             else //------------------------------------------------------------------------------------
             if(this.detailType=='action'){

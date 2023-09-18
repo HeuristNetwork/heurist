@@ -271,10 +271,6 @@ $requestUri:
         }
     }
     
-    //DEBUG print print_r($host_params,true).'<br>';
-    //DEBUG print print_r($_SERVER,true).'<br>';
-    //DEBUG echo $host_params['install_dir'].'<br>';
-    //DEBUG echo $redirect;
     if($error_msg){
        $redirect .= ('/hclient/framecontent/infoPage.php?error='.rawurlencode($error_msg)); 
     }else if($rewrite_path){

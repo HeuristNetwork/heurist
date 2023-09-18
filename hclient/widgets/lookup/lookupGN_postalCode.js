@@ -315,10 +315,6 @@ $.widget( "heurist.lookupGN_postalCode", $.heurist.recordAction, {
                 sURL += '&country=' + _countryCode; 
             }
         }
-/* DEBUGGING
-this._onSearchResult({"postalcodes":[{"adminCode2":"708","adminCode3":"70805","adminName3":"Breitenwang","adminCode1":"07","adminName2":"Politischer Bezirk Reutte","lng":10.7333333,"countryCode":"AT","postalcode":"6600","adminName1":"Tirol","placeName":"Breitenwang","lat":47.4833333}]});
-return;
-*/
         window.hWin.HEURIST4.msg.bringCoverallToFront(this._as_dialog.parent());
 
         var that = this;

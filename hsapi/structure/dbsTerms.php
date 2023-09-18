@@ -286,7 +286,7 @@ class DbsTerms
                 foreach($children as $trm_ID){
                     
                     if($trm_ID==$parent_id){
-                        error_log('!!!!Database '.HEURIST_DBNAME
+                        errorLog('!!!!Database '.HEURIST_DBNAME
                             .' Recursive tree for term '.$trm_ID.' parent '.$parent_id);
                         continue;
                     }
@@ -296,7 +296,7 @@ class DbsTerms
                     
                     }else if($mode==3){
                         if(in_array($trm_ID, $res)){ //already in set
-                            error_log('!!!!Database '.HEURIST_DBNAME
+                            errorLog('!!!!Database '.HEURIST_DBNAME
                                 .' Recursive tree or duplication for term '.$trm_ID.' parent '.$parent_id);
                             continue;
                         }else{

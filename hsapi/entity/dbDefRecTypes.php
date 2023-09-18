@@ -528,7 +528,7 @@ class DbDefRecTypes extends DbEntityBase
                             $this->data['fields'][$idx]['rty_TitleMask'] = 'Please edit any <b>' . $record['rty_Name'] . '</b> record to choose fields for the constructed title';
                         }
                         if(!array_key_exists($this->data['fields'][$idx], 'rty_RecTypeGroupID') && isset($this->data['rtg_ID'])){ // add rectype group
-                            $this->data['fields'][$idx]['rty_RecTypeGroupID'] = $this->data['rtg_ID']; error_log(print_r($this->data['fields'][$idx], TRUE));
+                            $this->data['fields'][$idx]['rty_RecTypeGroupID'] = $this->data['rtg_ID'];
                         }
                     }
                 }

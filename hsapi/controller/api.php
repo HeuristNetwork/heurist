@@ -30,8 +30,6 @@ if(@$_REQUEST['method']){
     } 
 }
 
-//error_log($method);
-
 //$requestUri[1] = "api"
 //$requestUri[2] - database name
 //$requestUri[3] - resource(entity )
@@ -115,7 +113,6 @@ if($method=='save' || $method=='add'){
     if(!@$_REQUEST['fields']){
         $data = json_decode(file_get_contents('php://input'), true);
         if($data){
-            //DEBUG error_log(print_r($data,true));    
             //request body
             $_REQUEST['fields'] = $data;
         }else{

@@ -131,7 +131,6 @@ function getHostParams( $argv=null )
                         }
             }
             $installDir_pro = implode('/', $iDir);
-            //DEBUG - pro is the same as dev $installDir_pro = $installDir; 
         }
         
         //validate

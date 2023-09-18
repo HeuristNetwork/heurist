@@ -168,8 +168,6 @@ function hMapDocument( _options )
                             recName = record['d'][1][0];
                         }else{
                             recName = resdata.fld(record, 'rec_Title');
-                            //console.log(record);
-                            //continue;
                         }
                         
                         var $res = {};  
@@ -609,7 +607,6 @@ function hMapDocument( _options )
         var layer_style = _getSymbology(  mapdoc_id, rec_id );
 
         var current_value = layer_style;//affected_layer.options.default_style;
-        ///console.log(affected_layer);                   
         current_value.sym_Name = layer_title; //affected_layer.options.layer_name;
         //open edit dialog to specify symbology
         window.hWin.HEURIST4.ui.showEditSymbologyDialog(current_value, 1, function(new_value){

@@ -396,11 +396,6 @@ function cloneDatabase($targetdbname, $nodata=false, $templateddb, $user_id) {
         return false;
     }
     
-
-/*    
-    echo_flush ("<p>DEBUG. Db created without indicies and triggers</p>");
-    return true;
-*/    
     $sHighLoadWarning = "<p><h4>Note: </h4>Failure to clone a database may result from high server load. Please try again, and if the problem continues ".CONTACT_HEURIST_TEAM."</p>";
     
     // 4. add contrainsts, procedure and triggers

@@ -232,8 +232,6 @@ $.widget( "heurist.searchBuilder", {
 
             var ht = Math.min(ch, window.innerHeight-topPos);
 
-            //console.log(ch+'  '+dh+'  new '+ht);                   
-            
             this._dialog.dialog('option', 'height', ht);    
         }else{
             topPos = this.element.parent().offset().top + 10;
@@ -388,7 +386,6 @@ $.widget( "heurist.searchBuilder", {
                 if(ele_id){
                    
                     var ele = this.pnl_Items.find('#'+ele_id)
-//console.log('assign '+code);                                            
                     ele.searchBuilderItem('changeOptions',{
                             code: code,
                             top_rty_ID: top_rty_ID, 
@@ -1080,8 +1077,7 @@ $.widget( "heurist.searchBuilder", {
                                             that.select_field_for_id = null;
                                             that.pnl_Tree.hide();
                                         }else{
-                                            //debug 
-                                            console.error('code not defined for',data);
+                                            console.error('ERROR: code not defined for',data);
                                         }
                                     }
                                 },
@@ -1299,7 +1295,6 @@ $.widget( "heurist.searchBuilder", {
         */
         
 /*
-console.log(aCodes);    
 0: "10:20"
 1: "10:lt134:12:1147"
 2: "10:lt134:12:26"
@@ -1345,7 +1340,6 @@ console.log(aCodes);
             
             //var ele = that.field_array[i]; // that.field_items[code];
             var code = ele.searchBuilderItem('getCodes');
-//console.log(code);            
             
             var value = ele.searchBuilderItem('getValues');
             var branch;

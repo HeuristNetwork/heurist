@@ -402,7 +402,6 @@ $.widget( "heurist.dh_search", {
                 var matches = search_value.match(regex);
                 var hasOR = false;
                 if(matches!=null){
-//DEBUG console.log(matches);
                     //const regex = /"[^"]+"|(&&|\ OR \b)/gi;
                     for(var i=0;i<matches.length;i++){
                         if(matches[i].toUpperCase() === 'OR'){
@@ -435,7 +434,6 @@ $.widget( "heurist.dh_search", {
                     }
                     search_value = (hasOR)?criteria_or:criteria;
                     */
-//DEBUG console.log(search_value);  
                 }
                 
                 

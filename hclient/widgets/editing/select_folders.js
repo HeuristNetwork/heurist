@@ -236,10 +236,6 @@ $.widget( "heurist.select_folders", {
     //
     _initTreeView: function( treeData ){
       
-        if(!$.ui.fancytree._extensions["edit"]){
-            console.log('edit not enabled');
-        }
-        
         var that = this;
         
         var fancytree_options =
@@ -288,8 +284,6 @@ $.widget( "heurist.select_folders", {
                     var currname = path+data.node.origTitle;
                     request = {operation:'rename', name:currname, newname:newpath};
                 }
-
-//console.log(data.node.getLevel()+',  '+path+', '+data.node.orgTitle+', '+data.input.val());
                 
                 window.hWin.HAPI4.SystemMgr.get_sysfolders(request, 
                     function(response){
@@ -314,19 +308,8 @@ $.widget( "heurist.select_folders", {
             }        
             },
             select: function(event, data) {
-                /* debug
-                var wtrr = that._treeview.fancytree("getTree");
-                // Get a list of all selected TOP nodes
-                var snodes = wtrr.getSelectedNodes(true);
-                var selRootKeys = $.map(snodes, function(node){
-                    console.log(node.getKeyPath());
-                });
-                */
             },
             activate: function(event, data) {
-                
-                //that.selectedRecords([data.node.key]);
-                //console.log('click on '+data.node.key+' '+data.node.title);
             }
         };
 

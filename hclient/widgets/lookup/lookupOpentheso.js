@@ -334,7 +334,6 @@ $.widget( "heurist.lookupOpentheso", $.heurist.recordAction, {
                     'translations': recset.fld(rec, 'translations')
                 }];
             }
-console.log(res, this.options.mapping);
             this.closingAction(res);
         }
     },
@@ -411,7 +410,6 @@ console.log(res, this.options.mapping);
             service: sURL, // request url
             serviceType: 'opentheso' // requesting service, otherwise no
         };
-console.log(sURL);
         // calls /heurist/hsapi/controller/record_lookup.php
         window.hWin.HAPI4.RecordMgr.lookup_external_service(request, function(response){
             window.hWin.HEURIST4.msg.sendCoverallToBack(that.element); // hide loading cover

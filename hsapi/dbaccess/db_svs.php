@@ -123,7 +123,6 @@
             $query = $query.' order by FIELD(svs_ID,'.implode(',',$order).')';
         }
 
-//error_log($query);        
         $res = $mysqli->query($query);
 
         if ($res){

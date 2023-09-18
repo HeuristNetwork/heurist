@@ -30,7 +30,6 @@
 * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
 * @package     Heurist academic knowledge management system
 * @subpackage  Viewers/Map
-* @deprecated
 */
     require_once (dirname(__FILE__).'/../../hsapi/System.php');
     require_once (dirname(__FILE__).'/../../hsapi/dbaccess/db_recsearch.php');
@@ -419,19 +418,10 @@
             if($poly_all!=''){
                 $url = $url.'&pl='.$poly_all;
             }
-//error_log($url);        
-            
         }
 
-        if(@$_REQUEST['debug']){
-            //print '<div>'.strlen($url)."</div>";
-            //print $url;
-        }else{
-		    header('Location: '.$url);
-        }
-		//return $url;
+		header('Location: '.$url);
 	}else{
 		header('Location: '.HEURIST_BASE_URL.'hclient/assets/notfound.png');
-		//print "noting found";
 	}
 ?>

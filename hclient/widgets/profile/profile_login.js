@@ -712,7 +712,6 @@ function doSamlLogin(callback, parentwin, sp_entity){
         //noClose: true,
         
         afterclose: function(context) {
-console.log('afterclose', context, window.hWin.HAPI4.currentUser);            
             //$(window.hWin.document).trigger(window.hWin.HAPI4.Event.ON_CREDENTIALS, 
             //                                                [window.hWin.HAPI4.currentUser]);
             /*
@@ -723,7 +722,6 @@ console.log('afterclose', context, window.hWin.HAPI4.currentUser);
             */
         },
         callback:function(context){
-console.log('callback', context);            
                 if(context){
                     
                         if(context>0){
@@ -736,8 +734,6 @@ console.log('callback', context);
 
                             if (success) {
 
-console.log('sys_info', success); 
-                                
                                 $(window.hWin.document).trigger(window.hWin.HAPI4.Event.ON_CREDENTIALS, 
                                                             [window.hWin.HAPI4.currentUser]);
 

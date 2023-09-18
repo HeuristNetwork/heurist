@@ -37,7 +37,6 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
     //    
     _init: function() {
 
-//this._time_debug = new Date().getTime() / 1000;
         this.options.default_palette_class = 'ui-heurist-design';
         
         //allow select existing fieldtype by typing
@@ -198,8 +197,6 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
             }
 
             this.coverMessage();			
-//console.log( 'DT initControls  ' + (new Date().getTime() / 1000 - this._time_debug));
-//this._time_debug = new Date().getTime() / 1000;
         
         this.options.onInitCompleted =  function(){
             
@@ -213,9 +210,6 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
                      select_mode: 'manager',
                      reference_dt_manger: that.element,
                      onSelect:function(res){
-                         
-//console.log( 'DT onSELECT!!!!  ' + (new Date().getTime() / 1000 - that._time_debug));
-//that._time_debug = new Date().getTime() / 1000;
                          
                         if(window.hWin.HEURIST4.util.isRecordSet(res)){
                              
@@ -314,6 +308,9 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
 
             this.recordList.resultList('resetGroups');
 
+            
+            //@todo - obtain definitions in new format
+            //get definitions (in old format) from REMOTE database
             window.hWin.HAPI4.SystemMgr.get_defs( //only basefield names
                 {detailtypes:'all', mode:2, remote:that.options.import_structure.database_url}, function(response){
                     if(response.status == window.hWin.ResponseStatus.OK){
@@ -2040,7 +2037,6 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
     
     //    
     saveUiPreferences:function(){
-//console.log('save prefs '+'prefs_'+this._entityName);        
         window.hWin.HAPI4.save_pref('prefs_'+this._entityName, this.usrPreferences);
    
         return true;
@@ -2166,7 +2162,7 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
 
         detailtypes = window.hWin.HEURIST4.util.cloneJSON(detailtypes);
 
-        rdata.fields = detailtypes.typedefs.commonFieldNames; console.log();
+        rdata.fields = detailtypes.typedefs.commonFieldNames;
         rdata.fields.unshift('dty_ID');
         
         var idx_ccode = 0;

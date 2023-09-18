@@ -269,8 +269,6 @@ if (!$error && isset($param_start))
     else
         $curfilename="";
 
-    //DEBUG error_log($curfilename);    
-
     // Recognize GZip filename
     $gzipmode=false;
 
@@ -490,13 +488,6 @@ if (!$error && isset($param_start) && isset($param_foffset) && preg_match("/(\.(
 
         $query = substr(trim($query),0,-1*strlen($delimiter));
 
-// DIAGNOSTIC "<p>Query: ".."</p>\n"
-/*
-if($linenumber>2999){
-    echo '<p>'.substr(trim(nl2br(htmlentities($query))),0,50).'</p>';
-    error_log (substr(trim(nl2br(htmlentities($query))),0,50));
-}
-*/
         if (!$mysqli->query($query)) //!TESTMODE && 
         { 
             $errorMsg = $mysqli->error;

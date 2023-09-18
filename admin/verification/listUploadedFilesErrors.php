@@ -373,7 +373,6 @@ $mysqli = $system->get_mysqli();
                         //check that the relative path is correct
                         $path_parts = pathinfo($fpath);
                         if(!@$path_parts['dirname']){
-                           error_log($fpath.'  '.$res['db_fullpath']);
                            continue;
                         }else{
                             $dirname = $path_parts['dirname'].'/';
@@ -428,7 +427,6 @@ $mysqli = $system->get_mysqli();
                                     .$mysqli->real_escape_string($row['filename']).'" where ulf_ID = '.intval($ulf_ID);
         }
        $mysqli->query($query);            
-//DEBUG       print '<div>'.$ulf_ID.'  rem '.@$row['clear_remote'].'   path='.$row['res_relative'].'  file='.$row['filename'].'</div>';
     }
     if(is_array($files_path_to_correct) && count($files_path_to_correct)>0){
             print '<div>Autorepair: corrected '.count($files_path_to_correct).' paths</div>';
@@ -464,10 +462,9 @@ $mysqli = $system->get_mysqli();
                             }else{
                                 //top.HEURIST.util.showMessage(context['result']);
                                 var url = top.HEURIST.baseURL + 'admin/verification/listDatabaseErrorsInit.php?type=files&db='+top.HEURIST.database.name;
-                                console.log(window.parent.addDataMenu);
+
                                 if(window.parent.parent.addDataMenu)
                                     window.parent.parent.addDataMenu.doAction('menulink-verify-files');
-                                //$(top.document).find('#frame_container2').attr('src', url); 
                             }
                         }
 

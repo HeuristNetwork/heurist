@@ -260,7 +260,7 @@ $.widget( "heurist.thematicMapping", $.heurist.recordAction, {
                     }
                     
                 }else{
-                    console.log(response.message);
+                    console.error(response.message);
                 }
             });            
         
@@ -1130,7 +1130,6 @@ $.widget( "heurist.thematicMapping", $.heurist.recordAction, {
 
             var that = this;
             window.HAPI4.RecordMgr.get_facets(request, function(response){ 
-//console.log(response);
                 if(response.status == window.hWin.ResponseStatus.OK){
 
                     //var this.popele = that.element.find('#divAutoRanges');
@@ -1150,7 +1149,7 @@ $.widget( "heurist.thematicMapping", $.heurist.recordAction, {
                     that._definePreviewRanges();
                     
                 }else{
-                    console.log(response.message);
+                    console.error(response.message);
                 }
             });            
         }

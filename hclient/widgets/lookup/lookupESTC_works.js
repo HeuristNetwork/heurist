@@ -290,7 +290,7 @@ $.widget("heurist.lookupESTC_works", $.heurist.recordAction, {
                     if(response.status == window.hWin.ResponseStatus.OK){
 
                         var recordset = new hRecordSet(response.data);
-                        recordset.each2(function(id, record){ console.log(record);
+                        recordset.each2(function(id, record){
                             for(var i in dlg_response){
                                 for(var j = 0; j < dlg_response[i].length; j++){
                                     if(dlg_response[i][j] == id){

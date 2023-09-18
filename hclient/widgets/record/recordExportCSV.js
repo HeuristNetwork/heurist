@@ -474,11 +474,7 @@ $.widget( "heurist.recordExportCSV", $.heurist.recordAction, {
                 }else{
                     selectedFields.push(node.data.code);
                 }
-                
-                //DEBUG console.log( node.data.code );
             }
-            //DEBUG
-
         return {
             'fields': selectedFields,
             'main_record_type_ids': mainRecordTypeIDs,

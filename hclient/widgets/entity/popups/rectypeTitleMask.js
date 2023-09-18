@@ -177,8 +177,6 @@ $.widget( "heurist.rectypeTitleMask", $.heurist.recordAction, {
             if(window.hWin.HEURIST4.util.isempty(node.data.code)) continue;
 
             _text = _text + '['+node.data.code+']\r\n'; //node.data.full_path
-            
-            //DEBUG console.log( node.data.code );
         }
         if(_text!=='')    {
             this._insertAtCursor(textedit, _text);
@@ -522,7 +520,7 @@ $.widget( "heurist.rectypeTitleMask", $.heurist.recordAction, {
     },
     
     //
-    // For debug
+    // Test purposes only
     //
     _doCanonical: function(mode){
 

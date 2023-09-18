@@ -1177,7 +1177,7 @@ content = content.replace('http://heurist.sydney.edu.au/heurist/',window.hWin.HA
                         mapping.map_control.addRecordsetLayer(params);
                         clearInterval(interval);
                     }else{
-                        //console.log('wait for map loading');
+                        //wait for map loading
                     }
                     },500);
 
@@ -2010,9 +2010,6 @@ content = content.replace('http://heurist.sydney.edu.au/heurist/',window.hWin.HA
                 $('#p_short_description_entry').parent().hide();            
             }
 
-            //console.log(record);            
-
-
             //Last updated -------------------------------
             fval = that.__getDate(person, ['rec_Modified']); 
             if(!that.isempty(fval)){
@@ -2217,7 +2214,7 @@ content = content.replace('http://heurist.sydney.edu.au/heurist/',window.hWin.HA
                         mapping.map_control.addRecordsetLayer(params);
                         clearInterval(interval);
                     }else{
-                        //console.log('wait for map loading');
+                        //wait for map loading
                     } 
                     },500);
 
@@ -2509,8 +2506,6 @@ content = content.replace('http://heurist.sydney.edu.au/heurist/',window.hWin.HA
                 this.recset.setFld(place_rec, this.DT_SYMBOLOGY,  //leaflet way
                  '{"iconType":"url","iconUrl":"'+iconPath+icon+'.png","iconSize":"22"}');
 
-                //console.log(place.names[i]+'  '+description+'   '+iconPath+icon+'.png')                                
-
             }
         }
 
@@ -2624,11 +2619,9 @@ content = content.replace('http://heurist.sydney.edu.au/heurist/',window.hWin.HA
     //
     stepBack: function(){
 
-        //console.log('step back');      
         if(this.historyNav.length>1){
             var toidx = ((this.currentNavIdx==0)?this.historyNav.length:this.currentNavIdx)-1;
             var nav = this.historyNav[toidx];
-            console.log( nav.page_name?nav.page_name:nav.title );    
             this._setOptions( nav );
         }
 
@@ -2709,8 +2702,6 @@ content = content.replace('http://heurist.sydney.edu.au/heurist/',window.hWin.HA
 
         if(opt.page_name=='home' || opt.page_name=='search' || opt.page_name=='people' || opt.entityType)
         {
-
-            //console.log(opt);
 
             //historyNav
             //find entry in history and put in the end of array
@@ -2878,11 +2869,6 @@ window.onload = function () {
             if (!ignoreHashChange) {
                 ignoreHashChange = true;
                 window.location.hash = Math.random();
-                // Detect and redirect change here
-                // Works in older FF and IE9
-                // * it does mess with your hash symbol (anchor?) pound sign
-                // delimiter on the end of the URL
-                //console.log('Back button 2');
             }
             else {
                 ignoreHashChange = false;

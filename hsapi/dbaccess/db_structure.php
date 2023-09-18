@@ -751,7 +751,7 @@ function dbs_GetRectypeConstraint($system) {
                         $offspring = array_merge($offspring, getTermOffspringList($mysqli, $subTermID, $parentlist));
                     }else{
                         $sMsg = 'DATABASE '.$system->dbname().'. Recursion in parent-term hierarchy '.$termID.'  '.$subTermID;
-                        error_log($sMsg);
+
                         if(!$emailsent){
                             
                             $emailsent = true;
@@ -1378,12 +1378,10 @@ function dbs_GetRectypeConstraint($system) {
             $query = $query . " order by dtg_Order, dtg_Name, dty_OrderInGroup, dty_Name";
         }
         $res = $mysqli->query($query);
-        //ARTEM    $dtStructs['sortedNames'] = mysql__select_assoc('defDetailTypes', 'dty_Name', 'dty_ID', '1 order by dty_Name');
 
         try{
             if(!$res){
-                error_log('FAILED QUERY: '.$mysqli->error);//$query);
-                errorLog('Database: '.$system->dbname());
+                errorLog('Database: '.$system->dbname().'FAILED QUERY: '.$mysqli->error);
             }else{
                 while ($row = $res->fetch_row()) {
                     $dty_ID = $row[2];

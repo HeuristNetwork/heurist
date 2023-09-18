@@ -172,7 +172,6 @@ $.widget( "heurist.manageSysUsers", $.heurist.manageEntity, {
                         
                                     if(data && window.hWin.HEURIST4.util.isArrayNotEmpty(data.selection))
                                     {
-                                        console.log(data.selection);
                                         var request = {};
                                         request['a']        = 'action'; //batch action
                                         request['entity']   = 'sysGroups';
@@ -544,8 +543,6 @@ $.widget( "heurist.manageSysUsers", $.heurist.manageEntity, {
         if(has_saml){
             window.hWin.HEURIST4.ui.initHSelect(saml_sel[0], false);
             this._on(saml_sel, {change:function(event){
-//DEBUG console.log($(event.target).val());  
-               
                //save current and load new one
                this._Saml_from_UI( this._currentSaml );
                

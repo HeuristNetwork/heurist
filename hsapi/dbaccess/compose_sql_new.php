@@ -866,22 +866,17 @@ class HLimb {
         $this->parent = &$parent;
         $this->conjunction = $conjunction;
 
-        //echo "<br>".(print_r($query_json, true));
         if(is_array($query_json))
         foreach ($query_json as $key => $value){
 
-            //echo "<br>key=".$key."  ".(print_r($value,true));
             if(is_numeric($key) && is_array($value)){  //this is sequental array
                 $key = array_keys($value);
                 $key = $key[0];
                 $value = $value[$key];
             }
 
-            //echo "<br>key=".$key." value=".(print_r($value,true));
-
             if( array_key_exists($key, $this->allowed) ){ //this is limb
                 $limb = new HLimb($this->parent, $key, $value);
-                //echo "<br>".$limb->conjunction."  count=".count($limb->limbs);
                 if(is_array($limb->limbs) && count($limb->limbs)>0){
                     //do not add empty limb
                     array_push( $this->limbs, $limb );
@@ -889,8 +884,6 @@ class HLimb {
             }else{ //this is predicate
 
                 $predicate = new HPredicate($this->parent, $key, $value, count($this->limbs) );
-
-                //echo  $key."  ".$value."  ".$predicate->valid;
 
                 if($predicate->valid){
                     array_push( $this->limbs,  $predicate);
@@ -943,8 +936,6 @@ class HLimb {
                     $limb->is_relationship = $is_relationship;
                     $res = $limb->makeSQL();
 
-                    //echo print_r($res, true)."<br>";
-
                     if($res && @$res["where"]){
                         $this->addTable(@$res["from"]);
                         if(false && $cnt==1){
@@ -964,19 +955,10 @@ class HLimb {
             //IMPORTANT!!!!!!!!
             if(is_array($wheres) && count($wheres)>0){  //@TODO!  this is temporal solution!!!!!
 //if cnj is OR (any) need to execute each OR section separately - otherwise it kills server (at least for old mySQL versions (5.7))           
-            
-            
                 $where = implode($cnj, $wheres);
-                
-//DEBUG error_log("TEST $cnj >>> ".$where);
-                
             }
         }
 
-
-        //print $from."<br>";
-
-        //$where = $where."}";
 
         $this->where_clause = $where;
         $res = array("from"=>$this->tables, "where"=>$where);
@@ -2637,11 +2619,6 @@ class HPredicate {
             }else{
                 return '';
             }
-            /*
-            error_log('value expected string - array given');
-            error_log(print_r($params_global,true));
-            $this->value = reset($this->value);
-            */
         }
 
         // -   negate value
@@ -3055,18 +3032,6 @@ $stopwords = array('a','about','an','are','as','at','be','by','com','de','en','f
             if($fld==null){
 
                 $mysqli->query('ALTER TABLE recDetails ADD FULLTEXT INDEX `dtl_Value_FullText` (`dtl_Value`)'); // VISIBLE
-              
-    /*            
-                $k=0;
-                while($k<10){
-                    $prog = mysql__select_value($mysqli,"select progress from FROM sys.session where db='".HEURIST_DBNAME_FULL."' "
-                    ." AND current_statement like 'ALTER TABLE recDetails ADD FULLTEXT%'");
-    error_log($prog);     
-    usleep(200);           
-                    $k++;
-                }
-    */            
-                
                 $this->error_message = 'create_fulltext';  
                 return true;
             }
@@ -3074,29 +3039,10 @@ $stopwords = array('a','about','an','are','as','at','be','by','com','de','en','f
         }
         
         return false;
-/*        
-ALTER TABLE `hdb_osmak_7`.`recdetails` DROP INDEX `dtl_Value_FullText` ;        
-ALTER TABLE `hdb_osmak_7`.`recdetails` ADD FULLTEXT INDEX `dtl_Value_FullText` (`dtl_Value`) VISIBLE;
 
-SELECT thd_id, conn_id, db, command, state, current_statement,
-              statement_latency, progress, current_memory, program_name
-         FROM sys.session
-        WHERE progress IS NOT NULL
-*/
     }
                             
 
 
 }//HPredicate
-
-/*
-{ all: { t:4, f1:peter , any: {}  } }
-
-query is json array  { conjunction: [ {predicate} , {predicate}, .... ] }
-
-{ any: [ {predicate} , {predicate}, .... ],  }
-
-[ ]
-
-*/
 ?>

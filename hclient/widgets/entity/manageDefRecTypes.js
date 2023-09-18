@@ -52,7 +52,6 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
     //    
     _init: function() {
         
-//this._time_debug = new Date().getTime() / 1000;
         this.options.default_palette_class = 'ui-heurist-design';
         
         this.options.innerTitle = false;
@@ -115,8 +114,6 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
             window.hWin.HAPI4.addEventListener(this, window.hWin.HAPI4.Event.ON_REC_UPDATE,
                 function(data) { 
 
-                    //console.log('ON_REC_UPDATE '+that.element.is(':visible'));                    
-                    
                     if(that.element.is(':visible'))
                     $Db.get_record_counts(function(){
                         that._loadData();
@@ -280,10 +277,6 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
 
         this.options.onInitCompleted =  function(){
 
-//console.log( 'onInitCompleted  ' + (new Date().getTime() / 1000 - that._time_debug));
-//that._time_debug = new Date().getTime() / 1000;
-
-            
             if(that.options.isFrontUI){
                     var rg_options = {
                         isdialog: false, 
@@ -454,7 +447,6 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
                 }
             }
             else{
-//console.log('_loadData '+$Db.needUpdateRtyCount);
                 if( is_first && $Db.needUpdateRtyCount>0 ){
                     $Db.get_record_counts(function(){
                         that._loadData(true);
@@ -665,11 +657,9 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
         if(i_desc>=0){
             w_desc = max_width-used_width-250;
             if(w_desc<30) w_desc = 30;
-//console.log(max_width+'  '+'  '+used_width+'  '+w_desc);            
             html = html.replace('$$DESC$$',fld2(w_desc, 'Description', 'Description', 'text-align:left'))
         }
         var name_width = 250; //max_width - used_width;
-//console.log('  =>'+name_width);        
         html = html.replace('$$NAME$$',fld2(name_width, 'Name', 'Name', 'text-align:left'))
         
         return html;
@@ -758,7 +748,7 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
         var html = '';
         
         var fields = this.options.ui_params?this.options.ui_params.fields:['rtyid'];
-//console.log(fields);
+
         //fields = ['rtyid','ccode','addrec','filter','count','group','icon','edit','editstr','name','description','show','duplicate','fields','status'];        
 
         var isTrash = false;//(recordset.fld(record, 'rty_RecTypeGroupID') == $Db.getTrashGroupId('rtg'));
@@ -877,10 +867,8 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
         }
         
         var name_width = 250; //max_width - used_width - w_desc;
-//console.log('  '+max_width+'  '+'  '+used_width+'  '+w_desc+'  =>'+name_width);        
-        
         html = html.replace('$$NAME$$',fld2('rty_Name', name_width, null,'text-align:left'))
-//padding:0.4em 0px;
+
         html = '<div class="recordDiv rt_draggable white-borderless" recid="'
             +recID+'" style="display:table-row;height:28px;padding:0.4em 0px;'+grayed+'">'
                     + '<div class="recordSelector item"><input type="checkbox" /></div>'
@@ -1077,7 +1065,6 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
                             var menu = this.fieldSelector.hSelect( "menuWidget" );
                             menu.css({'max-height':'350px'});                        
                                 this.fieldSelector.hSelect({change: function(event, data){
-    //console.log('SEELCT >>> '+data.item.value);                        
                                 var rg_options = {
                                      isdialog: true, 
                                      edit_mode: 'editonly',

@@ -145,9 +145,6 @@ class DbsImport {
     */
     public function doPrepare( $data ){
         
-$time_debug = microtime(true);
-$time_debug2 = $time_debug;
-
         $this->rename_target_entities = (@$data['is_rename_target'] == 1);
         
         $this->prime_defType = $data['defType']; //'rectype','detailtype','term'
@@ -217,15 +214,11 @@ $time_debug2 = $time_debug;
             $database_url = $data['databaseURL'];        
         }
         
-if(_DBG) error_log('get db url '.(microtime(true)-$time_debug));        
-$time_debug = microtime(true);        
-        
         if(!$database_url){
             $this->system->addError(HEURIST_ERROR, "Can not obtain database url for database # ".$this->source_db_reg_id);
             return false; //see $system->getError
         }        
     
-//error_log($database_url.'   id='.$db_reg_id);
         // 2. get definitions from remote database
         $this->source_defs  = $this->_getDatabaseDefinitions($database_url, $db_reg_id, ($this->prime_defType=='term'));
         
@@ -249,10 +242,6 @@ $time_debug = microtime(true);
         }
        
 
-if(_DBG) error_log('get src defs '.(microtime(true)-$time_debug));        
-$time_debug = microtime(true);        
-        
-        
         //find source id by conceptcodes or verify local_ids     
         $def_ids = array();
         $wrong_id = null;
@@ -458,8 +447,6 @@ $time_debug = microtime(true);
             
         }
      
-if(_DBG) error_log('Preparation '.(microtime(true)-$time_debug2));        
-     
         return true;   
     }
     
@@ -482,9 +469,6 @@ if(_DBG) error_log('Preparation '.(microtime(true)-$time_debug2));
         global $mysqli;
         $mysqli = $this->system->get_mysqli();
         $mysqli->autocommit(FALSE);
-
-$time_debug = microtime(true);
-$time_debug2 = $time_debug;
 
         $this->broken_terms = array();
         $this->broken_terms_reason = array();
@@ -662,7 +646,6 @@ foreach ($this->imp_recordtypes as $rtyID){
         //from saveStructureLib.php
         $res = createRectypes($columnNames, array("0"=>array("common"=>$def_rectype)), false, false, null); 
         
-    //if(_DBG) error_log('rt '.$rtyID);
         if(is_numeric($res)){
 
             $new_rtyID  = abs($res);
@@ -970,7 +953,6 @@ foreach ($this->imp_recordtypes as $rtyID){
 }
 
 TitleMask::set_fields_correspondence(null);
-if(_DBG) error_log('Total '.(microtime(true)-$time_debug2));           
 
 // ------------------------------------------------------------------------------------------------
 
@@ -1616,11 +1598,7 @@ $mysqli->commit();
             $idx_origin_name   = $terms['fieldNamesToIndex']['trm_NameInOriginatingDB'];
             
             $idx_vocab_group_id  = intval($terms['fieldNamesToIndex']["trm_VocabularyGroupID"]);
-/*            
-            if($term_id==5892){
-                error_log('!!!!!');
-            }
-*/
+
             //search both domains
             $term_import = $this->sourceTerms->getTerm($term_id, $domain);
             //$term_import = $terms['termsByDomainLookup'][$domain][$term_id]; //6256 returns wrong!!
@@ -1638,12 +1616,7 @@ $mysqli->commit();
             //find term by concept code among local terms
             $new_term_id = $this->targetTerms->findTermByConceptCode($term_import[$idx_ccode], $domain);
             
-/*            
-if($term_id==11 || $term_id==518 || $term_id==497){
-    error_log('!!!!');
-}
-*/
-            
+
             if($new_term_id){
                 //this term aready exists in target - add it as reference to this vocabulary
                 if($parent_id>0){ //this is not vocabulary
@@ -1669,10 +1642,6 @@ if($term_id==11 || $term_id==518 || $term_id==497){
                     }
                 }else{
                     //find vocabulary in target and all its terms
-/*error_log('check recursion in '.$new_term_id);
-if($new_term_id==5039){
-    error_log("Next will be ours");
-}*/
                     $all_terms_in_vocab = $this->targetTerms->treeData($new_term_id, 3);
                 }
                 

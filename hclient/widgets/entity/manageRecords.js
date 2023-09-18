@@ -472,7 +472,6 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                     if(prev_v<v) v = prev_v;
                     
                     that.rts_actions_menu.find('select.s_width').val(v).hSelect('refresh');
-                    //console.log(rst_fields['rst_DisplayWidth']+'  '+rst_fields['rst_MaxValues']);                                
                 }
 
                 that.rts_actions_menu.find('.edit_rts_btn').hide();
@@ -1356,8 +1355,6 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
             if(this.options.isdialog){
                 if(this._as_dialog.dialog('instance')){
                     this._as_dialog.dialog('close');    
-                }else{
-                    //console.log('dialog is not opened');
                 }
                 
             }else{
@@ -2653,8 +2650,6 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                 if(ffr['dty_Type']=='file'){
                     ffr['rst_FieldConfig'] = {"entity":"records", "accept":".png,.jpg,.gif", "size":200};
                 }
-            }else{
-                //console.log(dty_ID+' basefield not fefined');
             }
             
             return ffr;         
@@ -3477,7 +3472,7 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
             if(!(this._currentEditID>0)) return;
             
             if(window.hWin.HAPI4.is_callserver_in_progress()) {
-                //console.log('prevent repeatative call')
+                //prevent repeatative call
                 return;   
             }
         

@@ -413,9 +413,6 @@ function recordSave($system, $record, $use_transaction=true, $suppress_parent_ch
     //check capture for newsletter subscription
     if (@$record['Captcha'] && @$_SESSION["captcha_code"]){
 
-        //error_log(session_id());
-        //error_log($_SESSION["captcha_code"]);
-
         $is_InValid = (@$_SESSION["captcha_code"] != @$record['Captcha']);
 
         if (@$_SESSION["captcha_code"]){
@@ -1564,8 +1561,6 @@ function addReverseChildToParentPointer($mysqli, $child_id, $parent_id, $addedBy
 
         $dtl_ID = -1;
 
-        //error_log($parent_id.'  > '.$child_id);            
-
         $query = 'SELECT dtl_ID, dtl_Value FROM recDetails WHERE dtl_RecID='
         .$child_id.' AND dtl_DetailTypeID='.DT_PARENT_ENTITY;
         $res = $mysqli->query($query);
@@ -1573,7 +1568,6 @@ function addReverseChildToParentPointer($mysqli, $child_id, $parent_id, $addedBy
             $matches = array();
             while ($row = $res->fetch_row()){
                 if($parent_id == $row[1]){
-                    //error_log('exists');                        
                     return 0; //exactly the same already exists                           
                 }
                 $dtl_ID = $row[0];
@@ -1585,14 +1579,12 @@ function addReverseChildToParentPointer($mysqli, $child_id, $parent_id, $addedBy
         if($dtl_ID>0 && !$allow_multi_parent){ //pointer already exists
             $mysqli->query('UPDATE recDetails '.
                 'SET dtl_Value='.intval($parent_id).' WHERE dtl_ID='.intval($dtl_ID));                    
-            //error_log('upd '.$dtl_ID);                        
             if($mysqli->error) $res = -1; //($mysqli->affected_rows>0);
         }else{
             $mysqli->query('INSERT INTO recDetails '.
                 "(dtl_RecID, dtl_DetailTypeID, dtl_Value, dtl_AddedByImport) ".
                 "VALUES ($child_id, ".DT_PARENT_ENTITY.", $parent_id, $addedByImport )");                    
             if(!($mysqli->insert_id>0)) $res=-1;
-            //error_log('inserted '.$mysqli->insert_id.'   '.$mysqli->error);                        
         }
     }
 
@@ -1662,8 +1654,6 @@ function addParentToChildPointer($mysqli, $child_id, $child_rectype, $parent_id,
             return 0; //appropriate pointer field in parent record type not found   
         }
 
-        //error_log($parent_id.'  > '.$child_id);            
-
         //check if already exists
         $query = 'SELECT dtl_ID, dtl_Value FROM recDetails WHERE dtl_RecID='
         .$parent_id.' AND dtl_DetailTypeID='.$detailTypeId;
@@ -1672,7 +1662,6 @@ function addParentToChildPointer($mysqli, $child_id, $child_rectype, $parent_id,
             $matches = array();
             while ($row = $res->fetch_row()){
                 if($child_id == $row[1]){
-                    //error_log('exists');                        
                     return 0; //exactly the same already exists                           
                 }
                 $dtl_ID = $row[0];
@@ -1686,7 +1675,6 @@ function addParentToChildPointer($mysqli, $child_id, $child_rectype, $parent_id,
 
         $res = 1;
         if(!($mysqli->insert_id>0)) $res=-1;
-        //error_log('inserted '.$mysqli->insert_id.'   '.$mysqli->error);                        
     }
 
     return $res;
@@ -2165,8 +2153,6 @@ function executeSmarty($system, $params, $mode=null, $heuristRec=null){
   $smarty->assign('results', $record_ids); //assign 
   $smarty->error_reporting = 0;
   $smarty->debugging = false;
-  //$smarty->assign('template_file', $template_file);
-  //$smarty->registerFilter('output', 'smarty_remove_temp_template');
   
   $smarty->assign('r', $heuristRec->getRecord($record_ids[0]));
 
@@ -2240,18 +2226,6 @@ function recordUpdateTitle($system, $recID, $rectype_or_mask, $recTitleDefault)
             if(mb_strlen($new_title)>1023){
                 $new_title = mb_substr($new_title,0,1023);  
             } 
-            /*
-            if(strlen($new_title)>1023){
-            error_log('>>>>'.strlen($new_title).'   '+mb_strlen($new_title));                    
-            }
-
-            $k = 1022;
-            while(strlen($new_title)>1023){
-            $new_t1itle = mb_substr($new_title,0,$k);  
-            $k--;
-            }*/
-
-            //$date_mod = date('Y-m-d H:i:s'); rec_Modified=?, 
 
             $query = "UPDATE Records set rec_Title=? where rec_ID=".$recID;
 

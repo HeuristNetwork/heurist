@@ -150,7 +150,6 @@ function hImportRecords(_max_upload_size) {
                                 
                                     _hideProgress(0);
                                     if(response.status == window.hWin.ResponseStatus.OK){
-//DEBUG console.log(response);                                        
                                         //render list of rectypes to be imported
                                         source_db = response.data.database;
                                         source_db_url = response.data.database_url;
@@ -486,12 +485,7 @@ function hImportRecords(_max_upload_size) {
                 id: window.hWin.HEURIST4.util.random()
             };
             
-//var _time_debug = new Date().getTime() / 1000;            
-                   
                 function _afterImportDefinitions( response ){
-                    
-//console.log('inport defs '+(new Date().getTime() / 1000 - _time_debug));
-//_time_debug = new Date().getTime() / 1000;
                     _hideProgress();
                     $('body > div:not(.loading)').show();
                     
@@ -532,9 +526,6 @@ function hImportRecords(_max_upload_size) {
                 };
                 
                 window.hWin.HAPI4.doImportAction(request, _afterImportDefinitions);
-                //debug _afterImportDefinitions( {status:1, message:'Bla Error!!!!'} );
-                //_afterImportDefinitions( {status:window.hWin.ResponseStatus.OK } );
-        
     }        
 
     //
@@ -672,7 +663,7 @@ function hImportRecords(_max_upload_size) {
                 window.hWin.HEURIST4.util.sendRequest(progress_url, request, null, function(response){
                     _hideProgress( currentStep );
                     if(response && response.status==window.hWin.ResponseStatus.UNKNOWN_ERROR){
-                        console.log(response);                   
+                        console.error(response);                   
                     }
                 });
             } }, 'text');
@@ -684,8 +675,7 @@ function hImportRecords(_max_upload_size) {
                 window.hWin.HEURIST4.util.sendRequest(progress_url, request, null, function(response){
                     
                     if(!response || response.status==window.hWin.ResponseStatus.UNKNOWN_ERROR){
-                        //if(progressInterval!=null) _hideProgress( currentStep );
-                        //console.log(response+'  '+session_id);                   
+                        console.error(response, session_id);                   
                     }else{
                         
                         var resp = response?response.split(','):[0,0];

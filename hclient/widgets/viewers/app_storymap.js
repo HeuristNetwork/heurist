@@ -399,8 +399,6 @@ $.widget( "heurist.app_storymap", {
                 
                     var recset = data.recordset; //record in main result set (for example Persons)
                     
-//console.log('main result set loaded');
-                    
                     that._initial_div_message.find('h3')
                         .text(recset.length()>0
                             ?that.options.storyPlaceholder
@@ -675,7 +673,6 @@ $.widget( "heurist.app_storymap", {
                                 
                                 window.hWin.HAPI4.RecordMgr.search(request,
                                     function(response) {
-//console.log( response.data );                                        
                                         that._resultset = new hRecordSet(response.data);
                                         
                                         //sort
@@ -760,7 +757,6 @@ $.widget( "heurist.app_storymap", {
                 this._terminateAnimation = this._currentElementID>0?this._currentElementID:true;
             }
             
-    //console.log('REMOVE '+this._nativelayer_id);
             //clear map
             if(this._nativelayer_id>0 && this._mapping.app_timemap('instance')){
                 var mapwidget = this._mapping.app_timemap('getMapping');
@@ -1041,17 +1037,6 @@ $.widget( "heurist.app_storymap", {
                             that._scrollToStoryElement( that._initialElementID );
                             that._initialElementID = 0;   
                         }
-
-                        
-                        /*
-                        if(that.options.reportElementMode=='vertical'){
-                            var ele = that._resultList.find('.div-result-list-content');
-console.log('sctop '+ele.scrollTop()+'  '+ele.height());                            
-                            ele[0].scrollTop = 0;
-console.log('>sctop '+ele.scrollTop());                            
-                        }
-                        */
-                                
                     });   
                     
             }else 
@@ -1308,8 +1293,6 @@ console.log('>sctop '+ele.scrollTop());
                             }else{
                                 geojson_data = response;
                             }
-//console.log(geojson_data);
-//console.log(response['timeline']);
                             //REPLACE rec id and title to main result set
                             function __findMainId(storyID){
                                 var rec = null;
@@ -1374,22 +1357,6 @@ console.log('>sctop '+ele.scrollTop());
                 
             });
         //----------
-        
-        /*
-        var field_ids = 'linkedfrom:'+this.options.storyFields.join(',');
-        var query = {};
-        query[field_ids] = {ids:recset.getIds()};
-        query = [query];
-        
-
-        if( !window.hWin.HEURIST4.util.isempty(that.options.reportOverviewMapFilter)){
-            query = window.hWin.HEURIST4.query.mergeTwoHeuristQueries( query, that.options.reportOverviewMapFilter );    
-        }
-
-//console.log(query);
-//console.log(recset);
-
-            */
     },
 
 
@@ -1488,7 +1455,6 @@ console.log('>sctop '+ele.scrollTop());
                     }else{
                         geojson_data = response;
                     }
-//console.log(geojson_data);
                     if( window.hWin.HEURIST4.util.isGeoJSON(geojson_data, true) ){
                         that._cache_story_geo[recID] = geojson_data;
                     }else{
@@ -1611,7 +1577,6 @@ console.log('>sctop '+ele.scrollTop());
                 //this._animateStoryElement_A(recID);
                 if(recID==0 || Number.parseInt(recID)==this.options.storyRecordID){
                     //zoom for entire story
-                    //console.log('zoom for entire story');
                     
                     if(this._mapping){
                         var mapwidget = this._mapping.app_timemap('getMapping');
@@ -1624,23 +1589,6 @@ console.log('>sctop '+ele.scrollTop());
                 }
             
 
-            /*
-            if(actions.indexOf('fade_in')>=0){
-                var map = this._mapping.app_timemap('getMapping');
-                map.fadeInLayers( [recID] );
-            }
-            var map = this._mapping.app_timemap('getMapping');
-            var layers = map.findLayerByRecID( [recID] );
-            if(layers.length>0){
-                    console.log('Found: '+recID);  
-            }else{
-                console.log('NOT Found: '+recID);
-            } 
-            if(actions.indexOf('fade_in')>=0){
-                  this.fadeInLayerLeaflet(layers, 0, 1, 0.1, 100);     
-            }
-            */     
-            
             }  
         }
     },
@@ -1724,8 +1672,6 @@ console.log('>sctop '+ele.scrollTop());
                             return;
                         }
 
-//console.log(that._cache_story_places[recID]);
-
                         var qq = {ids:that._cache_story_places[recID]['places']};
                         
                         if(that.options.reportElementMapMode=='filtered'){ //additional filter for places 
@@ -1753,7 +1699,6 @@ console.log('>sctop '+ele.scrollTop());
                                 }else{
                                     geojson_data = response;
                                 }
-//console.log(geojson_data);
                                 if( window.hWin.HEURIST4.util.isGeoJSON(geojson_data, true) )
                                 {
                                      
@@ -1795,8 +1740,6 @@ console.log('>sctop '+ele.scrollTop());
         
         var that = this;
         
-//console.log(that._cache_story_places[recID]['geojson']);        
-        
         var mapwidget = that._mapping.app_timemap('getMapping');
         
         if(window.hWin.HEURIST4.util.isnull(this._L)) this._L = mapwidget.getLeaflet();
@@ -1819,7 +1762,6 @@ console.log('>sctop '+ele.scrollTop());
                 dataset_name: 'Story Map',
                 selectable: false,
                 preserveViewport: true });
-//console.log('ADDED '+this._nativelayer_id);                
         //possible sequences
         // gain: begin-visible, trans fade in, end-visible
         // loses: trans-visible, trans fade out
@@ -1828,8 +1770,6 @@ console.log('>sctop '+ele.scrollTop());
         
         // json to describe animation
         // [{scope:begin|trans|end|all, range:0~n, actions:[{ action: duration: , steps:},..]},....] 
-
-//console.log('Animation '+anime);        
 
         /*  examples:     
         var anime = [{scope:'all',action:'hide'},{scope:'all',range:1,action:'fade_in',duration:1000}]; //show in sequence
@@ -1869,7 +1809,7 @@ console.log('>sctop '+ele.scrollTop());
 
                     if(that._terminateAnimation!==false){ 
                         //do not start new animation - waiting for termination of previous animation
-console.log('wait for stopping of previous animation');
+                        // wait for stopping of previous animation 
                         if(that._currentElementID==recID){
                             setTimeout(__startNewAnimation, 500);                        
                         }else{
@@ -1893,8 +1833,6 @@ console.log('wait for stopping of previous animation');
     //
     _animateStoryElement_B_step3: function(recID, aSteps, step_idx, aRanges, range_idx, aActions, action_idx ){        
 
-//console.log(this._currentElementID+'  step_idx='+step_idx+' range_idx='+range_idx+'  action_idx='+action_idx);
-        
         //find ranges of places for animation
         if(window.hWin.HEURIST4.util.isempty(aRanges) || range_idx>=aRanges.length){ 
             //ranges not defined or all ranges are executed - go to new step
@@ -2008,9 +1946,6 @@ console.log('wait for stopping of previous animation');
        
         var action = aActions[action_idx];
                
-//console.log(range_of_places);               
-//console.log('before anime '+layers.length);
-
         // 
         //take list of required actions on story element change
         // ??zoom out - show entire bounds (all places within story element?)
@@ -2080,7 +2015,6 @@ console.log('wait for stopping of previous animation');
         
         promise
         .then(function(res){
-//console.log('after anim range_idx='+range_idx+'  action_idx='+action_idx);
             that._animationResolve = null;
             if(that._terminateAnimation===true || that._terminateAnimation==recID){
                 that._terminateAnimation = false;
@@ -2178,7 +2112,7 @@ console.log('wait for stopping of previous animation');
                 var that = this;
                 setTimeout(function(){
                         if(that._terminateAnimation===true || that._terminateAnimation==recID){
-    console.log('animation terminated actionBounds');                        
+                            //animation terminated actionBounds
                             if($.isFunction(that._animationReject)) that._animationReject();
                         }else{
                             if ($.isFunction(that._animationResolve)) that._animationResolve();
@@ -2242,7 +2176,7 @@ console.log('wait for stopping of previous animation');
                 $.each(layers, function(i, lyr){
                     
                     if(that._terminateAnimation===true || that._terminateAnimation==recID){
-console.log('animation terminated actionFadeIn');                        
+                        //animation terminated actionFadeIn
                         if($.isFunction(that._animationReject)) that._animationReject();
                         return false;
                     }
@@ -2316,7 +2250,7 @@ console.log('animation terminated actionFadeIn');
                 $.each(layers, function(i, lyr){
                     
                     if(that._terminateAnimation===true || that._terminateAnimation==recID){
-console.log('animation terminated actionGradient');                        
+                        //animation terminated actionGradient
                         if($.isFunction(that._animationReject)) that._animationReject();
                         return false;
                     }
@@ -2366,7 +2300,7 @@ console.log('animation terminated actionGradient');
                 }
             
                 if(that._terminateAnimation===true || that._terminateAnimation==recID){
-console.log('animation terminated actionBlink');                        
+                    //animation terminated actionBlink
                     clearInterval(interval);
                     interval = 0;
                     if($.isFunction(that._animationReject)) that._animationReject();
@@ -2391,7 +2325,6 @@ console.log('animation terminated actionBlink');
         
         //restore initial visibility
         if(!is_terminated){
-console.log('restore initial visibility');                        
             $.each(layers, function(i, lyr){
                 if(is_visible[i]){
                     if(lyr._map==null) lyr.addTo( mapwidget.nativemap );                    
@@ -2424,7 +2357,7 @@ console.log('restore initial visibility');
                 });
                 
                 if(that._terminateAnimation===true || that._terminateAnimation==recID){
-console.log('animation terminated actionSetStyle');                        
+                    //animation terminated actionSetStyle
                     if($.isFunction(that._animationReject)) that._animationReject();
                     return false;
                 }else

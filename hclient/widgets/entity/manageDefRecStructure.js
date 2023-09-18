@@ -981,7 +981,6 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
                                 'a': 'delete'
                             };
                             window.hWin.HAPI4.RecordMgr.batch_details(req, function(res){ 
-                                //console.log(res);
                                 if(res.status != window.hWin.ResponseStatus.OK){
                                     window.hWin.HEURIST4.msg.showMsgErr(res);                                
                                 }else{
@@ -1191,7 +1190,6 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
                     if(window.hWin.HEURIST4.util.isRecordSet(res.selection)){
                         var recordset = res.selection;
                         var record = recordset.getFirstRecord();
-                        //console.log(record);                    
                     }
                 }
                 if(res.updatedRstField && res.updatedRstField > 0 && $Db.rst(that.options.rty_ID, res.updatedRstField)){ // Update tree node's label
@@ -2373,7 +2371,6 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
         var that = this;
 
         if(window.hWin.HAPI4.is_callserver_in_progress()) {
-            //console.log('prevent repeatative call')
             return;   
         }
 
@@ -2535,8 +2532,6 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
         }*/
 
 //2. update $Db
-//console.log($Db.rst(this.options.rty_ID, recID));
-
         //3. refresh treeview
         var tree = this._treeview.fancytree("getTree");
         if(tree){
@@ -2706,8 +2701,6 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
     //
     //
     _afterDeleteEvenHandler: function( recID ){
-        
-console.log('_afterDeleteEvenHandler');
         
         var that = this;
         if(recID.indexOf(this.options.rty_ID+'.')===0){
@@ -3052,7 +3045,7 @@ console.log('_afterDeleteEvenHandler');
                             $dlg.dialog('close'); 
                         }
                     };
-                }else{ // error console.log();
+                }else{ 
                     return;
                 }
 

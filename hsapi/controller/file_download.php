@@ -84,12 +84,12 @@ if(!$error){
         $size = @$_REQUEST['size'];
         
         if(is_numeric($fileid)){
-            error_log('Obfuscated id is allowed only. Query: '.@$_SERVER['QUERY_STRING']);
+            //Obfuscated id is allowed only
             exit;
         }
 
         if(!preg_match('/^[a-z0-9]+$/', $fileid)){ //validatate obfuscation id
-            error_log('Obfuscated id is allowed only. Query: '.@$_SERVER['QUERY_STRING']);
+            //Obfuscated id is allowed only
             exit;
         }
         
@@ -207,8 +207,6 @@ if(!$error){
                     }
                 }
                 else if($external_url){
-//DEBUG error_log('External '.$external_url);
-
                     if(@$_REQUEST['mode']=='url'){
            
                         //if it does not start with http - this is relative path             
@@ -238,15 +236,13 @@ if(!$error){
                     
                     
                 }else{
-//DEBUG
-                    error_log('File not found '.print_r($filepath,true));
+                    //File not found
                     $placeholder = '../../hclient/assets/200x200-missed2.png';
                     header('Location: '.$placeholder);
                 }
             }
         }else{
-//DEBUG
-            error_log('Filedata not found '.$fileid);
+            //Filedata not found
             $placeholder = '../../hclient/assets/200x200-missed.png';
             header('Location: '.$placeholder);
         }

@@ -234,7 +234,6 @@ function ReportScheduleEditor() {
             if( !window.hWin.HEURIST4.util.isnull(el) && fname!='rps_ID' ){
                 if(_recID<0 || (el.value!==String(_entity[i]) && !(el.value==="" && _entity[i]===null)))
                 {
-                    // DEBUG alert(el.value+" "+String(_entity[i]));
                     _updatedFields.push(fname);
                     _updatedDetails.push(el.value);
                 }
@@ -334,9 +333,6 @@ function ReportScheduleEditor() {
             for(val in values) {
                 oDataToServer.report.defs[_recID].push(values[val]);
             }
-
-//DEBUG alert("Stringified changes: " + str);
-
             // 3. sends data to server
             var baseurl = window.hWin.HAPI4.baseURL + "export/publish/loadReports.php";
             var callback = _updateResult;

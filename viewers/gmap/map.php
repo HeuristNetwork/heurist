@@ -138,7 +138,6 @@ $system->defineConstants();
             togglerContent_closed:  '<div class="ui-icon"></div>',
             onresize_end: function(){
                 //global 
-//console.log('LAYOUT resize end');
                 if(mapping) mapping.onWinResize();
             }
             
@@ -155,7 +154,6 @@ $system->defineConstants();
         layout_opts.south__spacing_closed = 12;
         layout_opts.south__onresize_end = function() {
             if(mapping) mapping.setTimelineMinheight();
-            //console.log('timeline resize end');
             _adjustLegendHeight();
         };
 
@@ -224,8 +222,6 @@ $system->defineConstants();
                 window.hWin.HAPI4.RecordMgr.search({q: q, rules:rules, w: "a", detail:(rules?'detail':'timemap'), l:3000},
                     function(response){
                         if(response.status == window.hWin.ResponseStatus.OK){
-                            //console.log("onMapInit response");
-                            //console.log(response);
 
                             // Show info on map    @todo reimplement as map init callback IMPORTANT!!!!
                             var recset = new hRecordSet(response.data);
@@ -263,7 +259,7 @@ $system->defineConstants();
 
         //init popup for timeline  ART14072015
         $( document ).bubble({
-            items: ".timeline-event-icon" //deprecated since
+            items: ".timeline-event-icon"
         });
         $( document ).bubble({
             items: ".vis-item,.vis-item-overflow"
@@ -453,8 +449,6 @@ $system->defineConstants();
             }
             */
             
-//console.log('legend h='+(mh-nt-ch)+'  maph='+mh+'  contetn h='+ch+' bottom '+nt);            
-                         
             legend.css('bottom', nt);
             
             if(mh-nt-ch<50){
@@ -462,9 +456,6 @@ $system->defineConstants();
             }
             var top = mh-nt-ch;
             legend.css('top',top).height(ch);
-            
-//console.log('legend h='+ch+' top '+top+' bottom '+nt);            
-            
         },500);
     }
     

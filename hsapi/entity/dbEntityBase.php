@@ -891,7 +891,7 @@ class DbEntityBase
         }
         
         if(!$isSuccess){
-            error_log('Can\'t copy file '.$tempfile.' as '.$entity_name.' image');
+            //Can't copy file $tempfile as  $entity_name  image
         }
     }
     

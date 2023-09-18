@@ -169,7 +169,7 @@ function hLayoutMgr(){
                 if(widget_name=='heurist_StoryMap'){
                     if(!layout.options.map_widget_id){
                         var ele = layoutMgr.layoutContentFindWidget(_main_layout_cfg, 'heurist_Map');
-                        //if(ele) console.log(ele.options); //ele.options.widget_id ele.dom_id
+
                         if(ele && ele.dom_id){                        
                             window.hWin.HEURIST4.msg.showMsgDlg('For full fnctionality Story map has to be linked with Map/timeline element. '
                             +' Connect it to map widget "'+ele.dom_id+'" ?', 
@@ -222,9 +222,7 @@ function hLayoutMgr(){
                 //check that it is unique on this page
                 cnt++;
                 suffix = '_' + cnt;
-                if(cnt>1){
-                    console.log(layout.dom_id);
-                }
+                
             }while (body.find('#'+layout.dom_id).length>0);
             
         }
@@ -804,7 +802,6 @@ function hLayoutMgr(){
       
              var tag = ele[0].nodeName;
              var s = '<' + tag + '>'+ele.html()+'</' + tag + '>';
-//console.log(s);
              
              child = {name:"Content "+lvl+'.'+idx, 
                                 type:"text", 
@@ -846,8 +843,6 @@ function hLayoutMgr(){
                  
                  //var css = window.hWin.HEURIST4.util.isJSON(ele.attr('style'));
                  if(!$.isEmptyObject(css)) child['css'] = css;
-//console.log( ele.attr('style') );                 
-//console.log( css );                 
              }
              res.push(child);
          }
@@ -884,7 +879,7 @@ function hLayoutMgr(){
                           _prepareTemplateBlog(layout, callback);
                           
                     }).fail(function( jqxhr, settings, exception ) {
-                        console.log( 'Error in template script: '+exception );
+                        console.error( 'Error in template script: '+exception );
                     });
                     
                     return true;    

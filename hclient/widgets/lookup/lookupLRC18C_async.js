@@ -214,8 +214,6 @@ _rendererResultList: function (recordset, record) {
         work_xml_record = "";
         valid_records = false;
 
-        console.log("In XML Parse function and the Edition XML is: ")
-        console.log(editionXML)
         records = editionXML.getElementsByTagName('records')[0].children
         resultCount = editionXML.getElementsByTagName('resultCount')[0].innerText
         ids_n_title['resultCount'] = resultCount;
@@ -286,11 +284,6 @@ _rendererResultList: function (recordset, record) {
             }
         }
 
-        // To remove after user testing. Or leave it as it for debugging
-        console.log(estc_edition_dict)
-        console.log(author_dict)
-        console.log(place_dict)
-        console.log(work_dict)
         return {
             "editionDict": estc_edition_dict,
             "authorDict": author_dict,
@@ -890,14 +883,11 @@ _rendererResultList: function (recordset, record) {
         createAuthor = false;
         query_string = 'ids%3A' + estc_edition_id
         urlToGetEditionDetails = that._getQueryURL(query_string, "ESTC")
-        console.log("URL TO GET EDITION DETAILS")
-        console.log(urlToGetEditionDetails)
         return $.ajax({
             url: urlToGetEditionDetails,
             async: false,
             dataType: 'text',
             error: function (error) {
-                console.log(error)
                 window.hWin.HEURIST4.msg.showMsgErr(error);
             },
             success: function (editionXML) {
@@ -919,8 +909,6 @@ _rendererResultList: function (recordset, record) {
                         full_name = author_dict['253']
                         query_string = 't:10 f:1086: "' + full_name + '"';
                         urlToCheckAuthorinLibraries = that._getQueryURL(query_string, "libraries")
-                        console.log("URL to check author in libraries")
-                        console.log(urlToCheckAuthorinLibraries);
                         getEditionDetails = true;
 
                     }
@@ -958,8 +946,6 @@ _rendererResultList: function (recordset, record) {
                         }
                     }
                 } catch (err) {
-                    console.log(err)
-                    console.log("Unable to export XML from Heurist: " + urlToGetEditionDetails)
                     that._showEditionFetchFailMsg(urlToGetEditionDetails)
                     getEditionDetails = false;
                 }
@@ -1066,10 +1052,6 @@ _rendererResultList: function (recordset, record) {
         }
 
 
-        console.log("Query String is")
-        console.log(query_string);
-
-
         window.hWin.HEURIST4.msg.bringCoverallToFront(this._as_dialog.parent());
 
         var query_request = {db: 'ESTC_Helsinki_Bibliographic_Metadata', q: query_string};
@@ -1106,7 +1088,7 @@ function postAddingTerm(type, term_id, id, rec_data, that) {
         window.hWin.HAPI4.RecordMgr.saveRecord(rec_data,
             function (response) {
                 if (response.status == window.hWin.ResponseStatus.OK) {
-                    console.log("Prefix update ")
+                    //Prefix update
                 }
             });
     }
@@ -1116,9 +1098,9 @@ function postAddingTerm(type, term_id, id, rec_data, that) {
         window.hWin.HAPI4.RecordMgr.saveRecord(rec_data,
             function (response) {
                 if (response.status == window.hWin.ResponseStatus.OK) {
-                    console.log("Suffix update ")
+                    //Suffix update
                 } else {
-                    console.log("Unable to create suffix term");
+                    //Unable to create suffix term
                 }
             });
     }
@@ -1128,12 +1110,11 @@ function postAddingTerm(type, term_id, id, rec_data, that) {
         window.hWin.HAPI4.RecordMgr.saveRecord(rec_data,
             function (response) {
                 if (response.status == window.hWin.ResponseStatus.OK) {
-                    console.log("Agent Type update ")
+                    //Agent Type update
                 }
             });
     }
     if (type == "religion") {
-        console.log("Creating new religion")
         createReligionRecord(term_id, id)
     }
     if (type == "bookFormat") {
@@ -1143,8 +1124,7 @@ function postAddingTerm(type, term_id, id, rec_data, that) {
             function (response) {
                 if (response.status == window.hWin.ResponseStatus.OK) {
                 } else {
-                    console.log("Unable to add Bookformat while importing edition data.")
-                    console.log(response)
+                    //Unable to add Bookformat while importing edition data
                 }
             });
     }
@@ -1168,24 +1148,23 @@ function createReligionRecord(religion, author_id) {
 
     if(religion_check != null || religion_check!=undefined){
         setTimeout(function () {
-            console.log("Waiting 2 second before trying to create religion record again..")
+            //Waiting 2 second before trying to create religion record again..
         }, 2000);
     }
     if (religion != "" && religion != null) {
         window.hWin.HAPI4.RecordMgr.saveRecord(religion_data,
             function (response) {
                 if (response.status == window.hWin.ResponseStatus.OK) {
-                    console.log("Religion record was created")
+                    //Religion record was created
                 } else {
                     setTimeout(function () {
-                        console.log("Waiting 2 second before trying to create religion record again..")
+                        //Waiting 2 second before trying to create religion record again..
                     }, 2000);
-                    console.log("Something went wrong while creating the religion record")
+                    //Something went wrong while creating the religion record
                     window.hWin.HAPI4.RecordMgr.saveRecord(religion_data,
                         function (response) {
-                            console.log("Created religion record for the Author.")
+                            //Created religion record for the Author
                         });
-                    console.log(response)
                 }
             });
     }

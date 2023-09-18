@@ -261,8 +261,6 @@ $.widget( "heurist.manageUsrReminders", $.heurist.manageEntity, {
         
         
         function __onChange2( ){
-//console.log($(this.element).editing_input('option','dtID'));
-           
            var res = $(this.element).editing_input('getValues')
            if(res[0]!=''){
                var dtID = $(this.element).editing_input('option','dtID');

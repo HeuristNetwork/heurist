@@ -99,7 +99,6 @@ $.widget( "heurist.recordListExt", {
             {
                 if(!window.hWin.HAPI4.has_access()){ //logout
                     that.options.recordset = null;
-that._dout('credentials');                    
                     that._refresh();
                 }
             }else if(e.type == window.hWin.HAPI4.Event.ON_REC_SEARCH_FINISH){ 
@@ -108,7 +107,6 @@ that._dout('credentials');
                 
                 that.options.recordset = data.recordset; //hRecordSet
                 
-that._dout('search finished');                
                 that._refresh();
                 that.loadanimation(false);
 
@@ -132,7 +130,6 @@ that._dout('search finished');
                         that.options.selection = sel;
                         //that.option("selection", sel);
                     }
-that._dout('selected');                    
 
                     var smarty_template = window.hWin.HAPI4.get_prefs_def('main_recview', 'default'); // default = standard record viewer
                     if(window.hWin.HEURIST4.util.isArrayNotEmpty(that.options.selection) && that.options['url'] 
@@ -185,7 +182,6 @@ that._dout('selected');
 
         this.element.on("myOnShowEvent", function(event){
             if( event.target.id == that.element.attr('id')){
-that._dout('myOnShowEvent');                
                 that._refresh();
             }
         });
@@ -197,7 +193,6 @@ that._dout('myOnShowEvent');
         }
         
         if(this.options.search_initial){
-that._dout('>>'+this.options.search_initial);            
             this.doSearch( this.options.search_initial );
             this.options.search_initial = null;
         }        
@@ -229,8 +224,6 @@ that._dout('>>'+this.options.search_initial);
         this._current_url = newurl;
         this.loadanimation(true);
         
-this._dout('load '+this.options.is_frame_based+'  '+newurl);
-        
         if(this.options.is_frame_based){
             this.dosframe.attr('src', newurl);
         }else{
@@ -245,7 +238,6 @@ this._dout('load '+this.options.is_frame_based+'  '+newurl);
     onLoadComplete: function(){
         this.loadanimation(false);
         if(!this.options.reload_for_recordset && this.options.is_frame_based && !this.options.is_single_selection){
-this._dout('onLoadComplete refresh again');                
               this._refresh();
         }
         
@@ -342,7 +334,6 @@ this._dout('onLoadComplete refresh again');
         if(request.q!=''){
             this.loadanimation(true);
         }
-this._dout('update dataset '+request.q);        
         this._refresh();
     },
     
@@ -371,29 +362,6 @@ this._dout('update dataset '+request.q);
         }
     },
 
-    //debug console output    
-    _dout: function(msg){
-        /*
-        if(this.options.url  && this.options.url.indexOf('visual')>0){ //renderRecordData smarty
-            console.log(msg);
-        }
-        */
-    },
-    
-    /*
-    _setOption: function( key, value ) {
-    if(key=='url'){
-    value = window.hWin.HAPI4.baseURL + value;
-    }else if (key=='title'){
-    var id = this.element.attr('id');
-    $(".header"+id).html(value);
-    $('a[href="#'+id+'"]').html(value);
-    }
-
-    this._super( key, value );
-    this._refresh();
-    },*/
-
     /* private function */
     _refresh: function(){
 
@@ -407,8 +375,6 @@ this._dout('update dataset '+request.q);
             this.placeholder_ele.hide();
             //this.div_content.css('visibility','visibile');
         }
-
-this._dout('refresh vis='+this.element.is(':visible'));            
 
         //refesh if element is visible only - otherwise it costs much resources
         if( (!this.element.is(':visible') && !this._is_publication) || window.hWin.HEURIST4.util.isempty(this.options.url)){

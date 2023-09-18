@@ -83,8 +83,8 @@ $.widget( "heurist.recordAction", {
             this._currentRecordset = window.hWin.HAPI4.currentRecordset;
             this._currentRecordsetSelIds = window.hWin.HAPI4.currentRecordsetSelection;
         }else{
-            //debug
-            this._currentRecordset = new hRecordSet({count: "1",offset: 0,reccount: 1,records: [1069], rectypes:[10]});
+            //Testing
+            this._currentRecordset = new hRecordSet({count: "0",offset: 0,reccount: 0,records: [], rectypes:[]});
             this._currentRecordsetSelIds = null;
         }
         
@@ -461,7 +461,7 @@ $.widget( "heurist.recordAction", {
                 window.hWin.HEURIST4.util.sendRequest(progress_url, request, null, function(response){
                     that._hideProgress();
                     if(response && response.status==window.hWin.ResponseStatus.UNKNOWN_ERROR){
-                        //console.log(response);                   
+                        console.error(response);                   
                     }
                 });
             }});
@@ -487,11 +487,8 @@ $.widget( "heurist.recordAction", {
             
             window.hWin.HEURIST4.util.sendRequest(progress_url, request, null, function(response){
                
-//console.log(response);               
-                
                 if(response && response.status==window.hWin.ResponseStatus.UNKNOWN_ERROR){
                     that._hideProgress();
-                    //console.log(response+'  '+session_id);                   
                 }else{
                     //it may return terminate,done,
                     var resp = response?response.split(','):[];

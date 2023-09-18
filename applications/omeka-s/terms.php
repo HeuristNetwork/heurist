@@ -158,8 +158,6 @@ if ($res){
    break; 
 }
 
-//debug  break;
-    
 }//for config
 
 //------------------------

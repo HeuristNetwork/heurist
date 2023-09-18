@@ -54,10 +54,8 @@ window.hWin.HEURIST4.geo = {
         if (typeof(mdata) === "string" && !window.hWin.HEURIST4.util.isempty(mdata)){
             try{
                 mdata = $.parseJSON(mdata);
-                //mdata = JSON.parse( mdata );
             }catch(e){
                 mdata = null;
-                console.log('Not well formed JSON provided. Property names be quoted with double-quote characters');
             }
         }
         if(window.hWin.HEURIST4.util.isnull(mdata) || $.isEmptyObject(mdata)){

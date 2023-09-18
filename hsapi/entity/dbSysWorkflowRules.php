@@ -101,15 +101,14 @@ class DbSysWorkflowRules extends DbEntityBase
         $query = 'SELECT SQL_CALC_FOUND_ROWS  '.implode(',', $this->data['details'])
         .' FROM '.implode(',', $from_table);
 
-         if(count($where)>0){
+        if(count($where)>0){
             $query = $query.' WHERE '.implode(' AND ',$where);
-         }
-         if(count($order)>0){
+        }
+        if(count($order)>0){
             $query = $query.' ORDER BY '.implode(',',$order);
-         }
+        }
          
-         $query = $query.$this->searchMgr->getLimit().$this->searchMgr->getOffset();
-//error_log($query);
+        $query = $query.$this->searchMgr->getLimit().$this->searchMgr->getOffset();
         $calculatedFields = null;
         
         $result = $this->searchMgr->execute($query, $is_ids_only, $this->config['entityName'], $calculatedFields);

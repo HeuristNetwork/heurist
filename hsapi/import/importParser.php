@@ -376,7 +376,6 @@ public static function parseAndValidate($encoded_filename, $original_filename, $
                     }else{
 
                         if( !in_array($k, $multivals) && strpos($field, '|')!==false ){
-                            //DEBUG error_log('Line '.$line_no.'  '.$field.'  '.strpos($field, '|').'  field '.$k.' is multivalue');
                             array_push($multivals, $k);
                         }
 
@@ -569,7 +568,6 @@ public static function parseAndValidate($encoded_filename, $original_filename, $
 
                         //Identify repeating value fields and flag - will not be used as key fields
                         if( !in_array($k, $multivals) && strpos($field, '|')!==false ){
-    //DEBUG error_log('Line '.$line_no.'  '.$field.'  '.strpos($field, '|').'  field '.$k.' is multivalue');
                             array_push($multivals, $k);
                         }
                         

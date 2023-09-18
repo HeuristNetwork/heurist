@@ -53,7 +53,6 @@
     *       s - sort order
     *
     *       OUTPUT parameters
-    *       vo (=h3) - output format in vsn 3 for backward capability (for detail=ids only)
     *       needall (=1) - by default it returns only first 1000, to return all set it to 1,
     *                      it is set to 1 for server-side rules searches
     *       publiconly (=1) - ignore current user and returns only public records

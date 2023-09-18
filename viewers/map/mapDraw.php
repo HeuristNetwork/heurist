@@ -208,7 +208,6 @@ if(true || $_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0
 
                         $dlg.find('#geodata_textarea').val(geodata);
 
-console.log(geodata);                        
                         mapping.mapping( 'drawLoadGeometry', geodata);
                         $dlg.dialog( "close" );
                     };
@@ -227,7 +226,6 @@ console.log(geodata);
                         
                        var is_checked = $(e.target).is(':checked');
                        var el_name = $(e.target).attr('id');
-//console.log(el_name+'  '+is_checked);
                        var el_text = $(e.target).parents('#get-set-coordinates').find('#geodata_textarea');
 
                        if(el_name=='get-coord-wkt' && is_checked){
@@ -527,11 +525,7 @@ console.log(geodata);
                 var res = mapping.mapping( 'drawGetJson',  e);
                 if(window.hWin.HEURIST4.util.isGeoJSON(res)){
                     $('#coords1').text(JSON.stringify(res));
-                    
                     refreshImageOverlay( false ); //repos
-
-//console.log(JSON.stringify(res));     
-                    
                 }else{
                     $('#coords1').text('');
                 }

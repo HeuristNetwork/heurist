@@ -355,9 +355,6 @@ private static function findRecordIds($imp_session, $params){
                             $is_insert = true;
                         }else if(array_key_exists($keyvalue, $tmp_idx_update)) {
 
-//error_log($keyvalue);                            
-//error_log('REC_ID='.$tmp_idx_update[$keyvalue]);
-//error_log( $imp_session['validation']['recs_update'][$tmp_idx_update[$keyvalue]][0] );
                             // make first field (id)  - csv 
                             $imp_session['validation']['recs_update'][$tmp_idx_update[$keyvalue]][0] .= (','.$imp_id);
                                         
@@ -1721,13 +1718,6 @@ private static function validateEnumerations($query, $imp_session, $fields_check
                         //strip accents on both sides
                         $term_id = VerifyValue::isValidTermLabel($dt_def[$idx_term_tree], $dt_def[$idx_term_nosel], $r_value2, $dt_id, true );
                         
-                        
-                        /*if($cc<5 && !$term_id){
-                            //error_log(print_r($row,true));
-                            error_log($r_value.'   ['.$r_value2.']  >'.$term_id.'<  '.$dt_def[$idx_term_tree].'  idx='.$field_idx);
-                            $cc++;
-                        }*/
-                     
                         if(!$term_id){
                             $term_id = VerifyValue::isValidTermCode($dt_def[$idx_term_tree], $dt_def[$idx_term_nosel], $r_value2, $dt_id );
                         }
@@ -2076,7 +2066,7 @@ private static function validateGeoField($wkt, $rec_id, $table, $field){
                 }
 
                 $update_table = "UPDATE $table SET ".$field." = '" . $constructed_geo . "' WHERE imp_ID = ".intval($rec_id);
-                $update_table_res = $mysqli->query($update_table); error_log($update_table);
+                $update_table_res = $mysqli->query($update_table);
 
                 if($update_table_res){
                     $res = $constructed_geo;
@@ -2276,12 +2266,8 @@ private static function doInsertUpdateRecord($recordId, $import_table, $recordTy
         }
     }
     
-    //DEBUG 
     $out = recordSave(self::$system, $record, false, false, 0, $record_count);  //see db_records.php
-    //$out = array('status'=>HEURIST_OK, 'data'=>$recordId);
-    //$out = array('status'=>HEURIST_ERROR, 'message'=>'Fake error message');
-    
-    //array("status"=>HEURIST_OK, "data"=> $recID, 'rec_Title'=>$newTitle);
+
     $new_recordID = null;
 
     if ( @$out['status'] != HEURIST_OK ) {
@@ -2313,8 +2299,6 @@ private static function doInsertUpdateRecord($recordId, $import_table, $recordTy
             }
         }else{
             if(self::$rep_skipped<100){        
-//error_log( 'IMPORT CSV: '.($recordId>0?('rec#'.$recordId):'new record').$out["message"].'  '.print_r(@$out["sysmsg"], true) );
-
                 $line_id = @$details['imp_id'][0];
 
                 self::$rep_skipped_details[] = ($recordId>0?('record#'.$recordId):'new record')
@@ -2430,8 +2414,6 @@ private static function getImportValue($rec_id, $import_table){
 *         mapping
 */
 public static function performImport($params, $mode_output){
-    
-    $_time_debug = time();
     
     self::initialize();    
     
@@ -3122,11 +3104,9 @@ public static function performImport($params, $mode_output){
                         //if insert and require field is not defined - skip it
                         if( !($recordId>0) &&
                             @$recordTypeStructure[$field_type][$idx_reqtype] == "required")
-                            //!@$details["t:".$field_type][0])
                         {
-                            //error_log($field_type.' = '.print_r(@$details["t:".$field_type],true));
-                                                        //$is_valid_newrecord = false;
-                                                        //break;
+                            //$is_valid_newrecord = false;
+                            //break;
                         }
 
                     }   //for values
@@ -3178,13 +3158,6 @@ public static function performImport($params, $mode_output){
                 }
             }//foreach multivalue index
 
-            /*
-            if(self::$rep_processed>2000){ //DEBUG
-                break;
-            }
-            */
-            
-            
         }//main  all recs in import table
         $res->close();
 
@@ -3235,10 +3208,6 @@ public static function performImport($params, $mode_output){
             }
             $imp_session['sequence'][$currentSeqIndex]['mapping_keys_values'] = $new_keys_values;
         }
-        
-//DEBUG        
-//error_log( self::$rep_processed.'   '.(time() - $_time_debug) );
-        
         
         $import_report = array(                
             'processed'=>self::$rep_processed,

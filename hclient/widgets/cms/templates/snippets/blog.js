@@ -19,10 +19,6 @@ function _prepareTemplateBlog(new_element_json, callback){
             if(response.status == window.hWin.ResponseStatus.OK){
 
                 var svsID = response.data;
-            
-            
-//console.log(svsID);
-                
                 //replace search realm
                 var realm_id = 'sr'+window.hWin.HEURIST4.util.random();
 

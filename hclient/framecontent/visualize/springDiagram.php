@@ -80,13 +80,10 @@ function onPageInit(success){
             window.hWin.HAPI4.RecordMgr.search({q: q, rules:rules, w: "a", detail:'detail', l:MAXITEMS},
                 function(response){
                     if(response.status == window.hWin.ResponseStatus.OK){
-                        //console.log("onNetInit response");
-                        //console.log(response);
 
                         var recordset = new hRecordSet(response.data);
                           
                         var records_ids = recordset.getIds(MAXITEMS);
-                //console.log('was '+recordset.getIds().length+'  send for '+records_ids.length);        
                         if(records_ids.length>0){
                             
                             var callback = function(response)
@@ -94,8 +91,6 @@ function onPageInit(success){
                                 var resdata = null;
                                 if(response.status == window.hWin.ResponseStatus.OK){
                                     // Store relationships
-                //console.log("Successfully retrieved relationship data!", response.data);
-                                    
                                     // Parse response to spring diagram format
                                     var data = __parseData(records_ids, response.data);
                                     
@@ -227,9 +222,6 @@ function onPageInit(success){
         //
         function showData(data, selectedRecordsIds, onSelectEvent, onRefreshData) {
                // Processing...
-//if(data && data.nodes && data.links)
-    //console.log("showData called inside springDiagram nodes:"+data.nodes.length+'  edges:'+data.links.length);
-   
                 if(data && data.nodes){
                     $("#d3svg").html('<text x="25" y="25" fill="black">Buiding graph ...</text>');
                 }else{
@@ -239,7 +231,6 @@ function onPageInit(success){
 
                 // Custom data parsing
                 function getData(data) {
-                    //console.log("Custom getData() call");
                     return data;
                 }
 

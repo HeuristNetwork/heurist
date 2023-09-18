@@ -33,8 +33,6 @@
 
     $params = $_REQUEST;
     
-    $is_debug = (@$params['dbg']==1);
-    
     if(!isset($system) || $system==null){
     
         $system = new System();

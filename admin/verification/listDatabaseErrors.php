@@ -564,7 +564,6 @@ if($active_all || in_array('field_type', $active)) {
                     var request = {db:'<?=HEURIST_DBNAME?>', data:dt};
 
                     window.hWin.HEURIST4.util.sendRequest(baseurl, request, null, function(response){
-                        //console.log('result '+context);
                         if(response.status == window.hWin.ResponseStatus.OK)
                         {
                             window.hWin.HEURIST4.msg.showMsgDlg(response['result'], null, 'Auto repair');
@@ -1643,12 +1642,6 @@ if($active_all || in_array('expected_terms', $active)) {
                     
                 $is_finished = false;
                 //verify value
-                /*DEBUG                
-                $res = VerifyValue::getAllowedTerms($row['dty_JsonTermIDTree'], null, $row['dty_ID']);
-                print ("<br> >>>>".$row['dtl_Value']);                
-                print ('<br>'.implode(',',$res).'<br>');                
-                print ('<br>'.in_array($row['dtl_Value'], $res));                
-                */
                 if(  !in_array($row['dtl_ID'], $dtl_ids) &&  //already non existant
                 trim($row['dtl_Value'])!="" 
     && !VerifyValue::isValidTerm($row['dty_JsonTermIDTree'],null, $row['dtl_Value'], $row['dty_ID'] )) 

@@ -1237,7 +1237,7 @@ $.widget( "heurist.mapping", {
                         ts = tdata.when[k];
                         
                         if(!ts[0]){
-console.log('Start date not defined ',tdata.when,tdata.rec_ID);                            
+                            //Start date not defined for tdata.when,tdata.rec_ID                            
                             
                         }else{
                             
@@ -1825,8 +1825,6 @@ console.log('Start date not defined ',tdata.when,tdata.rec_ID);
 
                 // a.layer is actually a cluster
                 this.all_clusters[layer_id].on('clusterclick', function (a) {
-                    //console.log(a);
-                    //var clusterZoom = getBoundsZoom(a.layer.getBounds());
                     
                     var maxZoom = Math.min(that.nativemap.getMaxZoom(),that.markerClusterMaxZoom);
                     
@@ -2545,8 +2543,6 @@ console.log('Start date not defined ',tdata.when,tdata.rec_ID);
             def_style.stroke = true;
             
            
-//console.log(def_style);            
-            
         }
         else{
         }
@@ -2707,7 +2703,7 @@ console.log('Start date not defined ',tdata.when,tdata.rec_ID);
     },
     
     //
-    // NOT USED
+    // 
     //    
     findLayerByRecID: function(recIDs){
         
@@ -2734,21 +2730,6 @@ console.log('Start date not defined ',tdata.when,tdata.rec_ID);
             return true;
         }
         
-        /*
-        __eachLayer(that.nativemap, function(layer){
-            
-            if(layer instanceof L.LayerGroup)   //geojson only
-            {
-                var r = __eachLayer(layer, __validateLayer);
-                //console.log('>>');
-                //if(top_layer.feature) console.log('>'+top_layer.feature.properties.rec_ID);
-            } else{
-                return __validateLayer(layer);   
-            }
-            
-        });
-        */
-        
         that.nativemap.eachLayer(function(top_layer){    
             if(top_layer instanceof L.LayerGroup)   //geojson only
             {
@@ -2760,9 +2741,6 @@ console.log('Start date not defined ',tdata.when,tdata.rec_ID);
                         //if(recIDs.length==1) return false;
                     }
                 });
-                //if(r===false) return false;
-                //console.log('>>');
-                //if(top_layer.feature) console.log('>'+top_layer.feature.properties.rec_ID);
             }    
         });
         
@@ -2771,20 +2749,11 @@ console.log('Start date not defined ',tdata.when,tdata.rec_ID);
     },
 
     //
-    // NOT USED
+    // Testing for fadeIn and fadeOut
     //
     fadeInLayers: function( _selection){
         var layers = this.findLayerByRecID( _selection );
 
-        /*
-        $.each(layers,function(i, lyr){
-            if(lyr instanceof L.Marker){
-                var icon = lyr._icon;
-                $(icon).fadeIn(4000);
-                //layer.valueOf()._icon
-            }});
-        */    
-        
         var opacity = 0, finalOpacity=1, opacityStep=0.1, delay=200;
         var timer = setTimeout(function changeOpacity() {
             if (opacity < finalOpacity) {
@@ -3802,8 +3771,6 @@ console.log('Start date not defined ',tdata.when,tdata.rec_ID);
                 if(this.is_timeline_disabled){
                     
                     //keep current timeline 
-//console.log($(this.options.element_layout).layout().panes.south.height());
-                    
                     //hide resize control
                     layout_opts.south__size = 0;
                     layout_opts.south__spacing_open = 0;

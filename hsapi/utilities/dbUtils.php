@@ -511,14 +511,11 @@ class DbUtils {
     // 5. Append row to DELETED_DATABASES_LOG.csv in the Heurist filestore. 
     //
     public static function databaseDrop( $verbose=false, $database_name=null, $createArchive=false ){
-        
-//error_log('databaseDrop '.$database_name.'   '.$createArchive);
-//error_log(debug_print_backtrace());
 
         self::initialize();
 
         if(self::$db_del_in_progress!==null){
-            error_log('DELETION ALREADY IN PROGRESS '.self::$db_del_in_progress);
+            //DELETION ALREADY IN PROGRESS
             return false;
         }
         
@@ -652,9 +649,7 @@ class DbUtils {
                 //add to log file
                 $filename = HEURIST_FILESTORE_ROOT.'DELETED_DATABASES_LOG.csv';
                 $fp = fopen($filename, 'a'); //open for add
-                if($fp===false){
-                    error_log( 'Cannot open file '.$filename );    
-                }else{
+                if($fp){
                     $row = array($database_name,  
                         $owner_user['ugr_LastName'],
                         $owner_user['ugr_FirstName'],

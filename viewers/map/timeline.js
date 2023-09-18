@@ -273,7 +273,6 @@ $.widget( "heurist.timeline", {
                             && that.visible_fields[item.data.group] 
                             && that.visible_fields[item.data.group].length>0)
                         {
-//console.log(that.visible_fields[item.data.group], item.data.dtyID);                            
                             res = (that.visible_fields[item.data.group].indexOf(item.data.dtyID)>=0);
                         }
                         return res;
@@ -289,8 +288,7 @@ $.widget( "heurist.timeline", {
             try{
                 this.vis_timeline.setItems(items);    
             }catch(err){
-                console.log(items);
-                console.log(err);
+                console.error(err);
             }
 
             //apply label settings
@@ -307,7 +305,6 @@ $.widget( "heurist.timeline", {
             
             //add listener
             this._on($(this.timeline_ele).find('input[type="checkbox"][data-dty_id]'),{click:function(event){
-                //console.log($(event.target).attr('data-dty_id'));
                 var group_id = $(event.target).attr('data-layer_id');
                 if(!this.visible_fields) this.visible_fields = {};
                 if(!this.visible_fields[group_id]) this.visible_fields[group_id] = [];
@@ -483,8 +480,6 @@ $.widget( "heurist.timeline", {
         
             if (!this.isApplyTimelineFilter || !this.vis_timeline.itemsData || !params) return;
             
-            //console.log(params);
-            //console.log(new Date(params.start_stamp) + '  ' + new Date(params.end_stamp))
             //loop by timeline datasets
             
             //if fit range
@@ -542,8 +537,6 @@ $.widget( "heurist.timeline", {
                 start: range.start.valueOf() - interval * percentage,
                 end:   range.end.valueOf()   + interval * percentage
             });
-
-    //console.log('set2: '+(new Date(range.start.valueOf() - interval * percentage))+' '+(new Date(range.end.valueOf()   + interval * percentage)));
         }
 
         function __timelineZoomToSelection(){

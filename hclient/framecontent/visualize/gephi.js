@@ -38,8 +38,6 @@ function getDatabaseName() {
 function getGephiFormat() {
     // Get data
     var data = settings.getData.call(this, settings.data);
-//console.log("GEPHI DATA");
-//console.log(data);
                                                              
     // META
     var gexf = '<?xml version="1.0" encoding="UTF-8"?>';

@@ -1953,8 +1953,6 @@ function CrosstabsAnalysis(_query, _query_domain) {
                     needServerRequest = true;
                     _doRetrieve();
                 }
-            }else {
-                console.log( _currentRecordset.resultCount + ' click update to retrieve values ' );
             }
         }
     }
@@ -1987,29 +1985,7 @@ function CrosstabsAnalysis(_query, _query_domain) {
                             +'Please check the set of records you are analysing ');
                 $('#cbRows').focus();
                 return;
-            }/*else{
-
-                // Check if row has data related to the column
-                var supressBlankRow = $('#rbShowBlanks').is(':checked');
-                var isRowEmpty = true;
-
-                if(!supressBlankRow && !window.hWin.HEURIST4.util.isempty($('#cbColumns').val())){
-                    for(var i = 0; i < fields3.row.intervals.length; i++){
-                        if(fields3.row.intervals[i].isempty == false){ console.log('if', fields3.row.intervals[i], fields3.row.intervals[i].output, fields3.row.intervals[i].isempty);
-                            isRowEmpty = false;
-                            break;
-                        }else{
-                            console.log('else', fields3.row.intervals[i], fields3.row.intervals[i].output, fields3.row.intervals[i].isempty);
-                        }
-                    }
-
-                    if(isRowEmpty){
-                        window.hWin.HEURIST4.msg.showMsgDlg('The selected row has no related data with the selected column.<br><br>Please re-select either the row or column fields.'
-                            , null, 'Empty Set', {'data-palette': 'ui-heurist-explore'});
-                        return;
-                    }
-                }
-            }*/
+            }
 
             $("#pmessage").html('Requesting...');
             _setMode(1); //progress
@@ -2092,9 +2068,7 @@ function CrosstabsAnalysis(_query, _query_domain) {
             window.hWin.HEURIST4.util.sendRequest(baseurl, request, null,
                 function( response ){
                     __hideProgress();
-//
-//console.log('finised');
-//console.log(response.data);
+
                     if(response.status == window.hWin.ResponseStatus.OK){
 
                         needServerRequest = false;
@@ -2524,8 +2498,6 @@ function CrosstabsAnalysis(_query, _query_domain) {
 
         var pieChart = new Chart(pieCanvas, config);
         
-        //console.log($.fn.dataTable.isDataTable("table#resultsTable"));
-
         _setMode(2);//results
     }//_doRenders
 

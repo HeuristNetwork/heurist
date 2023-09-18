@@ -375,8 +375,6 @@ mapDraw.js initial_wkt -> parseWKT -> GeoJSON -> _loadGeoJSON (as set of separat
                 //var geovalues = array(); 
                 var shapes = (recShape && geoType!=1)?recShape:[];
                 if(!$.isArray(shapes)){
-                    //console.log(record);
-                    //console.log(shapes);
                     shapes = [];
                 }
                 
@@ -420,9 +418,6 @@ mapDraw.js initial_wkt -> parseWKT -> GeoJSON -> _loadGeoJSON (as set of separat
                                             }else{
                                                 shapes.push(shape);    
                                             }
-                                        }else{
-                                            console.log(record);
-                                            console.log(shapes);
                                         }
                                     }
                                 }
@@ -578,8 +573,6 @@ mapDraw.js initial_wkt -> parseWKT -> GeoJSON -> _loadGeoJSON (as set of separat
                 limit_warning:limit_warning
             };
 
-//console.log('mapitems: '+aitems.length+' of '+mapenabled+'  time:'+titems.length+' of '+timeenabled);            
-            
         return dataset;
     }//end _toTimemap
 
@@ -724,8 +717,6 @@ mapDraw.js initial_wkt -> parseWKT -> GeoJSON -> _loadGeoJSON (as set of separat
             
                 var geovalues = [];  
                 if(recShape && geoType!=1){  //geoType==1 from geo fields only, ignore recShape
-                    //console.log(record);
-                    //console.log(shapes);
                     geovalues = [recShape];
                 }
                 

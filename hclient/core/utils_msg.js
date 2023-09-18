@@ -704,7 +704,7 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
                             return true;
                         }
                     }catch(e){
-                        console.log(e);
+                        console.error(e);
                     }
 
                     if(!options["title"]){
@@ -985,7 +985,7 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
                     return true;
                 }
             };
-//console.log('define buttons');            
+
             //init close button     
             $('<button>').button({icon:'ui-icon-closethick',showLabel:false, label:'Close'}) 
                                     //classes:'ui-corner-all ui-dialog-titlebar-close'})
@@ -1043,7 +1043,7 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
                         return true;
                 }
                 }catch(e){
-                    console.log(e);
+                    console.error(e);
                 }
                 
                 frame_container.removeClass('loading');
@@ -1427,10 +1427,7 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
         btn_stop.click(function(){
                 var request = {terminate:1, t:(new Date()).getMilliseconds(), session:session_id};
                 window.hWin.HEURIST4.util.sendRequest(progress_url, request, null, function(response){
-                    _hideProgress(); //window.hWin.HEURIST4.ui
-                    if(response && response.status==window.hWin.ResponseStatus.UNKNOWN_ERROR){
-                        //console.log(response);                   
-                    }
+                    _hideProgress();
                 });
             });
     
@@ -1445,10 +1442,8 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
             
             window.hWin.HEURIST4.util.sendRequest(progress_url, request, null, function(response){
 
-//console.log(response);                
                 if(response && response.status==window.hWin.ResponseStatus.UNKNOWN_ERROR){
                     _hideProgress();
-                    //console.log(response+'  '+session_id);                   
                 }else{
                     //it may return terminate,done,
                     var resp = response?response.split(','):[];

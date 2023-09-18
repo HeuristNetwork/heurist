@@ -505,8 +505,6 @@ window.hWin.HEURIST4.query = {
 
         var result = {};
         
-//console.log(code);        
-        
         code = code.split(':');
 
         var dtid = code[code.length-1];
@@ -562,7 +560,6 @@ window.hWin.HEURIST4.query = {
             res['facet'] = {ids:'$IDS'};
             }else{}*/
             result['facet'] = __crt( code.length-2 );
-//console.log(JSON.stringify(result['facet']));
         }
 
         code.pop();

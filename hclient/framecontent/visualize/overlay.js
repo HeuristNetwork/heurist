@@ -55,15 +55,12 @@ function getRecordOverlayData(record) {
     var fontSize = getSetting(setting_fontsize, 12);
     var xpos = 17;
 
-//console.log(record);
-    
     // Going through the current displayed data
     var data = settings.getData.call(this, settings.data);
     if(data && data.links.length > 0) {
         var map = {};
         for(var i = 0; i < data.links.length; i++) {
             var link = data.links[i];
-//console.log(link);
             var isRequired = (settings.isDatabaseStructure && $Db.rst(link.source.rty_ID, link.relation.id, 'rst_RequirementType') == 'required') ? 'y' : 'n';
 
             if(link.relation.name == null && link.relation.type == 'resource'){
@@ -336,7 +333,7 @@ function createOverlay(x, y, type, selector, node_obj, parent_node) {
             if(desc!=null){
                 rollover = rollover + ' ' + desc;
             }else{
-                console.log('rectype not found '+rty_ID);
+                console.error('Rectype not found '+rty_ID);
             }
         }else{
             rec_ID = selector.substr(2);
@@ -967,8 +964,6 @@ function updateOverlays() {
         }else{
             bbox = $(".link."+id)[0].getBoundingClientRect();
         }
-        //console.log(bbox);
-        
         
         // Update position 
         var svgPos = $("svg").position();

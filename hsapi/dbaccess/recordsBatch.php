@@ -290,8 +290,6 @@ class RecordsBatch
             .'WHERE d.dtl_RecID=parent.rec_ID and parent.rec_RecTypeID='
             .$this->data['rtyID'].' and d.dtl_DetailTypeID='.$this->data['dtyID'];
 
-//error_log($query);
-            
         $res = $mysqli->query($query);
         if ($res){
           
@@ -344,10 +342,6 @@ class RecordsBatch
         $keep_autocommit = mysql__begin_transaction($mysqli);
         
         if (count($toProcess)>0){
-/*debug
-error_log('count '.count($childNotFound).'  '.count($toProcess).'  '.print_r(  $this->result_data,true) );
-    return $this->result_data;
-*/        
         //3. add reverse pointer field in child record to parent record 
         $processedParents = array();
         $childInserted = array();   
@@ -1429,8 +1423,6 @@ error_log('count '.count($childNotFound).'  '.count($toProcess).'  '.print_r(  $
                             } catch (\Exception $ex) {
                                 //throw new ParseException($ex);
                                 $skippedParseEx[$recID] = $file.' '.print_r($ex, true);
-                                //error_log('parse exception '.$recID.'  '.$file);
-                                //error_log(print_r($ex,true));
                             }
                         }else{
                             $skippedNoPDF[$recID] = 'PDF file not found';
@@ -1473,28 +1465,6 @@ error_log('count '.count($childNotFound).'  '.count($toProcess).'  '.print_r(  $
                                     break;
                             }
                         }
-                        
-                        
-                        /*DEBUG
-                        $offset = 17000;
-                        while($offset<mb_strlen($text)){
-                            $dtl['dtl_Value'] = mb_substr($text,$offset,5000);
-                            if(mb_detect_encoding($dtl['dtl_Value'], 'UTF-8', true)===false){
-                                $sqlErrors[$recID] = 'String is not valid utf8';
-                                break;
-                            }else{   
-   
-                                $ret = mysql__insertupdate($mysqli, 'recDetails', 'dtl', $dtl);
-                                if (!is_numeric($ret)) {
-                                    $sqlErrors[$recID] = $ret; // $dtl['dtl_Value'];//($ret.'  '.$offset);
-                                    break;
-                                }
-                                $offset = $offset + 5000;
-                            }
-                        }
-                        if(@$sqlErrors[$recID]) break;
-                        */
-                        
                     }//foreach
                     if(@$sqlErrors[$recID]) continue;
 

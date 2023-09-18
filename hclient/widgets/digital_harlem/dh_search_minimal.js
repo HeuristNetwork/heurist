@@ -50,10 +50,6 @@ function hSearchMinimalDigitalHarlem() {
         request.getrelrecs = 1;
         request.detail = 'detail'; //'5,6,7,9,10,11,28,74';  //@todo - take codes from magic numbers
 
-        window.hWin.HEURIST4._time_debug = new Date().getTime() / 1000;
-
-//console.log('Start search');
-
         window.hWin.HAPI4.RecordMgr.search(request,
             function(response) {
                 if(response.status != window.hWin.ResponseStatus.OK){
@@ -62,15 +58,9 @@ function hSearchMinimalDigitalHarlem() {
                     return;
                 }
 
-//console.log('get result '+ ( new Date().getTime() / 1000 - window.hWin.HEURIST4._time_debug ) );
-                window.hWin.HEURIST4._time_debug = new Date().getTime() / 1000;
-
                 var primary_rt = request.primary_rt;
                 var original_recordset = new hRecordSet(response.data);
                 var final_recordset = _prepareResultSet( original_recordset, primary_rt );
-
-//console.log('prepared '+ ( new Date().getTime() / 1000 - window.hWin.HEURIST4._time_debug) );
-                window.hWin.HEURIST4._time_debug = new Date().getTime() / 1000;
 
                 callback( final_recordset, original_recordset );
 
@@ -256,8 +246,6 @@ function hSearchMinimalDigitalHarlem() {
                   primary_rt = RT_ADDRESS;
             }
         } 
-//console.log('primary '+primary_rt);
-
         var is_Riot = '';
         if(window.hWin.HAPI4.sysinfo['layout']=='DigitalHarlem1935'){
             is_Riot = '&riot=1';
@@ -298,12 +286,10 @@ function hSearchMinimalDigitalHarlem() {
                             var addr_geo = recordset.fld(record_address, DT_GEO);
                             if( window.hWin.HEURIST4.util.isempty(addr_geo)) {
                                 //exclude addresses without geo
-                                console.log('address '+addrID+' has no geo');
                                 continue;
                             }else{
                                 recordset.setFld(record, DT_GEO, addr_geo);
                             }
-                            //console.log('address '+recID+' '+addr_geo);
                         
                             record_result = record;        
                             res_records[recID] = record_result;
@@ -330,11 +316,8 @@ function hSearchMinimalDigitalHarlem() {
                         var addr_geo = recordset.fld(record, DT_GEO);
                         if( window.hWin.HEURIST4.util.isempty(addr_geo)) {
                             //exclude addresses without geo
-                            console.log('address '+recID+' has no geo');
                             continue;
                         }
-                        //console.log('address '+recID+' '+addr_geo);
-                    
                         record_result = record;        
                         res_records[recID] = record_result;
                         res_orders.push(recID);
@@ -376,7 +359,6 @@ function hSearchMinimalDigitalHarlem() {
 
                                     //assign geo from address
                                     if(!recordset.transFld(record_result, record, DT_GEO, true )){
-                                        console.log('address '+recID+' has no geo');
                                         continue;
                                     }
                                     
@@ -459,7 +441,6 @@ function hSearchMinimalDigitalHarlem() {
                                     if(addr_geodata){
                                         recordset.setFld(record_result, DT_GEO, addr_geodata);
                                     }else{
-                                        console.log('address '+recID+' has no geo');
                                         continue;
                                     }
                                     
@@ -515,7 +496,6 @@ function hSearchMinimalDigitalHarlem() {
                                     if(addr_geodata){
                                         recordset.setFld(record_result, DT_GEO, addr_geodata);
                                     }else{
-                                        console.log('address '+recID+' has no geo');
                                         continue;
                                     }
                                     
@@ -558,7 +538,6 @@ function hSearchMinimalDigitalHarlem() {
                                     if(addr_geodata){
                                         recordset.setFld(record_result, DT_GEO, addr_geodata);
                                     }else{
-                                        console.log('address '+recID+' has no geo');
                                         continue;
                                     }
                                             

@@ -195,7 +195,7 @@ use PHPMailer\PHPMailer\Exception;
 
       if (!is_resource($res))
       {
-        error_log("email_smtp_error {$errno} {$errstr}");
+        errorLog("email_smtp_error {$errno} {$errstr}");
         return false;
       }
       return true;

@@ -820,8 +820,8 @@ function hMappingDraw(_mapdiv_id, _initial_wkt) {
                 mdata = $.parseJSON(mdata);
                 //mdata = JSON.parse( mdata );
             }catch(e){
+                //Not well formed JSON provided. Property names be quoted with double-quote characters
                 mdata = null;
-                console.log('Not well formed JSON provided. Property names be quoted with double-quote characters');
             }
         }
         if(window.hWin.HEURIST4.util.isnull(mdata) || $.isEmptyObject(mdata)){
@@ -1638,7 +1638,7 @@ function hMappingDraw(_mapdiv_id, _initial_wkt) {
                 }
                 _current_overlay = null;
             } catch(err) {
-                console.log(err);
+                console.error(err);
             }
         }
         

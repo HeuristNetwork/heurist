@@ -423,20 +423,6 @@ $.widget( "heurist.svs_list", {
 
         
         var that = this;
-/*        
-console.log('refresh '+(window.hWin.HAPI4.currentUser.usr_SavedSearch==null));        
-        if(!window.hWin.HAPI4.currentUser.usr_SavedSearch){  //find all saved searches for current user
-
-            window.hWin.HAPI4.SystemMgr.ssearch_get( null,
-                function(response){
-                    if(response.status == window.hWin.ResponseStatus.OK){
-                        window.hWin.HAPI4.currentUser.usr_SavedSearch = response.data;
-                        that._refresh();
-                    }
-            });
-            return;
-        }
-*/        
         
         if(!window.hWin.HAPI4.currentUser.ugr_Groups){
             window.hWin.HAPI4.currentUser.ugr_Groups = {}
@@ -479,7 +465,7 @@ console.log('refresh '+(window.hWin.HAPI4.currentUser.usr_SavedSearch==null));
 
                         var d = this.treeviews[groupID].toDict(true);
                         if(groupID=='all'){
-                            //console.log(d);                            
+                            
                         }
 
                         treeData[groupID] = d;
@@ -692,7 +678,6 @@ console.log('refresh '+(window.hWin.HAPI4.currentUser.usr_SavedSearch==null));
         if(!(this.options.container_width>0)){
             this.options.container_width = this.accordeon.width();
         }
-//console.log(this.options.container_width+'  t='+this.search_tree.width()+'  e='+this.element.width());
         
         if(true || islogged || this.isPublished){
 
@@ -1247,10 +1232,6 @@ console.log('refresh '+(window.hWin.HAPI4.currentUser.usr_SavedSearch==null));
             + 'style="display:inline-block;padding:0 4px"></span><span style="display:inline-block;vertical-align:top;width:'+sWidth+'px" class="truncate">'
             + name+'</span>'+sInfo+'</h3>').addClass('tree-accordeon-header svs-header');
 
-        if('dbs'!=domain){
-//console.log('adddddd');            
-        }
-
         return $header
     },
 
@@ -1508,8 +1489,6 @@ console.log('refresh '+(window.hWin.HAPI4.currentUser.usr_SavedSearch==null));
                     that._avoidConflictForGroup(groupID, function(){
                         //data.otherNode - dragging node
                         //node - target node
-//console.log('target '+node.tree._id+'  source '+data.otherNode.tree._id);                        
-
                         var newGroupID = node.tree.options.groupID;
 
                         if(node.tree._id != data.otherNode.tree._id){
@@ -2462,17 +2441,6 @@ console.log('refresh '+(window.hWin.HAPI4.currentUser.usr_SavedSearch==null));
                 
             }else 
             {
-                /*
-                if(Hul.isnull(node)){
-                    groupID = response.svs_UGrpID;
-                    if(response.svs_UGrpID == window.hWin.HAPI4.currentUser.ugr_ID){
-                        groupID = response.domain?response.domain:'all'; //all or bookmarks
-                    }
-                    var tree = that.treeviews[groupID];
-                    node = tree.getNodeByKey(response.svs_ID);
-                }
-console.log(node);
-                */                
             
                 if(node){ //edit is called from this widget only - otherwise we have to implement search node by svsID
                     //if group is changed move node to another tree
@@ -2707,7 +2675,7 @@ console.log(node);
                         }
                     }
                     catch (err) {
-console.log(err)                        
+                        console.error(err);
                         //window.hWin.HEURIST4.msg.showMsgErr(err);
                     }
                 }else{
@@ -2923,9 +2891,6 @@ console.log(err)
         var oldGroupID = mod_node.tree.options.groupID;
         var newGroupID_for_db = (newGroupID=='all' || newGroupID=='bookmark')
         ? window.hWin.HAPI4.currentUser.ugr_ID :newGroupID; 
-
-        //console.log('move '+mod_node.key+'  '+mod_node.title+' from '+oldGroupID
-        //    +' to '+newGroupID_for_db+' ('+newGroupID+') ');
 
         var affected = [];
         if(mod_node.folder){

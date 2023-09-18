@@ -325,7 +325,7 @@ function ShowReps( is_snippet_editor ) {
             window.hWin.HEURIST4.util.sendRequest(progress_url, request, null, function(response){
                 _hideProgress();
                 if(response && response.status==window.hWin.ResponseStatus.UNKNOWN_ERROR){
-                    console.log(response);                   
+                    console.error(response);                   
                 }
             });
         } }, 'text');
