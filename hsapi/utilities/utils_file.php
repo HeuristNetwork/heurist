@@ -120,7 +120,7 @@
     }
 
     //
-    // 
+    //  removes /../
     //
     function sanitizePath($path) {
         // Skip invalid input.
@@ -132,7 +132,7 @@
         }
 
         // Attempt to avoid path encoding problems.
-        $path = preg_replace("/[^\x20-\x7E]/", '', $path);
+        //$path = preg_replace("/[^\x20-\x7E]/", '', $path);
         $path = str_replace("\0", '', $path);
         $path = str_replace('\\', '/', $path);
 
