@@ -25,12 +25,11 @@
     * @package     Heurist academic knowledge management system
     * @subpackage  !!!subpackagename for file such as Administration, Search, Edit, Application, Library
     */
-print 'disabled'; 
-exit(); 
+//print 'disabled'; 
+//exit(); 
 
 ini_set('max_execution_time', '0');
 
-print htmlspecialchars($_REQUEST['db']).'<br>';
  
 //define('OWNER_REQUIRED', 1);   
 define('PDIR','../../');  //need for proper path to js and css    
@@ -39,6 +38,7 @@ require_once(dirname(__FILE__).'/../../hclient/framecontent/initPageMin.php');
 require_once(dirname(__FILE__).'/../../hsapi/utilities/utils_db_load_script.php');
 
 /*
+//print htmlspecialchars($_REQUEST['db']).'<br>';
 if( $system->verifyActionPassword($_REQUEST['pwd'], $passwordForServerFunctions) ){
     ?>
     
@@ -122,11 +122,12 @@ if(false){
     __updateDatabases_To_V14( @$_REQUEST['process']);
 }else if(false){
     __correctGetEstDate();
-}else if(true){
+}else if(false){
     __removeDuplicationValues();
+}else if(true){
 }
 */
-    __removeDuplicationValues();
+    __listOfAdminUsers();
 
 //
 // Report database versions
@@ -1285,4 +1286,26 @@ function __removeDuplicationValues(){
     
     print 'DONE. Removed '.$cnt.' duplications';
 }
+
+function __listOfAdminUsers(){
+
+    global $system, $mysqli, $databases; 
+
+    foreach ($databases as $idx=>$db_name){
+    
+        if($db_name=='') continue;
+        
+        mysql__usedatabase($mysqli, $db_name);
+
+        //get version of database        
+        $query = "SELECT ugr_Name, ugr_eMail FROM sysUGrps where  ugr_FirstName = 'sys' AND ugr_LastName = 'admin'";
+        $vals = mysql__select_row_assoc($mysqli, $query);
+        
+        if($vals){
+            echo  '<br>'.$db_name;//.'   '.$vals['ugr_Name'].'  '.$vals['ugr_eMail'];
+        }
+    }
+    print '<br>END';
+}
+
 ?>

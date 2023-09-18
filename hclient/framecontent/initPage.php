@@ -342,7 +342,6 @@ if($isLocalHost){
                             callback(true);
                         }
                     }else{
-_dout('error: LoadDatabaseDefintions');
                         window.hWin.HEURIST4.msg.showMsgErr(sMsg);
                         if($.isFunction(callback)){ callback(false); }
                     }
@@ -350,7 +349,6 @@ _dout('error: LoadDatabaseDefintions');
                 });
                 return true;
             }
-_dout('initialLoadDatabaseDefintions: already loaded');
             return false;
         
     }

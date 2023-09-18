@@ -311,8 +311,6 @@ if($isLocalHost){
 
     function onPageInit(success){
 
-_dout('onPageInit '+success);        
-        
         if(!success) return;
 
 
@@ -326,7 +324,6 @@ _dout('onPageInit '+success);
         //
         // cfg_widgets and cfg_layouts are defined in layout_default.js
         //
-_dout('LayoutMgr.init');
         window.hWin.HAPI4.LayoutMgr.init(cfg_widgets, cfg_layouts);
 
 
@@ -353,18 +350,12 @@ _dout('LayoutMgr.init');
             $(window.hWin.document.body).css({'margin':'0px',overflow:'hidden'});
         }
 
-_dout('window.hWin.HAPI4.sysinfo=');
-_dout(window.hWin.HAPI4.sysinfo);        
-        
         //
         // init layout
         //
-_dout('appInitAll');        
         window.hWin.HAPI4.LayoutMgr.appInitAll( window.hWin.HAPI4.sysinfo['layout'], "#layout_panes");
 
 
-_dout('DONE '+(new Date().getTime() / 1000 - _time_debug));        
-        _time_debug = new Date().getTime() / 1000;
         onInitCompleted_PerformSearch();
     }
 
@@ -509,9 +500,6 @@ _dout('DONE '+(new Date().getTime() / 1000 - _time_debug));
 
 
 
-
-        var fin_time = new Date().getTime() / 1000;
-        //console.log('ipage finished '+( fin_time - _time_debug)+ '  total: '+(fin_time-_time_start));
 
         $(document).trigger(window.hWin.HAPI4.Event.ON_SYSTEM_INITED, []);
 

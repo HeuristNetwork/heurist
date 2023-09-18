@@ -1946,7 +1946,7 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
                         if (response.status == window.hWin.ResponseStatus.OK || response['defRecTypes']) {
 
                             var fin_time = new Date().getTime() / 1000;
-                            console.log('definitions are loaded: '+(fin_time-s_time).' sec');
+                            console.log('definitions are loaded: '+(fin_time-s_time)+' sec');
                             var dbdefs = (response['defRecTypes']?response:response['data']);
 
                             for (var entityName in dbdefs) {
