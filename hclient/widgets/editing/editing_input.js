@@ -985,8 +985,10 @@ $.widget( "heurist.editing_input", {
 
                     if(!Object.hasOwn(window.hWin.HAPI4.dbSettings, 'TinyMCE_formats')){ // retrieve custom formatting
 
-                        window.hWin.HAPI4.SystemMgr.get_tinymce_formats({a: 'get_tinymce_formats'}, function(response){ console.log(response);
+                        window.hWin.HAPI4.SystemMgr.get_tinymce_formats({a: 'get_tinymce_formats'}, function(response){
+
                             if(response.status != window.hWin.ResponseStatus.OK){
+
                                 window.hWin.HEURIST4.msg.showMsgErr(response);
                                 window.hWin.HAPI4.dbSettings['TinyMCE_formats'] = {};
                             }else if(!window.hWin.HEURIST4.util.isObject(response.data)){

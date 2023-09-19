@@ -221,8 +221,6 @@
 
         $settings = $system->getDatabaseSetting('TinyMCE formats');
 
-        $err_file = 'zzzz_formating_log.txt';
-
         if(!is_array($settings) || array_key_exists('status', $settings)){
             $res = false;
         }else if(empty($settings) || empty($settings['formats'])){
