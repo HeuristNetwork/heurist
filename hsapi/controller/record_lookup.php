@@ -45,7 +45,7 @@
         'bnflibrary_aut' => 'https://catalogue.bnf.fr/api/SRU?', 
 
         'nomisma' => array(
-            'http://nomisma.org/apis/', 
+            'https://nomisma.org/apis/', 
             'https://nomisma.org/feed/?q='
         ), 
 
