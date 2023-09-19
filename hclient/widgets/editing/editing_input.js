@@ -3858,7 +3858,10 @@ $.widget( "heurist.editing_input", {
                     
         this._on(btn_field_visibility, {
             'click': function(e){
-                if(that.is_disabled) return;
+
+                let vis_mode = this.f('rst_NonOwnerVisibility');
+
+                if(that.is_disabled || vis_mode == 'viewable' || vis_mode == 'hidden') return;
                 
                 var btn = $(e.target);
                 
@@ -3892,10 +3895,10 @@ $.widget( "heurist.editing_input", {
     _setVisibilityStatus: function(input_id){
 
         var vis_mode = this.f('rst_NonOwnerVisibility');
-        
+
         if(this.options.showedit_button && this.detailType!="relmarker" &&
            (this.options.recordset && this.options.recordset.entityName == 'Records') && 
-           (vis_mode=='pending'))
+           (!window.hWin.HEURIST4.util.isempty(vis_mode)))
         {
         
             var that = this;
@@ -3909,21 +3912,51 @@ $.widget( "heurist.editing_input", {
                 var $input_div =  btn.parent('.input-div');
                 
                 if(btn.attr('hide_field')=='1'){
-                    $input_div.css('background-color','#CCCCCC');
+
+                    if($input_div.find('.sel_link2, .ui-selectmenu-button').length > 0){
+                        $input_div.find('.sel_link2, .ui-selectmenu-button').css('background-color', 'rgb(233 233 233)');
+                    }else{
+                        $input_div.css('background-color','#CCCCCC');
+                    }
+
                     $input_div.find('.text').addClass('grayed');
                     btn.removeClass('ui-icon-eye-open');            
                     btn.addClass('ui-icon-eye-crossed');
+                    btn.attr('title', 'This value is not visible to the public');
                     chbox.find('span.ui-icon').removeClass('ui-icon-check-off').addClass('ui-icon-check-on');
 
                     if(vis_mode=='public'){ 
                         btn.removeClass('show-onhover'); //show always for invisible field   
                         btn.css('display','inline-block');                        
                     }
+                }else if(vis_mode == 'viewable' || vis_mode == 'hidden'){
+
+                    if($input_div.find('.sel_link2, .ui-selectmenu-button').length > 0){
+                        $input_div.find('.sel_link2, .ui-selectmenu-button').css('background-color', 'rgb(233 233 233)');
+                    }else{
+                        $input_div.css('background-color','#CCCCCC');
+                    }
+
+                    $input_div.find('.text').addClass('grayed');
+                    btn.removeClass('ui-icon-eye-open');            
+                    btn.addClass('ui-icon-eye-crossed');
+                    btn.attr('title', vis_mode == 'viewable' ? 'This value is only visible to logged-in users' : 'This value is only visible to the owner/owner group')
+                    //chbox.find('span.ui-icon').removeClass('ui-icon-check-off').addClass('ui-icon-check-on');
+
+                    btn.removeClass('show-onhover');
+                    btn.css('display','inline-block');
                 }else{
-                    $input_div.css('background-color','transparent');
+
+                    if($input_div.find('.sel_link2, .ui-selectmenu-button').length > 0){
+                        $input_div.find('.sel_link2, .ui-selectmenu-button').css('background-color', '');
+                    }else{
+                        $input_div.css('background-color','transparent');
+                    }
+
                     $input_div.find('.text').removeClass('grayed');
                     btn.removeClass('ui-icon-eye-crossed');            
                     btn.addClass('ui-icon-eye-open');
+                    btn.attr('title', 'Show/hide value from public');
                     chbox.find('span.ui-icon').removeClass('ui-icon-check-on').addClass('ui-icon-check-off');
 
                     if(vis_mode=='public'){
@@ -3932,9 +3965,14 @@ $.widget( "heurist.editing_input", {
                     }
                 }
 
-                chbox.show();
-                btn.removeClass('show-onhover'); //show always for pending
-                btn.css('display','inline-block');                        
+                if(vis_mode=='public' || vis_mode == 'viewable' || vis_mode == 'hidden'){
+                    chbox.hide();
+                }else{
+                    //pending
+                    chbox.show();
+                    btn.removeClass('show-onhover'); //show always for pending
+                    btn.css('display','inline-block');                        
+                }
 
             });//each
         
@@ -4967,17 +5005,16 @@ $.widget( "heurist.editing_input", {
                 var $input = this.inputs[idx];
                 var btn = this.element.find('span.field-visibility[data-input-id="'+$input.attr('id')+'"]');
                 
-                if(vals && k<vals.length && vals[k]==1 && vis_mode!='piblic'){
+                if(vals && k<vals.length && vals[k]==1 && vis_mode!='public'){
                     btn.attr('hide_field',1);
                 }else{
                     btn.attr('hide_field',0);
                 }
                 k++;
             }
-            
+
             this._setVisibilityStatus();
 
-            
         }else{
             this.element.find('span.field-visibility').hide();
             this.element.find('div.field-visibility2').hide();
