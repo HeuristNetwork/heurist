@@ -217,6 +217,114 @@
                 }
             }
         }
+    }else if($action == 'get_tinymce_formats'){
+
+        $settings = $system->getDatabaseSetting('TinyMCE formats');
+
+        $err_file = 'zzzz_formating_log.txt';
+
+        if(!is_array($settings) || array_key_exists('status', $settings)){
+            $res = false;
+        }else if(empty($settings) || empty($settings['formats'])){
+            $res = array(
+                'content_style' => '',
+                'formats' => array(),
+                'style_formats' => array(),
+                'block_formats' => ''
+            );
+        }else{
+
+            $res = array(
+                'content_style' => '',
+                'formats' => array(),
+                'style_formats' => array(),
+                'block_formats' => ''
+            );
+
+            $valid_formats = array();
+
+            /*
+            $settings['formats'] keys => format id, for $settings['style_formats'] and $settings['block_formats']
+            $settings['formats'] values => array(
+                inline|block => html tag
+                classes => html class for selector
+                styles => css for class selectors
+            )
+            */
+            foreach($settings['formats'] as $key => $format){
+
+                $key = str_ireplace(' ', '_', $key); // replace spaces with underscore
+                if(in_array($key, $valid_formats)){
+                    continue; // already handle
+                }
+
+                $styles = $format['styles'];
+
+                $classes = $format['classes'];
+
+                if(empty($styles) || empty($classes)){
+                    continue;
+                }
+
+                $css = "." . implode(", .", explode(" ", $classes)) . " { ";
+                foreach($styles as $property => $value){
+                    $css .= "$property: $value; ";
+                }
+                $css .= "} ";
+
+                $res['content_style'] .= $css;
+
+                unset($format['styles']); // avoid inserting css into style attribute of html
+                $res['formats'][$key] = $format;
+
+                $valid_formats[] = $key;
+            }
+
+            $has_styles = !empty($settings['style_formats']);
+            $has_blocks = !empty($settings['block_formats']);
+
+            // Setup style and block formats
+            foreach($valid_formats as $key){
+
+                if($has_styles){
+
+                    foreach($settings['style_formats'] as $idx => $style){
+
+                        $style['format'] = str_ireplace(' ', '_', $style['format']); // replace spaces with underscore
+                        if($style['format'] == $key){
+
+                            $res['style_formats'][] = $style;
+
+                            unset($settings['style_formats'][$idx]); // remove
+                            break;
+                        }
+                    }
+
+                    $has_styles = !empty($settings['style_formats']);
+                }
+
+                if($has_blocks){
+
+                    foreach($settings['block_formats'] as $idx => $block){
+
+                        $block['format'] = str_ireplace(' ', '_', $block['format']); // replace spaces with underscore
+                        if($block['format'] == $key){
+
+                            $res['block_formats'] .= ";" . $block['title'] . "=" . $block['format'];
+
+                            unset($settings['block_formats'][$idx]); // remove
+                            break;
+                        }
+                    }
+
+                    $has_blocks = !empty($settings['block_formats']);
+                }
+            }
+
+            if(empty($res['style_formats']) && empty($res['block_formats'])){
+                $res = array(); // invalid formatting
+            }
+        }
     }else{
         
         $mysqli = $system->get_mysqli();

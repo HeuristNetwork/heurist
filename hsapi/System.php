@@ -66,7 +66,9 @@ class System {
     private $system_settings = null;
     private $send_email_on_error = 1; //set to 1 to send email for all severe errors
 	
-    private $version_release = null;	
+    private $version_release = null;
+
+    private $database_settings = array('TinyMCE formats' => 'text_styles.json');
     
     /*
     
@@ -2169,6 +2171,105 @@ $allowed = array(HEURIST_MAIN_SERVER, 'https://epigraphia.efeo.fr', 'https://nov
                 return;
             }
         }
-    }	
+    }
+    
+    /**
+     * Retrieve saved settings for current database from settings/
+     * 
+     * @param string $setting_name - setting's name, matches a key in database_settings
+     * 
+     * @return array - returns either error message, or array of settings
+     */
+    public function getDatabaseSetting($setting_name){
+
+        if(!defined('HEURIST_FILESTORE_DIR')){
+            return false;
+        }
+
+        if(!array_key_exists($setting_name, $this->database_settings)){
+            return $this->addError(HEURIST_INVALID_REQUEST, 'Invalid settings requested');
+        }
+
+        $setting_file = HEURIST_FILESTORE_DIR . "settings/" . $this->database_settings[$setting_name];
+
+        if(!file_exists($setting_file)){
+            return array();
+        }
+
+        $settings = file_get_contents($setting_file);
+        if($settings === false){
+            return $this->addError(HEURIST_ERROR, "An error occurred while attempting to read database settings for $setting_name");
+        }else if(empty($settings)){
+            return array();
+        }
+
+        $settings = json_decode($settings, TRUE);
+        if(json_last_error() !== JSON_ERROR_NONE){
+            return $this->addError(HEURIST_ERROR, "An error occurred while decoding the existing database settings for $setting_name");
+        }
+
+        return $settings !== null ? $settings : array();
+    }
+
+    /**
+     * Save settings for current database in settings/
+     * 
+     * @param string $setting_name - setting's name, matches a key in database_settings
+     * @param array $settings - settings in JSON format
+     * @param int $replace_settings - how to handle the saving, 0 - completely replace; 1 - merge and replace existing; 2 - merge and retain existing
+     * 
+     * @return true|array - returns true on success, returns array on error
+     */
+    public function setDatabaseSetting($setting_name, $settings, $replace_settings = 0){
+
+        if(!defined('HEURIST_FILESTORE_DIR')){
+            return false;
+        }
+
+        if(!array_key_exists($setting_name, $this->database_settings)){
+            return $this->addError(HEURIST_INVALID_REQUEST, 'Invalid settings requested');
+        }
+
+        if(!is_array($settings)){
+            return $this->addError(HEURIST_INVALID_REQUEST, 'Invalid settings format');
+        }
+
+        $setting_file = HEURIST_FILESTORE_DIR . "settings/" . $this->database_settings[$setting_name];
+        $existing_settings = '';
+
+        if(file_exists($setting_file) && $replace_settings != 0){
+
+            $existing_settings = file_get_contents($setting_file);
+
+            if(!empty($existing_settings)){
+
+                $existing_settings = json_decode($existing_settings, TRUE);
+                if(json_last_error() !== JSON_ERROR_NONE || !is_array($existing_settings)){
+                    return $this->addError(HEURIST_ERROR, "An error occurred with retrieving the existing database settings for $setting_name");
+                }
+
+                if($replace_settings == 1){
+                    $existing_settings = array_replace_recursive($existing_settings, $settings);
+                }else{
+                    $existing_settings = array_replace_recursive($settings, $existing_settings);
+                }
+            }
+        }
+
+        $existing_settings = empty($existing_settings) ? $settings : $existing_settings;
+
+        $final_settings = json_encode($existing_settings);
+        if(json_last_error() !== JSON_ERROR_NONE){
+            return $this->addError(HEURIST_ACTION_BLOCKED, 'JSON ENCODE ERROR => ' . json_last_error_msg());
+        }
+
+        $res = fileSave($final_settings, $setting_file);
+
+        if(!$res || $res == 0){
+            return $this->addError(HEURIST_ERROR, "An error occurred while attempting to save database settings for $setting_name");
+        }
+
+        return true;
+    }
 }
 ?>

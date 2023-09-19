@@ -269,12 +269,14 @@ div.mainMenu6 > div.ui-heurist-header:hover{
     height: 500px !important;
 }
 
-/* TinyMCE Smaller Icons */
+/* TinyMCE Smaller Toolbar Icons */
 .tox .tox-toolbar .tox-tbtn{
     transform: scale(70%) !important;
 
     width: unset !important;
     height: unset !important;
+
+    padding: 0 !important;
 }
 
 .tox .tox-toolbar .tox-tbtn.tox-tbtn--select.tox-tbtn--bespoke{
@@ -283,8 +285,15 @@ div.mainMenu6 > div.ui-heurist-header:hover{
     height: 22px !important;
     padding: 0 !important;
 }
+.tox .tox-tbtn--bespoke .tox-tbtn__select-label{
+    width: unset !important;
+}
 
-.tox .tox-toolbar .tinymce_format_group{
-    width: 115px !important;
-    padding: 0 !important;
+.tox .tox-toolbar{
+    background-image: none !important;
+}
+
+.tox .tox-toolbar__group{
+    height: 25px !important;
+    border-bottom: 1px solid #CCC !important;
 }

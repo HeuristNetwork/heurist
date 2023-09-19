@@ -151,6 +151,8 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
             }
         }
 
+        that.dbSettings = {};
+
         /*if(_currentUser){
         that.currentUser = _currentUser;
         }else{}*/
@@ -1123,6 +1125,17 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
                 if (!request) {
                     request = { a: 'check_for_alpha' };
                 }
+                _callserver('usr_info', request, callback);
+            },
+
+            /**
+             * Get object of custom formats for the TinyMCE editor
+             * @param {Request} request 
+             * @param {callserverCallback} callback 
+             */
+            get_tinymce_formats: function(request, callback){
+                if(!request) request = {a: 'get_tinymce_formats'};
+
                 _callserver('usr_info', request, callback);
             },
 

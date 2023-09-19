@@ -983,6 +983,24 @@ $.widget( "heurist.editing_input", {
                     
                     if(typeof tinymce === 'undefined') return false; //not loaded yet
 
+                    if(!Object.hasOwn(window.hWin.HAPI4.dbSettings, 'TinyMCE_formats')){ // retrieve custom formatting
+
+                        window.hWin.HAPI4.SystemMgr.get_tinymce_formats({a: 'get_tinymce_formats'}, function(response){ console.log(response);
+                            if(response.status != window.hWin.ResponseStatus.OK){
+                                window.hWin.HEURIST4.msg.showMsgErr(response);
+                                window.hWin.HAPI4.dbSettings['TinyMCE_formats'] = {};
+                            }else if(!window.hWin.HEURIST4.util.isObject(response.data)){
+                                window.hWin.HAPI4.dbSettings['TinyMCE_formats'] = {};
+                            }else{
+                                window.hWin.HAPI4.dbSettings['TinyMCE_formats'] = response.data;
+                            }
+
+                            __showEditor(is_manual);
+                        });
+
+                        return;
+                    }
+
                     var eid = '#'+$input.attr('id')+'_editor';
 
                     $(eid).parent().css({display:'inline-block'}); //.height($input.height()+100)
@@ -991,6 +1009,13 @@ $.widget( "heurist.editing_input", {
                     //html($.parseHTML(   
 
                     var nw = $input.css('min-width');
+
+                    let custom_formatting = window.hWin.HAPI4.dbSettings.TinyMCE_formats;
+                    let block_formats = Object.hasOwn(custom_formatting, 'block_formats') && !window.hWin.HEURIST4.util.isempty(custom_formatting.block_formats)
+                                            ? custom_formatting.block_formats : '';
+
+                    let style_formats = Object.hasOwn(custom_formatting, 'style_formats') && custom_formatting.style_formats.length > 0 
+                                            ? [ { title: 'Custom styles', items: custom_formatting.style_formats } ] : null;
 
                     tinymce.init({
                         //target: $editor, 
@@ -1014,7 +1039,8 @@ $.widget( "heurist.editing_input", {
 
                         entity_encoding:'raw',
                         inline_styles: true,
-                        content_style: "body { font-size: 8pt; font-family: Helvetica,Arial,sans-serif; }",
+                        content_style: "body { font-size: 8pt; font-family: Helvetica,Arial,sans-serif; } " + custom_formatting.content_style,
+
                         min_height: ($input.height()+110),
                         max_height: ($input.height()+110),
                         autoresize_bottom_margin: 10,
@@ -1033,7 +1059,7 @@ $.widget( "heurist.editing_input", {
                                 });                                        
                                 editor.ui.registry.addButton('customAddFigCaption', {
                                     icon: 'comment',
-                                    //text: 'Add caption',
+                                    text: 'Caption',
                                     tooltip: 'Add caption to current media',
                                     onAction: function (_) {
                                         that._addMediaCaption();
@@ -1054,7 +1080,7 @@ $.widget( "heurist.editing_input", {
                                 });
                                 editor.ui.registry.addButton('customHeuristLink', {
                                     icon: 'link',
-                                    text: 'Heurist',
+                                    text: 'Record',
                                     tooltip: 'Add link to Heurist record',
                                     onAction: function (_) {  //since v5 onAction in v4 onclick
                                         selectRecord(null, function(recordset){
@@ -1205,27 +1231,36 @@ $.widget( "heurist.editing_input", {
                             });
                         },
                         init_instance_callback: function(editor){
-                            let $container = $(editor.editorContainer);
-                            if($container.find('.tox-tbtn.tox-tbtn--select.tox-tbtn--bespoke').parent().length > 0){
-                                $container.find('.tox-tbtn.tox-tbtn--select.tox-tbtn--bespoke').parent().addClass('tinymce_format_group');
-                            }
+
+                            // button[12] is the link button
+                            let html = '<span class="tox-tbtn__select-label">URL</span>';
+                            $($(editor.container).find('.tox-tbtn')[12]).append(html);
                         },
                         plugins: [ //contextmenu, textcolor since v5 in core
                             'advlist autolink lists link image preview ', //anchor charmap print 
                             'searchreplace visualblocks code fullscreen',
-                            'media table paste help autoresize'  //insertdatetime  wordcount
+                            'media table paste help autoresize hr'  //insertdatetime  wordcount
                         ],      
                         //undo redo | code insert  |  fontselect fontsizeselect |  forecolor backcolor | media image link | alignleft aligncenter alignright alignjustify | fullscreen            
-                        toolbar: ['formatselect | bold italic forecolor blockquote | customHeuristMedia customAddFigCaption | customHeuristLink link | align | bullist numlist outdent indent | table | removeformat | help'],
-                        /*formats: { q: {block: 'q'} },
-                        style_formats: [ {title: 'Quotation', format: 'q'} ],*/
-                        block_formats: 'Paragraph=p;Heading 1=h1;Heading 2=h2;Heading 3=h3;Heading 4=h4;Heading 5=h5;Heading 6=h6;Preformatted=pre;Quotation=blockquote',
+                        toolbar: ['formatselect | styleselect | fontselect fontsizeselect | bold italic forecolor hr | customHeuristMedia customAddFigCaption customHeuristLink link | align | bullist numlist outdent indent | table | removeformat | help'],
+                        formats: custom_formatting.formats,
+                        style_formats_merge: true,
+                        style_formats: style_formats,
+                        block_formats: 'Paragraph=p;Heading 1=h1;Heading 2=h2;Heading 3=h3;Heading 4=h4;Heading 5=h5;Heading 6=h6;Preformatted=pre;Quotation=blockquote' + block_formats,
                         content_css: [
                             '//fonts.googleapis.com/css?family=Lato:300,300i,400,400i'
                             //,'//www.tinymce.com/css/codepen.min.css'
                         ]
                     });
                     $input.hide();
+
+                    if($btn_edit_switcher.is('span')){
+                        $btn_edit_switcher.text('text'); 
+                    }else{
+                        cur_action = 'wysiwyg';
+                        $btn_edit_switcher.find('span').css('text-decoration', '');
+                        $btn_edit_switcher.find('span:contains("wysiwyg")').css('text-decoration', 'underline');
+                    }
                     
                     return true;
                 } // _showEditor()
@@ -1381,19 +1416,7 @@ $.widget( "heurist.editing_input", {
                 if( !isCMS_content && this.options.dtID != window.hWin.HAPI4.sysinfo['dbconst']['DT_KML'] ) {
                     var nodes = $.parseHTML(value);
                     if(nodes && (nodes.length>1 || (nodes[0] && nodes[0].nodeName!='#text'))){ //if it has html - show editor at once
-                        setTimeout(function(){
-
-                            if(__showEditor()){
-                                if($btn_edit_switcher.is('span')){
-                                    $btn_edit_switcher.text('text'); 
-                                }else{
-                                    cur_action = 'wysiwyg';
-                                    $btn_edit_switcher.find('span').css('text-decoration', '');
-                                    $btn_edit_switcher.find('span:contains("wysiwyg")').css('text-decoration', 'underline');
-                                }
-                            }
-                            
-                        },1200); 
+                        setTimeout(__showEditor, 1200); 
                     }
                 }
                 
