@@ -108,6 +108,29 @@ $rec_id = intval(@$_REQUEST['recID']);
 $already_linked_ids = array();
 $group_details = array();
 
+$font_styles = '';
+
+$formats = $system->getDatabaseSetting('TinyMCE formats');
+
+if(is_array($formats) && array_key_exists('formats', $formats)){
+    foreach($formats['formats'] as $key => $format){
+
+        $styles = $format['styles'];
+
+        $classes = $format['classes'];
+
+        if(empty($styles) || empty($classes)){
+            continue;
+        }
+
+        $font_styles .= "." . implode(", .", explode(" ", $classes)) . " { ";
+        foreach($styles as $property => $value){
+            $font_styles .= "$property: $value; ";
+        }
+        $font_styles .= "} ";
+    }
+}
+
 // if we get a record id then see if there is a personal bookmark for it.
 if ($rec_id>0 && !@$_REQUEST['bkmk_id']) 
 {
@@ -807,6 +830,11 @@ else if(!$is_map_popup){
 </script>
 <?php
 } 
+
+if(!empty($font_styles)){ // add extra format styles from TinyMCE insertion
+    echo "<style> $font_styles </style>";
+}
+
 if ($bkm_ID>0 || $rec_id>0) {
        
         if ($bkm_ID>0) {

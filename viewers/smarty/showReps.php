@@ -584,247 +584,279 @@ function smarty_output_filter_strip_js($tpl_source, Smarty_Internal_Template $te
     global $system, $is_jsallowed, $record_with_custom_styles, $is_headless, $outputmode, $publishmode;
     
     if($outputmode=='js' || $outputmode=='html'){
-    
-    if($is_jsallowed){
-        
-        if(!$is_headless){ //full html output. inside iframe - add all styles and scripts to header at once
-        
-            //adds custom scripts and styles to html head
-        
-            $head = '';
-            $close_tags = '';
-        
-            if(strpos($tpl_source, '<html>')===false){
-                $open_tags = '<html><head><meta http-equiv="Content-Type" content="text/html; charset=utf-8"></head><body>';
-                $close_tags = '</body></html>';
-            }
-        
-            //add custom css and external links from CMS_HOME  DT_CMS_CSS and DT_CMS_EXTFILES
-            if($record_with_custom_styles>0){
-                //find record with css fields
-                $css_fields = array();
-                if($system->defineConstant('DT_CMS_CSS')){
-                    array_push($css_fields, DT_CMS_CSS);
-                }
-                if($system->defineConstant('DT_CMS_EXTFILES')){
-                    array_push($css_fields, DT_CMS_EXTFILES);
-                }
-                if(count($css_fields)>0){
-                    $record = recordSearchByID($system, $record_with_custom_styles,$css_fields,'rec_ID');
-                    if($record && @$record['details']){
 
-                        if(defined('DT_CMS_CSS') && @$record['details'][DT_CMS_CSS]){
-                           //add to begining 
-                           $head .= '<style>'.recordGetField($record, DT_CMS_CSS).'</style>';
-                        }
-                        
-                        if(defined('DT_CMS_EXTFILES') && @$record['details'][DT_CMS_EXTFILES]){
-                            //add to header
-                            $external_files = @$record['details'][DT_CMS_EXTFILES];
-                            if($external_files!=null){
-                                if(!is_array($external_files)){
-                                    $external_files = array($external_files);
-                                }
-                                foreach ($external_files as $ext_file){
-                                    $head .= $ext_file;
+        $font_styles = '';
+
+        $formats = $system->getDatabaseSetting('TinyMCE formats');
+
+        if(is_array($formats) && array_key_exists('formats', $formats)){
+            foreach($formats['formats'] as $key => $format){
+
+                $styles = $format['styles'];
+
+                $classes = $format['classes'];
+
+                if(empty($styles) || empty($classes)){
+                    continue;
+                }
+
+                $font_styles .= "." . implode(", .", explode(" ", $classes)) . " { ";
+                foreach($styles as $property => $value){
+                    $font_styles .= "$property: $value; ";
+                }
+                $font_styles .= "} ";
+            }
+        }
+        if(!empty($font_styles)){
+            $font_styles = "<style> $font_styles </style>";
+        }
+    
+        if($is_jsallowed){
+            
+            if(!$is_headless){ //full html output. inside iframe - add all styles and scripts to header at once
+            
+                //adds custom scripts and styles to html head
+            
+                $head = $font_styles;
+                $close_tags = '';
+            
+                if(strpos($tpl_source, '<html>')===false){
+                    $open_tags = '<html><head><meta http-equiv="Content-Type" content="text/html; charset=utf-8"></head><body>';
+                    $close_tags = '</body></html>';
+                }
+            
+                //add custom css and external links from CMS_HOME  DT_CMS_CSS and DT_CMS_EXTFILES
+                if($record_with_custom_styles>0){
+                    //find record with css fields
+                    $css_fields = array();
+                    if($system->defineConstant('DT_CMS_CSS')){
+                        array_push($css_fields, DT_CMS_CSS);
+                    }
+                    if($system->defineConstant('DT_CMS_EXTFILES')){
+                        array_push($css_fields, DT_CMS_EXTFILES);
+                    }
+                    if(count($css_fields)>0){
+                        $record = recordSearchByID($system, $record_with_custom_styles,$css_fields,'rec_ID');
+                        if($record && @$record['details']){
+
+                            if(defined('DT_CMS_CSS') && @$record['details'][DT_CMS_CSS]){
+                            //add to begining 
+                            $head .= '<style>'.recordGetField($record, DT_CMS_CSS).'</style>';
+                            }
+                            
+                            if(defined('DT_CMS_EXTFILES') && @$record['details'][DT_CMS_EXTFILES]){
+                                //add to header
+                                $external_files = @$record['details'][DT_CMS_EXTFILES];
+                                if($external_files!=null){
+                                    if(!is_array($external_files)){
+                                        $external_files = array($external_files);
+                                    }
+                                    foreach ($external_files as $ext_file){
+                                        $head .= $ext_file;
+                                    }
                                 }
                             }
                         }
                     }
-                }
-            }            
+                }            
 
-            //check if need to init mediaViewer
-            if(strpos($tpl_source,'fancybox-thumb')>0){
+                //check if need to init mediaViewer
+                if(strpos($tpl_source,'fancybox-thumb')>0){
 
-                $head .= 
-                    ('<script type="text/javascript" src="'.HEURIST_BASE_URL.'external/jquery-ui-1.12.1/jquery-1.12.4.js"></script>'
-                    .'<script type="text/javascript" src="'.HEURIST_BASE_URL.'external/jquery-ui-1.12.1/jquery-ui.min.js"></script>'
-                    .'<script type="text/javascript" src="'.HEURIST_BASE_URL.'external/jquery.fancybox/jquery.fancybox.js"></script>'
-                    .'<script type="text/javascript" src="'.HEURIST_BASE_URL.'hclient/core/detectHeurist.js"></script>'
-                    .'<script type="text/javascript" src="'.HEURIST_BASE_URL.'hclient/widgets/viewers/mediaViewer.js"></script>'
-                    .'<link rel="stylesheet" href="'.HEURIST_BASE_URL.'external/jquery.fancybox/jquery.fancybox.css" />');
-                
-                //init mediaviewer after page load
-                $head .=  ('<script>'
-                .'var rec_Files=[];'
-                .'$(document).ready(function() {'
-                    .'$("body").mediaViewer({rec_Files:rec_Files, showLink:false, selector:".fancybox-thumb", '
-                    .'database:"'.$system->dbname().'", baseURL:"'.HEURIST_BASE_URL.'"});'    
-                  .'});'
-                .'</script>'
-                .'<style>.fancybox-toolbar{visibility: visible !important; opacity: 1 !important;}</style>');
-            }
-
-            
-            //forcefully adds html and body tags
-            $tpl_source = $open_tags.$tpl_source.$close_tags;
-            
-            $tpl_source = str_replace('<body>','<body class="smarty-report">', $tpl_source);
-            if($head!=''){
-                $tpl_source = str_replace('</head>',$head.'</head>', $tpl_source);
-            }
-            
-            
-        }else{ //html snippet output (without head) ----------------------------
-        
-            //adds custom scripts and styles to parent document head (insertAdjacentHTML and )
-        
-            $head = '';
-        
-            //check if need to init mediaViewer
-            if(strpos($tpl_source,'fancybox-thumb')>0){
-                
-                $head = 
-                        '<script type="text/javascript" src="'.HEURIST_BASE_URL.'external/jquery-ui-1.12.1/jquery-1.12.4.js"></script>'
-                        .'<script type="text/javascript" src="'.HEURIST_BASE_URL.'external/jquery-ui-1.12.1/jquery-ui.js"></script>'
+                    $head .= 
+                        ('<script type="text/javascript" src="'.HEURIST_BASE_URL.'external/jquery-ui-1.12.1/jquery-1.12.4.js"></script>'
+                        .'<script type="text/javascript" src="'.HEURIST_BASE_URL.'external/jquery-ui-1.12.1/jquery-ui.min.js"></script>'
                         .'<script type="text/javascript" src="'.HEURIST_BASE_URL.'external/jquery.fancybox/jquery.fancybox.js"></script>'
                         .'<script type="text/javascript" src="'.HEURIST_BASE_URL.'hclient/core/detectHeurist.js"></script>'
                         .'<script type="text/javascript" src="'.HEURIST_BASE_URL.'hclient/widgets/viewers/mediaViewer.js"></script>'
-                        .'<script>'
-                        .'var rec_Files=[];</script>';
-                
-                $head .= (
-                    '<script>$(document).ready(function() {'
+                        .'<link rel="stylesheet" href="'.HEURIST_BASE_URL.'external/jquery.fancybox/jquery.fancybox.css" />');
                     
-    .'document.getElementsByTagName("head")[0].insertAdjacentHTML("beforeend","<link rel=\"stylesheet\" href=\"'.HEURIST_BASE_URL.'external/jquery.fancybox/jquery.fancybox.css\" />");'                
-                    
+                    //init mediaviewer after page load
+                    $head .=  ('<script>'
+                    .'var rec_Files=[];'
+                    .'$(document).ready(function() {'
                         .'$("body").mediaViewer({rec_Files:rec_Files, showLink:false, selector:".fancybox-thumb", '
                         .'database:"'.$system->dbname().'", baseURL:"'.HEURIST_BASE_URL.'"});'    
-                      .'});'
+                    .'});'
                     .'</script>'
                     .'<style>.fancybox-toolbar{visibility: visible !important; opacity: 1 !important;}</style>');
-            }
-            
-            //add custom css and external links from CMS_HOME  DT_CMS_CSS and DT_CMS_EXTFILES
-            if($record_with_custom_styles>0){
-                //find record with css fields
-                $css_fields = array();
-                if($system->defineConstant('DT_CMS_CSS')){
-                    array_push($css_fields, DT_CMS_CSS);
                 }
-                if($system->defineConstant('DT_CMS_EXTFILES')){
-                    array_push($css_fields, DT_CMS_EXTFILES);
-                }
-                if(count($css_fields)>0){
-                    $record = recordSearchByID($system, $record_with_custom_styles,$css_fields,'rec_ID');
-                    if($record && @$record['details']){
 
-                        if(defined('DT_CMS_CSS') && @$record['details'][DT_CMS_CSS]){
-                           //add to begining 
-                           $head = '<style>'.recordGetField($record, DT_CMS_CSS).'</style>'.$head;
-                           
-                           $head = $head.'<script>if(document.body){
-                                document.body.classList.add("smarty-report");
-                           } </script>';
-                        }
+                
+                //forcefully adds html and body tags
+                $tpl_source = $open_tags.$tpl_source.$close_tags;
+                
+                $tpl_source = str_replace('<body>','<body class="smarty-report">', $tpl_source);
+                if($head!=''){
+                    $tpl_source = str_replace('</head>',$head.'</head>', $tpl_source);
+                }
+                
+                
+            }else{ //html snippet output (without head) ----------------------------
+            
+                //adds custom scripts and styles to parent document head (insertAdjacentHTML and )
+            
+                $head = $font_styles;
+            
+                //check if need to init mediaViewer
+                if(strpos($tpl_source,'fancybox-thumb')>0){
+                    
+                    $head = 
+                            '<script type="text/javascript" src="'.HEURIST_BASE_URL.'external/jquery-ui-1.12.1/jquery-1.12.4.js"></script>'
+                            .'<script type="text/javascript" src="'.HEURIST_BASE_URL.'external/jquery-ui-1.12.1/jquery-ui.js"></script>'
+                            .'<script type="text/javascript" src="'.HEURIST_BASE_URL.'external/jquery.fancybox/jquery.fancybox.js"></script>'
+                            .'<script type="text/javascript" src="'.HEURIST_BASE_URL.'hclient/core/detectHeurist.js"></script>'
+                            .'<script type="text/javascript" src="'.HEURIST_BASE_URL.'hclient/widgets/viewers/mediaViewer.js"></script>'
+                            .'<script>'
+                            .'var rec_Files=[];</script>';
+                    
+                    $head .= (
+                        '<script>$(document).ready(function() {'
                         
-                        if(defined('DT_CMS_EXTFILES') && @$record['details'][DT_CMS_EXTFILES]){
-                            //add to header
-                            $external_files = @$record['details'][DT_CMS_EXTFILES];
-                            if($external_files!=null){
-                                if(!is_array($external_files)){
-                                    $external_files = array($external_files);
-                                }
-                                if(count($external_files)>0){
-                                    foreach ($external_files as $ext_file){
-                                        if(strpos($ext_file,'<link')===0){ // || strpos($ext_file,'<script')===0
-                                            $head = $head .$ext_file;
+        .'document.getElementsByTagName("head")[0].insertAdjacentHTML("beforeend","<link rel=\"stylesheet\" href=\"'.HEURIST_BASE_URL.'external/jquery.fancybox/jquery.fancybox.css\" />");'                
+                        
+                            .'$("body").mediaViewer({rec_Files:rec_Files, showLink:false, selector:".fancybox-thumb", '
+                            .'database:"'.$system->dbname().'", baseURL:"'.HEURIST_BASE_URL.'"});'    
+                        .'});'
+                        .'</script>'
+                        .'<style>.fancybox-toolbar{visibility: visible !important; opacity: 1 !important;}</style>');
+                }
+                
+                //add custom css and external links from CMS_HOME  DT_CMS_CSS and DT_CMS_EXTFILES
+                if($record_with_custom_styles>0){
+                    //find record with css fields
+                    $css_fields = array();
+                    if($system->defineConstant('DT_CMS_CSS')){
+                        array_push($css_fields, DT_CMS_CSS);
+                    }
+                    if($system->defineConstant('DT_CMS_EXTFILES')){
+                        array_push($css_fields, DT_CMS_EXTFILES);
+                    }
+                    if(count($css_fields)>0){
+                        $record = recordSearchByID($system, $record_with_custom_styles,$css_fields,'rec_ID');
+                        if($record && @$record['details']){
+
+                            if(defined('DT_CMS_CSS') && @$record['details'][DT_CMS_CSS]){
+                            //add to begining 
+                            $head = '<style>'.recordGetField($record, DT_CMS_CSS).'</style>'.$head;
+                            
+                            $head = $head.'<script>if(document.body){
+                                    document.body.classList.add("smarty-report");
+                            } </script>';
+                            }
+                            
+                            if(defined('DT_CMS_EXTFILES') && @$record['details'][DT_CMS_EXTFILES]){
+                                //add to header
+                                $external_files = @$record['details'][DT_CMS_EXTFILES];
+                                if($external_files!=null){
+                                    if(!is_array($external_files)){
+                                        $external_files = array($external_files);
+                                    }
+                                    if(count($external_files)>0){
+                                        foreach ($external_files as $ext_file){
+                                            if(strpos($ext_file,'<link')===0){ // || strpos($ext_file,'<script')===0
+                                                $head = $head .$ext_file;
+                                            }
                                         }
+    /*                                    
+                    $head = $head.'<script>(function() {';
+                                        foreach ($external_files as $ext_file){
+                                            if(strpos($ext_file,'<link')===0){ // || strpos($ext_file,'<script')===0
+                    $head = $head.'document.getElementsByTagName("head")[0].insertAdjacentHTML("beforeend",\''
+                                            .$ext_file //str_replace('"','\"',$ext_file)
+                                            .'\');';                                        }
+                                        }
+                                        
+                    $head = $head.' })();</script>';
+    */                
                                     }
-/*                                    
-                $head = $head.'<script>(function() {';
-                                    foreach ($external_files as $ext_file){
-                                        if(strpos($ext_file,'<link')===0){ // || strpos($ext_file,'<script')===0
-                $head = $head.'document.getElementsByTagName("head")[0].insertAdjacentHTML("beforeend",\''
-                                        .$ext_file //str_replace('"','\"',$ext_file)
-                                        .'\');';                                        }
-                                    }
-                                    
-                $head = $head.' })();</script>';
-*/                
                                 }
                             }
                         }
                     }
                 }
+
+                //
+                if($head!=''){
+                    //$tpl_source = removeHeadAndBodyTags($tpl_source);
+                    
+                    if(strpos($tpl_source, '<head>')>0){
+                        $tpl_source = str_replace('</head>',$head.'</head>', $tpl_source);    
+                    }else{
+                        $tpl_source = removeHeadAndBodyTags($tpl_source);
+                        $tpl_source = $head.$tpl_source;
+                    }
+                }
             }
+            
+        }else{
+            
+            //if javascript not allowed, use html purifier to remove suspicious code
 
-            //
-            if($head!=''){
-                //$tpl_source = removeHeadAndBodyTags($tpl_source);
-                
-                if(strpos($tpl_source, '<head>')>0){
-                    $tpl_source = str_replace('</head>',$head.'</head>', $tpl_source);    
-                }else{
-                    $tpl_source = removeHeadAndBodyTags($tpl_source);
-                    $tpl_source = $head.$tpl_source;
-                }            
-            }
-        }
-         
-    }else{
-        
-        //if javascript not allowed, use html purifier to remove suspicious code
+            $config = \HTMLPurifier_Config::createDefault();
+            $config->set('HTML.Doctype', 'HTML 4.01 Transitional');        
 
-        $config = \HTMLPurifier_Config::createDefault();
-        $config->set('HTML.Doctype', 'HTML 4.01 Transitional');        
+            $config->set('HTML.DefinitionID', 'html5-definitions'); // unqiue id
+            $config->set('HTML.DefinitionRev', 1);
 
-        $config->set('HTML.DefinitionID', 'html5-definitions'); // unqiue id
-        $config->set('HTML.DefinitionRev', 1);
-
-        //$config = HTMLPurifier_Config::createDefault();
-        $config->set('Cache', 'SerializerPath', $system->getSysDir('scratch'));
-        $config->set('CSS.Trusted', true);
-        $config->set('Attr.AllowedFrameTargets','_blank');
-        $config->set('HTML.SafeIframe', true);
-        //allow YouTube, Soundlcoud and Vimeo     
-        // https://w.soundcloud.com/player/
-        $config->set('URI.SafeIframeRegexp', '%^(https?:)?//(www\.youtube(?:-nocookie)?\.com/embed/|player\.vimeo\.com/video/|w\.soundcloud\.com/player/)%'); 
-        
-        $def = $config->getHTMLDefinition(true);
-        $def->addElement(
-            'audio',
-            'Block',
-            'Flow',
-            'Common',
-            [
-                'controls' => 'Bool',
-                'autoplay' => 'Bool',
-                'data-id' => 'Number'
-            ]
-        );        
-        $def->addElement('source', 'Block', 'Flow', 'Common', array(
-            'src' => 'URI',
-            'type' => 'Text',
-        ));
-
-        /* @todo test it
-        if ($def = $config->maybeGetRawHTMLDefinition()) {
-            // http://developers.whatwg.org/the-video-element.html#the-video-element
-            $def->addElement('video', 'Block', 'Optional: (source, Flow) | (Flow, source) | Flow', 'Common', array(
+            //$config = HTMLPurifier_Config::createDefault();
+            $config->set('Cache', 'SerializerPath', $system->getSysDir('scratch'));
+            $config->set('CSS.Trusted', true);
+            $config->set('Attr.AllowedFrameTargets','_blank');
+            $config->set('HTML.SafeIframe', true);
+            //allow YouTube, Soundlcoud and Vimeo     
+            // https://w.soundcloud.com/player/
+            $config->set('URI.SafeIframeRegexp', '%^(https?:)?//(www\.youtube(?:-nocookie)?\.com/embed/|player\.vimeo\.com/video/|w\.soundcloud\.com/player/)%'); 
+            
+            $def = $config->getHTMLDefinition(true);
+            $def->addElement(
+                'audio',
+                'Block',
+                'Flow',
+                'Common',
+                [
+                    'controls' => 'Bool',
+                    'autoplay' => 'Bool',
+                    'data-id' => 'Number'
+                ]
+            );        
+            $def->addElement('source', 'Block', 'Flow', 'Common', array(
                 'src' => 'URI',
                 'type' => 'Text',
-                'width' => 'Length',
-                'height' => 'Length',
-                'poster' => 'URI',
-                'preload' => 'Enum#auto,metadata,none',
-                'controls' => 'Bool',
             ));
-        }        
-        */
-        
-        
-        
-        //$config->set('HTML.Trusted', true);
-        //$config->set('Filter.ExtractStyleBlocks', true);
-        $purifier = new HTMLPurifier($config);
-        
-        $tpl_source = $purifier->purify($tpl_source);
-        
-        //$styles = $purifier->context->get('StyleBlocks');
-    }
-    
+
+            /* @todo test it
+            if ($def = $config->maybeGetRawHTMLDefinition()) {
+                // http://developers.whatwg.org/the-video-element.html#the-video-element
+                $def->addElement('video', 'Block', 'Optional: (source, Flow) | (Flow, source) | Flow', 'Common', array(
+                    'src' => 'URI',
+                    'type' => 'Text',
+                    'width' => 'Length',
+                    'height' => 'Length',
+                    'poster' => 'URI',
+                    'preload' => 'Enum#auto,metadata,none',
+                    'controls' => 'Bool',
+                ));
+            }        
+            */
+
+            //$config->set('HTML.Trusted', true);
+            //$config->set('Filter.ExtractStyleBlocks', true);
+            $purifier = new HTMLPurifier($config);
+            
+            $tpl_source = $purifier->purify($tpl_source);
+
+            if(!empty($font_styles)){
+                if(strpos($tpl_source, '<head>')>0){
+                    $tpl_source = str_replace('</head>',$font_styles.'</head>', $tpl_source);    
+                }else{
+                    $tpl_source = $font_styles.$tpl_source;
+                }
+            }
+
+            //$styles = $purifier->context->get('StyleBlocks');
+        }
+
     }else{
         //other than html or js output - it removes html and body tags
         $tpl_source = removeHeadAndBodyTags($tpl_source);
