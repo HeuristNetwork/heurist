@@ -2272,7 +2272,14 @@ var recordPopupFrame = null;
 // function to open link from record viewer
 //
 function link_open(link) {
+
+    let target = !link.getAttribute("target") ? '_popup' : link.getAttribute("target"); // without a defined target, by default attempt to open in a popup
     link.href = link.href+'&reloadPopup=1';
+
+    if(target !== '_popup'){
+        return true;
+    }
+
     try{
         if(recordPopupFrame && recordPopupFrame.is(':visible')){
             recordPopupFrame.attr('src', link.href);

@@ -273,8 +273,12 @@ if(!($is_map_popup || $without_header)){
                     return false;
                 <?php 
                 }else{
-                ?>    
-                if(window.hWin && window.hWin.HEURIST4 && window.hWin.HEURIST4.msg){
+                ?>
+
+                let href = link.href;
+                let target = !link.getAttribute("target") ? '_popup' : link.getAttribute("target"); // without a defined target, by default attempt to open in a popup
+
+                if(window.hWin && window.hWin.HEURIST4 && window.hWin.HEURIST4.msg && target == '_popup'){
                     try{
                        window.hWin.HEURIST4.msg.showDialog(link.href, { title:'.', width: 600, height: 500, modal:false });
                        return false;
