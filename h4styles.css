@@ -471,10 +471,14 @@ div.recordDiv.public  > .action-button-container{
     display: none;
 }
 
-
 .list .recordDiv:hover .recordTitle{
     right:96px;
 }
+
+.list .recordDiv.public:hover .recordTitle{
+    right:2px;
+}
+
 
 .list .recordDiv > .item{
     display: table-cell;

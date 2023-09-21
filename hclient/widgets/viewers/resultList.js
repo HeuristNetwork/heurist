@@ -2031,6 +2031,17 @@ $.widget( "heurist.resultList", {
             return;
         }else{
             
+            function __selectOnClick(map_layer_action){
+                        $(that.document).trigger(window.hWin.HAPI4.Event.ON_REC_SELECT, 
+                        {selection:[selected_rec_ID], 
+                            map_layer_action: map_layer_action,  //dataset_visibility: true, 
+                            source:that.element.attr('id'), 
+                            search_realm:that.options.search_realm
+                            //,search_page:this.options.search_page
+                        } );
+            }
+            
+            
             //this.options.recordview_onselect=='popup'
              //(this.options.recordview_onselect!==false && this.options.view_mode!='list')
             var isview = (this.options.recordview_onselect=='popup' ||
@@ -2041,7 +2052,11 @@ $.widget( "heurist.resultList", {
                 this._clearTimeouts();
                 this._showRecordViewPopup( selected_rec_ID );
 
-                return;
+                if(!(this.options.recordview_onselect=='popup')){
+                    //__selectOnClick(null);
+                    return;
+                }
+                
             }else
             if($target.hasClass('rec_expand_on_map') || $target.parents('.rec_expand_on_map').length>0){
                 if(this._currentRecordset){
@@ -2049,40 +2064,14 @@ $.widget( "heurist.resultList", {
                     var btn = $target.hasClass('rec_expand_on_map')?$target:$target.parents('.rec_expand_on_map');
                     if(btn.attr('data-loaded')=='loading') return; 
                     
-                    /*
-                    if(btn.attr('data-loaded')!='visible'){
-                         btn.attr('data-loaded','visible');
-                         btn.find('.ui-button-text').text('Hide data');
-                    }else{
-                         btn.attr('data-loaded','hidden');
-                         btn.find('.ui-button-text').text('Show data');
-                    }
-                    //+ '<span class="ui-button-icon-primary ui-icon ui-icon-globe"/>'
-                    */     
-                        //var record = this._currentRecordset.getById(selected_rec_ID);
-                        $(this.document).trigger(window.hWin.HAPI4.Event.ON_REC_SELECT, 
-                        {selection:[selected_rec_ID], 
-                            map_layer_action: 'trigger_visibility',  //dataset_visibility: true, 
-                            source:this.element.attr('id'), 
-                            search_realm:this.options.search_realm
-                            //,search_page:this.options.search_page
-                        } );
-                    
+                    __selectOnClick('trigger_visibility');
                 }            
                 return;            
             }else
             if($target.hasClass('rec_download') || $target.parents('.rec_download').length>0){
                 
                 if(this._currentRecordset){
-                    
-                    $(this.document).trigger(window.hWin.HAPI4.Event.ON_REC_SELECT, 
-                    {selection:[selected_rec_ID], 
-                        map_layer_action: 'download', //dataset_download: true, 
-                        source:this.element.attr('id'), 
-                        search_realm:this.options.search_realm
-                        //,search_page: this.options.search_page
-                    } );
-                    
+                    __selectOnClick('download');
                 }
                 return;            
                 
