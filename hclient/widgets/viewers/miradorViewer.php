@@ -62,7 +62,11 @@ if q only defined all images linked to record(s) will be included
 
         $url = $baseUrl . '/' .  $_SERVER['REQUEST_URI'];  
         
-        if(@$_REQUEST['manifest'] || @$_REQUEST['iiif']){
+        if(@$_REQUEST['url']) { //direct url to manifest
+        
+            $url = $_REQUEST['url'];
+            
+        }else if(@$_REQUEST['manifest'] || @$_REQUEST['iiif']){  //obfuscation id
             //load manifest directly
             $url = str_replace('hclient/widgets/viewers/miradorViewer.php','', $url);
             $url = str_replace($_SERVER['QUERY_STRING'],
