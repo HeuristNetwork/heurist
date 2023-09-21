@@ -849,8 +849,8 @@ window.hWin.HEURIST4.dbs = {
                 var $max_depth = 2;
                 if ($mode==4){ //$mode==6 || 
                    $max_depth = 3;
-                }else if ($mode==3){
-                   $max_depth = 3; //4
+                }else if ($mode==3){ //record titlemask
+                   $max_depth = 2; //was 4, then 3
                 }else if ($mode==5 || $mode==6 || $mode==7) //make it 1 for lazy load
                    $max_depth = 1; 
                                                                 
