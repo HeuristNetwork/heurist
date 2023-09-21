@@ -259,7 +259,7 @@ $title_alt = __getValue($rec, '3-1009');  //DT_CMS_ALT_TITLE
 $title_alt2 = __getValue($rec, '2-1052');
 $image_banner = __getFile($rec, '99-951', null); //DT_CMS_BANNER
 
-$image_logo = $image_logo?'<img style="max-height:80px;max-width:270px;" src="'.$image_logo.'">'
+$image_logo = $image_logo?'<img style="max-width:270px;" src="'.$image_logo.'">'
             :('<div style="text-align:center;display:block;width:250px;padding: 20px 10px;background:white;">'
             .'<h2 style="color:red;margin:4px">Logo</h2><div style="color:black">Set this as Website header/layout</div></div>');
 

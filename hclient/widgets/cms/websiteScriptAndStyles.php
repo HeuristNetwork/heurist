@@ -1225,9 +1225,10 @@ $website_languages_links ->#main-languages
         $('#main-logo').empty();
         $('<a href="#" style="text-decoration:none;"><?php print $image_logo;?></a>')
         .appendTo($('#main-logo'));
-
+        
         let $img = $('#main-logo img');
         if($img.length > 0 && !$img[0].complete && !window.hWin.HEURIST4.util.isempty($img.attr('src'))){
+            $img.css('max-height',$('#main-logo').css('max-height'));
             $img.on('load', () => {
                 $('#main-title').css({ left:$('#main-logo').width()+10 });
                 $('#main-title').fadeIn(500);

@@ -161,10 +161,11 @@ function editCMS_WidgetCfg( widget_cfg, _layout_content, $dlg, main_callback ){
                     $dlg.find('input[name="controls"]').each(
                         function(idx,item){$(item).prop('checked',ctrls.indexOf($(item).val())>=0);}
                     );
+                    
                     var legend = (opts.layout_params.legend)?opts.layout_params.legend.split(','):[];
                     if(legend.length>0){
 
-                        $dlg.find('input[name="legend_exp2"]').prop('checked',legend.indexOf('off')<0);
+                        $dlg.find('input[name="legend_exp2"]').prop('checked',legend.indexOf('off')<0); //expand on start
 
                         $.each(legend, function(i, val){
                             if(parseInt(val)>0){
@@ -172,14 +173,22 @@ function editCMS_WidgetCfg( widget_cfg, _layout_content, $dlg, main_callback ){
                             }else if(val!='off'){
                                 var is_exp = (val[0]!='-')
                                 if (!is_exp) legend[i] = val.substring(1);
-                                $dlg.find('input[name="legend_exp"][value="'+val+'"]').prop('checked',is_exp);
+                                $dlg.find('input[name="legend_exp"][value="'+legend[i]+'"]').prop('checked',is_exp);
                             }
                         });
-                        $dlg.find('input[name="legend"]').each(
-                            function(idx,item){
-                                $(item).prop('checked',legend.indexOf($(item).val())>=0);
-                            }
-                        );
+
+                        if(legend.indexOf('basemap')>=0 || legend.indexOf('mapdocs')>=0 || legend.indexOf('search')>=0){
+                            $dlg.find('input[name="legend"]').each(
+                                function(idx,item){
+                                    $(item).prop('checked',legend.indexOf($(item).val())>=0);
+                                }
+                            );
+                        }else{
+                            $dlg.find('input[name="legend"]').prop('checked', true);    
+                        }
+                        
+                        
+
                     }
                     if(opts.layout_params['template']){
                         $dlg.find('select[name="map_template"]').attr('data-template', opts.layout_params['template']);        
@@ -936,8 +945,10 @@ function editCMS_WidgetCfg( widget_cfg, _layout_content, $dlg, main_callback ){
                 ctrls = [];
                 $dlg.find('input[name="legend"]').each( //visible section in legend
                     function(idx,item){
-                        var is_exp = $dlg.find('input[name="legend_exp"][value="'+$(item).val()+'"]').is(':checked')?'':'-'
-                        ctrls.push(is_exp+$(item).val());
+                        if($(item).is(':checked')){
+                            var is_exp = $dlg.find('input[name="legend_exp"][value="'+$(item).val()+'"]').is(':checked')?'':'-'
+                            ctrls.push(is_exp+$(item).val());
+                        }
                     }
                 );
                 if(ctrls.length>0){
