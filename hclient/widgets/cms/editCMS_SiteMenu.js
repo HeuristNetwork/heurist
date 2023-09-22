@@ -252,7 +252,7 @@ title: "Overview"
         var tree_element = $container;
         
                 var item_li = $(item.li), 
-                menu_id = item.key, 
+                menu_id = item.data.page_id,
 
                 is_top = (item.data.parent_id==window.hWin.home_page_record_id);
 
