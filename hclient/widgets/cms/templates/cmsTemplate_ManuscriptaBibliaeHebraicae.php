@@ -256,10 +256,10 @@ if($isWebPage){ //set in websiteRecord.php
                             <p><span style="font-size: 13.008px;">©</span><span
                                     style="font-size: 13.008px;">&nbsp;</span>MBH 2022 -
                                 All rights reserved&nbsp;-&nbsp;<a
-                                    href="/heurist/?db=MBH_Manuscripta_Bibliae_Hebraicae&website&id=1408&pageid=1414"
+                                    href="/?db=MBH_Manuscripta_Bibliae_Hebraicae&website&id=1408&pageid=1414"
                                     title="Legal information">Legal information</a> - <a
-                                    href="//heurist/?db=MBH_Manuscripta_Bibliae_Hebraicae&website&id=1408&pageid=1415">General conditions of use</a>&nbsp;-&nbsp;<a
-                                    href="/heurist/?db=MBH_Manuscripta_Bibliae_Hebraicae&website&id=1408&pageid=1413">Contact</a> - 
+                                    href="/?db=MBH_Manuscripta_Bibliae_Hebraicae&website&id=1408&pageid=1415">General conditions of use</a>&nbsp;-&nbsp;<a
+                                    href="/?db=MBH_Manuscripta_Bibliae_Hebraicae&website&id=1408&pageid=1413">Contact</a> - 
                                 Proudly served by <a href="https://heuristnetwork.org/">Heurist</a> @
                                 <a href="https://huma-num.fr">Huma-Num</a>
                             </p>
