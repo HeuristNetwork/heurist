@@ -150,6 +150,10 @@ function editCMS_WidgetCfg( widget_cfg, _layout_content, $dlg, main_callback ){
 
             if(widget_name=='heurist_Map'){
                 //special behaviour for map widget
+                
+                //map symbology editor            
+                window.hWin.HEURIST4.ui.initEditSymbologyControl($dlg.find('#map_default_style'), opts.layout_params.style);
+                window.hWin.HEURIST4.ui.initEditSymbologyControl($dlg.find('#map_select_style'), opts.layout_params.selection_style );
 
                 if(opts.layout_params){
                     $dlg.find("#use_timeline").prop('checked', !opts.layout_params.notimeline);    
@@ -1000,7 +1004,10 @@ function editCMS_WidgetCfg( widget_cfg, _layout_content, $dlg, main_callback ){
 
             opts['custom_links'] = $dlg.find('textarea[name="custom_links"]').val(); 
             opts['current_search_filter'] = $dlg.find('input[name="current_search_filter"]').val();   
-        }
+            
+            layout_params['style'] = $dlg.find('#map_default_style').val();   
+            layout_params['selection_style'] = $dlg.find('#map_select_style').val();   
+        }//heurist_Map
 
                 var cont = $dlg.find('div.'+widget_name);
 

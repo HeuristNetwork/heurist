@@ -2545,6 +2545,46 @@ window.hWin.HEURIST4.ui = {
         }
         
     },
+
+    //
+    //
+    //
+    initEditSymbologyControl: function(element, value){
+
+                element.attr('readonly','readonly');
+                
+                value = window.hWin.HEURIST4.util.isJSON(value);
+                if (value) {
+                    element.val(JSON.stringify(value));   
+                }
+                
+                var parent_div = element.parent(); //$dlg.find(sname+'_div')
+        
+                var $btn_edit_clear = $('<span>')
+                .addClass("smallbutton ui-icon ui-icon-circlesmall-close")
+                .attr('tabindex', '-1')
+                .attr('title', 'Reset default symbology')
+                .appendTo( parent_div )
+                .css({'line-height': '20px',cursor:'pointer',
+                    outline: 'none','outline-style':'none', 'box-shadow':'none',  'border-color':'transparent'})
+                    .on( { click: function(){ window.hWin.HEURIST4.msg.showMsgDlg('<br>Are you sure?',
+                        function(){element.val('');}); }});
+                
+                var $btn_edit_switcher = $( '<span>open editor</span>', {title: 'Open symbology editor'})
+                    .addClass('smallbutton btn_add_term')
+                    .css({'line-height': '20px','vertical-align':'top',cursor:'pointer','text-decoration':'underline'})
+                    .appendTo( parent_div );
+                
+                $btn_edit_switcher.on( { click: function(){
+                        var current_val = window.hWin.HEURIST4.util.isJSON( element.val() );
+                        if(!current_val) current_val = {};
+                        window.hWin.HEURIST4.ui.showEditSymbologyDialog(current_val, 0, function(new_value){
+                            element.val(JSON.stringify(new_value));
+                        });
+                }});
+        
+    },
+
     
     //
     // show map style edit dialog

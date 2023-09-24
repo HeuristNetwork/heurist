@@ -1645,39 +1645,8 @@ $.widget( "heurist.mainMenu", {
             
             
             //map symbology editor            
-            function __symbology_btns(sname){
-                
-                sname = '#'+sname;
-
-                $dlg.find(sname).attr('readonly','readonly');
-                
-                var $btn_edit_clear = $('<span>')
-                .addClass("smallbutton ui-icon ui-icon-circlesmall-close")
-                .attr('tabindex', '-1')
-                .attr('title', 'Reset default symbology')
-                .appendTo( $dlg.find(sname+'_div') )
-                .css({'line-height': '20px',cursor:'pointer',
-                    outline: 'none','outline-style':'none', 'box-shadow':'none',  'border-color':'transparent'})
-                    .on( { click: function(){ window.hWin.HEURIST4.msg.showMsgDlg('<br>Are you sure?',
-                        function(){$dlg.find(sname).val('');}); }});
-                
-                var $btn_edit_switcher = $( '<span>open editor</span>', {title: 'Open symbology editor'})
-                    .addClass('smallbutton btn_add_term')
-                    .css({'line-height': '20px','vertical-align':'top',cursor:'pointer','text-decoration':'underline'})
-                    .appendTo( $dlg.find(sname+'_div') );
-                
-                $btn_edit_switcher.on( { click: function(){
-                        var current_val = window.hWin.HEURIST4.util.isJSON( $dlg.find(sname).val() );
-                        if(!current_val) current_val = {};
-                        window.hWin.HEURIST4.ui.showEditSymbologyDialog(current_val, 0, function(new_value){
-                            $dlg.find(sname).val(JSON.stringify(new_value));
-                        });
-                }});
-            
-            }//__symbology_btns
-            
-            __symbology_btns('map_default_style');
-            __symbology_btns('map_select_style');
+            window.hWin.HEURIST4.ui.initEditSymbologyControl($dlg.find('#map_default_style'));
+            window.hWin.HEURIST4.ui.initEditSymbologyControl($dlg.find('#map_select_style'));
             
             
             var ele = $dlg.find('#mapcluster_on');

@@ -276,6 +276,7 @@ if (!(@$_REQUEST['notimeline']=='true' || @$_REQUEST['notimeline']=='1')) { ?>
         layout_params['minzoom'] = __gp('minzoom');
         layout_params['pntzoom'] = __gp('pntzoom');
         layout_params['style'] = window.hWin.HEURIST4.util.isJSON(__gp('style')); //default style
+        layout_params['selection_style'] = window.hWin.HEURIST4.util.isJSON(__gp('selection_style'));
         
         mapping = $('#mapping').mapping({
             element_layout: '#mapping',
