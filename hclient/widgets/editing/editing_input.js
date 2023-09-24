@@ -3936,10 +3936,10 @@ $.widget( "heurist.editing_input", {
                 var chbox = that.element.find('div.field-visibility2[data-input-id="'+btn.attr('data-input-id')+'"]');
                 var $input_div =  btn.parent('.input-div');
                 
-                if(btn.attr('hide_field')=='1'){
+                if(btn.attr('hide_field')=='1' || vis_mode == 'viewable' || vis_mode == 'hidden'){
 
-                    if($input_div.find('.sel_link2, .ui-selectmenu-button').length > 0){
-                        $input_div.find('.sel_link2, .ui-selectmenu-button').css('background-color', 'rgb(233 233 233)');
+                    if($input_div.find('.sel_link2, .link-div, .ui-selectmenu-button').length > 0){
+                        $input_div.find('.sel_link2, .link-div, .ui-selectmenu-button').css('background-color', 'rgb(233 233 233)');
                     }else{
                         $input_div.css('background-color','#CCCCCC');
                     }
@@ -3948,30 +3948,24 @@ $.widget( "heurist.editing_input", {
                     btn.removeClass('ui-icon-eye-open');            
                     btn.addClass('ui-icon-eye-crossed');
                     btn.attr('title', 'This value is not visible to the public');
-                    chbox.find('span.ui-icon').removeClass('ui-icon-check-off').addClass('ui-icon-check-on');
+                    
 
-                    if(vis_mode=='public'){ 
+                    if(vis_mode=='public' || vis_mode == 'viewable' || vis_mode == 'hidden'){ 
                         btn.removeClass('show-onhover'); //show always for invisible field   
                         btn.css('display','inline-block');                        
-                    }
-                }else if(vis_mode == 'viewable' || vis_mode == 'hidden'){
+                    }else if(vis_mode == 'viewable' || vis_mode == 'hidden'){
 
-                    if($input_div.find('.sel_link2, .ui-selectmenu-button').length > 0){
-                        $input_div.find('.sel_link2, .ui-selectmenu-button').css('background-color', 'rgb(233 233 233)');
+                        btn.removeClass('show-onhover');
+                        btn.css('display','inline-block');
+                        btn.attr('title', vis_mode == 'viewable' ? 'This value is only visible to logged-in users' : 'This value is only visible to the owner/owner group');
                     }else{
-                        $input_div.css('background-color','#CCCCCC');
+                        chbox.find('span.ui-icon').removeClass('ui-icon-check-off').addClass('ui-icon-check-on');
                     }
-
-                    $input_div.find('.text').addClass('grayed');
-                    btn.removeClass('ui-icon-eye-open');            
-                    btn.addClass('ui-icon-eye-crossed');
-                    btn.attr('title', vis_mode == 'viewable' ? 'This value is only visible to logged-in users' : 'This value is only visible to the owner/owner group')
-                    //chbox.find('span.ui-icon').removeClass('ui-icon-check-off').addClass('ui-icon-check-on');
-
-                    btn.removeClass('show-onhover');
-                    btn.css('display','inline-block');
                 }else{
 
+                    if($input_div.find('.link-div').length > 0){
+                        $input_div.find('.link-div').css('background-color', '#F4F2F4 !important');
+                    }
                     if($input_div.find('.sel_link2, .ui-selectmenu-button').length > 0){
                         $input_div.find('.sel_link2, .ui-selectmenu-button').css('background-color', '');
                     }else{
@@ -5020,8 +5014,8 @@ $.widget( "heurist.editing_input", {
         
         var vis_mode = this.f('rst_NonOwnerVisibility');
         
-        if(this.options.showedit_button && this.detailType!="relmarker" &&
-         (vis_mode=='pending' || vis_mode=='public'))
+        if(this.options.showedit_button && this.detailType!="relmarker" && 
+            !window.hWin.HEURIST4.util.isempty(vis_mode))
         {
             var idx, k=0;
             
