@@ -411,7 +411,7 @@ if(!($is_map_popup || $without_header)){
             // Move related record details without particular relmarker field to the separated section
             //
             function moveRelatedDetails(related_records){
-                
+
                 var $rel_section = $('div.relatedSection');
 
                 var $public_fields = $('div#div_public_data').find('fieldset[id], div[data-order]');
@@ -1913,7 +1913,7 @@ function print_other_tags($bib) {
 //
 function print_relation_details($bib) {
 
-    global $system, $relRT,$relSrcDT,$relTrgDT,$ACCESSABLE_OWNER_IDS, $is_map_popup, $is_production, $rectypesStructure;
+    global $system, $relRT,$relSrcDT,$relTrgDT,$ACCESSABLE_OWNER_IDS, $is_map_popup, $is_production, $rectypesStructure, $defTerms;
 
     $mysqli = $system->get_mysqli();
 	
@@ -1949,7 +1949,7 @@ function print_relation_details($bib) {
     ($system->has_access()?'NOT rec_NonOwnerVisibility = "hidden")':'rec_NonOwnerVisibility = "public")');
 
     $relfields_details = mysql__select_all($mysqli,
-            'SELECT rst_DisplayName, rst_DisplayOrder, dty_PtrTargetRectypeIDs 
+            'SELECT rst_DisplayName, rst_DisplayOrder, dty_PtrTargetRectypeIDs, dty_JsonTermIDTree 
              FROM defRecStructure 
              INNER JOIN defDetailTypes ON rst_DetailTypeID = dty_ID 
              WHERE dty_Type = "relmarker" AND rst_RequirementType != "forbidden" AND rst_RecTypeID = '. $bib['rec_RecTypeID'] .'
@@ -1992,8 +1992,12 @@ function print_relation_details($bib) {
 
 					$ptrtarget_ids = explode(',', $relfields_details[$i][2]);
 					$fld_name = $relfields_details[$i][0];
+					$vocab_id = $relfields_details[$i][3];
 
-					if(in_array($bd['RelatedRecID']['rec_RecTypeID'], $ptrtarget_ids)){
+					$is_in_vocab = in_array($bd['RelTermID'], $defTerms->treeData($vocab_id, 3));
+
+                    // check if current relation is valid for field's rectype targets and reltype vocab
+					if(in_array($bd['RelatedRecID']['rec_RecTypeID'], $ptrtarget_ids) && $is_in_vocab){
 
 						if(array_key_exists($fld_name, $move_details)){
 
@@ -2077,8 +2081,12 @@ function print_relation_details($bib) {
 
 					$ptrtarget_ids = explode(',', $relfields_details[$i][2]);
 					$fld_name = $relfields_details[$i][0];
+					$vocab_id = $relfields_details[$i][3];
 
-					if(in_array($bd['RelatedRecID']['rec_RecTypeID'], $ptrtarget_ids)){
+					$is_in_vocab = in_array($bd['RelTermID'], $defTerms->treeData($vocab_id, 3));
+
+                    // check if current relation is valid for field's rectype targets and reltype vocab
+					if(in_array($bd['RelatedRecID']['rec_RecTypeID'], $ptrtarget_ids) && $is_in_vocab){
 
 						if(array_key_exists($fld_name, $move_details)){
 
@@ -2088,7 +2096,7 @@ function print_relation_details($bib) {
 						}else{
 
 							$move_details[$fld_name] = array();
-							array_push($move_details[$fld_name], $relfields_details[$i][1], $bd['recID']);
+							array_push($move_details[$fld_name], $relfields_details[$i][1], $bd['recID']);  //name of field, order, related recid
 
 							$field_name = $fld_name;
 						}
@@ -2140,7 +2148,7 @@ function print_relation_details($bib) {
     print '</div>';
 
     //$move_details - array of related records without particular relmarker field
-    if(is_array($move_details) && count($move_details) > 0){
+    if(is_array($move_details) && !empty($move_details)){
         echo '<script>moveRelatedDetails(', json_encode($move_details, JSON_FORCE_OBJECT), ');</script>';
     }
 
