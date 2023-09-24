@@ -62,7 +62,7 @@
                         "dty_Role":"title",
                         "dty_Size":255,
                         "rst_DisplayName": "Field label:",
-                        "rst_DisplayHelpText": "The name of the field, displayed next to the field in data entry and used to identify the field in report formats, analyses and so forth", 
+                        "rst_DisplayHelpText": "The name of the field, displayed next to the field in data entry.<br>Used to identify the field in report formats, analyses and so forth", 
                         "rst_DisplayExtendedDescription":"",
                         "rst_DisplayWidth":60,
                         "rst_DefaultValue":"",
@@ -79,6 +79,29 @@
                         "rst_DisplayName":"Field width:",
                         "rst_DisplayHelpText": "Display width of this field in the data entry form (does not limit maximum data length)",
                         "rst_RequirementType":"optional"
+                    }
+                },
+                {  
+                    "dtID": "rst_SeparatorType",
+                    "dtFields":{
+                        "dty_Type":"enum",
+                        "dty_Role":"virtual",
+                        "rst_Class":"group_separator",
+                        "rst_DisplayName":"Type:",
+                        "rst_DefaultValue": "tabs",
+                        "rst_DisplayHelpText": "Collapsible Block header delimits a block of fields which can be opened/closed/moved together.<br>Consecutive Tab headers create a row of tabs containing the fields which follow them.<br>Simple Divider is an independant heading with no grouping function.",
+                        "rst_FieldConfig": [
+                            {"key":"", "title": "GROUPS", "disabled": true},
+                            {"key":"tabs", "title":"Tab", "depth": 1},
+                            {"key":"tabs_new", "title":"Tab (new group)", "depth": 1},
+                            {"key":"group_break", "title":"Static block", "depth": 1},
+                            {"key":"accordion", "title":"Collapsible block (initially collapsed)", "depth": 1},
+                            {"key":"expanded", "title":"Collapsible block (initially expanded)", "depth": 1},
+                            {"key":"", "title": "WITHIN-GROUPS HEADING", "disabled": true},
+                            {"key":"group", "title":"Section heading", "depth": 1},
+                            {"key":"accordion_inner", "title":"Collapsible block (initially collapsed)", "depth": 1},
+                            {"key":"expanded_inner", "title":"Collapsible block (initially expanded)", "depth": 1}
+                        ]
                     }
                 },
                 {
@@ -241,7 +264,6 @@
                         "rst_Display":"hidden",
                         "rst_Class":"resource",
                         "rst_DisplayName":"Pointer mode:",
-                        "rst_DisplayHelpText": "", 
                         "rst_DefaultValue":"dropdown_add",
                         "rst_DisplayHelpText": "For child record pointers, only standard addition modes are available",
                         "rst_FieldConfig":[
@@ -299,28 +321,6 @@
                         "rst_DisplayName":"Default Value:",
                         "rst_DisplayHelpText": "Select record to be default resource/linked record",
                         "rst_FieldConfig": {"entity":"records"}
-                    }
-                },
-                {  "dtID": "rst_SeparatorType",
-                    "dtFields":{
-                        "dty_Type":"enum",
-                        "dty_Role":"virtual",
-                        "rst_Class":"group_separator",
-                        "rst_DisplayName":"Group/separator type:",
-                        "rst_DefaultValue": "tabs",
-                        "rst_DisplayHelpText": "Collapsible Block header delimits a block of fields which can be opened/closed/moved together. Consecutive Tab headers create a row of tabs containing the fields which follow them. Simple Divider is an independant heading with no grouping function.",
-                        "rst_FieldConfig": [
-                            {"key":"", "title": "WITHIN-GROUPS HEADING", "disabled": true},
-                            {"key":"group", "title":"Section heading", "depth": 1},
-                            {"key":"accordion_inner", "title":"Collapsible block (initially collapsed)", "depth": 1},
-                            {"key":"expanded_inner", "title":"Collapsible block (initially expanded)", "depth": 1},
-                            {"key":"", "title": "GROUPS", "disabled": true},
-                            {"key":"tabs", "title":"Tab", "depth": 1},
-                            {"key":"tabs_new", "title":"Tab (new group)", "depth": 1},
-                            {"key":"group_break", "title":"Static block", "depth": 1},
-                            {"key":"accordion", "title":"Collapsible block (initially collapsed)", "depth": 1},
-                            {"key":"expanded", "title":"Collapsible block (initially expanded)", "depth": 1}
-                        ]
                     }
                 },
                 {

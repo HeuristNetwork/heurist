@@ -217,40 +217,6 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
             var ele = window.hWin.HEURIST4.ui.initHSelect(this.rts_actions_menu.find('select.s_width'),
                                             false, {'max-width':'60px','font-size':'0.9em', padding:0});
             
-            
-            
-/* pre 2020-11-04 version                    
-            $('<div class="rts-editor-actions" '
-                    +'style="width:272px;background:none !important;display:none;padding-top:2px;'
-                    +'font-size:10px;font-weight:normal;cursor:pointer">'
-                   +'<div style="line-height:18px">&nbsp;</div>' 
-                   +'<span data-action="edit" style="background:lightblue;padding:3px;display:inline-block;width:52px;">'
-                        +'<span class="ui-icon ui-icon-pencil" title="Edit" style="font-size:9px;font-weight:normal"/>Edit</span>'           
-                        
-                   +'<span class="edit_rts_sel" style="background:lightblue;padding:4px" title="Requirement type">'
-                        +'<select class="edit_rts s_reqtype"><option>required</option><option>recommended</option><option>optional</option>'
-                        +'<option value="forbidden">hidden</option></select></span>'           
-                   +'<span class="edit_rts_sel" style="background:lightblue;padding:4px" title="Repeatability">'
-                        +'<select class="edit_rts s_repeat"><option value="1">single</option><option value="0">repeatable</option>'
-                        +'<option value="2">limited 2</option><option value="3">limited 3</option>'
-                        +'<option value="5">limited 5</option><option value="10">limited 10</option></select></span>'           
-                   +'<span class="edit_rts_sel" style="background:lightblue;padding:4px" title="Width of field">'
-                        +'<select class="edit_rts s_width"><option>5</option><option>10</option><option>20</option><option>30</option>'
-                        +'<option>40</option><option>50</option><option>60</option><option>80</option><option>100</option>'
-                        +'<option>120</option></select></span>'
-
-                   +'<span class="edit_rts_btn" style="top:24px;left:80px;position:absolute;background:lightblue;display:none" '
-                   +' data-apply="1" title="Save changes for field properties">Apply</span>'
-                   +'<span class="edit_rts_btn" style="top:24px;left:130px;position:absolute;background:lightblue;display:none">'
-                   +'Cancel</span>'
-                           
-                   +'<br><span data-action="field" style="background:lightcyan;padding:4px;display:inline-block;width: 50px;">'
-                        +'<span class="ui-icon ui-icon-plus" title="Add a new field to this record type" style="font-size:9px;font-weight:normal"/>Field</span>'
-                   +'<br><span data-action="block" title="Add a new group/separator" style="background:lightgreen;padding:4px;display:inline-block;width: 50px;"><span style="font-size:11px">&nbsp;+&nbsp;&nbsp;</span>Block</span>'               
-                    +'</div>')
-*/                    
-                    
-            
             //save/cancel rts buttons
             this.edit_rts_apply = this.rts_actions_menu.find('.edit_rts_btn').button();
             this._on( this.edit_rts_apply, {
@@ -372,9 +338,41 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                                     that.options.rts_editor.manageDefRecStructure(
                                         'showBaseFieldEditor', -1, dt_id, null, rec_dlg);
                                 }else if(action=='block'){
-                                    
-                                    that.options.rts_editor.manageDefRecStructure(
-                                        'addNewSeparator', dt_id);
+
+                                    window.hWin.HAPI4.EntityMgr.getEntityConfig('defRecStructure', function(response){
+
+                                        let fields = response.fields;
+
+                                        for(const idx in fields){
+
+                                            if(fields[idx]['dtID'] != 'rst_SeparatorType'){
+                                                continue;
+                                            }
+
+                                            let fieldConfig = fields[idx]['dtFields']['rst_FieldConfig'];
+
+                                            let $dlg;
+                                            let msg = '<div><label>Separator type:</label><select id="sep_type"></select></div>';
+
+                                            let btns = {};
+                                            btns[window.HR('Cancel')] = () => { $dlg.dialog('close'); };
+                                            btns[window.HR('Insert')] = () => {
+
+                                                let sep_type = $dlg.find('#sep_type').val(); // get value first
+
+                                                $dlg.dialog('close'); // then close dialog
+
+                                                that.options.rts_editor.manageDefRecStructure('addNewSeparator', dt_id, sep_type);
+                                            };
+
+                                            $dlg = window.hWin.HEURIST4.msg.showMsgDlg(msg, btns, {title: 'Inserting separator'}, {default_palette_class: 'ui-heurist-design'});
+
+                                            window.hWin.HEURIST4.ui.createSelector($dlg.find('#sep_type')[0], fieldConfig);
+                                            window.hWin.HEURIST4.ui.initHSelect($dlg.find('#sep_type'), false);
+
+                                            break;
+                                        }
+                                    });
                                     
                                 }else if(action=='edit'){
                                     that.options.rts_editor.manageDefRecStructure(

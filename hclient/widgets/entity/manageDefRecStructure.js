@@ -1305,7 +1305,8 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
         
         var dty_type = $Db.dty(dty_ID,'dty_Type');
         if(dty_type=='separator'){
-            fields['rst_SeparatorType'] = 'tabs';
+            fields['rst_SeparatorType'] = rst_fields['rst_SeparatorType'] ? rst_fields['rst_SeparatorType'] : 'tabs';
+            if(fields['rst_DisplayHelpText'] == 'new separator') fields['rst_DisplayHelpText'] = ''; // remove default help text
         }else if(dty_type=='resource'){
 
             fields['rst_PointerMode'] = rst_fields['rst_PointerMode'];
@@ -1318,7 +1319,6 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
                 fields['rst_DisplayWidth'] = 100;
             }
         }
-
 
         var that = this;
         this._saveEditAndClose(fields, function( recID, fields ){
@@ -1778,47 +1778,41 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
             this._onDetailTypeChange();
         }
         
-        
-        
+        const dt_type = this._editing.getValue('dty_Type')[0];
+
         //add show explanation checkbox
-        var ishelp_on = (this.usrPreferences['help_on']==true || this.usrPreferences['help_on']=='true');
-        var ele = $('<div id="help_container" style="display:inline-block;position:relative;top:5px;left:130px;"><label><input type="checkbox" '
-                        +(ishelp_on?'checked':'')+'/>show explanations</label></div>')
-                    .prependTo(this.editForm);
-        
-        this._on( ele.find('input'), {change: function( event){
-            var ishelp_on = $(event.target).is(':checked');
-            this.usrPreferences['help_on'] = ishelp_on;
-            window.hWin.HEURIST4.ui.switchHintState2(ishelp_on, this.editForm, '.heurist-helper3');
-        }});
+        let ishelp_on = (this.usrPreferences['help_on']==true || this.usrPreferences['help_on']=='true' || dt_type == 'separator');
+
+        if(dt_type != 'separator'){ // always show help text for separators
+
+            var ele = $('<div id="help_container" style="display:inline-block;position:relative;top:5px;left:130px;"><label><input type="checkbox" '
+                +(ishelp_on?'checked':'')+'/>show explanations</label></div>')
+            .prependTo(this.editForm);
+            
+            this._on( ele.find('input'), {change: function( event){
+                var ishelp_on = $(event.target).is(':checked');
+                this.usrPreferences['help_on'] = ishelp_on;
+                window.hWin.HEURIST4.ui.switchHintState2(ishelp_on, this.editForm, '.heurist-helper3');
+            }});
+        }
+
         this.editForm.find('.heurist-helper1').removeClass('heurist-helper1').addClass('heurist-helper3');
         window.hWin.HEURIST4.ui.switchHintState2(ishelp_on, this.editForm, '.heurist-helper3');
         
-        
         var bottom_div = $('<div style="width:100%;min-height:26px">').appendTo(this.editForm);
-        
-        var  dt_type = this._editing.getValue('dty_Type')[0];
 
         if(dt_type=='separator'){
             
-            var sep_type;
-            if(false){  //HARDCODE for Casey databases  && window.hWin.HAPI4.database.indexOf('Casey')>=0
+            let sep_type = this._editing.getValue('rst_DefaultValue')[0]; //take from db
+            if(!(sep_type=='accordion' || sep_type=='tabs' || sep_type=='tabs_new' || sep_type=='expanded')){
                 sep_type = 'group';
-                edit_ele = this._editing.getFieldByName('rst_SeparatorType');
-                edit_ele.hide();
-            }else{
-                sep_type = this._editing.getValue('rst_DefaultValue')[0]; //take from db
-                if(!(sep_type=='accordion' || sep_type=='tabs' || sep_type=='tabs_new' || sep_type=='expanded')){
-                    sep_type = 'group';
-                }
             }
             this._editing.setFieldValueByName( 'rst_SeparatorType', sep_type, false ); //assign to entry selector
 
             sep_type = this._editing.getValue('rst_RequirementType')[0];
             sep_type = (sep_type=='forbidden')?sep_type:'optional';
             this._editing.setFieldValueByName( 'rst_SeparatorRequirementType', sep_type, false );
-            
-            
+
             //clear title to force change default one
             if(this._clear_title_for_separator){
                 this._editing.setFieldValueByName( 'rst_DisplayName', '', true );
@@ -1829,6 +1823,13 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
             this._clear_title_for_separator = false;
 
             this.editForm.find('.ui-accordion').hide();
+
+            // Change name label
+            this._editing.getFieldByName('rst_DisplayName').find('.header > label').text(window.HR('Heading:'));
+
+            // Change help text label
+            this._editing.getFieldByName('rst_DisplayHelpText').find('.header > label').text(window.HR('Description (optional):'));
+
         }else{
             
             var s = '';
@@ -1991,8 +1992,7 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
         this.editForm.find('.ui-selectmenu-button').css({background: '#ECF1FB'});
         this.editForm.find('.required > label').css({color: '#6A7C99'});
 
-    },    
-    
+    },
     
     //
     //
@@ -2585,13 +2585,13 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
     //
     // add new separator/group
     //
-    addNewSeparator: function( after_dtid, allow_proceed ){
+    addNewSeparator: function( after_dtid, seperator_type = 'tabs', allow_proceed = null ){
         
         var that = this;
         
         if(allow_proceed!==true){
             this._allowActionIfModified( function(){ 
-                that.addNewSeparator( after_dtid, true );                            
+                that.addNewSeparator( after_dtid, seperator_type, true );                            
             } );
             return;
         }
@@ -2631,7 +2631,7 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
             });
             
             if(!window.hWin.HEURIST4.util.isnull(ft_separator_id)){
-                this.addNewFieldToStructure( ft_separator_id, after_dtid );
+                this.addNewFieldToStructure( ft_separator_id, after_dtid, {rst_SeparatorType: seperator_type} );
             }else{ //"not used" separator field type not found - create new one
             
                 var fields = {                
@@ -2656,7 +2656,7 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
                         
                             $Db.dty(dty_ID, null, fields); //add on client side  
                             
-                            that.addNewFieldToStructure( dty_ID, after_dtid );
+                            that.addNewFieldToStructure( dty_ID, after_dtid, {rst_SeparatorType: seperator_type} );
                         }else{
                             window.hWin.HEURIST4.msg.showMsgErr(response);
                         }
