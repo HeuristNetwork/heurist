@@ -336,12 +336,14 @@
 
             $aut_idx = 0;
             $pub_idx = 0;
+            $id = '';
 
             foreach ($details->recordData->children('info:lc/xmlns/marcxchange-v2', false)->record->controlfield as $key => $cf_ele) { // controlfield elements
                 $cf_tag = @$cf_ele->attributes()['tag'];
 
                 if($cf_tag == '001') { // BnF ID
                     $formatted_array['BnF_ID'] = (string)$cf_ele[0];
+                    $id = (string)$cf_ele[0];
                 }else if($cf_tag == '003') { // Record URL
                     $formatted_array['biburl'] = (string)$cf_ele[0];
                     break;
@@ -384,7 +386,7 @@
                     $name = array();
                     $location = array();
 
-                    foreach ($df_ele->subfield as $sub_key => $sf_ele) { // TODO - look for examples of sf_code == {b, r, s}
+                    foreach ($df_ele->subfield as $sub_key => $sf_ele) { // TODO - look for examples of sf_code == {b, r}
                         $sf_code = @$sf_ele->attributes()['code'];
 
                         $str_val = str_replace(array('[', ']'), '', (string)$sf_ele[0]);
@@ -395,6 +397,9 @@
                             $name[] = $str_val;
                         }else if($sf_code == 'd'){
                             $formatted_array['date'][] = $str_val;
+                        }else if($sf_code == 's'){
+                            $formatted_array['publisher'][$pub_idx] = $str_val;
+                            break;
                         }
                     }
 
@@ -593,7 +598,7 @@
                         $sf_code = @$sf_ele->attributes()['code'];
 
                         switch ($df_tag) {
-                            case '200': // Person MISSING - $d
+                            case '200': // Person
 
                                 if($sf_code == 'a'){ // Surname
                                     $formatted_array['name'] = (string)$sf_ele[0];
@@ -604,7 +609,7 @@
                                     }else{
                                         $formatted_array['name'] = (string)$sf_ele[0];
                                     }
-                                }else if($sf_code == 'f'){ // Years active
+                                }else if($sf_code == 'f' || $sf_code == 'd'){ // Years active
                                     $formatted_array['years_active'] = (string)$sf_ele[0];
                                 }else if($sf_code == 'c'){ // Role/Job
                                     $formatted_array['role'] = (string)$sf_ele[0];
