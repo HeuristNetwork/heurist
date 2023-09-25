@@ -197,6 +197,12 @@ if (!(@$_REQUEST['notimeline']=='true' || @$_REQUEST['notimeline']=='1')) { ?>
         background-position: 3px !important;
     }
     
+    .leaflet-zoom-anim
+    .leaflet-zoom-animated {
+            transition-timing-function: linear;
+            transition-duration: 100ms;
+    }    
+    
     .v1 .browser-print-mode{
         padding: 3px 10px;
     }
@@ -256,6 +262,7 @@ if (!(@$_REQUEST['notimeline']=='true' || @$_REQUEST['notimeline']=='1')) { ?>
         layout_params['notimeline'] = __gp('notimeline');
         layout_params['nocluster'] = __gp('nocluster');
         layout_params['editstyle'] = __gp('editstyle');
+        layout_params['smooth_zoom'] = __gp('smooth_zoom');
         layout_params['basemap'] = __gp('basemap');  //name of basemap
         layout_params['basemap_filter'] = __gp('basemap_filter');  //name of basemap
         layout_params['extent'] = __gp('extent'); //@todo

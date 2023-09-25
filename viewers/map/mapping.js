@@ -358,7 +358,7 @@ $.widget( "heurist.mapping", {
         $('#'+map_element_id).css('padding',0); //reset padding otherwise layout set it to 10px
         
         var map_options = {zoomControl:false, tb_del:true, worldCopyJump: false};
-
+        
         this.nativemap = L.map( map_element_id,  map_options)
             .on('load', function(){ } );
 
@@ -720,7 +720,6 @@ $.widget( "heurist.mapping", {
                     this.nativemap.options.maxBoundsViscosity = 1;
                 }
                 
-
                 this.basemaplayer.bringToBack(); // ensure basemap is below all map documents
 
                 if(this.basemaplayer_filter){
@@ -3171,7 +3170,14 @@ $.widget( "heurist.mapping", {
         //maxClusterRadius
         this.isMarkerClusterEnabled = !__parseval(params['nocluster']);
         this.options.isEditAllowed = !this.options.isPublished || __parseval(params['editstyle']);
-        
+
+        this.smooth_zoom = __parseval(params['smooth_zoom']);
+        if(this.options.layout_params['smooth_zoom']){
+            this.nativemap.options.zoomSnap = 0.1;
+            //this.nativemap.options.wheelDebounceTime = 100;
+        }else{
+            this.nativemap.options.zoomSnap = 1;
+        }
         this.options.map_popup_mode = params['popup']; //standard, none, in dialog
         if(!this.options.map_popup_mode) this.options.map_popup_mode = 'standard';
         

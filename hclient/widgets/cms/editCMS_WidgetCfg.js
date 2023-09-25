@@ -160,9 +160,10 @@ function editCMS_WidgetCfg( widget_cfg, _layout_content, $dlg, main_callback ){
                     $dlg.find("#map_rollover").prop('checked', opts.layout_params.map_rollover);    
                     $dlg.find("#use_cluster").prop('checked', !opts.layout_params.nocluster);    
                     $dlg.find("#editstyle").prop('checked', opts.layout_params.editstyle);    
+                    $dlg.find("#smooth_zoom").prop('checked', opts.layout_params.smooth_zoom);    
 
                     var ctrls = (opts.layout_params.controls)?opts.layout_params.controls.split(','):[];
-                    $dlg.find('input[name="controls"]').each(
+                    $dlg.find('input[name=""]').each(
                         function(idx,item){$(item).prop('checked',ctrls.indexOf($(item).val())>=0);}
                     );
                     
@@ -933,6 +934,7 @@ function editCMS_WidgetCfg( widget_cfg, _layout_content, $dlg, main_callback ){
             layout_params['nocluster'] = !$dlg.find("#use_cluster").is(':checked');
             layout_params['editstyle'] = $dlg.find("#editstyle").is(':checked');
             layout_params['map_rollover'] = $dlg.find("#map_rollover").is(':checked');
+            layout_params['smooth_zoom'] = $dlg.find("#smooth_zoom").is(':checked');
             //@todo select basemap from selector
             //layout_params['basemap']
 
