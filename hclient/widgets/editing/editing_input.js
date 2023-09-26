@@ -204,7 +204,7 @@ $.widget( "heurist.editing_input", {
             if(!repeatable || this.options.suppress_repeat){  
                 //spacer
                 $( "<span>")
-                .addClass('editint-inout-repeat-button')
+                .addClass('editint-inout-repeat-button editint-inout-repeat-container')
                 .css({'min-width':'22px', display:'table-cell'})
                 .appendTo( this.element );
                 
@@ -212,7 +212,7 @@ $.widget( "heurist.editing_input", {
             
                 this.is_sortable = !that.is_disabled && !that.options.is_faceted_search; 
             
-                var btn_cont = $('<span>')
+                var btn_cont = $('<span>', {class: 'editint-inout-repeat-container'})
                     .css({display:'table-cell', 'vertical-align':'top', //'padding-top':'2px',
                             'min-width':'22px',  'border-color':'transparent'})
                     .appendTo( this.element );
@@ -3938,13 +3938,11 @@ $.widget( "heurist.editing_input", {
                 
                 if(btn.attr('hide_field')=='1' || vis_mode == 'viewable' || vis_mode == 'hidden'){
 
-                    if($input_div.find('.sel_link2, .link-div, .ui-selectmenu-button').length > 0){
-                        $input_div.find('.sel_link2, .link-div, .ui-selectmenu-button').css('background-color', 'rgb(233 233 233)');
-                    }else{
-                        $input_div.css('background-color','#CCCCCC');
+                    if($input_div.find('.link-div').length > 0){
+                        $input_div.find('.link-div').css('background-color', ''); // remove existing property (it's set to important)
                     }
 
-                    $input_div.find('.text').addClass('grayed');
+                    $input_div.find('.text, .sel_link2, .link-div, .ui-selectmenu-button').addClass('grayed');
                     btn.removeClass('ui-icon-eye-open');            
                     btn.addClass('ui-icon-eye-crossed');
                     btn.attr('title', 'This value is not visible to the public');
@@ -3964,15 +3962,10 @@ $.widget( "heurist.editing_input", {
                 }else{
 
                     if($input_div.find('.link-div').length > 0){
-                        $input_div.find('.link-div').css('background-color', '#F4F2F4 !important');
-                    }
-                    if($input_div.find('.sel_link2, .ui-selectmenu-button').length > 0){
-                        $input_div.find('.sel_link2, .ui-selectmenu-button').css('background-color', '');
-                    }else{
-                        $input_div.css('background-color','transparent');
+                        $input_div.find('.link-div')[0].style.setProperty('background-color', '#F4F2F4', ' !important');
                     }
 
-                    $input_div.find('.text').removeClass('grayed');
+                    $input_div.find('.text, .sel_link2, .link-div, .ui-selectmenu-button').removeClass('grayed');
                     btn.removeClass('ui-icon-eye-crossed');            
                     btn.addClass('ui-icon-eye-open');
                     btn.attr('title', 'Show/hide value from public');
