@@ -3420,7 +3420,7 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
 
             if(max_length_fields.length > 0){ // Set the selected freetext and memo/blocktext fields to 'max' width
 
-                var popup_maxw = this.editForm.width() * ((this.options.rts_editor) ? 0.7 : 0.8);
+                var popup_maxw = this.editForm.width() * ((this.options.rts_editor) ? 0.7 : 0.75);
 
                 for(var i = 0; i < max_length_fields.length; i++){
 
@@ -4618,6 +4618,20 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
         window.hWin.HEURIST4.ui.switchHintState2(ishelp_on, $(this.element));
         
         this._afterInitEditForm_restoreGroupStatus();
+
+        // Change gap size for the repeat button container, to keep record fields closer inline with each other
+        let $all_repeat_gaps = this.editForm.find('.editint-inout-repeat-container:has(.editint-inout-repeat-button.ui-icon-circlesmall-plus)');
+        if($all_repeat_gaps.length > 0){
+
+            let is_both_icons = $all_repeat_gaps.has('.editint-inout-repeat-button.ui-icon-translate');
+            let width = $($all_repeat_gaps[0]).width();
+
+            if(is_both_icons.length > 0 && $($all_repeat_gaps[0]).has('.ui-icon-translate').length == 0){
+                width = $(is_both_icons[0]).width();
+            }
+
+            this.editForm.find('.editint-inout-repeat-container').css('min-width', width);
+        }
         
         //
         //
