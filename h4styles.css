@@ -1867,8 +1867,11 @@ background: #8ea9b9
     margin: 2px 0px;
     padding: 3px;    
 }
-.ent_wrapper.editor .text.grayed{
-    background: #CCCCCC !important;
+.ent_wrapper.editor .text.grayed,
+.ent_wrapper.editor .sel_link2.grayed, 
+.ent_wrapper.editor .link-div.grayed, 
+.ent_wrapper.editor .ui-selectmenu-button.grayed{
+    background: rgb(233 233 233) !important;
 }
 .ent_wrapper.editor .heurist-helper1{
     font-style: normal;
