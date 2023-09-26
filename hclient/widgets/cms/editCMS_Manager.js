@@ -59,9 +59,9 @@ function editCMS_Manager( options ){
         return;
     }else{
         //check field
-        let is_missed = true;
+        let is_missed = false;
         if(DT_LANGUAGES>0 && !$Db.rst(RT_CMS_HOME,DT_LANGUAGES)){
-            is_missed = false;
+            is_missed = true;
         }
         
         if (is_missed) {
