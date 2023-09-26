@@ -72,6 +72,8 @@ $.widget( "heurist.app_storymap", {
         , onClearStory: null
 
         , storyPlaceholder: 'Please select a story in the list' // placeholder text
+        , elementsPlaceholder: '<br><br>There are no story elements to display for the selected item'
+        , elementsPlaceholderSub: '<i>Story elements may exist but not be publicly visible</i>'
     },
 
     _resultset_main: null, // current all stories
@@ -165,9 +167,9 @@ $.widget( "heurist.app_storymap", {
                                                 
                                 },
                                 "empty_remark": 
-                        '<h3 class="not-found" style="color:teal;">'
-                        + top.HR('<br><br>There are no story elements to display for the selected item')
-                        + '</h3><i>Story elements may exist but not be publicly visible>/i><br><br>)',
+                                '<h3 class="not-found" style="color:teal;">'
+                                    +  this.options.elementsPlaceholder + '</h3>'
+                                    +  this.options.elementsPlaceholderSub,
                                 "onScroll": function(event){ that._onScroll(event, that) },
                                 "expandDetailsWithoutWarning": true,
                                 "show_toolbar":false,
@@ -891,8 +893,8 @@ $.widget( "heurist.app_storymap", {
             //this.options.storyRecordID = null;
             this.pnlOverview.html(
             '<h3 class="not-found" style="color:teal;">'
-            +top.HR('<br><br>There are no story elements to display for the selected item')
-            +'</h3><i>Story elements may exist but not be publicly visible>/i><br><br>)');
+            +  this.options.elementsPlaceholder + '</h3>'
+            +  this.options.elementsPlaceholderSub);
         }
         
         if(this._btn_clear_story){

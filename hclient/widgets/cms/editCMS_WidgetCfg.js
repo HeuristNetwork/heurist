@@ -745,7 +745,13 @@ function editCMS_WidgetCfg( widget_cfg, _layout_content, $dlg, main_callback ){
                 if(!opts['reportEndPageMode']) opts['reportEndPageMode'] = 'inline';
                 if(!opts['reportElementMode']) opts['reportElementMode'] = 'vertical';
                 if(!opts['reportElementMapMode']) opts['reportElementMapMode'] = 'linked';
+
                 
+                if(!opts['elementsPlaceholder']) opts['elementsPlaceholder'] = '<br><br>There are no story elements to display for the selected item';
+                if(!opts['elementsPlaceholderSub']) opts['elementsPlaceholderSub'] = '<i>Story elements may exist but not be publicly visible</i>';
+
+                $dlg.find('input[name="elementsPlaceholder"]').val(opts['elementsPlaceholder']);
+                $dlg.find('input[name="elementsPlaceholderSub"]').val(opts['elementsPlaceholderSub']);
                 
                 $dlg.find('select[name="reportOverviewMode"]').val(opts['reportOverviewMode']);
                 $dlg.find('select[name="reportEndPageMode"]').val(opts['reportEndPageMode']);
