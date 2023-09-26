@@ -2518,8 +2518,12 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
                     
                 
                 return def_val;
+            }else if($.isPlainObject(values)){
+                return values[Object.keys(values)[0]];
+            }else if ($.isArray(values) && values.length>0){
+                return  values[0];
             }else{
-                return $.isPlainObject(values)?values[Object.keys(values)[0]]:values[0];
+                return  values;
             }
             
         },

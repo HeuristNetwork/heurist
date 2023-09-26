@@ -693,9 +693,12 @@ var datatable_custom_render = null;
 //
 function assignPageTitle(pageid){
     
-    var pagetitle = window.hWin.HAPI4.getTranslation(page_cache[pageid][DT_NAME], current_language);
+    var pagetitle = '';
     
-    pagetitle = window.hWin.HEURIST4.util.stripTags(pagetitle,'i,b,u,em,strong,sup,sub,small'); //<br>
+    if(!window.hWin.HEURIST4.util.isempty(page_cache[pageid][DT_NAME])){
+        pagetitle = window.hWin.HAPI4.getTranslation(page_cache[pageid][DT_NAME], current_language);    
+        pagetitle = window.hWin.HEURIST4.util.stripTags(pagetitle,'i,b,u,em,strong,sup,sub,small'); //<br>
+    }
     
     var is_show_pagetitle = (is_show_pagetitle_main || 
          (!window.hWin.HEURIST4.util.isempty(page_cache[pageid][DT_CMS_PAGETITLE]) && 
