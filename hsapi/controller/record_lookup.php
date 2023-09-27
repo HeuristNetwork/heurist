@@ -36,13 +36,11 @@
             'https://tlcmap.org/ghap/search?', 
             'https://tlcmap.australiasoutheast.cloudapp.azure.com/ws/ghap/search?'
         ), 
-        'geonames' => array(
-            'http://api.geonames.org/searchJSON?', 
-            'http://api.geonames.org/postalCodeLookupJSON?'
-        ), 
+        'geonames' => 'http://api.geonames.org/', 
 
-        'bnflibrary_bib' => 'https://catalogue.bnf.fr/api/SRU?', 
-        'bnflibrary_aut' => 'https://catalogue.bnf.fr/api/SRU?', 
+        'bnflibrary_bib' => 'https://catalogue.bnf.fr/api/SRU?',
+        'bnflibrary_aut' => 'https://catalogue.bnf.fr/api/SRU?',
+        'bnf_recdump' => 'https://catalogue.bnf.fr/api/SRU?',
 
         'nomisma' => array(
             'https://nomisma.org/apis/', 
@@ -421,74 +419,74 @@
                      * 4 => Role Code
                      */
 
-                     $value = '';
-                     $id = $aut_idx;
-                     $role = null;
- 
-                     $author = array();
- 
-                     foreach ($df_ele->subfield as $sub_key => $sf_ele) {
- 
-                         $sf_code = @$sf_ele->attributes()['code'];
- 
-                         if($sf_code == '3'){
-                             $id = (string)$sf_ele[0];
-                             $author['id'] = $id;
-                             continue;
-                         }else if($sf_code == '4'){
-                             $role = (string)$sf_ele[0];
-                             $author['role'] = $role;
-                             continue;
-                         }
- 
-                         switch ($df_tag) {
-                             case '700':
-                             case '701':
-                             case '702':
-                             case '703':
- 
-                                 if($sf_code == 'a') { // Surname
-                                     $author['surname'] = (string)$sf_ele[0];
-                                 }else if($sf_code == 'b') { // Given name
-                                     $author['firstname'] = (string)$sf_ele[0];
-                                 }else if($sf_code == 'f') { // Years active
-                                     $author['active'] = (string)$sf_ele[0];
-                                 }
- 
-                                 break;
-                             
-                             case '710':
-                             case '711':
-                             case '712':
-                             case '713':
- 
-                                 if($sf_code == 'c') { // Date // $sf_code == 'f' Location
-                                     $author['active'] = '(' . (string)$sf_ele[0] . ')';
-                                 }else if($sf_code == 'b'){ // Sub unit name
-                                     $author['surname'] = (string)$sf_ele[0];
-                                 }else if($sf_code == 'a') { // Main name
-                                     $author['firstname'] = (string)$sf_ele[0];
-                                 }
- 
-                                 break;
- 
-                             case '720':
-                             case '721':
-                             case '722':
-                             case '723':
- 
-                                 if($sf_code == 'a') { // Name
-                                     $author['name'] = (string)$sf_ele[0];
-                                 }
- 
-                                 break;
- 
-                             default:
-                                 break;
-                         }
-                     }
+                    $value = '';
+                    $id = $aut_idx;
+                    $role = null;
 
-                     if(!empty($author)){
+                    $author = array();
+
+                    foreach ($df_ele->subfield as $sub_key => $sf_ele) {
+
+                        $sf_code = @$sf_ele->attributes()['code'];
+
+                        if($sf_code == '3'){
+                            $id = (string)$sf_ele[0];
+                            $author['id'] = $id;
+                            continue;
+                        }else if($sf_code == '4'){
+                            $role = (string)$sf_ele[0];
+                            $author['role'] = $role;
+                            continue;
+                        }
+
+                        switch ($df_tag) {
+                            case '700':
+                            case '701':
+                            case '702':
+                            case '703':
+
+                                if($sf_code == 'a') { // Surname
+                                    $author['surname'] = (string)$sf_ele[0];
+                                }else if($sf_code == 'b') { // Given name
+                                    $author['firstname'] = (string)$sf_ele[0];
+                                }else if($sf_code == 'f') { // Years active
+                                    $author['active'] = (string)$sf_ele[0];
+                                }
+
+                                break;
+                            
+                            case '710':
+                            case '711':
+                            case '712':
+                            case '713':
+
+                                if($sf_code == 'c') { // Date // $sf_code == 'f' Location
+                                    $author['active'] = '(' . (string)$sf_ele[0] . ')';
+                                }else if($sf_code == 'b'){ // Sub unit name
+                                    $author['surname'] = (string)$sf_ele[0];
+                                }else if($sf_code == 'a') { // Main name
+                                    $author['firstname'] = (string)$sf_ele[0];
+                                }
+
+                                break;
+
+                            case '720':
+                            case '721':
+                            case '722':
+                            case '723':
+
+                                if($sf_code == 'a') { // Name
+                                    $author['name'] = (string)$sf_ele[0];
+                                }
+ 
+                                break;
+ 
+                            default:
+                                break;
+                        }
+                    }
+
+                    if(!empty($author)){
                         if(isset($role) && !empty($role) && !empty($author_codes)){ // role code found
 
                             if(in_array($role, $author_codes)){

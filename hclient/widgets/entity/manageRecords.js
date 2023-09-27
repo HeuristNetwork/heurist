@@ -64,9 +64,11 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
         summary_tabs:['0','1']},
     
     // For external lookups, holds values that need to be processed
+    lookup_record_link: null,
     term_values: [],
     file_values: {},
     resource_values: [],
+    relmarker_values: [],
 
     _init: function() {
         
@@ -5448,16 +5450,18 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
 
             var assigned_fields = []; // list of fields assigned
 
+            that.lookup_record_link = null; // link to records from current lookup
             that.term_values = []; // list of label values for enum/term fields
             that.file_values = {}; // list of external urls for file fields
             that.resource_values = []; // list of search values for recpointer fields
+            that.relmarker_values = []; // list of search values and term values for relationship marker fields
 
             if(!window.hWin.HEURIST4.util.isempty(recset['ext_url'])){
-                that.resource_values.push({url: recset['ext_url'], type: 'ext'});
+                that.lookup_record_link = {url: recset['ext_url'], type: 'ext'};
             }else if(!window.hWin.HEURIST4.util.isempty(recset['heurist_url'])){
-                that.resource_values.push({url: recset['heurist_url'], type: 'heurist'});
+                that.lookup_record_link = {url: recset['heurist_url'], type: 'heurist'};
             }else{
-                that.resource_values.push({});
+                that.lookup_record_link = null;
             }
 
             for(var k=0; k<dtyIds.length; k++){
@@ -5469,7 +5473,7 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
                     var newval = recset[dt_id];
                     var type = $Db.dty(dt_id, 'dty_Type');
 
-                    if(type == 'resource' || type == 'enum'){
+                    if(type == 'resource' || type == 'enum' || type == 'relmarker'){
 
                         let completed = []; // completed recpointers/terms
 
@@ -5477,7 +5481,7 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
 
                             for(let i = 0; i < newval.length; i++){
 
-                                if(Number.isInteger(+newval[i])){ // is fine
+                                if(Number.isInteger(+newval[i]) && type != 'relmarker'){ // is fine
                                     completed.push(newval[i]);
                                     continue;
                                 }
@@ -5485,6 +5489,8 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
                                 // needs additional handling
                                 if(type == 'resource'){
                                     that.resource_values.push({fld_id: dt_id, values: newval[i]});
+                                }else if(type == 'relmarker'){
+                                    that.relmarker_values.push({fld_id: dt_id, values: newval[i]});
                                 }else{
 
                                     let vocab_id = $Db.dty(dt_id, 'dty_JsonTermIDTree');
@@ -5516,12 +5522,14 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
                             }
                         }else{
 
-                            if(Number.isInteger(+newval)){
+                            if(Number.isInteger(+newval) && type != 'relmarker'){
                                 completed.push(newval);
                             }else{
 
                                 if(type == 'resource'){
                                     that.resource_values.push({fld_id: dt_id, values: newval});
+                                }else if(type == 'relmarker'){
+                                    that.relmarker_values.push({fld_id: dt_id, values: newval});
                                 }else{
                                     
                                     let vocab_id = $Db.dty(dt_id, 'dty_JsonTermIDTree');
@@ -5572,7 +5580,7 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
                         continue;
                     }
 
-                    let req_url = 'http://catalogue.bnf.fr/api/SRU?version=1.2&operation=searchRetrieve&recordSchema=unimarcxchange&maximumRecords=1&startRecord=1&query=(';                                                        
+                    let req_url = 'https://catalogue.bnf.fr/api/SRU?version=1.2&operation=searchRetrieve&recordSchema=unimarcxchange&maximumRecords=1&startRecord=1&query=(';                                                        
                     let fld_name = cfg.service == 'bnfLibrary' ? 'bib.recordid' : 'aut.recordid';
 
                     req_url += encodeURIComponent(fld_name + ' all ' + value) + ')';
@@ -5624,7 +5632,7 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
                 }
             }
 
-            that.processTermFields(assigned_fields, {});
+            that.processTermFields(assigned_fields, {}); // order of operations is: Terms, Files, Record pointers, Relationship markers
         }
     },
 	
@@ -5904,7 +5912,7 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
     },
 
 	//
-    // Process record pointer fields values from External Lookups, that aren't integers (ids)
+    // Process record pointer and relationship fields values from External Lookups, that aren't integers (ids)
     // 
     // Param:
     //  completed_fields (array): array of field names that have already been assigned
@@ -5914,21 +5922,12 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
         var that = this;
 
         // Misc, styling for 'table cells'
-        var field_style = 'display: table-cell;padding: 7px 3px;max-width: 125px;min-width: 125px;';
-        var val_style = 'display: table-cell;padding: 7px 3px;max-width: 300px;min-width: 300px;';
+        const field_style = 'display: table-cell;padding: 7px 3px;max-width: 125px;min-width: 125px;';
+        const val_style = 'display: table-cell;padding: 7px 3px;max-width: 300px;min-width: 300px;';
 
-        // Construct Dialog for user handling of recpointer fields
-        var $dlg;
-        var url = '';
-        var completed = '';
-
-        var hasValue = (that.resource_values != null && that.resource_values.length > 1);
-
-        if(hasValue && Object.keys(that.resource_values[0]).length == 2){ // contains only the external record link
-            if(that.resource_values[0]['type'] == 'ext'){ // external link
-                url = '<a href="' + that.resource_values[0]['url'] + '" target="_blank">View external record <span style="font-size:10px;" class="ui-icon ui-icon-extlink" /></a><br><br>';
-            }
-        }
+        // Construct Dialog for user handling of record related fields
+        let $dlg;
+        let completed = '';
 
         // Add already assigned fields
         if(completed_fields.length > 0){
@@ -5941,36 +5940,74 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
             completed += '</ul><br>';
         }
 
-        var msg = url + completed
+        const hasValue = (that.resource_values != null && that.resource_values.length > 0) || (that.relmarker_values != null && that.relmarker_values.length > 0);
 
-        if(hasValue){ // Display full popup
+        if(!hasValue){
 
-            // Recpointer Dlg - Main Content
-            msg += 'Values remaining to be attributed, click a row to assign a value'
-                + '<br><br>'
-                + '<div id="wrapper" style="max-height: 250px;overflow: auto;">'
-                + '<div style="display: table">'
-                + '<div style="display: table-row">'
-                    + '<div style="'+ field_style +'">Field</div><div style="'+ val_style +'">Value</div>'
-                + '</div>';
+            $dlg = window.hWin.HEURIST4.msg.showMsgDlg(completed, null, 
+                {title: 'Field mapping completed', ok: 'Close'}, 
+                {default_palette_class: 'ui-heurist-populate', position: {my: "right-50 top+45", at: "right top", of: this._getEditDialog()}}
+            );
 
-            // Other variables
-            var field_values = {};
-            var todo_count = 0;
+            setTimeout(function(){ $dlg.dialog('close'); }, 2000);
+
+            return;
+        }
+
+        const type = (that.resource_values != null && that.resource_values.length > 0) ? 'resource' : 'relmarker';
+
+        function __nextProcess(){
+
+            $dlg.dialog('close');
+
+            if(type=='resource'){
+                that.resource_values = null;
+            }else{
+                that.relmarker_values = null;
+            }
+
+            that.processResourceFields(completed_fields);
+        }
+
+        // Control variables
+        let field_values = {};
+        let todo_count = 0;
+        let complete_count = 0;
+
+        let msg = completed;
+        let btn = {};
+
+        if(that.lookup_record_link !== null){ // external link to lookup record
+            msg = '<a href="' + that.lookup_record_link['url'] + '" target="_blank">View external record <span style="font-size:10px;" class="ui-icon ui-icon-extlink" /></a><br><br>' + msg;
+        }
+
+        // Dlg - Main Content
+        msg += 'Values remaining to be attributed, click a row to assign a value'
+            + '<br><br>'
+            + '<div id="wrapper" style="max-height: 250px;overflow: auto;">'
+            + '<div style="display: table">'
+            + '<div style="display: table-row">'
+                + '<div style="'+ field_style +'">Field</div>'
+                + '<div style="'+ val_style +'">Value</div>'
+                + (type == 'resource' ? '' : '<div style="'+ field_style +'">Relation</div>')
+            + '</div>';
+
+        // Add details
+        if(type == 'resource'){
 
             // Add each row of record pointers
-            for(var i = 1; i < that.resource_values.length; i++){
+            for(const cur_details of that.resource_values){
 
-                var cur_details = that.resource_values[i];
                 let fld_id = cur_details['fld_id'];
                 let value = cur_details['values'];
                 let search = value;
+
                 if(window.hWin.HEURIST4.util.isObject(value)){
                     search = value['search'];
                     value = value['value'];
                 }
 
-                var field_name = $Db.rst(this._currentEditRecTypeID, fld_id, 'rst_DisplayName');
+                let field_name = $Db.rst(this._currentEditRecTypeID, fld_id, 'rst_DisplayName');
 
                 msg += '<div style="display: table-row;color: black;opacity: 1;" class="recordDiv" data-value="" '
                             +'data-dtid="'+ fld_id +'" data-index="'+ todo_count +'" data-search="'+ search +'">'
@@ -5984,126 +6021,185 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
                 todo_count ++;
             }
 
-            msg += '</div></div>'; // close div.table and div#wrapper
+        }else{
 
-            // Recpointer Dlg - Button
-            var btn = {};
-            btn['Close'] = function(){
-                // Close Recpointer Dlg
-                if(complete_count < todo_count){
-                    window.hWin.HEURIST4.msg.showMsgDlg((todo_count - complete_count) + ' record pointer field values have not been inserted.<br>Do you want to omit them?', 
-                        () => { $dlg.dialog('close'); }, {title: 'Task incomplete'}, {default_palette_class: 'ui-heurist-populate'});
-                }else{
-                    $dlg.dialog('close');
+            // Add each row of relationship markers
+            for(const cur_details of that.relmarker_values){
+
+                let fld_id = cur_details['fld_id'];
+                let value = cur_details['values'];
+                let search = value;
+                let relation = 'none provided';
+
+                if(window.hWin.HEURIST4.util.isObject(value)){
+                    search = window.hWin.HEURIST4.util.isempty(value['search']) ? value['value'] : value['search'];
+                    relation = window.hWin.HEURIST4.util.isempty(value['relation']) ? relation : value['relation'];
+                    value = value['value'];
                 }
+
+                let field_name = $Db.rst(this._currentEditRecTypeID, fld_id, 'rst_DisplayName');
+
+                msg += '<div style="display: table-row;color: black;opacity: 1;" class="recordDiv" data-value="" '
+                            +'data-dtid="'+ fld_id +'" data-index="'+ todo_count +'" data-search="'+ search +'" data-rel="'+ relation +'">'
+                        + '<div style="'+ field_style +'" class="truncate" title="'+ field_name +'">'+ field_name +'</div>'
+                        + '<div style="'+ val_style +'" class="truncate" title="'+ value +'">'+ value +'</div>'
+                        + '<div style="'+ field_style +'" class="truncate" title="'+ relation +'">'+ relation +'</div>'
+                    + '</div>';
+
+                todo_count ++;
             }
 
-            // Create Recpointer Dlg
-            $dlg = window.hWin.HEURIST4.msg.showMsgDlg(msg, btn, {title: 'Record pointer fields to set', yes: 'Close'}, {
-                default_palette_class: 'ui-heurist-populate', 
-                modal: true, 
-                dialogId: 'lookup_RecPointers', 
-                position: {my: "right-50 top+45", at: "right top", of: this._getEditDialog()}
-            });
+        }
 
-            var complete_count = 0;
+        if(todo_count == 0){
+            __nextProcess();
+            return;
+        }
 
-            // onClick - 'Record' Row within the Recpointer Dlg
-            $dlg.find('.recordDiv').on('click', function(event){
+        msg += '</div></div>'; // close div.table and div#wrapper
 
-                var $ele = $(event.target);
-                if(!$ele.hasClass('recordDiv')){ // check that the correct element is retrieved
-                    $ele = $ele.parents('.recordDiv');
-                }
+        // Dlg - Close button
+        btn['Close'] = function(){
+            // Close dlg
+            if(complete_count < todo_count){
+                window.hWin.HEURIST4.msg.showMsgDlg(`${todo_count - complete_count} ${type=='resource' ? 'record pointer' : 'relationship marker'} field values have not been inserted.<br>Do you want to omit them?`, 
+                    __nextProcess, {title: 'Task incomplete'}, {default_palette_class: 'ui-heurist-populate'});
+            }else{
+                __nextProcess();
+            }
+        }
 
-                $ele.css('background', 'rgba(65, 105, 225, 0.8)'); // highlight selection
+        // Create dlg
+        $dlg = window.hWin.HEURIST4.msg.showMsgDlg(msg, btn, {title: `${type=='resource' ? 'Record pointer' : 'Relationship marker'} fields to set`, yes: 'Close'}, {
+            default_palette_class: 'ui-heurist-populate', 
+            modal: true, 
+            dialogId: 'lookup_RecPointers', 
+            position: {my: "right-50 top+45", at: "right top", of: this._getEditDialog()}
+        });
 
-                // Retrieve important details
-                var dt_id = $ele.attr('data-dtid');
-                var search = $ele.attr('data-search');
-                var ptr_rectypes = $Db.dty(dt_id, 'dty_PtrTargetRectypeIDs');
-                var index = Number($ele.attr('data-index'));
+        // onClick - 'Record' Row within the dlg
+        $dlg.find('.recordDiv').on('click', function(event){
 
-                var init_value = $($ele.find('div')[1]).text();
+            let $ele = $(event.target);
+            if(!$ele.hasClass('recordDiv')){ // check that the correct element is retrieved
+                $ele = $ele.parents('.recordDiv');
+            }
 
-                // Show dialog for selecting/creating a record
-                var opts = {
-                    select_mode: 'select_single',
-                    select_return_mode: 'recordset', // or ids
-                    edit_mode: 'popup',
-                    selectOnSave: true,
-                    title: 'Select or create a record for the ' + $Db.rst(that._currentEditRecTypeID, dt_id, 'rst_DisplayName') + ' field',
-                    rectype_set: ptr_rectypes, // string of rectype_ids separated by commas (e.g. '1,2,3')
-                    pointer_mode: 'both', // or browseonly or addonly
-                    pointer_filter: null, // Heurist query for initial search
-                    parententity: 0,
+            $ele.css('background', 'rgba(65, 105, 225, 0.8)'); // highlight selection
 
-                    init_filter: search,
-                    fill_data: init_value,
+            // Retrieve important details
+            let dt_id = $ele.attr('data-dtid');
+            let search = $ele.attr('data-search');
+            let ptr_rectypes = $Db.dty(dt_id, 'dty_PtrTargetRectypeIDs');
+            let index = Number($ele.attr('data-index'));
 
-                    height: 700,
-                    width: 600,
-                    modal: true,
+            let init_value = $($ele.find('div')[1]).text();
 
-                    // Process selected record set
-                    onselect: function(event, data){
+            // Show dialog for selecting/creating a record
+            let opts = {
+                select_mode: 'select_single',
+                select_return_mode: 'recordset', // or ids
+                edit_mode: 'popup',
+                selectOnSave: true,
+                title: 'Select or create a record for the ' + $Db.rst(that._currentEditRecTypeID, dt_id, 'rst_DisplayName') + ' field',
+                rectype_set: ptr_rectypes, // string of rectype_ids separated by commas (e.g. '1,2,3')
+                pointer_mode: 'both', // or browseonly or addonly
+                pointer_filter: null, // Heurist query for initial search
+                parententity: 0,
 
-                        $ele.css('background', ''); // remove higlight
+                init_filter: search,
+                fill_data: init_value,
 
-                        if(!data || !data.selection) return;
+                height: 700,
+                width: 600,
+                modal: true,
 
-                        var recset = data.selection;
+                // Process selected record set
+                onselect: function(event, data){
 
-                        var record = recset.getFirstRecord();
-                        var rec_ID = recset.fld(record, 'rec_ID')
-                        var rec_Title = recset.fld(record, 'rec_Title');
+                    if(!data || !data.selection) return;
 
-                        if(!rec_ID || rec_ID <= 0 || rec_Title=='') return;
+                    let recset = data.selection;
 
+                    let record = recset.getFirstRecord();
+                    let rec_ID = recset.fld(record, 'rec_ID')
+                    let rec_Title = recset.fld(record, 'rec_Title');
+
+                    if(!rec_ID || rec_ID <= 0 || rec_Title=='') return;
+
+                    if(type=='resource'){
                         field_values[dt_id].push(rec_ID);
-
                         that._editing.setFieldValueByName(dt_id, field_values[dt_id]);
+                    }else{
 
-                        // Update information
-                        $ele.attr('data-value', rec_ID);
-                        $($ele.find('div')[1]).attr('title', rec_Title).text(rec_Title);
-                        window.hWin.HEURIST4.util.setDisabled($ele, true); // set to disabled
-                        $ele.css('background', 'gray');
+                        let fld = that._editing.getFieldByName(dt_id);
+                        let rel = $ele.attr('data-rel') ? $ele.attr('data-rel') : '';
+                        fld.editing_input('setup_Relmarker_Target', rec_ID, rel, (context) => {
 
-                        complete_count ++;
+                            $ele.css('background', ''); // remove higlight
 
-                        if(complete_count >= todo_count){
-                            // Close Recpointer Dlg
-                            $dlg.dialog('close');
-                        }else{
+                            if(context && context.count>0){
 
-                            var $n_ele = $ele.parent().find('div[data-index="'+ (index+1) +'"]');
+                                // Update information
+                                $ele.attr('data-value', rec_ID);
+                                $($ele.find('div')[1]).attr('title', rec_Title).text(rec_Title);
+                                window.hWin.HEURIST4.util.setDisabled($ele, true); // set to disabled
+                                $ele.css('background', 'gray');
 
-                            if($n_ele.length == 1 && !$n_ele.hasClass('ui-state-disabled')){
+                                complete_count ++;
 
-                                $n_ele.click();
+                                if(complete_count >= todo_count){
+                                    // Close dlg
+                                    __nextProcess();
+                                }else if(type=='resource'){
+
+                                    let $n_ele = $ele.parent().find('div[data-index="'+ (index+1) +'"]');
+
+                                    if($n_ele.length == 1 && !$n_ele.hasClass('ui-state-disabled')){
+                                        $n_ele.click();
+                                    }
+                                }
                             }
-                        }
-                    },
 
-                    beforeClose: function(event, ui){
-                        if(!$ele.hasClass('ui-state-disabled')){ // remove highlighting
-                            $ele.css('background', '');
+                        }); // prepare relationship creation
+
+                        $(fld.find('button.rel_link')[0]).click(); // click invisible button, only the first just in case
+
+                        return;
+                    }
+
+                    $ele.css('background', ''); // remove higlight
+
+                    // Update information
+                    $ele.attr('data-value', rec_ID);
+                    $($ele.find('div')[1]).attr('title', rec_Title).text(rec_Title);
+                    window.hWin.HEURIST4.util.setDisabled($ele, true); // set to disabled
+                    $ele.css('background', 'gray');
+
+                    complete_count ++;
+
+                    if(complete_count >= todo_count){
+                        // Close dlg
+                        __nextProcess();
+                    }else if(type=='resource'){
+
+                        let $n_ele = $ele.parent().find('div[data-index="'+ (index+1) +'"]');
+
+                        if($n_ele.length == 1 && !$n_ele.hasClass('ui-state-disabled')){
+                            $n_ele.click();
                         }
                     }
-                };
+                },
 
-                window.hWin.HEURIST4.ui.showEntityDialog('records', opts);
-            });
-        }else{// Display reduced version for 2 seconds
+                beforeClose: function(event, ui){
+                    if(!$ele.hasClass('ui-state-disabled')){ // remove highlighting
+                        $ele.css('background', '');
+                    }
+                }
+            };
 
-            $dlg = window.hWin.HEURIST4.msg.showMsgDlg(msg, null, 
-                {title: 'Field mapping completed', ok: 'Close'}, 
-                {default_palette_class: 'ui-heurist-populate', position: {my: "right-50 top+45", at: "right top", of: this._getEditDialog()}}
-            );
-
-            setTimeout(function(){ $dlg.dialog('close'); }, 2000);
-        }
+            window.hWin.HEURIST4.ui.showEntityDialog('records', opts);
+        });
     },
 
     focusField: function(field_id){

@@ -1234,7 +1234,7 @@ $.widget( "heurist.lookupConfig", {
                 }
                 
                 var sel = window.hWin.HEURIST4.ui.createRectypeDetailSelect(ele, rty_ID, 
-                    ['freetext','blocktext','enum','date','geo','float','year','integer','resource','file'], '...',
+                    ['freetext','blocktext','enum','date','geo','float','year','integer','resource','file','relmaker'], '...',
                     {show_latlong:true, show_dt_name:true, selectedValue:dty_ID} );
                     
                 that._on($(sel), {change:function(){that._updateStatus();}});

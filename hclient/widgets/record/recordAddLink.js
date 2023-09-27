@@ -31,12 +31,13 @@ $.widget( "heurist.recordAddLink", $.heurist.recordAction, {
         htmlContent: 'recordAddLink.html',
         helpContent: 'recordAddLink.html', //in context_help folder
         
-        
         source_ID:null,
         target_ID:null,
         relmarker_dty_ID:null,//relmarker field type id  - this is creation of relationship only
         source_AllowedTypes:null,
-        onlyReverse:false
+        onlyReverse:false,
+
+        relationtype: null
         
     },
 
@@ -74,7 +75,7 @@ $.widget( "heurist.recordAddLink", $.heurist.recordAction, {
             
             this.getRecordValue(this.options.target_ID, 'target');
 
-            if(this.options.source_AllowedTypes && this.options.relmarker_dty_ID>0){  //inward relation
+            if(window.hWin.HEURIST4.util.isempty(this.options.source_ID) && this.options.source_AllowedTypes && this.options.relmarker_dty_ID>0){  //inward relation
                 
                 this.options.source_AllowedTypes = this.options.source_AllowedTypes.split(',');
                 
@@ -577,6 +578,28 @@ $.widget( "heurist.recordAddLink", $.heurist.recordAction, {
         var $field = this.element.find('#rt_'+party+'_sel_'+dtID).empty();
 
         var dt = $Db.dty(dtID);
+
+        let vocab_id = dt['dty_JsonTermIDTree'];
+        let trm_id = null;
+
+        if(this.options.relationtype){
+            trm_id = $Db.trm_InVocab(vocab_id, this.options.relationtype);
+
+            if(!trm_id){
+    
+                trm_id = $Db.getTermByLabel(vocab_id, this.options.relationtype);
+
+                if(!trm_id){
+                    trm_id = $Db.getTermByCode(vocab_id, this.options.relationtype);
+                }
+            }else{
+                trm_id = this.options.relationtype;
+            }
+        }
+
+        if(!trm_id){
+            trm_id = $Db.rst(rectypeID, dtID, 'rst_DefaultValue');
+        }
         
         //var dtFields =  window.hWin.HEURIST4.util.cloneJSON($Db.rst(rectypeID, dtID));
         var dtFields = {};
@@ -586,8 +609,8 @@ $.widget( "heurist.recordAddLink", $.heurist.recordAction, {
         dtFields['rst_DisplayWidth'] = '25ex';
         dtFields['dty_Type'] = 'relationtype';
         dtFields['rst_PtrFilteredIDs'] = '';//dt['dty_PtrTargetRectypeIDs'];
-        dtFields['rst_FilteredJsonTermIDTree'] = dt['dty_JsonTermIDTree'];
-        dtFields['rst_DefaultValue'] = $Db.rst(rectypeID, dtID, 'rst_DefaultValue');
+        dtFields['rst_FilteredJsonTermIDTree'] = vocab_id;
+        dtFields['rst_DefaultValue'] = trm_id;
         dtFields['dtID'] = dtID;
         
         var that = this;

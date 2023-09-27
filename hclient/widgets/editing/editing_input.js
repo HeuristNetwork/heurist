@@ -81,6 +81,12 @@ $.widget( "heurist.editing_input", {
 
     block_editing: false,
 
+    _external_relmarker: {
+        target: null,
+        relation: null,
+        callback: null
+    }, // pre-select a record target, possible relation type and setup a callback for relmarkers handled from external lookup
+
     // the constructor
     _create: function() {
 
@@ -1838,59 +1844,76 @@ $.widget( "heurist.editing_input", {
                     
                 
                     var __show_addlink_dialog = function(){
-                            if(isOpened || that.is_disabled) return;
-                            
-                            isOpened = true;
-                            
-                            if(that.options.editing && (that.options.editing.editStructureFlag()===true)){
-                                window.hWin.HEURIST4.msg.showMsgFlash('This feature is disabled in edit structure mode, you can use it in normal record editing',3000);                     return;
-                            }
-                            
-                            function __onCloseAddLink(context){
-                                    isOpened = false;
-                                    
-                                    if(context && context.count>0){
-                                        
-                                        var link_info = isInwardRelation?context.source:context.target;
-                                        link_info.relation_recID = context.relation_recID; //existing relationship record
-                                        link_info.relmarker_field = that.options.dtID;
-                                        link_info.trm_ID = context.trm_ID;
-                                        link_info.is_inward = isInwardRelation;
-                                        
-                                        var ele = window.hWin.HEURIST4.ui.createRecordLinkInfo($inputdiv,
-                                            link_info, true);
-                                        ele.insertBefore(that.element.find('.rel_link'));
-                                        that.element.find('.rel_link').hide();//hide this button if there are links
-                                        ele.on('remove', __onRelRemove);
-                                    }
-                            }    
-                            
-                            
-                            var rty_names = '';
-                            if(rts.length>0 && that.options.rectypeID>0){
-                                rty_names = $Db.rty(that.options.rectypeID,'rty_Name') 
-                                            + ' and ' + rts.join(', ');
-                            }else{
-                                rty_names = 'records';
-                            }
-                            
-                            var opts = {
-                                height:480, width:750, 
-                                title: 'Create relationship between '+rty_names+' ( Field: "'
-                                    +$Db.dty(that.options.dtID, 'dty_Name')+'" )',
-                                relmarker_dty_ID: that.options.dtID,
-                                default_palette_class: 'ui-heurist-populate',
-                                onClose: __onCloseAddLink 
-                            };
-                           
-                           if(isInwardRelation){
-                              opts['source_AllowedTypes'] = that.f('rst_PtrFilteredIDs');
-                              opts['target_ID'] = that.options.recID;
-                           }else{
-                              opts['source_ID'] = that.options.recID;
-                           }     
+                        if(isOpened || that.is_disabled) return;
                         
-                            window.hWin.HEURIST4.ui.showRecordActionDialog('recordAddLink', opts);
+                        isOpened = true;
+                        
+                        if(that.options.editing && (that.options.editing.editStructureFlag()===true)){
+                            window.hWin.HEURIST4.msg.showMsgFlash('This feature is disabled in edit structure mode, you can use it in normal record editing',3000);                     return;
+                        }
+                        
+                        function __onCloseAddLink(context){
+                            isOpened = false;
+                            
+                            if(context && context.count>0){
+                                
+                                var link_info = isInwardRelation?context.source:context.target;
+                                link_info.relation_recID = context.relation_recID; //existing relationship record
+                                link_info.relmarker_field = that.options.dtID;
+                                link_info.trm_ID = context.trm_ID;
+                                link_info.is_inward = isInwardRelation;
+                                
+                                var ele = window.hWin.HEURIST4.ui.createRecordLinkInfo($inputdiv,
+                                    link_info, true);
+                                ele.insertBefore(that.element.find('.rel_link'));
+                                that.element.find('.rel_link').hide();//hide this button if there are links
+                                ele.on('remove', __onRelRemove);
+
+                            }
+
+                            if($.isFunction(that._external_relmarker.callback)){
+                                that._external_relmarker.callback(context);
+
+                                that.__external_relmarker = {
+                                    target: null,
+                                    relation: null,
+                                    callback: null
+                                };
+                            }
+                        }
+                        
+                        var rty_names = '';
+                        if(rts.length>0 && that.options.rectypeID>0){
+                            rty_names = $Db.rty(that.options.rectypeID,'rty_Name') 
+                                        + ' and ' + rts.join(', ');
+                        }else{
+                            rty_names = 'records';
+                        }
+                        
+                        var opts = {
+                            height:480, width:750, 
+                            title: 'Create relationship between '+rty_names+' ( Field: "'
+                                +$Db.dty(that.options.dtID, 'dty_Name')+'" )',
+                            relmarker_dty_ID: that.options.dtID,
+                            default_palette_class: 'ui-heurist-populate',
+                            onClose: __onCloseAddLink 
+                        };
+
+                        if(isInwardRelation){
+                            opts['source_AllowedTypes'] = that.f('rst_PtrFilteredIDs');
+                            opts['target_ID'] = that.options.recID;
+                        }else{
+                            opts['source_ID'] = that.options.recID;
+                        }
+
+                        if(that._external_relmarker.target){ // setup from external source (currently from external lookup)
+                            opts['target_ID'] = that._external_relmarker.target;
+                        }
+                        if(that._external_relmarker.relation){ // setup from external source (currently from external lookup)
+                            opts['relationtype'] = that._external_relmarker.relation;
+                        }
+
+                        window.hWin.HEURIST4.ui.showRecordActionDialog('recordAddLink', opts);
                     };
                     
                     var sRels = '';
@@ -6250,5 +6273,23 @@ $.widget( "heurist.editing_input", {
         }
 
         return true;
+    },
+
+    //
+    // In preparation for creating a new relationship marker from an external lookup
+    //
+    setup_Relmarker_Target: function(target_id, relation_value, callback){
+
+        target_id = parseInt(target_id, 10);
+
+        if(isNaN(target_id) || target_id < 1){
+            return;
+        }
+
+        this._external_relmarker.target = target_id;
+
+        this._external_relmarker.relation = relation_value;
+
+        this._external_relmarker.callback = callback;
     }
 });

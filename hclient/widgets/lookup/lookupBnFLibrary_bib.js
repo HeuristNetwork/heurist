@@ -551,30 +551,36 @@ $.widget( "heurist.lookupBnFLibrary_bib", $.heurist.recordAction, {
 
                             let value = '';
                             let search = '';
+                            let role = '';
                             var cur_val = val[i];
 
                             if($.isPlainObject(cur_val)){
                                 if(cur_val['firstname']){
                                     value = cur_val['firstname'];
-                                    search = value;
                                 }
                                 if(cur_val['surname']){
                                     value = (value != '') ? value + ' ' + cur_val['surname'] : cur_val['surname'];
-                                    search = value;
                                 }
+                                search = value;
                                 if(cur_val['active']){
                                     value = (value != '') ? value + ' [' + cur_val['active'] + ']' : 'No Name, years active: ' + cur_val['active'];
                                 }
-                                if(obj_keys[k]){
-                                    value = (value != '') ? value + ' (id: ' + obj_keys[k] + ')' : 'No Name, id: ' + obj_keys[k];
+                                if(cur_val['id']){
+                                    value = (value != '') ? value + ' (id: ' + cur_val['id'] + ')' : 'id: ' + cur_val['id'];
+                                }
+                                if(cur_val['role']){
+                                    role = (value != '') ? cur_val['role'] : '';
                                 }
                             }else{
                                 value = cur_val;
+                                search = cur_val;
                             }
 
                             if(value != '' && !$.isArray(value) && !$.isPlainObject(value)){
                                 if(field_type == 'resource'){
                                     val[i] = {'value': value, 'search': search};
+                                }else if(field_type == 'relmarker'){
+                                    val[i] = {'value': value, 'search': search, 'relation': role};
                                 }else{
                                     val[i] = value;
                                 }
@@ -612,6 +618,8 @@ $.widget( "heurist.lookupBnFLibrary_bib", $.heurist.recordAction, {
 
                                 if(field_type == 'resource'){
                                     val[i] = {'value': value, 'search': search};
+                                }else if(field_type == 'relmarker'){
+                                    val[i] = {'value': value, 'search': search, 'relation': ''};
                                 }else{
                                     val[i] = value;
                                 }
@@ -627,7 +635,7 @@ $.widget( "heurist.lookupBnFLibrary_bib", $.heurist.recordAction, {
                     }else if(field_name == 'language'){ // handle if language equals '###'
 
                         for(var i = 0; i < val.length; i++){
-                            if(val[i] == '###'){
+                            if(val[i] == '###' || val[i] == 'und'){
                                 val[i] = 'unknown';
                             }
                         }
