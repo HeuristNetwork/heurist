@@ -3949,13 +3949,13 @@ $.widget( "heurist.editing_input", {
                     
 
                     if(vis_mode=='public' || vis_mode == 'viewable' || vis_mode == 'hidden'){ 
-                        btn.removeClass('show-onhover'); //show always for invisible field   
-                        btn.css('display','inline-block');                        
-                    }else if(vis_mode == 'viewable' || vis_mode == 'hidden'){
 
-                        btn.removeClass('show-onhover');
+                        btn.removeClass('show-onhover'); //show always for invisible field   
                         btn.css('display','inline-block');
-                        btn.attr('title', vis_mode == 'viewable' ? 'This value is only visible to logged-in users' : 'This value is only visible to the owner/owner group');
+
+                        if(vis_mode != 'public'){ // change rollover for eye icon
+                            btn.attr('title', vis_mode == 'viewable' ? 'This value is only visible to logged-in users' : 'This value is only visible to the owner/owner group');
+                        }
                     }else{
                         chbox.find('span.ui-icon').removeClass('ui-icon-check-off').addClass('ui-icon-check-on');
                     }
