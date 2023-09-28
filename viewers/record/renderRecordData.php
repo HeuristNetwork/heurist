@@ -359,18 +359,22 @@ if(!($is_map_popup || $without_header)){
 
                 if(groups == null || $data.length < 0 || $group_container.length < 0){
                     return;
-                }else{
+                }else{   
+                    var parent_group = -1;
                     $.each(groups, function(idx, group){
 
                         var group_name = group[0];
                         var order = group[1];
+                        var sep_type = group[2];
+                        let inner_group = sep_type == 'group' || sep_type == 'accordion_inner' || sep_type == 'expanded_inner';
+                        if(!inner_group){
+                            parent_group = order;
+                        }
 
                         var next_group = groups[Number(idx)+1];
                         var key = (next_group == null) ? null : next_group[0];
                         var next_order = (key == null) ? null : next_group[1];
-                        var sep_type = (key == null) ? null : next_group[2];
                         var $field_container = $('<fieldset>').attr('id', order);
-                        let inner_group = sep_type == 'group' || sep_type == 'accordion_inner' || sep_type == 'expanded_inner';
 
                         $.each($data, function(idx, detail){
 
@@ -387,9 +391,14 @@ if(!($is_map_popup || $without_header)){
 
                         if(group_name != '-'){
                             if(inner_group){
-                                $('<h5>').attr('data-order', order).css({'margin': '5px 15px 2px', 'font-size': '1em', 'font-style': 'italic'}).text(group_name).appendTo($group_container);
+                                $('<h5>').attr('data-order', order)
+                                    .css({'margin': '5px 15px 2px', 'font-size': '1em', 'font-style': 'italic'})
+                                    .text(group_name).appendTo($group_container);
+                                $field_container.attr('data_parent',parent_group);
                             }else{
-                                $('<h4>').attr('data-order', order).css({'margin': '5px 0px 2px', 'font-size': '1.1em', 'text-transform': 'uppercase'}).text(group_name).appendTo($group_container);
+                                $('<h4>').attr('data-order', order)
+                                    .css({'margin': '5px 0px 2px', 'font-size': '1.1em', 'text-transform': 'uppercase'})
+                                    .text(group_name).appendTo($group_container);
                             }
                         }else{
                             $('<hr>').attr('data-order', order).css({'margin': '5px 0px 5px', 'border-top': '1px solid black'}).appendTo($group_container);
@@ -398,10 +407,13 @@ if(!($is_map_popup || $without_header)){
                         $field_container.appendTo($group_container);
                     });
 
+                    //hide fieldset and groups without content
                     $.each($group_container.find('fieldset'), function(idx, fieldset){
                         if($(fieldset).find('div').length == 0){
                             $(fieldset).hide();
                             $group_container.find('h4[data-order="'+ $(fieldset).attr('id') +'"], h5[data-order="'+ $(fieldset).attr('id') +'"]').hide();
+                        }else if($(fieldset).attr('data_parent')>0){
+                            $group_container.find('h4[data-order="'+ $(fieldset).attr('data_parent') +'"]').show();
                         }
                     });
                 }
