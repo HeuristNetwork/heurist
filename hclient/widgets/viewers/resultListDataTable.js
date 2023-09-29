@@ -274,7 +274,7 @@ that._dout('myOnShowEvent');
                     if(window.hWin.HEURIST4.util.isempty(this.options.dataTableParams['columns'])){
                         
                         var settings = window.hWin.HAPI4.get_prefs('columns_datatable');
-
+                        
                         if(settings){
                             this.options.initial_cfg = settings;
                             this.options.dataTableParams['columns'] = settings.columns;
@@ -322,9 +322,11 @@ this._dout('reload datatable '+this.options.serverSide);
                             {q:queryStr, datatable:datatable_id}, null, 
                             function(response){
                                 if(response.status == window.hWin.ResponseStatus.OK){
-                                    that.options.dataTableParams['ajax'] = queryURL 
-                                        + '&recordsTotal='+rec_total_count
-                                        + '&datatable='+datatable_id;
+                                    that.options.dataTableParams['ajax'] = {
+                                            "type": "POST",
+                                            "url": queryURL 
+                                            + '&recordsTotal='+rec_total_count
+                                            + '&datatable='+datatable_id};
 
                                     that._dataTable = that.div_datatable.DataTable( that.options.dataTableParams );
                                 }else{
@@ -337,7 +339,9 @@ this._dout('reload datatable '+this.options.serverSide);
 
                         this.options.dataTableParams['processing'] = false;
                         this.options.dataTableParams['serverSide'] = false;                    
-                        this.options.dataTableParams['ajax'] = queryURL + '&datatable=1&q=' + queryStr;
+                        this.options.dataTableParams['ajax'] = {
+                                            "type": "POST",
+                                            "url": queryURL + '&datatable=1&q=' + queryStr};
                         this._dataTable = this.div_datatable.DataTable( this.options.dataTableParams );
                     }
 
@@ -528,9 +532,9 @@ this._dout('reload datatable '+this.options.serverSide);
     _onApplyColumnDefinition: function(config){
         
        window.hWin.HAPI4.save_pref('columns_datatable', config);        
-        
-       this.options.initial_cfg = config;
+       
        this.options.dataTableParams['columns'] = config.columns;
+       this.options.initial_cfg = config;
        this._current_url = null; //to force reset datatable
        this._refresh();
     },
