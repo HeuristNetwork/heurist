@@ -271,7 +271,7 @@ window.hWin.HEURIST4.dbs = {
       
      * @param {Object} db_structure // not used in this function, is it usefull to keep it here? 
      * @param {number} $mode - $mode 
-     *    3 - for record title mask editor - without reverse, enum (id,label,code,internal id) - 4 levels depth
+     *    3 - for record title mask editor - without reverse, enum (id,label,code,internal id) - max levels depth is calculated
      *    4 - find reverse links and relations   
      *    5 - for faceted search wiz, filter builder - lazy treeview with reverse links
      *    6 - for import structure, export csv - lazy tree without reverse
@@ -318,6 +318,8 @@ window.hWin.HEURIST4.dbs = {
         var _separator = ($mode==3)?'..':':';
         
         var recTypesWithParentLink = [];
+        
+        var max_allowed_depth = 2;
         
         //-------------------- internal functions    
 
@@ -520,7 +522,21 @@ window.hWin.HEURIST4.dbs = {
                     var $new_pointer_fields = [];
                     
                     // add details --------------------------------
-                    if($details)
+                    if($details){
+                        
+                    //count number of relmarkers and define allowed max depth for rectitle mask tree
+                    if($recursion_depth==0 && ($mode==3 || $mode==4)){
+                        var cnt_pointers = 0;
+                        $details.each2(function($dtID, $dtValue){
+                            if($dtValue['rst_RequirementType']!='forbidden'){
+                                var $dt_type = $Db.dty($dtID,'dty_Type');
+                                if($dt_type=='relmarker'){
+                                      cnt_pointers++;
+                                }
+                            }
+                        });
+                        max_allowed_depth = (cnt_pointers>10)?2:3;
+                    }
 
                     $details.each2(function($dtID, $dtValue){
                         //@TODO forbidden for import????
@@ -583,6 +599,8 @@ window.hWin.HEURIST4.dbs = {
                         }
                     });//for details
 
+                    }
+                    
                     //add resource and relation at the end of result array
                     $dtl_fields = $dtl_fields.concat($children_links);
 
@@ -846,15 +864,13 @@ window.hWin.HEURIST4.dbs = {
             case 'resource': // link to another record type
             case 'relmarker':
             
-                var $max_depth = 2;
-                if ($mode==4){ //$mode==6 || 
-                   $max_depth = 3;
-                }else if ($mode==3){ //record titlemask
-                   $max_depth = 2; //was 4, then 3
+                
+                if ($mode==4 || $mode==3){ //record titlemask
+                   //max_allowed_depth = 3; calculated
                 }else if ($mode==5 || $mode==6 || $mode==7) //make it 1 for lazy load
-                   $max_depth = 1; 
+                   max_allowed_depth = 1; 
                                                                 
-                if($recursion_depth<$max_depth){
+                if($recursion_depth<max_allowed_depth){
                     
                     if($reverseRecTypeId!=null){
                             var $res = __getRecordTypeTree($recTypeId, $recursion_depth+1, $mode, $fieldtypes, $pointer_fields);
