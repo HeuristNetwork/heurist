@@ -688,9 +688,7 @@ class System {
                     ?"does not exist (check setting in heuristConfigIni.php file)"
                     :"is not writeable by PHP (check permissions)")
                     ."<br><br>On a multi-tier service, the file server may not have restarted correctly or "
-                    ."may not have been mounted on the web server."
-                    ."<br><br>May 2022: for databases on the University of Sydney server please look for your database at HeuristRef.net "
-                    . "and contact us if you do not find it there, as we have moved to new servers and will need to enable your database.<br>";
+                    ."may not have been mounted on the web server.";
 
             // Error needs extra attention, send an email now to Heurist team/Bug report
             sendEmail(HEURIST_MAIL_TO_BUG, $title, $body, true);
@@ -701,9 +699,7 @@ class System {
                        ?"does not exist (check setting in heuristConfigIni.php file)"
                        :"is not writeable by PHP (check permissions)")
                        ."<br><br>On a multi-tier service, the file server may not have restarted correctly or "
-                       ."may not have been mounted on the web server."
-                       ."<br><br>May 2022: for databases on the University of Sydney server please look for your database at HeuristRef.net "
-                       . "and contact us if you do not find it there, as we have moved to new servers and will need to enable your database.<br>";
+                       ."may not have been mounted on the web server.";
 
 
             $this->addError(HEURIST_SYSTEM_FATAL, $usr_msg, null, "Problem opening database");

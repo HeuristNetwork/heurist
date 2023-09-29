@@ -1019,11 +1019,13 @@ $.widget( "heurist.editing_input", {
                     var nw = $input.css('min-width');
 
                     let custom_formatting = window.hWin.HAPI4.dbSettings.TinyMCE_formats;
-                    let block_formats = Object.hasOwn(custom_formatting, 'block_formats') && !window.hWin.HEURIST4.util.isempty(custom_formatting.block_formats)
-                                            ? custom_formatting.block_formats : '';
 
                     let style_formats = Object.hasOwn(custom_formatting, 'style_formats') && custom_formatting.style_formats.length > 0 
-                                            ? [ { title: 'Custom styles', items: custom_formatting.style_formats } ] : null;
+                                            ? [ { title: 'Custom styles', items: custom_formatting.style_formats } ] : [];
+
+                    if(Object.hasOwn(custom_formatting, 'block_formats') && custom_formatting.block_formats.length > 0){
+                        style_formats.push({ title: 'Custom blocks', items: custom_formatting.block_formats });
+                    }
 
                     tinymce.init({
                         //target: $editor, 
@@ -1250,11 +1252,11 @@ $.widget( "heurist.editing_input", {
                             'media table paste help autoresize hr'  //insertdatetime  wordcount
                         ],      
                         //undo redo | code insert  |  fontselect fontsizeselect |  forecolor backcolor | media image link | alignleft aligncenter alignright alignjustify | fullscreen            
-                        toolbar: ['formatselect | styleselect | fontselect fontsizeselect | bold italic forecolor hr | customHeuristMedia customAddFigCaption customHeuristLink link | align | bullist numlist outdent indent | table | removeformat | help'],
+                        toolbar: ['styleselect | fontselect fontsizeselect | bold italic forecolor hr | customHeuristMedia customAddFigCaption customHeuristLink link | align | bullist numlist outdent indent | table | removeformat | help'],
                         formats: custom_formatting.formats,
                         style_formats_merge: true,
                         style_formats: style_formats,
-                        block_formats: 'Paragraph=p;Heading 1=h1;Heading 2=h2;Heading 3=h3;Heading 4=h4;Heading 5=h5;Heading 6=h6;Preformatted=pre;Quotation=blockquote' + block_formats,
+                        //block_formats: 'Paragraph=p;Heading 1=h1;Heading 2=h2;Heading 3=h3;Heading 4=h4;Heading 5=h5;Heading 6=h6;Preformatted=pre;Quotation=blockquote',
                         content_css: [
                             '//fonts.googleapis.com/css?family=Lato:300,300i,400,400i'
                             //,'//www.tinymce.com/css/codepen.min.css'
