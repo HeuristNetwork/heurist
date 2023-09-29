@@ -1499,26 +1499,32 @@ function createBz2Archive($source, $only_these_folders, $destination, $verbose=t
 // Returns false if given file is not in heurist upload folder
 // Otherwise return real path
 //
-function isPathInHeuristUploadFolder($path){
+function isPathInHeuristUploadFolder($path, $check_existance=true){
   
     chdir(HEURIST_FILESTORE_DIR);  // relatively db root  or HEURIST_FILES_DIR??        
     $heurist_dir = realpath(HEURIST_FILESTORE_DIR);
-    $path = realpath($path);
+    $r_path = realpath($path);
     
-    if(!$path) return false; //does not exist
+    if($check_existance && !$r_path) return false; //does not exist
     
-    $path = str_replace('\\','/',$path);
-    $heurist_dir = str_replace('\\','/',$heurist_dir);
+    if($r_path){
+        $r_path = str_replace('\\','/',$r_path);
+        $heurist_dir = str_replace('\\','/',$heurist_dir);
 
-    //realpath gives real path on remote file server
-    if(strpos($path, '/srv/HEURIST_FILESTORE/')===0 || 
-       strpos($path, '/misc/heur-filestore/')===0 ||     //heurx
-       strpos($path, '/data/HEURIST_FILESTORE/')===0 ||  //huma-num
-       strpos($path, $heurist_dir)===0){
-           return $path;
-       }else{
-           return false;
-       }
+        //realpath gives real path on remote file server
+        if(strpos($r_path, '/srv/HEURIST_FILESTORE/')===0 || 
+           strpos($r_path, '/misc/heur-filestore/')===0 ||     //heurx
+           strpos($r_path, '/data/HEURIST_FILESTORE/')===0 ||  //huma-num
+           strpos($r_path, $heurist_dir)===0){
+               return $r_path;
+           }
+    }else{
+        if(strpos($path, HEURIST_FILESTORE_DIR)===0){
+            return $path;
+        }
+    }
+    
+    return false;
 }
 
         
