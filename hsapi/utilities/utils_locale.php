@@ -33,7 +33,7 @@
         if ($lang) { 
 
             if(!isset($glb_lang_codes)){
-                $glb_lang_codes = json_decode(file_get_contents('../../hclient/assets/language-codes-3b2.json'),true);
+                $glb_lang_codes = json_decode(file_get_contents(HEURIST_DIR.'hclient/assets/language-codes-3b2.json'),true);
                 foreach($glb_lang_codes as $codes){
                     $glb_lang_codes_index[strtoupper($codes['a3'])] = strtoupper($codes['a2']);
                 }
@@ -146,29 +146,7 @@
         
         
         // this is record detail field;
-        if(is_array($input)){
-            
-            $def = null;
-            foreach($input as $val){
-                if(is_string($val)){
-                    list($lang_, $val) = extractLangPrefix($val);
-
-                    if ($lang_==$lang){
-                        $res = $val;
-                        break;
-                    }else if($lang_==null){
-                        $def = $val;
-                    }
-                }
-            }
-            if($res==null){
-                $res = $def;
-            }
-            
-        }else if(is_string($input)) {
-            list($lang_, $res) = extractLangPrefix($input); //there is no localization
-        }
-        
+        $res = getCurrentTranslation($input, $lang);
         
         return ($res==null)?$input:$res;
     }
@@ -192,7 +170,7 @@
                 
                 list($lang_, $val) = extractLangPrefix($val);
 
-                if ($lang_==$lang){
+                if ($lang_!=null && $lang_==$lang){
                     $cnt++;
                     $fnd = $val;
                 }else if($lang_==null){
@@ -202,9 +180,14 @@
                 }
                 
             }
-            if($cnt==count($input)-1){
-                $res = $fnd?$fnd:$def;                
+            if($fnd && ($cnt==count($input)-1)){
+                $res = $fnd;
+            }else{
+                $res = $def;
             }
+            
+        }else if(is_string($input)) {
+            list($lang_, $res) = extractLangPrefix($input); //there is no localization
         }
         
         return $res;

@@ -50,7 +50,7 @@
 <html>
 
 <head>
-    <title><?php print htmlspecialchars(strip_tags($website_title)); ?></title>
+    <title><?php print htmlspecialchars(strip_tags($website_title_translated)); ?></title>
     <meta http-equiv="content-type" content="text/html; charset=utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="keywords" content="Heurist, Digital Humanities, Humanities Data, Research Data, Database Management, Academic data, Open Source, Free software, FOSS, University of Sydney,<?php echo $meta_keywords; ?>">

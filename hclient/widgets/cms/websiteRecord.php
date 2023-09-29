@@ -229,7 +229,6 @@ $TRM_NO = ConceptCode::getTermLocalID('2-531'); //TRM_NO
 $TRM_NO_OLD = ConceptCode::getTermLocalID('99-5447'); //TRM_NO_OLD
 
     
-$website_title = __getValueAsJSON($rec, DT_NAME);
 $isWebPage = ($rec['rec_RecTypeID']==RT_CMS_MENU && 
             defined('DT_CMS_PAGETYPE') &&
             __getValue($rec, DT_CMS_PAGETYPE)==ConceptCode::getTermLocalID('2-6254')); //TRM_PAGETYPE_WEBPAGE 
@@ -284,6 +283,12 @@ if(defined('DT_LANGUAGES')){
         $website_languages_links = $res;
     }
 }
+
+$current_language = @$_REQUEST['lang'];
+if(!$current_language) $current_language = $website_language_def; 
+
+$website_title = __getValueAsJSON($rec, DT_NAME); //multilang titles
+$website_title_translated = getCurrentTranslation(@$rec['details'][DT_NAME], $current_language); //default title
 
 
 $show_login_button = true; // by default, show login button

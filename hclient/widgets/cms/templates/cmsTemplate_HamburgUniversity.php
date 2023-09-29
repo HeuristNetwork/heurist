@@ -1,7 +1,7 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
 <html lang="de">
     <head>
-        <title><?php print htmlspecialchars($website_title);?></title>
+        <title><?php print htmlspecialchars($website_title_translated);?></title>
         <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
         <meta content="Hagen Peukert" name="author">
         <meta name="keywords" content="Heurist, Digital Humanities, Humanities Data, Research Data, Database Management, Academic data, Open Source, Free software, FOSS, University of Sydney,<?php echo $meta_keywords;?>">

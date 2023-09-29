@@ -3012,7 +3012,8 @@ function array_merge_unique($a, $b) {
     }                
     return $a;
 }     
-function array_merge_unique3(array $array1 /* [, array $...] */) {
+/*
+function array_merge_unique3(array $array1 ) { ///[, array $...] 
     $result = array_flip(array_flip($array1));
     foreach (array_slice(func_get_args(),1) as $arg) { 
         $result = 
@@ -3021,7 +3022,7 @@ function array_merge_unique3(array $array1 /* [, array $...] */) {
                 array_merge($result,$arg)));
     } 
     return $result;
-}    
+} */   
 
 
 function mergeRecordSets($rec1, $rec2){
