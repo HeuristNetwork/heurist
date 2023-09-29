@@ -1242,9 +1242,9 @@ $.widget( "heurist.editing_input", {
                         },
                         init_instance_callback: function(editor){
 
-                            // button[12] is the link button
+                            // button[11] is the link button
                             let html = '<span class="tox-tbtn__select-label">URL</span>';
-                            $($(editor.container).find('.tox-tbtn')[12]).append(html);
+                            $(editor.container).find('.tox-tbtn[title="Insert/edit link"]').append(html);
                         },
                         plugins: [ //contextmenu, textcolor since v5 in core
                             'advlist autolink lists link image preview ', //anchor charmap print 
