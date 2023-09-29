@@ -236,7 +236,7 @@
                 'content_style' => '',
                 'formats' => array(),
                 'style_formats' => array(),
-                'block_formats' => ''
+                'block_formats' => array()
             );
 
             $valid_formats = array();
@@ -308,7 +308,7 @@
                         $block['format'] = str_ireplace(' ', '_', $block['format']); // replace spaces with underscore
                         if($block['format'] == $key){
 
-                            $res['block_formats'] .= ";" . $block['title'] . "=" . $block['format'];
+                            $res['block_formats'][] = $block;
 
                             unset($settings['block_formats'][$idx]); // remove
                             break;
