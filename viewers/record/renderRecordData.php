@@ -1278,7 +1278,7 @@ function print_public_details($bib) {
     
     
     $rec_owner  = $bib['rec_OwnerUGrpID']; 
-    if(in_array($rec_owner, $ACCESSABLE_OWNER_IDS)){
+    if($system->has_access() && in_array($rec_owner, $ACCESSABLE_OWNER_IDS)){
         //owner of record can see any field
         $detail_visibility_conditions = ''; // .= ' OR rst_NonOwnerVisibility="hidden"';
     }else{
@@ -1300,7 +1300,7 @@ function print_public_details($bib) {
         rdr.rst_DisplayOrder,
         dty_ID,
         dtl_ID';      //show null last
-    
+
     $bds = array();
     $bds_temp = array();
     $thumbs = array();

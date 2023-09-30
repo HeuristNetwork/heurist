@@ -3290,16 +3290,20 @@ function recordSearchDetails($system, &$record, $detail_types) {
     $rec_owner = @$record['rec_OwnerUGrpID'];
     $rec_type = @$record['rec_RecTypeID'];
     
-    if($rec_owner!=null && $rec_owner>0 && $rec_type!=null && $rec_type>0){
+    if($rec_type!=null && $rec_type>0){
+       
+        if($rec_owner!=null && $rec_owner>0){
+            $usr_groups = $system->get_user_group_ids();    
+        }else{
+            $usr_groups = null;
+        }
         
-        $usr_groups = $system->get_user_group_ids();
-        
-        if(is_array($usr_groups) && in_array($rec_owner, $usr_groups)){
+        if($system->has_access() && is_array($usr_groups) && in_array($rec_owner, $usr_groups)){
             //owner of record can see any field
             $detail_visibility_conditions = null; // .= ' OR rst_NonOwnerVisibility="hidden"';
         }else{
             $detail_visibility_conditions = array('(rst_NonOwnerVisibility IS NULL)'); //not standard
-            if($usr_groups!=null){
+            if($system->has_access() && $usr_groups!=null){
                 //logged in user can see viewable
                 $detail_visibility_conditions[] = '(rst_NonOwnerVisibility="viewable")';
             }
