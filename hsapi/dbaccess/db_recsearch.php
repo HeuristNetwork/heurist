@@ -3307,9 +3307,7 @@ function recordSearchDetails($system, &$record, $detail_types) {
                 //logged in user can see viewable
                 $detail_visibility_conditions[] = '(rst_NonOwnerVisibility="viewable")';
             }
-            $detail_visibility_conditions[] = '(rst_NonOwnerVisibility="public")';
-            $detail_visibility_conditions[] = '(rst_NonOwnerVisibility="pending" AND IFNULL(dtl_HideFromPublic, 0)!=1)';    
-            
+            $detail_visibility_conditions[] = '((rst_NonOwnerVisibility="public" OR rst_NonOwnerVisibility="pending") AND IFNULL(dtl_HideFromPublic, 0)!=1)';    
             
             $detail_visibility_conditions = ' AND ('.implode(' OR ',$detail_visibility_conditions).')';
         }

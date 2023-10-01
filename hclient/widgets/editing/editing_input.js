@@ -4992,7 +4992,8 @@ $.widget( "heurist.editing_input", {
     getVisibilities: function(){
         
         var ress2 = [];
-        if(this.f('rst_NonOwnerVisibility')=='public' || this.f('rst_NonOwnerVisibility')=='pending')
+        var visibility_mode = this.f('rst_NonOwnerVisibility');
+        if(visibility_mode=='public' || visibility_mode=='pending')
         {
             var idx;
             var ress = {};
@@ -5005,10 +5006,9 @@ $.widget( "heurist.editing_input", {
                 if(!window.hWin.HEURIST4.util.isempty( val )){                 
                 
                     let res = 0;
-                    if(this.f('rst_NonOwnerVisibility')=='pending'){
-                        var ele = this.element.find('span.field-visibility[data-input-id="'+$input.attr('id')+'"]');
-                        res = (ele.attr('hide_field')=='1')?1:0; //1: hide this field from public
-                    }
+                    
+                    var ele = this.element.find('span.field-visibility[data-input-id="'+$input.attr('id')+'"]');
+                    res = (ele.attr('hide_field')=='1')?1:0; //1: hide this field from public
                                         
                     var ele = $input.parents('.input-div');
                     var k = ele.index();
@@ -5042,7 +5042,7 @@ $.widget( "heurist.editing_input", {
                 var $input = this.inputs[idx];
                 var btn = this.element.find('span.field-visibility[data-input-id="'+$input.attr('id')+'"]');
                 
-                if(vals && k<vals.length && vals[k]==1 && vis_mode!='public'){
+                if(vals && k<vals.length && vals[k]==1){
                     btn.attr('hide_field',1);
                 }else{
                     btn.attr('hide_field',0);
