@@ -210,6 +210,7 @@ $.widget( "heurist.mapping", {
              fillOpacity: 0.2},
     
     selection_style: null,
+    need_zoom_on_selection: true,
 
     //storages
     all_layers: {},    // array of all loaded TOP layers by leaflet id   
@@ -2781,6 +2782,8 @@ $.widget( "heurist.mapping", {
     // get bounds for selection
     //
     zoomToSelection: function( _selection, _fly_params ){
+    
+        if(!this.need_zoom_on_selection) return;
         
         if(!window.hWin.HEURIST4.util.isArrayNotEmpty(_selection)){
             _selection  =  this.selected_rec_ids;
@@ -3170,14 +3173,22 @@ $.widget( "heurist.mapping", {
         //maxClusterRadius
         this.isMarkerClusterEnabled = !__parseval(params['nocluster']);
         this.options.isEditAllowed = !this.options.isPublished || __parseval(params['editstyle']);
+        this.need_zoom_on_selection = __parseval(params['zoom_to_selected']);
 
-        this.smooth_zoom = __parseval(params['smooth_zoom']);
         if(this.options.layout_params['smooth_zoom']){
             this.nativemap.options.zoomSnap = 0.1;
             //this.nativemap.options.wheelDebounceTime = 100;
         }else{
             this.nativemap.options.zoomSnap = 1;
         }
+        
+        this.zoom_delta = params['zoom_delta'];
+        if(this.zoom_delta>0){
+            this.nativemap.options.zoomDelta = this.zoom_delta;
+        }else{
+            this.nativemap.options.zoomDelta = 1;
+        }
+        
         this.options.map_popup_mode = params['popup']; //standard, none, in dialog
         if(!this.options.map_popup_mode) this.options.map_popup_mode = 'standard';
         

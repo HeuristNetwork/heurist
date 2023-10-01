@@ -156,11 +156,14 @@ function editCMS_WidgetCfg( widget_cfg, _layout_content, $dlg, main_callback ){
                 window.hWin.HEURIST4.ui.initEditSymbologyControl($dlg.find('#map_select_style'), opts.layout_params.selection_style );
 
                 if(opts.layout_params){
+                    
                     $dlg.find("#use_timeline").prop('checked', !opts.layout_params.notimeline);    
                     $dlg.find("#map_rollover").prop('checked', opts.layout_params.map_rollover);    
                     $dlg.find("#use_cluster").prop('checked', !opts.layout_params.nocluster);    
                     $dlg.find("#editstyle").prop('checked', opts.layout_params.editstyle);    
                     $dlg.find("#smooth_zoom").prop('checked', opts.layout_params.smooth_zoom);    
+                    $dlg.find("#zoom_delta").val(opts.layout_params.zoom_delta>0?opts.layout_params.zoom_delta:1);    
+                    $dlg.find("#zoom_to_selected").prop('checked', opts.layout_params.zoom_to_selected);    
 
                     var ctrls = (opts.layout_params.controls)?opts.layout_params.controls.split(','):[];
                     $dlg.find('input[name=""]').each(
@@ -941,8 +944,8 @@ function editCMS_WidgetCfg( widget_cfg, _layout_content, $dlg, main_callback ){
             layout_params['editstyle'] = $dlg.find("#editstyle").is(':checked');
             layout_params['map_rollover'] = $dlg.find("#map_rollover").is(':checked');
             layout_params['smooth_zoom'] = $dlg.find("#smooth_zoom").is(':checked');
-            //@todo select basemap from selector
-            //layout_params['basemap']
+            layout_params['zoom_to_selected'] = $dlg.find("#zoom_to_selected").is(':checked');
+            layout_params['zoom_delta'] = $dlg.find("#zoom_delta").val();
 
             var ctrls = [];
             $dlg.find('input[name="controls"]:checked').each(
