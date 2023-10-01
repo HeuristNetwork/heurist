@@ -25,8 +25,8 @@
     * @package     Heurist academic knowledge management system
     * @subpackage  !!!subpackagename for file such as Administration, Search, Edit, Application, Library
     */
-//print 'disabled'; 
-//exit(); 
+print 'disabled'; 
+exit(); 
 
 ini_set('max_execution_time', '0');
 
@@ -124,10 +124,12 @@ if(false){
     __correctGetEstDate();
 }else if(false){
     __removeDuplicationValues();
-}else if(true){
+}else if(false){
+    __listOfAdminUsers();
 }
 */
-    __listOfAdminUsers();
+    
+    __convertTustep();
 
 //
 // Report database versions
@@ -1287,10 +1289,15 @@ function __removeDuplicationValues(){
     print 'DONE. Removed '.$cnt.' duplications';
 }
 
+//
+//
+//
 function __listOfAdminUsers(){
 
     global $system, $mysqli, $databases; 
 
+    $mind = '9999';
+    
     foreach ($databases as $idx=>$db_name){
     
         if($db_name=='') continue;
@@ -1298,14 +1305,248 @@ function __listOfAdminUsers(){
         mysql__usedatabase($mysqli, $db_name);
 
         //get version of database        
-        $query = "SELECT ugr_Name, ugr_eMail FROM sysUGrps where  ugr_FirstName = 'sys' AND ugr_LastName = 'admin'";
+        $query = "SELECT ugr_Name, ugr_eMail, ugr_Modified FROM sysUGrps where  ugr_FirstName = 'sys' AND ugr_LastName = 'admin'";
         $vals = mysql__select_row_assoc($mysqli, $query);
-        
         if($vals){
-            echo  '<br>'.$db_name;//.'   '.$vals['ugr_Name'].'  '.$vals['ugr_eMail'];
+            if(strpos($vals['ugr_Modified'],'2019')!==0 && $vals['ugr_Modified']<$mind) $mind = $vals['ugr_Modified'];
+            echo  '<br>'.$db_name.'   '.$vals['ugr_Modified'];//.'   '.$vals['ugr_Name'].'  '.$vals['ugr_eMail'];
         }
     }
-    print '<br>END';
+    print '<br>Earliest: '.$mind.'<br>END';
 }
+
+
+function hexToString($str){return chr(hexdec(substr($str, 2)));}
+//
+//
+//
+function __convertTustep(){
+     global $system, $mysqli, $databases; 
+
+/*
+    print '<xmp>'.$s.'</xmp>';
+    print '<br>';
+
+
+    $m = html_entity_decode($s, ENT_QUOTES|ENT_HTML401, 'UTF-8' );
+
+    // Convert the codepoints to entities
+    //$str = preg_replace("/\\\\u([0-9a-fA-F]{4})/", "&#x\\1;", $str);
+    
+    //preg_replace_callback("/(@[^\0-\x]@u)/isU", function($n) { return hexToString($n[0] ); }, $s);
+
+    $matches = array();
+    preg_match_all("/\&[0-9a-zA-Z]+;/", $s, $matches);
+
+    $matches2 = array();
+    preg_match_all("/\&#x[0-9a-fA-F]{4};/", $s, $matches2);
+
+    
+    print '<xmp>'.$m.'</xmp>';
+    print '<br>';
+    //print '<xmp>'.$s.'</xmp>';
+    print '<br>';
+    print print_r($matches, true);
+    print '<br>';
+    print print_r($matches2, true);
+    
+    //print '<xmp>'.htmlspecialchars_decode($s).'</xmp>';
+*/    
+    //print print_r(get_html_translation_table(HTML_ENTITIES),true);
+$tustep_to_html = array(
+'&amp;' =>'#%#%#',
+'^u'    =>'&uuml;',
+'#.s'   =>'&#x017F;',
+'%/u'   =>'&uacute;',
+//'_'     =>'&nbsp;',
+"^'"    =>'&lsquo;',
+'^-'    =>'&mdash;',
+'#(MPU)'=>'&#x00B7;',
+'%/U'   =>'&Uacute;',
+'#(MKR)'=>'&#x00D7;',
+'#.>'   =>'&ldquo;',
+'#.<'   =>'&rdquo;',
+'%<u'   =>'&ucirc;',
+'^o'    =>'&ouml;',
+'^s'    =>'&szlig;',
+'^a'    =>'&auml;',
+'^U'    =>'&Uuml;',
+'#.z'   =>'&#x0292;',
+'%:w'   =>'&#x1E85;',
+'#.>'   =>'&#x00BB;',
+'#.<'   =>'&#x00AB;',
+'%:e'   =>'&#x00EB;',
+'%:i'   =>'&#x00EF;',
+'^O'    =>'&Ouml;',
+'#.:'   =>'&rsaquo;',
+'#.;'   =>'&lsaquo;',
+"^'^'^'"=>'&#x2037;',
+"''"    =>'&#x2034;',
+//'_'     =>'&thinsp;',
+"#.'#.'"=>'&#x201C;',
+//"#.'#.'"=>'',
+'#.^o'  =>'&#x0153;',
+'%/e'   =>'&eacute;',
+'%<e'   =>'&ecirc;',
+'%/o'   =>'&oacute;',
+'%<o'   =>'&ocirc;',
+'%<u'   =>'&ucirc;',
+'%<a'   =>'&acirc;',
+'%<i'   =>'&icirc;',
+'#.^a'  =>'&aelig;',
+'^.'    =>'&middot;',
+'%/w'   =>'&x#1E83;',
+'%>o'   =>'&#x014F;',
+'%<A'   =>'&Acirc;',
+'%<E'   =>'&Ecirc;',
+'%<U'   =>'&Ucirc;',
+'%;;e'  =>'&#x0119;',
+'%;;a'  =>'&#x0115;',
+'%;;e'  =>'&#x0119;',
+'%<y'   =>'&#x0177;',
+'%<w'   =>'&#x0175;',
+'%<O'   =>'&Ocirc;',
+'^A'    =>'&Auml;',
+'%<j'   =>'&#x0135;',
+'%/a'   =>'&aacute;',
+'%-a'   =>'&#x0101;',
+'%-e'   =>'&#x0113;',
+'%-i'   =>'&#x012B;',
+'%-o'   =>'&#x014D;',
+'%-u'   =>'&#x016B;',
+'%.w'   =>'&#x1E87;',
+'#.l'   =>'&#x0197;',
+'#.^A'  =>'&AElig;',
+'^+'    =>'&dagger;',
+//','     =>'&sbquo;',
+'%/y'   =>'&yacute;',
+'%/Y'   =>'&Yacute;',
+'%<I'   =>'&Icirc;',
+'#.^O'  =>'&OElig;',
+'#;er'  =>'&re;',
+'%;e'   =>'&#x0229;',
+'>llll' =>'&gt;',
+'<IIII' =>'&lt;',
+'%-H'   =>'&#x0048;&#x0304;', //  '&Hmacr;',
+'#;e#.^a'=>'&aelige;',
+'#;vw'  =>'&wv;',  //????
+'%)u'   =>'&uslenis;',
+'%?n'   =>'&ntilde;',
+'#;oo'  =>'&oo;',
+'%>a'   =>'&ahacek;',
+'%/i'   =>'&iacute;',
+'%a'    =>'&agrave;',
+'%e'    =>'&egrave;',
+'%i'    =>'&igrave;',
+'%o'    =>'&ograve;',
+'%u'    =>'&ugrave;',
+'%:y'   =>'&ytrema;',
+'#;iv'  =>'&vi;', //????
+'#;iu'  =>'&ui;',
+'%-y'   =>'&ymacr;',
+'%..d'  =>'&dundpunkt;',
+'%>c'   =>'&chacek;',
+'%/'    =>'&#180;',
+'#.ä'   =>'&#230;',
+'#.ö'   =>'&oelig;');
+
+$html_to_hex = array(
+'&Hmacr;' =>  '&#x0048;&#x0304;'
+);
+
+/* test
+    $s = '<p>#.ö   &#163; > %/Y#;iv < &#x017F;  &longs; &Ouml;  &#x201E; &ldquo;  &#x201C; &rdquo; &#x0153; &oelig; &Hmacr;  &#x0048;&#x0304;   &wv;</p>';
+
+    print '<xmp>'.$s.'</xmp>';
+    print '<br>';
+*/    
+    $cnt = 0;
+    $missed = array();     //dty_Type="freetext" OR blocktext
+    $txt_field_types = mysql__select_list2($mysqli, 'SELECT dty_ID FROM defDetailTypes WHERE dty_Type="freetext" OR dty_Type="blocktext"');
+   
+   
+    $update_stmt = $mysqli->prepare('UPDATE recDetails SET dtl_Value=? WHERE dtl_ID=?');
+    $keep_autocommit = mysql__begin_transaction($mysqli);    
+    $isOk = true;
+   
+    // dtl_RecID=18 AND   dtl_RecID=85057 AND 
+    //     
+    $query = 'SELECT dtl_ID, dtl_Value, dtl_DetailTypeID, dtl_RecID FROM recDetails, Records '
+    .'WHERE dtl_RecID=rec_ID AND rec_RecTypeID NOT IN (51,52) AND dtl_DetailTypeID in ('.implode(',',$txt_field_types).')';
+    //.' AND rec_ID IN (1593,4060 ,8603, 11704, 22025, 22491, 25393 , 25570, 28848, 28959    )';     
+    $res = $mysqli->query($query);
+    if ($res){
+        while ($row = $res->fetch_row()){
+            
+            //skip json content
+            if(strpos($row[1],'{')===0 || strpos($row[1],'[')===0){
+                $r = json_decode($row[1],true);
+                if(is_array($r)) continue;
+            }
+    
+            $s = ''.$row[1];
+
+            //1. Convert TUSTEP to html entities
+            foreach ($tustep_to_html as $tustep=>$entity) {
+                if(strpos($s,$tustep)!==false){
+                    $s = str_replace($tustep, $entity, $s);
+                }
+            }
+            
+            //2. Decode HTML entities    
+            $m = html_entity_decode($s, ENT_QUOTES|ENT_HTML401, 'UTF-8' );
+            
+            $m2 = str_replace('#%#%#', '&amp;', $m); //convert back
+
+            //3. List unrecognized
+            if($m2!=$row[1]){
+                print $row[3].' '.$row[0].'<xmp>'.$row[1].'</xmp>';
+                print '<xmp>'.$m2.'</xmp>';
+                $cnt++;
+                //if($cnt>1000) break;
+            }
+            
+            //find missed unconverted HTML entities
+            $matches = array();
+            preg_match_all("/\&[0-9a-zA-Z]+;/", $m, $matches);
+
+            if(is_Array(@$matches[0]) && count($matches[0])>0){
+                    $missed = array_merge_unique($missed, $matches[0]);            
+            }
+            
+            $m = str_replace('#%#%#', '&amp;', $m); //convert back
+            
+            //update in database
+            /*
+            $update_stmt->bind_param('si', $m, $row[0]);
+            $res33 = $update_stmt->execute();
+            if(! $res33 )
+            {
+                $isOk = false;
+                print '<div class="error" style="color:red">Record #'.$row[3].'. Cannot replace value in record details. SQL error: '.$mysqli->error.'</div>';
+                $mysqli->rollback();
+                break;
+            }
+            */
+            
+        }//while
+        $res->close();
+    }
+    
+    if($isOk){
+        $mysqli->commit();  
+    }
+    if($keep_autocommit===true) $mysqli->autocommit(TRUE);
+
+    print '<br>Replaced in '.$cnt.' fields';
+    
+    print '<br>Missed:';
+    print print_r($missed, true);
+    
+    print '<xmp>'.print_r($missed, true).'</xmp>';
+    
+    
+}
+
 
 ?>
