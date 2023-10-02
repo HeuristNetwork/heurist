@@ -490,11 +490,13 @@ if(!($is_map_popup || $without_header)){
                             var $rel_field = $rel_section.find('div[data-id="'+ related_records[key][i] +'"]').hide();
 
                             if($pre_location.is('fieldset')){
-                                $rel_field.clone().appendTo($pre_location).show();
-                                $pre_location.show();
+                                $rel_field.clone().appendTo($pre_location).show(); // show rel field
+                                $pre_location.show(); // show fieldset
+                                $pre_location.prev().show(); // show header
                             }else{
-                                $pre_location.before($rel_field.clone().show());
-                                $pre_location.parent().show();
+                                $pre_location.before($rel_field.clone().show()); // show rel field
+                                $pre_location.parent().show(); // show fieldset
+                                $pre_location.parent().prev().show(); // show header
                             }
                         }
                     }
