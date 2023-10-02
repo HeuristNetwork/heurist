@@ -1435,6 +1435,8 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
         var pbar = $progress_div.find('#progressbar');
         var progressLabel = pbar.find('.progress-label').text('');
         pbar.progressbar({value:0});
+
+        let elapsed = 0;
         
         window.hWin.HEURIST4.msg._progressInterval = setInterval(function(){ 
             
@@ -1460,7 +1462,19 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
                         if(resp[0]>0 && resp[1]>0){
                             var val = resp[0]*100/resp[1];
                             pbar.progressbar( "value", val );
-                            progressLabel.text(resp[0]+' of '+resp[1]+'  '+(resp.length==3?resp[2]:''));
+
+                            elapsed += t_interval;
+                            est_remaining = (elapsed / resp[0]) * (resp[1] - resp[0]);
+
+                            if(est_remaining < 10000){ // less than 10 seconds
+                                est_remaining = 'a few seconds';
+                            }else if(est_remaining < 60000){ // less than a minute
+                                est_remaining = `${Math.ceil(est_remaining / 1000)} seconds`;
+                            }else{
+                                est_remaining = `${Math.ceil(est_remaining / 60000)} minutes`;
+                            }
+
+                            progressLabel.text(`${resp[0]} of ${resp[1]}   ${(resp.length==3?resp[2]:'')} (approximately ${est_remaining} remaining)`);
                         }else{
                             progressLabel.text('preparing...');
                             pbar.progressbar( "value", 0 );

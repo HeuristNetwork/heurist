@@ -174,7 +174,7 @@ if($init_client){
 <?php
 } 
 ?>
-            <p class="header_info">This will take some time for large databases</p>
+            <p class="header_info">This will take some time for large databases<br>During this time you will not be able to access the database</p>
             
             <div class="progress_div" style="background:white;min-height:40px;width:100%"></div>
 
@@ -332,7 +332,7 @@ function doRecTitleUpdate( $system, $progress_session_id, $recTypeIDs ){
             }
         }
         
-        if($progress_session_id>0 &&  $rec_count>100 && ($processed_count % 100 == 0)){
+        if($progress_session_id>0 &&  $rec_count>100){
             $session_val = $processed_count.','.$rec_count;
             $current_val = mysql__update_progress(null, $progress_session_id, false, $session_val);
             if($current_val && $current_val=='terminate'){
