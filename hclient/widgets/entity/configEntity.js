@@ -278,9 +278,9 @@ $.widget( "heurist.configEntity", {
         if(this.options.divSaveSettings){
 
             if(this.options.configName == "crosstabs"){
-                $('<div><label>Save settings as </div> '
+                $('<div style="display: block;"><label>Save settings as </div> '
                 + '<div style="margin-left: 6px;"><input class="inpt_save_setting_name text form-control rounded-0" style="font-size: small;"/></label></div>'
-                + (this.options.saveOnExit?'':'<div style="margin-left: 20px;">'
+                + (this.options.saveOnExit?'':'<div style="margin-left: 10px;">'
                 + '<button class="btn btn-success btnSaveSettings" style="font-size:10px;"><i class="ui-icon ui-icon-save"></i> Save </button></div>'))
                 .appendTo(this.options.divSaveSettings);
             }else{

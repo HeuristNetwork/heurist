@@ -83,7 +83,7 @@ require_once(dirname(__FILE__) . '/../../hclient/framecontent/initPage.php');
                         <div>
 
                             <!-- Left Side -->
-                            <div class="border border-dark bg-white" style="width: 400px;padding: 7px;float: left;height: 92%;">
+                            <div class="border border-dark bg-white" style="width: 340px;padding: 7px;float: left;height: 92%;">
                                 <fieldset>
                                     <!-- Dataset selection -->
                                     <div>
@@ -98,7 +98,7 @@ require_once(dirname(__FILE__) . '/../../hclient/framecontent/initPage.php');
 
                                             <fieldset id="shows" style="display:none;">
                                                 <div class="align-items-center">
-                                                    <div style="font-size: 14px;margin-left: 42px;">
+                                                    <div style="font-size: 14px;vertical-align: top;">
                                                         <label for="rbShowValue">Show</label>
                                                     </div>
 
@@ -109,6 +109,13 @@ require_once(dirname(__FILE__) . '/../../hclient/framecontent/initPage.php');
                                                         </div>
 
                                                         <div class="checkboxValues">
+                                                            <input type="checkbox" class="btn-check" onchange="crosstabsAnalysis.doRender()" checked id="rbShowTotals">
+                                                            <label class="btn btn-outline-primary" for="rbShowTotals">Totals</label>
+                                                        </div>
+
+                                                        <br>
+
+                                                        <div class="checkboxValues">
                                                             <input type="checkbox" class="btn-check" onchange="crosstabsAnalysis.doRender()" id="rbShowPercentRow">
                                                             <label class="btn btn-outline-primary" for="rbShowPercentRow">Row %</label>
                                                         </div>
@@ -116,11 +123,6 @@ require_once(dirname(__FILE__) . '/../../hclient/framecontent/initPage.php');
                                                         <div class="checkboxValues">
                                                             <input type="checkbox" class="btn-check" onchange="crosstabsAnalysis.doRender()" id="rbShowPercentColumn">
                                                             <label class="btn btn-outline-primary" for="rbShowPercentColumn">Column %</label>
-                                                        </div>
-
-                                                        <div class="checkboxValues">
-                                                            <input type="checkbox" class="btn-check" onchange="crosstabsAnalysis.doRender()" checked id="rbShowTotals">
-                                                            <label class="btn btn-outline-primary" for="rbShowTotals">Totals</label>
                                                         </div>
                                                     </div>
                                                 </div>
@@ -160,7 +162,8 @@ require_once(dirname(__FILE__) . '/../../hclient/framecontent/initPage.php');
                                                         </div>
                                                     </div>
                                                 </div>
-                                                <div>
+
+                                                <div style="display: block; padding-bottom: 15px;">
                                                     <div class="input-cell">
                                                         <div class="blankCheckboxes">
                                                             <input type="checkbox" onchange="crosstabsAnalysis.doRender()" id="rbShowBlanks">
@@ -177,10 +180,10 @@ require_once(dirname(__FILE__) . '/../../hclient/framecontent/initPage.php');
                             <!-- End of Left Side -->
 
                             <!-- Right Side -->
-                            <div class="border border-dark bg-white" style="width: 48%;padding: 7px;display: inline-block;height: 92%;">
+                            <div class="border border-dark bg-white" style="width: 43%;padding: 7px;display: inline-block;height: 92%;">
 
                                 <div style="font-size: 0.8em;">
-                                    Choice of record type determines the list of fields avaiable but does not filter the results - the analysis is based on all records in the result set
+                                    Choice of record type determines the list of fields avaiable<br>but does not filter the results - the analysis is based on all<br>records in the result set
                                 </div>
 
                                 <div style="margin-top: 10px;">
@@ -195,7 +198,7 @@ require_once(dirname(__FILE__) . '/../../hclient/framecontent/initPage.php');
 
                                 <fieldset id="vars" style="display:none;">
 
-                                    <div id="row_container" style="margin-bottom: 10px;">
+                                    <div id="row_container">
                                         <div class="align-items-center" id="rowVars" style="margin-bottom: 5px;">
 
                                             <div class="fldheader" style="margin: 0px 5px 0px 11px;">
@@ -217,7 +220,7 @@ require_once(dirname(__FILE__) . '/../../hclient/framecontent/initPage.php');
                                         <div id="rowWarning" class="align-items-center">&nbsp;</div>
                                     </div>
                                     
-                                    <div id="column_container" style="margin-bottom: 10px;">
+                                    <div id="column_container">
                                         <div class="align-items-center" id="columnVars" style="margin-bottom: 5px;">
 
                                             <div class="fldheader" style="margin: 0px 5px 0px -5px;">
@@ -239,7 +242,7 @@ require_once(dirname(__FILE__) . '/../../hclient/framecontent/initPage.php');
                                         <div id="columnWarning" class="align-items-center">&nbsp;</div>
                                     </div>
                                     
-                                    <div id="page_container" style="margin-bottom: 10px;">
+                                    <div id="page_container">
                                         <div class="align-items-center" id="pageVars" style="margin-bottom: 5px;">
 
                                             <div class="fldheader" style="margin: 0px 5px 0px 7px;">

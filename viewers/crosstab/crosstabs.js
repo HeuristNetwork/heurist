@@ -83,6 +83,8 @@ function CrosstabsAnalysis(_query, _query_domain) {
         $recTypeSelector.hSelect({ change: _onRectypeChange });
         $recTypeSelector.hSelect('refresh');
 
+        $recTypeSelector.hSelect('widget').css('width', '');
+
         $('.showintervals')
         .click(function( event ) {
             var $modal = determineModalType( $(this).attr('tt') );
