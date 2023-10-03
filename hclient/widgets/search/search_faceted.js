@@ -1143,7 +1143,7 @@ $.widget( "heurist.search_faceted", {
                                 showclear_button: false,
                                 showedit_button: false,
                                 suppress_prompts: true,  //supress help, error and required features
-                                suppress_repeat: (fld_type == 'freetext' && field['multisel']) ? 'force_repeat' : true, // true
+                                suppress_repeat: true, // currently disabled - (fld_type == 'freetext' && field['multisel']) ? 'force_repeat' : true
                                 is_faceted_search: true,
                                 onrecreate: () => {
 
@@ -1243,7 +1243,7 @@ $.widget( "heurist.search_faceted", {
                         }
                                                                
                         inpt.find('.header').css(btn_container_css);         //padding-top
-                        inpt.find('.editint-inout-repeat-button').parent()
+                        inpt.find('.editint-inout-repeat-container')
                             .css(btn_container_css)
                             .css({'padding-top':'15px'});
                         inpt.find('.editint-inout-repeat-button').css({
