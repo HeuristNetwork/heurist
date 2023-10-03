@@ -56,6 +56,8 @@ function hMapLayer2( _options ) {
         is_outof_range = false;
         
     var _max_zoom_level = 0;
+    
+    var _has_zoom_setting_per_record = 0;//1 - it does, -1 it doesn't, 0 - not checked yet
 
     //
     //
@@ -430,7 +432,7 @@ function hMapLayer2( _options ) {
 
         var layer_popup_template = _recordset.fld(options.rec_layer || _record, 
                                     window.hWin.HAPI4.sysinfo['dbconst']['DT_SMARTY_TEMPLATE']);
-        
+
         var layer_geofields = []
         var layer_default_style = null;
         if(window.hWin.HAPI4.sysinfo['dbconst']['DT_SYMBOLOGY']>0){
@@ -511,7 +513,7 @@ function hMapLayer2( _options ) {
                 rules: request.rules,
                 w: request.w,
                 geofields: layer_geofields, //additional filter - get geodata from specified fields only
-                //returns strict geojson and timeline data as two separate arrays, withoud details, only header fields rec_ID, RecTypeID and rec_Title
+                //returns strict geojson and timeline data as two separate arrays, withoud details, only header fields rec_ID, RecTypeID, rec_Title and rec_MinZoom, rec_MaxZoom
                 leaflet: 1, 
                 simplify: 1, //simplify paths with more than 1000 vertices
                 separate: (options.is_current_search===true)?1:0, //if true do not create GeometryCollection for heurist record
@@ -945,7 +947,10 @@ function hMapLayer2( _options ) {
         
         
     }
-
+    
+    //
+    // show/hide the entire layer depends on DT_MINIMUM_ZOOM_LEVEL,DT_MAXIMUM_ZOOM_LEVEL
+    //
     function _setVisibilityForZoomRange(current_zoom){
 
         if(is_inited){
@@ -956,16 +961,17 @@ function hMapLayer2( _options ) {
             }
             
             var _rec = options.rec_layer || _record;
-            if(_rec['maxzoom']==-1 && _rec['minzoom']==-1) return; //not set
+            if(_rec['maxzoom']==-1 && _rec['minzoom']==-1 && _has_zoom_setting_per_record<0) return; //not set
 
             var is_in_range = true;
-            
+
             if(_rec['maxzoom']>0 || _rec['minzoom']>=0){ //already defined
                 
                 is_in_range = (_rec['maxzoom']==-1 || _rec['maxzoom']>=current_zoom)
                         && (_rec['minzoom']==-1 || current_zoom>=_rec['minzoom']);
                 
-            }else{
+            }else if(!(_rec['maxzoom']==-1 && _rec['minzoom']==-1))
+            {
                 _rec['maxzoom'] = -1;
                 _rec['minzoom'] = -1;
                 if(_rec['layer']){
@@ -1017,6 +1023,38 @@ function hMapLayer2( _options ) {
                 is_outof_range = false;
                 status =  (is_visible)?'visible':'hidden';
                 options.mapwidget.mapping('setLayerVisibility', _nativelayer_id, is_visible);
+                
+
+                if(_dataset_type=='db' && _has_zoom_setting_per_record>=0){
+                
+                    var show_rec_ids = [], hide_rec_ids = [];
+                    
+                    _has_zoom_setting_per_record = -1;
+                    
+                    options.mapwidget.mapping('eachLayerFeature', _nativelayer_id, 
+                        function(layer){
+                            
+                            //get record from result set and assign field values
+                            if(layer.feature.properties.rec_MinZoom>=0 || layer.feature.properties.rec_MaxZoom>0){
+                                
+                                let is_in_range = (!(layer.feature.properties.rec_MaxZoom>0) || layer.feature.properties.rec_MaxZoom>=current_zoom)
+                                                  && (!(layer.feature.properties.rec_MinZoom>=0) || current_zoom>=layer.feature.properties.rec_MinZoom);
+                                if(is_in_range){
+                                    show_rec_ids.push(layer.feature.properties.rec_ID);    
+                                }else{
+                                    hide_rec_ids.push(layer.feature.properties.rec_ID);
+                                }
+                                
+                                _has_zoom_setting_per_record = 1;
+                            }
+                        });
+                                        
+                    
+                    options.mapwidget.mapping('setFeatureVisibility', show_rec_ids, true, 1);
+                    options.mapwidget.mapping('setFeatureVisibility', hide_rec_ids, false, 1);
+
+                }
+                
             }else{
                 status = 'out';
                 is_outof_range = true;
@@ -1124,6 +1162,7 @@ function hMapLayer2( _options ) {
         
         //
         // visiblity_set true,false or array of ids
+        // if visiblity_set is array of ids it allows to show only certain objects for this layer
         //
         setVisibility:function(visiblity_set){
             
@@ -1138,10 +1177,13 @@ function hMapLayer2( _options ) {
             if(is_inited){
                 if(_nativelayer_id>0){
                     status =  (is_visible)?'visible':'hidden';
-                    if(window.hWin.HEURIST4.util.isArrayNotEmpty(visiblity_set)){                            
+                    if(window.hWin.HEURIST4.util.isArrayNotEmpty(visiblity_set)){   
+                        //switch the layer on                         
                         if(was_invisible) options.mapwidget.mapping('setLayerVisibility', _nativelayer_id, true);
+                        //
                         options.mapwidget.mapping('setVisibilityAndZoom', {native_id:_nativelayer_id}, visiblity_set, false);
                     }else{        
+                        //show/hide entire layer
                         options.mapwidget.mapping('setLayerVisibility', _nativelayer_id, is_visible);
                     }
                 }

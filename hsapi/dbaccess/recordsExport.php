@@ -252,6 +252,9 @@ public static function output($data, $params){
         define('DT_PLACE_END2', ConceptCode::getDetailTypeLocalID('1414-1088'));
         define('DT_PLACE_TRAN', ConceptCode::getDetailTypeLocalID('1414-1090'));
         
+        self::$system->defineConstant('DT_MINIMUM_ZOOM_LEVEL', true);
+        self::$system->defineConstant('DT_MAXIMUM_ZOOM_LEVEL', true);
+        
 
         if(@$params['leaflet']){
             fwrite($fd, '{"geojson":');         
@@ -524,6 +527,7 @@ XML;
     }else
     if(@$params['leaflet']){
         //for leaflet get only limited set of fields 
+        $retrieve_detail_fields = null;
         $retrieve_header_fields = 'rec_ID,rec_RecTypeID,rec_Title';
     }else if(@$params['datatable']>0){ 
 
@@ -1415,6 +1419,10 @@ private static function _getGeoJsonFeature($record, $extended=false, $simplify=f
                     $symbology = json_decode($value,true);                    
                 //}else if(defined('DT_EXTENDED_DESCRIPTION') && $dty_ID==DT_EXTENDED_DESCRIPTION){
                 //    $ext_description = $value;
+                }else if(defined('DT_MINIMUM_ZOOM_LEVEL') && $dty_ID==DT_MINIMUM_ZOOM_LEVEL){
+                    $res['properties']['rec_MinZoom'] = $value;                    
+                }else if(defined('DT_MAXIMUM_ZOOM_LEVEL') && $dty_ID==DT_MAXIMUM_ZOOM_LEVEL){
+                    $res['properties']['rec_MaxZoom'] = $value;                    
                 }
                 $val = $value;
             }

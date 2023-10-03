@@ -62,11 +62,11 @@ Thematic mapping
     getStyle
     
     setFeatureSelection - triggers redraw for path and polygones (assigns styler function)  and creates highlight circles for markers
-    setFeatureVisibility - applies visibility for given set of heurist recIds (filter from timeline)
+    setFeatureVisibility - applies visibility for given set of heurist recIds (filter from timeline and filter by zoom)
     zoomToSelection
     zoomToLayer
     setLayerVisibility - show hide entire layer
-    setVisibilityAndZoom - show susbset n given recordset and zoom 
+    setVisibilityAndZoom - show susbset of given recordset and zoom 
     
     _onLayerClick - map layer (shape) on click event handler - highlight selection on timeline and map, opens popup
     _clearHighlightedMarkers - removes special "highlight" selection circle markers from map
@@ -1969,7 +1969,7 @@ $.widget( "heurist.mapping", {
                     layer.remove(); 
                 }else{
                     
-                    if(layer.hidden_by_filter!==true){
+                    if(layer.hidden_by_filter!==true && layer.hidden_by_zoom!==true){
                         all_visible_markers.push(layer); 
                            
                         if(layer.hidden_by_theme===true && !that.isMarkerClusterEnabled && !layer._map){
@@ -2000,7 +2000,7 @@ $.widget( "heurist.mapping", {
                     layer.hidden_by_theme = true;
                     layer.remove(); 
                 }else{
-                    if(layer.hidden_by_theme===true && layer.hidden_by_filter!==true && !layer._map){
+                    if(!layer._map && layer.hidden_by_theme===true && !(layer.hidden_by_filter || layer.hidden_by_zoom)){
                         layer.addTo( that.nativemap );
                     }
                     layer.hidden_by_theme = false;
@@ -2673,7 +2673,7 @@ $.widget( "heurist.mapping", {
         var selected_markers = this._getMarkersByRecordID(_selection);
         for(var idx in selected_markers){
             var layer = selected_markers[idx];
-            if(!(layer.hidden_by_filter || layer.hidden_by_theme)){
+            if(!(layer.hidden_by_filter || layer.hidden_by_theme || layer.hidden_by_zoom)){
 
                 //create special hightlight marker below this one
                 var use_style = layer.feature.style || layer.feature.default_style;
@@ -2798,7 +2798,7 @@ $.widget( "heurist.mapping", {
             if(top_layer instanceof L.LayerGroup)   //geojson only
                 top_layer.eachLayer(function(layer){
                     if (layer instanceof L.Layer && layer.feature && //(!(layer.cluster_layer_id>0)) &&
-                        (!(layer.hidden_by_filter || layer.hidden_by_theme)) &&
+                        (!(layer.hidden_by_filter || layer.hidden_by_theme || layer.hidden_by_zoom)) &&
                         (window.hWin.HEURIST4.util.findArrayIndex(layer.feature.properties.rec_ID, _selection)>=0)) 
                     {
                         bounds.push( that.getLayerBounds(layer, useRuler) );
@@ -2926,7 +2926,9 @@ $.widget( "heurist.mapping", {
     },
     
     //
+    // show (and zoom)/hide the specific set of objects for layer
     // dataset_id -  {mapdoc_id:, dataset_name:, dataset_id:  or native_id}
+    // _selection - show_all/hide_all|or array of ids
     //
     setVisibilityAndZoom: function( dataset_id, _selection, need_zoom ){
         
@@ -3008,8 +3010,9 @@ $.widget( "heurist.mapping", {
     //
     //  applies visibility for given set of heurist recIds (filter from timeline)
     // _selection - true - apply all layers, or array of rec_IDs
+    // origin: 0 -timeline, 1 - zoom
     //
-    setFeatureVisibility: function( _selection, is_visible ){
+    setFeatureVisibility: function( _selection, is_visible, origin ){
         
         if(_selection===true || window.hWin.HEURIST4.util.isArrayNotEmpty(_selection)) {
             
@@ -3028,11 +3031,19 @@ $.widget( "heurist.mapping", {
                                 window.hWin.HEURIST4.util.findArrayIndex(layer.feature.properties.rec_ID, _selection)>=0)) 
                         {
                             if(is_visible==false){
-                                layer.hidden_by_filter = true;
+                                if(origin==0){
+                                    layer.hidden_by_filter = true;    
+                                }else{
+                                    layer.hidden_by_zoom = true;        
+                                }
                                 layer.remove();    
                             }else{
-                                layer.hidden_by_filter = false; 
-                                if(layer.hidden_by_theme!==true && !layer._map){
+                                if(origin==0){
+                                    layer.hidden_by_filter = false;    
+                                }else{
+                                    layer.hidden_by_zoom = false;        
+                                }
+                                if(!layer._map && !(layer.hidden_by_theme || layer.hidden_by_zoom || layer.hidden_by_zoom)){
                                     layer.addTo( that.nativemap );
                                 }
                             }
@@ -3058,11 +3069,21 @@ $.widget( "heurist.mapping", {
                     var layer = selected_markers[idx];
                     if(layer.cluster_layer_id>0 && that.all_clusters[layer.cluster_layer_id]){
                         if(is_visible==false){
+                            if(origin==0){
+                                layer.hidden_by_filter = true;    
+                            }else{
+                                layer.hidden_by_zoom = true;        
+                            }
                             layer.hidden_by_filter = true;
                             that.all_clusters[layer.cluster_layer_id].removeLayer(layer);
                         }else {
                             layer.hidden_by_filter = false; 
-                            if(layer.hidden_by_theme!==true && !that.all_clusters[layer.cluster_layer_id].hasLayer(layer)){
+                            if(origin==0){
+                                layer.hidden_by_filter = false;    
+                            }else{
+                                layer.hidden_by_zoom = false;        
+                            }
+                            if(!(layer.hidden_by_theme || layer.hidden_by_zoom || layer.hidden_by_zoom) && !that.all_clusters[layer.cluster_layer_id].hasLayer(layer)){
                                 that.all_clusters[layer.cluster_layer_id].addLayer(layer);
                             }
                         }
@@ -3263,8 +3284,8 @@ $.widget( "heurist.mapping", {
                     },                
                     onfilter: function(show_rec_ids, hide_rec_ids){
                         
-                        that.setFeatureVisibility(show_rec_ids, true);
-                        that.setFeatureVisibility(hide_rec_ids, false);
+                        that.setFeatureVisibility(show_rec_ids, true, 0);
+                        that.setFeatureVisibility(hide_rec_ids, false, 0);
                     }});
             }
             
