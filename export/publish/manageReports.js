@@ -91,13 +91,17 @@ function ReportManager(_isFilterMode, _isWindowMode) {
 	* Creates and (re)fill datatable
 	*/
     function _initDataTable( dataSet ){
-        
-        if(!(dataSet && dataSet.length>0)) return;
+
+        if(!(dataSet && dataSet.length>0)){
+            $('#tb_bottom').hide(); // hide second 'create schedule' button
+            return;
+        }
+        $('#tb_bottom').show(); // show second 'create schedule' button
 
         if(_dataTable!=null){
-                    _dataTable.destroy();
-                    _dataTable = null;
-                    $('.div_datatable').empty();
+            _dataTable.destroy();
+            _dataTable = null;
+            $('.div_datatable').empty();
         }
         
         _dataTableParams = {
@@ -237,13 +241,10 @@ return '<div align="center" data-id="'+data+'">'
                     }
                 }
             }
-                                ];
-        
-        
-        
-        _dataTable = $('.div_datatable').DataTable( _dataTableParams );        
-        
-        
+        ];
+
+        _dataTable = $('.div_datatable').DataTable( _dataTableParams );
+
         $('.dataTables_filter').css({float:'left'});
     }
 
