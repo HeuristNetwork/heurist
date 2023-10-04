@@ -125,11 +125,6 @@ $.widget( "heurist.searchBuilder", {
             }else{
                 this._dialog.attr('data-palette', null);
             }
-            
-        }else{
-            
-            
-            
         }
         
         this.element.load(window.hWin.HAPI4.baseURL+"hclient/widgets/search/searchBuilder.html", function(){

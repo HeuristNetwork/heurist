@@ -53,9 +53,7 @@ $dbname = htmlspecialchars($_REQUEST['db']);
     $srcURL = 'listDatabaseErrors.php?db='.$dbname;
     $sTitle = 'Verifying database';
  }
-
 ?>
-<!DOCTYPE html>
 <html lang="en">
     <head>
         <title><?php echo $sTitle; ?></title>
