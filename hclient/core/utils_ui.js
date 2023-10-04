@@ -505,6 +505,7 @@ window.hWin.HEURIST4.ui = {
         var useGroups = (options.useGroups!==false);
         var useIds = (options.useIds===true);
         var useCheckboxes = (options.useCheckboxes===true);
+        var eventHandlers  = options.eventHandlers;
         
         var showAllRectypes = (options.showAllRectypes===true); //otherwise only non-hidden
  
@@ -667,7 +668,7 @@ window.hWin.HEURIST4.ui = {
         }
         }
         
-        selObj = window.hWin.HEURIST4.ui.initHSelect(selObj, useHtmlSelect);
+        selObj = window.hWin.HEURIST4.ui.initHSelect(selObj, useHtmlSelect, null, eventHandlers);
 
         return $(selObj);
     },
@@ -2247,7 +2248,7 @@ window.hWin.HEURIST4.ui = {
     //  It uses 3 chars codes: ISO639-2
     //  it is used in editTranslations and editCMS2
     //    
-    createLanguageSelect: function($select, topOptions, defValue, showName){
+    createLanguageSelect: function($select, topOptions, defValue, showName, eventHandlers){
         
             var languages = window.hWin.HAPI4.sysinfo.common_languages;
             var content = [];
@@ -2271,7 +2272,7 @@ window.hWin.HEURIST4.ui = {
                 if(defValue){
                     $select.val( defValue );
                 }
-                window.hWin.HEURIST4.ui.initHSelect($select[0], false);
+                return window.hWin.HEURIST4.ui.initHSelect($select[0], false, null, eventHandlers);
             }
             
     },

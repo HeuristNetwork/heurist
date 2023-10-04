@@ -267,14 +267,14 @@ $.widget( "heurist.searchInput", {
             }
         }else{
             
-            if(!$.isFunction($('body')['showSearchBuilder'])){ //OK! widget script js has been loaded
+            if(!$.isFunction($('body')['showSearchBuilder'])){ 
             
                 var path = window.hWin.HAPI4.baseURL + 'hclient/widgets/search/';
                 var scripts = [ path+'searchBuilder.js', 
                                 path+'searchBuilderItem.js',
                                 path+'searchBuilderSort.js'];
                 $.getMultiScripts(scripts)
-                .done(function() {
+                .done(function() {  //OK! widget script js has been loaded
                     showSearchBuilder({ search_realm:that.options.search_realm, 
                                         search_page:that.options.search_page});
                 }).fail(function(error) {

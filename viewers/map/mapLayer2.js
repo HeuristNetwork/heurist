@@ -1024,7 +1024,7 @@ function hMapLayer2( _options ) {
                 status =  (is_visible)?'visible':'hidden';
                 options.mapwidget.mapping('setLayerVisibility', _nativelayer_id, is_visible);
                 
-
+                //visibility per record
                 if(_dataset_type=='db' && _has_zoom_setting_per_record>=0){
                 
                     var show_rec_ids = [], hide_rec_ids = [];

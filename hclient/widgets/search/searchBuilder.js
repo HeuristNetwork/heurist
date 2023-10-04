@@ -23,6 +23,7 @@ $.widget( "heurist.searchBuilder", {
     // default options
     options: {
         is_dialog: false,
+        default_palette_class: 'ui-heurist-explore', 
         is_h6style: false,
         svsID: null,
         domain: null, // bookmark|all or usergroup ID
@@ -116,6 +117,15 @@ $.widget( "heurist.searchBuilder", {
         
             this.element.parent().addClass('ui-dialog-heurist');
             this.element.parent().find('.ui-dialog-buttonset').css('margin-right','260px');
+            
+            
+            if(this.options.default_palette_class){
+                this._dialog.attr('data-palette', this.options.default_palette_class);
+                this._dialog.parent().addClass(this.options.default_palette_class);
+            }else{
+                this._dialog.attr('data-palette', null);
+            }
+            
         }else{
             
             
@@ -203,8 +213,11 @@ $.widget( "heurist.searchBuilder", {
         if(this.options.is_for_rules){
             var sele = this.element.find('#sortby_accordion');
             sele.hide();
-            sele.prev().hide();
+            sele.prev().hide(); //hide <hr>
             sele.next().hide();
+            
+            sele = this.element.find('#ruleset_accordion');
+            sele.hide();
         }else
         if(this.sort_array.length==0){
             this.addSortItem();
@@ -470,20 +483,9 @@ $.widget( "heurist.searchBuilder", {
             this.select_main_rectype = null;
         }
 
-        this.select_main_rectype = window.hWin.HEURIST4.ui.createRectypeSelectNew( this.element.find("#opt_rectypes").get(0),
-            {
-                topOptions: this.options.rty_ID>0?null
-                :[{key:'-1',title:'select record type to search...'},
-                    {key:'',title:'any record type'}],
-                rectypeList: this.options.rty_ID>0?[this.options.rty_ID]:null,
-                useHtmlSelect: false,
-                showAllRectypes: true
-        });
-
-        
-        
+        //
+        //
         function __onRectypeChange(){
-
             if(that.select_additional_rectypes){
                 //reset
                 that.select_additional_rectypes.editing_input('setValue', '');
@@ -504,9 +506,22 @@ $.widget( "heurist.searchBuilder", {
 
             that.clearAll();
 
-        }        
+        }     
+        
+        this._on(this.element.find("#opt_rectypes"), {change: __onRectypeChange});
+        
+        this.select_main_rectype = window.hWin.HEURIST4.ui.createRectypeSelectNew( this.element.find("#opt_rectypes").get(0),
+            {
+                topOptions: this.options.rty_ID>0?null
+                :[{key:'-1',title:'select record type to search...'},
+                    {key:'',title:'any record type'}],
+                rectypeList: this.options.rty_ID>0?[this.options.rty_ID]:null,
+                useHtmlSelect: false,
+                showAllRectypes: true,
+                eventHandlers: {onSelectMenu:__onRectypeChange}
+        });
 
-        this._on(this.select_main_rectype, {change: __onRectypeChange});
+        
 
         if(this.options.rty_ID>0){
             selected = this.options.rty_ID;
@@ -628,10 +643,8 @@ $.widget( "heurist.searchBuilder", {
 
                 this.select_language = this.element.find('#opt_language');
                 let options = [{title: 'ANY', key: '*', selected: true}, {title: 'Default', key: ''}];
-                window.hWin.HEURIST4.ui.createLanguageSelect(this.select_language, options, '*', false);
-
-                this._on(this.select_language, {
-                    change: function(){
+                this.select_language = window.hWin.HEURIST4.ui.createLanguageSelect(this.select_language, options, '*', false,
+                {onSelectMenu: function(){
                         // Update language of dropdowns
                         let lang = that.select_language.val();
                         $.each(this.field_array, function(i, ele){
@@ -645,8 +658,8 @@ $.widget( "heurist.searchBuilder", {
                                 });
                             }
                         });
-                    }
-                });
+                    }});
+
 
                 this.select_language.hSelect('widget').css({width: '100px', 'min-width': '100px'});
 
@@ -1251,11 +1264,13 @@ $.widget( "heurist.searchBuilder", {
                     request.search_realm = this.options.search_realm;
                     request.search_page = this.options.search_page;
 
-                if(!window.hWin.HEURIST4.util.isempty(ruleset)){
-                    request.rules = ruleset;
-                }
-                if(ruleset_only.is(':checked')){
-                    request.rulesonly = this.rulesetSection.find('input[name="svs_RulesOnly"]:checked').val();
+                if(!this.options.is_for_rules){    
+                    if(!window.hWin.HEURIST4.util.isempty(ruleset)){
+                        request.rules = ruleset;
+                    }
+                    if(ruleset_only.is(':checked')){
+                        request.rulesonly = this.rulesetSection.find('input[name="svs_RulesOnly"]:checked').val();
+                    }
                 }
 
                 this.running_filter = true;

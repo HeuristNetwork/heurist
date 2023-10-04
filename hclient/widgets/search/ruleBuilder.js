@@ -547,10 +547,17 @@ $.widget( "heurist.ruleBuilder", {
             
             if(!codes && query){
                     
+                //var links = ['links','lt','lf','rt','rf','related'];
+                
                 // {"t":"5","lt:15":[{"t":"10"}],"plain":"Petia"}
+                // {"links":[{"t":"10"}]}
                 //parse query
-                var keys = Object.keys(query);
-                var link = keys[1]; //always second 
+                var link, keys = Object.keys(query);
+                if(keys[0]=='links' || keys[0]=='related'){
+                    link = keys[0]
+                }else{
+                    link = keys[1]; //always second 
+                }
                 linkdata = query[link];
                 
                 link = link.split(':');
@@ -558,8 +565,7 @@ $.widget( "heurist.ruleBuilder", {
                 var linktype = 0;
                 var dty_ID = 0;
                 var trm_ID = 0;
-                
-                
+                                
                 switch (link[0]) {
                     case 'links': linktype = 0; break;
                     case 'lt': linktype = 1; break;
@@ -569,7 +575,7 @@ $.widget( "heurist.ruleBuilder", {
                     case 'related': linktype = 4; break; //rf
                 }
                 
-                if(linktype>0){
+                if(linktype>0 && link.length>1){
                     dty_ID = link[1];
                 }
                 
