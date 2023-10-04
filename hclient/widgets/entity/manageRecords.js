@@ -5749,6 +5749,8 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
                 new_terms[cur_term[0]].push(trm_ID);
                 $dlg.dialog('close');
 
+                that.processTermFields(completed_fields, new_terms);
+
                 return;
             }
 

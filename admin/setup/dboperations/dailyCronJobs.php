@@ -6,6 +6,7 @@
 * 
 * 1. Send record remainders sepcified in usrReminders
 * 2. Updates reports by schedule specified in usrReportSchedule
+* 3. Checks that rec_URL and URL like values are valid, database is skipped if sys_URLCheckFlag is set to false
 * 
 * Databases in HEURIST/databases_exclude_cronjobs.txt are ignored
 * 
@@ -154,6 +155,10 @@ print 'HEURIST_MAIL_TO_INFO='.HEURIST_MAIL_TO_INFO."\n";
 
 //$databases = array(0=>'osmak_1');
 
+// For sending an email to the sysadmin about reports that take longer than 10 seconds to generate
+$long_reports = array();
+$long_reports_count = 0;
+
 foreach ($databases as $idx=>$db_name){
     
     if(in_array($db_name,$exclusion_list)){
@@ -192,10 +197,26 @@ foreach ($databases as $idx=>$db_name){
                         //continue;
                     }
                 }
+
+                $proc_start = time(); // time execution
                 $rep = doReport($system, 4, 'html', $row);
+                $proc_length = time() - $proc_start;
+
                 if($rep>0){
                     $report[$rep]++;
                     $is_ok = true;
+                }
+
+                if($proc_length > 10){ // report if this report takes more than 10 seconds to generate
+
+                    if(!array_key_exists($db_name, $long_reports)){
+                        $long_reports[$db_name] = array();
+                    }
+
+                    $report_file = basename($row['rps_FileName'] != null ? $row['rps_FileName'] : $row['rps_Template']);
+                    $long_reports[$db_name][] = array($report_file, $proc_length);
+
+                    $long_reports_count ++;
                 }
             }//while
             $res->close();        
@@ -359,6 +380,24 @@ if(count($email_list)>0 || count($report_list)>0 || count($url_list)>0){
     sendEmail(HEURIST_MAIL_TO_ADMIN, HEURIST_SERVER_NAME." Emails sent: ".$cnt." | Reports:".$rep_count." | Errors: ".$errors." | Bad URLs: ".count($url_list),
                 $text);
     
+}
+
+// Send list of long report generation to system admin
+if($long_reports_count > 0){
+
+    $email_body = "The following report" . ($long_reports_count > 1 ? "s have" : " has") . " taken longer than 10 seconds to regenerate:\n";
+
+    // $report_dtls
+    // [0] => Report name
+    // [1] => Execution time
+    foreach($long_reports as $dbname => $report_dtls){
+        $email_body .= "Report name: " . $report_dtls[0] . " takes " . $report_dtls[1] . " seconds to regenerate\n";
+    }
+
+    $email_body .= "\nWe recommend either increasing the time between regenerations for these reports, "
+                . "or setting the regeneration time to zero and requesting the owner to manually regenerate the report as needed.";
+
+    sendEmail(HEURIST_MAIL_TO_ADMIN, "Slow report generation on " . HEURIST_SERVER_NAME, $email_body)
 }
 
 function exclusion_list(){

@@ -1142,7 +1142,13 @@ $.widget( "heurist.editing_input", {
 
                                         });
                                     }
-                                });                                        
+                                });
+                                editor.ui.registry.addButton('customHRtag', {
+                                    text: '&lt;hr&gt;',
+                                    onAction: function (_) {
+                                        tinymce.activeEditor.insertContent( '<hr>' );
+                                    }
+                                });
                             }else{
                                 editor.addButton('customHeuristMedia', {
                                     icon: 'image',
@@ -1150,7 +1156,7 @@ $.widget( "heurist.editing_input", {
                                     onclick: function (_) {  //since v5 onAction in v4 onclick
                                         that._addHeuristMedia();
                                     }
-                                });                                        
+                                });
                             }
 
                             let has_initd = false, is_blur = false;
@@ -1249,10 +1255,10 @@ $.widget( "heurist.editing_input", {
                         plugins: [ //contextmenu, textcolor since v5 in core
                             'advlist autolink lists link image preview ', //anchor charmap print 
                             'searchreplace visualblocks code fullscreen',
-                            'media table paste help autoresize hr'  //insertdatetime  wordcount
+                            'media table paste help autoresize'  //insertdatetime  wordcount
                         ],      
                         //undo redo | code insert  |  fontselect fontsizeselect |  forecolor backcolor | media image link | alignleft aligncenter alignright alignjustify | fullscreen            
-                        toolbar: ['styleselect | fontselect fontsizeselect | bold italic forecolor hr | customHeuristMedia customAddFigCaption customHeuristLink link | align | bullist numlist outdent indent | table | removeformat | help'],
+                        toolbar: ['styleselect | fontselect fontsizeselect | bold italic forecolor customHRtag | customHeuristMedia customAddFigCaption customHeuristLink link | align | bullist numlist outdent indent | table | removeformat | help'],
                         formats: custom_formatting.formats,
                         style_formats_merge: true,
                         style_formats: style_formats,

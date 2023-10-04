@@ -532,7 +532,6 @@ $.widget( "heurist.lookupBnFLibrary_bib", $.heurist.recordAction, {
                 var dty_ID = this.options.mapping.fields[field_name];
                 val = recset.fld(rec, field_name);
                 var field_type = $Db.dty(dty_ID, 'dty_Type');
-                var obj_keys = [];
 
                 if(val != null && dty_ID != ''){
 

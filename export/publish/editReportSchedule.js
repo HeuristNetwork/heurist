@@ -193,7 +193,7 @@ function ReportScheduleEditor() {
         }
         //set interval to 1440 (1 day) in case not defined
         var interval = document.getElementById("rps_IntervalMinutes").value;
-        if(window.hWin.HEURIST4.util.isempty(interval) || isNaN(parseInt(interval)) || parseInt(interval)<1){
+        if(window.hWin.HEURIST4.util.isempty(interval) || isNaN(parseInt(interval)) || parseInt(interval)<0){
             document.getElementById("rps_IntervalMinutes").value = 1440;            
         }
 
@@ -220,7 +220,7 @@ function ReportScheduleEditor() {
         _updatedDetails = [];
 
         var interval = document.getElementById("rps_IntervalMinutes").value;
-        if(window.hWin.HEURIST4.util.isempty(interval) || isNaN(parseInt(interval)) || parseInt(interval)<1){
+        if(window.hWin.HEURIST4.util.isempty(interval) || isNaN(parseInt(interval)) || parseInt(interval)<0){
             document.getElementById("rps_IntervalMinutes").value = 1440;            
         }
         

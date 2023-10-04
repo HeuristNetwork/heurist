@@ -477,10 +477,11 @@ function editCMS2(website_document){
                 },
                 {text:window.hWin.HR('Discard'), 
                     click: function(){
-                            _toolbar_Page.hide();
-                            page_was_modified = false; 
-                            $dlg.dialog('close'); 
-                            if($.isFunction(callback)) callback.call(this);}
+                        _toolbar_Page.hide();
+                        page_was_modified = false; 
+                        $dlg.dialog('close'); 
+                        if($.isFunction(callback)) callback.call(this);
+                    }
                 },
                 {text:window.hWin.HR('Cancel'), 
                     click: function(){$dlg.dialog('close');}
@@ -617,6 +618,26 @@ var sMsg = '<p>Heurist\'s CMS editor has been upgraded to a new system which is 
     // 2) init hover toolbar - DnD,Edit Properties,Insert Sibling
     //
     function _initTinyMCE( key ){
+
+        if(!Object.hasOwn(window.hWin.HAPI4.dbSettings, 'TinyMCE_formats')){ // retrieve custom formatting
+
+            window.hWin.HAPI4.SystemMgr.get_tinymce_formats({a: 'get_tinymce_formats'}, function(response){
+
+                if(response.status != window.hWin.ResponseStatus.OK){
+
+                    window.hWin.HEURIST4.msg.showMsgErr(response);
+                    window.hWin.HAPI4.dbSettings['TinyMCE_formats'] = {};
+                }else if(!window.hWin.HEURIST4.util.isObject(response.data)){
+                    window.hWin.HAPI4.dbSettings['TinyMCE_formats'] = {};
+                }else{
+                    window.hWin.HAPI4.dbSettings['TinyMCE_formats'] = response.data;
+                }
+
+                _initTinyMCE(key);
+            });
+
+            return;
+        }
       
         tinymce.remove('.tinymce-body'); //detach
         _layout_container.find('.lid-actionmenu').remove();
@@ -624,6 +645,15 @@ var sMsg = '<p>Heurist\'s CMS editor has been upgraded to a new system which is 
         var selector = '.tinymce-body';
         if(key>0){
             selector = selector + '[data-hid='+key+']';
+        }
+
+        let custom_formatting = window.hWin.HAPI4.dbSettings.TinyMCE_formats;
+
+        let style_formats = Object.hasOwn(custom_formatting, 'style_formats') && custom_formatting.style_formats.length > 0 
+                                ? [ { title: 'Custom styles', items: custom_formatting.style_formats } ] : [];
+
+        if(Object.hasOwn(custom_formatting, 'block_formats') && custom_formatting.block_formats.length > 0){
+            style_formats.push({ title: 'Custom blocks', items: custom_formatting.block_formats });
         }
 
         var inlineConfig = {
@@ -634,11 +664,6 @@ var sMsg = '<p>Heurist\'s CMS editor has been upgraded to a new system which is 
             branding: false,
             elementpath: false,
             
-            
-            //relative_urls : false,
-            //remove_script_host : false, //if true protocol and host part will be removed
-            //convert_urls : true,            
-            
             relative_urls : true,
             remove_script_host: false,
             //document_base_url : window.hWin.HAPI4.baseURL,
@@ -646,7 +671,7 @@ var sMsg = '<p>Heurist\'s CMS editor has been upgraded to a new system which is 
 
             entity_encoding:'raw',
             inline_styles: true,
-            content_style: "body {font-family: Helvetica,Arial,sans-serif;}",
+            content_style: "body {font-family: Helvetica,Arial,sans-serif;} " + custom_formatting.content_style,
             
             plugins: [
                 'advlist autolink lists link image media preview', //anchor charmap print 
@@ -654,17 +679,23 @@ var sMsg = '<p>Heurist\'s CMS editor has been upgraded to a new system which is 
                 'media table  paste help noneditable '   //contextmenu textcolor - in core for v5
             ],      
 
-            toolbar: ['formatselect | bold italic forecolor backcolor  | customHeuristMedia link | align | bullist numlist outdent indent | table | customHRtag | removeformat | help' ],  
+            toolbar: ['styleselect | fontselect fontsizeselect | bold italic forecolor backcolor customHRtag | customHeuristMedia link | align | bullist numlist outdent indent | table | removeformat | help' ],  
 
             content_css: [
                 '//fonts.googleapis.com/css?family=Lato:300,300i,400,400i'
-            ],                    
+            ],
             
             //valid_elements: 'p[style],strong,em,span[style],a[href],ul,ol,li',
             //valid_styles: {'*': 'font-size,font-family,color,text-decoration,text-align'},
             powerpaste_word_import: 'clean',
             powerpaste_html_import: 'clean',
-            
+
+            formats: custom_formatting.formats,
+            style_formats_merge: true,
+            style_formats: style_formats,
+
+            image_caption: true,
+
             setup:function(editor) {
 
                 editor.on('change', function(e) {
@@ -698,37 +729,27 @@ var sMsg = '<p>Heurist\'s CMS editor has been upgraded to a new system which is 
                         $toolbar.css('width', '400px');
                     }
 
-                    /*setTimeout(function(){
-                        var $content = $('body').find('#main-content-container');
-                        if($toolbar.length>0){
-
-
-                            var top = parseInt($toolbar.css('top'));
-                            var top2 = $content.position().top - $toolbar.height();
-                            if(top<top2){
-                                $toolbar.css({top:top2+'px'});  
-                            } 
-                        }
-                    },200);*/
+                    let $link_btn = $toolbar.find('.tox-tbtn[title="Insert/edit link"]');
+                    if($link_btn.length > 0 && $link_btn.find('.tox-tbtn__select-label').length == 0){
+                        let html = '<span class="tox-tbtn__select-label">URL</span>';
+                        $link_btn.append(html);
+                    }
                 });
                     
                 editor.on('focus', function (e) {
                     if(current_edit_mode=='page'){
 
-                            _layout_container.find('.lid-actionmenu').hide();
-                            _layout_container.find('div[data-hid]').removeClass('cms-element-active');  
+                        _layout_container.find('.lid-actionmenu').hide();
+                        _layout_container.find('div[data-hid]').removeClass('cms-element-active');  
 
-                            _layout_container.find('.cms-element-overlay').css('visibility','hidden');
+                        _layout_container.find('.cms-element-overlay').css('visibility','hidden');
 
-                            //highlight editing element in tree
-                            var key = $(tinymce.activeEditor.targetElm).attr('data-hid');
-                            var node = _panel_treePage.fancytree('getTree').getNodeByKey(key);
-                            _panel_treePage.find('.fancytree-active').removeClass('fancytree-active');
-                            $(node.li).find('.fancytree-node:first').addClass('fancytree-active');
+                        //highlight editing element in tree
+                        var key = $(tinymce.activeEditor.targetElm).attr('data-hid');
+                        var node = _panel_treePage.fancytree('getTree').getNodeByKey(key);
+                        _panel_treePage.find('.fancytree-active').removeClass('fancytree-active');
+                        $(node.li).find('.fancytree-node:first').addClass('fancytree-active');
                     
-                    }else{
-                           //window.hWin.HEURIST4.util.stopEvent(e);
-                           //return false;
                     }
 
                     $(editor.bodyElement).css('padding-left', '5px'); // add space between content and body outline
@@ -738,26 +759,24 @@ var sMsg = '<p>Heurist\'s CMS editor has been upgraded to a new system which is 
                 });
 
                 editor.ui.registry.addButton('customHeuristMedia', {
-                      icon: 'image',
-                      text: 'Add Media',
-                      onAction: function (_) {  //since v5 onAction in v4 onclick
-                            __addHeuristMedia();
-                      }
-                    });
+                    icon: 'image',
+                    text: 'Add Media',
+                    onAction: function (_) {  //since v5 onAction in v4 onclick
+                        __addHeuristMedia();
+                    }
+                });
                 editor.ui.registry.addButton('customHRtag', {
-                      //icon: 'image',
-                      text: '&lt;hr&gt;',
-                      onAction: function (_) {  //since v5 onAction in v4 onclick
-                            tinymce.activeEditor.insertContent( '<hr>' );
-                      }
-                    });
-                
+                    text: '&lt;hr&gt;',
+                    onAction: function (_) {  //since v5 onAction in v4 onclick
+                        tinymce.activeEditor.insertContent( '<hr>' );
+                    }
+                });
             }
         };
-        
+
         tinymce.init(inlineConfig);
-        
-    }    
+
+    }
     
     //
     //
