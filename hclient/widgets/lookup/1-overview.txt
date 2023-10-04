@@ -8,7 +8,8 @@ New and existing service mapping is found at hsapi/controller/record_lookup_conf
 
 All lookups are extenstions of the recordAction widget (hclient/widget/record/recordAction.js)
 
-lookup_Template.js and lookup_Template.html can provide a simple template for creating new external lookups, this also includes how to prepare data for inserting terms and record pointers.
+lookup_Template.js and lookup_Template.html can provide a simple template for creating new external lookups, 
+    this also includes how to prepare data for terms (enum), record pointer (resource), files and relationship marker fields.
 (This template is based off of the BnF_bib lookup with some specifics stripped out)
 
 Current Services:
@@ -20,11 +21,14 @@ Current Services:
  - BnF Bib: Query the BnF Library's bibliographic records (site: www.bnf.fr)
  - BnF Aut: Query the BnF Library's authoritative records (site: www.bnf.fr)
  - Nomisma: Query Nomisma's database records (site: nomisma.org)
+ - Nakala: Query Nakala's media records (site: nakala.fr)
+ - Nakala Authors: Query Nakala's author records (site: nakala.fr)
+ - Opentheso: Query various servers that have a Opentheso service (sites: pactols.frantiq.fr/opentheso, opentheso.huma-num.fr/opentheso)
 
 Notes:
 
 The services can be accessed via a call to window.hWin.HAPI4.RecordMgr.lookup_external_service(request, callback), where:
- => request (JSON Object): requires at least two keys; 'service': the URL for the external API request, and 'service_type': the name of the current external lookup (e.g. tlcmap, geonames)
+ => request (JSON Object): requires at least two keys; 'service': the complete URL for the external API request, and 'service_type': the name of the current external lookup (e.g. tlcmap, geonames)
  => callback (Function): Function to receive the response from the server call
     -> The response variable will be a JSON object with two keys of focus; status: response status, and data: containing the response from the external API request
 

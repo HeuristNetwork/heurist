@@ -49,8 +49,6 @@ $.widget( "heurist.lookup_Template", $.heurist.recordAction, {
     
     recordList:null,
 
-    added_terms: false,
-
     //  
     // invoked from _init after loading of html content
     //
@@ -254,12 +252,34 @@ $.widget( "heurist.lookup_Template", $.heurist.recordAction, {
     /**
      * Return record field values in the form of a json array mapped as [dty_ID: value, ...]
      * For multi-values, [dty_ID: [value1, value2, ...], ...]
+     * It is preferable to return the values as an array, as that's how they are handled by editing_inputs
      * 
-     * To trigger record pointer selection/creation popup, value must equal [dty_ID, default_searching_value]
+     * Additional processing for terms (enum), record pointer (resource), file and relationship markers are handled in manageRecords.js
+     *  For terms return one of the following: 
+     *      an existing term id or label (the set vocabulary will be searched using these values), 
+     *      a single value that will act as the term's label, or 
+     *      an object with the keys ['label', 'desc', 'code', 'uri', 'translations']
+     * 
+     *  For record pointers one of the following:
+     *      an object with the keys ['value', 'search'] 
+     *          - here search is what is entered into the record selection popup and value is the initial data to be filled into a new record (if the user decides to make one)
+     *      a single value that will act as both 'value' and 'search'
+     * 
+     *  For relationship markers one of the following:
+     *      an object with the keys ['value', 'search', 'relation']
+     *          - both value and search works the same here as they do with record pointers, relation is a term value to act as the relation type
+     *      a single value that will act as 'value', 'search' and 'relation'
+     * 
+     *  For files: a url to the file, the file will be registered as an external file (currently, the file(s) will not be downloaded due to potential copyright problems)
+     * 
+     * New term values are given to the user where they will either create a completely new term with the given details, or select an existing term
+     * Record pointers and relationship markers are presented to the user for them to handle, allowing them to choose what values to keep, skip duplicates/un-wanted values, or even combine values
+     * 
+     * All other fields are inserted directly into their respective fields.
      * 
      * Include a url to an external record that will appear in the record pointer guiding popup, add 'ext_url' to res
-     *  the value must be the complete html (i.e. anchor tag with href and target attributes set)
-     *  e.g. res['ext_url'] = '<a href="www.google.com" target="_blank">Link to Google</a>'
+     *  the value must ONLY BE THE URL
+     *  e.g. res['ext_url'] = 'www.google.com'
      * 
      * Param: None
      */
@@ -267,172 +287,170 @@ $.widget( "heurist.lookup_Template", $.heurist.recordAction, {
 
         window.hWin.HEURIST4.msg.bringCoverallToFront(this._as_dialog.parent());
 
-        var that = this;
-
-        this.added_terms = false;
-
-        // get selected recordset
+        // Retrieve the selected record(s) as a record set from the result list widget
         var recset = this.recordList.resultList('getSelected', false);
 
         if(recset && recset.length() == 1){
 
             var res = {};
-            var rec = recset.getFirstRecord(); // get selected record
+            var rec = recset.getFirstRecord(); // Get first record, otherwise use getRecords() to retrieve all selected records as an array
 
-            var map_flds = Object.keys(this.options.mapping.fields); // mapped fields names, to access fields of rec
+            var map_flds = Object.keys(this.options.mapping.fields); // mapped fields names, to access fields of record
 
-            var new_terms = []; // array of terms that need to be created, [vocab id, detail id, value]
+            if(this.options.mapping.options.dump_record == true){
+                res['BnF_ID'] = recset.fld(rec, 'BnF_ID'); // add BnF ID
+            }
+            res['ext_url'] = recset.fld(rec, 'biburl'); // add BnF URL
 
             // Assign individual field values, here you would perform any additional processing for selected values (example. get ids for vocabulrary/terms and record pointers)
             for(var k=0; k<map_flds.length; k++){
 
-                var dty_ID = this.options.mapping.fields[map_flds[k]];
-                var val = recset.fld(rec, map_flds[k]);
+                field_name = map_flds[k];
+                var dty_ID = this.options.mapping.fields[field_name];
+                val = recset.fld(rec, field_name);
                 var field_type = $Db.dty(dty_ID, 'dty_Type');
 
-                if(val != null){
+                if(val != null && dty_ID != ''){
 
-                    if(field_type == 'resource' && !res['ext_url']){
-                        res['ext_url'] = recset.fld(rec, 'biburl');
+                    // Convert to array
+                    if(window.hWin.HEURIST4.util.isObject(val)){
+                        obj_keys = Object.keys(val);
+                        val = Object.values(val);
+                    }else if(!window.hWin.HEURIST4.util.isArray(val)){
+                        val = window.hWin.HEURIST4.util.isnull(val) ? '' : val;
+                        val = [val];
                     }
 
-                    var val_isArray = window.hWin.HEURIST4.util.isArray(val);
-                    var val_isObject = window.hWin.HEURIST4.util.isObject(val);
-
-                    var search_val = '';
-
-                    if(map_flds[k] == 'author'){ // special scenario for author field
+                    if(field_name == 'author' || field_name == 'contributor'){ // special treatment for author field
 
                         for(var i = 0; i < val.length; i++){
 
-                            search_val = '';
-
+                            let value = '';
+                            let search = '';
+                            let role = '';
                             var cur_val = val[i];
 
-                            if(cur_val['firstname']){
-                                search_val = cur_val['firstname'];
-                            }
-                            if(cur_val['surname']){
-                                search_val = (search_val != '') ? search_val + ' ' + cur_val['surname'] : cur_val['surname'];
-                            }
-                            if(cur_val['active']){
-                                search_val = (search_val != '') ? search_val + ' [' + cur_val['active'] + ']' : 'No Name, years active: ' + cur_val['active'];
-                            }
-                            if(cur_val['id']){
-                                search_val = (search_val != '') ? search_val + ' (id: ' + cur_val['id'] + ')' : 'No Name, id: ' + cur_val['id'];
-                            }
-
-                            if(search_val != ''){
-
-                                if(!res[dty_ID]){
-                                    res[dty_ID] = [];
+                            if($.isPlainObject(cur_val)){
+                                if(cur_val['firstname']){
+                                    value = cur_val['firstname'];
                                 }
+                                if(cur_val['surname']){
+                                    value = (value != '') ? value + ' ' + cur_val['surname'] : cur_val['surname'];
+                                }
+                                search = value;
+                                if(cur_val['active']){
+                                    value = (value != '') ? value + ' [' + cur_val['active'] + ']' : 'No Name, years active: ' + cur_val['active'];
+                                }
+                                if(cur_val['id']){
+                                    value = (value != '') ? value + ' (id: ' + cur_val['id'] + ')' : 'id: ' + cur_val['id'];
+                                }
+                                if(cur_val['role']){
+                                    role = (value != '') ? cur_val['role'] : '';
+                                }
+                            }else{
+                                value = cur_val;
+                                search = cur_val;
+                            }
 
-                                res[dty_ID].push(search_val);
+                            if(value != '' && !$.isArray(value) && !$.isPlainObject(value)){
+                                if(field_type == 'resource'){ // Record pointer
+                                    val[i] = {'value': value, 'search': search};
+                                }else if(field_type == 'relmarker'){ // Relationship marker
+                                    val[i] = {'value': value, 'search': search, 'relation': role};
+                                }else{
+                                    val[i] = value;
+                                }
                             }
                         }
+
+                        if(!res[dty_ID]){
+                            res[dty_ID] = [];
+                        }
+                        res[dty_ID] = res[dty_ID].concat(val);
+
+                        continue;
+                    }else if(field_name == 'publisher'){
+
+                        for(var i = 0; i < val.length; i++){
+
+                            let value = '';
+                            let search = '';
+                            var cur_val = val[i];
+
+                            if($.isPlainObject(cur_val)){
+                                if(cur_val['name']){
+                                    value = cur_val['name'];
+                                    search = value;
+                                }
+                                if(cur_val['location']){
+                                    value = (value != '') ? value + ' ' + cur_val['location'] : cur_val['location'];
+                                    search = (search != '') ? search : value;
+                                }
+                            }else{
+                                completed_val = cur_val;
+                            }
+
+                            if(value != '' && !$.isArray(value) && !$.isPlainObject(value)){
+
+                                if(field_type == 'resource'){ // Record pointer
+                                    val[i] = {'value': value, 'search': search};
+                                }else if(field_type == 'relmarker'){ // Relationship marker
+                                    val[i] = {'value': value, 'search': search, 'relation': ''};
+                                }else{
+                                    val[i] = value;
+                                }
+                            }
+                        }
+
+                        if(!res[dty_ID]){
+                            res[dty_ID] = [];
+                        }
+                        res[dty_ID] = res[dty_ID].concat(val);
 
                         continue;
                     }
 
-                    // Match term labels with val, need to return the term's id to properly save its value
-                    if(field_type == 'enum'){
+                    if(field_type == 'enum'){ 
+                        // For the BnF lookups the term field values are sometimes placed within the trm_Code field
+                        // So we check those first, returning the term id if found, otherwise the value is returned as the term label
 
-                        if(val_isObject){ 
-
-                            if(Object.keys(val).length > 1){ // should not be a term, or alternative handling required
-                                continue;
-                            }else{ // take first option
-                                val = val[Object.keys(val)[0]];
-                            }
+                        if(window.hWin.HEURIST4.util.isObject(val)){ 
+                            val = Object.values(val);
+                        }else if(!window.hWin.HEURIST4.util.isArray(val)){
+                            val = [val];
                         }
 
                         var vocab_ID = $Db.dty(dty_ID, 'dty_JsonTermIDTree');
                         var term_Ids = $Db.trm_TreeData(vocab_ID, 'set');
 
-                        var term_found = false;
+                        for(var i=0; i<val.length; i++){
 
-                        for(var i=0; i<term_Ids.length; i++){
+                            if(!Number.isInteger(+val[i])){
+                                continue;
+                            }
 
-                            var trm_Label = $Db.trm(term_Ids[i], 'trm_Label').toLowerCase();
-
-                            if(val_isArray){ // multiple values, Language usually has two values and Type only has one
-
-                                for(var j = 0; j < val.length; j++){
-
-                                    if(val[j].toLowerCase() == trm_Label){
-
-                                        val = term_Ids[i];
-                                        term_found = true;
-                                        break;
-                                    }
-                                }
-                            }else if(val){ // In case of one single value
-                                
-                                if(val.toLowerCase() == trm_Label){
-
-                                    val = term_Ids[i];
-                                    term_found = true;
+                            for(let j = 0; j < term_Ids.length; j++){
+                                let trm_code = $Db.trm(term_Ids[j], 'trm_Code');
+                                if(trm_code == val[i]){
+                                    val[i] = term_Ids[j];
                                     break;
                                 }
                             }
-
-                            if(term_found){
-                                break;
-                            }
                         }
-
-                        // Check if a value was found, if not prepare for creating new term
-                        if(!term_found){
-                            
-                            if(val_isArray){
-                                new_terms.push([vocab_ID, dty_ID, val[0]]); 
-                            }else{
-                                new_terms.push([vocab_ID, dty_ID, val]);
-                            }
-                        }
-                    }else if(field_type == 'resource'){ // prepare search string for user to select/create a record
-
-                        search_val = '';
-
-                        if(val_isObject){
-
-                            for(var key in val){
-
-                                if(search_val != ''){
-                                    search_val += ', ';
-                                }
-                                search_val += val[key];
-                            }
-                        }else if(val_isArray){
-                            search_val = val[key].join(', ');
-                        }else{
-                            search_val = val;
-                        }
-
-                        val = search_val;                        
                     }
                 }
 
                 // Check that val and id are valid, add to response object
-                if(dty_ID>0 && val){
+                if(dty_ID > 0 && val){
 
                     if(!res[dty_ID]){
                         res[dty_ID] = [];
                     }
 
                     if(window.hWin.HEURIST4.util.isObject(val)){
-
-                        var complete_val = '';
-                        for(var key in val){
-                            complete_val += val[key] + ', ';
-                        }
-
-                        res[dty_ID].push(complete_val.slice(0, -2));
-                    }else if(field_type != 'resource' && window.hWin.HEURIST4.util.isArray(val)){
-                        res[dty_ID].push(val.join(', '));
+                        res[dty_ID] = res[dty_ID].concat(Object.values(val));
                     }else{
-                        res[dty_ID].push(val);    
+                        res[dty_ID] = res[dty_ID].concat(val);    
                     }
                 }
             }
