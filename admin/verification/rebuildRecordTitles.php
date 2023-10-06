@@ -346,7 +346,7 @@ function doRecTitleUpdate( $system, $progress_session_id, $recTypeIDs ){
     $res->close();
     
     //remove session file
-    if($progress_session_id>0 && $rec_count>100){
+    if($progress_session_id>0 && $rec_count>25 && ($processed_count % 25 == 0)){
         mysql__update_progress(null, $progress_session_id, false, 'REMOVE');    
     }
     
