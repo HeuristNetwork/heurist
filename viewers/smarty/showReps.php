@@ -337,7 +337,16 @@ function executeSmartyTemplate($system, $params){
     $smarty->assignByRef('heurist', $heuristRec);
     
     $smarty->assign('results', $results); //assign record ids
-    
+
+    if(method_exists($smarty, 'registerPlugin')){ // version 3 and above
+
+        //$smarty->registerPlugin('modifier', 'translate', 'getTranslation'); // from utils_locale.php
+        $smarty->registerPlugin('modifier', 'file_data', [$heuristRec, 'getFileField']); // from reportRecord.php
+    }else if(method_exists($smarty, 'register_modifier')){ // version 2 and below
+
+        //$smarty->register_modifier('translate', 'getTranslation'); // from utils_locale.php
+        $smarty->register_modifier('file_data', [$heuristRec, 'getFileField']); // from reportRecord.php
+    }
 
     //$smarty->getvar()
 
@@ -863,7 +872,7 @@ function smarty_output_filter_strip_js($tpl_source, Smarty_Internal_Template $te
     }
     
     $onclick = '';
-    if($publishmode==0 || $publishmode==1){
+    if(($publishmode==0 || $publishmode==1) && ($outputmode=='js' || $outputmode=='html')){
         $onclick = 'onclick="'
             . '{try'
                 .'{'

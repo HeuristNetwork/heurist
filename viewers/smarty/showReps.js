@@ -1211,15 +1211,16 @@ function ShowReps( is_snippet_editor ) {
     //
     // NEW
     //    
-    function _addIfOperator2(_nodep, varname, language_handle){
+    function _addIfOperator2(_nodep, varname, language_handle = '', file_handle = ''){
         var _remark = '{* ' + _getRemark(_nodep) + ' *}';
         let inner_val = language_handle !== '' ? language_handle : "{$"+varname+"}";
+        inner_val = file_handle !== '' ? file_handle : inner_val;
         return "\n{if ($"+varname+")}"+_remark+"\n\n   "+inner_val+" \n\n{/if}\n"+_remark+" {* you can also add {/else} before {/if}} *}\n";
     }
     //
     // NEW
     //
-    function _addMagicLoopOperator2(_nodep, varname, language_handle = ''){
+    function _addMagicLoopOperator2(_nodep, varname, language_handle = '', file_handle = ''){
         
             var _remark = '{* ' + _getRemark(_nodep) + ' *}';
             
@@ -1233,6 +1234,9 @@ function ShowReps( is_snippet_editor ) {
             if(!window.hWin.HEURIST4.util.isempty(language_handle)){
                 language_handle = '\n\t' + language_handle.replace('replace_id', field) + '\n';
             }
+            if(!window.hWin.HEURIST4.util.isempty(file_handle)){
+                file_handle = '\n\t' + file_handle.replace('replace_id', field) + '\n';
+            }
             
             if(codes[1]=='Relationship'){
                 insertGetRelatedRecords();
@@ -1243,6 +1247,7 @@ function ShowReps( is_snippet_editor ) {
                 return '{foreach $'+varname+'s as $'+field+' name='+loopname+'}'+_remark
                         +'\n\t'+getrecord+'\n'  //' {* '+_remark + '*}'
                         + language_handle
+                        + file_handle
                         +'\n{/foreach} '+_remark;
             }
             
@@ -1269,7 +1274,7 @@ function ShowReps( is_snippet_editor ) {
     //
     // NEW
     //
-    function _addVariable2(_nodep, varname, insertMode, language_handle){
+    function _addVariable2(_nodep, varname, insertMode, language_handle = '', file_handle = ''){
         
         var res= '';
         
@@ -1278,6 +1283,7 @@ function ShowReps( is_snippet_editor ) {
         if(insertMode==0){ //variable only
 
             let inner_val = language_handle !== '' ? language_handle : "{$"+varname+"}";
+            inner_val = file_handle !== '' ? file_handle : inner_val;
             res = inner_val + " {*" +  remark + "*}";
 
         }else if (insertMode==1){ //label+field
@@ -1435,6 +1441,7 @@ function ShowReps( is_snippet_editor ) {
         var no_loop = (_nodep.data.type=='enum' || _nodep.key.indexOf('rec_')==0 || 
                     (_nodep.data.code && _nodep.data.code.indexOf('Relationship')==0));
         let show_languages = _nodep.key=='term' || _nodep.key=='desc';
+        let show_file_data = _nodep.data.type=='file';
         if(no_loop){
             h = 260;
         }else{
@@ -1470,12 +1477,13 @@ function ShowReps( is_snippet_editor ) {
             var $dlg2 = $ele.parents('.ui-dialog-content');
             var insertMode = $dlg2.find("#selInsertMode").val();
             let language = $dlg2.find('#selLanguage').val();
+            let file_data = $dlg2.find('#selFileData').val();
             
             var bid = $ele.attr('id');
             
             var inloop = (bid=='btn_insert_loop')?1:(bid.indexOf('_loop')>0?2:0);
             
-            _insertSelectedVars2(_nodep, inloop, bid.indexOf('_if')>0, insertMode, language);
+            _insertSelectedVars2(_nodep, inloop, bid.indexOf('_if')>0, insertMode, language, file_data);
             //_add_variable_dlg.dialog('close');
         }
         
@@ -1505,8 +1513,12 @@ function ShowReps( is_snippet_editor ) {
                 var $dlg2 = $(event.target).parents('.ui-dialog-content');
                 var sel = $dlg2.find("#selInsertModifiers")
                 var modname = sel.val();
+
+                if(modname !== ''){
+                    insertAtCursor("|"+modname);
+                }
+
                 sel.val('');
-                insertAtCursor("|"+modname);        
             });
 
         let $langSel = $ele_popup.find('#selLanguage');
@@ -1516,7 +1528,7 @@ function ShowReps( is_snippet_editor ) {
             $langSel.html($langSel.html() + lang_opts);
         }
         $langSel.val(''); // reset
-        h = !show_languages ? h - 10 : h;
+        h = !show_languages && !show_file_data ? h - 10 : h;
         
         _add_variable_dlg = window.hWin.HEURIST4.msg.showElementAsDialog(   
             {element: $ele_popup[0],
@@ -1535,7 +1547,7 @@ function ShowReps( is_snippet_editor ) {
             borderless: false,
             default_palette_class:null});
 
-        let grid_temp_cols = (!show_languages ? '' : '75px ') + '130px 180px'
+        let grid_temp_cols = (!show_languages && !show_file_data ? '' : '75px ') + '130px 180px'
 
         _add_variable_dlg.find('.insert-field-grid').css({'display': 'grid', 'grid-template-columns': '100%'});
         _add_variable_dlg.find('.insert-field-grid > div:not(.header)').css({'display': 'grid', 'grid-template-columns': grid_temp_cols, 'margin': '5px 0'});
@@ -1555,19 +1567,24 @@ function ShowReps( is_snippet_editor ) {
             _add_variable_dlg.find('.ins_isloop').show();
         }
 
-        if(!show_languages){
+        if(show_languages){
+
+            _add_variable_dlg.find('.language_row, .empty_ele').show();
+            _add_variable_dlg.find('.file_row').hide();
+        }else if(show_file_data){
+
             _add_variable_dlg.find('.language_row').hide();
-            _add_variable_dlg.find('.empty_ele').hide();
+            _add_variable_dlg.find('.file_row, .empty_ele').show(); console.log(_add_variable_dlg.find('.file_row, .empty_ele'));
         }else{
-            _add_variable_dlg.find('.language_row').show();
-            _add_variable_dlg.find('.empty_ele').show();
+
+            _add_variable_dlg.find('.language_row, .file_row, .empty_ele').hide();
         }
     }
     
     //
     // NEW
     //
-    function _insertSelectedVars2( _nodep, inloop, isif, _insertMode, language_code ){
+    function _insertSelectedVars2( _nodep, inloop, isif, _insertMode, language_code, file_field ){
 
         var textedit = document.getElementById('edTemplateBody'),
         _text = "",
@@ -1576,7 +1593,8 @@ function ShowReps( is_snippet_editor ) {
         rectypeId = 0,
         key = '',
         _getrec = '',
-        language_handle = '';
+        language_handle = '',
+        file_handle = '';
         
         if(_nodep){
             
@@ -1729,6 +1747,11 @@ this_id       : "term"
 
                             language_handle = `{$translated_label = $heurist->getTranslation("trm", $${fld}, "${trm_fld}", "${language_code}")} {* Get translated label *}\n\n`
                                 + (inloop==1 ? '\n\t' : '') + `{$translated_label} {* Print translated label *}`;
+                        }else if(file_field && _nodep.data.type == 'file'){
+
+                            let fld = (inloop==1) ? 'replace_id' : _varname;
+                            file_handle = `{$file_details = $${fld}_originalvalue|file_data:${file_field}} {* Get the requested field *}\n\n`
+                                + (inloop==1 ? '\n\t' : '') + `{$file_details} {* Print the field *}`;
                         }
                     }
                     
@@ -1744,7 +1767,7 @@ this_id       : "term"
             if( inloop==1 ){
                 
                 //** _getrec = '';
-                _text = _addMagicLoopOperator2(_nodep, _varname, language_handle);
+                _text = _addMagicLoopOperator2(_nodep, _varname, language_handle, file_handle);
                 
             }else if(isif){
                 
@@ -1752,12 +1775,12 @@ this_id       : "term"
                     _text = _insertRectypeIf2(_nodep, _varname, rectypeId);
                     cursorIndent = -7;
                 }else{
-                    _text = _addIfOperator2(_nodep, _varname, language_handle);    
+                    _text = _addIfOperator2(_nodep, _varname, language_handle, file_handle);    
                 }
                 
                 
             }else{
-                _text = _addVariable2(_nodep, _varname, _insertMode, language_handle);
+                _text = _addVariable2(_nodep, _varname, _insertMode, language_handle, file_handle);
             }
         
         

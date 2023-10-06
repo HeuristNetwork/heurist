@@ -934,6 +934,98 @@ class ReportRecord {
 
         return count($rtn) == 1 ? array_shift($rtn) : $rtn;
     }
+
+    public function getFileField($file_details, $field = 'name'){
+
+        global $system;
+        $mysqli = $system->get_mysqli();
+
+        switch ($field) {
+            case 'desc':
+            case 'description':
+                $field = 'ulf_Description';
+                break;
+
+            case 'cap':
+            case 'caption':
+                $field = 'ulf_Caption';
+                break;
+
+            case 'rights':
+            case 'copyright':
+                $field = 'ulf_Copyright';
+                break;
+
+            case 'owner':
+            case 'copyowner':
+                $field = 'ulf_Copyowner';
+                break;
+
+            case 'type':
+            case 'ext':
+            case 'extension':
+                $field = 'ulf_MimeExt';
+                break;
+
+            case 'name':
+            case 'filename';
+                $field = 'ulf_OrigFileName'; // ulf_FileName
+                break;
+
+            default:
+                $field = '';
+                break;
+        }
+
+        if(empty($field)){
+            return $file_details; // Provided field is not handled
+        }
+
+        $results = array();
+
+        if(!is_array($file_details) && is_string($file_details)){
+            
+            $files = explode(',', $file_details);
+
+            foreach ($files as $f_url) {
+
+                $f_url = trim($f_url);
+
+                if(!filter_var($f_url, FILTER_VALIDATE_URL)){
+                    $results[] = 'Not a Heurist file';
+                    continue;
+                }
+
+                $url = parse_url($f_url);
+                parse_str($url['query'], $url_params);
+
+                if(!array_key_exists('file', $url_params) || !preg_match('/^[a-z0-9]+$/', $url_params['file'])){
+                    $results[] = 'Not a Heurist file';
+                    continue;
+                }
+
+                $ulf_ObfuscatedFileID = $mysqli->real_escape_string($url_params['file']);
+
+                $query = "SELECT $field FROM recUploadedFiles WHERE ulf_ObfuscatedFileID = '$ulf_ObfuscatedFileID'";
+                $result = mysql__select_value($mysqli, $query);
+
+                if(empty($result)){
+                    $result = '';
+                }
+
+                $results[] = $result;
+            }
+        }else{
+
+            foreach ($file_details as $file_dtls) {
+
+                $value = array_key_exists($field, $file_dtls) ? $file_dtls[$field] : '';
+                array_push($results, $value);
+            }
+        }
+
+        return count($results) == 1 ? $results[0] : $results;
+    }
     
 }
 ?>
