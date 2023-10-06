@@ -80,7 +80,14 @@ $defTerms = new DbsTerms($system, $defTerms);
 
 $ACCESSABLE_OWNER_IDS = $system->get_user_group_ids();  //all groups current user is a member
 if(!is_array($ACCESSABLE_OWNER_IDS)) $ACCESSABLE_OWNER_IDS = array();
-array_push($ACCESSABLE_OWNER_IDS, 0);
+array_push($ACCESSABLE_OWNER_IDS, 0); //everyone
+
+$ACCESS_CONDITION = 'rec_OwnerUGrpID '.
+    (count($ACCESSABLE_OWNER_IDS)==1)?('='.$ACCESSABLE_OWNER_IDS[0])
+                                     :('in ('.join(',', $ACCESSABLE_OWNER_IDS).')');
+    
+$ACCESS_CONDITION = '(rec_NonOwnerVisibility = "public"'
+        .($system->has_access()?' OR (rec_NonOwnerVisibility!="hidden" OR '.$ACCESS_CONDITION.'))':')');
 
 
 $relRT = ($system->defineConstant('RT_RELATION')?RT_RELATION:0);
@@ -977,10 +984,9 @@ function print_details($bib) {
     $rec_visibility = $bib['rec_NonOwnerVisibility'];
     $rec_owner  = $bib['rec_OwnerUGrpID']; 
     $hasAccess = ($rec_visibility=='public') || 
-                                    ($system->has_access() && $rec_visibility!='hidden') || 
-                                    in_array($rec_owner, $ACCESSABLE_OWNER_IDS);
+                                    ($system->has_access() &&  //logged in
+                                    ($rec_visibility!='hidden' || in_array($rec_owner, $ACCESSABLE_OWNER_IDS))); //viewable or owner
     if($hasAccess){
-
     
         print_public_details($bib);
         
@@ -1257,7 +1263,8 @@ function print_personal_details($bkmk) {
 // prints recDetails
 //
 function print_public_details($bib) {
-    global $system, $defTerms, $is_map_popup, $without_header, $is_production, $ACCESSABLE_OWNER_IDS, $relRT, $startDT, $already_linked_ids, $group_details, $hide_images;
+    global $system, $defTerms, $is_map_popup, $without_header, $is_production, 
+        $ACCESSABLE_OWNER_IDS, $ACCESS_CONDITION, $relRT, $startDT, $already_linked_ids, $group_details, $hide_images;
     
     $has_thumbs = false;
 
@@ -1277,8 +1284,7 @@ function print_public_details($bib) {
         and rdr.rst_RecTypeID = '.$bib['rec_RecTypeID'].'
         where dtl_RecID = ' . $bib['rec_ID'];
     
-    
-    
+    $rec_visibility = $bib['rec_NonOwnerVisibility'];
     $rec_owner  = $bib['rec_OwnerUGrpID']; 
     if($system->has_access() && in_array($rec_owner, $ACCESSABLE_OWNER_IDS)){
         //owner of record can see any field
@@ -1329,9 +1335,8 @@ function print_public_details($bib) {
         .' where d1.dtl_RecID = '. $bib['rec_ID'].' and d1.dtl_DetailTypeID = dt1.dty_ID and dt1.dty_Type = "resource" '
         .' AND d2.dtl_RecID = d1.dtl_Value and d2.dtl_DetailTypeID = dt2.dty_ID and dt2.dty_Type = "file" ' 
         .' AND rec_ID = d2.dtl_RecID and rec_RecTypeID != '.$relRT
-        .' and (rec_OwnerUGrpID in ('.join(',', $ACCESSABLE_OWNER_IDS).') OR '.
-            ($system->has_access()?'NOT rec_NonOwnerVisibility = "hidden")':'rec_NonOwnerVisibility = "public")');
-
+        .' AND '.$ACCESS_CONDITION;
+        
 //print $query;            
         if(true){  //this query fails for maria db        
                 
@@ -1409,8 +1414,9 @@ function print_public_details($bib) {
                     $rec_owner = $row[2];
                     
                     $hasAccess = ($rec_visibility=='public') || 
-                                    ($system->has_access() && $rec_visibility!='hidden') || 
-                                    in_array($rec_owner, $ACCESSABLE_OWNER_IDS);
+                                    ($system->has_access() &&  //logged in
+                                    ($rec_visibility!='hidden' || in_array($rec_owner, $ACCESSABLE_OWNER_IDS))); //viewable or owner
+                                    
                     
                     if($hasAccess){
                         
@@ -1926,7 +1932,9 @@ function print_other_tags($bib) {
 //
 function print_relation_details($bib) {
 
-    global $system, $relRT,$relSrcDT,$relTrgDT,$ACCESSABLE_OWNER_IDS, $is_map_popup, $is_production, $rectypesStructure, $defTerms;
+    global $system, $relRT,$relSrcDT,$relTrgDT,
+        $ACCESSABLE_OWNER_IDS, $ACCESS_CONDITION, 
+        $is_map_popup, $is_production, $rectypesStructure, $defTerms;
 
     $mysqli = $system->get_mysqli();
 	
@@ -1957,9 +1965,6 @@ function print_relation_details($bib) {
     }else{
         print '<div class="detailRowHeader relatedSection" Xstyle="float:left">Related'; 
     }
-
-    $accessCondition = '(rec_OwnerUGrpID in ('.join(',', $ACCESSABLE_OWNER_IDS).') OR '.
-    ($system->has_access()?'NOT rec_NonOwnerVisibility = "hidden")':'rec_NonOwnerVisibility = "public")');
 
     $relfields_details = mysql__select_all($mysqli,
             'SELECT rst_DisplayName, rst_DisplayOrder, dty_PtrTargetRectypeIDs, dty_JsonTermIDTree 
@@ -1992,7 +1997,7 @@ function print_relation_details($bib) {
 			$relatedRecID = $bd['RelatedRecID']['rec_ID'];
 
 			if(mysql__select_value($mysqli, 
-				"select count(rec_ID) from Records where rec_ID =$relatedRecID and $accessCondition")==0){
+				"select count(rec_ID) from Records where rec_ID=$relatedRecID and $ACCESS_CONDITION")==0){
 				//related is not accessable
 				continue;
 			}
@@ -2081,7 +2086,7 @@ function print_relation_details($bib) {
 
          
 			if(mysql__select_value($mysqli, 
-				"select count(rec_ID) from Records where rec_ID =$relatedRecID and $accessCondition")==0){
+				"select count(rec_ID) from Records where rec_ID =$relatedRecID and $ACCESS_CONDITION")==0){
 				//related is not accessable
 				continue;
 			}
@@ -2173,7 +2178,8 @@ function print_relation_details($bib) {
 //
 function print_linked_details($bib, $link_cnt) 
 {
-    global $system, $relRT,$ACCESSABLE_OWNER_IDS, $is_map_popup, $is_production, $rectypesStructure, $already_linked_ids;
+    global $system, $relRT, $ACCESS_CONDITION, 
+        $is_map_popup, $is_production, $rectypesStructure, $already_linked_ids;
     
     /* old version without recLinks
     $query = 'select * '.
@@ -2184,8 +2190,7 @@ function print_linked_details($bib, $link_cnt)
     'and dtl_DetailTypeID = dty_ID '.
     'and dtl_Value = ' . $bib['rec_ID'].' '.
     'and rec_RecTypeID != '.$relRT.' '.
-    'and (rec_OwnerUGrpID in ('.join(',', $ACCESSABLE_OWNER_IDS).') OR '.
-    ($system->has_access()?'NOT rec_NonOwnerVisibility = "hidden")':'rec_NonOwnerVisibility = "public")').
+    'and '.$ACCESS_CONDITION.
     ' ORDER BY rec_RecTypeID, rec_Title';
     */
 
@@ -2200,9 +2205,8 @@ function print_linked_details($bib, $link_cnt)
                 .'where rl_TargetID = '.intval($bib['rec_ID'])
                 .' AND (rl_RelationID IS NULL) AND rl_SourceID=rec_ID '
                 .$ignored_ids
-    .' and (rec_OwnerUGrpID in ('.join(',', $ACCESSABLE_OWNER_IDS).') OR '
-    .($system->has_access()?'NOT rec_NonOwnerVisibility = "hidden")':'rec_NonOwnerVisibility = "public")')
-                .' ORDER BY rec_RecTypeID, rec_Title';    
+    .' and '.$ACCESS_CONDITION
+    .' ORDER BY rec_RecTypeID, rec_Title';    
     
     $res = $mysqli->query($query);
 
