@@ -2079,14 +2079,14 @@ function recordUpdateCalcFields($system, $recID, $rty_ID=null, $progress_session
         $q_updates = '';
         $q_cleared = '';
         
-        if(count($cleared)>1000){
+        if(count($updates)>1000){
             $q_updates = 'ids:'.array_slice($updates, 0, 1000);
         }else if(count($updates)>0){
             $q_updates = 'ids:'.implode(',',$updates);
         }
         if(count($cleared)>1000){
             $q_cleared = 'ids:'.array_slice($cleared, 0, 1000);
-        }else if(count($blanks)>0){
+        }else if(count($cleared)>0){
             $q_cleared = 'ids:'.implode(',',$cleared);
         }
         
