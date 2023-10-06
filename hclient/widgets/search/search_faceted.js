@@ -2358,7 +2358,7 @@ $.widget( "heurist.search_faceted", {
                                         //search for this term and all its children
                                         
                                         if(res_count>0){
-                                            term.children.unshift({title:'unspecified', count:headerData.count, value:'='+headerData.value});
+                                            term.children.push({title:'unspecified', count:headerData.count, value:'='+headerData.value});
                                             term.value = term.termssearch?term.termssearch:term.key;
                                             term.count = res_count + headerData.count;  
                                         } else {
