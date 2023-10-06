@@ -160,10 +160,6 @@ $long_reports = array();
 $long_reports_count = 0;
 
 foreach ($databases as $idx=>$db_name){
-    
-    if(in_array($db_name,$exclusion_list)){
-        continue;
-    }
 
     $report='';
     
@@ -229,6 +225,10 @@ foreach ($databases as $idx=>$db_name){
             echo $tabs.' reports: '.implode(' ',$report).$eol;
         }
             
+    }
+
+    if(in_array($db_name,$exclusion_list)){
+        continue;
     }
     
     if($do_reminders){
