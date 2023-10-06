@@ -1638,8 +1638,8 @@ function browseTerms(_editing_input, $input, value){
                 
                 while(1){
 
-                    trm_info = $Db.trm(trm_info.trm_ParentTermID);
                     let label = $Db.trm_getLabel(trm_info.trm_ParentTermID, lang_code);
+                    trm_info = $Db.trm(trm_info.trm_ParentTermID);
 
                     if(trm_info.trm_ParentTermID == 0){
                         break;
