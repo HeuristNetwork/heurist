@@ -489,7 +489,12 @@ function editCMS2(website_document){
             ];            
             
             var sMsg = '"'+ _editor_panel.find('.treePageHeader > h3').text() +'" '+window.hWin.HR('page has been modified');
-            $dlg = window.hWin.HEURIST4.msg.showMsgDlg(sMsg, _buttons, {title:window.hWin.HR('Page changed')});   
+            $dlg = window.hWin.HEURIST4.msg.showMsgDlg(sMsg, _buttons, {title:window.hWin.HR('Page changed')});
+
+            // Move dialog to document top and reset position
+            $dlg.parent().appendTo('body');
+            let pos = $dlg.dialog('option', 'position'); 
+            $dlg.dialog('option', 'position', pos);
 
             return true;     
         }else{
