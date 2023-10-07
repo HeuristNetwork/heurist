@@ -338,14 +338,24 @@ function executeSmartyTemplate($system, $params){
     
     $smarty->assign('results', $results); //assign record ids
 
-    if(method_exists($smarty, 'registerPlugin')){ // version 3 and above
+    try{
 
-        //$smarty->registerPlugin('modifier', 'translate', 'getTranslation'); // from utils_locale.php
-        $smarty->registerPlugin('modifier', 'file_data', [$heuristRec, 'getFileField']); // from reportRecord.php
-    }else if(method_exists($smarty, 'register_modifier')){ // version 2 and below
+        if(method_exists($smarty, 'registerPlugin')){ // version 3
 
-        //$smarty->register_modifier('translate', 'getTranslation'); // from utils_locale.php
-        $smarty->register_modifier('file_data', [$heuristRec, 'getFileField']); // from reportRecord.php
+            $smarty->registerPlugin('modifier', 'file_data', [$heuristRec, 'getFileField']); // from reportRecord.php
+            $smarty->registerPlugin('modifier', 'translate', 'getTranslation'); // from utils_locale.php
+        }else{ // version 2
+
+            $smarty->register_modifier('file_data', [$heuristRec, 'getFileField']); // from reportRecord.php
+            $smarty->register_modifier('translate', 'getTranslation'); // from utils_locale.php
+        }
+
+    }catch(Exception $e){
+
+        if(strpos($e, 'already registered') === false){ // not a dup modifier problem
+            smarty_error_output($system, $e);
+            exit();
+        }
     }
 
     //$smarty->getvar()
