@@ -2331,7 +2331,10 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
             if (window.hWin.HEURIST4.util.isempty(name)) {
                 return that.currentUser['ugr_Preferences']; //returns all preferences
             } else {
-                var res = that.currentUser['ugr_Preferences'][name];
+                var res = '';
+                if(that.currentUser['ugr_Preferences'] && that.currentUser['ugr_Preferences'][name]){
+                    res = that.currentUser['ugr_Preferences'][name];
+                }
 
                 // TODO: redundancy: this duplicates same in System.php
                 if ('search_detail_limit' == name) {

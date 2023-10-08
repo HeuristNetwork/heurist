@@ -722,8 +722,23 @@ function doSamlLogin(callback, parentwin, sp_entity){
             */
         },
         callback:function(context){
-                if(context){
+console.log('callback');            
+console.log(context);           
+                if(context && context.currentUser && context.sysinfo){
                     
+                        window.hWin.HAPI4.setCurrentUser(context.currentUser);
+                        window.hWin.HAPI4.sysinfo = context.sysinfo;
+                        
+                        $(window.hWin.document).trigger(window.hWin.HAPI4.Event.ON_CREDENTIALS, 
+                                                            [window.hWin.HAPI4.currentUser]);
+
+                                
+                        if( window.hWin.HAPI4.SystemMgr.versionCheck() ) {
+                                    //version is old 
+                                    return;
+                        }
+                    
+                        /*
                         if(context>0){
                             window.hWin.HAPI4.setCurrentUser(context);
                             //window.hWin.HAPI4.sysinfo = response.data.sysinfo;
@@ -745,7 +760,7 @@ function doSamlLogin(callback, parentwin, sp_entity){
 
                             }
                         });            
-                        
+                        */
 
 //}
                     return true;
