@@ -517,8 +517,30 @@
         </div>
         <input name="is_single_selection" type="checkbox"/>
         <i>&nbsp; check this to use this widget in place of inline or popup record view</i>
+        
     </div>
 
+    <div class="heurist_resultListExt">
+        <div class="header">
+            <label>Show as popup&nbsp;</label>
+        </div>
+        <input id="is_popup_report" type="checkbox"/>
+        <i>&nbsp; this widget will be opened as popup window (dimensions will be taken from style)</i>
+    </div>
+    <div class="heurist_resultListExt">
+        <div class="header">
+            <label>Position&nbsp;</label>
+        </div>
+        <select id="popup_report_position">
+          <option value="">&nbsp;</option>
+          <option value="left">left</option>
+          <option value="right">right</option>
+          <option value="top">top</option>
+          <option value="bottom">bottom</option>
+        </select>
+    </div>
+    
+    
     <div class="heurist_resultList heurist_resultListExt heurist_resultListDataTable">
         <div class="header">
             <label>Filter to be applied at start</label>

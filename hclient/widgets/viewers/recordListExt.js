@@ -31,6 +31,8 @@ $.widget( "heurist.recordListExt", {
         selection: null,  //list of selected record ids
         url:null,               //
         is_frame_based: true,
+        is_popup: false, //show popup dialog on every refresh
+        popup_position: null,
         
         reload_for_recordset: false, //refresh every time recordset is changed - for smarty report from CMS
 
@@ -55,6 +57,7 @@ $.widget( "heurist.recordListExt", {
     _is_publication:false, //this is CMS publication - take css from parent
 
     placeholder_ele: null, //element holding the placeholder text
+    reportPopupDlg: null,
 
     // the constructor
     _create: function() {
@@ -85,6 +88,11 @@ $.widget( "heurist.recordListExt", {
             this.dosframe = $( "<iframe>" ).css({overflow: 'none !important', width:'100% !important'})
             //.attr('src',window.hWin.HAPI4.baseURL+"common/html/msgNoRecordsSelected.html")
             .appendTo( this.div_content );
+        }
+        if(this.options.is_popup){
+            if(!this.options.popup_width) this.options.popup_width = this.element.css('width');
+            if(!this.options.popup_height) this.options.popup_height = this.element.css('height');
+            this.element.hide();
         }
 
         //-----------------------     listener of global events
@@ -377,9 +385,12 @@ $.widget( "heurist.recordListExt", {
         }
 
         //refesh if element is visible only - otherwise it costs much resources
-        if( (!this.element.is(':visible') && !this._is_publication) || window.hWin.HEURIST4.util.isempty(this.options.url)){
+        if(  (!this.element.is(':visible') && !this._is_publication) 
+            || window.hWin.HEURIST4.util.isempty(this.options.url)){
             return;  
         } 
+
+        var content_updated = false;
 
         if(this.options.is_single_selection){ //reload content on every selection event
 
@@ -438,6 +449,7 @@ $.widget( "heurist.recordListExt", {
 
                 if(this._current_url!==newurl){
                     this.loadURL(newurl);
+                    content_updated = true;
                 }
             }
 
@@ -447,6 +459,8 @@ $.widget( "heurist.recordListExt", {
             this.options.url = window.hWin.HAPI4.baseURL +  this.options.url.replace("[dbname]",  window.hWin.HAPI4.database);
 
             this.loadURL( this.options.url );
+            
+            content_updated = true;
 
         }else{ //content has been loaded already ===============================
 
@@ -472,6 +486,7 @@ $.widget( "heurist.recordListExt", {
                 }
                 
                 this.loadURL( newurl );
+                content_updated = true;
                 return;    
             }
             
@@ -525,6 +540,45 @@ $.widget( "heurist.recordListExt", {
             
             this.loadanimation(false);
         }
+        
+        
+        if(this.options.is_popup && content_updated){
+            if(this.reportPopupDlg && this.reportPopupDlg.dialog('instance')){
+                this.reportPopupDlg.dialog('open');
+            }else{
+                this.element.width()
+                
+                var opts = {
+                    window:  window.hWin, //opener is top most heurist window
+                    title: window.hWin.HR('Record Info'),
+                    width: this.options.popup_width,
+                    height: this.options.popup_height,
+                    modal: false,
+                    element: this.element[0],
+                    resizable: true,
+                    h6style_class: 'ui-heurist-publish'
+                    //buttons: codeEditorBtns,
+                    //default_palette_class: 'ui-heurist-publish'
+                    //close: function(){}
+                };   
+                if(this.options.popup_position){
+                    opts.position = { my: "center center", at: "center center", of: $(document) };                    
+                    if(this.options.popup_position=='left' || this.options.popup_position=='right'){
+                        opts.position.my = this.options.popup_position+' center';    
+                    }else{
+                        opts.position.my = 'center '+this.options.popup_position;    
+                    }
+                    opts.position.at = opts.position.my;
+                }
+                
+                this.reportPopupDlg = window.hWin.HEURIST4.msg.showElementAsDialog(opts);
+                
+                this.element.parent().css('padding',0);
+                this.element.width('100%');
+                this.element.height('100%');
+                
+            }         
+        }        
 
     },
 
@@ -536,6 +590,13 @@ $.widget( "heurist.recordListExt", {
         $(this.document).off(this._events);
 
         var that = this;
+        
+        if(this.reportPopupDlg){
+            if(this.reportPopupDlg.dialog('instance')){
+                this.reportPopupDlg.dialog('close');
+            }
+            this.reportPopupDlg.remove();
+        }
 
         // remove generated elements
         if(this.dosframe) this.dosframe.remove();

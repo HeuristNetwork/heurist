@@ -345,6 +345,10 @@ function editCMS_ElementCfg( element_cfg, _layout_content, _layout_container, $c
             l_cfg.dom_id = window.hWin.HEURIST4.util.stripTags(cont.find('input[data-type="element-id"]').val());
             if(l_cfg.appid && l_cfg.options){
                 l_cfg.options.widget_id = l_cfg.dom_id;
+                if(l_cfg.options.is_popup){
+                    l_cfg.options.popup_width = l_cfg.css.width;
+                    l_cfg.options.popup_height = l_cfg.css.height;
+                }
             }
 
             if(window.hWin.HEURIST4.util.isempty(cont.find('textarea[name="elementClasses"]').val())){

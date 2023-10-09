@@ -542,37 +542,6 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
             $dlg = $(opener.document).find('body #'+options['dialogid']);
         }
         
-        function __setDim(axis){
-
-            var wp = 0;
-            
-            if(axis=='width'){
-                wp = (opener && opener.innerWidth>0)? opener.innerWidth
-                    :(window.hWin?window.hWin.innerWidth:window.innerWidth);
-            }else{
-                wp = (opener && opener.innerHeight>0)? opener.innerHeight
-                    :(window.hWin?window.hWin.innerHeight:window.innerHeight);
-            }
-
-            if(typeof options[axis]==='string'){
-                var isPercent = (options[axis].indexOf('%')>0);
-                
-                options[axis] = parseInt(options[axis], 10);
-                
-                if(isPercent){
-                    options[axis] = wp*options[axis]/100;
-                }
-            }
-            
-            if(isNaN(options[axis]) || options[axis]<100){
-                options[axis] = (axis=='width')?640:480;
-            } 
-            
-            if(options[axis] > wp){
-                options[axis] = wp;
-            }
-            
-        }
         
         var $dosframe;
         
@@ -788,8 +757,8 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
 
             });
             
-            __setDim('height');
-            __setDim('width');
+            options.width = window.hWin.HEURIST4.msg._setDialogDimension(options, 'height');
+            options.height = window.hWin.HEURIST4.msg._setDialogDimension(options, 'width');
 
             var opts = {
                 autoOpen: true,
@@ -1077,6 +1046,47 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
             $dosframe.attr('src', url);
                         
             //return $dosframe;
+    },   
+    
+    //
+    //
+    //
+    _setDialogDimension: function(options, axis){
+        
+            var opener = options['window']?options['window'] :window;
+        
+            var wp = 0;
+            
+            if(axis=='width'){
+                wp = (opener && opener.innerWidth>0)? opener.innerWidth
+                    :(window.hWin?window.hWin.innerWidth:window.innerWidth);
+            }else{
+                wp = (opener && opener.innerHeight>0)? opener.innerHeight
+                    :(window.hWin?window.hWin.innerHeight:window.innerHeight);
+            }
+            
+            var res;
+
+            if(typeof options[axis]==='string'){
+                var isPercent = (options[axis].indexOf('%')>0);
+                
+                res = parseInt(options[axis], 10);
+                
+                if(isPercent){
+                    res = wp*res/100;
+                }
+            }
+            
+            if(isNaN(res) || res<100){
+                res = (axis=='width')?640:480;
+            } 
+            
+            if(res > wp){
+                res = wp;
+            }
+            
+            return res;
+        
     },
     
     //
@@ -1100,15 +1110,15 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
             //var dim = { h: Math.min((options.height>0?options.height:400), body.innerHeight()-10), 
             //            w: Math.min((options.width>0?options.width:690), body.innerWidth()-10) };
             
-            var dim = { h: (options.height>0?options.height:400), 
-                        w: (options.width>0?options.width:690) };
+            var dimW = window.hWin.HEURIST4.msg._setDialogDimension(options, 'width');
+            var dimH = window.hWin.HEURIST4.msg._setDialogDimension(options, 'height');
             
             var onCloseCalback = (options['close'])?options.close:null;
             
             var opts = {
                     autoOpen:(options['autoOpen']!==false),
-                    width : dim.w,
-                    height: dim.h,
+                    width : dimW,
+                    height: dimH,
                     modal: (options.modal!==false),
                     resizable: (options.resizable!==false),
                     //draggable: false,
