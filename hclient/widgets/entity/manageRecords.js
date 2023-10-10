@@ -4627,9 +4627,10 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
 
             let is_both_icons = $all_repeat_gaps.has('.editint-inout-repeat-button.ui-icon-translate');
             let width = $($all_repeat_gaps[0]).width();
+            width = !width || width <= 0 ? 30 : width;
 
             if(is_both_icons.length > 0){
-                width = width * 1.3; // increase width by 30%
+                width = width + 10; // add 10 pixels
             }
 
             this.editForm.find('.editint-inout-repeat-container').css('min-width', width);
