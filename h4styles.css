@@ -2078,6 +2078,13 @@ background: #8ea9b9
     background-size: contain;
 }
 
+.ui-icon-date-range { 
+    background-image: url(hclient/assets/date_range.svg) !important; 
+    width: 18px;
+    height: 18px;
+    background-size: contain;
+}
+
 
 .ui-icon-filter-form { background-image: url(hclient/assets/filter_form_icon_black.png) !important; }
 
@@ -2567,8 +2574,8 @@ li.edit-form-tab > a{
     z-index: 999999!important;
 }
 
-.fake_link::first-line {
-    color: blue;
+.fake_link {
+    color: blue !important;
 
     text-decoration: underline;
 

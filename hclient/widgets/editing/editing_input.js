@@ -2541,29 +2541,27 @@ $.widget( "heurist.editing_input", {
                 $input.val(value);    
                 $input.change(); 
 
-				// Add additional help text 
-				var help_text = this.input_prompt.html();
+				// Add additional controls to insert yesterday, today or tomorrow
+                let $help_controls = $('<div>')
+                    .css({
+                        display: 'block',
+                        'font-size': '0.8em',
+                        color: '#999999',
+                        padding: '0.3em 0px'
+                    })
+                    .html('<span class="fake_link">Yesterday</span>'
+                        + '<span style="margin: 0px 5px" class="fake_link">Today</span>'
+                        + '<span class="fake_link" class="fake_link">Tomorrow</span>'
+                        + '&nbsp;&nbsp;&nbsp;&nbsp;yyyy, yyyy-mm or yyyy + click calendar (remembers last date)');
 
-				if(!window.hWin.HEURIST4.util.isempty(help_text)){
+                //this.input_prompt.prepend('<br>');
+                $help_controls.insertBefore(this.input_prompt);
 
-                    var additional_help = 'For older dates, type year first, then click the calendar. Dates can be yyyy, yyyy-mm or yyyy-mm-dd.';
-
-                    if(help_text.indexOf(additional_help) < 0){
-                        this.input_prompt.html(help_text + '<br>' + additional_help);
-
-                        var $extended_desc = this.input_prompt.find('#show_extended, #extended_help, #hide_extended');
-                        if($extended_desc.length > 0){
-                            this.input_prompt.append($extended_desc);
-
-                            // Toggle extended description
-                            this._on($extended_desc, {
-                                'click': function(event){
-                                    $extended_desc.toggle()
-                                }
-                            });
-                        }
+                this._on($help_controls.find('span.fake_link'), {
+                    click: function(e){
+                        $input.val(e.target.textContent).change();
                     }
-				}
+                });
             }else 
             if(this.isFileForRecord){ //----------------------------------------------------
                 
@@ -5824,76 +5822,81 @@ $.widget( "heurist.editing_input", {
                 $input.css({'max-width':'13ex','min-width':'13ex'});
             
         }else if(this.options.dtID>0){ //this is details of records
-        
-            
-                var $btn_temporal = $( '<span>', 
-                    {title: 'Pop up widget to enter compound date information (uncertain, fuzzy, radiometric etc.)'})
-                .addClass('smallicon ui-icon ui-icon-clock')
-                .appendTo( $inputdiv );
-                //.button({icons:{primary: 'ui-icon-clock'}, text:false});
-                this._on( $btn_temporal, { click: function(){
-                    
-                    if(that.is_disabled) return;
 
-                    var url = window.hWin.HAPI4.baseURL 
-                        + 'hclient/widgets/editing/editTemporalObject.html?toedit='
-                        + encodeURIComponent(that.newvalues[$input.attr('id')]
-                                    ?that.newvalues[$input.attr('id')]:$input.val());
-                    
-                    window.hWin.HEURIST4.msg.showDialog(url, {height:570, width:750,
-                        title: 'Temporal Object',
-                        class:'ui-heurist-populate-fade',
-                        //is_h6style: true,
-                        default_palette_class: 'ui-heurist-populate',
-                        callback: function(str){
-                            if(!window.hWin.HEURIST4.util.isempty(str) && that.newvalues[$input.attr('id')] != str){
-                                $input.val(str);    
-                                $input.change();
+            // temporal widget button
+            let $btn_temporal = $( '<span>', {
+                title: 'Pop up widget to enter compound date information (uncertain, fuzzy, radiometric etc.)', 
+                class: 'smallicon', 
+                style: 'margin-left: 1em;width: 55px !important;font-size: 0.8em;cursor: pointer;'
+            })
+            .text('range')
+            .appendTo( $inputdiv );
+
+            $('<span>', {class: 'ui-icon ui-icon-date-range', style: 'margin-left: 5px;'}).appendTo($btn_temporal); // date range icon
+
+            this._on( $btn_temporal, { click: function(){
+                
+                if(that.is_disabled) return;
+
+                var url = window.hWin.HAPI4.baseURL 
+                    + 'hclient/widgets/editing/editTemporalObject.html?toedit='
+                    + encodeURIComponent(that.newvalues[$input.attr('id')]
+                                ?that.newvalues[$input.attr('id')]:$input.val());
+                
+                window.hWin.HEURIST4.msg.showDialog(url, {height:570, width:750,
+                    title: 'Temporal Object',
+                    class:'ui-heurist-populate-fade',
+                    //is_h6style: true,
+                    default_palette_class: 'ui-heurist-populate',
+                    callback: function(str){
+                        if(!window.hWin.HEURIST4.util.isempty(str) && that.newvalues[$input.attr('id')] != str){
+                            $input.val(str);    
+                            $input.change();
+                        }
+
+                        if($.isFunction($('body').calendarsPicker) && $tinpt.hasClass('hasCalendarsPicker')){
+
+                            var new_temporal = null;
+                            var new_cal = null;
+                            var new_date = null;
+                            try {
+                                new_temporal = Temporal.parse(str);
+                                new_cal = new_temporal.getField('CLD');
+                                new_cal = $.calendars.instance(new_cal);
+                                new_date = new_temporal.getTDate("DAT");
+                            } catch(e) {
+                                new_cal = null;
+                                new_date = null;
                             }
 
-                            if($.isFunction($('body').calendarsPicker) && $tinpt.hasClass('hasCalendarsPicker')){
+                            // Update calendar for calendarPicker
+                            if(new_cal && new_date && typeof $tinpt !== 'undefined'){
 
-                                var new_temporal = null;
-                                var new_cal = null;
-                                var new_date = null;
-                                try {
-                                    new_temporal = Temporal.parse(str);
-                                    new_cal = new_temporal.getField('CLD');
-                                    new_cal = $.calendars.instance(new_cal);
-                                    new_date = new_temporal.getTDate("DAT");
-                                } catch(e) {
-                                    new_cal = null;
-                                    new_date = null;
+                                if(new_date.getYear()){
+                                    var hasMonth = new_date.getMonth();
+                                    var hasDay = new_date.getDay();
+
+                                    var month = hasMonth ? new_date.getMonth() : 1;
+                                    var day = hasDay ? new_date.getDay() : 1;
+
+                                    new_date = translateDate({'year': new_date.getYear(), 'month': month, 'day': day}, g_calendar, new_cal);
+                                    new_date = new_date.formatDate('yyyy-mm-dd', new_cal);
                                 }
-    
-                                // Update calendar for calendarPicker
-                                if(new_cal && new_date && typeof $tinpt !== 'undefined'){
-    
-                                    if(new_date.getYear()){
-                                        var hasMonth = new_date.getMonth();
-                                        var hasDay = new_date.getDay();
-    
-                                        var month = hasMonth ? new_date.getMonth() : 1;
-                                        var day = hasDay ? new_date.getDay() : 1;
-    
-                                        new_date = translateDate({'year': new_date.getYear(), 'month': month, 'day': day}, g_calendar, new_cal);
-                                        new_date = new_date.formatDate('yyyy-mm-dd', new_cal);
-                                    }
-    
-                                    var cur_cal = $tinpt.calendarsPicker('option', 'calendar');
-                                    if(cur_cal.local.name.toLowerCase() != new_cal.local.name.toLowerCase()){
-                                        $tinpt.calendarsPicker('option', 'calendar', new_cal);
-                                    }
-    
-                                    if(typeof new_date == 'string'){
-                                        $tinpt.val(new_date);
-                                    }
+
+                                var cur_cal = $tinpt.calendarsPicker('option', 'calendar');
+                                if(cur_cal.local.name.toLowerCase() != new_cal.local.name.toLowerCase()){
+                                    $tinpt.calendarsPicker('option', 'calendar', new_cal);
+                                }
+
+                                if(typeof new_date == 'string'){
+                                    $tinpt.val(new_date);
                                 }
                             }
                         }
-                    } );
-                }} );
-            
+                    }
+                } );
+            }} );
+
         }//temporal allowed
         
         $input.change(__onDateChange);
