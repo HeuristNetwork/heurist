@@ -163,6 +163,7 @@ function doReport($system, $update_mode, $format, $row){
 				$outputfile = $outputfile.'.'.$format;
 			}
             $ext = $format;
+            $filename = $filename.'.'.$ext;
 		}
         
 		if(file_exists($outputfile)){
@@ -200,7 +201,7 @@ function doReport($system, $update_mode, $format, $row){
                         
                         if($ext!='html'){
                             header('Pragma: public');
-                            header('Content-Disposition: attachment; filename="'.$outputfile.'"'); 
+                            header('Content-Disposition: attachment; filename="'.$filename.'"'); 
                         }
                     }
                     

@@ -951,6 +951,7 @@ function save_report_into_file($tpl_source){
 
     $errors = null;
     $res_file = null;
+    $file_name = null;
     
     if($publishmode!=2){ //saves into $outputfile 
 
@@ -982,15 +983,38 @@ function save_report_into_file($tpl_source){
                 }
                 $ext =  '.'.$outputmode;
 
-                $res_file = $dirname."/".$path_parts['filename'].$ext;
-                $file = fopen ($res_file, "w");
+                $file_name = $path_parts['filename'].$ext;
+
+                $res_file = $dirname."/".$file_name; // acutal file
+                $temp_file = $dirname."/_".$file_name; // temporary file, if needed
+
+                $file = false; // file handle
+                $use_temp = false; // using temporary file
+
+                if(!file_exists($res_file) || is_writable($res_file)){ // open existing file
+                    $file = fopen ($res_file, "w");
+                }else{ // create temp file to replace original
+                    $file = fopen($temp_file, "w");
+                    $use_temp = true;
+                }
+
                 if(!$file){
                     $errors = "Can't write file $res_file. Check permission for directory";
                 }else{
                     fwrite($file, $tpl_source);
-                    fclose ($file);
+                    fclose($file);
                 }
 
+                if($use_temp){
+
+                    if(unlink($res_file) === false){ // Delete old file
+                        unlink($temp_file); // on error, remove temp file
+                        $errors = "Can't delete old report file $res_file. Check permission for file";
+                    }else if(rename($temp_file, $res_file) === false){ // Rename temp file
+                        unlink($temp_file); // on error, remove temp file
+                        $errors = "Can't rename temporary file $temp_file to $res_file. Check permissions";
+                    }
+                }
             }
 
         }catch(Exception $e)
@@ -1007,101 +1031,114 @@ function save_report_into_file($tpl_source){
     if(!$gparams['void'])
     {
 
-    if($publishmode!=1){
-        //2 - download with given file name (no browser output)
-        //3 - smarty report output
+        if($publishmode!=1){
+            //2 - download with given file name (no browser output)
+            //3 - smarty report output
 
-        if($errors!=null){
-            $tpl_source = $tpl_source."<div style='color:#ff0000;font-weight:bold;'>$errors</div>";
-        }
-
-        if($outputmode=='js'){
-            header("Content-type: text/javascript");
-            $tpl_res = add_javascript_wrap4($tpl_source);
-        }else{
-            
-            if($outputmode=='txt'){
-                $mimetype = 'plain/text';
-            }else if($outputmode=='json'){
-                $mimetype = 'application/json';
-            }else{
-                $mimetype = "text/$outputmode";    
+            if($errors!=null){
+                $tpl_source = $tpl_source."<div style='color:#ff0000;font-weight:bold;'>$errors</div>";
             }
 
-            header("Content-type: $mimetype;charset=UTF-8");
-            $tpl_res = $tpl_source;
-        }
-        if($publishmode==2){
-            //set file name - for download
-            header('Pragma: public');
-            header('Content-Disposition: attachment; filename="'.$outputfile.'"'); 
-            header('Content-Length: ' . strlen($tpl_res));
-        }
-        
-        echo $tpl_res;
+            if($outputmode=='js'){
+                header("Content-type: text/javascript");
+                $tpl_res = add_javascript_wrap4($tpl_source);
+            }else{
+                
+                if($outputmode=='txt'){
+                    $mimetype = 'plain/text';
+                }else if($outputmode=='json'){
+                    $mimetype = 'application/json';
+                }else{
+                    $mimetype = "text/$outputmode";    
+                }
 
-    }else if ($publishmode==1){ //info about success of saving into file and where to get it
-        
-        if($errors!=null){
-            header("Content-type: text/html;charset=UTF-8");
-            echo htmlspecialchars($errors);
-        }else{
-            ?>
-            <html>
-            <head>
-                <meta http-equiv="content-type" content="text/html; charset=utf-8">
-                <link rel="stylesheet" type="text/css" href="../../h4styles.css">
-            </head>
-            <body style="margin: 25px;">
-            <h3>
-                The following file has been updated:  <?php echo htmlspecialchars($res_file);?></h3><br />
+                header("Content-type: $mimetype;charset=UTF-8");
+                $tpl_res = $tpl_source;
+            }
+            if($publishmode==2){
+                //set file name - for download
+                $output_name = !empty($file_name) ? $file_name : null;
 
-            <?php
-            $rps_recid = @$gparams['rps_id'];
-            if($rps_recid){
+                if($output_name == null){
 
-                $link = str_replace('&amp;','&',htmlspecialchars(HEURIST_BASE_URL."viewers/smarty/updateReportOutput.php?db=".$system->dbname()."&publish=3&id=".$rps_recid));
+                    $path_parts = pathinfo($outputfile);
+                    $output_name = $path_parts['filename'] . '.' . $outputmode;
+                }
+
+                header('Pragma: public');
+                header('Content-Disposition: attachment; filename="'.$output_name.'"'); 
+                header('Content-Length: ' . strlen($tpl_res));
+            }
+            
+            echo $tpl_res;
+
+        }else if ($publishmode==1){ //info about success of saving into file and where to get it
+            
+            if($errors!=null){
+                header("Content-type: text/html;charset=UTF-8");
+                echo htmlspecialchars($errors);
+            }else{
+
+                $url = htmlspecialchars(HEURIST_FILESTORE_URL . '/generated-reports/' . $file_name);
                 ?>
-
-                <p style="font-size: 14px;">View the generated files by clicking the links below:<br /><br />
-                HTML: <a href="<?=$link?>" target="_blank" style="font-weight: bold;font-size: 0.9em;"><?=$link?></a><br />
-                Javascript: <a href="<?=$link?>&mode=js" target="_blank" style="font-weight: bold;font-size: 0.9em;"><?=$link?>&mode=js</a><br />
+                <html>
+                <head>
+                    <meta http-equiv="content-type" content="text/html; charset=utf-8">
+                    <link rel="stylesheet" type="text/css" href="../../h4styles.css">
+                    <title>File generated</title>
+                </head>
+                <body style="margin: 25px;">
+                <div>
+                    The following file has been updated:  <a href="<?php echo $url; ?>" target="_blank"><?php echo $url;?></a>
+                </div>
+                <br />
 
                 <?php
+                $rps_recid = @$gparams['rps_id'];
+                if($rps_recid){
+
+                    $link = str_replace('&amp;','&',htmlspecialchars(HEURIST_BASE_URL."viewers/smarty/updateReportOutput.php?db=".$system->dbname()."&publish=3&id=".$rps_recid));
+                    ?>
+
+                    <p style="font-size: 14px;">Regenerate and view the file:<br /><br />
+                        HTML: <a href="<?=$link?>" target="_blank" style="font-weight: bold;font-size: 0.9em;"><?=$link?></a><br /><br />
+                        Javascript: <a href="<?=$link?>&mode=js" target="_blank" style="font-weight: bold;font-size: 0.9em;"><?=$link?>&mode=js</a><br />
+
+                    <?php
+                }
+
+                // code for insert of dynamic report output - duplication of functionality in repMenu.html
+                $surl = HEURIST_BASE_URL."viewers/smarty/showReps.php?db=".$system->dbname().
+                "&ver=".$gparams['ver']."&w=".$gparams['w']."&q=".$gparams['q'].
+                "&publish=1&debug=0&template=".$gparams['template'];
+
+                if(@$gparams['rules']){
+                    $surl = $surl."&rules=".$gparams['rules'];
+                }
+                if(@$gparams['h4']){
+                    $surl = $surl."&h4=".$gparams['h4'];
+                }
+
+                $surl = str_replace('&amp;','&',htmlspecialchars($surl, ENT_QUOTES));
+                
+                ?><br />
+                To publish the report as dynamic (generated on-the-fly) output, use the code below.
+                <br /><br />
+                URL:<br />
+                <textarea readonly style="border: 1px dotted gray; padding: 3px; margin: 2px; font-family: times; font-size: 10px;"
+                    id="code-textbox1" onClick="select(); if (window.clipboardData) clipboardData.setData('Text', value);" rows="3" cols="150"><?php echo $surl;?></textarea>
+
+                <br />
+                Javascript wrap:<br />
+                <textarea readonly style="border: 1px dotted gray; padding: 3px; margin: 2px; font-family: times; font-size: 10px;"
+                    id="code-textbox2" onClick="select(); if (window.clipboardData) clipboardData.setData('Text', value);" rows="5" cols="150">
+                    <script type="text/javascript" src="<?php echo $surl;?>&mode=js"></script><noscript><iframe width="80%" height="70%" frameborder="0" src="<?php echo $surl;?>"></iframe></noscript>
+                </textarea>
+                <?php
+                echo "</p></body></html>";
+
             }
-
-            // code for insert of dynamic report output - duplication of functionality in repMenu.html
-            $surl = HEURIST_BASE_URL."viewers/smarty/showReps.php?db=".$system->dbname().
-            "&ver=".$gparams['ver']."&w=".$gparams['w']."&q=".$gparams['q'].
-            "&publish=1&debug=0&template=".$gparams['template'];
-
-            if(@$gparams['rules']){
-                $surl = $surl."&rules=".$gparams['rules'];
-            }
-            if(@$gparams['h4']){
-                $surl = $surl."&h4=".$gparams['h4'];
-            }
-
-            $surl = str_replace('&amp;','&',htmlspecialchars($url, ENT_QUOTES));
-            
-            ?><br />
-            To publish the report as dynamic (generated on-the-fly) output, use the code below.
-            <br /><br />
-            URL:<br />
-            <textarea readonly style="border: 1px dotted gray; padding: 3px; margin: 2; font-family: times; font-size: 10px; width: 70%; height: 60px;"
-                id="code-textbox1" onClick="select(); if (window.clipboardData) clipboardData.setData('Text', value);"><?php echo $surl;?></textarea>
-
-            <br />
-            Javascript wrap:<br />
-            <textarea readonly style="border: 1px dotted gray; padding: 3px; margin: 2; font-family: times; font-size: 10px; width: 70%; height: 100px;"
-                id="code-textbox2" onClick="select(); if (window.clipboardData) clipboardData.setData('Text', value);">
-                <script type="text/javascript" src="<?php echo $surl;?>&mode=js"></script><noscript><iframe width="80%" height="70%" frameborder="0" src="<?php echo $surl;?>"></iframe></noscript>
-            </textarea>
-            <?php
-            echo "</p></body></html>";
-
         }
-    }
     }
 }
 
