@@ -1079,7 +1079,7 @@ function save_report_into_file($tpl_source){
                 echo htmlspecialchars($errors);
             }else{
 
-                $url = htmlspecialchars(HEURIST_FILESTORE_URL . '/generated-reports/' . $file_name);
+                $url = htmlspecialchars(HEURIST_FILESTORE_URL . 'generated-reports/' . $file_name);
                 ?>
                 <html>
                 <head>
