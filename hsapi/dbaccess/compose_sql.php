@@ -233,9 +233,14 @@ function get_sql_query_clauses($db, $params, $currentUser=null) {
             if($query->recVisibilityType=='viewable'){
                 
                 $query->from_clause = $query->from_clause.' LEFT JOIN usrRecPermissions ON rcp_RecID=TOPBIBLIO.rec_ID ';
+
                 //if there is entry for record in usrRecPermissions current user must be member of allowed groups
-                $where2 = '(TOPBIBLIO.rec_NonOwnerVisibility="viewable" and (rcp_UGrpID is null or rcp_UGrpID in ('
-                            .join(',', $wg_ids).')))';
+                $where2 = '(TOPBIBLIO.rec_NonOwnerVisibility="viewable"';
+                if(!empty($wg_ids)){
+                    $where2 .= ' and (rcp_UGrpID is null or rcp_UGrpID in ('.join(',', $wg_ids).'))';
+                }
+                $where2 .= ')';
+
                 $where2_conj = ' and ';
             }else{
                 $where2 = '(TOPBIBLIO.rec_NonOwnerVisibility="'.$query->recVisibilityType.'")';
@@ -271,13 +276,13 @@ function get_sql_query_clauses($db, $params, $currentUser=null) {
         }
         
         if(is_array($wg_ids) && count($wg_ids)>0 && $currUserID>0){
-                //for hidden
-                $where2 = '( '.$where2.$where2_conj.'TOPBIBLIO.rec_OwnerUGrpID ';
-                if(count($wg_ids)>1){
-                    $where2 = $where2 . 'in (' . join(',', $wg_ids).') )';    
-                }else{
-                    $where2 = $where2 .' = '.$wg_ids[0] . ' )';    
-                }
+            //for hidden
+            $where2 = '( '.$where2.$where2_conj.'TOPBIBLIO.rec_OwnerUGrpID ';
+            if(count($wg_ids)>1){
+                $where2 = $where2 . 'in (' . join(',', $wg_ids).') )';    
+            }else{
+                $where2 = $where2 .' = '.$wg_ids[0] . ' )';    
+            }
         }
     }
     
