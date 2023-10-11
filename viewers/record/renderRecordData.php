@@ -796,6 +796,10 @@ if(!($is_map_popup || $without_header)){
         .detail img:not(.geo-image, .rv-magglass, .rv-editpencil, .rft){
             width: 50%;
         }
+
+        .detail > .value.grayed{
+            background: rgb(233 233 233) !important;
+        }
         
         .rft{
             width: 18px !important;
@@ -1277,7 +1281,8 @@ function print_public_details($bib) {
         dty_Type,
         if(dtl_Geo is not null, ST_asWKT(dtl_Geo), null) as dtl_Geo,
         if(dtl_Geo is not null, ST_asWKT(ST_Envelope(dtl_Geo)), null) as bd_geo_envelope,
-        dtl_HideFromPublic
+        dtl_HideFromPublic,
+        rst_NonOwnerVisibility
         from recDetails
         left join defDetailTypes on dty_ID = dtl_DetailTypeID
         left join defRecStructure rdr on rdr.rst_DetailTypeID = dtl_DetailTypeID
@@ -1877,9 +1882,9 @@ function print_public_details($bib) {
                 . '</div><div class="detail'.($is_map_popup && ($bd['dty_ID']!=DT_SHORT_SUMMARY)?' truncate':'').$is_cms_content.'">';
         }
 
+        $is_grayed_out = (intval($bd['dtl_HideFromPublic']) == 1 || ($bd['rst_NonOwnerVisibility'] != 'public' && $bd['rst_NonOwnerVisibility'] != 'pending')) ? ' grayed' : (' ' . intval($bd['dtl_HideFromPublic']));
         
-        
-        print '<span class="value"'.(@$bd['rollover']?' title="'.$bd['rollover'].'"':'')
+        print '<span class="value'.$is_grayed_out.'"'.(@$bd['rollover']?' title="'.$bd['rollover'].'"':'')
                 .'>' . $bd['val'] . '</span>'; // add value
         $prevLbl = $bd['name'];
     }

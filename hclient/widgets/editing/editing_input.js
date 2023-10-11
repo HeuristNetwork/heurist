@@ -1014,9 +1014,6 @@ $.widget( "heurist.editing_input", {
                     $(eid).parent().css({display:'inline-block'}); //.height($input.height()+100)
                     //to show all toolbar buttons - minimum 768
                     $(eid).width(Math.max(768, $input.width())).height($input.height()).val($input.val()); 
-                    //html($.parseHTML(   
-
-                    var nw = $input.css('min-width');
 
                     let custom_formatting = window.hWin.HAPI4.dbSettings.TinyMCE_formats;
 
@@ -1026,6 +1023,8 @@ $.widget( "heurist.editing_input", {
                     if(Object.hasOwn(custom_formatting, 'block_formats') && custom_formatting.block_formats.length > 0){
                         style_formats.push({ title: 'Custom blocks', items: custom_formatting.block_formats });
                     }
+
+                    let is_grayed = $input.hasClass('grayed') ? 'background: rgb(233 233 233) !important' : '';
 
                     tinymce.init({
                         //target: $editor, 
@@ -1049,7 +1048,7 @@ $.widget( "heurist.editing_input", {
 
                         entity_encoding:'raw',
                         inline_styles: true,
-                        content_style: "body { font-size: 8pt; font-family: Helvetica,Arial,sans-serif; } " + custom_formatting.content_style,
+                        content_style: `body { font-size: 8pt; font-family: Helvetica,Arial,sans-serif; ${is_grayed} } ${custom_formatting.content_style}`,
 
                         min_height: ($input.height()+110),
                         max_height: ($input.height()+110),
