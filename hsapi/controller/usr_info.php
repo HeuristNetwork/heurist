@@ -481,8 +481,28 @@
                 $username = @$_REQUEST['username'];
                 $password = @$_REQUEST['password'];
                 $session_type = @$_REQUEST['session_type'];
+                $skip_pwd_check = false;
+                $res = false;
+                
+                if(@$_REQUEST['saml_entity']){
+                    
+                    $sp = $_REQUEST['saml_entity'];
+                    
+                    //check saml session
+                    require (dirname(__FILE__).'/../utilities/utils_saml.php');
+                    
+                    $username = samlLogin($system, $sp, $system->dbname(), false);
+                    
+                    if($username>0){
+                        $password= 'X';    
+                        $session_type = 'remember';
+                        $skip_pwd_check = true;
+                    }else{
+                        $username = null;
+                    }
+                }
 
-                if($system->doLogin($username, $password, $session_type)){
+                if($username && $system->doLogin($username, $password, $session_type, $skip_pwd_check)){
                     $res = $system->getCurrentUserAndSysInfo( true ); //including reccount and dashboard entries
                     
                     checkDatabaseFunctions($mysqli);
