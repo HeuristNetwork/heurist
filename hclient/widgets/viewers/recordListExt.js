@@ -555,8 +555,8 @@ $.widget( "heurist.recordListExt", {
                     height: this.options.popup_height,
                     modal: false,
                     element: this.element[0],
-                    resizable: true,
-                    h6style_class: 'ui-heurist-publish'
+                    resizable: true
+                    //h6style_class: 'ui-heurist-publish'
                     //buttons: codeEditorBtns,
                     //default_palette_class: 'ui-heurist-publish'
                     //close: function(){}

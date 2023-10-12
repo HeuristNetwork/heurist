@@ -501,7 +501,7 @@ $siz = get_php_bytes('upload_max_filesize');
         $to = sanitizePath($to);
         if(isPathInHeuristUploadFolder($to, true)===false){
             $file->error = $this->get_error_message('only_heurist')
-                .'AAA 1)'.$to.'  '.realpath($to).'  2)'.HEURIST_FILESTORE_DIR.' 3)'.realpath(HEURIST_FILESTORE_DIR);
+                .' 1)'.realpath($to).'  2) '.realpath(HEURIST_FILESTORE_DIR);
             return false;
         }
         return copy($from, $to.$filename);
@@ -522,8 +522,8 @@ $siz = get_php_bytes('upload_max_filesize');
         //if(!(strpos($upload_path, HEURIST_FILESTORE_ROOT)===0))
         {
             $file->error = $this->get_error_message('only_heurist')
-                .'BBB 1)'.$upload_path.'   '.realpath($upload_path)
-                    .'  2)'.HEURIST_FILESTORE_DIR.' 3)'.realpath(HEURIST_FILESTORE_DIR);
+                .' a)'.realpath($upload_path)
+                    .' b)'.realpath(HEURIST_FILESTORE_DIR);
             
             return false;
         }

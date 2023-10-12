@@ -529,7 +529,8 @@ function __findLongTermLabels(){
             
                 print $db_name.'<br>';
                 foreach($list as $id=>$row){
-                    print '<div style="padding-left:100px">'.$id.'&nbsp;'.$row['chars'].'&nbsp;'.$row['len'].'&nbsp;'.$row['trm_Label'].'</div>';    
+                    print '<div style="padding-left:100px">'.$id.'&nbsp;'.intval($row['chars']).'&nbsp;'.intval($row['len'])
+                        .'&nbsp;'.htmlspecialchars($row['trm_Label']).'</div>';    
                 }
                 
             }

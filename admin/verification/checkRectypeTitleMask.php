@@ -177,7 +177,7 @@ if($mode!=3){
                         
                         if(!$is_included || $is_invalid){
                         
-                            echo "<h3 style=\"padding:15px 0px 10px 4px;\"><b> $rtID : <i>$rtName</i></b> <br/> </h3>";
+                            echo "<h3 style=\"padding:15px 0px 10px 4px;\"><b> $rtID : <i>".htmlspecialchars($rtName)."</i></b> <br/> </h3>";
                             echo "<div class='resultsRow'><div class='statusCell ".
                                         ($is_invalid? "invalid'>in":"valid'>")."valid</div>";
                                         
