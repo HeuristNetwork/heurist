@@ -83,8 +83,8 @@ if(!is_array($ACCESSABLE_OWNER_IDS)) $ACCESSABLE_OWNER_IDS = array();
 array_push($ACCESSABLE_OWNER_IDS, 0); //everyone
 
 $ACCESS_CONDITION = 'rec_OwnerUGrpID '.
-    (count($ACCESSABLE_OWNER_IDS)==1)?('='.$ACCESSABLE_OWNER_IDS[0])
-                                     :('in ('.join(',', $ACCESSABLE_OWNER_IDS).')');
+    (count($ACCESSABLE_OWNER_IDS)==1 ? '='.$ACCESSABLE_OWNER_IDS[0]
+                                     : 'in ('.join(',', $ACCESSABLE_OWNER_IDS).')');
     
 $ACCESS_CONDITION = '(rec_NonOwnerVisibility = "public"'
         .($system->has_access()?' OR (rec_NonOwnerVisibility!="hidden" OR '.$ACCESS_CONDITION.'))':')');
