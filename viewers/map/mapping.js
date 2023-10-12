@@ -247,11 +247,13 @@ $.widget( "heurist.mapping", {
     {name:'OpenStreetMap'},
     //{name:'OpenPtMap'},
     {name:'OpenTopoMap'},
+    /* account disabled
     {name:'MapBox.StreetMap', options:{accessToken: accessToken_MapBox}},
     {name:'MapBox.Satellite', options:{accessToken: accessToken_MapBox}},
     {name:'MapBox.Combined', options:{accessToken: accessToken_MapBox}},
     {name:'MapBox.Relief', options:{accessToken: accessToken_MapBox}},
     //{name:'MapBox.AncientWorld', options:{accessToken: accessToken_MapBox}},
+    */
     {name:'Esri.WorldStreetMap'},
     {name:'Esri.WorldTopoMap'},
     {name:'Esri.WorldImagery'},
@@ -259,10 +261,10 @@ $.widget( "heurist.mapping", {
     {name:'Esri.WorldShadedRelief'},
     {name:'Stamen.Toner'},
     {name:'Stamen.TonerLite'},
+    {name:'Stamen.Terrain'},  //terrain with labels
     {name:'Stamen.TerrainBackground'}, //terrain w/o labels
     //{name:'Stamen.TopOSMRelief'},    // doesn't work
     //{name:'Stamen.TopOSMFeatures'},  // doesn't work
-    //{name:'Stamen.Terrain'},  terrain with labels
     {name:'Stamen.Watercolor'},
     //{name:'OpenWeatherMap'}
     {name:'Esri.NatGeoWorldMap'},
