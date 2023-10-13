@@ -689,7 +689,7 @@ public static function parseAndValidate($encoded_filename, $original_filename, $
       
         if( count($err_colnums)>0 || count($err_encoding)>0 || count($err_keyfields)>0){
             //we have errors - delete temporary prepared file
-            unlink($prepared_filename);
+            if(file_exists($prepared_filename)) unlink($prepared_filename);
             
             return array( 'step'=>2, 'col_count'=>$len, 
                 'err_colnums'=>$err_colnums, 
@@ -721,7 +721,7 @@ public static function parseAndValidate($encoded_filename, $original_filename, $
            
             $res = self::saveToDatabase($preproc);
             //delete prepare
-            unlink($prepared_filename);
+            if(file_exists($prepared_filename)) unlink($prepared_filename);
             if($res!==false){
                 //delete encoded
                 ImportParser::_deleteEncodedFilename($encoded_filename_id);
@@ -741,39 +741,46 @@ public static function parseAndValidate($encoded_filename, $original_filename, $
 //
 private static function _saveEncodedFilename($encoded_filename){
     
-    $mysqli = self::$system->get_mysqli();
-    $is_exist = hasTable($mysqli, 'import_tmp_file');    
+    if($encoded_filename!=null && file_exists($encoded_filename)){
     
-    if(!$is_exist){
-        $query = "CREATE TABLE `import_tmp_file` (`imp_ID` int(10) unsigned NOT NULL AUTO_INCREMENT, "
-        ."`imp_Date` timestamp NOT NULL default CURRENT_TIMESTAMP, "
-        ."`imp_filename` VARCHAR(500) NOT NULL, "
-        ." PRIMARY KEY (`imp_ID`)) ENGINE=InnoDB  DEFAULT CHARSET=utf8mb4;";
-        if (!$mysqli->query($query)) {
-            self::$system->addError(HEURIST_DB_ERROR, "Cannot create import session table", $mysqli->error);                
-            return false;
-        }
-    }else{
-        $filenames = mysql__select_list2($mysqli, 'SELECT imp_filename FROM `import_tmp_file` WHERE imp_Date <  NOW() - INTERVAL 2 DAY');
-        if(is_array($filenames) && count($filenames)>0){
-            foreach ($filenames as $fname){
-                if(file_exists($fname)){ //&& in HEURIST_SCRATCH_DIR
-                    unlink($fname);
-                 }
+        $mysqli = self::$system->get_mysqli();
+        $is_exist = hasTable($mysqli, 'import_tmp_file');    
+        
+        if(!$is_exist){
+            $query = "CREATE TABLE `import_tmp_file` (`imp_ID` int(10) unsigned NOT NULL AUTO_INCREMENT, "
+            ."`imp_Date` timestamp NOT NULL default CURRENT_TIMESTAMP, "
+            ."`imp_filename` VARCHAR(500) NOT NULL, "
+            ." PRIMARY KEY (`imp_ID`)) ENGINE=InnoDB  DEFAULT CHARSET=utf8mb4;";
+            if (!$mysqli->query($query)) {
+                self::$system->addError(HEURIST_DB_ERROR, "Cannot create import session table", $mysqli->error);                
+                return false;
             }
-            $query = 'DELETE FROM `import_tmp_file` WHERE imp_Date <  NOW() - INTERVAL 2 DAY';
-            $mysqli->query($query);
+        }else{
+            $filenames = mysql__select_list2($mysqli, 'SELECT imp_filename FROM `import_tmp_file` WHERE imp_Date <  NOW() - INTERVAL 2 DAY');
+            if(is_array($filenames) && count($filenames)>0){
+                //cleanup
+                foreach ($filenames as $fname){
+                    if(file_exists($fname)){ //&& in HEURIST_SCRATCH_DIR
+                        unlink($fname);
+                     }
+                }
+                $query = 'DELETE FROM `import_tmp_file` WHERE imp_Date <  NOW() - INTERVAL 2 DAY';
+                $mysqli->query($query);
+            }
         }
-    }
     
-    $res = mysql__insertupdate($mysqli, 'import_tmp_file', 'imp', array('imp_filename'=>$encoded_filename));
-    //$query = 'INSERT INTO `import_tmp_file` (imp_filename) VALUES ("'.$mysqli->real_escape_string($encoded_filename).'")';
-    //$res = $mysqli->query($query);
-    if(is_numeric($res) && intval($res)>0){
-            return $res; //$mysqli->insert_id;
+        $res = mysql__insertupdate($mysqli, 'import_tmp_file', 'imp', array('imp_filename'=>$encoded_filename));
+        //$query = 'INSERT INTO `import_tmp_file` (imp_filename) VALUES ("'.$mysqli->real_escape_string($encoded_filename).'")';
+        //$res = $mysqli->query($query);
+        if(is_numeric($res) && intval($res)>0){
+                return $res; //$mysqli->insert_id;
+        }else{
+                self::$system->addError(HEURIST_DB_ERROR, "Cannot add into import session table", $res);                
+                return false;
+        }
+    
     }else{
-            self::$system->addError(HEURIST_DB_ERROR, "Cannot add into import session table", $res);                
-            return false;
+        return false;
     }
             
 }
