@@ -2540,27 +2540,27 @@ $.widget( "heurist.editing_input", {
                 $input.val(value);    
                 $input.change(); 
 
+                let css = 'display: block; font-size: 0.8em; color: #999999; padding: 0.3em 0px;';
+
 				// Add additional controls to insert yesterday, today or tomorrow
-                let $help_controls = $('<div>')
-                    .css({
-                        display: 'block',
-                        'font-size': '0.8em',
-                        color: '#999999',
-                        padding: '0.3em 0px'
-                    })
+                let $help_controls = $('<div>', { style: css })
                     .html('<span class="fake_link">Yesterday</span>'
                         + '<span style="margin: 0px 5px" class="fake_link">Today</span>'
-                        + '<span class="fake_link" class="fake_link">Tomorrow</span>'
-                        + '&nbsp;&nbsp;&nbsp;&nbsp;yyyy, yyyy-mm or yyyy + click calendar (remembers last date)');
+                        + '<span class="fake_link" class="fake_link">Tomorrow</span>');
 
-                //this.input_prompt.prepend('<br>');
-                $help_controls.insertBefore(this.input_prompt);
+                $help_controls.insertAfter($inputdiv);
 
                 this._on($help_controls.find('span.fake_link'), {
                     click: function(e){
                         $input.val(e.target.textContent).change();
                     }
                 });
+
+                if(!this.input_prompt.prev().is('div.add_help')){
+                    $('<div>', { style: css })
+                        .text('yyyy, yyyy-mm or yyyy + click calendar (remembers last date)')
+                        .insertBefore(this.input_prompt);
+                }
             }else 
             if(this.isFileForRecord){ //----------------------------------------------------
                 
@@ -3648,18 +3648,17 @@ $.widget( "heurist.editing_input", {
              
         }//end color/symbol editor
         
-        else if( this.options.dtID>0 && this.options.dtID == window.hWin.HAPI4.sysinfo['dbconst']['DT_MAP_IMAGE_WORLDFILE']){
-            
-                    var $btn_edit_switcher = $( '<span>calculate extent</span>', 
-                    {title: 'Get image extent based on worldfile parameters and image width and height'})
-                        //.addClass('smallicon ui-icon ui-icon-gear btn_add_term')
-                        .addClass('smallbutton btn_add_term')
-                        .css({'line-height': '20px','vertical-align':'top',cursor:'pointer','text-decoration':'underline'})
-                        .appendTo( $inputdiv );
-                    
-                    this._on( $btn_edit_switcher, { click: function(){
-                        calculateImageExtentFromWorldFile( that.options.editing );
-                    }});
+        else if( this.options.dtID > 0 && this.options.dtID == window.hWin.HAPI4.sysinfo['dbconst']['DT_MAP_IMAGE_WORLDFILE']){
+
+            let $btn_edit_switcher = $( '<span>calculate extent</span>', 
+                {title: 'Get image extent based on worldfile parameters and image width and height'})
+                    .addClass('smallbutton btn_add_term')
+                    .css({'line-height': '20px','vertical-align':'top',cursor:'pointer','text-decoration':'underline'})
+                    .appendTo( $inputdiv );
+
+            this._on( $btn_edit_switcher, { click: function(){
+                calculateImageExtentFromWorldFile( that.options.editing );
+            }});
         }
 
         // Semantic url links, separated by semi-colons, for RecTypes, Vocab+Terms, DetailTypes
@@ -4302,15 +4301,19 @@ $.widget( "heurist.editing_input", {
                         window.hWin.HAPI4.EntityMgr.doRequest(request,
                             function(response){
                                 if(response.status == window.hWin.ResponseStatus.OK){
-                                        var recordset = new hRecordSet(response.data);
-                                        var record = recordset.getFirstRecord();
-                                        if(record){
-                                            var newvalue = {ulf_ID: recordset.fld(record,'ulf_ID'),
-                                                        ulf_ExternalFileReference: recordset.fld(record,'ulf_ExternalFileReference'),
-                                                        ulf_OrigFileName: recordset.fld(record,'ulf_OrigFileName'),
-                                                        ulf_ObfuscatedFileID: recordset.fld(record,'ulf_ObfuscatedFileID')};
-                                            that._findAndAssignTitle(ele, newvalue, selector_function);
-                                        }
+
+                                    var recordset = new hRecordSet(response.data);
+                                    var record = recordset.getFirstRecord();
+
+                                    if(record){
+                                        var newvalue = {ulf_ID: recordset.fld(record,'ulf_ID'),
+                                                    ulf_ExternalFileReference: recordset.fld(record,'ulf_ExternalFileReference'),
+                                                    ulf_OrigFileName: recordset.fld(record,'ulf_OrigFileName'),
+                                                    ulf_ObfuscatedFileID: recordset.fld(record,'ulf_ObfuscatedFileID')};
+
+                                        that.newvalues[ele.attr('id')] = newvalue;
+                                        that._findAndAssignTitle(ele, newvalue, selector_function);
+                                    }
                                 }
                             });
                  }
