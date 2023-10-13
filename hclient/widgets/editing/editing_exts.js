@@ -757,23 +757,53 @@ function editSymbology(current_value, mode_edit, callback){
 //
 // Get image dimension and calculate bounding box based on world file parameters
 //
-function calculateImageExtentFromWorldFile(_editing){
+function calculateImageExtentFromWorldFile(_editing, ulf_ID = null){
 
     if(!_editing) return;
 
-    var ulf_ID = null, worldFile = null;
+    let worldFile = null;
     
     //
     // calculate extent based on worldfile parameters
     //
     var dtId_File = window.hWin.HAPI4.sysinfo['dbconst']['DT_FILE_RESOURCE'];
     var ele = _editing.getFieldByName( dtId_File );
-    if(ele){
+    if(ele && !ulf_ID){
+
         var val = ele.editing_input('getValues');
         if(val && val.length>0){
-            ulf_ID = val[0]['ulf_ObfuscatedFileID'];    
+
+            ulf_ID = val[0]['ulf_ObfuscatedFileID'];
+            if(!ulf_ID && val[0]['ulf_ID'] && parseInt(val[0]['ulf_ID']) > 0){
+
+                let request = {
+                    recID: parseInt(val[0]['ulf_ID']),
+                    a: 'search',
+                    details: 'list',
+                    entity: 'recUploadedFiles',
+                    request_id: window.hWin.HEURIST4.util.random()
+                };
+
+                window.hWin.HAPI4.EntityMgr.doRequest(request, function(response){
+                    if(response.status == window.hWin.ResponseStatus.OK){
+
+                        let recordset = new hRecordSet(response.data);
+                        let record = recordset.getFirstRecord();
+                        if(record){
+                            calculateImageExtentFromWorldFile(_editing, recordset.fld(record,'ulf_ObfuscatedFileID'));
+                        }else{
+                            window.hWin.HEURIST4.msg.showMsgFlash('Invalid image file provided');
+                        }
+                    }else{
+                        window.hWin.HEURIST4.msg.showMsgErr(response);
+                    }
+                });
+
+                return;
+            }
         }
     }
+
     var dtId_WorldFile = window.hWin.HAPI4.sysinfo['dbconst']['DT_MAP_IMAGE_WORLDFILE'];
     ele = _editing.getFieldByName( dtId_WorldFile );
     if(ele){
@@ -814,10 +844,13 @@ function calculateImageExtentFromWorldFile(_editing){
                                     }
 
                                 }else{
-                                    window.hWin.HEURIST4.msg.showMsgErr( response.data );                            
+                                    window.hWin.HEURIST4.msg.showMsgErr( response.data.error ? response.data.error : response.data );
                                 }
+                            }else{
+                                window.hWin.HEURIST4.msg.showMsgErr( response );
                             }
-                    });
+                        }
+                    );
 
                 },
                 {title:'Calculate image extent', yes:'Proceed', no:'Cancel'});

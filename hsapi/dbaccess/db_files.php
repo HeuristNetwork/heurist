@@ -367,31 +367,28 @@ function getImageFromFile($filename){
     $image = null;
     if(file_exists($filename)){
         
-            $path_parts = pathinfo($filename);
-        
-            try{
-        
-                switch($path_parts['extension']) {
-                    case 'jpeg':
-                    case 'jfif':
-                    case 'jpg':
-					case 'jpe':
-                        $image = @imagecreatefromjpeg($filename);
-                        break;
-                    case 'gif':
-                        $image = @imagecreatefromgif($filename);
-                        break;
-                    case 'png':
-                        $image = @imagecreatefrompng($filename);
-                        break;
-                }
-            
-            }catch(Exception $e) {
-                $rv = sendEmail(HEURIST_MAIL_TO_ADMIN, 'Image corruption '.HEURIST_DBNAME, 
-                    $filename.'. System message: ' .$e->getMessage());
+        $path_parts = pathinfo($filename);
+    
+        try{
+    
+            switch($path_parts['extension']) {
+                case 'jpeg':
+                case 'jfif':
+                case 'jpg':
+                case 'jpe':
+                    $image = @imagecreatefromjpeg($filename);
+                    break;
+                case 'gif':
+                    $image = @imagecreatefromgif($filename);
+                    break;
+                case 'png':
+                    $image = @imagecreatefrompng($filename);
+                    break;
             }
-
-            
+        
+        }catch(Exception $e) {
+            $rv = false;
+        }
     }
     return $image;
 }
@@ -1044,18 +1041,20 @@ function fileGetMetadata($fileinfo){
     }
 
     $image = null;
+    $alt_image = null;
     
     if(strpos($originalFileName,'_tiled')!==0 && $sourceType!='tiled' && $type_media=='image'){
     
         if(file_exists($filepath)){
             
             $image = getImageFromFile($filepath);
-            
+            $alt_image = @getimagesize($filepath);
+
         }else if($external_url){
 
             $image = UtilsImage::getRemoteImage( $external_url );
         }
-    
+
         if($image){
 
             try{    
@@ -1068,6 +1067,8 @@ function fileGetMetadata($fileinfo){
                 
                 $res = 'Cannot get image dimensions';
             }
+        }else if(file_exists($filepath) && is_array($alt_image) && !empty($alt_image)){ // [0] => width, [1] => height
+            $res = array('width' => $alt_image[0], 'height' => $alt_image[1]);
         }else{
             $res = array('error'=>'Image is not loaded'); //Cannot load image file to get dimensions
         }
