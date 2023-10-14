@@ -387,7 +387,8 @@ function getImageFromFile($filename){
             }
         
         }catch(Exception $e) {
-            $rv = false;
+            $rv = sendEmail(HEURIST_MAIL_TO_ADMIN, 'Image corruption '.HEURIST_DBNAME, 
+                    $filename.'. System message: ' .$e->getMessage());
         }
     }
     return $image;

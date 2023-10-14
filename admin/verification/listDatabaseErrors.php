@@ -147,7 +147,7 @@ $trmDuplicates = @$lists2["trm_dupes"];
                 //var link = document.getElementById('selected_link');
                 //if (link) return false;
                 if(ids){
-                    window.open('<?=HEURIST_BASE_URL.'?db='.HEURIST_DBNAME?>&w=all&q=ids:' + ids + '&nometadatadisplay=true', '_blank');
+                    window.open('<?=HEURIST_BASE_URL.'?db='.HEURIST_DBNAME?>&w=all&q=ids:' + ids, '_blank');
                 }
                 return false;
             }
@@ -219,12 +219,13 @@ $trmDuplicates = @$lists2["trm_dupes"];
             }
 			
             function correctDates(){
-                var ids=get_selected_by_name('recCB5'); 
+
+                let ids = get_selected_by_name('datesAmbig'); 
 
                 if(ids){
                     $('#linkbar').hide();
 
-                    var format = $('input[type="radio"][name="date_format"]:checked').val();
+                    let format = $('input[type="radio"][name="date_format"]:checked').val();
 
                     window.open('listDatabaseErrors.php?db=<?= HEURIST_DBNAME?>&fixdates=1&date_format='+format+'&recids='+ids,'_self')
                 }else{
@@ -1166,280 +1167,336 @@ if($active_all || in_array('empty_fields', $active)) {
 
 if($active_all || in_array('date_values', $active)) { 
     
-        ?>
+    ?>
 		
-        <!-- Fields of type "Date" with  wrong values -->
-        <!-- find all fields with faulty dates -->
+    <!-- Fields of type "Date" with  wrong values -->
+    <!-- find all fields with faulty dates -->
 
-        <div id="date_values" style="top:110px">   <!-- Start of Date Values -->
+    <div id="date_values" style="top:110px">   <!-- Start of Date Values -->
+    
+    <script>
+        $('#links').append('<li class="date_values"><a href="#date_values" style="white-space: nowrap;padding-right:10px;color:black;">Date Values</a></li>');
+        tabs_obj.tabs('refresh');
+    </script>
+
+    <?php
+
+    $res = $mysqli->query('select dtl_ID, dtl_RecID, dtl_Value, a.rec_RecTypeID, a.rec_Title, a.rec_Added, rst_DisplayName
+        from recDetails, defDetailTypes, defRecStructure, Records a
+        where (a.rec_ID = dtl_RecID) and (dty_ID = dtl_DetailTypeID) and (rst_DetailTypeID = dty_ID) and (rst_RecTypeID = a.rec_RecTypeID) and (a.rec_FlagTemporary!=1)
+    and (dty_Type = "date") and (dtl_Value is not null)');
+
+    $was_suggested = array();
+    $was_corrected = array();
+    $needs_manualfix = array();
+    $is_ambigious = array();
+    $bibs = array();
+    $ids  = array();
+    $dtl_ids = array();
+    $recids = @$_REQUEST['recids'];
+    $date_format = isset($_REQUEST['date_format']) ? $_REQUEST['date_format'] : 1;
+    if($recids!=null){
+        $recids = explode(',', $recids);
+    }
+    
+    $decade_regex = '/^\d{2,4}s$/'; //words like 80s 1990s
+    $year_range_regex = '/^\d{2,4}\-\d{2,4}$/'; //2-4 year ranges
+
+    $fix_as_suggested = false;
+
+    while ($row = $res->fetch_assoc()){
         
-        <script>
-            $('#links').append('<li class="date_values"><a href="#date_values" style="white-space: nowrap;padding-right:10px;color:black;">Date Values</a></li>');
-            tabs_obj.tabs('refresh');
-        </script>
+        $row['is_ambig'] = false;
+        $autofix = false;
 
-        <?php
+        if(!($row['dtl_Value']==null || trim($row['dtl_Value'])=='')){ //empty dates are not allowed
 
-        $res = $mysqli->query('select dtl_ID, dtl_RecID, dtl_Value, a.rec_RecTypeID, a.rec_Title, a.rec_Added, rst_DisplayName
-            from recDetails, defDetailTypes, defRecStructure, Records a
-            where (a.rec_ID = dtl_RecID) and (dty_ID = dtl_DetailTypeID) and (rst_DetailTypeID = dty_ID) and (rst_RecTypeID = a.rec_RecTypeID) and (a.rec_FlagTemporary!=1)
-        and (dty_Type = "date") and (dtl_Value is not null)');
-
-        $wassuggested = 0;
-        $wascorrected = 0;
-        $manualfix = false;
-        $ambigious = 0;
-        $bibs = array();
-        $ids  = array();
-        $dtl_ids = array();
-        $recids = @$_REQUEST['recids'];
-        $date_format = isset($_REQUEST['date_format']) ? $_REQUEST['date_format'] : 1;
-        if($recids!=null){
-            $recids = explode(',', $recids);
-        }
-        
-        $decade_regex = '/^\d{2,4}s$/'; //words like 80s 1990s
-        $year_range_regex = '/^\d{2,4}\-\d{2,4}$/'; //2-4 year ranges
-
-        $fix_as_suggested = false;
- 
-        while ($row = $res->fetch_assoc()){
+            //ignore decade dates
+            $row['new_value'] = null;
+            $row['dtl_Value'] = trim($row['dtl_Value']);
+            $row['is_ambig'] = true;
             
-            $row['is_ambig'] = false;
-            $autofix = false;
+            if(  (strlen($row['dtl_Value'])==3 || strlen($row['dtl_Value'])==5) 
+                && preg_match( $decade_regex, $row['dtl_Value'] )){
+                    
+                //this is decades    
+                $row['is_ambig'] = 'we suggest using a date range';
+                array_push($was_suggested, $row['dtl_RecID']);
 
-            if(!($row['dtl_Value']==null || trim($row['dtl_Value'])=='')){ //empty dates are not allowed
-
-                //ignore decade dates
-                $row['new_value'] = null;
-                $row['dtl_Value'] = trim($row['dtl_Value']);
-                $row['is_ambig'] = true;
+            }else if(preg_match( $year_range_regex, $row['dtl_Value'])){
                 
-                if(  (strlen($row['dtl_Value'])==3 || strlen($row['dtl_Value'])==5) 
-                    && preg_match( $decade_regex, $row['dtl_Value'] )){
-                        
-                    //this is decades    
+                list($y1, $y2) = explode('-',$row['dtl_Value']);
+                if($y1>31 && $y2>12){
+                    //this is year range
                     $row['is_ambig'] = 'we suggest using a date range';
-                    $wassuggested++;
-                    
-                }else if(preg_match( $year_range_regex, $row['dtl_Value'])){
-                    
-                    list($y1, $y2) = explode('-',$row['dtl_Value']);
-                    if($y1>31 && $y2>12){
-                        //this is year range
-                        $row['is_ambig'] = 'we suggest using a date range';
-                        $wassuggested++;
-                    }
+                    array_push($was_suggested, $row['dtl_RecID']);
                 }
-                
-                if($row['is_ambig']===true){
-                    
-                    //check if dtl_Value is old plain string temporal object ot new json object
-                    if(strpos($row['dtl_Value'],"|")!==false || strpos($row['dtl_Value'],'estMinDate')!==false){
-                        continue;
-                    }
-                    
-                    //parse and validate value order 2 (mm/dd), don't add day if it is not defined
-                    $row['new_value'] = Temporal::dateToISO($row['dtl_Value'], 2, false, $row['rec_Added']);
-                    if($row['new_value']==$row['dtl_Value']){ //nothing to correct - result is the same
-
-                        if(strlen($row['dtl_Value'])>=8 && strpos($row['dtl_Value'],'-')==false){ // try automatic convert to ISO format
-                            
-                            try{
-                                $t2 = new DateTime($row['dtl_Value']);
-
-                                $format = 'Y-m-d';
-                                if($t2->format('H')>0 || $t2->format('i')>0 || $t2->format('s')>0){
-                                    if($t2->format('s')>0){
-                                        $format .= ' H:i:s';
-                                    }else{
-                                        $format .= ' H:i';
-                                    }
-                                }
-                                $row['new_value'] = $t2->format($format);
-                                $row['dtl_Value'] = $row['new_value']; // for final ambiguous check
-                            }catch(Exception  $e){
-                                //skip
-                            }
-                        }
-                        continue;
-                    }
-                    if($row['new_value']!=null && $row['new_value']!=''){
-                        $row['is_ambig'] = Temporal::correctDMYorder($row['dtl_Value'], true);
-                        $autofix = ($row['is_ambig']===false);
-                    }
-                }
-                
-            }else{
-                $row['new_value'] = 'remove';
             }
+            
+            if($row['is_ambig']===true){
+                
+                //check if dtl_Value is old plain string temporal object ot new json object
+                if(strpos($row['dtl_Value'],"|")!==false || strpos($row['dtl_Value'],'estMinDate')!==false){
+                    continue;
+                }
+                
+                //parse and validate value order 2 (mm/dd), don't add day if it is not defined
+                $row['new_value'] = Temporal::dateToISO($row['dtl_Value'], 2, false, $row['rec_Added']);
+                if($row['new_value']==$row['dtl_Value']){ //nothing to correct - result is the same
 
-            $was_fixed = false;
-            //correct wrong dates and remove empty values
-            if($autofix || (@$_REQUEST['fixdates']=="1" && count($recids)>0 && in_array($row['dtl_RecID'], $recids)) ){
+                    if(strlen($row['dtl_Value'])>=8 && strpos($row['dtl_Value'],'-')==false){ // try automatic convert to ISO format
+                        
+                        try{
+                            $t2 = new DateTime($row['dtl_Value']);
 
+                            $format = 'Y-m-d';
+                            if($t2->format('H')>0 || $t2->format('i')>0 || $t2->format('s')>0){
+                                if($t2->format('s')>0){
+                                    $format .= ' H:i:s';
+                                }else{
+                                    $format .= ' H:i';
+                                }
+                            }
+                            $row['new_value'] = $t2->format($format);
+                            $row['dtl_Value'] = $row['new_value']; // for final ambiguous check
+                        }catch(Exception  $e){
+                            //skip
+                        }
+                    }
+                    continue;
+                }
+                if($row['new_value']!=null && $row['new_value']!=''){
+                    $row['is_ambig'] = Temporal::correctDMYorder($row['dtl_Value'], true);
+                    $autofix = ($row['is_ambig']===false);
+                }
+            }
+            
+        }else{
+            $row['new_value'] = 'remove';
+        }
+
+        $was_fixed = false;
+        //correct wrong dates and remove empty values
+        if($autofix || (@$_REQUEST['fixdates']=="1" && count($recids)>0 && in_array($row['dtl_RecID'], $recids)) ){
+
+                if($row['new_value']!=null && $row['new_value']!=''){
                 if($row['new_value']!=null && $row['new_value']!=''){
 //print ' u-'.$row['dtl_RecID'];                    
-                    $mysqli->query('update recDetails set dtl_Value="'.$row['new_value'].'" where dtl_ID='.$row['dtl_ID']);
-                }else{ // if($row['new_value']=='remove')
-//print ' r-'.$row['dtl_RecID'];                    
-                    $mysqli->query('delete from recDetails where dtl_ID='.$row['dtl_ID']);
-                }
-                $was_fixed = true;
+            if($row['new_value']!=null && $row['new_value']!=''){
+//print ' u-'.$row['dtl_RecID'];                    
+                $mysqli->query('update recDetails set dtl_Value="'.$row['new_value'].'" where dtl_ID='.$row['dtl_ID']);
+            }else{
+                $mysqli->query('delete from recDetails where dtl_ID='.$row['dtl_ID']);
             }
-
-            if($autofix || !$was_fixed){
-                if($row['new_value']!=null && $row['new_value']!=''){
-                    if(@$row['is_ambig']){
-                        $ambigious++;    
-                        //$ids[$row['dtl_RecID']] = 1;
-                    }else{
-                        $wascorrected++;    
-                    }
-                }else{
-                    $manualfix = true;
-                }
-                $ids[$row['dtl_RecID']] = 1;  //all record ids - to show as search result
-                
-                //autocorrection }else{
-                array_push($bibs, $row);
-                array_push($dtl_ids, $row['dtl_RecID']); // used for url length - to fix dates
-            }
-            
-            $fix_as_suggested = $fix_as_suggested || 
-                (is_bool($row['is_ambig']) && ($row['new_value']==null || $row['is_ambig']===true));
-        }//while
-
-        if(count($bibs)==0){
-            print '<div><h3 class="res-valid">OK: All records have recognisable Date values</h3></div>';
-            echo '<script>$(".date_values").css("background-color", "#6AA84F");</script>';
+            $was_fixed = true;
         }
-        else
-        {
-            echo '<script>$(".date_values").css("background-color", "#E60000");</script>';
-            ?>
 
-            <div>
-                <h3>Records with incorrect Date fields</h3>
-                <?php
-                if($wascorrected>0){
-                    print '<div style="margin:10px 0"><b>Auto-corrected dates</b> '
-                            ."The following dates have been corrected as shown ($wascorrected)</div><table>";
+        if($autofix || !$was_fixed){
+            if(!empty($row['new_value'])){
+                if(@$row['is_ambig']){
+                    array_push($is_ambigious, $row['dtl_RecID']);
+                }else{
+                    array_push($was_corrected, $row['dtl_RecID']);    
+                }
+            }else{
+                array_push($needs_manualfix, $row['dtl_RecID']);
+            }
+            $ids[$row['dtl_RecID']] = 1;  //all record ids - to show as search result
+            
+            //autocorrection
+            array_push($bibs, $row);
+            array_push($dtl_ids, $row['dtl_RecID']); // used for url length - to fix dates
+        }
+        
+        $fix_as_suggested = $fix_as_suggested || 
+            (is_bool($row['is_ambig']) && $row['is_ambig']===true && !empty($row['new_value']));
+    }//while
 
-					$skipped_dates = 0;
+    if(count($bibs)==0){
+        print '<div><h3 class="res-valid">OK: All records have recognisable Date values</h3></div>';
+        echo '<script>$(".date_values").css("background-color", "#6AA84F");</script>';
+    }
+    else
+    {
+        echo '<script>$(".date_values").css("background-color", "#E60000");</script>';
+        ?>
 
-                    foreach ($bibs as $row) {
-                        if($row['new_value']!=null && $row['new_value']!='' && @$row['is_ambig']===false) {
+        <div>
+            <h3>Records with incorrect Date fields</h3>
+            <?php
+            if(!empty($was_corrected)){
+                print '<div style="margin:10px 0"><b>Auto-corrected dates</b> '
+                        ."The following dates have been corrected as shown (". count($was_corrected) .")";
 
-                            if(strtotime($row['new_value']) == strtotime($row['dtl_Value'])){ 
+                $skipped_dates = 0;
+                ?>
 
-                                for($i = 0; $i < $row['dtl_Value']; $i ++){	
-                                    if($row['new_value'] == '0' && $row['dtl_Value'] != $row['new_value']){
-                                        $skipped_dates++;
-                                    }
-                                }
-							}
-                            else{
-                    ?>
+                    <span style="margin-left:10px;">
+                        <a target=_new href='<?=HEURIST_BASE_URL.'?db='.HEURIST_DBNAME?>&w=all&q=ids:<?= implode(',', array_values($was_corrected)) ?>'>
+                            (show results as search)</a>
+                        <a target=_new href='#' id=selected_link style="display: inline-block;"
+                                    onClick="return open_selected_by_name('datesCorrected');">(show selected as search)</a>
+                    </span>
+
+                </div>
+
+                <table role="none">
                     <tr>
-                        <td></td>
-                        <td><img class="rft" style="background-image:url(<?php echo HEURIST_RTY_ICON.$row['rec_RecTypeID']?>)" src="<?php echo HEURIST_BASE_URL.'hclient/assets/16x16.gif'?>"></td>
-                        <td style="white-space: nowrap;"><a target=_new
-                                href='<?=HEURIST_BASE_URL?>?fmt=edit&db=<?= HEURIST_DBNAME?>&recID=<?= $row['dtl_RecID'] ?>'>
-                                <?= $row['dtl_RecID'] ?>
-                                <img src='<?php echo HEURIST_BASE_URL.'hclient/assets/external_link_16x16.gif'?>' title='Click to edit record'>
-                            </a></td>
-                        <td class="truncate" style="max-width:400px;min-width:200px"><?=strip_tags($row['rec_Title']) ?></td>
-                        <td class="truncate" style="max-width:150px;min-width:50px"><?=strip_tags($row['rst_DisplayName']) ?></td>
-                        <td><?= @$row['dtl_Value']?$row['dtl_Value']:'empty' ?></td>
-                        <td><?= ($row['new_value']=='remove'?'=>&nbsp;removed':('=>&nbsp;&nbsp;'.$row['new_value'])) ?></td>
+                        <td colspan="7">
+                            <label><input type=checkbox 
+                                        onclick="{mark_all_by_name(event.target, 'datesCorrected');}">Mark all</label>
+                        </td>
                     </tr>
-                    <?php
+
+                <?php
+                foreach ($bibs as $row) {
+                    if($row['new_value']!=null && $row['new_value']!='' && @$row['is_ambig']===false) {
+
+                        if(strtotime($row['new_value']) == strtotime($row['dtl_Value'])){ 
+
+                            for($i = 0; $i < $row['dtl_Value']; $i ++){	
+                                if($row['new_value'] == '0' && $row['dtl_Value'] != $row['new_value']){
+                                    $skipped_dates++;
+                                }
                             }
                         }
-                    }
-                    print '</table>';
-
-                    if($skipped_dates != 0){
-                        print "<div style='font-weight: bold'>$skipped_dates dates have had leading zeroes added to them</div>";
-                    }
-                }
-                
-                
-                if($wassuggested>0){
-                    print '<div style="margin:10px 0"><b>Decades and year ranges</b> '
-                            ."we suggest using a date ranges for dates below</div><table>";
-                    
-                    foreach ($bibs as $row) 
-                    if(!is_bool($row['is_ambig']))
-                    {
-                    ?>
-                    <tr>
-                        <td></td>
-                        <td><img class="rft" style="background-image:url(<?php echo HEURIST_RTY_ICON.$row['rec_RecTypeID']?>)" src="<?php echo HEURIST_BASE_URL.'hclient/assets/16x16.gif'?>"></td>
-                        <td style="white-space: nowrap;"><a target=_new
-                                href='<?=HEURIST_BASE_URL?>?fmt=edit&db=<?= HEURIST_DBNAME?>&recID=<?= $row['dtl_RecID'] ?>'>
-                                <?= $row['dtl_RecID'] ?>
-                                <img src='<?php echo HEURIST_BASE_URL.'hclient/assets/external_link_16x16.gif'?>' title='Click to edit record'>
-                            </a></td>
-                        <td class="truncate" style="max-width:400px;min-width:200px"><?=strip_tags($row['rec_Title']) ?></td>
-                        <td class="truncate" style="max-width:150px;min-width:50px"><?=strip_tags($row['rst_DisplayName']) ?></td>
-                        <td><?= @$row['dtl_Value']?$row['dtl_Value']:'empty' ?></td>
-                    </tr>
-                    <?php
-                    }
-                    print '</table>';                    
-                }
-
-                if($manualfix){
-                    print '<div style="margin:10px 0"><b>Invalid dates</b> that needs to be fixed manually by a user</div><table>';
-
-                    foreach ($bibs as $row) {
-                        if(is_bool($row['is_ambig']) && $row['is_ambig']===true && ($row['new_value'] == null || $row['new_value'] == '')){
-                            ?>
+                        else{
+                        ?>
                             <tr>
-                                <td></td>
+                                <td><?php print '<input type=checkbox name="datesCorrected" value='.$row['dtl_RecID'].'>'; ?></td>
                                 <td><img class="rft" style="background-image:url(<?php echo HEURIST_RTY_ICON.$row['rec_RecTypeID']?>)" src="<?php echo HEURIST_BASE_URL.'hclient/assets/16x16.gif'?>"></td>
-                                <td style="white-space: nowrap;">
-                                    <a target="_new" href='<?=HEURIST_BASE_URL?>?fmt=edit&db=<?= HEURIST_DBNAME?>&recID=<?= $row['dtl_RecID'] ?>'>
+                                <td style="white-space: nowrap;"><a target=_new
+                                        href='<?=HEURIST_BASE_URL?>?fmt=edit&db=<?= HEURIST_DBNAME?>&recID=<?= $row['dtl_RecID'] ?>'>
                                         <?= $row['dtl_RecID'] ?>
                                         <img src='<?php echo HEURIST_BASE_URL.'hclient/assets/external_link_16x16.gif'?>' title='Click to edit record'>
-                                    </a>
-                                </td>
+                                    </a></td>
                                 <td class="truncate" style="max-width:400px;min-width:200px"><?=strip_tags($row['rec_Title']) ?></td>
                                 <td class="truncate" style="max-width:150px;min-width:50px"><?=strip_tags($row['rst_DisplayName']) ?></td>
-                                <td><?= @$row['dtl_Value']?$row['dtl_Value']:'empty' ?></td>
+                                <td style="padding-left: 10px;"><?= @$row['dtl_Value']?$row['dtl_Value']:'empty' ?></td>
+                                <td><?= ($row['new_value']=='remove'?'=>&nbsp;removed':('=>&nbsp;&nbsp;'.$row['new_value'])) ?></td>
                             </tr>
-                            <?php
+                        <?php
                         }
                     }
+                }
+                print '</table>';
 
-                    print '</table>';
+                if($skipped_dates != 0){
+                    print "<div style='font-weight: bold'>$skipped_dates dates have had leading zeroes added to them</div>";
+                }
+            }
+            
+            
+            if(!empty($was_suggested)){
+                print '<div style="margin:10px 0"><b>Decades and year ranges</b> we suggest using a date ranges for dates below';
+                ?>
+
+                    <span style="margin-left:10px;">
+                        <a target=_new href='<?=HEURIST_BASE_URL.'?db='.HEURIST_DBNAME?>&w=all&q=ids:<?= implode(',', array_values($was_suggested)) ?>'>
+                            (show results as search)</a>
+                        <a target=_new href='#' id=selected_link style="display: inline-block;"
+                                    onClick="return open_selected_by_name('datesSuggestion');">(show selected as search)</a>
+                    </span>
+
+                </div>
+
+                <table role="none">
+                    <tr>
+                        <td colspan="6">
+                            <label><input type=checkbox 
+                                        onclick="{mark_all_by_name(event.target, 'datesSuggestion');}">Mark all</label>
+                        </td>
+                    </tr>
+
+                <?php                    
+                foreach ($bibs as $row) 
+                if(!is_bool($row['is_ambig']))
+                {
+                ?>
+                <tr>
+                    <td><?php print '<input type=checkbox name="datesSuggestion" value='.$row['dtl_RecID'].'>'; ?></td>
+                    <td><img class="rft" style="background-image:url(<?php echo HEURIST_RTY_ICON.$row['rec_RecTypeID']?>)" src="<?php echo HEURIST_BASE_URL.'hclient/assets/16x16.gif'?>"></td>
+                    <td style="white-space: nowrap;"><a target=_new
+                            href='<?=HEURIST_BASE_URL?>?fmt=edit&db=<?= HEURIST_DBNAME?>&recID=<?= $row['dtl_RecID'] ?>'>
+                            <?= $row['dtl_RecID'] ?>
+                            <img src='<?php echo HEURIST_BASE_URL.'hclient/assets/external_link_16x16.gif'?>' title='Click to edit record'>
+                        </a></td>
+                    <td class="truncate" style="max-width:400px;min-width:200px"><?=strip_tags($row['rec_Title']) ?></td>
+                    <td class="truncate" style="max-width:150px;min-width:50px"><?=strip_tags($row['rst_DisplayName']) ?></td>
+                    <td style="padding-left: 10px;"><?= @$row['dtl_Value']?$row['dtl_Value']:'empty' ?></td>
+                </tr>
+                <?php
+                }
+                print '</table>';                    
+            }
+
+            if(!empty($needs_manualfix)){
+                print '<div style="margin:10px 0"><b>Invalid dates</b> that needs to be fixed manually by a user';
+                ?>
+
+                    <span style="margin-left:10px;">
+                        <a target=_new href='<?=HEURIST_BASE_URL.'?db='.HEURIST_DBNAME?>&w=all&q=ids:<?= implode(',', array_values($needs_manualfix)) ?>'>
+                            (show results as search)</a>
+                        <a target=_new href='#' id=selected_link style="display: inline-block;"
+                                    onClick="return open_selected_by_name('datesManual');">(show selected as search)</a>
+                    </span>
+
+                </div>
+
+                <table role="none">
+                    <tr>
+                        <td colspan="6">
+                            <label><input type=checkbox 
+                                        onclick="{mark_all_by_name(event.target, 'datesManual');}">Mark all</label>
+                        </td>
+                    </tr>
+
+                <?php
+                foreach ($bibs as $row) {
+                    if(is_bool($row['is_ambig']) && $row['is_ambig']===true && ($row['new_value'] == null || $row['new_value'] == '')){
+                        ?>
+                        <tr>
+                            <td><?php print '<input type=checkbox name="datesManual" value='.$row['dtl_RecID'].'>'; ?></td>
+                            <td><img class="rft" style="background-image:url(<?php echo HEURIST_RTY_ICON.$row['rec_RecTypeID']?>)" src="<?php echo HEURIST_BASE_URL.'hclient/assets/16x16.gif'?>"></td>
+                            <td style="white-space: nowrap;">
+                                <a target="_new" href='<?=HEURIST_BASE_URL?>?fmt=edit&db=<?= HEURIST_DBNAME?>&recID=<?= $row['dtl_RecID'] ?>'>
+                                    <?= $row['dtl_RecID'] ?>
+                                    <img src='<?php echo HEURIST_BASE_URL.'hclient/assets/external_link_16x16.gif'?>' title='Click to edit record'>
+                                </a>
+                            </td>
+                            <td class="truncate" style="max-width:400px;min-width:200px"><?=strip_tags($row['rec_Title']) ?></td>
+                            <td class="truncate" style="max-width:150px;min-width:50px"><?=strip_tags($row['rst_DisplayName']) ?></td>
+                            <td style="padding-left: 10px;"><?= @$row['dtl_Value']?$row['dtl_Value']:'empty' ?></td>
+                        </tr>
+                        <?php
+                    }
                 }
 
-                if($ambigious>0){
-                    print "<div style='margin:10px 0'><b>$ambigious Suggestions</b> for date field corrections (gray color in the list)</div>";
-                }
-                ?>
-                <span>
-                    <a target=_new href='<?=HEURIST_BASE_URL.'?db='.HEURIST_DBNAME?>&w=all&q=ids:<?= implode(',', array_keys($ids)) ?>'>
-                        (show results as search)</a>
-                    <a target=_new href='#' id=selected_link style="display:<?php echo ($fix_as_suggested?'inline-block':'none');?>;"
-                                onClick="return open_selected_by_name('recCB5');">(show selected as search)</a>
-                </span>
+                print '</table>';
+            }
 
-                <?php 
-                    $fixdate_url = strlen('listDatabaseErrors.php?db=&fixdates=1&date_format=yyyy-mm-dd&recids=' . HEURIST_DBNAME . (count($dtl_ids) > 0) ? implode(',', $dtl_ids) : '');
-                    if(strlen($fixdate_url) > 2000){ // roughly a upper limit for the date fix url
+            if(!empty($is_ambigious)){
+                print "<div style='margin:10px 0'><b>". count($is_ambigious) ." Suggestions</b> for date field corrections (gray color in the list)";
                 ?>
-                    <div style="color: red;margin: 10px 0;">
-                        Note: You cannot correct more than a few fundred dates at a time due to URL length limitations.<br>
-                        If you have more dates to correct we recommend exporting as a CSV, reformatting in a spreadsheet and reimporting as replacements.
-                    </div>
-                <?php }
 
-                if($fix_as_suggested){
+                    <span style="margin-left:10px;">
+                        <a target=_new href='<?=HEURIST_BASE_URL.'?db='.HEURIST_DBNAME?>&w=all&q=ids:<?= implode(',', array_values($is_ambigious)) ?>'>
+                            (show results as search)</a>
+                        <a target=_new href='#' id=selected_link style="display: inline-block;"
+                                    onClick="return open_selected_by_name('recCB5');">(show selected as search)</a>
+                    </span>
+
+                </div>
+
+                <?php
+                $fixdate_url = strlen('listDatabaseErrors.php?db=&fixdates=1&date_format=yyyy-mm-dd&recids=' . HEURIST_DBNAME . (count($dtl_ids) > 0) ? implode(',', $dtl_ids) : '');
+                if(strlen($fixdate_url) > 2000){ // roughly a upper limit for the date fix url
                 ?>
+                <div style="color: red;margin: 10px 0;">
+                    Note: You cannot correct more than a few hundred dates at a time due to URL length limitations.<br>
+                    If you have more dates to correct we recommend exporting as a CSV, reformatting in a spreadsheet and reimporting as replacements.
+                </div>
+                <?php } ?>
 
                 <div>To fix faulty date values as suggested, mark desired records and please click here:
                     <button
@@ -1452,45 +1509,44 @@ if($active_all || in_array('date_values', $active)) {
                         <label><input type="radio" name="date_format" value="2"> mm/dd/yyyy (US format)</label>
                     </div>
                 </div>
-                <?php 
-                    }
-                ?>
-
-            </div>
-
-            <table role="none">
-            <tr style="display:<?php echo ($fix_as_suggested?'block':'none');?>;">
-                <td colspan="6">
-                    <label><input type=checkbox 
-                                onclick="{mark_all_by_name(event.target, 'recCB5');}">Mark all</label>
-                </td>
-            </tr>
-            <?php
-            foreach ($bibs as $row) 
-            if(is_bool($row['is_ambig']) && $row['is_ambig']===true && $row['new_value'])
-            {
-                ?>
-                <tr style="color:gray">
-                    <td><?php print '<input type=checkbox name="recCB5" value='.$row['dtl_RecID'].'>'; ?></td>
-                    <td><img class="rft" style="background-image:url(<?php echo HEURIST_RTY_ICON.$row['rec_RecTypeID']?>)" 
-                                    src="<?php echo HEURIST_BASE_URL.'hclient/assets/16x16.gif'?>"></td>
-                    <td style="white-space: nowrap;"><a target=_new
-                            href='<?=HEURIST_BASE_URL?>?fmt=edit&db=<?= HEURIST_DBNAME?>&recID=<?= $row['dtl_RecID'] ?>'>
-                            <?= $row['dtl_RecID'] ?>
-                            <img src='<?php echo HEURIST_BASE_URL.'hclient/assets/external_link_16x16.gif'?>' title='Click to edit record'>
-                        </a></td>
-                    <td class="truncate" style="max-width:400px;min-width:200px"><?=strip_tags($row['rec_Title']) ?></td>
-                    <td class="truncate" style="max-width:150px;min-width:50px"><?=strip_tags($row['rst_DisplayName']) ?></td>
-                    <td><?= @$row['dtl_Value']?$row['dtl_Value']:'empty' ?></td>
-                    <td class="new_date"><?php print '=>&nbsp;&nbsp;'.$row['new_value']; ?></td>
-                </tr>
+                <table role="none">
+                    <tr>
+                        <td>
+                            <label><input type=checkbox 
+                                        onclick="{mark_all_by_name(event.target, 'datesAmbig');}">Mark all</label>
+                        </td>
+                    </tr>
                 <?php
+                foreach ($bibs as $row) 
+                if(is_bool($row['is_ambig']) && $row['is_ambig']===true && $row['new_value'])
+                {
+                    ?>
+                    <tr style="color:gray">
+                        <td><?php print '<input type=checkbox name="datesAmbig" value='.$row['dtl_RecID'].'>'; ?></td>
+                        <td><img class="rft" style="background-image:url(<?php echo HEURIST_RTY_ICON.$row['rec_RecTypeID']?>)" 
+                                        src="<?php echo HEURIST_BASE_URL.'hclient/assets/16x16.gif'?>"></td>
+                        <td style="white-space: nowrap;"><a target=_new
+                                href='<?=HEURIST_BASE_URL?>?fmt=edit&db=<?= HEURIST_DBNAME?>&recID=<?= $row['dtl_RecID'] ?>'>
+                                <?= $row['dtl_RecID'] ?>
+                                <img src='<?php echo HEURIST_BASE_URL.'hclient/assets/external_link_16x16.gif'?>' title='Click to edit record'>
+                            </a></td>
+                        <td class="truncate" style="max-width:400px;min-width:200px"><?=strip_tags($row['rec_Title']) ?></td>
+                        <td class="truncate" style="max-width:150px;min-width:50px"><?=strip_tags($row['rst_DisplayName']) ?></td>
+                        <td style="padding-left: 10px;"><?= @$row['dtl_Value']?$row['dtl_Value']:'empty' ?></td>
+                        <td class="new_date"><?php print '=>&nbsp;&nbsp;'.$row['new_value']; ?></td>
+                    </tr>
+                    <?php
+                }
+                print '</table>';
             }
-            print '</table>';
-        }
-        print '<br /></div>';   // End of Date Values
+            ?>
+
+        </div>
+        <?php
+    }
+    print '<br /></div>';   // End of Date Values
         
-} //END date_values    
+} //END date_values
     
 if($active_all || in_array('term_values', $active)) { 
         ?>

@@ -541,7 +541,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
 
                 let display_order = '001';
                 $Db.rst(that._currentEditRecTypeID).each2((id, f) => {
-                    if(f['rst_DisplayOrder'] > display_order){
+                    if(f['rst_DisplayOrder'] >= display_order){
                         display_order = String(+f['rst_DisplayOrder'] + 1).padStart(3, 0);
                     }
                 });
@@ -555,7 +555,8 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                     rst_DisplayHelpText: $Db.dty(dtid,'dty_HelpText'),
                     rst_RequirementType: 'optional',
                     rst_MaxValues: max_values,
-                    rst_DisplayWidth: '100',  
+                    rst_DisplayWidth: '100',
+                    rst_DisplayHeight: '3',
                     rst_SemanticReferenceURL: $Db.dty(dtid,'dty_SemanticReferenceURL'),
                     rst_TermsAsButtons: 0
                 };
@@ -575,8 +576,10 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                     window.hWin.HEURIST4.msg.sendCoverallToBack();
 
                     if(response.status == window.hWin.ResponseStatus.OK){
-                        $Db.rst(that._currentEditRecTypeID).setRecord(dtid, fields);
-                        that.reloadEditForm(true);
+                        window.hWin.HAPI4.EntityMgr.refreshEntityData(['defRecStructure'], function(){
+                            that.reloadEditForm(true); // reload record editor
+                            that._reloadRtsEditor(true); // reload structure editor
+                        });
                     }else{
                         window.hWin.HEURIST4.msg.showMsgErr(response);
                     }
@@ -4462,21 +4465,6 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
             });
         });
 
-//Artem: move it to browseRecords - avoid open select record popup if record can not be saved
-        if(false && window.hWin.HEURIST4.util.isempty(that._getField('rec_Title'))){
-            this._on($(this.element).find('.child_rec_fld'), {
-                click: (event) => {
-    
-                    if(window.hWin.HEURIST4.util.isempty(that._getField('rec_Title'))){ // Save record first without validation, only if this is a new record
-
-                        var fields = that._editing.getValues(false);
-                        fields['no_validation'] = 1; //do not validate required fields
-                        that._saveEditAndClose( fields, null);
-                    }
-                }
-            });
-        }
-
         //5. init rts_editor action buttons 
         if(this.options.rts_editor){
             //var that = this;
@@ -4653,12 +4641,12 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
     //
     //
     //
-    _reloadRtsEditor: function(){            
+    _reloadRtsEditor: function(force_reload = false){            
 
-            if(this.options.rts_editor){
-                 if(this.options.rts_editor.manageDefRecStructure('option','rty_ID')==this._currentEditRecTypeID){
-                     return;
-                 }
+            if(!force_reload && this.options.rts_editor){
+                if(this.options.rts_editor.manageDefRecStructure('option','rty_ID')==this._currentEditRecTypeID){
+                    return;
+                }
             } 
 
             var $structure_editor = this.element.find('.editStructure');

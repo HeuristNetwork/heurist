@@ -3224,7 +3224,7 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
                     that._on($div.find('.ui-icon'), {
                         'click': (event) => {
                             window.hWin.HEURIST4.util.stopEvent(event);
-                            let type = $(event.target).hasClass('ui-icon-close') ? 'without' : 'with';
+                            let type = $(event.target).hasClass('ui-icon-check') ? 'with' : 'without';
                             let fld_id = $(event.target).parent('div[data-dtyid]').attr('data-dtyid');
                             search_func(fld_id, type);
                             //$(this).contextmenu('open', event);
