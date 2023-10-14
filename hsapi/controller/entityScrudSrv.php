@@ -46,7 +46,6 @@
     require_once (dirname(__FILE__).'/../entity/dbSysWorkflowRules.php');
     require_once (dirname(__FILE__).'/../entity/dbRecThreadedComments.php');
     require_once (dirname(__FILE__).'/../entity/dbRecUploadedFiles.php');
-    require_once (dirname(__FILE__).'/../entity/dbRecords.php');
     require_once (dirname(__FILE__).'/../entity/dbUsrBookmarks.php');
     require_once (dirname(__FILE__).'/../entity/dbUsrReminders.php');
     require_once (dirname(__FILE__).'/../entity/dbUsrSavedSearches.php');
@@ -99,14 +98,14 @@
                 $rec_ID = @$search_params['recID'];
                 
                 if($rec_ID>0){
-                    $rty_ID = mysql__select_value($mysqli, 'select rec_RecTypeID from Records where rec_ID='.$rec_ID); 
+                    $rty_ID = mysql__select_value($mysqli, 'select rec_RecTypeID from Records where rec_ID='.intval($rec_ID)); 
                     $search_criteria['defRecTypes'] = array('ID'=>$rty_ID);
                 }else{
                     $rty_ID = $search_params['rty_ID'];
                 }
                 
                 if($rty_ID>0){
-                    $dty_IDs = mysql__select_list2($mysqli, 'SELECT rst_DetailTypeID FROM defRecStructure where rst_RecTypeID='.$rty_ID);
+                    $dty_IDs = mysql__select_list2($mysqli, 'SELECT rst_DetailTypeID FROM defRecStructure where rst_RecTypeID='.intval($rty_ID));
                     $search_criteria['defRecStructure'] = array('rst_RecTypeID'=>$rty_ID, 'rst_DetailTypeID'=>$dty_IDs);
                     $search_criteria['defDetailTypes'] = array('dty_ID'=>$dty_IDs);
 
