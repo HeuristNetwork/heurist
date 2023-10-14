@@ -755,7 +755,11 @@ class Temporal {
 
             $res = $res.'-'.$month.'-'.$day;
         }else{
-            $res = $date;
+            if($date=='0'){
+                $res = '0000-01-01';
+            }else{
+                $res = $date;    
+            }
         }
         return $res;        
     }
