@@ -57,7 +57,7 @@
     //    
     // $params
     //  entity
-    //  a - acrion 
+    //  a - action 
     //  details
     //
     function entityExecute($system, $params){
