@@ -1,7 +1,7 @@
 <?php
 /**
 * Service to get icons and thumbs for entities 
-* (for recUploadFiles see file_download.php)
+* (for recUploadFiles see fileDownload.php)
 * 
 * fileGet.php - 1) get image for given entity, record ID, version and color 
 *               2) get or check file from code folders - tips, help, doc content

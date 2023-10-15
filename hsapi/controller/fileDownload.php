@@ -1,7 +1,7 @@
 <?php
 
 /**
-* file_download.php : Download (or proxy) files that are registered in Heurist database
+* fileDownload.php : Download (or proxy) files that are registered in Heurist database (recUploadedFiles)
 * Usually it is callled via redirection from index.php (if there is parameter file, thumb or url)
 * 
 * for entity images (rt icons, user, group images) see fileGet.php
@@ -21,7 +21,7 @@
 *    for uploaded file - thumbnail is created in 
 *           hsapi/utilities/UploadHandler.php create_scaled_image() 
 *           on time of uploading and after registration it is copied to our filethumbs folder
-*    for remote file - thumbnail is created on first request file_download.php?thumb=  it uses common/php/resizeImage.php
+*    for remote file - thumbnail is created on first request fileDownload.php?thumb=  it uses common/php/resizeImage.php
 *    if record has an rec_URL, the thumbnail is created with UtilsImage::makeURLScreenshot
 * 
 * 

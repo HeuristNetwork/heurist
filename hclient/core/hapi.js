@@ -2712,7 +2712,7 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
                     mode: 'metaonly'  // get width and height for image file
                 };
 
-                window.hWin.HEURIST4.util.sendRequest(window.hWin.HAPI4.baseURL + 'hsapi/controller/file_download.php',
+                window.hWin.HEURIST4.util.sendRequest(window.hWin.HAPI4.baseURL + 'hsapi/controller/fileDownload.php',
                     request, null, callback);
 
             } else {

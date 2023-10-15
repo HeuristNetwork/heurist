@@ -99,8 +99,8 @@ if( @$_REQUEST['recID'] || @$_REQUEST['recid'] || array_key_exists('website', $_
         //execute smarty template
         $script_name = 'viewers/smarty/showReps.php';        
     }else {
-        //download file, thumb or remote url
-        $script_name = 'hsapi/controller/file_download.php';        
+        //download file, thumb or remote url for recUploadedFiles
+        $script_name = 'hsapi/controller/fileDownload.php';        
     }
         
     //to avoid "Open Redirect" security warning    

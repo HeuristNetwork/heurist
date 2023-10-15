@@ -26,8 +26,8 @@ if (array_key_exists('file',$_REQUEST) || array_key_exists('thumb',$_REQUEST) ||
         //download entity icon or thumbnail
         $script_name = 'fileGet.php';        
     }else {
-        //download file, thumb or remote url
-        $script_name = 'file_download.php';        
+        //download file, thumb or remote url for recUploadedFiles
+        $script_name = 'fileDownload.php';        
     }
         
     //to avoid "Open Redirect" security warning    

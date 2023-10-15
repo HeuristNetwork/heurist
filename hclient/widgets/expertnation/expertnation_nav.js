@@ -2073,7 +2073,7 @@ content = content.replace('http://heurist.sydney.edu.au/heurist/',window.hWin.HA
                             href = 'javascript:;';
 
                             var fileURL_forembed = window.hWin.HAPI4.baseURL
-                            + 'hsapi/controller/file_download.php?db=' 
+                            + 'hsapi/controller/fileDownload.php?db=' 
                             + window.hWin.HAPI4.database + '&embedplayer=1&file='+obf[0];
 
                             /*div.pdf {

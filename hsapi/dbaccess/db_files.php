@@ -340,7 +340,7 @@ function fileGetThumbnailURL($system, $recID, $get_bgcolor){
         if(defined('HEURIST_THUMB_URL') && file_exists(HEURIST_THUMB_DIR . $thumbfile)){
             $thumb_url = HEURIST_THUMB_URL.$thumbfile;
         }else{
-            //it will be redirected to hsapi/controller/file_download.php
+            //it will be redirected to hsapi/controller/fileDownload.php
             $thumb_url = HEURIST_BASE_URL."?db=".$system->dbname()."&thumb=".$fileid;
         }
         
@@ -614,7 +614,7 @@ function downloadViaProxy($filename, $mimeType, $url, $bypassProxy = true, $orig
 * 
 * Usage in 2 cases only
 * 1) Download database backup (exportMyDataPopup)
-* 2) Download registered file from Heurist storage folder (file_download)
+* 2) Download registered file from Heurist storage folder (fileDownload)
 *
 * @param mixed $mimeType
 * @param mixed $filename
