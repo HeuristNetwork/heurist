@@ -795,9 +795,17 @@ function getDateHistogramData($system, $range, $interval, $rec_ids, $dty_id, $fo
             $lower = $upper;
         }
     }else{
-        $start_interval0 = Temporal::decimalToYMD($s_date->getMinMax()[0]);
-        $start_interval = new DateTime($start_interval0);
-        $end_date = new DateTime(Temporal::decimalToYMD($e_date->getMinMax()[1]));
+        try{
+            $start_interval0 = Temporal::decimalToYMD($s_date->getMinMax()[0]);
+            $start_interval = new DateTime($start_interval0);    
+        }catch(Exception $e){
+            return $system->addError(HEURIST_ERROR, 'Wrong start of range '.$range[0].'  '.$s_date->getMinMax()[0].' '.$start_interval0);
+        }
+        try{
+            $end_date = new DateTime(Temporal::decimalToYMD($e_date->getMinMax()[1]));
+        }catch(Exception $e){
+            return $system->addError(HEURIST_ERROR, 'Wrong end of range '.$range[1].'  '.$s_date->getMinMax()[1]);
+        }
         
         for($i = 0; $i < $count; $i++){
             

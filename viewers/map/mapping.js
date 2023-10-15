@@ -247,7 +247,7 @@ $.widget( "heurist.mapping", {
     {name:'OpenStreetMap'},
     //{name:'OpenPtMap'},
     {name:'OpenTopoMap'},
-    /* account disabled
+    /* account disableb - it is a risk of cost overruns
     {name:'MapBox.StreetMap', options:{accessToken: accessToken_MapBox}},
     {name:'MapBox.Satellite', options:{accessToken: accessToken_MapBox}},
     {name:'MapBox.Combined', options:{accessToken: accessToken_MapBox}},
@@ -683,7 +683,6 @@ $.widget( "heurist.mapping", {
                 }
                 
                 try{ // use leaflet-provider
-
                     this.basemaplayer = L.tileLayer.provider(provider['name'], bm_opts)
                         .addTo(this.nativemap);
 
