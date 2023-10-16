@@ -42,6 +42,7 @@ class DbsImport {
     private $imp_terms;  //ids of source vocabularies to be imported
     private $terms_correspondence;
     private $vcg_correspondence; //vocab group src->target ids
+    private $inverse_term_pairs; //map of term id to inverse term id from source database, to be translated for target
 
     private $source_db_reg_id = 0;
             
@@ -301,6 +302,7 @@ class DbsImport {
         $this->imp_recordtypes = array();
         $this->imp_fieldtypes = array();
         $this->imp_terms = array("enum"=>array(), "relation"=>array());
+        $this->inverse_term_pairs = array();
 
         //source id => target id  - local ids 
         $this->rectypes_correspondence = array(); //source rectypeID => new (target) rectype ID
@@ -346,7 +348,9 @@ class DbsImport {
                 //if(count($this->imp_terms['enum'])==0)
                 $this->_getTopMostVocabulary($def_id, 'relation');
             }
-            
+
+            $this->_getInverseTerms();
+
         }else{
             
             if($this->prime_defType=='rectype'){
@@ -403,6 +407,8 @@ class DbsImport {
                             //get topmost vocabulary
                             $this->_getTopMostVocabulary($def_dts[$ftId]['commonFields'][$idx_terms], $dt_Type);
                         }
+
+                        $this->_getInverseTerms();
                         
                         if($local_ftId>0){ //already exists in target
                             $this->fields_correspondence[$ftId] = $local_ftId;
@@ -483,6 +489,13 @@ class DbsImport {
             return false;                
         }else if(count($this->def_translations['terms']) > 0){
             $this->_importTranslations('terms');
+        }
+
+        // Correct inverse term values
+        if(!empty($this->inverse_term_pairs) && !$this->_correctInverseIds()){
+            $mysqli->rollback();
+            $mysqli->close();
+            return false;
         }
         
         if(count($this->imp_recordtypes)==0 && count($this->imp_fieldtypes)==0){
@@ -1413,7 +1426,52 @@ $mysqli->commit();
                 array_push($this->imp_terms[$domain], $topmost);
             }
         }
-    }    
+    }
+
+    private function _getInverseTerms($vocab_ids = null){
+
+        $domain = 'relation';
+
+        $inverse_idx = $this->source_defs['terms']['fieldNamesToIndex']["trm_InverseTermID"];
+        $inverse_idx = $this->source_defs['terms']['fieldNamesToIndex']["trm_InverseTermID"];
+
+        if(empty($vocab_ids)){
+            $vocab_ids = $this->imp_terms[$domain]; // retrieve existing vocabs
+        }
+
+        $added_vcb_ids = array();
+
+        //array of valid ids
+        if(is_array($vocab_ids) && !empty($vocab_ids)){
+            foreach ($vocab_ids as $vocab_id){
+
+                $child_terms = $this->sourceTerms->treeData($vocab_id, 3);
+                if(!empty($child_terms)){
+    
+                    foreach($child_terms as $term_id){
+    
+                        $term = $this->sourceTerms->getTerm($term_id, $domain);
+                        $inverse_id = $term[$inverse_idx];
+                        $inverse_parent = $this->sourceTerms->getTopMostTermParent($inverse_id, $domain);
+    
+                        if(!empty($inverse_id) && $inverse_id > 0 
+                            && !in_array($inverse_id, $this->imp_terms[$domain]) && !in_array($inverse_parent, $this->imp_terms[$domain])){
+     
+                            array_push($this->imp_terms[$domain], $inverse_parent); // import vocab, avoid importing partial vocabs
+                            $this->inverse_term_pairs[$term_id] = $inverse_id; // for correcting later
+
+                            array_push($added_vcb_ids, $inverse_parent);
+
+                        }
+                    }
+                }
+            }
+        }
+
+        if(!empty($added_vcb_ids)){
+            $this->_getInverseTerms($added_vcb_ids); // get possible inverse terms for new terms
+        }
+    }
 
     // @todo move to dbsRectypes
     //
@@ -2320,6 +2378,43 @@ $mysqli->commit();
             }
         }
 
-    }    
+    }
+
+    private function _correctInverseIds(){
+
+        if(empty($this->inverse_term_pairs)){
+            return true;
+        }
+
+        $mysqli = $this->system->get_mysqli();
+        $idx_inverseid = intval($this->target_defs['terms']['fieldNamesToIndex']["trm_InverseTermID"]);
+
+        foreach($this->inverse_term_pairs as $org_trm_id => $org_inv_id){
+
+            $trm_id = @$this->terms_correspondence[$org_trm_id];
+            $inverse_id = @$this->terms_correspondence[$org_inv_id];
+
+            if(intval($trm_id) < 1 || intval($inverse_id) < 1){
+                continue;
+            }
+
+            $term = $this->targetTerms->getTerm($trm_id, 'relation');
+            $term[$idx_inverseid] = $inverse_id;
+
+            $inverse_term = $this->targetTerms->getTerm($inverse_id, 'relation');
+            $inverse_term[$idx_inverseid] = $trm_id;
+
+            $res = updateTerms(array('trm_InverseTermID'), $trm_id, array($inverse_id), $mysqli);
+            if(!is_numeric($res)){
+                array_push($this->broken_terms, $term); 
+                array_push($this->broken_terms_reason, $res);
+                return false;
+            }
+
+            $this->targetTerms->addNewTerm($trm_id, $term); //add in memory
+            $this->targetTerms->addNewTerm($inverse_id, $inverse_term); //add in memory
+
+        }
+    }
 }
 ?>
