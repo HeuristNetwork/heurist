@@ -61,9 +61,11 @@ $.widget( "heurist.rectypeTitleMask", $.heurist.recordAction, {
             return;
         }
         
+        // Change dialog title
+        this.element.dialog('option', 'title', `Edit title mask for ${$Db.rty(this.options.rty_ID, 'rty_Name')}`);
+
         //init tree
         this._loadRecordTypeTreeView();
-
         
         //init buttons
         var btn = this.element.find('#btnInsertField').button();
