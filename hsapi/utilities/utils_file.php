@@ -2205,15 +2205,12 @@ function uploadFileToNakala($system, $params) {
     curl_setopt($ch, CURLOPT_NOBODY, 0);
     curl_setopt($ch, CURLOPT_HEADER, 0);            //don't include header in output
     curl_setopt($ch, CURLOPT_FOLLOWLOCATION, 1);    // follow server header redirects
-    //Vulnerability curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, 0);    // don't verify peer cert
-    if(strpos($url, HEURIST_MAIN_SERVER)===0){
-        curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 1);
-    }
+
     curl_setopt($ch, CURLOPT_TIMEOUT, 60);          // timeout after sixty seconds
     curl_setopt($ch, CURLOPT_MAXREDIRS, 5);         // no more than 5 redirections
 
     curl_setopt($ch, CURLOPT_USERAGENT, $useragent);
-    //curl_setopt($ch, CURLOPT_FAILONERROR, true);
+
     curl_setopt($ch, CURLOPT_AUTOREFERER, true);
 
     if(defined("HEURIST_HTTP_PROXY")) {
@@ -2228,7 +2225,7 @@ function uploadFileToNakala($system, $params) {
         return false;
     }
 
-    $curl_file = new CURLFile($params['file']['path'], $params['file']['type'], $file['file']['name']);
+    $curl_file = new CURLFile($params['file']['path'], $params['file']['type'], $params['file']['name']);
     $local_sha1 = sha1_file($params['file']['path']);
 
     curl_setopt($ch, CURLOPT_URL, 'https://api.nakala.fr/datas/uploads');
@@ -2275,6 +2272,7 @@ function uploadFileToNakala($system, $params) {
             foreach ($file_list as $file_dtls) {
                 if($local_sha1 == $file_dtls['sha1']){
                     $file_sha1 = $local_sha1;
+                    break;
                 }
             }
         }
@@ -2361,7 +2359,7 @@ function uploadFileToNakala($system, $params) {
         $metadata['metas'][] = $data;    
     }
 
-    curl_setopt($ch, CURLOPT_HTTPHEADER, array($api_key, 'Content-Type:application/json'));
+    curl_setopt($ch, CURLOPT_HTTPHEADER, array($api_key, 'Content-Type:application/json')); // Reset headers to specify the return type
     curl_setopt($ch, CURLOPT_URL, 'https://api.nakala.fr/datas');
     curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($metadata));
 
