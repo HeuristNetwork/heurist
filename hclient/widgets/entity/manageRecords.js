@@ -5311,12 +5311,12 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
 
     _showSwfPopup: function(fields, _callback){
 
-        var that = this;
+        const that = this;
 
         let swf_mode = this.element.find('.sel_workflow_stages').val();
         let opts_swf_stages = '';
         const dtyID = window.hWin.HAPI4.sysinfo['dbconst']['DT_WORKFLOW_STAGE']; //$Db.getLocalID('dty', '2-1080'); //workflow stage field
-        let save_lbl = $.isFunction(_callback) ? 'Save' : 'Update';
+        let save_lbl = 'Save changes';
 
         if(!fields){
             fields = this._editing.getValues(false);
@@ -5343,50 +5343,59 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
                 +window.hWin.HEURIST4.util.htmlEscape($Db.trm(this._swf_rules[i]['swf_Stage'],'trm_Label'))
                 +'</option>';
         }
+
+        let $ele = this.element.find('.div_workflow_stages');
         
-        var $dlg;
-        var btns = {};
+        let $dlg;
+        let btns = {};
 
         btns[window.hWin.HR(save_lbl)] = function(){
+
             fields[dtyID] = $dlg.find('#dlg-prompt-value').val();
             that._saveEditAndClose( fields, _callback );
 
             $dlg.dialog('close');
         };
-        btns[window.hWin.HR('Cancel')] = function(){
-            swf_mode = $dlg.find('.sel_workflow_stages').val();
-            that.element.find('.sel_workflow_stages').val(swf_mode);
-
+        btns[window.hWin.HR('No change')] = function(){
             $dlg.dialog('close');
         };
 
         $dlg = window.hWin.HEURIST4.msg.showMsgDlg(
-        '<div class="heurist-helper3">This setting will determine actions to be taken such as visibility settings, marking for publication or email notifications</div>'
-        +'<p><label>Workflow stage: </label><select id="dlg-prompt-value" class="text ui-corner-all">'
+        '<div class="heurist-helper3">Changing this setting will determine actions to be taken such as visibility settings, marking for publication or email notifications</div>'
+        +'<p style="margin: 20px 0px 0px"><label>Workflow stage: </label><select id="dlg-prompt-value" class="text ui-corner-all">'
             + opts_swf_stages
-        +'</select>&nbsp;&nbsp;<button id="btn_advance">Advance</button></p><br><br>', btns, 
-        {title: window.hWin.HR('Set workflow stage'), yes: window.hWin.HR(save_lbl), no: window.hWin.HR('Cancel')},
+        +'</select>&nbsp;&nbsp;<button id="btn_advance">Advance</button></p>', btns, 
+        {title: window.hWin.HR('Set workflow stage'), yes: window.hWin.HR(save_lbl), no: window.hWin.HR('No change')},
         {default_palette_class: this.options.default_palette_class}); //'ui-heurist-populate'
-
-        var $ele = this.element.find('.div_workflow_stages');
 
         if($ele.length == 1){
             $ele.clone(true, true)
-                .appendTo($dlg);
+                .insertAfter($dlg.find('div'));
 
             $dlg.find('button#show_workflow_stages').remove(); // remove button to open popup
 
-            $dlg.find('.sel_workflow_stages').val(swf_mode);
+            $dlg.find('.sel_workflow_stages')
+                .css({
+                    display: 'inline-block',
+                    margin: '10px 0px 0px'
+                })
+                .val(swf_mode);
+            $dlg.find('.sel_workflow_stages').on('change', function(){
+                swf_mode = $dlg.find('.sel_workflow_stages').val();
+                that.element.find('.sel_workflow_stages').val(swf_mode).change(); // change value and trigger onChange
+            })
         }
 
         $dlg.find('#btn_advance').button({icon:'ui-icon-caret-1-e',iconPosition:'end'})
                 .css('font-size','0.9em')
         .click(function(){  //select next
-                $dlg.find('#dlg-prompt-value')[0].selectedIndex++;    
-                if($dlg.find('#dlg-prompt-value')[0].selectedIndex<0){
-                        $dlg.find('#dlg-prompt-value')[0].selectedIndex=0;            
-                }
+            $dlg.find('#dlg-prompt-value')[0].selectedIndex++;    
+            if($dlg.find('#dlg-prompt-value')[0].selectedIndex<0){
+                $dlg.find('#dlg-prompt-value')[0].selectedIndex=0;            
+            }
         });
+
+        $dlg.parent().find('.ui-dialog-buttonpane .ui-button').css('margin-right', '20px');
     },
 	
     //
