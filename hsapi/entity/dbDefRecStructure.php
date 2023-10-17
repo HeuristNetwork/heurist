@@ -23,6 +23,7 @@
 require_once (dirname(__FILE__).'/../System.php');
 require_once (dirname(__FILE__).'/dbEntityBase.php');
 require_once (dirname(__FILE__).'/dbEntitySearch.php');
+require_once(dirname(__FILE__).'/../structure/dbsTerms.php');
 
 
 class DbDefRecStructure extends DbEntityBase
@@ -485,6 +486,10 @@ class DbDefRecStructure extends DbEntityBase
 
             $rty_ID = intval(@$this->data['rtyID'], 10);
 
+            // For checking relation types
+            $defTerms = dbs_GetTerms($this->system);
+            $defTerms = new DbsTerms($this->system, $defTerms);
+
             if(isset($rty_ID) && is_numeric($rty_ID) && $rty_ID > 0){
 
                 // Get count for all details, except relmarkers
@@ -504,11 +509,11 @@ class DbDefRecStructure extends DbEntityBase
                 }
 
                 // Check for relmarkers
-                $query = 'SELECT dty_ID, dty_PtrTargetRectypeIDs '
+                $query = 'SELECT dty_ID, dty_PtrTargetRectypeIDs, dty_JsonTermIDTree '
                     . 'FROM defRecStructure '
                     . 'INNER JOIN defDetailTypes ON rst_DetailTypeID=dty_ID '
                     . 'WHERE dty_Type="relmarker" AND rst_RecTypeID=' . $rty_ID;
-                $relmarker_filters = mysql__select_assoc2($mysqli, $query); // [ relmarker_fld_ID1 => rty_id_list1, ... ]
+                $relmarker_filters = mysql__select_assoc($mysqli, $query); // [ relmarker_fld_ID1 => [rty_id_list1, trm_id1], ... ]
                 if($relmarker_filters && count($relmarker_filters) > 0){
 
                     // Retrieve record ids that are relevant
@@ -517,20 +522,62 @@ class DbDefRecStructure extends DbEntityBase
                     if(is_array($ids) && count($ids) > 0){
 
                         $rec_ids = implode(',', $ids);
-                        foreach ($relmarker_filters as $dty_id => $rectype_filter) {
+                        foreach ($relmarker_filters as $dty_id => $fld_details) {
 
-                            // Retrieve relmarker count
-                            $query = 'SELECT DISTINCT count(rl_ID) '
+                            $allowed_recs = array(); // records that meet the rectype requirement
+                            $not_allowed_recs = array(); // records that don't meet the rectype requirement
+                            $count = 0;
+
+                            // Get possible related types (relation terms)
+                            $terms = $defTerms->treeData($fld_details['dty_JsonTermIDTree'], 'set');
+                            // Split possible related rectypes
+                            $rectypes = explode(',', $fld_details['dty_PtrTargetRectypeIDs']);
+                            $allow_all = empty($rectypes);
+
+                            // Retrieve relmarker count - from
+                            $query = 'SELECT rl_TargetID '
                                 . 'FROM recLinks '
-                                . 'LEFT JOIN Records ON rec_ID=rl_SourceID '
-                                . 'WHERE rec_RecTypeID IN (' . $rectype_filter . ') AND rl_RelationID>0 AND (rl_SourceID IN ('. $rec_ids .') OR rl_TargetID IN ('. $rec_ids .'))';
-                            $rel_usage = mysql__select_value($mysqli, $query); // returns count
-                            if($rel_usage){
-                                $res[$dty_id] = $rel_usage;
-                            }else if(!empty($mysqli->error)){
-                                $this->system->addError(HEURIST_DB_ERROR, 'Cannot retrieve relationship marker usage for field #'.$dty_id.' for record type #'.$rty_ID, $mysqli->error);
+                                . 'WHERE rl_RelationTypeID IN (' . implode(',', $terms) . ') AND rl_SourceID IN ('. $rec_ids .')';
+                            $rel_usage_from = mysql__select_list2($mysqli, $query); // returns count
+                            if(!empty($mysqli->error)){
+                                $this->system->addError(HEURIST_DB_ERROR, 'Cannot retrieve relationship marker usage for field #'.$dty_id.' from record type #'.$rty_ID, $mysqli->error);
                                 return false;
                             }
+
+                            $query = 'SELECT rl_SourceID '
+                            . 'FROM recLinks '
+                            . 'WHERE rl_RelationTypeID IN (' . implode(',', $terms) . ') AND rl_TargetID IN ('. $rec_ids .')';
+                            $rel_usage_to = mysql__select_list2($mysqli, $query); // returns count
+                            if(!empty($mysqli->error)){
+                                $this->system->addError(HEURIST_DB_ERROR, 'Cannot retrieve reverse relationship marker usage for field #'.$dty_id.' from record type #'.$rty_ID, $mysqli->error);
+                                return false;
+                            }
+
+                            $rel_usages = array_merge($rel_usage_from, $rel_usage_to);
+
+                            foreach($rel_usages as $rec_id){
+                                if(in_array($rec_id, $allowed_recs)){
+                                    $count ++;
+                                    continue;
+                                }else if(in_array($rec_id, $not_allowed_recs)){
+                                    continue;
+                                }
+
+                                $check_res = mysql__select_value($mysqli, "SELECT rec_RecTypeID FROM Records WHERE rec_ID = $rec_id");
+                                if(!empty($mysqli->error)){
+                                    $this->system->addError(HEURIST_DB_ERROR, 'Cannot retrieve record type id for record #'.$rec_id, $mysqli->error);
+                                    return false;
+                                }
+
+                                if($allow_all || in_array($check_res, $rectypes)){
+                                    $count ++;
+                                    $allowed_recs[] = $rec_id;
+                                }else{
+                                    $not_allowed_recs[] = $rec_id;
+                                }
+                            }
+
+                            $res[$dty_id] = $count;
                         }
                     }else if(!empty($mysqli->error)){
                         $this->system->addError(HEURIST_DB_ERROR, 'Cannot retrieve related records for counting relationship marker field usage for record type #'.$rty_ID, $mysqli->error);

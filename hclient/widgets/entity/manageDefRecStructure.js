@@ -3190,7 +3190,10 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
             let $div = $(div);
             let dtyid = $div.attr('data-dtyid');
 
-            if(dtyid && that._calculated_usages[dtyid]){
+            let count = dtyid && that._calculated_usages[dtyid] 
+                && parseInt(that._calculated_usages[dtyid]) > 0 ? parseInt(that._calculated_usages[dtyid]) : 0;
+
+            if(count > 0){
                 let count = that._calculated_usages[dtyid];
                 $div.find('span:first-child').text(count);
 
