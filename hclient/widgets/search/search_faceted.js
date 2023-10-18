@@ -199,8 +199,8 @@ $.widget( "heurist.search_faceted", {
         
         if(!this.options.language) this.options.language = 'def'; //"xx" means use current language
         
-        if(this.element.parents('.mceNonEditable').length>0 
-        || this.element.parent().attr('data-heurist-app-id') || this.element.hasClass('cms-element'))
+        if( this.element.hasClass('cms-element') || (this.element.parents('.cms-element').length>0)  
+            || this.element.parent().attr('data-heurist-app-id') )
         {
             this.options.is_publication = true;
         }
@@ -757,7 +757,7 @@ $.widget( "heurist.search_faceted", {
             var facet_index, len = facets.length;
             let invalid_fields = [];
             let check_fields = !this._warned_missing_fields && !this.options.ispreview && 
-                (!this.options.is_publication || window.hWin.HAPI4.currentUser.ugr_ID !== 0);
+                !this.options.is_publication && (window.hWin.HAPI4.currentUser.ugr_ID !== 0);
 
             for (facet_index=0;facet_index<len;facet_index++){
                 facets[facet_index].history = [];
@@ -784,6 +784,8 @@ $.widget( "heurist.search_faceted", {
                 //facets[facet_index].isfacet = facets[facet_index].isfacet || window.hWin.HEURIST4.util.isnull(facets[facet_index].isfacet);
             }
 
+console.log('check field ',this.options.is_publication,check_fields);
+            
             if(Object.keys(invalid_fields).length > 0 && check_fields){
 
                 let several_fields = invalid_fields.length > 1;
@@ -793,7 +795,8 @@ $.widget( "heurist.search_faceted", {
                 if(several_fields){
                     msg = 'Several fields referenced by this facet filter are no longer part of their respective record type(s).';
                 }else{
-                    msg = (window.hWin.HEURIST4.util.isempty(fld_name) ? 'A field' : `The field ${fld_name}`)+ ' referenced in this facet filter is no longer part of the record type on which this filter is based.';
+                    msg = (window.hWin.HEURIST4.util.isempty(fld_name) ? 'A field' : `The field ${fld_name}`)
+                        + ' referenced in this facet filter is no longer part of the record type on which this filter is based.';
                 }
 
                 if(msg !== ''){
