@@ -323,6 +323,8 @@
                 $res = array(); // invalid formatting
             }
         }
+    }else if($action == "translate_string"){ // translate given string using Deepl's API, if able
+        $res = getExternalTranslation($system, @$_REQUEST['string'], @$_REQUEST['target'], @$_REQUEST['source']);
     }else{
         
         $mysqli = $system->get_mysqli();
