@@ -1070,7 +1070,8 @@ class System {
                $passwordForReservedChanges, $passwordForServerFunctions,
                $needEncodeRecordDetails, 
                $common_languages_for_translation, $glb_lang_codes, 
-               $saml_service_provides, $hideStandardLogin;
+               $saml_service_provides, $hideStandardLogin,
+               $accessToken_DeepLAPI;
    
         if(!isset($needEncodeRecordDetails)){
             $needEncodeRecordDetails = 0;
@@ -1183,8 +1184,9 @@ class System {
                     'pwd_DatabaseCreation'=> (strlen(@$passwordForDatabaseCreation)>6), 
                     'pwd_DatabaseDeletion'=> (strlen(@$passwordForDatabaseDeletion)>15), //delete for db statistics
                     'pwd_ReservedChanges' => (strlen(@$passwordForReservedChanges)>6),  //allow change reserved fields 
-                    'pwd_ServerFunctions' => (strlen(@$passwordForServerFunctions)>6)   //allow run multi-db server actions
-                    )
+                    'pwd_ServerFunctions' => (strlen(@$passwordForServerFunctions)>6),   //allow run multi-db server actions
+                    'api_Translator' => (!empty($accessToken_DeepLAPI)) // an api key has been setup for Deepl
+                )
             );
             
             if($include_reccount_and_dashboard_count){

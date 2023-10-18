@@ -281,23 +281,68 @@ $.widget( "heurist.editing_input", {
                         }else if($(event.target).hasClass('ui-icon-translate') && (that.detailType == 'freetext' || that.detailType == 'blocktext')){ // request language, then create new input with language prefix
 
                             let $dlg;
-                            let msg = 'Language: <select id="selLang"></select>';
+                            let msg = 'Language: <select id="selLang"></select><br>';
+
+                            let first_val = that.inputs.length > 0 ? that.inputs[0].val() : '';
 
                             let btns = {};
-                            btns[window.HR('Insert')] = function(){
+                            btns[window.HR('Insert blank')] = function(){
                                 that.new_value = $dlg.find('#selLang').val() + ':';
                                 $dlg.dialog('close');
                                 $(that.btn_add[1]).click(); // 'click' normal repeat
                             };
+
+                            let labels = {
+                                title: window.HR('Insert translated value'),
+                                yes: window.HR('Insert blank')
+                            };
+
+                            if(!window.hWin.HEURIST4.util.isempty(first_val) && window.hWin.HAPI4.sysinfo.api_Translator){ // allow external API translations
+
+                                msg += '<span style="display:inline-block;margin-top:10px;">Translate will translate the first value</span>';
+
+                                btns[window.HR('Translate')] = function(){
+
+                                    let source = '';
+                                    let target = $dlg.find('#selLang').val();
+    
+                                    if(first_val.match(/\w{3}:/)){
+    
+                                        // Pass as source language
+                                        source = first_val.match(/\w{3}:/)[0];
+                                        source = source.slice(0, -1);
+    
+                                        first_val = first_val.slice(4); // remove lang prefix
+                                    }
+    
+                                    let request = {
+                                        a: 'translate_string',
+                                        string: first_val,
+                                        target: target,
+                                        source: source
+                                    };
+    
+                                    window.hWin.HAPI4.SystemMgr.translate_string(request, function(response){
+
+                                        $dlg.dialog('close');
+
+                                        if(response.status == window.hWin.ResponseStatus.OK){
+                                            that.new_value = target + ':' + response.data;
+                                            $(that.btn_add[1]).click(); // 'click' normal repeat
+                                        }else{
+                                            window.hWin.HEURIST4.msg.showMsgErr(response);
+                                        }
+                                    });
+                                };
+
+                                labels['ok'] = window.HR('Translate');
+                            }
+
                             btns[window.HR('Cancel')] = function(){
                                 $dlg.dialog('close');
                             };
 
-                            let labels = {
-                                title: window.HR('Insert translated value'),
-                                yes: window.HR('Insert'),
-                                no: window.HR('Cancel')
-                            };
+                            labels['cancel'] = window.HR('Cancel');
 
                             $dlg = window.hWin.HEURIST4.msg.showMsgDlg(msg, btns, labels, {default_palette_class: 'ui-heurist-populate'});
 
@@ -2556,8 +2601,8 @@ $.widget( "heurist.editing_input", {
                     }
                 });
 
-                if(!this.input_prompt.prev().is('div.add_help')){
-                    $('<div>', { style: css })
+                if(!this.input_prompt.prev().is('div.extra_help')){
+                    $('<div>', { style: css, class: 'extra_help' })
                         .text('yyyy, yyyy-mm or yyyy + click calendar (remembers last date)')
                         .insertBefore(this.input_prompt);
                 }

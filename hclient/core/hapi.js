@@ -1140,6 +1140,17 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
             },
 
             /**
+             * Use Deepl to translate string
+             * @param {Request} request 
+             * @param {callserverCallback} callback 
+             */
+            translate_string: function(request, callback){
+                if(!request.a) request = {a: 'translate_string'};
+
+                _callserver('usr_info', request, callback);
+            },
+
+            /**
              * Check if the provided databases are available on the current server
              * @param data - array (registred ID => database name)
              * @param {callserverCallback} callback 
