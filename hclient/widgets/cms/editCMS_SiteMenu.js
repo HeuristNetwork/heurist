@@ -104,7 +104,7 @@ title: "Overview"
                     if(keep_expanded_nodes.indexOf(node.key)>=0){
                         node.setExpanded(true);
                     }
-                    node.setSelected((node.key==window.hWin.current_page_id));
+                    node.setSelected((node.data.page_id==window.hWin.current_page_id));
             });
 
         }else{
@@ -139,13 +139,13 @@ title: "Overview"
                     dragDrop: function(node, data) {
                         //data.otherNode - dragging node
                         //node - target node
-                        var source_parent = data.otherNode.parent.key;//data.otherNode.data.parent_id;
+                        var source_parent = data.otherNode.parent.data.page_id;
                         if(!(source_parent>0))
                             source_parent = window.hWin.home_page_record_id;
 
                         data.otherNode.moveTo(node, data.hitMode);
 
-                        var target_parent = data.otherNode.parent.key;
+                        var target_parent = data.otherNode.parent.data.page_id;
                         if(!(target_parent>0))
                             target_parent = window.hWin.home_page_record_id;
                         data.otherNode.data.parent_id = target_parent;
@@ -157,7 +157,7 @@ title: "Overview"
                                 {a: 'delete',
                                     recIDs: source_parent,
                                     dtyID: source_parent==window.hWin.home_page_record_id?DT_CMS_TOP_MENU:DT_CMS_MENU,
-                                    sVal:data.otherNode.key});
+                                    sVal:data.otherNode.data.page_id}); 
 
                         }
                         //return;
@@ -169,7 +169,7 @@ title: "Overview"
                                 recIDs: target_parent,
                                 dtyID: target_parent==window.hWin.home_page_record_id?DT_CMS_TOP_MENU:DT_CMS_MENU});
 
-                        //add chiildren in new order        
+                        //add children in new order        
                         for (var i=0; i<data.otherNode.parent.children.length; i++){
 
                             var menu_node = data.otherNode.parent.children[i];
@@ -177,7 +177,7 @@ title: "Overview"
                                 {a: 'add',
                                     recIDs: target_parent,
                                     dtyID: target_parent==window.hWin.home_page_record_id?DT_CMS_TOP_MENU:DT_CMS_MENU,
-                                    val:menu_node.key}                                                   
+                                    val:menu_node.data.page_id}                                                   
                             );
                         }                    
 
@@ -221,7 +221,7 @@ title: "Overview"
                     save:function(event, data){
                         if(''!=data.input.val()){
                             var new_name = data.input.val();
-                            _renameMenuEntry(data.node.key, new_name, function(){
+                            _renameMenuEntry(data.node.data.page_id, new_name, function(){
                                 
                             });
                         }else{
@@ -357,7 +357,7 @@ title: "Overview"
                                         var to_del = [];
                                         if(remove_menu_records){
                                             item.visit(function(node){
-                                                to_del.push(node.key);
+                                                to_del.push(node.data.page_id);
                                                 },true);
                                         }
 
@@ -491,7 +491,7 @@ title: "Overview"
                 $('.btn-website-homepage').css({'text-decoration':'none'});
                 
                 tree.visit(function(node){
-                    if(node.key==window.hWin.current_page_id){
+                    if(node.data.page_id==window.hWin.current_page_id){
                         $(node.li).find('.fancytree-title').css({'text-decoration':'underline'});    
                     }else{
                         $(node.li).find('.fancytree-title').css({'text-decoration':'none'});
