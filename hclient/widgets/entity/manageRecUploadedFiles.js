@@ -392,7 +392,7 @@ $.widget( "heurist.manageRecUploadedFiles", $.heurist.manageEntity, {
                     .insertBefore(this._edit_dialog.find('fieldset > div:first'));
                 
                 this._edit_dialog.find('#btn_upload_file').css({'min-width':'9em','z-index':2})
-                    .button({label: window.hWin.HR((this._additionMode=='tiled')?'Choose zip file':'Choose file')
+                    .button({label: window.hWin.HR((this._additionMode=='tiled')?'Choose zip or mbtiles file':'Choose file')
                     ,icons: {
                             primary: "ui-icon-upload"
                     }})
@@ -401,7 +401,7 @@ $.widget( "heurist.manageRecUploadedFiles", $.heurist.manageEntity, {
                     }); 
 
                 this._edit_dialog.find('#btn_upload_file_stack').css({'min-width':'9em','z-index':2})
-                    .button({label: window.hWin.HR('Choose zip file')
+                    .button({label: window.hWin.HR('Choose zip or mbtiles file')
                     ,icons: {
                             primary: "ui-icon-upload"
                     }})

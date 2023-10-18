@@ -14,6 +14,7 @@
 *   page - return
 *   tag - returns html wrap iframe with embed player, video, audio or img tag 
 *   size - returns width and height (for images only!)
+*   url - rerurns url for uploaded_tilestacks
 * size - width and height for html tag
 * embedplayer - for player
 * 
@@ -211,7 +212,16 @@ if(!$error){
            
                         //if it does not start with http - this is relative path             
                         if(!(strpos($external_url,'http://')===0 || strpos($external_url,'https://')===0)){
-                            $external_url = HEURIST_TILESTACKS_URL.$external_url;                 
+                            
+                            //check presence of mbtiles file within folder
+                            $recs = folderContent(HEURIST_TILESTACKS_DIR.$external_url, 'mbtiles');
+                            if($recs['count']>0){
+                                $filename = $recs['records'][1][1];
+                                $filename = pathinfo($filename);
+                                $external_url = HEURIST_BASE_URL.'mbtiles.php?'.HEURIST_DBNAME.'/'.$external_url.$filename['filename'];
+                            }else{
+                                $external_url = HEURIST_TILESTACKS_URL.$external_url;    
+                            }
                         }                        
                         
                         header('Content-type: application/json;charset=UTF-8');

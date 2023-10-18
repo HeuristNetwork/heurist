@@ -372,9 +372,11 @@ if($database_url!=null){ //redirect to resolver for another database
 }else if($format=='edit'){
     //todo include resolver recordSearchReplacement
     $redirect = '../hclient/framecontent/recordEdit.php?'.$_SERVER['QUERY_STRING'];
-}else{
+}else if(@$_REQUEST['db']){
     //todo include resolver  recordSearchReplacement
     $redirect = '../export/xml/flathml.php?db='.$_REQUEST['db'].'&depth=1&w=a&q=ids:'.$recid;
+}else{
+    $redirect = '../hclient/framecontent/infoPage.php?error='.rawurlencode($error_msg); 
 }
 
 header('Location: '.$redirect);
