@@ -175,7 +175,7 @@ $.widget( "heurist.navigation", {
     //
     getMenuContent: function(orientation, parent_id, menuitems, lvl){
         
-        if(window.hWin.HEURIST4.util.isnull(parent_id)) parent_id = 0;
+        if(window.hWin.HEURIST4.util.isnull(parent_id)) parent_id = '0';
         if(window.hWin.HEURIST4.util.isnull(orientation)) orientation = this.options.orientation;
         if(window.hWin.HEURIST4.util.isnull(menuitems)) menuitems = this.options.menu_recIDs; //top menu items
         if(!lvl>0){
@@ -187,6 +187,7 @@ $.widget( "heurist.navigation", {
         } 
         
         var resdata = this.menuData;
+        parent_id = ''+parent_id;
         
         var RT_CMS_MENU = window.hWin.HAPI4.sysinfo['dbconst']['RT_CMS_MENU'],
             DT_NAME = window.hWin.HAPI4.sysinfo['dbconst']['DT_NAME'],
@@ -245,7 +246,7 @@ $.widget( "heurist.navigation", {
                     function _updateChildNodes(menu_items, new_id){
 
                         for(let i = 0; i < menu_items.length; i++){
-                            menu_items[i]['parent_id'] = new_id;
+                            menu_items[i]['parent_id'] = ''+new_id;
                             menu_items[i]['key'] = new_id + ',' + menu_items[i]['page_id'];
 
                             if(menu_items[i]['children'] && menu_items[i]['children'].length > 0){
