@@ -2223,6 +2223,41 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
         this.searchForm.searchDefDetailTypes('startSearch');
         
         return this._cachedRecordset;
-    }    
+    },
+
+    //
+    // Extra details for the user when setting up sub-records
+    //
+    _setupSubRecordField: function(){ //create_sub_record
+
+        // Force type to record pointer
+        let $ele = this._editing.getFieldByName('dty_Type');
+        $ele.editing_input('setValue', 'resource');
+        $ele.editing_input('setDisabled', true);
+
+        // Force child records
+        $ele = this._editing.getFieldByName('rst_CreateChildIfRecPtr');
+        $ele.editing_input('setValue', '1');
+        $ele.editing_input('setDisabled', true);
+
+        // Force repeatable
+        $ele = this._editing.getFieldByName('rst_MaxValues');
+        $ele.editing_input('setValue', 0);
+        $ele.editing_input('setDisabled', true);
+
+        // Set default help text
+        $ele = this._editing.getFieldByName('dty_HelpText');
+        $ele.editing_input('setValue', "This field points to sub-records of the current record type.\nFields from the current record type have been moved to these sub-records");
+        //$ele.editing_input('setDisabled', true);
+
+        // Add required class to header
+        $ele = this._editing.getFieldByName('dty_PtrTargetRectypeIDs');
+        $ele.find('.header').addClass('required');
+
+        // Main message
+        $('<h2 style="margin-block:0;margin-bottom:0.2em">Create a new field</h2>'
+        + '<div style="color: red;display: block;margin-left: auto;margin-right: auto;width: 90%;font-size: 1.2em;"><strong>You are creating a new sub-record child pointer field</strong><br>'
+        + 'In the next step you will select fields to be transferred to the sub-records</div><br>').prependTo($(this._editing.getContainer()[0]).find('fieldset')[0]);
+    }
 
 });

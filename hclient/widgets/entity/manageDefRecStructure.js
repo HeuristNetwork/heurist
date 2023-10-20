@@ -1137,7 +1137,7 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
         
         if(allow_proceed!==true){
             this._allowActionIfModified( function(){ 
-                that.showBaseFieldEditor( arg1, arg2, true, parent_dialog );
+                that.showBaseFieldEditor( arg1, arg2, true, parent_dialog, create_sub_record );
             } );
             return;
         }
