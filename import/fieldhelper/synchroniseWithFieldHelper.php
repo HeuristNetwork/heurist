@@ -256,7 +256,7 @@ $failed_exts = array();
             }
 
             print "<div>Synchronisation completed</div>";
-            print "<div style=\"color:green\">Total files processed: $rep_counter </div>";
+            print '<div style="color:green">Total files processed:'.intval($rep_counter).'</div>';
 
             if($rep_counter > 0){
                 print '<script type="text/javascript">if(window.hWin.HEURIST4.dbs) { window.hWin.HEURIST4.dbs.get_record_counts(null); }</script>';
@@ -312,7 +312,7 @@ $failed_exts = array();
                         }
                         
                         if(!$dir || !( substr($dir, 0, strlen(HEURIST_FILESTORE_DIR)) === HEURIST_FILESTORE_DIR )){
-                            print "<div style=\"color:red\">$orig is ignored. Folder must be in heurist filestore directory.</div>";
+                            print '<div style="color:red">'.htmlspecialchars($orig).'is ignored. Folder must be in heurist filestore directory.</div>';
                             continue;
                         }
                     }
@@ -325,7 +325,7 @@ $failed_exts = array();
 
                 if(in_array($dir, $system_folders)){
 
-                    print "<div style=\"color:red\">Files are not scanned in system folder $dir</div>";
+                    print '<div style="color:red">Files are not scanned in system folder '.htmlspecialchars($dir).'</div>';
 
                 }else if($dir && file_exists($dir) && is_dir($dir))
                 {
@@ -346,7 +346,7 @@ $failed_exts = array();
                                 }else if($isfirst){ //if($filename == "fieldhelper.xml"){
                                     $isfirst = false;
                                     if($dir == HEURIST_FILESTORE_DIR){
-                                        print "<div style=\"color:red\">Files are not scanned in root upload folder $dir</div>";
+                                        print '<div style="color:red">Files are not scanned in root upload folder '.htmlspecialchars($dir).'</div>';
                                     }else{
                                         $rep_counter = $rep_counter + doHarvestInDir($dir);
                                     }
@@ -419,7 +419,7 @@ $failed_exts = array();
             $progress_divid++;
 
             ob_start();
-            print "<div><b>$dir</b><span id='progress$progress_divid'></span></div>";
+            print '<div><b>'.htmlspecialchars($dir).'</b><span id="progress'.intval($progress_divid).'"></span></div>';
             ob_flush();
             flush();
 
@@ -628,7 +628,7 @@ $failed_exts = array();
                                 $out = recordSave($system, $record);  //see db_records.php
 
                                 if ( @$out['status'] != HEURIST_OK ) {
-                                    print "<div>File: <i>$filename_base</i> <span  style='color:red'>Error: ".
+                                    print '<div>File: <i>'.htmlspecialchars($filename_base).'</i> <span  style="color:red">Error: '.
                                     $out["message"]."</span></div>";
                                     
                                 }else{
@@ -639,7 +639,7 @@ $failed_exts = array();
                                     //update xml
                                     if($recordId==null){
                                         if($old_md5!=$new_md5){
-                                            print "<div>File: <i>$filename_base</i> <span  style=\"color:#ff8844\">".
+                                            print '<div>File: <i>'.htmlspecialchars($filename_base).'</i> <span  style="color:#ff8844">'.
                                             "Warning: Checksum differs from value in manifest; ".
                                             "data file may have been changed</span></div>";
                                         }
@@ -655,7 +655,8 @@ $failed_exts = array();
                                     }
 
                                     if (@$out['warning']) {
-                                        print "<div>File: <i>$filename_base</i> <span  style=\"color:#ff8844\">Warning: ".
+                                        print '<div>File: <i>'.htmlspecialchars($filename_base).
+                                        '</i> <span  style="color:#ff8844">Warning: '.
                                         implode("; ",$out["warning"])."</span></div>";
                                     }
 
@@ -745,7 +746,7 @@ XML;
                             $details["t:".$fileDT] = array("1"=>$file_id);
                             $recordNotes = readEXIF($filename);
                         }else{
-                            print "<div>File: <i>$filename_base</i> <span  style=\"color:#ff8844\">".
+                            print '<div>File: <i>'.htmlspecialchars($filename_base).'</i> <span  style="color:#ff8844">'.
                             "Warning: failed to register. No record created for this file</span></div>";
                             //$rep_issues = $rep_issues."<br/>Can't register file:".$filename.". ".$file_id;
                             $file_id = null;
@@ -823,7 +824,8 @@ XML;
 
                         
                         if ( @$out['status'] != HEURIST_OK ) {                        
-                            print "<div>File: <i>$filename_base</i> <span style='color:red'>Error: ".$out["message"]."</span></div>";
+                            print '<div>File: <i>'.htmlspecialchars($filename_base)
+                            .'</i> <span style="color:red">Error: '.htmlspecialchars($out["message"])."</span></div>";
                         }else{
                             $new_recordID = intval($out['data']);
                             $f_item->addChild("heurist_id", $new_recordID);

@@ -111,8 +111,8 @@ if(!isset($msg)){
 <head>
 <script>
     window.onload = function(){
-console.log('Authentification completed ','<?php echo ($msg);?>');                                
-        setTimeout(function(){window.close("<?php echo ($msg);?>");}, 1000);    
+console.log('Authentification completed ','<?php echo htmlspecialchars($msg);?>');                                
+        setTimeout(function(){window.close("<?php echo htmlspecialchars($msg);?>");}, 1000);    
     }                 
 </script>
 </head>

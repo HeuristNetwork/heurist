@@ -253,7 +253,7 @@
                 $query = 'select rty_OriginatingDBID, rty_IDInOriginatingDB '
                 .' FROM defRecTypes WHERE rty_Name="'.$mysqli->real_escape_string($rty_Name).'"';
                 $res = $mysqli->query($query);
-                if (!$res) {  print $db_name.'  '.$query.'  '.$mysqli->error;  return; }
+                if (!$res) {  print htmlspecialchars($db_name.'  '.$query.'  '.$mysqli->error);  return; }
                 $row = $res->fetch_assoc();
                 if($row){
                     if($row[0]!=$db_id || $row[1]!=$orig_id){
@@ -270,7 +270,7 @@
             .$db_id.' AND rty_IDInOriginatingDB='.$orig_id;
         
             $res = $mysqli->query($query);
-            if (!$res) {  print $db_name.'  '.$query.'  '.$mysqli->error;  return; }
+            if (!$res) {  print htmlspecialchars($db_name.'  '.$query.'  '.$mysqli->error);  return; }
             
             $fields2 = array();      //per record type
             
@@ -441,7 +441,7 @@
         }
         
         if(count($databases)>1 && ($has_issues || @$_REQUEST['showalldbs']==1)){
-            print "<h4>db = $db_name</h4>";  
+            print '<h4>db = '.htmlspecialchars($db_name).'</h4>';  
         }
         
         if($has_issues){
