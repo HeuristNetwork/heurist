@@ -726,6 +726,10 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
                     
                     
                 }else
+                if(this.options.create_sub_record){
+                    this._setupSubRecordField();
+                    this.options.newFieldType = 'resource';
+                }else
                 if(this.options.newFieldForRtyID > 0){ // Ensure that the new field is for a specific rectype
                     var flavour_text = $('<h2 style="margin-block:0;margin-bottom:0.2em">Choose existing base field(s)</h2>'
                         + '<div class="heurist-helper2" style="font-size:0.95em">Rather than defining every field from scratch, you can pick some frequently used pre-defined fields from the existing Base fields.<br/>'
@@ -820,189 +824,170 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
         var elements = this._editing.getInputs('dty_Type');
         if(window.hWin.HEURIST4.util.isArrayNotEmpty(elements)){
             
-                if(this.options.newFieldType){
+            if(this.options.newFieldType){
 
-                    var el = $(elements[0])[0];
-                    var _dty_Type = this.options.newFieldType;
-                    $(el).empty();
-                    window.hWin.HEURIST4.ui.addoption(el, _dty_Type,  $Db.baseFieldType[_dty_Type]);
-                    el.disabled = true;
-                    if($(el).hSelect("instance")!=undefined){
-                        $(el).hSelect("refresh"); 
-                    }
-                    this._onDataTypeChange(_dty_Type);
-                    
-                    
-                    if(this.options.newFieldResource>0){
-                        this._editing.setFieldValueByName('dty_PtrTargetRectypeIDs', this.options.newFieldResource, true);
-                    }
-                    
-            
-                }else
-                if(this._currentEditID>0)
-                {
-                    //limit list and disable in case one option
-                    var el = $(elements[0])[0];
-                    //var _dty_Type = $(el).val();
-                    var _dty_Type = $Db.dty(this._currentEditID,'dty_Type');
-                    
-                    $(el).empty();
-                    el.disabled = false;
-                    
-                    window.hWin.HEURIST4.ui.addoption(el, _dty_Type,  $Db.baseFieldType[_dty_Type]);
-
-                    if(_dty_Type=='float' || _dty_Type=='date'){
-                        window.hWin.HEURIST4.ui.addoption(el, 'freetext',  $Db.baseFieldType['freetext']);
-                    }else if(_dty_Type=='freetext'){
-                        window.hWin.HEURIST4.ui.addoption(el, 'blocktext',  $Db.baseFieldType['blocktext']);
-                        window.hWin.HEURIST4.ui.addoption(el, 'date',  $Db.baseFieldType['date']);
-                        window.hWin.HEURIST4.ui.addoption(el, 'float',  $Db.baseFieldType['float']);
-                    }else if(_dty_Type=='blocktext'){
-                        window.hWin.HEURIST4.ui.addoption(el, 'freetext',  $Db.baseFieldType['freetext']);
-                        window.hWin.HEURIST4.ui.addoption(el, 'date',  $Db.baseFieldType['date']);
-                        window.hWin.HEURIST4.ui.addoption(el, 'float',  $Db.baseFieldType['float']);
-                    }else{
-                        el.disabled = true;
-                    }
-                    
-                    if($(el).hSelect("instance")!=undefined){
-                        $(el).hSelect("refresh"); 
-                    }
-
-                    this._on( $(elements[0]), {    
-                        'change': function(event){
-                               var dt_type = $(event.target).val();
-                               this._onDataTypeChange(dt_type);
-                               
-                               /*
-                               var virtual_fields = this._editing.getFieldByValue("dty_Role","virtual");
-                               for(var idx in virtual_fields){
-                                   $(virtual_fields[idx]).hide();
-                               }
-                               var ele = this._editing.getFieldByName('dty_PtrTargetRectypeIDs');
-                               
-                               if(dt_type!=='resource'){
-                                   ele.hide();
-                                   ele = this._editing.getFieldByName('dty_Mode_'+dt_type);
-                                   
-                                   if(dt_type=='enum'){
-                                        this._activateEnumControls(ele);
-                                   }
-                               }
-                               if(ele && ele.length>0) ele.show();
-                               */
-                        }
-                    });
-                }else {  // setup record type button and handler for selector
-                    
-                    var that = this;
-
-                    var ele = this._editing.getFieldByName('dty_Type');  
-                    ele = ele.find('.input-div');
-
-                    if(ele.find('select').hSelect("instance")){ 
-                        var len = ele.find('select').find('option').length;
-                        $(ele.find('select').find('option')[len-1]).attr({ // select... is listed last
-                            "disabled": true,
-                            "selected": true,
-                            "hidden": true
-                        }).hide();
-
-                        ele.find('select').hSelect("refresh");
-                    }                    
-
-                    this._on(ele.find('select'), {
-                        'change':function(event){
-                            var new_dty = $(event.target).val();
-
-                            if(!window.hWin.HEURIST4.util.isempty(new_dty)){
-                                that._onDataTypeChange(new_dty);
-                            }
-                        }
-                    });
-                    
-                    this.set_detail_type_btn = $('<button>')
-                        .button({icon:'ui-icon-circle-b-help'})
-                        .css({'min-width':'25px','margin-left':'10px','padding-left':'5px','padding-right':'5px','background':'#523365','color':'white'});
-                    this.set_detail_type_btn.appendTo(ele);
-
-                    $('<span style="margin-left:5px;font-style:italic">guided choice</span>').appendTo(ele);
-                    
-                    ele.find('.btn_input_clear').appendTo(ele);
-                    
-                    this._on( this.set_detail_type_btn, {    
-                        'click': function(event){
-
-                            var dt_type = this._editing.getValue('dty_Type')[0];
-                    
-                            var $dlg, buttons = [
-                                {text:window.hWin.HR('Cancel'),
-                                    //id:'btnRecCancel',
-                                    css:{'float':'right',margin:'.5em .4em .5em 0px'},  
-                                    click: function() { $dlg.dialog( "close" ); }},
-                                {text:window.hWin.HR('Use this field type'),
-                                    css:{'float':'right',margin:'.5em .4em .5em 0px'},  
-                                    class: 'ui-button-action',
-                                    click: function() { 
-                                        
-                                        var dt_type_new = $dlg.find('input[name="ft_type"]:checked').val();
-                                        
-                                        if(!window.hWin.HEURIST4.util.isempty(dt_type_new)) {
-
-                                            var changeToNewType = true;
-                                            if(((dt_type==="resource") || (dt_type==="relmarker") || 
-                                                (dt_type==="enum"))  && dt_type!==dt_type_new)
-                                            {
-
-                                                window.hWin.HEURIST4.msg.showMsgDlg("If you change the type to '"
-                                                    + $Db.baseFieldType[dt_type_new] 
-                                                    + "' you will lose all your settings for type '"   //vocabulary 
-                                                    + $Db.baseFieldType[dt_type]+
-                                                    "'.\n\nAre you sure?",                                            
-                                                    function(){   
-                                                        that._onDataTypeChange(dt_type_new);                                                   
-                                                    }, {title:'Change type for field',yes:'Continue',no:'Cancel'},
-                                                    {default_palette_class:that.options.default_palette_class});                                                
-                                            }else{
-                                                that._onDataTypeChange(dt_type_new);                                                   
-                                            }                            
-                                        }
-                            
-                                        $dlg.dialog( "close" ); 
-                                    }}
-                            ];                
-                            
-                            
-                            $dlg = window.hWin.HEURIST4.msg.showMsgDlgUrl(window.hWin.HAPI4.baseURL
-                                +"hclient/widgets/entity/popups/selectFieldType.html?t="+(new Date().getTime()), 
-                                buttons, 'Select data type of field', 
-                                {  container:'detailtypes-type-popup',
-                                    width:800,
-                                    height:620,
-                                    default_palette_class: this.options.default_palette_class,
-                                    close: function(){
-                                        $dlg.dialog('destroy');       
-                                        $dlg.remove();
-                                    },
-                                    open: function(){
-                                        $dlg.css({padding:0});
-                                        
-                                        window.hWin.HEURIST4.ui.initHelper( {button:$dlg.find('#hint_more_info1'), 
-                                                        title:'Field data type: Record pointer', 
-                                                        url:window.hWin.HAPI4.baseURL+'context_help/field_data_types.html #resource',
-                                                        position:{ my: "left top", at: "left top", of:$dlg}, no_init:true} ); 
-                                        window.hWin.HEURIST4.ui.initHelper( {button:$dlg.find('#hint_more_info2'), 
-                                                        title:'Field data type: Relationship marker', 
-                                                        url:window.hWin.HAPI4.baseURL+'context_help/field_data_types.html #relmarker',
-                                                        position:{ my: "left top", at: "left top", of:$dlg}, no_init:true} ); 
-                                        
-                                    }  //end open event
-                            });
-                            
-
-                    }});
-                    
+                var el = $(elements[0])[0];
+                var _dty_Type = this.options.newFieldType;
+                $(el).empty();
+                window.hWin.HEURIST4.ui.addoption(el, _dty_Type,  $Db.baseFieldType[_dty_Type]);
+                el.disabled = true;
+                if($(el).hSelect("instance")!=undefined){
+                    $(el).hSelect("refresh"); 
                 }
+                this._onDataTypeChange(_dty_Type);
+                
+                
+                if(this.options.newFieldResource>0){
+                    this._editing.setFieldValueByName('dty_PtrTargetRectypeIDs', this.options.newFieldResource, true);
+                }
+                
+        
+            }else
+            if(this._currentEditID>0)
+            {
+                //limit list and disable in case one option
+                var el = $(elements[0])[0];
+                //var _dty_Type = $(el).val();
+                var _dty_Type = $Db.dty(this._currentEditID,'dty_Type');
+                
+                $(el).empty();
+                el.disabled = false;
+                
+                window.hWin.HEURIST4.ui.addoption(el, _dty_Type,  $Db.baseFieldType[_dty_Type]);
+
+                if(_dty_Type=='float' || _dty_Type=='date'){
+                    window.hWin.HEURIST4.ui.addoption(el, 'freetext',  $Db.baseFieldType['freetext']);
+                }else if(_dty_Type=='freetext'){
+                    window.hWin.HEURIST4.ui.addoption(el, 'blocktext',  $Db.baseFieldType['blocktext']);
+                    window.hWin.HEURIST4.ui.addoption(el, 'date',  $Db.baseFieldType['date']);
+                    window.hWin.HEURIST4.ui.addoption(el, 'float',  $Db.baseFieldType['float']);
+                }else if(_dty_Type=='blocktext'){
+                    window.hWin.HEURIST4.ui.addoption(el, 'freetext',  $Db.baseFieldType['freetext']);
+                    window.hWin.HEURIST4.ui.addoption(el, 'date',  $Db.baseFieldType['date']);
+                    window.hWin.HEURIST4.ui.addoption(el, 'float',  $Db.baseFieldType['float']);
+                }else{
+                    el.disabled = true;
+                }
+                
+                if($(el).hSelect("instance")!=undefined){
+                    $(el).hSelect("refresh"); 
+                }
+
+                this._on( $(elements[0]), {    
+                    'change': function(event){
+                            var dt_type = $(event.target).val();
+                            this._onDataTypeChange(dt_type);
+                    }
+                });
+            }else {  // setup record type button and handler for selector
+                
+                var that = this;
+
+                var ele = this._editing.getFieldByName('dty_Type');  
+                ele = ele.find('.input-div');
+
+                if(ele.find('select').hSelect("instance")){ 
+                    var len = ele.find('select').find('option').length;
+                    $(ele.find('select').find('option')[len-1]).attr({ // select... is listed last
+                        "disabled": true,
+                        "selected": true,
+                        "hidden": true
+                    }).hide();
+
+                    ele.find('select').hSelect("refresh");
+                }                    
+
+                this._on(ele.find('select'), {
+                    'change':function(event){
+                        var new_dty = $(event.target).val();
+
+                        if(!window.hWin.HEURIST4.util.isempty(new_dty)){
+                            that._onDataTypeChange(new_dty);
+                        }
+                    }
+                });
+                
+                this.set_detail_type_btn = $('<button>')
+                    .button({icon:'ui-icon-circle-b-help'})
+                    .css({'min-width':'25px','margin-left':'10px','padding-left':'5px','padding-right':'5px','background':'#523365','color':'white'});
+                this.set_detail_type_btn.appendTo(ele);
+
+                $('<span style="margin-left:5px;font-style:italic">guided choice</span>').appendTo(ele);
+                
+                ele.find('.btn_input_clear').appendTo(ele);
+                
+                this._on( this.set_detail_type_btn, {    
+                    'click': function(event){
+
+                        var dt_type = this._editing.getValue('dty_Type')[0];
+                
+                        var $dlg, buttons = [
+                            {text:window.hWin.HR('Cancel'),
+                                //id:'btnRecCancel',
+                                css:{'float':'right',margin:'.5em .4em .5em 0px'},  
+                                click: function() { $dlg.dialog( "close" ); }},
+                            {text:window.hWin.HR('Use this field type'),
+                                css:{'float':'right',margin:'.5em .4em .5em 0px'},  
+                                class: 'ui-button-action',
+                                click: function() { 
+                                    
+                                    var dt_type_new = $dlg.find('input[name="ft_type"]:checked').val();
+                                    
+                                    if(!window.hWin.HEURIST4.util.isempty(dt_type_new)) {
+
+                                        var changeToNewType = true;
+                                        if(((dt_type==="resource") || (dt_type==="relmarker") || 
+                                            (dt_type==="enum"))  && dt_type!==dt_type_new)
+                                        {
+
+                                            window.hWin.HEURIST4.msg.showMsgDlg("If you change the type to '"
+                                                + $Db.baseFieldType[dt_type_new] 
+                                                + "' you will lose all your settings for type '"   //vocabulary 
+                                                + $Db.baseFieldType[dt_type]+
+                                                "'.\n\nAre you sure?",                                            
+                                                function(){   
+                                                    that._onDataTypeChange(dt_type_new);                                                   
+                                                }, {title:'Change type for field',yes:'Continue',no:'Cancel'},
+                                                {default_palette_class:that.options.default_palette_class});                                                
+                                        }else{
+                                            that._onDataTypeChange(dt_type_new);                                                   
+                                        }                            
+                                    }
+                        
+                                    $dlg.dialog( "close" ); 
+                                }}
+                        ];                
+                        
+                        
+                        $dlg = window.hWin.HEURIST4.msg.showMsgDlgUrl(window.hWin.HAPI4.baseURL
+                            +"hclient/widgets/entity/popups/selectFieldType.html?t="+(new Date().getTime()), 
+                            buttons, 'Select data type of field', 
+                            {  container:'detailtypes-type-popup',
+                                width:800,
+                                height:620,
+                                default_palette_class: this.options.default_palette_class,
+                                close: function(){
+                                    $dlg.dialog('destroy');       
+                                    $dlg.remove();
+                                },
+                                open: function(){
+                                    $dlg.css({padding:0});
+                                    
+                                    window.hWin.HEURIST4.ui.initHelper( {button:$dlg.find('#hint_more_info1'), 
+                                                    title:'Field data type: Record pointer', 
+                                                    url:window.hWin.HAPI4.baseURL+'context_help/field_data_types.html #resource',
+                                                    position:{ my: "left top", at: "left top", of:$dlg}, no_init:true} ); 
+                                    window.hWin.HEURIST4.ui.initHelper( {button:$dlg.find('#hint_more_info2'), 
+                                                    title:'Field data type: Relationship marker', 
+                                                    url:window.hWin.HAPI4.baseURL+'context_help/field_data_types.html #relmarker',
+                                                    position:{ my: "left top", at: "left top", of:$dlg}, no_init:true} ); 
+                                    
+                                }  //end open event
+                        });
+
+                }});
+                
+            }
 
             $(elements[0]).change(); //trigger
         }
@@ -1166,13 +1151,15 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
 
                 field_name = $Db.dty(dty_ID, 'dty_Name');
                 field_type  = $Db.dty(dty_ID, 'dty_Type');
+                let sub_rec_check = !that.options.create_sub_record || (field_type == 'resource' && !window.hWin.HEURIST4.util.isempty($Db.dty(dty_ID, 'dty_PtrTargetRectypeIDs')));
 
                 if( $Db.dty(dty_ID, 'dty_ShowInLists')!='0'
                     && field_type!='separator'
                     && (!aUsage || !aUsage.getById(dty_ID))
                     && (field_name.toLowerCase().indexOf( entered )>=0)
                     && (field_name.toLowerCase().indexOf( entered )>=0)
-                    && $Db.getConceptID('dty', dty_ID) != '2-247' )
+                    && $Db.getConceptID('dty', dty_ID) != '2-247'
+                    && sub_rec_check )
                 {
 
                     var ele;
@@ -1616,13 +1603,19 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
                 if(window.hWin.HEURIST4.util.isempty(dt_type)){ //actually it is already checked in _getValidatedValues
                     window.hWin.HEURIST4.msg.showMsgDlg('Field "Data type" is required');
                     fields = null;
+                }else if(this.options.create_sub_record && dt_type != 'resource'){
+                    return;
                 }else
-                
                 //last check for constrained pointer
                 if(window.hWin.HEURIST4.util.isempty(fields['dty_PtrTargetRectypeIDs'])) 
                 {
-                    if(dt_type=='resource')
-                    {    
+                    if(this.options.create_sub_record){
+                        window.hWin.HEURIST4.msg.showMsgDlg(
+                            'You must select a target record type for creating sub-record fields.',null, 'Warning',
+                            {default_palette_class:this.options.default_palette_class});
+                        return;
+                    }else if(dt_type=='resource'){
+    
                         window.hWin.HEURIST4.msg.showPrompt(
     'Please select target record type(s) for this entity pointer field before clicking the Create Field button.'
     +'<br><br>We strongly recommend NOT creating an unconstrained entity pointer unless you have a very special reason for doing so, as all the clever stuff that Heurist does with wizards for building facet searches, rules, visualisation etc. depend on knowing what types of entities are linked. It is also good practice to plan your connections carefully. If you really wish to create an unconstrained entity pointer - not recommended - check this box <input id="dlg-prompt-value" class="text ui-corner-all" '
@@ -1638,11 +1631,12 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
                             'Please select target record type. Unconstrained relationship is not allowed',null, 'Warning',
                             {default_palette_class:this.options.default_palette_class});
                         return;
-                    }    
+                    }
                     
                 }else if(!(dt_type=='resource' || dt_type=='relmarker')){
                     fields['dty_PtrTargetRectypeIDs'] = '';
-                }else if(this._currentEditID < 0 && dt_type=='resource' && window.hWin.HAPI4.get_prefs_def('edit_rts_open_formlet_after_add', 0)==0){ // show customisation for new record pointer fields
+                }else if(!this.options.create_sub_record && this._currentEditID < 0 && dt_type=='resource' 
+                    && window.hWin.HAPI4.get_prefs_def('edit_rts_open_formlet_after_add', 0)==0){ // show customisation for new record pointer fields
 
                     // Customisation options
                     var pointer_mode = this._editing.getFieldByName('rst_PointerMode');
@@ -1767,6 +1761,10 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
         }
         if(fields==null) return; //validation failed
         
+        if(this.options.create_sub_record){
+            fields['rst_CreateChildIfRecPtr'] = 1;
+            fields['rst_MaxValues'] = 0;
+        }
         
         if(this._currentEditID>0 
             && !fields['pwd_ReservedChanges']
@@ -2134,7 +2132,7 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
             var btn_array = this._super();
         
             // Add extra save button to new base field for a record, replaces the original checkbox
-            if(this.options.newFieldForRtyID > 0 && !this.options.newFieldType){
+            if(this.options.newFieldForRtyID > 0 && !this.options.newFieldType && !this.options.create_sub_record){
                 var that = this;
                 
                 btn_array.splice(1, 0, {

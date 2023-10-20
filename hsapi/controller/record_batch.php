@@ -84,6 +84,10 @@
 
             $res = $dbRecDetails->resetThumbnails();
             
+        }else if(@$_REQUEST['a'] == 'create_sub_records'){
+
+            $res = $dbRecDetails->createSubRecords();
+
         }else {
 
             $system->addError(HEURIST_INVALID_REQUEST, "Type of request not defined or not allowed");

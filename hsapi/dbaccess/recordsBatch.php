@@ -1906,6 +1906,238 @@ public methods
             }
 
         }
-    }    
+    }
+
+    /**
+     * Create sub records for the given record type
+     *  Selected record fields are transferred to the newly created records of the selected 'sub-record' type
+     *  This new 'sub-record' are set as a child record to the original record, the source of the field values
+     * 
+     * @return false|array - false on error | array with keys count (number of new records) and record_ids (comma list of new record ids)
+     */
+    public function createSubRecords(){
+
+        // Can only be used by an administrator
+        if(!$this->system->is_admin()){
+            $this->system->addError(HEURIST_ACTION_BLOCKED, 'Only database administrators can create sub records');
+            return false;
+        }
+
+        $system = $this->system;
+        $mysqli = $system->get_mysqli();
+
+        $system->defineConstant('DT_PARENT_ENTITY');
+        if(!defined('DT_PARENT_ENTITY')){
+            $system->addError(HEURIST_ERROR, 'An error occurred while attempting to define system constants');
+            return false;
+        }
+
+        $data = $this->data;
+
+        // Retrieve and validate values
+
+        /** List of values:
+         * src_rty => Source record type
+         * src_dtys => Source base fields
+         * trg_rty => Target record type
+         * trg_dty => Target record pointer field
+         * split_values => Create a record per repeated value for each record
+         */
+
+        if(empty(@$data['src_rty']) || empty(@$data['trg_rty']) || empty(@$data['src_dtys']) || empty(@$data['trg_dty'])){
+            $system->addError(HEURIST_INVALID_REQUEST, 'Parameters missing');
+            return false;
+        }
+
+        $source_rty = intval($data['src_rty']);
+        $target_rty = intval($data['trg_rty']);
+        $split_values = empty(@$data['split_value']) ? 0 : $data['split_value'];
+        $source_ids = prepareIds($data['src_dtys']);
+        $target_field = intval($data['trg_dty']);
+
+        if($source_rty <= 0){
+            $system->addError(HEURIST_INVALID_REQUEST, 'Invalid source record type provided');
+            return false;
+        }
+        if($target_rty <= 0){
+            $system->addError(HEURIST_INVALID_REQUEST, 'Invalid target record type provided');
+            return false;
+        }
+        if(empty($source_ids)){
+            $system->addError(HEURIST_INVALID_REQUEST, 'Invalid source fields prepared');
+            return false;
+        }
+        if($target_field <= 0){
+            $system->addError(HEURIST_INVALID_REQUEST, 'Invalid target field provided');
+            return false;
+        }
+
+        // Ensure target field exists in source structure and is a record pointer
+        $query = "SELECT rst_ID FROM defRecStructure INNER JOIN defDetailTypes ON dty_ID = rst_DetailTypeID WHERE rst_RecTypeID = $source_rty AND rst_DetailTypeID = $target_field AND dty_Type = 'resource'";
+        $target_in_struct = mysql__select_value($mysqli, $query);
+        if($target_in_struct <= 0){
+            $system->addError(HEURIST_ACTION_BLOCKED, 'Invalid target field');
+            return false;
+        }
+
+        // Retieve existing records of source type
+        $record_ids = mysql__select_list2($mysqli, "SELECT rec_ID FROM Records WHERE rec_FlagTemporary != 1 AND rec_RecTypeID = $source_rty", 'intval');
+
+        if(empty($record_ids)){
+            $system->addError(HEURIST_ACTION_BLOCKED, 'No source records found');
+            return false;
+        }
+
+        $rec_count = count($record_ids); // this is to avoid multiple swf emails when creating records
+
+        $new_records = array(); // final array of newly created records
+
+        $keep_autocommit = mysql__begin_transaction($mysqli);
+
+        foreach($record_ids as $rec_id){
+
+            // 1. Get values -----
+            $details_to_transfer = array();
+            $has_values = false;
+
+            foreach($source_ids as $dty_id){
+
+                $details = mysql__select_list2($mysqli, "SELECT dtl_ID FROM recDetails WHERE dtl_RecID = $rec_id AND dtl_DetailTypeID = $dty_id");
+
+                if(count($details) == 0){ // skip
+                    continue;
+                }
+
+                $idx = 0;
+
+                if($split_values == 0){
+                    array_push($details_to_transfer, ...$details);
+                }else{
+                    foreach($details as $dtl_ID){
+
+                        if(!array_key_exists($idx, $details_to_transfer)){
+                            $details_to_transfer[$idx] = array();
+                        }
+                        array_push($details_to_transfer[$idx], ...$dtl_ID);
+    
+                        ++ $idx;
+                    }
+                }
+
+                $has_values = true;
+            }
+
+            if(!$has_values){
+                continue;
+            }
+
+            // 2. Create new sub-records -----
+            // Include references to the parent record
+            $record = array(
+                'ID' => 0,
+                'no_validation' => 'ignore_all',
+                'rec_RecTypeID' => $target_rty,
+                'details' => array(
+                    DT_PARENT_ENTITY => array($rec_id)
+                )
+            );
+
+            $new_rec_ids = array();
+            if($split_values == 0){
+
+                //$record['details'][DT_PARENT_ENTITY] = array($rec_id);
+
+                $result = recordSave($this->system, $record, false, false, 0, $rec_count); // $rec_count to avoid sending multiple swf emails
+                if($result['status'] != HEURIST_OK){
+
+                    $mysqli->rollback();
+                    if($keep_autocommit===true) $mysqli->autocommit(TRUE);
+
+                    return false;
+                }
+
+                $new_rec_ids[] = $result['data'];
+            }else{
+
+                foreach($details_to_transfer as $details){
+
+                    //$record['details'][DT_PARENT_ENTITY] = array($rec_id);
+
+                    $result = recordSave($this->system, $record, false, false, 0, $rec_count); // $rec_count to avoid sending multiple swf emails
+                    if($result['status'] != HEURIST_OK){
+
+                        $mysqli->rollback();
+                        if($keep_autocommit===true) $mysqli->autocommit(TRUE);
+
+                        return false;
+                    }
+
+                    $new_rec_ids[] = $result['data'];
+                }
+            }
+
+            // 3. Update dtl_RecID for original values to point to new records -----
+            foreach($new_rec_ids as $idx => $rec_id){
+
+                $dtl_IDs = $details_to_transfer;
+                if($split_values != 0){
+                    $dtl_IDs = $details_to_transfer[$idx];
+                }
+
+                $upd_where = count($dtl_IDs) == 1 ? ("= " . $dtl_IDs[0]) : ("IN (" . implode(',', $dtl_IDs) . ")");
+                $upd_query = "UPDATE recDetails SET dtl_RecID = $rec_id WHERE dtl_ID $upd_where";
+                $res = $mysqli->query($upd_query);
+
+                if(!$res || $mysqli->affected_rows == 0){ // affected rows should always be greater than 0
+
+                    $msg = "<br><br>Error => " . $mysqli->error . "<br><br>Query => $upd_query";
+                    $msg .= "<br><br>dtl_IDs => " . print_r($dtl_IDs, TRUE);
+                    $system->addError(HEURIST_DB_ERROR, "An SQL error occurred while attempting to update the original values from record #$rec_id");
+
+                    $mysqli->rollback();
+                    if($keep_autocommit===true) $mysqli->autocommit(TRUE);
+
+                    return false;
+                }
+            }
+
+            // 4. Add child reference to original record -----
+
+            // Get original record's header fields, to avoid lossing them
+            $record = recordSearchByID($this->system, $rec_id, false);
+            if(!$record){
+
+                $mysqli->rollback();
+                if($keep_autocommit===true) $mysqli->autocommit(TRUE);
+                return false;
+            }
+
+            // Add rec pointer value(s)
+            $record['ID'] = $record['rec_ID'];
+            unset($record['rec_ID']);
+            $record['no_validation'] = 1;
+            $record['details'] = array(
+                $target_field => $new_rec_ids
+            );
+
+            $result = recordSave($this->system, $record, false, false, 2);
+            if($result['status'] != HEURIST_OK || $result['data'] != $record['ID']){
+
+                $mysqli->rollback();
+                if($keep_autocommit===true) $mysqli->autocommit(TRUE);
+
+                return false;
+            }
+
+            array_push($new_records, ...$new_rec_ids); // add new rec ids to array
+        }
+
+        $mysqli->commit();
+        if($keep_autocommit===true) $mysqli->autocommit(TRUE);
+
+        $final_count = count($new_records); // get final count of new records
+
+        return array('count' => $final_count, 'record_ids' => implode(',', $new_records));
+    }
 }
 ?>
