@@ -1184,7 +1184,7 @@ function recordGetAllIncremenetedValues($system, $params){
         $rst_dty_filter = '';
 
         if(!empty($ignore_dtys)){
-            $rst_dty_filter = 'AND rst_DetailTypeID ' . (count($ignore_dtys) > 1 ? ' NOT IN ('. explode($ignore_dtys, ',') .')' : ' != ' . $ignore_dtys[0]);
+            $rst_dty_filter = 'AND rst_DetailTypeID ' . (count($ignore_dtys) > 1 ? ' NOT IN ('. implode(',', $ignore_dtys) .')' : ' != ' . $ignore_dtys[0]);
         }
 
         $query = "SELECT rst_DetailTypeID FROM defRecStructure WHERE rst_DefaultValue = 'increment_new_values_by_1' AND rst_RecTypeID = $rty_ID $rst_dty_filter";
