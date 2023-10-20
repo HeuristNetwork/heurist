@@ -277,43 +277,50 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
         if(true || this.options.rts_editor){ //height:17px;background:#95A7B7 !important;
             this.rts_actions_menu = 
             $('<div class="rts-editor-actions" '
-                    +'style="width:110px;background:lightblue;display:none;padding-top:2px;'
-                    +'font-size:10px;font-weight:normal;cursor:pointer">'
-                   //+'<div style="line-height:18px">&nbsp;</div>' 
-                   +'<div data-action="edit" style="background:lightblue;padding:2px 4px;width:102px;">'
-                        +'<span class="ui-icon ui-icon-pencil" title="Edit" style="font-size:9px;font-weight:normal"/>Edit</div>'           
-                   +'<div data-action="field" style="background:lightcyan;padding:2px 4px;display:block;width: 102px;">'
-                        +'<span class="ui-icon ui-icon-arrowreturn-1-e" title="Add a new field to this record type" '
-                        +'style="transform: rotate(90deg);font-size:9px;font-weight:normal"/>Insert field</div>'
-                   +'<div data-action="block" title="Add a new group/separator" style="background:lightgreen;padding:2px 4px;width:102px;">'    +'<span class="ui-icon ui-icon-arrowreturn-1-e" '
-                       +'style="transform: rotate(90deg);font-size:9px;font-weight:normal"></span>Insert tab/divider</div>'               
-                        
-                   +'<div class="edit_rts_sel" style="padding:2px 4px;width: 102px;" title="Requirement type">'
-                        +'<select class="edit_rts s_reqtype"><option>required</option><option>recommended</option><option>optional</option>'
-                        +'<option value="forbidden">hidden</option></select></div>' 
-                                  
-                   +'<div class="edit_rts_sel" style="padding:2px 4px;width: 102px;" title="Repeatability">'
-                        +'<select class="edit_rts s_repeat"><option value="1">single</option><option value="0">repeatable</option>'
-                        +'<option value="2">limited 2</option><option value="3">limited 3</option>'
-                        +'<option value="5">limited 5</option><option value="10">limited 10</option></select></div>'           
-                        
-                   +'<div class="edit_rts_sel s_width" style="padding:2px 4px;width: 102px;" title="Width of field">Width: '
-                        +'<select class="edit_rts s_width" style="display:none">'
-                        +'<option>5</option><option>10</option><option>20</option><option>30</option>'
-                        +'<option>40</option><option>50</option><option>60</option><option>80</option><option>100</option>'
-                        +'<option>120</option><option>150</option>'
-                        +'<option>200</option><option>250</option>'
-                        +'<option value="0">Max</option></select></div>'
+                +'style="width:110px;background:lightblue;display:none;padding-top:2px;'
+                +'font-size:10px;font-weight:normal;cursor:pointer">'
+                //+'<div style="line-height:18px">&nbsp;</div>' 
+                +'<div data-action="edit" style="background:lightblue;padding:2px 4px;width:102px;">'
+                    +'<span class="ui-icon ui-icon-pencil" title="Edit" style="font-size:9px;font-weight:normal"/>Edit</div>'
+                +'<div data-action="field" style="background:lightcyan;padding:2px 4px;display:block;width: 102px;">'
+                    +'<span class="ui-icon ui-icon-arrowreturn-1-e" title="Add a new field to this record type" '
+                    +'style="transform: rotate(90deg);font-size:9px;font-weight:normal"/>Insert field</div>'
+                +'<div data-action="block" title="Add a new group/separator" style="background:lightgreen;padding:2px 4px;width:102px;">'    
+                    +'<span class="ui-icon ui-icon-arrowreturn-1-e" '
+                    +'style="transform: rotate(90deg);font-size:9px;font-weight:normal"></span>Insert tab/divider</div>'
+                +'<div data-action="sub-record" title="Create a sub-record" style="background:lightcyan;padding:2px 4px;width:102px;" class="admin-only">'    
+                    +'<span class="ui-icon ui-icon-arrowreturn-1-e" '
+                    +'style="transform: rotate(90deg);font-size:9px;font-weight:normal"></span>Insert sub-record</div>'
+                    
+                +'<div class="edit_rts_sel" style="padding:2px 4px;width: 102px;" title="Requirement type">'
+                    +'<select class="edit_rts s_reqtype"><option>required</option><option>recommended</option><option>optional</option>'
+                    +'<option value="forbidden">hidden</option></select></div>' 
+                                
+                +'<div class="edit_rts_sel" style="padding:2px 4px;width: 102px;" title="Repeatability">'
+                    +'<select class="edit_rts s_repeat"><option value="1">single</option><option value="0">repeatable</option>'
+                    +'<option value="2">limited 2</option><option value="3">limited 3</option>'
+                    +'<option value="5">limited 5</option><option value="10">limited 10</option></select></div>'
+                    
+                +'<div class="edit_rts_sel s_width" style="padding:2px 4px;width: 102px;" title="Width of field">Width: '
+                    +'<select class="edit_rts s_width" style="display:none">'
+                    +'<option>5</option><option>10</option><option>20</option><option>30</option>'
+                    +'<option>40</option><option>50</option><option>60</option><option>80</option><option>100</option>'
+                    +'<option>120</option><option>150</option>'
+                    +'<option>200</option><option>250</option>'
+                    +'<option value="0">Max</option></select></div>'
 
-                   +'<span class="edit_rts_btn" style="top:24px;left:80px;position:absolute;background:lightblue;display:none" '
-                   +' data-apply="1" title="Save changes for field properties">Apply</span>'
-                   +'<span class="edit_rts_btn" style="top:24px;left:130px;position:absolute;background:lightblue;display:none">'
-                   +'Cancel</span>'
-                           
-                    +'</div>')
-                    .appendTo(this.element);
+                +'<span class="edit_rts_btn" style="top:24px;left:80px;position:absolute;background:lightblue;display:none" '
+                +' data-apply="1" title="Save changes for field properties">Apply</span>'
+                +'<span class="edit_rts_btn" style="top:24px;left:130px;position:absolute;background:lightblue;display:none">'
+                +'Cancel</span>'
             
-            
+            +'</div>')
+            .appendTo(this.element);
+
+            if(!window.hWin.HAPI4.is_admin()){
+                this.rts_actions_menu.find('.admin-only').hide();
+            }
+
             window.hWin.HEURIST4.ui.initHSelect(this.rts_actions_menu.find('select.s_reqtype'),
                                             false, {'max-width':'100px','font-size':'0.9em', padding:0});
             window.hWin.HEURIST4.ui.initHSelect(this.rts_actions_menu.find('select.s_repeat'),
@@ -429,15 +436,14 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                         var action = ele.attr('data-action');
                         if(!action) action = ele.parent().attr('data-action');
                         
-                        if(action=='field' || action=='block' || action=='edit'){
+                        if(action=='field' || action=='block' || action=='edit' || action=='sub-record'){
                             
                             function __modifyStructureAction(){
                                 
                                 that._editing.setModified(0);
+                                let rec_dlg = that.options.isdialog && that._as_dialog != null ? that._as_dialog.parent() : null; 
 
-                                if(action=='field'){    
-
-                                    var rec_dlg = that.options.isdialog && that._as_dialog != null ? that._as_dialog.parent() : null; 
+                                if(action=='field'){
 
                                     that.options.rts_editor.manageDefRecStructure(
                                         'showBaseFieldEditor', -1, dt_id, null, rec_dlg);
@@ -481,6 +487,10 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                                 }else if(action=='edit'){
                                     that.options.rts_editor.manageDefRecStructure(
                                         'editField', dt_id);
+                                }else if(action=='sub-record'){
+
+                                    that.options.rts_editor.manageDefRecStructure(
+                                        'showBaseFieldEditor', -1, dt_id, null, rec_dlg, true);
                                 }
                             }
                             

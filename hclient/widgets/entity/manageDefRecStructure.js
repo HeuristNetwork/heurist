@@ -46,6 +46,8 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
     defval_container: null,
     
     _calculated_usages: false, // has field usages been calculated (re-calculate on reload)
+
+    create_sub_record: false, // is the new field for creating sub records (child record(s)) automatically
     
     //
     //
@@ -1126,9 +1128,11 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
     // arg2 - add new field after dty_ID 
     // allow_proceed - flag to ask user first
     // parent_dialog - parent dialog/popup
+    // create_sub_record - whether to treat the new field as a sub record field 
+    //                      (automatically creates child records for current record type)
     //
-    showBaseFieldEditor: function( arg1, arg2, allow_proceed, parent_dialog ){
-        
+    showBaseFieldEditor: function( arg1, arg2, allow_proceed, parent_dialog, create_sub_record = false ){
+
         var that = this;
         
         if(allow_proceed!==true){
@@ -1158,6 +1162,8 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
         }
 
         var that = this;
+
+        this.create_sub_record = create_sub_record;
         
         if(!(dtyID>0)){ //new field
         
@@ -1175,6 +1181,7 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
             popup_options['title'] = 'Select or Define new field';
             popup_options['newFieldForRtyID'] = this.options.rty_ID;
             popup_options['selectOnSave'] = true;
+            popup_options['create_sub_record'] = this.create_sub_record;
             popup_options['onselect'] = function(event, res)
             {
                 //update recordset
@@ -1311,8 +1318,9 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
 
             fields['rst_PointerMode'] = rst_fields['rst_PointerMode'];
             fields['rst_PointerBrowserFilter'] = rst_fields['rst_PointerBrowserFilter'];
-            fields['rst_CreateChildIfRecPtr'] = rst_fields['rst_CreateChildIfRecPtr'];
+            fields['rst_CreateChildIfRecPtr'] = this.create_sub_record ? '1' : rst_fields['rst_CreateChildIfRecPtr'];
             fields['rst_DefaultValue_resource'] = rst_fields['rst_DefaultValue_resource'];
+            fields['rst_MaxValues'] = this.create_sub_record ? '0' : fields['rst_MaxValues'];
         }else if(dty_type=='enum'){
 
             if(fields['rst_TermsAsButtons'] == 1 && fields['rst_DisplayWidth'] < 100){
@@ -2512,6 +2520,10 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
         this.refreshRecset_Definition_TreeNodeItem(recID, null);    
         
         this._dragIsAllowed = true;
+
+        if(this.create_sub_record){
+            this._createSubRecords(recID);
+        }
     },
     
     //
@@ -3271,6 +3283,180 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
             $(node.span).addClass('ui-state-active');
             this.element.parents('.editStructure').animate({scrollTop: $(node.span).offset().top}, 1);
         }
+    },
+
+    //
+    // Create 'sub-records' for the current record type
+    //  Sub-records are child records that contain field values that original appeared within the parent record
+    //  The user will be prompted to select the fields to transfer to the sub-record(s)
+    // 
+    _createSubRecords: function(rstID){
+
+        // Setup details
+        let that = this;
+
+        const source_rtyid = this.options.rty_ID;
+        const source_name = $Db.rty(source_rtyid, 'rty_Name');
+        const sub_rec_fld = $Db.rst(source_rtyid, rstID, 'rst_DisplayName');
+        const target_rectypes = $Db.dty(rstID, 'dty_PtrTargetRectypeIDs').split(',');
+
+        let cur_target_rtyid = target_rectypes[0];
+        let cur_target_name = $Db.rty(cur_target_rtyid, 'rty_Name');
+        let available_fields = $Db.rst(source_rtyid);
+
+        let $dlg;
+
+        let msg = '<div style="margin-bottom: 10px; cursor: default;">'
+            + `The selected fields will be moved from <strong>${source_name}</strong> into the record type (<strong><span class="target_name">${cur_target_name}</span></strong>)<br>`
+            + `A new record of type <span class="target_name">${cur_target_name}</span> will be created for each record of type <strong>${source_name}</strong><br>`
+            + `The data will be transfered from the <strong>${source_name}</strong> records to the new <strong><span class="target_name">${cur_target_name}</span></strong> records<br>`
+            + `The <strong>${sub_rec_fld}</strong> field will be set to point to the new <strong><span class="target_name">${cur_target_name}</span></strong> records as child records`
+        + '</div>'
+        // option to split multi-values into separate records
+        + '<div>'
+            + '<input type="checkbox" name="split_values">'
+            + '<label for="split_values" style="float: right;">'
+                + 'If there are multiple values for any of the fields selected, create multiple records and assign multiple<br>'
+                + 'values to each record in the order they appear. WARNING: this is not recommended unless data has been<br>'
+                + 'consistently recorded as multiple values in a consistent order corresponding with multiple entities.'
+            + '</label>'
+        + '</div>'
+        // details
+        + '<div style="margin-top: 30px; cursor: default;">'
+            + `Source record type: <strong>${source_name}</strong><br>`
+            + `Target sub-record type: <strong><span class="target_name">${cur_target_name}</span></strong><br>`
+            + `Child record pointer: <strong>${sub_rec_fld}</strong><br><br>`
+            + 'Note 1: creation of sub-records is very tedious to undo - use with care<br><br>'
+            + 'Note 2: If the record type already exists it may have requirements which are not satisfied<br>'
+            + 'by the data being transferred eg. missing values for required fields. This can be identified<br>'
+            + 'after this step through Admin > Verify integrity.'
+        + '</div>'
+        + '<div style="margin-top: 10px; cursor: default;">'
+            + 'Select fields to be transferred to sub-records:<br><br>'
+            + '<div id="field_list" style="padding-left: 10px;">';
+
+        // Get list of fields
+        for(const id of available_fields.getIds()){
+            let type = $Db.dty(id, 'dty_Type');
+            if(id == rstID || type == 'relmarker' || type == 'separator'){ continue; }
+            let record = available_fields.getRecord(id);
+            msg += `<label><input type="checkbox" class="rty_fields" value="${id}">${available_fields.fld(record, 'rst_DisplayName')}</label><br>`;
+        }
+
+        msg += '</div></div>';
+
+        let btns = {};
+        btns[window.HR('Create sub records')] = function(){
+            let $selected_fields = $dlg.find('.rty_fields:checked');
+
+            if($selected_fields.length < 1){
+                window.hWin.HEURIST4.msg.showMsgFlash('Please select a field to transfer...', 3000);
+                return;
+            }
+
+            let request = {
+                'a': 'create_sub_records',
+                'src_rty': source_rtyid,
+                'trg_rty': cur_target_rtyid,
+                'split_value': $dlg.find('[name="split_values"]').is(':checked') ? 1 : 0,
+                'src_dtys': [],
+                'trg_dty': rstID
+            };
+
+            $.each($selected_fields, (idx, ele) => {
+                ele = $(ele);
+                let id = ele.val();
+
+                if(window.hWin.HEURIST4.util.isNumber(id) && id > 0){
+                    request['src_dtys'].push(id);
+                }
+            });
+
+            window.hWin.HEURIST4.msg.bringCoverallToFront(this.element);
+
+            window.hWin.HAPI4.RecordMgr.batch_details(request, function(response){ console.log(response);
+
+                window.hWin.HEURIST4.msg.sendCoverallToBack();
+
+                if(response.status != window.hWin.ResponseStatus.OK){
+                    window.hWin.HEURIST4.msg.showMsgErr(response);
+                    return;
+                }
+
+                let count = response.data.count;
+                let new_rec_ids = response.data.record_ids;
+
+                if(count == 0){
+                    window.hWin.HEURIST4.msg.showMsgFlash('No sub records created...', 3000);
+                }else{
+                    let url = window.hWin.HAPI4.baseURL + '?db='+window.hWin.HAPI4.database+'&q=ids:'+new_rec_ids;
+                    let $res_dlg = window.hWin.HEURIST4.msg.showMsgDlg(`Created ${count} ${cur_target_name} records (view new records <a href="${url}" target="_blank">here</a>)`, 
+                        null, {title: 'Sub-records created'}, {default_palette_class: 'ui-heurist-populate', close: function(){
+
+                            $dlg.dialog('close');
+                            $res_dlg.dialog('close');
+                            that.previewEditor.manageRecords('reloadEditForm', true); 
+                        }
+                    });
+                }
+            });
+        };
+        btns[window.HR('Cancel')] = function(){
+            $dlg.dialog('close');
+        };
+
+        let labels = {
+            title: window.HR('Create sub-record from selected fields'),
+            yes: window.HR('Create sub records'),
+            cancel: window.HR('Cancel')
+        };
+
+        $dlg = window.hWin.HEURIST4.msg.showMsgDlg(msg, btns, labels, {default_palette_class: 'ui-heurist-populate', dialogId: 'create-sub-record'});
+
+        /*
+        // If multiple target types, allow uses to select one
+        $dlg.find('#target_rectype').hSelect({
+            onChange: function(){
+                cur_target_rtyid = $dlg.find('#target_rectype').val();
+                let name = $dlg.find('#target_rectype').find(`[value="${cur_target_rtyid}"]`).html();
+
+                $dlg.find('.target_name').text(name);
+
+                $dlg.find('#shared_flds_only').prop('checked', false);
+            }
+        });
+
+        // Filter field list by shared fields only
+        $dlg.find('#shared_flds_only').on('change', (e) => {
+            
+            let get_shared = $dlg.find('#shared_flds_only').is('checked');
+            let dty_IDs = [];
+            let list = '';
+
+            let $cont = $dlg.find('#field_list');
+
+            if(get_shared){
+                dty_IDs = $Db.getSharedFields([source_rtyid, cur_target_rtyid], rstID);
+            }else{
+                dty_IDs = available_fields.getIds();
+            }
+
+            if(dty_IDs.length == 0 || (dty_IDs.length - 1) == $cont.find('input').length){
+                return;
+            }
+
+            $cont.empty();
+
+            for(const id of dty_IDs){
+                let type = $Db.dty(id, 'dty_Type');
+                if(id == rstID || type == 'relmarker' || type == 'separator'){ continue; }
+                let record = available_fields.getRecord(id);
+                list += `<label><input type="checkbox" class="rty_fields" value="${id}">${available_fields.fld(record, 'rst_DisplayName')}</label><br>`;
+            }
+
+            $cont.html(list);
+        });
+        */
     }
 
 });
