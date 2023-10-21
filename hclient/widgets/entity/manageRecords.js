@@ -462,10 +462,9 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                                             let fieldConfig = fields[idx]['dtFields']['rst_FieldConfig'];
 
                                             let $dlg;
-                                            let msg = '<div><label>Separator type:</label><select id="sep_type"></select></div>';
+                                            let msg = '<label>Choose separator type:</label><div style="margin: 10px 0px 0px 10px"><select id="sep_type"></select></div>';
 
                                             let btns = {};
-                                            btns[window.HR('Cancel')] = () => { $dlg.dialog('close'); };
                                             btns[window.HR('Insert')] = () => {
 
                                                 let sep_type = $dlg.find('#sep_type').val(); // get value first
@@ -474,11 +473,52 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
 
                                                 that.options.rts_editor.manageDefRecStructure('addNewSeparator', dt_id, sep_type);
                                             };
+                                            btns[window.HR('Cancel')] = () => { $dlg.dialog('close'); };
 
-                                            $dlg = window.hWin.HEURIST4.msg.showMsgDlg(msg, btns, {title: 'Inserting separator'}, {default_palette_class: 'ui-heurist-design'});
+                                            $dlg = window.hWin.HEURIST4.msg.showMsgDlg(msg, btns, {title: 'Inserting separator'}, 
+                                                    {default_palette_class: 'ui-heurist-design', height: 385, width: 285});
 
-                                            window.hWin.HEURIST4.ui.createSelector($dlg.find('#sep_type')[0], fieldConfig);
-                                            window.hWin.HEURIST4.ui.initHSelect($dlg.find('#sep_type'), false);
+                                            let $select = $dlg.find('#sep_type');
+
+                                            window.hWin.HEURIST4.ui.createSelector($select[0], fieldConfig);
+                                            window.hWin.HEURIST4.ui.initHSelect($select, false);
+
+                                            if($select.hSelect('instance') !== undefined){
+
+                                                $select.hSelect('option', 'position', {
+                                                    my: 'left top',
+                                                    at: 'left top',
+                                                    of: $select.hSelect('widget')
+                                                });
+
+                                                $select.hSelect('open');
+
+                                                let $menu = $select.hSelect('menuWidget');
+
+                                                that._on($select, {
+                                                    'hselectchange': function(event, ui){ // highlight selection
+
+                                                        const idx = ui.item.index;
+
+                                                        $menu.find('li > div').removeClass('ui-heurist-header');
+                                                        $($menu.find('li > div')[idx]).addClass('ui-heurist-header');
+                                                    },
+                                                    'hselectclose': function(){ // keep open
+                                                        $select.hSelect('open');
+                                                    }
+                                                });
+
+                                                $($menu.find('li > div')[1]).addClass('ui-heurist-header'); // highlight first option
+                                            }
+
+                                            // Changes to dialog buttons
+                                            $($dlg.parent().find('.ui-dialog-buttonset button')[0]).css({
+                                                'margin-right': '20px',
+                                                'font-weight': 'bold'
+                                            });
+                                            $($dlg.parent().find('.ui-dialog-buttonset button')[1]).css({
+                                                'margin-right': '10px'
+                                            });
 
                                             break;
                                         }
