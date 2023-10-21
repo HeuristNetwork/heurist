@@ -4007,6 +4007,14 @@ $.widget( "heurist.editing_input", {
                 btn = $(btn);
                 var chbox = that.element.find('div.field-visibility2[data-input-id="'+btn.attr('data-input-id')+'"]');
                 var $input_div =  btn.parent('.input-div');
+
+                let $first_icon = $input_div.find('.show-onhover:first');
+                if($first_icon.length == 1 && !$first_icon.hasClass('field-visibility')){ // make eye the first icon
+                    $first_icon.before(btn);
+                    if($input_div.find('.vis_text_help').length > 0){
+                        $first_icon.before($input_div.find('.vis_text_help'));
+                    }
+                }
                 
                 if(btn.attr('hide_field')=='1' || vis_mode == 'viewable' || vis_mode == 'hidden'){
 
@@ -4026,7 +4034,18 @@ $.widget( "heurist.editing_input", {
                         btn.css('display','inline-block');
 
                         if(vis_mode != 'public'){ // change rollover for eye icon
-                            btn.attr('title', vis_mode == 'viewable' ? 'This value is only visible to logged-in users' : 'This value is only visible to the owner/owner group');
+
+                            const mini_text = vis_mode == 'viewable' ? 'logged-in only' : 'owner only';
+                            const vis_title = vis_mode == 'viewable' ? 'This value is only visible to logged-in users' : 'This value is only visible to the owner/owner group';
+
+                            btn.attr('title', vis_title);
+
+                            if($input_div.find('.vis_text_help').length == 0){
+                                let $vis_text = $('<span>', {title: vis_title, class: 'vis_text_help', style: 'vertical-align: 3px; padding-left: 5px; font-size: 10px; color: #999;'})
+                                                .text(mini_text)
+                                                .appendTo($input_div); //insertAfter(btn) - inserts multiple instances
+                                $vis_text.before(btn);
+                            }
                         }
                     }else{
                         chbox.find('span.ui-icon').removeClass('ui-icon-check-off').addClass('ui-icon-check-on');
