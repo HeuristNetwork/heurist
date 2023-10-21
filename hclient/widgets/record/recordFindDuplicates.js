@@ -163,7 +163,7 @@ $.widget( "heurist.recordFindDuplicates", $.heurist.recordAction, {
                     sort_field: settings.sort_field,
                     distance : settings.distance};
 
-                var url = window.hWin.HAPI4.baseURL + 'hsapi/controller/record_verify.php'
+                var url = window.hWin.HAPI4.baseURL + 'hsapi/controller/recordVerify.php'
                 var that = this;
 
                 window.hWin.HEURIST4.util.sendRequest(url, request, null, function(response){
@@ -471,7 +471,7 @@ $.widget( "heurist.recordFindDuplicates", $.heurist.recordAction, {
             db       : window.hWin.HAPI4.database,
             ignore   : sRecIds.join(',')};
 
-        var url = window.hWin.HAPI4.baseURL + 'hsapi/controller/record_verify.php'
+        var url = window.hWin.HAPI4.baseURL + 'hsapi/controller/recordVerify.php'
 
         window.hWin.HEURIST4.util.sendRequest(url, request, null, function(response){
 
@@ -495,7 +495,7 @@ $.widget( "heurist.recordFindDuplicates", $.heurist.recordAction, {
             db       : window.hWin.HAPI4.database,
             ignore   : 'clear'};
 
-        var url = window.hWin.HAPI4.baseURL + 'hsapi/controller/record_verify.php'
+        var url = window.hWin.HAPI4.baseURL + 'hsapi/controller/recordVerify.php'
 
         window.hWin.HEURIST4.util.sendRequest(url, request, null, function(response){
 

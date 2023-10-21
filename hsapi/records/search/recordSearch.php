@@ -1,7 +1,6 @@
 <?php
-//@TODO convert to class
-
 /**
+* recordSearch.php (former db_recsearch.php)
 * Library to search records
 *
 * recordSearchMinMax - Find minimal and maximal values for given detail type and record type

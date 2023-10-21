@@ -30,7 +30,7 @@
 * @subpackage  Records/View
 */
 require_once(dirname(__FILE__)."/../../hsapi/System.php");
-require_once(dirname(__FILE__)."/../../hsapi/dbaccess/db_recsearch.php");
+require_once(dirname(__FILE__)."/../../hsapi/records/search/recordSearch.php");
 
 $system = new System();
 

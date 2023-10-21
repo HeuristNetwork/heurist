@@ -43,7 +43,7 @@ if(!$system->init(@$_REQUEST['db'])){
 //require_once(dirname(__FILE__).'/../../records/woot/woot.php');
 require_once(dirname(__FILE__).'/../../hsapi/dbaccess/db_structure.php');
 require_once(dirname(__FILE__).'/../../hsapi/dbaccess/db_files.php');
-require_once(dirname(__FILE__).'/../../hsapi/dbaccess/db_recsearch.php');
+require_once(dirname(__FILE__).'/../../hsapi/records/search/recordSearch.php');
 require_once(dirname(__FILE__).'/../../hsapi/dbaccess/db_users.php');
 require_once(dirname(__FILE__).'/../../hsapi/dbaccess/db_rel_details_temp.php');
 

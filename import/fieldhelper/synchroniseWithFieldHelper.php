@@ -291,6 +291,14 @@ $failed_exts = array();
                         }
                     }
                     */
+                    
+                    $dir = sanitizePath($dir);
+                    if(isPathInHeuristUploadFolder($dir, true)===false){
+                            print '<div style="color:red">'.htmlspecialchars($orig).'is ignored. Folder must be in heurist filestore directory.</div>';
+                            continue;
+                    }
+                    
+/*                    
                     $dir = str_replace('\\','/',$dir);
                     if(!( substr($dir, 0, strlen(HEURIST_FILESTORE_DIR)) === HEURIST_FILESTORE_DIR )){
                         $orig = $dir;
@@ -316,6 +324,7 @@ $failed_exts = array();
                             continue;
                         }
                     }
+*/                    
 
                     if(substr($dir, -1) != '/'){
                         $dir .= "/";
@@ -360,7 +369,7 @@ $failed_exts = array();
                         }
                     }
                 }else if ($dir) {
-                    print "<div style=\"color:red\">Folder was not found: $dir</div>";
+                    print '<div style="color:red">Folder was not found: '.htmlspecialchars($dir).'</div>';
                 }
             }
         }
@@ -629,7 +638,7 @@ $failed_exts = array();
 
                                 if ( @$out['status'] != HEURIST_OK ) {
                                     print '<div>File: <i>'.htmlspecialchars($filename_base).'</i> <span  style="color:red">Error: '.
-                                    $out["message"]."</span></div>";
+                                    htmlspecialchars($out["message"])."</span></div>";
                                     
                                 }else{
                                     if($new_md5==null){
@@ -657,7 +666,7 @@ $failed_exts = array();
                                     if (@$out['warning']) {
                                         print '<div>File: <i>'.htmlspecialchars($filename_base).
                                         '</i> <span  style="color:#ff8844">Warning: '.
-                                        implode("; ",$out["warning"])."</span></div>";
+                                        htmlspecialchars(implode("; ",$out["warning"]))."</span></div>";
                                     }
 
                                 }

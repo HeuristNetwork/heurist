@@ -140,7 +140,7 @@
                         }
                     }
     
-                    require_once (dirname(__FILE__).'/../dbaccess/db_recsearch.php');
+                    require_once (dirname(__FILE__).'/../records/search/recordSearch.php');
 
                     $response = recordSearch($system, $params);
                 }else{ // unable to login, cannot access records

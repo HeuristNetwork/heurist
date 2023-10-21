@@ -13,7 +13,7 @@ getWootText  - returns text related with given record ID
 
 require_once(dirname(__FILE__).'/../../hsapi/System.php');
 require_once(dirname(__FILE__).'/../../hsapi/dbaccess/db_structure.php');
-require_once(dirname(__FILE__).'/../../hsapi/dbaccess/db_recsearch.php');
+require_once(dirname(__FILE__).'/../../hsapi/records/search/recordSearch.php');
 require_once(dirname(__FILE__).'/../../hsapi/dbaccess/db_rel_details_temp.php');
 
 require_once(dirname(__FILE__).'/../../hsapi/utilities/Temporal.php');
@@ -151,7 +151,7 @@ class ReportRecord {
             return $this->loaded_recs[$rec_ID];
         }
 
-        $rec = recordSearchByID($this->system, $rec_ID); //from db_recsearch.php
+        $rec = recordSearchByID($this->system, $rec_ID); //from recordSearch.php
         
         if($rec){
             $rec['rec_Tags'] = recordSearchPersonalTags($this->system, $rec_ID); //for current user only

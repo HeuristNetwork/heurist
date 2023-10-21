@@ -5,7 +5,7 @@
 * Searches for duplicates by header or detail fields
 * It uses metaphone, levenshtein (or @todo text_similar methods)
 * 
-* Controller is record_verify
+* Controller is recordVerify
 *
 * @package     Heurist academic knowledge management system
 * @link        https://HeuristNetwork.org

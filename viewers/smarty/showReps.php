@@ -50,7 +50,7 @@
 /* TODO: rename to showReports.php */
 
 require_once(dirname(__FILE__).'/../../hsapi/System.php');
-require_once(dirname(__FILE__).'/../../hsapi/dbaccess/db_recsearch.php');
+require_once(dirname(__FILE__).'/../../hsapi/records/search/recordSearch.php');
 require_once(dirname(__FILE__).'/../../hsapi/dbaccess/db_files.php');
 
 require_once(dirname(__FILE__).'/../../vendor/autoload.php'); //for geoPHP
@@ -216,7 +216,7 @@ function executeSmartyTemplate($system, $params){
     }else { //search record ids with query params
 
         $params['detail'] = 'ids'; // return ids only
-        $qresult = recordSearch($system, $params); //see db_recsearch.php
+        $qresult = recordSearch($system, $params); //see recordSearch.php
 
         if(@$qresult['status']==HEURIST_OK){
             $qresult = $qresult['data'];

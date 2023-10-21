@@ -21,7 +21,7 @@
 
 require_once(dirname(__FILE__).'/../../hsapi/System.php');
 require_once(dirname(__FILE__).'/../../hsapi/dbaccess/db_structure.php');
-require_once(dirname(__FILE__).'/../../hsapi/dbaccess/db_recsearch.php');
+require_once(dirname(__FILE__).'/../../hsapi/records/search/recordSearch.php');
 require_once(dirname(__FILE__).'/../../hsapi/dbaccess/conceptCode.php');
 
 if(!array_key_exists('rectype_ids', $_REQUEST)){
@@ -142,7 +142,7 @@ $sep = '';
 $rectypes = '';
 foreach ($rectype_ids as $rty_id) {
 
-    $rectype_structure = recordTemplateByRecTypeID($system, $rty_id); // db_recsearch.php
+    $rectype_structure = recordTemplateByRecTypeID($system, $rty_id); // recordSearch.php
     $rec_templates = '';
 
     if(!array_key_exists('error', $rectype_structure)){

@@ -1,9 +1,9 @@
 <?php
 
     /**
-    * Application interface. See hRecordMgr in hapi.js
-    * for varios utility and verification operations
-    * (@see recordDupes.php)
+    * Application interface. 
+    * @see recordFindDuplicates.js for client side
+    * @see recordDupes.php for actions
     * 
     * parameters
     * db - heurist database
@@ -32,8 +32,8 @@
     */
 
     require_once (dirname(__FILE__).'/../System.php');
-    require_once (dirname(__FILE__).'/../dbaccess/recordsDupes.php');
-    require_once (dirname(__FILE__).'/../dbaccess/utils_db.php');
+    require_once (dirname(__FILE__).'/../records/search/recordsDupes.php');
+    require_once (dirname(__FILE__).'/../utils/db/utils_db.php');
 
     $response = array();
     $res = false;

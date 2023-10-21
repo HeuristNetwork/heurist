@@ -103,7 +103,7 @@ if (@$argv) {
 
 require_once(dirname(__FILE__).'/../../hsapi/System.php');
 require_once(dirname(__FILE__).'/../../hsapi/dbaccess/db_structure.php');
-require_once(dirname(__FILE__).'/../../hsapi/dbaccess/db_recsearch.php');
+require_once(dirname(__FILE__).'/../../hsapi/records/search/recordSearch.php');
 require_once(dirname(__FILE__).'/../../hsapi/dbaccess/conceptCode.php');
 
 
@@ -1154,9 +1154,9 @@ function outputRecord($recID, $depth, $outputStub = false, $parentID = null){
     $hunifile = null;
 
     if($rectype_templates){
-        $record = recordTemplateByRecTypeID($system, $recID);//see db_recsearch
+        $record = recordTemplateByRecTypeID($system, $recID);//see recordSearch.php
     }else{
-        $record = recordSearchByID($system, $recID);//see db_recsearch
+        $record = recordSearchByID($system, $recID);//see recordSearch.php
     }
 
     $filter = (array_key_exists($depth, $RECTYPE_FILTERS) ? $RECTYPE_FILTERS[$depth] : null);
@@ -1461,7 +1461,7 @@ function outputDetail($dt, $value, $rt, $depth = 0, $outputStub) {
             if ($MAX_DEPTH == 0 && $outputStub) {
                 openTag('detail', $attrs);
 
-                $recinfo = recordSearchByID($system, $value['id']);//db_recsearch
+                $recinfo = recordSearchByID($system, $value['id']);//recordSearch.php
                 outputRecordStub($recinfo); //$recInfos[$value['id']]['record']);
                 closeTag('detail');
             } else {
@@ -1612,7 +1612,7 @@ function outputDetail($dt, $value, $rt, $depth = 0, $outputStub) {
         $attrs['isRecordPointer'] = "true";
         if ($MAX_DEPTH == 0 && $outputStub) {
             openTag('detail', $attrs);
-            $recinfo = recordSearchByID($system, $value['id']);//db_recsearch
+            $recinfo = recordSearchByID($system, $value['id']);//recordSearch.php
             outputRecordStub($recinfo); //$recInfos[$value['id']]['record']);
             closeTag('detail');
         } else {
@@ -1870,7 +1870,7 @@ if($rectype_templates){
     $result['records'] = $result;
     $result['reccount'] = count($result['records']);
 }else{
-    $result = recordSearch($system, $params); //see db_recsearch.php    
+    $result = recordSearch($system, $params); //see recordSearch.php
 
     if(@$result['status']==HEURIST_OK){
         $result = $result['data'];
