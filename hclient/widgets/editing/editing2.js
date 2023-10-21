@@ -281,6 +281,8 @@ function hEditing(_options) {
                         if(headerText == '-'){ // Placeholder for no text, just use a simple divider
                             headerText = '';
                             headerHelpText = '';
+                        }else if(headerHelpText == 'new separator'){ // remove default separator help
+                            headerHelpText = '';
                         }
 
                         var hele = $('<h4>')
