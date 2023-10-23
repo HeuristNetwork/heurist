@@ -537,9 +537,15 @@
 
         foreach ($dirs as $dir) {
             
+            $dir = sanitizePath($dir);
+            if( substr($dir, -1, 1) != '/' )  {
+                $dir .= '/';
+            }
+
+            
             if (!defined('HEURIST_FILESTORE_ROOT') || strpos($dir, HEURIST_FILESTORE_ROOT)!==false) {    
-                
-                $folder =  $dir;
+                //in database filestore
+                $folder = $dir;
                 $url = null;
                 
             }else{
@@ -550,17 +556,6 @@
             
             if (!(file_exists($folder) && is_dir($folder))) continue;
             
-            /*
-            if(is_dir($folder)){
-                continue;
-                if($is_reqursive){
-                    //$subcontent = folderContent($folder, $exts, true);
-                    //$records
-                }else{
-                    continue;
-                }
-            }
-            */
             
             $files = scandir($folder);
             foreach ($files as $filename) {

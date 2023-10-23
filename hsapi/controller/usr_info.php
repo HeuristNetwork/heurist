@@ -344,12 +344,42 @@
                 //session_write_close();
             }
 
-        }else if ($action=="sysimages") { //get list of system images
+        }else if ($action=="file_in_folder") { //get list of system images
         
-              $lib_path = @$_REQUEST['folders'];
-              $exts = array('png','svg');
+              $exts = @$_REQUEST['exts'];
+              if($exts){
+                    $exts = explode(',',$exts);
+              }
+              if(!is_array($exts) || count($exts)<1){
+                    $exts = array('png','svg');    
+              }
               
-              if(!is_array($lib_path) || count($lib_path)<1){
+              $source = @$_REQUEST['source'];
+              
+              if($source=='tilestacks'){
+                  $lib_path = array(HEURIST_FILESTORE_DIR.'uploaded_tilestacks/');
+              }else{ //assets
+                  $lib_path = array('admin/setup/iconLibrary/64px/');
+              }
+              
+              $res = folderContent($lib_path, $exts);
+              
+        }else if ($action=="foldercontent") { //get list of files for given folder
+        
+              //by default this are mbtiles in uploaded_tilestack  
+        
+              $source = @$_REQUEST['source'];
+              if(@$_REQUEST['exts']){
+                    $exts = explode(',',@$_REQUEST['exts']);    
+              }
+              if(!is_array($exts) || count($exts)<1){
+                    $exts = array('png','svg');    
+              }
+              
+              
+              if($source=='uploaded_tilestacks'){
+                  $lib_path = array(HEURIST_FILESTORE_DIR.'uploaded_tilestacks/');
+              }else{
                   $lib_path = array('admin/setup/iconLibrary/64px/'); //default
               }
               $res = folderContent($lib_path, $exts);

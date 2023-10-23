@@ -427,7 +427,7 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
     * 
     *   ------ 
     *   get_url_content_type - resolve mimetype for given url
-    *   get_sysimages
+    *   get_foldercontent
     *   get_sysfolders
     *   checkPresenceOfRectype - check and download missed rectypes
     *   import_definitions
@@ -1086,9 +1086,9 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
              * @param {string|Array.<string>} folders single folder or array of folders to search
              * @param {callserverCallback} callback 
              */
-            get_sysimages: function (folders, callback) {
+            get_foldercontent: function (source, exts, callback) {
                 /** @type {Request} */
-                var request = { a: 'sysimages', folders: folders };
+                var request = { a: 'foldercontent', source: source, exts:exts };
                 _callserver('usr_info', request, callback);
             },
 

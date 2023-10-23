@@ -371,9 +371,10 @@ $.widget( "heurist.manageRecUploadedFiles", $.heurist.manageEntity, {
                         sHelp = '';
                 }
                 sAdditional_Controls += '<div id="register_stack_container"><div class="header optional" style="vertical-align: top; display: table-cell;">'
-                    +'<label>Select existing resource:</label></div><span class="editint-inout-repeat-button" style="min-width: 22px; display: table-cell;"></span>'
+                    +'<label>Register previously uploaded:</label></div><span class="editint-inout-repeat-button" style="min-width: 22px; display: table-cell;"></span>'
                     +'<div class="input-cell" style="padding-bottom: 12px;">'
-                    +'<div id="btn_register_stack" style="display: inline-block;"></div>'+sHelp+'</div></div>';
+                    +'<div id="btn_register_stack" style="display: inline-block;"></div>'
+                    +'<div id="btn_register_single_file_stack" style="display: inline-block;"></div>'+sHelp+'</div></div>';
 
                 sHelp = '<div class="heurist-helper1" style="padding: 0.2em 0px;">'
                         + '<br>Store as a file in the chosen repository and linked to Heurist via its URL'
@@ -510,7 +511,7 @@ $.widget( "heurist.manageRecUploadedFiles", $.heurist.manageEntity, {
                     
                     this._edit_dialog.find('#btn_register_stack')
                         .css({'min-width':'9em','z-index':2,'margin-left':'5px'})
-                        .button({label: window.hWin.HR('Register previously uploaded image stack')
+                        .button({label: window.hWin.HR('Tielstack directory (eg. Zoomify)')
                         ,icons: {
                                 primary: "ui-icon-grid"
                         }})
@@ -552,6 +553,52 @@ $.widget( "heurist.manageRecUploadedFiles", $.heurist.manageEntity, {
                             
                             
                         });
+                        
+                    this._edit_dialog.find('#btn_register_single_file_stack')
+                        .css({'min-width':'9em','z-index':2,'margin-left':'5px'})
+                        .button({label: window.hWin.HR('Single file tilestack (eg. MBtiles)')
+                        ,icons: {
+                                primary: "ui-icon-grid"
+                        }})
+                        .click(function(e) {
+                            
+                            if(!that.select_file_dlg){
+                                that.select_file_dlg = $('<div/>').hide().appendTo( that._edit_dialog );
+                            }
+                                
+                            that.select_file_dlg.selectFile({
+                               source: 'uploaded_tilestacks',     
+                               extensions: 'mbtiles',
+                               title: window.HR('Select single file tilestack'),
+                               onselect:function(res){
+                                    if(res){
+                                        
+                                        if(that.options.edit_addrecordfirst){
+                                            //that.options.edit_addrecordfirst = false;
+                                            that._initControls();
+                                             
+                                            that._currentEditID = null;
+                                            that._editing.setFieldValueByName2('ulf_ExternalFileReference', res.filename, false);
+                                            
+                                            var ele2 = that._editing.getFieldByName('ulf_MimeExt');
+                                            ele2.editing_input('setValue', 'png' );
+                                            ele2.show();
+                                            //that.onEditFormChange();
+                                            var interval = setInterval(function(){
+                                                if(!window.hWin.HAPI4.is_callserver_in_progress()){
+                                                    clearInterval(interval);
+                                                    interval = 0;
+                                                    that._saveEditAndClose(null);        
+                                                }
+                                            },500);
+                                            
+                                        }
+                                    }
+                               }});
+                            
+                        });
+                        
+                        
                     this._edit_dialog.find('#register_stack_container').css('display', 'table-row');
                 }else{
                     this._edit_dialog.find('#register_stack_container').hide();

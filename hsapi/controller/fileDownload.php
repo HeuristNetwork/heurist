@@ -214,13 +214,19 @@ if(!$error){
                         if(!(strpos($external_url,'http://')===0 || strpos($external_url,'https://')===0)){
                             
                             //check presence of mbtiles file within folder
-                            $recs = folderContent(HEURIST_TILESTACKS_DIR.$external_url, 'mbtiles');
-                            if($recs['count']>0){
-                                $filename = $recs['records'][1][1];
-                                $filename = pathinfo($filename);
-                                $external_url = HEURIST_BASE_URL.'mbtiles.php?'.HEURIST_DBNAME.'/'.$external_url.$filename['filename'];
-                            }else{
-                                $external_url = HEURIST_TILESTACKS_URL.$external_url;    
+                            $path = HEURIST_TILESTACKS_DIR.$external_url;
+                            if(is_dir($path)){
+                                $recs = folderContent($path, 'mbtiles');
+                                if($recs['count']>0){
+                                    $filename = $recs['records'][1][1];
+                                    $filename = pathinfo($filename);
+                                    $external_url = HEURIST_BASE_URL.'mbtiles.php?'.HEURIST_DBNAME.'/'.$external_url.$filename['filename'];
+                                }else{
+                                    $external_url = $path;    
+                                }
+                            }else if (file_exists($path)) {
+                                $filename = pathinfo($path);
+                                $external_url = HEURIST_BASE_URL.'mbtiles.php?'.HEURIST_DBNAME.'/'.$filename['filename'];
                             }
                         }                        
                         

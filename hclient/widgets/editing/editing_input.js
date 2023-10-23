@@ -4103,7 +4103,7 @@ $.widget( "heurist.editing_input", {
         
         var that = this;
         
-        this.select_imagelib_dlg.select_imagelib({onselect:function(res){
+        this.select_imagelib_dlg.selectFile({source:'assets', onselect:function(res){
             if(res){
                 that.input_img.find('img').prop('src', res.url);
                 that.newvalues[$(that.inputs[0]).attr('id')] = res.path;  //$input

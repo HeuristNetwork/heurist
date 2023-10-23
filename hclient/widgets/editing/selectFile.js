@@ -1,5 +1,7 @@
 /**
-* Widget to select image (thumbs and icons) from image library
+* Widget to select 
+*       1) image file (thumb and icon) from image library
+*       2) tiled image mbtiles from uploaded_tilestacks
 * Used in editing_input and as popup for selected records in rec_list
 * 
 * @package     Heurist academic knowledge management system
@@ -18,7 +20,7 @@
 * See the License for the specific language governing permissions and limitations under the License.
 */
 
-$.widget( "heurist.select_imagelib", {
+$.widget( "heurist.selectFile", {
 
     // default options
     options: {
@@ -26,7 +28,11 @@ $.widget( "heurist.select_imagelib", {
 
         onselect: null,
         
-        assets:null, //array of directories with images
+        source:'assets', //or uploaded_tilestacks
+        
+        extensions: null,
+        
+        title: 'Select Image',
         
         size: 64
     },
@@ -50,7 +56,7 @@ $.widget( "heurist.select_imagelib", {
                 height: 640,
                 width: 840,
                 modal: true,
-                title: "Select Image",
+                title: window.HR(this.options.title),
                 resizeStop: function( event, ui ) {
                     var pele = that.element.parents('div[role="dialog"]');
                     that.element.css({overflow: 'none !important', width:pele.width()-24 });
@@ -92,15 +98,24 @@ $.widget( "heurist.select_imagelib", {
                                             + recordset.fld(record, 'file_name');
                            }
         
-                           var html_thumb = '<div class="recTypeThumb" style="top:0px !important;background-image: url(&quot;'
-                            +recThumb+'&quot;);opacity:1;height:'+that.options.size+'px !important">'
-                            +'</div>';
+                           if(this.options.source!='assets') {
 
-                            var html = '<div class="recordDiv" id="rd'+recID+'" recid="'+recID
-                                    + '" style="width:'+(that.options.size+4)+'px !important;height:'
-                                    + (that.options.size+4)+'px !important">'
-                                    + html_thumb + '</div>';
-                           
+                               var html = '<div class="recordDiv" id="rd'+recID+'" recid="'+recID
+                               + '" style="width:200px !important;height:50px !important"><p>'
+                               + recordset.fld(record, 'file_name')+'</p>size: '
+                               + (recordset.fld(record, 'file_size')/1024)+'KB</div>';
+
+                           }else{
+
+                               var html_thumb = '<div class="recTypeThumb" style="top:0px !important;background-image: url(&quot;'
+                               +recThumb+'&quot;);opacity:1;height:'+that.options.size+'px !important">'
+                               +'</div>';
+
+                               var html = '<div class="recordDiv" id="rd'+recID+'" recid="'+recID
+                               + '" style="width:'+(that.options.size+4)+'px !important;height:'
+                               + (that.options.size+4)+'px !important">'
+                               + html_thumb + '</div>';
+                           }
                            return html;  
                        }
                     });     
@@ -113,8 +128,9 @@ $.widget( "heurist.select_imagelib", {
                                     var recordset = selected_recs;
                                     var record = recordset.getFirstRecord();
                                     var filename = recordset.fld(record, 'file_name')
-                                    var res = {url:recordset.fld(record, 'file_url')+filename,
-                                               path:recordset.fld(record, 'file_dir')+filename};
+                                    var res = { filename: filename,
+                                                url:recordset.fld(record, 'file_url')+filename,
+                                                path:recordset.fld(record, 'file_dir')+filename};
 
                                     that.options.onselect.call(that, res);           
                                     if(that._as_dialog){
@@ -127,7 +143,7 @@ $.widget( "heurist.select_imagelib", {
             //search for images in given array of folder
             var that = this;                                                
        
-            window.hWin.HAPI4.SystemMgr.get_sysimages(this.options.assets, 
+            window.hWin.HAPI4.SystemMgr.get_foldercontent(this.options.source, this.options.extensions,
                 function(response){
                     if(response.status == window.hWin.ResponseStatus.OK){
                         

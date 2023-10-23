@@ -623,7 +623,11 @@ When we open "iiif_image" in mirador viewer we generate manifest dynamically.
                     if(strpos($record['ulf_OrigFileName'],'_tiled')===0 || $record['ulf_PreferredSource']=='tiled')
                     {
                         if(!@$record['ulf_ExternalFileReference']){
-                            $file2['ulf_ExternalFileReference'] = $ulf_ID.'/'; //HEURIST_TILESTACKS_URL.
+                            if($record['ulf_MimeExt']=='mbtiles'){
+                                $file2['ulf_ExternalFileReference'] = substr($record['ulf_OrigFileName'],7).'.mbtiles'; 
+                            }else{
+                                $file2['ulf_ExternalFileReference'] = $ulf_ID.'/'; //HEURIST_TILESTACKS_URL.
+                            }
                         }
                         $file2['ulf_FilePath'] = '';
                         
@@ -664,24 +668,11 @@ When we open "iiif_image" in mirador viewer we generate manifest dynamically.
                     
                     if(strpos($record['ulf_OrigFileName'],'_tiled')===0  || $record['ulf_PreferredSource']=='tiled')
                     {
-                        //create destination folder
-                        $dest = HEURIST_TILESTACKS_DIR.$ulf_ID.'/';
-                        $dest_exists = file_exists($dest);
-                            
-                        $warn = folderCreate2($dest, '');
-
                         if($record['ulf_MimeExt']=='mbtiles'){
                         
-                            if(!$dest_exists){
-                                //copy special tileserver htaccess 
-                                //$access_file = @$_SERVER["DOCUMENT_ROOT"].$installDir.'/external/php/.htaccess';
-                                //copy($access_file, $dest.'.htaccess');
-                            }
+                            $new_name = substr($record['ulf_OrigFileName'],7).'.mbtiles'; 
                             
-                            //$file2['ulf_MimeExt'] = 'png';
-                            $new_name = $ulf_ID.'.mbtiles'; 
-                            
-                            if( copy($tmp_name, $dest.$new_name) ) 
+                            if( copy($tmp_name, HEURIST_TILESTACKS_DIR.$new_name) ) 
                             {
                                 //remove temp file
                                 unlink($tmp_name);
@@ -697,12 +688,15 @@ When we open "iiif_image" in mirador viewer we generate manifest dynamically.
                             }else{
                                 $this->system->addError(HEURIST_INVALID_REQUEST,
                                      "Upload file: $new_name couldn't be saved to upload path definied for db = "
-                                    . $this->system->dbname().' ('.$dest
+                                    . $this->system->dbname().' ('.HEURIST_TILESTACKS_DIR
                                     .'). Please ask your system administrator to correct the path and/or permissions for this directory');
                             }                    
                         
                         }else{
 
+                            //create destination folder
+                            $dest = HEURIST_TILESTACKS_DIR.$ulf_ID.'/';
+                            $warn = folderCreate2($dest, '');
                             
                             //unzip archive to HEURIST_TILESTACKS_DIR
                             $unzip_error = null;
