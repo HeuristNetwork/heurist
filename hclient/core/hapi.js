@@ -1795,12 +1795,17 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
             // 
             getEntityConfig: function (entityName, callback) {
 
-                if (entity_configs[entityName]) {
+                if (entity_configs[entityName] || entityName=='records') {
+                    if(entityName=='records'){
+                        entity_configs[entityName] = window.hWin.entityRecordCfg;                        
+                    }
                     if ($.isFunction(callback)) {
                         callback(entity_configs[entityName]);
                     }
                     return entity_configs[entityName];
+                    
                 } else {
+
                     _callserver('entityScrud', { a: 'config', 'entity': entityName, 'locale': window.hWin.HAPI4.getLocale() },
                         function (response) {
                             if (response.status == window.hWin.ResponseStatus.OK) {
