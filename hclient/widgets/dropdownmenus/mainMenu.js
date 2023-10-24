@@ -2418,7 +2418,7 @@ $.widget( "heurist.mainMenu", {
                 params =  params + (opts.multifile?'&multifile=1':'');  
                
             }else{
-                script = 'hsapi/controller/record_output.php';
+                script = 'hserver/controller/record_output.php';
                 params = params + '&format='+opts.format+'&defs=0&extended='+($('#extendedJSON').is(':checked')?2:1);
                 
                 if(opts.format=='gephi' && $('#limitGEPHI').is(':checked')){

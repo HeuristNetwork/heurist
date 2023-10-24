@@ -28,8 +28,8 @@ set_time_limit(0); //no limit
 
 
 require_once(dirname(__FILE__).'/../../hclient/framecontent/initPageMin.php');
-require_once(dirname(__FILE__).'/../../hsapi/utilities/utils_file.php');
-require_once(dirname(__FILE__).'/../../hsapi/dbaccess/db_files.php');
+require_once(dirname(__FILE__).'/../../hserver/utilities/utils_file.php');
+require_once(dirname(__FILE__).'/../../hserver/records/search/recordFile.php');
 require_once(dirname(__FILE__).'/../../external/php/Mysqldump8.php');
 
 
@@ -49,7 +49,7 @@ if($mode>1){
     }
 
     if($mode=='2' && file_exists($folder.'.'.$format) ){ //archived entire folder
-        downloadFile($mime, $folder.'.'.$format); //see db_files.php
+        downloadFile($mime, $folder.'.'.$format); //see recordFile.php
     }else if($mode=='3' && file_exists($folder_sql.'.'.$format)){  //archived sql dump
         downloadFile($mime, $folder_sql.'.'.$format);
     }else if($mode=='4'){  //cleanup backup folder

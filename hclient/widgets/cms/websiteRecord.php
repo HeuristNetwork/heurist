@@ -108,8 +108,8 @@ if(!defined('PDIR')) {
 }
 
 require_once(dirname(__FILE__).'/../../framecontent/initPageMin.php'); //without client hapi
-require_once(dirname(__FILE__).'/../../../hsapi/records/search/recordSearch.php');
-require_once (dirname(__FILE__).'/../../../hsapi/dbaccess/db_users.php');
+require_once(dirname(__FILE__).'/../../../hserver/records/search/recordSearch.php');
+require_once (dirname(__FILE__).'/../../../hserver/structure/dbsUsersGroups.php');
 
 
 /*

@@ -101,10 +101,10 @@ if (@$argv) {
 
 }
 
-require_once(dirname(__FILE__).'/../../hsapi/System.php');
-require_once(dirname(__FILE__).'/../../hsapi/dbaccess/db_structure.php');
-require_once(dirname(__FILE__).'/../../hsapi/records/search/recordSearch.php');
-require_once(dirname(__FILE__).'/../../hsapi/dbaccess/conceptCode.php');
+require_once(dirname(__FILE__).'/../../hserver/System.php');
+require_once(dirname(__FILE__).'/../../hserver/structure/search/dbsData.php');
+require_once(dirname(__FILE__).'/../../hserver/records/search/recordSearch.php');
+require_once(dirname(__FILE__).'/../../hserver/structure/conceptCode.php');
 
 
 if(@$_REQUEST['postdata']){

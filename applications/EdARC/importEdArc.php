@@ -35,7 +35,7 @@ define('OWNER_REQUIRED',1);
 define('PDIR','../../');  //need for proper path to js and css    
 
 require_once(dirname(__FILE__).'/../../hclient/framecontent/initPageMin.php');
-require_once (dirname(__FILE__).'/../../hsapi/import/importParser.php');
+require_once (dirname(__FILE__).'/../../hserver/records/import/importParser.php');
 
 
 define('HEU_DB','hdb_Tuffery_EdARC');

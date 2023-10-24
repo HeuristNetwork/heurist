@@ -25,10 +25,8 @@
 * @package     Heurist academic knowledge management system
 */
 
-require_once(dirname(__FILE__).'/../../hsapi/System.php');
-require_once (dirname(__FILE__).'/../../hsapi/records/search/recordSearch.php');
-//require_once (dirname(__FILE__).'/../../hsapi/dbaccess/compose_sql.php');
-//require_once (dirname(__FILE__).'/../../hsapi/dbaccess/compose_sql_new.php');
+require_once(dirname(__FILE__).'/../../hserver/System.php');
+require_once (dirname(__FILE__).'/../../hserver/records/search/recordSearch.php');
 
 $system = new System();
 if( !$system->init(@$_REQUEST['db']) ){

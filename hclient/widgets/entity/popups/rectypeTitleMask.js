@@ -226,7 +226,7 @@ $.widget( "heurist.rectypeTitleMask", $.heurist.recordAction, {
         var mask = this.element.find('#rty_TitleMask').val().replace(/  +/g, ' '); // condense multiple spaces into one /[\t ]+/g
         this.element.find('#rty_TitleMask').val(mask);
 
-        var baseurl = window.hWin.HAPI4.baseURL + "hsapi/controller/rectype_titlemask.php";
+        var baseurl = window.hWin.HAPI4.baseURL + "hserver/controller/rectype_titlemask.php";
 
         var request = {rty_id:this.options.rty_ID, mask:mask, db:window.hWin.HAPI4.database, check:1}; //verify titlemask
         
@@ -284,7 +284,7 @@ $.widget( "heurist.rectypeTitleMask", $.heurist.recordAction, {
         var mask = this.element.find('#rty_TitleMask').val().replace(/  +/g, ' '); // condense multiple spaces into one
         this.element.find('#rty_TitleMask').val(mask);
 
-        var baseurl = window.hWin.HAPI4.baseURL + 'hsapi/controller/rectype_titlemask.php';
+        var baseurl = window.hWin.HAPI4.baseURL + 'hserver/controller/rectype_titlemask.php';
 
         var request = {rty_id:that.options.rty_ID, mask:mask, db: window.hWin.HAPI4.database, check:1}; //verify titlemask
         
@@ -529,7 +529,7 @@ $.widget( "heurist.rectypeTitleMask", $.heurist.recordAction, {
         var mask = (mode==2)?this.element.find('#rty_TitleMask').val()
                             :this.element.find('#rty_CanonincalMask').val()
         
-        var baseurl = window.hWin.HAPI4.baseURL + "hsapi/controller/rectype_titlemask.php";
+        var baseurl = window.hWin.HAPI4.baseURL + "hserver/controller/rectype_titlemask.php";
 
         var request = {rty_id:this.options.rty_ID, mask:mask, db:window.hWin.HAPI4.database, check:1}; //verify titlemask
         

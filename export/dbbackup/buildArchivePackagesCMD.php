@@ -78,8 +78,8 @@ if($arg_database==null){
 }
 
 
-require_once(dirname(__FILE__).'/../../hsapi/System.php');
-require_once(dirname(__FILE__).'/../../hsapi/dbaccess/db_files.php');
+require_once(dirname(__FILE__).'/../../hserver/System.php');
+require_once(dirname(__FILE__).'/../../hserver/records/search/recordFile.php');
 require_once(dirname(__FILE__).'/../../external/php/Mysqldump8.php');
 
 

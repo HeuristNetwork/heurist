@@ -27,7 +27,7 @@
 * @package     Heurist academic knowledge management system
 * @subpackage  !!!subpackagename for file such as Administration, Search, Edit, Application, Library
 */
-require_once(dirname(__FILE__).'/../../../hsapi/System.php');
+require_once(dirname(__FILE__).'/../../../hserver/System.php');
 
 $system = new System();
 

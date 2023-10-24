@@ -322,7 +322,7 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
                     }
                 };
 
-                let url = window.hWin.HAPI4.baseURL + 'hsapi/controller/record_output.php?';
+                let url = window.hWin.HAPI4.baseURL + 'hserver/controller/record_output.php?';
                 window.open(url+$.param(req), '_blank');
             }
         });

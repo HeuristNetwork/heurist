@@ -1442,7 +1442,7 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
 
             var mask = document.getElementById("rty_TitleMask").value;
             
-            var baseurl = window.hWin.HAPI4.baseURL + "hsapi/controller/rectype_titlemask.php";
+            var baseurl = window.hWin.HAPI4.baseURL + "hserver/controller/rectype_titlemask.php";
 
             var request = {rty_id:rectypeID, mask:mask, db:window.hWin.HAPI4.database, check:1}; //verify titlemask
             
@@ -1787,9 +1787,9 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
                         window.hWin.HEURIST4.msg.showMsgErr(response);
                     }                                        
                 }
-
-                var baseurl = window.hWin.HAPI4.baseURL + "hsapi/utilities/duplicateRectype.php";
                 
+                //@todo change to sys_structure controller
+                var baseurl = window.hWin.HAPI4.baseURL + "hserver/structure/edit/duplicateRectype.php";
                 window.hWin.HEURIST4.util.sendRequest(baseurl, { rtyID:rectypeID }, null, _editAfterDuplicate);
 
         }, {title:'Confirm',yes:'Continue',no:'Cancel'},

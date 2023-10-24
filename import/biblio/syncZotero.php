@@ -26,9 +26,9 @@ define('MANAGER_REQUIRED',1);
 define('PDIR','../../');  //need for proper path to js and css    
 
 require_once(dirname(__FILE__).'/../../hclient/framecontent/initPageMin.php');
-require_once(dirname(__FILE__).'/../../hsapi/dbaccess/db_structure.php');
-require_once(dirname(__FILE__).'/../../hsapi/dbaccess/db_records.php');
-require_once(dirname(__FILE__).'/../../hsapi/dbaccess/conceptCode.php');
+require_once(dirname(__FILE__).'/../../hserver/structure/search/dbsData.php');
+require_once(dirname(__FILE__).'/../../hserver/records/edit/recordModify.php');
+require_once(dirname(__FILE__).'/../../hserver/structure/conceptCode.php');
 
 require_once(dirname(__FILE__).'/../../external/php/phpZotero.php');
 
@@ -1390,7 +1390,7 @@ function addRecordFromZotero($recId, $recordType, $rec_URL, $details, $zotero_it
         $record['ScratchPad'] = null;
         $record['details'] = $details;
         
-        $out = recordSave($system, $record, true, false, 0, $record_count);  //see db_records.php
+        $out = recordSave($system, $record, true, false, 0, $record_count);  //see recordModify.php
         
     if ( @$out['status'] != HEURIST_OK ) {
            print "<div style='color:red'> Error: ".htmlspecialchars($out["message"])."</div>";

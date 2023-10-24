@@ -34,7 +34,7 @@ if (array_key_exists('file',$_REQUEST) || array_key_exists('thumb',$_REQUEST) ||
     parse_str($_SERVER['QUERY_STRING'], $vars);
     $query_string = http_build_query($vars);
     
-    header( 'Location: ../../hsapi/controller/'.$script_name.'?'.$query_string );
+    header( 'Location: ../../hserver/controller/'.$script_name.'?'.$query_string );
     
     return;
 }

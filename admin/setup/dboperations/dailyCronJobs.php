@@ -90,11 +90,11 @@ if (@$argv) {
 }
 
 require_once(dirname(__FILE__).'/../../../configIni.php'); // read in the configuration file
-require_once(dirname(__FILE__).'/../../../hsapi/consts.php');
-require_once(dirname(__FILE__).'/../../../hsapi/System.php');
-require_once(dirname(__FILE__).'/../../../hsapi/dbaccess/db_files.php');
-require_once(dirname(__FILE__).'/../../../hsapi/utilities/dbUtils.php');
-require_once(dirname(__FILE__).'/../../../hsapi/entity/dbUsrReminders.php');
+require_once(dirname(__FILE__).'/../../../hserver/consts.php');
+require_once(dirname(__FILE__).'/../../../hserver/System.php');
+require_once(dirname(__FILE__).'/../../../hserver/records/search/recordFile.php');
+require_once(dirname(__FILE__).'/../../../hserver/utilities/dbUtils.php');
+require_once(dirname(__FILE__).'/../../../hserver/entity/dbUsrReminders.php');
 require_once(dirname(__FILE__).'/../../../admin/verification/checkRecURL.php');
 
 //retrieve list of databases

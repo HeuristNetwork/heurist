@@ -49,9 +49,9 @@
 
 /* TODO: rename to showReports.php */
 
-require_once(dirname(__FILE__).'/../../hsapi/System.php');
-require_once(dirname(__FILE__).'/../../hsapi/records/search/recordSearch.php');
-require_once(dirname(__FILE__).'/../../hsapi/dbaccess/db_files.php');
+require_once(dirname(__FILE__).'/../../hserver/System.php');
+require_once(dirname(__FILE__).'/../../hserver/records/search/recordSearch.php');
+require_once(dirname(__FILE__).'/../../hserver/records/search/recordFile.php');
 
 require_once(dirname(__FILE__).'/../../vendor/autoload.php'); //for geoPHP
 require_once(dirname(__FILE__).'/../../vendor/ezyang/htmlpurifier/library/HTMLPurifier.auto.php');
@@ -1352,7 +1352,7 @@ function smarty_function_wrap($params, &$smarty)
                     
                 }else{ //player is default
 
-                    $sres = $sres.fileGetPlayerTag($system, $file_nonce, $mimeType, $params, $external_url, $size, $style); //see db_files
+                    $sres = $sres.fileGetPlayerTag($system, $file_nonce, $mimeType, $params, $external_url, $size, $style); //see recordFile.php
                     
                 }
                 

@@ -27,7 +27,7 @@ if (!window.hWin.HEURIST4.collection)
     window.hWin.HEURIST4.collection = {
 
         _collection: null,
-        _collectionURL: 'hsapi/utilities/manageCollection.php',
+        _collectionURL: 'hserver/utilities/manageCollection.php',
 
         //
         //
@@ -152,7 +152,6 @@ if (!window.hWin.HEURIST4.collection)
             if(!params){
                 params = {db:window.hWin.HAPI4.database, fetch:1};
             }
-
             window.hWin.HEURIST4.util.sendRequest(window.hWin.HAPI4.baseURL + window.hWin.HEURIST4.collection._collectionURL, 
                 params, this, 
                 __collectionOnUpdate);

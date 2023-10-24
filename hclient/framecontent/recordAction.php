@@ -47,23 +47,23 @@ to convert
     recordAction - change details in batch    -> RecordMgr.batch_details
 
     recordAccess - define ownership and access rights  -> h3 executeAction("set_wg_and_vis") or just close window
-    recordAdd - define record add initial preferences  -> save prefs and RecordMgr.add -> record_edit.php -> db_records.php
+    recordAdd - define record add initial preferences  -> save prefs and RecordMgr.add -> record_edit.php -> recordModify.php
 
 todo    
 *    recordRate - assign record rating -> EntityMgr.doRequest -> dbUsrBookmarks.php 
 *    recordBookmark - assign/remove record bookmark -> EntityMgr.doRequest -> dbUsrBookmarks.php 
     
 *    recordDelete -> RecordMgr.remove or (EntityMgr.doRequest) -> dbRecords.php
-    recordTitle - update titles -> RecordMgr.remove (or EntityMgr.doRequest) -> dbRecords.php use titleMask class
+     recordTitle - update titles -> RecordMgr.remove (or EntityMgr.doRequest) -> dbRecords.php use TitleMask class
     
 *    recordTag - add/remove tags in batch   -> EntityMgr.doRequest ->  dbUsrTags (use dbUsrBookmarks)
 
     recordNotify - send email about record
     
 on server side - controller
-RecordMgr.add, save, duplicate, remove  -> record_edit.php -> db_records.php
+RecordMgr.add, save, duplicate, remove  -> record_edit.php -> recordModify.php
 
-RecordMgr.batch_details -> record_batch.php  -> RecordsBatch
+RecordMgr.batch_details -> record_batch.php  -> recordsBatch
 
 
 

@@ -141,7 +141,7 @@ $requestUri:
 
         $params['db'] = $database;
         
-        require_once ('../hsapi/utilities/utils_host.php');
+        require_once ('../hserver/utilities/utils_host.php');
         $host_params = getHostParams();
         
         if($action=='web' || $action=='website'){
@@ -166,7 +166,7 @@ $requestUri:
             $rewrite_path = '../index.php';
 
         }else {
-            require_once ('../hsapi/dbaccess/utils_db.php');
+            require_once ('../hserver/dbaccess/utils_db.php');
             
             $redirect = $host_params['server_url'] . $host_params['install_dir'];
         

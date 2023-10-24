@@ -25,7 +25,7 @@
 * See the License for the specific language governing permissions and limitations under the License.
 */
 
-require_once(dirname(__FILE__)."/../../hsapi/System.php");
+require_once(dirname(__FILE__)."/../../hserver/System.php");
 
 if(defined('IS_INDEX_PAGE')){
     //from main (index) page it redirects to startup

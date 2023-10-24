@@ -29,8 +29,8 @@
 * @package     Heurist academic knowledge management system
 * @subpackage  Records/View
 */  
-require_once(dirname(__FILE__)."/../../hsapi/System.php");
-require_once(dirname(__FILE__).'/../../hsapi/utilities/Temporal.php');
+require_once(dirname(__FILE__)."/../../hserver/System.php");
+require_once(dirname(__FILE__).'/../../hserver/utilities/Temporal.php');
 
 $system = new System();
 $inverses = null;
@@ -41,11 +41,13 @@ if(!$system->init(@$_REQUEST['db'])){
 }
 
 //require_once(dirname(__FILE__).'/../../records/woot/woot.php');
-require_once(dirname(__FILE__).'/../../hsapi/dbaccess/db_structure.php');
-require_once(dirname(__FILE__).'/../../hsapi/dbaccess/db_files.php');
-require_once(dirname(__FILE__).'/../../hsapi/records/search/recordSearch.php');
-require_once(dirname(__FILE__).'/../../hsapi/dbaccess/db_users.php');
-require_once(dirname(__FILE__).'/../../hsapi/dbaccess/db_rel_details_temp.php');
+require_once(dirname(__FILE__).'/../../hserver/records/search/recordFile.php');
+require_once(dirname(__FILE__).'/../../hserver/records/search/recordSearch.php');
+require_once(dirname(__FILE__).'/../../hserver/records/search/relationshipData.php');
+require_once(dirname(__FILE__).'/../../hserver/structure/search/dbsData.php');
+require_once(dirname(__FILE__).'/../../hserver/structure/dbsUsersGroups.php');
+require_once(dirname(__FILE__).'/../../hserver/structure/dbsTerms.php');
+
 
 define('ALLOWED_TAGS', '<i><b><u><em><strong><sup><sub><small><br>'); //for record title see output_chunker for other fields
 //'<a><u><i><em><b><strong><sup><sub><small><br><h1><h2><h3><h4><p><ul><li><img>'
@@ -1464,7 +1466,7 @@ function print_public_details($bib) {
                      $ruf_entity = new DbRecUploadedFiles($system, array('entity'=>'recUploadedFiles'));
                      $fileinfo = $ruf_entity->registerURL($bd['val'], false, $bd['dtl_ID']);
                 }else{
-                    $listpaths = fileGetFullInfo($system, $bd['dtl_UploadedFileID']); //see db_files.php
+                    $listpaths = fileGetFullInfo($system, $bd['dtl_UploadedFileID']); //see recordFile.php
                     if(is_array($listpaths) && count($listpaths)>0){
                         $fileinfo = $listpaths[0]; //
                     }
@@ -1777,7 +1779,7 @@ function print_public_details($bib) {
                     
                     print '<div id="player'.$thumb['id'].'" style="min-height:100px;min-width:200px;text-align:left;">';
 
-                    print fileGetPlayerTag($system, $thumb['nonce'], $thumb['mimeType'], $thumb['params'], $thumb['external_url']); //see db_files
+                    print fileGetPlayerTag($system, $thumb['nonce'], $thumb['mimeType'], $thumb['params'], $thumb['external_url']); //see recordFile.php
                     
                     //print getPlayerTag($thumb['nonce'], $thumb['mimeType'], $thumb['url'], null); 
                     print '</div>';    

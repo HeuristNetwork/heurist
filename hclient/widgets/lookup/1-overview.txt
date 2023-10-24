@@ -2,9 +2,9 @@ Directory:  /hclient/widgets/lookup
 
 Overview:   Perform requests to external sources to populate records
 
-Service requests are handled within hsapi/controller/record_lookup.php
+Service requests are handled within hserver/controller/record_lookup.php
 
-New and existing service mapping is found at hsapi/controller/record_lookup_config.json
+New and existing service mapping is found at hserver/controller/record_lookup_config.json
 
 All lookups are extenstions of the recordAction widget (hclient/widget/record/recordAction.js)
 
