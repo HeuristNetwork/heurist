@@ -470,9 +470,11 @@ private static function __get_rec_detail_types($rt) {
 
                 $row['dty_ConceptCode'] = $dt_cc;
 
+                $fld_name_idx = mb_eregi_replace("/\s{2,}/", " ", $row['rst_DisplayName']); // remove double spacing from field name used for indexing
+
                 //keep 3 indexes by id, name and concept code    
                 self::$rdr[$rt][$row['dty_ID']] = $row;
-                self::$rdr[$rt][$row['rst_DisplayName']] = $row;
+                self::$rdr[$rt][$fld_name_idx] = $row;
                 self::$rdr[$rt][$dt_cc] = $row;
             }
             $res->close();
