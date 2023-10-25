@@ -992,7 +992,7 @@
         $passwd = '';
         $possible = '023456789bcdfghjkmnpqrstvwxyz';
         while (strlen($passwd) < $length) {
-            $char = substr($possible, mt_rand(0, strlen($possible)-1), 1);
+            $char = substr($possible, random_int(0, strlen($possible)-1), 1);
             if (!strstr($passwd, $char)) $passwd .= $char;
         }
         return $passwd;
@@ -1000,7 +1000,7 @@
 
     function hash_it ($passwd) {
         $s = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789./';
-        $salt = $s[rand(0, strlen($s)-1)] . $s[rand(0, strlen($s)-1)];
+        $salt = $s[random_int(0, strlen($s)-1)] . $s[random_int(0, strlen($s)-1)];
         return crypt($passwd, $salt);
     }
 

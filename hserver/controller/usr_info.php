@@ -496,7 +496,7 @@
                     $username = samlLogin($system, $sp, $system->dbname(), false);
                     
                     if($username>0){
-                        $password= 'X';    
+                        $password= null;    
                         $session_type = 'remember';
                         $skip_pwd_check = true;
                     }else{

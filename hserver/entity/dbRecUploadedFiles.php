@@ -614,7 +614,7 @@ When we open "iiif_image" in mirador viewer we generate manifest dynamically.
                 $ulf_ID = $record['ulf_ID'];
                 
                 if($ulf_ID>0){
-                    $nonce = addslashes(sha1($ulf_ID.'.'.rand()));
+                    $nonce = addslashes(sha1($ulf_ID.'.'.random_int(0,99)));
                         
                     $file2 = array();
                     $file2['ulf_ID'] = $ulf_ID;

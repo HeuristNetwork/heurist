@@ -2983,7 +2983,7 @@ public static function performImport($params, $mode_output){
                                             );
                            
                                             if($ulf_ID>0){
-                                                $nonce = addslashes(sha1($ulf_ID.'.'.rand()));
+                                                $nonce = addslashes(sha1($ulf_ID.'.'.random_int(0,99)));
                                                 mysql__insertupdate(self::$mysqli, 'recUploadedFiles', 'ulf', 
                                                 array("ulf_ID"=>$ulf_ID,
                                                     'ulf_ObfuscatedFileID'=>$nonce

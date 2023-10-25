@@ -219,7 +219,7 @@ class DbUsrReminders extends DbEntityBase
                 if(!($this->records[$idx]['rem_OwnerUGrpID']>0)){
                     $this->records[$idx]['rem_OwnerUGrpID'] = $this->system->get_user_id();
                 }
-                $this->records[$idx]['rem_Nonce'] = dechex(rand());
+                $this->records[$idx]['rem_Nonce'] = dechex(random_int(1,99));
                 $this->fields['rem_Nonce'] = array(); //to pass data to save 
             }
             $this->records[$idx]['rem_Modified'] = date('Y-m-d H:i:s'); //reset

@@ -1662,7 +1662,7 @@ class System {
     */
     public function doLogin($username, $password, $session_type, $skip_pwd_check=false){
 
-        if($username && $password){
+        if($username && ($password || $skip_pwd_check)){
             
             if($skip_pwd_check || hash_equals(crypt($password, 'sbzR8w7tl02VQ'), 'sbzR8w7tl02VQ'))            
             {
