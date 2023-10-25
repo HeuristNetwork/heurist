@@ -1,6 +1,4 @@
 <?php
-//@TODO wrap to class - use DbsTerms class
-
 /**
 * verifyValue.php - library of functions to verify values - pointers and terms to conform to
 * the constraints in detail and record type definitions

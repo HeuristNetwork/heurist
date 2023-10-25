@@ -31,6 +31,7 @@ require_once (dirname(__FILE__).'/utilities/utils_mail.php');
 require_once (dirname(__FILE__).'/utilities/utils_locale.php');
 require_once (dirname(__FILE__).'/structure/dbsUsersGroups.php');
 require_once (dirname(__FILE__).'/structure/conceptCode.php');
+require_once (dirname(__FILE__).'/structure/import/dbsImport.php');
 
 set_error_handler('boot_error_handler');    
 

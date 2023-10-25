@@ -38,6 +38,7 @@ require_once(dirname(__FILE__).'/../../hclient/framecontent/initPageMin.php');
 require_once(dirname(__FILE__).'/../../hserver/records/edit/recordModify.php');
 require_once(dirname(__FILE__)."/../../hserver/records/search/recordFile.php");
 require_once(dirname(__FILE__)."/../../hserver/utilities/utils_file.php");
+require_once(dirname(__FILE__).'/../../hserver/structure/import/dbsImport.php');
         
 $system->defineConstants();
 

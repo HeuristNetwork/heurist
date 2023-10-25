@@ -46,6 +46,7 @@ require_once (dirname(__FILE__).'/recordFile.php');  //it includes utils_file.ph
 require_once (dirname(__FILE__).'/composeSql.php');
 require_once (dirname(__FILE__).'/../../structure/search/dbsData.php');
 require_once (dirname(__FILE__).'/../../structure/dbsUsersGroups.php');
+require_once (dirname(__FILE__).'/../../structure/dbsTerms.php');
 require_once (dirname(__FILE__).'/../../utilities/Temporal.php');
 
 /**

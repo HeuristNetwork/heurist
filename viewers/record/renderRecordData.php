@@ -31,6 +31,7 @@
 */  
 require_once(dirname(__FILE__)."/../../hserver/System.php");
 require_once(dirname(__FILE__).'/../../hserver/utilities/Temporal.php');
+require_once(dirname(__FILE__).'/../../hserver/structure/dbsTerms.php');
 
 $system = new System();
 $inverses = null;

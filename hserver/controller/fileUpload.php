@@ -19,6 +19,7 @@
 * See the License for the specific language governing permissions and limitations under the License.
 */
 require_once(dirname(__FILE__)."/../System.php");
+require_once('entityScrudSrv.php');
 require_once(dirname(__FILE__).'/../entity/dbRecUploadedFiles.php');
 require_once(dirname(__FILE__).'/../utilities/utils_file.php');
 require_once(dirname(__FILE__).'/../utilities/utils_image.php');

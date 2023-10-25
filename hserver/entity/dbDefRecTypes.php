@@ -443,7 +443,7 @@ class DbDefRecTypes extends DbEntityBase
                     if($mask){
                             $parameters = array("");
                             $val = TitleMask::execute($mask, $rty_ID, 1, null, _ERR_REP_SILENT);//convert from human to coded
-                            $parameters = addParam($parameters, "s", $val);
+                            $parameters = array('s', $val);
 
                             $query = "update defRecTypes set rty_TitleMask = ? where rty_ID = $rty_ID";
 

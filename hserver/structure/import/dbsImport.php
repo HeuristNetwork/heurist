@@ -23,7 +23,7 @@ require_once(dirname(__FILE__).'/../../System.php');
 require_once(dirname(__FILE__).'/../search/dbsData.php');
 require_once(dirname(__FILE__).'/../edit/saveStructureLib.php');
 require_once(dirname(__FILE__).'/../../controller/entityScrudSrv.php');
-require_once('dbsTerms.php');
+require_once(dirname(__FILE__).'/../dbsTerms.php');
 
 require_once(dirname(__FILE__).'/../../utilities/utils_file.php');
 
@@ -1099,7 +1099,7 @@ $mysqli->commit();
     //
     private function _getDatabaseURL($database_id){
         
-        $to_include = dirname(__FILE__).'/../../admin/setup/dbproperties/getDatabaseURL.php';
+        $to_include = dirname(__FILE__).'/../../../admin/setup/dbproperties/getDatabaseURL.php';
         if (is_file($to_include)) {
             include_once $to_include;
         }
@@ -1163,8 +1163,8 @@ $mysqli->commit();
           $defs["terms"] = dbs_GetTerms($system2);
         }else{
         //2b. if remote server - call sys_strcture.php with loadRemoteURLContentWithRange
-
-            $remoteURL = $remote_url.'hserver/controller/sys_structure.php?mode=2&terms=all&db='.$remote_dbname;
+            //change hsapi to hserver when master index will be v7
+            $remoteURL = $remote_url.'hsapi/controller/sys_structure.php?mode=2&terms=all&db='.$remote_dbname;
             if(!$only_terms){
                 $remoteURL = $remoteURL.'&rectypes=all&detailtypes=all';
             }
@@ -1192,7 +1192,8 @@ $mysqli->commit();
             return false;
         }
         
-        $this->sourceIconURL = $remote_url.'hserver/controller/fileGet.php?db='.$remote_dbname.'&id=';
+        //change hsapi to hserver when master index will be v7
+        $this->sourceIconURL = $remote_url.'hsapi/controller/fileGet.php?db='.$remote_dbname.'&id=';
         $this->source_db_name = $remote_dbname;
         
         return $defs; 
@@ -2322,7 +2323,8 @@ $mysqli->commit();
             $translations = dbs_GetTranslations($system2, $this->def_translations[$def]);
         }else{ // remote server
 
-            $remoteURL = $remote_url.'hserver/controller/sys_structure.php?db='.$remote_dbname.'&' . http_build_query(array('translations' => $this->def_translations[$def]));
+            //change hsapi to hserver when master index will be v7
+            $remoteURL = $remote_url.'hsapi/controller/sys_structure.php?db='.$remote_dbname.'&' . http_build_query(array('translations' => $this->def_translations[$def]));
 
             $defs = loadRemoteURLContent($remoteURL);
             if(!$defs){ // unable to connect to remote server

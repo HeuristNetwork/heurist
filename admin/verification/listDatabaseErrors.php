@@ -1279,8 +1279,6 @@ if($active_all || in_array('date_values', $active)) {
         //correct wrong dates and remove empty values
         if($autofix || (@$_REQUEST['fixdates']=="1" && count($recids)>0 && in_array($row['dtl_RecID'], $recids)) ){
 
-                if($row['new_value']!=null && $row['new_value']!=''){
-                if($row['new_value']!=null && $row['new_value']!=''){
 //print ' u-'.$row['dtl_RecID'];                    
             if($row['new_value']!=null && $row['new_value']!=''){
 //print ' u-'.$row['dtl_RecID'];                    

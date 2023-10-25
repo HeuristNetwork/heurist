@@ -362,86 +362,82 @@ $.widget( "heurist.importStructure", {
 
         window.hWin.HEURIST4.msg.bringCoverallToFront(this.element);
 
-        window.hWin.HAPI4.EntityMgr.getEntityConfig('records', 
-            function(entity){
-                that.options.entity = entity;
+        that.options.entity = window.hWin.entityRecordCfg;
 
-                //retrieve all template databases from master index server
-                var query_request = {remote:'master'};
-                if(that.options.source_database_id>0){
-                    query_request['q'] = 'ids:'+that.options.source_database_id;
-                }
-                query_request['detail'] = '398'; //Allow Clone?  @todo - concept code
+        //retrieve all template databases from master index server
+        var query_request = {remote:'master'};
+        if(that.options.source_database_id>0){
+            query_request['q'] = 'ids:'+that.options.source_database_id;
+        }
+        query_request['detail'] = '398'; //Allow Clone?  @todo - concept code
 
-                window.hWin.HAPI4.RecordMgr.search(query_request, 
-                    function( response ){
+        window.hWin.HAPI4.RecordMgr.search(query_request, 
+            function( response ){
 
-                        if(response.status == window.hWin.ResponseStatus.OK){
+                if(response.status == window.hWin.ResponseStatus.OK){
 
-                            response.data.fields.push('rec_ScratchPad');
-                            response.data.fields.push('rec_AllowClone');
-                            var clone_recs = {};
+                    response.data.fields.push('rec_ScratchPad');
+                    response.data.fields.push('rec_AllowClone');
+                    var clone_recs = {};
 
-                            that._cachedRecordset_dbs = new hRecordSet(response.data);
+                    that._cachedRecordset_dbs = new hRecordSet(response.data);
 
-                            //prepare recordset - extract database name and transfer title to notes
-                            that._cachedRecordset_dbs.each(function(recID, record){
+                    //prepare recordset - extract database name and transfer title to notes
+                    that._cachedRecordset_dbs.each(function(recID, record){
 
-                                var recURL  = this.fld(record, 'rec_URL');
-                                var recDesc = this.fld(record, 'rec_Title');
-                                var isAllowClone = ( this.fld(record, 398)!=6023 )?1:0; //@todo - concept code
-                                var dbURL = '';
-                                var dbName = 'Broken registration (Db URL is not defined)';
-                                
-                                if(recURL){
-                                    var splittedURL = recURL.split('?');
-                                    if(splittedURL && splittedURL.length>0){
-                                        dbURL = splittedURL[0];
-                                        var matches = recURL.match(/db=([^&]*).*$/);
-                                        dbName = (matches && matches.length>1)?matches[1]:'';
+                        var recURL  = this.fld(record, 'rec_URL');
+                        var recDesc = this.fld(record, 'rec_Title');
+                        var isAllowClone = ( this.fld(record, 398)!=6023 )?1:0; //@todo - concept code
+                        var dbURL = '';
+                        var dbName = 'Broken registration (Db URL is not defined)';
+                        
+                        if(recURL){
+                            var splittedURL = recURL.split('?');
+                            if(splittedURL && splittedURL.length>0){
+                                dbURL = splittedURL[0];
+                                var matches = recURL.match(/db=([^&]*).*$/);
+                                dbName = (matches && matches.length>1)?matches[1]:'';
 
-                                        if(isAllowClone === 1 && recID < 1000){ // need to check that the DB is on current server
-                                            clone_recs[recID] = dbName;
-                                        }
-                                    }
+                                if(isAllowClone === 1 && recID < 1000){ // need to check that the DB is on current server
+                                    clone_recs[recID] = dbName;
                                 }
-                                var url_Error = this.fld(record, 'rec_URLErrorMessage');
-                                if( !window.hWin.HEURIST4.util.isempty( url_Error ) ){
-                                    dbName = dbName + ' (unavailable)';
-                                    dbURL = '';
-                                }
-                                
-                                this.setFld(record, 'rec_URL', dbURL);
-                                this.setFld(record, 'rec_Title', dbName);
-                                this.setFld(record, 'rec_ScratchPad', recDesc);
-                                this.setFld(record, 'rec_RecTypeID', recID<1000?0:1);
-                                this.setFld(record, 'rec_AllowClone', isAllowClone);                                    
-                            });
-
-                            window.hWin.HAPI4.SystemMgr.check_for_databases(clone_recs, (check_response) => {
-
-                                window.hWin.HEURIST4.msg.sendCoverallToBack();
-
-                                $.each(clone_recs, (rec_ID, db_name) => {
-                                    that._cachedRecordset_dbs.setFldById(rec_ID, 'rec_AllowClone', check_response.data && check_response.data[rec_ID] == 1);
-                                });
-
-                                if(that.options.source_database_id>0){
-                                    var selected_recs = that._cachedRecordset_dbs.getSubSetByIds( [that.options.source_database_id] );
-                                    that._loadDefinitionsForDb( selected_recs );
-                                }else{
-                                    that.startSearch_dbs(); //filterRecordList_dbs({}); 
-                                }
-                            });
-
-                        }else{
-                            window.hWin.HEURIST4.msg.sendCoverallToBack();
-                            window.hWin.HEURIST4.msg.showMsgErr(response);
+                            }
                         }
-                    }
-                );
+                        var url_Error = this.fld(record, 'rec_URLErrorMessage');
+                        if( !window.hWin.HEURIST4.util.isempty( url_Error ) ){
+                            dbName = dbName + ' (unavailable)';
+                            dbURL = '';
+                        }
+                        
+                        this.setFld(record, 'rec_URL', dbURL);
+                        this.setFld(record, 'rec_Title', dbName);
+                        this.setFld(record, 'rec_ScratchPad', recDesc);
+                        this.setFld(record, 'rec_RecTypeID', recID<1000?0:1);
+                        this.setFld(record, 'rec_AllowClone', isAllowClone);                                    
+                    });
 
-        });
+                    window.hWin.HAPI4.SystemMgr.check_for_databases(clone_recs, (check_response) => {
+
+                        window.hWin.HEURIST4.msg.sendCoverallToBack();
+
+                        $.each(clone_recs, (rec_ID, db_name) => {
+                            that._cachedRecordset_dbs.setFldById(rec_ID, 'rec_AllowClone', check_response.data && check_response.data[rec_ID] == 1);
+                        });
+
+                        if(that.options.source_database_id>0){
+                            var selected_recs = that._cachedRecordset_dbs.getSubSetByIds( [that.options.source_database_id] );
+                            that._loadDefinitionsForDb( selected_recs );
+                        }else{
+                            that.startSearch_dbs(); //filterRecordList_dbs({}); 
+                        }
+                    });
+
+                }else{
+                    window.hWin.HEURIST4.msg.sendCoverallToBack();
+                    window.hWin.HEURIST4.msg.showMsgErr(response);
+                }
+            }
+        );
 
         //----------------------------                
         //show dialog if required 

@@ -1165,8 +1165,11 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
         }else{
             
             var ele = this._editing.getFieldByName('rty_ID');
-            ele.find('div.input-div').html(this._currentEditID+'&nbsp;&nbsp;<span style="font-weight:normal">Code: </span>'
-                                    +$Db.getConceptID('rty',this._currentEditID, true));
+            if(ele.length>0){
+                ele.find('div.input-div').html(this._currentEditID
+                        +'&nbsp;&nbsp;<span style="font-weight:normal">Code: </span>'
+                        +$Db.getConceptID('rty',this._currentEditID, true));
+            }
             
             
             //hide after edit init btnRecRemove for status locked 
@@ -1470,7 +1473,7 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
 
         if(!fields){
             fields = this._getValidatedValues(); 
-            fields['isfull'] = 1;
+            if(fields) fields['isfull'] = 1;
         }
 
         if(fields==null) return; //validation failed

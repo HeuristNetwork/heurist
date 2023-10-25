@@ -11,7 +11,7 @@
     * 
     *  mysql__getdatabases4 - get list of databases
     * 
-    *  mysql__select_assoc - returns array  key_column(first filed)=>array(field=>val,....)
+    *  mysql__select_assoc - returns array  key_column(first field)=>array(field=>val,....)
     *  mysql__select_assoc2 - returns array  key_column=>val_column for given table
     *  mysql__select_list - returns array of one column values
     *  mysql__select_value   - return the first column of first row

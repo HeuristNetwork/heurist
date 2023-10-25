@@ -29,6 +29,7 @@ require_once(dirname(__FILE__).'/../../hclient/framecontent/initPageMin.php');
 require_once(dirname(__FILE__).'/../../hserver/structure/search/dbsData.php');
 require_once(dirname(__FILE__).'/../../hserver/records/edit/recordModify.php');
 require_once(dirname(__FILE__).'/../../hserver/structure/conceptCode.php');
+require_once(dirname(__FILE__).'/../../hserver/structure/import/dbsImport.php');
 
 require_once(dirname(__FILE__).'/../../external/php/phpZotero.php');
 
