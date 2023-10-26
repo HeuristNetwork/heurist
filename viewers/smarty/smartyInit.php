@@ -22,7 +22,7 @@
 
     //smarty is already included via composer autoload in showReps.php    
     //define('SMARTY_DIR', HEURIST_DIR.'external/Smarty-3.0.7/libs/'); 
-    //require_once(SMARTY_DIR.'Smarty.class.php');
+    //require_once SMARTY_DIR.'Smarty.class.php';
     $smarty = null;
     
     initSmarty();

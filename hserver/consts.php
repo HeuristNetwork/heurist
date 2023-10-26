@@ -24,7 +24,7 @@
 
 // TODO: Rationalise the duplication of constants across /php/consts.php and /common/connect/initialise.php
 //       in particualr this duplication of HEURIST_MIN_DB_VERSION and any other explicit constants
-require_once (dirname(__FILE__).'/utilities/utils_host.php');
+require_once dirname(__FILE__).'/utilities/utils_host.php';
 
 define('HEURIST_VERSION', $version);  //code version is defined congigIni.php
 define('HEURIST_MIN_DBVERSION', "1.3.14"); //minimal version of db for current version of code

@@ -29,8 +29,8 @@ set_time_limit(0);
 define('MANGER_REQUIRED',1);   
 define('PDIR','../../');  //need for proper path to js and css    
 
-require_once(dirname(__FILE__).'/../../hclient/framecontent/initPageMin.php');
-require_once(dirname(__FILE__).'/../../hserver/records/edit/recordModify.php');
+require_once dirname(__FILE__).'/../../hclient/framecontent/initPageMin.php';
+require_once dirname(__FILE__).'/../../hserver/records/edit/recordModify.php';
 
 //
 // options:
@@ -61,7 +61,7 @@ if(!$init_client || @$_REQUEST['session']>0){ //2a. init operation on client sid
         }
         
         print json_encode($response);
-        exit();
+        exit;
     }else{
         
         if(@$_REQUEST['recTypeIDs']){
@@ -197,7 +197,7 @@ if($init_client){
     if( is_bool($res) && !$res ){
         print '<div><span style="color:red">'.htmlspecialchars($system->getError()['message']).'</span></div>';
         print '</div></body></html>';
-        exit();
+        exit;
     }else if($res['message']){
         print '<div><span style="color:red">'.htmlspecialchars($res['message']).'</span></div>';
     }

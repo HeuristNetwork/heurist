@@ -38,8 +38,8 @@ define('DELETE_RECORDS', 1);
 
 define('PDIR','../../');  //need for proper path to js and css    
 
-require_once(dirname(__FILE__).'/../../hclient/framecontent/initPageMin.php');
-require_once(dirname(__FILE__).'/../../hserver/records/edit/recordTitleMask.php');
+require_once dirname(__FILE__).'/../../hclient/framecontent/initPageMin.php';
+require_once dirname(__FILE__).'/../../hserver/records/edit/recordTitleMask.php';
 
 $mysqli = $system->get_mysqli();
 
@@ -71,7 +71,7 @@ $bib_ids_list = implode(',', $bib_ids);
 
 if ( count($bib_ids)==0 ){
     header('Location: '.ERROR_REDIR.'&msg='.rawurlencode('Wrong parameter. List of record ids is not defined'));
-    exit();
+    exit;
 } 
 
 if(@$_REQUEST['commit']){

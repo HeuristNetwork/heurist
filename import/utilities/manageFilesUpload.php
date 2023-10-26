@@ -27,7 +27,7 @@
 define('MANAGER_REQUIRED',1);
 define('PDIR','../../');  //need for proper path to js and css    
 
-require_once(dirname(__FILE__).'/../../hclient/framecontent/initPageMin.php');
+require_once dirname(__FILE__).'/../../hclient/framecontent/initPageMin.php';
 
 $post_max_size = get_php_bytes('post_max_size');
 $file_max_size = get_php_bytes('upload_max_filesize');

@@ -21,12 +21,12 @@
 * See the License for the specific language governing permissions and limitations under the License.
 */
 
-require_once(dirname(__FILE__).'/../../hserver/System.php');
+require_once dirname(__FILE__).'/../../hserver/System.php';
 
 
 $system = new System();
 if( !$system->init(@$_REQUEST['db']) ){
-    $system->error_exit();
+    $system->error_exit;
 }
 
 if(!$system->has_access()){
@@ -150,7 +150,7 @@ $mysqli = $system->get_mysqli();
         $system->error_exit('Invalid or no method provided to loadReports.php');
     }
 
-exit();
+exit;
 
     /**
     * @return 0 - ok,  1 - template file missed, 2 - output folder does not exist, 2 - file does not exist

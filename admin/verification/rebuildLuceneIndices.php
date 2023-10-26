@@ -24,8 +24,8 @@
 
     define('PDIR','../../');  //need for proper path to js and css    
 
-    require_once(dirname(__FILE__).'/../../hclient/framecontent/initPageMin.php');
-    require_once(dirname(__FILE__).'/../../records/index/elasticSearch.php');
+    require_once dirname(__FILE__).'/../../hclient/framecontent/initPageMin.php';
+    require_once dirname(__FILE__).'/../../records/index/elasticSearch.php';
 ?>
 <!DOCTYPE html>
 <html lang="en">

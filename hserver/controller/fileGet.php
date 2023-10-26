@@ -23,8 +23,8 @@
 * See the License for the specific language governing permissions and limitations under the License.
 */
 
-require_once(dirname(__FILE__)."/../System.php");
-require_once(dirname(__FILE__).'/entityScrudSrv.php');
+require_once dirname(__FILE__).'/../System.php';
+require_once dirname(__FILE__).'/entityScrudSrv.php';
 
 /*
 
@@ -58,7 +58,7 @@ if($filename){ //download from scratch (for csv import)
         if(!isPathInHeuristUploadFolder( $file_read ) || is_dir($file_read))        
         {
             print 'Temporary file (uploaded csv data) '.htmlspecialchars($filename). ' not found';                
-            exit();
+            exit;
         }
 
         $content_type = null;//'image/'.$file_ext;
@@ -77,7 +77,7 @@ if($filename){ //download from scratch (for csv import)
                 
                 if($s){
                     print 'Temporary file (uploaded csv data) '.htmlspecialchars($file_read). $s;                
-                    exit();
+                    exit;
                 }
             }
         
@@ -93,7 +93,7 @@ if($filename){ //download from scratch (for csv import)
             if(!$line){
                 print 'Temporary file (uploaded csv data) '.$file_read
                 .' can\'t be converted to UTF-8. Please open it in any advanced editor and save with UTF-8 text encoding';
-                exit();
+                exit;
             } 
             */           
             $content = file_get_contents($file_read);
@@ -101,7 +101,7 @@ if($filename){ //download from scratch (for csv import)
             if(!$content){
                 print 'Temporary file (uploaded csv data) '.htmlspecialchars($file_read)
                 .' can\'t be converted to UTF-8. Please open it in any advanced editor and save with UTF-8 text encoding';
-                exit();
+                exit;
             } 
                
             //$encoded_file_name = tempnam(HEURIST_FILESTORE_DIR.'scratch/', $original_filename);      
@@ -109,7 +109,7 @@ if($filename){ //download from scratch (for csv import)
             unset($content);
             if(!$res){
                 print 'Cant save temporary file (with UTF-8 encoded csv data) '.htmlspecialchars($file_read);
-                exit();
+                exit;
             }
             
         }
@@ -139,7 +139,7 @@ if($filename){ //download from scratch (for csv import)
         $entity_name = entityResolveName($entity_name);
         
         if(!$entity_name){
-            exit();
+            exit;
         }
         
         list($filename, $content_type, $file_url) = resolveEntityFilename($entity_name, $rec_id, $viewmode, $db);
@@ -196,7 +196,7 @@ if($filename){ //download from scratch (for csv import)
                                 
                 if(file_exists($filename) && !is_dir($filename)){
                     _download_file($filename, $content_type);
-                    exit();
+                    exit;
                 }
             }
                     
@@ -212,7 +212,7 @@ if($filename){ //download from scratch (for csv import)
             }
         
         }
-        exit();
+        exit;
 }
 
 }else {

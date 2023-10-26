@@ -18,12 +18,12 @@
 * distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
 * See the License for the specific language governing permissions and limitations under the License.
 */
-require_once(dirname(__FILE__)."/../System.php");
-require_once('entityScrudSrv.php');
-require_once(dirname(__FILE__).'/../entity/dbRecUploadedFiles.php');
-require_once(dirname(__FILE__).'/../utilities/utils_file.php');
-require_once(dirname(__FILE__).'/../utilities/utils_image.php');
-require_once(dirname(__FILE__).'/../utilities/UploadHandler.php');
+require_once dirname(__FILE__).'/../System.php';
+require_once 'entityScrudSrv.php';
+require_once dirname(__FILE__).'/../entity/dbRecUploadedFiles.php';
+require_once dirname(__FILE__).'/../utilities/utils_file.php';
+require_once dirname(__FILE__).'/../utilities/utils_image.php';
+require_once dirname(__FILE__).'/../utilities/UploadHandler.php';
 
 $response = null;
 $system = new System();
@@ -76,7 +76,7 @@ if($system->init(@$_REQUEST['db'])){
 if($response!=null){
     header('Content-type: application/json;charset=UTF-8');
     print json_encode($response);
-    exit();
+    exit;
 }
     
     

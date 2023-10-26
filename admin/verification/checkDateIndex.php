@@ -7,7 +7,7 @@ if(!$is_included){
 
     define('PDIR','../../');  //need for proper path to js and css    
     define('MANAGER_REQUIRED', 1);   
-    require_once(dirname(__FILE__).'/../../hclient/framecontent/initPageMin.php');
+    require_once dirname(__FILE__).'/../../hclient/framecontent/initPageMin.php';
 }
 ?>    
 <!DOCTYPE html>
@@ -40,7 +40,7 @@ if(!$is_included){
                 <div><a href="<?php echo HEURIST_BASE_URL.'?db='.HEURIST_DBNAME;?>">Open Heurist</a></div>
                 </div></body></html>
 <?php
-                exit();
+                exit;
             }else{
                 print '<div><h3 class="res-valid">Record Details Date Index has been successfully recreated</h3></div>';    
             }

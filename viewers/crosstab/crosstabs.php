@@ -25,7 +25,7 @@
  */
 
 define('PDIR', '../../');  //need for proper path to js and css
-require_once(dirname(__FILE__) . '/../../hclient/framecontent/initPage.php');
+require_once dirname(__FILE__) . '/../../hclient/framecontent/initPage.php';
 ?>
 <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.24/css/jquery.dataTables.css">
 <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/buttons/1.7.0/css/buttons.dataTables.min.css">

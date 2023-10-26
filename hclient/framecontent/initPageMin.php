@@ -19,7 +19,7 @@
 */
 if(!defined('PDIR')) define('PDIR','../../'); //need for js scripts
 
-require_once(dirname(__FILE__)."/../../hserver/System.php");
+require_once dirname(__FILE__).'/../../hserver/System.php';
 
 define('ERROR_REDIR', dirname(__FILE__).'/../../hclient/framecontent/infoPage.php');
 
@@ -41,7 +41,7 @@ else{
 
 if(!$isSystemInited){
     include ERROR_REDIR;
-    exit();
+    exit;
 }
 
 $login_warning = 'To perform this action you must be logged in';
@@ -51,7 +51,7 @@ $is_admin = $system->is_admin();
 
 //
 // to limit access to particular page
-// define const in the very begining of your php code  just before require_once(dirname(__FILE__)."/initPage.php");
+// define const in the very begining of your php code  just before require_once 'initPage.php';
 //
 if(defined('LOGIN_REQUIRED') && !$system->has_access()){
     $message = $login_warning;
@@ -81,7 +81,7 @@ if(!$invalid_access && (defined('CREATE_RECORDS') || defined('DELETE_RECORDS')))
 
 if(isset($message)){
     include ERROR_REDIR;
-    exit();
+    exit;
 }
 
 function echo_flush($msg){

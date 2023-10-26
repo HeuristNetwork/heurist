@@ -87,15 +87,15 @@
         import_records 
 
     */
-require_once(dirname(__FILE__)."/../System.php");
-require_once (dirname(__FILE__).'/../entity/dbSysImportFiles.php');
-require_once (dirname(__FILE__).'/../structure/search/dbsData.php');
-require_once (dirname(__FILE__).'/../structure/search/dbsDataTree.php');
+require_once dirname(__FILE__).'/../System.php';
+require_once dirname(__FILE__).'/../entity/dbSysImportFiles.php';
+require_once dirname(__FILE__).'/../structure/search/dbsData.php';
+require_once dirname(__FILE__).'/../structure/search/dbsDataTree.php';
 
-require_once (dirname(__FILE__).'/../records/import/importParser.php'); //parse CSV, KML and save into import table
-require_once (dirname(__FILE__).'/../records/import/importSession.php'); //work work with import session 
-require_once (dirname(__FILE__).'/../records/import/importAction.php'); //work with import table: matching, assign id, performs validation and import
-require_once (dirname(__FILE__).'/../records/import/importHeurist.php'); //work with Heurist exchange format
+require_once dirname(__FILE__).'/../records/import/importParser.php'; //parse CSV, KML and save into import table
+require_once dirname(__FILE__).'/../records/import/importSession.php'; //work work with import session 
+require_once dirname(__FILE__).'/../records/import/importAction.php'; //work with import table: matching, assign id, performs validation and import
+require_once dirname(__FILE__).'/../records/import/importHeurist.php'; //work with Heurist exchange format
 
 
 set_time_limit(0);

@@ -214,7 +214,7 @@ if($recTypeID==RT_PERSON){
         </body></html>
 
     <?php
-    exit();
+    exit;
 }
 
 }

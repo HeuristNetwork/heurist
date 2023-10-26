@@ -33,8 +33,8 @@
 
 /* load some very basic HEURIST objects into top.HEURIST */
 
-require_once (dirname(__FILE__).'/../../hserver/System.php');
-require_once (dirname(__FILE__).'/../../hserver/structure/search/dbsData.php');
+require_once dirname(__FILE__).'/../../hserver/System.php';
+require_once dirname(__FILE__).'/../../hserver/structure/search/dbsData.php';
 
 $system = new System();
 if(!$system->init(@$_REQUEST['db'])){
@@ -54,7 +54,7 @@ $lastModified = strtotime($lastModified[0]);
 
 if (strtotime(@$_SERVER["HTTP_IF_MODIFIED_SINCE"]) > $lastModified) {
   header('HTTP/1.1 304 Not Modified');
-  exit();
+  exit;
 }
 
 ob_start();

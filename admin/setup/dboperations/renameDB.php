@@ -22,8 +22,8 @@
 define('MANAGER_REQUIRED', 1); 
 define('PDIR','../../../');  //need for proper path to js and css    
 
-require_once(dirname(__FILE__).'/../../../hclient/framecontent/initPageMin.php');
-require_once(dirname(__FILE__).'/../../../hserver/utilities/dbUtils.php');
+require_once dirname(__FILE__).'/../../../hclient/framecontent/initPageMin.php';
+require_once dirname(__FILE__).'/../../../hserver/utilities/dbUtils.php';
 
 $user_id = $system->get_user_id();
 $mysqli  = $system->get_mysqli();
@@ -33,7 +33,7 @@ $sErrorMsg = null;
 $regID = mysql__select_value($mysqli, 'select sys_dbRegisteredID from sysIdentification where 1');
 if($regID > 0 && $user_id != 2){
     print '<h4 style="margin-inline-start: 10px;margin-block-start: 20px;">Renaming registered databases can only be performed by the database owner</h4>';
-    exit();
+    exit;
 }
 
 if($_REQUEST['mode'] == 2){ // verify the new name is unique
@@ -244,7 +244,7 @@ if(@$_REQUEST['mode']=='2' && $targetdbname!=null){
     </body>
 </html>
 <?php
-	exit();
+	exit;
 }
 
 function perform_rename($system, $new_name){

@@ -21,17 +21,17 @@
 
 //@todo - reimplement using Singleton pattern
 
-require_once (dirname(__FILE__).'/../configIni.php'); // read in the configuration file
-require_once (dirname(__FILE__).'/consts.php');
+require_once dirname(__FILE__).'/../configIni.php'; // read in the configuration file
+require_once dirname(__FILE__).'/consts.php';
 
 
-require_once (dirname(__FILE__).'/dbaccess/utils_db.php');
-require_once (dirname(__FILE__).'/utilities/utils_file.php');
-require_once (dirname(__FILE__).'/utilities/utils_mail.php');
-require_once (dirname(__FILE__).'/utilities/utils_locale.php');
-require_once (dirname(__FILE__).'/structure/dbsUsersGroups.php');
-require_once (dirname(__FILE__).'/structure/conceptCode.php');
-require_once (dirname(__FILE__).'/structure/import/dbsImport.php');
+require_once dirname(__FILE__).'/dbaccess/utils_db.php';
+require_once dirname(__FILE__).'/utilities/utils_file.php';
+require_once dirname(__FILE__).'/utilities/utils_mail.php';
+require_once dirname(__FILE__).'/utilities/utils_locale.php';
+require_once dirname(__FILE__).'/structure/dbsUsersGroups.php';
+require_once dirname(__FILE__).'/structure/conceptCode.php';
+require_once dirname(__FILE__).'/structure/import/dbsImport.php';
 
 set_error_handler('boot_error_handler');    
 
@@ -386,7 +386,7 @@ class System {
                     . CONTACT_SYSADMIN.' for assistance. MySQL error: '
                     . $this->mysqli->error;
                 */
-                exit();
+                exit;
             }
             
             $regID = $this->get_system('sys_dbRegisteredID');
@@ -447,7 +447,7 @@ class System {
             if (!$res) {
                 echo "Unable to build internal field-type lookup table. Please ".CONTACT_SYSADMIN
                         ." for assistance. MySQL error: " . $this->mysqli->error;
-                exit();
+                exit;
             }
                 
                 
@@ -910,7 +910,7 @@ class System {
 
         print json_encode( $this->getError() );
         
-        exit();
+        exit;
     }
 
 
@@ -953,7 +953,7 @@ class System {
             
         print json_encode( $response );
         
-        exit();
+        exit;
     }
     
     //

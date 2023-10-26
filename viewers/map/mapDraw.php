@@ -20,7 +20,7 @@
     */
 
 define('PDIR','../../');  //need for proper path to js and css    
-require_once(dirname(__FILE__).'/../../hclient/framecontent/initPage.php');
+require_once dirname(__FILE__).'/../../hclient/framecontent/initPage.php';
 ?>
 
 <link rel="stylesheet" href="<?php echo PDIR;?>external/leaflet/geocoder/Control.Geocoder.css" />

@@ -74,7 +74,7 @@ RecordMgr.batch_details -> record_batch.php  -> recordsBatch
 
 define('LOGIN_REQUIRED',1);
 
-require_once(dirname(__FILE__)."/initPage.php");
+require_once 'initPage.php';
 
 //verify parameter action
 $action_type = @$_REQUEST['action'];
@@ -83,7 +83,7 @@ if(!in_array($action_type, $allowed_actions)){
     //@todo - it does not work since initPage already produces some output
     // need to call this piece of code with callback function in initPage after system itit
     header('Location: '.ERROR_REDIR.'?msg=Action is not defined or not allowed');
-    exit();
+    exit;
 }
 
 ?>

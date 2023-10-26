@@ -77,11 +77,11 @@ if (@$argv) {
 
 define('HEURIST_DIR', dirname(__FILE__).'/../../');
 
-require_once(dirname(__FILE__).'/../../configIni.php'); // read in the configuration file
-require_once(dirname(__FILE__).'/../../hserver/consts.php');
-require_once(dirname(__FILE__).'/../../hserver/System.php');
-require_once(dirname(__FILE__).'/../../hserver/records/search/recordFile.php');
-require_once(dirname(__FILE__).'/../../hserver/utilities/dbUtils.php');
+require_once dirname(__FILE__).'/../../configIni.php'; // read in the configuration file
+require_once dirname(__FILE__).'/../../hserver/consts.php';
+require_once dirname(__FILE__).'/../../hserver/System.php';
+require_once dirname(__FILE__).'/../../hserver/records/search/recordFile.php';
+require_once dirname(__FILE__).'/../../hserver/utilities/dbUtils.php';
 
 //retrieve list of databases
 $system = new System();

@@ -34,11 +34,11 @@
 define('MANAGER_REQUIRED',1);
 define('PDIR','../../');  //need for proper path to js and css    
 
-require_once(dirname(__FILE__).'/../../hclient/framecontent/initPageMin.php');
-require_once(dirname(__FILE__).'/../../hserver/records/edit/recordModify.php');
-require_once(dirname(__FILE__)."/../../hserver/records/search/recordFile.php");
-require_once(dirname(__FILE__)."/../../hserver/utilities/utils_file.php");
-require_once(dirname(__FILE__).'/../../hserver/structure/import/dbsImport.php');
+require_once dirname(__FILE__).'/../../hclient/framecontent/initPageMin.php';
+require_once dirname(__FILE__).'/../../hserver/records/edit/recordModify.php';
+require_once dirname(__FILE__).'/../../hserver/records/search/recordFile.php';
+require_once dirname(__FILE__).'/../../hserver/utilities/utils_file.php';
+require_once dirname(__FILE__).'/../../hserver/structure/import/dbsImport.php';
         
 $system->defineConstants();
 
@@ -56,12 +56,12 @@ if(!defined('RT_MEDIA_RECORD')){
     if(!$isOK){
             $system->addErrorMsg('Cannot download record type "Digital Media item" required by the function you have requested. ');
             include ERROR_REDIR;
-            exit();
+            exit;
     }
     if(!$system->defineConstant('RT_MEDIA_RECORD', true)){
         $system->addError(HEURIST_ERROR, 'Record type "Digital Media item"" id not defined');
         include ERROR_REDIR;
-        exit();
+        exit;
     }
 }
 
@@ -222,7 +222,7 @@ $failed_exts = array();
                     print '<input type="submit" value="Continue" class="h3button"/>';
                 }
             }
-            exit();
+            exit;
         }
 
         // ---- visit #3 - PROCESS THE HARVESTING -----------------------------------------------------------------

@@ -1,5 +1,5 @@
 <?php
-require_once(dirname(__FILE__).'/../../../hserver/utilities/utils_db_load_script.php');
+require_once dirname(__FILE__).'/../../../hserver/utilities/utils_db_load_script.php';
 
 function doUpgradeDatabase($system, $dbname, $trg_maj, $trg_min, $verbose=false)
 {

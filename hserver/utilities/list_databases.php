@@ -20,7 +20,7 @@
 
 if(!defined('PDIR')){
     define('PDIR','../../');
-    require_once(dirname(__FILE__).'/../System.php');
+    require_once dirname(__FILE__).'/../System.php';
 }
 
 $is_json = (@$_REQUEST['format']=='json');
@@ -44,7 +44,7 @@ if($system->get_mysqli()!=null) { //server is connected
     if(!$is_json && count($list)<1){
         //redirect to create database
         header('Location: ' . HEURIST_BASE_URL . 'admin/setup/dbcreate/createNewDB.php');
-        exit();
+        exit;
     }
 }
 
@@ -59,7 +59,7 @@ if($is_json){
     }    
         
     print json_encode( $response );
-    exit();
+    exit;
 }
 
 ?>

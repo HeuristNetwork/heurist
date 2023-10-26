@@ -36,12 +36,12 @@ set_time_limit(0);
 define('MANAGER_REQUIRED', 1);   
 define('PDIR','../../../');  //need for proper path to js and css    
 
-require_once(dirname(__FILE__).'/../../../hclient/framecontent/initPageMin.php');
-require_once(dirname(__FILE__).'/../../../hserver/utilities/dbUtils.php');
-require_once(dirname(__FILE__).'/../../../records/index/elasticSearch.php');
-require_once('welcomeEmail.php');
+require_once dirname(__FILE__).'/../../../hclient/framecontent/initPageMin.php';
+require_once dirname(__FILE__).'/../../../hserver/utilities/dbUtils.php';
+require_once dirname(__FILE__).'/../../../records/index/elasticSearch.php';
+require_once 'welcomeEmail.php';
 
-//require_once(dirname(__FILE__).'/../../../hserver/utilities/utils_db_load_script.php');
+//require_once dirname(__FILE__).'/../../../hserver/utilities/utils_db_load_script.php';
 
 $user_id = $system->get_user_id(); //keep user id (need to copy current user into cloned db for template cloning)
 $mysqli  = $system->get_mysqli();
@@ -59,7 +59,7 @@ if($isCloneTemplate){ //template db must be registered with id less than 21
     if(mysql__usedatabase($mysqli, $templateddb)!==true){
         $system->addError(HEURIST_ERROR, "Sorry, could not connect to the database $templateddb. Operation is possible when database to be cloned is on the same server");
         include $ERROR_REDIR;
-        exit();
+        exit;
     }
 
     $dbRegID = $system->get_system('sys_dbRegisteredID', true);
@@ -67,7 +67,7 @@ if($isCloneTemplate){ //template db must be registered with id less than 21
     if(!($dbRegID>0 && $dbRegID<1000)){
         $system->addError(HEURIST_ERROR, "Sorry, the database $templateddb must be registered with an ID less than 1000, indicating a database curated or approved by the Heurist team, to allow cloning through this function. You may also clone any database that you can log into through the Advanced functions under Administration.");
         include $ERROR_REDIR;
-        exit();
+        exit;
     }
 }else{
     $templateddb = null;

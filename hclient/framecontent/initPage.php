@@ -25,7 +25,7 @@
 * See the License for the specific language governing permissions and limitations under the License.
 */
 
-require_once(dirname(__FILE__)."/../../hserver/System.php");
+require_once dirname(__FILE__).'/../../hserver/System.php';
 
 if(defined('IS_INDEX_PAGE')){
     //from main (index) page it redirects to startup
@@ -54,7 +54,7 @@ if(!$isSystemInited){
         $_REQUEST['error'] = $system->getError();
     }
     include ERROR_REDIR;
-    exit();
+    exit;
 }
 
 $login_warning = 'To perform this action you must be logged in';
@@ -64,21 +64,21 @@ $is_admin = $system->is_admin();
 
 //
 // to limit access to particular page
-// define const in the very begining of your php code  just before require_once(dirname(__FILE__)."/initPage.php");
+// define const in the very begining of your php code  just before require_once '/initPage.php';
 //
 if(defined('LOGIN_REQUIRED') && !$system->has_access()){
     //No Need to show error message when login is required, login popup will be shown
     //$message = $login_warning
     //include ERROR_REDIR;
-    exit();
+    exit;
 }else if(defined('MANAGER_REQUIRED') && !$is_admin){ //A member should also be able to create and open database
     $message = $login_warning.' as Administrator of group \'Database Managers\'';
     include ERROR_REDIR;
-    exit();
+    exit;
 }else if(defined('OWNER_REQUIRED') && !$system->is_dbowner()){
     $message = $login_warning.' as Database Owner';
     include ERROR_REDIR;
-    exit();
+    exit;
 }else{
     $invalid_access = false;
 }
@@ -110,7 +110,7 @@ if(defined('IS_INDEX_PAGE')){
     .$subsubVer){
 
         include 'admin/setup/dbupgrade/upgradeDatabase.php';
-        exit();
+        exit;
     }
 }
 

@@ -33,7 +33,7 @@ if($is_included){
 }else{
     define('PDIR','../../');
     
-    require_once (dirname(__FILE__).'/../../hserver/System.php');
+    require_once dirname(__FILE__).'/../../hserver/System.php';
     
     $system = new System();
     if( ! $system->init(@$_REQUEST['db']) ){
@@ -61,11 +61,11 @@ if($is_included){
         </form>
 
         <?php
-        exit();
+        exit;
         }
     }else if(!$system->is_admin()){ //  $system->is_dbowner()
         print '<span>You must be logged in as Database Administrator to perform this operation</span>';
-        exit();
+        exit;
     }
 ?>    
 <html>

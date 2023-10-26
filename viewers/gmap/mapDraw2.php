@@ -20,7 +20,7 @@
     */
 
 define('PDIR','../../');  //need for proper path to js and css    
-require_once(dirname(__FILE__).'/../../hclient/framecontent/initPage.php');
+require_once dirname(__FILE__).'/../../hclient/framecontent/initPage.php';
 ?>
         <script type="text/javascript" src="<?php echo PDIR;?>external/layout/jquery.layout-latest.js"></script>
 

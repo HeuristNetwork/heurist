@@ -20,8 +20,8 @@
     * See the License for the specific language governing permissions and limitations under the License.
     */
 
-require_once (dirname(__FILE__).'/../System.php');
-require_once (dirname(__FILE__).'/dbEntityBase.php');
+require_once dirname(__FILE__).'/../System.php';
+require_once dirname(__FILE__).'/dbEntityBase.php';
 
 class DbAnnotations extends DbEntityBase 
 {
@@ -92,7 +92,7 @@ class DbAnnotations extends DbEntityBase
             $redirect = HEURIST_BASE_URL.'/hclient/framecontent/recordEdit.php?db='.HEURIST_DBNAME.'&fmt=edit&recID='.$recordId;
            
             header('Location: '.$redirect);  
-            exit();
+            exit;
             
         }else{
             $item = $this->findItem_by_UUID($this->data['recID']);

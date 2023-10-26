@@ -27,7 +27,7 @@
  
 define('PDIR','../../');  //need for proper path to js and css    
 
-require_once(dirname(__FILE__).'/../../hclient/framecontent/initPageMin.php');
+require_once dirname(__FILE__).'/../../hclient/framecontent/initPageMin.php';
 
 
 if( $system->verifyActionPassword($_REQUEST['pwd'], $passwordForServerFunctions) ){
@@ -50,7 +50,7 @@ if( $system->verifyActionPassword($_REQUEST['pwd'], $passwordForServerFunctions)
     </form>
 
     <?php
-    exit();
+    exit;
 }
 
 ?>            
@@ -65,14 +65,14 @@ if( $system->verifyActionPassword($_REQUEST['pwd'], $passwordForServerFunctions)
     
     if(!$ccode){
         print 'conceptid is not defined';
-        exit();
+        exit;
     }
     list($orig_db_id, $orig_id) = explode('-',$ccode);
     $orig_db_id = intval($orig_db_id);
     $orig_id = intval($orig_id);
     if(!($orig_db_id>0 && $orig_id>0)){
         print 'conceptid is not wrong';
-        exit();
+        exit;
     }
     
     $type_2 = 'external';
@@ -149,7 +149,7 @@ if( $system->verifyActionPassword($_REQUEST['pwd'], $passwordForServerFunctions)
                     $m++;
                 }else{
                     print 'Cannot register url '.htmlspecialchars($url).' for detail id '.intval($dtl_ID);
-                    exit();
+                    exit;
                 }
                 
             }//while recDeetails

@@ -24,8 +24,8 @@ define('DEMO_DB_TEMPLATE', 'hdb_demo_template');
 define('DEMO_DB_ONLY', false);
 
 
-require_once(dirname(__FILE__).'/../../../hserver/System.php');
-require_once(dirname(__FILE__).'/../../../hserver/utilities/dbUtils.php');
+require_once dirname(__FILE__).'/../../../hserver/System.php';
+require_once dirname(__FILE__).'/../../../hserver/utilities/dbUtils.php';
 
 set_time_limit(0);
 

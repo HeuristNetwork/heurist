@@ -20,7 +20,7 @@
     */
 
 if(!defined('PDIR')) define('PDIR','../../../');
-require_once(dirname(__FILE__)."/../initPage.php");
+require_once dirname(__FILE__).'../initPage.php';
 ?>
         <style>
             body, html {

@@ -35,7 +35,7 @@
 * @package     Heurist academic knowledge management system
 * @subpackage  CommonPHP
 */
-require_once(dirname(__FILE__).'/../../utilities/Temporal.php');
+require_once dirname(__FILE__).'/../../utilities/Temporal.php';
 
 
 define('_ERR_REP_WARN', 0); // returns general message that titlemask is invalid - default

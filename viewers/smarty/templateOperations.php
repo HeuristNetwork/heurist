@@ -26,9 +26,9 @@ if($mode!='serve'){ // OK to serve tempalte files without login
 }
 define('PDIR','../../');  //need for proper path to js and css    
 
-require_once(dirname(__FILE__).'/../../hclient/framecontent/initPageMin.php');
-require_once(dirname(__FILE__).'/../../hserver/structure/search/dbsData.php');
-require_once(dirname(__FILE__).'/../../hserver/structure/conceptCode.php');
+require_once dirname(__FILE__).'/../../hclient/framecontent/initPageMin.php';
+require_once dirname(__FILE__).'/../../hserver/structure/search/dbsData.php';
+require_once dirname(__FILE__).'/../../hserver/structure/conceptCode.php';
 
 
     $dir = HEURIST_SMARTY_TEMPLATES_DIR;

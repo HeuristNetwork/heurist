@@ -23,7 +23,7 @@
 * See the License for the specific language governing permissions and limitations under the License.
 */
 
-require_once (dirname(__FILE__).'/composeSqlOld.php');
+require_once dirname(__FILE__).'/composeSqlOld.php';
 
 /*
 Heurist is either json array  { conjunction: [ {predicate} , {predicate}, .... ] }

@@ -31,8 +31,8 @@ define('OWNER_REQUIRED',1);
  
 define('PDIR','../../../');  //need for proper path to js and css    
 
-require_once(dirname(__FILE__).'/../../../hclient/framecontent/initPageMin.php');
-require_once(dirname(__FILE__).'/../../../admin/setup/dbupgrade/DBUpgrade.php');
+require_once dirname(__FILE__).'/../../../hclient/framecontent/initPageMin.php';
+require_once dirname(__FILE__).'/../../../admin/setup/dbupgrade/DBUpgrade.php';
 
 
 print '<div style="font-family:Arial,Helvetica;sans-serif;font-size:12px">';

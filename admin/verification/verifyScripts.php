@@ -26,7 +26,7 @@
     * @subpackage  !!!subpackagename for file such as Administration, Search, Edit, Application, Library
     */
 print 'disabled'; 
-exit(); 
+exit; 
 
 ini_set('max_execution_time', '0');
 
@@ -34,8 +34,8 @@ ini_set('max_execution_time', '0');
 //define('OWNER_REQUIRED', 1);   
 define('PDIR','../../');  //need for proper path to js and css    
 
-require_once(dirname(__FILE__).'/../../hclient/framecontent/initPageMin.php');
-require_once(dirname(__FILE__).'/../../hserver/utilities/utils_db_load_script.php');
+require_once dirname(__FILE__).'/../../hclient/framecontent/initPageMin.php';
+require_once dirname(__FILE__).'/../../hserver/utilities/utils_db_load_script.php';
 
 /*
 //print htmlspecialchars($_REQUEST['db']).'<br>';
@@ -55,7 +55,7 @@ if( $system->verifyActionPassword($_REQUEST['pwd'], $passwordForServerFunctions)
     </form>
 
     <?php
-    exit();
+    exit;
 }
 <script>window.history.pushState({}, '', '<?php echo htmlspecialchars($_SERVER['PHP_SELF']); ?>')</script>  
 */
@@ -308,7 +308,7 @@ function findMissedTermLinks() {
                         $mysqli->query($query);
                         if($mysqli->error){
                             print '<div style="color:red">'.$mysqli->error.'</div>';                    
-                            exit();
+                            exit;
                         }
                     }
                     $db3_with_terms[$db_name] = $value;
@@ -426,7 +426,7 @@ function verifySpatialVocab($sName,$f_code,$v_code){
                         $mysqli->query($query);
                         if($mysqli->error){
                             print '<div style="color:red">'.$mysqli->error.'</div>';                    
-                            exit();
+                            exit;
                         }
                     }
                     
@@ -712,7 +712,7 @@ function __recreateProceduresTriggers(){
             if(db_script('hdb_'.$db_name, dirname(__FILE__).'/../setup/dbcreate/addFunctions.sql', false)){
                 $res = true;    
             }else{
-                exit();
+                exit;
             }
         }
     }//foreach

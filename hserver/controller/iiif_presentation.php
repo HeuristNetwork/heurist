@@ -25,9 +25,9 @@
     * See the License for the specific language governing permissions and limitations under the License.
     */
 
-    require_once (dirname(__FILE__).'/../System.php');
-    require_once (dirname(__FILE__).'/../dbaccess/utils_db.php');
-    require_once (dirname(__FILE__).'/../records/export/recordsExport.php');
+    require_once dirname(__FILE__).'/../System.php';
+    require_once dirname(__FILE__).'/../dbaccess/utils_db.php';
+    require_once dirname(__FILE__).'/../records/export/recordsExport.php';
 
     $response = array();
 

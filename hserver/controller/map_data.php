@@ -23,8 +23,8 @@
 * See the License for the specific language governing permissions and limitations under the License.
 */
 
-require_once (dirname(__FILE__).'/../System.php');
-require_once (dirname(__FILE__).'/../records/search/recordFile.php');
+require_once dirname(__FILE__).'/../System.php';
+require_once dirname(__FILE__).'/../records/search/recordFile.php';
 
 $recordQuery = "SELECT * FROM Records r INNER JOIN defRecTypes d ON r.rec_RecTypeID=d.rty_ID";
 

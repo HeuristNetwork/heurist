@@ -28,22 +28,22 @@
 define('MANAGER_REQUIRED', 1);   
 define('PDIR','../../../');  //need for proper path to js and css    
 
-require_once(dirname(__FILE__).'/../../../hclient/framecontent/initPageMin.php');
-require_once(dirname(__FILE__).'/../../../hserver/utilities/dbUtils.php');
+require_once dirname(__FILE__).'/../../../hclient/framecontent/initPageMin.php';
+require_once dirname(__FILE__).'/../../../hserver/utilities/dbUtils.php';
 
 $sysadmin_protection = htmlspecialchars(@$_REQUEST['sa_protected']);
 
 if(!$system->is_dbowner() && $system->verifyActionPassword($sysadmin_protection, $passwordForServerFunctions) ){
     $err = $response = $system->getError();
     print @$err['message'];
-    exit();
+    exit;
 }
 
 if(strpos(HEURIST_BASE_URL, '//localhost')>0 ||  strpos(HEURIST_BASE_URL, '//127.0.0.1')>0){
 
     $message = 'Impossible to register database running on local server '.HEURIST_BASE_URL;
     include dirname(__FILE__).'/../../../hclient/framecontent/infoPage.php';    
-    exit();
+    exit;
 }
 
 $mysqli = $system->get_mysqli();
@@ -54,7 +54,7 @@ if(!$dbowner['ugr_eMail'] || !$dbowner['ugr_FirstName'] || !$dbowner['ugr_LastNa
     
     header('Location: '.ERROR_REDIR.'&msg='.rawurlencode( 
         'Warning<br/><br/>Please edit your user profile to specify your full name, login and email address before registering this database'     )); 
-    exit();
+    exit;
 }
 ?>
 <!DOCTYPE html>

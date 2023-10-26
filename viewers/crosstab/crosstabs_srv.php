@@ -25,8 +25,8 @@
 * @package     Heurist academic knowledge management system
 */
 
-require_once(dirname(__FILE__).'/../../hserver/System.php');
-require_once (dirname(__FILE__).'/../../hserver/records/search/recordSearch.php');
+require_once dirname(__FILE__).'/../../hserver/System.php';
+require_once dirname(__FILE__).'/../../hserver/records/search/recordSearch.php';
 
 $system = new System();
 if( !$system->init(@$_REQUEST['db']) ){
@@ -57,7 +57,7 @@ ini_set('max_execution_time', '0');
 
 header('Content-type: text/javascript');
 print json_encode($response);
-exit();
+exit;
 
 
 /**

@@ -19,8 +19,8 @@
 * See the License for the specific language governing permissions and limitations under the License.
 */
 
-require_once (dirname(__FILE__).'/../../../hserver/System.php');
-require_once (dirname(__FILE__).'/../../../hserver/records/search/recordFile.php');
+require_once dirname(__FILE__).'/../../../hserver/System.php';
+require_once dirname(__FILE__).'/../../../hserver/records/search/recordFile.php';
 
 define('ERROR_REDIR', dirname(__FILE__).'/../../framecontent/infoPage.php');
 
@@ -160,7 +160,7 @@ if($system->init($db, true, false)){
 
 if($is_not_inited){
     include ERROR_REDIR;
-    exit();
+    exit;
 }
 
 }

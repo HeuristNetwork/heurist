@@ -27,12 +27,10 @@
 * @todo - only one kml per record, perhaps need to return the combination of kml
 */
 
-require_once(dirname(__FILE__).'/../../hserver/System.php');
-require_once(dirname(__FILE__).'/../../hserver/records/search/recordSearch.php');
-
-require_once(dirname(__FILE__).'/../../hserver/utilities/Temporal.php');
-
-require_once(dirname(__FILE__).'/../../vendor/autoload.php'); //for geoPHP
+require_once dirname(__FILE__).'/../../hserver/System.php';
+require_once dirname(__FILE__).'/../../hserver/records/search/recordSearch.php';
+require_once dirname(__FILE__).'/../../hserver/utilities/Temporal.php';
+require_once dirname(__FILE__).'/../../vendor/autoload.php'; //for geoPHP
 
 $system = new System();
 if( !$system->init(@$_REQUEST['db']) ){

@@ -59,9 +59,9 @@
     *
     */
 
-    require_once (dirname(__FILE__).'/../../records/edit/recordTitleMask.php');
-    require_once (dirname(__FILE__).'/../../utilities/utils_mail.php');
-    require_once(dirname(__FILE__).'/../../../viewers/smarty/reportActions.php');
+    require_once dirname(__FILE__).'/../../records/edit/recordTitleMask.php';
+    require_once dirname(__FILE__).'/../../utilities/utils_mail.php';
+    require_once dirname(__FILE__).'/../../../viewers/smarty/reportActions.php';
     
 
     /**

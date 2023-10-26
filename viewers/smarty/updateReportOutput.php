@@ -46,14 +46,14 @@
 * @package     Heurist academic knowledge management system
 * @subpackage  !!!subpackagename for file such as Administration, Search, Edit, Application, Library
 */
-require_once(dirname(__FILE__).'/../../viewers/smarty/showReps.php');
+require_once dirname(__FILE__).'/../../viewers/smarty/showReps.php';
 
 if(isset($_REQUEST) && count($_REQUEST)>0){ //if set it is included in dailyCronJobs
 
     //system is defined in showReps
     if(!$system->is_inited()){
         echo 'System is not inited';
-        exit();
+        exit;
     }
 
     $rps_ID = (array_key_exists('id',$_REQUEST)) ? $_REQUEST['id'] :0;
@@ -102,7 +102,7 @@ if(isset($_REQUEST) && count($_REQUEST)>0){ //if set it is included in dailyCron
         echo "Wrong report ID parameter: ".$rps_ID;
     }
 
-    exit();
+    exit;
 }
 //
 // Generates report

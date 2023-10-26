@@ -42,12 +42,12 @@
 * See the License for the specific language governing permissions and limitations under the License.
 */
 
-require_once (dirname(__FILE__).'/recordFile.php');  //it includes utils_file.php
-require_once (dirname(__FILE__).'/composeSql.php');
-require_once (dirname(__FILE__).'/../../structure/search/dbsData.php');
-require_once (dirname(__FILE__).'/../../structure/dbsUsersGroups.php');
-require_once (dirname(__FILE__).'/../../structure/dbsTerms.php');
-require_once (dirname(__FILE__).'/../../utilities/Temporal.php');
+require_once dirname(__FILE__).'/recordFile.php';  //it includes utils_file.php
+require_once dirname(__FILE__).'/composeSql.php';
+require_once dirname(__FILE__).'/../../structure/search/dbsData.php';
+require_once dirname(__FILE__).'/../../structure/dbsUsersGroups.php';
+require_once dirname(__FILE__).'/../../structure/dbsTerms.php';
+require_once dirname(__FILE__).'/../../utilities/Temporal.php';
 
 /**
 * Find minimal and maximal values for given detail type and record type
@@ -2427,7 +2427,7 @@ function recordSearch($system, $params)
 
     if(@$_REQUEST['dbg']==1) {
         print htmlspecialchars($query);
-        exit();
+        exit;
     }
         
 

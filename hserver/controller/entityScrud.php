@@ -46,8 +46,8 @@ if (@$argv) {
 }
 */    
     
-    require_once (dirname(__FILE__).'/../System.php');
-    require_once ('entityScrudSrv.php');
+    require_once dirname(__FILE__).'/../System.php';
+    require_once 'entityScrudSrv.php';
     
     $dbname = @$_REQUEST['db'];
 
@@ -86,7 +86,7 @@ if (@$argv) {
             }else{
                 downloadFile(null, $dbdef_cache);
             }
-            exit();
+            exit;
     }
     
     $response = array();

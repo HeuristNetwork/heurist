@@ -107,9 +107,9 @@ if(!defined('PDIR')) {
     define('PDIR','../../../');  //need for proper path to js and css           
 }
 
-require_once(dirname(__FILE__).'/../../framecontent/initPageMin.php'); //without client hapi
-require_once(dirname(__FILE__).'/../../../hserver/records/search/recordSearch.php');
-require_once (dirname(__FILE__).'/../../../hserver/structure/dbsUsersGroups.php');
+require_once dirname(__FILE__).'/../../framecontent/initPageMin.php'; //without client hapi
+require_once dirname(__FILE__).'/../../../hserver/records/search/recordSearch.php';
+require_once dirname(__FILE__).'/../../../hserver/structure/dbsUsersGroups.php';
 
 
 /*
@@ -155,12 +155,12 @@ if(!($rec_id>0))
             .'Please ' . ($try_login ? '<a class="login-link">login</a> or' : '') . ' ask the owner to publish their website(s).';
 
             include ERROR_REDIR;
-            exit();
+            exit;
         }
     }else{
         //$message = $system->getError()['message'];
         include ERROR_REDIR;
-        exit();
+        exit;
     }
 }
 
@@ -179,7 +179,7 @@ if($rec==null){
     $message = 'Website ID '.$home_page_on_init.' does not refer to a CMS Home record';
     //'Record #'.$home_page_on_init.' not found';
     include ERROR_REDIR;
-    exit();
+    exit;
 }
 
 $hasAccess = (($rec['rec_NonOwnerVisibility'] == 'public') || 
@@ -200,7 +200,7 @@ print ($system->is_admin()===true).'<br>';
 print ($system->get_user_id()>0).'<br>'; 
 print ($rec['rec_NonOwnerVisibility'] !== 'hidden').'<br>'; 
 print  $system->is_member($rec['rec_OwnerUGrpID']);
-exit();
+exit;
 */
 
 if(!$hasAccess){
@@ -212,7 +212,7 @@ if(!$hasAccess){
         . ($try_login ? '<br>Try <a class="login-link">logging in</a> to view this website.' : '');
 
     include ERROR_REDIR;
-    exit();
+    exit;
 } 
 
 $showWarnAboutPublic = !$edit_OldEditor && ($rec['rec_NonOwnerVisibility'] != 'public');
@@ -246,7 +246,7 @@ if(!($rec['rec_RecTypeID']==RT_CMS_HOME || $isWebPage)){
     $message = 'Record #'.$rec_id.' is not allowed record type. '
                     .'Expecting Website Home Page or Standalone Web Page';
     include ERROR_REDIR;
-    exit();
+    exit;
 }                
 
 $image_icon = __getFile($rec, DT_THUMBNAIL, (array_key_exists('embed', $_REQUEST)?PDIR:HEURIST_BASE_URL).'favicon.ico');
@@ -489,7 +489,7 @@ if($template!==false){
             .'Please ask the owner to verify server configuration.';
 
             include ERROR_REDIR;
-            exit();
+            exit;
     }else{
         include 'cmsTemplate.php';    
     }

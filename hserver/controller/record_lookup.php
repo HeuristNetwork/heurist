@@ -27,8 +27,8 @@
 * distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
 * See the License for the specific language governing permissions and limitations under the License.
 */
-    require_once (dirname(__FILE__).'/../System.php');
-    require_once (dirname(__FILE__).'/../dbaccess/utils_db.php');
+    require_once dirname(__FILE__).'/../System.php';
+    require_once dirname(__FILE__).'/../dbaccess/utils_db.php';
 
     // allowed and handled services, 'serviceType' => 'service/url base'
     $services_details = array(
@@ -116,8 +116,8 @@
         if(strpos(strtolower(HEURIST_BASE_URL), strtolower(HEURIST_MAIN_SERVER)) !== false){ // currently on server where ESTC DB is located
 
             if(array_key_exists('entity', $params)){ // retrieve entity info (term lookup)
-                require_once (dirname(__FILE__).'/entityScrud.php');
-                exit();
+                require_once dirname(__FILE__).'/entityScrud.php';
+                exit;
             }
 
             $is_inited = $system->init(@$params['db']);
@@ -132,15 +132,15 @@
                     if(array_key_exists('action', $params)){ // import record for LRC18C lookup
     
                         if($params['action'] == 'import_records'){ // perform standard record import action, user on ESTC server
-                            require_once(dirname(__FILE__).'/importController.php');
-                            exit();
+                            require_once dirname(__FILE__).'/importController.php';
+                            exit;
                         }else if($params['action'] == 'record_output'){ // retrieve record from record_output, user on external server
-                            require_once(dirname(__FILE__).'/record_output.php');
-                            exit();
+                            require_once dirname(__FILE__).'/record_output.php';
+                            exit;
                         }
                     }
     
-                    require_once (dirname(__FILE__).'/../records/search/recordSearch.php');
+                    require_once dirname(__FILE__).'/../records/search/recordSearch.php';
 
                     $response = recordSearch($system, $params);
                 }else{ // unable to login, cannot access records
@@ -177,7 +177,7 @@
                 if($filesize>0 && file_exists($heurist_path)){
                     //read temp file, import record
               
-                    require_once (dirname(__FILE__).'/../records/import/importHeurist.php'); 
+                    require_once dirname(__FILE__).'/../records/import/importHeurist.php'; 
                     
                     $params2 = array(
                         'dbg' => ($is_debug?1:0),
@@ -949,7 +949,7 @@
             if(json_last_error() !== JSON_ERROR_NONE || !is_array($data) || $data['last_update'] < date('Y-m-d')){
                 if($already_updated){
                     $system->error_exit_api('Unable to retrieve Opentheso thesauruses due to unknown error.');
-                    exit();
+                    exit;
                 }
                 $data = updateOpenthesoThesauruses($system);
             }
@@ -981,7 +981,7 @@
 
             if($thesauruses === false){
                 $system->error_exit_api('Unable to retrieve the available thesauruses from ' . $server);
-                exit();
+                exit;
             }
 
             $thesauruses = json_decode($thesauruses, TRUE);
@@ -1015,7 +1015,7 @@
         $file_size = fileSave(json_encode($data_rtn), $opentheso_file);
         if($file_size <= 0){
             $system->error_exit_api('Cannot save Opentheso thesaurus list into local file store');
-            exit();
+            exit;
         }else{
             return $data_rtn;
         }
@@ -1049,7 +1049,7 @@
             if(json_last_error() !== JSON_ERROR_NONE || !is_array($data) || $data['last_update'] < date('Y-m-d')){
                 if($already_updated){
                     $system->error_exit_api('Unable to retrieve Nakala metadata due to unknown error.');
-                    exit();
+                    exit;
                 }
                 $data = updateNakalaMetadata($system);
             }
@@ -1095,7 +1095,7 @@
 
             if($results === false){
                 $system->error_exit_api('Unable to retrieve metadata values from Nakala');
-                exit();
+                exit;
             }
 
             $results = json_decode($results, TRUE);
@@ -1169,7 +1169,7 @@
                 }
             }else{
                 $system->error_exit_api('Unable to retrieve metadata values from Nakala, receieved a response not in a JSON format');
-                exit();
+                exit;
             }
 
             $page ++;
@@ -1190,7 +1190,7 @@
         $file_size = fileSave(json_encode($data_rtn), $nakala_file);
         if($file_size <= 0){
             $system->error_exit_api('Cannot save Nakala metadata into local file store');
-            exit();
+            exit;
         }else{
             return $data_rtn;
         }

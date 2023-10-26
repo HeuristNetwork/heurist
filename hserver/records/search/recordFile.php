@@ -47,10 +47,10 @@
 * See the License for the specific language governing permissions and limitations under the License.
 */
 
-require_once (dirname(__FILE__).'/../../System.php');
-require_once (dirname(__FILE__).'/../../structure/dbsUsersGroups.php');
-require_once (dirname(__FILE__).'/../../utilities/utils_file.php');
-require_once (dirname(__FILE__).'/../../entity/dbRecUploadedFiles.php');
+require_once dirname(__FILE__).'/../../System.php';
+require_once dirname(__FILE__).'/../../structure/dbsUsersGroups.php';
+require_once dirname(__FILE__).'/../../utilities/utils_file.php';
+require_once dirname(__FILE__).'/../../entity/dbRecUploadedFiles.php';
 
 /**
 * Register file in recUploadedFiles - used for import CSV, index directory

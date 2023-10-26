@@ -26,7 +26,7 @@
 * @package     Heurist academic knowledge management system
 * @subpackage  !!!subpackagename for file such as Administration, Search, Edit, Application, Library
 */
-require_once(dirname(__FILE__)."/../../../hserver/System.php");
+require_once dirname(__FILE__).'/../../../hserver/System.php';
 
 $isOutSideRequest = (strpos(strtolower(HEURIST_INDEX_BASE_URL), strtolower(HEURIST_SERVER_URL))===false); //this is reference server
 if($isOutSideRequest){ //this is request from outside - redirect to master index    

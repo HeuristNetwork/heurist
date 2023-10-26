@@ -22,17 +22,17 @@
 define('MANAGER_REQUIRED',1);
 define('PDIR','../../');  //need for proper path to js and css    
 
-require_once(dirname(__FILE__).'/../../hclient/framecontent/initPageMin.php');
+require_once dirname(__FILE__).'/../../hclient/framecontent/initPageMin.php';
 
 $log_file = HEURIST_FILESTORE_DIR.'userInteraction.log';
 
 if(!file_exists($log_file)){
 	print '<h2>There is no interactions log file</h2>';
-	exit();
+	exit;
 }else if(!is_readable($log_file)){
     $system->addError(HEURIST_ERROR, 'Unable to read the interaction log file for DB ' . htmlspecialchars($_REQUEST['db']));
     print '<h2>Unable to read User interactions file</h2>';
-    exit();
+    exit;
 }
 
 if(@$_REQUEST['actionType']){ // filter and download interaction log as CSV file
@@ -43,11 +43,11 @@ if(@$_REQUEST['actionType']){ // filter and download interaction log as CSV file
     if(!$log_fd){ // Unable to open log
         $system->addError(HEURIST_ERROR, 'Unable to open the interaction log file for DB ' . htmlspecialchars($_REQUEST['db']));
         print '<h2>An error has occurred while trying to open the Interaction log for this database</h2>';
-        exit();
+        exit;
     }else if(!$csv_fd){
         $system->addError(HEURIST_ERROR, 'Unable to open temporary file for exporting');
         print '<h2>An error has occurred</h2>';
-        exit();
+        exit;
     }
 
     // Construct initial headers
@@ -171,7 +171,7 @@ if(@$_REQUEST['actionType']){ // filter and download interaction log as CSV file
     fclose($csv_fd);
     fclose($log_fd);
 
-	exit();
+	exit;
 }
 //else, display download form, allows for filtering
 ?>

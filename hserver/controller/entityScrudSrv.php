@@ -23,35 +23,35 @@
     * See the License for the specific language governing permissions and limitations under the License.
     */
 
-    require_once (dirname(__FILE__).'/../System.php');
+    require_once dirname(__FILE__).'/../System.php';
 
-    require_once (dirname(__FILE__).'/../entity/dbUsrTags.php');
-    require_once (dirname(__FILE__).'/../entity/dbSysDatabases.php');
-    require_once (dirname(__FILE__).'/../entity/dbSysIdentification.php');
-    require_once (dirname(__FILE__).'/../entity/dbSysGroups.php');
-    require_once (dirname(__FILE__).'/../entity/dbSysUsers.php');
-    require_once (dirname(__FILE__).'/../entity/dbDefDetailTypeGroups.php');
-    require_once (dirname(__FILE__).'/../entity/dbDefFileExtToMimetype.php');
-    require_once (dirname(__FILE__).'/../entity/dbDefTerms.php');
-    require_once (dirname(__FILE__).'/../entity/dbDefVocabularyGroups.php');
-    require_once (dirname(__FILE__).'/../entity/dbDefRecTypeGroups.php');
-    require_once (dirname(__FILE__).'/../entity/dbDefDetailTypes.php');
-    require_once (dirname(__FILE__).'/../entity/dbDefRecTypes.php');
-    require_once (dirname(__FILE__).'/../entity/dbDefRecStructure.php');
-    require_once (dirname(__FILE__).'/../entity/dbDefCalcFunctions.php');
-    require_once (dirname(__FILE__).'/../entity/dbSysArchive.php');
-    require_once (dirname(__FILE__).'/../entity/dbSysBugreport.php');
-    require_once (dirname(__FILE__).'/../entity/dbSysDashboard.php');
-    require_once (dirname(__FILE__).'/../entity/dbSysImportFiles.php');
-    require_once (dirname(__FILE__).'/../entity/dbSysWorkflowRules.php');
-    require_once (dirname(__FILE__).'/../entity/dbRecThreadedComments.php');
-    require_once (dirname(__FILE__).'/../entity/dbRecUploadedFiles.php');
-    require_once (dirname(__FILE__).'/../entity/dbUsrBookmarks.php');
-    require_once (dirname(__FILE__).'/../entity/dbUsrReminders.php');
-    require_once (dirname(__FILE__).'/../entity/dbUsrSavedSearches.php');
-    require_once (dirname(__FILE__).'/../entity/dbAnnotations.php');
+    require_once dirname(__FILE__).'/../entity/dbUsrTags.php';
+    require_once dirname(__FILE__).'/../entity/dbSysDatabases.php';
+    require_once dirname(__FILE__).'/../entity/dbSysIdentification.php';
+    require_once dirname(__FILE__).'/../entity/dbSysGroups.php';
+    require_once dirname(__FILE__).'/../entity/dbSysUsers.php';
+    require_once dirname(__FILE__).'/../entity/dbDefDetailTypeGroups.php';
+    require_once dirname(__FILE__).'/../entity/dbDefFileExtToMimetype.php';
+    require_once dirname(__FILE__).'/../entity/dbDefTerms.php';
+    require_once dirname(__FILE__).'/../entity/dbDefVocabularyGroups.php';
+    require_once dirname(__FILE__).'/../entity/dbDefRecTypeGroups.php';
+    require_once dirname(__FILE__).'/../entity/dbDefDetailTypes.php';
+    require_once dirname(__FILE__).'/../entity/dbDefRecTypes.php';
+    require_once dirname(__FILE__).'/../entity/dbDefRecStructure.php';
+    require_once dirname(__FILE__).'/../entity/dbDefCalcFunctions.php';
+    require_once dirname(__FILE__).'/../entity/dbSysArchive.php';
+    require_once dirname(__FILE__).'/../entity/dbSysBugreport.php';
+    require_once dirname(__FILE__).'/../entity/dbSysDashboard.php';
+    require_once dirname(__FILE__).'/../entity/dbSysImportFiles.php';
+    require_once dirname(__FILE__).'/../entity/dbSysWorkflowRules.php';
+    require_once dirname(__FILE__).'/../entity/dbRecThreadedComments.php';
+    require_once dirname(__FILE__).'/../entity/dbRecUploadedFiles.php';
+    require_once dirname(__FILE__).'/../entity/dbUsrBookmarks.php';
+    require_once dirname(__FILE__).'/../entity/dbUsrReminders.php';
+    require_once dirname(__FILE__).'/../entity/dbUsrSavedSearches.php';
+    require_once dirname(__FILE__).'/../entity/dbAnnotations.php';
 
-    require_once (dirname(__FILE__).'/../dbaccess/utils_db.php');
+    require_once dirname(__FILE__).'/../dbaccess/utils_db.php';
 
     
     //    

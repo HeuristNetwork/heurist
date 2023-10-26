@@ -21,7 +21,7 @@
     * See the License for the specific language governing permissions and limitations under the License.
     */
 
-require_once(dirname(__FILE__)."/initPage.php");
+require_once 'initPage.php';
 ?>
         <script type="text/javascript" src="<?php echo PDIR;?>external/jquery.layout/jquery.layout-latest.js"></script>
         <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/editing/editing_input.js"></script>

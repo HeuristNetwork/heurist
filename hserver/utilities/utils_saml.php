@@ -57,7 +57,7 @@ function samlLogin($system, $sp, $dbname, $require_auth=true){
                     <a href="<?php echo htmlspecialchars($_SERVER['PHP_SELF']).'?a=login&auth=1&db='.htmlspecialchars($dbname); ?>">LOGIN</a>
                 </html>
                 <?php
-                exit();
+                exit;
         }
     }else{    
         $as = new \SimpleSAML\Auth\Simple($sp);
@@ -66,7 +66,7 @@ function samlLogin($system, $sp, $dbname, $require_auth=true){
             
             if($require_auth){
                 $as->requireAuth();    //after saml login - it returns to this page again
-                exit();
+                exit;
             }else{
                 $system->addError(HEURIST_REQUEST_DENIED, 'Not externally authenticated');
                 return 0;

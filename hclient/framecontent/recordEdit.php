@@ -27,8 +27,8 @@
     * distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
     * See the License for the specific language governing permissions and limitations under the License.
     */
-    require_once(dirname(__FILE__)."/initPage.php");
-    require_once(dirname(__FILE__)."/../../hserver/utilities/testSimilarURLs.php");
+    require_once 'initPage.php';
+    require_once dirname(__FILE__).'/../../hserver/utilities/testSimilarURLs.php';
    
     $params = array();
     
@@ -47,7 +47,7 @@ if(@$_REQUEST['annotationId'] || @$_REQUEST['a']){
         $params = array('recID'=>intval($res[0]));
     }else{
         //annotation not found
-        //exit();
+        //exit;
     }
     
     
@@ -79,7 +79,7 @@ if(@$_REQUEST['u']){
 
         //redirect to disambiguation
          
-        exit();  
+        exit;  
     }else{
 // 3. otherwise prepare description and write parameters as json array in header of this page        
 

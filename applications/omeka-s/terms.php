@@ -10,7 +10,7 @@
 */
 ini_set('max_execution_time', '0');
 
-exit();
+exit;
 
 //enum flag properties
 /* 227,228,232,285,357,370
@@ -61,9 +61,9 @@ define('HEU_DB','hdb_def19_v1');
 define('OWNER_REQUIRED',1);   
 define('PDIR','../../');  //need for proper path to js and css    
 
-require_once(dirname(__FILE__).'/../../hclient/framecontent/initPageMin.php');
-require_once (dirname(__FILE__).'/../../hserver/records/import/importParser.php');
-require_once (dirname(__FILE__).'/../../hserver/entity/dbDefTerms.php');
+require_once dirname(__FILE__).'/../../hclient/framecontent/initPageMin.php';
+require_once dirname(__FILE__).'/../../hserver/records/import/importParser.php';
+require_once dirname(__FILE__).'/../../hserver/entity/dbDefTerms.php';
 
 $mysqli = $system->get_mysqli();
 

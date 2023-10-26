@@ -67,16 +67,16 @@
     */
 
 
-    require_once (dirname(__FILE__).'/../System.php');
-    require_once (dirname(__FILE__).'/../records/search/recordSearch.php');
-    require_once (dirname(__FILE__).'/../dbaccess/utils_db.php');
-    require_once (dirname(__FILE__).'/../records/search/recordFile.php');
-    require_once (dirname(__FILE__).'/../structure/dbsTerms.php');
-    require_once (dirname(__FILE__).'/../utilities/Temporal.php');
-    require_once (dirname(__FILE__).'/../../admin/verification/verifyValue.php');
+    require_once dirname(__FILE__).'/../System.php';
+    require_once dirname(__FILE__).'/../records/search/recordSearch.php';
+    require_once dirname(__FILE__).'/../dbaccess/utils_db.php';
+    require_once dirname(__FILE__).'/../records/search/recordFile.php';
+    require_once dirname(__FILE__).'/../structure/dbsTerms.php';
+    require_once dirname(__FILE__).'/../utilities/Temporal.php';
+    require_once dirname(__FILE__).'/../../admin/verification/verifyValue.php';
 
-    require_once (dirname(__FILE__).'/../records/export/recordsExport.php');
-    require_once (dirname(__FILE__).'/../records/export/recordsExportCSV.php');
+    require_once dirname(__FILE__).'/../records/export/recordsExport.php';
+    require_once dirname(__FILE__).'/../records/export/recordsExportCSV.php';
  
     $response = array();
 
@@ -173,7 +173,7 @@
                     //query was removed 
                     header( 'Content-Type: application/json');    
                     echo json_encode(array('error'=>'Datatable session expired. Please refresh search'));
-                    exit();
+                    exit;
                 }
                 
                 $search_by_type = '';
@@ -226,7 +226,7 @@
                 //returns OK
                 header( 'Content-Type: application/json');    
                 echo json_encode(array('status'=>HEURIST_OK));
-                exit();
+                exit;
             }
         }
        
@@ -282,7 +282,7 @@ function downloadFileReferences($system, $ids){
 
         header('Content-type: application/json');
         echo json_encode(array('status'=>HEURIST_INVALID_REQUEST, 'message'=>'No file ids have been provided'));
-        exit();
+        exit;
     }
 
     if(is_array($ids)){ // change comma separated list into array
@@ -295,7 +295,7 @@ function downloadFileReferences($system, $ids){
 
         header('Content-type: application/json');
         echo 'Unable to open temporary output for writing CSV.<br>Please contact the Heurist team.';
-        exit();
+        exit;
     }
 
     // retrieve file details
@@ -313,7 +313,7 @@ function downloadFileReferences($system, $ids){
 
         header('Content-type: application/json');
         echo json_encode(array('status'=>HEURIST_ERROR, 'message'=>'File record details could not be retrieved from database'));
-        exit();
+        exit;
     }
 
     // return setup

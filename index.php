@@ -44,13 +44,13 @@ if( @$_REQUEST['recID'] || @$_REQUEST['recid'] || array_key_exists('website', $_
 
         //embed - when heurist is run on page on non-heurist server
         if(array_key_exists('embed', $_REQUEST)){
-            require_once(dirname(__FILE__).'/hserver/System.php');
+            require_once dirname(__FILE__).'/hserver/System.php';
             define('PDIR', HEURIST_INDEX_BASE_URL);
         }else{
             if(!defined('PDIR')) define('PDIR','');    
         }
         include dirname(__FILE__).'/hclient/widgets/cms/websiteRecord.php';
-        exit();
+        exit;
 
         if(intval(@$_REQUEST['field'])>0){
             $redirect = $redirect.'&field='.intval($_REQUEST['field']);    
@@ -159,7 +159,7 @@ if( @$_REQUEST['recID'] || @$_REQUEST['recid'] || array_key_exists('website', $_
 define('IS_INDEX_PAGE',true);
 if(!defined('PDIR')) define('PDIR','');
 
-require_once(dirname(__FILE__)."/hclient/framecontent/initPage.php");
+require_once dirname(__FILE__).'/hclient/framecontent/initPage.php';
 
 if($isLocalHost){
     print '<script type="text/javascript" src="external/jquery.fancytree/jquery.fancytree-all.min.js"></script>';

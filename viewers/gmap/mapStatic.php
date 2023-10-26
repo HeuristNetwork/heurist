@@ -31,13 +31,13 @@
 * @package     Heurist academic knowledge management system
 * @subpackage  Viewers/Map
 */
-    require_once (dirname(__FILE__).'/../../hserver/System.php');
-    require_once (dirname(__FILE__).'/../../hserver/records/search/recordSearch.php');
+    require_once dirname(__FILE__).'/../../hserver/System.php';
+    require_once dirname(__FILE__).'/../../hserver/records/search/recordSearch.php';
     
-    require_once (dirname(__FILE__).'/../../vendor/autoload.php'); //for geoPHP
+    require_once dirname(__FILE__).'/../../vendor/autoload.php'; //for geoPHP
 
-    require_once(dirname(__FILE__)."/../../hserver/utilities/geo/mapEncodePolyline.php");
-    require_once(dirname(__FILE__)."/../../hserver/utilities/geo/mapSimplify.php");
+    require_once dirname(__FILE__)."/../../hserver/utilities/geo/mapEncodePolyline.php";
+    require_once dirname(__FILE__)."/../../hserver/utilities/geo/mapSimplify.php";
 
 	$mapobjects = array();
     
@@ -48,7 +48,7 @@
         //get error and response
         //$response = $system->getError();
         header('Location: '.HEURIST_BASE_URL.'hclient/assets/notfound.png');
-        exit();
+        exit;
     }
     
 	if(false && @$_REQUEST['value'] && $_REQUEST['value']!='undefined'){

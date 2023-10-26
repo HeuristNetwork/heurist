@@ -20,10 +20,10 @@
     * See the License for the specific language governing permissions and limitations under the License.
     */
 
-require_once (dirname(__FILE__).'/../System.php');
-require_once (dirname(__FILE__).'/dbEntityBase.php');
-require_once (dirname(__FILE__).'/dbEntitySearch.php');
-require_once (dirname(__FILE__).'/../utilities/utils_mail.php');
+require_once dirname(__FILE__).'/../System.php';
+require_once dirname(__FILE__).'/dbEntityBase.php';
+require_once dirname(__FILE__).'/dbEntitySearch.php';
+require_once dirname(__FILE__).'/../utilities/utils_mail.php';
 
 class DbUsrReminders extends DbEntityBase
 {
@@ -301,7 +301,7 @@ class DbUsrReminders extends DbEntityBase
 /*        
         if(!$mysqli){
 echo 'Database connection not established '.spl_object_id($this->system).'   '.isset($mysqli).'>>>'."\n";   
-exit();         
+exit;         
             //$this->system->addError(HEURIST_ERROR, 'Database connection not established');
             return false;
         }

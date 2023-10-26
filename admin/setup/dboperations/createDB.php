@@ -19,10 +19,10 @@
 * See the License for the specific language governing permissions and limitations under the License.
 */
 
-require_once(dirname(__FILE__).'/../../../hserver/System.php');
-require_once(dirname(__FILE__).'/../../../hserver/utilities/dbUtils.php');
-require_once(dirname(__FILE__).'/../../../hserver/utilities/utils_file.php');
-require_once('welcomeEmail.php');
+require_once dirname(__FILE__).'/../../../hserver/System.php';
+require_once dirname(__FILE__).'/../../../hserver/utilities/dbUtils.php';
+require_once dirname(__FILE__).'/../../../hserver/utilities/utils_file.php';
+require_once 'welcomeEmail.php';
 
 header('Content-type: text/javascript');
 
@@ -57,7 +57,7 @@ if( isset($passwordForDatabaseCreation) && $passwordForDatabaseCreation!='' &&
         
         if(!$isSystemInited){
             print json_encode($system->getError());
-            exit();
+            exit;
         }
         
         $mysqli = $system->get_mysqli();
@@ -89,7 +89,7 @@ if( isset($passwordForDatabaseCreation) && $passwordForDatabaseCreation!='' &&
                 $system->addError(HEURIST_ACTION_BLOCKED, 
                     'Are you a bot? Please enter the correct answer to the challenge question');
                 print json_encode($system->getError());
-                exit();
+                exit;
             }
             if (@$_SESSION["captcha_code"]){
                 unset($_SESSION["captcha_code"]);
@@ -106,7 +106,7 @@ if( isset($passwordForDatabaseCreation) && $passwordForDatabaseCreation!='' &&
                 $system->addError(HEURIST_ACTION_BLOCKED, 'Mandatory data for your registration profile '
                     .'(first and last name, email, password) are not completed. Please fill out registration form');
                 print json_encode($system->getError());
-                exit();
+                exit;
             }
             
             $user_record = array();
@@ -139,7 +139,7 @@ if( isset($passwordForDatabaseCreation) && $passwordForDatabaseCreation!='' &&
                 $system->addError(HEURIST_ACTION_BLOCKED, 
                         'Database name '.htmlspecialchars($database_name_full).' is too long. Max 64 characters allowed');
                 print json_encode($system->getError());
-                exit();
+                exit;
         }
         $invalidDbName = System::dbname_check($database_name_full);
         if ($invalidDbName) {
@@ -147,7 +147,7 @@ if( isset($passwordForDatabaseCreation) && $passwordForDatabaseCreation!='' &&
                         'Database name '.htmlspecialchars($database_name_full)
                         .' is invalid. Only letters, numbers and underscores (_) are allowed in the database name');
                 print json_encode($system->getError());
-                exit();
+                exit;
         }
         
         
@@ -158,7 +158,7 @@ if( isset($passwordForDatabaseCreation) && $passwordForDatabaseCreation!='' &&
                 $system->addError(HEURIST_ACTION_BLOCKED, 
                         'Database with name '.htmlspecialchars($database_name_full).' aready exists. Try different name');
                 print json_encode($system->getError());
-                exit();
+                exit;
         }
 
         //get path to registered db template and download coreDefinitions.txt
@@ -179,7 +179,7 @@ if( isset($passwordForDatabaseCreation) && $passwordForDatabaseCreation!='' &&
 
             if(is_bool($res) && $res===false){
                 print json_encode($system->getError());
-                exit();
+                exit;
             }else if(is_array($res) && count($res) > 0){
             
                 // Catch if db root directory or any sub directory couldn't be created    
@@ -211,7 +211,7 @@ if( isset($passwordForDatabaseCreation) && $passwordForDatabaseCreation!='' &&
 
                 print json_encode(array('status'=>HEURIST_SYSTEM_CONFIG, 'message'=>'Sorry, we were not able to create all file directories required by the database.<br>Please contact the system administrator (email: ' . HEURIST_MAIL_TO_ADMIN . ') for assistance.', 'sysmsg'=>'This error has been emailed to the Heurist team (for servers maintained by the project - may not be enabled on personal servers). We apologise for any inconvenience', 'error_title'=>null));
 
-                exit();
+                exit;
             }
 
 //@TODO                createElasticIndex($database_name_full); // All Elastic methods use the database prefix.

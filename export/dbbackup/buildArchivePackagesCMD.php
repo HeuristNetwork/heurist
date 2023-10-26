@@ -78,9 +78,9 @@ if($arg_database==null){
 }
 
 
-require_once(dirname(__FILE__).'/../../hserver/System.php');
-require_once(dirname(__FILE__).'/../../hserver/records/search/recordFile.php');
-require_once(dirname(__FILE__).'/../../external/php/Mysqldump8.php');
+require_once dirname(__FILE__).'/../../hserver/System.php';
+require_once dirname(__FILE__).'/../../hserver/records/search/recordFile.php';
+require_once dirname(__FILE__).'/../../external/php/Mysqldump8.php';
 
 
 //retrieve list of databases

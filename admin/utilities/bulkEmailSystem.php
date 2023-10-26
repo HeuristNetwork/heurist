@@ -19,9 +19,9 @@
 * See the License for the specific language governing permissions and limitations under the License.
 */
 
-require_once(dirname(__FILE__).'/../../hclient/framecontent/initPageMin.php');
-require_once(dirname(__FILE__).'/../../hserver/structure/conceptCode.php');
-require_once(dirname(__FILE__).'/../../hserver/records/edit/recordModify.php');
+require_once dirname(__FILE__).'/../../hclient/framecontent/initPageMin.php';
+require_once dirname(__FILE__).'/../../hserver/structure/conceptCode.php';
+require_once dirname(__FILE__).'/../../hserver/records/edit/recordModify.php';
 
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception;
@@ -651,7 +651,7 @@ class systemEmailExt {
 
         // Close descriptor and exit
 		fclose($fd);
-        exit();
+        exit;
 	}
 
 	/*

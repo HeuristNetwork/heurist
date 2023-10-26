@@ -11,15 +11,15 @@ getLinkedRecords - returns array of linkedto and linkedfrom record IDs
 getWootText  - returns text related with given record ID
 */
 
-require_once(dirname(__FILE__).'/../../hserver/System.php');
-require_once(dirname(__FILE__).'/../../hserver/structure/search/dbsData.php');
-require_once(dirname(__FILE__).'/../../hserver/records/search/recordSearch.php');
-require_once(dirname(__FILE__).'/../../hserver/records/search/relationshipData.php');
-require_once(dirname(__FILE__).'/../../hserver/structure/dbsTerms.php');
+require_once dirname(__FILE__).'/../../hserver/System.php';
+require_once dirname(__FILE__).'/../../hserver/structure/search/dbsData.php';
+require_once dirname(__FILE__).'/../../hserver/records/search/recordSearch.php';
+require_once dirname(__FILE__).'/../../hserver/records/search/relationshipData.php';
+require_once dirname(__FILE__).'/../../hserver/structure/dbsTerms.php';
 
-require_once(dirname(__FILE__).'/../../hserver/utilities/Temporal.php');
-require_once (dirname(__FILE__).'/../../vendor/autoload.php'); //for geoPHP
-//require_once(dirname(__FILE__).'/../../records/woot/woot.php');
+require_once dirname(__FILE__).'/../../hserver/utilities/Temporal.php';
+require_once dirname(__FILE__).'/../../vendor/autoload.php'; //for geoPHP
+//require_once dirname(__FILE__).'/../../records/woot/woot.php';
 
 /*
 public methods

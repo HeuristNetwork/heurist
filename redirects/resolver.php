@@ -52,14 +52,14 @@ $allowedActions = array('web','hml','tpl','view','edit','adm');
 
 //print $_SERVER['REQUEST_URI'];
 //print print_r($requestUri,true);
-//exit();
+//exit;
 
 
 /*
 if(count($requestUri)==1){
    if($requestUri[0]==='heurist'){
        header('Location: ../index.php');
-       exit();
+       exit;
    }else{
        $_SERVER["SCRIPT_NAME"] .= '/web/';
        array_push($requestUri, 'web');
@@ -70,7 +70,7 @@ http://127.0.0.1/heurist/MBH
 if(count($requestUri)==1 && ($requestUri[0]=='heurist' || $requestUri[0]=='h6-alpha')){
 
     header('Location: /'.filter_var($requestUri[0]).'/index.php');  
-    exit();
+    exit;
     
 }else if ((count($requestUri)==1)
      || 
@@ -81,11 +81,11 @@ if(count($requestUri)==1 && ($requestUri[0]=='heurist' || $requestUri[0]=='h6-al
     
     if($dbname=='startup'){
         header('Location: /'.filter_var($requestUri[0]).'/startup/index.php');  
-        exit();
+        exit;
     }else
     if(!preg_match('/[^A-Za-z0-9_\$]/', $dbname)){
         header('Location: /'.$dbname.'/web/');  
-        exit();
+        exit;
     }
 }
 
@@ -136,12 +136,12 @@ $requestUri:
             $database='MBH_Manuscripta_Bibliae_Hebraicae';
         }else if($database=='heurist' || $database=='h6-alpha'){
             header('Location: /'.$database.'/index.php');  
-            exit();
+            exit;
         }
 
         $params['db'] = $database;
         
-        require_once ('../hserver/utilities/utils_host.php');
+        require_once '../hserver/utilities/utils_host.php';
         $host_params = getHostParams();
         
         if($action=='web' || $action=='website'){
@@ -166,7 +166,7 @@ $requestUri:
             $rewrite_path = '../index.php';
 
         }else {
-            require_once ('../hserver/dbaccess/utils_db.php');
+            require_once '../hserver/dbaccess/utils_db.php';
             
             $redirect = $host_params['server_url'] . $host_params['install_dir'];
         
@@ -276,11 +276,11 @@ $requestUri:
     }else if($rewrite_path){
         $_REQUEST = $params;
         include $rewrite_path;
-        exit();
+        exit;
     }
     
     header('Location: '.$redirect);  
-    exit();
+    exit;
 
 }
 
@@ -337,7 +337,7 @@ if ($database_id>0) {
     
     if(isset($error_msg)){
         header('Location:../hclient/framecontent/infoPage.php?error='.rawurlencode($error_msg));
-        exit();
+        exit;
     }
 
 }

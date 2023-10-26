@@ -27,13 +27,13 @@
 
 
 // Include Composer autoloader if not already done.
-require_once (dirname(__FILE__).'/../../../vendor/autoload.php');
+require_once dirname(__FILE__).'/../../../vendor/autoload.php';
 
-require_once (dirname(__FILE__).'/../../System.php');
-require_once (dirname(__FILE__).'/recordModify.php');
-require_once (dirname(__FILE__).'/recordTitleMask.php');
-require_once (dirname(__FILE__).'/../search/recordSearch.php');
-//require_once (dirname(__FILE__).'/../../vendor/ezyang/htmlpurifier/library/HTMLPurifier.auto.php');
+require_once dirname(__FILE__).'/../../System.php';
+require_once dirname(__FILE__).'/recordModify.php';
+require_once dirname(__FILE__).'/recordTitleMask.php';
+require_once dirname(__FILE__).'/../search/recordSearch.php';
+//require_once dirname(__FILE__).'/../../vendor/ezyang/htmlpurifier/library/HTMLPurifier.auto.php';
 
 /**
 * Methods for batch actions for list of records (recIDs) OR by record type rtyID

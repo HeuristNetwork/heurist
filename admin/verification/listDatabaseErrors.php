@@ -30,20 +30,20 @@ ini_set('max_execution_time', '0');
 define('MANAGER_REQUIRED',1);
 define('PDIR','../../');  //need for proper path to js and css    
 
-require_once(dirname(__FILE__).'/../../hclient/framecontent/initPageMin.php');
-require_once(dirname(__FILE__).'/../../hserver/structure/search/dbsData.php');
-require_once(dirname(__FILE__).'/../../hserver/records/edit/recordModify.php');
-require_once(dirname(__FILE__).'/../../hserver/structure/dbsTerms.php');
-require_once(dirname(__FILE__).'/../../hserver/utilities/Temporal.php');
-require_once(dirname(__FILE__)."/../../hserver/utilities/geo/mapCoordinates.php");
+require_once dirname(__FILE__).'/../../hclient/framecontent/initPageMin.php';
+require_once dirname(__FILE__).'/../../hserver/structure/search/dbsData.php';
+require_once dirname(__FILE__).'/../../hserver/records/edit/recordModify.php';
+require_once dirname(__FILE__).'/../../hserver/structure/dbsTerms.php';
+require_once dirname(__FILE__).'/../../hserver/utilities/Temporal.php';
+require_once dirname(__FILE__)."/../../hserver/utilities/geo/mapCoordinates.php";
 
-//require_once (dirname(__FILE__).'/../../vendor/autoload.php'); //for geoPHP
+//require_once dirname(__FILE__).'/../../vendor/autoload.php'; //for geoPHP
 
 
 $mysqli = $system->get_mysqli();
 
-require_once('verifyValue.php');
-require_once('verifyFieldTypes.php');
+require_once 'verifyValue.php';
+require_once 'verifyFieldTypes.php';
 
 
 $system->defineConstant('DT_RELATION_TYPE');

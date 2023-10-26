@@ -29,14 +29,14 @@
 * @package     Heurist academic knowledge management system
 * @subpackage  Records/View
 */
-require_once(dirname(__FILE__)."/../../hserver/System.php");
-require_once(dirname(__FILE__)."/../../hserver/records/search/recordSearch.php");
+require_once dirname(__FILE__).'/../../hserver/System.php';
+require_once dirname(__FILE__).'/../../hserver/records/search/recordSearch.php';
 
 $system = new System();
 
 if(!$system->init(@$_REQUEST['db'])){
     include dirname(__FILE__).'/../../hclient/framecontent/infoPage.php';
-    exit();
+    exit;
 }
 
 $mysqli = $system->get_mysqli();
@@ -70,7 +70,7 @@ $rec = mysql__select_row_assoc($mysqli,
 
 if($rec==null){
     header('Location: '.ERROR_REDIR.'&msg='.rawurlencode('Record #'.$rec_id.' not found'));
-    exit();
+    exit;
 }
 
 $hasAccess = ($rec['rec_NonOwnerVisibility'] == 'public' ||
@@ -81,7 +81,7 @@ if(!$hasAccess){
     header('Location: '.ERROR_REDIR.'&msg='
         .rawurlencode('You are not a member of the workgroup that owns the Heurist record #'
         .$rec_id.', and cannot therefore view or edit this information.'));
-    exit();
+    exit;
 }        
     
 //find bookmark by rec id    
@@ -103,7 +103,7 @@ $record_renderer_url = HEURIST_BASE_URL.'viewers/record/renderRecordData.php?db=
 
 if(!@$_REQUEST['popup']){
     header('Location: '.$record_renderer_url);
-    exit();    
+    exit;    
 }
         
 ?>

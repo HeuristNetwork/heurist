@@ -25,13 +25,12 @@ ini_set('max_execution_time', '0');
 define('MANAGER_REQUIRED',1);
 define('PDIR','../../');  //need for proper path to js and css    
 
-require_once(dirname(__FILE__).'/../../hclient/framecontent/initPageMin.php');
-require_once(dirname(__FILE__).'/../../hserver/structure/search/dbsData.php');
-require_once(dirname(__FILE__).'/../../hserver/records/edit/recordModify.php');
-require_once(dirname(__FILE__).'/../../hserver/structure/conceptCode.php');
-require_once(dirname(__FILE__).'/../../hserver/structure/import/dbsImport.php');
-
-require_once(dirname(__FILE__).'/../../external/php/phpZotero.php');
+require_once dirname(__FILE__).'/../../hclient/framecontent/initPageMin.php';
+require_once dirname(__FILE__).'/../../hserver/structure/search/dbsData.php';
+require_once dirname(__FILE__).'/../../hserver/records/edit/recordModify.php';
+require_once dirname(__FILE__).'/../../hserver/structure/conceptCode.php';
+require_once dirname(__FILE__).'/../../hserver/structure/import/dbsImport.php';
+require_once dirname(__FILE__).'/../../external/php/phpZotero.php';
 
 $system->defineConstants();
 
@@ -51,12 +50,12 @@ if($dt_SourceRecordID==0){ //this field is critical - need to download it from h
     if(!$isOK){
             $system->addErrorMsg('Cannot download field "Source record" required by the function you have requested. ');
             include ERROR_REDIR;
-            exit();
+            exit;
     }
     if(!$system->defineConstant('DT_ORIGINAL_RECORD_ID', true)){
         $system->addError(HEURIST_ERROR, 'Detail type "source record" id not defined');
         include ERROR_REDIR;
-        exit();
+        exit;
     }
     
 }
@@ -67,7 +66,7 @@ if($HEURIST_ZOTEROSYNC==''){
     $system->addError(HEURIST_ERROR, 'Library key for Zotero synchronisation is not defined. '
                 .'Please configure Zotero connection in Database > Properties');
     include ERROR_REDIR;
-    exit();
+    exit;
 }
 */
 $mapping_file = "zoteroMap.xml";
@@ -77,7 +76,7 @@ if(!file_exists($mapping_file) || !is_readable($mapping_file)){
     $system->addError(HEURIST_ERROR, 'Sorry, could not find/read configuration file .../import/biblio/zoteroMap.xml '
     .'required for Zotero synchronisation - please ask your system administrator to copy it from Heurist source code');
     include ERROR_REDIR;
-    exit();
+    exit;
 }
 
 $step = @$_REQUEST['step'];
@@ -87,7 +86,7 @@ if($fh_data==null || is_string($fh_data)){
         $system->addError(HEURIST_ERROR, 'Sorry, configuration file import/biblio/zoteroMap.xml for Zotero '
         .'synchronisation is corrupted - please ask your system administrator to update it from Heurist source code');
         include ERROR_REDIR;
-        exit();
+        exit;
 }
 ?>
 <html>
@@ -161,7 +160,7 @@ if($fh_data==null || is_string($fh_data)){
                 </html>
 
         <?php            
-            exit();
+            exit;
         }
 
         // 1) load config file from import/biblio/zoteroMap.xml.
@@ -213,7 +212,7 @@ if($fh_data==null || is_string($fh_data)){
         </html>
 
         <?php
-        exit();
+        exit;
     }else{
         $lib_key_idx = 0;
         $step = "1";

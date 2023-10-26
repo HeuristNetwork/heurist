@@ -60,7 +60,7 @@
     - rebuildLuceneIndices.php
 
     */
-require_once("elasticSearchHelper.php");
+require_once 'elasticSearchHelper.php';
     
 // it is assumed that $system is already inited    
 class ElasticSearch {

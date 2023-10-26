@@ -21,7 +21,7 @@
     */
 
     if(!defined('PDIR')) define('PDIR','../../../');
-    require_once(dirname(__FILE__).'/../initPage.php');
+    require_once dirname(__FILE__).'/../initPage.php';
 ?>
         <script src='selectLinkField.js'></script>
 

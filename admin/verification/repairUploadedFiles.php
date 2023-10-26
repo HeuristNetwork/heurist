@@ -24,7 +24,7 @@
     * @package     Heurist academic knowledge management system
     * @subpackage  !!!subpackagename for file such as Administration, Search, Edit, Application, Library
     */
-require_once (dirname(__FILE__).'/../../hserver/System.php');
+require_once dirname(__FILE__).'/../../hserver/System.php';
 
 header('Content-type: text/javascript');
 
@@ -77,7 +77,7 @@ if(@$_REQUEST['data']){
         }
         $response = array("status"=>HEURIST_OK, "data"=> $res);
         print json_encode($response);
-        exit();
+        exit;
     }
     
     //------------------------------------------------------
@@ -97,7 +97,7 @@ if(@$_REQUEST['data']){
             
         }
         print json_encode($response);
-        exit();
+        exit;
     }    
     
     /*
@@ -131,7 +131,7 @@ if(@$_REQUEST['data']){
         }
         
         print json_encode($response);
-        exit();
+        exit;
     }
     
     print json_format($rv);

@@ -27,15 +27,15 @@
 
 // NOTE: THIS IS PRELIMINARY WORK late 2021 for proof of concept only
 
-exit();
+exit;
 
 ini_set('max_execution_time', '0');
 
 define('OWNER_REQUIRED',1);   
 define('PDIR','../../');  //need for proper path to js and css    
 
-require_once(dirname(__FILE__).'/../../hclient/framecontent/initPageMin.php');
-require_once (dirname(__FILE__).'/../../hserver/records/import/importParser.php');
+require_once dirname(__FILE__).'/../../hclient/framecontent/initPageMin.php';
+require_once dirname(__FILE__).'/../../hserver/records/import/importParser.php';
 
 
 define('HEU_DB','hdb_Tuffery_EdARC');

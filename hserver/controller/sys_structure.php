@@ -21,10 +21,10 @@
     */
 
 
-    require_once (dirname(__FILE__).'/../System.php');
-    require_once (dirname(__FILE__).'/../structure/search/dbsData.php');
-    require_once (dirname(__FILE__).'/../structure/search/dbsDataTree.php');
-    require_once (dirname(__FILE__).'/../structure/import/dbsImport.php');
+    require_once dirname(__FILE__).'/../System.php';
+    require_once dirname(__FILE__).'/../structure/search/dbsData.php';
+    require_once dirname(__FILE__).'/../structure/search/dbsDataTree.php';
+    require_once dirname(__FILE__).'/../structure/import/dbsImport.php';
 
     $response = array();
     $is_remote = false;
@@ -76,7 +76,7 @@
                 
                 header('Content-type: application/json;charset=UTF-8');
                 echo $data; 
-                exit();                
+                exit;                
                 //$response = json_decode($data, true);
                 //$is_remote = true;
                 

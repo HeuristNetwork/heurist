@@ -27,7 +27,7 @@
  
 define('PDIR','../../');  //need for proper path to js and css    
 
-require_once(dirname(__FILE__).'/../../hclient/framecontent/initPageMin.php');
+require_once dirname(__FILE__).'/../../hclient/framecontent/initPageMin.php';
 
 
 if( $system->verifyActionPassword($_REQUEST['pwd'], $passwordForServerFunctions) ){
@@ -46,7 +46,7 @@ if( $system->verifyActionPassword($_REQUEST['pwd'], $passwordForServerFunctions)
     </form>
 
     <?php
-    exit();
+    exit;
 }
 
 ?>            

@@ -20,9 +20,9 @@
     * See the License for the specific language governing permissions and limitations under the License.
     */
 
-    require_once (dirname(__FILE__).'/../System.php');
-    require_once (dirname(__FILE__).'/../records/edit/recordsBatch.php');
-    require_once (dirname(__FILE__).'/../dbaccess/utils_db.php');
+    require_once dirname(__FILE__).'/../System.php';
+    require_once dirname(__FILE__).'/../records/edit/recordsBatch.php';
+    require_once dirname(__FILE__).'/../dbaccess/utils_db.php';
 
     $response = array();
     $res = false;
@@ -107,5 +107,5 @@
     
     $system->setResponseHeader(); //UTF-8?? apparently need to remove
     print json_encode($response);
-    exit();
+    exit;
 ?>

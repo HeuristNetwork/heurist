@@ -33,8 +33,8 @@ set_time_limit(0);
 define('MANGER_REQUIRED',1);   
 define('PDIR','../../');  //need for proper path to js and css    
 
-require_once(dirname(__FILE__).'/../../hclient/framecontent/initPageMin.php');
-require_once(dirname(__FILE__).'/../../hserver/records/edit/recordTitleMask.php');
+require_once dirname(__FILE__).'/../../hclient/framecontent/initPageMin.php';
+require_once dirname(__FILE__).'/../../hserver/records/edit/recordTitleMask.php';
 
 //
 // options:
@@ -68,7 +68,7 @@ if(!$init_client || intval(@$_REQUEST['session'])>0){ //2a. init operation on cl
         
         $system->setResponseHeader();
         print json_encode($response);
-        exit();
+        exit;
     }
 }
 

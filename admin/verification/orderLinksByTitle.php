@@ -25,7 +25,7 @@
     * @subpackage  !!!subpackagename for file such as Administration, Search, Edit, Application, Library
     */
 
-require_once (dirname(__FILE__).'/../../hserver/System.php');
+require_once dirname(__FILE__).'/../../hserver/System.php';
 
 $rv = array();
 
@@ -35,16 +35,16 @@ $system = new System();
 if(!$system->init(@$_REQUEST['db'])){
     $response = $system->getError();
     print json_encode($response);
-    exit();
+    exit;
 }
 if (!$system->is_admin()) {
     print 'To perform this action you must be logged in  as Administrator of group \'Database Managers\'';
-    exit();
+    exit;
 }
 
 if(!(@$_REQUEST['rty_ID']>0 && @$_REQUEST['dty_ID']>0)){
     print 'You have to define rty_ID (rectype id) and dty_ID (field id) parameters';
-    exit();
+    exit;
 }
     
 $mysqli = $system->get_mysqli();
@@ -97,7 +97,7 @@ function updateDtlValues($mysqli, $ids, $vals, $titles){
             $res = $mysqli->query($query);
             if ($mysqli->error) {
                     print 'Error for query '.$query.' '.$mysqli->error;
-            	    exit();
+            	    exit;
             }
 
 	    $k++;

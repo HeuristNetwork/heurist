@@ -27,7 +27,7 @@
     * @subpackage  !!!subpackagename for file such as Administration, Search, Edit, Application, Library
     */
 
-require_once (dirname(__FILE__).'/../../hserver/System.php');
+require_once dirname(__FILE__).'/../../hserver/System.php';
 
 header('Content-type: application/json;charset=UTF-8');
 
@@ -39,13 +39,13 @@ $system = new System();
 if(!$system->init(@$_REQUEST['db'])){
     $response = $system->getError();
     print json_encode($response);
-    exit();
+    exit;
 }
 if (!$system->is_admin()) {
     $response = $system->addError(HEURIST_REQUEST_DENIED,
                  'To perform this action you must be logged in  as Administrator of group \'Database Managers\'');
     print json_encode($response);
-    exit();
+    exit;
 }
     
 $mysqli = $system->get_mysqli();
@@ -61,7 +61,7 @@ $rv = array();
         $response = $system->addError(HEURIST_INVALID_REQUEST,
                      'Data not defined');
         print json_encode($response);
-        exit();
+        exit;
     }
 
     $k = 0;
@@ -90,7 +90,7 @@ $rv = array();
             $response = $system->addError(HEURIST_DB_ERROR,
                          'SQL error updating field type '.$dt_id, $mysqli->error);
             print json_encode($response);
-            exit();
+            exit;
         }
 
     }//for

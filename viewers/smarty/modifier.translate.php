@@ -31,7 +31,7 @@
  */
 $path = (dirname(__FILE__).'/../../../../../hserver/utilities/utils_locale.php'); 
 //file_exists($path);
-require_once ($path);
+require_once $path;
 
 function smarty_modifier_translate($input, $lang, $field=null)
 {

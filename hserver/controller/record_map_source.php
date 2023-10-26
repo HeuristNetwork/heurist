@@ -36,14 +36,14 @@
     * See the License for the specific language governing permissions and limitations under the License.
     */
 
-    require_once (dirname(__FILE__).'/../System.php');
-    require_once (dirname(__FILE__).'/../records/search/recordSearch.php');
-    require_once (dirname(__FILE__).'/../dbaccess/utils_db.php');
+    require_once dirname(__FILE__).'/../System.php';
+    require_once dirname(__FILE__).'/../records/search/recordSearch.php';
+    require_once dirname(__FILE__).'/../dbaccess/utils_db.php';
     
-    require_once (dirname(__FILE__).'/../../vendor/autoload.php'); //for geoPHP
-    require_once (dirname(__FILE__).'/../records/import/importParser.php'); //parse CSV, KML and save into import table
-    require_once (dirname(__FILE__).'/../records/export/recordsExport.php');
-    require_once (dirname(__FILE__).'/../utilities/geo/mapSimplify.php');
+    require_once dirname(__FILE__).'/../../vendor/autoload.php'; //for geoPHP
+    require_once dirname(__FILE__).'/../records/import/importParser.php'; //parse CSV, KML and save into import table
+    require_once dirname(__FILE__).'/../records/export/recordsExport.php';
+    require_once dirname(__FILE__).'/../utilities/geo/mapSimplify.php';
     
     $response = array();
 
@@ -126,7 +126,7 @@
                         $ext = strtolower(substr($filepath,-4,4));
                     }else{
                         // Cannot load kml file
-                        exit(); //@todo error return
+                        exit; //@todo error return
                     }
                     
                     if($tmp_destination==null){

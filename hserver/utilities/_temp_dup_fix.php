@@ -17,9 +17,9 @@
 * distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
 * See the License for the specific language governing permissions and limitations under the License.
 */
-exit();
+exit;
 
-require_once (dirname(__FILE__).'/../System.php');
+require_once dirname(__FILE__).'/../System.php';
 
 $system = new System();
 $isSystemInited = $system->init(@$_REQUEST['db'], true);
@@ -33,7 +33,7 @@ if( !$isSystemInited ){  //cannot init system (apparently connection to Database
 }
 if(isset($error_msg)){
     print $error_msg;
-    exit();
+    exit;
 }
 $mysqli = $system->get_mysqli();
 
@@ -59,7 +59,7 @@ while ( $row = $res->fetch_row() ) {
         removeDuplicates($ids); 
         $name   = $row[1];
         $gov_id = $row[2];    
-        //if(count($ids)>1) exit();
+        //if(count($ids)>1) exit;
         $ids = array();
     }
     array_push($ids, $row[0]);

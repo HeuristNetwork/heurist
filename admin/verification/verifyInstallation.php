@@ -21,9 +21,9 @@
 * See the License for the specific language governing permissions and limitations under the License.
 */
 
-require_once (dirname(__FILE__).'/../../configIni.php'); // read in the configuration file
-require_once (dirname(__FILE__).'/../../hserver/consts.php');
-require_once (dirname(__FILE__).'/../../hserver/dbaccess/utils_db.php');
+require_once dirname(__FILE__).'/../../configIni.php'; // read in the configuration file
+require_once dirname(__FILE__).'/../../hserver/consts.php';
+require_once dirname(__FILE__).'/../../hserver/dbaccess/utils_db.php';
 
 ?>
 <!DOCTYPE html>

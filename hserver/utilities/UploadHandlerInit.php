@@ -24,7 +24,7 @@
 
 error_reporting(E_ALL | E_STRICT);
 
-require_once(dirname(__FILE__)."/../System.php");
+require_once dirname(__FILE__).'/../System.php';
 
 
 if(@$_REQUEST['db']){
@@ -32,7 +32,7 @@ if(@$_REQUEST['db']){
     $dbname = @$_REQUEST['db'];
     $error = System::dbname_check($dbname);
     if($error){
-        exit();
+        exit;
     }else{
         $system->initPathConstants($dbname);
     }

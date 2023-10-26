@@ -37,14 +37,14 @@
     * See the License for the specific language governing permissions and limitations under the License.
     */
 
-    require_once (dirname(__FILE__).'/../System.php');
-    require_once (dirname(__FILE__).'/../records/search/recordSearch.php');
-    require_once (dirname(__FILE__).'/../dbaccess/utils_db.php');
-    require_once (dirname(__FILE__).'/../utilities/geo/mapSimplify.php');
-    //require_once (dirname(__FILE__).'/../../vendor/autoload.php'); //for ShapeFile
+    require_once dirname(__FILE__).'/../System.php';
+    require_once dirname(__FILE__).'/../records/search/recordSearch.php';
+    require_once dirname(__FILE__).'/../dbaccess/utils_db.php';
+    require_once dirname(__FILE__).'/../utilities/geo/mapSimplify.php';
+    //require_once dirname(__FILE__).'/../../vendor/autoload.php'; //for ShapeFile
     
 // Register autoloader
-require_once('../../vendor/gasparesganga/php-shapefile/src/Shapefile/ShapefileAutoloader.php');
+require_once '../../vendor/gasparesganga/php-shapefile/src/Shapefile/ShapefileAutoloader.php';
 Shapefile\ShapefileAutoloader::register();
 
 // Import classes

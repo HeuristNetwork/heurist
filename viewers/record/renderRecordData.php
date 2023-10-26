@@ -29,25 +29,25 @@
 * @package     Heurist academic knowledge management system
 * @subpackage  Records/View
 */  
-require_once(dirname(__FILE__)."/../../hserver/System.php");
-require_once(dirname(__FILE__).'/../../hserver/utilities/Temporal.php');
-require_once(dirname(__FILE__).'/../../hserver/structure/dbsTerms.php');
+require_once dirname(__FILE__).'/../../hserver/System.php';
+require_once dirname(__FILE__).'/../../hserver/utilities/Temporal.php';
+require_once dirname(__FILE__).'/../../hserver/structure/dbsTerms.php';
 
 $system = new System();
 $inverses = null;
 
 if(!$system->init(@$_REQUEST['db'])){
     include dirname(__FILE__).'/../../hclient/framecontent/infoPage.php';
-    exit();
+    exit;
 }
 
-//require_once(dirname(__FILE__).'/../../records/woot/woot.php');
-require_once(dirname(__FILE__).'/../../hserver/records/search/recordFile.php');
-require_once(dirname(__FILE__).'/../../hserver/records/search/recordSearch.php');
-require_once(dirname(__FILE__).'/../../hserver/records/search/relationshipData.php');
-require_once(dirname(__FILE__).'/../../hserver/structure/search/dbsData.php');
-require_once(dirname(__FILE__).'/../../hserver/structure/dbsUsersGroups.php');
-require_once(dirname(__FILE__).'/../../hserver/structure/dbsTerms.php');
+//require_once dirname(__FILE__).'/../../records/woot/woot.php';
+require_once dirname(__FILE__).'/../../hserver/records/search/recordFile.php';
+require_once dirname(__FILE__).'/../../hserver/records/search/recordSearch.php';
+require_once dirname(__FILE__).'/../../hserver/records/search/relationshipData.php';
+require_once dirname(__FILE__).'/../../hserver/structure/search/dbsData.php';
+require_once dirname(__FILE__).'/../../hserver/structure/dbsUsersGroups.php';
+require_once dirname(__FILE__).'/../../hserver/structure/dbsTerms.php';
 
 
 define('ALLOWED_TAGS', '<i><b><u><em><strong><sup><sub><small><br>'); //for record title see output_chunker for other fields

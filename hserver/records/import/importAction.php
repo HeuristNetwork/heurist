@@ -23,14 +23,11 @@
 * distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
 * See the License for the specific language governing permissions and limitations under the License.
 */
-require_once(dirname(__FILE__)."/../edit/recordModify.php");
-
-//require_once(dirname(__FILE__).'/../../hserver/utilities/geo/UTMtoLL.php');
-require_once(dirname(__FILE__)."/../../utilities/geo/mapCoordinates.php");
-require_once(dirname(__FILE__).'/../../utilities/geo/mapCoordConverter.php');
-
-require_once(dirname(__FILE__).'/../../../vendor/autoload.php'); //for geoPHP
-require_once(dirname(__FILE__)."/../../../admin/verification/verifyValue.php");
+require_once dirname(__FILE__).'/../edit/recordModify.php';
+require_once dirname(__FILE__).'/../../utilities/geo/mapCoordinates.php';
+require_once dirname(__FILE__).'/../../utilities/geo/mapCoordConverter.php';
+require_once dirname(__FILE__).'/../../../vendor/autoload.php'; //for geoPHP
+require_once dirname(__FILE__).'/../../../admin/verification/verifyValue.php';
 
 
 /**

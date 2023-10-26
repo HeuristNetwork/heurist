@@ -22,8 +22,8 @@
 
 define('PDIR','../../');  //need for proper path to js and css    
 
-require_once(dirname(__FILE__)."/../../hserver/System.php");
-require_once(dirname(__FILE__).'/../../hserver/structure/conceptCode.php');
+require_once dirname(__FILE__).'/../../hserver/System.php';
+require_once dirname(__FILE__).'/../../hserver/structure/conceptCode.php';
 
 //header("Access-Control-Allow-Origin: *");
 header('Content-type: application/json;charset=UTF-8');
@@ -42,7 +42,7 @@ if(!$isSystemInited) {
 	$rtn = json_encode($response);
 
 	print $rtn;
-	exit();
+	exit;
 }
 
 $mysqli = $system->get_mysqli();
@@ -61,7 +61,7 @@ if(isset($_REQUEST['get_email']) && isset($_REQUEST['recid'])) {	/* Get the Titl
 		$rtn = json_encode($response);
 
 		print $rtn;
-		exit();
+		exit;
 	}
 
 	// Get title/name and short summary detail type ids
@@ -81,7 +81,7 @@ if(isset($_REQUEST['get_email']) && isset($_REQUEST['recid'])) {	/* Get the Titl
 		$rtn = json_encode($response);
 
 		print $rtn;
-		exit();
+		exit;
 	}
 
   $query = "SELECT dtl_Value, dtl_DetailTypeID
@@ -95,7 +95,7 @@ if(isset($_REQUEST['get_email']) && isset($_REQUEST['recid'])) {	/* Get the Titl
     $rtn = json_encode($response);
 
     print $rtn;
-    exit();
+    exit;
   }
 
   while($email_dtl = $detail_rtn->fetch_row()){
@@ -130,7 +130,7 @@ if(isset($_REQUEST['get_email']) && isset($_REQUEST['recid'])) {	/* Get the Titl
 	    $rtn = json_encode($response);
 
 	    print $rtn;
-	    exit();
+	    exit;
 	}
 
 	while($db = $db_list->fetch_row()){
@@ -208,7 +208,7 @@ if(isset($_REQUEST['get_email']) && isset($_REQUEST['recid'])) {	/* Get the Titl
 
 				print $rtn;
 
-				exit();
+				exit;
 
 			}
 		}
@@ -253,7 +253,7 @@ if(isset($_REQUEST['get_email']) && isset($_REQUEST['recid'])) {	/* Get the Titl
 			$rtn = json_encode($response);
 
 			print $rtn;
-			exit();
+			exit;
 		}
 
 		$query = "SELECT DISTINCT ugr.ugr_FirstName, ugr.ugr_LastName, ugr.ugr_eMail 
@@ -269,7 +269,7 @@ if(isset($_REQUEST['get_email']) && isset($_REQUEST['recid'])) {	/* Get the Titl
 			$rtn = json_encode($response);
 
 			print $rtn;
-			exit();
+			exit;
 */            
 		}
 

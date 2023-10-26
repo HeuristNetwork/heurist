@@ -189,7 +189,7 @@ if($recTypeID==RT_EVENT){
             </div>
         </body></html>
     <?php
-    exit();
+    exit;
 }
 
 }

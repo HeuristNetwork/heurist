@@ -19,7 +19,7 @@
     * See the License for the specific language governing permissions and limitations under the License.
     */
 
-    require_once (dirname(__FILE__).'/../System.php');        
+    require_once dirname(__FILE__).'/../System.php';        
 
     if(isset($_REQUEST['db'])) {
         $dbName = $_REQUEST['db'];

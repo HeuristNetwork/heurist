@@ -27,10 +27,10 @@ define('PDIR','../../');  //need for proper path to js and css
 set_time_limit(0); //no limit
 
 
-require_once(dirname(__FILE__).'/../../hclient/framecontent/initPageMin.php');
-require_once(dirname(__FILE__).'/../../hserver/utilities/utils_file.php');
-require_once(dirname(__FILE__).'/../../hserver/records/search/recordFile.php');
-require_once(dirname(__FILE__).'/../../external/php/Mysqldump8.php');
+require_once dirname(__FILE__).'/../../hclient/framecontent/initPageMin.php';
+require_once dirname(__FILE__).'/../../hserver/utilities/utils_file.php';
+require_once dirname(__FILE__).'/../../hserver/records/search/recordFile.php';
+require_once dirname(__FILE__).'/../../external/php/Mysqldump8.php';
 
 
 $folder = HEURIST_FILESTORE_DIR.'backup/'.HEURIST_DBNAME;
@@ -55,7 +55,7 @@ if($mode>1){
     }else if($mode=='4'){  //cleanup backup folder
         folderDelete2(HEURIST_FILESTORE_DIR.'backup/', false);
     }
-    exit();
+    exit;
 }
 
 ?>
@@ -307,7 +307,7 @@ if($mode>1){
             if(file_exists($progress_flag)){
                print 'It appears that backup opearation has been started already. Please try this function later'; 
                if(file_exists($progress_flag)) unlink($progress_flag);
-               exit();
+               exit;
             }
             $fp = fopen($progress_flag,'w');
             fwrite($fp, '1');
@@ -324,7 +324,7 @@ if($mode>1){
                 if(!$res){
                     print 'It appears that backup opearation has been started already. Please try this function later'; 
                     if(file_exists($progress_flag)) unlink($progress_flag);
-                    exit();
+                    exit;
                 }
             }
             if (!folderCreate($folder, true)) {
@@ -332,7 +332,7 @@ if($mode>1){
                 
                 $message = 'Failed to create folder '.$folder.'<br/> in which to create the backup. Please consult your sysadmin.';                
                 report_message($message, true);
-                exit();
+                exit;
             }
 
             // Just SQL dump
@@ -341,7 +341,7 @@ if($mode>1){
                 if(!$res){
                     print 'It appears that backup opearation has been started already. Please try this function later';
                     if(file_exists($progress_flag)) unlink($progress_flag);
-                    exit();
+                    exit;
                 }
             }
             if($separate_sql_zip && !folderCreate($folder_sql, true)){

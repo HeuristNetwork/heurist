@@ -34,21 +34,21 @@
 * _prepareDetails - validate records detail (need to combine with validators in fileParse)
 * 
 */
-require_once (dirname(__FILE__).'/../../System.php');
-require_once (dirname(__FILE__).'/recordTitleMask.php');
-require_once (dirname(__FILE__).'/../search/recordSearch.php');
-require_once (dirname(__FILE__).'/../../dbaccess/utils_db.php');
-require_once (dirname(__FILE__).'/../../structure/search/dbsData.php');
-require_once (dirname(__FILE__).'/../../structure/dbsUsersGroups.php');
-require_once (dirname(__FILE__).'/../../structure/dbsTerms.php');
-require_once (dirname(__FILE__).'/../../entity/dbRecUploadedFiles.php');
-require_once (dirname(__FILE__).'/../../entity/dbDefRecTypes.php');
-require_once (dirname(__FILE__).'/../../utilities/utils_image.php');
-require_once (dirname(__FILE__).'/../../../records/index/elasticSearch.php');
-//require_once (dirname(__FILE__).'/../../../vendor/ezyang/htmlpurifier/library/HTMLPurifier.auto.php');
+require_once dirname(__FILE__).'/../../System.php';
+require_once dirname(__FILE__).'/recordTitleMask.php';
+require_once dirname(__FILE__).'/../search/recordSearch.php';
+require_once dirname(__FILE__).'/../../dbaccess/utils_db.php';
+require_once dirname(__FILE__).'/../../structure/search/dbsData.php';
+require_once dirname(__FILE__).'/../../structure/dbsUsersGroups.php';
+require_once dirname(__FILE__).'/../../structure/dbsTerms.php';
+require_once dirname(__FILE__).'/../../entity/dbRecUploadedFiles.php';
+require_once dirname(__FILE__).'/../../entity/dbDefRecTypes.php';
+require_once dirname(__FILE__).'/../../utilities/utils_image.php';
+require_once dirname(__FILE__).'/../../../records/index/elasticSearch.php';
+//require_once dirname(__FILE__).'/../../../vendor/ezyang/htmlpurifier/library/HTMLPurifier.auto.php';
 
-require_once(dirname(__FILE__).'/../../../viewers/smarty/smartyInit.php');
-require_once(dirname(__FILE__).'/../../../viewers/smarty/reportRecord.php');
+require_once dirname(__FILE__).'/../../../viewers/smarty/smartyInit.php';
+require_once dirname(__FILE__).'/../../../viewers/smarty/reportRecord.php';
 
 
 $recstructures = array();

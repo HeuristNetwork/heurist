@@ -1,6 +1,6 @@
 <?php
-require_once(dirname(__FILE__).'/../../verification/verifyValue.php');
-require_once(dirname(__FILE__).'/../../verification/verifyFieldTypes.php');
+require_once dirname(__FILE__).'/../../verification/verifyValue.php';
+require_once dirname(__FILE__).'/../../verification/verifyFieldTypes.php';
 
     /*
     * Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except in compliance

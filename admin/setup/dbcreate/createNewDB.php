@@ -29,7 +29,7 @@
 
 define('PDIR','../../../');  //need for proper path to js and css    
     
-require_once(dirname(__FILE__)."/../../../hserver/System.php");
+require_once dirname(__FILE__).'/../../../hserver/System.php';
 
 $error_msg = '';
 $isSystemInited = false;
@@ -44,7 +44,7 @@ if(@$_REQUEST['db']){
     //if database is defined then connect to given database
     if(!$system->init(@$_REQUEST['db'])){
         include dirname(__FILE__).'/../../../hclient/framecontent/infoPage.php';
-        exit();
+        exit;
     }
     $registrationRequired = false;
     

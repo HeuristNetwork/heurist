@@ -22,7 +22,7 @@
 define('LOGIN_REQUIRED',1);
 define('PDIR','../../');    
 
-require_once(dirname(__FILE__)."/../../hclient/framecontent/initPage.php");
+require_once dirname(__FILE__).'/../../hclient/framecontent/initPage.php';
 ?>
         <script type="text/javascript" src="importMedia.js"></script>
 

@@ -20,8 +20,8 @@
 */
 
 
-require_once(dirname(__FILE__)."/../System.php");
-require_once(dirname(__FILE__)."/../../records/edit/recordModify.php");
+require_once dirname(__FILE__).'/../System.php';
+require_once dirname(__FILE__).'/../../records/edit/recordModify.php';
 
 //@todo HARDCODED id of OriginalID
 $dt_SourceRecordID = 36;
@@ -31,7 +31,7 @@ $system = new System();
 if(! $system->init(@$_REQUEST['db'], true) ){
     //@todo - redirect to error page
     print_r($system->getError(),true);
-    exit();
+    exit;
 }
 ?>
 <html>
@@ -52,7 +52,7 @@ if(! $system->init(@$_REQUEST['db'], true) ){
 
             if(!$system->is_admin()){
                 print "You must be logged in as database owner";
-                exit();
+                exit;
             }
 
             $mysqli = $system->get_mysqli();
@@ -67,13 +67,13 @@ if(! $system->init(@$_REQUEST['db'], true) ){
 
             if(!file_exists($dbname_faims)){
                 print "DB file not found";
-                exit();
+                exit;
             }
 
             if (!class_exists('PDO' )) {
                 print "FAIMS synchronisation requires installation of the PDO SQLite extension to PHP."
                 ." Please ask your system administrator to install this extension. See <put in appropriate URL to doco> for installation information.";
-                exit();
+                exit;
             }
             if (!extension_loaded ('pdo_sqlite' )) {
                 echo 'PDO sqllite unavailable';
@@ -90,7 +90,7 @@ if(! $system->init(@$_REQUEST['db'], true) ){
             {
                 echo $e->getMessage();
                 echo "<br><br>Database NOT loaded";
-                exit();
+                exit;
             }
 
 

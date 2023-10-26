@@ -29,13 +29,13 @@
 * @package     Heurist academic knowledge management system
 * @subpackage  !!!subpackagename for file such as Administration, Search, Edit, Application, Library
 */
-require_once (dirname(__FILE__).'/../../configIni.php'); // read in the configuration file
-require_once (dirname(__FILE__).'/../consts.php');
+require_once dirname(__FILE__).'/../../configIni.php'; // read in the configuration file
+require_once dirname(__FILE__).'/../consts.php';
 
 header('Content-type: text/javascript');
 
 $db = @$_REQUEST['db'];
-if(!$db) exit();
+if(!$db) exit;
 
 if(strpos($db, HEURIST_DB_PREFIX)===0){
     $dbname_full = $db;

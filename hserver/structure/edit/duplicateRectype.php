@@ -18,7 +18,7 @@
 * @package     Heurist academic knowledge management system
 * @subpackage  
 */
-require_once (dirname(__FILE__).'/../../System.php');
+require_once dirname(__FILE__).'/../../System.php';
 
 $res = false;
 

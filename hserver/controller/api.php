@@ -194,7 +194,7 @@ else
         include '../../hserver/controller/entityScrud.php';
     }
 }
-exit();
+exit;
 //header("HTTP/1.1 " . $status . " " . $this->requestStatus($status));
 //echo json_encode($data); 
 
@@ -205,7 +205,7 @@ function exitWithError($message, $code){
     
     http_response_code($code);    
     print json_encode(array("status"=>'invalid', "message"=>$message));
-    exit();
+    exit;
 }
 
 function getAction($method){

@@ -24,8 +24,8 @@
 * See the License for the specific language governing permissions and limitations under the License.
 */
 
-require_once (dirname(__FILE__).'/../System.php');
-require_once (dirname(__FILE__).'/../utilities/utils_saml.php');
+require_once dirname(__FILE__).'/../System.php';
+require_once dirname(__FILE__).'/../utilities/utils_saml.php';
 
 $action = @$_REQUEST['a']; //$system->getError();
 
@@ -50,7 +50,7 @@ if($error){
             $system->initPathConstants($dbname);
             
             samlLogout($system, $sp, $_SERVER['PHP_SELF']);
-            exit();
+            exit;
         }
     }else if ($action == "login"){
 
@@ -88,7 +88,7 @@ console.log('Authentification completed ','<?php echo intval($user_id);?>');
                     </html>
                     
                     <?php
-                    exit();                
+                    exit;                
                 }
 */                
             }

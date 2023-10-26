@@ -358,7 +358,7 @@ if($recTypeID==RT_ADDRESS){
         </body></html>
 
     <?php
-    exit();
+    exit;
 }
 
 }

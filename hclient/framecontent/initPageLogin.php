@@ -19,12 +19,12 @@
 * See the License for the specific language governing permissions and limitations under the License.
 */
 
-require_once(dirname(__FILE__).'/initPageMin.php'); //without client hapi
+require_once 'initPageMin.php'; //without client hapi
 
 if(!@$_REQUEST['db']){
     $message = '<b>Required</b> database parameter >>> is not defined';
     include ERROR_REDIR;
-    exit();
+    exit;
 }
 
 /*

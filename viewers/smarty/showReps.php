@@ -49,12 +49,12 @@
 
 /* TODO: rename to showReports.php */
 
-require_once(dirname(__FILE__).'/../../hserver/System.php');
-require_once(dirname(__FILE__).'/../../hserver/records/search/recordSearch.php');
-require_once(dirname(__FILE__).'/../../hserver/records/search/recordFile.php');
+require_once dirname(__FILE__).'/../../hserver/System.php';
+require_once dirname(__FILE__).'/../../hserver/records/search/recordSearch.php';
+require_once dirname(__FILE__).'/../../hserver/records/search/recordFile.php';
 
-require_once(dirname(__FILE__).'/../../vendor/autoload.php'); //for geoPHP
-require_once(dirname(__FILE__).'/../../vendor/ezyang/htmlpurifier/library/HTMLPurifier.auto.php');
+require_once dirname(__FILE__).'/../../vendor/autoload.php'; //for geoPHP
+require_once dirname(__FILE__).'/../../vendor/ezyang/htmlpurifier/library/HTMLPurifier.auto.php';
 
 $outputfile = null;
 
@@ -104,8 +104,8 @@ if(!$is_included){
     }
 }
 
-require_once(dirname(__FILE__).'/smartyInit.php');
-require_once(dirname(__FILE__).'/reportRecord.php');
+require_once dirname(__FILE__).'/smartyInit.php';
+require_once dirname(__FILE__).'/reportRecord.php';
 
 if( (@$_REQUEST['q'] || @$_REQUEST['recordset']) &&
 (array_key_exists('template',$_REQUEST) || array_key_exists('template_body',$_REQUEST)))
@@ -247,7 +247,7 @@ function executeSmartyTemplate($system, $params){
             
             smarty_error_output( $system, $error );
         }
-        return true; //exit();
+        return true; //exit;
     }
 
     //get name of template file
@@ -267,7 +267,7 @@ function executeSmartyTemplate($system, $params){
             $error = '<b><font color="#ff0000">Template file '.htmlspecialchars($template_file).' does not exist</font></b>';
             
             smarty_error_output($system, $error);
-            return false; //exit();
+            return false; //exit;
         }
     }else{
         $content = $template_body;
@@ -293,7 +293,7 @@ function executeSmartyTemplate($system, $params){
                     .'support at HeuristNetwork dot org and we will adjust the template for you.</p>';
            
            smarty_error_output($system, $error);
-           return false; //exit();
+           return false; //exit;
     }
     
 
@@ -316,7 +316,7 @@ function executeSmartyTemplate($system, $params){
         initSmarty($system->getSysDir('smarty-templates')); //global function from smartyInit.php
         if(!isset($smarty) || $smarty==null){
             smarty_error_output($system, 'Cannot init Smarty report engine');
-            exit();
+            exit;
         }
     }
 
@@ -354,7 +354,7 @@ function executeSmartyTemplate($system, $params){
 
         if(strpos($e, 'already registered') === false){ // not a dup modifier problem
             smarty_error_output($system, $e);
-            exit();
+            exit;
         }
     }
 
@@ -411,7 +411,7 @@ function executeSmartyTemplate($system, $params){
                 unlink($template_folder.$template_file);   
             }
             echo $output;
-            return true; //exit();
+            return true; //exit;
         }
     }
     else

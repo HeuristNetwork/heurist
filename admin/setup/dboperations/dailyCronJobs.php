@@ -62,7 +62,7 @@ if (@$argv) {
     }
     
 //print print_r($ARGV,true)."\n";
-//exit();    
+//exit;    
 
     if(@$ARGV['reminder']){
         $do_reminders = true;
@@ -89,13 +89,13 @@ if (@$argv) {
     */    
 }
 
-require_once(dirname(__FILE__).'/../../../configIni.php'); // read in the configuration file
-require_once(dirname(__FILE__).'/../../../hserver/consts.php');
-require_once(dirname(__FILE__).'/../../../hserver/System.php');
-require_once(dirname(__FILE__).'/../../../hserver/records/search/recordFile.php');
-require_once(dirname(__FILE__).'/../../../hserver/utilities/dbUtils.php');
-require_once(dirname(__FILE__).'/../../../hserver/entity/dbUsrReminders.php');
-require_once(dirname(__FILE__).'/../../../admin/verification/checkRecURL.php');
+require_once dirname(__FILE__).'/../../../configIni.php'; // read in the configuration file
+require_once dirname(__FILE__).'/../../../hserver/consts.php';
+require_once dirname(__FILE__).'/../../../hserver/System.php';
+require_once dirname(__FILE__).'/../../../hserver/records/search/recordFile.php';
+require_once dirname(__FILE__).'/../../../hserver/utilities/dbUtils.php';
+require_once dirname(__FILE__).'/../../../hserver/entity/dbUsrReminders.php';
+require_once dirname(__FILE__).'/../../../admin/verification/checkRecURL.php';
 
 //retrieve list of databases
 $system = new System();
@@ -103,7 +103,7 @@ if( !$system->init(null, false, false) ){
     exit("Cannot establish connection to sql server\n");
 }
 
-require_once(dirname(__FILE__).'/../../../viewers/smarty/updateReportOutput.php');
+require_once dirname(__FILE__).'/../../../viewers/smarty/updateReportOutput.php';
 
 
 if(!defined('HEURIST_MAIL_DOMAIN')) define('HEURIST_MAIL_DOMAIN', 'cchum-kvm-heurist.in2p3.fr');

@@ -30,9 +30,9 @@
 * @package     Heurist academic knowledge management system
 * @subpackage  !!!subpackagename for file such as Administration, Search, Edit, Application, Library
 */
-require_once(dirname(__FILE__).'/../../records/edit/recordTitleMask.php');
-require_once(dirname(__FILE__).'/../../records/edit/recordModify.php');  //to delete temporary records
-require_once(dirname(__FILE__).'/../conceptCode.php'); 
+require_once dirname(__FILE__).'/../../records/edit/recordTitleMask.php';
+require_once dirname(__FILE__).'/../../records/edit/recordModify.php';  //to delete temporary records
+require_once dirname(__FILE__).'/../conceptCode.php'; 
 
 
 $rtyColumnNames = array(

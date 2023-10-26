@@ -21,14 +21,14 @@
 
 define('PDIR','../../');  //need for proper path to js and css    
  
-require_once(dirname(__FILE__).'/../../hclient/framecontent/initPageMin.php');
-require_once(dirname(__FILE__).'/../../hserver/structure/conceptCode.php');
-require_once(dirname(__FILE__).'/bulkEmailSystem.php');
+require_once dirname(__FILE__).'/../../hclient/framecontent/initPageMin.php';
+require_once dirname(__FILE__).'/../../hserver/structure/conceptCode.php';
+require_once dirname(__FILE__).'/bulkEmailSystem.php';
 
 if (@$_REQUEST["exportCSV"] == "true") {
 
     getCSVDownload($_REQUEST);
-    exit();
+    exit;
 }
 
 if ( !isset($_REQUEST['db']) && $system->verifyActionPassword(@$_REQUEST['pwd'], $passwordForServerFunctions) ){
@@ -37,13 +37,13 @@ if ( !isset($_REQUEST['db']) && $system->verifyActionPassword(@$_REQUEST['pwd'],
     <h3> A Heurist database and Server Manager password are required to enter this function </h3>
 
     <?php
-    exit();
+    exit;
 } else if (isset($_REQUEST['databases']) && isset($_REQUEST['users']) && isset($_REQUEST['emailBody']) && isset($_REQUEST['db']) && isset($_REQUEST['pwd'])) {
 
     if($system->verifyActionPassword($_REQUEST['pwd'], $passwordForServerFunctions)){
 
         echo "The System Administrator password is invalid, please re-try in the previous tab/window";
-        exit();
+        exit;
     } else {
 
         $rtn = sendSystemEmail($_REQUEST);
@@ -54,7 +54,7 @@ if ( !isset($_REQUEST['db']) && $system->verifyActionPassword(@$_REQUEST['pwd'],
 
         //echo "<script>window.close();</script>";
 
-        exit();
+        exit;
     }
 }
 
@@ -69,7 +69,7 @@ $current_db = HEURIST_DB_PREFIX . htmlspecialchars($_REQUEST['db']);
 $email_rectype_id = ConceptCode::getRecTypeLocalID("2-9");
 if (empty($email_rectype_id)) {
     print "Unable to retrieve the id for the Email record type.<br>Please download this record type from the Heurist Core Definitions database, available via Design > Browser templates.";
-    exit();
+    exit;
 }
 
 $query = "SELECT rec_ID, rec_Title FROM Records WHERE rec_RecTypeID = " 
@@ -79,7 +79,7 @@ $query = "SELECT rec_ID, rec_Title FROM Records WHERE rec_RecTypeID = "
 $email_list = $mysqli->query($query);
 if (!$email_list) { 
     print "Either unable to retrieve Email records from the current database, Error => " . $mysqli->error. ", Query => " .$query; 
-    exit();
+    exit;
 }
 
 while($email = $email_list->fetch_row()){
@@ -108,7 +108,7 @@ if(!$has_emails || empty($emails)) {
     . "##dburl## &rarr; Database URL,<br>" 
     . "##records## &rarr; Record Count, and<br>" 
     . "##lastmodified## &rarr; Date of the Last Modified Record<br>";
-    exit();
+    exit;
 }
 ?>  
 <!DOCTYPE html>

@@ -22,11 +22,11 @@
 */
 
 
-require_once(dirname(__FILE__)."/../edit/recordModify.php");
-require_once(dirname(__FILE__).'/../edit/recordsBatch.php');
-require_once(dirname(__FILE__).'/../../utilities/dbUtils.php');
-require_once(dirname(__FILE__).'/../../structure/import/dbsImport.php');
-require_once(dirname(__FILE__)."/../../../admin/verification/verifyValue.php");
+require_once dirname(__FILE__).'/../edit/recordModify.php';
+require_once dirname(__FILE__).'/../edit/recordsBatch.php';
+require_once dirname(__FILE__).'/../../utilities/dbUtils.php';
+require_once dirname(__FILE__).'/../../structure/import/dbsImport.php';
+require_once dirname(__FILE__).'/../../../admin/verification/verifyValue.php';
 
 
 /*

@@ -72,7 +72,7 @@ if (@$argv) {
 }else{
     //from browser
     define('ADMIN_REQUIRED',1);
-    require_once(dirname(__FILE__).'/../../hclient/framecontent/initPageMin.php');
+    require_once dirname(__FILE__).'/../../hclient/framecontent/initPageMin.php';
 
     $eol = "</div><br>";
     $tabs0 = '<div style="min-width:300px;display:inline-block;text-align:left">';
@@ -84,10 +84,10 @@ if (@$argv) {
 }
 
 
-require_once(dirname(__FILE__).'/../../configIni.php'); // read in the configuration file
-require_once(dirname(__FILE__).'/../../hserver/consts.php');
-require_once(dirname(__FILE__).'/../../hserver/System.php');
-require_once(dirname(__FILE__).'/../../hserver/utilities/dbUtils.php');
+require_once dirname(__FILE__).'/../../configIni.php'; // read in the configuration file
+require_once dirname(__FILE__).'/../../hserver/consts.php';
+require_once dirname(__FILE__).'/../../hserver/System.php';
+require_once dirname(__FILE__).'/../../hserver/utilities/dbUtils.php';
 
 //retrieve list of databases
 $system = new System();

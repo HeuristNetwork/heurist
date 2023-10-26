@@ -26,7 +26,7 @@ ini_set('max_execution_time', '0');
 define('OWNER_REQUIRED',1);   
 define('PDIR','../../');  //need for proper path to js and css    
 
-require_once(dirname(__FILE__).'/../../hclient/framecontent/initPageMin.php');
+require_once dirname(__FILE__).'/../../hclient/framecontent/initPageMin.php';
 
 $mysqli = $system->get_mysqli();
 ?>

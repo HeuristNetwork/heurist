@@ -4,7 +4,7 @@
 * 
 * it imports directly resource class id is preserved as rectype rty_ID
 */
-exit();
+exit;
 
 ini_set('max_execution_time', '0');
 
@@ -14,9 +14,9 @@ define('HEU_DB','hdb_def19_v1');
 define('OWNER_REQUIRED',1);   
 define('PDIR','../../');  //need for proper path to js and css    
 
-require_once(dirname(__FILE__).'/../../hclient/framecontent/initPageMin.php');
-//require_once (dirname(__FILE__).'/../../hserver/records/import/importParser.php');
-require_once (dirname(__FILE__).'/../../hserver/entity/dbDefRectypes.php');
+require_once dirname(__FILE__).'/../../hclient/framecontent/initPageMin.php';
+//require_once dirname(__FILE__).'/../../hserver/records/import/importParser.php';
+require_once dirname(__FILE__).'/../../hserver/entity/dbDefRectypes.php';
 
 $mysqli = $system->get_mysqli();
 
