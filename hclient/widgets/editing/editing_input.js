@@ -5745,10 +5745,14 @@ $.widget( "heurist.editing_input", {
                 },
                 onSelect: function(date){
 
-                    var cur_cal = $tinpt.calendarsPicker('option', 'calendar');
-                    var value = $tinpt.val();
-                    var val_parts = value != '' ? value.split('-') : '';
-                    var new_temporal = new Temporal();
+                    let cur_cal = $tinpt.calendarsPicker('option', 'calendar');
+                    let value = $tinpt.val();
+                    const org_value = value;
+                    if(cur_cal.name.toLowerCase() === 'japanese'){
+                        value = cur_cal.japaneseToGregorianStr(value);
+                    }
+                    let val_parts = value != '' ? value.split('-') : '';
+                    let new_temporal = new Temporal();
 
                     if(val_parts.length == 4 && val_parts[0] == ''){ // for BC years
                         val_parts.shift();
@@ -5757,7 +5761,7 @@ $.widget( "heurist.editing_input", {
 
                     if(window.hWin.HEURIST4.util.isArrayNotEmpty(val_parts) && val_parts.length == 3 && cur_cal.local.name.toLowerCase() != 'gregorian'){
 
-                        var g_value = translateDate({'year': val_parts[0], 'month': val_parts[1], 'day': val_parts[2]}, cur_cal, g_calendar);
+                        let g_value = translateDate({'year': val_parts[0], 'month': val_parts[1], 'day': val_parts[2]}, cur_cal, g_calendar);
                         g_value = g_calendar.formatDate('yyyy-mm-dd', g_value);
 
                         if(g_value != ''){
@@ -5768,7 +5772,7 @@ $.widget( "heurist.editing_input", {
                                 new_temporal.setType('s');
                                 new_temporal.setTDate('DAT', new_tdate);
                                 new_temporal.addObjForString('CLD', cur_cal.local.name);
-                                new_temporal.addObjForString('CL2', value);
+                                new_temporal.addObjForString('CL2', org_value);
 
                                 value = new_temporal.toString();
                             } catch(e) {}

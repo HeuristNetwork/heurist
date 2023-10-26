@@ -198,8 +198,9 @@ var TemporalPopup = (function () {
 	var _change_tab_only = false;
 
 	function _init () {
-		if (location.search.length > 1) {// the calling app passed a parameter string - save it
-			that.originalInputString = window.hWin.HEURIST4.util.getUrlParameter('toedit', location.search); //unescape(location.search.substring(1));
+
+		if (location.search.length > 1) { // the calling app passed a parameter string - save it
+			that.originalInputString = decodeURIComponent (location.search.substring(1));
 		}
 		if ( Temporal.isValidFormat(that.originalInputString)) {
 			try {
@@ -496,6 +497,7 @@ var TemporalPopup = (function () {
         }
 
 		var fields = Temporal.getFieldsForType(type);
+		let is_japanese_cal = (calendar && calendar.name.toLowerCase() === 'japanese');
 		for(var i =0; i< fields.length; i++) {
 			var code = fields[i];
 			var elem = $( "#" + type + code);
@@ -552,7 +554,9 @@ var TemporalPopup = (function () {
                     temporal.removeObjForCode("CL2");
                 }*/
                 dt = convert(elem, true);
-            }
+			}else if(is_japanese_cal || dt.indexOf('年') !== -1){
+				dt = $.calendars.instance('japanese').japaneseToGregorianStr(dt); // translate japanese
+			}
 			if (strDate && dt) {
 				strDate = dt + " " + strDate;
 			}else{
@@ -598,26 +602,28 @@ var TemporalPopup = (function () {
 	};
 
     var calendar = null;
+	let setup_era_sel = true;
 
     function _initJqCalendar(temporal){
 
         var defaultDate = null;
-        var calendar_name = temporal.getStringForCode("CLD");
-        if(!calendar_name){
-            calendar_name = "gregorian";
-        }else{
-        	calendar_name = calendar_name.toLowerCase();
-        }
+
+        let calendar_type = temporal.getStringForCode("CLD");
+        calendar_type = !calendar_type ? 'gregorian' : calendar_type.toLowerCase();
+
+        fixCalendarPickerCMDs();
 
         var type = temporal.getType();
         if (!type) {
             return;
         }
 
-        $('.withCalendarsPicker').calendarsPicker({
-            calendar: $.calendars.instance('gregorian'),
+        calendar = $.calendars.instance(calendar_type);
+
+        let calendar_options = {
+            calendar: calendar,
             showOnFocus: false,
-            //defaultDate: convert($(this)), //null, defaultDate),
+
             dateFormat: 'yyyy-mm-dd',
             pickerClass: 'calendars-jumps',
             onSelect: function(dates){ 
@@ -630,129 +636,209 @@ var TemporalPopup = (function () {
                     {picker: $.calendars.picker.defaultRenderer.picker.
                         replace(/\{link:prev\}/, '{link:prevJump}{link:prev}').
                         replace(/\{link:next\}/, '{link:nextJump}{link:next}')}),
-            showTrigger: '<img src="'+window.hWin.HAPI4.baseURL+'hclient/assets/cal.gif" alt="Popup" class="trigger">'}
-        );
+            showTrigger: '<img src="'+window.hWin.HAPI4.baseURL+'hclient/assets/cal.gif" alt="Popup" class="trigger">'
+        };
+
+        if(calendar_type == 'japanese'){ // first era dates
+
+			if(setup_era_sel){
+
+				setupEras();
+				setup_era_sel = false;
+			}
+        }
+
+        $('.withCalendarsPicker').calendarsPicker(calendar_options);
 
         //change current calendar
         $('#selectCLD').change(function() {
 
-            var name = $(this).val();
-            if(!name) return;
-            //var loadName = (name == 'julian' ? '' : '.'+name);
-            //$.localise('../../external/jquery.calendars-1.2.1/jquery.calendars' + (loadName ? '.' : '') + loadName, 'en');
+            let new_calendar = $(this).val();
+            if(!new_calendar) return;
 
-            calendar = $.calendars.instance(name);
+            calendar = $.calendars.instance(new_calendar);
             if(!calendar) return;
+
+            if(new_calendar == 'japanese'){
+
+				if(setup_era_sel){
+
+					setupEras();
+					setup_era_sel = false;
+				}
+            }
+
+            let changed_options = {
+				calendar: calendar
+            };
+
             //assign new calendar for all pickers
             $('.withCalendarsPicker').each(function() {
 
-                var dd = '';
+                changed_options['defaultDate'] = '';
                 try{
-                    dd = convert($(this), false);
-                }catch(e){
-                    
-                }
-                $(this).calendarsPicker('option', {calendar: calendar,
-                        defaultDate: dd
-                });
+					changed_options['defaultDate'] = convert($(this), false);
+                }catch(e){}
+
+                $(this).calendarsPicker('option', changed_options);
+
             });
+
+            if(new_calendar == 'japanese'){
+
+                $(".withCalendarsPicker").each(function(idx, ele){
+					ele = $(ele);
+					if(ele.val() != '' && ele.val().match(/\D*/)){
+						let era = ele.val().match(/\D*/)[0];
+
+						era = $('#era_sel').find(`option:contains("(${era})")`).val();
+
+						$('#era_sel').val(era).change();
+
+						return false;
+					}
+                });
+
+                $('#era_sel').show();
+            }else{
+                $('#era_sel').hide();
+            }
         }); //end change calendar
 
-        calendar = $.calendars.instance(calendar_name);
-        $('#selectCLD').val(calendar_name);
+        $('#selectCLD').val(calendar_type);
         $('#selectCLD').change();
 
-        /*
-        if (type === "s") {
-            var tDate = temporal.getTDate("DAT");
-            // if DAT then separate Date, Time and TimeZone
-            if (tDate) {
-                if(tDate.getYear()){
-                    var month = tDate.getMonth()? tDate.getMonth(): 1;
-                    var day = tDate.getDay()? tDate.getDay(): 1;
-                    defaultDate = calendar.newDate(tDate.getYear(),month, day);
-                }
-            }
-        }*/
-
-
+        if(calendar_type == 'japanese'){
+			$('#era_sel').show();
+        }else{
+			$('#era_sel').hide();
+        }
     }
+
+	function setupEras(){
+
+		let options = calendar.getEras();
+
+		for(let i = 0; i < options.length; i ++){
+			window.hWin.HEURIST4.ui.addoption($('#era_sel')[0], i, options[i]);
+		}
+
+		$('#era_sel').change(function(){
+
+			let limits = calendar.getJapaneseEraLimits($(this).val());
+
+			let changed_options = {
+				minDate: calendar.newDate(limits[0][0], limits[0][1], limits[0][2]),
+				defaultDate: ''
+			};
+
+			if(limits[1].length > 0){
+				changed_options['maxDate'] = calendar.newDate(limits[1][0], limits[1][1], limits[1][2])
+			}else{
+				changed_options['maxDate'] = '';
+			}
+
+			$('.withCalendarsPicker').each(function() {
+				$(this).calendarsPicker('option', changed_options);
+			});
+		});
+	}
 
     // mode 0 - to gregorian (no assign), 1 - to
     var convert = function($inpt, togregorian) {
 
-            //current value
-            var tDate = TDate.parse($inpt.val());
-            var value = null;
-            var dformat = 'yyyy';
-            var hasMonth = true;
-            if (tDate && tDate.getYear()) {
-                    hasMonth = tDate.getMonth()>0;
-                    var hasDay  = tDate.getDay()>0;
+		//current value
+		let fromcal = $inpt.calendarsPicker('option', 'calendar');
+		let tDate = null;
+		let value = $inpt.val();
+		let toJapaneseStr = false;
+		let cur_calendar = $('#selectCLD').val();
 
-                    var month = hasMonth? tDate.getMonth(): 1;
-                    var day = hasDay? tDate.getDay(): 1;
+		if((fromcal.name.toLowerCase() == 'japanese' || cur_calendar == 'japanese') && value != ''){
 
-                    dformat = dformat + (hasMonth?'-mm':'');
-                    dformat = dformat + (hasDay?'-dd':'');
+			try{
+				tDate = TDate.parse(value);
+				toJapaneseStr = true;
+			}catch($e){
+				toJapaneseStr = value;
+				value = fromcal.japaneseToGregorian(value); // translate first
+				value = `${value.year()}-${value.month()}-${value.day()}`;
+			}
+		}
 
-                    /*var value = $inpt.calendarsPicker('getDate');
-                    if(value && Object.prototype.toString.apply(value) === '[object Array]' && value.length>0){
-                            value = value[0];
-                    }*/
+		tDate = TDate.parse(value);
+		let dformat = 'yyyy';
+		let hasMonth = true;
+		if (tDate && tDate.getYear()) {
+			hasMonth = tDate.getMonth()>0;
+			let hasDay  = tDate.getDay()>0;
 
-                    var fromcal = $inpt.calendarsPicker('option', 'calendar');
-                    value = fromcal.newDate(tDate.getYear(),month, day);
-            }
-            //var value = $inpt.calendarsPicker('getDate');
+			let month = hasMonth? tDate.getMonth(): 1;
+			let day = hasDay? tDate.getDay(): 1;
 
-            function noNeedConvert(from, to){
+			dformat = dformat + (hasMonth?'-mm':'');
+			dformat = dformat + (hasDay?'-dd':'');
 
-                var cc = ['taiwan','julian','gregorian'];
+			value = fromcal.newDate(tDate.getYear(),month, day);
+		}
 
-                return (from.name.toLowerCase()==to.name.toLowerCase()) ||
-                (!hasMonth &&
-                 ((cc.indexOf(from.name.toLowerCase())>=0 && cc.indexOf(to.name.toLowerCase())>=0) ||
-                  (cc.indexOf(from.name.toLowerCase())>=0 && cc.indexOf(to.name.toLowerCase())>=0)));
-            }
+		toJapaneseStr = togregorian || cur_calendar == 'japanese' ? toJapaneseStr : false;
 
-            var newval = '';
-            if(value){
+		if(cur_calendar == 'japanese' && toJapaneseStr === true){
+			toJapaneseStr = $.calendars.instance('japanese').gregorianToJapaneseStr(value);
+		}
 
-                        var tocalendar = togregorian ?$.calendars.instance('gregorian') :calendar;
-                        if(noNeedConvert(value._calendar, tocalendar)){
-                            if(togregorian){
-                                newval = $inpt.val();
-                            }else{
-                                //newval = togregorian ?$inpt.val():value;
-                                newval = value;
-                                newval._calendar.local.name = tocalendar.local.name;
-                                newval._calendar.name  = tocalendar.local.name;
-                            }
-                        }else{
-                            try{
-                                var jd = value._calendar.toJD(Number(value.year()), Number(value.month()), Number(value.day()));
-                                newval = tocalendar.fromJD(jd);
-                            }catch(err){
-                                alert(err);
-                                if(togregorian){
-                                    newval = '';
-                                }else{
-                                    $inpt.val('');
-                                }
-                            }
+		function noNeedConvert(from, to){
 
-                            if(togregorian){
-                                newval = tocalendar.formatDate(dformat, newval);
-                            }else {
-                                $inpt.val( tocalendar.formatDate(dformat, newval) );
-                            }
-                        }
-            }else {
-                $inpt.val('');
-            }
+			let cc = ['taiwan','julian','gregorian'];
 
-            return newval;
+			return (from.name.toLowerCase()==to.name.toLowerCase()) ||
+			(!hasMonth &&
+				((cc.indexOf(from.name.toLowerCase())>=0 && cc.indexOf(to.name.toLowerCase())>=0) ||
+				(cc.indexOf(from.name.toLowerCase())>=0 && cc.indexOf(to.name.toLowerCase())>=0)));
+		}
+
+		let newval = '';
+		if(value){
+
+			let tocalendar = togregorian ?$.calendars.instance('gregorian') :calendar;
+			if(noNeedConvert(value._calendar, tocalendar)){
+				if(togregorian){
+					newval = $inpt.val();
+				}else{
+					//newval = togregorian ?$inpt.val():value;
+					newval = value;
+					newval._calendar.local.name = tocalendar.local.name;
+					newval._calendar.name  = tocalendar.local.name;
+				}
+			}else{
+				try{
+					let jd = value._calendar.toJD(Number(value.year()), Number(value.month()), Number(value.day()));
+					newval = tocalendar.fromJD(jd);
+				}catch(err){
+					alert(err);
+					if(togregorian){
+						newval = '';
+					}else{
+						$inpt.val('');
+					}
+				}
+
+				if(togregorian){
+					newval = tocalendar.formatDate(dformat, newval);
+				}else {
+					$inpt.val( tocalendar.formatDate(dformat, newval) );
+				}
+			}
+		}else{
+			$inpt.val('');
+		}
+
+		if(toJapaneseStr !== false){
+			$inpt.val(toJapaneseStr);
+		}
+
+		return newval;
     };
 	//public members
 	var that = {

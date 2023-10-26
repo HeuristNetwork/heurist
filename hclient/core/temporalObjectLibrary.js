@@ -2238,3 +2238,61 @@ function temporalSimplifyDate(sdate) {
         return sdate;
     }
 }
+
+/**
+ * Fix Calendar Picker plugin's commands 
+ *  for skipping forwards/backwards through months and years when there is a min date or max date
+ */
+function fixCalendarPickerCMDs(){
+
+    // Fix an issue with the 'enabled' check for prev, prevJump, next, and nextJump commands
+    $.calendars.picker.commands.prev.enabled = function(inst){
+        var minDate = inst.curMinDate();
+        let goPrev = true;
+        if(minDate){
+            let newDate = inst.drawDate.newDate();
+            newDate.add(1 - inst.options.monthsToStep - inst.options.monthsOffset, 'm');
+            newDate.day(inst.options.calendar.minDay);
+            newDate.add(-1, 'd');
+            goPrev = newDate.compareTo(minDate) !== -1;
+        }
+        return (!minDate || goPrev);
+    };
+
+    $.calendars.picker.commands.prevJump.enabled = function(inst) {
+        var minDate = inst.curMinDate();
+        let goPrev = true;
+        if(minDate){
+            let newDate = inst.drawDate.newDate();
+            newDate.add(1 - inst.options.monthsToJump - inst.options.monthsOffset, 'm');
+            newDate.day(inst.options.calendar.minDay);
+            newDate.add(-1, 'd');
+            goPrev = newDate.compareTo(minDate) !== -1;
+        }
+        return (!minDate || goPrev);
+    };
+
+    $.calendars.picker.commands.next.enabled = function(inst) {
+        var maxDate = inst.get('maxDate');
+        let goNext = true;
+        if(maxDate){
+            let newDate = inst.drawDate.newDate();
+            newDate.add(inst.options.monthsToStep - inst.options.monthsOffset, 'm');
+            newDate.day(inst.options.calendar.minDay);
+            goNext = newDate.compareTo(maxDate) !== +1;
+        }
+        return (!maxDate || goNext);
+    };
+
+    $.calendars.picker.commands.nextJump.enabled = function(inst) {
+        var maxDate = inst.get('maxDate');
+        let goNext = true;
+        if(maxDate){
+            let newDate = inst.drawDate.newDate();
+            newDate.add(inst.options.monthsToJump - inst.options.monthsOffset, 'm');
+            newDate.day(inst.options.calendar.minDay);
+            goNext = newDate.compareTo(maxDate) !== +1;
+        }
+        return (!maxDate || goNext);
+    };
+}
