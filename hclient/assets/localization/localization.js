@@ -19,7 +19,7 @@
 There are 3 approaches for localization in proejct
 1) Context help (popups), long snippets of html (for example empty message for result list), explanatory messages, inline help texts 
 See /context_help folder. Localizations are in /ru, /fr …. subfolders
-2) Translations for database definitions. Need to provide translations for labels and help text per field. See for example /hsapi/entity/defRecTypes_ru.json
+2) Translations for database definitions. Need to provide translations for labels and help text per field. See for example /hserver/entity/defRecTypes_ru.json
 3) Translations in js code and html snippets. 
 3.1) Text in js code to be localized should be wrapped in function window.hWin.HR(‘keyword’)
 3.2) Element in html snippet should have css class “slocale”. For example <span class=””slocale”>Keyword</locale>

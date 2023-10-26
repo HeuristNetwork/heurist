@@ -44,7 +44,7 @@ if( @$_REQUEST['recID'] || @$_REQUEST['recid'] || array_key_exists('website', $_
 
         //embed - when heurist is run on page on non-heurist server
         if(array_key_exists('embed', $_REQUEST)){
-            require_once(dirname(__FILE__).'/hsapi/System.php');
+            require_once(dirname(__FILE__).'/hserver/System.php');
             define('PDIR', HEURIST_INDEX_BASE_URL);
         }else{
             if(!defined('PDIR')) define('PDIR','');    
@@ -73,7 +73,7 @@ if( @$_REQUEST['recID'] || @$_REQUEST['recid'] || array_key_exists('website', $_
     parse_str($_SERVER['QUERY_STRING'], $vars);
     $query_string = http_build_query($vars);
     
-    header('Location: hsapi/controller/api.php?'.$query_string);
+    header('Location: hserver/controller/api.php?'.$query_string);
     return;
     
 }else 
@@ -93,14 +93,14 @@ if( @$_REQUEST['recID'] || @$_REQUEST['recid'] || array_key_exists('website', $_
     if(array_key_exists('icon',$_REQUEST))
     {
         //download entity icon or thumbnail
-        $script_name = 'hsapi/controller/fileGet.php';        
+        $script_name = 'hserver/controller/fileGet.php';        
     }else if(array_key_exists('template',$_REQUEST))
     {
         //execute smarty template
         $script_name = 'viewers/smarty/showReps.php';        
     }else {
         //download file, thumb or remote url for recUploadedFiles
-        $script_name = 'hsapi/controller/fileDownload.php';        
+        $script_name = 'hserver/controller/fileDownload.php';        
     }
         
     //to avoid "Open Redirect" security warning    

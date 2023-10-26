@@ -35,10 +35,10 @@ define('MANAGER_REQUIRED',1);
 define('PDIR','../../');  //need for proper path to js and css    
 
 require_once(dirname(__FILE__).'/../../hclient/framecontent/initPageMin.php');
-//require_once(dirname(__FILE__).'/../../hsapi/dbaccess/db_structure.php');
-require_once(dirname(__FILE__).'/../../hsapi/dbaccess/db_records.php');
-require_once(dirname(__FILE__)."/../../hsapi/dbaccess/db_files.php");
-require_once(dirname(__FILE__)."/../../hsapi/utilities/utils_file.php");
+require_once(dirname(__FILE__).'/../../hserver/records/edit/recordModify.php');
+require_once(dirname(__FILE__)."/../../hserver/records/search/recordFile.php");
+require_once(dirname(__FILE__)."/../../hserver/utilities/utils_file.php");
+require_once(dirname(__FILE__).'/../../hserver/structure/import/dbsImport.php');
         
 $system->defineConstants();
 
@@ -291,6 +291,14 @@ $failed_exts = array();
                         }
                     }
                     */
+                    
+                    $dir = sanitizePath($dir);
+                    if(isPathInHeuristUploadFolder($dir, true)===false){
+                            print '<div style="color:red">'.htmlspecialchars($orig).'is ignored. Folder must be in heurist filestore directory.</div>';
+                            continue;
+                    }
+                    
+/*                    
                     $dir = str_replace('\\','/',$dir);
                     if(!( substr($dir, 0, strlen(HEURIST_FILESTORE_DIR)) === HEURIST_FILESTORE_DIR )){
                         $orig = $dir;
@@ -316,6 +324,7 @@ $failed_exts = array();
                             continue;
                         }
                     }
+*/                    
 
                     if(substr($dir, -1) != '/'){
                         $dir .= "/";
@@ -360,7 +369,7 @@ $failed_exts = array();
                         }
                     }
                 }else if ($dir) {
-                    print "<div style=\"color:red\">Folder was not found: $dir</div>";
+                    print '<div style="color:red">Folder was not found: '.htmlspecialchars($dir).'</div>';
                 }
             }
         }
@@ -573,7 +582,7 @@ $failed_exts = array();
                                         $currfile = $filename; //assign to global
 
                                         //add-update the uploaded file
-                                        $file_id = fileRegister($system, $filename); //see db_files.php
+                                        $file_id = fileRegister($system, $filename); //see recordFile.php
                                         if(is_numeric($file_id)){
                                             $details["t:".$fileDT] = array("1"=>$file_id);
 
@@ -625,11 +634,11 @@ $failed_exts = array();
                                 $record['ScratchPad'] = null;
                                 $record['details'] = $details;
                                 
-                                $out = recordSave($system, $record);  //see db_records.php
+                                $out = recordSave($system, $record);  //see recordModify.php
 
                                 if ( @$out['status'] != HEURIST_OK ) {
                                     print '<div>File: <i>'.htmlspecialchars($filename_base).'</i> <span  style="color:red">Error: '.
-                                    $out["message"]."</span></div>";
+                                    htmlspecialchars($out["message"])."</span></div>";
                                     
                                 }else{
                                     if($new_md5==null){
@@ -657,7 +666,7 @@ $failed_exts = array();
                                     if (@$out['warning']) {
                                         print '<div>File: <i>'.htmlspecialchars($filename_base).
                                         '</i> <span  style="color:#ff8844">Warning: '.
-                                        implode("; ",$out["warning"])."</span></div>";
+                                        htmlspecialchars(implode("; ",$out["warning"]))."</span></div>";
                                     }
 
                                 }
@@ -740,7 +749,7 @@ XML;
 
                         $details = array();
                         
-                        $file_id = fileRegister($system, $filename);  //see db_files.php
+                        $file_id = fileRegister($system, $filename);  //see recordFile.php
                             
                         if($file_id>0){
                             $details["t:".$fileDT] = array("1"=>$file_id);
@@ -804,7 +813,7 @@ XML;
                         $record['ScratchPad'] = $recordNotes;
                         $record['details'] = $details;
                         
-                        $out = recordSave($system, $record);  //see db_records.php
+                        $out = recordSave($system, $record);  //see recordModify.php
 
                         $f_item = $f_items->addChild("item");
                         $f_item->addChild("filename", htmlspecialchars($flleinfo['basename']));

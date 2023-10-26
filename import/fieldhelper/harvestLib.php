@@ -200,7 +200,7 @@ function getFilesInDir($system, $dir, $mediaExts, $imode) {
             {
                 if($imode==1){
                 
-                    $file_id = fileGetByFileName( $system, $filename);  //see db_files.php
+                    $file_id = fileGetByFileName( $system, $filename);  //see recordFile.php
 
                     if($file_id>0){
                         array_push($reg_info['reg'], $filename);

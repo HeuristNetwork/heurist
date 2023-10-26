@@ -26,7 +26,7 @@ define('OWNER_REQUIRED',1);
 define('PDIR','../../');  //need for proper path to js and css    
 
 require_once(dirname(__FILE__).'/../../hclient/framecontent/initPageMin.php');
-require_once(dirname(__FILE__).'/../../hsapi/dbaccess/db_files.php');
+require_once(dirname(__FILE__).'/../../hserver/records/search/recordFile.php');
 require_once(dirname(__FILE__).'/../../import/fieldhelper/harvestLib.php');
 
 $mysqli = $system->get_mysqli();
@@ -130,7 +130,7 @@ $mysqli = $system->get_mysqli();
                 if(@$res['ulf_FilePath']==null){
                     $res_fullpath = $res['ulf_FileName'];
                 }else{
-                    $res_fullpath = resolveFilePath( $res['ulf_FilePath'].$res['ulf_FileName'] ); //see db_files.php
+                    $res_fullpath = resolveFilePath( $res['ulf_FilePath'].$res['ulf_FileName'] ); //see recordFile.php
                 }
                 $files_duplicates[$res_fullpath] = $dups_ids;
                 
@@ -219,7 +219,7 @@ $mysqli = $system->get_mysqli();
                     if(@$res4['ulf_FilePath']==null){
                         $res_fullpath = $res4['ulf_FileName'];
                     }else{
-                        $res_fullpath = resolveFilePath( $res4['ulf_FilePath'].$res4['ulf_FileName'] ); //see db_files.php
+                        $res_fullpath = resolveFilePath( $res4['ulf_FilePath'].$res4['ulf_FileName'] ); //see recordFile.php
                     }
                    
                     

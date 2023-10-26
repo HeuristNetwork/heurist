@@ -34,9 +34,9 @@ define('LOGIN_REQUIRED',1);
 define('PDIR','../../');  //need for proper path to js and css    
 
 require_once (dirname(__FILE__).'/../../hclient/framecontent/initPage.php');
-require_once (dirname(__FILE__).'/../../hsapi/utilities/testSimilarURLs.php');
-require_once (dirname(__FILE__).'/../../hsapi/entity/dbUsrTags.php');
-require_once (dirname(__FILE__).'/../../hsapi/dbaccess/db_records.php');
+require_once (dirname(__FILE__).'/../../hserver/utilities/testSimilarURLs.php');
+require_once (dirname(__FILE__).'/../../hserver/entity/dbUsrTags.php');
+require_once (dirname(__FILE__).'/../../hserver/records/edit/recordModify.php');
 
 
 $nextmode = 'inputselect';
@@ -586,7 +586,7 @@ function records_check($url, $title, $notes, $user_rec_id) {
     $record['details']["t:".DT_EXTENDED_DESCRIPTION] = array("0"=>$notes);
 
     
-    $out = recordSave($system, $record);  //see db_records.php    
+    $out = recordSave($system, $record);  //see recordModify.php    
     
     if ( @$out['status'] != HEURIST_OK ) {
         //print "<div style='color:red'> Error: ".$out["message"]."</div>";

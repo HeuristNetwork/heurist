@@ -33,7 +33,7 @@ header("Content-type: text/javascript");
 
 if (! @$_REQUEST["url"]) return;
 
-require_once(dirname(__FILE__).'/../../hsapi/System.php');
+require_once(dirname(__FILE__).'/../../hserver/System.php');
 $system = new System();
 if(!$system->init(@$_REQUEST['db'])){
     return;

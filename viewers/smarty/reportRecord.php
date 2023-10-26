@@ -11,12 +11,13 @@ getLinkedRecords - returns array of linkedto and linkedfrom record IDs
 getWootText  - returns text related with given record ID
 */
 
-require_once(dirname(__FILE__).'/../../hsapi/System.php');
-require_once(dirname(__FILE__).'/../../hsapi/dbaccess/db_structure.php');
-require_once(dirname(__FILE__).'/../../hsapi/dbaccess/db_recsearch.php');
-require_once(dirname(__FILE__).'/../../hsapi/dbaccess/db_rel_details_temp.php');
+require_once(dirname(__FILE__).'/../../hserver/System.php');
+require_once(dirname(__FILE__).'/../../hserver/structure/search/dbsData.php');
+require_once(dirname(__FILE__).'/../../hserver/records/search/recordSearch.php');
+require_once(dirname(__FILE__).'/../../hserver/records/search/relationshipData.php');
+require_once(dirname(__FILE__).'/../../hserver/structure/dbsTerms.php');
 
-require_once(dirname(__FILE__).'/../../hsapi/utilities/Temporal.php');
+require_once(dirname(__FILE__).'/../../hserver/utilities/Temporal.php');
 require_once (dirname(__FILE__).'/../../vendor/autoload.php'); //for geoPHP
 //require_once(dirname(__FILE__).'/../../records/woot/woot.php');
 
@@ -151,7 +152,7 @@ class ReportRecord {
             return $this->loaded_recs[$rec_ID];
         }
 
-        $rec = recordSearchByID($this->system, $rec_ID); //from db_recsearch.php
+        $rec = recordSearchByID($this->system, $rec_ID); //from recordSearch.php
         
         if($rec){
             $rec['rec_Tags'] = recordSearchPersonalTags($this->system, $rec_ID); //for current user only

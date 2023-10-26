@@ -561,7 +561,7 @@ if(!($max_size>0)) $max_size = 0;
                     //xhrFields: {withCredentials: true},
                     //formData: {name: 'acceptFileTypes', value:"<?=implode('|',$allowed_exts)?>" },
                     //upload_thumb_dir: '<?=HEURIST_THUMB_DIR?>', 
-                    url: '<?=HEURIST_BASE_URL?>hsapi/utilities/UploadHandlerInit.php', //was external/jquery-file-upload/server/php/
+                    url: '<?=HEURIST_BASE_URL?>hserver/utilities/UploadHandlerInit.php', //was external/jquery-file-upload/server/php/
                     added: function(e, data){
                         
                         //verify that all files are processed and show total size to be uploaded

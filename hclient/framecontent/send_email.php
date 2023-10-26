@@ -29,7 +29,7 @@
 define('PDIR','../../');  //need for proper path to js and css    
 
 require_once(dirname(__FILE__).'/initPageMin.php');
-require_once(dirname(__FILE__).'/../../hsapi/utilities/utils_mail.php');
+require_once(dirname(__FILE__).'/../../hserver/utilities/utils_mail.php');
 
 // POST request
 if(isset($_POST['data'])) {

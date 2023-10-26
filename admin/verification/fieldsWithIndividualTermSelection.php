@@ -28,7 +28,7 @@ define('OWNER_REQUIRED',1);
 define('PDIR','../../');  //need for proper path to js and css    
 
 require_once(dirname(__FILE__).'/../../hclient/framecontent/initPageMin.php');
-require_once(dirname(__FILE__).'/../../hsapi/dbaccess/db_structure.php');
+require_once(dirname(__FILE__).'/../../hserver/structure/search/dbsData.php');
 
 $mysqli = $system->get_mysqli();
 
@@ -99,7 +99,7 @@ $is_csv = (@$_REQUEST['html']!=1);
             */
             
             //parse
-            $terms = getTermsFromFormat(@$row[1]); //db_structure
+            $terms = getTermsFromFormat(@$row[1]); //see dbsData.php
             
             if (is_array($terms) && count($terms) ==1 ) { //vocabulary
                     $cnt1++;

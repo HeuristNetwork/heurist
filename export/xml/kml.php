@@ -27,10 +27,10 @@
 * @todo - only one kml per record, perhaps need to return the combination of kml
 */
 
-require_once(dirname(__FILE__).'/../../hsapi/System.php');
-require_once(dirname(__FILE__).'/../../hsapi/dbaccess/db_recsearch.php');
+require_once(dirname(__FILE__).'/../../hserver/System.php');
+require_once(dirname(__FILE__).'/../../hserver/records/search/recordSearch.php');
 
-require_once(dirname(__FILE__).'/../../hsapi/utilities/Temporal.php');
+require_once(dirname(__FILE__).'/../../hserver/utilities/Temporal.php');
 
 require_once(dirname(__FILE__).'/../../vendor/autoload.php'); //for geoPHP
 
@@ -137,7 +137,7 @@ if($islist || (array_key_exists("id", $_REQUEST) && $_REQUEST["id"]!="")){
 
             $_REQUEST['detail'] = 'ids'; // return ids only
 
-            $result = recordSearch($system, $_REQUEST); //see db_recsearch.php
+            $result = recordSearch($system, $_REQUEST); //see recordSearch.php
         
             if(!(@$result['status']==HEURIST_OK && @$result['data']['reccount']>0)){
                 $error_msg = $system->getError();

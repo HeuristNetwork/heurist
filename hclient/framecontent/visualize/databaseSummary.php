@@ -268,7 +268,7 @@ A:link {
                 //$("#visualisation-column").slideToggle(500);
 
                 // VISUALISATION CALL
-                var url = window.hWin.HAPI4.baseURL+"hsapi/controller/rectype_relations.php" + window.location.search;
+                var url = window.hWin.HAPI4.baseURL+"hserver/controller/rectype_relations.php" + window.location.search;
                 d3.json(url, function(error, json_data) {
                     // Error check
                     if(error) {

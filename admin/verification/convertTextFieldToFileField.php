@@ -132,7 +132,7 @@ if( $system->verifyActionPassword($_REQUEST['pwd'], $passwordForServerFunctions)
 
                 //$ulf_ID = $entity->registerURL($url, $type_!=='_remote');
                 
-                $nonce = addslashes(sha1($k.'.'.rand()));
+                $nonce = addslashes(sha1($k.'.'.random_int(0,99)));
                 $ext = ($type_=='_remote') ? recognizeMimeTypeFromURL($mysqli, $url) :'png'; //@todo check preferred source
                 
                 $query = 'insert into '.$db_name.'.recUploadedFiles '

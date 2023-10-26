@@ -25,10 +25,8 @@
 * @package     Heurist academic knowledge management system
 */
 
-require_once(dirname(__FILE__).'/../../hsapi/System.php');
-require_once (dirname(__FILE__).'/../../hsapi/dbaccess/db_recsearch.php');
-//require_once (dirname(__FILE__).'/../../hsapi/dbaccess/compose_sql.php');
-//require_once (dirname(__FILE__).'/../../hsapi/dbaccess/compose_sql_new.php');
+require_once(dirname(__FILE__).'/../../hserver/System.php');
+require_once (dirname(__FILE__).'/../../hserver/records/search/recordSearch.php');
 
 $system = new System();
 if( !$system->init(@$_REQUEST['db']) ){
@@ -40,7 +38,7 @@ if( !$system->init(@$_REQUEST['db']) ){
 
     if(@$_REQUEST['a'] == 'minmax' ){
 
-            $response = recordSearchMinMax( $system, $params ); //db_recsearch
+            $response = recordSearchMinMax( $system, $params ); //recordSearch.php
 
     }else if(@$_REQUEST['a'] == 'pointers' ){
 

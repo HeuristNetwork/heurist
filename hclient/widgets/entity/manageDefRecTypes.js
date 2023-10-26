@@ -1165,8 +1165,11 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
         }else{
             
             var ele = this._editing.getFieldByName('rty_ID');
-            ele.find('div.input-div').html(this._currentEditID+'&nbsp;&nbsp;<span style="font-weight:normal">Code: </span>'
-                                    +$Db.getConceptID('rty',this._currentEditID, true));
+            if(ele.length>0){
+                ele.find('div.input-div').html(this._currentEditID
+                        +'&nbsp;&nbsp;<span style="font-weight:normal">Code: </span>'
+                        +$Db.getConceptID('rty',this._currentEditID, true));
+            }
             
             
             //hide after edit init btnRecRemove for status locked 
@@ -1442,7 +1445,7 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
 
             var mask = document.getElementById("rty_TitleMask").value;
             
-            var baseurl = window.hWin.HAPI4.baseURL + "hsapi/controller/rectype_titlemask.php";
+            var baseurl = window.hWin.HAPI4.baseURL + "hserver/controller/rectype_titlemask.php";
 
             var request = {rty_id:rectypeID, mask:mask, db:window.hWin.HAPI4.database, check:1}; //verify titlemask
             
@@ -1470,7 +1473,7 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
 
         if(!fields){
             fields = this._getValidatedValues(); 
-            fields['isfull'] = 1;
+            if(fields) fields['isfull'] = 1;
         }
 
         if(fields==null) return; //validation failed
@@ -1787,9 +1790,9 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
                         window.hWin.HEURIST4.msg.showMsgErr(response);
                     }                                        
                 }
-
-                var baseurl = window.hWin.HAPI4.baseURL + "hsapi/utilities/duplicateRectype.php";
                 
+                //@todo change to sys_structure controller
+                var baseurl = window.hWin.HAPI4.baseURL + "hserver/structure/edit/duplicateRectype.php";
                 window.hWin.HEURIST4.util.sendRequest(baseurl, { rtyID:rectypeID }, null, _editAfterDuplicate);
 
         }, {title:'Confirm',yes:'Continue',no:'Cancel'},

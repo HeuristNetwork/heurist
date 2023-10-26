@@ -42,7 +42,7 @@ if($is_included){
     define('PDIR','../../');
     set_time_limit(0);
     
-    require_once (dirname(__FILE__).'/../../hsapi/System.php');
+    require_once (dirname(__FILE__).'/../../hserver/System.php');
     
     $system = new System();
     if( ! $system->init(@$_REQUEST['db']) ){

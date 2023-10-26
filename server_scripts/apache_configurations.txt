@@ -21,8 +21,8 @@ RewriteRule (.+)/$ /$1 [L,R=301]
 # rather than the use of the long parameterised URLs used by Heurist internally
  
 #if URI starts with api/ redirect it to controller/api.php
-RewriteRule ^heurist/api/(.*)$ /heurist/hsapi/controller/api.php
-RewriteRule ^h6-alpha/api/(.*)$ /h6-alpha/hsapi/controller/api.php
+RewriteRule ^heurist/api/(.*)$ /heurist/hserver/controller/api.php
+RewriteRule ^h6-alpha/api/(.*)$ /h6-alpha/hserver/controller/api.php
 
 #if URI starts with web, tpl, hml, view etc. redirect it to redirects/resolver.php
 RewriteRule ^h6-alpha/([A-Za-z0-9_]+)/(website|web|tpl|hml|view)/(.*)$ /h6-alpha/redirects/resolver.php

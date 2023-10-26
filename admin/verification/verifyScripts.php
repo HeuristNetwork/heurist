@@ -35,7 +35,7 @@ ini_set('max_execution_time', '0');
 define('PDIR','../../');  //need for proper path to js and css    
 
 require_once(dirname(__FILE__).'/../../hclient/framecontent/initPageMin.php');
-require_once(dirname(__FILE__).'/../../hsapi/utilities/utils_db_load_script.php');
+require_once(dirname(__FILE__).'/../../hserver/utilities/utils_db_load_script.php');
 
 /*
 //print htmlspecialchars($_REQUEST['db']).'<br>';

@@ -525,7 +525,7 @@ $.widget( "heurist.lookup_Template", $.heurist.recordAction, {
             serviceType: 'bnflibrary_bib' // requesting service, otherwise the request will result in an error
         };
 
-        // calls /heurist/hsapi/controller/record_lookup.php
+        // calls /heurist/hserver/controller/record_lookup.php
         window.hWin.HAPI4.RecordMgr.lookup_external_service(request, function(response){
 
             window.hWin.HEURIST4.msg.sendCoverallToBack(); // hide loading cover
@@ -574,7 +574,7 @@ $.widget( "heurist.lookup_Template", $.heurist.recordAction, {
             var res_records = {}, res_orders = [];
 
             // Prepare fields for mapping
-            // the fields used here are defined within /heurist/hsapi/controller/record_lookup_config.json where "service" = bnfLibrary
+            // the fields used here are defined within /heurist/hserver/controller/record_lookup_config.json where "service" = bnfLibrary
             var fields = ['rec_ID', 'rec_RecTypeID']; // added for record set
             var map_flds = Object.keys(this.options.mapping.fields);
             fields = fields.concat(map_flds);            

@@ -1,6 +1,4 @@
 <?php
-//@TODO wrap to class - use DbsTerms class
-
 /**
 * verifyValue.php - library of functions to verify values - pointers and terms to conform to
 * the constraints in detail and record type definitions
@@ -114,22 +112,22 @@ public static function getAllowedTerms($defs, $defs_nonsel, $dtyID){
 /*
         if ( $dtyID == DT_RELATION_TYPE) {
             //get all root terms (vocabs)
-            $allowed_terms = getTermListAll(self::$mysqli, 'relation'); //from db_structure
+            $allowed_terms = getTermListAll(self::$mysqli, 'relation'); //see dbsData.php
             self::$dtyIDDefs[$dtyID] = $allowed_terms;
 
         } else {
 
-            $terms = getTermsFromFormat($defs); //db_structure
+            $terms = getTermsFromFormat($defs); //see dbsData.php
             
             if (($cntTrm = count($terms)) > 0) {
 
                 if ($cntTrm == 1) {  //vocabulary
                     $vocabId = $terms[0];
-                    $terms = getTermOffspringList(self::$mysqli, $vocabId); //db_structure
+                    $terms = getTermOffspringList(self::$mysqli, $vocabId); //see dbsData.php
                     array_push($terms, $vocabId);
                     
                 }else{
-                    $nonTerms = getTermsFromFormat($defs_nonsel); //from db_structure
+                    $nonTerms = getTermsFromFormat($defs_nonsel); //see dbsData.php
                     if (count($nonTerms) > 0) {
                         $terms = array_diff($terms, $nonTerms);
                     }
@@ -258,7 +256,7 @@ public static function isValidTermLabel($defs, $defs_nonsel, $label, $dtyID, $is
         }
     }else{
         return false;
-        //$term_ID = getTermByLabel($label); //db_structure
+        //$term_ID = getTermByLabel($label); //see dbsData.php
     }
 
     return $term_ID;
@@ -312,7 +310,7 @@ public static function isValidTermCode($defs, $defs_nonsel, $code, $dtyID){
         $term_ID = array_search($code, $allowed_codes, true);
     }else{
         return false;
-        //$term_ID = getTermByCode($code); //db_structure
+        //$term_ID = getTermByCode($code); //see dbsData.php
     }
 
     return $term_ID;

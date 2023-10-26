@@ -62,7 +62,7 @@ function hImportFileData() {
         })                        
 
         uploadWidget.fileupload({
-            url: window.hWin.HAPI4.baseURL +  'hsapi/controller/fileUpload.php', 
+            url: window.hWin.HAPI4.baseURL +  'hserver/controller/fileUpload.php', 
             formData: [ {name:'db', value: window.hWin.HAPI4.database}, 
                         {name:'entity', value:'temp'}, //to place file into scratch folder
                         {name:'max_file_size', value:1024*1024}], //'1024*1024'

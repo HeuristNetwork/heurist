@@ -18,7 +18,7 @@
 * See the License for the specific language governing permissions and limitations under the License.
 */
 
-require_once(dirname(__FILE__)."/../hsapi/System.php");
+require_once(dirname(__FILE__)."/../hserver/System.php");
 
 if (!defined('PDIR')) define('PDIR','../');
 
@@ -235,10 +235,10 @@ if(($_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0.0.1'))
         var id = window.hWin.HEURIST4.util.random();
         if(true){  //simple captcha
             var ele = $('.center-box.screen2 label[for="ugr_Captcha"]')
-            ele.load(baseURL+'hsapi/utilities/captcha.php?id='+id);
+            ele.load(baseURL+'hserver/utilities/captcha.php?id='+id);
         }else{ //image captcha
             $dd.empty(); //find("#img").remove();
-            $('<img id="img" src="hsapi/utilities/captcha.php?img='+id+'"/>').appendTo($dd);
+            $('<img id="img" src="hserver/utilities/captcha.php?img='+id+'"/>').appendTo($dd);
         }
     }
     
@@ -398,7 +398,7 @@ if(($_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0.0.1'))
     //    
     function _getDatabases( show_list ){
         
-            var url = baseURL+'hsapi/utilities/list_databases.php';
+            var url = baseURL+'hserver/utilities/list_databases.php';
             
             var request = {format:'json'};
         

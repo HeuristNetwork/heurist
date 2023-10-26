@@ -146,7 +146,6 @@ if(!window.hWin.entityRecordCfg){
     };
 
 }
-
 /*if (window.top != window.self) {
 //this is frame
 } else {

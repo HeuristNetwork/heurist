@@ -28,7 +28,7 @@
     * See the License for the specific language governing permissions and limitations under the License.
     */
     require_once(dirname(__FILE__)."/initPage.php");
-    require_once(dirname(__FILE__)."/../../hsapi/utilities/testSimilarURLs.php");
+    require_once(dirname(__FILE__)."/../../hserver/utilities/testSimilarURLs.php");
    
     $params = array();
     
