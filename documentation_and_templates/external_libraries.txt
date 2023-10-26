@@ -3,7 +3,7 @@
 * external_libraries.txt: documentation of external JS,. PHP and help files used by Heurist
 *
 * @package     Heurist academic knowledge management system
-* @link        http://HeuristNetwork.org
+* @link        https://HeuristNetwork.org
 * @copyright   (C) 2005-2019 University of Sydney
 * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
 * @author      Ian Johnson     <ian.johnson@sydney.edu.au>

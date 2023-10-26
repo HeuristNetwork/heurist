@@ -29,7 +29,7 @@
     * HEURIST_BASE_URL
     
     * @package Heurist academic knowledge management system
-    * @link http://HeuristNetwork.org
+    * @link https://HeuristNetwork.org
     * @copyright (C) 2005-2020 University of Sydney
     * @author Michael Falk <michael.falk@sydney.edu.au>
     * @author Artem Osmakov <artem.osmakov@sydney.edu.au>

@@ -458,7 +458,7 @@ if($registrationRequired){ //show user registration dialog again after wrong cap
                         THIS DATABASE IS CURRENTLY UNDER DEVELOPMENT - PLEASE DON'T USE THIS OPTION
                         <br/>
                         A training database consisting of interlinked information about Shakespeare's plays, company, actors, theatres, performances etc.
-                        Use this database as a starting point for becoming familiar with Heurist<br>(See <a href="https://HeuristNetwork.org/screencasts" target="_blank">introductory video</a>).
+                        Use this database as a starting point for becoming familiar with Heurist<br>(See <a href="https://HeuristNetwork.org/screencasts" target="_blank" rel="noopener">introductory video</a>).
                     </div>
 
                     <div id="nextSteps" style="padding:10px 0 10px 26px;width:600px;display:none">

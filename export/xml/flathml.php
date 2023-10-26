@@ -1189,9 +1189,9 @@ function outputRecord($recID, $depth, $outputStub = false, $parentID = null){
         output( "<?xml version='1.0' encoding='UTF-8'?>\n" );
 
         //add attributes
-        $recAttr['xmlns'] = 'http://heuristnetwork.org';
-        $recAttr['xmlns:xsi'] = 'http://www.w3.org/2001/XMLSchema-instance';
-        $recAttr['xsi:schemaLocation'] = 'http://heuristnetwork.org/documentation_and_templates/scheme_record.xsd';
+        $recAttr['xmlns'] = 'http:s//heuristnetwork.org';
+        $recAttr['xmlns:xsi'] = 'https://www.w3.org/2001/XMLSchema-instance';
+        $recAttr['xsi:schemaLocation'] = 'https://heuristnetwork.org/documentation_and_templates/scheme_record.xsd';
     }
 
     if(!$rectype_templates){
@@ -1841,12 +1841,12 @@ if (@$_REQUEST['mode'] != '1') { //not include
 
 $hmlAttrs = array();
 
-$hmlAttrs['xmlns'] = 'http://heuristnetwork.org';
-$hmlAttrs['xmlns:xsi'] = 'http://www.w3.org/2001/XMLSchema-instance';
-$hmlAttrs['xsi:schemaLocation'] = 'http://heuristnetwork.org/documentation_and_templates/scheme_hml.xsd';
+$hmlAttrs['xmlns'] = 'https://heuristnetwork.org';
+$hmlAttrs['xmlns:xsi'] = 'https://www.w3.org/2001/XMLSchema-instance';
+$hmlAttrs['xsi:schemaLocation'] = 'https://heuristnetwork.org/documentation_and_templates/scheme_hml.xsd';
 
 if ($USEXINCLUDE) {
-    $hmlAttrs['xmlns:xi'] = 'http://www.w3.org/2001/XInclude';
+    $hmlAttrs['xmlns:xi'] = 'https://www.w3.org/2001/XInclude';
 }
 
 if (@$_REQUEST['filename']) {
@@ -1930,9 +1930,9 @@ if($intofile){ // flags HuNI manifest + separate files per record
                 <td colspan="2">
 
                     <p style="margin-top: 1em;">
-                        The HuNI project (Humanities Networked Infrastructure, <a href="http://huni.net.au" target="_blank">http://huni.net.au</a>) 
+                        The HuNI project (Humanities Networked Infrastructure, <a href="https://huni.net.au" target="_blank">https://huni.net.au</a>) 
                         funded as a Virtual Laboratory by the Australian National eResearch Collaboration Tools and Resources Project 
-                        (<a href="http://nectar.org.au">NeCTAR</a>, has built a central searchable aggregate of metadata harvested from 28 Australian 
+                        (<a href="https://nectar.org.au">NeCTAR</a>, has built a central searchable aggregate of metadata harvested from 28 Australian 
                         cultural datasets, including AusStage, AusLit, Dictionary of Art and Architecture Online, Australian Dictionary of Biography, 
                         Circus Oz and Paradisec</p>
 
@@ -2089,7 +2089,7 @@ if($intofile){ // flags HuNI manifest + separate files per record
     /*  TODO: The schema locations are clearly rubbish
     openTag('hml', array(
     'xmlns' => '<?pho echo HEURIST_INDEX_BASE_URL;?>hml',
-    'xmlns:xsi' => 'http://www.w3.org/2001/XMLSchema-instance',
+    'xmlns:xsi' => 'https://www.w3.org/2001/XMLSchema-instance',
     'xsi:schemaLocation' => '<?pho echo HEURIST_INDEX_BASE_URL;?>hml <?pho echo HEURIST_INDEX_BASE_URL;?>schemas/hml.xsd')
     );
     */

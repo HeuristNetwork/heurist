@@ -4,7 +4,7 @@
 * visualize.html: Toolbar for the network diagram of database structure or current resultset
 *
 * @package     Heurist academic knowledge management system
-* @link        http://HeuristNetwork.org
+* @link        https://HeuristNetwork.org
 * @copyright   (C) 2005-2020 University of Sydney
 * @author      Jan-Jaap de Groot
 * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>

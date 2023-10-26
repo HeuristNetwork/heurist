@@ -322,10 +322,10 @@
         
         // Create xml object
         $xml_obj = simplexml_load_string($remote_data, null, LIBXML_PARSEHUGE);
-        // xml namespace urls: http://www.loc.gov/zing/srw/ (srw), info:lc/xmlns/marcxchange-v2 (mxc)
+        // xml namespace urls: https://www.loc.gov/zing/srw/ (srw), info:lc/xmlns/marcxchange-v2 (mxc)
 
         // Retrieve records from results
-        $records = $xml_obj->children('http://www.loc.gov/zing/srw/', false)->records->record;
+        $records = $xml_obj->children('https://www.loc.gov/zing/srw/', false)->records->record;
 
         // Move each result's details into seperate array
         foreach ($records as $key => $details) {
@@ -549,7 +549,7 @@
         }
 
         // Add other details
-        $results['numberOfRecords'] = intval($xml_obj->children('http://www.loc.gov/zing/srw/', false)->numberOfRecords);
+        $results['numberOfRecords'] = intval($xml_obj->children('https://www.loc.gov/zing/srw/', false)->numberOfRecords);
 
         // Encode to json for response to JavaScript
         $remote_data = json_encode($results);
@@ -559,10 +559,10 @@
         
         // Create xml object
         $xml_obj = simplexml_load_string($remote_data, null, LIBXML_PARSEHUGE);
-        // xml namespace urls: http://www.loc.gov/zing/srw/ (srw), info:lc/xmlns/marcxchange-v2 (mxc)
+        // xml namespace urls: https://www.loc.gov/zing/srw/ (srw), info:lc/xmlns/marcxchange-v2 (mxc)
 
         // Retrieve records from results
-        $records = $xml_obj->children('http://www.loc.gov/zing/srw/', false)->records->record;
+        $records = $xml_obj->children('https://www.loc.gov/zing/srw/', false)->records->record;
 
         $df_handled = array(200, 210, 240, 230, 215, 216, 250, 220);
 
@@ -717,8 +717,8 @@
         }
 
         // Add other details, can be used for more calls to retrieve all results (currently retrieves 500 records at max)
-        $results['numberOfRecords'] = intval($xml_obj->children('http://www.loc.gov/zing/srw/', false)->numberOfRecords);
-        $results['nextStart'] = intval($xml_obj->children('http://www.loc.gov/zing/srw/', false)->nextRecordPosition);
+        $results['numberOfRecords'] = intval($xml_obj->children('https://www.loc.gov/zing/srw/', false)->numberOfRecords);
+        $results['nextStart'] = intval($xml_obj->children('https://www.loc.gov/zing/srw/', false)->nextRecordPosition);
 
         // Encode to json for response to JavaScript
         $remote_data = json_encode($results);
@@ -727,10 +727,10 @@
         
         // Create xml object
         $xml_obj = simplexml_load_string($remote_data, null, LIBXML_PARSEHUGE);
-        // xml namespace urls: http://www.loc.gov/zing/srw/ (srw), info:lc/xmlns/marcxchange-v2 (mxc)
+        // xml namespace urls: https://www.loc.gov/zing/srw/ (srw), info:lc/xmlns/marcxchange-v2 (mxc)
 
         // Retrieve records from results
-        $records = $xml_obj->children('http://www.loc.gov/zing/srw/', false)->records->record;
+        $records = $xml_obj->children('https://www.loc.gov/zing/srw/', false)->records->record;
 
         foreach($records as $key => $details){
             $record = $details->recordData->children('info:lc/xmlns/marcxchange-v2', false)->record;
@@ -752,7 +752,7 @@
             $id = (string)$record->id[0];
             $link = @$record->link;
             if(empty($link) || $link->attributes()['rel'] != 'canonical'){
-                $link = 'http://nomisma.org/id/' . $id;
+                $link = 'https://nomisma.org/id/' . $id;
             }else{
                 $link = (string)$link->attributes()['href'];
             }
@@ -863,15 +863,15 @@
 
         $remote_data = json_decode($remote_data, TRUE);
 
-        $type_idx = 'http://www.w3.org/1999/02/22-rdf-syntax-ns#type';
-        $trm_uri = 'http://www.w3.org/2004/02/skos/core#Concept';
-        $desc_idx = 'http://www.w3.org/2004/02/skos/core#definition';
-        $code_idx = 'http://purl.org/dc/terms/identifier';
-        $label_idx = 'http://www.w3.org/2004/02/skos/core#prefLabel';
+        $type_idx = 'https://www.w3.org/1999/02/22-rdf-syntax-ns#type';
+        $trm_uri = 'https://www.w3.org/2004/02/skos/core#Concept';
+        $desc_idx = 'https://www.w3.org/2004/02/skos/core#definition';
+        $code_idx = 'https://purl.org/dc/terms/identifier';
+        $label_idx = 'https://www.w3.org/2004/02/skos/core#prefLabel';
 
-        $parent_idx = 'http://www.w3.org/2004/02/skos/core#broader';
-        $child_idx = 'http://www.w3.org/2004/02/skos/core#narrower';
-        $sibling_idx = 'http://www.w3.org/2004/02/skos/core#related';
+        $parent_idx = 'https://www.w3.org/2004/02/skos/core#broader';
+        $child_idx = 'https://www.w3.org/2004/02/skos/core#narrower';
+        $sibling_idx = 'https://www.w3.org/2004/02/skos/core#related';
 
         $results = array();
 

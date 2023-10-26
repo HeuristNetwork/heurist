@@ -428,9 +428,9 @@ XML;
         
         //@TODO
         
-        fwrite($fd, '<?xml version="1.0" encoding="UTF-8" xmlns="http://heuristnetwork.org" '
+        fwrite($fd, '<?xml version="1.0" encoding="UTF-8" xmlns="https://heuristnetwork.org" '
         .'xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" '
-        .'xsi:schemaLocation="http://heuristnetwork.org/documentation_and_templates/scheme_record.xsd"?><hml><records>');     
+        .'xsi:schemaLocation="https://heuristnetwork.org/documentation_and_templates/scheme_record.xsd"?><hml><records>');     
 
         $dbID = self::$system->get_system('sys_dbRegisteredID');
         fwrite($fd, '<dbID>'.($dbID>0?$dbID:0).'</dbID>'."\n");

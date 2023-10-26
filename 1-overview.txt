@@ -1,6 +1,6 @@
 Heurist academic data management system
 
-http://HeuristNetwork.org 
+https://HeuristNetwork.org 
 
 Copyright © 2005 - 2019 University of Sydney
 
@@ -19,7 +19,7 @@ Heurist is designed primarily for academic research data, but has been used succ
 undergraduate teaching as a blogging, bibliography and student project tool, as well as for
 administrative data.
 
-For full information please visit http://HeuristNetwork.org
+For full information please visit https://HeuristNetwork.org
 
 Documentation standards and overall structure are described in files in the /documentation_and_templates
 directory. This includes a detaiiled description of the layout of the Heurist directories and steps for 
@@ -31,7 +31,7 @@ Updated:     08 April 2016
 
 /**
 * @package     Heurist academic knowledge management system
-* @link        http://HeuristNetwork.org
+* @link        https://HeuristNetwork.org
 * @copyright   (C) 2005-2019 University of Sydney
 * @author      Ian Johnson     <ian.johnson@sydney.edu.au>
 * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>

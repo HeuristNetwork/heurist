@@ -371,7 +371,7 @@ foreach ($databases as $idx=>$db_name){
             foreach ($cms_homes as $idx => $rec_ID) {
                 $prime_url = $prime_url_base.$rec_ID;
                 $alt_url = $alt_url_base.$rec_ID;
-                $cms_homes[$idx] = '<a href="'.$prime_url.'" target="_blank">'.$prime_url.'</a> (<a href="'.$alt_url.'" target="_blank">alternative link</a>)';
+                $cms_homes[$idx] = '<a href="'.$prime_url.'" target="_blank" rel="noopener">'.$prime_url.'</a> (<a href="'.$alt_url.'" target="_blank" rel="noopener">alternative link</a>)';
             }
             $values[3] = implode('<br>', $cms_homes);
         }
