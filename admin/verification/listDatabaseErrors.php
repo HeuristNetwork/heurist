@@ -101,7 +101,7 @@ $trmDuplicates = @$lists2["trm_dupes"];
         <script type="text/javascript" src="<?php echo PDIR;?>hclient/core/detectHeurist.js"></script>
 
         <!-- CSS -->
-        <?php include dirname(__FILE__).'/../../hclient/framecontent/initPageCss.php'; ?>
+        <?php include_once dirname(__FILE__).'/../../hclient/framecontent/initPageCss.php'; ?>
 
         <script type=text/javascript>
 
@@ -2145,7 +2145,7 @@ if($active_all || in_array('invalid_chars', $active)) {
         <?php
         // $_REQUEST['verbose'] = 1;
         // $_REQUEST['filter_exact']  = HEURIST_DBNAME_FULL;
-        //remove this remark along with html remarks include(dirname(__FILE__).'/verifyForOrigin.php');
+        //remove this remark along with html remarks include_once dirname(__FILE__).'/verifyForOrigin.php';
         ?>
         </div>
         </div>
@@ -2159,7 +2159,7 @@ if($active_all || in_array('invalid_chars', $active)) {
         </script>
 
         <?php
-        include(dirname(__FILE__).'/cleanInvalidChars.php');
+        include_once dirname(__FILE__).'/cleanInvalidChars.php';
         print '<br /></div>';     /* End of Invalid Char Section */
         
         
@@ -2178,7 +2178,7 @@ if($active_all || in_array('title_mask', $active)) {
         </script>
 
         <?php        
-        include(dirname(__FILE__).'/checkRectypeTitleMask.php');
+        include_once dirname(__FILE__).'/checkRectypeTitleMask.php';
         print '<br /><br /></div>';     
         
 } //END title_mask
@@ -2195,7 +2195,7 @@ if($active_all || in_array('relationship_cache', $active)) {
         </script>
 
         <?php
-        include(dirname(__FILE__).'/checkRecLinks.php');
+        include_once dirname(__FILE__).'/checkRecLinks.php';
         print '<br /><br /></div>';     /* End of Relationship Cache */
         
 } //END relationship_cache
@@ -2212,7 +2212,7 @@ if($active_all || in_array('dateindex', $active)) {
         </script>
 
         <?php
-        include(dirname(__FILE__).'/checkDateIndex.php');
+        include_once dirname(__FILE__).'/checkDateIndex.php';
         print '<br /><br /></div>';     /* End of Date Indexe */
         
 } //END dateindex

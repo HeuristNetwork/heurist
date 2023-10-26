@@ -159,7 +159,7 @@ if($system->init($db, true, false)){
 }
 
 if($is_not_inited){
-    include ERROR_REDIR;
+    include_once ERROR_REDIR;
     exit;
 }
 

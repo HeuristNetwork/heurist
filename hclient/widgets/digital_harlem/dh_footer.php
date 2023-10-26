@@ -27,7 +27,7 @@ $statistics = "";
 $system = new System();
 // connect to given database
 if(@$_REQUEST['db'] && $system->init(@$_REQUEST['db'])){
-    include('dh_stats.php');
+    include_once 'dh_stats.php';
 }
 ?>
 <style>

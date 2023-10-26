@@ -70,7 +70,7 @@ if($mode>1){
         <script type="text/javascript" src="<?php echo PDIR;?>hclient/core/detectHeurist.js"></script>
 
         <!-- CSS -->
-        <?php include dirname(__FILE__).'/../../hclient/framecontent/initPageCss.php'; ?>
+        <?php include_once dirname(__FILE__).'/../../hclient/framecontent/initPageCss.php'; ?>
         
         <script type=text/javascript>
             $(document).ready(function() {
@@ -413,7 +413,7 @@ if($mode>1){
 
                 $to_include = dirname(__FILE__).'/../../export/xml/flathml.php';
                 if (is_file($to_include)) {
-                    include $to_include;
+                    include_once $to_include;
                 }
             
             /* OLD WAY. It works but leads to memory overflow for large database
@@ -421,7 +421,7 @@ if($mode>1){
             
             if (is_file($to_include)) {
                 ob_start();
-                include $to_include;
+                include_once $to_include;
                 $content = ob_get_contents();
                 ob_end_clean();
             }

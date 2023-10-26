@@ -154,12 +154,12 @@ if(!($rec_id>0))
             $message = 'Sorry, there are no publicly accessible websites defined for this database. '
             .'Please ' . ($try_login ? '<a class="login-link">login</a> or' : '') . ' ask the owner to publish their website(s).';
 
-            include ERROR_REDIR;
+            include_once ERROR_REDIR;
             exit;
         }
     }else{
         //$message = $system->getError()['message'];
-        include ERROR_REDIR;
+        include_once ERROR_REDIR;
         exit;
     }
 }
@@ -178,7 +178,7 @@ if($rec==null){
     //header('Location: '.ERROR_REDIR.'&msg='.rawurlencode('Record #'.$rec_id.' not found'));
     $message = 'Website ID '.$home_page_on_init.' does not refer to a CMS Home record';
     //'Record #'.$home_page_on_init.' not found';
-    include ERROR_REDIR;
+    include_once ERROR_REDIR;
     exit;
 }
 
@@ -211,7 +211,7 @@ if(!$hasAccess){
     $message = 'The Heurist website at this address is not yet publicly accessible. ' 
         . ($try_login ? '<br>Try <a class="login-link">logging in</a> to view this website.' : '');
 
-    include ERROR_REDIR;
+    include_once ERROR_REDIR;
     exit;
 } 
 
@@ -245,7 +245,7 @@ if(!$isWebPage){ //for standalone webpage always without title
 if(!($rec['rec_RecTypeID']==RT_CMS_HOME || $isWebPage)){
     $message = 'Record #'.$rec_id.' is not allowed record type. '
                     .'Expecting Website Home Page or Standalone Web Page';
-    include ERROR_REDIR;
+    include_once ERROR_REDIR;
     exit;
 }                
 
@@ -480,7 +480,7 @@ if(!$template && $default_CMS_Template){
 
 if($template!==false){
     //use custom template for website
-    include ($template);
+    include_once $template;
 }else{
     //use default template for this folder
     $template = HEURIST_DIR.'hclient/widgets/cms/cmsTemplate.php';
@@ -488,10 +488,10 @@ if($template!==false){
             $message = 'Sorry, it is not possible to load default cms template. '
             .'Please ask the owner to verify server configuration.';
 
-            include ERROR_REDIR;
+            include_once ERROR_REDIR;
             exit;
     }else{
-        include 'cmsTemplate.php';    
+        include_once 'cmsTemplate.php';    
     }
 } 
 

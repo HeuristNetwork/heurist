@@ -49,7 +49,7 @@ if( @$_REQUEST['recID'] || @$_REQUEST['recid'] || array_key_exists('website', $_
         }else{
             if(!defined('PDIR')) define('PDIR','');    
         }
-        include dirname(__FILE__).'/hclient/widgets/cms/websiteRecord.php';
+        include_once dirname(__FILE__).'/hclient/widgets/cms/websiteRecord.php';
         exit;
 
         if(intval(@$_REQUEST['field'])>0){

@@ -43,7 +43,7 @@ $query="delete from sysLocks";
 $res = $mysqli->query($query);
 if (!$res) {
     $message = 'Invalid query, please '.CONTACT_HEURIST_TEAM.': '.$query.'  Error: '.$mysqli->error();
-    include dirname(__FILE__).'/../../hclient/framecontent/infoPage.php';
+    include_once dirname(__FILE__).'/../../hclient/framecontent/infoPage.php';
     exit;
 }
 

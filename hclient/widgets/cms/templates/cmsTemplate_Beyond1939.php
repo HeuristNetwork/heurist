@@ -59,7 +59,7 @@
     <link rel="shortcut icon" href="<?php echo $image_icon; ?>">
 
     <?php
-    include $websiteScriptAndStyles_php;  //include heurist scripts and styles
+    include_once $websiteScriptAndStyles_php;  //include heurist scripts and styles
     $faq_page_id = 121976; // Presumably this won't change, but if it does, then they will need to be edited here.
     ?>
 </head>

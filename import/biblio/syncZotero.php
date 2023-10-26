@@ -49,12 +49,12 @@ if($dt_SourceRecordID==0){ //this field is critical - need to download it from h
     
     if(!$isOK){
             $system->addErrorMsg('Cannot download field "Source record" required by the function you have requested. ');
-            include ERROR_REDIR;
+            include_once ERROR_REDIR;
             exit;
     }
     if(!$system->defineConstant('DT_ORIGINAL_RECORD_ID', true)){
         $system->addError(HEURIST_ERROR, 'Detail type "source record" id not defined');
-        include ERROR_REDIR;
+        include_once ERROR_REDIR;
         exit;
     }
     
@@ -65,7 +65,7 @@ $HEURIST_ZOTEROSYNC = $system->get_system('sys_SyncDefsWithDB');
 if($HEURIST_ZOTEROSYNC==''){
     $system->addError(HEURIST_ERROR, 'Library key for Zotero synchronisation is not defined. '
                 .'Please configure Zotero connection in Database > Properties');
-    include ERROR_REDIR;
+    include_once ERROR_REDIR;
     exit;
 }
 */
@@ -75,7 +75,7 @@ $fh_data = null;
 if(!file_exists($mapping_file) || !is_readable($mapping_file)){
     $system->addError(HEURIST_ERROR, 'Sorry, could not find/read configuration file .../import/biblio/zoteroMap.xml '
     .'required for Zotero synchronisation - please ask your system administrator to copy it from Heurist source code');
-    include ERROR_REDIR;
+    include_once ERROR_REDIR;
     exit;
 }
 
@@ -85,7 +85,7 @@ $fh_data = simplexml_load_file($mapping_file);
 if($fh_data==null || is_string($fh_data)){
         $system->addError(HEURIST_ERROR, 'Sorry, configuration file import/biblio/zoteroMap.xml for Zotero '
         .'synchronisation is corrupted - please ask your system administrator to update it from Heurist source code');
-        include ERROR_REDIR;
+        include_once ERROR_REDIR;
         exit;
 }
 ?>
@@ -103,7 +103,7 @@ if($fh_data==null || is_string($fh_data)){
         <script type="text/javascript" src="<?php echo PDIR;?>hclient/core/detectHeurist.js"></script>
 
         <!-- CSS -->
-        <?php include dirname(__FILE__).'/../../hclient/framecontent/initPageCss.php'; ?>
+        <?php include_once dirname(__FILE__).'/../../hclient/framecontent/initPageCss.php'; ?>
 
         <style type="text/css">
             .tbl-head > td {

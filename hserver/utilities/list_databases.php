@@ -70,7 +70,7 @@ if($is_json){
         <link rel=icon href="<?php echo PDIR?>favicon.ico" type="image/x-icon">
 
         <!-- CSS -->
-        <?php include dirname(__FILE__).'/../../hclient/framecontent/initPageCss.php'; ?>
+        <?php include_once dirname(__FILE__).'/../../hclient/framecontent/initPageCss.php'; ?>
 
         <script type="text/javascript">
         </script>

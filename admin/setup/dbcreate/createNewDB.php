@@ -43,7 +43,7 @@ $current_user = null;
 if(@$_REQUEST['db']){
     //if database is defined then connect to given database
     if(!$system->init(@$_REQUEST['db'])){
-        include dirname(__FILE__).'/../../../hclient/framecontent/infoPage.php';
+        include_once dirname(__FILE__).'/../../../hclient/framecontent/infoPage.php';
         exit;
     }
     $registrationRequired = false;
@@ -66,7 +66,7 @@ if(@$_REQUEST['db']){
         <script type="text/javascript" src="<?php echo PDIR;?>external/jquery-ui-1.12.1/jquery-ui.js"></script>
 
         <!-- CSS -->
-        <?php include dirname(__FILE__).'/../../../hclient/framecontent/initPageCss.php'; ?>
+        <?php include_once dirname(__FILE__).'/../../../hclient/framecontent/initPageCss.php'; ?>
 
         <!-- Heurist JS -->
         <script type="text/javascript" src="<?php echo PDIR;?>hclient/core/detectHeurist.js"></script>        

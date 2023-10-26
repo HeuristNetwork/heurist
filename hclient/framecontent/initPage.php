@@ -53,7 +53,7 @@ if(!$isSystemInited){
     if(count($system->getError()) > 0){
         $_REQUEST['error'] = $system->getError();
     }
-    include ERROR_REDIR;
+    include_once ERROR_REDIR;
     exit;
 }
 
@@ -69,15 +69,15 @@ $is_admin = $system->is_admin();
 if(defined('LOGIN_REQUIRED') && !$system->has_access()){
     //No Need to show error message when login is required, login popup will be shown
     //$message = $login_warning
-    //include ERROR_REDIR;
+    //include_once ERROR_REDIR;
     exit;
 }else if(defined('MANAGER_REQUIRED') && !$is_admin){ //A member should also be able to create and open database
     $message = $login_warning.' as Administrator of group \'Database Managers\'';
-    include ERROR_REDIR;
+    include_once ERROR_REDIR;
     exit;
 }else if(defined('OWNER_REQUIRED') && !$system->is_dbowner()){
     $message = $login_warning.' as Database Owner';
-    include ERROR_REDIR;
+    include_once ERROR_REDIR;
     exit;
 }else{
     $invalid_access = false;
@@ -109,7 +109,7 @@ if(defined('IS_INDEX_PAGE')){
     .$system->get_system('sys_dbSubVersion').'.'
     .$subsubVer){
 
-        include 'admin/setup/dbupgrade/upgradeDatabase.php';
+        include_once 'admin/setup/dbupgrade/upgradeDatabase.php';
         exit;
     }
 }
@@ -228,7 +228,7 @@ if($isLocalHost){
     <?php } ?>
 
 <!-- CSS -->
-<?php include dirname(__FILE__).'/initPageCss.php'; ?>
+<?php include_once dirname(__FILE__).'/initPageCss.php'; ?>
 
 <script type="text/javascript">
 

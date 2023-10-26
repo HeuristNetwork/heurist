@@ -802,7 +802,7 @@
             }else{ //3d party function that uses PDO  - DEFAULT
                 
                 if(!function_exists('execute_db_script')){
-                        include(dirname(__FILE__).'/../utilities/utils_db_load_script.php'); // used to load procedures/triggers
+                        include_once dirname(__FILE__).'/../utilities/utils_db_load_script.php'; // used to load procedures/triggers
                 }
                 if(db_script($database_name_full, $script_file, false)){
                         $res = true;

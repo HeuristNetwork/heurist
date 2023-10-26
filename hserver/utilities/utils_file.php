@@ -1884,7 +1884,7 @@ function getScriptOutput($path, $print = FALSE)
 
     if( is_readable($path) && $path )
     {
-        include $path;
+        include_once $path;
     }
     else
     {

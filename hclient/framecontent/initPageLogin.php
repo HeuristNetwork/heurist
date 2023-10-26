@@ -23,7 +23,7 @@ require_once 'initPageMin.php'; //without client hapi
 
 if(!@$_REQUEST['db']){
     $message = '<b>Required</b> database parameter >>> is not defined';
-    include ERROR_REDIR;
+    include_once ERROR_REDIR;
     exit;
 }
 
@@ -65,7 +65,7 @@ if (($_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0.0.1')
     <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/profile/profile_login.js"></script>   
     <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/profile/profile_edit.js"></script>   
 <?php
-    include dirname(__FILE__).'/initPageCss.php'; 
+    include_once dirname(__FILE__).'/initPageCss.php'; 
     
     $dbname = @$_REQUEST['db'];
     $dbname = (preg_match('[\W]', $dbname))?'':$dbname;

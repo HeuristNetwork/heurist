@@ -75,7 +75,7 @@ if(!isset($message)){
         <link rel=icon href="<?php echo PDIR;?>favicon.ico" type="image/x-icon">
 
         <!-- CSS -->
-        <?php include dirname(__FILE__).'/initPageCss.php'; ?>
+        <?php include_once dirname(__FILE__).'/initPageCss.php'; ?>
         <link rel="stylesheet" type="text/css" href="<?php echo PDIR;?>external/jquery-ui-iconfont-master/jquery-ui.icon-font.css" />
 
         <style>

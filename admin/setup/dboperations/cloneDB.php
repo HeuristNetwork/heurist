@@ -58,7 +58,7 @@ if($isCloneTemplate){ //template db must be registered with id less than 21
 
     if(mysql__usedatabase($mysqli, $templateddb)!==true){
         $system->addError(HEURIST_ERROR, "Sorry, could not connect to the database $templateddb. Operation is possible when database to be cloned is on the same server");
-        include $ERROR_REDIR;
+        include_once $ERROR_REDIR;
         exit;
     }
 
@@ -66,7 +66,7 @@ if($isCloneTemplate){ //template db must be registered with id less than 21
 
     if(!($dbRegID>0 && $dbRegID<1000)){
         $system->addError(HEURIST_ERROR, "Sorry, the database $templateddb must be registered with an ID less than 1000, indicating a database curated or approved by the Heurist team, to allow cloning through this function. You may also clone any database that you can log into through the Advanced functions under Administration.");
-        include $ERROR_REDIR;
+        include_once $ERROR_REDIR;
         exit;
     }
 }else{
@@ -153,7 +153,7 @@ if(@$_REQUEST['mode']=='2'){
         <script type="text/javascript" src="<?php echo PDIR;?>external/jquery-ui-1.12.1/jquery-ui.js"></script>
         
         <!-- CSS -->
-        <?php include dirname(__FILE__).'/../../../hclient/framecontent/initPageCss.php'; ?>
+        <?php include_once dirname(__FILE__).'/../../../hclient/framecontent/initPageCss.php'; ?>
 
         <!-- Heurist JS -->
         <script type="text/javascript" src="<?php echo PDIR;?>hclient/core/detectHeurist.js"></script>        

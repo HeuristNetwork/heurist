@@ -249,7 +249,7 @@ foreach ($arg_database as $idx=>$db_name){
 
         $to_include = dirname(__FILE__).'/../../export/xml/flathml.php';
         if (is_file($to_include)) {
-        include $to_include;
+        include_once $to_include;
         }
         */
     }//export HML

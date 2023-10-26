@@ -28,7 +28,7 @@ $system = new System();
 $is_inited = false;
 // connect to given database
 if(@$_REQUEST['db'] && $system->init(@$_REQUEST['db'])){
-    //include('dh_stats.php');
+    //include_once 'dh_stats.php';
     $appcode = @$_REQUEST['app'];
     if($appcode=='DigitalHarlem1935'){
         $appcode = 4800; //prod: 4800; dev:4751;

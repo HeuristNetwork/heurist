@@ -121,7 +121,7 @@ function onPageInit(success){
         <!-- Visualize HTML -->
         <?php 
             $isDatabaseStructure = 0;
-            include "visualize.php"; 
+            include_once "visualize.php"; 
         ?>
 
         <!-- Call from parent iframe -->

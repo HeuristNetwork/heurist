@@ -187,7 +187,7 @@ if(@$_REQUEST['actionType']){ // filter and download interaction log as CSV file
         <script type="text/javascript" src="<?php echo PDIR;?>hclient/core/detectHeurist.js"></script>
 
         <!-- CSS -->
-        <?php include dirname(__FILE__).'/../../hclient/framecontent/initPageCss.php'; ?>
+        <?php include_once dirname(__FILE__).'/../../hclient/framecontent/initPageCss.php'; ?>
 
         <script type="text/javascript">
             $(document).ready(function(){

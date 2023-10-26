@@ -254,7 +254,7 @@ A:link {
                 <div id="main_content" class="ent_wrapper" style="left:0px">
                     <?php 
                         $isDatabaseStructure = 1;
-                        include dirname(__FILE__).'/visualize.php';
+                        include_once dirname(__FILE__).'/visualize.php';
                     ?>
                 </div>
             </div>

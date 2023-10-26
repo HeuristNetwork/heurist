@@ -40,7 +40,7 @@ else{
 }
 
 if(!$isSystemInited){
-    include ERROR_REDIR;
+    include_once ERROR_REDIR;
     exit;
 }
 
@@ -80,7 +80,7 @@ if(!$invalid_access && (defined('CREATE_RECORDS') || defined('DELETE_RECORDS')))
 }
 
 if(isset($message)){
-    include ERROR_REDIR;
+    include_once ERROR_REDIR;
     exit;
 }
 

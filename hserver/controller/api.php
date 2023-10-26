@@ -139,7 +139,7 @@ if (@$requestUri[3]=='iiif') {
         $_REQUEST['id'] = @$requestUri[5];
         $_REQUEST['restapi'] = 1; //set http response code
         
-        include '../../hserver/controller/iiif_presentation.php';
+        include_once '../../hserver/controller/iiif_presentation.php';
     }else{
         exitWithError('Method Not Allowed', 405);
     }
@@ -147,7 +147,7 @@ if (@$requestUri[3]=='iiif') {
     
 }else if ($entities[@$requestUri[3]]=='System') {
     
-    include '../System.php';
+    include_once '../System.php';
     
     $system = new System();
     if( ! $system->init($_REQUEST['db']) ){
@@ -186,12 +186,12 @@ else
 
     if($_REQUEST['entity']=='Records'){
         if($method=='search'){
-            include '../../hserver/controller/record_output.php';
+            include_once '../../hserver/controller/record_output.php';
         }else{
             exitWithError('Method Not Allowed', 405);
         }
     }else{
-        include '../../hserver/controller/entityScrud.php';
+        include_once '../../hserver/controller/entityScrud.php';
     }
 }
 exit;

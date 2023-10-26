@@ -6,7 +6,7 @@
     * 
     *  It should be included in CMS template php sript in html header section
     *   
-    *  include 'websiteScriptAndStyles.php'; 
+    *  include_once 'websiteScriptAndStyles.php'; 
     *
     * @package     Heurist academic knowledge management system
     * @link        https://HeuristNetwork.org
@@ -69,7 +69,7 @@ if (($_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0.0.1')
 <!-- CSS -->
 <?php 
     //PDIR.
-    include dirname(__FILE__).'/../../framecontent/initPageCss.php'; 
+    include_once dirname(__FILE__).'/../../framecontent/initPageCss.php'; 
     
     if(true || !$edit_OldEditor){ //creates new instance of heurist
         print '<script>window.hWin = window;</script>';

@@ -60,6 +60,6 @@ if($layout_theme==null || $layout_theme=='' || $layout_theme=="heurist" || $layo
 <style id="heurist_color_theme">
 <?php
 //was PDIR.
-    include dirname(__FILE__).'/initPageTheme.php';
+    include_once dirname(__FILE__).'/initPageTheme.php';
 ?>
 </style>

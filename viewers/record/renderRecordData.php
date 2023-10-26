@@ -37,7 +37,7 @@ $system = new System();
 $inverses = null;
 
 if(!$system->init(@$_REQUEST['db'])){
-    include dirname(__FILE__).'/../../hclient/framecontent/infoPage.php';
+    include_once dirname(__FILE__).'/../../hclient/framecontent/infoPage.php';
     exit;
 }
 

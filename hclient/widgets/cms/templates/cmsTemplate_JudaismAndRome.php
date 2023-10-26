@@ -78,7 +78,7 @@
     <link rel="shortcut icon" href="<?php echo $image_icon; ?>">
 
     <?php
-    include $websiteScriptAndStyles_php;  //include heurist scripts and styles
+    include_once $websiteScriptAndStyles_php;  //include heurist scripts and styles
     ?>
 
 

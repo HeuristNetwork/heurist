@@ -75,7 +75,7 @@ if(($_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0.0.1'))
 <link rel="stylesheet" type="text/css" href="<?php echo PDIR;?>external/jquery-ui-themes-1.12.1/themes/base/jquery-ui.css">
 <?php 
 //https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css
-//include dirname(__FILE__).'/../../hclient/framecontent/initPageCss.php'; 
+//include_once dirname(__FILE__).'/../../hclient/framecontent/initPageCss.php'; 
 ?>
 
 <script type="text/javascript">

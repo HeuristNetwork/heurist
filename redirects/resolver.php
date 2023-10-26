@@ -275,7 +275,7 @@ $requestUri:
        $redirect .= ('/hclient/framecontent/infoPage.php?error='.rawurlencode($error_msg)); 
     }else if($rewrite_path){
         $_REQUEST = $params;
-        include $rewrite_path;
+        include_once $rewrite_path;
         exit;
     }
     
@@ -332,7 +332,7 @@ if ($database_id>0) {
     
     $to_include = dirname(__FILE__).'/../admin/setup/dbproperties/getDatabaseURL.php';
     if (is_file($to_include)) {
-        include $to_include;
+        include_once $to_include;
     }
     
     if(isset($error_msg)){

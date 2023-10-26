@@ -56,7 +56,7 @@ if(!defined('PDIR')){
         <script type="text/javascript" src="<?php echo PDIR;?>external/jquery-ui-1.12.1/jquery-ui.js"></script>
 
         <!-- CSS -->
-        <?php include dirname(__FILE__).'/../../../hclient/framecontent/initPageCss.php'; ?>
+        <?php include_once dirname(__FILE__).'/../../../hclient/framecontent/initPageCss.php'; ?>
         
         <script type="text/javascript" src="<?php echo PDIR;?>hclient/core/detectHeurist.js"></script>
 
@@ -131,11 +131,11 @@ if(!defined('PDIR')){
                             if( file_exists($dir.$filename) ){
                                 
                                 if($trg_maj==1 && $src_min==2){
-                                    include($filename);
+                                    include_once $filename;
                                     $rep = updateDatabseTo_v3($system);    //PHP
                                 }else if($src_min==3 && $src_sub<$trg_sub){
                                     if($src_sub<13){
-                                        include($filename);
+                                        include_once $filename;
                                         $rep = updateDatabseTo_v1_3_12($system);
                                     }else{
                                         $rep = array('');
