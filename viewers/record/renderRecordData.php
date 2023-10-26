@@ -1813,7 +1813,7 @@ function print_public_details($bib) {
     //print url first
     $url = $bib['rec_URL'];
     if ($url  &&  ! preg_match('!^[^\\/]+:!', $url)){
-        $url = 'http://' . $url;
+        $url = 'https://' . $url;
     }
     /*
     $webIcon = mysql__select_value($system->get_mysqli(),

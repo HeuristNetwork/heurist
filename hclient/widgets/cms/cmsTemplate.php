@@ -81,7 +81,7 @@
     <link rel="icon" href="<?php echo $image_icon;?>"> <!--  type="image/x-icon" -->
     <link rel="shortcut icon" href="<?php echo $image_icon;?>">
     <?php
-        include $websiteScriptAndStyles_php;  //include heurist scripts and styles
+        include_once $websiteScriptAndStyles_php;  //include heurist scripts and styles
     ?>
     
 <style>

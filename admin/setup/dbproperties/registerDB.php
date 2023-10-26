@@ -42,7 +42,7 @@ if(!$system->is_dbowner() && $system->verifyActionPassword($sysadmin_protection,
 if(strpos(HEURIST_BASE_URL, '//localhost')>0 ||  strpos(HEURIST_BASE_URL, '//127.0.0.1')>0){
 
     $message = 'Impossible to register database running on local server '.HEURIST_BASE_URL;
-    include dirname(__FILE__).'/../../../hclient/framecontent/infoPage.php';    
+    include_once dirname(__FILE__).'/../../../hclient/framecontent/infoPage.php';    
     exit;
 }
 

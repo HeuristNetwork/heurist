@@ -956,7 +956,7 @@ function getPlayerURL($mimeType, $url, $params=null){
     
     if( $mimeType == 'video/youtube' 
             || strpos($url, 'youtu.be')>0
-            || strpos($url, 'youtube.com')>0){ //match('http://(www.)?youtube|youtu\.be')
+            || strpos($url, 'youtube.com')>0){ //match('https://(www.)?youtube|youtu\.be')
             
         $url = 'https://www.youtube.com/embed/'.youtube_id_from_url($url);
         
@@ -1180,7 +1180,7 @@ function fileCreateThumbnail( $system, $fileid, $is_download ){
             }else    
             if( @$file['fxm_MimeType'] == 'video/youtube' 
                 || strpos($file['ulf_ExternalFileReference'], 'youtu.be')>0
-                || strpos($file['ulf_ExternalFileReference'], 'youtube.com')>0){ //match('http://(www.)?youtube|youtu\.be')
+                || strpos($file['ulf_ExternalFileReference'], 'youtube.com')>0){ //match('https://(www.)?youtube|youtu\.be')
                 
                 //@todo - youtube changed the way of retrieving thumbs !!!!
                 $url = $file['ulf_ExternalFileReference'];
@@ -1189,7 +1189,7 @@ function fileCreateThumbnail( $system, $fileid, $is_download ){
                 
                 $youtubeid = $matches[1];
                 
-                $img = UtilsImage::getRemoteImage('http://img.youtube.com/vi/'.$youtubeid.'/default.jpg');
+                $img = UtilsImage::getRemoteImage('https://img.youtube.com/vi/'.$youtubeid.'/default.jpg');
                 
                 //$youtubeid = preg_replace('/^[^v]+v.(.{11}).*/' , '$1', $url);
                 //$img = get_remote_image("http://img.youtube.com/vi/".$youtubeid."/0.jpg"); //get thumbnail

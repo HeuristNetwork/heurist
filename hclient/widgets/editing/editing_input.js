@@ -2461,7 +2461,7 @@ $.widget( "heurist.editing_input", {
                         }else if(window.hWin.HEURIST4.util.isnull($btn_extlink)){
                             
                             if($input.val()!='' && !($input.val().indexOf('http://')==0 || $input.val().indexOf('https://')==0)){
-                                $input.val( 'http://'+$input.val());
+                                $input.val( 'https://'+$input.val());
                             }
                             $input.addClass('rec_URL').removeClass('text').attr('readonly','readonly');
                             
@@ -5458,7 +5458,7 @@ $.widget( "heurist.editing_input", {
             
             if(!window.hWin.HEURIST4.util.isempty(value) &&
                !(value.indexOf('http://')==0 || value.indexOf('https://')==0)){
-                value = 'http://'+ value;
+                value = 'https://'+ value;
             }
             disp_value = '<a href="'+value+'" target="_blank" title="'+value+'">'+value+'</a>';
             

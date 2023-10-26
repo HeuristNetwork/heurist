@@ -61,7 +61,7 @@ class DbAnnotations extends DbEntityBase
     */
     public function search(){
 
-        $sjson = array('id'=>"http://$_SERVER[HTTP_HOST]$_SERVER[REQUEST_URI]", 
+        $sjson = array('id'=>"https://$_SERVER[HTTP_HOST]$_SERVER[REQUEST_URI]", 
                         'type' => 'AnnotationPage');
                        
 
@@ -271,9 +271,9 @@ class DbAnnotations extends DbEntityBase
                                     $iiif_manifest = json_decode($iiif_manifest, true);
                                     if($iiif_manifest!==false && is_array($iiif_manifest)){
 
-                                    //"@context": "http://iiif.io/api/presentation/2/context.json"    
+                                    //"@context": "https://iiif.io/api/presentation/2/context.json"    
                                     //sequences->canvases->images->resource->service->@id
-                                    if(@$iiif_manifest['@context']=='http://iiif.io/api/presentation/2/context.json'){
+                                    if(@$iiif_manifest['@context']=='https://iiif.io/api/presentation/2/context.json'){
                                         if(is_array(@$iiif_manifest['sequences']))
                                         foreach($iiif_manifest['sequences'] as $seq){
                                             if(is_array(@$seq['canvases']))
@@ -291,7 +291,7 @@ class DbAnnotations extends DbEntityBase
                                         }
                                         
                                     }else{ //version 3
-                                    //"@context": "http://iiif.io/api/presentation/3/context.json" 
+                                    //"@context": "https://iiif.io/api/presentation/3/context.json" 
                                     //items(type:Canvas)->items[AnnotationPage]->items[Annotation]->body->service[0]->id
                                         
                                         if(is_array(@$iiif_manifest['items']))

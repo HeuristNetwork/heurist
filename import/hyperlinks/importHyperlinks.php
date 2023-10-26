@@ -608,7 +608,7 @@ function print_link($url, $title) {
 	global $disambiguate_rec_ids;
 	global $notes;
     
-    $url_visit = (strpos($url,'http://')===false)?'http://'.$url :$url;
+    $url_visit = (strpos($url,'http://')===false)?'https://'.$url :$url;
 
 ?>
 <div class="input-row" style="background-color:#CCCCCC; padding-left: 40px; width:90%;">

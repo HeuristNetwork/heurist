@@ -165,7 +165,7 @@
                 $size = "300x300";
             }
             
-		    $url = "http://maps.google.com/maps/api/staticmap";
+		    $url = "https://maps.google.com/maps/api/staticmap";
 		    $url = $url."?size=".$size."&sensor=false";
 
 		    if(@$_REQUEST['zoom'] && is_numeric($_REQUEST['zoom'])){

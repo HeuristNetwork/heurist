@@ -579,8 +579,8 @@ if($mode>1){
                             $params['meta']['title'] = array(
                                 'value' => 'Archive of ' . HEURIST_DBNAME . ' on ' . $date,
                                 'lang' => null,
-                                'typeUri' => 'http://www.w3.org/2001/XMLSchema#string',
-                                'propertyUri' => 'http://nakala.fr/terms#title'
+                                'typeUri' => 'https://www.w3.org/2001/XMLSchema#string',
+                                'propertyUri' => 'https://nakala.fr/terms#title'
                             );
 
                             $usr = $system->getCurrentUser();
@@ -588,31 +588,31 @@ if($mode>1){
                                 $params['meta']['creator'] = array(
                                     'value' => $usr['ugr_FullName'],
                                     'lang' => null,
-                                    'typeUri' => 'http://www.w3.org/2001/XMLSchema#string',
-                                    'propertyUri' => 'http://purl.org/dc/terms/creator'
+                                    'typeUri' => 'https://www.w3.org/2001/XMLSchema#string',
+                                    'propertyUri' => 'https://purl.org/dc/terms/creator'
                                 );
                             }
 
                             $params['meta']['created'] = array(
                                 'value' => $date,
                                 'lang' => null,
-                                'typeUri' => 'http://www.w3.org/2001/XMLSchema#string',
-                                'propertyUri' => 'http://nakala.fr/terms#created'
+                                'typeUri' => 'https://www.w3.org/2001/XMLSchema#string',
+                                'propertyUri' => 'https://nakala.fr/terms#created'
                             );
 
                             $params['meta']['type'] = array(
-                                'value' => 'http://purl.org/coar/resource_type/c_ddb1',
+                                'value' => 'https://purl.org/coar/resource_type/c_ddb1',
                                 'lang' => null,
-                                'typeUri' => 'http://www.w3.org/2001/XMLSchema#anyURI',
-                                'propertyUri' => 'http://nakala.fr/terms#type'
+                                'typeUri' => 'https://www.w3.org/2001/XMLSchema#anyURI',
+                                'propertyUri' => 'https://nakala.fr/terms#type'
                             );
 
                             if(array_key_exists('license', $_REQUEST) && !empty($_REQUEST['license'])){
                                 $params['meta']['license'] = array(
                                     'value' => $_REQUEST['license'],
                                     'lang' => null,
-                                    'typeUri' => 'http://www.w3.org/2001/XMLSchema#string',
-                                    'propertyUri' => 'http://nakala.fr/terms#license'
+                                    'typeUri' => 'https://www.w3.org/2001/XMLSchema#string',
+                                    'propertyUri' => 'https://nakala.fr/terms#license'
                                 );
                             }
 
