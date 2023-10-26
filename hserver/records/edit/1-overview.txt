@@ -1,13 +1,10 @@
+Directory:    /hserver/records/edit
 
-Directory:    hserver/dbaccess
+Overview: CRUD functions for Records
 
-Overview:     Classes to work with database server.
+Updated: 26th October 2023
 
-Notes:        
-
-Updated:     26 Oct 2023
-
-----------------------------------------------------------------------------------------------------------------
+-------------------------------------------------------------------------------------------------------------------------------------
 
 /**
 * @package     Heurist academic knowledge management system

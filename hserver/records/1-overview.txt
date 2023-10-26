@@ -1,13 +1,15 @@
+Directory:    /hserver/records
 
-Directory:    hserver/dbaccess
+Overview: This directory contains classes and functions to manipulate Heurist user data (records and record details)
 
-Overview:     Classes to work with database server.
+edit - CRUD functions for Records
+import - import Heurist records from csv, kml, xml, json
+export - export Heurist records to various formats
+search - general and specific search functions. Query composer (plain text and json to sql)
 
-Notes:        
+Updated:     24th October 2023
 
-Updated:     26 Oct 2023
-
-----------------------------------------------------------------------------------------------------------------
+-------------------------------------------------------------------------------------------------------------------------------------
 
 /**
 * @package     Heurist academic knowledge management system

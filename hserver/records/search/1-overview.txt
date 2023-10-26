@@ -1,13 +1,12 @@
+Directory:    /hserver/records/search
 
-Directory:    hserver/dbaccess
+Overview: General and specific search functions. Query composer (plain text and json to sql)
 
-Overview:     Classes to work with database server.
+composeSql.php - json (and  plain text to json)  to sql query composer
 
-Notes:        
+Updated: 26th October 2023
 
-Updated:     26 Oct 2023
-
-----------------------------------------------------------------------------------------------------------------
+-------------------------------------------------------------------------------------------------------------------------------------
 
 /**
 * @package     Heurist academic knowledge management system
