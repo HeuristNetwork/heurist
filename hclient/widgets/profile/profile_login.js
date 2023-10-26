@@ -93,7 +93,7 @@ function showLoginDialog(isforsed, callback, parentwin, dialog_id){
     console.log('callback on close saml dialog', user_id);            
 
                 if(user_id>0){
-                    doAuthentication({username: user_id, password:'x', saml_entity:sp_entity}, login_dialog);
+                    doAuthentication({username: user_id, password:null, saml_entity:sp_entity}, login_dialog);
                 }else{
                     //reopen login dialogue
                     alert(user_id+'.  todo: Open login dialog');
@@ -825,7 +825,7 @@ function doSamlLogin(callback, parentwin, sp_entity, login_dialog){
 console.log('callback on close saml dialog', user_id);            
 
             if(user_id>0){
-                doAuthentication({username: user_id, password:'x', saml_entity:sp_entity}, login_dialog);
+                doAuthentication({username: user_id, password:null, saml_entity:sp_entity}, login_dialog);
             }else{
                 //reopen login dialogue
                 alert(user_id+'.  todo: Open login dialog');

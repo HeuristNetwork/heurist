@@ -50,9 +50,9 @@ if(@$_REQUEST['img']){ //IMAGE CAPTCHA
     imagejpeg($target_layer);
 }else{  //TRIVIA CAPTCHA
     $planets = array('Sun','Jupiter','Saturn','Uranus','Neptune','Earth','Venus','Mars','Titan','Mercury','Moon','Europa','Triton','Pluto');
-    $ran0 = rand(0,13);
-    $ran1 = rand(1,9);
-    $ran2 = rand(1,9);
+    $ran0 = random_int(0,13);
+    $ran1 = random_int(1,9);
+    $ran2 = random_int(1,9);
     // $captcha_code = strtolower($planets[$ran0]).($ran1+$ran2);
     $captcha_code = ($ran1+$ran2) + 1;
     $_SESSION["captcha_code"] = $captcha_code;
