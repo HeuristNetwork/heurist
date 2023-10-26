@@ -747,7 +747,7 @@ a{
                 <br>and provides comprehensive tools to collect, manage, analyse, visualise, export, publish and archive information.
             </div>
             <div style="float:right;padding:34px">
-                <a href="https://heuristnetwork.org" target="_blank">Heurist Network website</a>
+                <a href="https://heuristnetwork.org" target="_blank" rel="noopener">Heurist Network website</a>
             </div>
         </div>
         <div class="ent_content_full bg_intro">
@@ -759,7 +759,7 @@ a{
                 <div class="helper">                
                     Create your first database on this Heurist server (<strong><?php print HEURIST_SERVER_NAME; ?></strong>) by registering as a user.<br>
                     As creator of a database you becomes the database owner and can manage the database and other database users.<br>
-                    For more information on Heurist see <a href="https://heuristnetwork.org/" target="_blank">Heurist Network website</a>
+                    For more information on Heurist see <a href="https://heuristnetwork.org/" target="_blank" rel="noopener">Heurist Network website</a>
                 </div>
             
                 <div class="entry-box">

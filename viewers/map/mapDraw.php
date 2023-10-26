@@ -687,7 +687,7 @@ if(true || $_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0
                 <label>Paste geo data as Simple points (X,Y or X Y), GeoJSON or WKT</label>
                 <div class="heurist-helper1" style="padding:5px 0">
                     WKT:  POINT(x y)   LINESTRING(x1 y1, x2 y2, x3 y3)   POLYGON((x1 y1, x2 y2, x3 y3)) see 
-                    <a href="https://en.wikipedia.org/wiki/Well-known_text_representation_of_geometry" target="_blank">wikipedia</a> for more.<br>
+                    <a href="https://en.wikipedia.org/wiki/Well-known_text_representation_of_geometry" target="_blank" rel="noopener">wikipedia</a> for more.<br>
                     Coordinates in decimal lat/long or UTM (x/easting then y/northing). Easting in W hemisphere starts at -180, northing in S Hemisphere starts at -90.<br>
                 </div>
             </div>

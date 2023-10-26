@@ -1089,7 +1089,7 @@ function save_report_into_file($tpl_source){
                 </head>
                 <body style="margin: 25px;">
                 <div>
-                    The following file has been updated:  <a href="<?php echo $url; ?>" target="_blank"><?php echo $url;?></a>
+                    The following file has been updated:  <a href="<?php echo $url; ?>" target="_blank" rel="noopener"><?php echo $url;?></a>
                 </div>
                 <br />
 
@@ -1101,7 +1101,7 @@ function save_report_into_file($tpl_source){
                     ?>
 
                     <p style="font-size: 14px;">Regenerate and view the file:<br /><br />
-                        HTML: <a href="<?=$link?>" target="_blank" style="font-weight: bold;font-size: 0.9em;"><?=$link?></a><br /><br />
+                        HTML: <a href="<?=$link?>" target="_blank"  rel="noopener" style="font-weight: bold;font-size: 0.9em;"><?=$link?></a><br /><br />
                         Javascript: <a href="<?=$link?>&mode=js" target="_blank" style="font-weight: bold;font-size: 0.9em;"><?=$link?>&mode=js</a><br />
 
                     <?php
@@ -1300,7 +1300,7 @@ function smarty_function_wrap($params, &$smarty)
 
         if($dt=="url"){
 
-            return "<a href='".$params['var']."' target='_blank' $style>".$params['var']."</a>";
+            return "<a href='".$params['var']."' target=_blank rel=noopener $style>".$params['var']."</a>";
 
         }else if($dt=="file"){
             //insert image or link
@@ -1335,9 +1335,9 @@ function smarty_function_wrap($params, &$smarty)
                         
                     if(@$params['fancybox']){
                         $sres = $sres."<a class=\"fancybox-thumb\" data-id=\"$file_nonce\" href='"
-                            .$file_URL."' target='_blank' title='".$file_desc."' $style>".$sname."</a>";
+                            .$file_URL."' target=_blank rel=noopener title='".$file_desc."' $style>".$sname."</a>";
                     }else{
-                        $sres = $sres."<a href='".$file_URL."' target='_blank' title='".$file_desc."' $style>".$sname."</a>";
+                        $sres = $sres."<a href='".$file_URL."' target=_blank rel=noopener title='".$file_desc."' $style>".$sname."</a>";
                     }
                     
                 }else 
@@ -1346,7 +1346,7 @@ function smarty_function_wrap($params, &$smarty)
                     if(@$params['fancybox']){
                         $sres .= "<img class=\"fancybox-thumb\" data-id=\"$file_nonce\" src=\"".$file_thumbURL."\" title=\"".$file_desc."\" $size $style/></a>";
                     }else{
-                        $sres = $sres."<a href='".$file_URL."' target='_blank'>".
+                        $sres = $sres."<a href='".$file_URL."' target=_blank rel=noopener>".
                         "<img class=\"\" src=\"".$file_thumbURL."\" title=\"".$file_desc."\" $size $style/></a>";
                     }
                     
@@ -1385,7 +1385,7 @@ function smarty_function_wrap($params, &$smarty)
                     if(array_key_exists('mode',$params) && $params['mode']=="link"){
                         $point = $geom->centroid();
                         if($label=="") $label = "on map";
-                        $res = '<a href="http://maps.google.com/maps?z=18&q='.$point->y().",".$point->x().'" target="_blank">'.$label."</a>";
+                        $res = '<a href="https://maps.google.com/maps?z=18&q='.$point->y().",".$point->x().'" target="_blank" rel="noopener">'.$label."</a>";
                     }else{
                         $recid = $value['recid'];
                         $url = HEURIST_BASE_URL."viewers/gmap/mapStatic.php?".$mapsize."&q=ids:".$recid."&db=".$system->dbname(); //"&t="+d;

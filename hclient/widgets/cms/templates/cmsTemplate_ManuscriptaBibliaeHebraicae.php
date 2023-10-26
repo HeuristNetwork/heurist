@@ -169,10 +169,10 @@ if($isWebPage){ //set in websiteRecord.php
                         The Medieval Hebrew Bible Manuscripts in Western Europe: A Material, Cultural and Social Approach
                     </div>
                     <div class="navbar-social-network">
-                        <a href="https://twitter.com/projetMBH" class="tw" target="_blank"><img
+                        <a href="https://twitter.com/projetMBH" class="tw" target="_blank" rel="noopener"><img
                                 src="<?php echo HEURIST_BASE_URL?>?db=MBH_Manuscripta_Bibliae_Hebraicae&file=1be81f1bc799e511f9f766da4119a297c0383240"
                                 width="24" alt="Twitter"></a>&nbsp;<a
-                            href="https://www.facebook.com/manuscriptabibliaehebraicae/" class="fb" target="_blank"><img
+                            href="https://www.facebook.com/manuscriptabibliaehebraicae/" class="fb" target="_blank" rel="noopener"><img
                                 src="<?php echo HEURIST_BASE_URL?>?db=MBH_Manuscripta_Bibliae_Hebraicae&file=082682853f46e477acd87c3c8e55cabd1aeb9bbc"
                                 width="24" alt="Facebook"></a>
                     </div>
@@ -238,11 +238,11 @@ if($isWebPage){ //set in websiteRecord.php
 
                             </div>
                             <div class="col-md-3 social-networks">Follow us on the social media networks<br><br><a
-                                    href="https://twitter.com/projetMBH" class="tw" target="_blank"><img
+                                    href="https://twitter.com/projetMBH" class="tw" target="_blank" rel="noopener"><img
                                         src="https://heurist.huma-num.fr/heurist/?db=MBH_Manuscripta_Bibliae_Hebraicae&file=1be81f1bc799e511f9f766da4119a297c0383240"
                                         width="32" alt="Twitter"></a>&nbsp;<a
                                     href="https://www.facebook.com/manuscriptabibliaehebraicae/" class="fb"
-                                    target="_blank"><img
+                                    target="_blank" rel="noopener"><img
                                         src="https://heurist.huma-num.fr/heurist/?db=MBH_Manuscripta_Bibliae_Hebraicae&file=082682853f46e477acd87c3c8e55cabd1aeb9bbc"
                                         width="32" alt="Facebook"></a></div>
                         </div>
