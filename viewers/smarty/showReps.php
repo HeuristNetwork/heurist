@@ -47,8 +47,6 @@
 * @subpackage  !!!subpackagename for file such as Administration, Search, Edit, Application, Library
 */
 
-/* TODO: rename to showReports.php */
-
 require_once dirname(__FILE__).'/../../hserver/System.php';
 require_once dirname(__FILE__).'/../../hserver/records/search/recordSearch.php';
 require_once dirname(__FILE__).'/../../hserver/records/search/recordFile.php';

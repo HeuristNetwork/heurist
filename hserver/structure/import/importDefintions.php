@@ -1,7 +1,8 @@
 <?php
 /**
-* importDefinitions.php - add definitions to database
-* see createDB - it creates database defintions from file created with getDBStructureAsSQL. coreDefinitions.txt
+* importDefinitions.php - add complete set of definitions to database
+* see dbUtils::databaseCreateFull - it creates database and import defintions 
+* from file coreDefinitions.txt created with getDBStructureAsSQL. 
 *
 * @package     Heurist academic knowledge management system
 * @link        https://HeuristNetwork.org

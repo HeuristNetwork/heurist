@@ -39,9 +39,9 @@
 * - databaseNextRegisterID - get next registration ID from HEURIST_INDEX_DATABASE database
 */
 
-require_once dirname(__FILE__).'/../../hserver/utilities/utils_db_load_script.php';
+require_once 'utils_db_load_script.php';
 require_once dirname(__FILE__).'/../../external/php/Mysqldump8.php';
-require_once dirname(__FILE__).'/../../admin/structure/import/importDefintions.php';
+require_once dirname(__FILE__).'/../structure/import/importDefintions.php';
 
 class DbUtils {
 

@@ -258,7 +258,7 @@ number of widgets. Currently it is commented out of the code in layout_default.j
 <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/entity/manageDefVocabularyGroups.js"></script>
 
 
-<script type="text/javascript" src="<?php echo PDIR;?>admin/structure/import/importStructure.js"></script>
+<script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/admin/importStructure.js"></script>
 <script type="text/javascript" src="<?php echo PDIR;?>viewers/map/mapPublish.js"></script>
 <script type="text/javascript" src="<?php echo PDIR;?>hclient/framecontent/publishDialog.js"></script>
 
