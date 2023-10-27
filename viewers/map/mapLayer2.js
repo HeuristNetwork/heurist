@@ -370,7 +370,7 @@ function hMapLayer2( _options ) {
         var layer_style = _recordset.fld(options.rec_layer || _record, window.hWin.HAPI4.sysinfo['dbconst']['DT_SYMBOLOGY']);
         var rec_ID = _recordset.fld(_record, 'rec_ID');
             
-        //var url = window.hWin.HAPI4.baseURL + 'hserver/controller/record_map_source.php?db='
+        //var url = window.hWin.HAPI4.baseURL + 'hsrv/controller/record_map_source.php?db='
         //            +window.hWin.HAPI4.database+'&format=geojson&recID='+rec_ID;
                     
         request = {recID:rec_ID};             
@@ -1242,7 +1242,7 @@ function hMapLayer2( _options ) {
                 sQuery = sQuery + '&metadata='+window.hWin.HAPI4.database+'-'+dataset_ID; 
                  
                 url = window.hWin.HAPI4.baseURL 
-                        + 'hserver/controller/record_output.php'+ sQuery;
+                        + 'hsrv/controller/record_output.php'+ sQuery;
                                                                   
                 window.open(url, '_blank');
 
@@ -1271,7 +1271,7 @@ function hMapLayer2( _options ) {
                      rectypeID == window.hWin.HAPI4.sysinfo['dbconst']['RT_FILE_SOURCE']){  //csv
 
                 url = window.hWin.HAPI4.baseURL 
-                        + 'hserver/controller/record_map_source.php?db='+ window.hWin.HAPI4.database
+                        + 'hsrv/controller/record_map_source.php?db='+ window.hWin.HAPI4.database
                         + '&format=rawfile&recID='+dataset_ID
                         + '&metadata='+dataset_ID+(layer_ID>0?(','+layer_ID):'');
 
@@ -1280,7 +1280,7 @@ function hMapLayer2( _options ) {
             }else if(rectypeID == window.hWin.HAPI4.sysinfo['dbconst']['RT_SHP_SOURCE']){
                 
                 url = window.hWin.HAPI4.baseURL 
-                        + 'hserver/controller/record_shp.php?db='+ window.hWin.HAPI4.database
+                        + 'hsrv/controller/record_shp.php?db='+ window.hWin.HAPI4.database
                         + '&format=rawfile&recID='+dataset_ID
                         + '&metadata='+dataset_ID+(layer_ID>0?(','+layer_ID):'');
 

@@ -21,7 +21,7 @@
 */
 
 header('Content-type: text/javascript');
-require_once dirname(__FILE__).'/../../hserver/System.php';
+require_once dirname(__FILE__).'/../../hsrv/System.php';
 $system = new System();
 if(!$system->init(@$_REQUEST['db'])){
     return;

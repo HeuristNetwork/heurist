@@ -234,7 +234,7 @@ $.widget( "heurist.lookupNomisma", $.heurist.recordAction, {
 
         var request = {service:sURL, serviceType:'nomisma', 'search_type': search_type};
 
-        // calls /heurist/hserver/controller/record_lookup.php
+        // calls /heurist/hsrv/controller/record_lookup.php
         window.hWin.HAPI4.RecordMgr.lookup_external_service(request,
             function(response){
                 window.hWin.HEURIST4.msg.sendCoverallToBack();

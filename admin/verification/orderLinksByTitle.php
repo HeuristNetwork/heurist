@@ -25,7 +25,7 @@
     * @subpackage  !!!subpackagename for file such as Administration, Search, Edit, Application, Library
     */
 
-require_once dirname(__FILE__).'/../../hserver/System.php';
+require_once dirname(__FILE__).'/../../hsrv/System.php';
 
 $rv = array();
 

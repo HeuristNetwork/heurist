@@ -24,7 +24,7 @@ define('MANAGER_REQUIRED',1);
 define('PDIR','../../');    
 
 require_once dirname(__FILE__).'/../../hclient/framecontent/initPage.php';
-require_once dirname(__FILE__).'/../../hserver/utilities/utils_file.php';
+require_once dirname(__FILE__).'/../../hsrv/utilities/utils_file.php';
 
 $post_max_size = get_php_bytes('post_max_size');
 $file_max_size = get_php_bytes('upload_max_filesize');

@@ -1,7 +1,7 @@
 
 Directory:    /hclient
 
-Overview:     Client-side functions, H4 onwards. See also hserver for server-side functions
+Overview:     Client-side functions, H4 onwards. See also hsrv for server-side functions
 
 Notes:
 

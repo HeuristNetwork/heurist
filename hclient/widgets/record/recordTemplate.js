@@ -141,7 +141,7 @@ $.widget( "heurist.recordTemplate", $.heurist.recordAction, {
                 }};
                 
             
-            var url = window.hWin.HAPI4.baseURL + 'hserver/controller/record_output.php'
+            var url = window.hWin.HAPI4.baseURL + 'hsrv/controller/record_output.php'
             
             this.element.find('#postdata').val( JSON.stringify(request) );
             this.element.find('#postform').attr('action', url);

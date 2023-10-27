@@ -22,7 +22,7 @@ $is_inlcuded = false;
 if(!defined('PDIR')) {
     $is_inlcuded = true;
     define('PDIR','../../');   
-    require_once dirname(__FILE__).'/../../hserver/System.php';
+    require_once dirname(__FILE__).'/../../hsrv/System.php';
 }
 
 //variable is_error can be defined as global

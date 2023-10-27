@@ -268,10 +268,10 @@ $.widget( "heurist.profile_edit", {
         var $dd = that.edit_form.find('#imgdiv');
         var id = window.hWin.HEURIST4.util.random();
         if(true){  //simple captcha
-            $dd.load(window.hWin.HAPI4.baseURL+'hserver/utilities/captcha.php?id='+id);
+            $dd.load(window.hWin.HAPI4.baseURL+'hsrv/utilities/captcha.php?id='+id);
         }else{ //image captcha
             $dd.empty(); //find("#img").remove();
-            $('<img id="img" src="hserver/utilities/captcha.php?img='+id+'"/>').appendTo($dd);
+            $('<img id="img" src="hsrv/utilities/captcha.php?img='+id+'"/>').appendTo($dd);
         }
     },
 

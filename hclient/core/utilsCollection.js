@@ -27,7 +27,7 @@ if (!window.hWin.HEURIST4.collection)
     window.hWin.HEURIST4.collection = {
 
         _collection: null,
-        _collectionURL: 'hserver/controller/collectionController.php',
+        _collectionURL: 'hsrv/controller/collectionController.php',
 
         //
         //

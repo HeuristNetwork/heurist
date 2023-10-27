@@ -438,7 +438,7 @@ $.widget( "heurist.lookupNakala", $.heurist.recordAction, {
             serviceType: 'nakala' // requesting service, otherwise the request will result in an error
         };
 
-        // calls /heurist/hserver/controller/record_lookup.php
+        // calls /heurist/hsrv/controller/record_lookup.php
         window.hWin.HAPI4.RecordMgr.lookup_external_service(request, function(response){
 
             window.hWin.HEURIST4.msg.sendCoverallToBack(); // hide loading cover

@@ -84,7 +84,7 @@ if q only defined all images linked to record(s) will be included
                 }
             }
             //record_output creates manifest dynamically
-            $url = str_replace('hclient/widgets/viewers/miradorViewer.php','hserver/controller/record_output.php', $url);
+            $url = str_replace('hclient/widgets/viewers/miradorViewer.php','hsrv/controller/record_output.php', $url);
         }
         
     

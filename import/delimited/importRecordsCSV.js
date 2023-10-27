@@ -98,7 +98,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
                 
                 
                 uploadWidget.fileupload({
-        url: window.hWin.HAPI4.baseURL +  'hserver/controller/fileUpload.php', 
+        url: window.hWin.HAPI4.baseURL +  'hsrv/controller/fileUpload.php', 
         formData: [ {name:'db', value: window.hWin.HAPI4.database}, //{name:'DBGSESSID', value:'424533833945300001;d=1,p=0,c=0'},
                     {name:'max_file_size', value: _max_upload_size},
                     {name:'entity', value:'temp'}, //just place file into scratch folder
@@ -3873,7 +3873,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
                            }
                        }
                        var params = params.join('&');
-                       var url = window.hWin.HAPI4.baseURL + 'hserver/controller/importController.php?'+params;
+                       var url = window.hWin.HAPI4.baseURL + 'hsrv/controller/importController.php?'+params;
                         
                        window.hWin.HEURIST4.util.downloadURL(url);
                         

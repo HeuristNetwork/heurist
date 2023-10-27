@@ -20,8 +20,8 @@
 */
 
 require_once dirname(__FILE__).'/../../hclient/framecontent/initPageMin.php';
-require_once dirname(__FILE__).'/../../hserver/structure/conceptCode.php';
-require_once dirname(__FILE__).'/../../hserver/records/edit/recordModify.php';
+require_once dirname(__FILE__).'/../../hsrv/structure/conceptCode.php';
+require_once dirname(__FILE__).'/../../hsrv/records/edit/recordModify.php';
 
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception;

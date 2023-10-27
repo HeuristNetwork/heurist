@@ -47,9 +47,9 @@
 * @subpackage  !!!subpackagename for file such as Administration, Search, Edit, Application, Library
 */
 
-require_once dirname(__FILE__).'/../../hserver/System.php';
-require_once dirname(__FILE__).'/../../hserver/records/search/recordSearch.php';
-require_once dirname(__FILE__).'/../../hserver/records/search/recordFile.php';
+require_once dirname(__FILE__).'/../../hsrv/System.php';
+require_once dirname(__FILE__).'/../../hsrv/records/search/recordSearch.php';
+require_once dirname(__FILE__).'/../../hsrv/records/search/recordFile.php';
 
 require_once dirname(__FILE__).'/../../vendor/autoload.php'; //for geoPHP
 require_once dirname(__FILE__).'/../../vendor/ezyang/htmlpurifier/library/HTMLPurifier.auto.php';

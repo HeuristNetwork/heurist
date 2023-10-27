@@ -24,8 +24,8 @@ if(!defined('PDIR')){
     define('PDIR','../../../');  //need for proper path to js and css    
     require_once dirname(__FILE__).'/../../../hclient/framecontent/initPageMin.php';
 }
-    require_once dirname(__FILE__).'/../../../hserver/utilities/utils_db_load_script.php';
-    require_once dirname(__FILE__).'/../../../hserver/structure/import/dbsImport.php';
+    require_once dirname(__FILE__).'/../../../hsrv/utilities/utils_db_load_script.php';
+    require_once dirname(__FILE__).'/../../../hsrv/structure/import/dbsImport.php';
 
     /*if(isForAdminOnly("to upgrade database structure")){
     return;

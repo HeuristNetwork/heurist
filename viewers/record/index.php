@@ -24,10 +24,10 @@ if (array_key_exists('file',$_REQUEST) || array_key_exists('thumb',$_REQUEST) ||
     if(array_key_exists('icon',$_REQUEST))
     {
         //download entity icon or thumbnail
-        $script_name = '../../hserver/controller/fileGet.php';        
+        $script_name = '../../hsrv/controller/fileGet.php';        
     }else {
         //download file, thumb or remote url for recUploadedFiles
-        $script_name = '../../hserver/controller/fileDownload.php';        
+        $script_name = '../../hsrv/controller/fileDownload.php';        
     }
 }else{
     $script_name = 'renderRecordData.php';

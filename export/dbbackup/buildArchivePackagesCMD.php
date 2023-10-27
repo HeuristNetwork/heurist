@@ -78,8 +78,8 @@ if($arg_database==null){
 }
 
 
-require_once dirname(__FILE__).'/../../hserver/System.php';
-require_once dirname(__FILE__).'/../../hserver/records/search/recordFile.php';
+require_once dirname(__FILE__).'/../../hsrv/System.php';
+require_once dirname(__FILE__).'/../../hsrv/records/search/recordFile.php';
 require_once dirname(__FILE__).'/../../external/php/Mysqldump8.php';
 
 
@@ -261,12 +261,12 @@ foreach ($arg_database as $idx=>$db_name){
     /*
     echo_flush2("Exporting database definitions as readable text<br>");
 
-    $url = HEURIST_BASE_URL . "hserver/structure/export/getDBStructureAsSQL.php?db=".HEURIST_DBNAME."&pretty=1";
+    $url = HEURIST_BASE_URL . "hsrv/structure/export/getDBStructureAsSQL.php?db=".HEURIST_DBNAME."&pretty=1";
     saveURLasFile($url, $folder."/Database_Structure.txt"); //save to $upload_root.'backup/'.HEURIST_DBNAME
 
     echo_flush2("Exporting database definitions as XML<br>");
 
-    $url = HEURIST_BASE_URL . "hserver/structure/export/getDBStructureAsXML.php?db=".HEURIST_DBNAME;
+    $url = HEURIST_BASE_URL . "hsrv/structure/export/getDBStructureAsXML.php?db=".HEURIST_DBNAME;
     saveURLasFile($url, $folder."/Database_Structure.xml"); //save to $upload_root.'backup/'.HEURIST_DBNAME
     */
 

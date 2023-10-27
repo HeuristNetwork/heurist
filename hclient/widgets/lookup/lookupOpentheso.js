@@ -410,7 +410,7 @@ $.widget( "heurist.lookupOpentheso", $.heurist.recordAction, {
             service: sURL, // request url
             serviceType: 'opentheso' // requesting service, otherwise no
         };
-        // calls /heurist/hserver/controller/record_lookup.php
+        // calls /heurist/hsrv/controller/record_lookup.php
         window.hWin.HAPI4.RecordMgr.lookup_external_service(request, function(response){
             window.hWin.HEURIST4.msg.sendCoverallToBack(that.element); // hide loading cover
 
@@ -447,7 +447,7 @@ $.widget( "heurist.lookupOpentheso", $.heurist.recordAction, {
             let res_records = {}, res_orders = [];
 
             // Prepare fields for mapping
-            // the fields used here are defined within /heurist/hserver/controller/record_lookup_config.json where "service" = bnfLibrary
+            // the fields used here are defined within /heurist/hsrv/controller/record_lookup_config.json where "service" = bnfLibrary
             let fields = ['rec_ID', 'rec_RecTypeID']; // added for record set
             fields = fields.concat(['label', 'desc', 'code', 'uri', 'translations']);
             

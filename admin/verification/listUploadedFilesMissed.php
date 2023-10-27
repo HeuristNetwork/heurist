@@ -33,7 +33,7 @@ if($is_included){
 }else{
     define('PDIR','../../');
     
-    require_once dirname(__FILE__).'/../../hserver/System.php';
+    require_once dirname(__FILE__).'/../../hsrv/System.php';
     
     $system = new System();
     if( ! $system->init(@$_REQUEST['db']) ){

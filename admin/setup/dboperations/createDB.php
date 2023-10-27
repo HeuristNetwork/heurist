@@ -19,9 +19,9 @@
 * See the License for the specific language governing permissions and limitations under the License.
 */
 
-require_once dirname(__FILE__).'/../../../hserver/System.php';
-require_once dirname(__FILE__).'/../../../hserver/utilities/dbUtils.php';
-require_once dirname(__FILE__).'/../../../hserver/utilities/utils_file.php';
+require_once dirname(__FILE__).'/../../../hsrv/System.php';
+require_once dirname(__FILE__).'/../../../hsrv/utilities/dbUtils.php';
+require_once dirname(__FILE__).'/../../../hsrv/utilities/utils_file.php';
 require_once 'welcomeEmail.php';
 
 header('Content-type: text/javascript');
