@@ -2563,7 +2563,7 @@ $.widget( "heurist.svs_list", {
         
         window.hWin.HAPI4.LayoutMgr.executeCommand('mainMenu', 'menuActionById', 'menu-structure-summary');
         /*
-        var url = window.hWin.HAPI4.baseURL+ "hclient/framecontent/visualize/databaseSummary.php?popup=1&db=" + window.hWin.HAPI4.database;
+        var url = window.hWin.HAPI4.baseURL+ "viewers/visualize/databaseSummary.php?popup=1&db=" + window.hWin.HAPI4.database;
         var body = this.document.find('body');
         var dim = {h:body.innerHeight(), w:body.innerWidth()};
         window.hWin.HEURIST4.msg.showDialog(url, { height:dim.h*0.8, width:dim.w*0.8, title:'Database Summary',} );

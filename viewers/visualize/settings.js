@@ -1,6 +1,6 @@
 
 /**
-* filename: explanation
+* settings.js: Functions to handle the visualisation settings
 *
 * @package     Heurist academic knowledge management system
 * @link        https://HeuristNetwork.org

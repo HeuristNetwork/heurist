@@ -1,6 +1,6 @@
 
 /**
-* filename: explanation
+* overlay.js: Functions to handle node and relationship overlays
 *
 * @package     Heurist academic knowledge management system
 * @link        https://HeuristNetwork.org
@@ -531,10 +531,10 @@ function createOverlay(x, y, type, selector, node_obj, parent_node) {
             .attr("xlink:href", function(d) { // pick relation icon
                   
                 if(info[k].type=='resource'){ // single arrow
-                    return window.hWin.HAPI4.baseURL+'hclient/framecontent/visualize/arrow_1.png'; 
+                    return window.hWin.HAPI4.baseURL+'viewers/visualize/assets/arrow_1.png'; 
                 }
                 else if(info[k].type=='relmarker'){ // double arrow
-                    return window.hWin.HAPI4.baseURL+'hclient/framecontent/visualize/arrow_2.png';
+                    return window.hWin.HAPI4.baseURL+'viewers/visualize/assets/arrow_2.png';
                 }
                 else{
                     return '';
@@ -683,7 +683,7 @@ function createOverlay(x, y, type, selector, node_obj, parent_node) {
                 .append("svg:image")
                 .attr("class", "icon info-mode menu-close")
                 .attr("xlink:href", function(d){
-                    return window.hWin.HAPI4.baseURL+'hclient/framecontent/visualize/arrow_1.png'
+                    return window.hWin.HAPI4.baseURL+'viewers/visualize/assets/arrow_1.png'
                 })
                 .attr("transform", menuarrow_transform)
                 .attr("height", iconSize)
@@ -1019,7 +1019,7 @@ function _addNewLinkField(source_ID, target_ID){
             
             if(settings.isDatabaseStructure){
                 
-                url = url + "hclient/framecontent/visualize/selectLinkField.php?&db="
+                url = url + "viewers/visualize/selectLinkField.php?&db="
                     + window.hWin.HAPI4.database
                     + '&source_ID='+source_ID;
                

@@ -1,6 +1,6 @@
 
 /**
-* filename: explanation
+* selection.js: Functions to select nodes in the visualisation
 *
 * @package     Heurist academic knowledge management system
 * @link        https://HeuristNetwork.org

@@ -1,7 +1,6 @@
 <?php
 /**
-*
-* visualize.html: Toolbar for the network diagram of database structure or current resultset
+* visualize.php: Toolbar for the network diagram of database structure or current resultset
 *
 * @package     Heurist academic knowledge management system
 * @link        https://HeuristNetwork.org
@@ -20,11 +19,7 @@
 * distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
 * See the License for the specific language governing permissions and limitations under the License.
 */
-?>
 
-<!-- Network diagram HTML -->
-
-<?php
 if(@$isDatabaseStructure == 1){
 ?>
 <!-- Network diagram HTML -->

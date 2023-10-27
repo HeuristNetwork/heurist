@@ -1,5 +1,5 @@
 /**
-* Widget for network diagram of a result set. Calls hclient/framecontent/visualize/springDiagram.php
+* Widget for network diagram of a result set. Calls viewers/visualize/springDiagram.php
 * 
 * @package     Heurist academic knowledge management system
 * @link        https://HeuristNetwork.org
@@ -159,7 +159,7 @@ $.widget( "heurist.connections", {
             if( window.hWin.HEURIST4.util.isempty(this.graphframe.attr('src')) || this.graphframe.attr('src')!==this.options.url)
             {
                 
-                this.options.url = window.hWin.HAPI4.baseURL + 'hclient/framecontent/visualize/springDiagram.php?db=' + window.hWin.HAPI4.database;
+                this.options.url = window.hWin.HAPI4.baseURL + 'viewers/visualize/springDiagram.php?db=' + window.hWin.HAPI4.database;
                 this.graphframe.attr('src', this.options.url);
               
             // Content loaded already    

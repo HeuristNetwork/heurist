@@ -19,8 +19,8 @@
     * See the License for the specific language governing permissions and limitations under the License.
     */
 
-if(!defined('PDIR')) define('PDIR','../../../');
-require_once dirname(__FILE__).'../initPage.php';
+define('PDIR','../../');  //need for proper path to js and css    
+require_once dirname(__FILE__).'/../../hclient/framecontent/initPage.php';
 ?>
         <style>
             body, html {
@@ -37,14 +37,14 @@ require_once dirname(__FILE__).'../initPage.php';
         <link href="<?php echo PDIR;?>external/js/evol.colorpicker.css" rel="stylesheet" type="text/css">
         
         <!-- Visualize plugin -->
-        <script type="text/javascript" src="<?php echo PDIR;?>hclient/framecontent/visualize/settings.js"></script>
-        <script type="text/javascript" src="<?php echo PDIR;?>hclient/framecontent/visualize/overlay.js"></script>
-        <script type="text/javascript" src="<?php echo PDIR;?>hclient/framecontent/visualize/selection.js"></script>
-        <script type="text/javascript" src="<?php echo PDIR;?>hclient/framecontent/visualize/gephi.js"></script>
-        <script type="text/javascript" src="<?php echo PDIR;?>hclient/framecontent/visualize/drag.js"></script>
-        <script type="text/javascript" src="<?php echo PDIR;?>hclient/framecontent/visualize/visualize.js"></script>
+        <script type="text/javascript" src="<?php echo PDIR;?>viewers/visualize/settings.js"></script>
+        <script type="text/javascript" src="<?php echo PDIR;?>viewers/visualize/overlay.js"></script>
+        <script type="text/javascript" src="<?php echo PDIR;?>viewers/visualize/selection.js"></script>
+        <script type="text/javascript" src="<?php echo PDIR;?>viewers/visualize/gephi.js"></script>
+        <script type="text/javascript" src="<?php echo PDIR;?>viewers/visualize/drag.js"></script>
+        <script type="text/javascript" src="<?php echo PDIR;?>viewers/visualize/visualize.js"></script>
 
-        <link rel="stylesheet" type="text/css" href="<?php echo PDIR;?>hclient/framecontent/visualize/visualize.css">
+        <link rel="stylesheet" type="text/css" href="<?php echo PDIR;?>viewers/visualize/visualize.css">
         
         <script type="text/javascript">
 

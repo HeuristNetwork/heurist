@@ -6,15 +6,15 @@
 
 /*
 .drag {
-    cursor: url('visualize/drag.png'), all-scroll;
+    cursor: url('assets/drag.png'), all-scroll;
 }
 
 .information {
-    cursor: url('visualize/information.png'), help;
+    cursor: url('assets/information.png'), help;
 }
 
 .selection {
-    cursor: url('visualize/selection.png'), crosshair;
+    cursor: url('assets/selection.png'), crosshair;
 }
 */
 
@@ -336,37 +336,37 @@ ul.split_bar {
 }
 
 .ui-icon-cursor{
-    background-image: url(cursor.png) !important; 
+    background-image: url(assets/cursor.png) !important; 
     width: 16;
     height: 16;
 }
 .ui-icon-gravity0{
-    background-image: url(gravity_0.png) !important; 
+    background-image: url(assets/gravity_0.png) !important; 
     width: 16;
     height: 16;
 }
 .ui-icon-gravity1{
-    background-image: url(gravity_1.png) !important; 
+    background-image: url(assets/gravity_1.png) !important; 
     width: 16;
     height: 16;
 }
 .ui-icon-gravity2{
-    background-image: url(gravity_2.png) !important; 
+    background-image: url(assets/gravity_2.png) !important; 
     width: 16;
     height: 16;
 }
 .ui-icon-link-streight{
-    background-image: url(link_streight.png) !important; 
+    background-image: url(assets/link_streight.png) !important; 
     width: 16;
     height: 16;
 }
 .ui-icon-link-curved{
-    background-image: url(link_curved.png) !important; 
+    background-image: url(assets/link_curved.png) !important; 
     width: 16;
     height: 16;
 }
 .ui-icon-link-stepped{
-    background-image: url(link_stepped.png) !important; 
+    background-image: url(assets/link_stepped.png) !important; 
     width: 16;
     height: 16;
 }

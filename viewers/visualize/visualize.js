@@ -1,5 +1,5 @@
 /**
-* filename: explanation
+* visualize.js: Visualisation plugin
 *
 * @package     Heurist academic knowledge management system
 * @link        https://HeuristNetwork.org
@@ -1587,12 +1587,12 @@ function showEmbedDialog(){
 
     var query = window.hWin.HEURIST4.query.composeHeuristQuery2(window.hWin.HEURIST4.current_query_request, false);
     query = query + ((query=='?')?'':'&') + 'db='+window.hWin.HAPI4.database;
-    var url = window.hWin.HAPI4.baseURL+'hclient/framecontent/visualize/springDiagram.php' + query;
+    var url = window.hWin.HAPI4.baseURL+'viewers/visualize/springDiagram.php' + query;
 
     //encode
     query = window.hWin.HEURIST4.query.composeHeuristQuery2(window.hWin.HEURIST4.current_query_request, true);
     query = query + ((query=='?')?'':'&') + 'db='+window.hWin.HAPI4.database;
-    var url_enc = window.hWin.HAPI4.baseURL+'hclient/framecontent/visualize/springDiagram.php' + query;
+    var url_enc = window.hWin.HAPI4.baseURL+'viewers/visualize/springDiagram.php' + query;
 
     window.hWin.HEURIST4.ui.showPublishDialog({mode:'graph', url: url, url_encoded: url_enc});
 
@@ -1650,7 +1650,7 @@ function refreshButton() {
 //refresh graph while in fullscreen mode - Travis Doyle 28/9
 function refreshButtonFullscreen() {
     return;
-    //var url2 = window.hWin.HAPI4.baseURL + 'hclient/framecontent/visualize/springDiagram.php' + window.location.search;
+    //var url2 = window.hWin.HAPI4.baseURL + 'viewers/visualize/springDiagram.php' + window.location.search;
     //location.href = url2;
 }
 //Gravity Fullscreen Button Fix - Travis Doyle 6/10
@@ -1658,7 +1658,7 @@ function refreshGravityOn() {
     return;
     /*var gravitystat = getSetting(setting_gravity);
 
-    var url2 = window.hWin.HAPI4.baseURL + 'hclient/framecontent/visualize/springDiagram.php' + window.location.search;
+    var url2 = window.hWin.HAPI4.baseURL + 'viewers/visualize/springDiagram.php' + window.location.search;
     location.href = url2;
 
     if (gravitystat == 'off') {
@@ -1669,7 +1669,7 @@ function refreshGravityOff() {
     return;
     /*var gravitystat = getSetting(setting_gravity);
 
-    var url2 = window.hWin.HAPI4.baseURL + 'hclient/framecontent/visualize/springDiagram.php' + window.location.search;
+    var url2 = window.hWin.HAPI4.baseURL + 'viewers/visualize/springDiagram.php' + window.location.search;
     location.href = url2;
 
     if (gravitystat == 'touch') {
@@ -1680,7 +1680,7 @@ function refreshGravityOff() {
 function openWin() {
     var hrefnew = window.hWin.HEURIST4.query.composeHeuristQuery2(window.hWin.HEURIST4.current_query_request, false);
     hrefnew = hrefnew + ((hrefnew == '?') ? '' : '&') + 'db=' + window.hWin.HAPI4.database;
-    var url2 = window.hWin.HAPI4.baseURL + 'hclient/framecontent/visualize/springDiagram.php' + hrefnew;
+    var url2 = window.hWin.HAPI4.baseURL + 'viewers/visualize/springDiagram.php' + hrefnew;
     window.open(url2);
 }
 //close fullscreen graph - Travis Doyle 28/9
