@@ -91,7 +91,8 @@ if(count($requestUri)==1 && ($requestUri[0]=='heurist' || $requestUri[0]=='h6-al
 
 
                            // dbname/action                               heurist/dbname/action
-if(count($requestUri)>1 && (in_array($requestUri[1],$allowedActions) || in_array(@$requestUri[2],$allowedActions))){
+if(count($requestUri)>1 && (in_array($requestUri[1],$allowedActions) || in_array(@$requestUri[2],$allowedActions)))
+{
 /*
 To enable this redirection add to httpd.conf
 
@@ -283,7 +284,14 @@ $requestUri:
     exit;
 
 }
-
+else if(count($requestUri)>2 && ($requestUri[0]=='heurist' || $requestUri[0]=='h6-alpha') && $requestUri[1]=='viewers'){
+    //Redirects to index page for viewers plugins
+    parse_str($_SERVER['QUERY_STRING'], $vars);
+    $query_string = http_build_query($vars);
+    header('Location: /'.filter_var($requestUri[0]).'/'.$requestUri[1].'/'.$requestUri[2].'/index.php?'.$query_string);  
+    exit;
+    
+}
 
 if(@$_REQUEST['fmt']){
     $format = filter_var($_REQUEST['fmt'], FILTER_SANITIZE_STRING);    

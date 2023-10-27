@@ -40,7 +40,9 @@ var originalOutliers = [];
 */ 
 function CrosstabsAnalysis(_query, _query_domain) {
 
-    var _className = "CrosstabsAnalysis";
+    var _className = 'CrosstabsAnalysis';
+    
+    var _controllerURL = window.hWin.HAPI4.baseURL + 'viewers/crosstab/crosstabsController.php';
 
     var MAX_FOR_AUTO_RETRIEVE = 6000;
 
@@ -361,10 +363,9 @@ function CrosstabsAnalysis(_query, _query_domain) {
             $('#aggSum').show();
             $('#aggAvg').show();
 
-            var baseurl = window.hWin.HAPI4.baseURL + "viewers/crosstab/crosstabs_srv.php";
             var request = { a:'minmax', rt:_selectedRtyID , dt:detailid, session: Math.round((new Date()).getTime()/1000) };
 
-            window.hWin.HEURIST4.util.sendRequest(baseurl, request, null,
+            window.hWin.HEURIST4.util.sendRequest(_controllerURL, request, null,
                 function( response ){
                     if(response.status == window.hWin.ResponseStatus.OK){
 
@@ -396,7 +397,6 @@ function CrosstabsAnalysis(_query, _query_domain) {
 
             //get list of possible values for pointer detail type
             var request = { a:'pointers', rt:_selectedRtyID , dt:detailid };
-            var baseurl = window.hWin.HAPI4.baseURL + "viewers/crosstab/crosstabs_srv.php";
 
             if(_currentRecordset!=null){
                 request['recordset'] = _currentRecordset;  //CSV
@@ -405,7 +405,7 @@ function CrosstabsAnalysis(_query, _query_domain) {
                 request['w'] = query_domain;
             }
 
-            window.hWin.HEURIST4.util.sendRequest(baseurl, request, null,
+            window.hWin.HEURIST4.util.sendRequest(_controllerURL, request, null,
                 function( response ){
                     if(response.status == window.hWin.ResponseStatus.OK){
 
@@ -431,10 +431,9 @@ function CrosstabsAnalysis(_query, _query_domain) {
 
         }else if(detailtype=="date"){
             //get min and max for this detail in database
-            var baseurl = window.hWin.HAPI4.baseURL + "viewers/crosstab/crosstabs_srv.php";
             var request = { a:'minmax', rt:_selectedRtyID , dt:detailid, session: Math.round((new Date()).getTime()/1000) };
 
-            window.hWin.HEURIST4.util.sendRequest(baseurl, request, null,
+            window.hWin.HEURIST4.util.sendRequest(_controllerURL, request, null,
                 function( response ){
                     if(response.status == window.hWin.ResponseStatus.OK){
 
@@ -2065,9 +2064,7 @@ function CrosstabsAnalysis(_query, _query_domain) {
                 inProgress = false;
            }
 
-            var baseurl = window.hWin.HAPI4.baseURL + "viewers/crosstab/crosstabs_srv.php";
-
-            window.hWin.HEURIST4.util.sendRequest(baseurl, request, null,
+            window.hWin.HEURIST4.util.sendRequest(_controllerURL, request, null,
                 function( response ){
                     __hideProgress();
 

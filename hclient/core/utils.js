@@ -314,6 +314,15 @@ window.hWin.HEURIST4.util = {
             query = window.location.search;
         }
 
+        const urlParams = new URLSearchParams(query);
+                
+        if(urlParams.has(name)){
+            return decodeURIComponent(urlParams.get(name));
+        }else{
+            return null;
+        }
+        
+        /* old way
         var regexS = "[\\?&]"+name+"=([^&#]*)";
         var regex = new RegExp( regexS );
         var results = regex.exec( query );
@@ -327,6 +336,7 @@ window.hWin.HEURIST4.util = {
                 return results[1];
             }
         }
+        */
     },
     
     

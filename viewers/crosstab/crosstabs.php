@@ -50,22 +50,32 @@ require_once dirname(__FILE__) . '/../../hclient/framecontent/initPage.php';
 
     // Callback function on page initialization - see initPage.php
     function onPageInit(success) {
+        
+        const urlParams = new URLSearchParams(window.location.search);
+
+        var query_main = '';
+                
+        if(urlParams.has('q')){
+            query_main = decodeURIComponent(urlParams.get('q'));
+        }
+
         //database, query q, domain w
-        crosstabsAnalysis = CrosstabsAnalysis('', '');
+        crosstabsAnalysis = CrosstabsAnalysis(query_main, '');
         //
     }
-    //Used to open the crosstabs section to the full width on the initial load.
-    // window.hWin.HAPI4.LayoutMgr.cardinalPanel('sizePane',
-    //     ['east', (top ? top.innerWidth : window.innerWidth)]); 
-
-    window.hWin.HAPI4.LayoutMgr.cardinalPanel('sizePane',
-        ['east', (top ?  '55%' : window.innerWidth)]);
+        //Used to open the crosstabs section to the full width on the initial load.
+        // window.hWin.HAPI4.LayoutMgr.cardinalPanel('sizePane',
+        //     ['east', (top ? top.innerWidth : window.innerWidth)]); 
+        if(window.hWin.HAPI4 && window.hWin.HAPI4.LayoutMgr){
+            window.hWin.HAPI4.LayoutMgr.cardinalPanel('sizePane',
+                ['east', (top ?  '55%' : window.innerWidth)]);
+        }
 </script>
 
 <link rel=stylesheet href="crosstabs.css" media="all">
 </head>
 
-<body style="padding:5px;overflow-x:auto;" class="popup">
+<body style="padding:5px;overflow-x:auto;" class="popup selectmenu-parent">
 
     <script src="crosstabs.js"></script>
 
