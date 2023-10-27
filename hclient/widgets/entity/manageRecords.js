@@ -5534,11 +5534,6 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
 
                             for(let i = 0; i < newval.length; i++){
 
-                                if(Number.isInteger(+newval[i]) && type != 'relmarker'){ // is fine
-                                    completed.push(newval[i]);
-                                    continue;
-                                }
-
                                 // needs additional handling
                                 if(type == 'resource'){
                                     that.resource_values.push({fld_id: dt_id, values: newval[i]});
@@ -5547,6 +5542,11 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
                                 }else{
 
                                     let vocab_id = $Db.dty(dt_id, 'dty_JsonTermIDTree');
+
+                                    if(Number.isInteger(+newval[i]) && $Db.trm_InVocab(vocab_id, newval[i])){ // check if 'id' is in vocabulary
+                                        completed.push(newval[i]);
+                                        continue;
+                                    }
 
                                     if(window.hWin.HEURIST4.util.isArray(newval[i])){
                                         for(let j = 0; j < newval[i].length; j++){
@@ -5575,25 +5575,26 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
                             }
                         }else{
 
-                            if(Number.isInteger(+newval) && type != 'relmarker'){
-                                completed.push(newval);
+                            if(type == 'resource'){
+                                that.resource_values.push({fld_id: dt_id, values: newval});
+                            }else if(type == 'relmarker'){
+                                that.relmarker_values.push({fld_id: dt_id, values: newval});
                             }else{
+                                
+                                let vocab_id = $Db.dty(dt_id, 'dty_JsonTermIDTree');
 
-                                if(type == 'resource'){
-                                    that.resource_values.push({fld_id: dt_id, values: newval});
-                                }else if(type == 'relmarker'){
-                                    that.relmarker_values.push({fld_id: dt_id, values: newval});
+                                if(Number.isInteger(+newval[i]) && $Db.trm_InVocab(vocab_id, newval[i])){ // check if 'id' is in vocabulary
+                                    completed.push(newval[i]);
+                                    continue;
+                                }
+
+                                let label = window.hWin.HEURIST4.util.isObject(newval) ? newval['label'] : newval;
+                                let trm_id = $Db.getTermByLabel(vocab_id, label);
+
+                                if(trm_id == null){
+                                    that.term_values.push([dt_id, newval]);
                                 }else{
-                                    
-                                    let vocab_id = $Db.dty(dt_id, 'dty_JsonTermIDTree');
-                                    let label = window.hWin.HEURIST4.util.isObject(newval) ? newval['label'] : newval;
-                                    let trm_id = $Db.getTermByLabel(vocab_id, label);
-
-                                    if(trm_id == null){
-                                        that.term_values.push([dt_id, newval]);
-                                    }else{
-                                        completed.push(trm_id);
-                                    }
+                                    completed.push(trm_id);
                                 }
                             }
                         }
