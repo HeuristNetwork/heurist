@@ -1,10 +1,13 @@
 Directory:    /hclient/core
 
-Overview:     Core client-side functions, H4 onwards.
+Overview:  Core client-side functions, H4 onwards.
 
 Notes:
 
 Updated:     18 Oct 2015
+
+
+utilsCollection.js - manages user's collection of record ids stored in SESSION
 
 
 Heurist Records,recDetails

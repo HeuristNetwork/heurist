@@ -220,7 +220,7 @@ if($isLocalHost){
 <script type="text/javascript" src="<?php echo PDIR;?>hclient/core/utils_query.js"></script>
 <script type="text/javascript" src="<?php echo PDIR;?>hclient/core/utils_msg.js"></script>
 <script type="text/javascript" src="<?php echo PDIR;?>hclient/core/utils_geo.js"></script>
-<script type="text/javascript" src="<?php echo PDIR;?>hclient/core/utils_collection.js"></script>
+<script type="text/javascript" src="<?php echo PDIR;?>hclient/core/utilsCollection.js"></script>
 
 <?php if(@$_REQUEST['ll']=='DigitalHarlem' || @$_REQUEST['ll']=='DigitalHarlem1935'){ ?>
     <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/digital_harlem/dh_search_minimal.js"></script>

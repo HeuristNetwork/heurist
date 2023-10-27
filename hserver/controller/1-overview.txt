@@ -5,7 +5,13 @@ Overview:   All files in this folder are services. They are utilized in hapi.js 
 
 
 
+utilsCollection.js - manages user's collection of record ids stored in SESSION
+
+
+--------------
 usr_info.php - controller for request from client side HAPI4.hSystemMgr (@todo rename to "system something")
+
+
 
 
 
