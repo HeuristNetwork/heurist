@@ -211,7 +211,7 @@ $.widget( "heurist.expertnation_nav", {
             //assign map for iframes
             $('.mapframe').prop('src', window.hWin.HAPI4.baseURL+
                 'viewers/gmap/map.php?ll='+window.hWin.HAPI4.sysinfo['layout']+'&db=ExpertNation&header=off&legend=off');
-                //'viewers/map/map_leaflet.php?ll='+window.hWin.HAPI4.sysinfo['layout']+'&db=ExpertNation&controls=none&nocluster=1');
+                //'viewers/map/map.php?ll='+window.hWin.HAPI4.sysinfo['layout']+'&db=ExpertNation&controls=none&nocluster=1'); //leaflet
 
         }
 

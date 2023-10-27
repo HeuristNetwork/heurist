@@ -124,7 +124,7 @@ function hPublishDialog( _options )
     //
     function _updateUrls(){
 
-        var base_url = window.hWin.HAPI4.baseURL+'viewers/map/map_leaflet.php';
+        var base_url = window.hWin.HAPI4.baseURL+'viewers/map/'; //map.php
         var params_search,params_search_encoded;
         var layout_params = {};
         

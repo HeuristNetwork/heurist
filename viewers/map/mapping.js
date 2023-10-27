@@ -119,7 +119,7 @@ $.widget( "heurist.mapping", {
         element_timeline: 'timeline',
  
         //various layout and behaviour settings
-        // they are assigned in map_leaflet.php onPageInit from url parameters
+        // they are assigned in map.php onPageInit from url parameters
         // which in turn can be set in app_timemap.js
         layout_params:{}, 
         

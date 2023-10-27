@@ -18,25 +18,10 @@
 * distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
 * See the License for the specific language governing permissions and limitations under the License.
 */
-if (array_key_exists('file',$_REQUEST) || array_key_exists('thumb',$_REQUEST) ||
-    array_key_exists('icon',$_REQUEST)){
-              
-    if(array_key_exists('icon',$_REQUEST))
-    {
-        //download entity icon or thumbnail
-        $script_name = 'fileGet.php';        
-    }else {
-        //download file, thumb or remote url for recUploadedFiles
-        $script_name = 'fileDownload.php';        
-    }
-        
-}else{
-    $script_name = 'showReps.php';
-}        
+$script_name = 'springDiagram.php';
 //to avoid "Open Redirect" security warning    
 parse_str($_SERVER['QUERY_STRING'], $vars);
 $query_string = http_build_query($vars);
 
 header( 'Location: '.$script_name.'?'.$query_string );
-
 

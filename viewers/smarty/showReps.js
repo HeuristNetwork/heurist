@@ -2146,7 +2146,7 @@ this_id       : "term"
         params.url_schedule = window.hWin.HAPI4.baseURL + "export/publish/manageReports.html?"
                                     + q + "&db="+window.hWin.HAPI4.database;
 
-        params.url = window.hWin.HAPI4.baseURL + "viewers/smarty/showReps.php?"+
+        params.url = window.hWin.HAPI4.baseURL + "viewers/smarty/?"+ //showReps.php
             squery.replace('"','%22') + '&publish=1&debug=0&template='+encodeURIComponent(template_file);
         
         

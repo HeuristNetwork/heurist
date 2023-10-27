@@ -1,8 +1,8 @@
 /**
 * app_timemap.js - load map + timeline into an iframe in the interface.
-* This widget acts as a wrapper for viewers/gmap/map.php or viewers/map/map_leaflet.php
+* This widget acts as a wrapper for viewers/gmap/map.php (google maps) or viewers/map/map.php (leaflet)
 * 
-* app_timemap -> map_leaflet.php -> mapping.js
+* app_timemap -> map.php -> mapping.js
 *
 * @package     Heurist academic knowledge management system
 * @link        https://HeuristNetwork.org
@@ -254,7 +254,7 @@ $.widget( "heurist.app_timemap", {
 
                 this.loadanimation(true);
                 
-                //adding url parameters to map_leaflet.php from widget options
+                //adding url parameters to map.php from widget options
               
                 var mapdoc = window.hWin.HEURIST4.util.getUrlParameter('mapdocument', window.hWin.location.search);
                 if(mapdoc>0){
@@ -262,7 +262,7 @@ $.widget( "heurist.app_timemap", {
                 }
                 var url;
                 if(this.options.leaflet){
-                    url = window.hWin.HAPI4.baseURL + 'viewers/map/map_leaflet.php?';
+                    url = window.hWin.HAPI4.baseURL + 'viewers/map/map.php?';
                 }else{
                     url = window.hWin.HAPI4.baseURL + 'viewers/gmap/map.php?';
                 }

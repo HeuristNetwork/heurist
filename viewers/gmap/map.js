@@ -1131,7 +1131,7 @@ if(_mapdata.limit_warning){
                         nativemap.fitBounds(bounds);
                     }
                     
-                    // loading the list of map documents  see map_overlay.js
+                    // loading the list of map documents  see mapOverlay.js
                     that.map_control = new hMappingControls(that, __startup_mapdocument);
 
                     
@@ -1165,7 +1165,7 @@ if(_mapdata.limit_warning){
                 }
 
                 if(__startup_mapdocument>0){
-                    that.map_control.loadMapDocumentById(__startup_mapdocument);    //see map_overlay.js
+                    that.map_control.loadMapDocumentById(__startup_mapdocument);    //see mapOverlay.js
                 }
 
                 if(_callback){

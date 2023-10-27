@@ -68,8 +68,8 @@ $system->defineConstants();
 
 <!-- Mapping -->
 <script type="text/javascript" src="<?php echo PDIR;?>viewers/gmap/map.js"></script>
-<script type="text/javascript" src="<?php echo PDIR;?>viewers/gmap/map_overlay.js"></script>
-<script type="text/javascript" src="<?php echo PDIR;?>viewers/gmap/map_bubble.js"></script>
+<script type="text/javascript" src="<?php echo PDIR;?>viewers/gmap/mapOverlay.js"></script>
+<script type="text/javascript" src="<?php echo PDIR;?>viewers/gmap/mapBubble.js"></script>
 
 
 <style>
