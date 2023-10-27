@@ -84,7 +84,7 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
         }else if(this.options.external_preview){ 
             
             this.options.layout_mode = 
-                '<div class="treeview_with_header" style="background:white">'
+                '<div class="treeview_with_header" style="background:white; overflow: hidden auto;">'
                     +'<div style="padding:0px 20px 4px 0px;border-bottom:1px solid lightgray">' //instruction and close button
                         +'<span style="font-style:italic;display:inline-block;line-height:1.3;">Drag to reposition<br>Select to navigate<br>'
                         +'Double click or <span class="ui-icon ui-icon-gear" style="font-size: small;"/> to modify</span>&nbsp;&nbsp;&nbsp;'
@@ -275,7 +275,7 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
         }});
 
         // Field data count
-        this.element.find('#field_usage').button().css({'padding': '3px', 'margin': '1px 0 3px'});
+        this.element.find('#field_usage').button().css({'padding': '3px', 'margin': '3px 0 3px'});
         this._on(this.element.find('#field_usage, #field_ttl_usage'), {click: function(){
             var req = {
                 'rtyID': this.options.rty_ID,
@@ -529,9 +529,6 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
                 preventRecursiveMoves: true, // Prevent dropping nodes on own descendants
                 preventVoidMoves: true, // Prevent moving nodes 'before self', etc.
                 dragStart: function(node, data) {
-                    if(node.data.type == 'group'){ // stop simple dividers from dragging
-                        return false;
-                    }
 
                     let count = $(node.li).find('.fancytree-node').length; // remove divider
                     if(count > 1){
@@ -2376,7 +2373,7 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
     //
     _saveEditAndClose: function( fields, afterAction ){
 
-        var that = this;
+        const that = this;
 
         if(window.hWin.HAPI4.is_callserver_in_progress()) {
             return;   
@@ -2384,8 +2381,8 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
 
         if(this._editing && this._editing.getValue('dty_Type') == 'separator'){
             
-            var val = this._editing.getValue('rst_DisplayName');
-            var sep_type = this._editing.getValue('rst_SeparatorType');
+            let val = this._editing.getValue('rst_DisplayName');
+            let sep_type = this._editing.getValue('rst_SeparatorType');
             if(val && window.hWin.HEURIST4.util.isempty(val[0]) && sep_type && (sep_type[0]=='group' || sep_type[0]=='group_break')) {
 
                 let $dlg;
@@ -2419,9 +2416,9 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
         }
         if(fields==null) return; //validation failed
 
-        var treeview = this._treeview.fancytree("getTree");
-        var recID = fields['rst_ID'];
-        var dt_type = $Db.dty(fields['rst_DetailTypeID'], 'dty_Type');
+        const recID = fields['rst_ID'];
+        const dt_type = $Db.dty(fields['rst_DetailTypeID'], 'dty_Type');
+        const refresh_tree = dt_type == 'separator' && $Db.rst(fields['rst_RecTypeID'], recID, 'rst_SeparatorType') != fields['rst_SeparatorType'];
 
         if(dt_type=='enum' || dt_type=='relmarker' || dt_type=='relationtype'){
             fields['rst_DefaultValue'] = fields['rst_TermPreview'];
@@ -2450,6 +2447,7 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
             afterAction = function( recID ){
                 that._stillNeedUpdateForRecID = 0;
                 that._afterSaveEventHandler( recID ); //to update definitions and tree
+                if(refresh_tree) { that._initTreeView(); } // refresh tree if separator type has been changed
                 that._showRecordEditorPreview();  //refresh 
             };
         }
@@ -3201,6 +3199,7 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
 
             let $div = $(div);
             let dtyid = $div.attr('data-dtyid');
+            let lbl_width = '80%';
 
             let count = dtyid && that._calculated_usages[dtyid] 
                 && parseInt(that._calculated_usages[dtyid]) > 0 ? parseInt(that._calculated_usages[dtyid]) : 0;
@@ -3242,18 +3241,20 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
                             let type = $(event.target).hasClass('ui-icon-check') ? 'with' : 'without';
                             let fld_id = $(event.target).parent('div[data-dtyid]').attr('data-dtyid');
                             search_func(fld_id, type);
-                            //$(this).contextmenu('open', event);
                         }
                     });
                 }
 
                 $div.attr('data-empty', 0);
+
+                lbl_width = `${$div.parent().width() - ($div[0].offsetWidth + 10)}px`;
+
             }else{
                 $div.text('-');
                 $div.attr('data-empty', 1);
             }
 
-            //$div.parent().find('span.fancytree-title').css({'max-width': '80%', 'overflow': 'hidden'});
+            $div.parent().find('span.fancytree-title').addClass('truncate').css({'max-width': lbl_width});
         });
     },
 
@@ -3374,7 +3375,7 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
 
             window.hWin.HEURIST4.msg.bringCoverallToFront(this.element);
 
-            window.hWin.HAPI4.RecordMgr.batch_details(request, function(response){ console.log(response);
+            window.hWin.HAPI4.RecordMgr.batch_details(request, function(response){
 
                 window.hWin.HEURIST4.msg.sendCoverallToBack();
 
