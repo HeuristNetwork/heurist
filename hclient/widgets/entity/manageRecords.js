@@ -1229,6 +1229,9 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                                 $('<span class="heurist-helper2 westTogglerVertical" style="width:200px;margin-top:220px;">Navigate / Move / Delete</span>').appendTo(tog);
                             }
                         },
+                        onresize_end: function(){
+                            that.options.rts_editor.manageDefRecStructure('updateFieldUsage');
+                        },
                         togglerContent_open:    '<div class="ui-icon ui-icon-triangle-1-w"></div>',
                         togglerContent_closed:  '<div class="ui-icon ui-icon-carat-2-e"></div>',
                     },
