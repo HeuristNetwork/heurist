@@ -756,10 +756,10 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
                 
 
             });
-            
-            options.width = window.hWin.HEURIST4.msg._setDialogDimension(options, 'height');
-            options.height = window.hWin.HEURIST4.msg._setDialogDimension(options, 'width');
 
+            options.width = window.hWin.HEURIST4.msg._setDialogDimension(options, 'width');
+            options.height = window.hWin.HEURIST4.msg._setDialogDimension(options, 'height');
+            
             var opts = {
                 autoOpen: true,
                 width : options.width,
@@ -1075,6 +1075,8 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
                 if(isPercent){
                     res = wp*res/100;
                 }
+            }else{
+                res = options[axis];
             }
             
             if(isNaN(res) || res<100){
