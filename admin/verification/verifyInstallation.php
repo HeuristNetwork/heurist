@@ -22,8 +22,8 @@
 */
 
 require_once dirname(__FILE__).'/../../configIni.php'; // read in the configuration file
-require_once dirname(__FILE__).'/../../hsrv/consts.php';
-require_once dirname(__FILE__).'/../../hsrv/dbaccess/utils_db.php';
+require_once dirname(__FILE__).'/../../hserv/consts.php';
+require_once dirname(__FILE__).'/../../hserv/dbaccess/utils_db.php';
 
 ?>
 <!DOCTYPE html>

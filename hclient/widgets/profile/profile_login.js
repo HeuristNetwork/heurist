@@ -70,7 +70,7 @@ function showLoginDialog(isforsed, callback, parentwin, dialog_id){
         
         //loads saml dialog into iframe
         window.hWin.HEURIST4.msg.showDialog(
-        window.hWin.HAPI4.baseURL+'hsrv/controller/saml.php?a=login&sp='+sp_entity+'&db='+window.hWin.HAPI4.database,
+        window.hWin.HAPI4.baseURL+'hserv/controller/saml.php?a=login&sp='+sp_entity+'&db='+window.hWin.HAPI4.database,
         {
             title: 'BnF Authentification',
             width: 980,
@@ -603,7 +603,7 @@ function setupCaptcha($dlg){
         $ele.empty();
     }
 
-    $ele.load(window.hWin.HAPI4.baseURL+'hsrv/utilities/captcha.php?id='+id, function(e){
+    $ele.load(window.hWin.HAPI4.baseURL+'hserv/utilities/captcha.php?id='+id, function(e){
         // add input
         let $input = $('<input>', {id: 'captcha_ans'}).css('width', '30px');
         $ele.append($input);
@@ -802,7 +802,7 @@ function doSamlLogin(callback, parentwin, sp_entity, login_dialog){
     
     //loads saml dialog into iframe
     window.hWin.HEURIST4.msg.showDialog(
-    window.hWin.HAPI4.baseURL+'hsrv/controller/saml.php?a=login&sp='+sp_entity+'&db='+window.hWin.HAPI4.database,
+    window.hWin.HAPI4.baseURL+'hserv/controller/saml.php?a=login&sp='+sp_entity+'&db='+window.hWin.HAPI4.database,
     {
         title: 'BnF Authentification',
         width: 980,

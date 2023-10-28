@@ -34,9 +34,9 @@ define('LOGIN_REQUIRED',1);
 define('PDIR','../../');  //need for proper path to js and css    
 
 require_once dirname(__FILE__).'/../../hclient/framecontent/initPage.php';
-require_once dirname(__FILE__).'/../../hsrv/utilities/testSimilarURLs.php';
-require_once dirname(__FILE__).'/../../hsrv/entity/dbUsrTags.php';
-require_once dirname(__FILE__).'/../../hsrv/records/edit/recordModify.php';
+require_once dirname(__FILE__).'/../../hserv/utilities/testSimilarURLs.php';
+require_once dirname(__FILE__).'/../../hserv/entity/dbUsrTags.php';
+require_once dirname(__FILE__).'/../../hserv/records/edit/recordModify.php';
 
 
 $nextmode = 'inputselect';

@@ -19,7 +19,7 @@
 */
 if(!defined('PDIR')) define('PDIR','../../'); //need for js scripts
 
-require_once dirname(__FILE__).'/../../hsrv/System.php';
+require_once dirname(__FILE__).'/../../hserv/System.php';
 
 define('ERROR_REDIR', dirname(__FILE__).'/../../hclient/framecontent/infoPage.php');
 

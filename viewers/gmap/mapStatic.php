@@ -31,13 +31,13 @@
 * @package     Heurist academic knowledge management system
 * @subpackage  Viewers/Map
 */
-    require_once dirname(__FILE__).'/../../hsrv/System.php';
-    require_once dirname(__FILE__).'/../../hsrv/records/search/recordSearch.php';
+    require_once dirname(__FILE__).'/../../hserv/System.php';
+    require_once dirname(__FILE__).'/../../hserv/records/search/recordSearch.php';
     
     require_once dirname(__FILE__).'/../../vendor/autoload.php'; //for geoPHP
 
-    require_once dirname(__FILE__)."/../../hsrv/utilities/geo/mapEncodePolyline.php";
-    require_once dirname(__FILE__)."/../../hsrv/utilities/geo/mapSimplify.php";
+    require_once dirname(__FILE__)."/../../hserv/utilities/geo/mapEncodePolyline.php";
+    require_once dirname(__FILE__)."/../../hserv/utilities/geo/mapSimplify.php";
 
 	$mapobjects = array();
     

@@ -21,11 +21,11 @@
 * See the License for the specific language governing permissions and limitations under the License.
 */
 
-    require_once dirname(__FILE__).'/../../../hsrv/System.php';
-    require_once dirname(__FILE__).'/../../../hsrv/records/search/recordSearch.php';
-    require_once dirname(__FILE__).'/../../../hsrv/structure/search/dbsData.php';
-    require_once dirname(__FILE__).'/../../../hsrv/dbaccess/utils_db.php';
-    require_once  dirname(__FILE__).'/../../../hsrv/utilities/Temporal.php';
+    require_once dirname(__FILE__).'/../../../hserv/System.php';
+    require_once dirname(__FILE__).'/../../../hserv/records/search/recordSearch.php';
+    require_once dirname(__FILE__).'/../../../hserv/structure/search/dbsData.php';
+    require_once dirname(__FILE__).'/../../../hserv/dbaccess/utils_db.php';
+    require_once  dirname(__FILE__).'/../../../hserv/utilities/Temporal.php';
     
     $response = array();
 

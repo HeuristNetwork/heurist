@@ -689,7 +689,7 @@ $.widget( "heurist.editing_input", {
     * get value for given record type structure field
     *
     * dtFields - json with parameters that describes this input field
-    *            for recDetails it is taken from $Db.rst for other entities from config files in hsrv/entities
+    *            for recDetails it is taken from $Db.rst for other entities from config files in hserv/entities
     * 
     dty_Type,
     rst_DisplayName,  //label
@@ -3158,7 +3158,7 @@ $.widget( "heurist.editing_input", {
          
          
         var fileupload_opts = {
-    url: window.hWin.HAPI4.baseURL +  'hsrv/controller/fileUpload.php',
+    url: window.hWin.HAPI4.baseURL +  'hserv/controller/fileUpload.php',
     formData: [ {name:'db', value: window.hWin.HAPI4.database}, 
                 {name:'entity', value:this.configMode.entity},
                 {name:'version', value:this.configMode.version},

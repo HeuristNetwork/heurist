@@ -2073,7 +2073,7 @@ content = content.replace('http://heurist.sydney.edu.au/heurist/',window.hWin.HA
                             href = 'javascript:;';
 
                             var fileURL_forembed = window.hWin.HAPI4.baseURL
-                            + 'hsrv/controller/fileDownload.php?db=' 
+                            + 'hserv/controller/fileDownload.php?db=' 
                             + window.hWin.HAPI4.database + '&embedplayer=1&file='+obf[0];
 
                             /*div.pdf {
@@ -2607,10 +2607,10 @@ content = content.replace('http://heurist.sydney.edu.au/heurist/',window.hWin.HA
         var $dd = edit_form.find('#captcha_img');
         var id = window.hWin.HEURIST4.util.random();
         if(true){  //simple captcha
-            $dd.load(window.hWin.HAPI4.baseURL+'hsrv/utilities/captcha.php?id='+id);
+            $dd.load(window.hWin.HAPI4.baseURL+'hserv/utilities/captcha.php?id='+id);
         }else{ //image captcha
             $dd.empty();
-            $('<img src="'+window.hWin.HAPI4.baseURL+'hsrv/utilities/captcha.php?img='+id+'"/>').appendTo($dd);
+            $('<img src="'+window.hWin.HAPI4.baseURL+'hserv/utilities/captcha.php?img='+id+'"/>').appendTo($dd);
         }
     },
 

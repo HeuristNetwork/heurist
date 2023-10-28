@@ -258,7 +258,7 @@ $.widget( "heurist.lookupTLC", $.heurist.recordAction, {
         var that = this;
         var request = {service:sURL, serviceType:'tlcmap'};             
 
-        // performing request - see controller hsrv/controller/record_lookup.php for service external lookups
+        // performing request - see controller hserv/controller/record_lookup.php for service external lookups
         window.hWin.HAPI4.RecordMgr.lookup_external_service(request,
             function(response){
 

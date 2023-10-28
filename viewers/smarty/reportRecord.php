@@ -11,13 +11,13 @@ getLinkedRecords - returns array of linkedto and linkedfrom record IDs
 getWootText  - returns text related with given record ID
 */
 
-require_once dirname(__FILE__).'/../../hsrv/System.php';
-require_once dirname(__FILE__).'/../../hsrv/structure/search/dbsData.php';
-require_once dirname(__FILE__).'/../../hsrv/records/search/recordSearch.php';
-require_once dirname(__FILE__).'/../../hsrv/records/search/relationshipData.php';
-require_once dirname(__FILE__).'/../../hsrv/structure/dbsTerms.php';
+require_once dirname(__FILE__).'/../../hserv/System.php';
+require_once dirname(__FILE__).'/../../hserv/structure/search/dbsData.php';
+require_once dirname(__FILE__).'/../../hserv/records/search/recordSearch.php';
+require_once dirname(__FILE__).'/../../hserv/records/search/relationshipData.php';
+require_once dirname(__FILE__).'/../../hserv/structure/dbsTerms.php';
 
-require_once dirname(__FILE__).'/../../hsrv/utilities/Temporal.php';
+require_once dirname(__FILE__).'/../../hserv/utilities/Temporal.php';
 require_once dirname(__FILE__).'/../../vendor/autoload.php'; //for geoPHP
 //require_once dirname(__FILE__).'/../../records/woot/woot.php';
 

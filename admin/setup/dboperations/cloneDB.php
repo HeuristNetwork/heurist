@@ -37,11 +37,11 @@ define('MANAGER_REQUIRED', 1);
 define('PDIR','../../../');  //need for proper path to js and css    
 
 require_once dirname(__FILE__).'/../../../hclient/framecontent/initPageMin.php';
-require_once dirname(__FILE__).'/../../../hsrv/utilities/dbUtils.php';
+require_once dirname(__FILE__).'/../../../hserv/utilities/dbUtils.php';
 require_once dirname(__FILE__).'/../../../records/index/elasticSearch.php';
 require_once 'welcomeEmail.php';
 
-//require_once dirname(__FILE__).'/../../../hsrv/utilities/utils_db_load_script.php';
+//require_once dirname(__FILE__).'/../../../hserv/utilities/utils_db_load_script.php';
 
 $user_id = $system->get_user_id(); //keep user id (need to copy current user into cloned db for template cloning)
 $mysqli  = $system->get_mysqli();

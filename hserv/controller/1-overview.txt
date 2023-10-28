@@ -1,0 +1,54 @@
+
+Directory:    /hserv/controller
+
+Overview:   All files in this folder are services. They are utilized in hapi.js to obtain various data (in json format) from server side.
+
+
+
+utilsCollection.js - manages user's collection of record ids stored in SESSION
+
+
+--------------
+usr_info.php - controller for request from client side HAPI4.hSystemMgr (@todo rename to "system something")
+
+
+
+
+
+Notes:      Work process:
+            1. check permission
+            2. parse  $_REQUEST
+            3. call functions from   common/db_***.php
+            4. json response
+
+            
+            
+record_map_source.php - Converts kml,csv to geojson or downloads file (or zip) based on Datasource record id
+record_shp.php - Converts shp+dbf files to geojson output or downloads zip archive based on Datasource record id
+ 
+ 
+deprecated
+map_data.php - for google map interface only
+sys_structure.php  - used in import defintions only to retrieve structure from different database          
+            
+Updated:     29 Nov 2021
+
+----------------------------------------------------------------------------------------------------------------
+
+/**
+* @package     Heurist academic knowledge management system
+* @link        https://HeuristNetwork.org
+* @copyright   (C) 2005-2019 University of Sydney
+* @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
+* @author      Ian Johnson     <ian.johnson@sydney.edu.au>
+* @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
+* @version     4
+*/
+
+/*
+* Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except in compliance
+* with the License. You may obtain a copy of the License at http://www.gnu.org/licenses/gpl-3.0.txt
+* Unless required by applicable law or agreed to in writing, software distributed under the License is
+* distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
+* See the License for the specific language governing permissions and limitations under the License.
+*/

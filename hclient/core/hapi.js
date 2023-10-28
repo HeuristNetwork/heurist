@@ -95,7 +95,7 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
             installDir = script_name.replace(/\/([A-Za-z0-9_]+)\/(website|web|hml|tpl|view|edit|adm)\/.*/, '')+'/';
             if(installDir=='/') installDir = '/h6-alpha/';//'/heurist/';
         }else{
-            installDir = script_name.replace(/(((\?|admin|applications|common|context_help|export|hapi|hclient|hsrv|import|startup|records|redirects|search|viewers|help|ext|external)\/.*)|(index.*|test.php))/, ""); // Upddate in utils_host.php also
+            installDir = script_name.replace(/(((\?|admin|applications|common|context_help|export|hapi|hclient|hserv|import|startup|records|redirects|search|viewers|help|ext|external)\/.*)|(index.*|test.php))/, ""); // Upddate in utils_host.php also
         }
         
         //TODO: top directories - admin|applications|common| ... are defined in 3 separate locations. Rationalise.
@@ -228,7 +228,7 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
     /**
      * internal function see hSystemMgr, hRecordMgr - ajax request to server
      *
-     * @param {string} action - name of php script in hsrv/controller folder on server side
+     * @param {string} action - name of php script in hserv/controller folder on server side
      * @param {Request} request - data to be sent to server side
      * @param {callserverCallback} callback - callback, which receives object with following properties:
      * - `status`: a complete list of possible statuses can be found in `hclient/core/detectHeurist.js`
@@ -249,7 +249,7 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
         //set d=0 and c=0 to disable debug  https://www.nusphere.com/kb/technicalfaq/faq_dbg_related.htm
         request.DBGSESSID = (_use_debug) ? '425944380594800002;d=1,p=0,c=1' : '425944380594800002;d=0,p=0,c=0';
 
-        var url = that.baseURL + "hsrv/controller/" + action + ".php"; //+(new Date().getTime());
+        var url = that.baseURL + "hserv/controller/" + action + ".php"; //+(new Date().getTime());
         
         //@todo - count keys in request to avoid "Input variables exceeded 1000" on server side
         var cnt = _getKeyCount(request);
@@ -1773,7 +1773,7 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
     *       Database definitions - record structure, field types, terms
     *       @todo saved searches
     *
-    * see entityScrud.php and db[TableName].php in hsrv/entity
+    * see entityScrud.php and db[TableName].php in hserv/entity
     *
     * methods:
     *   config - loads entity config
@@ -1968,7 +1968,7 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
                 
                 var s_time = new Date().getTime() / 1000;
                 //'multi':1,  
-//[domain]/h6-alpha/hsrv/controller/entityScrud.php?db=[database]&a=structure&entity=all                
+//[domain]/h6-alpha/hserv/controller/entityScrud.php?db=[database]&a=structure&entity=all                
                  
                 _callserver('entityScrud', params,
                     function (response) {
@@ -2707,7 +2707,7 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
         //
         , getImageUrl: function (entityName, recID, version, def, database) {
 
-            return window.hWin.HAPI4.baseURL //redirected to + 'hsrv/controller/fileGet.php'
+            return window.hWin.HAPI4.baseURL //redirected to + 'hserv/controller/fileGet.php'
                 + '?db=' + (database ? database : window.hWin.HAPI4.database)
                 + (entityName ? ('&entity=' + entityName) : '') //rty by default
                 + '&icon=' + recID
@@ -2728,7 +2728,7 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
                     mode: 'metaonly'  // get width and height for image file
                 };
 
-                window.hWin.HEURIST4.util.sendRequest(window.hWin.HAPI4.baseURL + 'hsrv/controller/fileDownload.php',
+                window.hWin.HEURIST4.util.sendRequest(window.hWin.HAPI4.baseURL + 'hserv/controller/fileDownload.php',
                     request, null, callback);
 
             } else {

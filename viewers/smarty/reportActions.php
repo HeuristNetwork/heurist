@@ -20,8 +20,8 @@
     * See the License for the specific language governing permissions and limitations under the License.
     */
 
-require_once dirname(__FILE__).'/../../hsrv/structure/search/dbsData.php';
-require_once dirname(__FILE__).'/../../hsrv/structure/conceptCode.php';
+require_once dirname(__FILE__).'/../../hserv/structure/search/dbsData.php';
+require_once dirname(__FILE__).'/../../hserv/structure/conceptCode.php';
     
 class ReportActions {
     

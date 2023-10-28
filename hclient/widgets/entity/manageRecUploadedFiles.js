@@ -412,7 +412,7 @@ $.widget( "heurist.manageRecUploadedFiles", $.heurist.manageEntity, {
                     
                 let $select = this._edit_dialog.find('#external_repos');
                 this._edit_dialog.find('#upload_file_repository').fileupload({
-                    url: window.hWin.HAPI4.baseURL +  'hsrv/controller/fileUpload.php', 
+                    url: window.hWin.HAPI4.baseURL +  'hserv/controller/fileUpload.php', 
                     formData: [ {name:'db', value: window.hWin.HAPI4.database}, 
                                 {name:'entity', value:'temp'}, //to place file into scratch folder
                                 {name:'max_file_size', value:1024*1024}],
@@ -1160,7 +1160,7 @@ window.hWin.HAPI4.baseURL+'?db=' + window.hWin.HAPI4.database  //(needplayer?'&p
             return;
         }
 
-        var url = window.hWin.HAPI4.baseURL + 'hsrv/controller/record_output.php?db=' + window.hWin.HAPI4.database + '&file_refs=1&ids=' + ids.join(',');
+        var url = window.hWin.HAPI4.baseURL + 'hserv/controller/record_output.php?db=' + window.hWin.HAPI4.database + '&file_refs=1&ids=' + ids.join(',');
         window.open(url, '_blank');
     },
 

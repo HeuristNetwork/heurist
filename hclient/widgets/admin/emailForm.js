@@ -451,7 +451,7 @@ $.widget( "heurist.emailForm", {
         if(true){  //simple captcha
             var that = this;
             
-            var url = window.hWin.HAPI4.baseURL+'hsrv/utilities/captcha.php?json&id='+id;
+            var url = window.hWin.HAPI4.baseURL+'hserv/utilities/captcha.php?json&id='+id;
             
             //var request = {json:1,id:id};
             //window.hWin.HEURIST4.util.sendRequest(url, request, null, 
@@ -463,11 +463,11 @@ $.widget( "heurist.emailForm", {
 
         
         }else if(false){
-            var url = window.hWin.HAPI4.baseURL+'hsrv/utilities/captcha.php?id='+id;
+            var url = window.hWin.HAPI4.baseURL+'hserv/utilities/captcha.php?id='+id;
             $dd.load(url);
         }else{ //image captcha
             $dd.empty();
-            $('<img src="'+window.hWin.HAPI4.baseURL+'hsrv/utilities/captcha.php?img='+id+'"/>').appendTo($dd);
+            $('<img src="'+window.hWin.HAPI4.baseURL+'hserv/utilities/captcha.php?img='+id+'"/>').appendTo($dd);
         }
     },
     

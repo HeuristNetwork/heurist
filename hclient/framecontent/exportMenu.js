@@ -373,7 +373,7 @@ function hexportMenu( container ) {
                
             }else{
                 
-                script = 'hsrv/controller/record_output.php';
+                script = 'hserv/controller/record_output.php';
                 
                 if(opts.format=='iiif'){
                     

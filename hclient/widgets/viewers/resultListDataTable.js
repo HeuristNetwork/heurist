@@ -225,7 +225,7 @@ that._dout('myOnShowEvent');
                 if(recIds_list.length>0){
 
                     var queryURL = window.hWin.HAPI4.baseURL
-                    +'hsrv/controller/record_output.php?format=json'
+                    +'hserv/controller/record_output.php?format=json'
                     +'&db=' + window.hWin.HAPI4.database;
                     var queryStr = '';
                     var rec_total_count = recIds_list.length;

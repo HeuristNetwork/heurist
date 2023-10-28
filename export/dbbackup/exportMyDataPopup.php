@@ -28,8 +28,8 @@ set_time_limit(0); //no limit
 
 
 require_once dirname(__FILE__).'/../../hclient/framecontent/initPageMin.php';
-require_once dirname(__FILE__).'/../../hsrv/utilities/utils_file.php';
-require_once dirname(__FILE__).'/../../hsrv/records/search/recordFile.php';
+require_once dirname(__FILE__).'/../../hserv/utilities/utils_file.php';
+require_once dirname(__FILE__).'/../../hserv/records/search/recordFile.php';
 require_once dirname(__FILE__).'/../../external/php/Mysqldump8.php';
 
 
@@ -439,12 +439,12 @@ if($mode>1){
 
             echo_flush2("Exporting database definitions as readable text<br>");
 
-            $url = HEURIST_BASE_URL . "hsrv/structure/export/getDBStructureAsSQL.php?db=".HEURIST_DBNAME."&pretty=1";
+            $url = HEURIST_BASE_URL . "hserv/structure/export/getDBStructureAsSQL.php?db=".HEURIST_DBNAME."&pretty=1";
             saveURLasFile($url, $folder."/Database_Structure.txt"); //save to HEURIST_FILESTORE_DIR.'backup/'.HEURIST_DBNAME
 
             echo_flush2("Exporting database definitions as XML<br>");
             
-            $url = HEURIST_BASE_URL . "hsrv/structure/export/getDBStructureAsXML.php?db=".HEURIST_DBNAME;
+            $url = HEURIST_BASE_URL . "hserv/structure/export/getDBStructureAsXML.php?db=".HEURIST_DBNAME;
             saveURLasFile($url, $folder."/Database_Structure.xml"); //save to HEURIST_FILESTORE_DIR.'backup/'.HEURIST_DBNAME
 
 

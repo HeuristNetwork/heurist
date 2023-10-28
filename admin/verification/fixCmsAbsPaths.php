@@ -28,7 +28,7 @@
 define('PDIR','../../');  //need for proper path to js and css    
 
 require_once dirname(__FILE__).'/../../hclient/framecontent/initPageMin.php';
-require_once dirname(__FILE__).'/../../hsrv/records/edit/recordsBatch.php';
+require_once dirname(__FILE__).'/../../hserv/records/edit/recordsBatch.php';
 
 if( !isset($_REQUEST['db']) && $system->verifyActionPassword($_REQUEST['pwd'], $passwordForServerFunctions) ){
     ?>

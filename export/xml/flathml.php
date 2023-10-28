@@ -101,10 +101,10 @@ if (@$argv) {
 
 }
 
-require_once dirname(__FILE__).'/../../hsrv/System.php';
-require_once dirname(__FILE__).'/../../hsrv/structure/search/dbsData.php';
-require_once dirname(__FILE__).'/../../hsrv/records/search/recordSearch.php';
-require_once dirname(__FILE__).'/../../hsrv/structure/conceptCode.php';
+require_once dirname(__FILE__).'/../../hserv/System.php';
+require_once dirname(__FILE__).'/../../hserv/structure/search/dbsData.php';
+require_once dirname(__FILE__).'/../../hserv/records/search/recordSearch.php';
+require_once dirname(__FILE__).'/../../hserv/structure/conceptCode.php';
 
 
 if(@$_REQUEST['postdata']){

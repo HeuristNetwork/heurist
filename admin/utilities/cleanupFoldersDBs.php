@@ -85,9 +85,9 @@ if (@$argv) {
 
 
 require_once dirname(__FILE__).'/../../configIni.php'; // read in the configuration file
-require_once dirname(__FILE__).'/../../hsrv/consts.php';
-require_once dirname(__FILE__).'/../../hsrv/System.php';
-require_once dirname(__FILE__).'/../../hsrv/utilities/dbUtils.php';
+require_once dirname(__FILE__).'/../../hserv/consts.php';
+require_once dirname(__FILE__).'/../../hserv/System.php';
+require_once dirname(__FILE__).'/../../hserv/utilities/dbUtils.php';
 
 //retrieve list of databases
 $system = new System();

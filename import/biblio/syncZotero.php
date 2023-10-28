@@ -26,10 +26,10 @@ define('MANAGER_REQUIRED',1);
 define('PDIR','../../');  //need for proper path to js and css    
 
 require_once dirname(__FILE__).'/../../hclient/framecontent/initPageMin.php';
-require_once dirname(__FILE__).'/../../hsrv/structure/search/dbsData.php';
-require_once dirname(__FILE__).'/../../hsrv/records/edit/recordModify.php';
-require_once dirname(__FILE__).'/../../hsrv/structure/conceptCode.php';
-require_once dirname(__FILE__).'/../../hsrv/structure/import/dbsImport.php';
+require_once dirname(__FILE__).'/../../hserv/structure/search/dbsData.php';
+require_once dirname(__FILE__).'/../../hserv/records/edit/recordModify.php';
+require_once dirname(__FILE__).'/../../hserv/structure/conceptCode.php';
+require_once dirname(__FILE__).'/../../hserv/structure/import/dbsImport.php';
 require_once dirname(__FILE__).'/../../external/php/phpZotero.php';
 
 $system->defineConstants();

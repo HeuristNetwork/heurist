@@ -26,6 +26,6 @@
 parse_str($_SERVER['QUERY_STRING'], $vars);
 $query_string = http_build_query($vars);
 
-header('Location: ../hsrv/structure/export/getDBStructureAsSQL.php?'.$query_string);
+header('Location: ../hserv/structure/export/getDBStructureAsSQL.php?'.$query_string);
 exit;
 ?>

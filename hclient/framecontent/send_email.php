@@ -21,7 +21,7 @@
 define('PDIR','../../');  //need for proper path to js and css    
 
 require_once 'initPageMin.php';
-require_once dirname(__FILE__).'/../../hsrv/utilities/utils_mail.php';
+require_once dirname(__FILE__).'/../../hserv/utilities/utils_mail.php';
 
 // POST request
 if(isset($_POST['data'])) {

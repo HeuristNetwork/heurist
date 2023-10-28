@@ -39,7 +39,7 @@ define('DELETE_RECORDS', 1);
 define('PDIR','../../');  //need for proper path to js and css    
 
 require_once dirname(__FILE__).'/../../hclient/framecontent/initPageMin.php';
-require_once dirname(__FILE__).'/../../hsrv/records/edit/recordTitleMask.php';
+require_once dirname(__FILE__).'/../../hserv/records/edit/recordTitleMask.php';
 
 $mysqli = $system->get_mysqli();
 

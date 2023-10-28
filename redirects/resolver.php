@@ -142,7 +142,7 @@ $requestUri:
 
         $params['db'] = $database;
         
-        require_once '../hsrv/utilities/utils_host.php';
+        require_once '../hserv/utilities/utils_host.php';
         $host_params = getHostParams();
         
         if($action=='web' || $action=='website'){
@@ -167,7 +167,7 @@ $requestUri:
             $rewrite_path = '../index.php';
 
         }else {
-            require_once '../hsrv/dbaccess/utils_db.php';
+            require_once '../hserv/dbaccess/utils_db.php';
             
             $redirect = $host_params['server_url'] . $host_params['install_dir'];
         
@@ -358,7 +358,7 @@ if($database_url!=null){ //redirect to resolver for another database
     }
 }else if($entity!=null){
     
-    $redirect = '../hsrv/structure/export/getDBStructureAsXML.php?db='.$_REQUEST['db'].'&'.$entity.'='.$recid;
+    $redirect = '../hserv/structure/export/getDBStructureAsXML.php?db='.$_REQUEST['db'].'&'.$entity.'='.$recid;
     
 }else if($format=='html'){
     

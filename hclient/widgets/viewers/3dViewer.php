@@ -19,8 +19,8 @@
 * See the License for the specific language governing permissions and limitations under the License.
 */
 
-require_once dirname(__FILE__).'/../../../hsrv/System.php';
-require_once dirname(__FILE__).'/../../../hsrv/records/search/recordFile.php';
+require_once dirname(__FILE__).'/../../../hserv/System.php';
+require_once dirname(__FILE__).'/../../../hserv/records/search/recordFile.php';
 
 define('ERROR_REDIR', dirname(__FILE__).'/../../framecontent/infoPage.php');
 

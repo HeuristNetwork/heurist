@@ -35,8 +35,8 @@
 
 // TODO: We may need to hobble/delete some of the functionality on Heurist Reference Index db (HEURIST_INDEX_DATABASE) to avoid people
 // creating unwanted records or importing random crap into it
-require_once dirname(__FILE__).'/../../../hsrv/System.php';
-require_once dirname(__FILE__).'/../../../hsrv/utilities/dbUtils.php';
+require_once dirname(__FILE__).'/../../../hserv/System.php';
+require_once dirname(__FILE__).'/../../../hserv/utilities/dbUtils.php';
 
 if(@$_REQUEST["db"]!=HEURIST_INDEX_DATABASE){
     echo '0,This script allowed for Master Index database only';

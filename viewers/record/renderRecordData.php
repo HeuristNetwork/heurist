@@ -22,9 +22,9 @@
 * @package     Heurist academic knowledge management system
 * @subpackage  Records/View
 */  
-require_once dirname(__FILE__).'/../../hsrv/System.php';
-require_once dirname(__FILE__).'/../../hsrv/utilities/Temporal.php';
-require_once dirname(__FILE__).'/../../hsrv/structure/dbsTerms.php';
+require_once dirname(__FILE__).'/../../hserv/System.php';
+require_once dirname(__FILE__).'/../../hserv/utilities/Temporal.php';
+require_once dirname(__FILE__).'/../../hserv/structure/dbsTerms.php';
 
 $system = new System();
 $inverses = null;
@@ -35,12 +35,12 @@ if(!$system->init(@$_REQUEST['db'])){
 }
 
 //require_once dirname(__FILE__).'/../../records/woot/woot.php';
-require_once dirname(__FILE__).'/../../hsrv/records/search/recordFile.php';
-require_once dirname(__FILE__).'/../../hsrv/records/search/recordSearch.php';
-require_once dirname(__FILE__).'/../../hsrv/records/search/relationshipData.php';
-require_once dirname(__FILE__).'/../../hsrv/structure/search/dbsData.php';
-require_once dirname(__FILE__).'/../../hsrv/structure/dbsUsersGroups.php';
-require_once dirname(__FILE__).'/../../hsrv/structure/dbsTerms.php';
+require_once dirname(__FILE__).'/../../hserv/records/search/recordFile.php';
+require_once dirname(__FILE__).'/../../hserv/records/search/recordSearch.php';
+require_once dirname(__FILE__).'/../../hserv/records/search/relationshipData.php';
+require_once dirname(__FILE__).'/../../hserv/structure/search/dbsData.php';
+require_once dirname(__FILE__).'/../../hserv/structure/dbsUsersGroups.php';
+require_once dirname(__FILE__).'/../../hserv/structure/dbsTerms.php';
 
 
 define('ALLOWED_TAGS', '<i><b><u><em><strong><sup><sub><small><br>'); //for record title see output_chunker for other fields

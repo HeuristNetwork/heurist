@@ -33,8 +33,8 @@
 
 /* load some very basic HEURIST objects into top.HEURIST */
 
-require_once dirname(__FILE__).'/../../hsrv/System.php';
-require_once dirname(__FILE__).'/../../hsrv/structure/search/dbsData.php';
+require_once dirname(__FILE__).'/../../hserv/System.php';
+require_once dirname(__FILE__).'/../../hserv/structure/search/dbsData.php';
 
 $system = new System();
 if(!$system->init(@$_REQUEST['db'])){

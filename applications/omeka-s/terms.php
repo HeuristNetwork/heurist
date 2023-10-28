@@ -62,8 +62,8 @@ define('OWNER_REQUIRED',1);
 define('PDIR','../../');  //need for proper path to js and css    
 
 require_once dirname(__FILE__).'/../../hclient/framecontent/initPageMin.php';
-require_once dirname(__FILE__).'/../../hsrv/records/import/importParser.php';
-require_once dirname(__FILE__).'/../../hsrv/entity/dbDefTerms.php';
+require_once dirname(__FILE__).'/../../hserv/records/import/importParser.php';
+require_once dirname(__FILE__).'/../../hserv/entity/dbDefTerms.php';
 
 $mysqli = $system->get_mysqli();
 

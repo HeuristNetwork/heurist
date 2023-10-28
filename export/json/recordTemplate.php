@@ -19,13 +19,13 @@
 * See the License for the specific language governing permissions and limitations under the License.
 */
 
-require_once dirname(__FILE__).'/../../hsrv/System.php';
-require_once dirname(__FILE__).'/../../hsrv/structure/search/dbsData.php';
-require_once dirname(__FILE__).'/../../hsrv/records/search/recordSearch.php';
-require_once dirname(__FILE__).'/../../hsrv/structure/conceptCode.php';
+require_once dirname(__FILE__).'/../../hserv/System.php';
+require_once dirname(__FILE__).'/../../hserv/structure/search/dbsData.php';
+require_once dirname(__FILE__).'/../../hserv/records/search/recordSearch.php';
+require_once dirname(__FILE__).'/../../hserv/structure/conceptCode.php';
 
 if(!array_key_exists('rectype_ids', $_REQUEST)){
-    require_once dirname(__FILE__).'/../../hsrv/controller/record_output.php'; // attempt to export actual records
+    require_once dirname(__FILE__).'/../../hserv/controller/record_output.php'; // attempt to export actual records
     exit;
 }
 

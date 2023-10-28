@@ -1323,7 +1323,7 @@ $.widget( "heurist.search_faceted_wiz", {
                     return data;                                                   
                     /* from server
                     var node = data.node;
-                    var sURL = window.hWin.HAPI4.baseURL + "hsrv/controller/sys_structure.php";
+                    var sURL = window.hWin.HAPI4.baseURL + "hserv/controller/sys_structure.php";
                     data.result = {
                         url: sURL,
                         data: {db:window.hWin.HAPI4.database, mode:5, parentcode:node.data.code, 

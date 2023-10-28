@@ -29,7 +29,7 @@
 
 define('PDIR','../../../');  //need for proper path to js and css    
     
-require_once dirname(__FILE__).'/../../../hsrv/System.php';
+require_once dirname(__FILE__).'/../../../hserv/System.php';
 
 $error_msg = '';
 $isSystemInited = false;

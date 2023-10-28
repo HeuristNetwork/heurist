@@ -165,7 +165,7 @@ $.widget( "heurist.recordExport", $.heurist.recordAction, {
             }else{
                 request['extended'] = 1;
                 request['defs'] = 0; //don't include defintions
-                url += 'hsrv/controller/record_output.php';
+                url += 'hserv/controller/record_output.php';
             }
             
             if(false){

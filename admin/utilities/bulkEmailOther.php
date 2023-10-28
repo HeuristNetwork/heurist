@@ -22,8 +22,8 @@
 
 define('PDIR','../../');  //need for proper path to js and css    
 
-require_once dirname(__FILE__).'/../../hsrv/System.php';
-require_once dirname(__FILE__).'/../../hsrv/structure/conceptCode.php';
+require_once dirname(__FILE__).'/../../hserv/System.php';
+require_once dirname(__FILE__).'/../../hserv/structure/conceptCode.php';
 
 //header("Access-Control-Allow-Origin: *");
 header('Content-type: application/json;charset=UTF-8');
