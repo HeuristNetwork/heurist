@@ -155,7 +155,7 @@ class UploadHandler
             // take precedence over the following max_file_size setting:
             // need to set this value - to catch oversize on client size 
             // post_max_size will not be checked on server side: $_FILES will be empty
-            'max_file_size' => null,
+            'max_file_size' => null, //in bytes
             'min_file_size' => 1,
             // The maximum number of files for the upload directory:
             'max_number_of_files' => null,

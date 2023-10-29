@@ -49,25 +49,7 @@ $.widget( "heurist.selectFile", {
                 +'</div>').appendTo( this.element );
 
 
-        if(this.options.isdialog){
-
-            var $dlg = this.element.dialog({
-                autoOpen: true,
-                height: 640,
-                width: 840,
-                modal: true,
-                title: window.HR(this.options.title),
-                resizeStop: function( event, ui ) {
-                    var pele = that.element.parents('div[role="dialog"]');
-                    that.element.css({overflow: 'none !important', width:pele.width()-24 });
-                },
-                close:function(){
-                    that._as_dialog.remove();    
-                }
-            });
-            
-            this._as_dialog = $dlg; 
-        }
+        var emptyMessage = `Specified files (${this.options.extensions}) are not found in `+this.options.source;
         
         //resultList with images
 //init record list
@@ -85,7 +67,7 @@ $.widget( "heurist.selectFile", {
                        view_mode: 'thumbs',
                        
                        pagesize: 500,
-                       empty_remark: '',
+                       empty_remark: emptyMessage,
                        renderer: function(recordset, record){ 
                            
                            var recID   = recordset.fld(record, 'file_id');
@@ -147,7 +129,35 @@ $.widget( "heurist.selectFile", {
                 function(response){
                     if(response.status == window.hWin.ResponseStatus.OK){
                         
-                        that.recordList.resultList('updateResultSet', new hRecordSet(response.data));
+                        let recset = new hRecordSet(response.data);
+                        if(recset.length()>0){
+                            
+                            if(that.options.isdialog){
+
+                                var $dlg = that.element.dialog({
+                                    autoOpen: true,
+                                    height: 640,
+                                    width: 840,
+                                    modal: true,
+                                    title: window.HR(that.options.title),
+                                    resizeStop: function( event, ui ) {
+                                        var pele = that.element.parents('div[role="dialog"]');
+                                        that.element.css({overflow: 'none !important', width:pele.width()-24 });
+                                    },
+                                    close:function(){
+                                        that._as_dialog.remove();    
+                                    }
+                                });
+                                
+                                that._as_dialog = $dlg; 
+                            }
+                            
+                            
+                            that.recordList.resultList('updateResultSet', recset);
+                        }else{
+                            if(that._as_dialog) that._as_dialog.dialog('close');
+                            window.hWin.HEURIST4.msg.showMsgFlash(emptyMessage);    
+                        }
 
                     }else{
                         window.hWin.HEURIST4.msg.showMsgErr(response);

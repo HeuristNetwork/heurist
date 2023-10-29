@@ -3045,7 +3045,7 @@ $.widget( "heurist.editing_input", {
                 that.newvalues[$input.attr('id')] = value;
                     
                 this._on( $gicon, { click: function(){                                 
-                        $select_folder_dlg.select_folders({
+                        $select_folder_dlg.selectFolders({
                        onselect:function(newsel){
                             if(newsel){
                                 var newsel = newsel.join(';');
@@ -3162,7 +3162,7 @@ $.widget( "heurist.editing_input", {
     formData: [ {name:'db', value: window.hWin.HAPI4.database}, 
                 {name:'entity', value:this.configMode.entity},
                 {name:'version', value:this.configMode.version},
-                {name:'maxsize', value:this.configMode.size},
+                {name:'maxsize', value:this.configMode.size}, //dimension
                 {name:'registerAtOnce', value:this.configMode.registerAtOnce},
                 {name:'recID', value:that.options.recID}, //need to verify permissions
                 {name:'newfilename', value:newfilename }], //unique temp name
@@ -3172,6 +3172,8 @@ $.widget( "heurist.editing_input", {
     dataType: 'json',
     pasteZone: $input_img,
     dropZone: $input_img,
+    //to check file size on client side
+    max_file_size: Math.min(window.hWin.HAPI4.sysinfo['max_post_size'], window.hWin.HAPI4.sysinfo['max_file_size']),
     // add: function (e, data) {  data.submit(); },
     submit: function (e, data) { //start upload
     
@@ -3184,6 +3186,10 @@ $.widget( "heurist.editing_input", {
           });                        
         $progress_dlg.dialog('open'); 
         $progress_dlg.parent().find('.ui-dialog-titlebar-close').hide();
+    },
+    fail: function (e, response) {
+        $progress_dlg.dialog( "close" );
+        window.hWin.HEURIST4.msg.showMsgErr(response);
     },
     done: function (e, response) {
             //hide progress bar
@@ -3258,7 +3264,7 @@ $.widget( "heurist.editing_input", {
         fileupload_opts['formData'].push({name:'tiledImageStack', value:1});
         fileupload_opts['formData'].push({name: 'acceptFileTypes', value:'zip|mbtiles'});
         
-        $input.attr('accept','.zip, application/zip, mbtiles');
+        $input.attr('accept','.zip, .mbtiles');
     }                
        
                         //init upload widget
@@ -4103,7 +4109,10 @@ $.widget( "heurist.editing_input", {
         
         var that = this;
         
-        this.select_imagelib_dlg.selectFile({source:'assets', onselect:function(res){
+        this.select_imagelib_dlg.selectFile({
+                source: 'assets', 
+                extensions: 'png,svg',
+                onselect:function(res){
             if(res){
                 that.input_img.find('img').prop('src', res.url);
                 that.newvalues[$(that.inputs[0]).attr('id')] = res.path;  //$input

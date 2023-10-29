@@ -1,3 +1,5 @@
+ // @todo: move to utils_geo
+ // converts coordinate pairs (points) to WKT and calls callback function with result as parameter
  //
  // Requires external/js/geodesy-master/utm.js
  //

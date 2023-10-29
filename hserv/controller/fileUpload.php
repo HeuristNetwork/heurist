@@ -64,7 +64,7 @@ if($system->init(@$_REQUEST['db'])){
         }else if(!($entity_name=='recUploadedFiles' || $entity_name=='sysBugreport'))
         { //for all other entities other than recUploadedFile must be admin of dbowners group
                 if(!$system->is_admin()){
-                  $response = $system->addError(HEURIST_REQUEST_DENIED);
+                  $response = $syfstem->addError(HEURIST_REQUEST_DENIED);
                 }
         }
     }
@@ -174,7 +174,7 @@ if($response!=null){
         $entityDir = HEURIST_FILESTORE_DIR.'entity/'.$entity_name.'/';
         
         $version = @$_REQUEST['version']!='icon'?'thumbnail':'icon';
-        $maxsize = intval(@$_REQUEST['maxsize'])>0?intval($_REQUEST['maxsize']):120;
+        $maxsize = intval(@$_REQUEST['maxsize'])>0?intval($_REQUEST['maxsize']):120; //dimension
 
         $options = array(
                 'upload_dir' => $entityDir,

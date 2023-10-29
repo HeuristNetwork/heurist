@@ -17,11 +17,15 @@
 * See the License for the specific language governing permissions and limitations under the License.
 */
 
-$.widget( "heurist.select_folders", {
+$.widget( "heurist.selectFolders", {
 
     // default options
     options: {
         isdialog: true, //show in dialog or embedded
+        
+        title: 'Select Folders',
+        
+        emptyMessage: 'No subfolders found',
 
         multiselect: true, 
         
@@ -125,53 +129,6 @@ $.widget( "heurist.select_folders", {
             ent_header.hide();
         }
         
-                
-
-        if(this.options.isdialog){
-            
-            var buttons = {};
-            buttons[window.hWin.HR('Select')]  = function() {
-                
-                var wtrr = that._treeview.fancytree("getTree");
-                // Get a list of all selected TOP nodes
-                var snodes = wtrr.getSelectedNodes(true);
-                // ... and convert to a key array:
-                var res = [];
-                var selRootKeys = $.map(snodes, function(node){
-                    var currname = node.getKeyPath()
-                    if(currname[0]=='/') currname = currname.substring(1);
-                    
-                    res.push(currname);
-                });
-                
-                if($.isFunction(that.options.onselect)){
-                    that.options.onselect.call(that, res);           
-                }
-                that._as_dialog.dialog('close');
-            }; 
-            buttons[window.hWin.HR('Cancel')]  = function() {
-                that._as_dialog.dialog('close');
-            }; 
-
-            var $dlg = this.element.dialog({
-                autoOpen: true,
-                height: 640,
-                width: 480,
-                modal: true,
-                title: "Select Folders",
-                resizeStop: function( event, ui ) {
-                    var pele = that.element.parents('div[role="dialog"]');
-                    that.element.css({overflow: 'none !important', width:pele.width()-24 });
-                },
-                close:function(){
-                    that._as_dialog.remove();    
-                },
-                buttons: buttons
-            });
-            
-            this._as_dialog = $dlg; 
-        }
-        
         this.recordList = this.element.find('.recordList');
 
         /*        
@@ -210,7 +167,13 @@ $.widget( "heurist.select_folders", {
             window.hWin.HAPI4.SystemMgr.get_sysfolders(opts, 
                 function(response){
                     if(response.status == window.hWin.ResponseStatus.OK){
-                        that._initTreeView( response.data );
+console.log( response.data );                        
+                        if($.isArray(reponse.data) && response.data.length>0){
+                            that._showAsDialog();
+                            that._initTreeView( response.data );    
+                        }else{
+                            window.hWin.HEURIST4.msg.showMsgFlash(window.hWin.HR(this.options.emptyMessage));
+                        }
                     }else{
                         window.hWin.HEURIST4.msg.showMsgErr(response);
                     }
@@ -229,6 +192,58 @@ $.widget( "heurist.select_folders", {
     _destroy: function() {
         // remove generated elements
         this.recordList.remove();
+    },
+    
+    //
+    //
+    //
+    _showAsDialog: function(){
+        
+        if(this.options.isdialog){
+            
+            var buttons = {};
+            buttons[window.hWin.HR('Select')]  = function() {
+                
+                var wtrr = that._treeview.fancytree("getTree");
+                // Get a list of all selected TOP nodes
+                var snodes = wtrr.getSelectedNodes(true);
+                // ... and convert to a key array:
+                var res = [];
+                var selRootKeys = $.map(snodes, function(node){
+                    var currname = node.getKeyPath()
+                    if(currname[0]=='/') currname = currname.substring(1);
+                    
+                    res.push(currname);
+                });
+                
+                if($.isFunction(that.options.onselect)){
+                    that.options.onselect.call(that, res);           
+                }
+                that._as_dialog.dialog('close');
+            }; 
+            buttons[window.hWin.HR('Cancel')]  = function() {
+                that._as_dialog.dialog('close');
+            }; 
+
+            var $dlg = this.element.dialog({
+                autoOpen: true,
+                height: 640,
+                width: 480,
+                modal: true,
+                title: window.hWin.HR(this.options.title),
+                resizeStop: function( event, ui ) {
+                    var pele = that.element.parents('div[role="dialog"]');
+                    that.element.css({overflow: 'none !important', width:pele.width()-24 });
+                },
+                close:function(){
+                    that._as_dialog.remove();    
+                },
+                buttons: buttons
+            });
+            
+            this._as_dialog = $dlg; 
+        }        
+        
     },
     
     //
