@@ -111,7 +111,7 @@ private static function _readDataFile($filename, $type=null, $validate=true){
                 {
                     if(!(count(self::$system->getError())>0))
                         self::$system->addError(HEURIST_ACTION_BLOCKED, 
-                            'The data file contains data which does not correspond with expectations.<br> "Record type" section not found');
+                            'The data file contains data which does not correspond with expectations.<br> "Record type" section not found. You might be trying to load a data template file.');
                 }
                 
                 
@@ -301,13 +301,13 @@ private static function hmlToJson($filename){
 
         }//records
     }else{
-        self::$system->addError(HEURIST_ACTION_BLOCKED, 'Cannot find any records within the provided xml file,<br>records need to be incased within "records" elements.', null, 'XML import error');
+        self::$system->addError(HEURIST_ACTION_BLOCKED, 'Cannot find any records within the provided xml file,<br>records need to be within "records" elements.<br>You might be trying to load a template file without data.', null, 'XML import error');
         return null;
     }
 
     if($hasValidIdCount == 0){
         $extra_details = "<br><br>If this occurs when Heurist says it is doing an automatic update,<br>please advise the Heurist team (Bug Report in the Help menu at the top right) so that we can fix this problem.<br>" . (count($invalidIds) > 0) ? "The list of invalid ids: " . implode(',', $invalidIds) : "";
-        self::$system->addError(HEURIST_ACTION_BLOCKED, 'There are no valid record IDs within the provided xml file.<br>You may have accidentally uploaded the xml template file.' . $extra_details, null, 'XML import error');
+        self::$system->addError(HEURIST_ACTION_BLOCKED, 'There are no valid record IDs within the provided xml file.<br>You may be trying to upload an xml data template rather than actual data.' . $extra_details, null, 'XML import error');
         return null;
     }
     

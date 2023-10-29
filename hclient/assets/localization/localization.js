@@ -201,7 +201,7 @@ regional['ENG'] = {
         'menu-import-zotero-hint': 'Synchronise with a Zotero web library - new records are added to Heurist, existing records updated',
         'menu-import-xml-hint': 'Import records from another database',
         'menu-import-kml-hint': 'Import KML files (geographic data in WKT can be imported from CSV &amp; tab delimited files)',
-        'menu-import-get-template-hint': 'Get a template that describes database structure', 
+        'menu-import-get-template-hint': 'Get a template for creating an XML or JSon data file which can be imported into Heurist', 
     'Media Files': '',
         'menu-files-upload': 'Upload media files',
         'menu-files-index': 'Index media files',
