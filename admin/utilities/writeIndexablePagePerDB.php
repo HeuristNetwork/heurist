@@ -475,4 +475,25 @@ if($res <= 0){
 }else{
     echo $tabs0.' Updated index.html'.$eol;
 }
+
+// Check index directory for database pages that don't exist anymore
+$files = scandir($index_dir);
+if(is_array($files)){ // iterate through files
+
+    foreach ($files as $full_filename) {
+        
+        $filename = pathinfo("$index_dir/$full_filename", PATHINFO_FILENAME);
+
+        if(empty($filename) || $filename === '.' || $filename === 'index' || in_array($filename, $databases)){
+            continue;
+        }else{ // delete file
+
+            fileDelete($index_dir/$full_filename);
+            echo $tabs0.' Removed old index for '.$filename.$eol;
+        }
+    }
+
+}else{ // failed
+    echo $tabs0.' We were unable to scan the index directory'.$eol;
+}
 ?>
