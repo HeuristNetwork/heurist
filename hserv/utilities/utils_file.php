@@ -1961,6 +1961,7 @@ function autoDetectSeparators($filename, $csv_linebreak='auto', $csv_enclosure='
     
     
     $delimiters = array("\t"=>0,','=>0,';'=>0,':'=>0,'|'=>0,'-'=>0);
+    $force_tabs = false; // if the first line contains tab separators, default to tabs
     
     foreach ($delimiters as $csv_delimiter=>$val){
         $line_no = 0;
@@ -1983,7 +1984,12 @@ function autoDetectSeparators($filename, $csv_linebreak='auto', $csv_enclosure='
                 break;
             }else{
                 if($line_no==0){
-                    $delimiters[$csv_delimiter] = $cnt; 
+                    $delimiters[$csv_delimiter] = $cnt;
+
+                    if($cnt > 0 && $csv_delimiter == "\t"){
+                        $force_tabs = true;
+                        break 2;
+                    }
                 }else if($delimiters[$csv_delimiter] != $cnt){
                     $delimiters[$csv_delimiter] = 0; //not use
                     break;
@@ -1997,15 +2003,20 @@ function autoDetectSeparators($filename, $csv_linebreak='auto', $csv_enclosure='
     }//for delimiters
     fclose($handle);
     
-    $max = 0;
-    $csv_delimiter = ',';//default
-    foreach ($delimiters as $delimiter=>$cnt){
-        if($cnt>$max){
-            $csv_delimiter = $delimiter;
-            $max = $cnt;
+    if($force_tabs){
+        $csv_delimiter = "tab";
+    }else{
+
+        $max = 0;
+        $csv_delimiter = ',';//default
+        foreach ($delimiters as $delimiter=>$cnt){
+            if($cnt>$max){
+                $csv_delimiter = $delimiter;
+                $max = $cnt;
+            }
         }
+        if($csv_delimiter=="\t") $csv_delimiter = "tab";
     }
-    if($csv_delimiter=="\t") $csv_delimiter = "tab";
     
     if($eol=="\r\n"){
         $csv_linebreak='win';
