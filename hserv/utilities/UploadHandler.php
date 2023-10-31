@@ -433,8 +433,9 @@ $siz = get_php_bytes('upload_max_filesize');
             $file->name = $file_name;
             $file->subfolder = $subfolder;
             $file->size = $this->get_file_size(
-                $this->get_upload_path($file_name)
+                $this->get_upload_path($file_name)   //chunk size
             );
+            //$file->total_size = $this->get_file_size();
             $file->url = $this->get_download_url($file->name, $file->subfolder);
             foreach($this->options['image_versions'] as $version => $options) {
                 if (!empty($version)) {
@@ -1394,6 +1395,7 @@ $siz = get_php_bytes('upload_max_filesize');
         $file->name = $this->get_file_name($uploaded_file, $name, $subfolder, $size, $type, $error,
             $index, $content_range);
         $file->size = $this->fix_integer_overflow((int)$size);
+        $file->size_total = $file->size;
         $file->type = $type;
         $file->original_name = $original_name;
         $file->subfolder = $subfolder;

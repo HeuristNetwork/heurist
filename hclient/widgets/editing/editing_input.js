@@ -3158,7 +3158,7 @@ $.widget( "heurist.editing_input", {
          
          
         var fileupload_opts = {
-    url: window.hWin.HAPI4.baseURL +  'hserv/controller/fileUpload.php',
+    url: window.hWin.HAPI4.baseURL + 'hserv/controller/fileUpload.php',
     formData: [ {name:'db', value: window.hWin.HAPI4.database}, 
                 {name:'entity', value:this.configMode.entity},
                 {name:'version', value:this.configMode.version},
@@ -3168,7 +3168,9 @@ $.widget( "heurist.editing_input", {
                 {name:'newfilename', value:newfilename }], //unique temp name
     //acceptFileTypes: /(\.|\/)(gif|jpe?g|png)$/i
     //autoUpload: true,
-    sequentialUploads:true,
+    multipart: true,
+    maxChunkSize: 1024*1024*10, //10M
+    sequentialUploads: true,
     dataType: 'json',
     pasteZone: $input_img,
     dropZone: $input_img,
@@ -3192,6 +3194,7 @@ $.widget( "heurist.editing_input", {
         window.hWin.HEURIST4.msg.showMsgErr(response);
     },
     done: function (e, response) {
+        
             //hide progress bar
             $progress_dlg.dialog( "close" );
         

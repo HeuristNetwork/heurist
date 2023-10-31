@@ -29,7 +29,7 @@ $response = null;
 $system = new System();
 
 $content_length = (int)@$_SERVER['CONTENT_LENGTH'];
-            
+
 $post_max_size = get_php_bytes('post_max_size');
 if ($post_max_size && ($content_length > $post_max_size)) {
     $error = 'The uploaded file exceeds the maximum size ('. ini_get('post_max_size') .'Bytes) set for this server (post_max_size in php.ini)';
@@ -216,8 +216,8 @@ if($response!=null){
     //@todo set print_response=false
     //and send to client standard HEURIST response
     $response = null;
-    $res = $upload_handler->get_response(); //it returns file object
-
+    $res = $upload_handler->get_response(); //it returns file object  $res['size]
+        
     foreach($res['files'] as $idx=>$file){
         if(@$file->error){
             $sMsg = "Sorry, file was not processed due to the following reported error:\n\n".$file->error.".\n\n"; // Error Log
@@ -245,43 +245,48 @@ if($response!=null){
             break;            
         }
         
-        if($entity_name=="recUploadedFiles"){ //register at once
-            
-            if($registerAtOnce==1){
-            
-                $entity = new DbRecUploadedFiles($system, null);
-                $ret = $entity->registerFile($file, null, true, $tiledImageStack); //it returns ulf_ID
+        if( !($file->size_total>0) || $file->size_total==$file->size){
+        
+            if($entity_name=="recUploadedFiles"){ //register at once
                 
-                if( is_bool($ret) && !$ret ){
-                    $response = $system->getError();
-                }else{
-                    $file->ulf_ID = $ret;
+                if($registerAtOnce==1){
+                
+                    $entity = new DbRecUploadedFiles($system, null);
+                    $ret = $entity->registerFile($file, null, true, $tiledImageStack); //it returns ulf_ID
+                    
+                    if( is_bool($ret) && !$ret ){
+                        $response = $system->getError();
+                    }else{
+                        $file->ulf_ID = $ret;
+                    }
+                }else if(!@$file->thumbnailUrl){ //if UploadHandler does not create thumb - creates it as image with text (file extension)
+                    
+                    $thumb_file = HEURIST_SCRATCH_DIR.'thumbs/'.$new_file_name;
+                    $img = UtilsImage::createFromString($file->type?$file->type:'XXX!');
+                    imagepng($img, $thumb_file);//save into file
+                    imagedestroy($img);
+                    $res['files'][$idx] ->thumbnailUrl = HEURIST_FILESTORE_URL.'scratch/thumbs/'.$new_file_name;
                 }
-            }else if(!@$file->thumbnailUrl){ //if UploadHandler does not create thumb - creates it as image with text (file extension)
-                
-                $thumb_file = HEURIST_SCRATCH_DIR.'thumbs/'.$new_file_name;
-                $img = UtilsImage::createFromString($file->type?$file->type:'XXX!');
-                imagepng($img, $thumb_file);//save into file
-                imagedestroy($img);
-                $res['files'][$idx] ->thumbnailUrl = HEURIST_FILESTORE_URL.'scratch/thumbs/'.$new_file_name;
+                    
             }
+            else if($entity_name=="temp" && $is_autodect_csv) {
                 
-        }else if($entity_name=="temp" && $is_autodect_csv) {
-            
-            $filename = HEURIST_FILESTORE_DIR.'scratch/'.$file->original_name;
-            
-            $extension = strtolower(pathinfo($filename, PATHINFO_EXTENSION));
-            $isKML = ($extension=='kml' || $extension=='kmz');
-            if($isKML){ //no need to detect params for kml
-                $res['files'][$idx]->isKML = true;
-            }else{
-                $csv_params = autoDetectSeparators( $filename );
-                if(is_array($csv_params) && !@$csv_params['error']){
-                    $res['files'][$idx]->csv_params = $csv_params;
+                $filename = HEURIST_FILESTORE_DIR.'scratch/'.$file->original_name;
+                
+                $extension = strtolower(pathinfo($filename, PATHINFO_EXTENSION));
+                $isKML = ($extension=='kml' || $extension=='kmz');
+                if($isKML){ //no need to detect params for kml
+                    $res['files'][$idx]->isKML = true;
+                }else{
+                    $csv_params = autoDetectSeparators( $filename );
+                    if(is_array($csv_params) && !@$csv_params['error']){
+                        $res['files'][$idx]->csv_params = $csv_params;
+                    }
                 }
             }
         }
     }
+    
     if($response==null){
         $response = array("status"=>HEURIST_OK, "data"=> $res);
     }
