@@ -49,6 +49,7 @@
     allowWebAccessForForlder
     
     folderContent  - get list of files in folder as search result (record list)
+    folderSize2
     folderSize
     folderTree
     folderTreeToFancyTree - NOT USED
@@ -647,7 +648,7 @@
                         return $totalSize;
                     }
                 }
-                // If System calls did't work, use slower PHP 5
+                // If System calls did't work, use slower PHP
                 $files = new \RecursiveIteratorIterator(new \RecursiveDirectoryIterator($dir, RecursiveDirectoryIterator::SKIP_DOTS));
                 foreach ($files as $file) {
                     

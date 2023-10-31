@@ -127,7 +127,13 @@ $.widget( "heurist.searchRecUploadedFiles", $.heurist.searchEntity, {
         this.selectGroup.css({position:'absolute','height':'1.8em','bottom':0});
         this.selectGroup.tabs();
         if(!window.hWin.HEURIST4.util.isempty(this.options.filter_group_selected)){
-                this.selectGroup.tabs('option','active',this.options.filter_group_selected=='external'?1:0);
+                let grp_idx = 0;
+                if(this.options.filter_group_selected=='external'){
+                    grp_idx = 1;
+                }else if(this.options.filter_group_selected=='tiled'){
+                    grp_idx = 2;
+                }
+                this.selectGroup.tabs('option','active',grp_idx);
         }
         this.selectGroup.find('ul').css({'background':'none','border':'none'});
         this.selectGroup.css({'background':'none','border':'none'});
@@ -194,7 +200,7 @@ $.widget( "heurist.searchRecUploadedFiles", $.heurist.searchEntity, {
         this.input_sort_type.val('recent');
 
         if(!window.hWin.HEURIST4.util.isempty(domain)){
-            this.selectGroup.tabs('option','active',domain=='external'?1:0);
+            this.selectGroup.tabs('option','active',(domain=='tiled')?2:(domain=='external'?1:0));
         }
 
         this.startSearch();
@@ -211,7 +217,7 @@ $.widget( "heurist.searchRecUploadedFiles", $.heurist.searchEntity, {
         
             var domain = this.currentDomain();
             
-            if(this.options.additionMode=='tiled'){
+            if(domain=='tiled'){
                 
                 request['ulf_OrigFileName'] = '_tiled';                        
 
@@ -230,7 +236,7 @@ $.widget( "heurist.searchRecUploadedFiles", $.heurist.searchEntity, {
                 }else{
                     request['ulf_ExternalFileReference'] = '-NULL';                        
                 }
-                
+                request['ulf_OrigFileName'] = '-_tiled';
             }
             else{
                 
@@ -296,7 +302,7 @@ $.widget( "heurist.searchRecUploadedFiles", $.heurist.searchEntity, {
     
     currentDomain:function(){
             var domain = this.selectGroup.tabs('option','active');
-            return domain==1?'external':'local';
+            return domain==1?'external':((domain==2)?'tiled':'local');
     },
     
     getUploadContainer:function(){

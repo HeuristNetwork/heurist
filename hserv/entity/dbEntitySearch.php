@@ -272,7 +272,8 @@ class DbEntitySearch
                 if(strpos($value, '-')===0){
                     $negate = true;
                     $value = substr($value, 1);
-                }else if(strpos($value, '=')===0){
+                }
+                if(strpos($value, '=')===0){
                     $exact = true;
                     $value = substr($value, 1);
                 }else if(strpos($value, '<')===0){
@@ -332,8 +333,11 @@ class DbEntitySearch
                     $res = $between.$values[0].' and '.$values[1];
                 }else{
                     
-                    if($eq=='=' && !$exact && ($data_type == 'freetext' || $data_type == 'url' || $data_type == 'blocktext') ){
+                    if(($eq=='=' || $eq=='!=') && !$exact && ($data_type == 'freetext' || $data_type == 'url' || $data_type == 'blocktext') ){
                         $eq = 'like';
+                        if($negate){
+                            $eq = 'not like';
+                        }
                         $k = strpos($value,"%");
                         if($k===false || ($k>0 && $k+1<strlen($value))){
                             $value = '%'.$value.'%';

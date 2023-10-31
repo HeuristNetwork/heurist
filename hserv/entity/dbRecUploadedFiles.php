@@ -715,7 +715,7 @@ When we open "iiif_image" in mirador viewer we generate manifest dynamically.
                                 //detect 1) mimetype 2) summary size of stack images 3) copy first image as thumbnail
                                 $size = folderSize2($dest);
                                 
-                                //get first file from first folder
+                                //get first file from first folder - use it as thumbnail
                                 $filename = folderFirstTileImage($dest);
                                 
                                 $thumb_name = HEURIST_THUMB_DIR.'ulf_'.$ulf_ObfuscatedFileID.'.png';

@@ -855,8 +855,11 @@ $.widget( "heurist.manageRecUploadedFiles", $.heurist.manageEntity, {
         var recTitleHint;
         if(rectype=='external'){
             var val = fld('ulf_OrigFileName');
-            if(val.indexOf('_tiled@')==0){
-                val = val.substr(7);
+            if(val.indexOf('_tiled')==0){
+                rectype = 'tiled';
+                if(val.indexOf('_tiled@')==0){ 
+                        val = val.substr(7);
+                }
                 if(!window.hWin.HEURIST4.util.isempty(val)){
                     recTitle = '<div class="item" style="width:auto">'+val+'</div>';    
                 }
@@ -1103,8 +1106,10 @@ window.hWin.HAPI4.baseURL+'?db=' + window.hWin.HAPI4.database  //(needplayer?'&p
                     this._selectAndClose();
                     return;        
                 }else{
-                    
                     var domain = (window.hWin.HEURIST4.util.isempty(fieldvalues['ulf_ExternalFileReference']))?'local':'external';
+                    if(fieldvalues('ulf_OrigFileName').indexOf('_tiled')==0){
+                            domain = 'tiled';
+                    }
                     //it was insert - select recent and search
                     this.searchForm.searchRecUploadedFiles('searchRecent', domain);
                 }
