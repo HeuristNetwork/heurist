@@ -609,7 +609,7 @@ $.widget( "heurist.mapping", {
     //
     //
     defineCRS: function(CRS){
-
+        
         if(this.crs_current!=CRS){
             this.crs_current = CRS;
 
@@ -635,14 +635,20 @@ $.widget( "heurist.mapping", {
                 this.is_crs_simple = false;
                 this.nativemap.worldCopyJump = false;
                 this.nativemap.setMinZoom(0);
-                this.nativemap.setMaxZoom(19);
+                this.nativemap.setMaxZoom(20);
                 
                 $(this.map_scale._container).show();
             }
             
             
             //map.setView(center); //we need this, because after changing crs the center is shifted (as mentioned above probably it's an issue to)
-            this.nativemap._resetView(this.nativemap.getCenter(), this.nativemap.getZoom(), true);            
+            try{
+                this.nativemap._resetView(this.nativemap.getCenter(), this.nativemap.getZoom(), true);                
+            }catch(e){
+                this.nativemap.options.crs = '';
+                console.error(e);
+            }
+            
         }
         
     },

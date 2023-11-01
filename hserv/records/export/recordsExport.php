@@ -178,8 +178,9 @@ public static function output($data, $params){
     //
     if($params['format']=='geojson'){
         
-        $find_geo_by_pointer_rty =  (@$params['suppress_linked_places']!=1) 
-               && (self::$system->user_GetPreference('deriveMapLocation', 1)==1);
+        $find_geo_by_pointer_rty =  @$params['geofields'] ||
+               ((@$params['suppress_linked_places']!=1) 
+               && (self::$system->user_GetPreference('deriveMapLocation', 1)==1));
                
         if($find_geo_by_pointer_rty){ //true
             

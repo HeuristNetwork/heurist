@@ -548,7 +548,7 @@ function hMapLayer2( _options ) {
                     }else{
                         geojson_data = response;
                     }
-                    
+
                     if( window.hWin.HEURIST4.util.isGeoJSON(geojson_data, true) 
                         || window.hWin.HEURIST4.util.isArrayNotEmpty(timeline_data) )
                     {

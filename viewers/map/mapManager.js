@@ -628,7 +628,7 @@ function hMapManager( _options )
                                                     var all_hidden = true;
                                                     for(var i=0; i<themes.length; i++){
                                                         if(themes[i].isSelected()){
-                                                            all_hidden = flase;
+                                                            all_hidden = false;
                                                             break;
                                                         }
                                                     }
