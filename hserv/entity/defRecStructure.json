@@ -1,347 +1,396 @@
 {
-        "entityName": "defRecStructure",
+    "entityName": "defRecStructure",
 
-        "tableName": "defRecStructure",
-        
-        "tablePrefix": "rst",
-        
-        "helpContent": "defRecStructure.html",
-        
-        "searchFormContent": "searchDefRecStructure.html",
-        
-        "entityTitle": "Field",
-        "entityTitlePlural": "Record Type Fields",
-        "empty_remark": "",
-        
-        "fields": [
-                {
-                    "dtID": "rst_ID",
-                    "keyField": true,
-                    "dtFields":{
-                        "dty_Type":"integer",
-                        "dty_Role":"primary",
-                        "rst_DisplayName": "ID:",
-                        "rst_Display":"hidden"
-                    }
-                },
-                {
-                    "dtID": "rst_RecTypeID",
-                    "dtFields":{
-                        "dty_Type":"integer",
-                        "rst_Display":"hidden",
-                        "rst_DisplayName":"Rectype"
-                    }
-                },
-                {
-                    "dtID": "rst_DisplayOrder",
-                    "dtFields":{
-                        "dty_Type":"integer",
-                        "rst_Display":"hidden",
-                        "rst_DisplayName":"Order"
-                    }
-                },
-                {
-                    "dtID": "rst_DetailTypeID",
-                    "dtFields":{
-                        "dty_Type":"integer",
-                        "rst_Display":"hidden",
-                        "rst_DisplayName":"ID"
-                    }   
-                },
-                {
-                    "dtID": "rst_Modified",
-                    "dtFields":{
-                        "dty_Type":"date",
-                        "rst_Display":"hidden"
-                    }
-                },
-                {
-                    "dtID": "rst_DisplayName",
-                    "dtFields":{
-                        "dty_Type":"freetext",
-                        "dty_Role":"title",
-                        "dty_Size":255,
-                        "rst_DisplayName": "Field label:",
-                        "rst_DisplayHelpText": "The name of the field, displayed next to the field in data entry.<br>Used to identify the field in report formats, analyses and so forth", 
-                        "rst_DisplayExtendedDescription":"",
-                        "rst_DisplayWidth":60,
-                        "rst_DefaultValue":"",
-                        "rst_RequirementType":"required",
-                        "rst_MaxValues":1
-                    }
-                },
-                {
-                    "dtID": "rst_DisplayWidth_ext",
-                    "dtFields":{
-                        "dty_Type":"integer",
-                        "dty_Role":"virtual",
-                        "rst_Class":"freetext blocktext float",
-                        "rst_DisplayName":"Field width:",
-                        "rst_DisplayHelpText": "Display width of this field in the data entry form (does not limit maximum data length)",
-                        "rst_RequirementType":"optional"
-                    }
-                },
-                {  
-                    "dtID": "rst_SeparatorType",
-                    "dtFields":{
-                        "dty_Type":"enum",
-                        "dty_Role":"virtual",
-                        "rst_Class":"group_separator",
-                        "rst_DisplayName":"Type:",
-                        "rst_DefaultValue": "tabs",
-                        "rst_DisplayHelpText": "Collapsible Block header delimits a block of fields which can be opened/closed/moved together.<br>Consecutive Tab headers create a row of tabs containing the fields which follow them.<br>Simple Divider is an independant heading with no grouping function.",
-                        "rst_FieldConfig": [
-                            {"key":"", "title": "GROUPS", "disabled": true},
-                            {"key":"tabs", "title":"Tab", "depth": 1},
-                            {"key":"tabs_new", "title":"Tab (new group)", "depth": 1},
-                            {"key":"group_break", "title":"Static block", "depth": 1},
-                            {"key":"accordion", "title":"Collapsible block (initially collapsed)", "depth": 1},
-                            {"key":"expanded", "title":"Collapsible block (initially expanded)", "depth": 1},
-                            {"key":"", "title": "WITHIN-GROUPS HEADING", "disabled": true},
-                            {"key":"group", "title":"Section heading", "depth": 1},
-                            {"key":"accordion_inner", "title":"Collapsible block (initially collapsed)", "depth": 1},
-                            {"key":"expanded_inner", "title":"Collapsible block (initially expanded)", "depth": 1}
-                        ]
-                    }
-                },
-                {
-                    "dtID": "rst_DisplayHelpText",
-                    "dtFields":{
-                        "dty_Type":"blocktext",
-                        "rst_DisplayName":"Help text:",
-                        "dty_Size":255,
-                        "rst_DisplayWidth":60,
-                        "rst_DisplayHeight":3,
-                        "rst_DisplayHelpText": "Use &lt;br&gt; for new line and &lt;a href=&quot;web page URL&quot; target=_blank&gt;Help&lt;/a&gt; for a link to a help page.", 
-                        "rst_RequirementType":"recommended"
-                    }
-                },
-                {
-                    "dtID": "dty_Type",
-                    "dtFields":{
-                        "dty_Type":"enum",
-                        "dty_Role":"virtual",
-                        "rst_Display":"hidden",
-                        "rst_DisplayName":"Data type:",
-                        "rst_DisplayHelpText": "", 
-                        "rst_DefaultValue":"freetext",
-                        "rst_FieldConfig":[
-                            {"key":"blocktext", "title":"Memo (multi-line)"},
-                            {"key":"date", "title":"Date / temporal"},
-                            {"key":"enum", "title":"Terms list"},
-                            {"key":"file", "title":"File"},
-                            {"key":"float", "title":"Numeric"},
-                            {"key":"freetext", "title":"Text (single line)"},
-                            {"key":"geo", "title":"Geospatial"},
-                            {"key":"integer", "title":"Numeric - integer"},
-                            {"key":"relationtype", "title":"Relationship type"},
-                            {"key":"relmarker", "title":"Relationship marker"},
-                            {"key":"resource", "title":"Record pointer"},
-                            {"key":"separator", "title":"Header"}
-                            ]
-                    }
-                },
-                {
-                    "dtID": "rst_TermsAsButtons",
-                    "dtFields":{
-                        "dty_Type":"boolean",
-                        "rst_Display":"hidden",
-                        "rst_DisplayName":"Display as buttons:",
-                        "rst_DisplayHelpText":"If checked, will use radio buttons if single value field, checkboxes if multi-value, reverts automatically to dropdown if >20 values.",
-                        "rst_DefaultValue":"0",
-                        "rst_FieldConfig":["1", "0"]
-                    }
-                },
-                {
-                    "dtID": "rst_RequirementType",
-                    "dtFields":{
-                        "dty_Type":"enum",
-                        "rst_DisplayName":"Requirement:",
-                        "rst_DisplayHelpText": "Define requirement type", 
-                        "rst_DefaultValue":"optional",
-                        "rst_FieldConfig":[
-                            {"key":"required", "title":"required"},
-                            {"key":"recommended", "title":"recommended"},
-                            {"key":"optional", "title":"optional"},
-                            {"key":"forbidden", "title":"hidden"}]
-                    }
-                },
-                {
-                    "dtID": "rst_Repeatability",
-                    "dtFields":{
-                        "dty_Type":"enum",
-                        "dty_Role":"virtual",
-                        "rst_DisplayName":"Repeatability:",
-                        "rst_DefaultValue":"single",
-                        "rst_FieldConfig":["single","repeatable","limited"]
-                    }
-                },
-                {  "dtID": "rst_MaxValues",
-                    "dtFields":{
-                        "dty_Type":"integer",
-                        "rst_Display":"hidden",
-                        "rst_DefaultValue":"1",
-                        "rst_DisplayName":"Maximum values:",
-                        "rst_DisplayHelpText": "Maximum number of values per record for this detail"
-                    }
-                },
-                {
-                    "dtID": "rst_DisplayWidth",
-                    "dtFields":{
-                        "dty_Type":"integer",
-                        "dty_Size":3,
-                        "rst_Class":"freetext blocktext float",
-                        "rst_DisplayName": "Field width:",
-                        "rst_DisplayHelpText": "Display width of this field in the data entry form (does not limit maximum data length)",
-                        "rst_RequirementType":"optional",
-                        "rst_DisplayWidth":5,
-                        "rst_MaxValues":1
-                    }
-                },
-                {
-                    "dtID": "rst_DisplayHeight",
-                    "dtFields":{
-                        "dty_Type":"integer",
-                        "dty_Size":3,
-                        "rst_Class":"blocktext",
-                        "rst_DisplayName": "Height:",
-                        "rst_DisplayHelpText": "Display height in rows of this field in the data entry form",
-                        "rst_RequirementType":"optional",
-                        "rst_DisplayWidth":5,
-                        "rst_MaxValues":1
-                    }
-                },
-                {  "dtID": "rst_TermPreview",
-                    "dtFields":{
-                        "dty_Type":"enum",
-                        "dty_Role":"virtual",
-                        "rst_Class":"enum relmarker relationtype",
-                        "rst_Display":"hidden",
-                        "rst_DisplayName":"Default Value:",
-                        "rst_DisplayHelpText": "Select default value from the list of terms available"
-                    }
-                },
-                {  "dtID": "rst_TermVocabularyName",
-                    "dtFields":{
-                        "dty_Type":"freetext",
-                        "dty_Role":"virtual",
-                        "rst_Class":"enum relmarker",
-                        "rst_DisplayName":"Vocabulary(terms):",
-                        "rst_Display":"readonly"
-                    }
-                },
-                {  "dtID": "rst_FilteredJsonTermIDTree",
-                    "dtFields":{
-                        "dty_Type":"freetext",
-                        "dty_Role":"virtual",
-                        "rst_Display":"hidden"
-                    }
-                },
-                {  "dtID": "dty_TermIDTreeNonSelectableIDs",
-                    "dtFields":{
-                        "dty_Type":"freetext",
-                        "dty_Role":"virtual",
-                        "rst_DisplayName":"Term headers:",
-                        "rst_Display":"hidden"
-                    }
-                },
-                {
-                    "dtID": "rst_PtrFilteredIDs",
-                    "dtFields":{
-                        "dty_Type":"resource",
-                        "dty_Role":"virtual",
-                        "rst_Class":"resource relmarker",
-                        "rst_Display":"hidden",
-                        "rst_DisplayName":"Target record type(s):",
-                        "rst_DisplayHelpText": "Determines which record types this pointer field can point to. It is preferable to select target record types than to leave the pointer unconstrained", 
-                        "rst_FieldConfig": {"entity":"DefRecTypes","csv":true}
-                    }
-                },
-                {
-                    "dtID": "rst_PointerMode",
-                    "dtFields":{
-                        "dty_Type":"enum",
-                        "rst_Display":"hidden",
-                        "rst_Class":"resource",
-                        "rst_DisplayName":"Pointer mode:",
-                        "rst_DefaultValue":"dropdown_add",
-                        "rst_DisplayHelpText": "For child record pointers, only standard addition modes are available",
-                        "rst_FieldConfig":[
-                            {"key":"dropdown_add", "title":"Dropdown (add OK, list max #)"},
-                            {"key":"dropdown", "title":"Dropdown (no add, list max #)"},
-                            {"key":"addorbrowse", "title":"add or browse"},
-                            {"key":"addonly", "title":"add only"},
-                            {"key":"browseonly", "title":"browse only"}]
-                    }
-                },
-                {
-                    "dtID": "rst_PointerBrowseFilter",
-                    "dtFields":{
-                        "dty_Type":"freetext",
-                        "rst_Class":"resource",
-                        "rst_Display":"hidden",
-                        "rst_DisplayWidth":60,
-                        "rst_DisplayName":"Filter browse list:",
-                        "rst_DisplayHelpText": "Filter and/or sort list of potential target records (eg. by type, by date)"
-                    }
-                },
-                {
-                    "dtID": "rst_CreateChildIfRecPtr",
-                    "dtFields":{
-                        "dty_Type":"boolean",
-                        "rst_Class":"resource",
-                        "rst_Display":"hidden",
-                        "rst_DisplayName":"Child records:",
-                        "rst_DisplayHelpText": "New records created via this field become child records. Click &quot;i&quot; for further information.",
-                        "rst_FieldConfig":["1","0"]
-                    }
-                },
-                {  "dtID": "rst_DefaultValue",
-                    "dtFields":{
-                        "dty_Type":"freetext",
-                        "rst_Class":"blocktext date",
-                        "rst_DisplayName":"Default Value:",
-                        "rst_DisplayHelpText": "Select or enter the default value to be inserted automatically into new records"
-                    }
-                },
-                {  "dtID": "rst_DefaultValue_inc",
-                    "dtFields":{
-                        "dty_Type":"freetext",
-                        "dty_Role":"virtual",
-                        "rst_Class":"freetext integer float",
-                        "rst_DisplayName":"Default Value:",
-                        "rst_DisplayHelpText": "Select or enter the default value to be inserted automatically into new records"
-                    }
-                },
-                {  "dtID": "rst_DefaultValue_resource",
-                    "dtFields":{
-                        "dty_Type":"resource",
-                        "dty_Role":"virtual",
-                        "rst_Class":"resource",
-                        "rst_DisplayName":"Default Value:",
-                        "rst_DisplayHelpText": "Select record to be default resource/linked record",
-                        "rst_FieldConfig": {"entity":"records"}
-                    }
-                },
-                {
-                    "dtID": "rst_SeparatorRequirementType",
-                    "dtFields":{
-                        "dty_Type":"boolean",
-                        "dty_Role":"virtual",
-                        "rst_Class":"group_separator",
-                        "rst_DisplayName":"Hidden:",
-                        "rst_DisplayHelpText": "Not applicable for Collapsible block and Tab header", 
-                        "rst_DefaultValue":"optional",
-                        "rst_FieldConfig":["forbidden","optional"]
-                    }
-                },
-                {
-                    "groupHeader": "Additional",
-                    "groupType": "accordion",
-                    "groupHeaderClass": "ui-heurist-bg-light",
-                    "groupStyle": null,
-                    "children":[
-                
+    "tableName": "defRecStructure",
+    
+    "tablePrefix": "rst",
+    
+    "helpContent": "defRecStructure.html",
+    
+    "searchFormContent": "searchDefRecStructure.html",
+    
+    "entityTitle": "Field",
+    "entityTitlePlural": "Record Type Fields",
+    "empty_remark": "",
+    
+    "fields": [
+            {
+                "dtID": "rst_ID",
+                "keyField": true,
+                "dtFields":{
+                    "dty_Type":"integer",
+                    "dty_Role":"primary",
+                    "rst_DisplayName": "ID:",
+                    "rst_Display":"hidden"
+                }
+            },
+            {
+                "dtID": "rst_RecTypeID",
+                "dtFields":{
+                    "dty_Type":"integer",
+                    "rst_Display":"hidden",
+                    "rst_DisplayName":"Rectype"
+                }
+            },
+            {
+                "dtID": "rst_DisplayOrder",
+                "dtFields":{
+                    "dty_Type":"integer",
+                    "rst_Display":"hidden",
+                    "rst_DisplayName":"Order"
+                }
+            },
+            {
+                "dtID": "rst_DetailTypeID",
+                "dtFields":{
+                    "dty_Type":"integer",
+                    "rst_Display":"hidden",
+                    "rst_DisplayName":"ID"
+                }   
+            },
+            {
+                "dtID": "rst_Modified",
+                "dtFields":{
+                    "dty_Type":"date",
+                    "rst_Display":"hidden"
+                }
+            },
+            {
+                "dtID": "rst_DisplayName",
+                "dtFields":{
+                    "dty_Type":"freetext",
+                    "dty_Role":"title",
+                    "dty_Size":255,
+                    "rst_DisplayName": "Field label:",
+                    "rst_DisplayHelpText": "The name of the field, displayed next to the field in data entry. Used to identify the field in report formats, analyses and so forth", 
+                    "rst_DisplayExtendedDescription":"",
+                    "rst_DisplayWidth":40,
+                    "rst_DefaultValue":"",
+                    "rst_RequirementType":"required",
+                    "rst_MaxValues":1
+                }
+            },
+            {  
+                "dtID": "rst_SeparatorType",
+                "dtFields":{
+                    "dty_Type":"enum",
+                    "dty_Role":"virtual",
+                    "rst_Class":"group_separator",
+                    "rst_DisplayName":"Type:",
+                    "rst_DefaultValue": "tabs",
+                    "rst_DisplayHelpText": "Collapsible Block header delimits a block of fields which can be opened/closed/moved together.<br>Consecutive Tab headers create a row of tabs containing the fields which follow them.<br>Simple Divider is an independant heading with no grouping function.",
+                    "rst_FieldConfig": [
+                        {"key":"", "title": "GROUPS", "disabled": true},
+                        {"key":"tabs", "title":"Tab", "depth": 1},
+                        {"key":"tabs_new", "title":"Tab (new group)", "depth": 1},
+                        {"key":"group_break", "title":"Static block", "depth": 1},
+                        {"key":"accordion", "title":"Collapsible block (initially collapsed)", "depth": 1},
+                        {"key":"expanded", "title":"Collapsible block (initially expanded)", "depth": 1},
+                        {"key":"", "title": "WITHIN-GROUPS HEADING", "disabled": true},
+                        {"key":"group", "title":"Section heading", "depth": 1},
+                        {"key":"accordion_inner", "title":"Collapsible block (initially collapsed)", "depth": 1},
+                        {"key":"expanded_inner", "title":"Collapsible block (initially expanded)", "depth": 1}
+                    ]
+                }
+            },
+            {
+                "dtID": "rst_DisplayHelpText",
+                "dtFields":{
+                    "dty_Type":"blocktext",
+                    "rst_DisplayName":"Help text:",
+                    "dty_Size":255,
+                    "rst_DisplayWidth":60,
+                    "rst_DisplayHeight":3,
+                    "rst_DisplayHelpText": "Can be dhown under field. Use &lt;br&gt; for new line and &lt;a href=&quot;web page URL&quot; target=_blank&gt;Help&lt;/a&gt; for a link to a help page.", 
+                    "rst_RequirementType":"recommended"
+                }
+            },
+            {
+                "dtID": "dty_Type",
+                "dtFields":{
+                    "dty_Type":"enum",
+                    "dty_Role":"virtual",
+                    "rst_Display":"hidden",
+                    "rst_DisplayName":"Data type:",
+                    "rst_DisplayHelpText": "", 
+                    "rst_DefaultValue":"freetext",
+                    "rst_FieldConfig":[
+                        {"key":"blocktext", "title":"Memo (multi-line)"},
+                        {"key":"date", "title":"Date / temporal"},
+                        {"key":"enum", "title":"Terms list"},
+                        {"key":"file", "title":"File"},
+                        {"key":"float", "title":"Numeric"},
+                        {"key":"freetext", "title":"Text (single line)"},
+                        {"key":"geo", "title":"Geospatial"},
+                        {"key":"integer", "title":"Numeric - integer"},
+                        {"key":"relationtype", "title":"Relationship type"},
+                        {"key":"relmarker", "title":"Relationship marker"},
+                        {"key":"resource", "title":"Record pointer"},
+                        {"key":"separator", "title":"Header"}
+                    ]
+                }
+            },
+            {
+                "dtID": "rst_DisplayWidth_ext",
+                "dtFields":{
+                    "dty_Type":"integer",
+                    "dty_Role":"virtual",
+                    "rst_Class":"freetext blocktext float",
+                    "rst_DisplayName":"Field size:",
+                    "rst_DisplayHelpText": "(does not limit maximum data length)",
+                    "rst_RequirementType":"optional"
+                }
+            },
+            {
+                "dtID": "rst_DisplayWidth",
+                "dtFields":{
+                    "dty_Type":"integer",
+                    "dty_Size":3,
+                    "rst_Class":"freetext blocktext float",
+                    "rst_DisplayName": "Field size:",
+                    "rst_DisplayHelpText": "(does not limit maximum data length)",
+                    "rst_RequirementType":"optional",
+                    "rst_DisplayWidth":5,
+                    "rst_MaxValues":1
+                }
+            },
+            {
+                "dtID": "rst_DisplayHeight",
+                "dtFields":{
+                    "dty_Type":"integer",
+                    "dty_Size":3,
+                    "rst_Class":"blocktext",
+                    "rst_DisplayName": "Height:",
+                    "rst_DisplayHelpText": "Display height in rows of this field in the data entry form",
+                    "rst_RequirementType":"optional",
+                    "rst_DisplayWidth":5,
+                    "rst_MaxValues":1
+                }
+            },
+            {
+                "dtID": "rst_TermsAsButtons",
+                "dtFields":{
+                    "dty_Type":"boolean",
+                    "rst_Display":"hidden",
+                    "rst_DisplayName":"Display as buttons:",
+                    "rst_DisplayHelpText":"If checked, will use radio buttons if single value field, checkboxes if multi-value, reverts automatically to dropdown if >20 values.",
+                    "rst_DefaultValue":"0",
+                    "rst_FieldConfig":["1", "0"]
+                }
+            },
+            {
+                "dtID": "rst_RequirementType",
+                "dtFields":{
+                    "dty_Type":"enum",
+                    "rst_DisplayName":"Requirement:",
+                    "rst_DisplayHelpText": "Define requirement type", 
+                    "rst_DefaultValue":"optional",
+                    "rst_FieldConfig":[
+                        {"key":"required", "title":"required"},
+                        {"key":"recommended", "title":"recommended"},
+                        {"key":"optional", "title":"optional"},
+                        {"key":"forbidden", "title":"hidden"}
+                    ]
+                }
+            },
+            {
+                "dtID": "rst_Repeatability",
+                "dtFields":{
+                    "dty_Type":"enum",
+                    "dty_Role":"virtual",
+                    "rst_DisplayName":"Repeatability:",
+                    "rst_DefaultValue":"single",
+                    "rst_FieldConfig":["single","repeatable","limited"]
+                }
+            },
+            {  
+                "dtID": "rst_MaxValues",
+                "dtFields":{
+                    "dty_Type":"integer",
+                    "rst_Display":"hidden",
+                    "rst_DefaultValue":"1",
+                    "rst_DisplayName":"Maximum values:",
+                    "rst_DisplayHelpText": "Maximum number of values per record for this detail"
+                }
+            },
+            
+            {  
+                "dtID": "rst_DefaultValue",
+                "dtFields":{
+                    "dty_Type":"freetext",
+                    "rst_Class":"blocktext date",
+                    "rst_DisplayName":"Default Value (new records):",
+                    "rst_DisplayHelpText": "Select or enter the default value to be inserted automatically into new records"
+                }
+            },
+            {  
+                "dtID": "rst_DefaultValue_inc",
+                "dtFields":{
+                    "dty_Type":"freetext",
+                    "dty_Role":"virtual",
+                    "rst_Class":"freetext integer float",
+                    "rst_DisplayName":"Default Value (new records):",
+                    "rst_DisplayHelpText": "Select or enter the default value to be inserted automatically into new records"
+                }
+            },
+            {  "dtID": "rst_DefaultValue_resource",
+                "dtFields":{
+                    "dty_Type":"resource",
+                    "dty_Role":"virtual",
+                    "rst_Class":"resource",
+                    "rst_DisplayName":"Default Value (new records):",
+                    "rst_DisplayHelpText": "Select record to be default resource/linked record",
+                    "rst_FieldConfig": {"entity":"records"}
+                }
+            },
+            {  
+                "dtID": "rst_TermPreview",
+                "dtFields":{
+                    "dty_Type":"enum",
+                    "dty_Role":"virtual",
+                    "rst_Class":"enum relmarker relationtype",
+                    "rst_Display":"hidden",
+                    "rst_DisplayName":"Default Value (new records):",
+                    "rst_DisplayHelpText": "Select default value from the list of terms available"
+                }
+            },
+            {  
+                "dtID": "rst_TermVocabularyName",
+                "dtFields":{
+                    "dty_Type":"freetext",
+                    "dty_Role":"virtual",
+                    "rst_Class":"enum relmarker",
+                    "rst_DisplayName":"Vocabulary (terms):",
+                    "rst_Display":"readonly"
+                }
+            },
+            {  
+                "dtID": "rst_FilteredJsonTermIDTree",
+                "dtFields":{
+                    "dty_Type":"freetext",
+                    "dty_Role":"virtual",
+                    "rst_Display":"hidden"
+                }
+            },
+            {  
+                "dtID": "dty_TermIDTreeNonSelectableIDs",
+                "dtFields":{
+                    "dty_Type":"freetext",
+                    "dty_Role":"virtual",
+                    "rst_DisplayName":"Term headers:",
+                    "rst_Display":"hidden"
+                }
+            },
+            {
+                "dtID": "rst_PtrFilteredIDs",
+                "dtFields":{
+                    "dty_Type":"resource",
+                    "dty_Role":"virtual",
+                    "rst_Class":"resource relmarker",
+                    "rst_Display":"hidden",
+                    "rst_DisplayName":"Target record type(s):",
+                    "rst_DisplayHelpText": "Determines which record types this pointer field can point to. It is preferable to select target record types than to leave the pointer unconstrained", 
+                    "rst_FieldConfig": {"entity":"DefRecTypes","csv":true}
+                }
+            },
+            {
+                "dtID": "rst_PointerMode",
+                "dtFields":{
+                    "dty_Type":"enum",
+                    "rst_Display":"hidden",
+                    "rst_Class":"resource",
+                    "rst_DisplayName":"Pointer mode:",
+                    "rst_DefaultValue":"dropdown_add",
+                    "rst_DisplayHelpText": "For child record pointers, only standard addition modes are available",
+                    "rst_FieldConfig":[
+                        {"key":"dropdown_add", "title":"Dropdown (add OK, list max #)"},
+                        {"key":"dropdown", "title":"Dropdown (no add, list max #)"},
+                        {"key":"addorbrowse", "title":"add or browse"},
+                        {"key":"addonly", "title":"add only"},
+                        {"key":"browseonly", "title":"browse only"}
+                    ]
+                }
+            },
+            {
+                "dtID": "rst_PointerBrowseFilter",
+                "dtFields":{
+                    "dty_Type":"freetext",
+                    "rst_Class":"resource",
+                    "rst_Display":"hidden",
+                    "rst_DisplayWidth":60,
+                    "rst_DisplayName":"Filter browse list:",
+                    "rst_DisplayHelpText": "Filter and/or sort list of potential target records (eg. by type, by date)"
+                }
+            },
+            {
+                "dtID": "rst_CreateChildIfRecPtr",
+                "dtFields":{
+                    "dty_Type":"boolean",
+                    "rst_Class":"resource",
+                    "rst_Display":"hidden",
+                    "rst_DisplayName":"Child records:",
+                    "rst_DisplayHelpText": "New records created via this field become child records. Click &quot;i&quot; for further information.",
+                    "rst_FieldConfig":["1","0"]
+                }
+            },
+            {
+                "dtID": "rst_SeparatorRequirementType",
+                "dtFields":{
+                    "dty_Type":"boolean",
+                    "dty_Role":"virtual",
+                    "rst_Class":"group_separator",
+                    "rst_DisplayName":"Hidden:",
+                    "rst_DisplayHelpText": "Not applicable for Collapsible block and Tab header", 
+                    "rst_DefaultValue":"optional",
+                    "rst_FieldConfig":["forbidden","optional"]
+                }
+            },
+            {
+                "dtID": "rst_SemanticReferenceURL",
+                "dtFields":{
+                    "dty_Type":"freetext",
+                    "dty_Size":250,
+                    "rst_DisplayWidth":80,
+                    "rst_DisplayName": "Semantic/Reference URI:",
+                    "rst_DisplayHelpText": "The URI to a semantic definition or web page describing this field used within this record type" 
+                }
+            },
+            {
+                "dtID": "rst_NonOwnerVisibility",
+                "dtFields":{
+                    "dty_Type":"enum",
+                    "rst_DisplayName":"Restrict visibility:",
+                    "rst_DisplayHelpText": "Determines whether the field can be viewed by users other than the record owner/owner group", 
+                    "rst_DisplayExtendedDescription":"viewable",
+                    "rst_DisplayWidth":45,
+                    "rst_DefaultValue":"viewable",
+                    "rst_RequirementType":"optional",
+                    "rst_MaxValues":1,
+                    "rst_FieldConfig":[
+                        {"key":"public", "title":"visible to anyone who can view record"},
+                        {"key":"pending", "title":"visible to anyone + hide-from-public checkbox"},
+                        {"key":"viewable", "title":"visible to logged in users only"},
+                        {"key":"hidden", "title":"visible to owner/owner group only"}
+                    ]
+                }
+            },
+            {
+                "dtID": "rst_CalcFunctionID",
+                "dtFields":{
+                    "dty_Type":"resource",
+                    "rst_Class":"freetext blocktext integer float enum date",
+                    "rst_DisplayWidth":60,
+                    "rst_DisplayName":"Formula:",
+                    "rst_DisplayHelpText":"Define formula if value of this field will be calculated",
+                    "rst_FieldConfig": {"entity":"DefCalcFunctions"}
+                }
+            },
+            {
+                "groupHeader": "Additional",
+                "groupType": "accordion",
+                "groupHeaderClass": "ui-heurist-bg-light",
+                "groupStyle": null,
+                "children":[
                     {
                         "dtID": "rst_DisplayExtendedDescription",
                         "dtFields":{
@@ -367,24 +416,6 @@
                         }
                     },
                     {
-                        "dtID": "rst_NonOwnerVisibility",
-                        "dtFields":{
-                            "dty_Type":"enum",
-                            "rst_DisplayName":"Restrict visibility:",
-                            "rst_DisplayHelpText": "Determines whether the field can be viewed by users other than the record owner/owner group", 
-                            "rst_DisplayExtendedDescription":"viewable",
-                            "rst_DisplayWidth":45,
-                            "rst_DefaultValue":"viewable",
-                            "rst_RequirementType":"optional",
-                            "rst_MaxValues":1,
-                            "rst_FieldConfig":[
-                                {"key":"public", "title":"visible to anyone who can view record"},
-                                {"key":"pending", "title":"visible to anyone + hide-from-public checkbox"},
-                                {"key":"viewable", "title":"visible to logged in users only"},
-                                {"key":"hidden", "title":"visible to owner/owner group only"}]
-                        }
-                    },
-                    {
                         "dtID": "rst_MayModify",
                         "dtFields":{
                             "dty_Type":"enum",
@@ -398,37 +429,19 @@
                             "rst_FieldConfig":[
                                 {"key":"open", "title":"Editable"},
                                 {"key":"discouraged", "title":"Edit discouraged"},
-                                {"key":"locked", "title":"Readonly/locked"}]
+                                {"key":"locked", "title":"Readonly/locked"}
+                            ]
                         }
                     },
-                    {  "dtID": "rst_LocallyModified",
+                    {  
+                        "dtID": "rst_LocallyModified",
                         "dtFields":{
                             "dty_Type":"integer",
                             "rst_Display":"hidden",
                             "rst_DefaultValue":"0"
                         }
-                    },
-                    {
-                        "dtID": "rst_SemanticReferenceURL",
-                        "dtFields":{
-                            "dty_Type":"freetext",
-                            "dty_Size":250,
-                            "rst_DisplayWidth":80,
-                            "rst_DisplayName": "Semantic/Reference URI:",
-                            "rst_DisplayHelpText": "The URI to a semantic definition or web page describing this field used within this record type" 
-                        }
-                    },
-                    {
-                        "dtID": "rst_CalcFunctionID",
-                        "dtFields":{
-                            "dty_Type":"resource",
-                            "rst_Class":"freetext blocktext integer float enum date",
-                            "rst_DisplayWidth":60,
-                            "rst_DisplayName":"Formula:",
-                            "rst_DisplayHelpText":"Define formula if value of this field will be calculated",
-                            "rst_FieldConfig": {"entity":"DefCalcFunctions"}
-                        }
                     }
-                ]}                
-     ]
+                ]
+            }
+    ]
 }

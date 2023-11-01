@@ -97,7 +97,7 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
                         +'style="display: inline-block;position:absolute;right:8px;padding-top:5px;cursor:default;font-weight:bold;cursor:pointer;">Count'
                     +'</span>'
                     +'<div class="treeView" style="margin:12px -10px 0 -10px;"/>' //treeview
-                    +'<div class="editForm editFormRtStructure" style="top:0px;display:none">EDITOR</div>'
+                    +'<div class="editForm editFormRtStructure" style="display:none;padding:5px;">EDITOR</div>'
                     +'<div class="recordList" style="display:none"/>'
                 +'</div>';
             
@@ -1578,125 +1578,120 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
             
         if(this.previewEditor)
         {
-            if(true || this.options.showEditorInline){
-                
-                //place rts editor into record edit form
-                var isHeader = false;
-                var ed_ele = this.previewEditor.find('fieldset[data-dtid='+this._currentEditID+']');
-                
-                if(ed_ele.length==0){
-                    ed_ele = this.previewEditor.find('div[data-dtid='+this._currentEditID+']');
-                }else{
-                    isHeader = true;
-                }
-                    
-                if(ed_ele.length==0){ //popup edit, currently used for fields/headers that are hidden in receditor
-                    if(!this.editForm.hasClass('ent_content_full')){
-                        //put editForm back to original container
-                        this.editForm
-                            .css({'margin-left':'0px'})
-                            .addClass('ent_content_full')
-                            .appendTo(this.previewEditor.parent());
-                    }
-                    //open in popup editor
-                    this.options.edit_height = 250;
-                    this.showEditFormDialog(false);
-                    this._edit_dialog.dialog('option','close', function(){
-                        that._closeFormlet();
-                    });
-                    this._edit_dialog.removeClass('ui-heurist-bg-light').parent().addClass('ui-heurist-design');
-                }else{
-                    //make field edit formlet in "design" color
-                    this.editForm
-                        .css({'margin-left':'209px'})
-                        .removeClass('ent_content_full ui-heurist-bg-light')
-                        .addClass('ui-heurist-design-fade');
-                    
-                    var ed_cont;
-                    if(this.editForm.parent().hasClass('editor-container')){
-                        //already created
-                        ed_cont = this.editForm.parent();
-                    }else{
-                        //create new table div for editor
-                        ed_cont = $('<div class="editor-container" style="display:table">');
-                        this.editForm.appendTo(ed_cont);
-                    }
-                    
-                    //remove bg color for previous label
-                    this.previewEditor.find('div.header').removeClass('ui-heurist-design-fade');    
-                    
-                    if(isHeader){
-                        //insert as fist child for header
-                        ed_ele.prepend( ed_cont );
-                        //ed_cont.appendTo(ed_ele); //prepend
-                    }else{
-                        ed_ele.find('div.header').addClass('ui-heurist-design-fade');    
-                        ed_cont.insertAfter(ed_ele);    
-                    }
-                    //for empty fieldsets
-                    if(!this.editForm.parents('fieldset:first').is(':visible')){
-                        this.editForm.parents('fieldset:first').show();
-                    }
-                    
-                    //expand accordion or tab
-                    var ele = this.editForm.parents('.ui-accordion:first');
-                    if(ele.length>0){
-                        
-                        var atab = this.editForm.parents('.ui-accordion-content');
-                        if(!atab.is(':visible')){
-                            var header_id = atab.attr('aria-labelledby');
-                            $.each(ele.find('.ui-accordion-header'),function(idx,item){
-                                if($(item).attr('id') == header_id){
-                                    ele.accordion( 'option', 'active', idx);            
-                                    return false;
-                                }
-                            });
-                        }
-                        
-                        
-                    }else{
-                        ele = this.editForm.parents('.ui-tabs');
-                        if(ele.length>0){
-                            var tabIndex = this.editForm.parents('fieldset:first').attr('data-tabindex');
-                            ele.tabs( 'option', 'active', tabIndex);
-                        }
-                    }
-                    
-                    //adjust preview editor position
-                    var ele_ed = this.previewEditor.find('.editForm'); //editFormDialog
-                    setTimeout(function(){
-                        ele_ed.scrollTop(0);
-                        var top = $(ed_cont).position().top - 60;
-                        
-                        var ele = that.editForm.parents('.ui-tabs');
-                        if(ele.length>0){
-                            top = top + $(ele).position().top;
-                        }
-                        ele_ed.scrollTop(top);
-                        
-                    },200); //without timeout preview form scrolls to kept position
-                    
-                }
-                
-                var v = that._editing.getValue('rst_CreateChildIfRecPtr')[0];
-                //$Db.rst(rty_ID, dty_ID, 'rst_CreateChildIfRecPtr');
-                this._rst_PointerMode_Enable(v!=1);
-                
-                this.editForm.show();
-                this._editing.setFocus();
-                
-                //this.editForm.position({my:'left top', at:'left bottom', of:ed_ele}).show();
-				
-                // Temporary Solution: Sometimes, after using the 'Add new base field' popup, the requirement type dropdown loads incorrectly
-                // The menu widget is loaded behind the record editor popup and lacks the populate highlight for the hover event on menu options
-                var requirement_sel = this._editing.getFieldByName('rst_RequirementType').find('select');
-                if(requirement_sel.hSelect('instance') != undefined){
-                    window.hWin.HEURIST4.ui.initHSelect(requirement_sel.get(0), false);
-                }
-                
+            //place rts editor into record edit form
+            var isHeader = false;
+            var ed_ele = this.previewEditor.find('fieldset[data-dtid='+this._currentEditID+']');
+            
+            if(ed_ele.length==0){
+                ed_ele = this.previewEditor.find('div[data-dtid='+this._currentEditID+']');
             }else{
-                this.previewEditor.hide();
+                isHeader = true;
             }
+                
+            if(ed_ele.length==0){ //popup edit, currently used for fields/headers that are hidden in receditor
+                if(!this.editForm.hasClass('ent_content_full')){
+                    //put editForm back to original container
+                    this.editForm
+                        .css({'margin-left':'0px'})
+                        .addClass('ent_content_full')
+                        .appendTo(this.previewEditor.parent());
+                }
+                //open in popup editor
+                this.options.edit_height = 250;
+                this.showEditFormDialog(false);
+                this._edit_dialog.dialog('option','close', function(){
+                    that._closeFormlet();
+                });
+                this._edit_dialog.removeClass('ui-heurist-bg-light').parent().addClass('ui-heurist-design');
+            }else{
+                //make field edit formlet in "design" color
+                this.editForm
+                    .css({'margin-left':'209px'})
+                    .removeClass('ent_content_full ui-heurist-bg-light')
+                    .addClass('ui-heurist-design-fade');
+                
+                var ed_cont;
+                if(this.editForm.parent().hasClass('editor-container')){
+                    //already created
+                    ed_cont = this.editForm.parent();
+                }else{
+                    //create new table div for editor
+                    ed_cont = $('<div class="editor-container" style="display:table">');
+                    this.editForm.appendTo(ed_cont);
+                }
+                
+                //remove bg color for previous label
+                this.previewEditor.find('div.header').removeClass('ui-heurist-design-fade');    
+                
+                if(isHeader){
+                    //insert as fist child for header
+                    ed_ele.prepend( ed_cont );
+                    //ed_cont.appendTo(ed_ele); //prepend
+                }else{
+                    ed_ele.find('div.header').addClass('ui-heurist-design-fade');    
+                    ed_cont.insertAfter(ed_ele);    
+                }
+                //for empty fieldsets
+                if(!this.editForm.parents('fieldset:first').is(':visible')){
+                    this.editForm.parents('fieldset:first').show();
+                }
+                
+                //expand accordion or tab
+                var ele = this.editForm.parents('.ui-accordion:first');
+                if(ele.length>0){
+                    
+                    var atab = this.editForm.parents('.ui-accordion-content');
+                    if(!atab.is(':visible')){
+                        var header_id = atab.attr('aria-labelledby');
+                        $.each(ele.find('.ui-accordion-header'),function(idx,item){
+                            if($(item).attr('id') == header_id){
+                                ele.accordion( 'option', 'active', idx);            
+                                return false;
+                            }
+                        });
+                    }
+                    
+                    
+                }else{
+                    ele = this.editForm.parents('.ui-tabs');
+                    if(ele.length>0){
+                        var tabIndex = this.editForm.parents('fieldset:first').attr('data-tabindex');
+                        ele.tabs( 'option', 'active', tabIndex);
+                    }
+                }
+                
+                //adjust preview editor position
+                var ele_ed = this.previewEditor.find('.editForm'); //editFormDialog
+                setTimeout(function(){
+                    ele_ed.scrollTop(0);
+                    var top = $(ed_cont).position().top - 60;
+                    
+                    var ele = that.editForm.parents('.ui-tabs');
+                    if(ele.length>0){
+                        top = top + $(ele).position().top;
+                    }
+                    ele_ed.scrollTop(top);
+                    
+                },200); //without timeout preview form scrolls to kept position
+                
+            }
+            
+            var v = that._editing.getValue('rst_CreateChildIfRecPtr')[0];
+            //$Db.rst(rty_ID, dty_ID, 'rst_CreateChildIfRecPtr');
+            this._rst_PointerMode_Enable(v!=1);
+            
+            this.editForm.show();
+            this._editing.setFocus();
+            
+            //this.editForm.position({my:'left top', at:'left bottom', of:ed_ele}).show();
+            
+            // Temporary Solution: Sometimes, after using the 'Add new base field' popup, the requirement type dropdown loads incorrectly
+            // The menu widget is loaded behind the record editor popup and lacks the populate highlight for the hover event on menu options
+            var requirement_sel = this._editing.getFieldByName('rst_RequirementType').find('select');
+            if(requirement_sel.hSelect('instance') != undefined){
+                window.hWin.HEURIST4.ui.initHSelect(requirement_sel.get(0), false);
+            }
+
         }
             
         //----------
@@ -1766,14 +1761,22 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
                 that.onCreateChildIfRecPtr( this );  
             }); 
         }
-        
-        
+
+        // Add horizontal rules
+        edit_ele = this._editing.getFieldByName('rst_SemanticReferenceURL');
+        if(edit_ele){
+
+            let $hr = $('<hr>', {style: 'border-color: black; width: 95%;'});
+            $hr.clone().insertBefore(edit_ele);
+            $hr.clone().appendTo(this.editForm);
+        }
+
         //fill init values of virtual fields
         //add lister for dty_Type field to show hide these fields
-        //var elements = this._editing.getInputs('dty_Type');
-        var edit_ele = this._editing.getFieldByName('rst_PtrFilteredIDs');
+        edit_ele = this._editing.getFieldByName('rst_PtrFilteredIDs');
         if(edit_ele){
             edit_ele.editing_input('option','showclear_button',false);
+            edit_ele.find('.link-div').css({'font-size': '1.1em', padding: '1px'});
         }
         edit_ele = this._editing.getFieldByName('dty_Type');
         if(edit_ele){
@@ -1785,26 +1788,12 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
         
         const dt_type = this._editing.getValue('dty_Type')[0];
 
-        //add show explanation checkbox
-        let ishelp_on = (this.usrPreferences['help_on']==true || this.usrPreferences['help_on']=='true' || dt_type == 'separator');
+        // Always show help text
+        this.editForm.find('.heurist-helper1').removeClass('heurist-helper1').addClass('heurist-helper3').show();
 
-        if(dt_type != 'separator'){ // always show help text for separators
-
-            var ele = $('<div id="help_container" style="display:inline-block;position:relative;top:5px;left:130px;"><label><input type="checkbox" '
-                +(ishelp_on?'checked':'')+'/>show explanations</label></div>')
-            .prependTo(this.editForm);
-            
-            this._on( ele.find('input'), {change: function( event){
-                var ishelp_on = $(event.target).is(':checked');
-                this.usrPreferences['help_on'] = ishelp_on;
-                window.hWin.HEURIST4.ui.switchHintState2(ishelp_on, this.editForm, '.heurist-helper3');
-            }});
-        }
-
-        this.editForm.find('.heurist-helper1').removeClass('heurist-helper1').addClass('heurist-helper3');
-        window.hWin.HEURIST4.ui.switchHintState2(ishelp_on, this.editForm, '.heurist-helper3');
-        
-        var bottom_div = $('<div style="width:100%;min-height:26px">').appendTo(this.editForm);
+        let bottom_div = $('<div style="width:100%;min-height:26px">').appendTo(this.editForm);
+        let $height_header = null;
+        let $width_header = null;
 
         if(dt_type=='separator'){
             
@@ -1836,39 +1825,31 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
             this._editing.getFieldByName('rst_DisplayHelpText').find('.header > label').text(window.HR('Description (optional):'));
 
         }else{
-            
-            var s = '';
-            if (dt_type=='enum' || dt_type=='relmarker' || dt_type=='resource'){
-                s = 'To change';
-                if (dt_type=='enum' || dt_type=='relmarker'){
-                    s += ' vocabulary';    
+
+            // Add link(s) to edit base field definition
+            let $helper = $('<span>', {class: 'heurist-helper2', style: 'padding-left: 20px; font-weight: normal;'})
+                .html('to change, <a class="edit_basefield" href="#" style="color:blue;">edit base field definition</a>');
+
+            if(dt_type=='enum' || dt_type=='relmarker' || dt_type=='resource'){
+                
+                if(dt_type == 'enum' || dt_type == 'relmarker'){
+                    this._editing.getFieldByName('rst_TermVocabularyName').find('.input-div').append($helper.clone());
                 }
-                if (dt_type=='relmarker' || dt_type=='resource'){
-                    s += (dt_type=='relmarker'?' or ':' ')+'target entity types';    
+                if(dt_type == 'resource' || dt_type == 'relmarker'){
+                    this._editing.getFieldByName('rst_PtrFilteredIDs').find('.input-div').append($helper.clone());
                 }
-                s += ': ';
             }else if(dt_type=='blocktext'){
                 let $ele = this._editing.getFieldByName('rst_DefaultValue').find('.input-cell .heurist-helper3');
                 $('<span class="display:block;" class="heurist-helper2">To trigger WYSIWYG for blank field, enter a html tag such as &lt;p&gt;</span>').insertAfter($ele);
             }
-            
-            var ele = $('<div style="font-style:italic;padding:10px;display:inline-block">'
-                +'<span id="edit_bf_extra">'+ s +'</span>'
-                +'<a class="edit_basefield" href="#">Edit base field definitions</a></div>');
-            if(s==''){
-                ele.appendTo(bottom_div); //usual field
-            }else{
-                //enum,relmarker,resource  - show vocabulary name
-                var edit_ele = this._editing.getFieldByName('rst_TermVocabularyName');
-                ele.css({'border-top':'1px lightgray solid','padding':'10px 0px 0px',margin:'10px 0 0 126px'});
-                ele.insertBefore(edit_ele);
-            }
 
-            let ele_left = this.editForm.width() - this.editForm.find('#help_container').width() - parseInt(this.editForm.find('#help_container').css('left'), 10) - 50;
-            ele.clone()
-               .insertAfter(this.editForm.find('#help_container'))
-               .css({ display: 'inline-block', padding: 0, position: 'relative', top: '5px', left: ele_left })
-               .find('#edit_bf_extra').hide();
+            this._editing.getFieldByName('dty_Type').find('.input-div').append($helper.clone());
+            
+            let ele = $('<div style="font-style:italic;padding:10px 20px;display:inline-block">'
+                +'<a class="edit_basefield" href="#">Edit base field definitions</a></div>');
+            
+            ele.appendTo(bottom_div); // add extra link to edit
+
             this._on(this.editForm.find('a.edit_basefield'),{click: this.showBaseFieldEditor});
             
             $('<span style="padding-left:40px;color:gray;cursor:pointer">ID: '
@@ -1878,17 +1859,17 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
                 .appendTo(bottom_div);
                 
                 
-            var edit_ele= this._editing.getFieldByName('rst_DisplayWidth');
+            let edit_ele= this._editing.getFieldByName('rst_DisplayWidth');
             if(edit_ele){
                 edit_ele.editing_input('option','change', function(){
-                    
-                    var res = this.getValues()[0];
+
+                    var res = this.getValues()[0]; console.log('display width change');
                     if(res>120){
                         window.hWin.HEURIST4.msg.showMsgDlg(
                         'This field width might result in the field being wider than the screen. '
                         +'Click OK for this width, Cancel to set to 120 (conservative setting).',
                         function(){
-                            that._editing.setFieldValueByName('rst_DisplayWidth', 120, true);        
+                            that._editing.setFieldValueByName('rst_DisplayWidth', 120, true);
                             that.onEditFormChange(); //trigger change   
                         }, 
                         {title:'Warning',yes:'Cancel',no:'OK'},
@@ -1899,12 +1880,13 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
                 }); 
             }
             
-            edit_ele = this._editing.getInputs('rst_DisplayName');
-            this._on( $(edit_ele[0]), {
+            let edit_input = this._editing.getInputs('rst_DisplayName');
+            this._on( $(edit_input[0]), {
                 keypress: window.hWin.HEURIST4.ui.preventChars} );
 
-            $('<label style="margin-left:195px;"><input id="alter_basefield" type="checkbox" tabindex="-1"> also change base field name and help</label>')
-                .insertAfter($(edit_ele[0]).parent());
+            edit_ele = this._editing.getFieldByName('rst_DisplayName');
+            $('<label style="margin-left:30px;font-size:10px;"><input id="alter_basefield" type="checkbox" tabindex="-1"> also change base field name and help</label>')
+                .appendTo(edit_ele.find('.input-div'));
 
             edit_ele = this._editing.getFieldByName('rst_TermsAsButtons');
             if(dt_type=='enum'){
@@ -1918,7 +1900,6 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
                             var f_width = that._editing.getValue('rst_DisplayWidth')[0];
 
                             if(f_width <= 0){
-
                                 that._editing.setFieldValueByName('rst_DisplayWidth', 100, true);
                                 that.onEditFormChange();
                             }
@@ -1929,8 +1910,7 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
                 if(edit_ele.find('input').is(':checked')){
                     var f_width = this._editing.getValue('rst_DisplayWidth')[0];
 
-                    if(f_width <= 0){
-
+                    if(f_width <= 0){ console.log('changes to display width');
                         this._editing.setFieldValueByName('rst_DisplayWidth', 100, true);
                         this.onEditFormChange();
                     }
@@ -1943,16 +1923,49 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
                     '<div style="display: inline-block; font-style: italic">Enter an old-style (non-JSon) filter string such as f:123:7245 to filter to term 7245 in field 123</div>'
                 );
             }
+
+            edit_ele = this._editing.getFieldByName('rst_TermVocabularyName');
+            if(edit_ele){
+                edit_ele.find('.input-div').css('font-size', '1.1em');
+            }
+
+            // Place width and height fields on the same line
+            let width_fld = (dt_type=='freetext' || dt_type=='blocktext' || dt_type=='float') ? 
+                            this._editing.getFieldByName('rst_DisplayWidth_ext') : this._editing.getFieldByName('rst_DisplayWidth');
+            let height_fld = this._editing.getFieldByName('rst_DisplayHeight');
+            if(width_fld && height_fld){
+
+                // Change display + hide height help
+                width_fld.css('display', 'inline-block');
+                height_fld.css('display', 'inline-block').find('.heurist-helper3').hide();
+
+                $height_header = height_fld.find('.header'); // store heading element, to reduce width later
+
+                $width_header = width_fld.find('.header').clone().insertBefore(width_fld.find('.input-cell')); // clone current label, and store
+                $width_header.css({width: '35px', 'min-width': '35px'}) // set width
+                             .find('label').text('Width:'); // set inner label
+                
+                width_fld.find('.input-div').css('padding-right', '20px'); // reduce padding
+
+                // Move width field help to end of line
+                setTimeout(() => {
+                    width_fld.find('.heurist-helper3').css('position', 'absolute').position({
+                        my: 'left-35 center+10',
+                        at: 'right center',
+                        of: height_fld
+                    });
+                }, 500);
+            }
         }
 
         var btnCancel = $('<button>').attr('id', 'btnCloseEditor_rts')
                 .button({label:window.hWin.HR('Close')})
-                .css({'margin-right':'1em','float':'right',display:'none','margin-top':'2px'})
+                .css({'margin-right':'20px','float':'right',display:'none','margin-top':'2px'})
                 .appendTo(bottom_div);
 
         var btnSave = $('<button>').attr('id', 'btnRecSaveAndClose_rts')
                 .button({label:window.hWin.HR('Save')})
-                .css({'font-weight':'bold','float':'right',display:'none','margin-top':'2px','margin-right':'6px'})
+                .css({'font-weight':'bold','float':'right',display:'none','margin-top':'2px','margin-right':'15px'})
                 .addClass('ui-button-action')
                 .appendTo(bottom_div);
             
@@ -1997,6 +2010,15 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
         this.editForm.find('.ui-selectmenu-button').css({background: '#ECF1FB'});
         this.editForm.find('.required > label').css({color: '#6A7C99'});
 
+        this.editForm.find('.header').css('width', '160px');
+
+        // Custom widths for width and height field headings
+        if($height_header.length){
+            $height_header.css({width: '50px', 'min-width': '50px'});
+        }
+        if($width_header.length){
+            $width_header.css({width: '35px', 'min-width': '35px'});
+        }
     },
     
     //
@@ -2025,69 +2047,67 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
     //
     // Event listener for dty_Type - shows/hides dependent fields
     //
-    _onDetailTypeChange: function()
-    {
-                       var dt_type = this._editing.getValue('dty_Type')[0]
-                       
-                       //hide all virtual 
-                       var virtual_fields = this._editing.getFieldByValue("dty_Role","virtual");
-                       for(var idx in virtual_fields){
-                           $(virtual_fields[idx]).hide();
-                       }
-                       
-                       //hide all 
-                       var depended_fields = this._editing.getFieldByValue("rst_Class","[not empty]");
-                       for(var idx in depended_fields){
-                           $(depended_fields[idx]).hide();
-                       }
-                       //show specific
-                       depended_fields = this._editing.getFieldByClass( (dt_type=='separator')?'group_separator':dt_type );
-                       for(var idx in depended_fields){
-                           $(depended_fields[idx]).show();
-                       }
-                       
-                       if(dt_type=='separator'){
-                           this._editing.getFieldByName('rst_RequirementType').hide();
-                       }else{
+    _onDetailTypeChange: function(){
 
-                           this._editing.getFieldByName('dty_Type').show();
-                           
-                           this._editing.getFieldByName('rst_RequirementType').show();
-                           this._editing.getFieldByName('rst_Repeatability').show();
+        var dt_type = this._editing.getValue('dty_Type')[0]
+        
+        //hide all virtual 
+        var virtual_fields = this._editing.getFieldByValue("dty_Role","virtual");
+        for(var idx in virtual_fields){
+            $(virtual_fields[idx]).hide();
+        }
+        
+        //hide all 
+        var depended_fields = this._editing.getFieldByValue("rst_Class","[not empty]");
+        for(var idx in depended_fields){
+            $(depended_fields[idx]).hide();
+        }
+        //show specific
+        depended_fields = this._editing.getFieldByClass( (dt_type=='separator')?'group_separator':dt_type );
+        for(var idx in depended_fields){
+            $(depended_fields[idx]).show();
+        }
+        
+        if(dt_type=='separator'){
+            this._editing.getFieldByName('rst_RequirementType').hide();
+        }else{
 
-                           if(dt_type=='enum' || dt_type=='relmarker' || dt_type=='relationtype'){
-                               this._recreateTermsPreviewSelector();
-                           }
-                           if(dt_type=='relmarker' || dt_type=='resource'){
-                               this._recreateResourceSelector();
-                           }
-                           
-                           var maxval = parseInt(this._editing.getValue('rst_MaxValues')[0]);
-                           var res = 'repeatable';
-                           if(maxval==1){
-                               res = 'single';
-                           }else if(maxval>1){
-                               res = 'limited';
-                           }else{
-                               this._editing.setFieldValueByName('rst_MaxValues', 0, false);
-                           }
-                           
-                           this._editing.setFieldValueByName('rst_Repeatability', res, false);
-                           if(maxval>1){
-                               this._editing.getFieldByName('rst_MaxValues').show();
-                           }else{
-                               this._editing.getFieldByName('rst_MaxValues').hide();
-                           }
-                           
-                           if(dt_type=='freetext' || dt_type=='integer' || dt_type=='float'){
-                               this._recreateDefaultValue();
-                           }
-                           if(dt_type=='freetext' || dt_type=='blocktext' || dt_type=='float'){
-                               this._recreateFieldWidth();
-                           }
-                       }
-                       
-                    
+            this._editing.getFieldByName('dty_Type').show();
+            
+            this._editing.getFieldByName('rst_RequirementType').show();
+            this._editing.getFieldByName('rst_Repeatability').show();
+
+            if(dt_type=='enum' || dt_type=='relmarker' || dt_type=='relationtype'){
+                this._recreateTermsPreviewSelector();
+            }
+            if(dt_type=='relmarker' || dt_type=='resource'){
+                this._recreateResourceSelector();
+            }
+            
+            var maxval = parseInt(this._editing.getValue('rst_MaxValues')[0]);
+            var res = 'repeatable';
+            if(maxval==1){
+                res = 'single';
+            }else if(maxval>1){
+                res = 'limited';
+            }else{
+                this._editing.setFieldValueByName('rst_MaxValues', 0, false);
+            }
+            
+            this._editing.setFieldValueByName('rst_Repeatability', res, false);
+            if(maxval>1){
+                this._editing.getFieldByName('rst_MaxValues').show();
+            }else{
+                this._editing.getFieldByName('rst_MaxValues').hide();
+            }
+            
+            if(dt_type=='freetext' || dt_type=='integer' || dt_type=='float'){
+                this._recreateDefaultValue();
+            }
+            if(dt_type=='freetext' || dt_type=='blocktext' || dt_type=='float'){
+                this._recreateFieldWidth();
+            }
+        }
     },    
     
     //
@@ -2133,14 +2153,6 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
             this._editing.setFieldValueByName('rst_TermsAsButtons', $Db.rst(this.options.rty_ID, this._currentEditID, 'rst_TermsAsButtons'), false);
         }
 
-        /*
-        var ele = this._editing.getFieldByName('rst_DefaultValue_enum');
-        var defval = this._editing.getValue('rst_DefaultValue_enum')[0];
-        ele.editing_input('fset','dty_Type',term_type!='relation'?'enum':'relationtype');
-        ele.editing_input('fset','rst_FilteredJsonTermIDTree', allTerms);
-        ele.editing_input('fset','rst_TermIDTreeNonSelectableIDs', disTerms);
-        ele.editing_input('setValue',[defval]);
-        */
     },
     
     //
@@ -2207,12 +2219,7 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
                     if(defval!=res){
                         this._editing.setFieldValueByName('rst_DefaultValue', res, true);    
                     }
-                    
-                    
-                    //var ele = this._editing.getFieldByName('rst_DefaultValue');
-                    //ele.editing_input( 'setValue',  res); 
-                    //this.onEditFormChange();
-                    
+
                 }});
             this._on(this.defval_container.find('input.text'),{keyup:function(event){
                 var res = this.defval_container.find('input.text').val();
@@ -2232,21 +2239,21 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
     //
     _recreateFieldWidth: function(){
 
-        var that = this;
+        const that = this;
 
         setTimeout(function(){that._editing.getFieldByName('rst_DisplayWidth').hide();}, 200);
 
-        var curr_width = this._editing.getValue('rst_DisplayWidth')[0];
-        var $ele = this._editing.getFieldByName('rst_DisplayWidth_ext').find('.input-div');
+        let curr_width = this._editing.getValue('rst_DisplayWidth')[0];
+        let $ele = this._editing.getFieldByName('rst_DisplayWidth_ext').find('.input-div');
 
         $ele.empty();
 
-        var is_max = (curr_width == 0);
+        const is_max = (curr_width == 0);
 
-        $('<div style="line-height:2ex;padding-top:4px">'
+        $('<div style="line-height:2ex;">'
                 +'<input type="radio" value="0" name="widthType">'
                 +'<input class="text ui-widget-content ui-corner-all" autocomplete="disabled" autocorrect="off" autocapitalize="none" spellcheck="false" type="number" min="3" style="max-width:7ex;width7ex;">'
-                +'<span style="width:50px;display:inline-block"/>'
+                +'<span style="width:15px;display:inline-block"/>'
                 +'<label style="text-align:left;line-height:12px;">'
                 +'<input type="radio" value="1" name="widthType" style="margin-top:0px">'
                 +'&nbsp;Max width</label>'
@@ -2254,13 +2261,13 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
 
         this._on($ele.find('input[name="widthType"]'), {
             change: function(event){
-                var $input = $ele.find('input.text');
-                var is_max = $ele.find('input[name="widthType"]:checked').val() == '1';
+                let $input = $ele.find('input.text');
+                const is_max = $ele.find('input[name="widthType"]:checked').val() == '1';
 
                 window.hWin.HEURIST4.util.setDisabled($input, is_max);
                 $input.val(is_max?'': (curr_width>0?curr_width:40));
 
-                var val = is_max ? 0 : $input.val();
+                let val = is_max ? 0 : $input.val();
                 if(curr_width != val){
                     this._editing.setFieldValueByName('rst_DisplayWidth', val, true); //hidden field
                 }
@@ -2269,7 +2276,7 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
 
         this._on($ele.find('input.text'),{
             keyup: function(event){
-                var val = $ele.find('input.text').val();
+                let val = $ele.find('input.text').val();
                 this._editing.setFieldValueByName('rst_DisplayWidth', val, true);
             }
         });
