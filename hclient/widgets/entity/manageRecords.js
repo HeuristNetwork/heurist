@@ -32,6 +32,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
     _rts_selector_flag: false, //mouse over rts selectors
     _rts_changed_flag: false,
     _resizeTimer: 0,
+    _duplicatedRecord: false, // current record was created via the 'Dupe' button
     
     // additional option for this widget
     // this.options.fixed_search - search form hidden and search query is fixed
@@ -758,19 +759,19 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
     //
     //
     _initDialog: function(){
-        
-            //restore from preferences    
-            if(this.options.edit_mode == 'editonly'){
-                this.getUiPreferences();
-                if(this.options.forced_Width){
-                    this.options.width = this.options.forced_Width;
-                }else{
-                    this.options['width']  = this.usrPreferences['width'];    
-                }
-                this.options['height'] = this.usrPreferences['height'];
+
+        //restore from preferences    
+        if(this.options.edit_mode == 'editonly'){
+            this.getUiPreferences();
+            if(this.options.forced_Width){
+                this.options.width = this.options.forced_Width;
+            }else{
+                this.options['width']  = this.usrPreferences['width'];    
             }
-        
-            this._super();
+            this.options['height'] = this.usrPreferences['height'];
+        }
+    
+        this._super();
     },
 
     //
@@ -925,10 +926,8 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                     
                 }else{
                 
-                    btns = [       /*{text:window.hWin.HR('Reload'), id:'btnRecReload',icons:{primary:'ui-icon-refresh'},
-                        click: function() { that._initEditForm_step3(that._currentEditID) }},  //reload edit form*/
-                              
-                              
+                    btns = [
+
                         {showText:false, icons:{primary:'ui-icon-circle-triangle-w'},title:window.hWin.HR('Previous'),
                               css:{'display':'none','margin-right':'0.5em',}, id:'btnPrev',
                               click: function() { that._navigateToRec(-1); }},
@@ -954,12 +953,16 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
 
                                             btn.css('display','inline-block');  //restore button visibility
                                             if(response.status == window.hWin.ResponseStatus.OK){
+
                                                 window.hWin.HEURIST4.msg.showMsgFlash(
-                                                    window.hWin.HR('Record has been duplicated'));
-                                                var new_recID = ''+response.data.added;
+                                                    window.hWin.HR('Record has been duplicated'), 3000);
+
+                                                const new_recID = ''+response.data.added;
+                                                that._duplicatedRecord = that._currentEditID;
+
                                                 that._initEditForm_step3(new_recID);
-                                                  
-                                                var dlged = that._getEditDialog();
+
+                                                let dlged = that._getEditDialog();
                                                 dlged.find('.coverall-div-bare').remove();
 
                                             }else{
@@ -1005,9 +1008,6 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                               
                               ];
                 }
-                                
-                //btns = btns.concat([]); 
-                              
             }
             return btns;
     },
@@ -1016,6 +1016,9 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
     //
     //
     _initEditForm_step1: function(recID){
+
+        this.element.attr('data-recid', recID);
+
         if(this.options.edit_mode=='popup'){
 
             var query = null, popup_options={};
@@ -4585,10 +4588,6 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
             //ele_id.find('input').css('border','1px dotted red');
             ele_id.find('input,textarea,button,.ui-selectmenu-button').css('border','1px dotted red');
             
-            //reduce width of header
-            $(this.element).find('.separator').css({width: '80%', display: 'inline-block'});
-            $(this.element).find('.separator-hidden').css({width: '80%', display: 'inline-block'});
-            
             //display message at bottom
             $('<div id="mod-struct-help" style="font-size:1.2em;margin-top:30px;">Use the gearwheel <span class="ui-icon ui-icon-gear"></span> to add/edit fields and headings</div>')
             .appendTo(this.editForm.last('.editForm.recordEditor'));			
@@ -5064,6 +5063,29 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
 
             // Append to top
             $top_fieldset.append($url_field);
+        }
+
+        if(this._duplicatedRecord && this._duplicatedRecord > 0){ // add message about being a dupe record
+
+            let $dupe_ele = $('<div>', {style: 'font-size: 12px; color: orange; cursor: default; padding-left: 35px;'})
+                .text(`This is a duplicate of record ${this._duplicatedRecord} - edit as required`);
+
+            // Small button to remove dupe message
+            $('<span>', {class: 'smallbutton ui-icon ui-icon-circlesmall-close', style: 'cursor: pointer', title: 'Remove message'})
+                .appendTo($dupe_ele);
+
+            $top_fieldset.append($dupe_ele);
+
+            this._on($dupe_ele.find('span'), {
+                click: (event) => {
+
+                    this._off($(event.target), 'click'); // remove click event
+
+                    $(event.target).parent().remove(); // remove element
+                }
+            })
+
+            this._duplicatedRecord = false;
         }
     },
 	
