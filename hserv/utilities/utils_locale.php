@@ -364,15 +364,15 @@
         }
 
         $data = json_decode($data, true);
-        if(json_last_error() !== JSON_ERROR_NONE){
+        if(json_last_error() !== JSON_ERROR_NONE || !is_array($data) || !array_key_exists('translations', $data)){
             $system->addError(HEURIST_ERROR, 'Deepl has responsed in an unknown format.<br>Please report this to the Heurist team.');
             return false;
         }
 
         $res = '';
         $translation = $data['translations'];
-        if(is_array($translation) && !empty($translation['text']) && $translation['text'] != $string){
-            $res = $translation['text'];
+        if(is_array($translation) && !empty($translation)){
+            $res = $translation[0]['text'];
         }
 
         return $res;
