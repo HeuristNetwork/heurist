@@ -3417,6 +3417,12 @@ $.widget( "heurist.resultList", {
                         }else{
                             ordered_recordset = this._query_request;
                         }
+
+                        let existing_dlg = $(`[id^="heurist-dialog-Record"][data-recid="${selected_rec_ID}"]`);
+                        if(selected_rec_ID > 0 && existing_dlg.length > 0 && existing_dlg.dialog('instance') !== undefined){ // record already opened
+                            return;
+                        }
+
                         window.hWin.HEURIST4.ui.openRecordInPopup(selected_rec_ID, ordered_recordset, true, null);                        
                         
                         //@todo callback to change rectitle    
