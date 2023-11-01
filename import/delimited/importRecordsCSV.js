@@ -2755,7 +2755,6 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
                                 $('#divFieldRolesHeader').show();
                                 container2.show();
                         }
-                        $('#divFieldRolesHeader').show();
 
                         //preview parser
                         if(response.data.step==1 && response.data.values){
