@@ -2574,7 +2574,7 @@ $.widget( "heurist.mainMenu", {
     //
     _show_version_message: function(){
 
-        var that = this;
+        const that = this;
 
         if(this.version_message){
             return;
@@ -2583,7 +2583,8 @@ $.widget( "heurist.mainMenu", {
         this.version_message = true;
 
         let is_alpha = window.hWin.HAPI4.baseURL.match(/h\d+-alpha|alpha/);
-        //is_alpha = true;
+        let suggestion_txt = '';
+
         if(!is_alpha){ // need to check that an alpha version is available on this server
             window.hWin.HAPI4.SystemMgr.check_for_alpha({a:'check_for_alpha'}, function(response){ 
                 
@@ -2591,18 +2592,14 @@ $.widget( "heurist.mainMenu", {
                     return;
                 }
 
-                suggestion_txt = '<a style="cursor: pointer;text-decoration: underline;" href="#" id="lnk_change">Use the latest (alpha) version</a> (recommended)';
+                suggestion_txt = `<a style="cursor: pointer;text-decoration: underline;" href="${response.data + location.search}" id="lnk_change">`
+                               + `Use the latest (alpha) version</a> (recommended)`;
 
                 that.version_message = $("<div>")
                     .css({display:'inline-block', 'margin-top':' 1.2em', 'margin-left':'5em', width:'360px', 'font-size':'0.85em', cursor:'default'})
                     .insertAfter(that.div_dbname)
                     .html(suggestion_txt);
 
-                that._on(that.version_message.find('#lnk_change'), {
-                    click: () => { // switch to alpha
-                        location.href = response.data + location.search;
-                    }
-                });
             });
         }else{ // currently on alpha
 

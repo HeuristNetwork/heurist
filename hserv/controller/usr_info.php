@@ -130,7 +130,7 @@
 
                     $url = HEURIST_SERVER_URL . '/h' . $number . '-alpha/';
                     $http_response = get_headers($url)[0];
-                    if(strpos($http_response, '200')!==false){ // valid
+                    if(preg_match('/4\d{2}|5\d{2}/', $http_response) === 0){ // valid
                         $res = $url;
                         break;
                     }
@@ -139,7 +139,7 @@
                 if($res == ''){ // Finally, check last supported version
                     $url = HEURIST_SERVER_URL . '/alpha/';
                     $http_response = get_headers($url)[0];
-                    if(strpos($http_response, '404')===false){ // valid
+                    if(preg_match('/4\d{2}|5\d{2}/', $http_response) === 0){ // valid
                         $res = $url;
                     }
                 }
