@@ -68,6 +68,9 @@ if($hide_images<0 || $hide_images>2){
     }
 }
 
+// How to handle fields set to hidden
+$show_hidden_fields = $is_production && $is_map_popup ? -1 : $system->user_GetPreference('recordData_HiddenFields', 0);
+
 $rectypesStructure = dbs_GetRectypeStructures($system); //getAllRectypeStructures(); //get all rectype names
 
 $defTerms = dbs_GetTerms($system);
@@ -677,6 +680,20 @@ if(!($is_map_popup || $without_header)){
 
                 //$('a.img-desc, a.img-right').off('mouseleave focusout');
             }
+
+            // Toggle the visibility of hidden fields
+            function toggleHiddenFields(){
+
+                let show_hidden_fields = $('#toggleHidden').is(':checked') ? 1 : 0;
+
+                if(show_hidden_fields == 0){
+                    $('.hiddenField').hide();
+                }else{
+                    $('.hiddenField').show();
+                }
+
+                window.hWin.HAPI4.save_pref('recordData_HiddenFields', show_hidden_fields);
+            }
             
             $(document).ready(function() {
                 showHidePrivateInfo(null);
@@ -688,6 +705,8 @@ if(!($is_map_popup || $without_header)){
                 //displayImages(false);
 
                 mediaTooltips();
+
+                toggleHiddenFields();
 
             });
             
@@ -820,7 +839,12 @@ if(!($is_map_popup || $without_header)){
         }
 <?php if($is_production){
     print '.detailType {width:160px;}';
-}?>        
+}?>
+
+        .hiddenField .detailType{
+            text-decoration: line-through;
+        }
+
         @media print {
           .download_link {
             visibility: hidden;
@@ -1021,10 +1045,21 @@ function print_details($bib) {
 
 // this functions outputs the header line of icons and links for managing the record.
 function print_header_line($bib) {
+
     global $is_map_popup, $without_header, $is_production, $system;
-    
+
     $rec_id = $bib['rec_ID'];
-                    //(($is_production)?'':'padding-top:21px')
+
+    $wfs_details = array();
+    if(defined('DT_WORKFLOW_STAGE')){
+
+        $mysqli = $system->get_mysqli();
+        $res = $mysqli->query('SELECT trm_ID, trm_Label FROM defTerms INNER JOIN recDetails ON dtl_Value = trm_ID WHERE dtl_DetailTypeID = ' . DT_WORKFLOW_STAGE . ' AND dtl_RecID = ' . $rec_id);
+
+        if($res && $res->num_rows > 0){
+            $wfs_details = $res->fetch_row();
+        }
+    }
     ?>
 
     <div class=HeaderRow style="margin-bottom:<?php echo $is_map_popup?5:15?>px;min-height:0px;">
@@ -1041,7 +1076,18 @@ function print_header_line($bib) {
             <span class="link"><a id=edit-link class="normal"
                 onClick="return sane_link_opener(this);"
                 target=_new href="<?php echo HEURIST_BASE_URL;?>?fmt=edit&db=<?=HEURIST_DBNAME?>&recID=<?= $bib['rec_ID'] ?>">
-                <img class="rv-editpencil" src="<?php echo HEURIST_BASE_URL;?>hclient/assets/edit-pencil.png" title="Edit record" style="vertical-align: bottom"></a>
+                <img class="rv-editpencil" src="<?php echo HEURIST_BASE_URL;?>hclient/assets/edit-pencil.png" title="Edit record" style="vertical-align: top"></a>
+            </span>
+
+        <?php }
+        if(!empty($wfs_details)){
+
+            $wfs_icon = HEURIST_BASE_URL . '?db=' . HEURIST_DBNAME . '&entity=defTerms&icon=' . $wfs_details[0];
+        ?>
+
+            <span style="cursor: default; padding-left: 20px;">
+                Workflow stage: <?php echo $wfs_details[1]; ?>
+                <image class="rft" style="background-image: url('<?php echo $wfs_icon; ?>')" src="<?php echo HEURIST_BASE_URL; ?>hclient/assets/16x16.gif"></span>
             </span>
 
         <?php } ?>
@@ -1056,7 +1102,7 @@ function print_header_line($bib) {
 // ownereship, viewability, dates, tags, rate
 //
 function print_private_details($bib) {
-    global $system, $is_map_popup;
+    global $system, $is_map_popup, $is_production, $show_hidden_fields;
 
     if($bib['rec_OwnerUGrpID']==0){
         
@@ -1104,7 +1150,25 @@ function print_private_details($bib) {
             onClick="showHidePrivateInfo(event)">more...</a>
     </div>
     <div class="detailRowHeader morePrivateInfo" style="float:left;padding:0 0 20px 0;display:none;border:none;">
-        
+    
+    <?php
+    if(!$is_production && !$is_map_popup){ // add checkbox to toggle the visbility of hidden fields
+
+        $chkbox_state = $show_hidden_fields > 0 ? 'checked="checked"' : '';
+    ?>
+
+    <div class="detailRow fieldRow">
+        <div class="detailType">
+            <input type="checkbox" onchange="toggleHiddenFields();" id="toggleHidden" <?php echo $chkbox_state; ?>>
+        </div>
+        <div class="detail" style="vertical-align: middle;">
+            <label for="toggleHidden">Show hidden fields (marked with <span style="text-decoration: line-through;">strikethrought</span>)</label>
+        </div>
+    </div>
+
+    <?php
+    }
+    ?>
     <div class="detailRow fieldRow"<?php echo $is_map_popup?' style="display:none"':''?>>
         <div class=detailType>Cite as</div><div class="detail<?php echo ($is_map_popup?' truncate" style="max-width:400px;"':'"');?>>
             <a target=_blank class="external-link" 
@@ -1299,6 +1363,10 @@ function print_public_details($bib) {
         $detail_visibility_conditions[] = '((rst_NonOwnerVisibility="public" OR rst_NonOwnerVisibility="pending") AND IFNULL(dtl_HideFromPublic, 0)!=1)';    
         
         $detail_visibility_conditions = ' AND ('.implode(' OR ',$detail_visibility_conditions).')';
+    }
+
+    if($is_production || $is_map_popup){ // hide hidden fields in publication and map popups
+        $detail_visibility_conditions .= ' AND rst_NonOwnerVisibility != "hidden"';
     }
         
     
@@ -1597,15 +1665,13 @@ function print_public_details($bib) {
     }
 
     //print info about parent record
-    if(true || !$is_production) {
-        foreach ($bds as $bd) {
-            if(defined('DT_PARENT_ENTITY') && $bd['dty_ID']==DT_PARENT_ENTITY){
+    foreach ($bds as $bd) {
+        if(defined('DT_PARENT_ENTITY') && $bd['dty_ID']==DT_PARENT_ENTITY){
 
-                print '<div class="detailRow" style="width:100%;border:none 1px #00ff00;">'
-                .'<div class=detailType>Parent record</div><div class="detail">'
-                .' '.$bd['val'].'</div></div>';
-                break;
-            }
+            print '<div class="detailRow" style="width:100%;border:none 1px #00ff00;">'
+            .'<div class=detailType>Parent record</div><div class="detail">'
+            .' '.$bd['val'].'</div></div>';
+            break;
         }
     }
     
@@ -1870,7 +1936,8 @@ function print_public_details($bib) {
             }
 
             // open new detail row
-            print '<div class="detailRow fieldRow" '. $ele_id .' style="border:none 1px #00ff00;'   //width:100%;
+            $row_classes = 'detailRow fieldRow' . ($bd['rst_NonOwnerVisibility'] == 'hidden' ? ' hiddenField' : '');
+            print '<div class="'. $row_classes .'" '. $ele_id .' style="border:none 1px #00ff00;'   //width:100%;
                     .($is_map_popup && !in_array($bd['dty_ID'], $always_visible_dt)?'display:none;':'')
                     .($is_map_popup?'':'width:100%;')
                     .$font_size
@@ -1878,7 +1945,7 @@ function print_public_details($bib) {
                 . '</div><div class="detail'.($is_map_popup && ($bd['dty_ID']!=DT_SHORT_SUMMARY)?' truncate':'').$is_cms_content.'">';
         }
 
-        $is_grayed_out = (intval($bd['dtl_HideFromPublic']) == 1 || ($bd['rst_NonOwnerVisibility'] != 'public' && $bd['rst_NonOwnerVisibility'] != 'pending')) ? ' grayed' : (' ' . intval($bd['dtl_HideFromPublic']));
+        $is_grayed_out = (intval($bd['dtl_HideFromPublic']) == 1 || ($bd['rst_NonOwnerVisibility'] != 'public' && $bd['rst_NonOwnerVisibility'] != 'pending')) ? ' grayed' : ' ';
         
         print '<span class="value'.$is_grayed_out.'"'.(@$bd['rollover']?' title="'.$bd['rollover'].'"':'')
                 .'>' . $bd['val'] . '</span>'; // add value
@@ -1890,8 +1957,6 @@ function print_public_details($bib) {
     }
 
     $group_details = array();
-    $current_type = null;
-    $tabs_list = array();
 
     $query = "SELECT rst_DisplayName, rst_DisplayOrder, rst_DefaultValue 
               FROM defRecStructure
