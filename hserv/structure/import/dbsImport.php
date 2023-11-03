@@ -25,7 +25,7 @@ require_once dirname(__FILE__).'/../edit/saveStructureLib.php';
 require_once dirname(__FILE__).'/../../controller/entityScrudSrv.php';
 require_once dirname(__FILE__).'/../dbsTerms.php';
 
-require_once dirname(__FILE__).'/../../utilities/utils_file.php';
+require_once dirname(__FILE__).'/../../utilities/uFile.php';
 
 define('_DBG', false); //debug log output
 

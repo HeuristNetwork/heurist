@@ -5,6 +5,9 @@
     * 
     * getLangCode3 - validates lang code and returns upper case 3 letters code
     * extractLangPrefix - splits and extract language code and value from string code:value
+    * getTranslation - for smarty modifier
+    * getCurrentTranslation - returns translated value for multivalue field 
+    * getExternalTranslation - translates given string to traget language via Deepl's API
     *
     * @package     Heurist academic knowledge management system
     * @link        https://HeuristNetwork.org
@@ -152,7 +155,7 @@
     }
     
     //
-    // For smarty records - it returns translated value for multivalue field 
+    // It returns translated value for multivalue field 
     // if all values have language prefix (except default one)
     //
     function getCurrentTranslation($input, $lang){

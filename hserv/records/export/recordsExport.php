@@ -1013,12 +1013,12 @@ XML;
                     //$val = mysql__select_value(self::$mysqli,'select dtl_Value from recDetails where rec_ID='
                     //    .$params['metadata'].' and dtl_DetailTypeID='.DT_NAME);
                     //if($val){
-                        //$originalFileName = fileNameSanitize($val);
+                        //$originalFileName = USanitize::sanitizeFileName($val);
                     //}
                     
                     recordSearchDetails(self::$system, $record, array(DT_NAME));
                     if(is_array($record['details'][DT_NAME])){
-                        $originalFileName = fileNameSanitize(array_values($record['details'][DT_NAME])[0]);
+                        $originalFileName = USanitize::sanitizeFileName(array_values($record['details'][DT_NAME])[0]);
                     }
                 }
                 if(!$originalFileName) $originalFileName = 'Dataset_'.$record['rec_ID'];

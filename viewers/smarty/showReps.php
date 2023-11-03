@@ -228,7 +228,7 @@ function executeSmartyTemplate($system, $params){
     if( !$qresult ||  !array_key_exists('records', $qresult) || !(intval(@$qresult['reccount'])>0) ){
     
         if($publishmode==4){ //from string var
-            echo sanitizeString(($emptysetmessage && $emptysetmessage != 'def') ? $emptysetmessage : '');
+            echo USanitize::sanitizeString(($emptysetmessage && $emptysetmessage != 'def') ? $emptysetmessage : '');
         }else{
             
             if ($emptysetmessage && $emptysetmessage != 'def') {
@@ -341,11 +341,11 @@ function executeSmartyTemplate($system, $params){
         if(method_exists($smarty, 'registerPlugin')){ // version 3
 
             $smarty->registerPlugin('modifier', 'file_data', [$heuristRec, 'getFileField']); // from reportRecord.php
-            $smarty->registerPlugin('modifier', 'translate', 'getTranslation'); // from utils_locale.php
+            $smarty->registerPlugin('modifier', 'translate', 'getTranslation'); // from uLocale.php
         }else{ // version 2
 
             $smarty->register_modifier('file_data', [$heuristRec, 'getFileField']); // from reportRecord.php
-            $smarty->register_modifier('translate', 'getTranslation'); // from utils_locale.php
+            $smarty->register_modifier('translate', 'getTranslation'); // from uLocale.php
         }
 
     }catch(Exception $e){
@@ -387,7 +387,7 @@ function executeSmartyTemplate($system, $params){
         //this is user name $template_file = "_temp.tpl";
         $user = $system->getCurrentUser();
         
-        $template_file = '_'.fileNameSanitize($user['ugr_Name']).'.tpl'; //snyk SSRF
+        $template_file = '_'.USanitize::sanitizeFileName($user['ugr_Name']).'.tpl'; //snyk SSRF
         $template_folder = $smarty->getTemplateDir();
         if(is_array($template_folder)) $template_folder = $template_folder[0];
         $file = fopen ($template_folder.$template_file, "w"); 
@@ -956,7 +956,7 @@ function save_report_into_file($tpl_source){
         try{
 
             $path_parts = pathinfo($outputfile);
-            $dirname = sanitizePath((array_key_exists('dirname',$path_parts))?$path_parts['dirname']:'');
+            $dirname = USanitize::sanitizePath((array_key_exists('dirname',$path_parts))?$path_parts['dirname']:'');
             
             if($dirname && isPathInHeuristUploadFolder($dirname)===false){
                 $dirname = null;
@@ -1420,7 +1420,7 @@ function smarty_error_output($system, $error_msg){
     if($publishmode>0 && $publishmode<4 && $outputfile!=null){ //save empty output into file
         save_report_into_file($error_msg."<div style=\"padding:20px;font-size:110%\">Currently there are no results</div>");
     }else{
-        echo sanitizeString($error_msg);    
+        echo USanitize::sanitizeString($error_msg);    
     }
 }
 

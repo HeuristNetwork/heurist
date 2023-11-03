@@ -21,7 +21,7 @@
 define('PDIR','../../');  //need for proper path to js and css    
 
 require_once 'initPageMin.php';
-require_once dirname(__FILE__).'/../../hserv/utilities/utils_mail.php';
+require_once dirname(__FILE__).'/../../hserv/utilities/uMail.php';
 
 // POST request
 if(isset($_POST['data'])) {
@@ -39,7 +39,7 @@ if(isset($_POST['data'])) {
             $recipient_sanitized = filter_var($recipient, FILTER_VALIDATE_EMAIL);
             if($recipient_sanitized) {
                 // Send e-mail
-                $result = sendEmail_native($recipient_sanitized, $subject, $message, $header); // utils_mail.php
+                $result = sendEmail_native($recipient_sanitized, $subject, $message, $header); // uMail.php
                 $response .= $recipient_sanitized . " --> " . $result . "\n";
             }else{
                 $response .= $recipient . " --> invalid e-mail address\n";

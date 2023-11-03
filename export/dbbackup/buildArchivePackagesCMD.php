@@ -81,6 +81,7 @@ if($arg_database==null){
 require_once dirname(__FILE__).'/../../hserv/System.php';
 require_once dirname(__FILE__).'/../../hserv/records/search/recordFile.php';
 require_once dirname(__FILE__).'/../../external/php/Mysqldump8.php';
+require_once dirname(__FILE__).'/../../hserv/utilities/uArchive.php';
 
 
 //retrieve list of databases
@@ -287,7 +288,7 @@ foreach ($arg_database as $idx=>$db_name){
     // Create a zipfile of the definitions and data which have been dumped to disk
     $destination = $backup_zip; //$folder.'.zip';
     if(file_exists($destination)) unlink($destination);
-    $res = createZipArchive($folder, null, $destination, false);
+    $res = UArchive::zip($folder, null, $destination, false);
 
     folderDelete2($folder, true);
 

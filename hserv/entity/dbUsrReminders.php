@@ -23,7 +23,7 @@
 require_once dirname(__FILE__).'/../System.php';
 require_once dirname(__FILE__).'/dbEntityBase.php';
 require_once dirname(__FILE__).'/dbEntitySearch.php';
-require_once dirname(__FILE__).'/../utilities/utils_mail.php';
+require_once dirname(__FILE__).'/../utilities/uMail.php';
 
 class DbUsrReminders extends DbEntityBase
 {
@@ -333,7 +333,7 @@ exit;
                 $row = mysql__select_row($mysqli,
                     'select usr.ugr_FirstName,usr.ugr_LastName,usr.ugr_eMail FROM sysUGrps usr '
                     .' left join usrRemindersBlockList on rbl_UGrpID=usr.ugr_ID and rbl_RemID = '.intval($record['rem_ID'])
-                    .'WHERE usr.ugr_Type="user" and usr.ugr_ID='.intval($record['rem_ToUserID']).' and isnull(rbl_RemID)');
+                    .' WHERE usr.ugr_Type="user" and usr.ugr_ID='.intval($record['rem_ToUserID']).' and isnull(rbl_RemID)');
                 if ($row) {
                     array_push($recipients, array(
                         "email" => $row[0].' '.$row[1].' <'.$row[2].'>', //username <email>
@@ -348,7 +348,7 @@ exit;
                     $query = 'select usr.ugr_FirstName,usr.ugr_LastName,usr.ugr_eMail,usr.ugr_ID '
                                .' from sysUsrGrpLinks left join sysUGrps usr on ugl_UserID=usr.ugr_ID'
                                .' left join usrRemindersBlockList on rbl_UGrpID=usr.ugr_ID and rbl_RemID = '.intval($record['rem_ID'])
-                               .' where ugl_GroupID = '.intval($record['rem_ToWorkgroupID']).' and isnull(rbl_RemID)';
+                               .' WHERE ugl_GroupID = '.intval($record['rem_ToWorkgroupID']).' and isnull(rbl_RemID)';
                 }else{
                     $query = 'select usr.ugr_FirstName,usr.ugr_LastName,ugr_eMail,usr.ugr_ID'
                                        .' from sysUsrGrpLinks left join sysUGrps usr on ugl_UserID=usr.ugr_ID'

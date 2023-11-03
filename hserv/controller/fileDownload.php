@@ -23,7 +23,7 @@
 *           hserv/utilities/UploadHandler.php create_scaled_image() 
 *           on time of uploading and after registration it is copied to our filethumbs folder
 *    for remote file - thumbnail is created on first request fileDownload.php?thumb=  it uses common/php/resizeImage.php
-*    if record has an rec_URL, the thumbnail is created with UtilsImage::makeURLScreenshot
+*    if record has an rec_URL, the thumbnail is created with UImage::makeURLScreenshot
 * 
 * 
 * @package     Heurist academic knowledge management system

@@ -36,7 +36,7 @@ require_once dirname(__FILE__).'/../../hserv/structure/conceptCode.php';
     if($mode){ //operations with template files
 
         //get name of template file
-        $template_file = (array_key_exists('template',$_REQUEST)?  fileNameSanitize(basename(urldecode($_REQUEST['template'])),false) :null);
+        $template_file = (array_key_exists('template',$_REQUEST)?  USanitize::sanitizeFileName(basename(urldecode($_REQUEST['template'])),false) :null);
         //get template body from request (for execution from editor)
         $template_body = (array_key_exists('template_body',$_REQUEST)?$_REQUEST['template_body']:null);
         

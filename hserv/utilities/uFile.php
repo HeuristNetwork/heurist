@@ -2,9 +2,32 @@
 
     /**
     * File library - convert to static class
-    *  File/folder utilities
+    * File/folder utilities
     *
+    * folderExists
     * folderCreate
+    * folderDelete  
+    * folderDelete2   using RecursiveIteratorIterator
+    * 
+    * folderCreate2  - create folder, check write permissions, add index.html, write htaccess 
+    * folderAddIndexHTML
+    * allowWebAccessForForlder
+    * 
+    * folderContent  - get list of files in folder as search result (record list)
+    * folderSize2
+    * folderSize
+    * folderTree
+    * folderTreeToFancyTree - NOT USED
+    * folderFirstTileImage - returns first file from first folder - for tiled image stack
+    *     
+    * fileCopy
+    * fileSave
+    * fileOpen - check existance, readability, opens and returns file handle, or -1 not exist, -2 not readable -3 can't open
+    *     
+    * getRelativePath
+    * folderRecurseCopy
+    * folderSubs - list of subfolders
+    * 
     *
     * @package     Heurist academic knowledge management system
     * @link        https://HeuristNetwork.org
@@ -23,61 +46,18 @@
     */
     
     /*
-    sanitizeRequest - removes all tags from request variables
-    sanitizePath - removes /../
-    sanitizeURL
-    sanitizeString - strip_tags (except allowed) and htmlspecialchars
     
     isPathInHeuristUploadFolder - checks that path is HEURIST_FILESTORE_DIR
     
-    stripScriptTagInRequest - removes only script tags
-    getHTMLPurifier
-    purifyHTML - clean html with HTMLPurifier
-    
-    get_php_bytes
-    redirectToRemoteServer - redirect request to remove heurist server
-    
     ----
     
-    folderExists
-    folderCreate
-    folderDelete  
-    folderDelete2   using RecursiveIteratorIterator
-    
-    folderCreate2  - create folder, check write permissions, add index.html, write htaccess 
-    folderAddIndexHTML
-    allowWebAccessForForlder
-    
-    folderContent  - get list of files in folder as search result (record list)
-    folderSize2
-    folderSize
-    folderTree
-    folderTreeToFancyTree - NOT USED
-    folderFirstTileImage - returns first file from first folder - for tiled image stack
-    
-    fileCopy
-    fileSave
-    fileOpen - check existance, readability, opens and returns file handle, or -1 not exist, -2 not readable -3 can't open
-    
-    fileNameSanitize
-    fileNameBeautify
-    
-    saveURLasFile  loadRemoteURLContent + fileSave
     @todo move from record_shp? fileRetrievePath returns fullpath to file is storage, or to tempfile, 
                    if it requires it extracts zip archive to tempfile or download remote url to tempfile
     
-    getRelativePath
-    folderRecurseCopy
-    folderSubs - list of subfolders
-    
     ===
-    createZipArchive
-    unzipArchive
-    unzipArchiveFlat
+    move these function to separate uCurl
     
-    createBz2Archive
-    
-    ===
+    saveURLasFile  loadRemoteURLContent + fileSave
     getTitleFromURL
     
     loadRemoteURLContentSpecial tries to avoid curl if url on the same domain
@@ -92,244 +72,14 @@
     
     autoDetectSeparators
     
-    errorLog - wrap around error_log to prevent log injection
     */
     
     $glb_curl_code = null;
     $glb_curl_error = null;
     
-    function sanitizeRequest(&$params){
 
-        foreach($params as $k => $v)
-        {
-            if($v!=null){
-                
-                if(is_array($v) && count($v)>0){
-                    sanitizeRequest($v);
-                    
-                }else{
-                    $v = trim($v);//so we are sure it is whitespace free at both ends
-
-                    //sanitise string
-                    $v = filter_var($v, FILTER_SANITIZE_STRING);
-               
-                }
-                $params[$k] = $v;
-            }
-        }
-        
-    }
-
-    //
-    //  removes /../
-    //
-    function sanitizePath($path) {
-        // Skip invalid input.
-        if (!isset($path)) {
-            return '';
-        }
-        if ($path === '') {
-            return '';
-        }
-
-        // Attempt to avoid path encoding problems.
-        //$path = preg_replace("/[^\x20-\x7E]/", '', $path);
-        $path = str_replace("\0", '', $path);
-        $path = str_replace('\\', '/', $path);
-
-        // Remember path root.
-        $prefix = substr($path, 0, 1) === '/' ? '/' : '';
-
-        // Process path components
-        $stack = array();
-        $parts = explode('/', $path);
-        foreach ($parts as $part) {
-            if ($part === '' || $part === '.') {
-                // No-op: skip empty part.
-            } elseif ($part !== '..') {
-                array_push($stack, $part);
-            } elseif (!empty($stack)) {
-                array_pop($stack);
-            } else {
-                return ''; // Out of the root.
-            }
-        }
-
-        // Return the "clean" path
-        $path = $prefix . implode('/', $stack);
-        if( is_dir($path) && substr($path, -1, 1) != '/' )  {
-            $path = $path.'/';
-        }
-        return $path;
-    }
     
-    
-    
-    //
-    //
-    //
-    function sanitizeURL($url){
-        if($url!=null && trim($url)!=''){
-            $url = filter_var($url, FILTER_SANITIZE_URL);
-            if(filter_var($url, FILTER_VALIDATE_URL)){
-                return $url;
-            }
-        }
-        return null;
-    }
-    
-    //
-    //
-    //
-    function sanitizeString($message, $allowed_tags=null){
-        if($message==null){
-            $message = '';
-        }else{
-            if($allowed_tags==null) {
-                $allowed_tags = '<a><u><i><em><b><strong><sup><sub><small><br><h1><h2><h3><h4><h5><h6><p><ul><li><img><font><blockquote><pre><span>';   
-            }else if($allowed_tags===false){
-                $allowed_tags = null;
-            }
-            $message = htmlspecialchars(strip_tags($message, $allowed_tags), ENT_NOQUOTES);
-            $message = preg_replace("/&lt;/", '<', $message);
-            $message = preg_replace("/&gt;/", '>', $message);
-        }
-        return $message;
-    }
-    
-    //
-    //
-    //
-    function stripScriptTagInRequest(&$params){
-
-        foreach($params as $k => $v)
-        {
-            if($v!=null){
-                
-                if(is_array($v) && count($v)>0){
-                    stripScriptTagInRequest($v);
-                }else{
-                    $v = trim($v);//so we are sure it is whitespace free at both ends
-
-                    //remove script tag
-                    $v = preg_replace('#<script(.*?)>(.*?)</script>#is', '', $v);
-               
-                }
-                $params[$k] = $v;
-            }
-        }//for
-    }
-
-    //
-    //
-    //
-    function getHTMLPurifier(){
-
-            $config = HTMLPurifier_Config::createDefault();  
-            //$config->set('Cache.DefinitionImpl', null);
-            $config->set('Cache.SerializerPath', HEURIST_SCRATCHSPACE_DIR);
-            //$config->set('Core.EscapeNonASCIICharacters', true);
-            $config->set('CSS.AllowImportant', true);
-            $config->set('CSS.AllowTricky', true);
-            $config->set('CSS.Proprietary', true);
-            $config->set('CSS.Trusted', true);
-            /*$config->set('Core.AcceptFullDocuments',false);
-            $config->set('Core.HiddenElements',array (
-                    'script' => true,
-                    'style' => false,
-                    'head' => false,
-                    ));
-            $config->set('HTML.Trusted', true);
-            $config->set('HTML.Allowed', array('head'=>true,'style'=>true));
-            $config->set('HTML.AllowedElements', array('head'=>true,'style'=>true));
-            */
-            $def = $config->getHTMLDefinition(true);
-            $def->addAttribute('div', 'id', 'Text');            
-            $def->addAttribute('div', 'data-heurist-app-id', 'Text');            
-            $def->addAttribute('div', 'data-inited', 'Text');
-            $def->addAttribute('a', 'data-ref', 'Text');
-            
-            return new HTMLPurifier($config);
-        
-    }
-    //
-    //
-    //    
-    function purifyHTML(&$params, $purifier = null){
-        
-        if($purifier==null){
-            $purifier = getHTMLPurifier();
-        }
-
-        foreach($params as $k => $v)
-        {
-            if($v!=null){
-                
-                if(is_array($v) && count($v)>0){
-                    purifyHTML($v, $purifier);
-                }else{
-                    $v = $purifier->purify($v);
-                    //$v = htmlspecialchars_decode($v);
-                }
-                $params[$k] = $v;
-            }
-        }//for
-    }
-
-    //
-    //
-    //
-    function is_memory_allowed( $memoryNeeded ){
-        
-        $mem_limit = get_php_bytes('memory_limit');
-        $mem_usage = memory_get_usage();
-        
-        if ($mem_usage+$memoryNeeded > $mem_limit - 10485760){
-            return 'It requires '.((int)($memoryNeeded/1024/1024)).
-                            ' Mb.  Available '.((int)($mem_limit/1024/1024)).' Mb';           
-        }else{
-            return true;
-        }
-    }
-    
-    //
-    // 
-    //
-    function get_php_bytes( $php_var ){
-        
-        $val = ini_get($php_var);
-        $val = trim($val);
-        $last = strtolower($val[strlen($val)-1]);
-
-        if($last){
-            $val = intval(substr($val,0,strlen($val)-1));
-        }
-            
-        switch($last) {
-            case 'g':
-                $val *= 1024;
-            case 'm':
-                $val *= 1024;
-            case 'k':
-                $val *= 1024;
-        }
-        //_fix_integer_overflow
-        if ($val < 0) {
-            $val += 2.0 * (PHP_INT_MAX + 1);
-        }
-        return $val;
-    }
-    
-    // @todo
-    // redirect request to remote heurist server 
-    //
-    function redirectToRemoteServer( $request ){
-       /* 
-       preg_match("/db=([^&]*).*$/", $url, $match);
-       return $match[1]         
-       */
-    }
-    
+    //--------------------------------------------------------------------------
     // 1 - OK
     // -1  not exists
     // -2  not writable
@@ -538,7 +288,7 @@
 
         foreach ($dirs as $dir) {
             
-            $dir = sanitizePath($dir);
+            $dir = USanitize::sanitizePath($dir);
             if( substr($dir, -1, 1) != '/' )  {
                 $dir .= '/';
             }
@@ -1036,461 +786,6 @@ function folderSubs($src, $exclude=null) {
 }   
     
 //------------------------------------------    
-/**
-* Zips everything in a directory
-*
-* @param mixed $source       Source folder or array of folders
-* @param mixed $destination  Destination file
-*/
-function createZipArchive($source, $only_these_folders, $destination, $verbose=true) {
-    
-    if (!extension_loaded('zip')) {
-        echo "<br/>PHP Zip extension is not accessible";
-        return false;
-    }
-    if (!file_exists($source)) {
-        echo "<br/>".htmlspecialchars($source)." was not found";
-        return false;
-    }
-
-    
-
-    $zip = new ZipArchive();
-    if (!$zip->open($destination, ZIPARCHIVE::CREATE)) {
-        if($verbose) echo "<br/>Failed to create zip file at ".htmlspecialchars($destination);
-        return false;
-    }
-
-    try{
-
-        $src = realpath($source);
-        if(!$src) {
-            if($verbose) {
-                echo '<br/>Cannot create zip archive '.htmlspecialchars($source).' is not a folder';
-            }
-            return false;
-        }
-        $source = str_replace('\\', '/', $src);
-
-        if (is_dir($source) === true) {
-
-            chdir($source);
-            
-            $parent_dir = '';
-            //$root_dir = $source;
-            if( is_array($only_these_folders) ){
-                foreach ($only_these_folders as $idx=>$folder) {
-                    $folder = str_replace('\\', '/', $folder);
-                    if(strpos( $folder, $source )!==0){
-                        $folder = $source."/".$folder;    
-                    }
-                    $only_these_folders[$idx] = $folder;
-                }
-            }
-            
-            $files = new RecursiveIteratorIterator(new RecursiveDirectoryIterator($source), RecursiveIteratorIterator::SELF_FIRST);
-
-            foreach ($files as $file) {
-
-                $file = str_replace('\\', '/', $file);
-
-                // Ignore "." and ".." folders
-                if( in_array(substr($file, strrpos($file, '/')+1), array('.', '..')) )
-                    continue;
-                    
-                if( is_dir($file) && substr($file,-1)!='/' ){
-                    $file = $file.'/';
-                }
-
-                //ignore files that are not in list of specified folders
-                $is_filtered = true;
-                if( is_array($only_these_folders) ){
-                    $is_filtered = false;
-                    foreach ($only_these_folders as $folder) {
-                        if( strpos( $file, $folder )===0 ){
-                            $is_filtered = true;
-                            break;
-                        }
-                    }
-                }
-
-                if(!$is_filtered) continue; //exclude not in $only_these_folders
-
-                // Determine real path
-                $file = realpath($file);
-
-                if($file!==false){
-                
-                    $file2 = str_replace('\\', '/', $file);
-                    
-                    if (is_dir($file) === true) { // Directory
-                        //remove root path
-                        $newdir = str_replace($source.'/', '', $file2.'/');
-                        if(!$zip->addEmptyDir( $newdir )){
-                            //$zip->getStatusString()
-                            return false;
-                        }
-                    }
-                    else if (is_file($file) === true) { // File
-                        $newfile = str_replace($source.'/', '', $file2); //without folder name
-                        if(!$zip->addFile($file, $newfile)){
-                            return false;
-                        }
-                        //$zip->addFromString(str_replace($source . '/', '', $file), file_get_contents($file));
-                    }
-                }
-            }//recursion
-            
-        } else if (is_file($source) === true) {
-            $zip->addFile($source, basename($source));
-            //$zip->addFromString(basename($source), file_get_contents($source));
-        }
-
-    
-    // Close zip and show output if verbose
-    $numFiles = $zip->numFiles;
-    $zip->close();
-    if(file_exists($destination)){
-        $size = filesize($destination) / pow(1024, 2);
-
-        if($verbose) {
-            echo "<br/>Successfully dumped data from ". htmlspecialchars($source) ." to ".htmlspecialchars($destination);
-            echo "<br/>The zip file contains ".htmlspecialchars($numFiles." files and is ".sprintf("%.2f", $size))."MB";
-        }
-    }else{
-        return false;    
-    }
-    return true;
-    
-    } catch (Exception  $e){
-        error_log( $e->getMessage() );
-        if($verbose) {
-            echo "<br/>Cannot create zip archive ".htmlspecialchars($destination).' '.Exception::getMessage();
-        }
-        return false;
-    }                            
-}
-
-/* not secure
-function unzipArchive($zipfile, $destination, $entries=null){
-
-    if(file_exists($zipfile) && filesize($zipfile)>0 &&  file_exists($destination)){
-        
-        $dest = realpath($destination);
-        if ($dest !== false) {
-            if (strpos($dest, $system->getFileStoreRootFolder()) !== 0) {
-            //HEURIST_SCRATCH_DIR
-            //HEURIST_TILESTACKS_DIR
-                    return false; //not allowed
-            }
-        }
-
-        $zip = new ZipArchive;
-        if ($zip->open($zipfile) === TRUE) {
-
-            if($entries==null){
-                $zip->extractTo($dest);//, array()
-            }else{
-                $zip->extractTo($dest, $entries);
-            }
-            $zip->close();
-            return true;
-        } else {
-            return false;
-        }
-
-    }else{
-        return false;
-    }
-}
-*/
-
-define('MAX_FILES', 10000);
-define('MAX_SIZE', 1073741824); // 1 GB
-define('MAX_RATIO', 10);
-define('READ_LENGTH', 1024);
-
-function unzipArchive($system, $zipfile, $destination){
-    
-    if(!(file_exists($zipfile) && filesize($zipfile)>0 &&  file_exists($destination))){
-        throw new Exception('Archive file not found');
-    }
-    
-    //set current folder
-    chdir($destination);  // relatively db root  or HEURIST_FILES_DIR??        
-    $destination_dir = realpath($destination);
-    
-    if ($destination_dir !== false) {
-        if (strpos($destination_dir, '\\')!==false){
-            $destination_dir = str_replace('\\','/',$destination_dir);  
-        } 
-        if( substr($destination_dir, -1, 1) != '/' )  $destination_dir = $destination_dir.'/';
-        
-        if (strpos($destination_dir, $system->getFileStoreRootFolder()) !== 0) {
-        //HEURIST_SCRATCH_DIR
-        //HEURIST_TILESTACKS_DIR
-            throw new Exception('Destination folder must within database storage folder');
-        }
-    }
-
-    $fileCount = 0;
-    $totalSize = 0;
-
-    $zip = new ZipArchive();
-    if ($zip->open($zipfile) === true) {
-        for ($i = 0; $i < $zip->numFiles; $i++) {
-            $filename = $zip->getNameIndex($i);
-            $stats = $zip->statIndex($i);
-
-            if (strpos($filename, '../') !== false || substr($filename, 0, 1) === '/') {
-                throw new Exception('Archive contains unsecure entry '.$filename);
-            }
-
-            if (substr($filename, -1) !== '/') {
-                $fileCount++;
-                if ($fileCount > MAX_FILES) {
-                    // Reached max. number of files
-                    throw new Exception('Archive contains more than '.MAX_FILES.' entries');
-                }
-                
-                $destination_file = $destination_dir.$filename;
-
-                $fp = $zip->getStream($filename); // Compliant
-                $currentSize = 0;
-                while (!feof($fp)) {
-                    $currentSize += READ_LENGTH;
-                    $totalSize += READ_LENGTH;
-
-                    if ($totalSize > MAX_SIZE) {
-                        // Reached max. size
-                        throw new Exception('Maximum allowed extraction size achieved ('.MAX_SIZE.')');
-                    }
-
-                    // Additional protection: check compression ratio
-                    if ($stats['comp_size'] > 0  && $stats['comp_size']>READ_LENGTH) {
-                        $ratio = $currentSize / $stats['comp_size'];
-                        if ($ratio > MAX_RATIO) {
-                            // Reached max. compression ratio
-                            throw new Exception('Maximum allowed compression ration detected');
-                        }
-                    }
-
-                    file_put_contents($destination_file, fread($fp, READ_LENGTH), FILE_APPEND);
-                }
-
-                fclose($fp);
-            } else {
-                if (!mkdir($destination_dir.$filename, 0777, true)) {
-                    throw new Exception('Cannot create subfolder on unzip');
-                }
-            }
-        }
-        $zip->close();
-    }
-
-}
-
-//
-// flatten zip archive - extract without structures 
-// returns list of files
-//
-function unzipArchiveFlat($zipfile, $destination){
-
-    if(file_exists($zipfile) && filesize($zipfile)>0 &&  file_exists($destination)){
-        
-        $res = array();
-        $zip = new ZipArchive; 
-        if ( $zip->open( $zipfile ) === true) 
-        { 
-            for ( $i=0; $i < $zip->numFiles; $i++ ) 
-            { 
-                $entry = $zip->getNameIndex($i); 
-                if ( substr( $entry, -1 ) == '/' ) continue; // skip directories 
-                
-                $fp = $zip->getStream( $entry ); 
-                if (!$fp ) {
-                    throw new Exception('Unable to extract the file.'); 
-                }else{                
-                    $filename = $destination.fileNameSanitize(basename($entry)); //snyk SSRF
-                    $ofp = fopen($filename, 'w' ); 
-                    while ( ! feof( $fp ) ) 
-                        fwrite( $ofp, fread($fp, 8192) ); 
-                    
-                    fclose($fp); 
-                    fclose($ofp); 
-                    
-                    $res[] = $filename;
-                }
-            } 
-
-            $zip->close(); 
-            return $res;
-        } 
-        else {
-            return false; 
-        }
-    }else{
-        return false;
-    }
-}
-
-//
-//
-//
-function createBz2Archive($source, $only_these_folders, $destination, $verbose=true) {
-    
-    if (!extension_loaded('bz2')) {
-        echo "<br/>PHP Bz2 extension is not accessible";
-        return false;
-    }
-    if (!file_exists($source)) {
-        echo "<br/>".htmlspecialchars($source)." was not found";
-        return false;
-    }else 
-    
-    $numFiles = 0;
-    
-    $phar = new PharData($destination);
-
-    if (false === $phar) {
-        if($verbose) echo "<br/>Failed to create bz2 file at ".htmlspecialchars($destination);
-        return false;
-    }
-
-    try{
-        
-        $src = realpath($source);
-        
-        if(!$src) {
-            if($verbose) {
-                echo '<br/>Cannot create bz2 archive '.htmlspecialchars($source).' is not a folder';
-            }
-            return false;
-        }
-        
-        if($verbose){
-            echo "<br/>Source $source $src";
-        }
-        
-    $source = str_replace('\\', '/', $src);
-
-    
-    if (is_dir($source) === true) {
-
-        chdir($source);
-        
-        $parent_dir = '';
-        //$root_dir = $source;
-        if( is_array($only_these_folders) ){
-            foreach ($only_these_folders as $idx=>$folder) {
-                $folder = str_replace('\\', '/', $folder);
-                if(strpos( $folder, $source )!==0){
-                    $folder = $source."/".$folder;    
-                }
-                $only_these_folders[$idx] = $folder;
-            }
-        }
-        
-        $files = new RecursiveIteratorIterator(new RecursiveDirectoryIterator($source), RecursiveIteratorIterator::SELF_FIRST);
-
-        foreach ($files as $file) {
-
-            $file = str_replace('\\', '/', $file);
-
-            // Ignore "." and ".." folders
-            if( in_array(substr($file, strrpos($file, '/')+1), array('.', '..')) )
-                continue;
-                
-            if( is_dir($file) && substr($file,-1)!='/' ){
-                $file = $file.'/';
-            }
-
-            //ignore files that are not in list of specified folders
-            $is_filtered = true;
-            if( is_array($only_these_folders) ){
-                $is_filtered = false;
-                foreach ($only_these_folders as $folder) {
-                    if( strpos( $file, $folder )===0 ){
-                        $is_filtered = true;
-                        break;
-                    }
-                }
-            }
-
-            if(!$is_filtered) continue; //exclude not in $only_these_folders
-
-            // Determine real path
-            $file = realpath($file);
-            
-            if($file!==false){
-            
-                $file2 = str_replace('\\', '/', $file);
-                
-                if (is_dir($file) === true) { // Directory
-                    //remove root path
-                    $newdir = str_replace($source.'/', '', $file2.'/');
-                    $phar->addEmptyDir( $newdir );
-                }
-                else if (is_file($file) === true) { // File
-                    $newfile = str_replace($source.'/', '', $file2); //without folder name
-
-                    $phar->addFile($file, $newfile);
-                    
-                    $numFiles++;
-
-                    //$phar->addFromString(str_replace($source . '/', '', $file), file_get_contents($file));
-                }
-                
-            }
-        }//recursion
-        
-    } else if (is_file($source) === true) {
-        
-        $size_mb = filesize($source) / pow(1024, 2);
-        if($size_mb>128){
-            if($size_mb>256){
-                ini_set('memory_limit','1024M');
-            }else{
-                ini_set('memory_limit','256M');//'2048M');
-            }
-        }
-        
-        if($verbose) echo "Add file ".basename($source)." (size $size_mb)\n";        
-        
-        $phar->addFile($source, basename($source));
-        $numFiles++;
-        //$phar->addFromString(basename($source), file_get_contents($source));
-    }
-
-        $phar->compress(Phar::BZ2);
-        
-        if(file_exists($destination.'.bz2')){ //
-            
-            unlink($destination);
-
-            $size = filesize($destination.'.bz2') / pow(1024, 2);
-            
-            if($verbose) {
-                echo "<br/>Successfully dumped data from ". htmlspecialchars($source) ." to ".htmlspecialchars($destination);
-                echo "<br/>The archive file contains ".$numFiles." files and is ".sprintf("%.2f", $size)."MB";
-            }
-        }else{
-            echo "$destination.bz2 archive not created\n";
-            return false;    
-        }
-        
-        return true;
-    
-    } catch (Exception  $e){
-        error_log( $e->getMessage() );
-        if($verbose) {
-            echo "<br/>Cannot create archive ".htmlspecialchars($destination).' '.$e->getMessage();
-        }
-        return false;
-    }                            
-}
-
-
 //
 // Returns false if given file is not in heurist upload folder
 // Otherwise return real path
@@ -1760,7 +1055,7 @@ function loadRemoteURLContentType($url, $bypassProxy = true, $timeout=30) {
 
     if ($error) {
         $code = intval(curl_getinfo($ch, CURLINFO_HTTP_CODE));
-        errorLog('CURL ERROR: http code = '.$code.'  curl error='.$error);
+        USanitize::errorLog('CURL ERROR: http code = '.$code.'  curl error='.$error);
     } else {
         //if(!$data){
             $content_type = curl_getinfo($ch, CURLINFO_CONTENT_TYPE);    
@@ -2045,70 +1340,8 @@ function isXMLfile($filename){
     return $res;
 }
 
-function flush_buffers($start=true){
-    //ob_end_flush();
-    @ob_flush();
-    @flush();
-    if($start) @ob_start();
-}
-
 //
-//
-//
-function fileNameSanitize($filename, $beautify=true) {
-    // sanitize filename
-    if($filename!=null){
-//            [\x7F\xA0\xAD]|          # non-printing characters DEL, NO-BREAK SPACE, SOFT HYPHEN - removed since it brokes utf-8 characters
-
-//            [#\[\]@!$&\'+,;=()]|     # URI reserved https://tools.ietf.org/html/rfc3986#section-2.2
-//            [{}^\~`]                 # URL unsafe characters https://www.ietf.org/rfc/rfc1738.txt
-
-        $filename = preg_replace(
-            '~
-            [\x00-\x1F]|             # control characters http://msdn.microsoft.com/en-us/library/windows/desktop/aa365247%28v=vs.85%29.aspx
-            [<>:"/\\|?*]             # file system reserved https://en.wikipedia.org/wiki/Filename#Reserved_characters_and_words
-            ~x',
-            '-', $filename);
-        // avoids ".", ".." or ".hiddenFiles"
-        $filename = ltrim($filename, '.-');
-        // optional beautification
-        if ($beautify) $filename = fileNameBeautify($filename);
-        // maximize filename length to 255 bytes http://serverfault.com/a/9548/44086
-        $ext = pathinfo($filename, PATHINFO_EXTENSION);
-        $filename = mb_strcut(pathinfo($filename, PATHINFO_FILENAME), 0, 255 - ($ext ? strlen($ext) + 1 : 0), mb_detect_encoding($filename)) . ($ext ? '.' . $ext : '');
-    }
-    return $filename;
-}
-
-//
-//
-//
-function fileNameBeautify($filename) {
-    // reduce consecutive characters
-    $filename = preg_replace(array(
-        // "file   name.zip" becomes "file-name.zip"
-        '/ +/',
-        // "file___name.zip" becomes "file-name.zip"
-        '/_+/',
-        // "file---name.zip" becomes "file-name.zip"
-        '/-+/'
-    ), '-', $filename);
-    $filename = preg_replace(array(
-        // "file--.--.-.--name.zip" becomes "file.name.zip"
-        '/-*\.-*/',
-        // "file...name..zip" becomes "file.name.zip"
-        '/\.{2,}/'
-    ), '.', $filename);
-    // lowercase for windows/unix interoperability http://support.microsoft.com/kb/100625
-    $filename = mb_strtolower($filename, mb_detect_encoding($filename));
-    // ".file-name.-" becomes "file-name"
-    $filename = trim($filename, '.-');
-    return $filename;
-}
-
-
-//
-// Working with semaphore file for particulat long action
+// Working with semaphore file for particular long action
 //
 function isActionInProgress($action, $range_minutes){
     
@@ -2449,14 +1682,13 @@ function uploadFileToNakala($system, $params) {
     return $external_url;
 }
 
-
 //
-// wrap around error_log to prevent log injection
-// 
-function errorLog($message){
-    //$regex = '/\R/'; 
-    $regex = "/[\r\n]/";
-    $safe_message = preg_replace($regex, ' ', $message);
-    error_log($safe_message);
+// not used
+//
+function flush_buffers($start=true){
+    //ob_end_flush();
+    @ob_flush();
+    @flush();
+    if($start) @ob_start();
 }
 ?>

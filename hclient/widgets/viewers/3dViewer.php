@@ -21,6 +21,7 @@
 
 require_once dirname(__FILE__).'/../../../hserv/System.php';
 require_once dirname(__FILE__).'/../../../hserv/records/search/recordFile.php';
+require_once dirname(__FILE__).'/../../../hserv/utilities/uSanitize.php';
 
 define('ERROR_REDIR', dirname(__FILE__).'/../../framecontent/infoPage.php');
 
@@ -66,7 +67,7 @@ if($system->init($db, true, false)){
                 
                 //find related mtl and texture files by original file name
                 if($fileExt=='obj'){
-                    $filename = sanitizePath(HEURIST_FILESTORE_DIR.$fileinfo['fullPath']);
+                    $filename = USanitize::sanitizePath(HEURIST_FILESTORE_DIR.$fileinfo['fullPath']);
                     //$filename = basename($fileinfo['fullPath']);
                     $file_obj = realpath($filename);
                     $file_mtl = null;

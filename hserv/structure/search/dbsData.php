@@ -1,12 +1,4 @@
 <?php
-    /*
-    * Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except in compliance
-    * with the License. You may obtain a copy of the License at https://www.gnu.org/licenses/gpl-3.0.txt
-    * Unless required by applicable law or agreed to in writing, software distributed under the License is
-    * distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
-    * See the License for the specific language governing permissions and limitations under the License.
-    */
-
     /**
     * dbsData.php - retrieveing database definitions
     * 
@@ -59,8 +51,15 @@
     *
     */
 
+    /*
+    * Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except in compliance
+    * with the License. You may obtain a copy of the License at https://www.gnu.org/licenses/gpl-3.0.txt
+    * Unless required by applicable law or agreed to in writing, software distributed under the License is
+    * distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
+    * See the License for the specific language governing permissions and limitations under the License.
+    */
     require_once dirname(__FILE__).'/../../records/edit/recordTitleMask.php';
-    require_once dirname(__FILE__).'/../../utilities/utils_mail.php';
+    require_once dirname(__FILE__).'/../../utilities/uMail.php';
     require_once dirname(__FILE__).'/../../../viewers/smarty/reportActions.php';
     
 
@@ -194,7 +193,7 @@
                 }
                 $res->close();
             }else{
-                errorLog('DATABASE: '.$system->dbname().'. Error retrieving rectype structure '.$mysqli->error);
+                USanitize::errorLog('DATABASE: '.$system->dbname().'. Error retrieving rectype structure '.$mysqli->error);
             }
 
 
@@ -280,7 +279,7 @@
             }
             $res->close();
         }else{
-            errorLog('DATABASE: '.$system->dbname().'. Error retrieving rectype structure '.$mysqli->error);
+            USanitize::errorLog('DATABASE: '.$system->dbname().'. Error retrieving rectype structure '.$mysqli->error);
         }
 
 
@@ -644,7 +643,7 @@ function dbs_GetRectypeConstraint($system) {
             
             $res->close();
         }else{
-            errorLog('DATABASE: '.$system->dbname().'. Error retrieving terms '.$mysqli->error);
+            USanitize::errorLog('DATABASE: '.$system->dbname().'. Error retrieving terms '.$mysqli->error);
         }
         $terms['treesByDomain'] = array(
                 'relation' => __getTermTree($system, "relation", "exact"), 
@@ -687,7 +686,7 @@ function dbs_GetRectypeConstraint($system) {
                 }                
                 $res->close();
             }else{
-                errorLog('DATABASE: '.$system->dbname().'. Error retrieving vocabulary groups '.$mysqli->error);
+                USanitize::errorLog('DATABASE: '.$system->dbname().'. Error retrieving vocabulary groups '.$mysqli->error);
             }
             
             
@@ -706,7 +705,7 @@ function dbs_GetRectypeConstraint($system) {
                 }
                 $res->close();
             }else{
-                errorLog('DATABASE: '.$system->dbname().'. Error retrieving terms by reference '.$mysqli->error);
+                USanitize::errorLog('DATABASE: '.$system->dbname().'. Error retrieving terms by reference '.$mysqli->error);
             }
             
         }//$dbVer==1 && $dbVerSub>2
@@ -1135,7 +1134,7 @@ function dbs_GetRectypeConstraint($system) {
                             $dbname = $system->dbname();
                             $sMsg = 'Recursion in '.$dbname.'.defTerms! Tree '.implode('>',$parents)
                                     .'. Cannot add term '.$gChildID;
-                            errorLog($sMsg);        
+                            USanitize::errorLog($sMsg);        
                             if(!$emailsent){
                                 $dbowner = user_getDbOwner($system->get_mysqli()); //info about user #2
                                 $emailsent = true;
@@ -1378,7 +1377,7 @@ function dbs_GetRectypeConstraint($system) {
 
         try{
             if(!$res){
-                errorLog('Database: '.$system->dbname().'FAILED QUERY: '.$mysqli->error);
+                USanitize::errorLog('Database: '.$system->dbname().'FAILED QUERY: '.$mysqli->error);
             }else{
                 while ($row = $res->fetch_row()) {
                     $dty_ID = $row[2];
@@ -1402,9 +1401,9 @@ function dbs_GetRectypeConstraint($system) {
             }
         }catch(Exception $e) {
             //trying to find weird error - missed trm_Modified column
-            errorLog('Message: ' .$e->getMessage());
-            errorLog('QUERY: '.$query);
-            errorLog('Database: '.$system->dbname());
+            USanitize::errorLog('Message: ' .$e->getMessage());
+            USanitize::errorLog('QUERY: '.$query);
+            USanitize::errorLog('Database: '.$system->dbname());
         }
         
         //SPECIAL CASE for relation type #6

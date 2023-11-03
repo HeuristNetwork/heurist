@@ -369,7 +369,7 @@
                 }
                 $res->close();
             }else{
-                errorLog('Query: '.$query.'.  mySQL error: '.$mysqli->error);
+                USanitize::errorLog('Query: '.$query.'.  mySQL error: '.$mysqli->error);
             }
         }
         return $result;
@@ -737,7 +737,7 @@
             
             if($dbScriptMode==2 && !(defined('HEURIST_DB_MYSQLPATH') && file_exists(HEURIST_DB_MYSQLPATH))){
                 $dbScriptMode = 0;  
-            }else if($dbScriptMode==1 && !is_memory_allowed(filesize($script_file))){
+            }else if($dbScriptMode==1 && !USystem::isMemoryAllowed(filesize($script_file))){
                 $dbScriptMode = 0;
             }
             

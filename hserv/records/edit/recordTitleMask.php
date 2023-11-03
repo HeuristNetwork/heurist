@@ -544,7 +544,7 @@ private static function __get_related_record_ids($rec_id, $dty_ID) {
 private static function __get_record_value($rec_id, $reset=false) {
 
 /*    
-    $memory_limit = get_php_bytes('memory_limit');
+    $memory_limit = USystem::getConfigBytes('memory_limit');
     $mem_used = memory_get_usage();
     if($mem_used>$memory_limit-104857600){ //100M
     

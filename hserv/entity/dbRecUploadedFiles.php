@@ -26,6 +26,7 @@ require_once dirname(__FILE__).'/dbEntitySearch.php';
 require_once dirname(__FILE__).'/../records/search/recordFile.php';
 require_once dirname(__FILE__).'/../records/edit/recordModify.php';
 require_once dirname(__FILE__).'/../../import/fieldhelper/harvestLib.php';
+require_once dirname(__FILE__).'/../utilities/uArchive.php';
 
 /**
 * some public methods
@@ -653,7 +654,7 @@ When we open "iiif_image" in mirador viewer we generate manifest dynamically.
                     $thumb_name = HEURIST_THUMB_DIR.'ulf_'.$this->records[$rec_idx]['ulf_ObfuscatedFileID'].'.png';
                     $temp_path = tempnam(HEURIST_SCRATCH_DIR, "_temp_");
                     if(saveURLasFile($record['ulf_TempThumbUrl'], $temp_path)){ //save to temp in scratch folder
-                        UtilsImage::createThumbnailFile($temp_path, $thumb_name); //create thumbnail for iiif image
+                        UImage::createThumbnailFile($temp_path, $thumb_name); //create thumbnail for iiif image
                         unlink($temp_path);       
                     }
             }else
@@ -679,8 +680,8 @@ When we open "iiif_image" in mirador viewer we generate manifest dynamically.
                                 
                                 //create thumbnail
                                 $thumb_name = HEURIST_THUMB_DIR.'ulf_'.$ulf_ObfuscatedFileID.'.png';
-                                //UtilsImage::createThumbnailFile($filename, $thumb_name);
-                                $img = UtilsImage::createFromString('tileserver tiled images');
+                                //UImage::createThumbnailFile($filename, $thumb_name);
+                                $img = UImage::createFromString('tileserver tiled images');
                                 imagepng($img, $thumb_name);//save into file
                                 imagedestroy($img);
                                 
@@ -701,7 +702,7 @@ When we open "iiif_image" in mirador viewer we generate manifest dynamically.
                             //unzip archive to HEURIST_TILESTACKS_DIR
                             $unzip_error = null;
                             try{
-                                unzipArchive($this->system, $tmp_name, $dest);    
+                                UArchive::unzip($this->system, $tmp_name, $dest);    
                             } catch (Exception  $e) {
                                 $unzip_error = $e->getMessage();
                             }
@@ -720,10 +721,10 @@ When we open "iiif_image" in mirador viewer we generate manifest dynamically.
                                 
                                 $thumb_name = HEURIST_THUMB_DIR.'ulf_'.$ulf_ObfuscatedFileID.'.png';
                                 
-                                $mimeExt = UtilsImage::getImageType($filename);
+                                $mimeExt = UImage::getImageType($filename);
                                 
                                 if($mimeExt){
-                                    UtilsImage::createThumbnailFile($filename, $thumb_name); //create thumbnail for tiled image
+                                    UImage::createThumbnailFile($filename, $thumb_name); //create thumbnail for tiled image
                                     $file2['ulf_MimeExt'] = $mimeExt;    
                                 }else{
                                     $file2['ulf_MimeExt'] = 'png';
@@ -1849,7 +1850,7 @@ When we open "iiif_image" in mirador viewer we generate manifest dynamically.
             return false;
         }
         
-        $filename = fileNameSanitize($newname.'.'.$type);
+        $filename = USanitize::sanitizeFileName($newname.'.'.$type);
 
         file_put_contents(HEURIST_SCRATCH_DIR.$filename, $data);        
         

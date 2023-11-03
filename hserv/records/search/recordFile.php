@@ -16,14 +16,14 @@
 * fileGetFullInfo  - local paths, external links, mimetypes and parameters (mediatype and source)
 * fileGetThumbnailURL - URL to thumbnail for given record ID and specified bg color
 * fileGetMetadata - return metadata for registered media, plus width,height for images
-* getImageFromFile - return image object for given file
+*
 * getPrevailBackgroundColor2  - not used
 * getPrevailBackgroundColor 
 * 
 * fileGetPlayerTag - produce appropriate html tag to view media content
 * getPlayerURL  - get player url for youtube, vimeo, soundcloud
 * 
-* @todo move to utils_file.php
+* @todo move to uFile.php
 * resolveFilePath  
 * downloadFile
 * 
@@ -49,7 +49,8 @@
 
 require_once dirname(__FILE__).'/../../System.php';
 require_once dirname(__FILE__).'/../../structure/dbsUsersGroups.php';
-require_once dirname(__FILE__).'/../../utilities/utils_file.php';
+require_once dirname(__FILE__).'/../../utilities/uFile.php';
+require_once dirname(__FILE__).'/../../utilities/uImage.php';
 require_once dirname(__FILE__).'/../../entity/dbRecUploadedFiles.php';
 
 /**
@@ -350,7 +351,7 @@ function fileGetThumbnailURL($system, $recID, $get_bgcolor){
             if(false && file_exists(HEURIST_THUMB_DIR . $background_file)){
                 $bg_color = file_get_contents(HEURIST_THUMB_DIR.$background_file);
             }else if(file_exists(HEURIST_THUMB_DIR . $thumbfile)){
-                $bg_color = getPrevailBackgroundColor( HEURIST_THUMB_DIR . $thumbfile );
+                $bg_color = UImage::getPrevailBackgroundColor( HEURIST_THUMB_DIR . $thumbfile );
             }else{
                 $bg_color = 'rgb(223, 223, 223)';
             }
@@ -361,160 +362,8 @@ function fileGetThumbnailURL($system, $recID, $get_bgcolor){
     return array('url'=>$thumb_url, 'bg_color'=>$bg_color);
 }
 
-//
-// return image object for given file
-//
-function getImageFromFile($filename){
-    $image = null;
-    if(file_exists($filename)){
-        
-        $path_parts = pathinfo($filename);
-    
-        try{
-    
-            switch($path_parts['extension']) {
-                case 'jpeg':
-                case 'jfif':
-                case 'jpg':
-                case 'jpe':
-                    $image = @imagecreatefromjpeg($filename);
-                    break;
-                case 'gif':
-                    $image = @imagecreatefromgif($filename);
-                    break;
-                case 'png':
-                    $image = @imagecreatefrompng($filename);
-                    break;
-            }
-        
-        }catch(Exception $e) {
-            $rv = sendEmail(HEURIST_MAIL_TO_ADMIN, 'Image corruption '.HEURIST_DBNAME, 
-                    $filename.'. System message: ' .$e->getMessage());
-        }
-    }
-    return $image;
-}
-
 /**
-* find prevail background color need php version 5.5
-* 
-* @param mixed $file
-*/
-function getPrevailBackgroundColor2($filename){
-    
-    $image = getImageFromFile($filename);
-    if($image){
-        
-        $scaled = imagescale($image, 1, 1, IMG_BICUBIC);  //since v5.5
-        $index = imagecolorat($scaled, 0, 0);
-        $rgb = imagecolorsforindex($scaled, $index); 
-        /* $red = round(round(($rgb['red'] / 0x33)) * 0x33); 
-        $green = round(round(($rgb['green'] / 0x33)) * 0x33); 
-        $blue = round(round(($rgb['blue'] / 0x33)) * 0x33); 
-        return sprintf('#%02X%02X%02X', $red, $green, $blue);     
-        */
-        return sprintf('#%02X%02X%02X', $rgb['red'], $rgb['green'], $rgb['blue']);
-    }else{
-        return '#FFFFFF';
-    }
-    
-}
-
-//
-//
-//
-function rgb2hex($rgb) {
-   $hex = "#";
-   $hex .= str_pad(dechex($rgb[0]), 2, '0', STR_PAD_LEFT);
-   $hex .= str_pad(dechex($rgb[1]), 2, '0', STR_PAD_LEFT);
-   $hex .= str_pad(dechex($rgb[2]), 2, '0', STR_PAD_LEFT);
-
-   return $hex; // returns the hex value including the number sign (#)
-}
-
-//
-//
-//
-function getPrevailBackgroundColor($filename){
-    // histogram options
-
-    $maxheight = 300;
-    $barwidth = 2;
-
-    $image = getImageFromFile($filename);
-    if($image){
-
-        $im = $image;
-
-        $imgw = imagesx($im);
-        $imgh = imagesy($im);
-
-        // n = total number or pixels
-
-        $n = $imgw*$imgh;
-
-        $histo = array();
-        for ($i=0; $i<256; $i++) $histo[]=0;
-
-        for ($i=0; $i<$imgw; $i++)
-        {
-            for ($j=0; $j<$imgh; $j++)
-            {
-
-                // get the rgb value for current pixel
-
-                $rgb = imagecolorat($im, $i, $j);
-
-                // extract each value for r, g, b
-
-                $r = ($rgb >> 16) & 0xFF;
-                $g = ($rgb >> 8) & 0xFF;
-                $b = $rgb & 0xFF;
-
-                // get the Value from the RGB value
-
-                $V = round(($r + $g + $b) / 3);
-
-                // add the point to the histogram
-                $histo[$V] += $V / $n;
-                $histo_color[$V] = rgb2hex(array($r,$g,$b));
-            }
-        }
-
-        // find the maximum in the histogram in order to display a normated graph
-
-        $max = 0;
-        for ($i=0; $i<256; $i++)
-        {
-            if ($histo[$i] > $max)
-            {
-                $max = $histo[$i];
-            }
-        }
-
-        $key = array_search ($max, $histo);
-        $col = $histo_color[$key];
-        return $col;
-        /*
-        echo "<div style='width: ".(256*$barwidth)."px; border: 1px solid'>";
-        for ($i=0; $i<255; $i++)
-        {
-        $val += $histo[$i];
-
-        $h = ( $histo[$i]/$max )*$maxheight;
-
-        echo "<img src=\"img.gif\" width=\"".$barwidth."\"
-        height=\"".$h."\" border=\"0\">";
-        }
-        echo "</div>";
-        */
-    }else{
-        return '#FFFFFF';   
-    }
-}
-
-/**
-* @TODO there are places with the same code - 1) use this function everywhere 2) move to utils_file.php
+* @TODO there are places with the same code - 1) use this function everywhere 2) move to uFile.php
 * 
 * resolve path relatively db root or file_uploads
 * 
@@ -720,7 +569,7 @@ function downloadFileWithMetadata($system, $fileinfo, $rec_ID){
     if($system->defineConstant('DT_NAME')){
         recordSearchDetails($system, $record, array(DT_NAME));
         if(is_array($record['details'][DT_NAME])){
-                $downloadFileName = fileNameSanitize(array_values($record['details'][DT_NAME])[0]);
+                $downloadFileName = USanitize::sanitizeFileName(array_values($record['details'][DT_NAME])[0]);
         }
     }
     if(!$downloadFileName) $downloadFileName = 'Dataset_'.$rec_ID;
@@ -1049,12 +898,12 @@ function fileGetMetadata($fileinfo){
     
         if(file_exists($filepath)){
             
-            $image = getImageFromFile($filepath);
+            $image = UImage::getImageFromFile($filepath);
             $alt_image = @getimagesize($filepath);
 
         }else if($external_url){
 
-            $image = UtilsImage::getRemoteImage( $external_url );
+            $image = UImage::getRemoteImage( $external_url );
         }
 
         if($image){
@@ -1136,30 +985,30 @@ function fileCreateThumbnail( $system, $fileid, $is_download ){
 
             //special case for pdf        
             if($mimeExt=='application/pdf' || $mimeExt=='pdf'){
-                UtilsImage::getPdfThumbnail($filename, $thumbnail_file);
+                UImage::getPdfThumbnail($filename, $thumbnail_file);
             }else{
                 
                 //get real image type from exif
-                $mimeExt = UtilsImage::getImageType($filename);
+                $mimeExt = UImage::getImageType($filename);
                 
-                $errorMsg = UtilsImage::checkMemoryForImage($filename, $mimeExt);
+                $errorMsg = UImage::checkMemoryForImage($filename, $mimeExt);
                     
                 if($errorMsg){
                     //database, record ID and name of bad image
                     sendEmail(HEURIST_MAIL_TO_ADMIN, 'Cant create thumbnail image. DB:'.HEURIST_DBNAME, 
                             'File ID#'.$file['ulf_ID'].'  '.$filename.'. '.$errorMsg);
                  
-                    $img = UtilsImage::createFromString('Thumbnail not created. '.$errorMsg);
+                    $img = UImage::createFromString('Thumbnail not created. '.$errorMsg);
                     
                 }else{
                     
                     //load content
-                    $img = UtilsImage::safeLoadImage($filename, $mimeExt);
+                    $img = UImage::safeLoadImage($filename, $mimeExt);
                     
                     if($img===false){
                         //this is not an image
                         $desc = '***' . strtoupper(preg_replace('/.*[.]/', '', $file['ulf_OrigFileName'])) . ' file';
-                        $img = UtilsImage::createFromString($desc); //from string
+                        $img = UImage::createFromString($desc); //from string
                     }
                     
                 }                    
@@ -1172,11 +1021,11 @@ function fileCreateThumbnail( $system, $fileid, $is_download ){
             if(@$file['ulf_OrigFileName'] && 
                 (strpos($file['ulf_OrigFileName'],'_tiled')===0 || @$file['ulf_PreferredSource']=='tiled') )  {
                 
-                $img = UtilsImage::createFromString('tiled images stack'); //from string
+                $img = UImage::createFromString('tiled images stack'); //from string
         
             }else if(@$file['fxm_MimeType'] && strpos($file['fxm_MimeType'], 'image/')===0){
                 //@todo for image services (flikr...) take thumbnails directly
-                $img = UtilsImage::getRemoteImage($file['ulf_ExternalFileReference']);
+                $img = UImage::getRemoteImage($file['ulf_ExternalFileReference']);
             }else    
             if( @$file['fxm_MimeType'] == 'video/youtube' 
                 || strpos($file['ulf_ExternalFileReference'], 'youtu.be')>0
@@ -1189,7 +1038,7 @@ function fileCreateThumbnail( $system, $fileid, $is_download ){
                 
                 $youtubeid = $matches[1];
                 
-                $img = UtilsImage::getRemoteImage('https://img.youtube.com/vi/'.$youtubeid.'/default.jpg');
+                $img = UImage::getRemoteImage('https://img.youtube.com/vi/'.$youtubeid.'/default.jpg');
                 
                 //$youtubeid = preg_replace('/^[^v]+v.(.{11}).*/' , '$1', $url);
                 //$img = get_remote_image("http://img.youtube.com/vi/".$youtubeid."/0.jpg"); //get thumbnail
@@ -1200,7 +1049,7 @@ function fileCreateThumbnail( $system, $fileid, $is_download ){
                 $hash = json_decode(loadRemoteURLContent("https://vimeo.com/api/oembed.json?url=".rawurlencode($url), false), true); //get vimeo thumbnail
                 $thumb_url = @$hash['thumbnail_url'];
                 if($thumb_url){
-                    $img = UtilsImage::getRemoteImage($thumb_url);    
+                    $img = UImage::getRemoteImage($thumb_url);    
                 }
                 
                 //it works also - except regex is wrong for some vimeo urls
@@ -1209,7 +1058,7 @@ function fileCreateThumbnail( $system, $fileid, $is_download ){
                     $vimeo_id = $matches[5];
                     $hash = unserialize(file_get_contents("http://vimeo.com/api/v2/video/$vimeo_id.php"));
                     $thumb_url = $hash[0]['thumbnail_medium']; 
-                    $img = UtilsImage::getRemoteImage($thumb_url);
+                    $img = UImage::getRemoteImage($thumb_url);
                 }
                 */
             }else if($file['fxm_MimeType'] == 'audio/soundcloud'){
@@ -1220,7 +1069,7 @@ function fileCreateThumbnail( $system, $fileid, $is_download ){
                                 .rawurlencode($url), false), true);
                 $thumb_url = @$hash['thumbnail_url'];
                 if($thumb_url){
-                    $img = UtilsImage::getRemoteImage($thumb_url);    
+                    $img = UImage::getRemoteImage($thumb_url);    
                 }else{
                     $img = '../../hclient/assets/branding/logo_soundcloud.png';
                 }
@@ -1240,7 +1089,7 @@ function fileCreateThumbnail( $system, $fileid, $is_download ){
             header('Location: '.$placeholder);
         }
     }else{
-        UtilsImage::resizeImage($img, $thumbnail_file); //$img will be destroyed inside this function
+        UImage::resizeImage($img, $thumbnail_file); //$img will be destroyed inside this function
         if($is_download){
             if(file_exists($thumbnail_file)){
                 header('Content-type: image/png');

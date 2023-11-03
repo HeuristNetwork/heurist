@@ -392,7 +392,7 @@ sendEmail(array($usr_owner['ugr_eMail']), $email_title, $email_text);
             foreach($sif_purge as  $sif_id => $sif_table){
                 
                 if(hasTable($mysqli,$sif_table)){
-                    $file_name = fileNameSanitize($sif_list[$sif_id]);
+                    $file_name = USanitize::sanitizeFileName($sif_list[$sif_id]);
                     
 //echo $file_name."\n";                    
 //echo strlen($file_name)."\n";                        
@@ -441,7 +441,7 @@ sendEmail(array($usr_owner['ugr_eMail']), $email_title, $email_text);
             {
                 $archOK = true;
                 $destination = $backup_imports.$db_name.' '.$datetime1->format('Y-m-d').'.tar';
-                $archOK = createBz2Archive($backup_imports2, null, $destination, false);
+                $archOK = UArchive::createBz2($backup_imports2, null, $destination, false);
                 
                 if($archOK){
                     $report .= 'd';
@@ -508,11 +508,11 @@ sendEmail(array($usr_owner['ugr_eMail']), $email_title, $email_text);
 
                             //echo ' ... archived to '.$destination."\n";
 
-                            $archOK = createBz2Archive($dumpfile, null, $destination, false);
+                            $archOK = UArchive::createBz2($dumpfile, null, $destination, false);
                         }else{
                             
                             $destination = $destination.'.zip'; 
-                            $archOK = createZipArchive($dumpfile, null, $destination, false);
+                            $archOK = UArchive::zip($dumpfile, null, $destination, false);
                         }
                         
                         if($archOK){

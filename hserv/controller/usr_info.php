@@ -25,8 +25,10 @@
     require_once dirname(__FILE__).'/../System.php';
     require_once dirname(__FILE__).'/../structure/dbsUsersGroups.php';
     require_once dirname(__FILE__).'/../structure/dbsSavedSearches.php';
-    require_once dirname(__FILE__).'/../utilities/utils_file.php';
-    require_once dirname(__FILE__).'/../utilities/utils_image.php';	
+    require_once dirname(__FILE__).'/../utilities/uFile.php';
+    require_once dirname(__FILE__).'/../utilities/uImage.php';	
+    require_once dirname(__FILE__).'/../utilities/uSanitize.php';
+    
 
     $response = array(); //"status"=>"fatal", "message"=>"OBLOM");
     $res = false;
@@ -393,7 +395,7 @@
 
                   $root_dir = null;
                   if(@$_REQUEST['root_dir']){
-                      $root_dir = sanitizePath(HEURIST_FILESTORE_DIR.@$_REQUEST['root_dir']);     
+                      $root_dir = USanitize::sanitizePath(HEURIST_FILESTORE_DIR.@$_REQUEST['root_dir']);     
                   }
 
                   $res = folderTree($root_dir, 
@@ -404,7 +406,7 @@
                   
                   $res = false;
                   
-                  $dir_name = sanitizePath(@$_REQUEST['name']);
+                  $dir_name = USanitize::sanitizePath(@$_REQUEST['name']);
                   
                   if($dir_name==''){
                       $response = $system->addError(HEURIST_ACTION_BLOCKED, 'Folder name is not defined or out of the root');
@@ -417,7 +419,7 @@
                   }else
                   if($op=='rename'){
                       
-                      $new_name = sanitizePath(@$_REQUEST['newname']);
+                      $new_name = USanitize::sanitizePath(@$_REQUEST['newname']);
                       if($new_name==''){
                           $response = $system->addError(HEURIST_ACTION_BLOCKED, 'New folder name is not defined or out of the root');
                       }else if($folders[strtolower($new_name)]){
@@ -579,7 +581,7 @@
                         
             } else if ($action=="usr_save") {
                 
-                sanitizeRequest($_REQUEST);
+                USanitize::sanitizeRequest($_REQUEST);
                 $res = user_Update($system, $_REQUEST);
 
             } else if ($action=="usr_get" && is_numeric(@$_REQUEST['UGrpID'])) {
@@ -619,7 +621,7 @@
 
             } else if ($action=="svs_save"){
                 
-                stripScriptTagInRequest($_REQUEST);
+                USanitize::stripScriptTagInRequest($_REQUEST);
                 $res = svsSave($system, $_REQUEST);
 
             } else if ($action=="svs_delete" && @$_REQUEST['ids']) {
@@ -636,7 +638,7 @@
 
             } else if ($action=="svs_savetree" ) { //save saved searches tree status
 
-                stripScriptTagInRequest($_REQUEST);
+                USanitize::stripScriptTagInRequest($_REQUEST);
                 $res = svsSaveTreeData($system, @$_REQUEST['data']);
 
             } else if ($action=="svs_gettree" ) { //save saved searches tree status

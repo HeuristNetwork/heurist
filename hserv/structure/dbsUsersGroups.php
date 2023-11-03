@@ -40,7 +40,7 @@
     define('USER_GROUPS_ROLE_FIELD', 'ugl_Role');
     */
 
-    require_once dirname(__FILE__).'/../utilities/utils_mail.php';
+    require_once dirname(__FILE__).'/../utilities/uMail.php';
 
     /**
     * Get user/group by field value

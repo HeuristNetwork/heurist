@@ -294,7 +294,7 @@ public static function parseAndValidate($encoded_filename, $original_filename, $
         
         if($extension=='kmz'){
             
-            $files = unzipArchiveFlat($encoded_filename, HEURIST_SCRATCH_DIR);
+            $files = UArchive::unzipFlat($encoded_filename, HEURIST_SCRATCH_DIR);
             
             foreach($files as $filename){
                 if(strpos(strtolower($filename),'.kml')==strlen($filename)-4){

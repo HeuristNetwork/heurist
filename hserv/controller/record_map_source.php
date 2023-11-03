@@ -44,6 +44,7 @@
     require_once dirname(__FILE__).'/../records/import/importParser.php'; //parse CSV, KML and save into import table
     require_once dirname(__FILE__).'/../records/export/recordsExport.php';
     require_once dirname(__FILE__).'/../utilities/geo/mapSimplify.php';
+    require_once dirname(__FILE__).'/../utilities/uArchive.php';
     
     $response = array();
 
@@ -138,7 +139,7 @@
                                 $system->error_exit_api('Cannot extract kmz data to "scratch" folder. '.$res, HEURIST_ERROR);    
                             }
                             
-                            $files = unzipArchiveFlat($filepath, HEURIST_SCRATCH_DIR);
+                            $files = UArchive::unzipFlat($filepath, HEURIST_SCRATCH_DIR);
                             
                             foreach($files as $filename){
                                 if(strpos(strtolower($filename),'.kml')==strlen($filename)-4){
@@ -312,7 +313,7 @@
                 //downloadFile()
                 $originalFileName = null;
                 if(is_array($record['details'][DT_NAME])){
-                    $originalFileName = fileNameSanitize(array_values($record['details'][DT_NAME])[0]);
+                    $originalFileName = USanitize::sanitizeFileName(array_values($record['details'][DT_NAME])[0]);
                 }
                 if(!$originalFileName) $originalFileName = 'Dataset_'.$record['rec_ID'];
                 

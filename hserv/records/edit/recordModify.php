@@ -43,9 +43,10 @@ require_once dirname(__FILE__).'/../../structure/dbsUsersGroups.php';
 require_once dirname(__FILE__).'/../../structure/dbsTerms.php';
 require_once dirname(__FILE__).'/../../entity/dbRecUploadedFiles.php';
 require_once dirname(__FILE__).'/../../entity/dbDefRecTypes.php';
-require_once dirname(__FILE__).'/../../utilities/utils_image.php';
+require_once dirname(__FILE__).'/../../utilities/uImage.php';
 require_once dirname(__FILE__).'/../../../records/index/elasticSearch.php';
 //require_once dirname(__FILE__).'/../../../vendor/ezyang/htmlpurifier/library/HTMLPurifier.auto.php';
+require_once dirname(__FILE__).'/../../utilities/uSanitize.php';
 
 require_once dirname(__FILE__).'/../../../viewers/smarty/smartyInit.php';
 require_once dirname(__FILE__).'/../../../viewers/smarty/reportRecord.php';
@@ -319,7 +320,7 @@ function recordAdd($system, $record, $return_id_only=false){
     $stmt = $mysqli->prepare($query);
 
     $currentUserId = $system->get_user_id();
-    $rec_url  = sanitizeURL(@$record['URL']);
+    $rec_url  = USanitize::sanitizeURL(@$record['URL']);
 
     $rec_scr  = @$record['ScratchPad'];
     $rec_imp  = (@$record['AddedByImport']?1:0);
@@ -647,7 +648,7 @@ function recordSave($system, $record, $use_transaction=true, $suppress_parent_ch
         
         $params = array('siisi', $rec_mod, $rectype, $owner_grps[0], $access, $rec_temp);
         
-        $rec_url = sanitizeURL(@$record['URL']);
+        $rec_url = USanitize::sanitizeURL(@$record['URL']);
         if($rec_url){
             $params[0] = $params[0].'s';
             $params[] = $rec_url;
@@ -2264,7 +2265,7 @@ function prepareRecordForUpdate($system, $record, $detailValuesNew, $update_mode
 
     /*
     todo
-    $rec_url = sanitizeURL(@$record['URL']);
+    $rec_url = USanitize::sanitizeURL(@$record['URL']);
     $rec_spad = @$record['ScratchPad'];
     $rec_temp = (@$record['FlagTemporary']==1)?1:0;        
     */
@@ -2450,7 +2451,7 @@ function _prepareDetails($system, $rectype, $record, $validation_mode, $recID, $
     if($system->defineConstant('DT_QUERY_STRING')){ array_push($not_purify, DT_QUERY_STRING); }
     if($system->defineConstant('DT_SERVICE_URL')){ array_push($not_purify, DT_SERVICE_URL); }*/
     if($system->defineConstant('DT_CMS_EXTFILES')){ array_push($not_purify, DT_CMS_EXTFILES); }
-    // $purifier = getHTMLPurifier();
+    // $purifier = USanitize::getHTMLPurifier();
     //2. verify (value, termid, file id, resource id) and prepare details (geo field). verify required field presence
 
     $insertValues = array();
@@ -2659,7 +2660,7 @@ function _prepareDetails($system, $rectype, $record, $validation_mode, $recID, $
 
                     if($dtl_Value=='generate_thumbnail_from_url' && @$record['URL']){
 
-                        $tmp_file = UtilsImage::makeURLScreenshot($record['URL']);
+                        $tmp_file = UImage::makeURLScreenshot($record['URL']);
 
                         if(!is_a($tmp_file,'stdClass')){
                             $err_msg = is_array($tmp_file) ?$tmp_file['error'] :('System message: '.$tmp_file);

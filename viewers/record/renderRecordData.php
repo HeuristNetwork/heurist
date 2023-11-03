@@ -928,7 +928,7 @@ if ($bkm_ID>0 || $rec_id>0) {
 .'oncontextmenu="return false;" onclick="$(\'div[data-recid]\').hide();$(\'div[data-recid='.$id.']\').show();'
 .'$(\'.gm-style-iw\').find(\'div:first\').scrollTop(0)">'
 //.'$(event.traget).parents(\'.gm-style-iw\').children()[0].scrollTop()">'
-.sanitizeString($bibInfo['rec_Title'],ALLOWED_TAGS).'</a></div></div>';  //htmlspecialchars
+.USanitize::sanitizeString($bibInfo['rec_Title'],ALLOWED_TAGS).'</a></div></div>';  //htmlspecialchars
                    
                     $cnt++;
                 }
@@ -1029,7 +1029,7 @@ function print_header_line($bib) {
 
     <div class=HeaderRow style="margin-bottom:<?php echo $is_map_popup?5:15?>px;min-height:0px;">
         <h2 style="text-transform:none;line-height:16px;font-size:1.4em;margin-bottom:0;<?php echo ($is_map_popup)?'max-width: 380px;':'';?>">
-                <?php echo (sanitizeString($bib['rec_Title'],ALLOWED_TAGS)); ?>
+                <?php echo (USanitize::sanitizeString($bib['rec_Title'],ALLOWED_TAGS)); ?>
         </h2>
 
         <div <?="style='padding:0 10px 0 22px;margin:10px 0 0;height:20px;background-repeat: no-repeat;background-image:url("
@@ -1423,12 +1423,12 @@ function print_public_details($bib) {
                         
                         $bd['val'] = '<a target="_popup" href="'.$system->recordLink($rec_id)
                             .'" onclick="return link_open(this);">'
-                            .sanitizeString($rec_title,ALLOWED_TAGS).'</a>';
+                            .USanitize::sanitizeString($rec_title,ALLOWED_TAGS).'</a>';
                         
                     }else{
                         
                         $bd['val'] = '<a href="#" oncontextmenu="return false;" onclick="return no_access_message(this);">'
-                            .sanitizeString($rec_title,ALLOWED_TAGS).'</a>';
+                            .USanitize::sanitizeString($rec_title,ALLOWED_TAGS).'</a>';
                         
                     }
 
@@ -2064,9 +2064,9 @@ function print_relation_details($bib) {
 
 					print '<a target=_popup href="'.$system->recordLink($bd['RelatedRecID']['rec_ID'])
                             .'" onclick="return link_open(this);">'
-							.sanitizeString($recTitle,ALLOWED_TAGS).'</a>';
+							.USanitize::sanitizeString($recTitle,ALLOWED_TAGS).'</a>';
 				} else {
-					print sanitizeString($bd['Title'],ALLOWED_TAGS);
+					print USanitize::sanitizeString($bd['Title'],ALLOWED_TAGS);
 				}
 				print '&nbsp;&nbsp;';
 				if (@$bd['StartDate']) print Temporal::toHumanReadable($bd['StartDate'], true, 1); //compact
@@ -2152,9 +2152,9 @@ function print_relation_details($bib) {
 
 					print '<a target=_popup href="'.$system->recordLink($bd['RelatedRecID']['rec_ID'])
                         .'" onclick="return link_open(this);">'
-						.sanitizeString($recTitle,ALLOWED_TAGS).'</a>';
+						.USanitize::sanitizeString($recTitle,ALLOWED_TAGS).'</a>';
 				} else {
-					print sanitizeString($bd['Title'],ALLOWED_TAGS);
+					print USanitize::sanitizeString($bd['Title'],ALLOWED_TAGS);
 				}
 				print '&nbsp;&nbsp;';
 				if (@$bd['StartDate']) print htmlspecialchars($bd['StartDate']);
@@ -2251,7 +2251,7 @@ function print_linked_details($bib, $link_cnt)
             .($is_map_popup?'max-width:250px;':'').'" class="truncate"><a target=_popup href="'
                             .$system->recordLink($row['rec_ID'])
                             .'" onclick="return link_open(this);">'
-                .sanitizeString($row['rec_Title'],ALLOWED_TAGS).'</a></div>';
+                .USanitize::sanitizeString($row['rec_Title'],ALLOWED_TAGS).'</a></div>';
             
         print '</div>';
     }
@@ -2288,7 +2288,7 @@ function output_chunker($val) {
 
     list(, $val) = extractLangPrefix($val); // remove possible language prefix
     // chunk up the value so that it will be able to line-break if necessary
-    $val = sanitizeString($val); 
+    $val = USanitize::sanitizeString($val); 
     return $val;
     /* it adds word breaker incorrectly, so Arabic words are displayed incorrecly
     return preg_replace('/(\\b.{15,20}\\b|.{20}.*?(?=[\x0-\x7F\xC2-\xF4]))/', '\\1<wbr>', $val);

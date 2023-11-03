@@ -21,7 +21,7 @@
 
 require_once dirname(__FILE__).'/../../../hserv/System.php';
 require_once dirname(__FILE__).'/../../../hserv/utilities/dbUtils.php';
-require_once dirname(__FILE__).'/../../../hserv/utilities/utils_file.php';
+require_once dirname(__FILE__).'/../../../hserv/utilities/uFile.php';
 require_once 'welcomeEmail.php';
 
 header('Content-type: text/javascript');

@@ -21,8 +21,8 @@
 require_once dirname(__FILE__).'/../System.php';
 require_once 'entityScrudSrv.php';
 require_once dirname(__FILE__).'/../entity/dbRecUploadedFiles.php';
-require_once dirname(__FILE__).'/../utilities/utils_file.php';
-require_once dirname(__FILE__).'/../utilities/utils_image.php';
+require_once dirname(__FILE__).'/../utilities/uFile.php';
+require_once dirname(__FILE__).'/../utilities/uImage.php';
 require_once dirname(__FILE__).'/../utilities/UploadHandler.php';
 
 $response = null;
@@ -30,7 +30,7 @@ $system = new System();
 
 $content_length = (int)@$_SERVER['CONTENT_LENGTH'];
 
-$post_max_size = get_php_bytes('post_max_size');
+$post_max_size = USystem::getConfigBytes('post_max_size');
 if ($post_max_size && ($content_length > $post_max_size)) {
     $error = 'The uploaded file exceeds the maximum size ('. ini_get('post_max_size') .'Bytes) set for this server (post_max_size in php.ini)';
     $response = $system->addError(HEURIST_INVALID_REQUEST, $error);
@@ -46,7 +46,7 @@ if($system->init(@$_REQUEST['db'])){
     $tiledImageStack = (@$_REQUEST['tiledImageStack']==1); //unzip archive and copy to uploaded_tilestacks
     
     $new_file_name = @$_REQUEST['newfilename'];
-    if($new_file_name) $new_file_name = fileNameSanitize($new_file_name, false);
+    if($new_file_name) $new_file_name = USanitize::sanitizeFileName($new_file_name, false);
     
     if(@$_REQUEST['entity']){
         $entity_name = entityResolveName($_REQUEST['entity']);
@@ -262,7 +262,7 @@ if($response!=null){
                 }else if(!@$file->thumbnailUrl){ //if UploadHandler does not create thumb - creates it as image with text (file extension)
                     
                     $thumb_file = HEURIST_SCRATCH_DIR.'thumbs/'.$new_file_name;
-                    $img = UtilsImage::createFromString($file->type?$file->type:'XXX!');
+                    $img = UImage::createFromString($file->type?$file->type:'XXX!');
                     imagepng($img, $thumb_file);//save into file
                     imagedestroy($img);
                     $res['files'][$idx] ->thumbnailUrl = HEURIST_FILESTORE_URL.'scratch/thumbs/'.$new_file_name;
@@ -336,7 +336,7 @@ function postmode_file_selection() {
             
             $content_length = fix_integer_overflow((int)@$_SERVER['CONTENT_LENGTH']);
             
-            $post_max_size = get_php_bytes('post_max_size');
+            $post_max_size = USystem::getConfigBytes('post_max_size');
             if ($post_max_size && ($content_length > $post_max_size)) {
                 $error = 'The uploaded file exceeds the post_max_size directive in php.ini';
             }else{
@@ -345,7 +345,7 @@ function postmode_file_selection() {
                 } else {
                     $file_size = $content_length;
                 }
-                $file_max_size = get_php_bytes('upload_max_filesize');
+                $file_max_size = USystem::getConfigBytes('upload_max_filesize');
                 if ($file_max_size && ($content_length > $file_max_size)) {
                     $error = 'The uploaded file exceeds the upload_max_filesize directive in php.ini';
                 }

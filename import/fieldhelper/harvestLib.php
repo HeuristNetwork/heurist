@@ -28,7 +28,7 @@ function getMediaFolders($mysqli) {
     $dirs = explode(';', $mediaFolders); // get an array of folders
 
     //sanitize folder names
-    $dirs = array_map('sanitizePath', $dirs);
+    $dirs = array_map(array('USanitize', 'sanitizePath'), $dirs);
     //$mediaFolders = implode(';', $dirs);
     
     // The defined list of file extensions for FieldHelper indexing.

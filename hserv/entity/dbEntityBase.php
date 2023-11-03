@@ -223,7 +223,7 @@ class DbEntityBase
             
         }else if($operation=='put'){
             
-            $filename = fileNameSanitize($filename);
+            $filename = USanitize::sanitizeFileName($filename);
 
             //verify exetension for $filename
             $path_parts = pathinfo($filename);
@@ -269,7 +269,7 @@ class DbEntityBase
             $fileOld = @$action['fileOld'];
             if(file_exists($path.$fileOld)){
                 
-                $filename = fileNameSanitize($filename);
+                $filename = USanitize::sanitizeFileName($filename);
 
                 //verify exetension for $filename
                 $path_parts = pathinfo($filename);

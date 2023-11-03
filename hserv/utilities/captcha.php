@@ -1,4 +1,5 @@
 <?php
+//@todo move controller
     /**
     * Stores Capture value in session "captcha_code"
     * Returns either string or image with challenge

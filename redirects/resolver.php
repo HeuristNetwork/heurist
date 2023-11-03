@@ -142,8 +142,8 @@ $requestUri:
 
         $params['db'] = $database;
         
-        require_once '../hserv/utilities/utils_host.php';
-        $host_params = getHostParams();
+        require_once '../hserv/utilities/uSystem.php';
+        $host_params = USystem::getHostParams();
         
         if($action=='web' || $action=='website'){
             

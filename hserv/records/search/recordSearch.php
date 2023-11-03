@@ -42,7 +42,7 @@
 * See the License for the specific language governing permissions and limitations under the License.
 */
 
-require_once dirname(__FILE__).'/recordFile.php';  //it includes utils_file.php
+require_once dirname(__FILE__).'/recordFile.php';  //it includes uFile.php
 require_once dirname(__FILE__).'/composeSql.php';
 require_once dirname(__FILE__).'/../../structure/search/dbsData.php';
 require_once dirname(__FILE__).'/../../structure/dbsUsersGroups.php';
@@ -1780,7 +1780,7 @@ function recordSearch($system, $params)
     }
 
 
-    $memory_limit = get_php_bytes('memory_limit');
+    $memory_limit = USystem::getConfigBytes('memory_limit');
 
     //set savedSearchName for error messages
     $savedSearchName = '';

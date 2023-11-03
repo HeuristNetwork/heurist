@@ -1,5 +1,5 @@
 <?php
-
+//@todo move partly to controller and html output to pages
 /**
 * list_databases.php: Produces page listing available databases
 *

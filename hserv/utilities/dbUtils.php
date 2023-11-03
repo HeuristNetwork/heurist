@@ -40,6 +40,7 @@
 */
 
 require_once 'utils_db_load_script.php';
+require_once 'uArchive.php';
 require_once dirname(__FILE__).'/../../external/php/Mysqldump8.php';
 require_once dirname(__FILE__).'/../structure/import/importDefintions.php';
 
@@ -600,12 +601,12 @@ class DbUtils {
                 
                 $destination = $destination.'.tar'; 
                 
-                $archOK = createBz2Archive($source, $folders_to_copy, $destination, $verbose);
+                $archOK = UArchive::createBz2($source, $folders_to_copy, $destination, $verbose);
                 
             }else{
                 $destination = $destination.'.zip'; 
                 
-                $archOK = createZipArchive($source, $folders_to_copy, $destination, $verbose);
+                $archOK = UArchive::zip($source, $folders_to_copy, $destination, $verbose);
             }
             
             if(!$archOK){
@@ -956,7 +957,7 @@ class DbUtils {
                 
                 $unzip_error = null;
                 try{
-                    unzipArchive($system, $templateFoldersContent, $upload_root.$database_name.'/');
+                    UArchive::unzip($system, $templateFoldersContent, $upload_root.$database_name.'/');
                 }catch(Exceprion $e){
                     array_push($warnings, 'Cannot extract template folders from archive '.$templateFoldersContent
                                 .' Error: '.Exception::getMessage());        

@@ -1225,7 +1225,7 @@ class DbDefTerms extends DbEntityBase
                 $total_count_rows = $total_count_rows[0];
                 $fres->close();
 
-                if($total_count_rows>0 && ($total_count_rows<10000 || $total_count_rows*10<get_php_bytes('memory_limit'))){
+                if($total_count_rows>0 && ($total_count_rows<10000 || $total_count_rows*10<USystem::getConfigBytes('memory_limit'))){
 
                     $records = array();
                     while ($row = $res->fetch_row())  {

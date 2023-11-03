@@ -79,7 +79,7 @@ class ReportActions {
                     if(is_array($res) && @$res['details_not_found']){
                         //error except Harvard Bibliography (since many databases do not have biblio defs by default)
                         if($filename!='Harvard Bibliography.gpl'){
-                            errorLog('Cant convert gpl template '.$this->dir.$filename
+                            USanitize::errorLog('Cant convert gpl template '.$this->dir.$filename
                                 .'. Local details not found '.print_r($res['details_not_found'],true)); 
                         }
                         
@@ -96,10 +96,10 @@ class ReportActions {
                             fileDelete($this->dir.$filename);
                             array_push($results, array( 'filename'=>$filename_tpl, 'name'=>$name));
                         }else{
-                            errorLog('Cant save template '.$this->dir.$filename_tpl.' '.print_r($res,true)); 
+                            USanitize::errorLog('Cant save template '.$this->dir.$filename_tpl.' '.print_r($res,true)); 
                         }
                     }else{
-                        errorLog('Unknow issue on gpl convertation '.$this->dir.$filename.'. '.print_r($res,true)); 
+                        USanitize::errorLog('Unknow issue on gpl convertation '.$this->dir.$filename.'. '.print_r($res,true)); 
                     }
                        
                     
@@ -388,7 +388,7 @@ class ReportActions {
                     $filename = $path.DIRECTORY_SEPARATOR.basename(substr($filename,4));    
                 }
             }else{
-               $filename = sanitizePath($filename); 
+               $filename = USanitize::sanitizePath($filename); 
             }
             if(file_exists($filename)){
                 

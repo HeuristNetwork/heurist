@@ -81,7 +81,7 @@ if (!@$dbHost) $dbHost= ""; //optional, blank = localhost
 $httpProxyAlwaysActive = false; // if true - always use proxy for CURL, otherwise proxy will be used for non heurist resources mostly
 if (!@$httpProxy) $httpProxy = ''; // blank = assumes direct internet access from server
 if (!@$httpProxyAuth) $httpProxyAuth = ''; // authorization for proxy server "username:password"
-// If set this will override the value of bypassProxy when making external requests via cURL within utils_file.php
+// If set this will override the value of bypassProxy when making external requests via cURL within uFile.php
 
 
 //  set to IP address and port of Elastic search server, if used

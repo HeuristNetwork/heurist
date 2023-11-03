@@ -28,7 +28,8 @@ set_time_limit(0); //no limit
 
 
 require_once dirname(__FILE__).'/../../hclient/framecontent/initPageMin.php';
-require_once dirname(__FILE__).'/../../hserv/utilities/utils_file.php';
+require_once dirname(__FILE__).'/../../hserv/utilities/uFile.php';
+require_once dirname(__FILE__).'/../../hserv/utilities/uArchive.php';
 require_once dirname(__FILE__).'/../../hserv/records/search/recordFile.php';
 require_once dirname(__FILE__).'/../../external/php/Mysqldump8.php';
 
@@ -494,9 +495,9 @@ if($mode>1){
             }
 
             if($format == 'zip'){
-                $res = createZipArchive($folder, null, $destination, true);
+                $res = UArchive::zip($folder, null, $destination, true);
             }else{
-                $res = createBz2Archive($folder, null, $destination, true);
+                $res = UArchive::createBz2($folder, null, $destination, true);
             }
             
             if($res){
@@ -513,9 +514,9 @@ if($mode>1){
                     }
 
                     if($format == 'zip'){
-                        $res_sql = createZipArchive($folder.'_sql', null, $destination_sql, true);   
+                        $res_sql = UArchive::zip($folder.'_sql', null, $destination_sql, true);   
                     }else{
-                        $res_sql = createBz2Archive($folder.'_sql', null, $destination_sql, true);
+                        $res_sql = UArchive::createBz2($folder.'_sql', null, $destination_sql, true);
                     }
                     
                 }

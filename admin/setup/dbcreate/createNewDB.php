@@ -34,7 +34,7 @@ require_once dirname(__FILE__).'/../../../hserv/System.php';
 $error_msg = '';
 $isSystemInited = false;
 
-sanitizeRequest($_REQUEST);
+USanitize::sanitizeRequest($_REQUEST);
 
 // init main system class
 $system = new System();

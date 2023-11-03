@@ -1,39 +1,52 @@
 <?php
-//use Screen\Capture; //for micorweber
-
-/*@todo move here from recordFile.php
-* getImageFromFile - return image object for given file
-* getPrevailBackgroundColor2  - not used
-* getPrevailBackgroundColor 
-* from captcha 
+/**
+* Image manipulation library
+* 
+* createFromString - creates image with given text
+* makeURLScreenshot - makes screenshot for given url
+* getRemoteImage - downloads image from given url
+* getImageFromFile - returns image object for given file
+* changeImageColor - changes black color in given image to new one (for icons), adds circle and circle background   
+* getImageType - returns extension based of exif
+* checkMemoryForImage - verifies if image can be loaded into memory
+* 
+* safeLoadImage -  memory safe load from file to image object
+* createThumbnailFile - creates thumbnail for given image file
+* resizeImage - resizes given image   
+* getPdfThumbnail - creates thumbnail from pdf file
+* 
+* getPrevailBackgroundColor - finds prevail background color
+*
+* private 
+* _resizeImageGD - creates scaled image with native GD php functions
+* _parseColor
+* _rgb2hex
+* 
+*
+* @package     Heurist academic knowledge management system
+* @link        https://HeuristNetwork.org
+* @copyright   (C) 2005-2023 University of Sydney
+* @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
+* @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
+* @version     4.0
 */
 
-    /**
-    * Image manipulation library
-    *
-    * @package     Heurist academic knowledge management system
-    * @link        https://HeuristNetwork.org
-    * @copyright   (C) 2005-2023 University of Sydney
-    * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
-    * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
-    * @version     4.0
-    */
+/*
+* Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except in compliance
+* with the License. You may obtain a copy of the License at https://www.gnu.org/licenses/gpl-3.0.txt
+* Unless required by applicable law or agreed to in writing, software distributed under the License is
+* distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
+* See the License for the specific language governing permissions and limitations under the License.
+*/
 
-    /*
-    * Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except in compliance
-    * with the License. You may obtain a copy of the License at https://www.gnu.org/licenses/gpl-3.0.txt
-    * Unless required by applicable law or agreed to in writing, software distributed under the License is
-    * distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
-    * See the License for the specific language governing permissions and limitations under the License.
-    */
-  
-  
-class UtilsImage {
+//use Screen\Capture; //for micorweber
+
+class UImage {
   
     private function __construct() {}    
     
     /**
-    * Creates image from given string
+    * Creates image with given text
     *
     * @param mixed $desc - text to be inserted into resulted image
     * @return resource - image with the given text
@@ -87,7 +100,8 @@ class UtilsImage {
 
 
     /**
-    * makes screenshot for given url
+    * makes screenshot for given url (using either WEBSITE_THUMBNAIL_SERVICE
+    * or Google PageSpeed Insights API
     * 
     * @param mixed $url
     */
@@ -176,7 +190,7 @@ class UtilsImage {
     }
 
     /**
-    * download image from given url
+    * Downloads image from given url
     *
     * @param mixed $remote_url
     * @return resource
@@ -199,41 +213,33 @@ class UtilsImage {
         return $img;
     }
     
-    
-    private static function _parseColor($param_color){
-
-        if($param_color!=null){
-
-            if(strpos($param_color,'rgb')===0){
-                $clr = substr($param_color,4,-1);
-                $color_new = explode(',',$clr);
-            }else{
-                //1st way list($r,$g,$b) = array_map('hexdec',str_split($colorName,2));
-                //2d way
-                $hexcolor = $param_color;
-                $shorthand = (strlen($hexcolor) == 4);
-                list($r, $g, $b) = $shorthand? sscanf($hexcolor, "#%1s%1s%1s") : sscanf($hexcolor, "#%2s%2s%2s");
-                $color_new = $shorthand?array(hexdec("$r$r"), hexdec("$g$g"), hexdec("$b$b")) 
-                :array(hexdec($r), hexdec($g), hexdec($b));
-            }
-
-        }else{
-            $color_new = null; //array(255, 0, 0);    
-        }  
-        return $color_new;
-    }
-
     /**
+    * Returns image object for given filename
     *     
+    * @param mixed $filename
+    * @return {false|GdImage|null}
+    */
+    public static function getImageFromFile($filename){
+        $mimeExt = UImage::getImageType($filename);
+        $image = null;
+        if($mimeExt){
+            $image = UImage::safeLoadImage($filename, $mimeExt);
+        }
+        return $image;
+    }
+    
+    /**
+    * Changes black color in given image to new one (for icons)
+    * Adds circle and circle background   
     */
     public static function changeImageColor($filename, $filename_new, $color_new, $circle_color, $bg_circle_color){
       
         if(file_exists($filename)){
             
             
-            $color_new = UtilsImage::_parseColor($color_new);
-            $circle_color = UtilsImage::_parseColor($circle_color);
-            $bg_circle_color = UtilsImage::_parseColor($bg_circle_color);
+            $color_new = UImage::_parseColor($color_new);
+            $circle_color = UImage::_parseColor($circle_color);
+            $bg_circle_color = UImage::_parseColor($bg_circle_color);
             
             // load icon
             $img_icon = @imagecreatefrompng($filename);
@@ -311,27 +317,48 @@ class UtilsImage {
             
         }
     }
-    
-    //
-    //
-    //
+
+    /**
+    * Returns extension based of exif
+    *     
+    * @param mixed $filename
+    * @return null
+    */
     public static function getImageType($filename){
         
         $mimeExt = null;
         
-                if (function_exists('exif_imagetype')) {
-                    switch(@exif_imagetype($filename)){
-                        case IMAGETYPE_JPEG:
-                            $mimeExt = 'jpg';
-                            break;
-                        case IMAGETYPE_PNG:
-                            $mimeExt = 'png';
-                            break;
-                        case IMAGETYPE_GIF:
-                            $mimeExt = 'gif';
-                            break;
-                    }
+        if(file_exists($filename)){
+        
+            if (function_exists('exif_imagetype')) {
+                switch(@exif_imagetype($filename)){
+                    case IMAGETYPE_JPEG:
+                        $mimeExt = 'jpg';
+                        break;
+                    case IMAGETYPE_PNG:
+                        $mimeExt = 'png';
+                        break;
+                    case IMAGETYPE_GIF:
+                        $mimeExt = 'gif';
+                        break;
                 }
+            }else{
+                $path_parts = pathinfo($filename);
+                switch($path_parts['extension']) {
+                    case 'jpeg':
+                    case 'jfif':
+                    case 'jpg':
+                    case 'jpe':
+                        $mimeExt = 'jpg';
+                        break;
+                    case 'gif':
+                        $mimeExt = 'gif';
+                    case 'png':
+                        $mimeExt = 'png';
+                        break;
+                }
+            }
+        }
                 
         return  $mimeExt;
     }
@@ -366,7 +393,7 @@ class UtilsImage {
                         $memoryNeeded = round($imageInfo[0] * $imageInfo[1]*3);  
                     } 
                     
-                    $error_msg = is_memory_allowed( $memoryNeeded );
+                    $error_msg = USystem::isMemoryAllowed( $memoryNeeded );
                     if($error_msg!==true){
                         $errorMsg = $error_msg;
                     }
@@ -379,10 +406,9 @@ class UtilsImage {
         return $errorMsg;
         
     }
-
     
     /**
-    * save load from file to image object
+    * memory safe load from file to image object
     * 
     * @param mixed $filename
     * @param mixed $mimeExt
@@ -401,7 +427,7 @@ class UtilsImage {
                     
                         $errline_prev=$errline;
                         //database, record ID and name of bad image
-                        sendEmail(HEURIST_MAIL_TO_ADMIN, 'Cant create thumbnail image. DB:'.HEURIST_DBNAME, 
+                        sendEmail(HEURIST_MAIL_TO_ADMIN, 'Cannot load image file. DB:'.HEURIST_DBNAME, 
                         'File :'.$filename.' is corrupted. System message: '.$errstr);
                         //ID#'.$file['ulf_ID'].'  
                     
@@ -434,27 +460,27 @@ class UtilsImage {
         
             return $img;
     }
-    
-    //
-    // it works for images only
-    //
+
+    /**
+    * Creates thumbnail for given image file
+    */
     public static function createThumbnailFile($filename, $thumbnail_file){
     
-        $mimeExt = UtilsImage::getImageType($filename);
+        $mimeExt = UImage::getImageType($filename);
         
         if($mimeExt){
-            $errorMsg = UtilsImage::checkMemoryForImage($filename, $mimeExt);
+            $errorMsg = UImage::checkMemoryForImage($filename, $mimeExt);
             
             if($errorMsg){
             
-                $img = UtilsImage::createFromString($errorMsg);
+                $img = UImage::createFromString($errorMsg);
                 imagepng($img, $thumbnail_file);                
                 imagedestroy($img);
                 
             }else{
-                $img = UtilsImage::safeLoadImage($filename, $mimeExt);
+                $img = UImage::safeLoadImage($filename, $mimeExt);
                 if($img){
-                    UtilsImage::resizeImageGD($img, $thumbnail_file);
+                    UImage::_resizeImageGD($img, $thumbnail_file);
                 }
             }
         }
@@ -462,7 +488,7 @@ class UtilsImage {
 
     
     /**
-    * Resize image 
+    * Resizes given image
     * saves into $thumbnail_file and returns its content
     * 
     * @param mixed $filename
@@ -531,7 +557,7 @@ class UtilsImage {
                 exec($cmd, $output, $error);
 
                 if ($error) {
-                    errorLog('ERROR on pdf thumbnail creation: '.$filename.'  '.$cmd.'   '.implode('\n', $output));
+                    USanitize::errorLog('ERROR on pdf thumbnail creation: '.$filename.'  '.$cmd.'   '.implode('\n', $output));
                     return false;
                 }
                 
@@ -549,7 +575,7 @@ class UtilsImage {
                     $im->writeImage($thumbnail_file);
                     
                 } catch(ImagickException $e) {
-                    errorLog($e . ', From Database: ' . HEURIST_DBNAME);
+                    USanitize::errorLog($e . ', From Database: ' . HEURIST_DBNAME);
                     return false;
                 }
 
@@ -559,17 +585,126 @@ class UtilsImage {
             //return $resized;
     }
 
-
     /**
-    * creates scaled image with native GD php functions
+    * Finds prevail background color need php version >5.5
+    * NOT USED
+    * @param mixed $file
+    */
+    public static function getPrevailBackgroundColor2($filename){
+        
+        $image = UImage::getImageFromFile($filename);
+        if($image){
+            
+            $scaled = imagescale($image, 1, 1, IMG_BICUBIC);  //since v5.5
+            $index = imagecolorat($scaled, 0, 0);
+            $rgb = imagecolorsforindex($scaled, $index); 
+            /* $red = round(round(($rgb['red'] / 0x33)) * 0x33); 
+            $green = round(round(($rgb['green'] / 0x33)) * 0x33); 
+            $blue = round(round(($rgb['blue'] / 0x33)) * 0x33); 
+            return sprintf('#%02X%02X%02X', $red, $green, $blue);     
+            */
+            return sprintf('#%02X%02X%02X', $rgb['red'], $rgb['green'], $rgb['blue']);
+        }else{
+            return '#FFFFFF';
+        }
+        
+    }
+
+    
+    /**
+    * Finds prevail background color
+    * 
+    * @param mixed $file
+    */
+    public static function getPrevailBackgroundColor($filename){
+        // histogram options
+
+        $maxheight = 300;
+        $barwidth = 2;
+
+        $image = UImage::getImageFromFile($filename);
+        if($image){
+
+            $im = $image;
+
+            $imgw = imagesx($im);
+            $imgh = imagesy($im);
+
+            // n = total number or pixels
+
+            $n = $imgw*$imgh;
+
+            $histo = array();
+            for ($i=0; $i<256; $i++) $histo[]=0;
+
+            for ($i=0; $i<$imgw; $i++)
+            {
+                for ($j=0; $j<$imgh; $j++)
+                {
+
+                    // get the rgb value for current pixel
+
+                    $rgb = imagecolorat($im, $i, $j);
+
+                    // extract each value for r, g, b
+
+                    $r = ($rgb >> 16) & 0xFF;
+                    $g = ($rgb >> 8) & 0xFF;
+                    $b = $rgb & 0xFF;
+
+                    // get the Value from the RGB value
+
+                    $V = round(($r + $g + $b) / 3);
+
+                    // add the point to the histogram
+                    $histo[$V] += $V / $n;
+                    $histo_color[$V] = UImage::_rgb2hex(array($r,$g,$b));
+                }
+            }
+
+            // find the maximum in the histogram in order to display a normated graph
+
+            $max = 0;
+            for ($i=0; $i<256; $i++)
+            {
+                if ($histo[$i] > $max)
+                {
+                    $max = $histo[$i];
+                }
+            }
+
+            $key = array_search ($max, $histo);
+            $col = $histo_color[$key];
+            return $col;
+            /*
+            echo "<div style='width: ".(256*$barwidth)."px; border: 1px solid'>";
+            for ($i=0; $i<255; $i++)
+            {
+            $val += $histo[$i];
+
+            $h = ( $histo[$i]/$max )*$maxheight;
+
+            echo "<img src=\"img.gif\" width=\"".$barwidth."\"
+            height=\"".$h."\" border=\"0\">";
+            }
+            echo "</div>";
+            */
+        }else{
+            return '#FFFFFF';   
+        }
+    }
+    
+    
+    /**
+    * Creates scaled image with native GD php functions
     * saves into $thumbnail_file and returns its content
     * 
     * @param mixed $filename
     */
-    public static function resizeImageGD($src_img, $thumbnail_file=null, $max_width = 200, $max_height = 200){
+    private static function _resizeImageGD($src_img, $thumbnail_file=null, $max_width = 200, $max_height = 200){
         
         if (!function_exists('imagecreatetruecolor')) {
-            errorLog('Function not found: imagecreatetruecolor');
+            USanitize::errorLog('Function not found: imagecreatetruecolor');
             return false;
         }
         
@@ -633,6 +768,45 @@ class UtilsImage {
         return $success;
     }
 
+
+    //
+    //
+    //
+    private static function _parseColor($param_color){
+
+        if($param_color!=null){
+
+            if(strpos($param_color,'rgb')===0){
+                $clr = substr($param_color,4,-1);
+                $color_new = explode(',',$clr);
+            }else{
+                //1st way list($r,$g,$b) = array_map('hexdec',str_split($colorName,2));
+                //2d way
+                $hexcolor = $param_color;
+                $shorthand = (strlen($hexcolor) == 4);
+                list($r, $g, $b) = $shorthand? sscanf($hexcolor, "#%1s%1s%1s") : sscanf($hexcolor, "#%2s%2s%2s");
+                $color_new = $shorthand?array(hexdec("$r$r"), hexdec("$g$g"), hexdec("$b$b")) 
+                :array(hexdec($r), hexdec($g), hexdec($b));
+            }
+
+        }else{
+            $color_new = null; //array(255, 0, 0);    
+        }  
+        return $color_new;
+    }
+
+    
+    //
+    //
+    //
+    private static function _rgb2hex($rgb) {
+       $hex = "#";
+       $hex .= str_pad(dechex($rgb[0]), 2, '0', STR_PAD_LEFT);
+       $hex .= str_pad(dechex($rgb[1]), 2, '0', STR_PAD_LEFT);
+       $hex .= str_pad(dechex($rgb[2]), 2, '0', STR_PAD_LEFT);
+
+       return $hex; // returns the hex value including the number sign (#)
+    }
 
     
 }

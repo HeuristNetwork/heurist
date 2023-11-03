@@ -195,7 +195,7 @@ public static function output($data, $params){
         
     }
 
-    $memory_limit = get_php_bytes('memory_limit');
+    $memory_limit = USystem::getConfigBytes('memory_limit');
 
     //create header
     $any_rectype = null;

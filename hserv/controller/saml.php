@@ -25,7 +25,7 @@
 */
 
 require_once dirname(__FILE__).'/../System.php';
-require_once dirname(__FILE__).'/../utilities/utils_saml.php';
+require_once dirname(__FILE__).'/../utilities/uSaml.php';
 
 $action = @$_REQUEST['a']; //$system->getError();
 

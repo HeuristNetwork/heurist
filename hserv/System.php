@@ -26,9 +26,10 @@ require_once dirname(__FILE__).'/consts.php';
 
 
 require_once dirname(__FILE__).'/dbaccess/utils_db.php';
-require_once dirname(__FILE__).'/utilities/utils_file.php';
-require_once dirname(__FILE__).'/utilities/utils_mail.php';
-require_once dirname(__FILE__).'/utilities/utils_locale.php';
+require_once dirname(__FILE__).'/utilities/uFile.php';
+require_once dirname(__FILE__).'/utilities/uSanitize.php';
+require_once dirname(__FILE__).'/utilities/uMail.php';
+require_once dirname(__FILE__).'/utilities/uLocale.php';
 require_once dirname(__FILE__).'/structure/dbsUsersGroups.php';
 require_once dirname(__FILE__).'/structure/conceptCode.php';
 require_once dirname(__FILE__).'/structure/import/dbsImport.php';
@@ -1165,8 +1166,8 @@ class System {
                     "service_config"=>$this->get_system('sys_ExternalReferenceLookups'), //get 3d part web service mappings
                     "services_list"=>$this->getWebServiceConfigs(), //get list of all implemented lookup services
                     "dbrecent"=>$dbrecent,  //!!!!!!! need to store in preferences
-                    'max_post_size'=>get_php_bytes('post_max_size'),
-                    'max_file_size'=>get_php_bytes('upload_max_filesize'),
+                    'max_post_size'=>USystem::getConfigBytes('post_max_size'),
+                    'max_file_size'=>USystem::getConfigBytes('upload_max_filesize'),
                     'host_logo'=>$host_logo,
                     'host_url'=>$host_url,
                     
@@ -1458,7 +1459,7 @@ class System {
                 
                 
                 if($cres==false){                    
-                    errorLog('CANNOT UPDATE COOKIE '.$session_id.'   '.$this->dbname_full);                
+                    USanitize::errorLog('CANNOT UPDATE COOKIE '.$session_id.'   '.$this->dbname_full);                
                 }
             }
                 

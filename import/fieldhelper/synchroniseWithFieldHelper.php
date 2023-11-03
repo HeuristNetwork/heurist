@@ -37,7 +37,9 @@ define('PDIR','../../');  //need for proper path to js and css
 require_once dirname(__FILE__).'/../../hclient/framecontent/initPageMin.php';
 require_once dirname(__FILE__).'/../../hserv/records/edit/recordModify.php';
 require_once dirname(__FILE__).'/../../hserv/records/search/recordFile.php';
-require_once dirname(__FILE__).'/../../hserv/utilities/utils_file.php';
+require_once dirname(__FILE__).'/../../hserv/utilities/uFile.php';
+require_once dirname(__FILE__).'/../../hserv/utilities/uSanitize.php';
+
 require_once dirname(__FILE__).'/../../hserv/structure/import/dbsImport.php';
         
 $system->defineConstants();
@@ -196,7 +198,7 @@ $failed_exts = array();
                 $dirs = explode(';', $mediaFolders); // get an array of folders
 
                 //sanitize folder names
-                $dirs = array_map('sanitizePath', $dirs);
+                $dirs = array_map(array('USanitize', 'sanitizePath'), $dirs);
                 $mediaFolders = implode(';', $dirs);
                 
                 // The defined list of file extensions for FieldHelper indexing.
@@ -292,7 +294,7 @@ $failed_exts = array();
                     }
                     */
                     
-                    $dir = sanitizePath($dir);
+                    $dir = USanitize::sanitizePath($dir);
                     if(isPathInHeuristUploadFolder($dir, true)===false){
                             print '<div style="color:red">'.htmlspecialchars($orig).'is ignored. Folder must be in heurist filestore directory.</div>';
                             continue;

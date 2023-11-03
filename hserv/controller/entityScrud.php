@@ -71,7 +71,7 @@ if (@$argv) {
             
             if(isset($allowWebAccessEntityFiles) && $allowWebAccessEntityFiles)
             {
-                $host_params = getHostParams();
+                $host_params = USystem::getHostParams();
                 // 
                 if(strpos($defaultRootFileUploadURL, $host_params['server_url'])===0){
                     $url = $defaultRootFileUploadURL;
@@ -96,8 +96,8 @@ if (@$argv) {
     
     $need_config = false;
     
-    //sanitizeRequest($_REQUEST);  it brokes json strings
-    stripScriptTagInRequest($_REQUEST);
+    //USanitize::sanitizeRequest($_REQUEST);  it brokes json strings
+    USanitize::stripScriptTagInRequest($_REQUEST);
     
     if($system->init($dbname)){
 

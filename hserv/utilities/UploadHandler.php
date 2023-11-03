@@ -256,7 +256,7 @@ class UploadHandler
             $siz = 100*1024*1024;
             ini_set( 'post_max_size', '12000000' );
             ini_set( 'upload_max_filesize', '10000000' );
-$siz = get_php_bytes('upload_max_filesize');            
+$siz = USystem::getConfigBytes('upload_max_filesize');            
         }
 */        
         if ($initialize) {
@@ -326,7 +326,7 @@ $siz = get_php_bytes('upload_max_filesize');
         } else {
             $version_dir = @$this->options['image_versions'][$version]['upload_dir'];
             if ($version_dir) {
-                return sanitizePath($version_dir.$this->get_user_path().$file_name); //realpath
+                return USanitize::sanitizePath($version_dir.$this->get_user_path().$file_name); //realpath
             }
             $version_path = $version.'/';
         }
@@ -337,7 +337,7 @@ $siz = get_php_bytes('upload_max_filesize');
             $subfolder = $subfolder.'/';
         }
         
-        return sanitizePath($this->options['upload_dir'].$this->get_user_path()
+        return USanitize::sanitizePath($this->options['upload_dir'].$this->get_user_path()
             .$subfolder.$version_path.$file_name);
     }
 
@@ -496,10 +496,10 @@ $siz = get_php_bytes('upload_max_filesize');
     //
     protected function safe_copy($from, $to) {
        
-        $from = sanitizePath($from);
+        $from = USanitize::sanitizePath($from);
         $filename = basename($to);
         $to = dirname($to);
-        $to = sanitizePath($to);
+        $to = USanitize::sanitizePath($to);
         if(isPathInHeuristUploadFolder($to, true)===false){
             $file->error = $this->get_error_message('only_heurist')
                 .' 1)'.realpath($to).'  2) '.realpath(HEURIST_FILESTORE_DIR);
@@ -887,7 +887,7 @@ $siz = get_php_bytes('upload_max_filesize');
     //
     protected function check_memory($file_path, $new_file_path, $type, $version) {
     
-        $isTooBig = UtilsImage::checkMemoryForImage($file_path, $type);
+        $isTooBig = UImage::checkMemoryForImage($file_path, $type);
         
         if($isTooBig){
             if(empty($version)){
@@ -898,7 +898,7 @@ $siz = get_php_bytes('upload_max_filesize');
                 }
                 //return true;
             }else{
-                $img = UtilsImage::createFromString('Thumbnail not created. '.$isTooBig);
+                $img = UImage::createFromString('Thumbnail not created. '.$isTooBig);
                 $res = imagepng($img, $new_file_path);
                 imagedestroy($img);
                 //return $res;
@@ -1755,7 +1755,7 @@ $siz = get_php_bytes('upload_max_filesize');
                     
                     //Artem Osmakov - get subfolder name by replacing Ё to /     
                     $file_name = ($file_name ? $file_name : $upload['name'][$index]);
-                    //$file_name = fileNameSanitize($file_name ? $file_name : $upload['name'][$index], false);
+                    //$file_name = USanitize::sanitizeFileName($file_name ? $file_name : $upload['name'][$index], false);
                     //if(strpos($file_name,'~')!==0){
                     //    $file_name = $prefix.$file_name
                     //}
@@ -1786,7 +1786,7 @@ $siz = get_php_bytes('upload_max_filesize');
                 // $upload is a one-dimensional array:
                 $files[] = $this->handle_file_upload(
                     isset($upload['tmp_name']) ? $upload['tmp_name'] : null,
-                    //$prefix.fileNameSanitize($file_name ? $file_name : (isset($upload['name']) ?$upload['name'] : null), false),
+                    //$prefix.USanitize::sanitizeFileName($file_name ? $file_name : (isset($upload['name']) ?$upload['name'] : null), false),
                     $file_name ? $file_name : (isset($upload['name']) ?$upload['name'] : null),
                     (isset($upload['name']) ? $upload['name'] : null), //original name
                     '',        

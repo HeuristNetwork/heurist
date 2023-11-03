@@ -41,6 +41,7 @@
     require_once dirname(__FILE__).'/../records/search/recordSearch.php';
     require_once dirname(__FILE__).'/../dbaccess/utils_db.php';
     require_once dirname(__FILE__).'/../utilities/geo/mapSimplify.php';
+    require_once dirname(__FILE__).'/../utilities/uArchive.php';
     //require_once dirname(__FILE__).'/../../vendor/autoload.php'; //for ShapeFile
     
 // Register autoloader
@@ -133,7 +134,7 @@ use Shapefile\ShapefileReader;
                 
                 $originalFileName = null;
                 if(is_array($record['details'][DT_NAME])){
-                    $originalFileName = fileNameSanitize(array_values($record['details'][DT_NAME])[0]);
+                    $originalFileName = USanitize::sanitizeFileName(array_values($record['details'][DT_NAME])[0]);
                 }
                 if(!$originalFileName) $originalFileName = 'Dataset_'.$record['rec_ID'];
                 
@@ -368,7 +369,7 @@ function fileRetrievePath($fileinfo, $need_ext=null, $isArchive=false){
         if($isArchive){ //$need_ext!==null){
             $destination = HEURIST_SCRATCH_DIR;//.$system->get_user_id().'/';
             
-            $files = unzipArchiveFlat($filepath, $destination);
+            $files = UArchive::unzipFlat($filepath, $destination);
             
             if($files!==false){
                 foreach ($files as $filename) {

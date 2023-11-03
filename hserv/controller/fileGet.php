@@ -51,7 +51,7 @@ $system->initPathConstants($db);
 if($filename){ //download from scratch (for csv import)
 
         //remove slashes - prevents Local file disclosure
-        $filename = fileNameSanitize($filename, false);
+        $filename = USanitize::sanitizeFileName($filename, false);
 
         $file_read = HEURIST_FILESTORE_DIR.'scratch/'.$filename;
         
@@ -169,7 +169,7 @@ if($filename){ //download from scratch (for csv import)
                 
                 //color, bg, circle
                 if(@$_REQUEST['color'] && $ext!='svg'){
-                    UtilsImage::changeImageColor($filename, null, @$_REQUEST['color'], @$_REQUEST['circle'], @$_REQUEST['bg']);    
+                    UImage::changeImageColor($filename, null, @$_REQUEST['color'], @$_REQUEST['circle'], @$_REQUEST['bg']);    
                 }else{
                     if($file_url!=null && isset($allowWebAccessEntityFiles) && $allowWebAccessEntityFiles){
                         header('Location:'.$file_url);    

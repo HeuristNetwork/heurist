@@ -2590,7 +2590,7 @@ $.widget( "heurist.mainMenu", {
                 if(window.hWin.HEURIST4.util.isempty(response.data)){
                     return;
                 }
-
+                var url_alpha_version = response.data;
                 suggestion_txt = '<a style="cursor: pointer;text-decoration: underline;" href="#" id="lnk_change">Use the latest (alpha) version</a> (recommended)';
 
                 that.version_message = $("<div>")
@@ -2600,7 +2600,7 @@ $.widget( "heurist.mainMenu", {
 
                 that._on(that.version_message.find('#lnk_change'), {
                     click: () => { // switch to alpha
-                        location.href = response.data + location.search;
+                        location.href = url_alpha_version + location.search;
                     }
                 });
             });

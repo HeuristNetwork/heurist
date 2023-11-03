@@ -97,6 +97,8 @@ require_once dirname(__FILE__).'/../records/import/importSession.php'; //work wo
 require_once dirname(__FILE__).'/../records/import/importAction.php'; //work with import table: matching, assign id, performs validation and import
 require_once dirname(__FILE__).'/../records/import/importHeurist.php'; //work with Heurist exchange format
 
+require_once dirname(__FILE__).'/../utilities/uArchive.php';
+
 
 set_time_limit(0);
     
@@ -124,7 +126,7 @@ if(!$system->init(@$_REQUEST['db'])){
             //file is uploaded with help fileupload widget and controller/fileUpload.php
             $upload_file_name = @$_REQUEST["upload_file_name"]; 
             if($upload_file_name!=null){
-                $upload_file_name = fileNameSanitize(basename($upload_file_name), false); //snyk SSRF
+                $upload_file_name = USanitize::sanitizeFileName(basename($upload_file_name), false); //snyk SSRF
                 //encode and invoke parse_prepare with limit
                 $res = ImportParser::encodeAndGetPreview( $upload_file_name, $_REQUEST);  
             }

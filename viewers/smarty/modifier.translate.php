@@ -29,7 +29,7 @@
  *
  * @return string translated string
  */
-$path = (dirname(__FILE__).'/../../../../../hserv/utilities/utils_locale.php'); 
+$path = (dirname(__FILE__).'/../../../../../hserv/utilities/uLocale.php'); 
 //file_exists($path);
 require_once $path;
 

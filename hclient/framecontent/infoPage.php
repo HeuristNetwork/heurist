@@ -148,7 +148,7 @@ if(!isset($message)){
                 style="width:90%;margin:auto;margin-top:10px;padding:10px;">
                 <span class="ui-icon <?php echo ($is_error)?'ui-icon-alert':'ui-icon-info'; ?>" 
                       style="float: left; margin-right:.3em;font-weight:bold"></span>
-                <?php echo sanitizeString($message);?>
+                <?php echo USanitize::sanitizeString($message);?>
             </div>
         </div>
     </body>

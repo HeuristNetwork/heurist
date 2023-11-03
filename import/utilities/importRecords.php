@@ -28,10 +28,10 @@ define('MANAGER_REQUIRED',1);
 define('PDIR','../../');  //need for proper path to js and css    
 
 require_once dirname(__FILE__).'/../../hclient/framecontent/initPageMin.php';
-require_once dirname(__FILE__).'/../../hserv/utilities/utils_file.php';
+require_once dirname(__FILE__).'/../../hserv/utilities/uFile.php';
 
-$post_max_size = get_php_bytes('post_max_size');
-$file_max_size = get_php_bytes('upload_max_filesize');
+$post_max_size = USystem::getConfigBytes('post_max_size');
+$file_max_size = USystem::getConfigBytes('upload_max_filesize');
 $max_size = min($file_max_size,$post_max_size);
 $s_max_size = round($max_size/1024/1024).' MBytes';
 ?>

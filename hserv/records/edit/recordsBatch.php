@@ -126,7 +126,7 @@ class RecordsBatch
             if($this->system->defineConstant('DT_CMS_EXTFILES')){ array_push($not_purify, DT_CMS_EXTFILES); }
             
             $this->not_purify = $not_purify;
-            //$this->purifier = getHTMLPurifier();  DISABLED
+            //$this->purifier = USanitize::getHTMLPurifier();  DISABLED
         }
     }
 
