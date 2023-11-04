@@ -158,7 +158,7 @@ function executeSmartyTemplate($system, $params){
         return false;
     }
     
-    $is_jsallowed = $system->is_js_acript_allowed();
+    $is_jsallowed = $system->isJavaScriptAllowed();
            
     $mysqli = $system->get_mysqli();
 

@@ -199,9 +199,11 @@ class USystem {
     *     
     * @param mixed $php_var
     */
-    public static function getConfigBytes( $php_var ){
+    public static function getConfigBytes( $php_var, $val=null ){
 
-        $val = ini_get($php_var);
+        if($val==null){
+            $val = ini_get($php_var);
+        }
         $val = trim($val);
         $last = strtolower($val[strlen($val)-1]);
 

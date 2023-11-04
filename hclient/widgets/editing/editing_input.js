@@ -3156,7 +3156,6 @@ $.widget( "heurist.editing_input", {
                               }
                           });
          
-         
         var fileupload_opts = {
     url: window.hWin.HAPI4.baseURL + 'hserv/controller/fileUpload.php',
     formData: [ {name:'db', value: window.hWin.HAPI4.database}, 
@@ -3168,8 +3167,8 @@ $.widget( "heurist.editing_input", {
                 {name:'newfilename', value:newfilename }], //unique temp name
     //acceptFileTypes: /(\.|\/)(gif|jpe?g|png)$/i
     //autoUpload: true,
-    multipart: true,
-    maxChunkSize: 1024*1024*10, //10M
+    multipart: (window.hWin.HAPI4.sysinfo['is_file_multipart_upload']==1),
+    maxChunkSize: 10485760, //10M
     sequentialUploads: true,
     dataType: 'json',
     pasteZone: $input_img,
@@ -3191,6 +3190,9 @@ $.widget( "heurist.editing_input", {
     },
     fail: function (e, response) {
         $progress_dlg.dialog( "close" );
+        if(response && response.jqXHR && response.jqXHR.responseJSON){
+            response = response.jqXHR.responseJSON.message;
+        }
         window.hWin.HEURIST4.msg.showMsgErr(response);
     },
     done: function (e, response) {

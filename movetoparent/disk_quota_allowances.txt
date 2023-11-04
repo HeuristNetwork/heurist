@@ -1,0 +1,11 @@
+// This file lists databases on this server which are permitted 
+// multipart upload of files of any size and specifies disk space quota 
+// for file_uploads and uploaded_tilestacks folders per database
+// 
+// if it is not set the default quota is 1GB and max upload file size is limited by upload_max_filesize in php.ini
+
+// MOVE THIS FILE TO HEURIST BASE DIRECTORY 
+// (one level above the root of the code base, normally /var/www/html/HEURIST) in order to enable it.
+
+// List one database name per line (exclude hdb_ prefix). Order is unimportant.
+// format of line: dbname 2G or 500M or 102345678

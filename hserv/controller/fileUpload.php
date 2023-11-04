@@ -28,14 +28,8 @@ require_once dirname(__FILE__).'/../utilities/UploadHandler.php';
 $response = null;
 $system = new System();
 
-$content_length = (int)@$_SERVER['CONTENT_LENGTH'];
-
 $post_max_size = USystem::getConfigBytes('post_max_size');
-if ($post_max_size && ($content_length > $post_max_size)) {
-    $error = 'The uploaded file exceeds the maximum size ('. ini_get('post_max_size') .'Bytes) set for this server (post_max_size in php.ini)';
-    $response = $system->addError(HEURIST_INVALID_REQUEST, $error);
-    $response['message'] = $error . '<br><br>If you need to upload larger files please contact the system administrator ' . HEURIST_MAIL_TO_ADMIN;
-}else
+
 if($system->init(@$_REQUEST['db'])){
 
     //define upload folder   HEURIST_FILESTORE_DIR/ $_REQUEST['entity'] /
@@ -69,12 +63,41 @@ if($system->init(@$_REQUEST['db'])){
         }
     }
     
+    if(!$response){
+        
+        $quota = $system->getDiskQuota();
+        $quota_not_defined = (!($quota>0));
+        if($quota_not_defined){
+            $quota = 1073741824; //1GB    
+        }
+        $usage = filestoreGetUsageByScan($system);
+        
+        
+        $content_length = (int)@$_SERVER['CONTENT_LENGTH'];
+        $file_length = (int)(@$_REQUEST['fileSize']>0?@$_REQUEST['fileSize']:$content_length);
+
+        if($usage + $file_length > $quota){ //check quota
+            
+            $error = 'The allowed disk quota ('.($quota/1048576).'Mb) for this database is reached';
+            $response = $system->addError(HEURIST_ACTION_BLOCKED, $error);
+            $response['message'] = $error . '<br><br>If you need more disk space please contact the system administrator ' . HEURIST_MAIL_TO_ADMIN;    
+            
+        }else
+        if ($quota_not_defined && $post_max_size && ($content_length > $post_max_size)) { //quota not defined - multipart upload disabled
+            $error = 'The uploaded file exceeds the maximum size ('. ini_get('post_max_size') .'Bytes) set for this server (post_max_size in php.ini)';
+            $response = $system->addError(HEURIST_ACTION_BLOCKED, $error);
+            $response['message'] = $error . '<br><br>If you need to upload larger files please contact the system administrator ' . HEURIST_MAIL_TO_ADMIN;
+        }        
+        
+    }
+    
 }else{
     $response = $system->getError();
 }
 
 if($response!=null){
     header('Content-type: application/json;charset=UTF-8');
+    http_response_code(406);
     print json_encode($response);
     exit;
 }

@@ -54,6 +54,7 @@ require_once dirname(__FILE__).'/../../utilities/uImage.php';
 require_once dirname(__FILE__).'/../../entity/dbRecUploadedFiles.php';
 
 /**
+* @todo - make it as method of DbRecUploadedFiles
 * Register file in recUploadedFiles - used for import CSV, index directory
 * 
 * @param mixed $system
@@ -62,7 +63,7 @@ require_once dirname(__FILE__).'/../../entity/dbRecUploadedFiles.php';
 function fileRegister($system, $fullname, $description=null){
     
     
-    $file_id = fileGetByFileName($system, $fullname); //apparently it is already registered
+    $file_id = fileGetByFileName($system, $fullname); //check if it is already registered
     
     if(!($file_id>0)) {
                             
@@ -1121,4 +1122,39 @@ function detect3D_byExt($fileExt){
     
     return $mode_3d_viewer;
 }
+
+
+/**
+* Calculates disk usage for file_uploads and uploaded_tilestacks folders
+* 
+* @param mixed $system
+*/
+function filestoreGetUsageByScan($system){
+    
+    //HEURIST_FILESTORE_ROOT.$db_name.'/';
+    //$dir_root = HEURIST_FILESTORE_DIR; 
+    //$dir_files = $dir_root.'file_uploads/';
+    //$dir_tiles = $dir_root.'uploaded_tilestacks/';
+    
+    $sz1 = folderSize2(HEURIST_FILES_DIR);
+    $sz2 = folderSize2(HEURIST_TILESTACKS_DIR);
+    
+    return $sz1+$sz2;
+}
+
+
+/**
+* Calculates disk usage for file_uploads and uploaded_tilestacks folders
+* by sum in recUploadedFiles
+* 
+* @param mixed $system
+*/
+function filestoreGetUsageByDb($system){
+    
+    $mysqli = $system->get_mysqli();
+    $res =  mysql__select_value($mysqli, 'SELECT SUM(ulf_FileSizeKB) FROM recUploadedFiles');
+    
+    return $res;
+}
+
 ?>

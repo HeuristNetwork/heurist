@@ -36,11 +36,6 @@ require_once dirname(__FILE__).'/../utilities/uArchive.php';
 *   registerURL - register url: retrieves MimeExt 
 * 
 */
-    
-    
-
-
-
 class DbRecUploadedFiles extends DbEntityBase
 {
     private $error_ext;

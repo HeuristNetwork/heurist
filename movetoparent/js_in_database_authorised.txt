@@ -1,5 +1,5 @@
 // This file lists databases on this server which are permitted 
-// to include JS code in the CMS Home Page or CMS Menu records
+// to include JS code in the CMS Home Page, CMS Menu records and Smarty reports
 // All other databases are excluded from executing such code. 
 
 // MOVE THIS FILE TO HEURIST BASE DIRECTORY 

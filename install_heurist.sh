@@ -118,6 +118,8 @@ $2 mkdir "${base_dir}/HEURIST/HEURIST_FILESTORE"
 $2 cp "${base_dir}/HEURIST/$1/admin/setup/.htaccess_for_filestore" "${base_dir}/HEURIST/HEURIST_FILESTORE/.htaccess"
 
 # set up override configIni files
+$2 mv "${base_dir}/HEURIST/$1/movetoparent/disk_quota_allowances.txt" "${base_dir}/HEURIST/disk_quota_allowances.txt"
+$2 mv "${base_dir}/HEURIST/$1/movetoparent/js_in_database_authorised.txt" "${base_dir}/HEURIST/js_in_database_authorised.txt"
 $2 mv "${base_dir}/HEURIST/$1/movetoparent/heuristConfigIni.php" "${base_dir}/HEURIST/heuristConfigIni.php"
 $2 mv "${base_dir}/HEURIST/$1/movetoparent/index.html" "${base_dir}/HEURIST/index.html"
 

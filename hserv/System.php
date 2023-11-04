@@ -1168,6 +1168,7 @@ class System {
                     "dbrecent"=>$dbrecent,  //!!!!!!! need to store in preferences
                     'max_post_size'=>USystem::getConfigBytes('post_max_size'),
                     'max_file_size'=>USystem::getConfigBytes('upload_max_filesize'),
+                    'is_file_multipart_upload'=>($this->getDiskQuota()>0)?1:0,
                     'host_logo'=>$host_logo,
                     'host_url'=>$host_url,
                     
@@ -1853,9 +1854,9 @@ class System {
     }
 
     //
+    // Check if user's javascript is allowed in smarty reports
     //
-    //
-    public function is_js_acript_allowed(){
+    public function isJavaScriptAllowed(){
         
         $is_allowed = false;
         $fname = realpath(dirname(__FILE__)."/../../js_in_database_authorised.txt");
@@ -1877,6 +1878,38 @@ class System {
             */
         }
         return $is_allowed;
+    }
+
+    //
+    // Returns allowed disk quota (for file_uploads and uploaded_tilestacks)
+    //
+    public function getDiskQuota(){
+        
+        $quota = 0;
+        $fname = realpath(dirname(__FILE__)."/../../disk_quota_allowances.txt");
+        if($fname!==false && file_exists($fname)){
+            //ini_set('auto_detect_line_endings', 'true');
+            $handle = @fopen($fname, "r");
+            while (!feof($handle)) {
+                $line = trim(fgets($handle, 100));
+                if(strpos($line,$this->dbname)===0){
+                    $quota = USystem::getConfigBytes(null, substr($line, strlen($this->dbname)));
+                    break;
+                }
+            }
+            fclose($handle);
+            /*
+            $databases = file_get_contents($fname);   
+            $databases = explode("\n", $databases);
+            $is_allowed = (array_search($this->dbname,$databases)>0);
+            */
+        }
+        
+        if(!($quota>0)){
+            $quota = 0;
+            //$quota = 1073741824; //1GB    
+        }
+        return $quota;
     }
     
     //
