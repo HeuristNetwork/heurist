@@ -456,6 +456,10 @@ $.widget( "heurist.resultListMenu", {
 
             this.detailBatchEditPopup('url_to_file');
             
+        }else if(action == "menu-selected-local-to-repository"){
+
+            this.detailBatchEditPopup('local_to_repository');
+
         }else if(action == "menu-selected-reset-thumbs"){
 
             this.detailBatchEditPopup('reset_thumbs', function(){

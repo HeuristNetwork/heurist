@@ -44,7 +44,8 @@ function hRecordAction(_action_type, _scope_type, _field_type, _field_value) {
     var action_type = _action_type,
         init_scope_type = _scope_type,
         init_field_type = _field_type,
-        init_field_value = _field_value;
+        init_field_value = _field_value,
+        repositories = ['Nakala']; // list of repositories
 
 
     /*
@@ -88,6 +89,47 @@ function hRecordAction(_action_type, _scope_type, _field_type, _field_value) {
         });
         //if(!data || data.origin!='recordAction'){
         //}
+    }
+
+    function _popuplateNakalaLicense(){
+
+        let $sel_license = $('#sel_license');
+
+        if($sel_license.attr('data-init') == 'Nakala' && $sel_license.find('option').length > 0){ // already has values
+            return;
+        }
+
+        let request = {
+            serviceType: 'nakala_get_metadata',
+            type: 'licenses'
+        };
+
+        window.hWin.HEURIST4.msg.bringCoverallToFront($('body'), null, 'Retrieving available licenses...');
+
+        window.hWin.HAPI4.RecordMgr.lookup_external_service(request, (data) => {
+
+            window.hWin.HEURIST4.msg.sendCoverallToBack();
+
+            data = window.hWin.HEURIST4.util.isJSON(data);
+
+            if(data.status && data.status != window.hWin.ResponseStatus.OK){
+                window.hWin.HEURIST4.msg.showMsgErr(data);
+                window.close();
+                return;
+            }
+
+            if(data.length > 0){
+                $.each(data, (idx, license) => {
+                    window.hWin.HEURIST4.ui.addoption($sel_license[0], license, license);
+                });
+
+                $sel_license.attr('data-init', 'Nakala');
+            }else{
+                window.hWin.HEURIST4.msg.showMsgErr('An unknown error has occurred while attempting to retrieve the licenses for Nakala records.<br>'
+                        + 'If this problem persists, please contact the Heurist team.');
+                window.close();
+            }
+        });
     }
 
     //
@@ -182,6 +224,7 @@ function hRecordAction(_action_type, _scope_type, _field_type, _field_value) {
             case 'delete_detail':
             case 'extract_pdf':
             case 'url_to_file':
+            case 'local_to_repository':
                 $('#div_sel_fieldtype').show();
                 _fillSelectFieldTypes();
                 break;
@@ -260,7 +303,7 @@ function hRecordAction(_action_type, _scope_type, _field_type, _field_value) {
             
             if(action_type=='extract_pdf'){
                 allowed = ['blocktext'];    
-            }else if(action_type=='url_to_file'){
+            }else if(action_type=='url_to_file' || action_type=='local_to_repository'){
                 allowed = ['file'];    
             }
 
@@ -353,6 +396,43 @@ function hRecordAction(_action_type, _scope_type, _field_type, _field_value) {
                 +'<div class="heurist-helper1 style="padding: 0.2em 0px;">Looks for existing uploaded files based solely on name, and uses these rather than fetching a new copy. This will produce unwanted results if the names are re-used eg. in different folders.'
                 +'</div></div>').appendTo($fieldset);            
             
+        }else if(action_type=='local_to_repository'){
+
+            $('<div style="padding: 0.2em; width: 100%;" class="input">'
+                + '<div class="header" style="padding-right: 16px;"><label for="sel_repository">Repository</label></div>'
+                + '<select id="sel_repository" style="max-width:30em"><option value="">select a repository...</option></select>'
+            + '</div>').appendTo($fieldset);
+
+            $('<div style="padding: 0.2em; width: 100%;display: none;" class="input">'
+                + '<div class="header" style="padding-right: 16px;"><label for="sel_license">License</label></div>'
+                + '<select id="sel_license" style="max-width:30em" data-init="0"></select>'
+            + '</div>').appendTo($fieldset);
+
+            $('<div style="padding: 0.2em; width: 100%;" class="input">'
+                + '<div class="header" style="padding-right: 16px;"><label for="cb_del_local_file">Delete local file on success </label></div>'
+                + '<input id="cb_del_local_file" type="checkbox" class="text ui-widget-content ui-corner-all" style="margin-bottom:10px">'
+                + '<div class="heurist-helper1 style="padding: 0.2em 0px;">Delete locally stored file(s) after successfully uploading to repository</div>'
+            + '</div>').appendTo($fieldset);
+
+            if($fieldset.find('#sel_repository').length != 0){
+                let $sel_repos = $fieldset.find('#sel_repository');
+                for (let i = 0; i < repositories.length; i++) {
+                    var repo_name = repositories[i];
+                    window.hWin.HEURIST4.ui.addoption($sel_repos[0], repo_name, repo_name);
+                }
+                $sel_repos.on('change', () => {
+                    let repo = $sel_repos.val();
+                    switch (repo) {
+                        case 'Nakala':
+                            $('#sel_license').parent().show();
+                            _popuplateNakalaLicense();
+                            break;
+                    
+                        default:
+                            return;
+                    }
+                });
+            }
         }else if(action_type=='merge_delete_detail'){ //@todo
             _createInputElement('fld-1', window.hWin.HR('Value to remove'), init_field_value);
             _createInputElement('fld-2', window.hWin.HR('Or repalce it with'));
@@ -575,6 +655,24 @@ function hRecordAction(_action_type, _scope_type, _field_type, _field_value) {
                 }
                 
 
+            }else if(action_type=='local_to_repository'){
+
+                request['a'] = 'local_to_repository';
+
+                request['repository'] = $('#sel_repository').val();
+
+                if($('#cb_del_local_file').is(':checked')){
+                    request['delete_file'] = 1;
+                }
+
+                if(request['repository'] == 'Nakala'){
+                    request['license'] = $('#sel_license').val();
+                    if(window.hWin.HEURIST4.util.isempty(request['license'])){
+                        window.hWin.HEURIST4.msg.showMsgFlash('Please select a license', 3000);
+                        return;
+                    }
+                }
+
             }else if(action_type=='delete_detail'){
 
                 request['a'] = 'delete';
@@ -734,7 +832,11 @@ function hRecordAction(_action_type, _scope_type, _field_type, _field_value) {
                             if(recids && recids.length>0){
                                 sResult += '<div style="max-height:300;overflow-y:auto;background-color:#ffcccc">';
                                 for(key in response['errors_list']){
-                                    sResult += (key+': '+response['errors_list'][key] + '<br>');   
+                                    let text = response['errors_list'][key];
+                                    if(window.hWin.HEURIST4.util.isArray(text)){
+                                        text = text.join('<br>');
+                                    }
+                                    sResult += (key+': '+ text + '<br>');   
                                 }
                                 sResult += '</div>';   
                             }

@@ -80,6 +80,10 @@
 
             $res = $dbRecDetails->changeUrlToFileInBatch();
             
+        }else if(@$_REQUEST['a'] == 'local_to_repository'){
+
+            $res = $dbRecDetails->uploadFileToRepository();
+
         }else if(@$_REQUEST['a'] == 'reset_thumbs'){
 
             $res = $dbRecDetails->resetThumbnails();

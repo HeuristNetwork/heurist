@@ -2141,5 +2141,253 @@ public methods
 
         return array('count' => $final_count, 'record_ids' => implode(',', $new_records));
     }
+
+    /**
+     * Upload file to an external repository
+     */
+    public function uploadFileToRepository(){
+
+        if(!$this->_validateParamsAndCounts()){
+            return false;
+        }else if (!is_array(@$this->recIDs) || count($this->recIDs)==0){
+            return $this->result_data;
+        }
+
+        $mysqli = $this->system->get_mysqli();
+        $date_mode = date('Y-m-d H:i:s');
+
+        $dtyID = $this->data['dtyID'];
+        $dtyName = (@$this->data['dtyName'] ? "'".$this->data['dtyName']."'" : "id:".$this->data['dtyID']);
+        $baseTag = "~replace file to url $dtyName $date_mode";
+
+        $processedRecIDs = array();
+        $sqlErrors = array();
+        $uploadError = array();
+        $failed_ids = array();
+
+        $file_entity = new DbRecUploadedFiles($this->system, array('entity'=>'recUploadedFiles'));
+        
+        // Find relevant local files
+        $query = 'SELECT dtl_ID, ulf_ID, dtl_RecID '
+        .'FROM recUploadedFiles, recDetails '
+        .'WHERE ulf_ID=dtl_UploadedFileID AND ulf_OrigFileName<>"_remote"'
+        .' AND dtl_DetailTypeID='.$dtyID.' AND dtl_RecID in ('.implode(',',$this->recIDs).')'
+        .'ORDER BY ulf_ID';
+        $res = $mysqli->query($query);
+        /** $row:
+         * [0] => Rec Detail ID
+         * [1] => File ID
+         * [2] => Record ID
+         */
+
+        if(!$res){ // mysql error, end
+            $this->system->addError(HEURIST_ERROR, 'An error occurred while attempting to retrieve records using locally stored files.<br><br>MySQLi Error: ' . $mysqli->error);
+            return false;
+        }
+
+        $cur_ulf_ID = 0;
+        $new_ulf_ID = 0;
+        $dtl_IDs = array();
+        $rec_IDs = array();
+        $completed_ulf_IDs = array();
+
+        if($this->data['repository'] == 'Nakala'){
+
+            if(array_key_exists('license', $this->data) || empty($this->data['license'])){ // ensure a license has been provided
+                $this->system->addError(HEURIST_ACTION_BLOCKED, 'A license is missing');
+                return false;
+            }
+
+            $meta_values = array();
+            $file = array();
+
+            // General Meta data
+            // Normal Creator field (we use alternative author field, as this requires Author Ids/ORCIDs)
+            $meta_values['creator'] = array(
+                'value' => null,
+                'lang' => null,
+                'typeUri' => null,
+                'propertyUri' => 'http://nakala.fr/terms#creator'
+            );
+            // Provided by user - used for all files
+            $meta_values['license'] = array(
+                'value' => $this->data['license'],
+                'lang' => null,
+                'typeUri' => 'http://www.w3.org/2001/XMLSchema#string',
+                'propertyUri' => 'http://nakala.fr/terms#license'
+            );
+
+            $api_key = $this->system->get_system('sys_NakalaKey');
+
+            while($row = $res->fetch_row()){
+
+                if($cur_ulf_ID != $row[1]){
+
+                    if($new_ulf_ID > 0){
+                        if($this->_updateUploadedFileIDs($new_ulf_ID, $dtl_IDs, $date_mode)){
+                            $completed_ulf_IDs[$row[1]] = $new_ulf_ID;
+                            $processedRecIDs = array_merge($processedRecIDs, $rec_IDs);
+                        }else{
+                            $failed_ids = array_merge($failed_ids, $rec_IDs);
+                        }
+                    }
+
+                    $cur_ulf_ID = $row[1];
+                    $dtl_IDs = array();
+                    $rec_IDs = array();
+                    $new_ulf_ID = 0;
+
+                    $file_query = 'SELECT ulf_OrigFileName, concat(ulf_FilePath, ulf_FileName) AS "fullPath", fxm_MimeType, ulf_Description, concat(ugr_FirstName, " ", ugr_LastName) AS "fullName", DATE(ulf_Added) '
+                    .'FROM recUploadedFiles, defFileExtToMimetype, sysUGrps '
+                    .'WHERE ulf_ID=' . $row[1] . ' AND ulf_MimeExt=fxm_Extension AND ulf_UploaderUGrpID=ugr_ID';
+                    $file_res = $mysqli->query($file_query);
+                    if(!$file_res){ // another mysql error, skip
+                        $sqlErrors[$row[2]][] = 'File #' . $row[1] . ' &Rightarrow; ' . $mysqli->error;
+                        $failed_ids[] = $row[2];
+                        continue;
+                    }
+                    /** $file_dtl:
+                     * [0] => title
+                     * [1] => file path
+                     * [2] => mime type
+                     * [3] => description
+                     * [4] => Uploader's full name
+                     * [5] => created date (no time)
+                     */
+
+                    $file_dtl = $file_res->fetch_row();
+                    $file_path = resolveFilePath($file_dtl[1]);
+                    if(!file_exists($file_path)){
+                        $uploadError[$row[2]][] = 'File #' . $row[1] . ' &Rightarrow; Unable to locate the local file for transfer';
+                        $failed_ids[] = $row[2];
+                        continue;
+                    }
+
+                    $file = array('path' => $file_path, 'type' => $file_dtl[2], 'name' => $file_dtl[0], 'description' => $file_dtl[3]);
+
+                    $meta_values['title'] = array(
+                        'value' => $file_dtl[0],
+                        'lang' => null,
+                        'typeUri' => 'http://www.w3.org/2001/XMLSchema#string',
+                        'propertyUri' => 'http://nakala.fr/terms#title'
+                    );
+
+                    $file_type = $file_dtl[2];
+
+                    /** Use fxm_MimeType
+                     * Nakala <=> Mime Type
+                     * text <=> text | pdf
+                     * image <=> image
+                     * sound <=> sound | audio
+                     * video <=> video
+                     * other <=> anything else
+                     */
+                    if(strpos($file_type, 'text') !== false || strpos($file_type, 'pdf') !== false){
+                        $file_type = 'http://purl.org/coar/resource_type/c_1843';
+                    }else if(strpos($file_type, 'sound') !== false || strpos($file_type, 'audio') !== false){
+                        $file_type = 'http://purl.org/coar/resource_type/c_18cc';
+                    }else if(strpos($file_type, 'image') !== false){
+                        $file_type = 'http://purl.org/coar/resource_type/c_c513';
+                    }else if(strpos($file_type, 'video') !== false){
+                        $file_type = 'http://purl.org/coar/resource_type/c_12ce';
+                    }else{ // other
+                        $file_type = 'http://purl.org/coar/resource_type/c_1843';
+                    }
+                    $meta_values['type'] = array(
+                        'value' => $file_type,
+                        'lang' => null,
+                        'typeUri' => 'http://www.w3.org/2001/XMLSchema#anyURI',
+                        'propertyUri' => 'http://nakala.fr/terms#type'
+                    );
+
+                    // Current Heurist user
+                    $meta_values['alt_creator'] = array(
+                        'value' => $file_dtl[4],
+                        'lang' => null,
+                        'typeUri' => 'http://www.w3.org/2001/XMLSchema#string',
+                        'propertyUri' => 'http://purl.org/dc/terms/creator'
+                    );
+
+                    // ulf_Added
+                    $meta_values['created'] = array(
+                        'value' => $file_dtl[5],//date('Y-m-d', $file_dtl[5]),
+                        'lang' => null,
+                        'typeUri' => 'http://www.w3.org/2001/XMLSchema#string',
+                        'propertyUri' => 'http://nakala.fr/terms#created'
+                    );
+
+                    $rtn = uploadFileToNakala($this->system, array('api_key' => $api_key, 'file' => $file, 'meta' => $meta_values, 'status' => 'published')); // pending | published
+
+                    if($rtn){ // register URL ($rtn)
+                        $file_entity->setRecords(null); // reset records
+                        $new_ulf_ID = $file_entity->registerURL($rtn); // register nakala url
+                        if(!is_numeric($new_ulf_ID) || $new_ulf_ID > 0){
+                            $sqlErrors[$row[2]][] = 'File #' . $row[1] . ' &Rightarrow; ' . $mysqli->error;
+                            $failed_ids[] = $row[2];
+                        }
+                    }else{
+                        $err_msg = $this->system->getError();
+                        if(array_key_exists('message', $err_msg)){
+                            $err_msg = $err_msg['message'];
+                        }else{
+                            $err_msg = 'Unknown error occurred while uploading to Nakala';
+                        }
+                        $uploadError[$row[2]][] = 'File #' . $row[1] . ' &Rightarrow; ' . $err_msg;
+                        $failed_ids[] = $row[2];
+                    }
+                }
+
+                $dtl_IDs[] = $row[0];
+                $rec_IDs[] = $row[3];
+
+            } // while
+        }
+        if($new_ulf_ID > 0){
+            if($this->_updateUploadedFileIDs($new_ulf_ID, $dtl_IDs, $date_mode)){
+                $completed_ulf_IDs[$row[1]] = $new_ulf_ID;
+                $processedRecIDs = array_merge($processedRecIDs, $rec_IDs);
+            }else{
+                $failed_ids = array_merge($failed_ids, $rec_IDs);
+            }
+        }
+
+        if(count($completed_ulf_IDs) > 0){
+            $ulf_to_delete = array();
+            foreach ($completed_ulf_IDs as $org_ID => $new_ID) {
+                $query = 'SELECT dtl_ID FROM recDetails WHERE dtl_UploadedFileID = ' . $org_ID;
+                $dtl_IDs = mysql__select_list2($mysqli, $query);
+
+                if(!$dtl_IDs){
+                    continue;
+                }
+
+                if(count($dtl_IDs) == 0){ // delete file reference + local file
+                    $ulf_to_delete[] = $org_ID;
+                }else if(array_key_exists('delete_file', $this->data) && $this->data['delete_file'] == 1){
+                    // update references
+                    if($this->_updateUploadedFileIDs($new_ID, $dtl_IDs, $date_mode)){
+                        // then delete the file reference + local file
+                        $ulf_to_delete[] = $org_ID;
+                    }
+                }
+            }
+
+            if(count($ulf_to_delete) > 0){
+                $cur_data = $file_entity->getData();
+                $cur_date['ulf_ID'] = array_unique($ulf_to_delete);
+                $file_entity->setData($cur_data);
+                $file_entity->delete();
+            }
+        }
+
+        $failed_ids = array_unique($failed_ids);
+
+        $this->_assignTagsAndReport('processed', $processedRecIDs, $baseTag);
+        $this->_assignTagsAndReport('errors',  array_merge($sqlErrors, $uploadError), $baseTag);
+        $this->result_data['fails'] = count($failed_ids);
+        $this->result_data['fails_list'] = $failed_ids;
+
+        return $this->result_data;
+    }
 }
 ?>
