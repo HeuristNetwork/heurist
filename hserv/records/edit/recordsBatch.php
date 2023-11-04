@@ -2170,7 +2170,8 @@ public methods
         // Find relevant local files
         $query = 'SELECT dtl_ID, ulf_ID, dtl_RecID '
         .'FROM recUploadedFiles, recDetails '
-        .'WHERE ulf_ID=dtl_UploadedFileID AND ulf_OrigFileName<>"_remote"'
+        .'WHERE ulf_ID=dtl_UploadedFileID AND '
+        .'(NOT(ulf_OrigFileName="_remote" OR ulf_OrigFileName LIKE "_iiif%" OR ulf_OrigFileName LIKE "_tiled%"))'
         .' AND dtl_DetailTypeID='.$dtyID.' AND dtl_RecID in ('.implode(',',$this->recIDs).')'
         .'ORDER BY ulf_ID';
         $res = $mysqli->query($query);
