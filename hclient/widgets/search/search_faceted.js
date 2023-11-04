@@ -3805,7 +3805,7 @@ console.log('check field ',this.options.is_publication,check_fields);
                 }else{
                     if(this.options.params.ui_counts_mode!='bracket'){
                         dcount.addClass('truncate')
-                              .css('max-width', '45px')
+                              .css('max-width', this.options.is_publication ? '3em' : '45px')
                               .attr('title', dcount.text());
                     }
                     dcount.appendTo(f_link);    

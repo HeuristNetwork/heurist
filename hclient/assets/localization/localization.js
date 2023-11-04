@@ -336,6 +336,7 @@ regional['ENG'] = {
         'menu-selected-extract-pdf': 'Extract text from PDF files',
         'menu-selected-extract-pdf-hint': 'Extract text from PDF (experimental)',
         'menu-selected-url-to-file': 'Remote URLs to local files',
+        'menu-selected-local-to-repository': 'Local files to remote repository',
         'menu-selected-reset-thumbs': 'Reset thumbnails',
     'Share': '',
         'menu-selected-notify': 'Notify (email)',
@@ -575,6 +576,7 @@ regional['ENG'] = {
     'add_link':'Add new link or create a relationship between records',
     'extract_pdf':'Extract text from PDF',
     'url_to_file':'Remote URLs to local files',
+    'local_to_repository':'Upload local files to repository',
     'reset_thumbs':'Reset thumbnails',
 
     //helps
@@ -606,6 +608,7 @@ regional['ENG'] = {
         +'<br><br>'
 +'Text is only extracted if the (corresponding value) of the field is empty to avoid overwriting any text entered manually.'),
     'record_action_url_to_file':'This function fetches files indicated by remote URLs in the specified File field, <br>places them in the database, and replaces the remote URL with a reference to file in the database. Other fields are not affected.',
+    'record_action_local_to_repository': 'This function will upload local files within the selected field used by records to the selected repository.<br>The file record is then updated for use as a remote resource, pointing to the repository record.',
     'record_action_reset_thumbs':'This function removes thumbnail for files and external resources for selected scope of records. Thumbnails will be recreated on next demand',
     
     //reports
@@ -624,6 +627,8 @@ regional['ENG'] = {
     'record_action_limited_extract_pdf': 'Records with field already populated',
     
     'record_action_fails_url_to_file': 'Records with URL that failed to download',   
+    
+    'record_action_fails_local_to_repository': 'Files that failed to upload to the selected repository',
     
     'record_action_errors': 'Errors',
 

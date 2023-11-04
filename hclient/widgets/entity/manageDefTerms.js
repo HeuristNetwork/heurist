@@ -54,6 +54,8 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
 
     use_remote: false,
 
+    _cachedUsages: {}, // cached term usages
+
     //
     //                                                  
     //    
@@ -576,8 +578,36 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
 
                         }
 
-                    }
+                    },
 
+                    onTooltip: function(callback){
+
+                        let content = $(this).attr('title');
+                        let trmid = $(this).parent().attr('recid');
+
+                        if(that._cachedUsages[trmid]){ // add usage count
+                            content += `<p>Usage count: ${that._cachedUsages[trmid]}</p>`;
+                        }
+
+                        if(Number.isInteger(+trmid) && trmid > 0){ // add term image
+
+                            const ele_context = this;
+
+                            window.hWin.HAPI4.checkImage(that._entityName, trmid, 'icon', function(response){
+                                if(response.status == window.hWin.ResponseStatus.OK && response.data == 'ok'){
+
+                                    let icon = window.hWin.HAPI4.getImageUrl(that._entityName, trmid, 'icon');
+                                    content += `<br><img src='${window.hWin.HAPI4.baseURL}hclient/assets/16x16.gif' style='background-image: url("${icon}")' height=64 width=64 />`;
+                                }
+
+                                callback.call(ele_context, content);
+                            });
+
+                            return '';
+                        }
+
+                        return content;
+                    }
                 };
 
                 //vocabularies options
@@ -1006,8 +1036,7 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
                 }
             }
 
-            sWidth = 'display:inline-block;padding-top:4px;max-width:320px;'; //+((lvl>2)?'25':'30')+'%;';
-            //sPad = 'padding-left:'+(lvl*20);
+            sWidth = 'display:inline-block;padding-top:4px;max-width:320px;';
 
             sPad = '<span style="font-size:'+(1+lvl * 0.1)+'em">'+('&nbsp;'.repeat(lvl*4))+'</span>';
             sFontSize = 'font-size:'+(1.1 - lvl * 0.1)+'em;';
@@ -1021,29 +1050,29 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
             + (sURI?('<p>URI: '+sURI+'</p>'):'')
             + '<p>ID: '+recID+' ('+$Db.getConceptID('trm',recID)+')</p>';
 
-            if(ref_lvl!==false)  //
-            {
+            if(ref_lvl!==false){
+
                 sHint = sHint +     
                 '<p>Reference to: <i>'+real_vocab_name+'</i> vocabulary.</p>'
                 +'<p style=&quot;color:orange&quot;>The term can only be edited in that vocabulary.</p>';
-
-                //sWidth = sWidth + '45%;';
-            }else{
-                //sWidth = sWidth + '49%;';
             }
             sHint = sHint + '"';
 
+            let recIcon = window.hWin.HAPI4.getImageUrl(this._entityName, recID, 'icon');
+            let recUsage = this._cachedUsages[recID] ? `[${this._cachedUsages}]` : '';
+
             recTitle = '<div class="item truncate label_term rolloverTooltip"'
             +' style="'+sFontSize+sWidth+sBold+'" '+sHint+'>'
-            +sLabel+'&nbsp;&nbsp;<span class="term_usage"></span></div>'; // $Db.trm(recID, 'trm_Parents')+'  '+recID+' '+
-            //+sPad            
+            +sLabel+'&nbsp;&nbsp;'
+            +`<img src='${window.hWin.HAPI4.baseURL}hclient/assets/16x16.gif' style='background-image: url("${recIcon}"); vertical-align:bottom;' />`
+            +`&nbsp;&nbsp;<span class="term_usage">${recUsage}</span></div>`;
 
             var html_thumb = '';
             
             var recThumb = window.hWin.HAPI4.getImageUrl(this._entityName, recID, 'thumb');
 
             html_thumb = '<div class="recTypeThumb" style="background-image: url(&quot;'
-                    +recThumb+'&quot;);opacity:1"></div>';
+                    +recThumb+'&quot;);opacity:1;top:45px;"></div>';
                     
             sPad = lvl==1?0:(lvl==2?(lvl-0.5):lvl);                                                                         
             var exp_btn_style = 'width:20px;display:inline-block;vertical-align:bottom;margin-left:'+sPad+'em;';
@@ -2981,6 +3010,14 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
     updateTermUsage: function(term_usages){
 
         if(window.hWin.HEURIST4.util.isempty(term_usages)){
+            term_usages = {};
+        }
+
+        const that = this;
+
+        this._cachedUsages = $.extend(this._cachedUsages, term_usages);
+
+        if(window.hWin.HEURIST4.util.isempty(this._cachedUsages)){
             return;
         }
 
@@ -2990,8 +3027,8 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
             let trm_id = $record.attr('recid');
             let $label = $record.find('.label_term');
 
-            if(trm_id && term_usages[trm_id] && term_usages[trm_id] > 0){ // has usage
-                $label.find('.term_usage').text('[' + term_usages[trm_id] + ']');
+            if(trm_id && that._cachedUsages[trm_id] && that._cachedUsages[trm_id] > 0){ // has usage
+                $label.find('.term_usage').text('[' + that._cachedUsages[trm_id] + ']');
                 $label.css('color', '');
             }else{ // not used
                 $label.find('.term_usage').text('[--]');
