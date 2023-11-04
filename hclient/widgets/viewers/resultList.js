@@ -97,6 +97,8 @@ $.widget( "heurist.resultList", {
         
         onPageRender: null, //event listner on complete of page render
 
+        onTooltip: null, // on retrieving content for the tooltip
+
         navigator:'auto',  //none, buttons, menu, auto
 
         entityName:'records',   //records by default
@@ -3291,10 +3293,16 @@ $.widget( "heurist.resultList", {
                     });
         }
         
-        function ___ontooltip(){
-                var ele = $( this );
-                var s = ele.attr('title');
-                return window.hWin.HEURIST4.util.isempty(s)?'':s;
+        function ___ontooltip(callback){
+
+            let s = '';
+            if($.isFunction(that.options.onTooltip)){
+                s = that.options.onTooltip.call(this, callback); // pass content to callback, if a server call is required
+            }else{
+                let ele = $( this );
+                s = ele.attr('title');
+            }
+            return window.hWin.HEURIST4.util.isempty(s)?'':s;
         }
         
         this.div_content.find('div.recordTitle').tooltip({content: ___ontooltip}); //title may have html format - use jquery tooltip
