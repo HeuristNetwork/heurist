@@ -659,14 +659,14 @@
 
                 // File
                 $params['file'] = array(
-                    'path' => HEURIST_FILESTORE_DIR . '/scratch/' . $_REQUEST['file'][0]['name'],
-                    'type' => $_REQUEST['file'][0]['type'],
-                    'name' => $_REQUEST['file'][0]['original_name']
+                    'path' => HEURIST_FILESTORE_DIR . '/scratch/' . USanitize::sanitizeFileName($_REQUEST['file'][0]['name']),
+                    'type' => htmlspecialchars($_REQUEST['file'][0]['type']),
+                    'name' => htmlspecialchars($_REQUEST['file'][0]['original_name'])
                 );
 
                 // Metadata
                 $params['meta']['title'] = array(
-                    'value' => @$_REQUEST['meta']['title'],
+                    'value' => htmlspecialchars(@$_REQUEST['meta']['title']),
                     'lang' => null,
                     'typeUri' => 'https://www.w3.org/2001/XMLSchema#string',
                     'propertyUri' => 'https://nakala.fr/terms#title'
@@ -684,10 +684,10 @@
 
                         $fullname = '';
                         if(array_key_exists('givenname', $_REQUEST['meta']['creator'])){
-                            $fullname .= $_REQUEST['meta']['creator']['givenname'];
+                            $fullname .= htmlspecialchars($_REQUEST['meta']['creator']['givenname']);
                         }
                         if(array_key_exists('surname', $_REQUEST['meta']['creator'])){
-                            $fullname .= ' ' . $_REQUEST['meta']['creator']['surname'];
+                            $fullname .= ' ' . htmlspecialchars($_REQUEST['meta']['creator']['surname']);
                         }
                         $fullname = trim($fullname);
 

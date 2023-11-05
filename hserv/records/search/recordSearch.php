@@ -1948,7 +1948,7 @@ function recordSearch($system, $params)
 
     if(null==$system){
         $system = new System();
-        if( ! $system->init(@$_REQUEST['db']) ){
+        if( ! $system->init(htmlspecialchars(@$_REQUEST['db'])) ){
             $response = $system->getError();
             if($return_h3_format){
                 $response['error'] = $response['message'];
