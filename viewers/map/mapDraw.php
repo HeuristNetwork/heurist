@@ -196,17 +196,21 @@ if(true || $_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0
                     var titleYes = window.hWin.HR('[Add to Map]');
                     var button={};
                     button[titleYes] = function() {
+                        
+                        let geodata = $dlg.find('#geodata_textarea').val();
+                        if(!window.hWin.HEURIST4.util.isJSON(geodata)){
 
-                        let geodata = $dlg.find('#geodata_textarea').val().toUpperCase(); // ensure captialised
-                        geodata = geodata.replace(/\s\s+/g, ' ').trim(); // remove double spacing
-                        geodata = geodata.replace(/\s*\(\s*/g, '('); // remove space before+after left bracket
-                        geodata = geodata.replace(/\s*\)/g, ')'); // remove space before right bracket
+                            geodata = geodata.toUpperCase(); // ensure captialised
+                            geodata = geodata.replace(/\s\s+/g, ' ').trim(); // remove double spacing
+                            geodata = geodata.replace(/\s*\(\s*/g, '('); // remove space before+after left bracket
+                            geodata = geodata.replace(/\s*\)/g, ')'); // remove space before right bracket
 
-                        if(geodata.indexOf('POINT') >= 0){
-                            geodata = geodata.replace(/\,\s*/g, ' '); // replace comma | comma+space with a single space
+                            if(geodata.indexOf('POINT') >= 0){
+                                geodata = geodata.replace(/\,\s*/g, ' '); // replace comma | comma+space with a single space
+                            }
+
+                            $dlg.find('#geodata_textarea').val(geodata);
                         }
-
-                        $dlg.find('#geodata_textarea').val(geodata);
 
                         mapping.mapping( 'drawLoadGeometry', geodata);
                         $dlg.dialog( "close" );
@@ -434,7 +438,13 @@ if(true || $_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0
                 var mode = 'full';
                 if(imageurl) mode = 'image'
                 else if (is_geofilter) mode = 'filter';
-                mapping.mapping( 'drawSetControls', mode );                
+                mapping.mapping( 'drawSetControls', mode );   
+                
+                if(!window.hWin.HEURIST4.util.isempty(tool_option) && tool_option != null){ // check if only one type of drawing tool is allowed
+                    mapping.mapping( 'drawSetControls', tool_option);
+                }
+
+             
                 
                 if( !window.hWin.HEURIST4.util.isempty(initial_wkt) && initial_wkt!='undefined' ){ //params && params['wkt']
                 
@@ -472,10 +482,6 @@ if(true || $_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0
                     if(is_geofilter){
                         window.hWin.HEURIST4.msg.showMsgFlash(sMsgDigizeSearch, 2000);
                     }
-                }
-
-                if(!window.hWin.HEURIST4.util.isempty(tool_option) && tool_option != null){ // check if only one type of drawing tool is allowed
-                    mapping.mapping( 'drawSetControls', tool_option);
                 }
 
                 var that = this;

@@ -3968,8 +3968,6 @@ $.widget( "heurist.mapping", {
                 this.projectGeoJson( gjson, false );
             }            
 
-            var l2 = L.geoJSON(gjson);
-            
             function __addDrawItems(lg){
                 if(lg instanceof L.LayerGroup){
                     lg.eachLayer(function (layer) {
@@ -4042,10 +4040,16 @@ $.widget( "heurist.mapping", {
                         
                 }                
             }
-            __addDrawItems(l2);
             
-            this.drawZoomTo();
-
+            
+            var l2 = null
+            try{
+                l2 = L.geoJSON(gjson);
+                __addDrawItems(l2);
+                this.drawZoomTo();
+            }catch(e){
+                //window.hWin.HEURIST4.msg.showMsgFlash('Invalid geojson', 2000);
+            }
     },   
     
     //
