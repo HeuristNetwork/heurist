@@ -99,8 +99,8 @@ $missed_folders = array();
 foreach ($databases as $idx=>$db_name){
 
     //mysql__usedatabase($mysqli, $db_name);
-    $db_name = htmlspecialchars($db_name);
-    $query2 = 'SELECT ulf_FilePath, ulf_FileName FROM `hdb_'.$mysqli->real_escape_string($db_name).'`.recUploadedFiles '
+    $db_name2 = $mysqli->real_escape_string('hdb_'.$db_name);
+    $query2 = 'SELECT ulf_FilePath, ulf_FileName FROM `'.$db_name2.'`.recUploadedFiles '
                     .'WHERE ulf_FileName is not null ORDER BY ulf_FilePath';
                     
     $res2 = $mysqli->query($query2);
