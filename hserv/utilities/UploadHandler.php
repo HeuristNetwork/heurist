@@ -1240,7 +1240,7 @@ $siz = USystem::getConfigBytes('upload_max_filesize');
         if (!empty($this->options['convert_params'])) {
             $cmd .= ' '.$this->options['convert_params'];
         }
-        $cmd .= ' '.escapeshellarg($file_path);
+        $cmd .= ' '.escapeshellarg(USanitize::sanitizePath($file_path));
         if (!empty($options['auto_orient'])) {
             $cmd .= ' -auto-orient';
         }
@@ -1271,6 +1271,7 @@ $siz = USystem::getConfigBytes('upload_max_filesize');
 
     protected function get_image_size($file_path) {
         if ($this->options['image_library']) {
+            $file_path = USanitize::sanitizePath($file_path);
             if (extension_loaded('imagick')) {
                 $image = new \Imagick();
                 try {

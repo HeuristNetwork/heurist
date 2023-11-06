@@ -659,7 +659,8 @@
 
                 // File
                 $params['file'] = array(
-                    'path' => HEURIST_FILESTORE_DIR . '/scratch/' . USanitize::sanitizeFileName($_REQUEST['file'][0]['name']),
+                    'path' => HEURIST_FILESTORE_DIR . '/scratch/' 
+                            . USanitize::sanitizeFileName(USanitize::sanitizePath($_REQUEST['file'][0]['name'])),
                     'type' => htmlspecialchars($_REQUEST['file'][0]['type']),
                     'name' => htmlspecialchars($_REQUEST['file'][0]['original_name'])
                 );
@@ -669,7 +670,7 @@
                     'value' => htmlspecialchars(@$_REQUEST['meta']['title']),
                     'lang' => null,
                     'typeUri' => 'https://www.w3.org/2001/XMLSchema#string',
-                    'propertyUri' => 'https://nakala.fr/terms#title'
+                    'propertyUri' => 'ht\]tps://nakala.fr/terms#title'
                 );
 
                 if(empty($_REQUEST['meta']['creator']['authorId'])){

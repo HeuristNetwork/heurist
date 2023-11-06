@@ -480,7 +480,7 @@ function cloneDatabase($targetdbname, $nodata=false, $templateddb, $user_id) {
     $res1 = $mysqli->query($query1);
     if ($mysqli->error)  { //(mysql_num_rows($res1) == 0)
         print "<p><h4>Warning</h4><b>Unable to set database files path to new path</b>".
-        "<br>Query was:".$query1.
+        "<br>Query was:".htmlspecialchars($query1).
         "<br>Please get your system administrator to fix this problem BEFORE editing the database (your edits will affect the original database)</p>";
     }
 

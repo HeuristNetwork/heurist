@@ -125,7 +125,7 @@ foreach ($dbs as $db){
     //ID  Records     Files(MB)    RecTypes     Fields    Terms     Groups    Users   Version   DB     Files     Modified    Access    Owner   Deleteable
     if(!hasTable($mysqli, 'sysIdentification',$db) || !hasTable($mysqli, 'Records',$db)){
       
-      $broken_dbs[] = substr($db, 4);
+      $broken_dbs[] = htmlspecialchars(substr($db, 4));
     }else{
 
         $record_row = array (substr($db, 4),
