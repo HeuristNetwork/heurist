@@ -148,7 +148,7 @@ if(!(is_array($missed) && count($missed)>0)){
     print '<br><br>Detail:<br>';
     print 'Database name,Directory name,File name<br>';
     foreach($missed as $data){
-        print implode(',',$data).'<br>';
+        print htmlspecialchars(implode(',',$data)).'<br>';
     }
     
     print '<div style="padding-top:20px;color:red">There are <b>'.count($missed).' of '.$total_count

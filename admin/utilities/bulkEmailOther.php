@@ -173,9 +173,9 @@ if(isset($_REQUEST['get_email']) && isset($_REQUEST['recid'])) {	/* Get the Titl
 
 		$count = intval($db_request['count']);
 
-		$lastmod_logic = filter_var($db_request['lastmod_logic'],FILTER_SANITIZE_STRING);
+		$lastmod_logic = $mysqli->real_escape_string( filter_var($db_request['lastmod_logic'],FILTER_SANITIZE_STRING) );
 		$lastmod_period = intval($db_request['lastmod_period']);
-		$lastmod_unit = filter_var($db_request['lastmod_unit'],FILTER_SANITIZE_STRING);
+		$lastmod_unit = $mysqli->real_escape_string( filter_var($db_request['lastmod_unit'],FILTER_SANITIZE_STRING) );
 
 		$lastmod_where = ($lastmod_unit!="ALL") ? "AND rec_Modified " . $lastmod_logic . " date_format(curdate(), '%Y-%m-%d') - \ " . $lastmod_period . " " . $lastmod_unit . " " : "";
 
