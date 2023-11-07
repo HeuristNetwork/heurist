@@ -81,13 +81,15 @@ function samlLogin($system, $sp, $dbname, $require_auth=true){
         $attr = $as->getAttributes();
     }
 
-    if(count($attr)==0 || $is_debug){
+    if($is_debug){
         //test login data
         $attr = array(
                     'uid'=>array('BNF0017879'),
                     'mail'=>array('aaaa.bbbb@bnf.fr'));
-        //$system->addError(HEURIST_REQUEST_DENIED, 
-        //    '<p>External authentication returns empty attributes. Please contact Service provider admin</p>');
+    }
+    if(count($attr)==0){
+        $system->addError(HEURIST_REQUEST_DENIED, 
+            '<p>External authentication returns empty attributes. Please contact Service provider admin</p>');
     }      
 
         

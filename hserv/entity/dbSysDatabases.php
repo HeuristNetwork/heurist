@@ -155,6 +155,7 @@ class DbSysDatabases extends DbEntityBase
             $this->searchMgr = new DbEntitySearch( $this->system, $this->fields );
             $db_list = $this->searchMgr->execute($query, false, $this->config['entityName']);
             
+            /*
             if(false){ //validation that database (in central index) does really exsist
                 
                 $query = "show databases";
@@ -182,8 +183,8 @@ class DbSysDatabases extends DbEntityBase
                         $mysqli->query('DELETE FROM Heurist_DBs_index.sysIdentifications WHERE sys_Database=`'.$database.'`');
                     }
                 }
-            
             }
+            */
             
             return $db_list;
         
