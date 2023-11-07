@@ -173,7 +173,7 @@ foreach ($dbs as $db){
            
             $aitem_quote = function($n)
             {
-                return is_numeric($n) ?$n :('"'.str_replace('"','\"',$n).'"');
+                return is_numeric($n) ?$n :('"'.str_replace('"','\"',htmlspecialchars($n, ENT_NOQUOTES)).'"');
             };        
             
             $record_row[] = $record_row[0]; //add dbname to the end
@@ -313,7 +313,7 @@ if($is_csv){
             var dataSet = [
                 <?php
                     foreach ($arr_databases as $db) {
-                        print '['.htmlspecialchars($db).'],'.PHP_EOL;
+                        print '['.$db.'],'.PHP_EOL;
                     }
                 ?>
             ];
