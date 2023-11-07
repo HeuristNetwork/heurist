@@ -511,7 +511,13 @@ if($isLocalHost){
                     title: 'Welcome',
                     buttons:{'Close':function(){ $(this).dialog( 'close' )} } });                                  
         }else if (window.hWin.HEURIST4.util.isIE() ) {
-            window.hWin.HEURIST4.msg.showMsgDlg('Heurist is not fully supported in Internet Explorer. Please use Chrome, Firefox, Safari or Edge.');
+            window.hWin.HEURIST4.msg.showMsgDlg('Heurist is not fully supported in Internet Explorer. Please use Chrome, Firefox or Edge.');
+        }else if (platform.description.toLowerCase().indexOf('safari')>=0){
+            window.hWin.HEURIST4.msg.showElementAsDialog(
+                {element:document.getElementById('heurist-safari-warning'),
+                    width:480, height:260,
+                    title: 'Safari browser support',
+                    buttons:{'Close':function(){ $(this).dialog( 'close' )} } });                                  
         }
 
     } //onInitCompleted_PerformSearch
@@ -538,6 +544,17 @@ if($isLocalHost){
         <p style="padding:10px">Please <?php echo CONTACT_HEURIST_TEAM;?> for further information or to express an interest in a tablet version</p>
     </div> 
 
+    <div id="heurist-safari-warning" style="display:none;">
+        <p style="padding:10px">
+            Heurist is not fully supported in Safari. 
+            Sorry, we no longer support Apple's Safari browser which was discontinued on Windows over a decade ago due to the appearance of widely used free cross-platform browsers such as Chrome and Firefox. 
+        </p>
+
+        <p style="padding:10px">
+            Please download Chrome or Firefox to use with Heurist (and perhaps with your other applications).
+        </p>
+    </div> 
+    
     <div id="heurist-dialog">
     </div>
 
