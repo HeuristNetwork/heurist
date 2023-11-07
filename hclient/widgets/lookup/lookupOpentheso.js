@@ -26,7 +26,7 @@ $.widget( "heurist.lookupOpentheso", $.heurist.recordAction, {
     options: {
     
         height: 750,
-        width:  650,
+        width:  700,
         modal:  true,
         
         title:  "Search Opentheso records",
@@ -172,15 +172,9 @@ $.widget( "heurist.lookupOpentheso", $.heurist.recordAction, {
             options.push({key: server, title: this._servers[server]['title']});
         }
         window.hWin.HEURIST4.ui.fillSelector(this._sel_elements['server'][0], options);
-        window.hWin.HEURIST4.ui.initHSelect(this._sel_elements['server'], null, {
-            onSelectMenu: this._displayThesauruses
+        window.hWin.HEURIST4.ui.initHSelect(this._sel_elements['server'], false, null, {
+            onSelectMenu: () => { that._displayThesauruses(); }
         });
-
-        /*
-        this._on(this._sel_elements['server'], {
-            change: this._displayThesauruses
-        });
-        */
 
         // ----- LANGUAGE SELECT -----
         window.hWin.HEURIST4.ui.createLanguageSelect(this._sel_elements['lang'], [{key: '', title: 'select a language...'}]);
@@ -217,7 +211,7 @@ $.widget( "heurist.lookupOpentheso", $.heurist.recordAction, {
         }
 
         window.hWin.HEURIST4.ui.fillSelector(this._sel_elements['theso'][0], options);
-        window.hWin.HEURIST4.ui.initHSelect(this._sel_elements['theso']);
+        window.hWin.HEURIST4.ui.initHSelect(this._sel_elements['theso'], true);
     },
     
     /**
@@ -395,7 +389,7 @@ $.widget( "heurist.lookupOpentheso", $.heurist.recordAction, {
         // Add language
         if(!window.hWin.HEURIST4.util.isempty(language)){
 
-            lang = window.hWin.HAPI4.sysinfo.common_languages[lang]['a2']; // use 2 char version
+            language = window.hWin.HAPI4.sysinfo.common_languages[language]['a2']; // use 2 char version
             sURL += '&lang=' + language;
         }
         // Add groupings
@@ -482,8 +476,8 @@ $.widget( "heurist.lookupOpentheso", $.heurist.recordAction, {
         if(is_wrong_data){
             this.recordList.resultList('updateResultSet', null);
             window.hWin.HEURIST4.msg.showMsgErr('Service did not return data in an appropriate format');
-        }else{
-            this.tabs_container.tabs('option', 'active', 1); // switch to results tab
         }
+
+        this.tabs_container.tabs('option', 'active', 1); // switch to results tab
     }
 });
