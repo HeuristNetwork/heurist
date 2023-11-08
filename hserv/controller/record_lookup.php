@@ -281,6 +281,7 @@
 
     $system->dbclose();
 
+    // Retrieve metadata values for use
     if(@$params['service'] == 'nakala_get_metadata' || @$params['service'] == 'opentheso_get_thesauruses'){
 
         $response = array();
@@ -1168,6 +1169,8 @@
         $datatypes_xml = loadRemoteURLContentWithRange('https://vocabularies.coar-repositories.org/resource_types/resource_types_for_dspace.xml', null, true, 60);
         $datatypes_xml = simplexml_load_string($datatypes_xml, null, LIBXML_PARSEHUGE);
 
+        $handled_types = array(); // type codes already added
+
         while ($page <= $totalPages) {
 
             $results = loadRemoteURLContentWithRange('https://api.nakala.fr/search?fq=scope%3Ddata&order=relevance&page='.$page.'&size=1000', null, true, 60);
@@ -1180,71 +1183,71 @@
             $results = json_decode($results, true);
             if(json_last_error() == JSON_ERROR_NONE){
 
-                if($results['totalResults'] > 0 && count($results['datas']) > 0){
+                if($results['totalResults'] == 0 || empty($results['datas'])){ // no more records
+                    break;
+                }
 
-                    foreach ($results['datas'] as $records) {
+                foreach ($results['datas'] as $records) {
 
-                        $handled_type = false;
-                        $handled_license = false;
-                        $handled_year = false;
-                        
-                        foreach ($records['metas'] as $metadata) {
+                    $handled_type = false;
+                    $handled_license = false;
+                    $handled_year = false;
+                    
+                    foreach ($records['metas'] as $metadata) {
 
-                            if($metadata['value'] == null){
-                                continue;
+                        if($metadata['value'] == null){
+                            continue;
+                        }
+
+                        if(strpos($metadata['propertyUri'], 'terms#created') !== false){ // Created Date
+
+                            if(strpos($metadata['value'], '-') !== false){ // YYYY-MM | YYYY-MM-DD
+                                $metadata['value'] = explode('-', $metadata['value'])[0];
                             }
 
-                            if(strpos($metadata['propertyUri'], 'terms#created') !== false){ // Created Date
+                            if(!in_array($metadata['value'], $data_rtn['years'])){
+                                $data_rtn['years'][] = $metadata['value'];
+                            }
 
-                                if(strpos($metadata['value'], '-') !== false){ // YYYY-MM | YYYY-MM-DD
-                                    $metadata['value'] = explode('-', $metadata['value'])[0];
-                                }
+                            $handled_year = true;
+                        }else if(strpos($metadata['propertyUri'], 'terms#license') !== false && !in_array($metadata['value'], $data_rtn['licenses'])){ // License
+                            $data_rtn['licenses'][] = $metadata['value'];
+                            $handled_license = true;
+                        }else if(strpos($metadata['propertyUri'], 'terms#type') !== false){ // Type
 
-                                if(!in_array($metadata['value'], $data_rtn['years'])){
-                                    $data_rtn['years'][] = $metadata['value'];
-                                }
+                            //Retrieve type name from XML object
+                            $code = explode('/', $metadata['value']);
+                            $code = $code[count($code) - 1];
+                            $label = $code;
 
-                                $handled_year = true;
-                            }else if(strpos($metadata['propertyUri'], 'terms#license') !== false && !in_array($metadata['value'], $data_rtn['licenses'])){ // License
-                                $data_rtn['licenses'][] = $metadata['value'];
-                                $handled_license = true;
-                            }else if(strpos($metadata['propertyUri'], 'terms#type') !== false){ // Type
+                            if(strpos($code, 'c_') === false){
+                                $code = $metadata['value'];
+                            }
 
-                                //Retrieve type name from XML object
-                                $code = explode('/', $metadata['value']);
-                                $code = $code[count($code) - 1];
-                                $label = $code;
+                            if(!in_array($code, $handled_types)){
 
-                                if(strpos($code, 'c_') === false){
-                                    $code = $metadata['value'];
-                                }
+                                if(strpos($code, 'c_') !== false){
 
-                                if(!array_key_exists($code, $data_rtn['types'])){
-
-                                    if(strpos($code, 'c_') !== false){
-
-                                        $nodes = $datatypes_xml->xpath("//node[@id='". $code ."']");
-                                        if(is_array($nodes) && count($nodes) > 0){
-                                            $label = $nodes[0]->attributes()->label;
-                                            $label = ucfirst($label);
-                                        }else{
-                                            $label .= ' (deprecated type)';
-                                        }
+                                    $nodes = $datatypes_xml->xpath("//node[@id='". $code ."']");
+                                    if(is_array($nodes) && count($nodes) > 0){
+                                        $label = $nodes[0]->attributes()->label;
+                                        $label = ucfirst($label);
+                                    }else{
+                                        $label .= ' (deprecated type)';
                                     }
-    
-                                    $data_rtn['types'][$code] = $label;
                                 }
 
-                                $handled_type = true;
+                                $data_rtn['types'][] = array($label, $code);
+                                $handled_types[] = $code;
                             }
 
-                            if($handled_year && $handled_type && $handled_license){ // handled all necessary metadata for current record
-                                break;
-                            }
+                            $handled_type = true;
+                        }
+
+                        if($handled_year && $handled_type && $handled_license){ // handled all necessary metadata for current record
+                            break;
                         }
                     }
-                }else{ // no more records
-                    break;
                 }
             }else{
                 $system->error_exit_api('Unable to retrieve metadata values from Nakala, receieved a response not in a JSON format');
@@ -1254,11 +1257,12 @@
             $page ++;
         }
 
-        if(count($data_rtn['years']) > 0){ // sort years
+        // Sort values
+        if(count($data_rtn['years']) > 0){
             sort($data_rtn['years']);
         }
         if(count($data_rtn['types']) > 0){
-            sort($data_rtn['types']);
+            array_multisort($data_rtn['types']);
         }
         if(count($data_rtn['licenses']) > 0){
             sort($data_rtn['licenses']);
