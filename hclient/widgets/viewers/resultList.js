@@ -338,7 +338,11 @@ $.widget( "heurist.resultList", {
                         that._currentRecordset = recset;
 						
                         if(data.empty_remark){
-                            that.div_content.html( data.empty_remark );
+
+                            let msg = data.is_facet && !window.hWin.HEURIST4.util.isempty(that.options.placeholder_text) ? 
+                                            that.options.placeholder_text : data.empty_remark;
+
+                            that.div_content.html( msg );
                         }else{
 
                             var recID_withStartupInfo = window.hWin.HEURIST4.util.getUrlParameter('Startinfo');

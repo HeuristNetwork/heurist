@@ -1315,7 +1315,7 @@ console.log('check field ',this.options.is_publication,check_fields);
             //trigget empty fake event to update messge in result list
             $(this.document).trigger(window.hWin.HAPI4.Event.ON_REC_SEARCH_FINISH, 
                 [ {empty_remark:'<div style="padding:10px;"><h3><span class="ui-icon ui-icon-arrowthick-1-w"></span>'
-                +'Please select from facets on left</h3></div>', search_realm:this.options.search_realm} ]);
+                +'Please select from facets on left</h3></div>', search_realm:this.options.search_realm, is_facet: true} ]);
         }
        
     }
@@ -3470,7 +3470,7 @@ console.log('check field ',this.options.is_publication,check_fields);
 
                 data.level = level;
                 var f_link = this._createFacetLink( f_index, 
-                    data,
+                    $.extend(data, {level: level}),
                     display_mode );
                 
                 if(data.count > 0){ // check that facet link has been drawn
@@ -3758,11 +3758,11 @@ console.log('check field ',this.options.is_publication,check_fields);
             if(display_mode=='block'){         
 
                 let width = content_max_width < 200 ? content_max_width * 0.6 : content_max_width - 80;
-                f_link_content.css('max-width', width).addClass('truncate');
+                width = cterm.level ? width - (cterm.level - 1) * 10 : width;
 
-                //f_link_content.css('width', width);
-            
-                f_link_content.attr('title', cterm.title);
+                f_link_content.css('max-width', width)
+                              .addClass('truncate')
+                              .attr('title', cterm.title);
             }
             
             if(!window.hWin.HEURIST4.util.isempty(currval)){
