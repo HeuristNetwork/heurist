@@ -78,7 +78,8 @@ function recordSearchMinMax($system, $params){
         }
         //@todo - current user constraints
 
-        $res = $mysqli->query($query.$where_clause);
+        //$res = $mysqli->query($query.$where_clause);
+        $res = mysql__select($mysqli, $query.$where_clause);
         if (!$res){
             $response = $system->addError(HEURIST_DB_ERROR, "Search query error on min/max. Query ".$query, $mysqli->error);
         }else{
@@ -366,7 +367,8 @@ function recordSearchFacets($system, $params){
                 }*/
 
 
-                $res = $mysqli->query($query);
+                //$res = $mysqli->query($query);
+                $res = mysql__select($mysqli, $query);
                 if (!$res){
                     return $system->addError(HEURIST_DB_ERROR, $savedSearchName
                         .'Facet query error(A). Parameters:'.print_r($params, true), $mysqli->error);
@@ -451,7 +453,8 @@ function recordSearchFacets($system, $params){
         }
         */
 
-        $res = $mysqli->query($query);
+        //$res = $mysqli->query($query);
+        $res = mysql__select($mysqli, $query);
         if (!$res){
             $response = $system->addError(HEURIST_DB_ERROR, $savedSearchName
                 .'Facet query error(B). '.$query);// 'Parameters:'.print_r($params, true), $mysqli->error);
@@ -832,8 +835,8 @@ function getDateHistogramData($system, $range, $interval, $rec_ids, $dty_id, $fo
             .' WHERE rdi_estMaxDate<2100 AND rdi_RecID IN ('
                 .implode(',', $rec_ids).") AND rdi_DetailTypeID = ".$dty_id; 
                 
-    $res = $mysqli->query($sql);
-
+    //$res = $mysqli->query($sql);
+    $res = mysql__select($mysqli, $sql);
     if(!$res){
         return $system->addError(HEURIST_DB_ERROR, "An SQL Error has Occurred => " . $mysqli->error);
     }else{
@@ -2431,7 +2434,8 @@ function recordSearch($system, $params)
     }
         
 
-    $res = $mysqli->query($query);
+    //$res = $mysqli->query($query);
+    $res = mysql__select($mysqli, $query);
     if (!$res){
         
         $sMsg = '';

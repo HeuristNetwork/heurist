@@ -182,7 +182,9 @@
             
                 if(!@$_REQUEST['q']) $_REQUEST['q'] = '{"t":"'.HEURIST_INDEX_DBREC.'"}'; //all registred db
                 //change hsapi to hserv when master index will be v7
-                $reg_url = HEURIST_INDEX_BASE_URL.'hsapi/controller/record_search.php?db='.HEURIST_INDEX_DATABASE.'&q='.$_REQUEST['q'];
+                $reg_url = HEURIST_INDEX_BASE_URL
+                .(strpos(HEURIST_INDEX_BASE_URL,'/h6-alpha')>0?'hserv':'hsapi')
+                .'/controller/record_search.php?db='.HEURIST_INDEX_DATABASE.'&q='.$_REQUEST['q'];
                 if(@$_REQUEST['detail']){
                     $reg_url = $reg_url.'&detail='
                         .(is_array($_REQUEST['detail'])?json_encode($_REQUEST['detail']):$_REQUEST['detail']);

@@ -11,6 +11,7 @@
     * 
     *  mysql__getdatabases4 - get list of databases
     * 
+    *  mysql__select - base function
     *  mysql__select_assoc - returns array  key_column(first field)=>array(field=>val,....)
     *  mysql__select_assoc2 - returns array  key_column=>val_column for given table
     *  mysql__select_list - returns array of one column values
@@ -123,6 +124,7 @@
             //$mysqli->query('SET CHARACTER SET utf8mb4'); //utf8 is utf8mb3 by default
             //$mysqli->query('SET NAMES utf8mb4 COLLATE utf8mb4_0900_ai_ci');
             $mysqli->query('SET NAMES utf8mb4');
+            //$mysqli->query('SET SESSION MAX_EXECUTION_TIME=2000'); //60000 = 1 min
         }
         return true;
     }
@@ -260,6 +262,27 @@
 
         return $result;
 
+    }
+    
+    
+    function mysql__select($mysqli, $query){
+        
+        $res = null;
+        if($mysqli && $query){
+            $res = $mysqli->query($query);
+            if (!$res){
+                error_log($mysqli->errno.'****'.$mysqli->error);
+                error_log($query);
+                return null;    
+                
+/* determine our thread id */
+//$thread_id = $mysqli->thread_id;
+/* Kill connection */
+//$mysqli->kill($thread_id);                
+            }
+        }
+        
+        return $res;
     }
 
     /**

@@ -51,7 +51,9 @@
                     
                     $remoteURL_original = $remoteURL;
                     //change hsapi to hserv when master index will be v7   
-                    $remoteURL = $splittedURL[0].'hsapi/controller/sys_structure.php?db='.$match[1];
+                    $remoteURL = $splittedURL[0]
+                    .(strpos($splittedURL[0],'/h6-alpha')>0?'hserv':'hsapi')
+                    .'/controller/sys_structure.php?db='.$match[1];
 
                     if (@$_REQUEST['rectypes']) $remoteURL = $remoteURL.'&rectypes='.$_REQUEST['rectypes'];
                     if (@$_REQUEST['detailtypes']) $remoteURL = $remoteURL.'&detailtypes='.$_REQUEST['detailtypes'];

@@ -1164,7 +1164,8 @@ $mysqli->commit();
         }else{
         //2b. if remote server - call sys_strcture.php with loadRemoteURLContentWithRange
             //change hsapi to hserv when master index will be v7
-            $remoteURL = $remote_url.'hsapi/controller/sys_structure.php?mode=2&terms=all&db='.$remote_dbname;
+            $remoteURL = $remote_url.(strpos($remote_url,'/h6-alpha')>0?'hserv':'hsapi')
+                            .'/controller/sys_structure.php?mode=2&terms=all&db='.$remote_dbname;
             if(!$only_terms){
                 $remoteURL = $remoteURL.'&rectypes=all&detailtypes=all';
             }
@@ -1176,7 +1177,7 @@ $mysqli->commit();
 
                 $this->system->addError(HEURIST_ERROR, "Unable to connect Heurist Reference Index, possibly due to timeout or proxy setting<br>"
                     . $error_code . "<br>"
-                    ."URL requested: " . $database_url . "<br><br>");
+                    ."a) URL requested: " . $remoteURL . "<br><br>"); //$database_url
             }
 
             $defs = json_decode(gzdecode($defs), true);
@@ -1193,7 +1194,8 @@ $mysqli->commit();
         }
         
         //change hsapi to hserv when master index will be v7
-        $this->sourceIconURL = $remote_url.'hsapi/controller/fileGet.php?db='.$remote_dbname.'&id=';
+        $this->sourceIconURL = $remote_url.(strpos($remote_url,'/h6-alpha')>0?'hserv':'hsapi')
+                            .'/controller/fileGet.php?db='.$remote_dbname.'&id=';
         $this->source_db_name = $remote_dbname;
         
         return $defs; 
@@ -2324,7 +2326,9 @@ $mysqli->commit();
         }else{ // remote server
 
             //change hsapi to hserv when master index will be v7
-            $remoteURL = $remote_url.'hsapi/controller/sys_structure.php?db='.$remote_dbname.'&' . http_build_query(array('translations' => $this->def_translations[$def]));
+            $remoteURL = $remote_url.(strpos($remote_url,'/h6-alpha')>0?'hserv':'hsapi')
+                .'/controller/sys_structure.php?db='.$remote_dbname.'&' 
+                . http_build_query(array('translations' => $this->def_translations[$def]));
 
             $defs = loadRemoteURLContent($remoteURL);
             if(!$defs){ // unable to connect to remote server

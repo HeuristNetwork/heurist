@@ -151,11 +151,15 @@
             }
         }else if(isset($ESTC_ServerURL)){ // external server
             //change hsapi to hserv when master index will be v7
-            $base_url = $ESTC_ServerURL . '/hsapi/controller/record_lookup.php?';
+            $base_url = $ESTC_ServerURL
+                .(strpos($ESTC_ServerURL,'/h6-alpha')>0?'hserv':'hsapi')
+                .'/controller/record_lookup.php?';
 
             if(array_key_exists('action', $params) && @$params['action'] == 'import_records'){
                 
-                $base_url = $ESTC_ServerURL . '/hsapi/controller/record_lookup.php?';  //record_output
+                $base_url = $ESTC_ServerURL 
+                    .(strpos($ESTC_ServerURL,'/h6-alpha')>0?'hserv':'hsapi')
+                    .'/controller/record_lookup.php?';  //record_output
                 $params2 = array();
                 $params2['action'] = 'record_output';
                 $params2['serviceType'] = 'ESTC';
