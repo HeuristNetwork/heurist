@@ -80,7 +80,7 @@ $.widget( "heurist.selectFile", {
                                             + recordset.fld(record, 'file_name');
                            }
         
-                           if(this.options.source!='assets') {
+                           if(that.options.source!='assets') {
 
                                var html = '<div class="recordDiv" id="rd'+recID+'" recid="'+recID
                                + '" style="width:200px !important;height:50px !important"><p>'
