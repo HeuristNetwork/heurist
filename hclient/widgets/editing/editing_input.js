@@ -3167,14 +3167,14 @@ $.widget( "heurist.editing_input", {
                 {name:'newfilename', value:newfilename }], //unique temp name
     //acceptFileTypes: /(\.|\/)(gif|jpe?g|png)$/i
     //autoUpload: true,
-    multipart: (window.hWin.HAPI4.sysinfo['is_file_multipart_upload']==1),
-    maxChunkSize: 10485760, //10M
+    //multipart: (window.hWin.HAPI4.sysinfo['is_file_multipart_upload']==1),
+    //maxChunkSize: 10485760, //10M
+    //to check file size on client side
+    max_file_size: Math.min(window.hWin.HAPI4.sysinfo['max_post_size'], window.hWin.HAPI4.sysinfo['max_file_size']),
     sequentialUploads: true,
     dataType: 'json',
     pasteZone: $input_img,
     dropZone: $input_img,
-    //to check file size on client side
-    max_file_size: Math.min(window.hWin.HAPI4.sysinfo['max_post_size'], window.hWin.HAPI4.sysinfo['max_file_size']),
     // add: function (e, data) {  data.submit(); },
     submit: function (e, data) { //start upload
     
