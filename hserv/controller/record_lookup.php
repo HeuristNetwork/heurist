@@ -31,33 +31,34 @@
     require_once dirname(__FILE__).'/../dbaccess/utils_db.php';
 
     // allowed and handled services, 'serviceType' => 'service/url base'
-    $services_details = array(
+    // base url is used to reconstruct url validated request
+    $service_types = array(
         'tlcmap' => array(
-            'https://tlcmap.org/ghap/search?', 
+            'https://tlcmap.org/ghap/search?',
             'https://tlcmap.australiasoutheast.cloudapp.azure.com/ws/ghap/search?'
-        ), 
-        'geonames' => 'http://api.geonames.org/', 
+        ),
+        'geonames' => 'http://api.geonames.org/',
 
         'bnflibrary_bib' => 'https://catalogue.bnf.fr/api/SRU?',
         'bnflibrary_aut' => 'https://catalogue.bnf.fr/api/SRU?',
         'bnf_recdump' => 'https://catalogue.bnf.fr/api/SRU?',
 
         'nomisma' => array(
-            'https://nomisma.org/apis/', 
-            'https://nomisma.org/feed/?q='
-        ), 
+            'https://nomisma.org/apis/',
+            'https://nomisma.org/feed/?'
+        ),
 
         'nakala' => array(
-            'https://api.nakala.fr/search?q=', 
+            'https://api.nakala.fr/search?',
             'nakala_get_metadata'
-        ), 
-        'nakala_author' => 'https://api.nakala.fr/authors/search?q=',
+        ),
+        'nakala_author' => 'https://api.nakala.fr/authors/search?',
 
         'opentheso' => array(
             'pactols' => 'https://pactols.frantiq.fr/opentheso/openapi/v1/',
             'huma-num' => 'https://opentheso.huma-num.fr/opentheso/openapi/v1/',
             'other' => 'opentheso_get_thesauruses'
-        ), 
+        ),
 
         'ESTC' => array(
             'db' => 'ESTC_Helsinki_Bibliographic_Metadata',
@@ -65,26 +66,67 @@
         )
     );
 
+    $NUMBERED = 'number';
+    $MIXED = 'mixed';
+
+    $service_parameters = array(
+        'tlcmap' => array(
+            'name' => $MIXED,
+            'fuzzyname' => $MIXED,
+            'anps_id' => $MIXED,
+            'lga' => $MIXED,
+            'state' => $MIXED
+        ),
+
+        'geonames' => array(
+            'q' => $MIXED,
+            'country' => $MIXED,
+            'postalcode' => $MIXED,
+            'placename' => $MIXED
+        ),
+
+        'bnf' => array(
+            'query' => $MIXED,
+            'maximumRecords' => $NUMBERED
+        ),
+
+        'nomisma' => array('id' => $MIXED),
+
+        'nakala' => array(
+            'fq' => $MIXED,
+            'q' => $MIXED,
+            'size' => $NUMBERED
+        ),
+
+        'opentheso' => array(
+            'q' => $MIXED,
+            'lang' => $MIXED,
+            'group' => $MIXED
+        )
+    );
+
     $is_estc = false;
     $valid_service = false;
-    if(!empty(@$_REQUEST['serviceType']) && array_key_exists($_REQUEST['serviceType'], $services_details)){
+    $cur_type = @$_REQUEST['serviceType'];
 
-        $service_type = $_REQUEST['serviceType'];
-        $srv_details = $services_details[$service_type];
+    // check that service type and service request match
+    if(!empty($cur_type) && array_key_exists($cur_type, $service_types)){
+
+        $srv_details = $service_types[$cur_type];
 
         $url = empty(@$_REQUEST['service']) ? '' : $_REQUEST['service'];
 
-        if($service_type == 'ESTC'){
+        if($cur_type == 'ESTC'){
             $action = @$_REQUEST['action'];
             $valid_service = @$_REQUEST['db'] == $srv_details['db'] || $action == $srv_details['action'];
             $is_estc = $valid_service;
         }else if(!is_array($srv_details)){
-            $valid_service = strpos($srv_details, $url) == 0;
+            $valid_service = $srv_details == $url || strpos($url, $srv_details) === 0;
         }else if(in_array($url, $srv_details)){
             $valid_service = true;
         }else{
             foreach ($srv_details as $srv_base) {
-                if($url == $srv_base || strpos($srv_base, $url) == 0){
+                if($url == $srv_base || strpos($url, $srv_base) === 0){
                     $valid_service = true;
                     break;
                 }
@@ -102,6 +144,9 @@
 
     if(!$valid_service){
         $system->error_exit_api('The provided look up details are invalid', HEURIST_INVALID_REQUEST); //exit from script
+    }
+    if($cur_type == 'geonames' && (!isset($accessToken_GeonamesAPI) || empty($accessToken_GeonamesAPI))){
+        $system->error_exit_api('Unable to use the geonames API, API key is missing from configuration file', HEURIST_ACTION_BLOCKED);
     }
 
     $remote_data = false;
@@ -240,12 +285,13 @@
 
     $system->dbclose();
 
+    // Retrieve metadata values for use
     if(@$params['service'] == 'nakala_get_metadata' || @$params['service'] == 'opentheso_get_thesauruses'){
 
         $response = array();
-        if($service_type == 'opentheso'){
+        if($cur_type == 'opentheso'){
             $response = getOpenthesoThesauruses($system);
-        }else if($service_type == 'nakala'){
+        }else if($cur_type == 'nakala'){
             $response = getNakalaMetadata($system, @$params['type']);
         }
         $response = json_encode($response);
@@ -255,9 +301,58 @@
         exit($response);
     }
 
-    // Perform external lookup / API request
-    $url = $params['service'];
+    // validate url and query
+    $url = filter_var($params['service'], FILTER_VALIDATE_URL);
 
+    $clean_query = array();
+
+    if($url !== false && !empty($url)){
+
+        $url_parts = parse_url($url);
+        $url = '';
+
+        $cur_type = strpos($cur_type, 'bnf') !== false ? 'bnf' : $cur_type;
+        $cur_type = strpos($cur_type, 'nakala') !== false ? 'nakala' : $cur_type;
+
+        if(!empty(@$url_parts['query']) && array_key_exists($cur_type, $service_parameters)){
+
+            $url = $url_parts['scheme'] . "://" . $url_parts['host'];
+            $url = isset($url_parts['path']) ? $url . $url_parts['path'] : $url;
+            parse_str($url_parts['query'], $url_query);
+
+            foreach($service_parameters[$cur_type] as $field => $type){
+
+                if(array_key_exists($field, $url_query)){
+
+                    if($type == $NUMBERED){
+                        $clean_query[$field] = intval($url_query[$field]);
+                    }else{
+                        $clean_query[$field] = htmlspecialchars($url_query[$field], ENT_NOQUOTES);
+                    }
+                }
+            }
+            // Add default extras
+            if($cur_type == 'geonames' && !empty($clean_query)){
+                $clean_query['username'] = $accessToken_GeonamesAPI;
+            }else if($cur_type == 'bnf'){
+                $clean_query['version'] = '1.2';
+                $clean_query['operation'] = 'searchRetrieve';
+                $clean_query['recordSchema'] = 'unimarcxchange';
+            }
+
+            if(empty($clean_query)){
+                $url = '';
+            }else{
+                $url .= "?" . http_build_query($clean_query);
+            }
+        }
+    }
+
+    if($url === false || empty($url)){
+        $system->error_exit_api('Heurist was unable to process the url provided for the given external service<br>If this problem persists, please file a bug report.', HEURIST_INVALID_REQUEST);
+    }
+
+    // Perform external lookup / API request
     $remote_data = loadRemoteURLContentWithRange($url, null, true, 30);
     if($remote_data===false){
 
@@ -662,24 +757,10 @@
                                 break;
 
                             case '215': // Geographical name
+                            case '216': // Marque
+                            case '250': // ???
 
                                 if($sf_code != 'a'){ // && $sf_code != 'x'
-                                    break;
-                                }
-
-                                // Name
-                                if( array_key_exists('name', $formatted_array)){
-                                    $formatted_array['name'] .= ' ' . (string)$sf_ele[0];
-                                }else{
-                                    $formatted_array['name'] = (string)$sf_ele[0];
-                                }
-
-                                break;
-
-                            case '216': // Marque
-                            case '250': // 
-
-                                if($sf_code != 'a'){
                                     break;
                                 }
 
@@ -769,7 +850,7 @@
 
     }else if(@$params['serviceType'] == 'nakala'){ // Retrieve basic details - Citation, ID, Name(s)
 
-        $remote_data = json_decode($remote_data, TRUE);
+        $remote_data = json_decode($remote_data, true);
         if(json_last_error() == JSON_ERROR_NONE){
 
             $results = array();
@@ -865,7 +946,7 @@
         
         $def_lang = $system->user_GetPreference('layout_language', 'en');
 
-        $remote_data = json_decode($remote_data, TRUE);
+        $remote_data = json_decode($remote_data, true);
 
         $type_idx = 'https://www.w3.org/1999/02/22-rdf-syntax-ns#type';
         $trm_uri = 'https://www.w3.org/2004/02/skos/core#Concept';
@@ -947,7 +1028,7 @@
                 $data = updateOpenthesoThesauruses($system);
                 $already_updated = true;
             }else{
-                $data = json_decode($data, TRUE);
+                $data = json_decode($data, true);
             }
 
             if(json_last_error() !== JSON_ERROR_NONE || !is_array($data) || $data['last_update'] < date('Y-m-d')){
@@ -959,7 +1040,7 @@
             }
         }
 
-        if(!$data || !is_array($data) || count($data) == 0){
+        if(!$data || !is_array($data) || empty($data)){
             return array();
         }else{
             unset($data['last_update']);
@@ -968,14 +1049,14 @@
     }
     function updateOpenthesoThesauruses($system){
 
-        global $services_details;
+        global $service_types;
 
         // update OPENTHESO_thesauruses.json
         $opentheso_file = HEURIST_FILESTORE_ROOT . 'OPENTHESO_thesauruses.json';
 
         $data_rtn = array('pactols' => array(), 'huma-num' => array());
 
-        foreach ($services_details['opentheso'] as $server => $base_uri) {
+        foreach ($service_types['opentheso'] as $server => $base_uri) {
 
             if($server == 'other'){
                 continue;
@@ -988,7 +1069,7 @@
                 exit;
             }
 
-            $thesauruses = json_decode($thesauruses, TRUE);
+            $thesauruses = json_decode($thesauruses, true);
 
             if(json_last_error() !== JSON_ERROR_NONE){
                 $system->error_exit_api('An error occurred while handling a response from an Opentheso server', HEURIST_UNKNOWN_ERROR);
@@ -1019,10 +1100,9 @@
         $file_size = fileSave(json_encode($data_rtn), $opentheso_file);
         if($file_size <= 0){
             $system->error_exit_api('Cannot save Opentheso thesaurus list into local file store');
-            exit;
-        }else{
-            return $data_rtn;
         }
+
+        return $data_rtn;
     }
 
     function getNakalaMetadata($system, $type){
@@ -1047,7 +1127,7 @@
                 $data = updateNakalaMetadata($system);
                 $already_updated = true;
             }else{
-                $data = json_decode($data, TRUE);
+                $data = json_decode($data, true);
             }
 
             if(json_last_error() !== JSON_ERROR_NONE || !is_array($data) || $data['last_update'] < date('Y-m-d')){
@@ -1059,7 +1139,7 @@
             }
         }
 
-        if(!$data || !is_array($data) || count($data) == 0){
+        if(!$data || !is_array($data) || empty($data)){
             return array();
         }
 
@@ -1093,6 +1173,8 @@
         $datatypes_xml = loadRemoteURLContentWithRange('https://vocabularies.coar-repositories.org/resource_types/resource_types_for_dspace.xml', null, true, 60);
         $datatypes_xml = simplexml_load_string($datatypes_xml, null, LIBXML_PARSEHUGE);
 
+        $handled_types = array(); // type codes already added
+
         while ($page <= $totalPages) {
 
             $results = loadRemoteURLContentWithRange('https://api.nakala.fr/search?fq=scope%3Ddata&order=relevance&page='.$page.'&size=1000', null, true, 60);
@@ -1102,74 +1184,74 @@
                 exit;
             }
 
-            $results = json_decode($results, TRUE);
+            $results = json_decode($results, true);
             if(json_last_error() == JSON_ERROR_NONE){
 
-                if($results['totalResults'] > 0 && count($results['datas']) > 0){
+                if($results['totalResults'] == 0 || empty($results['datas'])){ // no more records
+                    break;
+                }
 
-                    foreach ($results['datas'] as $records) {
+                foreach ($results['datas'] as $records) {
 
-                        $handled_type = false;
-                        $handled_license = false;
-                        $handled_year = false;
-                        
-                        foreach ($records['metas'] as $metadata) {
+                    $handled_type = false;
+                    $handled_license = false;
+                    $handled_year = false;
+                    
+                    foreach ($records['metas'] as $metadata) {
 
-                            if($metadata['value'] == null){
-                                continue;
+                        if($metadata['value'] == null){
+                            continue;
+                        }
+
+                        if(strpos($metadata['propertyUri'], 'terms#created') !== false){ // Created Date
+
+                            if(strpos($metadata['value'], '-') !== false){ // YYYY-MM | YYYY-MM-DD
+                                $metadata['value'] = explode('-', $metadata['value'])[0];
                             }
 
-                            if(strpos($metadata['propertyUri'], 'terms#created') !== false){ // Created Date
+                            if(!in_array($metadata['value'], $data_rtn['years'])){
+                                $data_rtn['years'][] = $metadata['value'];
+                            }
 
-                                if(strpos($metadata['value'], '-') !== false){ // YYYY-MM | YYYY-MM-DD
-                                    $metadata['value'] = explode('-', $metadata['value'])[0];
-                                }
+                            $handled_year = true;
+                        }else if(strpos($metadata['propertyUri'], 'terms#license') !== false && !in_array($metadata['value'], $data_rtn['licenses'])){ // License
+                            $data_rtn['licenses'][] = $metadata['value'];
+                            $handled_license = true;
+                        }else if(strpos($metadata['propertyUri'], 'terms#type') !== false){ // Type
 
-                                if(!in_array($metadata['value'], $data_rtn['years'])){
-                                    $data_rtn['years'][] = $metadata['value'];
-                                }
+                            //Retrieve type name from XML object
+                            $code = explode('/', $metadata['value']);
+                            $code = $code[count($code) - 1];
+                            $label = $code;
 
-                                $handled_year = true;
-                            }else if(strpos($metadata['propertyUri'], 'terms#license') !== false && !in_array($metadata['value'], $data_rtn['licenses'])){ // License
-                                $data_rtn['licenses'][] = $metadata['value'];
-                                $handled_license = true;
-                            }else if(strpos($metadata['propertyUri'], 'terms#type') !== false){ // Type
+                            if(strpos($code, 'c_') === false){
+                                $code = $metadata['value'];
+                            }
 
-                                //Retrieve type name from XML object
-                                $code = explode('/', $metadata['value']);
-                                $code = $code[count($code) - 1];
-                                $label = $code;
+                            if(!in_array($code, $handled_types)){
 
-                                if(strpos($code, 'c_') === false){
-                                    $code = $metadata['value'];
-                                }
+                                if(strpos($code, 'c_') !== false){
 
-                                if(!array_key_exists($code, $data_rtn['types'])){
-
-                                    if(strpos($code, 'c_') !== false){
-
-                                        $nodes = $datatypes_xml->xpath("//node[@id='". $code ."']");
-                                        if(is_array($nodes) && count($nodes) > 0){
-                                            $label = $nodes[0]->attributes()->label;
-                                            $label = ucfirst($label);
-                                        }else{
-                                            $label .= ' (deprecated type)';
-                                        }
+                                    $nodes = $datatypes_xml->xpath("//node[@id='". $code ."']");
+                                    if(is_array($nodes) && count($nodes) > 0){
+                                        $label = $nodes[0]->attributes()->label;
+                                        $label = ucfirst($label);
+                                    }else{
+                                        $label .= ' (deprecated type)';
                                     }
-    
-                                    $data_rtn['types'][$code] = $label;
                                 }
 
-                                $handled_type = true;
+                                $data_rtn['types'][] = array($label, $code);
+                                $handled_types[] = $code;
                             }
 
-                            if($handled_year && $handled_type && $handled_license){ // handled all necessary metadata for current record
-                                break;
-                            }
+                            $handled_type = true;
+                        }
+
+                        if($handled_year && $handled_type && $handled_license){ // handled all necessary metadata for current record
+                            break;
                         }
                     }
-                }else{ // no more records
-                    break;
                 }
             }else{
                 $system->error_exit_api('Unable to retrieve metadata values from Nakala, receieved a response not in a JSON format');
@@ -1179,11 +1261,12 @@
             $page ++;
         }
 
-        if(count($data_rtn['years']) > 0){ // sort years
+        // Sort values
+        if(count($data_rtn['years']) > 0){
             sort($data_rtn['years']);
         }
         if(count($data_rtn['types']) > 0){
-            sort($data_rtn['types']);
+            array_multisort($data_rtn['types']);
         }
         if(count($data_rtn['licenses']) > 0){
             sort($data_rtn['licenses']);

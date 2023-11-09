@@ -123,8 +123,8 @@ $.widget( "heurist.lookupNakala", $.heurist.recordAction, {
 
             let $select = that.element.find('#inpt_type');
             if(data.hasOwnProperty('types')){
-                $.each(data['types'], (code, label) => {
-                    window.hWin.HEURIST4.ui.addoption($select[0], code, label);
+                $.each(data['types'], (idx, type) => {
+                    window.hWin.HEURIST4.ui.addoption($select[0], type[1], type[0]);
                 });
                 window.hWin.HEURIST4.ui.initHSelect($select, false);
             }else{

@@ -692,6 +692,10 @@ if(!($is_map_popup || $without_header)){
                     $('.hiddenField').show();
                 }
 
+                if($('.hiddenField').length == 0){ // hide hidden field toggler
+                    $('#toggleHidden').parents('.detailRow').remove();
+                }
+
                 window.hWin.HAPI4.save_pref('recordData_HiddenFields', show_hidden_fields);
             }
             
@@ -1342,7 +1346,8 @@ function print_public_details($bib) {
         if(dtl_Geo is not null, ST_asWKT(dtl_Geo), null) as dtl_Geo,
         if(dtl_Geo is not null, ST_asWKT(ST_Envelope(dtl_Geo)), null) as bd_geo_envelope,
         dtl_HideFromPublic,
-        rst_NonOwnerVisibility
+        rst_NonOwnerVisibility,
+        rst_RequirementType
         from recDetails
         left join defDetailTypes on dty_ID = dtl_DetailTypeID
         left join defRecStructure rdr on rdr.rst_DetailTypeID = dtl_DetailTypeID
@@ -1366,7 +1371,7 @@ function print_public_details($bib) {
     }
 
     if($is_production || $is_map_popup){ // hide hidden fields in publication and map popups
-        $detail_visibility_conditions .= ' AND rst_NonOwnerVisibility != "hidden"';
+        $detail_visibility_conditions .= ' AND rst_NonOwnerVisibility != "hidden" AND rst_RequirementType != "forbidden"';
     }
         
     
@@ -1936,7 +1941,9 @@ function print_public_details($bib) {
             }
 
             // open new detail row
-            $row_classes = 'detailRow fieldRow' . ($bd['rst_NonOwnerVisibility'] == 'hidden' ? ' hiddenField' : '');
+            $row_classes = 'detailRow fieldRow' . ($bd['rst_NonOwnerVisibility'] == 'hidden' || $bd['rst_RequirementType'] == 'forbidden' ? 
+                                                    ' hiddenField' : '');
+
             print '<div class="'. $row_classes .'" '. $ele_id .' style="border:none 1px #00ff00;'   //width:100%;
                     .($is_map_popup && !in_array($bd['dty_ID'], $always_visible_dt)?'display:none;':'')
                     .($is_map_popup?'':'width:100%;')

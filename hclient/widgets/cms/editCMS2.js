@@ -489,12 +489,7 @@ function editCMS2(website_document){
             ];            
             
             var sMsg = '"'+ _editor_panel.find('.treePageHeader > h3').text() +'" '+window.hWin.HR('page has been modified');
-            $dlg = window.hWin.HEURIST4.msg.showMsgDlg(sMsg, _buttons, {title:window.hWin.HR('Page changed')});
-
-            // Move dialog to document top and reset position
-            $dlg.parent().appendTo('body');
-            let pos = $dlg.dialog('option', 'position'); 
-            $dlg.dialog('option', 'position', pos);
+            $dlg = window.hWin.HEURIST4.msg.showMsgDlg(sMsg, _buttons, {title:window.hWin.HR('Page changed')}, {appendTo: 'body'});
 
             return true;     
         }else{
@@ -853,7 +848,7 @@ var sMsg = '<p>Heurist\'s CMS editor has been upgraded to a new system which is 
 
                         $dlg = window.hWin.HEURIST4.msg.showMsgDlg(msg, btns, 
                             {title: 'Adding caption to media', yes: 'Add caption', no: 'No caption'}, 
-                            {default_palette_class: 'ui-heurist-populate'}
+                            { default_palette_class: 'ui-heurist-populate', appendTo: 'body' }
                         );
                     }
 

@@ -8,10 +8,34 @@
 
 <i><pre>
      Please use this as an example from which to create your own reports, by copying this template.<br/>
-     To do this, choose <b>Edit</b> (first button at top right), then click the <b>Save As</b> button.<br/>
+     To do this, choose <b>Edit</b> (first button above the report), then click the <b>Save As</b> button.<br/>
+     You can also create a new report template with the <b>Create a new template</b> icon (second button)<br/>
      As you edit, hit the <b>Test</b> button repeatedly to see how your changes are working.<br/>
      Ctrl-Z will undo most recent change - can be repeated to backtrack through changes.<br/>
 </pre></i>
+
+{* -----------------------------------------------------------------------------------------------------------*}
+{* This section shows the counts of each record type selected. *}
+
+<b>Total records:</b> {$heurist->getSysInfo('db_total_records')}
+<br><br>
+
+{$rty_Counts = $heurist->getSysInfo('db_rty_counts')}
+<table>
+        <tr>
+             <td><b>Entity type</b></td>
+             <td>&nbsp;&nbsp;</td>
+             <td><b>Count</b></td>
+        </tr>
+        {foreach $rty_Counts as $rty_ID=>$rty_Count}
+                     <tr>
+               <td>{$heurist->rty_Name($rty_ID)} </td>
+               <td></td>
+               <td>{$rty_Count}</td>
+          </tr>
+       {/foreach}
+</table>
+{* -----------------------------------------------------------------------------------------------------------*}
 
 <hr>
 
