@@ -772,19 +772,19 @@ $.widget( "heurist.search_faceted", {
                 }
 
                 if(check_fields){
+
                     let codes = facets[facet_index]['code'].split(':');
                     let rtyid = codes[codes.length-2];
                     let dtyid = codes[codes.length-1];
-                    if(rtyid && dtyid && !$Db.rst(rtyid, dtyid)){
+
+                    rtyid = rtyid.indexOf(',') >= 0 ? rtyid.split(',')[0] : rtyid; // take first rectype id
+
+                    if(rtyid && dtyid && Number.isInteger(+dtyid) && !$Db.rst(rtyid, dtyid)){
                         let fld_name = !window.hWin.HEURIST4.util.isempty(facets['title']) ? facets['title'] : null;//$Db.dty(dtyid, 'dty_Name');
                         invalid_fields.push(fld_name);
                     }
                 }
-                
-                //facets[facet_index].isfacet = facets[facet_index].isfacet || window.hWin.HEURIST4.util.isnull(facets[facet_index].isfacet);
             }
-
-console.log('check field ',this.options.is_publication,check_fields);
             
             if(Object.keys(invalid_fields).length > 0 && check_fields){
 
