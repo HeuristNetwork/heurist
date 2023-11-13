@@ -1602,8 +1602,9 @@ function browseRecords(_editing_input, $input){
                 }else{
                     that._off($(that.selObj), 'change');    
                 }
-                
-                let org_scroll = $inputdiv.parents('.editForm')[0].scrollTop;
+
+                let org_scroll = $inputdiv.parents('.editForm').length > 0 ?
+                                    $inputdiv.parents('.editForm')[0].scrollTop : null;
                 
                 var $inpt_ele = $inputdiv.find('.sel_link2'); //button
                 var _ref_id = $input.attr('id');
@@ -1620,7 +1621,9 @@ function browseRecords(_editing_input, $input){
                 var prn = that.selObj.hSelect('menuWidget').parent('div.ui-selectmenu-menu');
                 if(prn.length>0){
                     prn.css({'position':'fixed'}); //to show above all 
-                    prn.parents('.editForm').scrollTop(org_scroll); // fix scroll
+                    if(org_scroll !== null){ // fix scroll
+                        prn.parents('.editForm').scrollTop(org_scroll);
+                    }
                 }
                 that.selObj.hSelect('menuWidget')
                         .position({my: "left top", at: "left bottom", of: $inpt_ele});
@@ -1895,7 +1898,8 @@ function browseTerms(_editing_input, $input, value){
             if(event) event.preventDefault();
         }
 
-        let org_scroll = $inputdiv.parents('.editForm')[0].scrollTop;
+        let org_scroll = $inputdiv.parents('.editForm').length > 0 ?
+                    $inputdiv.parents('.editForm')[0].scrollTop : null;
         
         //recreate dropdown if not inited
         if(!that.selObj || !that.selObj.hSelect('instance')){
@@ -1921,7 +1925,9 @@ function browseTerms(_editing_input, $input, value){
         var prn = that.selObj.hSelect('menuWidget').parent('div.ui-selectmenu-menu');
         if(prn.length>0){
             prn.css({'position':'fixed'}); //to show above all 
-            prn.parents('.editForm').scrollTop(org_scroll); // fix scroll
+            if(org_scroll !== null){ // fix scroll
+                prn.parents('.editForm').scrollTop(org_scroll);
+            }
         }
         that.selObj.hSelect('menuWidget')
             .position({my: "left top", at: "left bottom", of: menu_location});
