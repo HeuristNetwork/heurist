@@ -71,7 +71,8 @@ foreach($databases as $db){
         }
 
         if(!empty($query_str)){ // simple query, convert to object
-            $query_obj = parse_str(substr($query_str,1), $query_str);
+            $query_str = strpos($query_str, '?') !== false ? substr($query_str, 1) : $query_str;
+            parse_str($query_str, $query_obj);
         }
 
         if(!empty($owners) && !in_array(intval($svs_Details['svs_UGrpID']), $owners)){
