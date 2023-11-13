@@ -889,6 +889,7 @@ $.widget( "heurist.mapping", {
         
         this._updatePanels();
         
+        /*
         if(layer_options){
             if(layer_options['maxZoom']>0)
             {
@@ -899,6 +900,7 @@ $.widget( "heurist.mapping", {
                 this.defineMinZoom(new_layer._leaflet_id, layer_options['minZoom']); //from tile layer
             }
         }
+        */
 
         return new_layer._leaflet_id;
     }, //addTileLayer
@@ -1488,10 +1490,11 @@ $.widget( "heurist.mapping", {
     {            
             if(this.is_crs_simple) return;
     
-        
             var idx = this.available_maxzooms.findIndex(arr => arr[0] == layer_name); //find restrictions for basemap
+
+            layer_maxZoom = parseInt(layer_maxZoom);
             
-            if(layer_maxZoom<0){ //remove this layer
+            if(!(layer_maxZoom>=0)){ //remove this layer
                 if(idx != -1){
                     this.available_maxzooms.splice(idx, 1);
                 }else{
@@ -1514,7 +1517,7 @@ $.widget( "heurist.mapping", {
                 //take first - lowest restriction
                 this.nativemap.setMaxZoom(this.available_maxzooms[0][1]);
             }else{
-                this.nativemap.setMaxZoom(18);
+                this.nativemap.setMaxZoom(20);
             }
     },
     
@@ -1525,9 +1528,12 @@ $.widget( "heurist.mapping", {
     //
     defineMinZoom: function(layer_name, layer_minZoom)
     {                
+
             var idx = this.available_minzooms.findIndex(arr => arr[0] == layer_name); //find restrictions for basemap
             
-            if(layer_minZoom<0){ //remove this layer
+            layer_minZoom = parseInt(layer_minZoom);
+            
+            if(!(layer_minZoom>=0)){ //remove this layer
                 if(idx != -1){
                     this.available_minzooms.splice(idx, 1);
                 }else{
@@ -1549,6 +1555,7 @@ $.widget( "heurist.mapping", {
                 this.available_minzooms.sort((a, b) => b[1] - a[1]);
                 //take first - max restriction
                 this.nativemap.setMinZoom(this.available_minzooms[0][1]);
+                
             }else{
                 this.nativemap.setMinZoom(0);
             }

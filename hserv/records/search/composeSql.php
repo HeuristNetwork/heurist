@@ -722,9 +722,15 @@ class HQuery {
                 case 'set': case 'fixed': //no sort - returns as is
                 
                         if($this->fixed_sortorder){
-                            $sort_fields[] = 'r0.rec_ID';
-                            $sort_expr[] = 'FIND_IN_SET(r0.rec_ID, \''.$this->fixed_sortorder.'\')';
+                            $cs_ids = $this->fixed_sortorder;
+                        }else{
+                            $cs_ids = getCommaSepIds($dty_ID);
                         }
+                        if($cs_ids){
+                            $sort_fields[] = 'r0.rec_ID';
+                            $sort_expr[] = 'FIND_IN_SET(r0.rec_ID, \''.$cs_ids.'\')';
+                        }
+                        
                         break;
                 case 'r': case 'rating':
                     if ($this->search_domain == BOOKMARK) {

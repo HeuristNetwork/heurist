@@ -155,10 +155,12 @@ function hMapDocument( _options )
         if(_isDocumentLoaded(mapdoc_id)){
             var resdata = map_documents_content[mapdoc_id];
             var idx, records = resdata.getRecords();
-            for(idx in records){
+            var order2 = resdata.getOrder();
+            for(idx in order2){
                 if(idx)
                 {
-                    var record = records[idx];
+                    var recid = order2[idx];
+                    var record = records[recid];
                     
                     if(resdata.fld(record, 'rec_RecTypeID')==RT_MAP_LAYER
                         || resdata.fld(record, 'rec_RecTypeID')==RT_TLCMAP_DATASET)
@@ -169,7 +171,7 @@ function hMapDocument( _options )
                         }else{
                             recName = resdata.fld(record, 'rec_Title');
                         }
-                        
+
                         var $res = {};  
                         $res['key'] = recID;
                         $res['title'] = '<span style="'+(mapdoc_id==0?'font-size:1.1em':'font-style:italic;')+'">' + recName + '</span>';
@@ -253,7 +255,7 @@ function hMapDocument( _options )
     // invoked from _openMapDocument and call the same method when data are recieved from server side
     // deferred object is required for treeview, it returns treeview data
     //    
-    function _loadMapDocumentContent(mapdoc_id, deferred){
+    function _loadMapDocumentContent(mapdoc_id, deferred, order){
 
 //{"any":[{"ids":mapdoc_id},{"all":{"t":RT_MAP_LAYER,"linkedfrom":mapdoc_id}}]},    //mapdoc and layer linked to given mapdoc     
 //{"t":RT_MAP_LAYER,"linkedfrom":mapdoc_id},  //layers linked to given mapdoc
@@ -273,6 +275,34 @@ function hMapDocument( _options )
                     request['q'] = {"t":RT_MAP_LAYER+','+RT_TLCMAP_DATASET,"linkedfrom":mapdoc_id};
                 }else{
                     request['q'] = {"t":RT_MAP_LAYER,"linkedfrom":mapdoc_id};  //layers linked to given mapdoc
+                    
+                    if(order){
+                        
+                        if($.isArray(order)){
+                            request['q']['sortby'] = 'set:'+order.join(',');
+                        }
+                    
+                    }else if(DT_MAP_LAYER>0){
+                        var request2 = {
+                                    w: 'a',
+                                    detail: DT_MAP_LAYER,
+                                    q:{'ids':mapdoc_id}
+                        };
+                        window.hWin.HAPI4.RecordMgr.search(request2,
+                            function(response){
+              
+                                var order = 1;                  
+                                if(response.status == window.hWin.ResponseStatus.OK){
+                                    var resdata = new hRecordSet(response.data);
+                                    var rec = resdata.getFirstRecord();
+                                    order = resdata.values(rec, DT_MAP_LAYER);
+                                    if(!order) order = 1;
+                                              
+                                }
+                                _loadMapDocumentContent(mapdoc_id, deferred, order);
+                            });
+                        return;
+                    }
                 }
             }
             if(RT_TLCMAP_DATASET>0){
@@ -286,7 +316,6 @@ function hMapDocument( _options )
                     
                     if(response.status == window.hWin.ResponseStatus.OK){
                         var resdata = new hRecordSet(response.data);
-                        
                         map_documents_content[mapdoc_id] = resdata;
 
                         _openMapDocument( mapdoc_id, deferred);
