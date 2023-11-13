@@ -60,7 +60,7 @@ function editCMS_Manager( options ){
     }else{
         //check field
         let is_missed = false;
-        if(DT_LANGUAGES>0 && !$Db.rst(RT_CMS_HOME,DT_LANGUAGES)){
+        if( !(DT_LANGUAGES>0) || !$Db.rst(RT_CMS_HOME,DT_LANGUAGES)){
             is_missed = true;
         }
         

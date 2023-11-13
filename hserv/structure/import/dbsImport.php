@@ -494,6 +494,7 @@ class DbsImport {
 
         // Correct inverse term values
         if(!empty($this->inverse_term_pairs) && !$this->_correctInverseIds()){
+            $this->system->addError(HEURIST_ERROR, 'Can not import/set inverse terms');
             $mysqli->rollback();
             $mysqli->close();
             return false;
@@ -2387,6 +2388,9 @@ $mysqli->commit();
 
     }
 
+    //
+    //
+    //
     private function _correctInverseIds(){
 
         if(empty($this->inverse_term_pairs)){
@@ -2422,6 +2426,8 @@ $mysqli->commit();
             $this->targetTerms->addNewTerm($inverse_id, $inverse_term); //add in memory
 
         }
+        
+        return true;
     }
 }
 ?>
