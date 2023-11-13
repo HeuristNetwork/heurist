@@ -2269,8 +2269,8 @@ public methods
                     $meta_values['title'] = array(
                         'value' => $file_dtl[0],
                         'lang' => null,
-                        'typeUri' => 'https://www.w3.org/2001/XMLSchema#string',
-                        'propertyUri' => 'https://nakala.fr/terms#title'
+                        'typeUri' => 'http://www.w3.org/2001/XMLSchema#string',
+                        'propertyUri' => 'http://nakala.fr/terms#title'
                     );
 
                     $file_type = $file_dtl[2];
@@ -2284,37 +2284,37 @@ public methods
                      * other <=> anything else
                      */
                     if(strpos($file_type, 'text') !== false || strpos($file_type, 'pdf') !== false){
-                        $file_type = 'https://purl.org/coar/resource_type/c_1843';
+                        $file_type = 'http://purl.org/coar/resource_type/c_1843';
                     }else if(strpos($file_type, 'sound') !== false || strpos($file_type, 'audio') !== false){
-                        $file_type = 'https://purl.org/coar/resource_type/c_18cc';
+                        $file_type = 'http://purl.org/coar/resource_type/c_18cc';
                     }else if(strpos($file_type, 'image') !== false){
-                        $file_type = 'https://purl.org/coar/resource_type/c_c513';
+                        $file_type = 'http://purl.org/coar/resource_type/c_c513';
                     }else if(strpos($file_type, 'video') !== false){
-                        $file_type = 'https://purl.org/coar/resource_type/c_12ce';
+                        $file_type = 'http://purl.org/coar/resource_type/c_12ce';
                     }else{ // other
-                        $file_type = 'https://purl.org/coar/resource_type/c_1843';
+                        $file_type = 'http://purl.org/coar/resource_type/c_1843';
                     }
                     $meta_values['type'] = array(
                         'value' => $file_type,
                         'lang' => null,
-                        'typeUri' => 'https://www.w3.org/2001/XMLSchema#anyURI',
-                        'propertyUri' => 'https://nakala.fr/terms#type'
+                        'typeUri' => 'http://www.w3.org/2001/XMLSchema#anyURI',
+                        'propertyUri' => 'http://nakala.fr/terms#type'
                     );
 
                     // Current Heurist user
                     $meta_values['alt_creator'] = array(
                         'value' => $file_dtl[4],
                         'lang' => null,
-                        'typeUri' => 'https://www.w3.org/2001/XMLSchema#string',
-                        'propertyUri' => 'https://purl.org/dc/terms/creator'
+                        'typeUri' => 'http://www.w3.org/2001/XMLSchema#string',
+                        'propertyUri' => 'http://purl.org/dc/terms/creator'
                     );
 
                     // ulf_Added
                     $meta_values['created'] = array(
                         'value' => $file_dtl[5],//date('Y-m-d', $file_dtl[5]),
                         'lang' => null,
-                        'typeUri' => 'https://www.w3.org/2001/XMLSchema#string',
-                        'propertyUri' => 'https://nakala.fr/terms#created'
+                        'typeUri' => 'http://www.w3.org/2001/XMLSchema#string',
+                        'propertyUri' => 'http://nakala.fr/terms#created'
                     );
 
                     $rtn = uploadFileToNakala($this->system, array('api_key' => $api_key, 'file' => $file, 'meta' => $meta_values, 'status' => 'published')); // pending | published
