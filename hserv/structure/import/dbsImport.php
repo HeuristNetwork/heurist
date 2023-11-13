@@ -1164,9 +1164,9 @@ $mysqli->commit();
           $defs["terms"] = dbs_GetTerms($system2);
         }else{
         //2b. if remote server - call sys_strcture.php with loadRemoteURLContentWithRange
-            //change hsapi to hserv when master index will be v7
-            $remoteURL = $remote_url.(strpos($remote_url,'/h6-alpha')>0?'hserv':'hsapi')
-                            .'/controller/sys_structure.php?mode=2&terms=all&db='.$remote_dbname;
+            //change hsapi to hserv when master index will be v6.5
+            $remoteURL = $remote_url
+                            .'hserv/controller/sys_structure.php?mode=2&terms=all&db='.$remote_dbname;
             if(!$only_terms){
                 $remoteURL = $remoteURL.'&rectypes=all&detailtypes=all';
             }
@@ -1194,9 +1194,9 @@ $mysqli->commit();
             return false;
         }
         
-        //change hsapi to hserv when master index will be v7
-        $this->sourceIconURL = $remote_url.(strpos($remote_url,'/h6-alpha')>0?'hserv':'hsapi')
-                            .'/controller/fileGet.php?db='.$remote_dbname.'&id=';
+        //change hsapi to hserv when master index will be v6.5
+        $this->sourceIconURL = $remote_url
+                            .'hserv/controller/fileGet.php?db='.$remote_dbname.'&id=';
         $this->source_db_name = $remote_dbname;
         
         return $defs; 
@@ -2326,9 +2326,9 @@ $mysqli->commit();
             $translations = dbs_GetTranslations($system2, $this->def_translations[$def]);
         }else{ // remote server
 
-            //change hsapi to hserv when master index will be v7
-            $remoteURL = $remote_url.(strpos($remote_url,'/h6-alpha')>0?'hserv':'hsapi')
-                .'/controller/sys_structure.php?db='.$remote_dbname.'&' 
+            //change hsapi to hserv when master index will be v6.5
+            $remoteURL = $remote_url
+                .'hserv/controller/sys_structure.php?db='.$remote_dbname.'&' 
                 . http_build_query(array('translations' => $this->def_translations[$def]));
 
             $defs = loadRemoteURLContent($remoteURL);

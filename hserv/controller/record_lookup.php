@@ -195,16 +195,14 @@
                 $response = $is_allowed ? $system->getError() : array('status' => HEURIST_REQUEST_DENIED, 'message' => $def_err_msg);
             }
         }else if(isset($ESTC_ServerURL)){ // external server
-            //change hsapi to hserv when master index will be v7
+            //change hsapi to hserv when master index will be v6.5
             $base_url = $ESTC_ServerURL
-                .(strpos($ESTC_ServerURL,'/h6-alpha')>0?'hserv':'hsapi')
-                .'/controller/record_lookup.php?';
+                .'hserv/controller/record_lookup.php?';
 
             if(array_key_exists('action', $params) && @$params['action'] == 'import_records'){
                 
                 $base_url = $ESTC_ServerURL 
-                    .(strpos($ESTC_ServerURL,'/h6-alpha')>0?'hserv':'hsapi')
-                    .'/controller/record_lookup.php?';  //record_output
+                    .'hserv/controller/record_lookup.php?';  //record_output
                 $params2 = array();
                 $params2['action'] = 'record_output';
                 $params2['serviceType'] = 'ESTC';
