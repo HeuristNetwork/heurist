@@ -185,12 +185,21 @@ if(!$error){
                     }
                     
                     $is_download = (@$_REQUEST['download']==1); 
-                    
-                    //if($_SERVER["SERVER_NAME"]=='127.0.0.1' &&  @$_REQUEST['fancybox']==1 
+
                     if(!$is_download && isset($allowWebAccessUploadedFiles) && $allowWebAccessUploadedFiles
                                         && strpos($fileinfo['fullPath'],'file_uploads/')===0){
+
                         //show in viewer directly
                         $direct_url = HEURIST_FILESTORE_URL.$fileinfo['fullPath'];
+
+                        if(@$_REQUEST['fullres'] === 0 || @$_REQUEST['fullres'] === '0'){ // get web cached version
+
+                            $org_url = $direct_url;
+
+                            $cache_url = getWebImageCache($system, $fileid, true);
+                            $direct_url = is_array($cache_url) && !empty($cache_url) ? $cache_url[0] : $org_url;
+                        }
+
                         header('Location: '.$direct_url);
                         
                     }else if(!$is_download 
