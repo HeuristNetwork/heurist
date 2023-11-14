@@ -53,7 +53,29 @@ if($layout_theme==null || $layout_theme=='' || $layout_theme=="heurist" || $layo
 <link rel="stylesheet" type="text/css" href="<?php echo PDIR;?>h4styles.css" />
 <?php 
     $lt = @$_REQUEST['ll'];
-    if(!($lt=='H5Default' || $lt=='Beyond1914' ||  $lt=='UAdelaide')){?>
+    if(!($lt=='H5Default' || $lt=='Beyond1914' ||  $lt=='UAdelaide')){
+
+//special webfont for database
+$font_styles = '';
+$webfonts = $system->getDatabaseSetting('Webfonts');
+if(is_array($webfonts) && count($webfonts)>0){
+    foreach($webfonts as $font_family => $src){
+        $src = str_replace("url('settings/", "url('".HEURIST_FILESTORE_URL.'settings/',$src);
+        $font_styles = $font_styles . ' @font-face {font-family:"'.$font_family.'";src:'.$src.';} ';    
+        $font_families[] = $font_family;
+    }
+}
+  
+if(!empty($font_styles)){ // add extra font-faces
+    echo "<style> $font_styles </style>";
+    
+    if(count($font_families)>0){
+        $font_families[] = 'sans-serif';
+        echo '<style>body,.ui-widget,.ui-widget input,.ui-widget textarea,.ui-widget select{font-family: '
+            .implode(',',$font_families).'}</style>';
+    }
+}
+?>
 <link rel="stylesheet" type="text/css" href="<?php echo PDIR;?>h6styles.css" />
 <?php } ?>
 <!-- Heurist Color Themes -->

@@ -70,7 +70,7 @@ class System {
 	
     private $version_release = null;
 
-    private $database_settings = array('TinyMCE formats' => 'text_styles.json');
+    private $database_settings = array('TinyMCE formats' => 'text_styles.json', 'Webfonts' => 'webfonts.json');
     
     /*
     

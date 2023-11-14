@@ -115,6 +115,7 @@ $already_linked_ids = array();
 $group_details = array();
 
 $font_styles = '';
+$font_families = array();
 
 $formats = $system->getDatabaseSetting('TinyMCE formats');
 
@@ -136,6 +137,16 @@ if(is_array($formats) && array_key_exists('formats', $formats)){
         $font_styles .= "} ";
     }
 }
+
+$webfonts = $system->getDatabaseSetting('Webfonts');
+if(is_array($webfonts) && count($webfonts)>0){
+    foreach($webfonts as $font_family => $src){
+        $src = str_replace("url('settings/", "url('".HEURIST_FILESTORE_URL.'settings/',$src);
+        $font_styles = $font_styles . ' @font-face {font-family:"'.$font_family.'";src:'.$src.';} ';    
+        $font_families[] = $font_family;
+    }
+}
+
 
 // if we get a record id then see if there is a personal bookmark for it.
 if ($rec_id>0 && !@$_REQUEST['bkmk_id']) 
@@ -886,6 +897,11 @@ else if(!$is_map_popup){
 
 if(!empty($font_styles)){ // add extra format styles from TinyMCE insertion
     echo "<style> $font_styles </style>";
+    
+    if(count($font_families)>0){
+        $font_families[] = 'sans-serif';
+        echo '<style>body{font-family: '.implode(',',$font_families).'}</style>';
+    }
 }
 
 if ($bkm_ID>0 || $rec_id>0) {
