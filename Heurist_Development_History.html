@@ -17,96 +17,234 @@
 <body>
 <h1>Heurist development history</h1>
 This page contains an ordered history of the main changes implemented in the Heurist software ( <a href="https://HeuristNetwork.org" target="_blank" rel="noopener">HeuristNetwork.org</a> ) since 2018. Note that bug fixes and minor layout changes are not included here and the style is somewhat telegraphic. We aim to update the list with recent changes approximately twice a year. For additional information see the commits in gitHub (if you dare). We just passed 10,000 commits (as of beginning Nov 2023).</span></p>
-<p><span style="font-size:9pt"><span style="font-family:Arial,sans-serif"><span style="color:#000000"><strong>May 2023</strong></span></span></span></p>
 
+
+<p><strong>December 2023</strong></p>
 <ul>
-    <li style="list-style-type:disc"><span style="font-size:9pt"><span style="font-family:Arial,sans-serif"><span style="color:#000000">Improve facet search cosmetics particularly on websites</span></span></span></li>
-    <li style="list-style-type:disc"><span style="font-size:9pt"><span style="font-family:Arial,sans-serif"><span style="color:#000000">option for login button on all website pages</span></span></span></li>
-    <li style="list-style-type:disc"><span style="font-size:9pt"><span style="font-family:Arial,sans-serif"><span style="color:#000000">optional auto creation of digital media records on multi-file upload</span></span></span></li>
-    <li style="list-style-type:disc"><span style="font-size:9pt"><span style="font-family:Arial,sans-serif"><span style="color:#000000">create indexable html pages for all databases run from cron job</span></span></span></li>
-    <li style="list-style-type:disc"><span style="font-size:9pt"><span style="font-family:Arial,sans-serif"><span style="color:#000000">add filter by field counts (fc) to filter builder and json search</span></span></span></li>
-    <li style="list-style-type:disc"><span style="font-size:9pt"><span style="font-family:Arial,sans-serif"><span style="color:#000000">add database sorting to bulk mailer</span></span></span></li>
-    <li style="list-style-type:disc"><span style="font-size:9pt"><span style="font-family:Arial,sans-serif"><span style="color:#000000">add login link to warning about hidden websites</span></span></span></li>
-    <li style="list-style-type:disc"><span style="font-size:9pt"><span style="font-family:Arial,sans-serif"><span style="color:#000000">hide record content view switch and add automatic record content view on blog pages</span></span></span></li>
-    <li style="list-style-type:disc"><span style="font-size:9pt"><span style="font-family:Arial,sans-serif"><span style="color:#000000">remove delete unused files option because not recognising images embedded in texts</span></span></span></li>
-    <li style="list-style-type:disc"><span style="font-size:9pt"><span style="font-family:Arial,sans-serif"><span style="color:#000000">ability to allow or deny record creation and deletion per user, default to selected records rather than resultset for dangerous actions</span></span></span></li>
-    <li style="list-style-type:disc"><span style="font-size:9pt"><span style="font-family:Arial,sans-serif"><span style="color:#000000">new GeoJSon-T complex/fuzzy date storage format to replace old string format</span></span></span></li>
-    <li style="list-style-type:disc"><span style="font-size:9pt"><span style="font-family:Arial,sans-serif"><span style="color:#000000">query dates including fuzzy dates through special index table built by trigger on record save</span></span></span></li>
-    <li style="list-style-type:disc"><span style="font-size:9pt"><span style="font-family:Arial,sans-serif"><span style="color:#000000">standard search on dates based on index</span></span></span></li>
-    <li style="list-style-type:disc"><span style="font-size:9pt"><span style="font-family:Arial,sans-serif"><span style="color:#000000">interpret date string entered eg. 1850-1865 directly into complex/fuzzy date where possible</span></span></span></li>
-    <li style="list-style-type:disc"><span style="font-size:9pt"><span style="font-family:Arial,sans-serif"><span style="color:#000000">select date fields for use on the timeline as we do with geo fields on the map</span></span></span></li>
-    <li style="list-style-type:disc"><span style="font-size:9pt"><span style="font-family:Arial,sans-serif"><span style="color:#000000">import complex dates from a Heurist export file</span></span></span></li>
-    <li style="list-style-type:disc"><span style="font-size:9pt"><span style="font-family:Arial,sans-serif"><span style="color:#000000">human readable display of new date format on rollover</span></span></span></li>
-    <li style="list-style-type:disc"><span style="font-size:9pt"><span style="font-family:Arial,sans-serif"><span style="color:#000000">batch convert dates from old to new format db version 16</span></span></span></li>
-    <li style="list-style-type:disc"><span style="font-size:9pt"><span style="font-family:Arial,sans-serif"><span style="color:#000000">improved website header load order,&nbsp;</span></span></span></li>
+    <li style="list-style-type:disc">UPDATED as of 14 November 2023</li>
 </ul>
 
-<p><span style="font-size:9pt"><span style="font-family:Arial,sans-serif"><span style="color:#000000"><strong>April 2023</strong></span></span></span></p>
 
+
+<p><strong>November 2023</strong></p>
 <ul>
-    <li style="list-style-type:disc"><span style="font-size:9pt"><span style="font-family:Arial,sans-serif"><span style="color:#000000">Result lsit custom class based on value to allow referencing, add URL check to daily cronjob script</span></span></span></li>
-    <li style="list-style-type:disc"><span style="font-size:9pt"><span style="font-family:Arial,sans-serif"><span style="color:#000000">update defTranslations table to handle description and longer values</span></span></span></li>
-    <li style="list-style-type:disc"><span style="font-size:9pt"><span style="font-family:Arial,sans-serif"><span style="color:#000000">add translation to term definition</span></span></span></li>
-    <li style="list-style-type:disc"><span style="font-size:9pt"><span style="font-family:Arial,sans-serif"><span style="color:#000000">allow searching on a specified language</span></span></span></li>
-    <li style="list-style-type:disc"><span style="font-size:9pt"><span style="font-family:Arial,sans-serif"><span style="color:#000000">allow standard search on code</span></span></span></li>
-    <li style="list-style-type:disc"><span style="font-size:9pt"><span style="font-family:Arial,sans-serif"><span style="color:#000000">description and concept ID as well as labels for term fields</span></span></span></li>
-    <li style="list-style-type:disc"><span style="font-size:9pt"><span style="font-family:Arial,sans-serif"><span style="color:#000000">SAML2 identities&nbsp;</span></span></span></li>
-    <li style="list-style-type:disc"><span style="font-size:9pt"><span style="font-family:Arial,sans-serif"><span style="color:#000000">slightly improved version of network visualisation from PX group&nbsp;</span></span></span></li>
+    <li style="list-style-type:disc">Default CSV field separator to tabs, as this causes much less problems with long text fields</li>
+    <li style="list-style-type:disc">Add initial version of a traditional Japanese calendar to the supported calendars</li>
+    <li style="list-style-type:disc">Improve structure tree in record structure modification to allow dragging sub headings</li>
+    <li style="list-style-type:disc">Import CSV, select tabs as separator if ny tabs are foind in the field names line</li>
+    <li style="list-style-type:disc">Revise layout of field structure edit popup in record strucutre modification</li>
+    <li style="list-style-type:disc">Bulk upload local fiels to external repository</li>
+    <li style="list-style-type:disc">Display term images inline and in tooltips on manage terms</li>
+    <li style="list-style-type:disc">Dwtect Sfari on Mac and warn that it is not supported</li>
+    <li style="list-style-type:disc">Process request url's parameters on external lookups</li>
+    <li style="list-style-type:disc">Hide hidden fields/values on record viewer, with option to view on backend if logged in</li>
+    <li style="list-style-type:disc">Integrity check to report on saved searches with errors such as missing fields or uninterpretable format</li>
+    <li style="list-style-type:disc">Define custom font families per database </li>
+    <li style="list-style-type:disc">SAML2 database logins at BnF now appear to be working correctly after much testing</li>
+    <li style="list-style-type:disc">UPDATED as of 14 November 2023</li>
 </ul>
 
-<p><span style="font-size:9pt"><span style="font-family:Arial,sans-serif"><span style="color:#000000"><strong>March 2023</strong></span></span></span></p>
+
+<p><strong>October 2023</strong></p>
 
 <ul>
-    <li style="list-style-type:disc"><span style="font-size:9pt"><span style="font-family:Arial,sans-serif"><span style="color:#000000">Ruleset option to keep original and last level results</span></span></span></li>
-    <li style="list-style-type:disc"><span style="font-size:9pt"><span style="font-family:Arial,sans-serif"><span style="color:#000000">CSV import option to retain duplicate values</span></span></span></li>
-    <li style="list-style-type:disc"><span style="font-size:9pt"><span style="font-family:Arial,sans-serif"><span style="color:#000000">add common lookups such as GeoNames at DB creation</span></span></span></li>
-    <li style="list-style-type:disc"><span style="font-size:9pt"><span style="font-family:Arial,sans-serif"><span style="color:#000000">highlight tabs with missing required fields in record edit</span></span></span></li>
-    <li style="list-style-type:disc"><span style="font-size:9pt"><span style="font-family:Arial,sans-serif"><span style="color:#000000">allow administrators to assign record ownership to any user</span></span></span></li>
-    <li style="list-style-type:disc"><span style="font-size:9pt"><span style="font-family:Arial,sans-serif"><span style="color:#000000">handling of CMS web pages with &gt;64K text</span></span></span></li>
-    <li style="list-style-type:disc"><span style="font-size:9pt"><span style="font-family:Arial,sans-serif"><span style="color:#000000">support CRS definition of projection in map widget</span></span></span></li>
-    <li style="list-style-type:disc"><span style="font-size:9pt"><span style="font-family:Arial,sans-serif"><span style="color:#000000">cartesian non-geo base map support</span></span></span></li>
-    <li style="list-style-type:disc"><span style="font-size:9pt"><span style="font-family:Arial,sans-serif"><span style="color:#000000">script to trigger mailings etc. to be called by cron job</span></span></span></li>
-    <li style="list-style-type:disc"><span style="font-size:9pt"><span style="font-family:Arial,sans-serif"><span style="color:#000000">add gdal2tiles to list of tiling schemes</span></span></span></li>
-    <li style="list-style-type:disc"><span style="font-size:9pt"><span style="font-family:Arial,sans-serif"><span style="color:#000000">move map document to legend rather than toolbar</span></span></span></li>
-    <li style="list-style-type:disc"><span style="font-size:9pt"><span style="font-family:Arial,sans-serif"><span style="color:#000000">improve facets date slider</span></span></span></li>
-    <li style="list-style-type:disc"><span style="font-size:9pt"><span style="font-family:Arial,sans-serif"><span style="color:#000000">new menu entry rename database</span></span></span></li>
-    <li style="list-style-type:disc"><span style="font-size:9pt"><span style="font-family:Arial,sans-serif"><span style="color:#000000">login button for websites</span></span></span></li>
-    <li style="list-style-type:disc"><span style="font-size:9pt"><span style="font-family:Arial,sans-serif"><span style="color:#000000">verify integrity checks redundant spaces in text fields</span></span></span></li>
-    <li style="list-style-type:disc"><span style="font-size:9pt"><span style="font-family:Arial,sans-serif"><span style="color:#000000">add an End Page to StoryMaps</span></span></span></li>
-    <li style="list-style-type:disc"><span style="font-size:9pt"><span style="font-family:Arial,sans-serif"><span style="color:#000000">documentation of use of tile maps and support for MBTiles</span></span></span></li>
-    <li style="list-style-type:disc"><span style="font-size:9pt"><span style="font-family:Arial,sans-serif"><span style="color:#000000">map access to IIIF map images</span></span></span></li>
-    <li style="list-style-type:disc"><span style="font-size:9pt"><span style="font-family:Arial,sans-serif"><span style="color:#000000">relationship marker fields in title masks</span></span></span></li>
-    <li style="list-style-type:disc"><span style="font-size:9pt"><span style="font-family:Arial,sans-serif"><span style="color:#000000">redirection of Huma-Num sub domains to Heurist website</span></span></span></li>
+    <li style="list-style-type:disc">Clarification and priority of visibility settings at record, field and value levels/li>
+    <li style="list-style-type:disc">0 seconds frequency excludes auto regeneration of custom report output to avoid regenerating rarely changed or very server intensive reports</li>
+    <li style="list-style-type:disc">Add handling for relationship fields to external lookups</li>
+    <li style="list-style-type:disc">Combine custom styles and block formats for TinyMCE editor to simplify interface</li>
+    <li style="list-style-type:disc">Add custom styles to website text editor's toolbar</li>
+    <li style="list-style-type:disc">Add new modifier to custom reports to get file metadata</li>
+    <li style="list-style-type:disc">Fix for changed availability of Stamen maps as base maps, more changes required later</li>
+    <li style="list-style-type:disc">Imporve upload fro MBTiles files - large file handling to come</li>
+    <li style="list-style-type:disc">Layout changes to improve workflow stage popup</li>
+    <li style="list-style-type:disc">Import of inverse terms from CSV files</li>
+    <li style="list-style-type:disc">Support for automatic translation via DeepL</li>
+    <li style="list-style-type:disc">Function to split out certain fields from records into child records and transfer the data</li>
+    <li style="list-style-type:disc">Allow setting of fiel storage data quotas in preparation for allowinf segmented upload of large files such as tilestacks</li>
+    <li style="list-style-type:disc">Renaming hsapi server-side functions to hserv for coherence with the namign of hclient (hserver turns out to be identified as a spam server)</li>
 </ul>
 
-<p><span style="font-size:9pt"><span style="font-family:Arial,sans-serif"><span style="color:#000000"><strong>Feb 2023</strong></span></span></span></p>
+
+<p><strong>September 2023</strong></p>
 
 <ul>
-    <li style="list-style-type:disc"><span style="font-size:9pt"><span style="font-family:Arial,sans-serif"><span style="color:#000000">Get record count on selected databases on bulk emailer</span></span></span></li>
-    <li style="list-style-type:disc"><span style="font-size:9pt"><span style="font-family:Arial,sans-serif"><span style="color:#000000">Database page in default website creation</span></span></span></li>
-    <li style="list-style-type:disc"><span style="font-size:9pt"><span style="font-family:Arial,sans-serif"><span style="color:#000000">hide no-values facets and list at bottom</span></span></span></li>
-    <li style="list-style-type:disc"><span style="font-size:9pt"><span style="font-family:Arial,sans-serif"><span style="color:#000000">external lookups improvements</span></span></span></li>
-    <li style="list-style-type:disc"><span style="font-size:9pt"><span style="font-family:Arial,sans-serif"><span style="color:#000000">render limited html tags in record title on record view</span></span></span></li>
-    <li style="list-style-type:disc"><span style="font-size:9pt"><span style="font-family:Arial,sans-serif"><span style="color:#000000">additional map backgrounds on map widget</span></span></span></li>
-    <li style="list-style-type:disc"><span style="font-size:9pt"><span style="font-family:Arial,sans-serif"><span style="color:#000000">choose geo fields to be included in maps</span></span></span></li>
-    <li style="list-style-type:disc"><span style="font-size:9pt"><span style="font-family:Arial,sans-serif"><span style="color:#000000">send multiple geometries as separate geometries from server</span></span></span></li>
-    <li style="list-style-type:disc"><span style="font-size:9pt"><span style="font-family:Arial,sans-serif"><span style="color:#000000">update on hidden fields</span></span></span></li>
-    <li style="list-style-type:disc"><span style="font-size:9pt"><span style="font-family:Arial,sans-serif"><span style="color:#000000">fix GEPHI exports</span></span></span></li>
+
+    <li style="list-style-type:disc">Increased timeout for sessions to 1 day</li>
+    <li style="list-style-type:disc">Fixing display and hiding of fields marked for non-display to public and imporovements in representation on edit form</li>
+    <li style="list-style-type:disc">Significant work on fixing security holes and code cleanup</li>
+    <li style="list-style-type:disc">Additional handling for translated text fields</li>
+    <li style="list-style-type:disc">Initial version of OpenTheso lookup</li>
+    <li style="list-style-type:disc">Auto-correction, wheere uneqwuivocal meaning, of dates entered in various 'human-friendly' formats</li>
+    <li style="list-style-type:disc">Add custom TinyMCE font styles to record viewer and reports</li>
+    <li style="list-style-type:disc">Record editor - improve field visibility identification</li>
+    <li style="list-style-type:disc">Setting messages for use with Story Map when no search initiated or no records found</li>
 </ul>
 
-<p><span style="font-size:9pt"><span style="font-family:Arial,sans-serif"><span style="color:#000000"><strong>Jan 2023</strong></span></span></span></p>
+
+<p><strong>August 2023</strong></p>
+<ul>
+    <li style="list-style-type:disc">Moving over to new date format everywhere</li>
+    <li style="list-style-type:disc">Add handling for term descriptions in custom reports</li>
+    <li style="list-style-type:disc">Add handling for new metadata added to uploaded or remote file fields</li>
+    <li style="list-style-type:disc">Language selector on web pages if multiple languages defined</li>
+    <li style="list-style-type:disc">Reading and writing fuzzy dates in CSV and XML formats</li>
+    <li style="list-style-type:disc">Filter builder changes to handle fuzzy dates</li>
+    <li style="list-style-type:disc">Leaflet support for new geojson-h format (with dates)</li>
+    <li style="list-style-type:disc">Render human-readable dates from fuzzy dates as rollover on date fields</li>
+    <li style="list-style-type:disc">Automatic conversion of old format dates to new geojson-h format on read</li>
+    <li style="list-style-type:disc">Fuzzy bar ends and points on timelines (to check)</li>
+    <li style="list-style-type:disc">Improve initial load speed of database definitions on startup 4 - 10x</li>
+    <li style="list-style-type:disc">Import base fields and vocabularies individually from registered databases and templates</li>
+    <li style="list-style-type:disc">Several additions to smarty (custom) reports to handle selection and identification of language</li>
+    <li style="list-style-type:disc">Labels with accents now sort alphabetically ignoring accents</li>
+    <li style="list-style-type:disc">Improved creation of base fields from a list in CSV format</li>
+    <li style="list-style-type:disc">Ability to increment an independent field when importing from CSV</li>
+    <li style="list-style-type:disc">Automatic download of language field definition for use with translations</li>
+    <li style="list-style-type:disc">For website default language can be changed via url param or via link in the header</li>
+    <li style="list-style-type:disc">Very compact URL for websites such as heurist.huma-num.fr/Geo_Recits </li>
+    <li style="list-style-type:disc">Keywords after database name: tpl,edit,web - redirect to showReps, recordEdit and website without url rewrite
+adm,hml,view - redirect to index, flathml and renderRecord with url rewrite</li>
+    <li style="list-style-type:disc">Dates can be displayed with transparency or light to deep colour range according to level of certainty</li>
+    <li style="list-style-type:disc">Selector for date fields to be displayed on timeline rather than showing all date fields together</li>
+    <li style="list-style-type:disc">Ability to delete multiple terms at once in the vocabulary editor</li>
+    <li style="list-style-type:disc">Importing file field data from CSV file</li>
+    <li style="list-style-type:disc">Add description, rights and record owner to Record View</li>
+    <li style="list-style-type:disc">Improved server-side handling of lookups</li>
+ </ul>
+
+
+<p><strong>July 2023</strong></p>
+<ul>
+    <li style="list-style-type:disc">Add blocking and discouraging edit to the definition of fields</li>
+    <li style="list-style-type:disc">Default seach builder to term labels to simplify the tree</li>
+    <li style="list-style-type:disc">Support for circa, floruit, about and other date qualifier terms</li>
+    <li style="list-style-type:disc">New comparison operators for range dates</li>
+    <li style="list-style-type:disc">hideStandardLogin in heuristConfigIni.php will only show single sign-on</li>
+    <li style="list-style-type:disc">Handle range dates aoristically on facet time graph</li>
+    <li style="list-style-type:disc">Highlight fields and tabs with errors on saving record</li>
+    <li style="list-style-type:disc">Handle languages for filter builder on term fields</li>
+    <li style="list-style-type:disc">Retrieve term field labels in specified languages for custom reports</li>
+    <li style="list-style-type:disc">Login link top right of web pages for non-logged-in users</li>
+    <li style="list-style-type:disc">On-demand loading of record pointer lists, vocabularie and field usages in record edit, rather than initial load of everything - very significant speedup</li>
+    <li style="list-style-type:disc">Add 'Insert link to Heurist record' tool to the wysiwyg text field editor</li>
+    <li style="list-style-type:disc">Additional metadata fields for uploaded or remote files/images - copyright, copy owner and caption</li>
+    <li style="list-style-type:disc">When in record structure edit mode you can export a list of the fields as a CSV file</li>
+    <li style="list-style-type:disc">Clean / simplified URLs, replacing parameters with / separated values</li>
+    <li style="list-style-type:disc">Semicolon between email addresses allows emailing to multiple recipients</li>
+    <li style="list-style-type:disc">Shorten dropdown and text search fields in facet searches, general cleanup of appearance</li>
+</ul>
+
+
+<p><strong>June 2023</strong></p>
+<ul>
+    <li style="list-style-type:disc">Cleanup of temporary content and legacy files in filestore directories, script to run this cleanup on a cron
+</li>
+    <li style="list-style-type:disc">Added date indexing function using decimal date storage and triggers to create</li>
+    <li style="list-style-type:disc">Additional data field options on BnF library lookups</li>
+    <li style="list-style-type:disc">Caption format in WYSIWYG text fields</li>
+    <li style="list-style-type:disc">Add the Digital Atlas of the Roman Empire base map</li>
+    <li style="list-style-type:disc">Rec viewer - Checkbox to show/hide linked media</li>
+    <li style="list-style-type:disc">Harvestable database descriptions index</li>
+    <li style="list-style-type:disc">Corrections to IIIF annotations storage</li>
+    <li style="list-style-type:disc">Ability to generate raw text (without html tags) in custom report output</li>
+    <li style="list-style-type:disc">Website Discover page generated with 100% height rather than fixed height</li>
+    <li style="list-style-type:disc">Specify text field search on versions in a specific language</li>
+    <li style="list-style-type:disc">Add handling for GeoNames IDs in GeoNames lookups</li>
+    <li style="list-style-type:disc">Conjunction on multi-select facets and highlighting of selected values</li>
+    <li style="list-style-type:disc">Cleanup unneeded files on completion of database archive function</li>
+</ul>
+
+
+<p><strong>May 2023</strong></p>
 
 <ul>
-    <li style="list-style-type:disc"><span style="font-size:9pt"><span style="font-family:Arial,sans-serif"><span style="color:#000000">JSon export template</span></span></span></li>
-    <li style="list-style-type:disc"><span style="font-size:9pt"><span style="font-family:Arial,sans-serif"><span style="color:#000000">clean shortened URLs with / instead of parameters</span></span></span></li>
-    <li style="list-style-type:disc"><span style="font-size:9pt"><span style="font-family:Arial,sans-serif"><span style="color:#000000">order by date in StoryMaps</span></span></span></li>
-    <li style="list-style-type:disc"><span style="font-size:9pt"><span style="font-family:Arial,sans-serif"><span style="color:#000000">option to hide linked media on record view</span></span></span></li>
-    <li style="list-style-type:disc"><span style="font-size:9pt"><span style="font-family:Arial,sans-serif"><span style="color:#000000">improve UI on Facets builder</span></span></span></li>
-    <li style="list-style-type:disc"><span style="font-size:9pt"><span style="font-family:Arial,sans-serif"><span style="color:#000000">first draft thematic mapping</span></span></span></li>
-    <li style="list-style-type:disc"><span style="font-size:9pt"><span style="font-family:Arial,sans-serif"><span style="color:#000000">character limit option on title mask fields</span></span></span></li>
-    <li style="list-style-type:disc"><span style="font-size:9pt"><span style="font-family:Arial,sans-serif"><span style="color:#000000">CSV import across all record types at once</span></span></span></li>
-    <li style="list-style-type:disc"><span style="font-size:9pt"><span style="font-family:Arial,sans-serif"><span style="color:#000000">record edit popup resize button</span></span></span></li>
-    <li style="list-style-type:disc"><span style="font-size:9pt"><span style="font-family:Arial,sans-serif"><span style="color:#000000">structure edit show field usage counts automatically and link to used/not used records</span></span></span></li>
+    <li style="list-style-type:disc">Improve facet search cosmetics particularly on websites</li>
+    <li style="list-style-type:disc">option for login button on all website pages</li>
+    <li style="list-style-type:disc">optional auto creation of digital media records on multi-file upload</li>
+    <li style="list-style-type:disc">create indexable html pages for all databases run from cron job</li>
+    <li style="list-style-type:disc">add filter by field counts (fc) to filter builder and json search</li>
+    <li style="list-style-type:disc">add database sorting to bulk mailer</li>
+    <li style="list-style-type:disc">add login link to warning about hidden websites</li>
+    <li style="list-style-type:disc">hide record content view switch and add automatic record content view on blog pages</li>
+    <li style="list-style-type:disc">remove delete unused files option because not recognising images embedded in texts</li>
+    <li style="list-style-type:disc">ability to allow or deny record creation and deletion per user, default to selected records rather than resultset for dangerous actions</li>
+    <li style="list-style-type:disc">new GeoJSon-T complex/fuzzy date storage format to replace old string format</li>
+    <li style="list-style-type:disc">query dates including fuzzy dates through special index table built by trigger on record save</li>
+    <li style="list-style-type:disc">standard search on dates based on index</li>
+    <li style="list-style-type:disc">interpret date string entered eg. 1850-1865 directly into complex/fuzzy date where possible</li>
+    <li style="list-style-type:disc">select date fields for use on the timeline as we do with geo fields on the map</li>
+    <li style="list-style-type:disc">import complex dates from a Heurist export file</li>
+    <li style="list-style-type:disc">human readable display of new date format on rollover</li>
+    <li style="list-style-type:disc">batch convert dates from old to new format db version 16</li>
+    <li style="list-style-type:disc">improved website header load order,&nbsp;</li>
+</ul>
+
+<p><strong>April 2023</strong></p>
+
+<ul>
+    <li style="list-style-type:disc">Result lsit custom class based on value to allow referencing, add URL check to daily cronjob script</li>
+    <li style="list-style-type:disc">update defTranslations table to handle description and longer values</li>
+    <li style="list-style-type:disc">add translation to term definition</li>
+    <li style="list-style-type:disc">allow searching on a specified language</li>
+    <li style="list-style-type:disc">allow standard search on code</li>
+    <li style="list-style-type:disc">description and concept ID as well as labels for term fields</li>
+    <li style="list-style-type:disc">SAML2 identities&nbsp;</li>
+    <li style="list-style-type:disc">slightly improved version of network visualisation from PX group&nbsp;</li>
+</ul>
+
+<p><strong>March 2023</strong></p>
+
+<ul>
+    <li style="list-style-type:disc">Ruleset option to keep original and last level results</li>
+    <li style="list-style-type:disc">CSV import option to retain duplicate values</li>
+    <li style="list-style-type:disc">add common lookups such as GeoNames at DB creation</li>
+    <li style="list-style-type:disc">highlight tabs with missing required fields in record edit</li>
+    <li style="list-style-type:disc">allow administrators to assign record ownership to any user</li>
+    <li style="list-style-type:disc">handling of CMS web pages with &gt;64K text</li>
+    <li style="list-style-type:disc">support CRS definition of projection in map widget</li>
+    <li style="list-style-type:disc">cartesian non-geo base map support</li>
+    <li style="list-style-type:disc">script to trigger mailings etc. to be called by cron job</li>
+    <li style="list-style-type:disc">add gdal2tiles to list of tiling schemes</li>
+    <li style="list-style-type:disc">move map document to legend rather than toolbar</li>
+    <li style="list-style-type:disc">improve facets date slider</li>
+    <li style="list-style-type:disc">new menu entry rename database</li>
+    <li style="list-style-type:disc">login button for websites</li>
+    <li style="list-style-type:disc">verify integrity checks redundant spaces in text fields</li>
+    <li style="list-style-type:disc">add an End Page to StoryMaps</li>
+    <li style="list-style-type:disc">documentation of use of tile maps and support for MBTiles</li>
+    <li style="list-style-type:disc">map access to IIIF map images</li>
+    <li style="list-style-type:disc">relationship marker fields in title masks</li>
+    <li style="list-style-type:disc">redirection of Huma-Num sub domains to Heurist website</li>
+</ul>
+
+<p><strong>Feb 2023</strong></p>
+
+<ul>
+    <li style="list-style-type:disc">Get record count on selected databases on bulk emailer</li>
+    <li style="list-style-type:disc">Database page in default website creation</li>
+    <li style="list-style-type:disc">hide no-values facets and list at bottom</li>
+    <li style="list-style-type:disc">external lookups improvements</li>
+    <li style="list-style-type:disc">render limited html tags in record title on record view</li>
+    <li style="list-style-type:disc">additional map backgrounds on map widget</li>
+    <li style="list-style-type:disc">choose geo fields to be included in maps</li>
+    <li style="list-style-type:disc">send multiple geometries as separate geometries from server</li>
+    <li style="list-style-type:disc">update on hidden fields</li>
+    <li style="list-style-type:disc">fix GEPHI exports</li>
+</ul>
+
+<p><strong>Jan 2023</strong></p>
+
+<ul>
+    <li style="list-style-type:disc">JSon export template</li>
+    <li style="list-style-type:disc">clean shortened URLs with / instead of parameters</li>
+    <li style="list-style-type:disc">order by date in StoryMaps</li>
+    <li style="list-style-type:disc">option to hide linked media on record view</li>
+    <li style="list-style-type:disc">improve UI on Facets builder</li>
+    <li style="list-style-type:disc">first draft thematic mapping</li>
+    <li style="list-style-type:disc">character limit option on title mask fields</li>
+    <li style="list-style-type:disc">CSV import across all record types at once</li>
+    <li style="list-style-type:disc">record edit popup resize button</li>
+    <li style="list-style-type:disc">structure edit show field usage counts automatically and link to used/not used records</li>
 </ul>
 
 <p><strong>Dec 2022</strong></p>
