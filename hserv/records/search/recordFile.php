@@ -22,6 +22,8 @@
 * 
 * fileGetPlayerTag - produce appropriate html tag to view media content
 * getPlayerURL  - get player url for youtube, vimeo, soundcloud
+*
+* getWebImageCache - get scaled down jpeg version of a image, to reduce load times
 * 
 * @todo move to uFile.php
 * resolveFilePath  
@@ -114,7 +116,7 @@ function fileGetByObfuscatedId($system, $ulf_ObfuscatedFileID){
     if(!$ulf_ObfuscatedFileID || strlen($ulf_ObfuscatedFileID)<1) return null;
 
     $res = mysql__select_value($system->get_mysqli(), 'select ulf_ID from recUploadedFiles where ulf_ObfuscatedFileID="'.
-        $system->get_mysqli()->real_escape_string(ulf_ObfuscatedFileID).'"');
+        $system->get_mysqli()->real_escape_string($ulf_ObfuscatedFileID).'"');
 
     return $res;
 }
@@ -839,6 +841,158 @@ function getPlayerURL($mimeType, $url, $params=null){
     } 
     
     return $url;
+}
+
+/**
+ * Create a jpeg version of an image for website usage
+ *  Only performs this if the file is greater than 500 KB
+ *  Also, scales the image down to at most 1000x1000 pixels
+ * 
+ * @param System $system - initialised Heurist system object
+ * @param string|array $obfuscated_ids - array or comma list of obfuscated file ids
+ * @param bool $return_url - return url to file instead of file path
+ * 
+ * @return array - array of file paths or urls
+ * @return bool - false on error
+ */
+function getWebImageCache($system, $obfuscated_ids, $return_url = true){
+
+    $web_cache_dir = HEURIST_FILESTORE_DIR . "webimagecache";
+
+    if(empty($obfuscated_ids)){
+        $system->addError(HEURIST_INVALID_REQUEST, 'Missing file ids');
+        return false;
+    }
+
+    if(!is_array($obfuscated_ids)){
+        $obfuscated_ids = explode(',', $obfuscated_ids);
+    }
+
+    $can_write = file_exists($web_cache_dir) && is_writable($web_cache_dir);
+
+    if(!file_exists($web_cache_dir)){
+
+        $res = folderCreate($web_cache_dir, true);
+        if(!$res){
+            $system->addError(HEURIST_ERROR, 'Unable to create directory for cached web images');
+            return false;
+        }
+
+        $can_write = is_writable($web_cache_dir);
+    }
+
+    if(!$can_write){
+        $system->addError(HEURIST_ERROR, 'Unable to write to the cached web images directory');
+        return false;
+    }
+
+    $mysqli = $system->get_mysqli();
+
+    foreach($obfuscated_ids as $idx => $obfuscated_id){
+
+        if(ctype_alnum($obfuscated_id)){
+            $obfuscated_ids[$idx] = $mysqli->real_escape_string($obfuscated_id);
+        }else{
+            $system->addError(HEURIST_INVALID_REQUEST, 'Invalid obfuscated id provided');
+            return false;
+        }
+    }
+
+    $where = 'ulf_ObfuscatedFileID ';
+    if(count($obfuscated_ids) > 1){
+        $where .= 'IN ("'.implode('","', $obfuscated_ids).'")';
+    }else{
+        $where .= '= "' . $obfuscated_ids[0] . '"';
+    }
+    
+    $file_query = 'SELECT ulf_ID, CONCAT(ulf_FilePath,ulf_FileName) AS fullPath, ulf_FileSizeKB '
+                . 'FROM recUploadedFiles WHERE ' . $where;
+
+    $results = $mysqli->query($file_query);
+    if(!$results){
+        $system->addError(HEURIST_DB_ERROR, 'An error occurred with retrieving file details for creating scaled down images');
+        return false;
+    }
+
+    $files = array();
+    $error_reported = false;
+
+    while($row = $results->fetch_assoc()){
+
+        // setup original file details
+        $org_file = resolveFilePath($row['fullPath']);
+        $file_info = pathinfo($org_file);
+        $org_rtn = $return_url ? str_replace(HEURIST_FILESTORE_DIR, HEURIST_FILESTORE_URL, $org_file) : $org_file;
+
+        // setup new file details
+        $new_file = $web_cache_dir . "/" . $file_info['basename'];
+        $new_file = str_replace('.' . $file_info['extension'], '.jpg', $new_file); // force jpeg
+        $new_rtn = $return_url ? str_replace(HEURIST_FILESTORE_DIR, HEURIST_FILESTORE_URL, $new_file) : $new_file;
+
+        if($row['ulf_FileSizeKB'] < 500){ // skip
+            array_push($files, $org_rtn);
+            continue;
+        }
+        if(file_exists($new_file)){ // already exists
+            array_push($files, $new_rtn);
+            continue;
+        }
+
+        if(extension_loaded('imagick')){
+
+            try{
+
+                $image = new \Imagick($org_file);
+                $dims = array('height' => $image->getImageHeight(), 'width' => $image->getImageWidth());
+
+                // rescale if either dimension is greater than 1000 pixels
+                if($dims['height'] > 1000 || $dims['width'] > 1000){
+
+                    // scale by the bigger of height or width
+                    $scaleHeight = $dims['height'] > $dims['width'] ? 1000 : 0;
+                    $scaleWidth = $dims['width'] > $dims['height'] ? 1000 : 0;
+
+                    $image->scaleImage($scaleWidth, $scaleHeight); // scale image
+                }
+
+                // force jpeg output
+                $image->setImageType('jpeg');
+
+                $image->setImageCompression(\imagick::COMPRESSION_JPEG);
+                $image->setImageCompressionQuality(75);
+
+                $success = $image->writeImage($new_file);
+
+                if($success){
+                    array_push($files, $new_rtn);
+                }else{
+                    array_push($files, $org_rtn);
+                }
+
+                $image->destroy();
+            }catch(\ImagickException $e){
+
+                if(!$error_reported){ // report error once
+
+                    $msg = "An error occurred while attempting to create a cached version of image.\n\n"
+                        . "Database: " . HEURIST_DBNAME . "\nImage: " . intval($row['ulf_ID']) . "\n"
+                        . "Imagick error: ";
+
+                    $system->addError(HEURIST_ERROR, $msg . $e->message);
+
+                    $error_reported = true;
+                }
+
+                array_push($files, $org_rtn);
+            }
+        }else{
+            array_push($files, $org_rtn);
+        }
+    }
+
+    $results->close();
+
+    return $files;
 }
 
 function youtube_id_from_url($url) {

@@ -1057,7 +1057,7 @@ window.hWin.HEURIST4.util = {
 
         //extract params from image src and recreate new url pointed to  baseURL_pro
         if(!window.hWin.HEURIST4.util.isempty(src)){
-            var query = src.slice(src.indexOf('?'));
+            let query = src.slice(src.indexOf('?'));
 
             if(src.indexOf('file=') > 0){
                 file_id = window.hWin.HEURIST4.util.getUrlParameter('file', query);
@@ -1071,6 +1071,14 @@ window.hWin.HEURIST4.util = {
                 extra_params += '&fancybox='+window.hWin.HEURIST4.util.getUrlParameter('fancybox', query);
             }else{
                 extra_params += '&fancybox=1';
+            }
+
+            if(window.HAPI4.is_publish_mode){ // image for a webpage
+
+                let webcached = window.hWin.HEURIST4.util.getUrlParameter('fullres', query);
+                webcached = !webcached ? 0 : webcached;
+
+                extra_params += `&fullres=${webcached}`; // look for scaled down image, when retrieving
             }
 
             if(src.indexOf('db=') > 0){
