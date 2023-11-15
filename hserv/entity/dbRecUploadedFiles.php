@@ -656,121 +656,125 @@ When we open "iiif_image" in mirador viewer we generate manifest dynamically.
             //if there is file to be copied                        
             if(@$this->records[$rec_idx]['ulf_TempFile']){ 
                     
-                    $ulf_ID = $this->records[$rec_idx]['ulf_ID'];
-                    $ulf_ObfuscatedFileID = $this->records[$rec_idx]['ulf_ObfuscatedFileID'];
-                    
-                    //copy temp file from scratch to fileupload folder
-                    $tmp_name = $this->records[$rec_idx]['ulf_TempFile'];
-                    
-                    if(strpos($record['ulf_OrigFileName'],'_tiled')===0  || $record['ulf_PreferredSource']=='tiled')
-                    {
-                        if($record['ulf_MimeExt']=='mbtiles'){
-                        
-                            $new_name = substr($record['ulf_OrigFileName'],7).'.mbtiles'; 
-                            
-                            if( copy($tmp_name, HEURIST_TILESTACKS_DIR.$new_name) ) 
-                            {
-                                //remove temp file
-                                unlink($tmp_name);
-                                
-                                //create thumbnail
-                                $thumb_name = HEURIST_THUMB_DIR.'ulf_'.$ulf_ObfuscatedFileID.'.png';
-                                //UImage::createThumbnailFile($filename, $thumb_name);
-                                $img = UImage::createFromString('tileserver tiled images');
-                                imagepng($img, $thumb_name);//save into file
-                                imagedestroy($img);
-                                
-                                
-                            }else{
-                                $this->system->addError(HEURIST_INVALID_REQUEST,
-                                     "Upload file: $new_name couldn't be saved to upload path definied for db = "
-                                    . $this->system->dbname().' ('.HEURIST_TILESTACKS_DIR
-                                    .'). Please ask your system administrator to correct the path and/or permissions for this directory');
-                            }                    
-                        
-                        }else{
-
-                            //create destination folder
-                            $dest = HEURIST_TILESTACKS_DIR.$ulf_ID.'/';
-                            $warn = folderCreate2($dest, '');
-                            
-                            //unzip archive to HEURIST_TILESTACKS_DIR
-                            $unzip_error = null;
-                            try{
-                                UArchive::unzip($this->system, $tmp_name, $dest);    
-                            } catch (Exception  $e) {
-                                $unzip_error = $e->getMessage();
-                            }
-                            
-                            if($unzip_error==null){
-                                //remove temp file
-                                unlink($tmp_name);
-
-                                $file2 = array();
-                                
-                                //detect 1) mimetype 2) summary size of stack images 3) copy first image as thumbnail
-                                $size = folderSize2($dest);
-                                
-                                //get first file from first folder - use it as thumbnail
-                                $filename = folderFirstTileImage($dest);
-                                
-                                $thumb_name = HEURIST_THUMB_DIR.'ulf_'.$ulf_ObfuscatedFileID.'.png';
-                                
-                                $mimeExt = UImage::getImageType($filename);
-                                
-                                if($mimeExt){
-                                    UImage::createThumbnailFile($filename, $thumb_name); //create thumbnail for tiled image
-                                    $file2['ulf_MimeExt'] = $mimeExt;    
-                                }else{
-                                    $file2['ulf_MimeExt'] = 'png';
-                                }
-                                
-                                $file2['ulf_ID'] = $ulf_ID;
-                                $file2['ulf_FileSizeKB'] = $size/1024;
+                $ulf_ID = $this->records[$rec_idx]['ulf_ID'];
+                $ulf_ObfuscatedFileID = $this->records[$rec_idx]['ulf_ObfuscatedFileID'];
                 
-                                mysql__insertupdate($this->system->get_mysqli(), $this->config['tableName'], 'ulf', $file2);
-                                
-                                
-                            }else{
-                                $this->system->addError(HEURIST_ERROR,
-                                     'Can\'t extract tiled images stack. It couldn\'t be saved to upload path definied for db = '
-                                    . $this->system->dbname().' ('.$dest
-                                    .'). Please ask your system administrator to correct the path and/or permissions for this directory', $unzip_error);
-                                return false;
-                            }
+                //copy temp file from scratch to fileupload folder
+                $tmp_name = $this->records[$rec_idx]['ulf_TempFile'];
+                
+                if(strpos($record['ulf_OrigFileName'],'_tiled')===0  || $record['ulf_PreferredSource']=='tiled')
+                {
+                    if($record['ulf_MimeExt']=='mbtiles'){
+                    
+                        $new_name = substr($record['ulf_OrigFileName'],7).'.mbtiles'; 
                         
-                        }
-                        
-                    }else{
-                        
-                        $new_name = $this->records[$rec_idx]['ulf_FileName']; 
-                        
-                        if( copy($tmp_name, HEURIST_FILES_DIR.$new_name) ) 
+                        if( copy($tmp_name, HEURIST_TILESTACKS_DIR.$new_name) ) 
                         {
                             //remove temp file
                             unlink($tmp_name);
                             
-                            //copy thumbnail
-                            if(@$record['ulf_TempFileThumb']){
-                                $thumb_name = HEURIST_SCRATCH_DIR.'thumbs/'.$record['ulf_TempFileThumb'];
-                                if(file_exists($thumb_name)){
-                                    $new_name = HEURIST_THUMB_DIR.'ulf_'.$ulf_ObfuscatedFileID.'.png';
-                                    copy($thumb_name, $new_name);
-                                    //remove temp file
-                                    unlink($thumb_name);
-                                }
-                            }
+                            //create thumbnail
+                            $thumb_name = HEURIST_THUMB_DIR.'ulf_'.$ulf_ObfuscatedFileID.'.png';
+                            //UImage::createThumbnailFile($filename, $thumb_name);
+                            $img = UImage::createFromString('tileserver tiled images');
+                            imagepng($img, $thumb_name);//save into file
+                            imagedestroy($img);
+                            
                             
                         }else{
                             $this->system->addError(HEURIST_INVALID_REQUEST,
-                                 "Upload file: $new_name couldn't be saved to upload path definied for db = "
-                                . $this->system->dbname().' ('.HEURIST_FILES_DIR
+                                    "Upload file: $new_name couldn't be saved to upload path definied for db = "
+                                . $this->system->dbname().' ('.HEURIST_TILESTACKS_DIR
                                 .'). Please ask your system administrator to correct the path and/or permissions for this directory');
                         }                    
-                    }
+                    
+                    }else{
+
+                        //create destination folder
+                        $dest = HEURIST_TILESTACKS_DIR.$ulf_ID.'/';
+                        $warn = folderCreate2($dest, '');
                         
-            }
+                        //unzip archive to HEURIST_TILESTACKS_DIR
+                        $unzip_error = null;
+                        try{
+                            UArchive::unzip($this->system, $tmp_name, $dest);    
+                        } catch (Exception  $e) {
+                            $unzip_error = $e->getMessage();
+                        }
+                        
+                        if($unzip_error==null){
+                            //remove temp file
+                            unlink($tmp_name);
+
+                            $file2 = array();
+                            
+                            //detect 1) mimetype 2) summary size of stack images 3) copy first image as thumbnail
+                            $size = folderSize2($dest);
+                            
+                            //get first file from first folder - use it as thumbnail
+                            $filename = folderFirstTileImage($dest);
+                            
+                            $thumb_name = HEURIST_THUMB_DIR.'ulf_'.$ulf_ObfuscatedFileID.'.png';
+                            
+                            $mimeExt = UImage::getImageType($filename);
+                            
+                            if($mimeExt){
+                                UImage::createThumbnailFile($filename, $thumb_name); //create thumbnail for tiled image
+                                $file2['ulf_MimeExt'] = $mimeExt;    
+                            }else{
+                                $file2['ulf_MimeExt'] = 'png';
+                            }
+                            
+                            $file2['ulf_ID'] = $ulf_ID;
+                            $file2['ulf_FileSizeKB'] = $size/1024;
             
+                            mysql__insertupdate($this->system->get_mysqli(), $this->config['tableName'], 'ulf', $file2);
+                            
+                            
+                        }else{
+                            $this->system->addError(HEURIST_ERROR,
+                                    'Can\'t extract tiled images stack. It couldn\'t be saved to upload path definied for db = '
+                                . $this->system->dbname().' ('.$dest
+                                .'). Please ask your system administrator to correct the path and/or permissions for this directory', $unzip_error);
+                            return false;
+                        }
+                    
+                    }
+                    
+                }else{
+                    
+                    $new_name = $this->records[$rec_idx]['ulf_FileName']; 
+                    
+                    if( copy($tmp_name, HEURIST_FILES_DIR.$new_name) ) 
+                    {
+                        //remove temp file
+                        unlink($tmp_name);
+                        
+                        //copy thumbnail
+                        if(@$record['ulf_TempFileThumb']){
+                            $thumb_name = HEURIST_SCRATCH_DIR.'thumbs/'.$record['ulf_TempFileThumb'];
+                            if(file_exists($thumb_name)){
+                                $new_name = HEURIST_THUMB_DIR.'ulf_'.$ulf_ObfuscatedFileID.'.png';
+                                copy($thumb_name, $new_name);
+                                //remove temp file
+                                unlink($thumb_name);
+                            }
+                        }
+                        
+                    }else{
+                        $this->system->addError(HEURIST_INVALID_REQUEST,
+                                "Upload file: $new_name couldn't be saved to upload path definied for db = "
+                            . $this->system->dbname().' ('.HEURIST_FILES_DIR
+                            .'). Please ask your system administrator to correct the path and/or permissions for this directory');
+                    }                    
+                }
+
+                // remove web cached image, will be remade on next request
+                $webcache_file = HEURIST_FILESTORE_DIR . "webimagecache/ulf_$ulf_ObfuscatedFileID.jpg";
+                if(file_exists($webcache_file)){
+                    unlink($webcache_file);
+                }
+            }
         }//after save loop
         return $ret;
     } 
@@ -1709,6 +1713,11 @@ When we open "iiif_image" in mirador viewer we generate manifest dynamically.
                 $thumbnail_file = HEURIST_THUMB_DIR."ulf_".$file_id.".png";
                 if(file_exists($thumbnail_file)){
                     unlink($thumbnail_file);
+                }
+                // remove web cached image
+                $webcache_file = HEURIST_FILESTORE_DIR . "webimagecache/ulf_$file_id.jpg";
+                if(file_exists($webcache_file)){
+                    unlink($webcache_file);
                 }
             }
         }

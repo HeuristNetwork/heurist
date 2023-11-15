@@ -905,7 +905,7 @@ function getWebImageCache($system, $obfuscated_ids, $return_url = true){
         $where .= '= "' . $obfuscated_ids[0] . '"';
     }
     
-    $file_query = 'SELECT ulf_ID, CONCAT(ulf_FilePath,ulf_FileName) AS fullPath, ulf_FileSizeKB '
+    $file_query = 'SELECT ulf_ID, CONCAT(ulf_FilePath,ulf_FileName) AS fullPath, ulf_FileSizeKB, ulf_OrigFileName '
                 . 'FROM recUploadedFiles WHERE ' . $where;
 
     $results = $mysqli->query($file_query);
@@ -929,7 +929,11 @@ function getWebImageCache($system, $obfuscated_ids, $return_url = true){
         $new_file = str_replace('.' . $file_info['extension'], '.jpg', $new_file); // force jpeg
         $new_rtn = $return_url ? str_replace(HEURIST_FILESTORE_DIR, HEURIST_FILESTORE_URL, $new_file) : $new_file;
 
-        if($row['ulf_FileSizeKB'] < 500){ // skip
+        $skip_file = strpos($row['ulf_OrigFileName'], '_remote') === 0 || // skip if not local file
+                     strpos($row['ulf_OrigFileName'], '_iiif') === 0 || 
+                     strpos($row['ulf_OrigFileName'], '_tiled') === 0;
+
+        if($skip_file || $row['ulf_FileSizeKB'] < 500){ // skip
             array_push($files, $org_rtn);
             continue;
         }
