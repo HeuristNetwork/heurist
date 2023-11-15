@@ -146,6 +146,10 @@
     background-color: white !important;
     outline: darkblue solid 1px;
 }
+#btn_signin{
+    font-weight: normal;
+    outline: none;
+}
 </style>
 </head>
 <body>
@@ -206,7 +210,7 @@ if($isWebPage){ //set in websiteRecord.php
         
         <div id="main-title" class="mceNonEditable header-element" style="position:absolute;top:20px;left:280px;right:280px;max-height:90px;"></div>
 
-        <div id="main-languages" class="mceNonEditable header-element" style="position:absolute;top:20px;right:10px;max-height:90px;"></div>
+        <div id="main-languages" class="mceNonEditable header-element" style="position:absolute;top:10px;right:40px;max-height:90px;"></div>
         
         <div id="main-menu" class="mceNonEditable header-element" style="position:absolute;top:110px;width:100%;min-height:40px;border:2px none yellow;color:black;font-size:1.1em;" data-heurist-app-id="heurist_Navigation" data-generated="1">
             <?php print $page_header_menu; ?>
@@ -222,7 +226,7 @@ if($isWebPage){ //set in websiteRecord.php
         .'style="position:absolute;left:5px;top:5px;color:blue !important;" class="cms-button">website editor</a>';
     }
     if(!$edit_OldEditor && $system->get_user_id() == 0 && $show_login_button){
-        print '<a href="#" id="btn_signin" style="position:absolute;right:5px; top:5px;color:blue !important;" class="cms-button">login</a>'; // login link
+        print '<a href="#" id="btn_signin" style="position:absolute;right:5px; top:5px;color:blue !important;font-weight: normal;" class="cms-button">login</a>'; // login link
     }
     ?>  
         <div id="main-pagetitle" class="ui-heurist-bg-light"></div>       
