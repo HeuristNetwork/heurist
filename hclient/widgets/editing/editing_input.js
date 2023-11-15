@@ -1070,6 +1070,26 @@ $.widget( "heurist.editing_input", {
                     }
 
                     let is_grayed = $input.hasClass('grayed') ? 'background: rgb(233 233 233) !important' : '';
+                    
+                                          
+                        /*
+                        "webfonts":{
+                            "LinuxLibertine":"@import url('settings/linlibertine-webfont.css');"
+                        }
+                        */
+                    let font_family = 'Helvetica,Arial,sans-serif';
+                    let webfonts = '';
+                    if(Object.hasOwn(custom_formatting, 'webfonts')){
+                        let fams = Object.keys(custom_formatting.webfonts);
+                        for(let i=0; i<fams.length; i++){
+                            if(Object.hasOwn(custom_formatting.webfonts, fams[i])){
+                                webfonts = webfonts + custom_formatting.webfonts[fams[i]];
+                                font_family = fams[i];
+                            }
+                        }
+                    }
+                    
+                    let custom_webfonts = `${webfonts} body { font-size: 8pt; font-family: ${font_family}; ${is_grayed} }`;
 
                     tinymce.init({
                         //target: $editor, 
@@ -1092,9 +1112,9 @@ $.widget( "heurist.editing_input", {
                         urlconverter_callback : 'tinymceURLConverter',
 
                         entity_encoding:'raw',
-                        inline_styles: true,
-                        content_style: `body { font-size: 8pt; font-family: Helvetica,Arial,sans-serif; ${is_grayed} } ${custom_formatting.content_style}`,
-
+                        inline_styles: true,    
+                        content_style: `${custom_webfonts} ${custom_formatting.content_style}`,
+                        
                         min_height: ($input.height()+110),
                         max_height: ($input.height()+110),
                         autoresize_bottom_margin: 10,

@@ -61,7 +61,11 @@ $webfonts = $system->getDatabaseSetting('Webfonts');
 if(is_array($webfonts) && count($webfonts)>0){
     foreach($webfonts as $font_family => $src){
         $src = str_replace("url('settings/", "url('".HEURIST_FILESTORE_URL.'settings/',$src);
-        $font_styles = $font_styles . ' @font-face {font-family:"'.$font_family.'";src:'.$src.';} ';    
+        if(strpos($src,'@import')===0){
+            $font_styles = $font_styles . $src;
+        }else{
+            $font_styles = $font_styles . ' @font-face {font-family:"'.$font_family.'";src:'.$src.';} ';    
+        }
         $font_families[] = $font_family;
     }
 }

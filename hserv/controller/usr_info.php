@@ -251,6 +251,14 @@
                 styles => css for class selectors
             )
             */
+            if(@$settings['webfonts']){
+                $res['webfonts'] = array();
+                foreach($settings['webfonts'] as $key => $font){
+                    $font = str_replace("url('settings/", "url('".HEURIST_FILESTORE_URL.'settings/', $font);
+                    $res['webfonts'][$key] = $font;
+                }
+            }
+            
             foreach($settings['formats'] as $key => $format){
 
                 $key = str_ireplace(' ', '_', $key); // replace spaces with underscore

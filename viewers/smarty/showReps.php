@@ -624,9 +624,34 @@ function smarty_output_filter_strip_js($tpl_source, Smarty_Internal_Template $te
                 $font_styles .= "} ";
             }
         }
+        
+        $import_webfonts = '';
+        $webfonts = $system->getDatabaseSetting('Webfonts');
+        if(is_array($webfonts) && count($webfonts)>0){
+            $font_families = array();
+            
+            foreach($webfonts as $font_family => $src){
+                $src = str_replace("url('settings/", "url('".HEURIST_FILESTORE_URL.'settings/',$src);
+                if(strpos($src,'@import')===0){
+                    $import_webfonts = $import_webfonts . $src;
+                }else{
+                    $import_webfonts = $import_webfonts . ' @font-face {font-family:"'.$font_family.'";src:'.$src.';} ';    
+                }
+                $font_families[] = $font_family;
+            }
+            if(count($font_families)>0){
+                $font_families[] = 'sans-serif';
+                $font_styles = 'body{font-family: '.implode(',',$font_families).'} '.$font_styles;
+            }
+        }
+        
         if(!empty($font_styles)){
             $font_styles = "<style> $font_styles </style>";
         }
+        if(!empty($import_webfonts)){
+            $font_styles = '<style>'.$import_webfonts.'</style>'.$font_styles;
+        }
+        
     
         if($is_jsallowed){
             

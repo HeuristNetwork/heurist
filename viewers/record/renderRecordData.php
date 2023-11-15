@@ -138,11 +138,17 @@ if(is_array($formats) && array_key_exists('formats', $formats)){
     }
 }
 
+$import_webfonts = null;
 $webfonts = $system->getDatabaseSetting('Webfonts');
 if(is_array($webfonts) && count($webfonts)>0){
+    $import_webfonts = '';
     foreach($webfonts as $font_family => $src){
         $src = str_replace("url('settings/", "url('".HEURIST_FILESTORE_URL.'settings/',$src);
-        $font_styles = $font_styles . ' @font-face {font-family:"'.$font_family.'";src:'.$src.';} ';    
+        if(strpos($src,'@import')===0){
+            $import_webfonts = $import_webfonts . $src;
+        }else{
+            $import_webfonts = $import_webfonts . ' @font-face {font-family:"'.$font_family.'";src:'.$src.';} ';    
+        }
         $font_families[] = $font_family;
     }
 }
@@ -745,6 +751,11 @@ if(!($is_map_popup || $without_header)){
             */
 
         </script>
+<?php 
+if(!empty($import_webfonts)){
+    echo '<style>'.$import_webfonts.'</style>';
+}
+?>
         <style>
         .detailRowHeader{
             padding: 20px 0 20px;
@@ -852,9 +863,19 @@ if(!($is_map_popup || $without_header)){
             margin: 0;
             vertical-align: -2px;
         }
-<?php if($is_production){
+<?php 
+if(!empty($font_styles)){ // add extra format styles from TinyMCE insertion
+    echo ' '.$font_styles.' ';
+}
+if(count($font_families)>0){
+    $font_families[] = 'sans-serif';
+    echo ' body{font-family: '.implode(',',$font_families).'} ';
+}
+
+if($is_production){
     print '.detailType {width:160px;}';
-}?>
+}
+?>
 
         .hiddenField .detailType{
             text-decoration: line-through;
@@ -894,15 +915,6 @@ else if(!$is_map_popup){
 </script>
 <?php
 } 
-
-if(!empty($font_styles)){ // add extra format styles from TinyMCE insertion
-    echo "<style> $font_styles </style>";
-    
-    if(count($font_families)>0){
-        $font_families[] = 'sans-serif';
-        echo '<style>body{font-family: '.implode(',',$font_families).'}</style>';
-    }
-}
 
 if ($bkm_ID>0 || $rec_id>0) {
        
