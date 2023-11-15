@@ -768,12 +768,6 @@ When we open "iiif_image" in mirador viewer we generate manifest dynamically.
                             .'). Please ask your system administrator to correct the path and/or permissions for this directory');
                     }                    
                 }
-
-                // remove web cached image, will be remade on next request
-                $webcache_file = HEURIST_FILESTORE_DIR . "webimagecache/ulf_$ulf_ObfuscatedFileID.jpg";
-                if(file_exists($webcache_file)){
-                    unlink($webcache_file);
-                }
             }
         }//after save loop
         return $ret;
@@ -1679,15 +1673,22 @@ When we open "iiif_image" in mirador viewer we generate manifest dynamically.
         if ($res){
             $file_data = array();
             while ($row = $res->fetch_row()){
+
+                $fullpath = null;
+                $filename = null;
+
                 if(@$row[1] || @$row[2]){
                     $fullpath = @$row[1] . @$row[2];
                     //add database media storage folder for relative paths
                     $fullpath = resolveFilePath($fullpath);
-                    if(!file_exists($fullpath)) $fullpath=null;
-                }else{
-                    $fullpath = null; //remote
+                    $filename = @$row[2];
+                    if(!file_exists($fullpath)){
+                        $fullpath=null;
+                        $filename = null;
+                    }
                 }
-                $file_data[$row[0]] = $fullpath;
+
+                $file_data[$row[0]] = array('path' => $fullpath, 'name' => $filename);
             }
             $res->close();
         }
@@ -1705,9 +1706,9 @@ When we open "iiif_image" in mirador viewer we generate manifest dynamically.
         }else{
             
             //remove files
-            foreach ($file_data as $file_id=>$filepath){
-                if($filepath!=null){
-                    unlink($filepath);
+            foreach ($file_data as $file_id=>$file){
+                if($file['path']!=null){
+                    unlink($file['path']);
                 }
                 //remove thumbnail
                 $thumbnail_file = HEURIST_THUMB_DIR."ulf_".$file_id.".png";
@@ -1715,7 +1716,9 @@ When we open "iiif_image" in mirador viewer we generate manifest dynamically.
                     unlink($thumbnail_file);
                 }
                 // remove web cached image
-                $webcache_file = HEURIST_FILESTORE_DIR . "webimagecache/ulf_$file_id.jpg";
+                $webimage_name = pathinfo($file['name']);
+                $webimage_name = $webimage_name['filename'] . ".jpg";
+                $webcache_file = HEURIST_FILESTORE_DIR . "webimagecache/$webimage_name";
                 if(file_exists($webcache_file)){
                     unlink($webcache_file);
                 }
