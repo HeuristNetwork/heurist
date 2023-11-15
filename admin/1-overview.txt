@@ -7,6 +7,9 @@ The code has been modified where needed to work within H4
 The most important menus have been moved into the main search/filter page layout
 This page is slated for elimination once all functions moved as submenus of the main page menus
 
+Vsn 6: In the end, all this is fairly simple code which has worked for years and has no relation to the performance and structure 
+of the main data entry and retrieval functions, so it has been left untouched. It is the product of many hands, but it works.
+
 Updated: 	18th October 2015
 
 ------------------------------------------------------------------------------------------------------------------------------------------------------

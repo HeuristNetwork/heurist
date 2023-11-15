@@ -1,6 +1,6 @@
 Directory:    /hclient/setup
 
-Overview:  Setup sequence - registet new use, create new database, getting started
+Overview:  Setup sequence - register new user, create new database, getting started
 
 Notes:
 

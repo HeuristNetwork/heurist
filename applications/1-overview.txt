@@ -10,13 +10,22 @@
 
 Directory:	/applications
 
-Overview:	Applications developed within Heurist vsn 3
+Overview:	Applications developed for specific functions generally unrelated to the general structure of Heurist
 
 Notes:
 
+EdARC: developed as a demo for INRAP
+
+Omeka-s : used to extract data from Omeka-s for the DEF19 database. It is database specific.
+
+
 Several applications removed in 2016 cleanup:
-dictofsyd, was not converted and would therefore most likely require editing to work (but no longer needed - may be useful base for other web publishing)
+
+dictofsyd, was not converted and would therefore most likely require editing to work 
+(but is no longer needed - may be useful base for other web publishing)
+
 mobile was never properly finished and would require extensive work
+
 proxyfilter is a standalone for filtering a specified website to restyle pages and restrict to listed content
 
 Updated: 	26 Oct 2016
