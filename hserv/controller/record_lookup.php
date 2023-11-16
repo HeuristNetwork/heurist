@@ -32,6 +32,9 @@
 
     // allowed and handled services, 'serviceType' => 'service/url base'
     // base url is used to reconstruct url validated request
+
+    $BNF_BASE_URL = 'https://catalogue.bnf.fr/api/SRU?';
+
     $service_types = array(
         'tlcmap' => array(
             'https://tlcmap.org/ghap/search?',
@@ -39,9 +42,9 @@
         ),
         'geonames' => 'http://api.geonames.org/',
 
-        'bnflibrary_bib' => 'https://catalogue.bnf.fr/api/SRU?',
-        'bnflibrary_aut' => 'https://catalogue.bnf.fr/api/SRU?',
-        'bnf_recdump' => 'https://catalogue.bnf.fr/api/SRU?',
+        'bnflibrary_bib' => $BNF_BASE_URL,
+        'bnflibrary_aut' => $BNF_BASE_URL,
+        'bnf_recdump' => $BNF_BASE_URL,
 
         'nomisma' => array(
             'https://nomisma.org/apis/',
@@ -104,6 +107,10 @@
             'group' => $MIXED
         )
     );
+
+    // BnF xml namespace urls
+    $BNF_XML_RECORDS_NAMESPACE = 'http://www.loc.gov/zing/srw/'; // srw
+    $BNF_XML_DETAILS_NAMESPACE = 'info:lc/xmlns/marcxchange-v2'; // mxc
 
     $is_estc = false;
     $valid_service = false;
@@ -419,10 +426,9 @@
         
         // Create xml object
         $xml_obj = simplexml_load_string($remote_data, null, LIBXML_PARSEHUGE);
-        // xml namespace urls: https://www.loc.gov/zing/srw/ (srw), info:lc/xmlns/marcxchange-v2 (mxc)
 
         // Retrieve records from results
-        $records = $xml_obj->children('https://www.loc.gov/zing/srw/', false)->records->record;
+        $records = $xml_obj->children($BNF_XML_RECORDS_NAMESPACE, false)->records->record;
 
         // Move each result's details into seperate array
         foreach ($records as $key => $details) {
@@ -433,7 +439,7 @@
             $pub_idx = 0;
             $id = '';
 
-            foreach ($details->recordData->children('info:lc/xmlns/marcxchange-v2', false)->record->controlfield as $key => $cf_ele) { // controlfield elements
+            foreach ($details->recordData->children($BNF_XML_DETAILS_NAMESPACE, false)->record->controlfield as $key => $cf_ele) { // controlfield elements
                 $cf_tag = @$cf_ele->attributes()['tag'];
 
                 if($cf_tag == '001') { // BnF ID
@@ -445,7 +451,7 @@
                 }
             }
 
-            foreach ($details->recordData->children('info:lc/xmlns/marcxchange-v2', false)->record->datafield as $key => $df_ele) { // datafield elements
+            foreach ($details->recordData->children($BNF_XML_DETAILS_NAMESPACE, false)->record->datafield as $key => $df_ele) { // datafield elements
                 $df_tag = @$df_ele->attributes()['tag'];
 
                 if(!$df_tag) {
@@ -646,7 +652,7 @@
         }
 
         // Add other details
-        $results['numberOfRecords'] = intval($xml_obj->children('https://www.loc.gov/zing/srw/', false)->numberOfRecords);
+        $results['numberOfRecords'] = intval($xml_obj->children($BNF_XML_RECORDS_NAMESPACE, false)->numberOfRecords);
 
         // Encode to json for response to JavaScript
         $remote_data = json_encode($results);
@@ -656,10 +662,9 @@
         
         // Create xml object
         $xml_obj = simplexml_load_string($remote_data, null, LIBXML_PARSEHUGE);
-        // xml namespace urls: https://www.loc.gov/zing/srw/ (srw), info:lc/xmlns/marcxchange-v2 (mxc)
 
         // Retrieve records from results
-        $records = $xml_obj->children('https://www.loc.gov/zing/srw/', false)->records->record;
+        $records = $xml_obj->children($BNF_XML_RECORDS_NAMESPACE, false)->records->record;
 
         $df_handled = array(200, 210, 240, 230, 215, 216, 250, 220);
 
@@ -668,7 +673,7 @@
 
             $formatted_array = array();
 
-            foreach ($details->recordData->children('info:lc/xmlns/marcxchange-v2', false)->record->controlfield as $key => $cf_ele) { // controlfield elements
+            foreach ($details->recordData->children($BNF_XML_DETAILS_NAMESPACE, false)->record->controlfield as $key => $cf_ele) { // controlfield elements
                 $cf_tag = @$cf_ele->attributes()['tag'];
 
                 if($cf_tag == '001') { // BnF ID
@@ -679,7 +684,7 @@
                 }
             }
 
-            foreach ($details->recordData->children('info:lc/xmlns/marcxchange-v2', false)->record->datafield as $key => $df_ele) { // datafield elements
+            foreach ($details->recordData->children($BNF_XML_DETAILS_NAMESPACE, false)->record->datafield as $key => $df_ele) { // datafield elements
                 $df_tag = @$df_ele->attributes()['tag'];
 
                 if(!$df_tag) {
@@ -800,8 +805,7 @@
         }
 
         // Add other details, can be used for more calls to retrieve all results (currently retrieves 500 records at max)
-        $results['numberOfRecords'] = intval($xml_obj->children('https://www.loc.gov/zing/srw/', false)->numberOfRecords);
-        $results['nextStart'] = intval($xml_obj->children('https://www.loc.gov/zing/srw/', false)->nextRecordPosition);
+        $results['numberOfRecords'] = intval($xml_obj->children($BNF_XML_RECORDS_NAMESPACE, false)->numberOfRecords);
 
         // Encode to json for response to JavaScript
         $remote_data = json_encode($results);
@@ -810,13 +814,12 @@
         
         // Create xml object
         $xml_obj = simplexml_load_string($remote_data, null, LIBXML_PARSEHUGE);
-        // xml namespace urls: https://www.loc.gov/zing/srw/ (srw), info:lc/xmlns/marcxchange-v2 (mxc)
 
         // Retrieve records from results
-        $records = $xml_obj->children('https://www.loc.gov/zing/srw/', false)->records->record;
+        $records = $xml_obj->children($BNF_XML_RECORDS_NAMESPACE, false)->records->record;
 
         foreach($records as $key => $details){
-            $record = $details->recordData->children('info:lc/xmlns/marcxchange-v2', false)->record;
+            $record = $details->recordData->children($BNF_XML_DETAILS_NAMESPACE, false)->record;
             $results['record'] = $record->asXML();//json_encode($record, JSON_PRETTY_PRINT);
             break;
         }
@@ -946,15 +949,11 @@
 
         $remote_data = json_decode($remote_data, true);
 
-        $type_idx = 'https://www.w3.org/1999/02/22-rdf-syntax-ns#type';
-        $trm_uri = 'https://www.w3.org/2004/02/skos/core#Concept';
-        $desc_idx = 'https://www.w3.org/2004/02/skos/core#definition';
-        $code_idx = 'https://purl.org/dc/terms/identifier';
-        $label_idx = 'https://www.w3.org/2004/02/skos/core#prefLabel';
-
-        $parent_idx = 'https://www.w3.org/2004/02/skos/core#broader';
-        $child_idx = 'https://www.w3.org/2004/02/skos/core#narrower';
-        $sibling_idx = 'https://www.w3.org/2004/02/skos/core#related';
+        $type_idx = 'http://www.w3.org/1999/02/22-rdf-syntax-ns#type';
+        $trm_uri = 'http://www.w3.org/2004/02/skos/core#Concept';
+        $desc_idx = 'http://www.w3.org/2004/02/skos/core#definition';
+        $code_idx = 'http://purl.org/dc/terms/identifier';
+        $label_idx = 'http://www.w3.org/2004/02/skos/core#prefLabel';
 
         $results = array();
 
