@@ -57,7 +57,9 @@ $.widget( "heurist.lookupGN", $.heurist.recordAction, {
         //fill countries dropdown
         var ele = this.element.find('#inpt_country');
         this._country_vocab_id = $Db.getLocalID('trm','2-509');
-        window.hWin.HEURIST4.ui.createTermSelect(ele.get(0), {vocab_id:this._country_vocab_id,topOptions:'select...',useHtmlSelect:false});
+        if(this._country_vocab_id > 0){
+            window.hWin.HEURIST4.ui.createTermSelect(ele.get(0), {vocab_id:this._country_vocab_id,topOptions:'select...',useHtmlSelect:false});
+        }
 
         if(ele.hSelect('instance') != 'undefined'){
             ele.hSelect('widget').css({'max-width':'30em'});

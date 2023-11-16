@@ -69,13 +69,15 @@ $.widget( "heurist.lookupGN_postalCode", $.heurist.recordAction, {
         //fill countries dropdown
         var ele = this.element.find('#inpt_country');
         this._country_vocab_id = $Db.getLocalID('trm','2-509');
-        window.hWin.HEURIST4.ui.createTermSelect(ele.get(0), {vocab_id:this._country_vocab_id,topOptions:'select...',useHtmlSelect:false});
+        if(this._country_vocab_id > 0){
+            window.hWin.HEURIST4.ui.createTermSelect(ele.get(0), {vocab_id:this._country_vocab_id,topOptions:'select...',useHtmlSelect:false});
+        }
 
         if(ele.hSelect('instance') != 'undefined'){
             ele.hSelect('widget').css({'max-width':'30em'});
         }
         
-        this.element.find('#search_container > div > div > .header').css({width:'70px','min-width':'70px', display: 'inline-block'});
+        this.element.find('#search_container > div > div > .header').css({width:'80px','min-width':'80px', display: 'inline-block'});
 
         this.element.find('#btn_container').position({my: 'left center', at: 'right center', of: '#search_container'});
 
