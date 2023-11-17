@@ -107,7 +107,7 @@ if($is_csv){
     if (false === $fd) {
         die('Failed to create temporary file');
     } 
-    $record_row = array('Name','Reg ID','Records','DB Vsn','Data updated','Structure modified','Owner','eMail','Institution');
+    $record_row = array('Name','Records','File MBytes','Data updated','Structure modified','Reg ID','DB Vsn','Owner','eMail','Institution');
     fputcsv($fd, $record_row, ',', '"');
 }else{
     $arr_databases = array();
@@ -123,54 +123,48 @@ $i = 0;
 foreach ($dbs as $db){
     
     //ID  Records     Files(MB)    RecTypes     Fields    Terms     Groups    Users   Version   DB     Files     Modified    Access    Owner   Deleteable
+
+    $db_name = htmlspecialchars(substr($db, 4));
     if(!hasTable($mysqli, 'sysIdentification',$db) || !hasTable($mysqli, 'Records',$db)){
       
-      $broken_dbs[] = htmlspecialchars(substr($db, 4));
+      $broken_dbs[] = $db_name;
     }else{
 
-        $record_row = array (substr($db, 4),
-        mysql__select_val("select cast(sys_dbRegisteredID as CHAR) from ".$db.".sysIdentification where 1"),
-        mysql__select_val("select count(*) from ".$db.".Records where (not rec_FlagTemporary)"),
-        //0,mysql__select_val("select count(*) from ".$db.".recDetails"),
-        /* Removed Ian 10/12/16 to speed up - very slow on USyd server with very large # of DBs. See additional comment-outs below
-        mysql__select_val("select count(*) from ".$db.".defRecTypes").",".
-        mysql__select_val("select count(*) from ".$db.".defDetailTypes").",".
-        mysql__select_val("select count(*) from ".$db.".defTerms").",".
-        mysql__select_val("select count(*) from ".$db.".sysUGrps where ugr_Type='workgroup'").",".
-        mysql__select_val("select count(*) from ".$db.".sysUGrps where ugr_Type='user'").",".
-        */
-        mysql__select_val("select concat_ws('.',cast(sys_dbVersion as char),cast(sys_dbSubVersion as char)) "
-            ." from ".$db.".sysIdentification where 1"),
-        /*
-        mysql__select_val("SELECT Round(Sum(data_length + index_length) / 1024 / 1024, 1)"
-        ." FROM information_schema.tables where table_schema='".$db."'").",".
-        round( (dirsize(HEURIST_FILESTORE_ROOT . substr($db, 4) . '/')/ 1024 / 1024), 1).",".
-        */
-        mysql__select_val("select max(rec_Modified)  from ".$db.".Records"),
-        //mysql__select_val("select max(ugr_LastLoginTime)  from ".$db.".sysUGrps") );
-        mysql__select_value($mysqli, "select max(rst_Modified) from ".$db.".defRecStructure") );
+        $size = file_exists(HEURIST_FILESTORE_ROOT . $db_name) ? folderSize(HEURIST_FILESTORE_ROOT . $db_name) : 0;
+
+        if($size > 0){ // to MB
+            $size /= 1048576;
+            $size = round((float)$size, 2);
+        }
+
+        $record_row = array (
+            $db_name,
+            mysql__select_val("select count(*) from ".$db.".Records where (not rec_FlagTemporary)"),
+            $size,
+            mysql__select_val("select max(rec_Modified)  from ".$db.".Records"),
+            mysql__select_value($mysqli, "select max(rst_Modified) from ".$db.".defRecStructure"),
+            mysql__select_val("select cast(sys_dbRegisteredID as CHAR) from ".$db.".sysIdentification where 1"),
+            mysql__select_val("select concat_ws('.',cast(sys_dbVersion as char),cast(sys_dbSubVersion as char)) "
+                ." from ".$db.".sysIdentification where 1")
+        );
 
         $owner = mysql__select_row($mysqli, "SELECT concat(ugr_FirstName,' ',ugr_LastName),ugr_eMail,ugr_Organisation ".
             "FROM ".$db.".sysUGrps where ugr_id=2");
-            
-        //$sz = folderSize( HEURIST_FILESTORE_ROOT.substr($db, 4).'/');
-        //$record_row[3] = $sz>0?round($sz/1048576):0;
-            
-        if($is_csv){    
+
+        if($is_csv){
+
             $record_row[] = $owner[0];
             $record_row[] = $owner[1];
             $record_row[] = $owner[2];
-            
-            
+
             fputcsv($fd, $record_row, ',', '"');
         }else{
+
             $record_row[] = implode(' ', $owner);
-            
+
             $record_row[4] = strtotime($record_row[4]); 
             $record_row[5] = strtotime($record_row[5]); 
-            
-            //$record_row[] = $sysadmin;
-           
+
             $aitem_quote = function($n)
             {
                 return is_numeric($n) ?$n :('"'.str_replace('"','\"',htmlspecialchars($n, ENT_NOQUOTES)).'"');
@@ -356,10 +350,8 @@ if($is_csv){
                         return data;    
                     }
                 }},
-                { title: "Reg ID", sortable:true, searchable:true, className:'right'}, //data: "db_regid", 
                 { title: "Records", sortable:true, searchable:false, className:'right'}, //data: "cnt_recs", 
-                //{ title: "Files(MB)", sortable:true, searching:false, className:'right'}, //data: "cnt_vals", 
-                { title: "DB Vsn", sortable:true, searchable:false, className:'right'},  //data: "db_version", 
+                { title: "File MBytes", sortable:true, searching:false, className:'right'}, //data: "cnt_vals", 
                 { title: "Data updated", searchable:false, sortable:true,    //data: "date_mod", 
                     render: function(data, type) {
                         return (type === 'display')?__format_date(data):data;
@@ -368,6 +360,8 @@ if($is_csv){
                     render: function(data, type) {
                         return (type === 'display')?__format_date(data):data;
                     }},
+                { title: "Reg ID", sortable:true, searchable:true, className:'right'}, //data: "db_regid", 
+                { title: "DB Vsn", sortable:true, searchable:false, className:'right'},  //data: "db_version", 
                 { title: "Owner", searchable:false, width:200,  //data: "owner", 
                     render: function(data, type) {
                         if (type === 'display') {

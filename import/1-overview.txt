@@ -2,21 +2,17 @@
 Directory:	/import
 
 Overview:	Heurist Vsn 3 Functions for importing and disambiguating external data
+            These have not been significantly updated since version 3. They do what they do ...
 
-Notes:		In order of development:
+Notes:	
 
-		The bibliographic importers (EndNote, Refer and Zotero) are an
-		extremely complex bit of imbricated coding developed by Tom Murtagh.
-		They really need a clean redevelop.
+		The bibliographic synchroniser (Zotero) is an extremely complex bit of imbricated coding developed by Tom Murtagh.
 
-		Fleximport and detailupdater are more recent flexible importing tools.
-
-		sucasa is an experimental Picasa web album importer developed by Kim Jackson.
- 		Needs a bit more work and is not currently (March 2010) linked into
-		the Heurist interface.
+		sucasa (removed to backlog) was an experimental Picasa web album importer developed by Kim Jackson.
+ 		Needs a bit more work and is probably no longer relevant at 2023 because Picasa discontinued.
 
 
-Updated: 	28 March 2010
+Updated: 	16 Nov 2023
 
 ---------------------------------------------------------------------
 

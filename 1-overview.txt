@@ -2,7 +2,7 @@ Heurist academic data management system
 
 https://HeuristNetwork.org 
 
-Copyright © 2005 - 2019 University of Sydney
+Copyright © 2005 - 2023 University of Sydney
 
 Concept/direction:      Ian Johnson
 Developers:             Artem Osmakov, Tom Murtagh, Kim Jackson, Steve White, Ireneusz Golka, Maria Shvedova, Steven Hayes, Maxim Nikitin
