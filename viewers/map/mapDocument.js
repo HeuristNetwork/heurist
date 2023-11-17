@@ -433,17 +433,24 @@ function hMapDocument( _options )
                     crs = $Db.trm(crs_id, 'trm_Code');
                     if(crs=='XY') crs = 'Simple'
                     else if(!crs) crs = '';
+                    
+                    if(crs && crs.indexOf(':')>0){
+                        crs = crs.replace(':','');
+                    }
                 }
             }
         }
         
-        if(crs!=''){
+        //EPSG3857  EPSG4326 - Mercator
+        let is_standard_projection = (crs=='' || crs=='EPSG3857' || crs=='EPSG4326');
+        
+        if(!is_standard_projection){
             _loadBaseMap('None');
         }
         
         options.mapwidget.mapping('defineCRS', crs);            
         
-        return (crs=='');
+        return is_standard_projection;
     }
     
     //

@@ -610,10 +610,14 @@ $.widget( "heurist.mapping", {
     //
     defineCRS: function(CRS){
         
+        if(CRS && CRS.indexOf(':')>0){
+            CRS = CRS.replace(':','');
+        }
+        
         if(this.crs_current!=CRS){
             this.crs_current = CRS;
 
-            if(CRS==''){
+            if(CRS=='' || !L.CRS[CRS]){
                 //default L.CRS.EPSG3857
                 CRS = 'EPSG3857';
             }
@@ -647,6 +651,7 @@ $.widget( "heurist.mapping", {
             }catch(e){
                 this.nativemap.options.crs = '';
                 console.error(e);
+                this.defineCRS('');
             }
             
         }
@@ -657,7 +662,7 @@ $.widget( "heurist.mapping", {
     // basemap_id index in mapprovider array OR provider name
     //
     loadBaseMap: function(basemap_id){
-        
+
         var provider = this.basemap_providers[0];
         if(window.hWin.HEURIST4.util.isNumber(basemap_id) && basemap_id>=0){
             provider = this.basemap_providers[basemap_id];

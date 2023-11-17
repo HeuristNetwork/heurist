@@ -231,7 +231,7 @@ if(!$error){
                                     $filename = pathinfo($filename);
                                     $external_url = HEURIST_BASE_URL.'mbtiles.php?'.HEURIST_DBNAME.'/'.$external_url.$filename['filename'];
                                 }else{
-                                    $external_url = $path;    
+                                    $external_url = HEURIST_TILESTACKS_URL.$external_url;  //$path;    
                                 }
                             }else if (file_exists($path)) {
                                 $filename = pathinfo($path);
