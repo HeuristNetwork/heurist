@@ -3160,22 +3160,38 @@ $.widget( "heurist.editing_input", {
 
                         //crate progress dialog
                         var $progress_dlg = $('<div title="File Upload"><div class="progress-label">Starting upload...</div>'
-                        +'<div class="progressbar" style="margin-top: 20px;"></div></div>').hide().appendTo( $inputdiv );
+                        +'<div class="progressbar" style="margin-top: 20px;"></div>'
+                        +'<div class="cancelButton">Cancel upload</div></div>').hide().appendTo( $inputdiv );
                         var $progress_bar = $progress_dlg.find('.progressbar');
                         var $progressLabel = $progress_dlg.find('.progress-label');
-                        
+                        let $cancelButton = $progress_dlg.find('.cancelButton');
+
                         this.select_imagelib_dlg = $('<div/>').hide().appendTo( $inputdiv );//css({'display':'inline-block'}).
-         
+
                         $progress_bar.progressbar({
-                              value: false,
-                              change: function() {
+                            value: false,
+                            change: function() {
                                 $progressLabel.text( "Current Progress: " + $progress_bar.progressbar( "value" ) + "%" );
-                              },
-                              complete: function() {
-                                    $progressLabel.text( "Complete!" );
-                              }
-                          });
-         
+                            },
+                            complete: function() {
+                                $progressLabel.html( "Upload Complete!<br>processing on server, this may take up to a minute" );
+                                $cancelButton.hide().off('click');
+                            }
+                        });
+
+                        // Setup abort button
+                        $cancelButton.button();
+                        this._on($cancelButton, {
+                            click: function(){
+
+                                if(fileHandle && fileHandle.abort){
+                                    fileHandle.abort();
+                                }
+
+                                fileHandle = true;
+                            }
+                        });
+
         var fileupload_opts = {
     url: window.hWin.HAPI4.baseURL + 'hserv/controller/fileUpload.php',
     formData: [ {name:'db', value: window.hWin.HAPI4.database}, 
@@ -3274,7 +3290,19 @@ $.widget( "heurist.editing_input", {
             $input_img.on({click: function(){
                         $(inpt).click();
             }});
-            },                            
+    },
+    fail: function(e, data){
+
+        $progress_dlg.dialog("close");
+
+        if(fileHandle === true){ // was aborted by user
+            window.hWin.HEURIST4.msg.showMsgFlash('File upload was aborted', 3000);
+        }else{
+            window.hWin.HEURIST4.msg.showMsgErr('An unknown error occurred while attempting to upload your file.');
+        }
+
+        fileHandle = null;
+    },
     progressall: function (e, data) { //@todo to implement
         var progress = parseInt(data.loaded / data.total * 100, 10);
         //$('#progress .bar').css('width',progress + '%');
