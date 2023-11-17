@@ -397,7 +397,7 @@ if($long_reports_count > 0){
     $email_body .= "\nWe recommend either increasing the time between regenerations for these reports, "
                 . "or setting the regeneration time to zero and requesting the owner to manually regenerate the report as needed.";
 
-    sendEmail(HEURIST_MAIL_TO_ADMIN, "Slow report generation on " . HEURIST_SERVER_NAME, $email_body)
+    sendEmail(HEURIST_MAIL_TO_ADMIN, "Slow report generation on " . HEURIST_SERVER_NAME, $email_body);
 }
 
 function exclusion_list(){
