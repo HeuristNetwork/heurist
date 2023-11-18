@@ -117,7 +117,7 @@ foreach ($databases as $idx=>$db_name){
                     
                     $missed[] = array($db_name, @$row['ulf_FilePath'], $row['ulf_FileName']);    
                     
-                    $key = $db_name.','.@$row['ulf_FilePath'];
+                    $key = htmlspecialchars($db_name.','.@$row['ulf_FilePath']);
                     if(!@$missed_folders[$key]){
                         $missed_folders[$key] = 0;
                     }
@@ -142,7 +142,7 @@ if(!(is_array($missed) && count($missed)>0)){
     
     print 'Summary:<br>';
     foreach($missed_folders as $key=>$cnt){
-        print $key.",".$cnt.'<br>';
+        print $key.",".intval($cnt).'<br>';
     }
 
     print '<br><br>Detail:<br>';

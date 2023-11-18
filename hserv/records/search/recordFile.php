@@ -379,7 +379,7 @@ function resolveFilePath($path, $db_name=null){
             if(!file_exists($path) ){
                 
                 if($db_name!=null){
-                    $dir_folder = HEURIST_FILESTORE_ROOT . $db_name . '/';
+                    $dir_folder = USanitize::sanitizePath(HEURIST_FILESTORE_ROOT . $db_name . '/');
                     $db_folder_files = $dir_folder . 'file_uploads/';
                 }else{
                     $dir_folder = HEURIST_FILESTORE_DIR;

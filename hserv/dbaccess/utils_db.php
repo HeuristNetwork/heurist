@@ -272,7 +272,7 @@
             $res = $mysqli->query($query);
             if (!$res){
                 error_log($mysqli->errno.'****'.$mysqli->error);
-                error_log($query);
+                //error_log($query);
                 return null;    
                 
 /* determine our thread id */
