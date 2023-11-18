@@ -391,7 +391,9 @@ if($long_reports_count > 0){
     // [0] => Report name
     // [1] => Execution time
     foreach($long_reports as $dbname => $report_dtls){
-        $email_body .= "Report name: " . $report_dtls[0] . " takes " . $report_dtls[1] . " seconds to regenerate\n";
+        foreach($report_dtls as $idx => $report_dtl){
+            $email_body .= "Report name: " . $report_dtl[0] . " takes " . $report_dtl[1] . " seconds to regenerate\n";
+        }
     }
 
     $email_body .= "\nWe recommend either increasing the time between regenerations for these reports, "
