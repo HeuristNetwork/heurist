@@ -119,7 +119,7 @@
     // search for single record by "recID", by set of "ids" or heurist query "q"
     //
     if(@$params['recID']>0){
-        $search_params['q'] = array('ids'=>$params['recID']);
+        $search_params['q'] = array('ids'=>intval($params['recID']));
     }else if(@$params['ids']){
         $search_params['q'] = array('ids'=>implode(',', prepareIds($params['ids']) ));
     }else  if(@$params['iiif_image']){

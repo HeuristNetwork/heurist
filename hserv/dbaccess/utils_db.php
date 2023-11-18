@@ -665,9 +665,10 @@
             $query2 = substr($query2,0,strlen($query2)-2).")";
             $query = $query.$query2;
         }else{
-            $val = $mysqli->real_escape_string($rec_ID);
             $query = $query." where ".$primary_field."="
-                .($primary_field_type=='integer'?$val:("'".$val."'"));
+                .($primary_field_type=='integer'
+                        ?intval($rec_ID)
+                        :("'".$mysqli->real_escape_string($rec_ID)."'"));
         }
 
         $result = mysql__exec_param_query($mysqli, $query, $params);

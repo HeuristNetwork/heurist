@@ -53,7 +53,7 @@ public static function load($import_id){
     if($import_id && is_numeric($import_id)){
 
         $res = mysql__select_row(self::$mysqli,
-            "select sif_ProcessingInfo , sif_TempDataTable from sysImportFiles where sif_ID=".$import_id);
+            "select sif_ProcessingInfo , sif_TempDataTable from sysImportFiles where sif_ID=".intval($import_id));
 
         $session = json_decode($res[0], true);
         $session["import_id"] = $import_id;
@@ -181,7 +181,7 @@ public static function getRecordsFromImportTable1( $import_table, $imp_ids) {
     
     $imp_ids = prepareIds($imp_ids);
     
-    $query = 'SELECT * FROM '.$import_table.' WHERE imp_id IN ('. implode( ',', $imp_ids ) .')';
+    $query = 'SELECT * FROM `'.$import_table.'` WHERE imp_id IN ('. implode( ',', $imp_ids ) .')';
     $res = mysql__select_row($mysqli, $query);
     
     return $res;

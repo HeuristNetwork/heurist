@@ -2228,7 +2228,7 @@ function recordUpdateTitle($system, $recID, $rectype_or_mask, $recTitleDefault)
                 $new_title = mb_substr($new_title,0,1023);  
             } 
 
-            $query = "UPDATE Records set rec_Title=? where rec_ID=".$recID;
+            $query = "UPDATE Records set rec_Title=? where rec_ID=".intval($recID);
 
             $stmt = $mysqli->prepare($query);
 
