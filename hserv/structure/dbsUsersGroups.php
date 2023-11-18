@@ -50,8 +50,8 @@
     function user_getByField($mysqli, $field, $value, $database=null){
 
         $user = null;
-        $value = $mysqli->real_escape_string($value);
-        $query = 'select * from '.($database!=null?('`'.$database.'`.'):'').'sysUGrps where '.$field.' = "'.$value.'"';
+        $query = 'select * from '.($database!=null?('`'.$database.'`.'):'')
+            .'sysUGrps where '.$field.' = "'.$mysqli->real_escape_string($value).'"';
         $res = $mysqli->query($query);
         if($res){
             $user =$res->fetch_assoc();
@@ -435,7 +435,7 @@
             .' from '.($database!=null?('`'.$database.'`.'):'').'sysUsrGrpLinks '
             .' left join '.($database!=null?('`'.$database.'`.'):'').'sysUGrps grp '
             .' on grp.ugr_ID=ugl_GroupID where '
-            .' ugl_UserID='.$ugr_ID
+            .' ugl_UserID='.intval($ugr_ID)
             .' and grp.ugr_Type != "user" order by ugl_GroupID';
 
             $res = $mysqli->query($query);
@@ -479,7 +479,7 @@
 
             $query = 'select ugl_UserID, ugl_Role, ugr_FirstName, ugr_LastName, ugr_Organisation '
             .' from sysUsrGrpLinks left join sysUGrps usr on usr.ugr_ID=ugl_UserID where '
-            .' ugl_GroupID='.$ugr_ID
+            .' ugl_GroupID='.intval($ugr_ID)
             .' and usr.ugr_Type = "user" and usr.ugr_Enabled!="n" order by ugl_UserID';
 
             $res = $mysqli->query($query);
@@ -868,12 +868,12 @@
 
                             $query1 = "insert into $ldb.sysUGrps (ugr_Type,ugr_Name,$fields) ".
                             "SELECT ugr_Type,ugr_eMail,$fields ".
-                            "FROM sysUGrps where ugr_ID=".$userID;                            
+                            "FROM sysUGrps where ugr_ID=".intval($userID);                            
 
 
                         }else if($is_approvement){
                             //enable user
-                            $query1 = "update $ldb.sysUGrps set ugr_Enabled='". $is_approvement ."' where ugr_ID=".$userID;                            
+                            $query1 = "update $ldb.sysUGrps set ugr_Enabled='". $is_approvement ."' where ugr_ID=".intval($userID);                            
                         }
 
                         $res = $mysqli->query($query1);

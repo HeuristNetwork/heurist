@@ -2023,8 +2023,8 @@ When we open "iiif_image" in mirador viewer we generate manifest dynamically.
        if( $ulf_ID>0 && $dtl_ID>0 ){ //register in recDetails
                
                //update in recDetails
-               $query2 = 'update recDetails set dtl_Value=null, `dtl_UploadedFileID`='.$ulf_ID
-                                            .' where dtl_ID='.$dtl_ID;
+               $query2 = 'update recDetails set dtl_Value=null, `dtl_UploadedFileID`='.intval($ulf_ID)
+                                            .' where dtl_ID='.intval($dtl_ID);
                                             
                $this->system->get_mysqli()->query($query2);
 

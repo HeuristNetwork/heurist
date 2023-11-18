@@ -238,18 +238,20 @@ function fileGetFullInfo($system, $file_ids, $all_fields=false){
             
             $query = 'ulf_ObfuscatedFileID';
             if(count($file_ids)>1){
+                escapeValues($mysqli, $file_ids);
                 $query = $query.' in ("'.implode('","', $file_ids).'")';
             }else{
-                $query = $query.' = "'.$file_ids[0].'"';
+                $query = $query.' = "'.$mysqli->real_escape_string($file_ids[0]).'"';
             }
             
         }else if(is_numeric($file_ids[0]) && $file_ids[0]>0){
             $query = 'ulf_ID';
             
             if(count($file_ids)>1){
+                $file_ids = prepareIds($file_ids);
                 $query = $query.' in ('.implode(',', $file_ids).')';
             }else{
-                $query = $query.' = '.$file_ids[0];
+                $query = $query.' = '.intval($file_ids[0]);
             }
         }else{
             $system->addError(HEURIST_INVALID_REQUEST, 

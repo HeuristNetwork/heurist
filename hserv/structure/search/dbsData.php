@@ -363,7 +363,7 @@
     function dbs_GetRectypeByID($mysqli, $rty_ID) {
 
         $rectype = null;
-        $query = 'select * from defRecTypes where rty_ID ='.$rty_ID;
+        $query = 'select * from defRecTypes where rty_ID ='.intval($rty_ID);
         $res = $mysqli->query($query);
         if($res){
             $rectype =$res->fetch_assoc();

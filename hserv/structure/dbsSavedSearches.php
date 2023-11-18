@@ -91,8 +91,6 @@
                 $ugrID = $ugrID.',0';
             }
 
-        }else if(is_array($ugrID)){
-            $ugrID = implode(',', $ugrID);
         }
         
         if(!$ugrID) {
@@ -101,7 +99,8 @@
         
         if($keep_order){
             $order = array();
-            $query = 'SELECT ugr_NavigationTree FROM `sysUGrps` WHERE ugr_ID in ('.$ugrID.')';
+            $ugrID = prepareIds($ugrID,true);
+            $query = 'SELECT ugr_NavigationTree FROM `sysUGrps` WHERE ugr_ID in ('.implode(',', $ugrID).')';
             $res = $mysqli->query($query);
             if($res){
                 while ($row = $res->fetch_row()) {

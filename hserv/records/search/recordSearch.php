@@ -2027,7 +2027,7 @@ function recordSearch($system, $params)
             
             //second parameter is link - add ids
             $keys = array_keys($params['q']);
-            array_push($params['q'][$keys[count($keys)>1?1:0]],array('ids'=>$params['topids']));
+            array_push($params['q'][$keys[count($keys)>1?1:0]],array('ids'=>prepareIds($params['topids'])));
             
         }else{
 
@@ -2038,7 +2038,7 @@ function recordSearch($system, $params)
             }else{
                 $query_top['from'] = 'FROM Records TOPBIBLIO LEFT JOIN usrBookmarks TOPBKMK ON bkm_recID=rec_ID and bkm_UGrpID='.$currUserID.' ';
             }
-            $query_top['where'] = "(TOPBIBLIO.rec_ID in (".$params['topids']."))";
+            $query_top['where'] = "(TOPBIBLIO.rec_ID in (".implode(',',prepareIds($params['topids']))."))";
             $query_top['sort'] =  '';
             $query_top['limit'] =  '';
             $query_top['offset'] =  '';

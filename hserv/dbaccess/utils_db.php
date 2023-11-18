@@ -1318,6 +1318,14 @@
     function is_true($val){
         return $val===true || in_array(strtolower($val), array('y','yes','true','t','ok'));
     }
+    //
+    //
+    //
+    function escapeValues($mysqli, &$values){
+        foreach($values as $idx=>$v){
+            $values[$idx] = $mysqli->real_escape_string($v);
+        }
+    }
 
     //
     // $rec_IDs - may by csv string or array 

@@ -824,7 +824,7 @@ private static function __get_rt_id( $rt_search ){
         }                
         if($where==''){
             if($rt_search>0){
-                $where = 'rty_ID='.$rt_search;    
+                $where = 'rty_ID='.intval($rt_search);    
             }else{
                 $where = 'LOWER(rty_Name)="'.mb_strtolower($rt_search, 'UTF-8').'"';    
             }
