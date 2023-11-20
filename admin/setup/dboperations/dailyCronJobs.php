@@ -392,7 +392,7 @@ if($long_reports_count > 0){
     // [1] => Execution time
     foreach($long_reports as $dbname => $report_dtls){
         foreach($report_dtls as $idx => $report_dtl){
-            $email_body .= "Report name: " . $report_dtl[0] . " takes " . $report_dtl[1] . " seconds to regenerate\n";
+            $email_body .= "DB: $dbname, Report name: " . $report_dtl[0] . " takes " . $report_dtl[1] . " seconds to regenerate\n";
         }
     }
 
