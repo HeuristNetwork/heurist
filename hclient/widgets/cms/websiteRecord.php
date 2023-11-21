@@ -271,9 +271,11 @@ $website_languages = null;
 if(defined('DT_LANGUAGES')){
     $website_languages = @$rec['details'][DT_LANGUAGES];
     if(is_array($website_languages) && count($website_languages)>0){
-        $website_languages = getTermCodes($mysqli, $website_languages);
+        $orig_arr = print_r($website_languages,true);
+        $website_languages_codes = getTermCodes($mysqli, $website_languages);
         $res = '';
-        foreach($website_languages as $lang_code){
+        foreach($website_languages as $term_id){
+            $lang_code = @$website_languages_codes[$term_id];
             if($lang_code){
                 $lang_code = strtoupper($lang_code);
                 if($website_language_def=='') $website_language_def = $lang_code;

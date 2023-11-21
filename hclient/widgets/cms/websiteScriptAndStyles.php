@@ -82,8 +82,7 @@ if (($_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0.0.1')
     var init_page_record_id=<?php echo $open_page_or_record_on_init; ?>;
     var isWebPage = <?php echo ($isWebPage ?'true':'false');?>;
     var current_page_id = 0;
-    var current_language = 'def';
-    var default_language = '<?php echo $website_language_def; ?>';
+    var current_language = '<?php echo $website_language_def?$website_language_def:'def'; ?>';
     var website_languages = '<?php echo $website_languages?implode(',',$website_languages):''; ?>';
     var is_show_pagetitle_main = <?php echo $show_pagetitle?'true':'false'; ?>;  //is show page title per website 
     var isCMS_active = <?php echo (@$_REQUEST['edit']?'true':'false'); ?>; //use new CMS editor and init it once
@@ -93,7 +92,6 @@ if (($_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0.0.1')
     var is_execute_homepage_custom_javascript = false;
     var first_not_empty_page = 0;
     var website_title = <?php echo $website_title; ?>; 
-    
     
     var record_view_smarty_template = '<?php echo ($record_view_smarty_template!=null?$record_view_smarty_template:'');?>';
     var record_view_target = '<?php echo ($record_view_target!=null?$record_view_target:'');?>';
@@ -1159,7 +1157,10 @@ function onHapiInit(success){
         return;
     }
     
-    current_language = window.hWin.HEURIST4.util.getUrlParameter('lang');            
+    var lang_from_url = window.hWin.HEURIST4.util.getUrlParameter('lang');
+    if(lang_from_url){
+        current_language = lang_from_url;                
+    }
     
     function __init_completed(success){
         if(success){
