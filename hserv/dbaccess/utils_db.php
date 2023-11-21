@@ -666,10 +666,14 @@
             $query2 = substr($query2,0,strlen($query2)-2).")";
             $query = $query.$query2;
         }else{
-            $query = $query." where ".$primary_field."="
-                .($primary_field_type=='integer'
-                        ?intval($rec_ID)
-                        :("'".$mysqli->real_escape_string($rec_ID)."'"));
+            $query = $query.' where '.$primary_field.'=?';
+            
+            if($primary_field_type=='integer'){
+                $params[0] = $params[0].'i';    
+            }else{
+                $params[0] = $params[0].'s';
+            }
+            array_push($params, $rec_ID);
         }
 
         $result = mysql__exec_param_query($mysqli, $query, $params);

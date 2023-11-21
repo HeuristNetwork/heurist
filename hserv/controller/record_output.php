@@ -109,7 +109,7 @@
     $search_params['w'] = filter_var(@$params['w'], FILTER_SANITIZE_STRING);
     
     if(@$params['format']=='gephi' || @$params['format']=='geojson'){
-        $search_params['limit'] = (@$params['limit']>0)?$params['limit']:null;
+        $search_params['limit'] = (@$params['limit']>0)?intval($params['limit']):null;
     }else
     if(!(@$params['offset'] || @$params['limit'])){
         $search_params['needall'] = 1;  //search without limit of returned record count
