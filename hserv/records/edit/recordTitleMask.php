@@ -826,7 +826,7 @@ private static function __get_rt_id( $rt_search ){
             if($rt_search>0){
                 $where = 'rty_ID='.intval($rt_search);    
             }else{
-                $where = 'LOWER(rty_Name)="'.mb_strtolower($rt_search, 'UTF-8').'"';    
+                $where = 'LOWER(rty_Name)="'.self::$mysqli->real_escape_string(mb_strtolower($rt_search, 'UTF-8')).'"';    
             }
         }
         $query = $query . $where;

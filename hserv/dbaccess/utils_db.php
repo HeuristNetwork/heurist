@@ -177,7 +177,7 @@
     //
     function mysql__drop_database( $mysqli, $db_name ){
 
-        return $mysqli->query('DROP DATABASE '.$db_name);
+        return $mysqli->query('DROP DATABASE `'.$db_name.'`');
     }
 
     //
@@ -211,7 +211,8 @@
                              $email = null, $role = null, $prefix=HEURIST_DB_PREFIX)
     {
         
-        if($starts_with!=null){
+        if($starts_with!=null && (mysql__check_dbname($starts_with)===true))
+        {
             $where = "'hdb_$starts_with%'";
         }else{
             $where = "'hdb_%'";    

@@ -223,6 +223,7 @@ $.widget( "heurist.editing_input", {
                             'min-width':'22px',  'border-color':'transparent'})
                     .appendTo( this.element );
 
+                //translation for text field only    
                 let rec_translate = this.options.recordset && this.options.recordset.entityName == 'Records' && !is_translation
                                     && (this.detailType == 'freetext' || this.detailType == 'blocktext');
 
@@ -565,7 +566,7 @@ $.widget( "heurist.editing_input", {
         }else if(this.isReadonly()){
             this.input_cell.attr('title', 'This field has been marked as non-editable');
         }
-    }, //end _create
+    }, //end _create------------------------------------------------------------
 
     /* private function */
     _refresh: function(){
@@ -823,6 +824,9 @@ $.widget( "heurist.editing_input", {
         
     },
     
+    //
+    //
+    //
     _setAutoWidth: function(){
 
         if(this.options.is_faceted_search) return;
@@ -1504,7 +1508,8 @@ $.widget( "heurist.editing_input", {
 
         }
         // || this.options.dtID=='tag'
-        else if(this.detailType=='enum' || this.detailType=='relationtype'){//--------------------------------------
+        else 
+        if(this.detailType=='enum' || this.detailType=='relationtype'){//--------------------------------------
 
             var dwidth;
             if(this.configMode && this.configMode.entity!='records'){
@@ -2626,7 +2631,8 @@ $.widget( "heurist.editing_input", {
                         .text('yyyy, yyyy-mm or yyyy + click calendar (remembers last date)')
                         .insertBefore(this.input_prompt);
                 }
-            }else 
+            }
+            else 
             if(this.isFileForRecord){ //----------------------------------------------------
                 
 				var $input_img, $gicon;
@@ -3376,7 +3382,8 @@ $.widget( "heurist.editing_input", {
 
                 this._on( $input, { keypress: __show_action_dialog, click: __show_action_dialog } );
                 this._on( $gicon, { click: __show_action_dialog } );
-            }else 
+            }
+            else 
             if(this.detailType=='geo'){   //----------------------------------------------------
                 
                 $input.css({'width':'62ex','padding-left':'30px',cursor:'hand'});
@@ -3490,7 +3497,8 @@ $.widget( "heurist.editing_input", {
                 this._on( $input, { keypress: __show_mapdigit_dialog, click: __show_mapdigit_dialog } );
                 this._on( $gicon, { click: __show_mapdigit_dialog } );
 
-            }else if(this.configMode && this.configMode['colorpicker']){ //-----------------------------------------------
+            }
+            else if(this.configMode && this.configMode['colorpicker']){ //-----------------------------------------------
                 
                 $input.colorpicker({
                         hideButton: false, //show button right to input
@@ -3498,7 +3506,9 @@ $.widget( "heurist.editing_input", {
                         val:value});
                 $input.parent('.evo-cp-wrap').css({display:'inline-block',width:'200px'});
                 
-            }else if(this.options.dtID && this.options.dtID == window.hWin.HAPI4.sysinfo['dbconst']['DT_MAP_BOOKMARK']){ // Geo Bookmark, five input form, experimental 
+            }
+            else 
+            if(this.options.dtID && this.options.dtID == window.hWin.HAPI4.sysinfo['dbconst']['DT_MAP_BOOKMARK']){ // Geo Bookmark, five input form, experimental 
 
                 $input.css({cursor:'hand'});
 
@@ -3852,7 +3862,7 @@ $.widget( "heurist.editing_input", {
                 || this.detailType=='integer' || this.detailType=='float')){
 
                     
-                this.addSecondInut( $input.attr('id') );
+                this.addSecondInput( $input.attr('id') );
                     
             }else {
                 this.options.is_between_mode = false;
@@ -6047,7 +6057,7 @@ $.widget( "heurist.editing_input", {
            this.options.is_between_mode = mode_val;
            
            if(this.options.is_between_mode){
-                this.addSecondInut();           
+                this.addSecondInput();           
            }else{
                var that = this;
                this.element.find('.span-dash').remove();
@@ -6066,7 +6076,7 @@ $.widget( "heurist.editing_input", {
     //
     //
     //
-    addSecondInut: function(input_id){
+    addSecondInput: function(input_id){
 
         var that = this;
         $.each(this.inputs, function(idx, item){

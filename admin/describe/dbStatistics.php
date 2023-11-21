@@ -29,7 +29,7 @@ require_once dirname(__FILE__).'/../../hserv/utilities/uFile.php';
 
 $is_csv = (@$_REQUEST['csv']==1);
 
-$starts_with = @$_REQUEST['start'];
+$starts_with = filter_var(@$_REQUEST['start'], FILTER_SANITIZE_STRING);
 
 if( $system->verifyActionPassword( @$_REQUEST['pwd'], $passwordForServerFunctions) ){
     $response = $system->getError();
@@ -136,20 +136,22 @@ foreach ($dbs as $db){
             $size /= 1048576;
             $size = round((float)$size, 2);
         }
+        
+        $db = '`'.$db.'`';
 
         $record_row = array (
             $db_name,
-            mysql__select_val("select count(*) from ".$db.".Records where (not rec_FlagTemporary)"),
+            mysql__select_val("select count(*) from $db.`Records` where (not rec_FlagTemporary)"),
             $size,
-            mysql__select_val("select max(rec_Modified)  from ".$db.".Records"),
-            mysql__select_value($mysqli, "select max(rst_Modified) from ".$db.".defRecStructure"),
-            mysql__select_val("select cast(sys_dbRegisteredID as CHAR) from ".$db.".sysIdentification where 1"),
+            mysql__select_val("select max(rec_Modified)  from $db.`Records`"),
+            mysql__select_value($mysqli, "select max(rst_Modified) from $db.`defRecStructure`"),
+            mysql__select_val("select cast(sys_dbRegisteredID as CHAR) from $db.`sysIdentification` where 1"),
             mysql__select_val("select concat_ws('.',cast(sys_dbVersion as char),cast(sys_dbSubVersion as char)) "
-                ." from ".$db.".sysIdentification where 1")
+                ." from $db.`sysIdentification` where 1")
         );
 
         $owner = mysql__select_row($mysqli, "SELECT concat(ugr_FirstName,' ',ugr_LastName),ugr_eMail,ugr_Organisation ".
-            "FROM ".$db.".sysUGrps where ugr_id=2");
+            "FROM $db.`sysUGrps` where ugr_id=2");
 
         if($is_csv){
 

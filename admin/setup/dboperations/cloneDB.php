@@ -108,7 +108,7 @@ if(@$_REQUEST['mode']=='2'){
                     .$system->getError()['message'].'<br/></div>';
     }else{
 
-        $targetdbname = htmlspecialchars($_REQUEST['targetdbname']);
+        $targetdbname = filter_var(@$_REQUEST['targetdbname'], FILTER_SANITIZE_STRING);
 
         if(strlen($targetdbname)>64){
                 $sErrorMsg = 'Database name '.$targetdbname.' is too long. Max 64 characters allowed';
