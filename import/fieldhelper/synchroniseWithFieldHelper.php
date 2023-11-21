@@ -230,12 +230,12 @@ $failed_exts = array();
         // ---- visit #3 - PROCESS THE HARVESTING -----------------------------------------------------------------
 
         if(array_key_exists('mode', $_REQUEST) && $_REQUEST['mode']=='2'){
-            $mediaFolders = $_REQUEST['media'];
+            $mediaFolders = filter_var($_REQUEST['media'], FILTER_SANITIZE_STRING);
             print "<p>Now harvesting FieldHelper metadata into <b> ". HEURIST_DBNAME. "</b><br> ";
 
             $dirs = explode(';', $mediaFolders); // get an array of folders
 
-            $mediaExts = $_REQUEST['exts'];
+            $mediaExts = filter_var($_REQUEST['exts'], FILTER_SANITIZE_STRING);
             $mediaExts = explode(',', $mediaExts);
 
             $rep_counter = 0;

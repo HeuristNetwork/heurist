@@ -1576,12 +1576,15 @@ function addReverseChildToParentPointer($mysqli, $child_id, $parent_id, $addedBy
             $res->close();
             $res = ($dtl_ID>0)?2:1;
         }
+        
+        $parent_id = intval($parent_id);
 
         if($dtl_ID>0 && !$allow_multi_parent){ //pointer already exists
             $mysqli->query('UPDATE recDetails '.
-                'SET dtl_Value='.intval($parent_id).' WHERE dtl_ID='.intval($dtl_ID));                    
+                'SET dtl_Value='.$parent_id.' WHERE dtl_ID='.intval($dtl_ID));                    
             if($mysqli->error) $res = -1; //($mysqli->affected_rows>0);
         }else{
+            $child_id  = intval($child_id);
             $mysqli->query('INSERT INTO recDetails '.
                 "(dtl_RecID, dtl_DetailTypeID, dtl_Value, dtl_AddedByImport) ".
                 "VALUES ($child_id, ".DT_PARENT_ENTITY.", $parent_id, $addedByImport )");                    

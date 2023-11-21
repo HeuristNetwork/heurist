@@ -135,7 +135,8 @@ if(!$system->init(@$_REQUEST['db'])){
             
             //vaidate values(dates,int) saves into import table
             $res = ImportParser::parseAndValidate( intval(@$_REQUEST["encoded_filename_id"]), 
-                                                   @$_REQUEST["original_filename"], 0, $_REQUEST);
+                                                   filter_var(@$_REQUEST["original_filename"],FILTER_SANITIZE_STRING),
+                                                   0, $_REQUEST);
             
         }else if($action=='step3'){ // matching - assign record ids
         
@@ -155,23 +156,25 @@ if(!$system->init(@$_REQUEST['db'])){
             
         }else if($action=='set_primary_rectype'){
             
-            $res = ImportSession::setPrimaryRectype( @$_REQUEST['imp_ID'], @$_REQUEST['rty_ID'], @$_REQUEST['sequence']);
+            $res = ImportSession::setPrimaryRectype( intval(@$_REQUEST['imp_ID']), intval(@$_REQUEST['rty_ID']), @$_REQUEST['sequence']);
             
         }else if($action=='get_matching_samples'){
             
-            $res = ImportSession::getMatchingSamples( @$_REQUEST['imp_ID'], @$_REQUEST['rty_ID'] );
+            $res = ImportSession::getMatchingSamples( intval(@$_REQUEST['imp_ID']), intval(@$_REQUEST['rty_ID']) );
             
         }else if($action=='records'){  //load records from temp import table   
+        
+            $table_name = filter_var(@$_REQUEST['table'],FILTER_SANITIZE_STRING);
             
-            if(!@$_REQUEST['table']){
+            if($table_name==null || $table_name==''){
                 $system->addError(HEURIST_INVALID_REQUEST, '"table" parameter is not defined');                  
                 $res = false;
                 
             }else
             if(@$_REQUEST['imp_ID']){
-                $res = ImportSession::getRecordsFromImportTable1($_REQUEST['table'], $_REQUEST['imp_ID']);    
+                $res = ImportSession::getRecordsFromImportTable1($table_name, intval($_REQUEST['imp_ID']));    
             }else{
-                $res = ImportSession::getRecordsFromImportTable2($_REQUEST['table'], 
+                $res = ImportSession::getRecordsFromImportTable2($table_name, 
                             @$_REQUEST['id_field'],       
                             @$_REQUEST['mode'], //all, insert, update
                             @$_REQUEST['mapping'],
@@ -180,6 +183,7 @@ if(!$system->init(@$_REQUEST['db'])){
                             @$_REQUEST['output']
                             );    
             }
+            
             
             if($res && @$_REQUEST['output']=='csv'){
             
@@ -216,14 +220,15 @@ if(!$system->init(@$_REQUEST['db'])){
             
         }else if($action=='import_preview'){
             //reads import file and returns list of record types to be imported
-            $filename = basename(@$_REQUEST['filename']);
+            $filename = filter_var(basename(@$_REQUEST['filename']),FILTER_SANITIZE_STRING);
             
             $res = ImportHeurist::getDefintions($filename);
             
         }else if($action=='import_definitions'){ //import defs before import records
             
             //update record types from remote database
-            $filename = basename(@$_REQUEST['filename']);
+            $filename = filter_var(basename(@$_REQUEST['filename']),FILTER_SANITIZE_STRING);
+
             $res = ImportHeurist::importDefintions($filename, @$_REQUEST['session']);
             //$need_compress = true;
             
@@ -232,7 +237,8 @@ if(!$system->init(@$_REQUEST['db'])){
             //returns count of imported records
             if(@$_REQUEST['filename']!=null){
                 //filename - source hml or json file (in scratch), session - unique id for progress
-                $filename = basename(@$_REQUEST['filename']);
+                $filename = filter_var(basename(@$_REQUEST['filename']),FILTER_SANITIZE_STRING);
+
                 $res = ImportHeurist::importRecords($filename, @$_REQUEST);
 
             }else{
