@@ -234,7 +234,13 @@
         }
 
         if($rectypeids){
-            $querywhere = " where rty_ID in (".(is_array($rectypeids)?join(",", $rectypeids) :$rectypeids).")";
+            
+            if(!is_array($rectypeids)){
+                $rectypeids = array($rectypeids);
+            }
+            $rectypeids = prepareIds($rectypeids);
+            
+            $querywhere = ' where rty_ID '.(count($rectypeids)>1)?(' IN ('.implode(',', $rectypeids).')') :('='.intval($rectypeids[0]));
         } else {
             $querywhere = "";
         }
@@ -1333,8 +1339,10 @@ function dbs_GetRectypeConstraint($system) {
             if($dettypeids[0]!='all'){
                 //detect ID or TYPE
                 if(is_numeric($dettypeids[0])){
+                    $dettypeids = prepareIds($dettypeids);
                     $where_exp = ' dty_ID in ('.implode(',',$dettypeids).')';        
                 }else{
+                    escapeValues($mysqli, $dettypeids); 
                     $where_exp = ' dty_Type in (\''.implode("','",$dettypeids).'\')';        
                 }
             }

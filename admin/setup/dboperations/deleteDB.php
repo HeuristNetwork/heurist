@@ -33,7 +33,7 @@ if(!@$_REQUEST['pwd']){
     $system->addError(HEURIST_INVALID_REQUEST, 'Password parameter is not defined');
 }else{
     
-    $database_to_delete = @$_REQUEST['database'];
+    $database_to_delete = filter_var(@$_REQUEST['database'], FILTER_SANITIZE_STRING);
     $invalidDbName = System::dbname_check($database_to_delete);
     if ($invalidDbName) {
         $system->addError(HEURIST_ACTION_BLOCKED, 

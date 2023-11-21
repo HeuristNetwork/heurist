@@ -157,7 +157,8 @@ if (@$requestUri[3]=='iiif') {
     
     if($requestUri[3]==='login'){
         
-        if(!$system->doLogin(@$_REQUEST['fields']['login'], @$_REQUEST['fields']['password'], 'shared'))
+        if(!$system->doLogin(filter_var(@$_REQUEST['fields']['login'], FILTER_SANITIZE_STRING),
+                             @$_REQUEST['fields']['password'], 'shared'))
         {
             $system->error_exit_api();
         }else{

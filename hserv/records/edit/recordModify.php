@@ -1560,6 +1560,7 @@ function addReverseChildToParentPointer($mysqli, $child_id, $parent_id, $addedBy
 
     if(defined('DT_PARENT_ENTITY')){
 
+        $child_id  = intval($child_id);
         $dtl_ID = -1;
 
         $query = 'SELECT dtl_ID, dtl_Value FROM recDetails WHERE dtl_RecID='
@@ -1584,7 +1585,6 @@ function addReverseChildToParentPointer($mysqli, $child_id, $parent_id, $addedBy
                 'SET dtl_Value='.$parent_id.' WHERE dtl_ID='.intval($dtl_ID));                    
             if($mysqli->error) $res = -1; //($mysqli->affected_rows>0);
         }else{
-            $child_id  = intval($child_id);
             $mysqli->query('INSERT INTO recDetails '.
                 "(dtl_RecID, dtl_DetailTypeID, dtl_Value, dtl_AddedByImport) ".
                 "VALUES ($child_id, ".DT_PARENT_ENTITY.", $parent_id, $addedByImport )");                    

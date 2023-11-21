@@ -821,19 +821,24 @@ private static function __get_rt_id( $rt_search ){
                 $where = 'rty_OriginatingDBID ='.$db_oid
                     .' AND rty_IDInOriginatingDB ='.$oid;
             }
-        }                
+        }
+        $params = null;                
         if($where==''){
             if($rt_search>0){
-                $where = 'rty_ID='.intval($rt_search);    
+                $params = array('i',intval($rt_search));
+                $where = 'rty_ID=?';    
             }else{
-                $where = 'LOWER(rty_Name)="'.self::$mysqli->real_escape_string(mb_strtolower($rt_search, 'UTF-8')).'"';    
+                $params = array('s', mb_strtolower($rt_search, 'UTF-8'));
+                $where = 'LOWER(rty_Name)=?';    
             }
         }
         $query = $query . $where;
         
-        $res = self::$mysqli->query($query);
+        $res = mysql__exec_param_query(self::$mysqli, $query, $params);
+        
         if($res){
             $row = $res->fetch_assoc();
+            $res->close();
             if($row){
                 
                 if (is_numeric($row['rty_OriginatingDBID']) && $row['rty_OriginatingDBID']>0 &&
@@ -846,7 +851,6 @@ private static function __get_rt_id( $rt_search ){
                 }
                 return array($row['rty_ID'], $rt_cc, $row['rty_Name']);
             }
-            $res->close();
         }    
         return array(0, '', '');
 }

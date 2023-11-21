@@ -106,7 +106,7 @@
     if(!@$params['format']) $params['format'] = 'json';
     
     $search_params = array();
-    $search_params['w'] = @$params['w'];
+    $search_params['w'] = filter_var(@$params['w'], FILTER_SANITIZE_STRING);
     
     if(@$params['format']=='gephi' || @$params['format']=='geojson'){
         $search_params['limit'] = (@$params['limit']>0)?$params['limit']:null;

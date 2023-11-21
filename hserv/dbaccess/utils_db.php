@@ -682,20 +682,28 @@
         return $result;
     }
     //
-    // returns true ot mysql error
+    // returns for SELECT - $stmt->get_result() or false
+    //         for INSERT, UPDATE  return $return_affected_rows or true
+    //         OR mysql error
     //  $query with parameters "?"
     //  $params - array for parameters, first element is string with types "sdi"
     //
     function mysql__exec_param_query($mysqli, $query, $params, $return_affected_rows=false){
+        
+        $is_select = (stripos($query, 'select') === 0 && stripos($query, 'from') !== false);
+        
+        $result = false;
 
         if (!is_array($params) || count($params) < 1) {// not parameterised
             if ($result = $mysqli->query($query)) {
-
-                $result = $return_affected_rows ?$mysqli->affected_rows  :true;
                 
-            } else {
+                if(!$is_select){
+                    $result = $return_affected_rows ?$mysqli->affected_rows  :true;
+                }
+                
+            } else if(!$is_select){
                 $result = $mysqli->error;
-                if ($result == "") {
+                if ($result == '') {
                    $result = $return_affected_rows ?$mysqli->affected_rows  :true;
                 }
             }
@@ -706,14 +714,18 @@
                 //Call the $stmt->bind_param() method with atrguments (string $types, mixed &...$vars)
                 call_user_func_array(array($stmt, 'bind_param'), referenceValues($params));
                 if(!$stmt->execute()){
-                    $result = $mysqli->error;
+                    $result = ($is_select)?false:$mysqli->error;
                 }else{
-                    $result = $return_affected_rows ?$mysqli->affected_rows  :true;
+                    if($is_select){    
+                        $result = $stmt->get_result();
+                    }else{
+                        $result = $return_affected_rows ?$mysqli->affected_rows  :true;
+                    }
                     //$result = $stmt->insert_id ?$stmt->insert_id :$mysqli->affected_rows;
                 }
                 $stmt->close();
             }else{
-                $result = $mysqli->error;
+                $result = ($is_select)?false:$mysqli->error;
             }
         }
 

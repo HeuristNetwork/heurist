@@ -51,8 +51,10 @@
 
         $user = null;
         $query = 'select * from '.($database!=null?('`'.$database.'`.'):'')
-            .'sysUGrps where '.$field.' = "'.$mysqli->real_escape_string($value).'"';
-        $res = $mysqli->query($query);
+            .'sysUGrps where '.$field.' = ?';
+            
+        $res = mysql__exec_param_query($mysqli, $query, array('s',$value));
+            
         if($res){
             $user =$res->fetch_assoc();
             $res->close();
