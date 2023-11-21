@@ -2495,11 +2495,19 @@ class HPredicate {
         return ($timestamp0  &&  $timestamp1);
     }
 
-    function makeDateClause_old_to_remove() {
+    //
+    //
+    //
+    function makeDateClause_ForHeaderField() {
 
-        if (strpos($this->value,"<>")) {
+        if (strpos($this->value,"<>") || strpos($this->value,"/")) {
 
-            $vals = explode("<>", $this->value);
+            if(strpos($this->value,"<>")){
+                $vals = explode("<>", $this->value);
+            }else{
+                $vals = explode("/", $this->value);
+            }
+            
             $datestamp0 = Temporal::dateToISO($vals[0]);
             $datestamp1 = Temporal::dateToISO($vals[1]);
 
@@ -2925,6 +2933,7 @@ class HPredicate {
         }
         else {
             
+            $isHeaderDate = false;
             
             if($this->pred_type=='addedby' || $this->pred_type=='owner')
             {
@@ -2936,15 +2945,15 @@ class HPredicate {
             }       
             
             if($this->pred_type=='modified' || $this->pred_type=='added' 
-                || $this->pred_type=='after'  || $this->pred_type=='before'){
-                    
-                    
+                || $this->pred_type=='after'  || $this->pred_type=='before'
+                || $this->field_id=='added' || $this->field_id=='modified'){
+        
                 if($this->pred_type=='before') $this->lessthan = '<=';
                 if($this->pred_type=='after')  $this->greaterthan = '>';
-            
                     
                 $this->field_type = 'date';
                 $cs_ids = null;    
+                $isHeaderDate = true;
             }else
             if($this->pred_type=='title' || $this->pred_type=='url' || $this->pred_type=='notes'
                 || $this->field_type=='date'){
@@ -2964,7 +2973,11 @@ class HPredicate {
 
             } else if($this->field_type=='date'){ //$this->isDateTime()){
                 //
-                $res = $this->makeDateClause();
+                if($isHeaderDate){
+                    $res = $this->makeDateClause_ForHeaderField();    
+                }else{
+                    $res = $this->makeDateClause();    
+                }
 
             } else {
                 
