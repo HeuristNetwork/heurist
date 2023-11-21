@@ -65,7 +65,7 @@ if($system->init(@$_REQUEST['db'])){
     
     if(!$response){
         
-        $quota = $system->getDiskQuota();
+        $quota = $system->getDiskQuota(); //takes value from disk_quota_allowances.txt
         $quota_not_defined = (!($quota>0));
         if($quota_not_defined){
             $quota = 1073741824; //1GB    

@@ -386,7 +386,7 @@
         $result = null;
         if($mysqli){
             
-            $res = mysql__exec_param_query($mysqli, $query, $params);
+            $res = mysql__select_param_query($mysqli, $query, $params);
             if($res){
                 $row = $res->fetch_row();
                 if($row){
@@ -687,25 +687,49 @@
     }
     //
     // returns for SELECT - $stmt->get_result() or false
-    //         for INSERT, UPDATE  return $return_affected_rows or true
-    //         OR mysql error
+    //
+    function mysql__select_param_query($mysqli, $query, $params=null){
+    
+        $result = false;
+
+        if ($params==null || !is_array($params) || count($params) < 1) {// not parameterised
+            $result = $mysqli->query($query);
+        }else{        
+
+            $stmt = $mysqli->prepare($query);
+            if($stmt){
+                //Call the $stmt->bind_param() method with atrguments (string $types, mixed &...$vars)
+                call_user_func_array(array($stmt, 'bind_param'), referenceValues($params));
+                if($stmt->execute()){
+                    $result = $stmt->get_result();
+                }else{
+                    $result = false;
+                }
+                $stmt->close();
+            }else{
+                $result = false;
+            }
+        }
+
+        return $result;
+    }
+    
+    //
+    //  For INSERT, UPDATE  return $return_affected_rows or true
+    //         if fails it returns mysql error
     //  $query with parameters "?"
     //  $params - array for parameters, first element is string with types "sdi"
     //
     function mysql__exec_param_query($mysqli, $query, $params, $return_affected_rows=false){
-        
-        $is_select = (stripos($query, 'select') === 0 && stripos($query, 'from') !== false);
         
         $result = false;
 
         if (!is_array($params) || count($params) < 1) {// not parameterised
             if ($result = $mysqli->query($query)) {
                 
-                if(!$is_select){
-                    $result = $return_affected_rows ?$mysqli->affected_rows  :true;
-                }
+                $result = $return_affected_rows ?$mysqli->affected_rows  :true;
                 
-            } else if(!$is_select){
+            } else {
                 $result = $mysqli->error;
                 if ($result == '') {
                    $result = $return_affected_rows ?$mysqli->affected_rows  :true;
@@ -718,18 +742,13 @@
                 //Call the $stmt->bind_param() method with atrguments (string $types, mixed &...$vars)
                 call_user_func_array(array($stmt, 'bind_param'), referenceValues($params));
                 if(!$stmt->execute()){
-                    $result = ($is_select)?false:$mysqli->error;
+                    $result = $mysqli->error;
                 }else{
-                    if($is_select){    
-                        $result = $stmt->get_result();
-                    }else{
-                        $result = $return_affected_rows ?$mysqli->affected_rows  :true;
-                    }
-                    //$result = $stmt->insert_id ?$stmt->insert_id :$mysqli->affected_rows;
+                    $result = $return_affected_rows ?$mysqli->affected_rows  :true;
                 }
                 $stmt->close();
             }else{
-                $result = ($is_select)?false:$mysqli->error;
+                $result = $mysqli->error;
             }
         }
 

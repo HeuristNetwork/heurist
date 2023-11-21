@@ -834,7 +834,7 @@ private static function __get_rt_id( $rt_search ){
         }
         $query = $query . $where;
         
-        $res = mysql__exec_param_query(self::$mysqli, $query, $params);
+        $res = mysql__select_param_query(self::$mysqli, $query, $params);
         
         if($res){
             $row = $res->fetch_assoc();

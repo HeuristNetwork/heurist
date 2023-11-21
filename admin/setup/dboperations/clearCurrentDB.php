@@ -65,7 +65,7 @@ require_once dirname(__FILE__).'/../../../records/index/elasticSearch.php';
     <div class='banner'><h3>Clear Records from Current Heurist database</h3></div>
     <div id='page-inner' style='overflow:auto'>
 <?php
-    $dbname = htmlspecialchars($_REQUEST['db']);
+    $dbname = filter_var($_REQUEST['db'], FILTER_SANITIZE_STRING);
     $is_db_valid = mysql__check_dbname($dbname);
     
     $sysadmin_protection = @$_REQUEST['sa_protect'];
