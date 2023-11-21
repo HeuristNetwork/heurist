@@ -783,7 +783,7 @@ function recordSave($system, $record, $use_transaction=true, $suppress_parent_ch
                         //update record title for child record
                         list($child_rectype, $child_title) = mysql__select_row($mysqli,
                             'SELECT rec_RecTypeID, rec_Title FROM Records WHERE rec_ID='
-                            .$dtl_Value);
+                            .intval($dtl_Value));
                         recordUpdateTitle($system, $dtl_Value, $child_rectype, $child_title);
                     }
 
@@ -802,7 +802,7 @@ function recordSave($system, $record, $use_transaction=true, $suppress_parent_ch
                         //update record title for parent record
                         list($parent_rectype, $parent_title) = mysql__select_row($mysqli,
                             'SELECT rec_RecTypeID, rec_Title FROM Records WHERE rec_ID='
-                            .$dtl_Value);
+                            .intval($dtl_Value));
                         recordUpdateTitle($system, $dtl_Value, $parent_rectype, $parent_title);
                     }
 
@@ -1634,6 +1634,8 @@ function addParentToChildPointer($mysqli, $child_id, $child_rectype, $parent_id,
     if(defined('DT_PARENT_ENTITY')){
 
         $dtl_ID = -1;
+        $parent_id = intval($parent_id);
+        $child_id = intval($child_id);
 
         //find what field in parent record refers
         if(!($detailTypeId>0)){

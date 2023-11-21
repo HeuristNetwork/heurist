@@ -365,8 +365,8 @@
     * @param mixed $mysqli
     * @param mixed $query
     */
-    function mysql__select_value($mysqli, $query) {
-        $row = mysql__select_row($mysqli, $query);
+    function mysql__select_value($mysqli, $query, $params=null) {
+        $row = mysql__select_row($mysqli, $query, $params);
 
         if($row && @$row[0]!=null){
             $result = $row[0];
@@ -382,10 +382,11 @@
     * @param mixed $mysqli
     * @param mixed $query
     */
-    function mysql__select_row($mysqli, $query) {
+    function mysql__select_row($mysqli, $query, $params=null) {
         $result = null;
         if($mysqli){
-            $res = $mysqli->query($query);
+            
+            $res = mysql__exec_param_query($mysqli, $query, $params);
             if($res){
                 $row = $res->fetch_row();
                 if($row){
@@ -595,8 +596,7 @@
             }else{
                 //check insert or update
                 $res = mysql__select_value($mysqli, 
-                    "SELECT $primary_field FROM $table_name WHERE $primary_field='"
-                        .$mysqli->real_escape_string($rec_ID)."'");
+                    "SELECT $primary_field FROM $table_name WHERE $primary_field=?", array('s', $recID));
                 $isinsert = ($res==null);
             }
         }

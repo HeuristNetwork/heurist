@@ -1255,7 +1255,7 @@ class System {
     *
     */
     public function get_user_id(){
-        return $this->current_User? $this->current_User['ugr_ID'] :0;
+        return $this->current_User? intval($this->current_User['ugr_ID']) :0;
     }
 
 
