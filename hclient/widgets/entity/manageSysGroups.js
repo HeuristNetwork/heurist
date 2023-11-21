@@ -117,24 +117,35 @@ $.widget( "heurist.manageSysGroups", $.heurist.manageEntity, {
         if(this.options.select_mode=='manager' || that.options.select_mode=='select_roles'){
             this.recordList.parent().css({'border-right':'lightgray 1px solid'});
 
+            let center_cols = 'border-left:1px solid gray;text-align:center;';
             this.recordList.resultList('option','rendererHeader',
                 function(){
-                    sHeader = '<div style="width:60px"></div><div style="width:3em">ID</div>'
-                    +'<div style="width:11em">Name</div>'
-                    +'<div style="width:16em;border:none">Description</div>';
 
-                    if(that.options.ugl_UserID>0 || that.options.select_mode=='select_roles'){
-                        sHeader = sHeader                
-                        +'<div style="position:absolute;right:210px;width:60px;border-left:1px solid gray">Members</div>'
-                        +'<div style="position:absolute;right:150px;width:45px">Admin</div>'
-                        +'<div style="position:absolute;right:74px;width:60px">Member</div>';
-                        //+'<div style="position:absolute;right:4px;width:60px">Edit</div>';
+                    let select_roles = that.options.ugl_UserID>0 || that.options.select_mode=='select_roles';
+
+                    sHeader = '<div style="display:flex;">'
+                        +`<div style="flex:0 0 33px;border-right:none;"></div>`
+                        +`<div style="flex:0 1 ${select_roles?'3.5':'4'}em;border-left:1px solid gray;padding-left:5px;">ID</div>`
+                        +`<div style="flex:0 2 11em;border-left:1px solid gray;padding-left:5px;">Name</div>`;
+
+                    if(select_roles){
+                        sHeader = sHeader
+                        +`<div style="width:6em;${center_cols}">Members</div>`
+                        +`<div style="width:5em;${center_cols}">Admin</div>`
+                        +`<div style="width:5em;${center_cols}">Member</div>`
+                        +`<div style="width:4.5em;${center_cols}">Edit</div>`
+                        +`<div style="width:6em;${center_cols}">Delete</div>`;
                     }else{
-                        sHeader = sHeader                
-                        +'<div style="position:absolute;right:150px;width:60px;border-left:1px solid gray">Members</div>'
-                        +'<div style="position:absolute;right:74px;width:60px">Role</div>'
-                        +'<div style="position:absolute;right:4px;width:60px">Edit</div>';
+                        sHeader = sHeader
+                        +`<div style="flex:0 0 6em;${center_cols}">Your role</div>`
+                        +`<div style="flex:0 0 4em;${center_cols}">Edit</div>`
+                        +`<div style="flex:0 0 5em;${center_cols}">Delete</div>`
+                        +`<div style="flex:0 1 6em;${center_cols}">Members</div>`
+                        +`<div style="flex:0 0 8em;${center_cols}">Edit members</div>`;
                     }
+
+                    sHeader += '<div style="flex:0 5 50em;padding-left:5px;border-left:1px solid gray;">Description</div>'
+                    +'</div>';
 
                     return sHeader;
                 }
@@ -323,127 +334,117 @@ $.widget( "heurist.manageSysGroups", $.heurist.manageEntity, {
                 sstyle = '';
             }
             var val = window.hWin.HEURIST4.util.htmlEscape(recordset.fld(record, fldname));
-            return '<div class="item" '+sstyle+' title="'+tip_text+'">'+val+'</div>';
+            return '<div class="truncate" '+sstyle+' title="'+tip_text+'">'+val+'</div>';
         }
 
         //ugr_ID,ugr_Type,ugr_Name,ugr_Description, ugr_eMail,ugr_FirstName,ugr_LastName,ugr_Enabled,ugl_Role
 
-        var recID   = fld('ugr_ID');
-        var tip_text = fld('ugr_Description');
+        let is_user_roles = (this.options.ugl_UserID>0 || this.options.select_mode=='select_roles');
 
-        var recTitle = fld2('ugr_ID','width:4em', '')
-        +fld2('ugr_Name','width:12em', tip_text)
-        +fld2('ugr_Description','width:100%;position:absolute', tip_text);
-        var recTitleHint = '';//recID+' : '+fld('ugr_Description');
+        const recID   = fld('ugr_ID');
+        let name = fld('ugr_Name');
+        let desc = fld('ugr_Description');
 
-        var rtIcon = window.hWin.HAPI4.getImageUrl(this._entityName, 0, 'icon');
-        //var rtThumb = window.hWin.HAPI4.getImageUrl(this._entityName, 0, 'thumb');
-        var recThumb = window.hWin.HAPI4.getImageUrl(this._entityName, recID, 'thumb');
+        let name_width = navigator.userAgent.toLowerCase().includes('firefox') ? 10 : 11;
+        let recTitle = fld2('ugr_ID','flex:0 1 4em', '')
+        +fld2('ugr_Name',`flex:0 2 ${name_width}em;padding-left:5px;`, name);
 
-        var html_thumb = '<div class="recTypeThumb" style="background-image: url(&quot;'+recThumb+'&quot;);opacity:1">'
+        let rtIcon = window.hWin.HAPI4.getImageUrl(this._entityName, 0, 'icon');
+
+        let recThumb = window.hWin.HAPI4.getImageUrl(this._entityName, recID, 'thumb');
+
+        let html_thumb = '<div class="recTypeThumb" style="background-image: url(&quot;'+recThumb+'&quot;);opacity:1">'
         +'</div>';
-
         
-        var is_user_roles = (this.options.ugl_UserID>0 || this.options.select_mode=='select_roles');
-
-        
-        var html = '<div class="recordDiv" id="rd'+recID+'" recid="'+recID+'" data-value="'+ fld('ugl_Role')+'">'
+        let html = '<div class="recordDiv" id="rd'+recID+'" recid="'+recID+'" data-value="'+ fld('ugl_Role')+'" style="display:flex;">'
         + html_thumb
         + '<div class="recordSelector"><input type="checkbox" /></div>'
-        + '<div class="recordIcons">' //recid="'+recID+'" bkmk_id="'+bkm_ID+'">'
+        + '<div class="recordIcons" style="flex: 0 0 30px;">'
         +     '<img src="'+window.hWin.HAPI4.baseURL+'hclient/assets/16x16.gif'
         +     '" style="background-image: url(&quot;'+rtIcon+'&quot;);">'
         + '</div>'
-        + '<div class="recordTitle" style="right:'+(is_user_roles?270:210)+'px">'
-        +     recTitle 
+        + recTitle;
+
+        let add_role = this.options.select_mode!='select_roles' && !this.options.ugl_UserID;
+        if(!is_user_roles){
+
+            let show_role = this.searchForm.find('#input_search_type').val()!='any';
+            html = html + `<div title="Role" style="flex:0 0 80px;text-align:center;">${show_role?fld('ugl_Role'):''}</div>`;
+        }
+
+        let btn_edit = '<div title="Click to edit group" class="ui-button ui-widget ui-state-default ui-corner-all ui-button-icon-only" role="button" aria-disabled="false" data-key="edit" '
+        +   'style="height:16px;margin: 0px 15px;flex:0 0 25px;">'
+        +     '<span class="ui-button-icon-primary ui-icon ui-icon-pencil"></span><span class="ui-button-text"></span>'
         + '</div>';
+        let btn_delete = '<div title="Click to delete group" class="ui-button ui-widget ui-state-default ui-corner-all ui-button-icon-only" role="button" aria-disabled="false" data-key="delete" '
+        +   'style="height:16px;margin: 0px 18px;flex:0 0 25px;">'
+        +     '<span class="ui-button-icon-primary ui-icon ui-icon-circle-close"></span><span class="ui-button-text"></span>'
+        + '</div>';
+
+        let locked_edit = '<div title="Status: not admin - locked" class="ui-button ui-widget ui-state-default ui-corner-all ui-button-icon-only" role="button" aria-disabled="false" '
+            +   'style="height:16px;margin: 0px 15px;flex:0 0 25px;">'
+            +     '<span class="ui-button-icon-primary ui-icon ui-icon-lock"></span><span class="ui-button-text"></span>'
+            + '</div>';
+
+        if(!is_user_roles){
+            html += window.hWin.HAPI4.has_access(recID) ? btn_edit : locked_edit;
+            html += window.hWin.HAPI4.has_access(recID) && recID != 1 ? btn_delete : 
+                        '<div style="height:16px;flex:0 0 60px;"></div>';
+        }
 
         if(this.options.select_mode=='select_roles'){
 
-
             html = html
-            +'<div class="user-list-count">' + fld('ugr_Members') + '</div>'
-            +'<div class="user-list-edit user-list-member">'
-            +'<div class="adminSelector" style="padding-top:2px;width:60px"><input type="checkbox" id="adm'+recID
+            +'<div class="truncate" style="flex:0 1 50px;text-align:center;margin: 0px 15px 0px 10px;">' + fld('ugr_Members') + '</div>'
+            +'<div class="adminSelector" style="flex:0 0 50px;padding-top:2px;"><input type="checkbox" id="adm'+recID
             +'" '+(this._select_roles[recID]=='admin'?'checked':'')
-            +'/><label for="adm'+recID+'">Admin</label></div>' 
-            +'<div class="memberSelector" style="padding-top:2px;width:60px"><input type="checkbox" id="mem'+recID
+            +'/></div>' 
+            +'<div class="memberSelector" style="flex:0 0 30px;padding-top:2px;"><input type="checkbox" id="mem'+recID
             +'" '+(this._select_roles[recID]=='member'?'checked':'')
-            +'/><label for="mem'+recID+'">Member</label></div></div>';
+            +'/><label for="mem'+recID+'">Member</label></div>';
 
-            html = html + '<div class="rec_actions user-list" style="top:4px;width:60px;right:2px;position:absolute;"></div></div>';
+            html = html + '</div>';
 
+        }else if(this.options.select_mode=='manager' && this.options.edit_mode=='popup'){
 
-        } else
-            if(this.options.select_mode=='manager' && this.options.edit_mode=='popup'){
+            // admin/member checkboxes
+            if(this.options.ugl_UserID>0){ //select_role
 
-                // admin/member checkboxes
-                if(this.options.ugl_UserID>0){ //select_role
+                html = html
+                +'<div class="truncate" style="flex:0 1 50px;text-align:center;margin: 0px 15px;">' + fld('ugr_Members') + '</div>'
+                +'<div class="adminSelector" style="flex:0 0 50px;padding-top:2px;"><input type="checkbox" id="adm'+recID
+                +'" '+(fld('ugl_Role')=='admin'?'checked':'')
+                +'/></div>' 
+                +'<div class="memberSelector" style="flex:0 0 30px;padding-top:2px;"><input type="checkbox" id="mem'+recID
+                +'" '+(fld('ugl_Role')=='member'?'checked':'')
+                +'/></div>';
 
-                    html = html
-                    +'<div class="user-list-count">' + fld('ugr_Members') + '</div>'
-                    +'<div class="user-list-edit user-list-member">'
-                    +'<div class="adminSelector" style="padding-top:2px;width:60px"><input type="checkbox" id="adm'+recID
-                    +'" '+(fld('ugl_Role')=='admin'?'checked':'')
-                    +'/><label for="adm'+recID+'">Admin</label></div>' 
-                    +'<div class="memberSelector" style="padding-top:2px;width:60px"><input type="checkbox" id="mem'+recID
-                    +'" '+(fld('ugl_Role')=='member'?'checked':'')
-                    +'/><label for="mem'+recID+'">Member</label></div></div>';
+            }else{
 
-                    html = html + '<div class="rec_actions user-list" style="top:4px;width:60px;right:2px;position:absolute;">';
-
-                }else{
-
-                    html = html 
-                    + '<div class="user-list user-list-edit edit-members" style="right:150px;width:50px;">'
-                    + fld('ugr_Members') + '<span class="ui-icon ui-icon-pencil" '
-                    + ' style="font-size:0.8em;float:right;top:2px;right:2px"/></div>'  //'<span class="ui-icon ui-icon-pencil" style="font-size:0.8em"></span>
-
-                    html = html + '<div class="rec_actions user-list" style="top:4px;width:140px;right:2px;position:absolute;">';
-
-                    if(this.searchForm.find('#input_search_type').val()!='any'){
-
-                        //current user is admin of given group
-                        /*if(window.hWin.HAPI4.has_access(recID)){ 
-                        html = html                        
-                        + '<select title="Role" style="width:70px;margin:0 4px" class="user-role" data-value="'
-                        + fld('ugl_Role')+'">'
-                        +'<option>admin</option><option>member</option><option>remove</option></select>';
-
-                        }else{}*/
-                        html = html                      
-                        + '<div title="Role" style="min-width:80px;text-align:center">'
-                        + fld('ugl_Role')+'</div>';
-
-                    }else{
-                        //placeholder
-                        html = html + '<div style="min-width:78px;"></div>';
-                    }
-                }
-
-
-                if(window.hWin.HAPI4.has_access(recID)){ //current user is admin of given group
-                    html = html                                    
-                    + '<div title="Click to edit group" class="ui-button ui-widget ui-state-default ui-corner-all ui-button-icon-only" role="button" aria-disabled="false" data-key="edit" style="height:16px">'
-                    +     '<span class="ui-button-icon-primary ui-icon ui-icon-pencil"></span><span class="ui-button-text"></span>'
-                    + '</div>&nbsp;&nbsp;';
-                    if(recID!=1){
-                        html = html                                
-                        + '<div title="Click to delete group" class="ui-button ui-widget ui-state-default ui-corner-all ui-button-icon-only" role="button" aria-disabled="false" data-key="delete" style="height:16px">'
-                        +     '<span class="ui-button-icon-primary ui-icon ui-icon-circle-close"></span><span class="ui-button-text"></span>'
-                        + '</div>';
-                    }
-                }else{
-                    html = html                                    
-                    + '<div title="Status: not admin - locked" class="ui-button ui-widget ui-state-default ui-corner-all ui-button-icon-only" role="button" aria-disabled="false" style="height:16px">'
-                    +     '<span class="ui-button-icon-primary ui-icon ui-icon-lock"></span><span class="ui-button-text"></span>'
-                    + '</div>&nbsp;&nbsp;';
-                }
-                html = html + '</div>';
+                html = html 
+                + '<div class="truncate" style="flex:0 1 50px;text-align:center;margin: 0px 15px 0px 10px;">'
+                    + fld('ugr_Members')
+                + '</div>'  //'<span class="ui-icon ui-icon-pencil" style="font-size:0.8em"></span>
+                + '<div class="edit-members ui-button ui-widget ui-state-default ui-corner-all ui-button-icon-only" role="button" aria-disabled="false" '
+                +   'style="height:16px;margin: 0px 35px;">'
+                +     '<span class="ui-button-icon-primary ui-icon ui-icon-pencil"></span><span class="ui-button-text"></span>'
+                + '</div>'
             }
+        }
 
+        if(is_user_roles){
 
-        html = html + '</div>';
+            let edit = window.hWin.HAPI4.has_access(recID) ? btn_edit : locked_edit; 
+            edit = edit.replace('margin: 0px 15px;', 'margin: 0px 10px;');
+
+            html += edit;
+            html += window.hWin.HAPI4.has_access(recID) && recID != 1 || true ? btn_delete : 
+                        '<div style="height:16px;margin: 0px 25px;"></div>';
+        }
+
+        html = html 
+            + fld2('ugr_Description','flex:0 5 50em;padding-left:10px;', desc)
+        + '</div>';
 
         return html;
 
