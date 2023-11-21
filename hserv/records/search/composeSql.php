@@ -202,6 +202,7 @@ $mysqli = null;
 $wg_ids = null; //groups current user is member
 $publicOnly = false;
 $currUserID = 0;
+$is_admin = false;
 //$use_user_wss = false;
 
 //keep params for debug only!
@@ -422,7 +423,7 @@ function parse_query_to_json($query){
 function get_sql_query_clauses_NEW($db, $params, $currentUser=null){
 
     global $mysqli, $wg_ids, $currUserID, $publicOnly, $params_global, $top_query
-        , $rty_id_relation, $dty_id_relation_type;//, $use_user_wss;
+        , $rty_id_relation, $dty_id_relation_type, $is_admin;//, $use_user_wss;
     
 
     if(defined('RT_RELATION')){
@@ -462,6 +463,20 @@ function get_sql_query_clauses_NEW($db, $params, $currentUser=null){
     array_push($wg_ids, 0); // be sure to include the generic everybody workgroup
 
     $publicOnly = (@$params['publiconly'] == 1); //@todo change to vt - visibility type parameter of query
+
+    // set is_admin
+    $is_admin = $currUserID == 2;
+    if(!$is_admin && $currUserID > 0){
+
+        // Check if user is part of db admin group
+        $db_admin_id = mysql__select_value($mysqli, 'SELECT sys_OwnerGroupID FROM sysIdentification');
+        $db_admin_id = !$db_admin_id || !intval($db_admin_id) < 1 ? 1 : intval($db_admin_id);
+
+        $admin_query = "SELECT ugl_ID FROM sysUsrGrpLinks WHERE ugl_UserID = $currUserID AND ugl_GroupID = $db_admin_id AND ugl_Role='admin'";
+
+        $is_admin = mysql__select_value($mysqli, $admin_query);
+        $is_admin = $is_admin && intval($is_admin) < 0;
+    }
 
     // 2. DETECT SEARCH DOMAIN ------------------------------------------------------------------------------------------
     if (strcasecmp($params['w'],'B') == 0  ||  strcasecmp($params['w'],BOOKMARK) == 0) {    // my bookmark entries
@@ -560,7 +575,7 @@ class HQuery {
 
     function makeSQL(){
 
-        global $publicOnly, $wg_ids, $params_global; //, $mysqli, $use_user_wss;
+        global $publicOnly, $wg_ids, $is_admin; //, $mysqli, $use_user_wss;
 
         $res = $this->top_limb->makeSQL(); //it creates where_clause and fill tables array
         
@@ -580,10 +595,14 @@ class HQuery {
         }else{
             $this->from_clause =  "Records r".$this->level;
         }
+
+        if(!$is_admin){
+            $this->from_clause .= ' LEFT JOIN defRecStructure ON rst_RecTypeID = r'.$this->level.'.rec_RecTypeID ';
+        }
         
         //add usrRecPermission join
         if($this->level=='0' && !$publicOnly && $this->currUserID>0 && $this->currUserID!=2){
-                $this->from_clause = $this->from_clause.' LEFT JOIN usrRecPermissions ON rcp_RecID=r0.rec_ID ';
+            $this->from_clause = $this->from_clause.' LEFT JOIN usrRecPermissions ON rcp_RecID=r0.rec_ID ';
         } 
         /*           
         if($this->level=='0' && $this->currUserID>0 && $use_user_wss===true)
@@ -1417,7 +1436,8 @@ class HPredicate {
     //
     //
     function predicateField(){
-        global $mysqli;
+
+        global $mysqli, $is_admin, $top_query, $wg_ids;
 
         $p = "rd".$this->qlevel.".";
         $p = "";
@@ -1427,6 +1447,13 @@ class HPredicate {
             $this->field_id = $several_ids[0];    
         }else{
             $several_ids = null;
+        }
+
+        $field_id_filter = '='.$this->field_id;
+        if(is_array($several_ids) && count($several_ids)>0){
+            $field_id_filter = (count($several_ids)>1
+                    ?' IN ('.implode(',',$several_ids).')'
+                    :'='.$several_ids[0]);
         }
         
         if($this->pred_type=='count' || $this->pred_type=='cnt' || $this->pred_type=='fc'){
@@ -1443,6 +1470,32 @@ class HPredicate {
             }
         }else{
             $this->field_type = 'freetext';
+        }
+
+        $field_condition = '';
+
+        if(!$is_admin){
+
+            $field_condition = ' AND rst_DetailTypeID '.$field_id_filter
+                                .' AND rst_RecTypeID = r'.$this->qlevel.'.rec_RecTypeID'
+                                .' AND rst_RequirementType != "forbidden"';
+            
+            if($top_query->currUserID < 1){
+                $field_condition .= ' AND (rst_NonOwnerVisibility = "public" OR rst_NonOwnerVisibility = "pending") AND NOT dtl_HideFromPublic';
+            }else{
+                $field_condition .= ' AND (rst_NonOwnerVisibility != "hidden"';
+
+                if(is_array($wg_ids) && !empty($wg_ids)){
+                    $field_condition .= ' OR r'.$this->qlevel.'.rec_OwnerUGrpID ';
+                    if(count($wg_ids)>1){
+                        $field_condition .= 'IN (' . join(',', $wg_ids).')';
+                    }else{
+                        $field_condition .= '= '.$wg_ids[0];
+                    }
+                }
+
+                $field_condition .= ')';
+            }
         }
         
         $is_empty = $this->isEmptyValue(); //search for empty or not defined value
@@ -1519,7 +1572,7 @@ class HPredicate {
                     
                     if($sHeaderField=='rec_Title'){
                         //execute fulltext search query
-                        $res = $res.'('. ($this->negate ? 'NOT ' : '') .'MATCH(r'.$this->qlevel.'.'.$sHeaderField.') '.$val.')';
+                        $res = '('. ($this->negate ? 'NOT ' : '') .'MATCH(r'.$this->qlevel.'.'.$sHeaderField.') '.$val.')';
                     }else{
                         $this->error_message = 'Full text search is allowed for rec_Title only';
                         return null;
@@ -1537,15 +1590,8 @@ class HPredicate {
             
             $res = "NOT exists (select dtl_ID from recDetails ".$p." where r".$this->qlevel.".rec_ID=".$p."dtl_RecID AND "
             .$p.' dtl_DetailTypeID';
-            if(is_array($several_ids) && count($several_ids)>0){
-                $res = $res.(count($several_ids)>1
-                        ?' IN ('.implode(',',$several_ids).')'
-                        :'='.$several_ids[0])
-                        .')';    
-            }else{
-                $res = $res.'='.$this->field_id.')';
-            }
 
+            $res .= $field_id_filter . $field_condition .')';
         
         }else if($this->pred_type=='tag' || $this->field_id=='tag'){
             // it is better to use kwd keyword instead of f:tag
@@ -1557,14 +1603,7 @@ class HPredicate {
             $res = "(select count(dtl_ID) from recDetails ".$p." where r".$this->qlevel.".rec_ID=".$p."dtl_RecID AND "
             .$p.'dtl_DetailTypeID';
         
-            if(is_array($several_ids) && count($several_ids)>0){
-                $res = $res.(count($several_ids)>1
-                        ?' IN ('.implode(',',$several_ids).')'
-                        :'='.$several_ids[0])
-                        .')';    
-            }else{
-                $res = $res.'='.$this->field_id.')';
-            }
+            $res .= $field_id_filter . $field_condition . ')';
             
             $res = $res.$val; //$val is number of occurences
             
@@ -1613,18 +1652,11 @@ class HPredicate {
                     }
                 }
                 
-                if(is_array($several_ids) && count($several_ids)>0){
-                    $res = $res.(count($several_ids)>1
-                            ?' IN ('.implode(',',$several_ids).')'
-                            :'='.$several_ids[0]);
-                            
-                }else{
-                    $res = $res.'='.$this->field_id;
-                }
+                $res .= $field_id_filter;
                 
                 if($this->fulltext){
                     //execute fulltext search query
-                    $res = $res.' AND'. ($this->negate ? ' NOT ' : ' ') .'MATCH(dtl_Value) '.$val;
+                    $res = $res.' AND'. ($this->negate ? ' NOT ' : ' ') .'MATCH(dtl_Value) '.$val.$field_condition;
                     $list_ids = mysql__select_list2($mysqli, $res);
                     
                     if(is_array($list_ids) && count($list_ids)>0){
@@ -1637,11 +1669,11 @@ class HPredicate {
                     }
                     
                 }else{
-                    $res = $res.' AND '.$field_name.$val.')';        
+                    $res = $res.' AND '.$field_name.$val.$field_condition.')';        
                 }
             }else{
                 //field id not defined - at the moment used for search via registered file
-                $res = 'select dtl_RecID from recDetails where '.$field_name.$val;
+                $res = 'select dtl_RecID from recDetails where '.$field_name.$val.$field_condition;
                 $list_ids = mysql__select_list2($mysqli, $res);
 
                 if(is_array($list_ids) && count($list_ids)>0){
@@ -1665,7 +1697,8 @@ class HPredicate {
     //
     //
     function predicateAnyField(){
-        global $mysqli;
+
+        global $mysqli, $is_admin, $top_query, $wg_ids;
         
         $p = "rd".$this->qlevel.".";
         $p = "";
@@ -1689,32 +1722,57 @@ class HPredicate {
             $field_name1 = 'replace('.$field_name1.", \"'\", \"\") ";                   
             $field_name2 = 'replace('.$field_name2.", \"'\", \"\") ";                   
         }
+
+        $field_condition = '';
+
+        if(!$is_admin){
+
+            $field_condition = ' AND rst_DetailTypeID = dtl_DetailTypeID'
+                                .' AND rst_RecTypeID = r'.$this->qlevel.'.rec_RecTypeID'
+                                .' AND rst_RequirementType != "forbidden"';
+            
+            if($top_query->currUserID < 1){
+                $field_condition .= ' AND (rst_NonOwnerVisibility = "public" OR rst_NonOwnerVisibility = "pending") AND NOT dtl_HideFromPublic';
+            }else{
+                $field_condition .= ' AND (rst_NonOwnerVisibility != "hidden"';
+
+                if(is_array($wg_ids) && !empty($wg_ids)){
+                    $field_condition .= ' OR r'.$this->qlevel.'.rec_OwnerUGrpID ';
+                    if(count($wg_ids)>1){
+                        $field_condition .= 'IN (' . join(',', $wg_ids).')';
+                    }else{
+                        $field_condition .= '= '.$wg_ids[0];
+                    }
+                }
+
+                $field_condition .= ')';
+            }
+        }
         
         if($this->fulltext){
-                
+
+            //execute fulltext search query
+            $res = 'select dtl_RecID from recDetails '
+            . ' left join defDetailTypes on dtl_DetailTypeID=dty_ID '
+            . ' left join Records link on dtl_Value=link.rec_ID '
+            . ' left join defRecStructure on dtl_DetailTypeID=rst_DetailTypeID '
+            .' where if(dty_Type != "resource", '
+                .' if(dty_Type="enum", dtl_Value'.$val_enum 
+                    .', '. ($this->negate ? 'NOT ' : '') .'MATCH(dtl_Value) '.$val
+                    .'), '.$field_name2.' LIKE "%'.$val_wo_prefixes.'%")'
+                .$field_condition; 
             
-                //execute fulltext search query
-                $res = 'select dtl_RecID from recDetails '
-                . ' left join defDetailTypes on dtl_DetailTypeID=dty_ID '
-                . ' left join Records link on dtl_Value=link.rec_ID '
-                .' where if(dty_Type != "resource", '
-                    .' if(dty_Type="enum", dtl_Value'.$val_enum 
-                       .', '. ($this->negate ? 'NOT ' : '') .'MATCH(dtl_Value) '.$val
-                       .'), '.$field_name2.' LIKE "%'.$val_wo_prefixes.'%")'; 
-                
-                $list_ids = mysql__select_list2($mysqli, $res);
-                
-                if(is_array($list_ids) && count($list_ids)>0){
-                    $res = 'r'.$this->qlevel.'.rec_ID'
-                        .(count($list_ids)>1
-                            ?' IN ('.implode(',',$list_ids).')'
-                            :'='.$list_ids[0]);
-                }else{
-                    $res = '(1=0)'; //nothing found    
-                }
-                
+            $list_ids = mysql__select_list2($mysqli, $res);
             
-            
+            if(is_array($list_ids) && count($list_ids)>0){
+                $res = 'r'.$this->qlevel.'.rec_ID'
+                    .(count($list_ids)>1
+                        ?' IN ('.implode(',',$list_ids).')'
+                        :'='.$list_ids[0]);
+            }else{
+                $res = '(1=0)'; //nothing found    
+            }
+
         }else{
 
             $res = 'exists (select dtl_ID from recDetails '.$p
@@ -1724,7 +1782,8 @@ class HPredicate {
             .'  and if(dty_Type != "resource", '
                     .' if(dty_Type="enum", '.$p.'dtl_Value'.$val_enum 
                        .', '.$field_name1.$val
-                       .'), '.$field_name2.$val.'))';   //'LIKE "%'.$mysqli->real_escape_string($this->value).'%"))';
+                       .'), '.$field_name2.$val.')'
+            .$field_condition.')';
                    
         }
 
