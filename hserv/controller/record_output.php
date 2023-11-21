@@ -121,10 +121,10 @@
     if(@$params['recID']>0){
         $search_params['q'] = array('ids'=>intval($params['recID']));
     }else if(@$params['ids']){
-        $search_params['q'] = array('ids'=>implode(',', prepareIds($params['ids']) ));
+        $search_params['q'] = array('ids'=>filter_var(implode(',', prepareIds($params['ids']) ), FILTER_SANITIZE_STRING));
     }else  if(@$params['iiif_image']){
         $params['format'] = 'iiif';
-        $search_params['q'] = '*file @'.$params['iiif_image'];
+        $search_params['q'] = '*file @'.filter_var($params['iiif_image'],FILTER_SANITIZE_STRING);
         
     }else{
         $search_params['q'] = @$params['q'];

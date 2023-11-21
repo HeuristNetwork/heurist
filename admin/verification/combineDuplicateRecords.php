@@ -728,7 +728,7 @@ function do_fix_dupe()
     $now = date('Y-m-d H:i:s');
     $rec_values = array('rec_ID'=>$master_rec_id, "rec_Modified"=>$now);
     if(@$_REQUEST['URL']){
-        $rec_values['rec_URL'] = $_REQUEST['URL'];   
+        $rec_values['rec_URL'] = filter_var($_REQUEST['URL'], FILTER_SANITIZE_URL);   
     }
     
     mysql__insertupdate($mysqli, 'Records', 'rec_', $rec_values);
