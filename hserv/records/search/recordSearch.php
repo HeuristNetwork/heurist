@@ -2560,6 +2560,7 @@ function recordSearch($system, $params, $relation_query=null)
                 $rectypes = array();
                 $records = array();
                 $order = array();
+                $all_rec_ids = array();
                 $memory_warning = null;
                 $limit_warning = false;
 
@@ -2624,13 +2625,15 @@ function recordSearch($system, $params, $relation_query=null)
 
 
                     //array_push( $row, $row[4] ); //by default icon if record type ID
-                    $records[$row[$rec_ID_index]] = $row;
-                    array_push($order, $row[$rec_ID_index]);
+                    $rec_ID = intval($row[$rec_ID_index]);
+                    $records[$rec_ID] = $row;
+                    array_push($order, $rec_ID);
+                    array_push($all_rec_ids, $rec_ID);
                     if($rec_RecTypeID_index>=0 && !@$rectypes[$row[$rec_RecTypeID_index]]){  //rectypes is resultset
                         $rectypes[$row[$rec_RecTypeID_index]]=1;
                     }
 
-                    if(count($order)>5000){
+                    if(count($all_rec_ids)>5000){
                         $mem_used = memory_get_usage();
                         if($mem_used>$memory_limit-104857600){ //100M
                             return $system->addError(HEURIST_ACTION_BLOCKED, 
@@ -2649,7 +2652,7 @@ function recordSearch($system, $params, $relation_query=null)
                 $params['detail']=='structure') && count($records)>0){
 
 
-                    $all_rec_ids = array_keys($records); 
+                    //$all_rec_ids = array_keys($records); 
                     $res_count = count($all_rec_ids);
                     //split to 2500 to use in detail query
                     $offset = 0;

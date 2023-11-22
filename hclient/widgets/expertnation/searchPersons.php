@@ -89,7 +89,7 @@ while(true){
     $response['data']['q2'] = $params['q'];
     
     if(@$_REQUEST['uni_ID']>0){
-        $uni_id  = ' f:196:'.$_REQUEST['uni_ID'];
+        $uni_id  = ' f:196:'.intval($_REQUEST['uni_ID']);
     }
     
     //2. search places by title and persons related to place

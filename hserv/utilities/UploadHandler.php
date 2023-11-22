@@ -19,7 +19,7 @@
  public create_scaled_image
     gd_create_scaled_image
     imagick_create_scaled_image
-    imagemagick_create_scaled_image
+    imagemagick_create_scaled_image - DISABLED DUE SECURITY REASONS
  
 */
 
@@ -1222,7 +1222,8 @@ $siz = USystem::getConfigBytes('upload_max_filesize');
         }
         return $success && $image->writeImage($new_file_path);
     }
-
+    
+    /* AO: USING SHELL DISABLED DUE SECURITY REASONS
     protected function imagemagick_create_scaled_image($file_name, $subfolder, $version, $options) {
         list($file_path, $new_file_path) =
             $this->get_scaled_image_file_paths($file_name, $subfolder, $version);
@@ -1268,6 +1269,7 @@ $siz = USystem::getConfigBytes('upload_max_filesize');
         }
         return true;
     }
+    */
 
     protected function get_image_size($file_path) {
         if ($this->options['image_library']) {
@@ -1285,6 +1287,8 @@ $siz = USystem::getConfigBytes('upload_max_filesize');
                     error_log($e->getMessage());
                 }
             }
+            
+            /*  AO: USING SHELL DISABLED DUE SECURITY REASONS
             if ($this->options['image_library'] === 2) {
                 $cmd = $this->options['identify_bin'];
                 $cmd .= ' -ping '.escapeshellarg($file_path);
@@ -1297,6 +1301,7 @@ $siz = USystem::getConfigBytes('upload_max_filesize');
                 }
                 return false;
             }
+            */
         }
         if (!function_exists('getimagesize')) {
             error_log('Function not found: getimagesize');
@@ -1307,7 +1312,7 @@ $siz = USystem::getConfigBytes('upload_max_filesize');
 
     protected function create_scaled_image($file_name, $subfolder, $version, $options) {
         if ($this->options['image_library'] === 2) {
-            return $this->imagemagick_create_scaled_image($file_name, $subfolder, $version, $options);
+            //DISABLED DUE SECURITY REASONS return $this->imagemagick_create_scaled_image($file_name, $subfolder, $version, $options);
         }
         if ($this->options['image_library'] && extension_loaded('imagick')) {
             return $this->imagick_create_scaled_image($file_name, $subfolder, $version, $options);
