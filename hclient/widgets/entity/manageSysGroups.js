@@ -230,6 +230,14 @@ $.widget( "heurist.manageSysGroups", $.heurist.manageEntity, {
                         }
                     }
 
+                    // verify that at least one checkbox is checked
+                    let has_membership = that.recordList.find('input[type="checkbox"]:visible').is(':checked');
+                    if(!has_membership){
+                        ele.prop('checked', true);
+                        window.hWin.HEURIST4.msg.showMsgFlash('User must be member of atleast one workgroup...', 3000);
+                        return false;
+                    }
+
                     var item = ele.parents('.recordDiv');
                     var group_ID = item.attr('recid');  
 
@@ -249,7 +257,7 @@ $.widget( "heurist.manageSysGroups", $.heurist.manageEntity, {
                         }else{
                             cb2 = item.find('.adminSelector > input');
                         } 
-                        cb2.attr('checked',false);      
+                        cb2.prop('checked',false);      
 
                         return;
                     }
@@ -282,7 +290,7 @@ $.widget( "heurist.manageSysGroups", $.heurist.manageEntity, {
                                     }else{
                                         cb2 = item.find('.adminSelector > input');
                                     } 
-                                    cb2.attr('checked',false);      
+                                    cb2.prop('checked',false);      
 
                                     window.hWin.HEURIST4.msg.showMsgFlash('New role applied');      
                                 }
