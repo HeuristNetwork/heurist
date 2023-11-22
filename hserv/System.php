@@ -137,7 +137,7 @@ class System {
                         $this->login_verify( false ); //load user info from session
                         if($this->get_user_id()>0){
                             //set current user for stored procedures (log purposes)
-                            $this->mysqli->query('set @logged_in_user_id = '.$this->get_user_id());
+                            $this->mysqli->query('set @logged_in_user_id = '.intval($this->get_user_id()));
                         }
                         
                         //ONLY_FULL_GROUP_BY,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO

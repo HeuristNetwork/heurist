@@ -111,7 +111,6 @@ if(@$_REQUEST['postdata']){
     //all parameters can be sent as json array in postdata 
     $_REQUEST = json_decode($_REQUEST['postdata'], true);
 }
-foreach($_REQUEST as $key=>$value) { $_REQUEST[$key] = filter_var($value, FILTER_SANITIZE_STRING); }
 
 if(@$_REQUEST['rectype_templates']){ // output manifest + files ??
     $rectype_templates = $_REQUEST['rectype_templates']!=null && $_REQUEST['rectype_templates']!=0; //flag to produce rectype templates instead of real records
@@ -1857,7 +1856,8 @@ if (@$_REQUEST['pathfilename']) {
     $hmlAttrs['pathfilename'] = $_REQUEST['pathfilename'];
 }
 
-$params = $_REQUEST;
+$params = array();
+foreach($_REQUEST as $key=>$value) { $params[$key] = filter_var($value, FILTER_SANITIZE_STRING); }
 
 $params['detail'] = 'ids'; // return ids only
 

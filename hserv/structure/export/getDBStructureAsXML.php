@@ -86,48 +86,48 @@ if(!$is_subset){
 // ------------------------------------------------------------------------------------------
 // defRecTypeGroups
 
-do_print_table('defRecTypeGroups');
+do_print_table2('defRecTypeGroups');
 
 
 // ------------------------------------------------------------------------------------------
 // defDetailTypeGroups
 
-do_print_table('defDetailTypeGroups');
+do_print_table2('defDetailTypeGroups');
 
 // ------------------------------------------------------------------------------------------
 // defVocabularyGroups
 
-do_print_table('defVocabularyGroups');
+do_print_table2('defVocabularyGroups');
 
 // ------------------------------------------------------------------------------------------
 // Detail Type ONTOLOGIES
 
-do_print_table('defOntologies');
+do_print_table2('defOntologies');
 
 }
 // ------------------------------------------------------------------------------------------
 // Detail Type TERMS
 if(!$is_subset || $trm_ID>0){
 
-    do_print_table('defTerms', $trm_ID);
+    do_print_table2('defTerms', $trm_ID);
 }
 // ------------------------------------------------------------------------------------------
 // RECORD TYPES (this will be repeated for each of the tables)
 if(!$is_subset || $rty_ID>0){
 
-    do_print_table('defRecTypes', $rty_ID);    
+    do_print_table2('defRecTypes', $rty_ID);    
 }
 // ------------------------------------------------------------------------------------------
 // DETAIL TYPES
 if(!$is_subset || $dty_ID>0){
 
-    do_print_table('defDetailTypes', $dty_ID);    
+    do_print_table2('defDetailTypes', $dty_ID);    
 }
 // ------------------------------------------------------------------------------------------
 // RECORD STRUCTURE
 if(!$is_subset || $rty_ID>0){
 
-    do_print_table('defRecStructure', $rty_ID);    
+    do_print_table2('defRecStructure', $rty_ID);    
     
 }
 
@@ -136,42 +136,42 @@ if(!$is_subset){
 // ------------------------------------------------------------------------------------------
 // RELATIONSHIP CONSTRAINTS
 
-do_print_table('defRelationshipConstraints');
+do_print_table2('defRelationshipConstraints');
 
 // ------------------------------------------------------------------------------------------
 // defFileExtToMimetype
 
-do_print_table('defFileExtToMimetype');
+do_print_table2('defFileExtToMimetype');
 
 // ------------------------------------------------------------------------------------------
 // defTranslations
 
-do_print_table('defTranslations');
+do_print_table2('defTranslations');
 
 // ------------------------------------------------------------------------------------------
 // sysDashboard
 
-do_print_table('sysDashboard');
+do_print_table2('sysDashboard');
 
 // ------------------------------------------------------------------------------------------
 // defLanguages
 
-do_print_table('defLanguages');
+do_print_table2('defLanguages');
 
 // ------------------------------------------------------------------------------------------
 // defCalcFunctions
 
-do_print_table('defCalcFunctions');
+do_print_table2('defCalcFunctions');
 
 // ------------------------------------------------------------------------------------------
 // defCrosswalk
 
-do_print_table('defCrosswalk');
+do_print_table2('defCrosswalk');
 
 // ------------------------------------------------------------------------------------------
 // defURLPrefixes
 
-do_print_table('defURLPrefixes');
+do_print_table2('defURLPrefixes');
 
 }
 // ------------------------------------------------------------------------------------------
@@ -193,22 +193,22 @@ if(!$is_subset){
 // ------------------------------------------------------------------------------------------
 // sysUGrps
 
-do_print_table('sysUGrps');
+do_print_table2('sysUGrps');
 
 // ------------------------------------------------------------------------------------------
 // sysUsrGrpLinks
 
-do_print_table('sysUsrGrpLinks');
+do_print_table2('sysUsrGrpLinks');
 
 // ------------------------------------------------------------------------------------------
 // usrHyperlinkFilters
 
-do_print_table('usrHyperlinkFilters');
+do_print_table2('usrHyperlinkFilters');
 
 // ------------------------------------------------------------------------------------------
 // usrTags
 
-do_print_table('usrTags');
+do_print_table2('usrTags');
 
 }
 
@@ -218,7 +218,7 @@ print "\n</hml_structure>"; // end of file
 //
 //
 //
-function do_print_table( $tname, $id=0 )
+function do_print_table2( $tname, $id=0 )
 {
     global $mysqli;
 
