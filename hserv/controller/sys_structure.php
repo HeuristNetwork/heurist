@@ -176,13 +176,15 @@ ini_set('max_execution_time', 0);
             }
 
             if (@$_REQUEST['detailtypes']) {
-                $ids = $_REQUEST['detailtypes']=='all'?null:$_REQUEST['detailtypes'];
+                $ids = $_REQUEST['detailtypes']=='all'?null
+                            :filter_var($_REQUEST['detailtypes'], FILTER_SANITIZE_STRING);
                 $data["detailtypes"] = dbs_GetDetailTypes($system, $ids, intval(@$_REQUEST['mode']) );
             }
 
             
             if (@$_REQUEST['rectypes']) {
-                $ids = $_REQUEST['rectypes']=='all'?null:$_REQUEST['rectypes'];
+                $ids = $_REQUEST['rectypes']=='all'?null
+                            :filter_var($_REQUEST['rectypes'], FILTER_SANITIZE_STRING);
                 $mode = intval(@$_REQUEST['mode']);
 
                 if($mode>2){

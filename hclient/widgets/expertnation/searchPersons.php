@@ -49,7 +49,7 @@ while(true){
     $persons_ids = array();
 
     //prepare search string    
-    $params = array('db'=>$_REQUEST['db'], 'detail'=>'ids');
+    $params = array('db'=>filter_var($_REQUEST['db'], FILTER_SANITIZE_STRING), 'detail'=>'ids');
 
     $search = $_REQUEST['search']; //'"'.$_REQUEST['search'].'"';
 

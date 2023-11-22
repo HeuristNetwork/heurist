@@ -51,7 +51,7 @@ $error = System::dbname_check($db);
 if(!$error){
     
     $system = new System(); //without connection
-    $fileid = @$_REQUEST['thumb'];
+    $fileid = filter_var(@$_REQUEST['thumb'], FILTER_SANITIZE_STRING);
     if($fileid){ 
         
         if(preg_match('/^[a-z0-9]+$/', $fileid)){ //validatate obfuscation id
