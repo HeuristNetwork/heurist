@@ -1682,6 +1682,7 @@ function recordSearchMenuItems($system, $menuitems, &$result, $find_root_menu=fa
 * put your comment there...
 *
 * @param mixed $system
+* @param mixed $relation_query - sql expression to be executed (used as recursive parameters to search relationship records)
 * @param mixed $params
 *
 *       FOR RULES
@@ -1695,7 +1696,6 @@ function recordSearchMenuItems($system, $menuitems, &$result, $find_root_menu=fa
 *
 *       INTERNAL/recursive
 *       parentquery - sql expression to substiture in rule query
-*       sql - sql expression to execute (used as recursive parameters to search relationship records)
 * 
 *       SEARCH parameters that are used to compose sql expression
 *       q - query string (old mode) or json array (new mode)
@@ -1724,7 +1724,7 @@ function recordSearchMenuItems($system, $menuitems, &$result, $find_root_menu=fa
 *       source - id of html element that is originator of this search
 *       qname - original name of saved search (for messaging)
 */
-function recordSearch($system, $params)
+function recordSearch($system, $params, $relation_query=null)
 {
     //if $params['q'] has svsID it means search by saved filter - all parameters will be taken from saved filter
     // {"svs":5}
@@ -2224,9 +2224,9 @@ function recordSearch($system, $params)
                                 unset($params2['topids']);
                                 unset($params2['q']);
 
-                                $params2['sql'] = $select_clause.$from.$where;
+                                $relation_query = $select_clause.$from.$where;
 
-                                $response = recordSearch($system, $params2);  //search for relationship records
+                                $response = recordSearch($system, $params2, $relation_query);  //search for relationship records
                                 if($response['status'] == HEURIST_OK){
 
                                     if(!@$fin_result['data']['relationship']){
@@ -2363,8 +2363,8 @@ function recordSearch($system, $params)
 
     $search_detail_limit = PHP_INT_MAX;
 
-    if(@$params['sql']){
-        $query = $params['sql'];
+    if($relation_query!=null){
+        $query = $relation_query;
     }else{
 
         $is_mode_json = false;

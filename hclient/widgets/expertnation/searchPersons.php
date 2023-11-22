@@ -55,7 +55,7 @@ while(true){
 
     $uni_id = '';
     if(@$_REQUEST['uni_ID']>0){
-        $uni_id  = ',"f:196":'.$_REQUEST['uni_ID'];
+        $uni_id  = ',"f:196":'.intval($_REQUEST['uni_ID']);
     }
        
     //1. search persons by title,name,family,bor descr
@@ -65,7 +65,7 @@ while(true){
     $search_predicate_1 = array();
     $search_predicate_2 = array();
     foreach($search as $val){
-        $val = str_replace('"','\\"',$val);
+        $val = str_replace('"','\\"', filter_var($val, FILTER_SANITIZE_STRING, FILTER_FLAG_NO_ENCODE_QUOTES));
         $search_predicate_1[] = '"title":"'.$val.'"';
         $search_predicate_1[] = '"f:134":"'.$val.'"';        
         $search_predicate_2[] = '"title":"'.$val.'"';
