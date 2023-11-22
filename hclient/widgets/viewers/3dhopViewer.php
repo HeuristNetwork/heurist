@@ -33,7 +33,7 @@ file or ulf_ID - obfuscation id for registred 3object in nxs or nxz format
 
 */
 $is_not_inited = true;
-$db = @$_REQUEST['db'];
+$db = filter_var(@$_REQUEST['db'], FILTER_SANITIZE_STRING);
 
 // init main system class
 $system = new System();

@@ -100,6 +100,7 @@ if(!@$_REQUEST['mail']){
     foreach ($databases as $idx=>$db_name){
 
         //list($database_name_full, $db_name) = mysql__get_names($db_name);
+        $db_name = htmlspecialchars($db_name);
             
         $dir = $root.$db_name.'/';
         

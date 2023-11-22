@@ -971,7 +971,7 @@ if ($bkm_ID>0 || $rec_id>0) {
         }else{
         }*/
 	        
-            print '<div data-recid="'.$bibInfo['rec_ID'].'">'; // style="font-size:0.8em"
+            print '<div data-recid="'.intval($bibInfo['rec_ID']).'">'; // style="font-size:0.8em"
             print_details($bibInfo);
 	        print '</div>';
             
@@ -1239,7 +1239,7 @@ function print_private_details($bib) {
     
     //zero date not allowed by default since MySQL 5.7 default date changed to 1000
     if($add_date && $bib['rec_Added']!='0000-00-00 00:00:00' && $bib['rec_Added']!='1000-01-01 00:00:00') {
-        $add_date = $add_date->setTimezone(new DateTimeZone('UTC'))->format('Y-m-d H:i:s'); //convert to UTC
+        $add_date = htmlspecialchars($add_date->setTimezone(new DateTimeZone('UTC'))->format('Y-m-d H:i:s')); //convert to UTC
         $add_date_local = ' (<span id="lt0"></span><script type="text/javascript">printLTime("'.  //output in js in local time
                             $add_date.'", "lt0")</script> local)';
 
@@ -1249,7 +1249,7 @@ function print_private_details($bib) {
 
     $mod_date = DateTime::createFromFormat('Y-m-d H:i:s', $bib['rec_Modified']); //get form database in server time
     if($mod_date){
-        $mod_date = $mod_date->setTimezone(new DateTimeZone('UTC'))->format('Y-m-d H:i:s'); //convert to UTC
+        $mod_date = htmlspecialchars($mod_date->setTimezone(new DateTimeZone('UTC'))->format('Y-m-d H:i:s')); //convert to UTC
         $mod_date_local = ' (<span id="lt1"></span><script type="text/javascript">printLTime("'.  //output in js in local time
                             $mod_date.'", "lt1")</script> local)';
     }else{
@@ -1812,7 +1812,7 @@ function print_public_details($bib) {
                     .'<span class="ui-icon ui-icon-menu" style="font-size:1.2em;display:inline-block;vertical-align: middle;"></span>&nbsp;all images</a><br><br>';
                 }
                 if(count($thumbs)>0 && !$isAudioVideo){
-                    print '<a href="#" data-id="'.$thumb['nonce'].'" class="mediaViewer_link">'
+                    print '<a href="#" data-id="'.htmlspecialchars($thumb['nonce']).'" class="mediaViewer_link">'
                     .'<span class="ui-icon ui-icon-fullscreen" style="font-size:1.2em;display:inline-block;vertical-align: middle;"></span>&nbsp;full screen</a><br><br>';
                 }
             }
@@ -1822,7 +1822,7 @@ function print_public_details($bib) {
                    strpos($thumb['mimeType'],'vimeo')===false && 
                    strpos($thumb['mimeType'],'soundcloud')===false)) )
             {
-                print '<a href="#" data-id="'.$thumb['nonce'].'" class="miradorViewer_link">'
+                print '<a href="#" data-id="'.htmlspecialchars($thumb['nonce']).'" class="miradorViewer_link">'
                     .'<span class="ui-icon ui-icon-mirador" style="width:12px;height:12px;margin-left:5px;font-size:1em;display:inline-block;vertical-align: middle;'
                     .'filter: invert(35%) sepia(91%) saturate(792%) hue-rotate(174deg) brightness(96%) contrast(89%);'
                     .'"></span>&nbsp;Mirador</a><br><br>';
@@ -1868,8 +1868,9 @@ function print_public_details($bib) {
             }
 
             if(!$is_map_popup && $thumb['player'] && !$without_header){
-                print '<a id="lnk'.$thumb['id'].'" href="#" oncontextmenu="return false;" style="display:none;" onclick="window.hWin.HEURIST4.ui.hidePlayer('
-                        .$thumb['id'].', this.parentNode)">show thumbnail</a>';
+                print '<a id="lnk'.htmlspecialchars($thumb['id'])
+                        .'" href="#" oncontextmenu="return false;" style="display:none;" onclick="window.hWin.HEURIST4.ui.hidePlayer('
+                        .htmlspecialchars($thumb['id']).', this.parentNode)">show thumbnail</a>';
             }
 
             print '</div><!-- CLOSE download_link -->';  //CLOSE download_link
@@ -1894,18 +1895,18 @@ function print_public_details($bib) {
                 if($isAudioVideo){
                     //audio or video is maximized at once
                     
-                    print '<div id="player'.$thumb['id'].'" style="min-height:100px;min-width:200px;text-align:left;">';
+                    print '<div id="player'.htmlspecialchars($thumb['id']).'" style="min-height:100px;min-width:200px;text-align:left;">';
 
                     print fileGetPlayerTag($system, $thumb['nonce'], $thumb['mimeType'], $thumb['params'], $thumb['external_url']); //see recordFile.php
                     
                     //print getPlayerTag($thumb['nonce'], $thumb['mimeType'], $thumb['url'], null); 
                     print '</div>';    
                 }else{
-                    print '<img id="img'.$thumb['id'].'" style="width:200px" src="'.htmlspecialchars($thumb['thumb']).'"';
+                    print '<img id="img'.htmlspecialchars($thumb['id']).'" style="width:200px" src="'.htmlspecialchars($thumb['thumb']).'"';
                     if($isImageOrPdf && !$without_header){                        
                         print ' onClick="window.hWin.HEURIST4.ui.showPlayer(this,this.parentNode,'.$thumb['id'].',\''. htmlspecialchars($thumb['player'].'&origin=recview') .'\')"';
                     }
-                    print '><div id="player'.$thumb['id'].'" style="min-height:240px;min-width:320px;display:none;"></div>';
+                    print '><div id="player'.htmlspecialchars($thumb['id']).'" style="min-height:240px;min-width:320px;display:none;"></div>';
                 }
             }else{  //for usual image
                 print '<img src="'.htmlspecialchars($thumb['thumb']).'" '

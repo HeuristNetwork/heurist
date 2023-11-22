@@ -72,6 +72,11 @@ $mysqli = $system->get_mysqli();
 //find all database
 $databases = mysql__getdatabases4($mysqli, false);   
 
+foreach ($databases as $idx=>$db_name){
+    $databases[$idx] = htmlspecialchars( $db_name );
+}
+
+
 /*    
     $query = 'show databases';
     $res = $mysqli->query($query);
