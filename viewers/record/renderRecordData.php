@@ -713,7 +713,30 @@ if(!($is_map_popup || $without_header)){
                     $('#toggleHidden').parents('.detailRow').remove();
                 }
 
-                window.hWin.HAPI4.save_pref('recordData_HiddenFields', show_hidden_fields);
+                let $group_container = $('div#div_public_data');
+
+                $.each($group_container.find('fieldset'), function(idx, fieldset){
+
+                    $(fieldset).show();
+                    $group_container.find('h4[data-order="'+ $(fieldset).attr('id') +'"], h5[data-order="'+ $(fieldset).attr('id') +'"]').show();
+
+                    if(!$(fieldset).find('div').is(':visible')){
+                        $(fieldset).hide();
+                        $group_container.find('h4[data-order="'+ $(fieldset).attr('id') +'"], h5[data-order="'+ $(fieldset).attr('id') +'"]').hide();
+                    }
+
+                    let parent_id = $(fieldset).attr('data_parent');
+                    let $parent_ele = parent_id > 0 ? [] : $group_container.find(`h4[data-order="${parent_id}"]`);
+                    if($parent_ele.length > 0){
+                        if($parent_ele.find('h4, h5').is(':visible')){
+                            $group_container.find(`h4[data-order="${parent_id}"]`).show();
+                        }else{
+                            $group_container.find(`h4[data-order="${parent_id}"]`).hide();
+                        }
+                    }
+                });
+
+                window.hWin.HAPI4?.save_pref('recordData_HiddenFields', show_hidden_fields);
             }
             
             $(document).ready(function() {
@@ -1386,23 +1409,24 @@ function print_public_details($bib) {
     $rec_owner  = $bib['rec_OwnerUGrpID']; 
     if($system->has_access() && in_array($rec_owner, $ACCESSABLE_OWNER_IDS)){
         //owner of record can see any field
-        $detail_visibility_conditions = ''; // .= ' OR rst_NonOwnerVisibility="hidden"';
+        $detail_visibility_conditions = '';
     }else{
         $detail_visibility_conditions = array();
         if($system->has_access()){
             //logged in user can see viewable
             $detail_visibility_conditions[] = '(rst_NonOwnerVisibility="viewable")';
         }
-        $detail_visibility_conditions[] = '((rst_NonOwnerVisibility="public" OR rst_NonOwnerVisibility="pending") AND IFNULL(dtl_HideFromPublic, 0)!=1)';    
+        $detail_visibility_conditions[] = '((rst_NonOwnerVisibility="public" OR rst_NonOwnerVisibility="pending") AND IFNULL(dtl_HideFromPublic, 0)!=1)';
+
+        $detail_visibility_conditions[] = '(rst_RequirementType != "forbidden")';
         
         $detail_visibility_conditions = ' AND ('.implode(' OR ',$detail_visibility_conditions).')';
     }
 
     if($is_production || $is_map_popup){ // hide hidden fields in publication and map popups
-        $detail_visibility_conditions .= ' AND rst_NonOwnerVisibility != "hidden" AND rst_RequirementType != "forbidden"';
-    }
-        
-    
+        $detail_visibility_conditions .= ' AND rst_NonOwnerVisibility != "hidden" AND rst_RequirementType != "forbidden" AND IFNULL(dtl_HideFromPublic, 0) != 1';
+    }   
+
     $query = $query.$detail_visibility_conditions
         .' order by rdr.rst_DisplayOrder is null,
         rdr.rst_DisplayOrder,
