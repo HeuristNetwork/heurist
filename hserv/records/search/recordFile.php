@@ -924,7 +924,16 @@ function getWebImageCache($system, $obfuscated_ids, $return_url = true){
         // setup original file details
         $org_file = resolveFilePath($row['fullPath']);
         $file_info = pathinfo($org_file);
-        $org_rtn = $return_url ? str_replace(HEURIST_FILESTORE_DIR, HEURIST_FILESTORE_URL, $org_file) : $org_file;
+        $org_rtn = '';
+
+        if(strpos($org_file, HEURIST_FILESTORE_DIR) !== false){
+            $org_rtn = $return_url ? str_replace(HEURIST_FILESTORE_DIR, HEURIST_FILESTORE_URL, $org_file) : $org_file;
+        }else if(strpos($row['fullPath'], 'file_uploads/') === 0){
+            $org_rtn = ($return_url ? HEURIST_FILESTORE_URL : HEURIST_FILESTORE_DIR) . $row['fullPath'];
+        }else{
+            $system->addError(HEURIST_ERROR, 'An error occurred while attempting to resolve the file path for file #' . $row['ulf_ID']);
+            return false;
+        }
 
         // setup new file details
         $new_file = $web_cache_dir . "/" . $file_info['basename'];
