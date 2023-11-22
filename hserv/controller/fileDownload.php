@@ -192,7 +192,9 @@ if(!$error){
                         //show in viewer directly
                         $direct_url = HEURIST_FILESTORE_URL.$fileinfo['fullPath'];
 
-                        if(@$_REQUEST['fullres'] === 0 || @$_REQUEST['fullres'] === '0'){ // get web cached version
+                        $get_web_cache = @$_REQUEST['fullres'] === 0 || @$_REQUEST['fullres'] === '0';
+
+                        if(extension_loaded('imagick') && $get_web_cache){ // get web cached version
 
                             $org_url = $direct_url;
 
