@@ -1820,13 +1820,13 @@ function checkTerms($termID){
                 $dt_labels = array();
 
                 while ($row = $res->fetch_row()) {
-                    array_push($dtyIDs, $row[0]);
+                    array_push($dtyIDs, intval($row[0]));
                     array_push($dt_labels,$row[1]);
                 }
 
                 $query = 'select rec_ID, rec_RecTypeID  from recDetails, Records '
                 .'where (dtl_RecID=rec_ID) AND (dtl_DetailTypeID in ('.implode(',',$dtyIDs).')) and '
-                .'(dtl_Value='.$termID.')';
+                .'(dtl_Value='.intval($termID).')';
 
                 $res = $mysqli->query($query);
 

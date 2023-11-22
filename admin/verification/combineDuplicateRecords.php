@@ -247,7 +247,7 @@ $reference_bdts = mysql__select_assoc2($mysqli,'select dty_ID, dty_Name from def
                             $details = array();
                             $res = $mysqli->query('select dtl_DetailTypeID, dtl_Value, dtl_ID, dtl_UploadedFileID, if(dtl_Geo is not null, ST_AsWKT(dtl_Geo), null) as dtl_Geo, trm_Label
                                 from recDetails  left join defTerms on trm_ID = dtl_Value
-                                where dtl_RecID = ' . $records[$index]['rec_ID'] . '
+                                where dtl_RecID = ' . intval($records[$index]['rec_ID']) . '
                             order by dtl_DetailTypeID, dtl_ID');
                             
                             $records[$index]['details'] = array();
@@ -520,7 +520,7 @@ $reference_bdts = mysql__select_assoc2($mysqli,'select dty_ID, dty_Name from def
                                 
                                 $res2 = $mysqli->query('select concat(ugr_FirstName," ",ugr_LastName) as name, '
                                 .'rem_Freq, rem_StartDate from usrReminders left join sysUGrps on ugr_ID=rem_OwnerUGrpID '
-                                .'where rem_RecID='.$record['rec_ID']);
+                                .'where rem_RecID='.intval($record['rec_ID']));
                                 
                                 $rems = array();
                                 while ($rem = $res2->fetch_assoc()){
@@ -911,7 +911,8 @@ function do_fix_dupe()
         $new_title = TitleMask::execute($mask, $master_rectype_id, 0, $master_rec_id);
         
         if ($new_title!=null) {
-            $mysqli->query("update Records set rec_Title = '" . $mysqli->real_escape_string($new_title) . "' where rec_ID = $master_rec_id");
+            $mysqli->query("update Records set rec_Title = '" . $mysqli->real_escape_string($new_title) . "' where rec_ID = ".
+                intval($master_rec_id));
         }
     }
     //reload with flag that operation is completed

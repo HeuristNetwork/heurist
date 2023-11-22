@@ -222,6 +222,7 @@ class DbUsrBookmarks extends DbEntityBase
                     . ' and bkm_UGrpID = ' . $this->system->get_user_id();
             
             $bkm_IDs = mysql__select_list2($mysqli, $query);
+            $bkm_IDs = prepareIds( $bkm_IDs );
         }
             
             

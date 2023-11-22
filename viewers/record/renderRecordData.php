@@ -1103,7 +1103,7 @@ function print_header_line($bib) {
 
     global $is_map_popup, $without_header, $is_production, $system;
 
-    $rec_id = $bib['rec_ID'];
+    $rec_id = intval($bib['rec_ID']);
 
     $wfs_details = array();
     if(defined('DT_WORKFLOW_STAGE')){
@@ -1402,8 +1402,8 @@ function print_public_details($bib) {
         from recDetails
         left join defDetailTypes on dty_ID = dtl_DetailTypeID
         left join defRecStructure rdr on rdr.rst_DetailTypeID = dtl_DetailTypeID
-        and rdr.rst_RecTypeID = '.$bib['rec_RecTypeID'].'
-        where dtl_RecID = ' . $bib['rec_ID'];
+        and rdr.rst_RecTypeID = '.intval($bib['rec_RecTypeID']).'
+        where dtl_RecID = ' . intval($bib['rec_ID']);
     
     $rec_visibility = $bib['rec_NonOwnerVisibility'];
     $rec_owner  = $bib['rec_OwnerUGrpID']; 
@@ -1458,9 +1458,9 @@ function print_public_details($bib) {
                 .'null as dtl_Geo, '
                 .'null as bd_geo_envelope '
         .' from recDetails d1, defDetailTypes dt1, recDetails d2, defDetailTypes dt2, Records '
-        .' where d1.dtl_RecID = '. $bib['rec_ID'].' and d1.dtl_DetailTypeID = dt1.dty_ID and dt1.dty_Type = "resource" '
+        .' where d1.dtl_RecID = '. intval($bib['rec_ID']).' and d1.dtl_DetailTypeID = dt1.dty_ID and dt1.dty_Type = "resource" '
         .' AND d2.dtl_RecID = d1.dtl_Value and d2.dtl_DetailTypeID = dt2.dty_ID and dt2.dty_Type = "file" ' 
-        .' AND rec_ID = d2.dtl_RecID and rec_RecTypeID != '.$relRT
+        .' AND rec_ID = d2.dtl_RecID and rec_RecTypeID != '.intval($relRT)
         .' AND '.$ACCESS_CONDITION;
         
 //print $query;            
@@ -2020,7 +2020,7 @@ function print_public_details($bib) {
     $query = "SELECT rst_DisplayName, rst_DisplayOrder, rst_DefaultValue 
               FROM defRecStructure
               LEFT JOIN defDetailTypes ON rst_DetailTypeID = dty_ID
-              WHERE rst_RecTypeID = ". $bib['rec_RecTypeID'] ." AND dty_Type = 'separator' AND rst_RequirementType != 'forbidden'
+              WHERE rst_RecTypeID = ". intval($bib['rec_RecTypeID']) ." AND dty_Type = 'separator' AND rst_RequirementType != 'forbidden'
               ORDER BY rst_DisplayOrder";
 
     $groups_res = $mysqli->query($query);

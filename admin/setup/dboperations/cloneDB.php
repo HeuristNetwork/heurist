@@ -46,9 +46,9 @@ require_once 'welcomeEmail.php';
 $user_id = $system->get_user_id(); //keep user id (need to copy current user into cloned db for template cloning)
 $mysqli  = $system->get_mysqli();
 
-$templateddb = @$_REQUEST['templatedb'];
+$templateddb = filter_var(@$_REQUEST['templatedb'], FILTER_SANITIZE_STRING);
 $isCloneTemplate = ($templateddb!=null);
-if($isCloneTemplate) $templateddb = htmlspecialchars($templateddb);
+
 $sErrorMsg = null;
 $sHasNewDefsWarning = false;
 

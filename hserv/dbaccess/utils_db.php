@@ -21,6 +21,7 @@
     *  mysql__select_all
     *  mysql__duplicate_table_record
     *  mysql__insertupdate
+    *  mysql__select_param_query
     *  mysql__exec_param_query
     *  mysql__delete
     *  mysql__begin_transaction
@@ -692,7 +693,7 @@
     
         $result = false;
 
-        if ($params==null || !is_array($params) || count($params) < 1) {// not parameterised
+        if ($params==null || !is_array($params) || count($params) < 2) {// not parameterised
             $result = $mysqli->query($query);
         }else{        
 

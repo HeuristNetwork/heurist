@@ -1041,20 +1041,39 @@ When we open "iiif_image" in mirador viewer we generate manifest dynamically.
                 //find id with duplicated path+name
                 while($local_file = $local_dups->fetch_row()){
                     
-                    $path = (@$local_file[0]!=null) ? ('="' . $mysqli->real_escape_string($local_file[0]) . '"') : ' IS NULL';
-                    $fname = (@$local_file[1]!=null) ? ('="' . $mysqli->real_escape_string($local_file[1]) . '"') : ' IS NULL';
+                    $path = ' IS NULL';    
+                    $fname = ' IS NULL';    
+                    $params = array('');
+                    if(@$local_file[0]!=null){
+                        $path = '=?';    
+                        $params[0] = 's';
+                        $params[] = $local_file[0];
+                    }
+                    if(@$local_file[1]!=null){
+                        $fname = '=?';    
+                        $params[0] = $params[0].'s';
+                        $params[] = $local_file[1];
+                    }
+                    
+                    //$path = (@$local_file[0]!=null) ? ('="' . $mysqli->real_escape_string($local_file[0]) . '"') : ' IS NULL';
+                    //$fname = (@$local_file[1]!=null) ? ('="' . $mysqli->real_escape_string($local_file[1]) . '"') : ' IS NULL';
 
                     $query = 'SELECT ulf_ID FROM recUploadedFiles WHERE ulf_FilePath' 
                         .  $path
                         .' AND ulf_FileName '.$fname 
                         . $where_ids;
-                    $res = $mysqli->query($query);
+                        
+                    $res = mysql__select_param_query($mysqli, $query, $params);    
+                        
+                    //$res = $mysqli->query($query);
 
                     $dups_ids = array();
-                    while ($local_id = $res->fetch_row()) {
-                        array_push($dups_ids, $local_id[0]);
+                    if($res){
+                        while ($local_id = $res->fetch_row()) {
+                            array_push($dups_ids, intval($local_id[0]));
+                        }
+                        $res->close();
                     }
-                    $res->close();
 
                     $new_ulf_id = array_shift($dups_ids);
                     $upd_query = 'UPDATE recDetails set dtl_UploadedFileID='.intval($new_ulf_id)
@@ -1154,7 +1173,7 @@ When we open "iiif_image" in mirador viewer we generate manifest dynamically.
                         foreach ($dups_files as $ulf_ID => $file_arr){ 
                             if ($file_arr['size'] == $f_size && $file_arr['md5'] == $f_md5){ // same file
                                 $is_unique = false;
-                                $dups_files[$ulf_ID]['dups'][] = $file_dtls['ulf_ID'];
+                                $dups_files[$ulf_ID]['dups'][] = intval($file_dtls['ulf_ID']);
                                 break;
                             }
                         }

@@ -46,7 +46,7 @@ function fetch_relation_details($recID, $i_am_primary) {
     
     /* get recDetails for the given linked resource and extract all the necessary values */
     $mysqli = $system->get_mysqli();
-    $res = $mysqli->query('select * from recDetails where dtl_RecID = ' . $recID);
+    $res = $mysqli->query('select * from recDetails where dtl_RecID = ' . intval($recID));
     
     $bd = array('recID' => $recID);
     if($res){

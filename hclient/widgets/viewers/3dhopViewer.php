@@ -42,7 +42,7 @@ if($system->init($db, true, false)){
 
     if(@$_REQUEST['file'] || @$_REQUEST['ulf_ID']) { //ulf_ID is obfuscation id here
 
-        $fileid = htmlspecialchars(@$_REQUEST['file']? $_REQUEST['file'] :@$_REQUEST['ulf_ID']);
+        $fileid = filter_var(@$_REQUEST['file']? $_REQUEST['file'] :@$_REQUEST['ulf_ID'], FILTER_SANITIZE_STRING);
             
         //find file info
         $listpaths = fileGetFullInfo($system, $fileid);

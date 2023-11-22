@@ -1317,7 +1317,7 @@ class DbUtils {
                         }
                         
                         $mysqli->query("ALTER TABLE `".$table."` DISABLE KEYS");
-                        $res = $mysqli->query("INSERT INTO `".$table."` SELECT * FROM ".$db_source.".`".$table."`"  );
+                        $res = $mysqli->query("INSERT INTO `".$table."` SELECT * FROM `".$db_source."`.`".$table."`"  );
 
                         if($res){
                                 if($verbose) {
