@@ -363,7 +363,7 @@ function recordAdd($system, $record, $return_id_only=false){
 
             $params = array("q"=>"ids:".$newId, 'detail'=>'complete', "w"=>"e");
             //retrieve new record with structure
-            $response = recordSearch($system, $params, true, true);
+            $response = recordSearch($system, $params);
         }
     }
     return $response;
