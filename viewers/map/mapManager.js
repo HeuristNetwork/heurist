@@ -154,12 +154,20 @@ function hMapManager( _options )
         options.container = $(options.container);
         
         options.container.css({border: '2px solid rgba(0,0,0,0.2)','background-clip': 'padding-box'}); 
-        
+
         btn_expand = $('<a>').attr('title', window.hWin.HR('Map Legend'))
-            .css({'width':'22px','height':'22px','border-radius': '2px','cursor':'pointer','margin':'0.1px'})
-            .addClass('ui-icon ui-icon-list')
+            .css({'width':'70px','height':'22px','border-radius': '2px','cursor':'pointer','margin':'0.1px'})
             .on({click: _onExpand })
             .appendTo(options.container);
+
+        // Legend text
+        $('<span>', {style: 'margin-right:5px;font-weight:bold;text-align:unset;line-height:26px;'})
+            .text(window.hWin.HR('Legend'))
+            .appendTo(btn_expand);
+
+        // Legend icon
+        $('<span>', {class: 'ui-icon ui-icon-list'})
+            .appendTo(btn_expand);
 
         btn_collapse = $('<a>').attr('title', 'Minimize legend')
             .css({'width':'16px','height':'16px','z-index':1001,background:'none',border:'none',cursor:'pointer',position:'absolute',right:'3px'})
@@ -168,7 +176,7 @@ function hMapManager( _options )
             .appendTo(options.container);
         
         options.container.find('.ui-resizable-handle')
-            .css({'border-right': '1px solid lightgray', 'width': '7px'})
+            .css({'border-right': '1px solid lightgray', 'width': '7px', 'height': '99%'})
             .append($('<span class="ui-icon ui-icon-carat-1-w" style="height:100%;width:11px;color:gray;top:3px;left:-3px;font-size:10px;">'));
         
         mapDocuments = hMapDocument( { mapwidget:options.mapwidget } ); 
@@ -258,7 +266,7 @@ function hMapManager( _options )
         //<span class="ui-icon ui-icon-'+sIcon+'" ' + 'style="display:inline-block;padding:0 4px"></span>
         
         var $header = $('<h3 grpid="'+domain+'" class="hasmenu">' + sIcon + '<span style="vertical-align:top;">'
-            + name + '</span></h3>')
+            + window.hWin.HR(name) + '</span></h3>')
             .addClass('tree-accordeon-header outline_suppress svs-header');
 
         /*    
@@ -270,15 +278,6 @@ function hMapManager( _options )
          var isPublished = options.mapwidget.mapping('option','isPublished');
          if(domain=='mapdocs' && !isPublished){
 
-            /*old version             
-            var append_link = $('<a title="create new map document">',{href:'#'})
-                .html('<span class="ui-icon ui-map-document" style="width:22px">'
-+'<span class="ui-icon ui-icon-plus" style="position:absolute;bottom:-2px;right:-2px;font-size:12px;color:white;text-shadow: 2px 2px gray" />'
-                +'</span>New map document')
-                .css({height:'26px',width: '100%',background: 'none'})
-                .click(_createNewMapDocument)
-                .appendTo($header);
-            */
             var append_link = $('<a title="create new map document">',{href:'#'})
                 .html('Add <span class="ui-icon ui-map-document" style="width:22px">'
 +'<span class="ui-icon ui-icon-plus" style="position:absolute;bottom:-2px;right:-2px;font-size:12px;color:white;text-shadow: 2px 2px gray" />'
@@ -832,22 +831,22 @@ function hMapManager( _options )
             if(isEditAllowed){        
                 
                 if(item.data.type=='mapdocument' && mapdoc_id>0){
-                    
-                    actionspan +=
-                        ('<span class="ui-icon ui-icon-pencil" title="Modify the map document"></span>'
-                        +'<span class="ui-icon ui-map-layer" title="Add map layer">'
+
+                    actionspan += (
+                        '<span class="ui-icon ui-icon-pencil" title="Modify the map document"></span>'
+                        + (window.hWin.HAPI4.has_access() ? 
+                        '<span class="ui-icon ui-map-layer" title="Add map layer">'
                             +'<span class="ui-icon ui-icon-plus" style="position:absolute;bottom:-2px;right:-2px;font-size:12px;color:white;text-shadow: 2px 2px gray" />'
-                        +'</span>'
+                        +'</span>' : '')
                         +'<span class="ui-icon ui-icon-refresh" style="color:gray" title="Reload map document"></span>'
                         //+'<span class="ui-icon ui-icon-trash" style="color:gray" title="Close map document"></span>'
-                        )
-                    
+                    )
+
                 }else if(mapdoc_id>0){
-                    
+
                     actionspan +=
                         '<span class="ui-icon ui-icon-pencil" title="Change symbology and behaviour of map layer"></span>';
-                    
-                    
+
                 }else{
                     
                     if(recid<9000000){
@@ -1066,10 +1065,14 @@ function hMapManager( _options )
 
     function _onCollapse(){
         isExpanded = false;
+
         keepWidth = options.container.width();
         btn_expand.show();
         btn_collapse.hide();
-        options.container.css({'width':'22px','height':'22px','overflow-y':'hidden','overflow-x':'hidden',padding:'1px'})
+
+        let width_dims = (navigator.userAgent.toLowerCase().indexOf('firefox') >= 0 ? 76 : 70) + 'px';
+        let height_dims = (navigator.userAgent.toLowerCase().indexOf('firefox') >= 0 ? 28 : 22) + 'px';
+        options.container.css({'width':width_dims,'height':height_dims,'overflow-y':'hidden','overflow-x':'hidden',padding:'1px'})
             .resizable( "disable" );
             
         if(options.is_ui_main){
@@ -1098,22 +1101,26 @@ function hMapManager( _options )
         },
         */
         setHeight: function( val ){
-            
-           if(isExpanded){
-               
-               if(val>0) maxHeight  = val;
-                
-               var ele = options.container.find('.svs-acordeon:visible');
-               var h = 20;
-               $(ele).each(function(idx,item){h=h+$(item).height()});
-                
-               options.container.height( Math.min(h, maxHeight) );
-               
-           }else{
-               options.container.height( 22 );
-               options.container.width( 22 );
-           }
-           
+
+            if(isExpanded){
+
+                if(val>0) maxHeight  = val;
+
+                var ele = options.container.find('.svs-acordeon:visible');
+                var h = 20;
+                $(ele).each(function(idx,item){h=h+$(item).height()});
+
+                options.container.height( Math.min(h, maxHeight) );
+
+            }else{
+
+                let width_dims = (navigator.userAgent.toLowerCase().indexOf('firefox') >= 0 ? 76 : 70) + 'px';
+                let height_dims = (navigator.userAgent.toLowerCase().indexOf('firefox') >= 0 ? 28 : 22) + 'px';
+
+                options.container.height( height_dims );
+                options.container.width( width_dims );
+            }
+
         },
         
         //

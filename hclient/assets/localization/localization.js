@@ -535,6 +535,14 @@ regional['ENG'] = {
     facet_wizard_select_field: 'Select fields that act as facet',    
     facet_wizard_define_field: 'Define titles, help tips and facet type',
 
+    // Map WIDGET --------------------
+    // Map legend headings
+    'Legend': '',
+    'Result Sets': '',
+    'Map Documents': '',
+    'Temp Map': '',
+    'Base Maps': '',
+
 //===================    
     
     'Design database': 'Design database',
