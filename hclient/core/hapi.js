@@ -2516,7 +2516,7 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
 
                     var val = values[key];
                     
-                    if(val.length>4 && val.substr(3,1)==':'){ //has lang prefix
+                    if(val!=null && val.length>4 && val.substr(3,1)==':'){ //has lang prefix
                         if(val.substr(0,3)==lang){
                             def_val = val.substr(4).trim();
                             break;
