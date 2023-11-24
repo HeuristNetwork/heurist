@@ -83,6 +83,7 @@ if (($_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0.0.1')
     var isWebPage = <?php echo ($isWebPage ?'true':'false');?>;
     var current_page_id = 0;
     var current_language = '<?php echo $website_language_def?$website_language_def:'def'; ?>';
+    var default_language = current_language; //is is needed for edit CMS
     var website_languages = '<?php echo $website_languages?implode(',',$website_languages):''; ?>';
     var is_show_pagetitle_main = <?php echo $show_pagetitle?'true':'false'; ?>;  //is show page title per website 
     var isCMS_active = <?php echo (@$_REQUEST['edit']?'true':'false'); ?>; //use new CMS editor and init it once

@@ -283,6 +283,7 @@ if(defined('DT_LANGUAGES')){
             } 
         }
         $website_languages_links = $res;
+        $website_languages = $website_languages_codes;
     }
 }
 
