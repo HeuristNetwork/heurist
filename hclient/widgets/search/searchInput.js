@@ -135,7 +135,7 @@ $.widget( "heurist.searchInput", {
         this._on( this.btn_start_search, {
             click:  function(){
                 //that.option("search_domain", "a");
-                that._doSearch(true);}
+                that._doSearch();}
         });
    
         this._on( this.input_search, {
@@ -144,7 +144,7 @@ $.widget( "heurist.searchInput", {
                 if (code == 13) {
                     window.hWin.HEURIST4.util.stopEvent(e);
                     e.preventDefault();
-                    that._doSearch(true);
+                    that._doSearch();
                 }
             },
             keydown: function(e){
@@ -159,10 +159,19 @@ $.widget( "heurist.searchInput", {
         $(this.document).on(
             window.hWin.HAPI4.Event.ON_REC_SEARCHSTART
             + ' ' + window.hWin.HAPI4.Event.ON_REC_SEARCH_FINISH, 
-            function(e, data) { that._onSearchGlobalListener(e, data) } );
+            function(e, data) { 
+                that._onSearchGlobalListener(e, data) 
+            } );
         
 
         this._refresh();
+        
+        if(!window.hWin.HEURIST4.util.isempty(that.options.preliminary_filter)){
+            setTimeout(function(){
+                    that.input_search.val(that.options.preliminary_filter);
+                    that._doSearch();
+            },1000);
+        }
 
     }, //end _create
 
