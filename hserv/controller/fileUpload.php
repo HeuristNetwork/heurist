@@ -30,6 +30,14 @@ $system = new System();
 
 $post_max_size = USystem::getConfigBytes('post_max_size');
 
+if(intval($_SERVER['CONTENT_LENGTH'])>$post_max_size){
+    
+        $response = '<p class="heurist-message">The upload size of '.$_SERVER['CONTENT_LENGTH'].' bytes exceeds the limit of '.ini_get('post_max_size')
+        .'.<br><br>If you need to upload larger files please contact the system administrator '.HEURIST_MAIL_TO_ADMIN.'</p>';
+        /*    
+            $response = $system->addError(HEURIST_ACTION_BLOCKED, $response);
+        */
+}else
 if($system->init(@$_REQUEST['db'])){
 
     //define upload folder   HEURIST_FILESTORE_DIR/ $_REQUEST['entity'] /
@@ -84,9 +92,7 @@ if($system->init(@$_REQUEST['db'])){
             
         }else
         if ($quota_not_defined && $post_max_size && ($content_length > $post_max_size)) { //quota not defined - multipart upload disabled
-            $error = 'The uploaded file exceeds the maximum size ('. ini_get('post_max_size') .'Bytes) set for this server (post_max_size in php.ini)';
-            $response = $system->addError(HEURIST_ACTION_BLOCKED, $error);
-            $response['message'] = $error . '<br><br>If you need to upload larger files please contact the system administrator ' . HEURIST_MAIL_TO_ADMIN;
+
         }        
         
     }
@@ -98,7 +104,11 @@ if($system->init(@$_REQUEST['db'])){
 if($response!=null){
     header('Content-type: application/json;charset=UTF-8');
     http_response_code(406);
-    print json_encode($response);
+    if(is_array($response)){
+        print json_encode($response);    
+    }else{
+        print $response;    
+    }
     exit;
 }
     

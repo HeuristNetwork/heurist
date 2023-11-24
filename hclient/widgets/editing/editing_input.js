@@ -3087,6 +3087,7 @@ $.widget( "heurist.editing_input", {
             else
             if( this.detailType=='file' ){ //----------------------------------------------------
                 
+                        var fileHandle = null; //to support file upload cancel
                 
                         this.options.showclear_button = (this.configMode.hideclear!=1);
                         
@@ -3167,7 +3168,8 @@ $.widget( "heurist.editing_input", {
                         //crate progress dialog
                         var $progress_dlg = $('<div title="File Upload"><div class="progress-label">Starting upload...</div>'
                         +'<div class="progressbar" style="margin-top: 20px;"></div>'
-                        +'<div class="cancelButton">Cancel upload</div></div>').hide().appendTo( $inputdiv );
+                        +'<div style="padding-top:4px;text-align:center"><div class="cancelButton">Cancel upload</div></div></div>')
+                        .hide().appendTo( $inputdiv );
                         var $progress_bar = $progress_dlg.find('.progressbar');
                         var $progressLabel = $progress_dlg.find('.progress-label');
                         let $cancelButton = $progress_dlg.find('.cancelButton');
@@ -3191,12 +3193,15 @@ $.widget( "heurist.editing_input", {
                             click: function(){
 
                                 if(fileHandle && fileHandle.abort){
+                                    fileHandle.message = 'File upload was aborted';
                                     fileHandle.abort();
                                 }
 
-                                fileHandle = true;
+                                //fileHandle = true;
                             }
                         });
+                        
+        var max_file_size = Math.min(window.hWin.HAPI4.sysinfo['max_post_size'], window.hWin.HAPI4.sysinfo['max_file_size']);
 
         var fileupload_opts = {
     url: window.hWin.HAPI4.baseURL + 'hserv/controller/fileUpload.php',
@@ -3212,12 +3217,35 @@ $.widget( "heurist.editing_input", {
     //multipart: (window.hWin.HAPI4.sysinfo['is_file_multipart_upload']==1),
     //maxChunkSize: 10485760, //10M
     //to check file size on client side
-    max_file_size: Math.min(window.hWin.HAPI4.sysinfo['max_post_size'], window.hWin.HAPI4.sysinfo['max_file_size']),
+    max_file_size: max_file_size,
     sequentialUploads: true,
     dataType: 'json',
     pasteZone: $input_img,
     dropZone: $input_img,
-    // add: function (e, data) {  data.submit(); },
+    
+    add: function (e, data) {
+        if (e.isDefaultPrevented()) {
+            return false;
+        }
+//console.log(data);      
+
+        if(data.files && data.files.length>0 && data.files[0].size>max_file_size)
+        {
+                data.message = `The upload size of ${data.files[0].size} bytes exceeds the limit of ${max_file_size}`
+                +` bytes.<br><br>If you need to upload larger files please contact the system administrator ${window.hWin.HAPI4.sysinfo.sysadmin_email}`;
+
+                data.abort();
+                
+        }else if (data.autoUpload || (data.autoUpload !== false &&
+                $(this).fileupload('option', 'autoUpload'))) 
+        {
+            fileHandle = data;
+            data.process().done(function () {
+                data.submit();
+            });
+        }
+
+    },
     submit: function (e, data) { //start upload
     
         $progress_dlg = $progress_dlg.dialog({
@@ -3229,13 +3257,6 @@ $.widget( "heurist.editing_input", {
           });                        
         $progress_dlg.dialog('open'); 
         $progress_dlg.parent().find('.ui-dialog-titlebar-close').hide();
-    },
-    fail: function (e, response) {
-        $progress_dlg.dialog( "close" );
-        if(response && response.jqXHR && response.jqXHR.responseJSON){
-            response = response.jqXHR.responseJSON.message;
-        }
-        window.hWin.HEURIST4.msg.showMsgErr(response);
     },
     done: function (e, response) {
         
@@ -3299,17 +3320,39 @@ $.widget( "heurist.editing_input", {
     },
     fail: function(e, data){
 
-        $progress_dlg.dialog("close");
+        if($progress_dlg.dialog('instance')){
+            $progress_dlg.dialog("close");   
+        }
+        
+//console.log(data);        
 
-        if(fileHandle === true){ // was aborted by user
-            window.hWin.HEURIST4.msg.showMsgFlash('File upload was aborted', 3000);
-        }else{
-            window.hWin.HEURIST4.msg.showMsgErr('An unknown error occurred while attempting to upload your file.');
+        if(!window.hWin.HEURIST4.util.isnull(fileHandle) && fileHandle.message){ // was aborted by user
+            window.hWin.HEURIST4.msg.showMsgFlash(fileHandle.message, 3000);
+        }else if( data.message ) {
+            window.hWin.HEURIST4.msg.showMsgErr( data );
+        }else {
+            
+            var msg = 'An unknown error occurred while attempting to upload your file.'
+            
+            if(data._response && data._response.jqXHR) {
+                if(data._response.jqXHR.responseJSON){
+                    msg = data._response.jqXHR.responseJSON;    
+                }else if(data._response.jqXHR.responseText){
+                    msg = data._response.jqXHR.responseText;    
+                    let k = msg.indexOf('<p class="heurist-message">');
+                    if(k>0){
+                        msg = msg.substring(k);   
+                    }
+                }
+            }
+            
+            window.hWin.HEURIST4.msg.showMsgErr(msg);
         }
 
         fileHandle = null;
     },
     progressall: function (e, data) { //@todo to implement
+console.log(data.loaded, data.total);    
         var progress = parseInt(data.loaded / data.total * 100, 10);
         //$('#progress .bar').css('width',progress + '%');
         $progress_bar.progressbar( "value", progress );        
