@@ -97,6 +97,7 @@ $.widget( "heurist.svs_list", {
                 this.options.allowed_svsIDs = this.options.allowed_svsIDs.trim().replace(/\s+/g,'').split(',');    
             }
         }
+       
         if(this.options.allowed_UGrpID && !$.isArray(this.options.allowed_UGrpID)){
             this.options.allowed_UGrpID = this.options.allowed_UGrpID.trim().replace(/\s+/g,'').split(',');
         }

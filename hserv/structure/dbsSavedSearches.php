@@ -97,9 +97,10 @@
             $ugrID = '0,4'; //get saved searches for guest and websearches
         }
         
+        $ugrID = prepareIds($ugrID,true);
+        
         if($keep_order){
             $order = array();
-            $ugrID = prepareIds($ugrID,true);
             $query = 'SELECT ugr_NavigationTree FROM `sysUGrps` WHERE ugr_ID in ('.implode(',', $ugrID).')';
             $res = $mysqli->query($query);
             if($res){
@@ -113,7 +114,7 @@
             }
         }
         
-        $query = 'SELECT svs_ID, svs_Name, svs_Query, svs_UGrpID FROM usrSavedSearches WHERE svs_UGrpID in ('.$ugrID.')';
+        $query = 'SELECT svs_ID, svs_Name, svs_Query, svs_UGrpID FROM usrSavedSearches WHERE svs_UGrpID in ('.implode(',', $ugrID).')';
 
         if($keep_order && count($order)>0){
             $query = $query.' order by FIELD(svs_ID,'.implode(',',$order).')';
