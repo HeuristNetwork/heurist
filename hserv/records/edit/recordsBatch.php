@@ -651,7 +651,7 @@ class RecordsBatch
     */
     public function detailsReplace()
     {
-        if (@$this->data['rVal']==null){
+        if (@$this->data['rVal']==null && @$this->data['replace_empty'] != 1){
             $this->system->addError(HEURIST_INVALID_REQUEST, "Insufficent data passed. New value not defined");
             return false;
         }

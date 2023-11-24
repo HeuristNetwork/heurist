@@ -3974,7 +3974,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
             dlg_options = {
                 title:'Disambiguation',
                 buttons: buttons
-                };
+            };
             
             var j, i=0, keyvalues = Object.keys(res['disambiguation']);
             
@@ -3986,7 +3986,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
             var fieldnames = Object.keys(res['mapped_fields']);
             for(i=0;i<fieldnames.length;i++){
                 
-                var colname = imp_session['columns'][fieldnames[i].substr(6)];
+                var colname = imp_session['columns'][fieldnames[i].substring(6)];
                 csv_output += colname+',';
                 s += ('<th align="left">'+colname+'</th>');
             }
@@ -4001,6 +4001,9 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
                 //WHY???!!! keyvalue.shift(); //remove first element 
                 csv_output +=('"'+keyvalue.join('","')+'"');
                 var keys_prefix = ','.repeat(keyvalue.length);
+
+                let str_length = keyvalue.join(' ').length;
+                str_length = str_length > 75 ? 75 : str_length;
                 
                 keyvalue = keyvalue.join('</div></td><td><div class="truncate" style="max-width:100px">'); //';&nbsp;&nbsp;');
                 
@@ -4010,7 +4013,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
 
                 var recIds = Object.keys(disamb);
                         
-                s = s + '<tr><td><div class="truncate" style="max-width:100px;text-align:center">'+ keyvalue +'</div></td><td style="text-align:center">'
+                s = s + `<tr><td><div class="truncate" style="max-width:${str_length}ch;text-align:center" title="${keyvalue}">${keyvalue}</div></td><td style="text-align:center">`
                 + '<a href="#" '
                 + 'style="text-decoration:underline;color:blue" '
                 + ' onclick="{window.hWin.HEURIST4.util.findObjInFrame(\'importRecordsCSV\').showImportLineInPopup(\''+disambig_imp_id+'\');}">'

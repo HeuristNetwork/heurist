@@ -45,7 +45,8 @@ function hRecordAction(_action_type, _scope_type, _field_type, _field_value) {
         init_scope_type = _scope_type,
         init_field_type = _field_type,
         init_field_value = _field_value,
-        repositories = ['Nakala']; // list of repositories
+        repositories = ['Nakala'], // list of repositories
+        _allow_empty_replace = false;
 
 
     /*
@@ -638,9 +639,26 @@ function hRecordAction(_action_type, _scope_type, _field_type, _field_value) {
                     }
                 }
                 request['rVal'] = getFieldValue('fld-2');
-                if(window.hWin.HEURIST4.util.isempty(request['rVal'])){
-                    alert('Define value to replace');
+                if(!_allow_empty_replace && window.hWin.HEURIST4.util.isempty(request['rVal'])){
+                    
+                    let msg = 'You have not defined a replacement value<br><br>'
+                            + `Click "${window.hWin.HR('OK')}" to delete the search string<br>`
+                            + `Click "${window.hWin.HR('Cancel')}" if you want to replace the search string with a new string`;
+
+                    window.hWin.HEURIST4.msg.showMsgDlg(msg, 
+                        () => {
+                            _allow_empty_replace = true;
+                            _startAction();
+                            return;
+                        },
+                        {title: window.hWin.HR('Empty replace value'), yes: window.hWin.HR('OK'), no: window.hWin.HR('Cancel')}, 
+                        {default_palette_class: 'ui-heurist-explore'}
+                    );
+
                     return;
+                }else if(_allow_empty_replace){
+                    request['replace_empty'] = 1;
+                    _allow_empty_replace = false;
                 }
             
             }else if(action_type=='url_to_file'){

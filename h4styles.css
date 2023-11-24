@@ -1642,6 +1642,20 @@ span.fancytree-checkbox{
     display: inline-block;
 }
 
+/* Fancytree: Change individual checkboxes to radio buttons */
+span.fancytree-checkbox.fancytree-radio{
+    background-position: 0px -47px;
+}
+span.fancytree-checkbox.fancytree-radio:hover{
+    background-position: -16px -47px;
+}
+.fancytree-selected span.fancytree-checkbox.fancytree-radio{
+    background-position: -32px -47px;
+}
+.fancytree-selected span.fancytree-checkbox.fancytree-radio:hover{
+    background-position: -48px -47px;
+}
+
 /* Allow horizontal scrolling of trees */
 .tree-csv .fancytree-container, .tree-facets .fancytree-container, 
 .tree-filter .fancytree-container, .tree-rts .fancytree-container, 

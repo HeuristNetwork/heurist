@@ -367,7 +367,27 @@
         if(strpos($glb_curl_error, '404') !== false && @$params['serviceType'] == 'nomisma'){ // No result for Nomisma returns a 404 error
             $remote_data = json_encode(array()); // return empty array
         }else{
-            $system->error_exit_api('<br>Cannot connect/load data from the service: '.$url.'<br>'.$error_code, HEURIST_ERROR);
+
+            preg_match("/\d+/", $glb_curl_error, $http_code);
+            $http_code = $http_code[0];
+            $heurist_err_type = HEURIST_ERROR;
+
+            if(@$params['serviceType'] == 'geonames'){
+                $url = preg_replace("/&?username=$accessToken_GeonamesAPI&?/", "", $url);
+                $_REQUEST['service'] = $url;
+            }
+
+            $err_msg = '<br>Heurist cannot connect/load data from the service url: '.$url.'<br>'.$error_code;
+
+            if(intval($http_code) >= 500){
+
+                $err_msg .= '<br><br>Please retry your request in a few minutes as the requested service is currently busy,'
+                         .  '<br>if the problem persists then please make a bug report.';
+
+                $heurist_err_type = HEURIST_ACTION_BLOCKED;
+            }
+
+            $system->error_exit_api($err_msg, $heurist_err_type);
         }
     }
 

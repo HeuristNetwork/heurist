@@ -143,7 +143,9 @@ function hMapManager( _options )
     
     basemaplayer =null,  //current basemap layer
     
-    _suppress_select_event = false;
+    _suppress_select_event = false,
+
+    _mapdoc_layers = {}; // cached toggle setting for each layer within each mapdoc
 
     // Any time the widget is called with no arguments or with only an option hash, 
     // the widget is initialized; this includes when the widget is created.
@@ -265,7 +267,7 @@ function hMapManager( _options )
         var sIcon = '';
         //<span class="ui-icon ui-icon-'+sIcon+'" ' + 'style="display:inline-block;padding:0 4px"></span>
         
-        var $header = $('<h3 grpid="'+domain+'" class="hasmenu">' + sIcon + '<span style="vertical-align:top;">'
+        var $header = $('<h3 grpid="'+domain+'" class="hasmenu">' + sIcon + '<span>'
             + window.hWin.HR(name) + '</span></h3>')
             .addClass('tree-accordeon-header outline_suppress svs-header');
 
@@ -492,308 +494,292 @@ function hMapManager( _options )
         if($.isFunction($('body').fancytree)){
      
             tree_container.fancytree({  //addClass('tree-facets').
-                                    //extensions: ["filter"],
-                                    //            extensions: ["select"],
-                                    checkbox: true,
-                                    selectMode: 2,  // hierarchical multi-selection
-                                    source: treedata,
-                                    /*
-                                    beforeSelect: function(event, data){
-                                        // A node is about to be selected: prevent this, for folder-nodes:
-                                        if( data.node.hasChildren() ){
-                                            return false;
-                                        }
-                                    },*/
-                                    lazyLoad: function(event, data){
-                                    //load: function(forceReload){
-                                        //load content of mapdocument
-                                        var node = data.node;
-                                        var dfd = new $.Deferred();
-                                        data.result = dfd.promise();
-                                        mapDocuments.zoomToMapDocument(node.key);
-                                        mapDocuments.openMapDocument(node.key, dfd);
-                                        //return dfd.promise();
-                                        
-                                    },
-                                    expand: function(e, data){
-                                       
-                                    },
-                                    loadChildren: function(e, data){
-    
-                                        setTimeout(function(){
-                                            
-                                            if(data.node.data.type=='mapdocument'){
-                                                data.node.setSelected(true, {noEvents:true} );
-                                                //enable buttons
-                                                var btns = $(data.node.li).find('.svs-contextmenu3');
-                                                btns.find('span.ui-icon-arrow-4-diag').css({color:'black'});    
-                                                btns.find('span.ui-icon-refresh').css({color:'black'});
-                                            }
-                                                
-                                            
-                                            //$.each(data.node.children, function( idx, item ){
-                                            //    _defineActionIcons( item );
-                                            //}) 
-                                        }, 500);                                           
-                                    },
-                                    select: function(e, data) {  //show/hide   checkbox event listener
-                                        
-                                        var node = data.node;
-                                        if(node.data.type=='mapdocument'){
-                                            //if not expanded, expand, it loads layers (opens mapdocument)
-                                            
-                                            if(node.isSelected()){
-                                                delete mapdoc_visible[mapdoc_id];
-                                                //hide all other mapdocs
-                                                that.toggleMapDocument(Object.keys(mapdoc_visible).join(','), false); 
-                                                mapdoc_visible = {};
-                                            }
-                                            
-                                            var mapdoc_id = node.key;
-                                            if(!node.isExpanded() && !mapDocuments.isLoaded(mapdoc_id)){
-                                                node.setExpanded(true); //load content - init lazy load - see lazyLoad ->  mapDocuments.openMapDocument
-                                            }else{
 
-                                                mapDocuments.setMapDocumentVisibility(mapdoc_id, node.isSelected());
-                                          
-                                                if(node.hasChildren()){
-                                                    var mapdoc_vis = node.isSelected();
-                                                    //set selection in legend for child layers
-                                                    _suppress_select_event = true;
-                                                    $.each(node.getChildren(), function(i, layer_node){
-                                                           layer_node.setSelected( mapdoc_vis );
-                                                    });
-                                                    _suppress_select_event = false;
-                                                }
-                                            }
-                                            
-                                            if(node.isSelected()){
-                                                mapdoc_visible[mapdoc_id] = node.title; // add to list
-                                            }else{
-                                                //restore default CRS if mapdoc is off
-                                                options.mapwidget.mapping('defineCRS', '');
-                                                that.loadBaseMap(0); //loads default
-                                                delete mapdoc_visible[mapdoc_id]; // remove from list
-                                            }
-                                            
+                checkbox: true,
+                selectMode: 2,  // hierarchical multi-selection
+                source: treedata,
+                lazyLoad: function(event, data){
+                //load: function(forceReload){
+                    //load content of mapdocument
+                    var node = data.node;
+                    var dfd = new $.Deferred();
+                    data.result = dfd.promise();
+                    mapDocuments.zoomToMapDocument(node.key);
+                    mapDocuments.openMapDocument(node.key, dfd);
+                    //return dfd.promise();
+                    
+                },
+                expand: function(e, data){
+                    
+                },
+                loadChildren: function(e, data){
 
-                                            if(mapdoc_select !== null){
+                    setTimeout(function(){
+                        
+                        if(data.node.data.type=='mapdocument'){
+                            data.node.setSelected(true, {noEvents:true} );
+                            //enable buttons
+                            var btns = $(data.node.li).find('.svs-contextmenu3');
+                            btns.find('span.ui-icon-arrow-4-diag').css({color:'black'});    
+                            btns.find('span.ui-icon-refresh').css({color:'black'});
+                        }
 
-                                                var selected_opts = Object.values(mapdoc_visible);
-                                                selected_opts = selected_opts.length == 0 ? ['Current result set'] : selected_opts;
-                                                if(!mapdoc_select.hSelect('instance')){
-                                                    mapdoc_select.hSelect();
-                                                }
-                                                mapdoc_select.hSelect('widget').attr('title', selected_opts.join(', '));
+                    }, 500);                                           
+                },
+                select: function(e, data) {  //show/hide   checkbox event listener
 
-                                                if(selected_opts.length == 1){
-                                                    mapdoc_select.hSelect('widget').find('span.ui-selectmenu-text').text(selected_opts[0]);
-                                                }else{
-                                                    mapdoc_select.hSelect('widget').find('span.ui-selectmenu-text').text(selected_opts.length+' documents displayed');
-                                                }
-                                            }
+                    var node = data.node;
+                    let is_selected = node.isSelected();
+                    if(node.data.type=='mapdocument'){
 
-                                            //
-                                            //mapDocuments.openMapDocument(node.key, dfd);
-                                        }
-                                        else if(node.data.type=='layer'){   //show/hide layer
-                                            
-                                            if(_suppress_select_event) return;
-                                            
-                                            var mapdoc_id = node.data.mapdoc_id;
-                                            var not_visible = true;
-                                            if((mapdoc_id>0 && mapdoc_visible[mapdoc_id]) || mapdoc_id==0 || mapdoc_id=='temp'){
-                                                //node.key - heurist layer record id
-                                                var layer_rec = mapDocuments.getLayer(mapdoc_id, node.key);
-                                                if(layer_rec){
-                                                    //set layer visibility on map
-                                                    (layer_rec['layer']).setVisibility( node.isSelected() );  
-                                                    not_visible = !node.isSelected();
-                                                    
-                                                } 
-                                                
-                                                
-                                                
-                                            }
-                                            if(mapdoc_id>0 && !mapdoc_visible[mapdoc_id]){
-                                                not_visible = true; //mapdocument is not visible
-                                            }
-                                            if(not_visible){ //reset
-                                                node.setSelected(false);
-                                            }else if(mapdoc_id==0 || mapdoc_id=='temp'){
-                                                //need to make all themes visible if none of them marked
-                                                var themes = node.children;
-                                                if(themes.length>0){
-                                                    var all_hidden = true;
-                                                    for(var i=0; i<themes.length; i++){
-                                                        if(themes[i].isSelected()){
-                                                            all_hidden = false;
-                                                            break;
-                                                        }
-                                                    }
-                                                    if(all_hidden)
-                                                    for(var i=0; i<themes.length; i++){
-                                                        themes[i].setSelected(true);
-                                                    }
-                                                }
-                                            }
-                                        }
-                                        else if(node.data.type=='theme'){ //on show/hide theme
-                                        
-                                            //theme is obtained from resdata.fld(record, DT_SYMBOLOGY); see _getTreeData
+                        const mapdoc_id = node.key;
 
+                        //if not expanded, expand, it loads layers (opens mapdocument)
+                        if(is_selected){
 
-                                            //if(node.parent.isSelected()){
-                                            var mapdoc_id = node.data.mapdoc_id;
-                                            var layer_id = node.data.layer_id;
-                                            var not_visible = true; 
-                                            if( layer_id>0 && 
-                                                ((mapdoc_id>0 && mapdoc_visible[mapdoc_id])|| mapdoc_id==0 || mapdoc_id=='temp')){
-                                            
-                                                var active_themes = [];
-                                                var layer_rec = mapDocuments.getLayer(mapdoc_id, layer_id);
-                                                if(layer_rec){
-                                                    var siblings = node.parent.children;
-                                                    
-                                                    for(var i=0; i<siblings.length; i++){
-                                                            if(siblings[i].isSelected()){
-                                                                active_themes.push(siblings[i].data.theme);
-                                                                not_visible = false;
-                                                            }
-                                                    }
-                                                    //node.visitSiblings(function(){},true);
-                                                    
-                                                }
-                                                
-                                                (layer_rec['layer']).applyThematicMap( active_themes );
-                                            }
-                                            if(not_visible){ //all themes are invisible - hide parent layer as well
-                                                mapdoc_id = node.parent.data.mapdoc_id;
-                                                if(mapdoc_id==0 || mapdoc_id=='temp'){ //current search
-                                                    node.parent.setSelected(false);    
-                                                }
-                                            }else{
-                                                //something is visible but parent layer is not - set it visible
-                                                if(!node.parent.isSelected()){
-                                                    node.parent.setSelected(true);    
-                                                }
-                                            }
-                                            
-                                        }
+                            delete mapdoc_visible[mapdoc_id];
+                            //hide all other mapdocs
+                            that.toggleMapDocument(Object.keys(mapdoc_visible).join(','), false); 
+                            mapdoc_visible = {};
 
+                            node.setExpanded(true); //load content - init lazy load - see lazyLoad ->  mapDocuments.openMapDocument
+                        }else{
 
-                                        /* Get a list of all selected nodes, and convert to a key array:
-                                        var selKeys = $.map(data.tree.getSelectedNodes(), function(node){
-                                        return node.key;
-                                        });
-                                        $("#echoSelection3").text(selKeys.join(", "));
+                            if(node.isExpanded() && node.hasChildren()){ // save checked layers
+                                $.each(node.getChildren(), function(i, layer_node){
 
-                                        // Get a list of all selected TOP nodes
-                                        var selRootNodes = data.tree.getSelectedNodes(true);
-                                        // ... and convert to a key array:
-                                        var selRootKeys = $.map(selRootNodes, function(node){
-                                        return node.key;
-                                        });
-                                        $("#echoSelectionRootKeys3").text(selRootKeys.join(", "));
-                                        $("#echoSelectionRoots3").text(selRootNodes.join(", "));
-                                        */
-                                    },
-                                    /*
-                                    click: function(e, data){
-                                       if($(e.originalEvent.target).is('span') && data.node.children && data.node.children.length>0){
-                                           data.node.setExpanded(!data.node.isExpanded());
-                                           //treediv.find('.fancytree-expander').hide();
-                                           
-                                       }else if( data.node.lazy) {
-                                           data.node.setExpanded( true );
-                                       }
-                                    },
-                                    */
-                                    dblclick: function(e, data) {
-                                        data.node.toggleSelected();
-                                    },
-                                    keydown: function(e, data) {
-                                        if( e.which === 32 ) {
-                                            data.node.toggleSelected();
-                                            return false;
-                                        }
-                                    },
-                                    renderNode: function(event, data) {
-                                        // Optionally tweak data.node.span
-                                        var item = data.node;
-                                        if(item.data.type=='layer'){
-                                            var rec_id = item.key;
-                                            var mapdoc_id = item.data.mapdoc_id;
-                                            
-                                            var style = mapDocuments.getSymbology( mapdoc_id, rec_id );
-                                            
-                                            if(style['rectypeIconUrl']){
-                                                var dcss = {'display':'inline-block', 'background-image':'url('+style['rectypeIconUrl']+')'};
-                                            }else{
-                                                
-                                                var dcss = {'display':'inline-block', 'background-image':'none'};
-                                                if(style['stroke']!==false){
-                                                    
-                                                    var opacity = style['opacity']>0?style['opacity']:1;
-                                                    var weight = (style['weight']>0&&style['weight']<4)?style['weight']:3;
-                                                    dcss['width']  = 16-weight*2; 
-                                                    dcss['height'] = 16-weight*2;
-                                                    
-                                                    dcss['border'] = weight+'px solid '
-                                                                    + window.hWin.HEURIST4.ui.hexToRgbStr(style['color'], opacity);
-                                                    if ( style['opacity']>0 && style['opacity']<1 ) {
-                                                        dcss['-webkit-background-clip'] = 'padding-box'; //for Safari
-                                                        dcss['background-clip'] = 'padding-box'; //for IE9+, Firefox 4+, Opera, Chrome
-                                                    }
-                                                    
-                                                } else {
-                                                    dcss['border'] = 'none';
-                                                }
+                                    let is_checked = layer_node.isSelected();
+                                    let node_key = layer_node.key;
 
-                                                if(style['fill']!==false){
-                                                    var fillColor = style['fillColor']?style['fillColor']:style['color'];
-                                                    var fillOpacity = style['fillOpacity']>0?style['fillOpacity']:0.2;
-                                                    dcss['background-color'] = window.hWin.HEURIST4.ui.hexToRgbStr(fillColor, fillOpacity);
-                                                }else{
-                                                    dcss['background'] = 'none';
-                                                }
-                                            }
-                                            var $span = $(item.span);
-                                            $span.find("> span.fancytree-icon")
-                                            .css(dcss);
-                                            
-                                                //backgroundImage: "url(skin-custom/customDoc2.gif)",
-                                                //backgroundPosition: "0 0"
-                                        }else 
-                                        if(item.data.type=='theme'){ //render theme label in treeview
-                                            
-                                            
-                                        } else if(item.data.type=='mapdocument'){
-                                            var $span = $(item.span);
-                                            $span.find("> span.fancytree-checkbox").addClass('fancytree-radio');
-                                                //.css('background-position-y', '-48px !important');
-                                        }
+                                    if(!Object.hasOwn(_mapdoc_layers, mapdoc_id)){ _mapdoc_layers[mapdoc_id] = {}; }
 
-                                        if(item.data.type!='theme'){
-                                            _defineActionIcons( item );                                        
-                                        }
+                                    _mapdoc_layers[mapdoc_id][node_key] = is_checked;
+                                });
+                            }
+
+                            node.setExpanded(false);
+                        }
+
+                        if(node.isExpanded() || mapDocuments.isLoaded(mapdoc_id)){
+
+                            mapDocuments.setMapDocumentVisibility(mapdoc_id, is_selected);
+                        
+                            if(node.hasChildren()){
+                                var mapdoc_vis = is_selected;
+                                //set selection in legend for child layers
+                                _suppress_select_event = true;
+                                $.each(node.getChildren(), function(i, layer_node){
+
+                                    let node_key = layer_node.key;
+
+                                    if(!Object.hasOwn(_mapdoc_layers, mapdoc_id)){ _mapdoc_layers[mapdoc_id] = { node_key: true }; }
+
+                                    let display_layer = mapdoc_vis && _mapdoc_layers[mapdoc_id][node_key];
+                                    layer_node.setSelected( display_layer );
+                                });
+                                _suppress_select_event = false;
+                            }
+                        }
+                        
+                        if(is_selected){
+                            mapdoc_visible[mapdoc_id] = node.title; // add to list
+                        }else{
+                            //restore default CRS if mapdoc is off
+                            options.mapwidget.mapping('defineCRS', '');
+                            that.loadBaseMap(0); //loads default
+                            delete mapdoc_visible[mapdoc_id]; // remove from list
+                        }
+
+                        if(mapdoc_select !== null){
+
+                            var selected_opts = Object.values(mapdoc_visible);
+                            selected_opts = selected_opts.length == 0 ? ['Current result set'] : selected_opts;
+                            if(!mapdoc_select.hSelect('instance')){
+                                mapdoc_select.hSelect();
+                            }
+                            mapdoc_select.hSelect('widget').attr('title', selected_opts.join(', '));
+
+                            if(selected_opts.length == 1){
+                                mapdoc_select.hSelect('widget').find('span.ui-selectmenu-text').text(selected_opts[0]);
+                            }else{
+                                mapdoc_select.hSelect('widget').find('span.ui-selectmenu-text').text(selected_opts.length+' documents displayed');
+                            }
+                        }
+
+                        //
+                        //mapDocuments.openMapDocument(node.key, dfd);
+                    }
+                    else if(node.data.type=='layer'){   //show/hide layer
+                        
+                        if(_suppress_select_event) return;
+                        
+                        var mapdoc_id = node.data.mapdoc_id;
+                        var not_visible = true;
+                        if((mapdoc_id>0 && mapdoc_visible[mapdoc_id]) || mapdoc_id==0 || mapdoc_id=='temp'){
+                            //node.key - heurist layer record id
+                            var layer_rec = mapDocuments.getLayer(mapdoc_id, node.key);
+                            if(layer_rec){
+                                //set layer visibility on map
+                                (layer_rec['layer']).setVisibility( is_selected );  
+                                not_visible = !is_selected;
+                            }
+                        }
+                        if(mapdoc_id>0 && !mapdoc_visible[mapdoc_id]){
+                            not_visible = true; //mapdocument is not visible
+                        }
+                        if(not_visible && node.parent){ // toggle map doc
+
+                            let parent_key = node.parent.key;
+                            let node_key = node.key
+
+                            if(!Object.hasOwn(_mapdoc_layers, parent_key)) {
+                                _mapdoc_layers[parent_key] = { node_key: true }; 
+                            }else{
+                                _mapdoc_layers[parent_key][node_key] = true;
+                            }
+
+                            node.parent.setSelected(true);
+                            not_visible = false;
+                        }
+
+                        if(not_visible){
+                            node.setSelected(false);
+                        }else if(mapdoc_id==0 || mapdoc_id=='temp'){
+                            //need to make all themes visible if none of them marked
+                            var themes = node.children;
+                            if(themes.length>0){
+                                var all_hidden = true;
+                                for(var i=0; i<themes.length; i++){
+                                    if(themes[i].isSelected()){
+                                        all_hidden = false;
+                                        break;
                                     }
-                                    // The following options are only required, if we have more than one tree on one page:
-                                    //          initId: "treeData",
-                                    //cookieId: "fancytree-Cb3",
-                                    //idPrefix: "fancytree-Cb3-"
-                                });     
+                                }
+                                if(all_hidden)
+                                for(var i=0; i<themes.length; i++){
+                                    themes[i].setSelected(true);
+                                }
+                            }
+                        }
+                    }
+                    else if(node.data.type=='theme'){ //on show/hide theme
+                    
+                        //theme is obtained from resdata.fld(record, DT_SYMBOLOGY); see _getTreeData
+
+
+                        //if(node.parent.isSelected()){
+                        var mapdoc_id = node.data.mapdoc_id;
+                        var layer_id = node.data.layer_id;
+                        var not_visible = true; 
+                        if( layer_id>0 && 
+                            ((mapdoc_id>0 && mapdoc_visible[mapdoc_id])|| mapdoc_id==0 || mapdoc_id=='temp')){
+                        
+                            var active_themes = [];
+                            var layer_rec = mapDocuments.getLayer(mapdoc_id, layer_id);
+                            if(layer_rec){
+                                var siblings = node.parent.children;
                                 
-                                tree_container.addClass('tree-map');
+                                for(var i=0; i<siblings.length; i++){
+                                        if(siblings[i].isSelected()){
+                                            active_themes.push(siblings[i].data.theme);
+                                            not_visible = false;
+                                        }
+                                }
+                                //node.visitSiblings(function(){},true);
+                                
+                            }
                             
+                            (layer_rec['layer']).applyThematicMap( active_themes );
+                        }
+                        if(not_visible){ //all themes are invisible - hide parent layer as well
+                            mapdoc_id = node.parent.data.mapdoc_id;
+                            if(mapdoc_id==0 || mapdoc_id=='temp'){ //current search
+                                node.parent.setSelected(false);    
+                            }
+                        }else{
+                            //something is visible but parent layer is not - set it visible
+                            if(!node.parent.isSelected()){
+                                node.parent.setSelected(true);    
+                            }
+                        }
+                        
+                    }
+
+                },
+                dblclick: function(e, data) {
+                    data.node.toggleSelected();
+                },
+                keydown: function(e, data) {
+                    if( e.which === 32 ) {
+                        data.node.toggleSelected();
+                        return false;
+                    }
+                },
+                renderNode: function(event, data) {
+                    // Optionally tweak data.node.span
+                    var item = data.node;
+                    let $span = $(item.span);
+                    if(item.data.type=='layer'){
+                        var rec_id = item.key;
+                        var mapdoc_id = item.data.mapdoc_id;
+                        
+                        var style = mapDocuments.getSymbology( mapdoc_id, rec_id );
+                        
+                        if(style['rectypeIconUrl']){
+                            var dcss = {'display':'inline-block', 'background-image':'url('+style['rectypeIconUrl']+')'};
+                        }else{
+                            
+                            var dcss = {'display':'inline-block', 'background-image':'none'};
+                            if(style['stroke']!==false){
+                                
+                                var opacity = style['opacity']>0?style['opacity']:1;
+                                var weight = (style['weight']>0&&style['weight']<4)?style['weight']:3;
+                                dcss['width']  = 16-weight*2; 
+                                dcss['height'] = 16-weight*2;
+                                
+                                dcss['border'] = weight+'px solid '
+                                                + window.hWin.HEURIST4.ui.hexToRgbStr(style['color'], opacity);
+                                if ( style['opacity']>0 && style['opacity']<1 ) {
+                                    dcss['-webkit-background-clip'] = 'padding-box'; //for Safari
+                                    dcss['background-clip'] = 'padding-box'; //for IE9+, Firefox 4+, Opera, Chrome
+                                }
+                                
+                            } else {
+                                dcss['border'] = 'none';
+                            }
+
+                            if(style['fill']!==false){
+                                var fillColor = style['fillColor']?style['fillColor']:style['color'];
+                                var fillOpacity = style['fillOpacity']>0?style['fillOpacity']:0.2;
+                                dcss['background-color'] = window.hWin.HEURIST4.ui.hexToRgbStr(fillColor, fillOpacity);
+                            }else{
+                                dcss['background'] = 'none';
+                            }
+                        }
+                        $span.find("> span.fancytree-icon")
+                        .css(dcss);
+
+                    }else 
+                    if(item.data.type=='theme'){ //render theme label in treeview
+
+                    }else if(item.data.type=='mapdocument'){
+                        $span.find("> span.fancytree-checkbox").addClass('fancytree-radio');
+                    }
+
+                    if(item.data.type!='theme'){
+                        _defineActionIcons( item );                                        
+                    }
+                }
+            });     
+            
+            tree_container.addClass('tree-map');
         }
-        
-        
-        
-        
+
         if(treedata.length==0){    
             //tree_container.find('.ui-fancytree').hide();
             tree_container.append('<span class="empty_msg" style="font-style:italic;padding-left:10px;line-height:10px">none</span>');
+        }else{
+            tree_container.css('padding-left', '15px');
         }
         that.setHeight();
     
