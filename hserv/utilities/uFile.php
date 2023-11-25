@@ -1422,6 +1422,10 @@ function uploadFileToNakala($system, $params) {
 
     $herror = HEURIST_ACTION_BLOCKED;
 
+    $missing_key = '<br><br>Your Nakala API key is either missing or invalid, please ';
+    $missing_key .= $system->is_admin() ? 'ask a database administrator to setup the key within' : 'ensure you\'ve set it in';
+    $missing_key .= ' Database properties';
+
     if(!function_exists("curl_init"))  {
 
         $glb_curl_code = HEURIST_SYSTEM_FATAL;
@@ -1483,7 +1487,7 @@ function uploadFileToNakala($system, $params) {
         $code = intval(curl_getinfo($ch, CURLINFO_HTTP_CODE));
 
         if($code == 401 || $code == 403){ // invalid/missing api key, or unknown account/user
-            $glb_curl_error .= '<br><br>Your Nakala API key is either missing or invalid, please ensure you\'ve set it in My Preferences';
+            $glb_curl_error .= $missing_key;
             $herror = HEURIST_INVALID_REQUEST;
 
             curl_close($ch);
@@ -1500,7 +1504,7 @@ function uploadFileToNakala($system, $params) {
             $code = intval(curl_getinfo($ch, CURLINFO_HTTP_CODE));
 
             if($code == 401 || $code == 403){ // invalid/missing api key, or unknown account/user
-                $glb_curl_error .= '<br><br>Your Nakala API key is either missing or invalid, please ensure you\'ve set it in My Preferences';
+                $glb_curl_error .= $missing_key;
                 $herror = HEURIST_INVALID_REQUEST;
 
                 curl_close($ch);
@@ -1535,7 +1539,7 @@ function uploadFileToNakala($system, $params) {
             $code = intval(curl_getinfo($ch, CURLINFO_HTTP_CODE));
 
             if($code == 401 || $code == 403){ // invalid/missing api key, or unknown account/user
-                $glb_curl_error .= '<br><br>Your Nakala API key is either missing or invalid, please ensure you\'ve set it in My Preferences';
+                $glb_curl_error .= $missing_key;
                 $herror = HEURIST_INVALID_REQUEST;
             }else{
                 $glb_curl_error = $file_details['message'];
@@ -1561,7 +1565,7 @@ function uploadFileToNakala($system, $params) {
             $code = intval(curl_getinfo($ch, CURLINFO_HTTP_CODE));
 
             if($code == 401 || $code == 403){ // invalid/missing api key, or unknown account/user
-                $glb_curl_error .= '<br><br>Your Nakala API key is either missing or invalid, please ensure you\'ve set it in My Preferences';
+                $glb_curl_error .= $missing_key;
                 $herror = HEURIST_INVALID_REQUEST;
             }else{
                 $glb_curl_error = $file_details['message'];
@@ -1615,7 +1619,7 @@ function uploadFileToNakala($system, $params) {
         $code = intval(curl_getinfo($ch, CURLINFO_HTTP_CODE));
 
         if($code == 401 || $code == 403){ // invalid/missing api key, or unknown account/user
-            $glb_curl_error .= '<br><br>Your Nakala API key is either missing or invalid, please ensure you\'ve set it in My Preferences';
+            $glb_curl_error .= $missing_key;
             $herror = HEURIST_INVALID_REQUEST;
         }else{
             $glb_curl_error = $file_details['message'];
@@ -1662,7 +1666,7 @@ function uploadFileToNakala($system, $params) {
         $code = intval(curl_getinfo($ch, CURLINFO_HTTP_CODE));
 
         if($code == 401 || $code == 403){ // invalid/missing api key, or unknown account/user
-            $glb_curl_error .= '<br><br>Your Nakala API key is either missing or invalid, please ensure you\'ve set it in My Preferences';
+            $glb_curl_error .= $missing_key;
             $herror = HEURIST_INVALID_REQUEST;
         }else{
             $glb_curl_error = $result['message'];
