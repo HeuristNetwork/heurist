@@ -1465,6 +1465,11 @@ table.dataTable th{
     text-align: left;
 }
 
+table.dataTable tr.ui-highlight{
+    background:-moz-linear-gradient(top, #EDF5FF, #EDF5FF) repeat scroll 0 0 transparent;
+    background:-webkit-gradient(linear, left top, left bottom, from(#EDF5FF), to(#EDF5FF));
+}
+
 /* Allow Font Awesome Icons in lieu of jQuery UI and only apply when using a FA icon
 Remove the jQuery UI Icon
 Remove the jQuery UI Text Indent

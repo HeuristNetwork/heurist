@@ -242,7 +242,7 @@ that._dout('myOnShowEvent');
                     this.options.dataTableParams['scrollX'] = true;
                     this.options.dataTableParams['autoWidth'] = false;
                     
-                    this.options.dataTableParams['initComplete'] = function(){that._onDataTableInitComplete()};
+                    this.options.dataTableParams['initComplete'] = function(settings, data) {that._onDataTableInitComplete(settings, data);}
                     
                     if(window.hWin.HEURIST4.util.isempty(this.options.dataTableParams['dom'])){
                         var dom = '';
@@ -290,7 +290,7 @@ that._dout('myOnShowEvent');
                     
 
                     var cols = this.options.dataTableParams['columns'];
-                    hidden_cols = [];
+                    this.hidden_cols = [];
                     for(var i=0;i<cols.length;i++){
                         if(typeof cols[i]['render']==='string'){
                             var fooName = cols[i]['render']
@@ -302,7 +302,7 @@ that._dout('myOnShowEvent');
                         }
 
                         if(cols[i]['visible'] === "false" || cols[i]['visible'] === false){
-                            hidden_cols.push(i);
+                            this.hidden_cols.push(i);
                         }
                     }
                     
@@ -355,6 +355,8 @@ this._dout('reload datatable '+this.options.serverSide);
                         this.no_records_message.show();
                     }
                 }
+            }else{
+                this._highlightSelected();
             }
 
         }
@@ -385,8 +387,8 @@ this._dout('reload datatable '+this.options.serverSide);
         var that = this;
 		
         // Ensure that columns set to hidden are hidden
-        if(hidden_cols.length > 0){
-            this._dataTable.columns(hidden_cols).visible(false);
+        if(this.hidden_cols.length > 0){
+            this._dataTable.columns(this.hidden_cols).visible(false);
         }
         
         // Add title to elements that will truncate
@@ -481,6 +483,7 @@ this._dout('reload datatable '+this.options.serverSide);
             }                            
         }
 
+        this._highlightSelected();
     },
     
     //
@@ -558,6 +561,33 @@ this._dout('reload datatable '+this.options.serverSide);
         //see widgets/record/recordDataTable.js                                                                                 
         window.hWin.HEURIST4.ui.showRecordActionDialog('recordDataTable', opts);        
         
+    },
+
+    _highlightSelected: function(){
+
+        const that = this;
+
+        // No rows
+        if(this.div_content.find('tr[role="row"]').length == 0){
+            return;
+        }
+
+        // Remove previous highlighting
+        this.div_content.find('tr[role="row"].ui-highlight').removeClass('ui-highlight');
+
+        if(!this.options.selection || this.options.selection.length == 0){
+            return;
+        }
+
+        // Highlight selected
+        $.each(this.div_content.find('tr[role="row"]'), (idx, row) => {
+
+            let row_data = that._dataTable.row(row).data();
+
+            if(row_data && that.options.selection.indexOf(row_data?.rec_ID) !== -1){
+                $(row).addClass('ui-highlight');
+            }
+        });
     }
 
 });
