@@ -27,12 +27,12 @@
         <div class="ent_content_full" style="top:50px">
 
         <fieldset style="font-size:1em;">
-            <div style="display:inline-block;" class="header_narrow">Widget description:</div>
+            <div style="display:inline-block;" class="header_narrow">Widget label:</div>
             <div style="display:inline-block;width:80%;max-width:200px"><input data-type="element-name" style="width:100%"/></div>
             <div class="heurist-helper3">Please edit to clarify the tree</div>
         </fieldset>
         <br>
-        <div style="text-align:left;padding-left: 7px;">
+        <div style="text-align: center; padding-left: 7px; margin-bottom: 5px;">
             <div class="btn-widget ui-button-action">Configure widget</div>
         </div>
         <div id="properties_form" style="font-size:1em;">
@@ -353,23 +353,23 @@
                         -->
                 </fieldset>
             </div>
-            <h3>Edit source</h3>
-            <div style="background:none">
-                <fieldset style="border:1px solid lightgray;border-radius:4px;margin:2px 4px;">
-                        <div>
-                            <div class="header_narrow"><b>ID</b></div>
-                            <input data-type="element-id" value=""/>
-                            <div class="heurist-helper3">HTML (DOM) ID. For example to define target element for menu ("page-content")</div>
-                        </div>
-                        <div>
-                            <div class="header_narrow" style="vertical-align:top;"><b>CSS:</b></div>
-                            <textarea name="elementCss" rows="10" cols="40">
-                            </textarea>
-                        </div>
-                        <div style="text-align:center;display: block;">
-                            <div class="btn-html-edit">Edit HTML source</div>
-                        </div>
-                </fieldset>
+            <div style="padding-left: 5px; margin-top: 5px;">
+                <strong>Source</strong>
+            </div>
+            <div style="background: none;margin: 2px 15px;">
+                <div style="margin: 10px 0px;">
+                    <div style="display: inline-block"><b>HTML (DOM) ID</b></div>
+                    <input data-type="element-id" value=""/>
+                    <div class="heurist-helper3">For example to define target element for menu ("page-content")</div>
+                </div>
+                <div style="margin-bottom: 10px;">
+                    <div style="display: inline-block; vertical-align: top;"><b>CSS:</b></div>
+                    <textarea name="elementCss" rows="10" cols="40">
+                    </textarea>
+                </div>
+                <div style="text-align:center;display: block;">
+                    <div class="btn-html-edit">Edit HTML source</div>
+                </div>
             </div>
         </div>
         

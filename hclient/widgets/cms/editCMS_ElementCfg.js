@@ -83,6 +83,10 @@ function editCMS_ElementCfg( element_cfg, _layout_content, _layout_container, $c
 
         var activePage = (etype=='group'?0:(etype=='widget'?2:(etype=='cardinal'?1:2)));
 
+        cont.find('fieldset:first .heurist-helper3').position({
+            my: 'left top', at: 'left bottom', of: cont.find('fieldset:first div:nth(1)')
+        });
+
         cont.find('#properties_form').accordion({header:'h3',heightStyle:'content',active:activePage});
         cont.find('h3').css({'font-size': '1.1em', 'font-weight': 'bold'});
 
