@@ -69,7 +69,7 @@ if($hide_images<0 || $hide_images>2){
 }
 
 // How to handle fields set to hidden
-$show_hidden_fields = $is_production && $is_map_popup ? -1 : $system->user_GetPreference('recordData_HiddenFields', 0);
+$show_hidden_fields = $is_production || $is_map_popup ? -1 : $system->user_GetPreference('recordData_HiddenFields', 0);
 
 $rectypesStructure = dbs_GetRectypeStructures($system); //getAllRectypeStructures(); //get all rectype names
 
