@@ -455,9 +455,17 @@ $.widget( "heurist.app_storymap", {
     //
     //
     _isSameRealm: function(data){
-        return (!this.options.search_realm && (!data || window.hWin.HEURIST4.util.isempty(data.search_realm)))
-        ||
-        (this.options.search_realm && (data && this.options.search_realm==data.search_realm));
+        
+        if (this.options.search_realm && data && data.search_realm){
+            
+            if(!$.isArray(this.options.search_realm)){
+                this.options.search_realm = this.options.search_realm.split(',');
+            }
+            return (this.options.search_realm.indexOf(data.search_realm)>=0);
+            
+        }else{
+            return true; //search realm not defined
+        }
     },
     
     //

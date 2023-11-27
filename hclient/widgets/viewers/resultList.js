@@ -388,9 +388,11 @@ $.widget( "heurist.resultList", {
                 else if(e.type == window.hWin.HAPI4.Event.ON_REC_SELECT){
 
                     //this selection is triggered by some other app - we have to redraw selection
-                    if(data && data.source!=that.element.attr('id') && that._isSameRealm(data)) {
+                    if(data && data.source!=that.element.attr('id')) {
                         
-                        if(data.reset){ //clear selection
+                        if(!that._isSameRealm(data)){
+                            that.setSelected(null);
+                        }else if(data.reset){ //clear selection
                             that.setSelected(null);
                         }else{
                             that.setSelected(data.selection);        
