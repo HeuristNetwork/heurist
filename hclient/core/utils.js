@@ -317,7 +317,7 @@ window.hWin.HEURIST4.util = {
         const urlParams = new URLSearchParams(query);
                 
         if(urlParams.has(name)){
-            return decodeURIComponent(urlParams.get(name));
+            return urlParams.get(name); //already decoded decodeURIComponent
         }else{
             return null;
         }
