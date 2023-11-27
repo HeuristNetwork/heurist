@@ -110,6 +110,8 @@ require_once dirname(__FILE__).'/../../hserv/dbaccess/utils_db.php';
 
             if (extension_loaded("pdo_sqlite")) {print "pdo_sqlite ok<br />";} else {print "pdo_sqlite MISSING, optional, required for FAIMS<br />";}
             if (extension_loaded("exif")) {print "exif ok<br />";} else {print "exif MISSING, optional, required for image file indexing<br />";}
+            
+            if (extension_loaded("imagick")) {print "imagick ok<br />";} else {print "imagick MISSING, optional, required for image webcache and pdf thumbnails<br />";}
 
             print "<br><br><h3>All loaded extensions:</h3><br />";
             // TODO: write lsit of loaded extensions out neatly rather than dumping the array

@@ -857,7 +857,7 @@ function getPlayerURL($mimeType, $url, $params=null){
  * @return array - array of file paths or urls
  * @return bool - false on error
  */
-function getWebImageCache($system, $obfuscated_ids, $return_url = true){
+function getWebImageCache($system, $obfuscated_ids, $need_return_url = true){
 
     $web_cache_dir = HEURIST_FILESTORE_DIR . "webimagecache";
 
@@ -927,9 +927,9 @@ function getWebImageCache($system, $obfuscated_ids, $return_url = true){
         $org_rtn = '';
 
         if(strpos($org_file, HEURIST_FILESTORE_DIR) !== false){
-            $org_rtn = $return_url ? str_replace(HEURIST_FILESTORE_DIR, HEURIST_FILESTORE_URL, $org_file) : $org_file;
+            $org_rtn = $need_return_url ? str_replace(HEURIST_FILESTORE_DIR, HEURIST_FILESTORE_URL, $org_file) : $org_file;
         }else if(strpos($row['fullPath'], 'file_uploads/') === 0){
-            $org_rtn = ($return_url ? HEURIST_FILESTORE_URL : HEURIST_FILESTORE_DIR) . $row['fullPath'];
+            $org_rtn = ($need_return_url ? HEURIST_FILESTORE_URL : HEURIST_FILESTORE_DIR) . $row['fullPath'];
         }else{
             $system->addError(HEURIST_ERROR, 'An error occurred while attempting to resolve the file path for file #' . $row['ulf_ID']);
             return false;
@@ -938,7 +938,8 @@ function getWebImageCache($system, $obfuscated_ids, $return_url = true){
         // setup new file details
         $new_file = $web_cache_dir . "/" . $file_info['basename'];
         $new_file = str_replace('.' . $file_info['extension'], '.jpg', $new_file); // force jpeg
-        $new_rtn = $return_url ? str_replace(HEURIST_FILESTORE_DIR, HEURIST_FILESTORE_URL, $new_file) : $new_file;
+        
+        $new_rtn = $need_return_url ? str_replace(HEURIST_FILESTORE_DIR, HEURIST_FILESTORE_URL, $new_file) : $new_file;
 
         $skip_file = strpos($row['ulf_OrigFileName'], '_remote') === 0 || // skip if not local file
                      strpos($row['ulf_OrigFileName'], '_iiif') === 0 || 
@@ -977,7 +978,7 @@ function getWebImageCache($system, $obfuscated_ids, $return_url = true){
                 $image->setImageCompressionQuality(75);
 
                 $success = $image->writeImage($new_file);
-
+                
                 if($success){
                     array_push($files, $new_rtn);
                 }else{

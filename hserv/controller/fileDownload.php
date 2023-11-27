@@ -200,8 +200,9 @@ if(!$error){
 
                             $cache_url = getWebImageCache($system, $fileid, true);
                             $direct_url = is_array($cache_url) && !empty($cache_url) ? $cache_url[0] : $org_url;
+                            
                         }
-
+                        
                         header('Location: '.$direct_url);
                         
                     }else if(!$is_download 
