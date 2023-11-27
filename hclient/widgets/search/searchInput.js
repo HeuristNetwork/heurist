@@ -33,6 +33,7 @@ $.widget( "heurist.searchInput", {
 
         search_button_label: '',
         search_input_label: '',
+        placeholder_text: 'def', // textarea placeholder text
         show_search_assistant: true,
         
         button_class: 'ui-heurist-btn-header1',
@@ -71,6 +72,10 @@ $.widget( "heurist.searchInput", {
         }else {
             this.options.button_class = '';
         }
+
+        if(this.options.placeholder_text == 'def'){
+            this.options.placeholder_text = window.hWin.HR('filter_placeholder');
+        }
         
         //------------------------------------------- filter inputs                        
 
@@ -96,7 +101,7 @@ $.widget( "heurist.searchInput", {
 			'resize':'none', 
             'min-height':'27px', 'line-height': '14px', 
             'min-width':'80px' }) 
-        .attr('placeholder',window.hWin.HR('define filter'))   
+        .attr('placeholder', this.options.placeholder_text)   
         .addClass("text ui-widget-content ui-corner-all")
         .appendTo(  this.div_search_input );
         

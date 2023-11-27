@@ -326,6 +326,8 @@ function editCMS_WidgetCfg( widget_cfg, _layout_content, $dlg, main_callback ){
                     $dlg.find('#dataTableParams').val(opts['dataTableParams']);
                     $dlg.find('#empty_remark').val(opts['emptyTableMsg']);
                     $dlg.find('#placeholder_text').val(opts['placeholder_text']);
+                }else if(widget_name=='heurist_SearchInput'){
+                    $dlg.find('#placeholder_text').val(opts['placeholder_text']);
                 }
             }
 
@@ -1032,107 +1034,109 @@ function editCMS_WidgetCfg( widget_cfg, _layout_content, $dlg, main_callback ){
             layout_params['selection_style'] = $dlg.find('#map_select_style').val();   
         }//heurist_Map
 
-                var cont = $dlg.find('div.'+widget_name);
+        var cont = $dlg.find('div.'+widget_name);
 
-                if(widget_name=='heurist_SearchTree'){
-                    cont.find('input[name="allowed_UGrpID"]').val( 
-                        cont.find('#allowed_UGrpID').editing_input('getValues') );
-                    cont.find('input[name="allowed_svsIDs"]').val( 
-                        cont.find('#allowed_svsIDs').editing_input('getValues') );
-                    cont.find('input[name="init_svsID"]').val( 
-                        cont.find('#init_svsID').editing_input('getValues') );
-                }else 
-                if(widget_name=='heurist_Navigation'){
-                    var menu_recIDs = cont.find('#menu_recIDs').editing_input('getValues');
-                    if(window.hWin.HEURIST4.util.isempty(menu_recIDs) || 
-                        ($.isArray(menu_recIDs)&& (menu_recIDs.length==0||window.hWin.HEURIST4.util.isempty(menu_recIDs[0]))))
-                    {
-                        window.hWin.HEURIST4.msg.showMsgErr('Please set at least one top level menu item');                     
-                        return false;   
-                    }
-                    cont.find('input[name="menu_recIDs"]').val( menu_recIDs );
-                }else
-                if(widget_name=='heurist_StoryMap'){
-                    //var storyRectypes = cont.find('#storyRectypes').editing_input('getValues');
-                    //cont.find('input[name="storyRectypes"]').val( storyRectypes );
-                    
-                    //cont.find('select[name="storyFields"]').val
-                    var storyFields = cont.find('#storyFields').editing_input('getValues');
-                    cont.find('input[name="storyFields"]').val( storyFields );
-                    
-                    if(window.hWin.HEURIST4.util.isempty(storyFields) || 
-                        ($.isArray(storyFields)&& (storyFields.length==0||window.hWin.HEURIST4.util.isempty(storyFields[0]))))
-                    {
-                        window.hWin.HEURIST4.msg.showMsgErr('Please set at least one story field');                     
-                        return false;   
-                    }
-                }
-                
+        if(widget_name=='heurist_SearchTree'){
+            cont.find('input[name="allowed_UGrpID"]').val( 
+                cont.find('#allowed_UGrpID').editing_input('getValues') );
+            cont.find('input[name="allowed_svsIDs"]').val( 
+                cont.find('#allowed_svsIDs').editing_input('getValues') );
+            cont.find('input[name="init_svsID"]').val( 
+                cont.find('#init_svsID').editing_input('getValues') );
+        }else 
+        if(widget_name=='heurist_Navigation'){
+            var menu_recIDs = cont.find('#menu_recIDs').editing_input('getValues');
+            if(window.hWin.HEURIST4.util.isempty(menu_recIDs) || 
+                ($.isArray(menu_recIDs)&& (menu_recIDs.length==0||window.hWin.HEURIST4.util.isempty(menu_recIDs[0]))))
+            {
+                window.hWin.HEURIST4.msg.showMsgErr('Please set at least one top level menu item');                     
+                return false;   
+            }
+            cont.find('input[name="menu_recIDs"]').val( menu_recIDs );
+        }else
+        if(widget_name=='heurist_StoryMap'){
+            //var storyRectypes = cont.find('#storyRectypes').editing_input('getValues');
+            //cont.find('input[name="storyRectypes"]').val( storyRectypes );
+            
+            //cont.find('select[name="storyFields"]').val
+            var storyFields = cont.find('#storyFields').editing_input('getValues');
+            cont.find('input[name="storyFields"]').val( storyFields );
+            
+            if(window.hWin.HEURIST4.util.isempty(storyFields) || 
+                ($.isArray(storyFields)&& (storyFields.length==0||window.hWin.HEURIST4.util.isempty(storyFields[0]))))
+            {
+                window.hWin.HEURIST4.msg.showMsgErr('Please set at least one story field');                     
+                return false;   
+            }
+        }
+        
 //controls":false,"legend":true,"legend_width":"250","legend_exp":false,"legend_exp2":false,
-                //find INPUT elements and fill opts with values
-                cont.find('input').each(function(idx, item){
-                    item = $(item);
-                    if(item.attr('name') && item.parents('.heurist_Map').length==0){ //item.attr('name').indexOf('map')<0){
-                        if(item.attr('type')=='checkbox'){
-                            opts[item.attr('name')] = item.is(':checked');    
-                        }else if(item.attr('type')=='radio'){
-                            if(item.is(':checked')) opts[item.attr('name')] = __prepareVal(item.val());    
-                        }else if(item.val()!=''){
-                            opts[item.attr('name')] = __prepareVal(item.val());    
-                        }
-                    }
-                });
-                //find SELECT
-                $dlg.find('div.'+widget_name+' select').each(function(idx, item){
-                    item = $(item);
-                    if(item.parents('.heurist_Map').length==0){
-                        opts[item.attr('name')] = item.val();     
-                    }
-                });
-
-                if(widget_name=='heurist_resultListExt'){
-                    opts['template'] = $dlg.find('select[name="rep_template"]').val();
-                    opts['reload_for_recordset'] = true;
-                    opts['emptysetmessage'] = $dlg.find('#empty_remark').val() == '' ? 'def' : $dlg.find('#empty_remark').val();
-
-                    if(opts['template'] != ''){
-                        opts['url'] = 'viewers/smarty/showReps.php?publish=1&debug=0'
-                        +'&emptysetmessage='+encodeURIComponent(opts['emptysetmessage'])
-                        +'&template='+encodeURIComponent(opts['template'])
-                        +'&[query]';
-                    }else{
-                        opts['url'] = 'viewers/record/renderRecordData.php?db=[dbname]&recID=[recID]';
-                        opts['is_single_selection'] = true; // force single selection
-                    }
-
-                    opts['placeholder_text'] = $dlg.find('#placeholder_text').val();
-                    opts['is_popup'] = $dlg.find('#is_popup_report').is(':checked');
-                    opts['popup_position'] = $dlg.find('#popup_report_position').val();
-                    
-                }else if(widget_name=='heurist_resultList'){
-                    opts['show_toolbar'] = opts['show_counter'] || opts['show_viewmode'];
-                    if(window.hWin.HEURIST4.util.isempty(opts['recordview_onselect'])){
-                        opts['recordview_onselect']  = 'inline'; //default value    
-                    }
-                    opts['empty_remark'] = $dlg.find('#empty_remark').val();
-                    opts['placeholder_text'] = $dlg.find('#placeholder_text').val();
-                }else if(widget_name=='heurist_resultListDataTable'){
-                    opts['dataTableParams'] = $dlg.find('#dataTableParams').val();
-                    opts['emptyTableMsg'] = $dlg.find('#empty_remark').val();
-                    opts['placeholder_text'] = $dlg.find('#placeholder_text').val();
+        //find INPUT elements and fill opts with values
+        cont.find('input').each(function(idx, item){
+            item = $(item);
+            if(item.attr('name') && item.parents('.heurist_Map').length==0){ //item.attr('name').indexOf('map')<0){
+                if(item.attr('type')=='checkbox'){
+                    opts[item.attr('name')] = item.is(':checked');    
+                }else if(item.attr('type')=='radio'){
+                    if(item.is(':checked')) opts[item.attr('name')] = __prepareVal(item.val());    
+                }else if(item.val()!=''){
+                    opts[item.attr('name')] = __prepareVal(item.val());    
                 }
+            }
+        });
+        //find SELECT
+        $dlg.find('div.'+widget_name+' select').each(function(idx, item){
+            item = $(item);
+            if(item.parents('.heurist_Map').length==0){
+                opts[item.attr('name')] = item.val();     
+            }
+        });
 
-                var selval = opts.searchTreeMode;
-                if(window.hWin.HEURIST4.util.isempty(opts.allowed_UGrpID)){ //groups are not defined
+        if(widget_name=='heurist_resultListExt'){
+            opts['template'] = $dlg.find('select[name="rep_template"]').val();
+            opts['reload_for_recordset'] = true;
+            opts['emptysetmessage'] = $dlg.find('#empty_remark').val() == '' ? 'def' : $dlg.find('#empty_remark').val();
 
-                    if(selval==1){
-                        window.hWin.HEURIST4.msg.showMsgErr('For "tree" mode you have to select groups to be displayed');
-                        return false;
-                    }else if (window.hWin.HEURIST4.util.isempty(opts.allowed_svsIDs) && selval==0) { //individual filters are not defined
-                        window.hWin.HEURIST4.msg.showMsgErr('For "button" mode you must select either workgroups or filters individually');
-                        return false;
-                    }
-                }
+            if(opts['template'] != ''){
+                opts['url'] = 'viewers/smarty/showReps.php?publish=1&debug=0'
+                +'&emptysetmessage='+encodeURIComponent(opts['emptysetmessage'])
+                +'&template='+encodeURIComponent(opts['template'])
+                +'&[query]';
+            }else{
+                opts['url'] = 'viewers/record/renderRecordData.php?db=[dbname]&recID=[recID]';
+                opts['is_single_selection'] = true; // force single selection
+            }
+
+            opts['placeholder_text'] = $dlg.find('#placeholder_text').val();
+            opts['is_popup'] = $dlg.find('#is_popup_report').is(':checked');
+            opts['popup_position'] = $dlg.find('#popup_report_position').val();
+            
+        }else if(widget_name=='heurist_resultList'){
+            opts['show_toolbar'] = opts['show_counter'] || opts['show_viewmode'];
+            if(window.hWin.HEURIST4.util.isempty(opts['recordview_onselect'])){
+                opts['recordview_onselect']  = 'inline'; //default value    
+            }
+            opts['empty_remark'] = $dlg.find('#empty_remark').val();
+            opts['placeholder_text'] = $dlg.find('#placeholder_text').val();
+        }else if(widget_name=='heurist_resultListDataTable'){
+            opts['dataTableParams'] = $dlg.find('#dataTableParams').val();
+            opts['emptyTableMsg'] = $dlg.find('#empty_remark').val();
+            opts['placeholder_text'] = $dlg.find('#placeholder_text').val();
+        }else if(widget_name=='heurist_SearchInput'){
+            opts['placeholder_text'] = $dlg.find('#placeholder_text').val();
+        }
+
+        var selval = opts.searchTreeMode;
+        if(window.hWin.HEURIST4.util.isempty(opts.allowed_UGrpID)){ //groups are not defined
+
+            if(selval==1){
+                window.hWin.HEURIST4.msg.showMsgErr('For "tree" mode you have to select groups to be displayed');
+                return false;
+            }else if (window.hWin.HEURIST4.util.isempty(opts.allowed_svsIDs) && selval==0) { //individual filters are not defined
+                window.hWin.HEURIST4.msg.showMsgErr('For "button" mode you must select either workgroups or filters individually');
+                return false;
+            }
+        }
 
         opts['init_at_once'] = true;
         opts['search_realm'] = $dlg.find('input[name="search_realm"]').val();
