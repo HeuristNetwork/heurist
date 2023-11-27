@@ -82,6 +82,11 @@ class DbEntitySearch
             
             foreach($values as $val){ 
                 //search in enums
+
+                if(strpos($val, '-') === 0){ // remove negation
+                    $val = substr($val, 1);
+                }
+
                 $isNotFound = true;
                 if($iskeybased){
                     foreach($enums as $enum){ 
