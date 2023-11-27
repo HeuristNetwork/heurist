@@ -246,8 +246,8 @@ $.widget( "heurist.search_faceted", {
         this.refreshSubsetSign();
         
         //"font-size":"0.7em",
-        this.div_toolbar = $( "<div>" ).css({'font-size': '0.9em',"float":"right",
-                    "padding-top":"0px","padding-right":"18px"})
+        this.div_toolbar = $( "<div>" ).css({'font-size': '0.9em', //"float":"right",
+                    "padding":"0px 5px"})
                 .appendTo( this.div_header );
 
                 
@@ -257,6 +257,7 @@ $.widget( "heurist.search_faceted", {
         
         this.btn_reset = $( "<button>", {title:window.hWin.HR('filter_facet_resetall_hint') })
         .appendTo( this.div_toolbar )
+        .css({"z-index":"100","float":"left"})
         .button({label: window.hWin.HR('filter_facet_resetall'), icon: 'ui-icon-arrowreturnthick-1-w', iconPosition:'end' }).hide();
         
         this.btn_save = $( "<button>", { text: window.hWin.HR('filter_facet_savestate') })
@@ -269,9 +270,15 @@ $.widget( "heurist.search_faceted", {
         
         this.btn_close = $( "<button>", { 
                     title:window.hWin.HR('filter_facet_exit_hint') })
-        .css({"z-index":"100"})
+        .css({"z-index":"100","float":"right"})
         .appendTo( this.div_toolbar )
+        
         .button({icon: "ui-icon-close", iconPosition:'end', label:lbl}); //was Close
+        
+        if(this.options.is_publication){
+            this.btn_close.addClass('ui-button-action');
+        }
+        
 
         this.btn_close.find('.ui-icon-close').css({right: 0}); //'font-size': '1.3em', 
         
@@ -292,7 +299,6 @@ $.widget( "heurist.search_faceted", {
         this._on( this.btn_terminate, { click: function(){
 
             this.btn_terminate.hide();
-            this.div_toolbar.css('padding-right', '0px');
             this.div_toolbar.find('#facet_process_msg')
                             .attr('data-interrupt', 1)
                             .text('some facets not processed')
@@ -1808,7 +1814,6 @@ $.widget( "heurist.search_faceted", {
         
             this._terminateFacetCalculation = false;
             this.btn_terminate.show();
-            this.div_toolbar.css('padding-right', '18px');
             this.div_toolbar.find('#facet_process_msg').show();
             if(this.btn_reset) this.btn_reset.hide()    
             this.btn_close.hide();
