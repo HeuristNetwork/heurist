@@ -1416,7 +1416,7 @@ function print_public_details($bib) {
             //logged in user can see viewable
             $detail_visibility_conditions[] = '(rst_NonOwnerVisibility="viewable")';
         }
-        $detail_visibility_conditions[] = '((rst_NonOwnerVisibility="public" OR rst_NonOwnerVisibility="pending") AND IFNULL(dtl_HideFromPublic, 0)!=1)';
+        $detail_visibility_conditions[] = '((rst_NonOwnerVisibility="public" OR rst_NonOwnerVisibility="pending") AND IFNULL(dtl_HideFromPublic, 1)!=1)';
 
         $detail_visibility_conditions[] = '(rst_RequirementType != "forbidden")';
         
@@ -1424,7 +1424,7 @@ function print_public_details($bib) {
     }
 
     if($is_production || $is_map_popup){ // hide hidden fields in publication and map popups
-        $detail_visibility_conditions .= ' AND rst_NonOwnerVisibility != "hidden" AND rst_RequirementType != "forbidden" AND IFNULL(dtl_HideFromPublic, 0) != 1';
+        $detail_visibility_conditions .= ' AND rst_NonOwnerVisibility != "hidden" AND rst_RequirementType != "forbidden" AND IFNULL(dtl_HideFromPublic, 1) != 1';
     }   
 
     $query = $query.$detail_visibility_conditions
@@ -1803,6 +1803,7 @@ function print_public_details($bib) {
                         :(HEURIST_BASE_URL.'?db='.HEURIST_DBNAME.'&file='.$thumb['nonce']);
             $download_url = HEURIST_BASE_URL.'?db='.HEURIST_DBNAME.'&debug=3&download=1&file='.$thumb['nonce'];
 
+        if(!$is_map_popup){
             print '<div class="download_link">';
 
             if(!$is_map_popup){
@@ -1874,6 +1875,8 @@ function print_public_details($bib) {
             }
 
             print '</div><!-- CLOSE download_link -->';  //CLOSE download_link
+        }
+            
 
             if($thumb['player'] && !$is_map_popup && $isAudioVideo){
                 print '<div class="fullSize media-content" style="text-align:left;'
