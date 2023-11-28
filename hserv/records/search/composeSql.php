@@ -465,9 +465,10 @@ function get_sql_query_clauses_NEW($db, $params, $currentUser=null){
     $publicOnly = (@$params['publiconly'] == 1); //@todo change to vt - visibility type parameter of query
 
     // set is_admin
-    $is_admin = $currUserID == 2;
+    $is_admin = true; //2023-11-28 TEMPORARY DISABLE field visibility check  $is_admin = $currUserID == 2;
     if(!$is_admin && $currUserID > 0){
-
+        //$system->is_admin()
+        
         // Check if user is part of db admin group
         $db_admin_id = mysql__select_value($mysqli, 'SELECT sys_OwnerGroupID FROM sysIdentification');
         $db_admin_id = !$db_admin_id || !intval($db_admin_id) < 1 ? 1 : intval($db_admin_id);
