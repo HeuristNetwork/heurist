@@ -2095,6 +2095,7 @@ $.widget( "heurist.search_faceted", {
                           .appendTo(this.facets_list);
 
                 let max_w = $ele.width() - 80;
+
                 $('<span>', {class: 'truncate'}).css({
                     'display': 'inline-block',
                     'vertical-align': 'top',
@@ -3717,10 +3718,12 @@ $.widget( "heurist.search_faceted", {
         
         if(isNaN(content_max_width) || content_max_width<10){
             
-            content_max_width = this.options.is_publication 
-                        ? this.element.parents('.mceNonEditable').width() 
-                        : this.element.width();
-            
+            if(this.options.is_publication && this.element.parents('.heurist-widget').width()>10){
+                content_max_width = this.element.parents('.heurist-widget').width();
+            }else{
+                content_max_width = this.element.width();
+            }
+
             if(content_max_width<10){
                 content_max_width = 250;
             }
@@ -3762,9 +3765,11 @@ $.widget( "heurist.search_faceted", {
             
             if(display_mode=='block'){         
 
-                let width = content_max_width < 200 ? content_max_width * 0.6 : content_max_width - 80;
+                let width = content_max_width < 200 ? content_max_width * 0.6 : content_max_width - 60;
                 width = cterm.level ? width - (cterm.level - 1) * 10 : width;
 
+                f_link.css({display:'block'});
+                
                 f_link_content.css('max-width', width)
                               .addClass('truncate')
                               .attr('title', cterm.title);
@@ -3837,7 +3842,10 @@ $.widget( "heurist.search_faceted", {
             this._on( f_link, {
                 click: function(event) { 
 
-                    var link = $(event.target).parents('.facet_link');
+                    var link = $(event.target);
+                    if(!link.hasClass('facet_link')){
+                        link = link.parents('.facet_link');    
+                    }
                     var facet_index = Number(link.attr('facet_index'));
                     var value = link.attr('facet_value');                  
                     var label = link.attr('facet_label');                  
