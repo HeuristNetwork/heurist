@@ -709,7 +709,7 @@ if(!($is_map_popup || $without_header)){
                     $('.hiddenField').show();
                 }
 
-                if($('.hiddenField').length == 0){ // hide hidden field toggler
+                if($('.hiddenField').length == 0){ // remove hidden field toggler
                     $('#toggleHidden').parents('.detailRow').remove();
                 }
 
@@ -717,12 +717,14 @@ if(!($is_map_popup || $without_header)){
 
                 $.each($group_container.find('fieldset'), function(idx, fieldset){
 
+                    let $header = $group_container.find('h4[data-order="'+ $(fieldset).attr('id') +'"], h5[data-order="'+ $(fieldset).attr('id') +'"]');
                     $(fieldset).show();
-                    $group_container.find('h4[data-order="'+ $(fieldset).attr('id') +'"], h5[data-order="'+ $(fieldset).attr('id') +'"]').show();
+                    $header.show();
 
-                    if(!$(fieldset).find('div').is(':visible')){
+                    let $vis_rows = $(fieldset).find('div.detailRow').filter((idx, div) => { return $(div).css('display') != 'none'; });
+                    if($vis_rows.length == 0){
                         $(fieldset).hide();
-                        $group_container.find('h4[data-order="'+ $(fieldset).attr('id') +'"], h5[data-order="'+ $(fieldset).attr('id') +'"]').hide();
+                        $header.hide();
                     }
 
                     let parent_id = $(fieldset).attr('data_parent');
@@ -738,7 +740,26 @@ if(!($is_map_popup || $without_header)){
 
                 window.hWin.HAPI4?.save_pref('recordData_HiddenFields', show_hidden_fields);
             }
-            
+            function onWindowResize(){
+
+                const doc_width = $(document).width();
+                let $fld_names = $('#div_public_data .detailType');
+
+                if($fld_names.length == 0){
+                    return;
+                }
+
+                $fld_names.removeClass('row10 row15 row20');
+
+                if(doc_width >= 1400){
+                    $fld_names.addClass('row10');
+                }else if(doc_width >= 1000){
+                    $fld_names.addClass('row15');
+                }else if(doc_width >= 750){
+                    $fld_names.addClass('row20');
+                }
+            }
+
             $(document).ready(function() {
                 showHidePrivateInfo(null);
              
@@ -751,6 +772,9 @@ if(!($is_map_popup || $without_header)){
                 mediaTooltips();
 
                 toggleHiddenFields();
+
+                onWindowResize();
+                $(document).on('resize', onWindowResize);
 
             });
             
@@ -902,6 +926,19 @@ if($is_production){
 
         .hiddenField .detailType{
             text-decoration: line-through;
+        }
+
+        .detailType.row10{
+            min-width: 100px;
+            width: 10%;
+        }
+        .detailType.row15{
+            min-width: 100px;
+            width: 15%;
+        }
+        .detailType.row20{
+            min-width: 100px;
+            width: 20%;
         }
 
         @media print {
@@ -1417,15 +1454,16 @@ function print_public_details($bib) {
             $detail_visibility_conditions[] = '(rst_NonOwnerVisibility="viewable")';
         }
         $detail_visibility_conditions[] = '((rst_NonOwnerVisibility="public" OR rst_NonOwnerVisibility="pending") AND IFNULL(dtl_HideFromPublic, 1)!=1)';
-
-        $detail_visibility_conditions[] = '(rst_RequirementType != "forbidden")';
         
         $detail_visibility_conditions = ' AND ('.implode(' OR ',$detail_visibility_conditions).')';
     }
 
     if($is_production || $is_map_popup){ // hide hidden fields in publication and map popups
         $detail_visibility_conditions .= ' AND rst_NonOwnerVisibility != "hidden" AND rst_RequirementType != "forbidden" AND IFNULL(dtl_HideFromPublic, 1) != 1';
-    }   
+    }else if(!$system->is_admin() && !in_array($rec_owner, $ACCESSABLE_OWNER_IDS)){
+        // hide forbidden fields from all except owners an admins
+        $detail_visibility_conditions .= ' AND rst_RequirementType != "forbidden"';
+    }
 
     $query = $query.$detail_visibility_conditions
         .' order by rdr.rst_DisplayOrder is null,
