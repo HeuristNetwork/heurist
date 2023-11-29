@@ -723,14 +723,16 @@ class DbUtils {
             //0: use 3d party PDO mysqldump (default), 1:use internal routine, 2 - call mysql via shell
             $dbScriptMode = defined('HEURIST_DB_MYSQL_DUMP_MODE')?HEURIST_DB_MYSQL_DUMP_MODE :0;
 
-            if($dbScriptMode==2 && !(defined('HEURIST_DB_MYSQLDUMP') && file_exists(HEURIST_DB_MYSQLDUMP))){
-                $dbScriptMode = 0;  
+            if($dbScriptMode==2){
+                if(!defined('HEURIST_DB_MYSQLDUMP') || !file_exists(HEURIST_DB_MYSQLDUMP)){
+                    $dbScriptMode = 0;  
+                }
             }else if($dbScriptMode==1){
+                $dbScriptMode = 0; //disabled 
+            }else{
                 $dbScriptMode = 0;
             }
             
-            $dbScriptMode = 0; //disable all others
-
             
             if($dbScriptMode==2){ // use mysql native mysqldump utility via shell
             
@@ -759,7 +761,12 @@ class DbUtils {
                 //-u ".ADMIN_DBUSERNAME." -p".ADMIN_DBUSERPSWD."
                 $return = null;
                 
-                /* remarked temporary to avoid security warnings
+                //https://dev.mysql.com/doc/refman/8.0/en/mysql-config-editor.html
+                // use mysql_config_editor to store authentication credentials 
+                // in an obfuscated login path file named .mylogin.cnf. 
+                
+                
+                /* remarked temporary to avoid security warnings*/
                 $cmd = escapeshellarg(HEURIST_DB_MYSQLDUMP)
                 ." --login-path=local {$database_name_full} {$options} {$tables} > " 
                 .$database_dumpfile;
@@ -767,7 +774,7 @@ class DbUtils {
                 $arr_out = array();
                 
                 exec($cmd, $arr_out, $return);
-                */
+                
                 
 //echo 'return '.$return;                
 //echo print_r($arr_out,true)."\n\n";
@@ -778,6 +785,9 @@ class DbUtils {
                     $msg = "mysqldump for ".htmlspecialchars($database_name_full)
                                 ." failed with a return code of {$return}";
                     if($verbose) echo '<br>'.$msg;
+                    
+                    self::$system->addError(HEURIST_SYSTEM_CONFIG, $msg);
+                    
                     /*
                     echo "Error message was:\n";
                     $file = escapeshellarg("mysqldump_error.log");
