@@ -439,18 +439,19 @@ $.widget( "heurist.recordFindDuplicates", $.heurist.recordAction, {
         var that = this;
 
         window.hWin.HEURIST4.msg.showDialog(url, {
-            width:700, height:600,
+            width:800, height:600,
             default_palette_class:'ui-heurist-explore',
             title: window.hWin.HR('Combine duplicate records'),
             callback: function(context) {
                 if(context=='commited'){
-                   that.element.find('.group_'+sGroupID).hide();
+                    that.element.find('.group_'+sGroupID).hide();
 
-                   var cur_query = $.extend(true, {}, window.hWin.HEURIST4.current_query_request);
-                   cur_query.id = null;
-                   cur_query.source = null;
+                    var cur_query = $.extend(true, {}, window.hWin.HEURIST4.current_query_request);
+                    cur_query.id = null;
+                    cur_query.source = null;
+                    cur_query.no_explore = 1;
 
-                   window.hWin.HAPI4.RecordSearch.doSearch(that, cur_query)
+                    window.hWin.HAPI4.RecordSearch.doSearch(that, cur_query)
                 }
             }
         });
