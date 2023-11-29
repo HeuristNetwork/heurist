@@ -31,7 +31,7 @@ require_once dirname(__FILE__).'/../../hclient/framecontent/initPageMin.php';
 require_once dirname(__FILE__).'/../../hserv/utilities/uFile.php';
 require_once dirname(__FILE__).'/../../hserv/utilities/uArchive.php';
 require_once dirname(__FILE__).'/../../hserv/records/search/recordFile.php';
-require_once dirname(__FILE__).'/../../external/php/Mysqldump8.php';
+require_once dirname(__FILE__).'/../../hserv/utilities/dbUtils.php';
 
 
 $folder = HEURIST_FILESTORE_DIR.'backup/'.HEURIST_DBNAME;
@@ -452,32 +452,23 @@ if($mode>1){
             if($system->is_admin()){
                 // Do an SQL dump of the whole database
                 echo_flush2("Exporting SQL dump of the whole database (several minutes for large databases)<br>");
-
-                try{
-                    $pdo_dsn = 'mysql:host='.HEURIST_DBSERVER_NAME.';dbname='.HEURIST_DBNAME_FULL.';charset=utf8mb4';
-                    $dump = new Mysqldump( $pdo_dsn, ADMIN_DBUSERNAME, ADMIN_DBUSERPSWD,
-                            array('skip-triggers' => true,  'add-drop-trigger' => false, 'add-drop-table'=>true));
-                            
-/*                    
-                            array(
-                            'add-drop-table' => true,
-                            'single-transaction' => true,
-                            'skip-triggers' => false,
-                            'add-drop-trigger' => true,
-                            'databases' => true,
-                            'add-drop-database' => true));
-*/                    
-                    $dump->start($folder."/".HEURIST_DBNAME."_MySQL_Database_Dump.sql");
-
-                    if($separate_sql_zip){ // copy sql dump to separate directory
-                        $separate_sql_zip = fileCopy($folder."/".HEURIST_DBNAME."_MySQL_Database_Dump.sql", $folder_sql."/".HEURIST_DBNAME."_MySQL_Database_Dump.sql");
-                    }
-                } catch (Exception $e) {
+                
+                
+                $database_dumpfile = $folder."/".HEURIST_DBNAME."_MySQL_Database_Dump.sql";
+                $dump_options = array('skip-triggers' => true,  'add-drop-trigger' => false, 'add-drop-table'=>true);
+                
+                $res = DbUtils::databaseDump(HEURIST_DBNAME_FULL, $database_dumpfile, $dump_options, false );
+                
+                if(!$res){
                     if(file_exists($progress_flag)) unlink($progress_flag);
                     print '</div><script>document.getElementById("divProgress").style.display="none";</script>';
-                    die ("Sorry, unable to generate MySQL database dump.".$e->getMessage().$please_advise);
+                    die ("Sorry, unable to generate MySQL database dump.".$system->getError()['message'].'  '.$please_advise);
                 }
 
+                if($separate_sql_zip){ // copy sql dump to separate directory
+                    $separate_sql_zip = fileCopy($database_dumpfile, $folder_sql."/".HEURIST_DBNAME."_MySQL_Database_Dump.sql");
+                }
+                
             }
 
             // remove old mysql dump - specifically the ones named HEURIST_DBNAME_FULL.sql
