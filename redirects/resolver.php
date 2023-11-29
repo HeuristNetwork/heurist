@@ -384,6 +384,9 @@ if($database_url!=null){ //redirect to resolver for another database
     //todo include resolver  recordSearchReplacement
     $redirect = '../export/xml/flathml.php?db='.$_REQUEST['db'].'&depth=1&w=a&q=ids:'.$recid;
 }else{
+    if(!isset($error_msg)){
+        $error_msg = 'Can\'t resolve the given URI: '.$_SERVER['REQUEST_URI'];
+    }
     $redirect = '../hclient/framecontent/infoPage.php?error='.rawurlencode($error_msg); 
 }
 
