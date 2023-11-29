@@ -146,8 +146,37 @@ $reference_bdts = mysql__select_assoc2($mysqli,'select dty_ID, dty_Name from def
             }
             
             $(document).ready(function() {
-               $('input[type="button"]').button();
-               $('input[type="submit"]').addClass('ui-button-action').button();
+
+                $('input[type="button"]').button();
+                $('input[type="submit"]').addClass('ui-button-action').button();
+
+                let $merge = $('input[name="merge"]');
+                if($merge.length == 1 && $('input[name="duplicate[]"]').length == 2){ 
+                    // automatically merge if there is only two records listed
+                    $merge.click();
+                    return;
+                }
+
+                let $popup = $(window.frameElement).parent('div.ui-dialog-content'); //[role="dialog"]
+                let content_ele = $('.ent_content')[0];
+                let max_height = window.parent.innerHeight - 80;
+
+                if($popup.length == 0){
+                    return;
+                }
+
+                setTimeout(() => {
+                    
+                    let has_scroll = content_ele.scrollHeight - content_ele.clientHeight;
+
+                    if(has_scroll > 0){
+                        let height = content_ele.scrollHeight + 50;
+                        height = height > max_height ? max_height : height;
+    
+                        $popup.height(`${height}px`);
+                        $popup.parent().position({of: window.parent});
+                    }
+                }, 1000);
             });
             
             -->
@@ -193,19 +222,8 @@ $reference_bdts = mysql__select_assoc2($mysqli,'select dty_ID, dty_Name from def
                             'select rty_ID, rty_Name from Records left join defRecTypes on rty_ID=rec_RecTypeID '
                             .'where rec_ID in ('.$bib_ids_list.')');
 
-                        $temptypes = '';
-                        if (is_array($rtyNameLookup) && count($rtyNameLookup) > 0) {
-                            foreach ($rtyNameLookup as $rtyID => $rtyName){
-                                if (!$temptypes) {
-                                    $temptypes = $rtyName;
-                                    $firstRtyID = $rtyID;
-                                }else{
-                                    $temptypes .= '/'.$rtyName;
-                                }
-                            }
-                            print '<tr><td colspan="3" style="text-align: center; font-weight: bold;">'.htmlspecialchars($temptypes).'</td></tr>';
-                        }
-                        
+                        print '<tr><td></td></tr>';
+                                                
                         //get requirements for details
                         $res = $mysqli->query('select rst_RecTypeID,rst_DetailTypeID, rst_DisplayName, rst_RequirementType, rst_MaxValues from defRecStructure where rst_RecTypeID in ('.join(',',array_keys($rtyNameLookup)).')');
                         $rec_requirements =  array();
@@ -227,8 +245,9 @@ $reference_bdts = mysql__select_assoc2($mysqli,'select dty_ID, dty_Name from def
                         $res->close();
 
                         foreach($records as $index => $record){
+
                             $rec_references = mysql__select_list2($mysqli, 
-                                    'select dtl_RecID from recDetails WHERE dtl_Value='.$records[$index]['rec_ID']
+                                    'select dtl_RecID from recDetails WHERE dtl_Value='.intval($records[$index]['rec_ID'])
                                     .' and dtl_DetailTypeID in ('.join(',', array_keys($reference_bdts)).')');
                             if ($rec_references){
                                 // only store the references that are actually records
@@ -239,11 +258,9 @@ $reference_bdts = mysql__select_assoc2($mysqli,'select dty_ID, dty_Name from def
                                 }else{
                                     $records[$index]["ref_count"] = 0;
                                 }
-                                $counts[$index] = $records[$index]["ref_count"];
                                 $invalid_rec_references += array_diff($rec_references, $records[$index]["refs"]);
-                            } else{
-                                array_push($counts,0);
                             }
+
                             $details = array();
                             $res = $mysqli->query('select dtl_DetailTypeID, dtl_Value, dtl_ID, dtl_UploadedFileID, if(dtl_Geo is not null, ST_AsWKT(dtl_Geo), null) as dtl_Geo, trm_Label
                                 from recDetails  left join defTerms on trm_ID = dtl_Value
@@ -265,9 +282,10 @@ $reference_bdts = mysql__select_assoc2($mysqli,'select dty_ID, dty_Name from def
                                 
                                 array_push($records[$index]['details'][$type], $row);
                             }
+                            $counts[$index] = $res->num_rows;
                             $res->close();
                         }
-                        //FIXME place results into array and output record with most references and/or date rule first - not sure what to do here
+                        //Output records in order of most fiel values - first is the default 'master' record
                         $rec_keys = array_keys($records);
                         if (! @$master_rec_id){
                             array_multisort($counts, SORT_NUMERIC, SORT_DESC, $rec_keys );
@@ -362,7 +380,7 @@ $reference_bdts = mysql__select_assoc2($mysqli,'select dty_ID, dty_Name from def
                                 print '<table>';
 
                                 if (array_key_exists("refs",$record)) {
-                                    print '<tr><td>References</td><td>';
+                                    print '<tr><td>References</td></tr><tr><td>';
                                     $i = 1;
                                     foreach ($record["refs"] as $ref) {  //FIXME  check for reference to be a valid record else mark detail for delete and don't print
                                         print '<a target="edit" href="'.HEURIST_BASE_URL.'?fmt=edit&db='.HEURIST_DBNAME.'&recID='.intval($ref).'">'.($i++).'</a> ';
@@ -500,7 +518,7 @@ $reference_bdts = mysql__select_assoc2($mysqli,'select dty_ID, dty_Name from def
                                 print '<table>';
 
                                 if (array_key_exists("refs",$record)) {
-                                    print '<tr><td>References</td><td>';
+                                    print '<tr><td>References</td></tr><tr><td>';
                                     $i = 1;
                                     foreach ($record["refs"] as $ref) {
                                         print '<a target="edit" href="'.HEURIST_BASE_URL.'?fmt=edit&db='.HEURIST_DBNAME.'&recID='.intval($ref).'">'.$i++.'</a> ';
@@ -587,12 +605,14 @@ function detail_get_html_input_str( $detail, $repeatCount, $is_master ) {
         }
         
         if($detail_val==null) $detail_val = '';
-       
+
+        $def_checked = $is_master || $is_type_repeatable ? "checked=checked" : "";
+
         $input = '<input type="'.($is_type_repeatable? "checkbox":"radio").
         '" name="'.($is_type_repeatable? ($is_master?"keep":"add").$detail_type.'[]':"update".$detail_type).
         '" title="'.($is_type_repeatable?($is_master?"check to Keep value in Master record - uncheck to Remove value from Master record":"Check to Add value to Master record"):
             ($is_master?  "Click to Keep value in Master record": "Click to Replace value in Master record")).  
-        '" '.($is_master?"checked=checked":"").
+        '" '.($def_checked).
         ' value="'.($is_type_repeatable?  $detail_id :($is_master? "master":$detail_id)).
         '" id="'.($is_type_repeatable? ($is_master?"keep_detail_id":"add_detail_id"):"update").$detail_id.
         '">'.detail_str($detail_type, $detail_val).'';

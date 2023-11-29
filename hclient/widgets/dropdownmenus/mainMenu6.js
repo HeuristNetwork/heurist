@@ -294,9 +294,11 @@ $.widget( "heurist.mainMenu6", {
                         that.currentSearch = window.hWin.HEURIST4.util.cloneJSON(data);
                         that._updateSaveFilterButton(1);
 
-                        that.switchContainer('explore');
-                        that._mouseout_SectionMenu();
-                        that._collapseMainMenuPanel(true, 1000);
+                        if(!data.no_explore){
+                            that.switchContainer('explore');
+                            that._mouseout_SectionMenu();
+                            that._collapseMainMenuPanel(true, 1000);
+                        }
                         
                     }else if(data.reset){
                         that.currentSearch = null;

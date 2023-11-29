@@ -676,7 +676,7 @@ $.widget( "heurist.resultListMenu", {
                     + recIDs_list.join(",")+"&db=" + window.hWin.HAPI4.database;
 
         window.hWin.HEURIST4.msg.showDialog(url, {
-            width:700, height:550,
+            width:800, height:550,
             default_palette_class:'ui-heurist-explore',
             title: window.hWin.HR('Combine duplicate records'),
             callback: function(context) {

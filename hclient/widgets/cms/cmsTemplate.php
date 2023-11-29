@@ -150,6 +150,10 @@
     font-weight: normal;
     outline: none;
 }
+
+#main-languages a:not(.lang-selected){
+    text-decoration: none;
+}
 </style>
 </head>
 <body>

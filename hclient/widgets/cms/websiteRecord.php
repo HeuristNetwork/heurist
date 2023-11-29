@@ -290,6 +290,11 @@ if(defined('DT_LANGUAGES')){
 $current_language = @$_REQUEST['lang'];
 if(!$current_language) $current_language = $website_language_def; 
 
+if(!empty($website_languages_links)){
+    $curr_lang_text = 'data-lang="'.$website_language_def.'"';
+    $website_languages_links = str_replace($curr_lang_text, $curr_lang_text . ' class="lang-selected"', $website_languages_links);
+}
+
 $website_title = __getValueAsJSON($rec, DT_NAME); //multilang titles
 $website_title_translated = getCurrentTranslation(@$rec['details'][DT_NAME], $current_language); //default title
 

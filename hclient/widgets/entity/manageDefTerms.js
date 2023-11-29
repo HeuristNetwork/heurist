@@ -108,7 +108,7 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
         
         if(this.recordList.is(':visible') && this.options.auxilary=='term' && this.options.select_mode == 'manager')
         this.space_for_drop = $('<span class="space_for_drop heurist-helper3" '
-                        +'style="position:absolute;top:80px;text-align:left;left:0;right:0;font-size: 0.8em;display:block;margin:0px;padding:5px 0 0 3px;background:white">'
+                        +'style="position:absolute;top:90px;text-align:left;left:0;right:0;font-size: 0.8em;display:block;margin:0px;padding:5px 0 0 3px;background:white">'
                         +'<span class="ui-icon ui-icon-arrowthick-1-e"/>&nbsp;top</span>') //drop here to move term to top level&nbsp;<span class="ui-icon ui-icon-arrowthick-1-w"/>
                             .insertBefore(this.recordList);
         
@@ -342,7 +342,7 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
 
                     {showText:true, icons:{primary:'ui-icon-plus'}, text:window.hWin.HR('Add'), //Add Term
                         css:{'margin-right':'0.5em','display':'inline-block',padding:'2px'}, id:'btnAddButton',
-                        click: function() { that._onActionListener(null, 'add'); }},
+                        class: 'ui-button-action',click: function() { that._onActionListener(null, 'add'); }},
 
                     {showText:true, icons:{primary:'ui-icon-link'}, text:window.hWin.HR('Ref'), //Add Term
                         css:{'margin-right':'0.5em','display':'inline-block',padding:'2px'}, id:'btnAddButton2',
@@ -378,7 +378,7 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
                 //padding:'6px'
                 this.searchForm.css({'min-width': '470px', 'padding-top':this.options.isFrontUI?'6px':'4px', height:80})
                 .empty();                                     
-                this.recordList.css({'min-width': '315px', top:'104px'});
+                this.recordList.css({'min-width': '315px', top:'107px'});
                 this.searchForm.parent().css({'overflow-x':'auto'});
 
                 $('<div style="vertical-align: middle;width: 100%;min-height: 32px; border-bottom: 1px solid gray; clear: both;">'
@@ -404,22 +404,22 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
                 //add, import buttons
                 var c1 = this.searchForm.find('div.action-buttons');
                 for(var idx in btn_array){
+
                     this._defineActionButton2(btn_array[idx], c1);
+
+                    if(btn_array[idx]['id'] == 'btnAddButton'){ // remove bold effect from button
+                        c1.find('#btnAddButton')[0].style.setProperty('font-weight', 'normal', 'important');
+                    }
                 }
-
-                $('<span style="font-size:10px">drag to <label><input type="radio" name="rbDnD" id="rbDnD_move" checked/>move<label> '
-                    +'<label><input type="radio" name="rbDnD" id="rbDnD_merge"/>merge<label></span>')
-                .appendTo(c1);
-
-                var cal_usage_btn = {showText:true, text:window.hWin.HR('Calculate usage'), //Calculate term usages for current page
-                                    css:{'margin-left':'0.75em','display':'inline-block',padding:'2px'}, id:'btnCalUsage',
-                                    click: function() { that._onActionListener(null, 'term-usages'); }};
-                this._defineActionButton2(cal_usage_btn, c1);
 
                 var del_multi_btn = {showText:true, text:window.hWin.HR('Delete selected'), //Delete selected terms
                                     css:{'margin-left':'0.75em','display':'inline-block',padding:'2px'}, id:'btnDelMulti',
                                     click: function() { that._onActionListener(null, 'term-delete-mutliple'); }};
                 this._defineActionButton2(del_multi_btn, c1);
+
+                $('<br><span style="font-size:10px">drag to <label><input type="radio" name="rbDnD" id="rbDnD_move" checked/>move as sub-term<label> '
+                    +'<label><input type="radio" name="rbDnD" id="rbDnD_merge"/>merge into target term<label></span>')
+                .appendTo(c1);
 
                 //add input search
                 this._on(this.searchForm.find('.find-term'), {
@@ -873,6 +873,8 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
 
         if(!this.getRecordSet()) return;
 
+        const that = this;
+
         var sGroupTitle = '<h3 style="margin:0;padding:0 8px" class="truncate">';
         if(this.options.auxilary=='vocabulary'){
             //filter by group
@@ -935,6 +937,28 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
                 sGroupTitle += ($Db.trm(vocab_id,'trm_Label')
                     +'</h3><div class="heurist-helper3 truncate" style="font-size:0.7em;padding:0 8px">'
                     +$Db.trm(vocab_id,'trm_Description')+'&nbsp;</div>');
+
+                // Retrieve Term usages
+                let trm_ids = $Db.trm_TreeData(vocab_id, 3);
+                if(window.hWin.HEURIST4.util.isempty(trm_ids)){
+                    return;
+                }
+                trm_ids = trm_ids.join(',');
+
+                let req = {
+                    'trmID': trm_ids,
+                    'a': 'counts',
+                    'mode': 'term_usage',
+                    'entity': 'defTerms',
+                    'request_id': window.hWin.HEURIST4.util.random()
+                };
+                window.hWin.HAPI4.EntityMgr.doRequest(req, function(response){
+                    if(response.status == window.hWin.ResponseStatus.OK){
+                        that.updateTermUsage(response.data);
+                    }else{
+                        window.hWin.HEURIST4.msg.showMsgErr(response);
+                    }
+                });
 
             }else{
                 this.recordList.resultList('clearAllRecordDivs',null,
@@ -1059,13 +1083,12 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
             sHint = sHint + '"';
 
             let recIcon = window.hWin.HAPI4.getImageUrl(this._entityName, recID, 'icon');
-            let recUsage = this._cachedUsages[recID] ? `[${this._cachedUsages}]` : '';
-
+            
             recTitle = '<div class="item truncate label_term rolloverTooltip"'
             +' style="'+sFontSize+sWidth+sBold+'" '+sHint+'>'
             +sLabel+'&nbsp;&nbsp;'
             +`<img src='${window.hWin.HAPI4.baseURL}hclient/assets/16x16.gif' style='background-image: url("${recIcon}"); vertical-align:bottom;' />`
-            +`&nbsp;&nbsp;<span class="term_usage">${recUsage}</span></div>`;
+            +'&nbsp;&nbsp;<span class="term_usage"></span></div>';
 
             var html_thumb = '';
             
@@ -2604,29 +2627,7 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
                 this.recordTree.css({top:this.recordList.position().top}).show();      
                 this.recordList.hide();
 
-            }else if(action == 'term-usages'){ // retrieve term usage and update tree with data
-
-                var trm_ids = $Db.trm_TreeData(this.options.trm_VocabularyID, 3);
-                if(window.hWin.HEURIST4.util.isempty(trm_ids)){
-                    return;
-                }
-                trm_ids = trm_ids.join(',');
-
-                var req = {
-                    'trmID': trm_ids,
-                    'a': 'counts',
-                    'mode': 'term_usage',
-                    'entity': 'defTerms',
-                    'request_id': window.hWin.HEURIST4.util.random()
-                };
-                window.hWin.HAPI4.EntityMgr.doRequest(req, function(response){
-                    if(response.status == window.hWin.ResponseStatus.OK){
-                        that.updateTermUsage(response.data);
-                    }else{
-                        window.hWin.HEURIST4.msg.showMsgErr(response);
-                    }
-                });
-            }else if(action == 'term-delete-mutliple'){
+            }else if(action == 'term-delete-mutliple'){ // delete all selected terms
 
                 let selected_recs = this.recordList.resultList('getSelected', true);
                 if(selected_recs.length == 0){
@@ -3021,18 +3022,45 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
             return;
         }
 
+        this._off(this.recordList.find('.term_usage.has-usage'), 'click');
+
         $.each(this.recordList.find('.recordDiv'), function(idx, record){
 
             let $record = $(record);
-            let trm_id = $record.attr('recid');
             let $label = $record.find('.label_term');
+            let $usage = $label.find('.term_usage');
+
+            const trm_id = $record.attr('recid');
 
             if(trm_id && that._cachedUsages[trm_id] && that._cachedUsages[trm_id] > 0){ // has usage
-                $label.find('.term_usage').text('[' + that._cachedUsages[trm_id] + ']');
+                $usage.text('[' + that._cachedUsages[trm_id] + ']')
+                      .addClass('has-usage')
+                      .css({
+                        'text-decoration': 'underline',
+                        cursor: 'pointer'
+                      });
                 $label.css('color', '');
             }else{ // not used
-                $label.find('.term_usage').text('[--]');
+                $usage.text('[--]')
+                      .removeClass('has-usage')
+                      .attr('style', '');
                 $label.css('color', 'gray');
+            }
+        });
+
+        this._on(this.recordList.find('.term_usage.has-usage'), {
+            click: (e) => {
+
+                let $parent_div = $(e.target).parents('.recordDiv');
+                if($parent_div.length == 0){
+                    return;
+                }
+
+                const id = $parent_div.attr('recid');
+                const lbl = $Db.trm(id, 'trm_Label');
+
+                let query = `[{"f":"=${id}"},{"f":"=${lbl}"}]`;
+                window.open(window.hWin.HAPI4.baseURL + '?db=' + window.hWin.HAPI4.database + '&q=' + encodeURIComponent(query), '_blank');
             }
         });
     },
