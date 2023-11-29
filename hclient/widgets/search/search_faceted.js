@@ -3318,6 +3318,10 @@ $.widget( "heurist.search_faceted", {
 
                             var k, len = field.history.length;
                             for (k=0;k<1;k++){
+                                if(len>2){
+                                    k=len-2; //instead of reset show last one    
+                                }
+                                
                                 var cvalue = field.history[k];
                                 
                                 var $span = $('<span>').css('display','block'); //was inline
@@ -3325,6 +3329,7 @@ $.widget( "heurist.search_faceted", {
                                     $span.text(cvalue.title).appendTo($facet_values);
                                     //$span.append($('<br>'));
                                 }else{
+                                    cvalue.reset_link = true;
                                     var f_link = this._createFacetLink(facet_index, cvalue, 'inline-block');
                                     $span.css({'display':'inline-block','vertical-align':'middle'}).append(f_link).appendTo($facet_values);
                                     //$span.append($('<span class="ui-icon ui-icon-carat-1-e" />').css({'display':'inline-block','height':'13px'}));
@@ -3733,7 +3738,7 @@ $.widget( "heurist.search_faceted", {
         //var step = cterm.step;
         var hist = field.history;
         if(!hist) hist = [];
-        var step = hist.length+1;
+        var step = (cterm && cterm.reset_link)?cterm.step:(hist.length+1);
         var iscurrent = false;
         
         var currval = field.selectedvalue?field.selectedvalue.value:null;
@@ -3752,9 +3757,9 @@ $.widget( "heurist.search_faceted", {
         //----
         var f_link_content;
         
-        
         if(window.hWin.HEURIST4.util.isempty(cterm.value)){
             f_link_content = $("<span>").addClass("ui-icon ui-icon-arrowreturnthick-1-w")
+                .attr('title','Reset facet value')
                 .css({'font-size':'11px','font-style':'normal'}); //1.2em
             //            .insertBefore( $input_div )
             //.addClass("ui-icon ui-icon-arrowreturnthick-1-w resetbutton")
