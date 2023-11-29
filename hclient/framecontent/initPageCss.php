@@ -57,19 +57,20 @@ if($layout_theme==null || $layout_theme=='' || $layout_theme=="heurist" || $layo
 
 //special webfont for database
 $font_styles = '';
-$webfonts = $system->getDatabaseSetting('Webfonts');
-if(is_array($webfonts) && count($webfonts)>0){
-    foreach($webfonts as $font_family => $src){
-        $src = str_replace("url('settings/", "url('".HEURIST_FILESTORE_URL.'settings/',$src);
-        if(strpos($src,'@import')===0){
-            $font_styles = $font_styles . $src;
-        }else{
-            $font_styles = $font_styles . ' @font-face {font-family:"'.$font_family.'";src:'.$src.';} ';    
+if(isset($system) && $system->is_inited()){
+    $webfonts = $system->getDatabaseSetting('Webfonts');
+    if(is_array($webfonts) && count($webfonts)>0){
+        foreach($webfonts as $font_family => $src){
+            $src = str_replace("url('settings/", "url('".HEURIST_FILESTORE_URL.'settings/',$src);
+            if(strpos($src,'@import')===0){
+                $font_styles = $font_styles . $src;
+            }else{
+                $font_styles = $font_styles . ' @font-face {font-family:"'.$font_family.'";src:'.$src.';} ';    
+            }
+            $font_families[] = $font_family;
         }
-        $font_families[] = $font_family;
     }
-}
-  
+}  
 if(!empty($font_styles)){ // add extra font-faces
     echo "<style> $font_styles </style>";
     
