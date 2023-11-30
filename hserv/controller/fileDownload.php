@@ -22,7 +22,7 @@
 *    for uploaded file - thumbnail is created in 
 *           hserv/utilities/UploadHandler.php create_scaled_image() 
 *           on time of uploading and after registration it is copied to our filethumbs folder
-*    for remote file - thumbnail is created on first request fileDownload.php?thumb=  it uses common/php/resizeImage.php
+*    for remote file - thumbnail is created on first request fileDownload.php?thumb=  recordFile.php fileCreateThumbnail
 *    if record has an rec_URL, the thumbnail is created with UImage::makeURLScreenshot
 * 
 * 
@@ -192,15 +192,12 @@ if(!$error){
                         //show in viewer directly
                         $direct_url = HEURIST_FILESTORE_URL.$fileinfo['fullPath'];
 
-                        $get_web_cache = @$_REQUEST['fullres'] === 0 || @$_REQUEST['fullres'] === '0';
+                        if(@$_REQUEST['fullres'] === '0'){ // get web cached version
 
-                        if(extension_loaded('imagick') && $get_web_cache){ // get web cached version
-
-                            $org_url = $direct_url;
-
-                            $cache_url = getWebImageCache($system, $fileid, true);
-                            $direct_url = is_array($cache_url) && !empty($cache_url) ? $cache_url[0] : $org_url;
-                            
+                            $cache_url = getWebImageCache($system, $fileinfo);
+                            if($cache_url){
+                                $direct_url = $cache_url;    
+                            }
                         }
                         
                         header('Location: '.$direct_url);

@@ -11,7 +11,7 @@
 * checkMemoryForImage - verifies if image can be loaded into memory
 * 
 * safeLoadImage -  memory safe load from file to image object
-* createThumbnailFile - creates thumbnail for given image file
+* createScaledImageFile - creates thumbnail for given image file
 * resizeImage - resizes given image   
 * getPdfThumbnail - creates thumbnail from pdf file
 * 
@@ -464,32 +464,49 @@ class UImage {
     /**
     * Creates thumbnail for given image file
     */
-    public static function createThumbnailFile($filename, $thumbnail_file){
+    public static function createScaledImageFile($filename, $scaled_file, $max_width = 200, $max_height = 200, $create_error_thumb=true){
     
         $mimeExt = UImage::getImageType($filename);
         
         if($mimeExt){
             $errorMsg = UImage::checkMemoryForImage($filename, $mimeExt);
             
-            if($errorMsg){
+            if(!$errorMsg){
             
-                $img = UImage::createFromString($errorMsg);
-                imagepng($img, $thumbnail_file);                
-                imagedestroy($img);
-                
-            }else{
-                $img = UImage::safeLoadImage($filename, $mimeExt);
-                if($img){
-                    UImage::_resizeImageGD($img, $thumbnail_file);
+                if (extension_loaded('imagick')) {
+                    $res = UImage::_resizeImageImagic($filename, $scaled_file, $max_width, $max_height);
+                    if($res!==true) $errorMsg = 'Cannot resize image. '.$res;
+                }else{
+                    $img = UImage::safeLoadImage($filename, $mimeExt);
+                    if($img){
+                        UImage::_resizeImageGD($img, $scaled_file, $max_width, $max_height);
+                        if(!file_exists($scaled_file)){
+                            $errorMsg = 'Cannot resize image';
+                        }
+                    }else{
+                        $errorMsg = 'Cannot load image file';
+                    }
                 }
+                
+            }
+            if($errorMsg && $create_error_thumb)
+            {
+                $img = UImage::createFromString($errorMsg);
+                imagepng($img, $scaled_file);                
+                imagedestroy($img);
+                return $errorMsg;
+            
+            }else{
+                return file_exists($scaled_file)?true:$errorMsg;
             }
         }
     }
 
     
     /**
-    * Resizes given image
-    * saves into $thumbnail_file and returns its content
+    * Resizes given image to PNG
+    * saves into $thumbnail_file and returns true if success
+    * Used ONLY in recordFile.php fileCreateThumbnail
     * 
     * @param mixed $filename
     */
@@ -693,15 +710,59 @@ class UImage {
             return '#FFFFFF';   
         }
     }
-    
-    
+
     /**
-    * Creates scaled image with native GD php functions
-    * saves into $thumbnail_file and returns its content
+    * Creates scaled image with Imagic
+    * saves into $thumbnail_file and returns true or error message
     * 
     * @param mixed $filename
     */
-    private static function _resizeImageGD($src_img, $thumbnail_file=null, $max_width = 200, $max_height = 200){
+    private static function _resizeImageImagic($filename, $scaled_file, $max_width = 200, $max_height = 200, $force_type='png'){
+       
+            try{
+                $image = new \Imagick($filename);
+                $dims = array('height' => $image->getImageHeight(), 'width' => $image->getImageWidth());
+
+                // rescale if either dimension is greater than 1000 pixels
+                if($dims['height'] > $max_height || $dims['width'] > $max_width){
+
+                    // scale by the bigger of height or width
+                    $scaleHeight = $dims['height'] > $dims['width'] ? $max_width : 0;
+                    $scaleWidth = $dims['width'] > $dims['height'] ? $max_height : 0;
+
+                    $image->scaleImage($scaleWidth, $scaleHeight); // scale image
+                }
+
+                // force jpeg output
+                if($force_type=='png'){
+                    $image->setImageType('png');
+                }
+                if($force_type=='jpg'){
+                    $image->setImageType('jpeg');
+
+                    $image->setImageCompression(\imagick::COMPRESSION_JPEG);
+                    $image->setImageCompressionQuality(75);
+                }
+
+                $success = $image->writeImage($scaled_file);
+                
+                $image->destroy();
+        
+                return $success;
+                
+            }catch(\ImagickException $e){
+                return $e->message;
+            }                
+    }
+    
+    
+    /**
+    * Creates scaled PNG image with native GD php functions
+    * saves into $thumbnail_file and returns true or false
+    * 
+    * @param mixed $filename
+    */
+    private static function _resizeImageGD($src_img, $scaled_file, $max_width = 200, $max_height = 200){
         
         if (!function_exists('imagecreatetruecolor')) {
             USanitize::errorLog('Function not found: imagecreatetruecolor');
@@ -731,9 +792,9 @@ class UImage {
         if ($scale >= 1) {
             
             //if ($image_oriented) {
-            //   return ($write_func!=null)?$write_func($src_img, $thumbnail_file, $image_quality):false;
+            //   return ($write_func!=null)?$write_func($src_img, $scaled_file, $image_quality):false;
             //}
-            imagepng($src_img, $thumbnail_file);//save into file
+            imagepng($src_img, $scaled_file);//save into file
             imagedestroy($src_img);
             return true;
         }
@@ -760,7 +821,7 @@ class UImage {
             $new_height,
             $img_width,
             $img_height
-        ) && imagepng($new_img, $thumbnail_file, $image_quality);
+        ) && imagepng($new_img, $scaled_file, $image_quality);
         
         imagedestroy($src_img);
         if($new_img) imagedestroy($new_img);

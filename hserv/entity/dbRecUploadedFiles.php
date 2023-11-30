@@ -649,7 +649,7 @@ When we open "iiif_image" in mirador viewer we generate manifest dynamically.
                     $thumb_name = HEURIST_THUMB_DIR.'ulf_'.$this->records[$rec_idx]['ulf_ObfuscatedFileID'].'.png';
                     $temp_path = tempnam(HEURIST_SCRATCH_DIR, "_temp_");
                     if(saveURLasFile($record['ulf_TempThumbUrl'], $temp_path)){ //save to temp in scratch folder
-                        UImage::createThumbnailFile($temp_path, $thumb_name); //create thumbnail for iiif image
+                        UImage::createScaledImageFile($temp_path, $thumb_name); //create thumbnail for iiif image
                         unlink($temp_path);       
                     }
             }else
@@ -675,7 +675,7 @@ When we open "iiif_image" in mirador viewer we generate manifest dynamically.
                             
                             //create thumbnail
                             $thumb_name = HEURIST_THUMB_DIR.'ulf_'.$ulf_ObfuscatedFileID.'.png';
-                            //UImage::createThumbnailFile($filename, $thumb_name);
+                            //UImage::createScaledImageFile($filename, $thumb_name);
                             $img = UImage::createFromString('tileserver tiled images');
                             imagepng($img, $thumb_name);//save into file
                             imagedestroy($img);
@@ -719,7 +719,7 @@ When we open "iiif_image" in mirador viewer we generate manifest dynamically.
                             $mimeExt = UImage::getImageType($filename);
                             
                             if($mimeExt){
-                                UImage::createThumbnailFile($filename, $thumb_name); //create thumbnail for tiled image
+                                UImage::createScaledImageFile($filename, $thumb_name); //create thumbnail for tiled image
                                 $file2['ulf_MimeExt'] = $mimeExt;    
                             }else{
                                 $file2['ulf_MimeExt'] = 'png';

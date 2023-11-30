@@ -553,6 +553,7 @@ function downloadFile($mimeType, $filename, $originalFileName=null){
 }
 
 //
+// $fileinfo - data obtained by fileGetFullInfo
 // $rec_ID -  metadata for record_id
 //
 function downloadFileWithMetadata($system, $fileinfo, $rec_ID){
@@ -846,170 +847,67 @@ function getPlayerURL($mimeType, $url, $params=null){
 }
 
 /**
- * Create a jpeg version of an image for website usage
+ * Create a png version of an image for website usage
  *  Only performs this if the file is greater than 500 KB
  *  Also, scales the image down to at most 1000x1000 pixels
  * 
  * @param System $system - initialised Heurist system object
- * @param string|array $obfuscated_ids - array or comma list of obfuscated file ids
+ * @param $fileinfo - data obtained by fileGetFullInfo
  * @param bool $return_url - return url to file instead of file path
  * 
- * @return array - array of file paths or urls
+ * @return path or url for cached image
  * @return bool - false on error
  */
-function getWebImageCache($system, $obfuscated_ids, $need_return_url = true){
+function getWebImageCache($system, $fileinfo, $return_url=true){
 
-    $web_cache_dir = HEURIST_FILESTORE_DIR . "webimagecache";
+    $skip_file = strpos(@$fileinfo['ulf_OrigFileName'], '_remote') === 0 || // skip if not local file
+                 strpos(@$fileinfo['ulf_OrigFileName'], '_iiif') === 0 || 
+                 strpos(@$fileinfo['ulf_OrigFileName'], '_tiled') === 0;
 
-    if(empty($obfuscated_ids)){
-        $system->addError(HEURIST_INVALID_REQUEST, 'Missing file ids');
+    if($skip_file || @$fileinfo['ulf_FileSizeKB'] < 500){ // skip
         return false;
-    }
-
-    if(!is_array($obfuscated_ids)){
-        $obfuscated_ids = explode(',', $obfuscated_ids);
-    }
-
-    $can_write = file_exists($web_cache_dir) && is_writable($web_cache_dir);
-
-    if(!file_exists($web_cache_dir)){
-
-        $res = folderCreate($web_cache_dir, true);
-        if(!$res){
-            $system->addError(HEURIST_ERROR, 'Unable to create directory for cached web images');
-            return false;
-        }
-
-        $can_write = is_writable($web_cache_dir);
-    }
-
-    if(!$can_write){
-        $system->addError(HEURIST_ERROR, 'Unable to write to the cached web images directory');
-        return false;
-    }
-
-    $mysqli = $system->get_mysqli();
-
-    foreach($obfuscated_ids as $idx => $obfuscated_id){
-
-        if(ctype_alnum($obfuscated_id)){
-            $obfuscated_ids[$idx] = $mysqli->real_escape_string($obfuscated_id);
-        }else{
-            $system->addError(HEURIST_INVALID_REQUEST, 'Invalid obfuscated id provided');
-            return false;
-        }
-    }
-
-    $where = 'ulf_ObfuscatedFileID ';
-    if(count($obfuscated_ids) > 1){
-        $where .= 'IN ("'.implode('","', $obfuscated_ids).'")';
-    }else{
-        $where .= '= "' . $obfuscated_ids[0] . '"';
     }
     
-    $file_query = 'SELECT ulf_ID, CONCAT(ulf_FilePath,ulf_FileName) AS fullPath, ulf_FileSizeKB, ulf_OrigFileName '
-                . 'FROM recUploadedFiles WHERE ' . $where;
+    $file_path = resolveFilePath( @$fileinfo['fullPath'] );
+    if(!file_exists($file_path)){
+        return false;
+    }
+    
+    $web_cache_dir = HEURIST_FILESTORE_DIR . 'webimagecache';
+    
+    $swarn = folderCreate2($web_cache_dir,'(for cached web images)', true);
 
-    $results = $mysqli->query($file_query);
-    if(!$results){
-        $system->addError(HEURIST_DB_ERROR, 'An error occurred with retrieving file details for creating scaled down images');
+    if($swarn!=''){
+        $system->addError(HEURIST_ERROR, $swarn);
         return false;
     }
 
     $files = array();
     $error_reported = false;
 
-    while($row = $results->fetch_assoc()){
+    //direct url to filestore folder
+    $file_url = HEURIST_FILESTORE_URL.$fileinfo['fullPath'];
 
-        // setup original file details
-        $org_file = resolveFilePath($row['fullPath']);
-        $file_info = pathinfo($org_file);
-        $org_rtn = '';
+    $file_path_info = pathinfo($file_path);
+    
+    //return basename with extension
+    $file_name_cached = $file_path_info['filename'].'.png';
 
-        if(strpos($org_file, HEURIST_FILESTORE_DIR) !== false){
-            $org_rtn = $need_return_url ? str_replace(HEURIST_FILESTORE_DIR, HEURIST_FILESTORE_URL, $org_file) : $org_file;
-        }else if(strpos($row['fullPath'], 'file_uploads/') === 0){
-            $org_rtn = ($need_return_url ? HEURIST_FILESTORE_URL : HEURIST_FILESTORE_DIR) . $row['fullPath'];
-        }else{
-            $system->addError(HEURIST_ERROR, 'An error occurred while attempting to resolve the file path for file #' . $row['ulf_ID']);
-            return false;
-        }
-
-        // setup new file details
-        $new_file = $web_cache_dir . "/" . $file_info['basename'];
-        $new_file = str_replace('.' . $file_info['extension'], '.jpg', $new_file); // force jpeg
-        
-        $new_rtn = $need_return_url ? str_replace(HEURIST_FILESTORE_DIR, HEURIST_FILESTORE_URL, $new_file) : $new_file;
-
-        $skip_file = strpos($row['ulf_OrigFileName'], '_remote') === 0 || // skip if not local file
-                     strpos($row['ulf_OrigFileName'], '_iiif') === 0 || 
-                     strpos($row['ulf_OrigFileName'], '_tiled') === 0;
-
-        if($skip_file || $row['ulf_FileSizeKB'] < 500){ // skip
-            array_push($files, $org_rtn);
-            continue;
-        }
-        if(file_exists($new_file)){ // already exists
-            array_push($files, $new_rtn);
-            continue;
-        }
-
-        if(extension_loaded('imagick')){
-
-            try{
-
-                $image = new \Imagick($org_file);
-                $dims = array('height' => $image->getImageHeight(), 'width' => $image->getImageWidth());
-
-                // rescale if either dimension is greater than 1000 pixels
-                if($dims['height'] > 1000 || $dims['width'] > 1000){
-
-                    // scale by the bigger of height or width
-                    $scaleHeight = $dims['height'] > $dims['width'] ? 1000 : 0;
-                    $scaleWidth = $dims['width'] > $dims['height'] ? 1000 : 0;
-
-                    $image->scaleImage($scaleWidth, $scaleHeight); // scale image
-                }
-
-                // force jpeg output
-                $image->setImageType('jpeg');
-
-                $image->setImageCompression(\imagick::COMPRESSION_JPEG);
-                $image->setImageCompressionQuality(75);
-
-                $success = $image->writeImage($new_file);
-                
-                if($success){
-                    array_push($files, $new_rtn);
-                }else{
-                    array_push($files, $org_rtn);
-                }
-
-                $image->destroy();
-            }catch(\ImagickException $e){
-
-                if(!$error_reported){ // report error once
-
-                    $msg = "An error occurred while attempting to create a cached version of image.\n\n"
-                        . "Database: " . HEURIST_DBNAME . "\nImage: " . intval($row['ulf_ID']) . "\n"
-                        . "Imagick error: ";
-
-                    $system->addError(HEURIST_ERROR, $msg . $e->message);
-
-                    $error_reported = true;
-                }
-
-                array_push($files, $org_rtn);
-            }
-        }else{
-            array_push($files, $org_rtn);
-        }
+    $file_url_cached = HEURIST_FILESTORE_URL.'webimagecache/'.$file_name_cached; 
+    $file_path_cached =  $web_cache_dir.'/'.$file_name_cached;  
+      //fileWithGivenExt( $web_cache_dir , $file_path_info['basename'] );
+    
+    $res  = true;
+    if(!file_exists($file_path_cached)){ // already exists
+        $res = UImage::createScaledImageFile($file_path, $file_path_cached, 1000, 1000, false);
     }
-
-    $results->close();
-
-    return $files;
+    if($res===true){
+        return $return_url?$file_url_cached:$file_path_cached;   
+    }else{
+        return false;            
+    }
 }
+
 
 function youtube_id_from_url($url) {
 /*    

@@ -23,6 +23,7 @@
     * fileCopy
     * fileSave
     * fileOpen - check existance, readability, opens and returns file handle, or -1 not exist, -2 not readable -3 can't open
+    * fileWithGivenExt - returns basename by filename (extension is known)
     *     
     * getRelativePath
     * folderRecurseCopy
