@@ -733,6 +733,9 @@ class DbUtils {
                 $dbScriptMode = 0;
             }
             
+            //2023-12-01 - only default mode 
+            $dbScriptMode = 0; 
+            
             
             if($dbScriptMode==2){ // use mysql native mysqldump utility via shell
             
@@ -773,7 +776,8 @@ class DbUtils {
 
                 $arr_out = array();
                 
-                exec($cmd, $arr_out, $return);
+                //remarked to avoid security report alert 
+                //exec($cmd, $arr_out, $return);
                 
                 
 //echo 'return '.$return;                
@@ -799,7 +803,8 @@ class DbUtils {
                             
             
             }
-            else if($dbScriptMode==1){//NOT USED
+            else 
+            if($dbScriptMode==1){//NOT USED
                 //create dump manually - all tables without triggers
                 $file = fopen($database_dumpfile, "a+");
                 if(!$file){
