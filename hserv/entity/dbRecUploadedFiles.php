@@ -1724,23 +1724,20 @@ When we open "iiif_image" in mirador viewer we generate manifest dynamically.
             return false;
         }else{
             
-            //remove files
+            //remove files from webimagecache
             foreach ($file_data as $file_id=>$file){
                 if($file['path']!=null){
                     unlink($file['path']);
                 }
                 //remove thumbnail
                 $thumbnail_file = HEURIST_THUMB_DIR."ulf_".$file_id.".png";
-                if(file_exists($thumbnail_file)){
-                    unlink($thumbnail_file);
-                }
+                fileDelete($thumbnail_file);
+
                 // remove web cached image
                 $webimage_name = pathinfo($file['name']);
-                $webimage_name = $webimage_name['filename'] . ".jpg";
-                $webcache_file = HEURIST_FILESTORE_DIR . "webimagecache/$webimage_name";
-                if(file_exists($webcache_file)){
-                    unlink($webcache_file);
-                }
+                $webcache_file = HEURIST_FILESTORE_DIR . 'webimagecache/'.$webimage_name['filename'];
+                fileDelete($webcache_file.'.jpg');
+                fileDelete($webcache_file.'.png');
             }
         }
         
