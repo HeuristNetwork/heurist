@@ -66,14 +66,25 @@ require_once dirname(__FILE__).'/../../../records/index/elasticSearch.php';
     <div id='page-inner' style='overflow:auto'>
 <?php
     $dbname = filter_var($_REQUEST['db'], FILTER_SANITIZE_STRING);
-    $is_db_valid = mysql__check_dbname($dbname);
+    
+    //database validation - code duplicates System::dbname_check. However security reports does not recognize it
+    $sErrorMsg = null;
+    if($dbname==null || trim($dbname)==''){
+        $sErrorMsg = 'Database parameter not defined';
+    }else if(preg_match('/[^A-Za-z0-9_\$]/', $dbname)){ //validatate database name
+        $sErrorMsg = 'Database name '.$dbname.' is wrong';
+    }else if(strlen($dbname)>64){
+        $sErrorMsg = 'Database name '.$dbname.' is too long. Max 64 characters allowed';
+    }
+    
+    //$is_db_valid = mysql__check_dbname($dbname);
     
     $sysadmin_protection = @$_REQUEST['sa_protect'];
     
-    //owner can delete without password
-    if ($is_db_valid!==true){
-        print '<div class="ui-state-error">'.$is_db_valid[1].'</div>';
-    }else if(!$system->is_dbowner() && $system->verifyActionPassword($sysadmin_protection, $passwordForDatabaseDeletion) ){
+    if ($sErrorMsg!=null){
+            print '<div class="ui-state-error">'.$sErrorMsg.'</div>';
+    }else //owner can delete without password
+    if(!$system->is_dbowner() && $system->verifyActionPassword($sysadmin_protection, $passwordForDatabaseDeletion) ){
             print '<div class="ui-state-error">'.$response = $system->getError()['message'].'</div>';
     }else{
 

@@ -57,14 +57,14 @@ require_once dirname(__FILE__).'/../../utilities/Temporal.php';
 */
 function recordSearchMinMax($system, $params){
 
-    if(@$params['rt'] && @$params['dt']){
+    if(intval(@$params['rt'])>0 && intval(@$params['dt'])>0){
 
         $mysqli = $system->get_mysqli();
         //$currentUser = $system->getCurrentUser();
 
         $query = 'SELECT MIN(CAST(dtl_Value as decimal)) as MIN, MAX(CAST(dtl_Value as decimal)) AS MAX FROM Records, recDetails';
         $where_clause  = ' WHERE rec_ID=dtl_RecID AND rec_RecTypeID='
-        .$params['rt'].' AND dtl_DetailTypeID='.$params['dt']." AND dtl_Value is not null AND dtl_Value!=''";
+        .intval($params['rt']).' AND dtl_DetailTypeID='.intval($params['dt'])." AND dtl_Value is not null AND dtl_Value!=''";
 
         $currUserID = $system->get_user_id();
         if( $currUserID > 0 ) {

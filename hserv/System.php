@@ -839,21 +839,20 @@ class System {
         return $this->dbname;
     }
 
-
+    /**
+    * returns error message if $db is not valid
+    * 
+    * @param mixed $db
+    */
     public static function dbname_check($db){
         
-        $error = null;
-
-        if($db){
-            if(preg_match('/[^A-Za-z0-9_\$]/', $db)){ //validatate database name
-                $error = 'Database parameter is wrong';
-            }else if(strlen($targetdbname)>64){
-                $error = 'Database parameter is too long';
-            }
+        $error = mysql__check_dbname( $db );
+        
+        if(is_array($error)){
+            return $error[1];
         }else{
-            $error = 'Database parameter not defined';
+            return null;
         }
-        return $error;   
     }
     
     /**

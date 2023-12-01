@@ -47,6 +47,7 @@ $user_id = $system->get_user_id(); //keep user id (need to copy current user int
 $mysqli  = $system->get_mysqli();
 
 $templateddb = filter_var(@$_REQUEST['templatedb'], FILTER_SANITIZE_STRING);
+
 $isCloneTemplate = ($templateddb!=null);
 
 $sErrorMsg = null;
@@ -54,21 +55,30 @@ $sHasNewDefsWarning = false;
 
 if($isCloneTemplate){ //template db must be registered with id less than 21
 
+    $sErrorMsg = null;
     $ERROR_REDIR = PDIR.'hclient/framecontent/infoPage.php';
+    //database validation - code duplicates System::dbname_check. However security reports does not recognize it
+    if(preg_match('/[^A-Za-z0-9_\$]/', $templateddb)){ //validatate database name
+        $sErrorMsg = 'Database name '.$templateddb.' is wrong';
+    }else if(strlen($templateddb)>64){
+        $sErrorMsg = 'Database name '.$templateddb.' is too long. Max 64 characters allowed';
+    }else if(mysql__usedatabase($mysqli, $templateddb)!==true){
+        $sErrorMsg = "Sorry, could not connect to the database $templateddb. Operation is possible when database to be cloned is on the same server";
+    }else{
 
-    if(mysql__usedatabase($mysqli, $templateddb)!==true){
-        $system->addError(HEURIST_ERROR, "Sorry, could not connect to the database $templateddb. Operation is possible when database to be cloned is on the same server");
+        $dbRegID = $system->get_system('sys_dbRegisteredID', true);
+
+        if(!($dbRegID>0 && $dbRegID<1000)){
+            $sErrorMsg = "Sorry, the database $templateddb must be registered with an ID less than 1000, indicating a database curated or approved by the Heurist team, to allow cloning through this function. You may also clone any database that you can log into through the Advanced functions under Administration.";
+        }
+    }
+    
+    if($sErrorMsg){
+        $system->addError(HEURIST_ERROR, $sErrorMsg);
         include_once $ERROR_REDIR;
         exit;
     }
-
-    $dbRegID = $system->get_system('sys_dbRegisteredID', true);
-
-    if(!($dbRegID>0 && $dbRegID<1000)){
-        $system->addError(HEURIST_ERROR, "Sorry, the database $templateddb must be registered with an ID less than 1000, indicating a database curated or approved by the Heurist team, to allow cloning through this function. You may also clone any database that you can log into through the Advanced functions under Administration.");
-        include_once $ERROR_REDIR;
-        exit;
-    }
+    
 }else{
     $templateddb = null;
 

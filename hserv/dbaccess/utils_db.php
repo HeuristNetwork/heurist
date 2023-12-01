@@ -10,6 +10,7 @@
     *  mysql__drop_database
     * 
     *  mysql__getdatabases4 - get list of databases
+    *  mysql__check_dbname
     * 
     *  mysql__select - base function
     *  mysql__select_assoc - returns array  key_column(first field)=>array(field=>val,....)
@@ -136,10 +137,19 @@
     function mysql__check_dbname($db_name){
         
         $res = true;
-        if (preg_match('[\W]', $db_name)){
-            $res = array(HEURIST_INVALID_REQUEST, 
-                'Only letters, numbers and underscores (_) are allowed in the database name');
+        
+        if($db_name==null || trim($db_name)==''){
+            $res = 'Database parameter not defined';
+        }else if(preg_match('/[^A-Za-z0-9_\$]/', $db_name)){ //validatate database name
+            $res = 'Database name '.$db_name.' is wrong. Only letters, numbers and underscores (_) are allowed in the database name';
+        }else if(strlen($db_name)>64){
+            $res = 'Database name '.$db_name.' is too long. Max 64 characters allowed';
         }
+        
+        if($res!==true){
+            $res = array(HEURIST_INVALID_REQUEST, $res);
+        }
+        
         return $res;
     }
     
