@@ -208,7 +208,7 @@ $.widget( "heurist.recordListExt", {
         if(!window.hWin.HEURIST4.util.isempty(this.options.placeholder_text)
         || !window.hWin.HEURIST4.util.isempty(this.options.empty_remark)){
             this.placeholder_ele = $('<div>')
-                .css('white-space', 'pre-wrap')
+                .css({'white-space': 'pre-wrap', 'padding-top': '20px'})
                 .prependTo(this.element)
                 .html(window.hWin.HEURIST4.util.isempty(this.options.empty_remark)
                     ?this.options.placeholder_text:this.options.empty_remark);
@@ -233,7 +233,7 @@ $.widget( "heurist.recordListExt", {
         this.loadanimation(true);
         
         if(this.options.is_frame_based){
-            this.dosframe.attr('src', newurl);
+            this.dosframe.attr('src', newurl).show();
         }else{
             this.div_content.load(newurl, function(){ that.onLoadComplete(); })
         }
@@ -432,7 +432,7 @@ $.widget( "heurist.recordListExt", {
                         this.placeholder_ele.html(this.options.placeholder_text).show();   
                     }
                     if(this.options.is_frame_based){
-                        this.dosframe.attr('src', null);
+                        this.dosframe.attr('src', null).hide();
                     }else{
                         this.div_content.empty();
                     }
