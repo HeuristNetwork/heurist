@@ -3215,7 +3215,6 @@ $.widget( "heurist.editing_input", {
     //acceptFileTypes: /(\.|\/)(gif|jpe?g|png)$/i
     //autoUpload: true,
     //multipart: (window.hWin.HAPI4.sysinfo['is_file_multipart_upload']==1),
-    //maxChunkSize: 10485760, //10M
     //to check file size on client side
     max_file_size: max_file_size,
     sequentialUploads: true,
@@ -3227,9 +3226,9 @@ $.widget( "heurist.editing_input", {
         if (e.isDefaultPrevented()) {
             return false;
         }
-//console.log(data);      
 
-        if(data.files && data.files.length>0 && data.files[0].size>max_file_size)
+        if(window.hWin.HAPI4.sysinfo['is_file_multipart_upload']!=1 && 
+            data.files && data.files.length>0 && data.files[0].size>max_file_size)
         {
                 data.message = `The upload size of ${data.files[0].size} bytes exceeds the limit of ${max_file_size}`
                 +` bytes.<br><br>If you need to upload larger files please contact the system administrator ${window.hWin.HAPI4.sysinfo.sysadmin_email}`;
@@ -3324,8 +3323,6 @@ $.widget( "heurist.editing_input", {
             $progress_dlg.dialog("close");   
         }
         
-//console.log(data);        
-
         if(!window.hWin.HEURIST4.util.isnull(fileHandle) && fileHandle.message){ // was aborted by user
             window.hWin.HEURIST4.msg.showMsgFlash(fileHandle.message, 3000);
         }else if( data.message ) {
@@ -3352,12 +3349,16 @@ $.widget( "heurist.editing_input", {
         fileHandle = null;
     },
     progressall: function (e, data) { //@todo to implement
-console.log(data.loaded, data.total);    
         var progress = parseInt(data.loaded / data.total * 100, 10);
         //$('#progress .bar').css('width',progress + '%');
         $progress_bar.progressbar( "value", progress );        
     }                            
-                        };        
+                        };      
+                        
+    if(window.hWin.HAPI4.sysinfo['is_file_multipart_upload']==1){
+        fileupload_opts['multipart'] = true;
+        fileupload_opts['maxChunkSize'] = 10485760; //10M
+    }
         
     var isTiledImage = that.configMode.tiledImageStack ||
                         (that.options.rectypeID == window.hWin.HAPI4.sysinfo['dbconst']['RT_TILED_IMAGE_SOURCE']     
