@@ -558,7 +558,7 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
                                         '<div style="padding:1em 0 1em 0">'+
                                         (hasRtToImport
                                         ?this.options.entity.empty_remark
-                                        :'Your database already has all the entity types available in this source'
+                                        :'Your database already has all the entity types available in this source. Check the Show All box to update existing types.'
                                         )+'</div>');
         }
         
