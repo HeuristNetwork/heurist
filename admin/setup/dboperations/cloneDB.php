@@ -109,6 +109,7 @@ if(@$_REQUEST['mode']=='2'){
     }else{
 
         $targetdbname = filter_var(@$_REQUEST['targetdbname'], FILTER_SANITIZE_STRING);
+        //database validation - code duplicates System::dbname_check. However security reports does not recognize it
         if(preg_match('/[^A-Za-z0-9_\$]/', $targetdbname)){ //validatate database name
                 $sErrorMsg = 'Database name '.$targetdbname.' is wrong';
         }else if(strlen($targetdbname)>64){
