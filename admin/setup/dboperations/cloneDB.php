@@ -109,8 +109,9 @@ if(@$_REQUEST['mode']=='2'){
     }else{
 
         $targetdbname = filter_var(@$_REQUEST['targetdbname'], FILTER_SANITIZE_STRING);
-
-        if(strlen($targetdbname)>64){
+        if(preg_match('/[^A-Za-z0-9_\$]/', $targetdbname)){ //validatate database name
+                $sErrorMsg = 'Database name '.$targetdbname.' is wrong';
+        }else if(strlen($targetdbname)>64){
                 $sErrorMsg = 'Database name '.$targetdbname.' is too long. Max 64 characters allowed';
         }else{
             // Avoid illegal chars in db name

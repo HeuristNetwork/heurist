@@ -847,6 +847,8 @@ class System {
         if($db){
             if(preg_match('/[^A-Za-z0-9_\$]/', $db)){ //validatate database name
                 $error = 'Database parameter is wrong';
+            }else if(strlen($targetdbname)>64){
+                $error = 'Database parameter is too long';
             }
         }else{
             $error = 'Database parameter not defined';

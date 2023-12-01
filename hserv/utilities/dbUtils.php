@@ -736,7 +736,8 @@ class DbUtils {
             //2023-12-01 - only default mode 
             $dbScriptMode = 0; 
             
-            
+            //remarked to avoid security report alert 
+/*
             if($dbScriptMode==2){ // use mysql native mysqldump utility via shell
             
                 $tables = array();
@@ -769,15 +770,13 @@ class DbUtils {
                 // in an obfuscated login path file named .mylogin.cnf. 
                 
                 
-                /* remarked temporary to avoid security warnings*/
                 $cmd = escapeshellarg(HEURIST_DB_MYSQLDUMP)
                 ." --login-path=local {$database_name_full} {$options} {$tables} > " 
                 .$database_dumpfile;
 
                 $arr_out = array();
                 
-                //remarked to avoid security report alert 
-                //exec($cmd, $arr_out, $return);
+                exec($cmd, $arr_out, $return);
                 
                 
 //echo 'return '.$return;                
@@ -792,18 +791,19 @@ class DbUtils {
                     
                     self::$system->addError(HEURIST_SYSTEM_CONFIG, $msg);
                     
-                    /*
-                    echo "Error message was:\n";
-                    $file = escapeshellarg("mysqldump_error.log");
-                    $message = `tail -n 1 $file`;
-                    echo "- $message\n\n";
-                    */
+                    
+                    //echo "Error message was:\n";
+                    //$file = escapeshellarg("mysqldump_error.log");
+                    //$message = `tail -n 1 $file`;
+                    //echo "- $message\n\n";
+                    
                     return false;
                 }
                             
             
             }
             else 
+*/            
             if($dbScriptMode==1){//NOT USED
                 //create dump manually - all tables without triggers
                 $file = fopen($database_dumpfile, "a+");
@@ -882,7 +882,8 @@ class DbUtils {
                 // Close file
                 fclose($file);
             
-            }else{ //DEFAULT MODE - USE 3d Party php MySQLdump lib
+            }
+            else{ //DEFAULT MODE - USE 3d Party php MySQLdump lib
                 
                 try{
                     $pdo_dsn = 'mysql:host='.HEURIST_DBSERVER_NAME.';dbname='.$database_name_full.';charset=utf8mb4';
