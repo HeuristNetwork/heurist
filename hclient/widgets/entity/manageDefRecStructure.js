@@ -1863,7 +1863,7 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
             if(edit_ele){
                 edit_ele.editing_input('option','change', function(){
 
-                    var res = this.getValues()[0]; console.log('display width change');
+                    var res = this.getValues()[0];
                     if(res>120){
                         window.hWin.HEURIST4.msg.showMsgDlg(
                         'This field width might result in the field being wider than the screen. '
@@ -1910,7 +1910,7 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
                 if(edit_ele.find('input').is(':checked')){
                     var f_width = this._editing.getValue('rst_DisplayWidth')[0];
 
-                    if(f_width <= 0){ console.log('changes to display width');
+                    if(f_width <= 0){
                         this._editing.setFieldValueByName('rst_DisplayWidth', 100, true);
                         this.onEditFormChange();
                     }
@@ -2772,17 +2772,18 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
     _rst_PointerMode_Enable: function(is_enable){
         
         var pointer_mode = this._editing.getFieldByName('rst_PointerMode');
+        let value = is_enable ? 'dropdown_add' : 'addorbrowse';
+        pointer_mode.editing_input('setValue', [value], true);
+
         var inpt = pointer_mode.editing_input('getInputs');
         inpt = inpt[0];
 
         if(is_enable){
             inpt.find('option[value^="dropdown"]').removeProp('disabled');
             inpt.find('option[value^="browseonly"]').removeProp('disabled');
-            inpt.val('dropdown_add');
         }else{
             inpt.find('option[value^="dropdown"]').prop('disabled','disabled');
             inpt.find('option[value^="browseonly"]').prop('disabled','disabled');
-            inpt.val('addorbrowse');
         }
         inpt.parent().addClass('selectmenu-parent');
 
