@@ -124,6 +124,14 @@ $.widget( "heurist.resultList", {
         init_completed: false,   //flag to be set to true on full widget initializtion
 
         recviewer_images: 1, // show images in record viewer; 0 - show all images, 1 - no linked media, 2 - no images
+        recview_dimensions: { // popup size and placement
+            height: '80%',
+            width: '60%',
+            top: 'center',
+            left: 'center'
+        },
+        recview_private_details: null, // how to handle the 'more...' section
+
         field_for_ext_classes: 20 // add class related to field value to record's row; 0 - disabled, n > 0 - detail type id
     },
 
@@ -4162,19 +4170,33 @@ $.widget( "heurist.resultList", {
             this._myTimeoutCloseRecPopup = 0;
     },
     
-    //
-    //
-    //
+    /**
+     * Display record details within a popup
+     *  using either the default record viewer or a selected custom report
+     * 
+     * @param {int} rec_ID - record ID 
+     * @returns none
+     */
     _showRecordViewPopup: function( rec_ID ){
-                    
-        var recInfoUrl = null;
-        var is_template = false;
+
+        const that = this;
+
+        let recInfoUrl = null;
+        let is_template = false;
+        let recTitle = 'Loading ';
+
         if(this._currentRecordset && rec_ID>0){
             recInfoUrl = this._currentRecordset.fld( this._currentRecordset.getById(rec_ID), 'rec_InfoFull' );
         }else{
             return;
         }
-        var lt = 'WebSearch';//window.hWin.HAPI4.sysinfo['layout'];  
+
+        if(this._currentRecordset && rec_ID>0){
+            recTitle += this._currentRecordset.fld( this._currentRecordset.getById(rec_ID), 'rec_Title' ) + ' ';
+        }
+        recTitle += '...';
+
+        let lt = 'WebSearch';//window.hWin.HAPI4.sysinfo['layout'];  
         if( !recInfoUrl ){
             
             if ( typeof this.options.rendererExpandDetails === 'string' && this.options.rendererExpandDetails.substr(-4)=='.tpl' ){
@@ -4192,15 +4214,19 @@ $.widget( "heurist.resultList", {
                 if(this._is_publication && this.options.recviewer_images != 0){
                     recInfoUrl += '&hideImages=' + this.options.recviewer_images;
                 }
+                if(this._is_publication && this.options.recview_private_details !== null){
+                    recInfoUrl += '&privateDetails=' + this.options.recview_private_details;
+                }
             }
         }
-
-        var that = this;
         
-        var pos = null;
-        var dlg = $('#recordview_popup');               
+        let pos = null;
+        let dlg = $('#recordview_popup');
 
-        var opts = {
+        let popup_title = window.hWin.HR('Record Info');
+        popup_title += `<em style="font-size:10px;font-weight:normal;position:absolute;right:4em;top:35%;">${window.hWin.HR('drag to rescale')}</em>`;
+
+        let opts = {
             is_h6style: true,
             modal: false,
             dialogid: 'recordview_popup',    
@@ -4208,23 +4234,56 @@ $.widget( "heurist.resultList", {
             onmouseover: function(){
                 that._clearTimeouts();
             },
-            title:window.hWin.HR('Record Info'),
-            default_palette_class: 'ui-heurist-explore'
+            title: popup_title,
+            default_palette_class: 'ui-heurist-explore',
+            coverMsg: recTitle
         }
 
-        if(!(dlg.length>0)){
-            
-            if(this.element.parent().attr('data-heurist-app-id') || this.element.hasClass('cms-element')){ //CMS publication 
-                pos = {my:'center', of: window};
+        if(dlg.length <= 0){
 
-                opts.height = window.hWin.innerHeight*0.9;
+            if(this._is_publication){
 
-                if(is_template){
-                    opts.width = window.hWin.innerWidth*0.8;
+                let popup_dims = this.options.recview_dimensions;
+                
+                pos = {at: 'left top', of: window};
+
+                let pos_my_left = 'center';
+                let pos_my_top = 'center';
+
+                if(popup_dims.left == 'center' && popup_dims.top == 'center'){
+                    pos_my = 'center center';
+                }
+                if(popup_dims.left){
+                    pos_my_left = window.hWin.HEURIST4.util.isempty(popup_dims.left) || popup_dims.left == 'center' ? 
+                                    pos_my_left : `left+${popup_dims.left}`;
+                }
+                if(popup_dims.top){
+                    pos_my_top = window.hWin.HEURIST4.util.isempty(popup_dims.top) || popup_dims.top == 'center' ? 
+                                    pos_my_top : `top+${popup_dims.top}`;
+                }
+                pos['my'] = `${pos_my_left} ${pos_my_top}`;
+
+                // Set width and height
+                let prop_h = popup_dims.height.replace(/\D+/, ''); console.log(prop_h, popup_dims.height.indexOf('%'), window.hWin.innerHeight);
+                let prop_w = popup_dims.width.replace(/\D+/, ''); console.log(prop_w, popup_dims.width.indexOf('%'), window.hWin.innerWidth);
+    
+                if(popup_dims.height.indexOf('%') > 0){ // percentage of available space
+                    opts.height = window.hWin.innerHeight * (prop_h / 100);
+                }else{ // specific amount of pixels
+                    opts.height = prop_h;
+                }
+                if(popup_dims.width.indexOf('%') > 0){ // percentage of available space
+                    opts.width = window.hWin.innerWidth * (prop_w / 100);
+                }else{ // specific amount of pixels
+                    opts.width = prop_w;
                 }
             }else{
                 //set intial position right to result list - for main interface only!
                 pos = { my: "left top", at: "right top+100", of: $(this.element) };
+            }
+
+            if(pos.my.indexOf('center') !== -1){
+                pos.at = 'center center';
             }
 
             opts.position = pos;
@@ -4240,7 +4299,7 @@ $.widget( "heurist.resultList", {
                         that._closeRecordViewPopup();
                     }
                 });
-                var dlg_header = dlg.parent().find('.ui-dialog-titlebar');
+                let dlg_header = dlg.parent().find('.ui-dialog-titlebar');
                 this._on(dlg_header,{mouseout:function(){
                     that._closeRecordViewPopup();
                 }});

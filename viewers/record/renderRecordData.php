@@ -53,6 +53,8 @@ $layout_name = @$_REQUEST['ll'];
 $is_production = !$is_map_popup && $layout_name=='WebSearch';
 
 $is_reloadPopup = array_key_exists('reloadPopup', $_REQUEST) && ($_REQUEST['reloadPopup']==1);
+// 0 - No private details, 1 - collapsed private details, 2 - expanded private details
+$show_private_details = !array_key_exists('privateDetails', $_REQUEST) ? 1 : intval($_REQUEST['privateDetails']);
 
 $hide_images = -1;
 
@@ -290,7 +292,8 @@ if(!($is_map_popup || $without_header)){
             //
             // catch click on a href and opens it in popup dialog for ADMIN UI
             //
-            function link_open(link) {
+            function link_open(link, is_record_viewer = true) {
+
                 <?php if($is_reloadPopup){ ?>
                     this.document.location.href = link.href+'&reloadPopup=1';
                     return false;
@@ -303,10 +306,63 @@ if(!($is_map_popup || $without_header)){
 
                 if(window.hWin && window.hWin.HEURIST4 && window.hWin.HEURIST4.msg && target == '_popup'){
                     try{
-                       window.hWin.HEURIST4.msg.showDialog(link.href, { title:'.', width: 600, height: 500, modal:false });
-                       return false;
+
+                        let width = 600;
+                        let height = 500;
+
+                        if(!is_record_viewer){
+                            window.hWin.HEURIST4.msg.showDialog(href, { title:'.', width: width, height: height, modal:false });
+                            return false;
+                        }
+
+                        let title = `Record Info <em style="font-size:10px;font-weight:normal;position:absolute;right:4em;top:30%;">${window.hWin.HR('drag to rescale')}</em>`;
+                        let cover = link.innerHTML; //innerText
+
+                        let cur_params = window.hWin.HEURIST4.util.getUrlParams(location.href);
+                        if(Object.hasOwn(cur_params, 'privateDetails')){
+                            href += `&privateDetails=${cur_params['privateDetails']}`;
+                        }
+
+                        let cur_dlg = window.frameElement?.parentElement.parentElement; // dialog's widget
+
+                        let pos = null;
+                        // Maintain dialog height and width, if able
+                        if(cur_dlg && cur_dlg.classList.contains('ui-dialog')){
+
+                            if(window.frameElement.parentElement.classList.contains('ui-dialog-content')){
+                                height = cur_dlg.offsetHeight;
+                                width = cur_dlg.offsetWidth;
+                            }
+
+                            pos = $(cur_dlg).position();
+                        }
+
+                        window.hWin.HEURIST4.msg.showDialog(href, 
+                            { 
+                                title:title,
+                                width: width,
+                                height: height,
+                                modal:false,
+                                coverMsg: cover,
+                                onOpen: function(e, ui){
+
+                                    // Place popup
+                                    if(pos){
+
+                                        let top = pos.top + (pos.top * 0.1);
+                                        let left = pos.left + (pos.left * 0.05);
+    
+                                        $(this).parent().css({
+                                            top: top,
+                                            left: left
+                                        });
+                                    }
+                                }
+                            }
+                        );
+                        return false;
                     }catch(e){
-                       return true; 
+                        return true; 
                     }
                 }else{
                     return true; 
@@ -342,6 +398,10 @@ if(!($is_map_popup || $without_header)){
             //
             //
             function showHidePrivateInfo( event ){
+
+                if($('#link_showhide_private').length == 0){
+                    return;
+                }
                 
                 var prefVal = 0;
                 if(window.hWin && window.hWin.HAPI4){
@@ -349,7 +409,10 @@ if(!($is_map_popup || $without_header)){
                 }
                 if(event!=null){
                     prefVal = (prefVal!=1)?1:0;
-                }         
+                }else{
+                    prefVal = $('#link_showhide_private').attr('data-expand') !== null ? 
+                                    $('#link_showhide_private').attr('data-expand') : prefVal;
+                }
                 
                 if(prefVal==1){
                     $('#link_showhide_private').text('less...');
@@ -1093,7 +1156,7 @@ exit(0);
 
 // this functions outputs common info.
 function print_details($bib) {
-    global $is_map_popup, $without_header, $ACCESSABLE_OWNER_IDS, $system, $group_details;
+    global $is_map_popup, $without_header, $ACCESSABLE_OWNER_IDS, $system, $group_details, $show_private_details;
 
     print_header_line($bib);
 
@@ -1119,7 +1182,7 @@ function print_details($bib) {
         <?php
         }
 
-        if(!$is_map_popup){
+        if(!$is_map_popup && $show_private_details != 0){
             print_private_details($bib);
             print_other_tags($bib);
             
@@ -1194,7 +1257,7 @@ function print_header_line($bib) {
 // ownereship, viewability, dates, tags, rate
 //
 function print_private_details($bib) {
-    global $system, $is_map_popup, $is_production, $show_hidden_fields;
+    global $system, $is_map_popup, $is_production, $show_hidden_fields, $show_private_details;
 
     if($bib['rec_OwnerUGrpID']==0){
         
@@ -1239,6 +1302,7 @@ function print_private_details($bib) {
     ?>
     <div class="detailRowHeader" style="float:left;padding:10px">
         <a href="#" oncontextmenu="return false;" id="link_showhide_private" 
+            data-expand="<?php echo $show_private_details -= 1; ?>"
             onClick="showHidePrivateInfo(event)">more...</a>
     </div>
     <div class="detailRowHeader morePrivateInfo" style="float:left;padding:0 0 20px 0;display:none;border:none;">
@@ -1561,7 +1625,7 @@ function print_public_details($bib) {
                         function($matches){
                             global $system;
 
-                            return 'onclick="return link_open(this);" href="'
+                            return 'onclick="return link_open(this, false);" href="'
                                     .$system->recordLink($matches[1]).'"';
                         },
                         $bd['val']);
