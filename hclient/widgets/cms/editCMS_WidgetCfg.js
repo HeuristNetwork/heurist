@@ -322,6 +322,30 @@ function editCMS_WidgetCfg( widget_cfg, _layout_content, $dlg, main_callback ){
                     if(opts['field_for_ext_classes']){
                         $dlg.find('select[name="field_for_ext_classes"]').attr('fld-id', opts['field_for_ext_classes']);
                     }
+                    if(opts['recview_dimensions']){
+
+                        let popup_dims = opts['recview_dimensions'];
+
+                        let h_unit = popup_dims.height.indexOf('px') !== -1 ? 'px' : '%';
+                        let w_unit = popup_dims.width.indexOf('px') !== -1 ? 'px' : '%';
+                        let l_unit = popup_dims.left.indexOf('px') !== -1 ? 'px' : '%';
+                        let t_unit = popup_dims.top.indexOf('px') !== -1 ? 'px' : '%';
+
+                        $dlg.find('[name="dialog_hunit"]').val(h_unit);
+                        $dlg.find('[name="dialog_wunit"]').val(w_unit);
+                        $dlg.find('[name="dialog_lunit"]').val(l_unit);
+                        $dlg.find('[name="dialog_tunit"]').val(t_unit);
+
+                        let h_val = popup_dims.height.replace(/\D+/, '');
+                        let w_val = popup_dims.width.replace(/\D+/, '');
+                        let l_val = popup_dims.left.replace(/\D+/, '');
+                        let t_val = popup_dims.top.replace(/\D+/, '');
+
+                        $dlg.find('[name="dialog_height"]').val(h_val);
+                        $dlg.find('[name="dialog_width"]').val(w_val);
+                        $dlg.find('[name="dialog_left"]').val(l_val);
+                        $dlg.find('[name="dialog_top"]').val(t_val);
+                    }
                 }else if(widget_name=='heurist_resultListDataTable'){ // datatable
                     $dlg.find('#dataTableParams').val(opts['dataTableParams']);
                     $dlg.find('#empty_remark').val(opts['emptyTableMsg']);
@@ -1118,6 +1142,29 @@ function editCMS_WidgetCfg( widget_cfg, _layout_content, $dlg, main_callback ){
             }
             opts['empty_remark'] = $dlg.find('#empty_remark').val();
             opts['placeholder_text'] = $dlg.find('#placeholder_text').val();
+
+            let h_unit = opts['dialog_height'] > 0 ? opts['dialog_hunit'] : '';
+            let w_unit = opts['dialog_width'] > 0 ? opts['dialog_wunit'] : '';
+            let l_unit = opts['dialog_left'] > 0 ? opts['dialog_lunit'] : '';
+            let t_unit = opts['dialog_top'] > 0 ? opts['dialog_tunit'] : '';
+
+            opts['recview_dimensions'] = {
+                height: `${opts['dialog_height']}${h_unit}`,
+                width: `${opts['dialog_width']}${w_unit}`,
+                left: `${opts['dialog_left']}${l_unit}`,
+                top: `${opts['dialog_top']}${t_unit}`
+            };
+
+            // Remove un-needed keys
+            delete opts['dialog_height'];
+            delete opts['dialog_hunit'];
+            delete opts['dialog_width'];
+            delete opts['dialog_wunit'];
+            delete opts['dialog_left'];
+            delete opts['dialog_lunit'];
+            delete opts['dialog_top'];
+            delete opts['dialog_tunit'];
+
         }else if(widget_name=='heurist_resultListDataTable'){
             opts['dataTableParams'] = $dlg.find('#dataTableParams').val();
             opts['emptyTableMsg'] = $dlg.find('#empty_remark').val();

@@ -2,6 +2,8 @@
 Directory:	/hclient/widgets/digital_harlem
 
 Overview:   The customised University of Sydney Digital Harlem interface (see DigitalHarlem.org)
+            This site-specific Heurist application was developed using Google Maps around 2013, 
+            based on a 2005 PHP-Mysql application also developed at the Sydney University Archaeological Computing Lab.
 
 Updated: 	18 Oct 2015
 

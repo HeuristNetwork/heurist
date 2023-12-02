@@ -196,6 +196,32 @@
     </div>
 
     <div  class="heurist_resultList">
+        <div class="header"><label>Handle private record details in record viewer</label></div>
+        <select name="recview_private_details" class="text ui-widget-content ui-corner-all">
+            <option value="0"> Hide private details </option>
+            <option value="1"> Show private details (collapsed) </option>
+            <option value="2"> Show private details (expanded) </option>
+        </select>
+    </div>
+
+    <div  class="heurist_resultList">
+        <div class="header"><label>Popup dimensions: </label></div>
+        <label>&nbsp;&nbsp;&nbsp;<span id="pw_label">Width:</span> <input name="dialog_width" maxlength="3" size="3" value="300"></label>&nbsp;
+        <select name="dialog_hunit"><option value="px">px</option><option value="%">%</option></select>
+        <label>&nbsp;<span id="ph_label">Height:</span> <input name="dialog_height" maxlength="3" size="3" value="400"></label>&nbsp;
+        <select name="dialog_wunit"><option value="px">px</option><option value="%">%</option></select>
+    </div>
+
+    <div  class="heurist_resultList">
+        <div class="header"><label>Popup position: </label></div>
+        <label>&nbsp;&nbsp;&nbsp;<span id="pt_label">Top:</span> <input name="dialog_top" maxlength="3" size="3" value="300"></label>&nbsp;
+        <select name="dialog_tunit"><option value="px">px</option><option value="%">%</option></select>
+        <label>&nbsp;<span id="pl_label">Left:</span> <input name="dialog_left" maxlength="3" size="3" value="400"></label>&nbsp;
+        <select name="dialog_lunit"><option value="px">px</option><option value="%">%</option></select>
+        <br><em>A blank value will use the centre of the window</em>
+    </div>
+
+    <div  class="heurist_resultList">
         <div class="header"><label>Set class(es) for record from term value(s) for </label></div>
         <select name="field_for_ext_classes" class="text ui-widget-content ui-corner-all" title="" style="width:400px">
         </select>

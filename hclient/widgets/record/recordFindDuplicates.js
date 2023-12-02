@@ -444,14 +444,15 @@ $.widget( "heurist.recordFindDuplicates", $.heurist.recordAction, {
             title: window.hWin.HR('Combine duplicate records'),
             callback: function(context) {
                 if(context=='commited'){
+
                     that.element.find('.group_'+sGroupID).hide();
 
                     var cur_query = $.extend(true, {}, window.hWin.HEURIST4.current_query_request);
                     cur_query.id = null;
                     cur_query.source = null;
-                    cur_query.no_explore = 1;
+                    cur_query.no_menu_switch = 1;
 
-                    window.hWin.HAPI4.RecordSearch.doSearch(that, cur_query)
+                    window.hWin.HAPI4.RecordSearch.doSearch(that, cur_query);
                 }
             }
         });

@@ -592,6 +592,11 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
                  $dlg.dialog('option', 'height', options['height']);    
             }
 
+            if($dosframe.attr('src')!=url || options['force_reload']){ // hide previous content
+                $dosframe.hide();
+                $dlg.addClass('loading');
+            }
+
         }else{
 
             //create new div for dialogue with $(this).uniqueId();
@@ -658,6 +663,8 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
                 if(window.hWin.HEURIST4.util.isempty($dosframe.attr('src'))){
                     return;
                 }
+
+                window.hWin.HEURIST4.msg.sendCoverallToBack();
 
                 let has_access = __canAccessIframe($dosframe[0]);
                 
@@ -781,7 +788,8 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
                     if(!options['dialogid']){
                         $dlg.remove();
                     }
-                }
+                },
+                open: options.onOpen
             };
             $dlg.dialog(opts);
             
@@ -794,6 +802,7 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
                 $dlg.attr('data-palette', null);
             }
             
+            $dlg.parent().find(".ui-dialog-title").html(options["title"]);
             $dlg.parent().find('.ui-dialog-content').css({'overflow':'hidden'});
 
             if(options.noClose){
@@ -881,10 +890,12 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
         }
 
         //start content loading
-        if($dosframe.attr('src')!=url || options['force_reload']){
+        if(url!='' && ($dosframe.attr('src')!=url || options['force_reload'])){
+            if(options.coverMsg){
+                window.hWin.HEURIST4.msg.bringCoverallToFront($dlg, {'font-size': '16px', color: 'white'}, options.coverMsg); 
+            }
             $dosframe.attr('src', url);
         }
-        //return $dosframe;
 
     },
 
