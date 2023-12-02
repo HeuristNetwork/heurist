@@ -287,6 +287,12 @@ $.widget( "heurist.mainMenu6", {
                     //not need to check realm since this widget the only per instance
                     //if(data && that.options.search_realm && that.options.search_realm!=data.search_realm) return;
                     if(data && (data.ispreview || data.increment || data.search_realm)) return;
+
+                    let move_to_explore = !data.no_menu_switch ? false : true;
+                    if(Object.hasOwn(data, 'no_menu_switch')){
+                        delete data.no_menu_switch;
+                        delete window.hWin.HEURIST4.current_query_request.no_menu_switch;
+                    }
                     
                     that.reset_svs_edit = true;
                     if(data && !data.reset){
@@ -294,7 +300,7 @@ $.widget( "heurist.mainMenu6", {
                         that.currentSearch = window.hWin.HEURIST4.util.cloneJSON(data);
                         that._updateSaveFilterButton(1);
 
-                        if(!data.no_explore){
+                        if(move_to_explore){
                             that.switchContainer('explore');
                             that._mouseout_SectionMenu();
                             that._collapseMainMenuPanel(true, 1000);
@@ -1130,8 +1136,8 @@ $.widget( "heurist.mainMenu6", {
                     }else if(!is_drop){ // remove existing
 
                         // remove from prefs
-                        var idx = cur_favs.findIndex(filter => filter[0] == filter_id);
-                        var removed = cur_favs.splice(idx, 1); 
+                        let idx = cur_favs.findIndex(filter => filter[0] == filter_id);
+                        if(idx >= 0) { cur_favs.splice(idx, 1); } 
 
                         if(cur_favs.length == 0){
                             cur_favs = [''];
