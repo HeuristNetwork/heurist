@@ -284,7 +284,7 @@
             $res = $mysqli->query($query);
             if (!$res){
                 error_log($mysqli->errno.'****'.$mysqli->error);
-                error_log($query);
+//remarked to avoid security report alert      error_log($query);
                 return null;    
                 
 /* determine our thread id */

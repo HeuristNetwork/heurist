@@ -65,7 +65,7 @@ require_once dirname(__FILE__).'/../../../records/index/elasticSearch.php';
     <div class='banner'><h3>Clear Records from Current Heurist database</h3></div>
     <div id='page-inner' style='overflow:auto'>
 <?php
-    $dbname = filter_var($_REQUEST['db'], FILTER_SANITIZE_STRING);
+    $dbname = filter_var(@$_REQUEST['db'], FILTER_SANITIZE_STRING);
     
     //database validation - code duplicates System::dbname_check. However security reports does not recognize it
     $sErrorMsg = null;
