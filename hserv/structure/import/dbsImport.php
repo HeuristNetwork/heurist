@@ -2419,11 +2419,12 @@ $mysqli->commit();
             if(!is_numeric($res)){
                 array_push($this->broken_terms, $term); 
                 array_push($this->broken_terms_reason, $res);
-                return false;
+                //return false;
+            }else{
+                $this->targetTerms->addNewTerm($trm_id, $term); //add in memory
+                $this->targetTerms->addNewTerm($inverse_id, $inverse_term); //add in memory
             }
 
-            $this->targetTerms->addNewTerm($trm_id, $term); //add in memory
-            $this->targetTerms->addNewTerm($inverse_id, $inverse_term); //add in memory
 
         }
         
