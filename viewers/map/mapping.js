@@ -67,6 +67,7 @@ Thematic mapping
     zoomToLayer
     setLayerVisibility - show hide entire layer
     setVisibilityAndZoom - show susbset of given recordset and zoom 
+    convertZoomToNative - Converts zoom in km to nativemap zoom (0-22)
     
     _onLayerClick - map layer (shape) on click event handler - highlight selection on timeline and map, opens popup
     _clearHighlightedMarkers - removes special "highlight" selection circle markers from map
@@ -785,7 +786,6 @@ $.widget( "heurist.mapping", {
                         getBounds: function(){
                             return this.options._extent;  
                         }});
-        
         if(layer_options['IIIF']){ 
         
                 HeuristTilerLayer = L.TileLayer.Iiif.extend({
@@ -888,6 +888,10 @@ $.widget( "heurist.mapping", {
             }else{
                 new_layer = new HeuristTilerLayer(layer_url, layer_options).addTo(this.nativemap);             
             }
+        }
+        
+        if(layer_options.fillOpacity>0){
+            new_layer.setOpacity(layer_options.fillOpacity);    
         }
         
         this.all_layers[new_layer._leaflet_id] = new_layer;
@@ -1468,13 +1472,13 @@ $.widget( "heurist.mapping", {
             var ll;
             if(!bounds){
                 ll = L.latLng(45, 0);
-            }else if(bounds instanceof L.latLng){
+            }else if(bounds.hasOwnProperty('lng') && bounds.hasOwnProperty('lat')){ //  instanceof L.latLng
                 ll = bounds;
             }else{
                 ll = bounds.getCenter();
             }
             var ruler = cheapRuler(ll.lat);
-            var bbox = ruler.bufferPoint([ll.lng, ll.lat], zoomInKM/2);
+            var bbox = ruler.bufferPoint([ll.lng, ll.lat], zoomInKM/4);
             //w, s, e, n
             var corner1 = L.latLng(bbox[1], bbox[0]),
                 corner2 = L.latLng(bbox[3], bbox[2]);
@@ -1642,18 +1646,21 @@ $.widget( "heurist.mapping", {
         var affected_layer = this.all_layers[layer_id];
 
         if(affected_layer){
+           
+            if(affected_layer.layers){
             
-            this._clearHighlightedMarkers();
-            
-            if(this.all_clusters[layer_id]){
-                this.all_clusters[layer_id].clearLayers();
-                this.all_clusters[layer_id].remove();
-                this.all_clusters[layer_id] = null;
-                delete this.all_clusters[layer_id];
-            }
-            if(this.all_markers[layer_id]){
-                this.all_markers[layer_id] = null;
-                delete this.all_markers[layer_id];
+                this._clearHighlightedMarkers(layer_id);
+                
+                if(this.all_clusters[layer_id]){
+                    this.all_clusters[layer_id].clearLayers();
+                    this.all_clusters[layer_id].remove();
+                    this.all_clusters[layer_id] = null;
+                    delete this.all_clusters[layer_id];
+                }
+                if(this.all_markers[layer_id]){
+                    this.all_markers[layer_id] = null;
+                    delete this.all_markers[layer_id];
+                }
             }
             this.nativemap.removeLayer( affected_layer );
             affected_layer.remove();
@@ -1680,12 +1687,15 @@ $.widget( "heurist.mapping", {
     {
         var affected_layer = this.all_layers[nativelayer_id];
         if(affected_layer){
-            this._clearHighlightedMarkers();
             
             if(visiblity_set===false){
                 //hide all
+                if(!this.isImageLayer(affected_layer)){
+                    this._clearHighlightedMarkers( nativelayer_id );
+                }
                 affected_layer.remove();
                 if(this.all_clusters[nativelayer_id]) this.all_clusters[nativelayer_id].remove();
+                
             }else if(!affected_layer._map){
                 affected_layer.addTo(this.nativemap);
                 if(this.all_clusters[nativelayer_id]) this.all_clusters[nativelayer_id].addTo(this.nativemap);
@@ -1760,6 +1770,14 @@ $.widget( "heurist.mapping", {
             return style;
         }
     },
+    
+    
+    isImageLayer: function(affected_layer){
+        return !affected_layer 
+            || affected_layer instanceof L.ImageOverlay 
+            || affected_layer instanceof L.TileLayer;    
+    },
+    
     //
     // Applies style for given TOP layer
     // it takes style from this.options.default_style (defined user prereferences)
@@ -1776,11 +1794,11 @@ $.widget( "heurist.mapping", {
         
         var affected_layer = this.all_layers[layer_id];
         
-        if(!affected_layer || affected_layer instanceof L.ImageOverlay || affected_layer instanceof L.TileLayer){
+        if(this.isImageLayer(affected_layer)){
             return; //not applicable for images   
         } 
 
-        this._clearHighlightedMarkers();
+        this._clearHighlightedMarkers(layer_id);
 
         
         var that = this;
@@ -2500,15 +2518,27 @@ $.widget( "heurist.mapping", {
     //
     // remove special "highlight" selection circle markers from map
     //
-    _clearHighlightedMarkers: function(){
-      
-      for(var idx in this.highlightedMarkers){
-          this.highlightedMarkers[idx].remove();
-      }
-      
-      this.highlightedMarkers = [];  
+    _clearHighlightedMarkers: function(affected_layer_id){
+
+        var idx = 0;
+        if(this.highlightedMarkers){
+            while(idx < this.highlightedMarkers.length){
+                if( !(affected_layer_id>0) || this.highlightedMarkers[idx].parent_layer_id == affected_layer_id){
+                    this.highlightedMarkers[idx].remove();  
+                    if(affected_layer_id>0){
+                        this.highlightedMarkers.splice(idx,1);
+                        continue;        
+                    }
+                }
+                idx++;    
+            }
+        }
+        if(!(affected_layer_id>0)){
+            this.highlightedMarkers = [];  
+        }
+
     },
-    
+
     //
     // assigns default values for style (size,color and marker type)
     // default values priority: widget options, topmost mapdocument, user preferences
@@ -2680,7 +2710,6 @@ $.widget( "heurist.mapping", {
         this._clearHighlightedMarkers();
         
         this.selected_rec_ids = (window.hWin.HEURIST4.util.isArrayNotEmpty(_selection)) ?_selection:[];
-        
         that.nativemap.eachLayer(function(top_layer){    
             if(top_layer instanceof L.LayerGroup){  //apply only for geojson
                 top_layer.setStyle(function(feature) { return that._stylerForPoly(feature); });
@@ -2705,6 +2734,9 @@ $.widget( "heurist.mapping", {
                 new_layer.setRadius(radius);
                 new_layer.addTo( this.nativemap );
                 new_layer.bringToBack();
+                if(layer.parent_layer) {
+                    new_layer.parent_layer_id = layer.parent_layer._leaflet_id;   
+                }
                 this.highlightedMarkers.push(new_layer);
             }
         }        
@@ -2828,7 +2860,6 @@ $.widget( "heurist.mapping", {
         bounds = this._mergeBounds(bounds);
         
         this.zoomToBounds(bounds, _fly_params);    
-        
     },
 
     
@@ -2909,10 +2940,14 @@ $.widget( "heurist.mapping", {
             if(useRuler && that.options.zoomToPointInKM>0){ //zoom to single point
             
                 var ruler = cheapRuler(ll.lat);
-                var bbox = ruler.bufferPoint([ll.lng, ll.lat], that.options.zoomToPointInKM);   //0.01          
+                var bbox = ruler.bufferPoint([ll.lng, ll.lat], that.options.zoomToPointInKM/4);   //0.01          
                 //w, s, e, n
                 var corner1 = L.latLng(bbox[1], bbox[0]),
                     corner2 = L.latLng(bbox[3], bbox[2]);
+                    
+//            var nativeZoom = that.convertZoomToNative(that.options.zoomToPointInKM, L.latLng(ll.lat, ll.lng)); 
+//console.log('>>>',that.options.zoomToPointInKM,nativeZoom);            
+                    
                 return L.latLngBounds(corner1, corner2);            
             }else{
                 //for city 0.002 for country 0.02
@@ -3223,7 +3258,7 @@ $.widget( "heurist.mapping", {
         }
         
         this.zoom_delta = params['zoom_delta'];
-        if(this.zoom_delta>0){
+        if(this.zoom_delta>0){ //step (in levels) for zoom buttons (+/-)
             this.nativemap.options.zoomDelta = this.zoom_delta;
         }else{
             this.nativemap.options.zoomDelta = 1;

@@ -647,7 +647,7 @@ function hMapManager( _options )
                         }else if(mapdoc_id==0 || mapdoc_id=='temp'){
                             //need to make all themes visible if none of them marked
                             var themes = node.children;
-                            if(themes.length>0){
+                            if(themes && themes.length>0){
                                 var all_hidden = true;
                                 for(var i=0; i<themes.length; i++){
                                     if(themes[i].isSelected()){

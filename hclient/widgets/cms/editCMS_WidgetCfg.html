@@ -432,7 +432,9 @@
                 <span style="display:inline-block;width:105px"></span>
                 <label><input type="checkbox" id="zoom_to_selected" checked>Zoom map to selected objects</label>
                 <label><input type="checkbox" id="smooth_zoom">Smooth zoom</label> 
-                <label>&nbsp;&nbsp;&nbsp;Zoom step: <input id="zoom_delta" type="number" step=".01" min="0" max="10" value="1" style="width:50px"></label>
+                <label title="step (in levels) for zoom buttons">&nbsp;&nbsp;&nbsp;Zoom step: 
+                        <input id="zoom_delta" type="number" step="1" min="0" max="10" value="1" style="width:50px">
+                </label>
             </p>  
             <p><span style="min-width: 105px;display: inline-block;text-align: right;">Controls to show&nbsp;</span>
                 <label><input type="checkbox" name="controls" value="legend" checked>legend</label>&nbsp;

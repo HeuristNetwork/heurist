@@ -3779,8 +3779,10 @@ $.widget( "heurist.editing_input", {
                                                     mode_edit = 3;
                                                     if(response['records'] && response['records'].length>0){
                                                         var res = response['records'][0]['details'];
-                                                        //{12:{4407:"t:10"}}
-                                                        hquery = res[DT_QUERY_STRING][ Object.keys(res[DT_QUERY_STRING])[0] ];
+                                                        if(res[DT_QUERY_STRING]){
+                                                            //{12:{4407:"t:10"}}
+                                                            hquery = res[DT_QUERY_STRING][ Object.keys(res[DT_QUERY_STRING])[0] ];
+                                                        }
                                                     }
                                                     
                                                     current_val.maplayer_query = hquery;

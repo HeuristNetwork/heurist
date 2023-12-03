@@ -213,7 +213,7 @@ function hMapLayer2( _options ) {
             //in basemap zoom levels (1-19)
             var minZoom = _recordset.fld(_record, window.hWin.HAPI4.sysinfo['dbconst']['DT_MINIMUM_ZOOM_LEVEL']); 
             var maxZoom = _recordset.fld(_record, window.hWin.HAPI4.sysinfo['dbconst']['DT_MAXIMUM_ZOOM_LEVEL']);
-
+            
             var tileUrlFunc = null; 
             
             var ccode1 = $Db.getConceptID('trm', tilingSchema);
@@ -269,6 +269,18 @@ function hMapLayer2( _options ) {
             }
             
             layer_options._extent = _getBoundingBox();
+
+            var layer_style = _recordset.fld(options.rec_layer || _record, window.hWin.HAPI4.sysinfo['dbconst']['DT_SYMBOLOGY']);
+
+            if(layer_style){
+                layer_style = window.hWin.HEURIST4.util.isJSON(layer_style);
+                if(layer_style && $.isNumeric(layer_style.fillOpacity) && layer_style.fillOpacity>0){
+                    layer_options.fillOpacity = parseFloat(layer_style.fillOpacity);
+                    if(layer_options.fillOpacity>1){
+                       layer_options.fillOpacity = layer_options.fillOpacity/100;   
+                    }
+                }
+            }
             
             _nativelayer_id = options.mapwidget.mapping('addTileLayer', 
                                                         layer_url, 
