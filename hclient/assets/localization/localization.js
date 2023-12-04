@@ -261,6 +261,7 @@ regional['ENG'] = {
         
     //HELP menu
     HELP: '',
+        'menu-help-quick-tips': 'Heurist in 5 mins',
         'menu-help-online': 'Documentation',
         'menu-help-website': 'Heurist Network website',
         'menu-help-online-hint': 'Comprehensive online documentation for the Heurist system',

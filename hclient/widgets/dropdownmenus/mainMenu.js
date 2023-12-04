@@ -1293,6 +1293,9 @@ $.widget( "heurist.mainMenu", {
             that._refreshLists( true );
         }else if(action == "menu-admin-server"){
             that._showAdminServer({entered_password:entered_password});
+        }else if(action == "menu-help-quick-tips"){
+            let url = window.hWin.HAPI4.baseURL+'context_help/quick_tips.html';
+            window.hWin.HEURIST4.msg.showMsgDlgUrl(url, null, '.', {isPopupDlg:true, use_doc_title: true});
         }else
         if(!window.hWin.HEURIST4.util.isempty(href) && href!='#'){
             
