@@ -72,6 +72,9 @@ onInactive invokes cb after ms user inactivity
 For mapping:
 
 prepareMapSymbol
+
+showEditSymbologyDialog
+showImgFilterDialog
 */
 
 if (!window.hWin.HEURIST4){
@@ -2575,6 +2578,20 @@ window.hWin.HEURIST4.ui = {
         editSymbology(current_value, mode_edit, callback);
     },
 
+    //
+    // show map style edit dialog
+    //
+    showImgFilterDialog: function(current_value, callback){
+        //todo optionally load dynamically editing_exts.js
+        if(typeof imgFilter !== 'undefined' && $.isFunction(imgFilter)){  // already loaded
+            imgFilter( current_value, callback );    
+        }else{
+            $.getScript(window.hWin.HAPI4.baseURL+'hclient/widgets/editing/imgFilter.js', function(){
+                window.hWin.HEURIST4.ui.showImgFilterDialog(current_value, callback);
+            }); 
+        }
+    },
+    
     //
     // show heurist theme dialog
     //

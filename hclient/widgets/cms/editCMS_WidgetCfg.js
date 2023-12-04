@@ -274,7 +274,7 @@ function editCMS_WidgetCfg( widget_cfg, _layout_content, $dlg, main_callback ){
                     .on( { click: function(){
                         var cfg = window.hWin.HEURIST4.util.isJSON($dlg.find('input[name="map_basemap_filter"]').val());
                         if(!cfg) cfg = null;
-                        imgFilter(cfg,null,function(filter){
+                        window.hWin.HEURIST4.ui.showImgFilterDialog(cfg, function(filter){
                             $dlg.find('input[name="map_basemap_filter"]').val( JSON.stringify(filter) );
                         });   
                     }});

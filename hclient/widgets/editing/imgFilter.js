@@ -20,7 +20,7 @@
 //
 //
 //
-function imgFilter( current_cfg, $dlg, main_callback ){
+function imgFilter( current_cfg, main_callback, $container=null ){
 
     var _className = 'imgFilter';
     var _default_values = {};
@@ -51,11 +51,11 @@ function imgFilter( current_cfg, $dlg, main_callback ){
                         $dlg.dialog( "close" );    
         }}];
 
-        if($dlg && $dlg.length>0){
+        if($container && $container.length>0){
             //container provided
 
             $container.empty().load(window.hWin.HAPI4.baseURL
-                +'hclient/widgets/viewers/imgFilter.html',
+                +'hclient/widgets/editing/imgFilter.html',
                 _initControls
             );
 
@@ -63,7 +63,7 @@ function imgFilter( current_cfg, $dlg, main_callback ){
             //open as popup
 
             $dlg = window.hWin.HEURIST4.msg.showMsgDlgUrl(window.hWin.HAPI4.baseURL
-                +"hclient/widgets/viewers/imgFilter.html?t="+(new Date().getTime()), 
+                +"hclient/widgets/editing/imgFilter.html?t="+(new Date().getTime()), 
                 buttons, 'Define Filters', 
                 {   //container:'cms-add-widget-popup',
                     default_palette_class: 'ui-heurist-explore', //'ui-heurist-publish',

@@ -529,17 +529,26 @@ $.widget( "heurist.mapping", {
             this.basemaplayer_filter = null;
         }
         
-        this.applyBaseMapFilter();
+        this.applyImageMapFilter('heurist-imageoverlay-basemap',this.basemaplayer_filter);
     },
     
-    applyBaseMapFilter: function(){
+    //
+    //
+    //
+    applyImageMapFilter: function(layerClassName, image_filter=null)
+    {
         var filter = '';
-        if(this.basemaplayer_filter && $.isPlainObject(this.basemaplayer_filter)){
-            $.each(this.basemaplayer_filter, function(key, val){
+        if(image_filter==null){
+            image_filter = this.basemaplayer_filter;
+        }
+        layerClassName = ('.'+layerClassName);
+        
+        if(image_filter && $.isPlainObject(image_filter)){
+            $.each(image_filter, function(key, val){
                 filter = filter + key+'('+val+') ';
             });
         }
-        $('.leaflet-layer').css('filter', filter);
+        $(layerClassName).css('filter', filter); //'.leaflet-layer'+
     },
 
     getBaseMapFilter: function(){
@@ -694,6 +703,8 @@ $.widget( "heurist.mapping", {
                     bm_opts.noWrap = true; 
                 }
                 
+                bm_opts.className = 'heurist-imageoverlay-basemap';
+                
                 try{ // use leaflet-provider
                     this.basemaplayer = L.tileLayer.provider(provider['name'], bm_opts)
                         .addTo(this.nativemap);
@@ -737,7 +748,7 @@ $.widget( "heurist.mapping", {
                 this.basemaplayer.bringToBack(); // ensure basemap is below all map documents
 
                 if(this.basemaplayer_filter){
-                    this.applyBaseMapFilter();
+                    this.applyImageMapFilter('heurist-imageoverlay-basemap', this.basemaplayer_filter);
                 }
 
                 //var layer_maxZoom = (provider['options'] && provider['options']['maxZoom']) ? provider['options']['maxZoom'] : 18;
@@ -781,7 +792,7 @@ $.widget( "heurist.mapping", {
     addTileLayer: function(layer_url, layer_options, dataset_name){
     
         var new_layer;
-
+        
         var HeuristTilerLayer = L.TileLayer.extend({
                         getBounds: function(){
                             return this.options._extent;  
@@ -890,10 +901,6 @@ $.widget( "heurist.mapping", {
             }
         }
         
-        if(layer_options.fillOpacity>0){
-            new_layer.setOpacity(layer_options.fillOpacity);    
-        }
-        
         this.all_layers[new_layer._leaflet_id] = new_layer;
         
         this._updatePanels();
@@ -917,9 +924,13 @@ $.widget( "heurist.mapping", {
     //
     // adds image overlay to map
     //
-    addImageOverlay: function(image_url, image_extent, dataset_name){
+    addImageOverlay: function(image_url, image_extent, dataset_name, className=''){
     
         var new_layer = L.imageOverlay(image_url, image_extent).addTo(this.nativemap);
+        
+        if(!window.hWin.HEURIST4.util.isempty(className)){
+            new_layer.getElement().classList.add(className);
+        }
       
         this.all_layers[new_layer._leaflet_id] = new_layer;
         

@@ -207,10 +207,6 @@ $rtDefines = array(
     'RT_INTERPRETATION' => array(2, 8),
     'RT_PERSON' => array(2, 10),
 
-    // see also spatial data types below
-    'RT_IMAGE_SOURCE' => array(3, 1018),
-    'RT_TILED_IMAGE_SOURCE' => array(2, 11), // added Ian 23/10/14 for consistency
-
     // Record types added by SW and SH for their extensions, no longer in core definitions, now in DB 4 Heurist ToolExtensions
     'RT_FILTER' => array(2, 12),
     'RT_XML_DOCUMENT' => array(2, 13),
@@ -247,16 +243,19 @@ $rtDefines = array(
     // Spatial data
     'RT_PLACE' => array(3, 1009), 
     'RT_EN_PLACE' => array(1125, 25), //place for Expert Nation database
+    'RT_MAP_ANNOTATION' => array(2, 101),
+    'RT_MAP_DOCUMENT' => array(3, 1019), // HeuristReferenceSet DB 3: Map document, layers and queries for new map function Oct 2014
+    'RT_MAP_LAYER' => array(3, 1020),     
+
     'RT_KML_SOURCE' => array(3, 1014),
     'RT_FILE_SOURCE' => array(2, 53), //csv tsv or dbf source
     'RT_SHP_SOURCE' => array(3, 1017),
-    'RT_GEOTIFF_SOURCE' => array(3, 1018),
-    'RT_MAP_DOCUMENT' => array(3, 1019), // HeuristReferenceSet DB 3: Map document, layers and queries for new map function Oct 2014
-    'RT_MAP_LAYER' => array(3, 1020),     
     'RT_QUERY_SOURCE' => array(3, 1021),  //RT_MAPABLE_QUERY
     'RT_TLCMAP_DATASET' => array(1271, 54),     
-    'RT_MAP_ANNOTATION' => array(2, 101),
 
+    'RT_IMAGE_SOURCE' => array(3, 1018),
+    'RT_TILED_IMAGE_SOURCE' => array(2, 11), // added Ian 23/10/14 for consistency
+    'RT_GEOTIFF_SOURCE' => array(3, 1018),
 
     //Web content
     'RT_WEB_CONTENT' => array(1147, 25),

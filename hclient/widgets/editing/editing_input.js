@@ -3767,7 +3767,7 @@ $.widget( "heurist.editing_input", {
                                         q: 'ids:'+dataset_record_id,
                                         restapi: 1,
                                         columns: 
-                                        ['rec_ID', DT_QUERY_STRING],
+                                        ['rec_ID', 'rec_RecTypeID', DT_QUERY_STRING],
                                         zip: 1,
                                         format:'json'};
                     
@@ -3778,16 +3778,31 @@ $.widget( "heurist.editing_input", {
                                                     let hquery = null;
                                                     mode_edit = 3;
                                                     if(response['records'] && response['records'].length>0){
-                                                        var res = response['records'][0]['details'];
-                                                        if(res[DT_QUERY_STRING]){
-                                                            //{12:{4407:"t:10"}}
-                                                            hquery = res[DT_QUERY_STRING][ Object.keys(res[DT_QUERY_STRING])[0] ];
+                                                        let rectype = response['records'][0]['rec_RecTypeID']; 
+                                                        
+                                                        if (rectype==window.hWin.HAPI4.sysinfo['dbconst']['RT_IMAGE_SOURCE']
+                                                        || rectype==window.hWin.HAPI4.sysinfo['dbconst']['RT_TILED_IMAGE_SOURCE']){
+                                                            //show image filter dialogue
+                                                            window.hWin.HEURIST4.ui.showImgFilterDialog(current_val, function(new_value){
+                                                                $input.val(JSON.stringify(new_value));
+                                                                that.onChange();
+                                                            });
+                                                            return;                                                            
+                                                        }else if (rectype==window.hWin.HAPI4.sysinfo['dbconst']['RT_QUERY_SOURCE']){
+                                                            
+                                                            var res = response['records'][0]['details'];
+                                                            if(res[DT_QUERY_STRING]){
+                                                                //{12:{4407:"t:10"}}
+                                                                hquery = res[DT_QUERY_STRING][ Object.keys(res[DT_QUERY_STRING])[0] ];
+                                                            }
+                                                            
                                                         }
                                                     }
                                                     
                                                     current_val.maplayer_query = hquery;
                                                     
-                                                    window.hWin.HEURIST4.ui.showEditSymbologyDialog(current_val, 3, function(new_value){
+                                                    window.hWin.HEURIST4.ui.showEditSymbologyDialog(current_val, 
+                                                            hquery==null?1:3, function(new_value){
                                                         $input.val(JSON.stringify(new_value));
                                                         that.onChange();
                                                     });

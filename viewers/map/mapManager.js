@@ -362,7 +362,7 @@ function hMapManager( _options )
                 .css({'font-size': '0.8em', 'padding': '0em 1em'})
                 .on( { click: function(){
                         var cfg = options.mapwidget.mapping('getBaseMapFilter');
-                        imgFilter(cfg,null,function(filter){
+                        window.hWin.HEURIST4.ui.showImgFilterDialog(cfg, function(filter){
                             options.mapwidget.mapping('setBaseMapFilter', filter);
                         });   
                 }});

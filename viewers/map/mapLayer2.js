@@ -274,11 +274,9 @@ function hMapLayer2( _options ) {
 
             if(layer_style){
                 layer_style = window.hWin.HEURIST4.util.isJSON(layer_style);
-                if(layer_style && $.isNumeric(layer_style.fillOpacity) && layer_style.fillOpacity>0){
-                    layer_options.fillOpacity = parseFloat(layer_style.fillOpacity);
-                    if(layer_options.fillOpacity>1){
-                       layer_options.fillOpacity = layer_options.fillOpacity/100;   
-                    }
+                if(layer_style){
+                    options.imageFilter = layer_options.imageFilter = layer_style;
+                    options.className = layer_options.className = 'heurist-imageoverlay-'+_recordset.fld(options.rec_layer, 'rec_ID');
                 }
             }
             
@@ -286,6 +284,11 @@ function hMapLayer2( _options ) {
                                                         layer_url, 
                                                         layer_options, 
                                                         _recordset.fld(_record, 'rec_Title') );
+            
+            
+            if(options.imageFilter){
+                    options.mapwidget.mapping('applyImageMapFilter', options.className, options.imageFilter);
+             }
             
         }
     }
@@ -321,11 +324,25 @@ function hMapLayer2( _options ) {
             window.hWin.HEURIST4.msg.showMsgErr(msg);
          }else{
              
+            var layer_style = _recordset.fld(options.rec_layer || _record, window.hWin.HAPI4.sysinfo['dbconst']['DT_SYMBOLOGY']);
+
+            if(layer_style){
+                layer_style = window.hWin.HEURIST4.util.isJSON(layer_style);
+                if(layer_style){
+                    options.imageFilter = layer_style;
+                    options.className = 'heurist-imageoverlay-'+_recordset.fld(options.rec_layer, 'rec_ID');
+                }
+            }
+
             _nativelayer_id = options.mapwidget.mapping('addImageOverlay', 
                                                         image_url, 
                                                         image_extent, 
-                                                        _recordset.fld(_record, 'rec_Title') );
+                                                        _recordset.fld(_record, 'rec_Title'),
+                                                        options.className );
           
+            if(options.imageFilter){
+                    options.mapwidget.mapping('applyImageMapFilter', options.className, options.imageFilter);
+             }
              
          }
           
@@ -1199,10 +1216,16 @@ function hMapLayer2( _options ) {
                         options.mapwidget.mapping('setLayerVisibility', _nativelayer_id, is_visible);
                     }
                 }
+                
+                if(is_visible && options.imageFilter){
+                    options.mapwidget.mapping('applyImageMapFilter', options.className, options.imageFilter);
+                }
+                
             }else if(is_visible) {
                 status = 'loading'
                 _addLayerToMap();    
             }
+            
             
             //trigger callback
             _triggerLayerStatus( status );
