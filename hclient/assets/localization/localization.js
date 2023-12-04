@@ -109,6 +109,7 @@ regional['ENG'] = {
     'Advanced': '',
     'Rules': '',
     'Favourites': '',
+    'Overview': '',
     
     //admin menu
     'Database': '',

@@ -188,6 +188,9 @@ $.widget( "heurist.mainMenu6", {
                                     },  this._delayOnCollapse_ExploreMenu); //600
                     }
                 });
+                that._on(that.menues['explore'].find('li[data-action-popup="databaseOverview"]'), {
+                    click: that.showDatabaseOverview
+                });
                 
                 //forcefully hide coverAll on click
                 that._on(that.coverAll, {
@@ -644,7 +647,7 @@ $.widget( "heurist.mainMenu6", {
                 if(ele.parents('.ui-heurist-quicklinks').length>0) ele.css('background','aliceblue');
                 hasAction = ele.attr('data-action-popup');
                 
-                if(hasAction=='search_recent') {
+                if(hasAction=='search_recent' || hasAction=='databaseOverview') {
                     hasAction = false;   
                     return;
                 }
@@ -683,8 +686,7 @@ $.widget( "heurist.mainMenu6", {
         }
         
         if(this._current_explore_action==action_name) return;
-        
-        
+
         var that = this,
             expandRecordAddSetting = false,
             delay = this._delayOnShow_ExploreMenu; //500
@@ -1422,6 +1424,9 @@ $.widget( "heurist.mainMenu6", {
             });
             this._on(this.menues['explore'].find('li[data-action-popup="recordAddSettings"]'), {
                 click: this._mousein_ExploreMenu
+            });
+            this._on(this.menues['explore'].find('li[data-action-popup="databaseOverview"]'), {
+                click: this.showDatabaseOverview
             });
             this._updateDefaultAddRectype();
 
@@ -2212,8 +2217,24 @@ $.widget( "heurist.mainMenu6", {
                 $('span.flavour-text')
                 .css({
                     'display': 'inline-block',
-                    'margin-left': '10px',
-                    'cursor': 'default'
+                    'margin-left': '10px'
+                });
+
+                // Link to quick tips popup
+                $('div#quick_tips')
+                .css({
+                    'text-decoration': 'underline',
+                    color: 'blue',
+                    width: '100px',
+                    'text-align': 'center',
+                    'margin-left': 'auto',
+                    'margin-right': 'auto',
+                    'margin-top': '40px',
+                    cursor: 'pointer'
+                })
+                .on('click', function(){
+                    let url = window.hWin.HAPI4.baseURL+'context_help/quick_tips.html';
+                    window.hWin.HEURIST4.msg.showMsgDlgUrl(url, null, '.', {isPopupDlg:true, use_doc_title: true});
                 });
 
                 // Commonly used entities/rectypes

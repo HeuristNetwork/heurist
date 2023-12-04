@@ -2097,6 +2097,13 @@ background: #8ea9b9
     background-size: contain;
 }
 
+.ui-icon-eye-explore {
+    background-image: url(hclient/assets/eye_explore.svg) !important; 
+    width: 18px;
+    height: 18px;
+    background-size: contain;
+}
+
 .ui-icon-date-range { 
     background-image: url(hclient/assets/date_range.svg) !important; 
     width: 18px;
