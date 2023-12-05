@@ -34,7 +34,10 @@ $.widget( "heurist.manageRecUploadedFiles", $.heurist.manageEntity, {
     
     _external_repositories: ['Nakala'], // list of external repositories
     _last_upload_details: [], // last uploaded file details
-    
+
+    _selectAllFiles: false, // checked when perform certain operations
+    _downloadAllFiles: false, // download selected files, or all files
+
     //
     //
     //
@@ -164,11 +167,16 @@ $.widget( "heurist.manageRecUploadedFiles", $.heurist.manageEntity, {
                 "searchrecuploadedfilesonrefreshindex": this._refreshIndex,
                 "searchrecuploadedfilesonfilerecs": this._createMediaRecords,
                 "searchrecuploadedfilesonselectall": function(event){ 
-                    let val = 'all';
+                    this._selectAllFiles = true;
                     if($(event.target).find('#select_all').length > 0){
-                        val = $(event.target).find('#select_all').prop('checked') ? 'all' : '';
+                        this._selectAllFiles = $(event.target).find('#select_all').prop('checked') ? true : false;
                     }
-                    this.recordList.resultList('setSelected', val); 
+                },
+                "onselectedonly": function(event){
+                    this._downloadAllFiles = false;
+                    if($(event.target).find('#selected_only').length > 0){
+                        this._downloadAllFiles = $(event.target).find('#selected_only').prop('checked') ? false : true;
+                    }
                 }
         });
 
@@ -1169,7 +1177,8 @@ window.hWin.HAPI4.baseURL+'?db=' + window.hWin.HAPI4.database  //(needplayer?'&p
     //
     _downloadFileRefs: function(){
 
-        var ids = this.recordList ? this.recordList.resultList('getRecordSet').getIds() : [];
+        let ids = this.recordList && !this._downloadAllFiles && !this._selectAllFiles ? 
+                    this.recordList.resultList('getSelected', true) : 'all';
 
         if(ids.length == 0){
             window.hWin.HEURIST4.msg.showMsgFlash('No files in current search', 2000);
@@ -1532,12 +1541,12 @@ window.hWin.HAPI4.baseURL+'?db=' + window.hWin.HAPI4.database  //(needplayer?'&p
             return;
         }
 
-        var ids = this.recordList ? this.recordList.resultList('getSelected', true) : 'all';
+        let ids = this.recordList && !this._selectAllFiles ? this.recordList.resultList('getSelected', true) : 'all';
 
         var request = {
             'a': 'batch',
             'entity': that.options.entity.entityName,
-            'delete_unused': 'all', // ids
+            'delete_unused': ids,
             'operate': 'get'
         };
 
@@ -1632,7 +1641,7 @@ window.hWin.HAPI4.baseURL+'?db=' + window.hWin.HAPI4.database  //(needplayer?'&p
             return;
         }
 
-        var ids = this.recordList ? this.recordList.resultList('getSelected', true) : 'all';
+        var ids = this.recordList && !this._selectAllFiles ? this.recordList.resultList('getSelected', true) : 'all';
 
         var request = {
             'a': 'batch',
@@ -1692,7 +1701,7 @@ window.hWin.HAPI4.baseURL+'?db=' + window.hWin.HAPI4.database  //(needplayer?'&p
             if(response.status == window.hWin.ResponseStatus.OK){
 
                 if(window.hWin.HEURIST4.util.isempty(response.data)){
-                    window.hWin.HEURIST4.msg.showMsgFlash('No files to index', 3000);
+                    window.hWin.HEURIST4.msg.showMsgFlash('No new files to index', 3000);
                 }else{
 
                     var $dlg = window.hWin.HEURIST4.msg.showMsgDlg(response.data, {'OK': function(){

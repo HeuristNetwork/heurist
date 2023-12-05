@@ -285,8 +285,10 @@ function downloadFileReferences($system, $ids){
         exit;
     }
 
-    if(is_array($ids)){ // change comma separated list into array
-        $ids = implode(',', $ids);
+    $where_clause = '';
+    if(is_array($ids) || (is_string($ids) && $ids != 'all')){ // change comma separated list into array
+        $ids = prepareIds($ids);
+        $where_clause = ' WHERE ulf_ID IN ('. $ids .')';
     }
 
     // open output handler
@@ -303,8 +305,7 @@ function downloadFileReferences($system, $ids){
     $file_query = 'SELECT ulf_ID, ulf_FileName, ulf_ExternalFileReference, ulf_ObfuscatedFileID, ulf_FilePath, ulf_Description, ulf_MimeExt, ulf_FileSizeKB, 
                     ugr_Name, ulf_Added, ulf_Modified, ulf_OrigFileName, ulf_Caption, ulf_Copyright, ulf_Copyowner 
                    FROM recUploadedFiles 
-                   LEFT JOIN sysUGrps ON ulf_UploaderUGrpID = ugr_ID
-                   WHERE ulf_ID IN ('. $ids .')';
+                   LEFT JOIN sysUGrps ON ulf_UploaderUGrpID = ugr_ID' . $where_clause;
 
     $file_refs = mysql__select_all($mysqli, $file_query, 1);
     if(!$file_refs){
@@ -324,7 +325,7 @@ function downloadFileReferences($system, $ids){
     header('Expires: ' . gmdate("D, d M Y H:i:s", time() - 3600));
 
     // write results
-    fputcsv($fd, array("ID", "Name", "Path", "Obfuscated URL", "Description", "Caption", "Copyright", "Copy Owner", "File Type", "File Size (in KB)", "Checksum", "Uploaded By", "Added On", "Last Modified", "Original file name" , "Record Usage"));
+    fputcsv($fd, array("ID", "Name", "Path", "Obfuscated URL", "Description", "Caption", "Copyright", "Copy Owner", "File Type", "File Size (in KB)", "Checksum", "Uploaded By", "Added On", "Last Modified", "Original file name" , "Record Usage"), "\t");
 
     /*
         [0] => File Name
@@ -357,7 +358,7 @@ function downloadFileReferences($system, $ids){
         if(!$recs || count($recs) == 0){
             $recs = array(0);
         }
-        fputcsv($fd, array($id, $name, $path, $obf_url, $details[4], $details[11], $details[12], $details[13], $details[5], $file_size, $checksum, $details[7], $details[8], $details[9], $details[10], implode('|', $recs)));
+        fputcsv($fd, array($id, $name, $path, $obf_url, $details[4], $details[11], $details[12], $details[13], $details[5], $file_size, $checksum, $details[7], $details[8], $details[9], $details[10], implode('|', $recs)), "\t");
     }
 
     rewind($fd);
