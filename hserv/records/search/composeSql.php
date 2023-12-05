@@ -1482,7 +1482,7 @@ class HPredicate {
                                 .' AND rst_RequirementType != "forbidden"';
             
             if($top_query->currUserID < 1){
-                $field_condition .= ' AND (rst_NonOwnerVisibility = "public" OR rst_NonOwnerVisibility = "pending") AND NOT dtl_HideFromPublic';
+                $field_condition .= ' AND (rst_NonOwnerVisibility = "public" OR rst_NonOwnerVisibility = "pending") AND IFNULL(dtl_HideFromPublic, 0)!=1';
             }else{
                 $field_condition .= ' AND (rst_NonOwnerVisibility != "hidden"';
 
@@ -1733,7 +1733,7 @@ class HPredicate {
                                 .' AND rst_RequirementType != "forbidden"';
             
             if($top_query->currUserID < 1){
-                $field_condition .= ' AND (rst_NonOwnerVisibility = "public" OR rst_NonOwnerVisibility = "pending") AND NOT dtl_HideFromPublic';
+                $field_condition .= ' AND (rst_NonOwnerVisibility = "public" OR rst_NonOwnerVisibility = "pending") AND IFNULL(dtl_HideFromPublic, 0)!=1';
             }else{
                 $field_condition .= ' AND (rst_NonOwnerVisibility != "hidden"';
 

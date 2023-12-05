@@ -1517,13 +1517,13 @@ function print_public_details($bib) {
             //logged in user can see viewable
             $detail_visibility_conditions[] = '(rst_NonOwnerVisibility="viewable")';
         }
-        $detail_visibility_conditions[] = '((rst_NonOwnerVisibility="public" OR rst_NonOwnerVisibility="pending") AND IFNULL(dtl_HideFromPublic, 1)!=1)';
+        $detail_visibility_conditions[] = '((rst_NonOwnerVisibility="public" OR rst_NonOwnerVisibility="pending") AND IFNULL(dtl_HideFromPublic, 0)!=1)';
         
         $detail_visibility_conditions = ' AND ('.implode(' OR ',$detail_visibility_conditions).')';
     }
 
     if($is_production || $is_map_popup){ // hide hidden fields in publication and map popups
-        $detail_visibility_conditions .= ' AND rst_NonOwnerVisibility != "hidden" AND rst_RequirementType != "forbidden" AND IFNULL(dtl_HideFromPublic, 1) != 1';
+        $detail_visibility_conditions .= ' AND rst_NonOwnerVisibility != "hidden" AND rst_RequirementType != "forbidden" AND IFNULL(dtl_HideFromPublic, 0) != 1';
     }else if(!$system->is_admin() && !in_array($rec_owner, $ACCESSABLE_OWNER_IDS)){
         // hide forbidden fields from all except owners an admins
         $detail_visibility_conditions .= ' AND rst_RequirementType != "forbidden"';
