@@ -1214,7 +1214,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                         togglerAlign_closed:16,   //top position   
                         togglerLength_closed:80,  //height of toggler button
                         initHidden: !this.options.edit_structure,   //show structure list at once 
-                        initClosed: !this.options.edit_structure && (this.usrPreferences.structure_closed!=0),
+                        initClosed: !this.options.edit_structure, // && (this.usrPreferences.structure_closed!=0)
                         slidable:false,  //otherwise it will be over center and autoclose
                         contentSelector: '.editStructure',   
                         onopen_start : function( ){ 
@@ -4396,10 +4396,11 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
         //add resizing buttons to dialog title bar
         if(this._as_dialog){
 
-            $('<span>', {id: 'btn_Fullscreen'}).appendTo(this._as_dialog.parent().find('.ui-dialog-titlebar'));
-            $('<span>', {id: 'btn_Standard'}).appendTo(this._as_dialog.parent().find('.ui-dialog-titlebar'));
+            let $dlg = this._as_dialog.dialog('widget');
+            $('<span>', {id: 'btn_Fullscreen'}).appendTo($dlg.find('.ui-dialog-titlebar'));
+            $('<span>', {id: 'btn_Standard'}).appendTo($dlg.find('.ui-dialog-titlebar'));
 
-            this._as_dialog.parent().find('#btn_Fullscreen').button({label:window.hWin.HR('Fullscreen')}).css({
+            $dlg.find('#btn_Fullscreen').button({label:window.hWin.HR('Fullscreen')}).css({
                 margin: '-0.9em 0 0 0',
                 right: '12.5em',
                 top: '45%',
@@ -4410,7 +4411,7 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
                 that._setDialogSize(true);
             });
 
-            this._as_dialog.parent().find('#btn_Standard').button({label:window.hWin.HR('Standard')}).css({
+            $dlg.find('#btn_Standard').button({label:window.hWin.HR('Standard')}).css({
                 margin: '-0.9em 0 0 0',
                 right: '5.5em',
                 top: '45%',
@@ -4421,7 +4422,7 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
                 that._setDialogSize(false);
             });
 
-            this._as_dialog.parent().css('box-shadow', '2px 3px 10px #00000080');
+            $dlg.css('box-shadow', '2px 3px 10px #00000080');
         }
 
         //add record title at the top ======================
