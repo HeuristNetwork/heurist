@@ -150,6 +150,10 @@
     font-weight: normal;
     outline: none;
 }
+
+#main-languages a:not(.lang-selected){
+    text-decoration: none;
+}
 </style>
 </head>
 <body>
@@ -226,7 +230,7 @@ if($isWebPage){ //set in websiteRecord.php
         .'style="position:absolute;left:5px;top:5px;color:blue !important;" class="cms-button">website editor</a>';
     }
     if(!$edit_OldEditor && $system->get_user_id() == 0 && $show_login_button){
-        print '<a href="#" id="btn_signin" style="position:absolute;right:5px; top:5px;color:blue !important;" class="cms-button">login</a>'; // login link
+        print '<a href="#" id="btn_signin" style="position:absolute;right:5px; top:5px;color:blue !important;font-weight: normal;" class="cms-button">login</a>'; // login link
     }
     ?>  
         <div id="main-pagetitle" class="ui-heurist-bg-light"></div>       

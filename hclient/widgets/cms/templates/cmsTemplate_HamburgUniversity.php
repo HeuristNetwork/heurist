@@ -104,6 +104,19 @@ body{
                 <div id="main-logo" style="width: 145px;display: table-cell"></div>
                 <div id="main-logo-alt" style="display: table-cell;min-width: 140px;height: 80px;"></div>
             </div>
+<?php            
+    if(!$edit_OldEditor && $system->is_member(1)){
+        print '<a href="'.HEURIST_BASE_URL.'?db='.$system->dbname().'" id="btn_editor" target="_blank" '
+        .'style="position:absolute;left:120px; font-size:14px !important; top:5px;color:blue !important;" class="cms-button">database</a>'
+        .'<a href="#" id="btnOpenCMSeditor" onclick="_openCMSeditor(event); return false;" '
+        .'style="position:absolute;left:5px; font-size:14px !important; top:5px;color:blue !important;" class="cms-button">website editor</a>';
+    }
+    if(!$edit_OldEditor && $system->get_user_id() == 0 && $show_login_button){
+        print '<a href="#" id="btn_signin" style="position:absolute;right:5px; top:5px;color:blue !important;font-weight: normal;" class="cms-button">login</a>'; // login link
+    }
+?>  
+            
+            
             <a href="#"></a><!-- do not touch this stub for UH script -->
         </div>
 
@@ -115,6 +128,7 @@ body{
                 print $mainmenu_content;
           }
           ?>
+          <div id="mobilemenu" style="display:none"></div>
         </div>
 
         <div class="page">
