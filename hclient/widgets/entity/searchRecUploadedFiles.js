@@ -101,7 +101,7 @@ $.widget( "heurist.searchRecUploadedFiles", $.heurist.searchEntity, {
                     of: this.btn_remove_unused
                 });*/
 
-            this.btn_refresh_index.button({label: window.hWin.HR("Refresh index")})
+            this.btn_refresh_index.button({label: window.hWin.HR("Index new files")})
                 .click(function() {
                     that._checkUserPermissions(1, 'onrefreshindex')
                 });
@@ -111,10 +111,15 @@ $.widget( "heurist.searchRecUploadedFiles", $.heurist.searchEntity, {
                     that._trigger('onselectall');
                 })
                 .parent().position({
-                my: 'right-10 center',
-                at: 'left center',
-                of: this.btn_create_records
+                my: 'right-5 top+5',
+                at: 'right bottom',
+                of: this.btn_edit_mimetypes
             });
+
+            this.element.find('#selected_only')
+                .change(function() {
+                    that._trigger('onselectedonly');
+                });
         }
 
         this.selectGroup = this.element.find('#sel_group');
@@ -139,6 +144,10 @@ $.widget( "heurist.searchRecUploadedFiles", $.heurist.searchEntity, {
         this.selectGroup.css({'background':'none','border':'none'});
         
         this._on( this.selectGroup, { tabsactivate: this.startSearch  });
+
+        this.element.find('#group_help').position({
+            my: 'left+35 top', at: 'right center', of: this.selectGroup
+        });
         
         //-----------------
         this.input_search_path = this.element.find('#input_search_path');

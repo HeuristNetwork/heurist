@@ -1140,6 +1140,7 @@ When we open "iiif_image" in mirador viewer we generate manifest dynamically.
                 $remote_dups->close();
             }
 
+            // Check dup local file's size and checksum against each other
             $query = 'SELECT ulf_OrigFileName, count(*) AS cnt '
             . 'FROM recUploadedFiles '
             . 'WHERE ulf_OrigFileName IS NOT NULL AND ulf_OrigFileName<>"_remote" AND ulf_OrigFileName NOT LIKE "_iiif%"'. $where_ids . ' '
