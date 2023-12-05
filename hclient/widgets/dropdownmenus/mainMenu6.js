@@ -71,6 +71,8 @@ $.widget( "heurist.mainMenu6", {
 
     _left_position: 91, //normal width for most languages, for German it is 115
 
+    _show_quick_tips: false, // popup quick tips on next moving to the explore menu
+
     // the widget's constructor
     _create: function() {
 
@@ -1647,6 +1649,10 @@ $.widget( "heurist.mainMenu6", {
             if(that.containers['explore'].find('div#db_overview').is(':visible')){
                 that.containers['explore'].find('div#db_overview').hide();
             }
+
+            if(this._show_quick_tips){
+                this.showQuickTips();
+            }
         }
 
     },
@@ -1918,6 +1924,8 @@ $.widget( "heurist.mainMenu6", {
                            $('.template-url').attr('href', window.hWin.HAPI4.baseURL
                                             +'documentation_and_templates/db_design_template.rtf');
                         });
+
+                this._show_quick_tips = true;
             }            
         }
     },
@@ -2233,8 +2241,7 @@ $.widget( "heurist.mainMenu6", {
                     cursor: 'pointer'
                 })
                 .on('click', function(){
-                    let url = window.hWin.HAPI4.baseURL+'context_help/quick_tips.html';
-                    window.hWin.HEURIST4.msg.showMsgDlgUrl(url, null, '.', {isPopupDlg:true, use_doc_title: true});
+                    that.showQuickTips();
                 });
 
                 // Commonly used entities/rectypes
@@ -2399,5 +2406,16 @@ $.widget( "heurist.mainMenu6", {
 
     closeContainer: function(section){
         this.containers[section].empty().hide();
+    },
+
+    showQuickTips: function(is_popup = true){
+
+        let url = window.hWin.HAPI4.baseURL+'context_help/quick_tips.html';
+
+        if(is_popup){
+            window.hWin.HEURIST4.msg.showMsgDlgUrl(url, null, '.', {isPopupDlg:true, use_doc_title: true});
+        }else{
+            window.open(url, '_blank');
+        }
     }
 });
