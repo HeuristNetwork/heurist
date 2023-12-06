@@ -224,6 +224,7 @@ number of widgets. Currently it is commented out of the code in layout_default.j
 
 <!-- edit entity -->        
 <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/editing/selectFile.js"></script>
+<script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/editing/selectMultiValues.js"></script>
 <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/editing/selectFolders.js"></script>
 <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/editing/editing_input.js"></script>
 <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/editing/editing2.js"></script>

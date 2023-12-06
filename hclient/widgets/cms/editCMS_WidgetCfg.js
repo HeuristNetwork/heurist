@@ -257,10 +257,17 @@ function editCMS_WidgetCfg( widget_cfg, _layout_content, $dlg, main_callback ){
                     if(opts.layout_params['pntzoom']>0){
                         $dlg.find('input[name="map_pntzoom"]').val(opts.layout_params['pntzoom']);        
                     }
+                    if(opts.layout_params['mapdocuments']){
+                        $dlg.find('input[name="mapdocuments"]').attr('data-mapdocuments', opts.layout_params['mapdocuments']);        
+                    }
+                    if(opts.layout_params['basemaps']){
+                        $dlg.find('input[name="basemaps"]').val(opts.layout_params['basemaps']);        
+                    }
                 }
                 if(opts['mapdocument']>0){
                     $dlg.find('select[name="mapdocument"]').attr('data-mapdocument', opts['mapdocument']);        
                 }
+                
                 if(opts['custom_links']){
                     $dlg.find('textarea[name="custom_links"]').val(opts['custom_links']);    
                 }
@@ -680,6 +687,26 @@ function editCMS_WidgetCfg( widget_cfg, _layout_content, $dlg, main_callback ){
             }else
             if(widget_name=='heurist_Map' && 
                 $dlg.find('select[name="mapdocument"]').find('options').length==0){
+                    
+                var allMapDocuments = [];
+                
+                $selectedDocuments =  $('input[name="mapdocuments"]');
+                $selectedBasemaps =  $('input[name="basemaps"]');
+                
+                function __assignMapDocNames(newsel){
+                    if(newsel){
+                        newsel = newsel.split(';');
+                        var newsel_names = [];
+                        $.each(allMapDocuments, function(i,item){
+                            if(newsel.indexOf(item.key)>=0){
+                                newsel_names.push(item.title)    
+                            }
+                        });
+                        $selectedDocuments.val(newsel_names.join(';'));
+                    }else{
+                        $selectedDocuments.val('');
+                    }
+                }
 
                 var $selectMapDoc = $dlg.find('select[name="mapdocument"]');
                 //fill list of mapdpcuments
@@ -709,11 +736,37 @@ function editCMS_WidgetCfg( widget_cfg, _layout_content, $dlg, main_callback ){
 							}
 							window.hWin.HEURIST4.ui.initHSelect($selectMapDoc[0], false);
 
+                            allMapDocuments = opts;
+                            allMapDocuments.splice(0,1); //remove none
+                            
+                            __assignMapDocNames($selectedDocuments.attr('data-mapdocuments'));
+                            
 						}else {
 							window.hWin.HEURIST4.msg.showMsgErr(response);
 						}
                     }
-                );  
+                );
+                
+                var $gicon = $('<span>').addClass('ui-icon ui-icon-gear')
+                    .css({position:'absolute',margin:'7px 0 0 0px',cursor:'hand'})
+                    .insertBefore($selectedDocuments);
+                var $select_documents_dlg = $('<div/>').hide().appendTo( $selectedDocuments.parent() );
+                
+                $gicon.on({ click: function(){                                 
+                       $select_documents_dlg.selectMultiValues({
+                       onselect:function(newsel){
+                            if(newsel){
+                                var newsel = newsel.join(';');
+                                $selectedDocuments.attr('data-mapdocuments', newsel);
+                                __assignMapDocNames(newsel);
+                            }
+                        }, 
+                       allValues: allMapDocuments,
+                       selectedValues: $selectedDocuments.attr('data-mapdocuments'), 
+                       multiselect: true});
+                    }} );                
+                
+                //======================================
 
                 var $selectMapTemplate = $dlg.find('select[name="map_template"]'); 
 
@@ -721,6 +774,8 @@ function editCMS_WidgetCfg( widget_cfg, _layout_content, $dlg, main_callback ){
                     ,[{key:'',title:'Standard popup template'}], $selectMapTemplate.attr('data-template'));
                     //,{key:'none',title:'Disable popup'}
 
+                //======================================
+                    
                 var $selectBaseMap = $dlg.find('select[name="map_basemap"]');
 
                 var baseMapOptions = [
@@ -742,15 +797,36 @@ function editCMS_WidgetCfg( widget_cfg, _layout_content, $dlg, main_callback ){
                 ];
 
                 window.hWin.HEURIST4.ui.fillSelector($selectBaseMap[0], baseMapOptions);
+                
                 if($selectBaseMap.attr('data-basemap') != null){
                     $selectBaseMap.val($selectBaseMap.attr('data-basemap'));
                 }
                 $selectBaseMap = window.hWin.HEURIST4.ui.initHSelect($selectBaseMap[0], false);
-
+                
                 if($selectBaseMap.hSelect('instance') != undefined){
                     $selectBaseMap.hSelect('widget').css('width', '200px');
                 }
-
+                
+                var $gicon = $('<span>').addClass('ui-icon ui-icon-gear')
+                    .css({position:'absolute',margin:'7px 0 0 0px',cursor:'hand'})
+                    .insertBefore($selectedBasemaps);
+                var $select_basemaps_dlg = $('<div/>').hide().appendTo( $selectedBasemaps.parent() );
+                
+                $gicon.on({ click: function(){                                 
+                       $select_basemaps_dlg.selectMultiValues({
+                       onselect:function(newsel){
+                            if(newsel){
+                                var newsel = newsel.join(';');
+                                $selectedBasemaps.val(newsel);
+                            }
+                        }, 
+                       allValues: baseMapOptions,
+                       selectedValues: $selectedBasemaps.val().split(';'), 
+                       multiselect: true});
+                    }} );
+                    
+                //======================================================
+                    
                 $dlg.find('input[name="popup_behaviour"]')
                     .change(function(event){
 
@@ -1019,6 +1095,7 @@ function editCMS_WidgetCfg( widget_cfg, _layout_content, $dlg, main_callback ){
             layout_params['published'] = 1;
             layout_params['template'] = $dlg.find('select[name="map_template"]').val();
             layout_params['basemap'] = $dlg.find('select[name="map_basemap"]').val();
+            layout_params['basemaps'] = $dlg.find('input[name="basemaps"]').val();
             layout_params['basemap_filter'] = $dlg.find('input[name="map_basemap_filter"]').val();
 
             layout_params['popup_behaviour'] = $dlg.find('input[name="popup_behaviour"]:checked').val();
@@ -1045,17 +1122,25 @@ function editCMS_WidgetCfg( widget_cfg, _layout_content, $dlg, main_callback ){
                 layout_params['popup'] = popup;
             }
 
-            opts['layout_params'] = layout_params;
-            opts['leaflet'] = true;
-
             var mapdoc_id = $dlg.find('select[name="mapdocument"]').val();
-            if(mapdoc_id>0) opts['mapdocument'] = mapdoc_id;
+            if(mapdoc_id>0) {opts['mapdocument'] = mapdoc_id;}
 
+            if($dlg.find('input[name="mapdocuments"]').attr('data-mapdocuments')){
+                layout_params['mapdocuments'] = $dlg.find('input[name="mapdocuments"]').attr('data-mapdocuments');    
+            }
+
+            if($dlg.find('input[name="basemaps"]').val()){
+                layout_params['basemaps'] = $dlg.find('input[name="basemaps"]').val();    
+            }
+            
             opts['custom_links'] = $dlg.find('textarea[name="custom_links"]').val(); 
             opts['current_search_filter'] = $dlg.find('input[name="current_search_filter"]').val();   
             
             layout_params['style'] = $dlg.find('#map_default_style').val();   
             layout_params['selection_style'] = $dlg.find('#map_select_style').val();   
+            
+            opts['layout_params'] = layout_params;
+            opts['leaflet'] = true;
         }//heurist_Map
 
         var cont = $dlg.find('div.'+widget_name);

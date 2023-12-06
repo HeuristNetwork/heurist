@@ -397,7 +397,13 @@ $.widget( "heurist.mapping", {
         $(this.map_scale._container).css({'margin-left': '20px', 'margin-bottom': '20px'});
         
         //content for legend
-        this.mapManager = new hMapManager({container:this.map_legend._container, mapwidget:this.element, is_ui_main:is_ui_main});
+        this.mapManager = new hMapManager(
+            { container:this.map_legend._container, 
+              mapwidget:this.element, 
+              is_ui_main:is_ui_main
+              ,visible_basemaps: this.options.layout_params?this.options.layout_params['basemaps']:null
+              ,visible_mapdocuments: this.options.layout_params?this.options.layout_params['mapdocuments']:null
+            });
         
         this.updateLayout();
 
@@ -3187,6 +3193,7 @@ $.widget( "heurist.mapping", {
     //   nomap, notimeline
     //   controls: [all,none,zoom,bookmark,geocoder,print,publish,legend]
     //   legend: [basemaps,search,mapdocs|onedoc]
+    //   basemaps: list of available basemaps
     //   basemap: name of initial basemap
     //   basemap_filter: css filter for basemap layer
     //   extent: fixed extent    
@@ -3529,6 +3536,13 @@ $.widget( "heurist.mapping", {
         this.mapManager.updatePanelVisibility(__splitval(params['legend']));
         
         //$('#map-settingup-message').text('EXPERIMENTAL');
+        
+        //show/hide available basemaps
+        this.mapManager.filterListBaseMap( params['basemaps'] );  
+
+        //show/hide available basemaps
+        this.mapManager.filterListMapDocuments( params['mapdocuments'] );  
+
         
         // basemap: name of initial basemap
         if(params['basemap']){

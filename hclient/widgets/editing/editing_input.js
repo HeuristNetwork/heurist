@@ -3066,12 +3066,12 @@ $.widget( "heurist.editing_input", {
                 var $gicon = $('<span>').addClass('ui-icon ui-icon-gear')
                     .css({position:'absolute',margin:'2px 0 0 8px',cursor:'hand'})
                     .insertBefore($input);
-                var $select_folder_dlg = $('<div/>').hide().appendTo( $inputdiv )
+                var $select_folder_dlg = $('<div/>').hide().appendTo( $inputdiv );
                 
                 that.newvalues[$input.attr('id')] = value;
                     
                 this._on( $gicon, { click: function(){                                 
-                        $select_folder_dlg.selectFolders({
+                       $select_folder_dlg.selectFolders({
                        onselect:function(newsel){
                             if(newsel){
                                 var newsel = newsel.join(';');
@@ -3080,7 +3080,7 @@ $.widget( "heurist.editing_input", {
                                 that.onChange();
                             }
                         }, 
-                       selectedFolders: that.newvalues[$input.attr('id')], 
+                       selectedValues: that.newvalues[$input.attr('id')], 
                        multiselect: that.configMode && that.configMode.multiselect});
                     }} );
             }

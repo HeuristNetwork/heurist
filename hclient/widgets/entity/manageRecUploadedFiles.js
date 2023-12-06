@@ -565,7 +565,7 @@ $.widget( "heurist.manageRecUploadedFiles", $.heurist.manageEntity, {
                                }, 
                                root_dir: 'uploaded_tilestacks',
                                allowEdit: false,
-                               selectedFolders: '', 
+                               selectedValues: '', 
                                title: 'Select Uploaded tilestack',
                                emptyMessage: 'No previously uploaded map tilestacks found',
                                multiselect: false});

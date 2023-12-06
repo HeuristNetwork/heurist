@@ -264,7 +264,9 @@ if (!(@$_REQUEST['notimeline']=='true' || @$_REQUEST['notimeline']=='1')) { ?>
         layout_params['smooth_zoom'] = __gp('smooth_zoom');
         layout_params['zoom_delta'] = __gp('zoom_delta');
         layout_params['zoom_to_selected'] = __gp('zoom_to_selected');
-        layout_params['basemap'] = __gp('basemap');  //name of basemap
+        layout_params['mapdocuments'] = __gp('mapdocuments'); //visible mapdocuments
+        layout_params['basemaps'] = __gp('basemaps'); //visible basemaps
+        layout_params['basemap'] = __gp('basemap');   //name of basemap
         layout_params['basemap_filter'] = __gp('basemap_filter');  //name of basemap
         layout_params['extent'] = __gp('extent'); //@todo
         

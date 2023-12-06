@@ -28,7 +28,7 @@
 * @param _options
 
   private 
-    _loadMapDocuments - loads all map document records
+    _loadMapDocuments - loads all or filtered map document records
     _getTreeData - converts mapdocument recordset (list of layers) to treeview data
     _loadMapDocumentContent - loads all linked layer and datasources for mapdocument - store it in map_documents_content 
     _openMapDocument - call _loadMapDocumentContent add layer to map
@@ -105,7 +105,7 @@ function hMapDocument( _options )
     //
     // loads all map documents from server
     //
-    function _loadMapDocuments( onRefreshList ){
+    function _loadMapDocuments( qFilter, onRefreshList ){
         
             if(!(RT_MAP_DOCUMENT>0)) return;
             
@@ -119,8 +119,25 @@ function hMapDocument( _options )
                 details.push( DT_CRS );
             }
             
+            if(!window.hWin.HEURIST4.util.isempty(qFilter)){
+                var aIds = [];
+                $.each(qFilter.split(';'),function(i,item){
+                    if(Number.isInteger(item) && item>0){
+                        aIds.push(item);
+                    }
+                });
+                if(aIds.length>0){
+                    qFilter = 'ids:'+aIds.join(',');
+                }else{
+                    qFilter = null;
+                }
+            }
+            if(window.hWin.HEURIST4.util.isempty(qFilter)){
+                qFilter = 't:'+RT_MAP_DOCUMENT;
+            }
+            
             var request = {
-                        q: 't:'+RT_MAP_DOCUMENT,w: 'a',
+                        q:qFilter, w: 'a',
                         detail: details, //fields_to_be_downloaded
                         source: 'map_document'};
             //perform search        
@@ -691,8 +708,8 @@ function hMapDocument( _options )
         //
         // Loads list of map documents
         //
-        loadMapDocuments: function( onRefreshList ){
-            _loadMapDocuments( onRefreshList );    
+        loadMapDocuments: function( qFilter, onRefreshList ){
+            _loadMapDocuments( qFilter, onRefreshList );    
         },
         
         //

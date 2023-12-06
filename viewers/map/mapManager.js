@@ -122,9 +122,11 @@ function hMapManager( _options )
     _version   = "0.4",
 
     options = {
-        container:null,  
-        mapwidget:null,   
-        visible_panels:null,
+        container: null,  
+        mapwidget: null,   
+        visible_panels: null,
+        visible_basemaps: null,
+        visible_mapdocuments: null,
         hasTempMap: false,  //show hide this panel
         is_ui_main: false   //if true - hide on collapse
     },
@@ -257,7 +259,6 @@ function hMapManager( _options )
         //
         
     }
-
     
     //
     //
@@ -338,18 +339,29 @@ function hMapManager( _options )
             // load list of predefined base layers 
             // see extensive list in leaflet-providers.js
             var map_providers = options.mapwidget.mapping('getBaseMapProviders');
-            
+
+            if(typeof options.visible_basemaps === 'string'){
+                options.visible_basemaps = options.visible_basemaps.split(';');
+            }
+            if(!$.isArray(options.visible_basemaps)){
+                options.visible_basemaps = [];
+            }
+
             content = '';
             for (var k=0; k<map_providers.length; k++){
-                content = content + '<label><input type="radio" name="basemap" data-mapindex="'+k
+                if(options.visible_basemaps.length==0 || options.visible_basemaps.indexOf(map_providers[k]['name'])>=0){
+                    content = content + '<label><input type="radio" name="basemap" data-mapindex="'+k
                                   + '" data-mapid="'+map_providers[k]['name']+'">'
                                   + map_providers[k]['name']+'</label><br>';
+                }
             }
             
-            content = content + '<span style="color: darkgray; padding-left: 5px;" class="heurist-helper1">Email team for '
+            if(options.is_ui_main){
+                content = content + '<span style="color: darkgray; padding-left: 5px;" class="heurist-helper1">Email team for '
                 + '<a href="http://leaflet-extras.github.io/leaflet-providers/preview/index.html" target="_blank" '
                     + 'style="display: inline; background: transparent; text-decoration: underline; color: black;">other base maps</a>'
                 + '</span>';
+            }
             content = content + '<div style="text-align:center; display: inline-block;margin-left: 5px;" id="basemap_filter_btns">'
                 +'<button name="basemap_filter">filters</button>'
                 +'<button name="basemap_filter_reset">reset</button></div>';
@@ -377,7 +389,7 @@ function hMapManager( _options )
             //load list of mapddocuments
             mapdoc_treeview = $('<div>');
             
-            mapDocuments.loadMapDocuments( function(resdata){
+            mapDocuments.loadMapDocuments(null, function(resdata){
                         _refreshMapDocumentTree( resdata, mapdoc_treeview );
                         options.mapwidget.mapping('onInitComplete', 'mapdocs');
                     } );
@@ -408,9 +420,6 @@ function hMapManager( _options )
             //defineContent( 'search' );
             
             //hide invisible layers and allow max 5 entries
-            
-            
-            
             that.setHeight();
         
     }
@@ -509,6 +518,7 @@ function hMapManager( _options )
                     //return dfd.promise();
                     
                 },
+                extensions: ["filter"],
                 expand: function(e, data){
                     
                 },
@@ -1204,7 +1214,7 @@ function hMapManager( _options )
 
             mapdoc_select = $select;
 
-            mapDocuments.loadMapDocuments(function(resdata){
+            mapDocuments.loadMapDocuments(null, function(resdata){
                 
                 window.hWin.HEURIST4.ui.addoption(mapdoc_select[0], '', 'None');
 
@@ -1497,7 +1507,47 @@ function hMapManager( _options )
         getLayer: function( mapdoc_id, recid ){
             return mapDocuments.getLayer(mapdoc_id, recid);
         },
+        
+        
+        //
+        //
+        //
+        filterListBaseMap: function (visible_basemaps){
+            if(options.visible_basemaps != visible_basemaps){
+                options.visible_basemaps = visible_basemaps;
+                var grp_div = options.container.find('.svs-acordeon[grpid="basemaps"]');
+                _defineContent('basemaps', null, grp_div.find('.ui-accordion-content'));
+                that.setHeight();
+            }
+        },
+        
+        
+        filterListMapDocuments: function(visible_mapdocuments){
+            if($.isFunction($('body').fancytree) && options.visible_mapdocuments != visible_mapdocuments){
                 
+                options.visible_mapdocuments = visible_mapdocuments;
+                
+                var mapdoc_ids = visible_mapdocuments?visible_mapdocuments.split(';'):[];
+                
+                var tree = mapdoc_treeview.fancytree("getTree");
+                if(mapdoc_ids && mapdoc_ids.length>0){
+                    tree.filterBranches(function(node){
+                        return mapdoc_ids.indexOf(node.key)>=0;
+                    }, {mode: "hide"});
+                    //that._treeview.fancytree('render')                          
+                }else{
+                    tree.clearFilter();                
+                }
+                
+                that.setHeight();
+
+                //var mapdoc_treeview = options.container.find('.svs-acordeon[grpid="mapdocs"]').find('.tree-map');
+                //var tree = mapdoc_treeview.fancytree("getTree");
+                
+            
+            }
+        },
+        
         //
         // switch base map layer
         //

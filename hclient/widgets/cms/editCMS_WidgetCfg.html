@@ -397,26 +397,8 @@
         <br><i>Reference to map widget. Define this unique ID in Map widget properties</i>
     </div>
     
-    <!-- mapping -->    
+    <!-- mapping -->   
     <div class="heurist_Map">
-        <div class="header">
-            <label>Default global base map&nbsp;</label>
-        </div>
-        <select name="map_basemap" class="text ui-widget-content ui-corner-all" title="" style="width:auto">
-        </select>&nbsp;&nbsp;
-        <button name="basemap_filter">filters</button>&nbsp;
-        <button name="basemap_filter_reset">reset</button>        
-        &nbsp;&nbsp;Filters&nbsp; 
-        <input name="map_basemap_filter" class="hidden" title="" style="width:200px"/>
-    </div>
-
-    <div class="heurist_Map">
-        <div class="header"><label>Superimpose map document&nbsp;</label></div>
-        <select name="mapdocument" class="text ui-widget-content ui-corner-all" title="" style="width:300px">
-        </select>
-    </div>
-
-    <div  class="heurist_Map">
         <div class="header"><label>Map layout parameters</label></div>
         <div>
             <!-- <p><span style="min-width: 105px;display: inline-block;text-align: right;">Include&nbsp;</span>
@@ -457,25 +439,38 @@
         </div>
     </div>
 
-    <!-- diagram 
-    <div class="heurist_Graph">
-
-    <div class="header"><label>XXX</label></div>
-    <select name="XXX" class="text ui-widget-content ui-corner-all" title="">
-    </select>
+    <div class="heurist_Map">
+        <div class="header"><label>Visible base maps&nbsp;</label></div>
+        <input name="basemaps" class="text ui-widget-content ui-corner-all" title="" readonly 
+                style="width:300px;padding-left: 18px;line-height: 20px;"/>
+    
+        <label>&nbsp;Default base map&nbsp;</label>
+        <select name="map_basemap" class="text ui-widget-content ui-corner-all" title="" style="width:150px">
+        </select>&nbsp;&nbsp;
+        <button name="basemap_filter">filters</button>&nbsp;
+        <button name="basemap_filter_reset">reset</button>        
+        &nbsp;&nbsp;Filters&nbsp; 
+        <input name="map_basemap_filter" class="hidden" title="" style="width:100px"/>
     </div>
-    -->
-    <div  class="heurist_Map" id="map_default_style_div">
+
+    <div class="heurist_Map">
+        <div class="header"><label>Visible map documents&nbsp;</label></div>
+        <input name="mapdocuments" class="text ui-widget-content ui-corner-all" title="" readonly 
+                style="width:300px;padding-left: 18px;line-height: 20px;"/>
+        <label>&nbsp;Default map documents&nbsp;</label>
+        <select name="mapdocument" class="text ui-widget-content ui-corner-all" title="" style="width:150px">
+        </select>
+    </div>
+    
+    <div class="heurist_Map" id="map_default_style_div">
         <div class="header"><label>Symbology for current search </label></div>
         <input id="map_default_style" name="map_default_style" class="text ui-widget-content ui-corner-all"/>
     </div>
 
-    <div  class="heurist_Map" id="map_select_style_div">
+    <div class="heurist_Map" id="map_select_style_div">
         <div class="header"><label>Symbology for selection on map </label></div>
         <input id="map_select_style" name="map_select_style" class="text ui-widget-content ui-corner-all"/>
     </div>
-    
-    
     
     <div class="heurist_Map">
         <div class="header">
@@ -496,7 +491,7 @@
         </select>
     </div>
 
-    <div  class="heurist_Map">
+    <div class="heurist_Map">
         <div class="header"><label>Map popup size</label></div>
         <div>
             <label><input type="radio" name="popup_behaviour" value="fixed" checked>Fixed size</label>&nbsp;
@@ -529,6 +524,8 @@
             <input name="map_pntzoom" type="number" min="0" value="5" placeholder="" style="width:40px"> km
         </div>
     </div>
+    
+    <!-- end mapping -->
 
     <div class="heurist_resultListExt">
         <div class="header">
