@@ -70,7 +70,13 @@ $.widget( "heurist.searchSysUsers", $.heurist.searchEntity, {
             if(this.options.edit_mode=='inline'){
                 this.btn_add_record.css({'float':'left','border-bottom':'1px lightgray solid',
                 'min-height': '2.4em', 'margin-bottom': '0.4em'});    
-            }                       
+            }else if(this.options.ugl_GroupID > 0){
+                this.btn_add_record.parent().css({
+                    top: '10px',
+                    right: '0px',
+                    left: ''
+                });
+            }
         }
         
         this.input_search_inactive = this.element.find('#input_search_inactive');

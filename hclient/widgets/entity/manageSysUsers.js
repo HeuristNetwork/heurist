@@ -137,19 +137,29 @@ $.widget( "heurist.manageSysUsers", $.heurist.manageEntity, {
         if(this.options.select_mode=='manager'){
             this.recordList.parent().css({'border-right':'lightgray 1px solid'});
             
-            
+            let center_cols = 'border-left:1px solid gray;text-align:center;';
             this.recordList.resultList('option','rendererHeader',
                     function(){
-                    var s = '<div style="width:40px"></div><div style="width:3em">ID</div>'
-                +'<div style="width:8em">Name</div>'
-                +'<div style="width:12em;border:none;">Full name</div>'
-                +'<div style="position:absolute;width:7em;right:270px;border-right:none;border-left:1px solid gray">Institution/Organisation</div>'
-                +'<div style="position:absolute;right:76px;width:90px;border-left:1px solid gray">'
-                        +'Membership</div>';
-                        
+
+                        let s = '<div style="display: flex;">'
+                                    +'<div style="width:25px;border:none;"></div>'
+                                    +'<div style="flex:0 2 3.5em;border-left:1px solid gray;padding-left:5px;">ID</div>'
+                                    +'<div style="flex:0 1 8em;border-left:1px solid gray;padding-left:5px;">Name</div>'
+                                    +'<div style="flex:0 3 10em;border-left:1px solid gray;padding-left:5px;">Full name</div>';
+
                         if (window.hWin.HAPI4.is_admin()){
-                            s = s+'<div style="position:absolute;right:4px;width:60px">Edit</div>';
+                            s += `<div style="flex:0 0 4.5em;${center_cols}">Edit</div>`;
+                            s += `<div style="flex:0 0 6em;${center_cols}">Delete</div>`;
                         }
+
+                        s += `<div style="flex:0 1 8em;${center_cols}">Membership</div>`;
+
+                        if(!that.options.ugl_GroupID){
+                            s += `<div style="flex:0 0 10em;${center_cols}">Edit membership</div>`;
+                        }
+
+                        s += '<div style="flex:0 5 20em;border-left:1px solid gray;padding-left: 10px;">Institution/Organisation</div>';
+                        s += '</div>';
                         
                         return s;
                     }
@@ -274,7 +284,7 @@ $.widget( "heurist.manageSysUsers", $.heurist.manageEntity, {
                 });
 
                 //manage membership of user in all groups
-                this.recordList.find('.user-list-edit')
+                this.recordList.find('.edit-members')
                 .click(function(event){
                     var user_ID = $(event.target).parents('.recordDiv').attr('recid');
                     var enabled = $(event.target).parents('.recordDiv').attr('usr_status');
@@ -343,114 +353,106 @@ $.widget( "heurist.manageSysUsers", $.heurist.manageEntity, {
         function fld(fldname){
             return window.hWin.HEURIST4.util.htmlEscape(recordset.fld(record, fldname));
         }
-        function fld2(fldname, col_width){
+        function fld2(fldname, sstyle){
             swidth = '';
-            if(!window.hWin.HEURIST4.util.isempty(col_width)){
-                swidth = ' style="width:'+col_width+'"';
+            if(!window.hWin.HEURIST4.util.isempty(sstyle)){
+                swidth = ` style="${sstyle}"`;
             }
-            return '<div class="item" '+swidth+'>'+window.hWin.HEURIST4.util.htmlEscape(recordset.fld(record, fldname))+'</div>';
+            return `<div class="truncate" ${swidth}>${window.hWin.HEURIST4.util.htmlEscape(recordset.fld(record, fldname))}</div>`;
         }
         
         //ugr_ID,ugr_Type,ugr_Name,ugr_Description, ugr_eMail,ugr_FirstName,ugr_LastName,ugr_Enabled,ugl_Role
         
-        var recID   = fld('ugr_ID');
-        
-        //var recTitle = fld2('ugr_ID','3em')+fld2('ugr_Name','10em')+fld('ugr_FirstName')+' '+fld('ugr_LastName');
-        var recTitleHint = fld('ugr_Organisation');
-        
-        var recTitle = fld2('ugr_ID','3.5em')
-                    + '<a class="item" style="width:9.5em" href="mailto:'+fld('ugr_eMail')+'" title="'+fld('ugr_eMail')+'">'
-                    + fld('ugr_Name')+'</a>'
-                    + '<div class="item" style="width:  15em">'+fld('ugr_FirstName')+' '+fld('ugr_LastName')+'</div>'
-                    + '<div class="item" style="width:14em;position: absolute;right: 2px;">'+fld('ugr_Organisation')+'</div>';
-        
-        var recOpacity = (fld('ugr_Enabled')!='n')?1:0.3;
-        
-        var rtIcon = window.hWin.HAPI4.getImageUrl(this._entityName, 0, 'icon');
-        //var rtThumb = window.hWin.HAPI4.getImageUrl(this._entityName, 0, 'thumb');
-        var recThumb = window.hWin.HAPI4.getImageUrl(this._entityName, recID, 'thumb', 2, this.options.database);
-        
-        var html_thumb = '<div class="recTypeThumb" style="background-image: url(&quot;'+recThumb+'&quot;);opacity:'+recOpacity+'">'
+        const recID = fld('ugr_ID');
+
+        let recOpacity = (fld('ugr_Enabled')!='n')?1:0.3;
+
+        let rtIcon = window.hWin.HAPI4.getImageUrl(this._entityName, 0, 'icon');
+
+        let recThumb = window.hWin.HAPI4.getImageUrl(this._entityName, recID, 'thumb', 2, this.options.database);
+
+        let html_thumb = '<div class="recTypeThumb" style="background-image: url(&quot;'+recThumb+'&quot;);opacity:'+recOpacity+'">'
         +'</div>';
 
-        var html = '<div class="recordDiv" id="rd'+recID+'" recid="'+recID+'" usr_status="'+fld('ugr_Enabled')+'">'
+        let name_width = navigator.userAgent.toLowerCase().includes('firefox') ? 7.5 : 8.5;
+
+        let html = '<div class="recordDiv" id="rd'+recID+'" recid="'+recID+'" usr_status="'+fld('ugr_Enabled')+'" style="display: flex;">'
         + html_thumb
-        + '<div class="recordSelector"><input type="checkbox" /></div>'
-        + '<div class="recordIcons" style="min-width:16px;">' //recid="'+recID+'" bkmk_id="'+bkm_ID+'">'
+        + '<div class="recordSelector"><input type="checkbox"></div>'
+        + '<div class="recordIcons" style="flex:0 0 20px;">'
         +     '<img src="'+window.hWin.HAPI4.baseURL+'hclient/assets/16x16.gif'
         +     '" style="background-image: url(&quot;'+rtIcon+'&quot;);opacity:'+recOpacity+'">'
         + '</div>'
-        + '<div class="recordTitle recordTitle2" title="'+recTitleHint+'" style="right:180px">'
-        +     recTitle
-        + '</div>';
-        
-        // add edit/remove action buttons
-        if(this.options.select_mode=='manager' && this.options.edit_mode=='popup'){
-        
-            var ugl_GroupID = this.searchForm.find('#input_search_group').val(); 
-            if(window.hWin.HAPI4.is_admin() && !(ugl_GroupID>0)){  //all groups - show count of groups where user is a member
-                html = html   //rec_actions 
-                    + '<div class="user-list user-list-edit" style="right:90px;width:50px;" title="Edit participation of user in groups">'
-                    + fld('ugr_Member') + '<span class="ui-icon ui-icon-pencil" '
-                    + ' style="font-size:0.8em;float:right;top:2px;right:2px"></span></div>';
-            }
+        + fld2('ugr_ID','flex:0 2 4em;')
+        + `<a class="truncate" style="flex:0 1 ${name_width}em" href="mailto:'+fld('ugr_eMail')+'" title="'+fld('ugr_eMail')+'">`
+            + fld('ugr_Name')
+        + '</a>'
+        + '<div class="truncate" style="flex:0 3 10em;">'+fld('ugr_FirstName')+' '+fld('ugr_LastName')+'</div>';
 
+        // add edit/remove action buttons
+        if(recID == 2 && window.hWin.HAPI4.has_access(2)){ // only db owner can edit db owner
+
+            html += '<div title="Click to edit user" class="ui-button ui-widget ui-state-default ui-corner-all ui-button-icon-only" role="button" aria-disabled="false" data-key="edit" '
+                  + 'style="height:16px;margin: 0px 15px;flex:0 0 25px;">'
+                    +'<span class="ui-button-icon-primary ui-icon ui-icon-pencil"></span><span class="ui-button-text"></span>'
+                + '</div>'
+                + '<div style="width: 75px;"></div>';
+
+        }else
+        if( window.hWin.HAPI4.is_admin() ) {//current user is admin of database managers
             
-            var ugl_GroupID = this.searchForm.find('#input_search_group').val();
-                
-            if(ugl_GroupID>0){
-                html = html + '<div class="rec_actions user-list" style="top:4px;width:160px;right:2px;position:absolute">'
-                if(recID==2 && ugl_GroupID==window.hWin.HAPI4.sysinfo.db_managers_groupid){
-                    html = html + '<div style="min-width:88px;text-align:center">admin</div>';
-                }else 
-                if(window.hWin.HAPI4.has_access(ugl_GroupID)){//current user is admin of given group
-                    html = html 
-                        + '<select title="Role" style="min-width:70px;text-align:center;margin-right:18px;" class="user-role" data-value="'
-                        + fld('ugl_Role')+'">'
-                        +'<option>admin</option><option>member</option><option>remove</option></select>';
-                    
-                }else{
-                    html = html 
-                        + '<div title="Role" style="min-width:88px;text-align:center">'
-                        + fld('ugl_Role')+'</div>';
-                }
-            }else{
-                html = html + '<div class="rec_actions user-list" style="top:4px;width:60px;right:2px;position:absolute">'
-                //placeholder
-                //html = html + '<div style="min-width:78px;"></div>';
-            }
-            
-            if(recID == 2 && window.hWin.HAPI4.has_access(2)){ // only db owner can edit db owner
-                html = html 
-                    + '<div title="Click to edit user" class="ui-button ui-widget ui-state-default ui-corner-all ui-button-icon-only" role="button" aria-disabled="false" data-key="edit" style="height:16px">'
-                    +     '<span class="ui-button-icon-primary ui-icon ui-icon-pencil"></span><span class="ui-button-text"></span>'
-                    + '</div>&nbsp;&nbsp;';
-            }else
-            if( window.hWin.HAPI4.is_admin() ) {//current user is admin of database managers
-                
-                html = html 
-                    + '<div title="Click to edit user" class="ui-button ui-widget ui-state-default ui-corner-all ui-button-icon-only" role="button" aria-disabled="false" data-key="edit" style="height:16px">'
-                    +     '<span class="ui-button-icon-primary ui-icon ui-icon-pencil"></span><span class="ui-button-text"></span>'
-                    + '</div>&nbsp;&nbsp;'
-                    // delete button
-                    + '<div title="Click to delete user" class="ui-button ui-widget ui-state-default ui-corner-all ui-button-icon-only" role="button" aria-disabled="false" data-key="delete" style="height:16px">'
-                    +     '<span class="ui-button-icon-primary ui-icon ui-icon-circle-close"></span><span class="ui-button-text"></span>'
-                    + '</div>';
-               
-            }else{
-               /*
-                html = html 
-                    + '<div title="Status: not admin - locked" class="ui-button ui-widget ui-state-default ui-corner-all ui-button-icon-only" role="button" aria-disabled="false" style="height:16px">'
-                    +     '<span class="ui-button-icon-primary ui-icon ui-icon-lock"></span><span class="ui-button-text"></span>'
-                    + '</div>&nbsp;&nbsp;';
-               */
-            }
-            html = html + '</div>';
-            
+            html += '<div title="Click to edit user" class="ui-button ui-widget ui-state-default ui-corner-all ui-button-icon-only" role="button" aria-disabled="false" data-key="edit" '
+                  + 'style="height:16px;margin: 0px 15px;flex:0 0 25px;">'
+                    + '<span class="ui-button-icon-primary ui-icon ui-icon-pencil"></span><span class="ui-button-text"></span>'
+                + '</div>'
+                + '<div title="Click to delete user" class="ui-button ui-widget ui-state-default ui-corner-all ui-button-icon-only" role="button" aria-disabled="false" data-key="delete" '
+                  + 'style="height:16px;margin: 0px 25px;flex:0 0 25px;">'
+                    + '<span class="ui-button-icon-primary ui-icon ui-icon-circle-close"></span><span class="ui-button-text"></span>'
+                + '</div>';
+           
         }
         
+        // add edit group memberships
+        if(this.options.select_mode=='manager' && this.options.edit_mode=='popup'){
+        
+            const ugl_GroupID = this.searchForm.find('#input_search_group').val(); 
+            if(window.hWin.HAPI4.is_admin() && !(ugl_GroupID>0)){  //all groups - show count of groups where user is a member
+                html += '<div class="truncate" style="flex: 0 1 8em;text-align: center;">'
+                            + fld('ugr_Member') 
+                    + '</div>'
+                    + '<div class="edit-members ui-button ui-widget ui-state-default ui-corner-all ui-button-icon-only" style="height:16px;margin: 0px 60px;" '
+                      + 'title="Edit participation of user in groups">'
+                        + '<span class="ui-icon ui-icon-pencil"></span>'
+                    + '</div>';
+            }
 
-        html = html + '</div>';
+            if(ugl_GroupID>0){
+
+                html += '<div class="rec_actions user-list" style="flex:0 1 8em;">';
+
+                if(recID==2 && ugl_GroupID==window.hWin.HAPI4.sysinfo.db_managers_groupid){
+                    html += '<div style="min-width:88px;text-align:center">admin</div>';
+                }else 
+                if(window.hWin.HAPI4.has_access(ugl_GroupID)){ // current user is admin of given group
+
+                    html += '<select title="Role" style="min-width:70px;text-align:center;margin-right:18px;" class="user-role" data-value="'
+                                + fld('ugl_Role')+'">'
+                                +'<option>admin</option><option>member</option><option>remove</option></select>';
+
+                }else{
+
+                    html += '<div title="Role" style="min-width:88px;text-align:center">'
+                                + fld('ugl_Role')+'</div>';
+                }
+
+                html += '</div>';
+            }
+
+        }
+        
+        html += '<div class="truncate" style="flex: 0 5 20em;">'+fld('ugr_Organisation')+'</div>';
+
+        html += '</div>';
 
         return html;
         

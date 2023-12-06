@@ -54,6 +54,14 @@ $.widget( "heurist.searchSysGroups", $.heurist.searchEntity, {
         if(this.options.edit_mode=='inline'){
             this.btn_search_start.css('float','right');   
         }
+
+        if(this.options.ugl_UserID > 0){
+            this.btn_add_record.css({
+                bottom: '',
+                left: '',
+                right: '15px'
+            });
+        }
         
         this.input_search_role = this.element.find('#input_search_type');
         
