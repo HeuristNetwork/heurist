@@ -36,15 +36,16 @@
         <input name="isloginforced" type="hidden" value="false"/>
         <div class="header"><label>Filter button label</label></div>
         <input name="search_button_label" value=""/>
+        <span class="heurist-helper1" style="padding-left: 10px;">If blank, the button will only have an icon</span>
     </div>    
     <div  class="heurist_SearchInput">
-            <div class="header"><label>Label preceding filter field</label></div>
-            <input name="search_input_label" value=""/>
+        <div class="header"><label>Label preceding filter field</label></div>
+        <input name="search_input_label" value=""/>
+        <span class="heurist-helper1" style="padding-left: 10px;">If blank, the label will be omitted</span>
         </div>
     <div  class="heurist_SearchInput">
-            <div class="header"><label>Preliminary filter</label></div>
-            <input name="preliminary_filter" value=""/>
-            
+        <div class="header"><label>Preliminary filter</label></div>
+        <input name="sup_filter" value=""/>
     </div>
     <div  class="heurist_SearchInput">
         <div class="header"><label>Show filter builder button</label></div>
@@ -648,10 +649,11 @@
         <div class="header" style="vertical-align:top">
             <label>No data message</label>
         </div>
-        <textarea id="empty_remark" rows="3" style="width:500px"/>
-        <br>
-        <span class="heurist-helper1">
-            Message to be shown if query returns no records
+        <textarea id="empty_remark" rows="3" cols="85"/>
+        <label><input type="checkbox" name="blank_empty_remark"> check to leave blank</label>
+        <span class="heurist-helper1" style="display: inline-block;line-height: 12px;padding-bottom: 10px;">
+            Message to be shown if query returns no records<br>
+            Default value: "<span id="empty_remark_def"></span>"
         </span>
     </div>
 
@@ -659,10 +661,11 @@
         <div class="header" style="vertical-align:top">
             <label>Place holder text</label>
         </div>
-        <textarea id="placeholder_text" rows="3" style="width:500px"/>
-        <br>
-        <span class="heurist-helper1">
-            Message to display while search is not performed or no record or search has been selected
+        <textarea id="placeholder_text" rows="3" cols="85"/>
+        <label><input type="checkbox" name="blank_placeholder"> check to leave blank</label>
+        <span class="heurist-helper1" style="display: inline-block;line-height: 12px;padding-bottom: 10px;">
+            Message to display while search is not performed or no record or search has been selected<br>
+            Default value: "<span id="placeholder_def"></span>"
         </span>
     </div>
     

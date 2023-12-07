@@ -46,7 +46,8 @@ $.widget( "heurist.recordListExt", {
         onLoadComplete: null,  //callback
 
         empty_remark: null, //html content for empty message  (search returns empty result)
-        placeholder_text: null //text to display while no record/recordset is loaded  (search is not prefromed)
+        placeholder_text: null, //text to display while no record/recordset is loaded  (search is not prefromed)
+        blank_placeholder: false // leave placeholder blank
     },
 
     _current_url: null, //keeps current url - see loadURL 
@@ -436,7 +437,7 @@ $.widget( "heurist.recordListExt", {
                     }else{
                         this.div_content.empty();
                     }
-                }else{
+                }else if(!this.options.blank_placeholder){
                     
                     if(this.options.is_frame_based){
                         this.dosframe.attr('src', window.hWin.HRes('recordSelectMsg'));
