@@ -287,6 +287,7 @@ function hMapManager( _options )
                 +'</span>')
                 .css({'line-height':'15px',height:'14px',width:'50px',background: 'none',float:'right'})
                 .click(_createNewMapDocument)
+                //.click(function(){that.filterListMapDocuments(true);})
                 .appendTo($header);
                 
            //$header.addClass('with_supplementals');
@@ -333,8 +334,8 @@ function hMapManager( _options )
             
             var resdata = mapDocuments.getTreeData((groupID=='search')?0:'temp');
             
-            _refreshMapDocumentTree( resdata, content )
-        
+            _refreshMapDocumentTree( resdata, content, groupID);
+    
         }else if(groupID=='basemaps'){
             // load list of predefined base layers 
             // see extensive list in leaflet-providers.js
@@ -390,7 +391,7 @@ function hMapManager( _options )
             mapdoc_treeview = $('<div>');
             
             mapDocuments.loadMapDocuments(null, function(resdata){
-                        _refreshMapDocumentTree( resdata, mapdoc_treeview );
+                        _refreshMapDocumentTree( resdata, mapdoc_treeview, 'mapdocs' );
                         options.mapwidget.mapping('onInitComplete', 'mapdocs');
                     } );
             
@@ -462,7 +463,7 @@ function hMapManager( _options )
     // it is invoked on retieve of map document list 
     // or on update of search results
     //
-    function _refreshMapDocumentTree( resdata, tree_container ){
+    function _refreshMapDocumentTree( resdata, tree_container, groupid ){
 
         //create treeview data
         var treedata = [];
@@ -1521,30 +1522,39 @@ function hMapManager( _options )
             }
         },
         
-        
+        //
+        //
+        //
         filterListMapDocuments: function(visible_mapdocuments){
-            if($.isFunction($('body').fancytree) && options.visible_mapdocuments != visible_mapdocuments){
+            if($.isFunction($('body').fancytree) 
+                && ((visible_mapdocuments===true)  ////force
+                || options.visible_mapdocuments != visible_mapdocuments)){
                 
-                options.visible_mapdocuments = visible_mapdocuments;
-                
+                    if(visible_mapdocuments===true){
+                        visible_mapdocuments = options.visible_mapdocuments;
+                    }else{
+                        options.visible_mapdocuments = visible_mapdocuments;
+                    }
+                        
+        
                 var mapdoc_ids = visible_mapdocuments?visible_mapdocuments.split(';'):[];
                 
                 var tree = mapdoc_treeview.fancytree("getTree");
                 if(mapdoc_ids && mapdoc_ids.length>0){
-                    tree.filterBranches(function(node){
-                        return mapdoc_ids.indexOf(node.key)>=0;
+                    tree.filterBranches(function(node){  //filterNodes
+                        let res = mapdoc_ids.indexOf(node.key)>=0;
+                        if(res){
+                            $(node.li).show();    
+                        }else{
+                            $(node.li).hide()
+                        }
+                        return res;
                     }, {mode: "hide"});
-                    //that._treeview.fancytree('render')                          
                 }else{
                     tree.clearFilter();                
                 }
                 
                 that.setHeight();
-
-                //var mapdoc_treeview = options.container.find('.svs-acordeon[grpid="mapdocs"]').find('.tree-map');
-                //var tree = mapdoc_treeview.fancytree("getTree");
-                
-            
             }
         },
         
