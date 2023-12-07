@@ -180,8 +180,24 @@ if (!(@$_REQUEST['notimeline']=='true' || @$_REQUEST['notimeline']=='1')) { ?>
     div.svs-contextmenu3{
         right:7px;
         display:none;
-        background:lightgray;
-        color:black;/*#95A7B7;*/
+        background:#95A7B7;
+        color:black;
+    }
+
+    /* 'Edit layer' and 'Reload layer' buttons */
+    div.svs-contextmenu3 .ui-icon-pencil,
+    div.svs-contextmenu3 .ui-icon-refresh{
+        font-size: 12px;
+    }
+
+    /* 'Zoom to extent' button */
+    div.svs-contextmenu3 .ui-icon-arrow-4-diag{
+        font-size: 10px;
+    }
+
+    /* 'Add layer' button */
+    div.svs-contextmenu3 .ui-map-layer{
+        transform: scale(0.8);
     }
 
     .leaflet-control-browser-print{
