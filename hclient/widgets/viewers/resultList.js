@@ -58,6 +58,7 @@ $.widget( "heurist.resultList", {
 
         emptyMessageURL: null, //url of page to be loaded on empty result set 
         empty_remark: 'def', //html content for empty message (search returns no result)
+        blank_empty_remark: false, // leave empty remark blank
         pagesize: -1,
         
         
@@ -348,7 +349,10 @@ $.widget( "heurist.resultList", {
                         if(data.empty_remark){
 
                             let msg = data.is_facet && !window.hWin.HEURIST4.util.isempty(that.options.placeholder_text) ? 
-                                            that.options.placeholder_text : data.empty_remark;
+                                            that.options.placeholder_text : '';
+
+                            msg = window.hWin.HEURIST4.util.isempty(msg) && !that.options.blank_empty_remark && data.empty_remark ? 
+                                            data.empty_remark : '';
 
                             that.div_content.html( msg );
                         }else{
@@ -1376,7 +1380,7 @@ $.widget( "heurist.resultList", {
 
             window.hWin.HRes('resultListEmptyEntity', this.div_content);
             
-        }else{
+        }else if(!this.options.blank_empty_remark){
 
             var that = this;
             

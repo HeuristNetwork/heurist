@@ -923,17 +923,27 @@ $.widget( "heurist.mainMenu6", {
     //
     // List user's favourite filters
     //
-    populateFavouriteFilters: function(favourite_filters){
+    populateFavouriteFilters: function(favourite_filters, resize_only = false){
 
-        var that = this;
+        const that = this;
 
         if(!(this.menues && this.menues.explore && this.menues.explore.find('ul.favourite-filters').length != 0)){
             setTimeout(function(){ that.populateFavouriteFilters(favourite_filters); }, 1000);
             return;
         }
 
-        var $favourite_container = this.menues.explore.find('ul.favourite-filters');
+        let $favourite_container = this.menues.explore.find('ul.favourite-filters');
         if($favourite_container.length < 0){
+            return;
+        }
+
+        if(resize_only){ // just resize container
+
+            let cont_height = this.menues.explore.height() - $favourite_container.position().top; console.log('before => ', cont_height);
+            cont_height -= $favourite_container.find('li').length > 0 ? 60 : 110; console.log('after => ', cont_height);
+
+            $favourite_container.css('height', cont_height + 'px');
+
             return;
         }
 
@@ -946,7 +956,7 @@ $.widget( "heurist.mainMenu6", {
             this.menues.explore.find('.favour-help').show();
         }
 
-        var cont_height = this.menues.explore.height() - $favourite_container.position().top;
+        let cont_height = this.menues.explore.height() - $favourite_container.position().top;
         $favourite_container.css('height', cont_height + 'px');
 
         if(this.menues.explore[0].clientHeight <= this.menues.explore[0].scrollHeight){ 
@@ -960,9 +970,9 @@ $.widget( "heurist.mainMenu6", {
                 this.getSvsList();
             }
 
-            for(var filter of favourite_filters){
+            for(const filter of favourite_filters){
 
-                var $remove_btn = $('<span>')
+                let $remove_btn = $('<span>')
                                  .addClass('smallbutton ui-icon ui-icon-redo')
                                  .attr('title', 'Remove filter from favourites')
                                  .attr('data-fid', filter[0])
@@ -973,7 +983,7 @@ $.widget( "heurist.mainMenu6", {
                                     'color': 'black'
                                  });
 
-                var $txt = $('<span>')
+                let $txt = $('<span>')
                             .addClass('truncate')
                             .css({
                                 'font-size': '13px',
@@ -999,18 +1009,18 @@ $.widget( "heurist.mainMenu6", {
 
             if($favourite_container.find('li').length > 0){
 
-                var block_filter = false;
+                let block_filter = false;
 
                 this._on($favourite_container.find('li'), {
                     click: function(event){
 
                         if(block_filter) { return; } // user current re-ordering favourite filters
 
-                        var $ele = $(event.target);
+                        let $ele = $(event.target);
                         if($ele.is('span') && !$ele.hasClass('smallbutton')){ // filter text clicked
                             $ele = $ele.parents('li.fancytree-node');
                         }
-                        var id = $ele.attr('data-fid');
+                        let id = $ele.attr('data-fid');
 
                         if($ele.is('li.fancytree-node')){
                             this.svs_list.svs_list('doSearchByID', id, $ele.text()); // perform filter
@@ -1021,7 +1031,7 @@ $.widget( "heurist.mainMenu6", {
 
                             if(favourite_filters.length > 1){
                                 // remove from prefs
-                                var idx = favourite_filters.findIndex(filter => filter[0] == id);
+                                let idx = favourite_filters.findIndex(filter => filter[0] == id);
                                 favourite_filters.splice(idx, 1);
                             }else{
                                 favourite_filters = [''];
@@ -1052,10 +1062,10 @@ $.widget( "heurist.mainMenu6", {
                     },
                     stop: function(event, ui){
                         
-                        var new_order = [];
+                        let new_order = [];
 
                         $favourite_container.find('li').each(function(idx, ele){
-                            var $ele = $(ele);
+                            let $ele = $(ele);
                             new_order.push([$ele.attr('data-fid'), $ele.find('span.truncate').text()]);
                         });
 
@@ -1065,12 +1075,12 @@ $.widget( "heurist.mainMenu6", {
                     }
                 });
 
-                var cont_height = this.menues.explore.height() - $favourite_container.position().top - 50;
+                cont_height = this.menues.explore.height() - $favourite_container.position().top - 60;
                 $favourite_container.css('height', cont_height + 'px');
 
                 this.menues.explore.find('.favour-help').hide();
             }else{
-                var cont_height = this.menues.explore.height() - $favourite_container.position().top - 100;
+                cont_height = this.menues.explore.height() - $favourite_container.position().top - 110; 
                 $favourite_container.css('height', cont_height + 'px');
             }
         }
@@ -1653,6 +1663,8 @@ $.widget( "heurist.mainMenu6", {
             if(this._show_quick_tips){
                 this.showQuickTips();
             }
+
+            this.populateFavouriteFilters(null, true); // resize favourite filters section
         }
 
     },
