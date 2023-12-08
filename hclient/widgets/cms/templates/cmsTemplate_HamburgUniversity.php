@@ -80,7 +80,13 @@ body{
 .text2 a{
     position:relative !important;
 }
-
+.page {
+    width: 100%;
+    max-width: 1258px;
+    margin: auto;
+    overflow: hidden;
+    min-height: 400px;
+}
 
     </style>
     </head>
@@ -97,13 +103,13 @@ body{
 
         <div id="uhh-header-sublogo">
             <!-- HEURIST CMS LOGO IMAGE -->
-            <div class="text2">
+            <!--div class="text2">
                 <div id="main-title" style="display: table-cell;width: 70%;"></div>
                 <div id="main-title-alt" style="display: table-cell;"></div>
                 <div id="main-title-alt2" style="display: table-cell;"></div>
                 <div id="main-logo" style="width: 145px;display: table-cell"></div>
                 <div id="main-logo-alt" style="display: table-cell;min-width: 140px;height: 80px;"></div>
-            </div>
+            </div-->
 <?php            
     if(!$edit_OldEditor && $system->is_member(1)){
         print '<a href="'.HEURIST_BASE_URL.'?db='.$system->dbname().'" id="btn_editor" target="_blank" '
@@ -115,7 +121,9 @@ body{
         print '<a href="#" id="btn_signin" style="position:absolute;right:5px; top:5px;color:blue !important;font-weight: normal;" class="cms-button">login</a>'; // login link
     }
 ?>  
-            
+    	  <a href="<?php print $image_altlogo_url;?>">
+        		<div class="kurz"><?php print $title_alt . " " . $title_alt2;?></div>
+        		<h1 class="wortmarke"><b><?php print $title_alt;?></b><?php print $title_alt2;?></h1>            
             
             <a href="#"></a><!-- do not touch this stub for UH script -->
         </div>
@@ -147,7 +155,7 @@ body{
           </ul>
         </div>
     </body>
-    <script id="UHH-DOM" src="https://www.uni-hamburg.de/onTEAM/inc/dom/v43/insert.js" async
+    <script id="UHH-DOM" src="https://www.uni-hamburg.de/onTEAM/inc/dom/v5/insert.js" async
       data-options='{
         "header": {
           "language":{},
