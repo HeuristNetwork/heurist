@@ -4268,8 +4268,8 @@ $.widget( "heurist.resultList", {
                 pos['my'] = `${pos_my_left} ${pos_my_top}`;
 
                 // Set width and height
-                let prop_h = popup_dims.height.replace(/\D+/, ''); console.log(prop_h, popup_dims.height.indexOf('%'), window.hWin.innerHeight);
-                let prop_w = popup_dims.width.replace(/\D+/, ''); console.log(prop_w, popup_dims.width.indexOf('%'), window.hWin.innerWidth);
+                let prop_h = popup_dims.height.replace(/\D+/, '');
+                let prop_w = popup_dims.width.replace(/\D+/, '');
     
                 if(popup_dims.height.indexOf('%') > 0){ // percentage of available space
                     opts.height = window.hWin.innerHeight * (prop_h / 100);
