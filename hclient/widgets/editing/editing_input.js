@@ -307,10 +307,10 @@ $.widget( "heurist.editing_input", {
                                     let source = '';
                                     let target = $dlg.find('#selLang').val();
     
-                                    if(first_val.match(/\w{3}:/)){
+                                    if(first_val.match(/^\w{3}:/)){ // check for a source language
     
                                         // Pass as source language
-                                        source = first_val.match(/\w{3}:/)[0];
+                                        source = first_val.match(/^\w{3}:/)[0];
                                         source = source.slice(0, -1);
     
                                         first_val = first_val.slice(4); // remove lang prefix
