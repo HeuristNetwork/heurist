@@ -2694,7 +2694,23 @@ $.widget( "heurist.editing_input", {
                             default_palette_class: 'ui-heurist-populate',
                             width: 950,
                             onClose: (recset) => {
-                                // nothing to do / nothing to update
+
+                                // update external reference, if necessary
+                                if(window.hWin.HEURIST4.util.isRecordSet(recset)){
+
+                                    let record = recset.getFirstRecord();
+
+                                    let newvalue = {
+                                        ulf_ID: recset.fld(record,'ulf_ID'),
+                                        ulf_ExternalFileReference: recset.fld(record,'ulf_ExternalFileReference'),
+                                        ulf_OrigFileName: recset.fld(record,'ulf_OrigFileName'),
+                                        ulf_MimeExt: recset.fld(record,'fxm_MimeType'),
+                                        ulf_ObfuscatedFileID: recset.fld(record,'ulf_ObfuscatedFileID')
+                                    };
+
+                                    that.newvalues[$input.attr('id')] = newvalue;
+                                    that._findAndAssignTitle($input, newvalue);
+                                }
                             }
                         };
 
