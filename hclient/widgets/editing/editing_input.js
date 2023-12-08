@@ -307,10 +307,10 @@ $.widget( "heurist.editing_input", {
                                     let source = '';
                                     let target = $dlg.find('#selLang').val();
     
-                                    if(first_val.match(/\w{3}:/)){
+                                    if(first_val.match(/^\w{3}:/)){ // check for a source language
     
                                         // Pass as source language
-                                        source = first_val.match(/\w{3}:/)[0];
+                                        source = first_val.match(/^\w{3}:/)[0];
                                         source = source.slice(0, -1);
     
                                         first_val = first_val.slice(4); // remove lang prefix
@@ -2694,7 +2694,23 @@ $.widget( "heurist.editing_input", {
                             default_palette_class: 'ui-heurist-populate',
                             width: 950,
                             onClose: (recset) => {
-                                // nothing to do / nothing to update
+
+                                // update external reference, if necessary
+                                if(window.hWin.HEURIST4.util.isRecordSet(recset)){
+
+                                    let record = recset.getFirstRecord();
+
+                                    let newvalue = {
+                                        ulf_ID: recset.fld(record,'ulf_ID'),
+                                        ulf_ExternalFileReference: recset.fld(record,'ulf_ExternalFileReference'),
+                                        ulf_OrigFileName: recset.fld(record,'ulf_OrigFileName'),
+                                        ulf_MimeExt: recset.fld(record,'fxm_MimeType'),
+                                        ulf_ObfuscatedFileID: recset.fld(record,'ulf_ObfuscatedFileID')
+                                    };
+
+                                    that.newvalues[$input.attr('id')] = newvalue;
+                                    that._findAndAssignTitle($input, newvalue);
+                                }
                             }
                         };
 

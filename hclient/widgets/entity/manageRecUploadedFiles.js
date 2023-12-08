@@ -38,6 +38,8 @@ $.widget( "heurist.manageRecUploadedFiles", $.heurist.manageEntity, {
     _selectAllFiles: false, // checked when perform certain operations
     _downloadAllFiles: false, // download selected files, or all files
 
+    _lastFileDetails: null, // holds the saved final details for the current file, to be returned
+
     //
     //
     //
@@ -1109,17 +1111,19 @@ window.hWin.HAPI4.baseURL+'?db=' + window.hWin.HAPI4.database  //(needplayer?'&p
                 this._additionMode = null; //reset
                 if(this.options.select_mode=='select_single'){
                     this._selection = new hRecordSet();
-                    //{fields:{}, order:[recID], records:[fieldvalues]});
                     this._selection.addRecord(recID, fieldvalues);
                     this._selectAndClose();
                     return;        
-                }else{
+                }else if(this.searchForm && this.searchForm.searchRecUploadedFiles('instance')){ // trigger search refresh
+                    
                     var domain = (window.hWin.HEURIST4.util.isempty(fieldvalues['ulf_ExternalFileReference']))?'local':'external';
-                    if(fieldvalues('ulf_OrigFileName').indexOf('_tiled')==0){
-                            domain = 'tiled';
-                    }
                     //it was insert - select recent and search
                     this.searchForm.searchRecUploadedFiles('searchRecent', domain);
+                }else if(this.options.select_mode == 'manager' && this.options.edit_mode == 'editonly'){
+
+                    // update cached record set
+                    this._lastFileDetails = new hRecordSet();
+                    this._lastFileDetails.addRecord(recID, fieldvalues);
                 }
             }
         }
@@ -1772,6 +1776,10 @@ window.hWin.HAPI4.baseURL+'?db=' + window.hWin.HAPI4.database  //(needplayer?'&p
         }
 
         return true;
+    },
+
+    contextOnClose: function(){
+        return this._lastFileDetails;
     }
     
 });

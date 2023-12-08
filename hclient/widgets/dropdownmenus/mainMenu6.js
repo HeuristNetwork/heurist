@@ -939,8 +939,8 @@ $.widget( "heurist.mainMenu6", {
 
         if(resize_only){ // just resize container
 
-            let cont_height = this.menues.explore.height() - $favourite_container.position().top; console.log('before => ', cont_height);
-            cont_height -= $favourite_container.find('li').length > 0 ? 60 : 110; console.log('after => ', cont_height);
+            let cont_height = this.menues.explore.height() - $favourite_container.position().top;
+            cont_height -= $favourite_container.find('li').length > 0 ? 60 : 110;
 
             $favourite_container.css('height', cont_height + 'px');
 

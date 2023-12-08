@@ -284,7 +284,11 @@
             $url .= '&source_lang=' . $source_language;
         }
 
-        $url .= '&tag_handling=xml';
+        if(strpos($string, '<?xml') === 0){ // possible xml
+            $url .= '&tag_handling=xml';
+        }else{ // assume html
+            $url .= '&tag_handling=html';
+        }
         
         $additional_headers = array('Authorization: DeepL-Auth-Key ' . $accessToken_DeepLAPI);
 
