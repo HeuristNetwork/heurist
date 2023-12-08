@@ -121,11 +121,11 @@ body{
         print '<a href="#" id="btn_signin" style="position:absolute;right:5px; top:5px;color:blue !important;font-weight: normal;" class="cms-button">login</a>'; // login link
     }
 ?>  
-    	  <a href="<?php print $image_altlogo_url;?>">
-        		<div class="kurz"><?php print $title_alt . " " . $title_alt2;?></div>
-        		<h1 class="wortmarke"><b><?php print $title_alt;?></b><?php print $title_alt2;?></h1>            
-            
-            <a href="#"></a><!-- do not touch this stub for UH script -->
+    	  
+          <div class="kurz"><a href="<?php print $image_altlogo_url;?>"><?php print $title_alt . " " . $title_alt2;?></a></div>
+          <h1 class="wortmarke"><a href="<?php print $image_altlogo_url;?>"><b><?php print $title_alt;?></b><?php print $title_alt2;?></a></h1>
+          
+          <a href="#"></a><!-- do not touch this stub for UH script -->
         </div>
 
         <div id="uhh-header-nav">
