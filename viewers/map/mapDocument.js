@@ -475,6 +475,11 @@ function hMapDocument( _options )
     //
     function _defineZooms( mapdoc_id ){
         if(mapdoc_id!='temp'){
+            
+            if(options.mapwidget.mapping('option','useWidgetZoomSettingsOnly')){
+                return;    
+            } 
+            
             var record2 = map_documents.getById( mapdoc_id );
             if(DT_ZOOM_KM_POINT>0){
                 var val = map_documents.fld(record2, DT_ZOOM_KM_POINT);

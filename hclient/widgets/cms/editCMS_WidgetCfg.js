@@ -268,6 +268,10 @@ function editCMS_WidgetCfg( widget_cfg, _layout_content, $dlg, main_callback ){
                         $dlg.find('input[name="popup_resizing"]').prop('checked', false); //opts.layout_params['popup_resizing']
                     }
                     
+                    $dlg.find('input[name="ignore_mapdoc_zoom"]').prop('checked', false);
+                    if(opts.layout_params['ignore_mapdoc_zoom']){
+                        $dlg.find('input[name="ignore_mapdoc_zoom"]').prop('checked', opts.layout_params['ignore_mapdoc_zoom']);
+                    }
                     if(opts.layout_params['maxzoom']>0){
                         $dlg.find('input[name="map_maxzoom"]').val(opts.layout_params['maxzoom']);        
                     }
@@ -1137,6 +1141,9 @@ function editCMS_WidgetCfg( widget_cfg, _layout_content, $dlg, main_callback ){
             layout_params['popup_height'] = $dlg.find('input[name="popup_height"]').val() + $dlg.find('select[name="popup_hunit"]').val();
             layout_params['popup_resizing'] = false;//$dlg.find('input[name="popup_resizing"]').is(':checked')
             
+            if($dlg.find('input[name="ignore_mapdoc_zoom"]').is(':checked')){
+                layout_params['ignore_mapdoc_zoom'] = $dlg.find('input[name="ignore_mapdoc_zoom"]').is(':checked');
+            }
             if($dlg.find('input[name="map_maxzoom"]').val()>0){
                 layout_params['maxzoom'] = $dlg.find('input[name="map_maxzoom"]').val();
             }

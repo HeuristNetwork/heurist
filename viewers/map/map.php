@@ -298,6 +298,7 @@ if (!(@$_REQUEST['notimeline']=='true' || @$_REQUEST['notimeline']=='1')) { ?>
         layout_params['published'] = __gp('published');
         layout_params['popup'] = __gp('popup');
         layout_params['map_rollover'] = __gp('map_rollover');
+        layout_params['ignore_mapdoc_zoom'] = __gp('ignore_mapdoc_zoom');
         layout_params['maxzoom'] = __gp('maxzoom');
         layout_params['minzoom'] = __gp('minzoom');
         layout_params['pntzoom'] = __gp('pntzoom');

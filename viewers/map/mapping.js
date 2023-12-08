@@ -140,6 +140,7 @@ $.widget( "heurist.mapping", {
         map_rollover: false,
         map_popup_mode: 'standard', //,'dialog'
         
+        useWidgetZoomSettingsOnly: false, //overwrite widget min,max zoom setting by mapdocument values
         zoomToPointInKM: 5,  //is set either from map documet DT_ZOOM_KM_POINT or from url parameters
         zoomMaxInKM: 0,
         zoomMinInKM: 0,
@@ -911,7 +912,7 @@ $.widget( "heurist.mapping", {
         
         this._updatePanels();
         
-        /*
+        /* layer does not global min and max zooms
         if(layer_options){
             if(layer_options['maxZoom']>0)
             {
@@ -3292,6 +3293,7 @@ $.widget( "heurist.mapping", {
         //default selection style
         this.selection_style = this.setStyleDefaultValues(null, true, true);
         
+        this.options.useWidgetZoomSettingsOnly = __parseval(params['ignore_mapdoc_zoom']);
         
         //these settings may be overwritten by map document, by basemap or by tiled layer
         if(params['maxzoom']>0){
@@ -3310,7 +3312,7 @@ $.widget( "heurist.mapping", {
         if(this.options.zoomMinInKM>0){
             var zoomNative = this.convertZoomToNative(this.options.zoomMinInKM);
             if(zoomNative>=0){
-                this.defineMinZoom('widget', zoomNative);
+                this.defineMinZoom('widget', zoomNative); //on widget init
             }
         }
         
