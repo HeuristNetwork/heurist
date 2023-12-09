@@ -1,7 +1,7 @@
--- Heurist Definitions Exchange File generated: 31 Jul 2023 @ 13:04
+-- Heurist Definitions Exchange File generated: 09 Dec 2023 @ 09:39
 -- Installation = https://heuristref.net/h6-alpha/
 -- Database = Heurist_Core_Definitions
--- Program Version: 6.3.20
+-- Program Version: 6.5.0
 -- Database Version: 1.3.15
 
 -- RECORD TYPE GROUPS
@@ -4704,6 +4704,7 @@
 ('1097','Bibliographic citation','Please document the nature of this detail type (field)) ...','resource','A citation of a bibliographic record along with page reference and notes','','','open','2','Bibliographic citation','1097','1','0','','','102','','1','viewable','2023-06-02 19:10:36','0',''),
 ('1098','IIIF Annotation','Please document the nature of this detail type (field)) ...','blocktext','The IIIF annotation information for this annotation','','','open','2','IIIF Annotation','1098','1','0','','','','','1','viewable','2023-06-08 19:19:11','0',''),
 ('1099','Website template','Please document the nature of this detail type (field)) ...','freetext','Specify the name of a template php file in the /HEURIST/hclient/widgets/cms/templates/ directory to provide a particular (eg. institutional) layout The template will have been set up by the server administrator.','','','open','2','Website template','1099','138','0','','','','','1','viewable','2023-07-23 18:32:29','1',''),
+('1100','Is visible','Please document the nature of this detail type (field)) ...','enum','Is object visible','','','open','2','Is visible','1100','1','0','6247','','','','1','viewable','2023-12-09 20:35:25','0',''),
 >>EndData>>
 
  
@@ -4834,7 +4835,7 @@
 ('1931','25','39','Thumbnail image','Thumbnail image for map layer, up to 400 wide, for display normally 100 - 200 wide in search results, lists and reports','','004','60','3','','0','0','','recommended','public','approved','open','1','1931','1','0','1','0','','','0','addorbrowse','','0','','0','0','','','2022-11-03 21:02:30','1','','0'),
 ('1932','25','148','Copyright owner','Person or organisation that holds copyright','Person or organisation that holds copyright','017','0','3','','0','0','','optional','public','open','open','2','1932','1','0','1','1','','','0','addorbrowse','','0','','0','0','','','2023-01-23 02:56:24','0','','0'),
 ('1933','25','76','Attribution','','','014','0','3','tabs','0','0','','optional','public','open','open','2','1933','1','0','1','1','','','0','addorbrowse','','0','','0','0','','','2023-01-23 02:56:24','0','','0'),
-('1934','25','80','Behaviours','Note: these parameters may not yet be operational - please contact Heurist team if you need them.','','008','0','3','tabs','0','0','','optional','public','open','open','2','1934','1','0','1','1','','','0','addorbrowse','','0','','0','0','','','2023-01-23 02:56:24','0','','0'),
+('1934','25','80','Behaviours','Note: these parameters may not yet be operational - please contact Heurist team if you need them.','','007','0','3','tabs','0','0','','optional','public','open','open','2','1934','1','0','1','1','','','0','addorbrowse','','0','','0','0','','','2023-12-09 20:26:50','0','','0'),
 ('1936','11','1','Title for tiled image data source','A short title for the image file which will be used as its default legend name','','001','60','3','','1','0','','required','public','reserved','open','2','72','1','1','1','0','','','0','addorbrowse','','0','','0','0','','','2022-11-03 21:02:30','1','','0'),
 ('1937','11','3','Brief description','Short summary, typically used in annotated listings, information popups and so forth. Aim for 100 - 200 words.','','002','100','3','','0','0','','recommended','public','approved','open','2','75','1','0','1','1','','','0','addorbrowse','','0','','0','0','','','2022-11-03 21:02:30','1','','0'),
 ('1938','11','15','Creator(s)','The person or organisation who created the resource','May include authors, artists, organisations that sponsored a resource etc.','012','0','3','','0','0','','optional','public','open','open','2','1938','0','0','1','1','','','0','addorbrowse','','0','','0','0','','','2022-11-03 21:02:30','0','','0'),
@@ -4871,7 +4872,7 @@
 ('1972','29','148','Copyright owner','Person or organisation that holds copyright','','009','0','3','','0','0','','recommended','public','approved','open','2','1972','1','0','1','1','','','0','addorbrowse','','0','','0','0','','','2022-11-03 21:02:30','0','','0'),
 ('1973','29','76','Attribution','','','006','0','3','tabs','0','0','','optional','public','open','open','2','1973','1','0','1','1','','','0','addorbrowse','','0','','0','0','','','2023-01-12 21:16:12','0','','0'),
 ('1974','25','169','Map layer data source','The file or service which delivers the map data - Shapefile, KML, GeoTIF, Tiled image, MrSID service etc.','','002','0','3','','0','0','','required','public','reserved','open','2','1974','1','1','1','1','','','0','addorbrowse','','0','','0','0','','','2022-11-03 21:02:30','0','','0'),
-('1975','25','170','Min zoom for layer display (km)','The minimum zoom below which the map layer is turned off (if the larger map dimension falls below this)','','009','40','3','','0','0','','recommended','public','open','open','2','1975','1','0','1','1','','','0','dropdown_add','','0','','0','0','','','2023-01-23 02:56:24','0','','0'),
+('1975','25','170','Min zoom for layer display (km)','The minimum zoom below which the map layer is turned off (if the larger map dimension falls below this)','','009','40','3','','0','0','','recommended','public','open','open','2','1975','1','0','1','1','','','0','dropdown_add','','0','','0','0','','','2023-12-09 20:35:27','0','','0'),
 ('1976','25','171','Max zoom for layer display (km)','The maximum zoom above which the map layer is turned off or the map cannot be zoomed out (if the larger map dimension falls below this)','','010','40','3','','0','0','','recommended','public','open','open','2','1976','1','0','1','1','','','0','dropdown_add','','0','','0','0','','','2023-01-23 02:56:24','0','','0'),
 ('1977','25','172','Hide in legend outside zoom range','Hide the map layer altogether in the legend if map is outside the zoom range specified in previous fields','','011','0','3','5205','0','0','','recommended','public','reserved','open','2','1977','1','0','1','1','','','0','addorbrowse','','0','','0','0','','','2023-01-23 02:56:24','0','','0'),
 ('1979','25','174','Type of data source','Define the type of data source which will be rendered in this map layer','','003','0','3','5211','0','0','','required','public','reserved','open','2','1979','1','1','1','1','','','0','addorbrowse','','0','','0','0','','','2022-11-03 21:02:30','0','','0'),
@@ -5596,7 +5597,7 @@
 ('3198','99','177','Symbology','Specifications for symbol, line and fill styles on vector layers. Use the <u>style editor</u> link next to the field to choose values.','','002','60','2','','0','','','optional','public','open','open','2','3198','1','0','1','','','','0','addorbrowse','','','','0','0','','','2022-11-03 21:02:30','0','','0'),
 ('3199','99','1','Symbology name','A concise but descriptive unique name/description of this symbology. Include the field types for which the symbology is relevant.','','001','60','3','','0','','','required','public','open','open','2','3199','1','0','1','','','','0','addorbrowse','','','','0','0','','','2022-11-03 21:02:30','0','','0'),
 ('3200','99','39','Thumbnail of appearance','An image of up to 400 pixels wide, showing what this symbology looks like','','003','100','3','','0','','','optional','public','open','open','2','3200','1','0','1','','','','0','addorbrowse','','','','0','0','','','2022-11-03 21:02:30','0','','0'),
-('3201','25','1079','Override layer style','A pointer to a Map Layer Style record containign a style which overrides the style set in the Symbology field','','007','100','3','','0','','','optional','public','open','open','2','3201','1','0','1','','','','0','addorbrowse','','','','0','0','','','2023-01-23 02:56:24','0','','0'),
+('3201','25','1079','Override layer style','A pointer to a Map Layer Style record containign a style which overrides the style set in the Symbology field','','006','100','3','','0','','','optional','public','open','open','2','3201','1','0','1','','','','0','addorbrowse','','','','0','0','','','2023-12-09 20:26:50','0','','0'),
 ('3206','52','36','Original ID','The original ID of the record in a source spreadsheet or database from which these data were imported','','021','5','3','','0','','','optional','public','open','open','2','3206','1','0','1','','','','0','addorbrowse','','','','0','0','','','2022-11-03 21:02:30','0','','0'),
 ('3207','51','36','Original ID','The original ID of the record in a source spreadsheet or database from which these data were imported','','036','5','3','','0','','','optional','public','open','open','2','3207','1','0','1','','','','0','addorbrowse','','','','0','0','','','2023-07-31 00:12:21','0','','0'),
 ('3208','3','986','URL(s)','The URL(s) of resources or web pages relating to the current record. Include http:// or https:// <br>\nIf there is a primary URL, turn on the special URL field in the record type definition (Attributes) form., which will become a hotlink.','','004','100','3','','0','','','optional','public','open','open','2','3208','1','0','1','','','','0','addorbrowse','','','','0','0','','','2022-11-03 21:02:30','0','','0'),
@@ -5717,6 +5718,7 @@
 ('3341','51','1099','Website template','Specify the name of a template php file in the /HEURIST/hclient/widgets/cms/templates/ directory to provide a particular (eg. institutional) layout The template will have been set up by the server administrator.','','029','60','3','','0','','','optional','public','open','open','2','3341','1','0','1','','','','0','dropdown_add','','','','0','0','','','2023-07-31 00:12:21','0','','0'),
 ('3342','51','918','Record info target','HTML id of target element where record info will be loaded. Reserved values are: \'recordview\' - in main-recordview div on the same page; \'popup\' - info will be opened in popup window. Otherwise it will be opened in new browser tab','Please provide an extended description for display on rollover ...','028','40','3','','0','','','optional','public','open','open','2','3342','1','0','1','','','','0','dropdown_add','','','','0','0','','','2023-07-31 00:12:21','0','','0'),
 ('3344','51','967','Languages','Select languages supported by this website. First in list is default one. Define textual content in particular language by click \"Translate\" in dropdown menu','','004','100','3','','0','','','optional','public','open','open','2','3344','0','0','1','','','','0','dropdown_add','','','','0','0','','','2023-07-30 14:13:06','0','','0'),
+('3346','25','1100','Initialy visible','Is layer visible on mapdocument initialization','','008','100','3','5444','0','','','recommended','public','open','open','2','3346','1','0','1','','','','0','dropdown_add','','','','0','0','','','2023-12-09 09:37:49','0','','0'),
 >>EndData>>
 
  
@@ -5813,6 +5815,7 @@
 ('m4u','video/vnd.mpegurl','0','movie.gif','M4U Playlist File','','2012-03-01 00:50:22'),
 ('man','application/x-troff-man','0','','','','0000-00-00 00:00:00'),
 ('mathml','application/mathml+xml','1','','MathML','','0000-00-00 00:00:00'),
+('mbtiles','application/x-sqlite3','0','','tileserver map image','','2023-10-18 17:40:26'),
 ('me','application/x-troff-me','0','','Readme Text','','2012-03-01 00:51:18'),
 ('mesh','model/mesh','0','','','','0000-00-00 00:00:00'),
 ('mid','audio/midi','0','movie.gif','MIDI audio','','0000-00-00 00:00:00'),
