@@ -196,7 +196,7 @@ function hMapDocument( _options )
                         $res['mapdoc_id'] = mapdoc_id; //reference to parent mapdoc
                         
                         var layer_rec = that.getLayer(mapdoc_id, recID);
-                        if(layer_rec && mapdoc_id==0){
+                        if(layer_rec && layer_rec['layer']){ // && mapdoc_id==0
                             $res['selected'] = (layer_rec['layer']).isVisible();  
                         }else{
                             $res['selected'] = true;
@@ -398,7 +398,7 @@ function hMapDocument( _options )
                     //creates and add layer to nativemap
                     //returns mapLayer object
                     record['source_rectype'] = resdata.fld(datasource_record, 'rec_RecTypeID');  //for icon in legend
-                    record['layer'] = new hMapLayer2({rec_layer: record, 
+                    record['layer'] = new hMapLayer2({rec_layer: record,      //on mapdoc open
                                                       rec_datasource: datasource_record, 
                                                       mapdoc_recordset: resdata, //need to get fields
                                                       mapwidget: options.mapwidget});
@@ -565,7 +565,7 @@ function hMapDocument( _options )
                                         //creates and add layer to nativemap
                                         //returns mapLayer object
                                         record2['source_rectype'] = resdata.fld(datasource_record, 'rec_RecTypeID'); //for icon in legend
-                                        record2['layer'] = new hMapLayer2({rec_layer: record, 
+                                        record2['layer'] = new hMapLayer2({rec_layer: record,  //on add layer
                                                                           rec_datasource: datasource_record, 
                                                                           mapdoc_recordset: resdata, //need to get fields
                                                                           mapwidget: options.mapwidget,
@@ -820,7 +820,7 @@ function hMapDocument( _options )
             const preserveViewport = (mapdoc_id!=0) || (dataset_options.viewport===true);
             
             recset.setFld(_record, 'layer',
-                        new hMapLayer2({rec_datasource: _record, 
+                        new hMapLayer2({rec_datasource: _record,   //adds search results or query as a new layer
                                         mapdoc_recordset: recset, //need to get fields
                                         mapwidget: options.mapwidget,  //need to call back addGeoJson when data ara obtained from server
                                         mapdocument_id: mapdoc_id,
@@ -906,7 +906,7 @@ function hMapDocument( _options )
             
             _record['source_rectype'] = RT_QUERY_SOURCE;  //for icon in legend
             recset.setFld(_record, 'layer',
-                        new hMapLayer2({recordset: recordset,
+                        new hMapLayer2({recordset: recordset,  //adds recordset
                                         rec_datasource: _record, 
                                         mapdoc_recordset: recset, //need to get fields
                                         mapwidget: options.mapwidget,

@@ -33,7 +33,7 @@ function hMapLayer2( _options ) {
         // mapdoc_recordset: // recordset to retrieve values from rec_layer and rec_datasource
         
         // rec_layer:       // record of type Heurist layer, it is needed 
-                           // for symbology (DT_SYMBOLOGY), thematic map (DT_MAP_THEMATIC) and min/max zoom
+                            // for symbology (DT_SYMBOLOGY), thematic map (DT_MAP_THEMATIC) and min/max zoom
         // rec_datasource:  // record of type map datasource
         
         // not_init_atonce  - if true don't add to nativemap
@@ -65,18 +65,28 @@ function hMapLayer2( _options ) {
     function _init( _options ){
 
         options = $.extend(options, _options);
-        
+
         if(options.record_id>0){
             //search record on server side
             _searchLayerRecord( options.record_id );
             
             options.record_id = -1;
         }else{
+            
 
             _recordset = options.mapdoc_recordset;
             _record = options.rec_datasource;
             _parent_mapdoc = options.mapdocument_id;
-            
+
+            if(typeof options.not_init_atonce === 'undefined'){
+                if(window.hWin.HAPI4.sysinfo['dbconst']['DT_IS_VISIBLE']>0 && options.rec_layer){
+                    var is_initailly_visible = _recordset.fld(options.rec_layer, 
+                        window.hWin.HAPI4.sysinfo['dbconst']['DT_IS_VISIBLE']);
+                        
+                    options.not_init_atonce = (is_initailly_visible==window.hWin.HAPI4.sysinfo['dbconst']['TRM_NO']);
+                }
+            }
+
             if(options.not_init_atonce) return;
             
             _addLayerToMap();

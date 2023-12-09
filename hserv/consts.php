@@ -294,6 +294,7 @@ $dtDefines = array('DT_NAME' => array(2, 1),
     //note that minimum in km turns to maximum in native zoom  
     'DT_MINIMUM_ZOOM' => array(3, 1086), //in UI this field acts as maximum zoom in km
     'DT_MAXIMUM_ZOOM' => array(3, 1085), //in UI this field acts as minimum zoom in km  
+    'DT_IS_VISIBLE' => array(2, 1100),   //is layer initially visible on mapdocument initialization
     
     'DT_SERVICE_URL' => array(2, 34),
     'DT_URL' => array(3, 1058),
