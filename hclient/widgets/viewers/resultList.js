@@ -1463,7 +1463,7 @@ $.widget( "heurist.resultList", {
                             var q = that._query_request.q, rt = 0;
                             if ($.isPlainObject(q) && Object.keys(q).length==1 && !q['t']){
                                 rt = q['t'];
-                            }else if (q.indexOf('t:')==0){
+                            }else if (typeof q === 'string' && q.indexOf('t:')==0){
                                   q = q.split(':');
                                   if(window.hWin.HEURIST4.util.isNumber(q[1])){
                                       rt = q[1];
