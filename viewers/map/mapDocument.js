@@ -296,7 +296,9 @@ function hMapDocument( _options )
                     if(order){
                         
                         if($.isArray(order)){
-                            request['q']['sortby'] = 'set:'+order.join(',');
+                            //simplify request if order is set
+                            request['q'] = {"ids":order.join(','),"sortby":'set:'+order.join(',')};
+                            //request['sortby'] = 'set:'+order.join(',');
                         }
                     
                     }else if(DT_MAP_LAYER>0){
