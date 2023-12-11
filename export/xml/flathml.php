@@ -1932,7 +1932,7 @@ if($intofile){ // flags HuNI manifest + separate files per record
                     <p style="margin-top: 1em;">
                         The HuNI project (Humanities Networked Infrastructure, <a href="https://huni.net.au" target="_blank" rel="noopener">https://huni.net.au</a>) 
                         funded as a Virtual Laboratory by the Australian National eResearch Collaboration Tools and Resources Project 
-                        (<a href="https://nectar.org.au">NeCTAR</a>, has built a central searchable aggregate of metadata harvested from 28 Australian 
+                        (<a href="https://nectar.org.au">NeCTAR</a>), has built a central searchable aggregate of metadata harvested from 28 Australian 
                         cultural datasets, including AusStage, AusLit, Dictionary of Art and Architecture Online, Australian Dictionary of Biography, 
                         Circus Oz and Paradisec</p>
 
