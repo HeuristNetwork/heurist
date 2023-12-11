@@ -1172,9 +1172,8 @@ $.widget( "heurist.mapping", {
                 });
             } 
             */   
-            
+
             this.all_layers[new_layer._leaflet_id] = new_layer;
-            
                 
             if(!this.notimeline){
                 this.updateTimelineData(new_layer._leaflet_id, timeline_data, options.timeline_dty_ids, dataset_name);
@@ -1665,7 +1664,7 @@ $.widget( "heurist.mapping", {
 
         if(affected_layer){
            
-            if(affected_layer.layers){
+            if(!this.isImageLayer(affected_layer)){
             
                 this._clearHighlightedMarkers(layer_id);
                 

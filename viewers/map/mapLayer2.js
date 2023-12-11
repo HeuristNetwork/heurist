@@ -653,7 +653,8 @@ function hMapLayer2( _options ) {
                                     dataset_name:_recordset.fld(options.rec_layer || _record, 'rec_Title'),  //name for timeline
                                     dataset_type:'db',
                                     preserveViewport:options.preserveViewport });
-                                                         
+                                       
+                                       
                         //_triggerLayerStatus( 'visible' );
                         _setVisibilityForZoomRange();   
                         
@@ -1212,7 +1213,7 @@ function hMapLayer2( _options ) {
             if(is_outof_range) return;
             
             var status = null;
-           
+            
             if(is_inited){
                 if(_nativelayer_id>0){
                     status =  (is_visible)?'visible':'hidden';

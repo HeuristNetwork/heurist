@@ -790,6 +790,7 @@ function hMapDocument( _options )
                 map_documents_content[mapdoc_id] = new hRecordSet(); //create new recordset - list of layers for mapdocument
             }
             
+            //recset - list of layers in mapdoc
             var recset = map_documents_content[mapdoc_id];
             
             //dataset_name is unique within mapdoc
