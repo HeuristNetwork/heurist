@@ -133,7 +133,9 @@ $.widget( "heurist.resultList", {
         },
         recview_private_details: null, // how to handle the 'more...' section
 
-        field_for_ext_classes: 20 // add class related to field value to record's row; 0 - disabled, n > 0 - detail type id
+        field_for_ext_classes: 20, // add class related to field value to record's row; 0 - disabled, n > 0 - detail type id
+
+        show_export_button: false // display to that opens the export menu, for exporting the current result set
     },
 
     _is_publication:false, //this is CMS publication - take css from parent
@@ -179,6 +181,8 @@ $.widget( "heurist.resultList", {
     _sortResult_was_changed: false,
     
     _currentSavedFilterID: 0,
+
+    export_button: null, // button to export current recordset
     
     // the constructor
     _create: function() {
@@ -370,7 +374,10 @@ $.widget( "heurist.resultList", {
 
                         if(that.btn_search_save){
                             that.btn_search_save.hide();
-                        } 
+                        }
+                        if(that.export_button){
+                            that.export_button.hide();
+                        }
                     }else if(that._query_request!=null && recset.queryid()==that._query_request.id) {
                         
                         //it accepts only results that has the same query id as it was set in ON_REC_SEARCHSTART
@@ -388,6 +395,9 @@ $.widget( "heurist.resultList", {
                                 that.search_save_hint.show('fade',{},1000);
                                 setTimeout(function(){that.search_save_hint.hide('slide', {}, 6000);}, 5000);    
                             }
+                        }
+                        if(that.export_button){
+                            that.export_button.show();
                         }
                     }
                     
@@ -792,8 +802,39 @@ $.widget( "heurist.resultList", {
                     .appendTo(this.div_toolbar);
                 }
             }
-        }    
-        
+        }
+
+        if(this.options.show_export_button){
+
+            this.export_button = $('<button>', {
+                text: window.hWin.HR('Export'), title: window.hWin.HR('Export current results'), 
+                class: 'ui-heurist-btn-header1 btnExportRecords', style: 'margin: 6px 0px 2px; float: right;'
+            }).button({
+                icons: {
+                    primary: 'ui-icon-upload'
+                },
+                showLabel: false
+            }).prependTo(this.div_toolbar);
+
+            this._on(this.export_button, {
+                click: function(){
+
+                    if(!this._currentRecordset || this._currentRecordset.length() == 0){
+                        window.hWin.HEURIST4.msg.showMsgFlash('No records to export...', 3000);
+                        return;
+                    }
+
+                    // Set current query and current recordset
+                    window.hWin.HEURIST4.current_query_request = this._query_request;
+                    window.hWin.HAPI4.currentRecordset = this._currentRecordset;
+
+                    // open export menu in dialog/popup
+                    let url = `${window.hWin.HAPI4.baseURL}hclient/framecontent/exportMenu.php?db=${window.hWin.HAPI4.database}`;
+                    window.hWin.HEURIST4.msg.showDialog(url, {width: 650, height: 568});
+                }
+            });
+        }
+
         if(this.options.header_class){
             this.div_header.addClass(this.options.header_class);
             this.div_toolbar.removeClass('ui-heurist-bg-light').addClass(this.options.header_class);
@@ -1020,7 +1061,8 @@ $.widget( "heurist.resultList", {
                     this.sortResultList.remove();
                     this.sortResultListDlg.remove();
             }
-        } 
+        }
+        if(this.export_button) { this.export_button.remove(); }
         if(this.div_actions) this.div_actions.remove();
         if(this.div_search_form) this.div_search_form.remove();
         if(this.fancybox_button) this.fancybox_button.remove();

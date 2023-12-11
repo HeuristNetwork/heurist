@@ -178,12 +178,7 @@ function hexportMenu( container ) {
             window.hWin.HAPI4.SystemMgr.user_log(link.attr('data-logaction'));
         }
 
-        if(event.target && $(event.target).attr('data-nologin')!='1'){
-            //check if login
-            window.hWin.HAPI4.SystemMgr.verify_credentials(function(){window.hWin.HEURIST4.msg.showDialog(url, options);});
-        }else{
-            window.hWin.HEURIST4.msg.showDialog(url, options);
-        }        
+        window.hWin.HEURIST4.msg.showDialog(url, options);
 
         event.preventDefault();
         return false;
@@ -211,10 +206,7 @@ function hexportMenu( container ) {
         if(action_log){
             window.hWin.HAPI4.SystemMgr.user_log(action_log);
         }
-        
-        window.hWin.HAPI4.SystemMgr.verify_credentials(
-        function(){
-        
+
         if(action == "menu-export-csv"){
         
            
@@ -256,8 +248,6 @@ function hexportMenu( container ) {
         }else if(action == "menu-export-atom"){ //hidden
             _exportFeed('atom');
         }
-      
-        });
         
         event.preventDefault();
     }    
@@ -367,32 +357,30 @@ function hexportMenu( container ) {
             
             if(opts.format=='hml'){
                 script = 'export/xml/flathml.php';                
-                
+
                 //multifile is for HuNI  
                 params =  params + (opts.multifile?'&multifile=1':'');  
-               
+
             }else{
                 
                 script = 'hserv/controller/record_output.php';
                 
                 if(opts.format=='iiif'){
-                    
-                        
-                        
-                        if(opts.save_as_file==='mirador'){
-                            //create dynamic manifest with given set of media
-                            script = 'hclient/widgets/viewers/miradorViewer.php'
-                        }else{
-                            params = 'format=iiif';    
-                        }
-                }else {
-                        params = params + '&format='+opts.format+'&defs=0&extended='+($('#extendedJSON').is(':checked')?2:1);
-                    
-                        if(opts.format=='gephi' && $('#limitGEPHI').is(':checked')){
-                            params = params + '&limit=1000';    
-                        }else if(opts.format=='geojson'){
-                            params = params + '&detail_mode='+$('input[name="detail_mode"]:checked').val();        
-                        }
+
+                    if(opts.save_as_file==='mirador'){
+                        //create dynamic manifest with given set of media
+                        script = 'hclient/widgets/viewers/miradorViewer.php'
+                    }else{
+                        params = 'format=iiif';
+                    }
+                }else{
+                    params = params + '&format='+opts.format+'&defs=0&extended='+($('#extendedJSON').is(':checked')?2:1);
+
+                    if(opts.format=='gephi' && $('#limitGEPHI').is(':checked')){
+                        params = params + '&limit=1000';    
+                    }else if(opts.format=='geojson'){
+                        params = params + '&detail_mode='+$('input[name="detail_mode"]:checked').val();        
+                    }
                 }
             }
             
