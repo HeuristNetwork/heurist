@@ -47,7 +47,8 @@ $.widget( "heurist.recordListExt", {
 
         empty_remark: null, //html content for empty message  (search returns empty result)
         placeholder_text: null, //text to display while no record/recordset is loaded  (search is not prefromed)
-        blank_placeholder: false // leave placeholder blank
+        
+        show_export_button: false // show button to export current record set
     },
 
     _current_url: null, //keeps current url - see loadURL 
@@ -58,7 +59,8 @@ $.widget( "heurist.recordListExt", {
     _is_publication:false, //this is CMS publication - take css from parent
 
     placeholder_ele: null, //element holding the placeholder text
-    reportPopupDlg: null,
+    
+    export_button: null, // export button
 
     // the constructor
     _create: function() {
@@ -94,6 +96,55 @@ $.widget( "heurist.recordListExt", {
             if(!this.options.popup_width) this.options.popup_width = this.element.css('width');
             if(!this.options.popup_height) this.options.popup_height = this.element.css('height');
             this.element.hide();
+        }
+
+        if(this.options.show_export_button){
+
+            this.export_button = $('<button>', {
+                text: window.hWin.HR('Export'), title: window.hWin.HR('Export current results'), 
+                class: 'ui-heurist-btn-header1 btnExportRecords', style: 'height:25px;width:75px;position:absolute;top:5px;right:15px;'
+            })
+            .button({
+                icons: {
+                    primary: 'ui-icon-upload'
+                }
+            })
+            .prependTo(this.div_content);
+
+            this._on(this.export_button, {
+                click: function(){
+
+                    if(!this.options.recordset || this.options.recordset.length() == 0){
+                        window.hWin.HEURIST4.msg.showMsgFlash('No records to export...', 3000);
+                        return;
+                    }
+
+                    // Set current query and current recordset
+                    if(!this._query_request && this.options.selection && this.options.selection.length > 0){
+                        window.hWin.HEURIST4.current_query_request = {
+                            q: `[{"ids":"${this.options.selection.join(',')}"}]`,
+                            w: 'a',
+                            db: window.hWin.HAPI4.database,
+                            search_realm: this.options.search_realm
+                        };
+                    }else{
+                        window.hWin.HEURIST4.current_query_request = this._query_request;
+                    }
+
+                    if(this.options.selection && this.options.selection.length > 0){ // filter complete subset by selected records
+
+                        let records = this.options.recordset.getSubSetByIds(this.options.selection);
+                        window.hWin.HAPI4.currentRecordset = records;
+                    }else{
+                        window.hWin.HAPI4.currentRecordset = this.options.recordset;
+                    }
+
+                    // open export menu in dialog/popup
+                    let url = `${window.hWin.HAPI4.baseURL}hclient/framecontent/exportMenu.php?db=${window.hWin.HAPI4.database}`;
+                    window.hWin.HEURIST4.msg.showDialog(url, {width: 650, height: 568});
+                }
+            });
+
         }
 
         //-----------------------     listener of global events
