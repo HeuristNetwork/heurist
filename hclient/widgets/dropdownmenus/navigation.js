@@ -432,7 +432,7 @@ $.widget( "heurist.navigation", {
         var menu_content = this.getMenuContent(null, 0, this.options.menu_recIDs, 0);     
         var DT_NAME = window.hWin.HAPI4.sysinfo['dbconst']['DT_NAME'];
         
-        if(this.ids_recurred.length>0){
+        if(this.ids_recurred.length>0 && window.hWin.HAPI4.has_access()){
             var s = [];
             for(var i=0;i<this.ids_recurred.length;i++){
                 s.push(this.ids_recurred[i]+' '
