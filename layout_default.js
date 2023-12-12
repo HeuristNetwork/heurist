@@ -123,7 +123,7 @@ var cfg_layouts = [
     {id:'H6Default', name:'Heurist Def v6', theme:'heurist', type:'free',
         north_pane:{ dropable:false, dragable:false, 
                 css:{position:'absolute', top:0,left:0,height:'50px',right:'-2px', 
-                     'min-width':'75em'}, 
+                     'min-width':'77em'}, 
             apps:[{appid:'heurist_mainMenu', hasheader:false, css:{height:'100%', border:'solid'}}] 
         },
         center_pane:{ dockable:false, dropable:false, dragable:false, 

@@ -2586,6 +2586,7 @@ $.widget( "heurist.mainMenu", {
 
         let is_alpha = window.hWin.HAPI4.baseURL.match(/h\d+-alpha|alpha/);
         let suggestion_txt = '';
+        let styling = {float:'left', 'margin-left':'25px', width:'360px', 'font-size':'0.85em', cursor:'default'};
 
         if(!is_alpha){ // need to check that an alpha version is available on this server
             window.hWin.HAPI4.SystemMgr.check_for_alpha({a:'check_for_alpha'}, function(response){ 
@@ -2597,8 +2598,10 @@ $.widget( "heurist.mainMenu", {
                 suggestion_txt = `<a style="cursor: pointer;text-decoration: underline;" href="${response.data + location.search}" id="lnk_change">`
                                + `Use the latest (alpha) version</a> (recommended)`;
 
+                styling['margin-top'] = '1.2em';
+
                 that.version_message = $("<div>")
-                    .css({display:'inline-block', 'margin-top':' 1.2em', 'margin-left':'5em', width:'360px', 'font-size':'0.85em', cursor:'default'})
+                    .css(styling)
                     .insertAfter(that.div_dbname)
                     .html(suggestion_txt);
             });
@@ -2608,8 +2611,10 @@ $.widget( "heurist.mainMenu", {
                 + '<a style="cursor: pointer;text-decoration: underline;" href="#" id="lnk_change">standard version</a>'
                 + ' PLEASE REPORT BUGS.';
 
+            styling['margin-top'] = '0.9em';
+
             this.version_message = $("<div>")
-                .css({display:'inline-block', 'margin-top':' 0.9em', 'margin-left':'5em', width:'360px', 'font-size':'0.85em', cursor:'default'})
+                .css(styling)
                 .insertAfter(this.div_dbname)
                 .html(suggestion_txt);
 
