@@ -828,6 +828,11 @@ $.widget( "heurist.resultList", {
                     window.hWin.HEURIST4.current_query_request = this._query_request;
                     window.hWin.HAPI4.currentRecordset = this._currentRecordset;
 
+                    let selected = this.getSelected(true); console.log(selected);
+                    if(selected && selected.length > 0){
+                        window.hWin.HAPI4.currentRecordsetSelection = selected;
+                    }
+
                     // open export menu in dialog/popup
                     let url = `${window.hWin.HAPI4.baseURL}hclient/framecontent/exportMenu.php?db=${window.hWin.HAPI4.database}`;
                     window.hWin.HEURIST4.msg.showDialog(url, {width: 650, height: 568});
