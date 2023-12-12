@@ -3449,10 +3449,21 @@ $.widget( "heurist.mapping", {
                             */
                             
                     }else
-                    //print plugin
                     if(val=='print'){
-                        that.map_print = L.control.browserPrint({ position: 'topleft' })
+                        //browser.print plugin
+                        that.map_print = L.control.browserPrint({ position: 'topleft' });
                         $(that.map_print).find('.browser-print-mode').css({padding: '2px 10px !important'}); //.v1 .browser-print-mode
+                        
+                        that.nativemap.on("browser-print-start", function(e){ //browser-pre-print
+                                    L.control.scale({
+                                        position: 'topleft',
+                                        //imperial: false,
+                                        maxWidth: 200
+                                    }).addTo(e.printMap);
+                                });                        
+                                        
+                        
+                        
                     }else
                     if(val=='publish'){ //publish plugin
                         that.map_publish = L.control.publish({ position: 'topleft', mapwidget:that });
@@ -3624,6 +3635,7 @@ $.widget( "heurist.mapping", {
         }
 
         if(that.map_print){
+            // browser.print plugin
             toolbar.find('.ui-icon-print').button()
             .attr('title', window.hWin.HR('Print map'))
             .on({click:function(){  
@@ -3633,6 +3645,7 @@ $.widget( "heurist.mapping", {
             $(that.map_print.getContainer()).css({border:'none',height:'0px !important',
                 width:'0px !important','margin-left':'200px'});
             $('.leaflet-browser-print').hide();
+            
         }else{
             toolbar.find('.ui-icon-print').hide();
         }
