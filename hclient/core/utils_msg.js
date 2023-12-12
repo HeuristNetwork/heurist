@@ -236,7 +236,7 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
                 if(ele.attr('type')!='checkbox' || ele.is(':checked')){
                     val =  ele.val();
                 }
-                callbackFunc.call(this,val);
+                callbackFunc.call(this, val);
             }
         },
         window.hWin.HEURIST4.util.isempty(sTitle)?'Specify value':sTitle, ext_options);

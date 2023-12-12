@@ -191,6 +191,8 @@ $.widget( "heurist.mapping", {
     map_help: null,
     map_scale: null,
     
+    printScaleMode: 'none', //position of scale control for printing out
+    
     //popup element
     main_popup: null,
     mapPopUpTemplate: null,  //name of popup template (from map params)
@@ -3451,15 +3453,27 @@ $.widget( "heurist.mapping", {
                     }else
                     if(val=='print'){
                         //browser.print plugin
-                        that.map_print = L.control.browserPrint({ position: 'topleft' });
+                        that.map_print = L.control.browserPrint(
+                            { position: 'topleft', 
+                              /*documentTitle: 'Heurist map',
+                              printModesNames: {Portrait: window.hWin.HR('Portrait'),
+                                                Landscape: window.hWin.HR('Landscape'),
+                                                Auto: window.hWin.HR('Auto'),
+                                                Custom: 'Select Area'},
+                              */
+                              manualMode: false
+                            });
+                            
                         $(that.map_print).find('.browser-print-mode').css({padding: '2px 10px !important'}); //.v1 .browser-print-mode
                         
                         that.nativemap.on("browser-print-start", function(e){ //browser-pre-print
+                            if(that.printScaleMode!='none'){
                                     L.control.scale({
-                                        position: 'topleft',
+                                        position: that.printScaleMode,
                                         //imperial: false,
                                         maxWidth: 200
                                     }).addTo(e.printMap);
+                            }
                                 });                        
                                         
                         
@@ -3520,6 +3534,11 @@ $.widget( "heurist.mapping", {
                 }
                 
                 if(that['map_'+val] && !that['map_'+val]._map) that['map_'+val].addTo(that.nativemap);
+                
+                if(val=='print'){
+                    $('ul.browser-print-holder').css('display','none'); //hide default print modes popup
+                    $('a.leaflet-browser-print').css('cursor','pointer').on({click:function(){that.onPrintStart(that)}}); //redefine action
+                }
                 
             }else if(that['map_'+val]){
                 that['map_'+val].remove();
@@ -3638,9 +3657,7 @@ $.widget( "heurist.mapping", {
             // browser.print plugin
             toolbar.find('.ui-icon-print').button()
             .attr('title', window.hWin.HR('Print map'))
-            .on({click:function(){  
-                $('.browser-print-mode').css('display','inline-block');
-            }});
+            .on({click:function(){that.onPrintStart(that)}});
 
             $(that.map_print.getContainer()).css({border:'none',height:'0px !important',
                 width:'0px !important','margin-left':'200px'});
@@ -3843,6 +3860,43 @@ $.widget( "heurist.mapping", {
         
     },
     
+    //
+    //
+    //
+    onPrintStart: function(that){
+                //$('.browser-print-mode').css('display','inline-block'); //show print modes
+                //return;
+                
+                window.hWin.HEURIST4.msg.showMsgDlg(
+'<fieldset>'
++'<div><label class="header_narrow">'+window.hWin.HR('Title')+':</label>'
+    +'<input id="dlg-prompt-title" class="text ui-corner-all" style="max-width: 250px; min-width: 10em; width: 250px; margin-left:0.2em"/></div><div><label class="header_narrow">'
++ window.hWin.HR('Scale')+':</label><select id="dlg-prompt-scale"  class="text ui-corner-all">'
+    +'<option value="topleft">'+window.hWin.HR('Top left')+'</option>'
+    +'<option value="topright">'+window.hWin.HR('Top right')+'</option>'
+    +'<option value="bottomleft">'+window.hWin.HR('Bottom left')+'</option>'
+    +'<option value="none">'+window.hWin.HR('None')+'</option>'
+    +'</select></div><div><label class="header_narrow">'
++window.hWin.HR('Mode')+':</label><select id="dlg-prompt-mode"  class="text ui-corner-all">'
+    +'<option value="Auto">'+window.hWin.HR('Auto')+'</option>'
+    +'<option value="Custom">'+window.hWin.HR('Select Area')+'</option>'
+    +'<option value="Portrait">'+window.hWin.HR('Portrait')+'</option>'
+    +'<option value="Landscape">'+window.hWin.HR('Landscape')+'</option></select></div></fieldset>',
+                function(){
+                        var $dlg = window.hWin.HEURIST4.msg.getMsgDlg('dialog-common-messages');      
+                        var sTitle = $dlg.find('#dlg-prompt-title').val();
+                        $('div.grid-map-print-title > h3').text(sTitle);
+
+                        that.printScaleMode = $dlg.find('#dlg-prompt-scale').val();
+                        
+                        var sMode = $dlg.find('#dlg-prompt-mode').val();
+                        
+                        var modeToUse = L.BrowserPrint.Mode[sMode]();
+                        that.map_print.browserPrint.print(modeToUse);
+                },
+                {title:window.hWin.HR('Print map'), yes:'Print'});
+                
+    },
     
     //
     //

@@ -39,14 +39,6 @@ if($_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0.0.1'){
 <?php
 }else{
 ?>
-<!--  v 1.7
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css"
-      integrity="sha512-xodZBNTC5n17Xt2atTPuE1HxjVMSvLVW9ocqUKLsCC5CXdbqCmblAshOMAS6/keqq/sMZMZ19scR4PsZChSR7A=="
-      crossorigin=""/>
-    <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"
-      integrity="sha512-XQoYMqMTK8LvdxXYG3nZ448hOEQiglfqkJs1NOQV44cWnUrBc8PkAOcXy20w0vlaXaVUearIOBhiXZ5V3ynxwA=="
-      crossorigin=""></script>
--->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
 
@@ -243,6 +235,27 @@ if (!(@$_REQUEST['notimeline']=='true' || @$_REQUEST['notimeline']=='1')) { ?>
         filter: invert(100%); grayscale(100%) sepia(100%) hue-rotate(180deg)
     }    
     */
+    
+</style>
+
+<!-- map print layout with custom title -->
+<style leaflet-browser-print-content>
+    .grid-print-container {
+        grid-template: auto 1fr auto / 1fr;
+        background-color: none;
+    }
+    .grid-map-print {
+        grid-row: 2;
+    }
+    .grid-map-print-title {
+        grid-row: 1;
+        justify-self: center;
+        color: black;
+    }
+    .sub-content {
+        grid-row: 5;
+        padding-left: 10px;
+    }
 </style>
 
 <!-- Initializing -->
@@ -484,5 +497,6 @@ if (!(@$_REQUEST['notimeline']=='true' || @$_REQUEST['notimeline']=='1')) { ?>
         
     </div>
     
+    <div class="grid-map-print-title" leaflet-browser-print-content><h3>Heurist map printing out</h3></div>    
 </body>
 </html>
