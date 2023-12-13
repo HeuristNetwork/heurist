@@ -1950,13 +1950,14 @@ $.widget( "heurist.editing_input", {
 
                             if($.isFunction(that._external_relmarker.callback)){
                                 that._external_relmarker.callback(context);
-
-                                that.__external_relmarker = {
-                                    target: null,
-                                    relation: null,
-                                    callback: null
-                                };
                             }
+
+                            // Reset relmarker details for lookups
+                            that._external_relmarker = {
+                                target: null,
+                                relation: null,
+                                callback: null
+                            };
                         }
                         
                         var rty_names = '';
