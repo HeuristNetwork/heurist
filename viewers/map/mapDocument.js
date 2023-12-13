@@ -1080,40 +1080,7 @@ function hMapDocument( _options )
 
             var ext = null;
             
-            if(map_documents!=null && mapdoc_id!='temp'){ //for temp always zoom to real extent
-            
-                var record2 = map_documents.getById( mapdoc_id );
-
-                ext = window.hWin.HEURIST4.geo.getWktBoundingBox(
-                            map_documents.getFieldGeoValue(record2, DT_GEO_OBJECT));
-                            
-                if(options.mapwidget.mapping('getCurrentCRS')=='Simple'){
-                    
-                    if($.isArray(ext) && ext.length==2){
-                        var max_dim = Math.max(ext[1][0]-ext[0][0], ext[1][1]-ext[0][1]);
-
-                        var maxzoom =  Math.ceil(
-                            Math.log(
-                                max_dim /
-                                256
-                            ) / Math.log(2)
-                        );        
-                    
-                        if(maxzoom>0 && max_dim>512){
-                            var nativemap = options.mapwidget.mapping('getNativeMap');
-                            var latlong1 = nativemap.unproject([ext[0][1],ext[0][0]], maxzoom);
-                            var latlong2 = nativemap.unproject([ext[1][1],ext[1][0]], maxzoom);
-                            
-                            ext = [latlong1, latlong2];
-                        }          
-                    }
-                            
-                }else            
-                if(ext==null){
-                    ext = window.hWin.HEURIST4.geo.getHeuristBookmarkBoundingBox(
-                            map_documents.fld(record2, DT_MAP_BOOKMARK));
-                }
-            }    
+            ext = that.getMapDocumentBounds(mapdoc_id);
                 
             if(ext!=null){ 
 
@@ -1131,7 +1098,51 @@ function hMapDocument( _options )
             }
         },
         
-             
+        //
+        // Get map doc bounds
+        //
+        getMapDocumentBounds: function(mapdoc_id){
+
+            let ext = null;
+
+            if(map_documents!=null && mapdoc_id!='temp'){ //for temp always zoom to real extent
+            
+                let record2 = map_documents.getById( mapdoc_id );
+
+                ext = window.hWin.HEURIST4.geo.getWktBoundingBox(
+                            map_documents.getFieldGeoValue(record2, DT_GEO_OBJECT));
+                            
+                if(options.mapwidget.mapping('getCurrentCRS')=='Simple'){
+                    
+                    if($.isArray(ext) && ext.length==2){
+                        let max_dim = Math.max(ext[1][0]-ext[0][0], ext[1][1]-ext[0][1]);
+
+                        let maxzoom =  Math.ceil(
+                            Math.log(
+                                max_dim /
+                                256
+                            ) / Math.log(2)
+                        );        
+                    
+                        if(maxzoom>0 && max_dim>512){
+                            let nativemap = options.mapwidget.mapping('getNativeMap');
+                            let latlong1 = nativemap.unproject([ext[0][1],ext[0][0]], maxzoom);
+                            let latlong2 = nativemap.unproject([ext[1][1],ext[1][0]], maxzoom);
+                            
+                            ext = [latlong1, latlong2];
+                        }          
+                    }
+                            
+                }else            
+                if(ext==null){
+                    ext = window.hWin.HEURIST4.geo.getHeuristBookmarkBoundingBox(
+                            map_documents.fld(record2, DT_MAP_BOOKMARK));
+                }
+            }
+
+            return ext;
+        },
+
         //
         // returns layer record OR mapdocument record (if rec_id is not defined)
         //

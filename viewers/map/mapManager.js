@@ -821,7 +821,7 @@ function hMapManager( _options )
             var actionspan = '<div class="svs-contextmenu3" '
                     +((mapdoc_id>=0 || mapdoc_id=='temp')?('" data-mapdoc="'+mapdoc_id+'"'):'')
                     +(recid>0?('" data-recid="'+recid+'"'):'')+'>'
-                +'<span class="ui-icon ui-icon-arrow-4-diag" '
+                +'<span class="ui-icon ui-icon-zoom zoom-to-extent" '
                     +((item.data.type=='mapdocument' && !item.data.extent)?'style="color:gray"':'')
                     +' title="Zoom to '+item.data.type+' extent"></span>';
                     
@@ -883,9 +883,9 @@ function hMapManager( _options )
                     var recid = ele.parents('.svs-contextmenu3').attr('data-recid');
                     var mapdoc_id = ele.parents('.svs-contextmenu3').attr('data-mapdoc');
                     
-                        if(ele.hasClass('ui-icon-arrow-4-diag')){
+                        if(ele.hasClass('zoom-to-extent')){
+
                             //zoom to extent
-                            
                             if(recid>0){
                                 
                                 if(mapdoc_id>=0 || mapdoc_id=='temp'){
@@ -896,7 +896,11 @@ function hMapManager( _options )
                             }else if(mapdoc_id>0){
                                     mapDocuments.zoomToMapDocument(mapdoc_id);
                             }
-                            
+
+                            // Update zoom icon
+                            ele.removeClass('ui-icon-zoom ui-icon-zoomin ui-icon-zoomout');
+                            ele.addClass('ui-icon-zoom');
+
                         }else if(ele.hasClass('ui-icon-plus')){ //add new layer to map document
                         
                             var in_progress = __in_progress();
@@ -1039,7 +1043,45 @@ function hMapManager( _options )
                         node = $(event.target).parents('.fancytree-node');
                     }
                     if(! ($(node).hasClass('fancytree-loading') || $(node).find('.svs-contextmenu4').is(':visible')) ){
-                        var ele = $(node).find('.svs-contextmenu3');
+
+                        let ele = $(node).find('.svs-contextmenu3');
+
+                        let mapdoc_id = ele.attr('data-mapdoc');
+                        let rec_id = ele.attr('data-recid');
+
+                        // Get bounds
+                        let bounds = null;
+                        let zooms = null;
+                        if(rec_id > 0 && (mapdoc_id>=0 || mapdoc_id=='temp')){ // layer
+
+                            let layer_rec = mapDocuments.getLayer(mapdoc_id, recid);
+                            bounds = (layer_rec['layer']).getBounds();
+                        }else if(mapdoc_id > 0){ // map document
+                            bounds = mapDocuments.getMapDocumentBounds(mapdoc_id);
+                        }
+
+                        // Get zoom details
+                        if(bounds){
+                            zooms = options.mapwidget.mapping('getBoundsZooms', bounds); // possible zoom level and current zoom
+                        }
+
+                        // Update zoom icon
+                        let $zoom = ele.find('.zoom-to-extent');
+                        $zoom.removeClass('ui-icon-zoom ui-icon-zoomin ui-icon-zoomout');
+                        if(zooms){
+
+                            zooms = (zooms.zoom > zooms.cur_zoom) ? 'ui-icon-zoomin' : zooms;
+
+                            zooms = (window.hWin.HEURIST4.util.isJSON(zooms) && zooms.zoom < zooms.cur_zoom) ? 
+                                        'ui-icon-zoomout' : zooms;
+
+                            zooms = (window.hWin.HEURIST4.util.isJSON(zooms)) ? 'ui-icon-zoom' : zooms;
+
+                        }else{
+                            zooms = 'ui-icon-zoom';
+                        }
+                        $zoom.addClass(zooms);
+
                         ele.css({'display':'inline-block'});//.css('visibility','visible');
                     }
                 }

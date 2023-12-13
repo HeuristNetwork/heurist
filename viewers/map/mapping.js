@@ -1655,6 +1655,19 @@ $.widget( "heurist.mapping", {
                 }             
             }
     },
+
+    getBoundsZooms: function(bounds){
+
+        if(bounds && !(bounds instanceof L.LatLngBounds)){
+            if($.isArray(bounds) && bounds.length>1 ){
+                bounds = L.latLngBounds(bounds);
+            }
+        }
+
+        if(bounds && bounds.isValid()){
+            return {zoom: this.nativemap.getBoundsZoom(bounds), cur_zoom: this.nativemap.getZoom()};
+        }
+    },
     
     //
     // remove top layer
