@@ -748,8 +748,9 @@ function hMapManager( _options )
                                 dcss['width']  = 16-weight*2; 
                                 dcss['height'] = 16-weight*2;
                                 
-                                dcss['border'] = weight+'px solid '
-                                                + window.hWin.HEURIST4.ui.hexToRgbStr(style['color'], opacity);
+                                const clr = window.hWin.HEURIST4.ui.hexToRgbStr(style['color'], opacity);
+                                dcss['border'] = (clr!=null)?(weight+'px solid '+clr):'none';
+                                                
                                 if ( style['opacity']>0 && style['opacity']<1 ) {
                                     dcss['-webkit-background-clip'] = 'padding-box'; //for Safari
                                     dcss['background-clip'] = 'padding-box'; //for IE9+, Firefox 4+, Opera, Chrome
@@ -759,10 +760,14 @@ function hMapManager( _options )
                                 dcss['border'] = 'none';
                             }
 
+                            var fillColor = null;
                             if(style['fill']!==false){
-                                var fillColor = style['fillColor']?style['fillColor']:style['color'];
+                                fillColor = style['fillColor']?style['fillColor']:style['color'];
                                 var fillOpacity = style['fillOpacity']>0?style['fillOpacity']:0.2;
-                                dcss['background-color'] = window.hWin.HEURIST4.ui.hexToRgbStr(fillColor, fillOpacity);
+                                fillColor = window.hWin.HEURIST4.ui.hexToRgbStr(fillColor, fillOpacity);
+                            }
+                            if (fillColor != null){
+                                dcss['background-color'] = fillColor;
                             }else{
                                 dcss['background'] = 'none';
                             }
