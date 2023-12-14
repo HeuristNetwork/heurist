@@ -1,4 +1,4 @@
--- Heurist Definitions Exchange File generated: 14 Dec 2023 @ 13:46
+-- Heurist Definitions Exchange File generated: 14 Dec 2023 @ 14:31
 -- Installation = https://heuristref.net/h6-alpha/
 -- Database = Heurist_Core_Definitions
 -- Program Version: 6.5.0
@@ -4308,21 +4308,21 @@
 ('9490','World base map (WGS84) vocab','','Worldwide base maps (OSM, Stamen, Google, ESRI etc.','open','2','World base map (WGS84) vocab','9490','0','0','enum','0','0','','1','2022-07-27 04:56:42','0','','','','18',''),
 ('9491','_NONE','','Use this if other map layers are not in standard WGS84 / GPS coordinates','open','2','_NONE (set EPSG below)','9491','0','0','enum','0','0','9490','1','2022-07-27 08:33:33','1','','','','',''),
 ('9492','OpenStreetMap','','','open','2','1. OSM Open Street Map','9492','0','0','enum','0','0','9490','1','2022-07-27 05:07:30','1','','','','',''),
-('9493','Open.TopoMap','','','open','2','2. Open TopoMap','9493','0','0','enum','0','0','9490','1','2022-07-27 05:08:44','1','','','','',''),
+('9493','OpenTopoMap','','','open','2','2. Open TopoMap','9493','0','0','enum','0','0','9490','1','2023-12-14 14:24:41','1','','','','',''),
 ('9494','MapBox.StreetMap','','','open','2','3. MapBox StreetMap','9494','0','0','enum','0','0','9490','1','2022-07-27 05:08:58','1','','','','',''),
 ('9495','MapBox.Satellite','','','open','2','4. MapBox Satellite','9495','0','0','enum','0','0','9490','1','2022-07-27 05:09:10','1','','','','',''),
 ('9496','MapBox.Combined','','','open','2','5. MapBox Combined','9496','0','0','enum','0','0','9490','1','2022-07-27 05:09:19','1','','','','',''),
 ('9497','MapBox.Relief','','','open','2','6. MapBox Relief','9497','0','0','enum','0','0','9490','1','2022-07-27 05:09:29','1','','','','',''),
-('9498','ESRI.WorldStreetMap','','','open','2','7. ESRI World Streetmap','9498','0','0','enum','0','0','9490','1','2022-07-27 05:09:56','1','','','','',''),
-('9499','ESRI.WorldTopMap','','','open','2','8.ESRI Wolrd Topmap','9499','0','0','enum','0','0','9490','1','2022-07-27 05:10:21','1','','','','',''),
-('9500','ESRI.WorldImagery','','','open','2','. ESRI WorldImagery','9500','0','0','enum','0','0','9490','1','2022-07-27 05:10:39','1','','','','',''),
-('9501','ESRI.WorldShadedRelief','','','open','2','10. ESRI World Shaded Relief','9501','0','0','enum','0','0','9490','1','2022-07-27 05:07:49','1','','','','',''),
+('9498','Esri.WorldStreetMap','','','open','2','7. ESRI World Streetmap','9498','0','0','enum','0','0','9490','1','2023-12-14 14:27:55','1','','','','',''),
+('9499','Esri.WorldTopoMap','','','open','2','8.ESRI Wolrd Topmap','9499','0','0','enum','0','0','9490','1','2023-12-14 14:28:02','1','','','','',''),
+('9500','Esri.WorldImagery','','','open','2','. ESRI WorldImagery','9500','0','0','enum','0','0','9490','1','2023-12-14 14:27:41','1','','','','',''),
+('9501','Esri.WorldShadedRelief','','','open','2','10. ESRI World Shaded Relief','9501','0','0','enum','0','0','9490','1','2023-12-14 14:27:48','1','','','','',''),
 ('9502','Stamen.Toner','','','open','2','11. Stamen Toner','9502','0','0','enum','0','0','9490','1','2022-07-27 05:08:01','1','','','','',''),
 ('9503','Stamen.TonerLite','','','open','2','12. Stamen Toner Lite','9503','0','0','enum','0','0','9490','1','2022-07-27 05:08:17','1','','','','',''),
 ('9504','Stamen.TerrainBackground','','','open','2','13. Stamen Terrain Background','9504','0','0','enum','0','0','9490','1','2022-07-27 05:08:32','1','','','','',''),
 ('9505','Stamen.Watercolor','','','open','2','Stamen.Watercolor','9505','0','0','enum','0','0','9490','1','2022-07-27 05:06:17','0','','','','',''),
-('9506','ESRI.NatGeoWorldMap','','','open','2','ESRI.NatGeoWorldMap','9506','0','0','enum','0','0','9490','1','2022-07-27 05:06:39','0','','','','',''),
-('9507','ESRI.WorldGrayCanvas','','','open','2','ESR.WorldGrayCanvas','9507','0','0','enum','0','0','9490','1','2022-07-27 05:13:37','1','','','','',''),
+('9506','Esri.NatGeoWorldMap','','','open','2','ESRI.NatGeoWorldMap','9506','0','0','enum','0','0','9490','1','2023-12-15 01:27:26','1','','','','',''),
+('9507','Esri.WorldGrayCanvas','','','open','2','ESR.WorldGrayCanvas','9507','0','0','enum','0','0','9490','1','2023-12-14 14:27:33','1','','','','',''),
 >>EndData>>
 
  
