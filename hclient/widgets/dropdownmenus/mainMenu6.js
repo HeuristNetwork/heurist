@@ -1661,6 +1661,7 @@ $.widget( "heurist.mainMenu6", {
             }
 
             if(this._show_quick_tips){
+                this._show_quick_tips = false; //show once
                 this.showQuickTips();
             }
 
