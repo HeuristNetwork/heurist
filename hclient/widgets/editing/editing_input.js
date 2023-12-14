@@ -830,24 +830,29 @@ $.widget( "heurist.editing_input", {
     _setAutoWidth: function(){
 
         if(this.options.is_faceted_search) return;
-        
-        var that = this; 
+
+        let units = this.options.recordset && this.options.recordset.entityName == 'Records' ? 'ch' : 'ex';
+        let $parent_container = this.inputs.length > 0 ? $(this.inputs[0]).parents('.editForm.recordEditor') : [];
+
         //auto width
         if ( this.detailType=='freetext' || this.detailType=='integer' || 
              this.detailType=='float' || this.detailType=='url' || this.detailType=='file'){
-            $.each(this.inputs, function(index, input){ 
-                var ow = $(input).width(); //current width
-                if(ow<580){
-                    var nw = ($(input).val().length+3)+'ex';
+
+            $.each(this.inputs, function(index, input){
+
+                input = $(input);
+
+                let ow = input.width(); // current width
+                let max_w = $parent_container.length > 0 ? $parent_container.width() - 280 : 600;
+                max_w = !max_w || max_w <= 0 ? 600 : max_w;
+
+                if(Math.ceil(ow) < Math.floor(max_w)){
+
+                    let nw = `${input.val().length+3}${units}`;
                     $(input).css('width', nw);
-                    if($(input).width()<ow) $(input).width(ow); //we can only increase - restore
-                    else if($(input).width()>600){
-                        if($(input).parents('fieldset').width()>0){
-                            $(input).width($(input).parents('fieldset').width()-20);    
-                        }else{
-                            $(input).width(600); 
-                        }
-                    } 
+
+                    if(input.width() < ow) input.width(ow); // we can only increase - restore
+                    else if(input.width() > max_w) input.width(max_w); // set to max
                 }
             });
         }

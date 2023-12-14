@@ -1027,7 +1027,6 @@ function openSearchMenu(that, $select, has_filter=true){
                                 end_pos = right_arrow ? cur_val.length : start_pos;
                                 swap_start = true;
                             }else{
-                                end_pos = end_pos;
                                 start_pos = right_arrow ? end_pos : 0;
                             }
 
@@ -1043,7 +1042,6 @@ function openSearchMenu(that, $select, has_filter=true){
                                 swap_start = true;
                             }else{
                                 start_pos = right_arrow ? ++cur_start : --cur_start;
-                                end_pos = end_pos;
                             }
 
                         }else if(ctrl_pressed){

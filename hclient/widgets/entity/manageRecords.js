@@ -3483,12 +3483,12 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
 
             if(max_length_fields.length > 0){ // Set the selected freetext and memo/blocktext fields to 'max' width
 
-                var popup_maxw = this.editForm.width() * ((this.options.rts_editor) ? 0.7 : 0.75);
+                let popup_maxw = this.editForm.width() * ((this.options.rts_editor) ? 0.7 : 0.75) - 40;
 
-                for(var i = 0; i < max_length_fields.length; i++){
+                for(let i = 0; i < max_length_fields.length; i++){
 
-                    var width = popup_maxw;
-                    var field = this._editing.getFieldByName(max_length_fields[i]);
+                    let width = popup_maxw;
+                    let field = this._editing.getFieldByName(max_length_fields[i]);
 
                     field.find('input, textarea').css({'width': width, 'max-width': width});
                 }
@@ -4990,8 +4990,8 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
 
         // add new separate fieldset at the start
         let $top_fieldset = $('<fieldset>', {id: 'receditor-top'}).insertBefore(this.editForm.find('fieldset:first'));
-        let top_width = $top_fieldset.parent().width();
-        top_width -= 10;
+        let top_width = $top_fieldset.parents('.editForm.recordEditor').width();
+        top_width -= 130;
 
         $top_fieldset.css('min-width', top_width + 'px');
 
@@ -5008,7 +5008,7 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
         }
 
         let title_maxwidth = ($top_fieldset.css('min-width') != 0) ? $top_fieldset.css('min-width') : $top_fieldset.parent().width();
-        title_maxwidth = title_maxwidth * 0.85 - (this.options.rts_editor ? 45 : 17);
+        title_maxwidth = parseFloat(title_maxwidth) * 0.9 - (this.options.rts_editor ? 60 : 50);
 
         // Display record title
         let $title_field = this._editing.getFieldByName('rec_Title').show().editing_input('setDisabled', true);
@@ -5017,8 +5017,8 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
         let cur_styling = $title_field.find('input').attr('style');
         let cur_title = this._getField('rec_Title').replace(/[\r\n]+/g, ' ');
         $title_field.find('input')
-                    .replaceWith('<div style="'+cur_styling+'background-color:#e3f0f0!important;font-size:13px;padding:3px;max-width:'+title_maxwidth+'px;width:'+title_maxwidth+'px;" class="truncate"'
-                        + ' title="A title constructed from one or more fields, which is used to identify records when displayed in search results.">'+ cur_title +'</div>');
+                    .replaceWith(`<div style="${cur_styling}background-color:#e3f0f0!important;font-size:13px;padding:3px;max-width:${title_maxwidth}px;width:${title_maxwidth}px;cursor:default;"`
+                        + ` class="truncate" title="${cur_title}">${cur_title}</div>`);
 
         // change label to required version, and add help icon
         $title_field.find('div.header')
