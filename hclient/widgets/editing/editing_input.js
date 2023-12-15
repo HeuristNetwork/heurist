@@ -4256,8 +4256,9 @@ $.widget( "heurist.editing_input", {
         var that = this;
         
         this.select_imagelib_dlg.selectFile({
-                source: 'assets', 
+                source: 'assets'+(that.options.dtID=='rty_Icon'?'16':''), 
                 extensions: 'png,svg',
+                //size: 64, default value
                 onselect:function(res){
             if(res){
                 that.input_img.find('img').prop('src', res.url);
@@ -4267,11 +4268,13 @@ $.widget( "heurist.editing_input", {
                 
                 //HARDCODED!!!! sync icon or thumb to defRecTypes
                 if(res.path.indexOf('setup/iconLibrary/')>0){
+                    //sync paired value
                     var tosync = '', repl, toval;
                     if(that.options.dtID=='rty_Thumb'){ tosync = 'rty_Icon'; repl='64'; toval='16';}
                     else if(that.options.dtID=='rty_Icon'){tosync = 'rty_Thumb'; repl='16'; toval='64';}
                
-                    if(tosync){
+                    if(tosync!=''){
+                        
                         var ele = that.options.editing.getFieldByName(tosync);
                         if(ele){
                             var s_path = res.path;
@@ -4284,10 +4287,7 @@ $.widget( "heurist.editing_input", {
                             var s_path2 = s_path.replace(repl,toval)
                             var s_url2 = s_url.replace(repl,toval)
                             
-                            if(ele && ele.find('.image_input').length > 0){// elements in correct location
-                                ele.find('.image_input').find('img').prop('src', s_url2); 
-                                
-                            }else if(that.linkedImgContainer !== null && that.linkedImgInput !== null)
+                            if(that.linkedImgContainer !== null && that.linkedImgInput !== null)
                             {
                                 if(ele){
                                     ele.editing_input('setValue', s_path2 );
@@ -4296,7 +4296,10 @@ $.widget( "heurist.editing_input", {
                                 
                                 that.linkedImgInput.val( s_path2 );
                                 that.linkedImgContainer.find('img').prop('src', s_url2 );
-                            }
+                            }else if(ele && ele.find('.image_input').length > 0){// elements in correct location
+                                ele.find('.image_input').find('img').prop('src', s_url2); 
+                            }                                
+
                         }
                     }
                 }

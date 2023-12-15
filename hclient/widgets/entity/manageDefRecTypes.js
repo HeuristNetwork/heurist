@@ -1165,7 +1165,7 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
         }else{
             
             var ele = this._editing.getFieldByName('rty_ID');
-            if(ele.length>0){
+            if(ele && ele.length>0){
                 ele.find('div.input-div').html(this._currentEditID
                         +'&nbsp;&nbsp;<span style="font-weight:normal">Code: </span>'
                         +$Db.getConceptID('rty',this._currentEditID, true));

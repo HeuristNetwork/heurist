@@ -369,7 +369,7 @@
               if($source=='tilestacks'){
                   $lib_path = array(HEURIST_FILESTORE_DIR.'uploaded_tilestacks/');
               }else{ //assets
-                  $lib_path = array('admin/setup/iconLibrary/64px/');
+                  $lib_path = array('admin/setup/iconLibrary/'.(($source=='assets16')?'16':'64').'px/');
               }
               
               $res = folderContent($lib_path, $exts);
@@ -390,7 +390,8 @@
               if($source=='uploaded_tilestacks'){
                   $lib_path = array(HEURIST_FILESTORE_DIR.'uploaded_tilestacks/');
               }else{
-                  $lib_path = array('admin/setup/iconLibrary/64px/'); //default
+                  //default 64px
+                  $lib_path = array('admin/setup/iconLibrary/'.(($source=='assets16')?'16':'64').'px/');
               }
               $res = folderContent($lib_path, $exts);
               
