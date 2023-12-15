@@ -1636,6 +1636,24 @@ function hMapManager( _options )
             }else{
                 _onExpand();
             }
+        },
+        
+        //
+        // returns html content for current active map document (used in printable version)
+        //
+        getActiveMapDocumentLegend(){
+        
+            var tree = mapdoc_treeview.fancytree("getTree");
+            
+            var res = null;
+
+            tree.visit(function(node){
+                    if(node.data.type=='mapdocument' && node.isSelected()){
+                        res = $(node.li).html();
+                        return false;
+                    }
+                });
+            return res;
         }
         
     }

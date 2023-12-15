@@ -192,6 +192,7 @@ $.widget( "heurist.mapping", {
     map_scale: null,
     
     printScaleMode: 'none', //position of scale control for printing out
+    printLegend: false,
     
     //popup element
     main_popup: null,
@@ -3487,6 +3488,17 @@ $.widget( "heurist.mapping", {
                                         maxWidth: 200
                                     }).addTo(e.printMap);
                             }
+                            
+                            if(that.printLegend){
+                                var legend_content = that.mapManager.getActiveMapDocumentLegend();
+                                if(legend_content){
+                                    var mleg = L.control.manager({ position: 'topright' }).addTo( e.printMap );
+                                    var cont = $(mleg._container);
+                                //cont.css({border: '2px solid rgba(0,0,0,0.2)','background-clip': 'padding-box', width:'200px', height:'400px'}); 
+                                    $(legend_content).appendTo(cont);
+                                }
+                            }
+                            
                                 });                        
                                         
                         
@@ -3890,6 +3902,8 @@ $.widget( "heurist.mapping", {
     +'<option value="bottomleft">'+window.hWin.HR('Bottom left')+'</option>'
     +'<option value="none">'+window.hWin.HR('None')+'</option>'
     +'</select></div><div><label class="header_narrow">'
++window.hWin.HR('Legend')+':</label><input type="checkbox" id="dlg-prompt-legend"  class="text ui-corner-all"/> visible for active map document'    
+    +'</div><div><label class="header_narrow">'
 +window.hWin.HR('Mode')+':</label><select id="dlg-prompt-mode"  class="text ui-corner-all">'
     +'<option value="Auto">'+window.hWin.HR('Auto')+'</option>'
     +'<option value="Custom">'+window.hWin.HR('Select Area')+'</option>'
@@ -3901,6 +3915,8 @@ $.widget( "heurist.mapping", {
                         $('div.grid-map-print-title > h3').text(sTitle);
 
                         that.printScaleMode = $dlg.find('#dlg-prompt-scale').val();
+                        
+                        that.printLegend = $dlg.find('#dlg-prompt-legend').is(':checked');
                         
                         var sMode = $dlg.find('#dlg-prompt-mode').val();
                         
