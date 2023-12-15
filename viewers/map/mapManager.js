@@ -1614,7 +1614,7 @@ function hMapManager( _options )
 
             if(window.hWin.HEURIST4.util.isNumber(e) && e>=0){
                 idx = e;
-            }else if(typeof e == 'string'){
+            }else if(typeof e == 'string'){  //find by map name
                 idx = options.container.find('input[data-mapid="'+e+'"]').attr('data-mapindex');
             }else{
                 idx = $(e.target).attr('data-mapindex');

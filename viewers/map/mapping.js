@@ -755,7 +755,7 @@ $.widget( "heurist.mapping", {
                 }
                 
                 this.basemaplayer.bringToBack(); // ensure basemap is below all map documents
-
+                
                 if(this.basemaplayer_filter){
                     this.applyImageMapFilter('heurist-imageoverlay-basemap', this.basemaplayer_filter);
                 }
@@ -769,7 +769,6 @@ $.widget( "heurist.mapping", {
 
                 this.defineMaxZoom('basemap', layer_maxZoom);
                 this.defineMinZoom('basemap', layer_minZoom);
-                
             }            
             
         }   
@@ -2345,7 +2344,7 @@ $.widget( "heurist.mapping", {
                 $(evt.target).siblings().removeClass('selected');
                 $(evt.target).addClass('selected');
                 var layer = selected_layers[leaflet_id];
-                that.setFeatureSelection([layer.feature.properties.rec_ID]); //highlight from popup
+                that.setFeatureSelection([layer.feature.properties.rec_ID], false); //highlight from popup without zoom
             }
         }});
     },
@@ -2455,9 +2454,9 @@ $.widget( "heurist.mapping", {
 
         if(layer.feature.properties.rec_ID>0){
             
-            if(that.vistimeline) that.vistimeline.timeline('setSelection', [layer.feature.properties.rec_ID]);
+            //if(that.vistimeline) that.vistimeline.timeline('setSelection', [layer.feature.properties.rec_ID]);
 
-            that.setFeatureSelection([layer.feature.properties.rec_ID]); //highlight
+            that.setFeatureSelection([layer.feature.properties.rec_ID], false); //highlight without zoom
             if($.isFunction(that.options.onselect)){
                 that.options.onselect.call(that, [layer.feature.properties.rec_ID] );
             }
@@ -2736,7 +2735,7 @@ $.widget( "heurist.mapping", {
     // triggers redraw for path and polygones (assigns styler function)  and creates highlight circles for markers
     // is_external - true - public call (from app_timemap for example)  - perform zoom
     //    
-    setFeatureSelection: function( _selection, is_external ){
+    setFeatureSelection: function( _selection, _need_zoom, _from_timeline ){
         var that = this;
         
         this._clearHighlightedMarkers();
@@ -2775,11 +2774,10 @@ $.widget( "heurist.mapping", {
           
         //this.main_layer.remove();
         //this.main_layer.addTo( this.nativemap );
-        if (is_external===true && !this.notimeline) { //call from external source (app_timemap)
+        if (!(_from_timeline===true || this.notimeline)) {
             this.vistimeline.timeline('setSelection', this.selected_rec_ids);
         }
-        
-        if (is_external===true){
+        if(_need_zoom){    
             this.zoomToSelection();        
         }
         
@@ -3281,7 +3279,9 @@ $.widget( "heurist.mapping", {
         //maxClusterRadius
         this.isMarkerClusterEnabled = !__parseval(params['nocluster']);
         this.options.isEditAllowed = !this.options.isPublished || __parseval(params['editstyle']);
-        this.need_zoom_on_selection = __parseval(params['zoom_to_selected']);
+        if(params['zoom_to_selected']!=null){
+            this.need_zoom_on_selection = __parseval(params['zoom_to_selected']);    
+        }
 
         if(this.options.layout_params['smooth_zoom']){
             this.nativemap.options.zoomSnap = 0.1;
@@ -3365,7 +3365,7 @@ $.widget( "heurist.mapping", {
                 this.vistimeline = $(this.element).find('.ui-layout-south').timeline({
                     element_timeline: this.options.element_timeline,
                     onselect: function(selected_rec_ids){
-                        that.setFeatureSelection(selected_rec_ids); //timeline select - highlight on map
+                        that.setFeatureSelection(selected_rec_ids, true, true); //timeline select - highlight on map and zoom
                         if($.isFunction(that.options.onselect)){ //trigger global event
                             that.options.onselect.call(that, selected_rec_ids);
                         }
