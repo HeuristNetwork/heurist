@@ -287,8 +287,11 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
 
             window.hWin.HAPI4.EntityMgr.doRequest(req, function(response){
                 if(response.status == window.hWin.ResponseStatus.OK){
+
                     that._calculated_usages = response.data;
                     that.updateFieldUsage();
+
+                    that.element.find('#field_usage').button('option', 'label', window.HR('Update counts'));
                 }else{
                     window.hWin.HEURIST4.msg.showMsgErr(response);
                 }

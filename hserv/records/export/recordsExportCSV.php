@@ -890,8 +890,11 @@ public static function output_header($data, $params)
     $details = array();  //array of detail fields included into output
     $relmarker_details = array(); //relmarker fields included into output
     $fld_type_names = dbs_GetDtLookups();
+    $base_fld_names = dbs_GetDetailTypes(self::$system, null, 0);
     
     if(self::$defRecTypes==null) self::$defRecTypes = dbs_GetRectypeStructures(self::$system, null, 2);
+
+    $idx_cid = self::$defRecTypes['typedefs']['dtFieldNamesToIndex']['dty_ConceptID'];
     $idx_name = self::$defRecTypes['typedefs']['dtFieldNamesToIndex']['rst_DisplayName'];
     $idx_dtype = self::$defRecTypes['typedefs']['dtFieldNamesToIndex']['dty_Type'];
     $idx_count = self::$defRecTypes['typedefs']['dtFieldNamesToIndex']['rst_MaxValues'];
@@ -900,7 +903,7 @@ public static function output_header($data, $params)
     $idx_term_nosel = self::$defRecTypes['typedefs']['dtFieldNamesToIndex']['dty_TermIDTreeNonSelectableIDs'];
     
     $fld_usages = array();
-    $header_details = array('Field name', 'Field type', 'Multivalue', 'Requirement', 'Usage count'); // field details being exported
+    $header_details = array('Field ID', 'Field name', 'Field type', 'Multivalue', 'Requirement', 'Usage count', 'Concept ID', 'Base name'); // field details being exported
     $defRecStructure = new DbDefRecStructure(self::$system, null);
     $rst_data = array('a' => 'counts', 'mode' => 'rectype_field_usage', 'get_meta_counts' => 1, 'rtyID' => null);
 
@@ -999,6 +1002,8 @@ public static function output_header($data, $params)
                 $typename = !empty($fld_type_names[$field_type]) ? $fld_type_names[$field_type] : 'Built-in';
                 $requirement = $fld[$idx_require];
                 $usage = is_array($fld_usages[$rt]) && array_key_exists($dt_id, $fld_usages[$rt]) ? $fld_usages[$rt][$dt_id] : 0;
+                $concept_id = $fld[$idx_cid];
+                $base_name = $base_fld_names['names'][$dt_id];
 
                 if($requirement == ''){
                     if($dt_id == 'rec_ID'){ 
@@ -1008,7 +1013,7 @@ public static function output_header($data, $params)
                     }
                 }
 
-                array_push($fld_details[$rt], array($field_name, $typename, $count, ucfirst($requirement), "N=$usage"));
+                array_push($fld_details[$rt], array($dt_id, $field_name, $typename, $count, ucfirst($requirement), "N=$usage", $concept_id, $base_name));
 
                 if($field_type=='enum' || $field_type=='relationtype'){
 
