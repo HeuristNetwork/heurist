@@ -385,12 +385,15 @@ function editCMS_WidgetCfg( widget_cfg, _layout_content, $dlg, main_callback ){
                     $dlg.find('#placeholder_text').val(opts['placeholder_text']);
                 }
 
-                let def_placeholder = _def_labels[widget_name]['placeholder_def'];
+                if(_def_labels[widget_name]){ // fill in default labels
 
-                let def_remark = _def_labels[widget_name]['empty_remark_def'];
+                    let def_placeholder = _def_labels[widget_name]['placeholder_def'];
 
-                $dlg.find('#placeholder_def').text(window.hWin.HR(def_placeholder));
-                $dlg.find('#empty_remark_def').text(window.hWin.HR(def_remark));
+                    let def_remark = _def_labels[widget_name]['empty_remark_def'];
+    
+                    $dlg.find('#placeholder_def').text(window.hWin.HR(def_placeholder));
+                    $dlg.find('#empty_remark_def').text(window.hWin.HR(def_remark));    
+                }
 
                 if(opts['blank_placeholder'] || $dlg.find('#placeholder_text').val() == 'def'){ // replace 'def' with a blank
                     $dlg.find('#placeholder_text').val('');
