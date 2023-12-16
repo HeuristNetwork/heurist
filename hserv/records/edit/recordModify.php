@@ -2876,7 +2876,7 @@ function _prepareDetails($system, $rectype, $record, $validation_mode, $recID, $
         $system->addError(HEURIST_ACTION_BLOCKED, 'Required field'.(count($det_required)>1?'s':'')
             .' missing value or '.
             (count($det_required)>1?'have':'has')
-            .' invalid value: '.implode(',',array_values($det_required)));
+            .' invalid value:<div style="padding-left:10px;font-style:italic;">'.implode('<br>',array_values($det_required)).'</div>');
 
     }else if (!is_array($insertValues) || count($insertValues)<1) {
 
