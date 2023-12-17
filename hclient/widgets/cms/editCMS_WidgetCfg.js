@@ -395,10 +395,10 @@ function editCMS_WidgetCfg( widget_cfg, _layout_content, $dlg, main_callback ){
                     $dlg.find('#empty_remark_def').text(window.hWin.HR(def_remark));    
                 }
 
-                if(!opts['blank_placeholder'] || $dlg.find('#placeholder_text').val() == 'def'){ // replace 'def' with a blank
+                if(opts['blank_placeholder'] || $dlg.find('#placeholder_text').val() == 'def'){ // replace 'def' with a blank
                     $dlg.find('#placeholder_text').val('');
                 }
-                if(!opts['blank_empty_remark'] || $dlg.find('#empty_remark').val() == 'def'){ // replace 'def' with a blank
+                if(opts['blank_empty_remark'] || $dlg.find('#empty_remark').val() == 'def'){ // replace 'def' with a blank
                     $dlg.find('#empty_remark').val('');
                 }
             }
