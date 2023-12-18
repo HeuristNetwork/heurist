@@ -1214,7 +1214,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                         togglerAlign_closed:16,   //top position   
                         togglerLength_closed:80,  //height of toggler button
                         initHidden: !this.options.edit_structure,   //show structure list at once 
-                        initClosed: !this.options.edit_structure, // && (this.usrPreferences.structure_closed!=0)
+                        initClosed: !this.options.edit_structure && !this.options.rts_editor,
                         slidable:false,  //otherwise it will be over center and autoclose
                         contentSelector: '.editStructure',   
                         onopen_start : function( ){ 
@@ -2325,7 +2325,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
             
             this._reloadRtsEditor();
             //show and expand left hand panel 
-            var isClosed = (!this.options.edit_structure && this.usrPreferences.structure_closed!=0);
+            var isClosed = (!this.options.edit_structure && !this.options.rts_editor);
             this.editFormPopup.layout().show('west', !isClosed ); 
             if(isClosed){
                 var tog = that.editFormPopup.find('.ui-layout-toggler-west');
@@ -3307,11 +3307,8 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
             }
 
             // display record title field, move child record field (if present) to the top of form and move non-standard workflow stage field to end of popup
-            let handle_swf = this._swf_rules.length > 0 && $Db.rst(this._currentEditRecTypeID, DT_WORKFLOW_STAGE) === null;
-            if(!that.options.edit_structure && (!window.hWin.HEURIST4.util.isempty(that._getField('rec_Title')) || handle_swf)){
-                that.showExtraRecordInfo();
-            }
-
+            this.showExtraRecordInfo();
+            
             // Add a divider between the popup controls and the first set of input, 
             // if the first set is not contained within a group and there are groups below these loose inputs
             let first_child = this.editForm.children('fieldset#receditor-top');
@@ -3875,13 +3872,12 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
                 return;
             }
             
-            //
             let rec_URL = fields['rec_URL'],
                 rec_OwnerUGrpID = fields['rec_OwnerUGrpID'],
                 rec_NonOwnerVisibility = fields['rec_NonOwnerVisibility'],
                 rec_NonOwnerVisibilityGroups = fields['rec_NonOwnerVisibilityGroups'],
                 rec_ScratchPad = fields['rec_ScratchPad'];
-            //unset header fields                
+            // Unset header fields to avoid accidental overriding                
             for (var key in fields){
                 if( (!(parseInt(key)>0)) && (key.indexOf('rec_')==0) )
                 {
@@ -4211,7 +4207,7 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
         
         var ishelp_on = (this.usrPreferences['help_on']==true || this.usrPreferences['help_on']=='true');
         var isfields_on = this.usrPreferences['optfields']==true || this.usrPreferences['optfields']=='true';
-        var btn_css = {'font-weight': 'bold', color:'#7D9AAA', background:'none' }; //#ecf1fb
+        var btn_css = {'font-weight': 'bold', color:'#7D9AAA', background:'none', padding: '4.5px' }; //#ecf1fb
 
         var swf_rules_mode = 'on';
         if(this.usrPreferences['swf_rules_mode'] && this.usrPreferences['swf_rules_mode'][this._currentEditRecTypeID]){
@@ -4247,15 +4243,16 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
 
                 +'<div style="padding-right:20px;padding-left:5px;display:inline-block">'
                     +'<span class="btn-edit-rt2 btns-admin-only" style="font-size:larger"></span>'
-                    +'<span class="btn-edit-rt-back" style="font-size:larger;display:none">Close</span>' //Back to Whole Form
+                    +'<span class="btn-edit-rt-back" style="font-size:larger;display:none">Close (&rarr; Data editing)</span>' //Back to Whole Form
                 +'</div>'
              
                 +'<div style="display:inline-block;padding-left:20px">'
                     +'<label><input type="checkbox" class="chb_show_help" '
-                        +(ishelp_on?'checked':'')+'/>Show help</label><span style="display:inline-block;width:40px"></span>'
+                        +(ishelp_on?'checked':'')+'/>Show help</label>'
+                    +'<span class="gap" style="display:inline-block;width:40px"></span>'
                     +'<label class="lbl_opt_fields"><input type="checkbox" class="chb_opt_fields" '
                         +(isfields_on?'checked':'')+'/>Optional fields</label>'
-                    +'<span style="display:inline-block;width:40px"></span>'
+                    +'<span class="gap" style="display:inline-block;width:40px"></span>'
                     +'<span class="div_workflow_stages"><label>Workflow stage popup: </label>'
                         +'<select class="sel_workflow_stages">'
                             +'<option value="new">New records only</option>'
@@ -4268,7 +4265,6 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
 
                 +'<div style="padding:10px 50px 0px 0px;float:right">'
                     +'<span class="btn-edit-rt btns-admin-only">Attributes</span>'
-                    +'<span class="btn-edit-rt-titlemask btns-admin-only">Edit title mask</span>'
                     +'<span class="btn-edit-rt-template btns-admin-only">Template</span>'
                     +'<span class="btn-bugreport">Bug report</span>'
                 +'</div>'
@@ -4283,27 +4279,14 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
                 
                 this.element.find('.btns-admin-only').show();
 
-                this.element.find('.btn-edit-rt').button({icon:'ui-icon-pencil'}).css(btn_css).css({'padding':'4.5px'})
+                this.element.find('.btn-edit-rt').button({icon:'ui-icon-pencil'}).css(btn_css)
                         .click(function(){that.editRecordTypeAttributes();}); //was editRecordType(false)
                 
                 var btn = this.element.find('.btn-edit-rt2');        
                 if(this.options.edit_structure){
                     
-                    var cont = this.element.find('.editStructureHeader').css({overflow:'hidden'});
+                    let cont = this.element.find('.editStructureHeader').css({overflow:'hidden'});
                     btn.hide();
-
-                    /*  2021-01-02
-                    btn.button({icon:'ui-icon-pencil',label:'Edit attributes<br>(name, icon ...)'})
-                            .css(btn_css)
-                            .width(150).show()
-                            .click(function(){that.editRecordTypeAttributes(true);});
-
-                    var btn2 = btn.clone().css({'float':'left','margin':'2px 20px',background:'#DAD0E4'})
-                                .click(function(){that.editRecordTypeAttributes(true);})
-                                .appendTo(cont);    
-                    btn2.find('.ui-button-icon')
-                            .css({'font-size':'25px','float':'left',width:'25px',height:'25px','margin-top':'0px'});
-                    */
                     
                     $('<div style="float:left;">'
                         +'<span style="margin-top: 15px;display: inline-block;font-size: 12px;">Fields for: </span>'
@@ -4326,10 +4309,7 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
                         
                 btn.find('.ui-button-icon')
                             .css({'font-size':'25px','float':'left',width:'25px',height:'25px','margin-top':'0px'});
-                        
-                this.element.find('.btn-edit-rt-titlemask').button({icon:'ui-icon-tags'})  //marker, pencil, tags
-                        .css(btn_css).click(function(){that.editRecordTypeTitle();});
-                
+                                        
                 this.element.find('.btn-edit-rt-template').button({icon:'ui-icon-arrowthickstop-1-s'})
                         .css(btn_css).click(function(){
                             window.hWin.HEURIST4.ui.showRecordActionDialog('recordTemplate'
@@ -4571,13 +4551,10 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
                 this.element.find('.rt-info-header').hide();
             }
             
-            //switch on optional fields and disable checckbox
+            //switch on optional fields, disable checckbox and hide
             this.element.find('.chb_opt_fields').prop('checked',true).attr('disabled', true).change();
-            
-            //show the attributes and title mask dialog
-            this.element.find('.btn-edit-rt').show();
-            this.element.find('.btn-edit-rt-titlemask').show();			
-			
+            this.element.find('.lbl_opt_fields').hide();
+            			
             //hide message about forbidden fields
             $(this.element).find('.hidden_field_warning').hide();
             
@@ -4595,12 +4572,24 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
             
             //hide swf mode selector
             this.element.find('.div_workflow_stages').hide();            
+
+            //hide additional markup
+            this.element.find('.gap').hide();
 			
             //if record type has been changed - reload rts_editor
             this._reloadRtsEditor();
 
             // add '+' button to end of tabs, creates new tab header
             this._addNewTabButton();
+
+            //show the attributes button
+            this.element.find('.btn-edit-rt')
+                        .show()
+                        .button('option', 'label', 'Edit record type attributes')
+                        .css('position', 'absolute')
+                        .position({
+                            my: 'left+20 center', at: 'right center', of: this.element.find('.chb_show_help').parent().parent()
+                        });
 
             // Highlight current focus in tree structure
             this._on(this.editForm.find('div[data-dtid] input, div[data-dtid] select, div[data-dtid] textarea'), {
@@ -4641,17 +4630,20 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
             this.element.find('.lbl_opt_fields').show();
             this.element.find('.sel_workflow_stages').attr('disabled', false);
             this.element.find('.lbl_workflow_stages').show();
-            
-            this.element.find('.btn-edit-rt').hide();
-            this.element.find('.btn-edit-rt-titlemask').hide();  
-            
+
+            this.element.find('.btn-edit-rt')
+                        .hide()
+                        .button('option', 'label', 'Attributes')
+                        .css({top: '', left: '', position: ''});
+
             $(this.element).find('div.forbidden').parent().css({'display':'none'} ); 
 
             if(this._swf_rules.length>0){
                 this.element.find('.div_workflow_stages').show();
             }
-            
-            
+
+            this.element.find('.gap').show();
+
             //to save space - hide all fieldsets without visible fields
             this._showHideEmptyFieldGroups();
 
@@ -4664,7 +4656,7 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
         
         this._afterInitEditForm_restoreGroupStatus();
 
-        // Change gap size for the repeat button container, to keep record fields closer inline with each other
+        // Change gap size for the repeat button container, to keep form elements inline with each other
         let $all_repeat_gaps = this.editForm.find('.editint-inout-repeat-container:has(.editint-inout-repeat-button.ui-icon-circlesmall-plus)');
         if($all_repeat_gaps.length > 0){
 
@@ -4971,7 +4963,7 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
 	//
     showExtraRecordInfo: function(){
 
-        var that = this;
+        const that = this;
         const parententity = Number(window.hWin.HAPI4.sysinfo['dbconst']['DT_PARENT_ENTITY']);
         const workflow_stage = Number(window.hWin.HAPI4.sysinfo['dbconst']['DT_WORKFLOW_STAGE']);
 
@@ -4981,11 +4973,6 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
             let $bottom_fieldset = $('<fieldset>', {id: 'receditor-bottom'}).insertBefore(this.editForm.find('.optional_hint').prev());
 
             $bottom_fieldset.append($ele);
-        }
-
-        // Skip remaining if no title has been set
-        if(window.hWin.HEURIST4.util.isempty(that._getField('rec_Title'))){
-            return;
         }
 
         // add new separate fieldset at the start
@@ -5015,7 +5002,9 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
 
         // remove opacity change and set background to lighter background
         let cur_styling = $title_field.find('input').attr('style');
-        let cur_title = this._getField('rec_Title').replace(/[\r\n]+/g, ' ');
+        let cur_title = this._getField('rec_Title');
+        cur_title = window.hWin.HEURIST4.util.isempty(cur_title) ? '&lt;not yet set&gt;'
+                        : cur_title.replace(/[\r\n]+/g, ' ');
         $title_field.find('input')
                     .replaceWith(`<div style="${cur_styling}background-color:#e3f0f0!important;font-size:13px;padding:3px;max-width:${title_maxwidth}px;width:${title_maxwidth}px;cursor:default;"`
                         + ` class="truncate" title="${cur_title}">${cur_title}</div>`);
