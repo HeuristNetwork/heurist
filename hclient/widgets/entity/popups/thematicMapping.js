@@ -70,7 +70,7 @@ $.widget( "heurist.thematicMapping", $.heurist.recordAction, {
         default_palette_class: 'ui-heurist-design', 
         
         maplayer_query: null,
-        thematic_mapping: null,
+        thematic_mapping: null, //json with all symbols/ranges
         
         path: 'widgets/entity/popups/', //location of this widget
         
@@ -149,10 +149,10 @@ $.widget( "heurist.thematicMapping", $.heurist.recordAction, {
         var i=0;
         while(i<this.options.thematic_mapping.length){
             var t_map = this.options.thematic_mapping[i];
-            if(t_map.fields){
+            if(t_map.fields){ //with fields - thematic map
                 window.hWin.HEURIST4.ui.addoption(themes_list[0], i, t_map.title);
                 i++;
-            }else{
+            }else{ //without fields - this is base symbol
                 this.baseLayerSymbol = t_map;
                 this.options.thematic_mapping.splice(i,1);
             }
@@ -948,7 +948,7 @@ $.widget( "heurist.thematicMapping", $.heurist.recordAction, {
                 
                 window.hWin.HEURIST4.msg.showMsgDlg('<br>Are you sure?',
                 function(){
-                    that.selectedFields[this.currentField].ranges = [];
+                    that.selectedFields[that.currentField].ranges = [];
                     that.element.find('#f_ranges').empty();
                 });
                 

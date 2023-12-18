@@ -227,6 +227,10 @@ function hMapDocument( _options )
                                         $theme['mapdoc_id'] = mapdoc_id; //reference to parent mapdoc
                                         $theme['theme'] = theme;     
                                         $theme['selected'] = (theme.active===true);
+                                        
+                                        
+                                        
+                                        
 
                                         $themes.push($theme);
                                         
@@ -411,6 +415,13 @@ function hMapDocument( _options )
         
         if(deferred){
             var treedata = _getTreeData(mapdoc_id);
+            
+/*
+console.log(treedata);
+    [{type:layer,title:'aaa',
+        children:[{type:theme.theme:{title:'bbb',
+                fields:[{ranges:[{title:'ccc',value:'0<>1',symbol:{}}]}]}  },..] }]            
+*/            
             deferred.resolve( treedata ); //returns data to fancytree to render child layers for given mapdocument
         }
                                 

@@ -734,49 +734,19 @@ function hMapManager( _options )
                         var rec_id = item.key;
                         var mapdoc_id = item.data.mapdoc_id;
                         
+                        //get symbology for layer (rec_id)
                         var style = mapDocuments.getSymbology( mapdoc_id, rec_id );
-                        
-                        if(style['rectypeIconUrl']){
-                            var dcss = {'display':'inline-block', 'background-image':'url('+style['rectypeIconUrl']+')'};
-                        }else{
-                            
-                            var dcss = {'display':'inline-block', 'background-image':'none'};
-                            if(style['stroke']!==false){
-                                
-                                var opacity = style['opacity']>0?style['opacity']:1;
-                                var weight = (style['weight']>0&&style['weight']<4)?style['weight']:3;
-                                dcss['width']  = 16-weight*2; 
-                                dcss['height'] = 16-weight*2;
-                                
-                                const clr = window.hWin.HEURIST4.ui.hexToRgbStr(style['color'], opacity);
-                                dcss['border'] = (clr!=null)?(weight+'px solid '+clr):'none';
-                                                
-                                if ( style['opacity']>0 && style['opacity']<1 ) {
-                                    dcss['-webkit-background-clip'] = 'padding-box'; //for Safari
-                                    dcss['background-clip'] = 'padding-box'; //for IE9+, Firefox 4+, Opera, Chrome
-                                }
-                                
-                            } else {
-                                dcss['border'] = 'none';
-                            }
+                        //convert json to css
+                        var dcss = _prepareSymbologyForLegendItem(style);
 
-                            var fillColor = null;
-                            if(style['fill']!==false){
-                                fillColor = style['fillColor']?style['fillColor']:style['color'];
-                                var fillOpacity = style['fillOpacity']>0?style['fillOpacity']:0.2;
-                                fillColor = window.hWin.HEURIST4.ui.hexToRgbStr(fillColor, fillOpacity);
-                            }
-                            if (fillColor != null){
-                                dcss['background-color'] = fillColor;
-                            }else{
-                                dcss['background'] = 'none';
-                            }
-                        }
                         $span.find("> span.fancytree-icon")
                         .css(dcss);
 
                     }else 
                     if(item.data.type=='theme'){ //render theme label in treeview
+                    
+                        
+                    
 
                     }else if(item.data.type=='mapdocument'){
                         $span.find("> span.fancytree-checkbox").addClass('fancytree-radio');
@@ -799,6 +769,52 @@ function hMapManager( _options )
         }
         that.setHeight();
     
+    }
+    
+    //
+    // Converts symbology json to css
+    //
+    function _prepareSymbologyForLegendItem(style){
+        
+        var dcss = '';
+        if(style['rectypeIconUrl']){
+            dcss = {'display':'inline-block', 'background-image':'url('+style['rectypeIconUrl']+')'};
+        }else{
+            
+            dcss = {'display':'inline-block', 'background-image':'none'};
+            if(style['stroke']!==false){
+                
+                var opacity = style['opacity']>0?style['opacity']:1;
+                var weight = (style['weight']>0&&style['weight']<4)?style['weight']:3;
+                dcss['width']  = 16-weight*2; 
+                dcss['height'] = 16-weight*2;
+                
+                const clr = window.hWin.HEURIST4.ui.hexToRgbStr(style['color'], opacity);
+                dcss['border'] = (clr!=null)?(weight+'px solid '+clr):'none';
+                                
+                if ( style['opacity']>0 && style['opacity']<1 ) {
+                    dcss['-webkit-background-clip'] = 'padding-box'; //for Safari
+                    dcss['background-clip'] = 'padding-box'; //for IE9+, Firefox 4+, Opera, Chrome
+                }
+                
+            } else {
+                dcss['border'] = 'none';
+            }
+
+            var fillColor = null;
+            if(style['fill']!==false){
+                fillColor = style['fillColor']?style['fillColor']:style['color'];
+                var fillOpacity = style['fillOpacity']>0?style['fillOpacity']:0.2;
+                fillColor = window.hWin.HEURIST4.ui.hexToRgbStr(fillColor, fillOpacity);
+            }
+            if (fillColor != null){
+                dcss['background-color'] = fillColor;
+            }else{
+                dcss['background'] = 'none';
+            }
+        }   
+        
+        return dcss;     
     }
     
     //

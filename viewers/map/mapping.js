@@ -1836,6 +1836,8 @@ $.widget( "heurist.mapping", {
         var that = this;
         var theme_has_changed = false;
         
+        
+        
         /* REMOVE
         if(newThematicMap!=null){
             theme_has_changed = window.hWin.HEURIST4.util.isnull( affected_layer.options.thematic_map );

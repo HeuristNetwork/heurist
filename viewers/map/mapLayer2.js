@@ -821,6 +821,8 @@ function hMapLayer2( _options ) {
         if(_dataset_type!='db' || _geojson_ids==null || _geojson_ids.length==0) return;
         
         //theme = window.hWin.HEURIST4.util.isJSON(theme);
+  
+//console.log(active_themes);
         
         if(active_themes==null || active_themes.length==0){
             //switch off current theme
