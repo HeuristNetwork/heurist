@@ -3895,7 +3895,7 @@ $.widget( "heurist.mapping", {
                 //return;
                 
                 window.hWin.HEURIST4.msg.showMsgDlg(
-'<fieldset>'
+'<fieldset style="line-height: 22px;">'
 +'<div><label class="header_narrow">'+window.hWin.HR('Title')+':</label>'
     +'<input id="dlg-prompt-title" class="text ui-corner-all" style="max-width: 250px; min-width: 10em; width: 250px; margin-left:0.2em"/></div><div><label class="header_narrow">'
 + window.hWin.HR('Scale')+':</label><select id="dlg-prompt-scale"  class="text ui-corner-all">'
@@ -3904,13 +3904,16 @@ $.widget( "heurist.mapping", {
     +'<option value="bottomleft">'+window.hWin.HR('Bottom left')+'</option>'
     +'<option value="none">'+window.hWin.HR('None')+'</option>'
     +'</select></div><div><label class="header_narrow">'
-+window.hWin.HR('Legend')+':</label><input type="checkbox" id="dlg-prompt-legend"  class="text ui-corner-all"/> visible for active map document'    
++window.hWin.HR('Legend')+':</label><input type="checkbox" id="dlg-prompt-legend"  class="text ui-corner-all"/> visible for active Map Document'    
     +'</div><div><label class="header_narrow">'
 +window.hWin.HR('Mode')+':</label><select id="dlg-prompt-mode"  class="text ui-corner-all">'
-    +'<option value="Auto">'+window.hWin.HR('Auto')+'</option>'
     +'<option value="Custom">'+window.hWin.HR('Select Area')+'</option>'
+    +'<option value="Auto">'+window.hWin.HR('Auto')+'</option>'
     +'<option value="Portrait">'+window.hWin.HR('Portrait')+'</option>'
-    +'<option value="Landscape">'+window.hWin.HR('Landscape')+'</option></select></div></fieldset>',
+    +'<option value="Landscape">'+window.hWin.HR('Landscape')+'</option></select></div><div>'
+    +'<label class="header_narrow">'+window.hWin.HR('Note:')+'</label><p style="max-width:270px">'
+    + window.hWin.HR('map_print_note')
+    +'</p></div></fieldset>',
                 function(){
                         var $dlg = window.hWin.HEURIST4.msg.getMsgDlg('dialog-common-messages');      
                         var sTitle = $dlg.find('#dlg-prompt-title').val();

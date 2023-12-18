@@ -544,6 +544,8 @@ regional['ENG'] = {
     'Map Documents': '',
     'Temp Map': '',
     'Base Maps': '',
+    
+    map_print_note: 'After clicking Print you need to drag a box on the map to define the area you want to print. Until you do this the print dialogue will not display.',
 
 //===================    
     
