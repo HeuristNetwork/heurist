@@ -102,14 +102,16 @@ $.widget( "heurist.recordListExt", {
 
             this.export_button = $('<button>', {
                 text: window.hWin.HR('Export'), title: window.hWin.HR('Export current results'), 
-                class: 'ui-heurist-btn-header1 btnExportRecords', style: 'height:25px;width:75px;position:absolute;top:5px;right:15px;'
+                class: 'btnExportRecords ui-button-action', style: 'height:25px;width:75px;position:absolute;top:5px;right:15px;'
             })
             .button({
                 icons: {
-                    primary: 'ui-icon-upload'
+                    primary: 'ui-icon-download'
                 }
             })
             .prependTo(this.div_content);
+
+            this.export_button[0].style.setProperty('color', '#FFF', 'important');
 
             this._on(this.export_button, {
                 click: function(){

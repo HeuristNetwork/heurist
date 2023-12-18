@@ -67,22 +67,25 @@ $.widget( "heurist.recordExportCSV", $.heurist.recordAction, {
 
         this._super();    
 
+        if(window.hWin.HAPI4.has_access()){
 
-        this.element.find('#divLoadSettings').configEntity({
-            entityName: 'defRecTypes',
-            configName: 'csvexport',
-
-            getSettings: function(){ return that.getSettings(false); }, //callback function to retieve configuration
-            setSettings: function( settings ){ that.setSettings( settings ); }, //callback function to apply configuration
-
-            //divLoadSettingsName: this.element
-            divSaveSettings: this.element.find('#divSaveSettings'),  //element
-            showButtons: true
-
-        });
-
-        this.element.find('#divLoadSettings').configEntity( 'updateList', this.selectRecordScope.val() );    
-
+            this.element.find('#divLoadSettings').configEntity({
+                entityName: 'defRecTypes',
+                configName: 'csvexport',
+    
+                getSettings: function(){ return that.getSettings(false); }, //callback function to retieve configuration
+                setSettings: function( settings ){ that.setSettings( settings ); }, //callback function to apply configuration
+    
+                //divLoadSettingsName: this.element
+                divSaveSettings: this.element.find('#divSaveSettings'),  //element
+                showButtons: true
+    
+            });
+    
+            this.element.find('#divLoadSettings').configEntity( 'updateList', this.selectRecordScope.val() );    
+        }else{
+            this.element.find('#divLoadSettings, #divSaveSettings').hide();
+        }
 
         // Initialize field advanced pane.
         this._resetAdvancedControls();

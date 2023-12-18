@@ -808,13 +808,15 @@ $.widget( "heurist.resultList", {
 
             this.export_button = $('<button>', {
                 text: window.hWin.HR('Export'), title: window.hWin.HR('Export current results'), 
-                class: 'ui-heurist-btn-header1 btnExportRecords', style: 'margin: 6px 0px 2px; float: right;'
+                class: 'btnExportRecords ui-button-action', style: 'margin: 6px 0px 2px; float: right;'
             }).button({
                 icons: {
-                    primary: 'ui-icon-upload'
+                    primary: 'ui-icon-download'
                 },
                 showLabel: false
             }).prependTo(this.div_toolbar);
+
+            this.export_button[0].style.setProperty('color', '#FFF', 'important');
 
             this._on(this.export_button, {
                 click: function(){
@@ -828,7 +830,7 @@ $.widget( "heurist.resultList", {
                     window.hWin.HEURIST4.current_query_request = this._query_request;
                     window.hWin.HAPI4.currentRecordset = this._currentRecordset;
 
-                    let selected = this.getSelected(true); console.log(selected);
+                    let selected = this.getSelected(true);
                     if(selected && selected.length > 0){
                         window.hWin.HAPI4.currentRecordsetSelection = selected;
                     }
