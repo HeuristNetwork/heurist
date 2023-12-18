@@ -1239,6 +1239,11 @@ $website_languages_links ->#main-languages
                 $('#main-title').fadeIn(500);
                 $('#main-title').attr('data-adjusted',1)
             });
+        }else if($img.length == 0){
+            $('#main-title').css({
+                left: '10px',
+                top: '30px'
+            });
         }
     }
   
