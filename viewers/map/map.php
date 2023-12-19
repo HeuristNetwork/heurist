@@ -246,6 +246,11 @@ if (!(@$_REQUEST['notimeline']=='true' || @$_REQUEST['notimeline']=='1')) { ?>
     }
     .grid-map-print {
         grid-row: 2;
+        /*scale: 75%;
+        border: 2px solid red;
+        */
+        height: 75% !important;
+        justify-self: center;
     }
     .grid-map-print-title {
         grid-row: 1;
@@ -497,6 +502,7 @@ if (!(@$_REQUEST['notimeline']=='true' || @$_REQUEST['notimeline']=='1')) { ?>
         
     </div>
     
-    <div class="grid-map-print-title" leaflet-browser-print-content><h3>Heurist map printing out</h3></div>    
+    <!-- Heurist map printing out -->
+    <div class="grid-map-print-title" leaflet-browser-print-content><h3></h3></div>    
 </body>
 </html>

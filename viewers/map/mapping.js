@@ -3483,6 +3483,7 @@ $.widget( "heurist.mapping", {
                         $(that.map_print).find('.browser-print-mode').css({padding: '2px 10px !important'}); //.v1 .browser-print-mode
                         
                         that.nativemap.on("browser-print-start", function(e){ //browser-pre-print
+                            window.hWin.HEURIST4.msg.showMsgFlash('Rendering....', 5000);
                             if(that.printScaleMode!='none'){
                                     L.control.scale({
                                         position: that.printScaleMode,
@@ -3916,8 +3917,11 @@ $.widget( "heurist.mapping", {
     +'</p></div></fieldset>',
                 function(){
                         var $dlg = window.hWin.HEURIST4.msg.getMsgDlg('dialog-common-messages');      
-                        var sTitle = $dlg.find('#dlg-prompt-title').val();
+                        var sTitle = $dlg.find('#dlg-prompt-title').val().trim();
                         $('div.grid-map-print-title > h3').text(sTitle);
+                        if(sTitle==''){
+                            $('div.grid-map-print-title').hide();    
+                        }
 
                         that.printScaleMode = $dlg.find('#dlg-prompt-scale').val();
                         
@@ -3925,7 +3929,14 @@ $.widget( "heurist.mapping", {
                         
                         var sMode = $dlg.find('#dlg-prompt-mode').val();
                         
-                        var modeToUse = L.BrowserPrint.Mode[sMode]();
+                        //var opts = {pageSize:'A4'};
+                        //margin:{right:150}, scale:1};
+                        //if(sTitle!=''){
+                        //    opts['header'] = {text:sTitle, enabled:true };
+                        //}
+                        
+                        var modeToUse = L.BrowserPrint.Mode[sMode](); 
+                       
                         that.map_print.browserPrint.print(modeToUse);
                 },
                 {title:window.hWin.HR('Print map'), yes:'Print'});

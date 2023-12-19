@@ -611,6 +611,10 @@ if(true || $_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0
                 font-size:0.9em;
                 text-align:left;
             }
+            .leaflet-attribution-flag{
+                visibility:hidden;
+                display:none !important;
+            }
         </style>
 
     </head>
