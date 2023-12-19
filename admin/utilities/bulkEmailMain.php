@@ -1061,8 +1061,8 @@ if(!$has_emails || empty($emails)) {
                         <span class="non-selectable"> Last modified
 
                             <select name="recModLogic" id="recModifiedLogic">
-                                <option value="<=">more than</option>
-                                <option value=">=" selected>less than</option>
+                                <option value="more">more than</option>
+                                <option value="less" selected>less than</option>
                             </select>
 
                             <input type="number" class="input-num" name="recModVal" id="recModified" min="1" value="">
