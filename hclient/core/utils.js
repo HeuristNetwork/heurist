@@ -541,12 +541,19 @@ window.hWin.HEURIST4.util = {
                     if(textStatus=='timeout'){
                         
                     }
-                            
-                    var err_message = (window.hWin.HEURIST4.util.isempty(jqXHR.responseText))
-                                            ?'Error_Connection_Reset':jqXHR.responseText;
+                        
+                    var err_message;    
+                    if(window.hWin.HEURIST4.util.isempty(jqXHR.responseText)){
+                        err_message = 'Error_Connection_Reset';    
+                        console.error(err_message, url);
+                    }else{
+                        err_message = jqXHR.responseText;
+                    }
+                                            
                     var response = {status:window.hWin.ResponseStatus.UNKNOWN_ERROR, 
                                         message: err_message,
                                         request_code:request_code};
+                                        
                     
                     if(caller){
                         callback(caller, response);
@@ -568,8 +575,16 @@ window.hWin.HEURIST4.util = {
                     }
                 }
             },
-            fail: function(  jqXHR, textStatus, errorThrown ){
-                var err_message = (window.hWin.HEURIST4.util.isempty(jqXHR.responseText))?'Error_Connection_Reset':jqXHR.responseText;
+            fail: function(  jqXHR, textStatus, errorThrown )
+            {
+                var err_message;    
+                if(window.hWin.HEURIST4.util.isempty(jqXHR.responseText)){
+                    err_message = 'Error_Connection_Reset';    
+                    console.error(err_message, url);
+                }else{
+                    err_message = jqXHR.responseText;
+                }
+                
                 var response = {status:window.hWin.ResponseStatus.UNKNOWN_ERROR, 
                                 message: err_message,
                                 request_code:request_code};

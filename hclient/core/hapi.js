@@ -280,8 +280,15 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
                 if (jqXHR.responseJSON && jqXHR.responseJSON.status) {
                     response = jqXHR.responseJSON;
                 } else {
-                    var err_message = (window.hWin.HEURIST4.util.isempty(jqXHR.responseText))
-                        ? 'Error_Connection_Reset' : jqXHR.responseText;
+                    
+                    var err_message;    
+                    if(window.hWin.HEURIST4.util.isempty(jqXHR.responseText)){
+                        err_message = 'Error_Connection_Reset';    
+                        console.error(err_message, url);
+                    }else{
+                        err_message = jqXHR.responseText;
+                    }
+                    
                     response = {
                         status: window.hWin.ResponseStatus.UNKNOWN_ERROR,
                         message: err_message,
