@@ -293,6 +293,9 @@ $.widget( "heurist.navigation", {
                 var menuName = resdata.fld(record, DT_NAME, this.options.language);
                 var menuTitle = resdata.fld(record, DT_SHORT_SUMMARY, this.options.language);
                 var menuIcon = resdata.fld(record, DT_THUMBNAIL);
+                if(window.hWin.HEURIST4.util.isArray(menuIcon)){ // remove empty indexes
+                    menuIcon = menuIcon.filter((icon) => !window.hWin.HEURIST4.util.isempty(icon));
+                }
 
                 var recType = resdata.fld(record, 'rec_RecTypeID');
                 
@@ -564,19 +567,24 @@ $.widget( "heurist.navigation", {
     //
     _onMenuClickEvent: function(event){
 
+        let $target = $(event.target);
+
+        if($target.is('span') || $target.is('img')){
+            $target = $target.parents('[role="menuitem"]');
+        }
+
         var data = {
-            page_id: $(event.target).attr('data-pageid'), 
-            page_target: $(event.target).attr('data-target'),
-            page_showtitle: ($(event.target).attr('data-showtitle')==1),
-            hasContent: ($(event.target).attr('data-hascontent')==1)
+            page_id: $target.attr('data-pageid'), 
+            page_target: $target.attr('data-target'),
+            page_showtitle: ($target.attr('data-showtitle')==1),
+            hasContent: ($target.attr('data-hascontent')==1)
         };
 
         //hide submenu
-        $(event.target).parents('.ui-menu[data-level!=0]').hide();
-        /*var mele = $(event.target).parents('.ui-menu[data-level!=0]');
-        if(mele.attr('data-level')!=0) mele.hide();*/
-        let check_selectable = $(event.target).attr('data-checksubmenu');
-        if(check_selectable!=1 && $(event.target).parent().find('ul').length != 0){ // stop click if a submenu exists
+        $target.parents('.ui-menu[data-level!=0]').hide();
+
+        let check_selectable = $target.attr('data-checksubmenu');
+        if(check_selectable!=1 && $target.parent().find('ul').length != 0){ // stop click if a submenu exists
             return;
         }
         
@@ -586,14 +594,14 @@ $.widget( "heurist.navigation", {
         }else if(data.page_id>0){
 
             let page_id = data.page_id;
-            if($(event.target).attr('data-parentid')){
-                page_id = $(event.target).attr('data-parentid') + ',' + page_id;
+            if($target.attr('data-parentid')){
+                page_id = $target.attr('data-parentid') + ',' + page_id;
             }
 
             //highlight top most menu
             this.highlightTopItem(page_id);
 
-            this._onMenuItemAction(data);
+            this._onMenuItemAction(data);                
 
         }
 
