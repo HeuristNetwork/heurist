@@ -2,7 +2,7 @@
 
 /**
 *
-* resolver.php
+* resolver.php     (developed 2015)
 * Acts as a PID redirector to an XML rendition of the record (database on current server).
 * Future version will resolve to remote databases via a lookup on the Heurist master index
 * and caching of remote server URLs to avoid undue load on the Heurist master index.
@@ -29,14 +29,16 @@
 // Input is of the form .../redirects/resolver.php?db=mydatabase&recID=3456
 
 // TODO: future form accepting recID=123-3456 which redirects to record 3456 on database 123.
-//       This will require qizzing the central Heurist index to find out the location of database 123.
+//       This will require quizzing the central Heurist index to find out the location of database 123.
 //       The location of database 123 should then be cached so it does not require a hit on the
 //       master index server for every record. By proceeding in this way, every Heurist database
 //       becomes a potential global resolver.
+
 // Redirect to .../records/view/viewRecordAsXML.php (TODO:)
 // TODO: write /redirects/resolver.php as an XML feed with parameterisation for a human-readable view
 // TODO: the following is a temporary redirect to viewRecord.php which renders a human-readable form
 
+// NOTE: THIS HAS BEEN SUBSTANTIALLY DEVELOPED AND IS NOW DOCUMENTED IN /server_scripts/utility/apacjhe_configurations.txt
 // Add to httpd.conf
 // RewriteRule ^/heurist/([A-Za-z0-9_]+)/(web|tpl|hml|view)/(.*)$ /heurist/redirects/resolver.php
 //redirection for CMS, Smarty, hml output and record view
@@ -47,6 +49,7 @@
 // edit - record edit
 // adm - main admin ui
 //  heurist/database_name/action/param1/param2
+
 $requestUri = explode('/', trim($_SERVER['REQUEST_URI'],'/'));
 $allowedActions = array('web','hml','tpl','view','edit','adm');
 

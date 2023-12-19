@@ -38,7 +38,7 @@ define('PDIR','../../../');  //need for proper path to js and css
 
 require_once dirname(__FILE__).'/../../../hclient/framecontent/initPageMin.php';
 require_once dirname(__FILE__).'/../../../hserv/utilities/dbUtils.php';
-require_once dirname(__FILE__).'/../../../records/index/elasticSearch.php';
+require_once dirname(__FILE__).'/../../../hserv/records/indexing/elasticSearch.php';
 require_once 'welcomeEmail.php';
 
 //require_once dirname(__FILE__).'/../../../hserv/utilities/utils_db_load_script.php';
