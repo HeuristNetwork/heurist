@@ -822,8 +822,6 @@ function hMapLayer2( _options ) {
         
         //theme = window.hWin.HEURIST4.util.isJSON(theme);
   
-//console.log(active_themes);
-        
         if(active_themes==null || active_themes.length==0){
             //switch off current theme
             options.mapwidget.mapping('eachLayerFeature', _nativelayer_id, 
@@ -881,6 +879,7 @@ function hMapLayer2( _options ) {
                 }
                 */
                 
+                var isNumeric = true;
                 //prepare ranges
                 for(var j=0; j<ftheme.ranges.length; j++){
                     var range = ftheme.ranges[j].value;
@@ -891,8 +890,18 @@ function hMapLayer2( _options ) {
                         }else{
                             values = range.split('<>');
                             if(values.length==2){
-                                ftheme.ranges[j].min = values[0];
-                                ftheme.ranges[j].max = values[1];
+                                if(window.hWin.HEURIST4.util.isNumber(values[0])){
+                                    ftheme.ranges[j].min = Number(values[0]);    
+                                }else{
+                                    ftheme.ranges[j].min = values[0];
+                                    isNumeric = false;    
+                                }
+                                if(window.hWin.HEURIST4.util.isNumber(values[1])){
+                                    ftheme.ranges[j].max = Number(values[1]);    
+                                }else{
+                                    ftheme.ranges[j].max = values[1];    
+                                    isNumeric = false;
+                                }
                             }
                         }
                     }
@@ -900,6 +909,7 @@ function hMapLayer2( _options ) {
                         ftheme.ranges[j].symbol = {};  
                     } 
                 }
+                ftheme.isNumeric = isNumeric;
             });
         }
         
@@ -1135,6 +1145,9 @@ function hMapLayer2( _options ) {
                 */
                 
                 let value = feature[tfield];
+                if(ftheme.isNumeric && window.hWin.HEURIST4.util.isNumber(feature[tfield])){
+                    value = Number(feature[tfield]);
+                }
 
                 let fsymb = null;
 
@@ -1163,7 +1176,11 @@ function hMapLayer2( _options ) {
                     }//for
                     if(fsymb!=null){
                         //if theme.symbol is not defined it takes def_layer_style)
-                        new_symbol = _mergeThematicSymbol(theme.symbol?theme.symbol:that.getStyle(), fsymb);
+                        if(new_symbol){
+                            new_symbol = _mergeThematicSymbol(new_symbol, fsymb);
+                        }else{
+                            new_symbol = _mergeThematicSymbol(theme.symbol?theme.symbol:that.getStyle(), fsymb);
+                        }
                     }
                 }
             }

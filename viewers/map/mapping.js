@@ -2204,8 +2204,8 @@ $.widget( "heurist.mapping", {
             var feature = layer.feature;
             
             var rty_ID = feature.properties.rec_RecTypeID;
-            if(that.myIconRectypes[rty_ID+markerStyle.color]){ //cache
-                setIcon = that.myIconRectypes[rty_ID+markerStyle.color];
+            if(that.myIconRectypes[rty_ID+'_'+markerStyle.iconSize+'_'+markerStyle.color]){ //cache
+                setIcon = that.myIconRectypes[rty_ID+'_'+markerStyle.iconSize+'_'+markerStyle.color];
             }else{
                 var fsize = markerStyle.iconSize;
                 if(markerStyle.color){
@@ -2228,7 +2228,7 @@ $.widget( "heurist.mapping", {
                 
                 
                 
-                that.myIconRectypes[rty_ID+markerStyle.color] = setIcon;
+                that.myIconRectypes[rty_ID+'_'+markerStyle.iconSize+'_'+markerStyle.color] = setIcon;
             }
         }
         
