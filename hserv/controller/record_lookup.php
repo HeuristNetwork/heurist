@@ -899,6 +899,8 @@
                         $results['records'][$id]['mime_type'] = array();
                         $results['records'][$id]['url'] = array();
                         $results['records'][$id]['author'] = array();
+                        $results['records'][$id]['contributor'] = array();
+                        $results['records'][$id]['source'] = array();
                         
                         foreach ($records['metas'] as $metadata) {
 
@@ -932,6 +934,10 @@
                                 $results['records'][$id]['license'] = $metadata['value'];
                             }else if(strpos($metadata['propertyUri'], 'abstract') !== false){ // Abstract
                                 $results['records'][$id]['abstract'] = $metadata['value'];
+                            }else if(strpos($metadata['propertyUri'], 'contributor') !== false){ // Contributor
+                                $results['records'][$id]['contributor'][] = $metadata['value'];
+                            }else if(strpos($metadata['propertyUri'], 'source') !== false){ // Source
+                                $results['records'][$id]['source'][] = $metadata['value'];
                             }
                         }
 
@@ -954,6 +960,9 @@
                         }
                         if(count($results['records'][$id]['author']) == 0){
                             $results['records'][$id]['author'] = 'Anonymous';
+                        }
+                        if(count($results['records'][$id]['source']) == 0){
+                            $results['records'][$id]['source'] = 'Unknown';
                         }
                     }
                 }
