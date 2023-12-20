@@ -835,6 +835,9 @@ $.widget( "heurist.lookupBnFLibrary_bib", $.heurist.recordAction, {
                 }else if(response.status && response.status != window.hWin.ResponseStatus.OK){ // Error return
                     window.hWin.HEURIST4.msg.showMsgErr(response);
                 }else{ // No results
+
+                    window.hWin.HEURIST4.msg.showMsgFlash('No results returned', 3000);
+
                     that.recordList.show();
                     that.recordList.resultList('updateResultSet', null);
                 }

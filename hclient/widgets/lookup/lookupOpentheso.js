@@ -415,6 +415,9 @@ $.widget( "heurist.lookupOpentheso", $.heurist.recordAction, {
                 }else if(response.length > 0){
                     that._onSearchResult(response);
                 }else{ // No results
+
+                    window.hWin.HEURIST4.msg.showMsgFlash('No results returned', 3000);
+
                     that.recordList.show();
                     that.recordList.resultList('updateResultSet', null);
                 }
@@ -441,7 +444,6 @@ $.widget( "heurist.lookupOpentheso", $.heurist.recordAction, {
             let res_records = {}, res_orders = [];
 
             // Prepare fields for mapping
-            // the fields used here are defined within /heurist/hserv/controller/record_lookup_config.json where "service" = bnfLibrary
             let fields = ['rec_ID', 'rec_RecTypeID']; // added for record set
             fields = fields.concat(['label', 'desc', 'code', 'uri', 'translations']);
             
