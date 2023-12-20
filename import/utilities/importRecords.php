@@ -102,6 +102,8 @@ $s_max_size = round($max_size/1024/1024).' MBytes';
             <input type="file" id="uploadFile" style="display:none">
             <button id="btn_UploadData" class="ui-button-action">Select file to import</button>
             <div style="margin-top: 10px;float: right;">Maximum size <?php echo $s_max_size?> - contact Heurist team if you need to upload a larger file</div>
+            <div style="margin-top: 10px;float: right;">Source database MUST be registered ( Design > Register ) unless the database structure is identical</div>
+
         </div>
 
         <!-- STEP 1 - list of missing record types - offer to sync definitions -->

@@ -89,8 +89,9 @@ require_once 'initPage.php';
            <div class="prompt" style="font-style: italic;padding-left:110px;width:400px">
                 XML and JSon exported from a registered Heurist database can be imported directly into any other Heurist database even if the structure is different. Use this to migrate selected or complete data, including between different servers.
            </div>
-           <div class="prompt" id="divWarnAboutReg" style="font-style: italic;padding-left:110px;width:400px">
-                This database has not been registered and that the XML file is not therefore importable except into an identically structured database
+  
+           <div class="prompt" id="divWarnAboutReg" style="font-style:italic; color:red; padding-left:110px; width:400px">
+                NOTE: This database has not been registered ( Design > Register ) and the file is not therefore importable except into an identically structured database
            </div>
         
         </div>
