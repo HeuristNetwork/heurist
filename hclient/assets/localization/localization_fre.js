@@ -675,6 +675,164 @@ regional['FRE'] = {
     'Personal Files':'Fichiers personnels',
     'Delete selected files': 'Supprimer les fichiers sélectionnés ',
 
+       // Search (simple filter) WIDGET --------------------
+    'Filter': '',
+    filter_start_hint: 'Appliquer le filtre/la recherche dans le champ de recherche et afficher les résultats dans le panneau central ci-dessous',
+    filter_placeholder: 'définir le filtre',
+    'Filtered Result': 'Résultat filtré',
+    'Save Filter': 'Enregistrer le filtre',
+    'Filter help': 'Aide sur le filtre',
+    filter_help_hint: 'Montrer la syntaxe et les exemples du langage de requête/filtre Heurist',
+    save_filter_hint: 'Sauvegarder le filtre actuel et les règles en tant que lien dans l\'arbre de navigation',
+    search_filter_hint: 'Saisir une recherche/un filtre ou utiliser le "Constructeur de filtre"',
+    'Constructeur de filtre': '',
+    filter_builder_hint: 'Construire une expression de filtre en utilisant une approche basée sur le formulaire',
+    'Constructeur de facettes': '',
+    filter_facetbuilder_hint: 'Construire une nouvelle recherche à facettes',
+    filter_save_hint: 'Enregistrer le filtre actuel',
+    //END Search (simple filter) WIDGET
+     
+    // Faceted Search WIDGET --------------------
+    filter_facet_processing: 'traitement des facettes...',
+    filter_facet_submit: 'Soumettre',
+    filter_facet_interrupt: 'Interruption',
+    filter_facet_exit: 'Fermer',
+    filter_facet_exit_hint: 'Fermer cette recherche de facettes et retourner à la liste des recherches sauvegardées',
+    filter_facet_resetall: 'Réinitialiser tout',
+    filter_facet_resetall_hint: 'Effacer tous les champs / Réinitialiser tous les filtres à leur état initial',
+    filter_facet_reset: 'Pour effacer la recherche précédente, cliquez sur le bouton RESET',
+    filter_facet_savestate: 'Sauvegarder l\'état',
+    filter_facet_titleprefix: 'filtrer : ',
+    filter_facet_apply_preliminary: 'Appliquer le filtre préliminaire',
+    filter_facet_mapsearch: 'Recherche spatiale',
+    filter_facet_mapsearch_hint: 'Cliquez sur ce bouton pour définir et appliquer des limites de recherche spatiale',
+    filter_facet_general_search: 'Recherche tout champs',
+
+    filter_facet_spatial_search: 'Heurist recherhce spatiale',
+    facet_search_no_values: 'pas de valeurs',
+    facet_search_select: 'selectionner...',
+    facet_search_expand_dropdown:  'dropdown',
+    
+    // Faceted Search wizard WIDGET --------------------
+    facet_wizard_select_field: 'Sélectionner les champs qui agissent comme des facettes',    
+    facet_wizard_define_field: 'Définir les titres, les conseils d\'aide et le type de facette',
+
+    // Map WIDGET --------------------
+    // Map legend headings
+    'Legend': 'Légend',
+    'Result Sets': 'Jeu de résultats',
+    'Map Documents': 'Documents cartographiques',
+    'Temp Map': 'Carte temporaire',
+    'Base Maps': 'Cartes de base',
+    
+    map_print_note: 'Après avoir cliqué sur Imprimer, vous devez faire glisser une boîte sur la carte pour définir la zone que vous souhaitez imprimer. Tant que vous ne l\'aurez pas fait, la boîte de dialogue d\'impression ne s\'affichera pas.',
+
+//===================    
+    
+    'Design database': 'Conçevoir base de données',
+    'Import data': 'Importation des données',
+    'Please log in':'Veuillez vous connecter ou vous enregistrer pour utiliser toutes les fonctionnalités de Heurist.',
+    'Session expired': ' semble que vous ne soyez pas connecté ou que votre session ait expiré. Veuillez recharger la page pour vous connecter à nouveau',
+    'Please contact to register':'Veuillez contacter le propriétaire de la base de données pour vous enregistrer et utiliser toutes les fonctionnalités de Heurist.',
+    'My Searches':'Mes filtres',
+    'My Bookmarks':'Mes bookmarks',
+
+    'Password_Reset':'Votre mot de passe a été réinitialisé. Vous devriez recevoir sous peu un e-mail contenant votre nouveau mot de passe.',
+    'Error_Password_Reset':'Impossible de terminer l\'opération.',
+    'Error_Mail_Recovery':'Votre e-mail de récupération de mot de passe ne peut pas être envoyé car le système de messagerie smtp n\'a pas été correctement installé sur ce serveur. Veuillez demander à votre administrateur système de corriger l\'installation.',
+    'Error_Mail_Registration':'Votre information d\'inscription est ajoutée à la base de données. Cependant, il n\'est pas possible de l\'approuver car l\'e-mail d\'inscription ne peut pas être envoyé.',
+    'Error_Mail_Approvement':'Impossible d\'envoyer l\'e-mail d\'approbation d\'inscription - veuillez contacter les développeurs de Heurist.',
+    'Error_Connection_Reset':'Dépassé délai d\'attente pour la réponse du serveur Heurist.<br><br>'
+    +'Cela peut être dû à une interruption d\'Internet (la source la plus courante) ou à une charge du serveur ou à une demande de trop grande taille, ou à une requête qui ne parvient pas à se résoudre. '
+    +'Si le problème persiste, veuillez envoyer un rapport de bogue à l\'équipe Heurist afin que nous puissions enquêter.',
+
+    'New_Function_Conversion':'Cette fonction n\'a pas encore été convertie de la version 4 à la version 5 de Heurist (2018). ',
+    
+    'New_Function_Contact_Team':'Si vous avez besoin de cette fonction, veuillez envoyer un e-mail à heuristnetwork dot org ou '
+    +'cliquez sur l\'entrée Rapport de bogue/demande de fonctionnalité dans le menu Aide - nous avons peut-être déjà une version alpha '
+    +'que vous pouvez utiliser ou que nous pouvons prioriser pour le développement.',
+    
+    //OLD VERSION    No response from server. This may be due to too many simultaneous requests or a coding problem. Please report to Heurist developers if this reoccurs.',
+
+    'mailto_fail': 'Vous n\'avez pas configuré de gestionnaire de messagerie pour les liens mailto: '
+    +'<br/>Veuillez le configurer dans votre navigateur (il se trouve normalement dans les paramètres de contenu sous Confidentialité).',
+
+    //titles
+    'add_record':'Ajouter un nouvel enregistrement',
+    'add_detail':'Ajouter une valeur de champ',
+    'replace_detail':'Remplacer la valeur du champ',
+    'delete_detail':'Supprimer la valeur du champ',
+    'rectype_change':'Changer le type d\'enregistrement (entité)',
+    'ownership':'Changer l\'accès et la propriété de l\'enregistrement',
+    'add_link':'Ajouter un nouveau lien ou créer une relation entre les enregistrements',
+    'extract_pdf':'Extraire du texte d\'un PDF',
+    'url_to_file':'URL distantes vers des fichiers locaux',
+    'local_to_repository':'Télécharger des fichiers locaux dans le référentiel',
+    'reset_thumbs':'Réinitialiser les miniatures',
+
+    //helps
+    'record_action_add_record':'Cette fonction ajoute une nouvelle enregistrement',
+    'record_action_add_detail':'Cette fonction ajoute une nouvelle valeur pour un champ spécifique à l\'ensemble des enregistrements '
+    +'sélectionnés dans la liste déroulante. Les valeurs existantes ne sont pas affectées. l\'ajout ajoutera des valeurs même si cela '
+    +'dépasse le nombre de répétitions valide (par exemple, plus d\'une valeur pour les champs à valeur unique) - vérifiez la base de données '
+    +'ensuite pour la validité en utilisant Vérifier > Vérifier l\'intégrité.',
+    
+    'record_action_replace_detail':'Cette fonction remplace une valeur spécifiée dans un champ particulier pour l\'ensemble des enregistrements '
+    +'sélectionnés dans la liste déroulante. Les autres champs/valeurs ne sont pas affectés.',
+    
+    'record_action_delete_detail':'Cette fonction supprime une valeur spécifiée dans un champ particulier pour l\'ensemble des enregistrements '
+    +'sélectionnés dans la liste déroulante. Les autres champs/valeurs ne sont pas affectés. '
+    +'La suppression supprimera des valeurs, y compris la dernière valeur dans un champ requis - vérifiez la base de données '
+    +'ensuite pour la validité en utilisant Vérifier > Vérifier l\'intégrité.',
+    
+    'record_action_rectype_change':('Cette fonction change le type d\'enregistrement (entité) de l\'ensemble des enregistrements '
+    +'sélectionnés dans la liste déroulante. Tous les enregistrements sélectionnés seront convertis en le nouveau type.'
+        +'<br><br>'
+        +'<b>Avertissement</b>: Il est très probable que les données enregistrées pour de nombreux ou tous ces enregistrements ne '
+        +'satisferont pas aux conditions fixées pour le type d\'enregistrement vers lequel ils sont convertis. '
+        +'<br><br>'
+        +'Veuillez utiliser Vérifier > Vérifier l\'intégrité pour localiser et corriger tout enregistrement invalide généré par ce processus.'),    
+    'record_action_ownership':'&nbsp;',
+    'record_action_extract_pdf':('Cette fonction extrait du texte (jusqu\'à 64 000 caractères) de tous les fichiers PDF attachés à un enregistrement et place le texte extrait dans le champ spécifié (par défaut "Texte extrait" (2-652), s\'il est défini). Les caractères incorrects rencontrés sont ignorés.'
+        +'<br><br>'
++'S\'il y a plus d\'un fichier PDF, le texte est placé dans les valeurs répétées du champ. '
+        +'<br><br>'
++'Le texte n\'est extrait que si la (valeur correspondante) du champ est vide pour éviter d\'écraser tout texte saisi manuellement.'),
+    'record_action_url_to_file':'Cette fonction récupère les fichiers indiqués par des URL distantes dans le champ de fichier spécifié, <br>les place dans la base de données et remplace l\'URL distante par une référence au fichier dans la base de données. Les autres champs ne sont pas affectés.',
+    'record_action_local_to_repository': 'Cette fonction téléchargera les fichiers locaux dans le champ sélectionné utilisé par les enregistrements vers le référentiel sélectionné.<br>l\'enregistrement du fichier est ensuite mis à jour pour être utilisé comme ressource distante, pointant vers l\'enregistrement du référentiel.',
+    'record_action_reset_thumbs':'Cette fonction supprime la miniature des fichiers et des ressources externes pour la portée sélectionnée d\'enregistrements. Les miniatures seront recréées à la demande suivante',
+    
+    //reports
+    'record_action_passed': 'Enregistrements passés au processus',
+    'record_action_noaccess': 'Enregistrements non modifiables trouvés (peut être dû aux autorisations)',
+    'record_action_processed': 'Enregistrements traités',
+    'record_action_undefined_add_detail': 'Enregistrements avec des champs non définis',
+    'record_action_undefined_replace_detail': 'Ignoré en raison de l\'absence de correspondance',
+    'record_action_undefined_delete_detail': 'Ignoré en raison de l\'absence de correspondance',
+    'record_action_limited_add_detail': 'Ignoré en raison du dépassement de la limite de répétition des valeurs',
+    'record_action_limited_delete_detail': 'Ignoré car le champ requis ne peut pas être supprimé',
+    
+    'record_action_undefined_extract_pdf': 'Enregistrements sans PDF associé',
+    'record_action_parseexception_extract_pdf': 'Enregistrements avec des PDF verrouillés (extraction interdite)',
+    'record_action_parseempty_extract_pdf': 'Enregistrements sans texte à extraire (par exemple, images)',
+    'record_action_limited_extract_pdf': 'Enregistrements avec champ déjà rempli',
+    
+    'record_action_fails_url_to_file': 'Enregistrements avec URL qui n\'ont pas pu être téléchargés',   
+    
+    'record_action_fails_local_to_repository': 'Fichiers qui n\'ont pas pu être téléchargés dans le référentiel sélectionné',
+    
+    'record_action_errors': 'Erreurs',
+
+    'thumbs3':'aperçu',
+    
+    'Collected':'Collecter',
+    'Shared':'Partager',
+
+    'feature_request': 'Veuillez demander à l\'équipe Heurist si nécessaire ou ajoutez au code et soumettez une demande de tirage (pull request)'
 
 };
+
+// TODO: messages above, particularly the default startup message, have been substnatially modified/improved 6/11/17, 
+//       so translated versions require update.
+
 
