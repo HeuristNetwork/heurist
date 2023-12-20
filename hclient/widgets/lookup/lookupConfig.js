@@ -403,8 +403,8 @@ $.widget( "heurist.lookupConfig", {
 
     updateOldConfigurations: function(){
 
-        let that = this;
-        let has_changes = false;
+        var that = this;
+        var has_changes = false;
 
         $.each(this.options.service_config, function(key, value){
 
@@ -447,42 +447,58 @@ $.widget( "heurist.lookupConfig", {
                 has_changes = true;
             }
 
+            // Ensure that the key is correct, otherwise there will be problems with updating (creating duplicates)
+            if(key.includes("_") === false){
+
+                var new_key = that.options.service_config[key]['service_id'];
+                that.options.service_config[new_key] = window.hWin.HEURIST4.util.cloneJSON(that.options.service_config[key]);
+
+                delete that.options.service_config[key];
+
+                has_changes = true;
+            }
+
             // Update configurations (Add missing fields, additional options, remove fields no longer handled)
-            let n_fields = that.options.service_config[key]['fields'];
-            let service_details = that._available_services.find((service) => service['service'] == that.options.service_config[key]['service']);
-
-            let fld_removes = Object.keys(n_fields).filter((key) => !Object.hasOwn(service_details['fields'], key));
-
-            if(fld_removes.length > 0){ // remove fields not part of configuration
-
-                for(let field of fld_removes){
-                    delete n_fields[field];
-                }
-
-                that.options.service_config[key]['fields'] = n_fields;
-
-                has_changes = true;
-            }
-
-            // Add missing fields
-            let has_field_changes = false;
-            for(let field in service_details['fields']){
-                if(Object.hasOwn(n_fields, field)){
-                    continue;
-                }
-
-                n_fields[field] = service_details['fields'][field];
-
-                has_field_changes = true;
-            }
-
-            if(has_field_changes){
-                that.options.service_config[key]['fields'] = n_fields;
-
-                has_changes = true;
-            }
+            var n_fields = that.options.service_config[key]['fields'];
 
             if(that.options.service_config[key]['service'] == 'bnfLibrary'){
+
+                var hasFieldChanges = false;
+                for(var obj_key in n_fields){
+
+                    var val = '';
+                    if(obj_key == 'subject'){
+
+                        delete n_fields[obj_key];
+                        n_fields['ext_description'] = '';
+
+                        hasFieldChanges = true;
+                    }else if(obj_key == 'rights'){
+
+                        delete n_fields[obj_key];
+
+                        hasFieldChanges = true;
+                    }else if(obj_key == 'creator'){
+
+                        val = n_fields[obj_key];
+                        n_fields['author'] = val;
+
+                        delete n_fields[obj_key];
+
+                        hasFieldChanges = true;
+                    }
+                }
+
+                if(!Object.hasOwn(n_fields, 'contributor')){
+                    n_fields['contributor'] = '';
+                    hasFieldChanges = true;
+                }
+
+                if(hasFieldChanges){
+                    that.options.service_config[key]['fields'] = n_fields;
+
+                    has_changes = true;
+                }
 
                 if(!Object.hasOwn(that.options.service_config[key], 'options')){ // add default options
 
@@ -495,6 +511,29 @@ $.widget( "heurist.lookupConfig", {
                 }
             }else if(that.options.service_config[key]['service'] == "bnfLibraryAut"){
 
+                if(!Object.hasOwn(n_fields, 'authority_type')){
+                    n_fields['authority_type'] = '';
+                    hasFieldChanges = true;
+                }
+                if(!Object.hasOwn(n_fields, 'years_active')){
+                    n_fields['years_active'] = '';
+                    hasFieldChanges = true;
+                }
+                if(!Object.hasOwn(n_fields, 'role')){
+                    n_fields['role'] = '';
+                    hasFieldChanges = true;
+                }
+                if(!Object.hasOwn(n_fields, 'location')){
+                    n_fields['location'] = '';
+                    hasFieldChanges = true;
+                }
+
+                if(hasFieldChanges){
+                    that.options.service_config[key]['fields'] = n_fields;
+
+                    has_changes = true;
+                }
+
                 if(!Object.hasOwn(that.options.service_config[key], 'options')){ // add default options
                     that.options.service_config[key]['options'] = {
                         'dump_receord': true,
@@ -502,17 +541,22 @@ $.widget( "heurist.lookupConfig", {
                     };
                     has_changes = true;
                 }
-            }
+            }else if(that.options.service_config[key]['service'] == 'nakala'){
+                
+                var hasFieldChanges = false;
 
-            // Correct service's key (to allow the service to be assigned to multiple record types)
-            if(key.includes("_") === false){
+                if(!n_fields.hasOwnProperty('rec_url')){
+                    n_fields['rec_url'] = '';
+                }
+                if(!n_fields.hasOwnProperty('filename')){
+                    n_fields['filename'] = '';
+                }
 
-                let new_key = that.options.service_config[key]['service_id'];
-                that.options.service_config[new_key] = window.hWin.HEURIST4.util.cloneJSON(that.options.service_config[key]);
+                if(hasFieldChanges){
+                    that.options.service_config[key]['fields'] = n_fields;
 
-                delete that.options.service_config[key];
-
-                has_changes = true;
+                    has_changes = true;
+                }
             }
         });
 
