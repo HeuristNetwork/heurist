@@ -503,6 +503,32 @@ window.hWin.HEURIST4.util = {
     },
 
     //
+    //
+    //                    
+    interpretServerError: function(jqXHR, url, request_code){
+    
+        if(window.hWin.HEURIST4.util.isempty(jqXHR.responseText)){
+            
+            //403 Forbidden
+            
+            if(jqXHR.status==500){
+                err_message = 'Error_Server_Side';    
+            }else{
+                err_message = 'Error_Connection_Reset';    
+            }
+            console.error(err_message, url);
+        }else{
+            err_message = jqXHR.responseText;
+        }
+        return {
+            status: window.hWin.ResponseStatus.UNKNOWN_ERROR,
+            message: err_message,
+            request_code: request_code
+        };
+        
+    },
+       
+    //
     // we have to reduce the usage to minimum. Need to implement method in hapi via central controller
     // this method is used 
     // 1) for call H3 scripts in H4 code
@@ -541,19 +567,8 @@ window.hWin.HEURIST4.util = {
                     if(textStatus=='timeout'){
                         
                     }
-                        
-                    var err_message;    
-                    if(window.hWin.HEURIST4.util.isempty(jqXHR.responseText)){
-                        err_message = 'Error_Connection_Reset';    
-                        console.error(err_message, url);
-                    }else{
-                        err_message = jqXHR.responseText;
-                    }
-                                            
-                    var response = {status:window.hWin.ResponseStatus.UNKNOWN_ERROR, 
-                                        message: err_message,
-                                        request_code:request_code};
-                                        
+                    
+                    var response = window.hWin.HEURIST4.util.interpretServerError(jqXHR, url, request_code);
                     
                     if(caller){
                         callback(caller, response);
@@ -577,18 +592,9 @@ window.hWin.HEURIST4.util = {
             },
             fail: function(  jqXHR, textStatus, errorThrown )
             {
-                var err_message;    
-                if(window.hWin.HEURIST4.util.isempty(jqXHR.responseText)){
-                    err_message = 'Error_Connection_Reset';    
-                    console.error(err_message, url);
-                }else{
-                    err_message = jqXHR.responseText;
-                }
                 
-                var response = {status:window.hWin.ResponseStatus.UNKNOWN_ERROR, 
-                                message: err_message,
-                                request_code:request_code};
-
+                var response = window.hWin.HEURIST4.util.interpretServerError(jqXHR, url, request_code);
+                
                 if(callback){
                     if(caller){
                         callback(caller, response);

@@ -563,6 +563,9 @@ regional['ENG'] = {
     'Error_Mail_Recovery':'Your password recovery email cannot be sent as the smtp mail system has not been properly installed on this server. Please ask your system administrator to correct the installation.',
     'Error_Mail_Registration':'Your registration info is added to database. However, it is not possible to approve it since registration email cannot be sent.',
     'Error_Mail_Approvement':'Cannot send registration approval email - please contact Heurist developers.',
+    'Error_Server_Side':'The server responded with a status of 500 (Internal Server Error).<br><br>'
+    +'This may be due to uncought exception in server side code. '
+    +'If the problem persists, please email a bug report to the Heurist team so we can investigate.',
     'Error_Connection_Reset':'Timeout on response from Heurist server.<br><br>'
     +'This may be due to an internet outage (the most common source), or due to server load or to requesting too large a result set, or a query that fails to resolve. '
     +'If the problem persists, please email a bug report to the Heurist team so we can investigate.',
