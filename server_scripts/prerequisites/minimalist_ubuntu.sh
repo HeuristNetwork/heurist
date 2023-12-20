@@ -3,7 +3,7 @@
 # install.sh: installation script for Ubuntu
 # @package     Heurist academic knowledge management system
 # @link        http://HeuristNetwork.org
-# @copyright   (C) 2005-2019 University of Sydney
+# @copyright   (C) 2005-2023 University of Sydney
 # @author      Ian Johnson     <ian.johnson@sydney.edu.au>
 # @author      Brian Ballsun-Stanton   <brian@fedarch.org>
 # @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
