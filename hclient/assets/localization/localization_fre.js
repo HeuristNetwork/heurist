@@ -116,8 +116,15 @@ regional['FRE'] = {
     'tags': 'êtiquettes',
     'share': 'partager',
     'more': 'plus',
+    'MORE': 'plus',
+    'more...': 'plus...',
+    'less': 'moins',
+    'LESS': 'moins',
+    'No values': 'pas de valeur indiqué',
     'edit': 'modifier',
     'options': 'options',
+    'Referenced by': 'Référencé par',
+    'Linked from': 'Lié depuis',
 
     'by name': 'par titre',
     'by usage': 'par usage',
@@ -143,9 +150,9 @@ regional['FRE'] = {
     'Edit Tag': 'Éditer le tag',
     'Define new tag that replaces old ones': 'Définir un nouveau tag qui remplace les anciens',
     'Length of tag must be more than 2.': 'La longueur du tag doit être supériure à 2',
-    'Assign selected tags': 'Assigner les tags selectionnés',
+    'Assign selected tags': 'Assigner les tags sélectionnés',
     'Personal Tags':'Mes tags personnels',
-    'Delete selected tags': 'Supprimer les tags selectionnés',
+    'Delete selected tags': 'Supprimer les tags sélectionnés',
 
     'Preferences' : 'Préférences',
     'Layout configuration file': 'Fichier de configuration de la mise en page',
@@ -174,7 +181,7 @@ regional['FRE'] = {
 
     'Delete? Please confirm': 'Supprimer ? Veuillez confirmer',
 
-    'select record': 'selectionner enregistrement' ,
+    'select record': 'sélectionner enregistrement' ,
 
     'Leave blank for no change': 'Laisser vide pour aucun changement',
     'Passwords are different': 'Les mots de passe ne correspondent pas',
@@ -230,7 +237,7 @@ regional['FRE'] = {
     'Ignore and close': 'Ignorer et fermer',
     'Drop data changes': 'Abandonner les changements effectués',
     'Manage': 'Gérer',
-    'Select': 'Selectionner',
+    'Select': 'Sélectionner',
     'Configure': 'Configurer',
     'Full screen': 'Plein écran',
     'Record info': 'Info',
@@ -484,8 +491,8 @@ regional['FRE'] = {
     'menu-collected-show': 'Montrer en tant que recherche',
     'menu-collected-show-hint': 'Montrer la liste des résultats dans la collection',
     collection_limit: 'Le nombre d\'enregistrements sélectionnés est supérieur à la limite indiquée dans la rubrique ',
-    collection_select_hint:  'Veuillez sélectionner au mons un enregistrement pour l\'ajouter à la collection',
-    collection_select_hint2: 'Veuillez sélectionner au mons un enregistrement pour le retirer de la collection',
+    collection_select_hint:  'Veuillez sélectionner au moins un enregistrement pour l\'ajouter à la collection',
+    collection_select_hint2: 'Veuillez sélectionner au moins un enregistrement pour le retirer de la collection',
     collection_url_hint: 'Les collections sont sauvegardées comme une liste d\'identifiants. L\'URL générée par cette collection va dépasser la limite possible pour une URL (2083 caractères). Veuillez enregistrer la colection en tant que recherche sauvegardée (qui autorise un plus grand nombre d\'enregistrements), ou sélectionnez moins d\'enregistrements.',
 
     'Recode': 'Modifier',
@@ -693,7 +700,7 @@ regional['FRE'] = {
     //END Search (simple filter) WIDGET
      
     // Faceted Search WIDGET --------------------
-    filter_facet_processing: 'traitement des facettes...',
+    filter_facet_processing: 'traitement des facettes ...',
     filter_facet_submit: 'Soumettre',
     filter_facet_interrupt: 'Interruption',
     filter_facet_exit: 'Fermer',
@@ -708,10 +715,10 @@ regional['FRE'] = {
     filter_facet_mapsearch_hint: 'Cliquez sur ce bouton pour définir et appliquer des limites de recherche spatiale',
     filter_facet_general_search: 'Recherche tout champs',
 
-    filter_facet_spatial_search: 'Heurist recherhce spatiale',
+    filter_facet_spatial_search: 'Heurist recherche spatiale',
     facet_search_no_values: 'pas de valeurs',
-    facet_search_select: 'selectionner...',
-    facet_search_expand_dropdown:  'dropdown',
+    facet_search_select: 'sélectionner...',
+    facet_search_expand_dropdown:  'liste',
     
     // Faceted Search wizard WIDGET --------------------
     facet_wizard_select_field: 'Sélectionner les champs qui agissent comme des facettes',    
