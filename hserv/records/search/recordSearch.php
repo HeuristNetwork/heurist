@@ -561,7 +561,7 @@ function __assignFacetValue($params, $subs){
 // @return:
 //   Array => each index is the lower and upper limits for the interval plus the number of records that fit this interval
 //
-function getDateHistogramData($system, $range, $interval, $rec_ids, $dty_id, $format="year", $is_between){
+function getDateHistogramData($system, $range, $interval, $rec_ids, $dty_id, $format="year", $is_between=true){
 
     $mysqli = $system->get_mysqli();
 
