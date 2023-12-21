@@ -1020,7 +1020,7 @@
     // $need_populate - adds entries to recDetailsDateIndex
     // $json_for_record_details - update recDetails - change Plain string temporals to JSON 
     //
-    function recreateRecDetailsDateIndex($system, $need_populate, $json_for_record_details){
+    function recreateRecDetailsDateIndex($system, $need_populate, $json_for_record_details, $offset=0){
         
         $mysqli = $system->get_mysqli();
         
@@ -1037,44 +1037,64 @@
         
         $log_file = $system->getSysDir().'recDetailsDateIndex.log';
         
-        $mysqli->query('DROP TABLE IF EXISTS recDetailsDateIndex;');
-        $res = $mysqli->query("CREATE TABLE recDetailsDateIndex (
-              rdi_ID   int unsigned NOT NULL auto_increment COMMENT 'Primary key',
-              rdi_RecID int unsigned NOT NULL COMMENT 'Record ID',
-              rdi_DetailTypeID int unsigned NOT NULL COMMENT 'Detail type ID',
-              rdi_DetailID int unsigned NOT NULL COMMENT 'Detail ID',
-              rdi_estMinDate DECIMAL(15,4) NOT NULL COMMENT '',
-              rdi_estMaxDate DECIMAL(15,4) NOT NULL COMMENT '',
-              PRIMARY KEY  (rdi_ID),
-              KEY rdi_RecIDKey (rdi_RecID),
-              KEY rdi_DetailTypeKey (rdi_DetailTypeID),
-              KEY rdi_DetailIDKey (rdi_DetailID),
-              KEY rdi_MinDateKey (rdi_estMinDate),
-              KEY rdi_MaxDateKey (rdi_estMaxDate)
-            ) ENGINE=InnoDB COMMENT='A cache for date fields to speed access';");
+        if($offset>0){
+            $res = true;
+        }else{
+            $mysqli->query('DROP TABLE IF EXISTS recDetailsDateIndex;');
+            $res = $mysqli->query("CREATE TABLE recDetailsDateIndex (
+                  rdi_ID   int unsigned NOT NULL auto_increment COMMENT 'Primary key',
+                  rdi_RecID int unsigned NOT NULL COMMENT 'Record ID',
+                  rdi_DetailTypeID int unsigned NOT NULL COMMENT 'Detail type ID',
+                  rdi_DetailID int unsigned NOT NULL COMMENT 'Detail ID',
+                  rdi_estMinDate DECIMAL(15,4) NOT NULL COMMENT '',
+                  rdi_estMaxDate DECIMAL(15,4) NOT NULL COMMENT '',
+                  PRIMARY KEY  (rdi_ID),
+                  KEY rdi_RecIDKey (rdi_RecID),
+                  KEY rdi_DetailTypeKey (rdi_DetailTypeID),
+                  KEY rdi_DetailIDKey (rdi_DetailID),
+                  KEY rdi_MinDateKey (rdi_estMinDate),
+                  KEY rdi_MaxDateKey (rdi_estMaxDate)
+                ) ENGINE=InnoDB COMMENT='A cache for date fields to speed access';");
+        }
+        
 
         if(!$res){
             $system->addError(HEURIST_DB_ERROR, 'Cannot create recDetailsDateIndex', $mysqli->error);
             return false;
         }else{
-            $report[] = 'recDetailsDateIndex created';
-            //recreate triggers
-            $res = mysql__script(HEURIST_DBNAME_FULL, 'addProceduresTriggers.sql');
-            if($res!==true){
-                $system->addErrorArr($res);
-                return false;
-            }
 
-            $report[] = 'Triggers to populate recDetailsDateIndex created';
+            if($offset==0){
+
+                $report[] = 'recDetailsDateIndex created';
+                //recreate triggers
+                $res = mysql__script(HEURIST_DBNAME_FULL, 'addProceduresTriggers.sql');
+                if($res!==true){
+                    $system->addErrorArr($res);
+                    return false;
+                }
+
+                $report[] = 'Triggers to populate recDetailsDateIndex created';
+                
+            }
             
             if($need_populate){
             
             //fill database with min/max date values
             //1. find all date values in recDetails
-            $query = 'SELECT count(dtl_ID) FROM recDetails, defDetailTypes  WHERE dtl_DetailTypeID=dty_ID AND dty_Type="date" AND dtl_Value!=""';
+            $query = 'SELECT dty_ID FROM defDetailTypes WHERE dty_Type="date"';
+            $fld_dates = mysql__select_list2($mysqli, $query);
+            $fld_dates = implode(',',prepareIds($fld_dates));
+            $query = 'SELECT count(dtl_ID) FROM recDetails  WHERE dtl_DetailTypeID in ('.$fld_dates.')'; //' AND dtl_Value!=""';
             $cnt_dates = mysql__select_value($mysqli, $query);
+            if($offset>0){
+                $cnt_dates = $cnt_dates - $offset;
+            }
             
-            $query = 'SELECT dtl_ID,dtl_RecID,dtl_DetailTypeID,dtl_Value FROM recDetails, defDetailTypes WHERE dtl_DetailTypeID=dty_ID AND dty_Type="date" AND dtl_Value!=""';
+            $query = 'SELECT dtl_ID,dtl_RecID,dtl_DetailTypeID,dtl_Value FROM recDetails '
+            .'WHERE dtl_DetailTypeID in ('.$fld_dates.')'; //' AND dtl_Value!=""';
+            if($offset>0){
+                $query = $query.' LIMIT '.$offset.', 18446744073709551615';
+            }
             $res = $mysqli->query($query);
             
             if ($res){
@@ -1101,6 +1121,26 @@
                     $error = '';
                     
                     if(trim($dtl_Value)=='') continue;
+                    
+                    $iYear = intval($row[3]);
+                    
+                    if($iYear==$dtl_Value && $iYear>0 && $iYear<10000){
+                        //just year
+                        $is_date_simple = true;
+                        $query = 'insert into recDetailsDateIndex (rdi_RecID, rdi_DetailTypeID, rdi_DetailID, rdi_estMinDate, rdi_estMaxDate)'
+." values ($dtl_RecID, $dtl_DetailTypeID, $dtl_ID, $iYear, $iYear)";
+                        $res5 = $mysqli->query($query);
+//getEstDate('$dtl_NewValue',0), getEstDate('$dtl_NewValue',1)
+
+                        if(!$res5){
+                            //fails insert into recDetailsDateIndex
+                            $system->addError(HEURIST_DB_ERROR, $err_prefix.'Error on index insert query:'.$query, $mysqli->error);
+                            $isok = false;
+                            break;
+                        }                     
+                    }else{
+                    
+                    
                     
             //2. Create temporal object
                     $preparedDate = new Temporal( $dtl_Value );
@@ -1198,6 +1238,7 @@
                         //$system->addError(HEURIST_ERROR, $err_prefix.'Cannot parse temporal "'.$dtl_Value);
                         $error = 'Cannot parse temporal';
                     }
+                    }
                     
                     //keep log
                     if(!$is_date_simple || $error){
@@ -1213,7 +1254,12 @@
                         }
                         
                     }
-                    if(!$error) $cnt++;
+                    if(!$error){
+                        $cnt++;  
+                        //if($offset>0 && $cnt % 50000 == 0){
+                        //    print 'processed :'.$cnt;
+                        //}
+                    } 
                  
                     
                 }//while

@@ -311,19 +311,19 @@
             }
 
 
-            /*
-            if($dbVerSubSub<13){
-            if(!recreateRecDetailsDateIndex( $system, false, false )){
-            return false;
-            }
-            }
-            */
-
             //update version
             if($dbVerSubSub<12){
                 $mysqli->query('UPDATE sysIdentification SET sys_dbVersion=1, sys_dbSubVersion=3, sys_dbSubSubVersion=12 WHERE 1');
             }
-
+            
+            /* date index created in upgradeDatabase.php
+            if($dbVerSubSub<14){
+                if(!recreateRecDetailsDateIndex( $system, false, false )){
+                    return false;
+                }
+            }
+            */
+            
 
             //import field 2-1080 Workflowstages
             if($dbVerSubSub<4 && !(ConceptCode::getDetailTypeLocalID('2-1080')>0)){

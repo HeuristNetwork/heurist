@@ -2,8 +2,11 @@
 $is_included = (defined('PDIR'));
 $cache_missed = false;
 $is_upgrade = (@$_REQUEST['upgrade']==1);
+$offset = 0;
 
 if(!$is_included){
+    
+    ini_set('max_execution_time', '0');
 
     define('PDIR','../../');  //need for proper path to js and css    
     define('MANAGER_REQUIRED', 1);   
@@ -26,9 +29,12 @@ if(!$is_included){
 
     $is_ok = true;
     if(@$_REQUEST['fixdateindex']=='1'){
+
+        //$offset = intval(@$_REQUEST['offset']);
+        if(!($offset>0)) $offset = 0;
         
         $need_convert_dates = (intval(@$_REQUEST['convert_dates'])=='1');
-        $rep = recreateRecDetailsDateIndex($system, true, $need_convert_dates);
+        $rep = recreateRecDetailsDateIndex($system, true, $need_convert_dates, $offset);
         if($rep){
             foreach($rep as $msg){
                 print $msg.'<br>';
@@ -57,12 +63,15 @@ if(!$is_included){
         $index_outdated = false;
 
         //count of date fields
-        $query = 'SELECT count(dtl_ID) FROM recDetails, defDetailTypes  WHERE dtl_DetailTypeID=dty_ID AND dty_Type="date" AND dtl_Value!=""';
+        $query = 'SELECT dty_ID FROM defDetailTypes WHERE dty_Type="date"';
+        $fld_dates = mysql__select_list2($mysqli, $query);
+        $fld_dates = implode(',',prepareIds($fld_dates));
+        $query = 'SELECT count(dtl_ID) FROM recDetails  WHERE dtl_DetailTypeID in ('.$fld_dates.')'; //' AND dtl_Value!=""';
         $cnt_dates = mysql__select_value($mysqli, $query);
 
         if($is_upgrade){
             
-            $query = 'SELECT count(dtl_ID) FROM recDetails, defDetailTypes  WHERE dtl_DetailTypeID=dty_ID AND dty_Type="date" AND dtl_Value LIKE "|VER=1%"';
+            $query = 'SELECT count(dtl_ID) FROM recDetails WHERE dtl_DetailTypeID in ('.$fld_dates.') AND dtl_Value LIKE "|VER=1%"';
             $cnt_fuzzy_dates = mysql__select_value($mysqli, $query);
             
 ?>            
@@ -74,7 +83,7 @@ Please advise the Heurist team if you think you have a problem after the upgrade
             </p>
 <?php   
         }else{
-            $query = 'SELECT count(dtl_ID) FROM recDetails, defDetailTypes  WHERE dtl_DetailTypeID=dty_ID AND dty_Type="date" AND dtl_Value LIKE "%estMinDate%"';
+            $query = 'SELECT count(dtl_ID) FROM recDetails WHERE dtl_DetailTypeID in ('.$fld_dates.') AND dtl_Value LIKE "%estMinDate%"';
             $cnt_fuzzy_dates = mysql__select_value($mysqli, $query);
         }
 
@@ -125,9 +134,14 @@ Please advise the Heurist team if you think you have a problem after the upgrade
                 echo '<div><h3 class="res-valid">Record Details Date Index table does not exist</h3></div>';        
         }
         
+        //&offset=144193
 ?>            
             <div><br><br>
+<?php    if($is_included){    ?>
                     <button onclick="{window.open('listDatabaseErrors.php?db=<?php echo HEURIST_DBNAME;?>&fixdateindex=1&convert_dates=0','_self')}">Recreate date index</button>
+<?php    }else{    ?>                    
+                    <button onclick="{var ele = document.getElementById('page-inner'); ele.innerHTML=''; ele.classList.add('loading');window.open('<?php echo HEURIST_BASE_URL;?>admin/verification/checkDateIndex.php?db=<?php echo HEURIST_DBNAME;?>&fixdateindex=1','_self')}">*Recreate date index*</button>                    
+<?php    }    ?>                    
             </div>        
 <?php    
         }            
