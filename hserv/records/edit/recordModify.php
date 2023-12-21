@@ -1124,7 +1124,7 @@ function recordGetIncrementedValue($system, $params){
             }else{
                 $res = mysql__select_value($mysqli, 'select dtl_Value FROM recDetails, Records'
                     .' WHERE dtl_RecID=rec_ID and rec_RecTypeID='.$rt_ID.' and dtl_DetailTypeID='.$dt_ID
-                    .' ORDER BY rec_Added DESC LIMIT 1');    
+                    .' ORDER BY rec_ID DESC LIMIT 1');    
             }
 
             $value = 1;
@@ -1140,8 +1140,25 @@ function recordGetIncrementedValue($system, $params){
                     if (preg_match('/(\d+)$/', $value, $matches)){
                         $digits = $matches[1];
                         $increment_digit = str_pad(intval($digits) + 1, strlen($digits), '0', STR_PAD_LEFT);
-
+                        /* double check
+                        $len = strlen($value)-strlen($digits);
+                        if($len>=0){
+                            $len++;
+                            //rec_Added may be equal for several value - double check
+                            $res = mysql__select_value($mysqli, 'select dtl_Value FROM recDetails, Records'
+                                .' WHERE dtl_RecID=rec_ID and rec_RecTypeID='.$rt_ID.' and dtl_DetailTypeID='.$dt_ID
+                                .' ORDER BY CAST(SUBSTR(dtl_Value,'.$len.') as SIGNED) DESC LIMIT 1');    
+                            if($res!=null){
+                                $value = $res;
+                                $matches = array();
+                                if(preg_match('/(\d+)$/', $value, $matches)){
+                                    $digits = $matches[1];
+                                    $increment_digit = str_pad(intval($digits) + 1, strlen($digits), '0', STR_PAD_LEFT);
+                                }    
+                            }
+                        }*/
                         $value = substr($value,0,-strlen($digits)).($increment_digit);
+                        
                     }else{
                         $value = $value.'1';
                     }
