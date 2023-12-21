@@ -72,6 +72,8 @@ class USystem {
 
             $installDir_pro = '/heurist/';
             $host_params['heurist_dir'] = implode('/',$path).'/';
+            
+            $host_params['server_name'] = $serverName;
 
             //echo "Install dir      $installDir \n";
             //echo "3>>> ".$host_params['heurist_dir']."\n";
@@ -79,18 +81,21 @@ class USystem {
         }else{
 
             // server name or IP address of your Web server, null will pull SERVER_NAME from the request header
-            if (!@$serverName) {
+            if (true){ //always detatect dynamically  !@$serverName) {
                 if(@$_SERVER["SERVER_NAME"]){
-                    $serverName = $_SERVER["SERVER_NAME"] . 
+                    
+                    $host_params['server_name'] = $_SERVER["SERVER_NAME"] . 
                     ((is_numeric(@$_SERVER["SERVER_PORT"]) && $_SERVER["SERVER_PORT"] != "80" && $_SERVER["SERVER_PORT"] != "443") 
                         ? ":" . $_SERVER["SERVER_PORT"] : "");
                     $host_params['domain'] = $_SERVER["SERVER_NAME"];
                 }else{
+                    $host_params['server_name'] = '127.0.0.1';
                     $host_params['domain'] = '127.0.0.1';
                 }
             }else{
                 $k = strpos($serverName,":");
                 $host_params['domain'] = ($k>0)?substr($serverName,0,$k-1):$serverName;
+                $host_params['server_name'] = $serverName;
             }
 
             $isSecure = false;
@@ -167,7 +172,7 @@ class USystem {
 
         }    
 
-        $host_params['server_url'] = ($isSecure ? 'https' : 'http') . "://" . $serverName;
+        $host_params['server_url'] = ($isSecure ? 'https' : 'http') . "://" . $host_params['server_name'];
         $host_params['install_dir'] = $installDir;
         $host_params['install_dir_pro'] = $installDir_pro;
 

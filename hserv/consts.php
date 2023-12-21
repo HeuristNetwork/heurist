@@ -63,7 +63,7 @@ if (!@$mailDomain) {
 }
 
 define('HEURIST_SERVER_URL', $host_params['server_url']);
-define('HEURIST_SERVER_NAME', @$serverName); // server host name for the configured name, eg. myheurist.net
+define('HEURIST_SERVER_NAME', @$host_params['server_name']); // server host name for the configured name, eg. myheurist.net
 
 if(@$_SERVER["REQUEST_URI"]) define('HEURIST_CURRENT_URL', $host_params['server_url'] . $_SERVER["REQUEST_URI"]); //NOT USED
 if(!defined('HEURIST_DIR')){

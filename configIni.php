@@ -180,7 +180,8 @@ $dbHost = '';
 $dbPort = null;  //'3306'
 $dbAdminUsername = '';
 $dbAdminPassword = '';
-//$serverName = "null";
+// for various separate server side scripts (cronjbs)
+// $serverName = "null";  
 $dbPrefix = '';
 
 // Elastic Search (Lucene) server
