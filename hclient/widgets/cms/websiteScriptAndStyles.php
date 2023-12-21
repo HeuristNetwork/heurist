@@ -317,15 +317,15 @@ function onPageInit(success)
     //cfg_widgets is from layout_defaults.js
     window.hWin.HAPI4.LayoutMgr.init(cfg_widgets, null);
     
-    //reload website by click on logo, opens first page with content
-    $("#main-logo,#custom-logo").click(function(event){
+    //reload website by click on logo or title, opens first page with content
+    $("#main-logo,#custom-logo,#main-title").click(function(event){
             
-            var load_initially = home_page_record_id;
-            <?php if($isEmptyHomePage){
-                echo 'if(typeof first_not_empty_page !== "undefined" && first_not_empty_page>0){ load_initially=first_not_empty_page;}';  
-            }?>
-            is_execute_homepage_custom_javascript = true;
-            loadPageContent( load_initially ); //on logo click
+        var load_initially = home_page_record_id;
+        <?php if($isEmptyHomePage){
+            echo 'if(typeof first_not_empty_page !== "undefined" && first_not_empty_page>0){ load_initially=first_not_empty_page;}';  
+        }?>
+        is_execute_homepage_custom_javascript = true;
+        loadPageContent( load_initially ); //on logo click
     });
     
     //fix bug for tinymce popups - it lost focus if it is called from dialog
@@ -1330,6 +1330,9 @@ function initHeaderTitle(){
             }
             return;
         }
+
+
+
         ele.show();
     }
     
