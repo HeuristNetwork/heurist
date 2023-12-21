@@ -216,6 +216,7 @@
         } 
 
         if(!$version){
+            //if version is not specified default is thumbnail (except for record types)
             $version = ($entity_name=='defRecTypes')?'icon':'thumbnail';   
         }else if($version=='thumb'){ 
             $version='thumbnail';

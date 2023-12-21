@@ -1927,19 +1927,19 @@ $mysqli->commit();
     // @todo
     // Copy record type icon and thumbnail from source to destination database
     //
-    private function copyRectypeIcon($source_RtyID, $target_RtyID, $thumb=""){
+    private function copyRectypeIcon($source_RtyID, $target_RtyID, $is_thumb=false){
 
         //new  entity/defRecTypes/  --------------------------------------------
         
         //@todo SVG ext support
         $targetFolder = HEURIST_FILESTORE_DIR.'/entity/defRecTypes/';
-        $targetPath = $targetFolder.($thumb==''?'/icon/':'/thumbnail/').$target_RtyID.'.png';
+        $targetPath = $targetFolder.($is_thumb?'/thumbnail/':'/icon/').$target_RtyID.'.png';
         
         //check if the same server with target
         if(strpos($this->sourceIconURL, HEURIST_SERVER_URL)===0){ 
 
-            $filename = HEURIST_FILESTORE_ROOT.$this->source_db_name.
-                    ($thumb==''?'/icon/':'/thumbnail/').$thumb.$source_RtyID.'.png';
+            $filename = HEURIST_FILESTORE_ROOT.$this->source_db_name.'/entity/defRecTypes/'.
+                    ($is_thumb?'/thumbnail/':'/icon/').$source_RtyID.'.png';
             if(file_exists($filename)){
                 if(file_exists($targetPath)){
                     unlink($targetPath);
@@ -1947,14 +1947,14 @@ $mysqli->commit();
                 copy($filename, $targetPath);
             }
         }else{
-            $sourceURL = $this->sourceIconURL.$thumb.$source_RtyID.'.png';
+            $sourceURL = $this->sourceIconURL.$source_RtyID.($is_thumb?'&version=thumb':'');
             saveURLasFile($sourceURL, $targetPath); //save rty icon on import
         }
 
                 
         //and thumbnail
-        if($thumb==''){
-            $this->copyRectypeIcon($source_RtyID, $target_RtyID, 'thumb/th_');
+        if(!$is_thumb){
+            $this->copyRectypeIcon($source_RtyID, $target_RtyID, true);
         }
     }
     

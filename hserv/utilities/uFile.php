@@ -608,7 +608,7 @@
     //
     function fileSave($rawdata, $filename)
     {
-        if($rawdata){
+        if(is_resource($rawdata) && is_string($filename)){
             fileDelete($filename);
             $fp = fopen($filename,'x');
             fwrite($fp, $rawdata);
@@ -839,9 +839,10 @@ function saveURLasFile($url, $filename)
 {   
     //Download file from remote server
     $rawdata = loadRemoteURLContent($url, false); //use proxy 
-    if($rawdata!==false){
+    if(is_resource($rawdata)){
         return fileSave($rawdata, $filename); //returns file size
     }else{
+        error_log('Can not access remote resource '.$url);
         return 0;
     }
 }

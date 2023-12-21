@@ -132,6 +132,12 @@ if($filename){ //download from scratch (for csv import)
             $entity_name  = 'trm';
             $viewmode = 'icon';
             //$path = HEURIST_TERM_ICON_DIR;
+        }else if($rec_id && strpos($rec_id, 'thumb/th_')===0){
+            //backward support - thumbnail for rectype import
+            $rec_id = substr($rec_id, 9);
+            $entity_name  = 'rty';
+            $viewmode = 'thumb';
+
         }else if(!$entity_name) {
             $entity_name = 'rty'; //default - defRecTypes   
         }
@@ -140,6 +146,10 @@ if($filename){ //download from scratch (for csv import)
         
         if(!$entity_name){
             exit;
+        }
+        
+        if(strpos($rec_id, '.png')>0){
+            $rec_id = substr($rec_id, 0, -4);
         }
         
         list($filename, $content_type, $file_url) = resolveEntityFilename($entity_name, $rec_id, $viewmode, $db);
