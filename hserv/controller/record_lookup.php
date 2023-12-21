@@ -901,6 +901,8 @@
                         $results['records'][$id]['author'] = array();
                         $results['records'][$id]['contributor'] = array();
                         $results['records'][$id]['source'] = array();
+                        $results['records'][$id]['copyright'] = array();
+                        $results['records'][$id]['provenance'] = array();
                         
                         foreach ($records['metas'] as $metadata) {
 
@@ -938,6 +940,10 @@
                                 $results['records'][$id]['contributor'][] = $metadata['value'];
                             }else if(strpos($metadata['propertyUri'], 'source') !== false){ // Source
                                 $results['records'][$id]['source'][] = $metadata['value'];
+                            }else if(strpos($metadata['propertyUri'], 'rightsHolder') !== false){ // Right Holders
+                                $results['records'][$id]['copyright'][] = $metadata['value'];
+                            }else if(strpos($metadata['propertyUri'], 'provenance') !== false){ // Provenance
+                                $results['records'][$id]['provenance'][] = $metadata['value'];
                             }
                         }
 
