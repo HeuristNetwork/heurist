@@ -3380,7 +3380,10 @@ $.widget( "heurist.resultList", {
             
             if(this.options.auto_select_first !== false){ // this.options.view_mode == 'vertical' || 
                 var ele = this.div_content.find('.recordDiv:first');//.addClass('selected');
-                if(ele.length>0) this._recordDivOnClick({target:ele[0]});
+                if(ele.length>0){
+                    //this._recordDivOnClick({target:ele[0]});
+                    setTimeout(() => {that._recordDivOnClick({target:ele[0]});}, 1500); // allow later widgets to catch up
+                }
             }            
             
         }else if(this._currentMultiSelection!=null) { //highlight retained selected records
