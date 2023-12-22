@@ -169,18 +169,19 @@ if($isWebPage){ //set in websiteRecord.php
                         The Medieval Hebrew Bible Manuscripts in Western Europe: A Material, Cultural and Social Approach
                     </div>
                     <div class="navbar-social-network">
-                        <a href="https://twitter.com/projetMBH" class="tw" target="_blank" rel="noopener"><img
+                     <!-- removed on request 22 dec 2023, twitter not required
+                       <a href="https://twitter.com/projetMBH" class="tw" target="_blank" rel="noopener"><img
                                 src="<?php echo HEURIST_BASE_URL?>?db=MBH_Manuscripta_Bibliae_Hebraicae&file=1be81f1bc799e511f9f766da4119a297c0383240"
-                                width="24" alt="Twitter"></a>&nbsp;<a
-                            href="https://www.facebook.com/manuscriptabibliaehebraicae/" class="fb" target="_blank" rel="noopener"><img
+                                width="24" alt="Twitter"></a>&nbsp;
+                    -->
+                            <a href="https://www.facebook.com/manuscriptabibliaehebraicae/" class="fb" target="_blank" rel="noopener"><img
                                 src="<?php echo HEURIST_BASE_URL?>?db=MBH_Manuscripta_Bibliae_Hebraicae&file=082682853f46e477acd87c3c8e55cabd1aeb9bbc"
                                 width="24" alt="Facebook"></a>
                     </div>
-
+                    
+<!-- Removed 22 dec 2023 on request, site only in English
                     <div class="region region-language-switcher">
                         <section id="block-locale-language" class="block block-locale clearfix">
-
-
                             <ul class="language-switcher-locale-url">
                                 <li class="fr first active"><a href="#" class="language-link active" xml:lang="fr"
                                         title="Le projet Manuscripta Bibliae Hebraicae">FR</a></li>
@@ -189,6 +190,8 @@ if($isWebPage){ //set in websiteRecord.php
                             </ul>
                         </section>
                     </div>
+    -->
+                        
 
                     <div id="main-menu" class="navbar-collapse collapse" data-heurist-app-id="heurist_Navigation"
                         data-generated="1"></div>
@@ -201,11 +204,13 @@ if($isWebPage){ //set in websiteRecord.php
     
     ?>
         </div>
+        
         <div class="ent_content_full  ui-heurist-bg-light" id="main-content-container">
             <div id="main-content" data-homepageid="<?php print $home_page_record_id;?>"
                 <?php print ($open_page_or_record_on_init>0)?'data-initid="'.$open_page_or_record_on_init.'"':''; ?>
                 data-viewonly="<?php print ($hasAccess)?0:1;?>">
             </div>
+            
             <footer class="footer">
                 <div class="open-book-effect-sym">
                     <span class="b"></span>
@@ -237,11 +242,13 @@ if($isWebPage){ //set in websiteRecord.php
                             <div class="col-md-1">
 
                             </div>
-                            <div class="col-md-3 social-networks">Follow us on the social media networks<br><br><a
-                                    href="https://twitter.com/projetMBH" class="tw" target="_blank" rel="noopener"><img
+                            <div class="col-md-3 social-networks">Follow us on the social media networks<br><br>
+                            <!-- removed on request 22 dec 2023, twitter not required
+                                    <a href="https://twitter.com/projetMBH" class="tw" target="_blank" rel="noopener"><img
                                         src="https://heurist.huma-num.fr/heurist/?db=MBH_Manuscripta_Bibliae_Hebraicae&file=1be81f1bc799e511f9f766da4119a297c0383240"
-                                        width="32" alt="Twitter"></a>&nbsp;<a
-                                    href="https://www.facebook.com/manuscriptabibliaehebraicae/" class="fb"
+                                        width="32" alt="Twitter"></a>&nbsp;
+                                    -->
+                                    <a href="https://www.facebook.com/manuscriptabibliaehebraicae/" class="fb"
                                     target="_blank" rel="noopener"><img
                                         src="https://heurist.huma-num.fr/heurist/?db=MBH_Manuscripta_Bibliae_Hebraicae&file=082682853f46e477acd87c3c8e55cabd1aeb9bbc"
                                         width="32" alt="Facebook"></a></div>
@@ -251,10 +258,8 @@ if($isWebPage){ //set in websiteRecord.php
                 <div class="region region-footer">
                     <div class="container">
                         <section id="block-block-3" class="block block-block clearfix">
-
-
                             <p><span style="font-size: 13.008px;">©</span><span
-                                    style="font-size: 13.008px;">&nbsp;</span>MBH 2022 -
+                                    style="font-size: 13.008px;">&nbsp;</span>MBH 2024 -
                                 All rights reserved&nbsp;-&nbsp;<a
                                     href="/?db=MBH_Manuscripta_Bibliae_Hebraicae&website&id=1408&pageid=1414"
                                     title="Legal information">Legal information</a> - <a
@@ -268,13 +273,15 @@ if($isWebPage){ //set in websiteRecord.php
                 </div>
             </footer>
         </div>
-        </div>
+
         
         
-        <!-- https://mbh.huma-num.fr/sites/all/themes/mbh/assets/videos/output_poster.jpg 
+        <!-- References to old MBH website, for reference
+             https://mbh.huma-num.fr/sites/all/themes/mbh/assets/videos/output_poster.jpg 
              https://mbh.huma-num.fr/sites/all/themes/mbh/assets/videos/output.mp4 
              document.getElementById('wrapper-video').style.display = 'none';
              -->
+             
         <div id="wrapper-video" onclick="{$('#wrapper-video').fadeOut(4000);}">
           <video autoplay="" loop="" muted="" 
           poster="https://heurist.huma-num.fr/heurist/?db=MBH_Manuscripta_Bibliae_Hebraicae&file=62c18d37f7d63b7777e5dc0add9c5ea669d78ec7" id="video-background">
