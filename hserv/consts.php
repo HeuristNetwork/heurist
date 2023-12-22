@@ -394,6 +394,7 @@ $dtDefines = array('DT_NAME' => array(2, 1),
     'DT_CMS_FOOTER' => array(2, 940),
     'DT_CMS_FOOTER_FIXED' => array(2, 941),    //fixed 2-532
     'DT_LANGUAGES' => array(2, 967),
+    'DT_CMS_MENU_FORMAT' => array(2, 1104), //show name + icon, name only, or icon only
     
     'DT_WORKFLOW_STAGE' => array(2, 1080)
 
@@ -407,7 +408,12 @@ $trmDefines = array(
     'TRM_NO_OLD' => array(99, 5447),
     'TRM_SWF' => array(2, 9453), //workflow stages vocabulary
     'TRM_SWF_ADDED' => array(2, 9464), //01 - Editing (includes manually created)
-    'TRM_SWF_IMPORT' => array(2, 9454) //00 - Imported
+    'TRM_SWF_IMPORT' => array(2, 9454), //00 - Imported
+
+    // For DT_CMS_MENU_FORMAT
+    'TRM_NAME_ONLY' => array(2, 9634),
+    'TRM_ICON_ONLY' => array(2, 9635),
+    'TRM_NAME_AND_ICON' => array(2, 9636)
 );
 
 
