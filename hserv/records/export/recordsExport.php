@@ -643,6 +643,8 @@ XML;
         
         $rty_ID = @$record['rec_RecTypeID'];
         
+        //$record['origin'] = @$_SERVER['HTTP_ORIGIN'];
+        
         //change record type to layer, remove redundant fields
         if($is_tlc_export){
             if($rty_ID==RT_TLCMAP_DATASET){
@@ -994,6 +996,9 @@ XML;
         //$content = stream_get_contents($fd);
         fclose($fd);
         
+        //
+        // download output as a file
+        //
         if(@$params['filename'] || @$params['metadata']){
             
             $record = null;
@@ -1067,6 +1072,32 @@ XML;
         }else{
             //$content = file_get_contents($tmp_destination);
 
+            if(@$params['restapi']==1){
+                //header("Access-Control-Allow-Origin: *");    
+                //header("Access-Control-Allow-Methods: POST, GET");
+                
+                // Allow from any origin
+                if (isset($_SERVER['HTTP_ORIGIN'])) {
+                    // Decide if the origin in $_SERVER['HTTP_ORIGIN'] is one
+                    // you want to allow, and if so:
+                    header("Access-Control-Allow-Origin: {$_SERVER['HTTP_ORIGIN']}");
+                    header('Access-Control-Allow-Credentials: true');
+                    header('Access-Control-Max-Age: 5');    // default value 5 sec
+                    //header('Access-Control-Max-Age: 86400');    // cache for 1 day
+                /*}else if ($_SERVER['REQUEST_METHOD'] == 'OPTIONS') {
+        
+                    if (isset($_SERVER['HTTP_ACCESS_CONTROL_REQUEST_METHOD']))
+                        // may also be using PUT, PATCH, HEAD etc
+                        header("Access-Control-Allow-Methods: GET, POST, OPTIONS");
+                    
+                    if (isset($_SERVER['HTTP_ACCESS_CONTROL_REQUEST_HEADERS']))
+                        header("Access-Control-Allow-Headers: {$_SERVER['HTTP_ACCESS_CONTROL_REQUEST_HEADERS']}");
+                    exit(0);*/
+                }else{
+                    header("Access-Control-Allow-Origin: *");
+                }                
+            }
+            
             if($params['format']=='json' || $params['format']=='geojson' || $params['format']=='iiif'){
                 header( 'Content-Type: application/json');    
             }else{
@@ -1085,8 +1116,13 @@ XML;
                 header('Content-Length: ' . self::get_file_size($tmp_destination));
             }
             
-            if(@$params['restapi']==1 && count($rt_counts)==0){
-                http_response_code(404);
+            if(@$params['restapi']==1){
+                
+                if(count($rt_counts)==0){
+                    http_response_code(404);
+                }else{
+                    http_response_code(200);
+                }
             }
             self::readfile($tmp_destination);
             fileDelete($tmp_destination);

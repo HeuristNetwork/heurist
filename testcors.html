@@ -1,0 +1,115 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html>
+<head>
+
+<title>Heurist CORS</title>
+
+<script src="https://code.jquery.com/jquery-1.12.2.min.js" integrity="sha256-lZFHibXzMHo3GGeehn1hudTAP3Sc0uKXBXAzHX1sjtk=" crossorigin="anonymous"></script>
+
+<script>
+function loadDoc() {
+    
+    let rtype = document.querySelector('input[name="rtype"]:checked').value;
+
+    let sURL = document.getElementById("url-request").value;
+    var rele = document.getElementById("area-response");
+    rele.value = 'processing...';
+
+    if(rtype=='fetch'){
+
+        /*fetch(sURL, {
+            method: 'GET',
+            //body: post,
+            //credentials: "include",
+            //mode: 'cors',
+            headers: {
+                'Accept': 'application/json'
+                ,'Content-Type': 'application/json'
+            }
+        })*/
+        fetch(sURL, {
+            method: 'GET',
+            header:{'Content-Type': 'application/json'}
+        })
+        .then((response) => {
+            
+            if (!response.ok) {
+              rele.value = `HTTP error! Status: ${response.status}`;
+              throw new Error(`HTTP error! Status: ${response.status}`);
+            }            
+            
+            return response.json();
+
+        }).then((data) => {
+            rele.value = JSON.stringify(data);
+        }).catch((error) => {
+            console.log('Error', error);
+            rele.value = 'Errrr';
+        });
+        
+    }else if(rtype=='jquery'){
+       
+        var options = {
+            url: sURL,
+            type: "GET",
+            dataType: 'json',
+            //data: {},
+            cache: false,
+            error: function(jqXHR, textStatus, errorThrown ) {
+                console.log(this);
+                rele.value = jqXHR.statusText;
+            },
+            success: function( response, textStatus, jqXHR ){
+                rele.value = JSON.stringify( response );
+            }
+        };
+        
+        $.ajax(options);
+        
+        
+        
+    }else {
+    
+        var xhttp = new XMLHttpRequest();
+        xhttp.onreadystatechange = function() {
+            if (this.readyState === 4) {
+                if (this.status == 200) {
+                    rele.value = this.responseText;
+                }else {
+                    console.log(this);
+                    rele.value = 'Error: '+this.statusText;
+                }
+            }
+        };
+        xhttp.open("GET", sURL);
+        xhttp.send();
+    
+    }
+
+
+}
+</script>
+</head>
+<body>
+
+<h3>Request:</h3>
+<p> 
+  <label><input type="radio" name="rtype" value="xhttp" checked>xhttp</label>
+  <label><input type="radio" name="rtype" value="fetch">fetch</label>
+  <label><input type="radio" name="rtype" value="jquery">jquery</label>
+
+  <select id="url-request" style="width: 60%;">
+  <option>https://heuristref.net/h6-alpha/api/digital_harlem/records/12828</option>
+  <option>https://heurist.huma-num.fr/h6-alpha/api/osmak_1/records/42</option>
+  <option>https://heuristref.net/h6-alpha/hserv/controller/record_output.php?q=ids%3A12828&db=digital_harlem&format=json</option>
+  <option>https://heuristref.net/h6-alpha/hserv/controller/record_output.php?q=ids%3A12828&restapi=1&db=digital_harlem&format=json</option>
+<!--  <option>http://127.0.0.1/h6-alpha/api/osmak_9c/records/36</option> -->
+  </select>
+  <button onclick="loadDoc()">Submit</button>
+</p> 
+<h3>Response:</h3>
+<textarea id="area-response" rows="10" style="width: 80%;"> 
+</textarea> 
+  
+</body>
+</html>

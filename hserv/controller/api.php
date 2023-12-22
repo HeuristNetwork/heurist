@@ -189,7 +189,7 @@ else
         if($method=='search'){
             include_once '../../hserv/controller/record_output.php';
         }else{
-            exitWithError('Method Not Allowed', 405);
+            exitWithError('Method Not Implemented', 405);
         }
     }else{
         include_once '../../hserv/controller/entityScrud.php';
@@ -212,9 +212,9 @@ function exitWithError($message, $code){
 function getAction($method){
     if($method=='GET'){
         return 'search';
-    }else if($method=='POST'){ //add new 
+    }else if($method=='POST'){ // add new 
         return 'add';
-    }else if($method=='PUT'){ //replace
+    }else if($method=='PUT'){ // replace
         return 'save';
     }else if($method=='DELETE'){
         return 'delete';

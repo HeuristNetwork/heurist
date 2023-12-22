@@ -603,7 +603,7 @@ window.hWin.HEURIST4.util = {
                     }
                 }
             }
-        }
+        };
 
         if(window.hWin.HEURIST4.util.isnull(dataType)){
             options['dataType'] = 'json';
