@@ -522,6 +522,7 @@ $failed_exts = array();
                                             
                                             $relative_path = getRelativePath(HEURIST_FILESTORE_DIR, $dir);
                                             $details["t:".$key3] = array("1"=>$relative_path); //change to relative path
+                                            
                                         }
 
                                     }else if($key2=="lat"){
@@ -750,7 +751,7 @@ XML;
                     {
 
                         $details = array();
-                        
+        
                         $file_id = fileRegister($system, $filename);  //see recordFile.php
                             
                         if($file_id>0){
@@ -785,10 +786,10 @@ XML;
                         if($key>0){
 
                             $targetPath = $flleinfo['dirname'];
-
+                            
                             $rel_path = getRelativePath(HEURIST_FILESTORE_DIR, $targetPath); //getRelativePath2($targetPath);
                             $details["t:".$key] = array("1"=>  $rel_path);
-
+                            
                             /*print "<div>".HEURIST_FILESTORE_DIR."</div>";
                             print "<div>file path :".$targetPath."</div>";
                             print "<div>relative path :".strpos($targetPath, HEURIST_FILESTORE_DIR)."--".$rel_path."</div>";

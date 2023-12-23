@@ -169,12 +169,10 @@ $mysqli = $system->get_mysqli();
                         $dirname = str_replace("\0", '', $dirname);
                         $dirname = str_replace('\\', '/', $dirname);
                         if(strpos($dirname, $_HEURIST_FILESTORE_DIR)===0){
-                            
-                        
-                        $relative_path = getRelativePath($_HEURIST_FILESTORE_DIR, $dirname);   //db root folder
-                    }else{
-                        $relative_path = '';
-                    }
+                            $relative_path = getRelativePath($_HEURIST_FILESTORE_DIR, $dirname);   //db root folder
+                        }else{
+                            $relative_path = '';
+                        }
                     
                     if($relative_path!=@$res['ulf_FilePath']){
                         
