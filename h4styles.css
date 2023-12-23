@@ -2607,3 +2607,10 @@ li.edit-form-tab > a{
 
     cursor: pointer;
 }
+
+/* Configure CMS widgets popup */
+.cms-widget-config i.help-text{
+    display: block;
+    line-height: 5px;
+    padding: 2.5px 0px 5px;
+}
