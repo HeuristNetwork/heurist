@@ -2619,7 +2619,7 @@ if($active_all || in_array('geo_values', $active)){ // Check for geo fields that
 
                     <label><input type=checkbox onclick="{mark_all_by_class(event.target, 'invalid_lng');}">Mark with wrong longitudes</label>
                     &nbsp;&nbsp;
-                    <span style="font-size:0.9em">To fix longitudes (<-180 and >180 deg) click here:
+                    <span style="font-size:0.9em">To fix longitudes (less than -180 or greater than 180 deg) click here:
                         <button
                             onclick="{document.getElementById('linkbar').style.display = 'none';window.open('listDatabaseErrors.php?db=<?= HEURIST_DBNAME?>&fixlong=1','_self')}">
                             Fix longitudes</button>
