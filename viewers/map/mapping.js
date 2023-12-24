@@ -1912,7 +1912,7 @@ $.widget( "heurist.mapping", {
                             $.each(markers, function(i, top_layer){    
                                 if(top_layer.feature){
                                     selected_layers[top_layer._leaflet_id] = top_layer;
-                                    var title = window.hWin.HEURIST4.util.htmlEscape( top_layer.feature.properties.rec_Title );
+                                    var title = top_layer.feature.properties.rec_Title;
                                     sText = sText + '<div class="leaflet_layer_opt" title="'+ title +'" data-id="'+top_layer._leaflet_id+'">'+ title +'</div>';
                                 }
                             });
@@ -2293,7 +2293,7 @@ $.widget( "heurist.mapping", {
                                 
                                     if(top_layer.contains(latlng)){
                                         selected_layers[top_layer._leaflet_id] = top_layer;
-                                        var title = window.hWin.HEURIST4.util.htmlEscape( top_layer.feature.properties.rec_Title );
+                                        var title = top_layer.feature.properties.rec_Title;
                                         sText = sText + '<div class="leaflet_layer_opt" title="'+title+'" data-id="'+top_layer._leaflet_id+'">'+title+'</div>';
                                     }
                                     

@@ -27,7 +27,7 @@
 </div>
 -->
 <div class="ent_content_full" style="top:0px;overflow-x:hidden;font-size:0.9em;padding: 1em;">
-<fieldset style="padding:0;line-height:20px">
+<fieldset style="padding:0;line-height:20px" class="cms-widget-config">
 
     <div  class="heurist_SearchInput">
         <!--<div class="header"><label>Show filter by entity buttons</label></div>-->
@@ -169,7 +169,7 @@
         <div class="header">
             <label>Record view template</label>
         </div>
-        <select name="rendererExpandDetails" class="text ui-widget-content ui-corner-all" title="" style="width:400px">
+        <select name="rendererExpandDetails" class="text ui-widget-content ui-corner-all" title="">
         </select>
     </div>
 
@@ -224,7 +224,7 @@
 
     <div  class="heurist_resultList">
         <div class="header"><label>Set class(es) for record from term value(s) for </label></div>
-        <select name="field_for_ext_classes" class="text ui-widget-content ui-corner-all" title="" style="width:400px">
+        <select name="field_for_ext_classes" class="text ui-widget-content ui-corner-all" title="">
         </select>
     </div>
 
@@ -279,9 +279,9 @@
         <div class="header">
             <label>Overview template&nbsp;</label>
         </div>
-        <select name="reportOverview" class="text ui-widget-content ui-corner-all" title="" style="width:400px">
+        <select name="reportOverview" class="text ui-widget-content ui-corner-all" title="">
         </select>
-        <br><i>Defines the format used to display story overview derived from the main story record</i>
+        <i class="help-text">Defines the format used to display story overview derived from the main story record</i>
     </div>
     <div  class="heurist_StoryMap">
         <div class="header"><label>End page mode:</label></div>
@@ -296,31 +296,31 @@
         <div class="header">
             <label>End page template&nbsp;</label>
         </div>
-        <select name="reportEndPage" class="text ui-widget-content ui-corner-all" title="" style="width:400px">
+        <select name="reportEndPage" class="text ui-widget-content ui-corner-all" title="">
         </select>
-        <br><i>Defines the format used to display end of story derived from the main story record</i>
+        <i class="help-text">Defines the format used to display end of story derived from the main story record</i>
     </div>
     <div class="heurist_StoryMap">
         <div class="header">
             <label>Story element filter for initial map&nbsp;</label>
         </div>
-        <input name="reportOverviewMapFilter" class="text ui-widget-content ui-corner-all" title="" style="width:400px"/>
-        <br><i>Determines the set of story elements which will be represented on the initial map (showing all stories in the current resultset)</i>
+        <input name="reportOverviewMapFilter" class="text ui-widget-content ui-corner-all" title="" style="width:250px"/>
+        <i class="help-text">Determines the set of story elements on the initial map (rather than showing all stories in the current resultset)</i>
     </div>
     <div  class="heurist_StoryMap">
         <div class="header"><label>Order elements by&nbsp;</label></div>
-        <select name="elementOrder" class="text ui-widget-content ui-corner-all" title="" style="width:400px">
+        <select name="elementOrder" class="text ui-widget-content ui-corner-all" title="">
         </select>
-        <br><i>Determines the order of story elements. Use date, year or integer fields to define custom story order</i>        
+        <i class="help-text">Determines the order of story elements. Use date, year or integer fields to define custom story order</i>        
     </div>
     
     <div class="heurist_StoryMap">
         <div class="header">
             <label>Story element template&nbsp;</label>
         </div>
-        <select name="reportElement" class="text ui-widget-content ui-corner-all" title="" style="width:400px">
+        <select name="reportElement" class="text ui-widget-content ui-corner-all" title="">
         </select>
-        <br><i>Defines the format used to display story element information</i>
+        <i class="help-text">Defines the format used to display story element information</i>
     </div>
     <div class="heurist_StoryMap">
         <div class="header"><label>Story mode:</label></div>
@@ -373,31 +373,21 @@
     <div class="heurist_StoryMap">
         <div class="header"><label>Message when no record selected</label></div>
         <input name="storyPlaceholder" size="100"/>
-        <br><i></i>
+        <i class="help-text"></i>
     </div>
 
     <div class="heurist_StoryMap">
         <div class="header"><label>Message if no story elements</label></div>
         <input name="elementsPlaceholder" size="100"/>
-        <br><i></i>
+        <i class="help-text"></i>
     </div>
     
     <div class="heurist_StoryMap">
         <div class="header"><label>Sub-message in smaller font</label></div>
         <input name="elementsPlaceholderSub" size="100"/>
-        <br><i></i>
+        <i class="help-text"></i>
     </div>
-    
-    
 
-    <hr class="heurist_StoryMap" style="margin: 1em -10px;">
-
-    <div class="heurist_StoryMap">
-        <div class="header"><label>Map Unique ID</label></div>
-        <input name="map_widget_id"/>
-        <br><i>Reference to map widget. Define this unique ID in Map widget properties</i>
-    </div>
-    
     <!-- mapping -->   
     <div class="heurist_Map">
         <div class="header"><label>Map layout parameters</label></div>
@@ -432,10 +422,10 @@
                 &nbsp;&nbsp;<label>Legend width&nbsp;<input name="legend_width" size="3" maxlength="4" value="200"></label>
             </p>
             <p><span style="min-width: 105px;display: inline-block;text-align: right;">Expand at start&nbsp;</span>
-                <label><input type="checkbox" name="legend_exp" value="basemaps">basemap</label>&nbsp;
+                <label><input type="checkbox" name="legend_exp2" checked>legend</label>&nbsp;
                 <label><input type="checkbox" name="legend_exp" value="search" checked>result set</label>&nbsp;
-                <label><input type="checkbox" name="legend_exp" value="mapdocs">map documents</label>
-                <label><input type="checkbox" name="legend_exp2" checked>entire legend</label>&nbsp;
+                <label><input type="checkbox" name="legend_exp" value="mapdocs">map documents</label>&nbsp;
+                <label><input type="checkbox" name="legend_exp" value="basemaps">basemaps</label>&nbsp;
             </p>  
         </div>
     </div>
@@ -506,7 +496,7 @@
             <!-- Temp hide -->
             <p style="display: none;"><span style="min-width: 105px;display: none;text-align: right;">Other settings&nbsp;</span>
                 <label><input type="checkbox" name="popup_resizing">Resizable</label>
-                <br><i>check this to allow the user to resize the popup, note: this will overwrite any width and length you set here</i>
+                <i class="help-text">check this to allow the user to resize the popup, note: this will overwrite any width and length you set here</i>
             </p>
         </div>
     </div>
@@ -534,9 +524,9 @@
         <div class="header">
              <label>Custom report template&nbsp;</label>
         </div>
-        <select name="rep_template" class="text ui-widget-content ui-corner-all" title="" style="width:400px">\
+        <select name="rep_template" class="text ui-widget-content ui-corner-all" title="">
         </select>
-        <br><i>Define custom reports using the Custom report tab in Explore</i>
+        <i class="help-text">Define custom reports using the Custom report tab in Explore</i>
     </div>
     
     <div class="heurist_resultListExt">
@@ -610,7 +600,7 @@
     -->    
     <div class="heurist_Navigation">
         <div class="header"><label>Open&nbsp;</label></div>
-        <select name="target" class="text ui-widget-content ui-corner-all" title="" style="width:400px">
+        <select name="target" class="text ui-widget-content ui-corner-all" title="">
             <option value="inline">inline (uses field "Target element")</option>
             <option value="inline_page_content">inline (into div id="page-content")</option>
             <option value="popup">in popup</option>
@@ -646,7 +636,7 @@
     <div class="heurist_Map">
         <div class="header" style="vertical-align: top;padding-top:0px;"><label>Link to custom style&nbsp;</label></div>
         <textarea name="custom_links" rows="1" cols="50"></textarea>
-        <br><i>Link to CSS file with styles to be injected to iframe with map</i>
+        <i class="help-text">Link to CSS file with styles to be injected to iframe with map</i>
     </div>
     
     <div class="heurist_Map">
@@ -660,7 +650,7 @@
             <label>No data message</label>
         </div>
         <textarea id="empty_remark" rows="3" cols="85"/>
-        <label><input type="checkbox" name="blank_empty_remark"> check to leave blank</label>
+        <label style="vertical-align: top;"><input type="checkbox" name="blank_empty_remark"> check to leave blank</label>
         <span class="heurist-helper1" style="display: inline-block;line-height: 12px;padding-bottom: 10px;">
             Message to be shown if query returns no records<br>
             Default value: "<span id="empty_remark_def"></span>"
@@ -672,7 +662,7 @@
             <label>Place holder text</label>
         </div>
         <textarea id="placeholder_text" rows="3" cols="85"/>
-        <label><input type="checkbox" name="blank_placeholder"> check to leave blank</label>
+        <label style="vertical-align: top;"><input type="checkbox" name="blank_placeholder"> check to leave blank</label>
         <span class="heurist-helper1" style="display: inline-block;line-height: 12px;padding-bottom: 10px;">
             Message to display while search is not performed or no record or search has been selected<br>
             Default value: "<span id="placeholder_def"></span>"
@@ -681,22 +671,28 @@
     
     <hr style="margin: 1em -10px;">
 
+    <div class="heurist_StoryMap">
+        <div class="header"><label>Map Unique ID</label></div>
+        <input name="map_widget_id"/>
+        <i class="help-text">Reference to map widget. Define this unique ID in Map widget properties</i>
+    </div>
+
     <div Xclass="heurist_Navigation heurist_Search heurist_SearchTree heurist_resultList heurist_resultListExt heurist_resultListDataTable heurist_resultListCollection heurist_Map">
         <div class="header"><label>Search group&nbsp;</label></div>
         <input name="search_realm"  value="sr1"/>
-        <br><i>Arbitrary identifier for a group of widgets which share search and select events</i>
+        <i class="help-text">Arbitrary identifier for a group of widgets which share search and select events</i>
     </div>
     
     <div>
         <div class="header"><label>Info directs to page&nbsp;</label></div>
         <select name="search_page"/>
-        <br><i>Info request should load this page and pass search request or selection to widgets of the specified search group</i>
+        <i class="help-text">Info request should load this page and pass search request or selection to widgets of the specified search group</i>
     </div>
 
     <div>
         <div class="header"><label>Unique widget id&nbsp;</label></div>
         <input name="widget_id"/>
-        <br><i>Unique, arbitrary, HTML ID for widget, for reference in javascript and from other widgets</i>
+        <i class="help-text">Unique, arbitrary, HTML ID for widget, for reference in javascript and from other widgets</i>
     </div>
     
     

@@ -672,8 +672,10 @@
         
         if( substr($targetPath, -1, 1) != '/' )  $targetPath = $targetPath.'/';
         
-        if ($basePath === $targetPath) {
+        if ($basePath === $targetPath){
             return '';
+        }else if (substr($targetPath,0,1)!='/') { //it is already relative
+            return $targetPath;
         }
         //else  if(strpos($basePath, $targetPath)===0){
         //    $relative_path = $dirname;

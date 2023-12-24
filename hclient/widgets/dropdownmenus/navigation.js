@@ -201,9 +201,13 @@ $.widget( "heurist.navigation", {
             DT_CMS_PAGETITLE = window.hWin.HAPI4.sysinfo['dbconst']['DT_CMS_PAGETITLE'],//show page title above content
             DT_CMS_TOPMENUSELECTABLE = window.hWin.HAPI4.sysinfo['dbconst']['DT_CMS_TOPMENUSELECTABLE'],//top menu selectable, if a submenu is available
             DT_THUMBNAIL = window.hWin.HAPI4.sysinfo['dbconst']['DT_THUMBNAIL'],
+            DT_CMS_MENU_FORMAT = window.hWin.HAPI4.sysinfo['dbconst']['DT_CMS_MENU_FORMAT'],
             
             TERM_NO = window.hWin.HAPI4.sysinfo['dbconst']['TRM_NO'], //$Db.getLocalID('trm','2-531'),
-            TERM_NO_old = window.hWin.HAPI4.sysinfo['dbconst']['TRM_NO_OLD']; //$Db.getLocalID('trm','99-5447');
+            TERM_NO_old = window.hWin.HAPI4.sysinfo['dbconst']['TRM_NO_OLD'], //$Db.getLocalID('trm','99-5447');
+
+            TRM_NAME_ONLY = window.hWin.HAPI4.sysinfo['dbconst']['TRM_NAME_ONLY'],
+            TRM_ICON_ONLY = window.hWin.HAPI4.sysinfo['dbconst']['TRM_ICON_ONLY'];
 
         
         var res = (orientation=='list')?[]:'';
@@ -293,6 +297,8 @@ $.widget( "heurist.navigation", {
                 var menuName = resdata.fld(record, DT_NAME, this.options.language);
                 var menuTitle = resdata.fld(record, DT_SHORT_SUMMARY, this.options.language);
                 var menuIcon = resdata.fld(record, DT_THUMBNAIL);
+                let menuFormat = resdata.fld(record, DT_CMS_MENU_FORMAT);
+
                 if(window.hWin.HEURIST4.util.isArray(menuIcon)){ // remove empty indexes
                     menuIcon = menuIcon.filter((icon) => !window.hWin.HEURIST4.util.isempty(icon));
                 }
@@ -347,20 +353,36 @@ $.widget( "heurist.navigation", {
                     res.push($res);
                     
                 }else{
-                
+
+                    let iconOnly = false;
+                    let nameOnly = false;
+                    let iconStyle = 'height:16px;width:16px;vertical-align:text-bottom;';
+
+                    if(menuFormat){
+                        iconOnly = menuFormat == TRM_ICON_ONLY;
+                        nameOnly = menuFormat == TRM_NAME_ONLY;
+                    }
+                    iconOnly = iconOnly && !nameOnly && window.hWin.HEURIST4.util.isArrayNotEmpty(menuIcon);
+                    
+                    menuName = window.hWin.HEURIST4.util.htmlEscape(menuName);
+                    menuName = iconOnly ? `<span style="display:none;">${menuName}</span>` : menuName;
+
+                    iconStyle += !iconOnly ? 'padding-right:4px;' : '';//scale:2;
+
                     $res = '<li><a href="#" style="padding:2px 1em;'
                             +(hasContent?'':'cursor:default;')
+                            +(iconOnly?'width:20px;':'')
                             +'" data-pageid="'+ page_id + '" data-parentid="'+ parent_id +'"'
                             + (pageTarget?' data-target="' + pageTarget +'"':'')
                             + (showTitle?' data-showtitle="1"':'')
                             + (selectable?' data-checksubmenu="1"':'')
                             + (hasContent?' data-hascontent="1"':'')
                             + ' title="'+window.hWin.HEURIST4.util.htmlEscape(menuTitle)+'">'
-                            
-                            + (menuIcon?('<span><img src="'+window.hWin.HAPI4.baseURL+'?db='+window.hWin.HAPI4.database
+
+                            + (!nameOnly && menuIcon?('<span><img src="'+window.hWin.HAPI4.baseURL+'?db='+window.hWin.HAPI4.database
                                 +'&thumb='+menuIcon+'" '
-                                +'style="height:16px;width:16px;padding-right:4px;vertical-align: text-bottom;"></span>'):'')
-                            + window.hWin.HEURIST4.util.htmlEscape(menuName)+'</a>';
+                                +`style="${iconStyle}"></span>`):'')
+                            + menuName+'</a>';
                     res = res + $res;
                 }
                     

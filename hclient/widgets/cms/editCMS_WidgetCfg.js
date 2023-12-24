@@ -28,8 +28,7 @@ function editCMS_WidgetCfg( widget_cfg, _layout_content, $dlg, main_callback ){
     const _def_labels = {
         heurist_SearchInput: {
             placeholder_def: 'filter_placeholder',
-            empty_remark_def: 'No default',
-
+            empty_remark_def: 'No default'
         },
         heurist_resultList: {
             placeholder_def: 'No default',
@@ -44,6 +43,8 @@ function editCMS_WidgetCfg( widget_cfg, _layout_content, $dlg, main_callback ){
             empty_remark_def: 'No default'
         }
     };
+
+
     
     function _init(){
 
@@ -79,13 +80,13 @@ function editCMS_WidgetCfg( widget_cfg, _layout_content, $dlg, main_callback ){
             //open as popup
 
             let height = 700;
-            if(widget_cfg.appid == 'StoryMap'){
-                height = 830;
+            if(widget_cfg.appid == 'heurist_StoryMap'){
+                height = 745;
             }
 
             $dlg = window.hWin.HEURIST4.msg.showMsgDlgUrl(window.hWin.HAPI4.baseURL
                 +"hclient/widgets/cms/editCMS_WidgetCfg.html?t="+(new Date().getTime()), 
-                buttons, 'Modify Widget Properties', 
+                buttons, `Modify ${widget_cfg.name ? widget_cfg.name : 'Widget'} Properties`, 
                 {  container:'cms-add-widget-popup',
                     default_palette_class: 'ui-heurist-publish',
                     width: 800,
@@ -110,6 +111,8 @@ function editCMS_WidgetCfg( widget_cfg, _layout_content, $dlg, main_callback ){
         
         var widget_name = widget_cfg.appid;
         var opts = window.hWin.HEURIST4.util.isJSON(widget_cfg.options);
+
+        $dlg.find('.header').css('width', '160px');
 
         $dlg.find('div[class^="heurist_"], hr[class^="heurist_"]').hide(); //hide all
         $dlg.find('div.'+widget_name+', hr.'+widget_name).show();

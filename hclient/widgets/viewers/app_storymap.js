@@ -189,10 +189,14 @@ $.widget( "heurist.app_storymap", {
         
         if(!layoutMgr) hLayoutMgr();
         layoutMgr.layoutInit(layout, this.element);
+
+        let placeholder = !window.hWin.HEURIST4.util.isempty(this.options.storyPlaceholder) && this.options.storyPlaceholder != 'def' ? 
+                            this.options.storyPlaceholder : '';
+        placeholder = this.options.storyPlaceholder == 'def' ? 'No records match the filter criteria' : placeholder;
         
         this._initial_div_message = 
         $('<div class="ent_wrapper" style="padding: 1em;background: white;"><br>'
-        +'<h3 class="not-found" style="color:teal;display:inline-block">No records match the filter criteria</h3></div>')
+        +`<h3 class="not-found" style="color:teal;display:inline-block">${placeholder}</h3></div>`)
         .appendTo(this.element);
         
         
@@ -400,10 +404,14 @@ $.widget( "heurist.app_storymap", {
                 }else if(e.type == window.hWin.HAPI4.Event.ON_REC_SEARCH_FINISH){
                 
                     var recset = data.recordset; //record in main result set (for example Persons)
-                    
+
+                    let placeholder = !window.hWin.HEURIST4.util.isempty(that.options.storyPlaceholder) && that.options.storyPlaceholder != 'def' ? 
+                                        that.options.storyPlaceholder : '';
+                    placeholder = that.options.storyPlaceholder == 'def' ? 'Please select a story in the list' : placeholder;
+
                     that._initial_div_message.find('h3')
                         .text(recset.length()>0
-                            ?that.options.storyPlaceholder
+                            ?placeholder
                             :'No records match the filter criteria');
                     that._initial_div_message.show();
                     
