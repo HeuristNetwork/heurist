@@ -693,10 +693,15 @@ $mysqli = $system->get_mysqli();
                     <a name="unused_local"></a>    
                     <h3>Unused local files</h3>
                     <div style="padding-bottom:10px;font-weight:bold"><?php echo count($files_unused_local);?> entries</div>
-                    <div>These files are not referenced by any record in the database. 
-                    Select all or some entries and click the button 
+                    <div>These files are not referenced by a File field in any record in the database. 
+                    <!-- Select all or some entries and click the button 
                     <button onclick="doRepairAction('unused_file_local')">Remove selected unused local files</button>
-                    to remove registrations from the database. Files remain untouched</div>
+                    to remove registrations from the database. Files remain untouched
+                    -->
+                    <br>Unfortunately these files cannot be removed because they may have 
+                    <br>been referenced within text fields, which we do not check at present. 
+                    <br>If you need this function, please let us know.
+                    </div>
                     <br>
                     <label><input type=checkbox
                         onchange="{$('.unused_file_local').prop('checked', $(event.target).is(':checked'));}">&nbsp;Select/unselect all</label>
@@ -708,10 +713,17 @@ $mysqli = $system->get_mysqli();
                             .'<b>'.intval($row['ulf_ID']).'</b> '.htmlspecialchars($row['res_fullpath']).( $row['isfound']?'':' ( file not found )' ).'</label></div>';
                                     //@$row['ulf_ExternalFileReference'];
                 }//for
+                
+                /*  24/12/23 - removed by Ian b/c too dangerous, see explanation below
                 if(is_array($files_unused_local) && count($files_unused_local)>10){
                     print '<div><br><button onclick="doRepairAction(\'unused_file_local\')">Remove selected unused local files</button></div>';
                 }
-                print '<br><br><hr/></div>';
+                */
+                print '
+                    <br>Unfortunately these files cannot be removed because they may have 
+                    <br>been referenced within text fields, which we do not check at present. 
+                    <br>If you need this function, please let us know.
+                    <br><br><hr/></div>';
                 }
                 //------------------------------------------
                 if(is_array($files_unused_remote) && count($files_unused_remote)>0){
@@ -722,8 +734,14 @@ $mysqli = $system->get_mysqli();
                     <div style="padding-bottom:10px;font-weight:bold"><?php echo count($files_unused_remote);?> entries</div>
                     <div>These URLs are not referenced by any record in the database. 
                     Select all or some entries and click the button 
+                    <!--
                     <button onclick="doRepairAction('unused_file_remote')">Remove selected unused URLs</button>
-                    to remove registrations from the database.</div>
+                    to remove registrations from the database.
+                    -->
+                    <br>Unfortunately these references cannot be removed because they may have 
+                    <br>been referenced within text fields, which we do not check at present. 
+                    <br>If you need this function, please let us know.
+                </div>
                     
                     <br>
                     <label><input type=checkbox
@@ -735,10 +753,18 @@ $mysqli = $system->get_mysqli();
                     print '<div class="msgline"><label><input type=checkbox class="unused_file_remote" data-id="'.intval($row['ulf_ID']).'">&nbsp;'
                             .'<b>'.intval($row['ulf_ID']).'</b> '.filter_var($row['ulf_ExternalFileReference'],FILTER_SANITIZE_URL).'</label></div>';
                 }//for
+                
+                /*
                 if(is_array($files_unused_remote) && count($files_unused_remote)>10){
                     print '<div><br><button onclick="doRepairAction(\'unused_file_remote\')">Remove selected unused URLs</button></div>';
                 }
-                print '<br><br><hr/></div>';
+                */
+                
+                print '
+                    <br>Unfortunately these references cannot be removed because they may have 
+                    <br>been referenced within text fields, which we do not check at present. 
+                    <br>If you need this function, please let us know.
+                    <br><br><hr/></div>';
                 }//if
                 
                 //------------------------------------------
