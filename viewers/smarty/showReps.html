@@ -657,7 +657,7 @@ ul#rep_list.menu li ul {
                     dataType: 'json',
                     done: function (e, data) {
 
-                        var obj = data.jqXHR.responseJSON; //Hul.evalJson(data.jqXHR.responseJSON);
+                        var obj = data.jqXHR.responseJSON;
                         if(window.hWin.HEURIST4.util.isnull(obj)){
                             obj = data.jqXHR.responseText;
                             obj = JSON.parse(obj);
