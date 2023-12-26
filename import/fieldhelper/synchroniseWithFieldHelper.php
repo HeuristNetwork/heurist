@@ -710,13 +710,14 @@ $failed_exts = array();
             }//manifest does not exists
             else{
                 //create empty manifest XML  - TODO!!!!
-                $s_manifest = <<<'XML'
+                $ver = HEURIST_VERSION;
+                $s_manifest = <<<XML
 <?xml version="1.0" encoding="UTF-8"?>
 <fieldhelper version="1">
   <info>
     <AppName>Heurist</AppName>
-    <AppVersion>v 3.0.0 2012-01-01</AppVersion>
-    <AppCopyright>© ArtEresearch, University of Sydney</AppCopyright>
+    <AppVersion>v $ver</AppVersion>
+    <AppCopyright>(c) 2012-2023 University of Sydney</AppCopyright>
     <date></date>
   </info>
 <formatOutput>1</formatOutput>
