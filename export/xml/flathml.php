@@ -125,16 +125,19 @@ if(@$_REQUEST['multifile']){ // output manifest + files ??
 
 $output_file = null;
 $hunifile = null; //name of file-per-record for HuNI mode
-/* output to file is disabled
-if(@$_REQUEST['filename']){ //write the output into single file
-    $output_file_name = $_REQUEST['filename'];
+
+//write the output into single file
+// output to file is allowed in the only case - archiving database
+if(@$_REQUEST['filename']==1 && file_exists(HEURIST_FILESTORE_DIR.'backup/'.HEURIST_DBNAME)){ 
+    $output_file_name = HEURIST_FILESTORE_DIR.'backup/'.HEURIST_DBNAME."/".HEURIST_DBNAME.".xml";
+
     $output_file = fopen ($output_file_name, "w");    
     if(!$output_file){
         die("Can't write ".$output_file." file. Please ask sysadmin to check permissions");
     }
     $_REQUEST['mode'] = 1;
 }
-*/
+
 
 if(!defined('PDIR')){
     $system = new System();
@@ -1848,13 +1851,11 @@ if ($USEXINCLUDE) {
     $hmlAttrs['xmlns:xi'] = 'https://www.w3.org/2001/XInclude';
 }
 
+/* DISABLED  2023-12-26
 if (@$_REQUEST['filename']) {
     $hmlAttrs['filename'] = $_REQUEST['filename'];
 }
-
-if (@$_REQUEST['pathfilename']) {
-    $hmlAttrs['pathfilename'] = $_REQUEST['pathfilename'];
-}
+*/
 
 $params = array();
 foreach($_REQUEST as $key=>$value) { $params[$key] = filter_var($value, FILTER_SANITIZE_STRING); }

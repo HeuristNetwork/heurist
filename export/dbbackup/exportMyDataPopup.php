@@ -359,7 +359,7 @@ if($mode>1){
             //copy resource folders
             if(@$_REQUEST['include_docs']=='1'){
                 $folders_to_copy = folderSubs(HEURIST_FILESTORE_DIR, 
-                    array('backup', 'scratch', 'file_uploads', 'filethumbs', 'uploaded_files', 'uploaded_tilestacks', 'rectype-icons', 'term-images'));
+                    array('backup', 'scratch', 'generated-reports', 'file_uploads', 'filethumbs', 'tileserver', 'uploaded_files', 'uploaded_tilestacks', 'rectype-icons', 'term-images')); //except these folders - some of them may exist in old databases only
                 
                 //limited set
                 //$folders_to_copy = $system->getSystemFolders( 1 );
@@ -385,13 +385,17 @@ if($mode>1){
                folderRecurseCopy( HEURIST_FILESTORE_DIR, $folder, $folders_to_copy, null, $copy_files_in_root);
            }
             
-            if(@$_REQUEST['include_docs']=='1'){// 2016-10-25  
+           if(@$_REQUEST['include_docs']=='1'){// 2016-10-25  
                 echo_flush2('Copy context_help folder<br>');                
                 folderRecurseCopy( HEURIST_DIR.'context_help/', $folder.'/context_help/', null);
-            }
+           }
+           
+           
+           //remove db.json (database def cache) from entity
+           fileDelete($folder.'/entity/db.json');
             
 
-            if(@$_REQUEST['include_hml']=='1'){
+           if(@$_REQUEST['include_hml']=='1'){
             
                 //load hml output into string file and save it
                 if(@$_REQUEST['allrecs']!="1"){
@@ -408,8 +412,8 @@ if($mode>1){
                 $_REQUEST['a'] = '1';
                 $_REQUEST['q'] = $q;
                 $_REQUEST['rev'] = 'no'; //do not include reverse pointers
-                $_REQUEST['filename'] = $folder."/".HEURIST_DBNAME.".xml";
-
+                $_REQUEST['filename'] = '1'; //$folder."/".HEURIST_DBNAME.".xml";
+                
                 echo_flush2("Exporting database as HML (Heurist Markup Language = XML)<br>(may take several minutes for large databases)<br>");
 
                 $to_include = dirname(__FILE__).'/../../export/xml/flathml.php';
