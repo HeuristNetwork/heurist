@@ -82,7 +82,6 @@ $.widget( "heurist.searchRecUploadedFiles", $.heurist.searchEntity, {
                     that._checkUserPermissions(1, 'onremovedups');
                 });
 
-
 // Removed by Ian 12 May 2023
 // TODO: WARNING: This button only recognises use in a File field, it does nto see use in web pages 
 // or within text files. It is therefore exceedingly dangerous. Also operates instantly without warning.

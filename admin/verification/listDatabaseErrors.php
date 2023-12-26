@@ -229,7 +229,7 @@ $trmDuplicates = @$lists2["trm_dupes"];
 
                     window.open('listDatabaseErrors.php?db=<?= HEURIST_DBNAME?>&fixdates=1&date_format='+format+'&recids='+ids,'_self')
                 }else{
-                    window.hWin.HEURIST4.msg.showMsgDlg('Mark at least one record to correct');
+                    window.hWin.HEURIST4.msg.showMsg('Mark at least one record to correct');
                 }
             }
 
@@ -241,9 +241,19 @@ $trmDuplicates = @$lists2["trm_dupes"];
                     $('#linkbar').hide();
                     window.open('listDatabaseErrors.php?db=<?= HEURIST_DBNAME?>&fixmultispace=1&recids='+ids,'_self')
                 }else{
-                    window.hWin.HEURIST4.msg.showMsgDlg('Mark at least one record to correct');
+                    window.hWin.HEURIST4.msg.showMsg('Mark at least one record to correct');
                 }
             }
+            
+            function openFileCheckPopup(){
+                
+                var body = $(window.hWin.document).find('body');
+                var opts = {height:body.innerHeight()*0.9, width:body.innerWidth()*0.8};
+       
+                window.hWin.HEURIST4.msg.showDialog(
+                        window.hWin.HAPI4.baseURL+'admin/verification/longOperationInit.php?type=files&db='+window.hWin.HAPI4.database, opts);                
+            }
+            
 
             $(document).ready(function() {
                 $('button').button();
@@ -2875,8 +2885,9 @@ if($active_all || in_array('fld_spacing', $active)){ // Check spacing in freetex
 
         <div>
             <br>
-            <a href="longOperationInit.php?type=files&db=<?php echo HEURIST_DBNAME;?>" 
-                target="_blank"><b>FILE CHECKER</b> Finds missing, duplicate and unused uploaded files</a>
+            <button onclick="{openFileCheckPopup()}">
+                <b>FILE CHECKER</b> Finds missing, duplicate and unused uploaded files
+            </button>
         </div>
 
 

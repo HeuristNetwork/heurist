@@ -130,7 +130,7 @@ function hexportMenu( container ) {
         var action = $(event.target).attr('id');
         
         var body = $(window.hWin.document).find('body');
-        var dim = {h:body.innerHeight   (), w:body.innerWidth()},
+        var dim = {h:body.innerHeight(), w:body.innerWidth()},
         link = $(event.target);
 
         var options = { title: link.html() };

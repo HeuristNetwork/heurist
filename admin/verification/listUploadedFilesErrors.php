@@ -40,6 +40,8 @@ $mysqli = $system->get_mysqli();
 
         <script type="text/javascript" src="<?php echo PDIR;?>external/jquery-ui-1.12.1/jquery-1.12.4.js"></script>
         <script type="text/javascript" src="<?php echo PDIR;?>external/jquery-ui-1.12.1/jquery-ui.js"></script>
+    
+        <script type="text/javascript" src="<?php echo PDIR;?>hclient/core/detectHeurist.js"></script>
         
         <!-- CSS -->
         <?php include_once dirname(__FILE__).'/../../hclient/framecontent/initPageCss.php'; ?>
@@ -458,11 +460,11 @@ $mysqli = $system->get_mysqli();
                             
                             $('#in_porgress').hide();
                             
-                            if(top.HEURIST.util.isnull(context) || top.HEURIST.util.isnull(context['result'])){
-                                top.HEURIST.util.showError(null);
+                            if(window.hWin.HEURIST4.util.isnull(context) || window.hWin.HEURIST4.util.isnull(context['result'])){
+                                window.hWin.HEURIST4.msg.showMsgErr(null);
                             }else{
-                                //top.HEURIST.util.showMessage(context['result']);
-                                var url = top.HEURIST.baseURL + 'admin/verification/listDatabaseErrorsInit.php?type=files&db='+top.HEURIST.database.name;
+                                //window.hWin.HEURIST4.msg.showMsg(context['result']);
+                                var url = window.hWin.HAPI4.baseURL + 'admin/verification/listDatabaseErrorsInit.php?type=files&db='+window.hWin.HAPI4.database;
 
                                 if(window.parent.parent.addDataMenu)
                                     window.parent.parent.addDataMenu.doAction('menulink-verify-files');
@@ -511,26 +513,27 @@ $mysqli = $system->get_mysqli();
                         
                         var str = JSON.stringify(dt);
 
-                        var baseurl = top.HEURIST.baseURL + "admin/verification/repairUploadedFiles.php";
+                        var baseurl = window.hWin.HAPI4.baseURL + "admin/verification/repairUploadedFiles.php";
                         var callback = _callbackRepair;
-                        var params = "db=<?= HEURIST_DBNAME?>&data=" + encodeURIComponent(str);
+                        var params = 'db='+window.hWin.HAPI4.database+'&data=' + encodeURIComponent(str);
                         
                         $('#in_porgress').show();
-                        top.HEURIST.util.getJsonData(baseurl, callback, params);
+                        window.hWin.HEURIST4.ajax.getJsonData(baseurl, callback, params);
                         
                         document.getElementById('page-inner').style.display = 'none';
                     }
                     
                     //
+                    // NOT USED
                     //
-                    //
+/*                    
                     function removeUnlinkedFiles(){
                         
                         function _callback(context){
                             document.getElementById('page-inner').style.display = 'block';
                             
-                            if(top.HEURIST.util.isnull(context) || context['status']!='ok'){
-                                top.HEURIST.util.showError(context || context['message']);
+                            if(window.hWin.HEURIST4.util.isnull(context) || context['status']!='ok'){
+                                window.hWin.HEURIST4.msg.showMsgErr(context || context['message']);
                             }else{
                                 
                                 var ft = $('input.file_to_clear:checked');
@@ -553,7 +556,7 @@ $mysqli = $system->get_mysqli();
                                         }
                                     }
                                 }
-                                top.HEURIST.util.showMessage(cnt+' non-registered/unlinked files have been removed from media folders');
+                                window.hWin.HEURIST4.msg.showMsg(cnt+' non-registered/unlinked files have been removed from media folders');
                             }
                         }
 
@@ -573,15 +576,15 @@ $mysqli = $system->get_mysqli();
                         var str = JSON.stringify(dt);
                        
 
-                        var baseurl = top.HEURIST.baseURL + "admin/verification/repairUploadedFiles.php";
+                        var baseurl = window.hWin.HAPI4.baseURL + "admin/verification/repairUploadedFiles.php";
                         var callback = _callback;
-                        var params = "db=<?= HEURIST_DBNAME?>&data=" + encodeURIComponent(str);
-                        top.HEURIST.util.getJsonData(baseurl, callback, params);
+                        var params = "db="+window.hWin.HAPI4.database+"&data=" + encodeURIComponent(str);
+                        window.hWin.HEURIST4.ajax.getJsonData(baseurl, callback, params);
                         
                         document.getElementById('page-inner').style.display = 'none';
 
                     }
-                    
+*/                    
                     //
                     //
                     //
@@ -590,8 +593,8 @@ $mysqli = $system->get_mysqli();
                         function _callback(context){
                             document.getElementById('page-inner').style.display = 'block'; //restore visibility
                             
-                            if(top.HEURIST.util.isnull(context) || context['status']!='ok'){
-                                top.HEURIST.util.showError(context || context['message']);
+                            if(window.hWin.HEURIST4.util.isnull(context) || context['status']!='ok'){
+                                window.hWin.HEURIST4.msg.showMsgErr(context || context['message']);
                             }else{
                                 
                                 var ft = $('input.'+action_name+':checked');
@@ -614,7 +617,7 @@ $mysqli = $system->get_mysqli();
                                         }
                                     }
                                 }
-                                top.HEURIST.util.showMessage(cnt+' entries have been fixed');
+                                window.hWin.HEURIST4.msg.showMsg(cnt+' entries have been fixed');
                             }
                         }
 
@@ -638,10 +641,15 @@ $mysqli = $system->get_mysqli();
                         var str = JSON.stringify(dt);
                        
 
-                        var baseurl = top.HEURIST.baseURL + "admin/verification/repairUploadedFiles.php";
+                        var baseurl = window.hWin.HAPI4.baseURL + "admin/verification/repairUploadedFiles.php";
                         var callback = _callback;
-                        var params = "db=<?= HEURIST_DBNAME?>&data=" + encodeURIComponent(str);
-                        top.HEURIST.util.getJsonData(baseurl, callback, params);
+                        
+                        //var params = "db="+window.hWin.HAPI4.database+"&data=" + encodeURIComponent(str);
+                        //window.hWin.HEURIST4.ajax.getJsonData(baseurl, callback, params);
+
+                        var request = {db:window.hWin.HAPI4.database, data:str};
+                        window.hWin.HEURIST4.util.sendRequest(baseurl, request, null, callback);
+
                         
                         document.getElementById('page-inner').style.display = 'none'; //hide all
                         
