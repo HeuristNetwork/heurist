@@ -444,6 +444,7 @@ $.widget( "heurist.recordListExt", {
             return;  
         } 
 
+        let empty_results = this.options.recordset==null || this.options.recordset.length()==0;
         var content_updated = false;
 
         if(this.options.is_single_selection){ //reload content on every selection event
@@ -516,6 +517,22 @@ $.widget( "heurist.recordListExt", {
             
             content_updated = true;
 
+        }else if(empty_results && this.placeholder_ele!=null){
+
+            if(!window.hWin.HEURIST4.util.isempty(this.options.empty_remark)){
+                this.placeholder_ele.html(this.options.empty_remark);
+            }
+
+            if(this.options.is_frame_based){
+                this.dosframe.hide();
+            }else{
+                this.div_content.empty();
+            }
+
+            this.placeholder_ele.show();
+
+            content_updated = true;
+
         }else{ //content has been loaded already ===============================
 
             var query_string_all = null,
@@ -557,37 +574,30 @@ $.widget( "heurist.recordListExt", {
 
             if(this.options.is_frame_based){
                 //there is heurist apps in iframe - smarty report, crosstabs analysis or mapping
-                
-                if ((this.options.recordset==null || this.options.recordset.length()==0) &&
-                    !window.hWin.HEURIST4.util.isempty(this.options.empty_remark)) 
-                {
-                    if(this.placeholder_ele!=null){
-                        this.placeholder_ele.html(this.options.empty_remark).show();
+
+                this.dosframe.show();
+
+                var showReps = this.dosframe[0].contentWindow.showReps;
+                if(showReps){
+                    //@todo - reimplement - send on server JSON with list of record IDs
+                    //{"resultCount":23,"recordCount":23,"recIDs":"8005,11272,8599,8604,8716,8852,8853,18580,18581,18582,18583,18584,8603,8589,11347,8601,8602,8600,8592,10312,11670,11672,8605"}
+                    if (this.options.recordset!=null){
+                        this._checkRecordsetLengthAndRunSmartyReport(-1);
                     }
+                }else if (this.dosframe[0].contentWindow.crosstabsAnalysis) {
+                    
+                    if (this.options.recordset!=null){
+                        this._checkRecordsetLengthAndRunCrosstabsAnalysis(6000, query_string_main);
+                    }
+                    
                 }else{
+                    var showMap = this.dosframe[0].contentWindow.showMap;
+                    if(showMap){ //not used anymore
+                        showMap.processMap();
+                    }else if(this.dosframe[0].contentWindow.updateRuleBuilder && this.options.recordset) {
 
-                    var showReps = this.dosframe[0].contentWindow.showReps;
-                    if(showReps){
-                        //@todo - reimplement - send on server JSON with list of record IDs
-                        //{"resultCount":23,"recordCount":23,"recIDs":"8005,11272,8599,8604,8716,8852,8853,18580,18581,18582,18583,18584,8603,8589,11347,8601,8602,8600,8592,10312,11670,11672,8605"}
-                        if (this.options.recordset!=null){
-                            this._checkRecordsetLengthAndRunSmartyReport(-1);
-                        }
-                    }else if (this.dosframe[0].contentWindow.crosstabsAnalysis) {
-                        
-                        if (this.options.recordset!=null){
-                            this._checkRecordsetLengthAndRunCrosstabsAnalysis(6000, query_string_main);
-                        }
-                        
-                    }else{
-                        var showMap = this.dosframe[0].contentWindow.showMap;
-                        if(showMap){ //not used anymore
-                            showMap.processMap();
-                        }else if(this.dosframe[0].contentWindow.updateRuleBuilder && this.options.recordset) {
-
-                            //todo - swtich to event trigger????
-                            this.dosframe[0].contentWindow.updateRuleBuilder(this.options.recordset.getRectypes(), this._query_request);
-                        }
+                        //todo - swtich to event trigger????
+                        this.dosframe[0].contentWindow.updateRuleBuilder(this.options.recordset.getRectypes(), this._query_request);
                     }
                 }
             }
