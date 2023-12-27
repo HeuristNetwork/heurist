@@ -3041,7 +3041,7 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
                       });
                 $label.css('color', '');
             }else{ // not used
-                $usage.text('[--]')
+                $usage.text('-')
                       .removeClass('has-usage')
                       .attr('style', '');
                 $label.css('color', 'gray');
