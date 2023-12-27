@@ -35,6 +35,7 @@ $.widget( "heurist.searchRecUploadedFiles", $.heurist.searchEntity, {
         this.btn_remove_unused = this.element.find('#btn_remove_unused');
         this.btn_refresh_index = this.element.find('#btn_refresh_index');
         this.btn_create_records = this.element.find('#btn_create_records');
+        this.btn_check_files = this.element.find('#btn_check_files');
         
         if(this.options.edit_mode=='none'){
             this.element.find('#div_add_record').hide();
@@ -108,16 +109,17 @@ $.widget( "heurist.searchRecUploadedFiles", $.heurist.searchEntity, {
             this.element.find('#select_all')
                 .change(function() {
                     that._trigger('onselectall');
-                })
-                .parent().position({
-                my: 'right-5 top+5',
-                at: 'right bottom',
-                of: this.btn_edit_mimetypes
-            });
+                });
 
             this.element.find('#selected_only')
                 .change(function() {
                     that._trigger('onselectedonly');
+                });
+
+            this.btn_check_files.button({label: window.hWin.HR("Check files")})
+                .click(function(){
+                    let url = `${window.hWin.HAPI4.baseURL}admin/verification/longOperationInit.php?type=files&db=${window.hWin.HAPI4.database}`;
+                    window.open(url, '_blank');
                 });
         }
 

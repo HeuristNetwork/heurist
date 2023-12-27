@@ -77,22 +77,27 @@
         
         <div id="btn_add_record_popup" style="display:none;margin-left:2em"></div>
 
-        <div id="btn_edit_mimetypes" style="min-width:9em;z-index:2;float:right;margin-left:15px;"></div>
+        <div id="btn_edit_mimetypes" style="min-width:9em;z-index:2;float:right;"></div>
 
         <div id="btn_remove_dups" style="min-width:9em;z-index:2;float:right;margin: 0px 10px;" class="admin-only manager-only"
             title="Removes extra identical copies of a file and connects all references to the remaining copy"></div>
         
-        <div id="btn_refresh_index" style="min-width:6em;z-index:2;float:right;" class="admin-only manager-only"
+        <div id="btn_refresh_index" style="min-width:6em;z-index:2;float:right;padding:0.4em 0.2em;margin-right:10px;" class="admin-only manager-only"
             title="Indexes any files that have been uploaded but not indexed so that they appear in this view"></div>
 
+        <div id="btn_check_files" style="min-width:6em;z-index:2;float:right;" class="admin-only manager-only"
+            title="Find missing, duplicate and unused uploaded files"></div>
+
+        <br style="display: block;content: '';margin:5px 0px;">
+
         <div id="btn_create_records" style="min-width:9em;z-index:2;float:right;" class="admin-only manager-only"
-            title="Removes extra identical copies of a file and connects all references to the remaining copy"></div>
+            title="Creates a multimedia record for each of the files selected"></div>
 <!--
         <div id="btn_remove_unused" style="min-width:9em;z-index:2;float:right" class="admin-only manager-only"
             title="Checks and deletes any files which are not referenced"></div>
 -->        
             
-        <label style="float: right;font-size: 12px;"><input type="checkbox" id="select_all" style="vertical-align: middle;"> select all</label>
+        <label style="float: right;font-size: 12px;margin:5px 20px 0px 0px;"><input type="checkbox" id="select_all" style="vertical-align: middle;"> select all</label>
         
         <!-- div id="btn_add_record_any" style="margin-left:2em"></div -->
     </div>

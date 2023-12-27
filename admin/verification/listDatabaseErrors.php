@@ -2886,7 +2886,7 @@ if($active_all || in_array('fld_spacing', $active)){ // Check spacing in freetex
         <div>
             <br>
             <button onclick="{openFileCheckPopup()}">
-                <b>FILE CHECKER</b> Finds missing, duplicate and unused uploaded files
+                <b>Check files for consistency</b> Finds missing, duplicate and unused uploaded files
             </button>
         </div>
 

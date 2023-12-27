@@ -173,6 +173,7 @@ $.widget( "heurist.manageRecUploadedFiles", $.heurist.manageEntity, {
                     if($(event.target).find('#select_all').length > 0){
                         this._selectAllFiles = $(event.target).find('#select_all').prop('checked') ? true : false;
                     }
+                    this.recordList.resultList('setSelected', this._selectAllFiles ? 'all' : '');
                 },
                 "onselectedonly": function(event){
                     this._downloadAllFiles = false;
@@ -901,7 +902,9 @@ window.hWin.HAPI4.baseURL+'?db=' + window.hWin.HAPI4.database  //(needplayer?'&p
  + '&file='+fld('ulf_ObfuscatedFileID')+'" target="yoxview" class="yoxviewLink">' +  html_thumb + '</a>';                   
         }
 
-        var html = '<div class="recordDiv" id="rd'+recID+'" recid="'+recID+'" rectype="'+rectype+'">'
+        let classes = `recordDiv${this._selectAllFiles ? ' selected' : ''}`;
+
+        let html = '<div class="'+classes+'" id="rd'+recID+'" recid="'+recID+'" rectype="'+rectype+'">'
         + html_thumb
         + '<div class="recordSelector"><input type="checkbox" /></div>'
         + '<div class="recordIcons" style="display:none;">' //recid="'+recID+'" bkmk_id="'+bkm_ID+'">'
