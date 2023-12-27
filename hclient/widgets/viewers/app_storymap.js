@@ -410,7 +410,7 @@ $.widget( "heurist.app_storymap", {
                     placeholder = that.options.storyPlaceholder == 'def' ? 'Please select a story in the list' : placeholder;
 
                     that._initial_div_message.find('h3')
-                        .text(recset.length()>0
+                        .html(recset.length()>0
                             ?placeholder
                             :'No records match the filter criteria');
                     that._initial_div_message.show();
