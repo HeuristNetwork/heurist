@@ -776,6 +776,8 @@ var sMsg = '<p>Heurist\'s CMS editor has been upgraded to a new system which is 
 
         tinymce.init(inlineConfig);
 
+        // Correct image and embedded urls
+        _layout_container.find('img, embed').each(function(i,ele){window.hWin.HEURIST4.util.restoreRelativeURL(ele);});
     }
     
     //
