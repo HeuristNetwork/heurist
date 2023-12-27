@@ -28,6 +28,8 @@ define('MAX_FILES', 10000);
 define('MAX_SIZE', 1073741824); // 1 GB
 define('MAX_RATIO', 10);
 define('READ_LENGTH', 1024);
+define('WRITE_LENGTH', 4096);   //16384
+
 
 class UArchive {
 
@@ -321,7 +323,6 @@ class UArchive {
         }
 
         try{
-
             $src = realpath($source);
 
             if(!$src) {
@@ -425,7 +426,9 @@ class UArchive {
                 //$phar->addFromString(basename($source), file_get_contents($source));
             }
 
-            $phar->compress(Phar::BZ2);
+            self::bzip2($destination, $destination.'.bz2');
+            
+            //$phar->compress(Phar::BZ2);  it does not work for large data
 
             if(file_exists($destination.'.bz2')){ //
 
@@ -452,5 +455,45 @@ class UArchive {
             return false;
         }                            
     }
+    
+    /**
+     * @return bool
+     * @param string $in - filename to be compressed 
+     * @param string $out - name of archive if not set it renames $in with bz2 ext and place in the same folder
+     * @desc compressing the file with the bzip2-extension
+    */
+
+    private static function bzip2 ($in, $out)
+    {
+
+        if (!file_exists ($in) || !is_readable ($in)){
+            return false;
+        }
+        
+        if($out==null){
+            $out = $in.'.bz2';
+            if(file_exists($out)){
+                unlink($out);
+            }
+        }
+
+        if ((!file_exists($out) && !is_writeable (dirname($out)) || (file_exists($out) && !is_writable($out)) )){
+            return false;        
+        }
+        
+
+        $in_file = fopen ($in, "rb");
+        $out_file = bzopen ($out, "w");
+
+        while (!feof ($in_file)) {
+            $buffer = fgets ($in_file, WRITE_LENGTH);
+            bzwrite ($out_file, $buffer, WRITE_LENGTH);
+        }
+
+        fclose ($in_file);
+        bzclose ($out_file);
+
+        return true;
+    }    
 }
 ?>
