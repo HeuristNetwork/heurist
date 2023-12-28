@@ -1079,7 +1079,6 @@ window.hWin.HEURIST4.util = {
         //extract params from image src and recreate new url pointed to  baseURL_pro
         if(!window.hWin.HEURIST4.util.isempty(src)){
             let query = src.slice(src.indexOf('?'));
-
             if(src.indexOf('file=') > 0){
                 file_id = window.hWin.HEURIST4.util.getUrlParameter('file', query);
             }
@@ -1109,7 +1108,8 @@ window.hWin.HEURIST4.util = {
 
         //yes this is link to registered image
         if(!window.hWin.HEURIST4.util.isempty(file_id) && !window.hWin.HEURIST4.util.isempty(db)){
-            ele.setAttribute('src', window.hWin.HAPI4.baseURL_pro + '?db=' + db + '&file=' + file_id + extra_params);
+            src = window.hWin.HAPI4.baseURL_pro + '?db=' + db + '&file=' + file_id + extra_params;
+            ele.setAttribute('src', src);
         }else 
         if (!window.hWin.HEURIST4.util.isempty(src) 
             && (src.indexOf('./')==0 || src.indexOf('/')==0)){ //relative path

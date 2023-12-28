@@ -2536,6 +2536,8 @@ $.widget( "heurist.resultList", {
                             //h = Math.min(h+10, 600);
                             ele2.removeClass('loading').height('auto');    
                             
+                            ele2.find('img').each(function(i,img){window.hWin.HEURIST4.util.restoreRelativeURL(img);});
+                            
                             /*
                             if(that._expandAllDivs){
                                 ele2.removeClass('loading').height('auto');    

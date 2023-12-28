@@ -1548,12 +1548,16 @@ $.widget( "heurist.app_storymap", {
                     that.pnlStoryReport.addClass('loading').css({'overflow-y':'auto'})
                         .load(infoURL, function(){ 
                             
+                            
                             var ele2 = $(this);
                             ele2.removeClass('loading').css('min-height','200px');//.height('auto');    
 
                             if(ele2.find('div[data-recid]').length>0){ //for standard view
                                 ele2.find('div[data-recid]')[0].style = null;
                             }
+                            
+                            $ele2.find('img').each(function(i,img){window.hWin.HEURIST4.util.restoreRelativeURL(img);});
+                            
                         });
                 }
                 
