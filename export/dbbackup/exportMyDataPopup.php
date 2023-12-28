@@ -506,7 +506,11 @@ if($mode>1){
                 if(!$is_repository) {
                         //success - print two links to download archives
     
-    $is_zip = '&is_zip='.($format == 'zip' ? 1 : 0); 
+        $is_zip = '&is_zip='.($format == 'zip' ? 1 : 0); 
+    
+        if($format == 'tar'){
+            $format = 'tar.bz2';
+        }
     ?>                
     <p>Your data have been backed up in <?php echo FOLDER_BACKUP;?></p>
     <br><br><div class='lbl_form'></div>
