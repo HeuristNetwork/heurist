@@ -808,12 +808,11 @@ $.widget( "heurist.resultList", {
 
             this.export_button = $('<button>', {
                 text: window.hWin.HR('Export'), title: window.hWin.HR('Export current results'), 
-                class: 'btnExportRecords ui-button-action', style: 'margin: 6px 0px 2px; float: right;'
+                class: 'btnExportRecords ui-button-action', style: 'margin: 6px 10px 2px 0px; float: right;'
             }).button({
                 icons: {
                     primary: 'ui-icon-download'
-                },
-                showLabel: false
+                }
             }).prependTo(this.div_toolbar);
 
             this.export_button[0].style.setProperty('color', '#FFF', 'important');
