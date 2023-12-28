@@ -88,7 +88,7 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
         
         let script_name = window.hWin.location.pathname;
         var installDir = '';
-        if(script_name.endsWith('/web')) script_name = script_name + '/'; //add last slash
+        if(script_name.endsWith('/web') || script_name.endsWith('/website')) script_name = script_name + '/'; //add last slash
 
         //actions for redirection https://hist/heurist/[dbname]/web/
         if(script_name.search(/\/([A-Za-z0-9_]+)\/(website|web|hml|tpl|view|edit|adm)\/.*/)>=0){

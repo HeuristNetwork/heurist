@@ -40,9 +40,9 @@
 
 // NOTE: THIS HAS BEEN SUBSTANTIALLY DEVELOPED AND IS NOW DOCUMENTED IN /server_scripts/utility/apacjhe_configurations.txt
 // Add to httpd.conf
-// RewriteRule ^/heurist/([A-Za-z0-9_]+)/(web|tpl|hml|view)/(.*)$ /heurist/redirects/resolver.php
+// RewriteRule ^/heurist/([A-Za-z0-9_]+)/(website|web|tpl|hml|view)/(.*)$ /heurist/redirects/resolver.php
 //redirection for CMS, Smarty, hml output and record view
-// web - cms website
+// website or web - cms website
 // tpl - smarty
 // hml - xml output
 // view - record view
@@ -51,7 +51,7 @@
 //  heurist/database_name/action/param1/param2
 
 $requestUri = explode('/', trim($_SERVER['REQUEST_URI'],'/'));
-$allowedActions = array('web','hml','tpl','view','edit','adm');
+$allowedActions = array('website','web','hml','tpl','view','edit','adm');
 
 //print $_SERVER['REQUEST_URI'];
 //print print_r($requestUri,true);

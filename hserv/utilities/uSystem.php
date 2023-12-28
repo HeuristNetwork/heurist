@@ -108,7 +108,8 @@ class USystem {
 
             $rewrite_actions = 'website|web|hml|tpl|view|edit|adm'; //actions for redirection https://hist/heurist/[dbname]/web/
 
-            if(@$_SERVER["SCRIPT_NAME"] && substr($_SERVER["SCRIPT_NAME"], -4 ) === '/web'){
+            if(@$_SERVER["SCRIPT_NAME"] && 
+                (substr($_SERVER["SCRIPT_NAME"], -4 ) === '/web' || substr($_SERVER["SCRIPT_NAME"], -8 ) === '/website')){
                 $_SERVER["SCRIPT_NAME"] .= '/';
             }
 

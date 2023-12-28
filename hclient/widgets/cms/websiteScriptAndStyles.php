@@ -838,13 +838,17 @@ function afterPageLoad(document, pageid, eventdata){
 
         var surl;
        
-        if(spath.endsWith('/web')) spath = spath + '/'; //add last slash  
+        if(spath.endsWith('/web') || spath.endsWith('/website')) spath = spath + '/'; //add last slash  
        
-        if(spath.search(/\/([A-Za-z0-9_]+)\/web\/.*/)>=0){
+        if(spath.search(/\/([A-Za-z0-9_]+)\/(website|web)\/.*/)>=0){
             //folder style parameters [database]/web/[site id]/[page id]/?q=[query params]
 
             //remove after web
-            spath = spath.substring(0,spath.indexOf('/web/')+5);
+            if(spath.indexOf('/website/')>0){
+                spath = spath.substring(0,spath.indexOf('/website/')+9);    
+            }else{
+                spath = spath.substring(0,spath.indexOf('/web/')+5);    
+            }
             
             surl = spath + home_page_record_id;
             if(pageid!=home_page_record_id){
