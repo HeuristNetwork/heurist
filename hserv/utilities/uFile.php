@@ -1346,13 +1346,19 @@ function isXMLfile($filename){
 
 //
 // Working with semaphore file for particular long action
+// if $range_minutes<0 - remove log file
 //
-function isActionInProgress($action, $range_minutes){
+function isActionInProgress($action, $range_minutes, $db_name=''){
     
-    $progress_flag = HEURIST_FILESTORE_ROOT.'_operation_locks.info';
+    $progress_flag = HEURIST_FILESTORE_ROOT.'_operation_locks'.($db_name?('_'.$db_name):'').'.info';
     
     //flag that backup in progress
     if(file_exists($progress_flag)){
+        
+        if($range_minutes<0){
+            unlink($progress_flag);
+            return false;
+        }
 
         $datetime2 = date_create('now');
 
@@ -1394,8 +1400,8 @@ function isActionInProgress($action, $range_minutes){
         if($not_allowed){
             return false;
         }
-    }else{
-        $fp = fopen($progress_flag,'w');
+    }else if ($range_minutes>0) {
+        $fp = fopen($progress_flag, 'w');
         fwrite($fp, $action.' '. date_create('now')->format('Y-m-d H:i:s'));
         fclose($fp);            
     }

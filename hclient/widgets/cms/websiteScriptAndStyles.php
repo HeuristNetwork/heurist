@@ -900,7 +900,7 @@ function afterPageLoad(document, pageid, eventdata){
         
         }
 
-        window.history.pushState("object or string", "Title", surl);
+        window.history.pushState({}, "Title", surl);
         
     }
     

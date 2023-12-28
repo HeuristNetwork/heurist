@@ -135,6 +135,8 @@ if(!isset($message)){
             });
         </script>
     <?php
+    }else{
+        print '<script>if(window.history && typeof history.pushState === "function") {window.history.pushState({}, document.title, window.location.pathname)}</script>';
     }
     
     ?>

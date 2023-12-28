@@ -42,30 +42,24 @@ class UArchive {
     public static function zip($source, $only_these_folders, $destination, $verbose=true) {
 
         if (!extension_loaded('zip')) {
-            echo "<br/>PHP Zip extension is not accessible";
-            return false;
+            return $verbose?'PHP Zip extension is not accessible':false;
         }
         if (!file_exists($source)) {
-            echo "<br/>".htmlspecialchars($source)." was not found";
-            return false;
+            return $verbose?(htmlspecialchars($source).' was not found'):false;
         }
 
 
 
         $zip = new ZipArchive();
         if (!$zip->open($destination, ZIPARCHIVE::CREATE)) {
-            if($verbose) echo "<br/>Failed to create zip file at ".htmlspecialchars($destination);
-            return false;
+            return $verbose?('Failed to create zip file at '.htmlspecialchars($destination)):false;
         }
 
         try{
 
             $src = realpath($source);
             if(!$src) {
-                if($verbose) {
-                    echo '<br/>Cannot create zip archive '.htmlspecialchars($source).' is not a folder';
-                }
-                return false;
+                return $verbose?('Cannot create zip archive '.htmlspecialchars($source).' is not a folder'):false;
             }
             $source = str_replace('\\', '/', $src);
 
@@ -125,13 +119,13 @@ class UArchive {
                             $newdir = str_replace($source.'/', '', $file2.'/');
                             if(!$zip->addEmptyDir( $newdir )){
                                 //$zip->getStatusString()
-                                return false;
+                                return $verbose?('Can not add folder '.$newdir.' to archive'):false;
                             }
                         }
                         else if (is_file($file) === true) { // File
                             $newfile = str_replace($source.'/', '', $file2); //without folder name
                             if(!$zip->addFile($file, $newfile)){
-                                return false;
+                                return $verbose?('Can not add file '.$newfile.' to archive'):false;
                             }
                             //$zip->addFromString(str_replace($source . '/', '', $file), file_get_contents($file));
                         }
@@ -155,16 +149,13 @@ class UArchive {
                     echo "<br/>The zip file contains ".htmlspecialchars($numFiles." files and is ".sprintf("%.2f", $size))."MB";
                 }
             }else{
-                return false;    
+                return $verbose?($destination.' archive not created. Directory may be non-writeable or archive function is not installed on server'):false;    
             }
             return true;
 
         } catch (Exception  $e){
             error_log( $e->getMessage() );
-            if($verbose) {
-                echo "<br/>Cannot create zip archive ".htmlspecialchars($destination).' '.Exception::getMessage();
-            }
-            return false;
+            return $verbose?('Cannot create zip archive '.htmlspecialchars($destination).' '.Exception::getMessage()):false;
         }                            
     }
 
@@ -305,12 +296,10 @@ class UArchive {
     public static function createBz2($source, $only_these_folders, $destination, $verbose=true) {
 
         if (!extension_loaded('bz2')) {
-            echo "<br/>PHP Bz2 extension is not accessible";
-            return false;
+            return $verbose?'PHP Bz2 extension is not accessible':false;
         }
         if (!file_exists($source)) {
-            echo "<br/>".htmlspecialchars($source)." was not found";
-            return false;
+            return $verbose?(htmlspecialchars($source).' was not found'):false;
         }else 
 
             $numFiles = 0;
@@ -318,18 +307,14 @@ class UArchive {
         $phar = new PharData($destination);
 
         if (false === $phar) {
-            if($verbose) echo "<br/>Failed to create bz2 file at ".htmlspecialchars($destination);
-            return false;
+            return $verbose?('Failed to create bz2 file at '.htmlspecialchars($destination)):false;
         }
 
         try{
             $src = realpath($source);
 
             if(!$src) {
-                if($verbose) {
-                    echo '<br/>Cannot create bz2 archive '.htmlspecialchars($source).' is not a folder';
-                }
-                return false;
+                return $verbose?('Cannot create bz2 archive '.htmlspecialchars($source).' is not a folder'):false;
             }
 
             if($verbose){
@@ -426,7 +411,11 @@ class UArchive {
                 //$phar->addFromString(basename($source), file_get_contents($source));
             }
 
-            self::bzip2($destination, $destination.'.bz2');
+            $res = self::bzip2($destination, $destination.'.bz2');
+            
+            if($res!==true){
+                return $verbose?$res:false;
+            }
             
             //$phar->compress(Phar::BZ2);  it does not work for large data
 
@@ -441,23 +430,19 @@ class UArchive {
                     echo "<br/>The archive file contains ".$numFiles." files and is ".sprintf("%.2f", $size)."MB";
                 }
             }else{
-                echo "$destination.bz2 archive not created\n";
-                return false;    
+                return $verbose?($destination.'.bz2 archive not created Directory may be non-writeable or archive function is not installed on server'):false;    
             }
 
             return true;
 
         } catch (Exception  $e){
             error_log( $e->getMessage() );
-            if($verbose) {
-                echo "<br/>Cannot create archive ".htmlspecialchars($destination).' '.$e->getMessage();
-            }
-            return false;
+            return $verbose? ('Cannot create archive '.htmlspecialchars($destination).' '.$e->getMessage()) :false;
         }                            
     }
     
     /**
-     * @return bool
+     * @return true or error message
      * @param string $in - filename to be compressed 
      * @param string $out - name of archive if not set it renames $in with bz2 ext and place in the same folder
      * @desc compressing the file with the bzip2-extension
@@ -467,7 +452,7 @@ class UArchive {
     {
 
         if (!file_exists ($in) || !is_readable ($in)){
-            return false;
+            return 'Source file to be archived doesn\'t exists';
         }
         
         if($out==null){
@@ -477,10 +462,9 @@ class UArchive {
             }
         }
 
-        if ((!file_exists($out) && !is_writeable (dirname($out)) || (file_exists($out) && !is_writable($out)) )){
-            return false;        
+        if ((!file_exists($out) && !is_writeable(dirname($out)) || (file_exists($out) && !is_writable($out)) )){
+            return 'Destination folder is not writeable';
         }
-        
 
         $in_file = fopen ($in, "rb");
         $out_file = bzopen ($out, "w");

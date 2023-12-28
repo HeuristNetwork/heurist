@@ -553,7 +553,7 @@ class DbUtils {
 
         
         if(!$connected){
-            $msg = $msg_prefix.'Failed to connect to database '
+            $msg = $msg_prefix.' Failed to connect to database '
                     .($database_name).'  '.($createArchive);
             $system->addError(HEURIST_DB_ERROR, $msg, $mysqli->error);
             if($verbose) echo '<br>'.htmlspecialchars($msg);
@@ -564,7 +564,7 @@ class DbUtils {
             // Create DELETED_DATABASES directory if needed
             if(!folderCreate($archiveFolder, true)){
                     $system->addError(HEURIST_SYSTEM_CONFIG, 
-                        $msg_prefix.'Cannot create archive folder for database to be deleteted.');                
+                        $msg_prefix.' Cannot create archive folder for database to be deleteted.');                
                     self::$db_del_in_progress = null;
                     return false;
             }
@@ -572,7 +572,7 @@ class DbUtils {
             $db_dump_file = DbUtils::databaseDump( $database_name, null, null, $verbose );
             
             if ($db_dump_file===false) {
-                    $msg = $msg_prefix.'Failed to dump database to a .sql file';
+                    $msg = $msg_prefix.' Failed to dump database to a .sql file';
                     self::$system->addError(HEURIST_SYSTEM_CONFIG, $msg);                
                     if($verbose) echo '<br/>'.htmlspecialchars($msg);
                     self::$db_del_in_progress = null;
@@ -608,9 +608,15 @@ class DbUtils {
                 
                 $archOK = UArchive::zip($source, $folders_to_copy, $destination, $verbose);
             }
-            
-            if(!$archOK){
-                $msg = $msg_prefix.'Cannot create archive with database folder. Failed to archive '
+
+            if($archOK!==true){
+
+                if($verbose){
+                    $msg_prefix = $msg_prefix.' <br>'.$archOK;
+                    $archOK = false;
+                }
+                
+                $msg = $msg_prefix.' Cannot create archive with database folder. Failed to archive '
                         .($source).' to '.($destination);
                 self::$system->addError(HEURIST_SYSTEM_CONFIG, $msg);                
                 if($verbose) echo '<br/>'.htmlspecialchars($msg);

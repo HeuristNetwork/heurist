@@ -21,6 +21,7 @@
 */
 
 
+
 define('MANAGER_REQUIRED', 1);   
 define('PDIR','../../');  //need for proper path to js and css    
 
@@ -34,13 +35,13 @@ require_once dirname(__FILE__).'/../../hserv/records/search/recordFile.php';
 require_once dirname(__FILE__).'/../../hserv/utilities/dbUtils.php';
 
 
-$folder = HEURIST_FILESTORE_DIR.'backup/'.HEURIST_DBNAME;
-$folder_sql = HEURIST_FILESTORE_DIR.'backup/'.HEURIST_DBNAME.'_sql';
-$progress_flag = HEURIST_FILESTORE_DIR.'backup/inprogress.info';
+define('FOLDER_BACKUP', HEURIST_FILESTORE_DIR.'backup/'.HEURIST_DBNAME);
+define('FOLDER_SQL_BACKUP', HEURIST_FILESTORE_DIR.'backup/'.HEURIST_DBNAME.'_sql');
 
-$mode = @$_REQUEST['mode']; // mode=2 - entire archived folder,  mode=3 - sql dump only
+$mode = @$_REQUEST['mode']; // mode=2 - entire archived folder,  mode=3 - sql dump only, mode=4 - cleanup backup folder
 $format = array_key_exists('is_zip', $_REQUEST) && $_REQUEST['is_zip'] == 1 ? 'zip' : 'tar';
 $mime = $format == 'tar' ? 'application/x-bzip2' : 'application/zip';
+$is_repository = array_key_exists('repository', $_REQUEST);
 
 // Download the dumped data as a zip file
 if($mode>1){
@@ -49,11 +50,11 @@ if($mode>1){
         $format = 'tar.bz2';
     }
 
-    if($mode=='2' && file_exists($folder.'.'.$format) ){ //archived entire folder
-        downloadFile($mime, $folder.'.'.$format); //see recordFile.php
-    }else if($mode=='3' && file_exists($folder_sql.'.'.$format)){  //archived sql dump
-        downloadFile($mime, $folder_sql.'.'.$format);
-    }else if($mode=='4'){  //cleanup backup folder
+    if($mode=='2' && file_exists(FOLDER_BACKUP.'.'.$format) ){ //archived entire folder
+        downloadFile($mime, FOLDER_BACKUP.'.'.$format); //see recordFile.php
+    }else if($mode=='3' && file_exists(FOLDER_SQL_BACKUP.'.'.$format)){  //archived sql dump
+        downloadFile($mime, FOLDER_SQL_BACKUP.'.'.$format);
+    }else if($mode=='4'){  //cleanup backup folder on exit
         folderDelete2(HEURIST_FILESTORE_DIR.'backup/', false);
     }
     exit;
@@ -69,18 +70,34 @@ if($mode>1){
         <script type="text/javascript" src="<?php echo PDIR;?>external/jquery-ui-1.12.1/jquery-ui.js"></script>
 
         <script type="text/javascript" src="<?php echo PDIR;?>hclient/core/detectHeurist.js"></script>
+        <script type="text/javascript" src="<?php echo PDIR;?>hclient/core/utils_msg.js"></script>
+        <script type="text/javascript" src="<?php echo PDIR;?>hclient/core/utils_ui.js"></script>
 
         <!-- CSS -->
         <?php include_once dirname(__FILE__).'/../../hclient/framecontent/initPageCss.php'; ?>
         
         <script type=text/javascript>
+            var is_repository = <?php echo $is_repository?'true':'false';?>;
+            
             $(document).ready(function() {
                 $('input[type="submit"]').button();
                 $('input[type="button"]').button();
-
-                if($('#sel_repository').length > 0){
+                
+                if(!window.hWin.HAPI4){
+                    $('#btnClose_1').hide();
+                    $('#btnClose_2').hide();
+                    
+                    if(is_repository){
+                        $('body').children().hide();
+                        //show warning message: upload to repository is not available 
+                        window.location = '<?php echo PDIR.'hclient/framecontent/infoPage.php?error='.rawurlencode('It is possible to perform this operation from Heurist admin interface only');?>';
+                    }
+                }else if(is_repository){
+                    //if($('#sel_repository').length > 0)
                     initRepositorySelector();
                 }
+                
+                
                 
             });
             
@@ -92,6 +109,9 @@ if($mode>1){
                 window.close();
             }
 
+            //
+            // fill repository selector
+            //
             function initRepositorySelector(){
 
                 let available = ['Nakala'];
@@ -121,30 +141,10 @@ if($mode>1){
                     }
                 });
             }
-
-            function exportArchive(){
-                let is_upload = <?php echo array_key_exists('repository', $_REQUEST) ? 1 : -1; ?>;
-
-                if(is_upload){
-                    let repo = $('#sel_repository').val();
-                    if(repo == ''){
-                        window.hWin.HEURIST4.msg.showMsgFlash('Please select a repository...', 2000);
-                        return;
-                    }else if(repo == 'Nakala' && window.hWin.HEURIST4.util.isempty(window.hWin.HAPI4.sysinfo.nakala_api_key)){
-                        window.hWin.HEURIST4.msg.showMsgErr('You need to enter your Nakala API Key into Design > Setup > Properties > Personal Nakala API Key, in order to upload to Nakala.');
-                        return;
-                    }
-                }
-
-                $('<div>Preparing archive file for download...</div>')
-                    .addClass('coverall-div')
-                    .css({'zIndex':60000,'padding':'30px 0 0 30px','font-size':'1.2em','opacity':0.8,'color':'white'})
-                    .appendTo('body'); 
-
-                document.getElementById('buttons').style.visibility = 'hidden';
-                document.forms[0].submit();
-            }
-
+            
+            //
+            // fill license selector
+            //
             function getNakalaLicenses(){
                 let $sel_license = $('#sel_license');
 
@@ -186,11 +186,46 @@ if($mode>1){
                     }
                 });
             }
+            
+
+            //
+            // on start button click event handler
+            //
+            function exportArchive(){
+
+                if(is_repository){
+                    let repo = $('#sel_repository').val();
+                    if(repo == ''){
+                        window.hWin.HEURIST4.msg.showMsgFlash('Please select a repository...', 2000);
+                        return;
+                    }else if(repo == 'Nakala' && window.hWin.HEURIST4.util.isempty(window.hWin.HAPI4.sysinfo.nakala_api_key)){
+                        window.hWin.HEURIST4.msg.showMsgErr('You need to enter your Nakala API Key into Design > Setup > Properties > Personal Nakala API Key, in order to upload to Nakala.');
+                        return;
+                    }
+                }
+                
+                
+                if(window.hWin.HAPI4){
+                    /*
+                    $('<div>Preparing archive file...</div>')
+                        .addClass('coverall-div')
+                        .css({'zIndex':60000,'padding':'30px 0 0 30px','font-size':'1.2em','opacity':0.8,'color':'white'})
+                        .appendTo('body'); 
+                    */     
+                    //show wait screen
+                    window.hWin.HEURIST4.msg.bringCoverallToFront(null, null, 'Preparing archive file...');
+                }
+
+                document.getElementById('buttons').style.visibility = 'hidden';
+                document.forms[0].submit(); //page reload
+            }
+
         </script>
     </head>
     <body class="popup ui-heurist-admin">
         
         <?php
+        
         //<div class="banner"  style="padding-left:3px"><h2>Complete data archive package</h2></div>    
 
         $please_advise = "<br>Please consult with your system administrator for a resolution.";
@@ -205,7 +240,7 @@ if($mode>1){
             </p>
             <p>The MySQL dump will contain the complete database which can be reloaded on any up-to-date MySQL database server.
             </p>
-        <?php if(!array_key_exists('repository', $_REQUEST)){?>
+        <?php if(!$is_repository){?>
             <p>The output of the process will be made available as a link to a downloadable zip file
             <br>but is also available to the system adminstrator as a file in the backup directory in the database.
             </p>
@@ -224,19 +259,11 @@ if($mode>1){
             <br>This may also be useful for databases with lots of attached files which are already backed up elsewhere.
             </p>
 
-
-            <!-- TODO: Need to also include record type icons, report formats etc. This was originally developed to allow individual users to save their
-            data out of the sandpit. With shift to individual and small project databases, it is now best to regard this as a database-administrators-only
-            function, and to simply zip up the entire database upload directory, dump entire content as HML, and thus maximise reliability and
-            minimise maintenance requirements -->
-
             <form name='f1' action='exportMyDataPopup.php' method='get'>
             
                 <input name='db' value='<?=HEURIST_DBNAME?>' type='hidden'>
                 <input name='mode' value='1' type='hidden'>
-<?php if(@$_REQUEST['inframe']==1) { ?>                    
-                <input name='inframe' value='1' type='hidden'>
-<?php } ?>                
+
                 <div class="input-row" style="padding-top:10px">
                     <label>
                         <input type="checkbox" name="includeresources" value="1" checked>
@@ -273,7 +300,7 @@ if($mode>1){
                     </label>
                 </div>
 
-        <?php if(array_key_exists('repository', $_REQUEST)){ ?>
+        <?php if($is_repository){ ?>
                 <div class="input-row" style="padding: 20px 0 5px 0;">
                     <label>Select a repository <select id='sel_repository' name='repository'><option value="">select a repository...</option></select></label>
                 </div>
@@ -284,76 +311,54 @@ if($mode>1){
         <?php } ?>
 
                 <div id="buttons" class="actionButtons" style="padding-top:10px;text-align:left">
-                    <input type="button" value="<?php echo (array_key_exists('repository', $_REQUEST) ? 'Export & Upload' : 'Create Archive'); ?>" 
+                    <input type="button" value="<?php echo ($is_repository ? 'Export & Upload' : 'Create Archive'); ?>" 
                         style="margin-right: 20px;" class="ui-button-action" onClick="{ exportArchive(); }">
-<?php if(@$_REQUEST['inframe']!=1) { ?>                    
-                    <input type="button" value="Cancel" onClick="closeArchiveWindow();">
-<?php } ?>
-
+                    <input type="button" id="btnClose_1" value="Cancel" onClick="closeArchiveWindow();">
                 </div>
             </form>
             <?php
 
         }else{
             
+            $operation_in_progress = 'It appears that backup operation has been started already. Please try this function later';
+            
             //flag that backup in progress
-            $action = 'exportDB';
-            if(!isActionInProgress($action, 2)){
-                exit("It appears that backup operation has been started already. Please try this function later");        
+            if(!isActionInProgress('exportDB', 2, HEURIST_DBNAME)){
+                report_message($operation_in_progress, false);
             }else{
                 echo_flush2("<br>Beginning archive process<br>");
             }
             
-            /*
-            if(file_exists($progress_flag)){
-               print 'It appears that backup opearation has been started already. Please try this function later'; 
-               if(file_exists($progress_flag)) unlink($progress_flag);
-               exit;
-            }
-            $fp = fopen($progress_flag,'w');
-            fwrite($fp, '1');
-            fclose($fp);            
-            */
-            
-            $separate_sql_zip = !array_key_exists('repository', $_REQUEST);
+            $separate_sql_zip = !$is_repository;
 
             // 
-            if(file_exists($folder)){
-                echo_flush2("<br>Clear folder ".$folder."<br>");
+            if(file_exists(FOLDER_BACKUP)){
+                echo_flush2("<br>Clear folder ".FOLDER_BACKUP."<br>");
                 //clean folder
-                $res = folderDelete2($folder, true);
+                $res = folderDelete2(FOLDER_BACKUP, true);
                 if(!$res){
-                    print 'It appears that backup opearation has been started already. Please try this function later'; 
-                    if(file_exists($progress_flag)) unlink($progress_flag);
-                    exit;
+                    report_message($operation_in_progress, false);
                 }
             }
-            if (!folderCreate($folder, true)) {
-                if(file_exists($progress_flag)) unlink($progress_flag);
-                
-                $message = 'Failed to create folder '.$folder.'<br/> in which to create the backup. Please consult your sysadmin.';                
-                report_message($message, true);
-                exit;
+            if (!folderCreate(FOLDER_BACKUP, true)) {
+                $message = 'Failed to create folder '.FOLDER_BACKUP.'<br/> in which to create the backup. Please consult your sysadmin.';            report_message($message, true);
             }
 
             // Just SQL dump
-            if(file_exists($folder_sql)){
-                $res = folderDelete2($folder_sql, true);
+            if(file_exists(FOLDER_SQL_BACKUP)){
+                $res = folderDelete2(FOLDER_SQL_BACKUP, true);
                 if(!$res){
-                    print 'It appears that backup opearation has been started already. Please try this function later';
-                    if(file_exists($progress_flag)) unlink($progress_flag);
-                    exit;
+                    report_message($operation_in_progress, false);
                 }
             }
-            if($separate_sql_zip && !folderCreate($folder_sql, true)){
+            if($separate_sql_zip && !folderCreate(FOLDER_SQL_BACKUP, true)){
                 $separate_sql_zip = false; // hide option
             }
 
-            ?>
-            <div id="divProgress" style="cursor:wait;width:50%;height:100%;margin:0 auto;position:relative;z-index:999999;background:url(../../hclient/assets/loading-animation-white.gif)  no-repeat center center"></div>
-            <div style="position:absolute;top:70;left:10;right:20">
-            <?php
-            
+            if($is_repository && @$_REQUEST['repository']!='Nakala'){
+                report_message('The repository ' . $repo . ' is not supported please ' . CONTACT_HEURIST_TEAM, true, false);
+            }
+
             $folders_to_copy = null;
             
             //copy resource folders
@@ -382,17 +387,17 @@ if($mode>1){
             
                 
            if(@$_REQUEST['include_docs']=='1' || @$_REQUEST['includeresources']=='1'){     
-               folderRecurseCopy( HEURIST_FILESTORE_DIR, $folder, $folders_to_copy, null, $copy_files_in_root);
+               folderRecurseCopy( HEURIST_FILESTORE_DIR, FOLDER_BACKUP, $folders_to_copy, null, $copy_files_in_root);
            }
             
            if(@$_REQUEST['include_docs']=='1'){// 2016-10-25  
                 echo_flush2('Copy context_help folder<br>');                
-                folderRecurseCopy( HEURIST_DIR.'context_help/', $folder.'/context_help/', null);
+                folderRecurseCopy( HEURIST_DIR.'context_help/', FOLDER_BACKUP.'/context_help/', null);
            }
            
            
            //remove db.json (database def cache) from entity
-           fileDelete($folder.'/entity/db.json');
+           fileDelete(FOLDER_BACKUP.'/entity/db.json');
             
 
            if(@$_REQUEST['include_hml']=='1'){
@@ -412,7 +417,7 @@ if($mode>1){
                 $_REQUEST['a'] = '1';
                 $_REQUEST['q'] = $q;
                 $_REQUEST['rev'] = 'no'; //do not include reverse pointers
-                $_REQUEST['filename'] = '1'; //$folder."/".HEURIST_DBNAME.".xml";
+                $_REQUEST['filename'] = '1'; //FOLDER_BACKUP."/".HEURIST_DBNAME.".xml";
                 
                 echo_flush2("Exporting database as HML (Heurist Markup Language = XML)<br>(may take several minutes for large databases)<br>");
 
@@ -421,120 +426,103 @@ if($mode>1){
                     include_once $to_include;
                 }
             
-            /* OLD WAY. It works but leads to memory overflow for large database
-            $content = "";
+           }//export HML
             
-            if (is_file($to_include)) {
-                ob_start();
-                include_once $to_include;
-                $content = ob_get_contents();
-                ob_end_clean();
-            }
+           // Export database definitions as readable text
+
+           echo_flush2("Exporting database definitions as readable text<br>");
+
+           $url = HEURIST_BASE_URL . "hserv/structure/export/getDBStructureAsSQL.php?db=".HEURIST_DBNAME."&pretty=1";
+           saveURLasFile($url, FOLDER_BACKUP."/Database_Structure.txt"); //save to HEURIST_FILESTORE_DIR.'backup/'.HEURIST_DBNAME
+
+           echo_flush2("Exporting database definitions as XML<br>");
             
-            $file = fopen ($folder."/".HEURIST_DBNAME.".xml", "w");
-            if(!$file){
-                die("Can't write ".HEURIST_DBNAME."xml file. Please ask sysadmin to check permissions");
-            }
-            fwrite($file, $content);
-            fclose ($file);
-            */
-            }//export HML
-            
-            // Export database definitions as readable text
-
-            echo_flush2("Exporting database definitions as readable text<br>");
-
-            $url = HEURIST_BASE_URL . "hserv/structure/export/getDBStructureAsSQL.php?db=".HEURIST_DBNAME."&pretty=1";
-            saveURLasFile($url, $folder."/Database_Structure.txt"); //save to HEURIST_FILESTORE_DIR.'backup/'.HEURIST_DBNAME
-
-            echo_flush2("Exporting database definitions as XML<br>");
-            
-            $url = HEURIST_BASE_URL . "hserv/structure/export/getDBStructureAsXML.php?db=".HEURIST_DBNAME;
-            saveURLasFile($url, $folder."/Database_Structure.xml"); //save to HEURIST_FILESTORE_DIR.'backup/'.HEURIST_DBNAME
+           $url = HEURIST_BASE_URL . "hserv/structure/export/getDBStructureAsXML.php?db=".HEURIST_DBNAME;
+           saveURLasFile($url, FOLDER_BACKUP."/Database_Structure.xml"); //save to HEURIST_FILESTORE_DIR.'backup/'.HEURIST_DBNAME
 
 
-            if($system->is_admin()){
+           if($system->is_admin()){
                 // Do an SQL dump of the whole database
                 echo_flush2("Exporting SQL dump of the whole database (several minutes for large databases)<br>");
                 
                 
-                $database_dumpfile = $folder."/".HEURIST_DBNAME."_MySQL_Database_Dump.sql";
+                $database_dumpfile = FOLDER_BACKUP."/".HEURIST_DBNAME."_MySQL_Database_Dump.sql";
                 $dump_options = array('skip-triggers' => true,  'add-drop-trigger' => false, 'add-drop-table'=>true);
                 
                 $res = DbUtils::databaseDump(HEURIST_DBNAME_FULL, $database_dumpfile, $dump_options, false );
                 
                 if(!$res){
-                    if(file_exists($progress_flag)) unlink($progress_flag);
-                    print '</div><script>document.getElementById("divProgress").style.display="none";</script>';
-                    die ("Sorry, unable to generate MySQL database dump.".$system->getError()['message'].'  '.$please_advise);
+                    print '</div>';
+                    report_message("Sorry, unable to generate MySQL database dump.".$system->getError()['message'].'  '.$please_advise, true, true);
                 }
 
                 if($separate_sql_zip){ // copy sql dump to separate directory
-                    $separate_sql_zip = fileCopy($database_dumpfile, $folder_sql."/".HEURIST_DBNAME."_MySQL_Database_Dump.sql");
+                    $separate_sql_zip = fileCopy($database_dumpfile, FOLDER_SQL_BACKUP."/".HEURIST_DBNAME."_MySQL_Database_Dump.sql");
                 }
-                
-            }
+           }
 
-            // remove old mysql dump - specifically the ones named HEURIST_DBNAME_FULL.sql
-            if(file_exists($folder.'/'.HEURIST_DBNAME_FULL.'.sql')) unlink($folder.'/'.HEURIST_DBNAME_FULL.'.sql');
+           // remove old mysql dump - specifically the ones named HEURIST_DBNAME_FULL.sql
+           if(file_exists(FOLDER_BACKUP.'/'.HEURIST_DBNAME_FULL.'.sql')) {
+               unlink(FOLDER_BACKUP.'/'.HEURIST_DBNAME_FULL.'.sql');   
+           }
 
-            echo_flush2('<br>Zipping files<br>');
+           echo_flush2('<br>Zipping files<br>');
 
-            // Create a zipfile of the definitions and data which have been dumped to disk
-            $destination = $folder.'.'.$format; // Complete archive
-            if(file_exists($destination)){ 
-                unlink($destination);
-            }
-            if($format == 'tar' && file_exists($folder.'.tar.bz2')){
-                unlink($folder.'.tar.bz2');
-            }
+           // Create a zipfile of the definitions and data which have been dumped to disk
+           $destination = FOLDER_BACKUP.'.'.$format; // Complete archive
+           if(file_exists($destination)){ 
+               unlink($destination);
+           }
+           if($format == 'tar' && file_exists(FOLDER_BACKUP.'.tar.bz2')){
+               unlink(FOLDER_BACKUP.'.tar.bz2');
+           }
 
-            if($format == 'zip'){
-                $res = UArchive::zip($folder, null, $destination, true);
-            }else{
-                $res = UArchive::createBz2($folder, null, $destination, true);
-            }
-            
-            if($res){
+           if($format == 'zip'){
+               $res = UArchive::zip(FOLDER_BACKUP, null, $destination, true);
+           }else{
+               $res = UArchive::createBz2(FOLDER_BACKUP, null, $destination, true);
+           }
+
+           if($res===true){ //archive successful
 
                 $res_sql = false;
                 if($separate_sql_zip){
 
-                    $destination_sql = $folder.'_sql.'.$format; // SQL dump only
+                    $destination_sql = FOLDER_BACKUP.'_sql.'.$format; // SQL dump only
                     if(file_exists($destination_sql)){
                         unlink($destination_sql);
                     }
-                    if($format == 'tar' && file_exists($folder.'_sql.tar.bz2')){
-                        unlink($folder.'_sql.tar.bz2');
+                    if($format == 'tar' && file_exists(FOLDER_BACKUP.'_sql.tar.bz2')){
+                        unlink(FOLDER_BACKUP.'_sql.tar.bz2');
                     }
 
                     if($format == 'zip'){
-                        $res_sql = UArchive::zip($folder.'_sql', null, $destination_sql, true);   
+                        $res_sql = UArchive::zip(FOLDER_BACKUP.'_sql', null, $destination_sql, true);   
                     }else{
-                        $res_sql = UArchive::createBz2($folder.'_sql', null, $destination_sql, true);
+                        $res_sql = UArchive::createBz2(FOLDER_BACKUP.'_sql', null, $destination_sql, true);
                     }
-                    
                 }
             
-                if(!array_key_exists('repository', $_REQUEST)) {
-    //&format=<?php echo ($format == 'zip' ? 1 : 0);                 
+                if(!$is_repository) {
+                        //success - print two links to download archives
+    
     $is_zip = '&is_zip='.($format == 'zip' ? 1 : 0); 
     ?>                
-    <p>Your data have been backed up in <?php echo $folder;?></p>
+    <p>Your data have been backed up in <?php echo FOLDER_BACKUP;?></p>
     <br><br><div class='lbl_form'></div>
         <a href="exportMyDataPopup.php/<?php echo HEURIST_DBNAME;?>.<?php echo $format; ?>?mode=2&db=<?php echo HEURIST_DBNAME.$is_zip;?>"
             target="_blank" style="color:blue; font-size:1.2em">Click here to download your data as a <?php echo $format;?> archive</a>
 
     <?php 
     if($separate_sql_zip){
-        if($res_sql){ ?>
+        if($res_sql===true){ ?>
         <br><br>
         <a href="exportMyDataPopup.php/<?php echo HEURIST_DBNAME;?>_sql.<?php echo $format; ?>?mode=3&db=<?php echo HEURIST_DBNAME.$is_zip;?>"
             target="_blank" style="color:blue; font-size:1.2em">Click here to download the SQL <?php echo $format;?> file only</a> 
         <span class="heurist-helper1">(for db transfer on tiered servers)</span>
     <?php }else{ ?>
         <br><br>
-        <div>Failed to create standalone SQL dump</div>
+        <div>Failed to create standalone SQL dump. <?php echo $res_sql;?></div>
     <?php 
         } 
     }
@@ -542,13 +530,12 @@ if($mode>1){
     <p class="heurist-helper1">
     Note: If this file fails to download properly (eg. "Failed … file incomplete") the file is too large to download. Please ask your system administrator (<?php echo HEURIST_MAIL_TO_ADMIN; ?>) to send it to you via a large file transfer service
     </p>        
+    
+                    <input type="button" id="btnClose_2" class="ui-button-action" value="Close" onClick="closeArchiveWindow();">
+
     <?php                
-                    if(@$_REQUEST['inframe']!=1) {
-                        print '<br><input type="button" class="ui-button-action" value="Close" onClick="closeArchiveWindow();">';
-                    }
-                
                 }
-                else if(array_key_exists('repository', $_REQUEST)){
+                else if($is_repository){
                     //upload archive to repository
 
                     $repo = htmlspecialchars($_REQUEST['repository']);
@@ -567,7 +554,7 @@ if($mode>1){
 
                             $params = array();
                             $params['file'] = array(
-                                'path' => $folder . '.' . $format,
+                                'path' => FOLDER_BACKUP . '.' . $format,
                                 'type' => $mime,
                                 'name' => HEURIST_DBNAME . '.' . $format
                             );
@@ -630,34 +617,25 @@ if($mode>1){
         
                                 echo_flush2('<br>'. $rtn .'<br>');
                             }else{
-                                echo_flush('failed<br>Your Nakala API key cannot be retrieved, '
-                                .'please ensure it has been entered into Design > Setup > Properties > Personal Nakala API Key');
+                                report_message('Your Nakala API key cannot be retrieved, '
+                                .'please ensure it has been entered into Design > Setup > Properties > Personal Nakala API Key', true, true);
                             }
                             
                             break;
                         
                         default:
-                            print "The repository " . $repo . " is not supported please " . CONTACT_HEURIST_TEAM;
+                            report_message('The repository ' . $repo . ' is not supported please ' . CONTACT_HEURIST_TEAM, true, true);
                             break;
                     }
                     
-                    //cleanup backup after upload to reporsitory
-                    folderDelete2(HEURIST_FILESTORE_DIR.'backup/', false);
-            
-                    
-                }
-                print '</div><script>document.getElementById("divProgress").style.display="none";</script>';
-                if(file_exists($progress_flag)) unlink($progress_flag);
-            
+                }//end repository
+                
+                report_message('', false, true);
             }else
             {
-                print "<br>Directory may be non-writeable or archive function is not installed on server (error code 127) - please consult system adminstrator";
-
+                report_message($res.'<br>Try different archive format otherwise please consult system adminstrator', true, true);
             }
             
-            //cleanup temp folders
-            folderDelete2($folder, true);
-            folderDelete2($folder_sql, true);
         }
         ?>
 
@@ -665,11 +643,25 @@ if($mode>1){
 </html>
 
 <?php
-function report_message($message, $is_error){
+function report_message($message, $is_error=true, $need_cleanup=false)
+{
+    if($need_cleanup){
+            if(array_key_exists('repository', $_REQUEST)){
+                //cleanup backup after upload to reporsitory
+                folderDelete2(HEURIST_FILESTORE_DIR.'backup/', false);
+            }else{
+                //cleanup temp folders
+                folderDelete2(FOLDER_BACKUP, true);
+                folderDelete2(FOLDER_SQL_BACKUP, true);
+            }
+            //remove lock file
+            isActionInProgress('exportDB', -1, HEURIST_DBNAME);
+    }
+    if($message){
 ?>
         <div class="ui-corner-all ui-widget-content" style="text-align:left; width:70%; min-width:220px; margin:0px auto; padding: 0.5em;">
 
-            <div class="logo" style="background-color:#2e3e50;width:100%"></div>
+            <!-- <div class="logo" style="background-color:#2e3e50;width:100%"></div> -->
 
             <div class="<?php echo ($is_error)?'ui-state-error':''; ?>" 
                 style="width:90%;margin:auto;margin-top:10px;padding:10px;">
@@ -678,8 +670,13 @@ function report_message($message, $is_error){
                 <?php echo $message;?>
             </div>
         </div>
+<?php
+    }
+?>
+        <script>if(window.hWin.HEURIST4.msg){ window.hWin.HEURIST4.msg.sendCoverallToBack(true); }</script>
     </body>    
 </html>
 <?php
+    exit;
 }
 ?>
