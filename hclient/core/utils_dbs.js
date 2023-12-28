@@ -2485,6 +2485,8 @@ window.hWin.HEURIST4.dbs = {
                 rec_header = "Tags"; 
             }else if(dtid=='anyfield'){
                 rec_header = "Any field"; 
+            }else if(dtid=='exists'){
+                rec_header = `${$Db.rty(rtid, 'rty_Name')} records`;
             }
             
             if( rec_header ){

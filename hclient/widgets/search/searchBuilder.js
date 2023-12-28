@@ -370,97 +370,94 @@ $.widget( "heurist.searchBuilder", {
     //    
     , addFieldItem: function( code, codes, ele_id ){
 
-            if(true){
-                
-                if(!codes) codes = code.split(':');
-                
-                var enum_field = null;
-                if (this.enum_fields.indexOf(codes[codes.length-1])>=0){
-                    enum_field = codes[codes.length-1];
-                    codes.splice(-1);
-                    code = codes.join(':');
-                    if(enum_field=='internalid') enum_field = null;
-                }
+        if(!codes) codes = code.split(':');
         
-                var rty_ID = codes[codes.length-2];
-                var dty_ID = codes[codes.length-1];
-                var top_rty_ID = codes[0];
-                let lang = this.select_language.val();
+        var enum_field = null;
+        if (this.enum_fields.indexOf(codes[codes.length-1])>=0){
+            enum_field = codes[codes.length-1];
+            codes.splice(-1);
+            code = codes.join(':');
+            if(enum_field=='internalid') enum_field = null;
+        }
 
-                if(!(top_rty_ID>0)) top_rty_ID = 0;
-                if(!(rty_ID>0)) rty_ID = 0;
-                //if(!(dty_ID>0)) dty_ID = 0;
-                
-                if(ele_id){
-                   
-                    var ele = this.pnl_Items.find('#'+ele_id)
-                    ele.searchBuilderItem('changeOptions',{
-                            code: code,
-                            top_rty_ID: top_rty_ID, 
-                            rty_ID: rty_ID,
-                            dty_ID: dty_ID,
-                            enum_field:enum_field,
-                            language: lang
-                        });
+        var rty_ID = codes[codes.length-2];
+        var dty_ID = codes[codes.length-1];
+        var top_rty_ID = codes[0];
+        let lang = this.select_language.val();
 
-                }else{
-                    var ele = $('<div>').uniqueId().attr('data-code',code).insertBefore(this.btnAddFieldItem);
-                    this.field_array.push(ele);
-                
-                    var that = this;
-                    ele.searchBuilderItem({
-                            //token:  dty_ID>0?'f':dty_ID,
-                            hasFieldSelector: !this.is_advanced,
-                            code: code,
-                            top_rty_ID: top_rty_ID, 
-                            rty_ID: rty_ID,
-                            dty_ID: dty_ID,
-                            enum_field: enum_field,
-                            language: lang,
-                            onremove: function(){
-                                var id = this.element.attr('id');
-                                $.each(that.field_array,function(k,item){
-                                    if(item.attr('id')==id){
-                                        that.field_array.splice(k,1);
-                                        that.pnl_Items.find('#'+id).remove();    
-                                        
-                                        return false;
-                                    }
-                                });
+        if(!(top_rty_ID>0)) top_rty_ID = 0;
+        if(!(rty_ID>0)) rty_ID = 0;
+        //if(!(dty_ID>0)) dty_ID = 0;
+        
+        if(ele_id){
+            
+            var ele = this.pnl_Items.find('#'+ele_id)
+            ele.searchBuilderItem('changeOptions',{
+                    code: code,
+                    top_rty_ID: top_rty_ID, 
+                    rty_ID: rty_ID,
+                    dty_ID: dty_ID,
+                    enum_field:enum_field,
+                    language: lang
+                });
 
-                                that.adjustDimension();
-                                that._doCompose();
-                            },
-                            onchange: function(){
-                                that._doCompose();
-                                that.sortbySection.find('#sortby_header #sortby_values').text('record title');
-                            },
-                            onselect_field: function(){
-                                var id = this.element.attr('id');
-                                that.showFieldSelector( id );
+        }else{
+            var ele = $('<div>').uniqueId().attr('data-code',code).insertBefore(this.btnAddFieldItem);
+            this.field_array.push(ele);
+        
+            var that = this;
+            ele.searchBuilderItem({
+                    //token:  dty_ID>0?'f':dty_ID,
+                    hasFieldSelector: !this.is_advanced,
+                    code: code,
+                    top_rty_ID: top_rty_ID, 
+                    rty_ID: rty_ID,
+                    dty_ID: dty_ID,
+                    enum_field: enum_field,
+                    language: lang,
+                    onremove: function(){
+                        var id = this.element.attr('id');
+                        $.each(that.field_array,function(k,item){
+                            if(item.attr('id')==id){
+                                that.field_array.splice(k,1);
+                                that.pnl_Items.find('#'+id).remove();    
+                                
+                                return false;
                             }
-                    });
-                    
-                    if(this.field_array.length>1){
-                        var conjunct = (this.search_conjunction.val()=='any')?'OR':'AND';
-
-                        ele.find('.field_header').text(conjunct).attr('title', 'Change value in dropdown above fields');
-                    }
-
-                    if(this.field_array.length == 2){
-
-                        this.element.find('.search_conjunction').position({
-                            my: 'right center',
-                            at: 'right center',
-                            of: ele.find('.field_header')
                         });
 
-                        this.element.find('.search_conjunction').css('left', 3);
+                        that.adjustDimension();
+                        that._doCompose();
+                    },
+                    onchange: function(){
+                        that._doCompose();
+                        that.sortbySection.find('#sortby_header #sortby_values').text('record title');
+                    },
+                    onselect_field: function(){
+                        var id = this.element.attr('id');
+                        that.showFieldSelector( id );
                     }
-                }
-                
-                this.adjustDimension();
+            });
+            
+            if(this.field_array.length>1){
+                var conjunct = (this.search_conjunction.val()=='any')?'OR':'AND';
+
+                ele.find('.field_header').text(conjunct).attr('title', 'Change value in dropdown above fields');
             }
+
+            if(this.field_array.length == 2){
+
+                this.element.find('.search_conjunction').position({
+                    my: 'right center',
+                    at: 'right center',
+                    of: ele.find('.field_header')
+                });
+
+                this.element.find('.search_conjunction').css('left', 3);
+            }
+        }
+        
+        this.adjustDimension();
     }
 
     //
@@ -832,306 +829,305 @@ $.widget( "heurist.searchBuilder", {
         
 
         if(window.hWin.HEURIST4.util.isArrayNotEmpty(rectypeIds) && this.current_tree_rectype_ids != rectypeIds.join(',') ){
-            /*if(!this.options.params.rectypes ||
-            !($(rectypeIds).not(this.options.params.rectypes).length == 0 &&
-            $(this.options.params.rectypes).not(rectypeIds).length == 0))*/
-            {
 
-                var that = this;
-                //this.options.params.rectypes = rectypeIds;
-                var treediv = this.element.find('#field_treeview');
-                var rectype = rectypeIds.join(',');
+            var that = this;
+            //this.options.params.rectypes = rectypeIds;
+            var treediv = this.element.find('#field_treeview');
+            var rectype = rectypeIds.join(',');
 
-                /*
-                if(this.options.params.rectypes){
-                    rectype = this.options.params.rectypes.join(',');
-                }
-                */
-                
-                let node_order = sessionStorage.getItem('heurist_ftorder_filterbuilder');
-                if(window.hWin.HEURIST4.util.isempty(node_order) || !Number.isInteger(+node_order)){
-                    node_order = 0; // default to form order
-                }
-                this.element.find('[name="tree_order"]').filter('[value="'+ node_order +'"]').prop('checked', true);
+            /*
+            if(this.options.params.rectypes){
+                rectype = this.options.params.rectypes.join(',');
+            }
+            */
+            
+            let node_order = sessionStorage.getItem('heurist_ftorder_filterbuilder');
+            if(window.hWin.HEURIST4.util.isempty(node_order) || !Number.isInteger(+node_order)){
+                node_order = 0; // default to form order
+            }
+            this.element.find('[name="tree_order"]').filter('[value="'+ node_order +'"]').prop('checked', true);
 
-                //window.hWin.HEURIST4.util.setDisabled($('#btnNext'),true);
+            //window.hWin.HEURIST4.util.setDisabled($('#btnNext'),true);
 
-                //'title','modified',
-                var allowed_fieldtypes = ['header_ext','anyfield','enum','freetext','blocktext',
-                                'geo','year','date','integer','float','resource','relmarker','relationtype','file','separator'];
-                      
-                var treedata = window.hWin.HEURIST4.dbs.createRectypeStructureTree_new( 
-                                {
-                                    mode:5, rectypeids:rectype, fieldtypes:allowed_fieldtypes, field_order:node_order //, enum_mode:'expanded' 
-                                } );
+            //'title','modified',
+            var allowed_fieldtypes = ['header_ext','anyfield','enum','freetext','blocktext',
+                            'geo','year','date','integer','float','resource','relmarker','relationtype','file','separator'];
+                    
+            var treedata = window.hWin.HEURIST4.dbs.createRectypeStructureTree_new( 
+                            {
+                                mode:5, rectypeids:rectype, fieldtypes:allowed_fieldtypes, field_order:node_order //, enum_mode:'expanded' 
+                            } );
 
-                            treedata[0].expanded = true; //first expanded
+                        treedata[0].expanded = true; //first expanded
 
-                            if(!treediv.is(':empty') && treediv.fancytree('instance')){
-                                treediv.fancytree('destroy');
+                        if(!treediv.is(':empty') && treediv.fancytree('instance')){
+                            treediv.fancytree('destroy');
+                        }
+
+            if(rectypeIds.length == 1){
+                treedata[0]['children'].unshift({code: `${rectype}:exists`, key: 'exists', name: `${$Db.rty(rectype, 'rty_Name')}`, title: `${$Db.rty(rectype, 'rty_Name')} records`, type: 'freetext'});
+            }
+
+            //setTimeout(function(){
+            treediv.addClass('tree-filter hidden_checkboxes').fancytree({
+                //extensions: ["filter"],
+                //            extensions: ["select"],
+                checkbox: true,
+                selectMode: 1,  // single
+                source: treedata,
+                beforeSelect: function(event, data){
+                    // A node is about to be selected: prevent this, for folder-nodes:
+                    if( data.node.hasChildren() ){
+                        return false;
+                    }
+                },
+                renderNode: function(event, data){
+                    
+                    let order = that.element.find('[name="tree_order"]:checked').val();
+
+                    if(data.node.data.is_generic_fields || data.node.data.is_rec_fields){
+                        $(data.node.span.childNodes[0]).css('display', 'inline-block');
+                        $(data.node.span.childNodes[1]).hide();
+                        $(data.node.span.childNodes[3]).css('font-weight', 'normal');
+
+                        if(data.node.parent && data.node.parent.data.type == 'resource' || data.node.parent.data.type == 'relmarker'){ // add left border+margin
+                            $(data.node.li).attr('style', 'border-left: black solid 1px !important;margin-left: 9px;');
+                        }
+                    }
+                    if(data.node.data.type == 'separator'){
+                        $(data.node.span).attr('style', 'background: none !important;color: black !important;'); //stop highlighting
+                        $(data.node.span.childNodes[1]).hide(); //checkbox for separators
+
+                        if(order == 1){
+                            $(data.node.li).addClass('fancytree-hidden');
+                        }
+                    }else if(data.node.data.type == 'enum'){ // add options dropdown menu
+
+                        const key = data.node.key;
+
+                        let $ele = $('<ul>', {class: 'horizontalmenu fancytree-submenu'})
+                            .attr('data-type', 'enum').attr('data-code', data.node.data.code)
+                            .html('<li data-id="internalid"><span>option</span><ul>' //default is internalid = trm_ID
+                                        + '<li data-id="internalid">Internal ID</li>'
+                                        + '<li data-id="term">Term</li>'
+                                        + '<li data-id="code">Code</li>'
+                                        + '<li data-id="conceptid">Concept ID</li>'
+                                        + '<li data-id="desc">Description</li>'
+                                + '</ul></li>')
+                            .appendTo($(data.node.span.childNodes[3]));
+
+                        $ele.menu({
+                            icons: { submenu: "ui-icon-triangle-1-s" },
+                            select: function(e, ui){
+
+                                window.hWin.HEURIST4.util.stopEvent(e);
+
+                                let code = $ele.attr('data-code');
+                                code += ':' + ui.item.attr('data-id');
+                                let codes = code.split(':');
+                                let codes2 = code.split(':');
+
+                                codes2[0] = 'any';
+                                code = codes2.join(':');
+
+                                //add or replace field in builderItem
+                                that.addFieldItem( code, codes, that.select_field_for_id);
+                                that.select_field_for_id = null;
+                                that.pnl_Tree.hide();
+
+                                if(treediv.fancytree('instance') !== undefined){
+                                    const tree = treediv.fancytree('getTree');
+                                    const node = tree.getNodeByKey(key);
+
+                                    node.setActive(true);
+
+                                    $ele.menu('collapseAll');
+                                }
+                            },
+                            focus: function(e, ui){
+
+                                if(!ui.item.parent().is('ul.horizontalmenu')){
+                                    return;
+                                }
+
+                                let code = $ele.attr('data-code');
+                                $.each(that.pnl_Tree.find('.fancytree-submenu'), function(idx, ele){
+                                    ele = $(ele);
+
+                                    if(ele.attr('data-code') == code){
+                                        return;
+                                    }
+
+                                    if(ele.menu('instance') !== undefined){
+                                        ele.menu('collapseAll');
+                                    }
+                                });
+
+                                let $parent = that.element.find('#field_treeview').children();
+
+                                // getComputedStyle(ele) | getBoundingClientRect()
+                                let cont_rect = $parent[0].getBoundingClientRect();
+                                let ele_rect = $ele[0].getBoundingClientRect();
+
+                                let bottom_val = ele_rect.bottom + 110;
+
+                                if(bottom_val > cont_rect.bottom){
+                                    $ele.menu('option', 'position', {my: 'left bottom-5', at: 'left top'});
+                                }else{
+                                    $ele.menu('option', 'position', {my: 'left top+5', at: 'left bottom'});
+                                }
+
+                            },
+                            position: {
+                                my: 'left top+5',
+                                at: 'left bottom'
+                            }
+                        });
+                    }
+                },
+                lazyLoad: function(event, data){
+                    
+                    var node = data.node;
+                    var parentcode = node.data.code; 
+                    var rectypes = node.data.rt_ids;
+
+                    let node_order = that.element.find('[name="tree_order"]:checked').val();
+                    //var res = window.hWin.HEURIST4.dbs.createRectypeStructureTree( null, 5, rectypes, 
+                    //                                                        allowed_fieldtypes, parentcode, node_order );
+                                                                            
+                    var res = window.hWin.HEURIST4.dbs.createRectypeStructureTree_new( 
+                    {
+                        mode:5, rectypeids:rectypes, fieldtypes:allowed_fieldtypes, 
+                        parentcode: parentcode,
+                        field_order:node_order//, enum_mode:'expanded' 
+                    } );
+                                                                            
+                                                                            
+                    if(res.length>1){
+                        data.result = res;
+                    }else{
+                        data.result = res[0].children;
+                    }
+                    
+                    var ptr_fld = window.hWin.HEURIST4.util.cloneJSON(data.node.data);
+                    if(ptr_fld.type=='resource'){
+                        ptr_fld.title = '<span style="font-size:smaller">Target record: '+ptr_fld.name+'</span>';
+                        ptr_fld.lazy = false;
+                        data.result.unshift(ptr_fld);
+                    }
+                                                                            
+
+                    return data;                                                   
+                },
+                expand: function(e, data){
+                    that.showHideReverse(data);
+                },
+                collapse: function(e, data){
+                    that._update_GenericField(data.node);
+                },
+                loadChildren: function(e, data){
+                    setTimeout(function(){
+                        that.showHideReverse(data);   
+                        //that._assignSelectedFacets();
+                    },500);
+                },
+                select: function(e, data) {
+                    /* Get a list of all selected nodes, and convert to a key array:
+                    var selKeys = $.map(data.tree.getSelectedNodes(), function(node){
+                    return node.key;
+                    });
+                    $("#echoSelection3").text(selKeys.join(", "));
+
+                    // Get a list of all selected TOP nodes
+                    var selRootNodes = data.tree.getSelectedNodes(true);
+                    // ... and convert to a key array:
+                    var selRootKeys = $.map(selRootNodes, function(node){
+                    return node.key;
+                    });
+                    $("#echoSelectionRootKeys3").text(selRootKeys.join(", "));
+                    $("#echoSelectionRoots3").text(selRootNodes.join(", "));
+                    */
+                },
+                click: function(e, data){
+
+                    if(data.node.data.type == 'separator'){
+                        return false;
+                    }
+
+                    var isExpander = $(e.originalEvent.target).hasClass('fancytree-expander');
+
+                    if(isExpander) return;
+
+                    if($(e.originalEvent.target).is('span') && data.node.children && data.node.children.length>0){
+                        data.node.setExpanded(!data.node.isExpanded());
+                    }else if( data.node.lazy){
+                        data.node.setExpanded( true );
+                    }else{
+                        var code = data.node.data.code;
+                        if(code){
+                            var codes = code.split(':');
+
+                            if(codes.length == 2 && $Db.dty(codes[1], 'dty_Type') == 'enum'){
+                                // by default, handle as internal id
+                                //code += ':term';
+                                //codes.push('term');
                             }
 
-                            //setTimeout(function(){
-                            treediv.addClass('tree-filter hidden_checkboxes').fancytree({
-                                //extensions: ["filter"],
-                                //            extensions: ["select"],
-                                checkbox: true,
-                                selectMode: 1,  // single
-                                source: treedata,
-                                beforeSelect: function(event, data){
-                                    // A node is about to be selected: prevent this, for folder-nodes:
-                                    if( data.node.hasChildren() ){
-                                        return false;
-                                    }
-                                },
-                                renderNode: function(event, data){
-                                    
-                                    let order = that.element.find('[name="tree_order"]:checked').val();
+                            var codes2 = code.split(':');
+                            codes2[0] = 'any';
+                            code = codes2.join(':');
 
-                                    if(data.node.data.is_generic_fields || data.node.data.is_rec_fields){
-                                        $(data.node.span.childNodes[0]).css('display', 'inline-block');
-                                        $(data.node.span.childNodes[1]).hide();
-                                        $(data.node.span.childNodes[3]).css('font-weight', 'normal');
+                            //add or replace field in builderItem
+                            that.addFieldItem( code, codes, that.select_field_for_id);
+                            that.select_field_for_id = null;
+                            that.pnl_Tree.hide();
+                        }else{
+                            console.error('ERROR: code not defined for',data);
+                        }
+                    }
+                },
+                dblclick: function(e, data) {
+                    if(data.node.data.type == 'separator'){
+                        return false;
+                    }
+                    data.node.toggleSelected();
+                },
+                keydown: function(e, data) {
+                    if( e.which === 32 ) {
+                        data.node.toggleSelected();
+                        return false;
+                    }
+                }
+            });
 
-                                        if(data.node.parent && data.node.parent.data.type == 'resource' || data.node.parent.data.type == 'relmarker'){ // add left border+margin
-                                            $(data.node.li).attr('style', 'border-left: black solid 1px !important;margin-left: 9px;');
-                                        }
-                                    }
-                                    if(data.node.data.type == 'separator'){
-                                        $(data.node.span).attr('style', 'background: none !important;color: black !important;'); //stop highlighting
-                                        $(data.node.span.childNodes[1]).hide(); //checkbox for separators
+            //hide all folder triangles
+            //treediv.find('.fancytree-expander').hide();
 
-                                        if(order == 1){
-                                            $(data.node.li).addClass('fancytree-hidden');
-                                        }
-                                    }else if(data.node.data.type == 'enum'){ // add options dropdown menu
-
-                                        const key = data.node.key;
-
-                                        let $ele = $('<ul>', {class: 'horizontalmenu fancytree-submenu'})
-                                            .attr('data-type', 'enum').attr('data-code', data.node.data.code)
-                                            .html('<li data-id="internalid"><span>option</span><ul>' //default is internalid = trm_ID
-                                                     + '<li data-id="internalid">Internal ID</li>'
-                                                     + '<li data-id="term">Term</li>'
-                                                     + '<li data-id="code">Code</li>'
-                                                     + '<li data-id="conceptid">Concept ID</li>'
-                                                     + '<li data-id="desc">Description</li>'
-                                                + '</ul></li>')
-                                            .appendTo($(data.node.span.childNodes[3]));
-
-                                        $ele.menu({
-                                            icons: { submenu: "ui-icon-triangle-1-s" },
-                                            select: function(e, ui){
-
-                                                window.hWin.HEURIST4.util.stopEvent(e);
-
-                                                let code = $ele.attr('data-code');
-                                                code += ':' + ui.item.attr('data-id');
-                                                let codes = code.split(':');
-                                                let codes2 = code.split(':');
-
-                                                codes2[0] = 'any';
-                                                code = codes2.join(':');
-
-                                                //add or replace field in builderItem
-                                                that.addFieldItem( code, codes, that.select_field_for_id);
-                                                that.select_field_for_id = null;
-                                                that.pnl_Tree.hide();
-
-                                                if(treediv.fancytree('instance') !== undefined){
-                                                    const tree = treediv.fancytree('getTree');
-                                                    const node = tree.getNodeByKey(key);
-
-                                                    node.setActive(true);
-
-                                                    $ele.menu('collapseAll');
-                                                }
-                                            },
-                                            focus: function(e, ui){
-
-                                                if(!ui.item.parent().is('ul.horizontalmenu')){
-                                                    return;
-                                                }
-
-                                                let code = $ele.attr('data-code');
-                                                $.each(that.pnl_Tree.find('.fancytree-submenu'), function(idx, ele){
-                                                    ele = $(ele);
-
-                                                    if(ele.attr('data-code') == code){
-                                                        return;
-                                                    }
-
-                                                    if(ele.menu('instance') !== undefined){
-                                                        ele.menu('collapseAll');
-                                                    }
-                                                });
-
-                                                let $parent = that.element.find('#field_treeview').children();
-
-                                                // getComputedStyle(ele) | getBoundingClientRect()
-                                                let cont_rect = $parent[0].getBoundingClientRect();
-                                                let ele_rect = $ele[0].getBoundingClientRect();
-
-                                                let bottom_val = ele_rect.bottom + 110;
-
-                                                if(bottom_val > cont_rect.bottom){
-                                                    $ele.menu('option', 'position', {my: 'left bottom-5', at: 'left top'});
-                                                }else{
-                                                    $ele.menu('option', 'position', {my: 'left top+5', at: 'left bottom'});
-                                                }
-
-                                            },
-                                            position: {
-                                                my: 'left top+5',
-                                                at: 'left bottom'
-                                            }
-                                        });
-                                    }
-                                },
-                                lazyLoad: function(event, data){
-                                    
-                                    var node = data.node;
-                                    var parentcode = node.data.code; 
-                                    var rectypes = node.data.rt_ids;
-
-                                    let node_order = that.element.find('[name="tree_order"]:checked').val();
-                                    //var res = window.hWin.HEURIST4.dbs.createRectypeStructureTree( null, 5, rectypes, 
-                                    //                                                        allowed_fieldtypes, parentcode, node_order );
-                                                                                            
-                                    var res = window.hWin.HEURIST4.dbs.createRectypeStructureTree_new( 
-                                    {
-                                        mode:5, rectypeids:rectypes, fieldtypes:allowed_fieldtypes, 
-                                        parentcode: parentcode,
-                                        field_order:node_order//, enum_mode:'expanded' 
-                                    } );
-                                                                                            
-                                                                                            
-                                    if(res.length>1){
-                                        data.result = res;
-                                    }else{
-                                        data.result = res[0].children;
-                                    }
-                                    
-                                    var ptr_fld = window.hWin.HEURIST4.util.cloneJSON(data.node.data);
-                                    if(ptr_fld.type=='resource'){
-                                        ptr_fld.title = '<span style="font-size:smaller">Target record: '+ptr_fld.name+'</span>';
-                                        ptr_fld.lazy = false;
-                                        data.result.unshift(ptr_fld);
-                                    }
-                                                                                            
-
-                                    return data;                                                   
-                                },
-                                expand: function(e, data){
-                                    that.showHideReverse(data);
-                                },
-                                collapse: function(e, data){
-                                    that._update_GenericField(data.node);
-                                },
-                                loadChildren: function(e, data){
-                                    setTimeout(function(){
-                                        that.showHideReverse(data);   
-                                        //that._assignSelectedFacets();
-                                    },500);
-                                },
-                                select: function(e, data) {
-                                    /* Get a list of all selected nodes, and convert to a key array:
-                                    var selKeys = $.map(data.tree.getSelectedNodes(), function(node){
-                                    return node.key;
-                                    });
-                                    $("#echoSelection3").text(selKeys.join(", "));
-
-                                    // Get a list of all selected TOP nodes
-                                    var selRootNodes = data.tree.getSelectedNodes(true);
-                                    // ... and convert to a key array:
-                                    var selRootKeys = $.map(selRootNodes, function(node){
-                                    return node.key;
-                                    });
-                                    $("#echoSelectionRootKeys3").text(selRootKeys.join(", "));
-                                    $("#echoSelectionRoots3").text(selRootNodes.join(", "));
-                                    */
-                                },
-                                click: function(e, data){
-
-                                    if(data.node.data.type == 'separator'){
-                                        return false;
-                                    }
-
-                                    var isExpander = $(e.originalEvent.target).hasClass('fancytree-expander');
-
-                                    if(isExpander) return;
-
-                                    if($(e.originalEvent.target).is('span') && data.node.children && data.node.children.length>0){
-                                        data.node.setExpanded(!data.node.isExpanded());
-                                    }else if( data.node.lazy){
-                                        data.node.setExpanded( true );
-                                    }else{
-                                        var code = data.node.data.code;
-                                        if(code){
-                                            var codes = code.split(':');
-
-                                            if(codes.length == 2 && $Db.dty(codes[1], 'dty_Type') == 'enum'){
-                                                // by default, handle as internal id
-                                                //code += ':term';
-                                                //codes.push('term');
-                                            }
-
-                                            var codes2 = code.split(':');
-                                            codes2[0] = 'any';
-                                            code = codes2.join(':');
-
-                                            //add or replace field in builderItem
-                                            that.addFieldItem( code, codes, that.select_field_for_id);
-                                            that.select_field_for_id = null;
-                                            that.pnl_Tree.hide();
-                                        }else{
-                                            console.error('ERROR: code not defined for',data);
-                                        }
-                                    }
-                                },
-                                dblclick: function(e, data) {
-                                    if(data.node.data.type == 'separator'){
-                                        return false;
-                                    }
-                                    data.node.toggleSelected();
-                                },
-                                keydown: function(e, data) {
-                                    if( e.which === 32 ) {
-                                        data.node.toggleSelected();
-                                        return false;
-                                    }
-                                }
-                            });
-
-                            //hide all folder triangles
-                            //treediv.find('.fancytree-expander').hide();
-
-                            that.current_tree_rectype_ids = rectypeIds.join(',');
+            that.current_tree_rectype_ids = rectypeIds.join(',');
 
 
-                            $("#fsw_showreverse").change(function(event){
-                                that.showHideReverse();
-                            });
+            $("#fsw_showreverse").change(function(event){
+                that.showHideReverse();
+            });
 
-                            //tree.options.filter.mode = "hide";
-                            //tree.options.filter.highlight = false;
-                            $("#fsw_showreverse").attr('checked', false);
-                            $("#fsw_showreverse").change();
+            //tree.options.filter.mode = "hide";
+            //tree.options.filter.highlight = false;
+            $("#fsw_showreverse").attr('checked', false);
+            $("#fsw_showreverse").change();
 
-                            this._off($('[name="tree_order"]'), 'change');
-                            this._on($('[name="tree_order"]'), {
-                                change: () => {
-                                    let order = $('[name="tree_order"]:checked').val();
-                                    sessionStorage.setItem('heurist_ftorder_filterbuilder', order);
+            this._off($('[name="tree_order"]'), 'change');
+            this._on($('[name="tree_order"]'), {
+                change: () => {
+                    let order = $('[name="tree_order"]:checked').val();
+                    sessionStorage.setItem('heurist_ftorder_filterbuilder', order);
 
-                                    if(treediv.fancytree('instance')!==undefined){
+                    if(treediv.fancytree('instance')!==undefined){
 
-                                        window.hWin.HEURIST4.ui.reorderFancytreeNodes_rst(treediv, order);
-                                        that.showHideReverse();
-                                    }
-                                }
-                            });
-            }
+                        window.hWin.HEURIST4.ui.reorderFancytreeNodes_rst(treediv, order);
+                        that.showHideReverse();
+                    }
+                }
+            });
         }
     }
     
@@ -1345,6 +1341,8 @@ $.widget( "heurist.searchBuilder", {
         var fields_query = [];
 
         var that = this;
+
+        let existing_records = false;
         
         $.each(this.field_array, function(i, ele){
             
@@ -1354,6 +1352,11 @@ $.widget( "heurist.searchBuilder", {
             var value = ele.searchBuilderItem('getValues');
             var branch;
             var is_relationship = false; //is current branch is relationship (rt,rf)
+
+            if(code == 'any:exists'){
+                existing_records = true;
+                return;
+            }
             
             if(value!=null){
                 var codes = code.split(':');
@@ -1511,9 +1514,8 @@ $.widget( "heurist.searchBuilder", {
                 mainquery = mainquery.concat(fields_query)
             }
         }
-        
-        
-        if(mainquery.length>0 || !window.hWin.HEURIST4.util.isempty(that.rulesetSection.find('#svs_Rules').val())){
+
+        if(mainquery.length>0 || existing_records || !window.hWin.HEURIST4.util.isempty(that.rulesetSection.find('#svs_Rules').val())){
 
         
             if(rty_IDs>0){

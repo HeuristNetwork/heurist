@@ -528,6 +528,8 @@ $.widget( "heurist.searchBuilderItem", {
                 {key:'ends',title:'ends with'}
                 ]);
             
+        }else if(dty_ID == 'exists'){
+            eqopts = [{key: 'any', title: 'exists'}];
         }else{
 
 /*        
