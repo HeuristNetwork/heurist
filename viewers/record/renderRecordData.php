@@ -315,7 +315,7 @@ if(!($is_map_popup || $without_header)){
                             return false;
                         }
 
-                        let title = `Record Info <em style="font-size:10px;font-weight:normal;position:absolute;right:4em;top:30%;">${window.hWin.HR('drag to rescale')}</em>`;
+                        let title = `Record Info <em style="font-size:10px;font-weight:normal;position:absolute;right:10em;top:30%;">${window.hWin.HR('drag to rescale')}</em>`;
                         let cover = link.innerHTML; //innerText
 
                         let cur_params = window.hWin.HEURIST4.util.getUrlParams(location.href);
@@ -346,16 +346,47 @@ if(!($is_map_popup || $without_header)){
                                 coverMsg: cover,
                                 onOpen: function(e, ui){
 
+                                    let $dlg = $(this);
+
+                                    if(!window.hWin.record_viewer_popups){
+                                        window.hWin.record_viewer_popups = []
+                                    }
+
+                                    window.hWin.record_viewer_popups.push($dlg);
+
                                     // Place popup
                                     if(pos){
 
                                         let top = pos.top + (pos.top * 0.1);
                                         let left = pos.left + (pos.left * 0.05);
     
-                                        $(this).parent().css({
+                                        $dlg.parent().css({
                                             top: top,
                                             left: left
                                         });
+                                    }
+
+                                    // Add 'Close all' button
+                                    let $titleBar = $dlg.parent().find('.ui-dialog-titlebar');
+                                    if($titleBar.length > 0){
+
+                                        $('<button>', {style: 'position: absolute;font-size: 0.8em;right: 4em;top: 15%;'})
+                                            .text('Close all')
+                                            .insertBefore($titleBar.find('button'))
+                                            .button()
+                                            .on('click', () => {
+
+                                                if(window.hWin.record_viewer_popups){
+                                                    while(window.hWin.record_viewer_popups.length > 0){
+                                                        let $dlg = window.hWin.record_viewer_popups.shift();
+                                                        if($dlg.dialog('instance') !== undefined){
+                                                            $dlg.dialog('close');
+                                                        }else{
+                                                            $dlg.parent().remove();
+                                                        }
+                                                    }
+                                                }
+                                            });
                                     }
                                 }
                             }
