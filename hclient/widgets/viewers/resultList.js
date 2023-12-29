@@ -183,6 +183,8 @@ $.widget( "heurist.resultList", {
     _currentSavedFilterID: 0,
 
     export_button: null, // button to export current recordset
+
+    _collection: null, // current collection of record ids
     
     // the constructor
     _create: function() {
@@ -829,7 +831,7 @@ $.widget( "heurist.resultList", {
                     window.hWin.HEURIST4.current_query_request = this._query_request;
                     window.hWin.HAPI4.currentRecordset = this._currentRecordset;
 
-                    let selected = this.getSelected(true);
+                    let selected = this._collection && this._collection.length > 0 ? this._collection : this.getSelected(true);
                     if(selected && selected.length > 0){
                         window.hWin.HAPI4.currentRecordsetSelection = selected;
                     }
@@ -2728,7 +2730,14 @@ $.widget( "heurist.resultList", {
             }else if(collection==null){
                 window.hWin.HEURIST4.collection.collectionUpdate();
             }
+        
+            // update local cache
+            this._collection = collection;
+
+            // update 'cart' count
+            this._updateInfo();
         }
+
     },
 
 
@@ -2790,6 +2799,10 @@ $.widget( "heurist.resultList", {
         this.span_pagination.attr('title', sinfo);
 
         var w = this.element.width();
+
+        if(this._is_publication && this._collection && this._collection.length > 0){
+            sinfo = `${sinfo} | Collected: ${this._collection.length}`;
+        }
 
         if(this.options.select_mode=='select_multi' && this._currentMultiSelection!=null && this._currentMultiSelection.length>0){
             sinfo = sinfo + " | Selected: "+this._currentMultiSelection.length;
