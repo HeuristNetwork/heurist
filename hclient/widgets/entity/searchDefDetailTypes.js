@@ -117,6 +117,21 @@ $.widget( "heurist.searchDefDetailTypes", $.heurist.searchEntity, {
                 this.input_search_group.val(this.element.find('#chb_show_all_groups').is(':checked')
                                             ?'any':this.options.dtg_ID).change();
         }});
+
+        this.input_filter_rectype = this.element.find('#input_filter_rectype');
+
+        if(this.options.use_cache && this.options.select_mode != 'manager'){
+
+            window.hWin.HEURIST4.ui.createRectypeSelectNew(this.input_filter_rectype[0], {useHtmlSelect: true, topOptions: [{key:'any', title:'All record types'}]});
+
+            this._on(this.input_filter_rectype, {
+                change: function(){
+                    this.startSearch();
+                }
+            });
+        }else{
+            this.input_filter_rectype.hide();
+        }
         
         if(this.options.simpleSearch){
             this.element.find('#input_field_type_div').hide();
@@ -211,6 +226,10 @@ $.widget( "heurist.searchDefDetailTypes", $.heurist.searchEntity, {
             }
   
             if(this.options.use_cache){
+
+                if(this.options.select_mode != 'manager'){
+                    request['rtyID'] = this.input_filter_rectype.val();
+                }
             
                 this._trigger( "onfilter", null, request);            
                 
