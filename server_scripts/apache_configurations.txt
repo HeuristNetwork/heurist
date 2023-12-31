@@ -20,16 +20,19 @@ RewriteRule (.+)/$ /$1 [L,R=301]
 # These rewrite rules allow clean, short URLs of the form myserver.net/mydatabase/web 
 # rather than the use of the long parameterised URLs used by Heurist internally
  
-#if URI starts with api/ redirect it to controller/api.php
+# if URI starts with /api redirect it to controller/api.php
 RewriteRule ^heurist/api/(.*)$ /heurist/hserv/controller/api.php
 RewriteRule ^h6-alpha/api/(.*)$ /h6-alpha/hserv/controller/api.php
 
-#if URI starts with web, tpl, hml, view etc. redirect it to redirects/resolver.php
-RewriteRule ^h6-alpha/([A-Za-z0-9_]+)/(website|web|tpl|hml|view)/(.*)$ /h6-alpha/redirects/resolver.php
-RewriteRule ^heurist/([A-Za-z0-9_]+)/(website|web|tpl|hml|view)/(.*)$ /heurist/redirects/resolver.php
-RewriteRule ^([A-Za-z0-9_]+)/(website|web|tpl|hml|view)/(.*)$ /h6-alpha/redirects/resolver.php
-RewriteRule ^h6-alpha/([A-Za-z0-9_]+)/web(.*)$ /h6-alpha/redirects/resolver.php
-RewriteRule ^heurist/([A-Za-z0-9_]+)/web(.*)$ /heurist/redirects/resolver.php
-RewriteRule ^([A-Za-z0-9_]+)/web(.*)$ /h6-alpha/redirects/resolver.php
+
+# if URI starts with website|web|tpl|hml|view|edit|adm redirect it to redirects/resolver.php
+RewriteRule ^h6-alpha/([A-Za-z0-9_]+)/(website|web|tpl|hml|view|edit|adm)(.*)$ /h6-alpha/redirects/resolver.php
+RewriteRule ^heurist/([A-Za-z0-9_]+)/(website|web|tpl|hml|view|edit|adm)(.*)$ /heurist/redirects/resolver.php
+RewriteRule ^(?!heurist|h6-alpha|startup)([A-Za-z0-9_]+)/(website|web|tpl|hml|view|edit|adm)(.*)$ /heurist/redirects/resolver.php
+
+# redirect to default website
+RewriteRule ^h6-alpha/([A-Za-z0-9_]+\/?)$ /h6-alpha/redirects/resolver.php
+RewriteRule ^heurist/([A-Za-z0-9_]+\/?)$ /heurist/redirects/resolver.php
+RewriteRule ^(?!heurist|h6-alpha|startup)([A-Za-z0-9_]+\/?)$ /heurist/redirects/resolver.php
 
 </VirtualHost>
