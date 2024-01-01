@@ -421,12 +421,12 @@
                 } 
                 
                 if(!$hasGeo){
-                    $system->error_exit_api('Service did not return data in an appropriate format');
+                    $system->error_exit_api('Service did not return data in an appropriate format', HEURIST_ACTION_BLOCKED);
                 }
             }else if(is_array($remote_data) && count($remote_data)==1){
                     $system->error_exit_api('No records match the search criteria', HEURIST_NOT_FOUND);
             }else{
-                    $system->error_exit_api('Service did not return any data');
+                    $system->error_exit_api('Service did not return any data', HEURIST_ERROR);
             }
     
             $remote_data = json_encode($remote_data);
@@ -976,7 +976,7 @@
 
             $remote_data = json_encode($results);
         }else{
-            $system->error_exit_api('Service did not return data in an handled format');
+            $system->error_exit_api('Service did not return data in an handled format', HEURIST_ERROR);
         }
     }else if(@$params['serviceType'] == 'opentheso'){
         
@@ -1065,7 +1065,7 @@
 
             if(json_last_error() !== JSON_ERROR_NONE || !is_array($data) || $data['last_update'] < date('Y-m-d')){
                 if($already_updated){
-                    $system->error_exit_api('Unable to retrieve Opentheso thesauruses due to unknown error.');
+                    $system->error_exit_api('Unable to retrieve Opentheso thesauruses due to unknown error.', HEURIST_ACTION_BLOCKED);
                     exit;
                 }
                 $data = updateOpenthesoThesauruses($system);
@@ -1097,7 +1097,7 @@
             $thesauruses = loadRemoteURLContentWithRange($base_uri.'thesaurus', null, true, 60);
 
             if($thesauruses === false){
-                $system->error_exit_api('Unable to retrieve the available thesauruses from ' . $server);
+                $system->error_exit_api('Unable to retrieve the available thesauruses from ' . $server, HEURIST_ACTION_BLOCKED);
                 exit;
             }
 
@@ -1131,7 +1131,7 @@
 
         $file_size = fileSave(json_encode($data_rtn), $opentheso_file);
         if($file_size <= 0){
-            $system->error_exit_api('Cannot save Opentheso thesaurus list into local file store');
+            $system->error_exit_api('Cannot save Opentheso thesaurus list into local file store', HEURIST_ERROR);
         }
 
         return $data_rtn;
@@ -1164,7 +1164,7 @@
 
             if(json_last_error() !== JSON_ERROR_NONE || !is_array($data) || $data['last_update'] < date('Y-m-d')){
                 if($already_updated){
-                    $system->error_exit_api('Unable to retrieve Nakala metadata due to unknown error.');
+                    $system->error_exit_api('Unable to retrieve Nakala metadata due to unknown error.', HEURIST_UNKNOWN_ERROR);
                     exit;
                 }
                 $data = updateNakalaMetadata($system);
@@ -1202,7 +1202,7 @@
         $data_rtn = array('years' => array(), 'licenses' => array(), 'types' => array());
 
         // Get datatype names, Nakala only provides the datatype ids
-        $datatypes_xml = loadRemoteURLContentWithRange('https://vocabularies.coar-repositories.org/resource_types/resource_types_for_dspace.xml', null, true, 60);
+        $datatypes_xml = loadRemoteURLContentWithRange('https://vocabularies.coar-repositories.org/resource_types/resource_types_for_dspace_en.xml', null, true, 60);
         $datatypes_xml = simplexml_load_string($datatypes_xml, null, LIBXML_PARSEHUGE);
 
         $handled_types = array(); // type codes already added
@@ -1212,7 +1212,7 @@
             $results = loadRemoteURLContentWithRange('https://api.nakala.fr/search?fq=scope%3Ddata&order=relevance&page='.$page.'&size=1000', null, true, 60);
 
             if($results === false){
-                $system->error_exit_api('Unable to retrieve metadata values from Nakala');
+                $system->error_exit_api('Unable to retrieve metadata values from Nakala', HEURIST_ACTION_BLOCKED);
                 exit;
             }
 
@@ -1228,6 +1228,10 @@
                     $handled_type = false;
                     $handled_license = false;
                     $handled_year = false;
+
+                    if(empty($records['metas'])){
+                        continue;
+                    }
                     
                     foreach ($records['metas'] as $metadata) {
 
@@ -1286,7 +1290,7 @@
                     }
                 }
             }else{
-                $system->error_exit_api('Unable to retrieve metadata values from Nakala, receieved a response not in a JSON format');
+                $system->error_exit_api('Unable to retrieve metadata values from Nakala, receieved a response not in a JSON format', HEURIST_ERROR);
                 exit;
             }
 
@@ -1308,7 +1312,7 @@
 
         $file_size = fileSave(json_encode($data_rtn), $nakala_file);
         if($file_size <= 0){
-            $system->error_exit_api('Cannot save Nakala metadata into local file store');
+            $system->error_exit_api('Cannot save Nakala metadata into local file store', HEURIST_ERROR);
             exit;
         }else{
             return $data_rtn;
