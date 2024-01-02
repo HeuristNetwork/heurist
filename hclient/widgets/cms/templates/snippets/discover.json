@@ -13,7 +13,7 @@
                                      "editstyle":true, 
                                      "map_rollover":true, 
                                      "controls":"legend",
-                                     "legend":"off",
+                                     "legend":"-basemaps,-search,-mapdocs,200",
                                      "published":1, 
                                      "template":"", 
                                      "basemap":""},              

@@ -34,6 +34,9 @@ $.widget( "heurist.recordExportCSV", $.heurist.recordAction, {
 
     selectedFields:null,
     
+    _collected_rtyid: null,
+    _selected_rtyid: null,
+    
     MAX_LEVEL:3,
     
     _destroy: function() {
@@ -299,6 +302,37 @@ $.widget( "heurist.recordExportCSV", $.heurist.recordAction, {
                     msg +' (count=' + this._currentRecordset.length()+')');
         }
         
+        if (this._currentRecordsetColIds &&  this._currentRecordsetColIds.length > 0) {
+
+            let common_id = null;
+
+            // Check if collected records all share the same id
+            $.each(this._currentRecordsetColIds, (idx, id) => {
+
+                let record = that._currentRecordset.getRecord(id);
+                if(!record){
+                    return;
+                }
+
+                let cur_rectypeid = record['rec_RecTypeID'];
+
+                if(!common_id){
+                    common_id = cur_rectypeid;
+                    return;
+                }else if(common_id != cur_rectypeid){
+                    common_id = -1;
+                    return false;
+                }
+            });
+
+            if(common_id > 0){
+                this._collected_rtyid = common_id;
+            }
+
+            window.hWin.HEURIST4.ui.addoption(selScope, 'collected',
+                'Collected records only (count=' + this._currentRecordsetColIds.length+')');
+        }
+
         if (this._currentRecordsetSelIds &&  this._currentRecordsetSelIds.length > 0) {
 
             let id = 'selected';
@@ -323,9 +357,11 @@ $.widget( "heurist.recordExportCSV", $.heurist.recordAction, {
                 }
             });
 
-            id = common_id > 0 ? (common_id * -1) : id;
+            if(common_id > 0){
+                this._selected_rtyid = common_id;
+            }
 
-            window.hWin.HEURIST4.ui.addoption(selScope, id,
+            window.hWin.HEURIST4.ui.addoption(selScope, 'selected',
                 'Selected records only (count=' + this._currentRecordsetSelIds.length+')');
         }
         
@@ -532,12 +568,14 @@ $.widget( "heurist.recordExportCSV", $.heurist.recordAction, {
     //
     _onRecordScopeChange: function() 
     {
-        var isdisabled = this._super();
+        let isdisabled = this._super();
         
         //window.hWin.HEURIST4.util.setDisabled( this.element.parents('.ui-dialog').find('#btnDoAction2'), isdisabled );
         
-        var rtyID = this.selectRecordScope.val();
-        rtyID = Number.isInteger(+rtyID) ? ''+Math.abs(rtyID) : rtyID;
+        let rtyID = this.selectRecordScope.val();
+        rtyID = rtyID == 'collected' && this._collected_rtyid ? this._collected_rtyid : rtyID;
+        rtyID = rtyID == 'selected' && this._selected_rtyid ? this._selected_rtyid : rtyID;
+
         //reload treeview
         this._loadRecordTypesTreeView( rtyID );
         

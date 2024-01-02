@@ -154,7 +154,8 @@ $.widget( "heurist.resultList", {
 
     _currentRecordset:null,
     _currentMultiSelection:null, //for select_multi - to keep selection across pages and queries
-    _fullRecordset:null, //keep full set for multiselection (to get records diregard current filters)
+    _fullRecordset: null, //keep full set for multiselection (to get records diregard current filters)
+    _currentSubset: null, // subset of full record set (usually a recordset of the collected records to display)
 
     _startupInfo:null,
 
@@ -831,8 +832,12 @@ $.widget( "heurist.resultList", {
                     window.hWin.HEURIST4.current_query_request = this._query_request;
                     window.hWin.HAPI4.currentRecordset = this._currentRecordset;
 
-                    let selected = this._collection && this._collection.length > 0 ? this._collection : this.getSelected(true);
-                    if(selected && selected.length > 0){
+                    if(this._collection && this._collection.length > 0){
+                        window.hWin.HAPI4.currentRecordsetCollected = this._collection;
+                    }
+
+                    let selected = this.getSelected(true);
+                    if(selected){
                         window.hWin.HAPI4.currentRecordsetSelection = selected;
                     }
                     
@@ -2716,10 +2721,11 @@ $.widget( "heurist.resultList", {
     setCollected: function(collection){
         
         this.div_content.find('.collected').removeClass('collected');
-        
+        let hasCollection = window.hWin.HEURIST4.util.isArrayNotEmpty(collection);
+
         if(this.options.support_collection){
 
-            if(window.hWin.HEURIST4.util.isArrayNotEmpty(collection)){
+            if(hasCollection){
     
                 this.div_content.find('.recordDiv').each(function(ids, rdiv){
                     var rec_id = $(rdiv).attr('recid');
@@ -2728,12 +2734,18 @@ $.widget( "heurist.resultList", {
                         $(rdiv).addClass('collected');
                     }
                 });
+
             }else if(collection==null){
                 window.hWin.HEURIST4.collection.collectionUpdate();
             }
-        
+
             // update local cache
-            this._collection = collection;
+            if(this._currentRecordset && this._currentRecordset.length() > 0 && hasCollection){
+                let collected = this._currentRecordset.getSubSetByIds(collection);
+                this._collection = collected && collected.length() > 0 ? collected.getIds() : [];
+            }else{
+                this._collection = [];
+            }
 
             // update 'cart' count
             this._updateInfo();
@@ -2791,7 +2803,8 @@ $.widget( "heurist.resultList", {
     //
     _updateInfo: function(){
 
-        var total_inquery = (this._currentRecordset!=null)?this._currentRecordset.count_total():0;
+        let total_inquery = (this._currentRecordset!=null) ? this._currentRecordset.count_total() : 0;
+        total_inquery = (this._currentSubset) ? this._currentSubset.count_total() : total_inquery;
 
         //IJ wants just n=
         var sinfo = 'n = '+total_inquery;
@@ -2801,8 +2814,10 @@ $.widget( "heurist.resultList", {
 
         var w = this.element.width();
 
-        if(this._is_publication && this._collection && this._collection.length > 0){
-            sinfo = `${sinfo} | Collected: ${this._collection.length}`;
+        let addCollectionControls = this._is_publication && this._collection && this._collection.length > 0;
+
+        if(addCollectionControls){
+            sinfo = `${sinfo} | <a href="#" id="searchCollected">collected</a>: ${this._collection.length}`;
         }
 
         if(this.options.select_mode=='select_multi' && this._currentMultiSelection!=null && this._currentMultiSelection.length>0){
@@ -2811,41 +2826,13 @@ $.widget( "heurist.resultList", {
                 sinfo = sinfo+' <a href="#">'+window.hWin.HR('Clear')+'</a>';
             }
         }
-/*
-            var pv = false;
 
-            // pagination has LESS priority than reccount
-            if ( w > 530 && this.max_page>1) {
-                this.span_pagination.show();
-                pv = true;
-            }else{
-                this.span_pagination.hide();
-            }
-            if ( w > (470 + (pv?60:0)) ) {
-                this.span_info.show();
-            }else{
-                this.span_info.hide();
-            }
-  */                  
-        /*
-        if(w<530){
-            this.span_info.prop('title',sinfo);
-            if(w<530){
-                this.span_info.hide();
-            }else {
-                this.span_info.show();
+        if(this._currentSubset && w > 500){
+            sinfo = `${sinfo} <span class="ui-icon ui-icon-refresh" title="Refresh result list"></span>`;
+        }
 
-                //IJ wants just n=
-                this.span_info.html(w>340 || total_inquery<1000?('n = '+total_inquery):'i');
-            }
-
-        }else{
-        */
         this.span_info.prop('title','');
         this.span_info.html(sinfo);
-        
-
-
 
         if(this.options.select_mode=='select_multi'){
             var that = this;
@@ -2859,6 +2846,25 @@ $.widget( "heurist.resultList", {
                 that.triggerSelection();
 
                 return false; });
+        }
+        if(addCollectionControls){
+
+            // Show 'shopping cart' of collected records
+            this._on(this.span_info.find('a#searchCollected'), {
+                click: function(){
+                    this._currentSubset = this._currentRecordset.getSubSetByIds(this._collection);
+                    this._renderPage(0);
+                }
+            });
+
+            // Refresh currently displayed result list
+            this.span_info.find('.ui-icon-refresh').button().css({ padding: '5px', 'margin-left': '5px' });
+            this._on(this.span_info.find('.ui-icon-refresh'), {
+                click: function(){
+                    this._currentSubset = null;
+                    this._renderPage(0);
+                }
+            });
         }
     },
 
@@ -3131,7 +3137,7 @@ $.widget( "heurist.resultList", {
             if(this.cb_selected_only) this.cb_selected_only.prop('checked', '');
 
             if(!recordset){
-                recordset = this._currentRecordset;
+                recordset = this._currentSubset ? this._currentSubset : this._currentRecordset;
             }
 
             if(!recordset) return;
@@ -4254,7 +4260,9 @@ $.widget( "heurist.resultList", {
 
         let recInfoUrl = null;
         let is_template = false;
-        let recTitle = 'Loading ';
+        let coverMsg = 'Loading ';
+        let rec_Title = this._currentRecordset.fld( this._currentRecordset.getById(rec_ID), 'rec_Title' );
+        let rec_Type = this._currentRecordset.fld( this._currentRecordset.getById(rec_ID), 'rec_RecTypeID' );
 
         if(this._currentRecordset && rec_ID>0){
             recInfoUrl = this._currentRecordset.fld( this._currentRecordset.getById(rec_ID), 'rec_InfoFull' );
@@ -4263,9 +4271,9 @@ $.widget( "heurist.resultList", {
         }
 
         if(this._currentRecordset && rec_ID>0){
-            recTitle += this._currentRecordset.fld( this._currentRecordset.getById(rec_ID), 'rec_Title' ) + ' ';
+            coverMsg += rec_Title + ' ';
         }
-        recTitle += '...';
+        coverMsg += '...';
 
         let lt = 'WebSearch';//window.hWin.HAPI4.sysinfo['layout'];  
         if( !recInfoUrl ){
@@ -4294,7 +4302,8 @@ $.widget( "heurist.resultList", {
         let pos = null;
         let dlg = $('#recordview_popup');
 
-        let popup_title = window.hWin.HR('Record Info');
+        rec_Title = !window.hWin.HEURIST4.util.isempty(rec_Title) ? `${$Db.rty(rec_Type, 'rty_Name')}: ${rec_ID} ${rec_Title}` : '';
+        let popup_title = window.hWin.HEURIST4.util.isempty(rec_Title) ? window.hWin.HR('Record Info') : rec_Title;
         popup_title += `<em style="font-size:10px;font-weight:normal;position:absolute;right:4em;top:35%;">${window.hWin.HR('drag to rescale')}</em>`;
 
         let opts = {
@@ -4307,7 +4316,7 @@ $.widget( "heurist.resultList", {
             },
             title: popup_title,
             default_palette_class: 'ui-heurist-explore',
-            coverMsg: recTitle
+            coverMsg: coverMsg
         }
 
         if(dlg.length <= 0){
@@ -4371,6 +4380,7 @@ $.widget( "heurist.resultList", {
                     }
                 });
                 let dlg_header = dlg.parent().find('.ui-dialog-titlebar');
+                dlg_header.find('.ui-dialog-title').css({width: '80%', 'font-size': '1em'});
                 this._on(dlg_header,{mouseout:function(){
                     that._closeRecordViewPopup();
                 }});
