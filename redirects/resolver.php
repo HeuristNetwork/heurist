@@ -38,10 +38,10 @@
 // TODO: write /redirects/resolver.php as an XML feed with parameterisation for a human-readable view
 // TODO: the following is a temporary redirect to viewRecord.php which renders a human-readable form
 
-// NOTE: THIS HAS BEEN SUBSTANTIALLY DEVELOPED AND IS NOW DOCUMENTED IN /server_scripts/utility/apacjhe_configurations.txt
+// NOTE: THIS HAS BEEN SUBSTANTIALLY DEVELOPED AND IS NOW DOCUMENTED IN /server_scripts/utility/apache_configurations.txt
 // Add to httpd.conf
 // RewriteRule ^/heurist/([A-Za-z0-9_]+)/(website|web|tpl|hml|view)/(.*)$ /heurist/redirects/resolver.php
-//redirection for CMS, Smarty, hml output and record view
+// redirection for CMS, Smarty, hml output and record view
 // website or web - cms website
 // tpl - smarty
 // hml - xml output

@@ -688,7 +688,7 @@ function editCMS_ElementCfg( element_cfg, _layout_content, _layout_container, $c
     function _initCodeEditor() {
         
         var $dlg;
-        
+
         if(codeEditor==null){
             
             

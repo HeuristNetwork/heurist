@@ -835,6 +835,7 @@ $.widget( "heurist.resultList", {
                     if(selected && selected.length > 0){
                         window.hWin.HAPI4.currentRecordsetSelection = selected;
                     }
+                    
 
                     // open export menu in dialog/popup
                     let url = `${window.hWin.HAPI4.baseURL}hclient/framecontent/exportMenu.php?db=${window.hWin.HAPI4.database}`;
