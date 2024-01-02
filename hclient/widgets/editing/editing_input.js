@@ -1389,7 +1389,7 @@ $.widget( "heurist.editing_input", {
                             fstatus = 'Leave this field blank if you wish the first menu entry to load automatically on startup.';    
                     }
                     
-                    var div_prompt = $('<div style="line-height:20px"><b>Please use the '
+                    var div_prompt = $('<div style="line-height:20px;display:inline-block;"><b>Please use the '
                         + fname
                         + ' button in the <span>website editor</span> to edit this field.<br>'
                         + fstatus+'</b></div>')
@@ -1411,6 +1411,9 @@ $.widget( "heurist.editing_input", {
                             'cursor': 'pointer'
                         })
                         .insertAfter( $btn_edit_switcher );
+
+                    $('<br>').insertBefore($btn_edit_switcher);
+
                     var $label_edit_switcher = $('<span>Advanced users:</span>')
                         .css({'line-height': '20px','vertical-align':'top'}).addClass('smallbutton')
                         .insertBefore( $btn_edit_switcher );
@@ -1418,6 +1421,7 @@ $.widget( "heurist.editing_input", {
                     this._on( $btn_edit_switcher, { click: function(){
                         //$btn_edit_switcher.hide();
                         //$input.show();
+                        div_prompt.css('display', '');
                         $btn_edit_switcher2.hide();
                         $label_edit_switcher.hide();
                         var eid = '#'+$input.attr('id')+'_editor';                    
