@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta http-equiv="Expires" content="Fri, Jan 01 1900 00:00:00 GMT">
+        <meta http-equiv="Pragma" content="no-cache">
+        <meta http-equiv="Cache-Control" content="no-cache">
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+        <meta http-equiv="Lang" content="en">
+        <meta name="author" content="Artem Osmakov and Ian Johnson">
+        <meta http-equiv="Reply-to" content="@.com">
+        <meta name="generator" content="PhpED 8.0">
+        <meta name="description" content="Documentatin of the use of extrernal libraries by Heurist">
+        <meta name="keywords" content="Libraries, JS, PHP, Heurist">
+        <meta name="creation-date" content="09/06/2012">
+        <meta name="revisit-after" content="15 days">
+        <title>Heurist use of extrenal libraries</title>
+        <link rel="stylesheet" type="text/css" href="my.css">
+    </head>
+    <body>
+        <table style="border-spacing:0; color:#000000; border-color:#000000; border-style:solid; border-width:1px; font-size:12px; vertical-align:top; width:100%">
+            <tbody style="border-spacing:0; color:#000000; border-color:#000000; border-style:solid; border-width:1px; font-size:12px; vertical-align:top;">
+                <tr style="font-size:14px">
+                    <td style="width:219px"><strong>Library</strong></td>
+                    <td style="width:70px"><strong>Uses Composer</strong></td>
+                    <td style="width:113px"><strong>Current version<br>used</strong></td>
+                    <td style="width:106px"><strong>Latest version<br>available</strong></td>
+                    <td style="width:738px"><strong>Notes</strong></td>
+                </tr>
+
+                <tr>
+                    <td><span style="background-color:#e67e22">DELETIONS?</span></td>
+                </tr>
+
+                <tr>
+                    <td>medialement/flashmediaelement.swf</td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td>we use flashmediaelement.swf as a last resort for video/audio playback<br />
+                        <span style="color:#e74c3c">to remove since flash is blocked nearly everywhere these days</span></td>
+                </tr>
+
+                <tr>
+                    <td>colpick</td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td> Colour picker for visualisations by Jaan Jaap. <span style="color:#e74c3c">Is it still used?</span></td>               
+                </tr>
+
+                <tr>
+                    <td>timemap.js</td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td>Timelines timemap library. <span style="color:#e74c3c">todo replace to native google.map.data or leaflet</span></td>
+                </tr>
+
+                <tr>
+                    <td>YUI</td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td>Are we using YUI DataTable or another?<br />
+                        admin db defininition, smarty and dbStatistics.php (DataTable)do we still use this? Delete?</td>
+                </tr>
+
+                <tr>
+                    <td>bin</td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td>seems to be empty. <span style="color:#e74c3c">Delete?</span></td>
+                </tr>
+                <tr>
+                    <td>image_sample.txt</td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td>incorporate in code if needed. Delete?</td>
+                </tr>
+
+                <tr>
+                    <td><hr style="width:100px;text-align:left"></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                </tr>
+
+                <tr>
+                    <td><span style="background-color:#e67e22">IN USE</span></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                </tr>
+
+                <tr> <td><hr style="width:100px;text-align:left"></td> </tr>
+
+                <tr>
+                    <td>
+                        <p>JQuery</p>
+                    </td>
+                    <td></td>
+                    <td>1.12 &amp; ???</td>
+                    <td></td>
+                    <td>
+                        <p>jquery-file-upload   - upload files in editTerms,smarty template, manageFilesUpload.php and main usage in editing_input.js/fileUpload.php - original code was modified|<br />
+                            query-ui-1.12.1<br />
+                            jquery-ui-themes-1.12.1  - heurist theme added<br />
+                            jquery-ui-iconfont-master - icons compliant with jquery ui-icon-xxx. Works with all jQuery UI themes<br />
+                            jquery.calendars-1.2.1- editTemporalObject<br />
+                            jquery.fancybox - gallery and image viewer - original code was modified<br />
+                            jquery.fancytree- treeview component (saved searches, terms, rt structure) - css was modified<br />
+                            jquery.layout - cardinal layout control - original code was modified</p>
+                    </td>
+                </tr>
+
+                <tr> <td><hr style="width:100px;text-align:left"></td> </tr>
+
+                <tr>
+                    <td>
+                        <p>Leaflet (Mapping)</p>
+                    </td>
+                    <td></td>
+                    <td>1.4.0</td>
+                    <td></td>
+                    <td>
+                        <p>bookmarks - https://github.com/w8r/Leaflet.Bookmarks<br />
+                            geocoder - https://github.com/perliedman/leaflet-control-geocoder<br />
+                            providers - https://github.com/leaflet-extras/leaflet-providers<br />
+                            print - https://github.com/Igor-Vladyka/leaflet.browser.print<br />
+                            markercluster   - https://github.com/Leaflet/Leaflet.markercluster<br />
+                            selector - @todo<br />
+                            editor - @todo</p>
+                    </td>
+                </tr>
+
+                <tr> <td><hr style="width:100px;text-align:left"></td> </tr>
+
+                <tr>
+                    <td>js</td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td>
+                        <p>js/geodesy-master- convert UTM to/from WGS in mapDraw.php<br />
+                            js/wellknown.js - parse/stringfy WKT to json in mapDraw.php and in utils_geo.parseWKTCoordinates<br />
+                            js/shapefile - shp to json parser see map.php<br />
+                            js/evol.colorpicker.js - color picker in map.php (@todo replace with colpick or vv)<br />
+                            js/platform.js- browser and platform detect<br />
+                            js/jquery.ui-contextmenu.js - context menu plugin (used in saved search treeview)<br />
+                            js/themeswitchertool.js - jquery theme switcher</p>
+                    </td>
+                </tr>
+
+                <tr> <td><hr style="width:100px;text-align:left"></td> </tr>  
+
+                <tr>
+                    <td>
+                        <p>phayes/geophp</p>
+                    </td>
+                    <td>Yes</td>
+                    <td></td>
+                    <td></td>
+                    <td>
+                        <p>native PHP library for geometry operations.<a href="https://github.com/phayes/geoPHP">https://github.com/phayes/geoPHP</a></p>
+                    </td>
+                </tr>
+
+                <tr> <td><hr style="width:100px;text-align:left"></td> </tr>
+
+                <tr>
+                    <td>
+                        <p>gasparesganga/phpShapefile</p>
+                    </td>
+                    <td>Yes</td>
+                    <td></td>
+                    <td></td>
+                    <td>
+                        <p>Shapefile handling. Doesn&#39;t Leaflet or GeoPHP or js/shapefile do this?<br />
+                            <a href="https://gasparesganga.com/labs/php-shapefile/">https://gasparesganga.com/labs/php-shapefile/</a></p>
+                    </td>
+                </tr>
+
+                <tr> <td><hr style="width:100px;text-align:left"></td> </tr>
+
+                <tr>
+                    <td>
+                        <p>tileserver.php (serving tilemaps)</p>
+                    </td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td>
+                        <p></p>
+                    </td>
+                </tr>
+
+                <tr> <td><hr style="width:100px;text-align:left"></td> </tr>
+
+                <tr>
+                    <td>VIS</td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td>we use only timeline (original code was modified) need to extract only code for timeline since the size of package is 1.5Mb (used in map.php)</td>
+                </tr>
+
+                <tr> <td><hr style="width:100px;text-align:left"></td> </tr>
+
+                <tr>
+                    <td>
+                        <p>Mirador</p>
+                    </td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td>
+                        <p>2 and 3.??? Vsn 3 listed as v2.4.2 Openseadragon</p>
+
+                        <p>Image visualisation client. Can we get rid of vsn 2?<br />
+                            There seem to be several versions in version 3, but the licensing in version 3 says version 2.4.2</p>
+                    </td>
+                </tr>
+
+                <tr> <td><hr style="width:100px;text-align:left"></td> </tr>
+
+                <tr>
+                    <td>
+                        <p>TinyMCE</p>
+                    </td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td>
+                        <p>4.8 &amp; 5</p>
+
+                        <p>WYSIWYG editingfor blocktext fields in record edit. Can we get rid of vsn 4.8?</p>
+                    </td>
+                </tr>
+
+                <tr> <td><hr style="width:100px;text-align:left"></td> </tr>
+
+                <tr>
+                    <td>
+                        <p>CodeMirror</p>
+                    </td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td>
+                        <p>3.20 &amp; 5.61</p>
+
+                        <p>Code editing (Smarty). Can we get rid of old version?</p>
+                    </td>
+                </tr>
+
+                <tr> <td><hr style="width:100px;text-align:left"></td> </tr>
+
+                <tr>
+                    <td>
+                        <p>Smarty (for custom reports)</p>
+                    </td>
+                    <td>Yes</td>
+                    <td></td>
+                    <td></td>
+                    <td>
+                        <p><a href="http://www.smarty.net">http://www.smarty.net</a></p>
+                    </td>
+                </tr>
+
+                <tr> <td><hr style="width:100px;text-align:left"></td> </tr>
+
+                <tr>
+                    <td>
+                        <p>D3 (used for network diagrams)</p>
+                    </td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td>
+                        <p>3.4.11<br />
+                            links visualization <a href="http://d3js.org/">http://d3js.org/</a><br />
+                            <a href="https://github.com/d3/d3-plugins/tree/master/fisheye">https://github.com/d3/d3-plugins/tree/master/fisheye</a></p>
+                    </td>
+                </tr>
+
+                <tr> <td><hr style="width:100px;text-align:left"></td> </tr>
+
+                <tr>
+                    <td>
+                        <p>php/phpZotero/syncZotero.php</p>
+                    </td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td>
+                        <p></p>
+                    </td>
+                </tr>
+
+                <tr> <td><hr style="width:100px;text-align:left"></td> </tr>
+
+                <tr>
+                    <td>
+                        <p>ezyang/hmlpurifier</p>
+                    </td>
+                    <td>Yes</td>
+                    <td></td>
+                    <td></td>
+                    <td>
+                        <p><a href="http://ezyang.com">http://ezyang.com</a>,<a href="http://htmlpurifier.org/">http://htmlpurifier.org/</a></p>
+                    </td>
+                </tr>
+
+                <tr> <td><hr style="width:100px;text-align:left"></td> </tr>
+
+                <tr>
+                    <td>
+                        <p>smalot/pdfparser</p>
+                    </td>
+                    <td>Yes</td>
+                    <td></td>
+                    <td></td>
+                    <td>
+                        <p>PHP parser for PDF files.<a href="http://www.pdfparser.org">http://www.pdfparser.org</a></p>
+                    </td>
+                </tr>
+
+                <tr> <td><hr style="width:100px;text-align:left"></td> </tr>
+
+                <tr>
+                    <td>tecknickcom/tcpdf</td>
+                    <td>Yes</td>
+                    <td></td>
+                    <td></td>
+                    <td>
+                        <p>A PHP class for generating PDF documents and barcodes.<a href="http://www.tcpdf.org/">http://www.tcpdf.org/</a></p>
+
+                        <p><span style="color:#e74c3c">Not included in our support files</span></p>
+                    </td>
+                </tr>
+
+                <tr> <td><hr style="width:100px;text-align:left"></td> </tr>
+
+                <tr>
+                    <td>php/Mysqldump.php</td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td>dump database in dbUtils.php exportMyDataPopup.php</td>
+                </tr>
+
+                <tr> <td><hr style="width:100px;text-align:left"></td> </tr>
+
+                <tr>
+                    <td>
+                        <p>phpmailer (email sending)</p>
+                    </td>
+                    <td>Yes</td>
+                    <td></td>
+                    <td></td>
+                    <td>
+                        <p></p>
+                    </td>
+                </tr>
+
+                <tr> <td><hr style="width:100px;text-align:left"></td> </tr>
+
+                <tr>
+                    <td>
+                        <p>symfony</p>
+                    </td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td>
+                        <p>Do we use this or is it there for experiment?</p>
+                    </td>
+                </tr>
+
+                <tr> <td><hr style="width:100px;text-align:left"></td> </tr>
+
+                <tr>
+                    <td>
+                        <p>composer</p>
+                    </td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td>
+                        <p>Code support</p>
+                    </td>
+                </tr>
+
+                <tr> <td><hr style="width:100px;text-align:left"></td> </tr>
+
+                <tr>
+                    <td>
+                        <p>autoload.php</p>
+                    </td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td>
+                        <p>File generated by composer</p>
+                    </td>
+                </tr>
+
+                <tr> <td><hr style="width:100px;text-align:left"></td> </tr>
+
+            </tbody>
+        </table>
+
+    </body>
+</html>
