@@ -52,6 +52,7 @@ $.widget( "heurist.recordAction", {
     
     _currentRecordset:null,
     _currentRecordsetSelIds:null,
+    _currentRecordsetColIds: null,
     
     _as_dialog:null, //reference to itself as dialog (see options.isdialog)
     _toolbar:null,
@@ -78,14 +79,17 @@ $.widget( "heurist.recordAction", {
         
         if(this.options.currentRecordset){
             this._currentRecordset  = this.options.currentRecordset;
-            this._currentRecordsetSelIds = null; //this.options.currentRecordsetSel;
+            this._currentRecordsetSelIds = null;
+            this._currentRecordsetColIds = null;
         }else if(window.hWin.HAPI4.currentRecordset){
             this._currentRecordset = window.hWin.HAPI4.currentRecordset;
             this._currentRecordsetSelIds = window.hWin.HAPI4.currentRecordsetSelection;
+            this._currentRecordsetColIds = window.hWin.HAPI4.currentRecordsetCollected;
         }else{
             //Testing
             this._currentRecordset = new hRecordSet({count: "0",offset: 0,reccount: 0,records: [], rectypes:[]});
             this._currentRecordsetSelIds = null;
+            this._currentRecordsetColIds = null;
         }
         
         
