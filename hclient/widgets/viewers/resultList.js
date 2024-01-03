@@ -965,7 +965,8 @@ $.widget( "heurist.resultList", {
             this.div_header.hide();
         }
 
-        if(this.options.show_toolbar){
+        let has_export_button = this.options.show_export_button && this.export_button.is(':visible');
+        if(this.options.show_toolbar || has_export_button){
             this.div_toolbar.css({'top':(top-1)+'px', height:'auto'});
             this.div_toolbar.show();
             top = top + this.div_toolbar.height();
