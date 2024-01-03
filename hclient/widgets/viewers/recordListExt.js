@@ -26,7 +26,11 @@ $.widget( "heurist.recordListExt", {
     options: {
         widget_id: null, //outdated: user identificator to find this widget custom js script on web/CMS page
         title: '',
+
         is_single_selection: false, //work with the only record - reloads content on every selection event
+        is_multi_selection: false, //work with all selectd records
+        init_show_all: false, //show complete recordset at initialisation
+
         recordset: null,
         selection: null,  //list of selected record ids
         url:null,               //
@@ -48,7 +52,8 @@ $.widget( "heurist.recordListExt", {
         empty_remark: null, //html content for empty message  (search returns empty result)
         placeholder_text: null, //text to display while no record/recordset is loaded  (search is not prefromed)
         
-        show_export_button: false // show button to export current record set
+        show_export_button: false, // show button to export current record set
+        show_print_button: false // show button to print current record set
     },
 
     _current_url: null, //keeps current url - see loadURL 
@@ -61,6 +66,9 @@ $.widget( "heurist.recordListExt", {
     placeholder_ele: null, //element holding the placeholder text
     
     export_button: null, // export button
+    print_button: null, // print button
+
+    _print_frame: null, // for printing
 
     // the constructor
     _create: function() {
@@ -98,18 +106,81 @@ $.widget( "heurist.recordListExt", {
             this.element.hide();
         }
 
+        if(this.options.show_print_button){
+
+            this._print_frame = $('<iframe>', {style: 'width:0px;height:0px;'}).appendTo(this.div_content);
+
+            this.print_button = $('<button>', {
+                text: window.hWin.HR('Print'), title: window.hWin.HR('Print current results'), 
+                class: 'btnPrintRecords', style: `height:25px;position:absolute;top:5px;right:${this.options.show_export_button ? 115 : 15}px;`
+            })
+            .button({
+                icons: {
+                    primary: 'ui-icon-print'
+                },
+                showLabel: false
+            })
+            .prependTo(this.div_content)
+            .hide();
+
+            this._on(this.print_button, {
+                click: function(){
+
+                    let has_frame = this._print_frame && this._print_frame.length > 0;
+                    let has_records = this.options.recordset && this.options.recordset.length() > 0;
+                    if(!has_records){
+                        return;
+                    }
+
+                    let content = null;
+                    if(this.options.is_frame_based && this.dosframe.contents().length > 0){
+
+                        let frame = this.dosframe[0].contentWindow;
+                        let frame_doc = this.dosframe[0].contentDocument || this.dosframe[0].contentWindow.document;
+
+                        // Check for content to print
+                        if(!frame_doc || frame_doc.body.childElementCount == 0){
+                            return;
+                        }
+
+                        frame.print();
+
+                        return;
+                    }
+
+                    content = this.div_content.html();
+
+                    // Check for content to print
+                    if(window.hWin.HEURIST4.util.isempty(content)){
+                        return;
+                    }
+
+                    let print_doc = this._print_frame[0].contentDocument || this._print_frame[0].contentWindow.document;
+                    print_doc = print_doc.document ? print_doc.document : print_doc;
+
+                    print_doc.write('<head><title></title>');
+                    print_doc.write('</head><body onload="this.focus(); this.print();">');
+                    print_doc.write(content);
+                    print_doc.write('</body>');
+                    print_doc.close();
+                }
+            });
+
+        }
+
         if(this.options.show_export_button){
 
             this.export_button = $('<button>', {
                 text: window.hWin.HR('Export'), title: window.hWin.HR('Export current results'), 
-                class: 'btnExportRecords ui-button-action', style: 'height:25px;width:75px;position:absolute;top:5px;right:15px;'
+                class: 'btnExportRecords ui-button-action', style: 'height:25px;position:absolute;top:5px;right:15px;'
             })
             .button({
                 icons: {
                     primary: 'ui-icon-download'
                 }
             })
-            .prependTo(this.div_content);
+            .prependTo(this.div_content)
+            .hide();
 
             this.export_button[0].style.setProperty('color', '#FFF', 'important');
 
@@ -168,7 +239,9 @@ $.widget( "heurist.recordListExt", {
                 if(!that._isSameRealm(data)) return;
                 
                 that.options.recordset = data.recordset; //hRecordSet
-                
+
+                that._run_initial = true;
+
                 that._refresh();
                 that.loadanimation(false);
 
@@ -183,7 +256,7 @@ $.widget( "heurist.recordListExt", {
             }else if(e.type == window.hWin.HAPI4.Event.ON_REC_SELECT){
 
                 //selection happened somewhere else
-                if(that.options.is_single_selection && that._isSameRealm(data) && data.source!=that.element.attr('id')){
+                if((that.options.is_single_selection || that.options.is_multi_selection) && that._isSameRealm(data) && data.source!=that.element.attr('id')){
                     if(data.reset){
                         //that.option("selection",  null);
                         that.options.selection = null;
@@ -285,6 +358,10 @@ $.widget( "heurist.recordListExt", {
 
         this._current_url = newurl;
         this.loadanimation(true);
+
+        if(this._print_frame){
+            this._print_frame.attr('src', '');
+        }
         
         if(this.options.is_frame_based){
             this.dosframe.attr('src', newurl).show();
@@ -299,7 +376,8 @@ $.widget( "heurist.recordListExt", {
     //
     onLoadComplete: function(){
         this.loadanimation(false);
-        if(!this.options.reload_for_recordset && this.options.is_frame_based && !this.options.is_single_selection){
+        if(!this.options.reload_for_recordset && this.options.is_frame_based && !this.options.is_single_selection && !this.options.is_multi_selection){
+this._dout('onLoadComplete refresh again');                
               this._refresh();
         }
         
@@ -373,6 +451,28 @@ $.widget( "heurist.recordListExt", {
                     
                 });
             }
+
+            // Toggle display of buttons
+            let hasContent = !window.hWin.HEURIST4.util.isempty(this.dosframe.attr('src')) || fdoc.body.childElementCount > 0;
+            let hasRecords = this.options.recordset && this.options.recordset.length() > 0;
+
+            if(this.export_button){
+                // Allow print if there is content to print
+                if(!hasRecords){
+                    this.export_button.hide();
+                }else{
+                    this.export_button.show();
+                }
+            }
+
+            if(this.print_button){
+                // Allow export if there are records
+                if(!hasContent){ //!hasRecords && 
+                    this.print_button.hide();
+                }else{
+                    this.print_button.show().css('right', `${this.export_button.is(':visible') ? 115 : 15}px`);
+                }
+            }
         }
         
     },
@@ -442,21 +542,27 @@ $.widget( "heurist.recordListExt", {
         if(  (!this.element.is(':visible') && !this._is_publication) 
             || window.hWin.HEURIST4.util.isempty(this.options.url)){
             return;  
-        } 
+        }
 
         let empty_results = this.options.recordset==null || this.options.recordset.length()==0;
         var content_updated = false;
 
-        if(this.options.is_single_selection){ //reload content on every selection event
+        if(this.options.is_single_selection || this.options.is_multi_selection){ //reload content on every selection event
 
-            var newurl = null;
+            let newurl = null;
+            let show_all = this._run_initial && this.options.init_show_all && !empty_results;
+            this._run_initial = false;
 
-            if (window.hWin.HEURIST4.util.isArrayNotEmpty(this.options.selection)) {
+            if(window.hWin.HEURIST4.util.isArrayNotEmpty(this.options.selection) || show_all){
 
-                var recIDs_list = this.options.selection;
+                let recIDs_list = !show_all ? this.options.selection : this.options.recordset.getIds().join(',');
 
                 if(recIDs_list.length>0){
-                    var recID = recIDs_list[recIDs_list.length-1];
+                    
+                    let recID = recIDs_list;
+                    if(!show_all){
+                        recID = this.options.is_single_selection ? recIDs_list[recIDs_list.length-1] : recIDs_list.join(',');
+                    }
                     
                     newurl = this.options.url;
                     
@@ -474,8 +580,6 @@ $.widget( "heurist.recordListExt", {
                     if(this.options.record_with_custom_styles){
                         newurl = newurl + '&cssid=' + this.options.record_with_custom_styles;
                     }
-                    
-                    
                 }
             }
             if(newurl==null){
@@ -539,18 +643,13 @@ $.widget( "heurist.recordListExt", {
             query_string_sel = null,
             query_string_main = window.hWin.HEURIST4.query.composeHeuristQueryFromRequest( this._query_request, true );
 
-/*
+            if(this.options.reload_for_recordset){ //reloads content entirely
 
-            window.hWin.HEURIST4.currentQuery_all  = query_string_main+'&h4=1'; //query_string_all;
-            window.hWin.HEURIST4.currentQuery_sel  = query_string_sel;
-            window.hWin.HEURIST4.currentQuery_main = query_string_main;
+                if(this.options.show_all && !empty_results && query_string_main.indexOf('q=') === -1){
+                    query_string_main = `q=ids:${this.options.recordset.getIds().join(',')}&${query_string_main}`;
+                }
 
-            window.hWin.HEURIST4.currentQuery_sel_waslimited = false;
-            window.hWin.HEURIST4.currentQuery_all_waslimited = false;
-*/
-            if(this.options.reload_for_recordset) //reloads content entirely
-            {
-                var newurl = window.hWin.HAPI4.baseURL +  this.options.url.replace("[query]", query_string_main);
+                let newurl = window.hWin.HAPI4.baseURL +  this.options.url.replace("[query]", query_string_main);
                 
                 if(this.options.record_with_custom_styles){ //to load custom css and style links
                     newurl = newurl + '&cssid=' + this.options.record_with_custom_styles;
@@ -604,7 +703,6 @@ $.widget( "heurist.recordListExt", {
             
             this.loadanimation(false);
         }
-        
         
         if(this.options.is_popup && content_updated){
             if(this.reportPopupDlg && this.reportPopupDlg.dialog('instance')){
