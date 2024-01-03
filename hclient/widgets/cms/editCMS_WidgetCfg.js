@@ -347,6 +347,17 @@ function editCMS_WidgetCfg( widget_cfg, _layout_content, $dlg, main_callback ){
                     }
                     $dlg.find('#empty_remark').val(opts['emptysetmessage']);
                     $dlg.find('#placeholder_text').val(opts['placeholder_text']);
+
+                    if(!opts['selection_mode']){
+
+                        if(opts['is_single_selection']){
+                            opts['selection_mode'] = 'is_single_selection';
+                        }else{
+                            opts['selection_mode'] = 'show_all';
+                        }
+
+                        $dlg.find(`input[value="${opts['selection_mode']}"]`).prop('checked', true);
+                    }
                 }else if(widget_name=='heurist_resultList'){ // standard result list
                     if(opts['rendererExpandDetails']){
                         $dlg.find('select[name="rendererExpandDetails"]').attr('data-template', opts['rendererExpandDetails']);        
@@ -1025,22 +1036,6 @@ function editCMS_WidgetCfg( widget_cfg, _layout_content, $dlg, main_callback ){
                     window.hWin.HEURIST4.ui.createTemplateSelector( $select3 
                         ,[{key:'',title:'Standard record view template'}], $select3.attr('data-template'));
 
-/* artem 2023-10-09  Standard record view can be used as well                        
-                    $select3.on('change', () => {
-
-                        if($select3.val() == ''){ 
-                            $dlg.find('input[name="is_single_selection"]').parent().hide();
-                        }else{
-                            $dlg.find('input[name="is_single_selection"]').parent().show();
-                        }
-                    });
-
-                    if($select3.attr('data-template') == ''){
-                        $dlg.find('input[name="is_single_selection"]').parent().hide();
-                    }else{
-                        $dlg.find('input[name="is_single_selection"]').parent().show();
-                    }
-*/
                      $dlg.find('#is_popup_report').change(function(e){
                         if($dlg.find('#is_popup_report').is(':checked')){
                             $dlg.find('#popup_report_position').parent().show();       
@@ -1266,6 +1261,14 @@ function editCMS_WidgetCfg( widget_cfg, _layout_content, $dlg, main_callback ){
             opts['template'] = $dlg.find('select[name="rep_template"]').val();
             opts['reload_for_recordset'] = true;
             opts['emptysetmessage'] = empty_remark;
+
+            let selection_mode = opts['selection_mode'];
+
+            opts['is_single_selection'] = false;
+            opts['is_multi_selection'] = false;
+            opts['show_all'] = false;
+
+            opts[selection_mode] = true;
 
             if(opts['template'] != ''){
                 opts['url'] = 'viewers/smarty/showReps.php?publish=1&debug=0'

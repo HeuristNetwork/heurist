@@ -521,49 +521,47 @@
     <!-- end mapping -->
 
     <div class="heurist_resultListExt">
-        <div class="header">
-             <label>Custom report template&nbsp;</label>
+        <div class="header row-spacing">
+            <label>Custom report template&nbsp;</label>
         </div>
         <select name="rep_template" class="text ui-widget-content ui-corner-all" title="">
         </select>
-        <i class="help-text">Define custom reports using the Custom report tab in Explore</i>
-    </div>
-    
-    <div class="heurist_resultListExt">
-        <div class="header">
-            <label>Show selected record only&nbsp;</label>
-        </div>
-        <input name="is_single_selection" type="checkbox"/>
-        <i>&nbsp; check this to use this widget in place of inline or popup record view</i>
-        
+        <i class="help-text" style="display: inline-block;padding-left: 10px;">Define custom reports using the Custom report tab in Explore</i>
     </div>
 
     <div class="heurist_resultListExt">
         <div class="header">
-            <label>Show as popup&nbsp;</label>
+            <label>Show entire resultset&nbsp;</label>
         </div>
-        <input id="is_popup_report" type="checkbox"/>
-        <i>&nbsp; this widget will be opened as popup window (dimensions will be taken from style)</i>
+        <input value="show_all" name="selection_mode" type="radio" checked="checked"/>
+        <i>&nbsp; shows all records in the resultset</i>
     </div>
+
     <div class="heurist_resultListExt">
         <div class="header">
-            <label>Position&nbsp;</label>
+            <label>Show all selected records &nbsp;</label>
         </div>
-        <select id="popup_report_position">
-          <option value="">&nbsp;</option>
-          <option value="left">left</option>
-          <option value="right">right</option>
-          <option value="top">top</option>
-          <option value="bottom">bottom</option>
-        </select>
+        <input value="is_multi_selection" name="selection_mode" type="radio"/>
+        <i>&nbsp; show selected records only</i>
+
+        <input name="init_show_all" type="checkbox"/>
+        <i>&nbsp; show all records in resultset prior to selection</i>
     </div>
-    
-    
-    <div class="heurist_resultList heurist_resultListExt heurist_resultListDataTable">
-        <div class="header">
-            <label>Filter to be applied at start</label>
+
+    <div class="heurist_resultListExt">
+        <div class="header row-spacing">
+            <label>Show selected record only&nbsp;</label>
         </div>
-        <input name="search_initial"  size="60"/>
+        <input value="is_single_selection" name="selection_mode" type="radio"/>
+        <i>&nbsp; shows a single (most recent) selected record. Use this in place of inline or popup record view</i>
+    </div>
+
+    <div class="heurist_resultListExt">
+        <div class="header">
+            <label>Show print button</label>
+        </div>
+        <input name="show_print_button" type="checkbox"/>
+        <i>&nbsp; allow users to print the current record set</i>
     </div>
 
     <div class="heurist_resultList heurist_resultListExt">
@@ -572,6 +570,33 @@
         </div>
         <input name="show_export_button" type="checkbox"/>
         <i>&nbsp; allow users to export the current record set</i>
+    </div>
+
+    <div class="heurist_resultListExt">
+        <div class="header row-spacing">
+            <label>Show as popup&nbsp;</label>
+        </div>
+        <input id="is_popup_report" type="checkbox"/>
+        <i>&nbsp; this widget will be opened as popup window (dimensions will be taken from style)</i>
+    </div>
+    <div class="heurist_resultListExt">
+        <div class="header row-spacing">
+            <label>Position&nbsp;</label>
+        </div>
+        <select id="popup_report_position">
+            <option value="">&nbsp;</option>
+            <option value="left">left</option>
+            <option value="right">right</option>
+            <option value="top">top</option>
+            <option value="bottom">bottom</option>
+        </select>
+    </div>
+
+    <div class="heurist_resultList heurist_resultListExt heurist_resultListDataTable">
+        <div class="header">
+            <label>Filter to be applied at start</label>
+        </div>
+        <input name="search_initial"  size="60"/>
     </div>
 
     <div class="heurist_Navigation">
@@ -645,27 +670,25 @@
         <i>Filter is applied to the current resultset </i>
     </div>
     
-    <div class="heurist_resultList heurist_resultListExt heurist_resultListDataTable">
-        <div class="header" style="vertical-align:top">
-            <label>No data message</label>
+    <div class="heurist_SearchInput heurist_resultList heurist_resultListExt heurist_resultListDataTable">
+        <div class="header">
+            <label>Message prior to selection</label>
         </div>
-        <textarea id="empty_remark" rows="3" cols="85"/>
-        <label style="vertical-align: top;"><input type="checkbox" name="blank_empty_remark"> check to leave blank</label>
+        <label><input type="checkbox" name="blank_placeholder"> check to leave blank</label>, otherwise defaults to "<span id="placeholder_def"></span>"
+        <textarea id="placeholder_text" rows="3" cols="85"/>
         <span class="heurist-helper1" style="display: inline-block;line-height: 12px;padding-bottom: 10px;">
-            Message to be shown if query returns no records<br>
-            Default value: "<span id="empty_remark_def"></span>"
+            Message to display while search is not performed or no record or search has been selected
         </span>
     </div>
 
-    <div class="heurist_SearchInput heurist_resultList heurist_resultListExt heurist_resultListDataTable">
-        <div class="header" style="vertical-align:top">
-            <label>Place holder text</label>
+    <div class="heurist_resultList heurist_resultListExt heurist_resultListDataTable">
+        <div class="header">
+            <label>No data message</label>
         </div>
-        <textarea id="placeholder_text" rows="3" cols="85"/>
-        <label style="vertical-align: top;"><input type="checkbox" name="blank_placeholder"> check to leave blank</label>
+        <label><input type="checkbox" name="blank_empty_remark"> check to leave blank</label>, otherwise defaults to "<span id="empty_remark_def"></span>"
+        <textarea id="empty_remark" rows="3" cols="85"/>
         <span class="heurist-helper1" style="display: inline-block;line-height: 12px;padding-bottom: 10px;">
-            Message to display while search is not performed or no record or search has been selected<br>
-            Default value: "<span id="placeholder_def"></span>"
+            Message to be shown if query returns no records
         </span>
     </div>
     

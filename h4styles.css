@@ -2614,3 +2614,6 @@ li.edit-form-tab > a{
     line-height: 5px;
     padding: 2.5px 0px 5px;
 }
+.cms-widget-config .row-spacing{
+    padding-bottom: 15px;
+}
