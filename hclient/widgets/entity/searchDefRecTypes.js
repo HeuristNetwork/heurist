@@ -65,7 +65,7 @@ $.widget( "heurist.searchDefRecTypes", $.heurist.searchEntity, {
 
             this.btn_find_record.css({'min-width':'9m','z-index':2})
                     .button({label: window.hWin.HR("Find/Add Record Type"), icon: "ui-icon-search"})
-                .click(function(e) {
+                .on('click',function(e) {
                     that._trigger( "onfind" );
                 }); 
                 
@@ -109,7 +109,7 @@ $.widget( "heurist.searchDefRecTypes", $.heurist.searchEntity, {
             /*
             function(){
                 this.input_search_group.val(this.element.find('#chb_show_all_groups').is(':checked')
-                                            ?'any':this.options.rtg_ID).change();
+                                            ?'any':this.options.rtg_ID).trigger('change');
             }});*/
                         
         }
@@ -163,7 +163,7 @@ $.widget( "heurist.searchDefRecTypes", $.heurist.searchEntity, {
 
         }
        
-        if($.isFunction(this.options.onInitCompleted)){
+        if(window.hWin.HUL.isFunction(this.options.onInitCompleted)){
             this.options.onInitCompleted.call();
         }else{
             this.startSearch();              
@@ -178,7 +178,7 @@ $.widget( "heurist.searchDefRecTypes", $.heurist.searchEntity, {
         if(key == 'rtg_ID'){
             if(!this.element.find('#chb_show_all_groups').is(':checked'))
                 this.startSearch();
-                //this.element.find('#input_search_group').val(value).change();
+                //this.element.find('#input_search_group').val(value).trigger('change');
                 
                 if(value==$Db.getTrashGroupId('rtg')){
                     this.btn_add_record.hide();

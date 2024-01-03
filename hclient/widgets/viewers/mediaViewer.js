@@ -129,7 +129,7 @@ $.widget( "heurist.mediaViewer", {
 
         this.mediacontent.empty();
         
-        if($.isArray(this.options.rec_Files))
+        if(Array.isArray(this.options.rec_Files))
         {
 
             for (var idx in this.options.rec_Files){
@@ -148,7 +148,7 @@ $.widget( "heurist.mediaViewer", {
                         mode_3d_viewer = file.mode_3d_viewer; //3dhop or 3d or ''
                     }else{
                         obf_recID = file[0];
-                        mimeType = file[1]; //($.isArray(file) ?file[2] :file ) ;
+                        mimeType = file[1]; //(Array.isArray(file) ?file[2] :file ) ;
                     }
                     if(!filetitle) filetitle = title;
                     if(!mimeType) mimeType = '';
@@ -235,10 +235,10 @@ $.widget( "heurist.mediaViewer", {
                                 selector : 'a[data-myfancybox="fb-images"]', 
                                 loop:true};
             
-            if(window.hWin.HAPI4 && window.hWin.HAPI4.fancybox){ // && $.isFunction($.fancybox)
+            if(window.hWin.HAPI4 && window.hWin.HAPI4.fancybox){ // && window.hWin.HUL.isFunction($.fancybox)
                     $('body').unbind('click.fb-start');
                     window.hWin.HAPI4.fancybox( fancy_opts );
-            }else if ($.isFunction($.fn.fancybox)){
+            }else if (window.hWin.HUL.isFunction($.fn.fancybox)){
                     $('body').unbind('click.fb-start');
                     $.fn.fancybox( fancy_opts );
             }
@@ -448,7 +448,7 @@ $.widget( "heurist.mediaViewer", {
         
         if(window.hWin && window.hWin.HAPI4 && window.hWin.HAPI4.fancybox){ 
                 window.hWin.HAPI4.fancybox( fancy_opts );
-        }else if ($.isFunction($.fn.fancybox)){
+        }else if (window.hWin.HUL.isFunction($.fn.fancybox)){
                 $.fn.fancybox( fancy_opts );
         }
         
@@ -458,7 +458,7 @@ $.widget( "heurist.mediaViewer", {
     // opens explicitely
     //    
     show: function (){
-        this.mediacontent.find(this.options.selector+':first').click();
+        this.mediacontent.find(this.options.selector+':first').trigger('click');
     },
     
     //

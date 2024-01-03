@@ -159,7 +159,7 @@ content =
             a.css('top', pos_ay + (posy - posynew));
             ab.css('top', pos_ay + (posy - posynew));*/
         
-            //$(".bubbleCloser").click()
+            //$(".bubbleCloser").trigger('click')
             this._on( $(".bubbleCloser"), { click:function(event){ event.currentTarget=target; this.close(event); }   }); 
             //{ click:function(event){  $( "#btnTest" ).bubble( "close" ) } });
             //{ click:function(event){ this._trigger( "close", event, { tooltip: tooltip } ); }   }); 

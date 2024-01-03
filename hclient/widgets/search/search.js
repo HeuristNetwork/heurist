@@ -86,7 +86,7 @@ $.widget( "heurist.search", {
 
             function __initEntityFilter(){
 
-                if($.isFunction($('body')['searchByEntity'])){ //OK! widget script js has been loaded            
+                if(window.hWin.HUL.isFunction($('body')['searchByEntity'])){ //OK! widget script js has been loaded            
                     this.div_entity_fiter   = $('<div>').searchByEntity({is_publication:this._is_publication})
                     .css({'height':'auto','font-size':'1em'})
                     .appendTo( this.element );
@@ -94,7 +94,7 @@ $.widget( "heurist.search", {
 
                     $.getScript( window.hWin.HAPI4.baseURL + 'hclient/widgets/search/searchByEntity.js', 
                         function() {  //+'?t='+(new Date().getTime())
-                            if($.isFunction($('body')['searchByEntity'])){
+                            if(window.hWin.HUL.isFunction($('body')['searchByEntity'])){
                                 __initEntityFilter();
                             }else{
                                 window.hWin.HEURIST4.msg.showMsgErr('Widget searchByEntity not loaded. Verify your configuration');
@@ -227,8 +227,9 @@ $.widget( "heurist.search", {
                 + ' <span class="ui-icon ui-icon-info" style="font-size:0.8em"></span></span>')
             .attr('id', 'search_help_link')
             .addClass('graytext')
-            .css({'text-decoration':'none','outline':0, cursor:'pointer'})
+            .css({'text-decoration':'none','outline':'0', cursor:'pointer'})
             .appendTo(div_search_help_links);
+            
 
             this._on( link, {  click: function(){
                 window.open('context_help/advanced_search.html','_blank');
@@ -271,7 +272,7 @@ $.widget( "heurist.search", {
         this.input_search.data('y', this.input_search.outerHeight());
 
         /*AAAA*/
-        this.input_search.mouseup(function () {
+        this.input_search.on('mouseup',function () {
             var $this = $(this);
             if ($this.outerWidth() != $this.data('x') || $this.outerHeight() != $this.data('y')) {
                 //alert($this.outerWidth() + ' - ' + $this.data('x') + '\n' + $this.outerHeight() + ' - ' + $this.data('y'));
@@ -292,7 +293,7 @@ $.widget( "heurist.search", {
             // set new height/width
             $this.data('x', $this.outerWidth());
             $this.data('y', $this.outerHeight());
-        }) // this.input_search.mouseup
+        }) // this.input_search.on('mouseup'
 
         //
         // quick filter builder buttons
@@ -471,13 +472,13 @@ $.widget( "heurist.search", {
             .appendTo( this.div_add_record )
             .button({label: window.hWin.HR("Add Record"), icon:'ui-icon-plusthick'}) //"ui-icon-circle-plus"
             .addClass('truncate')
-            .click( function(){ 
+            .on('click', function(){ 
                 window.hWin.HAPI4.SystemMgr.verify_credentials(function(){
                     if(that.select_rectype_addrec.val()>0){
                         window.hWin.HEURIST4.ui.openRecordEdit(-1, null, 
                             {new_record_params:{RecTypeID:that.select_rectype_addrec.val()}});
                     }else{
-                        that.btn_select_rt.click();
+                        that.btn_select_rt.trigger('click');
                     }
                 }); 
             });
@@ -495,7 +496,7 @@ $.widget( "heurist.search", {
                 +window.hWin.HR('Define Parameters') +'<br>'+window.hWin.HR('Add Record')+'</div>', 
                 icon: "ui-icon-carat-1-s", iconPosition:'end',
                 title:'Click to define parameters and add new record'})
-            .click( function(){ 
+            .on('click', function(){ 
                 window.hWin.HEURIST4.ui.showRecordActionDialog('recordAdd');            
             });
 
@@ -526,7 +527,7 @@ $.widget( "heurist.search", {
                     var btn_select_owner = this.btn_select_owner;
 
                     var add_rec_prefs = window.hWin.HAPI4.get_prefs('record-add-defaults');
-                    if(!$.isArray(add_rec_prefs) || add_rec_prefs.length<4){
+                    if(!Array.isArray(add_rec_prefs) || add_rec_prefs.length<4){
                         add_rec_prefs = [0, 0, 'viewable', '']; //rt, owner, access, tags  (default to Everyone)
                     }
                     if(add_rec_prefs.length<5){ //visibility groups
@@ -743,7 +744,7 @@ $.widget( "heurist.search", {
                     that.btn_add_record.button({label: 'Add '+opt.text().trim()});
 
                     var prefs = window.hWin.HAPI4.get_prefs('record-add-defaults');
-                    if(!$.isArray(prefs) || prefs.length<4){
+                    if(!Array.isArray(prefs) || prefs.length<4){
                         prefs = [selval, 0, 'viewable', '']; //default to everyone   window.hWin.HAPI4.currentUser['ugr_ID']
                     }else{
                         prefs[0] = selval; 
@@ -761,7 +762,7 @@ $.widget( "heurist.search", {
             }
 
             var add_rec_prefs = window.hWin.HAPI4.get_prefs('record-add-defaults');
-            if(!$.isArray(add_rec_prefs) || add_rec_prefs.length<4){
+            if(!Array.isArray(add_rec_prefs) || add_rec_prefs.length<4){
                 add_rec_prefs = [0, 0, 'viewable', '']; //rt, owner, access, tags  (default to Everyone)
             }
             if(add_rec_prefs.length<4){
@@ -865,7 +866,7 @@ $.widget( "heurist.search", {
             //data is search query request
             if(data.reset){
                 that.input_search.val('');
-                that.input_search.change();
+                that.input_search.trigger('change');
             }else            
                 //topids not defined - this is not rules request
                 if(window.hWin.HEURIST4.util.isempty(data.topids) && data.apply_rules!==true){
@@ -873,7 +874,7 @@ $.widget( "heurist.search", {
                     //request is from some other widget (outside)
                     if(data.source!=that.element.attr('id')){
                         var qs;
-                        if($.isArray(data.q)){
+                        if(Array.isArray(data.q)){
                             qs = JSON.stringify(data.q);
                         }else{
                             qs = data.q;
@@ -906,7 +907,7 @@ $.widget( "heurist.search", {
                         }
                     }
 
-                    that.input_search.change();
+                    that.input_search.trigger('change');
 
                 }
 
@@ -957,7 +958,7 @@ $.widget( "heurist.search", {
 
         if(this.input_search.is(':visible')) {
             try{
-                this.input_search.focus();
+                this.input_search.trigger('focus');
             }catch(e){}
         }
 
@@ -1049,7 +1050,7 @@ $.widget( "heurist.search", {
             }
         }else{
 
-            if(!$.isFunction($('body')['showSearchBuilder'])){ //OK! widget script js has been loaded
+            if(!window.hWin.HUL.isFunction($('body')['showSearchBuilder'])){ //OK! widget script js has been loaded
 
                 var path = window.hWin.HAPI4.baseURL + 'hclient/widgets/search/';
                 var scripts = [ path+'searchBuilder.js', 

@@ -1005,7 +1005,7 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
                 
             }
 
-            $(elements[0]).change(); //trigger
+            $(elements[0]).trigger('change'); //trigger
         }
 
         elements = this._editing.getInputs('dty_Name');
@@ -1024,7 +1024,7 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
             }
 
             //add extra click functionalities to save buttons
-            this._toolbar.find('#btnSaveExt').show().click(function(){
+            this._toolbar.find('#btnSaveExt').show().on('click',function(){
                 window.hWin.HAPI4.save_pref('edit_rts_open_formlet_after_add', 1);
             }); 
 
@@ -1147,10 +1147,10 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
             var that = this;
             //add current value as first
             var first_ele = $('<div class="truncate"><b>'+input_name.val()+' [new]</b></div>').appendTo(this.fields_list_div)
-                            .click( function(event){
+                            .on('click', function(event){
                                 window.hWin.HEURIST4.util.stopEvent(event);
                                 that.fields_list_div.hide(); 
-                                //!!!! $('#ed_dty_HelpText').focus();
+                                //!!!! $('#ed_dty_HelpText').trigger('focus');
                             });
 
                             
@@ -1188,7 +1188,7 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
                     is_added = true;
                     ele.attr('dty_ID',dty_ID)
                     .text(field_name+' ['+ $Db.baseFieldType[field_type] +']')
-                    .click( function(event){
+                    .on('click', function(event){
                         window.hWin.HEURIST4.util.stopEvent(event);
 
                         var ele = $(event.target).hide();
@@ -1197,7 +1197,7 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
 
                         if(_dty_ID>0){
                             that.fields_list_div.hide();
-                            input_name.val('').focus();
+                            input_name.val('').trigger('focus');
 
                             window.hWin.HEURIST4.msg.showMsgFlash('Field added to record structure');
 

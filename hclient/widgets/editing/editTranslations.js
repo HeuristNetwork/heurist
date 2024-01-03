@@ -210,7 +210,7 @@ $.widget( "heurist.editTranslations", {
                         .css({width:'680px'})
                         .val(value)
                         .keyup(function(){that._was_changed=true;})
-                        .change(function(){that._was_changed=true;})
+                        .on('change',function(){that._was_changed=true;})
                         .appendTo( values_container );
                         
             if(_is_default){
@@ -288,7 +288,7 @@ $.widget( "heurist.editTranslations", {
                 
             });
         
-            if($.isFunction(this.options.onclose)){
+            if(window.hWin.HUL.isFunction(this.options.onclose)){
                 this.options.onclose.call(this, res);        
             }
                 

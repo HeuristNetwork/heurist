@@ -164,19 +164,19 @@ var svg;        // The SVG where the visualisation will be executed on
             ele_warn.hide();
         }
 
-        $('#btnZoomIn').button({icons:{primary:'ui-icon-plus'},text:false}).click(
+        $('#btnZoomIn').button({icons:{primary:'ui-icon-plus'},text:false}).on('click',
             function(){
                  zoomBtn(true);
             }
         );
 
-        $('#btnZoomOut').button({icons:{primary:'ui-icon-minus'},text:false}).click(
+        $('#btnZoomOut').button({icons:{primary:'ui-icon-minus'},text:false}).on('click',
             function(){
                  zoomBtn(false);
             }
         );
 
-        $('#btnFitToExtent').button({icons:{primary:'ui-icon-fullscreen'},text:false}).click(
+        $('#btnFitToExtent').button({icons:{primary:'ui-icon-fullscreen'},text:false}).on('click',
             function(){
                  zoomToFit();
             }
@@ -454,7 +454,7 @@ function visualizeData() {
     if(settings.isDatabaseStructure || isStandAlone){
         $('#embed-export').css('visibility','hidden');//hide();
     }else{
-        $('#embed-export').button({icons:{primary:'ui-icon-globe'},text:false}).click(
+        $('#embed-export').button({icons:{primary:'ui-icon-globe'},text:false}).on('click',
             function(){
                  showEmbedDialog();
             }
@@ -1440,7 +1440,7 @@ function updateSteppedLines(lines, type){
               //"A",dr,dr,0,0,1,d.source.x,d.source.y
             ];
             
-            if($.isFunction($(this).attr)){
+            if(window.hWin.HUL.isFunction($(this).attr)){
                 $(this).attr("marker-mid", marker_type);
             }
            

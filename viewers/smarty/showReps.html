@@ -604,23 +604,23 @@ ul#rep_list.menu li ul {
                 
                 //window.showReps.onResize(this.innerWidth);
 
-                $("#btnRepPrint2").button({text:false, icons: { primary: "ui-icon-print" }}).click(onPrint);
+                $("#btnRepPrint2").button({text:false, icons: { primary: "ui-icon-print" }}).on('click',onPrint);
 
-                $("#btnRepEdit").button({text:false, icons: { primary: "ui-icon-pencil" }}).click(onShowEditor);
-                $("#btnRepNew").button({text:false, icons: { primary: "ui-icon-plusthick" }}).click(onGenerate);
-                $("#btnRepDelete").button({text:false, icons: { primary: "ui-icon-closethick" }}).click(onDeleteTemplate);
-                $("#btnRepImport").button({text:false, icons: { primary: "ui-icon-sign-out" }}).click(function(){
-                    $('#fileupload').click();return false;
+                $("#btnRepEdit").button({text:false, icons: { primary: "ui-icon-pencil" }}).on('click',onShowEditor);
+                $("#btnRepNew").button({text:false, icons: { primary: "ui-icon-plusthick" }}).on('click',onGenerate);
+                $("#btnRepDelete").button({text:false, icons: { primary: "ui-icon-closethick" }}).on('click',onDeleteTemplate);
+                $("#btnRepImport").button({text:false, icons: { primary: "ui-icon-sign-out" }}).on('click',function(){
+                    $('#fileupload').trigger('click');return false;
                 });
                 $("#btnRepImport").find('span.ui-icon').css({'transform':'rotate(180deg)','margin-top':'-9px'});
                 
                 $("#btnRepExport").button({text:false, icons: { primary: "ui-icon-sign-out" }})
-                        .click( window.showReps.doExportTemplate );
+                        .on('click', window.showReps.doExportTemplate );
                 $("#btnRepSave").button({text:false, icons: { primary: "ui-icon-disk" }})
-                        .click( window.showReps.saveOutput );
+                        .on('click', window.showReps.saveOutput );
                 $("#btnRepPublish").button({text:false, icons: { primary: "ui-icon-globe-b" }})
-                        .click(window.showReps.onReportPublish);
-                $("#btnRepRefresh").button({text:false, icons: { primary: "ui-icon-refresh" }}).click(onSelectTemplate);
+                        .on('click',window.showReps.onReportPublish);
+                $("#btnRepRefresh").button({text:false, icons: { primary: "ui-icon-refresh" }}).on('click',onSelectTemplate);
 
 
                 /*replaced with toolbar 2015-01-15

@@ -566,7 +566,7 @@ $.widget( "heurist.resultList", {
             this.btn_select_and_close = this.element.find('#btn_select_and_close')
             .css({'min-width':'11.9em'})
             .button({label: window.hWin.HR( this.options.selectbutton_label )})
-            .click(function(e) {
+            .on('click',function(e) {
                 that._trigger( "onaction", null, 'select-and-close' );
             });
 
@@ -590,7 +590,7 @@ $.widget( "heurist.resultList", {
         .appendTo( this.element );
         
         
-        if($.isFunction(this.options.onScroll)){
+        if(window.hWin.HUL.isFunction(this.options.onScroll)){
             this._on(this.div_content, {'scroll':this.options.onScroll});
         }
                           
@@ -621,7 +621,7 @@ $.widget( "heurist.resultList", {
                 btn_icon = {primary: btn_icon};
                 $('<div>',{'data-key':key}).button({icons: btn_icon, text:true, label:window.hWin.HR(title) })
                 .appendTo(this.action_buttons_div)
-                .click(function( event ) {
+                .on('click',function( event ) {
                     var key = $(event.target).parent().attr('data-key');
                     that._trigger( "onaction", null, key );
                 });
@@ -787,7 +787,7 @@ $.widget( "heurist.resultList", {
         }
         
         if(this.options.show_menu){
-            if($.isFunction($('body').resultListMenu)){
+            if(window.hWin.HUL.isFunction($('body').resultListMenu)){
 
                 this.div_actions = $('<div>').resultListMenu({
                         is_h6style: this.options.is_h6style,
@@ -878,7 +878,7 @@ $.widget( "heurist.resultList", {
             this.options.onScroll = value;
 
             this._off(this.div_content, 'scroll');
-            if($.isFunction(value)){
+            if(window.hWin.HUL.isFunction(value)){
                 this._on(this.div_content, {'scroll':value});
             }
                           
@@ -1238,7 +1238,7 @@ $.widget( "heurist.resultList", {
         }
         
         //show hide table header
-        if($.isFunction(this.options.rendererHeader)){
+        if(window.hWin.HUL.isFunction(this.options.rendererHeader)){
             
             var header_html = (this.options.view_mode=='list')
                     ?this.options.rendererHeader():'';
@@ -1489,7 +1489,7 @@ $.widget( "heurist.resultList", {
                                         +$Db.rty(rt,'rty_Plural')+')</span>')
                                     .appendTo($emptyres.find('.not-found2'));
                                 $('<div>').button({label:window.hWin.HR('Add')+' '+$Db.rty(rt,'rty_Name'), icon:'ui-icon-plusthick'})
-                                    .click(function(){
+                                    .on('click',function(){
                                         window.hWin.HEURIST4.ui.openRecordEdit(-1, null, 
                                             {new_record_params:{RecTypeID:rt}});                                        
                                     })
@@ -1591,7 +1591,7 @@ $.widget( "heurist.resultList", {
     _renderRecord_html: function(recordset, record){
 
         //call external/custom function to render
-        if($.isFunction(this.options.renderer)){
+        if(window.hWin.HUL.isFunction(this.options.renderer)){
             return this.options.renderer.call(this, recordset, record);
         }
 
@@ -1882,7 +1882,7 @@ $.widget( "heurist.resultList", {
     //
     _recordDivOnHover: function(event){
         
-        if($.isFunction(this.options.renderer)) return;
+        if(window.hWin.HUL.isFunction(this.options.renderer)) return;
     
         var $rdiv = $(event.target);
         if($rdiv.hasClass('rt-icon') && !$rdiv.attr('title')){
@@ -2304,7 +2304,7 @@ $.widget( "heurist.resultList", {
 
         }
         
-        //$.isFunction(this.options.renderer) && 
+        //window.hWin.HUL.isFunction(this.options.renderer) && 
         if((this.options.view_mode!='horizontal' && this.options.view_mode!='vertical')   // && this.options.view_mode!='icons_list'
             && this.options.recordview_onselect=='inline'
             && this.options.expandDetailsOnClick){ // && this.options.view_mode=='list'
@@ -2362,7 +2362,7 @@ $.widget( "heurist.resultList", {
                 
                 var rendererTemplate = null;
                 //expand selected recordDiv and draw record details inline
-                if($.isFunction(this.options.rendererExpandDetails)){
+                if(window.hWin.HUL.isFunction(this.options.rendererExpandDetails)){
                     rendererTemplate = this.options.rendererExpandDetails.call(this, this._currentRecordset, recID);
                 }else {
                     rendererTemplate = this.options.rendererExpandDetails?this.options.rendererExpandDetails:'default'; //use renderRecordData.php
@@ -2586,7 +2586,7 @@ $.widget( "heurist.resultList", {
             this._trigger( "onselect", null, selected_recs );
         }
         
-        if($.isFunction(this.options.onSelect)){
+        if(window.hWin.HUL.isFunction(this.options.onSelect)){
             if(!this.options.eventbased){
                 selected_ids = this.getSelected( true );
             }
@@ -2837,7 +2837,7 @@ $.widget( "heurist.resultList", {
 
         if(this.options.select_mode=='select_multi'){
             var that = this;
-            this.span_info.find('a').click(function(){
+            this.span_info.find('a').on('click',function(){
                 that._currentMultiSelection = null;
                 that._updateInfo();
 
@@ -2958,7 +2958,7 @@ $.widget( "heurist.resultList", {
 
                         var $btn = $( "<button>", { text:''+i, id: 'page'+(i-1) }).css({'font-size':'0.7em'}).button()
                         .appendTo( span_pages )
-                        .click( function(event){
+                        .on('click', function(event){
                             var page = Number(this.id.substring(4));
                             that._renderPage(page);
                         } );
@@ -3293,7 +3293,7 @@ $.widget( "heurist.resultList", {
                 
         if(this.options.groupByField){
             //Object.keys(html_groups);
-            var hasRender = $.isFunction(this.options.rendererGroupHeader);
+            var hasRender = window.hWin.HUL.isFunction(this.options.rendererGroupHeader);
 
             //
             if(this.options.groupOnlyOneVisible && 
@@ -3350,7 +3350,7 @@ $.widget( "heurist.resultList", {
             }
         
             this.div_content.find('div[data-grp]')
-                    .click(function(event){
+                    .on('click',function(event){
                         var btn = $(event.target);
                         var grp_val = btn.attr('data-grp');
                         if(!grp_val){
@@ -3385,7 +3385,7 @@ $.widget( "heurist.resultList", {
         function ___ontooltip(callback){
 
             let s = '';
-            if($.isFunction(that.options.onTooltip)){
+            if(window.hWin.HUL.isFunction(that.options.onTooltip)){
                 s = that.options.onTooltip.call(this, callback); // pass content to callback, if a server call is required
             }else{
                 let ele = $( this );
@@ -3490,7 +3490,7 @@ $.widget( "heurist.resultList", {
             mouseover: this._recordDivOnHover,
             /* enable but specify entityName to edit in options */
             dblclick: function(event){ //start edit on dblclick
-                if(!$.isFunction(this.options.renderer)){
+                if(!window.hWin.HUL.isFunction(this.options.renderer)){
                     
                     if(window.hWin.HAPI4.has_access()){
                         
@@ -3574,7 +3574,7 @@ $.widget( "heurist.resultList", {
                     });
                     that._currentRecordset.setOrder(rec_order);
 
-                    if($.isFunction(that.options.onSortStop)){
+                    if(window.hWin.HUL.isFunction(that.options.onSortStop)){
                         that.options.onSortStop.call(that, this.div_content);    
                     }
                 }
@@ -3583,10 +3583,10 @@ $.widget( "heurist.resultList", {
             this.div_content.sortable(this.options.sortable_opts);
             //$allrecs.draggable({containment:this.div_content});    
         }
-        if($.isFunction(this.options.draggable)){
+        if(window.hWin.HUL.isFunction(this.options.draggable)){
             this.options.draggable.call();
         }
-        if($.isFunction(this.options.droppable)){
+        if(window.hWin.HUL.isFunction(this.options.droppable)){
             this.options.droppable.call();
         }
         
@@ -3605,7 +3605,7 @@ $.widget( "heurist.resultList", {
         this._trigger( "onpagerender", null, this );
         
         //@todo replace it to event listener in manageRecUploadedFiles as in manageSysGroups
-        if($.isFunction(this.options.onPageRender)){
+        if(window.hWin.HUL.isFunction(this.options.onPageRender)){
             this.options.onPageRender.call(this);
         }
 
@@ -3651,7 +3651,7 @@ $.widget( "heurist.resultList", {
 
             that.loadanimation(true);
 
-            if($.isFunction(this.options.searchfull)){
+            if(window.hWin.HUL.isFunction(this.options.searchfull)){
                 //call custom function 
                 this.options.searchfull.call(this, rec_toload, this.current_page, 
                     function(response){ 

@@ -38,7 +38,7 @@ function showLoginDialog(isforsed, callback, parentwin, dialog_id){
             var allFields = $dlg.find('input');       
             allFields.val( "" ).removeClass( "ui-state-error" );
             
-            if($.isFunction(callback)){
+            if(window.hWin.HUL.isFunction(callback)){
                 callback(window.hWin.HAPI4.has_access());
             }else
             if( isforsed && !window.hWin.HAPI4.has_access() ){
@@ -200,7 +200,7 @@ function showLoginDialog(isforsed, callback, parentwin, dialog_id){
                     }
                     
                     $dlg.find('#login_saml').css({'display':'inline-block'});
-                    $dlg.find('#btn_saml_auth').button().click( __onSamlLogin );
+                    $dlg.find('#btn_saml_auth').button().on('click', __onSamlLogin );
                     
                 }
             }
@@ -350,7 +350,7 @@ function showLoginDialog(isforsed, callback, parentwin, dialog_id){
             /*if(isforsed){
             var left_pane = $("div").css('float','left').appendTo( $dlg.find(".ui-dialog-buttonpane") );
             var btn_db = $( "<button>" ).appendTo( left_pane )
-            .button( {title: window.hWin.HR("Change database")} ).click( function() { $dlg.dialog( "close" ); } );
+            .button( {title: window.hWin.HR("Change database")} ).on('click', function() { $dlg.dialog( "close" ); } );
             }*/
             
             login_dialog.dialog('option','close', function(){__onDialogClose($dlg)});
@@ -623,7 +623,7 @@ function doRegister( parentwin ){
     } 
     var $doc = $(parentwin.document['body']);
 
-    if($.isFunction($doc.profile_edit)){
+    if(window.hWin.HUL.isFunction($doc.profile_edit)){
 
         var profile_edit_dialog = $('#heurist-profile-dialog');
         if(profile_edit_dialog.length<1){
@@ -633,7 +633,7 @@ function doRegister( parentwin ){
         
     }else{
         $.getScript(window.hWin.HAPI4.baseURL+'hclient/widgets/profile/profile_edit.js', function() {
-            if($.isFunction($doc.profile_edit)){
+            if(window.hWin.HUL.isFunction($doc.profile_edit)){
                 doRegister( parentwin );
             }else{
                 window.hWin.HEURIST4.msg.showMsgErr('Widget "Profile edit" cannot be loaded!');
@@ -776,7 +776,7 @@ function doAuthentication(login_data, login_dialog)
                     return;
                 }
                 /*
-                if($.isFunction(callback)){
+                if(window.hWin.HUL.isFunction(callback)){
                         callback(true);
                 }
                 */

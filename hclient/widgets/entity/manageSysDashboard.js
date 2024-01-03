@@ -113,7 +113,7 @@ $.widget( "heurist.manageSysDashboard", $.heurist.manageEntity, {
 
         /*this.show_longer_description
                 .attr('checked',(prefs.viewmode=='thumbs3'))
-            .change(function(){
+            .on('change',function(){
                 that.recordList.resultList('option','view_mode', 'thumbs');
                     //that.show_longer_description.is(':checked')?'thumbs3':'thumbs');
                 that.saveUiPreferences();
@@ -126,7 +126,7 @@ $.widget( "heurist.manageSysDashboard", $.heurist.manageEntity, {
         
         this._setMode(this.options.isViewMode);
         
-        this.searchForm.find('#edit_dashboard').click(function(){
+        this.searchForm.find('#edit_dashboard').on('click',function(){
             that._setMode(false);
         });
                     
@@ -165,7 +165,7 @@ $.widget( "heurist.manageSysDashboard", $.heurist.manageEntity, {
         var widget = window.hWin.HAPI4.LayoutMgr.getWidgetByName('mainMenu');
         if(widget){
             menu_entries = widget.mainMenu('menuGetAllActions');
-            if($.isArray(menu_entries)){
+            if(Array.isArray(menu_entries)){
                 menu_entries.unshift( {key:'action-CreateFilter', title: 'Trigger quick query dropdown'} );
                 menu_entries.unshift( {key:'action-SearchById', title: 'Run a  saved filter' } );
                 menu_entries.unshift( {key:'action-Search', title: 'Execute a filter string'} );
@@ -450,7 +450,7 @@ $.widget( "heurist.manageSysDashboard", $.heurist.manageEntity, {
                 
             });
             
-            $(elements[0]).change(); //trigger
+            $(elements[0]).trigger('change'); //trigger
         }
 
     },

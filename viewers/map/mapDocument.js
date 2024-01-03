@@ -148,7 +148,7 @@ function hMapDocument( _options )
                         var resdata = new hRecordSet(response.data);
                         map_documents = resdata;
                         
-                        if($.isFunction(onRefreshList)) onRefreshList.call(that, resdata);
+                        if(window.hWin.HUL.isFunction(onRefreshList)) onRefreshList.call(that, resdata);
                     }else {
                         window.hWin.HEURIST4.msg.showMsgErr(response);
                     }
@@ -287,7 +287,7 @@ function hMapDocument( _options )
                         rules: [{"query":"linkedfrom:"+RT_MAP_LAYER+"-"+DT_DATA_SOURCE}]
             };
 
-            if($.isArray(mapdoc_id)){ //this is load of temp mapspace with given set of layers
+            if(Array.isArray(mapdoc_id)){ //this is load of temp mapspace with given set of layers
                 //"t":RT_MAP_LAYER+','+RT_TLCMAP_DATASET,
                 request['q'] = {"ids":mapdoc_id.join(',')};
                 mapdoc_id = 'temp';
@@ -299,7 +299,7 @@ function hMapDocument( _options )
                     
                     if(order){
                         
-                        if($.isArray(order)){
+                        if(Array.isArray(order)){
                             //simplify request if order is set
                             request['q'] = {"ids":order.join(','),"sortby":'set:'+order.join(',')};
                             //request['sortby'] = 'set:'+order.join(',');
@@ -364,9 +364,9 @@ function hMapDocument( _options )
     function _openMapDocument(mapdoc_id, deferred){
 
         //1. Gets list of layers and datasets
-        if($.isArray(mapdoc_id) || !map_documents_content[mapdoc_id]){ //if array this is set of layers for temp mapspace
+        if(Array.isArray(mapdoc_id) || !map_documents_content[mapdoc_id]){ //if array this is set of layers for temp mapspace
             //map doc is not loaded yet
-            if(!$.isArray(mapdoc_id)) map_documents_content[mapdoc_id] = 'loading';
+            if(!Array.isArray(mapdoc_id)) map_documents_content[mapdoc_id] = 'loading';
             _loadMapDocumentContent(mapdoc_id, deferred);    
             return;
         }else if(map_documents_content[mapdoc_id]=='error' || map_documents_content[mapdoc_id]=='loading'){
@@ -533,7 +533,7 @@ console.log(treedata);
             if(!_isDocumentLoaded(mapdoc_id)) return;
             
             if(!rec_ids) return;
-            if(!$.isArray(rec_ids)) rec_ids = [rec_ids];
+            if(!Array.isArray(rec_ids)) rec_ids = [rec_ids];
         
             var request = {
                         q: {"ids":rec_ids.join(',')},  
@@ -589,13 +589,13 @@ console.log(treedata);
                         });
                                 
                         
-                        if($.isFunction(callback)){
+                        if(window.hWin.HUL.isFunction(callback)){
                             callback.call(that, _getTreeData(mapdoc_id));
                         }
                         
                     }else {
                         window.hWin.HEURIST4.msg.showMsgErr(response);
-                        if($.isFunction(callback)) callback.call(that);
+                        if(window.hWin.HUL.isFunction(callback)) callback.call(that);
                     }
 
                 }
@@ -702,7 +702,7 @@ console.log(treedata);
             (_record['layer']).applyStyle(new_value);
             
            //callback to update ui in mapManager
-            if($.isFunction(callback)){
+            if(window.hWin.HUL.isFunction(callback)){
                 callback( new_title, new_style );
             }
         });        
@@ -746,7 +746,7 @@ console.log(treedata);
         //
         createVirtualMapDocument: function(layer_ids, deferred){
             that.closeMapDocument('temp'); //clear old one
-            if(!$.isArray(layer_ids)){
+            if(!Array.isArray(layer_ids)){
                 if(window.hWin.HEURIST4.util.isNumber(layer_ids)){
                     layer_ids = [parseInt(layer_ids)];
                 }else{
@@ -1125,7 +1125,7 @@ console.log(treedata);
                             
                 if(options.mapwidget.mapping('getCurrentCRS')=='Simple'){
                     
-                    if($.isArray(ext) && ext.length==2){
+                    if(Array.isArray(ext) && ext.length==2){
                         let max_dim = Math.max(ext[1][0]-ext[0][0], ext[1][1]-ext[0][1]);
 
                         let maxzoom =  Math.ceil(
@@ -1243,7 +1243,7 @@ console.log(treedata);
 
                 onClose:function(event){
 
-                    if($.isFunction(callback)) callback.call(that);
+                    if(window.hWin.HUL.isFunction(callback)) callback.call(that);
                 }
             };//popup_options
 
@@ -1351,12 +1351,12 @@ console.log(treedata);
                             }else{
                                 window.hWin.HEURIST4.msg.showMsgErr(response);
                             }
-                            if($.isFunction(callback)) callback.call(that);
+                            if(window.hWin.HUL.isFunction(callback)) callback.call(that);
                         });
                         
                     }else{
                         window.hWin.HEURIST4.msg.showMsgErr(response);
-                        if($.isFunction(callback)) callback.call(that);
+                        if(window.hWin.HUL.isFunction(callback)) callback.call(that);
                     }
             });
         }

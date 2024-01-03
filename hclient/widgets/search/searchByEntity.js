@@ -111,7 +111,7 @@ $.widget( "heurist.searchByEntity", {
                 this.usage_btn = $('<span title="Show list of entities to filter">'
                 +'by usage <span class="ui-icon ui-icon-triangle-1-s"></span></span>')  
                 .addClass('graytext')
-                .css({'text-decoration':'none','padding':'0 10px','outline':0,'font-weight':'bold','font-size':'1.1em', cursor:'pointer'})
+                .css({'text-decoration':'none','padding':'0 10px','outline':'0','font-weight':'bold','font-size':'1.1em', cursor:'pointer'})
                 .appendTo( $d2 ); //was div_search_help_links
         
                 //click on label "by usage" - opens selector
@@ -443,7 +443,7 @@ $.widget( "heurist.searchByEntity", {
                 this[select_rectype].hSelect({
                         change: opts.onselect,
                         close: function(){
-                                if($.isFunction(that.options.menu_locked)){
+                                if(window.hWin.HUL.isFunction(that.options.menu_locked)){
                                     that.options.menu_locked.call( that, false ); //unlock
                                 }
                         }
@@ -498,7 +498,7 @@ $.widget( "heurist.searchByEntity", {
                     var ele = $(menu[0]);
                     ele.scrollTop(0);        
                    
-                    if(opts.useCheckboxes && $.isFunction(opts.onmarker)){
+                    if(opts.useCheckboxes && window.hWin.HUL.isFunction(opts.onmarker)){
                         var spans = menu.find('span.rt-checkbox');
                         that._off(spans,'click');
                         that._on(spans,{'click':function(e){
@@ -507,7 +507,7 @@ $.widget( "heurist.searchByEntity", {
                                 window.hWin.HEURIST4.util.stopEvent(e);
                             }}});
                         /*
-                        menu.find('span.rt-checkbox').click(function(e){
+                        menu.find('span.rt-checkbox').on('click',function(e){
                             if($(event.target).is('span')){
                                 opts.onmarker.call(that, $(event.target) );
                                 window.hWin.HEURIST4.util.stopEvent(e);
@@ -520,7 +520,7 @@ $.widget( "heurist.searchByEntity", {
                 
                 if(this[select_rectype]){
                     
-                    if($.isFunction(this.options.menu_locked)){
+                    if(window.hWin.HUL.isFunction(this.options.menu_locked)){
                         this.options.menu_locked.call( this, true); //lock
                     }
                     __openSelect();
@@ -546,7 +546,7 @@ $.widget( "heurist.searchByEntity", {
             
             window.hWin.HAPI4.RecordSearch.doSearch( this, request );
             
-            if($.isFunction(this.options.onClose)){
+            if(window.hWin.HUL.isFunction(this.options.onClose)){
                 this.options.onClose();
             }
     }

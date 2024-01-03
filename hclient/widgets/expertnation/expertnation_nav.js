@@ -105,11 +105,11 @@ $.widget( "heurist.expertnation_nav", {
         //this._focusable($element);
         $('.float-panel').sideFollow();
         /*var ele = $('.float-panel > select');
-        ele.change(function(e){
+        ele.on('change',function(e){
         var idx = $(e.target).val();
         that._setOptions( that.historyNav[idx] );
         });*/
-        $('.float-panel > div > span.ui-icon-triangle-1-n').click(
+        $('.float-panel > div > span.ui-icon-triangle-1-n').on('click',
             function(e){
                 var pnl = $('.float-panel > .historylist');
                 if(pnl.is(':visible')){
@@ -121,7 +121,7 @@ $.widget( "heurist.expertnation_nav", {
                 }
             }        
         );
-        $('.float-panel > div > span.ui-icon-close').hide().click(
+        $('.float-panel > div > span.ui-icon-close').hide().on('click',
             function(e){
                 that.currentNavIdx = 0;
                 that.historyNav = [];
@@ -167,7 +167,7 @@ $.widget( "heurist.expertnation_nav", {
                     page_id = this._getStaticPageIdByName(page_name);
                 }
                 if(page_id){
-                    $('#'+this.options.menu_div).find('a.nav-link[data-id='+page_id+']').click();
+                    $('#'+this.options.menu_div).find('a.nav-link[data-id='+page_id+']').trigger('click');
                     //this.history.push({page_name:recID});
                 }
             }
@@ -232,7 +232,7 @@ $.widget( "heurist.expertnation_nav", {
             return false;
         });        
 
-        $('body').bind('cut copy paste', function (e) {
+        $('body').on('cut copy paste', function (e) {
             e.preventDefault();
         });
         */
@@ -320,7 +320,7 @@ content = content.replace('http://heurist.sydney.edu.au/heurist/',window.hWin.HA
 
                             if(edit_form.length>0){
                                 if(home_page_id == recID) that._refreshCaptcha(edit_form); //on load for home only
-                                edit_form.find('#newsletter_type_submit').click(function(event){
+                                edit_form.find('#newsletter_type_submit').on('click',function(event){
                                     that._doSubsribeNewsLetter(edit_form);
                                     return false;
                                 })
@@ -379,7 +379,7 @@ content = content.replace('http://heurist.sydney.edu.au/heurist/',window.hWin.HA
         }
 
         /*
-        $('.bor-dismiss-veil').click(function(event){
+        $('.bor-dismiss-veil').on('click',function(event){
         event.preventDefault(); 
         $('.bor-veil').toggle("slide",{direction:"right"});
         });
@@ -434,7 +434,7 @@ content = content.replace('http://heurist.sydney.edu.au/heurist/',window.hWin.HA
 
         };
 
-        menu_ele.find('.nav-link').click( __onNavMenuClick );
+        menu_ele.find('.nav-link').on('click', __onNavMenuClick );
 
 
         //drop down menu for resources and search--------------------
@@ -560,7 +560,7 @@ content = content.replace('http://heurist.sydney.edu.au/heurist/',window.hWin.HA
 
 
         //init links to search person by first char
-        $('div.bor-pagination > ul.pagination > li > a').click(function(event){
+        $('div.bor-pagination > ul.pagination > li > a').on('click',function(event){
 
             var firstChar = $(event.target).text();
             $('div.bor-pagination > ul.pagination > li').removeClass('active');
@@ -581,7 +581,7 @@ content = content.replace('http://heurist.sydney.edu.au/heurist/',window.hWin.HA
             this._setOptions({entityType:'profile', entityID:profileID});
         }else{
             $('#main_pane > .clearfix').hide(); //hide all
-            $(menu_ele.find('.nav-link')[0]).click();
+            $(menu_ele.find('.nav-link')[0]).trigger('click');
         }
 
 
@@ -597,20 +597,20 @@ content = content.replace('http://heurist.sydney.edu.au/heurist/',window.hWin.HA
 
         //find all links with placeid or profileid
         setTimeout(function(){
-            $('#main_pane').find('a[href*="placeid="]').click( window.hWin.enResolver );
-            $('#main_pane').find('a[href*="profileid="]').click( window.hWin.enResolver );
-            $('#main_pane').find('a[href*="/profile/"]').click( window.hWin.enResolver );
-            $('#main_pane').find('a[href*="/place/"]').click( window.hWin.enResolver );
-            $('#main_pane').find('a[href*="/contribute"]').click( window.hWin.enResolver );
-            $('#main_pane').find('a[href*="/about"]').click( window.hWin.enResolver );
-            $('#main_pane').find('a[href*="/faq"]').click( window.hWin.enResolver );
-            $('#main_pane').find('a[href*="/search"]').click( window.hWin.enResolver );
-            $('#main_pane').find('a[href*="/people"]').click( window.hWin.enResolver );
+            $('#main_pane').find('a[href*="placeid="]').on('click', window.hWin.enResolver );
+            $('#main_pane').find('a[href*="profileid="]').on('click', window.hWin.enResolver );
+            $('#main_pane').find('a[href*="/profile/"]').on('click', window.hWin.enResolver );
+            $('#main_pane').find('a[href*="/place/"]').on('click', window.hWin.enResolver );
+            $('#main_pane').find('a[href*="/contribute"]').on('click', window.hWin.enResolver );
+            $('#main_pane').find('a[href*="/about"]').on('click', window.hWin.enResolver );
+            $('#main_pane').find('a[href*="/faq"]').on('click', window.hWin.enResolver );
+            $('#main_pane').find('a[href*="/search"]').on('click', window.hWin.enResolver );
+            $('#main_pane').find('a[href*="/people"]').on('click', window.hWin.enResolver );
             },2000);
 
 
 
-        $('#help_link').click(function(event){
+        $('#help_link').on('click',function(event){
 
             var sURL = $(event.target).attr('href');
             window.hWin.HEURIST4.util.stopEvent(event);
@@ -663,7 +663,7 @@ content = content.replace('http://heurist.sydney.edu.au/heurist/',window.hWin.HA
         });
 
         /* fancybox gallery
-        if($.fancybox && $.isFunction($.fancybox)){
+        if($.fancybox && window.hWin.HUL.isFunction($.fancybox)){
         $.fancybox({selector : selector,
         loop:true, buttons: [
         "zoom",
@@ -972,7 +972,7 @@ content = content.replace('http://heurist.sydney.edu.au/heurist/',window.hWin.HA
                         //find education record institution
                         var educat = that.recset.values(person, that.DT_TERTIARY);
                         var ind = 0;
-                        if($.isArray(educat)){
+                        if(Array.isArray(educat)){
 
                             var res = [];
                             for (ind in educat){
@@ -997,7 +997,7 @@ content = content.replace('http://heurist.sydney.edu.au/heurist/',window.hWin.HA
 
                             var educat = that.recset.values(person, that.DT_TERTIARY);
                             var ind = 0;
-                            if($.isArray(educat)){
+                            if(Array.isArray(educat)){
 
                                 var res = [];
                                 for (ind in educat){
@@ -1026,7 +1026,7 @@ content = content.replace('http://heurist.sydney.edu.au/heurist/',window.hWin.HA
 
                         var service = that.recset.values(person, that.DT_MILSERVICE);
                         var idx = 0;
-                        if($.isArray(service)){
+                        if(Array.isArray(service)){
                             for (idx in service){
                                 var rec_id = service[idx];
                                 var record = that.recset.getById(rec_id);
@@ -1060,7 +1060,7 @@ content = content.replace('http://heurist.sydney.edu.au/heurist/',window.hWin.HA
 
                         var awards = that.recset.values(person, that.DT_MILAWARD);
                         var idx = 0;
-                        if($.isArray(awards)){
+                        if(Array.isArray(awards)){
                             for (idx in awards){
                                 var rec_id = awards[idx];
                                 var record = that.recset.getById(rec_id);
@@ -1393,7 +1393,7 @@ content = content.replace('http://heurist.sydney.edu.au/heurist/',window.hWin.HA
         var early = that.recset.values(person, that.DT_SCHOOLING);
         idx = 0
         html = '';
-        if($.isArray(early)){
+        if(Array.isArray(early)){
             for (idx in early){
                 var rec_id = early[idx];
                 var record = that.recset.getById(rec_id);
@@ -1440,7 +1440,7 @@ content = content.replace('http://heurist.sydney.edu.au/heurist/',window.hWin.HA
         var educat = that.recset.values(person, that.DT_TERTIARY);
         idx = 0;
         html = '';
-        if($.isArray(educat)){
+        if(Array.isArray(educat)){
             for (idx in educat){
                 var rec_id = educat[idx];
                 var record = that.recset.getById(rec_id);
@@ -1515,7 +1515,7 @@ content = content.replace('http://heurist.sydney.edu.au/heurist/',window.hWin.HA
         var events = that.recset.values(person, 79);
 
         idx = 0;
-        if($.isArray(events)){
+        if(Array.isArray(events)){
             for (idx in events){
                 var rec_id = events[idx];
                 var record = that.recset.getById(rec_id);
@@ -1588,7 +1588,7 @@ content = content.replace('http://heurist.sydney.edu.au/heurist/',window.hWin.HA
         events = that.recset.values(person, 151);
         idx = 0;
         html = '';
-        if($.isArray(events)){
+        if(Array.isArray(events)){
             for (idx in events){
                 var rec_id = events[idx];
                 var record = that.recset.getById(rec_id);
@@ -1653,7 +1653,7 @@ content = content.replace('http://heurist.sydney.edu.au/heurist/',window.hWin.HA
         var assocs = that.recset.values(person, 259);
         idx = 0;
         html = '';
-        if($.isArray(assocs)){
+        if(Array.isArray(assocs)){
             for (idx in events){
                 var rec_id = assocs[idx];
                 var record = that.recset.getById(rec_id);
@@ -1670,7 +1670,7 @@ content = content.replace('http://heurist.sydney.edu.au/heurist/',window.hWin.HA
         var awards = that.recset.values(person, that.DT_MILAWARD);
         idx = 0;
         html = '';
-        if($.isArray(awards)){
+        if(Array.isArray(awards)){
             for (idx in awards){
                 var rec_id = awards[idx];
                 var record = that.recset.getById(rec_id);
@@ -1712,7 +1712,7 @@ content = content.replace('http://heurist.sydney.edu.au/heurist/',window.hWin.HA
         var service = that.recset.values(person, that.DT_MILSERVICE);
         idx = 0;
         html = '';
-        if($.isArray(service)){
+        if(Array.isArray(service)){
             for (idx in service){
                 var rec_id = service[idx];
                 var record = that.recset.getById(rec_id);
@@ -1914,7 +1914,7 @@ content = content.replace('http://heurist.sydney.edu.au/heurist/',window.hWin.HA
             }
 
             fval = that.recset.values(person, 104); //Discovering Anzacs  url
-            if($.isArray(fval)){
+            if(Array.isArray(fval)){
                 idx = 0;
                 for (idx in fval)
                     if(!that.isempty(fval)){
@@ -1935,7 +1935,7 @@ content = content.replace('http://heurist.sydney.edu.au/heurist/',window.hWin.HA
             }
 
             fval = that.recset.values(person, 108); //Additional resources
-            if($.isArray(fval)){
+            if(Array.isArray(fval)){
                 idx = 0;
                 for (idx in fval)
                     if(!that.isempty(fval)){
@@ -1975,7 +1975,7 @@ content = content.replace('http://heurist.sydney.edu.au/heurist/',window.hWin.HA
             //PDF of book entry -------------------------------
             html = '';
             fval = that.recset.values(person, 61);
-            if($.isArray(fval)){
+            if(Array.isArray(fval)){
                 idx = 0;
                 for (idx in fval)
                     if(!that.isempty(fval)){
@@ -2022,14 +2022,14 @@ content = content.replace('http://heurist.sydney.edu.au/heurist/',window.hWin.HA
             //From the archives -------------------------------
             html = '';
             fval = that.recset.values(person, 135); //photo
-            if(!$.isArray(fval))  fval = [];
+            if(!Array.isArray(fval))  fval = [];
             var fval2 = that.recset.values(person, 144); //docs
-            if(!$.isArray(fval2))  fval2 = [];
+            if(!Array.isArray(fval2))  fval2 = [];
             fval = fval.concat(fval2)
 
             var uniqid = 1;
 
-            if($.isArray(fval)){
+            if(Array.isArray(fval)){
                 idx = 0;
                 for (idx in fval)
                     if(!that.isempty(fval)){
@@ -2128,7 +2128,7 @@ content = content.replace('http://heurist.sydney.edu.au/heurist/',window.hWin.HA
                 $('#p_gallery').empty().append($(html));            
 
                 //top.lightbox.init();
-                if($.fancybox && $.isFunction($.fancybox)){
+                if($.fancybox && window.hWin.HUL.isFunction($.fancybox)){
                     $.fancybox({selector : 'a[data-fancybox="profile-images"]', loop:true});
                 }
             }
@@ -2277,7 +2277,7 @@ content = content.replace('http://heurist.sydney.edu.au/heurist/',window.hWin.HA
     //
     __getDate: function(rec, preferred_dty_ids){
         var date = null;
-        if( $.isArray(preferred_dty_ids) && preferred_dty_ids.length>0 ){
+        if( Array.isArray(preferred_dty_ids) && preferred_dty_ids.length>0 ){
             for(var i=0;i<preferred_dty_ids.length;i++){
                 date = this.recset.fld(rec, preferred_dty_ids[i]);    
                 if(!this.isempty(date) && date!=0){
@@ -2413,7 +2413,7 @@ content = content.replace('http://heurist.sydney.edu.au/heurist/',window.hWin.HA
         var place_names = [];
         var hasGeo = false;
 
-        if($.isArray(places)){
+        if(Array.isArray(places)){
             for (idx in places){
 
                 var placeID, place_rec = null;
@@ -2667,7 +2667,7 @@ content = content.replace('http://heurist.sydney.edu.au/heurist/',window.hWin.HA
 
                     $('<a>').attr('history_idx',idx).attr('title',text).text(text)
                     .css({color:'white',cursor:'pointer'})
-                    .click(function(event){
+                    .on('click',function(event){
                         if(that.historyNav.length>1){
                             var idx = $(event.target).attr('history_idx');
                             that._setOptions( that.historyNav[idx] );

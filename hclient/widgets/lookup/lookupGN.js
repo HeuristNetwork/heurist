@@ -365,7 +365,7 @@ $.widget( "heurist.lookupGN", $.heurist.recordAction, {
             var i=0;
             var data = json_data.geonames;
 
-            if(!window.hWin.HEURIST4.util.isArray(data)){
+            if(!Array.isArray(data)){
                 data = [data];
             }
 

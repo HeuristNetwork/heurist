@@ -447,14 +447,14 @@ if(!($max_size>0)) $max_size = 0;
                         $(document).off('mouseleave');
                         
                         //Cancel possible uploads and reset form
-                        $('#btnCancel').click();
+                        $('#btnCancel').trigger('click');
                         // Close Upload media window
                         if($(event.target).is('button')) {
                             setTimeout(function(){ window.close(); }, 100);
                         }
 
                         // Open Index media files window
-                        setTimeout(function(){ $(parent.document).find('li[data-action="menu-files-index"]').click(); }, 500);
+                        setTimeout(function(){ $(parent.document).find('li[data-action="menu-files-index"]').trigger('click'); }, 500);
                     };
                     btns[window.hWin.HR('Exit without Indexing')] = function(){
                         
@@ -467,7 +467,7 @@ if(!($max_size>0)) $max_size = 0;
 
                         // Close Upload media window
                         if($(event.target).is('button')) {
-                            $('#btnCancel').click();  //reset form
+                            $('#btnCancel').trigger('click');  //reset form
                             setTimeout(function(){ window.close(); }, 100);
                         }
                     }
@@ -475,7 +475,7 @@ if(!($max_size>0)) $max_size = 0;
                     window.hWin.HEURIST4.msg.showMsgDlg(msg, btns, {title:'Indexing Uploaded Media Files', 
                         yes:window.hWin.HR('Index Media Files'), no:window.hWin.HR('Exit without Indexing')});
                 } else if ($(event.target).is('button')){
-                        $('#btnCancel').click(); 
+                        $('#btnCancel').trigger('click'); 
                         setTimeout(function(){ window.close(); }, 100);
                 }
             }
@@ -681,7 +681,7 @@ if(!($max_size>0)) $max_size = 0;
                     }
                 });
                 
-                $('#btnCancel').click(function(e){ 
+                $('#btnCancel').on('click',function(e){ 
                     
                     if($('#btnCancel').button('option','label')=='Clear list'){
                         $('tbody.files').find('.template-download').remove();    
@@ -704,7 +704,7 @@ if(!($max_size>0)) $max_size = 0;
                     }
                     
                 });
-                $('#btnStart').click(function(e){ 
+                $('#btnStart').on('click',function(e){ 
                     window.hWin.HEURIST4.util.setDisabled($('#btnStart'), true);                    
                     window.hWin.HEURIST4.util.setDisabled($('#btnFinished'), true);                    
                     $('#btnStart').button('option','label','uploading...');
@@ -716,7 +716,7 @@ if(!($max_size>0)) $max_size = 0;
                 //cancel and close window
                 $('#btnFinished')
                         .button({icons:{primary: 'ui-icon-check'}})
-                        .click( function(e){ 
+                        .on('click', function(e){ 
                             e.preventDefault();
                             closeCheck(e);
                             return false; });
@@ -780,7 +780,7 @@ if(!($max_size>0)) $max_size = 0;
                                 
                             var buttons = {};
                             buttons[window.hWin.HR('OK')] = function(){
-                                    ele.click();
+                                    ele.trigger('click');
                                     $dlg.dialog('close');
                                 };
                             buttons[window.hWin.HR('Cancel')] = function(){
@@ -790,13 +790,13 @@ if(!($max_size>0)) $max_size = 0;
                             $dlg = window.hWin.HEURIST4.msg.showMsgDlg(msg, buttons,
                             'Uploading FOLDER and sub-folders', { default_palette_class: 'ui-heurist-populate' });
                         }else{
-                            ele.click();
+                            ele.trigger('click');
                         }
                     }
                 });			
                 
                 /*
-                $('#upload_folder').change(function(){
+                $('#upload_folder').on('change',function(){
                     if($('#upload_folder').val()==''){
                         $('.fileupload-buttonbar').hide();
                         $('#presentation').hide();

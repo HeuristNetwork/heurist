@@ -227,7 +227,7 @@ window.hWin.HEURIST4.ui = {
     //
     fillSelector: function(selObj, topOptions) {
         
-        if(window.hWin.HEURIST4.util.isArray(topOptions)){
+        if(Array.isArray(topOptions)){
             var idx,key,title,disabled,depth, border, selected, hidden;
             if(topOptions){  //list of options that must be on top of list
                 for (idx in topOptions)
@@ -459,7 +459,7 @@ window.hWin.HEURIST4.ui = {
         var recset = $Db[entity]();
         var options = recset.makeKeyValueArray(entity+'_Name');
         
-        if(!(window.hWin.HEURIST4.util.isArray(topOptions) ||
+        if(!(Array.isArray(topOptions) ||
            window.hWin.HEURIST4.util.isempty(topOptions) ||
            topOptions===false)){
             if(topOptions===true) topOptions = '  ';  // <blank>
@@ -524,7 +524,7 @@ window.hWin.HEURIST4.ui = {
 
         if(!window.hWin.HEURIST4.util.isempty(rectypeList)){
 
-            if(!window.hWin.HEURIST4.util.isArray(rectypeList)){
+            if(!Array.isArray(rectypeList)){
                 rectypeList = rectypeList.split(',');
             }
         }else if(!useGroups){ //all rectypes however plain list (not grouped)
@@ -798,7 +798,7 @@ window.hWin.HEURIST4.ui = {
         //details for the only recordtype
         if((window.hWin.HEURIST4.util.isArrayNotEmpty(rtyIDs) && rtyIDs.length==1) || Number(rtyIDs)>0){
             
-            var rectype = Number((window.hWin.HEURIST4.util.isArray(rtyIDs))?rtyIDs[0]:rtyIDs);
+            var rectype = Number((Array.isArray(rtyIDs))?rtyIDs[0]:rtyIDs);
             
             details = $Db.rst(rectype);
             if(!details) return selObj; //structure not defined
@@ -1077,7 +1077,7 @@ window.hWin.HEURIST4.ui = {
                     }else{ //case 3
                         groupID = idx;
                         name = groups[groupID];    
-                        if($.isArray(name)) name = name[1] //backward  case 4
+                        if(Array.isArray(name)) name = name[1] //backward  case 4
                     }
                     
                     if(window.hWin.HEURIST4.util.findArrayIndex(groupID,addedontop)<0 
@@ -1172,19 +1172,19 @@ window.hWin.HEURIST4.ui = {
             
             var onSelectMenu, onOpenMenu, onCloseMenu;
             if(eventHandlers && $.isPlainObject(eventHandlers)){
-                if($.isFunction(eventHandlers.onOpenMenu)){
+                if(window.hWin.HUL.isFunction(eventHandlers.onOpenMenu)){
                     onOpenMenu = eventHandlers.onOpenMenu;
                 }
-                if($.isFunction(eventHandlers.onCloseMenu)){
+                if(window.hWin.HUL.isFunction(eventHandlers.onCloseMenu)){
                     onCloseMenu = eventHandlers.onCloseMenu;
                 }
-                if($.isFunction(eventHandlers.onSelectMenu)){
+                if(window.hWin.HUL.isFunction(eventHandlers.onSelectMenu)){
                     onSelectMenu = eventHandlers.onSelectMenu;
                 }
-            }else if(eventHandlers && $.isFunction(eventHandlers)){
+            }else if(eventHandlers && window.hWin.HUL.isFunction(eventHandlers)){
                 onOpenMenu = eventHandlers;
             }
-            if(Object.values(arguments).length > 4 && $.isFunction(arguments[4])){
+            if(Object.values(arguments).length > 4 && window.hWin.HUL.isFunction(arguments[4])){
                 onSelectMenu = arguments[4];
             }
  
@@ -1196,7 +1196,7 @@ window.hWin.HEURIST4.ui = {
  
                         selObj.val((data && data.item)?data.item.value:data);//change value for underlaying html select
 
-                        if(onSelectMenu && $.isFunction(onSelectMenu)){
+                        if(onSelectMenu && window.hWin.HUL.isFunction(onSelectMenu)){
                             onSelectMenu.call(this, event);
                         }else{
                             selObj.trigger('change');
@@ -1229,12 +1229,12 @@ window.hWin.HEURIST4.ui = {
                     
                     wmenu_div.css('zIndex',69999);
 
-                    if(onOpenMenu && $.isFunction(onOpenMenu)){
+                    if(onOpenMenu && window.hWin.HUL.isFunction(onOpenMenu)){
                         onOpenMenu.call(this, event);
                     }
                 },
                 close: function(event, ui){
-                    if(onCloseMenu && $.isFunction(onCloseMenu)){
+                    if(onCloseMenu && window.hWin.HUL.isFunction(onCloseMenu)){
                         onCloseMenu.call(this, event);
                     }
                 }
@@ -1344,9 +1344,9 @@ window.hWin.HEURIST4.ui = {
         } 
         
         if(!hideExpLevelButton){
-            var $help_menu = $('<ul><li data-user-admin-status="2"><a><span class="ui-icon"/>Beginner</a></li>'
-                +'<li data-user-admin-status="1"><a><span class="ui-icon"/>Intermediate</a></li>'
-                +'<li data-user-admin-status="0"><a><span class="ui-icon"/>Expert</a></li><ul>')
+            var $help_menu = $('<ul><li data-user-admin-status="2"><a><span class="ui-icon"></span>Beginner</a></li>'
+                +'<li data-user-admin-status="1"><a><span class="ui-icon"></span>Intermediate</a></li>'
+                +'<li data-user-admin-status="0"><a><span class="ui-icon"></span>Expert</a></li><ul>')
                 .width(150).hide().appendTo($dialog);
             
         var $help_button = $('<div>').button({icons: { primary: "ui-icon-book" }, 
@@ -1635,7 +1635,7 @@ window.hWin.HEURIST4.ui = {
                  
         if(options.is_open_at_once && options.container){
             options.container.find('.ui-helper-popup').hide();
-            $help_button.click();    
+            $help_button.trigger('click');    
         }
     },
     
@@ -1646,7 +1646,7 @@ window.hWin.HEURIST4.ui = {
 
         if(!window.hWin.HAPI4.has_access()){
             // {status:window.hWin.ResponseStatus.REQUEST_DENIED} 
-            if(typeof showLoginDialog !== 'undefined' && $.isFunction(showLoginDialog)){  // already loaded in index.php
+            if(typeof showLoginDialog !== 'undefined' && window.hWin.HUL.isFunction(showLoginDialog)){  // already loaded in index.php
                 //window.hWin.HEURIST4.msg.showMsgErr(top.HR('Session expired2'));
                 showLoginDialog(isforsed, callback);
             }else{
@@ -1707,7 +1707,7 @@ window.hWin.HEURIST4.ui = {
             
             title: window.hWin.HR('Edit record'),
             layout_mode:'<div class="ent_wrapper editor">'
-                + '<div class="ent_content_full recordList"  style="display:none;"/>'
+                + '<div class="ent_content_full recordList"  style="display:none;"></div>'
 
                 //+ '<div class="ent_header editHeader"></div>'
                 + '<div class="editFormDialog ent_content_full">'
@@ -1718,7 +1718,7 @@ window.hWin.HEURIST4.ui = {
                 
                         + '<div class="ui-layout-west"><div class="editStructure treeview_with_header" style="background:white">'
                             +'</div></div>' //container for rts_editor
-                        + '<div class="ui-layout-center"><div class="editForm"/></div>'
+                        + '<div class="ui-layout-center"><div class="editForm"></div></div>'
                         + '<div class="ui-layout-east"><div class="editFormSummary">....</div></div>'
                         //+ '<div class="ui-layout-south><div class="editForm-toolbar"/></div>'
                 + '</div>'
@@ -1790,7 +1790,7 @@ window.hWin.HEURIST4.ui = {
                     widget.addEditRecord(-1);
                 }
             },
-            //selectOnSave: $.isFunction(callback),
+            //selectOnSave: window.hWin.HUL.isFunction(callback),
             //onselect: callback
         });
 
@@ -1854,7 +1854,7 @@ window.hWin.HEURIST4.ui = {
                     callback: popup_options.callback,
                     beforeClose: function(){
                         //access manageRecord within frame within this popup and call close prefs
-                        if($dosframe && $.isFunction($dosframe[0].contentWindow.onBeforeClose)){
+                        if($dosframe && window.hWin.HUL.isFunction($dosframe[0].contentWindow.onBeforeClose)){
                                 $dosframe[0].contentWindow.onBeforeClose();
                         }
                     }
@@ -1905,10 +1905,10 @@ window.hWin.HEURIST4.ui = {
             //margin-left:0.5em;
             sRelBtn = 
                 '<div style="display:table-cell;min-width:120px;text-align:right;vertical-align: middle;">'
-                +'<div class="btn-edit"/><div class="btn-rel"/><div class="btn-del"/></div>';
+                +'<div class="btn-edit"></div><div class="btn-rel"></div><div class="btn-del"></div></div>';
         }else if (!isHiddenRecord) {
             sRelBtn = '<div style="display:table-cell;min-width:23px;text-align:right;padding-left:16px;vertical-align: middle;">'
-            +'<div class="btn-edit"/></div>';     // data-recID="'+info['rec_ID']+'"
+            +'<div class="btn-edit"></div></div>';     // data-recID="'+info['rec_ID']+'"
         }
         
         var reltype = ''
@@ -1952,7 +1952,7 @@ window.hWin.HEURIST4.ui = {
                             
                         //triangle icon fo
                         + ((reltype!='' && isEdit)?'<span style="display:table-cell;vertical-align:middle;padding-top:3px">'
-                            +'<span class="ui-icon ui-icon-triangle-1-e"/></span>':'') //padding-top:3px;
+                            +'<span class="ui-icon ui-icon-triangle-1-e"></span></span>':'') //padding-top:3px;
 
                         //record type icon for resource
                         + (reltype==''?rectype_icon:'')
@@ -1978,20 +1978,20 @@ window.hWin.HEURIST4.ui = {
         
         if(isEdit){
             
-            if($.isFunction(selector_function)){
+            if(window.hWin.HUL.isFunction(selector_function)){
                 var triangle_icon = ele.find('.ui-icon-triangle-1-e');
                 if(triangle_icon.length>0){
                    ele.find('.detail').css({'cursor':'hand'});
-                   triangle_icon.click(selector_function);
+                   triangle_icon.on('click',selector_function);
                 }
-                ele.find('span[data-recID='+info['rec_ID']+']').click(selector_function);
+                ele.find('span[data-recID='+info['rec_ID']+']').on('click',selector_function);
             }
             
             //remove button
             ele.find('.btn-del').button({text:false, label:top.HR('Remove '+(info['relation_recID']>0?'relation':'link')),
                             icons:{primary:'ui-icon-circlesmall-close'}})
             .css({'font-size': '0.8em', height: '21px', 'max-width': '18px'})
-            .click(function(event){
+            .on('click',function(event){
                 window.hWin.HEURIST4.msg.showMsgDlg(
                     'You are about to delete link between records<br><br>Are you sure?',
                      function(){
@@ -2066,7 +2066,7 @@ window.hWin.HEURIST4.ui = {
             
             bele.addClass('ui-button').css({'font-size': '0.8em', height: '18px', 'max-width': '40px',
                 'min-width': '40px', display: 'inline-block', padding: 0, background: 'none'})
-            .click(function(event){
+            .on('click',function(event){
                 event.preventDefault();
                 
                 var recID = ele.attr('data-relID');
@@ -2128,7 +2128,7 @@ window.hWin.HEURIST4.ui = {
         }
         
         /* 2017-08-11 no more link for edit linked record :(    
-        ele.find('a').click(function(event){
+        ele.find('a').on('click',function(event){
             event.preventDefault();
             var inpt = $(event.target);
             var recID = inpt.attr('data-recID');
@@ -2173,7 +2173,7 @@ window.hWin.HEURIST4.ui = {
                 
                 btn_edit
                     .attr('data-recID', info['rec_ID'])
-                    .click(function(event){
+                    .on('click',function(event){
            
             var recID = $(event.target).hasClass('ui-button')
                     ?$(event.target).attr('data-recID')
@@ -2216,7 +2216,7 @@ window.hWin.HEURIST4.ui = {
                     var recordset = new hRecordSet(response.data);
                     if(recordset.length()>0){
                         var record = recordset.getFirstRecord();
-                        if($.isFunction(callback)){
+                        if(window.hWin.HUL.isFunction(callback)){
                             callback(recordset.fld(record,'rec_Title'));    
                         }
                     }
@@ -2394,7 +2394,7 @@ window.hWin.HEURIST4.ui = {
                             
                             var groups = new hRecordSet(response.data).makeKeyValueArray(fieldTitle);
                             
-                            if(!window.hWin.HEURIST4.util.isArray(topOptions)){
+                            if(!Array.isArray(topOptions)){
                                 if(topOptions==true){
                                     topOptions = [{key:'',title:window.hWin.HR('select...')}];
                                 }else if(!window.hWin.HEURIST4.util.isempty(topOptions) && topOptions!==false){
@@ -2402,9 +2402,9 @@ window.hWin.HEURIST4.ui = {
                                     topOptions = [{key:'',title:topOptions}];
                                 }
                             }
-                            if(window.hWin.HEURIST4.util.isArray(topOptions) && window.hWin.HEURIST4.util.isArray(groups)){
+                            if(Array.isArray(topOptions) && Array.isArray(groups)){
                                 groups = topOptions.concat(groups);
-                            }else if(window.hWin.HEURIST4.util.isArray(topOptions)){
+                            }else if(Array.isArray(topOptions)){
                                 groups = topOptions;
                             }
 
@@ -2414,7 +2414,7 @@ window.hWin.HEURIST4.ui = {
                             window.hWin.HEURIST4.msg.showMsgErr(response);
                         }
                         
-                        if($.isFunction(callback)){
+                        if(window.hWin.HUL.isFunction(callback)){
                             callback(selObj);
                         }
                         
@@ -2437,7 +2437,7 @@ window.hWin.HEURIST4.ui = {
         if(options.isdialog!==false) options.isdialog = true; //by default popup      
 
         
-        if($.isFunction($('body')[widgetName])){ //OK! widget script js has been loaded
+        if(window.hWin.HUL.isFunction($('body')[widgetName])){ //OK! widget script js has been loaded
         
             var manage_dlg;
             
@@ -2513,7 +2513,7 @@ window.hWin.HEURIST4.ui = {
     showPublishDialog: function( options ){
         
         //OK! script as been loaded
-        if( typeof hPublishDialog==='undefined' || !$.isFunction(hPublishDialog)){        
+        if( typeof hPublishDialog==='undefined' || !window.hWin.HUL.isFunction(hPublishDialog)){        
             var that = this;
             $.getScript(window.hWin.HAPI4.baseURL+'hclient/framecontent/publishDialog.js?t'
                         +window.hWin.HEURIST4.util.random(),  
@@ -2583,7 +2583,7 @@ window.hWin.HEURIST4.ui = {
     //
     showImgFilterDialog: function(current_value, callback){
         //todo optionally load dynamically editing_exts.js
-        if(typeof imgFilter !== 'undefined' && $.isFunction(imgFilter)){  // already loaded
+        if(typeof imgFilter !== 'undefined' && window.hWin.HUL.isFunction(imgFilter)){  // already loaded
             imgFilter( current_value, callback );    
         }else{
             $.getScript(window.hWin.HAPI4.baseURL+'hclient/widgets/editing/imgFilter.js', function(){
@@ -2597,7 +2597,7 @@ window.hWin.HEURIST4.ui = {
     //
     showEditThemeDialog: function(current_value, needName, callback){
         //todo optionally load dynamically editTheme.js
-        if(typeof editTheme !== 'undefined' && $.isFunction(editTheme)){
+        if(typeof editTheme !== 'undefined' && window.hWin.HUL.isFunction(editTheme)){
             editTheme(current_value, callback);    
         }else{
             $.getScript(window.hWin.HAPI4.baseURL+'hclient/widgets/editing/editTheme.js', function(){
@@ -2656,7 +2656,7 @@ window.hWin.HEURIST4.ui = {
         if(options.isdialog!==false) options.isdialog = true; //by default popup      
 
         var  doc_body = $(window.hWin.document).find('body');
-        if($.isFunction(doc_body[actionName])){ //OK! widget script js has been loaded
+        if(window.hWin.HUL.isFunction(doc_body[actionName])){ //OK! widget script js has been loaded
         
             var manage_dlg;
             
@@ -2807,7 +2807,7 @@ window.hWin.HEURIST4.ui = {
                 
                 window.hWin.HEURIST4.msg.showMsgFlash(sWarn,700,null, trg);
                 setTimeout(function(){
-                        $(trg).focus();
+                        $(trg).trigger('focus');
                 }, 750);
                 
                 return false;
@@ -2990,10 +2990,10 @@ window.hWin.HEURIST4.ui = {
              window.hWin.HEURIST4.wait_terminated = false;
              window.hWin.HEURIST4.ui.wait_ms = ms;
           }
-          if($.isFunction(cb)){
+          if(window.hWin.HUL.isFunction(cb)){
              window.hWin.HEURIST4.wait_callback = cb;
           }
-          if($.isFunction(window.hWin.HEURIST4.wait_callback)){
+          if(window.hWin.HUL.isFunction(window.hWin.HEURIST4.wait_callback)){
 
              window.hWin.HEURIST4.ui.wait_timeout = setTimeout(
                   function(){
@@ -3075,7 +3075,7 @@ window.hWin.HEURIST4.ui = {
                         that.hidePlayer( id, container );            
                     }
 
-                    $(elem).find('img').click( __closePlayer );
+                    $(elem).find('img').on('click', __closePlayer );
 
                     // Display the show thumbnail anchor
                     elem = (container.querySelector('#lnk'+id)) ? container.querySelector('#lnk'+id) : container.parentNode.querySelector('#lnk'+id);
@@ -3264,7 +3264,7 @@ window.hWin.HEURIST4.ui = {
         });
 
         /* fancybox gallery
-        if($.fancybox && $.isFunction($.fancybox)){
+        if($.fancybox && window.hWin.HUL.isFunction($.fancybox)){
         $.fancybox({selector : selector,
         loop:true, buttons: [
         "zoom",
@@ -3380,7 +3380,7 @@ $.widget( "heurist.hSelect", $.ui.selectmenu, {
     if(rt_checkbox>=0){
         $('<span style="float:left;padding:2px 0;min-width:1.5em;border:1px dot lightblue" '
                 + ' data-id="'+item.element.attr( 'data-id' )
-                + '" class="rt-checkbox ui-icon ui-icon-check-'+(rt_checkbox==1?'on':'off')+'"/>')
+                + '" class="rt-checkbox ui-icon ui-icon-check-'+(rt_checkbox==1?'on':'off')+'"></span>')
           .appendTo( wrapper );    
     }
     
@@ -3430,7 +3430,7 @@ $.widget( "heurist.hSelect", $.ui.selectmenu, {
             
             $('.menu-or-popup').hide(); //hide other
             
-            //parent.click();
+            //parent.trigger('click');
             
             return false;
         };

@@ -174,7 +174,7 @@ $.widget( "heurist.dh_search", {
 
                 $.each(predicate, function(key,val)
                     {
-                        if( $.isArray(val) || $.isPlainObject(val) ){
+                        if( Array.isArray(val) || $.isPlainObject(val) ){
                             __fillQuery(val);
                         }else if( (typeof val === 'string') && (val == '$IDS') ) {
                             //substitute with array of ids
@@ -203,7 +203,7 @@ $.widget( "heurist.dh_search", {
 
             $.each(predicate, function(key,val)
                 {
-                    if( $.isArray(val) ) { //|| $.isPlainObject(val) ){
+                    if( Array.isArray(val) ) { //|| $.isPlainObject(val) ){
                         var is_empty = that._fillQuery(val, _inputs);
                         isbranch_empty = isbranch_empty && is_empty;
 

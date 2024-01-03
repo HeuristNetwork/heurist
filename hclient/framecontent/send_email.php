@@ -214,7 +214,7 @@ if(isset($_POST['data'])) {
             }
 
             // Listen to dropdown hanges
-            $(dropdowns[i]).change(function(e) {
+            $(dropdowns[i]).on('change',function(e) {
                 var id = $(this).attr("id"); // Dropdown ID
                 var value = $(this).prop("selectedIndex"); // Selected dropdown index
                 putItem("#"+id, value); // Store data

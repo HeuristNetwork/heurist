@@ -159,7 +159,7 @@ $.widget( "heurist.manageDefRecTypeGroups", $.heurist.manageEntity, {
             this.searchForm.height(70);
             
 /* IJ does not want trash button/zone - trash group is in common list            
-            var ele = $('<div title="Drag record types here to hide them"><span class="ui-icon ui-icon-trash"/>Trash</div>')
+            var ele = $('<div title="Drag record types here to hide them"><span class="ui-icon ui-icon-trash"></span>Trash</div>')
                 .css({float:'right',border:'2px dashed blue',cursor:'pointer',
                         margin:'5px','font-size': '11px', padding:'3px'})
                 .appendTo(this.searchForm);
@@ -334,7 +334,7 @@ $.widget( "heurist.manageDefRecTypeGroups", $.heurist.manageEntity, {
                 });
                 
             }else if(action=='trash'){
-                if($.isFunction(this.options.onSelect)){
+                if(window.hWin.HUL.isFunction(this.options.onSelect)){
                     var id = $Db.getTrashGroupId('rtg');
                     this.options.onSelect.call( this, [id] );
                 }

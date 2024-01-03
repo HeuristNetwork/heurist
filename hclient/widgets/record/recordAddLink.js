@@ -398,14 +398,14 @@ $.widget( "heurist.recordAddLink", $.heurist.recordAction, {
             var ele = this.element.find('#source_field').find('.field_item').css('padding-left',0);
             this.element.find('#source_field').find('.field_item > div').css('padding-left',0);
             this.element.find('#source_field').find('.field_item > label').hide();
-            this.element.find('#source_field').find('input[type=radio]').hide().click(); //prop('checked',true).
+            this.element.find('#source_field').find('input[type=radio]').hide().trigger('click'); //prop('checked',true).
         }
                             
         
         if(party=='source' && window.hWin.HEURIST4.util.isempty(this.options.source_ID)){
 
             if(this.element.find('input[type="radio"][name="link_field"]').length>0){
-                $(this.element.find('input[type="radio"][name="link_field"]')[0]).attr('checked','checked').change();
+                $(this.element.find('input[type="radio"][name="link_field"]')[0]).attr('checked','checked').trigger('change');
             }
 
             if(window.hWin.HEURIST4.util.isempty(this.options.target_ID)){
@@ -422,7 +422,7 @@ $.widget( "heurist.recordAddLink", $.heurist.recordAction, {
         
         var ele = this.element.find('#source_field').find('input[type=radio]');
         if(ele.length==1){
-            ele.click();
+            ele.trigger('click');
         }
         
 
@@ -460,7 +460,7 @@ $.widget( "heurist.recordAddLink", $.heurist.recordAction, {
     //
     _createInputElement_RecordSelector: function(party, rt_constraints){
         
-        if(!$.isArray(rt_constraints)){
+        if(!Array.isArray(rt_constraints)){
             if(window.hWin.HEURIST4.util.isempty(rt_constraints)){
                 rt_constraints = [];
             }else{

@@ -196,7 +196,7 @@ function hMapLayer2( _options ) {
              //obfuscated file id
              var file_info = _recordset.fld(_record, window.hWin.HAPI4.sysinfo['dbconst']['DT_SERVICE_URL']);
              
-             if($.isArray(file_info)){
+             if(Array.isArray(file_info)){
              
                  var url = window.hWin.HAPI4.baseURL + '?db=' + window.hWin.HAPI4.database + '&mode=url&file='+
                             file_info[0];
@@ -739,7 +739,7 @@ function hMapLayer2( _options ) {
         if(options.mapwidget.mapping('getCurrentCRS')=='Simple'){
             var maxzoom = _getMaxZoomLevel();
             
-            if($.isArray(ext) && ext.length==2){
+            if(Array.isArray(ext) && ext.length==2){
             
                 var max_dim = Math.max(ext[1][0]-ext[0][0], ext[1][1]-ext[0][1]);
                 
@@ -1156,7 +1156,7 @@ function hMapLayer2( _options ) {
                 }else{
                     for(var j=0; j<ftheme.ranges.length; j++){
                         var range = ftheme.ranges[j];
-                        if($.isArray(range.value))
+                        if(Array.isArray(range.value))
                         {
                             if(window.hWin.HEURIST4.util.findArrayIndex(value, range.value)>-1){
                                 fsymb = range.symbol;       

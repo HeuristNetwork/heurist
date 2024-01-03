@@ -94,7 +94,7 @@ function hLayoutMgr(){
             layout = res;    
         }
         
-        if(!$.isArray(layout)){
+        if(!Array.isArray(layout)){
             layout = [layout];    
         }
 
@@ -411,7 +411,7 @@ function hLayoutMgr(){
         
         if (app && app.script && app.widgetname) { //widgetname - function name to init widget
 
-            if($.isFunction($('body')[app.widgetname])){ //OK! widget script js has been loaded            
+            if(window.hWin.HUL.isFunction($('body')[app.widgetname])){ //OK! widget script js has been loaded            
 
                 container[app.widgetname]( layout.options );   //call function
                 
@@ -420,7 +420,7 @@ function hLayoutMgr(){
             }else{
 
                 $.getScript( window.hWin.HAPI4.baseURL + app.script, function() {  //+'?t='+(new Date().getTime())
-                    if($.isFunction(container[app.widgetname])){
+                    if(window.hWin.HUL.isFunction(container[app.widgetname])){
                         container[app.widgetname]( layout.options );   //call function
                     }else{
                         window.hWin.HEURIST4.msg.showMsgErr('Widget '+app.widgetname+' not loaded. Verify your configuration');
@@ -627,7 +627,7 @@ function hLayoutMgr(){
     //
     function _layoutContentFindElement(content, ele_key){
 
-        if(!$.isArray(content)){
+        if(!Array.isArray(content)){
             if(content.children && content.children.length>0){
                 return _layoutContentFindElement(content.children, ele_key);    
             }else{
@@ -651,7 +651,7 @@ function hLayoutMgr(){
     //
     function _layoutContentFindWidget(content, widget_name){
         
-        if(!$.isArray(content)){
+        if(!Array.isArray(content)){
             if(content.children && content.children.length>0){
                 return _layoutContentFindWidget(content.children, widget_name);    
             }else{
@@ -677,7 +677,7 @@ function hLayoutMgr(){
 
         var res = [];
         
-        if(!$.isArray(content)){
+        if(!Array.isArray(content)){
             if(content.children && content.children.length>0){
                 var res2 =  _layoutContentFindAllWidget(content.children);    
                 if(res2) res = res.concat(res2);
@@ -732,7 +732,7 @@ function hLayoutMgr(){
     function _layoutContentFindParent(parent, ele_key){
         
         var children;
-        if($.isArray(parent)){
+        if(Array.isArray(parent)){
             children = parent;
             parent = 'root';
         }else{

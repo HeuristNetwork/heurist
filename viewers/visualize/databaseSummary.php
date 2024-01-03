@@ -148,7 +148,7 @@ A:link {
            
            function onPageInit(success){
                    if(!success) return;
-                   $("#expand").click();
+                   $("#expand").trigger('click');
             }
             
         </script>
@@ -261,7 +261,7 @@ A:link {
         </div>
 
         <script>
-            $("#expand").click(function(e) {
+            $("#expand").on('click',function(e) {
                 // Show visualisation elements
                 $(this).remove();
                 //$(".show").slideToggle(500);
@@ -317,7 +317,7 @@ A:link {
                     }
                     
                     // Listen to 'show-record' checkbox changes
-                    $(".show-record").change(function(e) {
+                    $(".show-record").on('change',function(e) {
                         // Update record field 'checked' value in localstorage
                         var name = $(e.target).attr("name");
 
@@ -330,7 +330,7 @@ A:link {
                     });
 
                     // Listen to the 'show-all' checkbox
-                    $("#show-all").change(function() {
+                    $("#show-all").on('change',function() {
                         // Change all check boxes
                         var checked = $(this).prop('checked');
                         $(".show-record").prop("checked", checked);
@@ -346,7 +346,7 @@ A:link {
                     });
 
                     // Listen to the 'group_chkbox' checkboxes, toggles all checkboxes within a record type group
-                    $('.group_chkbox').change(function(){
+                    $('.group_chkbox').on('change',function(){
 
                         var group_id = $(this).attr('data-id');
                         var checked = $(this).prop('checked');

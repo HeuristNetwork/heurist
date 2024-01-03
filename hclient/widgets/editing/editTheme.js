@@ -344,7 +344,7 @@ function __editTheme_continue(){
                 _theme_editing_symbology.setModified(false);
                 edit_dialog.dialog('close');
                 
-                if($.isFunction(callback)){
+                if(window.hWin.HUL.isFunction(callback)){
                     callback.call(this, res);
                 }
 
@@ -368,7 +368,7 @@ function __editTheme_continue(){
                 var $dlg, buttons = {};
                 buttons['Save'] = function(){ 
                     //that._saveEditAndClose(null, 'close'); 
-                    edit_dialog.parent().find('#btnRecSave').click();
+                    edit_dialog.parent().find('#btnRecSave').trigger('click');
                     $dlg.dialog('close'); 
                 }; 
                 buttons['Ignore and close'] = function(){ 

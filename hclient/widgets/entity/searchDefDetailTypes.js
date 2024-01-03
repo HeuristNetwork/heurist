@@ -30,7 +30,7 @@ $.widget( "heurist.searchDefDetailTypes", $.heurist.searchEntity, {
         var filter_types = [];
         if(this.options.filters && this.options.filters.types){
             filter_types = this.options.filters.types;
-            if($.isArray(filter_types) && filter_types.length>0){
+            if(Array.isArray(filter_types) && filter_types.length>0){
                 this.input_search_type.val(filter_types[0]);
             }else{
                 filter_types = [];
@@ -115,7 +115,7 @@ $.widget( "heurist.searchDefDetailTypes", $.heurist.searchEntity, {
         
         this._on(this.element.find('#chb_show_all_groups'),  { change:function(){
                 this.input_search_group.val(this.element.find('#chb_show_all_groups').is(':checked')
-                                            ?'any':this.options.dtg_ID).change();
+                                            ?'any':this.options.dtg_ID).trigger('change');
         }});
 
         this.input_filter_rectype = this.element.find('#input_filter_rectype');
@@ -137,7 +137,7 @@ $.widget( "heurist.searchDefDetailTypes", $.heurist.searchEntity, {
             this.element.find('#input_field_type_div').hide();
             this.element.find('#input_sort_type_div').hide();
         }
-        if($.isFunction(this.options.onInitCompleted)){
+        if(window.hWin.HUL.isFunction(this.options.onInitCompleted)){
             this.options.onInitCompleted.call();
         }else{
             this.startSearch();              
@@ -151,7 +151,7 @@ $.widget( "heurist.searchDefDetailTypes", $.heurist.searchEntity, {
         this._super( key, value );
         if(key == 'dtg_ID'){
             if(!this.element.find('#chb_show_all_groups').is(':checked'))
-                this.element.find('#input_search_group').val(value).change();
+                this.element.find('#input_search_group').val(value).trigger('change');
         }
     },
 

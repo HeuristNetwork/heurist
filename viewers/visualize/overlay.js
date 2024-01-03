@@ -479,10 +479,10 @@ function createOverlay(x, y, type, selector, node_obj, parent_node) {
 				if(ids.indexOf(',') != -1){
 
 					ids.split(',').forEach(function(id){
-						$('#records').find('#'+id).prop('checked', true).change();
+						$('#records').find('#'+id).prop('checked', true).trigger('change');
 					});
 				}else{
-					$('#records').find('#'+ids).prop('checked', true).change();
+					$('#records').find('#'+ids).prop('checked', true).trigger('change');
 				}
 			}).style('cursor', 'pointer');
         }else{
@@ -838,7 +838,7 @@ function createOverlay(x, y, type, selector, node_obj, parent_node) {
                            .attr("transform", "translate("+(maxWidth+(icons_cnt-1)*iconSize-3)+",3)")  //position of icon maxWidth-iconSize
                            .style('display', 'none')
                            .on("mouseup", function(d) {
-                               $(".show-record[name='"+node_obj.name+"']").prop('checked', false).change();
+                               $(".show-record[name='"+node_obj.name+"']").prop('checked', false).trigger('change');
                             });
                            
         // Close rectangle                                                                     

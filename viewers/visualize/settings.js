@@ -113,7 +113,7 @@ function handleSettingsInUI() {
     
     var is_advanced = getSetting(setting_advanced);
     
-    $('#setAdvancedMode').css({cursor:'hand'}).click(
+    $('#setAdvancedMode').css({cursor:'hand'}).on('click',
         function(){
               var is_advanced = getSetting(setting_advanced);
               is_advanced = (is_advanced==='false');
@@ -146,25 +146,25 @@ function handleSettingsInUI() {
     //-------------------------------
     
     $('#btnSingleSelect').button({icon:'ui-icon-cursor' , showLabel:false})
-        .click( function(){ selectionMode = 'single'; $("#d3svg").css("cursor", "default"); _syncUI();});
+        .on('click', function(){ selectionMode = 'single'; $("#d3svg").css("cursor", "default"); _syncUI();});
     $('#btnMultipleSelect').button({icon: 'ui-icon-select', showLabel:false})
-        .click( function(){ selectionMode = 'multi'; $("#d3svg").css("cursor", "crosshair"); _syncUI();});
+        .on('click', function(){ selectionMode = 'multi'; $("#d3svg").css("cursor", "crosshair"); _syncUI();});
     $('#selectMode').controlgroup();
         
     $('#btnViewModeIcon').button({icon: 'ui-icon-circle' , showLabel:false})
-        .click( function(){changeViewMode('icons');} );
+        .on('click', function(){changeViewMode('icons');} );
     $('#btnViewModeInfo').button({icon: 'ui-icon-circle-b-info' , showLabel:false})
-        .click( function(){changeViewMode('infoboxes');} );
+        .on('click', function(){changeViewMode('infoboxes');} );
     $('#btnViewModeFull').button({icon: 'ui-icon-circle-info' , showLabel:false})
-        .click( function(){changeViewMode('infoboxes_full');} );
+        .on('click', function(){changeViewMode('infoboxes_full');} );
     $( "#setViewMode" ).controlgroup();    
 
     $('#gravityMode0').button(/*{icon: 'ui-icon-gravity0' , showLabel:false}*/)
-        .click( function(){setGravity('off');} );
+        .on('click', function(){setGravity('off');} );
     $('#gravityMode1').button(/*{icon: 'ui-icon-gravity1' , showLabel:false}*/)
-        .click( function(){setGravity('touch');} );
+        .on('click', function(){setGravity('touch');} );
     /*$('#gravityMode2').button(/*{icon: 'ui-icon-gravity2' , showLabel:false})
-        .click( function(){setGravity('aggressive');} );*/
+        .on('click', function(){setGravity('aggressive');} );*/
     $("#setGravityMode").controlgroup();    
     
     //------------ NODES ----------
@@ -172,7 +172,7 @@ function handleSettingsInUI() {
     var radius = getSetting(setting_entityradius);
     if(radius<circleSize) radius = circleSize  //min
     else if(radius>maxEntityRadius) radius = maxEntityRadius;
-    $('#nodesRadius').val(radius).change(function(){
+    $('#nodesRadius').val(radius).on('change',function(){
         putSetting(setting_entityradius, $(event.target).val());
         //visualizeData();
         d3.selectAll(".node > .background").attr("r", function(d) {
@@ -183,11 +183,11 @@ function handleSettingsInUI() {
     //$("input[name='nodesMode'][value='" +getSetting(setting_formula)+ "']").attr("checked", true);
     
     $('#nodesMode0').button().css('width','35px')
-        .click( function(){ setFormulaMode('linear'); });
+        .on('click', function(){ setFormulaMode('linear'); });
     $('#nodesMode1').button().css('width','40px')
-        .click( function(){ setFormulaMode('logarithmic'); }); 
+        .on('click', function(){ setFormulaMode('logarithmic'); }); 
     $('#nodesMode2').button().css('width','50px')
-        .click( function(){ setFormulaMode('unweighted'); });
+        .on('click', function(){ setFormulaMode('unweighted'); });
     $( "#setNodesMode" ).controlgroup();    
 
     if($('#entityColor').length > 0){
@@ -215,18 +215,18 @@ function handleSettingsInUI() {
     //$("input[name='linksMode'][value='" +getSetting(setting_linetype)+ "']").attr("checked", true);
     
     $('#linksMode0').button({icon: 'ui-icon-link-streight', showLabel:false})
-        .click( function(){ setLinkMode('straight');} );
+        .on('click', function(){ setLinkMode('straight');} );
     $('#linksMode1').button({icon: 'ui-icon-link-curved', showLabel:false})
-        .click( function(){ setLinkMode('curved');} );
+        .on('click', function(){ setLinkMode('curved');} );
     $('#linksMode2').button({icon: 'ui-icon-link-stepped', showLabel:false})
-        .click( function(){ setLinkMode('stepped');} );
+        .on('click', function(){ setLinkMode('stepped');} );
         
-    $('#linksEmpty').change( function(e){
+    $('#linksEmpty').on('change', function(e){
         putSetting(setting_line_empty_link, $(e.target).is(':checked')?1:0);
         visualizeData();
         _syncUI();
     });
-	$('#expand-links').change( function(){ // expand single links
+	$('#expand-links').on('change', function(){ // expand single links
         tick(); 
 	});
     if(settings.isDatabaseStructure){ // show all links by default for database structure vis
@@ -240,7 +240,7 @@ function handleSettingsInUI() {
     //_syncUI();
 
     var linksLength = 200; //2022-01-01 getSetting(setting_linelength, 200);    
-    $('#linksLength').val(linksLength).change(function(){
+    $('#linksLength').val(linksLength).on('change',function(){
         var newval = $(event.target).val();
         putSetting(setting_linelength, newval);
         if(getSetting(setting_gravity) != "off"){
@@ -252,7 +252,7 @@ function handleSettingsInUI() {
     if(linksWidth<1) linksWidth = 1  //min
     else if(linksWidth>maxLinkWidth) linksWidth = maxLinkWidth;
     
-    $('#linksWidth').val(linksWidth).change(
+    $('#linksWidth').val(linksWidth).on('change',
     function(){
         var newval = $(event.target).val();
         putSetting(setting_linewidth, newval);
@@ -264,7 +264,7 @@ function handleSettingsInUI() {
     $("#linksPathColor")
         //.addClass('ui-icon ui-icon-loading-status-circle')
         .css({'font-size':'1.8em','font-weight':'bold','color':getSetting(setting_linecolor)})
-        .click(function(e){
+        .on('click',function(e){
                 window.hWin.HEURIST4.util.stopEvent(e);
                 $("#linksPathColor_inpt").colorpicker("showPalette");
         });
@@ -288,7 +288,7 @@ function handleSettingsInUI() {
     $("#linksMarkerColor")
         .addClass('ui-icon ui-icon-triangle-1-e')
         .css({'color':getSetting(setting_markercolor)})
-        .click(function(e){
+        .on('click',function(e){
                 window.hWin.HEURIST4.util.stopEvent(e);
                 $("#linksMarkerColor_inpt").colorpicker("showPalette");
         });
@@ -314,7 +314,7 @@ function handleSettingsInUI() {
     putSetting(setting_labels, 'on'); //always on
     var isLabelVisible = (getSetting(setting_labels, 'on')=='on');
     
-    $('#textOnOff').attr('checked',isLabelVisible).change(function(){
+    $('#textOnOff').attr('checked',isLabelVisible).on('change',function(){
         
         var newval = $(event.target).is(':checked')?'on':'off';
         putSetting(setting_labels, newval);
@@ -332,7 +332,7 @@ function handleSettingsInUI() {
     });
     
     var textLength = getSetting(setting_textlength, 200);    
-    $('#textLength').val(textLength).change(function(){
+    $('#textLength').val(textLength).on('change',function(){
         var newval = $(event.target).val();
         putSetting(setting_textlength, newval);
         var isLabelVisible = (currentMode!='icons' || (getSetting(setting_labels, 'on')=='on'));
@@ -344,7 +344,7 @@ function handleSettingsInUI() {
     if(isNaN(fontSize) || fontSize<8) fontSize = 8  //min
     else if(fontSize>25) fontSize = 25;
    
-    $('#fontSize').val(fontSize).change(
+    $('#fontSize').val(fontSize).on('change',
     function(){
         var newval = $(event.target).val();
         putSetting(setting_fontsize, newval);

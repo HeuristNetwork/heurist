@@ -218,7 +218,7 @@ $.widget( "heurist.dh_maps", {
 
         var recId = $rdiv.attr('recid');
 
-        //hack $('#map-doc-select').click();
+        //hack $('#map-doc-select').trigger('click');
         this.loadMapDocument(recId);
     },
     

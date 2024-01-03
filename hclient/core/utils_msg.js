@@ -145,7 +145,7 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
         if(window.hWin.HEURIST4.util.isempty(dlg_title)){
                 dlg_title = 'Error_Title';
         }
-        dlg_title = $.isFunction(window.hWin.HR)?window.hWin.HR(dlg_title):'Heurist';
+        dlg_title = window.hWin.HUL.isFunction(window.hWin.HR)?window.hWin.HR(dlg_title):'Heurist';
 
         var buttons = {};
         buttons[window.hWin.HR('OK')]  = function() {
@@ -229,7 +229,7 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
 
         return window.hWin.HEURIST4.msg.showMsgDlg( message,
         function(){
-            if($.isFunction(callbackFunc)){
+            if(window.hWin.HUL.isFunction(callbackFunc)){
                 var $dlg = window.hWin.HEURIST4.msg.getMsgDlg(dlg_id);      
                 var ele = $dlg.find('#dlg-prompt-value');
                 var val = '';
@@ -292,7 +292,7 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
     //
     showTooltipFlash: function(message, timeout, to_element){
         
-        if(!$.isFunction(window.hWin.HR)){
+        if(!window.hWin.HUL.isFunction(window.hWin.HR)){
             alert(message);
             return;
         }
@@ -335,7 +335,7 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
     //
     showMsgFlash: function(message, timeout, options, position_to_element){
 
-        if(!$.isFunction(window.hWin.HR)){
+        if(!window.hWin.HUL.isFunction(window.hWin.HR)){
             alert(message);
             return;
         }
@@ -576,7 +576,7 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
 
                     var rval = true;
                     var closeCallback = options['callback'];
-                    if($.isFunction(closeCallback)){
+                    if(window.hWin.HUL.isFunction(closeCallback)){
                         rval = closeCallback.apply(opener, arguments);
                     }
                     if ( rval===false ){ //!rval  &&  rval !== undefined){
@@ -587,7 +587,7 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
                 };
 
                 // if content in iframe has function "assignParameters" we may pass parameters
-                if(options['params'] && $.isFunction(content.assignParameters)) {
+                if(options['params'] && window.hWin.HUL.isFunction(content.assignParameters)) {
                     content.assignParameters(options['params']);
                 }
             }
@@ -723,7 +723,7 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
 
                         var rval = true;
                         var closeCallback = options['callback'];
-                        if($.isFunction(closeCallback)){
+                        if(window.hWin.HUL.isFunction(closeCallback)){
                             rval = closeCallback.apply(opener, arguments);
                         }
                         if ( rval===false ){ //!rval  &&  rval !== undefined){
@@ -747,11 +747,11 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
                 }
 
                 if(has_access){
-                    if($.isFunction(content.onFirstInit)) {  //see mapPreview
+                    if(window.hWin.HUL.isFunction(content.onFirstInit)) {  //see mapPreview
                         content.onFirstInit();
                     }
                     //pass parameters to frame 
-                    if(options['params'] && $.isFunction(content.assignParameters)) {
+                    if(options['params'] && window.hWin.HUL.isFunction(content.assignParameters)) {
                         content.assignParameters(options['params']);
                     }
                 }
@@ -786,7 +786,7 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
                 beforeClose: options.beforeClose,
                 close: function(event, ui){
                     var closeCallback = options['afterclose'];
-                    if($.isFunction(closeCallback)){
+                    if(window.hWin.HUL.isFunction(closeCallback)){
                         closeCallback.apply();
                     }
                     if(!options['dialogid']){
@@ -956,14 +956,14 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
             function __onDialogClose() {
                 
                 var canClose = true;
-                if($.isFunction(options['beforeClose'])){
+                if(window.hWin.HUL.isFunction(options['beforeClose'])){
                     canClose = options['beforeClose'].call( $dosframe[0], arguments );
                 }
                 if(canClose===false){
                     return false;
                 }else{
                     $container.hide();
-                    if($.isFunction(options['afterClose'])){
+                    if(window.hWin.HUL.isFunction(options['afterClose'])){
                         canClose = options['afterClose'].call( $dosframe[0], arguments );
                     }
                     return true;
@@ -1037,15 +1037,15 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
                 content.close = __onDialogClose;
                 
                
-                if($.isFunction(options['doDialogResize'])){
+                if(window.hWin.HUL.isFunction(options['doDialogResize'])){
                     content.doDialogResize = options['doDialogResize'];
                 } 
-                if($.isFunction(options['onContentLoad'])){
+                if(window.hWin.HUL.isFunction(options['onContentLoad'])){
                     options['onContentLoad'].call(this, $dosframe[0]);
                 } 
                        
                 //pass params into iframe
-                if(options['params'] && $.isFunction(content.assignParameters)) {
+                if(options['params'] && window.hWin.HUL.isFunction(content.assignParameters)) {
                     content.assignParameters(options['params']);
                 }
                 
@@ -1146,7 +1146,7 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
                     close: function(event, ui){
 
                         var need_remove = true;                        
-                        if($.isFunction(onCloseCalback)){
+                        if(window.hWin.HUL.isFunction(onCloseCalback)){
                              need_remove = onCloseCalback.call(this, event, ui);
                         }
                         
@@ -1211,7 +1211,7 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
         
         if(!message){
             message = 'Loading Content';
-            message = ($.isFunction(window.hWin.HR)?window.hWin.HR(message):message)+'...';
+            message = (window.hWin.HUL.isFunction(window.hWin.HR)?window.hWin.HR(message):message)+'...';
         }    
         window.hWin.HEURIST4.msg.coverall.find('.internal_msg').html(message);
         
@@ -1253,7 +1253,7 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
     
     showMsgDlg: function(message, buttons, labels, ext_options){
 
-        if(!$.isFunction(window.hWin.HR)){
+        if(!window.hWin.HUL.isFunction(window.hWin.HR)){
             alert(message);
             return;
         }
@@ -1323,7 +1323,7 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
             title = labels;
         }
         
-        if ($.isFunction(buttons)){ //}typeof buttons === "function"){
+        if (window.hWin.HUL.isFunction(buttons)){ //}typeof buttons === "function"){
 
             callback = buttons;
 
@@ -1451,7 +1451,7 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
         
         //this._on(,{click: function() {
         
-        btn_stop.click(function(){
+        btn_stop.on('click',function(){
                 var request = {terminate:1, t:(new Date()).getMilliseconds(), session:session_id};
                 window.hWin.HEURIST4.util.sendRequest(progress_url, request, null, function(response){
                     _hideProgress();

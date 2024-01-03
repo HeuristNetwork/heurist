@@ -52,9 +52,9 @@ function hImportRecords(_max_upload_size) {
         $('button').button();
                     
         //buttons
-        btnUploadData = $('#btn_UploadData').click(function(e) {
+        btnUploadData = $('#btn_UploadData').on('click',function(e) {
                             if( window.hWin.HAPI4.is_admin() ){
-                                uploadWidget.click();    
+                                uploadWidget.trigger('click');    
                             }else{
                                 window.hWin.HEURIST4.msg.showMsgErr({
                                     status:window.hWin.ResponseStatus.REQUEST_DENIED,
@@ -62,16 +62,16 @@ function hImportRecords(_max_upload_size) {
                             }
                         });
                     
-        $('#btn_ImportRt').click(_importDefinitions);
+        $('#btn_ImportRt').on('click',_importDefinitions);
 
-        $('#btn_ImportRecords').click(_importRecords);
+        $('#btn_ImportRecords').on('click',_importRecords);
         
-        $('#sa_insert').click(_onUpdateModeSet);
-        $('#sa_update').click(_onUpdateModeSet);
+        $('#sa_insert').on('click',_onUpdateModeSet);
+        $('#sa_update').on('click',_onUpdateModeSet);
 
-        $('#btn_Close').click(function(){window.close()});
+        $('#btn_Close').on('click',function(){window.close()});
         
-        $('#sel_UniqueIdField').change(function(event){
+        $('#sel_UniqueIdField').on('change',function(event){
 
             if(window.hWin.HEURIST4.util.isempty($(event.target).val())){
                 $('#sa_mode').hide();
@@ -186,7 +186,7 @@ function hImportRecords(_max_upload_size) {
                 var inpt = this;
                 btnUploadData.off('click');
                 btnUploadData.on({click: function(){
-                            $(inpt).click();
+                            $(inpt).trigger('click');
                 }});                
            
         },//done                    
@@ -361,7 +361,7 @@ function hImportRecords(_max_upload_size) {
             }//for detailtypes
 
         $('#div_tsv').text(tsv);
-        $('.tsv_download').click(function(event){
+        $('.tsv_download').on('click',function(event){
             window.hWin.HEURIST4.util.stopEvent(event);
             window.hWin.HEURIST4.util.downloadInnerHtml('elements_in_import.tsv',
                 $('#div_tsv'),'text/tab-separated-values');

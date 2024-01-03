@@ -183,7 +183,7 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
         
         if(this.options.select_mode=='manager'){
    
-            if(this.options.ui_params && $.isArray(this.options.ui_params.fields)){
+            if(this.options.ui_params && Array.isArray(this.options.ui_params.fields)){
                 var fields = this.options.ui_params.fields;
                 if(fields.indexOf('name')<0) fields.unshift('name');
                 if(fields.indexOf('edit')<0) fields.unshift('edit');
@@ -292,7 +292,7 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
                                 res = res.getIds();                     
                             }
                             
-                            if(res && $.isArray(res) && res.length>0){
+                            if(res && Array.isArray(res) && res.length>0){
                                 that.options.rtg_ID = res[0];
                                 that.searchForm.searchDefRecTypes('option','rtg_ID', that.options.rtg_ID);
                             }
@@ -937,7 +937,7 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
 
                 this._on($dlg.find('a[data-rty_ID]'),{click:function(e){
 
-                    $ele.find('div[recid="'+ rectype_id +'"]').find('div[data-key="filter"]').click();
+                    $ele.find('div[recid="'+ rectype_id +'"]').find('div[data-key="filter"]').trigger('click');
 
                     $dlg.dialog('close');
                     return false;
@@ -1240,7 +1240,7 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
                             .css({'font-weight': 'bold','font-size':'12px'})
                             .addClass('ui-heurist-button')
                             .width(150)
-                            .click(function(){
+                            .on('click',function(){
                                 //close this form and open edit structure
                                 function __openEditStructure(){
                                     that._currentEditID = null;
@@ -1332,7 +1332,7 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
         // link clear buttons, only icon clear button is visible
         this._on($icon.find('span.btn_input_clear'), {
             'click': function(){
-                $thumb.find('span.btn_input_clear').click();
+                $thumb.find('span.btn_input_clear').trigger('click');
             }
         });
     },
@@ -1510,7 +1510,7 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
             this.searchForm.searchDefRecTypes('startSearch'); //refresh
 
             if(this.options.select_mode=='select_multi'){ // auto select new rectype, and force close
-                this.recordList.find('div[recid="'+ recID +'"]').click();
+                this.recordList.find('div[recid="'+ recID +'"]').trigger('click');
                 this._selectAndClose();
             }
 

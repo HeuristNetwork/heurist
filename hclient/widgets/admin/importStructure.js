@@ -104,8 +104,8 @@ $.widget( "heurist.importStructure", {
         
         //1. database selector
         +'<div class="ent_wrapper" id="panel_dbs">'
-        +    '<div class="ent_header searchForm"/>'     
-        +    '<div class="ent_content_full recordList"/>'
+        +    '<div class="ent_header searchForm"></div>'     
+        +    '<div class="ent_content_full recordList"></div>'
         +'</div>'
         
         //2. List of record types to be imported
@@ -114,7 +114,7 @@ $.widget( "heurist.importStructure", {
         +'<div class="ent_header" style="padding:4px;">'
         +'<div style="position:absolute;right:225px;left:0">' //450px
         +'<h4  style="margin:0;padding:4 0 0 4" id="h_source"></h4>'     
-        +'<div id="btn_back_to_databases" style="position:absolute;right:30px;top:0px;z-index:10"/>'
+        +'<div id="btn_back_to_databases" style="position:absolute;right:30px;top:0px;z-index:10"></div>'
         +'</div>'
 
         //+'<div style="border-left:1px solid lightgray;position:absolute;right:225px;width:224px;height:2.8em">'
@@ -163,8 +163,8 @@ $.widget( "heurist.importStructure", {
 
         //3. report after completion of import
         +'<div class="ent_wrapper" id="panel_report" style="display:none">'
-        +    '<div class="ent_content_full" style="bottom:2.8em;top:0;padding:10px"/>'
-        +    '<div class="ent_footer" style="text-align:center"><div id="btn_close_panel_report"/></div>'
+        +    '<div class="ent_content_full" style="bottom:2.8em;top:0;padding:10px"></div>'
+        +    '<div class="ent_footer" style="text-align:center"><div id="btn_close_panel_report"></div></div>'
         +'</div>'
 
         +'</div>';
@@ -190,7 +190,7 @@ $.widget( "heurist.importStructure", {
         this.panel_report.find('#btn_close_panel_report')
         .button({icon: 'ui-icon-carat-1-w', iconPosition:'right', label:'Back to Record Type List'})
         //.css({'line-height': '0.9em'})
-        .click(function(){
+        .on('click',function(){
             that.panel_report.hide();
             that.panel_defs.show();
 
@@ -1065,7 +1065,7 @@ $.widget( "heurist.importStructure", {
             resizeStop: function(){ that._fixWidth(); },
             close:function(){
 
-                if($.isFunction(that.options.onClose)){
+                if(window.hWin.HUL.isFunction(that.options.onClose)){
                     //that.options.onClose(that._currentEditRecordset);  
                     that.options.onClose.call();
                 } 
@@ -1162,7 +1162,7 @@ $.widget( "heurist.importStructure", {
 
                 if(response.status == window.hWin.ResponseStatus.OK){
 
-                    that.panel_report.find('#btn_close_panel_report').click();
+                    that.panel_report.find('#btn_close_panel_report').trigger('click');
 
                     let report = '';
 
@@ -1522,13 +1522,13 @@ $.widget( "heurist.importStructure", {
 
         if(cur_acc == 2){ // trm
             this.panel_trm_list.find('.searchForm #input_search').val(search);
-            this.panel_trm_list.find('.searchForm #chb_show_already_in_db').prop('checked', true).change(); // always show all
+            this.panel_trm_list.find('.searchForm #chb_show_already_in_db').prop('checked', true).trigger('change'); // always show all
         }else if(cur_acc == 1){ // dty
             this.panel_dty_list.find('.searchForm #input_search').val(search);
-            this.panel_dty_list.find('.searchForm #chb_show_already_in_db').prop('checked', false).change(); // always hide those already in db
+            this.panel_dty_list.find('.searchForm #chb_show_already_in_db').prop('checked', false).trigger('change'); // always hide those already in db
         }else{ // rty
             this.panel_rty_list.find('.searchForm #input_search').val(search);
-            this.panel_rty_list.find('.searchForm #chb_show_already_in_db').prop('checked', state).change();
+            this.panel_rty_list.find('.searchForm #chb_show_already_in_db').prop('checked', state).trigger('change');
         }
     }
 

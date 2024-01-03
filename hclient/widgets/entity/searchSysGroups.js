@@ -41,7 +41,7 @@ $.widget( "heurist.searchSysGroups", $.heurist.searchEntity, {
                     .button({label: window.hWin.HR("Add New Group"), icons: {
                             primary: "ui-icon-plus"
                     }})
-                .click(function(e) {
+                .on('click',function(e) {
                     that._trigger( "onadd" );
                 }); 
                 

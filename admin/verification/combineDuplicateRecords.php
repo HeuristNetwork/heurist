@@ -153,7 +153,7 @@ $reference_bdts = mysql__select_assoc2($mysqli,'select dty_ID, dty_Name from def
                 let $merge = $('input[name="merge"]');
                 if($merge.length == 1 && $('input[name="duplicate[]"]').length == 2){ 
                     // automatically merge if there is only two records listed
-                    $merge.click();
+                    $merge.trigger('click');
                     return;
                 }
 

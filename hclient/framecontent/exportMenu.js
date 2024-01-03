@@ -67,7 +67,7 @@ function hexportMenu( container ) {
                     }
                 }
                 
-                lnk.attr('href', href).click(
+                lnk.attr('href', href).on('click',
                     function(event){
                         var save_as_file = true;
                         
@@ -92,9 +92,9 @@ function hexportMenu( container ) {
                 );
             }
 
-            ele.button().click(
+            ele.button().on('click',
                     function(event){
-                        $(this).parent().find('a').click();
+                        $(this).parent().find('a').trigger('click');
                     });
             
         });

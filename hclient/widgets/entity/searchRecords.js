@@ -40,7 +40,7 @@ $.widget( "heurist.searchRecords", $.heurist.searchEntity, {
         var is_expand_rt_list = false;
         var is_only_rt = false;
         if(!window.hWin.HEURIST4.util.isempty(rt_list)){
-            if(!window.hWin.HEURIST4.util.isArray(rt_list)){
+            if(!Array.isArray(rt_list)){
                 rt_list = rt_list.split(',');
             }
             is_expand_rt_list = (rt_list.length>1 && rt_list.length<20);
@@ -101,7 +101,7 @@ $.widget( "heurist.searchRecords", $.heurist.searchEntity, {
             .button({label: window.hWin.HR('Add Record'), 
                         icon: is_browse?null:"ui-icon-plus"})
             .addClass('ui-button-action')
-            .click(function(e) {
+            .on('click',function(e) {
 
                 var search_val = that.element.find('#fill_in_data').val();
                 search_val = search_val == '' ? that.options.init_filter : search_val;
@@ -159,7 +159,7 @@ $.widget( "heurist.searchRecords", $.heurist.searchEntity, {
                 var rtyid = ui.newPanel.attr('id').substr(3);
                 that._select_mode = 1; //search
                 that.selectRectype.val( rtyid ).hSelect('refresh');
-                that.selectRectype.change();
+                that.selectRectype.trigger('change');
             }});
             groupTabHeader.css('background','none');
             
@@ -210,7 +210,7 @@ $.widget( "heurist.searchRecords", $.heurist.searchEntity, {
                     //this.element.find('#addrec_helper').hide();
                 }
             }else if(is_addonly){
-                that.btn_select_rt.click(); //show dropdown
+                that.btn_select_rt.trigger('click'); //show dropdown
             }
 
         }//is_expand_rt_list    
@@ -251,7 +251,7 @@ $.widget( "heurist.searchRecords", $.heurist.searchEntity, {
                 if(this._select_mode==1){
                     this.startSearch();    
                 }else{
-                    this.btn_add_record.click();
+                    this.btn_add_record.trigger('click');
                 }
                 
             }
@@ -317,14 +317,14 @@ $.widget( "heurist.searchRecords", $.heurist.searchEntity, {
                 }
                 //start search
                 if(!window.hWin.HEURIST4.util.isempty(this.selectRectype.val())){
-                    this.selectRectype.change(); 
+                    this.selectRectype.trigger('change'); 
                 }
             }
         }
         
         //if(this.searchForm && this.searchForm.length>0)
-        //this.searchForm.find('#input_search').focus();
-        this.input_search.focus();
+        //this.searchForm.find('#input_search').trigger('focus');
+        this.input_search.trigger('focus');
 
         if(!window.hWin.HEURIST4.util.isempty(this.options.fill_data) || !window.hWin.HEURIST4.util.isempty(this.options.init_filter)){
 

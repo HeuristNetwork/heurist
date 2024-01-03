@@ -857,7 +857,7 @@ function hMappingDraw(_mapdiv_id, _initial_wkt) {
                     function _extractCoords(shapes, coords){
 
                         function _isvalid_pnt(pnt){
-                            return ($.isArray(pnt) && pnt.length==2 && 
+                            return (Array.isArray(pnt) && pnt.length==2 && 
                                 $.isNumeric(pnt[0]) && $.isNumeric(pnt[1]) &&
                                 Math.abs(pnt[0])<=180.0 && Math.abs(pnt[1])<=90.0);
                         }
@@ -877,7 +877,7 @@ function hMappingDraw(_mapdiv_id, _initial_wkt) {
                         }else{
                             var n;
                             for (n=0; n<coords.length; n++){
-                                if($.isArray(coords[n]))
+                                if(Array.isArray(coords[n]))
                                     _extractCoords(shapes, coords[n]);
                             }
                         }
@@ -1048,7 +1048,7 @@ function hMappingDraw(_mapdiv_id, _initial_wkt) {
         .button({label: window.hWin.HR("Start search"), text:false, icons: {
             secondary: "ui-icon-search"
         }})
-        .click(_startGeocodingSearch);
+        .on('click',_startGeocodingSearch);
 
         $('#input_search')
         .on('keypress',
@@ -1062,14 +1062,14 @@ function hMappingDraw(_mapdiv_id, _initial_wkt) {
         });          
 
         //clear/delete buttons --------------------------------------------
-        $('#delete-button').button().click(_deleteSelectedShape);
-        $('#delete-all-button').button().click(_deleteAllShapes);
+        $('#delete-button').button().on('click',_deleteSelectedShape);
+        $('#delete-all-button').button().on('click',_deleteAllShapes);
 
         
         //get overlay layers (image,tiled,kml) ------------------------------------
         var $sel_overlays = $('#sel_overlays');
 
-        $sel_overlays.change(function(){
+        $sel_overlays.on('change',function(){
             var rec_ID = $sel_overlays.val();
             _addOverlay(rec_ID);
             window.hWin.HAPI4.save_pref('map_overlay_sel', rec_ID);                
@@ -1093,7 +1093,7 @@ function hMappingDraw(_mapdiv_id, _initial_wkt) {
         $sel_viepoints.empty();
         window.hWin.HEURIST4.ui.createSelector( $sel_viepoints.get(0), map_viewpoints);
 
-        $sel_viepoints.click(function(){
+        $sel_viepoints.on('click',function(){
             var bounds = $(this).val();
             if(bounds!=''){
                 //get LatLngBounds from urlvalue lat_lo,lng_lo,lat_hi,lng_hi
@@ -1111,7 +1111,7 @@ function hMappingDraw(_mapdiv_id, _initial_wkt) {
         $('#btn_viewpoint_delete')
         .button({label: window.hWin.HR("Delete selected extent"), showLabel:false, icon:"ui-icon-close"})
         .css({'font-size':'0.9em'})
-        .click(function(){
+        .on('click',function(){
             var selval = $sel_viepoints.val();
             if(selval!=''){
                 // remove from preferences
@@ -1135,7 +1135,7 @@ function hMappingDraw(_mapdiv_id, _initial_wkt) {
 
         $('#btn_viewpoint_save')
         .button({label: window.hWin.HR("Save extent")})
-        .click(function(){
+        .on('click',function(){
             window.hWin.HEURIST4.msg.showPrompt('Name for extent', function(location_name){
                 if(!window.hWin.HEURIST4.util.isempty(location_name) && location_name!='none defined'){
                     //save into preferences 
@@ -1167,9 +1167,9 @@ function hMappingDraw(_mapdiv_id, _initial_wkt) {
         });
 
         // apply coordinates
-        $('#apply-coords-button').button().click(_applyCoordsForSelectedShape);
+        $('#apply-coords-button').button().on('click',_applyCoordsForSelectedShape);
 
-        $('#load-geometry-button').button().click(function(){
+        $('#load-geometry-button').button().on('click',function(){
 
             var titleYes = window.hWin.HR('Yes'),
             titleNo = window.hWin.HR('No'),
@@ -1195,7 +1195,7 @@ function hMappingDraw(_mapdiv_id, _initial_wkt) {
 
         });
 
-        $('#get-geometry-button').button().click(function(){
+        $('#get-geometry-button').button().on('click',function(){
 
             $('#geodata_textarea').val(JSON.stringify(_getGeoJSON()));    
 
@@ -1214,7 +1214,7 @@ function hMappingDraw(_mapdiv_id, _initial_wkt) {
         }
         */ 
         
-        $('#save-button').button().click(function(){
+        $('#save-button').button().on('click',function(){
             
             if(!$('#cbAllowMulti').is(':checked') && overlays.length>1){
                 
@@ -1222,7 +1222,7 @@ function hMappingDraw(_mapdiv_id, _initial_wkt) {
                 buttons['Continue'] = function(){ 
                     _deleteAllShapes( true );  
                     $ddlg.dialog('close'); 
-                    $('#save-button').click();
+                    $('#save-button').trigger('click');
                 }; 
                 buttons['Cancel'] = function(){ $ddlg.dialog('close'); };
                 
@@ -1265,7 +1265,7 @@ function hMappingDraw(_mapdiv_id, _initial_wkt) {
             }
             */
         });
-        $('#cancel-button').button().click(function(){
+        $('#cancel-button').button().on('click',function(){
             _saveExtentOnExit();
             window.close();
         });
@@ -1380,7 +1380,7 @@ function hMappingDraw(_mapdiv_id, _initial_wkt) {
             if(not_found){
                 $sel_viepoints.find('option:last-child').attr('selected', 'selected');
             }
-            $sel_viepoints.change();
+            $sel_viepoints.trigger('change');
             */
         }    
         
@@ -1435,7 +1435,7 @@ function hMappingDraw(_mapdiv_id, _initial_wkt) {
                        var map_overlay_sel = window.hWin.HAPI4.get_prefs('map_overlay_sel');     
                        if(map_overlay_sel>0) {
                            $sel_overlays.val(map_overlay_sel);   
-                           $sel_overlays.change();
+                           $sel_overlays.trigger('change');
                        }
                             
                     }else{

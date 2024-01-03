@@ -34,7 +34,7 @@ $.widget( "heurist.searchDefFileExtToMimetype", $.heurist.searchEntity, {
                     .button({label: window.hWin.HR("Add New File Type"), icons: {
                             primary: "ui-icon-plus"
                     }})
-                .click(function(e) {
+                .on('click',function(e) {
                     that._trigger( "onaddrecord" );
                 }); 
             if(this.options.edit_mode=='inline'){

@@ -214,7 +214,7 @@ $.widget( "heurist.search_faceted", {
 
         var that = this;
         
-        if(!$.isFunction($('body')['editing_input'])){
+        if(!window.hWin.HUL.isFunction($('body')['editing_input'])){
             $.getScript( window.hWin.HAPI4.baseURL + 'hclient/widgets/editing/editing_input.js', function() {
                 that._create();
             });
@@ -369,7 +369,7 @@ $.widget( "heurist.search_faceted", {
                           that._recalculateFacets(-1);       
                           that.refreshSubsetSign();
 
-                          if($.isFunction(that.options.params.callback_on_search_finish) && recset){
+                          if(window.hWin.HUL.isFunction(that.options.params.callback_on_search_finish) && recset){
                               that.options.params.callback_on_search_finish.call(this, recset.count_total());
                           }
                     }         
@@ -594,7 +594,7 @@ $.widget( "heurist.search_faceted", {
                     for (var i=0;i<len0;i++){
                         if(! window.hWin.HEURIST4.util.isnull( qarr[i][key] ) ){ //such key already exsits
 
-                            if(window.hWin.HEURIST4.util.isArray(qarr[i][key])){ //next level
+                            if(Array.isArray(qarr[i][key])){ //next level
                                 return qarr[i][key];   
                             }else if(qarr[0][key]==val){ //already exists
                                 return qarr;
@@ -617,7 +617,7 @@ $.widget( "heurist.search_faceted", {
                     predicat[key] = val;
                     qarr.push(predicat);
 
-                    if(window.hWin.HEURIST4.util.isArray(val)){
+                    if(Array.isArray(val)){
                         return val;
                     }else{
                         return qarr;
@@ -1417,7 +1417,7 @@ $.widget( "heurist.search_faceted", {
     ,doClose: function(){
         //$(this.document).trigger(window.hWin.HAPI4.Event.ON_REC_SEARCHSTART, [ {reset:true, search_realm:this.options.search_realm} ]);  //global app event to clear views
         this._trigger( "onclose");
-        if($.isFunction(this.options.onclose)){
+        if(window.hWin.HUL.isFunction(this.options.onclose)){
             this.options.onclose(this);
         }
         if(!this.options.is_publication){
@@ -1492,7 +1492,7 @@ $.widget( "heurist.search_faceted", {
         
             $.each(predicate, function(key,val)
             {
-                if( $.isArray(val) ) { //|| $.isPlainObject(val) ){
+                if( Array.isArray(val) ) { //|| $.isPlainObject(val) ){
                      var is_empty = that._fillQueryWithValues(val, facet_index_do_not_touch);
                      isbranch_empty = isbranch_empty && is_empty;
                      
@@ -1870,7 +1870,7 @@ $.widget( "heurist.search_faceted", {
                                 
                                 $.each(predicate, function(key,val)
                                 {
-                                        if( $.isArray(val) || $.isPlainObject(val) ){
+                                        if( Array.isArray(val) || $.isPlainObject(val) ){
                                             __fillQuery(val);
                                          }else if( (typeof val === 'string') && (val == '$IDS') ) {
                                             //substitute with array of ids
@@ -1885,7 +1885,7 @@ $.widget( "heurist.search_faceted", {
                     
                             var res = null;
 
-                            if($.isArray(query)){
+                            if(Array.isArray(query)){
                             
                             $(query).each(function(idx, predicate){
                                 
@@ -1897,7 +1897,7 @@ $.widget( "heurist.search_faceted", {
                                             res = query
                                             return false;
                                             
-                                        }else if( $.isArray(val) || $.isPlainObject(val) ){
+                                        }else if( Array.isArray(val) || $.isPlainObject(val) ){
                                             
                                             res = __getOtherParameters(val, rt);
                                             return false;
@@ -2182,7 +2182,7 @@ $.widget( "heurist.search_faceted", {
                         $('<div class="bor-filter-expand bor-toggler">'
                             +'<span class="bor-toggle-show-on" style="display:none;margin-bottom: 5px;"><span>&nbsp;less...&nbsp;</span></span>'
                             +'<span class="bor-toggle-show-off" style="margin-bottom: 5px;"><span>&nbsp;more...&nbsp;</span></span>'
-                         +'</div>').click(function(event){
+                         +'</div>').on('click',function(event){
                                 if($(event.target).is('span[class^="ui-selectmenu"],select')){
                                     return;
                                 }
@@ -2529,7 +2529,7 @@ $.widget( "heurist.search_faceted", {
                             }else{
                                 btn_dropdown.css({"font-size": "0.9em", "min-width": "8em"});
                             }
-                            $sel.change(function(event){ that._onDropdownSelect(event); });
+                            $sel.on('change',function(event){ that._onDropdownSelect(event); });
                         }
                         
                     }else 
@@ -3431,7 +3431,7 @@ $.widget( "heurist.search_faceted", {
                             }                            
                             
 
-                            $sel.change(function(event){ that._onDropdownSelect(event); });
+                            $sel.on('change',function(event){ that._onDropdownSelect(event); });
                         }
                     }
 

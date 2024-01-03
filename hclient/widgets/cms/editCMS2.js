@@ -151,12 +151,12 @@ function editCMS2(website_document){
                 
                 
                 _editor_panel = $('<div class="ui-layout-'+options.editor_pos+'">'
-                        +'<div style="margin: 10px;text-align: right;cursor: pointer;" id="closeCMS">close<span style="padding-left: 10px;" class="ui-icon ui-icon-close" /></div>'                
+                        +'<div style="margin: 10px;text-align: right;cursor: pointer;" id="closeCMS">close<span style="padding-left: 10px;" class="ui-icon ui-icon-close"></span></div>'                
                         +'<div class="ent_wrapper editStructure" id="tabsEditCMS">' 
                             +'<ul style="margin-'+(options.editor_pos=='west'?'right':'left')+':40px"><li><a href="#treeWebSite">Site</a></li><li><a href="#treePage">Page</a></li></ul>'
                             
                             +'<span style="position:absolute;top:22px;width:32px;height:24px;font-size:29px;cursor:pointer;'+(options.editor_pos=='west'?'right:5px':'')+'" '
-                            +'class="bnt-cms-hidepanel ui-icon ui-icon-carat-2-'+(options.editor_pos=='west'?'w':'e')+'"/>'
+                            +'class="bnt-cms-hidepanel ui-icon ui-icon-carat-2-'+(options.editor_pos=='west'?'w':'e')+'"></span>'
                             
                             +'<div id="treeWebSite" style="top:43px;" class="ent_wrapper ui-cms-mainmenu">'
                                 +'<div class="toolbarWebSite ent_header" style="height:85px;padding-top:15px;">'
@@ -176,14 +176,14 @@ function editCMS2(website_document){
                                     +'<div style="padding:10px 8px;">'
                                         +'<a href="#" title="Edit website home page" '
                                             +'class="btn-website-homepage" style="text-decoration:none;">'
-                                            +'<span class="ui-icon ui-icon-home"/>&nbsp;Home page</a>'
+                                            +'<span class="ui-icon ui-icon-home"></span>&nbsp;Home page</a>'
                                         +'<span  title="Add top level menu" class="btn-website-addpage ui-icon ui-icon-plus" '
                                             +'style="display:none;float:right;cursor:pointer;color:black;margin-top:0px"></span>'
                                     +'</div>'     
                                         
                                 +'</div>'
                                 
-                                +'<div class="treeWebSite ent_content_full" style="top:135px;padding:3px 10px;"/>' //treeview - edit website menu
+                                +'<div class="treeWebSite ent_content_full" style="top:135px;padding:3px 10px;"></div>' //treeview - edit website menu
                             +'</div>'
                             +'<div id="treePage" style="font-size:1em;top:43px" class="ent_wrapper">'
                             
@@ -191,7 +191,7 @@ function editCMS2(website_document){
                                     
                                     +(isWebPage
                                     ?('<div style="padding:20px"><a href="#" class="btn-website-edit">'
-                                        +'<span class="ui-icon ui-icon-pencil"/>&nbsp;Configure webpage</a></div>')
+                                        +'<span class="ui-icon ui-icon-pencil"></span>&nbsp;Configure webpage</a></div>')
                                     :'<h3 class="truncate" style="margin-block-start: 0.7em; margin-block-end: 0.7em; font-size: revert; font-family: revert;"></h3>')
                                     +'<span style="float:left;" class="heurist-helper1 page_tree">'
                                         +'Drag elements to re-order</span>'
@@ -204,9 +204,9 @@ function editCMS2(website_document){
                                         
                                 +'</div>'
                             
-                                +'<div class="treePage ent_content_full" style="top:30px;padding:10px;border-top:1px solid gray;line-height:normal;"/>' //treeview - edit page
+                                +'<div class="treePage ent_content_full" style="top:30px;padding:10px;border-top:1px solid gray;line-height:normal;"></div>' //treeview - edit page
                                 +'<div class="propertyView ent_content_full ui-widget-content-gray" '
-                                    +' style="top:190px;padding:10px 0px;display:none;"/>' //edit properties for element
+                                    +' style="top:190px;padding:10px 0px;display:none;"></div>' //edit properties for element
                                 
                             +'</div>'
                         +'</div></div>').appendTo(_ws_body);
@@ -318,7 +318,7 @@ function editCMS2(website_document){
         }
         
         //swtich to page tab automatically
-        _layout_container.click(function(event){
+        _layout_container.on('click',function(event){
             if(current_edit_mode!='page'){
                 //if($(event.target).is('a') || 
                 //if($(event.target).parents('.mceNonEditable').length>0) return;
@@ -342,17 +342,17 @@ function editCMS2(website_document){
             _editor_panel = $(innerDoc.body);
         }
        
-        _editor_panel.find('.btn-website-homepage').click(_editHomePage);
+        _editor_panel.find('.btn-website-homepage').on('click',_editHomePage);
         if(!isWebPage){
             _editor_panel.find('.btn-website-edit')
                          .button({classes:{'ui-button': 'ui-button-action'}})
                          .css({'padding':'5px','font-size':'9px','margin-left':'20px'})
-                         .click(_editHomePageRecord);
+                         .on('click',_editHomePageRecord);
         }else{
-            _editor_panel.find('.btn-website-edit').click(_editHomePageRecord);
+            _editor_panel.find('.btn-website-edit').on('click',_editHomePageRecord);
         }
-        _editor_panel.find('.btn-website-addpage').click(_addNewRootMenu); // button({icon:'ui-icon-plus'}).
-        _editor_panel.find('.btn-website-url').click(function(){ // save website url to clipboard
+        _editor_panel.find('.btn-website-addpage').on('click',_addNewRootMenu); // button({icon:'ui-icon-plus'}).
+        _editor_panel.find('.btn-website-url').on('click',function(){ // save website url to clipboard
             window.hWin.HEURIST4.util.copyStringToClipboard(window.hWin.HAPI4.baseURL_pro+'?db='+window.hWin.HAPI4.database+'&website');
             window.hWin.HEURIST4.msg.showMsgFlash('Website URL saved to clipboard', 3000);
         });
@@ -364,11 +364,11 @@ function editCMS2(website_document){
             function(e){_editor_panel.find('.btn-website-addpage').hide()});
 
         
-        _editor_panel.find('.bnt-website-menu').button({icon:'ui-icon-menu'}).click(_showWebSiteMenu);
+        _editor_panel.find('.bnt-website-menu').button({icon:'ui-icon-menu'}).on('click',_showWebSiteMenu);
         
-        _editor_panel.find('.bnt-cms-hidepanel').click(function(){ _ws_body.layout().close(options.editor_pos); } );
+        _editor_panel.find('.bnt-cms-hidepanel').on('click',function(){ _ws_body.layout().close(options.editor_pos); } );
 
-        _editor_panel.find('#closeCMS').click(_closeCMS);
+        _editor_panel.find('#closeCMS').on('click',_closeCMS);
      
      
         _panel_propertyView = _editor_panel.find('.propertyView');
@@ -480,7 +480,7 @@ function editCMS2(website_document){
                         _toolbar_Page.hide();
                         page_was_modified = false; 
                         $dlg.dialog('close'); 
-                        if($.isFunction(callback)) callback.call(this);
+                        if(window.hWin.HUL.isFunction(callback)) callback.call(this);
                     }
                 },
                 {text:window.hWin.HR('Cancel'), 
@@ -516,7 +516,7 @@ function editCMS2(website_document){
         // Display cms editor button
         _ws_body.find('#btnOpenCMSeditor').show().html('website editor');
 
-        if($.isFunction(options.close)){
+        if(window.hWin.HUL.isFunction(options.close)){
             options.close.call();
         }
     }
@@ -950,13 +950,13 @@ var sMsg = '<p>Heurist\'s CMS editor has been upgraded to a new system which is 
             
             _toolbar_Page = _editor_panel.find('.toolbarPage').hide();
                                 
-                    _panel_treePage.find('.btn-page-save').button().css({'border-radius':'4px','margin-right':'5px'}).click(_saveLayoutCfg)
-                    _panel_treePage.find('.btn-page-restore').button().css({'border-radius':'4px','margin-right':'5px'}).click(
+                    _panel_treePage.find('.btn-page-save').button().css({'border-radius':'4px','margin-right':'5px'}).on('click',_saveLayoutCfg)
+                    _panel_treePage.find('.btn-page-restore').button().css({'border-radius':'4px','margin-right':'5px'}).on('click',
                         function(){
                             _startCMS({record_id:options.record_id, container:'#main-content', content:null});
                         }
                     );
-                    _panel_treePage.find('.bnt-cms-exit').button().css({'border-radius':'4px'}).click(_closeCMS); //{icon:'ui-icon-close'}
+                    _panel_treePage.find('.bnt-cms-exit').button().css({'border-radius':'4px'}).on('click',_closeCMS); //{icon:'ui-icon-close'}
 
         }
         
@@ -1144,17 +1144,17 @@ var sMsg = '<p>Heurist\'s CMS editor has been upgraded to a new system which is 
                             :'<span class="ui-icon ui-icon-gear" style="width:30px;height: 30px;font-size: 26px;margin-top: 0px;" title="Edit style and properties 2"></span>')
             + (true || is_root || is_cardinal?'':
                 ('<span data-action="drag" style="display:block;padding:4px" title="Drag to reposition">' //
-                    + '<span class="ui-icon ui-icon-arrow-4" style="font-weight:normal"/>Drag</span>'))               
+                    + '<span class="ui-icon ui-icon-arrow-4" style="font-weight:normal"></span>Drag</span>'))               
             + '<span data-action="edit" style="display:block;padding:4px" title="Edit style and properties 3">'
-            +'<span class="ui-icon ui-icon-pencil"/>Style</span>';               
+            +'<span class="ui-icon ui-icon-pencil"></span>Style</span>';               
             
             //hide element for cardinal and delete for its panes                     
             if(node.data.type!='cardinal'){
-                actionspan += '<span data-action="element" style="display:block;padding:4px"><span class="ui-icon ui-icon-plus" title="Add a new element/widget"/>Insert</span>';
+                actionspan += '<span data-action="element" style="display:block;padding:4px"><span class="ui-icon ui-icon-plus" title="Add a new element/widget"></span>Insert</span>';
             }
             if(!(is_root || is_cardinal)){
                 actionspan += ('<span data-action="delete" style="display:block;padding:4px"><span class="ui-icon ui-icon-close" title="'
-                    +'Remove element from layout"/>Delete</span>');
+                    +'Remove element from layout"></span>Delete</span>');
             }
 
             if(node.data.type=='text'){
@@ -1173,7 +1173,7 @@ var sMsg = '<p>Heurist\'s CMS editor has been upgraded to a new system which is 
                     }
                 }
                 actionspan = actionspan + '<span data-action="translate_header" style="display:block;padding:4px" title="'
-                        +stitle+'"><span class="ui-icon ui-icon-translate" />Translate</span>'
+                        +stitle+'"><span class="ui-icon ui-icon-translate"></span>Translate</span>'
                         +codes;
                         
             }
@@ -1185,7 +1185,7 @@ var sMsg = '<p>Heurist\'s CMS editor has been upgraded to a new system which is 
                 actionspan.appendTo(item);
                 
                 actionspan.find('span[data-action]').hide();
-                actionspan.find('span.ui-icon-menu').click(function(event){
+                actionspan.find('span.ui-icon-menu').on('click',function(event){
                     var ele = $(event.target);
                     window.hWin.HEURIST4.util.stopEvent(event);
                     ele.hide();
@@ -1197,7 +1197,7 @@ var sMsg = '<p>Heurist\'s CMS editor has been upgraded to a new system which is 
                 actionspan.insertAfter(item); //in main-content
 
                 actionspan.find('span[data-action]').hide();
-                actionspan.find('span.ui-icon-gear').click(function(event){ // edit widget
+                actionspan.find('span.ui-icon-gear').on('click',function(event){ // edit widget
 
                     var ele = $(event.target);
                     window.hWin.HEURIST4.util.stopEvent(event);
@@ -1206,7 +1206,7 @@ var sMsg = '<p>Heurist\'s CMS editor has been upgraded to a new system which is 
                     var is_widget = ele.parent().prev().hasClass('heurist-widget');
                     
                     if(is_widget){
-                        ele.parent().find('span[data-action="edit"]').click();
+                        ele.parent().find('span[data-action="edit"]').trigger('click');
                     }else{
                         if(ele.parent().hasClass('lid-actionmenu')){
                             ele.parent().show();    
@@ -1222,7 +1222,7 @@ var sMsg = '<p>Heurist\'s CMS editor has been upgraded to a new system which is 
             //
             // menu for action span
             //
-            actionspan.find('span[data-action]').click(function(event){
+            actionspan.find('span[data-action]').on('click',function(event){
                 var ele = $(event.target);
 
                 window.hWin.HEURIST4.util.stopEvent(event);
@@ -1292,7 +1292,7 @@ function(value){
 
             /*
             $('<span class="ui-icon ui-icon-pencil"></span>')                                                                
-            .click(function(event){ 
+            .on('click',function(event){ 
             //tree.contextmenu("open", $(event.target) ); 
 
             ).appendTo(actionspan);
@@ -2023,7 +2023,7 @@ function(value){
             }
         }
 
-        if($.isArray(new_element_json) && new_element_json.length==1){
+        if(Array.isArray(new_element_json) && new_element_json.length==1){
             new_element_json = new_element_json[0];
         }
 
@@ -2184,7 +2184,7 @@ function(value){
                         }
                         */
                         
-                        if($.isFunction(callback)) callback.call(this);
+                        if(window.hWin.HUL.isFunction(callback)) callback.call(this);
                     }
                     
                 }else{

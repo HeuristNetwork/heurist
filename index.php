@@ -161,7 +161,10 @@ if(!defined('PDIR')) define('PDIR','');
 
 require_once dirname(__FILE__).'/hclient/framecontent/initPage.php';
 
-if($isLocalHost){
+if(isset($isUpgrade) && $isUpgrade){
+    print '<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery.fancytree/2.38.3/jquery.fancytree-all.js"></script>';
+
+}else if($isLocalHost){
     print '<script type="text/javascript" src="external/jquery.fancytree/jquery.fancytree-all.min.js"></script>';
 }else{
     print '<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery.fancytree/2.16.1/jquery.fancytree-all.min.js"></script>';
@@ -171,7 +174,7 @@ if($isLocalHost){
 <!-- it is needed in preference dialog -->
 <link rel="stylesheet" type="text/css" href="external/jquery.fancytree/skin-themeroller/ui.fancytree.css" />
 
-<script type="text/javascript" src="external/jquery.layout/jquery.layout-latest.js"></script>
+<script type="text/javascript" src="external/jquery.layout/jquery.layout.js"></script>
 
 <!-- Gridster layout is an alternative similar to Windows tiles, not useful except with small
 number of widgets. Currently it is commented out of the code in layout_default.js -->
@@ -269,6 +272,44 @@ number of widgets. Currently it is commented out of the code in layout_default.j
 <!-- loaded dynamically in editing.js
 <script type="text/javascript" src="<?php echo PDIR;?>external/tinymce5/tinymce.min.js"></script>
 -->
+
+<!-- os, browser detector -->
+<script type="text/javascript" src="<?php echo PDIR;?>external/js/platform.js"></script>
+
+<?php
+if(isset($isUpgrade) && $isUpgrade){
+?>
+<link href="https://cdn.datatables.net/v/ju/jszip-3.10.1/dt-1.13.8/b-2.4.2/b-html5-2.4.2/datatables.min.css" rel="stylesheet">
+ 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/pdfmake.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/vfs_fonts.js"></script>
+<script src="https://cdn.datatables.net/v/ju/jszip-3.10.1/dt-1.13.8/b-2.4.2/b-html5-2.4.2/datatables.min.js"></script>
+
+
+<!-- Calendar picker -->
+<script type="text/javascript" src="<?php echo PDIR;?>external/jquery.calendars-2.1.1/js/jquery.plugin.min.js"></script>
+<script type="text/javascript" src="<?php echo PDIR;?>external/jquery.calendars-2.1.1/js/jquery.calendars.js"></script>
+<script type="text/javascript" src="<?php echo PDIR;?>external/jquery.calendars-2.1.1/js/jquery.calendars.plus.js"></script>
+
+<link rel="stylesheet" type="text/css" href="<?php echo PDIR;?>external/jquery.calendars-2.1.1/css/jquery.calendars.picker.css">
+<script type="text/javascript" src="<?php echo PDIR;?>external/jquery.calendars-2.1.1/js/jquery.calendars.picker.js"></script>
+
+<script src="<?php echo PDIR;?>external/jquery.calendars-2.1.1/js/jquery.calendars.taiwan.js"></script>
+<script src="<?php echo PDIR;?>external/jquery.calendars-2.1.1/js/jquery.calendars.thai.js"></script>
+<script src="<?php echo PDIR;?>external/jquery.calendars-2.1.1/js/jquery.calendars.julian.js"></script>
+<script src="<?php echo PDIR;?>external/jquery.calendars-2.1.1/js/jquery.calendars.persian.js"></script>
+<script src="<?php echo PDIR;?>external/jquery.calendars-2.1.1/js/jquery.calendars.islamic.js"></script>
+<script src="<?php echo PDIR;?>external/jquery.calendars-2.1.1/js/jquery.calendars.ummalqura.js"></script>
+<script src="<?php echo PDIR;?>external/jquery.calendars-2.1.1/js/jquery.calendars.hebrew.js"></script>
+<script src="<?php echo PDIR;?>external/jquery.calendars-2.1.1/js/jquery.calendars.ethiopian.js"></script>
+<script src="<?php echo PDIR;?>external/jquery.calendars-2.1.1/js/jquery.calendars.coptic.js"></script>
+<script src="<?php echo PDIR;?>external/jquery.calendars-2.1.1/js/jquery.calendars.nepali.js"></script>
+<script src="<?php echo PDIR;?>external/jquery.calendars-2.1.1/js/jquery.calendars.mayan.js"></script>
+
+<?php
+}else {
+?>    
+
 <!-- Calendar picker -->
 <script type="text/javascript" src="<?php echo PDIR;?>external/jquery.calendars-1.2.1/jquery.calendars.js"></script>
 <script type="text/javascript" src="<?php echo PDIR;?>external/jquery.calendars-1.2.1/jquery.calendars.plus.js"></script>
@@ -287,11 +328,8 @@ number of widgets. Currently it is commented out of the code in layout_default.j
 <script src="<?php echo PDIR;?>external/jquery.calendars-1.2.1/jquery.calendars.coptic.js"></script>
 <script src="<?php echo PDIR;?>external/jquery.calendars-1.2.1/jquery.calendars.nepali.js"></script>
 <script src="<?php echo PDIR;?>external/jquery.calendars-1.2.1/jquery.calendars.mayan.js"></script>
-
-<!-- os, browser detector -->
-<script type="text/javascript" src="<?php echo PDIR;?>external/js/platform.js"></script>
-
-<?php
+    
+<?php    
 if($isLocalHost){
     ?>
     <link rel="stylesheet" type="text/css" href="<?php echo PDIR;?>external/js/datatable/datatables.min.css"/>
@@ -305,6 +343,7 @@ if($isLocalHost){
     <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.36/vfs_fonts.js"></script>
     <script type="text/javascript" src="https://cdn.datatables.net/v/dt/jszip-2.5.0/dt-1.10.21/b-1.6.2/b-html5-1.6.2/datatables.min.js"></script>        
     <?php
+}
 }
 ?>
 

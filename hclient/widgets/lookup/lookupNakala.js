@@ -203,7 +203,7 @@ $.widget( "heurist.lookupNakala", $.heurist.recordAction, {
                 s = '';
             }
 
-            if(window.hWin.HEURIST4.util.isArray(s)){
+            if(Array.isArray(s)){
                 s = s.join('; ');
             }else if(window.hWin.HEURIST4.util.isObject(s)){
             	s = Object.values(s).join('; ');
@@ -307,7 +307,7 @@ $.widget( "heurist.lookupNakala", $.heurist.recordAction, {
 
                             var trm_Label = $Db.trm(term_Ids[i], 'trm_Label').toLowerCase();
 
-                            if(window.hWin.HEURIST4.util.isArray(val)){ // multiple values
+                            if(Array.isArray(val)){ // multiple values
 
                                 for(var j = 0; j < val.length; j++){
 

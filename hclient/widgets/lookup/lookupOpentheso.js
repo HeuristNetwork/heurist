@@ -180,7 +180,7 @@ $.widget( "heurist.lookupOpentheso", $.heurist.recordAction, {
         window.hWin.HEURIST4.ui.createLanguageSelect(this._sel_elements['lang'], [{key: '', title: 'select a language...'}]);
 
         this.tabs_container = this.element.find('#tabs-cont').tabs();
-        this.element.find('#inpt_search').focus();
+        this.element.find('#inpt_search').trigger('focus');
 
         window.hWin.HEURIST4.msg.bringCoverallToFront(this.element, null, '<span style="color: white;">Retrieving thesauruses...</span>');
 

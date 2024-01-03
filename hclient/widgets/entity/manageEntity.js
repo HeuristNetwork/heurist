@@ -334,7 +334,7 @@ $.widget( "heurist.manageEntity", {
                     function(entity){
                         that.options.entity = entity;
                         if(that._initControls()){
-                            if($.isFunction(that.options.onInitFinished)){
+                            if(window.hWin.HUL.isFunction(that.options.onInitFinished)){
                                 that.options.onInitFinished.call(that);
                             }        
                         }
@@ -344,7 +344,7 @@ $.widget( "heurist.manageEntity", {
             //entity already defined or set via options
             this._entityName = this.options.entity['entityName'];
             if(that._initControls()){
-                if($.isFunction(that.options.onInitFinished)){
+                if(window.hWin.HUL.isFunction(that.options.onInitFinished)){
                     that.options.onInitFinished.call( that );
                 }        
             }
@@ -680,7 +680,7 @@ $.widget( "heurist.manageEntity", {
         var btn_opts = {label:options.text, icons:options.icons, title:options.title, showLabel:options.showText!==false};
         
         var btn = $('<button>').button(btn_opts)
-                    .click(options.click)
+                    .on('click',options.click)
                     .appendTo(container);
         if(options.id){
             btn.attr('id', options.id);
@@ -1034,7 +1034,7 @@ $.widget( "heurist.manageEntity", {
                     }
 */              
                     
-                    if($.isFunction(that.options.onClose)){
+                    if(window.hWin.HUL.isFunction(that.options.onClose)){
                         //that.options.onClose(that._currentEditRecordset);  
                         that.options.onClose.call(that, that.contextOnClose());
                     } 
@@ -1112,7 +1112,7 @@ $.widget( "heurist.manageEntity", {
                     {default_palette_class: that.options.default_palette_class});
             return false;   
         }
-        if($.isFunction(that.saveUiPreferences))that.saveUiPreferences();
+        if(window.hWin.HUL.isFunction(that.saveUiPreferences))that.saveUiPreferences();
         return true;
     },
     
@@ -1172,7 +1172,7 @@ $.widget( "heurist.manageEntity", {
             this.element.hide();
         }
         
-        if(!this.options.isdialog && $.isFunction(this.options.onClose)){
+        if(!this.options.isdialog && window.hWin.HUL.isFunction(this.options.onClose)){
             this.options.onClose.call(this, this.contextOnClose());
         } 
         
@@ -1270,7 +1270,7 @@ $.widget( "heurist.manageEntity", {
             return this._selection;
         }else{
             
-            if($.isArray(value)){
+            if(Array.isArray(value)){
                 if(this._cachedRecordset){
                     value = this._cachedRecordset.getSubSetByIds(value);
                 }else{
@@ -1287,7 +1287,7 @@ $.widget( "heurist.manageEntity", {
                 this._selectAndClose(); //it triggers onselect and closes dialog
             }else{
                 //todo? use this._trigger( "onselect", null, this._selection);
-                if($.isFunction(this.options.onSelect)){
+                if(window.hWin.HUL.isFunction(this.options.onSelect)){
                     this.options.onSelect.call( this, this._selection );
                 }
                 
@@ -1445,7 +1445,7 @@ $.widget( "heurist.manageEntity", {
                 }
             }
 
-            $first_ele.focus();
+            $first_ele.trigger('focus');
 
             this.editForm.find('.ui-tabs-anchor.ui-state-error, .input-div.ui-state-error').removeClass('ui-state-error');
             $.each(eles, (idx, ele) => {
@@ -1583,14 +1583,14 @@ $.widget( "heurist.manageEntity", {
                             
                             that._afterSaveEventHandler2( recID, fields );        
                             
-                            if($.isFunction(afterAction)){
+                            if(window.hWin.HUL.isFunction(afterAction)){
                                 afterAction.call(that, recID, fields);
                             }else{
                                 that._afterSaveEventHandler( recID, fields );        
                             }
                             
                         }else{
-                            if($.isFunction(onErrorAction)){
+                            if(window.hWin.HUL.isFunction(onErrorAction)){
                                 onErrorAction.call(that, response);
                             }else{
                                 window.hWin.HEURIST4.msg.showMsgErr(response);    

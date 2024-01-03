@@ -464,7 +464,7 @@ function editCMS_WidgetCfg( widget_cfg, _layout_content, $dlg, main_callback ){
                 //ele.editing_input('setValue', rval);
 
                 $dlg.find('select[name="orientation"]')
-                .change(function(e){
+                .on('change',function(e){
 
                     var is_horiz = ($(e.target).val()=='horizontal');
                     var is_vertical = ($(e.target).val()=='vertical');
@@ -528,7 +528,7 @@ function editCMS_WidgetCfg( widget_cfg, _layout_content, $dlg, main_callback ){
                             }
                         }
 
-                        ele.button().click(
+                        ele.button().on('click',
                             function(){
                                 window.hWin.HEURIST4.ui.showRecordActionDialog('recordAdd',{
                                     title: 'Select record type',
@@ -555,7 +555,7 @@ function editCMS_WidgetCfg( widget_cfg, _layout_content, $dlg, main_callback ){
             if(widget_name=='heurist_SearchTree'){
 
                 var ele_rb = $dlg.find('input[name="searchTreeMode"]')
-                .change(function(e){
+                .on('change',function(e){
 
                     var selval = __getSearchTreeMode();
 
@@ -704,13 +704,13 @@ function editCMS_WidgetCfg( widget_cfg, _layout_content, $dlg, main_callback ){
                     var val = $dlg.find('#allowed_svsIDs').editing_input('getValues');
                     // $dlg.find('input[name="allowed_svsIDs"]').val();
                     if(!window.hWin.HEURIST4.util.isempty(val) && val[0]!=''){
-                        if($.isArray(val)) val = val.join(',');
+                        if(Array.isArray(val)) val = val.join(',');
                         ifilter = {svs_ID:val};
                     }else{
                         val = $dlg.find('#allowed_UGrpID').editing_input('getValues');
                         //$dlg.find('input[name="allowed_UGrpID"]').val();
                         if(!window.hWin.HEURIST4.util.isempty(val) && val[0]!=''){
-                            if($.isArray(val)) val = val.join(',');
+                            if(Array.isArray(val)) val = val.join(',');
                             ifilter = {svs_UGrpID:val};
                         }
                     }
@@ -729,9 +729,9 @@ function editCMS_WidgetCfg( widget_cfg, _layout_content, $dlg, main_callback ){
 
                 __restFilterForInitSearch();
 
-                ele_rb.change();
+                ele_rb.trigger('change');
 
-                $dlg.find('input[name="simple_search_allowed"]').change(function(){
+                $dlg.find('input[name="simple_search_allowed"]').on('change',function(){
                     var is_vis = $dlg.find('input[name="simple_search_allowed"]').is(':checked');
                     if(is_vis){
                         $dlg.find('#simple_search_header').parent().css('display','table-row');
@@ -894,7 +894,7 @@ function editCMS_WidgetCfg( widget_cfg, _layout_content, $dlg, main_callback ){
                 //======================================================
                     
                 $dlg.find('input[name="popup_behaviour"]')
-                    .change(function(event){
+                    .on('change',function(event){
 
                         var val = $dlg.find('input[name="popup_behaviour"]:checked').val();
 
@@ -1011,7 +1011,7 @@ function editCMS_WidgetCfg( widget_cfg, _layout_content, $dlg, main_callback ){
                 */
                 
                 $dlg.find('select[name="reportElementMode"]')
-                .change(function(e){
+                .on('change',function(e){
 
                     $dlg.find('select[name="reportElementSlideEffect"]').parent().hide();
                     $dlg.find('select[name="reportElementDistinct"]').parent().hide();
@@ -1023,10 +1023,10 @@ function editCMS_WidgetCfg( widget_cfg, _layout_content, $dlg, main_callback ){
                     }
                     
                 })
-                .val(opts['reportElementMode']).change();
+                .val(opts['reportElementMode']).trigger('change');
 
                 $dlg.find('select[name="reportElementMapMode"]')
-                .change(function(e){
+                .on('change',function(e){
 
                     if($(e.target).val()=='filtered'){
                         $dlg.find('input[name="reportElementMapFilter"]').parent().show();
@@ -1035,7 +1035,7 @@ function editCMS_WidgetCfg( widget_cfg, _layout_content, $dlg, main_callback ){
                     }
                     
                 })
-                .val(opts['reportElementMapMode']).change();
+                .val(opts['reportElementMapMode']).trigger('change');
                 
                 
             }else
@@ -1047,7 +1047,7 @@ function editCMS_WidgetCfg( widget_cfg, _layout_content, $dlg, main_callback ){
                     window.hWin.HEURIST4.ui.createTemplateSelector( $select3 
                         ,[{key:'',title:'Standard record view template'}], $select3.attr('data-template'));
 
-                     $dlg.find('#is_popup_report').change(function(e){
+                     $dlg.find('#is_popup_report').on('change',function(e){
                         if($dlg.find('#is_popup_report').is(':checked')){
                             $dlg.find('#popup_report_position').parent().show();       
 
@@ -1058,7 +1058,7 @@ function editCMS_WidgetCfg( widget_cfg, _layout_content, $dlg, main_callback ){
                             $dlg.find('#is_popup_report').parent().find('.header').addClass('row-spacing');
                         }    
                      });
-                     $dlg.find('#is_popup_report').prop('checked', opts['is_popup']).change();
+                     $dlg.find('#is_popup_report').prop('checked', opts['is_popup']).trigger('change');
                      $dlg.find('#popup_report_position').val(opts['popup_position'])
 
             }else 
@@ -1213,7 +1213,7 @@ function editCMS_WidgetCfg( widget_cfg, _layout_content, $dlg, main_callback ){
         if(widget_name=='heurist_Navigation'){
             var menu_recIDs = cont.find('#menu_recIDs').editing_input('getValues');
             if(window.hWin.HEURIST4.util.isempty(menu_recIDs) || 
-                ($.isArray(menu_recIDs)&& (menu_recIDs.length==0||window.hWin.HEURIST4.util.isempty(menu_recIDs[0]))))
+                (Array.isArray(menu_recIDs)&& (menu_recIDs.length==0||window.hWin.HEURIST4.util.isempty(menu_recIDs[0]))))
             {
                 window.hWin.HEURIST4.msg.showMsgErr('Please set at least one top level menu item');                     
                 return false;   
@@ -1229,7 +1229,7 @@ function editCMS_WidgetCfg( widget_cfg, _layout_content, $dlg, main_callback ){
             cont.find('input[name="storyFields"]').val( storyFields );
             
             if(window.hWin.HEURIST4.util.isempty(storyFields) || 
-                ($.isArray(storyFields)&& (storyFields.length==0||window.hWin.HEURIST4.util.isempty(storyFields[0]))))
+                (Array.isArray(storyFields)&& (storyFields.length==0||window.hWin.HEURIST4.util.isempty(storyFields[0]))))
             {
                 window.hWin.HEURIST4.msg.showMsgErr('Please set at least one story field');                     
                 return false;   

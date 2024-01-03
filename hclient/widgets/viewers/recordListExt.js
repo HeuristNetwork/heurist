@@ -381,7 +381,7 @@ this._dout('onLoadComplete refresh again');
               this._refresh();
         }
         
-        if($.isFunction(this.options.onLoadComplete)){
+        if(window.hWin.HUL.isFunction(this.options.onLoadComplete)){
             this.options.onLoadComplete.call(this);
         }
         
@@ -402,7 +402,7 @@ this._dout('onLoadComplete refresh again');
             var fdoc = this.dosframe[0].contentWindow.document;
             var smarty_template = window.hWin.HEURIST4.util.getUrlParameter('template', this.options.url);
             
-            if(this._is_publication && $.isFunction(initLinksAndImages))
+            if(this._is_publication && window.hWin.HUL.isFunction(initLinksAndImages))
             {
                 //init "a href" for CMS pages
                 if(!window.hWin.HEURIST4){
@@ -435,7 +435,7 @@ this._dout('onLoadComplete refresh again');
                             href = '/' + window.hWin.HAPI4.database+'/tpl/'+smarty_template+'/'+encodeURIComponent(query);
                         }
                                     
-                        $(link).click(function(event){
+                        $(link).on('click',function(event){
                             window.hWin.HEURIST4.util.stopEvent(event);
                             window.hWin.HAPI4.RecordSearch.doSearch(window.hWin,request);
                             return false;

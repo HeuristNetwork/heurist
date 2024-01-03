@@ -137,7 +137,7 @@ $.widget( "heurist.mainMenu", {
         .css({'float':'right', margin:'1.1em', 'font-size':'0.9em'})
         .addClass('ui-heurist-header2')
         .appendTo( this.element )
-        .click(
+        .on('click',
             function(){
                 that.btn_dashboard.hide();
 
@@ -164,12 +164,12 @@ $.widget( "heurist.mainMenu", {
             
             var wasCtrl = false;
             var selObj = window.hWin.HEURIST4.ui.createSelector(null, window.hWin.HAPI4.sysinfo.dbrecent);        
-            $(selObj).css({'font-size':'1em', 'font-weight':'bold','border':'none', outline:0,
+            $(selObj).css({'font-size':'1em', 'font-weight':'bold','border':'none', 'outline':'0',
                            'min-width':'150px', 'margin-left':'25px', })
-            .click(function(event){
+            .on('click',function(event){
                 wasCtrl = event.shiftKey;
             })
-            .change(function(event){
+            .on('change',function(event){
                 if(window.hWin.HAPI4.database!=$(event.target).val()){
                     var url =  window.hWin.HAPI4.baseURL+'?db='+$(event.target).val();
                     $(event.target).val(window.hWin.HAPI4.database);
@@ -373,13 +373,13 @@ $.widget( "heurist.mainMenu", {
                             that.sMsgCmsPrivate = '';
                         }
                         
-                        if($.isFunction(callback)) callback(that);
+                        if(window.hWin.HUL.isFunction(callback)) callback(that);
                     }
                 });
         }else{
             this.cms_home_records_count = 0;
             this.cms_home_private_records_ids = 0;
-            if($.isFunction(callback)) callback(this);
+            if(window.hWin.HUL.isFunction(callback)) callback(this);
         }   
     },
     
@@ -1652,9 +1652,9 @@ $.widget( "heurist.mainMenu", {
             
             
             var ele = $dlg.find('#mapcluster_on');
-            $dlg.find('#mapcluster_grid').change(function(){ ele.prop('checked', true)});
-            $dlg.find('#mapcluster_count').change(function(){ ele.prop('checked', true)});
-            $dlg.find('#mapcluster_zoom').change(function(){ ele.prop('checked', true)});
+            $dlg.find('#mapcluster_grid').on('change',function(){ ele.prop('checked', true)});
+            $dlg.find('#mapcluster_count').on('change',function(){ ele.prop('checked', true)});
+            $dlg.find('#mapcluster_zoom').on('change',function(){ ele.prop('checked', true)});
 
             //save to preferences
             function __doSave(){
@@ -2309,7 +2309,7 @@ $.widget( "heurist.mainMenu", {
     //
     _doRegister: function(){
 
-        if(false && !$.isFunction(doRegister)){  // already loaded in index.php
+        if(false && !window.hWin.HUL.isFunction(doRegister)){  // already loaded in index.php
             //var that = this;
             $.getScript(window.hWin.HAPI4.baseURL+'hclient/widgets/profile/profile_login.js', this._doRegister );
         }else{
@@ -2566,7 +2566,7 @@ $.widget( "heurist.mainMenu", {
 
         $dlg.find('input#rectypes-all').on('change', function(event){
             window.hWin.HEURIST4.util.setDisabled($dlg.find('button#rectypes-select, div#rectypes-list'), $(event.target).is(':checked'));
-        }).change();
+        }).trigger('change');
 
         return false;
     },

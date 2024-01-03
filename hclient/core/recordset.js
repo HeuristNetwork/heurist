@@ -55,7 +55,7 @@ function hRecordSet(initdata) {
     */
     function _init(response) {
         
-        if($.isArray(response)){
+        if(Array.isArray(response)){
             response = {entityName:'Records',count:response.length,offset:0,records:response};
         }
         
@@ -78,8 +78,8 @@ function hRecordSet(initdata) {
                 fields = response.fields;
                 rectypes = response.rectypes;
                 structures = response.structures;
-                records = response.records;  //$.isArray(records)
-                order = $.isArray(response.order)?response.order:[response.order];
+                records = response.records;  //Array.isArray(records)
+                order = Array.isArray(response.order)?response.order:[response.order];
                 relationship = response.relationship;
                 relations_ids = response.relations;
                 
@@ -90,7 +90,7 @@ function hRecordSet(initdata) {
             }else{
                     
                 if(response.order){
-                    order = $.isArray(response.order)?response.order:[response.order];    
+                    order = Array.isArray(response.order)?response.order:[response.order];    
                     records = response.records?response.records:{};   
                 }else{
                     order = response.records;  //ids only   
@@ -374,7 +374,7 @@ mapDraw.js initial_wkt -> parseWKT -> GeoJSON -> _loadGeoJSON (as set of separat
                 //we need to treat them as separate timemap item
                 //var geovalues = array(); 
                 var shapes = (recShape && geoType!=1)?recShape:[];
-                if(!$.isArray(shapes)){
+                if(!Array.isArray(shapes)){
                     shapes = [];
                 }
                 
@@ -406,14 +406,14 @@ mapDraw.js initial_wkt -> parseWKT -> GeoJSON -> _loadGeoJSON (as set of separat
                                             linkedPlaces[geodata[m].recID]['linkedRecs'].push(recID);
                                         }else{
                                             linkedPlaces[geodata[m].recID] = {linkedRecs:[recID],
-                                                                                shape:$.isArray(shape)?shape:[shape]}
+                                                                                shape:Array.isArray(shape)?shape:[shape]}
                                         }
                                         has_linked_places.push(geodata[m].recID); //one person can be linked to several places
                                         
                                     }else{
                                         //this is usual geo
-                                        if($.isArray(shapes)){
-                                            if($.isArray(shape)){
+                                        if(Array.isArray(shapes)){
+                                            if(Array.isArray(shape)){
                                                 shapes = shapes.concat(shape);                                            
                                             }else{
                                                 shapes.push(shape);    
@@ -752,7 +752,7 @@ mapDraw.js initial_wkt -> parseWKT -> GeoJSON -> _loadGeoJSON (as set of separat
                                             linkedPlaces[geodata[m].recID]['linkedRecs'].push(recID);
                                         }else{
                                             linkedPlaces[geodata[m].recID] = {linkedRecs:[recID], shape:geo_json};
-                                                                                //art $.isArray(shape)?shape:[shape]}
+                                                                                //art Array.isArray(shape)?shape:[shape]}
                                         }
                                         has_linked_places.push(geodata[m].recID); //one person can be linked to several places
                                         
@@ -988,7 +988,7 @@ mapDraw.js initial_wkt -> parseWKT -> GeoJSON -> _loadGeoJSON (as set of separat
     function _getFieldValues(record, fldname){
         if(window.hWin.HEURIST4.util.isempty(fldname)) return null;
 
-        if( (!$.isPlainObject(record)) && !isnull(record) && !$.isArray(record)){
+        if( (!$.isPlainObject(record)) && !isnull(record) && !Array.isArray(record)){
             if(records[record]){
                 record = records[record];    
             }else{
@@ -1061,7 +1061,7 @@ mapDraw.js initial_wkt -> parseWKT -> GeoJSON -> _loadGeoJSON (as set of separat
             return null;
         }
         
-        if(that.calcfields && $.isFunction(that.calcfields[fldname])){
+        if(that.calcfields && window.hWin.HUL.isFunction(that.calcfields[fldname])){
             return that.calcfields[fldname].call(that, record, fldname);
         }
         
@@ -1135,7 +1135,7 @@ mapDraw.js initial_wkt -> parseWKT -> GeoJSON -> _loadGeoJSON (as set of separat
             if(!d){
                 record['d'] = {};
             }
-            if($.isArray(newvalue)){
+            if(Array.isArray(newvalue)){
                 record['d'][fldname] = newvalue;
             }else{
                 record['d'][fldname] = [newvalue];    
@@ -1145,7 +1145,7 @@ mapDraw.js initial_wkt -> parseWKT -> GeoJSON -> _loadGeoJSON (as set of separat
         }else {
             //header fields always single values except rec_Shape
 
-            if($.isArray(newvalue) && fldname!='rec_Shape'){
+            if(Array.isArray(newvalue) && fldname!='rec_Shape'){
                 newvalue = (newvalue.length>0)?newvalue[0]:null;
             }
             
@@ -2076,7 +2076,7 @@ mapDraw.js initial_wkt -> parseWKT -> GeoJSON -> _loadGeoJSON (as set of separat
                             _setFieldValue(records[recID], fldname, record[fldname]);    
                         }
                     }
-                }else if($.isArray(record)){
+                }else if(Array.isArray(record)){
                     records[recID] = record;
                 }
                 return records[recID];

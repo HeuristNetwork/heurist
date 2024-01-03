@@ -55,12 +55,12 @@ $.widget( "heurist.recordExportCSV", $.heurist.recordAction, {
 
 
         var that = this;
-        if(!$.isFunction($('body')['configEntity'])){ //OK! widget script js has been loaded
+        if(!window.hWin.HUL.isFunction($('body')['configEntity'])){ //OK! widget script js has been loaded
 
             $.getScript(window.hWin.HAPI4.baseURL+'hclient/widgets/entity/configEntity.js', 
                 function(){ 
                     if(that._initControls()){
-                        if($.isFunction(that.options.onInitFinished)){
+                        if(window.hWin.HUL.isFunction(that.options.onInitFinished)){
                             that.options.onInitFinished.call(that);
                         }        
                     }

@@ -56,13 +56,13 @@ $.widget( "heurist.searchSysUsers", $.heurist.searchEntity, {
         }else{
             this.btn_add_record.css({'min-width':'9m','z-index':2})
                     .button({label: window.hWin.HR("Add New User"), icon: "ui-icon-plus"})
-                .click(function(e) {
+                .on('click',function(e) {
                     that._trigger( "onadd" );
                 }); 
 
             this.btn_find_record.css({'min-width':'9m','z-index':2})
                     .button({label: window.hWin.HR("Find/Add User"), icon: "ui-icon-search"})
-                .click(function(e) {
+                .on('click',function(e) {
                     that._trigger( "onfind" );
                 }); 
                 

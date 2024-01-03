@@ -388,7 +388,7 @@ doBookmark: function(rectype) {
                 + (rectype ? '&rec_rectype=' + rectype : '') 
 				+ '&version=' + version);
                 
-	void(window.setTimeout('window.focus()',200));
+	void(window.setTimeout("window.focus()",200));
 },
 
 

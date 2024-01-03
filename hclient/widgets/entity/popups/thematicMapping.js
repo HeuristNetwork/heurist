@@ -141,7 +141,7 @@ $.widget( "heurist.thematicMapping", $.heurist.recordAction, {
         
         if(this.options.thematic_mapping)
         {
-            if(!$.isArray(this.options.thematic_mapping)) this.options.thematic_mapping = [this.options.thematic_mapping];
+            if(!Array.isArray(this.options.thematic_mapping)) this.options.thematic_mapping = [this.options.thematic_mapping];
         }else{
             this.options.thematic_mapping = [];//
         }
@@ -249,7 +249,7 @@ $.widget( "heurist.thematicMapping", $.heurist.recordAction, {
                                         w: 'a',
                                         detail: 'ids'};
                                 window.HAPI4.RecordMgr.search(request2, function(response){ 
-                                    if(response && response.data && $.isArray(response.data.records)){
+                                    if(response && response.data && Array.isArray(response.data.records)){
                                         that.maplayer_ids = response.data.records.join(',');                                    
                                     }
                                     
@@ -395,7 +395,7 @@ $.widget( "heurist.thematicMapping", $.heurist.recordAction, {
                         +'<span class="ui-icon ui-icon-circle-b-plus" title="Add field" style="font-size:0.9em"></span>'
                         +'</div>').appendTo(parent_span);
                         
-                        actionspan.find('.ui-icon-circle-b-plus').click(function(event){
+                        actionspan.find('.ui-icon-circle-b-plus').on('click',function(event){
                             var ele = $(event.target);
                             window.hWin.HEURIST4.util.stopEvent(event);
                             that._addThemeField( ele.parents('[data-code]').attr('data-code') );                           
@@ -850,7 +850,7 @@ $.widget( "heurist.thematicMapping", $.heurist.recordAction, {
         if(range.symbol){
             ele.find('.field-symbol').val($.isPlainObject(range.symbol)?JSON.stringify(range.symbol):range.symbol);    
         }
-        ele.find('.field-symbol').change();
+        ele.find('.field-symbol').trigger('change');
 
         this._initSymbolEditor( ele.find('.field-symbol') ); 
         
@@ -899,7 +899,7 @@ $.widget( "heurist.thematicMapping", $.heurist.recordAction, {
                 var current_val = window.hWin.HEURIST4.util.isJSON( fele.val() );
                 if(!current_val) current_val = {};
                 window.hWin.HEURIST4.ui.showEditSymbologyDialog(current_val, 4, function(new_value){
-                    fele.val(JSON.stringify(new_value)).change();
+                    fele.val(JSON.stringify(new_value)).trigger('change');
                 });
         }});
             
@@ -1037,7 +1037,7 @@ $.widget( "heurist.thematicMapping", $.heurist.recordAction, {
                         selfield.ranges[i].symbol = symbol;
                         //assign to UI
                         f_ranges.find('.field-range[id='+selfield.ranges[i].uid+'] > .field-symbol')
-                                        .val(JSON.stringify(symbol)).change();
+                                        .val(JSON.stringify(symbol)).trigger('change');
                     }
                 });
                 
@@ -1087,7 +1087,7 @@ $.widget( "heurist.thematicMapping", $.heurist.recordAction, {
 
                     $.each(predicate, function(key,val)
                         {
-                            if( $.isArray(val) || $.isPlainObject(val) ){
+                            if( Array.isArray(val) || $.isPlainObject(val) ){
                                 __fillQuery(val);
                             }else if( (typeof val === 'string') && (val == '$IDS') ) {
                                 //substitute with array of ids

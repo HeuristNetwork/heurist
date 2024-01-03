@@ -217,7 +217,7 @@ $.widget( "heurist.profile_edit", {
                 /*that.edit_form.find('#btnCptRefresh')
                 .button({text:false, icons:{ secondary: "ui-icon-refresh" }})
                 .show()
-                .click( __refreshCaptcha );*/
+                .on('click', __refreshCaptcha );*/
 
                 this._refreshCaptcha();
             }
@@ -368,7 +368,7 @@ $.widget( "heurist.profile_edit", {
             that.options.edit_data['ugr_Type'] = 'user';
             that.options.edit_data['ugr_IsModelUser'] = (that.options.edit_data['ugr_IsModelUser']=='y')?1:0;
 
-            if( !window.hWin.HEURIST4.util.isnull(that.options.callback) && $.isFunction(that.options.callback) ){
+            if( !window.hWin.HEURIST4.util.isnull(that.options.callback) && window.hWin.HUL.isFunction(that.options.callback) ){
 
                 that.edit_form.dialog("close");
                 that.options.callback.call(that);

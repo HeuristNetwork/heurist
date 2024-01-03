@@ -40,7 +40,7 @@ $.widget( "heurist.recordDataTable", $.heurist.recordAction, {
 
 
         var that = this;
-        if(!$.isFunction($('body')['configEntity'])){ //OK! widget script js has been loaded
+        if(!window.hWin.HUL.isFunction($('body')['configEntity'])){ //OK! widget script js has been loaded
 
             $.getScript(window.hWin.HAPI4.baseURL+'hclient/widgets/entity/configEntity.js', 
                 function(){ 

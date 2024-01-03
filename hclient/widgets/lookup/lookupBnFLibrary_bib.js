@@ -152,7 +152,7 @@ $.widget( "heurist.lookupBnFLibrary_bib", $.heurist.recordAction, {
         });
 
         this.tabs_container = this.element.find('#tabs-cont').tabs();
-        this.element.find('#inpt_any').focus();
+        this.element.find('#inpt_any').trigger('focus');
 
         return this._super();
     },
@@ -377,7 +377,7 @@ $.widget( "heurist.lookupBnFLibrary_bib", $.heurist.recordAction, {
                         cur_string = cur_obj;
                     }
 
-                    if(!cur_string || $.isArray(cur_string) || $.isPlainObject(cur_string)){
+                    if(!cur_string || Array.isArray(cur_string) || $.isPlainObject(cur_string)){
                         creator_val += 'Missing author; ';
                     }else{
                         creator_val += cur_string + '; ';
@@ -413,7 +413,7 @@ $.widget( "heurist.lookupBnFLibrary_bib", $.heurist.recordAction, {
                         cur_string = cur_obj;
                     }
 
-                    if(!cur_string || $.isArray(cur_string) || $.isPlainObject(cur_string)){
+                    if(!cur_string || Array.isArray(cur_string) || $.isPlainObject(cur_string)){
                         pub_val += 'Missing publisher; ';
                     }else{
                         pub_val += cur_string + '; ';
@@ -421,9 +421,9 @@ $.widget( "heurist.lookupBnFLibrary_bib", $.heurist.recordAction, {
                 }
 
                 s = pub_val;
-            }else if(window.hWin.HEURIST4.util.isArray(s) && s.length > 1){
+            }else if(Array.isArray(s) && s.length > 1){
                 s = window.hWin.HEURIST4.util.htmlEscape(s.join('; '));
-            }else if(window.hWin.HEURIST4.util.isArray(s) && s.length == 1){
+            }else if(Array.isArray(s) && s.length == 1){
                 s = window.hWin.HEURIST4.util.htmlEscape(s[0]?s[0]:'');
             }else{
                 s = window.hWin.HEURIST4.util.htmlEscape(s?s:'');
@@ -495,7 +495,7 @@ $.widget( "heurist.lookupBnFLibrary_bib", $.heurist.recordAction, {
 
             var dty_id = that.options.mapping.fields[field_name];
 
-            if(window.hWin.HEURIST4.util.isArray(val) || window.hWin.HEURIST4.util.isObject(val)){
+            if(Array.isArray(val) || window.hWin.HEURIST4.util.isObject(val)){
                 val = JSON.stringify(val);
             }
 
@@ -539,7 +539,7 @@ $.widget( "heurist.lookupBnFLibrary_bib", $.heurist.recordAction, {
                     if(window.hWin.HEURIST4.util.isObject(val)){
                         obj_keys = Object.keys(val);
                         val = Object.values(val);
-                    }else if(!window.hWin.HEURIST4.util.isArray(val)){
+                    }else if(!Array.isArray(val)){
                         val = window.hWin.HEURIST4.util.isnull(val) ? '' : val;
                         val = [val];
                     }
@@ -575,7 +575,7 @@ $.widget( "heurist.lookupBnFLibrary_bib", $.heurist.recordAction, {
                                 search = cur_val;
                             }
 
-                            if(value != '' && !$.isArray(value) && !$.isPlainObject(value)){
+                            if(value != '' && !Array.isArray(value) && !$.isPlainObject(value)){
                                 if(field_type == 'resource'){
                                     val[i] = {'value': value, 'search': search};
                                 }else if(field_type == 'relmarker'){
@@ -613,7 +613,7 @@ $.widget( "heurist.lookupBnFLibrary_bib", $.heurist.recordAction, {
                                 completed_val = cur_val;
                             }
 
-                            if(value != '' && !$.isArray(value) && !$.isPlainObject(value)){
+                            if(value != '' && !Array.isArray(value) && !$.isPlainObject(value)){
 
                                 if(field_type == 'resource'){
                                     val[i] = {'value': value, 'search': search};
@@ -644,7 +644,7 @@ $.widget( "heurist.lookupBnFLibrary_bib", $.heurist.recordAction, {
 
                         if(window.hWin.HEURIST4.util.isObject(val)){ 
                             val = Object.values(val);
-                        }else if(!window.hWin.HEURIST4.util.isArray(val)){
+                        }else if(!Array.isArray(val)){
                             val = [val];
                         }
 

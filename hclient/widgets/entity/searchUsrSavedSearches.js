@@ -49,7 +49,7 @@ $.widget( "heurist.searchUsrSavedSearches", $.heurist.searchEntity, {
         }else{
             this.btn_add_record.css({'min-width':'9m','z-index':2})
                     .button({label: window.hWin.HR("Add New Filter"), icon: "ui-icon-plus"})
-                .click(function(e) {
+                .on('click',function(e) {
                     that._trigger( "onadd" );
                 }); 
 

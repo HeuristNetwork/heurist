@@ -127,16 +127,16 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
             window.hWin.HR = that.setLocale('ENG');
         }
 
-        if (!$.isFunction(that.fancybox)) {
+        if (!window.hWin.HUL.isFunction(that.fancybox)) {
             that.fancybox = $.fn.fancybox; //to call from iframes
         }
 
         // layout and configuration arrays are defined (from layout_default.js)    
-        if (typeof hLayout !== 'undefined' && $.isFunction(hLayout)
+        if (typeof hLayout !== 'undefined' && window.hWin.HUL.isFunction(hLayout)
             && typeof cfg_widgets !== 'undefined' && typeof cfg_layouts !== 'undefined') {
             that.LayoutMgr = new hLayout();
         }
-        if (typeof hRecordSearch !== 'undefined' && $.isFunction(hRecordSearch)) {
+        if (typeof hRecordSearch !== 'undefined' && window.hWin.HUL.isFunction(hRecordSearch)) {
             that.RecordSearch = new hRecordSearch();
         }
 
@@ -283,7 +283,7 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
                     response = window.hWin.HEURIST4.util.interpretServerError(jqXHR, url, request_code);
                 }
 
-                if ($.isFunction(callback)) {
+                if (window.hWin.HUL.isFunction(callback)) {
                     callback(response);
                 }
                 //message:'Error connecting server '+textStatus});
@@ -292,7 +292,7 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
 
                 _is_callserver_in_progress = false;
 
-                if ($.isFunction(callback)) {
+                if (window.hWin.HUL.isFunction(callback)) {
                     if ($.isPlainObject(response)) {
                         response.request_code = request_code;
                     }
@@ -316,7 +316,7 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
 
                 response = window.hWin.HEURIST4.util.interpretServerError(jqXHR, url, request_code);
 
-                if ($.isFunction(callback)) {
+                if (window.hWin.HUL.isFunction(callback)) {
                     callback(response);
                 }
             }
@@ -342,7 +342,7 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
                 //clear record browse cache
                 if (window.hWin.HEURIST4.browseRecordTargets) {
                     var rtys = [];
-                    if ($.isArray(response.affectedRty)) {
+                    if (Array.isArray(response.affectedRty)) {
                         rtys = response.affectedRty;
                     } else if (typeof response.affectedRty === 'string') {
                         rtys = response.affectedRty.split(',');
@@ -367,7 +367,7 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
             }
             window.hWin.HAPI4.triggerEvent(window.hWin.HAPI4.Event.ON_REC_UPDATE); //after save record     
         }
-        if ($.isFunction(callback)) {
+        if (window.hWin.HUL.isFunction(callback)) {
             callback(response);
         }
     }
@@ -759,7 +759,7 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
                 if (ugrp_ids >= 0) {
                     ugrp_ids = [ugrp_ids];
                 } else {
-                    ugrp_ids = (!$.isArray(ugrp_ids) ? ugrp_ids.split(',') : ugrp_ids);
+                    ugrp_ids = (!Array.isArray(ugrp_ids) ? ugrp_ids.split(',') : ugrp_ids);
                 }
 
                 //first try to take on client side
@@ -832,7 +832,7 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
              */
             user_log: function (activity, suplementary) {
 
-                if (typeof gtag !== 'undefined' && $.isFunction(gtag)) { //google log function
+                if (typeof gtag !== 'undefined' && window.hWin.HUL.isFunction(gtag)) { //google log function
                     /*                    
                     Category
                     Action
@@ -1047,11 +1047,11 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
                         }      
                         
                         window.hWin.HAPI4.triggerEvent(window.hWin.HAPI4.Event.ON_STRUCTURE_CHANGE);
-                        if ($.isFunction(callback)) callback.call(that, true);
+                        if (window.hWin.HUL.isFunction(callback)) callback.call(that, true);
 
                     } else {
                         window.hWin.HEURIST4.msg.sendCoverallToBack();
-                        if ($.isFunction(callback)) callback.call(that, false);
+                        if (window.hWin.HUL.isFunction(callback)) callback.call(that, false);
                     }
 
                 });
@@ -1214,9 +1214,9 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
             checkPresenceOfRectype: function (rty_IDs, databaseID, message, callback, force_refresh) {
 
                 if (!rty_IDs) {
-                    if ($.isFunction(callback)) callback.call();
+                    if (window.hWin.HUL.isFunction(callback)) callback.call();
                     return false;
-                } else if (!$.isArray(rty_IDs)) {
+                } else if (!Array.isArray(rty_IDs)) {
                     rty_IDs = [rty_IDs];
                 }
 
@@ -1240,7 +1240,7 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
 
                 //all record types are in this database
                 if (missed.length == 0) {
-                    if ($.isFunction(callback)) callback.call();
+                    if (window.hWin.HUL.isFunction(callback)) callback.call();
                     return true;
                 }
 
@@ -1272,7 +1272,7 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
                                         if ($dlg2.dialog('instance')) $dlg2.dialog('close');
 
                                         if (response.status == window.hWin.ResponseStatus.OK) {
-                                            if ($.isFunction(callback)) callback.call();
+                                            if (window.hWin.HUL.isFunction(callback)) callback.call();
                                         } else {
                                             window.hWin.HEURIST4.msg.showMsgErr(response);
                                         }
@@ -1327,7 +1327,7 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
 
                         window.hWin.HAPI4.triggerEvent(window.hWin.HAPI4.Event.ON_STRUCTURE_CHANGE);
                     }
-                    if ($.isFunction(callback)) {
+                    if (window.hWin.HUL.isFunction(callback)) {
                         callback(response);
                     }
                 });
@@ -1614,7 +1614,7 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
                     delete request['verify_credentials'];
                 }
 
-                if (!$.isFunction(callback)) {
+                if (!window.hWin.HUL.isFunction(callback)) {
                     // it happens only of calback function is not set
                     // remove all this stuff since callback function is always defined
 
@@ -1787,7 +1787,7 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
                     if(entityName=='records'){
                         entity_configs[entityName] = window.hWin.entityRecordCfg;                        
                     }
-                    if ($.isFunction(callback)) {
+                    if (window.hWin.HUL.isFunction(callback)) {
                         callback(entity_configs[entityName]);
                     }
                     return entity_configs[entityName];
@@ -1970,7 +1970,7 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
                                 window.hWin.HAPI4.EntityMgr.setEntityData(entityName, dbdefs)
                             }
 
-                            if ($.isFunction(callback)) callback(this, true);
+                            if (window.hWin.HUL.isFunction(callback)) callback(this, true);
 
                         } else {
                             console.log('ERROR: ',response);                            
@@ -2007,7 +2007,7 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
                                     window.hWin.HAPI4.EntityMgr.createRstIndex();
                                 }
 
-                                if ($.isFunction(callback)) {
+                                if (window.hWin.HUL.isFunction(callback)) {
                                     callback(entity_data[response.data.entityName]);
                                 }
                             } else {
@@ -2018,7 +2018,7 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
                     );
                 } else {
                     //take from cache
-                    if ($.isFunction(callback)) {
+                    if (window.hWin.HUL.isFunction(callback)) {
                         callback(entity_data[entityName]);
                     } else {
                         //if user sure that data is already on client side
@@ -2093,7 +2093,7 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
 
 
                     var edata = entity_data[entityName];
-                    if (!$.isArray(recIDs)) recIDs = [recIDs];
+                    if (!Array.isArray(recIDs)) recIDs = [recIDs];
                     for (idx in recIDs) {
                         display_value.push(
                             edata.fld(edata.getById(recIDs[idx]), ecfg.titleField));
@@ -2273,7 +2273,7 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
             if (ugs > 0) {
                 ugs = [ugs];
             } else {
-                ugs = $.isArray(ugs) ? ugs : ugs.split(',')
+                ugs = Array.isArray(ugs) ? ugs : ugs.split(',')
             }
 
             for (var idx in ugs) {
@@ -2370,12 +2370,12 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
 
             //window.hWin.HAPI4.SystemMgr.save_prefs({'map_viewpoints': map_viewpoints});
 
-            if ($.isArray(value) && limit > 0) {
+            if (Array.isArray(value) && limit > 0) {
                 value = value.slice(0, limit);
 
                 var cur_value = window.hWin.HAPI4.get_prefs(name);
                 cur_value = (cur_value ? cur_value.split(',') : null);
-                if (!$.isArray(cur_value)) cur_value = [];
+                if (!Array.isArray(cur_value)) cur_value = [];
 
                 $.each(value, function (i, item) {
                     if ($.inArray(item, cur_value) === -1) cur_value.unshift(item);
@@ -2527,7 +2527,7 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
                 return def_val;
             }else if($.isPlainObject(values)){
                 return values[Object.keys(values)[0]];
-            }else if ($.isArray(values) && values.length>0){
+            }else if (Array.isArray(values) && values.length>0){
                 return  values[0];
             }else{
                 return  values;

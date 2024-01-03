@@ -87,9 +87,9 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
                 '<div class="treeview_with_header" style="background:white; overflow: hidden auto;">'
                     +'<div style="padding:0px 20px 4px 0px;border-bottom:1px solid lightgray">' //instruction and close button
                         +'<span style="font-style:italic;display:inline-block;line-height:1.3;">Drag to reposition<br>Select to navigate<br>'
-                        +'Double click or <span class="ui-icon ui-icon-gear" style="font-size: small;"/> to modify</span>&nbsp;&nbsp;&nbsp;'
+                        +'Double click or <span class="ui-icon ui-icon-gear" style="font-size: small;"></span> to modify</span>&nbsp;&nbsp;&nbsp;'
                         //+'<button style="vertical-align:top;margin-top:4px;" class="closeRtsEditor"/>'
-                        +'<span style="position:absolute; right:4px;width:32px;top:26px;height:32px;font-size:32px;cursor:pointer" class="closeTreePanel ui-icon ui-icon-carat-2-w"/>'
+                        +'<span style="position:absolute; right:4px;width:32px;top:26px;height:32px;font-size:32px;cursor:pointer" class="closeTreePanel ui-icon ui-icon-carat-2-w"></span>'
                         +'<button id="download_structure">Export fields as CSV</button>'
                         +'<button id="field_usage">Calculate usage</button>'
                     +'</div>'
@@ -115,9 +115,9 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
                                 +'<div class="treeview_with_header" style="background:blue">'
                                     +'<div style="padding:10px 20px 4px 10px;border-bottom:1px solid lightgray">' //instruction and close button
                                         +'<span style="font-style:italic;display:inline-block">Drag to reposition<br>'
-                                        +'Select or <span class="ui-icon ui-icon-gear" style="font-size: small;"/> to modify</span>&nbsp;&nbsp;&nbsp;'
+                                        +'Select or <span class="ui-icon ui-icon-gear" style="font-size: small;"></span> to modify</span>&nbsp;&nbsp;&nbsp;'
                                         //+'<button style="vertical-align:top;margin-top:4px;" class="closeRtsEditor"/>'
-                                        +'<span style="position:absolute; right:4px;width:32px;top:26px;height:32px;font-size:32px;cursor:pointer" class="closeTreePanel ui-icon ui-icon-carat-2-w"/>'
+                                        +'<span style="position:absolute; right:4px;width:32px;top:26px;height:32px;font-size:32px;cursor:pointer" class="closeTreePanel ui-icon ui-icon-carat-2-w"></span>'
                                     +'</div>'
                                     +'<div class="treeView" style="margin-left:-27px;"/>' //treeview
                                 +'</div>'
@@ -608,7 +608,7 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
             });
 
             if(that._calculated_usages || $Db.rty(that.options.rty_ID, 'rty_RecCount') < 2000){ // trigger usage calculations
-                that.element.find('#field_usage').click();
+                that.element.find('#field_usage').trigger('click');
             }
         }, delay);
     },
@@ -628,7 +628,7 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
             var actionspan = $('<div class="svs-contextmenu3" style="position:absolute;right:2px;display:none;padding:2px;margin-top:0px;background:#95A7B7 !important;z-index:1;'
                 +'font-size:9px;font-weight:normal;text-transform:none">'
                 +'<span data-action="delete" style="background:red;padding:4px"><span class="ui-icon ui-icon-close" title="'
-                    +((is_folder)?'Delete header':'Exclude field from record type')+'" style="font-size:9px;font-weight:normal"/>Delete</span>'
+                    +((is_folder)?'Delete header':'Exclude field from record type')+'" style="font-size:9px;font-weight:normal"></span>Delete</span>'
                 +(true || is_folder?'':
                 '<span class="ui-icon ui-icon-star" title="Requirement"></span>'
                 +'<span class="ui-icon ui-icon-menu" title="Repeatability"></span>')
@@ -636,7 +636,7 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
                 
             var that = this;
 
-            actionspan.find('span').click(function(event){
+            actionspan.find('span').on('click',function(event){
                 var ele = $(event.target);
                 that._lockDefaultEdit = true;
                 //timeout need to activate current node    
@@ -1732,7 +1732,7 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
         //----------------
         var edit_ele = this._editing.getFieldByName('rst_CreateChildIfRecPtr');
 
-        var help_button = $('<span style="padding-left:40px;color:gray;cursor:pointer" class="ui-icon ui-icon-circle-info"/>')
+        var help_button = $('<span style="padding-left:40px;color:gray;cursor:pointer" class="ui-icon ui-icon-circle-info"></span>')
                 .appendTo(edit_ele.find('.input-div'));
         window.hWin.HEURIST4.ui.initHelper( {button:help_button, title:'Creation of records as children', 
                     url:window.hWin.HAPI4.baseURL+'context_help/parent_child_instructions.html #content',
@@ -1857,7 +1857,7 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
             
             $('<span style="padding-left:40px;color:gray;cursor:pointer">ID: '
                 +this._currentEditID+' Code: '+$Db.getConceptID('dty', this._currentEditID)
-                +' <span class="ui-icon ui-icon-circle-info"/></span>')
+                +' <span class="ui-icon ui-icon-circle-info"></span></span>')
                 .attr('title', baseFieldDetails)
                 .appendTo(bottom_div);
                 
@@ -2230,7 +2230,7 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
             }});
                 
             
-            this.defval_container.find('input[name="defvalType"][value="'+(is_increment?1:0)+'"]').prop('checked',true).change();
+            this.defval_container.find('input[name="defvalType"][value="'+(is_increment?1:0)+'"]').prop('checked',true).trigger('change');
             if(!is_increment){
                 this.defval_container.find('input.text').val( defval );
             }
@@ -2256,7 +2256,7 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
         $('<div style="line-height:2ex;">'
                 +'<input type="radio" value="0" name="widthType">'
                 +'<input class="text ui-widget-content ui-corner-all" autocomplete="disabled" autocorrect="off" autocapitalize="none" spellcheck="false" type="number" min="3" style="max-width:7ex;width7ex;">'
-                +'<span style="width:15px;display:inline-block"/>'
+                +'<span style="width:15px;display:inline-block"></span>'
                 +'<label style="text-align:left;line-height:12px;">'
                 +'<input type="radio" value="1" name="widthType" style="margin-top:0px">'
                 +'&nbsp;Max width</label>'
@@ -2284,7 +2284,7 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
             }
         });
 
-        $ele.find('input[name="widthType"][value="'+(is_max ? 1 : 0)+'"]').prop('checked', true).change();
+        $ele.find('input[name="widthType"][value="'+(is_max ? 1 : 0)+'"]').prop('checked', true).trigger('change');
         if(!is_max){
             $ele.find('input.text').val(curr_width);
         }
@@ -2343,9 +2343,9 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
     //
     _cleanTreeStructure: function(data){
         
-        if($.isArray(data)){
+        if(Array.isArray(data)){
             for(var i=0; i<data.length; i++){
-                if(data[i].folder || $.isArray(data[i].children)){
+                if(data[i].folder || Array.isArray(data[i].children)){
                     this._cleanTreeStructure( data[i].children );        
                 }else{
                     if(data[i].title) delete data[i].title;
@@ -2482,14 +2482,14 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
     //
     closeDialog: function(is_force){
         
-        if($.isFunction(this.saveUiPreferences)) this.saveUiPreferences();
+        if(window.hWin.HUL.isFunction(this.saveUiPreferences)) this.saveUiPreferences();
 
 
         if(this.options.external_toolbar){
             //rts editor is opened from record editor
 
             if(is_force || this.defaultBeforeClose()){
-                if($.isFunction(this.options.onClose)){
+                if(window.hWin.HUL.isFunction(this.options.onClose)){
                     this.options.onClose.call();
                 } 
             }
@@ -2927,7 +2927,7 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
 
         //enable proceed button on checkbox mark    
         var btn = $dlg.parent().find('button:contains("Proceed")');
-        var chb = $dlg.find('input[type="checkbox"]').change(function(){
+        var chb = $dlg.find('input[type="checkbox"]').on('change',function(){
             window.hWin.HEURIST4.util.setDisabled(btn, !chb.is(':checked') );
         })
         window.hWin.HEURIST4.util.setDisabled(btn, true);
@@ -3176,7 +3176,7 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
             return;
         }
 
-        if(dty_IDs !== null && !window.hWin.HEURIST4.util.isArray(dty_IDs)){
+        if(dty_IDs !== null && !Array.isArray(dty_IDs)){
             dty_IDs = [ dty_IDs ];
         }
 
@@ -3220,7 +3220,7 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
                 $div.find('span:first-child').text(count);
 
                 if($div.find('.ui-icon').length == 0){
-                    $div.append($('<span class="ui-icon ui-icon-check" title="Find records WITH field" style="color:gray;margin-left:5px;font-size:12px;" />'))
+                    $div.append($('<span class="ui-icon ui-icon-check" title="Find records WITH field" style="color:gray;margin-left:5px;font-size:12px;" ></span>'))
                         .append($('<span class="ui-icon" title="Find records WITHOUT field" style="color:gray;font-size:2em;text-indent:6px;">\\</span>'));
 
                     $div.contextmenu({
@@ -3450,7 +3450,7 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
 
                 $dlg.find('.target_name').text(name);
 
-                $dlg.find('input[name="shared_flds_only"]').prop('checked', false).change();
+                $dlg.find('input[name="shared_flds_only"]').prop('checked', false).trigger('change');
             },
             close: function(){
 
@@ -3464,7 +3464,7 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
 
         $('.target_placement').css('cursor', 'pointer').attr('title', 'Click to change target');
 
-        $dlg.find('.target_placement').click((e) => {
+        $dlg.find('.target_placement').on('click',(e) => {
 
             // Allow user to change target record type
             let $ele = $(e.target);
@@ -3479,7 +3479,7 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
             $target_rectype.hSelect('open');
         });
 
-        $dlg.find('input[name="shared_flds_only"]').change((e) => {
+        $dlg.find('input[name="shared_flds_only"]').on('change',(e) => {
 
             // Show either all fields or only shared fields
             let get_shared = $dlg.find('input[name="shared_flds_only"]').is(':checked');

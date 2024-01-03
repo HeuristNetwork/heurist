@@ -497,7 +497,7 @@ function ShowReps( is_snippet_editor ) {
         
         var rtSelect = $('#rectype_selector').css('max-width','150px');
         var $rec_select = window.hWin.HEURIST4.ui.createRectypeSelect( rtSelect.get(0), null, window.hWin.HR('select record type'), true );
-        $rec_select.change(function(event){
+        $rec_select.on('change',function(event){
             _loadRecordTypeTreeView();
         });
     }
@@ -884,7 +884,7 @@ function ShowReps( is_snippet_editor ) {
             ele.dispatchEvent(event);
         }else{
             // direct dispatch
-            ele.click();
+            ele.trigger('click');
         }
     }
 
@@ -930,7 +930,7 @@ function ShowReps( is_snippet_editor ) {
             _loadRecordTypeTreeView();
             _loadTestRecords()
         }else{
-            $rec_select.change(function(event){
+            $rec_select.on('change',function(event){
                 _loadRecordTypeTreeView();
                 _loadTestRecords();
             }); 
@@ -1491,24 +1491,24 @@ function ShowReps( is_snippet_editor ) {
         $ele_popup = $('#insert-popup');
         $ele_popup.find('#btn_insert_var').attr('onclick',null).button()
             .off('click')
-            .click(__on_add);
+            .on('click',__on_add);
         $ele_popup.find('#btn_insert_if').attr('onclick',null).button()
             .off('click')
-            .click(__on_add);
+            .on('click',__on_add);
             
         $ele_popup.find('#btn_insert_loop').attr('onclick',null).button()
             .off('click')
-            .click(__on_add);
+            .on('click',__on_add);
         $ele_popup.find('#btn_insert_loop_var').attr('onclick',null).button()
             .off('click')
-            .click(__on_add);
+            .on('click',__on_add);
         $ele_popup.find('#btn_insert_loop_if').attr('onclick',null).button()
             .off('click')
-            .click(__on_add);
+            .on('click',__on_add);
             
         $ele_popup.find('#selInsertModifiers').attr('onchange',null)
             .off('change')
-            .change(function __on_add(){
+            .on('change',function __on_add(){
         
                 var $dlg2 = $(event.target).parents('.ui-dialog-content');
                 var sel = $dlg2.find("#selInsertModifiers")
@@ -2298,7 +2298,7 @@ $(function(){
 * stops backspace -> back
 var rx = /INPUT|SELECT|TEXTAREA/i;
 
-$(document).bind("keydown keypress", function(e){
+$(document).on("keydown keypress", function(e){
 if( e.which == 8 ){ // 8 == backspace
 if(!rx.test(e.target.tagName) || e.target.disabled || e.target.readOnly ){
 e.preventDefault();

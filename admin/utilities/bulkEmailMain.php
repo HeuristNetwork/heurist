@@ -418,7 +418,7 @@ if(!$has_emails || empty($emails)) {
 
                         if($(e.target).is('div')){
 
-                            $(e.target).find('input').click();
+                            $(e.target).find('input').trigger('click');
                         }
                     });
 
@@ -1027,7 +1027,7 @@ if(!$has_emails || empty($emails)) {
 
                 set_element_position();
 
-                $("#btnCalRecCount").click(getRecordCount);
+                $("#btnCalRecCount").on('click',getRecordCount);
 
                 getInitDbList();
             });

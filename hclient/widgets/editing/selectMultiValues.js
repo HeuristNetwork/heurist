@@ -117,7 +117,7 @@ $.widget( "heurist.selectMultiValues", {
     //
     //
     _initList: function(){
-        if($.isArray(this.options.allValues) && this.options.allValues.length>0){
+        if(Array.isArray(this.options.allValues) && this.options.allValues.length>0){
             this._showAsDialog();
             this._initTreeView( this.options.allValues );    
         }else{
@@ -160,7 +160,7 @@ $.widget( "heurist.selectMultiValues", {
                     res.push(currname);
                 });
                 
-                if($.isFunction(that.options.onselect)){
+                if(window.hWin.HUL.isFunction(that.options.onselect)){
                     that.options.onselect.call(that, res);           
                 }
                 that._as_dialog.dialog('close');
@@ -278,7 +278,7 @@ $.widget( "heurist.selectMultiValues", {
         
         if(window.hWin.HEURIST4.util.isempty(this.options.selectedValues)){
             this.options.selectedValues = [];
-        }else if(!window.hWin.HEURIST4.util.isArray(this.options.selectedValues)){
+        }else if(!Array.isArray(this.options.selectedValues)){
             this.options.selectedValues = this.options.selectedValues.split(';');
         }
         

@@ -162,7 +162,7 @@ $.widget( "heurist.lookupNakalaAuthor", $.heurist.recordAction, {
                 }
             }
 
-            if(window.hWin.HEURIST4.util.isArray(s)){
+            if(Array.isArray(s)){
                 s = s.join('; ');
             }else if(window.hWin.HEURIST4.util.isObject(s)){
             	s = Object.values(s).join('; ');
@@ -326,7 +326,7 @@ $.widget( "heurist.lookupNakalaAuthor", $.heurist.recordAction, {
 
             if(window.hWin.HEURIST4.util.isJSON(response)){
 
-                if(window.hWin.HEURIST4.util.isArray(response) && response.length > 0){ // Search result
+                if(Array.isArray(response) && response.length > 0){ // Search result
                     that._onSearchResult(response);
                 }else if(response.status && response.status != window.hWin.ResponseStatus.OK){ // Error return
                     window.hWin.HEURIST4.msg.showMsgErr(response);
@@ -353,7 +353,7 @@ $.widget( "heurist.lookupNakalaAuthor", $.heurist.recordAction, {
         var maxRecords = $('#rec_limit').val(); // limit number of returned records
         maxRecords = (!maxRecords || maxRecords <= 0) ? 20 : maxRecords;
 
-        let is_array = window.hWin.HEURIST4.util.isArray(array_data);
+        let is_array = Array.isArray(array_data);
 
         if (is_array && array_data.length > 0) {
 

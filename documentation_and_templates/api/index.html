@@ -40,7 +40,7 @@
         a.style = "display: none";
         a.href = textFile;
         a.download = 'schema.txt';
-        a.click();
+        a.trigger('click');
 
         return textFile;
       };
@@ -78,7 +78,7 @@
 
       function initDynamic() {
         // tabs
-        $('.nav-tabs-examples a').click(function (e) {
+        $('.nav-tabs-examples a').on('click',function (e) {
             e.preventDefault();
             $(this).tab('show');
         });

@@ -59,7 +59,7 @@ function initialisePagination() {
         enabled_pages.each(
             function() {
                 let anchor = $(this).children("a");
-                anchor.click(() => {
+                anchor.on('click',() => {
                     enabled_pages.removeClass("active");
                     $(this).addClass("active");
                     displayPage($(this).data("letter"));

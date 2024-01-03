@@ -283,13 +283,13 @@ $system->defineConstants();
         //init buttons
         $("#mapToolbarDiv").css('background','none');
 
-        $("#btnExportKML").button().click(exportKML);
+        $("#btnExportKML").button().on('click',exportKML);
 
         $("#btnPrint").button({showLabel:false, icon: "ui-icon-print"})
-        .click(mapping.printMap);
+        .on('click',mapping.printMap);
 
         $("#btnEmbed").button({showLabel:false, icon: "ui-icon-globe-b"})
-        .click(showEmbedDialog);
+        .on('click',showEmbedDialog);
 
         $('#btn_help').button({icon: "ui-icon-help", showLabel:false}).on('click', 3, function(){
             var $helper = $("#helper");
@@ -368,14 +368,14 @@ $system->defineConstants();
             $items = $items.'<li rtid="'.checkRt('RT_QUERY_SOURCE').'"><a href="#">Query layer</a></li>';
             ?>
             $("#btnMapRefresh").button({ showLabel:false, icon:"ui-icon-arrowrefresh-1-e" })
-            .click( refreshMapDocument );
+            .on('click', refreshMapDocument );
             $("#btnMapNew").button({ showLabel:false, icon: "ui-map-document" })
-            .click( function(){ addNewRecord('<?=checkRt('RT_MAP_DOCUMENT')?>');} )
+            .on('click', function(){ addNewRecord('<?=checkRt('RT_MAP_DOCUMENT')?>');} )
             .append('<span class="ui-icon ui-icon-plus" style="margin-left:0px;margin-top:-2px" />');
             $("#btnMapEdit").button({showLabel:false, icon: "ui-icon-pencil"})
-            .click( mapEdit );
+            .on('click', mapEdit );
             $("#btnMapLayer").button({showLabel:false, icon: "ui-map-layer"})
-            .click(function(){ addNewRecord('<?=checkRt('RT_MAP_LAYER')?>');})
+            .on('click',function(){ addNewRecord('<?=checkRt('RT_MAP_LAYER')?>');})
             .append('<span class="ui-icon ui-icon-plus" style="margin-left:0px;margin-top:-2px" />');
 
             menu_datasets = $('<ul><?=$items?></ul>')
@@ -401,8 +401,8 @@ $system->defineConstants();
             
             btn_datasets = $("#btnMapDataSourceArrow").button({showLabel:false, icon: 'ui-icon-triangle-1-s'})
                 .css({'padding':'0.4em', 'max-width':'12px'})
-                .click(__drodown_mapDataSources);
-            $("#btnMapDataSource").button({showLabel:false,icon: "ui-icon-bars"}).click(__drodown_mapDataSources);
+                .on('click',__drodown_mapDataSources);
+            $("#btnMapDataSource").button({showLabel:false,icon: "ui-icon-bars"}).on('click',__drodown_mapDataSources);
 
 
             $("#mapToolbar").controlgroup();

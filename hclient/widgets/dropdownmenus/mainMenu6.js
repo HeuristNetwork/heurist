@@ -408,7 +408,7 @@ $.widget( "heurist.mainMenu6", {
     _updateDefaultAddRectype: function( preferences ){
 
         var prefs = (preferences)?preferences:window.hWin.HAPI4.get_prefs('record-add-defaults');
-        if($.isArray(prefs) && prefs.length>0){
+        if(Array.isArray(prefs) && prefs.length>0){
             var rty_ID = prefs[0];
 
             var ele = this.element.find('li[data-action-popup="recordAdd"]');
@@ -1491,7 +1491,7 @@ $.widget( "heurist.mainMenu6", {
                             title = link.text();
                         }
                     
-                        $('<span class="ui-icon '+link.attr('data-icon')+'"/>'
+                        $('<span class="ui-icon '+link.attr('data-icon')+'"></span>'
                          +'<span class="menu-text truncate" style="max-width: 109px;">'+title+'</span>')
                         .appendTo(item);
 
@@ -1551,7 +1551,7 @@ $.widget( "heurist.mainMenu6", {
                 
                 var btn = this.containers['publish'].find('#'
                                                     +li.attr('data-cms-action'));
-                if(btn.length>0) btn.click();
+                if(btn.length>0) btn.trigger('click');
                 
             }});
         }else  if (section=='populate'){
@@ -1683,10 +1683,10 @@ $.widget( "heurist.mainMenu6", {
         
         
         var s = '<li class="menu-explore" data-id="bookmark" style="display:'+(bm_on?'block':'none')+'">'  //data-action="svs_list" 
-            +'<span class="ui-icon ui-icon-user"/><span class="menu-text">'+window.hWin.HR('My Bookmarks')
+            +'<span class="ui-icon ui-icon-user"></span><span class="menu-text">'+window.hWin.HR('My Bookmarks')
             +'</span></li>'
             +'<li class="menu-explore" data-id="all">'  //data-action="svs_list" 
-            +'<span class="ui-icon ui-icon-user"/><span class="menu-text">'+window.hWin.HR('My Searches')
+            +'<span class="ui-icon ui-icon-user"></span><span class="menu-text">'+window.hWin.HR('My Searches')
             +'</span></li>'            
         
         var groups = window.hWin.HAPI4.currentUser.ugr_Groups;
@@ -1704,7 +1704,7 @@ $.widget( "heurist.mainMenu6", {
                 }
                 
                 s = s + '<li class="menu-explore" data-id="'+groupID+'">' // data-action="svs_list" 
-                    +'<span class="ui-icon ui-icon-'+sicon+'"/><span class="menu-text'+struncate+'">'
+                    +'<span class="ui-icon ui-icon-'+sicon+'"></span><span class="menu-text'+struncate+'">'
                     +name
                     +'</span></li>';
             }
@@ -1906,10 +1906,10 @@ $.widget( "heurist.mainMenu6", {
             +window.hWin.HAPI4.baseURL+'hclient/assets/v6/gs_'+section+'.png"></div>'
             
         +'<span class="ui-heurist-title header" id="menu-guide" style="display: inline-block; font-weight: normal;padding-left:20px;cursor: pointer">'
-            +'<span class="ui-icon ui-icon-help"/>&nbsp;Menu guide</span>'            
+            +'<span class="ui-icon ui-icon-help"></span>&nbsp;Menu guide</span>'            
             
         +'<span class="ui-heurist-title header" id="start-hints" style="display: inline-block; font-weight: normal;padding-left:20px;cursor: pointer">'
-            +'<span class="ui-icon ui-icon-help"/>&nbsp;Startup hints</span>' 			
+            +'<span class="ui-icon ui-icon-help"></span>&nbsp;Startup hints</span>' 			
 			
         +'<div class="ui-heurist-title" style="font-size: large !important;width: 80px;padding-top: 6px;">'+sname+'</div>'
         +'</div></div>')            
@@ -1929,7 +1929,7 @@ $.widget( "heurist.mainMenu6", {
                 ele.load(window.hWin.HAPI4.baseURL+'hclient/widgets/dropdownmenus/welcome.html',
                         function(){
                            var url = window.hWin.HAPI4.baseURL+'?db='+window.hWin.HAPI4.database;
-                           $('.bookmark-url').html('<a href="#">'+url+'</a>').click(function(e){
+                           $('.bookmark-url').html('<a href="#">'+url+'</a>').on('click',function(e){
                                 window.hWin.HEURIST4.util.stopEvent(e);
                                 window.hWin.HEURIST4.msg.showMsgFlash('Press Ctrl+D to bookmark this page',1000);
                                 return false;
@@ -2343,7 +2343,7 @@ $.widget( "heurist.mainMenu6", {
 
                     that.introductions[section].find('div.gs-box.ui-heurist-'+section)
                     .prepend( '<span class="ui-heurist-title header" id="start-hints" style="padding-top:57px;font-weight:normal;padding-left:20px;cursor:pointer">'
-                                +'<span class="ui-icon ui-icon-help"/>&nbsp;Startup hints</span>' ).click(function(){ that._loadStartHints(null); });					
+                                +'<span class="ui-icon ui-icon-help"></span>&nbsp;Startup hints</span>' ).on('click',function(){ that._loadStartHints(null); });					
 
                     that.introductions[section].find('.gs-box')
                         .css({position:'absolute', left:'10px', right:'10px', top:'10px', 'min-width':'700px', margin:0}) //,'padding-left':20
@@ -2384,7 +2384,7 @@ $.widget( "heurist.mainMenu6", {
                     // Link to Menu Guide
                     that.introductions[section].find('div.gs-box.ui-heurist-'+section)
                     .prepend( '<span class="ui-heurist-title header" id="menu-guide" style="padding-top:57px;font-weight:normal;padding-left:20px;cursor:pointer">'
-								+'<span class="ui-icon ui-icon-help"/>&nbsp;Menu guide</span>' ).click(function(){ that._loadIntroductoryGuide(null); });
+								+'<span class="ui-icon ui-icon-help"></span>&nbsp;Menu guide</span>' ).on('click',function(){ that._loadIntroductoryGuide(null); });
 
                     // Display Content
                     that.introductions[section].find('.gs-box')
@@ -2402,7 +2402,7 @@ $.widget( "heurist.mainMenu6", {
 							
 							// Bookmark Link
 							var url = window.hWin.HAPI4.baseURL+'?db='+window.hWin.HAPI4.database;
-							$('.bookmark-url').html('<a href="#">'+url+'</a>').click(function(e){
+							$('.bookmark-url').html('<a href="#">'+url+'</a>').on('click',function(e){
 								window.hWin.HEURIST4.util.stopEvent(e);
 								window.hWin.HEURIST4.msg.showMsgFlash('Press Ctrl+D to bookmark this page',1000);
 								return false;

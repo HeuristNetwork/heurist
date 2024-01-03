@@ -209,7 +209,7 @@ $.widget( "heurist.searchInput", {
       
         if(this.input_search.is(':visible')) {
                 try{
-                    this.input_search.focus();
+                    this.input_search.trigger('focus');
                 }catch(e){}
         }
 
@@ -281,7 +281,7 @@ $.widget( "heurist.searchInput", {
             }
         }else{
             
-            if(!$.isFunction($('body')['showSearchBuilder'])){ 
+            if(!window.hWin.HUL.isFunction($('body')['showSearchBuilder'])){ 
             
                 var path = window.hWin.HAPI4.baseURL + 'hclient/widgets/search/';
                 var scripts = [ path+'searchBuilder.js', 
@@ -348,14 +348,14 @@ $.widget( "heurist.searchInput", {
             //data is search query request
             if(data.reset){
                that.input_search.val('');
-               that.input_search.change();
+               that.input_search.trigger('change');
             }
             else if(window.hWin.HEURIST4.util.isempty(data.topids) && data.apply_rules!==true){ //topids not defined - this is not rules request
 
                 //request is from some other widget (outside)
                 if(data.source!=that.element.attr('id')){
                     var qs;
-                    if($.isArray(data.q)){
+                    if(Array.isArray(data.q)){
                         qs = JSON.stringify(data.q);
                     }else{
                         qs = data.q;
@@ -375,7 +375,7 @@ $.widget( "heurist.searchInput", {
                     }
                 }
 
-                that.input_search.change();
+                that.input_search.trigger('change');
             }
         }
         else if(e.type == window.hWin.HAPI4.Event.ON_REC_SEARCH_FINISH){ //search completed

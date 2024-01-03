@@ -150,7 +150,7 @@ $.widget( "heurist.lookupBnFLibrary_aut", $.heurist.recordAction, {
         });
 
         this.tabs_container = this.element.find('#tabs-cont').tabs();
-        this.element.find('#inpt_any').focus();
+        this.element.find('#inpt_any').trigger('focus');
 
         return this._super();
     },
@@ -400,7 +400,7 @@ $.widget( "heurist.lookupBnFLibrary_aut", $.heurist.recordAction, {
 
                 if(val != null){
 
-                    var val_isArray = window.hWin.HEURIST4.util.isArray(val);
+                    var val_isArray = Array.isArray(val);
                     var val_isObject = window.hWin.HEURIST4.util.isObject(val);
 
                     // Match term labels with val, need to return the term's id to properly save its value
@@ -469,7 +469,7 @@ $.widget( "heurist.lookupBnFLibrary_aut", $.heurist.recordAction, {
                             }
                             complete_val += val[key];
                         }
-                    }else if(field_type != 'resource' && window.hWin.HEURIST4.util.isArray(val)){
+                    }else if(field_type != 'resource' && Array.isArray(val)){
                         res[dty_ID].push(val.join(', '));
                     }else{
                         res[dty_ID].push(val);    

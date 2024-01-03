@@ -64,7 +64,7 @@ $.widget( "heurist.ruleBuilder", {
             .appendTo( cont );
 
         
-       if(that.options.recordtypes && !$.isArray(that.options.recordtypes)){
+       if(that.options.recordtypes && !Array.isArray(that.options.recordtypes)){
            that.options.recordtypes = that.options.recordtypes.split(',');
        }
              
@@ -508,7 +508,7 @@ $.widget( "heurist.ruleBuilder", {
 
         var query = '';
 
-        if(window.hWin.HEURIST4.util.isArray(codes) && codes.length==6){
+        if(Array.isArray(codes) && codes.length==6){
 
             var rt_source = codes[0];
             var dt_ID     = codes[1];
@@ -600,7 +600,7 @@ $.widget( "heurist.ruleBuilder", {
                     }
                 }
                 
-                if($.isArray(filter)){
+                if(Array.isArray(filter)){
                     filter =  (filter.length==0)?'':JSON.stringify(filter);
                 }
                 
@@ -609,7 +609,7 @@ $.widget( "heurist.ruleBuilder", {
                     
             }
             
-            if(window.hWin.HEURIST4.util.isArray(codes) && codes.length==6){
+            if(Array.isArray(codes) && codes.length==6){
 
                 var rt_source = codes[0];
                 var dt_ID     = codes[1];
@@ -656,7 +656,7 @@ $.widget( "heurist.ruleBuilder", {
 
                 //add and init subrules
                 var that = this;
-                if(window.hWin.HEURIST4.util.isArray(this.options.rules.levels))
+                if(Array.isArray(this.options.rules.levels))
                     $.each( this.options.rules.levels , function( index, value ) {
                         that._addChildRule(value);
                     });
@@ -752,7 +752,7 @@ $.widget( "heurist.ruleBuilder", {
                 if(window.hWin.HEURIST4.util.isJSON(filter))
                 {
                     filter = window.hWin.HEURIST4.util.isJSON(filter);
-                    if(!$.isArray(filter)){
+                    if(!Array.isArray(filter)){
                         filter = [filter];
                     }
                     for(var i=0; i<filter.length; i++){

@@ -130,7 +130,7 @@ function hLayout(args) {
             $container = $(_containerid); 
         }
      
-        //if(!$.isFunction($container.layout)) return;
+        //if(!window.hWin.HUL.isFunction($container.layout)) return;
         if(!$container.hasClass('ui-layout-container')) {
             $container = $container.children().find('.ui-layout-container');
         }
@@ -143,7 +143,7 @@ function hLayout(args) {
             myLayout = $container.layout();
         
         
-        if($.isArray(args)){
+        if(Array.isArray(args)){
             if(args.length<1) return;
             pane = args[0];
         }else{
@@ -759,7 +759,7 @@ console.error('Cardinal layout widget does not have proper options');
 					
                     if(pos == 'east'){ 
                         // Prevent east pane's tabs from navigating with arrow keys
-                        $tabs.find('.ui-tabs-anchor').keydown(function(e){
+                        $tabs.find('.ui-tabs-anchor').on('keydown',function(e){
                             e.stopPropagation();
                             e.preventDefault();
 
@@ -972,14 +972,14 @@ console.error('Cardinal layout widget does not have proper options');
 
             app.widget = $content;
 
-            if($.isFunction($('body')[app.widgetname])){ //OK! widget script js has been loaded
+            if(window.hWin.HUL.isFunction($('body')[app.widgetname])){ //OK! widget script js has been loaded
             
                 manage_dlg = $content[app.widgetname]( options );
             }else{
                 //this is normal way of widget initialization
                 // script is loaded dynamically and init function is widget name
                 $.getScript( window.hWin.HAPI4.baseURL + app.script, function() {  //+'?t='+(new Date().getTime())
-                    if($.isFunction($content[app.widgetname])){
+                    if(window.hWin.HUL.isFunction($content[app.widgetname])){
                         $content[app.widgetname]( options );   //call function
                     }else{
                         window.hWin.HEURIST4.msg.showMsgErr('Widget '+app.widgetname+' not loaded. Verify your configuration');
@@ -1006,7 +1006,7 @@ console.error('Cardinal layout widget does not have proper options');
 
         if(!apps) return null;
 
-        if(! $.isArray(apps)){
+        if(! Array.isArray(apps)){
             apps = [apps];
         }
         if(tabcfg==null){
@@ -1278,7 +1278,7 @@ console.error('Cardinal layout widget does not have proper options');
         //add style to header
         if(!Hul.isempty(layout.cssfile)){
             
-            if(!$.isArray(layout.cssfile)){
+            if(!Array.isArray(layout.cssfile)){
                 layout.cssfile = [layout.cssfile];
             }
             for (var idx in layout.cssfile){
@@ -1324,12 +1324,12 @@ console.error('Cardinal layout widget does not have proper options');
                 $(tabb).children('.ui-tabs-panel[layout_id!="FAP"]').css({position:'absolute', top:'5.01em',
                         left:0,bottom:'0.2em',right:0, 'min-width':'75em',overflow:'hidden'});
                 
-                tabheader.find('a').css({'width':'100%','outline':0}); 
+                tabheader.find('a').css({'width':'100%','outline':'0'}); 
                 
                 var lis = tabheader.children('li');
                 var count_lis = lis.length;
                     lis.css({
-                            'outline':0,
+                            'outline':'0',
                             'border':'none',
                             'font-weight': 'bold',
                             //A11 'font-size': '1.4em',
@@ -1361,7 +1361,7 @@ console.error('Cardinal layout widget does not have proper options');
                        
                        $('<span class="ui-icon ui-icon-close" title="Close this tab" '
                        +'style="font-size: 16px;width:24px;height:24px;position:absolute;right:10;top:20;z-index:2;cursor:pointer"></span>')
-                       .click(function(){ 
+                       .on('click',function(){ 
                             $(item).hide(); 
                             if($(tabb).tabs("option", "active")==1) $(tabb).tabs({active:0}); 
                        })
@@ -1435,7 +1435,7 @@ console.error('Cardinal layout widget does not have proper options');
 
         executeWidgetMethod: function( element_id, widgetname, method, params ){
             var app = window.hWin.document.getElementById(element_id);
-            if(app && $.isFunction($(app)[widgetname]))
+            if(app && window.hWin.HUL.isFunction($(app)[widgetname]))
                 $(app)[widgetname](method, params);
         },
     
@@ -1467,7 +1467,7 @@ console.error('Cardinal layout widget does not have proper options');
             if(layout){
                 _appInitAll(layout, $container); 
             }else{
-                if($.isFunction(onInitComplete)){
+                if(window.hWin.HUL.isFunction(onInitComplete)){
                         onInitComplete.call();
                 }
             }

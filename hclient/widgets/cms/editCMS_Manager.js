@@ -318,7 +318,7 @@ function editCMS_Manager( options ){
                         //exit allowed
                         if(need_close_explicitly!==false) closeCMSEditorFinally();
 
-                        if($.isFunction(main_callback) && home_page_record_id>0){
+                        if(window.hWin.HUL.isFunction(main_callback) && home_page_record_id>0){
                             main_callback( home_page_record_id, home_page_record_title ); 
                         }
                 });

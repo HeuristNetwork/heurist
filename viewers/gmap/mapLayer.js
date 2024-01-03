@@ -75,7 +75,7 @@ function hMapLayer( _options ) {
             //obfuscated file id
             var file_info = _recordset.fld(_record, window.hWin.HAPI4.sysinfo['dbconst']['DT_SERVICE_URL']);
 
-            if($.isArray(file_info)){
+            if(Array.isArray(file_info)){
 
                 var url = window.hWin.HAPI4.baseURL + '?db=' + window.hWin.HAPI4.database + '&mode=url&file='+
                 file_info[0];

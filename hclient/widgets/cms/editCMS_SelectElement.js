@@ -157,7 +157,7 @@ function editCMS_SelectElement( callback ){
 
                 });
 
-                sel.change(function(e){
+                sel.on('change',function(e){
                     window.hWin.HEURIST4.util.setDisabled( $dlg.parents('.ui-dialog').find('#btnDoAction'), false );
                     var sel = e.target;
                     var t_name = $(sel).val();
@@ -179,7 +179,7 @@ function editCMS_SelectElement( callback ){
                     }
                 });
 
-                sel.val('group').change();
+                sel.val('group').trigger('change');
                 selected_element = 'group';
 
             }

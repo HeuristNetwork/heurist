@@ -188,7 +188,7 @@ if($registrationRequired) //show user registration dialog at once
 
                     window.hWin.HEURIST4.util.stopEvent(event);
 
-                    if($.isFunction($('body').profile_edit)){
+                    if(window.hWin.HUL.isFunction($('body').profile_edit)){
                         
                         //@todo replace with entity sysUsers
                         if(profile_edit_dialog==null){
@@ -209,7 +209,7 @@ if($registrationRequired) //show user registration dialog at once
 
                     }else{
                         $.getScript(window.hWin.HAPI4.baseURL+'hclient/widgets/profile/profile_edit.js', function() {
-                            if($.isFunction($('body').profile_edit)){
+                            if(window.hWin.HUL.isFunction($('body').profile_edit)){
                                 doRegister();
                             }else{
                                 window.hWin.HEURIST4.msg.showMsgErr('Widget "Profile edit" cannot be loaded!');
@@ -335,7 +335,7 @@ if($registrationRequired){ //show user registration dialog again after wrong cap
                     ele.value = user_name.substr(0,5).replace(/[^a-zA-Z0-9$_]/g,'');
                 }
 
-                $("#dbname").focus();
+                $("#dbname").trigger('focus');
             }
 
             //

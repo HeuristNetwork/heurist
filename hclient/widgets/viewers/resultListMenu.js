@@ -724,7 +724,7 @@ $.widget( "heurist.resultListMenu", {
                                 that.executeAction( "set_wg_and_vis", context );
                         }
             };*/            
-        }else if(!$.isFunction(callback)){
+        }else if(!window.hWin.HUL.isFunction(callback)){
             callback = function(context){
                 window.hWin.HAPI4.NEED_TAG_REFRESH = true; //flag to reload tags in next manageUsrTags invocation
             }

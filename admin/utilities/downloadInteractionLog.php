@@ -194,14 +194,14 @@ if(@$_REQUEST['actionType']){ // filter and download interaction log as CSV file
 
                 var $dateSection = $('label#dateLastSev, label#dateRange');
 
-                $('input#enableDF').click(function(event){
+                $('input#enableDF').on('click',function(event){
                     window.hWin.HEURIST4.util.setDisabled($dateSection, !$(this).is(':checked'));
                 });
                 window.hWin.HEURIST4.util.setDisabled($dateSection, true);
 
                 $('div#wrkGroup')
                     .css('cursor', 'pointer')
-                    .click(function(){
+                    .on('click',function(){
                         var popup_opts = {
                             select_mode: 'select_multi',
                             select_return_mode: 'recordset',
@@ -232,7 +232,7 @@ if(@$_REQUEST['actionType']){ // filter and download interaction log as CSV file
                         window.hWin.HEURIST4.ui.showEntityDialog('sysGroups', popup_opts);
                     });
 
-                $('button#exportForm').click(function(event){
+                $('button#exportForm').on('click',function(event){
                     var formData = $('input, select').serialize();
                     var url = 'downloadInteractionLog.php?db=' + window.hWin.HAPI4.database + '&' + formData;
 

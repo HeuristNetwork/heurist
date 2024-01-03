@@ -259,7 +259,7 @@ $trmDuplicates = @$lists2["trm_dupes"];
                 $('button').button();
                 $('#linkbar').tabs('refresh');
 				
-                $('input[type="radio"][name="date_format"]').change(function(event){
+                $('input[type="radio"][name="date_format"]').on('change',function(event){
                     var ele = $(event.target);
 
                     var dates = $('.new_date');
@@ -1126,7 +1126,7 @@ if($active_all || in_array('empty_fields', $active)) {
             <div>
                 <h3>Records with empty fields</h3>
                 <span>
-                    <a target=_new href="javascript:void(0)" onclick="{document.getElementById('link_empty_values').click(); return false;}">(show results as search)</a>
+                    <a target=_new href="javascript:void(0)" onclick="{document.getElementById('link_empty_values').trigger('click'); return false;}">(show results as search)</a>
                     <a target=_new href='#' id=selected_link onClick="return open_selected_by_name('recCB6');">(show selected as search)</a>
                 </span>
 
@@ -1727,7 +1727,7 @@ if($active_all || in_array('expected_terms', $active)) {
                         $is_first = false;
                         ?>
                         <h3 style="padding-left:2px">Records with terms not in the list of terms specified for the field</h3>
-                        <span><a target=_new href="javascript:void(0)" onclick="{document.getElementById('link_wrongterms').click(); return false;}">(show results as search)</a></span>
+                        <span><a target=_new href="javascript:void(0)" onclick="{document.getElementById('link_wrongterms').trigger('click'); return false;}">(show results as search)</a></span>
                         <table>
                         <tr>
                             <th style="width: 30px;text-align:left">Record</th>

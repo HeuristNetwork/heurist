@@ -101,7 +101,7 @@
     
     else if(UTMzone!=0) {
         /*
-        if( !$.isFunction(document['Utm']) ){
+        if( !window.hWin.HUL.isFunction(document['Utm']) ){
             var path = window.hWin.HAPI4.baseURL + 'external/js/geodesy-master/';
             var scripts = [path+'vector3d.js', path+'latlon-ellipsoidal.js', path+'utm.js', path+'dms.js'];
         
@@ -193,7 +193,7 @@
             }
         }
     }
-    if(wkt!='' && $.isFunction(callback)){
+    if(wkt!='' && window.hWin.HUL.isFunction(callback)){
         callback.call(this, wkt);
     }
 }

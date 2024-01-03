@@ -29,7 +29,7 @@ if (!window.hWin.HEURIST4){
 if (!window.hWin.HEURIST4.util) 
 {
 
-window.hWin.HEURIST4.util = {
+window.hWin.HUL = window.hWin.HEURIST4.util = {
 
 
     isnull: function(obj){
@@ -39,7 +39,7 @@ window.hWin.HEURIST4.util = {
     isempty: function(obj){
         if (window.hWin.HEURIST4.util.isnull(obj)){
             return true;
-        }else if(window.hWin.HEURIST4.util.isArray(obj)){
+        }else if(Array.isArray(obj)){
             return obj.length<1;
         }else{
             return (obj==="") || (obj==="null");
@@ -97,6 +97,9 @@ window.hWin.HEURIST4.util = {
             }
     },
     
+    isFunction: function(f){
+        return typeof f === 'function';
+    },
 
     isNumber: function (n) {
         //return typeof n === 'number' && isFinite(n);
@@ -171,7 +174,7 @@ window.hWin.HEURIST4.util = {
     //
     setDisabled: function(element, mode){
         if(element){
-            if(!$.isArray(element)){
+            if(!Array.isArray(element)){
                 element = [element];
             }
             $.each(element, function(idx, ele){
@@ -179,7 +182,7 @@ window.hWin.HEURIST4.util = {
                 
                 //if(mode !== (ele.prop('disabled')=='disabled')){
                 
-                if( ($.heurist.hSelect !=="undefined") && $.isFunction($.heurist.hSelect) && ele.hSelect("instance")!=undefined){              
+                if( ($.heurist.hSelect !=="undefined") && window.hWin.HUL.isFunction($.heurist.hSelect) && ele.hSelect("instance")!=undefined){              
 
                     if (mode) {
                         ele.hSelect( "disable" );
@@ -279,7 +282,7 @@ window.hWin.HEURIST4.util = {
     //
     encodeSuspectedSequences: function (val) {
         
-        if(typeof val !== 'string' && ($.isArray(val) || $.isPlainObject(val))) {
+        if(typeof val !== 'string' && (Array.isArray(val) || $.isPlainObject(val))) {
             val = JSON.stringify(val);
         }
         return encodeURIComponent(val.replace(/(\.\.\/)/g, '^^/').replace(/( style=)/g,' xxx_style='));
@@ -295,7 +298,7 @@ window.hWin.HEURIST4.util = {
                     value = value.replace(/[\n\r]+/g, '');
                     value = $.parseJSON(value);    
                 }
-                if($.isArray(value) || $.isPlainObject(value)){
+                if(Array.isArray(value) || $.isPlainObject(value)){
                     return value;
                 }
             }
@@ -376,19 +379,13 @@ window.hWin.HEURIST4.util = {
         return params;
     },
     
-    
     isArrayNotEmpty: function (a){
-        return (window.hWin.HEURIST4.util.isArray(a) && a.length>0);
+        return (Array.isArray(a) && a.length>0);
     },
 
-    isArray: function (a)
-    {
-        return $.isArray(a); //Object.prototype.toString.apply(a) === '[object Array]';
-    },
-    
     isGeoJSON: function(a, allowempty){
         
-        if(allowempty && $.isArray(a) && a.length==0){
+        if(allowempty && Array.isArray(a) && a.length==0){
             return true;   
         }else if($.isPlainObject(a)){
             return (a['type']=='Feature' || a['type']=='FeatureCollection' || a['type']=='GeometryCollection');
@@ -804,7 +801,7 @@ window.hWin.HEURIST4.util = {
         if ($idown.length==0) {
             $idown = $('<iframe>', { id:'idown' }).hide().appendTo('body');
         }
-        if ($.isFunction(callback)) {
+        if (window.hWin.HUL.isFunction(callback)) {
             $idown.on('load', callback);   
         }
         $idown.attr('src',url);
@@ -834,7 +831,7 @@ window.hWin.HEURIST4.util = {
         {
             // Chrome allows the link to be clicked
             // without actually adding it to the DOM.
-            link.click();        
+            link.trigger('click');        
             link = null;
         }
         else
@@ -844,14 +841,14 @@ window.hWin.HEURIST4.util = {
             link.onclick = function(){ document.body.removeChild(link); link=null;} //destroy link;
             link.style.display = "none";
             document.body.appendChild(link);
-            link.click();        
+            link.trigger('click');        
         }
 
     },    
 
 
     isRecordSet: function(recordset){
-        return !window.hWin.HEURIST4.util.isnull(recordset) && $.isFunction(recordset.isA) && recordset.isA("hRecordSet");   
+        return !window.hWin.HEURIST4.util.isnull(recordset) && window.hWin.HUL.isFunction(recordset.isA) && recordset.isA("hRecordSet");   
     },
 
     random: function(){
@@ -1034,14 +1031,14 @@ window.hWin.HEURIST4.util = {
     //
     merge_sort: function(array, compare){
 
-        if(!window.hWin.HEURIST4.util.isArray(array) || array.length < 2){
+        if(!Array.isArray(array) || array.length < 2){
             return array;
         }
         if(!compare){
             compare = (a, b) => {
                 return a < b;
             };
-        }else if(!$.isFunction(compare)){
+        }else if(!window.hWin.HUL.isFunction(compare)){
             return array;
         }
 

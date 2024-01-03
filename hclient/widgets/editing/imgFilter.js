@@ -98,7 +98,7 @@ function imgFilter( current_cfg, main_callback, $container=null ){
             if(current_cfg && !window.hWin.HEURIST4.util.isempty(current_cfg[item.attr('name')]))
             {
                 var val = parseInt(current_cfg[item.attr('name')]);
-                item.val( val ).change();    
+                item.val( val ).trigger('change');    
             }
             
         });

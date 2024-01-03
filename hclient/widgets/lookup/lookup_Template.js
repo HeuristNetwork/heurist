@@ -189,7 +189,7 @@ $.widget( "heurist.lookup_Template", $.heurist.recordAction, {
                 }
 
                 s = creator_val;
-            }else if(window.hWin.HEURIST4.util.isArray(s)){
+            }else if(Array.isArray(s)){
                 s = window.hWin.HEURIST4.util.htmlEscape(s.join('; '));
             }else if(window.hWin.HEURIST4.util.isObject(s)){
 
@@ -316,7 +316,7 @@ $.widget( "heurist.lookup_Template", $.heurist.recordAction, {
                     if(window.hWin.HEURIST4.util.isObject(val)){
                         obj_keys = Object.keys(val);
                         val = Object.values(val);
-                    }else if(!window.hWin.HEURIST4.util.isArray(val)){
+                    }else if(!Array.isArray(val)){
                         val = window.hWin.HEURIST4.util.isnull(val) ? '' : val;
                         val = [val];
                     }
@@ -352,7 +352,7 @@ $.widget( "heurist.lookup_Template", $.heurist.recordAction, {
                                 search = cur_val;
                             }
 
-                            if(value != '' && !$.isArray(value) && !$.isPlainObject(value)){
+                            if(value != '' && !Array.isArray(value) && !$.isPlainObject(value)){
                                 if(field_type == 'resource'){ // Record pointer
                                     val[i] = {'value': value, 'search': search};
                                 }else if(field_type == 'relmarker'){ // Relationship marker
@@ -390,7 +390,7 @@ $.widget( "heurist.lookup_Template", $.heurist.recordAction, {
                                 completed_val = cur_val;
                             }
 
-                            if(value != '' && !$.isArray(value) && !$.isPlainObject(value)){
+                            if(value != '' && !Array.isArray(value) && !$.isPlainObject(value)){
 
                                 if(field_type == 'resource'){ // Record pointer
                                     val[i] = {'value': value, 'search': search};
@@ -416,7 +416,7 @@ $.widget( "heurist.lookup_Template", $.heurist.recordAction, {
 
                         if(window.hWin.HEURIST4.util.isObject(val)){ 
                             val = Object.values(val);
-                        }else if(!window.hWin.HEURIST4.util.isArray(val)){
+                        }else if(!Array.isArray(val)){
                             val = [val];
                         }
 

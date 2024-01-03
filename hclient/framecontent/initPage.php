@@ -178,10 +178,25 @@ if($allowGoogleAnalytics && !$isLocalHost) {
     }
 }
 
-if($isLocalHost){
+$isUpgrade = true;
+
+if($isUpgrade){
     ?>
+
+    <script src="https://code.jquery.com/jquery-3.7.1.js"></script>
+    <script src="https://code.jquery.com/jquery-migrate-3.4.1.js"></script>
+    <script src="https://code.jquery.com/ui/1.13.2/jquery-ui.js"></script>
+    
+    <script type="text/javascript" src="<?php echo PDIR;?>external/jquery-file-upload/js/jquery.iframe-transport.js"></script>
+    <script type="text/javascript" src="<?php echo PDIR;?>external/jquery-file-upload/js/jquery.fileupload.js"></script>
+
+<?php
+}else if($isLocalHost){
+    ?>
+    
     <script type="text/javascript" src="<?php echo PDIR;?>external/jquery-ui-1.12.1/jquery-1.12.4.js"></script>
     <script type="text/javascript" src="<?php echo PDIR;?>external/jquery-ui-1.12.1/jquery-ui.js"></script>
+    
     <script type="text/javascript" src="<?php echo PDIR;?>external/jquery-file-upload/js/jquery.iframe-transport.js"></script>
     <script type="text/javascript" src="<?php echo PDIR;?>external/jquery-file-upload/js/jquery.fileupload.js"></script>
     <?php
@@ -297,7 +312,7 @@ if($isLocalHost){
         {
             applyTheme();
 
-            if(!window.hWin.HEURIST4.util.isnull(onAboutInit) && $.isFunction(onAboutInit)){
+            if(!window.hWin.HEURIST4.util.isnull(onAboutInit) && window.hWin.HUL.isFunction(onAboutInit)){
                 if(window.hWin.HAPI4.sysinfo['layout']!='WebSearch')
                     onAboutInit(); //init about dialog
             }
@@ -311,7 +326,7 @@ if($isLocalHost){
             success = false;
         }
 
-        if($.isFunction(onPageInit)){
+        if(window.hWin.HUL.isFunction(onPageInit)){
             onPageInit(success);
         }
     }
@@ -335,12 +350,12 @@ if($isLocalHost){
                     if(arguments){                    
                     if(arguments[1]){
 
-                        if(!window.hWin.HEURIST4.util.isnull(callback) && $.isFunction(callback)){
+                        if(!window.hWin.HEURIST4.util.isnull(callback) && window.hWin.HUL.isFunction(callback)){
                             callback(true);
                         }
                     }else{
                         window.hWin.HEURIST4.msg.showMsgErr(sMsg);
-                        if($.isFunction(callback)){ callback(false); }
+                        if(window.hWin.HUL.isFunction(callback)){ callback(false); }
                     }
                     }
                 });

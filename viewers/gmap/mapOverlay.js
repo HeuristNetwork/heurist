@@ -118,7 +118,7 @@ function hMappingControls( mapping, startup_mapdocument_id ) {
                     
                     if(_isPublicSite()){
                         menu_mapdocuments.hide();
-                    }else if($.isFunction(onload_callback)) {
+                    }else if(window.hWin.HUL.isFunction(onload_callback)) {
                         onload_callback.call();
                     }
                     
@@ -356,7 +356,7 @@ function hMappingControls( mapping, startup_mapdocument_id ) {
             
             $('#map_extents').css('visibility','visible');
             selBookmakrs.selectedIndex = 1;
-            $(selBookmakrs).change();
+            $(selBookmakrs).trigger('change');
 
             mapping.setTimeMapProperty('centerOnItems', false);    
             
@@ -387,7 +387,7 @@ function hMappingControls( mapping, startup_mapdocument_id ) {
                     if(!map_container.is(':visible')) return;
                     clearInterval(checkVisible); //stop listener
 
-                    $(selBookmakrs).change();
+                    $(selBookmakrs).trigger('change');
                     //mapping.autoCenterAndZoom();
                     //mapping.zoomDataset()
                     //zoom to map document extent
@@ -551,12 +551,12 @@ function hMappingControls( mapping, startup_mapdocument_id ) {
             legend_content.append(legenditem);
         };
 
-        legenditem.find(".overlay-legend").change(_showHideOverlay);
+        legenditem.find(".overlay-legend").on('change',_showHideOverlay);
 
         if(true || !ismapdoc){//it is possible to edit mapdoc layers since 2017/07/01
 
             $('<div class="svs-contextmenu ui-icon ui-icon-close" layerid="'+overlay_idx+'"></div>')
-            .click(function(event){ 
+            .on('click',function(event){ 
                 //delete layer from map  
                 var overlay_id = $(this).attr("layerid");
                 _removeOverlayById( overlay_id );
@@ -565,7 +565,7 @@ function hMappingControls( mapping, startup_mapdocument_id ) {
             .appendTo(legenditem);
             
             $('<div class="svs-contextmenu ui-icon ui-icon-pencil" layerid="'+overlay_idx+'"></div>')
-            .click(function(event){ 
+            .on('click',function(event){ 
 
                 var overlayid = $(this).attr("layerid");
                 var overlay = overlays[overlayid]? overlays[overlayid] : overlays_not_in_doc[overlayid];
@@ -579,7 +579,7 @@ function hMappingControls( mapping, startup_mapdocument_id ) {
             
             
             $('<div class="svs-contextmenu ui-icon ui-icon-circle-zoomin" layerid="'+overlay_idx+'"></div>')
-            .click(function(event){ 
+            .on('click',function(event){ 
 
                 var overlayid = $(this).attr("layerid");
                 var overlay = overlays[overlayid]? overlays[overlayid] : overlays_not_in_doc[overlayid];
@@ -602,7 +602,7 @@ function hMappingControls( mapping, startup_mapdocument_id ) {
                     + ' data-mapdataid="'+mapdata_id+'" class="overlay-legend-depend" '+(overlay.visible?'checked="checked">':'>')
                     + mapdata_title + '</label></div>').appendTo(legenditem);        
             }            
-            legenditem.find(".overlay-legend-depend").change(_showHideLayer);
+            legenditem.find(".overlay-legend-depend").on('change',_showHideLayer);
         }
 
         _adjustLegendHeight();
@@ -1085,7 +1085,7 @@ map.data.addListener('mouseover', function(event) {
                             source.recordset.setMapEnabled( true );
                             _addRecordsetLayer(source, index);
                         }
-                        if( source.callback && $.isFunction(source.callback) ){
+                        if( source.callback && window.hWin.HUL.isFunction(source.callback) ){
                             source.callback( recordset, original_recordset );     
                         }
 
@@ -1822,7 +1822,7 @@ map.data.addListener('mouseover', function(event) {
         //$(legend).css('top','60px');
         
         // Legend collapse listener
-        $("#collapse").click(function(e) {
+        $("#collapse").on('click',function(e) {
             var tocollapse = ($(this).text() == "-");
             tocollapse ? $(this).text("+") : $(this).text("-");  // Update text to + or -
             
@@ -1840,7 +1840,7 @@ map.data.addListener('mouseover', function(event) {
 
         var btn_mapdocs = $("#mapSelectorBtn").button({showLabel:true, label:'Select...',
                 icon:"ui-icon-triangle-1-s", iconPosition:'end'}).css('max-height',22)
-                .click( function(e) {
+                .on('click', function(e) {
                 $('.menu-or-popup').hide(); //hide other
                 
                 if(loading_mapdoc_list) return;

@@ -94,20 +94,20 @@ function hImportDefTerms(_trm_ParentTermID, _vcg_ID, isImportTranslations) {
         var btnUploadFile = $('#btnUploadFile')
                     .css({'xwidth':'120px','font-size':'0.8em'})
                     .button({label: window.hWin.HR('Upload File')})  //icons:{secondary: "ui-icon-circle-arrow-e"}
-                    .click(function(e) {
-                            uploadWidget.click();
+                    .on('click',function(e) {
+                            uploadWidget.trigger('click');
                         });
         var btnParseData = $('#btnParseData')
                     .css({'width':'120px'})
                     .button({label: window.hWin.HR('Analyse'), icons:{secondary: "ui-icon-circle-arrow-e"}})
-                    .click(function(e) {
+                    .on('click',function(e) {
                             _doParse();
                         });
         var btnStartImport = $('#btnImportData')
                     .css({'width':'110px'})
                     .addClass('ui-button-action')
                     .button({label: window.hWin.HR('Import'), icons:{secondary: "ui-icon-circle-arrow-e"}})
-                    .click(function(e) {
+                    .on('click',function(e) {
 
                             var trm_sep = $('#term_separator').val();
                             if(!window.hWin.HEURIST4.util.isempty(trm_sep)){
@@ -127,7 +127,7 @@ function hImportDefTerms(_trm_ParentTermID, _vcg_ID, isImportTranslations) {
                             }
                         });
                         
-        $('#csv_header').change(_redrawPreviewTable);                        
+        $('#csv_header').on('change',_redrawPreviewTable);                        
                         
         window.hWin.HEURIST4.util.setDisabled(btnStartImport, true);
          
@@ -180,7 +180,7 @@ function hImportDefTerms(_trm_ParentTermID, _vcg_ID, isImportTranslations) {
                 var inpt = this;
                 btnUploadFile.off('click');
                 btnUploadFile.on({click: function(){
-                            $(inpt).click();
+                            $(inpt).trigger('click');
                 }});                
             }                    
                         });
@@ -188,7 +188,7 @@ function hImportDefTerms(_trm_ParentTermID, _vcg_ID, isImportTranslations) {
 
                         
                         
-        $('.column_roles').change(function(e){ 
+        $('.column_roles').on('change',function(e){ 
                 
                 var ele = $(e.target);
                 if(ele.val()>=0){

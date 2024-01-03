@@ -291,7 +291,7 @@ var TemporalPopup = (function () {
 
         _initJqCalendar(that.curTemporal);
 
-        $(".withCalendarsPicker").change(_updateGeorgianDate);
+        $(".withCalendarsPicker").on('change',_updateGeorgianDate);
         _updateGeorgianDate();
         
         
@@ -299,7 +299,7 @@ var TemporalPopup = (function () {
         $('input[value="Cancel"]').button();
         
 
-        $('#fTPQ, #fTAQ').blur(_updateSimpleRange).change(function(){
+        $('#fTPQ, #fTAQ').blur(_updateSimpleRange).on('change',function(){
         	const tpq = $('#fTPQ').val();
         	const taq = $('#fTAQ').val();
         	if(!window.hWin.HEURIST4.util.isempty(tpq) && !window.hWin.HEURIST4.util.isempty(taq)){
@@ -651,7 +651,7 @@ var TemporalPopup = (function () {
         $('.withCalendarsPicker').calendarsPicker(calendar_options);
 
         //change current calendar
-        $('#selectCLD').change(function() {
+        $('#selectCLD').on('change',function() {
 
             let new_calendar = $(this).val();
             if(!new_calendar) return;
@@ -693,7 +693,7 @@ var TemporalPopup = (function () {
 
 						era = $('#era_sel').find(`option:contains("(${era})")`).val();
 
-						$('#era_sel').val(era).change();
+						$('#era_sel').val(era).trigger('change');
 
 						return false;
 					}
@@ -706,7 +706,7 @@ var TemporalPopup = (function () {
         }); //end change calendar
 
         $('#selectCLD').val(calendar_type);
-        $('#selectCLD').change();
+        $('#selectCLD').trigger('change');
 
         if(calendar_type == 'japanese'){
 			$('#era_sel').show();
@@ -723,7 +723,7 @@ var TemporalPopup = (function () {
 			window.hWin.HEURIST4.ui.addoption($('#era_sel')[0], i, options[i]);
 		}
 
-		$('#era_sel').change(function(){
+		$('#era_sel').on('change',function(){
 
 			let limits = calendar.getJapaneseEraLimits($(this).val());
 

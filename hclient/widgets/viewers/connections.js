@@ -185,7 +185,7 @@ $.widget( "heurist.connections", {
                     
                     }
                 }else if(this.graphframe[0] && this.graphframe[0].contentWindow 
-                        && $.isFunction(this.graphframe[0].contentWindow.showData)){
+                        && window.hWin.HUL.isFunction(this.graphframe[0].contentWindow.showData)){
                     //clear
                     this.graphframe[0].contentWindow.showData(null);
                 }

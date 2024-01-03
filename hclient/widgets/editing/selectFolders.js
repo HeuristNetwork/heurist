@@ -37,14 +37,14 @@ $.widget( "heurist.selectFolders", $.heurist.selectMultiValues, {
 
         var ent_header = this.element.find('.ent_header');        
 
-        $('<div>').button({label:window.hWin.HR('New folder')}).click(
+        $('<div>').button({label:window.hWin.HR('New folder')}).on('click',
             function() {
                 var node = that._treeview.fancytree('getRootNode');
                 node.editCreateNode("child", "new folder");                    
             }        
         ).appendTo(ent_header);
 
-        $('<div>').button({label:window.hWin.HR('New subfolder')}).click(
+        $('<div>').button({label:window.hWin.HR('New subfolder')}).on('click',
             function() {
 
                 var node = that._treeview.fancytree("getActiveNode");
@@ -60,7 +60,7 @@ $.widget( "heurist.selectFolders", $.heurist.selectMultiValues, {
             }        
         ).appendTo(ent_header);
 
-        $('<div>').button({label:window.hWin.HR('Delete')}).click(
+        $('<div>').button({label:window.hWin.HR('Delete')}).on('click',
             function() {
 
                 var node = that._treeview.fancytree("getActiveNode");
@@ -90,7 +90,7 @@ $.widget( "heurist.selectFolders", $.heurist.selectMultiValues, {
 
         /*
         $('<label><input type="checkbox">Show system folders</label>').css({'margin-left':'20px'}).appendTo(ent_header);
-        ent_header.find('input').click(
+        ent_header.find('input').on('click',
         function(event){
         that._show_system_folders = $(event.target).is(':checked');
 
@@ -113,7 +113,7 @@ $.widget( "heurist.selectFolders", $.heurist.selectMultiValues, {
     //
     _initList: function(){
         
-        if($.isArray(this.options.allValues) && this.options.allValues.length>0){
+        if(Array.isArray(this.options.allValues) && this.options.allValues.length>0){
             
             this._showAsDialog();
             this._initTreeView( this.options.allValues );    
@@ -131,7 +131,7 @@ $.widget( "heurist.selectFolders", $.heurist.selectMultiValues, {
                 function(response){
                     if(response.status == window.hWin.ResponseStatus.OK){
                         that.options.allValues = response.data;
-                        if($.isArray(that.options.allValues) && that.options.allValues.length>0){
+                        if(Array.isArray(that.options.allValues) && that.options.allValues.length>0){
                             that._initList();
                         }else{
                             window.hWin.HEURIST4.msg.showMsgFlash(window.hWin.HR(that.options.emptyMessage));                

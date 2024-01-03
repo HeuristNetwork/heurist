@@ -170,7 +170,7 @@ $.widget( "heurist.manageSysGroups", $.heurist.manageEntity, {
                     /*$(item).button({icon:'ui-icon-pencil', iconPosition:"end"})
                     .css({'background':'gray !important', 'max-height':'1em'});*/
                 })
-                .click(function(event){
+                .on('click',function(event){
                     var group_ID = $(event.target).parents('.recordDiv').attr('recid');
 
                     var options = {select_mode: 'manager',
@@ -316,8 +316,8 @@ $.widget( "heurist.manageSysGroups", $.heurist.manageEntity, {
 
 
                 }
-                this.recordList.find('.adminSelector').change( __onRoleSelectorClick );
-                this.recordList.find('.memberSelector').change( __onRoleSelectorClick );
+                this.recordList.find('.adminSelector').on('change', __onRoleSelectorClick );
+                this.recordList.find('.memberSelector').on('change', __onRoleSelectorClick );
 
 
         }});

@@ -632,7 +632,7 @@ window.hWin.HEURIST4.dbs = {
                             for (var $dtID in reverse_fields) {
                                 if($dtID>0 && 
                                     ( $pointer_fields==null ||    // to avoid recursion
-                                        ($.isArray($pointer_fields) &&   
+                                        (Array.isArray($pointer_fields) &&   
                                         window.hWin.HEURIST4.util.findArrayIndex($dtID, $pointer_fields)<0) ) )
                                 {
                                     rev_fields[$dtID] = reverse_fields[$dtID];
@@ -1033,7 +1033,7 @@ window.hWin.HEURIST4.dbs = {
                     $def['children'][$idx]['code'] = $def['code'];    
                 }
             }
-            if($.isArray($det['children'])){
+            if(Array.isArray($det['children'])){
                    $def['children'][$idx] = __assignCodes($def['children'][$idx]);
             }
         }
@@ -1043,13 +1043,13 @@ window.hWin.HEURIST4.dbs = {
 
         if(fieldtypes==null){
             fieldtypes = ['integer','date','freetext','year','float','enum','resource','relmarker','relationtype','separator'];
-        }else if(!$.isArray(fieldtypes) && fieldtypes!='all'){
+        }else if(!Array.isArray(fieldtypes) && fieldtypes!='all'){
             fieldtypes = fieldtypes.split(',');
         }
 
         var res = [];
 
-        rectypeids = (!$.isArray(rectypeids)?rectypeids.split(','):rectypeids);    
+        rectypeids = (!Array.isArray(rectypeids)?rectypeids.split(','):rectypeids);    
 
         //create hierarchy tree 
         for (var k=0; k<rectypeids.length; k++) {
@@ -1075,7 +1075,7 @@ window.hWin.HEURIST4.dbs = {
                         }
                     }
                     //asign codes
-                    if($.isArray(def['children'])){
+                    if(Array.isArray(def['children'])){
                         //def['children'].unshift({});
                         def = __assignCodes(def);
                         res.push( def );
@@ -2098,7 +2098,7 @@ window.hWin.HEURIST4.dbs = {
     trm_getTranslatedLabels: function(vocab_id, language){
 
         let term_ids = [];
-        if(!window.hWin.HEURIST4.util.isArray(vocab_id)){
+        if(!Array.isArray(vocab_id)){
             term_ids = $Db.trm_TreeData(vocab_id, 'set');
             if(term_ids.length == 0){ // vocab id is term id(s)
                 term_ids = [vocab_id];
@@ -2240,7 +2240,7 @@ window.hWin.HEURIST4.dbs = {
 
                     $Db.changeParentInIndex(new_parent_id, term_IDs, old_parent_id);
 
-                    if($.isFunction(callback)){
+                    if(window.hWin.HUL.isFunction(callback)){
                             callback.call();
                     }
 
@@ -2287,7 +2287,7 @@ window.hWin.HEURIST4.dbs = {
         var t_idx = window.hWin.HAPI4.EntityMgr.getEntityData('trm_Links'); 
         if(new_parent_id>0){
             if(!t_idx[new_parent_id]) t_idx[new_parent_id] = []; 
-            if($.isArray(term_ID)){
+            if(Array.isArray(term_ID)){
                 //t_idx[new_parent_id] = t_idx[new_parent_id].concat( term_ID );
 
                 for(var i=0; i<term_ID.length; i++)
@@ -2350,14 +2350,14 @@ window.hWin.HEURIST4.dbs = {
             window.hWin.HAPI4.EntityMgr.doRequest(request, 
                 function(response){
                     if(response.status == window.hWin.ResponseStatus.OK){
-                        if($.isFunction(callback)) callback.call();
+                        if(window.hWin.HUL.isFunction(callback)) callback.call();
                     }else{
                         window.hWin.HEURIST4.msg.showMsgErr(response);
                     }
             });
 
         }else{
-            if($.isFunction(callback)) callback.call();
+            if(window.hWin.HUL.isFunction(callback)) callback.call();
         }
     },
     
@@ -2388,7 +2388,7 @@ window.hWin.HEURIST4.dbs = {
                         $Db.rty(rty_ID, 'rty_RecCount', cnt);
                     });
                     
-                    if($.isFunction(callback)){
+                    if(window.hWin.HUL.isFunction(callback)){
                         callback.call();
                     }
         
@@ -2825,10 +2825,10 @@ window.hWin.HEURIST4.dbs = {
             rty_IDs = $Db.rty().getIds();
         }
 
-        if(!window.hWin.HEURIST4.util.isArray(rty_IDs) && rty_IDs > 0){
+        if(!Array.isArray(rty_IDs) && rty_IDs > 0){
             rty_IDs = [ rty_IDs ];
         }
-        if(!window.hWin.HEURIST4.util.isArray(ignored_dty_id) && ignored_dty_id > 0){
+        if(!Array.isArray(ignored_dty_id) && ignored_dty_id > 0){
             ignored_dty_id = [ ignored_dty_id ];
         }
 
@@ -2948,10 +2948,10 @@ window.hWin.HEURIST4.dbs = {
             return dty_IDs;
         }
 
-        if(!window.hWin.HEURIST4.util.isArray(rty_IDs) && rty_IDs > 0){
+        if(!Array.isArray(rty_IDs) && rty_IDs > 0){
             rty_IDs = [ rty_IDs ];
         }
-        if(!window.hWin.HEURIST4.util.isArray(ignored_dty_id) && ignored_dty_id > 0){
+        if(!Array.isArray(ignored_dty_id) && ignored_dty_id > 0){
             ignored_dty_id = [ ignored_dty_id ];
         }
 

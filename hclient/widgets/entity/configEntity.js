@@ -194,7 +194,7 @@ $.widget( "heurist.configEntity", {
             //
             //
             ele = this.element.find('.btn-openedit');
-            if(this.options.buttons['openedit']!==false && $.isFunction(this.options.openEditAction)){
+            if(this.options.buttons['openedit']!==false && window.hWin.HUL.isFunction(this.options.openEditAction)){
                 
                 var showLabel = !window.hWin.HEURIST4.util.isempty(this.options.buttons['openedit']);
                 ele = ele.button({icon:null, //showLabel?null:'ui-icon-pencil', 
@@ -359,7 +359,7 @@ $.widget( "heurist.configEntity", {
                         
                     }
                     //callback function to apply configuration
-                    if($.isFunction(that.options.setSettings)){
+                    if(window.hWin.HUL.isFunction(that.options.setSettings)){
                         settings.cfg_name = that.sel_saved_settings.val();
                         that.options.setSettings( settings );      
                     }
@@ -455,7 +455,7 @@ $.widget( "heurist.configEntity", {
                     that.element.show();    
                     window.hWin.HEURIST4.msg.showMsgFlash('Settings have been saved');
                     
-                    if($.isFunction(callback)){
+                    if(window.hWin.HUL.isFunction(callback)){
                         callback.call( this, entity_ID+'/'+filename );
                     } 
 
@@ -499,7 +499,7 @@ $.widget( "heurist.configEntity", {
                 if(response.status == window.hWin.ResponseStatus.OK){
                     var ele = that.sel_saved_settings.empty();
                     window.hWin.HEURIST4.ui.addoption(ele[0], '', 'select...');
-                    if($.isFunction(that.options.openEditAction)){
+                    if(window.hWin.HUL.isFunction(that.options.openEditAction)){
                         window.hWin.HEURIST4.ui.addoption(ele[0], 'new', 'Create new field list');    
                     }
                     ele[0].selectedIndex = 0;

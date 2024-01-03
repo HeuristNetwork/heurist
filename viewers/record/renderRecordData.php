@@ -668,7 +668,7 @@ if(!($is_map_popup || $without_header)){
                     //setTimeout(function(){$('.thumbnail').mediaViewer('show');},1000);
                 }
                 //init open in mirador links
-                $('.miradorViewer_link').click(function(event){
+                $('.miradorViewer_link').on('click',function(event){
                    
                     var ele = $(event.target)
 

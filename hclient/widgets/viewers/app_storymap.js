@@ -357,7 +357,7 @@ $.widget( "heurist.app_storymap", {
                 this._mapping = $('#'+this.options.map_widget_id);
             }
             
-            if($.isFunction(this._mapping.app_timemap) && this._mapping.app_timemap('instance')){
+            if(window.hWin.HUL.isFunction(this._mapping.app_timemap) && this._mapping.app_timemap('instance')){
                 //widget inited
                 if(!this._mapping.app_timemap('isMapInited')){
                     this._mapping.app_timemap('option','onMapInit', function(){
@@ -466,7 +466,7 @@ $.widget( "heurist.app_storymap", {
         
         if (this.options.search_realm && data && data.search_realm){
             
-            if(!$.isArray(this.options.search_realm)){
+            if(!Array.isArray(this.options.search_realm)){
                 this.options.search_realm = this.options.search_realm.split(',');
             }
             return (this.options.search_realm.indexOf(data.search_realm)>=0);
@@ -638,10 +638,10 @@ $.widget( "heurist.app_storymap", {
             
             this.options.storyRecordID = recID;
         
-            if(!$.isArray(this.options.storyFields) && typeof this.options.storyFields === 'string'){
+            if(!Array.isArray(this.options.storyFields) && typeof this.options.storyFields === 'string'){
                 this.options.storyFields = this.options.storyFields.split(',');
             }
-            if(!$.isArray(this.options.storyRectypes) && typeof this.options.storyRectypes === 'string'){ //NOT USED
+            if(!Array.isArray(this.options.storyRectypes) && typeof this.options.storyRectypes === 'string'){ //NOT USED
                 this.options.storyRectypes = this.options.storyRectypes.split(',');
             }
             
@@ -821,7 +821,7 @@ $.widget( "heurist.app_storymap", {
         this._btn_clear_story.hide();
         if(this.options.reportOverviewMode=='tab' || this.options.reportEndPageMode=='tab') this._tabs.hide(); else this.element.find('#tabCtrl').hide();
         
-        if(trigger_event !== false && $.isFunction(this.options.onClearStory)){
+        if(trigger_event !== false && window.hWin.HUL.isFunction(this.options.onClearStory)){
             this.options.onClearStory.call(this);
         }
     },
@@ -1260,7 +1260,7 @@ $.widget( "heurist.app_storymap", {
         }
         
         //Find story elements ids
-        if(!$.isArray(this.options.storyFields) && typeof this.options.storyFields === 'string'){
+        if(!Array.isArray(this.options.storyFields) && typeof this.options.storyFields === 'string'){
             this.options.storyFields = this.options.storyFields.split(',');
         }
         
@@ -1895,7 +1895,7 @@ $.widget( "heurist.app_storymap", {
                 scope = '2-864';
             }else if( typeof step['scope'] === 'string' && step['scope'].indexOf('-')>0 ){ //dty concept code
                 scope = step['scope'];
-            }else if( $.isArray(step['scope']) ){
+            }else if( Array.isArray(step['scope']) ){
                 //array of record ids
                 places = step['scope'];
             }else if( parseInt(step['scope'])>0 ){
@@ -2127,7 +2127,7 @@ $.widget( "heurist.app_storymap", {
         }        
         
         
-        if($.isFunction(this._animationResolve)){
+        if(window.hWin.HUL.isFunction(this._animationResolve)){
             if(duration==0){
                 this._animationResolve();
             }else{
@@ -2135,9 +2135,9 @@ $.widget( "heurist.app_storymap", {
                 setTimeout(function(){
                         if(that._terminateAnimation===true || that._terminateAnimation==recID){
                             //animation terminated actionBounds
-                            if($.isFunction(that._animationReject)) that._animationReject();
+                            if(window.hWin.HUL.isFunction(that._animationReject)) that._animationReject();
                         }else{
-                            if ($.isFunction(that._animationResolve)) that._animationResolve();
+                            if (window.hWin.HUL.isFunction(that._animationResolve)) that._animationResolve();
                         }                
                     }, duration);                        
             }
@@ -2152,7 +2152,7 @@ $.widget( "heurist.app_storymap", {
             $.each(layers, function(i, layer){
                       layer.remove();
             });
-            if($.isFunction(this._animationResolve)) this._animationResolve();
+            if(window.hWin.HUL.isFunction(this._animationResolve)) this._animationResolve();
     },
 
     //
@@ -2165,7 +2165,7 @@ $.widget( "heurist.app_storymap", {
                       layer.addTo( nativemap )                    
                   }
             });
-            if($.isFunction(this._animationResolve)) this._animationResolve();
+            if(window.hWin.HUL.isFunction(this._animationResolve)) this._animationResolve();
     },
 
     //
@@ -2199,7 +2199,7 @@ $.widget( "heurist.app_storymap", {
                     
                     if(that._terminateAnimation===true || that._terminateAnimation==recID){
                         //animation terminated actionFadeIn
-                        if($.isFunction(that._animationReject)) that._animationReject();
+                        if(window.hWin.HUL.isFunction(that._animationReject)) that._animationReject();
                         return false;
                     }
                
@@ -2229,10 +2229,10 @@ $.widget( "heurist.app_storymap", {
                     if(opacityStep>0 && show_delay>0){
                         //delay after show
                         setTimeout(function(){
-                             if($.isFunction(that._animationResolve)) that._animationResolve();   
+                             if(window.hWin.HUL.isFunction(that._animationResolve)) that._animationResolve();   
                         }, show_delay);
                     }else{
-                        if($.isFunction(that._animationResolve)) that._animationResolve();        
+                        if(window.hWin.HUL.isFunction(that._animationResolve)) that._animationResolve();        
                     }
                     
                     
@@ -2273,7 +2273,7 @@ $.widget( "heurist.app_storymap", {
                     
                     if(that._terminateAnimation===true || that._terminateAnimation==recID){
                         //animation terminated actionGradient
-                        if($.isFunction(that._animationReject)) that._animationReject();
+                        if(window.hWin.HUL.isFunction(that._animationReject)) that._animationReject();
                         return false;
                     }
                     
@@ -2288,7 +2288,7 @@ $.widget( "heurist.app_storymap", {
                 color_step++;
                 timer = setTimeout(__changeColor, delay);
             }else{
-                if($.isFunction(that._animationResolve)) that._animationResolve();    
+                if(window.hWin.HUL.isFunction(that._animationResolve)) that._animationResolve();    
             }                
         }
         
@@ -2325,7 +2325,7 @@ $.widget( "heurist.app_storymap", {
                     //animation terminated actionBlink
                     clearInterval(interval);
                     interval = 0;
-                    if($.isFunction(that._animationReject)) that._animationReject();
+                    if(window.hWin.HUL.isFunction(that._animationReject)) that._animationReject();
                     is_terminated = true;
                     return false;
                 }else 
@@ -2341,7 +2341,7 @@ $.widget( "heurist.app_storymap", {
             if(count>steps){
                 clearInterval(interval);
                 interval = 0;
-                if($.isFunction(that._animationResolve)) that._animationResolve();    
+                if(window.hWin.HUL.isFunction(that._animationResolve)) that._animationResolve();    
             }
         },delay);
         
@@ -2380,14 +2380,14 @@ $.widget( "heurist.app_storymap", {
                 
                 if(that._terminateAnimation===true || that._terminateAnimation==recID){
                     //animation terminated actionSetStyle
-                    if($.isFunction(that._animationReject)) that._animationReject();
+                    if(window.hWin.HUL.isFunction(that._animationReject)) that._animationReject();
                     return false;
                 }else
-                    if($.isFunction(that._animationResolve)) that._animationResolve();            
+                    if(window.hWin.HUL.isFunction(that._animationResolve)) that._animationResolve();            
                 }, delay);
             
         }else{
-            if($.isFunction(that._animationResolve)) that._animationResolve();            
+            if(window.hWin.HUL.isFunction(that._animationResolve)) that._animationResolve();            
         }
         
     },

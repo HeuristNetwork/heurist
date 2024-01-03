@@ -115,7 +115,7 @@ function hSvsEdit(args) {
                 svs_name.val(svs[_NAME]);
                 svs_query.val( !window.hWin.HEURIST4.util.isempty(squery)
                                     ?squery  //overwrite (used in save fixed order)
-                                    : ($.isArray(request.q)?JSON.stringify(request.q):request.q) );
+                                    : (Array.isArray(request.q)?JSON.stringify(request.q):request.q) );
                                     
                 var crules = window.hWin.HEURIST4.query.cleanRules( request.rules );                                                        
                 svs_rules.val( crules==null?'':JSON.stringify(crules) );
@@ -148,18 +148,18 @@ function hSvsEdit(args) {
 
                 //var domain = 'all';
 
-                if(window.hWin.HEURIST4.util.isArray(squery)) { //this is RULES!!!
+                if(Array.isArray(squery)) { //this is RULES!!!
                     svs_rules.val(JSON.stringify(window.hWin.HEURIST4.query.cleanRules(squery)));
                     svs_rules_full.val(JSON.stringify(squery))
                     svs_query.val('');
 
                 } else if( squery && (squery.q || squery.rules) ) {
 
-                    svs_query.val( window.hWin.HEURIST4.util.isempty(squery)?'': ($.isArray(squery.q)?JSON.stringify(squery.q):squery.q) );
+                    svs_query.val( window.hWin.HEURIST4.util.isempty(squery)?'': (Array.isArray(squery.q)?JSON.stringify(squery.q):squery.q) );
                     
                     var crules = window.hWin.HEURIST4.query.cleanRules( squery.rules );                                                        
                     svs_rules.val( crules==null?'':JSON.stringify(crules) );
-                    var rules = window.hWin.HEURIST4.util.isArray(squery.rules)?JSON.stringify(squery.rules):squery.rules;
+                    var rules = Array.isArray(squery.rules)?JSON.stringify(squery.rules):squery.rules;
                     svs_rules_full.val( rules==null?'':rules );
 
                 } else if(!window.hWin.HEURIST4.util.isempty(squery)){
@@ -194,7 +194,7 @@ function hSvsEdit(args) {
             svs_rules_only.on('change',function(e){
                 $dlg.find('#divRulesOnly').css('display',$(e.target).is(':checked')?'block':'none');    
             });
-            svs_rules_only.change();
+            svs_rules_only.trigger('change');
                 
             
             var isRules = window.hWin.HEURIST4.util.isempty(svs_query.val()) && !window.hWin.HEURIST4.util.isempty(svs_rules.val());
@@ -219,7 +219,7 @@ function hSvsEdit(args) {
     */
     function _showSearchFacetedWizard ( params ){
 
-        if($.isFunction($('body').search_faceted_wiz)){ //already loaded
+        if(window.hWin.HUL.isFunction($('body').search_faceted_wiz)){ //already loaded
             return showSearchFacetedWizard(params);  //this function from search_faceted_wiz.js
         }else{
             $.getScript(window.hWin.HAPI4.baseURL+'hclient/widgets/search/search_faceted_wiz.js', 
@@ -427,7 +427,7 @@ function hSvsEdit(args) {
                 .button({icons: {primary: "ui-icon-pencil"}, text:false})
                 .attr('title', window.hWin.HR('Edit RuleSet'))
                 .css({'height':'16px', 'width':'16px'})
-                .click(function( event ) {
+                .on('click',function( event ) {
                     //that.
                     
                     var dlg_options = null;
@@ -435,13 +435,13 @@ function hSvsEdit(args) {
                         dlg_options = {
                             is_h6style:true, 
                             close:function(){
-                                if(menu_locked && $.isFunction(menu_locked)){
+                                if(menu_locked && window.hWin.HUL.isFunction(menu_locked)){
                                     menu_locked.call( this, false, false); //unlock
                                 }
                             }
                             };
                     }
-                    if(menu_locked && $.isFunction(menu_locked)){
+                    if(menu_locked && window.hWin.HUL.isFunction(menu_locked)){
                         menu_locked.call( this, true, false); //lock
                     }
                     
@@ -452,7 +452,7 @@ function hSvsEdit(args) {
                 .button({icons: {primary: "ui-icon-close"}, text:false})
                 .attr('title', window.hWin.HR('Clear RuleSet'))
                 .css({'height':'16px', 'width':'16px'})
-                .click(function( event ) {
+                .on('click',function( event ) {
                     $dlg.find('#svs_Rules').val('');
                     $dlg.find('#svs_Rules2').val('');
                 });
@@ -462,7 +462,7 @@ function hSvsEdit(args) {
                 $dlg.find("#svs_GetQuery").button({
                         label:'Get filter + rules as string',
                         title:'Gety query string for Mappable Query'})
-                .click(__getFilterString);
+                .on('click',__getFilterString);
                 */
 
                 var allFields = $dlg.find('input, textarea');
@@ -503,7 +503,7 @@ function hSvsEdit(args) {
                                 var svs = window.hWin.HAPI4.currentUser.usr_SavedSearch[id];
                                 if(svs[_NAME]==svs_name.val() && svs[_GRPID]==svs_ugrid && id!=svs_id.val()){
                                     
-                                    if(menu_locked && $.isFunction(menu_locked)){
+                                    if(menu_locked && window.hWin.HUL.isFunction(menu_locked)){
                                         menu_locked.call( this, true, false); //unlock
                                     }
                                     
@@ -514,14 +514,14 @@ function hSvsEdit(args) {
                                             __doSave(false), 
                                             $mdlg.dialog( "close" );
                                             
-                                            if(menu_locked && $.isFunction(menu_locked)){
+                                            if(menu_locked && window.hWin.HUL.isFunction(menu_locked)){
                                                 menu_locked.call( this, false, false); //unlock
                                             }
                                       }},
                                       {text:'Cancel', click: function(){ 
                                             $mdlg.dialog( "close" ); 
-                                            svs_name.focus();
-                                            if(menu_locked && $.isFunction(menu_locked)){
+                                            svs_name.trigger('focus');
+                                            if(menu_locked && window.hWin.HUL.isFunction(menu_locked)){
                                                 menu_locked.call( this, false, false); //unlock
                                             }
                                       }}
@@ -692,7 +692,7 @@ function hSvsEdit(args) {
                     ],
                     close: function() {
                         allFields.removeClass( "ui-state-error" );
-                        if(!isRules && menu_locked && $.isFunction(menu_locked)){
+                        if(!isRules && menu_locked && window.hWin.HUL.isFunction(menu_locked)){
                                 menu_locked.call( this, 'close'); //is_locked, is_mouseleave    
                         }
                     },
@@ -713,7 +713,7 @@ function hSvsEdit(args) {
                 if(is_h6style){
                     $dlg.parent().addClass('ui-heurist-explore');
                 }
-                if($.isFunction(menu_locked)){  //@todo add call on open rulebuilder
+                if(window.hWin.HUL.isFunction(menu_locked)){  //@todo add call on open rulebuilder
                     $dlg.parent('.ui-dialog').on({
                         mouseover:function(){ 
                             var is_mod = _isModified();
