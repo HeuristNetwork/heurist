@@ -108,19 +108,11 @@
     </div>
 
     <!-- result list -->    
-    <div  class="heurist_resultList">
-        <div class="header"><label>Controls and actions</label></div>
-        <!-- <input name="show_toolbar" type="checkbox"/>&nbsp;&nbsp; -->
-        <label>show record count&nbsp;<input type="checkbox" name="show_counter" checked="checked"/></label>&nbsp;&nbsp;&nbsp;
-        <label>view mode selector&nbsp;<input type="checkbox" name="show_viewmode" checked="checked"/></label>&nbsp;&nbsp;&nbsp;
-        <label>allow collection&nbsp;</label><input name="support_collection" type="checkbox"/>&nbsp;&nbsp;&nbsp;
-        <label>allow reorder&nbsp;<input type="checkbox" name="support_reorder"/></label>
-    </div>
-
     <div class="heurist_resultList">
         <div class="header"><label>Title above results</label></div>
-        <input name="title" value=""/>&nbsp;&nbsp;&nbsp;
-        <label>show filter name&nbsp;<input type="checkbox" name="show_inner_header"/></label>
+        <input name="title" value=""/>
+
+        <label class="inside_header">Show filter name above results&nbsp;<input type="checkbox" name="show_inner_header"/></label>
     </div>
 
     <div class="heurist_resultList">
@@ -135,31 +127,37 @@
             <option value="horizontal">Horizontal gallery</option>
             <option value="vertical">Vertical gallery</option>
         </select>
-    </div>
-	
-	<div class="heurist_resultList">
-        <div class="header"><label>Allow inline content display:</label></div>
-        <input type="checkbox" name="allow_record_content_view"/>
-        <span class="heurist-helper1">
-            Inline content display (all results). Use ONLY if never more than 10 - 20 records in results (intended for monthly blogs)
-        </span>
-    </div>
 
-	<div class="heurist_resultList">
-        <div class="header"><label>Blog Mode:</label></div>
-        <input type="checkbox" name="blog_result_list"/>
-        <span class="heurist-helper1">
-            (Limits initial display to 10 records, but does not limit display on subsequent selections)
-        </span>
+        <label class="inside_header">Show title as link if URL set</label><input name="show_url_as_link" type="checkbox" checked/>
     </div>
 
     <div class="heurist_resultList">
-        <div class="header"><label>Auto select first record:</label></div>
-        <input type="checkbox" name="auto_select_first"/>
+        <div class="header row-spacing">
+            <label>Filter to be applied at start</label>
+        </div>
+        <input name="search_initial" size="40"/>
+
+        <label class="inside_header">Auto select first record:</label><input type="checkbox" name="auto_select_first"/>
     </div>
 
     <div  class="heurist_resultList">
-        <div class="header"><label>Click for record view</label></div>
+        <div class="header"><label>Controls and actions</label></div>
+        <!-- <input name="show_toolbar" type="checkbox"/>&nbsp;&nbsp; -->
+        <label>show record count&nbsp;<input type="checkbox" name="show_counter" checked="checked"/></label>&nbsp;&nbsp;&nbsp;
+        <label>view mode selector&nbsp;<input type="checkbox" name="show_viewmode" checked="checked"/></label>&nbsp;&nbsp;&nbsp;
+        <label>allow collection&nbsp;</label><input name="support_collection" type="checkbox"/>&nbsp;&nbsp;&nbsp;
+        <label>export button&nbsp;</label><input name="show_export_button" type="checkbox"/>
+        <!--<label>allow reorder&nbsp;<input type="checkbox" name="support_reorder"/></label>-->
+    </div>
+
+    <div  class="heurist_resultList">
+        <div class="header"><label>Record action controls</label></div>
+        <label><input name="recordDivClass" type="radio" value=""/>internal style / rollover</label>
+        <label><input name="recordDivClass" type="radio" value="public" checked/>public style / always on (limited set)</label>
+    </div>
+
+    <div  class="heurist_resultList">
+        <div class="header row-spacing"><label>Click for record view</label></div>
         <label><input name="recordview_onselect" type="radio" value="inline" checked/>opens inline</label>
         <label><input name="recordview_onselect" type="radio" value="popup"/>opens as popup</label>
         <label><input name="recordview_onselect" type="radio" value="no"/>no action / trigger custom report widget</label>
@@ -171,22 +169,8 @@
         </div>
         <select name="rendererExpandDetails" class="text ui-widget-content ui-corner-all" title="">
         </select>
-    </div>
 
-    <div  class="heurist_resultList">
-        <div class="header"><label>Show record view in frame</label></div>
-        <input name="rendererExpandInFrame" type="checkbox" checked/>
-    </div>
-
-    <div  class="heurist_resultList">
-        <div class="header"><label>Record action controls</label></div>
-        <label><input name="recordDivClass" type="radio" value=""/>internal style / rollover</label>
-        <label><input name="recordDivClass" type="radio" value="public" checked/>public style / always on (limited set)</label>
-    </div>
-
-    <div  class="heurist_resultList">
-        <div class="header"><label>Show title as link if URL set</label></div>
-        <input name="show_url_as_link" type="checkbox" checked/>
+        <label class="inside_header">Show record view in frame</label><input name="rendererExpandInFrame" type="checkbox" checked/>
     </div>
 
     <div  class="heurist_resultList">
@@ -194,10 +178,8 @@
         <label><input name="recviewer_images" type="radio" value="0" /> Show all images</label>
         <label><input name="recviewer_images" type="radio" value="1" checked="checked"/> Hide linked media</label>
         <label><input name="recviewer_images" type="radio" value="2" /> Hide all images</label>
-    </div>
 
-    <div  class="heurist_resultList">
-        <div class="header"><label>Handle private record details in record viewer</label></div>
+        <label class="inside_header">Private record details</label>
         <select name="recview_private_details" class="text ui-widget-content ui-corner-all">
             <option value="0"> Hide private details </option>
             <option value="1"> Show private details (collapsed) </option>
@@ -206,28 +188,21 @@
     </div>
 
     <div  class="heurist_resultList">
-        <div class="header"><label>Popup dimensions: </label></div>
+        <div class="header row-spacing"><label>Popup dimensions: </label></div>
         <label>&nbsp;&nbsp;&nbsp;<span id="pw_label">Width:</span> <input name="dialog_width" maxlength="3" size="3" value="300"></label>&nbsp;
         <select name="dialog_hunit"><option value="px">px</option><option value="%">%</option></select>
         <label>&nbsp;<span id="ph_label">Height:</span> <input name="dialog_height" maxlength="3" size="3" value="400"></label>&nbsp;
         <select name="dialog_wunit"><option value="px">px</option><option value="%">%</option></select>
-    </div>
 
-    <div  class="heurist_resultList">
-        <div class="header"><label>Popup position: </label></div>
+        <label class="inside_header">Popup position: </label>
         <label>&nbsp;&nbsp;&nbsp;<span id="pt_label">Top:</span> <input name="dialog_top" maxlength="3" size="3" value="300"></label>&nbsp;
         <select name="dialog_tunit"><option value="px">px</option><option value="%">%</option></select>
         <label>&nbsp;<span id="pl_label">Left:</span> <input name="dialog_left" maxlength="3" size="3" value="400"></label>&nbsp;
         <select name="dialog_lunit"><option value="px">px</option><option value="%">%</option></select>
-        <br><em>A blank value will use the centre of the window</em>
+        <br><em style='position: absolute;right: 195px;'>A blank value will use the centre of the window</em>
     </div>
 
-    <div  class="heurist_resultList">
-        <div class="header"><label>Set class(es) for record from term value(s) for </label></div>
-        <select name="field_for_ext_classes" class="text ui-widget-content ui-corner-all" title="">
-        </select>
-    </div>
-
+    <!-- Data Tables -->
     <div  class="heurist_resultListDataTable">
         <div class="header"><label>Controls and actions</label></div>
         <!-- <label>rectype filter&nbsp;<input type="checkbox" name="show_rt_filter"/></label>&nbsp; -->
@@ -262,58 +237,12 @@
         <input name="storyFields" type="hidden" value=""/>
         <div id="storyFields" style="display:table-row"></div>
     </div>
+
     <div class="heurist_StoryMapXXXX">
         <input name="storyRectypes" type="hidden" value=""/>
         <div id="storyRectypes" style="display:table-row"></div>
     </div>
-    <div  class="heurist_StoryMap">
-        <div class="header"><label>Overview mode:</label></div>
-        <select name="reportOverviewMode" class="text ui-widget-content ui-corner-all" title="">
-            <option value="tab">Tab</option>
-            <option value="inline">Inline as first story element</option>
-            <option value="header">Header</option>
-            <option value="no">No overview</option>
-        </select>
-    </div>
-    <div class="heurist_StoryMap">
-        <div class="header">
-            <label>Overview template&nbsp;</label>
-        </div>
-        <select name="reportOverview" class="text ui-widget-content ui-corner-all" title="">
-        </select>
-        <i class="help-text">Defines the format used to display story overview derived from the main story record</i>
-    </div>
-    <div  class="heurist_StoryMap">
-        <div class="header"><label>End page mode:</label></div>
-        <select name="reportEndPageMode" class="text ui-widget-content ui-corner-all" title="">
-            <option value="tab">Tab</option>
-            <option value="inline">Inline as last story element</option>
-            <option value="footer">Footer</option>
-            <option value="no">No end page</option>
-        </select>
-    </div>
-    <div class="heurist_StoryMap">
-        <div class="header">
-            <label>End page template&nbsp;</label>
-        </div>
-        <select name="reportEndPage" class="text ui-widget-content ui-corner-all" title="">
-        </select>
-        <i class="help-text">Defines the format used to display end of story derived from the main story record</i>
-    </div>
-    <div class="heurist_StoryMap">
-        <div class="header">
-            <label>Story element filter for initial map&nbsp;</label>
-        </div>
-        <input name="reportOverviewMapFilter" class="text ui-widget-content ui-corner-all" title="" style="width:250px"/>
-        <i class="help-text">Determines the set of story elements on the initial map (rather than showing all stories in the current resultset)</i>
-    </div>
-    <div  class="heurist_StoryMap">
-        <div class="header"><label>Order elements by&nbsp;</label></div>
-        <select name="elementOrder" class="text ui-widget-content ui-corner-all" title="">
-        </select>
-        <i class="help-text">Determines the order of story elements. Use date, year or integer fields to define custom story order</i>        
-    </div>
-    
+
     <div class="heurist_StoryMap">
         <div class="header">
             <label>Story element template&nbsp;</label>
@@ -322,6 +251,14 @@
         </select>
         <i class="help-text">Defines the format used to display story element information</i>
     </div>
+
+    <div  class="heurist_StoryMap">
+        <div class="header"><label>Order elements by&nbsp;</label></div>
+        <select name="elementOrder" class="text ui-widget-content ui-corner-all" title="">
+        </select>
+        <i class="help-text">Determines the order of story elements. Use date, year or integer fields to define custom story order</i>        
+    </div>
+
     <div class="heurist_StoryMap">
         <div class="header"><label>Story mode:</label></div>
         <select name="reportElementMode" class="text ui-widget-content ui-corner-all" title="" style="margin-right:10px">
@@ -356,8 +293,9 @@
             <input name="zoomAnimationTime" class="text ui-widget-content ui-corner-all" width="60px" min="0" max="20000" step="100" title="" type="number" placeholder="5000"/>
         </span>        
     </div>
+
     <div class="heurist_StoryMap">
-        <div class="header"><label>Story on map:</label></div>
+        <div class="header row-spacing"><label>Story on map:</label></div>
         <select name="reportElementMapMode" class="text ui-widget-content ui-corner-all" title="">
             <option value="linked">Show all places in story elements with connecting lines</option>
             <option value="all">Show all places in story elements without connecting lines</option>
@@ -369,17 +307,57 @@
         <input name="reportElementMapFilter"/>
         </span>
     </div>
+
+    <div  class="heurist_StoryMap">
+        <div class="header"><label>Overview mode:</label></div>
+        <select name="reportOverviewMode" class="text ui-widget-content ui-corner-all" title="">
+            <option value="tab">Tab</option>
+            <option value="inline">Inline as first story element</option>
+            <option value="header">Header</option>
+            <option value="no">No overview</option>
+        </select>
+
+        <label class="inside_header">Overview template&nbsp;</label>
+        <select name="reportOverview" class="text ui-widget-content ui-corner-all" title="">
+        </select>
+
+        <i class="help-text">Defines the format used to display story overview derived from the main story record</i>
+    </div>
+
+    <div  class="heurist_StoryMap">
+        <div class="header row-spacing"><label>End page mode:</label></div>
+        <select name="reportEndPageMode" class="text ui-widget-content ui-corner-all" title="">
+            <option value="tab">Tab</option>
+            <option value="inline">Inline as last story element</option>
+            <option value="footer">Footer</option>
+            <option value="no">No end page</option>
+        </select>
+
+        <label class="inside_header">End page template&nbsp;</label>
+        <select name="reportEndPage" class="text ui-widget-content ui-corner-all" title="">
+        </select>
+
+        <i class="help-text" style="padding-bottom: 30px;">Defines the format used to display end of story derived from the main story record</i>
+    </div>
+
+    <div class="heurist_StoryMap">
+        <div class="header row-spacing">
+            <label>Story element filter for initial map&nbsp;</label>
+        </div>
+        <input name="reportOverviewMapFilter" class="text ui-widget-content ui-corner-all" title="" style="width:250px"/>
+        <i class="help-text" style="padding-bottom: 30px;">Determines the set of story elements on the initial map (rather than showing all stories in the current resultset)</i>
+    </div>
     
     <div class="heurist_StoryMap">
         <div class="header"><label>Message when no record selected</label></div>
         <input name="storyPlaceholder" size="100"/>
-        <i class="help-text"></i>
+        <i class="help-text">Message to display while search is not performed or no record or search has been selected</i>
     </div>
 
     <div class="heurist_StoryMap">
         <div class="header"><label>Message if no story elements</label></div>
         <input name="elementsPlaceholder" size="100"/>
-        <i class="help-text"></i>
+        <i class="help-text">Message to be shown if query returns no records</i>
     </div>
     
     <div class="heurist_StoryMap">
@@ -544,7 +522,7 @@
         <input value="is_multi_selection" name="selection_mode" type="radio"/>
         <i>&nbsp; show selected records only</i>
 
-        <input name="init_show_all" type="checkbox"/>
+        <input name="init_show_all" type="checkbox" style="margin:0px 0.2em 0px 1.7em;"/>
         <i>&nbsp; show all records in resultset prior to selection</i>
     </div>
 
@@ -564,7 +542,7 @@
         <i>&nbsp; allow users to print the current record set</i>
     </div>
 
-    <div class="heurist_resultList heurist_resultListExt">
+    <div class="heurist_resultListExt">
         <div class="header">
             <label>Show export button</label>
         </div>
@@ -592,7 +570,7 @@
         </select>
     </div>
 
-    <div class="heurist_resultList heurist_resultListExt heurist_resultListDataTable">
+    <div class="heurist_resultListExt heurist_resultListDataTable">
         <div class="header">
             <label>Filter to be applied at start</label>
         </div>
@@ -674,7 +652,8 @@
         <div class="header">
             <label>Message prior to selection</label>
         </div>
-        <label><input type="checkbox" name="blank_placeholder"> check to leave blank</label>, otherwise defaults to "<span id="placeholder_def"></span>"
+        <label><input type="checkbox" name="blank_placeholder"> check to leave blank</label>
+        , otherwise defaults to "<span id="placeholder_def" class="truncate" style="max-width: 350px;line-height: 9px;display: inline-block;"></span>"
         <textarea id="placeholder_text" rows="3" cols="85"/>
         <span class="heurist-helper1" style="display: inline-block;line-height: 12px;padding-bottom: 10px;">
             Message to display while search is not performed or no record or search has been selected
@@ -685,10 +664,35 @@
         <div class="header">
             <label>No data message</label>
         </div>
-        <label><input type="checkbox" name="blank_empty_remark"> check to leave blank</label>, otherwise defaults to "<span id="empty_remark_def"></span>"
+        <label><input type="checkbox" name="blank_empty_remark"> check to leave blank</label>
+        , otherwise defaults to "<span id="empty_remark_def" class="truncate" style="max-width: 350px;line-height: 9px;display: inline-block;"></span>"
         <textarea id="empty_remark" rows="3" cols="85"/>
         <span class="heurist-helper1" style="display: inline-block;line-height: 12px;padding-bottom: 10px;">
             Message to be shown if query returns no records
+        </span>
+    </div>
+
+    <hr class="heurist_resultList" style="margin: 1em -10px;">
+
+    <div class="heurist_resultList">
+        <div class="header" style="width:210px;"><label>Set class(es) for record from term value(s) for </label></div>
+        <select name="field_for_ext_classes" class="text ui-widget-content ui-corner-all" title="">
+        </select>
+    </div>
+
+	<div class="heurist_resultList">
+        <div class="header"><label>Allow inline content display:</label></div>
+        <input type="checkbox" name="allow_record_content_view"/>
+        <span class="heurist-helper1">
+            Inline content display (all results). Use ONLY if never more than 10 - 20 records in results (intended for monthly blogs)
+        </span>
+    </div>
+
+	<div class="heurist_resultList">
+        <div class="header"><label>Blog Mode:</label></div>
+        <input type="checkbox" name="blog_result_list"/>
+        <span class="heurist-helper1">
+            (Limits initial display to 10 records, but does not limit display on subsequent selections)
         </span>
     </div>
     
