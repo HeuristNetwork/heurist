@@ -38,10 +38,11 @@ Note: The following libraries are accessed directly on the web via their URL. Th
 
 See also /documentation_and_templates/modifications_to_external_functions.txt for specific changes that have been made to the source code of these functions (where unavoidable), and the reasons for modification.
 
-Contents of …/HEURIST_SUPPORT/external_h5
+Contents of …/HEURIST_SUPPORT/external_h7
 ------------------------------------------------------------------
 
-codemirror-3.20        - smarty template editor
+codemirror-5.61        - smarty template editor and direct html editor for CMS
+
 d3                     - links visualization  http://d3js.org/, https://github.com/d3/d3-plugins/tree/master/fisheye
 
 jquery-file-upload     - upload files in editTerms,smarty template, manageFilesUpload.php
@@ -59,8 +60,9 @@ tinymce                - wyswyg editor for blocktext fields in record edit
 vis                    - we use only timeline (original code was modified) need to extract only code for timeline
                                                  since the size of package is 1.5Mb  (used in map.php)
 
-php/Mysqldump.php      - dump database in dbUtils.php exportMyDataPopup.php.
-php/phpZotero.php      - syncZotero.php
+php/Mysqldump8.php      - dump database in dbUtils.php exportMyDataPopup.php.
+php/phpZotero.php       - syncZotero.php
+php/tileserver.php      - server to distribute pre-rendered map tiles (OGC WMTS standard)
 
 js/geodesy-master           - convert UTM to/from WGS in mapDraw.php
 js/wellknown.js             - parse/stringfy WKT to json in mapDraw.php and in utils_geo.parseWKTCoordinates
@@ -68,15 +70,10 @@ js/shapefile                - shp to json parser see map.php
 js/evol.colorpicker.js      - color picker in map.php (@todo replace with colpick or vv)
 js/platform.js              - browser and platform detect
 js/jquery.ui-contextmenu.js - context menu plugin (used in saved search treeview)
-js/themeswitchertool.js     - jquery theme switcher
 
-Candidates to remove as at Feb 2019: colpick, mediaelement, timemap.js, yui
+Candidates to remove as at Jan 2024
 ------------------------------
-colpick                - colorpicker for JJ visualization
-mediaelement           - we use flashmediaelement.swf as a last resort for video/audio playback - to remove
-                                                 since flash is blocked nearly everywhere this time.
 timemap.js             - timemap libarary - todo repalce to native google.map.data
-yui                        - admin db defininition, smarty and dbStatistics.php (DataTable)
 
 
 

@@ -20,7 +20,7 @@ VIS.JS
 "  overflow: visible; /* artem by default labels are not in box */", "vis.css (240:25)"
 "  /*ARTEM padding: 5px; */", "vis.css (265:5)"
 
-ext/fancytree/skin-themeroller/ui.fancytree.css (67) fix glitch for Chrome
+ext/jquery.fancytree/skin-themeroller/ui.fancytree.css (67) fix glitch for Chrome
 
 
 ext/shapefile/dbf.js  (lines: 74-101)  replacement deprecated synchronous request
@@ -46,7 +46,7 @@ external/php/phpZotero.php (114-121) support proxy settings
 						   
 2017-06-20 external\jquery-file-upload\server\php\UploadHandler.php	
 			- specification of thumbnail upload folder via url parameters upload_thumb_dir, upload_thumb_url
-2017-06-21 ext/fancytree/skin-themeroller/icons.gif 
+2017-06-21 ext/jquery.fancytree/skin-themeroller/icons.gif 
 			- add 2 arrow icons
 
 2017-07-01

@@ -1,6 +1,4 @@
 <?php
-//@TODO replace YUI dataTable to jQuery 
-
 /**
 * dbStatistics: shows a sortable list of databases on the server and their usage (record counts, access dates etc.)
 *
