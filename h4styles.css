@@ -2612,8 +2612,13 @@ li.edit-form-tab > a{
 .cms-widget-config i.help-text{
     display: block;
     line-height: 5px;
-    padding: 2.5px 0px 5px;
+    padding-bottom: 5px;
 }
+
 .cms-widget-config .row-spacing{
-    padding-bottom: 15px;
+    padding-bottom: 25px;
+}
+
+.cms-widget-config label.inside_header{
+    padding-left: 25px;
 }

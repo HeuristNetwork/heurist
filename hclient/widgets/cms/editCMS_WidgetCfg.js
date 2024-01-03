@@ -41,6 +41,11 @@ function editCMS_WidgetCfg( widget_cfg, _layout_content, $dlg, main_callback ){
         heurist_resultListDataTable: {
             placeholder_def: 'No default',
             empty_remark_def: 'No default'
+        },
+        heurist_storymap: {
+            storyPlaceholder_def: 'Please select a story in the list',
+            elementsPlaceholder_def: 'There are no story elements to display for the selected item',
+            elementsPlaceholderSub_def: 'Story elements may exist but not be publicly visible'
         }
     };
 
@@ -80,8 +85,12 @@ function editCMS_WidgetCfg( widget_cfg, _layout_content, $dlg, main_callback ){
             //open as popup
 
             let height = 700;
+            let width = 800;
             if(widget_cfg.appid == 'heurist_StoryMap'){
                 height = 745;
+            }else if(widget_cfg.appid == 'heurist_resultList'){
+                height = 850;
+                width = 850;
             }
 
             $dlg = window.hWin.HEURIST4.msg.showMsgDlgUrl(window.hWin.HAPI4.baseURL
@@ -89,7 +98,7 @@ function editCMS_WidgetCfg( widget_cfg, _layout_content, $dlg, main_callback ){
                 buttons, `Modify ${widget_cfg.name ? widget_cfg.name : 'Widget'} Properties`, 
                 {  container:'cms-add-widget-popup',
                     default_palette_class: 'ui-heurist-publish',
-                    width: 800,
+                    width: width,
                     height: height,
                     close: function(){
                         $dlg.dialog('destroy');       
@@ -391,6 +400,8 @@ function editCMS_WidgetCfg( widget_cfg, _layout_content, $dlg, main_callback ){
                         $dlg.find('[name="dialog_left"]').val(l_val);
                         $dlg.find('[name="dialog_top"]').val(t_val);
                     }
+
+                    $dlg.find('[name="field_for_ext_classes"]').prev().css('width', '210px');
                 }else if(widget_name=='heurist_resultListDataTable'){ // datatable
                     $dlg.find('#dataTableParams').val(opts['dataTableParams']);
                     $dlg.find('#empty_remark').val(opts['emptyTableMsg']);
@@ -401,12 +412,12 @@ function editCMS_WidgetCfg( widget_cfg, _layout_content, $dlg, main_callback ){
 
                 if(_def_labels[widget_name]){ // fill in default labels
 
-                    let def_placeholder = _def_labels[widget_name]['placeholder_def'];
+                    let def_placeholder = window.hWin.HR(_def_labels[widget_name]['placeholder_def']);
 
-                    let def_remark = _def_labels[widget_name]['empty_remark_def'];
-    
-                    $dlg.find('#placeholder_def').text(window.hWin.HR(def_placeholder));
-                    $dlg.find('#empty_remark_def').text(window.hWin.HR(def_remark));    
+                    let def_remark = window.hWin.HR(_def_labels[widget_name]['empty_remark_def']);
+
+                    $dlg.find('#placeholder_def').text(def_placeholder).attr('title', def_placeholder);
+                    $dlg.find('#empty_remark_def').text(def_remark).attr('title', def_remark);
                 }
 
                 if(opts['blank_placeholder'] || $dlg.find('#placeholder_text').val() == 'def'){ // replace 'def' with a blank
@@ -1039,8 +1050,12 @@ function editCMS_WidgetCfg( widget_cfg, _layout_content, $dlg, main_callback ){
                      $dlg.find('#is_popup_report').change(function(e){
                         if($dlg.find('#is_popup_report').is(':checked')){
                             $dlg.find('#popup_report_position').parent().show();       
+
+                            $dlg.find('#is_popup_report').parent().find('.header').removeClass('row-spacing');
                         }else{
                             $dlg.find('#popup_report_position').parent().hide();
+
+                            $dlg.find('#is_popup_report').parent().find('.header').addClass('row-spacing');
                         }    
                      });
                      $dlg.find('#is_popup_report').prop('checked', opts['is_popup']).change();
@@ -1285,7 +1300,7 @@ function editCMS_WidgetCfg( widget_cfg, _layout_content, $dlg, main_callback ){
             opts['popup_position'] = $dlg.find('#popup_report_position').val();
             
         }else if(widget_name=='heurist_resultList'){
-            opts['show_toolbar'] = opts['show_counter'] || opts['show_viewmode'];
+            opts['show_toolbar'] = opts['show_counter'] || opts['show_viewmode'] || opts['show_export_button'];
             if(window.hWin.HEURIST4.util.isempty(opts['recordview_onselect'])){
                 opts['recordview_onselect']  = 'inline'; //default value    
             }
