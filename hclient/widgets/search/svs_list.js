@@ -1081,6 +1081,7 @@ $.widget( "heurist.svs_list", {
 
             //$(this.accordeon).css({'overflow-x':'hidden',bottom:'3em'});
             $(this.accordeon).css({'overflow':'hidden',position:'unset','padding':'4px'});
+            $(this.accordeon).parent().css({'overflow-y':'auto'});
 
             if(this.options.simple_search_allowed){ // add search everything below buttons
                 this.addSearchEverything(true);
