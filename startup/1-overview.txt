@@ -1,4 +1,4 @@
-Directory:    /hclient/setup
+Directory:    /startup
 
 Overview:  Setup sequence - register new user, create new database, getting started
 

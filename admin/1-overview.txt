@@ -2,15 +2,12 @@ Directory:	/admin
 
 Overview:
 
-This directory contains all the adminstrative interface code from Heurist Vsn 3, which is used by Heurist Vsn 4.
-The code has been modified where needed to work within H4
-The most important menus have been moved into the main search/filter page layout
-This page is slated for elimination once all functions moved as submenus of the main page menus
+This directory contains all the administrative interface code from Heurist Vsn 3, also used by Heurist Vsn 4 and 5.
 
 Vsn 6: In the end, all this is fairly simple code which has worked for years and has no relation to the performance and structure 
 of the main data entry and retrieval functions, so it has been left untouched. It is the product of many hands, but it works.
 
-Updated: 	18th October 2015
+Updated: 	18th October 2015, updated 3 Jan 2024
 
 ------------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -21,7 +18,7 @@ Updated: 	18th October 2015
 * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
 * @author      Ian Johnson     <ian.johnson@sydney.edu.au>
 * @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
-* @version     4
+* @version     6
 */
 
 /*

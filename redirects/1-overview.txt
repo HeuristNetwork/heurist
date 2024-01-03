@@ -6,7 +6,8 @@ Overview:
 This directory contains redirector files to the functions which are called across servers,
 notably to the Heurist Reference Index Server.
 
-By using these redirectors, we avoid dependency on scripts remaining in the same location  eg. if the program code is restructured or new versions are written. That means that a newer, restructured version of
+By using these redirectors, we avoid dependency on scripts remaining in the same location  
+eg. if the program code is restructured or new versions are written. That means that a newer, restructured version of
 the code can be accessed by an older version on a remote server, without the latter seeing any difference.
 
 Version ( eg. _V1) suffix is used to allow new versions of the target scripts to generate different output
