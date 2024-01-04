@@ -1311,7 +1311,7 @@ function editCMS_WidgetCfg( widget_cfg, _layout_content, $dlg, main_callback ){
             opts['popup_position'] = $dlg.find('#popup_report_position').val();
             
         }else if(widget_name=='heurist_resultList'){
-            opts['show_toolbar'] = opts['show_counter'] || opts['show_viewmode'] || opts['show_export_button'];
+            opts['show_toolbar'] = opts['show_counter'] || opts['show_viewmode'] || opts['show_export_button'] || opts['support_collection'];
             if(window.hWin.HEURIST4.util.isempty(opts['recordview_onselect'])){
                 opts['recordview_onselect']  = 'inline'; //default value    
             }
