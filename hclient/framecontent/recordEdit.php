@@ -178,11 +178,6 @@ else{
 }   
 print '<script>var prepared_params = '.json_encode($params).';</script>';
 
-if($_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0.0.1'){
-        print '<script type="text/javascript" src="'.PDIR.'external/jquery.fancytree/jquery.fancytree-all.min.js"></script>';
-}else{
-        print '<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery.fancytree/2.16.1/jquery.fancytree-all.min.js"></script>';
-}   
 ?>
         <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery.fancytree/2.38.3/jquery.fancytree-all.js"></script>
         <link rel="stylesheet" type="text/css" href="<?php echo PDIR;?>external/jquery.fancytree/skin-themeroller/ui.fancytree.css" />
@@ -211,36 +206,6 @@ if($_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0.0.1'){
         <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/record/recordAction.js"></script>
         <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/record/recordAccess.js"></script>
         
-        <!-- loaded dynamically in editing.js
-        <script type="text/javascript" src="<?php echo PDIR;?>external/tinymce5/tinymce.min.js"></script>
-        -->
-
-        <!-- Calendar picker -->
-<!--        
-        <script type="text/javascript" src="<?php echo PDIR;?>external/jquery.calendars-2.1.1/js/jquery.plugin.min.js"></script>
-        <script type="text/javascript" src="<?php echo PDIR;?>external/jquery.calendars-2.1.1/js/jquery.calendars.all.min.js"></script>
-        <script type="text/javascript" src="<?php echo PDIR;?>external/jquery.calendars-2.1.1/js/jquery.calendars.picker.min.js"></script>
-        <link rel="stylesheet" type="text/css" href="<?php echo PDIR;?>external/jquery.calendars-2.1.1/css/jquery.calendars.picker.css">
-
-        <script type="text/javascript" src="<?php echo PDIR;?>external/jquery.calendars-1.2.1/jquery.calendars.js"></script>
-        <script type="text/javascript" src="<?php echo PDIR;?>external/jquery.calendars-1.2.1/jquery.calendars.plus.js"></script>
-
-        <link rel="stylesheet" type="text/css" href="<?php echo PDIR;?>external/jquery.calendars-1.2.1/jquery.calendars.picker.css">
-        <script type="text/javascript" src="<?php echo PDIR;?>external/jquery.calendars-1.2.1/jquery.calendars.picker.js"></script>
-
-        <script src="<?php echo PDIR;?>external/jquery.calendars-1.2.1/jquery.calendars.taiwan.js"></script>
-        <script src="<?php echo PDIR;?>external/jquery.calendars-1.2.1/jquery.calendars.thai.js"></script>
-        <script src="<?php echo PDIR;?>external/jquery.calendars-1.2.1/jquery.calendars.julian.js"></script>
-        <script src="<?php echo PDIR;?>external/jquery.calendars-1.2.1/jquery.calendars.persian.js"></script>
-        <script src="<?php echo PDIR;?>external/jquery.calendars-1.2.1/jquery.calendars.islamic.js"></script>
-        <script src="<?php echo PDIR;?>external/jquery.calendars-1.2.1/jquery.calendars.ummalqura.js"></script>
-        <script src="<?php echo PDIR;?>external/jquery.calendars-1.2.1/jquery.calendars.hebrew.js"></script>
-        <script src="<?php echo PDIR;?>external/jquery.calendars-1.2.1/jquery.calendars.ethiopian.js"></script>
-        <script src="<?php echo PDIR;?>external/jquery.calendars-1.2.1/jquery.calendars.coptic.js"></script>
-        <script src="<?php echo PDIR;?>external/jquery.calendars-1.2.1/jquery.calendars.nepali.js"></script>
-        <script src="<?php echo PDIR;?>external/jquery.calendars-1.2.1/jquery.calendars.mayan.js"></script>
--->        
-
         <script type="text/javascript">
             var $container;
             // Callback function on page initialization

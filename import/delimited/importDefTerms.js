@@ -133,7 +133,7 @@ function hImportDefTerms(_trm_ParentTermID, _vcg_ID, isImportTranslations) {
          
         var src_content = ''; 
         
-        $('#sourceContent').keyup(function(e){
+        $('#sourceContent').on('keyup', function(e){
             if(src_content != $(this).val().trim()){
                 src_content = $(this).val().trim();
                 _setCurtain( src_content==''?1:2 );

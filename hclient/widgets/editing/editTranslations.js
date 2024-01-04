@@ -209,7 +209,7 @@ $.widget( "heurist.editTranslations", {
                         .addClass('text ui-widget-content ui-corner-all')
                         .css({width:'680px'})
                         .val(value)
-                        .keyup(function(){that._was_changed=true;})
+                        .on('keyup', function(){that._was_changed=true;})
                         .on('change',function(){that._was_changed=true;})
                         .appendTo( values_container );
                         

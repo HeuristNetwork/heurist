@@ -2451,7 +2451,7 @@ $.widget( "heurist.editing_input", {
             .uniqueId()
             .addClass('text ui-widget-content ui-corner-all')
             .val(value)
-            .keyup(function(){that.onChange();})
+            .on('keyup', function(){that.onChange();})
             .on('change',function(){
                     that.onChange();
             })
@@ -2541,7 +2541,7 @@ $.widget( "heurist.editing_input", {
             else if(this.detailType=="integer" || this.detailType=="year"){//-----------------------------------------
 
                  
-                $input.keypress(function (e) {
+                $input.on('keypress', function (e) {
                     var code = e.charCode || e.keyCode;
                     var charValue = String.fromCharCode(code);
                     var valid = false;
@@ -2575,7 +2575,7 @@ $.widget( "heurist.editing_input", {
                 */
                 
                 
-                /*$input.keyup(function () {
+                /*$input.on('keyup', function () {
                 if (this.value != this.value.replace(/[^0-9-]/g, '')) {
                 this.value = this.value.replace(/[^0-9-]/g, '');  //[-+]?\d
                 }
@@ -2583,7 +2583,7 @@ $.widget( "heurist.editing_input", {
             }else
             if(this.detailType=="float"){//----------------------------------------------------
 
-                    $input.keypress(function (e) {
+                    $input.on('keypress', function (e) {
                         var code = e.charCode || e.keyCode; //(e.keyCode ? e.keyCode : e.which);
                         var charValue = String.fromCharCode(code);
                         var valid = false;
@@ -5463,7 +5463,7 @@ $.widget( "heurist.editing_input", {
 
                 if(ress.length==0 || window.hWin.HEURIST4.util.isempty(ress[0]) || 
                     ($.isPlainObject(ress[0]) &&  $.isEmptyObject(ress[0])) || 
-                    ($.type(ress[0])=='string' && ress[0].trim()=='')) {
+                    ( (typeof ress[0] ==='string') && ress[0].trim()=='')) {
                     
                     
                     if( data_type=='file' && !this.isFileForRecord && this.entity_image_already_uploaded){
@@ -5945,8 +5945,8 @@ $.widget( "heurist.editing_input", {
                     window.hWin.HAPI4.save_pref('edit_record_last_entered_date', $input.val());
                     __onDateChange();
                 },
-                renderer: $.extend({}, $.calendars.picker.defaultRenderer,
-                        {picker: $.calendars.picker.defaultRenderer.picker.
+                renderer: $.extend({}, $.calendarsPicker.defaultRenderer,
+                        {picker: $.calendarsPicker.defaultRenderer.picker.
                             replace(/\{link:prev\}/, '{link:prevJump}{link:prev}').
                             replace(/\{link:next\}/, '{link:nextJump}{link:next}')}),
                 showTrigger: '<span class="smallicon ui-icon ui-icon-calendar" style="display:inline-block" data-picker="'+$input.attr('id')+'" title="Show calendar"></span>'}

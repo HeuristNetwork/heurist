@@ -276,7 +276,7 @@ $.widget( "heurist.svs_list", {
 
         if(this.options.btn_visible_filter && !this.isPublished){
             // listeners
-            this.filter_input.keyup(function(e){
+            this.filter_input.on('keyup', function(e){
                 var leavesOnly = true; //$("#leavesOnly").is(":checked"),
                 match = $(this).val();
 

@@ -2246,7 +2246,7 @@ function temporalSimplifyDate(sdate) {
 function fixCalendarPickerCMDs(){
 
     // Fix an issue with the 'enabled' check for prev, prevJump, next, and nextJump commands
-    $.calendars.picker.commands.prev.enabled = function(inst){
+    $.calendarsPicker.commands.prev.enabled = function(inst){
         var minDate = inst.curMinDate();
         let goPrev = true;
         if(minDate){
@@ -2259,7 +2259,7 @@ function fixCalendarPickerCMDs(){
         return (!minDate || goPrev);
     };
 
-    $.calendars.picker.commands.prevJump.enabled = function(inst) {
+    $.calendarsPicker.commands.prevJump.enabled = function(inst) {
         var minDate = inst.curMinDate();
         let goPrev = true;
         if(minDate){
@@ -2272,7 +2272,7 @@ function fixCalendarPickerCMDs(){
         return (!minDate || goPrev);
     };
 
-    $.calendars.picker.commands.next.enabled = function(inst) {
+    $.calendarsPicker.commands.next.enabled = function(inst) {
         var maxDate = inst.get('maxDate');
         let goNext = true;
         if(maxDate){
@@ -2284,7 +2284,7 @@ function fixCalendarPickerCMDs(){
         return (!maxDate || goNext);
     };
 
-    $.calendars.picker.commands.nextJump.enabled = function(inst) {
+    $.calendarsPicker.commands.nextJump.enabled = function(inst) {
         var maxDate = inst.get('maxDate');
         let goNext = true;
         if(maxDate){
