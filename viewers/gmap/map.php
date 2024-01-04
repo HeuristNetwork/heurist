@@ -265,7 +265,7 @@ $system->defineConstants();
             items: ".vis-item,.vis-item-overflow"
         });
 
-        $( window ).resize(function() {
+        $( window ).on('onresize',function() {
             var w = $(this).width();
             if (w < 400) {
                 $("#mapSelectorBtn").button({showLabel:false}).width(20);

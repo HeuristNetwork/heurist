@@ -210,7 +210,7 @@ $.widget( "heurist.manageUsrSavedSearches", $.heurist.manageEntity, {
         
         var html = '<div class="recordDiv" id="rd'+recID+'" recid="'+recID+'">'
                 + '<div class="recordSelector"><input type="checkbox" /></div>'
-                + '<div class="recordIcons"><span class="ui-icon '+iconBtn+'"/></div>'
+                + '<div class="recordIcons"><span class="ui-icon '+iconBtn+'"></span></div>'
                 + fld2('svs_Name','39ex')
                 + '<div class="truncate" style="display:inline-block;width:29ex">'
                     +group_name+'</div>'

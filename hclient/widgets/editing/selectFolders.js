@@ -88,19 +88,6 @@ $.widget( "heurist.selectFolders", $.heurist.selectMultiValues, {
             }
         ).appendTo(ent_header);
 
-        /*
-        $('<label><input type="checkbox">Show system folders</label>').css({'margin-left':'20px'}).appendTo(ent_header);
-        ent_header.find('input').on('click',
-        function(event){
-        that._show_system_folders = $(event.target).is(':checked');
-
-        var wtrr = that._treeview.fancytree("getTree");
-        wtrr.filterBranches(function(node){
-        return that._show_system_folders || !node.data.issystem;
-        }, {mode: "hide"});
-        //that._treeview.fancytree('render')  
-        });
-        */
 
         if(this.options.allowEdit){
             ent_header.show();

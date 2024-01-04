@@ -603,12 +603,6 @@ $.widget( "heurist.svs_list", {
 
         var that = this;
 
-        //verify that all required libraries have been loaded
-        if(!window.hWin.HUL.isFunction($('body').fancytree)){        //jquery.fancytree-all.min.js
-            $.getScript(window.hWin.HAPI4.baseURL+'external/jquery.fancytree/jquery.fancytree-all.min.js', function(){ that._updateAccordeon(); } );
-            return;
-        } 
-        
 /*        
         if( (!islogged || this.isPublished) && !window.hWin.HAPI4.currentUser.ugr_SvsTreeData){ //!(islogged || window.hWin.HAPI4.currentUser.ugr_SvsTreeData)){
         
@@ -616,10 +610,6 @@ $.widget( "heurist.svs_list", {
 
             return;
             
-        }else if(!$.ui.fancytree._extensions["dnd"]){
-            //    $.getScript(window.hWin.HAPI4.baseURL+'external/jquery.fancytree/src/jquery.fancytree.dnd.js', function(){ that._updateAccordeon(); } );
-            alert('drag-n-drop extension for tree not loaded')
-            return;
         }else if(!window.hWin.HAPI4.currentUser.ugr_SvsTreeData){ //not loaded yet - load from sysUgrGrps.ugr_NavigationTree
 
             this.getFiltersTreeData( null, function(data){
@@ -1256,7 +1246,7 @@ $.widget( "heurist.svs_list", {
             if(response.status == window.hWin.ResponseStatus.OK){
                 var newdata = {};
                 try {
-                    var newdata = $.parseJSON(response.data);
+                    var newdata = JSON.parse(response.data);
                 }
                 catch (err) {
                     window.hWin.HEURIST4.msg.showMsgErrJson(response.data);
@@ -1539,7 +1529,7 @@ $.widget( "heurist.svs_list", {
 
                         var sNode = $.ui.fancytree.getNode(event.target);
 
-                        return $('<div class="fancytree-drag-helper"><span class="fancytree-drag-helper-img" /></div>')
+                        return $('<div class="fancytree-drag-helper"><span class="fancytree-drag-helper-img" ></span></div>')
                                     .append($(sNode.span).find('span.fancytree-title').clone())
                                     .data('ftSourceNode', sNode);
                     },
@@ -1584,8 +1574,9 @@ $.widget( "heurist.svs_list", {
 
                     // Custom event handler that is triggered by keydown-handler and
                     // context menu:
+                    var wtree = $.ui.fancytree.getTree(tree);
+                    
                     var refNode, moveMode,
-                    wtree = $(tree).fancytree("getTree"),
                     node = wtree.getActiveNode();
 
                     switch( data.cmd ) {
@@ -1818,8 +1809,8 @@ $.widget( "heurist.svs_list", {
                 select: function(event, ui) {
                     
                     if(ui.cmd=='copycb'){
-                            var wtree = $(tree).fancytree("getTree"),
-                                node = wtree.getActiveNode();
+                            var wtree = $.ui.fancytree.getTree(tree);
+                            var node = wtree.getActiveNode();
                             that._getFilterString(node.key);
                     }else{
                         var that2 = this;
@@ -1950,7 +1941,7 @@ $.widget( "heurist.svs_list", {
             }
         }
 
-        this.treeviews[groupID] = tree.fancytree("getTree");
+        this.treeviews[groupID] = $.ui.fancytree.getTree(tree);
 
         if(this.options.is_h6style){
             this._applyTreeViewFilter(groupID);
@@ -2005,24 +1996,16 @@ $.widget( "heurist.svs_list", {
                     $(item).addClass('leaves');
                 }
                 
-                $(item).mouseenter(
+                $(item).on('mouseenter',
                     function(event){
                         var ele = $(item).find('.svs-contextmenu2');
                         ele.css('display','inline-block');
                         //ele.show();
-                }).mouseleave(
+                }).on('mouseleave',
                     function(event){
                         var ele = $(item).find('.svs-contextmenu2');
                         ele.hide();
                 });
-                    /*
-                    $(item).hover(
-                    function(event){
-                    $(event.target).find('.svs-contextmenu2').css('display','inline-block');
-                    },
-                    function(event){
-                    $(event.target).find('.svs-contextmenu2').hide();
-                    });*/
                 
             });
     },

@@ -76,21 +76,22 @@ $.widget( "heurist.configEntity", {
                 +(loadSettingLabel)+'</label></div>'
                 +'<div style="margin-left: 10px;"><select class="sel_saved_settings text ui-widget-content ui-corner-all" style="width:100%;"></select></div>'
                 + ((this.options.showButtons)?
-                ('<div class="btn-action-div" style="margin-left: 15px;"><span class="btn-action btn-rename bg-warning saveEditButton"/>'
-                +'<span class="btn-action btn-openedit"/>'
-                +'<span style="margin: 2px;" class="btn-action btn-remove bg-danger saveRemoveButton"/></div></div>'):'') )
+                ('<div class="btn-action-div" style="margin-left: 15px;">'
+                +'<span class="btn-action btn-rename bg-warning saveEditButton"></span>'
+                +'<span class="btn-action btn-openedit"></span>'
+                +'<span style="margin: 2px;" class="btn-action btn-remove bg-danger saveRemoveButton"></span></div></div>'):'') )
             .appendTo(this.element);
         }else if(this.options.configName == "datatable"){ // TODO - setup for datatable version
 
             $('<div style="display:flex; align-content: center; flex-wrap: wrap; align-items: center;">'
-            + ((this.options.showButtons)?'<div style="flex: 0 0 140px;"><span class="btn-action btn-openedit"/></div>' : '')
+            + ((this.options.showButtons)?'<div style="flex: 0 0 140px;"><span class="btn-action btn-openedit"></span></div>' : '')
             + '<div style="flex: 0 0 300px;">'
                 + '<label for="sel_saved_settings" style="display:inline-block; margin-right: 10px;">'+loadSettingLabel+'</label><select class="sel_saved_settings text ui-widget-content ui-corner-all"></select>'
             + '</div>'
             +  ((this.options.showButtons)?
                 ('<div class="btn-action-div" style="flex: 0 0 125px">&nbsp;&nbsp;'
-                    + '<span class="btn-action btn-rename"/>'
-                    + '<span class="btn-action btn-remove"/>'
+                    + '<span class="btn-action btn-rename"></span>'
+                    + '<span class="btn-action btn-remove"></span>'
                 + '</div>'):'')
             + '</div>').appendTo(this.element);
         }else{
@@ -99,9 +100,9 @@ $.widget( "heurist.configEntity", {
                 +(loadSettingLabel)+'</label></div>'
                 +'<div'+st+'><select class="sel_saved_settings text ui-widget-content ui-corner-all"></select></div>'
                 + ((this.options.showButtons)?
-                ('<div class="btn-action-div"'+st+'>&nbsp;&nbsp;<span class="btn-action btn-rename"/>'
-                +'<span class="btn-action btn-openedit"/>'
-                +'<span class="btn-action btn-remove"/></div></div>'):'') )
+                ('<div class="btn-action-div"'+st+'>&nbsp;&nbsp;<span class="btn-action btn-rename"></span>'
+                +'<span class="btn-action btn-openedit"></span>'
+                +'<span class="btn-action btn-remove"></span></div></div>'):'') )
                 //('<span class="ui-icon ui-icon-pencil" style="font-size:smaller;cursor:pointer"></span>'
                 //+'<span class="ui-icon ui-icon-delete" style="font-size:smaller;cursor:pointer"></span>'):'') )
             .appendTo(this.element);

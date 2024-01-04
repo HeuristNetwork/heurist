@@ -41,7 +41,7 @@ $.widget( "heurist.editTranslations", {
         var that = this;
 
         
-        this._container = $('<div class="ent_content_full" style="top:0;padding:10px"/>')
+        this._container = $('<div class="ent_content_full" style="top:0;padding:10px"></div>')
                     .appendTo( $('<div class="ent_wrapper">').appendTo(this.element) );
 
         if(this.options.is_dialog){
@@ -192,9 +192,9 @@ $.widget( "heurist.editTranslations", {
             
             if(this.options.fieldtype=='blocktext')
             {
-                input_ele = $( "<textarea>",{rows:4}) //min number of lines
+                input_ele = $( "<textarea>",{rows:'4'}) //min number of lines
                         .css({'overflow-x':'hidden'})
-                        .keydown(function(e){
+                        .on('keydown',function(e){
                             if (e.keyCode == 65 && e.ctrlKey) {
                                 e.target.select()
                             }    

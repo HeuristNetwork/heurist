@@ -1720,9 +1720,9 @@ window.hWin.HEURIST4.ui = {
                             +'</div></div>' //container for rts_editor
                         + '<div class="ui-layout-center"><div class="editForm"></div></div>'
                         + '<div class="ui-layout-east"><div class="editFormSummary">....</div></div>'
-                        //+ '<div class="ui-layout-south><div class="editForm-toolbar"/></div>'
+                        //+ '<div class="ui-layout-south><div class="editForm-toolbar"></div></div>'
                 + '</div>'
-                //+ '<div class="ent_footer editForm-toolbar"/>'
+                //+ '<div class="ent_footer editForm-toolbar"></div>'
             +'</div>',
             onInitFinished:function( last_attempt ){
                 
@@ -1970,7 +1970,7 @@ window.hWin.HEURIST4.ui = {
                         
         + '</div>'
                         //record type icon for relmarker
-                        //+ (reltype==''?'': '<div class="btn-edit"/>')                        
+                        //+ (reltype==''?'': '<div class="btn-edit"></div>')                        
                         + sRelBtn
                         + '</div>')
         .appendTo($(container));

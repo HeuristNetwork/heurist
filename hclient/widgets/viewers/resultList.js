@@ -539,7 +539,7 @@ $.widget( "heurist.resultList", {
 
             $('<div class="result-list-header ui-widget-content" ' //was ui-heurist-heade
             + 'style="font-size:1em;text-align:left;padding-left:12px;position:relative;'
-            + 'font-weight: bold;letter-spacing: 0.26px;padding:10px;"/>')
+            + 'font-weight: bold;letter-spacing: 0.26px;padding:10px;"></div>')
                 .appendTo( this.div_header );
         }else{
         
@@ -1068,7 +1068,9 @@ $.widget( "heurist.resultList", {
         if(this.div_content_header) this.div_content_header.remove();
 
         // remove generated elements
-        this.action_buttons_div.remove();
+        if(this.action_buttons_div){
+            this.action_buttons_div.remove();  
+        } 
         if(this.btn_search_save){
             this.btn_search_save.remove(); 
             //this.btn_search_save_withorder.remove(); 
@@ -1081,15 +1083,15 @@ $.widget( "heurist.resultList", {
         if(this.div_actions) this.div_actions.remove();
         if(this.div_search_form) this.div_search_form.remove();
         if(this.fancybox_button) this.fancybox_button.remove();
-        this.reorder_button.remove();
-        this.div_toolbar.remove();
-        this.div_content.remove();
-        this.div_coverall.remove();
+        if(this.reorder_button) this.reorder_button.remove();
+        if(this.div_toolbar) this.div_toolbar.remove();
+        if(this.div_content) this.div_content.remove();
+        if(this.div_coverall) this.div_coverall.remove();
 
-        this.menu_tags.remove();
-        this.menu_share.remove();
-        this.menu_more.remove();
-        this.menu_view.remove();
+        if(this.menu_tags) this.menu_tags.remove();
+        if(this.menu_share) this.menu_share.remove();
+        if(this.menu_more) this.menu_more.remove();
+        if(this.menu_view) this.menu_view.remove();
 
         this._removeNavButtons();
 
@@ -1098,6 +1100,9 @@ $.widget( "heurist.resultList", {
 
     },
 
+    //
+    //
+    //
     _removeNavButtons: function(){
         if(this.btn_page_menu){
             this._off( this.btn_page_menu, 'click');
@@ -1801,7 +1806,7 @@ $.widget( "heurist.resultList", {
         + ' class="rec_edit_link_ext action-button logged-in-only ui-button ui-widget ui-state-default ui-corner-all ui-button-icon-only"'
         + ' role="button" aria-disabled="false" data-key="edit_ext">'
         + '<span class="ui-button-text">New tab</span>'
-        + '<span class="ui-button-icon-primary ui-icon ui-icon-newwin"/>'
+        + '<span class="ui-button-icon-primary ui-icon ui-icon-newwin"></span>'
         + '</div>'  // Replace ui-icon-pencil with ui-icon-extlink and swap position when this is finished 
         
         /* Ian removed 5/2/2020. TODO: Need to replace with Select, Preview and Download buttons */
@@ -1810,7 +1815,7 @@ $.widget( "heurist.resultList", {
         + 'class="rec_view_link action-button ui-button ui-widget ui-state-default ui-corner-all'+btn_icon_only+'" '
         + 'role="button" aria-disabled="false">'
         + '<span class="ui-button-text">Preview</span>'
-        + '<span class="ui-button-icon-primary ui-icon ui-icon-comment"/>'
+        + '<span class="ui-button-icon-primary ui-icon ui-icon-comment"></span>'
         + '</div>'):'')
         
         //toadd and toremove classes works with div.collected see h4styles
@@ -1832,7 +1837,7 @@ $.widget( "heurist.resultList", {
         + 'class="rec_view_link_ext action-button ui-button ui-widget ui-state-default ui-corner-all'+btn_icon_only+'" '
         + 'role="button" aria-disabled="false">'
         + '<span class="ui-button-text">Link</span>'
-        + '<span class="ui-button-icon-primary ui-icon ui-icon-extlink"/>'
+        + '<span class="ui-button-icon-primary ui-icon ui-icon-extlink"></span>'
         + '</div>'
             :'')
 
@@ -1843,13 +1848,13 @@ $.widget( "heurist.resultList", {
         + 'class="rec_expand_on_map action-button ui-button ui-widget ui-state-default ui-corner-all'+btn_icon_only+'" '
         + 'role="button" aria-disabled="false">'
         + '<span class="ui-button-text">'+window.hWin.HR('Show data')+'</span>'
-        + '<span class="ui-button-icon-primary ui-icon ui-icon-globe"/>'
+        + '<span class="ui-button-icon-primary ui-icon ui-icon-globe"></span>'
         + '</div>'
         +'<div title="'+window.hWin.HR('resultList_action_dataset')+'" '
         + 'class="rec_download action-button ui-button ui-widget ui-state-default ui-corner-all'+btn_icon_only+'" '
         + 'role="button" aria-disabled="false">'
         + '<span class="ui-button-text">'+window.hWin.HR('Download')+'</span>'
-        + '<span class="ui-button-icon-primary ui-icon ui-icon-arrowstop-1-s"/>'
+        + '<span class="ui-button-icon-primary ui-icon ui-icon-arrowstop-1-s"></span>'
         + '</div>'
             :'')
         
@@ -1859,13 +1864,13 @@ $.widget( "heurist.resultList", {
         + 'class="rec_view_link_ext action-button ui-button ui-widget ui-state-default ui-corner-all'+btn_icon_only+'" '
         + 'role="button" aria-disabled="false">'
         + '<span class="ui-button-text">'+window.hWin.HR('Embed')+'</span>'
-        + '<span class="ui-button-icon-primary ui-icon ui-icon-globe"/>'
+        + '<span class="ui-button-icon-primary ui-icon ui-icon-globe"></span>'
         + '</div>'
         + '<div title="'+window.hWin.HR('resultList_action_delete')+'" '
         + 'class="rec_delete action-button logged-in-only ui-button ui-widget ui-state-default ui-corner-all'+btn_icon_only+'" '
         + 'role="button" aria-disabled="false">'
         + '<span class="ui-button-text">'+window.hWin.HR('Delete')+'</span>'
-        + '<span class="ui-button-icon-primary ui-icon ui-icon-trash"/>'
+        + '<span class="ui-button-icon-primary ui-icon ui-icon-trash"></span>'
         + '</div>'
             :'')
         

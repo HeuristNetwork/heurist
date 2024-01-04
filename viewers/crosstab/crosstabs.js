@@ -2207,10 +2207,10 @@ function CrosstabsAnalysis(_query, _query_domain) {
             tableTitle += ' ' + aggregationMode;
             //Append text box for user to enter table title.
             $divres.append('<div id="titleInput" style="margin-top: 10px;"><input type="text" class="text form-control rounded-0" style="display: inline-block;width: 75%;" id="tableTitle">'
-                    + '<button class="btn btn-success ms-2 mb-2 p-1" style="font-size: 13px;" id="titleSubmit"><i class="ui-icon ui-icon-circle-check" /> Apply</button></div>');
+                    + '<button class="btn btn-success ms-2 mb-2 p-1" style="font-size: 13px;" id="titleSubmit"><span class="ui-icon ui-icon-circle-check" ></span> Apply</button></div>');
 
             $divres.append('<div id="titleDisplay" style="margin-top: 10px;"><h2 class="crosstab-page" style="display: inline-block;" id="tableHeader">'+tableTitle+'</h2>'
-                    + '<button class="btn btn-warning ms-2" id="titleEdit"><i class="ui-button-icon ui-icon ui-icon-pencil" /></button></div>');
+                    + '<button class="btn btn-warning ms-2" id="titleEdit"><span class="ui-button-icon ui-icon ui-icon-pencil" ></span></button></div>');
             
             $('#titleSubmit').on('click',function(){
                 var title = $('#tableTitle').val();

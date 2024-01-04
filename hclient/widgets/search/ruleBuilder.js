@@ -233,7 +233,7 @@ $.widget( "heurist.ruleBuilder", {
                 
                 var constraints = $Db.dty(dtyID, 'dty_PtrTargetRectypeIDs');
                 constraints = ( typeof(constraints) === "string" && !window.hWin.HEURIST4.util.isempty(constraints) )
-                                ? constraints.split(","):[];  // $.parseJSON(temp)
+                                ? constraints.split(","):[];  // JSON.parse(temp)
                 vocab_id = 0;
                        
                 if(rtyID==rt_ID){

@@ -54,8 +54,8 @@ $.widget( "heurist.selectMultiValues", {
         this.element.addClass('ui-heurist-bg-light');
 
         $('<div class="ent_wrapper">'
-                +'<div class="ent_header"/>'
-                +'<div class="ent_content_full recordList"/>'
+                +'<div class="ent_header"></div>'
+                +'<div class="ent_content_full recordList"></div>'
                 +'</div>').appendTo( this.element );
                 
         //hide toolbar by default                
@@ -148,7 +148,8 @@ $.widget( "heurist.selectMultiValues", {
             var buttons = {};
             buttons[window.hWin.HR('Select')]  = function() {
                 
-                var wtrr = that._treeview.fancytree("getTree");
+                var wtrr = $.ui.fancytree.getTree(that._treeview[0]);
+                
                 // Get a list of all selected TOP nodes
                 var snodes = wtrr.getSelectedNodes(true);
                 // ... and convert to a key array:
@@ -283,7 +284,7 @@ $.widget( "heurist.selectMultiValues", {
         }
         
         if(this.options.selectedValues.length>0){
-            var wtrr = that._treeview.fancytree("getTree");
+            var wtrr = $.ui.fancytree.getTree(that._treeview[0]);
             
             wtrr.visit(function(node){
                     if(!node.data.issystem){

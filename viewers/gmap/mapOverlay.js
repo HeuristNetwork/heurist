@@ -521,7 +521,7 @@ function hMappingControls( mapping, startup_mapdocument_id ) {
             ? ('<img src="'+window.hWin.HAPI4.baseURL+'hclient/assets/16x16.gif"'
                 + ' align="top" class="rt-icon" ' + icon_bg     
                 + '>')
-            : ('<div style="display:inline-block;vertical-align:-3px;border:6px solid '+bg_color+'" />')
+            : ('<div style="display:inline-block;vertical-align:-3px;border:6px solid '+bg_color+'" ></div>')
         )
         + '<label for="chbox-'+legendid+'" style="padding-left:1em">' + title
         + '</label>'

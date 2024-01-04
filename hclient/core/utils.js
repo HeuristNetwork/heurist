@@ -296,7 +296,7 @@ window.hWin.HUL = window.hWin.HEURIST4.util = {
             try {
                 if(typeof value === 'string'){
                     value = value.replace(/[\n\r]+/g, '');
-                    value = $.parseJSON(value);    
+                    value = JSON.parse(value);
                 }
                 if(Array.isArray(value) || $.isPlainObject(value)){
                     return value;

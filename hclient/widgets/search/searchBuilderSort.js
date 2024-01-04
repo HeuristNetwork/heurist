@@ -108,11 +108,13 @@ $.widget( "heurist.searchBuilderSort", {
         } });
         
         var that = this;
-        this.sel_container.hover(function(){
-                   that.remove_token.css({visibility:'visible'});  },
-        function(){
-                   that.remove_token.css({visibility:'hidden'});
-        });
+        this.sel_container
+        .on( 'mouseenter', function(event){ 
+            that.remove_token.css({visibility:'visible'});
+        } )
+        .on( 'mouseleave', function(event){
+            that.remove_token.css({visibility:'hidden'});
+        } );
 
 
         this._on( this.select_order, { change: function(){

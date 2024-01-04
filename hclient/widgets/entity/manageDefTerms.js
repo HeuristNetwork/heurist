@@ -930,7 +930,7 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
                     var treedata = $Db.trm_TreeData(vocab_id, 'tree'); //tree data
                     
                     // subset.getTreeViewData('trm_Label', 'trm_ParentTermID',vocab_id);
-                    var tree = this.recordTree.fancytree('getTree');
+                    var tree = $.ui.fancytree.getTree(this.recordTree[0]);
                     tree.reload(treedata);
                 }
 
@@ -1108,7 +1108,7 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
 
             var alt_btn_content = '&nbsp;';
             if(this.options.edit_mode == 'popup'){
-                alt_btn_content = '<span class="ui-icon ui-icon-triangle-1-e" style="color: black;opacity: 0.2;" />';
+                alt_btn_content = '<span class="ui-icon ui-icon-triangle-1-e" style="color: black;opacity: 0.2;" ></span>';
             }
 
             html = '<div class="recordDiv densed '+sclass+(!(ref_lvl>0)?' rt_draggable':'')
@@ -2598,7 +2598,7 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
             }else if(action=='viewmode-tree'){ //NOT USED - @todo rempove all recordTree mentions
 
                 if(!this.recordTree){
-                    this.recordTree = $('<div class="ent_content_full" style="display:none;"/>')
+                    this.recordTree = $('<div class="ent_content_full" style="display:none;"></div>')
                     .addClass('ui-heurist-bg-light')
                     .css({'font-size':'0.8em'})
                     .insertAfter(this.recordList);

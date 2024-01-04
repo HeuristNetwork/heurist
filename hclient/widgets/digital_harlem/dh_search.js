@@ -339,7 +339,7 @@ $.widget( "heurist.dh_search", {
 
             isfaceted = false;
             try {
-                facet_params = $.parseJSON(this.usr_SavedSearch[svsID][_QUERY]);
+                facet_params = JSON.parse(this.usr_SavedSearch[svsID][_QUERY]);
 
                 isfaceted = (facet_params && Hul.isArray(facet_params.rectypes));
             }
@@ -530,7 +530,7 @@ $.widget( "heurist.dh_search", {
         if(this.usr_SavedSearch[svsID][3]){  //_ISFACETED
             var facet_params = null;
             try {
-                facet_params = $.parseJSON(qsearch);
+                facet_params = JSON.parse(qsearch);
             }
             catch (err) {
                 facet_params = null;

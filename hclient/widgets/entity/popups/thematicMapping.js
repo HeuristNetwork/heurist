@@ -415,26 +415,26 @@ $.widget( "heurist.thematicMapping", $.heurist.recordAction, {
                             }
                             var ele = node.find('.svs-contextmenu3');
                             ele.hide();
-                        }               
-
-                        $(parent_span).hover(
-                            function(event){
-                                var node;
-                                if($(event.target).hasClass('fancytree-node')){
-                                    node =  $(event.target);
-                                }else{
-                                    node = $(event.target).parents('.fancytree-node');
-                                }
-                                if(! ($(node).hasClass('fancytree-loading') )){
-                                    var ele = $(node).find('.svs-contextmenu3');
-                                    ele.css({'display':'inline-block'});//.css('visibility','visible');
-                                }
-                            }
-                        );               
-                        $(parent_span).mouseleave(
-                            _onmouseexit
-                        );                                                  
+                        }    
                         
+                        function _onmouseenter(event){
+                            var node;
+                            if($(event.target).hasClass('fancytree-node')){
+                                node =  $(event.target);
+                            }else{
+                                node = $(event.target).parents('.fancytree-node');
+                            }
+                            if(! ($(node).hasClass('fancytree-loading') )){
+                                var ele = $(node).find('.svs-contextmenu3');
+                                ele.css({'display':'inline-block'});//.css('visibility','visible');
+                            }
+                        }
+
+                        $(parent_span).on('mouseenter',
+                            _onmouseenter
+                        ).on('mouseleave',
+                            _onmouseexit
+                        );                                      
                         
                     }
                     

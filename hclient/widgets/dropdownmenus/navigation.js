@@ -49,6 +49,8 @@ $.widget( "heurist.navigation", {
     first_not_empty_page_id:0,
 
     _current_query_string:'',
+    
+    _tree:null,
 
     // the widget's constructor
     _create: function() {
@@ -92,6 +94,8 @@ $.widget( "heurist.navigation", {
             };
 
             this.element.fancytree(fancytree_options).addClass('tree-cms');
+            
+            this._tree = $.ui.fancytree.getTree(this.element[0]);
 
         }else{
             
@@ -482,9 +486,10 @@ $.widget( "heurist.navigation", {
         //
         if(this.options.orientation=='treeview'){
             
-            var tree = this.element.fancytree('getTree');
-            tree.reload( menu_content );
-            this.element.find('.ui-fancytree').show();
+            if(this._tree!=null){
+                this._tree.reload( menu_content );
+                this.element.find('.ui-fancytree').show();
+            }
             
         }else{
 
@@ -549,16 +554,16 @@ $.widget( "heurist.navigation", {
 */
             //prevents default jquery delay         
             
-            this.divMainMenuItems.children('li.ui-menu-item').hover(function(event) {
+            this.divMainMenuItems.children('li.ui-menu-item')
+            .on( "mouseenter", function(event) {
                     event.preventDefault();
                     $(this).children('.ui-menu').show();  
-                },
-                function(event) {
+                } )
+            .on( "mouseleave", function(event) {
                     event.preventDefault();
                     $(this).find('.ui-menu').hide();
-                }
-            );        
-
+                } );
+            
             if(this.options.toplevel_css!==null){
                 this.divMainMenuItems.children('li.ui-menu-item').children('a').css(this.options.toplevel_css);
             }

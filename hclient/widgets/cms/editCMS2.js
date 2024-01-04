@@ -51,6 +51,7 @@ function editCMS2(website_document){
     var _lockDefaultEdit = false;
     
     var _panel_treePage,     // panel with treeview for current page 
+        _tree,               // tree widget
         _panel_treeWebSite,  // panel with tree menu - website structure
         _panel_propertyView, // panel with selected element properties
         _edit_Element = null,  //instance of edit element class editCMS_ElementCfg
@@ -204,7 +205,7 @@ function editCMS2(website_document){
                                         
                                 +'</div>'
                             
-                                +'<div class="treePage ent_content_full" style="top:30px;padding:10px;border-top:1px solid gray;line-height:normal;"></div>' //treeview - edit page
+                                +'<div id="tree_cms" class="treePage ent_content_full" style="top:30px;padding:10px;border-top:1px solid gray;line-height:normal;"></div>' //treeview - edit page
                                 +'<div class="propertyView ent_content_full ui-widget-content-gray" '
                                     +' style="top:190px;padding:10px 0px;display:none;"></div>' //edit properties for element
                                 
@@ -359,10 +360,12 @@ function editCMS2(website_document){
 
         _editor_panel.find('.btn-website-homepage').parent()
         .addClass('fancytree-node')
-        .hover(
-            function(e){_editor_panel.find('.btn-website-addpage').show()},
-            function(e){_editor_panel.find('.btn-website-addpage').hide()});
-
+        .on( 'mouseenter', function(event){ 
+            _editor_panel.find('.btn-website-addpage').show();
+        } )
+        .on( 'mouseleave', function(event){
+            _editor_panel.find('.btn-website-addpage').hide();
+        } );
         
         _editor_panel.find('.bnt-website-menu').button({icon:'ui-icon-menu'}).on('click',_showWebSiteMenu);
         
@@ -746,7 +749,7 @@ var sMsg = '<p>Heurist\'s CMS editor has been upgraded to a new system which is 
 
                         //highlight editing element in tree
                         var key = $(tinymce.activeEditor.targetElm).attr('data-hid');
-                        var node = _panel_treePage.fancytree('getTree').getNodeByKey(key);
+                        var node = _tree.getNodeByKey(key);
                         _panel_treePage.find('.fancytree-active').removeClass('fancytree-active');
                         $(node.li).find('.fancytree-node:first').addClass('fancytree-active');
                     
@@ -868,9 +871,9 @@ var sMsg = '<p>Heurist\'s CMS editor has been upgraded to a new system which is 
     //
     function _initTreePage( treeData ){
         
-        if(_panel_treePage){
+        if(_tree){
             
-            _panel_treePage.fancytree('getTree').reload(treeData);
+            _tree.reload(treeData);
             
         }else{
         
@@ -936,9 +939,11 @@ var sMsg = '<p>Heurist\'s CMS editor has been upgraded to a new system which is 
                 }
             };
 
+            //create tree
             _panel_treePage = _editor_panel.find('.treePage').addClass('tree-rts')
                                 .fancytree(fancytree_options); //was recordList
                                 
+            _tree = $.ui.fancytree.getTree(_panel_treePage[0]);
                                 
             $('<div class="toolbarPage" style="padding:10px;font-size:0.9em;text-align:center;">'
                                     +'<button title="Discard all changed and restore old version of page" class="btn-page-restore">Discard</button>'
@@ -1048,7 +1053,7 @@ var sMsg = '<p>Heurist\'s CMS editor has been upgraded to a new system which is 
             //_layout_container.find('div.editable').addClass('tinymce-body');
             //tinymce.init({inline:true});
             if(init_tinymce!==false){
-                _panel_treePage.fancytree('getTree').visit(function(node){
+                _tree.visit(function(node){
                     node.setSelected(false); //reset
                     node.setExpanded(true);
                 });            
@@ -1119,7 +1124,7 @@ var sMsg = '<p>Heurist\'s CMS editor has been upgraded to a new system which is 
         if($(item).find('.lid-actionmenu').length==0){ //no one defined
 
             ele_ID = ''+ele_ID;
-            var node = _panel_treePage.fancytree('getTree').getNodeByKey(ele_ID);
+            var node = _tree.getNodeByKey(ele_ID);
 
             if(node==null){
                 return;
@@ -1276,7 +1281,7 @@ function(value){
 
                     }else if(action=='delete'){
                         //different actions for separator and field
-                        var node = _panel_treePage.fancytree('getTree').getNodeByKey(''+ele_ID);
+                        var node = _tree.getNodeByKey(''+ele_ID);
                         $(node.li).find('.fancytree-node:first').addClass('fancytree-active');
                         window.hWin.HEURIST4.msg.showMsgDlg(
                             'Are you sure you wish to delete element "'+node.title+'"?', 
@@ -1434,7 +1439,7 @@ function(value){
                         
                         if(is_in_page){
                             //highlight in preview/page
-                            node = _panel_treePage.fancytree('getTree').getNodeByKey(ele_ID);
+                            node = _tree.getNodeByKey(ele_ID);
                             if(node) node.setActive(true);
 
                             _layout_container.find('div[data-hid]').removeClass('cms-element-active'); //remove from all
@@ -1459,7 +1464,7 @@ function(value){
             );  
 
             /*                            
-            $(item).mouseleave(
+            $(item).on('mouseleave',
 
             );
             */
@@ -1497,8 +1502,7 @@ function(value){
     //
     function _layoutRemoveElement(ele_id){
 
-        var tree = _panel_treePage.fancytree('getTree');
-        var node = tree.getNodeByKey(''+ele_id);
+        var node = _tree.getNodeByKey(''+ele_id);
         var parentnode = node.getParent();
         var parent_container, parent_children, parent_element;
         
@@ -1589,8 +1593,7 @@ function(value){
         parent_children.splice(idx, 1); //remove from children
         
         //add to new parent  ---------------
-        var tree = _panel_treePage.fancytree('getTree');
-        var node = tree.getNodeByKey(''+ele_id);
+        var node = _tree.getNodeByKey(''+ele_id);
         var prevnode = node.getPrevSibling();
         var parentnode = node.getParent();
         var parent_element = window.hWin.layoutMgr.layoutContentFindElement(_layout_content, parentnode.key);
@@ -1747,7 +1750,7 @@ function(value){
         }, 100);
         
         //scroll tree that selected element will be visible
-        var node = _panel_treePage.fancytree('getTree').getNodeByKey(ele_id);
+        var node = _tree.getNodeByKey(ele_id);
         var top1 = $(node.li).position().top;
         _panel_treePage.animate({scrollTop: $(node.li).offset().top}, 1);
         _panel_treePage.find('span.fancytree-title').css({'font-style':'normal','text-decoration':'none'});
@@ -1779,7 +1782,7 @@ function(value){
             
         if(is_cardinal){
              //find parent
-             var node = _panel_treePage.fancytree('getTree').getNodeByKey(''+ele_id);
+             var node = _tree.getNodeByKey(''+ele_id);
              var parentnode = node.getParent();
              ele_id = parentnode.key;
              element_cfg = window.hWin.layoutMgr.layoutContentFindElement(_layout_content, ele_id);
@@ -1804,7 +1807,7 @@ function(value){
                         window.hWin.layoutMgr.layoutContentSaveElement(_layout_content, new_cfg); //replace element to new one
 
                         //update treeview                    
-                        var node = _panel_treePage.fancytree('getTree').getNodeByKey(''+new_cfg.key);
+                        var node = _tree.getNodeByKey(''+new_cfg.key);
                         node.setTitle(new_cfg.title);
                         _defineActionIcons($(node.li).find('span.fancytree-node:first'), new_cfg.key, 
                                     'position:absolute;right:8px;padding:2px;margin-top:0px;');
@@ -1986,8 +1989,7 @@ function(value){
     //    
     function _layoutInsertElement_continue(ele_id, new_element_json){
 
-        var tree = _panel_treePage.fancytree('getTree');
-        var parentnode = tree.getNodeByKey(ele_id);
+        var parentnode = _tree.getNodeByKey(ele_id);
         var parent_container, parent_children, parent_element;
 
         tinymce.remove('.tinymce-body'); //detach

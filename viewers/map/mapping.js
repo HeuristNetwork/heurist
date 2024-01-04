@@ -411,7 +411,7 @@ $.widget( "heurist.mapping", {
         
         this.updateLayout();
 
-        $(window).resize(function(){
+        $(window).on('onresize',function(){
             that.adjustToolbarHeight();    
         });
         
@@ -3967,12 +3967,12 @@ $.widget( "heurist.mapping", {
         if(this.nomap){
             toolbar.find('#btn_layout_map').removeClass('ui-state-active');
         }else{
-            toolbar.find('#btn_layout_map').addClass('ui-state-active').blur();
+            toolbar.find('#btn_layout_map').addClass('ui-state-active').trigger('blur');
         }
         if(this.notimeline){
             toolbar.find('#btn_layout_timeline').removeClass('ui-state-active');
         }else{
-            toolbar.find('#btn_layout_timeline').addClass('ui-state-active').blur();
+            toolbar.find('#btn_layout_timeline').addClass('ui-state-active').trigger('blur');
         }
 
         var is_main_ui = this.options.layout_params && this.options.layout_params['ui_main'];

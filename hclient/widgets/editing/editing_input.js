@@ -373,14 +373,14 @@ $.widget( "heurist.editing_input", {
             if(this.options.dtID != 'rst_DefaultValue_resource'){
                 if(this.detailType=="resource" && this.configMode.entity=='records'){
                     
-                    $('<div style="float:right;padding-top:1px;width: 14px;"><span class="ui-icon ui-icon-triangle-1-e"/></div>')                
+                    $('<div style="float:right;padding-top:1px;width: 14px;"><span class="ui-icon ui-icon-triangle-1-e"></span></div>')                
                         .appendTo( this.header );
                         this.header.css({'padding-right':0, width:154});
                         this.header.find('label').css({display:'inline-block', width: 135});
                         
                 }else if(this.detailType=="relmarker"){
                     
-                    $('<div style="float:right;padding-top:1px;width: 14px;"><span style="font-size:11px" class="ui-icon ui-icon-triangle-2-e-w"/></div>')                
+                    $('<div style="float:right;padding-top:1px;width: 14px;"><span style="font-size:11px" class="ui-icon ui-icon-triangle-2-e-w"></span></div>')                
                         .appendTo( this.header )
                         this.header.css({'padding-right':0, width:154});
                         this.header.find('label').css({display:'inline-block', width: 135});
@@ -930,12 +930,12 @@ $.widget( "heurist.editing_input", {
             .val(value)
             .addClass('text ui-widget-content ui-corner-all')
             .css({'overflow-x':'hidden'})
-            .keydown(function(e){
+            .on('keydown',function(e){
                 if (e.keyCode == 65 && e.ctrlKey) {
                     e.target.select()
                 }    
             })
-            .keyup(function(){that.onChange();})
+            .on('keyup',function(){that.onChange();})
             .on('change',function(){that.onChange();})
             .appendTo( $inputdiv );
 
@@ -2462,7 +2462,7 @@ $.widget( "heurist.editing_input", {
             if(!(this.options.dtID=='file' || this.detailType=='resource' || 
                  this.detailType=='date' || this.detailType=='geo' || this.detailType=='action')){
                      
-                $input.keydown(function(e){  //Ctrl+A - select all
+                $input.on('keydown',function(e){  //Ctrl+A - select all
                     if (e.keyCode == 65 && e.ctrlKey) {
                                         e.target.select()
                     }    
@@ -3165,7 +3165,7 @@ $.widget( "heurist.editing_input", {
                                 that.newvalues[$input.attr('id')] = value; 
                             }
                             
-                            var ele = $('<div style="display:inline-block;vertical-align:top;padding-left:4px" class="file-options-container" />')
+                            var ele = $('<div style="display:inline-block;vertical-align:top;padding-left:4px" class="file-options-container" ></div>')
                                 .appendTo( $inputdiv );                            
 
                             $('<a href="#" title="Select from a library of images"><span class="ui-icon ui-icon-grid"/>Library</a>')
@@ -3173,7 +3173,7 @@ $.widget( "heurist.editing_input", {
 
                             $('<br/><br/>').appendTo( ele );
 
-                            $('<a href="#" title="or upload a new image"><span class="ui-icon ui-icon-folder-open"/><span class="upload-file-text">Upload file</span></a>')
+                            $('<a href="#" title="or upload a new image"><span class="ui-icon ui-icon-folder-open"></span><span class="upload-file-text">Upload file</span></a>')
                                 .on('click',function(){ $input.on('click',) }).appendTo( ele );
                         }
                             
@@ -4081,8 +4081,8 @@ $.widget( "heurist.editing_input", {
         btn_field_visibility.hide();
                     
                     
-        var chbox_field_visibility = $( '<div><span class="smallicon ui-icon ui-icon-check-off" style="font-size:1em"/> '
-                    +'Hide this value from public<div>', 
+        var chbox_field_visibility = $( '<div><span class="smallicon ui-icon ui-icon-check-off" style="font-size:1em"></span> '
+                    +'Hide this value from public</div>', 
                     {title: 'Per record visibility'})
                     .addClass('field-visibility2 graytext')
                     .attr('data-input-id', $input.attr('id'))
@@ -5949,7 +5949,7 @@ $.widget( "heurist.editing_input", {
                         {picker: $.calendars.picker.defaultRenderer.picker.
                             replace(/\{link:prev\}/, '{link:prevJump}{link:prev}').
                             replace(/\{link:next\}/, '{link:nextJump}{link:next}')}),
-                showTrigger: '<span class="smallicon ui-icon ui-icon-calendar" style="display:inline-block" data-picker="'+$input.attr('id')+'" title="Show calendar" />'}
+                showTrigger: '<span class="smallicon ui-icon ui-icon-calendar" style="display:inline-block" data-picker="'+$input.attr('id')+'" title="Show calendar"></span>'}
             );
 
             this._on($input, {

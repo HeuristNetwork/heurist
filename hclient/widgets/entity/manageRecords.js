@@ -84,15 +84,15 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                 this.options.layout_mode = //slightly modified 'short' layout
                         '<div class="ent_wrapper editor">'
                             +'<div class="ent_wrapper">'
-                                +    '<div class="ent_header searchForm" style="height:auto"/>'     
-                                +    '<div class="ent_content_full recordList"/>'
+                                +    '<div class="ent_header searchForm" style="height:auto"></div>'     
+                                +    '<div class="ent_content_full recordList"></div>'
                             +'</div>'
 
                             + '<div class="editFormDialog ent_wrapper editor">'
                                     + '<div class="ui-layout-west"><div class="editStructure">..</div></div>' //container for rts_editor
-                                    + '<div class="ui-layout-center"><div class="editForm"/></div>'
+                                    + '<div class="ui-layout-center"><div class="editForm"></div></div>'
                                     + '<div class="ui-layout-east"><div class="editFormSummary">....</div></div>'
-                                    //+ '<div class="ui-layout-south><div class="editForm-toolbar"/></div>'
+                                    //+ '<div class="ui-layout-south><div class="editForm-toolbar"></div></div>'
                             +'</div>'
                         +'</div>';
         }
@@ -162,7 +162,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
         
         var that = this;
         
-        jQuery(document).keydown(function(event) {
+        jQuery(document).on('keydown',function(event) {
                 // If Control or Command key is pressed and the S key is pressed
                 // run save function. 83 is the key code for S.
                 if((event.ctrlKey || event.metaKey) && event.which == 83) {
@@ -1465,11 +1465,11 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                 + $Db.rty(recRecTypeID, 'rty_Name')+'</h3>'
 +'<select class="rectypeSelect ui-corner-all ui-widget-content" '
 +'style="display:none;z-index: 20;position: absolute;border: 1px solid gray;'  //background:white;
-+'top: 5.7em;" size="20"></select><div class="btn-modify non-owner-disable"/></div>'
++'top: 5.7em;" size="20"></select><div class="btn-modify non-owner-disable"></div></div>'
 
 /* this section is moved on top of editForm 2017-12-21
 +'<div style="display:inline-block;float:right;">'   
-    +'<div class="btn-config2"/><div class="btn-config"/>'  //buttons
+    +'<div class="btn-config2"></div><div class="btn-config"></div>'  //buttons
     +'<span class="btn-config3" style="cursor:pointer;display:inline-block;float:right;color:#7D9AAA;padding:2px 4px;">Modify structure</span>'
 +'</div>'
 +'</div>'
@@ -1477,7 +1477,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
 
 +'<div style="padding-bottom:0.5em;width: 100%;">'
 +'<div><label class="small-header">Owner:</label><span id="recOwner">'
-    +that._getField('rec_OwnerUGrpID')+'</span><div class="btn-access non-owner-disable"/>'        
+    +that._getField('rec_OwnerUGrpID')+'</span><div class="btn-access non-owner-disable"></div>'        
 +'</div>'
 +'<div><label class="small-header">Access:</label><span id="recAccess">'
     + that._getField('rec_NonOwnerVisibility')
@@ -1866,8 +1866,8 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
             
                 if(panel.text()!='') return;
                 
-                panel.append('<div class="bookmark" style="min-height:2em;padding:4px 2px 4px 0;vertical-align:top"/>'
-                +'<div class="reminders truncate" style="min-height:2em;padding:4px 30px 4px 0;border-top: 1px lightgray solid;"/>');
+                panel.append('<div class="bookmark" style="min-height:2em;padding:4px 2px 4px 0;vertical-align:top"></div>'
+                +'<div class="reminders truncate" style="min-height:2em;padding:4px 30px 4px 0;border-top: 1px lightgray solid;"></div>');
                 
                 //find bookmarks and reminders
                 that._renderSummaryBookmarks(null, panel);
@@ -1901,7 +1901,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                                     isdialog: false,
                                     container: panel,
                                     select_mode:'select_multi', 
-                                    layout_mode: '<div class="recordList"/>',
+                                    layout_mode: '<div class="recordList"></div>',
                                     list_mode: 'compact', //special option for tags
                                     selection_ids: recs, //already selected tags
                                     select_return_mode:'recordset', //ids by default
@@ -4608,7 +4608,7 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
                         if($sel.length == 1){
                             let id = $sel.attr('id');
                             if($sel.parent().find('#'+id+'-menu').is(':visible')){
-                                setTimeout(($ele)=>{ $ele.blur(); }, 100, $target_ele);
+                                setTimeout(($ele)=>{ $ele.trigger('blur'); }, 100, $target_ele);
                                 return;
                             }
                             that.options.rts_editor.manageDefRecStructure('highlightNode', $target_ele.parents('div[data-dtid]:first').attr('data-dtid'), true);
@@ -6046,7 +6046,7 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
         let btn = {};
 
         if(that.lookup_record_link !== null){ // external link to lookup record
-            msg = '<a href="' + that.lookup_record_link['url'] + '" target="_blank">View external record <span style="font-size:10px;" class="ui-icon ui-icon-extlink" /></a><br><br>' + msg;
+            msg = '<a href="' + that.lookup_record_link['url'] + '" target="_blank">View external record <span style="font-size:10px;" class="ui-icon ui-icon-extlink" ></span></a><br><br>' + msg;
         }
 
         // Dlg - Main Content

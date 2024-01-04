@@ -248,7 +248,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
                                 _loadSession();    
                            }
                         });
-                        $('#selImportId-button').css('vertical-align',4); 
+                        $('#selImportId-button').css('vertical-align','4'); 
                     });
                 
         
@@ -409,7 +409,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
 
         window.hWin.HEURIST4.ui.createEncodingSelect($('#csv_encoding'), [{key: 'auto detect', title: 'auto detect'}]);
 
-        $(window).resize( function(e)
+        $(window).on('onresize', function(e)
         {
             _adjustTablePosition();
         });
@@ -492,7 +492,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
                             var record = resp.getFirstRecord();
                             var ses = resp.fld(record, 'sif_ProcessingInfo');
                             
-                            imp_session = (typeof ses == "string") ? $.parseJSON(ses) : null;
+                            imp_session = (typeof ses == "string") ? JSON.parse(ses) : null;
                             
                             //init field mapping table
                             if(imp_session){
@@ -3220,7 +3220,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
                             var disambig_keys = Object.keys(res['disambiguation']);
                             
                             if(disambig_keys.length>0){
-                                //imp_session = (typeof ses == "string") ? $.parseJSON(ses) : null;
+                                //imp_session = (typeof ses == "string") ? JSON.parse(ses) : null;
                                 /*
                                 $('#mr_cnt_disamb').text(disambig_keys.length);                                 
                                 $('#mr_cnt_disamb').parent().show();
@@ -3760,11 +3760,15 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
             
             s = ''
                 +'<div class="ent_wrapper"><div style="padding:8px 0 0 10px" class="ent_header">'
-                +'<a href="#" class="navigation2" style="display: inline-block;"><span data-dest="first" class="ui-icon ui-icon-seek-first"/></a>'
-                +'<a href="#" class="navigation2" style="display:inline-block;"><span data-dest="-1" class="ui-icon ui-icon-triangle-1-w"/></a>'
+                +'<a href="#" class="navigation2" style="display: inline-block;">'
+                +'<span data-dest="first" class="ui-icon ui-icon-seek-first"></span></a>'
+                +'<a href="#" class="navigation2" style="display:inline-block;">'
+                +'<span data-dest="-1" class="ui-icon ui-icon-triangle-1-w"></span></a>'
                 +'<div style="display: inline-block;vertical-align: super;">Range <span id="current_range"></span></div>'
-                +'<a href="#" class="navigation2" style="display: inline-block;"><span data-dest="1" class="ui-icon ui-icon-triangle-1-e"/></a>'
-                +'<a href="#" class="navigation2" style="display: inline-block;"><span data-dest="last" class="ui-icon ui-icon-seek-end"/></a></div>';
+                +'<a href="#" class="navigation2" style="display: inline-block;">'
+                +'<span data-dest="1" class="ui-icon ui-icon-triangle-1-e"></span></a>'
+                +'<a href="#" class="navigation2" style="display: inline-block;">'
+                +'<span data-dest="last" class="ui-icon ui-icon-seek-end"></span></a></div>';
             
                 
             s = s + '<div class="ent_content_full"><table class="tbmain" style="font-size:0.9em" width="100%"><thead><tr>'; 

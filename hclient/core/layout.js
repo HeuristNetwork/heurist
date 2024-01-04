@@ -1304,7 +1304,7 @@ console.error('Cardinal layout widget does not have proper options');
             if(tabb.length>0){
                 
                 $(tabb).tabs({activate: function( event, ui ) { 
-                        $(window).resize(); 
+                        $(window).trigger('resize'); 
                         //change/restore z-index and background color
                         $(ui.newTab[0]).css({'z-index': ui.newTab.attr('data-zmax'),
                                        'background': 'url(hclient/assets/tab_shape_sel.png)',

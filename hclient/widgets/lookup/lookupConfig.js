@@ -1208,7 +1208,7 @@ $.widget( "heurist.lookupConfig", {
         
         if(this._isNewCfg && this._current_cfg.label){
 
-            var s = this._current_cfg.label + '<span class="ui-icon ui-icon-arrowthick-1-e"/> ' 
+            var s = this._current_cfg.label + '<span class="ui-icon ui-icon-arrowthick-1-e"></span> ' 
                     +  (rty_ID>0?$Db.rty(rty_ID, 'rty_Name'):'select record type');
             this.serviceList.find('li[data-service-id="new"]').html(s);
         }
@@ -1242,26 +1242,29 @@ $.widget( "heurist.lookupConfig", {
                 }
             }
 
-            s = name + ' <span class="ui-icon ui-icon-arrowthick-1-e"/> ' 
+            s = name + ' <span class="ui-icon ui-icon-arrowthick-1-e"></span> ' 
                     + $Db.rty(cfg.rty_ID, 'rty_Name');
-            s = s + '<span data-service-id="'+idx+'" style="float:right;padding-top: 5px" class="ui-icon ui-icon-circle-b-close"/>';
+            s = s + '<span data-service-id="'+idx+'" style="float:right;padding-top: 5px" class="ui-icon ui-icon-circle-b-close"></span>';
 
             this._reloadServiceList_item( idx, s ); //add to list
         }
         
-        this.serviceList.find('li').hover(function(event){ // service list hover event
+        this.serviceList.find('li')
+        .on( 'mouseenter', function(event){ 
             var ele = $(event.target);
             if(!ele.is('li')) ele = ele.parent();
             ele.addClass('ui-state-hover');
-        }, function(event){
+        } )
+        .on( 'mouseleave', function(event){
             var ele = $(event.target);
             if(!ele.is('li')){ 
                 ele.removeClass('ui-state-hover'); // ensure that this element does not have the hover state
                 ele = ele.parent();
             }
             ele.removeClass('ui-state-hover');
-        });
+        } );
 
+        
         var eles = this.serviceList.find('span[data-service-id]');
         this._on(eles,{'click':function(event)
         { // remove service button

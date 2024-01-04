@@ -347,16 +347,7 @@ function hSvsEdit(args) {
             }else if(window.hWin.HEURIST4.util.isempty(r.q)){
                 mode = 'rules';
             }
-            /*  OLD WAY           
-            var mode = 'faceted';
-            try {
-                facet_params = $.parseJSON(qsearch);
-            }
-            catch (err) {
-                var hasrules = _hasRules(qsearch);
-                mode = hasrules==2?'rules':'saved';
-            }
-            */
+
         }
         
         //if not defined get last used
@@ -377,7 +368,7 @@ function hSvsEdit(args) {
                 var svs = window.hWin.HAPI4.currentUser.usr_SavedSearch[svsID];
                 if(svs){
                     try {
-                        facet_params = $.parseJSON(svs[_QUERY]);
+                        facet_params = JSON.parse(svs[_QUERY]);
                     }catch (err) {
                         // TODo something about the exception here
                         window.hWin.HEURIST4.msg.showMsgDlg(window.hWin.HR('Cannot initialise edit for faceted search due to corrupted parameters. Please remove and re-create this search.'), null, "Error");

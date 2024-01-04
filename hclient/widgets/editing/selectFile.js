@@ -45,7 +45,7 @@ $.widget( "heurist.selectFile", {
         var that = this;
 
         $('<div class="ent_wrapper">'
-                +'<div class="ent_content_full recordList" style="top:0"/>'
+                +'<div class="ent_content_full recordList" style="top:0"></div>'
                 +'</div>').appendTo( this.element );
 
 

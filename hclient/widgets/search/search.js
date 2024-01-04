@@ -165,7 +165,7 @@ $.widget( "heurist.search", {
         //promt to be shown when input has complex search expression (json search)
         this.input_search_prompt2 = $( "<span>" )
         .html('<span style="font-size:1em;padding:3px;display:inline-block;">'+window.hWin.HR("filter")
-            +'</span>&nbsp;&nbsp;<span class="ui-icon ui-icon-eye" style="font-size:1.8em;width: 1.7em;margin-top:1px"/>')
+            +'</span>&nbsp;&nbsp;<span class="ui-icon ui-icon-eye" style="font-size:1.8em;width: 1.7em;margin-top:1px"></span>')
         .css({ height:isNotFirefox?28:24, 'margin':'1px '+(isNotFirefox?'4px':'7px')+' 1px 2px',
             'position':'relative', 'text-align':'left', display:'block'})
         .appendTo( this.div_search_input );
@@ -332,7 +332,7 @@ $.widget( "heurist.search", {
                 title:window.hWin.HR('filter_builder_hint')})
             .css({display:'inline-block',position:'relative',top:'-10px','padding-right':'5px'}) //,top:'-3px'
             .addClass('ui-main-color btn-aux')
-            .append('<span class="ui-icon ui-icon-magnify-explore" style="height:15px;font-size:larger;" />')
+            .append('<span class="ui-icon ui-icon-magnify-explore" style="height:15px;font-size:larger;" ></span>')
             .append('<span style="display:inline-block; text-decoration: none; font-size: smaller; margin-left: 5px">'
             + window.hWin.HR('Filter builder') 
             +'</span>')
@@ -344,7 +344,7 @@ $.widget( "heurist.search", {
                 title:window.hWin.HR('filter_facetbuilder_hint')})
             .css({display:'inline-block',position:'relative',top:'-10px','padding-right':'5px'}) //width:90,,top:'-3px'
             .addClass('ui-main-color btn-aux')
-            .append('<span class="ui-icon ui-icon-box" style="font-size: larger;" />')
+            .append('<span class="ui-icon ui-icon-box" style="font-size: larger;" ></span>')
             .append('<span style="display:inline-block; text-decoration: none; font-size: smaller; margin-left: 5px">'
             + window.hWin.HR('Facet builder') +'</span>')
             .appendTo(this.div_buttons);
@@ -362,7 +362,7 @@ $.widget( "heurist.search", {
             this.btn_save_filter = $('<a>', {href: '#', title: window.hWin.HR('filter_save_hint')})
             .addClass('ui-main-color btn-aux logged-in-only')
             .css({display:'inline-block',position:'relative',top:'-10px'})  //width:'70px',
-            .append('<span class="ui-icon ui-icon-save" />')
+            .append('<span class="ui-icon ui-icon-save" ></span>')
             .append('<span style="display: inline-block; text-decoration: none; font-size: smaller; margin-left: 5px">'
             + window.hWin.HR('Save filter') +'</span>')
             .appendTo(this.div_buttons); // div_save_filter

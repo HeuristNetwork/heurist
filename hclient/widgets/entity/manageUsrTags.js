@@ -256,7 +256,7 @@ $.widget( "heurist.manageUsrTags", $.heurist.manageEntity, {
                 //ADD button        
                 $('<div class="recordDiv tagDiv tagDiv-fixed-width" style="display:block;text-decoration:none">'
                 + '<label>Add a tag</label> <input type="text" style="width:15ex" size="60"/>'
-                + '<div class="rec_action_link" data-key="add" style="margin-left:4px;visibility:visible !important"/>'
+                + '<div class="rec_action_link" data-key="add" style="margin-left:4px;visibility:visible !important"></div>'
              /*   
                 + '<div title="Click to add tag" class="rec_action_link logged-in-only ui-button ui-widget ui-state-default ui-corner-all ui-button-icon-only" role="button" aria-disabled="false" data-key="add" >'
                 +     '<span class="ui-button-icon-primary ui-icon ui-icon-circle-plus"></span><span class="ui-button-text"></span>'
@@ -309,7 +309,7 @@ $.widget( "heurist.manageUsrTags", $.heurist.manageEntity, {
 +usage
 //+'<span class="ui-icon ui-icon-link" style="font-size:0.8em;float:right;top:2px;right:2px"></span>
 +'</span>')                                                  
-                            +'<div class="rec_action_link" data-key="delete" style="float:right"/>'
+                            +'<div class="rec_action_link" data-key="delete" style="float:right"></div>'
                             +'</div>';
                
                 if(!maxlen[groupid] || label.length>maxlen[groupid]) {
@@ -519,7 +519,7 @@ $.widget( "heurist.manageUsrTags", $.heurist.manageEntity, {
                     
                     var ele = $('<div class="recordDiv tagDiv tagDiv-fixed-width" recid="'+recID
                     +'"><label>'+ fields['tag_Text']
-                    +'</label><div class="rec_action_link" data-key="delete" style="float:right"/>'
+                    +'</label><div class="rec_action_link" data-key="delete" style="float:right"></div>'
                     +'</div>')
                             .appendTo(content);
                             
@@ -700,7 +700,7 @@ $.widget( "heurist.manageUsrTags", $.heurist.manageEntity, {
                         +'<label>Find/assign:</label></div>'):'')
                 + ' <input type="text" style="width:15ex;margin-right:10px" size="60"/>&nbsp;in&nbsp;&nbsp;'
                 + '<select style="max-width:220px"></select>&nbsp;'
-                + '<div class="rec_action_link" data-key="add" style="margin-left:10px;visibility:visible !important"/>'
+                + '<div class="rec_action_link" data-key="add" style="margin-left:10px;visibility:visible !important"></div>'
                 + '</div>').appendTo(panel);
                 
         //3. top and recent tags        
@@ -831,7 +831,7 @@ $.widget( "heurist.manageUsrTags", $.heurist.manageEntity, {
                     that.list_div.empty();
                     $('<div style="min-width:160px;font-size:0.8em" class="ui-widget-content">'
                     +'<span class="ui-icon ui-icon-check" '
-                    +'style="display:inline-block;vertical-align:bottom;"/>'
+                    +'style="display:inline-block;vertical-align:bottom;"></span>'
                     +'Confirm&nbsp;and&nbsp;assign&nbsp;new&nbsp;Tag</div>')
                         .appendTo(that.list_div)
                             .on('click', function(event){
@@ -955,7 +955,7 @@ $.widget( "heurist.manageUsrTags", $.heurist.manageEntity, {
                          + '&q=tag:'+label
                          + '&nometadatadisplay=true" target="_blank">'+label+'</a>'
             +'<span class="ui-icon ui-icon-circlesmall-close" recid="'+recID
-            +'" style="display:inline-block;visibility:hidden;width:12px;vertical-align:middle"/></div>')
+            +'" style="display:inline-block;visibility:hidden;width:12px;vertical-align:middle"></span></div>')
                          .appendTo(grp);
             //css hover doesn't work for unknown reason - todo uss css                                     
             this._on(ele, {'mouseover':function(event){ 

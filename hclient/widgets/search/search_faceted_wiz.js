@@ -2468,13 +2468,6 @@ $.widget( "heurist.search_faceted_wiz", {
 
 function showSearchFacetedWizard( params ){
 
-    if(!window.hWin.HUL.isFunction($('body').fancytree)){
-
-        $.getScript(window.hWin.HAPI4.baseURL+'external/jquery.fancytree/jquery.fancytree-all.min.js', 
-                function(){ showSearchFacetedWizard(params); } );
-
-    }else{
-
         var manage_dlg = $('#heurist-search-faceted-dialog');
 
         var need_create = (manage_dlg.length<1);
@@ -2496,5 +2489,5 @@ function showSearchFacetedWizard( params ){
         manage_dlg.search_faceted_wiz( 'show' );
         
         return manage_dlg;
-    }
+
 }

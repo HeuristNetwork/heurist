@@ -243,7 +243,7 @@ function onPageInit(success){
                     return length;
                 }
                 
-                $(window).resize(onVisualizeResize);
+                $(window).on('onresize',onVisualizeResize);
                 onVisualizeResize();
 
                 $("#visualize").visualize({

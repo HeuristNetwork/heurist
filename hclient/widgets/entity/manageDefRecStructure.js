@@ -30,6 +30,7 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
     _fakeSepIdsCounter:0,
     _lockDefaultEdit: false,
     _dragIsAllowed: true,
+    _tree: null,
 
     _menuTimeoutId: -1,
 
@@ -96,17 +97,17 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
                     +'<span id="field_ttl_usage" title="Count of values in each field for this record type (n = '+ $Db.rty(this.options.rty_ID, 'rty_RecCount') +')"'
                         +'style="display: inline-block;position:absolute;right:8px;padding-top:5px;cursor:default;font-weight:bold;cursor:pointer;">Count'
                     +'</span>'
-                    +'<div class="treeView" style="margin:12px -10px 0 -10px;"/>' //treeview
+                    +'<div class="treeView" style="margin:12px -10px 0 -10px;"></div>' //treeview
                     +'<div class="editForm editFormRtStructure" style="display:none;padding:5px;">EDITOR</div>'
-                    +'<div class="recordList" style="display:none"/>'
+                    +'<div class="recordList" style="display:none"></div>'
                 +'</div>';
             
         }else {
             //not used            
             this.options.layout_mode =                 
                 '<div style="display:none">'
-                    +'<div class="ent_header searchForm"/>'     
-                    +'<div class="ent_content_full recordList"/>'
+                    +'<div class="ent_header searchForm"></div>'     
+                    +'<div class="ent_content_full recordList"></div>'
                 +'</div>'
                 
                 +'<div class="main-layout ent_wrapper">'
@@ -119,14 +120,14 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
                                         //+'<button style="vertical-align:top;margin-top:4px;" class="closeRtsEditor"/>'
                                         +'<span style="position:absolute; right:4px;width:32px;top:26px;height:32px;font-size:32px;cursor:pointer" class="closeTreePanel ui-icon ui-icon-carat-2-w"></span>'
                                     +'</div>'
-                                    +'<div class="treeView" style="margin-left:-27px;"/>' //treeview
+                                    +'<div class="treeView" style="margin-left:-27px;"></div>' //treeview
                                 +'</div>'
                         +'</div>'
                                 
                         +'<div class="ui-layout-center">'
                                 +'<div class="preview_and_edit_form">'
                                 +    '<div class="editForm" style="top:0px">EDITOR</div>'
-                                +    '<div class="previewEditor" style="display:none;top:0px"/>'
+                                +    '<div class="previewEditor" style="display:none;top:0px"></div>'
                                 +'</div>'
                         +'</div>'
                 +'</div>';
@@ -451,8 +452,8 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
         this._treeview = this.element.find('.treeView');
         
         if(this._treeview.fancytree('instance')){
-            var tree = this._treeview.fancytree('getTree');
-            tree.reload(treeData)
+            
+            this._tree.reload(treeData)
             //tree.render(true);
         
         }else{
@@ -588,6 +589,8 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
             
             this._treeview.addClass('tree-rts');
             this._treeview.fancytree(fancytree_options); //was recordList
+            
+            this._tree = $.ui.fancytree.getTree(this._treeview[0]);
         }    
 
         this._treeview.find('ul.fancytree-container').css('width', '100%');
@@ -701,73 +704,75 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
                     field_tooltip.tooltip("destroy");
                 }
             }               
-
-            $(item).hover(
-                function(event){
-                    var node;
-                    if($(event.target).hasClass('fancytree-node')){
-                        node =  $(event.target);
-                    }else{
-                        node = $(event.target).parents('.fancytree-node');
-                    }
-
-                    node.find('.svs-contextmenu3').css('display','inline-block');//.css('visibility','visible');
-
-                    // update button position based on existance of usage
-                    let $ele_usage = node.find('.detail-count');
-                    let count = node.find('.detail-count span:first-child').text();
-                    if($ele_usage.length == 0 || $ele_usage.attr('data-empty') == 1 || window.hWin.HEURIST4.util.isempty(count)){ // no usage
-
-                        $ele_usage.hide();
-                        node.find('.svs-contextmenu3').css('right', '2px');
-                    }else if(!window.hWin.HEURIST4.util.isempty(count)){
-
-                        let right = 50 + (5 * (count.length - 1));
-                        node.find('.svs-contextmenu3').css('right', right + 'px'); // leave external link icon visible
-                    }
-
-                    //highlight in preview
-                    var dty_ID = node.find('span[data-dtid]').attr('data-dtid');
-                    that.previewEditor.find('div[data-dtid]').removeClass('ui-state-active');
-                    if(dty_ID>0){
-                        that.previewEditor.find('div[data-dtid="'+dty_ID+'"]').addClass('ui-state-active');
-
-                        var code = 'ID: '+ dty_ID +' ('+ $Db.getConceptID('dty', dty_ID) +')';
-                        var type = $Db.dty(dty_ID, 'dty_Type');
-                        type = 'Type - '+ $Db.baseFieldType[type] ? $Db.baseFieldType[type] : type.charAt(0).toUpperCase() + type.slice(1);
-                        var name = $Db.dty(dty_ID, 'dty_Name');
-
-                        var tt_content = '<div>'+ name +'</div>'
-                                        +'<div style="margin: 10px 0px;">'+ type +'</div>'
-                                        +'<div>'+ code +'</div>';
-
-                        var tt_width = (code.length > name.length && code.length > type.length) ? code.length : (name.length > type.length) ? name.length : type.length;
-
-                        field_tooltip = node.parents('ul.fancytree-container').tooltip({
-                            items: node,
-                            position:{
-                                my: 'left+10 center',
-                                at: 'right center',
-                                collision: 'none'
-                            },
-                            show:{
-                                duration: 0
-                            },
-                            content: function(){
-                                return tt_content;
-                            },
-                            open: function(event, ui){
-                                ui.tooltip.css({
-                                    "width": tt_width + 'ex',
-                                    "background": "#D1E7E7",
-                                    "font-size": "1.1em"
-                                });
-                            }
-                        });
-                    }
+            
+            function _onmouseenter(event){
+                var node;
+                if($(event.target).hasClass('fancytree-node')){
+                    node =  $(event.target);
+                }else{
+                    node = $(event.target).parents('.fancytree-node');
                 }
-            );               
-            $(item).mouseleave(
+
+                node.find('.svs-contextmenu3').css('display','inline-block');//.css('visibility','visible');
+
+                // update button position based on existance of usage
+                let $ele_usage = node.find('.detail-count');
+                let count = node.find('.detail-count span:first-child').text();
+                if($ele_usage.length == 0 || $ele_usage.attr('data-empty') == 1 || window.hWin.HEURIST4.util.isempty(count)){ // no usage
+
+                    $ele_usage.hide();
+                    node.find('.svs-contextmenu3').css('right', '2px');
+                }else if(!window.hWin.HEURIST4.util.isempty(count)){
+
+                    let right = 50 + (5 * (count.length - 1));
+                    node.find('.svs-contextmenu3').css('right', right + 'px'); // leave external link icon visible
+                }
+
+                //highlight in preview
+                var dty_ID = node.find('span[data-dtid]').attr('data-dtid');
+                that.previewEditor.find('div[data-dtid]').removeClass('ui-state-active');
+                if(dty_ID>0){
+                    that.previewEditor.find('div[data-dtid="'+dty_ID+'"]').addClass('ui-state-active');
+
+                    var code = 'ID: '+ dty_ID +' ('+ $Db.getConceptID('dty', dty_ID) +')';
+                    var type = $Db.dty(dty_ID, 'dty_Type');
+                    type = 'Type - '+ $Db.baseFieldType[type] ? $Db.baseFieldType[type] : type.charAt(0).toUpperCase() + type.slice(1);
+                    var name = $Db.dty(dty_ID, 'dty_Name');
+
+                    var tt_content = '<div>'+ name +'</div>'
+                                    +'<div style="margin: 10px 0px;">'+ type +'</div>'
+                                    +'<div>'+ code +'</div>';
+
+                    var tt_width = (code.length > name.length && code.length > type.length) ? code.length : (name.length > type.length) ? name.length : type.length;
+
+                    field_tooltip = node.parents('ul.fancytree-container').tooltip({
+                        items: node,
+                        position:{
+                            my: 'left+10 center',
+                            at: 'right center',
+                            collision: 'none'
+                        },
+                        show:{
+                            duration: 0
+                        },
+                        content: function(){
+                            return tt_content;
+                        },
+                        open: function(event, ui){
+                            ui.tooltip.css({
+                                "width": tt_width + 'ex',
+                                "background": "#D1E7E7",
+                                "font-size": "1.1em"
+                            });
+                        }
+                    });
+                }
+            }
+            
+
+            $(item).on('mouseenter',
+                _onmouseenter
+            ).on('mouseleave',
                 _onmouseexit
             );
         }
@@ -802,8 +807,8 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
             .hide()
             .css({'position':'absolute', 'padding':'5px'})
             .menu({select: function(event, ui){
-                    var tree = that._treeview.fancytree("getTree");
-                    var node = tree.getActiveNode();
+                    
+                    var node = that._tree.getActiveNode();
                     if(node){
                         
                         var fields = {
@@ -1040,8 +1045,7 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
         this._treeview.find('.svs-contextmenu3').css('visibility', isEditOpen?'hidden':'visible' );
         if(!isEditOpen){
             //deactivate node - add action buttons
-            var tree = this._treeview.fancytree('getTree');
-            var node = tree.getActiveNode();
+            var node = this._tree.getActiveNode();
             if(node && node.key!=this._currentEditID){
                 node.setActive(false);  
             } 
@@ -1170,8 +1174,7 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
             var after_dty_ID = 0;
             if(arg2>0){ //add after
                 this._lockDefaultEdit = true;
-                var tree = this._treeview.fancytree("getTree");
-                node = tree.getNodeByKey(arg2);
+                node = this._tree.getNodeByKey(arg2);
                 if(node) node.setActive();
                 after_dty_ID = arg2;
             }
@@ -1201,13 +1204,6 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
                 }
                 if(res.updatedRstField && res.updatedRstField > 0 && $Db.rst(that.options.rty_ID, res.updatedRstField)){ // Update tree node's label
                     that._treeview.find('span[data-dtid="'+ res.updatedRstField +'"]').text($Db.rst(that.options.rty_ID, res.updatedRstField, 'rst_DisplayName'));
-
-                    /*
-                    var tree = that._treeview.fancytree('getTree');
-                    tree.getNodeByKey(res.updatedRstField).setTitle( // span w/ data-dtid & left padding = 10px + more inner elements
-                        '<span data-dtid="'+ res.updatedRstField +'" style="padding-left:10px">'+ $Db.rst(that.options.rty_ID, res.updatedRstField, 'rst_DisplayName') +'</span>'
-                    );
-                    */
                 }
             };
             popup_options['multiselect'] = function(event, res)
@@ -1447,13 +1443,12 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
                     that._cachedRecordset.setRecord(rec_ID, fields); // update cached record
                     $Db.rst(that.options.rty_ID).setRecord(rec_ID, fields);
                     
-                    var tree = that._treeview.fancytree("getTree"); // get fancytree to update
                     var parentnode;
                     // get parentnode for new leaf
                     if(after_dty_ID>0){
-                        parentnode = tree.getNodeByKey(after_dty_ID);
+                        parentnode = that._tree.getNodeByKey(after_dty_ID);
                     }else{
-                        parentnode = tree.rootNode;
+                        parentnode = that._tree.rootNode;
                     }
                     if(!parentnode){ 
                         return;  
@@ -1511,11 +1506,11 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
                         rec_ID: this.options.rec_ID_sample,
                         new_record_params: {RecTypeID: this.options.rty_ID},
                         layout_mode:'<div class="ent_wrapper editor">'
-                            + '<div class="ent_content_full recordList"  style="display:none;"/>'
+                            + '<div class="ent_content_full recordList"  style="display:none;"></div>'
 
                             //+ '<div class="ent_header editHeader"></div>'
                             + '<div class="editFormDialog ent_content" style="bottom:0px">'
-                                    + '<div class="ui-layout-center"><div class="editForm"/></div>'
+                                    + '<div class="ui-layout-center"><div class="editForm"></div></div>'
                                     + '<div class="ui-layout-east"><div class="editFormSummary">....</div></div>'
                             + '</div>'
                         +'</div>',
@@ -2296,12 +2291,12 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
     _saveRtStructureTree: function(){
         
             var recset = this._cachedRecordset;
-            var tree = this._treeview.fancytree("getTree");
+            
             var order = 0;
             var that = this;
             var dtyIDs = [];
             var orders = [];
-            tree.visit(function(node){
+            that._tree.visit(function(node){
             
                 
                 
@@ -2553,9 +2548,8 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
 
 //2. update $Db
         //3. refresh treeview
-        var tree = this._treeview.fancytree("getTree");
-        if(tree){
-            var node = tree.getNodeByKey( recID );
+        if(this._tree){
+            var node = this._tree.getNodeByKey( recID );
             if(node) {
                 var sType = $Db.dty(recID, 'dty_Type');
                 var isSep = (sType=='separator');
@@ -2618,8 +2612,7 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
         
             if(after_dtid>0){
                 this._lockDefaultEdit = true;
-                var tree = this._treeview.fancytree("getTree");
-                node = tree.getNodeByKey(after_dtid);
+                node = this._tree.getNodeByKey(after_dtid);
                 if(node) node.setActive();
             }
             
@@ -2693,12 +2686,11 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
     //
     _removeField: function(recID){
         
-        var tree = this._treeview.fancytree("getTree");
         var node = null;
         if(recID>0){
-            node = tree.getNodeByKey(String(recID));
+            node = this._tree.getNodeByKey(String(recID));
         }else {
-            node = tree.getActiveNode();   
+            node = this._tree.getActiveNode();   
         }
         if(!node) return;
         
@@ -2731,8 +2723,7 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
         
         this._super(recID);
         
-        var tree = this._treeview.fancytree("getTree");
-        var node = tree.getNodeByKey(String(recID));
+        var node = this._tree.getNodeByKey(String(recID));
         var isfolder = false;
         if(node){
             if(node.folder){
@@ -2763,9 +2754,9 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
     //
     //
     editField: function(recID){
-        var tree = this._treeview.fancytree("getTree");
-        tree.getRootNode().setActive();
-        var node = tree.getNodeByKey(String(recID));
+        
+        this._tree.getRootNode().setActive();
+        var node = this._tree.getNodeByKey(String(recID));
         node.setActive();
     },
     
@@ -3282,8 +3273,7 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
             return;
         }
 
-        let tree = this._treeview.fancytree("getTree");
-        let node = tree.getNodeByKey(dty_ID);
+        let node = this._tree.getNodeByKey(dty_ID);
 
         if(!node){
             return;

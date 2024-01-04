@@ -31,6 +31,8 @@ function editCMS_SiteMenu( $container, editCMS2 ){
         DT_CMS_MENU  = window.hWin.HAPI4.sysinfo['dbconst']['DT_CMS_MENU'],
         DT_CMS_PAGETITLE   = window.hWin.HAPI4.sysinfo['dbconst']['DT_CMS_PAGETITLE'],
         DT_CMS_PAGETYPE   = window.hWin.HAPI4.sysinfo['dbconst']['DT_CMS_PAGETYPE'];
+        
+    var _tree = null;
 
     function _init(){
 
@@ -87,20 +89,18 @@ page_target: null
 parent_id: 7
 title: "Overview"
 */
-        if(tree_element.fancytree('instance')){
+        if(_tree!=null){
             
-            var tree = tree_element.fancytree('getTree');
-
             //keep_expanded_nodes
             var keep_expanded_nodes = [];
-            tree.visit(function(node){
+            _tree.visit(function(node){
                     if(node.isExpanded()){
                         keep_expanded_nodes.push(node.key)
                     }});
             
-            tree.reload(treedata);
+            _tree.reload(treedata);
             
-            tree.visit(function(node){
+            _tree.visit(function(node){
                     if(keep_expanded_nodes.indexOf(node.key)>=0){
                         node.setExpanded(true);
                     }
@@ -233,8 +233,8 @@ title: "Overview"
 
             tree_element.fancytree(fancytree_options).addClass('tree-cms');
             
-            tree = tree_element.fancytree('getTree');
-            tree.visit(function(node){
+            _tree = $.ui.fancytree.getTree(tree_element[0]);
+            _tree.visit(function(node){
                 node.setExpanded(true);
             });            
             
@@ -316,7 +316,7 @@ title: "Overview"
                                                         _refreshCurrentPage(window.hWin.current_page_id);
                                                     }
                                                     
-                                                    var node = $container.fancytree('getTree').getNodeByKey(''+page_id);
+                                                    var node = _tree.getNodeByKey(''+page_id);
                                                     var old_name = node.title;
                                                     var new_name = recordset.fld(recordset.getFirstRecord(), DT_NAME);
                                                     if(old_name!=new_name){
@@ -423,8 +423,7 @@ title: "Overview"
                         ele.hide();
                     }               
 
-                    $(parent_span).hover(
-                        function(event){
+                    function _onmouseenter(event){
                             var node;
                             if($(event.target).hasClass('fancytree-node')){
                                 node =  $(event.target);
@@ -436,10 +435,14 @@ title: "Overview"
                                 ele.css({'display':'inline-block'});//.css('visibility','visible');
                             }
                         }
-                    );               
-                    $(parent_span).mouseleave(
+                    }
+                    
+                    $(parent_span).on('mouseenter',
+                        _onmouseenter
+                    ).on('mouseleave',
                         _onmouseexit
-                    );                                                  
+                    );                      
+                    
                 }
     } //end _defineActionIcons
 
@@ -458,7 +461,7 @@ title: "Overview"
             if(response.status == window.hWin.ResponseStatus.OK){
                 //refresh treeview
                 if($container.fancytree('instance')){                                 
-                    var node = $container.fancytree('getTree').getNodeByKey(''+rec_id);
+                    var node = _tree.getNodeByKey(''+rec_id);
                     if(node){
                         $(node.span).removeClass("pending");
                         node.setTitle( newvalue ); 
@@ -486,11 +489,10 @@ title: "Overview"
             $('.btn-website-homepage').css({'text-decoration':'underline'});
         }else
         if( $container.fancytree('instance')){
-                var tree = $container.fancytree('getTree');
                 
                 $('.btn-website-homepage').css({'text-decoration':'none'});
                 
-                tree.visit(function(node){
+                _tree.visit(function(node){
                     if(node.data.page_id==window.hWin.current_page_id){
                         $(node.li).find('.fancytree-title').css({'text-decoration':'underline'});    
                     }else{
@@ -768,12 +770,11 @@ title: "Overview"
             return page_id;
         }
 
-        let tree = $container.fancytree('getTree');
-        let page_node = tree.getNodeByKey(''+page_id);
+        let page_node = _tree.getNodeByKey(''+page_id);
         let parent_id = window.hWin.home_page_record_id;
 
         if(page_node == null){
-            tree.visit((node) => {
+            _tree.visit((node) => {
                 if(node.data.page_id == page_id){
                     parent_id = node.data.parent_id; //node.parent.data.page_id
                     return false;

@@ -179,7 +179,7 @@ $.widget( "heurist.mainMenu", {
                         window.open(url, '_blank');
                     }
                 }
-                $(event.target).blur();//remove focus
+                $(event.target).trigger('blur');//remove focus
             })
             .addClass('ui-heurist-header2')
             .val( window.hWin.HAPI4.database ).appendTo( this.div_dbname );

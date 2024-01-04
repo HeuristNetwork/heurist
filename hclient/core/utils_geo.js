@@ -53,7 +53,7 @@ window.hWin.HEURIST4.geo = {
 
         if (typeof(mdata) === "string" && !window.hWin.HEURIST4.util.isempty(mdata)){
             try{
-                mdata = $.parseJSON(mdata);
+                mdata = JSON.parse(mdata);
             }catch(e){
                 mdata = null;
             }
