@@ -42,8 +42,8 @@ function editCMS_WidgetCfg( widget_cfg, _layout_content, $dlg, main_callback ){
             placeholder_def: 'No default',
             empty_remark_def: 'No default'
         },
-        heurist_storymap: {
-            storyPlaceholder_def: 'Please select a story in the list',
+        heurist_StoryMap: {
+            placeholder_def: 'Please select a story in the list',
             elementsPlaceholder_def: 'There are no story elements to display for the selected item',
             elementsPlaceholderSub_def: 'Story elements may exist but not be publicly visible'
         }
@@ -87,7 +87,7 @@ function editCMS_WidgetCfg( widget_cfg, _layout_content, $dlg, main_callback ){
             let height = 700;
             let width = 800;
             if(widget_cfg.appid == 'heurist_StoryMap'){
-                height = 745;
+                height = 900;
             }else if(widget_cfg.appid == 'heurist_resultList'){
                 height = 850;
                 width = 850;
@@ -408,6 +408,8 @@ function editCMS_WidgetCfg( widget_cfg, _layout_content, $dlg, main_callback ){
                     $dlg.find('#placeholder_text').val(opts['placeholder_text']);
                 }else if(widget_name=='heurist_SearchInput'){
                     $dlg.find('#placeholder_text').val(opts['placeholder_text']);
+                }else if(widget_name=='heurist_StoryMap'){
+                    $dlg.find('#placeholder_text').val(opts['storyPlaceholder']);
                 }
 
                 if(_def_labels[widget_name]){ // fill in default labels
@@ -418,6 +420,11 @@ function editCMS_WidgetCfg( widget_cfg, _layout_content, $dlg, main_callback ){
 
                     $dlg.find('#placeholder_def').text(def_placeholder).attr('title', def_placeholder);
                     $dlg.find('#empty_remark_def').text(def_remark).attr('title', def_remark);
+
+                    if(widget_name == 'heurist_StoryMap'){
+                        let label = window.HR(_def_labels[widget_name]['elementsPlaceholder_def']);
+                        $dlg.find('#elementsPlaceholder_def').text(label).attr('title', label);
+                    }
                 }
 
                 if(opts['blank_placeholder'] || $dlg.find('#placeholder_text').val() == 'def'){ // replace 'def' with a blank
@@ -425,6 +432,10 @@ function editCMS_WidgetCfg( widget_cfg, _layout_content, $dlg, main_callback ){
                 }
                 if(opts['blank_empty_remark'] || $dlg.find('#empty_remark').val() == 'def'){ // replace 'def' with a blank
                     $dlg.find('#empty_remark').val('');
+                }
+                if(widget_name == 'heurist_StoryMap' && 
+                    (opts['blank_elementsPlaceholder'] || $dlg.find('#elementsPlaceholder').val() == 'def')){ // replace 'def' with a blank
+                    $dlg.find('#elementsPlaceholder').val('');
                 }
             }
 
@@ -1335,6 +1346,15 @@ function editCMS_WidgetCfg( widget_cfg, _layout_content, $dlg, main_callback ){
             opts['placeholder_text'] = placeholder;
         }else if(widget_name=='heurist_SearchInput'){
             opts['placeholder_text'] = placeholder;
+        }else if(widget_name=='heurist_StoryMap'){
+
+            opts['storyPlaceholder'] = placeholder;
+            delete opts['placeholder_text'];
+
+            if(window.hWin.HEURIST4.util.isempty(opts['elementsPlaceholder']) && !opts['blank_elementsPlaceholder']){
+                // replace with default
+                opts['elementsPlaceholder'] = 'def';
+            }
         }
 
         var selval = opts.searchTreeMode;

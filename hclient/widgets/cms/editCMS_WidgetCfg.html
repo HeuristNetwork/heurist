@@ -295,7 +295,7 @@
     </div>
 
     <div class="heurist_StoryMap">
-        <div class="header row-spacing"><label>Story on map:</label></div>
+        <div class="header"><label>Story on map:</label></div>
         <select name="reportElementMapMode" class="text ui-widget-content ui-corner-all" title="">
             <option value="linked">Show all places in story elements with connecting lines</option>
             <option value="all">Show all places in story elements without connecting lines</option>
@@ -306,6 +306,14 @@
         <label>Filter:</label>
         <input name="reportElementMapFilter"/>
         </span>
+    </div>
+
+    <div class="heurist_StoryMap">
+        <div class="header row-spacing">
+            <label>Show print button</label>
+        </div>
+        <input name="show_print_button" type="checkbox"/>
+        <i>&nbsp; allow users to print the current story</i>
     </div>
 
     <div  class="heurist_StoryMap">
@@ -346,24 +354,6 @@
         </div>
         <input name="reportOverviewMapFilter" class="text ui-widget-content ui-corner-all" title="" style="width:250px"/>
         <i class="help-text" style="padding-bottom: 30px;">Determines the set of story elements on the initial map (rather than showing all stories in the current resultset)</i>
-    </div>
-    
-    <div class="heurist_StoryMap">
-        <div class="header"><label>Message when no record selected</label></div>
-        <input name="storyPlaceholder" size="100"/>
-        <i class="help-text">Message to display while search is not performed or no record or search has been selected</i>
-    </div>
-
-    <div class="heurist_StoryMap">
-        <div class="header"><label>Message if no story elements</label></div>
-        <input name="elementsPlaceholder" size="100"/>
-        <i class="help-text">Message to be shown if query returns no records</i>
-    </div>
-    
-    <div class="heurist_StoryMap">
-        <div class="header"><label>Sub-message in smaller font</label></div>
-        <input name="elementsPlaceholderSub" size="100"/>
-        <i class="help-text"></i>
     </div>
 
     <!-- mapping -->   
@@ -648,12 +638,12 @@
         <i>Filter is applied to the current resultset </i>
     </div>
     
-    <div class="heurist_SearchInput heurist_resultList heurist_resultListExt heurist_resultListDataTable">
+    <div class="heurist_SearchInput heurist_resultList heurist_resultListExt heurist_resultListDataTable heurist_StoryMap">
         <div class="header">
             <label>Message prior to selection</label>
         </div>
-        <label><input type="checkbox" name="blank_placeholder"> check to leave blank</label>
-        , otherwise defaults to "<span id="placeholder_def" class="truncate" style="max-width: 350px;line-height: 9px;display: inline-block;"></span>"
+        <label><input type="checkbox" name="blank_placeholder"> check to leave blank</label>,
+        otherwise defaults to "<span id="placeholder_def" class="truncate" style="max-width: 350px;line-height: 8px;display: inline-block;"></span>"
         <textarea id="placeholder_text" rows="3" cols="85"/>
         <span class="heurist-helper1" style="display: inline-block;line-height: 12px;padding-bottom: 10px;">
             Message to display while search is not performed or no record or search has been selected
@@ -664,12 +654,32 @@
         <div class="header">
             <label>No data message</label>
         </div>
-        <label><input type="checkbox" name="blank_empty_remark"> check to leave blank</label>
-        , otherwise defaults to "<span id="empty_remark_def" class="truncate" style="max-width: 350px;line-height: 9px;display: inline-block;"></span>"
+        <label><input type="checkbox" name="blank_empty_remark"> check to leave blank</label>,
+        otherwise defaults to "<span id="empty_remark_def" class="truncate" style="max-width: 350px;line-height: 8px;display: inline-block;"></span>"
         <textarea id="empty_remark" rows="3" cols="85"/>
         <span class="heurist-helper1" style="display: inline-block;line-height: 12px;padding-bottom: 10px;">
             Message to be shown if query returns no records
         </span>
+    </div>
+
+    <div class="heurist_StoryMap">
+        <div class="header">
+            <label>Message if no story elements</label>
+        </div>
+        <label><input type="checkbox" name="blank_elementsPlaceholder"> check to leave blank</label>,
+        otherwise defaults to "<span id="elementsPlaceholder_def" class="truncate" style="max-width: 350px;line-height: 8px;display: inline-block;"></span>"
+        <textarea id="elementsPlaceholder" rows="3" cols="85"/>
+        <span class="heurist-helper1" style="display: inline-block;line-height: 12px;padding-bottom: 10px;">
+            Message to be shown if query returns no records
+        </span>
+    </div>
+    
+    <div class="heurist_StoryMap">
+        <div class="header">
+            <label>Sub-message in smaller font</label>
+        </div>
+        <input name="elementsPlaceholderSub" size="100"/>
+        <i class="help-text"></i>
     </div>
 
     <hr class="heurist_resultList" style="margin: 1em -10px;">
