@@ -4253,6 +4253,20 @@ console.log(stext);
             var dlg = $('#recordview_popup');
             var crs = dlg.css('cursor');
             if(crs && crs.indexOf('resize')>0) return;
+
+            if(window.hWin.record_viewer_popups && window.hWin.record_viewer_popups.length > 0){
+                // Keep open if nested record viewers are open
+
+                let has_viewer_open = false;
+                $.each(window.hWin.record_viewer_popups, (idx, ele) => {
+                    if(ele.is(':visible')){
+                        has_viewer_open = true;
+                        return false;
+                    }
+                });
+
+                if(has_viewer_open) { return; }
+            }
             
             if(dlg.dialog('instance')) dlg.dialog('close');
         },  2000); //600
