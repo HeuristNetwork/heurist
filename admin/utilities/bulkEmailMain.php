@@ -120,15 +120,17 @@ if(!$has_emails || empty($emails)) {
         <!-- Style Sheets -->
         <!--<link rel="stylesheet" type="text/css" href="../../external/jquery-ui-iconfont-master/jquery-ui.icon-font.css" />-->
         <link rel=icon href="<?php echo PDIR;?>favicon.ico" type="image/x-icon">
-        <link rel="stylesheet" type="text/css" href="../../external/jquery-ui-themes-1.12.1/themes/base/jquery-ui.css" />
+
+        <script src="https://code.jquery.com/jquery-3.7.1.js"></script>
+        <script src="https://code.jquery.com/jquery-migrate-3.4.1.js"></script>
+        <script src="https://code.jquery.com/ui/1.13.2/jquery-ui.js"></script>
+        <link rel="stylesheet" type="text/css" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
 
         <link rel="stylesheet" type="text/css" href="../../h4styles.css">
         <link rel="stylesheet" type="text/css" href="../../h6styles.css">
 
         <!-- Scripts -->
         <script type="text/javascript" src="../../hclient/core/detectHeurist.js"></script>
-        <script type="text/javascript" src="../../external/jquery-ui-1.12.1/jquery-1.12.4.js"></script>
-        <script type="text/javascript" src="../../external/jquery-ui-1.12.1/jquery-ui.js"></script>
 
         <script type="text/javascript" src="../../hclient/core/utils.js"></script>
         <script type="text/javascript" src="../../hclient/core/utils_ui.js"></script>

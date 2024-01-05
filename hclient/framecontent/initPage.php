@@ -286,7 +286,14 @@ $isUpgrade = true;
 
         if(success) // Successfully initialized system
         {
-            applyTheme();
+            if(!window.hWin.HAPI4.sysinfo['layout']){
+                var layoutid = '<?php echo htmlspecialchars(@$_REQUEST['ll']);?>';
+
+                if(window.hWin.HEURIST4.util.isempty(layoutid)){
+                    layoutid = "H6Default";
+                }
+                window.hWin.HAPI4.sysinfo['layout'] = layoutid; //keep current layout
+            }
 
             if(!window.hWin.HEURIST4.util.isnull(onAboutInit) && window.hWin.HUL.isFunction(onAboutInit)){
                 if(window.hWin.HAPI4.sysinfo['layout']!='WebSearch')
@@ -340,58 +347,5 @@ $isUpgrade = true;
             return false;
         
     }
-    
-    //
-    // it itakes name of theme from preferences , oherwise default theme is heurist
-    //
-    function applyTheme(){
-
-        var prefs = window.hWin.HAPI4.get_prefs();
-        /* unfortunately dynamic addition of theme and style is not applied properly.
-        Browser takes some time on its parsing while we have already created some ui elements, need timeout.
-        So, its better to detecct current theme on server side
-        if(prefs['layout_theme'] && !(prefs['layout_theme']=="heurist" || prefs['layout_theme']=="base")){
-        //load one of standard themes from jquery web resource
-        cssLink = $('<link rel="stylesheet" type="text/css" href="http:......./themes/'+
-        prefs['layout_theme']+'/jquery-ui.css" />');
-        }else{
-        //default BASE or HEURIST theme
-        cssLink = $('<link rel="stylesheet" type="text/css" href="ext/jquery-ui-....../themes/'+prefs['layout_theme']+'/jquery-ui.css" />');
-        }
-        $("head").append(cssLink);
-        $("head").append($('<link rel="stylesheet" type="text/css" href="h4styles.css?t='+(new Date().getTime())+'">'));
-        */
-        var layoutid = '<?php echo htmlspecialchars(@$_REQUEST['ll']);?>';
-
-        if(window.hWin.HEURIST4.util.isempty(layoutid)){
-            layoutid = "H6Default";
-            /*layoutid = window.hWin.HAPI4.get_prefs('layout_id');
-            if(window.hWin.HEURIST4.util.isempty(layoutid)){
-            layoutid = "H5Default";
-            }*/
-        }
-        if(!window.hWin.HAPI4.sysinfo['layout']){
-            window.hWin.HAPI4.sysinfo['layout'] = layoutid; //keep current layout
-
-            if(layoutid=='DigitalHarlem' || layoutid=='DigitalHarlem1935'){ //digital harlem - @todo move style to layout
-                /*
-                $.getScript(window.hWin.HAPI4.baseURL+'hclient/widgets/digital_harlem/dh_search_minimal.js').fail(function(){
-                window.hWin.HEURIST4.msg.showMsgErr('Cannot load script for Digital Harlem search');
-                });
-                $.getScript(window.hWin.HAPI4.baseURL+'hclient/widgets/digital_harlem/google_analytics.js').fail(function(){
-                window.hWin.HEURIST4.msg.showMsgErr('Cannot include Google Analtyics script');
-                });
-                */    
-            }
-        }
-
-        if(!(layoutid=='UAdelaide' || layoutid=='Beyond1914')){
-            //A11 $('body').css({'font-size':'0.7em'});
-        }
-
-        //add version to title
-        //window.document.title = window.document.title+' V'+window.hWin.HAPI4.sysinfo.version;
-    }
-
 </script>
 

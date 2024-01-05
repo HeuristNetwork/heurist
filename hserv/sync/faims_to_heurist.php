@@ -34,14 +34,11 @@ if(! $system->init(@$_REQUEST['db'], true) ){
     exit;
 }
 ?>
+<!DOCTYPE HTML>
 <html>
     <head>
         <title><?=HEURIST_TITLE ?></title>
         <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-
-        <link rel="stylesheet" type="text/css" href="../../external/jquery-ui-themes-1.12.1/themes/base/jquery-ui.css" />
-        
-        <link rel="stylesheet" type="text/css" href="../../style.css">
     </head>
     <body style="padding:44px;">
         <div class="ui-corner-all ui-widget-content" style="width:640px; margin:0px auto; padding: 0.5em;">

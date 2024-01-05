@@ -73,9 +73,10 @@ if(!$init_client || @$_REQUEST['session']>0){ //2a. init operation on client sid
         $res = recordUpdateCalcFields($system, null, $rty_IDs);
     }
 }
-
+if($init_client){
+    print '<!DOCTYPE HTML>';    
+}
 ?>
-<!DOCTYPE html>
 <html lang="en">
     <head>
         <title>Rebuild Calculated Fields</title>
@@ -84,9 +85,10 @@ if(!$init_client || @$_REQUEST['session']>0){ //2a. init operation on client sid
 
 <?php if($init_client){ ?>
     
-        <script type="text/javascript" src="<?php echo PDIR;?>external/jquery-ui-1.12.1/jquery-1.12.4.js"></script>
-        <script type="text/javascript" src="<?php echo PDIR;?>external/jquery-ui-1.12.1/jquery-ui.js"></script>
-        <link rel="stylesheet" type="text/css" href="<?php echo PDIR;?>external/jquery-ui-themes-1.12.1/themes/base/jquery-ui.css"/>
+        <script src="https://code.jquery.com/jquery-3.7.1.js"></script>
+        <script src="https://code.jquery.com/jquery-migrate-3.4.1.js"></script>
+        <script src="https://code.jquery.com/ui/1.13.2/jquery-ui.js"></script>
+        <link rel="stylesheet" type="text/css" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
         
         <script type="text/javascript">
     

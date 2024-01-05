@@ -164,14 +164,13 @@ require_once dirname(__FILE__).'/hclient/framecontent/initPage.php';
 
 
 <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery.fancytree/2.38.3/jquery.fancytree-all.js"></script>
-<link rel="stylesheet" type="text/css" href="external/jquery.fancytree/skin-themeroller/ui.fancytree.css" />
+<link rel="stylesheet" type="text/css" href="external/jquery.widgets/jquery.fancytree/skin-themeroller/ui.fancytree.css" />
 
-<script type="text/javascript" src="external/jquery.layout/jquery.layout-latest.js"></script>
-
-<!-- Gridster layout is an alternative similar to Windows tiles, not useful except with small
-number of widgets. Currently it is commented out of the code in layout_default.js -->
-
-<script type="text/javascript" src="external/js/jquery.ui-contextmenu.js"></script>
+<script type="text/javascript" src="<?php echo PDIR;?>external/jquery.widgets/jquery.ui-contextmenu.js"></script>
+<script type="text/javascript" src="<?php echo PDIR;?>external/jquery.widgets/ui.tabs.paging.js"></script>
+<script type="text/javascript" src="<?php echo PDIR;?>external/jquery.widgets/jquery.layout.js"></script>
+<script type="text/javascript" src="<?php echo PDIR;?>external/jquery.widgets/evol.colorpicker.js" charset="utf-8"></script>
+<link type="text/css" href="<?php echo PDIR;?>external/jquery.widgets/evol.colorpicker.css" rel="stylesheet"/>
 
 <!-- script type="text/javascript" src="ext/js/moment.min.js"></script
 <script type="text/javascript" src="ext/js/date.format.js"></script>
@@ -227,9 +226,6 @@ number of widgets. Currently it is commented out of the code in layout_default.j
 <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/editing/editTheme.js"></script>
 <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/cms/hLayoutMgr.js"></script>
 <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/cms/editCMS_Manager.js"></script>
-<script type="text/javascript" src="<?php echo PDIR;?>external/js/ui.tabs.paging.js"></script>
-<script type="text/javascript" src="<?php echo PDIR;?>external/js/evol.colorpicker.js" charset="utf-8"></script>
-<link href="<?php echo PDIR;?>external/js/evol.colorpicker.css" rel="stylesheet" type="text/css">
 
 <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/entity/configEntity.js"></script>
 <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/entity/manageEntity.js"></script>
@@ -261,9 +257,6 @@ number of widgets. Currently it is commented out of the code in layout_default.j
 <link rel="stylesheet" type="text/css" href="<?php echo PDIR;?>external/jquery.fancybox/jquery.fancybox.css" />
 <script type="text/javascript" src="<?php echo PDIR;?>external/jquery.fancybox/jquery.fancybox.js"></script>
 
-<!-- loaded dynamically in editing.js
-<script type="text/javascript" src="<?php echo PDIR;?>external/tinymce5/tinymce.min.js"></script>
--->
 
 <!-- os, browser detector -->
 <script type="text/javascript" src="<?php echo PDIR;?>external/js/platform.js"></script>
@@ -279,7 +272,7 @@ number of widgets. Currently it is commented out of the code in layout_default.j
 <script type="text/javascript" src="<?php echo PDIR;?>external/jquery.calendars-2.1.1/js/jquery.calendars.js"></script>
 <script type="text/javascript" src="<?php echo PDIR;?>external/jquery.calendars-2.1.1/js/jquery.calendars.plus.js"></script>
 
-<link rel="stylesheet" type="text/css" href="<?php echo PDIR;?>external/jquery.calendars-2.1.1/css/jquery.calendars.picker.css">
+<link rel="stylesheet" type="text/css" href="<?php echo PDIR;?>external/jquery.calendars-2.1.1/css/jquery.calendars.picker-1.2.1.css">
 <script type="text/javascript" src="<?php echo PDIR;?>external/jquery.calendars-2.1.1/js/jquery.calendars.picker.js"></script>
 
 <script src="<?php echo PDIR;?>external/jquery.calendars-2.1.1/js/jquery.calendars.taiwan.js"></script>

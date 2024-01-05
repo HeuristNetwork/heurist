@@ -37,10 +37,11 @@
                     <td style="width:113px"><strong>Current version<br>used</strong></td>
                     <td style="width:106px"><strong>Latest version<br>available</strong></td>
                     <td style="width:738px"><strong>Notes</strong></td>
+                    <td style="width:738px"><strong>URL</strong></td>
                 </tr>
 
                 <tr>
-                    <td><span style="background-color:#e67e22">CLEANUP/REPLACEMENT REQUIRED?</span></td>
+                    <td colspan="6" style="background-color:#e67e22">CLEANUP/REPLACEMENT REQUIRED?</td>
                 </tr>
 
                 <tr>
@@ -50,6 +51,7 @@
                     <td>discontinued ~2010</td>
                     <td>Used only by special application Digital Harlem and Beyond 1914/Melbourne Uni.<span style="color:#e74c3c">
                     <br>@todo replace to native google.map.data or leaflet</span></td>
+                    <td></td>
                 </tr>
 
                 <tr>
@@ -59,15 +61,12 @@
                     <td>discontinued ~2018</td>
                     <td>we use only timeline (original code was modified). Was heavily modified for fuzzy dates.
                         <br>Need to extract only code for timeline since the size of package is 1.5Mb (used in map.php)
-                        <br>See for new: https://github.com/visjs/vis-timeline</td>
+                    </td>
+                    <td>https://github.com/visjs/vis<br>Repalce with https://github.com/visjs/vis-timeline ?</td>
                 </tr>
 
                 <tr>
-                    <td><span style="background-color:#e67e22">IN USE</span></td>
-                    <td></td>
-                    <td></td>
-                    <td></td>
-                    <td></td>
+                    <td colspan="6" style="background-color:#e67e22">IN USE</td>
                 </tr>
 
                 <tr>
@@ -75,9 +74,10 @@
                         <p>JQuery</p>
                     </td>
                     <td>yes</td>
-                    <td>1.12.4</td>
-                    <td>3.7</td>
+                    <td>3.7.1</td>
+                    <td>3.7.1</td>
                     <td></td>
+                    <td>https://jquery.com/</td>
                 </tr>
 
                 <tr>
@@ -85,11 +85,85 @@
                         <p>JQuery-UI</p>
                     </td>
                     <td>yes</td>
-                    <td>1.12.1</td>
-                    <td>1.13</td>
+                    <td>1.13.2</td>
+                    <td>1.13.2</td>
+                    <td></td>
+                    <td>https://jqueryui.com/</td>
+                </tr>
+
+                <tr>
+                    <td>
+                        <p>Leaflet (Mapping)</p>
+                    </td>
+                    <td>yes</td>
+                    <td>1.9.4</td>
+                    <td>1.9.4</td>
+                    <td></td>
                     <td></td>
                 </tr>
+
+                <tr>
+                    <td colspan="6" style="background-color:#e67e22">
+                        <p>JQuery widgets</p>
+                    </td>
+                </tr>
+
+                <tr>
+                    <td>
+                        evol.colorpicker.js
+                    </td>
+                    <td></td>
+                    <td>3.2.4</td>
+                    <td>3.4.3</td>
+                    <td>color picker in map, CMS, visualization (modified)</td>
+                    <td>https://github.com/evoluteur/colorpicker</td>
+                </tr>
+                <tr>
+                    <td>
+                        jquery.layout.js        
+                    </td>
+                    <td></td>
+                    <td>1.4.3</td>
+                    <td>(discontinued 2014)</td>
+                    <td>
+                        cardinal layout control - original code was modified. (upgraded for jQuery 3.7)<br />
+                    </td>
+                    <td>https://github.com/allpro/layout</td>
+                </tr>
+                <tr>
+                    <td>
+                        jquery.ui-contextmenu.js
+                    </td>
+                    <td></td>
+                    <td>1.8.0</td>
+                    <td>1.18.1 (2017)</td>
+                    <td>context menu plugin, used in saved search treeview. (upgraded for jQuery 3.7)</td>
+                    <td>https://github.com/mar10/jquery-ui-contextmenu</td>
+                </tr>
+                <tr>
+                    <td>
+                        ui.tabs.paging.js
+                    </td>
+                    <td></td>
+                    <td>1.2.2</td>
+                    <td></td>
+                    <td>tabs control extension - allows tabs scrolling. (upgraded for jQuery 3.7)</td>
+                    <td>https://github.com/Akshay-Hegde/jquery-ui-tabs-paging</td>
+                </tr>
                 
+
+                <tr>
+                    <td>
+                        
+                    </td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                </tr>
+
+
                 <tr>
                     <td>
                         <p>JQuery widgets</p>
@@ -106,7 +180,6 @@
                             jquery.calendars-1.2.1- editTemporalObject (2.1.1)  (Upgraded for jQuery 3.7)<br />
                             jquery.fancybox 3.3.5 (5.0, discontinued)- gallery and image viewer - original code was modified<br />
                             jquery.fancytree 2.16.1 (2.38.3) - treeview component (saved searches, terms, rt structure) - small mods in css https://github.com/mar10/fancytree<br />
-                            jquery.layout 1.4.3 (1.4.3, discontinued 2014)- cardinal layout control - original code was modified. https://github.com/allpro/layout (Upgraded for jQuery 3.7)<br />
                             see also: js/jquery.ui-contextmenu.js 1.8.1 (1.8.1 ~2017) - context menu plugin (used in saved search treeview) https://github.com/mar10/jquery-ui-contextmenu  (Upgraded for jQuery 3.7)<br />
                             jquery.datatable
                         </p>
@@ -114,15 +187,6 @@
                 </tr>
                 
                 
-                <tr>
-                    <td>
-                        <p>Leaflet (Mapping)</p>
-                    </td>
-                    <td>yes</td>
-                    <td>1.9.4</td>
-                    <td></td>
-                    <td></td>
-                </tr>
 
                 <tr>
                     <td>
@@ -156,10 +220,7 @@
                         <p>js/geodesy-master- convert UTM to/from WGS in mapDraw.php<br />
                             js/wellknown.js - parse/stringfy WKT to json in mapDraw.php and in utils_geo.parseWKTCoordinates<br />
                             js/shapefile - shp to json parser see map.php<br />
-                            js/evol.colorpicker.js 3.2.4 (3.4.3) - color picker in map.php, modified<br />
                             js/platform.js- browser and platform detect<br />
-                            js/jquery.ui-contextmenu.js 1.8.0 (1.8.1 ~2016) - context menu plugin (used in saved search treeview)
-                            js/ui.tabs.paging.js https://github.com/Akshay-Hegde/jquery-ui-tabs-paging (Upgraded for jQuery 3.7)</p>
                     </td>
                 </tr>
 
@@ -182,8 +243,9 @@
                     <td>5.0.11</td>
                     <td>6.8.2</td>
                     <td>
-                        <p>WYSIWYG editingfor blocktext fields in record edit. </p>
+                        <p>WYSIWYG editingfor blocktext fields in record edit and content in CMS editor. It is loaded dynamically</p>
                     </td>
+                    <td>https://www.tiny.cloud/</td>
                 </tr>
 
                 <tr>

@@ -82,9 +82,7 @@ $.widget( "heurist.mainMenu", {
         .attr('title', 'Click to reload page and return to the default search for your database')
         .appendTo( this.element );
 
-        if(window.hWin.HAPI4.get_prefs('layout_theme')!='heurist'){
-            this.div_logo.button();
-        }
+        this.div_logo.button();
 
         //validate server side version  - compare version of code in server where main index database and this server version
         var res = window.hWin.HEURIST4.util.versionCompare(window.hWin.HAPI4.sysinfo.version_new, window.hWin.HAPI4.sysinfo['version']);   
@@ -1545,16 +1543,6 @@ $.widget( "heurist.mainMenu", {
             
             var allFields = $dlg.find('input,select');
 
-            var currentTheme = prefs['layout_theme'];
-            /* @todo later
-            var themeSwitcher = $("#layout_theme").themeswitcher(
-                {initialText: currentTheme.charAt(0).toUpperCase() + currentTheme.slice(1),
-                currentTheme:currentTheme,
-                onSelect: function(){
-                    currentTheme = this.currentTheme;
-            }});
-            */
-
             //default
             prefs['userCompetencyLevel'] = window.hWin.HAPI4.get_prefs_def('userCompetencyLevel', 2);
             prefs['userFontSize'] = window.hWin.HAPI4.get_prefs_def('userFontSize', 12);
@@ -1676,9 +1664,6 @@ $.widget( "heurist.mainMenu", {
                 });
                 request['mapcontrols'] = map_controls.length==0?'none':map_controls.join(',');
                 
-                request.layout_theme = currentTheme; //themeSwitcher.getSelected();//    getCurrentTheme();
-                //$('#layout_theme').themeswitcher.
-                
                 //save preferences in session
                 window.hWin.HAPI4.SystemMgr.save_prefs(request,
                     function(response){
@@ -1687,7 +1672,6 @@ $.widget( "heurist.mainMenu", {
                             var prefs = window.hWin.HAPI4.currentUser['ugr_Preferences'];
                             
                             var ask_reload = (prefs['layout_language'] != request['layout_language'] ||
-                                //prefs['layout_theme'] != request['layout_theme'] ||
                                 prefs['layout_id'] != request['layout_id']);
                                 
                             var reload_color_css = (prefs['custom_theme'] != request['custom_theme']);

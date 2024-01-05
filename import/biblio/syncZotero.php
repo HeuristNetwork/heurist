@@ -89,16 +89,18 @@ if($fh_data==null || is_string($fh_data)){
         exit;
 }
 ?>
+<!DOCTYPE HTML>
 <html>
 
     <head>
         <meta http-equiv="content-type" content="text/html; charset=utf-8">
         <title>Zotero synchronization</title>
 
-        <!-- jQuery UI -->
-        <script type="text/javascript" src="<?php echo PDIR;?>external/jquery-ui-1.12.1/jquery-1.12.4.js"></script>
-        <script type="text/javascript" src="<?php echo PDIR;?>external/jquery-ui-1.12.1/jquery-ui.js"></script>
- 
+        <script src="https://code.jquery.com/jquery-3.7.1.js"></script>
+        <script src="https://code.jquery.com/jquery-migrate-3.4.1.js"></script>
+        <script src="https://code.jquery.com/ui/1.13.2/jquery-ui.js"></script>
+        <link rel="stylesheet" type="text/css" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+        
         <!-- Heurist -->
         <script type="text/javascript" src="<?php echo PDIR;?>hclient/core/detectHeurist.js"></script>
 
@@ -111,7 +113,7 @@ if($fh_data==null || is_string($fh_data)){
             }
 
             .ui-accordion-header.ui-state-active .ui-icon {
-                background-image: url('<?php echo PDIR;?>external/jquery-ui-themes-1.12.1/themes/base/images/ui-icons_444444_256x240.png') !important;
+                background-image: url('https://code.jquery.com/ui/1.12.1/themes/base/images/ui-icons_444444_256x240.png') !important;
             }
         </style>
 

@@ -27,7 +27,9 @@ require_once dirname(__FILE__).'/../../hclient/framecontent/initPage.php';
 
 $system->defineConstants();
 ?>
-<script type="text/javascript" src="<?php echo PDIR;?>external/jquery.layout/jquery.layout-latest.js"></script>
+<script type="text/javascript" src="<?php echo PDIR;?>external/jquery.widgets/jquery.layout.js"></script>
+<script type="text/javascript" src="<?php echo PDIR;?>external/jquery.widgets/evol.colorpicker.js" charset="utf-8"></script>
+<link type="text/css" href="<?php echo PDIR;?>external/jquery.widgets/evol.colorpicker.css" rel="stylesheet"/>
 
 <script src="https://maps.googleapis.com/maps/api/js?key=<?php echo $accessToken_GoogleAPI;?>&libraries=drawing,geometry"></script>
 <script src="https://developers.google.com/maps/documentation/javascript/examples/markerclusterer/markerclusterer.js"></script>
@@ -56,15 +58,12 @@ $system->defineConstants();
 <script type="text/javascript" src="<?php echo PDIR;?>external/timemap.js/2.0.1/src/param.js"></script>
 <script type="text/javascript" src="<?php echo PDIR;?>external/timemap.js/2.0.1/src/loaders/xml.js"></script>
 <script type="text/javascript" src="<?php echo PDIR;?>external/timemap.js/2.0.1/src/loaders/kml.js"></script>
-<script type="text/javascript" src="<?php echo PDIR;?>external/timemap.js/2.0.1/src/manipulation2.js"></script>
+  <script type="text/javascript" src="<?php echo PDIR;?>external/timemap.js/2.0.1/src/manipulation2.js"></script>
 
 <!-- Shape file converting -->
 <script type="text/javascript" src="<?php echo PDIR;?>external/js/shapefile/stream.js"></script>
 <script type="text/javascript" src="<?php echo PDIR;?>external/js/shapefile/shapefile.js"></script>
 <script type="text/javascript" src="<?php echo PDIR;?>external/js/shapefile/dbf.js"></script>
-
-<script type="text/javascript" src="<?php echo PDIR;?>external/js/evol.colorpicker.js" charset="utf-8"></script>
-<link href="<?php echo PDIR;?>external/js/evol.colorpicker.css" rel="stylesheet" type="text/css">
 
 <!-- Mapping -->
 <script type="text/javascript" src="<?php echo PDIR;?>viewers/gmap/map.js"></script>

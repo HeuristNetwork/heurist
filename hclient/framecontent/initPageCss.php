@@ -33,22 +33,9 @@ Select linked record button   bg:#f0ecf0 - can be changed to button light gray o
 Scrollbar tracks and thumbs  rgba(0,0,0,0.3)/#bac4cb
 
 */
-if(isset($system) && $system->is_inited()){
-    $current_user = $system->getCurrentUser();
-    $layout_theme = @$current_user['ugr_Preferences']['layout_theme'];
-}else{    
-    $layout_theme = 'base';
-}
-
-if($layout_theme==null || $layout_theme=='' || $layout_theme=="heurist" || $layout_theme=="base"){
-    $cssLink = PDIR.'external/jquery-ui-themes-1.12.1/themes/base/jquery-ui.css';
-}else{
-    //load one of standard themes from jquery web resource
-    $cssLink = 'https://code.jquery.com/ui/1.12.1/themes/'.$layout_theme.'/jquery-ui.css';
-}
 ?>
 <!-- jQuery UI CSS -->
-<link rel="stylesheet" type="text/css" href="<?php echo $cssLink;?>">
+<link rel="stylesheet" type="text/css" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
 <!-- Heurist CSS -->
 <link rel="stylesheet" type="text/css" href="<?php echo PDIR;?>h4styles.css" />
 <?php 

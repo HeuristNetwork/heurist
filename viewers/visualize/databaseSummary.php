@@ -101,16 +101,13 @@ A:link {
         </style>
 
         <!-- Layouts -->
-        <script type="text/javascript" src="<?php echo PDIR;?>external/jquery.layout/jquery.layout-latest.js"></script>
-        <script type="text/javascript" src="<?php echo PDIR;?>hclient/core/layout.js"></script>
+        <script type="text/javascript" src="<?php echo PDIR;?>external/jquery.widgets/jquery.layout.js"></script>
+        <script type="text/javascript" src="<?php echo PDIR;?>external/jquery.widgets/evol.colorpicker.js" charset="utf-8"></script>
+        <link type="text/css" href="<?php echo PDIR;?>external/jquery.widgets/evol.colorpicker.css" rel="stylesheet"/>
 
         <!-- D3 -->
         <script type="text/javascript" src="<?php echo PDIR;?>external/d3/d3.js"></script>
         <script type="text/javascript" src="<?php echo PDIR;?>external/d3/fisheye.js"></script>
-
-        <!-- Colpick -->
-        <script type="text/javascript" src="<?php echo PDIR;?>external/js/evol.colorpicker.js" charset="utf-8"></script>
-        <link href="<?php echo PDIR;?>external/js/evol.colorpicker.css" rel="stylesheet" type="text/css">
 
         <!-- Visualize plugin -->
         <script type="text/javascript" src="<?php echo PDIR;?>viewers/visualize/settings.js"></script>

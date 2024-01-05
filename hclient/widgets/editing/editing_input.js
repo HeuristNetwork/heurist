@@ -2684,7 +2684,7 @@ $.widget( "heurist.editing_input", {
                     + '<a id="lnk'+f_id+'" href="#" oncontextmenu="return false;" style="display:none;padding-right:5px;text-decoration:underline;color:blue"'
                     + '>show thumbnail</a>'
                     + '<a id="dwn'+f_id+'" href="'+window.hWin.HEURIST4.util.htmlEscape(dwnld_link)+'" target="_surf" class="external-link image_tool'
-                        + '"style="display:inline-block;text-decoration:underline;color:blue" title="Download image"><span class="ui-icon ui-icon-download" />download</a>'
+                        + '"style="display:inline-block;text-decoration:underline;color:blue" title="Download image"><span class="ui-icon ui-icon-download"></span>download</a>'
                     + '</div>')
                 .clone()
                 .appendTo( $inputdiv )
@@ -3092,7 +3092,7 @@ $.widget( "heurist.editing_input", {
                 var $gicon = $('<span>').addClass('ui-icon ui-icon-gear')
                     .css({position:'absolute',margin:'2px 0 0 8px',cursor:'hand'})
                     .insertBefore($input);
-                var $select_folder_dlg = $('<div/>').hide().appendTo( $inputdiv );
+                var $select_folder_dlg = $('<div>').hide().appendTo( $inputdiv );
                 
                 that.newvalues[$input.attr('id')] = value;
                     
@@ -3168,7 +3168,7 @@ $.widget( "heurist.editing_input", {
                             var ele = $('<div style="display:inline-block;vertical-align:top;padding-left:4px" class="file-options-container" ></div>')
                                 .appendTo( $inputdiv );                            
 
-                            $('<a href="#" title="Select from a library of images"><span class="ui-icon ui-icon-grid"/>Library</a>')
+                            $('<a href="#" title="Select from a library of images"><span class="ui-icon ui-icon-grid"></span>Library</a>')
                                 .on('click',function(){that.openIconLibrary()}).appendTo( ele );
 
                             $('<br/><br/>').appendTo( ele );
@@ -3200,7 +3200,7 @@ $.widget( "heurist.editing_input", {
                         var $progressLabel = $progress_dlg.find('.progress-label');
                         let $cancelButton = $progress_dlg.find('.cancelButton');
 
-                        this.select_imagelib_dlg = $('<div/>').hide().appendTo( $inputdiv );//css({'display':'inline-block'}).
+                        this.select_imagelib_dlg = $('<div>').hide().appendTo( $inputdiv );//css({'display':'inline-block'}).
 
                         $progress_bar.progressbar({
                             value: false,
