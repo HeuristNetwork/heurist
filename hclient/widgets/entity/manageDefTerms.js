@@ -1946,6 +1946,17 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
                                 $Db.trm_RemoveLinks(trm_ID);
                                 $Db.trm().removeRecord(trm_ID);  //from record set
 
+                                // Update term usages
+                                let count = 0;
+                                if(that._cachedUsages[trm_ID]){
+                                    count = +that._cachedUsages[trm_ID];
+                                    delete that._cachedUsages[trm_ID];
+                                }
+                                if(that._cachedUsages[target_id]){
+                                    count += +that._cachedUsages[target_id];
+                                }
+                                that._cachedUsages[target_id] = count;
+
                                 if(!$.isEmptyObject(fieldvalues))
                                     $Db.trm().addRecord(target_id, fieldvalues);                
                                 that._filterByVocabulary();
