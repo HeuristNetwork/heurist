@@ -179,17 +179,21 @@ if(!($is_map_popup || $without_header)){
         <link rel="icon" href="<?=HEURIST_BASE_URL?>favicon.ico" type="image/x-icon">
         <link rel="shortcut icon" href="<?=HEURIST_BASE_URL?>favicon.ico" type="image/x-icon">
     
+        <script src="https://code.jquery.com/jquery-1.12.2.min.js" integrity="sha256-lZFHibXzMHo3GGeehn1hudTAP3Sc0uKXBXAzHX1sjtk=" crossorigin="anonymous"></script>
+        <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js" integrity="sha256-VazP97ZCwtekAsvgPBSUwPFKdrwD3unUfSGVYrahUqU=" crossorigin="anonymous"></script>
+<!--
         <script type="text/javascript" src="../../external/jquery-ui-1.12.1/jquery-1.12.4.js"></script>
         <script type="text/javascript" src="../../external/jquery-ui-1.12.1/jquery-ui.js"></script>
-        <link rel="stylesheet" type="text/css" href="../../external/jquery-ui-iconfont-master/jquery-ui.icon-font.css" />
+-->        
+        <link rel="stylesheet" type="text/css" href="<?=HEURIST_BASE_URL?>external/jquery-ui-iconfont-master/jquery-ui.icon-font.css" />
         <link rel="stylesheet" type="text/css" href="<?php echo HEURIST_BASE_URL;?>h4styles.css">
 
-        <script type="text/javascript" src="../../hclient/core/hintDiv.js"></script> <!-- for mapviewer roolover -->
-        <script type="text/javascript" src="../../hclient/core/detectHeurist.js"></script>
+        <script type="text/javascript" src="<?=HEURIST_BASE_URL?>hclient/core/hintDiv.js"></script> <!-- for mapviewer roolover -->
+        <script type="text/javascript" src="<?=HEURIST_BASE_URL?>hclient/core/detectHeurist.js"></script>
         
-        <link rel="stylesheet" type="text/css" href="../../external/jquery.fancybox/jquery.fancybox.css" />
+        <link rel="stylesheet" type="text/css" href="<?=HEURIST_BASE_URL?>external/jquery.fancybox/jquery.fancybox.css" />
 
-        <script type="text/javascript" src="../../hclient/widgets/viewers/mediaViewer.js"></script>
+        <script type="text/javascript" src="<?=HEURIST_BASE_URL?>hclient/widgets/viewers/mediaViewer.js"></script>
 
         <script type="text/javascript">
         
@@ -1050,7 +1054,7 @@ if($is_production){
     </head>
     <body class="popup" style="overflow-x: hidden;">
 
-        <script type="text/javascript" src="../../viewers/gmap/mapViewer.js"></script>
+        <script type="text/javascript" src="<?=HEURIST_BASE_URL?>viewers/gmap/mapViewer.js"></script>
         <script>
             mapStaticURL = "<?php echo HEURIST_BASE_URL;?>viewers/gmap/mapStatic.php?width=300&height=300&db=<?php echo HEURIST_DBNAME;?>";
         </script>
