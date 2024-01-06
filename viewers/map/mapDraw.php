@@ -26,20 +26,20 @@ require_once dirname(__FILE__).'/../../hclient/framecontent/initPage.php';
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
 <script src="https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.js"></script>
-<!-- <link rel="stylesheet" href="<?php echo PDIR;?>external/leaflet/geocoder/Control.Geocoder.css" />
+<!-- <link rel="stylesheet" href="<?php echo PDIR;?>external/leaflet.plugins/geocoder/Control.Geocoder.css" />
 <script src="https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.js"></script> -->
 
 <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery.fancytree/2.38.3/jquery.fancytree-all.js"></script>
-<script src="<?php echo PDIR;?>external/leaflet/leaflet-iiif.js"></script>
+<script src="<?php echo PDIR;?>external/leaflet.plugins/leaflet-iiif.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/dom-to-image/2.6.0/dom-to-image.js"></script>
 <!-- leaflet plugins -->
-<script src="<?php echo PDIR;?>external/leaflet/leaflet-providers.js"></script>
-<script src="<?php echo PDIR;?>external/leaflet/bookmarks/Leaflet.Bookmarks.min.js"></script>
-<script src="<?php echo PDIR;?>external/leaflet/draw/leaflet.draw-src.js"></script>
-<script src="<?php echo PDIR;?>external/leaflet/leaflet.circle.topolygon-src.js"></script>
+<script src="<?php echo PDIR;?>external/leaflet.plugins/leaflet-providers.js"></script>
+<script src="<?php echo PDIR;?>external/leaflet.plugins/bookmarks/Leaflet.Bookmarks.min.js"></script>
+<script src="<?php echo PDIR;?>external/leaflet.plugins/draw/leaflet.draw-src.js"></script>
+<script src="<?php echo PDIR;?>external/leaflet.plugins/leaflet.circle.topolygon-src.js"></script>
 <script type="text/javascript" src="<?php echo PDIR;?>external/js/cheapRuler.js" charset="utf-8"></script>
-<link type="text/css" rel="stylesheet" href="<?php echo PDIR;?>external/leaflet/bookmarks/leaflet.bookmarks.css">
-<link type="text/css" rel="stylesheet" href="<?php echo PDIR;?>external/leaflet/draw/leaflet.draw.css">
+<link type="text/css" rel="stylesheet" href="<?php echo PDIR;?>external/leaflet.plugins/bookmarks/leaflet.bookmarks.css">
+<link type="text/css" rel="stylesheet" href="<?php echo PDIR;?>external/leaflet.plugins/draw/leaflet.draw.css">
 <link rel="stylesheet" type="text/css" href="<?php echo PDIR;?>external/jquery.widgets/jquery.fancytree/skin-themeroller/ui.fancytree.css" />
 
         

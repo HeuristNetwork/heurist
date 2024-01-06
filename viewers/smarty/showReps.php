@@ -706,8 +706,8 @@ function smarty_output_filter_strip_js($tpl_source, Smarty_Internal_Template $te
                 if(strpos($tpl_source,'fancybox-thumb')>0){
 
                     $head .= 
-                        ('<script type="text/javascript" src="'.HEURIST_BASE_URL.'external/jquery-ui-1.12.1/jquery-1.12.4.js"></script>'
-                        .'<script type="text/javascript" src="'.HEURIST_BASE_URL.'external/jquery-ui-1.12.1/jquery-ui.min.js"></script>'
+                        ('<script type="text/javascript" src="https://code.jquery.com/jquery-3.7.1.js"></script>'
+                        .'<script type="text/javascript" src="https://code.jquery.com/ui/1.13.2/jquery-ui.js"></script>'
                         .'<script type="text/javascript" src="'.HEURIST_BASE_URL.'external/jquery.fancybox/jquery.fancybox.js"></script>'
                         .'<script type="text/javascript" src="'.HEURIST_BASE_URL.'hclient/core/detectHeurist.js"></script>'
                         .'<script type="text/javascript" src="'.HEURIST_BASE_URL.'hclient/widgets/viewers/mediaViewer.js"></script>'
@@ -744,8 +744,8 @@ function smarty_output_filter_strip_js($tpl_source, Smarty_Internal_Template $te
                 if(strpos($tpl_source,'fancybox-thumb')>0){
                     
                     $head = 
-                            '<script type="text/javascript" src="'.HEURIST_BASE_URL.'external/jquery-ui-1.12.1/jquery-1.12.4.js"></script>'
-                            .'<script type="text/javascript" src="'.HEURIST_BASE_URL.'external/jquery-ui-1.12.1/jquery-ui.js"></script>'
+                            '<script type="text/javascript" src="https://code.jquery.com/jquery-3.7.1.js"></script>'
+                            .'<script type="text/javascript" src="https://code.jquery.com/ui/1.13.2/jquery-ui.js"></script>'
                             .'<script type="text/javascript" src="'.HEURIST_BASE_URL.'external/jquery.fancybox/jquery.fancybox.js"></script>'
                             .'<script type="text/javascript" src="'.HEURIST_BASE_URL.'hclient/core/detectHeurist.js"></script>'
                             .'<script type="text/javascript" src="'.HEURIST_BASE_URL.'hclient/widgets/viewers/mediaViewer.js"></script>'

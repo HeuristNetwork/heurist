@@ -82,8 +82,6 @@ $.widget( "heurist.mainMenu", {
         .attr('title', 'Click to reload page and return to the default search for your database')
         .appendTo( this.element );
 
-        this.div_logo.button();
-
         //validate server side version  - compare version of code in server where main index database and this server version
         var res = window.hWin.HEURIST4.util.versionCompare(window.hWin.HAPI4.sysinfo.version_new, window.hWin.HAPI4.sysinfo['version']);   
         var sUpdate = '';
