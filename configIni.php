@@ -68,11 +68,11 @@ of the codebase and rename it to index.html
 
 // *** DO NOT CHANGE VERSION NUMBER, THIS IS SET BY THE HEURIST DEVELOPMENT TEAM ***
 
-$version = "6.5.1"; // sets current program version number, determined by Heurist development lead
+$version = "7.0.0"; // sets current program version number, determined by Heurist development lead
 
 // dates below are the date of release of the given version, and list changes since last release
 
-
+// 7.0.0    6 Jan 2024  jQuery 3.7.1 
 // 6.5.1    1 Jan 2024
 // 6.5.0   13 Nov 2023
 // 6.4.3   03 Oct 2023
