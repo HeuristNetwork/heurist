@@ -1948,12 +1948,12 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
 
                                 // Update term usages
                                 let count = 0;
-                                if(that._cachedUsages[trm_ID]){
-                                    count = +that._cachedUsages[trm_ID];
+                                if(that._cachedUsages[trm_ID]>0){
+                                    count = count + that._cachedUsages[trm_ID];
                                     delete that._cachedUsages[trm_ID];
                                 }
-                                if(that._cachedUsages[target_id]){
-                                    count += +that._cachedUsages[target_id];
+                                if(that._cachedUsages[target_id]>0){
+                                    count = count + that._cachedUsages[target_id];
                                 }
                                 that._cachedUsages[target_id] = count;
 
