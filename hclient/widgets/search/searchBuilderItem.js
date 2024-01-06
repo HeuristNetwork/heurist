@@ -550,7 +550,7 @@ Whole value = EQUAL
                 {key:'=',title:'whole value'}    //cs
             ];
 
-            if(field_type!='file' && (dty_ID>0 || dty_ID=='title')){
+            if(field_type!='file' && (dty_ID>0 || dty_ID=='title' || dty_ID=='anyfield')){
                 eqopts = eqopts.concat([
                     {key:'@++',title:'all of the words'}, //full text
                     {key:'@',title:'any of the words'},  //full text

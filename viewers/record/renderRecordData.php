@@ -317,7 +317,8 @@ if(!($is_map_popup || $without_header)){
                             return false;
                         }
 
-                        let title = `Record Info <em style="font-size:10px;font-weight:normal;position:absolute;right:10em;top:30%;">${window.hWin.HR('drag to rescale')}</em>`;
+                        let rec_title = link.innerHTML.indexOf('- >') === -1 ? link.innerHTML : link.innerHTML.split(' - > ')[1];
+                        let title = `${rec_title} <em style="font-size:10px;font-weight:normal;position:absolute;right:10em;top:25%;">${window.hWin.HR('drag to rescale')}</em>`;
                         let cover = link.innerHTML; //innerText
 
                         let cur_params = window.hWin.HEURIST4.util.getUrlParams(location.href);
@@ -389,6 +390,8 @@ if(!($is_map_popup || $without_header)){
                                                     }
                                                 }
                                             });
+
+                                        $titleBar.find('.ui-dialog-title').css('width', '73%');
                                     }
                                 }
                             }

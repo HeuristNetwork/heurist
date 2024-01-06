@@ -72,8 +72,11 @@ $.widget( "heurist.app_storymap", {
         , onClearStory: null
 
         , storyPlaceholder: 'Please select a story in the list' // placeholder text
+        , blank_placeholder: false // leave placeholder blank
         , elementsPlaceholder: '<br><br>There are no story elements to display for the selected item'
         , elementsPlaceholderSub: '<i>Story elements may exist but not be publicly visible</i>'
+
+        , show_print_button: false // show button to print storymaps
     },
 
     _resultset_main: null, // current all stories
@@ -109,6 +112,8 @@ $.widget( "heurist.app_storymap", {
     
     _btn_clear_story: null,
 
+    _print_button: null,
+
     // the constructor
     _create: function() {
 
@@ -128,6 +133,10 @@ $.widget( "heurist.app_storymap", {
             cssEndPage = {display:'none'};
         }else if(this.options.reportEndPageMode=='footer'){
             cssEndPage = {height: '100px'};
+        }
+
+        if(this.options.elementsPlaceholder == 'def'){
+            this.options.elementsPlaceholder = '<br><br>There are no story elements to display for the selected item';
         }
         
         var layout = [{"name":"StoryMap","type":"group","css":{}, //"position":"relative","height":"100%"
@@ -192,7 +201,7 @@ $.widget( "heurist.app_storymap", {
 
         let placeholder = !window.hWin.HEURIST4.util.isempty(this.options.storyPlaceholder) && this.options.storyPlaceholder != 'def' ? 
                             this.options.storyPlaceholder : '';
-        placeholder = this.options.storyPlaceholder == 'def' ? 'No records match the filter criteria' : placeholder;
+        placeholder = this.options.storyPlaceholder == 'def' ? 'Please select a story in the list' : placeholder;
         
         this._initial_div_message = 
         $('<div class="ent_wrapper" style="padding: 1em;background: white;"><br>'
@@ -332,8 +341,44 @@ $.widget( "heurist.app_storymap", {
         .hide()
         .insertBefore((this.options.reportOverviewMode=='tab')?this._tabs:this.element.find('#tabCtrl'));
         this._on(this._btn_clear_story, {click:this.clearStory});
+
+        // Print storymap content
+        if(this.options.show_print_button){
+
+            this._print_button = $('<button>', {
+                text: window.HR('Print'), title: window.hWin.HR('Print current story'),
+                class: 'btnPrintStory'
+            })
+            .button({
+                icons: {
+                    primary: 'ui-icon-print'
+                }, 
+                showLabel: false
+            })
+            .hide()
+            .css({position: 'absolute', top: '2px', right: '75px', 'z-index': '999', border: '2px solid rgb(204, 204, 204)', background: 'padding-box white'})
+            .insertBefore(this._btn_clear_story);
+
+            this._print_frame = $('<iframe>', {style: 'width:0px;height:0px;'}).insertBefore(this._print_button);
+
+            this._on(this._print_button, {
+                click: function(){
+
+                    let content = this._resultList.find('.div-result-list-content').html();
+
+                    let print_doc = this._print_frame[0].contentDocument || this._print_frame[0].contentWindow.document;
+                    print_doc = print_doc.document ? print_doc.document : print_doc;
+
+                    print_doc.write('<head><title></title>');
+                    print_doc.write('</head><body onload="this.focus(); this.print();">');
+                    print_doc.write(content);
+                    print_doc.write('</body>');
+                    print_doc.close();
+                }
+            });
+        }
         
-        if(window.hWin.HEURIST4.util.isempty(this.options.storyPlaceholder)){
+        if(window.hWin.HEURIST4.util.isempty(this.options.storyPlaceholder) && !this.options.blank_placeholder){
             this.options.storyPlaceholder = 'Please select a story in the list';
         }
 
@@ -818,7 +863,12 @@ $.widget( "heurist.app_storymap", {
         this.pnlEndPage.html('');        
         
         this.options.storyRecordID = null;
+
         this._btn_clear_story.hide();
+        if(this.options.show_print_button){
+            this._print_button.hide();
+        }
+
         if(this.options.reportOverviewMode=='tab' || this.options.reportEndPageMode=='tab') this._tabs.hide(); else this.element.find('#tabCtrl').hide();
         
         if(trigger_event !== false && window.hWin.HUL.isFunction(this.options.onClearStory)){
@@ -921,6 +971,9 @@ $.widget( "heurist.app_storymap", {
             }
             this._btn_clear_story.show();  
         } 
+        if(this.options.show_print_button){
+            this._print_button.show();
+        }
         
     },
     
