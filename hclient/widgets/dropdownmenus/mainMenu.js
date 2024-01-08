@@ -1236,6 +1236,11 @@ $.widget( "heurist.mainMenu", {
             
             var widget = window.hWin.HAPI4.LayoutMgr.getWidgetByName('resultList');
             if(widget){
+
+                if(that._rendered_db_overview){
+                    $('.ui-menu6').mainMenu6('hideDatabaseOverview');
+                }
+
                 widget.resultList('callResultListMenu', 'menu-subset-set'); //call method
             }
             
