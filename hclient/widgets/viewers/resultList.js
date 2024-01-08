@@ -2951,7 +2951,7 @@ $.widget( "heurist.resultList", {
 
                 var that = this;
 
-                var ismenu = that.options.navigator!='buttons' && (that.options.navigator=='menu' || (that.element.width()<450));
+                var ismenu = that.options.navigator!='buttons' && (that.options.navigator=='menu' || (that.element.width()<450 || pageCount > 5));
 
                 var smenu = '';
 
@@ -4402,6 +4402,8 @@ console.log(stext);
             }
 
             opts.position = pos;
+        }else if(dlg.dialog('instance') !== undefined){
+            dlg.dialog('option', 'title', popup_title);
         }
 
         window.hWin.HEURIST4.msg.showDialog(recInfoUrl, opts);
