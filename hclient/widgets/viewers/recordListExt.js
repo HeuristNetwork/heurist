@@ -112,7 +112,7 @@ $.widget( "heurist.recordListExt", {
 
             this.print_button = $('<button>', {
                 text: window.hWin.HR('Print'), title: window.hWin.HR('Print current results'), 
-                class: 'btnPrintRecords', style: `height:25px;position:absolute;top:5px;right:${this.options.show_export_button ? 115 : 15}px;`
+                class: 'btnPrintRecords', style: `height:25px;float:right;${this.options.show_export_button ? 'margin-right:15px;' : ''}`
             })
             .button({
                 icons: {
@@ -172,7 +172,7 @@ $.widget( "heurist.recordListExt", {
 
             this.export_button = $('<button>', {
                 text: window.hWin.HR('Export'), title: window.hWin.HR('Export current results'), 
-                class: 'btnExportRecords ui-button-action', style: 'height:25px;position:absolute;top:5px;right:15px;'
+                class: 'btnExportRecords ui-button-action', style: 'height:25px;float:right;'
             })
             .button({
                 icons: {
@@ -456,12 +456,15 @@ this._dout('onLoadComplete refresh again');
             let hasContent = !window.hWin.HEURIST4.util.isempty(this.dosframe.attr('src')) || fdoc.body.childElementCount > 0;
             let hasRecords = this.options.recordset && this.options.recordset.length() > 0;
 
+            this.dosframe.css('height', '');
+
             if(this.export_button){
                 // Allow print if there is content to print
                 if(!hasRecords){
                     this.export_button.hide();
                 }else{
                     this.export_button.show();
+                    this.dosframe.css('height', 'unset');
                 }
             }
 
@@ -470,7 +473,8 @@ this._dout('onLoadComplete refresh again');
                 if(!hasContent){ //!hasRecords && 
                     this.print_button.hide();
                 }else{
-                    this.print_button.show().css('right', `${this.export_button.is(':visible') ? 115 : 15}px`);
+                    this.print_button.show().css('margin-right', `${this.export_button.is(':visible') ? '15px' : ''}`);
+                    this.dosframe.css('height', 'unset');
                 }
             }
         }
