@@ -102,12 +102,12 @@ if(!$invalid_access && (defined('CREATE_RECORDS') || defined('DELETE_RECORDS')))
 //verify database version against minimal required
 if(defined('IS_INDEX_PAGE')){
     
-    $subsubVer = $system->get_system('sys_dbSubSubVersion');
+    $subsubVer = intval($system->get_system('sys_dbSubSubVersion'));
     
-    if(HEURIST_MIN_DBVERSION>
+    if (version_compare(HEURIST_MIN_DBVERSION,
     $system->get_system('sys_dbVersion').'.'
     .$system->get_system('sys_dbSubVersion').'.'
-    .$subsubVer){
+    .$subsubVer)>0){
 
         include_once 'admin/setup/dbupgrade/upgradeDatabase.php';
         exit;
