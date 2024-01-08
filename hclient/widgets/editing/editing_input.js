@@ -2626,7 +2626,8 @@ $.widget( "heurist.editing_input", {
                 let $help_controls = $('<div>', { style: css })
                     .html('<span class="fake_link">Yesterday</span>'
                         + '<span style="margin: 0px 5px" class="fake_link">Today</span>'
-                        + '<span class="fake_link" class="fake_link">Tomorrow</span>');
+                        + '<span class="fake_link" class="fake_link">Tomorrow</span>'
+                        + '<span style="margin-left: 10px;">yyyy, yyyy-mm or yyyy + click calendar (remembers last date)</span>');
 
                 $help_controls.insertAfter($inputdiv);
 
@@ -2635,12 +2636,6 @@ $.widget( "heurist.editing_input", {
                         $input.val(e.target.textContent).change();
                     }
                 });
-
-                if(!this.input_prompt.prev().is('div.extra_help')){
-                    $('<div>', { style: css, class: 'extra_help' })
-                        .text('yyyy, yyyy-mm or yyyy + click calendar (remembers last date)')
-                        .insertBefore(this.input_prompt);
-                }
             }
             else 
             if(this.isFileForRecord){ //----------------------------------------------------
