@@ -85,7 +85,7 @@ $.widget( "heurist.navigation", {
                 extensions:[],
                 activate: function(event, data) { 
                     //main entry point to start edit rts field - open formlet
-                    if(data.node.key>0){
+                    if(data.node.data.page_id>0){
                         that._onMenuItemAction(data.node.data);    
                     }
                 }
@@ -573,7 +573,7 @@ $.widget( "heurist.navigation", {
             //
             this._on(this.divMainMenuItems.find('a').addClass('truncate'),{click:this._onMenuClickEvent});
         }
-        
+
         
         if($.isFunction(this.options.onInitComplete)){
             this.options.onInitComplete.call(this, this.first_not_empty_page_id);

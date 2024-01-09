@@ -974,6 +974,8 @@ function initLinksAndImages($container, search_data){
 
     if(!$container){
         $container = $('body');
+    }else{
+        $container = $($container);
     }
     
     
