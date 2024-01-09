@@ -608,7 +608,7 @@
     //
     function fileSave($rawdata, $filename)
     {
-        if(is_resource($rawdata) && is_string($filename)){
+        if(!empty($rawdata) && is_string($filename)){
             fileDelete($filename);
             $fp = fopen($filename,'x');
             fwrite($fp, $rawdata);
