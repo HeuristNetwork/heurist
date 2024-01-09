@@ -932,7 +932,7 @@ if(!empty($import_webfonts)){
         }
 
         .external-link {
-            background-image: url(../../hclient/assets/external_link_16x16.gif);
+            background-image: url(<?=HEURIST_BASE_URL?>hclient/assets/external_link_16x16.gif);
             background-repeat: no-repeat;
             padding-left: 16px;
             padding-top: 4px;
@@ -956,13 +956,13 @@ if(!empty($import_webfonts)){
         }   
         .thumb_image {
             margin: 5px;
-            cursor: url(../../hclient/assets/zoom-in.png),pointer;
+            cursor: url(<?=HEURIST_BASE_URL?>hclient/assets/zoom-in.png),pointer;
         }
         div.thumbnail .fullSize img {
             margin: 0px;
             width: auto;
             max-width: 100%;
-            cursor: url(../../hclient/assets/zoom-out.png),pointer;
+            cursor: url(<?=HEURIST_BASE_URL?>hclient/assets/zoom-out.png),pointer;
         }        
         .download_link{
             float: left;
