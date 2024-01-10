@@ -377,7 +377,6 @@ $.widget( "heurist.recordListExt", {
     onLoadComplete: function(){
         this.loadanimation(false);
         if(!this.options.reload_for_recordset && this.options.is_frame_based && !this.options.is_single_selection && !this.options.is_multi_selection){
-this._dout('onLoadComplete refresh again');                
               this._refresh();
         }
         
