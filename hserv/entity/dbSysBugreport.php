@@ -138,6 +138,11 @@ class DbSysBugreport extends DbEntityBase
                                                       .$this->system->get_system('sys_dbSubVersion').'.'
                                                       .$this->system->get_system('sys_dbSubSubVersion'));
         
+        //extra information
+        array_push($ext_info, "   Report type: " . (array_key_exists('2-2', $record) ? $record['2-2'] : 'None provided'));
+        if(array_key_exists('3-1058', $record)){
+            array_push($ext_info, "   Provided url: " . $record['3-1058']);
+        }
         
         $user = $this->system->getCurrentUser();
         if($user){
@@ -152,14 +157,33 @@ class DbSysBugreport extends DbEntityBase
         $attachment_temp_name = @$record['2-38'];
         if($attachment_temp_name){
             
-            $info = parent::getTempEntityFile($attachment_temp_name);
-            if($info!=null){ //found
-            
-                $extension = pathinfo($info->getFilename(), PATHINFO_EXTENSION);
-                //$extension = $info->getExtension(); since 5.3.6 
-                $filename = $info->getPathname();
-                
-                $message['type:2-38'] = array($info->getFilename(), $extension);
+            if(is_array($attachment_temp_name)){
+
+                $filename = array();
+                $message['type:2-38'] = array();
+                foreach ($attachment_temp_name as $file) {
+
+                    $info = parent::getTempEntityFile($file);
+
+                    if(!$info){
+                        continue;
+                    }
+
+                    $extension = pathinfo($info->getFilename(), PATHINFO_EXTENSION);
+                    $filename[] = $info->getPathname();
+
+                    $message['type:2-38'][] = array($info->getFilename(), $extension);
+                }
+            }else{
+
+                $info = parent::getTempEntityFile($attachment_temp_name);
+                if($info!=null){ //found
+
+                    $extension = pathinfo($info->getFilename(), PATHINFO_EXTENSION);
+                    $filename = $info->getPathname();
+
+                    $message['type:2-38'] = array($info->getFilename(), $extension);
+                }
             }
         }
         
