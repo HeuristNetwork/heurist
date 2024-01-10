@@ -855,8 +855,7 @@ function getPlayerURL($mimeType, $url, $params=null){
  * @param $fileinfo - data obtained by fileGetFullInfo
  * @param bool $return_url - return url to file instead of file path
  * 
- * @return path or url for cached image
- * @return bool - false on error
+ * @return bool | string - false on error, or path or url for cached image
  */
 function getWebImageCache($system, $fileinfo, $return_url=true){
 
@@ -891,7 +890,7 @@ function getWebImageCache($system, $fileinfo, $return_url=true){
     $file_path_info = pathinfo($file_path);
     
     //return basename with extension
-    $file_name_cached = $file_path_info['filename'].'.png';
+    $file_name_cached = $file_path_info['filename'].'.jpg';
 
     $file_url_cached = HEURIST_FILESTORE_URL.'webimagecache/'.$file_name_cached; 
     $file_path_cached =  $web_cache_dir.'/'.$file_name_cached;  
@@ -899,7 +898,7 @@ function getWebImageCache($system, $fileinfo, $return_url=true){
     
     $res  = true;
     if(!file_exists($file_path_cached)){ // already exists
-        $res = UImage::createScaledImageFile($file_path, $file_path_cached, 1000, 1000, false);
+        $res = UImage::createScaledImageFile($file_path, $file_path_cached, 1000, 1000, false, 'jpg');
     }
     if($res===true){
         return $return_url?$file_url_cached:$file_path_cached;   
