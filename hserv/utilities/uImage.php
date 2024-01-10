@@ -464,7 +464,7 @@ class UImage {
     /**
     * Creates thumbnail for given image file
     */
-    public static function createScaledImageFile($filename, $scaled_file, $max_width = 200, $max_height = 200, $create_error_thumb=true){
+    public static function createScaledImageFile($filename, $scaled_file, $max_width = 200, $max_height = 200, $create_error_thumb=true, $force_type='png'){
     
         $mimeExt = UImage::getImageType($filename);
         
@@ -474,7 +474,7 @@ class UImage {
             if(!$errorMsg){
             
                 if (extension_loaded('imagick')) {
-                    $res = UImage::_resizeImageImagic($filename, $scaled_file, $max_width, $max_height);
+                    $res = UImage::_resizeImageImagic($filename, $scaled_file, $max_width, $max_height, $force_type);
                     if($res!==true) $errorMsg = 'Cannot resize image. '.$res;
                 }else{
                     $img = UImage::safeLoadImage($filename, $mimeExt);
@@ -762,7 +762,7 @@ class UImage {
     * 
     * @param mixed $filename
     */
-    private static function _resizeImageGD($src_img, $scaled_file, $max_width = 200, $max_height = 200){
+    private static function _resizeImageGD($src_img, $scaled_file, $max_width = 200, $max_height = 200, $scale_type = 'png'){
         
         if (!function_exists('imagecreatetruecolor')) {
             USanitize::errorLog('Function not found: imagecreatetruecolor');
@@ -794,7 +794,12 @@ class UImage {
             //if ($image_oriented) {
             //   return ($write_func!=null)?$write_func($src_img, $scaled_file, $image_quality):false;
             //}
-            imagepng($src_img, $scaled_file);//save into file
+            //save into file
+            if(!$scale_type || $scale_type == 'png'){
+                imagepng($src_img, $scaled_file);
+            }else if($scale_type == 'jpg'){
+                imagejpeg($src_img, $scaled_file);
+            }
             imagedestroy($src_img);
             return true;
         }
@@ -821,7 +826,16 @@ class UImage {
             $new_height,
             $img_width,
             $img_height
-        ) && imagepng($new_img, $scaled_file, $image_quality);
+        );
+
+        if($success){
+
+            if(!$scale_type || $scale_type == 'png'){
+                $success = imagepng($new_img, $scaled_file, $image_quality);
+            }else if($scale_type == 'jpg'){
+                $success = imagejpeg($new_img, $scaled_file, $image_quality);
+            }
+        }
         
         imagedestroy($src_img);
         if($new_img) imagedestroy($new_img);
