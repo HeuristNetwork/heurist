@@ -219,6 +219,8 @@
                 }
             }
         }
+    }else if($action == 'get_user_notifications'){
+        $res = user_getNotifications($system);
     }else if($action == 'get_tinymce_formats'){
 
         $settings = $system->getDatabaseSetting('TinyMCE formats');

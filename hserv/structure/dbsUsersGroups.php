@@ -990,6 +990,87 @@
         return true;
     }  // sendApprovalEmail
 
+    /**
+     * Get notifications to display to the user, currently handled:
+     *  Monthly Bug / Suggestion report
+     * 
+     * Monthly bug / suggestion report is handled separatly
+     * 
+     * @param System - initialised system object
+     * 
+     * @return array - messages to show
+     */
+    function user_getNotifications($system){
+
+        $user = $system->getCurrentUser(); // ugr_ID
+
+        $notes_user_settings = HEURIST_FILESTORE_DIR . 'user_notifications.json'; // individual user settings
+
+        $today = strtotime('now');
+        $usr_id = $user['ugr_ID'];
+
+        // Handled system notifications
+        $notifications = array(
+            'bug_report' => array(
+                'message' => '',
+                'links' => array(
+                    'mainMenu' => 'menu-help-bugreport'
+                ),
+                'period' => '+1 month'
+            )
+        );
+        $conditions = array(
+            'bug_report' => array(
+                '*' => array()
+            )
+        );
+
+        // LOAD USER SETTINGS
+        $user_settings = array();
+        if(file_exists($notes_user_settings)){
+
+            $user_settings = file_get_contents($notes_user_settings);
+            $user_settings = json_decode($user_settings, true);
+        }
+
+        if(empty($user_settings)){
+            $user_settings = array(
+                $usr_id => array()
+            );
+        }else if(!array_key_exists($usr_id, $user_settings)){
+            $user_settings[$usr_id] = array();
+        }
+
+        $messages = array();
+
+        if(empty($user_settings[$usr_id])){
+
+            $user_settings[$usr_id] = array_fill_keys(array_keys($notifications), $today);
+
+            fileSave(json_encode($user_settings), $notes_user_settings);
+
+            return $messages;
+        }
+
+        // Check bug report independently
+        if(array_key_exists('bug_report', $user_settings[$usr_id]) && 
+           ($user_settings[$usr_id]['bug_report'] + strtotime('+1 month')) <= $today){
+
+            $user_settings[$usr_id]['bug_report'] = $today;
+
+            $messages['bug_report'] = array(
+                'message' => @$notifications['bug_report']['message'],
+                'links' => @$notifications['bug_report']['links']
+            );
+        }else if(!array_key_exists('bug_report', $user_settings[$usr_id])){
+            $user_settings[$usr_id]['bug_report'] = $today;
+        }
+
+        fileSave(json_encode($user_settings), $notes_user_settings);
+
+        return $messages;
+    }
+
     function generate_passwd ($length = 8) {
         $passwd = '';
         $possible = '023456789bcdfghjkmnpqrstvwxyz';
