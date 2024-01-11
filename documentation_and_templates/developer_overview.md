@@ -64,7 +64,7 @@ There&#39;re several custom UI widgets extend to the jQuery in directory _hclien
 
 To create a new widget, _hclient/widgets/\_widget\_template.js_ can be used as a start point.
 
-## hsapi
+## hsapi (now hserv)
 
 This folder contains most of the server-side components, which include services, script and common entities.
 
