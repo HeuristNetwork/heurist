@@ -3779,7 +3779,7 @@ $.widget( "heurist.resultList", {
             stext = '<h3 style="margin:0">'+(this.options.title ?this.options.title :newtext)+'</h3>';
             if(this.options.show_inner_header && this.options.title && newtext) stext = stext +  '<h4 style="margin:0;font-size:0.9em">'+newtext+'</h4>';
         }
-console.log(stext);
+
         this.div_header.find('div.result-list-header').html( stext );
         if(headercss){
             this.div_header.css(headercss);    
