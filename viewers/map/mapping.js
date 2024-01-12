@@ -683,12 +683,17 @@ $.widget( "heurist.mapping", {
     //
     loadBaseMap: function(basemap_id){
 
-        var provider = this.basemap_providers[0];
-        if(window.hWin.HEURIST4.util.isNumber(basemap_id) && basemap_id>=0){
-            provider = this.basemap_providers[basemap_id];
+        var provider = this.basemap_providers[0]; //first by default
+        if(window.hWin.HEURIST4.util.isNumber(basemap_id)){
+            if(basemap_id>=0){
+                provider = this.basemap_providers[basemap_id];    
+            }else{
+                provider = {name:'None'};
+            }
         }else{
+            //find by name
             $(this.basemap_providers).each(function(idx, item){
-                if(item['name']==basemap_id){
+                if(item['name']==basemap_id){ 
                     provider = item;
                     return;        
                 }
@@ -699,10 +704,18 @@ $.widget( "heurist.mapping", {
             
             this.basemaplayer_name = provider['name'];
             
-            if(this.basemaplayer!=null){
+            if(this.basemaplayer!=null){ //remove previous
                 this.basemaplayer.remove();
             }
 
+            if(provider['name']=='None' || provider['name']=='_NONE'){
+                //remove zoom restrictions for basemap
+                this.defineMaxZoom('basemap', -1);
+                this.defineMinZoom('basemap', -1);
+                return;
+            }
+            
+            
             if(provider['name']!=='None'){
 
                 var bm_opts = provider['options'] || {};
@@ -763,7 +776,7 @@ $.widget( "heurist.mapping", {
 
                 //var layer_maxZoom = (provider['options'] && provider['options']['maxZoom']) ? provider['options']['maxZoom'] : 18;
                 var layer_maxZoom = (this.basemaplayer['options'] && this.basemaplayer['options']['maxZoom']) ? 
-                                        this.basemaplayer['options']['maxZoom'] : 18;
+                                        this.basemaplayer['options']['maxZoom'] : 19;
                 
                 var layer_minZoom = (this.basemaplayer['options'] && this.basemaplayer['options']['minZoom']) ? 
                                         this.basemaplayer['options']['minZoom'] : 0;
@@ -1479,7 +1492,6 @@ $.widget( "heurist.mapping", {
             return this.nativemap.getBoundsZoom(bounds);    
         }
         
-        
         var nativeZoom = -1;
         
         if(typeof zoomInKM == 'string'){ //in km
@@ -1503,16 +1515,47 @@ $.widget( "heurist.mapping", {
                 corner2 = L.latLng(bbox[3], bbox[2]);
             var bbox2 = L.latLngBounds(corner1, corner2);            
     
-            nativeZoom = this.nativemap.getBoundsZoom(bbox2);
+
+                
+            var sz = this.nativemap.getSize();
+            var fz = this.nativemap.getSize; //keep
+            
+            L.Map.include({
+                getSize: function () {
+                    return new L.Point(parseInt(sz.x), parseInt(sz.y));
+                }
+            });             
+            var cmap = new L.Map(document.createElement('div'), {
+                'center': [0, 0],
+                'zoom': 0
+            });
+
+            nativeZoom = cmap.getBoundsZoom(bbox2); //this.nativemap
+            
+            //restore getSize function
+            cmap = null;
+            L.Map.include({getSize:fz});
             
         }
         
         return nativeZoom; 
     },
     
+    _getZoomPriority: function(layer_name){
+        
+        if(layer_name=='basemap'){
+            return 2;
+        }else if(layer_name=='widget'){
+            return 1;
+        }else{
+            return 0;
+        }
+    },
+    
     //
     // Sets maximum possible zoom
-    // layer_name - name of restrictions(widget, basemap, layer id, mapdoc id)
+    // layer_name - name of restrictions(widget, basemap, or mapdoc id)
+    // priority level: map document, widget, basemap.
     //
     defineMaxZoom: function(layer_name, layer_maxZoom)
     {            
@@ -1532,18 +1575,18 @@ $.widget( "heurist.mapping", {
                 if(idx != -1){ 
                     //found - update max zoom value
                     if(this.available_maxzooms[idx][1]==layer_maxZoom) return; //the same value - no changes
-                    this.available_maxzooms[idx] = [layer_name, layer_maxZoom]; 
+                    this.available_maxzooms[idx] = [layer_name, layer_maxZoom, this._getZoomPriority(layer_name)]; 
                 }else{ 
                     // add max zoom value
-                    this.available_maxzooms.push([layer_name, layer_maxZoom]);
+                    this.available_maxzooms.push([layer_name, layer_maxZoom, this._getZoomPriority(layer_name)]);
                 }
             }
             
             if(this.available_maxzooms.length>0){
                 //sort asc
-                this.available_maxzooms.sort((a, b) => a[1] - b[1]);
+                this.available_maxzooms.sort((a, b) => (a[2]==b[2])?(a[1] - b[1]):(a[2] - b[2]));
                 //take first - lowest restriction
-                this.nativemap.setMaxZoom(this.available_maxzooms[0][1]);
+                this.nativemap.setMaxZoom(this.available_maxzooms[0][1]>320?32:this.available_maxzooms[0][1]);
             }else{
                 this.nativemap.setMaxZoom(20);
             }
@@ -1571,18 +1614,18 @@ $.widget( "heurist.mapping", {
                 if(idx != -1){ 
                     //found - update min zoom value
                     if(this.available_minzooms[idx][1]==layer_minZoom) return; //the same value - no changes
-                    this.available_minzooms[idx] = [layer_name, layer_minZoom]; 
+                    this.available_minzooms[idx] = [layer_name, layer_minZoom, this._getZoomPriority(layer_name)]; 
                 }else{ 
                     // add min zoom value
-                    this.available_minzooms.push([layer_name, layer_minZoom]);
+                    this.available_minzooms.push([layer_name, layer_minZoom, this._getZoomPriority(layer_name)]);
                 }
             }
             
             if(this.available_minzooms.length>0){
                 //sort desc
-                this.available_minzooms.sort((a, b) => b[1] - a[1]);
+                this.available_minzooms.sort((a, b) => (a[2]==b[2])?(b[1] - a[1]):(a[2]-b[2]));
                 //take first - max restriction
-                this.nativemap.setMinZoom(this.available_minzooms[0][1]);
+                this.nativemap.setMinZoom(this.available_minzooms[0][1]>=0?this.available_minzooms[0][1]:0);
                 
             }else{
                 this.nativemap.setMinZoom(0);
@@ -4320,7 +4363,7 @@ $.widget( "heurist.mapping", {
                 lr = layer;
             }
             
-            var gjson = lr.toGeoJSON(6);
+            var gjson = lr.toGeoJSON(8);
             
             if(that.is_crs_simple){
                 that.projectGeoJson( gjson, true );

@@ -503,7 +503,7 @@ console.log(treedata);
             
             if(DT_MAXIMUM_ZOOM >0){
                 var val = parseFloat(map_documents.fld(record2,DT_MAXIMUM_ZOOM  ));
-                if(val>0.01){
+                if(val>=0.0001){ //0.1 meter
                     var zoomNative = options.mapwidget.mapping('convertZoomToNative', val);
                     if(zoomNative>0){
                         options.mapwidget.mapping('defineMaxZoom', 'doc'+mapdoc_id, zoomNative);

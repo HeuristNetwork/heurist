@@ -1631,15 +1631,23 @@ function hMapManager( _options )
             if(window.hWin.HEURIST4.util.isNumber(e) && e>=0){
                 idx = e;
             }else if(typeof e == 'string'){  //find by map name
-                idx = options.container.find('input[data-mapid="'+e+'"]').attr('data-mapindex');
+            
+                if(e=='_NONE'){
+                    idx = -1;
+                }else{
+                    idx = options.container.find('input[data-mapid="'+e+'"]').attr('data-mapindex');    
+                }
             }else{
                 idx = $(e.target).attr('data-mapindex');
             }
 
             options.mapwidget.mapping('loadBaseMap', idx);
-            options.container.find('input[data-mapindex="'+idx+'"]').prop('checked',true);
-
-            options.container.find('input[data-mapindex="'+idx+'"]').parent().after(options.container.find('#basemap_filter_btns'));
+            if(idx>=0){
+                options.container.find('input[data-mapindex="'+idx+'"]').prop('checked',true);
+                options.container.find('input[data-mapindex="'+idx+'"]').parent().after(options.container.find('#basemap_filter_btns'));
+            }else{
+                options.container.find('input[data-mapindex]').prop('checked',false); //mark off all
+            }
         },
         
         //

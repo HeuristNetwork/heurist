@@ -703,7 +703,7 @@ if(true || $_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0
                 <label><input type="radio" name="get-coord-format" id="get-coord-json" checked="true">GeoJSON</label>
                 <label><input type="radio" name="get-coord-format" id="get-coord-wkt">WKT</label>
             </div>
-            <div style="float:right;width:140px">
+            <div style="float:right;width:140px;display:none;">
                 <input value="360" type="number" size="4" style="width:4em"/>&nbsp;<button id="fix-x-coords">Fix Long</button>
             </div>                  
             </div>
