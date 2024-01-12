@@ -1117,6 +1117,19 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
             },
 
             /**
+             * Get user notifications, if any
+             * @param {Request} [request] 
+             * @param {callserverCallback} callback 
+             */
+            get_user_notifications: function(request, callback){
+                if(!request){
+                    request = { a: 'get_user_notifications' };
+                }
+
+                _callserver('usr_info', request, callback);
+            },
+
+            /**
              * Get object of custom formats for the TinyMCE editor
              * @param {Request} request 
              * @param {callserverCallback} callback 
