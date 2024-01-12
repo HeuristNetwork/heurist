@@ -1419,13 +1419,65 @@ function smarty_function_wrap($params, &$smarty)
             return $res;
         }
         else{
+            //if this is CMS content
+            // 1. Extract HTML content from text elements [{"name":"Content","type":"text","css":{},"content":
+            // 2. Convert relative paths to absolute 
+            $content = json_decode($params['var'], true);
+            if(is_array($content)){
+                $content = cms_content_prepare($content);
+            }else{
+                $content = cms_content_prepare($params['var']);
+            }
+                                                                        
+            
             if($label!="") $label = $label.": ";
-            return $label.$params['var'].'<br/>';
+            return $label.$content.'<br/>';
         }
     }else{
         return '';
     }
 }
+
+//
+// 
+//
+function cms_content_prepare($content){
+    
+    $cnt = '';
+    $convert_links = true;
+    
+    if(is_array($content)){
+        
+        if(!@$content['type']=='text'){
+            $convert_links = false;
+            foreach($content as $grp){
+                $res = cms_content_prepare($grp);
+                if($res){
+                    $cnt = $cnt.'<br>'.$res;    
+                }
+            }
+        }else if(@$content['type']=='text'){
+            $cnt =  @$content['content'];    
+        }else if(@$content['type']=='group' && is_array(@$content['children'])){
+            $convert_links = false;
+            foreach($content['children'] as $grp){
+                $res = cms_content_prepare($grp);
+                if($res){
+                    $cnt = $cnt.'<br>'.$res;    
+                }
+            }
+        }
+    }else{
+        $cnt = $content;
+    }
+    
+    if($convert_links && $cnt!=null){
+        $cnt = str_replace('./?db=',HEURIST_BASE_URL.'?db=',$cnt);
+    }
+
+    return $cnt;    
+}
+
 
 //
 //
