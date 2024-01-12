@@ -387,12 +387,15 @@ function hMapDocument( _options )
         //4. Adds layers on map
         var resdata = map_documents_content[mapdoc_id];
         
-        var idx, records = resdata.getRecords();  //layers
-        for(idx in records){
-            if(idx)
+        var idx, records = resdata.getRecords(), order = resdata.getOrder();  //layers
+        for(idx=order.length-1; idx>=0; idx--){
+            if(idx>=0)
             {
-                var record = records[idx];
-                var recID  = resdata.fld(record, 'rec_ID');
+                var recID = order[idx];
+                var record = resdata.getById(recID);
+                
+                //var record = records[idx];
+                //var recID  = resdata.fld(record, 'rec_ID');
                 
                 if(resdata.fld(record, 'rec_RecTypeID')==RT_MAP_LAYER
                     ||resdata.fld(record, 'rec_RecTypeID')==RT_TLCMAP_DATASET){
@@ -1287,7 +1290,6 @@ console.log(treedata);
                     that.removeLayer(mapdoc_id, to_remove[idx]);    
                 }
             }
-            
             if(window.hWin.HEURIST4.util.isArrayNotEmpty(layers_ids)){
                 _addLayerRecord(mapdoc_id, layers_ids, callback);
             }else{
