@@ -456,6 +456,7 @@ $.widget( "heurist.recordListExt", {
             let hasRecords = this.options.recordset && this.options.recordset.length() > 0;
 
             this.dosframe.css('height', '');
+            let new_height = this.element.height() - 25;
 
             if(this.export_button){
                 // Allow print if there is content to print
@@ -463,7 +464,7 @@ $.widget( "heurist.recordListExt", {
                     this.export_button.hide();
                 }else{
                     this.export_button.show();
-                    this.dosframe.css('height', 'unset');
+                    this.dosframe.css('height', `${new_height}px`);
                 }
             }
 
@@ -473,7 +474,7 @@ $.widget( "heurist.recordListExt", {
                     this.print_button.hide();
                 }else{
                     this.print_button.show().css('margin-right', `${this.export_button.is(':visible') ? '15px' : ''}`);
-                    this.dosframe.css('height', 'unset');
+                    this.dosframe.css('height', `${new_height}px`);
                 }
             }
         }
