@@ -1692,6 +1692,7 @@ function hMapManager( _options )
                     var mapdoc_id = res[0];
                     
                     var layer_rec = mapDocuments.getLayer(mapdoc_id, layer_id);
+                    if(!layer_rec || !layer_rec['d']) return;
                     var val = layer_rec['d'][DT_LEGEND_OUT_ZOOM];
                     
                     if(val==TRM_LEGEND_OUT_ZOOM_HIDDEN || val==TRM_LEGEND_OUT_ZOOM_DISABLED){
