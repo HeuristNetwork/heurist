@@ -68,6 +68,11 @@ function hMapDocument( _options )
     DT_WORLD_BASEMAP = 0,
     DT_CRS = 0,
     
+    DT_LEGEND_OUT_ZOOM = 0,
+    TRM_LEGEND_OUT_ZOOM_HIDDEN = 0,
+    TRM_LEGEND_OUT_ZOOM_DISABLED = 0,
+    
+    
     map_documents = null, //recordset - all loaded documents
     map_documents_content = {}, //array mapdoc_id=>recordset with all layers and datasources of document
     //mapdoc_id - 0 current search, temp temporal mapspace, or record id
@@ -98,6 +103,10 @@ function hMapDocument( _options )
         DT_ZOOM_KM_POINT = window.hWin.HAPI4.sysinfo['dbconst']['DT_ZOOM_KM_POINT'];
         DT_WORLD_BASEMAP = window.hWin.HAPI4.sysinfo['dbconst']['DT_WORLD_BASEMAP'];
         DT_CRS = window.hWin.HAPI4.sysinfo['dbconst']['DT_CRS'];
+        
+        DT_LEGEND_OUT_ZOOM = window.hWin.HAPI4.sysinfo['dbconst']['DT_LEGEND_OUT_ZOOM'];
+        TRM_LEGEND_OUT_ZOOM_HIDDEN = window.hWin.HAPI4.sysinfo['dbconst']['TRM_LEGEND_OUT_ZOOM_HIDDEN'];
+        TRM_LEGEND_OUT_ZOOM_DISABLED = window.hWin.HAPI4.sysinfo['dbconst']['TRM_LEGEND_OUT_ZOOM_DISABLED'];
         
         //_loadMapDocuments();
     }

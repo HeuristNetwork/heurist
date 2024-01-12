@@ -53,7 +53,7 @@ function hMapLayer2( _options ) {
     
     var is_inited = false,
         is_visible = false,
-        is_outof_range = false;
+        is_outof_range = null;
         
     var _max_zoom_level = 0;
     
@@ -391,6 +391,7 @@ function hMapLayer2( _options ) {
                                 dataset_type:'shp',
                                 preserveViewport:options.preserveViewport });
                                 
+                        is_outof_range = null;
                         _setVisibilityForZoomRange();   
                     }
                     
@@ -453,11 +454,13 @@ function hMapLayer2( _options ) {
                                         dataset_type:'kml',
                                         preserveViewport:options.preserveViewport });
                                                              
+                            is_outof_range = null;                        
+                            _setVisibilityForZoomRange();   
                         }else {
                             window.hWin.HEURIST4.msg.showMsgErr(response);
+                            _triggerLayerStatus( 'error' );
                         }
                         
-                        _setVisibilityForZoomRange();   
                     }
                 }
             }
@@ -657,17 +660,18 @@ function hMapLayer2( _options ) {
                                        
                                        
                         //_triggerLayerStatus( 'visible' );
+                        is_outof_range = null;                        
                         _setVisibilityForZoomRange();   
                         
                    }else {
                         _triggerLayerStatus( 'error' );
                         window.hWin.HEURIST4.msg.showMsgErr(response);
-                    }
+                   }
                     
-                    //check if there are layers and tlcmapdatasets among result set
-                    if( _parent_mapdoc==0 ){ // && window.hWin.HEURIST4.util.isArrayNotEmpty(layers_ids)
+                   //check if there are layers and tlcmapdatasets among result set
+                   if( _parent_mapdoc==0 ){ // && window.hWin.HEURIST4.util.isArrayNotEmpty(layers_ids)
                         options.mapwidget.mapping('getMapManager').addLayerRecords( layers_ids );
-                    } 
+                   } 
                     
 
                 }
@@ -713,7 +717,8 @@ function hMapLayer2( _options ) {
                         dataset_name:_recordset.fld(options.rec_layer || _record, 'rec_Title'),  //name for timeline
                         dataset_type: 'db',
                         preserveViewport:options.preserveViewport });
-                                             
+                                      
+            is_outof_range = null;                        
             _setVisibilityForZoomRange(currZoom);   
         }else {
             _triggerLayerStatus( 'error' );
@@ -771,7 +776,7 @@ function hMapLayer2( _options ) {
 
 
     //
-    // trigger callback
+    // trigger callback (to update status in legend)
     //
     function _triggerLayerStatus( status ){
 
@@ -1083,13 +1088,13 @@ function hMapLayer2( _options ) {
             }
         
         
-//console.log( _rec['id'], is_in_range, current_zoom, 'min='+_rec['minzoom'], 'max='+_rec['maxzoom']);
-        
             var status = null;
             if(is_in_range){
-                is_outof_range = false;
-                status =  (is_visible)?'visible':'hidden';
-                options.mapwidget.mapping('setLayerVisibility', _nativelayer_id, is_visible);
+                if(is_outof_range!==false){
+                    is_outof_range = false;
+                    status =  (is_visible)?'visible':'hidden';
+                    options.mapwidget.mapping('setLayerVisibility', _nativelayer_id, is_visible);
+                }
                 
                 //visibility per record
                 if(_dataset_type=='db' && _has_zoom_setting_per_record>=0){
@@ -1122,14 +1127,17 @@ function hMapLayer2( _options ) {
 
                 }
                 
-            }else{
+            }else if(!is_outof_range) {
                 status = 'out';
                 is_outof_range = true;
                 options.mapwidget.mapping('setLayerVisibility', _nativelayer_id, false);
             }
-        
+            
             //trigger callback
-            _triggerLayerStatus( status );
+            if(status!=null){
+                _triggerLayerStatus( status );    
+            }
+            
         }//inited
         
         
@@ -1238,7 +1246,7 @@ function hMapLayer2( _options ) {
         // visiblity_set true,false or array of ids
         // if visiblity_set is array of ids it allows to show only certain objects for this layer
         //
-        setVisibility:function(visiblity_set){
+        setVisibility: function(visiblity_set){
             
             
             var was_invisible = !is_visible;
@@ -1273,8 +1281,9 @@ function hMapLayer2( _options ) {
             
             
             //trigger callback
-            _triggerLayerStatus( status );
-            
+            if(status!=null){
+                _triggerLayerStatus( status );
+            }
         },
         
         //

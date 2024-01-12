@@ -39,7 +39,7 @@ Thematic mapping
 * 
 * callback events:
 * onselect
-* onlayerstatus - arguments datasetid and status (visible,hidden )see mapManager treeview select event
+* onlayerstatus - arguments datasetid and status (visible,hidden,out,error)see mapManager treeview select event
 * oninit
 * style: default style for current query
 * 
@@ -1772,7 +1772,7 @@ $.widget( "heurist.mapping", {
                 affected_layer.remove();
                 if(this.all_clusters[nativelayer_id]) this.all_clusters[nativelayer_id].remove();
                 
-            }else if(!affected_layer._map){
+            }else if(!affected_layer._map){  //not on map
                 affected_layer.addTo(this.nativemap);
                 if(this.all_clusters[nativelayer_id]) this.all_clusters[nativelayer_id].addTo(this.nativemap);
             }
@@ -3022,9 +3022,6 @@ $.widget( "heurist.mapping", {
                 var corner1 = L.latLng(bbox[1], bbox[0]),
                     corner2 = L.latLng(bbox[3], bbox[2]);
                     
-//            var nativeZoom = that.convertZoomToNative(that.options.zoomToPointInKM, L.latLng(ll.lat, ll.lng)); 
-//console.log('>>>',that.options.zoomToPointInKM,nativeZoom);            
-                    
                 return L.latLngBounds(corner1, corner2);            
             }else{
                 //for city 0.002 for country 0.02
@@ -3988,13 +3985,19 @@ $.widget( "heurist.mapping", {
     },
     
     //
+    // event handler to update status 
+    // 1) in linked resultList (see app_timemap)
+    // 2) inn map legend
     //
-    //
-                
     onLayerStatus: function( layer_ID, status ){
         if($.isFunction(this.options.onlayerstatus)){
             this.options.onlayerstatus.call(this, layer_ID, status);
         }
+        
+        if(this.mapManager){
+            this.mapManager.updateLayerStatus(layer_ID, status);    
+        }
+        
         //this._updatePanels();
     },    
     

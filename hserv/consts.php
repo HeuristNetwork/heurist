@@ -292,8 +292,9 @@ $dtDefines = array('DT_NAME' => array(2, 1),
     'DT_MAXIMUM_ZOOM_LEVEL' => array(2, 33),
     // zoom in km used for map documents (map zoom ranges) and layers (visibility range)
     //note that minimum in km turns to maximum in native zoom  
-    'DT_MINIMUM_ZOOM' => array(3, 1086), //in UI this field acts as maximum zoom out km
     'DT_MAXIMUM_ZOOM' => array(3, 1085), //in UI this field acts as minimum zoom in km  
+    'DT_MINIMUM_ZOOM' => array(3, 1086), //in UI this field acts as maximum zoom out km
+    'DT_LEGEND_OUT_ZOOM' => array(3, 1087), //hide or disable layer in legend if layer is out of zoom range
     'DT_IS_VISIBLE' => array(2, 1100),   //is layer initially visible on mapdocument initialization
     
     'DT_SERVICE_URL' => array(2, 34),
@@ -413,7 +414,10 @@ $trmDefines = array(
     // For DT_CMS_MENU_FORMAT
     'TRM_NAME_ONLY' => array(2, 9634),
     'TRM_ICON_ONLY' => array(2, 9635),
-    'TRM_NAME_AND_ICON' => array(2, 9636)
+    'TRM_NAME_AND_ICON' => array(2, 9636),
+    
+    'TRM_LEGEND_OUT_ZOOM_HIDDEN' => array(3, 5081),
+    'TRM_LEGEND_OUT_ZOOM_DISABLED' => array(3, 5082)
 );
 
 
