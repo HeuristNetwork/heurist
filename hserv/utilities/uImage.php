@@ -419,7 +419,7 @@ class UImage {
         
             $errline_prev = 0;
             
-            set_error_handler(function($errno, $errstr, $errfile, $errline, array $errcontext) {
+            set_error_handler(function($errno, $errstr, $errfile, $errline=null, array $errcontext=null) {
                 global $errline_prev, $filename, $file;
                 
                 //it may report error several times with different messages - send for the first one
