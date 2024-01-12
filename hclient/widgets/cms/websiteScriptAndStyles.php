@@ -827,7 +827,8 @@ function afterPageLoad(document, pageid, eventdata){
         }
     }
     is_execute_homepage_custom_javascript = false;
-    
+
+    $('#main-content-container').scrollTop(0); // reset scroll
 
     // add current page as url parameter in browser url
     if(!is_embed){ 
