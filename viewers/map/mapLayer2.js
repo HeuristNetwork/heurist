@@ -58,6 +58,7 @@ function hMapLayer2( _options ) {
     var _max_zoom_level = 0;
     
     var _has_zoom_setting_per_record = 0;//1 - it does, -1 it doesn't, 0 - not checked yet
+    var _has_zoom_setting_per_layer = 0;//1 - it does, -1 it doesn't, 0 - not checked yet
 
     //
     //
@@ -1013,16 +1014,16 @@ function hMapLayer2( _options ) {
             }
             
             var _rec = options.rec_layer || _record;
-            if(_rec['maxzoom']==-1 && _rec['minzoom']==-1 && _has_zoom_setting_per_record<0) return; //not set
+            if(_has_zoom_setting_per_layer<0 && _has_zoom_setting_per_record<0) return; //not set
 
             var is_in_range = true;
 
-            if(_rec['maxzoom']>0 || _rec['minzoom']>=0){ //already defined
+            if(_has_zoom_setting_per_layer>0){ //already defined
                 
                 is_in_range = (_rec['maxzoom']==-1 || _rec['maxzoom']>=current_zoom)
                         && (_rec['minzoom']==-1 || current_zoom>=_rec['minzoom']);
                 
-            }else if(!(_rec['maxzoom']==-1 && _rec['minzoom']==-1))
+            }else if(_has_zoom_setting_per_layer==0)
             {
                 _rec['maxzoom'] = -1;
                 _rec['minzoom'] = -1;
@@ -1045,7 +1046,7 @@ function hMapLayer2( _options ) {
                         }
                     }
                     
-                    if(_rec['maxzoom']>0 || _rec['minzoom']>=0){ //already defined
+                    if(!(_rec['maxzoom']>0 || _rec['minzoom']>=0)){ //already defined
                     
                         // in kilometers
                         var dty_id = window.hWin.HAPI4.sysinfo['dbconst']['DT_MAXIMUM_ZOOM'];
@@ -1053,8 +1054,11 @@ function hMapLayer2( _options ) {
                         
                         if(dty_id>0){
                             var val = parseFloat(_recordset.fld(_rec, dty_id));
-                            if(val>0.01){ //old default value
-                                _rec['maxzoom'] = options.mapwidget.mapping('convertZoomToNative', val, layer_bnd);
+                            if(val>0){ 
+                                _rec['maxzoom'] = 32;
+                                if(val>0.0001){ //0.1 meter
+                                    _rec['maxzoom'] = options.mapwidget.mapping('convertZoomToNative', val, layer_bnd);
+                                }
                             }
                         }
                         dty_id = window.hWin.HAPI4.sysinfo['dbconst']['DT_MINIMUM_ZOOM'];
@@ -1066,9 +1070,20 @@ function hMapLayer2( _options ) {
                         }
                     }
                 }
+                
+                if(_rec['maxzoom']>0 || _rec['minzoom']>=0){
+                    _has_zoom_setting_per_layer = 1;    
+                }else{
+                    //not defined
+                    _has_zoom_setting_per_layer = -1;    
+                }
+                
                 _setVisibilityForZoomRange( current_zoom );
                 return;
             }
+        
+        
+//console.log( _rec['id'], is_in_range, current_zoom, 'min='+_rec['minzoom'], 'max='+_rec['maxzoom']);
         
             var status = null;
             if(is_in_range){
