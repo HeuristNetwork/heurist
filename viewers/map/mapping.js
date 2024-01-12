@@ -1532,6 +1532,8 @@ $.widget( "heurist.mapping", {
 
             nativeZoom = cmap.getBoundsZoom(bbox2); //this.nativemap
             
+            //console.log('Convert', zoomInKM,'=>',nativeZoom);          
+            
             //restore getSize function
             cmap = null;
             L.Map.include({getSize:fz});
@@ -1626,7 +1628,6 @@ $.widget( "heurist.mapping", {
                 this.available_minzooms.sort((a, b) => (a[2]==b[2])?(b[1] - a[1]):(a[2]-b[2]));
                 //take first - max restriction
                 this.nativemap.setMinZoom(this.available_minzooms[0][1]>=0?this.available_minzooms[0][1]:0);
-                
             }else{
                 this.nativemap.setMinZoom(0);
             }

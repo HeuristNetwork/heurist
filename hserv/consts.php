@@ -292,7 +292,7 @@ $dtDefines = array('DT_NAME' => array(2, 1),
     'DT_MAXIMUM_ZOOM_LEVEL' => array(2, 33),
     // zoom in km used for map documents (map zoom ranges) and layers (visibility range)
     //note that minimum in km turns to maximum in native zoom  
-    'DT_MINIMUM_ZOOM' => array(3, 1086), //in UI this field acts as maximum zoom in km
+    'DT_MINIMUM_ZOOM' => array(3, 1086), //in UI this field acts as maximum zoom out km
     'DT_MAXIMUM_ZOOM' => array(3, 1085), //in UI this field acts as minimum zoom in km  
     'DT_IS_VISIBLE' => array(2, 1100),   //is layer initially visible on mapdocument initialization
     

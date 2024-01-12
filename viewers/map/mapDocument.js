@@ -439,7 +439,9 @@ console.log(treedata);
             var record2 = map_documents.getById( mapdoc_id );
             if(DT_WORLD_BASEMAP>0){
                 basemap_name = map_documents.fld(record2, DT_WORLD_BASEMAP);
-                basemap_name = $Db.trm(basemap_name, 'trm_Label');
+                if(basemap_name>0){
+                    basemap_name = $Db.trm(basemap_name, 'trm_Label');    
+                }
             }
         }
         //todo: fix restore basemap to default (0) if current basemap 'None'
@@ -503,8 +505,11 @@ console.log(treedata);
             
             if(DT_MAXIMUM_ZOOM >0){
                 var val = parseFloat(map_documents.fld(record2,DT_MAXIMUM_ZOOM  ));
-                if(val>=0.0001){ //0.1 meter
-                    var zoomNative = options.mapwidget.mapping('convertZoomToNative', val);
+                if(val>0){ 
+                    var zoomNative = 32;
+                    if(val>0.0001){ //0.1 meter
+                        zoomNative = options.mapwidget.mapping('convertZoomToNative', val);
+                    }
                     if(zoomNative>0){
                         options.mapwidget.mapping('defineMaxZoom', 'doc'+mapdoc_id, zoomNative);
                     }

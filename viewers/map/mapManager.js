@@ -1633,10 +1633,10 @@ function hMapManager( _options )
             }else if(typeof e == 'string'){  //find by map name
             
                 if(e=='_NONE'){
-                    idx = -1;
-                }else{
-                    idx = options.container.find('input[data-mapid="'+e+'"]').attr('data-mapindex');    
+                    e = 'None';
                 }
+                idx = options.container.find('input[data-mapid="'+e+'"]').attr('data-mapindex');    
+                
             }else{
                 idx = $(e.target).attr('data-mapindex');
             }
