@@ -820,6 +820,7 @@ $.widget( "heurist.mapping", {
                             return this.options._extent;  
                         }});
         if(layer_options['IIIF']){ 
+                //IIIF layer can work as a basemap for CRS.Simple
         
                 HeuristTilerLayer = L.TileLayer.Iiif.extend({
                         getBounds: function(){
@@ -827,7 +828,7 @@ $.widget( "heurist.mapping", {
                         }});
                 
                 layer_options['fitBounds'] = false;
-                
+
                 new_layer = new HeuristTilerLayer(layer_url, layer_options).addTo(this.nativemap);                
                 //new L.TileLayer.iiif
         

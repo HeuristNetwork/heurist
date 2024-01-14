@@ -17,7 +17,6 @@
 * See the License for the specific language governing permissions and limitations under the License.
 */
 
-
 $.widget( "heurist.editing_input", {
 
     // default options
@@ -668,6 +667,10 @@ $.widget( "heurist.editing_input", {
                         tinymce.remove(eid);
                         $(eid).parent().remove(); //remove editor element
                         //$(eid).remove(); 
+
+                        eid = '#'+input.attr('id')+'_codemirror';
+                        $(eid).parent().remove(); //remove editor element
+
                         
                     }else if(that.detailType=='file'){
                         if($(input).fileupload('instance')!==undefined) $(input).fileupload('destroy');
@@ -1005,13 +1008,16 @@ $.widget( "heurist.editing_input", {
                 .appendTo( $('<div>').css({'display':'inline-block'}).appendTo($inputdiv) );
                 $editor.parent().hide();
 
+                //hidden textarea for codemirror editor
+                var codeEditor = new EditorCodeMirror($input);
+                
                 var $btn_edit_switcher;
 
                 if(this.options.recordset && this.options.recordset.entityName == 'Records'){
 
                     var $clear_container = $('<span id="btn_clear_container"></span>').appendTo( $inputdiv );
 
-                    $btn_edit_switcher = $('<div>').appendTo( $inputdiv );
+                    $btn_edit_switcher = $('<div class="editor_switcher">').appendTo( $inputdiv );
 
                     $('<span>text</span>')
                         .attr('title', 'plain text or source, showing markup')
@@ -1025,6 +1031,12 @@ $.widget( "heurist.editing_input", {
                         .css({cursor: 'pointer', 'margin-left': '10px'})
                         .appendTo($btn_edit_switcher);
 
+                    $('<span>codeeditor</span>')
+                        .attr('title', 'direct edit html in code editor')
+                        .addClass('smallbutton')
+                        .css({cursor: 'pointer', 'margin-left': '10px'})
+                        .appendTo($btn_edit_switcher);
+                        
                     $('<span>table</span>')
                         .attr('title', 'treats the text as a table/spreadsheet and opens a lightweight spreadsheet editor')
                         .addClass('smallbutton')
@@ -1361,9 +1373,11 @@ $.widget( "heurist.editing_input", {
                          this.options.dtID == window.hWin.HAPI4.sysinfo['dbconst']['DT_CMS_HEADER'] || 
                          this.options.dtID == window.hWin.HAPI4.sysinfo['dbconst']['DT_CMS_FOOTER']));
 
-                var cur_action = 'text';
+                var cur_action = 'text', cms_div_prompt = null, cms_label_edit_prompt = null;
 
                 if( isCMS_content ){
+                    
+                    cur_action = '';
                     
                     var fstatus = '';
                     var fname = 'Edit page content';
@@ -1389,100 +1403,71 @@ $.widget( "heurist.editing_input", {
                             fstatus = 'Leave this field blank if you wish the first menu entry to load automatically on startup.';    
                     }
                     
-                    var div_prompt = $('<div style="line-height:20px;display:inline-block;"><b>Please use the '
+                    cms_div_prompt = $('<div style="line-height:20px;display:inline-block;"><b>Please use the '
                         + fname
                         + ' button in the <span>website editor</span> to edit this field.<br>'
                         + fstatus+'</b></div>')
                         .insertBefore($input);
                     $input.hide();
-                    
-                    $btn_edit_switcher.text('edit source').css({
-                        'text-decoration': 'underline',
-                        'display': 'inline-block',
-                        'margin': '2px 10px 0px',
-                        'cursor': 'pointer'
-                    });
-                    
-                    var $btn_edit_switcher2 = $( '<div>edit wysiwyg</div>', {title: 'Show rich text editor'})
-                        .css({
-                            'text-decoration': 'underline',
-                            'display': 'inline-block',
-                            'margin': '2px 10px 0px',
-                            'cursor': 'pointer'
-                        })
-                        .insertAfter( $btn_edit_switcher );
 
                     $('<br>').insertBefore($btn_edit_switcher);
 
-                    var $label_edit_switcher = $('<span>Advanced users:</span>')
-                        .css({'line-height': '20px','vertical-align':'top'}).addClass('smallbutton')
+                    cms_label_edit_prompt = $('<span>Advanced users: edit source as </span>')
+                        .css({'line-height': '20px'}).addClass('smallbutton')
                         .insertBefore( $btn_edit_switcher );
-                    
-                    this._on( $btn_edit_switcher, { click: function(){
-                        //$btn_edit_switcher.hide();
-                        //$input.show();
-                        div_prompt.css('display', '');
-                        $btn_edit_switcher2.hide();
-                        $label_edit_switcher.hide();
-                        var eid = '#'+$input.attr('id')+'_editor';                    
-                        if($input.is(':visible')){
-                            if (__showEditor(true)) //show tinymce editor
-                                $btn_edit_switcher.text('text');
-                                
-                        }else{
-                            $btn_edit_switcher.text('wysiwyg');
-                            $input.show();
-                            //tinymce.remove('#'+$input.attr('id'));
-                            tinymce.remove(eid);
-                            $(eid).parent().hide();
-                            __adjustTextareaHeight();
-                        }                        
-                    }});
-                    this._on( $btn_edit_switcher2, { click: function(){
-                        if (__showEditor(true)){ //show tinymce editor
-                            $btn_edit_switcher2.hide();
-                            $label_edit_switcher.hide();
-                            $btn_edit_switcher.text('text');
-                        } 
-                    }});
-
-                    
+                    $btn_edit_switcher.css({display:'inline-block'});
+                                        
                     var $cms_dialog = window.hWin.HEURIST4.msg.getPopupDlg();
                     if($cms_dialog.find('.main_cms').length>0){ 
                         //opened from cms editor
                         //$btn_edit_switcher.hide();
                     }else{
                         //see manageRecords for event handler
-                        div_prompt.find('span')
+                        cms_div_prompt.find('span')
                             .css({cursor:'pointer','text-decoration':'underline'})
                             .attr('data-cms-edit', 1)
                             .attr('data-cms-field', this.options.dtID)
                             .attr('title','Edit website content in the website editor');   
                             
                     }
-                }else if($btn_edit_switcher.is('div')){
+                }
+                
+                if($btn_edit_switcher.is('div')){
 
                     this._on($btn_edit_switcher.find('span'), { 
                         click: function(event){
+                            
+                            if(cms_label_edit_prompt){
+                               cms_label_edit_prompt.hide(); 
+                               cms_div_prompt.hide(); 
+                            }
 
                             var sel_action = $(event.target).text();
                             if(cur_action == sel_action) return;
-
-                            cur_action = sel_action;
-
+                            
                             $btn_edit_switcher.find('span').css('text-decoration', '');
                             $(event.target).css('text-decoration', 'underline');
 
                             var eid = '#'+$input.attr('id')+'_editor';
 
-                            if(cur_action == 'wysiwyg'){
-                                __showEditor(true); //show tinymce editor
-                            }else if(cur_action == 'text'){
-                                $input.show();
+                            //hide previous
+                            if(cur_action=='wysiwyg'){
                                 tinymce.remove(eid);
                                 $(eid).parent().hide();
+                            }else if(cur_action=='codeeditor'){
+                                codeEditor.hideEditor();
+                            }
+                            //show now
+                            if(sel_action == 'codeeditor'){
+                                codeEditor.showEditor();
+                            }if(sel_action == 'wysiwyg'){
+                                __showEditor(true); //show tinymce editor
+                            }else if(sel_action == 'text'){
+                                $input.show();
                                 __adjustTextareaHeight();
                             }
+                           
+                            cur_action = sel_action;
                         }
                     });
 

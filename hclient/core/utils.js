@@ -1225,6 +1225,26 @@ if (!Array.prototype.unique){
 }
 
 
+$.getMultiScripts2 = function(arr, path) {
+    
+    return new Promise(function(_resolve, _reject){
+    
+        (async () => {
+          for (const scr of arr) {
+            await $.getScript((path||"") + scr);
+          }
+          
+          _resolve();
+        })()
+        .catch((err) => {
+            // Something went wrong
+            _reject(err);
+        });
+    
+    });
+    
+}
+
 $.getMultiScripts = function(arr, path) {
     var _arr = $.map(arr, function(scr) {
         return $.getScript( (path||"") + scr );

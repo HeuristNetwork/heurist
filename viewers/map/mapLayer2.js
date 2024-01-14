@@ -171,7 +171,7 @@ function hMapLayer2( _options ) {
 
         }else if(rectypeID == window.hWin.HAPI4.sysinfo['dbconst']['RT_GEOTIFF_SOURCE']){
 
-            _addImage();
+            _addImage();                              
 
             setTimeout(function(){ _triggerLayerStatus( 'visible' ); },200);
             
@@ -235,6 +235,7 @@ function hMapLayer2( _options ) {
             
             if(layer_url.indexOf('/info.json')>0){  //IIIF image
                 
+                //IIIF layer can work as a basemap for CRS.Simple
                 layer_options['IIIF'] = true;
             
             }else
