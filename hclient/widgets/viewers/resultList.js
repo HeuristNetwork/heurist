@@ -135,7 +135,8 @@ $.widget( "heurist.resultList", {
 
         field_for_ext_classes: 20, // add class related to field value to record's row; 0 - disabled, n > 0 - detail type id
 
-        show_export_button: false // display to that opens the export menu, for exporting the current result set
+        show_export_button: false, // display to that opens the export menu, for exporting the current result set
+        export_options: 'all' // export formats allowed
     },
 
     _is_publication:false, //this is CMS publication - take css from parent
@@ -842,11 +843,22 @@ $.widget( "heurist.resultList", {
                     if(selected){
                         window.hWin.HAPI4.currentRecordsetSelection = selected;
                     }
-                    
 
                     // open export menu in dialog/popup
                     let url = `${window.hWin.HAPI4.baseURL}hclient/framecontent/exportMenu.php?db=${window.hWin.HAPI4.database}`;
-                    window.hWin.HEURIST4.msg.showDialog(url, {width: 650, height: 568});
+
+                    let handle_formats = !window.hWin.HEURIST4.util.isempty(this.options.export_options) && this.options.export_options != 'all';
+                    if(handle_formats){
+                        url += `&output=${this.options.export_options}`
+                    }
+
+                    window.hWin.HEURIST4.msg.showDialog(url, {width: 650, height: 568, dialogid: 'export_record_popup', 
+                        onpopupload: function(){
+                            if(handle_formats){
+                                $('#export_record_popup').dialog('widget').hide();
+                            }
+                        }
+                    });
                 }
             });
         }

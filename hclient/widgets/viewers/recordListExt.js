@@ -53,7 +53,8 @@ $.widget( "heurist.recordListExt", {
         placeholder_text: null, //text to display while no record/recordset is loaded  (search is not prefromed)
         
         show_export_button: false, // show button to export current record set
-        show_print_button: false // show button to print current record set
+        show_print_button: false, // show button to print current record set
+        export_options: 'all' // export formats allowed
     },
 
     _current_url: null, //keeps current url - see loadURL 
@@ -214,7 +215,19 @@ $.widget( "heurist.recordListExt", {
 
                     // open export menu in dialog/popup
                     let url = `${window.hWin.HAPI4.baseURL}hclient/framecontent/exportMenu.php?db=${window.hWin.HAPI4.database}`;
-                    window.hWin.HEURIST4.msg.showDialog(url, {width: 650, height: 568});
+
+                    let handle_formats = !window.hWin.HEURIST4.util.isempty(this.options.export_options) && this.options.export_options != 'all';
+                    if(handle_formats){
+                        url += `&output=${this.options.export_options}`
+                    }
+
+                    window.hWin.HEURIST4.msg.showDialog(url, {width: 650, height: 568, dialogid: 'export_record_popup', 
+                        onpopupload: function(){
+                            if(handle_formats){
+                                $('#export_record_popup').dialog('widget').hide();
+                            }
+                        }
+                    });
                 }
             });
 
