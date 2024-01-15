@@ -2893,7 +2893,7 @@ $.widget( "heurist.resultList", {
                     if(recIDs.length == 0){ return; }
                     window.hWin.HEURIST4.collection.collectionUpdate(recIDs.join(','));
                     */
-                    this.div_content.find('.selected:not(.collected) .rec_collect').click();
+                    this.div_content.find('.selected:not(.collected) .rec_collect').trigger('click');
                 }
             });
 

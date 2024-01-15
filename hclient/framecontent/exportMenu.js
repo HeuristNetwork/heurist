@@ -51,7 +51,7 @@ function hexportMenu( container ) {
             outputs = outputs.split(',');
 
             if(outputs.length == 1){
-                container.find(`#menu-export-${outputs[0]} > button`).click();
+                container.find(`#menu-export-${outputs[0]} > button`).trigger('click');
             }else{
 
                 let $dlg;
@@ -65,7 +65,7 @@ function hexportMenu( container ) {
                 btns['Export'] = function(){
 
                     let format = $dlg.find('select').val();
-                    container.find(`#menu-export-${format} > button`).click();
+                    container.find(`#menu-export-${format} > button`).trigger('click');
 
                     $dlg.dialog('close');
 
