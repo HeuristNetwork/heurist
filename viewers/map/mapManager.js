@@ -301,24 +301,24 @@ function hMapManager( _options )
     //  adds new mapdocument record
     //
     function _createNewMapDocument(event){
-        
-                    window.hWin.HEURIST4.util.stopEvent(event);
-                    
-                    //edit layer or mapdocument record
-                    window.hWin.HEURIST4.ui.openRecordEdit(-1, null,
-                    {selectOnSave:true,
-                     onClose: function(){ 
-                         //parent_span.find('.svs-contextmenu4').hide();
-                     },
-                     onselect:function(event, data){
-                        if( window.hWin.HEURIST4.util.isRecordSet(data.selection) ){
-                            
-                            _addToMapDocumentTree( data.selection );
-                            
-                        }
-                    },
-                    new_record_params:{rt:window.hWin.HAPI4.sysinfo['dbconst']['RT_MAP_DOCUMENT']}
-                    });
+
+        window.hWin.HEURIST4.util.stopEvent(event);
+
+        //edit layer or mapdocument record
+        window.hWin.HEURIST4.ui.openRecordEdit(-1, null,
+            {selectOnSave:true,
+                onClose: function(){ 
+                    //parent_span.find('.svs-contextmenu4').hide();
+                },
+                onselect:function(event, data){
+                    if( window.hWin.HEURIST4.util.isRecordSet(data.selection) ){
+
+                        _addToMapDocumentTree( data.selection );
+
+                    }
+                },
+                new_record_params:{rt:window.hWin.HAPI4.sysinfo['dbconst']['RT_MAP_DOCUMENT']}
+        });
     }
     
     //
@@ -1592,7 +1592,7 @@ function hMapManager( _options )
         //
         filterListMapDocuments: function(visible_mapdocuments){
             if(window.hWin.HUL.isFunction($('body').fancytree) 
-                && ((visible_mapdocuments===true)  ////force
+                && ((visible_mapdocuments===true)  //force
                 || options.visible_mapdocuments != visible_mapdocuments)){
                 
                     if(visible_mapdocuments===true){
@@ -1633,15 +1633,23 @@ function hMapManager( _options )
             if(window.hWin.HEURIST4.util.isNumber(e) && e>=0){
                 idx = e;
             }else if(typeof e == 'string'){  //find by map name
-                idx = options.container.find('input[data-mapid="'+e+'"]').attr('data-mapindex');
+            
+                if(e=='_NONE'){
+                    e = 'None';
+                }
+                idx = options.container.find('input[data-mapid="'+e+'"]').attr('data-mapindex');    
+                
             }else{
                 idx = $(e.target).attr('data-mapindex');
             }
 
             options.mapwidget.mapping('loadBaseMap', idx);
-            options.container.find('input[data-mapindex="'+idx+'"]').prop('checked',true);
-
-            options.container.find('input[data-mapindex="'+idx+'"]').parent().after(options.container.find('#basemap_filter_btns'));
+            if(idx>=0){
+                options.container.find('input[data-mapindex="'+idx+'"]').prop('checked',true);
+                options.container.find('input[data-mapindex="'+idx+'"]').parent().after(options.container.find('#basemap_filter_btns'));
+            }else{
+                options.container.find('input[data-mapindex]').prop('checked',false); //mark off all
+            }
         },
         
         //
@@ -1672,6 +1680,53 @@ function hMapManager( _options )
                     }
                 });
             return res;
+        },
+        
+        //
+        // update layer status for mapdocument
+        //
+        updateLayerStatus: function(layer_id, status){
+
+            if(DT_LEGEND_OUT_ZOOM>0){
+
+                var res = that.getMapDocumentsIds('visible');
+                if(res && res.length>0){
+                    var mapdoc_id = res[0];
+                    
+                    var layer_rec = mapDocuments.getLayer(mapdoc_id, layer_id);
+                    if(!layer_rec || !layer_rec['d']) return;
+                    var val = layer_rec['d'][DT_LEGEND_OUT_ZOOM];
+                    
+                    if(val==TRM_LEGEND_OUT_ZOOM_HIDDEN || val==TRM_LEGEND_OUT_ZOOM_DISABLED){
+
+                        //find node
+                        var tree = mapdoc_treeview.fancytree("getTree");
+                        tree.visit(function(node){
+                                if(node.data.type=='layer' && node.key==layer_id && node.data.mapdoc_id===mapdoc_id){
+        
+                                    var ele = $(node.li).find('.fancytree-title');
+                                    
+                                    if(val==TRM_LEGEND_OUT_ZOOM_DISABLED){
+                                        if(status=='out'){
+                                            ele.addClass('ui-state-disabled');
+                                        }else{
+                                            ele.removeClass('ui-state-disabled');    
+                                        }
+                                    }else{
+                                        // show/hide node
+                                        if(status=='out'){
+                                            $(node.li).hide()
+                                        }else{
+                                            $(node.li).show();    
+                                        }
+                                    }
+                                    return false;
+                                }
+                            });
+                    }
+                }
+            }
+
         }
         
     }

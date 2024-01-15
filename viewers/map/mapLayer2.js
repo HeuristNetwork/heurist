@@ -53,11 +53,12 @@ function hMapLayer2( _options ) {
     
     var is_inited = false,
         is_visible = false,
-        is_outof_range = false;
+        is_outof_range = null;
         
     var _max_zoom_level = 0;
     
     var _has_zoom_setting_per_record = 0;//1 - it does, -1 it doesn't, 0 - not checked yet
+    var _has_zoom_setting_per_layer = 0;//1 - it does, -1 it doesn't, 0 - not checked yet
 
     //
     //
@@ -170,7 +171,7 @@ function hMapLayer2( _options ) {
 
         }else if(rectypeID == window.hWin.HAPI4.sysinfo['dbconst']['RT_GEOTIFF_SOURCE']){
 
-            _addImage();
+            _addImage();                              
 
             setTimeout(function(){ _triggerLayerStatus( 'visible' ); },200);
             
@@ -234,6 +235,7 @@ function hMapLayer2( _options ) {
             
             if(layer_url.indexOf('/info.json')>0){  //IIIF image
                 
+                //IIIF layer can work as a basemap for CRS.Simple
                 layer_options['IIIF'] = true;
             
             }else
@@ -390,6 +392,7 @@ function hMapLayer2( _options ) {
                                 dataset_type:'shp',
                                 preserveViewport:options.preserveViewport });
                                 
+                        is_outof_range = null;
                         _setVisibilityForZoomRange();   
                     }
                     
@@ -452,11 +455,13 @@ function hMapLayer2( _options ) {
                                         dataset_type:'kml',
                                         preserveViewport:options.preserveViewport });
                                                              
+                            is_outof_range = null;                        
+                            _setVisibilityForZoomRange();   
                         }else {
                             window.hWin.HEURIST4.msg.showMsgErr(response);
+                            _triggerLayerStatus( 'error' );
                         }
                         
-                        _setVisibilityForZoomRange();   
                     }
                 }
             }
@@ -656,17 +661,18 @@ function hMapLayer2( _options ) {
                                        
                                        
                         //_triggerLayerStatus( 'visible' );
+                        is_outof_range = null;                        
                         _setVisibilityForZoomRange();   
                         
                    }else {
                         _triggerLayerStatus( 'error' );
                         window.hWin.HEURIST4.msg.showMsgErr(response);
-                    }
+                   }
                     
-                    //check if there are layers and tlcmapdatasets among result set
-                    if( _parent_mapdoc==0 ){ // && window.hWin.HEURIST4.util.isArrayNotEmpty(layers_ids)
+                   //check if there are layers and tlcmapdatasets among result set
+                   if( _parent_mapdoc==0 ){ // && window.hWin.HEURIST4.util.isArrayNotEmpty(layers_ids)
                         options.mapwidget.mapping('getMapManager').addLayerRecords( layers_ids );
-                    } 
+                   } 
                     
 
                 }
@@ -712,7 +718,8 @@ function hMapLayer2( _options ) {
                         dataset_name:_recordset.fld(options.rec_layer || _record, 'rec_Title'),  //name for timeline
                         dataset_type: 'db',
                         preserveViewport:options.preserveViewport });
-                                             
+                                      
+            is_outof_range = null;                        
             _setVisibilityForZoomRange(currZoom);   
         }else {
             _triggerLayerStatus( 'error' );
@@ -770,7 +777,7 @@ function hMapLayer2( _options ) {
 
 
     //
-    // trigger callback
+    // trigger callback (to update status in legend)
     //
     function _triggerLayerStatus( status ){
 
@@ -1013,16 +1020,16 @@ function hMapLayer2( _options ) {
             }
             
             var _rec = options.rec_layer || _record;
-            if(_rec['maxzoom']==-1 && _rec['minzoom']==-1 && _has_zoom_setting_per_record<0) return; //not set
+            if(_has_zoom_setting_per_layer<0 && _has_zoom_setting_per_record<0) return; //not set
 
             var is_in_range = true;
 
-            if(_rec['maxzoom']>0 || _rec['minzoom']>=0){ //already defined
+            if(_has_zoom_setting_per_layer>0){ //already defined
                 
                 is_in_range = (_rec['maxzoom']==-1 || _rec['maxzoom']>=current_zoom)
                         && (_rec['minzoom']==-1 || current_zoom>=_rec['minzoom']);
                 
-            }else if(!(_rec['maxzoom']==-1 && _rec['minzoom']==-1))
+            }else if(_has_zoom_setting_per_layer==0)
             {
                 _rec['maxzoom'] = -1;
                 _rec['minzoom'] = -1;
@@ -1045,7 +1052,7 @@ function hMapLayer2( _options ) {
                         }
                     }
                     
-                    if(_rec['maxzoom']>0 || _rec['minzoom']>=0){ //already defined
+                    if(!(_rec['maxzoom']>0 || _rec['minzoom']>=0)){ //already defined
                     
                         // in kilometers
                         var dty_id = window.hWin.HAPI4.sysinfo['dbconst']['DT_MAXIMUM_ZOOM'];
@@ -1053,8 +1060,11 @@ function hMapLayer2( _options ) {
                         
                         if(dty_id>0){
                             var val = parseFloat(_recordset.fld(_rec, dty_id));
-                            if(val>0.01){ //old default value
-                                _rec['maxzoom'] = options.mapwidget.mapping('convertZoomToNative', val, layer_bnd);
+                            if(val>0){ 
+                                _rec['maxzoom'] = 32;
+                                if(val>0.0001){ //0.1 meter
+                                    _rec['maxzoom'] = options.mapwidget.mapping('convertZoomToNative', val, layer_bnd);
+                                }
                             }
                         }
                         dty_id = window.hWin.HAPI4.sysinfo['dbconst']['DT_MINIMUM_ZOOM'];
@@ -1066,15 +1076,26 @@ function hMapLayer2( _options ) {
                         }
                     }
                 }
+                
+                if(_rec['maxzoom']>0 || _rec['minzoom']>=0){
+                    _has_zoom_setting_per_layer = 1;    
+                }else{
+                    //not defined
+                    _has_zoom_setting_per_layer = -1;    
+                }
+                
                 _setVisibilityForZoomRange( current_zoom );
                 return;
             }
         
+        
             var status = null;
             if(is_in_range){
-                is_outof_range = false;
-                status =  (is_visible)?'visible':'hidden';
-                options.mapwidget.mapping('setLayerVisibility', _nativelayer_id, is_visible);
+                if(is_outof_range!==false){
+                    is_outof_range = false;
+                    status =  (is_visible)?'visible':'hidden';
+                    options.mapwidget.mapping('setLayerVisibility', _nativelayer_id, is_visible);
+                }
                 
                 //visibility per record
                 if(_dataset_type=='db' && _has_zoom_setting_per_record>=0){
@@ -1107,14 +1128,17 @@ function hMapLayer2( _options ) {
 
                 }
                 
-            }else{
+            }else if(!is_outof_range) {
                 status = 'out';
                 is_outof_range = true;
                 options.mapwidget.mapping('setLayerVisibility', _nativelayer_id, false);
             }
-        
+            
             //trigger callback
-            _triggerLayerStatus( status );
+            if(status!=null){
+                _triggerLayerStatus( status );    
+            }
+            
         }//inited
         
         
@@ -1223,7 +1247,7 @@ function hMapLayer2( _options ) {
         // visiblity_set true,false or array of ids
         // if visiblity_set is array of ids it allows to show only certain objects for this layer
         //
-        setVisibility:function(visiblity_set){
+        setVisibility: function(visiblity_set){
             
             
             var was_invisible = !is_visible;
@@ -1258,8 +1282,9 @@ function hMapLayer2( _options ) {
             
             
             //trigger callback
-            _triggerLayerStatus( status );
-            
+            if(status!=null){
+                _triggerLayerStatus( status );
+            }
         },
         
         //

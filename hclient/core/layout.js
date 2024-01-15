@@ -1433,10 +1433,20 @@ console.error('Cardinal layout widget does not have proper options');
                 $(app.widget)[widgetname](method, command);
         },
 
+        //
+        //
+        //
         executeWidgetMethod: function( element_id, widgetname, method, params ){
             var app = window.hWin.document.getElementById(element_id);
-            if(app && window.hWin.HUL.isFunction($(app)[widgetname]))
+            if(app && window.hWin.HUL.isFunction($(app)[widgetname]) && $(app)[widgetname]('instance'))
                 $(app)[widgetname](method, params);
+            }else if(!app){
+                console.log('widget '+element_id+' not found');
+            }else if(!$.isFunction($(app)[widgetname])){
+                console.log('widget '+widgetname+' not loaded');
+            //}else {
+            //    console.error('widget '+widgetname+' not inited');
+            }
         },
     
         //

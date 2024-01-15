@@ -63,6 +63,7 @@ $.widget( "heurist.mainMenu", {
     
     _initial_search_already_executed: false,
     _rendered_db_overview: false,
+    _retrieved_notifications: false,
 
     version_message: null, // container for message about available alpha/stable version
 
@@ -523,6 +524,7 @@ $.widget( "heurist.mainMenu", {
         }else {
             this._show_version_message();
             this._performInitialSearch();
+            this._getUserNotifications();
 
             // Setup user favourite filters, give mainMenu time to load completely
             setTimeout(function(){ $('.ui-menu6').mainMenu6('populateFavouriteFilters'); }, 2000);
@@ -1232,6 +1234,11 @@ $.widget( "heurist.mainMenu", {
             
             var widget = window.hWin.HAPI4.LayoutMgr.getWidgetByName('resultList');
             if(widget){
+
+                if(that._rendered_db_overview){
+                    $('.ui-menu6').mainMenu6('hideDatabaseOverview');
+                }
+
                 widget.resultList('callResultListMenu', 'menu-subset-set'); //call method
             }
             
@@ -1489,7 +1496,7 @@ $.widget( "heurist.mainMenu", {
 
                     $dlg.dialog({
                         autoOpen: true,
-                        height: 550,
+                        height: 600,
                         width: 600,
                         modal: true,
                         resizable: false,
@@ -2128,6 +2135,7 @@ $.widget( "heurist.mainMenu", {
 
                     that._show_version_message();
                     that._performInitialSearch();
+                    that._getUserNotifications();
 
                     $('.ui-menu6').mainMenu6('populateFavouriteFilters'); // show user's favourite filters
 
@@ -2639,4 +2647,37 @@ $.widget( "heurist.mainMenu", {
             });
         }
     },
+
+    /**
+     * Disply notifications about certain features / functions to the user
+     * Or, open the bug reporter monthly
+     * 
+     * @returns none
+     */
+    _getUserNotifications: function(){
+
+        if(this._retrieved_notifications){ return; }
+
+        const that = this;
+
+        this._retrieved_notifications = true;
+
+        let request = {
+            a: 'get_user_notifications'
+        };
+
+        window.hWin.HAPI4.SystemMgr.get_user_notifications(request, function(response){
+
+            if(window.hWin.HEURIST4.util.isempty(response.data) || response.status != window.hWin.ResponseStatus.OK){
+                return;
+            }
+
+            let notifications = response.data;
+
+            if(Object.keys(notifications).length == 1 && notifications['bug_report']){
+                that.menuActionById('menu-help-bugreport');
+                return;
+            }
+        });
+    }
 });

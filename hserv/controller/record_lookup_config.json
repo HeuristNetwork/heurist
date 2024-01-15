@@ -238,14 +238,12 @@
     "dialog": "lookupOpentheso",
     "description": "Use Opentheso services hosted on external servers to retrieve thesaurus and create new terms",
     "fields": {
-        "term_field": ""
-    },
-    "options": {
-        "create_type": "enum",
-        "label": "",
-        "desc": "",
-        "code": "",
-        "uri": ""
+        "term_field": "",
+        "term_label": "",
+        "term_desc": "",
+        "term_uri": "",
+        "term_code": "",
+        "term_translations": ""
     }
 }
 ]

@@ -183,15 +183,15 @@ if(!($is_map_popup || $without_header)){
 <script src="https://code.jquery.com/jquery-migrate-3.4.1.js"></script>
 <script src="https://code.jquery.com/ui/1.13.2/jquery-ui.js"></script>
         
-        <link rel="stylesheet" type="text/css" href="../../external/jquery-ui-iconfont-master/jquery-ui.icon-font.css" />
+        <link rel="stylesheet" type="text/css" href="<?=HEURIST_BASE_URL?>external/jquery-ui-iconfont-master/jquery-ui.icon-font.css" />
         <link rel="stylesheet" type="text/css" href="<?php echo HEURIST_BASE_URL;?>h4styles.css">
 
-        <script type="text/javascript" src="../../hclient/core/hintDiv.js"></script> <!-- for mapviewer roolover -->
-        <script type="text/javascript" src="../../hclient/core/detectHeurist.js"></script>
+        <script type="text/javascript" src="<?=HEURIST_BASE_URL?>hclient/core/hintDiv.js"></script> <!-- for mapviewer roolover -->
+        <script type="text/javascript" src="<?=HEURIST_BASE_URL?>hclient/core/detectHeurist.js"></script>
         
-        <link rel="stylesheet" type="text/css" href="../../external/jquery.fancybox/jquery.fancybox.css" />
+        <link rel="stylesheet" type="text/css" href="<?=HEURIST_BASE_URL?>external/jquery.fancybox/jquery.fancybox.css" />
 
-        <script type="text/javascript" src="../../hclient/widgets/viewers/mediaViewer.js"></script>
+        <script type="text/javascript" src="<?=HEURIST_BASE_URL?>hclient/widgets/viewers/mediaViewer.js"></script>
 
         <script type="text/javascript">
         
@@ -930,7 +930,7 @@ if(!empty($import_webfonts)){
         }
 
         .external-link {
-            background-image: url(../../hclient/assets/external_link_16x16.gif);
+            background-image: url(<?=HEURIST_BASE_URL?>hclient/assets/external_link_16x16.gif);
             background-repeat: no-repeat;
             padding-left: 16px;
             padding-top: 4px;
@@ -954,13 +954,13 @@ if(!empty($import_webfonts)){
         }   
         .thumb_image {
             margin: 5px;
-            cursor: url(../../hclient/assets/zoom-in.png),pointer;
+            cursor: url(<?=HEURIST_BASE_URL?>hclient/assets/zoom-in.png),pointer;
         }
         div.thumbnail .fullSize img {
             margin: 0px;
             width: auto;
             max-width: 100%;
-            cursor: url(../../hclient/assets/zoom-out.png),pointer;
+            cursor: url(<?=HEURIST_BASE_URL?>hclient/assets/zoom-out.png),pointer;
         }        
         .download_link{
             float: left;
@@ -1052,7 +1052,7 @@ if($is_production){
     </head>
     <body class="popup" style="overflow-x: hidden;">
 
-        <script type="text/javascript" src="../../viewers/gmap/mapViewer.js"></script>
+        <script type="text/javascript" src="<?=HEURIST_BASE_URL?>viewers/gmap/mapViewer.js"></script>
         <script>
             mapStaticURL = "<?php echo HEURIST_BASE_URL;?>viewers/gmap/mapStatic.php?width=300&height=300&db=<?php echo HEURIST_DBNAME;?>";
         </script>

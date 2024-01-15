@@ -257,6 +257,8 @@ require_once dirname(__FILE__).'/hclient/framecontent/initPage.php';
 <link rel="stylesheet" type="text/css" href="<?php echo PDIR;?>external/jquery.fancybox/jquery.fancybox.css" />
 <script type="text/javascript" src="<?php echo PDIR;?>external/jquery.fancybox/jquery.fancybox.js"></script>
 
+<script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/editing/editorCodeMirror.js"></script>
+<link rel="stylesheet" href="<?php echo PDIR;?>external/codemirror-5.61.0/lib/codemirror.css">
 
 <!-- os, browser detector -->
 <script type="text/javascript" src="<?php echo PDIR;?>external/js/platform.js"></script>

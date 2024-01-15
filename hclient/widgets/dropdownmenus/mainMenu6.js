@@ -732,9 +732,7 @@ $.widget( "heurist.mainMenu6", {
 
             that._current_explore_action = action_name;
 
-            if(action_name == 'svsAddFaceted' && that.containers['explore'].find('div#db_overview').length > 0){
-                that.containers['explore'].find('div#db_overview').hide();
-            }
+            that.hideDatabaseOverview();
 
             if(cont.length==0){
                 //create new one
@@ -1023,6 +1021,9 @@ $.widget( "heurist.mainMenu6", {
                         let id = $ele.attr('data-fid');
 
                         if($ele.is('li.fancytree-node')){
+
+                            this.hideDatabaseOverview();
+
                             this.svs_list.svs_list('doSearchByID', id, $ele.text()); // perform filter
                         }else if($ele.is('span')){
 
@@ -1446,7 +1447,10 @@ $.widget( "heurist.mainMenu6", {
             exp_img.attr('src', window.hWin.HAPI4.baseURL+'hclient/assets/v6/' + exp_img.attr('data-src'));
 
             this._on(this.element.find('li[data-action-popup="search_recent"]'),{
-                click: function(){
+                click: function(event){
+
+                    this.hideDatabaseOverview();
+
                     var q = '?w=a&q=sortby:-m';
                     var qname = 'All records';
                     if(!$(event.target).attr('data-search-all')){
@@ -1656,9 +1660,7 @@ $.widget( "heurist.mainMenu6", {
                  that.containers[section].layout().resizeAll();
             that._switch_SvsList( 0 );
 
-            if(that.containers['explore'].find('div#db_overview').is(':visible')){
-                that.containers['explore'].find('div#db_overview').hide();
-            }
+            this.hideDatabaseOverview();
 
             if(this._show_quick_tips){
                 this._show_quick_tips = false; //show once
@@ -2320,6 +2322,16 @@ $.widget( "heurist.mainMenu6", {
                 changeFuncAccess();
             }
         );
+    },
+
+    //
+    // Hide landing Page
+    //
+    hideDatabaseOverview: function(){
+
+        if(this.containers['explore'].find('div#db_overview').length > 0){
+            this.containers['explore'].find('div#db_overview').hide();
+        }
     },
 
     //

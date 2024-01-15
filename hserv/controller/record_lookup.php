@@ -1097,14 +1097,21 @@
             $thesauruses = loadRemoteURLContentWithRange($base_uri.'thesaurus', null, true, 60);
 
             if($thesauruses === false){
-                $system->error_exit_api('Unable to retrieve the available thesauruses from ' . $server, HEURIST_ACTION_BLOCKED);
-                exit;
+                
+                $system->addError(HEURIST_UNKNOWN_ERROR, 'Unable to retrieve the available thesauruses from ' . $server);
+                $data_rtn[$server] = array();
+
+                continue;
             }
 
             $thesauruses = json_decode($thesauruses, true);
 
             if(json_last_error() !== JSON_ERROR_NONE){
-                $system->error_exit_api('An error occurred while handling a response from an Opentheso server', HEURIST_UNKNOWN_ERROR);
+
+                $system->addError(HEURIST_ERROR, 'An error occurred while handling the response from Opentheso server ' . $server);
+                $data_rtn[$server] = array();
+
+                continue;
             }
             foreach ($thesauruses as $thesaurus) {
 
@@ -1130,8 +1137,8 @@
         $data_rtn['last_update'] = date('Y-m-d');
 
         $file_size = fileSave(json_encode($data_rtn), $opentheso_file);
-        if($file_size <= 0){
-            $system->error_exit_api('Cannot save Opentheso thesaurus list into local file store', HEURIST_ERROR);
+        if($file_size <= 0 && !empty($data_rtn)){
+            $system->addError(HEURIST_ERROR, 'Cannot save Opentheso thesaurus list into local file store');
         }
 
         return $data_rtn;
@@ -1311,8 +1318,8 @@
         $data_rtn['last_update'] = date('Y-m-d');
 
         $file_size = fileSave(json_encode($data_rtn), $nakala_file);
-        if($file_size <= 0){
-            $system->error_exit_api('Cannot save Nakala metadata into local file store', HEURIST_ERROR);
+        if($file_size <= 0 && !empty($data_rtn)){
+            $system->addError(HEURIST_ERROR, 'Cannot save Nakala metadata into local file store');
             exit;
         }else{
             return $data_rtn;

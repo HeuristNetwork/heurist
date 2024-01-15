@@ -91,6 +91,8 @@ function editCMS_WidgetCfg( widget_cfg, _layout_content, $dlg, main_callback ){
             }else if(widget_cfg.appid == 'heurist_resultList'){
                 height = 850;
                 width = 850;
+            }else if(widget_cfg.appid == 'heurist_resultListExt'){
+                height = 710;
             }
 
             $dlg = window.hWin.HEURIST4.msg.showMsgDlgUrl(window.hWin.HAPI4.baseURL
@@ -436,6 +438,22 @@ function editCMS_WidgetCfg( widget_cfg, _layout_content, $dlg, main_callback ){
                 if(widget_name == 'heurist_StoryMap' && 
                     (opts['blank_elementsPlaceholder'] || $dlg.find('#elementsPlaceholder').val() == 'def')){ // replace 'def' with a blank
                     $dlg.find('#elementsPlaceholder').val('');
+                }
+
+                if(opts['export_options']){
+
+                    let export_options = [];
+
+                    if(!window.hWin.HEURIST4.util.isempty(opts['export_options']) && opts['export_options'] != 'all'){
+                        export_options = opts['export_options'].split(',');
+                    }else{
+                        export_options = 'all';
+                    }
+
+                    $.each($dlg.find(`.${widget_name} input[name="export_options"]`), function(idx, ele){
+                        let is_checked = export_options.indexOf($(ele).val()) !== -1;
+                        $(ele).prop('checked', is_checked);
+                    });
                 }
             }
 
@@ -1309,7 +1327,7 @@ function editCMS_WidgetCfg( widget_cfg, _layout_content, $dlg, main_callback ){
             opts['placeholder_text'] = placeholder;
             opts['is_popup'] = $dlg.find('#is_popup_report').is(':checked');
             opts['popup_position'] = $dlg.find('#popup_report_position').val();
-            
+
         }else if(widget_name=='heurist_resultList'){
             opts['show_toolbar'] = opts['show_counter'] || opts['show_viewmode'] || opts['show_export_button'] || opts['support_collection'];
             if(window.hWin.HEURIST4.util.isempty(opts['recordview_onselect'])){
@@ -1354,6 +1372,22 @@ function editCMS_WidgetCfg( widget_cfg, _layout_content, $dlg, main_callback ){
             if(window.hWin.HEURIST4.util.isempty(opts['elementsPlaceholder']) && !opts['blank_elementsPlaceholder']){
                 // replace with default
                 opts['elementsPlaceholder'] = 'def';
+            }
+        }
+
+        if($dlg.find(`.${widget_name} input[name="export_options"]`).is(':visible')){
+
+            let export_options = [];
+            $.each($dlg.find(`.${widget_name} input[name="export_options"]`), function(idx, ele){
+                if($(ele).is(':checked')){
+                    export_options.push($(ele).val());
+                }
+            });
+
+            if(export_options.length > 0){
+                opts['export_options'] = export_options.join(',');
+            }else{
+                opts['export_options'] = 'all';
             }
         }
 

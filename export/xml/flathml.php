@@ -339,6 +339,7 @@ if(@$_REQUEST['linkmode']){//direct, direct_links, none, all
         
     }else if($_REQUEST['linkmode']=='direct_links'){
         $_REQUEST['revexpand'] = 'no';
+        $_REQUEST['rev'] = 'no';
         $NO_RELATIONSHIPS = true;
         
     }else if($_REQUEST['linkmode']=='all'){

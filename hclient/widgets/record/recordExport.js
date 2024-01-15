@@ -156,8 +156,7 @@ $.widget( "heurist.recordExport", $.heurist.recordAction, {
             //request['file'] = 1;
             
             var url = window.hWin.HAPI4.baseURL;
-            
-            
+                           
             if(this.options.format=='kml'){
                 url += 'export/xml/kml.php';
             }else if(this.options.format=='hml' || this.options.format=='xml'){

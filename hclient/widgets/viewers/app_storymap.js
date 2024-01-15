@@ -81,7 +81,7 @@ $.widget( "heurist.app_storymap", {
 
     _resultset_main: null, // current all stories
     _resultset: null, // current story element list - story elements
-    _resultList: null,
+    _resultList: null, 
     _tabs: null, //tabs control for overview/stories/end page
     _mapping: null,    // mapping widget
     _mapping_onselect: null, //mapping event listener
@@ -114,6 +114,9 @@ $.widget( "heurist.app_storymap", {
 
     _print_button: null,
 
+    pnlOverview: null,
+    pnlStory: null,
+    
     // the constructor
     _create: function() {
 
@@ -1027,7 +1030,7 @@ $.widget( "heurist.app_storymap", {
                         + encodeURIComponent(this.options.reportOverview);
                 isSmarty = true;
             }else{
-                infoURL = window.hWin.HAPI4.baseURL + 'viewers/record/renderRecordData.php?recID='  //mapPopup=1&
+                infoURL = window.hWin.HAPI4.baseURL + 'viewers/record/renderRecordData.php?mapPopup=1&recID='  // mapPopup=1 returns html snippet
                         +recID
                         +'&db='+window.hWin.HAPI4.database;
             }
@@ -1140,7 +1143,7 @@ $.widget( "heurist.app_storymap", {
                     + encodeURIComponent(this.options.reportEndPage);
             isSmarty = true;
         }else{
-            infoURL = window.hWin.HAPI4.baseURL + 'viewers/record/renderRecordData.php?recID='  //mapPopup=1&
+            infoURL = window.hWin.HAPI4.baseURL + 'viewers/record/renderRecordData.php?mapPopup=1&recID='  //mapPopup=1 returns html snippet
                     +recID
                     +'&db='+window.hWin.HAPI4.database;
         }

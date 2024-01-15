@@ -53,7 +53,8 @@ $.widget( "heurist.recordListExt", {
         placeholder_text: null, //text to display while no record/recordset is loaded  (search is not prefromed)
         
         show_export_button: false, // show button to export current record set
-        show_print_button: false // show button to print current record set
+        show_print_button: false, // show button to print current record set
+        export_options: 'all' // export formats allowed
     },
 
     _current_url: null, //keeps current url - see loadURL 
@@ -112,7 +113,7 @@ $.widget( "heurist.recordListExt", {
 
             this.print_button = $('<button>', {
                 text: window.hWin.HR('Print'), title: window.hWin.HR('Print current results'), 
-                class: 'btnPrintRecords', style: `height:25px;position:absolute;top:5px;right:${this.options.show_export_button ? 115 : 15}px;`
+                class: 'btnPrintRecords', style: `height:25px;float:right;${this.options.show_export_button ? 'margin-right:15px;' : ''}`
             })
             .button({
                 icons: {
@@ -172,7 +173,7 @@ $.widget( "heurist.recordListExt", {
 
             this.export_button = $('<button>', {
                 text: window.hWin.HR('Export'), title: window.hWin.HR('Export current results'), 
-                class: 'btnExportRecords ui-button-action', style: 'height:25px;position:absolute;top:5px;right:15px;'
+                class: 'btnExportRecords ui-button-action', style: 'height:25px;float:right;'
             })
             .button({
                 icons: {
@@ -214,7 +215,19 @@ $.widget( "heurist.recordListExt", {
 
                     // open export menu in dialog/popup
                     let url = `${window.hWin.HAPI4.baseURL}hclient/framecontent/exportMenu.php?db=${window.hWin.HAPI4.database}`;
-                    window.hWin.HEURIST4.msg.showDialog(url, {width: 650, height: 568});
+
+                    let handle_formats = !window.hWin.HEURIST4.util.isempty(this.options.export_options) && this.options.export_options != 'all';
+                    if(handle_formats){
+                        url += `&output=${this.options.export_options}`
+                    }
+
+                    window.hWin.HEURIST4.msg.showDialog(url, {width: 650, height: 568, dialogid: 'export_record_popup', 
+                        onpopupload: function(){
+                            if(handle_formats){
+                                $('#export_record_popup').dialog('widget').hide();
+                            }
+                        }
+                    });
                 }
             });
 
@@ -377,7 +390,6 @@ $.widget( "heurist.recordListExt", {
     onLoadComplete: function(){
         this.loadanimation(false);
         if(!this.options.reload_for_recordset && this.options.is_frame_based && !this.options.is_single_selection && !this.options.is_multi_selection){
-this._dout('onLoadComplete refresh again');                
               this._refresh();
         }
         
@@ -456,12 +468,16 @@ this._dout('onLoadComplete refresh again');
             let hasContent = !window.hWin.HEURIST4.util.isempty(this.dosframe.attr('src')) || fdoc.body.childElementCount > 0;
             let hasRecords = this.options.recordset && this.options.recordset.length() > 0;
 
+            this.dosframe.css('height', '');
+            let new_height = this.element.height() - 25;
+
             if(this.export_button){
                 // Allow print if there is content to print
                 if(!hasRecords){
                     this.export_button.hide();
                 }else{
                     this.export_button.show();
+                    this.dosframe.css('height', `${new_height}px`);
                 }
             }
 
@@ -470,7 +486,8 @@ this._dout('onLoadComplete refresh again');
                 if(!hasContent){ //!hasRecords && 
                     this.print_button.hide();
                 }else{
-                    this.print_button.show().css('right', `${this.export_button.is(':visible') ? 115 : 15}px`);
+                    this.print_button.show().css('margin-right', `${this.export_button.is(':visible') ? '15px' : ''}`);
+                    this.dosframe.css('height', `${new_height}px`);
                 }
             }
         }

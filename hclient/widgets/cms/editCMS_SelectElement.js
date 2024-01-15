@@ -39,7 +39,7 @@ function editCMS_SelectElement( callback ){
 
         header2:{name:'Page Content', description:'#page_content', is_section_header: true},
 
-            grp3:{name:'Containers', description:'#containers', is_group_header:true},
+            grp3:{name:'Layout', description:'#containers', is_group_header:true},
 
                 group:{name:'Group', description:'#group'}, //Container for elements
                 accordion:{name:'Accordion', description:'#accordion'}, //Set of collapsable groups

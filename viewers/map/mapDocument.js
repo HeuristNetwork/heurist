@@ -68,6 +68,11 @@ function hMapDocument( _options )
     DT_WORLD_BASEMAP = 0,
     DT_CRS = 0,
     
+    DT_LEGEND_OUT_ZOOM = 0,
+    TRM_LEGEND_OUT_ZOOM_HIDDEN = 0,
+    TRM_LEGEND_OUT_ZOOM_DISABLED = 0,
+    
+    
     map_documents = null, //recordset - all loaded documents
     map_documents_content = {}, //array mapdoc_id=>recordset with all layers and datasources of document
     //mapdoc_id - 0 current search, temp temporal mapspace, or record id
@@ -98,6 +103,10 @@ function hMapDocument( _options )
         DT_ZOOM_KM_POINT = window.hWin.HAPI4.sysinfo['dbconst']['DT_ZOOM_KM_POINT'];
         DT_WORLD_BASEMAP = window.hWin.HAPI4.sysinfo['dbconst']['DT_WORLD_BASEMAP'];
         DT_CRS = window.hWin.HAPI4.sysinfo['dbconst']['DT_CRS'];
+        
+        DT_LEGEND_OUT_ZOOM = window.hWin.HAPI4.sysinfo['dbconst']['DT_LEGEND_OUT_ZOOM'];
+        TRM_LEGEND_OUT_ZOOM_HIDDEN = window.hWin.HAPI4.sysinfo['dbconst']['TRM_LEGEND_OUT_ZOOM_HIDDEN'];
+        TRM_LEGEND_OUT_ZOOM_DISABLED = window.hWin.HAPI4.sysinfo['dbconst']['TRM_LEGEND_OUT_ZOOM_DISABLED'];
         
         //_loadMapDocuments();
     }
@@ -387,12 +396,15 @@ function hMapDocument( _options )
         //4. Adds layers on map
         var resdata = map_documents_content[mapdoc_id];
         
-        var idx, records = resdata.getRecords();  //layers
-        for(idx in records){
-            if(idx)
+        var idx, records = resdata.getRecords(), order = resdata.getOrder();  //layers
+        for(idx=order.length-1; idx>=0; idx--){
+            if(idx>=0)
             {
-                var record = records[idx];
-                var recID  = resdata.fld(record, 'rec_ID');
+                var recID = order[idx];
+                var record = resdata.getById(recID);
+                
+                //var record = records[idx];
+                //var recID  = resdata.fld(record, 'rec_ID');
                 
                 if(resdata.fld(record, 'rec_RecTypeID')==RT_MAP_LAYER
                     ||resdata.fld(record, 'rec_RecTypeID')==RT_TLCMAP_DATASET){
@@ -439,7 +451,9 @@ console.log(treedata);
             var record2 = map_documents.getById( mapdoc_id );
             if(DT_WORLD_BASEMAP>0){
                 basemap_name = map_documents.fld(record2, DT_WORLD_BASEMAP);
-                basemap_name = $Db.trm(basemap_name, 'trm_Label');
+                if(basemap_name>0){
+                    basemap_name = $Db.trm(basemap_name, 'trm_Label');    
+                }
             }
         }
         //todo: fix restore basemap to default (0) if current basemap 'None'
@@ -503,8 +517,11 @@ console.log(treedata);
             
             if(DT_MAXIMUM_ZOOM >0){
                 var val = parseFloat(map_documents.fld(record2,DT_MAXIMUM_ZOOM  ));
-                if(val>0.01){
-                    var zoomNative = options.mapwidget.mapping('convertZoomToNative', val);
+                if(val>0){ 
+                    var zoomNative = 32;
+                    if(val>0.0001){ //0.1 meter
+                        zoomNative = options.mapwidget.mapping('convertZoomToNative', val);
+                    }
                     if(zoomNative>0){
                         options.mapwidget.mapping('defineMaxZoom', 'doc'+mapdoc_id, zoomNative);
                     }
@@ -1282,7 +1299,6 @@ console.log(treedata);
                     that.removeLayer(mapdoc_id, to_remove[idx]);    
                 }
             }
-            
             if(window.hWin.HEURIST4.util.isArrayNotEmpty(layers_ids)){
                 _addLayerRecord(mapdoc_id, layers_ids, callback);
             }else{

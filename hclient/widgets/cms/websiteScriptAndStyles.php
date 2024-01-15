@@ -194,6 +194,8 @@ if(!array_key_exists('embed', $_REQUEST)){
 
 if($_is_new_cms_editor || $edit_OldEditor){ //$edit_OldEditor defined in websiteRecord.php - if true we use old CMS editor
 ?>
+    <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/editing/editorCodeMirror.js"></script>
+    
     <link rel="stylesheet" href="<?php echo PDIR;?>external/codemirror-5.61.0/lib/codemirror.css">
 
     <script src="<?php echo PDIR;?>external/codemirror-5.61.0/lib/codemirror.js"></script>
@@ -823,7 +825,8 @@ function afterPageLoad(document, pageid, eventdata){
         }
     }
     is_execute_homepage_custom_javascript = false;
-    
+
+    $('#main-content-container').scrollTop(0); // reset scroll
 
     // add current page as url parameter in browser url
     if(!is_embed){ 
@@ -970,6 +973,8 @@ function initLinksAndImages($container, search_data){
 
     if(!$container){
         $container = $('body');
+    }else{
+        $container = $($container);
     }
     
     

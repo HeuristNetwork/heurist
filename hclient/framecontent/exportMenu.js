@@ -45,6 +45,40 @@ function hexportMenu( container ) {
             }
         }
 
+        let outputs = window.hWin.HEURIST4.util.getUrlParameter('output', location.search);
+        if(outputs && outputs != 'all'){
+
+            outputs = outputs.split(',');
+
+            if(outputs.length == 1){
+                container.find(`#menu-export-${outputs[0]} > button`).click();
+            }else{
+
+                let $dlg;
+                let msg = 'Select an export format: <select style="margin-left: 10px;">';
+                for(const format of outputs){
+                    msg += `<option>${format}</option>`;
+                }
+                msg += '</select>';
+
+                let btns = {};
+                btns['Export'] = function(){
+
+                    let format = $dlg.find('select').val();
+                    container.find(`#menu-export-${format} > button`).click();
+
+                    $dlg.dialog('close');
+
+                    window.close();
+                };
+                btns['Close'] = function(){
+                    $dlg.dialog('close');
+                    window.close();
+                };
+
+                $dlg = window.hWin.HEURIST4.msg.showMsgDlg(msg, btns, {title: 'Export records', yes: 'Export', no: 'Close'}, {default_palette_class: 'ui-heurist-publish'});
+            }
+        }
     }
     
     
@@ -354,7 +388,7 @@ function hexportMenu( container ) {
             */
             
             params =  params + (opts.linksMode?('&linkmode='+opts.linksMode):'');  
-            
+
             if(opts.format=='hml'){
                 script = 'export/xml/flathml.php';                
 

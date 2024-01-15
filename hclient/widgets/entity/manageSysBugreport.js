@@ -29,12 +29,12 @@ $.widget( "heurist.manageSysBugreport", $.heurist.manageEntity, {
     
     _init: function() {
         
-        this.options.title = 'Bug Report';
+        this.options.title = 'Heurist feedback';
         this.options.edit_mode = 'editonly';
         this.options.select_mode = 'manager';
         this.options.layout_mode = 'editonly';
-        this.options.width = 700;
-        this.options.height = 825;
+        this.options.width = 750;
+        this.options.height = 912;
 
         this._super();
     },
@@ -89,31 +89,77 @@ $.widget( "heurist.manageSysBugreport", $.heurist.manageEntity, {
             ele.fileupload('option','pasteZone',this._as_dialog);
         }
 
+        // Add default values to report type and url
+        this._editing.getFieldByName('2-2', 'Suggestion / feature request', false);
+        this._editing.getFieldByName('3-1058', location.href, false);
+
 		// Add spacing between fields, and give textarea's larger height
         var eles = this._editing.getAllFields();
+        let help = '';
         for(var i = 0; i < eles.length; i++){ // ignore last element (image field)
 
             var $ele = $(eles[i]);
 
             if($ele.find('textarea').length != 0 || $ele.find('.fileupload').length != 0){
-                $ele.css({'padding-top': '2.2em', 'display': 'block'});
+                $ele.css({'padding-top': '10px', 'display': 'block'});
+            }else if($ele.attr('data-dtid') == '2-2'){
 
-                if($ele.find('textarea').length != 0){
-                    setTimeout(function(idx){ $(eles[idx]).find('textarea').attr('rows', 14); }, 1500, i);
-                }
+                $ele.hide();
+
+                let $input = $ele.find('input');
+
+                let report_types = '<label><input type="checkbox" name="report_types" value="Suggestion / feature request" checked="checked">Suggestion / feature request</label>'
+                                 + '<label style="margin-left: 5px"><input type="checkbox" name="report_types" value="Minor annoyance">Minor annoyance</label>'
+                                 + '<label style="margin-left: 5px"><input type="checkbox" name="report_types" value="Major annoyance">Major annoyance</label>'
+                                 + '<label style="margin-left: 5px"><input type="checkbox" name="report_types" value="Minor bug">Minor bug</label>'
+                                 + '<label style="margin-left: 5px"><input type="checkbox" name="report_types" value="Significant bug">Significant bug</label>'
+                                 + '<label style="margin-left: 5px"><input type="checkbox" name="report_types" value="Urgent bug">Urgent bug</label>';
+
+                let $types = $('<div>', {
+                    html: report_types,
+                    style: 'font-weight: bold;display: block;text-align: center;margin-bottom: 15px;',
+                    id: 'report_types_sel'
+                }).insertBefore($ele);
+
+                this._on($types, {
+                    change: function(event){
+
+                        let val = $(event.target).val();
+                        let cur_val = $input.val();
+                        let remove = !$(event.target).is(':checked');
+
+                        if(remove && cur_val.indexOf(val) === -1){
+                            return;
+                        }
+                        if(!remove){
+                            cur_val = cur_val == '' ? val : `${cur_val}, ${val}`;
+                        }else{
+                            cur_val = cur_val.split(', ');
+                            let idx = cur_val.indexOf(val);
+                            cur_val.splice(idx, 1);
+                            cur_val = cur_val.join(', ');
+                        }
+
+                        $input.val(cur_val).change();
+                    }
+                });
             }else{
-                // text input, first element
-                $ele.css({'padding-top': '1.2em', 'display': 'block'});
+
+                let $before = help === '' ? this._as_dialog.find('#report_types_sel') : $ele;
+                let padding = `padding: ${help === '' ? '0px' : '10px'} 15px 20px;`;
+                if(help === ''){
+                    help = 'We value your feedback and do our best to fix bugs rapidly and to incorporate your suggestions into our development process.<br>'
+                         + 'Please don\'t hesitate to let us know about anything which annoys you or which you feel could be improved.<br><br>'
+                         + 'We pop this form up monthly to encourage your feedback. It is accessible at any time through Help > Feedback / bug report.';
+                }else{
+                    help = 'It is very helpful if you can provide a screen capture for annoyances and bug reports,<br>'
+                         + 'or an annotated screen capture or drawing for feature requests.';
+                }
                 // add extra info at top
-				var $extra_info = $('<div>')
-                                    .append('<div class="header">')
-                                    .append($ele.find('span.editint-inout-repeat-button').clone())
-                                    .append('<div class="input-cell">');
-
-                $extra_info.find('div.input-cell')
-                            .html('For bug reports it is very helpful if you can provide a screen capture,<br>preferably of the whole screen including the URL');
-
-                $ele.parent().prepend($extra_info);
+				$('<div>', {
+                    html: help,
+                    style: `${padding} display: block;font-size: 12px;`
+                }).insertBefore($before);
             }
         }
     },    

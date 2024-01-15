@@ -318,16 +318,48 @@ $.widget( "heurist.lookupOpentheso", $.heurist.recordAction, {
 
             res['ext_url'] = recset.fld(rec, 'uri'); // add Opentheso link
 
-            if(this.options.mapping.options.create_terms === true || this.options.mapping.options.create_type == 'enum'){
-                let dtyID = this.options.mapping.fields.term_field;
-                res[dtyID] = [{
-                    'label': recset.fld(rec, 'label'),
-                    'desc': recset.fld(rec, 'desc'),
-                    'code': recset.fld(rec, 'code'),
-                    'uri': recset.fld(rec, 'uri'),
-                    'translations': recset.fld(rec, 'translations')
-                }];
+            for(const field in this.options.mapping.fields){
+
+                let dtyID = this.options.mapping.fields[field];
+
+                if(window.hWin.HEURIST4.util.isempty(dtyID)) { continue; }
+                else if(!res[dtyID]) { res[dtyID] = []; }
+
+                if(field == 'term_field'){
+    
+                    let type = $Db.dty(dtyID, 'dty_Type');
+                    let trm_val = {
+                        'label': recset.fld(rec, 'label'),
+                        'desc': recset.fld(rec, 'desc'),
+                        'code': recset.fld(rec, 'code'),
+                        'uri': recset.fld(rec, 'uri'),
+                        'translations': recset.fld(rec, 'translations')
+                    };
+    
+                    if(type != 'enum'){
+                        trm_val = type == 'blocktext' ? JSON.stringify(trm_val) : trm_val['label']; // Object.values(trm_val).join(' ; ')
+                    }
+    
+                    trm_val = Array.isArray(trm_val) ? trm_val : [trm_val];
+
+                    res[dtyID] = res[dtyID].concat(trm_val);
+                }else{
+
+                    let fld = field.slice(5);
+
+                    let value = recset.fld(rec, fld);
+
+                    if(fld == 'translations'){
+                        value = Object.keys(value).map((lang) => `${lang}: ${value[lang]}`);
+                    }
+
+                    value = Array.isArray(value) ? value : [value];
+
+
+                    res[dtyID] = res[dtyID].concat(value);
+                }
             }
+
             this.closingAction(res);
         }
     },
