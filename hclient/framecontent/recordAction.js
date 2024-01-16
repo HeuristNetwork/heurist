@@ -47,7 +47,7 @@ function hRecordAction(_action_type, _scope_type, _field_type, _field_value) {
         init_field_value = _field_value,
         repositories = ['Nakala'], // list of repositories
         _allow_empty_replace = false,
-        _default_exxceptions = []; // array of default exceptions for case conversions
+        _default_exceptions = []; // array of default exceptions for case conversions
 
 
     /*
@@ -478,7 +478,7 @@ function hRecordAction(_action_type, _scope_type, _field_type, _field_value) {
 
             let $widget_upload = $('#uploadWidget').hide();
             let $btn_upload = $('#uploadFile').button().on('click', function(e){ console.log($widget_upload);
-                $widget_upload.click(); // trigger file upload
+                $widget_upload.trigger('click'); // trigger file upload
             });
             $widget_upload.fileupload({
                 url: window.hWin.HAPI4.baseURL +  'hserv/controller/fileUpload.php',
@@ -509,13 +509,13 @@ function hRecordAction(_action_type, _scope_type, _field_type, _field_value) {
                     var inpt = this;
                     $btn_upload.off('click');
                     $btn_upload.on({click: function(){
-                        $(inpt).click();
+                        $(inpt).trigger('click');
                     }});                
                 }
             });
 
-            if(_default_exxceptions.length > 0){
-                $('#except_default').val(_default_exxceptions.join('\n'));
+            if(_default_exceptions.length > 0){
+                $('#except_default').val(_default_exceptions.join('\n'));
             }
 
             $('#div_widget').css('padding-left', '0px');
