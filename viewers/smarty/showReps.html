@@ -398,7 +398,9 @@ ul#rep_list.menu li ul {
         <!-- editor -->
         <div id="editorcontainer" class="ui-layout-north" style="display:none">
             <h3>Template <span id="edTemplateName"></span></h3>
-
+            
+            <label id="lblFormula" style="font-size:12px;left: 296px;position: absolute;font-weight:bold;display:none">Formula (Smarty code)</label>
+            
             <div style="position:absolute;top:4px;right:20px;">
                 <button onClick="doEditor(2)" id="btnSave" title="Save, Close and Execute the updated template">Save</button>
                 <button onClick="doEditor(1)" id="btnSaveAs">Save As</button>
@@ -406,17 +408,19 @@ ul#rep_list.menu li ul {
                 -->
                 <button onClick="doEditor(0)">Close Editor</button>
             </div>
-
+            
             <div id="templateCode">
                 <!-- PLAIN MODE <textarea id="edTemplateBody" name="edTemplateBody"></textarea>
                 <div id="editor"></div>-->
             </div>
             <div id="templateTree" style="bottom:25px;position: absolute;right: 5px;top: 30px;width: 270px;font-size:0.8em">
-                <div style="padding:5px">
-                    <a href="../../context_help/smarty_reports.html" class="heurist-helper3" style="float:right;padding-right:14px"
+                <div>
+                    <div id="divHelpLink" style="height:11px">
+                        <a href="../../context_help/smarty_reports.html" class="heurist-helper3" style="float:right;padding-right:14px"
                         onClick="window.hWin.HEURIST4.msg.showDialog( this.href );return false;"
                         title="Read full documentation on the Smarty templating language">
-                        <b>Help on using this function</b></a><br />
+                        <b>Help on using this function</b></a>
+                    </div>
                     <div style="margin:10px 0px;">
                         <label style="font-weight:bold;width:auto;">Select Type</label><select id="rectype_selector"></select>
                     </div>

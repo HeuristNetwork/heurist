@@ -52,7 +52,8 @@
                         "rst_RequirementType":"required",
                         "rst_DisplayName":"Code:",
                         "rst_DisplayHelpText": "",
-                        "rst_DisplayWidth":40 
+                        "rst_DisplayWidth":40,
+                        "rst_Display":"hidden"        
                     }
                 },
                 {

@@ -3878,7 +3878,7 @@ $.widget( "heurist.editing_input", {
             var that = this;
             
             this._on( $btn_calcfield,{ click: function(){ 
-                window.hWin.HEURIST4.dbs.editCalculatedField( this.options.dtFields['rst_CalcFunctionID'],
+                window.hWin.HEURIST4.dbs.editCalculatedField( this.options.dtFields['rst_CalcFunctionID'], 
                     function(){
                         //refresh value
                         if(!(that.options.recID>0)) return;

@@ -50,6 +50,10 @@ $.widget( "heurist.manageDefCalcFunctions", $.heurist.manageEntity, {
                 this.options.height = 600;
             }
         }
+        
+        this.options.edit_height =640;
+        this.options.edit_width = 900;
+        
 
         this._super();
     },
@@ -104,6 +108,7 @@ $.widget( "heurist.manageDefCalcFunctions", $.heurist.manageEntity, {
             this.searchForm.css({'height':iheight+'em',padding:'10px'});
             this.recordList.css({'top':iheight+0.5+'em'});
             
+            this.recordList.resultList('option','rendererHeader','');
             this.recordList.resultList('option','show_toolbar',false);
             this.recordList.resultList('option','view_mode','list');
             //this.recordList.resultList('option','recordview_onselect','none');
@@ -181,6 +186,26 @@ $.widget( "heurist.manageDefCalcFunctions", $.heurist.manageEntity, {
     _afterInitEditForm: function(){
 
         this._super();
+        
+        //add form to edit smarty snippet
+        this.dosframe = $( "<iframe>" )
+                    .css({'overflow-x': 'none !important', height:'400px', width:'100% !important'})
+                    .appendTo( this.editForm );
+           
+        var that = this;            
+        var surl = window.hWin.HAPI4.baseURL + 'viewers/smarty/showReps.html?db=' + window.hWin.HAPI4.database;
+        
+        this.dosframe.on('load', function(){
+            
+           var showReps = that.dosframe[0].contentWindow.showReps; 
+            
+           showReps.initSnippetEditor( that._editing.getValue('cfn_FunctionSpecification')[0], null, 
+            function(instance){
+                that._editing.setFieldValueByName2('cfn_FunctionSpecification', instance.getValue());
+            });
+        });
+        
+        this.dosframe.attr('src', surl).show();
     
     },
 
@@ -188,7 +213,8 @@ $.widget( "heurist.manageDefCalcFunctions", $.heurist.manageEntity, {
     // header for resultList
     //     
     _recordListHeaderRenderer:function(){
-        
+        return '';
+        /*
         function __cell(colname, width){
           //return '<div style="display:table-cell;width:'+width+'ex">'+colname+'</div>';            
           return '<div style="width:'+width+'ex">'+colname+'</div>';            
@@ -196,7 +222,7 @@ $.widget( "heurist.manageDefCalcFunctions", $.heurist.manageEntity, {
         
         //return '<div style="display:table;height:2em;width:99%;font-size:0.9em">'
         return __cell('Calculation title',120);
-                    
+        */            
     },
     
     //----------------------
@@ -220,7 +246,7 @@ $.widget( "heurist.manageDefCalcFunctions", $.heurist.manageEntity, {
         var recID   = fld('cfn_ID');
         
         var html = '<div class="recordDiv" id="rd'+recID+'" recid="'+recID+'">'
-                + fld2('cfn_Name','120ex');
+                + fld2('cfn_Name','50ex');
         
         // add edit/remove action buttons
         if(true || (this.options.select_mode=='manager' && this.options.edit_mode=='popup')){
@@ -228,22 +254,21 @@ $.widget( "heurist.manageDefCalcFunctions", $.heurist.manageEntity, {
                 + '<div class="logged-in-only" style="width:90px;display: inline-block">'
                 + '<div title="Click to edit calculation" class="ui-button ui-widget ui-state-default ui-corner-all ui-button-icon-only" role="button" aria-disabled="false" data-key="edit"  style="height:16px">'
                 +     '<span class="ui-button-icon-primary ui-icon ui-icon-pencil"></span><span class="ui-button-text"></span>'
-                + '</div>'
-/*                
-                + this._defineActionButton({key:'edit-formula',label:'Formula', title:'', icon:'ui-icon-calculator-b'}, 
-                                null,'icon_text');
-*/                
+                + '</div>'              
+/*
                 + '<div title="Click to edit calculation formula" class="ui-button ui-widget ui-state-default ui-corner-all ui-button-icon-only" role="button" aria-disabled="false" data-key="edit-formula"  style="height:16px">'
                 +     '<span class="ui-button-icon-primary ui-icon ui-icon-calculator-b"></span><span class="ui-button-text"></span>'
                 + '</div>'
-                
+*/                
                 +'<div title="Click to delete calculation" class="ui-button ui-widget ui-state-default ui-corner-all ui-button-icon-only" role="button" aria-disabled="false" data-key="delete"  style="height:16px;padding-left:20px">'
                 +     '<span class="ui-button-icon-primary ui-icon ui-icon-circle-close"></span><span class="ui-button-text"></span>'
                 + '</div></div>';
         }
         //<div style="float:right"></div>' + '<div style="float:right"></div>
         
-        html = html + '</div>';
+        html = html 
+            + fld2('cfn_FunctionSpecification','50%')
+            + '</div>';
 
         return html;
         
