@@ -46,7 +46,8 @@ function hRecordAction(_action_type, _scope_type, _field_type, _field_value) {
         init_field_type = _field_type,
         init_field_value = _field_value,
         repositories = ['Nakala'], // list of repositories
-        _allow_empty_replace = false;
+        _allow_empty_replace = false,
+        _default_exceptions = []; // array of default exceptions for case conversions
 
 
     /*
@@ -227,6 +228,7 @@ function hRecordAction(_action_type, _scope_type, _field_type, _field_value) {
             case 'extract_pdf':
             case 'url_to_file':
             case 'local_to_repository':
+            case 'case_conversion':
                 $('#div_sel_fieldtype').show();
                 _fillSelectFieldTypes();
                 break;
@@ -307,6 +309,8 @@ function hRecordAction(_action_type, _scope_type, _field_type, _field_value) {
                 allowed = ['blocktext'];    
             }else if(action_type=='url_to_file' || action_type=='local_to_repository'){
                 allowed = ['file'];    
+            }else if(action_type=='case_conversion'){
+                allowed = ['freetext','blocktext'];
             }
 
             window.hWin.HEURIST4.ui.createRectypeDetailSelect(fieldSelect, rtyIDs, allowed, null);
@@ -438,6 +442,83 @@ function hRecordAction(_action_type, _scope_type, _field_type, _field_value) {
         }else if(action_type=='merge_delete_detail'){ //@todo
             _createInputElement('fld-1', window.hWin.HR('Value to remove'), init_field_value);
             _createInputElement('fld-2', window.hWin.HR('Or repalce it with'));
+        }else if(action_type=='case_conversion'){
+
+            if($('#case_convert_op').length == 0){ // add extra field
+                $('<div style="padding: 0.2em; width: 100%;" class="input">'
+                    + '<div class="header" style="padding-right: 16px;"><label>Conversion type:</label></div>'
+                    + '<select id="case_convert_op" class="ui-widget-content ui-corner-all">'
+                        + '<option value="1">Lowercase, capital at start of field, capitalise after fullstop followed by newline or space</option>'
+                        + '<option value="2">Lowercase, capitalise start of each word</option>'
+                        + '<option value="3">All lowercase</option>'
+                        + '<option value="4">All capitals</option>'
+                    + '</select>'
+                + '</div>').insertAfter('#div_sel_fieldtype');
+            }else{
+                $('#case_convert_op').parent().show();
+            }
+
+            $('<h3 style="margin: 0px;">Exceptions</h3>'
+            + `<div style="font-size: 12px;display: block; padding: 10px 0px;">${window.hWin.HR('case_conversion_add')}</div>`
+            + '<div style="display: block; padding: 5px 0px;"> OR '
+                + '<input id="uploadWidget" type="file" style="display:none;"><button id="uploadFile">Upload file</button> encoding: '
+                + '<select id="except_encode" class="ui-widget-content ui-corner-all"></select>'
+            + '</div>'
+            + '<div style="display: inline-block;padding: 5px 20px 5px 50px;">'
+                + '<div style="display: block;"><strong>Configurable</strong></div>'
+                + '<textarea id="except_user" rows="25" cols="40"></textarea>'
+            + '</div>'
+            + '<div style="display: inline-block;padding: 5px 50px 5px 20px;">'
+                + '<div style="display: block;"><strong>Pre-defined</strong> <span style="font-size: 10px">(may be temporarily edited)</span></div>'
+                + '<textarea id="except_default" rows="25" cols="40"></textarea>'
+            + '</div>').appendTo($fieldset);
+
+            window.hWin.HEURIST4.ui.initHSelect($('#case_convert_op')[0], true);
+            window.hWin.HEURIST4.ui.createEncodingSelect($('#except_encode'));
+
+            let $widget_upload = $('#uploadWidget').hide();
+            let $btn_upload = $('#uploadFile').button().on('click', function(e){ console.log($widget_upload);
+                $widget_upload.trigger('click'); // trigger file upload
+            });
+            $widget_upload.fileupload({
+                url: window.hWin.HAPI4.baseURL +  'hserv/controller/fileUpload.php',
+                formData: [ {name:'db', value: window.hWin.HAPI4.database}, 
+                            {name:'entity', value:'temp'}, //to place file into scratch folder
+                            {name:'max_file_size', value:1024*1024}], //'1024*1024'
+                autoUpload: true,
+                sequentialUploads:true,
+                dataType: 'json',
+                done: function (e, response) {
+                    response = response.result;
+                    if(response.status==window.hWin.ResponseStatus.OK){ console.log(e, response);
+                        let data = response.data;
+                        $.each(data.files, function (index, file) {
+                            if(file.error){
+                                $('#except_user').val(file.error);
+                            }else{
+                                let url_get = file.deleteUrl.replace('fileUpload.php','fileGet.php')
+                                    +'&encoding='+$('#except_encode').val()+'&db='+window.hWin.HAPI4.database;
+                                
+                                $('#except_user').load(url_get, null);
+                            }
+                        });
+                    }else{
+                        window.hWin.HEURIST4.msg.showMsgErr(response.message);
+                    }
+                     
+                    var inpt = this;
+                    $btn_upload.off('click');
+                    $btn_upload.on({click: function(){
+                        $(inpt).trigger('click');
+                    }});                
+                }
+            });
+
+            if(_default_exceptions.length > 0){
+                $('#except_default').val(_default_exceptions.join('\n'));
+            }
+
+            $('#div_widget').css('padding-left', '0px');
         }
 
     }
@@ -708,6 +789,17 @@ function hRecordAction(_action_type, _scope_type, _field_type, _field_value) {
             }else if(action_type=='extract_pdf'){
                 
                 request['a'] = action_type;
+            }else if(action_type=='case_conversion'){
+
+                request['a'] = action_type;
+
+                request['op'] = $('#case_convert_op').val();
+
+                let except = $('#except_user').val();
+                except = except.split('\n').join('|');
+                except += $('#except_default').val().split('\n').join('|');
+
+                request['except'] = except;
             }
 
         }

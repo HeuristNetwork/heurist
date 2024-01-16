@@ -2143,6 +2143,217 @@ public methods
     }
 
     /**
+     * Change letter cases fo values found in freetext and blocktext (memo) fields based on selection:
+     *  1 - Lowercase, uppercase first letter + first letter following fullstops
+     *  2 - Lowercase, uppercase first letter of each word
+     *  3 - All lowercase
+     *  4 - All capital
+     * Also changes words/phrases based on list of exceptions (performed last to avoid further editing)
+     * Exceptions can be array or '|' separated list
+     * 
+     * @return false|array - false on error | array with keys processed (records with updated vaules), undefined (no values) and errors (encountered an SQL error)
+     */
+    public function caseConversion(){
+
+        if(!$this->_validateParamsAndCounts()){
+            return false;
+        }else if (!is_array(@$this->recIDs) || count($this->recIDs)==0){
+            return $this->result_data;
+        }
+
+        $mysqli = $this->system->get_mysqli();
+        $date_mode = date('Y-m-d H:i:s'); // for tags, rec_modified and dtl_modified
+
+        $operation = intval($this->data['op']); // number corresponding to an operation below
+        $doc = new DOMDocument; // for handling html text
+
+        // Prepare exceptions list
+        $exceptions = empty(@$this->data['except']) ? array() : $this->data['except'];
+        if(!is_array($exceptions)){
+            $exceptions = explode('|', $exceptions);
+        }
+
+        if(!empty($exceptions)){
+            $new_excepts = array();
+
+            foreach ($exceptions as $value) {
+                if(empty($value)){
+                    continue;
+                }
+
+                array_push($new_excepts, $mysqli->real_escape_string($value));
+            }
+
+            $exceptions = $new_excepts;
+        }
+
+        // Regular expressions for operations
+        $regex = $operation == 1 ? '(\.\s+)(\w+)' : '';
+        $regex = $operation != 1 ? '\w+' : $regex;
+
+        // Temp tags for HTML handling, loadHTML will tend to add paragraph tags if no outer tag exists
+        $temp_open = "<span data-t='zzz_temp'>";
+        $temp_close = "</span>";
+
+        // Callback function for regex functions
+        $callback = function($match) use ($operation){
+
+            if($operation == 1){
+                // lowercase then capitalise first letter + first letter following full stop
+
+                $word = mb_strtolower($match[2]);
+
+                $first = mb_substr($word, 0, 1);
+                $remainder = mb_substr($word, 1, null);
+
+                return $match[1] . mb_strtoupper($first) . $remainder;
+
+            }else if($operation == 2){
+                // lowercase then capitalise first letter for all words
+
+                if(strlen($match[0]) == 1 || mb_ereg("[a-z][A-Z]|[A-Z][a-z]", $match[0])){ // skip if one letter or camel case
+                    return $match[0];
+                }
+
+                $word = mb_strtolower($match[0]);
+
+                $first = mb_substr($word, 0, 1);
+                $remainder = mb_substr($word, 1, null);
+
+                return mb_strtoupper($first) . $remainder;
+
+            }else if($operation == 4){ // all capital
+                return mb_strtoupper($match[0]);
+            }else if($operation == 3){ // all lower
+                return mb_strtolower($match[0]);
+            }
+        };
+
+        // Field details
+        $dtyID = intval($this->data['dtyID']);
+        $dtyName = (@$this->data['dtyName'] ? "'".$this->data['dtyName']."'" : "id:".$this->data['dtyID']);
+        $baseTag = "~replace case convert $dtyName $date_mode";
+
+        // Check field is freetext or blocktext
+        $fld_type = mysql__select_value($mysqli, 'SELECT dty_Type FROM defDetailTypes WHERE dty_ID = ' . $dtyID);
+        if($dtyID < 1 || ($fld_type != 'freetext' && $fld_type != 'blocktext')){
+            $this->system->addError(HEURIST_INVALID_REQUEST, 'Case conversion only works on valid freetext and blocktext fields');
+            return false;
+        }
+
+        // Validate operation value
+        if($operation < 1 || $operation > 4){
+            $this->system->addError(HEURIST_INVALID_REQUEST, 'Provided operation is not handled by case converter');
+            return false;
+        }
+
+        //$keep_autocommit = mysql__begin_transaction($mysqli);
+
+        // Setup report variable
+        $completed_recs = array();
+        $skipped_recs = array();
+        $sql_errors = array();
+
+        // Cycle through records
+        foreach ($this->recIDs as $recID){
+
+            $res = $mysqli->query("SELECT dtl_ID, dtl_Value FROM recDetails WHERE dtl_DetailTypeID = $dtyID AND dtl_RecID = $recID");
+
+            if(!$res){
+                $sql_errors[$recID] = $mysqli->error;
+                continue;
+            }else if($res->num_rows == 0){ // no values within field
+                array_push($skipped_recs, $recID);
+                continue;
+            }
+
+            $sql_errors[$recID] = array();
+
+            // Cycle through values
+            while($values = $res->fetch_row()){
+
+                $value = '';
+
+                if($values[1] != strip_tags($values[1])){ // potentially has HTML
+
+                    $value = $temp_open.$values[1].$temp_close; // add temp tags, to avoid extra elements
+
+                    $doc->loadHTML($value, LIBXML_HTML_NOIMPLIED | LIBXML_HTML_NODEFDTD); // load html
+
+                    $xpath = new DOMXPath($doc); // retrieve text only
+                    $text_nodes = $xpath->query('//text()');
+
+                    foreach($text_nodes as $node){
+                        $node->data = mb_ereg_replace_callback($regex, $callback, $node->data);
+                    }
+
+                    $value = $doc->saveHTML(); // save new value
+
+                    // strip temp tags
+                    $value = mb_substr($value, strlen($temp_open));
+                    $value = mb_substr($value, 0, mb_strlen($value) - strlen($temp_close) - 1);
+
+                }else{ // normal text
+
+                    $value = mb_ereg_replace_callback($regex, $callback, $values[1]);
+    
+                    if($operation == 1 && !empty($value)){ // capitalise first letter
+    
+                        $first = mb_substr($value, 0, 1);
+                        $remainder = mb_strlen($value) == 1 ? "" : mb_substr($value, 1, null);
+    
+                        $value = mb_strtoupper($first) . $remainder;
+                    }
+                }
+
+                if(empty($value)){ // ensure there is a value to save
+                    continue;
+                }
+
+                foreach($exceptions as $except){ // apply exceptions
+                    if(mb_eregi("\b$except\b", $value)){ // check if exception appears in string
+                        $value = mb_eregi_replace("\b$except\b", $except, $value); // replace
+                    }
+                }
+
+                // Update details value + modified
+                $dtl_rec = array('dtl_ID' => intval($values[0]), 'dtl_Value' => $value, 'dtl_Modified' => $date_mode);
+
+                $ret = mysql__insertupdate($mysqli, 'recDetails', 'dtl', $dtl_rec);
+                if(!is_numeric($ret)){
+                    $sql_errors[$recID][] = $ret;
+                    continue;
+                }
+
+                // Update record modified
+                $ret = mysql__insertupdate($mysqli, 'Records', 'rec', array('rec_ID' => $recID, 'rec_Modified' => $date_mode));
+                if(!is_numeric($ret)){
+                    $sql_errors[$recID][] = $ret;
+                    continue;
+                }
+
+            }
+
+            array_push($completed_recs, $recID);
+            if(!empty($sql_errors[$recID])){
+                $sql_errors[$recID] = implode(' ; ', $sql_errors[$recID]);
+            }else{
+                unset($sql_errors[$recID]);
+            }
+        }
+
+        // Final touches to report
+        $this->_assignTagsAndReport('processed', $completed_recs, $baseTag);
+        $this->_assignTagsAndReport('undefined', $skipped_recs, $baseTag);
+        $this->_assignTagsAndReport('errors',  $sql_errors, $baseTag);
+
+        $this->result_data['undefined'] = count($skipped_recs);
+        $this->result_data['undefined_list'] = $skipped_recs;
+        
+        return $this->result_data;
+    }
+
+    /**
      * Upload file to an external repository
      */
     public function uploadFileToRepository(){
