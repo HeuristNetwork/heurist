@@ -240,7 +240,7 @@ function editCMS_ElementCfg( element_cfg, _layout_content, _layout_container, $c
 
         //4b. listeners for styles (border,bg,margin)
         cont.find('input[data-type="css"]').change(_getCss);
-        cont.find('input[data-type="css"]').change(_getCss);
+        cont.find('input[data-type="css"]').on('keyup', _getCss);
         cont.find('input[name="background"]').change(_getCss);
         /*
             var css = _getCss();
@@ -317,7 +317,7 @@ function editCMS_ElementCfg( element_cfg, _layout_content, _layout_container, $c
 
             _assignCssToUI();
            
-        });
+        }).trigger('change');
         
         
         var btnDirectEdit = cont.find('div.btn-html-edit');
@@ -578,16 +578,84 @@ function editCMS_ElementCfg( element_cfg, _layout_content, _layout_container, $c
     //
     //
     function _assignCssTextArea(){
-        
-        var s = '';
+
+        let s = '';
+        let has_border_prop = false;
         if(l_cfg.css){
-            var keys = Object.keys(l_cfg.css);
 
             s = [];
-            for(var i=0; i<keys.length; i++){
-                s.push( keys[i]+': '+l_cfg.css[keys[i]] );
-            }            
-            s = s.join(";\n");
+            for(const [style, value] of Object.entries(l_cfg.css)){
+
+                if(style == 'border'){ // translate border property to individual components
+
+                    if(Object.hasOwn(l_cfg.css, 'border-style')){
+                        has_border_prop = true;
+                        continue;
+                    }
+
+                    let parts = value.split(' ');
+
+                    let part_zero_style = (parts.length == 2 && parts[0].indexOf(border_styles) !== -1);
+                    let part_one_style = (parts.length == 2 && parts[1].indexOf(border_styles) !== -1);
+
+                    // Width
+                    if(parts.length == 3 || part_one_style){
+
+                        if(parts[0].indexOf('px') === -1 && isNaN(parts[0])){ // something else
+                            s.push(`${style}: ${value}`);
+                            continue;
+                        }
+
+                        let px = parts[0].indexOf('px') === -1 ? `${parts[0]}px` : parts[0];
+                        s.push(`border-width: ${px}`);
+
+                        l_cfg.css['border-width'] = px;
+                    }
+
+                    // Style
+                    if(parts.length == 1 || part_zero_style){
+                        s.push(`border-style: ${parts[0]}`);
+                        l_cfg.css['border-style'] = parts[0]; console.log(parts[0]);
+                    }else if(parts.length == 3 || part_one_style){
+                        s.push(`border-style: ${parts[1]}`);
+                        l_cfg.css['border-style'] = parts[1]; console.log(parts[1]);
+                    }
+
+                    // Colour
+                    if(parts.length == 3 || part_one_style){
+
+                        let idx = parts.length - 1;
+
+                        if(parts[idx].indexOf('rgb') !== -1){ // change rgb to hex
+
+                            let rgb = parts[idx];
+                            let matches = rgb.matches(/rgb\(\s*(\d+),\s*(\d+),\s*(\d+)\)/);
+
+                            let r = matches?.[1] ? parseInt(matches[1]) : '00';
+                            let g = matches?.[2] ? parseInt(matches[2]) : '00';
+                            let b = matches?.[3] ? parseInt(matches[3]) : '00';
+
+                            parts[idx] = window.hWin.HEURIST4.ui.rgbToHex(r, b, g);
+                        }
+
+                        s.push(`border-color: ${parts[idx]}`);
+
+                        l_cfg.css['border-color'] = parts[idx];
+                    }
+
+                    has_border_prop = true;
+
+                }else{
+                    s.push(`${style}: ${value}`);
+                }
+            }
+
+            if(has_border_prop){
+                delete l_cfg.css['border'];
+            }
+
+            s = s.join(';\n');
+            s += !window.hWin.HEURIST4.util.isempty(s) ? ';' : '';
         }
         
         $container.find('textarea[name="elementCss"]').val(s);    
@@ -659,6 +727,10 @@ function editCMS_ElementCfg( element_cfg, _layout_content, _layout_container, $c
                 fieldset.hide();
             }else{
                 fieldset.css('display','table-row');
+                fieldset.find('[name="border-color"]').trigger('keyup'); // trigger colour change
+            }
+            if(cont.find('#border-style').hSelect('instance') !== undefined){ // update border style dropdown
+                cont.find('#border-style').hSelect('refresh');
             }
             fieldset = cont.find('fieldset[data-section="background"] > div:not(:first)');
             if(cont.find('input[name="background"]').is(':checked')){
