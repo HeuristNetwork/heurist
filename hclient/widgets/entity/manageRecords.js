@@ -4215,8 +4215,9 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
         }
         
         // Icon
-        var ph_gif = window.hWin.HAPI4.baseURL + 'hclient/assets/16x16.gif';
-        var rt_icon = window.hWin.HAPI4.iconBaseURL+this._currentEditRecTypeID;
+        let ph_gif = window.hWin.HAPI4.baseURL + 'hclient/assets/16x16.gif';
+        let rt_icon = window.hWin.HAPI4.iconBaseURL+this._currentEditRecTypeID;
+        let rt_name = $Db.rty(this._currentEditRecTypeID,'rty_Name');
 
         if( this.element.find('.chb_opt_fields').length==0 )
         {  //not inited yet
@@ -4231,13 +4232,13 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
             $('<div style="display:table;min-width:575px;width:100%">'
              +'<div style="display:table-cell;text-align:left;padding:10px 0px 5px 15px;">'
 
-                +'<div style="padding-right:50px;display:inline-block" class="rt-info-header">'
+                +'<div style="padding-right:25px;display:inline-block" class="rt-info-header">'
                     +'<img src="'+ph_gif
                         +'" width=36 height=36 class="rt-icon" style="padding:2px;background-size: 28px 28px;vertical-align:middle;margin: 2px 10px 2px 4px;'
                         +'background-image:url(\'' + rt_icon + '\');"/>'
                     + '<span style="display:inline-block;vertical-align:middle;font-size:larger;font-weight:bold;max-width:25ex;" '
-                    + 'class="truncate" title="'+ $Db.rty(this._currentEditRecTypeID,'rty_Name') +'">'
-                        + $Db.rty(this._currentEditRecTypeID,'rty_Name')
+                    + 'class="truncate" title="'+ rt_name +'">'
+                        + rt_name
                     + '</span>'
                 +'</div>'
 
@@ -4246,13 +4247,13 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
                     +'<span class="btn-edit-rt-back" style="font-size:larger;display:none">Close (&rarr; Data editing)</span>' //Back to Whole Form
                 +'</div>'
              
-                +'<div style="display:inline-block;padding-left:20px">'
+                +'<div style="display:inline-block;padding-left:5px">'
                     +'<label><input type="checkbox" class="chb_show_help" '
                         +(ishelp_on?'checked':'')+'/>Show help</label>'
-                    +'<span class="gap" style="display:inline-block;width:40px"></span>'
+                    +'<span class="gap" style="display:inline-block;width:15px"></span>'
                     +'<label class="lbl_opt_fields"><input type="checkbox" class="chb_opt_fields" '
                         +(isfields_on?'checked':'')+'/>Optional fields</label>'
-                    +'<span class="gap" style="display:inline-block;width:40px"></span>'
+                    +'<span class="gap" style="display:inline-block;width:15px"></span>'
                     +'<span class="div_workflow_stages"><label>Workflow stage popup: </label>'
                         +'<select class="sel_workflow_stages">'
                             +'<option value="new">New records only</option>'
@@ -4260,6 +4261,10 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
                             +'<option value="off">OFF</option>'
                         +'</select>'
                         +'<button id="show_workflow_stages">show</button>'
+                    +'</span>'
+                    +'<span id="rec_visibility" style="padding-left: 5px;">'
+                        +'<span id="icon_rec_visibility" class="ui-icon"></span>'
+                        +'<span id="toggle_rec_visibility"></span>'
                     +'</span>'
                 +'</div>'
 
@@ -4371,6 +4376,34 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
         else{
             this.element.find('.chb_opt_fields').prop('checked', isfields_on);
             this.element.find('.chb_show_help').prop('checked', ishelp_on);
+
+            this.element.find('.rt-info-header img').css('background-image', rt_icon);
+            this.element.find('.rt-info-header span').text(rt_name).attr('title', rt_name);
+        }
+
+        // Toggle record visibility button
+        if(window.hWin.HAPI4.is_admin() || window.hWin.HAPI4.is_member(this._getField('rec_OwnerUGrpID'))){
+
+            let is_public = this._getField('rec_NonOwnerVisibility') == 'public';
+            this.element.find('#icon_rec_visibility').removeClass('ui-icon-eye-crossed ui-icon-eye-open')
+
+            this._on(this.element.find('#toggle_rec_visibility').button(), {
+                click: this._toggleRecordVisibility
+            });
+
+            if(is_public){
+                this.element.find('#icon_rec_visibility').addClass('ui-icon-eye-open');
+                this.element.find('#toggle_rec_visibility')
+                            .attr('title', 'This record is VISIBLE TO THE PUBLIC. Click to set it as hidden from the public')
+                            .button('option', 'label', 'Hide from public');
+            }else{
+                this.element.find('#icon_rec_visibility').addClass('ui-icon-eye-crossed');
+                this.element.find('#toggle_rec_visibility')
+                            .attr('title', 'This record is HIDDEN FROM PUBLIC VIEW. Click to make it visible to the public')
+                            .button('option', 'label', 'Make record public');
+            }
+        }else{
+            this._off(this.element.find('#toggle_rec_visibility'));
         }
 
         //add resizing buttons to dialog title bar
@@ -4582,6 +4615,11 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
             // add '+' button to end of tabs, creates new tab header
             this._addNewTabButton();
 
+            // Hide 'toggle record visibility'
+            if(this.element.find('#rec_visibility').length > 0){
+                this.element.find('#rec_visibility').hide();
+            }
+
             //show the attributes button
             this.element.find('.btn-edit-rt')
                         .show()
@@ -4640,6 +4678,9 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
 
             if(this._swf_rules.length>0){
                 this.element.find('.div_workflow_stages').show();
+            }
+            if(this.element.find('#rec_visibility').length > 0){
+                this.element.find('#rec_visibility').show();
             }
 
             this.element.find('.gap').show();
@@ -6316,5 +6357,56 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
         if(!isSeparator){
             $ele.editing_input('focus');
         }
+    },
+
+    _toggleRecordVisibility: function(){
+
+        const that = this;
+        let new_visibility = this._getField('rec_NonOwnerVisibility') == 'public' ? 'viewable' : 'public';
+        let allowed = window.hWin.HAPI4.is_admin() || window.hWin.HAPI4.is_member(this._getField('rec_OwnerUGrpID'));
+
+        if(!allowed){
+            return;
+        }
+
+        // Check modified
+        if(this._editing.isModified()){
+            
+            let $dlg;
+            let msg = 'You have made changes to the record.<br>In order to update the record\'s visibility it needs to be saved.<br>Do you want to save your changes?';
+            let btns = {};
+
+            btns[window.HR('Save changes')] = function(){
+
+                $dlg.dialog('close');
+
+                that._editing.setFieldValueByName('rec_NonOwnerVisibility', new_visibility);
+
+                that._saveEditAndClose();
+            };
+            btns[window.HR('Drop changes')] = function(){
+
+                $dlg.dialog('close');
+
+                that._initEditForm_step3(that._currentEditID); //reload edit form
+
+                setTimeout(function(){that._toggleRecordVisibility();}, 2500);
+            };
+            btns[window.HR('Cancel')] = function(){
+                $dlg.dialog('close');
+            };
+
+            $dlg = window.hWin.HEURIST4.msg.showMsgDlg(msg, btns, 
+                {title: 'Save record changes', yes: window.HR('Save changes'), no: window.HR('Drop changes'), cancel: window.HR('Cancel')}, 
+                {default_palette_class: 'ui-heurist-populate'});
+
+            return;
+        }
+
+        // Set rec_NonOwnerVisibility
+        this._editing.setFieldValueByName('rec_NonOwnerVisibility', new_visibility);
+
+        // Save record
+        this._saveEditAndClose();
     }
 });
