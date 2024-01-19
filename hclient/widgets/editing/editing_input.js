@@ -1051,6 +1051,29 @@ $.widget( "heurist.editing_input", {
                         .appendTo( $inputdiv );
                 }
 
+                function __openRecordLink(node){
+
+                    const org_href = $(node).attr('href');
+                    let href = '';
+
+                    if(org_href.indexOf('/') !== -1){ // check if href is in the format of record_id/custom_report
+
+                        let parts = org_href.split('/');
+
+                        if(parts.length == 2 && window.hWin.HEURIST4.util.isNumber(parts[0]) && parts[0] > 0){
+                            href = `${window.hWin.HAPI4.baseURL}viewers/smarty/showReps.php?publish=1&db=${window.hWin.HAPI4.database}&q=ids:${parts[0]}&template=${parts[1]}`
+                        }
+                    }else 
+                    if(window.hWin.HEURIST4.util.isNumber(org_href) && org_href > 0){ // check if href is just the record id
+                        href = `${window.hWin.HAPI4.baseURL}?recID=${org_href}&fmt=html&db=${window.hWin.HAPI4.database}`;
+                    }
+
+                    if(!window.hWin.HEURIST4.util.isempty(href)){ // use different url
+                        $(node).attr('href', href);
+                        setTimeout((ele, org_href) => { $(ele).attr('href', org_href); }, 500, node, org_href);
+                    }
+                }
+
                 function __showEditor(is_manual){
                     
                     if(typeof tinymce === 'undefined') return false; //not loaded yet
@@ -1207,13 +1230,17 @@ $.widget( "heurist.editing_input", {
                                                 let target = $dlg.find('#a_target').val();
                                                 let template = $dlg.find('#a_recview').val();
 
-                                                $link.attr('target', target)
+                                                $link.attr('target', target);
 
                                                 if(!window.hWin.HEURIST4.util.isempty(template)){
 
                                                     let new_href = record_id + '/' + template;
 
                                                     $link.attr('href', new_href).attr('data-mce-href', new_href);
+                                                }
+
+                                                if(!$link.text().match(/\w/)){ // if content is empty, replace with href
+                                                    $link.text($link.attr('href'));
                                                 }
 
                                                 $dlg.dialog('close');
@@ -1302,33 +1329,27 @@ $.widget( "heurist.editing_input", {
                                 }
                             });
 
+                            // Catch links opening
                             editor.on('contextmenu', (e) => {
                                 setTimeout(() => {
+
                                     $(document).find('.tox-menu [title="Open link"]').on('click', function(e){
 
                                         let node = tinymce.activeEditor.selection.getNode();
-                                        const org_href = $(node).attr('href');
-                                        let href = '';
 
-                                        if(org_href.indexOf('/') !== -1){ // check if href is in the format of record_id/custom_report
-
-                                            let parts = org_href.split('/');
-
-                                            if(parts.length == 2 && window.hWin.HEURIST4.util.isNumber(parts[0]) && parts[0] > 0){
-                                                href = `${window.hWin.HAPI4.baseURL}viewers/smarty/showReps.php?publish=1&db=${window.hWin.HAPI4.database}&q=ids:${parts[0]}&template=${parts[1]}`
-                                            }
-                                        }else 
-                                        if(window.hWin.HEURIST4.util.isNumber(org_href) && org_href > 0){ // check if href is just the record id
-
-                                            href = `${window.hWin.HAPI4.baseURL}?recID=${href}&fmt=html&db=${window.hWin.HAPI4.database}`;
-                                        }
-
-                                        if(!window.hWin.HEURIST4.util.isempty(href)){ // use different url
-                                            $(node).attr('href', href);
-                                            setTimeout((ele, org_href) => { $(ele).attr('href', org_href); }, 500, node, org_href);
-                                        }
+                                        __openRecordLink(node);
                                     });
+
                                 }, 500);
+                            });
+
+                            editor.on('click', (e) => {
+
+                                let node = tinymce.activeEditor.selection.getNode();
+
+                                if((e.ctrlKey || e.metaKey) && node.tagName == 'A'){
+                                    __openRecordLink(node);
+                                }
                             });
                         },
                         init_instance_callback: function(editor){
@@ -3619,7 +3640,7 @@ $.widget( "heurist.editing_input", {
                             callback: function(location){
                                 if( !window.hWin.HEURIST4.util.isempty(location) ){
                                     
-                                    var geovalue = window.hWin.HEURIST4.geo.wktValueToDescription(location.type+' '+location.wkt);
+                                    var geovalue = window.hWin.HEURIST4.geo.wktValueToDescription(location.type+' '+location.wkt, true);
                                     var geocode = geovalue.summary;
                                     geocode = geocode.replace('X', '');
                                     geocode = geocode.replace('Y', '');

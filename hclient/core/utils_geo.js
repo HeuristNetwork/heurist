@@ -774,7 +774,7 @@ window.hWin.HEURIST4.geo = {
     //
     //
     //
-    wktValueToDescription:function(wkt){
+    wktValueToDescription:function(wkt, simple_polygon = false){
 
         let decPoints = 7; //5
         var matches = wkt.match(/\??(\S+)\s+(.*)/);
@@ -829,7 +829,7 @@ window.hWin.HEURIST4.geo = {
             var extent = resdata._extent;
             let summary = "X "+extent.xmin.toFixed(decPoints)+","+extent.xmax.toFixed(decPoints)
                         +" Y "+extent.ymin.toFixed(decPoints)+","+extent.ymax.toFixed(decPoints);
-            if(type == 'Polygon'){
+            if(type == 'Polygon' && !simple_polygon){
                 decPoints = extent.xmin > 180 || extent.xmax > 180 || extent.xmin < -180 || extent.xmax < -180
                             || extent.ymin > 90 || extent.ymax > 90 || extent.ymin < -90 || extent.ymax < -90 ? 0 : decPoints;
 

@@ -4377,7 +4377,7 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
             this.element.find('.chb_opt_fields').prop('checked', isfields_on);
             this.element.find('.chb_show_help').prop('checked', ishelp_on);
 
-            this.element.find('.rt-info-header img').css('background-image', rt_icon);
+            this.element.find('.rt-info-header img').css('background-image', `url('${rt_icon}')`);
             this.element.find('.rt-info-header span').text(rt_name).attr('title', rt_name);
         }
 
@@ -5044,8 +5044,13 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
         // remove opacity change and set background to lighter background
         let cur_styling = $title_field.find('input').attr('style');
         let cur_title = this._getField('rec_Title');
-        cur_title = window.hWin.HEURIST4.util.isempty(cur_title) ? '&lt;not yet set&gt;'
+        let empty_title = window.hWin.HEURIST4.util.isempty(cur_title);
+
+        cur_title = empty_title ? '&lt;not yet set&gt;'
                         : cur_title.replace(/[\r\n]+/g, ' ');
+
+        cur_title = empty_title ? cur_title : window.hWin.HEURIST4.util.stripTags(cur_title,'u, i, b, strong');
+
         $title_field.find('input')
                     .replaceWith(`<div style="${cur_styling}background-color:#e3f0f0!important;font-size:13px;padding:3px;max-width:${title_maxwidth}px;width:${title_maxwidth}px;cursor:default;"`
                         + ` class="truncate" title="${cur_title}">${cur_title}</div>`);
