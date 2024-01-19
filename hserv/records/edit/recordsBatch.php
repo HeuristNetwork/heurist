@@ -2198,10 +2198,10 @@ public methods
         // Callback function for regex functions
         $callback = function($match) use ($operation){
 
+            $word = $operation == 1 ? $match[2] : $match[0];
+
             if($operation == 1){
                 // lowercase then capitalise first letter + first letter following full stop
-
-                $word = mb_strtolower($match[2]);
 
                 $first = mb_substr($word, 0, 1);
                 $remainder = mb_substr($word, 1, null);
@@ -2211,21 +2211,15 @@ public methods
             }else if($operation == 2){
                 // lowercase then capitalise first letter for all words
 
-                if(strlen($match[0]) == 1 || mb_ereg("[a-z][A-Z]|[A-Z][a-z]", $match[0])){ // skip if one letter or camel case
-                    return $match[0];
+                if(strlen($word) == 1 || mb_ereg("[a-z][A-Z]|[A-Z][a-z]", $word)){ // skip if one letter or camel case
+                    return $word;
                 }
-
-                $word = mb_strtolower($match[0]);
 
                 $first = mb_substr($word, 0, 1);
                 $remainder = mb_substr($word, 1, null);
 
                 return mb_strtoupper($first) . $remainder;
 
-            }else if($operation == 4){ // all capital
-                return mb_strtoupper($match[0]);
-            }else if($operation == 3){ // all lower
-                return mb_strtolower($match[0]);
             }
         };
 
@@ -2246,6 +2240,8 @@ public methods
             $this->system->addError(HEURIST_INVALID_REQUEST, 'Provided operation is not handled by case converter');
             return false;
         }
+
+        $use_reg = $operation < 2; // whether to use the regex functions
 
         //$keep_autocommit = mysql__begin_transaction($mysqli);
 
@@ -2284,7 +2280,11 @@ public methods
                     $text_nodes = $xpath->query('//text()');
 
                     foreach($text_nodes as $node){
-                        $node->data = mb_ereg_replace_callback($regex, $callback, $node->data);
+                        
+                        $text = $operation == 1 || $operation == 3 ? mb_strtolower($node->data) : $node->data;
+                        $text = $operation == 4 ? mb_strtoupper($text) : $text;
+
+                        $node->data = $use_reg ? mb_ereg_replace_callback($regex, $callback, $text) : $text;
                     }
 
                     $value = $doc->saveHTML(); // save new value
@@ -2295,7 +2295,10 @@ public methods
 
                 }else{ // normal text
 
-                    $value = mb_ereg_replace_callback($regex, $callback, $values[1]);
+                    $text = $operation == 1 ? mb_strtolower($values[1]) : $values[1];
+                    $text = $operation == 4 ? mb_strtoupper($text) : $text;
+
+                    $value = $use_reg ? mb_ereg_replace_callback($regex, $callback, $text) : $text;
     
                     if($operation == 1 && !empty($value)){ // capitalise first letter
     

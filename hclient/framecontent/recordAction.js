@@ -477,7 +477,7 @@ function hRecordAction(_action_type, _scope_type, _field_type, _field_value) {
             window.hWin.HEURIST4.ui.createEncodingSelect($('#except_encode'));
 
             let $widget_upload = $('#uploadWidget').hide();
-            let $btn_upload = $('#uploadFile').button().on('click', function(e){ console.log($widget_upload);
+            let $btn_upload = $('#uploadFile').button().on('click', function(e){
                 $widget_upload.trigger('click'); // trigger file upload
             });
             $widget_upload.fileupload({
@@ -490,7 +490,7 @@ function hRecordAction(_action_type, _scope_type, _field_type, _field_value) {
                 dataType: 'json',
                 done: function (e, response) {
                     response = response.result;
-                    if(response.status==window.hWin.ResponseStatus.OK){ console.log(e, response);
+                    if(response.status==window.hWin.ResponseStatus.OK){
                         let data = response.data;
                         $.each(data.files, function (index, file) {
                             if(file.error){
