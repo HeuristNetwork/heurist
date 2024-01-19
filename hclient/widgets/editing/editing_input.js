@@ -1009,7 +1009,10 @@ $.widget( "heurist.editing_input", {
                 $editor.parent().hide();
 
                 //hidden textarea for codemirror editor
-                var codeEditor = new EditorCodeMirror($input);
+                var codeEditor = null;
+                if(typeof EditorCodeMirror !== 'undefined'){
+                    codeEditor = new EditorCodeMirror($input);
+                }
                 
                 var $btn_edit_switcher;
 
@@ -1031,11 +1034,13 @@ $.widget( "heurist.editing_input", {
                         .css({cursor: 'pointer', 'margin-left': '10px'})
                         .appendTo($btn_edit_switcher);
 
-                    $('<span>codeeditor</span>')
-                        .attr('title', 'direct edit html in code editor')
-                        .addClass('smallbutton')
-                        .css({cursor: 'pointer', 'margin-left': '10px'})
-                        .appendTo($btn_edit_switcher);
+                    if(codeEditor){
+                        $('<span>codeeditor</span>')
+                            .attr('title', 'direct edit html in code editor')
+                            .addClass('smallbutton')
+                            .css({cursor: 'pointer', 'margin-left': '10px'})
+                            .appendTo($btn_edit_switcher);
+                    }
                         
                     $('<span>table</span>')
                         .attr('title', 'treats the text as a table/spreadsheet and opens a lightweight spreadsheet editor')
@@ -1464,6 +1469,7 @@ $.widget( "heurist.editing_input", {
                             }
 
                             var sel_action = $(event.target).text();
+                            sel_action = sel_action == 'codeeditor' && !codeEditor ? 'text' : sel_action;
                             if(cur_action == sel_action) return;
                             
                             $btn_edit_switcher.find('span').css('text-decoration', '');

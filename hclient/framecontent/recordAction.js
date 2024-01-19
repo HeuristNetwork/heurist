@@ -586,9 +586,9 @@ function hRecordAction(_action_type, _scope_type, _field_type, _field_value) {
         dtFields['rst_FilteredJsonTermIDTree'] = $Db.dty(dtID, 'dty_JsonTermIDTree');
         dtFields['dtID'] = dtID;
         
-        
-        //@todo set 50 for freetext and resource
-        //dtFields[fi['rst_DisplayWidth']] = 50;
+        if($Db.dty(dtID, 'dty_Type') == 'blocktext'){
+            dtFields['rst_DisplayWidth'] = 80;
+        }
 
         // Allow DB Admins to modify readonly fields
         let update_maymodify = dtFields['rst_MayModify'] == 'locked' && window.hWin.HAPI4.is_admin();
@@ -605,7 +605,7 @@ function hRecordAction(_action_type, _scope_type, _field_type, _field_value) {
             showclear_button: false,
             dtFields:dtFields,
 
-            force_displayheight: (field_type=='blocktext') ? 2 : null
+            force_displayheight: (field_type=='blocktext') ? 10 : null
         };
 
         var ele = $("<div>").attr('id',input_id).appendTo($fieldset);
@@ -698,7 +698,7 @@ function hRecordAction(_action_type, _scope_type, _field_type, _field_value) {
 
             if(action_type=='add_detail'){
                 request['a'] = 'add';
-                request['val'] = getFieldValue('fld-1');
+                request['val'] = getFieldValue('fld-1'); console.log(getFieldValue('fld-1'), $('#fld-1'));
                 if(window.hWin.HEURIST4.util.isempty(request['val'])){
                     alert('Define value to add');
                     return;
