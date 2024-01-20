@@ -269,8 +269,8 @@ number of widgets. Currently it is commented out of the code in layout_default.j
 <!-- loaded dynamically in editing.js
 <script type="text/javascript" src="<?php echo PDIR;?>external/tinymce5/tinymce.min.js"></script>
 -->
-    <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/editing/editorCodeMirror.js"></script>
-    <link rel="stylesheet" href="<?php echo PDIR;?>external/codemirror-5.61.0/lib/codemirror.css">
+<script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/editing/editorCodeMirror.js"></script>
+<link rel="stylesheet" href="<?php echo PDIR;?>external/codemirror-5.61.0/lib/codemirror.css">
 
 <!-- Calendar picker -->
 <script type="text/javascript" src="<?php echo PDIR;?>external/jquery.calendars-1.2.1/jquery.calendars.js"></script>
