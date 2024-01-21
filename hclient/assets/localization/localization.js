@@ -340,6 +340,7 @@ regional['ENG'] = {
         'menu-selected-url-to-file': 'Remote URLs to local files',
         'menu-selected-local-to-repository': 'Local files to remote repository',
         'menu-selected-reset-thumbs': 'Reset thumbnails',
+        'menu-selected-case-conversion': 'Case conversion',
     'Share': '',
         'menu-selected-notify': 'Notify (email)',
         'menu-selected-notify-hint': 'Select one or more records, then click to send notification',
@@ -593,6 +594,7 @@ regional['ENG'] = {
     'url_to_file':'Remote URLs to local files',
     'local_to_repository':'Upload local files to repository',
     'reset_thumbs':'Reset thumbnails',
+    'case_conversion': 'Correct field capitalisations',
 
     //helps
     'record_action_add_record':' ',
@@ -625,6 +627,8 @@ regional['ENG'] = {
     'record_action_url_to_file':'This function fetches files indicated by remote URLs in the specified File field, <br>places them in the database, and replaces the remote URL with a reference to file in the database. Other fields are not affected.',
     'record_action_local_to_repository': 'This function will upload local files within the selected field used by records to the selected repository.<br>The file record is then updated for use as a remote resource, pointing to the repository record.',
     'record_action_reset_thumbs':'This function removes thumbnail for files and external resources for selected scope of records. Thumbnails will be recreated on next demand',
+    'record_action_case_conversion': 'This function converts the chosen field for the records selected in the dropdown to the indicated upper / lower case,<br>format while applying specific rules to a list of words/phases with defined capitalisation.',
+    'case_conversion_add': 'Paste a list of exception words / phrases below, one per line (may include punctuation including spaces)<br>These words / phrases will be converted to the upper/lower case form indicated. Applies to whole words / phrases only.',
     
     //reports
     'record_action_passed': 'Records passed to process',
@@ -644,6 +648,8 @@ regional['ENG'] = {
     'record_action_fails_url_to_file': 'Records with URL that failed to download',   
     
     'record_action_fails_local_to_repository': 'Files that failed to upload to the selected repository',
+
+    'record_action_undefined_case_conversion': 'Records with no values to convert',
     
     'record_action_errors': 'Errors',
 

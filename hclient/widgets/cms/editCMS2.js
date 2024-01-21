@@ -546,42 +546,6 @@ function editCMS2(website_document){
         
         if(supress_conversion!==true && typeof _layout_content === 'string' &&
             _layout_content.indexOf('data-heurist-app-id')>0){ //old format with some widgets
-/* 
-                var $dlg_pce = null;
-
-                var btns = [
-                    {text:window.hWin.HR('Proceed'),
-                        click: function() { 
-                            
-                            $dlg_pce.dialog('close'); 
-                            
-                            var res = window.hWin.layoutMgr.convertOldCmsFormat(_layout_content, _layout_container);
-                            if(res!==false){
-                                _layout_content = res;
-                                var sMsg = '<p>Conversion complete</p>'
-                                window.hWin.HEURIST4.msg.showMsgDlg(sMsg);
-                            }
-                            
-                            _initPage(true);
-                        }
-                    },
-                    {text:window.hWin.HR('Cancel'),
-                        click: function() { 
-                            _initPage(true);
-                            $dlg_pce.dialog('close'); 
-                    }}
-                ];            
- 
-            
-                //trying to convert old format to new one - to json
-                $dlg_pce = window.hWin.HEURIST4.msg.showMsgDlg(
-'<p>Heurist\'s CMS editor has been upgraded to a new system which is both much easier and much more powerful than the original editor and requires an entirely new data format. Heurist will convert most pages automatically to the new editor.</p>'
- 
-+'<p>Unfortunately this page uses complex formatting which we cannot be sure of converting correctly through this automatic process. </p>'
- 
-+'<p>In the meantime you can continue to edit the page using the old web page editor, but please note this editor will be DISCONTINUED at the end of February 2022.</p>',btns,'New website editor'); 
-                 return;
-*/       
 
                             var res = window.hWin.layoutMgr.convertOldCmsFormat(_layout_content, _layout_container);
                             if(res!==false){
@@ -912,11 +876,11 @@ var sMsg = '<p>Heurist\'s CMS editor has been upgraded to a new system which is 
                 preventVoidMoves: true, // Prevent moving nodes 'before self', etc.
                 dragStart: function(node, data) {
 
-                    var is_root = node.getParent().isRootNode();
+                    let is_last_root = node.getParent().isRootNode() && node.getParent().countChildren(false) == 1;
                     var is_cardinal = (node.data.type=='north' || node.data.type=='south' || 
                                node.data.type=='east' || node.data.type=='west' || node.data.type=='center');
                     
-                    return !(is_root || is_cardinal);
+                    return !(is_last_root || is_cardinal);
                 },
                 dragEnter: function(node, data) {
                     if(node.data.type=='cardinal'){
@@ -928,10 +892,10 @@ var sMsg = '<p>Heurist\'s CMS editor has been upgraded to a new system which is 
                 dragDrop: function(node, data) {
                     // data.otherNode - dragging node
                     // node - target
-                    var is_root = node.getParent().isRootNode();
+                    //let is_root = node.getParent().isRootNode();
                     var is_cardinal = (node.data.type=='north' || node.data.type=='south' || 
                                node.data.type=='east' || node.data.type=='west' || node.data.type=='center');
-                    var hitMode = (is_root || is_cardinal)?'child' :data.hitMode;                    
+                    var hitMode = (is_cardinal)?'child' :data.hitMode;                    
                     
                     data.otherNode.moveTo(node, hitMode);    
                     //change layout content and redraw page
@@ -1136,7 +1100,7 @@ var sMsg = '<p>Heurist\'s CMS editor has been upgraded to a new system which is 
             }
 
             var is_folder = node.folder;  //$(item).hasClass('fancytree-folder'); 
-            var is_root = node.getParent().isRootNode();
+            let is_last_root = node.getParent().isRootNode() && node.getParent().countChildren(false) == 1;
             var is_cardinal = (node.data.type=='north' || node.data.type=='south' || 
                 node.data.type=='east' || node.data.type=='west' || node.data.type=='center');
 
@@ -1155,11 +1119,14 @@ var sMsg = '<p>Heurist\'s CMS editor has been upgraded to a new system which is 
             
             //hide element for cardinal and delete for its panes                     
             if(node.data.type!='cardinal'){
-                actionspan += '<span data-action="element" style="display:block;padding:4px"><span class="ui-icon ui-icon-plus" title="Add a new element/widget"></span>Insert</span>';
+                actionspan += '<span data-action="element" style="display:block;padding:4px" title="Add a new element/widget"><span class="ui-icon ui-icon-plus"></span>Insert</span>';
             }
             if(!(is_root || is_cardinal)){
-                actionspan += ('<span data-action="delete" style="display:block;padding:4px"><span class="ui-icon ui-icon-close" title="'
+                actionspan += ('<span data-action="delete" style="display:block;padding:4px" title="Remove element from layout"><span class="ui-icon ui-icon-close" title="'
                     +'Remove element from layout"></span>Delete</span>');
+            }else if(is_last_root){ // display delete, but block action
+                actionspan += ('<span data-action="none" style="display:block;padding:4px" title="Cannot have an empty tree">'
+                    +'<span class="ui-icon ui-icon-delete"></span>Delete</span>');
             }
 
             if(node.data.type=='text'){
@@ -1506,24 +1473,16 @@ function(value){
         var parentnode = node.getParent();
         var parent_container, parent_children, parent_element;
         
-        
-        if(parentnode.isRootNode()){
+        if(parentnode.isRootNode() && parentnode.countChildren(false) == 1){
             //cannot remove root element
-            window.hWin.HEURIST4.msg.showMsgFlash('It is not possible remove root element');
+            window.hWin.HEURIST4.msg.showMsgFlash('It is not possible to remove the last root element');
             return;    
             
-            //parent_children = _layout_content; 
-            //parent_container = _layout_container;
+        }else if(parentnode.isRootNode()){
+            parent_children = _layout_content;
+            parent_container = _layout_container;
         }else{
-            
-            
-            /*
-            if(parentnode.folder && parentnode.countChildren()==1){
-                window.hWin.HEURIST4.msg.showMsgFlash('It is not possible remove the last element in group. Remove the entire group');
-                return;    
-            }
-            */
-            
+
             //remove child
             parent_element = window.hWin.layoutMgr.layoutContentFindElement(_layout_content, parentnode.key);
             parent_children = parent_element.children;
@@ -1597,7 +1556,7 @@ function(value){
         var prevnode = node.getPrevSibling();
         var parentnode = node.getParent();
         var parent_element = window.hWin.layoutMgr.layoutContentFindElement(_layout_content, parentnode.key);
-        parent_children = parent_element.children;
+        parent_children = parent_element ? parent_element.children : _layout_content;
         
         if(prevnode==null){
             idx = 0;

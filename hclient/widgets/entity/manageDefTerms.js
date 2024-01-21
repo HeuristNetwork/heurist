@@ -2700,8 +2700,9 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
 
         if(this.fields_list_div == null){
             //init for the first time
+            let max_h = this.element.height() - 75;
             this.fields_list_div = $('<div class="list_div" '
-                +'style="z-index:999999999;height:auto;max-height:200px;padding:4px;cursor:pointer;overflow-y:auto"></div>')
+                +`style="z-index:999999999;height:auto;max-height:${max_h}px;padding:4px;cursor:pointer;overflow-y:auto"></div>`)
             .css({border: '1px solid rgba(0, 0, 0, 0.2)', margin: '2px 0px', background:'#F4F2F4'})
             .appendTo(this.element);
             this.fields_list_div.hide();
@@ -2761,7 +2762,7 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
                         is_added = true;
                         ele.attr('trm_IDs',ids.join(','))
 						.css({'padding-bottom':'5px'})
-                        .text( s + term_name + (term_code?(' ('+term_code+')'):'') )
+                        .html(` ${s} <strong>${term_name}</strong> ${(term_code?(' ('+term_code+')'):'')} `)
                         .on('click', function(event){
                             //start search the particular term
                             

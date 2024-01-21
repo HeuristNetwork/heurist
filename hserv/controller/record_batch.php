@@ -92,6 +92,10 @@
 
             $res = $dbRecDetails->createSubRecords();
 
+        }else if(@$_REQUEST['a'] == 'case_conversion'){
+
+            $res = $dbRecDetails->caseConversion();
+
         }else {
 
             $system->addError(HEURIST_INVALID_REQUEST, "Type of request not defined or not allowed");

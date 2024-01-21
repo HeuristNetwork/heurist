@@ -2614,8 +2614,10 @@ window.hWin.HEURIST4.dbs = {
 
                         var cfn_record = recset.getFirstRecord();
                         var cfn_Content = recset.fld(cfn_record, 'cfn_FunctionSpecification');
+                        var cfn_Name = recset.fld(cfn_record, 'cfn_Name');
 
-                        //finds affected record types
+                        //find affected record types
+                        //finds all fields with rst_CalcFunctionID = cfn_ID
                         var request = {};
                         request['rst_CalcFunctionID']  = cfn_ID;
                         request['a']          = 'search'; //action
@@ -2634,11 +2636,13 @@ window.hWin.HEURIST4.dbs = {
                                             rectypes.push(rec['rst_RecTypeID']);
                                         });
                                     }
+                                    
+                                    var surl = window.hWin.HAPI4.baseURL + 'viewers/smarty/showReps.html?db=' + window.hWin.HAPI4.database;
 
                                     window.hWin.HEURIST4.msg.showDialog( 
-                                        window.hWin.HAPI4.baseURL + 'viewers/smarty/showReps.html?db=' + window.hWin.HAPI4.database,
+                                        surl,
                                         {width:900, height:700, 
-                                            title: 'Edit formula for calculation field', 
+                                            title: 'Edit calculation field', 
                                             default_palette_class: 'ui-heurist-design', 
                                             params:{content: cfn_Content, rty_IDs:rectypes, rec_ID:0}, 
                                             callback: function(context){

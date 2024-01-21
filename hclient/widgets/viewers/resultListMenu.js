@@ -465,7 +465,10 @@ $.widget( "heurist.resultListMenu", {
             this.detailBatchEditPopup('reset_thumbs', function(){
                 that.reloadSearch();
             });
-           
+
+        }else if(action == "menu-selected-case-conversion"){
+
+            this.detailBatchEditPopup('case_conversion');
 
         }else if(action == "menu-selected-value-delete"){
 
@@ -732,8 +735,11 @@ $.widget( "heurist.resultListMenu", {
         
         var url = window.hWin.HAPI4.baseURL + 'hclient/framecontent/'+script_name+'.php?'
                 +'db='+window.hWin.HAPI4.database+'&action='+action_type;
-                
-        window.hWin.HEURIST4.msg.showDialog(url, {height:510, width:750,
+
+        let height = action_type == 'case_conversion' ? 750 : 510;
+        let width = 750;
+
+        window.hWin.HEURIST4.msg.showDialog(url, {height:height, width:width,
             padding: '0px',
             title: window.hWin.HR(action_type),
             callback: callback,

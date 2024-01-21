@@ -240,7 +240,7 @@
             }
             $rectypeids = prepareIds($rectypeids);
             
-            $querywhere = ' where rty_ID '.(count($rectypeids)>1)?(' IN ('.implode(',', $rectypeids).')') :('='.intval($rectypeids[0]));
+            $querywhere = ' where rty_ID '.(count($rectypeids)>1?(' IN ('.implode(',', $rectypeids).')') :('='.intval($rectypeids[0])));
         } else {
             $querywhere = "";
         }

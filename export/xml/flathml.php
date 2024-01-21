@@ -1861,6 +1861,7 @@ if (@$_REQUEST['filename']) {
 $params = array();
 foreach($_REQUEST as $key=>$value) { $params[$key] = filter_var($value, FILTER_SANITIZE_STRING); }
 
+$params['q'] = @$_REQUEST['q'];
 $params['detail'] = 'ids'; // return ids only
 
 $params['publiconly'] =  $PUBONLY?1:0;

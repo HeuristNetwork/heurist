@@ -892,8 +892,9 @@ function ShowReps( is_snippet_editor ) {
     * Special layour for edit small smarty template for calculated fields and record title masks (in future)
     * 
     */
-    function _initSnippetEditor(template_body, rty_IDs)
+    function _initSnippetEditor(template_body, rty_IDs, onChangeEvent)
     {
+        
         _is_snippet_editor = true;
         
         _initEditorMode('', template_body);
@@ -907,20 +908,34 @@ function ShowReps( is_snippet_editor ) {
         $('.ui-layout-resizer').hide();
         
         $('#editorcontainer').css({background:'none'});
-        $('.actionButtons').css({'right':0, left:'280px', top:'50%',padding:'10px'});
-        $('#templateTree').css({'bottom':0, top:'0px'});
+        $('.actionButtons').css({'right':'0px', left:'280px', top:'50%',padding:'10px'});
+        $('#templateTree').css({'bottom':'0px', top:'0px'});
         $('#templateCode').css({'bottom':'50%', margin:'10px'});
+        $('.rtt-tree').css({top:'60px'});
         $('#edTemplateName').parent().hide();
         $('#selInsertPattern').parent().hide();
         $('#btnSaveAs').hide();
         $('#btnSave').attr('title','');
+        
+        if(onChangeEvent){
+            $('.rtt-tree').css({top:'60px'});
+            $('#btnSaveAs').parent().hide();
+            $('#templateCode').css({'bottom':'50%', top:'10px'});
+            $('#lblFormula').show();
+            $('#divHelpLink').hide();
+            $('#templateTree').css({'padding-top':'0px'});
+            $('#rectype_selector').parent().css({'margin-top':'0px'});
+        }else{
+            $('.rtt-tree').css({top:'85px'});
+        }
+        
         
         $('<label>'+window.hWin.HR('Record to test')+': </label>').insertBefore($('#divDebugReportLimit'));
         $('<select id="listRecords">').css('max-width','260px').insertBefore($('#divDebugReportLimit'));
         $('#divDebugReportLimit').hide();
 
         $('<div id="snippet_output">')
-            .css({border: '1px solid blue',height:'230px',widht:'100%','margin-top':'10px',overflow:'auto',padding:'10px'})
+            .css({border: '1px solid blue',height:'40px',widht:'100%','margin-top':'10px',overflow:'auto',padding:'10px'})
             .appendTo($('.actionButtons'));
         
         var rtSelect = $('#rectype_selector').css('max-width','150px');
@@ -936,8 +951,11 @@ function ShowReps( is_snippet_editor ) {
             }); 
         }
         
-        
         //_doExecuteFromEditor
+        if(typeof onChangeEvent === 'function'){
+            codeEditor.on('change', onChangeEvent);
+        }
+        
     }
     
     //
@@ -2236,8 +2254,8 @@ this_id       : "term"
             _initEditorMode(template_file, template_body);
         },
         
-        initSnippetEditor: function(template_body, rty_IDs){
-            _initSnippetEditor(template_body, rty_IDs);    
+        initSnippetEditor: function(template_body, rty_IDs, onChangeEvent){
+            _initSnippetEditor(template_body, rty_IDs, onChangeEvent);    
         },
 
         operationEditor:  function (action){

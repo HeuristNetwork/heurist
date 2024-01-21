@@ -547,17 +547,26 @@ $.widget( "heurist.ruleBuilder", {
             
             if(!codes && query){
                     
-                //var links = ['links','lt','lf','rt','rf','related'];
-                
-                // {"t":"5","lt:15":[{"t":"10"}],"plain":"Petia"}
-                // {"links":[{"t":"10"}]}
                 //parse query
                 var link, keys = Object.keys(query);
-                if(keys[0]=='links' || keys[0]=='related'){
-                    link = keys[0]
-                }else{
+                
+                if(keys.length<1) return;
+                
+                let link_keys = ['links','lt','lf','rt','rf','related'];
+                let link2 = keys[0].split(':');
+                
+                if(link_keys.indexOf(link2[0])>=0){
+                    //for example: {"links":[{"t":"10"}]}
+                    //         or  {"lf:1086":[{"t":102}]}
+                    link = keys[0];    
+                }else if(keys.length>1){
+                    //for example: {"t":"5","lt:15":[{"t":"10"}],"plain":"Petia"}
                     link = keys[1]; //always second 
+                }else{
+                    //link not defined - broken rule
+                    return;
                 }
+
                 linkdata = query[link];
                 
                 link = link.split(':');
@@ -647,7 +656,11 @@ $.widget( "heurist.ruleBuilder", {
                     }
                 }
                 
-                this.select_reltype.val(rel_type);
+                if(rel_type==''){
+                    this.select_fields.prop("selectedIndex",0);
+                }else{
+                    this.select_reltype.val(rel_type);
+                }
              
                 if(this.select_reltype.hSelect("instance"))
                         this.select_reltype.hSelect('refresh');

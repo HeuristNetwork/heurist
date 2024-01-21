@@ -1925,7 +1925,7 @@ class System {
 
             //$parts = explode("/", $rec_id);
             $rec_id = intval($matches[1]);
-            $template = $matches[2];
+            $template = urldecode($matches[2]);
 
             // Check that the report exists
             if(empty($template) || !file_exists($this->getSysDir('smarty-templates') . $template)){

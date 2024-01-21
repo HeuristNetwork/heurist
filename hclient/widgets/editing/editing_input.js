@@ -1009,7 +1009,10 @@ $.widget( "heurist.editing_input", {
                 $editor.parent().hide();
 
                 //hidden textarea for codemirror editor
-                var codeEditor = new EditorCodeMirror($input);
+                var codeEditor = null;
+                if(typeof EditorCodeMirror !== 'undefined'){
+                    codeEditor = new EditorCodeMirror($input);
+                }
                 
                 var $btn_edit_switcher;
 
@@ -1031,11 +1034,13 @@ $.widget( "heurist.editing_input", {
                         .css({cursor: 'pointer', 'margin-left': '10px'})
                         .appendTo($btn_edit_switcher);
 
-                    $('<span>codeeditor</span>')
-                        .attr('title', 'direct edit html in code editor')
-                        .addClass('smallbutton')
-                        .css({cursor: 'pointer', 'margin-left': '10px'})
-                        .appendTo($btn_edit_switcher);
+                    if(codeEditor){
+                        $('<span>codeeditor</span>')
+                            .attr('title', 'direct edit html in code editor')
+                            .addClass('smallbutton')
+                            .css({cursor: 'pointer', 'margin-left': '10px'})
+                            .appendTo($btn_edit_switcher);
+                    }
                         
                     $('<span>table</span>')
                         .attr('title', 'treats the text as a table/spreadsheet and opens a lightweight spreadsheet editor')
@@ -1049,6 +1054,29 @@ $.widget( "heurist.editing_input", {
                         .addClass('smallbutton')
                         .css({'line-height': '20px','vertical-align':'top', cursor:'pointer','text-decoration':'underline'})
                         .appendTo( $inputdiv );
+                }
+
+                function __openRecordLink(node){
+
+                    const org_href = $(node).attr('href');
+                    let href = '';
+
+                    if(org_href.indexOf('/') !== -1){ // check if href is in the format of record_id/custom_report
+
+                        let parts = org_href.split('/');
+
+                        if(parts.length == 2 && window.hWin.HEURIST4.util.isNumber(parts[0]) && parts[0] > 0){
+                            href = `${window.hWin.HAPI4.baseURL}viewers/smarty/showReps.php?publish=1&db=${window.hWin.HAPI4.database}&q=ids:${parts[0]}&template=${parts[1]}`
+                        }
+                    }else 
+                    if(window.hWin.HEURIST4.util.isNumber(org_href) && org_href > 0){ // check if href is just the record id
+                        href = `${window.hWin.HAPI4.baseURL}?recID=${org_href}&fmt=html&db=${window.hWin.HAPI4.database}`;
+                    }
+
+                    if(!window.hWin.HEURIST4.util.isempty(href)){ // use different url
+                        $(node).attr('href', href);
+                        setTimeout((ele, org_href) => { $(ele).attr('href', org_href); }, 500, node, org_href);
+                    }
                 }
 
                 function __showEditor(is_manual){
@@ -1207,13 +1235,17 @@ $.widget( "heurist.editing_input", {
                                                 let target = $dlg.find('#a_target').val();
                                                 let template = $dlg.find('#a_recview').val();
 
-                                                $link.attr('target', target)
+                                                $link.attr('target', target);
 
                                                 if(!window.hWin.HEURIST4.util.isempty(template)){
 
                                                     let new_href = record_id + '/' + template;
 
                                                     $link.attr('href', new_href).attr('data-mce-href', new_href);
+                                                }
+
+                                                if(!$link.text().match(/\w/)){ // if content is empty, replace with href
+                                                    $link.text($link.attr('href'));
                                                 }
 
                                                 $dlg.dialog('close');
@@ -1302,33 +1334,27 @@ $.widget( "heurist.editing_input", {
                                 }
                             });
 
+                            // Catch links opening
                             editor.on('contextmenu', (e) => {
                                 setTimeout(() => {
+
                                     $(document).find('.tox-menu [title="Open link"]').on('click', function(e){
 
                                         let node = tinymce.activeEditor.selection.getNode();
-                                        const org_href = $(node).attr('href');
-                                        let href = '';
 
-                                        if(org_href.indexOf('/') !== -1){ // check if href is in the format of record_id/custom_report
-
-                                            let parts = org_href.split('/');
-
-                                            if(parts.length == 2 && window.hWin.HEURIST4.util.isNumber(parts[0]) && parts[0] > 0){
-                                                href = `${window.hWin.HAPI4.baseURL}viewers/smarty/showReps.php?publish=1&db=${window.hWin.HAPI4.database}&q=ids:${parts[0]}&template=${parts[1]}`
-                                            }
-                                        }else 
-                                        if(window.hWin.HEURIST4.util.isNumber(org_href) && org_href > 0){ // check if href is just the record id
-
-                                            href = `${window.hWin.HAPI4.baseURL}?recID=${href}&fmt=html&db=${window.hWin.HAPI4.database}`;
-                                        }
-
-                                        if(!window.hWin.HEURIST4.util.isempty(href)){ // use different url
-                                            $(node).attr('href', href);
-                                            setTimeout((ele, org_href) => { $(ele).attr('href', org_href); }, 500, node, org_href);
-                                        }
+                                        __openRecordLink(node);
                                     });
+
                                 }, 500);
+                            });
+
+                            editor.on('click', (e) => {
+
+                                let node = tinymce.activeEditor.selection.getNode();
+
+                                if((e.ctrlKey || e.metaKey) && node.tagName == 'A'){
+                                    __openRecordLink(node);
+                                }
                             });
                         },
                         init_instance_callback: function(editor){
@@ -1443,6 +1469,7 @@ $.widget( "heurist.editing_input", {
                             }
 
                             var sel_action = $(event.target).text();
+                            sel_action = sel_action == 'codeeditor' && !codeEditor ? 'text' : sel_action;
                             if(cur_action == sel_action) return;
                             
                             $btn_edit_switcher.find('span').css('text-decoration', '');
@@ -3619,7 +3646,7 @@ $.widget( "heurist.editing_input", {
                             callback: function(location){
                                 if( !window.hWin.HEURIST4.util.isempty(location) ){
                                     
-                                    var geovalue = window.hWin.HEURIST4.geo.wktValueToDescription(location.type+' '+location.wkt);
+                                    var geovalue = window.hWin.HEURIST4.geo.wktValueToDescription(location.type+' '+location.wkt, true);
                                     var geocode = geovalue.summary;
                                     geocode = geocode.replace('X', '');
                                     geocode = geocode.replace('Y', '');
@@ -3878,7 +3905,7 @@ $.widget( "heurist.editing_input", {
             var that = this;
             
             this._on( $btn_calcfield,{ click: function(){ 
-                window.hWin.HEURIST4.dbs.editCalculatedField( this.options.dtFields['rst_CalcFunctionID'],
+                window.hWin.HEURIST4.dbs.editCalculatedField( this.options.dtFields['rst_CalcFunctionID'], 
                     function(){
                         //refresh value
                         if(!(that.options.recID>0)) return;

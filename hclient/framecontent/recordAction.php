@@ -78,7 +78,7 @@ require_once 'initPage.php';
 
 //verify parameter action
 $action_type = @$_REQUEST['action'];
-$allowed_actions = array('add_detail','replace_detail','delete_detail','rectype_change','extract_pdf','url_to_file','local_to_repository','reset_thumbs');
+$allowed_actions = array('add_detail','replace_detail','delete_detail','rectype_change','extract_pdf','url_to_file','local_to_repository','reset_thumbs','case_conversion');
 if(!in_array($action_type, $allowed_actions)){
     //@todo - it does not work since initPage already produces some output
     // need to call this piece of code with callback function in initPage after system itit
@@ -132,7 +132,7 @@ if(!in_array($action_type, $allowed_actions)){
 <!-- HTML -->
 <body style="overflow:hidden;" class="ui-heurist-explore">
 
-    <div id="div_parameters" class="popup_content_div" style="overflow:auto;">
+    <div id="div_parameters" class="popup_content_div" style="overflow:auto;bottom:3.5em;">
 
         <div id="div_header" style="padding: 0.2em; min-width: 600px;">
 
