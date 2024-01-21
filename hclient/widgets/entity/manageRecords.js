@@ -4390,18 +4390,8 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
             this._on(this.element.find('#toggle_rec_visibility').button(), {
                 click: this._toggleRecordVisibility
             });
-
-            if(is_public){
-                this.element.find('#icon_rec_visibility').addClass('ui-icon-eye-open');
-                this.element.find('#toggle_rec_visibility')
-                            .attr('title', 'This record is VISIBLE TO THE PUBLIC. Click to set it as hidden from the public')
-                            .button('option', 'label', 'Hide from public');
-            }else{
-                this.element.find('#icon_rec_visibility').addClass('ui-icon-eye-crossed');
-                this.element.find('#toggle_rec_visibility')
-                            .attr('title', 'This record is HIDDEN FROM PUBLIC VIEW. Click to make it visible to the public')
-                            .button('option', 'label', 'Make record public');
-            }
+            
+            this._updateRecToggleButton(is_public);
         }else{
             this._off(this.element.find('#toggle_rec_visibility'));
         }
@@ -4725,6 +4715,23 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
         
                     
     },//END _afterInitEditForm
+    
+    //
+    //
+    //
+    _updateRecToggleButton: function(is_public){
+            if(is_public){
+                this.element.find('#icon_rec_visibility').removeClass('ui-icon-eye-crossed').addClass('ui-icon-eye-open');
+                this.element.find('#toggle_rec_visibility')
+                            .attr('title', 'This record is VISIBLE TO THE PUBLIC. Click to set it as hidden from the public')
+                            .button('option', 'label', window.hWin.HR('Hide from public'));
+            }else{
+                this.element.find('#icon_rec_visibility').removeClass('ui-icon-eye-open').addClass('ui-icon-eye-crossed');
+                this.element.find('#toggle_rec_visibility')
+                            .attr('title', 'This record is HIDDEN FROM PUBLIC VIEW. Click to make it visible to the public')
+                            .button('option', 'label', window.hWin.HR('Make record public'));
+            }
+    },
     
     //
     //
@@ -6364,54 +6371,48 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
         }
     },
 
+    //
+    //
+    //
     _toggleRecordVisibility: function(){
 
         const that = this;
-        let new_visibility = this._getField('rec_NonOwnerVisibility') == 'public' ? 'viewable' : 'public';
-        let allowed = window.hWin.HAPI4.is_admin() || window.hWin.HAPI4.is_member(this._getField('rec_OwnerUGrpID'));
+                       
+        var ele = this._editing.getFieldByName('rec_NonOwnerVisibility');
+        var vals = ele.editing_input('getValues');
+
+        let new_visibility = vals[0] == 'public' ? 'viewable' : 'public';
+        let current_owner = this._getField('rec_OwnerUGrpID');
+        let allowed = window.hWin.HAPI4.is_admin() || window.hWin.HAPI4.is_member(current_owner);
 
         if(!allowed){
             return;
         }
+        
+        
+        var request = {
+            request_id : window.hWin.HEURIST4.util.random(),
+            ids  : this._currentEditID,
+            OwnerUGrpID: current_owner,
+            NonOwnerVisibility: new_visibility
+        };
 
-        // Check modified
-        if(this._editing.isModified()){
-            
-            let $dlg;
-            let msg = 'You have made changes to the record.<br>In order to update the record\'s visibility it needs to be saved.<br>Do you want to save your changes?';
-            let btns = {};
-
-            btns[window.HR('Save changes')] = function(){
-
-                $dlg.dialog('close');
-
-                that._editing.setFieldValueByName('rec_NonOwnerVisibility', new_visibility);
-
-                that._saveEditAndClose();
-            };
-            btns[window.HR('Drop changes')] = function(){
-
-                $dlg.dialog('close');
-
-                that._initEditForm_step3(that._currentEditID); //reload edit form
-
-                setTimeout(function(){that._toggleRecordVisibility();}, 2500);
-            };
-            btns[window.HR('Cancel')] = function(){
-                $dlg.dialog('close');
-            };
-
-            $dlg = window.hWin.HEURIST4.msg.showMsgDlg(msg, btns, 
-                {title: 'Save record changes', yes: window.HR('Save changes'), no: window.HR('Drop changes'), cancel: window.HR('Cancel')}, 
-                {default_palette_class: 'ui-heurist-populate'});
-
-            return;
-        }
-
-        // Set rec_NonOwnerVisibility
-        this._editing.setFieldValueByName('rec_NonOwnerVisibility', new_visibility);
-
-        // Save record
-        this._saveEditAndClose();
+        window.hWin.HAPI4.RecordMgr.access(request, 
+            function(response){
+                if(response.status == window.hWin.ResponseStatus.OK){
+                    
+                    //update in edit form
+                    that._editing.setFieldValueByName('rec_NonOwnerVisibility', new_visibility, false);
+                    //update button caption
+                    that._updateRecToggleButton(new_visibility=='public');
+                    //update value in record summary
+                    that.editFormSummary.find('#recAccess').text(new_visibility=='viewable'?window.hWin.HR('Everyone'):new_visibility);
+                    
+                    window.hWin.HEURIST4.msg.showMsgFlash(
+                            window.hWin.HR('Record visibility has been changed'), 1500);
+                }else{
+                    window.hWin.HEURIST4.msg.showMsgErr(response);
+                }
+        });
     }
 });
