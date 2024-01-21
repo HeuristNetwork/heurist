@@ -698,7 +698,7 @@ function hRecordAction(_action_type, _scope_type, _field_type, _field_value) {
 
             if(action_type=='add_detail'){
                 request['a'] = 'add';
-                request['val'] = getFieldValue('fld-1'); console.log(getFieldValue('fld-1'), $('#fld-1'));
+                request['val'] = getFieldValue('fld-1'); 
                 if(window.hWin.HEURIST4.util.isempty(request['val'])){
                     alert('Define value to add');
                     return;

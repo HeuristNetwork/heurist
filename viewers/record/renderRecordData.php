@@ -1431,7 +1431,8 @@ function print_private_details($bib) {
                             break;
                         case 'public':
                         default:
-                            print '<span> - readable by anyone (public)</span></div></div>';
+                            print '<span data-val="'.htmlspecialchars($bib['rec_NonOwnerVisibility'])
+                                .'"> - readable by anyone (public)</span></div></div>';
                     }
                 }
 
