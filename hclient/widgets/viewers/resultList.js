@@ -422,6 +422,9 @@ $.widget( "heurist.resultList", {
                             that.setSelected(null);
                         }else if(data.reset){ //clear selection
                             that.setSelected(null);
+                        }else if(data.subset_only){
+                            that._currentSubset = that._currentRecordset.getSubSetByIds(data.selection);
+                            that._renderPage(0);
                         }else{
                             that.setSelected(data.selection);        
                         }
@@ -2833,7 +2836,7 @@ $.widget( "heurist.resultList", {
 
         if(handleCollections){
 
-            let hasCollection = this._collection && this._collection.length;
+            let hasCollection = this._collection && this._collection.length ? this._collection.length : 0;
             let subset = this._currentSubset;
 
             sinfo = `<a href="#" id="collectSelected" style="color:blue;padding-right:5px;" title="Add selected records to the collection">add selected</a> collected: ${hasCollection} `
@@ -3433,13 +3436,12 @@ $.widget( "heurist.resultList", {
             this.div_content.find('.recordSelector').hide();
             
             if(this.options.auto_select_first !== false){ // this.options.view_mode == 'vertical' || 
-                var ele = this.div_content.find('.recordDiv:first');//.addClass('selected');
+                var ele = this.div_content.find('.recordDiv:first');
                 if(ele.length>0){
-                    //this._recordDivOnClick({target:ele[0]});
                     setTimeout(() => {that._recordDivOnClick({target:ele[0]});}, 1500); // allow later widgets to catch up
                 }
-            }            
-            
+            }
+
         }else if(this._currentMultiSelection!=null) { //highlight retained selected records
 
             for(idx=0; idx<rec_onpage.length; idx++){
