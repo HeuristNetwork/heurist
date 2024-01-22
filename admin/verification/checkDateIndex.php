@@ -157,6 +157,6 @@ if(!$is_included){
     }else{
         echo '<script>$(".dateindex").css("background-color", "#6AA84F");</script>';        
     }
-    print '<br /></div>';
+    print '<br></div>';
 }
 ?>

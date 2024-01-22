@@ -468,13 +468,13 @@ function ShowReps( is_snippet_editor ) {
                         '     {$r.f1}     {* the name / title field - may or may not be present *}  ',
                         '',
                         '',
-                        '<br/> {* line break between each record *}',
+                        '<br> {* line break between each record *}',
                         '',
                         '{*------------------------------------------------------------*}',
                         '{/foreach} {* end records loop, do not remove *}',
                         '{*------------------------------------------------------------*}',
                         '',
-                        '<hr/>',
+                        '<hr>',
                         '<h2>End of report</h2> {* Text here appears at end of report *} ',
                         '</html>'];
 
@@ -1426,7 +1426,7 @@ function ShowReps( is_snippet_editor ) {
                 '  {* put the data you want output for each record here - insert the *} \n' +
                 '  {* fields using the tree of record types and fields on the right *} \n' +
                 ' \n' +
-                '<br/> {* line break between each record *} \n' +
+                '<br> {* line break between each record *} \n' +
                 ' \n' +
                 '{*------------------------------------------------------------*} \n' +
                 '{/foreach} {* end records loop, do not remove *} \n' +

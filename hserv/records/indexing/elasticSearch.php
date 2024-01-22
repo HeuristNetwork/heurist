@@ -294,7 +294,7 @@ class ElasticSearch {
     public static function buildAllIndices ($dbName, $print=true) {
         if(isElasticUp()) {
             if ($print)
-                print "Building all Elasticsearch indices for: $dbName<br />";
+                print "Building all Elasticsearch indices for: $dbName<br>";
 
             $query = "SELECT MAX(rec_RecTypeID) FROM Records WHERE 1";
             $res = self::$mysqli->query($query);

@@ -61,7 +61,7 @@ $mysqli = $system->get_mysqli();
             <div>
                 This function checks for invalid characters in the data fields in the database records.
                 <br>Use the following function to remove/clean up these characters, if found
-                <br />&nbsp;<hr />
+                <br>&nbsp;<hr>
             </div>
 
             <table role="none">

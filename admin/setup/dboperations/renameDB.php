@@ -56,7 +56,7 @@ if($_REQUEST['mode'] == 2){ // verify the new name is unique
             if (array_search(strtolower($targetdbname), array_map('strtolower', $dblist)) !== false ){
                 $sErrorMsg = "<div class='ui-state-error'>Warning: database '".
                 htmlspecialchars($targetdbname)
-                ."' already exists. Please choose a different name<br/></div>";
+                ."' already exists. Please choose a different name<br></div>";
             }else{
                 ob_start();
             }

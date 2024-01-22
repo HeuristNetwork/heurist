@@ -1078,7 +1078,7 @@ $.widget( "heurist.search_faceted", {
           }
           
           harchy = '<span class="truncate" style="display:inline-block;width:99%;font-weight:normal !important">'
-                + harchy.join(" &gt; ") + "</span><br/>&nbsp;&nbsp;&nbsp;";
+                + harchy.join(" &gt; ") + "</span><br>&nbsp;&nbsp;&nbsp;";
            
            if(!window.hWin.HEURIST4.util.isnull(field['var']) && field['code'] ){
                

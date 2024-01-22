@@ -130,6 +130,6 @@ if(!$is_included){
     }else{
         echo '<script>$(".relationship_cache").css("background-color", "#6AA84F");</script>';        
     }
-    print '<br /></div>';
+    print '<br></div>';
 }
 ?>

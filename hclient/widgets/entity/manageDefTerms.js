@@ -221,7 +221,7 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
                 this.recordList.css({ top: '80px' });
 
                 this.options.recordList = {
-                    empty_remark: 'No vocabularies in this group.<br/><br/>Please drag vocabulary from other groups or add new vocabulary to this group.',
+                    empty_remark: 'No vocabularies in this group.<br><br>Please drag vocabulary from other groups or add new vocabulary to this group.',
                     show_toolbar: false,
                     pagesize:99999,
                     recordDivEvenClass:'', //suppress highlight for even lines

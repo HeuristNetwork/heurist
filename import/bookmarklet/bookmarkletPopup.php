@@ -123,7 +123,7 @@ render: function() {
 	// heurist bookmarklet
 	var dd = document.createElement("div");
 	dd.id = "topline";
-	dd.innerHTML = (! HEURIST_url_bib_id ? "Highlight text that you want to include in your record,<br/> then choose one of the following:" : "");
+	dd.innerHTML = (! HEURIST_url_bib_id ? "Highlight text that you want to include in your record,<br> then choose one of the following:" : "");
     d.appendChild(dd);
 
 	var t = d.appendChild(document.createElement("table"));

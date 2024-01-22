@@ -685,7 +685,7 @@ class System {
             $title = "Cannot access filestore directory for the database ". $dbname ." on server " . HEURIST_SERVER_NAME;
 
             $body = "Cannot access filestore directory for the database <b>". $dbname . "</b> on the server " . HEURIST_SERVER_NAME .
-                    "<br/>The directory (" . HEURIST_FILESTORE_DIR . ")"
+                    "<br>The directory (" . HEURIST_FILESTORE_DIR . ")"
                     .(($check==-1)
                     ?"does not exist (check setting in heuristConfigIni.php file)"
                     :"is not writeable by PHP (check permissions)")
@@ -696,7 +696,7 @@ class System {
             sendEmail(HEURIST_MAIL_TO_BUG, $title, $body, true);
 
             $usr_msg = "Cannot access filestore directory for the database <b>". $dbname .
-                       "</b><br/>The directory "
+                       "</b><br>The directory "
                        .(($check==-1)
                        ?"does not exist (check setting in heuristConfigIni.php file)"
                        :"is not writeable by PHP (check permissions)")

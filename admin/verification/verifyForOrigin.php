@@ -461,7 +461,7 @@
                     .implode('<br>',$fileds_missed_rectypes).'</p>';
             }
             if(count($databases)>1){
-                print '<hr/>';
+                print '<hr>';
             }
         }
         

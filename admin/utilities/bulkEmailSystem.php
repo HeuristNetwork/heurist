@@ -552,7 +552,7 @@ class systemEmailExt {
 			$this->log .= "Values: {databases: {".$db_listed."}, email: $email, name: " .$details['first_name']. " " .$details["last_name"]
 					   .", record_count: {".$records_listed."}, last_modified: {".$lastmod_listed."} },"
 					   ."Timestamp: " . date("Y-m-d H:i:s") . ", Status: " . $status_msg
-					   . "<br/><br/>";
+					   . "<br><br>";
 
 			$mailer->clearAddresses(); // ensure that the current email is gone
 
@@ -727,21 +727,21 @@ class systemEmailExt {
 
 		$status_msg = $status==0 ? "Success" : "Failed, Error Message: " . $this->get_error();
 
-		$main = "Parameters: {<br/>"
-			   . "&nbsp;&nbsp;Databases: $db_list <br/>"
-			   . "&nbsp;&nbsp;User Type: $u <br/>"
-			   . "&nbsp;&nbsp;Number of Users to Email: $u_cnt <br/>"
-			   . "&nbsp;&nbsp;Number of Users Emailed: $user_count <br/>"
-			   . "&nbsp;&nbsp;Record Limit:$r_cnt <br/>"
-			   . "&nbsp;&nbsp;Last Modified Filter: $lm <br/>"
-			   . "}, <br/> Timestamp: " . date("Y-m-d H:i:s") . ", Status: " . $status_msg
-			   . ", <br/> Email Subject: " . $email_subject
-			   . ", <br/> Email Body: <br/>" . $email_body;
+		$main = "Parameters: {<br>"
+			   . "&nbsp;&nbsp;Databases: $db_list <br>"
+			   . "&nbsp;&nbsp;User Type: $u <br>"
+			   . "&nbsp;&nbsp;Number of Users to Email: $u_cnt <br>"
+			   . "&nbsp;&nbsp;Number of Users Emailed: $user_count <br>"
+			   . "&nbsp;&nbsp;Record Limit:$r_cnt <br>"
+			   . "&nbsp;&nbsp;Last Modified Filter: $lm <br>"
+			   . "}, <br> Timestamp: " . date("Y-m-d H:i:s") . ", Status: " . $status_msg
+			   . ", <br> Email Subject: " . $email_subject
+			   . ", <br> Email Body: <br>" . $email_body;
 	    $main_size = strlen($main);	// Main part in bytes
 
-		$user_list = "Users: {<br/>";
+		$user_list = "Users: {<br>";
 		foreach ($this->user_details as $email => $details) {
-			$user_list .= "&nbsp;&nbsp;". $details["first_name"] ." ". $details["last_name"] .": ". $email ."<br/>";
+			$user_list .= "&nbsp;&nbsp;". $details["first_name"] ." ". $details["last_name"] .": ". $email ."<br>";
 		}
 		$user_list .= "}";
 		$user_list_size = strlen($user_list); // User List part in bytes
@@ -799,7 +799,7 @@ class systemEmailExt {
 			}
 
 		} else { // Save together
-			$this->receipt = $main . "<br/>" . $user_list;
+			$this->receipt = $main . "<br>" . $user_list;
 		}
 	}
 	private function get_receipt() {
@@ -877,10 +877,10 @@ function sendSystemEmail($data) {
 
 		if ($rtn_value <= -1) {
 
-			echo "An error occurred with preparing and sending the system emails<br/>";
+			echo "An error occurred with preparing and sending the system emails<br>";
 			$output = $email_obj->get_error_log();
 			echo $output[0];
-			echo "<br/><br/>System Log: <br/>" . $output[1];
+			echo "<br><br>System Log: <br>" . $output[1];
 
 			$rtn_value = -1;
 		}
@@ -891,7 +891,7 @@ function sendSystemEmail($data) {
 		return $rtn_value;
 	} else {
 
-		echo "An error occurred with processing the form's data<br/>";
+		echo "An error occurred with processing the form's data<br>";
 		$output = $email_obj->get_error();
 		print htmlspecialchars($output);
 		return -1;
@@ -919,7 +919,7 @@ function getCSVDownload($data) {
 
 		if ($rtn_value <= -1) {
 
-			echo "An error occurred with exporting the selected data as a CSV file<br/>";
+			echo "An error occurred with exporting the selected data as a CSV file<br>";
 			$output = $csv_obj->get_error();
 			print $output[0];
 			return -1;
@@ -927,7 +927,7 @@ function getCSVDownload($data) {
 
 	} else {
 
-		echo "An error occurred with processing the form's data<br/>";
+		echo "An error occurred with processing the form's data<br>";
 		$output = $csv_obj->get_error();
 		print htmlspecialchars($output);
 		return -1;

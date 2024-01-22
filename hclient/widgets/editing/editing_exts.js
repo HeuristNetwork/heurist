@@ -1732,7 +1732,7 @@ function browseTerms(_editing_input, $input, value){
                             if(details == ''){
                                 details = "<span style='text-align: center;'>Code &rArr; N/A </span>";
                             }
-                            details += "<hr/><span>" + term.trm_Description + "</span>";
+                            details += "<hr><span>" + term.trm_Description + "</span>";
                         }
                     }
 

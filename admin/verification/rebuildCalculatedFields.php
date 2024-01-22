@@ -238,11 +238,11 @@ if($init_client){
                                 <span id=rec_cleared><?php echo intval(@$res['rec_cleared']);?></span> records</div>
                 <div><span id=fld_same><?php echo intval(@$res['fld_same']);?></span> fields unchanged</div>
                 
-                <br/>
+                <br>
 
                 <?php 
                 if($q_updates){
-                    print '<a target=_blank id="q_updates" href="'.$q_updates.'">Click to view updated records</a><br/>&nbsp;<br/>';
+                    print '<a target=_blank id="q_updates" href="'.$q_updates.'">Click to view updated records</a><br>&nbsp;<br>';
                 }
                 if($q_cleared){
                     print '<a target=_blank id="q_blanks" href="'.$q_cleared.'">Click to view records where fields were cleared</a>';
@@ -253,7 +253,7 @@ if($init_client){
                     <span id="formulae_errors">
                         <p>
                         There are errors in calculations execution. This is generally due to a faulty in formula
-                        <br/>or faulty data in individual records. Affected fields have not been changed.
+                        <br>or faulty data in individual records. Affected fields have not been changed.
                         </p>
                         <span id="formulae_errors_info">
                         <?php echo htmlspecialchars($q_errors);?>

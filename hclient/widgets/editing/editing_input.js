@@ -3178,7 +3178,7 @@ $.widget( "heurist.editing_input", {
                             $('<a href="#" title="Select from a library of images"><span class="ui-icon ui-icon-grid"/>Library</a>')
                                 .click(function(){that.openIconLibrary()}).appendTo( ele );
 
-                            $('<br/><br/>').appendTo( ele );
+                            $('<br><br>').appendTo( ele );
 
                             $('<a href="#" title="or upload a new image"><span class="ui-icon ui-icon-folder-open"/><span class="upload-file-text">Upload file</span></a>')
                                 .click(function(){ $input.click() }).appendTo( ele );
@@ -4947,7 +4947,7 @@ $.widget( "heurist.editing_input", {
     +$Db.trm(trm_id,'trm_Label')+'</span></div>'
 +'<div>In vocabulary: <span id="vocabName" style="font-style:italic">'
     +$Db.trm($(e.target).attr('data-vocab'),'trm_Label')+'</span></div>'
-+'<hr/>'
++'<hr>'
 +'<div>Vocabulary for this field is: <span id="vocabNameCorrect" style="font-style:italic">'
     +$Db.trm($(e.target).attr('data-vocab-correct'),'trm_Label')+'</span></div>'
 +'<p>Use the version of the term in this vocabulary for this field in all records of this type</p></div>'

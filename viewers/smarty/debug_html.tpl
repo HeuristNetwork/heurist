@@ -61,5 +61,5 @@
 
 </table>
 {/capture}
-<br/>
+<br>
 {$debug_output}

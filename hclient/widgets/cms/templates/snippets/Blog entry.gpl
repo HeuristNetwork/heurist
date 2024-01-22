@@ -58,7 +58,7 @@ by <b>
   
       {$r.f2_4}{*Blog Entry*} 
 
-<br/> {* line break between each record *}
+<br> {* line break between each record *}
 
 {*------------------------------------------------------------*}
 {/foreach} {* end records loop, do not remove *}

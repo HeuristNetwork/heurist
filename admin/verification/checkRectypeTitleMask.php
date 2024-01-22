@@ -100,12 +100,12 @@ if($mode!=3){
 
         <div id="page-inner">
 
-            Title masks are used to construct a composite title for a record based on data fields in the record.<br/>
-            For many record types, they will just render the title field, or the title with some additional contextual information.<br/>
-            For bibliographic records they provide a shortened bibliographic style entry.<br/><br/>
-            This check looks for ill formed title masks for record types defined in the <b><?=HEURIST_DBNAME?></b> Heurist database.<br/><br/>
+            Title masks are used to construct a composite title for a record based on data fields in the record.<br>
+            For many record types, they will just render the title field, or the title with some additional contextual information.<br>
+            For bibliographic records they provide a shortened bibliographic style entry.<br><br>
+            This check looks for ill formed title masks for record types defined in the <b><?=HEURIST_DBNAME?></b> Heurist database.<br><br>
             If the title mask is invalid please edit the record type (see under Structure in the menu on the left)
-            and correct the title mask for the record type.<br/><br/><hr>
+            and correct the title mask for the record type.<br><br><hr>
 <?php
 }//$mode!=3
 }//$is_included                
@@ -146,7 +146,7 @@ if($mode!=3){
                         }else{
                             echo '<script>$(".title_mask").css("background-color", "#E60000");</script>';
                         }                                   
-                        print '<br /></div>';
+                        print '<br></div>';
                     }else{
                         echo "</div></body></html>";
                     }                
@@ -177,7 +177,7 @@ if($mode!=3){
                         
                         if(!$is_included || $is_invalid){
                         
-                            echo "<h3 style=\"padding:15px 0px 10px 4px;\"><b> $rtID : <i>".htmlspecialchars($rtName)."</i></b> <br/> </h3>";
+                            echo "<h3 style=\"padding:15px 0px 10px 4px;\"><b> $rtID : <i>".htmlspecialchars($rtName)."</i></b> <br> </h3>";
                             echo "<div class='resultsRow'><div class='statusCell ".
                                         ($is_invalid? "invalid'>in":"valid'>")."valid</div>";
                                         
@@ -187,7 +187,7 @@ if($mode!=3){
                             }else if ($mask == "") {
                                 echo "<div class='errorCell'><b>< < < < < EMPTY TITLE MASK</b></div>";
                             }else if(strcasecmp($res,$mask)!=0){
-                                echo "<div><br/>&nbsp;Decoded Mask: ".htmlspecialchars($res)."</div>";
+                                echo "<div><br>&nbsp;Decoded Mask: ".htmlspecialchars($res)."</div>";
                             }
                             echo "</div>";
 
@@ -199,7 +199,7 @@ if($mode!=3){
                         
                     }else{
                         echo "Checking title mask ".htmlspecialchars($mask)
-                            .' for record type '.intval($rtID).' and record '.intval($recID).' <br/>';
+                            .' for record type '.intval($rtID).' and record '.intval($recID).' <br>';
                         echo htmlspecialchars(TitleMask::fill($recID, $mask));
                     }
                     

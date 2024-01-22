@@ -446,7 +446,7 @@ function hMappingDraw(_mapdiv_id, _initial_wkt) {
                 });*/
             } else {
                 alert(window.hWin.HR("Sorry, Google Maps reports " + status 
-                    + ". Could not find the specified place name. <br/><br/>Please check spelling."));
+                    + ". Could not find the specified place name. <br><br>Please check spelling."));
             }
         });        
     }

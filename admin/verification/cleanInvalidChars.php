@@ -64,7 +64,7 @@ $is_not_found = true;
     <body class="popup">
         <div class="banner"><h2>Clean Invalid Characters</h2></div>
         <div id="page-inner" style="overflow:auto;padding-left: 6px;">
-            <div>This function removes invalid characters in the data fields in the database records<br />&nbsp;<hr /></div>
+            <div>This function removes invalid characters in the data fields in the database records<br>&nbsp;<hr></div>
 <?php
 }
 ?>

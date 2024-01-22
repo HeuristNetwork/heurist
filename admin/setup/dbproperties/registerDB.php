@@ -53,7 +53,7 @@ $dbowner = user_getDbOwner($mysqli);
 if(!$dbowner['ugr_eMail'] || !$dbowner['ugr_FirstName'] || !$dbowner['ugr_LastName'] || !$dbowner['ugr_Name'] ){
     
     header('Location: '.ERROR_REDIR.'&msg='.rawurlencode( 
-        'Warning<br/><br/>Please edit your user profile to specify your full name, login and email address before registering this database'     )); 
+        'Warning<br><br>Please edit your user profile to specify your full name, login and email address before registering this database'     )); 
     exit;
 }
 ?>
@@ -231,7 +231,7 @@ if(!$dbowner['ugr_eMail'] || !$dbowner['ugr_FirstName'] || !$dbowner['ugr_LastNa
         </div>
                                 
         <div style="padding-top:10px"  xstyle="display:inline-block;vertical-align:top;padding-left:4px">
-                            <label id="cntChars" style="text-align:left"></label><br/>
+                            <label id="cntChars" style="text-align:left"></label><br>
                             <input id="btnSubmit" type="submit" name="submit" value="Register"
                                  style="padding:4px 6px;font-weight: bold;" onClick="hideRegistrationForm()" disabled="disabled" >
         </div>
@@ -241,14 +241,14 @@ if(!$dbowner['ugr_eMail'] || !$dbowner['ugr_FirstName'] || !$dbowner['ugr_LastNa
     <div  style="margin-top: 15px; margin-bottom: 20px;">
         <div class="header"></div>
         <div>
-        <br/>Note: After registering the database, you will be asked to log in to a Heurist database (<?php echo HEURIST_INDEX_DATABASE;?>).
-        <br/>You should log into this database using your email address and the same login as your current database
-        <br/>(or the first database you registered, if different). This will allow you to edit the collection metadata
-        <br/>describing your database.
+        <br>Note: After registering the database, you will be asked to log in to a Heurist database (<?php echo HEURIST_INDEX_DATABASE;?>).
+        <br>You should log into this database using your email address and the same login as your current database
+        <br>(or the first database you registered, if different). This will allow you to edit the collection metadata
+        <br>describing your database.
         </div>
 <?php if($is_SpecialAdminUseOnly){?>
         <div style="border:1px solid gray;margin-top:14px;padding:14px">
-            <label>SYSTEM ADMIN USE ONLY</label><br/><br/><label>ID </label>
+            <label>SYSTEM ADMIN USE ONLY</label><br><br><label>ID </label>
             <input name="dbNewID" pattern="[0-9]" type="number" size="7" style="width:70px" value="<?php echo htmlspecialchars($dbNewID);?>"/>
             <label style="padding-left:50px">PASSWORD </label>
             <input name="dbNewID_pwd" type="password"/>
@@ -281,14 +281,14 @@ if(!$dbowner['ugr_eMail'] || !$dbowner['ugr_FirstName'] || !$dbowner['ugr_LastNa
 
             <div class="detailRow">
                 <div class="detailType" style="width: 180px !important;">Structure &gt; <u>Browse templates</u></div>
-                <div class="detail">Browse and download record type definitions documented on the Heurist network web site. <br />
-                    In addition to saving a great deal of time, the documentation helps you learn about the best ways of setting up Heurist structures.<br />
+                <div class="detail">Browse and download record type definitions documented on the Heurist network web site. <br>
+                    In addition to saving a great deal of time, the documentation helps you learn about the best ways of setting up Heurist structures.<br>
                     The record type definitions downloaded can later be modified to your requirements.</div>
             </div>
             <div class="detailRow">
                 <div class="detailType" style="width: 180px !important;">Structure &gt; <u>Browse templates</u></div>
                 <div class="detail">Find and download common record type definitions from any registered Heurist database, including the specially
-                    curated databases set up by the Heurist developers. <br />The record type definitions downloaded can later be modified
+                    curated databases set up by the Heurist developers. <br>The record type definitions downloaded can later be modified
                     to your requirements.</div>
             </div>
 
@@ -299,9 +299,9 @@ if(!$dbowner['ugr_eMail'] || !$dbowner['ugr_FirstName'] || !$dbowner['ugr_LastNa
 
             <div class="detailRow">
                 <div class="detailType" style="width: 180px !important;">Database &gt; <u>Register</u></div>
-                <div class="detail">Register the database with the Heurist Reference Index.<br />
+                <div class="detail">Register the database with the Heurist Reference Index.<br>
                     This will give your database a unique code and allow Heurist to check for new versions of
-                    the software and database formats. <br/>It also allows other databases to import structural elements
+                    the software and database formats. <br>It also allows other databases to import structural elements
                     (record types, field types and terms) but does NOT confer any form of access to data in this database</div>
             </div>
  -->
@@ -401,7 +401,7 @@ function registerDatabase() {
                         " ... \nPlease ".CONTACT_HEURIST_TEAM." for advice";
                     }
                     
-                    echo '<p class="ui-state-error">'. htmlspecialchars($msg) . "</p><br />";
+                    echo '<p class="ui-state-error">'. htmlspecialchars($msg) . "</p><br>";
                     return false;
                 }
                 else if($dbID == -1)
@@ -461,7 +461,7 @@ function registerDatabase() {
                         <?php
                     } else {
                         $msg = '<div class=wrap><div class="ui-state-error"><span>Unable to write database identification record</span>'.
-                        'this database might be incorrectly set up<br />'.
+                        'this database might be incorrectly set up<br>'.
                         'Please '.CONTACT_HEURIST_TEAM.' for advice</div></div>';
                         echo $msg;
                     } // unable to write db identification record

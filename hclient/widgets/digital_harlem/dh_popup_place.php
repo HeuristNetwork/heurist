@@ -59,7 +59,7 @@ if($recTypeID==RT_ADDRESS){
 
                 <h3><?php echo getFieldValue($records, $recID, 'rec_Title'); ?></h3>
 
-                <br />
+                <br>
 
                 <p>
                     <b>Type of Building or Location: </b>
@@ -99,7 +99,7 @@ if($recTypeID==RT_ADDRESS){
                     </ul>
                 </p>
 
-                <br />
+                <br>
 
                 
                 
@@ -185,7 +185,7 @@ if($recTypeID==RT_ADDRESS){
 
                     </ul></p>
 
-                <br />
+                <br>
 
 
                 <p>
@@ -280,7 +280,7 @@ if($recTypeID==RT_ADDRESS){
 
                     </ul></p>
 
-                <br />
+                <br>
 
 
                 <p>

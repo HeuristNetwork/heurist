@@ -324,15 +324,15 @@ if(!$has_emails || empty($emails)) {
 
                 var isValid = true;
 
-                var err_text = "The following actions are required:<br/><br/>";
+                var err_text = "The following actions are required:<br><br>";
                 var messages = {
-                    "dbs": "Select at least one database for use<br/>",
-                    "workgroups": "Select at least one workgroup for use<br/>",
-                    "title": "Please enter a Email Title<br/>",
-                    "body": "Please enter a Email Body<br/>",
-                    "pwd": "Enter the System Admin password to proceed<br/>",
-                    "invalid_count": "Record count needs to be a non-negative number<br/>",
-                    "invalid_period": "Last modified amount needs to be a non-negative number higher than one<br/>"
+                    "dbs": "Select at least one database for use<br>",
+                    "workgroups": "Select at least one workgroup for use<br>",
+                    "title": "Please enter a Email Title<br>",
+                    "body": "Please enter a Email Body<br>",
+                    "pwd": "Enter the System Admin password to proceed<br>",
+                    "invalid_count": "Record count needs to be a non-negative number<br>",
+                    "invalid_period": "Last modified amount needs to be a non-negative number higher than one<br>"
                 };
 
                 var $dbSel = $("#dbSelection");
@@ -1042,8 +1042,8 @@ if(!$has_emails || empty($emails)) {
             <h3>Heurist System Email</h3>
             
             <label class="instruction">
-                This tool allows you to email all users / specified types of user on all / selected Heurist databases available on this server. <br/><br/>
-                The email to be sent should be created as a <strong>Email</strong> record in the current database, including subject line, body text and fields to be substituted using ##....## notation. <br/><br/>
+                This tool allows you to email all users / specified types of user on all / selected Heurist databases available on this server. <br><br>
+                The email to be sent should be created as a <strong>Email</strong> record in the current database, including subject line, body text and fields to be substituted using ##....## notation. <br><br>
             </label>
 
             <form id="emailOptions" action="bulkEmailMain.php" method="POST" target="_blank">
@@ -1142,15 +1142,15 @@ if(!$has_emails || empty($emails)) {
                             <div style="margin-bottom: 10px;">Placeholders that will be replaced with proper values (case insensitive): </div>
 
                             <div style="float: left;margin: 0px 20px 35px 0px;">
-                                ##firstname## &rarr; User's First Name, <br/>
-                                ##lastname## &rarr; User's Last Name, <br/>
-                                ##email## &rarr; User's Email, <br/>
+                                ##firstname## &rarr; User's First Name, <br>
+                                ##lastname## &rarr; User's Last Name, <br>
+                                ##email## &rarr; User's Email, <br>
                                 ##database## &rarr; Database Name
                             </div>
 
                             <div style="display: inline-block;">
-                                ##dburl## &rarr; Database URL, <br/>
-                                ##records## &rarr; Record Count, and <br/>
+                                ##dburl## &rarr; Database URL, <br>
+                                ##records## &rarr; Record Count, and <br>
                                 ##lastmodified## &rarr; Date of the Last Modified Record
                             </div>
 

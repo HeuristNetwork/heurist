@@ -552,10 +552,10 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
                     }
                 }
                 if(sList!=''){ 
-                    var sUsage = '<div><b>Warning</b><br/><br/><b>'+$Db.dty(action.recID,'dty_Name')
-                            +'</b> is used in the following record types:<br/><br/>'
+                    var sUsage = '<div><b>Warning</b><br><br><b>'+$Db.dty(action.recID,'dty_Name')
+                            +'</b> is used in the following record types:<br><br>'
                             +sList
-                            +'<br/><br/>'
+                            +'<br><br>'
                             +'You have to either delete the field from the record type, '
                             +'or delete the record type<br>(it may not be possible or desirable to delete the record type)</div>';
 
@@ -748,24 +748,24 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
                 }else
                 if(this.options.newFieldForRtyID > 0){ // Ensure that the new field is for a specific rectype
                     var flavour_text = $('<h2 style="margin-block:0;margin-bottom:0.2em">Choose existing base field(s)</h2>'
-                        + '<div class="heurist-helper2" style="font-size:0.95em">Rather than defining every field from scratch, you can pick some frequently used pre-defined fields from the existing Base fields.<br/>'
+                        + '<div class="heurist-helper2" style="font-size:0.95em">Rather than defining every field from scratch, you can pick some frequently used pre-defined fields from the existing Base fields.<br>'
                         + 'However, please read the following notes carefully.</div>'
                         + '<span id="btn-basefields-list" style="margin:1em 0 1em 3em"></span>'
                         + '<div class="heurist-helper2" style="font-size:0.95em">The base fields chosen should have a <span style="text-decoration:underline">similar sense of meaning</span>, '
-                        + 'e.g. use <em>Start date</em> for <em>Birth date</em>, <em>Creator</em> for <em>Author</em>, <em>Short description</em><br/>'
-                        + 'for <em>Abstract</em>, <em>Extended description</em> for <em>Notes</em>. You can rename the fields to what you actually want once selected - the new name applies<br/>'
-                        + 'to the current record type only (the base field retains its name).<br/><br/>'
+                        + 'e.g. use <em>Start date</em> for <em>Birth date</em>, <em>Creator</em> for <em>Author</em>, <em>Short description</em><br>'
+                        + 'for <em>Abstract</em>, <em>Extended description</em> for <em>Notes</em>. You can rename the fields to what you actually want once selected - the new name applies<br>'
+                        + 'to the current record type only (the base field retains its name).<br><br>'
 
-                        + '<span style="text-decoration:underline">Do not completely redefine a base field</span> for a different purpose than it appears to be intended for, for instance redefining Family name as<br/>'
-                        + 'Street, Length as Count, or Format as Condition. Significant change to the meaning of a field may later lead to confusion.<br/>'
-                        + 'Fields which use the same base field will reference the same vocabulary (for term-list dropdowns and relationship type) or the same target<br/>'
-                        + 'record types (for record pointers and relationships) - you cannot change the vocabulary or target record types for one without changing it<br/>'
+                        + '<span style="text-decoration:underline">Do not completely redefine a base field</span> for a different purpose than it appears to be intended for, for instance redefining Family name as<br>'
+                        + 'Street, Length as Count, or Format as Condition. Significant change to the meaning of a field may later lead to confusion.<br>'
+                        + 'Fields which use the same base field will reference the same vocabulary (for term-list dropdowns and relationship type) or the same target<br>'
+                        + 'record types (for record pointers and relationships) - you cannot change the vocabulary or target record types for one without changing it<br>'
                         + 'for all the others.</div><hr style="width:80%;margin:1em 10em 1em 0;"/>'
 
                         + '<h2 style="margin-block:0;margin-bottom:0.2em">Create a new field</h2>'
-                        + '<div class="heurist-helper2" style="font-size:0.95em">If you can\'t find a suitable base field, type a new name. This will create a new base field and use it to create a new field in this record type.<br/>'
-                        + 'It is a good idea to use a rather generic name and description so you can re-use the base field in other record types<br/>'
-                        + 'and then customise the field appropriately for this record type.</div><br/>').prependTo(main_container);
+                        + '<div class="heurist-helper2" style="font-size:0.95em">If you can\'t find a suitable base field, type a new name. This will create a new base field and use it to create a new field in this record type.<br>'
+                        + 'It is a good idea to use a rather generic name and description so you can re-use the base field in other record types<br>'
+                        + 'and then customise the field appropriately for this record type.</div><br>').prependTo(main_container);
 
                     var btnBasefieldsList = $(main_container).find('span#btn-basefields-list').button({label: 'Choose base fields'})
                     var rty_ID = this.options.newFieldForRtyID;
@@ -2100,10 +2100,10 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
 
                 if(window.hWin.HEURIST4.util.isempty(s_title) && !s_all && s_type=='any'){
                     sMsg = '<div style="margin-top:1em;">There are no base fields defined  in this group.'
-                            +'<br/><br/>Please drag base fields from other groups or add new<br/>base fields to this group.</div>'
+                            +'<br><br>Please drag base fields from other groups or add new<br>base fields to this group.</div>'
                 }else{
                     sMsg = '<div style="padding: 10px">'
-                            +'<h3 class="not-found" style="color:red;">Filter/s are active (see above)</h3><br/>'
+                            +'<h3 class="not-found" style="color:red;">Filter/s are active (see above)</h3><br>'
                             +'<h3 class="not-found" style="color:teal">No entities match the filter criteria</h3>'
                             +'</div>';
                 }
@@ -2126,9 +2126,9 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
 
             this.element.append('<div id="base-field-warning" style="position:relative;background:rgb(0,0,0,0.6);z-index:60000;height:100%;">'
                 + '<div style="background:lightgrey;border:2px solid black;color:black;position:absolute;top:50%;left:50%;transform:translate(-50%, -50%);height:200px;width:510px;font-size:'+font_size+';padding:20px;">'
-                + 'The base fields editing function is provided for completeness and for<br/>advanced data management. Most users will not need to use it.<br/><br/>'
-                + '<strong>We strongly recommend NOT using this function to create new<br/>base fields. It is much more intuitive to create them <em>in situ</em> while<br/>designing your record structure.</strong><br/></br>'
-                + 'Recommended: Design > <span style="text-decoration:underline;cursor:pointer" onclick="window.hWin.HAPI4.LayoutMgr.executeCommand(\'mainMenu\', \'menuActionById\', \'menu-structure-rectypes\');">Record Types</span><br/><br/>'
+                + 'The base fields editing function is provided for completeness and for<br>advanced data management. Most users will not need to use it.<br><br>'
+                + '<strong>We strongly recommend NOT using this function to create new<br>base fields. It is much more intuitive to create them <em>in situ</em> while<br>designing your record structure.</strong><br></br>'
+                + 'Recommended: Design > <span style="text-decoration:underline;cursor:pointer" onclick="window.hWin.HAPI4.LayoutMgr.executeCommand(\'mainMenu\', \'menuActionById\', \'menu-structure-rectypes\');">Record Types</span><br><br>'
                 + 'Click outside this box for access to base fields manager'
                 + '</div></div>'); // Add message
 

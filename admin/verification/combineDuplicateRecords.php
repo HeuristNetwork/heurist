@@ -192,8 +192,8 @@ $reference_bdts = mysql__select_assoc2($mysqli,'select dty_ID, dty_Name from def
                     if (! @$do_merge_details){
                         print 'This function combines duplicate records. One record MUST be selected as a master record'.
                         ' and there must be at least one duplicate selected. Processing duplicates allows you to merge,'.
-                        'data with the master record.<br/><br/>'.
-                        'Bookmarks, Tags and Relationships from deleted records are added to the master record.<br/><br/>'.
+                        'data with the master record.<br><br>'.
+                        'Bookmarks, Tags and Relationships from deleted records are added to the master record.<br><br>'.
                         'None of these data are duplicated if they already exist in the master record.';
                     } else{
                         print 'Select the data items which should be retained, added or replaced in the master records.'.
@@ -203,7 +203,7 @@ $reference_bdts = mysql__select_assoc2($mysqli,'select dty_ID, dty_Name from def
                         'the changes.';
                     }
                     ?>
-                </div><br/><hr/>
+                </div><br><hr>
 
                 <table role="none"><tbody id="tb">
                         <?php
@@ -416,7 +416,7 @@ $reference_bdts = mysql__select_assoc2($mysqli,'select dty_ID, dty_Name from def
                                 print '</table>';
 
                                 print '</td></tr>';
-                                print '<tr><td colspan=3><br/><hr /></td></tr>';
+                                print '<tr><td colspan=3><br><hr></td></tr>';
                                 print "</tr>\n\n";
                             }
                         }else{  //display page for the user to select the set of details to keep for this record  - this is the basic work for the merge
@@ -552,7 +552,7 @@ $reference_bdts = mysql__select_assoc2($mysqli,'select dty_ID, dty_Name from def
                                 print '</table>';
 
                                 print '</td></tr>';
-                                print '<tr><td colspan=3><br><hr /></td></tr>';
+                                print '<tr><td colspan=3><br><hr></td></tr>';
                                 print "</tr>\n\n";
                             }
                         }

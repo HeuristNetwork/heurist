@@ -35,7 +35,7 @@ if( !isset($_REQUEST['db']) && $system->verifyActionPassword($_REQUEST['pwd'], $
     
     <form action="fixCmsAbsPaths.php" method="POST">
         <div style="padding:20px 0px">
-            Only an administrator (server manager) can carry out this action.<br />
+            Only an administrator (server manager) can carry out this action.<br>
             This action requires a special system administrator password (not a normal login password)
         </div>
     

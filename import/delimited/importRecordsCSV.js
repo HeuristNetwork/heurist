@@ -1727,15 +1727,15 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
         if(mode_display_separate){
         
             if(sID_field!=''){
-                sID_field = '<tr height="40"><td class="subh" colspan="5"><br /><b>Heurist ID</b></td></tr>'
+                sID_field = '<tr height="40"><td class="subh" colspan="5"><br><b>Heurist ID</b></td></tr>'
                     +sID_field;
             }
             if(sIndexes!=''){
-                sIndexes = '<tr height="40"><td class="subh" colspan="5"><br /><b>Heurist identifiers (record pointers)</b></td></tr>'
+                sIndexes = '<tr height="40"><td class="subh" colspan="5"><br><b>Heurist identifiers (record pointers)</b></td></tr>'
                     +sIndexes;
             }
             if(sRemain!=''){
-                sRemain = '<tr height="40"><td class="subh" colspan="5"><br /><b>'
+                sRemain = '<tr height="40"><td class="subh" colspan="5"><br><b>'
                 + ((currentStep==3) ?'Matching - not yet used'
                                     :'Not yet Imported')
                 +'</b>'
@@ -1747,7 +1747,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
                     +sRemain;
             }
             if(sProcessed!=''){
-                sProcessed = '<tr height="40"><td class="subh" colspan="5"><br />'
+                sProcessed = '<tr height="40"><td class="subh" colspan="5"><br>'
                 +'<b>Already used</b>'
                  + ((currentStep==3)?'':'<span style="font-size:0.7em;font-style:italic"> You only need to map all required fields (red in dropdown) if you plan to create new records</span>')
                 +'<br><br><a href="#" class="lnk_SelectAll_processed" style="font-size:smaller">Select all/none</a></td></tr>'
@@ -3942,7 +3942,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
             + '<button style="float:right;margin-right:10px" '
             + 'onclick="{$(\'.sel_disamb\').each(function(i,item){$(item).val( $(item).find(\'option:first\').attr(\'value\') ) });}">First choice</button>'
             + '<span style="float:right; padding: 3px;">Set all to: </span>'
-            + '<br/><br/>'
+            + '<br><br>'
             + '<table class="tbmain" width="100%">';
             
             var buttons = {};
@@ -4097,7 +4097,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
                         }
                     }*/
                     
-                    s = s + "<div><span class='error'>Values in red are invalid: </span> "+rec_tab['err_message']+"<br/><br/></div>";
+                    s = s + "<div><span class='error'>Values in red are invalid: </span> "+rec_tab['err_message']+"<br><br></div>";
                     
                     var is_missed = (rec_tab['err_message'].indexOf('a value must be supplied')>0);
 
@@ -4141,7 +4141,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
                     print '</div>';
                     print '<div><a href="#" onclick="{top.HEURIST.util.popupTinyElement(window, document.getElementById(\'distinct_terms_'.
                     $k.'\'),{\'no-close\':false, \'no-titlebar\':false });}">Get list of unrecognised terms</a>'.
-                    ' (can be imported into terms tree)<br/>&nbsp;</div>';
+                    ' (can be imported into terms tree)<br>&nbsp;</div>';
                 }
             }
 

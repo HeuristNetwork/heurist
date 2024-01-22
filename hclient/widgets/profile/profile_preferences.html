@@ -99,7 +99,7 @@
     <div>
         <label class="header">Drag this link to your browser bookmarks bar</label><b><u>
                 <a style="color: blue;" id="bookmarklet-link"
-                    onclick="{alert('Heurist Bookmarklet <br/><br/>drag this link to your browser bookmarks toolbar, or right-click the link, choose Bookmark This Link, and add the link to your Bookmarks Toolbar or Favorites. <br/><br/>Clicking on the bookmarklet link when in a page will give options for creating a new Web page (or other) Heurist record, copying any highlighted text to an appropriate field. It also allows capturing of hyperlinks in the page as new Web page records.');return false;}"
+                    onclick="{alert('Heurist Bookmarklet <br><br>drag this link to your browser bookmarks toolbar, or right-click the link, choose Bookmark This Link, and add the link to your Bookmarks Toolbar or Favorites. <br><br>Clicking on the bookmarklet link when in a page will give options for creating a new Web page (or other) Heurist record, copying any highlighted text to an appropriate field. It also allows capturing of hyperlinks in the page as new Web page records.');return false;}"
                     title="Heurist Bookmarklet: Drag this link to your browser bookmarks toolbar, or right-click the link, choose Bookmark This Link, and add the link to your Bookmarks Toolbar or Favorites. "
                     href="#"></a>
             </u></b><label>&nbsp;to allow bookmarking of web pages</label><br><br>
@@ -133,7 +133,7 @@
     </div>
 
     <!-- ================================================= -->
-    <hr/>
+    <hr>
     <!-- ================================================= -->
     <h3 style="margin:0">Mapping</h3>
                                    
@@ -244,7 +244,7 @@
         <input type="checkbox" name="map_no_wrap " id="map_no_wrap" class="text ui-widget-content ui-corner-all"/>
     </div>
 
-    <br/><hr />
+    <br><hr>
 
 
     <h3 style="margin:0">Filter</h3>
@@ -261,7 +261,7 @@
     <div>
         <div class="header">
             <label for="search_result_pagesize">
-                Page size for display of search results list<br/><i style="font-size:smaller">Searches with many results will display slowly with larger page sizes</i>
+                Page size for display of search results list<br><i style="font-size:smaller">Searches with many results will display slowly with larger page sizes</i>
             </label>
         </div>
         <select name="search_result_pagesize" id="search_result_pagesize" class="text ui-widget-content ui-corner-all" style="min-width:50px"
@@ -278,7 +278,7 @@
     <div>
         <div class="header">
             <label for="smarty-output-limit">
-                Limit lines in interactive custom report output<br/><i style="font-size:smaller">Heurist interface only, not external calls</i>
+                Limit lines in interactive custom report output<br><i style="font-size:smaller">Heurist interface only, not external calls</i>
             </label>
         </div>
         <select name="smarty-output-limit" id="smarty-output-limit" class="text ui-widget-content ui-corner-all" style="min-width:50px"
@@ -293,7 +293,7 @@
 
     <div>
         <div class="header"><label for="search_detail_limit">
-                Limit objects on interactive map/timeline<br/><i style="font-size:smaller">Heurist interface, not external calls.<br/>Beware overloading websites with too many objects.</i>
+                Limit objects on interactive map/timeline<br><i style="font-size:smaller">Heurist interface, not external calls.<br>Beware overloading websites with too many objects.</i>
             </label></div>
         <select name="search_detail_limit" id="search_detail_limit" class="text ui-widget-content ui-corner-all" style="min-width:50px"
             title="This limit does not apply to external calls - make sure you do not overload websites with maps or timelines with too many objects">
@@ -310,13 +310,13 @@
 
     <div>
         <div class="header">
-        <label for="bookmarks_on">Show My Bookmarks in navigation panel<br/><i style="font-size:smaller">Turn on only if using bookmarks in shared db</i></label></div>
+        <label for="bookmarks_on">Show My Bookmarks in navigation panel<br><i style="font-size:smaller">Turn on only if using bookmarks in shared db</i></label></div>
         <input type="checkbox" name="bookmarks_on" id="bookmarks_on" class="text ui-widget-content ui-corner-all"/>
     </div>
 
     <!-- ================================================= -->
 <!--
-    <br/><hr />
+    <br><hr>
     <h3 style="margin:0">API Keys and Accounts</h3>
 
     <div>
@@ -331,19 +331,19 @@
     </div>
 -->    
     <!-- ================================================= -->
-    <br/><hr />
+    <br><hr>
     <h3 style="margin:0">Other</h3>
  
  <!-- Appears not to have been implemented in new editing functions 2017, possibly reinstate?
 
     <div>
-        <div class="header"><label for="tagging-popup">Prompt for tags when saving records<br /><i>if no tags have been set</i></label></div>
+        <div class="header"><label for="tagging-popup">Prompt for tags when saving records<br><i>if no tags have been set</i></label></div>
         <input type="checkbox" name="tagging-popup" id="tagging-popup" class="text ui-widget-content ui-corner-all"/>
     </div>
 -->
 
     <div>
-        <div class="header"><label for="defaultRecentPointerSearch">Default to recent records search when editing<br />pointer fields <i>(otherwise All Records)</i></label></div>
+        <div class="header"><label for="defaultRecentPointerSearch">Default to recent records search when editing<br>pointer fields <i>(otherwise All Records)</i></label></div>
         <input type="checkbox" name="defaultRecentPointerSearch" id="defaultRecentPointerSearch" class="text ui-widget-content ui-corner-all"/>
     </div>
     
@@ -379,15 +379,15 @@
 
 <!-- 14/4/18: This does not appear to do anything, besides it should really be replaced by proper indexing using Elastic and specification of composite key for each record type 
     <div>
-        <div class="header"><label for="findFuzzyMatches">Check for similar records on creation<br /><i>can slow new-record save</i></label></div>
+        <div class="header"><label for="findFuzzyMatches">Check for similar records on creation<br><i>can slow new-record save</i></label></div>
         <input type="checkbox" name="findFuzzyMatches" id="findFuzzyMatches" class="text ui-widget-content ui-corner-all"/>
     </div>
 -->
     
     <!-- Pre 2018: options which are no longer used or need rethinking or need proper maintenance
-    <br />
-    <hr />
-    <br />
+    <br>
+    <hr>
+    <br>
 
     <div>
     <div class="header"><label for="edit_open_in_new_window">Open edit in new window</label></div>
