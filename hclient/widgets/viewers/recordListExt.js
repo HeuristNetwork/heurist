@@ -266,6 +266,10 @@ $.widget( "heurist.recordListExt", {
                     that.updateDataset( jQuery.extend(true, {}, data) ); //keep current query request (clone)
                 }
 
+                if(data && data.facet_value){
+                    that._facet_value = data.facet_value;
+                }
+
             }else if(e.type == window.hWin.HAPI4.Event.ON_REC_SELECT){
 
                 //selection happened somewhere else
@@ -593,6 +597,10 @@ $.widget( "heurist.recordListExt", {
                     }else if(newurl.indexOf('db=')<0){
                         newurl = newurl + '&db=' + window.hWin.HAPI4.database;    
                     }
+
+                    if(!window.hWin.HEURIST4.util.isempty(this._facet_value)){
+                        newurl += `&facet_val=${this._facet_value}`;
+                    }
                     
                     if(this.options.record_with_custom_styles){
                         newurl = newurl + '&cssid=' + this.options.record_with_custom_styles;
@@ -820,7 +828,7 @@ $.widget( "heurist.recordListExt", {
             recordset = {"resultCount":0,"recordCount":0,"recIDs":[]};
         }
 
-        showReps.assignRecordsetAndQuery(recordset, this._query_request);
+        showReps.assignRecordsetAndQuery(recordset, this._query_request, this._facet_value);
         showReps.processTemplate();
     },
     

@@ -50,7 +50,9 @@ function ShowReps( is_snippet_editor ) {
 
     _add_variable_dlg = null,
     
-    _is_snippet_editor = (is_snippet_editor===true);
+    _is_snippet_editor = (is_snippet_editor===true),
+    
+    _facet_value = null;
     
     
     var top_repcontainer = '36px';
@@ -277,6 +279,10 @@ function ShowReps( is_snippet_editor ) {
         }else{
             return; //use global recordset only
             squery = _getQueryAndTemplate(template_file, false); //NOT USED
+        }
+
+        if(_facet_value){
+            request['facet_val'] = _facet_value;
         }
 
         if(request!=null){
@@ -2196,9 +2202,10 @@ this_id       : "term"
 
 
         // recordset is JSON array   {"resultCount":23,"recordCount":23,"recIDs":[8005,11272,8599.....]}
-        assignRecordsetAndQuery: function(recordset, query_request){
+        assignRecordsetAndQuery: function(recordset, query_request, facet_value = null){
             _currentRecordset = recordset;
             _currentQuery = query_request;
+            _facet_value = facet_value;
         },
 
         isNeedSelection: function(){

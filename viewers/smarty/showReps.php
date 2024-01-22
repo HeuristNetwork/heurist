@@ -138,6 +138,8 @@ function executeSmartyTemplate($system, $params){
     $publishmode = (array_key_exists("publish", $params))? intval($params['publish']):0;
     $emptysetmessage = (array_key_exists("emptysetmessage", $params))? $params['emptysetmessage'] :null;
     $record_with_custom_styles = (array_key_exists("cssid", $params))? intval($params['cssid']) :null;
+
+    $facet_value = (array_key_exists("facet_val", $params)) ? htmlspecialchars($params['facet_val']) : null;
     
 // text or text/plain - without header and body tags  $is_headless=true
 // html or text/html  - usual mode
@@ -335,6 +337,10 @@ function executeSmartyTemplate($system, $params){
     $smarty->assignByRef('heurist', $heuristRec);
     
     $smarty->assign('results', $results); //assign record ids
+
+    if(!empty($facet_value)){
+        $smarty->assign('selected_term', $facet_value); // facet value that trigger a search, term id(s) for now
+    }
 
     try{
 
