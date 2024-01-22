@@ -1392,6 +1392,8 @@ $.widget( "heurist.editing_input", {
                     return true;
                 } // _showEditor()
 
+                // RT_ indicates the record types affected, DT_ indicates the fields affected
+                // DT_EXTENDED_DESCRIPTION (field concept 2-4) is the page content or header/footer content
                 var isCMS_content = (( 
                          this.options.rectypeID == window.hWin.HAPI4.sysinfo['dbconst']['RT_CMS_MENU'] ||
                          this.options.rectypeID == window.hWin.HAPI4.sysinfo['dbconst']['RT_CMS_HOME']) &&
@@ -1406,36 +1408,42 @@ $.widget( "heurist.editing_input", {
                     cur_action = '';
                     
                     var fstatus = '';
-                    var fname = 'Edit page content';
-                    if(this.options.dtID == window.hWin.HAPI4.sysinfo['dbconst']['DT_CMS_HEADER']){
+                    var fname = 'Page content';
+                    
+                    if (this.options.rectypeID == window.hWin.HAPI4.sysinfo['dbconst']['RT_CMS_HOME'] &&
+                       this.options.dtID == window.hWin.HAPI4.sysinfo['dbconst']['DT_CMS_HEADER']){
                         fname = 'Custom header';
-                    }else if(this.options.dtID == window.hWin.HAPI4.sysinfo['dbconst']['DT_CMS_FOOTER']){
+                        fstatus = (window.hWin.HEURIST4.util.isempty(value))
+                            ?'No custom header defined'
+                            :'Delete html from this field to use default page header.';
+                    }
+                    
+                    if (this.options.rectypeID == window.hWin.HAPI4.sysinfo['dbconst']['RT_CMS_HOME'] &&
+                       this.options.dtID == window.hWin.HAPI4.sysinfo['dbconst']['DT_CMS_FOOTER']){
                         fname = 'Custom footer';
                         fstatus = (window.hWin.HEURIST4.util.isempty(value))
                             ?'No custom footer defined'
                             :'Delete html from this field to use default page footer.';
                     }
                                 
-                                
+                    // Only show this for the CMS Home record type and home page content            
                     if (this.options.rectypeID == window.hWin.HAPI4.sysinfo['dbconst']['RT_CMS_HOME']
-                        && this.options.dtID == window.hWin.HAPI4.sysinfo['dbconst']['DT_CMS_HEADER'])
-                        { // Only show this for the CMS Home record type
-                            fstatus = (window.hWin.HEURIST4.util.isempty(value))
-                            ?'No custom header defined'
-                            :'Delete html from this field to use default page header.';
-                        }
-                    else if(this.options.rectypeID == window.hWin.HAPI4.sysinfo['dbconst']['RT_CMS_HOME']
                         && this.options.dtID == window.hWin.HAPI4.sysinfo['dbconst']['DT_EXTENDED_DESCRIPTION']){
                             fstatus = 'Leave this field blank if you wish the first menu entry to load automatically on startup.';    
                     }
                     
-                    cms_div_prompt = $('<div style="line-height:20px;display:inline-block;"><b>Please use the '
-                        + fname
-                        + ' button in the <span>website editor</span> to edit this field.<br>'
-                        + fstatus+'</b></div>')
-                        .insertBefore($input);
-                    $input.hide();
-
+                    // Only show this message for CONTENT fields (of home page or menu pages) which can be directly edited in the CMS editor 
+                    if( (this.options.dtID == window.hWin.HAPI4.sysinfo['dbconst']['RT_CMS_HOME'] ||
+                         this.options.dtID == window.hWin.HAPI4.sysinfo['dbconst']['RT_CMS_MENU']) &&
+                       (this.options.dtID == window.hWin.HAPI4.sysinfo['dbconst']['DT_EXTENDED_DESCRIPTION'])
+                           {                
+                            cms_div_prompt = $('<div style="line-height:20px;display:inline-block;"><b>Please edit the content of the '
+                                + fname
+                                + ' field in the CMS editor.<br>'
+                                + fstatus+'</b></div>')
+                                .insertBefore($input);
+                            $input.hide();
+                    }
                     $('<br>').insertBefore($btn_edit_switcher);
 
                     cms_label_edit_prompt = $('<span>Advanced users: edit source as </span>')
