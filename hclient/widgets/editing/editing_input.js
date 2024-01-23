@@ -1433,17 +1433,13 @@ $.widget( "heurist.editing_input", {
                     }
                     
                     // Only show this message for CONTENT fields (of home page or menu pages) which can be directly edited in the CMS editor 
-                    if( (this.options.dtID == window.hWin.HAPI4.sysinfo['dbconst']['RT_CMS_HOME'] ||
-                         this.options.dtID == window.hWin.HAPI4.sysinfo['dbconst']['RT_CMS_MENU']) &&
-                       (this.options.dtID == window.hWin.HAPI4.sysinfo['dbconst']['DT_EXTENDED_DESCRIPTION'])
-                           {                
-                            cms_div_prompt = $('<div style="line-height:20px;display:inline-block;"><b>Please edit the content of the '
+                    cms_div_prompt = $('<div style="line-height:20px;display:inline-block;"><b>Please edit the content of the '
                                 + fname
                                 + ' field in the CMS editor.<br>'
                                 + fstatus+'</b></div>')
                                 .insertBefore($input);
-                            $input.hide();
-                    }
+                    $input.hide();
+
                     $('<br>').insertBefore($btn_edit_switcher);
 
                     cms_label_edit_prompt = $('<span>Advanced users: edit source as </span>')
