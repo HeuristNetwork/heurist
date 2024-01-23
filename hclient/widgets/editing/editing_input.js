@@ -2642,20 +2642,23 @@ $.widget( "heurist.editing_input", {
 
                 let css = 'display: block; font-size: 0.8em; color: #999999; padding: 0.3em 0px;';
 
-				// Add additional controls to insert yesterday, today or tomorrow
-                let $help_controls = $('<div>', { style: css })
-                    .html('<span class="fake_link">Yesterday</span>'
-                        + '<span style="margin: 0px 5px" class="fake_link">Today</span>'
-                        + '<span class="fake_link" class="fake_link">Tomorrow</span>'
-                        + '<span style="margin-left: 10px;">yyyy, yyyy-mm or yyyy + click calendar (remembers last date)</span>');
+                if(this.options.recordset?.entityName=='Records' && this.element.find('.extra_help').length == 0){
+                    // Add additional controls to insert yesterday, today or tomorrow
 
-                $help_controls.insertAfter($inputdiv);
-
-                this._on($help_controls.find('span.fake_link'), {
-                    click: function(e){
-                        $input.val(e.target.textContent).change();
-                    }
-                });
+                    let $help_controls = $('<div>', { style: css, class: 'extra_help' })
+                        .html('<span class="fake_link">Yesterday</span>'
+                            + '<span style="margin: 0px 5px" class="fake_link">Today</span>'
+                            + '<span class="fake_link" class="fake_link">Tomorrow</span>'
+                            + '<span style="margin-left: 10px;">yyyy, yyyy-mm or yyyy + click calendar (remembers last date)</span>');
+    
+                    $help_controls.insertBefore(this.input_prompt);
+    
+                    this._on($help_controls.find('span.fake_link'), {
+                        click: function(e){
+                            $input.val(e.target.textContent).change();
+                        }
+                    });
+                }
             }
             else 
             if(this.isFileForRecord){ //----------------------------------------------------
