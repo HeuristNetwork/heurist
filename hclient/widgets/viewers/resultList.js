@@ -205,9 +205,9 @@ $.widget( "heurist.resultList", {
                 this.options.pagesize = window.hWin.HAPI4.get_prefs('search_result_pagesize');
             }
         }
-        if(this.options.empty_remark=='def'){
-            this.options.empty_remark = window.hWin.HR('resultList_empty_remark');
-        }
+
+        this.options.empty_remark = this.options.empty_remark=='def' ? window.hWin.HR('resultList_empty_remark') : this.options.empty_remark;
+        this.options.placeholder_text = this.options.placeholder_text=='def' ? '' : this.options.placeholder_text;
 
         this._is_publication  = this.element.parent().attr('data-heurist-app-id') || this.element.hasClass('cms-element');
         
