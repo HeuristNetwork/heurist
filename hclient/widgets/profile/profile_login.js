@@ -96,7 +96,7 @@ function showLoginDialog(isforsed, callback, parentwin, dialog_id){
                     doAuthentication({username: user_id, password:null, saml_entity:sp_entity}, login_dialog);
                 }else{
                     //reopen login dialogue
-                    alert(user_id+'.  todo: Open login dialog');
+                    alert('Saml authentication returned:\n'+user_id+'\n Login dialog will be reopened');
                 }
 
     /* 
