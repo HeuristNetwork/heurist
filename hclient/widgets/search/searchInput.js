@@ -48,7 +48,9 @@ $.widget( "heurist.searchInput", {
         search_page: null, //target page (for CMS) - it will navigate to this page and pass search results to search_realm group
         search_realm:  null,  //accepts search/selection events from elements of the same realm only
 
-        update_on_external_search: false // update search box value on ON_REC_SEARCHSTART from facet/other filters
+        update_on_external_search: false, // update search box value on ON_REC_SEARCHSTART from facet/other filters
+
+        append_all_to_search: false // prepend all: to search
     },
 
     query_request:null,
@@ -224,6 +226,16 @@ $.widget( "heurist.searchInput", {
         var qsearch = this.input_search.val();
         
         qsearch = qsearch.replace(/,\s*$/, "");
+
+        if(this.options.append_all_to_search && !window.hWin.HEURIST4.util.isJSON(qsearch) && qsearch.indexOf(":") === -1){
+            // force search all fields
+
+            if(window.hWin.HEURIST4.util.isempty(qsearch)){ // do nothing
+                return;
+            }
+
+            qsearch = `all:"${qsearch}"`;
+        }
 
         if ( qsearch ) {
 
