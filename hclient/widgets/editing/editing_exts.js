@@ -362,10 +362,15 @@ function editSymbology(current_value, mode_edit, callback){
         }},
         {"dtID": "iconSize",
             "dtFields":{
-                "dty_Type":"freetext",
-                "rst_DisplayName": "Icon size:"
-                //"rst_DefaultValue": 18,
-        }}
+                "dty_Type":"integer",
+                "rst_DisplayName": "Icon size:",
+                "rst_DisplayWidth": 5,
+                "rst_DefaultValue": 18,
+                "rst_DisplayHelpText": "Icon size in pixels",
+                "rst_Spinner": "1",
+                "rst_MinValue": "0"
+            }
+        }
         
         ]},
 
@@ -397,15 +402,20 @@ function editSymbology(current_value, mode_edit, callback){
             "dtFields":{
                 "dty_Type":"freetext",
                 "rst_DisplayName": "Stroke color:",
+                "rst_DisplayWidth": 10,
                 "rst_DisplayHelpText": "",
-                "rst_FieldConfig":{"colorpicker":"colorpicker"}  //use colorpicker widget
+                "rst_FieldConfig":{"colorpicker":"colorpicker", "container_width":"130"}  //use colorpicker widget
         }},
         {"dtID": "weight",
             "dtFields":{
-                "dty_Type":"integer",
+                "dty_Type":"float",
                 "rst_DisplayName": "Stroke width:",
-                "rst_DisplayHelpText": "Stroke width in pixels"
-        }},
+                "rst_DisplayWidth": 5,
+                "rst_DisplayHelpText": "Stroke width in pixels",
+                "rst_Spinner": "1",
+                "rst_MinValue": "0"
+            }
+        },
         {"dtID": "dashArray",
             "dtFields":{
                 "dty_Type":"freetext",
@@ -416,13 +426,19 @@ function editSymbology(current_value, mode_edit, callback){
             "dtFields":{
                 "dty_Type":"float",
                 "rst_DisplayName": "Stroke opacity:",
-                "rst_DisplayHelpText": "Value from 0 (transparent) to 100 (opaque)"
-        }}
+                "rst_DisplayWidth": 5,
+                "rst_DisplayHelpText": "Value from 0 (transparent) to 100 (opaque)",
+                "rst_Spinner": "1",
+                "rst_SpinnerStep": "0.1",
+                "rst_MinValue": "0",
+                "rst_MaxValue": "100"
+            }
+        }
         
         ]},
 
         {
-        "groupHeader": "Are fill",
+        "groupHeader": "Area fill",
         "groupTitleVisible": true,
         "groupType": "group",
             "children":[
@@ -455,14 +471,20 @@ function editSymbology(current_value, mode_edit, callback){
                 "dty_Type":"freetext",
                 "rst_DisplayName": "Fill color:",
                 "rst_DisplayHelpText": "Fill color. Defaults to the value of the color option",
-                "rst_FieldConfig":{"colorpicker":"colorpicker"}  //use colorpicker widget
+                "rst_FieldConfig":{"colorpicker":"colorpicker", "container_width":"130"}  //use colorpicker widget
         }},
         {"dtID": "fillOpacity",
             "dtFields":{
                 "dty_Type":"float",
                 "rst_DisplayName": "Fill opacity:",
-                "rst_DisplayHelpText": "Value from 0 (transparent) to 100 (opaque)"
-        }}
+                "rst_DisplayWidth": 5,
+                "rst_DisplayHelpText": "Value from 0 (transparent) to 100 (opaque)",
+                "rst_Spinner": "1",
+                "rst_SpinnerStep": "0.1",
+                "rst_MinValue": "0",
+                "rst_MaxValue": "100"
+            }
+        }
         ]}
         //fillRule  A string that defines how the inside of a shape is determined.
         ];

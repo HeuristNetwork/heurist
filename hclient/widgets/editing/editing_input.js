@@ -733,6 +733,10 @@ $.widget( "heurist.editing_input", {
                         val = this.f('dty_Type')=='freetext'?20:80;  //default minimum width for input fields in ex
             else if(fieldname=='rst_TermsAsButtons')
                 val = 0;
+            else if(fieldname=='rst_Spinner')
+                val = 0;
+            else if(fieldname=='rst_SpinnerStep')
+                val = 1;
         }
         if(window.hWin.HEURIST4.util.isempty(val)){
             return null;
@@ -2583,50 +2587,74 @@ $.widget( "heurist.editing_input", {
                         window.hWin.HEURIST4.msg.showTooltipFlash(window.hWin.HR('Numeric field'),1000,$input);
                     }
                 });
-                
-                /*
-                if(this.options.is_faceted_search){
-                    $input.css({'max-width':'13ex','min-width':'13ex'});
+
+                if(this.f('rst_Spinner') == 1){
+
+                    let spinner_step = this.f('rst_SpinnerStep');
+
+                    $input.prop('type', 'number').prop('step', spinner_step);
+
+                    // Set minimum and maximum values
+                    let max_val = this.f('rst_MaxValue');
+                    let min_val = this.f('rst_MinValue');
+    
+                    if($.isNumeric(min_val)){
+                        $input.prop('min', min_val);
+                    }
+                    if($.isNumeric(max_val)){
+                        $input.prop('max', max_val);
+                    }
                 }
-                */
-                
-                
-                /*$input.keyup(function () {
-                if (this.value != this.value.replace(/[^0-9-]/g, '')) {
-                this.value = this.value.replace(/[^0-9-]/g, '');  //[-+]?\d
-                }
-                });*/
+
             }else
             if(this.detailType=="float"){//----------------------------------------------------
 
-                    $input.keypress(function (e) {
-                        var code = e.charCode || e.keyCode; //(e.keyCode ? e.keyCode : e.which);
-                        var charValue = String.fromCharCode(code);
-                        var valid = false;
+                $input.keypress(function (e) {
+                    var code = e.charCode || e.keyCode; //(e.keyCode ? e.keyCode : e.which);
+                    var charValue = String.fromCharCode(code);
+                    var valid = false;
 
-                        if(charValue=='-' && this.value.indexOf('-')<0){
-                            this.value = '-'+this.value;
-                        }else if(charValue=='.' && this.value.indexOf('.')<0){
-                            valid = true;
-                        }else{
-                            valid = /^[0-9]+$/.test(charValue);
-                        }
+                    if(charValue=='-' && this.value.indexOf('-')<0){
+                        this.value = '-'+this.value;
+                    }else if(charValue=='.' && this.value.indexOf('.')<0){
+                        valid = true;
+                    }else{
+                        valid = /^[0-9]+$/.test(charValue);
+                    }
 
-                        if(!valid){
-                            window.hWin.HEURIST4.util.stopEvent(e);
-                            e.preventDefault();
-                            window.hWin.HEURIST4.msg.showTooltipFlash(window.hWin.HR('Numeric field'),1000,$input);
-                        }
+                    if(!valid){
+                        window.hWin.HEURIST4.util.stopEvent(e);
+                        e.preventDefault();
+                        window.hWin.HEURIST4.msg.showTooltipFlash(window.hWin.HR('Numeric field'),1000,$input);
+                    }
 
-                    });
+                });
 
-                    $input.on('paste', function(e){
-                        if(!$.isNumeric(e.originalEvent.clipboardData.getData('text'))){
-                            window.hWin.HEURIST4.util.stopEvent(e);
-                            e.preventDefault();
-                            window.hWin.HEURIST4.msg.showTooltipFlash(window.hWin.HR('Numeric field'),1000,$input);
-                        }
-                    });
+                $input.on('paste', function(e){
+                    if(!$.isNumeric(e.originalEvent.clipboardData.getData('text'))){
+                        window.hWin.HEURIST4.util.stopEvent(e);
+                        e.preventDefault();
+                        window.hWin.HEURIST4.msg.showTooltipFlash(window.hWin.HR('Numeric field'),1000,$input);
+                    }
+                });
+
+                if(this.f('rst_Spinner') == 1){
+
+                    let spinner_step = this.f('rst_SpinnerStep');
+
+                    $input.prop('type', 'number').prop('step', spinner_step);
+
+                    // Set minimum and maximum values
+                    let max_val = this.f('rst_MaxValue');
+                    let min_val = this.f('rst_MinValue');
+    
+                    if($.isNumeric(min_val)){
+                        $input.prop('min', min_val);
+                    }
+                    if($.isNumeric(max_val)){
+                        $input.prop('max', max_val);
+                    }
+                }
 
             }else
             if(this.detailType=='date'){//----------------------------------------------------
@@ -4823,6 +4851,14 @@ $.widget( "heurist.editing_input", {
                     //if($input==null) $input = $('<select>').uniqueId();
                     var selObj = window.hWin.HEURIST4.ui.createSelector($input.get(0), allTerms);
                     window.hWin.HEURIST4.ui.initHSelect(selObj, this.options.useHtmlSelect);
+
+                    // move menuWidget to current dialog/document 
+                    // (sometimes, within CMS pages for example, it places it before the current dialog thus hiding it)
+                    let $menu = $input.hSelect('menuWidget');
+                    let $parent_ele = $input_div.parents('[role="dialog"]');
+                    $parent_ele = $parent_ele.length == 0 ? document : $parent_ele;
+
+                    if($parent_ele.length > 0) $menu.parent().appendTo($parent_ele);
                 }
             }
             
