@@ -504,34 +504,36 @@ function editCMS_WidgetCfg( widget_cfg, _layout_content, $dlg, main_callback ){
                         $dlg.find('#expandLevels').hide();
                     }
 
-                    var vals = $dlg.find('#widgetCss').val().split(';');
-                    for (var i=0; i<vals.length; i++){
-                        var vs = vals[i].split(':');
-                        if(vs && vs.length==2){
-                            vs[0] = vs[0].trim();
-                            if(is_horiz){
-                                if(vs[0]=='width'){
-                                    vals[i] = ('\nwidth: 100%');
-                                }else if(vs[0]=='height'){
-                                    vals[i] = ('\nheight:50px');
-                                }
-                            }else if(is_vertical){
-                                if(vs[0]=='width'){
-                                    vals[i] = ('\nwidth: 50px');
-                                }else if(vs[0]=='height'){
-                                    vals[i] = ('\nheight:100%');
-                                }
-                            }else{
-                                if(vs[0]=='width'){
-                                    vals[i] = ('\nwidth: 200px');
-                                }else if(vs[0]=='height'){
-                                    vals[i] = ('\nheight:300px');
+                    if($dlg.find('#widgetCss').length>0){
+                        var vals = $dlg.find('#widgetCss').val().split(';');
+                        for (var i=0; i<vals.length; i++){
+                            var vs = vals[i].split(':');
+                            if(vs && vs.length==2){
+                                vs[0] = vs[0].trim();
+                                if(is_horiz){
+                                    if(vs[0]=='width'){
+                                        vals[i] = ('\nwidth: 100%');
+                                    }else if(vs[0]=='height'){
+                                        vals[i] = ('\nheight:50px');
+                                    }
+                                }else if(is_vertical){
+                                    if(vs[0]=='width'){
+                                        vals[i] = ('\nwidth: 50px');
+                                    }else if(vs[0]=='height'){
+                                        vals[i] = ('\nheight:100%');
+                                    }
+                                }else{
+                                    if(vs[0]=='width'){
+                                        vals[i] = ('\nwidth: 200px');
+                                    }else if(vs[0]=='height'){
+                                        vals[i] = ('\nheight:300px');
+                                    }
                                 }
                             }
                         }
-                    }
 
-                    $dlg.find('#widgetCss').val( vals.join(';'));
+                        $dlg.find('#widgetCss').val( vals.join(';'));
+                    }
                 });
 
 

@@ -1044,6 +1044,26 @@ $.widget( "heurist.editing_input", {
                             .addClass('smallbutton')
                             .css({cursor: 'pointer', 'margin-left': '10px'})
                             .appendTo($btn_edit_switcher);
+                            
+
+                        /*DEBUG  
+                        var btn_debug = $('<span>debug</span>')
+                            .addClass('smallbutton')
+                            .css({cursor: 'pointer', 'margin-left': '10px'})
+                            .appendTo($btn_edit_switcher);
+                            
+                        this._on( btn_debug, {       
+                            click:function(event){
+                            
+                            if(!window.hWin.layoutMgr){
+                                hLayoutMgr(); //init global var layoutMgr
+                            }
+                                    
+                            //cfg_widgets is from layout_defaults.js
+                            window.hWin.layoutMgr.convertJSONtoHTML(that.getValues()[0]);
+                        }});
+                        */
+                            
                     }
                         
                     $('<span>table</span>')
@@ -1443,7 +1463,7 @@ $.widget( "heurist.editing_input", {
                                 + fstatus+'</b></div>')
                                 .insertBefore($input);
                     $input.hide();
-
+                    
                     $('<br>').insertBefore($btn_edit_switcher);
 
                     cms_label_edit_prompt = $('<span>Advanced users: edit source as </span>')

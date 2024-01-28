@@ -2149,7 +2149,8 @@ function print_public_details($bib) {
                 . '</div><div class="detail'.($is_map_popup && ($bd['dty_ID']!=DT_SHORT_SUMMARY)?' truncate':'').$is_cms_content.'">';
         }
 
-        $is_grayed_out = (intval($bd['dtl_HideFromPublic']) == 1 || ($bd['rst_NonOwnerVisibility'] != 'public' && $bd['rst_NonOwnerVisibility'] != 'pending')) ? ' grayed' : ' ';
+        $is_grayed_out = ( (@$bd['dtl_HideFromPublic']!=null && intval($bd['dtl_HideFromPublic']) == 1) 
+                    || ($bd['rst_NonOwnerVisibility'] != 'public' && $bd['rst_NonOwnerVisibility'] != 'pending')) ? ' grayed' : ' ';
         
         print '<span class="value'.$is_grayed_out.'"'.(@$bd['rollover']?' title="'.$bd['rollover'].'"':'')
                 .'>' . $bd['val'] . '</span>'; // add value

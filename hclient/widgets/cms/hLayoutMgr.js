@@ -49,11 +49,18 @@ function hLayoutMgr(){
     }
     
     //---------------------------------------
+    // 
     //
-    // layout - JSON config
+    //
+    // layout - JSON config or HTML string
     // container - id or element
+    // forStorage - if true do not init widgets and store options as a content for div 
     //
-    function _layoutInit(layout, container, isFirstLevel){
+    function _layoutInitFromJSON(layout, container, forStorage, isFirstLevel){
+        
+        if(container==null){
+            container = document.createElement('div');
+        }
         
         container = $(container);
         
@@ -66,24 +73,22 @@ function hLayoutMgr(){
             }
         }
         
-        container.empty();   
-        
-        if(typeof layout === 'string' &&
-            layout.indexOf('data-heurist-app-id')>0){ //old format with some widgets
-            
-            container.html(layout);
-            
-            //'#main-content'
-                
-            window.hWin.HAPI4.LayoutMgr.appInitFromContainer( null, container, _supp_options );
-            return false;
-        }
+        container.empty();
         
         var res = window.hWin.HEURIST4.util.isJSON(layout);
         
         if(res===false){
             //this is not json - HTML
-            //if(layout==''){ layout = 'Add content here'}
+            
+            if(forStorage){
+                return layout; //returns html 
+            }else if(typeof layout === 'string' && layout.indexOf('data-heurist-app-id')>0){
+                //old format with some widgets
+                container.html(layout);
+                //'#main-content'
+                window.hWin.HAPI4.LayoutMgr.appInitFromContainer( null, container, _supp_options );
+                return false;
+            }
             
             layout = [{name:'Page', type:'group',
                     children:[
@@ -99,6 +104,8 @@ function hLayoutMgr(){
         }
 
         if(isFirstLevel===true){
+            
+            pnl_counter = 1;
             
             if(_supp_options.page_name){
                 layout[0].name  = 'Page'; //_supp_options.page_name;
@@ -117,48 +124,68 @@ function hLayoutMgr(){
             
             if(ele.type=='cardinal'){
                 
-                _layoutInitCardinal(ele, container);
+                _layoutInitCardinal(ele, container, forStorage);
                 
             }else if(ele.type=='tabs'){
                 
-                _layoutInitTabs(ele, container);
+                _layoutInitTabs(ele, container, forStorage);
                 
             }else if(ele.type=='accordion'){
              
-                _layoutInitAccordion(ele, container);
+                _layoutInitAccordion(ele, container, forStorage);
                 
             }else if(ele.children && ele.children.length>0){ //free, flex or group
                 
-                _layoutInitGroup(ele, container);
+                _layoutInitGroup(ele, container, forStorage);
                 
             }else if( (ele.type && ele.type.indexOf('text')==0) || ele.content){
                 //text elements
-                _layoutInitText(ele, container);
+                _layoutInitText(ele, container, forStorage);
                 
             }else if(ele.type=='widget' || ele.appid){
                 //widget element
                 
-                _layoutAddWidget(ele, container);
+                _layoutAddWidget(ele, container, forStorage);
                 
             }
         }//for
         
-        return layout;
-    }//_layoutInit
+        if(forStorage){
+            return container.html();
+        }else{
+            return layout;    
+        }
+        
+    }//_layoutInitFromJSON
     
     //
     // creates new div
     //
-    function _layoutCreateDiv( layout, classes ){
+    function _layoutCreateDiv( layout, classes, forStorage ){
 
-        var $d = $(document.createElement('div'));
-        
-        
         if(layout.dom_id && layout.dom_id.indexOf('cms-tabs-')===0){
             //assign unique identificator (for cardinal, tabs, accordion)
             //id is reassigned on every page reload
             layout.dom_id = 'cms-tabs-' + layout.key;  
-        }else if(!layout.dom_id){
+        }
+        
+        var $d; //result
+        
+        if(forStorage){
+            //attributes
+            // key - unique id withing edit session - it is assigned every time layout recreated in edit mode   
+            // dom_id - unique html id                                                                          
+            // name - dats-cms-name
+            // type - data-cms-type
+            // css - css  
+            // classes - classes
+            
+            $d = $(`<div id="${layout.dom_id}" data-cms-name="${layout.name}" data-cms-type="${layout.type}"></div>`);
+        }else{
+
+        $d = $(document.createElement('div'));
+        
+        if(!layout.dom_id){
         
         
             if(layout.appid && _main_layout_cfg!=null){
@@ -227,13 +254,14 @@ function hLayoutMgr(){
             
         }
         
-        
         $d.attr('id', layout.dom_id)
           .attr('data-hid', layout.key); //.attr('data-lid', layout.key);
-        
+          
         if(classes){
             $d.addClass(classes);
         } 
+
+        }
         if(layout.classes){ //custom classes
             $d.addClass(layout.classes);
         }
@@ -241,10 +269,10 @@ function hLayoutMgr(){
         return $d;        
     }
 
-    function _layoutInitGroup(layout, container){
+    function _layoutInitGroup(layout, container, forStorage){
         
         //create parent div
-        var $d = _layoutCreateDiv(layout, 'cms-element brick');
+        var $d = _layoutCreateDiv(layout, 'cms-element brick', forStorage);
         
         $d.appendTo(container);
                 
@@ -261,7 +289,7 @@ function hLayoutMgr(){
             $d.css(layout.css);
         }
         
-        _layoutInit(layout.children, $d);
+        _layoutInitFromJSON(layout.children, $d, forStorage);
         
     }
     
@@ -269,9 +297,9 @@ function hLayoutMgr(){
     // layout - JSON config
     // container - parent element
     // 
-    function _layoutInitText(layout, container){
+    function _layoutInitText(layout, container, forStorage){
         
-        var $d = _layoutCreateDiv(layout, 'editable tinymce-body cms-element brick');
+        var $d = _layoutCreateDiv(layout, 'editable tinymce-body cms-element brick', forStorage);
 
         $d.appendTo(container);
             
@@ -286,15 +314,39 @@ function hLayoutMgr(){
         
         var content = 'content'; //default name of attribute
         
-        if(_supp_options['lang']){
-            var lang = window.hWin.HAPI4.getLangCode3(_supp_options['lang'], 'def'); //returns 'def' if not found
-            if(layout[content+lang]){ //if not found use the default
-                content = content+lang;
+        if(forStorage){
+            //keep content for all languages
+            var aLangs = [];
+            Object.keys(layout).forEach(key => {
+                if(key.indexOf('content')===0){
+                    aLangs.push(key);
+                }
+            });
+            
+            if(aLangs.length>1){
+                aLangs.forEach((lang) => {
+                    var lang_code = lang.substring(7);
+                    if(!lang_code) lang_code = 'def';
+                    $(`<div css="${lang_code=='def'?'':'display:none'}" data-lang="${lang_code}">${layout[lang]}</div>`).appendTo($d);    
+                });
+            }else{
+               $d.html(layout[aLangs[0]]);    
+            }                                
+            
+        }else{
+        
+            if(_supp_options['lang']){ //current language
+                var lang = window.hWin.HAPI4.getLangCode3(_supp_options['lang'], 'def'); //returns 'def' if not found
+                if(layout[content+lang]){ //if not found use the default
+                    content = content+lang;
+                }
+                $d.attr('data-lang', lang);
             }
-            $d.attr('data-lang', lang);
-        }
 
-        $d.html(layout[content]);
+            $d.html(layout[content]);
+            
+        }
+        
     }
     
     //
@@ -437,7 +489,7 @@ function hLayoutMgr(){
     //
     // groups of containers    
     //
-    function _layoutInitCardinal(layout, container){
+    function _layoutInitCardinal(layout, container, forStorage){
         
         var $d, $parent;
         
@@ -455,7 +507,7 @@ function hLayoutMgr(){
         }
         
         //create parent div
-        var $parent = _layoutCreateDiv(layout);
+        var $parent = _layoutCreateDiv(layout, '', forStorage);
         
         if( layout.css && !$.isEmptyObject(layout.css) ){
             $parent.css( layout.css );
@@ -500,28 +552,40 @@ function hLayoutMgr(){
                 }
             }
             
-            //create cardinal div
-            $d = $(document.createElement('div'));
-            $d.addClass('ui-layout-'+pos)
-              .appendTo($parent);
+            if(forStorage){
+                
+                $d2 = _layoutCreateDiv( layout.children[i], '', forStorage )
+            
+                if(!$.isEmptyObject(layout.children[i].options)){
+//console.log('assign css ', layout.children[i].options);                    
+                    $d2.attr('data-cms-options',JSON.stringify(layout.children[i].options));
+                }
+            
+                $d2.appendTo($parent);
+            }else{
+                //create cardinal div
+                $d = $(document.createElement('div'));
+            
+                $d.addClass('ui-layout-'+pos)
+                  .appendTo($parent);
 
 
-            lpane.dom_id = 'cms-tabs-'+lpane.key;
-            var $d2 =_layoutCreateDiv(lpane, 'ui-layout-content2');  
-              
-            $d2.appendTo($d);
-              
-              
-            //@todo additional container for children>1        
-            layout_opts[pos+'__contentSelector'] = '#'+lpane.dom_id;
+                lpane.dom_id = 'cms-tabs-'+lpane.key;
+                //@todo additional container for children>1        
+                layout_opts[pos+'__contentSelector'] = '#'+lpane.dom_id;
+                
+                var $d2 =_layoutCreateDiv(lpane, 'ui-layout-content2');  
+                $d2.appendTo($d);
+            }
                     
             //init                    
-            _layoutInit(layout.children[i].children, $d2);
+            _layoutInitFromJSON(layout.children[i].children, $d2, forStorage);
                     
         }//for
     
-    
-        $parent.layout( layout_opts );
+        if(!forStorage){
+            $parent.layout( layout_opts );
+        }
         
         //$parent.find('.ui-layout-content2').css('padding','0px !important');
     }
@@ -529,7 +593,7 @@ function hLayoutMgr(){
     //
     //
     //
-    function _layoutInitTabs(layout, container){
+    function _layoutInitTabs(layout, container, forStorage){
         
         
         var $d;
@@ -548,7 +612,7 @@ function hLayoutMgr(){
         }
         
         //create parent div
-        $d = _layoutCreateDiv(layout);
+        $d = _layoutCreateDiv(layout, '', forStorage);
         
         $d.appendTo(container);
           
@@ -559,28 +623,30 @@ function hLayoutMgr(){
         }
 
         //tab panels    
-        _layoutInit(layout.children, $d);
-                
-        //tab header
-        $d = body.find('#'+layout.dom_id);
-        var groupTabHeader = $('<ul>').prependTo($d);
-        
-        for(var i=0; i<layout.children.length; i++){
-      
-            //.addClass('edit-form-tab')
-            $('<li>').html('<a href="#'+layout.children[i].dom_id
-                                +'"><span style="font-weight:bold">'
-                                +layout.children[i].name+'</span></a>')
-                        .appendTo(groupTabHeader);
+        _layoutInitFromJSON(layout.children, $d, forStorage);
+               
+        if(!forStorage) {
+            //tab header
+            $d = body.find('#'+layout.dom_id);
+            var groupTabHeader = $('<ul>').prependTo($d);
+            
+            for(var i=0; i<layout.children.length; i++){
+          
+                //.addClass('edit-form-tab')
+                $('<li>').html('<a href="#'+layout.children[i].dom_id
+                                    +'"><span style="font-weight:bold">'
+                                    +layout.children[i].name+'</span></a>')
+                            .appendTo(groupTabHeader);
+            }
+            
+            $d.tabs();
         }
-        
-        $d.tabs();
     }
     
     //
     //
     //
-    function _layoutInitAccordion(layout, container){
+    function _layoutInitAccordion(layout, container, forStorage){
        
         var $d;
         
@@ -598,12 +664,14 @@ function hLayoutMgr(){
         }
             
         //create parent div
-        $d = _layoutCreateDiv(layout);
+        $d = _layoutCreateDiv(layout, '', forStorage);
         
         $d.appendTo(container);
        
         //accordion panels    
-        _layoutInit(layout.children, $d);
+        _layoutInitFromJSON(layout.children, $d, forStorage);
+        
+        if(!forStorage){
        
         //accordion headers
         for(var i=0; i<layout.children.length; i++){
@@ -620,6 +688,8 @@ function hLayoutMgr(){
                       active:false,
                 //active:(currGroupType == 'expanded')?0:false,
                       collapsible: true });
+                      
+        }
     }
     
     //
@@ -774,90 +844,6 @@ function hLayoutMgr(){
     //
     //
     //
-    // container.html(layout);
-    function _convertOldCmsFormat(container, lvl){
-        
-
-      var res = [];
-                
-      $.each(container.children(), function(idx, ele){
-          
-         ele = $(ele);
-         
-         var child;
-          
-         if(ele.attr('data-heurist-app-id')){
-             //this is widget
-             var opts = window.hWin.HEURIST4.util.isJSON(ele.text());
-             
-             child = {appid: ele.attr('data-heurist-app-id'),
-                                 options: opts};
-                                 
-             if(opts.__widget_name){
-                 child.name = opts.__widget_name.replaceAll('=','').trim();
-             }
-             if(!child.name) child.name = "Widget "+lvl+'.'+idx;
-         }else 
-         if(ele.find('div[data-heurist-app-id]').length==0){ //no widgets
-      
-             var tag = ele[0].nodeName;
-             var s = '<' + tag + '>'+ele.html()+'</' + tag + '>';
-             
-             child = {name:"Content "+lvl+'.'+idx, 
-                                type:"text", 
-                                content: s };
-         }else{
-             
-             if(ele[0].nodeName=='TABLE'){
-                 //window.hWin.HEURIST4.msg.showMsgDlg('We encounter troubles on conversion. Dynamic widget is within TABLE element');
-                 //return false;
-             }
-             
-             //there are widgets among children
-             child = {name:"Group "+lvl+'.'+idx,
-                                type:"group", 
-                                folder:true, 
-                                children:_convertOldCmsFormat(ele, lvl+1) };
-         }
-         
-         if(child){
-             if(ele.attr('style')){
-                 
-                 
-                var styles = ele.attr('style').split(';'),
-                    i= styles.length,
-                    css = {},
-                    style, k, v;
-
-
-                while (i--)
-                {
-                    style = styles[i].split(':');
-                    k = $.trim(style[0]);
-                    v = $.trim(style[1]);
-                    if (k.length > 0 && v.length > 0)
-                    {
-                        css[k] = v;
-                    }
-                }                 
-                 
-                 //var css = window.hWin.HEURIST4.util.isJSON(ele.attr('style'));
-                 if(!$.isEmptyObject(css)) child['css'] = css;
-             }
-             res.push(child);
-         }
-      });
-
-      if(lvl == 0){
-          res = [{name:"Name of this page",type:"group",folder:true, children:res }];
-      }
-      
-      return res;
-    }
-    
-    //
-    //
-    //
     function _prepareTemplate(layout, callback){ 
        
         if(layout.template=='default'){
@@ -891,8 +877,242 @@ function hLayoutMgr(){
         }
     }
         
+    
+    //
+    //
+    //
+    // container.html(layout);
+    function _convertOldCmsFormat(container, lvl){
+
+
+        var res = [];
+
+        $.each(container.children(), function(idx, ele){
+
+            ele = $(ele);
+
+            var child;
+
+            if(ele.attr('data-heurist-app-id')){
+                //this is widget
+                var opts = window.hWin.HEURIST4.util.isJSON(ele.text());
+
+                child = {appid: ele.attr('data-heurist-app-id'),
+                    options: opts};
+
+                if(opts.__widget_name){
+                    child.name = opts.__widget_name.replaceAll('=','').trim();
+                }
+                if(!child.name) child.name = "Widget "+lvl+'.'+idx;
+            }else 
+                if(ele.find('div[data-heurist-app-id]').length==0){ //no widgets
+
+                    var tag = ele[0].nodeName;
+                    var s = '<' + tag + '>'+ele.html()+'</' + tag + '>';
+
+                    child = {name:"Content "+lvl+'.'+idx, 
+                        type:"text", 
+                        content: s };
+                }else{
+
+                    if(ele[0].nodeName=='TABLE'){
+                        //window.hWin.HEURIST4.msg.showMsgDlg('We encounter troubles on conversion. Dynamic widget is within TABLE element');
+                        //return false;
+                    }
+
+                    //there are widgets among children
+                    child = {name:"Group "+lvl+'.'+idx,
+                        type:"group", 
+                        folder:true, 
+                        children:_convertOldCmsFormat(ele, lvl+1) };
+                }
+
+            if(child){
+                if(ele.attr('style')){
+
+
+                    var styles = ele.attr('style').split(';'),
+                    i= styles.length,
+                    css = {},
+                    style, k, v;
+
+
+                    while (i--)
+                    {
+                        style = styles[i].split(':');
+                        k = $.trim(style[0]);
+                        v = $.trim(style[1]);
+                        if (k.length > 0 && v.length > 0)
+                        {
+                            css[k] = v;
+                        }
+                    }                 
+
+                    //var css = window.hWin.HEURIST4.util.isJSON(ele.attr('style'));
+                    if(!$.isEmptyObject(css)) child['css'] = css;
+                }
+                res.push(child);
+            }
+        });
+
+        if(lvl == 0){
+            res = [{name:"Name of this page",type:"group",folder:true, children:res }];
+        }
+
+        return res;
+    }
+
+    
+    // 1. Save result of CMS edit as human-readble html
+    // <div id="cms-content-23" data-cms-name="Page" data-cms-type="text|group|accordion|tabs|cardianl|app" css=""> content </div>
+    // <div id="cms-widget-51" data-cms-name="Menu"  data-cms-type="app" css=""> options:{} </div>
+    //
+    // 2. Convert html t json (to edit)
+    //     id=>dom_id, data-cms-name=>name, data-cms-type=>type, css=>css, folder: true if it has children, 
+    //        children|options|content , appid  
+    // 
+    // 3. Init layout from html (as from json), if there are not accordion|tabs|cardianl|app it will be loaded "as is"
+    // 4. CMS editor for header and footer
+    //   a) create html content as Group+MainMenu   
+    // 
+    //
+    function _convertHTMLtoJSON(ele, lvl){
+        
+        ele = $(ele);
+
+        var res;
+        
+        if(ele.length>1){
+
+            if(ele.find('[data-cms-type]').length>0 || ele.attr('data-lang') || ele.find('div[data-lang]').length>0){
+                res = [];
+                ele.each((i, item)=>{
+                    res.push(_convertHTMLtoJSON(item, lvl));
+                });
+                return res;
+            }else{
+                return {content:ele.html()};
+            }
+        }
         
         
+        if(!ele.attr('data-cms-type')){
+            if(lvl==0){
+                res = [{name:'Page', type:'group',
+                        children:[
+                            {name:'Content', type:'text', css:{}}
+                        ] 
+                    }];
+            }else{
+                res = {};
+            }
+            
+            var translations = ele.children('[data-lang]');
+            if(translations.length>0){
+                translations.each((i,item)=>{
+                    res['content'+item.getAttribute('data-lang')] = item.html();                    
+                });
+            }else{
+                if(ele.attr('data-lang') && ele.attr('data-lang')!='def'){
+                    res['content'+ele.attr('data-lang')] = ele.html();
+                }else{
+                    res.content = ele.html();    
+                }
+                
+            }
+             
+            
+        }else{
+        
+            res = {dom_id: ele.attr('id'), 
+                   name: ele.attr('data-cms-name'),
+                   type: ele.attr('data-cms-type')};
+                   
+            if(ele.attr('style')){
+                if(res.type=='north' || res.type=='south' || res.type=='west' || res.type=='east'){
+                    var cardinal_opts = window.hWin.HEURIST4.util.isJSON(ele.attr('data-cms-options'));
+                    if(cardinal_opts){
+                        res['options'] = cardinal_opts;        
+                    }
+                    
+                }else{
+                    res['css'] = css2json(ele.attr('style'));    
+                }
+            }
+            if(ele.attr('class')){
+                res['classes'] = ele.attr('class'); //ele[0].classList;
+            }
+                   
+            if(res.type == 'app'){
+                res.options = window.hWin.HEURIST4.util.isJSON(ele.text());
+                res.appid = res.options.appid;
+            }else{
+                
+                var children = ele.children('[data-cms-type]');
+                if(children.length>0){
+                    
+                    res.children = [];
+                    children.each((i,item)=>{
+                        res.children.push(_convertHTMLtoJSON(item, lvl+1));                    
+                    });
+                    res.folder = true;    
+                    
+                }else{
+                    //no more css layout elements 
+                    if(ele.attr('data-lang') || ele.find('div[data-lang]').length>0){
+                            res = $.extend(res, _convertHTMLtoJSON(ele.html(), lvl+1));
+                    }else{
+                            res.content = ele.html();
+                    }
+                }
+            }
+        
+        }
+        
+        return res;
+    }
+    
+    function css2json(css) {
+        var s = {};
+        if (!css) return s;
+        if (css instanceof CSSStyleDeclaration) {
+            for (var i in css) {
+                if ((css[i]).toLowerCase) {
+                    s[(css[i]).toLowerCase()] = (css[css[i]]);
+                }        
+            }
+        } else if (typeof css == "string") {
+            css = css.split("; ");
+            for (var i in css) {
+                var l = css[i].split(": ");
+                s[l[0].toLowerCase()] = (l[1]);
+            }
+        }
+        return s;
+    }    
+
+    //
+    // Convert from JSON to human readable HTML string 
+    // (without widget initialization)
+    // <div id="cms-content-23" data-cms-name="Page" data-cms-type="text|group|accordion|tabs|cardianl|app" css=""> content </div>
+    // <div id="cms-widget-51" data-cms-name="Menu"  data-cms-type="app" css=""> options:{} </div>
+    // 
+    function _convertJSONtoHTML(content){
+        
+        //from json
+        console.log(content);
+        
+        //to html
+        var res = _layoutInitFromJSON(content, null, true, true);
+        console.log(res);
+        
+        //and back to json
+        res = _convertHTMLtoJSON(res, 0);
+        
+        console.log(res);
+        
+        return res;
+    }
     
     
     //
@@ -924,9 +1144,12 @@ function hLayoutMgr(){
         //
         layoutInit: function(layout, container, supp_options){
             _supp_options = supp_options?supp_options:{};
-            return _layoutInit(layout, container, true);
+            return _layoutInitFromJSON(layout, container, false, true);
         },
         
+        // 
+        //
+        //
         convertOldCmsFormat: function(layout, container){
             container = $(container);
             container.empty();   
@@ -998,6 +1221,11 @@ function hLayoutMgr(){
                 }
             });        
             return are_all_widgets_inited;
+        },
+        
+        
+        convertJSONtoHTML:function(content){
+            return _convertJSONtoHTML(content);
         }
         
         
