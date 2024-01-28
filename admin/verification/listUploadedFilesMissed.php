@@ -48,7 +48,7 @@ if($is_included){
         
         <form action="listUploadedFilesMissed.php" method="POST">
             <div style="padding:20px 0px">
-                Only an administrator (server manager) can carry out this action.<br />
+                Only an administrator (server manager) can carry out this action.<br>
                 This action requires a special system administrator password (not a normal login password)
             </div>
         
@@ -165,6 +165,6 @@ if(!$is_included){
     }else{
         echo '<script>$(".recordfiles_missed").css("background-color", "#6AA84F");</script>';        
     }
-    print '<br /></div>';
+    print '<br></div>';
 }
 ?>

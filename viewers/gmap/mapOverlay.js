@@ -301,7 +301,7 @@ function hMappingControls( mapping, startup_mapdocument_id ) {
                 }
 
                 if(err_msg!=''){
-                    err_msg_all = err_msg_all + '<br/>Map bookmark: "' + bookmark.join(',')+'" : '+err_msg;
+                    err_msg_all = err_msg_all + '<br>Map bookmark: "' + bookmark.join(',')+'" : '+err_msg;
                     continue;
                 }
 
@@ -319,7 +319,7 @@ function hMappingControls( mapping, startup_mapdocument_id ) {
             }//for map bookmarks
             if(err_msg_all!=''){
                 window.hWin.HEURIST4.msg.showMsgErr('<div>Map-zoom bookmark is not interpretable, set to Label,xmin,xmax,ymin,ymax,tmin,tmax (tmin,tmax are optional)</div>'
-                +'<br>eg. Harlem, -74.000000,-73.900000,40.764134,40.864134,1915,1930<br/> '
+                +'<br>eg. Harlem, -74.000000,-73.900000,40.764134,40.864134,1915,1930<br> '
                     +err_msg_all
                     +'<br><br><div>Please edit the map document (button next to map name dropdown above) and correct the contents of the map-zoom bookmark following the instructions in the field help.</div>'
                 );
@@ -1296,7 +1296,7 @@ map.data.addListener('mouseover', function(event) {
                         /* @todo - show individual warning per layer
                         var MAXITEMS = window.hWin.HAPI4.get_prefs('search_detail_limit');
                         var s = '<p>The map and timeline are limited to display a maximum of <b>'+MAXITEMS+'</b> results to avoid overloading your browser.</p>'
-                        +'<br/><p>There are <b>'+recset.count_total()+'</b> records with spatial and temporal data in the current results set. Please refine your filter to reduce the number of results.</p><br/>'
+                        +'<br><p>There are <b>'+recset.count_total()+'</b> records with spatial and temporal data in the current results set. Please refine your filter to reduce the number of results.</p><br>'
                         +'<p>The map/timeline limit can be reset in Design > Preferences.</p>';                        
 
                         mapdata.title = {title:mapdata.title,

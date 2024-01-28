@@ -185,24 +185,24 @@ if($init_client){
                 <div><span id=same_count></span> are unchanged</div>
                 <div><span id=blank_count></span> are left as-is (missing fields etc)</div>
 
-                <br/><a target=_blank id="q_updates" href="#">Click to view updated records</a><br/>&nbsp;<br/>
+                <br><a target=_blank id="q_updates" href="#">Click to view updated records</a><br>&nbsp;<br>
                 
                 <a target=_blank id="q_blanks" href="#">Click to view records for which the data would create a blank title</a>
                 <span id="q_blanks_info">
-                    <br/>This is generally due to a faulty title mask (verify with Check Title Masks)
-                    <br/>or faulty data in individual records. These titles have not been changed.
+                    <br>This is generally due to a faulty title mask (verify with Check Title Masks)
+                    <br>or faulty data in individual records. These titles have not been changed.
                 </span>
             </div>
 <?php
 /*
-print '<br/><br/><b>DONE</b><br/><br/><a target=_blank href="'.HEURIST_BASE_URL.'?db='.HEURIST_DBNAME.
-    '&w=all&q=ids:'.join(',', $updates).'">Click to view updated records</a><br/>&nbsp;<br/>';
+print '<br><br><b>DONE</b><br><br><a target=_blank href="'.HEURIST_BASE_URL.'?db='.HEURIST_DBNAME.
+    '&w=all&q=ids:'.join(',', $updates).'">Click to view updated records</a><br>&nbsp;<br>';
 
 if(count($blanks)>0){
-    print '<br/>&nbsp;<br/><a target=_blank href="'.HEURIST_BASE_URL.'?db='.HEURIST_DBNAME.
+    print '<br>&nbsp;<br><a target=_blank href="'.HEURIST_BASE_URL.'?db='.HEURIST_DBNAME.
         '&w=all&q=ids:'.join(',', $blanks).
     '">Click to view records for which the data would create a blank title</a>'.
-    '<br/>This is generally due to faulty title mask (verify with Check Title Masks)<br/>'.
+    '<br>This is generally due to faulty title mask (verify with Check Title Masks)<br>'.
     'or faulty data in individual records. These titles have not been changed.';
 }
 */
@@ -221,13 +221,13 @@ if(count($blanks)>0){
         
         if($res['q_updates']){        
             print '<a target=_blank href="'.HEURIST_BASE_URL.'?w=all&q='.htmlspecialchars($res['q_updates'])
-                .'&db='.HEURIST_DBNAME.'&nometadatadisplay=true">Click to view updated records</a><br/>&nbsp;<br/>';
+                .'&db='.HEURIST_DBNAME.'&nometadatadisplay=true">Click to view updated records</a><br>&nbsp;<br>';
         }
         if($res['q_blanks']){
             print '<a target=_blank href="'.HEURIST_BASE_URL.'?w=all&q='.htmlspecialchars($res['q_blanks']).'&db='.HEURIST_DBNAME.
                 '&nometadatadisplay=true">Click to view records for which the data would create a blank title</a>'.
-                '<br/>This is generally due to a faulty title mask (verify with Check Title Masks)'.
-                '<br/>or faulty data in individual records. These titles have not been changed.';
+                '<br>This is generally due to a faulty title mask (verify with Check Title Masks)'.
+                '<br>or faulty data in individual records. These titles have not been changed.';
             
         }                
         

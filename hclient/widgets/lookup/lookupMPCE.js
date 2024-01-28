@@ -1286,7 +1286,7 @@ $.widget( "heurist.lookupMPCE", $.heurist.recordAction, {
             var cur_edition = this.editions_info[i];
 
             var rec_url = window.hWin.HAPI4.baseURL+"viewers/record/renderRecordData.php?db="+window.hWin.HAPI4.database+"&recID="+cur_edition[1];
-            editions = editions.concat("<div style='font-size: 1.2em;'>" + cur_edition[0] + " - <a href='"+rec_url+"' target='_blank'> view record </a></div>", "<br /><br />");
+            editions = editions.concat("<div style='font-size: 1.2em;'>" + cur_edition[0] + " - <a href='"+rec_url+"' target='_blank'> view record </a></div>", "<br><br>");
         }
 
         if(editions == ''){

@@ -574,7 +574,7 @@ class DbUtils {
             if ($db_dump_file===false) {
                     $msg = $msg_prefix.' Failed to dump database to a .sql file';
                     self::$system->addError(HEURIST_SYSTEM_CONFIG, $msg);                
-                    if($verbose) echo '<br/>'.htmlspecialchars($msg);
+                    if($verbose) echo '<br>'.htmlspecialchars($msg);
                     self::$db_del_in_progress = null;
                     return false;
             }
@@ -619,7 +619,7 @@ class DbUtils {
                 $msg = $msg_prefix.' Cannot create archive with database folder. Failed to archive '
                         .($source).' to '.($destination);
                 self::$system->addError(HEURIST_SYSTEM_CONFIG, $msg);                
-                if($verbose) echo '<br/>'.htmlspecialchars($msg);
+                if($verbose) echo '<br>'.htmlspecialchars($msg);
                 self::$db_del_in_progress = null;
                 return false;
             }
@@ -637,12 +637,12 @@ class DbUtils {
 
                     $msg = $msg_prefix.' Database error on sql drop operation. '.$mysqli->error;
                     self::$system->addError(HEURIST_DB_ERROR, $msg, $mysqli->error);
-                    if($verbose) echo '<br/>'.htmlspecialchars($msg);
+                    if($verbose) echo '<br>'.htmlspecialchars($msg);
                     return false;
                 }
 
                 if($verbose) {
-                    echo "<br/>Database ".htmlspecialchars($database_name)." has been dropped";
+                    echo "<br>Database ".htmlspecialchars($database_name)." has been dropped";
                 }
                 
                 // Delete $source folder
@@ -650,7 +650,7 @@ class DbUtils {
                 //change current folder
                 chdir(HEURIST_FILESTORE_ROOT);
                 if($verbose) {
-                    echo "<br/>Folder ".htmlspecialchars($source)." has been deleted";   
+                    echo "<br>Folder ".htmlspecialchars($source)." has been deleted";   
                 }
 
                 //add to log file
@@ -910,9 +910,9 @@ class DbUtils {
             // Echo output
             if($verbose) {
                 $size = filesize($database_dumpfile) / pow(1024,2);
-                echo "<br/>Successfully dumped "
+                echo "<br>Successfully dumped "
                     .htmlspecialchars($database_name)." to ".htmlspecialchars($database_dumpfile);
-                echo "<br/>Size of SQL dump: ".sprintf("%.2f", $size)." MB";
+                echo "<br>Size of SQL dump: ".sprintf("%.2f", $size)." MB";
             }
 
             return $database_dumpfile;
@@ -1169,7 +1169,7 @@ class DbUtils {
 
         if(!$mysqli->query("delete from $name where 1")){
             if($verbose) {
-                echo ("<br/><p>Warning: Unable to clean ".htmlspecialchars($remark)
+                echo ("<br><p>Warning: Unable to clean ".htmlspecialchars($remark)
                     ." - SQL error: ".$mysqli->error."</p>");
             }
             return false;
@@ -1211,7 +1211,7 @@ class DbUtils {
         if(!$mysqli->query("update recThreadedComments set cmt_ParentCmtID = NULL where cmt_ID>0")){
             $res = false;
             if($verbose) {
-                echo ("<br/><p>Warning: Unable to set parent IDs to null for Comments".
+                echo ("<br><p>Warning: Unable to set parent IDs to null for Comments".
                     " - SQL error: ".$mysqli->error."</p>");
             }
         }
@@ -1274,7 +1274,7 @@ class DbUtils {
             $message = 'Could not open source database '.$db_source;
             $res = false;
             if($verbose) {
-                $message = '<br/><p>Warning: '.$message.'</p>';
+                $message = '<br><p>Warning: '.$message.'</p>';
             }
         }else{
             
@@ -1282,7 +1282,7 @@ class DbUtils {
                 $message = 'Could not open target database '.$db_target;
                 $res = false;
                 if($verbose) {
-                    $message = '<br/><p>Warning: '.$message.'</p>';
+                    $message = '<br><p>Warning: '.$message.'</p>';
                 }
             }
         }   
@@ -1348,12 +1348,12 @@ class DbUtils {
                         }else{
                                 if($table=='usrReportSchedule'){
                                     if($verbose) {
-                                        echo ("<br/><p class=\"error\">Warning: Unable to add records into ".htmlspecialchars($table)." - SQL error: ".$mysqli->error."</p>");
+                                        echo ("<br><p class=\"error\">Warning: Unable to add records into ".htmlspecialchars($table)." - SQL error: ".$mysqli->error."</p>");
                                     }
                                 }else{
                                     $message = "Unable to add records into ".$table." - SQL error: ".$mysqli->error;
                                     if($verbose) {
-                                        $message = "<br/><p class=\"error\">Error: $message</p>";
+                                        $message = "<br><p class=\"error\">Error: $message</p>";
                                     }
                                     $res = false;
                                     break;
@@ -1420,7 +1420,7 @@ class DbUtils {
                     $res = false;
                     $message = 'Cannot get list of table in database '.$db_target;
                     if($verbose) {
-                        echo ('<br/><p class=\"error\">Error: '.htmlspecialchars($message).'</p>');
+                        echo ('<br><p class=\"error\">Error: '.htmlspecialchars($message).'</p>');
                     }
                 }
 

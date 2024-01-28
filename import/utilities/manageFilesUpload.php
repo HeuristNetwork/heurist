@@ -206,7 +206,7 @@ if(!($max_size>0)) $max_size = 0;
                 // TODO: we should eliminate any duplicate extensions which might have been added by the user
 
                 if ($mediaFolders=="" || count($dirs) == 1) {
-                    print ("<p>If you wish to upload files to a directory other than those in the dropdown, or to define additional file extensions,<br />".
+                    print ("<p>If you wish to upload files to a directory other than those in the dropdown, or to define additional file extensions,<br>".
                         "go to "); // Design > Properties link is supplied by next block
                 }else{
                     print '<p><b>Allowable extensions for upload:</b>'.htmlspecialchars( implode(', ',$allowed_exts) ).'</p>';
@@ -434,8 +434,8 @@ if(!($max_size>0)) $max_size = 0;
 
                 if(files.length > 0){
 
-                    var msg = "You have uploaded " + (files.length/2) + " new media files.<br/><br/>"
-                            + "They will not be visible as records in the database until you create media<br/>records using Index media files.";
+                    var msg = "You have uploaded " + (files.length/2) + " new media files.<br><br>"
+                            + "They will not be visible as records in the database until you create media<br>records using Index media files.";
 
                     var btns = {};
                     btns[window.hWin.HR('Index Media Files')] = function(){
@@ -768,15 +768,15 @@ if(!($max_size>0)) $max_size = 0;
                             
                             var $dlg;
 
-                            var msg = "You are about to upload a FOLDER (and sub-folders)<br/><br/>"
+                            var msg = "You are about to upload a FOLDER (and sub-folders)<br><br>"
                             
-                                + "THE BROWSER WILL NOT LIST ANY FILES as you navigate the tree of folders<br/>"
-                                + "(this is due to limitations on browser interactions)<br/><br/>"
+                                + "THE BROWSER WILL NOT LIST ANY FILES as you navigate the tree of folders<br>"
+                                + "(this is due to limitations on browser interactions)<br><br>"
                                 
-                                + "Use of this mode allows the folder names to be recorded on upload, which is an <br/>"
-                                + "advantage if you use a hierarchical structure of named folders for your media files.<br/><br/>"
+                                + "Use of this mode allows the folder names to be recorded on upload, which is an <br>"
+                                + "advantage if you use a hierarchical structure of named folders for your media files.<br><br>"
                                 
-                                + "To upload files without folder name information, cancel this upload and clear the <br/>"
+                                + "To upload files without folder name information, cancel this upload and clear the <br>"
                                 + "'Upload directory ...' checkbox before clicking Add files";
                                 
                             var buttons = {};

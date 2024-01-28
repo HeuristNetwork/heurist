@@ -56,7 +56,7 @@ $mysqli = $system->get_mysqli();
             <h2>Check for missing and orphaned files and incorrect paths</h2>
         </div>
 
-        <div><br/><br/>
+        <div><br><br>
             These checks look for errors in uploaded file records.
         </div>
         <hr>
@@ -286,7 +286,7 @@ $mysqli = $system->get_mysqli();
                     </div>
                     <?php
                 }//for
-                print '<hr/>';
+                print '<hr>';
                 }
                 if(count($files_notfound)>0){
                 ?>
@@ -314,7 +314,7 @@ $mysqli = $system->get_mysqli();
                         </div>
                         <?php
                     }
-                    print '<hr/>';
+                    print '<hr>';
                 
                     file_put_contents($log_filename, $log_data, FILE_APPEND);                
 
@@ -341,15 +341,15 @@ $mysqli = $system->get_mysqli();
                     </div>
                     <?php
                 }
-                print '<hr/>';
+                print '<hr>';
                 }
                 if(false){
                 ?>
-                To fix the inconsistencies, please click here: <button onclick="repairBrokenPaths()">Repair selected</button><br/>
+                To fix the inconsistencies, please click here: <button onclick="repairBrokenPaths()">Repair selected</button><br>
                 <?php
                 }
             }else{
-                print "<br/><p><br/></p><h3>All uploaded file entries are valid</h3>";
+                print "<br><p><br></p><h3>All uploaded file entries are valid</h3>";
             }
     }//for dbs
     

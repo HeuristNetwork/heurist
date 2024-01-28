@@ -2198,7 +2198,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
         var smsg = "<p>Changes made to the record type will not become active until you reload this page (hit page reload in your browser).</p>";
         
         if(this._editing.isModified()){
-            var smsg = smsg + "<br/>Please SAVE the record first in order not to lose data";
+            var smsg = smsg + "<br>Please SAVE the record first in order not to lose data";
         }
         window.hWin.HEURIST4.msg.showMsgDlg(smsg);
 

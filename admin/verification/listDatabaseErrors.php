@@ -305,8 +305,8 @@ $trmDuplicates = @$lists2["trm_dupes"];
 
         <div style="padding-top:20px">
             These checks look for errors in the structure of the database and errors in the data within the database. These are generally not serious, but are best eliminated.
-            <br /> Click the hyperlinked record ID at the start of each row to open an edit form to change the data for that record.
-            <br />Look for red warning texts or pointer fields in the record which do not display data or which display a warning.
+            <br> Click the hyperlinked record ID at the start of each row to open an edit form to change the data for that record.
+            <br>Look for red warning texts or pointer fields in the record which do not display data or which display a warning.
         </div>
 
         <hr style="margin-top:15px">
@@ -409,7 +409,7 @@ if($active_all || in_array('owner_ref', $active)) {
             <?php
             }
             ?>
-                <br />
+                <br>
             </div>  <!-- End of Owner References -->
 
 <?php 
@@ -529,7 +529,7 @@ if($active_all || in_array('dup_terms', $active)) {
         }
         
         ?>  
-            <br />      
+            <br>      
         </div>      <!-- End of Duplicated Terms -->
  <?php } 
  
@@ -587,12 +587,12 @@ if($active_all || in_array('field_type', $active)) {
             </script>
 
 
-            <br/><p><br/></p><h3>Warning: Inconsistent field definitions</h3><br/>&nbsp;<br/>
+            <br><p><br></p><h3>Warning: Inconsistent field definitions</h3><br>&nbsp;<br>
 
-            The following field definitions have inconsistent data (unknown codes for terms and/or record types). This is nothing to be concerned about, unless it reoccurs, in which case please <?php echo CONTACT_HEURIST_TEAM;?><br/><br/>
-            To fix the inconsistencies, please click here: <button onclick="repairFieldTypes()">Auto Repair</button>  <br/>&nbsp;<br/>
-            You can also look at the individual field definitions by clicking on the name in the list below<br />&nbsp;<br/>
-            <hr/>
+            The following field definitions have inconsistent data (unknown codes for terms and/or record types). This is nothing to be concerned about, unless it reoccurs, in which case please <?php echo CONTACT_HEURIST_TEAM;?><br><br>
+            To fix the inconsistencies, please click here: <button onclick="repairFieldTypes()">Auto Repair</button>  <br>&nbsp;<br>
+            You can also look at the individual field definitions by clicking on the name in the list below<br>&nbsp;<br>
+            <hr>
             <?php 
             foreach ($dtysWithInvalidTerms as $row) {
                 ?>
@@ -627,7 +627,7 @@ if($active_all || in_array('field_type', $active)) {
             print '<h3 class="res-valid">OK: All field type definitions are valid</h3>';
             echo '<script>$(".field_type").css("background-color", "#6AA84f");</script>';
         }
-        print '<br /><br /></div>';   // End of Field Types
+        print '<br><br></div>';   // End of Field Types
  
 } //END field_type 
 
@@ -647,10 +647,10 @@ if($active_all || in_array('default_values', $active)) {
         is_array($rtysWithInvalidDefaultValues) && 
         count($rtysWithInvalidDefaultValues)>0){
             ?>
-            <br/><p><br/></p><h3>Warning: Wrong field default values for record type structures</h3><br/>&nbsp;<br/>
+            <br><p><br></p><h3>Warning: Wrong field default values for record type structures</h3><br>&nbsp;<br>
 
             The following fields use unknown terms as default values. <u>These default values have been removed</u>.
-            <br>You can define new default value by clicking on the name in the list below and editing the field definition.<br />&nbsp;<br/>
+            <br>You can define new default value by clicking on the name in the list below and editing the field definition.<br>&nbsp;<br>
 
             <?php 
             foreach ($rtysWithInvalidDefaultValues as $row) {
@@ -667,7 +667,7 @@ if($active_all || in_array('default_values', $active)) {
             print '<h3 class="res-valid">OK: All default values in record type structures are valid</h3>';
             echo '<script>$(".default_values").css("background-color", "#6AA84F");</script>';
         }
-        print '<br /><br /></div>';   // End of Default Vlaues
+        print '<br><br></div>';   // End of Default Vlaues
         
 } //END default_values      
 
@@ -774,7 +774,7 @@ if($active_all || in_array('pointer_targets', $active)) {
 
             <?php
         }
-        print '<br /></div>';   // End of Pointer Targets
+        print '<br></div>';   // End of Pointer Targets
         
 } //END pointer_targets
 
@@ -838,7 +838,7 @@ if($active_all || in_array('target_types', $active)) {
                 <?php
             }
             
-            print '<br /><br /></div>';   // End of Target Types
+            print '<br><br></div>';   // End of Target Types
             
 } //END target_types
         
@@ -1071,7 +1071,7 @@ if($active_all || in_array('target_parent', $active)) {
                 </table>
                 <?php
             }
-            print '<br /></div>';   // End of Target Parents
+            print '<br></div>';   // End of Target Parents
             
 } //END target_parent
 
@@ -1172,7 +1172,7 @@ if($active_all || in_array('empty_fields', $active)) {
             .'&w=all&q=ids:'.implode(',', array_keys($ids)).'>(show results as search)</a></span>';
 
         }
-        print '<br /></div>';   // End of Empty Fields
+        print '<br></div>';   // End of Empty Fields
         
 } //END empty_fields    
 
@@ -1553,7 +1553,7 @@ if($active_all || in_array('date_values', $active)) {
         </div>
         <?php
     }
-    print '<br /></div>';   // End of Date Values
+    print '<br></div>';   // End of Date Values
         
 } //END date_values
     
@@ -1657,7 +1657,7 @@ if($active_all || in_array('term_values', $active)) {
             }
             print '</table>';
         }
-        print '<br /></div>';       // End of Term Values
+        print '<br></div>';       // End of Term Values
         
 } //END term_values        
 
@@ -1807,7 +1807,7 @@ if($active_all || in_array('expected_terms', $active)) {
                 }//correct
                 else{
 ?>             
-<hr/>
+<hr>
 <h3>Terms referenced in incorrect vocabulary (n = <?php echo count($same_name_suggestions);?> )</h3><br>
 <span style="font-size:0.9em;">Terms are referenced in a different vocabulary than that specified for the corresponding field, 
 <br>however the same term label exists in the vocabulary specified for the field.
@@ -1838,8 +1838,8 @@ if($active_all || in_array('expected_terms', $active)) {
             }//same name suggestions
 
             ?>
-                <br />
-                <br />
+                <br>
+                <br>
             </div>  <!-- End of Expected Terms -->
 
 <?php
@@ -1935,7 +1935,7 @@ if($active_all || in_array('single_value', $active)) {
             <?php
         }
         ?>
-            <br />
+            <br>
         </div>  <!-- End of Single Value Fields -->
  
  
@@ -2034,7 +2034,7 @@ if($active_all || in_array('required_fields', $active)) {
             <?php
         }
         ?>
-            <br />
+            <br>
         </div>  <!-- End of Required Fields -->
  
 <?php
@@ -2139,8 +2139,8 @@ if($active_all || in_array('nonstandard_fields', $active)) {
                 <?php
             }
             ?>
-            <br />
-            <br />
+            <br>
+            <br>
         </div> <!-- End of Non-Standard Fields -->
 
 <?php
@@ -2171,7 +2171,7 @@ if($active_all || in_array('invalid_chars', $active)) {
 
         <?php
         include_once dirname(__FILE__).'/cleanInvalidChars.php';
-        print '<br /></div>';     /* End of Invalid Char Section */
+        print '<br></div>';     /* End of Invalid Char Section */
         
         
 } //END invalid_chars
@@ -2190,7 +2190,7 @@ if($active_all || in_array('title_mask', $active)) {
 
         <?php        
         include_once dirname(__FILE__).'/checkRectypeTitleMask.php';
-        print '<br /><br /></div>';     
+        print '<br><br></div>';     
         
 } //END title_mask
 
@@ -2207,7 +2207,7 @@ if($active_all || in_array('relationship_cache', $active)) {
 
         <?php
         include_once dirname(__FILE__).'/checkRecLinks.php';
-        print '<br /><br /></div>';     /* End of Relationship Cache */
+        print '<br><br></div>';     /* End of Relationship Cache */
         
 } //END relationship_cache
 
@@ -2224,7 +2224,7 @@ if($active_all || in_array('dateindex', $active)) {
 
         <?php
         include_once dirname(__FILE__).'/checkDateIndex.php';
-        print '<br /><br /></div>';     /* End of Date Indexe */
+        print '<br><br></div>';     /* End of Date Indexe */
         
 } //END dateindex
 
@@ -2310,7 +2310,7 @@ if($active_all || in_array('defgroups', $active)) {
                 echo '<div><h3 class="res-valid">OK: All Vocabularies belong to existing groups</h3></div>';        
             }
         
-        print '<br /><br /></div></div>';     /* End of def groups */
+        print '<br><br></div></div>';     /* End of def groups */
         
 
         if($orphaned_entities){
@@ -2686,7 +2686,7 @@ if($active_all || in_array('geo_values', $active)){ // Check for geo fields that
         echo '<script>$(".geo_values").css("background-color", "#6AA84F");</script>';
     }
 
-    print '<br /><br /></div>';
+    print '<br><br></div>';
 } //END geo_values check
 
 if($active_all || in_array('fld_spacing', $active)){ // Check spacing in freetext and blocktext values
@@ -2875,14 +2875,14 @@ if($active_all || in_array('fld_spacing', $active)){ // Check spacing in freetex
         echo '<script>$(".fld_spacing").css("background-color", "#6AA84F");</script>';
     }
 
-    print '<br /><br /></div>';
+    print '<br><br></div>';
 } //END fld_spacing check
         ?>
 
         </div>
         
         
-        <hr/>            
+        <hr>            
 
         <div>
             <br>

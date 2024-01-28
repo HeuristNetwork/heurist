@@ -138,6 +138,8 @@ function executeSmartyTemplate($system, $params){
     $publishmode = (array_key_exists("publish", $params))? intval($params['publish']):0;
     $emptysetmessage = (array_key_exists("emptysetmessage", $params))? $params['emptysetmessage'] :null;
     $record_with_custom_styles = (array_key_exists("cssid", $params))? intval($params['cssid']) :null;
+
+    $facet_value = (array_key_exists("facet_val", $params)) ? htmlspecialchars($params['facet_val']) : null;
     
 // text or text/plain - without header and body tags  $is_headless=true
 // html or text/html  - usual mode
@@ -278,16 +280,16 @@ function executeSmartyTemplate($system, $params){
     if($publishmode!=4 && strpos($content, '{foreach $results as ')>0 && strpos($content, '$heurist->getRecord(')===false){
             
            $error = '<p>To improve performance we have made some small changes to the report template specifications (July 2016).</p>'. 
-                    '<p>Please edit the report and add  <b>{$r = $heurist->getRecord($r)}</b><br/>'
+                    '<p>Please edit the report and add  <b>{$r = $heurist->getRecord($r)}</b><br>'
                     .'immediately after the start of the main record loop indicated by {foreach $results as $r}, like this:<p/>'
-                    .'<p><br/>{*------------------------------------------------------------*}'
-                    .'<br/>{foreach $results as $r}'
-                    .'<br/><b>{$r = $heurist->getRecord($r)}</b>'
-                    .'<br/>{*------------------------------------------------------------*}</p>'
-                    .'<p><br/>If your report format contains repeating value loops, you will also need to add similar<br/>'
-                    .'expressions to these loops, for example: {$r.f103 = $heurist->getRecord($r.f103)}.<br/>'
+                    .'<p><br>{*------------------------------------------------------------*}'
+                    .'<br>{foreach $results as $r}'
+                    .'<br><b>{$r = $heurist->getRecord($r)}</b>'
+                    .'<br>{*------------------------------------------------------------*}</p>'
+                    .'<p><br>If your report format contains repeating value loops, you will also need to add similar<br>'
+                    .'expressions to these loops, for example: {$r.f103 = $heurist->getRecord($r.f103)}.<br>'
                     .'Generate a new report to obtain examples, then cut and paste into your existing report.</p>'
-                    .'<p>If you are stuck, please send your report template to <br/>'
+                    .'<p>If you are stuck, please send your report template to <br>'
                     .'support at HeuristNetwork dot org and we will adjust the template for you.</p>';
            
            smarty_error_output($system, $error);
@@ -335,6 +337,10 @@ function executeSmartyTemplate($system, $params){
     $smarty->assignByRef('heurist', $heuristRec);
     
     $smarty->assign('results', $results); //assign record ids
+
+    if(!empty($facet_value)){
+        $smarty->assign('selected_term', $facet_value); // facet value that trigger a search, term id(s) for now
+    }
 
     try{
 
@@ -1114,7 +1120,7 @@ function save_report_into_file($tpl_source){
                 <div>
                     The following file has been updated:  <a href="<?php echo $url; ?>" target="_blank" rel="noopener"><?php echo $url;?></a>
                 </div>
-                <br />
+                <br>
 
                 <?php
                 $rps_recid = @$gparams['rps_id'];
@@ -1123,9 +1129,9 @@ function save_report_into_file($tpl_source){
                     $link = str_replace('&amp;','&',htmlspecialchars(HEURIST_BASE_URL."viewers/smarty/updateReportOutput.php?db=".$system->dbname()."&publish=3&id=".$rps_recid));
                     ?>
 
-                    <p style="font-size: 14px;">Regenerate and view the file:<br /><br />
-                        HTML: <a href="<?=$link?>" target="_blank"  rel="noopener" style="font-weight: bold;font-size: 0.9em;"><?=$link?></a><br /><br />
-                        Javascript: <a href="<?=$link?>&mode=js" target="_blank" style="font-weight: bold;font-size: 0.9em;"><?=$link?>&mode=js</a><br />
+                    <p style="font-size: 14px;">Regenerate and view the file:<br><br>
+                        HTML: <a href="<?=$link?>" target="_blank"  rel="noopener" style="font-weight: bold;font-size: 0.9em;"><?=$link?></a><br><br>
+                        Javascript: <a href="<?=$link?>&mode=js" target="_blank" style="font-weight: bold;font-size: 0.9em;"><?=$link?>&mode=js</a><br>
 
                     <?php
                 }
@@ -1144,15 +1150,15 @@ function save_report_into_file($tpl_source){
 
                 $surl = str_replace('&amp;','&',htmlspecialchars($surl, ENT_QUOTES));
                 
-                ?><br />
+                ?><br>
                 To publish the report as dynamic (generated on-the-fly) output, use the code below.
-                <br /><br />
-                URL:<br />
+                <br><br>
+                URL:<br>
                 <textarea readonly style="border: 1px dotted gray; padding: 3px; margin: 2px; font-family: times; font-size: 10px;"
                     id="code-textbox1" onClick="select(); if (window.clipboardData) clipboardData.setData('Text', value);" rows="3" cols="150"><?php echo $surl;?></textarea>
 
-                <br />
-                Javascript wrap:<br />
+                <br>
+                Javascript wrap:<br>
                 <textarea readonly style="border: 1px dotted gray; padding: 3px; margin: 2px; font-family: times; font-size: 10px;"
                     id="code-textbox2" onClick="select(); if (window.clipboardData) clipboardData.setData('Text', value);" rows="5" cols="150">
                     <script type="text/javascript" src="<?php echo $surl;?>&mode=js"></script><noscript><iframe width="80%" height="70%" frameborder="0" src="<?php echo $surl;?>"></iframe></noscript>
@@ -1431,7 +1437,7 @@ function smarty_function_wrap($params, &$smarty)
                                                                         
             
             if($label!="") $label = $label.": ";
-            return $label.$content.'<br/>';
+            return $label.$content.'<br>';
         }
     }else{
         return '';

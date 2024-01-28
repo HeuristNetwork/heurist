@@ -80,7 +80,7 @@ if(!$is_included){
     }else{
         echo '<script>$(".records_url").css("background-color", "#6AA84F");</script>';        
     }
-    print '<br /></div>';
+    print '<br></div>';
 }
 
 function __updateRecords_lastverified($mysqli){

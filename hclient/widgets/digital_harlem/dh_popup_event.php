@@ -37,13 +37,13 @@ if($recTypeID==RT_EVENT){
             <div class="infowindow">
 
                 <h3><?php echo getFieldValue($records, $recID, DT_NAME); ?></h3>
-                <br />
+                <br>
                 <p><b><?php echo getTermById_2(getFieldValue($records, $recID, DT_EVENT_TYPE)); ?></b></p>
                 <p><?php echo composeDates( $records, $recID, '<b>Date: </b>').'&nbsp;'.
                 composeTime( $records, $recID, '<b>Time: </b>' ); ?></p>
                 <p><b>Description: </b><?php echo getFieldValue($records, $recID, DT_SHORT_SUMMARY); ?></p>
-                <br />
-                <br />
+                <br>
+                <br>
                 <p>
                     <b>Addresses Involved: </b>
                     <ul>
@@ -71,7 +71,7 @@ if($recTypeID==RT_EVENT){
                                 print '<li>'.$event_address.' '
                                 .' <a href="dh_popup.php?db='.HEURIST_DBNAME.'&full=1&recID='.$addrID.'">'
                                 .getFieldValue($records_address, $addrID, 'rec_Title')
-                                .'</a><br/> '.$comment
+                                .'</a><br> '.$comment
                                 .'</li>';
                             }
                         }else{
@@ -145,7 +145,7 @@ if($recTypeID==RT_EVENT){
                     </ul>
                 </p>
 
-                <br />
+                <br>
 
                 <p>
                     <b>Documentary Sources:</b>

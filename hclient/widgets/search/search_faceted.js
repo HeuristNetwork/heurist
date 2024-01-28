@@ -194,6 +194,8 @@ $.widget( "heurist.search_faceted", {
     
     _last_active_facet: -1,
     
+    _last_term_value: null, // latest term value selected, to be passed to custom report widgets
+    
     // the widget's constructor
     _create: function() {
         
@@ -703,6 +705,7 @@ $.widget( "heurist.search_faceted", {
         //this.options.params.spatial_filter = null;
         this.options.params.add_filter = null;
         this.options.params.add_filter_original = null;
+        this._last_term_value = null; // reset last selected term(s)
         this.doReset();
     }
     //
@@ -1075,7 +1078,7 @@ $.widget( "heurist.search_faceted", {
           }
           
           harchy = '<span class="truncate" style="display:inline-block;width:99%;font-weight:normal !important">'
-                + harchy.join(" &gt; ") + "</span><br/>&nbsp;&nbsp;&nbsp;";
+                + harchy.join(" &gt; ") + "</span><br>&nbsp;&nbsp;&nbsp;";
            
            if(!window.hWin.HEURIST4.util.isnull(field['var']) && field['code'] ){
                
@@ -1778,8 +1781,9 @@ $.widget( "heurist.search_faceted", {
                             primary_rt: this.options.params.rectypes[0],
                             ispreview: this.options.ispreview,
                             search_realm: this.options.search_realm,
-                            search_page: this.options.search_page
-                            }; //, facets: facets
+                            search_page: this.options.search_page,
+                            facet_value: this._last_term_value
+                        }; //, facets: facets
                             
             if(this.options.ispreview){
                 request['limit'] = 1000;    
@@ -3884,6 +3888,9 @@ $.widget( "heurist.search_faceted", {
                     if(cterm.count=='reset'){  //field.multisel || 
                         that._last_active_facet = facet_index;
                     } 
+
+                    that._last_term_value = value != '' ? value : null;
+
                     that.doSearch();
                     
                     return false;

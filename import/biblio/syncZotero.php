@@ -154,7 +154,7 @@ if($fh_data==null || is_string($fh_data)){
         if($HEURIST_ZOTEROSYNC==''){
         ?>            
                 <p class="ui-state-error" style="padding:20px;text-align:center">
-                    Library key for Zotero synchronisation is not defined.<br/><br/>
+                    Library key for Zotero synchronisation is not defined.<br><br>
                     <a href="#" onclick="open_sysIdentification()">
                     Click here to edit properties which determine Zotero connection</a>
                 </p>                
@@ -324,8 +324,8 @@ if($step=="1"){  // info about current status
             print "<br><table>".implode("", $transfer_errors)."</table><br>";
         }
         if(count($mapping_rt_errors2)>0){
-            print "<p style='color:red'><br />No proper field mapping found for record types:";
-            print "<br><br>".implode("<br />",$mapping_rt_errors2).'</p>';
+            print "<p style='color:red'><br>No proper field mapping found for record types:";
+            print "<br><br>".implode("<br>",$mapping_rt_errors2).'</p>';
         }
 
         print "<p style='color: red;margin-top: 0px;'>Please import them from the Heurist_Bibliographic database (# 6) using Design > Browse templates</p>";
@@ -355,7 +355,7 @@ if($is_verbose){
 
 if( ( is_empty($group_ID) && is_empty($user_ID) ) || is_empty($api_Key) ){
     print "<div class='ui-state-error' style='padding:20px'>Current Zotero access settings incomplete: ' ".$key
-    .'<br/><br/><a href="#" onclick="open_sysIdentification()">Click here to edit properties which determine Zotero connection</a>'
+    .'<br><br><a href="#" onclick="open_sysIdentification()">Click here to edit properties which determine Zotero connection</a>'
     .'</div></body></html>';
     exit;
 }
@@ -396,10 +396,10 @@ if($step=="1"){  //first step - info about current status
     $code = $zotero->getResponseStatus();
 
     if($code>499 ){
-        print "<div class='ui-state-error' style='padding:20px'>Zotero Server Side Error: returns response code: $code.<br /><br />"
+        print "<div class='ui-state-error' style='padding:20px'>Zotero Server Side Error: returns response code: $code.<br><br>"
         ."Please try this operation later.</div>";
     }else if($code>399){
-        $msg = "<div class='ui-state-error' style='padding:20px'>Error. Cannot connect to Zotero API: returns response code: $code.<br /><br />";
+        $msg = "<div class='ui-state-error' style='padding:20px'>Error. Cannot connect to Zotero API: returns response code: $code.<br><br>";
         if($code==400 || $code==401 || $code==403){
             $msg = $msg."Please verify Zotero API key in Database > Properties - it may be incorrect or truncated.";
         }else if($code==404 ){
@@ -523,7 +523,7 @@ if($step=="1"){  //first step - info about current status
                 $itemtype = strval(findXMLelement($entry, "zapi", "itemType"));
                 $itemtitle = strval(findXMLelement($entry, null, "title"));
 
-                #print " <br/>".$itemtype."  ".strval(findXMLelement($entry, null, "title"))."<br/>";
+                #print " <br>".$itemtype."  ".strval(findXMLelement($entry, null, "title"))."<br>";
 
                 //@ob_flush();
                 //@flush();
@@ -532,7 +532,7 @@ if($step=="1"){  //first step - info about current status
 
                     print "<br>Undefined Record type ".htmlspecialchars($itemtype.' '.$itemtitle)."<br>";
 				
-                    #print " <br/> Undefined Record type".$itemtype."  ".$itemtitle."<br/>";
+                    #print " <br> Undefined Record type".$itemtype."  ".$itemtitle."<br>";
                     array_push($arr_ignored, $itemtype.':  '.$itemtitle);
                     if(!@$arr_ignored_by_type[$itemtype]) $arr_ignored_by_type[$itemtype] = 0;
                     $arr_ignored_by_type[$itemtype]++;
@@ -570,7 +570,7 @@ if($step=="1"){  //first step - info about current status
 
                         if(false && $t_updated && $rec_modified>$t_updated){
                             print 'Rec#'.intval($recId).'entry was not changed since last sync.  '.
-                            date("Y-m-d", $t_updated).' '.date("Y-m-d",$rec_modified ).'  <br/>';
+                            date("Y-m-d", $t_updated).' '.date("Y-m-d",$rec_modified ).'  <br>';
                             continue;
                         }
                     }

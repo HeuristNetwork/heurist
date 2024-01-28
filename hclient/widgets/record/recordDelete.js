@@ -270,7 +270,7 @@ $.widget( "heurist.recordDelete", $.heurist.recordAction, {
             
             window.hWin.HEURIST4.msg.showMsgDlg(
                 '<span class="ui-icon ui-icon-alert" style="display:inline-block">&nbsp;</span>&nbsp;'
-                +'Please confirm that you really wish to delete the selected records, <br/>along with all associated bookmarks?', 
+                +'Please confirm that you really wish to delete the selected records, <br>along with all associated bookmarks?', 
             function(){
                     that.doAction(true);
                     },'Confirm');

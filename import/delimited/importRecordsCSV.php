@@ -580,8 +580,8 @@ if(!$format) $format='csv';
         
         <table class="tbmain" style="width:99%;position:absolute;bottom:0px;" cellspacing="0" cellpadding="2">
             <thead><tr> <!-- Table headings -->
-                <th style="width:75px;">Use&nbsp;<br/>value</th>
-                <th style="width:75px;">Unique&nbsp;<br/>values</th>
+                <th style="width:75px;">Use&nbsp;<br>value</th>
+                <th style="width:75px;">Unique&nbsp;<br>values</th>
                 <th style="width:300px;">Column</th>
                 <th style="width:300px;" id="mapping_column_header">Column to Field Mapping</th>
                 <!-- last column allows step through imported data records-->
@@ -599,8 +599,8 @@ if(!$format) $format='csv';
     <div class="ent_content" style="bottom:0;top:339px;padding: 0em 0.5em;" id="divFieldMapping">
                 <table id="tblFieldMapping" class="tbmain" style="width:100%" cellspacing="0" cellpadding="2">
                     <!-- <thead><tr>
-                        <th style="width:75px;">Use&nbsp;<br/>value</th>
-                        <th width="75px">Unique&nbsp;<br/>values</th>
+                        <th style="width:75px;">Use&nbsp;<br>value</th>
+                        <th width="75px">Unique&nbsp;<br>values</th>
                         <th width="300px">Column</th>
                         <th width="300px">Column to Field Mapping</th>
                         <th></th></tr></thead> -->                                 

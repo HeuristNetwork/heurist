@@ -685,7 +685,7 @@ class System {
             $title = "Cannot access filestore directory for the database ". $dbname ." on server " . HEURIST_SERVER_NAME;
 
             $body = "Cannot access filestore directory for the database <b>". $dbname . "</b> on the server " . HEURIST_SERVER_NAME .
-                    "<br/>The directory (" . HEURIST_FILESTORE_DIR . ")"
+                    "<br>The directory (" . HEURIST_FILESTORE_DIR . ")"
                     .(($check==-1)
                     ?"does not exist (check setting in heuristConfigIni.php file)"
                     :"is not writeable by PHP (check permissions)")
@@ -696,7 +696,7 @@ class System {
             sendEmail(HEURIST_MAIL_TO_BUG, $title, $body, true);
 
             $usr_msg = "Cannot access filestore directory for the database <b>". $dbname .
-                       "</b><br/>The directory "
+                       "</b><br>The directory "
                        .(($check==-1)
                        ?"does not exist (check setting in heuristConfigIni.php file)"
                        :"is not writeable by PHP (check permissions)")
@@ -1074,7 +1074,7 @@ class System {
                $needEncodeRecordDetails, 
                $common_languages_for_translation, $glb_lang_codes, 
                $saml_service_provides, $hideStandardLogin,
-               $accessToken_DeepLAPI;
+               $accessToken_DeepLAPI, $useRewrtieRulesForRecordLink;
    
         if(!isset($needEncodeRecordDetails)){
             $needEncodeRecordDetails = 0;
@@ -1189,7 +1189,8 @@ class System {
                     'pwd_DatabaseDeletion'=> (strlen(@$passwordForDatabaseDeletion)>15), //delete for db statistics
                     'pwd_ReservedChanges' => (strlen(@$passwordForReservedChanges)>6),  //allow change reserved fields 
                     'pwd_ServerFunctions' => (strlen(@$passwordForServerFunctions)>6),   //allow run multi-db server actions
-                    'api_Translator' => (!empty($accessToken_DeepLAPI)) // an api key has been setup for Deepl
+                    'api_Translator' => (!empty($accessToken_DeepLAPI)), // an api key has been setup for Deepl
+                    'use_redirect' => @$useRewrtieRulesForRecordLink
                 )
             );
             
@@ -1216,7 +1217,8 @@ class System {
                     'host_url'=>$host_url,
                     'saml_service_provides'=>$saml_service_provides,
                     'hideStandardLogin' => $hideStandardLogin,
-                    'common_languages'=>$common_languages
+                    'common_languages'=>$common_languages,
+                    'use_redirect' => @$useRewrtieRulesForRecordLink
             );
 
         }

@@ -762,7 +762,7 @@ regional['FRE'] = {
     //OLD VERSION    No response from server. This may be due to too many simultaneous requests or a coding problem. Please report to Heurist developers if this reoccurs.',
 
     'mailto_fail': 'Vous n\'avez pas configuré de gestionnaire de messagerie pour les liens mailto: '
-    +'<br/>Veuillez le configurer dans votre navigateur (il se trouve normalement dans les paramètres de contenu sous Confidentialité).',
+    +'<br>Veuillez le configurer dans votre navigateur (il se trouve normalement dans les paramètres de contenu sous Confidentialité).',
 
     //titles
     'add_record':'Ajouter un nouvel enregistrement',

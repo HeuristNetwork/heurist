@@ -274,31 +274,34 @@
  * 
  * @param string|array $ids File ids to include (comma separated string or array)
  * 
- * @return file CSV file containing output
+ * @return none 
+ *  Output CSV file containing file references, or error message
  */
 function downloadFileReferences($system, $ids){
 
     if(empty($ids)){
 
-        header('Content-type: application/json');
-        echo json_encode(array('status'=>HEURIST_INVALID_REQUEST, 'message'=>'No file ids have been provided'));
+        header('Content-type: text/html');
+        echo 'No file ids have been provided';
         exit;
     }
 
     $where_clause = '';
     if(is_array($ids) || (is_string($ids) && $ids != 'all')){ // change comma separated list into array
         $ids = prepareIds($ids);
-        $where_clause = ' WHERE ulf_ID IN ('. $ids .')';
+        $where_clause = !empty($ids) ? ' WHERE ulf_ID IN ('. implode(',', $ids) .')' : '';
     }
 
     // open output handler
     $fd = fopen('php://output', 'w');
     if(!$fd){
 
-        header('Content-type: application/json');
+        header('Content-type: text/html');
         echo 'Unable to open temporary output for writing CSV.<br>Please contact the Heurist team.';
         exit;
     }
+
+    $sep = "\t";
 
     // retrieve file details
     $mysqli = $system->get_mysqli();
@@ -312,8 +315,8 @@ function downloadFileReferences($system, $ids){
 
         fclose($fd);
 
-        header('Content-type: application/json');
-        echo json_encode(array('status'=>HEURIST_ERROR, 'message'=>'File record details could not be retrieved from database'));
+        header('Content-type: text/html');
+        echo 'File record details could not be retrieved from database.<br><br>' (!empty($mysqli->error) ? $mysqli->error : 'Unknown error');
         exit;
     }
 
@@ -325,7 +328,7 @@ function downloadFileReferences($system, $ids){
     header('Expires: ' . gmdate("D, d M Y H:i:s", time() - 3600));
 
     // write results
-    fputcsv($fd, array("ID", "Name", "Path", "Obfuscated URL", "Description", "Caption", "Copyright", "Copy Owner", "File Type", "File Size (in KB)", "Checksum", "Uploaded By", "Added On", "Last Modified", "Original file name" , "Record Usage"), "\t");
+    fputcsv($fd, array("ID", "Referenced by", "New ref H-IDs", "Name", "Path", "Obfuscated URL", "Description", "Caption", "Copyright", "Copy Owner", "File Type", "File Size (in KB)", "Checksum", "Uploaded By", "Added On", "Last Modified", "Original file name"), $sep);
 
     /*
         [0] => File Name
@@ -358,7 +361,7 @@ function downloadFileReferences($system, $ids){
         if(!$recs || count($recs) == 0){
             $recs = array(0);
         }
-        fputcsv($fd, array($id, $name, $path, $obf_url, $details[4], $details[11], $details[12], $details[13], $details[5], $file_size, $checksum, $details[7], $details[8], $details[9], $details[10], implode('|', $recs)), "\t");
+        fputcsv($fd, array($id, implode('|', $recs), "", $name, $path, $obf_url, $details[4], $details[11], $details[12], $details[13], $details[5], $file_size, $checksum, $details[7], $details[8], $details[9], $details[10]), $sep);
     }
 
     rewind($fd);

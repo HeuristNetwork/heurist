@@ -40,7 +40,7 @@
         <div id="page-inner" style="overflow:auto;padding-left: 6px;">
             <div>
                 This function rebuilds lucene indices
-                <br />&nbsp;<hr />
+                <br>&nbsp;<hr>
             </div>
 <?php
 

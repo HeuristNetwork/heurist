@@ -102,7 +102,7 @@ require_once dirname(__FILE__).'/../../hclient/framecontent/initPage.php';
             
                 <!-- redundancy note: this functionality is repeated in selectFieldType.html/js -->
             	
-                <hr/>
+                <hr>
                 
                 <div>
                     <div style="display:inline-block; line-height: 1.5">
@@ -120,7 +120,7 @@ require_once dirname(__FILE__).'/../../hclient/framecontent/initPage.php';
                     </div>
                 </div>        
 
-                <hr/>
+                <hr>
                 
                 <div style="display:block">
                     <input type="radio" name="t_sel_field" id="t_add_new_field" checked>

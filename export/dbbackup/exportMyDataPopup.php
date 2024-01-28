@@ -342,7 +342,7 @@ if($mode>1){
                 }
             }
             if (!folderCreate(FOLDER_BACKUP, true)) {
-                $message = 'Failed to create folder '.FOLDER_BACKUP.'<br/> in which to create the backup. Please consult your sysadmin.';            report_message($message, true);
+                $message = 'Failed to create folder '.FOLDER_BACKUP.'<br> in which to create the backup. Please consult your sysadmin.';            report_message($message, true);
             }
 
             // Just SQL dump

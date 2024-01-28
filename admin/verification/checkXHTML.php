@@ -57,7 +57,7 @@ if($res){
         <div class="banner"><h2>Check Wysiwyg Texts</h2></div>
         
         <div id="page-inner" style="overflow:auto;padding-left: 6px;">
-            <div>This function checks the WYSIWYG text data (personal and public notes, blog posts) for invalid XHTML<br>&nbsp;<hr /></div>
+            <div>This function checks the WYSIWYG text data (personal and public notes, blog posts) for invalid XHTML<br>&nbsp;<hr></div>
         
             <table class="wysiwygCheckTable">
                 <?php

@@ -355,9 +355,13 @@ $.widget( "heurist.resultListMenu", {
 
             this.selectNone();
 
-        }else if(action == "menu-selected-select-show"){  //show selection as separate search
+        }else if(action == "menu-selected-select-insearch"){
 
             this.selectShow();
+
+        }else if(action == "menu-selected-select-show"){  //show selection as separate search
+
+            this.selectShowNewTab();
 
         }else if(action == "menu-selected-merge"){  //show add relation dialog
 
@@ -643,6 +647,16 @@ $.widget( "heurist.resultListMenu", {
     },
 
     selectShow: function(){
+        if(this._selection!=null){
+            let recIDs_list = this._selection.getIds();
+            if(recIDs_list.length > 0){
+                $(window.hWin.document).trigger(window.hWin.HAPI4.Event.ON_REC_SELECT, 
+                    {selection: recIDs_list, source: this.element.attr('id'), search_realm: this.options.search_realm, subset_only: true});
+            }
+        }
+    },
+
+    selectShowNewTab: function(){
         if(this._selection!=null){
             var recIDs_list = this._selection.getIds();
             if (recIDs_list.length > 0) {

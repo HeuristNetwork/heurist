@@ -208,7 +208,7 @@ if(!defined('PDIR')){
 
                     <p>Your database <b> <?=HEURIST_DBNAME?> </b> currently uses database format version 
                         <b><?=$src_maj.'.'.$src_min.'.'.$system->get_system('sys_dbSubSubVersion')?> </b>
-                        <br />(this is distinct from the program version # listed below)</p>
+                        <br>(this is distinct from the program version # listed below)</p>
 
                     <p>This version of the software <b>(Vsn <?=HEURIST_VERSION?>)</b>
                         requires upgrade of your database to format version <b><?=HEURIST_MIN_DBVERSION?></b>
@@ -287,17 +287,17 @@ $description = 'Modify tables:  defRecStructure(rst_SemanticReferenceURL,rst_Ter
                                 if($is_allfind)    {
                                 ?>
 
-                                <p>Upgrades marked SAFE are unlikely to harm your database but will make it incompatible with older versions of the code.<br />
-                                    Upgrades marked DANGEROUS involve major changes to your database structure and could cause data loss.<br />
-                                    For these upgrades we strongly recommend cloning your database first with an older version of the software<br />
-                                    or asking your system adminstrator to backup the MySQL database and database file directory.<br />
-                                    <br />
+                                <p>Upgrades marked SAFE are unlikely to harm your database but will make it incompatible with older versions of the code.<br>
+                                    Upgrades marked DANGEROUS involve major changes to your database structure and could cause data loss.<br>
+                                    For these upgrades we strongly recommend cloning your database first with an older version of the software<br>
+                                    or asking your system adminstrator to backup the MySQL database and database file directory.<br>
+                                    <br>
                                     If you need a partial upgrade eg. to an intermediate version, you will need to run an older version of the software -
                                     please consult Heurist support.
                                 </p>    
                                 <p>
                                     Please determine whether you need backward compatibility and/or clone your database with an older version before proceeding.
-                                    <br />
+                                    <br>
                                     Specific changes in each version upgrade are listed below:
                                 </p>
 

@@ -54,13 +54,13 @@ if(! $system->init(@$_REQUEST['db'], true) ){
 
             $mysqli = $system->get_mysqli();
 
-            print "<br /><h4>HELLO! This is FAIMS sync</h4><br />";
+            print "<br><h4>HELLO! This is FAIMS sync</h4><br>";
 
 
             //$dir_faims.
             $dbname_faims = HEURIST_FILESTORE_DIR. "faims/db.sqlite3";
 
-            print $dbname_faims."<br /><br />";
+            print $dbname_faims."<br><br>";
 
             if(!file_exists($dbname_faims)){
                 print "DB file not found";
@@ -172,7 +172,7 @@ if(! $system->init(@$_REQUEST['db'], true) ){
                 $row = mysql__select_row($mysqli, "select dty_ID, dty_Name, dty_JsonTermIDTree from defDetailTypes where dty_NameInOriginatingDB='FAIMS.".$attrID."'");
                 if($row){
 
-                    print  "DT ".$row[0]."  ".$row[1]."  =>".$attrID."<br/>";
+                    print  "DT ".$row[0]."  ".$row[1]."  =>".$attrID."<br>";
 
                     $dtyId = $row[0];
                     $dtyName = $row[1];
@@ -196,7 +196,7 @@ if(! $system->init(@$_REQUEST['db'], true) ){
 
                     $detailMap[$attrID] = $dtyId;
 
-                    print  "DT added ".$dtyId."  based on ".$attrID." ".$row1[1]." ".$row1[3]."<br/>";
+                    print  "DT added ".$dtyId."  based on ".$attrID." ".$row1[1]." ".$row1[3]."<br>";
                 }
 
 
@@ -227,7 +227,7 @@ if(! $system->init(@$_REQUEST['db'], true) ){
                     $row = mysql__select_row($mysqli, "select trm_ID, trm_Label from defTerms where trm_NameInOriginatingDB='FAIMS.".$row_vocab[0]."'");
                     if($row){
 
-                        print  "&nbsp;&nbsp;&nbsp;&nbsp;Term ".$row[0]."  ".$row[1]."  =>".$row_vocab[0]."<br/>";
+                        print  "&nbsp;&nbsp;&nbsp;&nbsp;Term ".$row[0]."  ".$row[1]."  =>".$row_vocab[0]."<br>";
 
                         $termsMap[$row_vocab[0]] = $row[0];
                     }else{
@@ -242,7 +242,7 @@ if(! $system->init(@$_REQUEST['db'], true) ){
 
                         $termsMap[$row_vocab[0]] = $trm_ID;
 
-                        print  "&nbsp;&nbsp;&nbsp;&nbsp;Term added ".$trm_ID."  based on ".$row_vocab[0]." ".$row_vocab[1]."<br/>";
+                        print  "&nbsp;&nbsp;&nbsp;&nbsp;Term added ".$trm_ID."  based on ".$row_vocab[0]." ".$row_vocab[1]."<br>";
                     }//add terms
 
                 }
@@ -264,7 +264,7 @@ if(! $system->init(@$_REQUEST['db'], true) ){
                 $row = mysql__select_row($mysqli, "select rty_ID, rty_Name from defRecTypes where rty_NameInOriginatingDB='FAIMS.".$attrID."'");
                 if($row){
 
-                    print  "RT ".$row[0]."  ".$row[1]."  =>".$attrID."<br/>";
+                    print  "RT ".$row[0]."  ".$row[1]."  =>".$attrID."<br>";
 
                     $rtyId = $row[0];
                     $rtyName = $row[1];
@@ -286,7 +286,7 @@ if(! $system->init(@$_REQUEST['db'], true) ){
 
                     $rectypeMap[$attrID] = $rtyId;
 
-                    print  "RT added ".$rtyId."  based on ".$attrID." ".$row1[1]." ".$row1[2]."<br/>";
+                    print  "RT added ".$rtyId."  based on ".$attrID." ".$row1[1]." ".$row1[2]."<br>";
                 }
 
                 //if AEntType has strucute described in IdealAEnt
@@ -304,7 +304,7 @@ if(! $system->init(@$_REQUEST['db'], true) ){
 
                     if($row){  //such detal in structure already exists
 
-                        print  "&nbsp;&nbsp;&nbsp;&nbsp;detail ".$row[0]."  ".$row[1]."<br/>";
+                        print  "&nbsp;&nbsp;&nbsp;&nbsp;detail ".$row[0]."  ".$row[1]."<br>";
 
                     }else{
 
@@ -319,7 +319,7 @@ if(! $system->init(@$_REQUEST['db'], true) ){
                             $stmt->close();
 
 
-                            print  "&nbsp;&nbsp;&nbsp;&nbsp;detail added ".$row3[0]."  ".$row3[1]."  based on ".$row_recstr[0]."<br/>";
+                            print  "&nbsp;&nbsp;&nbsp;&nbsp;detail added ".$row3[0]."  ".$row3[1]."  based on ".$row_recstr[0]."<br>";
                         }else{
                             print  "&nbsp;&nbsp;&nbsp;DETAIL NOT FOUND FAIMS.".$row_recstr[0]." !<br>";
                         }
@@ -349,7 +349,7 @@ if(! $system->init(@$_REQUEST['db'], true) ){
                 if(@$rectypeMap[$faims_atype]){
                     $rectype = $rectypeMap[$faims_atype];
                 }else{
-                    print "RECORD TYPE NOT FOUND for Vocabulary ".$faims_atype."<br />";
+                    print "RECORD TYPE NOT FOUND for Vocabulary ".$faims_atype."<br>";
                     continue;
                 }
 
@@ -381,7 +381,7 @@ if(! $system->init(@$_REQUEST['db'], true) ){
                             if(@$termsMap[$vocabID]){
                                 $value = $termsMap[$vocabID];
                             }else{
-                                print "TERM NOT FOUND for Vocabulary ".$vocabID."<br />";
+                                print "TERM NOT FOUND for Vocabulary ".$vocabID."<br>";
                                 continue;
                             }
                         }else if($row2[5]){ //freetext
@@ -403,7 +403,7 @@ if(! $system->init(@$_REQUEST['db'], true) ){
 
 
                     }else{
-                        print "DETAIL TYPE NOT FOUND for Attrubute ".$row2[3]."<br />";
+                        print "DETAIL TYPE NOT FOUND for Attrubute ".$row2[3]."<br>";
                     }
 
                 }
@@ -415,14 +415,14 @@ if(! $system->init(@$_REQUEST['db'], true) ){
                 if($response['status']==HEURIST_OK){
                     if($recID){
                         $cntUpdated++;
-                        print "UPDATED as #".$recID."<br/>";
+                        print "UPDATED as #".$recID."<br>";
                     }else{
                         $cntInsterted++;
-                        print "INSERTED as #".$response['data']."<br/>";
+                        print "INSERTED as #".$response['data']."<br>";
                     }
                 }else{
                     print 'Error: '.htmlspecialchars(@$response['status'].'  '.@$response['message']);
-                    //print print_r($response, true)."<br/>";
+                    //print print_r($response, true)."<br>";
                 }
 
 
@@ -431,8 +431,8 @@ if(! $system->init(@$_REQUEST['db'], true) ){
             }//for records
 
 
-            print "Inserted ".$cntInsterted."<br/>";
-            print "Updated ".$cntUpdated."<br/>";
+            print "Inserted ".$cntInsterted."<br>";
+            print "Updated ".$cntUpdated."<br>";
 
             // TODO: this also exists in syncFAIMS.php
             function faimsToHeurist_dt_mapping($ftype){

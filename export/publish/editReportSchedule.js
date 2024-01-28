@@ -105,7 +105,7 @@ function ReportScheduleEditor() {
 
 
         if (Number(_recID>0) && window.hWin.HEURIST4.util.isnull(_entity) ){
-            document.getElementById("statusMsg").innerHTML = "<strong>Error: Report Schedule #"+_recID+"  was not found. Clicking 'save' button will create a new Schedule.</strong><br /><br />";
+            document.getElementById("statusMsg").innerHTML = "<strong>Error: Report Schedule #"+_recID+"  was not found. Clicking 'save' button will create a new Schedule.</strong><br><br>";
         }
         
         _entity = (_recID>0&& _reports)? _reports.records[_recID] :null; 

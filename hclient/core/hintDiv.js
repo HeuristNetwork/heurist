@@ -171,7 +171,7 @@ function HintDiv(_id, _width, _height, _initcontent) {
 			//xy = [posx = event.target.x,posy = event.target.y];
 
 			//var _map_popup = $("#mapPopup");
-			//_map_popup.html(xy[0]+",  "+xy[1]+"<br/>");
+			//_map_popup.html(xy[0]+",  "+xy[1]+"<br>");
 
 			var border_top = $(window).scrollTop();
 			var border_right = $(window).width();

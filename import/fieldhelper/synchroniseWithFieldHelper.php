@@ -163,7 +163,7 @@ $failed_exts = array();
         if(count($notfound)>0){
             print "<p style='color:brown;'> Warning: There are no fields in this database to hold the following information: <b>".
             implode(", ",$notfound).
-            "</b><br />Note: these fields may appear to be present, but do not have the correct origin codes ".
+            "</b><br>Note: these fields may appear to be present, but do not have the correct origin codes ".
             "(source of the field definition) for this function to use them.".
             "<p>We recommend importing the appropriate fields by (re)importing the Digital Media Item record type as follows".
             "<ul><li>Go to Manage &gt; Structure &gt; Browse templates<br>&nbsp;</li>".
@@ -247,11 +247,11 @@ $failed_exts = array();
     
                 $invalid_ext = implode(', ', $failed_exts);
 
-                print "<br/><div style='color: red;'>The following file types, which were encountered during media indexing, 
-                        are not currently being indexed as media files: $invalid_ext</div><br/><br/><div>You may wish to add some 
+                print "<br><div style='color: red;'>The following file types, which were encountered during media indexing, 
+                        are not currently being indexed as media files: $invalid_ext</div><br><br><div>You may wish to add some 
                         of these types in the 
                         <span onclick='sysIdentificationPopup();' style='text-decoration:underline;cursor:pointer;color:blue;'>Design > Properties</span> 
-                        function and run indexing again.</div><br/>";
+                        function and run indexing again.</div><br>";
             }
 
             print "<div>Synchronisation completed</div>";
@@ -381,7 +381,7 @@ $failed_exts = array();
         function jsonError($message) {
             global $rep_issues, $currfile;
             //mysql_query("rollback");
-            $rep_issues = $rep_issues."<br/>Error save record for file:".$currfile.". ".$message;
+            $rep_issues = $rep_issues."<br>Error save record for file:".$currfile.". ".$message;
         }
 
         
@@ -758,7 +758,7 @@ XML;
                         }else{
                             print '<div>File: <i>'.htmlspecialchars($filename_base).'</i> <span  style="color:#ff8844">'.
                             "Warning: failed to register. No record created for this file</span></div>";
-                            //$rep_issues = $rep_issues."<br/>Can't register file:".$filename.". ".$file_id;
+                            //$rep_issues = $rep_issues."<br>Can't register file:".$filename.". ".$file_id;
                             $file_id = null;
                             continue;
                         }
@@ -903,7 +903,7 @@ XML;
                     /*
                     foreach ($exif as $key => $section) {
                     foreach  ($section as $name => $val) {
-                    echo "$key.$name: $val<br />\n";
+                    echo "$key.$name: $val<br>\n";
                     }
                     }*/
                 }

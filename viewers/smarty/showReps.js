@@ -50,7 +50,9 @@ function ShowReps( is_snippet_editor ) {
 
     _add_variable_dlg = null,
     
-    _is_snippet_editor = (is_snippet_editor===true);
+    _is_snippet_editor = (is_snippet_editor===true),
+    
+    _facet_value = null;
     
     
     var top_repcontainer = '36px';
@@ -279,6 +281,10 @@ function ShowReps( is_snippet_editor ) {
             squery = _getQueryAndTemplate(template_file, false); //NOT USED
         }
 
+        if(_facet_value){
+            request['facet_val'] = _facet_value;
+        }
+
         if(request!=null){
 
             window.hWin.HEURIST4.msg.bringCoverallToFront($(document).find('body')); //this frame
@@ -462,13 +468,13 @@ function ShowReps( is_snippet_editor ) {
                         '     {$r.f1}     {* the name / title field - may or may not be present *}  ',
                         '',
                         '',
-                        '<br/> {* line break between each record *}',
+                        '<br> {* line break between each record *}',
                         '',
                         '{*------------------------------------------------------------*}',
                         '{/foreach} {* end records loop, do not remove *}',
                         '{*------------------------------------------------------------*}',
                         '',
-                        '<hr/>',
+                        '<hr>',
                         '<h2>End of report</h2> {* Text here appears at end of report *} ',
                         '</html>'];
 
@@ -1420,7 +1426,7 @@ function ShowReps( is_snippet_editor ) {
                 '  {* put the data you want output for each record here - insert the *} \n' +
                 '  {* fields using the tree of record types and fields on the right *} \n' +
                 ' \n' +
-                '<br/> {* line break between each record *} \n' +
+                '<br> {* line break between each record *} \n' +
                 ' \n' +
                 '{*------------------------------------------------------------*} \n' +
                 '{/foreach} {* end records loop, do not remove *} \n' +
@@ -2196,9 +2202,10 @@ this_id       : "term"
 
 
         // recordset is JSON array   {"resultCount":23,"recordCount":23,"recIDs":[8005,11272,8599.....]}
-        assignRecordsetAndQuery: function(recordset, query_request){
+        assignRecordsetAndQuery: function(recordset, query_request, facet_value = null){
             _currentRecordset = recordset;
             _currentQuery = query_request;
+            _facet_value = facet_value;
         },
 
         isNeedSelection: function(){

@@ -84,12 +84,12 @@ function samlLogin($system, $sp, $dbname, $require_auth=true){
     if($is_debug){
         //test login data
         $attr = array(
-                    'uid'=>array('BNF0017879'),
+                    'uid'=>array('BNF_FAKEID'),
                     'mail'=>array('aaaa.bbbb@bnf.fr'));
     }
     if(count($attr)==0){
         $system->addError(HEURIST_REQUEST_DENIED, 
-            '<p>External authentication returns empty attributes. Please contact Service provider admin</p>');
+            'External authentication returns empty attributes. Please contact Service provider admin');
     }      
 
         
@@ -129,7 +129,8 @@ $query = 'SELECT ugr_ID FROM sysUGrps where usr_ExternalAuthentication is not nu
 
             if(!($user_id>0)){
                 //show error
-                $system->addError(HEURIST_REQUEST_DENIED, 'Heurist Database '.$dbname.' does not have an user with provided attributes');
+                $system->addError(HEURIST_REQUEST_DENIED, 'Heurist Database '.$dbname
+                    .' does not have an user with provided attributes ('.@$attr['uid'].','.@$attr['mail'][0].')');
             }
             /*
             $user_id = mysql__select_value($system->get_mysqli(),'SELECT ugr_ID FROM sysUGrps WHERE ugr_eMail="'

@@ -41,7 +41,7 @@ if($recTypeID==RT_PERSON){
                 <h3><?php echo getFieldValue($records, $recID, DT_NAME).' '
                     .getFieldValue($records, $recID, DT_PERSON_SECONDNAME).' '
                 .getFieldValue($records, $recID, DT_GIVEN_NAMES); ?></h3>
-                <br />
+                <br>
                 <p>
                 <b>Background Data:</b>
 
@@ -76,7 +76,7 @@ if($recTypeID==RT_PERSON){
                     </ul>
                 </p>
 
-                <br />
+                <br>
 
 
                 <p>
@@ -105,7 +105,7 @@ if($recTypeID==RT_PERSON){
                     </ul>
                 </p>
 
-                <br />
+                <br>
 
 
                 <p>
@@ -194,7 +194,7 @@ if($recTypeID==RT_PERSON){
                                     print '<li>'.$event_address.' '
                                     .' <a href="dh_popup.php?db='.HEURIST_DBNAME.'&full=1&recID='.$addrID.'">'
                                     .getFieldValue($records_address, $addrID, 'rec_Title')
-                                    .'</a><br/> '.$comment
+                                    .'</a><br> '.$comment
                                     .'</li>';
                                 }//for address
 

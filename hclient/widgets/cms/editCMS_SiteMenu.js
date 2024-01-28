@@ -316,14 +316,16 @@ title: "Overview"
                                                         _refreshCurrentPage(window.hWin.current_page_id);
                                                     }
                                                     
-                                                    var node = _tree.getNodeByKey(''+page_id);
-                                                    var old_name = node.title;
-                                                    var new_name = recordset.fld(recordset.getFirstRecord(), DT_NAME);
-                                                    if(old_name!=new_name){
-                                                        node.setTitle( new_name ); 
-                                                        _defineActionIcons( node );   
-                                                        if(page_cache[page_id]) page_cache[page_id][DT_NAME] = new_name;
-                                                        _refreshMainMenu( false ); //after Edit record
+                                                    var node = $container.fancytree('getTree').getNodeByKey(''+page_id);
+                                                    if(node){
+                                                        var old_name = node.title;
+                                                        var new_name = recordset.fld(recordset.getFirstRecord(), DT_NAME);
+                                                        if(old_name!=new_name){
+                                                            node.setTitle( new_name ); 
+                                                            _defineActionIcons( node );   
+                                                            if(page_cache[page_id]) page_cache[page_id][DT_NAME] = new_name;
+                                                            _refreshMainMenu( false ); //after Edit record
+                                                        }
                                                     }
                                                 }
                                     }});

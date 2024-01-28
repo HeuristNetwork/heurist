@@ -77,7 +77,7 @@ $mysqli = $system->get_mysqli();
             <h2>Check for missing and orphaned files and incorrect paths</h2>
         </div>
 
-        <div><br/><br/>
+        <div><br><br>
             These checks look for errors in uploaded file records.
             <br><br><hr><br><br>
             <div id="linkbar"></div>
@@ -724,7 +724,7 @@ $mysqli = $system->get_mysqli();
                     <br>Unfortunately these files cannot be removed because they may have 
                     <br>been referenced within text fields, which we do not check at present. 
                     <br>If you need this function, please let us know.
-                    <br><br><hr/></div>';
+                    <br><br><hr></div>';
                 }
                 //------------------------------------------
                 if(is_array($files_unused_remote) && count($files_unused_remote)>0){
@@ -765,7 +765,7 @@ $mysqli = $system->get_mysqli();
                     <br>Unfortunately these references cannot be removed because they may have 
                     <br>been referenced within text fields, which we do not check at present. 
                     <br>If you need this function, please let us know.
-                    <br><br><hr/></div>';
+                    <br><br><hr></div>';
                 }//if
                 
                 //------------------------------------------
@@ -793,7 +793,7 @@ $mysqli = $system->get_mysqli();
                 if(count($files_notfound)>10){
                     print '<div><br><button onclick="doRepairAction(\'files_notfound\')">Remove entries for missing files</button></div>';
                 }
-                print '<br><br><hr/></div>';
+                print '<br><br><hr></div>';
                 }//if                
                 
                 //------------------------------------------
@@ -822,7 +822,7 @@ $mysqli = $system->get_mysqli();
                 if(count($files_notreg)>10){
                     print '<div><br><button onclick="doRepairAction(\'files_notreg\')">Remove non-registered files</button></div>';
                 }
-                print '<br><br><hr/></div>';
+                print '<br><br><hr></div>';
                 }//if                
                 
                 //------------------------------------------

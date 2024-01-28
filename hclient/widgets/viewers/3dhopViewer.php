@@ -103,11 +103,11 @@ define('EDIR','../../../external/3DHOP/');
 <body>
 <div id="3dhop" class="tdhop" onmousedown="if (event.preventDefault) event.preventDefault()"><div id="tdhlg"></div>
  <div id="toolbar">
-  <img id="home"     title="Home"                  src="<?php echo EDIR;?>skins/dark/home.png"            /><br/>
-  <img id="zoomin"   title="Zoom In"               src="<?php echo EDIR;?>skins/dark/zoomin.png"          /><br/>
-  <img id="zoomout"  title="Zoom Out"              src="<?php echo EDIR;?>skins/dark/zoomout.png"         /><br/>
+  <img id="home"     title="Home"                  src="<?php echo EDIR;?>skins/dark/home.png"            /><br>
+  <img id="zoomin"   title="Zoom In"               src="<?php echo EDIR;?>skins/dark/zoomin.png"          /><br>
+  <img id="zoomout"  title="Zoom Out"              src="<?php echo EDIR;?>skins/dark/zoomout.png"         /><br>
   <img id="light_on" title="Disable Light Control" src="<?php echo EDIR;?>skins/dark/lightcontrol_on.png" style="position:absolute; visibility:hidden;"/>
-  <img id="light"    title="Enable Light Control"  src="<?php echo EDIR;?>skins/dark/lightcontrol.png"    /><br/>
+  <img id="light"    title="Enable Light Control"  src="<?php echo EDIR;?>skins/dark/lightcontrol.png"    /><br>
   <img id="full_on"  title="Exit Full Screen"      src="<?php echo EDIR;?>skins/dark/full_on.png"         style="position:absolute; visibility:hidden;"/>
   <img id="full"     title="Full Screen"           src="<?php echo EDIR;?>skins/dark/full.png"            />
  </div>

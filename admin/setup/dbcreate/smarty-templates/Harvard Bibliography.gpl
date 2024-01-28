@@ -7,7 +7,7 @@
 
 {if ($r.recTypeID==$heurist->constant("RT_INTERNET_BOOKMARK"))} {*Internet bookmark*}
 <div>
-   {$r.f2_9} {$r.f2_1} [Web site]<br/>
+   {$r.f2_9} {$r.f2_1} [Web site]<br>
    {$r.f2_3}
 </div>
 {elseif ($r.recTypeID==$heurist->constant("RT_BOOK"))} {*Book*}
@@ -209,10 +209,10 @@ In {$editors = $book.f2_15s}
 {/if}
 
 {if $recognized}
-<br/>
+<br>
 {/if}
 {/foreach}
 
 {if ($notrec>0)}
-<br/><b>{$notrec} records not supported by Harvard format</b>
+<br><b>{$notrec} records not supported by Harvard format</b>
 {/if}

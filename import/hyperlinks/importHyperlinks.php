@@ -459,8 +459,8 @@ Note: the list only shows links which you have not already bookmarked.<br>
         }
     } });}" 
     value="Change settings">
-<br />
-We recommend bookmarking a few links at a time.<br />The list is reloaded after each addition and after change of settings.
+<br>
+We recommend bookmarking a few links at a time.<br>The list is reloaded after each addition and after change of settings.
 
 <?php		if (@$error) {	?>
  <div class="input-row"><?= $error ?></div>

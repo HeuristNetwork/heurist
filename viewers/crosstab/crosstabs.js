@@ -2177,7 +2177,7 @@ function CrosstabsAnalysis(_query, _query_domain) {
 
         if(_currentRecordset!=null){
             $divres.append('<span style="padding-left: 15px;">N = '+ _currentRecordset['recordCount'] +' </span>');
-            topText += ', N = '+ _currentRecordset['recordCount'] +  ',<br/>Query string: '+_currentRecordset['query_main'];
+            topText += ', N = '+ _currentRecordset['recordCount'] +  ',<br>Query string: '+_currentRecordset['query_main'];
 
         }else{
             $divres.append('<span>Query string: q='+query_main+'&w='+query_domain +' </span>');
@@ -2195,7 +2195,7 @@ function CrosstabsAnalysis(_query, _query_domain) {
         $divres.append('<span style="padding-left: 15px;">Displaying: <b>'+aggregationMode+'</b></span>');
 
         if(_currentRecordset != null){
-            $divres.append('<br/><span>Query string: '+_currentRecordset['query_main'] +' </span>');
+            $divres.append('<br><span>Query string: '+_currentRecordset['query_main'] +' </span>');
         }
 
         //Type of value displayed (count, average, sum)

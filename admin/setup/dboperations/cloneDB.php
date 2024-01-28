@@ -115,7 +115,7 @@ if(@$_REQUEST['mode']=='2'){
        $system->verifyActionPassword($sysadmin_protection, $passwordForServerFunctions) ){
 
         $sErrorMsg = '<div class="ui-state-error">'
-                    .$system->getError()['message'].'<br/></div>';
+                    .$system->getError()['message'].'<br></div>';
     }else{
 
         $targetdbname = filter_var(@$_REQUEST['targetdbname'], FILTER_SANITIZE_STRING);
@@ -137,7 +137,7 @@ if(@$_REQUEST['mode']=='2'){
                 $dblist = mysql__select_list2($mysqli, 'show databases');
                 if (array_search(strtolower($targetdbname), array_map('strtolower', $dblist)) !== false ){
                     $sErrorMsg = "<div class='ui-state-error'>Warning: database '".$targetdbname
-                    ."' already exists. Please choose a different name<br/></div>";
+                    ."' already exists. Please choose a different name<br></div>";
                 }else{
                     ob_start();
                 }
@@ -282,9 +282,9 @@ if(@$_REQUEST['mode']=='2' && $targetdbname!=null){
         <?php if(!$isCloneTemplate) { ?>
 
             <p>
-                This function simply copies the current database <b> <?=HEURIST_DBNAME?> </b> to a new one with no changes. <br />
-                The new database is identical to the old in all respects including users, access and attachments <br />
-                (beware of making many copies of databases containing many large files, as all uploaded files are copied).<br />
+                This function simply copies the current database <b> <?=HEURIST_DBNAME?> </b> to a new one with no changes. <br>
+                The new database is identical to the old in all respects including users, access and attachments <br>
+                (beware of making many copies of databases containing many large files, as all uploaded files are copied).<br>
                 The target database is unregistered with the Heurist central index even if the source database is registered.
             </p>
 

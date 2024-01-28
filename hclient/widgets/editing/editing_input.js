@@ -733,6 +733,10 @@ $.widget( "heurist.editing_input", {
                         val = this.f('dty_Type')=='freetext'?20:80;  //default minimum width for input fields in ex
             else if(fieldname=='rst_TermsAsButtons')
                 val = 0;
+            else if(fieldname=='rst_Spinner')
+                val = 0;
+            else if(fieldname=='rst_SpinnerStep')
+                val = 1;
         }
         if(window.hWin.HEURIST4.util.isempty(val)){
             return null;
@@ -1040,6 +1044,26 @@ $.widget( "heurist.editing_input", {
                             .addClass('smallbutton')
                             .css({cursor: 'pointer', 'margin-left': '10px'})
                             .appendTo($btn_edit_switcher);
+                            
+
+                        /*DEBUG  
+                        var btn_debug = $('<span>debug</span>')
+                            .addClass('smallbutton')
+                            .css({cursor: 'pointer', 'margin-left': '10px'})
+                            .appendTo($btn_edit_switcher);
+                            
+                        this._on( btn_debug, {       
+                            click:function(event){
+                            
+                            if(!window.hWin.layoutMgr){
+                                hLayoutMgr(); //init global var layoutMgr
+                            }
+                                    
+                            //cfg_widgets is from layout_defaults.js
+                            window.hWin.layoutMgr.convertJSONtoHTML(that.getValues()[0]);
+                        }});
+                        */
+                            
                     }
                         
                     $('<span>table</span>')
@@ -1392,6 +1416,8 @@ $.widget( "heurist.editing_input", {
                     return true;
                 } // _showEditor()
 
+                // RT_ indicates the record types affected, DT_ indicates the fields affected
+                // DT_EXTENDED_DESCRIPTION (field concept 2-4) is the page content or header/footer content
                 var isCMS_content = (( 
                          this.options.rectypeID == window.hWin.HAPI4.sysinfo['dbconst']['RT_CMS_MENU'] ||
                          this.options.rectypeID == window.hWin.HAPI4.sysinfo['dbconst']['RT_CMS_HOME']) &&
@@ -1406,36 +1432,38 @@ $.widget( "heurist.editing_input", {
                     cur_action = '';
                     
                     var fstatus = '';
-                    var fname = 'Edit page content';
-                    if(this.options.dtID == window.hWin.HAPI4.sysinfo['dbconst']['DT_CMS_HEADER']){
+                    var fname = 'Page content';
+                    
+                    if (this.options.rectypeID == window.hWin.HAPI4.sysinfo['dbconst']['RT_CMS_HOME'] &&
+                       this.options.dtID == window.hWin.HAPI4.sysinfo['dbconst']['DT_CMS_HEADER']){
                         fname = 'Custom header';
-                    }else if(this.options.dtID == window.hWin.HAPI4.sysinfo['dbconst']['DT_CMS_FOOTER']){
+                        fstatus = (window.hWin.HEURIST4.util.isempty(value))
+                            ?'No custom header defined'
+                            :'Delete html from this field to use default page header.';
+                    }
+                    
+                    if (this.options.rectypeID == window.hWin.HAPI4.sysinfo['dbconst']['RT_CMS_HOME'] &&
+                       this.options.dtID == window.hWin.HAPI4.sysinfo['dbconst']['DT_CMS_FOOTER']){
                         fname = 'Custom footer';
                         fstatus = (window.hWin.HEURIST4.util.isempty(value))
                             ?'No custom footer defined'
                             :'Delete html from this field to use default page footer.';
                     }
                                 
-                                
+                    // Only show this for the CMS Home record type and home page content            
                     if (this.options.rectypeID == window.hWin.HAPI4.sysinfo['dbconst']['RT_CMS_HOME']
-                        && this.options.dtID == window.hWin.HAPI4.sysinfo['dbconst']['DT_CMS_HEADER'])
-                        { // Only show this for the CMS Home record type
-                            fstatus = (window.hWin.HEURIST4.util.isempty(value))
-                            ?'No custom header defined'
-                            :'Delete html from this field to use default page header.';
-                        }
-                    else if(this.options.rectypeID == window.hWin.HAPI4.sysinfo['dbconst']['RT_CMS_HOME']
                         && this.options.dtID == window.hWin.HAPI4.sysinfo['dbconst']['DT_EXTENDED_DESCRIPTION']){
                             fstatus = 'Leave this field blank if you wish the first menu entry to load automatically on startup.';    
                     }
                     
-                    cms_div_prompt = $('<div style="line-height:20px;display:inline-block;"><b>Please use the '
-                        + fname
-                        + ' button in the <span>website editor</span> to edit this field.<br>'
-                        + fstatus+'</b></div>')
-                        .insertBefore($input);
+                    // Only show this message for CONTENT fields (of home page or menu pages) which can be directly edited in the CMS editor 
+                    cms_div_prompt = $('<div style="line-height:20px;display:inline-block;"><b>Please edit the content of the '
+                                + fname
+                                + ' field in the CMS editor.<br>'
+                                + fstatus+'</b></div>')
+                                .insertBefore($input);
                     $input.hide();
-
+                    
                     $('<br>').insertBefore($btn_edit_switcher);
 
                     cms_label_edit_prompt = $('<span>Advanced users: edit source as </span>')
@@ -2579,50 +2607,75 @@ $.widget( "heurist.editing_input", {
                         window.hWin.HEURIST4.msg.showTooltipFlash(window.hWin.HR('Numeric field'),1000,$input);
                     }
                 });
-                
-                /*
-                if(this.options.is_faceted_search){
-                    $input.css({'max-width':'13ex','min-width':'13ex'});
+
+                if(this.f('rst_Spinner') == 1){
+
+                    let spinner_step = this.f('rst_SpinnerStep');
+
+                    $input.prop('type', 'number').prop('step', spinner_step);
+
+                    // Set minimum and maximum values
+                    let max_val = this.f('rst_MaxValue');
+                    let min_val = this.f('rst_MinValue');
+    
+                    if($.isNumeric(min_val)){
+                        $input.prop('min', min_val);
+                    }
+                    if($.isNumeric(max_val)){
+                        $input.prop('max', max_val);
+                    }
                 }
-                */
-                
-                
-                /*$input.on('keyup', function () {
-                if (this.value != this.value.replace(/[^0-9-]/g, '')) {
-                this.value = this.value.replace(/[^0-9-]/g, '');  //[-+]?\d
-                }
-                });*/
+
             }else
             if(this.detailType=="float"){//----------------------------------------------------
 
-                    $input.on('keypress', function (e) {
-                        var code = e.charCode || e.keyCode; //(e.keyCode ? e.keyCode : e.which);
-                        var charValue = String.fromCharCode(code);
-                        var valid = false;
+                $input.on('keypress', function (e) {
+                    var code = e.charCode || e.keyCode; //(e.keyCode ? e.keyCode : e.which);
+                    var charValue = String.fromCharCode(code);
+                    var valid = false;
 
-                        if(charValue=='-' && this.value.indexOf('-')<0){
-                            this.value = '-'+this.value;
-                        }else if(charValue=='.' && this.value.indexOf('.')<0){
-                            valid = true;
-                        }else{
-                            valid = /^[0-9]+$/.test(charValue);
-                        }
 
-                        if(!valid){
-                            window.hWin.HEURIST4.util.stopEvent(e);
-                            e.preventDefault();
-                            window.hWin.HEURIST4.msg.showTooltipFlash(window.hWin.HR('Numeric field'),1000,$input);
-                        }
+                    if(charValue=='-' && this.value.indexOf('-')<0){
+                        this.value = '-'+this.value;
+                    }else if(charValue=='.' && this.value.indexOf('.')<0){
+                        valid = true;
+                    }else{
+                        valid = /^[0-9]+$/.test(charValue);
+                    }
 
-                    });
+                    if(!valid){
+                        window.hWin.HEURIST4.util.stopEvent(e);
+                        e.preventDefault();
+                        window.hWin.HEURIST4.msg.showTooltipFlash(window.hWin.HR('Numeric field'),1000,$input);
+                    }
 
-                    $input.on('paste', function(e){
-                        if(!$.isNumeric(e.originalEvent.clipboardData.getData('text'))){
-                            window.hWin.HEURIST4.util.stopEvent(e);
-                            e.preventDefault();
-                            window.hWin.HEURIST4.msg.showTooltipFlash(window.hWin.HR('Numeric field'),1000,$input);
-                        }
-                    });
+                });
+
+                $input.on('paste', function(e){
+                    if(!$.isNumeric(e.originalEvent.clipboardData.getData('text'))){
+                        window.hWin.HEURIST4.util.stopEvent(e);
+                        e.preventDefault();
+                        window.hWin.HEURIST4.msg.showTooltipFlash(window.hWin.HR('Numeric field'),1000,$input);
+                    }
+                });
+
+                if(this.f('rst_Spinner') == 1){
+
+                    let spinner_step = this.f('rst_SpinnerStep');
+
+                    $input.prop('type', 'number').prop('step', spinner_step);
+
+                    // Set minimum and maximum values
+                    let max_val = this.f('rst_MaxValue');
+                    let min_val = this.f('rst_MinValue');
+    
+                    if($.isNumeric(min_val)){
+                        $input.prop('min', min_val);
+                    }
+                    if($.isNumeric(max_val)){
+                        $input.prop('max', max_val);
+                    }
+                }
 
             }else
             if(this.detailType=='date'){//----------------------------------------------------
@@ -2634,20 +2687,23 @@ $.widget( "heurist.editing_input", {
 
                 let css = 'display: block; font-size: 0.8em; color: #999999; padding: 0.3em 0px;';
 
-				// Add additional controls to insert yesterday, today or tomorrow
-                let $help_controls = $('<div>', { style: css })
-                    .html('<span class="fake_link">Yesterday</span>'
-                        + '<span style="margin: 0px 5px" class="fake_link">Today</span>'
-                        + '<span class="fake_link" class="fake_link">Tomorrow</span>'
-                        + '<span style="margin-left: 10px;">yyyy, yyyy-mm or yyyy + click calendar (remembers last date)</span>');
+                if(this.options.recordset?.entityName=='Records' && this.element.find('.extra_help').length == 0){
+                    // Add additional controls to insert yesterday, today or tomorrow
 
-                $help_controls.insertAfter($inputdiv);
-
-                this._on($help_controls.find('span.fake_link'), {
-                    click: function(e){
-                        $input.val(e.target.textContent).trigger('change');
-                    }
-                });
+                    let $help_controls = $('<div>', { style: css, class: 'extra_help' })
+                        .html('<span class="fake_link">Yesterday</span>'
+                            + '<span style="margin: 0px 5px" class="fake_link">Today</span>'
+                            + '<span class="fake_link" class="fake_link">Tomorrow</span>'
+                            + '<span style="margin-left: 10px;">yyyy, yyyy-mm or yyyy + click calendar (remembers last date)</span>');
+    
+                    $help_controls.insertBefore(this.input_prompt);
+    
+                    this._on($help_controls.find('span.fake_link'), {
+                        click: function(e){
+                            $input.val(e.target.textContent).trigger('change');
+                        }
+                    });
+                }
             }
             else 
             if(this.isFileForRecord){ //----------------------------------------------------
@@ -3178,7 +3234,7 @@ $.widget( "heurist.editing_input", {
                             $('<a href="#" title="Select from a library of images"><span class="ui-icon ui-icon-grid"></span>Library</a>')
                                 .on('click',function(){that.openIconLibrary()}).appendTo( ele );
 
-                            $('<br/><br/>').appendTo( ele );
+                            $('<br><br>').appendTo( ele );
 
                             $('<a href="#" title="or upload a new image"><span class="ui-icon ui-icon-folder-open"></span><span class="upload-file-text">Upload file</span></a>')
                                 .on('click',function(){ $input.on('click',) }).appendTo( ele );
@@ -4816,6 +4872,14 @@ $.widget( "heurist.editing_input", {
                     //if($input==null) $input = $('<select>').uniqueId();
                     var selObj = window.hWin.HEURIST4.ui.createSelector($input.get(0), allTerms);
                     window.hWin.HEURIST4.ui.initHSelect(selObj, this.options.useHtmlSelect);
+
+                    // move menuWidget to current dialog/document 
+                    // (sometimes, within CMS pages for example, it places it before the current dialog thus hiding it)
+                    let $menu = $input.hSelect('menuWidget');
+                    let $parent_ele = $input_div.parents('[role="dialog"]');
+                    $parent_ele = $parent_ele.length == 0 ? document : $parent_ele;
+
+                    if($parent_ele.length > 0) $menu.parent().appendTo($parent_ele);
                 }
             }
             
@@ -4947,7 +5011,7 @@ $.widget( "heurist.editing_input", {
     +$Db.trm(trm_id,'trm_Label')+'</span></div>'
 +'<div>In vocabulary: <span id="vocabName" style="font-style:italic">'
     +$Db.trm($(e.target).attr('data-vocab'),'trm_Label')+'</span></div>'
-+'<hr/>'
++'<hr>'
 +'<div>Vocabulary for this field is: <span id="vocabNameCorrect" style="font-style:italic">'
     +$Db.trm($(e.target).attr('data-vocab-correct'),'trm_Label')+'</span></div>'
 +'<p>Use the version of the term in this vocabulary for this field in all records of this type</p></div>'

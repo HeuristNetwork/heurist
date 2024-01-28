@@ -107,7 +107,7 @@ require_once dirname(__FILE__).'/../../hclient/framecontent/initPage.php';
     </div>          
     <div class="heurist-helper1" style="padding-top: 9px;">
 Separate term hierarchy levels with a period ( . ) eg. "History.Medieval.Late". 
-<br/>If supplying optional standard code, description and semantic URI, 
+<br>If supplying optional standard code, description and semantic URI, 
 separate term and each of these values with comma or tab.
     </div>                                    
                     

@@ -293,7 +293,8 @@ regional['ENG'] = {
         'menu-selected-select-all-hint': 'Select All on page',
         'menu-selected-select-none': 'Select none',
         'menu-selected-select-none-hint': 'Clear selection',
-        'menu-selected-select-show': 'Show as search',
+        'menu-selected-select-insearch': 'Show selected',
+        'menu-selected-select-show': 'Show as new tab',
         'menu-selected-select-show-hint': 'Launch selected records in a new search window',
         'menu-selected-tag': 'Tag',
         'menu-selected-tag-hint': 'Select one or more records, then click to add or remove tags',
@@ -580,7 +581,7 @@ regional['ENG'] = {
     //OLD VERSION    No response from server. This may be due to too many simultaneous requests or a coding problem. Please report to Heurist developers if this reoccurs.',
 
     'mailto_fail': 'You have not set an email handler for mailto: links. '
-    +'<br/>Please set this in your  browser (it is normally in the content settings under Privacy).',
+    +'<br>Please set this in your  browser (it is normally in the content settings under Privacy).',
 
     //titles
     'add_record':'Add new record',

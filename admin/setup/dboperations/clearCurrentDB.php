@@ -117,7 +117,7 @@ require_once dirname(__FILE__).'/../../../hserv/records/indexing/elasticSearch.p
     }else if(@$_REQUEST['mode']=='2') {
 
         if (@$_REQUEST['del']=='CLEAR ALL RECORDS') {
-            print "<br/><hr>";
+            print "<br><hr>";
             if ($dbname=='') {
                 print "<p>Undefined database name</p>"; // shouldn't get here
             } else {
@@ -129,10 +129,10 @@ require_once dirname(__FILE__).'/../../../hserv/records/indexing/elasticSearch.p
                     //print "<p><a href=".HEURIST_BASE_URL."?db=$dbname>Return to Heurist</a></p>";
                 } else {
                     // Remove from ElasticSearch
-                    print "<br/><br/>Removing indexes, calling deleteIndexForDatabase with parameter $dbname";
+                    print "<br><br>Removing indexes, calling deleteIndexForDatabase with parameter $dbname";
                     ElasticSearch::deleteIndexForDatabase($dbname); // ElasticSearch uses full database name with prefix
 
-                    print "<br/><br/>Record data, bookmarks and tags have been deleted from <b>$dbname</b><br/>";
+                    print "<br><br>Record data, bookmarks and tags have been deleted from <b>$dbname</b><br>";
                     print "Database structure (record types, fields, terms, constraints etc.) and users have not been affected.";
                     //print "<p><a href=".HEURIST_BASE_URL."?db=$dbname>Return to the database home page</a></p>";
                 }

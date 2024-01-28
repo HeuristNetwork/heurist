@@ -121,7 +121,7 @@
 
 <div class="infowindow infowindow-map">
     <h3><?php echo getFieldValue($records, $recID, 'rec_Title'); ?></h3>
-    <?php echo $comment? 'Building details:<br/>'.$comment:''; ?>
+    <?php echo $comment? 'Building details:<br>'.$comment:''; ?>
     <?php echo $moredetailLink; ?>
 </div>
 

@@ -354,7 +354,12 @@ function editCMS2(website_document){
         }
         _editor_panel.find('.btn-website-addpage').on('click',_addNewRootMenu); // button({icon:'ui-icon-plus'}).
         _editor_panel.find('.btn-website-url').on('click',function(){ // save website url to clipboard
-            window.hWin.HEURIST4.util.copyStringToClipboard(window.hWin.HAPI4.baseURL_pro+'?db='+window.hWin.HAPI4.database+'&website');
+
+            let url_part = window.hWin.HAPI4.sysinfo.use_redirect ? 
+                                `${window.hWin.HAPI4.database}/web/${home_page_record_id}` : 
+                                `?db=${window.hWin.HAPI4.database}&website&id=${home_page_record_id}`;
+
+            window.hWin.HEURIST4.util.copyStringToClipboard(`${window.hWin.HAPI4.baseURL_pro}${url_part}`);
             window.hWin.HEURIST4.msg.showMsgFlash('Website URL saved to clipboard', 3000);
         });
 

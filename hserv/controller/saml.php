@@ -32,11 +32,12 @@ $action = @$_REQUEST['a']; //$system->getError();
 $system = new System();
 $dbname = @$_REQUEST['db'];
 $error = System::dbname_check($dbname);
+$msg = null;
 
 if($error){
     $system->addError(HEURIST_INVALID_REQUEST, $error);
 }else{
-
+    
     $sp = @$_REQUEST['sp'];
     if(!$sp) $sp = 'default-sp';
     
@@ -99,9 +100,11 @@ console.log('Authentification completed ','<?php echo intval($user_id);?>');
 
 }
 //show error
-if(!isset($msg)){
+if($msg==null){
     $msg = $system->getError();
-    if(!($msg && @$msg['message'])){
+    if($msg && @$msg['message']){
+        $msg = $msg['message'];
+    }else{
         $msg = 'Indefenite error';     
     }
 }

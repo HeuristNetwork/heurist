@@ -457,7 +457,7 @@ if($registrationRequired){ //show user registration dialog again after wrong cap
 
                     <div style="padding:10px 0 10px 26px;width:600px">
                         THIS DATABASE IS CURRENTLY UNDER DEVELOPMENT - PLEASE DON'T USE THIS OPTION
-                        <br/>
+                        <br>
                         A training database consisting of interlinked information about Shakespeare's plays, company, actors, theatres, performances etc.
                         Use this database as a starting point for becoming familiar with Heurist<br>(See <a href="https://HeuristNetwork.org/screencasts" target="_blank" rel="noopener">introductory video</a>).
                     </div>
@@ -465,9 +465,9 @@ if($registrationRequired){ //show user registration dialog again after wrong cap
                     <div id="nextSteps" style="padding:10px 0 10px 26px;width:600px;display:none">
                         <div class="labelBold ui-heurist-title">Suggested next steps</div>
                         <div>
-                            <br />After the database is created, we suggest visiting Manage &gt; Structure &gt; Browse templates
+                            <br>After the database is created, we suggest visiting Manage &gt; Structure &gt; Browse templates
                             to download pre-configured templates or individual record types and fields from databases registered with the Heurist Network.
-                            <br />New databases are created on the current server. You will become the owner and administrator of the new database.
+                            <br>New databases are created on the current server. You will become the owner and administrator of the new database.
                         </div>
                     </div>
                 </div>
@@ -530,7 +530,7 @@ if($registrationRequired){ //show user registration dialog again after wrong cap
                     </div>
                     <div style="margin-top: 20px; margin-bottom: 20px;" class="heurist-helper3">
                         Please register in order to define the user who will become the database owner and administrator.<br><br>
-                        If you are already a user of another database on this server, we suggest logging into that database (<a href="../../../index.php">select database here</a>)<br/>
+                        If you are already a user of another database on this server, we suggest logging into that database (<a href="../../../index.php">select database here</a>)<br>
                         and creating your new database with Database &gt; New Database, as this will carry over your login information from the existing database.
                     </div>
                 </div>

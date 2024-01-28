@@ -708,7 +708,7 @@ $.widget( "heurist.manageSysUsers", $.heurist.manageEntity, {
         }else{
             var that = this;
             window.hWin.HEURIST4.msg.showMsgDlg(
-                'Are you sure you wish to transfer the ownership of this database to the selected user? This action can only be undone by the new owner.<br />'
+                'Are you sure you wish to transfer the ownership of this database to the selected user? This action can only be undone by the new owner.<br>'
                 +' <p style="font-size: 1.1em; font-weight: bold;">'
                 + 'Note: Heurist will need to logout and reload once the changes have been made, ensure you save and complete any additional tasks before proceeding.</p>',
                 function(){ that._transferDBOwner(true); },
@@ -722,7 +722,7 @@ $.widget( "heurist.manageSysUsers", $.heurist.manageEntity, {
     _afterTransferOwnerHandler: function(recID){
 
         window.hWin.HEURIST4.msg.showMsgFlash(this.options.entity.entityTitle + ' ' + window.hWin.HR('ownership has been transfered') + '.'
-            +'<br />Heurist will now refresh to set these changes.', 2000); // flash message
+            +'<br>Heurist will now refresh to set these changes.', 2000); // flash message
 
         /* Trigger Logout and Reload */
         window.hWin.HAPI4.SystemMgr.logout(
@@ -731,7 +731,7 @@ $.widget( "heurist.manageSysUsers", $.heurist.manageEntity, {
                     window.hWin.HAPI4.setCurrentUser(null);
                     window.location.reload();  // page reload
                 }else{
-                    window.hWin.HEURIST4.msg.showMsgErr(response + ' <br/> Heurist is unable to refresh the page!');
+                    window.hWin.HEURIST4.msg.showMsgErr(response + ' <br> Heurist is unable to refresh the page!');
                 }
             }
         );

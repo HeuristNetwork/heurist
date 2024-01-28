@@ -7,11 +7,11 @@
 <h2>Basic report as an example</h2> {* Text here appears at start of report *}
 
 <i><pre>
-     Please use this as an example from which to create your own reports, by copying this template.<br/>
-     To do this, choose <b>Edit</b> (first button above the report), then click the <b>Save As</b> button.<br/>
-     You can also create a new report template with the <b>Create a new template</b> icon (second button)<br/>
-     As you edit, hit the <b>Test</b> button repeatedly to see how your changes are working.<br/>
-     Ctrl-Z will undo most recent change - can be repeated to backtrack through changes.<br/>
+     Please use this as an example from which to create your own reports, by copying this template.<br>
+     To do this, choose <b>Edit</b> (first button above the report), then click the <b>Save As</b> button.<br>
+     You can also create a new report template with the <b>Create a new template</b> icon (second button)<br>
+     As you edit, hit the <b>Test</b> button repeatedly to see how your changes are working.<br>
+     Ctrl-Z will undo most recent change - can be repeated to backtrack through changes.<br>
 </pre></i>
 
 {* -----------------------------------------------------------------------------------------------------------*}
@@ -53,7 +53,7 @@
 
        FOR to loop through values for a repeating field
 
-       <br/> for line break, <b> for bold, <i> for italics
+       <br> for line break, <b> for bold, <i> for italics
 
        WRAP function to get images, maps and hyperlinks
 
@@ -67,12 +67,12 @@
 
        Media: <b>{$r.recID}  {* the unique record ID *}
 
-       {$r.f1}<br/> <br/> </b> {*Title*}
+       {$r.f1}<br> <br> </b> {*Title*}
 
-       {wrap var=$r.f38_originalvalue dt="file" width="300" height="auto"}<br/>
+       {wrap var=$r.f38_originalvalue dt="file" width="300" height="auto"}<br>
 
        {if ($r.f3)} {* Test if summary present *}
-         {$r.f3}{*Summary*}<br/>
+         {$r.f3}{*Summary*}<br>
        {/if}
 
      {else}
@@ -95,16 +95,16 @@
          {$r.f2}{*Name - Short*}
        {/if}{* Name - Short *}
 
-       {wrap var=$r.recURL dt="url"}<br/>
+       {wrap var=$r.recURL dt="url"}<br>
 
        {if ($r.f3)}
-         <br/>{$r.f3}{*Summary*}
+         <br>{$r.f3}{*Summary*}
        {/if}
 
 
        {if ($r.f39)}
-         <br/>
-       	 {wrap var=$r.f39_originalvalue dt="file" width="150" height="auto"}<br/> {* Thumbnail Image *}
+         <br>
+       	 {wrap var=$r.f39_originalvalue dt="file" width="150" height="auto"}<br> {* Thumbnail Image *}
        {/if}
 
      {else}{* Organisation *}
@@ -132,15 +132,15 @@
        {/if}
 
        {if ($r.f3)}
-         <br/><br/>{$r.f3}{*Summary*}
+         <br><br>{$r.f3}{*Summary*}
        {/if}
 
-			 <br/><br/>
+			 <br><br>
 
-       {wrap var=$r.f39_originalvalue dt="file" width="300" height="auto"}<br/> {*Image*}
+       {wrap var=$r.f39_originalvalue dt="file" width="300" height="auto"}<br> {*Image*}
 
        {if ($r.f28)} {* Test if map data present, put on new line *}
-         <br/>Birth place map below:<br/>{wrap var=$r.f28_originalvalue dt="geo"} {*Map*}
+         <br>Birth place map below:<br>{wrap var=$r.f28_originalvalue dt="geo"} {*Map*}
        {/if}
 
      {else}{* Person - detailed *}
@@ -157,7 +157,7 @@
      {$r.f1}, {*Family name*}
      {$r.f18}{*Given Name(s)*}
      </i>
-     </b> <br/>
+     </b> <br>
 
      {else}{* Person - minimal *}
 
@@ -171,10 +171,10 @@
 
        {$r.f1}{*Note Title*} </b>
 
-       <br/><br/>{wrap var=$r.recURL dt="url"}
+       <br><br>{wrap var=$r.recURL dt="url"}
 
        {if ($r.f3)}
-         <br/><br/>{$r.f3}{*Summary*}
+         <br><br>{$r.f3}{*Summary*}
        {/if}
 
      {else}{* Web site / page *}
@@ -190,9 +190,9 @@
        {$r.f1}{*Place name*}
        [{$r.f133.term}]{*Place Type >> Term*}
        {$r.f26.term}{*Country >> Term*}
-       </b><br/>
+       </b><br>
 
-       <br/>{wrap var=$r.f28_originalvalue dt="geo"} {*Map*}
+       <br>{wrap var=$r.f28_originalvalue dt="geo"} {*Map*}
 
      {else}{* Place *}
 
@@ -204,9 +204,9 @@
 
        Note: <b>{$r.recID}</b>  {* the unique record ID *}
 
-       <b>{$r.f1}</b><br/> {*Title*}
+       <b>{$r.f1}</b><br> {*Title*}
 
-       <br/>{$r.f3}{*Short Note / Summary*}
+       <br>{$r.f3}{*Short Note / Summary*}
 
      {else}{* Notes *}
 
@@ -216,9 +216,9 @@
 
        {$r.recTypeName}: <b>{$r.recID}</b>  {* the unique record ID *}
 
-       <b>{$r.f1}</b><br/> {*Title*}
+       <b>{$r.f1}</b><br> {*Title*}
 
-			 <br/> Unsupported record type: Please edit the template and copy and modify an existing format to add support for this record type, if required.
+			 <br> Unsupported record type: Please edit the template and copy and modify an existing format to add support for this record type, if required.
 
 
 
@@ -234,7 +234,7 @@
 
 
 
-<br/> <hr> <br/> {* line breaks / horizontal rule between each record *}
+<br> <hr> <br> {* line breaks / horizontal rule between each record *}
 
 
 {*------------------------------------------------------------*}

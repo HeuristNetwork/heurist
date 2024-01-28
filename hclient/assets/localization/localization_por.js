@@ -498,7 +498,7 @@ regional['POR'] = {
     //OLD VERSION    No response from server. This may be due to too many simultaneous requests or a coding problem. Please report to Heurist developers if this reoccurs.',
 
     'mailto_fail': 'Não definiu um endereço de correio para mailto: links. '
-    +'<br/>Por favor, defina isto no seu navegador (normalmente está nas definições de conteúdo em Privacidade).',
+    +'<br>Por favor, defina isto no seu navegador (normalmente está nas definições de conteúdo em Privacidade).',
 
     //titles
     'add_record':'Adicionar um novo registo',

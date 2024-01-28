@@ -1390,12 +1390,12 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
                 if(!s_all){
                     sMsg = '<div style="margin-top:5em;">'
                         +'<b>There are no record types (entity types) defined within this group.</b>'
-                        +'<br/><br/>Please drag record types from other groups or add new record types to this group.'
-                        +'<br/><br/>We suggest renaming the "My record types" group to something that suits your project.'
+                        +'<br><br>Please drag record types from other groups or add new record types to this group.'
+                        +'<br><br>We suggest renaming the "My record types" group to something that suits your project.'
                         +'</div>';   
                 }else{
                     sMsg = '<div style="padding: 10px">'
-                            +'<h3 class="not-found" style="color:red;">Filter/s are active (see above)</h3><br/>'
+                            +'<h3 class="not-found" style="color:red;">Filter/s are active (see above)</h3><br>'
                             +'<h3 class="not-found" style="color:teal">No entities match the filter criteria</h3>'
                             +'</div>';
                 }
