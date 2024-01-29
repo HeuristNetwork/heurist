@@ -23,7 +23,7 @@ function hLayoutMgr(){
 
     var _className = "hLayoutMgr";
 
-    var pnl_counter = 1;
+    var pnl_counter = 1;   //counter to assign unique key for layout elements
 
     var body = $(this.document).find('body');
     
@@ -33,13 +33,25 @@ function hLayoutMgr(){
     
     var _main_layout_cfg = null;
 
+    // layout.key    - unique key within page - it is assigned from scratch every time page is loaded
+    // it is assigned to data-lid - attribute in layout title and data-hid for div element
+    // data-lid and data-hid has the same value and used to link elements in cms editor and cms structure treeview
     //
-    // assign unique key property for all layer elements (in array "key" in html "data-lid")
+    // layout.dom_id - unique id within DOM (it is generated automatically on first creation as
+    //                 combination cms-content-KEY or cms-widget-KEY and can be changed 
+    //                 by user (website designer) manually
+    //
+    // for cardinal, tabs and accordion it assign cms-tabs-{layout.key}            
+    //
+    // Assigns unique key property for all layer elements 
+    // (in json array "key" in html "data-lid" and "data-hid")
     //
     function _layoutInitKey(layout, i){
         
         if(!layout[i].key){
+
             layout[i].key = pnl_counter;
+            //data-lid is required to find title in treeveiew
             layout[i].title = '<span data-lid="'+pnl_counter+'">' + layout[i].name 
                                 +'</span>';
             layout[i].folder = (layout[i].children && layout[i].children.length>0);
@@ -239,20 +251,17 @@ function hLayoutMgr(){
          
             // assign id for new content and widgety divs
             // it is saved in configuration
-            var suffix = '', cnt = 0;
+            var uid = ''+Math.floor(Math.random() * 10000);
+            //Math.floor(Math.random() * Date.now())
             do{
                 if(layout.appid){
-                    layout.dom_id = 'cms-widget-' + layout.key + suffix;
+                    layout.dom_id = 'cms-widget-' + uid;
                 }else{
-                    layout.dom_id = 'cms-content-' + layout.key + suffix;
+                    layout.dom_id = 'cms-content-' + uid;
                 }
-                //check that it is unique on this page
-                cnt++;
-                suffix = '_' + cnt;
-                
             }while (body.find('#'+layout.dom_id).length>0);
-            
-        }
+                  
+        }                         
         
         $d.attr('id', layout.dom_id)
           .attr('data-hid', layout.key); //.attr('data-lid', layout.key);
@@ -1143,6 +1152,7 @@ function hLayoutMgr(){
         // supp_options - additional parameters that refelect current status - for example page record id, current language
         //
         layoutInit: function(layout, container, supp_options){
+            
             _supp_options = supp_options?supp_options:{};
             return _layoutInitFromJSON(layout, container, false, true);
         },
