@@ -939,7 +939,7 @@ $.widget( "heurist.editing_input", {
             .css({'overflow-x':'hidden'})
             .keydown(function(e){
                 if (e.keyCode == 65 && e.ctrlKey) {
-                    e.target.select()
+                    e.target.select();
                 }    
             })
             .keyup(function(){that.onChange();})
@@ -4875,7 +4875,7 @@ $.widget( "heurist.editing_input", {
                     // move menuWidget to current dialog/document 
                     // (sometimes, within CMS pages for example, it places it before the current dialog thus hiding it)
                     let $menu = $input.hSelect('menuWidget');
-                    let $parent_ele = $input_div.parents('[role="dialog"]');
+                    let $parent_ele = this.element.closest('div[role="dialog"]'); //$input_div.parents('[role="dialog"]');
                     $parent_ele = $parent_ele.length == 0 ? document : $parent_ele;
 
                     if($parent_ele.length > 0) $menu.parent().appendTo($parent_ele);
