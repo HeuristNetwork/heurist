@@ -188,6 +188,8 @@ $.widget( "heurist.resultList", {
 
     _collection: null, // current collection of record ids
     
+    _auto_select_record: null, // record to auto select, retrieved from URL
+    
     // the constructor
     _create: function() {
 
@@ -212,6 +214,21 @@ $.widget( "heurist.resultList", {
         this._is_publication  = this.element.parent().attr('data-heurist-app-id') || this.element.hasClass('cms-element');
         
         //this.element.css({'font-size':'0.9em'});
+
+        // Auto select record(s), retrieved from url
+        let rec_ids = window.hWin.HEURIST4.util.getUrlParameter('rec_id', location.href);
+        if(!rec_ids && window.hWin.HAPI4.sysinfo.use_redirect){
+
+            let url = location.href;
+
+            rec_ids = url.indexOf('/website/') > 0 ? url.substring(url.indexOf('/website/')+9) : url.substring(url.indexOf('/web/')+5);
+            rec_ids = rec_ids.split('/');
+            rec_ids = rec_ids.length > 2 ? rec_ids.splice(0, 2) : null;
+        }
+
+        if(!window.hWin.HEURIST4.util.isempty(rec_ids)){
+            this._auto_select_record = Array.isArray(rec_ids) ? rec_ids : rec_ids.split(',');
+        }
 
         this._initControls();
 
@@ -3453,6 +3470,23 @@ $.widget( "heurist.resultList", {
                     $rdiv.addClass('selected');
                 }
             }
+        }
+
+        // Auto select record(s)
+        let auto_select = this._auto_select_record && this._auto_select_record.length > 0 && !this.options.auto_select_first;
+        if(auto_select){
+
+            this._auto_select_record = this.options.select_mode!='select_multi' ? [ this._auto_select_record[0] ] : this._auto_select_record;
+            let enum_multi = this._auto_select_record.length > 1;
+
+            setTimeout(() => {
+                for(const rec_id of that._auto_select_record){
+                    let $div = that.div_content.find('.recordDiv[recid="'+rec_id+'"]');
+                    if($div.length > 0){
+                        that._recordDivOnClick({target: $div, ctrlKey: enum_multi});
+                    }
+                }
+            }, 1500);
         }
         
         /*var lastdiv = this.div_content.last( ".recordDiv" ).last();
