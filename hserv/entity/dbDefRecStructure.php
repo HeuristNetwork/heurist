@@ -517,7 +517,8 @@ class DbDefRecStructure extends DbEntityBase
                 if($relmarker_filters && count($relmarker_filters) > 0){
 
                     // Retrieve record ids that are relevant
-                    $query = 'SELECT DISTINCT rec_ID FROM Records, recLinks WHERE rec_RecTypeID=' . $rty_ID . ' AND rl_RelationID > 0 AND (rl_SourceID=rec_ID OR rl_TargetID=rec_ID)';
+                    $query = 'SELECT DISTINCT rec_ID FROM Records, recLinks WHERE rec_RecTypeID=' . $rty_ID 
+                        . ' AND rl_RelationID > 0 AND (rl_SourceID=rec_ID OR rl_TargetID=rec_ID)';
                     $ids = mysql__select_list2($mysqli, $query); // returns array of rec ids
                     if(is_array($ids) && count($ids) > 0){
 
@@ -534,46 +535,48 @@ class DbDefRecStructure extends DbEntityBase
                             $rectypes = explode(',', $fld_details['dty_PtrTargetRectypeIDs']);
                             $allow_all = empty($rectypes);
 
-                            // Retrieve relmarker count - from
-                            $query = 'SELECT rl_TargetID '
-                                . 'FROM recLinks '
-                                . 'WHERE rl_RelationTypeID IN (' . implode(',', $terms) . ') AND rl_SourceID IN ('. $rec_ids .')';
-                            $rel_usage_from = mysql__select_list2($mysqli, $query); // returns count
-                            if(!empty($mysqli->error)){
-                                $this->system->addError(HEURIST_DB_ERROR, 'Cannot retrieve relationship marker usage for field #'.$dty_id.' from record type #'.$rty_ID, $mysqli->error);
-                                return false;
-                            }
-
-                            $query = 'SELECT rl_SourceID '
-                            . 'FROM recLinks '
-                            . 'WHERE rl_RelationTypeID IN (' . implode(',', $terms) . ') AND rl_TargetID IN ('. $rec_ids .')';
-                            $rel_usage_to = mysql__select_list2($mysqli, $query); // returns count
-                            if(!empty($mysqli->error)){
-                                $this->system->addError(HEURIST_DB_ERROR, 'Cannot retrieve reverse relationship marker usage for field #'.$dty_id.' from record type #'.$rty_ID, $mysqli->error);
-                                return false;
-                            }
-
-                            $rel_usages = array_merge($rel_usage_from, $rel_usage_to);
-
-                            foreach($rel_usages as $rec_id){
-                                if(in_array($rec_id, $allowed_recs)){
-                                    $count ++;
-                                    continue;
-                                }else if(in_array($rec_id, $not_allowed_recs)){
-                                    continue;
-                                }
-
-                                $check_res = mysql__select_value($mysqli, "SELECT rec_RecTypeID FROM Records WHERE rec_ID = $rec_id");
+                            if(is_array($terms) && count($terms) > 0){
+                                // Retrieve relmarker count - from
+                                $query = 'SELECT rl_TargetID '
+                                    . 'FROM recLinks '
+                                    . 'WHERE rl_RelationTypeID IN (' . implode(',', $terms) . ') AND rl_SourceID IN ('. $rec_ids .')';
+                                $rel_usage_from = mysql__select_list2($mysqli, $query); // returns count
                                 if(!empty($mysqli->error)){
-                                    $this->system->addError(HEURIST_DB_ERROR, 'Cannot retrieve record type id for record #'.$rec_id, $mysqli->error);
+                                    $this->system->addError(HEURIST_DB_ERROR, 'Cannot retrieve relationship marker usage for field #'.$dty_id.' from record type #'.$rty_ID, $mysqli->error);
                                     return false;
                                 }
 
-                                if($allow_all || in_array($check_res, $rectypes)){
-                                    $count ++;
-                                    $allowed_recs[] = $rec_id;
-                                }else{
-                                    $not_allowed_recs[] = $rec_id;
+                                $query = 'SELECT rl_SourceID '
+                                . 'FROM recLinks '
+                                . 'WHERE rl_RelationTypeID IN (' . implode(',', $terms) . ') AND rl_TargetID IN ('. $rec_ids .')';
+                                $rel_usage_to = mysql__select_list2($mysqli, $query); // returns count
+                                if(!empty($mysqli->error)){
+                                    $this->system->addError(HEURIST_DB_ERROR, 'Cannot retrieve reverse relationship marker usage for field #'.$dty_id.' from record type #'.$rty_ID, $mysqli->error);
+                                    return false;
+                                }
+
+                                $rel_usages = array_merge($rel_usage_from, $rel_usage_to);
+
+                                foreach($rel_usages as $rec_id){
+                                    if(in_array($rec_id, $allowed_recs)){
+                                        $count ++;
+                                        continue;
+                                    }else if(in_array($rec_id, $not_allowed_recs)){
+                                        continue;
+                                    }
+
+                                    $check_res = mysql__select_value($mysqli, "SELECT rec_RecTypeID FROM Records WHERE rec_ID = $rec_id");
+                                    if(!empty($mysqli->error)){
+                                        $this->system->addError(HEURIST_DB_ERROR, 'Cannot retrieve record type id for record #'.$rec_id, $mysqli->error);
+                                        return false;
+                                    }
+
+                                    if($allow_all || in_array($check_res, $rectypes)){
+                                        $count ++;
+                                        $allowed_recs[] = $rec_id;
+                                    }else{
+                                        $not_allowed_recs[] = $rec_id;
+                                    }
                                 }
                             }
 
