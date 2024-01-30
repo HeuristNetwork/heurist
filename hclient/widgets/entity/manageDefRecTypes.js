@@ -1021,6 +1021,9 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
                     
                     window.hWin.HAPI4.RecordSearch.doSearch( this, 
                         {q:'{"t":"'+recID+'"}',detail:'ids', source:this.element.attr('id')} );
+                    if(this.options.parent_dialog == null){
+                        $('.ui-menu6').mainMenu6('switchContainer', 'explore', true);
+                    }
                     //this.closeDialog(true);
                     
                 }else if(action=='group'){
