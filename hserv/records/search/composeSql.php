@@ -2810,6 +2810,7 @@ class HPredicate {
                     $trm_Field = $this->allowed_term_fields[$this->field_term];
                 }else{
                     $trm_Field = 'trm_Label';
+                    $this->value = '*:' . $this->value; // search translated labels as well
                 }
 
                 $value = $mysqli->real_escape_string($this->value);
