@@ -726,6 +726,12 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
             
             return html;
         }
+
+        // Skip items in the Trash group, unless in manager mode
+        let isTrash = (recordset.fld(record, 'rty_RecTypeGroupID') == $Db.getTrashGroupId('rtg'));
+        if(isTrash && this.options.select_mode!='manager'){
+            return '';
+        }
         
         var rtIcon = window.hWin.HAPI4.getImageUrl(this._entityName, recID, 'icon');
         var recThumb = window.hWin.HAPI4.getImageUrl(this._entityName, recID, 'thumb');
@@ -751,16 +757,9 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
 
         //fields = ['rtyid','ccode','addrec','filter','count','group','icon','edit','editstr','name','description','show','duplicate','fields','status'];        
 
-        var isTrash = false;//(recordset.fld(record, 'rty_RecTypeGroupID') == $Db.getTrashGroupId('rtg'));
-        
         function __action_btn(action, icon, title, color){
             if(!color) color = '#555555';            
             var sbg = '';
-            if(isTrash && action!='delete' && action!='') {
-                color = '#d7d7d7';
-                sbg = 'background:#f0f0f0';
-                action = '';
-            }
             
             return '<div class="item" style="min-width:34px;max-width:34px;text-align:center;'+sbg+'">'
                     +'<div title="'+title+'" '

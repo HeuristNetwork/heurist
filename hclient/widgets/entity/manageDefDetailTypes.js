@@ -452,6 +452,12 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
             }
             return '<div class="item truncate" '+style+'>'+window.hWin.HEURIST4.util.htmlEscape(value)+'</div>';
         }
+
+        // Skip items in the Trash group, unless in manager mode
+        let isTrash = (recordset.fld(record, 'dty_DetailTypeGroupID') == $Db.getTrashGroupId('dtg'));
+        if(isTrash && this.options.select_mode!='manager'){
+            return '';
+        }
         
         var recID = fld('dty_ID');
 

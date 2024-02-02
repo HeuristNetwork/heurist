@@ -311,11 +311,16 @@ window.hWin.HEURIST4.ui = {
             
         var data = $Db.trm_TreeData(vocab_id, 'select', false, lang_code);                
         var termCode;
+        let vcg_Trash = $Db.getTrashGroupId('vcg');
        
         //add optgroups and options
         for(var i=0; i<data.length; i++){
             
             if(data[i].is_vocab){
+
+                if($Db.trm(data[i].key, 'trm_VocabularyGroupID') == vcg_Trash){
+                    continue;
+                }
                 
                 var opt = window.hWin.HEURIST4.ui.addoption(selObj, 
                                                     data[i].key, data[i].title);
@@ -324,6 +329,11 @@ window.hWin.HEURIST4.ui = {
                 $(opt).attr('group', 1);
                 
             }else{
+
+                let vocab_id = $Db.trm(data[i].key, 'trm_Parents').split(',')[0];
+                if($Db.trm(vocab_id, 'trm_VocabularyGroupID') == vcg_Trash){
+                    continue;
+                }
             
                 if(supressTermCode || window.hWin.HEURIST4.util.isempty(data[i].code)){
                     termCode = '';
@@ -358,6 +368,7 @@ window.hWin.HEURIST4.ui = {
         useGroups = options.useGroups;
 
         var domain = (options.domain=='enum' || options.domain=='relation')?options.domain:null;
+        let vcg_Trash = $Db.getTrashGroupId('vcg');
 
         if (!(useGroups>0 || useGroups===false)){
             useGroups = true;
@@ -380,7 +391,7 @@ window.hWin.HEURIST4.ui = {
             var parent_id = this.fld(record, 'trm_ParentTermID');
             if(!(parent_id>0)){
                 var grp_id = this.fld(record, 'trm_VocabularyGroupID');
-                if(grp_id>0){ 
+                if(grp_id>0 && grp_id!=vcg_Trash){ 
                     if(useGroups===false){
                         vocabs['0'].push(trmID);
                     }else if(useGroups===true){
@@ -458,7 +469,14 @@ window.hWin.HEURIST4.ui = {
 
         var recset = $Db[entity]();
         var options = recset.makeKeyValueArray(entity+'_Name');
-        
+        let trash_id = $Db.getTrashGroupId(entity);
+
+        for(const idx of options){
+            if(trash_id != options[idx]['key']){ break; }
+
+            options.splice(idx, 1); // remove Trash group
+        }
+
         if(!(window.hWin.HEURIST4.util.isArray(topOptions) ||
            window.hWin.HEURIST4.util.isempty(topOptions) ||
            topOptions===false)){
@@ -517,7 +535,8 @@ window.hWin.HEURIST4.ui = {
         useHtmlSelect = (useHtmlSelect===true);
         
         //recordset 
-        var rectypes = $Db.rty().getSubSetByRequest({ 'sort:rty_Name':1 });
+        let rtg_Trash = $Db.getTrashGroupId('rtg');
+        var rectypes = $Db.rty().getSubSetByRequest({ 'sort:rty_Name':1, 'rty_RecTypeGroupID': `!=${rtg_Trash}` });
         var index;
 
         if(rectypes){ 
