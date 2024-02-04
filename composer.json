@@ -2,9 +2,10 @@
       "require": {
           "smalot/pdfparser": "*",
           "phpmailer/phpmailer": "~6.0",
-	  "phayes/geophp": "*",
+	      "phayes/geophp": "*",
           "smarty/smarty": "~3.1",
- 	  "gasparesganga/php-shapefile": "*",
- 	  "ezyang/htmlpurifier": "*"
+ 	      "gasparesganga/php-shapefile": "*",
+ 	      "ezyang/htmlpurifier": "*",
+          "easyrdf/easyrdf": "*"
       }
  }
