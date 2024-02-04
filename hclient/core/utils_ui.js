@@ -471,7 +471,7 @@ window.hWin.HEURIST4.ui = {
         var options = recset.makeKeyValueArray(entity+'_Name');
         let trash_id = $Db.getTrashGroupId(entity);
 
-        for(const idx of options){
+        for(let idx=1; idx<options.length; idx++){
             if(trash_id != options[idx]['key']){ break; }
 
             options.splice(idx, 1); // remove Trash group
