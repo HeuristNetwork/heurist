@@ -72,7 +72,7 @@
         }
         
         if(!$entity){
-            $this->system->addError(HEURIST_INVALID_REQUEST, 'Wrong entity parameter: '.htmlspecialchars(@$params['entity']));
+            $system->addError(HEURIST_INVALID_REQUEST, 'Wrong entity parameter: '.htmlspecialchars(@$params['entity']));
             return false;
         }else{
             return $entity->run();    
