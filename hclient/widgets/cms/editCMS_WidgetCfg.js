@@ -49,7 +49,7 @@ function editCMS_WidgetCfg( widget_cfg, _layout_content, $dlg, main_callback ){
         }
     };
 
-
+    let _using_dialog = !$dlg || $dlg.length == 0;
     
     function _init(){
 
@@ -76,7 +76,7 @@ function editCMS_WidgetCfg( widget_cfg, _layout_content, $dlg, main_callback ){
         if($dlg && $dlg.length>0){
             //container provided
 
-            $container.empty().load(window.hWin.HAPI4.baseURL
+            $dlg.empty().load(window.hWin.HAPI4.baseURL
                 +'hclient/widgets/cms/editCMS_WidgetCfg.html',
                 _initControls
             );
@@ -123,7 +123,36 @@ function editCMS_WidgetCfg( widget_cfg, _layout_content, $dlg, main_callback ){
         var widget_name = widget_cfg.appid;
         var opts = window.hWin.HEURIST4.util.isJSON(widget_cfg.options);
 
-        $dlg.find('.header').css('width', '160px');
+        if(_using_dialog){
+
+            $dlg.find('.header').css('width', '160px');
+
+            $dlg.find('.cms-widget-config').parent()
+                .addClass('ent_content_full')
+                .css({
+                    top: '0px',
+                    'overflow-x': 'hidden'
+                });
+        }
+
+        $dlg.find('.cms-widget-config').tabs();
+
+        let disabled_tabs = [];
+        let active_idx = null;
+
+        let last_idx = $dlg.find('.ui-tabs-panel').length - 1; // Connections tab, all widgets have connection field(s)
+
+        $dlg.find('.ui-tabs-panel').each(function(idx, ele){
+            if($(ele).find(`div.${widget_name}`).length == 0 && idx != last_idx){
+                disabled_tabs.push(idx);
+            }else if(active_idx == null){
+                active_idx = idx;
+            }
+        });
+        active_idx = active_idx == null ? 0 : active_idx;
+
+        $dlg.find('.cms-widget-config').tabs('option', 'disabled', disabled_tabs);
+        $dlg.find('.cms-widget-config').tabs('option', 'active', active_idx);
 
         $dlg.find('div[class^="heurist_"], hr[class^="heurist_"]').hide(); //hide all
         $dlg.find('div.'+widget_name+', hr.'+widget_name).show();
@@ -831,7 +860,7 @@ function editCMS_WidgetCfg( widget_cfg, _layout_content, $dlg, main_callback ){
 							if($selectMapDoc.attr('data-mapdocument')>0){
 								$selectMapDoc.val( $selectMapDoc.attr('data-mapdocument') );
 							}
-							window.hWin.HEURIST4.ui.initHSelect($selectMapDoc[0], false);
+							window.hWin.HEURIST4.ui.initHSelect($selectMapDoc[0], false, null, null, {menu_parent: $dlg});
 
                             allMapDocuments = opts;
                             allMapDocuments.splice(0,1); //remove none
@@ -868,7 +897,8 @@ function editCMS_WidgetCfg( widget_cfg, _layout_content, $dlg, main_callback ){
                 var $selectMapTemplate = $dlg.find('select[name="map_template"]'); 
 
                 window.hWin.HEURIST4.ui.createTemplateSelector( $selectMapTemplate
-                    ,[{key:'',title:'Standard popup template'}], $selectMapTemplate.attr('data-template'));
+                    ,[{key:'',title:'Standard popup template'}], $selectMapTemplate.attr('data-template')
+                    , {extraOptions: {menu_parent: $dlg}});
                     //,{key:'none',title:'Disable popup'}
 
                 //======================================
@@ -898,7 +928,7 @@ function editCMS_WidgetCfg( widget_cfg, _layout_content, $dlg, main_callback ){
                 if($selectBaseMap.attr('data-basemap') != null){
                     $selectBaseMap.val($selectBaseMap.attr('data-basemap'));
                 }
-                $selectBaseMap = window.hWin.HEURIST4.ui.initHSelect($selectBaseMap[0], false);
+                $selectBaseMap = window.hWin.HEURIST4.ui.initHSelect($selectBaseMap[0], false, null, null, {menu_parent: $dlg});
                 
                 if($selectBaseMap.hSelect('instance') != undefined){
                     $selectBaseMap.hSelect('widget').css('width', '200px');
@@ -962,17 +992,17 @@ function editCMS_WidgetCfg( widget_cfg, _layout_content, $dlg, main_callback ){
                 var $selectTemplate = $dlg.find('select[name="reportOverview"]'); 
 
                 window.hWin.HEURIST4.ui.createTemplateSelector( $selectTemplate
-                    ,[{key:'',title:'Standard record view'}], opts['reportOverview']);
+                    ,[{key:'',title:'Standard record view'}], opts['reportOverview'], {extraOptions: {menu_parent: $dlg}});
                     
                 $selectTemplate = $dlg.find('select[name="reportEndPage"]'); 
 
                 window.hWin.HEURIST4.ui.createTemplateSelector( $selectTemplate
-                    ,[{key:'',title:'Standard record view'}], opts['reportEndPage']);
+                    ,[{key:'',title:'Standard record view'}], opts['reportEndPage'], {extraOptions: {menu_parent: $dlg}});
                     
                 $selectTemplate = $dlg.find('select[name="reportElement"]'); 
 
                 window.hWin.HEURIST4.ui.createTemplateSelector( $selectTemplate
-                    ,[{key:'',title:'Standard record view'}], opts['reportElement']);
+                    ,[{key:'',title:'Standard record view'}], opts['reportElement'], {extraOptions: {menu_parent: $dlg}});
 
                     
                 var $elementOrder = $dlg.find('select[name="elementOrder"]'); 
@@ -1076,7 +1106,7 @@ function editCMS_WidgetCfg( widget_cfg, _layout_content, $dlg, main_callback ){
                     var $select3 = $dlg.find('select[name="rep_template"]'); 
 
                     window.hWin.HEURIST4.ui.createTemplateSelector( $select3 
-                        ,[{key:'',title:'Standard record view template'}], $select3.attr('data-template'));
+                        ,[{key:'',title:'Standard record view template'}], $select3.attr('data-template'), {extraOptions: {menu_parent: $dlg}});
 
                      $dlg.find('#is_popup_report').change(function(e){
                         if($dlg.find('#is_popup_report').is(':checked')){
@@ -1090,7 +1120,7 @@ function editCMS_WidgetCfg( widget_cfg, _layout_content, $dlg, main_callback ){
                         }    
                      });
                      $dlg.find('#is_popup_report').prop('checked', opts['is_popup']).change();
-                     $dlg.find('#popup_report_position').val(opts['popup_position'])
+                     $dlg.find('#popup_report_position').val(opts['popup_position']);
 
             }else 
             if(widget_name=='heurist_resultList'){
@@ -1099,13 +1129,14 @@ function editCMS_WidgetCfg( widget_cfg, _layout_content, $dlg, main_callback ){
                     var $select4 = $dlg.find('select[name="rendererExpandDetails"]'); 
 
                     window.hWin.HEURIST4.ui.createTemplateSelector( $select4
-                        ,[{key:'',title:'Standard record view template'}], $select4.attr('data-template'));
+                        ,[{key:'',title:'Standard record view template'}], $select4.attr('data-template'), {extraOptions: {menu_parent: $dlg}});
                 }
 
                 if($dlg.find('select[name="field_for_ext_classes"]').find('options').length==0){ // list of record fields that are enum
                     var $select5 = $dlg.find('select[name="field_for_ext_classes"]');
 
-                    window.hWin.HEURIST4.ui.createRectypeDetailSelect($select5[0], null, ['enum'], [{key: 0, title: 'None'}], {'selectedValue': $select5.attr('fld-id')});
+                    window.hWin.HEURIST4.ui.createRectypeDetailSelect($select5[0], null, ['enum'], [{key: 0, title: 'None'}], 
+                        {'selectedValue': $select5.attr('fld-id')}, {extraOptions: {menu_parent: $dlg}});
                 }
             }
             
@@ -1425,6 +1456,10 @@ function editCMS_WidgetCfg( widget_cfg, _layout_content, $dlg, main_callback ){
         isA: function (strClass) {
             return (strClass === _className);
         },
+
+        getValues: function(){
+            return _getValues();
+        }
     }
 
     _init();
