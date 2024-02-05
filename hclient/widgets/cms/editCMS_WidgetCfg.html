@@ -31,47 +31,46 @@
     <fieldset style="padding:0;line-height:20px" class="cms-widget-config">
 
         <ul id="tab-headers">
+            <li><a href="#setup">Setup</a></li>
             <li><a href="#controls">Controls</a></li>
-            <li><a href="#texts">Texts</a></li>
-            <li><a href="#layers">Layers</a></li>
-            <li><a href="#infobox">Infobox</a></li>
-            <li><a href="#story">Stories</a></li>
-            <li><a href="#connections">Connections</a></li>
+            <li><a href="#tools">Tools</a></li> <!-- Custom report widget -->
+            <li><a href="#layers">Layers</a></li> <!-- Map widget -->
+            <li><a href="#infobox">Infobox</a></li> <!-- Map widget, Normal record viewer / report popup -->
+            <li><a href="#image_blog">Images/blog</a></li> <!-- Result list widget -->
+            <li><a href="#story">Map</a></li> <!-- Story map widget -->
+            <li><a href="#story_overview">Overview</a></li> <!-- Story map widget, Overview and End page -->
+            <li><a href="#filters">Filters</a></li> <!-- Simple filter widget -->
+            <li><a href="#svs_filters">Saved filters</a></li> <!-- Saved filters widget -->
+            <li><a href="#datatable">Table</a></li> <!-- Datatable widget -->
+            <li><a href="#add_rec">Add record</a></li> <!-- Add record widget -->
+            <li><a href="#nav">Navigation</a></li> <!-- Navigation widget -->
+            <li><a href="#email">Email form</a></li> <!-- Email form widget -->
+            <!--<li><a href="#collect">Collection</a></li> Collection(?) widget [heurist_resultListCollection] -->
+            <li><a href="#texts">Messages</a></li> <!-- Various custom messages, e.g. placeholder and no data -->
+            <li><a href="#connections">Connect</a></li>
         </ul>
 
-        <div id="controls"> <!-- Controlling options; e.g. initial filter, visible widget controls -->
+        <div id="setup"> <!-- Widget settings -->
 
             <fieldset>
 
-                <div class="heurist_resultList heurist_resultListExt heurist_resultListDataTable">
+                <div class="heurist_resultList">
 
                     <div class="header">
-                        <label>Filter to be applied at start</label>
+                        <label>Title above results</label>
                     </div>
 
-                    <input name="search_initial" size="40"/>
+                    <input name="title" value=""/>
 
                 </div>
 
                 <div class="heurist_resultList">
 
                     <div class="header">
-                        <label>Auto select first record:</label>
-                    </div>
-                    
-                    <input type="checkbox" name="auto_select_first"/>
-
-                </div>
-
-                <div class="heurist_resultList">
-
-                    <div class="header">
-                        <label>Click for record view</label>
+                        <label>Show filter name above results&nbsp;</label>
                     </div>
 
-                    <label><input name="recordview_onselect" type="radio" value="inline" checked/>opens inline</label>
-                    <label><input name="recordview_onselect" type="radio" value="popup"/>opens as popup</label><br>
-                    <label><input name="recordview_onselect" type="radio" value="no"/>no action / trigger custom report widget</label>
+                    <input type="checkbox" name="show_inner_header"/>
 
                 </div>
 
@@ -107,13 +106,20 @@
                 <div class="heurist_resultList">
 
                     <div class="header">
-                        <label>Controls and actions</label>
+                        <label>Filter to be applied at start</label>
                     </div>
 
-                    <label>show record count&nbsp;<input type="checkbox" name="show_counter" checked="checked"/></label>&nbsp;&nbsp;
-                    <label>view mode selector&nbsp;<input type="checkbox" name="show_viewmode" checked="checked"/></label><br>
-                    <label>allow collection&nbsp;</label><input name="support_collection" type="checkbox"/>&nbsp;&nbsp;
-                    <label>export button&nbsp;</label><input name="show_export_button" type="checkbox"/>
+                    <input name="search_initial" size="40"/>
+
+                </div>
+
+                <div class="heurist_resultList">
+
+                    <div class="header">
+                        <label>Auto select first record:</label>
+                    </div>
+                    
+                    <input type="checkbox" name="auto_select_first"/>
 
                 </div>
 
@@ -125,6 +131,183 @@
 
                     <label><input name="recordDivClass" type="radio" value=""/>internal style / rollover</label><br>
                     <label><input name="recordDivClass" type="radio" value="public" checked/>public style / always on (limited set)</label>
+
+                </div>
+
+                <div class="heurist_resultList">
+
+                    <div class="header" style="width:210px;">
+                        <label>Set class(es) for record from term value(s) for </label>
+                    </div>
+
+                    <select name="field_for_ext_classes" class="text ui-widget-content ui-corner-all" title="">
+                    </select>
+
+                </div>
+
+                <div class="heurist_resultListExt">
+
+                    <div class="header">
+                        <label>Custom report template&nbsp;</label>
+                    </div>
+
+                    <select name="rep_template" class="text ui-widget-content ui-corner-all" title="">
+                    </select>
+                    <i class="help-text" style="display: inline-block;padding-left: 10px;">Define custom reports using the Custom report tab in Explore</i>
+
+                </div>
+
+                <div class="heurist_resultListExt">
+
+                    <div class="header">
+                        <label>Filter to be applied at start</label>
+                    </div>
+
+                    <input name="search_initial" size="40"/>
+
+                </div>
+
+                <div class="heurist_resultListExt">
+
+                    <div class="header">
+                        <label>Record(s) to show &nbsp;</label>
+                    </div>
+
+                    <input value="show_all" name="selection_mode" type="radio" checked="checked"/>
+                    <i>&nbsp; shows entire recordset</i>
+
+                    <input value="is_multi_selection" name="selection_mode" type="radio"/>
+                    <i>&nbsp; show all selected records only</i>
+
+                    <input value="is_single_selection" name="selection_mode" type="radio"/>
+                    <i>&nbsp; shows a single (most recent) selected record. Use this in place of inline or popup record view</i>
+
+                </div>
+
+                <div class="heurist_resultListExt">
+
+                    <div class="header">
+                        <label>Show all records prior to selection&nbsp;</label>
+                    </div>
+
+                    <input name="init_show_all" type="checkbox" style="margin:0px 0.2em 0px 1.7em;"/>
+
+                </div>
+
+                <div class="heurist_StoryMap">
+
+                    <input name="storyFields" type="hidden" value=""/>
+                    <div id="storyFields" style="display:table-row"></div>
+
+                </div>
+
+                <div class="heurist_StoryMapXXXX">
+
+                    <input name="storyRectypes" type="hidden" value=""/>
+                    <div id="storyRectypes" style="display:table-row"></div>
+
+                </div>
+
+                <div class="heurist_StoryMap">
+
+                    <div class="header">
+                        <label>Story element template&nbsp;</label>
+                    </div>
+
+                    <select name="reportElement" class="text ui-widget-content ui-corner-all" title="">
+                    </select>
+                    <i class="help-text">Defines the format used to display story element information</i>
+
+                </div>
+
+                <div class="heurist_StoryMap">
+
+                    <div class="header">
+                        <label>Order elements by&nbsp;</label>
+                    </div>
+
+                    <select name="elementOrder" class="text ui-widget-content ui-corner-all" title="">
+                    </select>
+                    <i class="help-text">Determines the order of story elements. Use date, year or integer fields to define custom story order</i>        
+
+                </div>
+
+                <div class="heurist_StoryMap">
+
+                    <div class="header">
+                        <label>Story mode:</label>
+                    </div>
+
+                    <select name="reportElementMode" class="text ui-widget-content ui-corner-all" title="" style="margin-right:10px">
+                        <option value="vertical">List Vertical</option>
+                        <option value="slide">Slide</option>
+                        <option value="tabs">Tabs</option>
+                    </select>
+
+                </div>
+
+                <div class="heurist_StoryMap">
+
+                    <div class="header">
+                        <label>Distinct story element:</label>
+                    </div>
+
+                    <select name="reportElementDistinct" class="text ui-widget-content ui-corner-all" title="">
+                        <option value="">None</option>
+                        <option value="unveil">Veil others</option>
+                        <option value="highlight">Highlight</option>
+                    </select>
+
+                </div>
+
+                <div class="heurist_StoryMap">
+
+                    <div class="header">
+                        <label>Slide transition:</label>
+                    </div>
+
+                    <select name="reportElementSlideEffect" class="text ui-widget-content ui-corner-all" title="">
+                        <option value="">Instant</option>
+                        <option value="fade">Fade</option>
+                        <option value="drop">Wipe</option>
+                        <option value="blind">Blind</option>
+                        <option value="clip">Clip</option>
+                        <!-- option value="puff">Puff</option>
+                        <option value="explode">Explode</option -->
+                    </select>
+
+                </div>
+
+                <div class="heurist_StoryMap">
+
+                    <div class="header">
+                        <label>Show print button</label>
+                    </div>
+
+                    <input name="show_print_button" type="checkbox"/>
+
+                    <i>&nbsp; allow users to print the current record set</i>
+
+                </div>
+
+            </fieldset>
+
+        </div>
+
+        <div id="controls"> <!-- Specific control options -->
+
+            <fieldset>
+
+                <div class="heurist_resultList">
+
+                    <div class="header">
+                        <label>Controls and actions</label>
+                    </div>
+
+                    <label>show record count&nbsp;<input type="checkbox" name="show_counter" checked="checked"/></label>&nbsp;&nbsp;
+                    <label>view mode selector&nbsp;<input type="checkbox" name="show_viewmode" checked="checked"/></label><br>
+                    <label>allow collection&nbsp;</label><input name="support_collection" type="checkbox"/>&nbsp;&nbsp;
+                    <label>export button&nbsp;</label><input name="show_export_button" type="checkbox"/>
 
                 </div>
 
@@ -145,144 +328,47 @@
                 <div class="heurist_resultList">
 
                     <div class="header">
-                        <label>Blog Mode:</label>
+                        <label>Click for record view</label>
                     </div>
 
-                    <input type="checkbox" name="blog_result_list"/><br>
-
-                    <span class="heurist-helper1">
-                        (Limits initial display to 10 records, but does not limit display on subsequent selections)
-                    </span>
+                    <label><input name="recordview_onselect" type="radio" value="inline" checked/>opens inline</label>
+                    <label><input name="recordview_onselect" type="radio" value="popup"/>opens as popup</label><br>
+                    <label><input name="recordview_onselect" type="radio" value="no"/>no action / trigger custom report widget</label>
 
                 </div>
 
                 <div class="heurist_resultList">
 
                     <div class="header">
-                        <label>Allow inline content display:</label>
+                        <label>Record view template</label>
                     </div>
 
-                    <input type="checkbox" name="allow_record_content_view"/><br>
-
-                    <span class="heurist-helper1">
-                        Inline content display (all results). Use ONLY if never more than 10 - 20 records in results (intended for monthly blogs)
-                    </span>
+                    <select name="rendererExpandDetails" class="text ui-widget-content ui-corner-all" title="">
+                    </select>
 
                 </div>
 
-                <div class="heurist_SearchInput">
+                <div class="heurist_resultList">
 
                     <div class="header">
-                        <label>Preliminary filter</label>
+                        <label>Show record view in frame</label>
                     </div>
 
-                    <input name="sup_filter" value=""/>
+                    <input name="rendererExpandInFrame" type="checkbox" checked/>
 
                 </div>
-        
-                <div class="heurist_SearchInput">
+
+                <div class="heurist_resultList">
 
                     <div class="header">
-                        <label>Show filter builder button</label>
+                        <label>Private record details</label>
                     </div>
 
-                    <input name="show_search_assistant" type="checkbox" value="false"/>
-
-                </div>
-        
-                <div class="heurist_SearchInput">
-
-                    <div class="header">
-                        <label>Update filter on external search</label>
-                    </div>
-
-                    <input name="update_on_external_search" type="checkbox" />
-
-                </div>
-        
-                <div class="heurist_SearchInput">
-
-                    <div class="header">
-                        <label>Prepend all: to search criteria (searches all fields)</label>
-                    </div>
-
-                    <input name="append_all_to_search" type="checkbox" />
-
-                </div>
-
-                <div class="heurist_SearchTree"  style="padding-top:10px">
-                    <!-- Allowed groups -->
-                    <input name="allowed_UGrpID" type="hidden" value=""/>
-                    <div id="allowed_UGrpID" style="display:table-row"></div>
-
-                </div>
-
-                <div class="heurist_SearchTree">
-                    <!-- Allowed filters -->
-                    <input name="allowed_svsIDs" type="hidden" value=""/>
-                    <div id="allowed_svsIDs" style="display:table-row"></div>
-
-                </div>
-
-                <div class="heurist_SearchTree">
-
-                    <div class="header" style="padding:10px 0.4em">
-                        <label>Display filters as&nbsp;</label>
-                    </div>
-
-                    <label><input id="heurist_SearchTreeMode1" type="radio" name="searchTreeMode" value="0" checked="checked"/>Buttons</label>&nbsp;
-                    <label><input id="heurist_SearchTreeMode2" type="radio" name="searchTreeMode" value="1"/>Tree</label>
-                    <label><input id="heurist_SearchTreeMode3" type="radio" name="searchTreeMode" value="2"/>Complete tree</label>
-
-                </div>
-
-                <div class="heurist_SearchTree">
-                    <!-- Initial filter to trigger -->
-                    <input name="init_svsID" type="hidden" value=""/>
-                    <div id="init_svsID" style="display:table-row"></div>
-
-                </div>
-
-                <div class="heurist_SearchTree">
-
-                    <div id="hide_no_value_facets" class="header" style="padding:10px 0.4em">
-                        <label>List empty facets at end</label>
-                    </div>
-
-                    <input name="hide_no_value_facets" type="checkbox" checked="checked" />
-
-                </div>
-
-                <div class="heurist_SearchTree">
-
-                    <div id="simple_search_allowed" class="header" style="padding:10px 0.4em">
-                        <label>Enable search everything:&nbsp;</label>
-                    </div>
-
-                    <label><input name="simple_search_allowed" type="checkbox" /></label>
-                    <span class="heurist-helper1"> Enable the search everything field </span>
-
-                </div>
-
-                <div class="heurist_SearchTree">
-
-                    <div id="simple_search_header" class="header" style="padding:10px 0.4em">
-                        <label>Search everything header:&nbsp;</label>
-                    </div>
-
-                    <label><input name="simple_search_header" value="" /></label>
-                    <span class="heurist-helper1"> Customise search everything header text<br>If blank: "Simple search"</span>
-
-                </div>
-
-                <div class="heurist_SearchTree">
-
-                    <div id="simple_search_text" class="header" style="padding:10px 0.4em">
-                        <label>Search everything text:&nbsp;</label>
-                    </div>
-
-                    <label><input name="simple_search_text" value="" /></label>
-                    <span class="heurist-helper1"> Customise search everything field text<br>If blank: "Search everything:"</span>
+                    <select name="recview_private_details" class="text ui-widget-content ui-corner-all">
+                        <option value="0"> Hide private details </option>
+                        <option value="1"> Show private details (collapsed) </option>
+                        <option value="2"> Show private details (expanded) </option>
+                    </select>
 
                 </div>
 
@@ -379,72 +465,63 @@
 
                 </div>
 
-                <div class="heurist_StoryMap">
-
-                    <input name="storyFields" type="hidden" value=""/>
-                    <div id="storyFields" style="display:table-row"></div>
-
-                </div>
-
-                <div class="heurist_StoryMapXXXX">
-
-                    <input name="storyRectypes" type="hidden" value=""/>
-                    <div id="storyRectypes" style="display:table-row"></div>
-
-                </div>
-
-                <div class="heurist_StoryMap">
+                <div class="heurist_resultListCollection">
 
                     <div class="header">
-                        <label>Story element template&nbsp;</label>
+                        <label>Action</label>
                     </div>
 
-                    <select name="reportElement" class="text ui-widget-content ui-corner-all" title="">
-                    </select>
-                    <i class="help-text">Defines the format used to display story element information</i>
+                    <label><input id="rsc_Mode1" type="radio" name="action_mode" value="map" checked/>Create Map</label>&nbsp;
+                    <label><input id="rsc_Mode2" type="radio" name="action_mode" value="filter" disabled="disabled"/>Save as filter</label>
 
                 </div>
 
-                <div class="heurist_StoryMap">
+                <div class="heurist_resultListCollection">
 
                     <div class="header">
-                        <label>Order elements by&nbsp;</label>
+                        <label>Target database</label>
                     </div>
 
-                    <select name="elementOrder" class="text ui-widget-content ui-corner-all" title="">
-                    </select>
-                    <i class="help-text">Determines the order of story elements. Use date, year or integer fields to define custom story order</i>        
+                    <input name="target_db" value=""/>
+
+                </div>
+
+            </fieldset>
+
+        </div>
+
+        <div id="tools"> <!-- Tools for custom report widget -->
+
+            <fieldset>
+
+                <div class="heurist_resultListExt">
+
+                    <div class="header">
+                        <label>Show as popup&nbsp;</label>
+                    </div>
+
+                    <input id="is_popup_report" type="checkbox"/>
+                    <i>&nbsp; this widget will be opened as popup window (dimensions will be taken from style)</i>
 
                 </div>
 
                 <div class="heurist_resultListExt">
 
                     <div class="header">
-                        <label>Record(s) to show &nbsp;</label>
+                        <label>Position&nbsp;</label>
                     </div>
 
-                    <input value="show_all" name="selection_mode" type="radio" checked="checked"/>
-                    <i>&nbsp; shows all records in the resultset</i>
-
-                    <input value="is_multi_selection" name="selection_mode" type="radio"/>
-                    <i>&nbsp; show selected records only</i>
-
-                    <input value="is_single_selection" name="selection_mode" type="radio"/>
-                    <i>&nbsp; shows a single (most recent) selected record. Use this in place of inline or popup record view</i>
+                    <select id="popup_report_position">
+                        <option value="">&nbsp;</option>
+                        <option value="left">left</option>
+                        <option value="right">right</option>
+                        <option value="top">top</option>
+                        <option value="bottom">bottom</option>
+                    </select>
 
                 </div>
 
                 <div class="heurist_resultListExt">
-
-                    <div class="header">
-                        <label>Show all records prior to selection&nbsp;</label>
-                    </div>
-
-                    <input name="init_show_all" type="checkbox" style="margin:0px 0.2em 0px 1.7em;"/>
-
-                </div>
-
-                <div class="heurist_resultListExt heurist_StoryMap">
 
                     <div class="header">
                         <label>Show print button</label>
@@ -482,246 +559,11 @@
 
                 </div>
 
-                <div class="heurist_StoryMap">
-
-                    <div class="header">
-                        <label>Story element filter for initial map&nbsp;</label>
-                    </div>
-
-                    <input name="reportOverviewMapFilter" class="text ui-widget-content ui-corner-all" title="" style="width:250px"/>
-                    <i class="help-text" style="padding-bottom: 30px;">Determines the set of story elements on the initial map (rather than showing all stories in the current resultset)</i>
-
-                </div>
-
-                <div class="heurist_resultListDataTable">
-
-                    <div class="header">
-                        <label>Controls and actions</label>
-                    </div>
-
-                    <!-- <label>rectype filter&nbsp;<input type="checkbox" name="show_rt_filter"/></label>&nbsp; -->
-                    <label>show record counter&nbsp;<input type="checkbox" name="show_counter" checked/></label>&nbsp;&nbsp;&nbsp;
-                    <label>enable column config&nbsp;<input type="checkbox" name="show_column_config"/></label>&nbsp;&nbsp;&nbsp;
-                    <label>enable find&nbsp;<input type="checkbox" name="show_search"/></label>
-
-                </div>
-
-                <div class="heurist_resultListDataTable">
-
-                    <div class="header" style="vertical-align:top">
-                        <label>Data table parameters (advanced)</label>
-                    </div>
-
-                    <textarea id="dataTableParams" rows="10" style="width:500px"/>
-
-                </div>
-
-                <div class="heurist_resultListCollection">
-
-                    <div class="header">
-                        <label>Action</label>
-                    </div>
-
-                    <label><input id="rsc_Mode1" type="radio" name="action_mode" value="map" checked/>Create Map</label>&nbsp;
-                    <label><input id="rsc_Mode2" type="radio" name="action_mode" value="filter" disabled="disabled"/>Save as filter</label>
-
-                </div>
-
-                <div class="heurist_resultListCollection">
-
-                    <div class="header">
-                        <label>Target database</label>
-                    </div>
-
-                    <input name="target_db" value=""/>
-
-                </div>
-
-                <div class="heurist_recordAddButton">
-
-                    <div class="header">
-                        <label>Select record type</label>
-                    </div>
-
-                    <button name="add_record_cfg">Config</button>
-                    <span id="add_record_desc" style="font-size: 0.9em;"></span>
-                    <input name="RecTypeID" type="hidden"/>
-                    <input name="OwnerUGrpID" type="hidden"/>
-                    <input name="NonOwnerVisibility" type="hidden"/>
-
-                </div>
-
-                <div class="heurist_emailForm">
-
-                    <div class="header">
-                        <label>Show form as&nbsp;</label>
-                    </div>
-
-                    <label><input name="isdialog" type="radio" value="1" checked/>Popup</label>
-                    <label><input name="isdialog" type="radio" value="0"/>Inline</label>
-
-                </div>
-
             </fieldset>
 
         </div>
-        <div id="texts"> <!-- Usually messages, general colouring and sizing, or anything that doesn't fit another category -->
 
-            <fieldset>
-
-                <div class="heurist_resultList">
-
-                    <div class="header">
-                        <label>Title above results</label>
-                    </div>
-
-                    <input name="title" value=""/>
-
-                </div>
-
-                <div class="heurist_resultList">
-
-                    <div class="header">
-                        <label>Show filter name above results&nbsp;</label>
-                    </div>
-
-                    <input type="checkbox" name="show_inner_header"/>
-
-                </div>
-
-                <div class="heurist_SearchInput">
-
-                    <input name="btn_entity_filter" type="hidden" value="false"/>
-                    <input name="menu_entity_filter" type="hidden" value="false"/>
-                    <input name="isloginforced" type="hidden" value="false"/>
-
-                    <div class="header">
-                        <label>Filter button label</label>
-                    </div>
-
-                    <input name="search_button_label" value=""/><br>
-
-                    <span class="heurist-helper1" style="padding-left: 10px;">If blank, the button will only have an icon</span>
-
-                </div>    
-        
-                <div class="heurist_SearchInput">
-
-                    <div class="header">
-                        <label>Label preceding filter field</label>
-                    </div>
-
-                    <input name="search_input_label" value=""/><br>
-
-                    <span class="heurist-helper1" style="padding-left: 10px;">If blank, the label will be omitted</span>
-
-                </div>
-
-                <div class="heurist_SearchInput heurist_resultList heurist_resultListExt heurist_resultListDataTable heurist_StoryMap">
-
-                    <div class="header">
-                        <label>Message prior to selection</label>
-                    </div>
-
-                    <label><input type="checkbox" name="blank_placeholder"> check to leave blank</label>,
-                    otherwise defaults to <br>
-                    "<span id="placeholder_def" class="truncate" style="width: 250px;max-width: 250px;line-height: 8px;display: inline-block;cursor: default;"></span>"
-
-                    <br>
-                    <textarea id="placeholder_text" rows="3" cols="45"/>
-                    <br>
-
-                    <span class="heurist-helper1" style="display: inline-block;line-height: 12px;padding-bottom: 10px;">
-                        Message to display while search is not performed or no record or search has been selected
-                    </span>
-
-                </div>
-        
-                <div class="heurist_resultList heurist_resultListExt heurist_resultListDataTable">
-
-                    <div class="header">
-                        <label>No data message</label>
-                    </div>
-
-                    <label><input type="checkbox" name="blank_empty_remark"> check to leave blank</label>,
-                    otherwise defaults to <br>
-                    "<span id="empty_remark_def" class="truncate" style="width: 250px;max-width: 250px;line-height: 8px;display: inline-block;cursor: default;"></span>"
-
-                    <br>
-                    <textarea id="empty_remark" rows="3" cols="45"/>
-                    <br>
-
-                    <span class="heurist-helper1" style="display: inline-block;line-height: 12px;padding-bottom: 10px;">
-                        Message to be shown if query returns no records
-                    </span>
-
-                </div>
-        
-                <div class="heurist_StoryMap">
-
-                    <div class="header">
-                        <label>Message if no story elements</label>
-                    </div>
-
-                    <label><input type="checkbox" name="blank_elementsPlaceholder"> check to leave blank</label>,
-                    otherwise defaults to <br>
-                    "<span id="elementsPlaceholder_def" class="truncate" style="width: 250px;max-width: 250px;line-height: 8px;display: inline-block;cursor: default;"></span>"
-
-                    <br>
-                    <textarea id="elementsPlaceholder" rows="3" cols="45"/>
-                    <br>
-
-                    <span class="heurist-helper1" style="display: inline-block;line-height: 12px;padding-bottom: 10px;">
-                        Message to be shown if query returns no records
-                    </span>
-
-                </div>
-                
-                <div class="heurist_StoryMap">
-
-                    <div class="header">
-                        <label>Sub-message in smaller font</label>
-                    </div>
-
-                    <input name="elementsPlaceholderSub" size="45"/>
-
-                </div>
-        
-                <div class="heurist_resultList">
-
-                    <div class="header" style="width:210px;">
-                        <label>Set class(es) for record from term value(s) for </label>
-                    </div>
-
-                    <select name="field_for_ext_classes" class="text ui-widget-content ui-corner-all" title="">
-                    </select>
-
-                </div>
-
-                <div class="heurist_resultListCollection">
-
-                    <div class="header">
-                        <label>Instructions</label>
-                    </div>
-        
-                    <input name="instructionText" value="Please search for the map document" size="60"/>
-        
-                </div>
-
-                <div class="heurist_recordAddButton">
-
-                    <div class="header">
-                        <label>Button label</label>
-                    </div>
-
-                    <input name="add_record_label" value=""/>
-
-                </div>
-
-            </fieldset>
-
-        </div>
-        <div id="layers"> <!-- Maps related -->
+        <div id="layers"> <!-- Maps widget -->
 
             <fieldset>
 
@@ -832,132 +674,13 @@
 
                 </div>
 
-                <div class="heurist_Navigation">
-
-                    <div class="header">
-                        <label>Orientation&nbsp;</label>
-                    </div>
-
-                    <select name="orientation" class="text ui-widget-content ui-corner-all" title="">
-                        <option value="horizontal">horizontal</option>
-                        <option value="vertical">vertical</option>
-                        <option value="treeview">treeview</option>
-                    </select>
-
-                </div>
-
-                <div class="heurist_Navigation">
-
-                    <input name="menu_recIDs" type="hidden" value=""/>
-                    <div id="menu_recIDs" style="display:table-row"></div>
-
-                </div>
-
-                <div class="heurist_Navigation" id="expandLevels">
-
-                    <div class="header">
-                        <label>On loading&nbsp;</label>
-                    </div>
-
-                    <label><input name="expand_levels" type="radio" value="0" checked/>Show first level only</label>
-                    <label><input name="expand_levels" type="radio" value="1"/>Open second level</label>
-                    <label><input name="expand_levels" type="radio" value="2"/>Open all levels</label>
-
-                </div>
-
-                <div class="heurist_Navigation">
-
-                    <div class="header">
-                        <label>Open&nbsp;</label>
-                    </div>
-
-                    <select name="target" class="text ui-widget-content ui-corner-all" title="">
-                        <option value="inline">inline (uses field "Target element")</option>
-                        <option value="inline_page_content">inline (into div id="page-content")</option>
-                        <option value="popup">in popup</option>
-                    </select>
-
-                </div>
-
             </fieldset>
 
         </div>
+
         <div id="infobox"> <!-- Record / Report popup -->
 
             <fieldset>
-
-                <div class="heurist_resultList">
-
-                    <div class="header">
-                        <label>Record view template</label>
-                    </div>
-
-                    <select name="rendererExpandDetails" class="text ui-widget-content ui-corner-all" title="">
-                    </select>
-
-                </div>
-
-                <div class="heurist_resultList">
-
-                    <div class="header">
-                        <label>Show record view in frame</label>
-                    </div>
-
-                    <input name="rendererExpandInFrame" type="checkbox" checked/>
-
-                </div>
-        
-                <div class="heurist_resultList">
-
-                    <div class="header">
-                        <label>Show images in record viewer</label>
-                    </div>
-
-                    <label><input name="recviewer_images" type="radio" value="0" /> Show all images</label>
-                    <label><input name="recviewer_images" type="radio" value="1" checked="checked"/> Hide linked media</label>
-                    <label><input name="recviewer_images" type="radio" value="2" /> Hide all images</label>
-
-                </div>
-
-                <div class="heurist_resultList">
-
-                    <div class="header">
-                        <label>Private record details</label>
-                    </div>
-
-                    <select name="recview_private_details" class="text ui-widget-content ui-corner-all">
-                        <option value="0"> Hide private details </option>
-                        <option value="1"> Show private details (collapsed) </option>
-                        <option value="2"> Show private details (expanded) </option>
-                    </select>
-
-                </div>
-        
-                <div class="heurist_resultList">
-
-                    <div class="header">
-                        <label>Popup dimensions: </label>
-                    </div>
-
-                    <label>&nbsp;&nbsp;&nbsp;<span id="pw_label">Width:</span> <input name="dialog_width" maxlength="3" size="3" value="300"></label>&nbsp;
-                    <select name="dialog_hunit"><option value="px">px</option><option value="%">%</option></select>
-                    <label>&nbsp;<span id="ph_label">Height:</span> <input name="dialog_height" maxlength="3" size="3" value="400"></label>&nbsp;
-                    <select name="dialog_wunit"><option value="px">px</option><option value="%">%</option></select>
-
-                </div>
-
-                <div class="heurist_resultList">
-
-                    <div class="header">
-                        <label>Popup position: </label>
-                    </div>
-
-                    <label>&nbsp;&nbsp;&nbsp;<span id="pt_label">Top:</span> <input name="dialog_top" maxlength="3" size="3" value="300"></label>&nbsp;
-                    <select name="dialog_tunit"><option value="px">px</option><option value="%">%</option></select>
-                    <label>&nbsp;<span id="pl_label">Left:</span> <input name="dialog_left" maxlength="3" size="3" value="400"></label>&nbsp;
-                    <select name="dialog_lunit"><option value="px">px</option><option value="%">%</option></select>
-
-                </div>
 
                 <div class="heurist_Map">
 
@@ -1008,48 +731,84 @@
 
                 </div>
 
-                <div class="heurist_resultListExt">
+            </fieldset>
+
+        </div>
+
+        <div id="image_blog"> <!-- Result list image and blog controls -->
+
+            <fieldset>
+
+                <div class="heurist_resultList">
 
                     <div class="header">
-                        <label>Custom report template&nbsp;</label>
+                        <label>Show images in record viewer</label>
                     </div>
 
-                    <select name="rep_template" class="text ui-widget-content ui-corner-all" title="">
-                    </select>
-                    <i class="help-text" style="display: inline-block;padding-left: 10px;">Define custom reports using the Custom report tab in Explore</i>
+                    <label><input name="recviewer_images" type="radio" value="0" /> Show all images</label>
+                    <label><input name="recviewer_images" type="radio" value="1" checked="checked"/> Hide linked media</label>
+                    <label><input name="recviewer_images" type="radio" value="2" /> Hide all images</label>
+
+                </div>
+        
+                <div class="heurist_resultList">
+
+                    <div class="header">
+                        <label>Popup dimensions: </label>
+                    </div>
+
+                    <label>&nbsp;&nbsp;&nbsp;<span id="pw_label">Width:</span> <input name="dialog_width" maxlength="3" size="3" value="300"></label>&nbsp;
+                    <select name="dialog_hunit"><option value="px">px</option><option value="%">%</option></select>
+                    <label>&nbsp;<span id="ph_label">Height:</span> <input name="dialog_height" maxlength="3" size="3" value="400"></label>&nbsp;
+                    <select name="dialog_wunit"><option value="px">px</option><option value="%">%</option></select>
 
                 </div>
 
-                <div class="heurist_resultListExt">
+                <div class="heurist_resultList">
 
                     <div class="header">
-                        <label>Show as popup&nbsp;</label>
+                        <label>Popup position: </label>
                     </div>
 
-                    <input id="is_popup_report" type="checkbox"/>
-                    <i>&nbsp; this widget will be opened as popup window (dimensions will be taken from style)</i>
+                    <label>&nbsp;&nbsp;&nbsp;<span id="pt_label">Top:</span> <input name="dialog_top" maxlength="3" size="3" value="300"></label>&nbsp;
+                    <select name="dialog_tunit"><option value="px">px</option><option value="%">%</option></select>
+                    <label>&nbsp;<span id="pl_label">Left:</span> <input name="dialog_left" maxlength="3" size="3" value="400"></label>&nbsp;
+                    <select name="dialog_lunit"><option value="px">px</option><option value="%">%</option></select>
 
                 </div>
 
-                <div class="heurist_resultListExt">
+                <div class="heurist_resultList">
 
                     <div class="header">
-                        <label>Position&nbsp;</label>
+                        <label>Allow inline content display:</label>
                     </div>
 
-                    <select id="popup_report_position">
-                        <option value="">&nbsp;</option>
-                        <option value="left">left</option>
-                        <option value="right">right</option>
-                        <option value="top">top</option>
-                        <option value="bottom">bottom</option>
-                    </select>
+                    <input type="checkbox" name="allow_record_content_view"/><br>
+
+                    <span class="heurist-helper1">
+                        Inline content display (all results). Use ONLY if never more than 10 - 20 records in results (intended for monthly blogs)
+                    </span>
+
+                </div>
+
+                <div class="heurist_resultList">
+
+                    <div class="header">
+                        <label>Blog Mode:</label>
+                    </div>
+
+                    <input type="checkbox" name="blog_result_list"/><br>
+
+                    <span class="heurist-helper1">
+                        (Limits initial display to 10 records, but does not limit display on subsequent selections)
+                    </span>
 
                 </div>
 
             </fieldset>
 
         </div>
+
         <div id="story"> <!-- Story map -->
 
             <fieldset>
@@ -1057,56 +816,11 @@
                 <div class="heurist_StoryMap">
 
                     <div class="header">
-                        <label>Story mode:</label>
+                        <label>Story element filter for initial map&nbsp;</label>
                     </div>
 
-                    <select name="reportElementMode" class="text ui-widget-content ui-corner-all" title="" style="margin-right:10px">
-                        <option value="vertical">List Vertical</option>
-                        <option value="slide">Slide</option>
-                        <option value="tabs">Tabs</option>
-                    </select>
-
-                </div>
-
-                <div class="heurist_StoryMap">
-
-                    <div class="header">
-                        <label>Distinct story element:</label>
-                    </div>
-
-                    <select name="reportElementDistinct" class="text ui-widget-content ui-corner-all" title="">
-                        <option value="">None</option>
-                        <option value="unveil">Veil others</option>
-                        <option value="highlight">Highlight</option>
-                    </select>
-
-                </div>
-
-                <div class="heurist_StoryMap">
-
-                    <div class="header">
-                        <label>Slide transition:</label>
-                    </div>
-
-                    <select name="reportElementSlideEffect" class="text ui-widget-content ui-corner-all" title="">
-                        <option value="">Instant</option>
-                        <option value="fade">Fade</option>
-                        <option value="drop">Wipe</option>
-                        <option value="blind">Blind</option>
-                        <option value="clip">Clip</option>
-                        <!-- option value="puff">Puff</option>
-                        <option value="explode">Explode</option -->
-                    </select>
-
-                </div>
-
-                <div class="heurist_StoryMap">
-
-                    <div class="header">
-                        <label>Duration for zoom on map:</label>
-                    </div>
-
-                    <input name="zoomAnimationTime" class="text ui-widget-content ui-corner-all" width="60px" min="0" max="20000" step="100" title="" type="number" placeholder="5000"/>
+                    <input name="reportOverviewMapFilter" class="text ui-widget-content ui-corner-all" title="" style="width:250px"/>
+                    <i class="help-text" style="padding-bottom: 30px;">Determines the set of story elements on the initial map (rather than showing all stories in the current resultset)</i>
 
                 </div>
 
@@ -1131,6 +845,24 @@
                     </span>
 
                 </div>
+
+                <div class="heurist_StoryMap">
+
+                    <div class="header">
+                        <label>Duration for zoom on map:</label>
+                    </div>
+
+                    <input name="zoomAnimationTime" class="text ui-widget-content ui-corner-all" width="60px" min="0" max="20000" step="100" title="" type="number" placeholder="5000"/>
+
+                </div>
+
+            </fieldset>
+
+        </div>
+
+        <div id="story_overview"> <!-- Story map, overview and end page -->
+
+            <fieldset>
 
                 <div class="heurist_StoryMap">
 
@@ -1191,7 +923,445 @@
             </fieldset>
 
         </div>
-        <div id="connections"> <!-- General widget details; i.e. Search group, linked map, widget id -->
+
+        <div id="filters"> <!-- Simple filter widget -->
+
+            <fieldset>
+
+                <div class="heurist_SearchInput">
+
+                    <input name="btn_entity_filter" type="hidden" value="false"/>
+                    <input name="menu_entity_filter" type="hidden" value="false"/>
+                    <input name="isloginforced" type="hidden" value="false"/>
+
+                    <div class="header">
+                        <label>Filter button label</label>
+                    </div>
+
+                    <input name="search_button_label" value=""/><br>
+
+                    <span class="heurist-helper1" style="padding-left: 10px;">If blank, the button will only have an icon</span>
+
+                </div>    
+        
+                <div class="heurist_SearchInput">
+
+                    <div class="header">
+                        <label>Label preceding filter field</label>
+                    </div>
+
+                    <input name="search_input_label" value=""/><br>
+
+                    <span class="heurist-helper1" style="padding-left: 10px;">If blank, the label will be omitted</span>
+
+                </div>
+
+                <div class="heurist_SearchInput">
+
+                    <div class="header">
+                        <label>Preliminary filter</label>
+                    </div>
+
+                    <input name="sup_filter" value=""/>
+
+                </div>
+
+                <div class="heurist_SearchInput">
+
+                    <div class="header">
+                        <label>Preliminary filter</label>
+                    </div>
+
+                    <input name="sup_filter" value=""/>
+
+                </div>
+
+                <div class="heurist_SearchInput">
+
+                    <div class="header">
+                        <label>Show filter builder button</label>
+                    </div>
+
+                    <input name="show_search_assistant" type="checkbox" value="false"/>
+
+                </div>
+        
+                <div class="heurist_SearchInput">
+
+                    <div class="header">
+                        <label>Update filter on external search</label>
+                    </div>
+
+                    <input name="update_on_external_search" type="checkbox" />
+
+                </div>
+        
+                <div class="heurist_SearchInput">
+
+                    <div class="header">
+                        <label>Prepend all: to search criteria (searches all fields)</label>
+                    </div>
+
+                    <input name="append_all_to_search" type="checkbox" />
+
+                </div>
+
+                <div class="heurist_SearchInput">
+
+                    <div class="header">
+                        <label>Message prior to selection</label>
+                    </div>
+
+                    <label><input type="checkbox" name="blank_placeholder"> check to leave blank</label>,
+                    otherwise defaults to <br>
+                    "<span id="placeholder_def" class="truncate" style="width: 250px;max-width: 250px;line-height: 8px;display: inline-block;cursor: default;"></span>"
+
+                    <br>
+                    <textarea id="placeholder_text" rows="3" cols="45"/>
+                    <br>
+
+                    <span class="heurist-helper1" style="display: inline-block;line-height: 12px;padding-bottom: 10px;">
+                        Message to display while search is not performed or no record or search has been selected
+                    </span>
+
+                </div>
+
+            </fieldset>
+
+        </div>
+
+        <div id="svs_filters"> <!-- Saved filters widget -->
+
+            <fieldset>
+
+                <div class="heurist_SearchTree"  style="padding-top:10px">
+                    <!-- Allowed groups -->
+                    <input name="allowed_UGrpID" type="hidden" value=""/>
+                    <div id="allowed_UGrpID" style="display:table-row"></div>
+
+                </div>
+
+                <div class="heurist_SearchTree">
+                    <!-- Allowed filters -->
+                    <input name="allowed_svsIDs" type="hidden" value=""/>
+                    <div id="allowed_svsIDs" style="display:table-row"></div>
+
+                </div>
+
+                <div class="heurist_SearchTree">
+
+                    <div class="header" style="padding:10px 0.4em">
+                        <label>Display filters as&nbsp;</label>
+                    </div>
+
+                    <label><input id="heurist_SearchTreeMode1" type="radio" name="searchTreeMode" value="0" checked="checked"/>Buttons</label>&nbsp;
+                    <label><input id="heurist_SearchTreeMode2" type="radio" name="searchTreeMode" value="1"/>Tree</label>
+                    <label><input id="heurist_SearchTreeMode3" type="radio" name="searchTreeMode" value="2"/>Complete tree</label>
+
+                </div>
+
+                <div class="heurist_SearchTree">
+                    <!-- Initial filter to trigger -->
+                    <input name="init_svsID" type="hidden" value=""/>
+                    <div id="init_svsID" style="display:table-row"></div>
+
+                </div>
+
+                <div class="heurist_SearchTree">
+
+                    <div id="hide_no_value_facets" class="header" style="padding:10px 0.4em">
+                        <label>List empty facets at end</label>
+                    </div>
+
+                    <input name="hide_no_value_facets" type="checkbox" checked="checked" />
+
+                </div>
+
+                <div class="heurist_SearchTree">
+
+                    <div id="simple_search_allowed" class="header" style="padding:10px 0.4em">
+                        <label>Enable search everything:&nbsp;</label>
+                    </div>
+
+                    <label><input name="simple_search_allowed" type="checkbox" /></label>
+                    <span class="heurist-helper1"> Enable the search everything field </span>
+
+                </div>
+
+                <div class="heurist_SearchTree">
+
+                    <div id="simple_search_header" class="header" style="padding:10px 0.4em">
+                        <label>Search everything header:&nbsp;</label>
+                    </div>
+
+                    <label><input name="simple_search_header" value="" /></label>
+                    <span class="heurist-helper1"> Customise search everything header text<br>If blank: "Simple search"</span>
+
+                </div>
+
+                <div class="heurist_SearchTree">
+
+                    <div id="simple_search_text" class="header" style="padding:10px 0.4em">
+                        <label>Search everything text:&nbsp;</label>
+                    </div>
+
+                    <label><input name="simple_search_text" value="" /></label>
+                    <span class="heurist-helper1"> Customise search everything field text<br>If blank: "Search everything:"</span>
+
+                </div>
+
+            </fieldset>
+
+        </div>
+
+        <div id="datatable"> <!-- Data tables widgets -->
+
+            <fieldset>
+
+                <div class="heurist_resultListDataTable">
+
+                    <div class="header">
+                        <label>Controls and actions</label>
+                    </div>
+
+                    <!-- <label>rectype filter&nbsp;<input type="checkbox" name="show_rt_filter"/></label>&nbsp; -->
+                    <label>show record counter&nbsp;<input type="checkbox" name="show_counter" checked/></label>&nbsp;&nbsp;&nbsp;
+                    <label>enable column config&nbsp;<input type="checkbox" name="show_column_config"/></label>&nbsp;&nbsp;&nbsp;
+                    <label>enable find&nbsp;<input type="checkbox" name="show_search"/></label>
+
+                </div>
+
+                <div class="heurist_resultListDataTable">
+
+                    <div class="header">
+                        <label>Filter to be applied at start</label>
+                    </div>
+
+                    <input name="search_initial" size="40"/>
+
+                </div>
+
+                <div class="heurist_resultListDataTable">
+
+                    <div class="header" style="vertical-align:top">
+                        <label>Data table parameters (advanced)</label>
+                    </div>
+
+                    <textarea id="dataTableParams" rows="10" style="width:500px"/>
+
+                </div>
+
+            </fieldset>
+
+        </div>
+
+        <div id="add_rec"> <!-- Add record widget -->
+            
+            <fieldset>
+
+                <div class="heurist_recordAddButton">
+
+                    <div class="header">
+                        <label>Select record type</label>
+                    </div>
+
+                    <button name="add_record_cfg">Config</button>
+                    <span id="add_record_desc" style="font-size: 0.9em;"></span>
+                    <input name="RecTypeID" type="hidden"/>
+                    <input name="OwnerUGrpID" type="hidden"/>
+                    <input name="NonOwnerVisibility" type="hidden"/>
+
+                </div>
+
+                <div class="heurist_recordAddButton">
+
+                    <div class="header">
+                        <label>Button label</label>
+                    </div>
+
+                    <input name="add_record_label" value=""/>
+
+                </div>
+
+            </fieldset>
+
+        </div>
+
+
+        <div id="nav"> <!-- Navigation widget -->
+
+            <fieldset>
+
+                <div class="heurist_Navigation">
+
+                    <div class="header">
+                        <label>Orientation&nbsp;</label>
+                    </div>
+
+                    <select name="orientation" class="text ui-widget-content ui-corner-all" title="">
+                        <option value="horizontal">horizontal</option>
+                        <option value="vertical">vertical</option>
+                        <option value="treeview">treeview</option>
+                    </select>
+
+                </div>
+
+                <div class="heurist_Navigation">
+
+                    <input name="menu_recIDs" type="hidden" value=""/>
+                    <div id="menu_recIDs" style="display:table-row"></div>
+
+                </div>
+
+                <div class="heurist_Navigation" id="expandLevels">
+
+                    <div class="header">
+                        <label>On loading&nbsp;</label>
+                    </div>
+
+                    <label><input name="expand_levels" type="radio" value="0" checked/>Show first level only</label>
+                    <label><input name="expand_levels" type="radio" value="1"/>Open second level</label>
+                    <label><input name="expand_levels" type="radio" value="2"/>Open all levels</label>
+
+                </div>
+
+                <div class="heurist_Navigation">
+
+                    <div class="header">
+                        <label>Open&nbsp;</label>
+                    </div>
+
+                    <select name="target" class="text ui-widget-content ui-corner-all" title="">
+                        <option value="inline">inline (uses field "Target element")</option>
+                        <option value="inline_page_content">inline (into div id="page-content")</option>
+                        <option value="popup">in popup</option>
+                    </select>
+
+                </div>
+
+            </fieldset>
+
+        </div>
+
+        <div id="email"> <!-- Email form widget -->
+
+            <fieldset>
+
+                <div class="heurist_emailForm">
+
+                    <div class="header">
+                        <label>Show form as&nbsp;</label>
+                    </div>
+
+                    <label><input name="isdialog" type="radio" value="1" checked/>Popup</label>
+                    <label><input name="isdialog" type="radio" value="0"/>Inline</label>
+
+                </div>
+
+                <div class="heurist_emailForm">
+
+                    <div class="header">
+                        <label>Form ID</label>
+                    </div>
+                    
+                    <div>
+                        <input name="element_id" value=""/>
+                        <div class="heurist-helper3">Specify html ID of your email form. Otherwise it will use predefined form</div>
+                    </div>
+
+                </div>
+
+            </fieldset>
+
+        </div>
+        <div id="texts"> <!-- Messages -->
+
+            <fieldset>
+
+                <div class="heurist_resultList heurist_resultListExt heurist_resultListDataTable heurist_StoryMap">
+
+                    <div class="header">
+                        <label>Message prior to selection</label>
+                    </div>
+
+                    <label><input type="checkbox" name="blank_placeholder"> check to leave blank</label>,
+                    otherwise defaults to <br>
+                    "<span id="placeholder_def" class="truncate" style="width: 250px;max-width: 250px;line-height: 8px;display: inline-block;cursor: default;"></span>"
+
+                    <br>
+                    <textarea id="placeholder_text" rows="3" cols="45"/>
+                    <br>
+
+                    <span class="heurist-helper1" style="display: inline-block;line-height: 12px;padding-bottom: 10px;">
+                        Message to display while search is not performed or no record or search has been selected
+                    </span>
+
+                </div>
+        
+                <div class="heurist_resultList heurist_resultListExt heurist_resultListDataTable">
+
+                    <div class="header">
+                        <label>No data message</label>
+                    </div>
+
+                    <label><input type="checkbox" name="blank_empty_remark"> check to leave blank</label>,
+                    otherwise defaults to <br>
+                    "<span id="empty_remark_def" class="truncate" style="width: 250px;max-width: 250px;line-height: 8px;display: inline-block;cursor: default;"></span>"
+
+                    <br>
+                    <textarea id="empty_remark" rows="3" cols="45"/>
+                    <br>
+
+                    <span class="heurist-helper1" style="display: inline-block;line-height: 12px;padding-bottom: 10px;">
+                        Message to be shown if query returns no records
+                    </span>
+
+                </div>
+        
+                <div class="heurist_StoryMap">
+
+                    <div class="header">
+                        <label>Message if no story elements</label>
+                    </div>
+
+                    <label><input type="checkbox" name="blank_elementsPlaceholder"> check to leave blank</label>,
+                    otherwise defaults to <br>
+                    "<span id="elementsPlaceholder_def" class="truncate" style="width: 250px;max-width: 250px;line-height: 8px;display: inline-block;cursor: default;"></span>"
+
+                    <br>
+                    <textarea id="elementsPlaceholder" rows="3" cols="45"/>
+                    <br>
+
+                    <span class="heurist-helper1" style="display: inline-block;line-height: 12px;padding-bottom: 10px;">
+                        Message to be shown if query returns no records
+                    </span>
+
+                </div>
+                
+                <div class="heurist_StoryMap">
+
+                    <div class="header">
+                        <label>Sub-message in smaller font</label>
+                    </div>
+
+                    <input name="elementsPlaceholderSub" size="45"/>
+
+                </div>
+
+                <div class="heurist_resultListCollection">
+
+                    <div class="header">
+                        <label>Instructions</label>
+                    </div>
+        
+                    <input name="instructionText" value="Please search for the map document" size="60"/>
+        
+                </div>
+
+            </fieldset>
+
+        </div>
+        <div id="connections"> <!-- General widget details; i.e. Search group id, linked map, widget id -->
 
             <fieldset>
 
@@ -1221,19 +1391,6 @@
                     <div class="header"><label>Search group&nbsp;</label></div>
                     <input name="search_realm"  value="sr1"/>
                     <i class="help-text">Arbitrary identifier for a group of widgets which share search and select events</i>
-                </div>
-
-                <div class="heurist_emailForm">
-
-                    <div class="header">
-                        <label>Form ID</label>
-                    </div>
-                    
-                    <div>
-                        <input name="element_id" value=""/>
-                        <div class="heurist-helper3">Specify html ID of your email form. Otherwise it will use predefined form</div>
-                    </div>
-
                 </div>
                 
                 <div>
