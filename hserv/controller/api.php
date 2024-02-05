@@ -41,6 +41,7 @@ $entities = array(
 'fields'=>'DefDetailTypes',
 'rectypegroups'=>'DefRecTypeGroups',
 'rectypes'=>'DefRecTypes',
+'terms'=>'DefTerms',
 'reminders'=>'DbUsrReminders',
 'users'=>'SysUsers',
 'groups'=>'SysGroups',
@@ -145,7 +146,7 @@ if (@$requestUri[3]=='iiif') {
     }
     
     
-}else if ($entities[@$requestUri[3]]=='System') {
+}else if (@$entities[@$requestUri[3]]=='System') {
     
     include_once '../System.php';
     
@@ -177,7 +178,7 @@ if (@$requestUri[3]=='iiif') {
 else
 {
     //action
-    $_REQUEST['entity'] = $entities[@$requestUri[3]];
+    $_REQUEST['entity'] = @$entities[@$requestUri[3]];
     $_REQUEST['a'] = $method;
     $_REQUEST['restapi'] = 1; //set http response code
 

@@ -469,9 +469,6 @@ class systemEmailExt {
 			$records_arr = array();
 			$lastmod_arr = array();
 
-			$db_listed;
-			$db_url_listed;
-
 			$dbs = $details["db_list"];
 
 			// Convert information into arrays and get DB urls

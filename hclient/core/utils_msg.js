@@ -620,7 +620,7 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
             }
 
             $dosframe = $( "<iframe>").attr('parent-dlg-id', $dlg.attr('id'))
-            .css({overflow: 'none !important', width:'100% !important'}).appendTo( $dlg );
+            .css({border:'2px solid green', overflow: 'none !important', width:'100% !important'}).appendTo( $dlg );
             
             if(options['allowfullscreen']){
                 $dosframe.attr('allowfullscreen',true);
@@ -629,24 +629,8 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
                 
                 //$dosframe.css({position:'fixed', top:'0px', left:'0px'});
             }
-            
-            $dosframe.hide();
-            /*
-            //on close event listener - invoke callback function if defined
-            $dosframe[0].close = function() {
-            var rval = true;
-            var closeCallback = options['callback'];
-            if(closeCallback){
-            rval = closeCallback.apply(opener, arguments);
-            }
-            if ( !rval  &&  rval !== undefined){
-            return false;
-            }
 
-            $dlg.dialog('close');
-            return true;
-            };
-            */
+            $dosframe.hide();
             //callback function to resize dialog from internal frame functions
             $dosframe[0].doDialogResize = function(width, height) {
                 //window.hWin.HEURIST4.msg.showMsgDlg('resize to '+width+','+height);
@@ -663,7 +647,6 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
 
             //on load content event listener
             $dosframe.on('load', function(){
-
                 if(window.hWin.HEURIST4.util.isempty($dosframe.attr('src'))){
                     return;
                 }
@@ -1001,9 +984,10 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
                 $container.children('.ui-helper-popup').hide();
             }
                 
-
+            if(navigator.userAgent.indexOf('Firefox')<0){            
+                $dosframe.hide();
+            }
             
-            $dosframe.hide();
             frame_container.addClass('loading');
             
             //callback function to resize dialog from internal iframe functions

@@ -187,7 +187,7 @@ function preventMenu(event) {
 
 function closeRectypeSelector(){     
     if(settings.isDatabaseStructure){
-        $($('body.popup div.ent_wrapper')[0]).layout().close('west');
+        $($('body.popup div.layout-container')[0]).layout().close('west');
     }
 }
 

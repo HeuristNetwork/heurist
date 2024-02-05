@@ -465,8 +465,7 @@ function initRecTypeSelector(){
         }
     };
 
-
-    var layout = $($('body.popup div.ent_wrapper')[0]).layout(layout_options);
+    var layout = $($('body.popup div.layout-container')[0]).layout(layout_options);
     
     if(!hidePane){ // initClosed option is inconsistent
         setTimeout(function(){

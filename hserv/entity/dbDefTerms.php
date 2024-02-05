@@ -126,7 +126,7 @@ class DbDefTerms extends DbEntityBase
         
             $this->data['details'] = 'trm_ID';
             
-        }else if(@$this->data['details']=='name'){
+        }else if($this->data['details']==null || @$this->data['details']=='name'){
 
             $this->data['details'] = 'trm_ID,trm_Label';
             

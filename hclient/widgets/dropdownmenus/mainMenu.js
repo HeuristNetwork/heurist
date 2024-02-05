@@ -1298,6 +1298,12 @@ $.widget( "heurist.mainMenu", {
             that._showAdminServer({entered_password:entered_password});
         }else if(action == "menu-help-quick-tips"){
             $('.ui-menu6').mainMenu6('showQuickTips');
+        }else if(action == "menu-manage-rectitles"){
+
+            let dlg_options = $.extend(popup_dialog_options, {});
+            dlg_options['title'] = item.attr('data-header') ? item.attr('data-header') : 'Rebuild record titles';
+
+            that._rebuildRecordTitles(dlg_options);
         }else
         if(!window.hWin.HEURIST4.util.isempty(href) && href!='#'){
             
@@ -2679,5 +2685,105 @@ $.widget( "heurist.mainMenu", {
                 return;
             }
         });
+    },
+
+    /**
+     * Popup to select record types to be rebuilt, or rebuild all
+     * 
+     * @param popup_options - popup/dialog options from menuActionHandler
+     * 
+     * @return none
+     */
+    _rebuildRecordTitles: function(popup_options){
+
+        let $dlg, selected_rectypes = [];
+        let base_url = `${window.hWin.HAPI4.baseURL}admin/verification/longOperationInit.php?type=titles&db=${window.hWin.HAPI4.database}`;
+
+        let msg = "Please select which options to use for rebuilding record titles:<br><br>"
+                + "<div>"
+                    + "<label for='rectypes-all'><input id='rectypes-all' type='checkbox' checked='checked'> All record titles</label>"
+                    + "<div style='margin: 5px 0px'>or</div>"
+                    + "<button id='rectypes-select'>Select record types</button>"
+                    + "<div style='margin: 10px 0px'>Selected Record Types: </div>"
+                    + "<div "
+                        + "style='min-width:165px;max-width:165px;max-height:200px;min-height:200px;border: black solid 1px;padding:5px;margin-top:5px;overflow-y:auto;'"
+                        + " id='rectypes-list' data-ids=''>"
+                            + "<span style='display: inline-block;margin: 5px 0px;'> None </span>"
+                    + "</div>"
+                + "</div>";
+
+        let btn = {};
+        btn[window.HR('Proceed')] = () => {
+
+            let all_rectypes = $dlg.find('#rectypes-all').is(':checked');
+            if(!all_rectypes && selected_rectypes.length == 0){
+                return;
+            }
+
+            rectypes = !all_rectypes ? `&recTypeIDs=${selected_rectypes.join(',')}` : '';
+
+            $dlg.dialog('close');
+
+            window.hWin.HEURIST4.msg.showDialog( `${base_url}${rectypes}`, popup_options );
+        };
+        btn[window.HR('Close')] = () => {
+            $dlg.dialog('close');
+        };
+
+        $dlg = window.hWin.HEURIST4.msg.showMsgDlg(msg, btn, 
+            {title: 'Rebuild record titles', yes: window.HR('Proceed'), no: window.HR('Close')}, 
+            {default_palette_class: 'ui-heurist-admin', dialogId: 'rebuild_titles', width: 400, height: 450}
+        );
+
+        $dlg.find('button#rectypes-select').button();
+
+        $dlg.find('button#rectypes-select, div#rectypes-list').on('click', function(){
+
+            let $selected_rectypes = $dlg.find('div#rectypes-list');
+
+            let popup_options = {
+                select_mode: 'select_multi',
+                edit_mode: 'popup',
+                isdialog: true,
+                width: 440,
+                title: 'Select record types',
+                selection_on_init: selected_rectypes,
+                default_palette_class: 'ui-heurist-publish',
+
+                onselect:function(event, data){
+
+                    const ids = data.selection;
+
+                    if(ids != null && window.hWin.HEURIST4.util.isArrayNotEmpty(ids)){
+
+                        selected_rectypes = ids;
+                        $selected_rectypes.text('');
+
+                        for(var i = 0; i < ids.length; i++){
+
+                            const name = $Db.rty(ids[i], 'rty_Name');
+
+                            $selected_rectypes.append(
+                                '<span class="truncate" style="display: inline-block;width: 155px; max-width: 155px;margin: 2.5px 0px; cursor: default;" title="'+ name +'">'
+                                    + name +
+                                '</span>');
+
+                            if((i+1) != ids.length){
+                                $selected_rectypes.append('<br>');
+                            }
+                        }
+                    }else{
+                        selected_rectypes = [];
+                        $selected_rectypes.text('<span style="display: inline-block;margin: 5px 0px;"> None </span>');
+                    }
+                }
+            };
+
+            window.hWin.HEURIST4.ui.showEntityDialog('defRecTypes', popup_options);
+        });
+
+        $dlg.find('input#rectypes-all').on('change', function(event){
+            window.hWin.HEURIST4.util.setDisabled($dlg.find('button#rectypes-select, div#rectypes-list'), $(event.target).is(':checked'));
+        }).change();
     }
 });

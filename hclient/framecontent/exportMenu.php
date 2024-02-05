@@ -98,6 +98,23 @@ require_once 'initPage.php';
 
         <br>
         <div id="menu-export-geojson" class="export-item">
+            <button class="export-button">RDF</button>
+            <a href="#" oncontextmenu="return false;" 
+                data-logaction="exp_RDF"
+                data-action="menu-export-rdf"
+                title="Generate RDF (Resource Description Framework) for current set of search results (current query)">
+                <span class="ui-icon ui-icon-extlink export-popup"></span><span class="export-popup" style="padding-right:10px">feed</span>
+                RDF</a>
+                &nbsp;&nbsp;<label style="font-size:smaller;">Serialize as: </labels>
+                <label style="font-size:smaller;"><input type="radio" name="serial_format" value="rdfxml" checked/>rdfxml</label>&nbsp;
+                <label style="font-size:smaller;"><input type="radio" name="serial_format" value="json"/>json</label>&nbsp;
+                <label style="font-size:smaller;"><input type="radio" name="serial_format" value="ntriples"/>ntriples</label>&nbsp;
+                <label style="font-size:smaller;"><input type="radio" name="serial_format" value="turtle" />turtle</label>
+        </div>
+        
+        
+        <br>
+        <div id="menu-export-geojson" class="export-item">
             <button class="export-button">GeoJSON</button>
             <a href="#" oncontextmenu="return false;" 
                 data-logaction="exp_GeoJSON"

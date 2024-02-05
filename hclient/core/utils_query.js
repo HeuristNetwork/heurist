@@ -42,7 +42,9 @@ window.hWin.HEURIST4.query = {
         
             if(!window.hWin.HEURIST4.util.isnull(query_request)){
 
-                query_string = query_string + '&w='+query_request.w;
+                if(!window.hWin.HEURIST4.util.isempty(query_request.w)){
+                    query_string = query_string + '&w='+query_request.w;
+                }
                 
                 if(!window.hWin.HEURIST4.util.isempty(query_request.q)){
                     

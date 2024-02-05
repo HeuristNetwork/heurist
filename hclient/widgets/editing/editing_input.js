@@ -939,7 +939,7 @@ $.widget( "heurist.editing_input", {
             .css({'overflow-x':'hidden'})
             .on('keydown',function(e){
                 if (e.keyCode == 65 && e.ctrlKey) {
-                    e.target.select()
+                    e.target.select();
                 }    
             })
             .on('keyup',function(){that.onChange();})
@@ -2554,7 +2554,6 @@ $.widget( "heurist.editing_input", {
                         $btn_extlink = $( '<span>', {title: 'Open URL in new window'})
                             .addClass('smallicon ui-icon ui-icon-extlink')
                             .appendTo( $inputdiv );
-                            //.button({icons:{primary: 'ui-icon-extlink'},text:false});
                     
                         that._on( $btn_extlink, { click: function(){ window.open($input.val(), '_blank') }} );
                         that._on( $input, { click: function(){ if ($input.val()!='') window.open($input.val(), '_blank') }} );
@@ -2563,20 +2562,6 @@ $.widget( "heurist.editing_input", {
                     //$input.focusout( __url_input_state ); 
                     __url_input_state(true);               
                 
-            }
-            else if(this.detailType=="freetext" && ($input.val().indexOf('http://')==0 || $input.val().indexOf('https://')==0)){ // add link to external url
-
-                var $btn_extlink = $('<span>')
-                                    .attr('title', 'Open URL in new window')
-                                    .addClass('smallicon ui-icon ui-icon-extlink')
-                                    .css({
-                                        'font-size': 'small',
-                                        'color': 'blue'
-                                    })
-                                    .appendTo( $inputdiv )
-
-                this._on($btn_extlink, {click: function(){ window.open($input.val(), '_blank'); }} );
-
             }
             else if(this.detailType=="integer" || this.detailType=="year"){//-----------------------------------------
 
@@ -3925,9 +3910,12 @@ $.widget( "heurist.editing_input", {
             }});
         }
 
+        // Freetext value that is a url
+        let freetext_url = this.detailType=="freetext" && ($input.val().indexOf('http://')==0 || $input.val().indexOf('https://')==0);
         // Semantic url links, separated by semi-colons, for RecTypes, Vocab+Terms, DetailTypes
-        if(this.options.dtID && (typeof this.options.dtID === 'string' || this.options.dtID instanceof String)
-            && this.options.dtID.indexOf('ReferenceURL') !== -1){
+        let semantic_uri = this.options.dtID && (typeof this.options.dtID === 'string' || this.options.dtID instanceof String)
+                            && this.options.dtID.indexOf('ReferenceURL') !== -1;
+        if(freetext_url || semantic_uri){
 
             $btn_extlink = $( '<span>', {title: 'Open URL(s) in new window'})
                 .addClass('smallicon ui-icon ui-icon-extlink')
@@ -4876,7 +4864,7 @@ $.widget( "heurist.editing_input", {
                     // move menuWidget to current dialog/document 
                     // (sometimes, within CMS pages for example, it places it before the current dialog thus hiding it)
                     let $menu = $input.hSelect('menuWidget');
-                    let $parent_ele = $input_div.parents('[role="dialog"]');
+                    let $parent_ele = this.element.closest('div[role="dialog"]'); //$input_div.parents('[role="dialog"]');
                     $parent_ele = $parent_ele.length == 0 ? document : $parent_ele;
 
                     if($parent_ele.length > 0) $menu.parent().appendTo($parent_ele);
@@ -5708,17 +5696,6 @@ $.widget( "heurist.editing_input", {
 
         $inputdiv.html(disp_value);
 
-        /*
-        if(this.detailType=="url"){
-
-            $btn_extlink = $( '<span>', {title: 'Open URL in new window'})
-                .addClass('smallicon ui-icon ui-icon-extlink')
-                .appendTo( $inputdiv.find('div') );
-        
-            this._on( $btn_extlink, { click: function(){ window.open(value, '_blank') }} );
-        
-        }
-        */   
     },
     
     //

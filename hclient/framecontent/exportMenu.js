@@ -269,6 +269,9 @@ function hexportMenu( container ) {
         }else if(action == "menu-export-geojson"){ 
             _exportRecords({format:'geojson', save_as_file:save_as_file});
             
+        }else if(action == "menu-export-rdf"){ 
+            _exportRecords({format:'rdf', save_as_file:save_as_file});
+            
         }else if(action == "menu-export-gephi"){ 
             _exportRecords({format:'gephi', save_as_file:save_as_file});
 
@@ -408,12 +411,16 @@ function hexportMenu( container ) {
                         params = 'format=iiif';
                     }
                 }else{
-                    params = params + '&format='+opts.format+'&defs=0&extended='+($('#extendedJSON').is(':checked')?2:1);
+                    params = params + '&format='+opts.format
 
                     if(opts.format=='gephi' && $('#limitGEPHI').is(':checked')){
                         params = params + '&limit=1000';    
                     }else if(opts.format=='geojson'){
                         params = params + '&detail_mode='+$('input[name="detail_mode"]:checked').val();        
+                    }else if(opts.format=='rdf'){
+                        params = params + '&vers=2&serial_format='+$('input[name="serial_format"]:checked').val();        
+                    }else{
+                        params = params +'&defs=0&extended='+($('#extendedJSON').is(':checked')?2:1);
                     }
                 }
             }

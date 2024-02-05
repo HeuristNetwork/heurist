@@ -75,6 +75,7 @@
     require_once dirname(__FILE__).'/../utilities/Temporal.php';
     require_once dirname(__FILE__).'/../../admin/verification/verifyValue.php';
 
+    require_once dirname(__FILE__).'/../records/export/exportRecords.php';
     require_once dirname(__FILE__).'/../records/export/recordsExport.php';
     require_once dirname(__FILE__).'/../records/export/recordsExportCSV.php';
  
@@ -259,7 +260,38 @@
         }
         
     }else{
-        $res = RecordsExport::output( $response, $params );
+        
+        if(!@$params['format']) @$params['format'] = 'xml';
+        
+        if(@$params['vers']==2){
+        
+            $classname = 'exportRecords'.strtoupper($params['format']);
+            
+            spl_autoload_register(function ($class) {
+                $file = dirname(__FILE__).'/../records/export/'.$class.'.php';
+                if (file_exists($file)) {
+                    require $file;
+                    return true;
+                }
+                return false;
+            });        
+            
+            $outputHandler = false;
+            
+            if(class_exists($classname, true)){
+                $outputHandler = new $classname($system);    
+            }
+            
+            if(!$outputHandler){
+                $this->system->addError(HEURIST_INVALID_REQUEST, 'Wrong parameter "format": '.htmlspecialchars(@$params['format']));
+                return false;
+            }else{
+                $res = $outputHandler->output( $response, $params );    
+            }
+        
+        }else{
+            $res = RecordsExport::output( $response, $params );
+        }
     }
     
     if(!$res) {

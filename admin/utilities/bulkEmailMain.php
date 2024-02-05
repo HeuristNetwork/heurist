@@ -1040,7 +1040,7 @@ if(!$has_emails || empty($emails)) {
 
     <body style="margin: 10px 10px 10px 20px;">
         
-        <div style="font-family:Arial,Helvetica;sans-serif;">
+        <div style="font-family:Arial,Helvetica,sans-serif;">
             <h3>Heurist System Email</h3>
             
             <label class="instruction">

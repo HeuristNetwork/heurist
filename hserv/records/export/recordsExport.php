@@ -266,7 +266,8 @@ public static function output($data, $params){
         
         fwrite($fd, '[');         
         
-    }else if(@$params['restapi']==1){
+    }
+    else if(@$params['restapi']==1){
         
         if(count($records)==1 && @$params['recID']>0){
             //fwrite($fd, '');             
@@ -342,7 +343,8 @@ IIIF;
         
         $params['depth'] = 0;
         
-    }else if($params['format']=='json'){
+    }
+    else if($params['format']=='json'){
         
         if(@$params['datatable']>1){
             
@@ -359,7 +361,7 @@ IIIF;
             fwrite($fd, '{"heurist":{"records":[');         
         }
             
-    }else if($params['format']=='gephi'){
+    }else if($params['format']=='gephi'){ //xml
 
         $gephi_links_dest = tempnam(HEURIST_SCRATCHSPACE_DIR, "links");    
         //$fd = fopen('php://temp/maxmemory:1048576', 'w');  //less than 1MB in memory otherwise as temp file 
@@ -425,7 +427,8 @@ XML;
         $gephi_header = '<?xml version="1.0" encoding="UTF-8"?>'.$gephi_header;
 
         fwrite($fd, $gephi_header);     
-    }else if($params['format']=='hml'){
+    }
+    else if($params['format']=='hml'){
         
         //@TODO
         
@@ -1477,8 +1480,8 @@ private static function _getGeoJsonFeature($record, $extended=false, $simplify=f
             if($extended){
                 //It needs to include the field name and term label and term standard code.
                 if($field_type=='enum' || $field_type=='relationtype'){
-                    $val['termLabel'] = self::$defTerms->getTermLabel($val, true);
-                    $term_code  = self::$defTerms->getTermCode($val);
+                    $val['termLabel'] = self::$defTerms->getTermLabel($val['value'], true);
+                    $term_code  = self::$defTerms->getTermCode($val['value']);
                     if($term_code) $val['termCode'] = $term_code;    
                 }
 

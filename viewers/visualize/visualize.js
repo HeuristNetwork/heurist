@@ -461,7 +461,8 @@ function visualizeData() {
         );
     }
 
-    tick(); // update display
+    tick()// update display
+    //setTimeout(function(){tick();},10000); 
     
 } //end visualizeData
 
@@ -1049,6 +1050,13 @@ function updateStraightLines(lines, type) {
             return '';
         }
         
+        //are source and target defined
+        if(d.source.id && d.target){
+            if(isNaN(d.source.x) || isNaN(d.source.y) || isNaN(d.target.x) || isNaN(d.target.y)){
+                return false;
+            }
+        }
+        
         var key = d.source.id+'_'+d.target.id,
             indent = 20;
 
@@ -1080,7 +1088,7 @@ function updateStraightLines(lines, type) {
         var ismultivalue = settings.isDatabaseStructure && $Db.rst(d.source.id, d.relation.id, 'rst_MaxValues') != 1 && $Db.rst(d.source.id, d.relation.id, 'rst_MaxValues') != null;
 
         if(d.target.id==d.source.id){ // Self Linking Node
-
+        
             var target_x, target_y, dx, dy, dr, mx, my;
 
             if(currentMode == 'infoboxes_full'){
@@ -1117,11 +1125,12 @@ function updateStraightLines(lines, type) {
                         .attr("marker-end", "url(#blob)")
                         .attr("marker-start", "url(#self-link)");
                     }
+
                     selectedLine
-                        .attr("x1", s_x)
-                        .attr("y1", s_y)
-                        .attr("x2", s_x2)
-                        .attr("y2", s_y);
+                            .attr("x1", s_x)
+                            .attr("y1", s_y)
+                            .attr("x2", s_x2)
+                            .attr("y2", s_y);
                 }
             }else{
 
@@ -1197,6 +1206,7 @@ function updateStraightLines(lines, type) {
                 }else{ // target is above/below source and was same side connectors
 
                     t_x += (target_width / 2);
+                    t_x2 = t_x;
 
                     if(t_y < s_y){ // target is higher than source
                         t_y2 = b_target_y;
@@ -1240,11 +1250,13 @@ function updateStraightLines(lines, type) {
                         .style("stroke-width", "3px")
                         .attr("marker-end", "url(#blob)");
                     }
+
                     selectedLine
-                        .attr("x1", s_x)
-                        .attr("y1", s_y)
-                        .attr("x2", s_x2)
-                        .attr("y2", s_y);
+                            .attr("x1", s_x)
+                            .attr("y1", s_y)
+                            .attr("x2", s_x2)
+                            .attr("y2", s_y);
+                    
                     var linecolour = (!ismultivalue) ? 'darkgray' : 'dimgray';
                     var linewidth = (!ismultivalue) ? '3px' : '2px';
                     // Junze: Node2NodeInfoBoxesFullBottomLineTarget
@@ -1265,10 +1277,10 @@ function updateStraightLines(lines, type) {
                         }
                         // Junze: update the coordinates
                         selectedLine
-                            .attr("x1", t_x)
-                            .attr("y1", t_y)
-                            .attr("x2", t_x2)
-                            .attr("y2", t_y);
+                                .attr("x1", t_x)
+                                .attr("y1", t_y)
+                                .attr("x2", t_x2)
+                                .attr("y2", t_y);
 
                         //add crows foot, if multi value
                         if(ismultivalue){
@@ -1308,10 +1320,11 @@ function updateStraightLines(lines, type) {
                             }
                             // add extra ending line
                             selectedLine
-                                .attr("x1", t_x)
-                                .attr("y1", t_y)
-                                .attr("x2", t_x)
-                                .attr("y2", t_y2);
+                                    .attr("x1", t_x)
+                                    .attr("y1", t_y)
+                                    .attr("x2", t_x)
+                                    .attr("y2", t_y2);
+                            
                             let hideId = `#n2nibfblsrcmv_${d.source.id}_${d.relation.id}_${d.target.id}`;
                             let hideLine = container.select(hideId);
                             if (!hideLine.empty()) 

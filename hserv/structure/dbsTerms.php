@@ -24,6 +24,8 @@
     *  findTermByConceptCode
     *  getTermsFromFormat
     *  getTermLabel
+    *  getTermField
+    *  getTermReferenceURL
     *  getTermCode
     *  getTerm
     *  getTermByLabel
@@ -171,29 +173,36 @@ class DbsTerms
     //
     //
     //
-    public function getTermCode($term_id) {
-        
+    public function getTermField($term_id, $field_name) {
         $term = $this->getTerm($term_id);
         if($term){
-            $idx_term_code = $this->data['fieldNamesToIndex']['trm_Code'];
+            $idx_term_code = $this->data['fieldNamesToIndex'][$field_name];
             return @$term[$idx_term_code]?$term[$idx_term_code]:'';
         }else{
             return '';
         }
+    }
+    
+    
+    //
+    //
+    //
+    public function getTermCode($term_id) {
+        return $this->getTermField($term_id, 'trm_Code');
     }
 
     //
     //
     //
     public function getTermConceptID($term_id) {
-        
-        $term = $this->getTerm($term_id);
-        if($term){
-            $idx_term_code = $this->data['fieldNamesToIndex']['trm_ConceptID'];
-            return @$term[$idx_term_code]?$term[$idx_term_code]:'';
-        }else{
-            return '';
-        }
+        return $this->getTermField($term_id, 'trm_ConceptID');
+    }
+    
+    //
+    //
+    //
+    public function getTermReferenceURL($term_id) {
+        return $this->getTermField($term_id, 'trm_SemanticReferenceURL');
     }
     
     //

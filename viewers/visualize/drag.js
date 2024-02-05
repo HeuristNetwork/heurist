@@ -213,6 +213,10 @@ function hideNodeInformation(){
 function updateNodes() {
     d3.selectAll(".node").attr("transform", function(d) { 
         // Store new position
+        if(d.x==null || d.y==null || isNaN(d.x) || isNaN(d.y)){
+            d.x=0;
+            d.y=0;
+        }
         var obj = {px: d.px, py: d.py, x: d.x, y: d.y};
         putSetting(d.id, JSON.stringify(obj));
         return "translate(" + d.x + "," + d.y + ")"; 

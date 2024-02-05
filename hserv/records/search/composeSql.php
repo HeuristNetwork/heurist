@@ -2810,6 +2810,7 @@ class HPredicate {
                     $trm_Field = $this->allowed_term_fields[$this->field_term];
                 }else{
                     $trm_Field = 'trm_Label';
+                    $this->value = '*:' . $this->value; // search translated labels as well
                 }
 
                 $value = $mysqli->real_escape_string($this->value);
@@ -3014,7 +3015,7 @@ class HPredicate {
                         $this->negate = ($op==' -'); 
                         
                         //get all words
-                        $pattern = "/(\w+)/";
+                        $pattern = "/(\w+)/u";
                         if (preg_match_all($pattern, $this->value, $matches)) {
 //words less than 3 characters in length or greater than 84 characters in length do not appear in an InnoDB full-text search index
 //and stopwords 

@@ -311,11 +311,16 @@ window.hWin.HEURIST4.ui = {
             
         var data = $Db.trm_TreeData(vocab_id, 'select', false, lang_code);                
         var termCode;
+        let vcg_Trash = $Db.getTrashGroupId('vcg');
        
         //add optgroups and options
         for(var i=0; i<data.length; i++){
             
             if(data[i].is_vocab){
+
+                if($Db.trm(data[i].key, 'trm_VocabularyGroupID') == vcg_Trash){
+                    continue;
+                }
                 
                 var opt = window.hWin.HEURIST4.ui.addoption(selObj, 
                                                     data[i].key, data[i].title);
@@ -324,6 +329,11 @@ window.hWin.HEURIST4.ui = {
                 $(opt).attr('group', 1);
                 
             }else{
+
+                let vocab_id = $Db.trm(data[i].key, 'trm_Parents').split(',')[0];
+                if($Db.trm(vocab_id, 'trm_VocabularyGroupID') == vcg_Trash){
+                    continue;
+                }
             
                 if(supressTermCode || window.hWin.HEURIST4.util.isempty(data[i].code)){
                     termCode = '';
@@ -358,6 +368,7 @@ window.hWin.HEURIST4.ui = {
         useGroups = options.useGroups;
 
         var domain = (options.domain=='enum' || options.domain=='relation')?options.domain:null;
+        let vcg_Trash = $Db.getTrashGroupId('vcg');
 
         if (!(useGroups>0 || useGroups===false)){
             useGroups = true;
@@ -380,7 +391,7 @@ window.hWin.HEURIST4.ui = {
             var parent_id = this.fld(record, 'trm_ParentTermID');
             if(!(parent_id>0)){
                 var grp_id = this.fld(record, 'trm_VocabularyGroupID');
-                if(grp_id>0){ 
+                if(grp_id>0 && grp_id!=vcg_Trash){ 
                     if(useGroups===false){
                         vocabs['0'].push(trmID);
                     }else if(useGroups===true){
@@ -458,10 +469,18 @@ window.hWin.HEURIST4.ui = {
 
         var recset = $Db[entity]();
         var options = recset.makeKeyValueArray(entity+'_Name');
-        
-        if(!(Array.isArray(topOptions) ||
-           window.hWin.HEURIST4.util.isempty(topOptions) ||
-           topOptions===false)){
+        let trash_id = $Db.getTrashGroupId(entity);
+
+        for(let idx=1; idx<options.length; idx++){
+            if(trash_id != options[idx]['key']){ break; }
+
+            options.splice(idx, 1); // remove Trash group
+        }
+
+        if(!(window.hWin.HEURIST4.util.isArray(topOptions) ||
+             window.hWin.HEURIST4.util.isempty(topOptions) ||
+             topOptions===false))
+        {
             if(topOptions===true) topOptions = '  ';  // <blank>
             topOptions = [{key:'', title:topOptions}];
         }
@@ -517,7 +536,8 @@ window.hWin.HEURIST4.ui = {
         useHtmlSelect = (useHtmlSelect===true);
         
         //recordset 
-        var rectypes = $Db.rty().getSubSetByRequest({ 'sort:rty_Name':1 });
+        let rtg_Trash = $Db.getTrashGroupId('rtg');
+        var rectypes = $Db.rty().getSubSetByRequest({ 'sort:rty_Name':1, 'rty_RecTypeGroupID': `!=${rtg_Trash}` });
         var index;
 
         if(rectypes){ 
@@ -697,6 +717,7 @@ window.hWin.HEURIST4.ui = {
         var useIds = false;
         var initial_indent = 0;
         var eventHandlers = null;
+        var extraOptions = {};
         if(options){  //at the moment it is implemented for single rectype only
             showDetailType    = options['show_dt_name']==true;
             addLatLongForGeo  = options['show_latlong']==true;
@@ -707,6 +728,7 @@ window.hWin.HEURIST4.ui = {
             useHtmlSelect     = options['useHtmlSelect']!==false;
             useIds            = options['useIds']===true;
             eventHandlers     = options['eventHandlers'];
+            extraOptions      = options['extraOptions'] ? options['extraOptions'] : {};
         }
         
         //var trash_id = $Db.getTrashGroupId('dtg');
@@ -959,7 +981,7 @@ window.hWin.HEURIST4.ui = {
             $(selObj).val(selectedValue);
         }
         
-        selObj = window.hWin.HEURIST4.ui.initHSelect(selObj, useHtmlSelect, null, eventHandlers);
+        selObj = window.hWin.HEURIST4.ui.initHSelect(selObj, useHtmlSelect, null, eventHandlers, extraOptions);
 
         return selObj;
     },
@@ -1096,17 +1118,23 @@ window.hWin.HEURIST4.ui = {
     
     //
     // eventHandlers {object} - object of event handlers ('onSelectMenu', 'onOpenMenu', 'onCloseMenu')
-    //
     //  onSelectMenu - in case defined use this callback instead of trigger
     //  onOpenMenu - called after selectmenu menuWidget has been created and rendered
     //  onCloseMenu - called after selectmenu loses focus and menuWidget is hidden
     //
-    initHSelect: function(selObj, useHtmlSelect, apply_style, eventHandlers){            
+    // extraOptions {object} - object to handle extra settings/setup
+    //  menu_parent - move the menuWidget into a different element (usually to avoid the menu from not appearing)
+    //
+    initHSelect: function(selObj, useHtmlSelect, apply_style, eventHandlers, extraOptions){            
 
         //var isNotFirefox = (navigator.userAgent.indexOf('Firefox')<0);
         ////depth>1 || (optgroup==null && depth>0
         
         selObj = $(selObj);
+
+        if(!extraOptions || !$.isPlainObject(extraOptions)){
+            extraOptions = {};
+        }
             
         //for usual HTML select we have to add spaces for indent
         if(useHtmlSelect){
@@ -1184,10 +1212,7 @@ window.hWin.HEURIST4.ui = {
             }else if(eventHandlers && window.hWin.HUL.isFunction(eventHandlers)){
                 onOpenMenu = eventHandlers;
             }
-            if(Object.values(arguments).length > 4 && window.hWin.HUL.isFunction(arguments[4])){
-                onSelectMenu = arguments[4];
-            }
- 
+             
             var menu = selObj.hSelect({ 
                 style: 'dropdown',
                 position: {collision: "flip"},  //(navigator.userAgent.indexOf('Firefox')<0)?{collision: "flip"}:{},
@@ -1260,7 +1285,10 @@ window.hWin.HEURIST4.ui = {
                 menu.hSelect( "widget" ).css({'padding':0, 'font-size':'1.1em', //'background':'#FFF',
                     width:(dwidth?dwidth:'auto'),'min-width':dminwidth }); //,'min-width':'16em''#F4F2F4'
             }
-                
+
+            if(extraOptions.menu_parent && extraOptions.menu_parent.length > 0){
+                menuwidget.parent().appendTo(extraOptions.menu_parent);
+            }
         }
         return selObj;
     },           
@@ -2293,7 +2321,7 @@ window.hWin.HEURIST4.ui = {
     //
     // $select jquery select
     //
-    createTemplateSelector: function($select, topOptions, defValue){
+    createTemplateSelector: function($select, topOptions, defValue, options){
         
         var baseurl = window.hWin.HAPI4.baseURL + "viewers/smarty/templateOperations.php";
         var request = {mode:'list', db:window.hWin.HAPI4.database};
@@ -2312,7 +2340,7 @@ window.hWin.HEURIST4.ui = {
                 if(defValue){
                     $select.val( defValue );
                 }
-                window.hWin.HEURIST4.ui.initHSelect($select[0], false);
+                window.hWin.HEURIST4.ui.initHSelect($select[0], false, null, options?.eventHandlers, options?.extraOptions);
                 
             });
         
