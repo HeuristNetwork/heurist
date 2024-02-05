@@ -2608,17 +2608,40 @@ li.edit-form-tab > a{
     cursor: pointer;
 }
 
-/* Configure CMS widgets popup */
+/* Configure CMS widgets popup/elements */
 .cms-widget-config i.help-text{
     display: block;
-    line-height: 5px;
+    line-height: 10px;
     padding-bottom: 5px;
 }
 
-.cms-widget-config .row-spacing{
-    padding-bottom: 25px;
+.cms-widget-config .header{
+    font-size: 10px !important;
+    width: 115px !important;
+    min-width: 115px !important;
+}
+.cms-widget-config .header.header_narrow{
+    width: 100px !important;
+    min-width: 100px !important;
+}
+.cms-widget-config .header.header_wide{
+    width: 135px !important;
+    min-width: 135px !important;
 }
 
-.cms-widget-config label.inside_header{
-    padding-left: 25px;
+/* widget config tabs */
+.cms-widget-config .ui-tabs-nav li a{
+    font-size: 1em;
+    font-weight: normal;
+    padding: 5px !important;
+}
+.cms-widget-config .ui-tabs-nav li.ui-state-disabled{
+    display: none;
+}
+
+.cms-widget-config .ui-tabs-panel .ui-selectmenu-button,
+.cms-widget-config .ui-tabs-panel select.truncate{
+    font-size: 1em !important;
+
+    width: 250px !important;
 }

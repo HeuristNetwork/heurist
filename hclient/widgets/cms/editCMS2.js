@@ -56,8 +56,7 @@ function editCMS2(website_document){
         _edit_Element = null,  //instance of edit element class editCMS_ElementCfg
         _toolbar_WebSite,
         _toolbar_Page,
-        _tabControl,
-        
+                
         _layout_content,   // JSON config 
         _layout_container; // main-content with CMS content
 
@@ -151,20 +150,19 @@ function editCMS2(website_document){
                 
                 
                 _editor_panel = $('<div class="ui-layout-'+options.editor_pos+'">'
-                        +'<div style="margin: 10px;text-align: right;cursor: pointer;" id="closeCMS">close<span style="padding-left: 10px;" class="ui-icon ui-icon-close" /></div>'                
-                        +'<div class="ent_wrapper editStructure" id="tabsEditCMS">' 
-                            +'<ul style="margin-'+(options.editor_pos=='west'?'right':'left')+':40px"><li><a href="#treeWebSite">Site</a></li><li><a href="#treePage">Page</a></li></ul>'
+                        +'<div class="ent_wrapper editStructure ui-heurist-publish" id="tabsEditCMS">' 
+
+                            +(!isWebPage ? '<span class="btn-website-edit" style="font-weight:normal !important;">Website layout / properties</span>'
+                            +'<br>' : '')
+                            +`<a href="#" class="btn-website-url" style="display:inline-block;font-size: ${isWebPage ? '12' : '9'}px;color: black;">Get website URL</a>`
+
                             
                             +'<span style="position:absolute;top:22px;width:32px;height:24px;font-size:29px;cursor:pointer;'+(options.editor_pos=='west'?'right:5px':'')+'" '
                             +'class="bnt-cms-hidepanel ui-icon ui-icon-carat-2-'+(options.editor_pos=='west'?'w':'e')+'"/>'
                             
-                            +'<div id="treeWebSite" style="top:43px;" class="ent_wrapper ui-cms-mainmenu">'
+                            +'<div id="treeWebSite" style="display:none;" class="ent_wrapper ui-cms-mainmenu">'
                                 +'<div class="toolbarWebSite ent_header" style="height:85px;padding-top:15px;">'
                                 
-                                    +'<span class="btn-website-edit" style="font-weight:normal !important;">Edit website layout / properties</span>'
-                                    +'<br>'
-                                    +'<a href="#" class="btn-website-url" style="padding:10px 20px 5px;display:inline-block;">Get website URL</a>'
-
                                     +'<span style="display:block;border-top:1px solid gray;padding:4px 8px;margin:4px 0px;">'
 
                                     +'<span style="display:inline-block;padding-top:7px" class="heurist-helper1" '
@@ -185,26 +183,22 @@ function editCMS2(website_document){
                                 
                                 +'<div class="treeWebSite ent_content_full" style="top:135px;padding:3px 10px;"/>' //treeview - edit website menu
                             +'</div>'
-                            +'<div id="treePage" style="font-size:1em;top:43px" class="ent_wrapper">'
+                            +'<div id="treePage" style="font-size:0.9em;top:50px" class="ent_wrapper ui-widget-content">'
                             
-                                +'<div class="treePageHeader ent_header" style="height:85px;font-size:0.9em;line-height:normal;">'
+                                +'<div class="treePageHeader ent_header" style="height:85px;line-height:normal;">'
                                     
                                     +(isWebPage
-                                    ?('<div style="padding:20px"><a href="#" class="btn-website-edit">'
+                                    ?('<div style="font-size: 10px; display: inline-block;"><a href="#" class="btn-website-edit">'
                                         +'<span class="ui-icon ui-icon-pencil"/>&nbsp;Configure webpage</a></div>')
-                                    :'<h3 class="truncate" style="margin-block-start: 0.7em; margin-block-end: 0.7em; font-size: revert; font-family: revert;"></h3>')
-                                    +'<span style="float:left;" class="heurist-helper1 page_tree">'
-                                        +'Drag elements to re-order</span>'
-                                    +'<span style="float:right" class="heurist-helper1 page_tree">'
-                                        +'Click to edit</span>'
-                                    +'<span style="display:none" class="heurist-helper1 element_edit">'
-+'<a href="'+window.hWin.HAPI4.sysinfo.referenceServerURL
-+'?db=Heurist_Help_System&website&id=39&pageid=708" target="_blank">website help</a>'
+                                    :'<h3 class="truncate" style="margin-block-start: 0.3em; margin-block-end: 0.7em; font-size: 10px; font-family: revert; max-width: 85%; display: inline-block"></h3>')
+                                        +'<span style="float: right; font-size: 10px;" class="heurist-helper1 element_edit">'
+                                            +'<a href="'+window.hWin.HAPI4.sysinfo.referenceServerURL
+                                            +'?db=Heurist_Help_System&website&id=39&pageid=708" target="_blank">website help</a>'
                                     +'</span>'
                                         
                                 +'</div>'
                             
-                                +'<div class="treePage ent_content_full" style="top:30px;padding:10px;border-top:1px solid gray;line-height:normal;"/>' //treeview - edit page
+                                +'<div class="treePage ent_content_full" style="top: 20px; padding: 0px 10px 5px; border-top: 1px solid gray; line-height: normal; font-size: 10px;"/>' //treeview - edit page
                                 +'<div class="propertyView ent_content_full ui-widget-content-gray" '
                                     +' style="top:190px;padding:10px 0px;display:none;"/>' //edit properties for element
                                 
@@ -346,7 +340,7 @@ function editCMS2(website_document){
         if(!isWebPage){
             _editor_panel.find('.btn-website-edit')
                          .button({classes:{'ui-button': 'ui-button-action'}})
-                         .css({'padding':'5px','font-size':'9px','margin-left':'20px'})
+                         .css({'padding':'5px','font-size':'9px'})
                          .click(_editHomePageRecord);
         }else{
             _editor_panel.find('.btn-website-edit').click(_editHomePageRecord);
@@ -372,40 +366,12 @@ function editCMS2(website_document){
         _editor_panel.find('.bnt-website-menu').button({icon:'ui-icon-menu'}).click(_showWebSiteMenu);
         
         _editor_panel.find('.bnt-cms-hidepanel').click(function(){ _ws_body.layout().close(options.editor_pos); } );
-
-        _editor_panel.find('#closeCMS').click(_closeCMS);
-     
      
         _panel_propertyView = _editor_panel.find('.propertyView');
         _panel_treeWebSite = _editor_panel.find('.treeWebSite');
         
         _toolbar_WebSite = _editor_panel.find('.toolbarWebSite');
-        
-        _tabControl = _editor_panel.find('#tabsEditCMS');
-     
-        _tabControl.tabs({
-        activate: function( event, ui ){
-            _switchMode();
-            //ui.newTab
-        },
-        beforeActivate: function( event, ui ){
-
-            if(current_edit_mode=='page' && _warningOnExit(function(){ _switchMode( 'website' ) })) {
-                return false;  
-            }else{
-                return true;
-            }
-            
-        }});
-        
-        _tabControl.addClass('ui-heurist-publish');
-        _tabControl.find('.ui-tabs-nav').css('background','none');
-        
-        if(isWebPage){
-            _tabControl.find('.ui-tabs-tab[aria-controls="treeWebSite"]').hide();
-        }
-        
-        
+                
         if(need_callback!==false) _startCMS(options);
     }
     
@@ -427,7 +393,10 @@ function editCMS2(website_document){
     //
     function _editHomePageRecord(){
 
-        if(_warningOnExit( _editHomePageRecord )) return;                           
+        if(_warningOnExit( _editHomePageRecord )) return;
+
+        if(!_editCMS_SiteMenu)
+            _editCMS_SiteMenu = editCMS_SiteMenu( _panel_treeWebSite, that );
         
         //edit menu item
         window.hWin.HEURIST4.ui.openRecordEdit(home_page_record_id, null,
@@ -964,7 +933,6 @@ var sMsg = '<p>Heurist\'s CMS editor has been upgraded to a new system which is 
             _keep_EditPanelWidth = 0;
 
             _editor_panel.find('.page_tree').show();
-            _editor_panel.find('.element_edit').hide();
             
             _onPageChange();
             
@@ -989,27 +957,12 @@ var sMsg = '<p>Heurist\'s CMS editor has been upgraded to a new system which is 
     function _switchMode( mode, init_tinymce )
     {
 
-        if(!mode){
-            if(_tabControl.tabs('option','active')==0){
-                mode='website';           
-            }else{
-                mode='page';
-            }
-        }else{
-            var activePage = (mode=='page')?1:0;
-            if(_tabControl.tabs('option','active')!=activePage){
-                _tabControl.tabs({active:activePage});
-                return;    
-            }
-        }
+        mode = !mode ? 'page' : mode;
         
         current_edit_mode = mode;
         
         if(mode=='page'){
-            
-            _tabControl.find('li[aria-controls="treeWebSite"]')
-                                .removeClass('ui-cms-mainmenu');
-                    
+                                
             _hidePropertyView();
             
             _toolbar_WebSite.hide();
@@ -1025,10 +978,7 @@ var sMsg = '<p>Heurist\'s CMS editor has been upgraded to a new system which is 
             } //_initTinyMCE();
             
         }else{
-            _tabControl.find('li[aria-controls="treeWebSite"]')
-                .removeClass('ui-state-active') //ui-tabs-active 
-                .addClass('ui-cms-mainmenu');
-                    
+                                
             _hidePropertyView();
             
             _toolbar_Page.hide();
@@ -1044,7 +994,6 @@ var sMsg = '<p>Heurist\'s CMS editor has been upgraded to a new system which is 
             //load website menu treeview
             if(!_editCMS_SiteMenu)
             _editCMS_SiteMenu = editCMS_SiteMenu( _panel_treeWebSite, that );
-            
             
             //tinymce.init({inline:false});
             //_layout_container.find('div.editable').removeClass('tinymce-body');
@@ -1693,24 +1642,14 @@ function(value){
         _panel_treePage.css('height',h+'px');//_panel_treePage.hide();
         _panel_propertyView.css('top',(h+70)+'px');
         _editor_panel.find('.page_tree').hide();
-        _editor_panel.find('.element_edit').show();
         _toolbar_Page.hide();
         
         _panel_propertyView.fadeIn(500);//show();
-        if(_ws_body.layout().state['west']['outerWidth']<400){
+        if(_ws_body.layout().state['west']['outerWidth']<450){
             _keep_EditPanelWidth = _ws_body.layout().state['west']['outerWidth'];
-            _ws_body.layout().sizePane('west', 400);    
+            _ws_body.layout().sizePane('west', 450);    
         }
 
-        // move 'website help' link, after property panel is shown
-        setTimeout(() => {
-            _editor_panel.find('.element_edit').position({
-                my: 'left+5 bottom-5',
-                at: 'left top',
-                of: _panel_propertyView
-            });
-        }, 100);
-        
         //scroll tree that selected element will be visible
         var node = _panel_treePage.fancytree('getTree').getNodeByKey(ele_id);
         var top1 = $(node.li).position().top;
