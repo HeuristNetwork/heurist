@@ -24,7 +24,7 @@
             <div class="btn-cancel" style="margin-right:20px">Cancel</div>
         </div>
         
-        <div class="ent_content_full" style="top:50px">
+        <div class="ent_content_full" style="top:50px; font-size: 11px;">
 
         <fieldset style="font-size:1em;">
             <div style="display:inline-block;" class="header_narrow">Widget label:</div>
@@ -32,9 +32,6 @@
             <div class="heurist-helper3">Please edit to clarify the tree</div>
         </fieldset>
         <br>
-        <div style="text-align: center; padding-left: 7px; margin-bottom: 5px;">
-            <div class="btn-widget ui-button-action">Configure widget</div>
-        </div>
         <div id="properties_form" style="font-size:1em;">
             <h3 class="props group">Layout</h3>
             <div class="props group" style="background:none">
@@ -212,24 +209,58 @@
 
                 
             </div>
-            <h3>Styles</h3>
-            <div style="background:none">
-            
+            <div>
+
                 <fieldset style="border:1px solid lightgray;border-radius:4px;margin:2px 4px;">
-                        <div>
-                            <div class="header_narrow"><b>Dimensions</b></div>
-                            <label>&nbsp;Width:</label>
-                            <input data-type="css" name="width" type="text" min="0" placeholder="auto" style="width:50px"/>
-                            <label>&nbsp;Height:</label>
-                            <input data-type="css" name="height"  type="text" min="0" placeholder="auto" style="width:50px"/>                       
-                        </div>
+                    <div>
+                        <div class="header_narrow"><b>Dimensions</b></div>
+                        <label>&nbsp;Width:</label>
+                        <input data-type="css" name="width" type="text" min="0" placeholder="auto" style="width:50px"/>
+                        <label>&nbsp;Height:</label>
+                        <input data-type="css" name="height"  type="text" min="0" placeholder="auto" style="width:50px"/>                       
+                    </div>
                 </fieldset>
-            
-                <fieldset style="border:1px solid lightgray;border-radius:4px;margin:2px 4px;" data-section="background">
+                <!-- Border -->
+                <fieldset style="border:1px solid lightgray;border-radius:4px;margin:2px 4px;" data-section="border">
+
+                    <h3 style="padding: 0.1em 0.1em 0.1em 1em;">
+                        Border:
+                        <select data-type="css" id="border-style" name="border-style">
+                            <option>none</option>
+                            <option>solid</option>
+                            <option>double</option>
+                            <option>dotted</option>
+                            <option>dashed</option>
+                            <option>inset</option>
+                            <option>outset</option>
+                            <option>groove</option>
+                            <option>ridge</option>
+                        </select>
+                    </h3>
+
+                    <div style="background:none">
                         <div>
-                            <label><b>Background:</b>
-                            <input data-type="css" name="background" type="checkbox" checked/></label>
+                            <div class="header_narrow">Color:</div>
+                            <input data-type="css" name="border-color" type="text" value="" placeholder="black" style="width:50px"/>
                         </div>
+                        <div>
+                            <div class="header_narrow">Size:</div>
+                            <input data-type="css" name="border-width" type="number" min="1" max="20" value="" placeholder="1" style="width:50px"/>
+                            <label>&nbsp;Corner:</label>
+                            <input data-type="css" name="border-radius"  type="number" min="0" max="40" value="" placeholder="0" style="width:50px"/>                       
+                        </div>
+                    </div>
+
+                </fieldset>
+                <!-- Background -->
+                <fieldset style="border:1px solid lightgray;border-radius:4px;margin:2px 4px;" data-section="background">
+
+                    <h3 style="padding: 0.1em 0.1em 0.1em 1em;">
+                        <label><b>Background:</b>
+                        <input data-type="css" name="background" type="checkbox" checked/></label>
+                    </h3>
+
+                    <div style="background:none">
                         <div>
                             <div class="header_narrow">Color:</div>
                             <input data-type="css" name="background-color" type="text" value="" style="width:50px"/>
@@ -265,43 +296,24 @@
                                 <option value="repeat-x">horizontally</option>
                             </select>
                         </div>
+                    </div>
+
                 </fieldset>
-                <fieldset style="border:1px solid lightgray;border-radius:4px;margin:2px 4px;" data-section="border">
-                        <div>
-                            <div class="header_narrow"><b>Border:</b></div>
-                            <select data-type="css" id="border-style" name="border-style">
-                                <option>none</option>
-                                <option>solid</option>
-                                <option>double</option>
-                                <option>dotted</option>
-                                <option>dashed</option>
-                                <option>inset</option>
-                                <option>outset</option>
-                                <option>groove</option>
-                                <option>ridge</option>
-                            </select>
-                        </div>
-                        <div>
-                            <div class="header_narrow">Color:</div>
-                            <input data-type="css" name="border-color" type="text" value="" placeholder="black" style="width:50px"/>
-                        </div>
-                        <div>
-                            <div class="header_narrow">Size:</div>
-                            <input data-type="css" name="border-width" type="number" min="1" max="20" value="" placeholder="1" style="width:50px"/>
-                            <label>&nbsp;Corner:</label>
-                            <input data-type="css" name="border-radius"  type="number" min="0" max="40" value="" placeholder="0" style="width:50px"/>                       
-                        </div>
-                </fieldset>
+                <!-- Margins and Padding -->
                 <fieldset style="border:1px solid lightgray;border-radius:4px;margin:2px 4px;">
-                        <button class="margin-mode" style="position:absolute;right: 10px;">compact</button>
-                        <div>
-                            <div class="header_narrow"><b>Margins</b></div>
-                            <div style="display:none;" class="margin-short">
+                    <button class="margin-mode" style="position:absolute;right: 10px;">compact</button>
+
+                    <h3 style="padding: 0.1em 0.1em 0.1em 1em;">
+                        Margins
+                        <div style="display:none;" class="margin-short">
                             <label>&nbsp;Inner:</label>
                             <input data-type="css" name="padding" type="number" min="0" value="" placeholder="0" style="width:50px"/>
                             <label>&nbsp;Outer:</label>
-                            <input data-type="css" name="margin"  type="number" min="0" value="" placeholder="0" style="width:50px"/>           </div> 
-                        </div>
+                            <input data-type="css" name="margin"  type="number" min="0" value="" placeholder="0" style="width:50px"/>
+                        </div> 
+                    </h3>
+
+                    <div style="background:none">
                         <div style="display:inline-block" class="margin-full">
                             <div class="header_narrow" style="vertical-align:middle">Inner</div>
                             <div style="vertical-align:middle;display:inline-block;padding-left:20px">
@@ -332,38 +344,51 @@
                                 <input data-type="css" name="margin-right" type="number" min="0" value="" placeholder="0" style="margin:2px;width:50px"/>
                             </div>    
                         </div>
+                    </div>
+
                 </fieldset>
             </div>
-            <h3>Classes</h3>
+
+            <h3 style="padding: 0.5em 0.5em 0.5em 1.8em;">Classes</h3>
             <div style="background:none">
                 <fieldset style="border:1px solid lightgray;border-radius:4px;margin:2px 4px;">
-                        <div>
-                            <div class="header_narrow" style="vertical-align:top;"><b>Custom CSS classes:</b></div>
-                            <textarea name="elementClasses" rows="4" cols="30">
-                            </textarea>
-                            <div class="heurist-helper3">Space separated list of classes defined in custom css field in page record</div>
-                        </div>
-                        <!--
-                        <div style="text-align:center;display: block;">
-                            <div class="header_narrow" style="vertical-align:top;"><b>Bootstrap classes:</b></div>
-                            <textarea name="elementBootstrap" rows="10" cols="30">
-                            </textarea>
-                            <div class="heurist-helper3">Use Grid, Typography and BG classes. Activate Bootstrap in home page record</div>
-                        </div>
-                        -->
+                    <div>
+                        <div class="header_narrow" style="vertical-align:top;"><b>Custom CSS classes:</b></div>
+                        <textarea name="elementClasses" rows="4" cols="30">
+                        </textarea>
+                        <div class="heurist-helper3">Space separated list of classes defined in custom css field in page record</div>
+                    </div>
+                    <!--
+                    <div style="text-align:center;display: block;">
+                        <div class="header_narrow" style="vertical-align:top;"><b>Bootstrap classes:</b></div>
+                        <textarea name="elementBootstrap" rows="10" cols="30">
+                        </textarea>
+                        <div class="heurist-helper3">Use Grid, Typography and BG classes. Activate Bootstrap in home page record</div>
+                    </div>
+                    -->
                 </fieldset>
             </div>
-            <div style="padding-left: 5px; margin-top: 5px;">
-                <strong>Source</strong>
+
+            <div style="border: 1px solid lightgray;border-radius:4px;margin: 2px 0px;overflow-x: auto;">
+                
+                <div style="text-align: center;padding-top: 5px;font-size: 9px;">
+                    <div class="btn-widget ui-button-action">Save configuration</div>
+                </div>
+
+                <div id="widget-config">
+                    <!-- Widget Config Content -->
+                </div>
+
             </div>
-            <div style="background: none;margin: 2px 15px;">
-                <div style="margin: 10px 0px;">
-                    <div style="display: inline-block"><b>HTML (DOM) ID</b></div>
+
+            <div style="background:none;margin:2px 15px;">
+                <div style="margin:10px 0px;">
+                    <div style="display:inline-block"><b>HTML (DOM) ID</b></div>
                     <input data-type="element-id" value=""/>
                     <div class="heurist-helper3">For example to define target element for menu ("page-content")</div>
                 </div>
-                <div style="margin-bottom: 10px;">
-                    <div style="display: inline-block; vertical-align: top;"><b>CSS:</b></div>
+                <div style="margin:10px 0px;">
+                    <div style="display:inline-block;vertical-align:top;"><b>CSS:</b></div>
                     <textarea name="elementCss" rows="10" cols="40">
                     </textarea>
                 </div>

@@ -24,7 +24,8 @@ function editCMS_ElementCfg( element_cfg, _layout_content, _layout_container, $c
 
     var _className = 'editCMS_ElementCfg';
     var element;
-    var l_cfg; //copy of json config  
+    var l_cfg, //copy of json config  
+        widget_cfg; //WidgetCfg object
     var codeEditor = null,
         codeEditorDlg = null,
         codeEditorBtns = null;
@@ -78,16 +79,17 @@ function editCMS_ElementCfg( element_cfg, _layout_content, _layout_container, $c
 
         cont.find('h4').css({margin:0});
         cont.find('.props').hide(); //hide all
-        $('.btn-widget').parent().hide();
+        cont.find('#widgetConfig').parent().hide();
+        cont.find('input[data-type="element-id"]').parent().show();
         cont.find('.props.'+etype).show(); //show required only
 
-        var activePage = (etype=='group'?0:(etype=='widget'?2:(etype=='cardinal'?1:2)));
+        var activePage = (etype=='group'?0:(etype=='widget'?false:(etype=='cardinal'?1:2)));
 
         cont.find('fieldset:first .heurist-helper3').position({
             my: 'left top', at: 'left bottom', of: cont.find('fieldset:first div:nth(1)')
         });
 
-        cont.find('#properties_form').accordion({header:'h3',heightStyle:'content',active:activePage});
+        cont.find('#properties_form').accordion({header:'h3',heightStyle:'content',active:activePage,collapsible:true});
         cont.find('h3').css({'font-size': '1.1em', 'font-weight': 'bold'});
 
         if(!l_cfg.css) l_cfg.css = {display:'block'};
@@ -97,46 +99,37 @@ function editCMS_ElementCfg( element_cfg, _layout_content, _layout_container, $c
         //load and init widget properties
         if(etype=='widget'){
 
-            //var l_cfg = layoutMgr.layoutContentFindElement(_layout_content, ele_id);  //json
-
-            function __openWidgetCfg(){
-                
-                var dom_id = window.hWin.HEURIST4.util.stripTags(cont.find('input[data-type="element-id"]').val());
-                if(dom_id!=l_cfg.options.widget_id){
-                    l_cfg.options.widget_id = dom_id;
-                }
-                
-                editCMS_WidgetCfg(l_cfg, _layout_content, null, function(new_cfg){
-                    //add new options 
-                    if(JSON.stringify(l_cfg.options) != JSON.stringify(new_cfg)){
-                        _enableSave();    
-                    }
-                    
-                    l_cfg.options = new_cfg;
-                    
-
-                    if(new_cfg.widget_id){
-                        l_cfg.dom_id = new_cfg.widget_id;
-                        cont.find('input[data-type="element-id"]').val(l_cfg.dom_id);
-                    }
-
-                    //recreate widget with new options
-                    layoutMgr.layoutAddWidget(l_cfg, element.parent());
-                    
-                    
-                } );
+            let dom_id = window.hWin.HEURIST4.util.stripTags(cont.find('input[data-type="element-id"]').val());
+            if(dom_id!=l_cfg.options.widget_id){
+                l_cfg.options.widget_id = dom_id;
             }
 
-            
-            $('.btn-widget').button().css({'border-radius':'4px',display:'inline-block'}).click(__openWidgetCfg)
-            $('.btn-widget').parent().show();
-            
-            //var container = cont.find('div.widget');
-            //$('<button>').button({label:top.HR('Configure')}).click(__openWidgetCfg).appendTo(container);
-            /*
-            if(l_cfg.app!='heurist_Graph'){
-                    __openWidgetCfg();
-            }*/
+            widget_cfg = editCMS_WidgetCfg(l_cfg, _layout_content, cont.find('#widget-config'), null, null);
+
+            function __returnWidgetCfg(){
+
+                let new_cfg = widget_cfg.getValues();
+
+                //add new options 
+                if(JSON.stringify(l_cfg.options) != JSON.stringify(new_cfg)){
+                    _enableSave();    
+                }
+                
+                l_cfg.options = new_cfg;
+
+                if(new_cfg.widget_id){
+                    l_cfg.dom_id = new_cfg.widget_id;
+                    cont.find('input[data-type="element-id"]').val(l_cfg.dom_id);
+                }
+
+                //recreate widget with new options
+                layoutMgr.layoutAddWidget(l_cfg, element.parent());
+
+            }
+
+            cont.find('.btn-widget').button().css({'border-radius':'4px',display:'inline-block'}).on('click', __returnWidgetCfg)
+            cont.find('#widget-config').parent().show();
+            cont.find('input[data-type="element-id"]').parent().hide();
 
         }else
         if(etype=='group' && l_cfg.children && l_cfg.children.length>0){
@@ -615,10 +608,10 @@ function editCMS_ElementCfg( element_cfg, _layout_content, _layout_container, $c
                     // Style
                     if(parts.length == 1 || part_zero_style){
                         s.push(`border-style: ${parts[0]}`);
-                        l_cfg.css['border-style'] = parts[0]; console.log(parts[0]);
+                        l_cfg.css['border-style'] = parts[0];
                     }else if(parts.length == 3 || part_one_style){
                         s.push(`border-style: ${parts[1]}`);
-                        l_cfg.css['border-style'] = parts[1]; console.log(parts[1]);
+                        l_cfg.css['border-style'] = parts[1];
                     }
 
                     // Colour

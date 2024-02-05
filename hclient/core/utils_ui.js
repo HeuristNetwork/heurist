@@ -716,6 +716,7 @@ window.hWin.HEURIST4.ui = {
         var useIds = false;
         var initial_indent = 0;
         var eventHandlers = null;
+        var extraOptions = {};
         if(options){  //at the moment it is implemented for single rectype only
             showDetailType    = options['show_dt_name']==true;
             addLatLongForGeo  = options['show_latlong']==true;
@@ -726,6 +727,7 @@ window.hWin.HEURIST4.ui = {
             useHtmlSelect     = options['useHtmlSelect']!==false;
             useIds            = options['useIds']===true;
             eventHandlers     = options['eventHandlers'];
+            extraOptions      = options['extraOptions'] ? options['extraOptions'] : {};
         }
         
         //var trash_id = $Db.getTrashGroupId('dtg');
@@ -978,7 +980,7 @@ window.hWin.HEURIST4.ui = {
             $(selObj).val(selectedValue);
         }
         
-        selObj = window.hWin.HEURIST4.ui.initHSelect(selObj, useHtmlSelect, null, eventHandlers);
+        selObj = window.hWin.HEURIST4.ui.initHSelect(selObj, useHtmlSelect, null, eventHandlers, extraOptions);
 
         return selObj;
     },
@@ -1115,17 +1117,23 @@ window.hWin.HEURIST4.ui = {
     
     //
     // eventHandlers {object} - object of event handlers ('onSelectMenu', 'onOpenMenu', 'onCloseMenu')
-    //
     //  onSelectMenu - in case defined use this callback instead of trigger
     //  onOpenMenu - called after selectmenu menuWidget has been created and rendered
     //  onCloseMenu - called after selectmenu loses focus and menuWidget is hidden
     //
-    initHSelect: function(selObj, useHtmlSelect, apply_style, eventHandlers){            
+    // extraOptions {object} - object to handle extra settings/setup
+    //  menu_parent - move the menuWidget into a different element (usually to avoid the menu from not appearing)
+    //
+    initHSelect: function(selObj, useHtmlSelect, apply_style, eventHandlers, extraOptions){            
 
         //var isNotFirefox = (navigator.userAgent.indexOf('Firefox')<0);
         ////depth>1 || (optgroup==null && depth>0
         
         selObj = $(selObj);
+
+        if(!extraOptions || !$.isPlainObject(extraOptions)){
+            extraOptions = {};
+        }
             
         //for usual HTML select we have to add spaces for indent
         if(useHtmlSelect){
@@ -1203,10 +1211,7 @@ window.hWin.HEURIST4.ui = {
             }else if(eventHandlers && $.isFunction(eventHandlers)){
                 onOpenMenu = eventHandlers;
             }
-            if(Object.values(arguments).length > 4 && $.isFunction(arguments[4])){
-                onSelectMenu = arguments[4];
-            }
- 
+             
             var menu = selObj.hSelect({ 
                 style: 'dropdown',
                 position: {collision: "flip"},  //(navigator.userAgent.indexOf('Firefox')<0)?{collision: "flip"}:{},
@@ -1279,7 +1284,10 @@ window.hWin.HEURIST4.ui = {
                 menu.hSelect( "widget" ).css({'padding':0, 'font-size':'1.1em', //'background':'#FFF',
                     width:(dwidth?dwidth:'auto'),'min-width':dminwidth }); //,'min-width':'16em''#F4F2F4'
             }
-                
+
+            if(extraOptions.menu_parent && extraOptions.menu_parent.length > 0){
+                menuwidget.parent().appendTo(extraOptions.menu_parent);
+            }
         }
         return selObj;
     },           
@@ -2312,7 +2320,7 @@ window.hWin.HEURIST4.ui = {
     //
     // $select jquery select
     //
-    createTemplateSelector: function($select, topOptions, defValue){
+    createTemplateSelector: function($select, topOptions, defValue, options){
         
         var baseurl = window.hWin.HAPI4.baseURL + "viewers/smarty/templateOperations.php";
         var request = {mode:'list', db:window.hWin.HAPI4.database};
@@ -2331,7 +2339,7 @@ window.hWin.HEURIST4.ui = {
                 if(defValue){
                     $select.val( defValue );
                 }
-                window.hWin.HEURIST4.ui.initHSelect($select[0], false);
+                window.hWin.HEURIST4.ui.initHSelect($select[0], false, null, options?.eventHandlers, options?.extraOptions);
                 
             });
         
