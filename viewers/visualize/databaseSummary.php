@@ -19,7 +19,7 @@
 * distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
 * See the License for the specific language governing permissions and limitations under the License.
 */
-
+print '<!DOCTYPE html>';
 define('PDIR','../../');  //need for proper path to js and css    
 require_once dirname(__FILE__).'/../../hclient/framecontent/initPage.php';
 ?>
@@ -158,6 +158,7 @@ A:link {
     <body class="popup" style="background-color: #FFF;padding: 0px;margin: 0px;">
     
         <div class="ent_wrapper" style="height: 100%;">
+        <div class="layout-container" style="height: 100%;">
 
             <div class="ui-layout-west">
 
@@ -251,13 +252,14 @@ A:link {
             </div>
 
             <div class="ui-layout-center">
-                <div id="main_content" class="ent_wrapper" style="left:0px">
+                <div id="main_content" class="ent_wrapper" style="left:0px;">
                     <?php 
                         $isDatabaseStructure = 1;
                         include_once dirname(__FILE__).'/visualize.php';
                     ?>
                 </div>
             </div>
+        </div>
         </div>
 
         <script>
