@@ -97,7 +97,7 @@ require_once 'initPage.php';
         </div>
 
         <br>
-        <div id="menu-export-geojson" class="export-item">
+        <div id="menu-export-rdf" class="export-item">
             <button class="export-button">RDF</button>
             <a href="#" oncontextmenu="return false;" 
                 data-logaction="exp_RDF"
