@@ -411,9 +411,9 @@ $.widget( "heurist.mainMenu6", {
         if($.isArray(prefs) && prefs.length>0){
             var rty_ID = prefs[0];
 
-            var ele = this.element.find('li[data-action-popup="recordAdd"]');
+            let ele = this.element.find('li[data-action-popup="recordAdd"]');
 
-            if(ele.length>0){
+            if(ele.length > 0){
 
                 if(rty_ID>0 && $Db.rty(rty_ID,'rty_Name')){
 
@@ -439,6 +439,18 @@ $.widget( "heurist.mainMenu6", {
                     ele.attr('data-id','');
                     this._off(ele, 'click');
                 }
+            }
+
+            ele = this.menues['populate'].find('li[data-action-popup="recordAdd"]');
+
+            if(ele.length > 0){
+
+                if(rty_ID>0 && $Db.rty(rty_ID,'rty_Name')){
+                    ele.find('span.menu-text').html(`New <i>${window.hWin.HEURIST4.util.htmlEscape($Db.rty(rty_ID,'rty_Name'))}</i>`);
+                }else{
+                    ele.find('span.menu-text').html(`New record`);
+                }
+
             }
         }
 
@@ -1499,11 +1511,13 @@ $.widget( "heurist.mainMenu6", {
                          +'<span class="menu-text truncate" style="max-width: 109px;">'+title+'</span>')
                         .appendTo(item);
 
-                        if(action_id=='menu-import-get-template' || 
-                           action_id=='menu-import-csv-fieldtypes' || 
+                        if(action_id=='menu-import-csv-fieldtypes' || 
                            action_id=='menu-import-csv-rectypes'){
-                            item.css({'font-size':'10px', padding:'0 0 0 8px','margin-top':'-1px'})
+                            item.css({'font-size':'10px', padding:'0 0 0 8px','margin-top':'-1px'});
 
+                        }else if(action_id=='menu-import-get-template'){
+                            item.find('.ui-icon').addClass('ui-icon-gear');
+                            item.css({'font-size':'10px', padding:'0 0 0 25px','margin-top':'-1px', 'margin-left': '0.25em'});
                         }else{
                             item.css({'font-size':'smaller', padding:'6px'})    
                         }
@@ -1513,6 +1527,11 @@ $.widget( "heurist.mainMenu6", {
                     }
                 }
             });
+
+        let $recAddSettings = this.menues[section].find('li[data-action-popup="recordAddSettings"]');
+        if($recAddSettings.length > 0){
+            $recAddSettings.css({'font-size':'10px', padding:'0 0 0 30px','margin-top':'-1px'});
+        }
             
         $(this.menues[section].children()[1]).find('.ui-icon')
                     .addClass('ui-heurist-title')  //apply color
@@ -1558,31 +1577,38 @@ $.widget( "heurist.mainMenu6", {
                 if(btn.length>0) btn.click();
                 
             }});
-        }else  if (section=='populate'){
+        }else if (section=='populate'){
         
-                this._updateDefaultAddRectype();
-                
-                //special behavior for 
-                var ele = this.menues['populate'].find('li[data-action-popup="recordAdd"]');
-                var that = this;
-                this._on(ele,{
-                     mouseenter: function(e){
+            this._updateDefaultAddRectype();
+            
+            //special behavior for 
+            let ele = this.menues['populate'].find('li[data-action-popup="recordAdd"], li[data-action-popup="recordAddSettings"]');
+            const that = this;
+            this._on(ele,{
+                mouseenter: function(e){
 
-                        this._resetCloseTimers();
-                        this.show_ExploreMenu(e);
-                     },
-                     mouseleave: function(e){
-                            clearTimeout(this._myTimeoutId3); this._myTimeoutId3 = 0; //clear timeout on show section menu
-                            this._resetCloseTimers();//reset
-                            this._myTimeoutId2 = setTimeout(function(){  //was 6
+                    this._resetCloseTimers();
+                    this.show_ExploreMenu(e);
+                },
+                mouseleave: function(e){
 
-                                        that._closeExploreMenuPopup();
-                                        //that.menues['explore'].hide();
-                                        //that.menues_explore_gap.hide();
-                                        //that._closeSectionMenu('explore');
-                                    },  this._delayOnCollapse_ExploreMenu); 
-                     }
-                });         
+                    clearTimeout(this._myTimeoutId3); this._myTimeoutId3 = 0; //clear timeout on show section menu
+                    this._resetCloseTimers();//reset
+                    this._myTimeoutId2 = setTimeout(function(){  //was 6
+
+                        that._closeExploreMenuPopup();
+                    },  this._delayOnCollapse_ExploreMenu); 
+                }
+            });
+
+            ele = this.menues['populate'].find('li[data-action-popup="recordAddSettings"]');
+
+            this._on(ele, {
+                click: function(e){
+                    this._resetCloseTimers();
+                    this.show_ExploreMenu(e);
+                }
+            });
         }
 
         if(this.menues[section].find('ul.accordionContainer').length > 0){ // check if current menu has any accordion groupings
