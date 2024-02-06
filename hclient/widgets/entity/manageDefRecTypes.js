@@ -1281,8 +1281,10 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
         }});
         
         ele = this._editing.getInputs('rty_Name');
-        this._on( $(ele[0]), {
+        if(ele && ele.length>0){
+            this._on( $(ele[0]), {
                 keypress: window.hWin.HEURIST4.ui.preventChars} );
+        }
         
         window.hWin.HEURIST4.ui.switchHintState2(ishelp_on, this.editForm, '.heurist-helper1');
         
