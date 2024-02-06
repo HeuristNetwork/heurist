@@ -34,18 +34,22 @@ class ExportRecordsRDF extends ExportRecords {
     private $graph;
 
     //indexes in defintions  
+    private $idx_rty_ccode;
     private $idx_rty_surl;
     private $idx_rst_surl;
+    private $idx_dty_ccode;
     private $idx_dty_surl;
     private $idx_dtype;
   
     private $serial_format = null;
+    private $dbid;
     
 protected function _outputPrepare($data, $params)
 {
     $res = parent::_outputPrepare($data, $params);
     if($res){
         $this->serial_format = @$params['serial_format'];
+        $this->dbid = $this->system->get_system('sys_dbRegisteredID');
     }
 
     return $res;
@@ -57,7 +61,9 @@ protected function _outputPrepare($data, $params)
 protected function _outputHeader(){
      $this->graph = new \EasyRdf\Graph();
      
-     \EasyRdf\RdfNamespace::set('xsd', 'http://www.w3.org/2001/XMLSchema#');
+     EasyRdf\RdfNamespace::set('xsd', 'http://www.w3.org/2001/XMLSchema#');
+     //EasyRdf\RdfNamespace::set('base', 'https://heuristref.net/ontology/');
+     EasyRdf\RdfNamespace::set('heurist', 'https://heuristref.net/ontology/');
      
     if(self::$defRecTypes==null) {
         self::$defRecTypes = dbs_GetRectypeStructures($this->system, null, 2);
@@ -67,10 +73,12 @@ protected function _outputHeader(){
     }
     
     $this->idx_rty_surl = self::$defRecTypes['typedefs']['commonNamesToIndex']['rty_ReferenceURL'];
+    $this->idx_rty_ccode = self::$defRecTypes['typedefs']['commonNamesToIndex']['rty_ConceptID'];
     $this->idx_rst_surl = self::$defRecTypes['typedefs']['dtFieldNamesToIndex']['rst_SemanticReferenceURL'];
     
     $this->idx_dtype = self::$defDetailtypes['typedefs']['fieldNamesToIndex']['dty_Type'];
     $this->idx_dty_surl = self::$defDetailtypes['typedefs']['fieldNamesToIndex']['dty_SemanticReferenceURL'];
+    $this->idx_dty_ccode = self::$defDetailtypes['typedefs']['fieldNamesToIndex']['dty_ConceptID'];
      
 }
 
@@ -174,6 +182,10 @@ protected function _outputRecord($record){
     $rty_ID = intval($record['rec_RecTypeID']);
     
     $type = $this->_prepareURI(self::$defRecTypes['typedefs'][$rty_ID]['commonFields'][$this->idx_rty_surl]);
+    
+    if($type==null){
+        $type = 'heurist:rty-'.self::$defRecTypes['typedefs'][$rty_ID]['commonFields'][$this->idx_rty_ccode];
+    }
 
     if($type){
         
@@ -181,6 +193,8 @@ protected function _outputRecord($record){
         //https://www.ica.org/standards/RiC/ontology#Person
         
         $uri = HEURIST_BASE_URL_PRO.'api/'.$this->system->dbname().'/view/'.$recID;
+        
+        $uri = HEURIST_BASE_URL_PRO.'record/'.$this->dbid.'-'.$recID; //new
         //$type = 'foaf:Person';
         
         $me = $this->graph->resource($uri, $type); 
@@ -248,6 +262,9 @@ private function _setResourceProps($record, &$resource){
         if($field_surl==null){
             $field_surl = $this->_prepareURI(self::$defDetailtypes['typedefs'][$dty_ID]['commonFields'][$this->idx_dty_surl]);
         }
+        if($field_surl==null && self::$defDetailtypes['typedefs'][$dty_ID]['commonFields'][$this->idx_dty_ccode]){
+            $field_surl = 'heurist:dty-'.self::$defDetailtypes['typedefs'][$dty_ID]['commonFields'][$this->idx_dty_ccode];
+        }
         
         if($field_surl==null) continue; //sematic url is not defined
         
@@ -291,6 +308,8 @@ private function _setResourceProps($record, &$resource){
                 
                     $val = $value['id'];
                     $uri = HEURIST_BASE_URL_PRO.'api/'.$this->system->dbname().'/view/'.$val;
+                    $uri = HEURIST_BASE_URL_PRO.'record/'.$this->dbid.'-'.$recID; //new
+
                     //$resource->add($field_surl, $this->graph->resource($uri));
                 }
                 
@@ -309,8 +328,12 @@ private function _setResourceProps($record, &$resource){
                         //$term_iri = HEURIST_BASE_URL_PRO.'api/'.$this->system->dbname().'/terms/'.$value;
                     }
                     if($term_iri!=null){
-                        $value = $this->graph->resource($term_iri);
-                        $value->add($field_surl, $value);
+                        $value = $this->graph->resource($term_iri); //create new or find resource
+                        $value->set('rdfs:label', $label);
+                        //works: $value->addLiteral('rdfs:name', $label);
+                       
+                        //as separate resource to graph root
+                        //$value->add($field_surl, $value); //add new resource
                     }else{
                         $value = $label;
                     }
@@ -444,6 +467,11 @@ private function _composeLinks(&$resource, $relations, $direction, $rty_ID){
                   }
             }
             $field_surl = $this->_prepareURI(self::$defTerms->getTermReferenceURL($trm_ID));
+
+            $trm_ConceptCode = self::$defTerms->getTermConceptID($trm_ID);
+            if($field_surl==null && $trm_ConceptCode){
+                $field_surl = 'heurist:trm-'.$trm_ConceptCode;
+            }
             
         }else{
             //link
@@ -452,6 +480,9 @@ private function _composeLinks(&$resource, $relations, $direction, $rty_ID){
             $field_surl = $this->_prepareURI(self::$defRecTypes['typedefs'][$rty_ID]['dtFields'][$dty_ID][$this->idx_rst_surl]);    
             if($field_surl==null){
                 $field_surl = $this->_prepareURI(self::$defDetailtypes['typedefs'][$dty_ID]['commonFields'][$this->idx_dty_surl]);
+            }
+            if($field_surl==null && self::$defDetailtypes['typedefs'][$dty_ID]['commonFields'][$this->idx_dty_ccode]){
+                $field_surl = 'heurist:dty-'.self::$defDetailtypes['typedefs'][$dty_ID]['commonFields'][$this->idx_dty_ccode];
             }
 
         }
@@ -472,6 +503,8 @@ private function _composeLinks(&$resource, $relations, $direction, $rty_ID){
         }
         
         $uri = HEURIST_BASE_URL_PRO.'api/'.$this->system->dbname().'/view/'.$related_rec_ID;
+        $uri = HEURIST_BASE_URL_PRO.'record/'.$this->dbid.'-'.$related_rec_ID; //new
+
         //$resource->add($field_surl, $this->graph->resource($uri));
         $resource->add($field_surl, $this->graph->resource($uri));
         
