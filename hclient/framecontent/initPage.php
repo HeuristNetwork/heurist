@@ -124,10 +124,9 @@ if(defined('IS_INDEX_PAGE')){
 <html  class="no-js" lang="en" dir="ltr">
 */
 if(defined('IS_INDEX_PAGE')){
-    print '<!DOCTYPE html>';
+    print "<!DOCTYPE html>\n";
 }
 ?>
-<!--[if IE 9]><html class="lt-ie10" lang="en" > <![endif]-->
 <html>
 <head>
 
