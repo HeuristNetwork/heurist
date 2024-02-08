@@ -2609,16 +2609,27 @@ li.edit-form-tab > a{
 }
 
 /* Configure CMS widgets popup/elements */
-.cms-widget-config i.help-text{
+.cms-widget-config i.help-text,
+.cms-widget-config i.help-text-block{
+    display: inline-block;
+
+    line-height: 12px;
+    padding-left: 5px;
+}
+.cms-widget-config i.help-text-block{
     display: block;
-    line-height: 10px;
+
+    padding-left: 0px;
     padding-bottom: 5px;
 }
 
 .cms-widget-config .header{
     font-size: 10px !important;
+
     width: 115px !important;
     min-width: 115px !important;
+
+    text-align: right;
 }
 .cms-widget-config .header.header_narrow{
     width: 100px !important;
@@ -2633,15 +2644,22 @@ li.edit-form-tab > a{
 .cms-widget-config .ui-tabs-nav li a{
     font-size: 1em;
     font-weight: normal;
+
     padding: 5px !important;
 }
 .cms-widget-config .ui-tabs-nav li.ui-state-disabled{
     display: none;
 }
 
+.cms-widget-config .ui-tabs-panel select:not(.truncate){
+    width: auto;
+    max-width: 240px;
+    min-width: unset;
+}
+
 .cms-widget-config .ui-tabs-panel .ui-selectmenu-button,
 .cms-widget-config .ui-tabs-panel select.truncate{
     font-size: 1em !important;
 
-    width: 250px !important;
+    width: 240px !important;
 }
