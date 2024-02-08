@@ -36,9 +36,14 @@ class ExportRecordsRDF extends ExportRecords {
     //indexes in defintions  
     private $idx_rty_ccode;
     private $idx_rty_surl;
+    private $idx_rty_dbid;
+    
     private $idx_rst_surl;
+    private $idx_rst_dbid;
+
     private $idx_dty_ccode;
     private $idx_dty_surl;
+    
     private $idx_dtype;
   
     private $serial_format = null;
@@ -63,7 +68,8 @@ protected function _outputHeader(){
      
      EasyRdf\RdfNamespace::set('xsd', 'http://www.w3.org/2001/XMLSchema#');
      //EasyRdf\RdfNamespace::set('base', 'https://heuristref.net/ontology/');
-     EasyRdf\RdfNamespace::set('heurist', 'https://heuristref.net/ontology/');
+     EasyRdf\RdfNamespace::set('hdb', 'https://heuristref.net/hdb/');
+     EasyRdf\RdfNamespace::set('dc', 'http://purl.org/dc/elements/1.1/');
      
     if(self::$defRecTypes==null) {
         self::$defRecTypes = dbs_GetRectypeStructures($this->system, null, 2);
@@ -74,7 +80,10 @@ protected function _outputHeader(){
     
     $this->idx_rty_surl = self::$defRecTypes['typedefs']['commonNamesToIndex']['rty_ReferenceURL'];
     $this->idx_rty_ccode = self::$defRecTypes['typedefs']['commonNamesToIndex']['rty_ConceptID'];
+    $this->idx_rty_dbid = self::$defRecTypes['typedefs']['commonNamesToIndex']['rty_OriginatingDBID'];
+    
     $this->idx_rst_surl = self::$defRecTypes['typedefs']['dtFieldNamesToIndex']['rst_SemanticReferenceURL'];
+    $this->idx_rst_dbid = self::$defRecTypes['typedefs']['dtFieldNamesToIndex']['rst_OriginatingDBID'];
     
     $this->idx_dtype = self::$defDetailtypes['typedefs']['fieldNamesToIndex']['dty_Type'];
     $this->idx_dty_surl = self::$defDetailtypes['typedefs']['fieldNamesToIndex']['dty_SemanticReferenceURL'];
@@ -99,7 +108,7 @@ private function initializeTerms(){
 // 1. https://www.ica.org/standards/RiC/ontology#Person  => rico:Person
 // 2. rico => https://www.ica.org/standards/RiC/ontology#
 //
-private function _prepareURI($surl){
+private function _prepareURI($surl, $original_dbid=null){
     
     $ns = null;
     
@@ -114,51 +123,90 @@ private function _prepareURI($surl){
         //
         if(strpos($surl,'#')>0){
             list($uri, $type) = explode('#',$surl);
-        }else{
+        }else if(strpos($surl,'http://')===0 || strpos($surl,'https://')===0){
             $parts = explode('/',$surl);
             $type = array_pop($parts);
+            if($type=='') $type = array_pop($parts);
             $uri = implode('/',$parts).'/';
+        }else{
+            //dty-2-1
+            //familyName
+            $type = $surl;
+            if(strpos($type,'rty-')===0 || strpos($type,'dty-')===0 || strpos($type,'trm-')===0){
+                $uri = 'https://heuristref.net/schema/';
+            }else if($original_dbid!=null){
+                
+                if(is_string($original_dbid) && strpos($original_dbid,'-')>0){
+                    list($dbid, $id) = explode('-', $original_dbid);
+                }else{
+                    $dbid = $original_dbid;
+                }
+                
+                if(intval($dbid)>0){
+                    $uri = 'https://heuristref.net/schema/';
+                    $uri .= $original_dbid.'/';    
+                }
+                
+            }
         }
+
+        //EasyRdf\RdfNamespace::set('heurist', 'https://heuristref.net/schema/');
+
         
         if($type){
         
             $ns = @$this->namespaces[$uri];
             if($ns==null){
                 //https://www.ica.org/standards/RiC/
-                if($uri=='https://www.ica.org/standards/RiC/ontology'){
+                if(strpos($uri,'https://heuristref.net/schema/')===0){
+
+                    $ns = 'heurist';                       
+                    
+                    $parts = explode('/',$uri);
+                    $dbid = array_pop($parts);
+                    if($dbid=='') $dbid = array_pop($parts);
+                    if(intval($dbid)>0){
+                        $ns .= $dbid;                       
+                    }
+                    
+                }else if($uri=='https://www.ica.org/standards/RiC/ontology'){
+                    
                     $ns = 'rico';
                 }else if($uri=='http://www.w3.org/2000/01/rdf-schema'){
                     $ns = 'rdfs';
                 }else if($uri=='https://www.omg.org/spec/LCC/Languages/ISO639-2-LanguageCodes'){
-                    
-                     $ns = 'lcc-639-2';
-                     
+
+                    $ns = 'lcc-639-2';
+
                 }else if($uri=='http://xmlns.com/foaf/0.1/'){
-                    
-                     $ns = 'foaf';
-                    
-                /*  http://xmlns.com/foaf/0.1/familyName
-                
-                }else if($uri=='http://dbpedia.org/resource/Category:'){
+
+                    $ns = 'foaf';
+
+                }else {
+
+
+                    /*  http://xmlns.com/foaf/0.1/familyName
+
+                    }else if($uri=='http://dbpedia.org/resource/Category:'){
                     $ns = 'dbc';
-                }else if($uri=='http://dbpedia.org/resource/'){
+                    }else if($uri=='http://dbpedia.org/resource/'){
                     $ns = 'dbpedia';
 
-                }else if($uri=='http://dbpedia.org/resource/'){
+                    }else if($uri=='http://dbpedia.org/resource/'){
                     $ns = 'dbo';
 
-                }else if($uri=='http://dbpedia.org/property/'){
+                    }else if($uri=='http://dbpedia.org/property/'){
                     $ns = 'dbp';*/
                 }
                     
                 if($ns!=null){
                     $this->namespaces[$uri] = $ns;
-                    if(substr($uri,-1)=='/'){
+                    if(substr($uri,-1)!='/'){
                         $uri = $uri.'#';
                     }
                     \EasyRdf\RdfNamespace::set($ns, $uri);
                 }else{
-                    if(substr($uri,-1)=='/'){
+                    if($uri && substr($uri,-1)=='/'){
                         return $uri.$type;
                     }
                 }
@@ -181,10 +229,15 @@ protected function _outputRecord($record){
     $recID = intval($record['rec_ID']);
     $rty_ID = intval($record['rec_RecTypeID']);
     
-    $type = $this->_prepareURI(self::$defRecTypes['typedefs'][$rty_ID]['commonFields'][$this->idx_rty_surl]);
+    $type = $this->_prepareURI(self::$defRecTypes['typedefs'][$rty_ID]['commonFields'][$this->idx_rty_surl],
+                               self::$defRecTypes['typedefs'][$rty_ID]['commonFields'][$this->idx_rty_dbid] );
+    
+    if($type==null && self::$defRecTypes['typedefs'][$rty_ID]['commonFields'][$this->idx_rty_ccode]){
+        $type = $this->_prepareURI('rty-'.self::$defRecTypes['typedefs'][$rty_ID]['commonFields'][$this->idx_rty_ccode]);
+    }
     
     if($type==null){
-        $type = 'heurist:rty-'.self::$defRecTypes['typedefs'][$rty_ID]['commonFields'][$this->idx_rty_ccode];
+        $type = 'rdf:Description';
     }
 
     if($type){
@@ -192,10 +245,9 @@ protected function _outputRecord($record){
         
         //https://www.ica.org/standards/RiC/ontology#Person
         
-        $uri = HEURIST_BASE_URL_PRO.'api/'.$this->system->dbname().'/view/'.$recID;
+        //$uri = HEURIST_BASE_URL_PRO.'api/'.$this->system->dbname().'/view/'.$recID;
+        $uri = 'record/'.$this->dbid.'-'.$recID; //new
         
-        $uri = HEURIST_BASE_URL_PRO.'record/'.$this->dbid.'-'.$recID; //new
-        //$type = 'foaf:Person';
         
         $me = $this->graph->resource($uri, $type); 
         
@@ -251,22 +303,15 @@ private function _setResourceProps($record, &$resource){
     $rec_Title = $record['rec_Title'];
 
     // label or name attribute    
-    $field_surl = $this->_prepareURI('http://www.w3.org/2000/01/rdf-schema#name'); //or label ?
-    $resource->set($field_surl, $rec_Title);
+    //$field_surl = $this->_prepareURI('http://www.w3.org/2000/01/rdf-schema#name'); //or label ?
+    $resource->set('dc:title', $rec_Title);
 
     //convert details to attributes
     foreach ($record['details'] as $dty_ID=>$field_details) {
         
+        $field_URI = $this->_getFieldURI($rty_ID, $dty_ID);
         
-        $field_surl = $this->_prepareURI(self::$defRecTypes['typedefs'][$rty_ID]['dtFields'][$dty_ID][$this->idx_rst_surl]);    
-        if($field_surl==null){
-            $field_surl = $this->_prepareURI(self::$defDetailtypes['typedefs'][$dty_ID]['commonFields'][$this->idx_dty_surl]);
-        }
-        if($field_surl==null && self::$defDetailtypes['typedefs'][$dty_ID]['commonFields'][$this->idx_dty_ccode]){
-            $field_surl = 'heurist:dty-'.self::$defDetailtypes['typedefs'][$dty_ID]['commonFields'][$this->idx_dty_ccode];
-        }
-        
-        if($field_surl==null) continue; //sematic url is not defined
+        if($field_URI==null) continue; //sematic url is not defined
         
         $field_type = self::$defDetailtypes['typedefs'][$dty_ID]['commonFields'][$this->idx_dtype];
 
@@ -307,8 +352,8 @@ private function _setResourceProps($record, &$resource){
                 if(@$value['id']){ //resource
                 
                     $val = $value['id'];
-                    $uri = HEURIST_BASE_URL_PRO.'api/'.$this->system->dbname().'/view/'.$val;
-                    $uri = HEURIST_BASE_URL_PRO.'record/'.$this->dbid.'-'.$recID; //new
+                    //$uri = HEURIST_BASE_URL_PRO.'api/'.$this->system->dbname().'/view/'.$val;
+                    $uri = 'record/'.$this->dbid.'-'.$recID; //new
 
                     //$resource->add($field_surl, $this->graph->resource($uri));
                 }
@@ -322,23 +367,24 @@ private function _setResourceProps($record, &$resource){
                 if($field_type=='enum'){
                     $this->initializeTerms();
                     
-                    $label = self::$defTerms->getTermLabel($value);
-                    $term_iri = $this->_prepareURI(self::$defTerms->getTermReferenceURL($value));
-                    if($term_iri == null){
-                        //$term_iri = HEURIST_BASE_URL_PRO.'api/'.$this->system->dbname().'/terms/'.$value;
+                    $trm_ID = $value;
+                    $trm_Label = self::$defTerms->getTermLabel($trm_ID);
+                    $trm_ConceptCode = self::$defTerms->getTermConceptID($trm_ID);
+                    $term_resource_uri = $this->_prepareURI(self::$defTerms->getTermReferenceURL($trm_ID));
+                    
+                    if($term_resource_uri == null){
+                        $term_resource_uri = 'term/'.$trm_ConceptCode;
                     }
-                    if($term_iri!=null){
-                        $value = $this->graph->resource($term_iri); //create new or find resource
-                        $value->set('rdfs:label', $label);
+                    if($term_resource_uri!=null){
+                        $value = $this->graph->resource($term_resource_uri); //create new or find resource
+                        $value->set('dc:title', $trm_Label);
                         //works: $value->addLiteral('rdfs:name', $label);
                        
                         //as separate resource to graph root
                         //$value->add($field_surl, $value); //add new resource
                     }else{
-                        $value = $label;
+                        $value = $trm_Label;
                     }
-                    
-                    //$value->add($this->_prepareURI('http://www.w3.org/2000/01/rdf-schema#label'), $label);
                     
                     
                 }else
@@ -375,7 +421,7 @@ private function _setResourceProps($record, &$resource){
                 $val = $value;
             }
             
-            $resource->add($field_surl, $value);
+            $resource->add($field_URI, $value);
   
 /*            
             if(!isset($val)) $val = '';
@@ -466,27 +512,15 @@ private function _composeLinks(&$resource, $relations, $direction, $rty_ID){
                       $trm_ID = $rev_trm_ID;
                   }
             }
-            $field_surl = $this->_prepareURI(self::$defTerms->getTermReferenceURL($trm_ID));
-
-            $trm_ConceptCode = self::$defTerms->getTermConceptID($trm_ID);
-            if($field_surl==null && $trm_ConceptCode){
-                $field_surl = 'heurist:trm-'.$trm_ConceptCode;
-            }
+            $relation_uri = $this->_getRelationURI($trm_ID);
             
         }else{
             //link
             $dty_ID = $relation->dtID;
-            
-            $field_surl = $this->_prepareURI(self::$defRecTypes['typedefs'][$rty_ID]['dtFields'][$dty_ID][$this->idx_rst_surl]);    
-            if($field_surl==null){
-                $field_surl = $this->_prepareURI(self::$defDetailtypes['typedefs'][$dty_ID]['commonFields'][$this->idx_dty_surl]);
-            }
-            if($field_surl==null && self::$defDetailtypes['typedefs'][$dty_ID]['commonFields'][$this->idx_dty_ccode]){
-                $field_surl = 'heurist:dty-'.self::$defDetailtypes['typedefs'][$dty_ID]['commonFields'][$this->idx_dty_ccode];
-            }
-
+            $relation_uri = $this->_getFieldURI($rty_ID, $dty_ID);
         }
         
+        /*        
         if($field_surl==null){
             //$field_surl = $this->_prepareURI('https://www.ica.org/standards/RiC/ontology#Relation');
             if($direction=='direct'){
@@ -495,22 +529,68 @@ private function _composeLinks(&$resource, $relations, $direction, $rty_ID){
                 $field_surl = $this->_prepareURI('https://www.ica.org/standards/RiC/ontology#hasSource');
             }
         }
+        */
         
-        if($direction=='direct'){
-            $related_rec_ID = $relation->targetID;
-        }else{
-            $related_rec_ID = $relation->sourceID;
-        }
-        
-        $uri = HEURIST_BASE_URL_PRO.'api/'.$this->system->dbname().'/view/'.$related_rec_ID;
-        $uri = HEURIST_BASE_URL_PRO.'record/'.$this->dbid.'-'.$related_rec_ID; //new
+        if($relation_uri!=null){
+            
+            if($direction=='direct'){
+                $related_rec_ID = $relation->targetID;
+            }else{
+                $related_rec_ID = $relation->sourceID;
+            }
+            
+            //old $uri = HEURIST_BASE_URL_PRO.'api/'.$this->system->dbname().'/view/'.$related_rec_ID;
+            $uri = 'record/'.$this->dbid.'-'.$related_rec_ID; //new
 
-        //$resource->add($field_surl, $this->graph->resource($uri));
-        $resource->add($field_surl, $this->graph->resource($uri));
-        
+            //$resource->add($field_surl, $this->graph->resource($uri));
+            $resource->add($relation_uri, $this->graph->resource($uri));
+            
+        }
     }
     
     
+    
+}
+
+//
+//
+//
+private function _getFieldURI($rty_ID, $dty_ID){
+  
+    $field_URI = $this->_prepareURI(self::$defRecTypes['typedefs'][$rty_ID]['dtFields'][$dty_ID][$this->idx_rst_surl],
+                                    self::$defRecTypes['typedefs'][$rty_ID]['dtFields'][$dty_ID][$this->idx_rst_dbid]);    
+    if($field_URI==null){
+        $field_URI = $this->_prepareURI(self::$defDetailtypes['typedefs'][$dty_ID]['commonFields'][$this->idx_dty_surl],
+                                         self::$defDetailtypes['typedefs'][$dty_ID]['commonFields'][$this->idx_dty_ccode]);
+    }
+    if($field_URI==null && self::$defDetailtypes['typedefs'][$dty_ID]['commonFields'][$this->idx_dty_ccode]){
+        $field_URI = $this->_prepareURI('dty-'.self::$defDetailtypes['typedefs'][$dty_ID]['commonFields'][$this->idx_dty_ccode]);
+        //$field_surl .= '-'.preg_replace('/\s+/', '', self::$defDetailtypes['typedefs'][$dty_ID]['commonFields'][$this->idx_dty_name]);
+    }
+    
+    return $field_URI;
+}
+
+//
+//
+//
+private function _getRelationURI($trm_ID){
+    
+    //$term = self::$defTerms->getTerm($trm_ID);
+
+    $term_URI = $this->_prepareURI(self::$defTerms->getTermReferenceURL($trm_ID),
+                                   self::$defTerms->getTermField($trm_ID, 'trm_OriginatingDBID'));
+
+    if($term_URI == null){
+        $trm_ConceptCode = self::$defTerms->getTermConceptID($trm_ID);
+        $trm_Label = self::$defTerms->getTermLabel($trm_ID);
+        if($term_URI==null && $trm_ConceptCode){
+            $field_URI = $this->_prepareURI('trm-'.$trm_ConceptCode);
+            //$term_URI = 'heurist:trm-'.$trm_ConceptCode.'-'.preg_replace('/\s+/', '', $trm_Label);
+        }
+    }
+
+    return $term_URI;    
     
 }
 
