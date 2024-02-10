@@ -49,12 +49,17 @@ class ExportRecordsRDF extends ExportRecords {
     private $serial_format = null;
     private $dbid;
     
+    
 protected function _outputPrepare($data, $params)
 {
     $res = parent::_outputPrepare($data, $params);
     if($res){
         $this->serial_format = @$params['serial_format'];
         $this->dbid = $this->system->get_system('sys_dbRegisteredID');
+        
+        if(!defined('HEURIST_REF')){
+            define('HEURIST_REF','https://heuristref.net/');    
+        }
     }
 
     return $res;
@@ -67,8 +72,8 @@ protected function _outputHeader(){
      $this->graph = new \EasyRdf\Graph();
      
      EasyRdf\RdfNamespace::set('xsd', 'http://www.w3.org/2001/XMLSchema#');
-     //EasyRdf\RdfNamespace::set('base', 'https://heuristref.net/ontology/');
-     EasyRdf\RdfNamespace::set('hdb', 'https://heuristref.net/hdb/');
+     //EasyRdf\RdfNamespace::set('base', HEURIST_REF);
+     EasyRdf\RdfNamespace::set('db', HEURIST_REF.'db/');
      EasyRdf\RdfNamespace::set('dc', 'http://purl.org/dc/elements/1.1/');
      
     if(self::$defRecTypes==null) {
@@ -133,7 +138,7 @@ private function _prepareURI($surl, $original_dbid=null){
             //familyName
             $type = $surl;
             if(strpos($type,'rty-')===0 || strpos($type,'dty-')===0 || strpos($type,'trm-')===0){
-                $uri = 'https://heuristref.net/schema/';
+                $uri = HEURIST_REF.'schema/';
             }else if($original_dbid!=null){
                 
                 if(is_string($original_dbid) && strpos($original_dbid,'-')>0){
@@ -143,22 +148,19 @@ private function _prepareURI($surl, $original_dbid=null){
                 }
                 
                 if(intval($dbid)>0){
-                    $uri = 'https://heuristref.net/schema/';
+                    $uri = HEURIST_REF.'schema/';
                     $uri .= $original_dbid.'/';    
                 }
                 
             }
         }
 
-        //EasyRdf\RdfNamespace::set('heurist', 'https://heuristref.net/schema/');
-
-        
         if($type){
         
             $ns = @$this->namespaces[$uri];
             if($ns==null){
                 //https://www.ica.org/standards/RiC/
-                if(strpos($uri,'https://heuristref.net/schema/')===0){
+                if(strpos($uri, HEURIST_REF.'schema/')===0){
 
                     $ns = 'heurist';                       
                     
@@ -246,7 +248,7 @@ protected function _outputRecord($record){
         //https://www.ica.org/standards/RiC/ontology#Person
         
         //$uri = HEURIST_BASE_URL_PRO.'api/'.$this->system->dbname().'/view/'.$recID;
-        $uri = 'record/'.$this->dbid.'-'.$recID; //new
+        $uri = HEURIST_REF.'db/record/'.$this->dbid.'-'.$recID; //new
         
         
         $me = $this->graph->resource($uri, $type); 
@@ -353,7 +355,7 @@ private function _setResourceProps($record, &$resource){
                 
                     $val = $value['id'];
                     //$uri = HEURIST_BASE_URL_PRO.'api/'.$this->system->dbname().'/view/'.$val;
-                    $uri = 'record/'.$this->dbid.'-'.$recID; //new
+                    $uri = HEURIST_REF.'db/record/'.$this->dbid.'-'.$recID; //new
 
                     //$resource->add($field_surl, $this->graph->resource($uri));
                 }
@@ -373,7 +375,7 @@ private function _setResourceProps($record, &$resource){
                     $term_resource_uri = $this->_prepareURI(self::$defTerms->getTermReferenceURL($trm_ID));
                     
                     if($term_resource_uri == null){
-                        $term_resource_uri = 'term/'.$trm_ConceptCode;
+                        $term_resource_uri = HEURIST_REF.'db/term/'.$trm_ConceptCode;
                     }
                     if($term_resource_uri!=null){
                         $value = $this->graph->resource($term_resource_uri); //create new or find resource
@@ -465,10 +467,10 @@ private function _setResourceProps($record, &$resource){
         
         if($links['status']==HEURIST_OK){
             if(@$links['data']['direct']){
-                $this->_composeLinks($resource, $links['data']['direct'], 'direct', $rty_ID);
+                $this->_composeLinks($resource, $links['data']['direct'], 'direct', $rty_ID, $links['data']['headers']);
             }
             if(@$links['data']['reverse']){
-                $this->_composeLinks($resource, $links['data']['reverse'], 'reverse', $rty_ID);
+                $this->_composeLinks($resource, $links['data']['reverse'], 'reverse', $rty_ID, $links['data']['headers']);
             }
         }
     }
@@ -478,7 +480,7 @@ private function _setResourceProps($record, &$resource){
 //
 //
 //
-private function _composeLinks(&$resource, $relations, $direction, $rty_ID){
+private function _composeLinks(&$resource, $relations, $direction, $rty_ID, $headers){
     
     /*
                 $relation->recID 
@@ -540,15 +542,18 @@ private function _composeLinks(&$resource, $relations, $direction, $rty_ID){
             }
             
             //old $uri = HEURIST_BASE_URL_PRO.'api/'.$this->system->dbname().'/view/'.$related_rec_ID;
-            $uri = 'record/'.$this->dbid.'-'.$related_rec_ID; //new
+            $uri = HEURIST_REF.'db/record/'.$this->dbid.'-'.$related_rec_ID; //new
 
+            $rec_resource = $this->graph->resource($uri);
+            if(@$headers[$related_rec_ID][0]){
+                $rec_resource->set('dc:title', $headers[$related_rec_ID][0]);    
+            }
+            
             //$resource->add($field_surl, $this->graph->resource($uri));
-            $resource->add($relation_uri, $this->graph->resource($uri));
+            $resource->add($relation_uri, $rec_resource);
             
         }
     }
-    
-    
     
 }
 
