@@ -27,12 +27,21 @@ if( @$_REQUEST['recID'] || @$_REQUEST['recid'] || array_key_exists('website', $_
 
     $recid = 0;
     if(@$_REQUEST['recID']){
-        $recid = intval($_REQUEST['recID']);    
+        $recid = $_REQUEST['recID'];    
     }elseif(@$_REQUEST['recid']){
-        $recid = intval($_REQUEST['recid']);        
+        $recid = $_REQUEST['recid'];        
     }elseif(@$_REQUEST['id']){
-        $recid = intval($_REQUEST['id']);                
+        $recid = $_REQUEST['id'];                
     }
+    if(strpos($recid, '-')>0){
+        list($database_id, $recid) = explode('-', $recid, 2);
+        $database_id = intval($database_id);
+        $recid = intval($database_id).'-'.intval($recid);
+    }else{
+        $recid = intval($recid);        
+    }
+    
+    
     if(@$_REQUEST['fmt']){
         $format = filter_var($_REQUEST['fmt'], FILTER_SANITIZE_STRING);    
     }elseif(@$_REQUEST['format']){

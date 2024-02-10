@@ -53,6 +53,9 @@
 $requestUri = explode('/', trim($_SERVER['REQUEST_URI'],'/'));
 $allowedActions = array('website','web','hml','tpl','view','edit','adm');
 
+$format = null;
+$redirection_path = '../';
+
 //print $_SERVER['REQUEST_URI'];
 //print print_r($requestUri,true);
 //exit;
@@ -74,8 +77,9 @@ if(count($requestUri)==1 && ($requestUri[0]=='heurist' || $requestUri[0]=='h6-al
 
     header('Location: /'.filter_var($requestUri[0]).'/index.php');  
     exit;
-    
-}else if ((count($requestUri)==1)
+
+}else
+if ((count($requestUri)==1)
      || 
     (count($requestUri)==2 && (!in_array($requestUri[1],$allowedActions) || $requestUri[1]=='startup'))
     )
@@ -93,7 +97,37 @@ if(count($requestUri)==1 && ($requestUri[0]=='heurist' || $requestUri[0]=='h6-al
 }
 
 
-                           // dbname/action                               heurist/dbname/action
+// db/record/2312-123  or  db/record/2312-123.rdf  or db/record/123?db=somedb&fmt=rdf
+if(count($requestUri)==3 && $requestUri[0]=='db' && $requestUri[1]=='record'){
+    //redirect to record info
+    $recID = $requestUri[2];
+    
+    if(strpos($recID,'?')>0){
+        list($recID, $query) = explode('?',$recID);
+    }
+    if(strpos($recID,'.')>0){
+        list($recID, $format) = explode('.',$recID);
+    }
+    
+    if(@$_REQUEST['fmt']==null){
+        // take format from Accept or Content-typee
+        //Accept: text/html, application/xhtml+xml
+        //Accept: application/rdf+xml;q=0.7, text/html
+        //$_SERVER['HTTP_ACCEPT']
+        //$_SERVER["CONTENT_TYPE"]
+        if($format==null){
+            
+        }
+        
+        $_REQUEST['fmt'] = $format;
+    }
+    $_REQUEST['recID'] = $recID;
+    
+    $redirection_path = '../../heurist/';
+
+    //header('Location: /h6-alpha/redirects/resolver.php?recID='.$requestUri[2].'&fmt='.$format);
+    
+}else                            // dbname/action                               heurist/dbname/action
 if(count($requestUri)>1 && (in_array($requestUri[1],$allowedActions) || in_array(@$requestUri[2],$allowedActions)))
 {
 /*
@@ -296,21 +330,22 @@ else if(count($requestUri)>2 && ($requestUri[0]=='heurist' || $requestUri[0]=='h
     
 }
 
+//alowed 
 if(@$_REQUEST['fmt']){
     $format = filter_var($_REQUEST['fmt'], FILTER_SANITIZE_STRING);    
 }elseif(@$_REQUEST['format']){
     $format = filter_var($_REQUEST['format'], FILTER_SANITIZE_STRING);        
 }else{
-    $format = 'xml';
+    $format = 'hml';
 }
+
 $entity = null;
 $recid = null;         
 $database_id = 0;
 
-if(@$_REQUEST['recID']){
-    $recid = intval($_REQUEST['recID']);    
-}else if(@$_REQUEST['recid']){
-    $recid = intval($_REQUEST['recid']);        
+if(@$_REQUEST['recID'] || @$_REQUEST['recid']){
+    $recid = @$_REQUEST['recid']?$_REQUEST['recid']:$_REQUEST['recID'];        
+    
 }else if (@$_REQUEST['rty'] || @$_REQUEST['dty'] || @$_REQUEST['trm']){
     
     if(@$_REQUEST['rty']) $entity = 'rty';
@@ -319,23 +354,30 @@ if(@$_REQUEST['recID']){
     
     $recid = filter_var($_REQUEST[$entity], FILTER_SANITIZE_STRING);
     $format = 'xml';
-
-    if(strpos($recid, '-')>0){    
-        $vals = explode('-', $recid);
-        if(count($vals)==3){
-            $database_id = intval($vals[0]);
-            $recid = intval($vals[1]).'-'.intval($vals[2]);
-        }
-    }
-    
 }
 
 //form accepting recID=123-3456 which redirects to record 3456 on database 123
-if(!$entity && strpos($recid, '-')>0){
-    list($database_id, $recid) = explode('-', $recid, 2);
-}else if (is_int(@$_REQUEST['db'])){
-    $database_id = intval($_REQUEST['db']);
+if($recid!=null){
+    if(strpos($recid, '-')>0){    
+        list($database_id, $recid) = explode('-', $recid, 2);
+        $database_id = intval($database_id);
+        $recid = intval($recid);
+    }else{
+        $recid = intval($recid);
+        
+        if (is_int(@$_REQUEST['db'])){
+            $database_id = intval($_REQUEST['db']);
+        }    
+    }
 }
+
+if(!($recid>0)){
+    if(isset($error_msg)){
+        header('Location:'.$redirection_path.'hclient/framecontent/infoPage.php?error=Record ID is not defined');
+        exit;
+    }
+}
+
 
 $database_url = null;    
 
@@ -347,11 +389,24 @@ if ($database_id>0) {
     }
     
     if(isset($error_msg)){
-        header('Location:../hclient/framecontent/infoPage.php?error='.rawurlencode($error_msg));
+        header('Location:'.$redirection_path.'hclient/framecontent/infoPage.php?error='.rawurlencode($error_msg));
         exit;
     }
 
 }
+
+
+//allowed formats
+// for definitions
+//      xml - xml template
+// for records
+//      web, website  - redirect ot website
+//      edit - redirect to edit
+//      hml (default)
+//      xml - record_output
+//      html
+//      json
+//      rdf
 
 if($database_url!=null){ //redirect to resolver for another database
     if($entity!=null){
@@ -361,38 +416,58 @@ if($database_url!=null){ //redirect to resolver for another database
     }
 }else if($entity!=null){
     
-    $redirect = '../hserv/structure/export/getDBStructureAsXML.php?db='.$_REQUEST['db'].'&'.$entity.'='.$recid;
+    $redirect = 'hserv/structure/export/getDBStructureAsXML.php?db='.$_REQUEST['db'].'&'.$entity.'='.$recid;
     
-}else if($format=='html'){
+}else if($format=='html'){ //recirect to recordView
     
     if(@$_REQUEST['noheader']){
-        $redirect = '../viewers/record/renderRecordData.php?db='
+        $redirect = 'viewers/record/renderRecordData.php?db='
             .$_REQUEST['db'].'&noheader=1&recID='.$recid;    
     }else{
-        $redirect = '../viewers/record/viewRecord.php?db='.$_REQUEST['db'].'&recID='.$recid;    
+        $redirect = 'viewers/record/viewRecord.php?db='.$_REQUEST['db'].'&recID='.$recid;    
     }
     
     
-}else if($format=='web' || $format=='website'){
+}else if($format=='web' || $format=='website'){ //redirect to website
     
-    $redirect = '../hclient/widgets/cms/websiteRecord.php?db='.$_REQUEST['db'].'&recID='.$recid;
+    $redirect = 'hclient/widgets/cms/websiteRecord.php?db='.$_REQUEST['db'].'&recID='.$recid;
     if(@$_REQUEST['field']>0){
         $redirect = $redirect.'&field='.$_REQUEST['field'];    
     }
     
-}else if($format=='edit'){
+}else if($format=='edit'){  //redirect to record edit
+
     //todo include resolver recordSearchReplacement
-    $redirect = '../hclient/framecontent/recordEdit.php?'.$_SERVER['QUERY_STRING'];
+    $redirect = 'hclient/framecontent/recordEdit.php?'.$_SERVER['QUERY_STRING'];
+    
 }else if(@$_REQUEST['db']){
-    //todo include resolver  recordSearchReplacement
-    $redirect = '../export/xml/flathml.php?db='.$_REQUEST['db'].'&depth=1&w=a&q=ids:'.$recid;
+    
+    if(in_array($format, array('xml','json','rdf','gephi','geojson','iiif'))){
+        
+        $redirect = 'hserv/controller/record_output.php?vers=2&fmt='.$format;
+        
+    }else{
+        //by default hml
+        $redirect = 'export/xml/flathml.php?w=a';
+    }
+    
+    $redirect .= '&db='.$_REQUEST['db'].'&q=ids:'.$recid;
+    
+    if(@$_REQUEST['depth']>0){
+        $redirect .= '&depth='.intval($_REQUEST['depth']);
+    }
+    /*if(@$_REQUEST['linkmode']!=null){
+        //direct, direct_links, none, all
+        $redirect .= '&linkmode='.$_REQUEST['linkmode'];
+    }*/
+    
 }else{
     if(!isset($error_msg)){
         $error_msg = 'Can\'t resolve the given URI: '.$_SERVER['REQUEST_URI'];
     }
-    $redirect = '../hclient/framecontent/infoPage.php?error='.rawurlencode($error_msg); 
+    $redirect = 'hclient/framecontent/infoPage.php?error='.rawurlencode($error_msg); 
 }
 
-header('Location: '.$redirect);
+header('Location: '.$redirection_path.$redirect);
 return;
 ?>
