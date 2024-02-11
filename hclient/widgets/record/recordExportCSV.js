@@ -155,23 +155,6 @@ $.widget( "heurist.recordExportCSV", $.heurist.recordAction, {
                 that._setFieldAdvancedOptions(settings.advanced_options);
             }
             
-            /*
-            var tree = that.element.find('.rtt-tree').fancytree("getTree");           
-            tree.visit(function(node){
-                node.setSelected(false);
-                node.setExpanded(true);
-            });            
-            
-            setTimeout(function(){
-                that._assignSelectedFields();
-
-                // Set advanced options.
-                if (settings.hasOwnProperty('advanced_options') && settings.advanced_options) {
-                    that._setFieldAdvancedOptions(settings.advanced_options);
-                }
-            },1000);
-            */
-            
             that.element.find('#delimiterSelect').val(settings.csv_delimiter);
             that.element.find('#quoteSelect').val(settings.csv_enclosure);
             that.element.find('#cbNamesAsFirstRow').prop('checked',(settings.csv_header==1));
@@ -222,23 +205,7 @@ $.widget( "heurist.recordExportCSV", $.heurist.recordAction, {
                             }
                         }
                 });
-            
-            
-/*
-        if(this.selectedFields && this.selectedFields.length>0){
-            tree.visit(function(node){
-                    if(!window.hWin.HEURIST4.util.isArrayNotEmpty(node.children)){ //this is leaf
-                        //find it among facets
-                        for(var i=0; i<that.selectedFields.length; i++){
-                            if(that.selectedFields[i]==node.data.code){
-                                node.setSelected(true);
-                                break;
-                            }
-                        }
-                    }
-                });
-        }
-*/                
+
     },
     
     //    
@@ -335,7 +302,6 @@ $.widget( "heurist.recordExportCSV", $.heurist.recordAction, {
 
         if (this._currentRecordsetSelIds &&  this._currentRecordsetSelIds.length > 0) {
 
-            let id = 'selected';
             let common_id = null;
 
             // Check if selected records all share the same id
@@ -638,7 +604,7 @@ $.widget( "heurist.recordExportCSV", $.heurist.recordAction, {
                 source: treedata,
                 beforeSelect: function(event, data){
                     // A node is about to be selected: prevent this, for folder-nodes:
-                    if( data.node.hasChildren() ){
+                    if( data.node.data.type== 'rectype' && data.node.hasChildren() ){
                         
                         if(data.node.isExpanded()){
                             for(var i=0; i<data.node.children.length; i++){
@@ -647,8 +613,6 @@ $.widget( "heurist.recordExportCSV", $.heurist.recordAction, {
                                     node.setSelected(true);
                                 }
                             }
-                        }else{
-
                         }
                         return false;
                     }
@@ -698,7 +662,19 @@ $.widget( "heurist.recordExportCSV", $.heurist.recordAction, {
                     },500);
                 },
                 select: function(e, data) {
-                    if (data.node.isSelected()) {
+                    if(data.node.isSelected()){
+
+                        // Expand parent nodes
+                        let cur_parent = data.node.parent;
+                        while(cur_parent){
+
+                            if(!cur_parent.isExpanded()){
+                                cur_parent.setExpanded(true);
+                            }
+
+                            cur_parent = cur_parent.parent;
+                        }
+
                         that._addFieldAdvancedOptions(data.node.title, data.node.data.type, data.node.data.code, data.node.li);
                     } else {
                         that._removeFieldAdvancedOptionsByCode(data.node.data.code);
@@ -725,7 +701,7 @@ $.widget( "heurist.recordExportCSV", $.heurist.recordAction, {
                     }
                 },
                 expand: function(e, data) {
-                    if(data.node.children.length > 0){
+                    if(data.node.data.type== 'rectype' && data.node.children.length > 0){
                         for(var i = 0; i < data.node.children.length; i++){
                             var node = data.node.children[i];
                             if(node.key=='rec_ID' || node.key=='rec_Title'){
