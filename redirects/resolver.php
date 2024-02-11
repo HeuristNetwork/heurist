@@ -52,6 +52,11 @@
 
 $requestUri = explode('/', trim($_SERVER['REQUEST_URI'],'/'));
 $allowedActions = array('website','web','hml','tpl','view','edit','adm');
+$requestContent = array('xml'=>'text/xml',
+                        'hml'=>'application/hml+xml',
+                        'json'=>'application/json',
+                        'rdf'=>'application/rdf+xml',
+                        'html'=>'text/html');
 
 $format = null;
 $redirection_path = '../';
@@ -113,10 +118,17 @@ if(count($requestUri)==3 && $requestUri[0]=='db' && $requestUri[1]=='record'){
         // take format from Accept or Content-typee
         //Accept: text/html, application/xhtml+xml
         //Accept: application/rdf+xml;q=0.7, text/html
-        //$_SERVER['HTTP_ACCEPT']
-        //$_SERVER["CONTENT_TYPE"]
         if($format==null){
             
+            $contentType = @$_SERVER["HTTP_ACCEPT"];
+            if($contentType){
+                foreach ($requestContent as $fmt=>$mimeType){
+                    if(strpos($contentType, $mimeType)!==false){
+                        $format = $fmt;
+                        break;
+                    }             
+                }
+            }
         }
         
         $_REQUEST['fmt'] = $format;

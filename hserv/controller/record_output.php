@@ -107,7 +107,9 @@
     if(!@$params['format']){
         $params['format'] = @$params['fmt'];
     } 
-    if(!@$params['format']) $params['format'] = 'json';
+    if(!@$params['format']){
+        $params['format'] = 'json';
+    }
         
     
     
