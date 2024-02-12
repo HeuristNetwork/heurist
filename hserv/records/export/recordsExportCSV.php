@@ -1187,7 +1187,8 @@ private static function writeResults( $streams, $temp_name, $headers, $error_log
         
             $filename = $temp_name;
             if($rty_ID>0){
-                $filename = $filename.'_t'.$rty_ID.'_'.self::$defRecTypes['names'][$rty_ID];
+                $rty_Name = mb_ereg_replace('\s', '_', self::$defRecTypes['names'][$rty_ID]);
+                $filename = $filename.'_t'.$rty_ID.'_'.$rty_Name;
             }
             $filename = $filename.'.csv'; //'_'.date("YmdHis").
         
@@ -1253,7 +1254,8 @@ private static function writeResults( $streams, $temp_name, $headers, $error_log
                             array_push($error_log, "Stream for record type $rty_ID is empty");
                         }else{
                             // add the in-memory file to the archive, giving a name
-                            $zip->addFromString('rectype-'.$rty_ID.'.csv',  $content);
+                            $rty_Name = mb_ereg_replace('\s', '_', self::$defRecTypes['names'][$rty_ID]);
+                            $zip->addFromString('rectype-'.$rty_ID.'-'.$rty_Name.'.csv',  $content);
                         }
                         
                     }

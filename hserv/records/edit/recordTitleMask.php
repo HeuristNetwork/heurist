@@ -575,7 +575,7 @@ private static function __get_record_value($rec_id, $reset=false) {
                 .'FROM recDetails LEFT JOIN defRecStructure '
                 .'ON rst_RecTypeID='.intval($ret['rec_RecTypeID'])
                    .' AND rst_DetailTypeID=dtl_DetailTypeID ' 
-                   .' WHERE dtl_RecID='.intval($rec_id)." order by dtl_DetailTypeID";
+                   .' WHERE dtl_RecID='.intval($rec_id)." ORDER BY dtl_DetailTypeID, dtl_ID";
                 $res2 = self::$mysqli->query($query);
                 while ($row = $res2->fetch_assoc()){
                     if($row['rst_RequirementType']!='forbidden'){

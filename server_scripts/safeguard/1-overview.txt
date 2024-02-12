@@ -1,0 +1,17 @@
+
+Directory:	/server_scripts/safeguard
+
+Overview:	Scripts for backing up and archiving backups, as well as cleaning up space consumed by archives.
+
+Note: we normally place this in /srv/scripts along with other server scripts, and then call these from the daily cron job
+
+Created: 	7 Feb 2024
+
+---------------------------------------------------------------------
+
+* @package     Heurist academic knowledge management system
+* @link        https://HeuristNetwork.org
+* @copyright   (C) 2005-2023 University of Sydney
+* @author      Ian Johnson     <ian.johnson@sydney.edu.au>
+* @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
+* @version     6

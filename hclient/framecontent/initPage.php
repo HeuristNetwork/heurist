@@ -124,7 +124,7 @@ if(defined('IS_INDEX_PAGE')){
 <html  class="no-js" lang="en" dir="ltr">
 */
 if(defined('IS_INDEX_PAGE')){
-    print '<!DOCTYPE html>';
+    print "<!DOCTYPE html>\n";
 }
 ?>
 <html>

@@ -104,7 +104,14 @@
         downloadFileReferences($system, $params['ids']);
     }
 
-    if(!@$params['format']) $params['format'] = 'json';
+    if(!@$params['format']){
+        $params['format'] = @$params['fmt'];
+    } 
+    if(!@$params['format']){
+        $params['format'] = 'json';
+    }
+        
+    
     
     $search_params = array();
     $search_params['w'] = filter_var(@$params['w'], FILTER_SANITIZE_STRING);
@@ -260,8 +267,6 @@
         }
         
     }else{
-        
-        if(!@$params['format']) @$params['format'] = 'xml';
         
         if(@$params['vers']==2){
         

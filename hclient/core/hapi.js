@@ -266,7 +266,7 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
             url: url,
             type: "POST",
             data: request,
-            dataType: "json",
+            dataType: "json", //data to be expected from server
             cache: false,
             xhrFields: {
                 withCredentials: true

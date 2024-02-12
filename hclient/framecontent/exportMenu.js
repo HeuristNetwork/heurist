@@ -294,6 +294,15 @@ function hexportMenu( container ) {
     //
     function _exportRecords(opts){ // isAll = resultset, false = current selection only
 
+        if(opts.format=='rdf' && !(window.hWin.HAPI4.sysinfo['db_registeredid']>0) ){
+
+           window.hWin.HEURIST4.msg.showMsgDlg(
+'<p>Sorry, RDF is only available for databases which have been registered. This is required in order to make your Subject, Predicate and Object URIs unique within the Heurist namespace.</p>'
++'<p>Please go to Design > Register to register your database.</p>');
+            return;
+        }
+    
+    
         var q = "",
         layoutString,rtFilter,relFilter,ptrFilter;
         
@@ -348,7 +357,12 @@ function hexportMenu( container ) {
 +'<br><br><label><input type="radio" name="links" value="direct_links" style="float:left;margin-right:8px;"/>Follow only pointers, ignore relationship markers <warning about losing relationships></label>'
 +'<br><br><label><input type="radio" name="links" value="none" style="float:left;margin-right:8px;"/>Don\'t follow pointers or relationship markers (you will lose any data which is referenced by pointer fields in the exported records)</label>'
 +'<br><br><label><input type="radio" name="links" value="all" style="float:left;margin-right:8px;"/>Follow ALL connections including reverse pointers" (warning: any commonly used connection, such as to Places, will result in a near-total dump of the database)</label></p>'
++(opts.format=='rdf'?'<p>Since, RDF export is exeprimental please specify the access word: <input type="password" name="rdfpwd"/>':'')
+
                         , function(){ 
+                            if(opts.format=='rdf' && $expdlg.find('input[name="rdfpwd"]').val()!='Tehri'){
+                                return;
+                            }
                             
                             var val = $expdlg.find('input[name="links"]:checked').val();
                             

@@ -103,7 +103,7 @@
                             <div class="col-lg-12 bor-search-body">
                                 <input id="search_query" type="search" aria-label="Searchbox for finding people in the database" placeholder="Search for people in the database" style="min-width: 40ex;" class="form-control input-lg" value="">
                                 <button id="search_button" class="submit fa-search ui-icon ui-icon-search" style="height:30px"><i>&nbsp;</i></button>
-                                <div class="col-lg-12">
+                                <div class="col-lg-12" style="display:none">
                                     <a style="color:white;text-decoration:underline" id="help_link" href="<?= $faq_page_id?>">How do I use this?</a>
                                 </div>
                             </div>

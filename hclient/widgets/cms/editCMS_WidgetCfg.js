@@ -449,8 +449,8 @@ function editCMS_WidgetCfg( widget_cfg, _layout_content, $dlg, main_callback ){
 
                     let def_remark = window.hWin.HR(_def_labels[widget_name]['empty_remark_def']);
 
-                    $dlg.find('#placeholder_def').text(def_placeholder).attr('title', def_placeholder);
-                    $dlg.find('#empty_remark_def').text(def_remark).attr('title', def_remark);
+                    $dlg.find(`.${widget_name} #placeholder_def`).text(def_placeholder).attr('title', def_placeholder);
+                    $dlg.find(`.${widget_name} #empty_remark_def`).text(def_remark).attr('title', def_remark);
 
                     if(widget_name == 'heurist_StoryMap'){
                         let label = window.HR(_def_labels[widget_name]['elementsPlaceholder_def']);
@@ -497,8 +497,6 @@ function editCMS_WidgetCfg( widget_cfg, _layout_content, $dlg, main_callback ){
 
                 if(!ele.editing_input('instance')){
 
-
-
                     var ed_options = {
                         recID: -1,                                                                                       
                         dtID: ele.attr('id'), //'group_selector',
@@ -517,9 +515,7 @@ function editCMS_WidgetCfg( widget_cfg, _layout_content, $dlg, main_callback ){
 
                     ele.editing_input(ed_options);
                     ele.parent().css('display','block');
-                    ele.find('.header').css({'width':'150px','text-align':'right'});
                 }
-                //ele.editing_input('setValue', rval);
 
                 $dlg.find('select[name="orientation"]')
                 .on('change',function(e){
@@ -691,9 +687,8 @@ function editCMS_WidgetCfg( widget_cfg, _layout_content, $dlg, main_callback ){
                     };
 
                     ele.editing_input(ed_options);
-                    //ele.editing_input('setValue','5'); 
                     ele.parent().css('display','block');
-                    ele.find('.header').css({'width':'150px','text-align':'right'});
+                    ele.find('.header').addClass('header_wide');
                 }
 
                 //visible for buttons mode only
@@ -720,7 +715,7 @@ function editCMS_WidgetCfg( widget_cfg, _layout_content, $dlg, main_callback ){
 
                     ele.editing_input(ed_options);
                     ele.parent().css('display','block');
-                    ele.find('.header').css({'width':'150px','text-align':'right'});
+                    ele.find('.header').addClass('header_wide');
                 }
 
                 ele = $dlg.find('#init_svsID');
@@ -742,7 +737,7 @@ function editCMS_WidgetCfg( widget_cfg, _layout_content, $dlg, main_callback ){
 
                     ele.editing_input(ed_options);
                     ele.parent().css('display','block');
-                    ele.find('.header').css({'width':'150px','text-align':'right'});
+                    ele.find('.header').addClass('header_wide');
                 }
 
                 function __getSearchTreeMode(){
@@ -1045,7 +1040,6 @@ function editCMS_WidgetCfg( widget_cfg, _layout_content, $dlg, main_callback ){
 
                 ele.editing_input(ed_options);
                 ele.parent().css('display','block');
-                ele.find('.header').css({'width':'150px','text-align':'right'});
                 
                 //----------------
                 /*
