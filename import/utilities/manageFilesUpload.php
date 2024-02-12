@@ -283,20 +283,20 @@ if(!($max_size>0)) $max_size = 0;
                 </label>
                 
                 <br>
-                <br>
+                
+                <h3>Files will not be uploaded until you click Upload (individual file) or Start uploads (batch)</h3>
+
                 <div class="fileupload-buttons">
                     <!-- The fileinput-button span is used to style the file input field as button -->
                     <span class="fileinput-button">
                         <span>Add files...</span>
                     </span>
                     <input type="file" name="files[]" multiple webkitdirectory="true" style="display:none;">
-                    <button id="btnStart" type="submit" class="start" disabled>Start uploads</button>
                     <button id="btnCancel" type="reset" class="cancel">Clear upload list</button>
-                    <!-- Ian 17/6/16 It's quite confusing what these are for
-                    <button type="button" class="delete">Delete selected</button>
-                    <input type="checkbox" class="toggle">
-                    -->
+                    
                     <div style="display:inline-block;min-width:40px"></div>
+
+                    <button id="btnStart" type="submit" class="start" style="text-transform: none;font-weight: normal !important;" disabled>Start uploads</button>
                     <button id="btnFinished" disabled>Finished</button>
                     <!-- The global file processing state -->
                     <span class="fileupload-process"></span>
@@ -596,10 +596,15 @@ if(!($max_size>0)) $max_size = 0;
                             
                             window.hWin.HEURIST4.util.setDisabled($('#btnStart'), false);                    
                             window.hWin.HEURIST4.util.setDisabled($('#btnCancel'), false);                    
-                            $('#btnStart').button('option','label','Start uploads '+window.hWin.HEURIST4.util.formatFileSize(size));
+                            
+                            $('#btnStart').button('option','label','Start uploads '+window.hWin.HEURIST4.util.formatFileSize(size))
+                                          .addClass('ui-button-action')
                         }else{
+
                             window.hWin.HEURIST4.util.setDisabled($('#btnStart'), true);                    
-                            $('#btnStart').button('option','label','Start uploads');
+                            
+                            $('#btnStart').button('option','label','Start uploads')
+                                          .removeClass('ui-button-action');
                         }
                   
                     },
@@ -609,8 +614,12 @@ if(!($max_size>0)) $max_size = 0;
                         var cnt = ele.find('.template-download').length;
                         
                         window.hWin.HEURIST4.filesWereUploaded = window.hWin.HEURIST4.filesWereUploaded || (cnt>0);
+
+                        // remove coverall
+                        $('table[role="presentation"] .coverall-div').remove();
  
-                        window.hWin.HEURIST4.util.setDisabled($('#btnFinished'), false);                    
+                        let disable_finished = e.originalEvent.type == 'done' && data.result?.files.length == 0;
+                        window.hWin.HEURIST4.util.setDisabled($('#btnFinished'), disable_finished);                    
                         
                         var cntAlreadyExists = 0;
                         var cntWarnMemtypes = 0;
@@ -695,7 +704,8 @@ if(!($max_size>0)) $max_size = 0;
                         && $('tbody.files').find('.template-upload').length==0  );                    
                     },500);
                         
-                    $('#btnStart').button('option','label','Start uploads');
+                    $('#btnStart').button('option','label','Start uploads')
+                                  .removeClass('ui-button-action');
                     
                     if($('tbody.files').find('.template-download').length>0){
                         $('#btnCancel').button('option','label','Clear list');
@@ -705,12 +715,18 @@ if(!($max_size>0)) $max_size = 0;
                     
                 });
                 $('#btnStart').click(function(e){ 
+
                     window.hWin.HEURIST4.util.setDisabled($('#btnStart'), true);                    
                     window.hWin.HEURIST4.util.setDisabled($('#btnFinished'), true);                    
-                    $('#btnStart').button('option','label','uploading...');
+                    
+                    $('#btnStart').button('option','label','uploading...')
+                                  .removeClass('ui-button-action');
                     $('#btnCancel').button('option','label','Cancel uploads');
 
                     to_reg_count = $('input[name="registerFiles"]').is(':checked') ? $('.template-upload').length : 1;
+
+                    // add coverall
+                    window.hWin.HEURIST4.msg.bringCoverallToFront($('table[role="presentation"]'), {'font-size': '16px', color: 'white', position: 'relative'}, 'Uploading all files...');
                 });
                 
                 //cancel and close window
@@ -719,7 +735,8 @@ if(!($max_size>0)) $max_size = 0;
                         .click( function(e){ 
                             e.preventDefault();
                             closeCheck(e);
-                            return false; });
+                            return false; 
+                        });
                 
                 // Enable iframe cross-domain access via redirect option:
                 $('#fileupload').fileupload(
