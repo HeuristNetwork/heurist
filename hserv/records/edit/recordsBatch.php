@@ -2181,7 +2181,7 @@ public methods
                     continue;
                 }
 
-                array_push($new_excepts, filter_var($value, FILTER_SANITIZE_STRING)); //$mysqli->real_escape_string
+                array_push($new_excepts, $mysqli->real_escape_string($value));
             }
 
             $exceptions = $new_excepts;
@@ -2314,8 +2314,10 @@ public methods
                 }
 
                 foreach($exceptions as $except){ // apply exceptions
-                    if(mb_eregi("\b$except\b", $value)){ // check if exception appears in string
-                        $value = mb_eregi_replace("\b$except\b", $except, $value); // replace
+                    $regex = preg_quote($except);
+                    $regex = "\b$regex\b";
+                    if(mb_eregi($regex, $value)){ // check if exception appears in string
+                        $value = mb_eregi_replace($regex, $except, $value); // replace
                     }
                 }
 
