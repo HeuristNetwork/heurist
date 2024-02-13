@@ -2181,7 +2181,7 @@ public methods
                     continue;
                 }
 
-                array_push($new_excepts, $mysqli->real_escape_string($value));
+                array_push($new_excepts, filter_var($value, FILTER_SANITIZE_STRING)); //$mysqli->real_escape_string
             }
 
             $exceptions = $new_excepts;

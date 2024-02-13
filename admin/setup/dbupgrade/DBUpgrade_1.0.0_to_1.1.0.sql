@@ -211,7 +211,7 @@ ALTER TABLE defRecTypeGroups
 ALTER TABLE recUploadedFiles
   CHANGE ulf_UploaderUGrpID ulf_UploaderUGrpID smallint(5) unsigned default NULL COMMENT 'The user who uploaded the file';
   
-update sysIdentification set sys_dbVersion=1,  sys_dbSubVersion=1, sys_dbSubSubVersion=0;
+update sysIdentification set sys_dbVersion=1,  sys_dbSubVersion=1, sys_dbSubSubVersion=0 WHERE 1=1;
 
 DROP PROCEDURE IF EXISTS sp_ChangeTable;
 DROP PROCEDURE IF EXISTS sp_AlterTable;

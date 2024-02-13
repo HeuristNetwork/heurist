@@ -224,7 +224,7 @@ Alter TABLE recUploadedFiles
   ADD COLUMN ulf_Modified timestamp NOT NULL default CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP
      COMMENT 'The date of last modification of the file description record, automatic update';
 
-update sysIdentification set sys_dbVersion=1,  sys_dbSubVersion=0, sys_dbSubSubVersion=0;
+update sysIdentification set sys_dbVersion=1,  sys_dbSubVersion=0, sys_dbSubSubVersion=0 WHERE 1=1;
 
 
 
