@@ -441,7 +441,7 @@ class DbUtils {
         }
 
         // Unable to retrieve existing user or provided password is wrong
-        if($user_id <= 0 || $valid_password){
+        if($user_id <= 0 || !$valid_password){
             return ($user_id <= 0 ? 'We were unable to retrieve your user account within the Heurist Index database.' 
                     : 'We were unable to authenicate your account on the Heurist Index database')
                 . '<br>Please ensure that your email address and password on the Heurist Index database match your current email address and password.'
