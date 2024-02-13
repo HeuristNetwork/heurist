@@ -269,8 +269,15 @@
     }else{
         
         if(@$params['vers']==2){
+            
+            $allowed_formats = array('xml','geojson','gephi','iiif','json','rdf');
+            $idx = array_search(strtolower($params['format']),$allowed_formats);
+            
+            if($idx===false || !($idx>0)){
+                $idx = 0;  
+            } 
         
-            $classname = 'exportRecords'.strtoupper($params['format']);
+            $classname = 'exportRecords'.strtoupper($allowed_formats[$idx]);
             
             spl_autoload_register(function ($class) {
                 $file = dirname(__FILE__).'/../records/export/'.$class.'.php';
