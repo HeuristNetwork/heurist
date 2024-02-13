@@ -101,16 +101,17 @@ if ((count($requestUri)==1)
     }
 }
 
+$isMediaRequest = false;
 
 // db/record/2312-123  or  db/record/2312-123.rdf  or db/record/123?db=somedb&fmt=rdf
-if(count($requestUri)==3 && $requestUri[0]=='db' && $requestUri[1]=='record'){
+if(count($requestUri)==3 && $requestUri[0]=='db' && ($requestUri[1]=='record' || $requestUri[1]=='file')){
     //redirect to record info
     $recID = $requestUri[2];
     
     if(strpos($recID,'?')>0){
         list($recID, $query) = explode('?',$recID);
     }
-    if(strpos($recID,'.')>0){
+    if(strpos($recID,'.')>0){//not used  
         list($recID, $format) = explode('.',$recID);
     }
     
@@ -137,6 +138,8 @@ if(count($requestUri)==3 && $requestUri[0]=='db' && $requestUri[1]=='record'){
     
     $redirection_path = '../../heurist/';
 
+    $isMediaRequest = ($requestUri[1]=='file');
+    
     //header('Location: /h6-alpha/redirects/resolver.php?recID='.$requestUri[2].'&fmt='.$format);
     
 }else                            // dbname/action                               heurist/dbname/action
@@ -348,7 +351,7 @@ if(@$_REQUEST['fmt']){
 }elseif(@$_REQUEST['format']){
     $format = filter_var($_REQUEST['format'], FILTER_SANITIZE_STRING);        
 }else{
-    $format = 'hml';
+    $format = ($isMediaRequest)?'html':'hml';
 }
 
 $entity = null;
@@ -373,23 +376,26 @@ if($recid!=null){
     if(strpos($recid, '-')>0){    
         list($database_id, $recid) = explode('-', $recid, 2);
         $database_id = intval($database_id);
-        $recid = intval($recid);
-    }else{
-        $recid = intval($recid);
         
+    }else{
         if (is_int(@$_REQUEST['db'])){
             $database_id = intval($_REQUEST['db']);
         }    
     }
 }
 
-if(!($recid>0)){
-    if(isset($error_msg)){
+if($isMediaRequest){
+    if($recid==null){
+        header('Location:'.$redirection_path.'hclient/framecontent/infoPage.php?error=File ID is not defined');
+        exit;
+    }
+}else{
+    $recid = intval($recid);    
+    if(!($recid>0)){
         header('Location:'.$redirection_path.'hclient/framecontent/infoPage.php?error=Record ID is not defined');
         exit;
     }
 }
-
 
 $database_url = null;    
 
@@ -423,15 +429,29 @@ if ($database_id>0) {
 if($database_url!=null){ //redirect to resolver for another database
     if($entity!=null){
         $redirect = $database_url.'&'.$entity.'='.$recid;        
+        
+    }else if($isMediaRequest){
+        
+        $redirect = $database_url.'&file='.$recid;    
+        
+        if($format=='html'){
+            $redirect .= '&mode=page';
+        }
+        
     }else{
         $redirect = $database_url.'&recID='.$recid.'&fmt='.$format;    
     }
+    $redirection_path = '';
 }else if($entity!=null){
     
     $redirect = 'hserv/structure/export/getDBStructureAsXML.php?db='.$_REQUEST['db'].'&'.$entity.'='.$recid;
+
+}else if($isMediaRequest){
+    
+    $redirect = '?db='.$_REQUEST['db'].'&mode=page&file='.$recid;  
     
 }else if($format=='html'){ //recirect to recordView
-    
+
     if(@$_REQUEST['noheader']){
         $redirect = 'viewers/record/renderRecordData.php?db='
             .$_REQUEST['db'].'&noheader=1&recID='.$recid;    
