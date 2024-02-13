@@ -183,6 +183,7 @@ $.widget( "heurist.mainMenu", {
                 $(event.target).blur();//remove focus
             })
             .addClass('ui-heurist-header2')
+            .uniqueId()
             .val( window.hWin.HAPI4.database ).appendTo( this.div_dbname );
         }else{
             
@@ -273,7 +274,7 @@ $.widget( "heurist.mainMenu", {
             $('<div style="height:40px;background:none;padding-left:4px;float:right;color:white">'
                 +'<a href="'+(window.hWin.HAPI4.sysinfo.host_url?window.hWin.HAPI4.sysinfo.host_url:'#')
                 +'" target="_blank" style="text-decoration: none;color:white;">'
-                        +'<label>hosted by: </label>'
+                        +'<span>hosted by: </span>'
                         +'<img src="'+window.hWin.HAPI4.sysinfo.host_logo
                         +'" height="40" align="center"></a></div>')
             .appendTo( this.divMainMenu );

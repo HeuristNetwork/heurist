@@ -118,6 +118,8 @@ $.widget( "heurist.configEntity", {
             }
         }
 
+        this.element.find('label[for="sel_saved_settings"]').attr('for', this.sel_saved_settings.attr('id'));
+
         //
         // rename
         //         
