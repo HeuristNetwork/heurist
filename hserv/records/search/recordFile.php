@@ -3,7 +3,7 @@
 * recordFile.php
 * 
 * methods for recUploadedFiles
-* @todo - 1) some methods to dbRecUploadedFiles 2) some to utils_image
+* @todo - 1) some methods to dbRecUploadedFiles 2) some to uImage
 * 
 * file - prefix for functions
 * 
