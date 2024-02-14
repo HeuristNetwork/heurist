@@ -224,6 +224,7 @@
         
         if($starts_with!=null && (mysql__check_dbname($starts_with)===true))
         {
+            $starts_with = $mysqli->real_escape_string($starts_with);
             $where = "'hdb_$starts_with%'";
         }else{
             $where = "'hdb_%'";    

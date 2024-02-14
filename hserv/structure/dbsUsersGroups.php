@@ -431,11 +431,17 @@
 
         if($mysqli && intval($ugr_ID))
         {
+            
+            $dbprefix = '';
+            if($database!=null){
+                $dbprefix = '`'.$mysqli->real_escape_string($database).'`.';
+            }
+
 
             $query = 'select ugl_GroupID, ugl_Role '
             .($isfull?', ugr_Name, ugr_Description ':'')
-            .' from '.($database!=null?('`'.$database.'`.'):'').'sysUsrGrpLinks '
-            .' left join '.($database!=null?('`'.$database.'`.'):'').'sysUGrps grp '
+            .' from '.$dbprefix.'sysUsrGrpLinks '
+            .' left join '.$dbprefix.'sysUGrps grp '
             .' on grp.ugr_ID=ugl_GroupID where '
             .' ugl_UserID='.intval($ugr_ID)
             .' and grp.ugr_Type != "user" order by ugl_GroupID';

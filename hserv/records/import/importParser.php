@@ -1029,13 +1029,15 @@ private static function saveToDatabase($preproc){
     }
 
     //always " if($csv_enclosure=="'") $csv_enclosure = "\\".$csv_enclosure;
-
+    
+    $filename = $mysqli->real_escape_string($filename);
+    /* real_escape_string does it
     if(strpos($filename,"\\")>0){
-        $filename = str_replace("\\","\\\\",$filename);
+       $filename = str_replace("\\","\\\\",$filename);
     }
     if(strpos($filename,"'")>0){
         $filename = str_replace("'","\\'",$filename);
-    }
+    }*/
     
     //allow_local_infile
     $mysqli->query('SET GLOBAL local_infile = true');

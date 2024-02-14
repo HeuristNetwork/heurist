@@ -1155,6 +1155,8 @@ function outputRecord($recID, $depth, $outputStub = false, $parentID = null){
     $EXPAND_REV_PTR, $REVERSE, $NO_RELATIONSHIPS, $rectype_templates;
 
     $hunifile = null;
+    
+    $recID = intval($recID);
 
     if($rectype_templates){
         $record = recordTemplateByRecTypeID($system, $recID);//see recordSearch.php

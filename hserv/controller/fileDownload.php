@@ -52,7 +52,7 @@ if(!$error){
     
     $system = new System(); //without connection
     $fileid = filter_var(@$_REQUEST['thumb'], FILTER_SANITIZE_STRING);
-    if($fileid){ 
+    if($fileid!=null){ 
         
         if(preg_match('/^[a-z0-9]+$/', $fileid)){ //validatate obfuscation id
         

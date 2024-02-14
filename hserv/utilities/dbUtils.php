@@ -1269,6 +1269,9 @@ class DbUtils {
         $res = true;
         $mysqli = self::$mysqli;
         $message = null;
+
+        $db_source = $mysqli->real_escape_string($db_source);
+        $db_target = $mysqli->real_escape_string($db_target);
         
         if( mysql__usedatabase($mysqli, $db_source)!==true ){
             $message = 'Could not open source database '.$db_source;
@@ -1286,7 +1289,7 @@ class DbUtils {
                 }
             }
         }   
-
+        
         if($res){
             
                 // Remove initial values from empty target database

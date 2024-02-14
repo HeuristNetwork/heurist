@@ -561,7 +561,7 @@ private static function __get_record_value($rec_id, $reset=false) {
         $ret = null;
 
         $query = 'SELECT rec_ID, rec_Title, rec_Modified, rec_RecTypeID, rty_Name, rty_TitleMask '
-                    .'FROM Records, defRecTypes where rec_RecTypeID=rty_ID and rec_ID='.$rec_id;
+                    .'FROM Records, defRecTypes where rec_RecTypeID=rty_ID and rec_ID='.intval($rec_id);
         $res = self::$mysqli->query($query);
         if($res){
             $row = $res->fetch_assoc();
@@ -609,7 +609,7 @@ private static function __get_enum_value($enum_id, $enum_param_name)
     }
 
     $ress = self::$mysqli->query('select trm_id, trm_label, trm_code, '
-    .'concat(trm_OriginatingDBID, \'-\', trm_IDInOriginatingDB) as trm_conceptid, trm_parenttermid from defTerms where trm_ID = '.$enum_id);
+    .'concat(trm_OriginatingDBID, \'-\', trm_IDInOriginatingDB) as trm_conceptid, trm_parenttermid from defTerms where trm_ID = '.intval($enum_id));
     if($ress){
         $relval = $ress->fetch_assoc();
 
