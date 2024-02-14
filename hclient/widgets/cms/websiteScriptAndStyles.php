@@ -841,7 +841,7 @@ function afterPageLoad(document, pageid, eventdata){
        
         if(spath.endsWith('/web') || spath.endsWith('/website')) spath = spath + '/'; //add last slash  
        
-        if(spath.search(/\/([A-Za-z0-9_]+)\/(website|web)\/.*/)>=0){
+        if(spath.search(/\/([A-Za-z0-9_]+)\/(website|web)\/.*/)>=0 || spath.indexOf('/web/')===0 ){
             //folder style parameters [database]/web/[site id]/[page id]/?q=[query params]
 
             //remove after web

@@ -85,9 +85,14 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
         } else {
             _database = window.hWin.HEURIST4.util.getUrlParameter('db');
         }
+
+        var installDir = '';
+        
+        if(window.hWin.location.host.indexOf('.huma-num.fr')>0 && window.hWin.location.host!=='heurist.huma-num.fr'){
+            installDir = '/heurist/';
+        }else{
         
         let script_name = window.hWin.location.pathname;
-        var installDir = '';
         if(script_name.endsWith('/web') || script_name.endsWith('/website')) script_name = script_name + '/'; //add last slash
 
         //actions for redirection https://hist/heurist/[dbname]/web/
@@ -96,6 +101,7 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
             if(installDir=='/') installDir = '/h6-alpha/';//'/heurist/';
         }else{
             installDir = script_name.replace(/(((\?|admin|applications|common|context_help|export|hapi|hclient|hserv|import|startup|records|redirects|search|viewers|help|ext|external)\/.*)|(index.*|test.php))/, ""); // Upddate in utils_host.php also
+        }
         }
         
         //TODO: top directories - admin|applications|common| ... are defined in 3 separate locations. Rationalise.

@@ -844,7 +844,7 @@ function saveURLasFile($url, $filename)
     if(is_resource($rawdata)){
         return fileSave($rawdata, $filename); //returns file size
     }else{
-        error_log('Can not access remote resource '.filter_var($url,FILTER_SANITIZE_URL));
+        error_log('Can not access remote resource'); //.filter_var($url,FILTER_SANITIZE_URL));
         return 0;
     }
 }

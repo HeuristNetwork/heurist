@@ -105,12 +105,16 @@ class USystem {
             elseif (!empty($_SERVER['HTTP_X_FORWARDED_PROTO']) && $_SERVER['HTTP_X_FORWARDED_PROTO'] == 'https' || !empty($_SERVER['HTTP_X_FORWARDED_SSL']) && $_SERVER['HTTP_X_FORWARDED_SSL'] == 'on') {
                 $isSecure = true;
             }
+            
+            $installDir = '/heurist';
+            $is_own_domain = (strpos($_SERVER["SERVER_NAME"],'.huma-num.fr')>0 && strpos($_SERVER["SERVER_NAME"],'heurist.huma-num.fr')==false);
+            if(!$is_own_domain){
 
             $rewrite_actions = 'website|web|hml|tpl|view|edit|adm'; //actions for redirection https://hist/heurist/[dbname]/web/
 
             if(@$_SERVER["SCRIPT_NAME"] && 
                 (substr($_SERVER["SCRIPT_NAME"], -4 ) === '/web' || substr($_SERVER["SCRIPT_NAME"], -8 ) === '/website')){
-                $_SERVER["SCRIPT_NAME"] .= '/';
+                $_SERVER["SCRIPT_NAME"] .= '/';  //add last slash
             }
 
             $matches = array();
@@ -127,6 +131,8 @@ class USystem {
                     $installDir = preg_replace("/\/[^\/]*$/", "", @$_SERVER["SCRIPT_NAME"]); // strip away everything past the last slash "/index.php" if it's there
                 }
 
+            }
+            
             }
 
             // this should be the path difference between document root $_SERVER["DOCUMENT_ROOT"] and heurist code root

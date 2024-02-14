@@ -49,6 +49,9 @@
 // edit - record edit
 // adm - main admin ui
 //  heurist/database_name/action/param1/param2
+//
+// special case for dicobiosport.huma-num.fr
+//
 
 $requestUri = explode('/', trim($_SERVER['REQUEST_URI'],'/'));
 $allowedActions = array('website','web','hml','tpl','view','edit','adm');
@@ -61,10 +64,15 @@ $requestContent = array('xml'=>'text/xml',
 $format = null;
 $redirection_path = '../';
 
-//print $_SERVER['REQUEST_URI'];
-//print print_r($requestUri,true);
-//exit;
-
+$is_own_domain = (strpos($_SERVER["SERVER_NAME"],'.huma-num.fr')>0 && strpos($_SERVER["SERVER_NAME"],'heurist.huma-num.fr')==false);
+if($is_own_domain){
+    //'dicobiosport'
+    //detect databasename 
+    $database_name_from_domain = substr($_SERVER["SERVER_NAME"],0,-12);
+    if(count($requestUri)==0 || $requestUri[0]!=$database_name_from_domain){
+        array_unshift($requestUri, $database_name_from_domain);
+    }
+}
 
 /*
 if(count($requestUri)==1){
