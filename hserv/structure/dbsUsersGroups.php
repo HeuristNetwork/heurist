@@ -242,7 +242,7 @@
 
             if($check_pin && $_SESSION[$db]['reset_pins'][$user_id]['expire'] > $now){ // pin check requested, and valid pin in session
 
-                if($_SESSION[$db]['reset_pins'][$user_id]['pin'] != $pin){
+                if(!hash_equals(crypt($pin, $_SESSION[$db]['reset_pins'][$user_id]['pin']), $_SESSION[$db]['reset_pins'][$user_id]['pin'])){
                     $system->addError(HEURIST_ACTION_BLOCKED, 'Invalid pin provided');
                     return false;
                 }
@@ -314,7 +314,7 @@
 
                 // Store in session
                 $_SESSION[$db]['reset_pins'][$user_id] = array( 
-                    'pin' => $new_pin,
+                    'pin' => hash_it($new_pin),
                     'expire' => strtotime('+5 minutes'),
                     'resends' => $resends,
                     'user' => $user_id,
@@ -375,7 +375,7 @@
                 $system->addError(HEURIST_ERROR, 'An error has occurred with changing your password using a reset pin.<br>Please contact the Heurist team');
                 return false;
             }
-            if($_SESSION[$db]['reset_pins'][$user_id]['pin'] != $pin){ // check the pins match
+            if(!hash_equals(crypt($pin, $_SESSION[$db]['reset_pins'][$user_id]['pin']), $_SESSION[$db]['reset_pins'][$user_id]['pin'])){ // check the pins match
                 $system->addError(HEURIST_ACTION_BLOCKED, 'Invalid reset pin');
                 return false;
             }
