@@ -57,6 +57,9 @@ $eol = "\n";
 $tabs = "\t\t";
 $tabs0 = '';
 
+define('ALLOW_ARCHIVE_SYSARCHIVE',true);
+define('ALLOW_PURGE_IMPORTTABLES',true);
+
 if (@$argv) {
     
 // example:
@@ -387,7 +390,7 @@ sendEmail(array($usr_owner['ugr_eMail']), $email_title, $email_text);
             //$sif_purge = array( 3 => 'import20210531163600');
             $arc_cnt = 0;
             $cnt_dumped = 0;
-            if(true){
+            if(ALLOW_PURGE_IMPORTTABLES){
             
             foreach($sif_purge as  $sif_id => $sif_table){
                 
@@ -411,6 +414,7 @@ sendEmail(array($usr_owner['ugr_eMail']), $email_title, $email_text);
                                   'add-drop-trigger' => false);
                     
                     
+                    /* 
                     if(false){
                         $res = DbUtils::databaseDump($db_name, $dumpfile, $opts);    
                         if($res===false){
@@ -419,6 +423,7 @@ sendEmail(array($usr_owner['ugr_eMail']), $email_title, $email_text);
                             $cnt_dumped++;
                         }
                     }else{
+                    */
                         try{
                             //$dump = new Mysqldump( 'hdb_'.$db_name, ADMIN_DBUSERNAME, ADMIN_DBUSERPSWD, HEURIST_DBSERVER_NAME, 'mysql', $opts);
                                                                                                      
@@ -432,7 +437,7 @@ sendEmail(array($usr_owner['ugr_eMail']), $email_title, $email_text);
                            $report .= (" Error: unable to generate MySQL database dump for import table $sif_table in $db_name."
                                 .$e->getMessage()."\n");
                         }
-                    }
+                    
                 }
             }//foreach
             }
@@ -464,7 +469,7 @@ sendEmail(array($usr_owner['ugr_eMail']), $email_title, $email_text);
             }//cnt>0
         }//sif list
         
-        if(true){ //alow archive sysArchive
+        if(ALLOW_ARCHIVE_SYSARCHIVE){ //alow archive sysArchive
         $arc_count = mysql__select_value($mysqli, 'SELECT count(arc_ID) FROM sysArchive'); //sif_TempDataTable, 
         if($arc_count>50000){
             
@@ -478,10 +483,12 @@ sendEmail(array($usr_owner['ugr_eMail']), $email_title, $email_text);
                                   'single-transaction' => false,
                                   'add-drop-trigger' => false);
                     
+                    /*
                     if(false){
                         $res = DbUtils::databaseDump($db_name, $dumpfile, $opts);
                     }else{
                         // old way
+                    */
                         try{
                             //$dump = new Mysqldump( 'hdb_'.$db_name, ADMIN_DBUSERNAME, ADMIN_DBUSERPSWD, HEURIST_DBSERVER_NAME, 'mysql', $opts);
                             $pdo_dsn = 'mysql:host='.HEURIST_DBSERVER_NAME.';dbname=hdb_'.$db_name.';charset=utf8mb4';
@@ -495,7 +502,7 @@ sendEmail(array($usr_owner['ugr_eMail']), $email_title, $email_text);
                             $report .= ("Error: ".$e->getMessage()."\n");
                             $res = false;
                         }
-                    }
+                    
                         
                     if($res===false){
                         $report .= (" Error: unable to generate MySQL database dump $dumpfile for sysArchive table in $db_name.\n");

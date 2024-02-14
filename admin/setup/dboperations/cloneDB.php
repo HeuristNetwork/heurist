@@ -308,7 +308,7 @@ if(@$_REQUEST['mode']=='2' && $targetdbname!=null){
             }
         }
         if($sErrorMsg){
-            echo $sErrorMsg;
+            echo htmlspecialchars($sErrorMsg);
         }
 
         // ---- SPECIFY THE TARGET DATABASE (first pass) -------------------------------------------------------------------
@@ -497,7 +497,7 @@ function cloneDatabase($targetdbname, $nodata=false, $templateddb, $user_id) {
     }
 
     // Success!
-    echo "<hr><p>&nbsp;</p><h2>New database '$targetdbname' created successfully</h2>";
+    echo "<hr><p>&nbsp;</p><h2>New database '".htmlspecialchars($targetdbname)."' created successfully</h2>";
     print "<p>Please access your new database through this link: <a href='".HEURIST_BASE_URL."?db=".$targetdbname.
     "' title='' target=\"_new\"><strong>".$targetdbname."</strong></a></p>";
     

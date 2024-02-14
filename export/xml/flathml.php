@@ -2107,7 +2107,7 @@ if($intofile){ // flags HuNI manifest + separate files per record
     }
 
     if (array_key_exists('error', $result)) {
-        makeTag('error', null, $result['error']);
+        makeTag('error', null, xmlspecialchars($result['error']));
     } else {
         if(!$rectype_templates) makeTag('resultCount', null, @$result['reccount']>0 ? $result['reccount'] : " 0 ");
         // Output all the records as XML blocks

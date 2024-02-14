@@ -1513,19 +1513,23 @@ $siz = USystem::getConfigBytes('upload_max_filesize');
     }
 
     protected function readfile($file_path) {
-        $file_size = $this->get_file_size($file_path);
-        $chunk_size = $this->options['readfile_chunk_size'];
-        if ($chunk_size && $file_size > $chunk_size) {
-            $handle = fopen($file_path, 'rb');
-            while (!feof($handle)) {
-                echo fread($handle, $chunk_size);
-                @ob_flush();
-                @flush();
+        if(file_exists(file_path)){
+            $file_size = $this->get_file_size($file_path);
+            $chunk_size = $this->options['readfile_chunk_size'];
+            if ($chunk_size && $file_size > $chunk_size) {
+                $handle = fopen($file_path, 'rb');
+                while (!feof($handle)) {
+                    echo fread($handle, $chunk_size);
+                    @ob_flush();
+                    @flush();
+                }
+                fclose($handle);
+                return $file_size;
             }
-            fclose($handle);
-            return $file_size;
+            return readfile($file_path);
+        }else{
+            return 0;
         }
-        return readfile($file_path);
     }
 
     protected function body($str) {
