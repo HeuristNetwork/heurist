@@ -107,7 +107,7 @@ class USystem {
             }
             
             $installDir = '/heurist';
-            $is_own_domain = (strpos($_SERVER["SERVER_NAME"],'.huma-num.fr')>0 && strpos($_SERVER["SERVER_NAME"],'heurist.huma-num.fr')==false);
+            $is_own_domain = (strpos($_SERVER["SERVER_NAME"],'.huma-num.fr')>0 && $_SERVER["SERVER_NAME"]!='heurist.huma-num.fr');
             if(!$is_own_domain){
 
             $rewrite_actions = 'website|web|hml|tpl|view|edit|adm'; //actions for redirection https://hist/heurist/[dbname]/web/

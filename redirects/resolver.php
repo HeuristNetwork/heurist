@@ -64,7 +64,11 @@ $requestContent = array('xml'=>'text/xml',
 $format = null;
 $redirection_path = '../';
 
-$is_own_domain = (strpos($_SERVER["SERVER_NAME"],'.huma-num.fr')>0 && strpos($_SERVER["SERVER_NAME"],'heurist.huma-num.fr')==false);
+$is_own_domain = (strpos($_SERVER["SERVER_NAME"],'.huma-num.fr')>0 && $_SERVER["SERVER_NAME"]!='heurist.huma-num.fr');
+
+//print $_SERVER["SERVER_NAME"].'  '.$is_own_domain.'   '.substr($_SERVER["SERVER_NAME"],0,-12);
+//exit;
+
 if($is_own_domain){
     //'dicobiosport'
     //detect databasename 
@@ -224,10 +228,10 @@ $requestUri:
             
             define('PDIR', $host_params['server_url'] . $host_params['install_dir']);
             
-            $rewrite_path = '../index.php';
+            $rewrite_path = dirname(__FILE__).'/../index.php';
 
         }else {
-            require_once '../hserv/dbaccess/utils_db.php';
+            require_once dirname(__FILE__).'/../hserv/dbaccess/utils_db.php';
             
             $redirect = $host_params['server_url'] . $host_params['install_dir'];
         
@@ -238,10 +242,10 @@ $requestUri:
                     $params['recID'] = intval($requestUri[3]);
                     
                     if($action=='view'){
-                        $rewrite_path = '../viewers/record/viewRecord.php';    
+                        $rewrite_path = dirname(__FILE__).'/../viewers/record/viewRecord.php';    
                     }else{
                         define('PDIR', $host_params['server_url'] . $host_params['install_dir']);
-                        $rewrite_path = '../hclient/framecontent/recordEdit.php';
+                        $rewrite_path = dirname(__FILE__).'/../hclient/framecontent/recordEdit.php';
                     }
                     
                 }else{
@@ -293,7 +297,7 @@ $requestUri:
                     $redirect = $redirect.'&q='.$query;
                 }
                 //define('PDIR', $host_params['server_url'] . $host_params['install_dir']);    
-                //$rewrite_path = '../index.php';
+                //$rewrite_path = dirname(__FILE__).'/../index.php';
                 
             }else if($action=='tpl'){
                 
@@ -318,7 +322,7 @@ $requestUri:
                         $params['w'] = 'a';
                         $params['q'] = urldecode($query);
                         $params['template'] = urldecode($requestUri[3]);
-                        $rewrite_path = '../viewers/smarty/showReps.php';
+                        $rewrite_path = dirname(__FILE__).'/../viewers/smarty/showReps.php';
                         
                     }else{
                         $error_msg = 'Query or Record ID is not defined';

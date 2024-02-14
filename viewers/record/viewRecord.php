@@ -28,8 +28,12 @@ require_once dirname(__FILE__).'/../../hserv/records/search/recordSearch.php';
 
 $system = new System();
 
+if(!defined('ERROR_INCLUDE')){
+    define('ERROR_INCLUDE', dirname(__FILE__).'/../../hclient/framecontent/infoPage.php');
+}
+
 if(!$system->init(@$_REQUEST['db'])){
-    include_once dirname(__FILE__).'/../../hclient/framecontent/infoPage.php';
+    include_once ERROR_INCLUDE;
     exit;
 }
 
@@ -38,20 +42,21 @@ $mysqli = $system->get_mysqli();
 $rec_id = 0;
 $bkm_ID = 0;
 
-if(!defined('ERROR_REDIR')){
-    define('ERROR_REDIR', dirname(__FILE__).'/../../hclient/framecontent/infoPage.php');
-}
 
 if (@$_REQUEST['bkmk_id']>0) {  //find record by bookmark id
 	$bkm_ID = $_REQUEST['bkmk_id'];
 	$rec_id = mysql__select_value($mysqli, 'select * from usrBookmarks where bkm_ID = ' . $bkm_ID);
     if(!($rec_id>0)){
-        header('Location: '.ERROR_REDIR.'&msg='.rawurlencode('Can\'t find record by bookmark ID'));
+        $_REQUEST['error'] = 'Can\'t find record by bookmark ID';
+        include_once ERROR_INCLUDE;
+        exit;
     }
 } else {   
 	$rec_id = @$_REQUEST['recID'];
     if(!($rec_id>0)){
-        header('Location: '.ERROR_REDIR.'&msg='.rawurlencode('Parameter recID not defined'));
+        $_REQUEST['error'] = 'Parameter recID not defined';
+        include_once ERROR_INCLUDE;
+        exit;
     }
 }
 
@@ -63,7 +68,8 @@ $rec = mysql__select_row_assoc($mysqli,
         'select rec_Title, rec_NonOwnerVisibility, rec_OwnerUGrpID from Records where rec_ID='.$rec_id);
 
 if($rec==null){
-    header('Location: '.ERROR_REDIR.'&msg='.rawurlencode('Record #'.$rec_id.' not found'));
+    $_REQUEST['error'] = 'Record #'.$rec_id.' not found';
+    include_once ERROR_INCLUDE;
     exit;
 }
 
@@ -72,10 +78,10 @@ $hasAccess = ($rec['rec_NonOwnerVisibility'] == 'public' ||
     $system->is_member($rec['rec_OwnerUGrpID']) );   //owner
 
 if(!$hasAccess){
-    header('Location: '.ERROR_REDIR.'&msg='
-        .rawurlencode('You are not a member of the workgroup that owns the Heurist record #'
-        .$rec_id.', and cannot therefore view or edit this information.'));
-    exit;
+        $_REQUEST['error'] = 'You are not a member of the workgroup that owns the Heurist record #'
+        .$rec_id.', and cannot therefore view or edit this information.';
+        include_once ERROR_INCLUDE;
+        exit;
 }        
     
 //find bookmark by rec id    
