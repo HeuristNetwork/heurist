@@ -1632,7 +1632,7 @@ function outputDetail($dt, $value, $rt, $depth = 0, $outputStub) {
                     $attrs['ParentTerm'] = $TL[$TL[$value]['trm_ParentTermID']]['trm_Label'];
                 }
             }
-            makeTag('detail', $attrs, $TL[$value]['trm_Label']);
+            makeTag('detail', $attrs, htmlspecialchars($TL[$value]['trm_Label']));
         }
 
     } else {
@@ -2109,7 +2109,7 @@ if($intofile){ // flags HuNI manifest + separate files per record
     if (array_key_exists('error', $result)) {
         makeTag('error', null, xmlspecialchars($result['error']));
     } else {
-        if(!$rectype_templates) makeTag('resultCount', null, @$result['reccount']>0 ? $result['reccount'] : " 0 ");
+        if(!$rectype_templates) makeTag('resultCount', null, @$result['reccount']>0 ? intval($result['reccount']) : " 0 ");
         // Output all the records as XML blocks
         if (@$result['reccount'] > 0){
             $resout = outputRecords($result);  

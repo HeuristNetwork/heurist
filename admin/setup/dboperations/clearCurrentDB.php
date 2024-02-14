@@ -82,7 +82,7 @@ require_once dirname(__FILE__).'/../../../hserv/records/indexing/elasticSearch.p
     $sysadmin_protection = @$_REQUEST['sa_protect'];
     
     if ($sErrorMsg!=null){
-            print '<div class="ui-state-error">'.$sErrorMsg.'</div>';
+            print '<div class="ui-state-error">'.htmlspecialchars($sErrorMsg).'</div>';
     }else //owner can delete without password
     if(!$system->is_dbowner() && $system->verifyActionPassword($sysadmin_protection, $passwordForDatabaseDeletion) ){
             print '<div class="ui-state-error">'.$response = $system->getError()['message'].'</div>';
@@ -110,7 +110,7 @@ require_once dirname(__FILE__).'/../../../hserv/records/indexing/elasticSearch.p
         &nbsp;&nbsp;&nbsp;&nbsp;<input type='submit' value='OK to Clear' class="h3button" style='font-weight: bold;' >
         <input name="sa_protect" value"<?php echo htmlspecialchars(@$_REQUEST['sa_protect']);?>" type="hidden">
         <input name='mode' value='2' type='hidden'>
-        <input name='db' value='<?php echo $dbname;?>' type='hidden'>
+        <input name='db' value='<?php echo htmlspecialchars($dbname);?>' type='hidden'>
     </form>
 <?php
 
@@ -125,21 +125,22 @@ require_once dirname(__FILE__).'/../../../hserv/records/indexing/elasticSearch.p
                 $res = DbUtils::databaseEmpty($dbname);
 
                 if (!$res) {
-                    echo ("<h2>Warning:</h2> Unable to fully delete records from <b>".HEURIST_DB_PREFIX.$dbname."</b>");
+                    echo ("<h2>Warning:</h2> Unable to fully delete records from <b>".htmlspecialchars(HEURIST_DB_PREFIX.$dbname)."</b>");
                     //print "<p><a href=".HEURIST_BASE_URL."?db=$dbname>Return to Heurist</a></p>";
                 } else {
                     // Remove from ElasticSearch
-                    print "<br><br>Removing indexes, calling deleteIndexForDatabase with parameter $dbname";
+                    print "<br><br>Removing indexes, calling deleteIndexForDatabase with parameter ".htmlspecialchars($dbname);
                     ElasticSearch::deleteIndexForDatabase($dbname); // ElasticSearch uses full database name with prefix
 
-                    print "<br><br>Record data, bookmarks and tags have been deleted from <b>$dbname</b><br>";
+                    print "<br><br>Record data, bookmarks and tags have been deleted from <b>".htmlspecialchars($dbname)."</b><br>";
                     print "Database structure (record types, fields, terms, constraints etc.) and users have not been affected.";
                     //print "<p><a href=".HEURIST_BASE_URL."?db=$dbname>Return to the database home page</a></p>";
                 }
             }
         }
         else { // didn't request properly
-            print "<p class='ui-state-error'><h2>Request disallowed</h2>Incorrect challenge words entered. Data was not deleted from <b>$dbname</b></p>";
+            print "<p class='ui-state-error'><h2>Request disallowed</h2>Incorrect challenge words entered. "
+            .'Data was not deleted from <b>'.htmlspecialchars($dbname).'</b></p>';
         }
     }
     }

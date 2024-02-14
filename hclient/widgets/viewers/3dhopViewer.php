@@ -122,7 +122,7 @@ function setup3dhop() {
 
     presenter.setScene({
         meshes: {
-            "mesh_1" : { url: "<?php echo $url;?>", mType:"nexus" }
+            "mesh_1" : { url: "<?php echo htmlspecialchars($url);?>", mType:"nexus" }
         },
         modelInstances : {
             "model_1" : { mesh : "mesh_1" }

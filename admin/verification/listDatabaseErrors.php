@@ -520,9 +520,11 @@ if($active_all || in_array('dup_terms', $active)) {
             print '<h3>Terms are duplicated or ending in a number: these may be the result of automatic duplicate-avoidance. '
             .'If so, we suggest deleting the numbered term or using Design > Vocabularies to merge it with the un-numbered version.</h3>';
             foreach ($trmDuplicates as $parent_ID=>$dupes) {
-                print '<div style="padding-top:10px;font-style:italic">parent '.$parent_ID.'  '.$TL[$parent_ID]['trm_Label'].'</div>';
+                print '<div style="padding-top:10px;font-style:italic">parent '.intval($parent_ID).'  '
+                    .htmlspecialchars($TL[$parent_ID]['trm_Label']).'</div>';
                 foreach ($dupes as $trm_ID) {
-                    print '<div style="padding-left:60px">'.$trm_ID.'  '.$TL[$trm_ID]['trm_Label'].'</div>';
+                    print '<div style="padding-left:60px">'.intval($trm_ID).'  '
+                    .htmlspecialchars($TL[$trm_ID]['trm_Label']).'</div>';
                 }
             }
         }
