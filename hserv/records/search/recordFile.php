@@ -312,7 +312,7 @@ function fileGetFullInfo($system, $file_ids, $all_fields=false){
 * @param mixed $system
 * @param mixed $recIDs
 */
-function fileGetThumbnailURL($system, $recID, $get_bgcolor){
+function fileGetThumbnailURL($system, $recID, $get_bgcolor, $check_linked_media = false){
 
     $thumb_url = null;
     $bg_color = null;
@@ -337,7 +337,25 @@ function fileGetThumbnailURL($system, $recID, $get_bgcolor){
             ." OR ulf_OrigFileName LIKE '_iiif%' OR ulf_PreferredSource LIKE 'iiif%')" // ORDER BY dtl_DetailTypeID, dtl_ID
             .' LIMIT 1';
         $fileid = mysql__select_value($system->get_mysqli(), $query);
-        
+    }
+
+    // Check linked record types
+    if(!$fileid && $check_linked_media && 
+        $system->defineConstant('RT_MEDIA_RECORD') && RT_MEDIA_RECORD > 0){
+
+        $query = "SELECT rec_ID FROM Records LEFT JOIN recLinks ON rl_TargetID = rec_ID WHERE rl_SourceID = $recID AND rec_RecTypeID = " . RT_MEDIA_RECORD;
+        $linked_rec_ids = mysql__select_list2($system->get_mysqli(), $query);
+
+        while(!empty($linked_rec_ids)){
+
+            $linked_rec_id = array_shift($linked_rec_ids);
+            $file_details = fileGetThumbnailURL($system, $linked_rec_id, $get_bgcolor, false);
+
+            if(!empty($file_details) && !empty($file_details['url'])){
+                return $file_details;
+                //break;
+            }
+        }
     }
     
     if($fileid){

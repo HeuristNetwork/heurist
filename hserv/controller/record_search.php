@@ -176,7 +176,19 @@
         $response = array('status'=>HEURIST_OK, 'data'=> $response);
         
         
-    }else {
+    }else if(@$_REQUEST['a'] == 'get_linked_media'){
+
+        $ids = prepareIds($_REQUEST['ids']);
+        $response = array();
+
+        foreach ($ids as $id) {
+            $res = fileGetThumbnailURL($system, $id, false, true);
+            $response[$id] = !$res || empty($res['url']) ? '' : $res['url'];
+        }
+
+        $response = array('status' => HEURIST_OK, 'data' => $response);        
+
+    }else{
         
         if(@$_REQUEST['remote'] == 'master'){
             

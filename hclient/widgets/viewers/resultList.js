@@ -136,7 +136,9 @@ $.widget( "heurist.resultList", {
         field_for_ext_classes: 20, // add class related to field value to record's row; 0 - disabled, n > 0 - detail type id
 
         show_export_button: false, // display to that opens the export menu, for exporting the current result set
-        export_options: 'all' // export formats allowed
+        export_options: 'all', // export formats allowed
+
+        check_linked_media: true // check linked records for an image
     },
 
     _is_publication:false, //this is CMS publication - take css from parent
@@ -189,6 +191,8 @@ $.widget( "heurist.resultList", {
     _collection: null, // current collection of record ids
     
     _auto_select_record: null, // record to auto select, retrieved from URL
+    
+    _cached_linked_images: {}, // cache of images linked to the record
     
     // the constructor
     _create: function() {
@@ -3702,6 +3706,63 @@ $.widget( "heurist.resultList", {
             this._rec_onpage = rec_onpage;
             if(this._is_fancybox_active){
                 this.div_content.mediaViewer({selector:'.realThumb', search_initial:'ids:'+rec_onpage.join(',') });        
+            }
+        }
+
+        // Replace default rectype thumbnail with linked media thumbnail
+        if(this.options.check_linked_media && $allrecs.find('.recTypeThumb.rectypeThumb').length > 0){
+
+            this._cached_linked_images;
+            let rec_images = [];
+
+            // Check if any records need checking
+            $allrecs.find('.recTypeThumb.rectypeThumb').each((idx, ele) => {
+
+                let cur_rec = $(ele).parent().attr('recid');
+
+                if(Object.hasOwn(that._cached_linked_images, cur_rec)){
+                    if(!window.hWin.HEURIST4.util.isempty(that._cached_linked_images[cur_rec])){
+                        $(ele).css('background-image', `url("${that._cached_linked_images[cur_rec]}")`)
+                    }
+                }else{
+                    rec_images.push(cur_rec);
+                    that._cached_linked_images[cur_rec] = ''; // default fill in
+                }
+            });
+
+            if(rec_images.length > 0){
+
+                // Get linked media thumbnail(s)
+                let request = {
+                    a: 'get_linked_media',
+                    ids: rec_images.join(',')
+                };
+
+                window.hWin.HAPI4.RecordMgr.search(request, (response) => {
+
+                    if(response.status != window.hWin.ResponseStatus.OK){
+                        window.hWin.HEURIST4.msg.showMsgErr(response);
+                        return;
+                    }
+
+                    for(let rec_id in response.data){
+
+                        let url = response.data[rec_id]
+                        let $rec = that.div_content.find(`.recordDiv[recid="${rec_id}"]`);
+
+                        that._cached_linked_images[rec_id] = url;
+
+                        if($rec.length <= 0 || window.hWin.HEURIST4.util.isempty(url)){
+                            continue;
+                        }
+
+                        // Use linked media thumbnail
+                        $rec.find('.recTypeThumb.rectypeThumb')
+                            .removeClass('rectypeThumb')
+                            .addClass('realThumb')
+                            .css('background-image', `url("${url}")`);
+                    }
+                });
             }
         }
 
