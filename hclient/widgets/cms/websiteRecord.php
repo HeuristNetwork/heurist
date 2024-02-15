@@ -317,17 +317,23 @@ if(!$isWebPage && __getValue($rec,DT_EXTENDED_DESCRIPTION)==''){
 // arbitrary external links and scripts
 //
 $external_files = null;
-if($system->defineConstant('DT_CMS_EXTFILES')){
-    $external_files = @$rec['details'][DT_CMS_EXTFILES];
-    if($external_files!=null){
-        if(!is_array($external_files)){
-            $external_files = array($external_files);
+$website_custom_css = null;
+$website_custom_javascript = null;
+$website_custom_javascript_allowed = $system->isJavaScriptAllowed();
+if($website_custom_javascript_allowed)
+{
+    if($system->defineConstant('DT_CMS_EXTFILES')){
+        $external_files = @$rec['details'][DT_CMS_EXTFILES];
+        if($external_files!=null){
+            if(!is_array($external_files)){
+                $external_files = array($external_files);
+            }
         }
     }
+    //custom styles - mainly to override positions/visibility for #main-xxx elements
+    $website_custom_css = __getValue($rec, DT_CMS_CSS);
+    $website_custom_javascript = __getValue($rec, DT_CMS_SCRIPT);
 }
-//custom styles - mainly to override positions/visibility for #main-xxx elements
-$website_custom_css = __getValue($rec, DT_CMS_CSS);
-$website_custom_javascript = __getValue($rec, DT_CMS_SCRIPT);
 
 //color scheme for website
 if($system->defineConstant('DT_SYMBOLOGY')){

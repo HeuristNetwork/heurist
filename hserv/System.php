@@ -1178,6 +1178,8 @@ class System {
                     
                     'need_encode'=>$needEncodeRecordDetails, 
                     
+                    'custom_js_allowed'=>$this->isJavaScriptAllowed(),
+                    
                     'common_languages'=>$common_languages,
                     
                     'saml_service_provides'=>$saml_service_provides,
