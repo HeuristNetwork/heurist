@@ -153,20 +153,19 @@ function editCMS2(website_document){
                 _editor_panel = $('<div class="ui-layout-'+options.editor_pos+'">'
                         +'<div class="ent_wrapper editStructure" id="tabsEditCMS">' 
 
-                            +(!isWebPage ? '<span class="btn-website-edit" style="font-weight:normal !important;">Website layout / properties</span>'
-                            +'<br>' : '')
-                            +`<a href="#" class="btn-website-url" style="display:inline-block;font-size: ${isWebPage ? '12' : '9'}px;color: black;">Get website URL</a>`
+                            +(!isWebPage ? '<span class="btn-website-edit" style="font-weight:normal !important;">Website layout / properties</span>' : '')
+                            +`<a href="#" class="btn-website-url" style="display:inline-block;padding-left:10px;font-size: ${isWebPage ? '12' : '9'}px;color: black;">Get website URL</a>`
 
                             +'<span style="position:absolute;top:22px;width:32px;height:24px;font-size:29px;cursor:pointer;'+(options.editor_pos=='west'?'right:5px':'')+'" '
                             +'class="bnt-cms-hidepanel ui-icon ui-icon-carat-2-'+(options.editor_pos=='west'?'w':'e')+'"/>'
-                            
+
                             +'<ul style="margin-'+(options.editor_pos=='west'?'right':'left')+':40px;font-size:9px;">'
                                 +'<li><a href="#treeWebSite">Site</a></li><li><a href="#treePage">Page</a></li>'
                             +'</ul>'
 
                             +'<div id="treeWebSite" style="display:none;top:70px;" class="ent_wrapper ui-cms-mainmenu">'
                                 +'<div class="toolbarWebSite ent_header" style="height:85px;padding-top:15px;">'
-                                
+
                                     +'<span style="display:block;border-top:1px solid gray;padding:4px 8px;margin:4px 0px;">'
 
                                     +'<span style="display:inline-block;padding-top:7px" class="heurist-helper1" '
@@ -195,9 +194,9 @@ function editCMS2(website_document){
                                     ?('<div style="font-size: 10px; display: inline-block;"><a href="#" class="btn-website-edit">'
                                         +'<span class="ui-icon ui-icon-pencil"/>&nbsp;Configure webpage</a></div>')
                                     :'<h3 class="truncate" style="margin-block-start: 0.3em; margin-block-end: 0.7em; font-size: 10px; font-family: revert; max-width: 85%; display: inline-block"></h3>')
-                                        +'<span style="float: right; font-size: 10px;" class="heurist-helper1 element_edit">'
-                                            +'<a href="'+window.hWin.HAPI4.sysinfo.referenceServerURL
-                                            +'?db=Heurist_Help_System&website&id=39&pageid=708" target="_blank">website help</a>'
+                                    +'<span style="float: right; font-size: 10px;" class="heurist-helper1 element_edit">'
+                                        +'<a href="'+window.hWin.HAPI4.sysinfo.referenceServerURL
+                                        +'?db=Heurist_Help_System&website&id=39&pageid=708" target="_blank">website help</a>'
                                     +'</span>'
                                         
                                 +'</div>'
@@ -225,39 +224,43 @@ function editCMS2(website_document){
                     };
                     
                     layout_opts[options.editor_pos] = {
-                            size: 230, //@todo this.usrPreferences.structure_width,
-                            maxWidth:800,
-                            minWidth:230,
-                            spacing_open:6,
-                            spacing_closed:40,  
-                            togglerAlign_open:'center',
-                            //togglerAlign_closed:'top',
-                            togglerAlign_closed:16,   //top position   
-                            togglerLength_closed:80,  //height of toggler button
-                            initHidden: false, //!this.options.edit_structure,   //show structure list at once 
-                            initClosed: false, //!this.options.edit_structure && (this.usrPreferences.structure_closed!=0),
-                            slidable:false,  //otherwise it will be over center and autoclose
-                            contentSelector: '.editStructure',   
-                            onopen_start : function( ){ 
-                                var tog = _ws_body.find('.ui-layout-toggler-'+options.editor_pos);
-                                tog.removeClass('prominent-cardinal-toggler togglerVertical');
-                                tog.find('.heurist-helper2.'+options.editor_pos+'TogglerVertical').hide();
-                            },
-                            onclose_end : function( ){ 
-                                var tog = _ws_body.find('.ui-layout-toggler-'+options.editor_pos);
-                                tog.addClass('prominent-cardinal-toggler togglerVertical');
+                        size: 230, //@todo this.usrPreferences.structure_width,
+                        maxWidth:800,
+                        minWidth:230,
+                        spacing_open:6,
+                        spacing_closed:40,  
+                        togglerAlign_open:'center',
+                        //togglerAlign_closed:'top',
+                        togglerAlign_closed:16,   //top position   
+                        togglerLength_closed:80,  //height of toggler button
+                        initHidden: false, //!this.options.edit_structure,   //show structure list at once 
+                        initClosed: false, //!this.options.edit_structure && (this.usrPreferences.structure_closed!=0),
+                        slidable:false,  //otherwise it will be over center and autoclose
+                        contentSelector: '.editStructure',   
+                        onopen_start : function( ){ 
+                            var tog = _ws_body.find('.ui-layout-toggler-'+options.editor_pos);
+                            tog.removeClass('prominent-cardinal-toggler togglerVertical');
+                            tog.find('.heurist-helper2.'+options.editor_pos+'TogglerVertical').hide();
+                        },
+                        onclose_end : function( ){ 
+                            var tog = _ws_body.find('.ui-layout-toggler-'+options.editor_pos);
+                            tog.addClass('prominent-cardinal-toggler togglerVertical');
 
-                                if(tog.find('.heurist-helper2.'+options.editor_pos+'TogglerVertical').length > 0){
-                                    tog.find('.heurist-helper2.'+options.editor_pos+'TogglerVertical').show();
-                                }else{
+                            if(tog.find('.heurist-helper2.'+options.editor_pos+'TogglerVertical').length > 0){
+                                tog.find('.heurist-helper2.'+options.editor_pos+'TogglerVertical').show();
+                            }else{
 
-                                    var margin = (options.editor_pos=='west') ? 'margin-top:270px;' : '';
-                                    $('<span class="heurist-helper2 '+options.editor_pos+'TogglerVertical" style="width:270px;'+margin+'">Menu structure and page content</span>').appendTo(tog);
-                                }
-                            },
-                            togglerContent_open:    '<div class="ui-icon ui-icon-triangle-1-'+(options.editor_pos=='west'?'w':'e')+'"></div>',
-                            togglerContent_closed:  '<div class="ui-icon ui-icon-carat-2-'+(options.editor_pos=='west'?'e':'w')+'"></div>',
-                        };
+                                var margin = (options.editor_pos=='west') ? 'margin-top:270px;' : '';
+                                $('<span class="heurist-helper2 '+options.editor_pos+'TogglerVertical" style="width:270px;'+margin+'">Menu structure and page content</span>').appendTo(tog);
+                            }
+                        },
+                        onresize_end: function(){
+                            let margin_top = _ws_body.layout().state['west']['outerWidth'] > 275 ? '12.5px' : '';
+                            _editor_panel.find('ul.ui-tabs-nav').css('margin-top', margin_top);
+                        },
+                        togglerContent_open:    '<div class="ui-icon ui-icon-triangle-1-'+(options.editor_pos=='west'?'w':'e')+'"></div>',
+                        togglerContent_closed:  '<div class="ui-icon ui-icon-carat-2-'+(options.editor_pos=='west'?'e':'w')+'"></div>',
+                    };
 
                     _ws_body.layout(layout_opts); //.addClass('ui-heurist-bg-light')
 
@@ -1618,59 +1621,7 @@ function(value){
     // 3. widget properties
     //
     function _layoutEditElement(ele_id){
-    
-/*        
-    var editFields = [                
-        {"dtID": "name",
-            "dtFields":{
-                "dty_Type":"freetext",
-                "rst_DisplayName":"Name:",
-        }},
-        
-        {
-        "groupHeader": "Styles",
-        "groupTitleVisible": true,
-        "groupType": "accordion",
-            "children":[
-            {"dtID": "background",
-                "dtFields":{
-                    "dty_Type":"freetext",
-                    "rst_DisplayName": "Background Color:",
-                    "rst_DisplayHelpText": "Background color for element",
-                    "rst_FieldConfig":{"colorpicker":"colorpicker"},
-                    "rst_DefaultValue": "#e0dfe0"
-            }},
-            {"dtID": "background-image",
-                "dtFields":{
-                    "dty_Type":"file",
-                    "rst_DisplayName": "Background Image:",
-                    "rst_DisplayHelpText": "Background image",
-                    "rst_DefaultValue": ""
-            }},
-            
-            {"dtID": "border-color",
-                "dtFields":{
-                    "dty_Type":"freetext",
-                    "rst_DisplayName": "Border Color:",
-                    "rst_DisplayHelpText": "Border color for element",
-                    "rst_FieldConfig":{"colorpicker":"colorpicker"},
-                    "rst_DefaultValue": "#eeeeee"
-            }},
-            {"dtID": "border-width",
-                "dtFields":{
-                    "dty_Type":"integer",
-                    "rst_DisplayName": "Border width:",
-                    "rst_DisplayHelpText": "Border width in pixels"
-            }},
-            {"dtID": "border-radius",
-            "dtFields":{
-                "dty_Type":"integer",
-                "rst_DisplayName": "Corner radius:",
-                "rst_DisplayHelpText": "Value from 0 to 16",
-                "rst_DefaultValue": "0"
-            }}
-        ]}];
-*/        
+
         if(_edit_Element){ //already opened - save previous
             
             if(_layout_container.find('div.cms-element-editing').attr('data-hid')==ele_id) return; //same
@@ -1685,9 +1636,9 @@ function(value){
         //1. show div with properties over treeview
         var h = _panel_treePage.find('ul.fancytree-container').height() + 10;
 
-        h = (h<200)?h:200; 
+        h = (h<175)?h:175; 
         _panel_treePage.css('height',h+'px');//_panel_treePage.hide();
-        _panel_propertyView.css('top',(h+70)+'px');
+        _panel_propertyView.css('top',(h+20)+'px');
         _editor_panel.find('.page_tree').hide();
         _toolbar_Page.hide();
         

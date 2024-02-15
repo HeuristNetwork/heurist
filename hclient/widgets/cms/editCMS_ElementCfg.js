@@ -24,7 +24,7 @@ function editCMS_ElementCfg( element_cfg, _layout_content, _layout_container, $c
 
     var _className = 'editCMS_ElementCfg';
     var element;
-    var l_cfg, //copy of json config  
+    var l_cfg, //copy of json config
         widget_cfg; //WidgetCfg object
     var codeEditor = null,
         codeEditorDlg = null,
@@ -79,7 +79,7 @@ function editCMS_ElementCfg( element_cfg, _layout_content, _layout_container, $c
 
         cont.find('h4').css({margin:0});
         cont.find('.props').hide(); //hide all
-        cont.find('#widgetConfig').parent().hide();
+        cont.find('#widget-config').parent().hide();
         cont.find('input[data-type="element-id"]').parent().show();
         cont.find('.props.'+etype).show(); //show required only
 
@@ -104,30 +104,15 @@ function editCMS_ElementCfg( element_cfg, _layout_content, _layout_container, $c
                 l_cfg.options.widget_id = dom_id;
             }
 
-            widget_cfg = editCMS_WidgetCfg(l_cfg, _layout_content, cont.find('#widget-config'), null, null);
-
-            function __returnWidgetCfg(){
+            widget_cfg = editCMS_WidgetCfg(l_cfg, _layout_content, cont.find('#widget-config'), null, function(){
 
                 let new_cfg = widget_cfg.getValues();
 
-                //add new options 
                 if(JSON.stringify(l_cfg.options) != JSON.stringify(new_cfg)){
                     _enableSave();    
                 }
-                
-                l_cfg.options = new_cfg;
+            });
 
-                if(new_cfg.widget_id){
-                    l_cfg.dom_id = new_cfg.widget_id;
-                    cont.find('input[data-type="element-id"]').val(l_cfg.dom_id);
-                }
-
-                //recreate widget with new options
-                layoutMgr.layoutAddWidget(l_cfg, element.parent());
-
-            }
-
-            cont.find('.btn-widget').button().css({'border-radius':'4px',display:'inline-block'}).on('click', __returnWidgetCfg)
             cont.find('#widget-config').parent().show();
             cont.find('input[data-type="element-id"]').parent().hide();
 
@@ -255,15 +240,26 @@ function editCMS_ElementCfg( element_cfg, _layout_content, _layout_container, $c
         cont.find('input[name="padding-left"]').change(_onMarginSyncVal);
         cont.find('input[name="margin-left"]').change(_onMarginSyncVal);
 
+        function __saveWidgetConfig(){
+            let new_cfg = widget_cfg.getValues();
+            l_cfg.options = new_cfg;
+
+            if(new_cfg.widget_id){
+                l_cfg.dom_id = new_cfg.widget_id;
+                cont.find('input[data-type="element-id"]').val(l_cfg.dom_id);
+            }
+        }
+
         //save entire page (in background)
         cont.find('.btn-save-page').button().css('border-radius','4px').click(function(){
+            __saveWidgetConfig();
             _getCfgFromUI();
             main_callback.call(this, l_cfg, 'save_close'); //save and close
         });
 
-        
         cont.find('.btn-save-element').button().css('border-radius','4px').click(function(){
-            //5. save in layout cfg        
+            __saveWidgetConfig();
+            //5. save in layout cfg
             _getCfgFromUI();
             main_callback.call(this, l_cfg, 'save'); //save only
             window.hWin.HEURIST4.util.setDisabled(cont.find('.btn-save-element'), true);
