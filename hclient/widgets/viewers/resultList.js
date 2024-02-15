@@ -138,7 +138,7 @@ $.widget( "heurist.resultList", {
         show_export_button: false, // display to that opens the export menu, for exporting the current result set
         export_options: 'all', // export formats allowed
 
-        check_linked_media: true // check linked records for an image
+        check_linked_media: true // check linked records (only type "media") for an image
     },
 
     _is_publication:false, //this is CMS publication - take css from parent
@@ -3710,7 +3710,9 @@ $.widget( "heurist.resultList", {
         }
 
         // Replace default rectype thumbnail with linked media thumbnail
-        if(this.options.check_linked_media && $allrecs.find('.recTypeThumb.rectypeThumb').length > 0){
+        if(this.options.entityName=='records' && rec_toload.length==0
+            && this.options.check_linked_media 
+            && $allrecs.find('.recTypeThumb.rectypeThumb').length > 0){
 
             this._cached_linked_images;
             let rec_images = [];
