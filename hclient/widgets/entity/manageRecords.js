@@ -3849,10 +3849,10 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
                 }
                 
                 //show warning for disabled javascript
-                if(_showCustomJsWarningOnce &&
+                if(that._showCustomJsWarningOnce &&
                     !window.hWin.HAPI4.sysinfo['custom_js_allowed'] && hasCustomJsOrCss)
                 {
-                    _showCustomJsWarningOnce = false;
+                    that._showCustomJsWarningOnce = false;
                     window.hWin.HEURIST4.msg.showMsg(
 '<h4>Website programming blocked</h4>'
 +'<p>Heurist blocks user-supplied Javascript by default (and strips out most user-defined CSS other than simple font changes) for security reasons.</p>'
