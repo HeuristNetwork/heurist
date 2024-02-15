@@ -298,8 +298,10 @@ if(isset($_REQUEST['get_email']) && isset($_REQUEST['recid'])) {	/* Get the Titl
 
 	$data = array();
 	foreach($dbs as $db){
-
-		$query = 'SELECT count(*) FROM ' . $db . '.Records WHERE rec_FlagTemporary != 1';
+                        
+        $db = $mysqli->real_escape_string($db);
+        
+		$query = 'SELECT count(*) FROM `' . $db . '`.Records WHERE rec_FlagTemporary != 1';
 		$res = $mysqli->query($query);
 		if(!$res){
 			$data[$db] = 'error';

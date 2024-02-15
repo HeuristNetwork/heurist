@@ -207,7 +207,7 @@ function getCrossTab( $params){
     $issum = (($mode=="avg" || $mode=="sum") && intval(@$params['agg_field'])>0);
 
     if ($issum){
-        $mode = $mode."(cast(d3.dtl_Value as decimal(20,2)))";  //.$params['agg_field'].")";
+        $mode = ($mode=='avg'?'avg':'sum').'(cast(d3.dtl_Value as decimal(20,2)))';  //.$params['agg_field'].")";
     }else{
         $mode = "count(*)";
     }
