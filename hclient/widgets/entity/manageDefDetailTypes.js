@@ -291,7 +291,8 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
 
                     this.recordList.resultList('updateResultSet', subset, null);
                     this.filterRecordList(event, null, subset);
-                }
+                },
+                "searchdefdetailtypesonimport": this.importDetailTypes
             });
                 
         }else{
@@ -299,7 +300,8 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
             
             this._on( this.searchForm, {
                 "searchdefdetailtypesonresult": this.updateRecordList,
-                "searchdefdetailtypesonadd": function() { this.addEditRecord(-1); }
+                "searchdefdetailtypesonadd": function() { this.addEditRecord(-1); },
+                "searchdefdetailtypesonimport": this.importDetailTypes
             });
             
         }
@@ -2291,6 +2293,35 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
         $('<h2 style="margin-block:0;margin-bottom:0.2em">Create a new field</h2>'
         + '<div style="color: red;display: block;margin-left: auto;margin-right: auto;width: 90%;font-size: 1.2em;"><strong>You are creating a new sub-record child pointer field</strong><br>'
         + 'In the next step you will select fields to be transferred to the sub-records</div><br>').prependTo($(this._editing.getContainer()[0]).find('fieldset')[0]);
+    },
+
+    importDetailTypes: function(){
+
+        const that = this;
+
+        let sURL = `${window.hWin.HAPI4.baseURL}import/delimited/importDefDetailTypes.php?db=${window.hWin.HAPI4.database}&dtg_ID=${this.options.dtg_ID}`;
+
+        window.hWin.HEURIST4.msg.showDialog(sURL, {
+            default_palette_class: 'ui-heurist-design',
+            'close-on-blur': false,
+            'no-resize': false,                  
+            title: 'Import Base fields by CSV',
+            height: 800,
+            width: 1000,
+            context_help: `${window.hWin.HAPI4.baseURL}context_help/defDetailTypes.html #import`,
+            callback: function(context){ 
+
+                if(context && context.result){
+
+                    that._loadData(false);
+
+                    let msg = $.isArray(context.result) ? context.result.join('<br>') : context.result;
+
+                    window.hWin.HEURIST4.msg.showMsgDlg(msg, null, 'Base fields imported',
+                        {default_palette_class:that.options.default_palette_class});
+                }
+            }
+        });
     }
 
 });

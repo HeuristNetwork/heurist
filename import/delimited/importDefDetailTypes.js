@@ -19,12 +19,14 @@
 * See the License for the specific language governing permissions and limitations under the License.
 */
 
-function hImportDefDetailTypes() {
+function hImportDefDetailTypes(_dtg_ID = null) {
     var _className = "ImportDefDetailTypes",
     _version   = "0.6",
     
     _parseddata = null,
-    _prepareddata = null;
+    _prepareddata = null,
+    
+    _return_results = !window.hWin.HEURIST4.util.isempty(_dtg_ID);
     
     function _init(){
 
@@ -67,6 +69,9 @@ function hImportDefDetailTypes() {
                 _doPrepare();
             }
         });
+
+        _dtg_ID = _dtg_ID > 0 ? _dtg_ID : 0;
+        $('#field_rtg').val(_dtg_ID);
 
         window.hWin.HEURIST4.util.setDisabled(btnStartImport, true);
          
@@ -426,6 +431,15 @@ function hImportDefDetailTypes() {
                 
                 if(response.status == window.hWin.ResponseStatus.OK){
 
+                    if(_return_results){
+
+                        window.hWin.HAPI4.EntityMgr.refreshEntityData('dty', function(){
+                            window.close({ result: response.data });
+                        }); // update cache and return import results
+
+                        return;
+                    }
+
                     var results = response.data;
                     var $tbl = $('.tbmain');
                     var $rows = $tbl.find('tr');
@@ -466,7 +480,7 @@ function hImportDefDetailTypes() {
                     let entities_refresh = 'dty,rst' + (results['refresh_terms'] == true ? ',trm' : '');
 
                     if(update_cache){
-                        window.hWin.HAPI4.EntityMgr.refreshEntityData(entities_refresh, jQuery.noop); // update cache
+                        window.hWin.HAPI4.EntityMgr.refreshEntityData(entities_refresh, null); // update cache
                     }
                 }else{
                     window.hWin.HEURIST4.msg.showMsgErr(response);

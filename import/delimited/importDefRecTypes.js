@@ -20,12 +20,14 @@
 * See the License for the specific language governing permissions and limitations under the License.
 */
 
-function hImportDefRecTypes() {
+function hImportDefRecTypes(_rtg_ID = null) {
     var _className = "ImportDefRecTypes",
     _version   = "0.6",
     
     _parseddata = null,
-    _prepareddata = null;
+    _prepareddata = null,
+    
+    _return_results = !window.hWin.HEURIST4.util.isempty(_rtg_ID);
     
     function _init(){
 
@@ -68,6 +70,9 @@ function hImportDefRecTypes() {
                 _doPrepare();
             }
         });
+
+        _rtg_ID = _rtg_ID > 0 ? _rtg_ID : 0;
+        $('#field_rtg').val(_rtg_ID);
 
         window.hWin.HEURIST4.util.setDisabled(btnStartImport, true);
          
@@ -414,6 +419,15 @@ function hImportDefRecTypes() {
                 window.hWin.HEURIST4.msg.sendCoverallToBack();
                 
                 if(response.status == window.hWin.ResponseStatus.OK){
+
+                    if(_return_results){
+
+                        window.hWin.HAPI4.EntityMgr.refreshEntityData('rty', function(){
+                            window.close({ result: response.data });
+                        }); // update cache and return import results
+
+                        return;
+                    }
 
                     var results = response.data;
                     var $tbl = $('.tbmain');

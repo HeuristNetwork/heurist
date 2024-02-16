@@ -1511,11 +1511,7 @@ $.widget( "heurist.mainMenu6", {
                          +'<span class="menu-text truncate" style="max-width: 109px;">'+title+'</span>')
                         .appendTo(item);
 
-                        if(action_id=='menu-import-csv-fieldtypes' || 
-                           action_id=='menu-import-csv-rectypes'){
-                            item.css({'font-size':'10px', padding:'0 0 0 8px','margin-top':'-1px'});
-
-                        }else if(action_id=='menu-import-get-template'){
+                        if(action_id=='menu-import-get-template'){
                             item.find('.ui-icon').addClass('ui-icon-gear');
                             item.css({'font-size':'10px', padding:'0 0 0 25px','margin-top':'-1px', 'margin-left': '0.25em'});
                         }else{
