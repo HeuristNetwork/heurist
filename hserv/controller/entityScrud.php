@@ -84,7 +84,7 @@ if (@$argv) {
                 $url = $url.$dbname.'/entity/db.json';
                 header('Location: '.$url);
             }else{
-                downloadFile(null, $dbdef_cache);
+                downloadFile('application/json', $dbdef_cache);
             }
             exit;
     }
