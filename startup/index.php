@@ -363,6 +363,8 @@ if(($_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0.0.1'))
                     
                     if(response.status == window.hWin.ResponseStatus.OK){
                         
+                        window.open(response.newdblink, '_self');
+                        /*
                         $('#newdbname').text(response.newdbname);
                         $('#newusername').text(response.newusername);
                         $('#newdblink').attr('href',response.newdblink).text(response.newdblink);
@@ -374,7 +376,7 @@ if(($_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0.0.1'))
                         }
 
                         _showStep(5);
-                           
+                        */
                     }else{
                         //either wrong captcha or invalid registration values
                         if(response.status == window.hWin.ResponseStatus.ACTION_BLOCKED){
