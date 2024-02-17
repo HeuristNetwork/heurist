@@ -241,12 +241,14 @@ function editCMS_ElementCfg( element_cfg, _layout_content, _layout_container, $c
         cont.find('input[name="margin-left"]').change(_onMarginSyncVal);
 
         function __saveWidgetConfig(){
-            let new_cfg = widget_cfg.getValues();
-            l_cfg.options = new_cfg;
+            if(widget_cfg){
+                let new_cfg = widget_cfg.getValues();
+                l_cfg.options = new_cfg;
 
-            if(new_cfg.widget_id){
-                l_cfg.dom_id = new_cfg.widget_id;
-                cont.find('input[data-type="element-id"]').val(l_cfg.dom_id);
+                if(new_cfg.widget_id){
+                    l_cfg.dom_id = new_cfg.widget_id;
+                    cont.find('input[data-type="element-id"]').val(l_cfg.dom_id);
+                }
             }
         }
 
