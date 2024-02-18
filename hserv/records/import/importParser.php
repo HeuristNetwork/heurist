@@ -708,7 +708,7 @@ public static function parseAndValidate($encoded_filename, $original_filename, $
             $encoded_filename_id = ImportParser::_saveEncodedFilename($encoded_filename);
             
             $preproc = array();
-            $preproc['prepared_filename'] = $prepared_filename;
+            //$preproc['prepared_filename'] = $prepared_filename; rearked to avoid sql injection warning
             $preproc['encoded_filename_id']  = $encoded_filename_id;
             $preproc['original_filename'] = $original_filename;  //filename only
             $preproc['fields'] = $header;
@@ -940,7 +940,7 @@ private static function parseKMLPlacemark($placemark, &$geom_types){
 private static function saveToDatabase($preproc, $prepared_filename=null){
 
 
-    $filename = $prepared_filename?$prepared_filename:$preproc["prepared_filename"];
+    $filename = $prepared_filename;
     
     $s = null;
     if (! file_exists($filename)) $s = ' does not exist';

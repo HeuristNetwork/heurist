@@ -434,9 +434,9 @@
             
             $dbprefix = '';
             if($database!=null){
+                $dbprefix = str_replace('`','',$dbprefix); 
                 $dbprefix = '`'.$mysqli->real_escape_string($database).'`.';
             }
-
 
             $query = 'select ugl_GroupID, ugl_Role '
             .($isfull?', ugr_Name, ugr_Description ':'')

@@ -307,17 +307,19 @@ if(isset($_REQUEST['get_email']) && isset($_REQUEST['recid'])) {	/* Get the Titl
 
 	$data = array();
 	foreach($dbs as $db){
-                        
-		$query = 'SELECT count(*) FROM `' . $mysqli->real_escape_string($db) . '`.Records WHERE rec_FlagTemporary != 1';
-		$res = $mysqli->query($query);
-		if(!$res){
-			$data[$db] = 'error';
-			continue;
-		}
+        if(strpos($db,'hdb_')===0){
+            $db = str_replace('`','',$db); 
+		    $query = 'SELECT count(*) FROM `' . $mysqli->real_escape_string($db) . '`.`Records` WHERE rec_FlagTemporary != 1';
+		    $res = $mysqli->query($query);
+		    if(!$res){
+			    $data[$db] = 'error';
+			    continue;
+		    }
 
-		while($row = $res->fetch_row()){
-			$data[$db] = $row[0];	
-		}
+		    while($row = $res->fetch_row()){
+			    $data[$db] = $row[0];	
+		    }
+        }
 	}
 
 	$response = array("status"=>HEURIST_OK, "data"=>$data, "request"=>implode(',', $dbs));
