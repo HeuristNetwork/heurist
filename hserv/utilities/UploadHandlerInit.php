@@ -26,6 +26,7 @@ error_reporting(E_ALL | E_STRICT);
 
 require_once dirname(__FILE__).'/../System.php';
 
+$options = array();
 
 if(@$_REQUEST['db']){
     $system = new System(); //to init folder const without actual coonection to db
@@ -36,9 +37,13 @@ if(@$_REQUEST['db']){
     }else{
         $system->initPathConstants($dbname);
     }
+    $options['database'] = $dbname;
+}else{
+    //database not defined
+    exit;
 }
 
-$options = array();
+
 if(@$_REQUEST['acceptFileTypes']!=null){
     $options['accept_file_types'] = $_REQUEST['acceptFileTypes'];   
 }
@@ -47,6 +52,9 @@ if(@$_REQUEST['unique_filename']!=null){
 }
 if(@$_REQUEST['max_file_size']>0){
     $options['max_file_size'] = $_REQUEST['max_file_size']; 
+}
+if(@$_REQUEST['upload_subfolder']){
+    $options['upload_subfolder'] = $_REQUEST['upload_subfolder']; 
 }
 
 //if(@$_REQUEST['upload_folder']){

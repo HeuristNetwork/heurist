@@ -63,35 +63,48 @@ class UploadHandler
     function __construct($options = null, $initialize = true, $error_messages = null) {
 	
         //ARTEM - take upload folder from request
-        $upload_thumb_dir = @$_REQUEST['upload_thumb_dir'];
-        $upload_thumb_url = @$_REQUEST['upload_thumb_url'];
-        //get upload folder from parameters
-        $upload_dir = @$_REQUEST['folder']; //defined in form
+        //$upload_thumb_dir = @$_REQUEST['upload_thumb_dir'];
+        //$upload_thumb_url = @$_REQUEST['upload_thumb_url'];
+        
+        $heurist_db = @$options['database'];
+        
+        $error = System::dbname_check($heurist_db);
+        if($error){
+            //database not defined
+            return;
+        }
+        
         $replace_edited_file = @$_REQUEST['replace_edited_file']; //defined in form
         $unique_filename = (@$_REQUEST['unique_filename']!=='0'); //defined in form
-        
-        if(!$upload_dir){
-            if(@$_REQUEST['db']){
-                //'/var/www/html/HEURIST/HEURIST_FILESTORE/'.$_REQUEST['db'].'/'
-                $upload_dir = HEURIST_FILESTORE_DIR.'insitu/'; 
-                $upload_url = HEURIST_FILESTORE_URL.'insitu/';
-            }else{
-                // by default into subfolder files next to script
-                $upload_dir = dirname($this->get_server_var('SCRIPT_FILENAME')).'/files/';
+
+        if($options==null || @$options['upload_dir']==null){  //from UploadHandlerInit.php
+
+            if($options==null) $options=array();
+
+            //get upload subfolder from parameters - this is subfolder of database upload folder
+            $upload_dir = @$_REQUEST['upload_subfolder']; //defined in form 
+            if(!$upload_dir){
+                $upload_dir = 'insitu/';
             }
-        }
-        //add last slash
-        if(substr($upload_dir, -1) != "/"){
-            $upload_dir = $upload_dir . "/";
-        }
-        
-        $k = strpos($upload_dir, "/HEURIST_FILESTORE/");
-        
-        if($k>0) {
-            //special case - add HEURIST folder
-            $upload_url = $this->get_server_url().'/HEURIST'.substr($upload_dir,$k); 
-        }else if(!@$_REQUEST['db']) {
-            $upload_url = $this->get_full_url().'/files/';  //default - next to script
+            
+            /*        
+                    //NOT ALLOWED
+                    // by default into subfolder files next to script
+                    $upload_dir = dirname($this->get_server_var('SCRIPT_FILENAME')).'/files/';
+                    $upload_url = $this->get_full_url().'/files/';  //default - next to script
+            */
+
+            //sanitize
+            $upload_dir = USanitize::sanitizePath($upload_dir);
+            //add last slash
+            if(substr($upload_dir, -1) != "/"){
+                $upload_dir = $upload_dir . "/";
+            }
+            
+            $options['upload_subfolder'] = $upload_dir;
+            $upload_url = HEURIST_FILESTORE_URL.$upload_dir;
+            $upload_dir = HEURIST_FILESTORE_DIR.$upload_dir;
+            
         }
         
         $this->response = array();
@@ -383,10 +396,13 @@ $siz = USystem::getConfigBytes('upload_max_filesize');
             .$this->get_singular_param_name()
             .'='.rawurlencode($file->name);
         $file->deleteType = $this->options['delete_type'];
-        if (!empty($file->subfolder)) {
+        if(@$this->options['upload_subfolder']){
+            $file->deleteUrl .= ('&db='.$this->options['database'].'&upload_subfolder='.rawurlencode($this->options['upload_subfolder']));
+        }else if (!empty($file->subfolder)) {
             $file->deleteUrl .= '&subfolder='.rawurlencode($file->subfolder);
+        }else{
+            $file->deleteUrl .= '&folder='.rawurlencode($this->options['upload_dir']);    
         }
-        $file->deleteUrl .= '&folder='.rawurlencode($this->options['upload_dir']);
         
         if ($file->deleteType !== 'DELETE') {
             $file->deleteUrl .= '&_method=DELETE';

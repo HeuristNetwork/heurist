@@ -108,10 +108,11 @@ if(!($max_size>0)) $max_size = 0;
 
                 // Find out which folders are allowable - the default scratch space plus any
                 // specified for FieldHelper indexing in Advanced Properties
-                $mediaFolders = $system->get_system('sys_MediaFolders');
-                if($mediaFolders==null || $mediaFolders == ''){
+                $mediaFolders = $system->get_system('sys_MediaFolders'); 
+                if($mediaFolders==null || $mediaFolders == ''){ //not defined
                     $mediaFolders = HEURIST_FILESTORE_DIR.'uploaded_files/';
                     folderCreate( $mediaFolders, true );
+                    $mediaFolders = 'uploaded_files';
                 }
                 $mediaExts = $system->get_system('sys_MediaExtensions'); //from preferences
                 if(!$mediaExts) $mediaExts = '';
@@ -120,25 +121,20 @@ if(!($max_size>0)) $max_size = 0;
                 // These are the most likely location for bulk upload (of images) and restricting to these directories
                 // avoids the risk of clobbering the system's required folders (since most people won't know what they're called)
                 $dirs = explode(';', $mediaFolders); // get an array of folders
-                $dirs2 = array();
+                $dirs_checked = array();
+                $dirs2 = array(); //real paths
 
                 // MEDIA FOLDERS ALWAYS RELATIVE TO HEURIST_FILESTORE_DIR
                 foreach ($dirs as $dir){
                     if( $dir && $dir!="*") {
                         
+                        $dir = str_replace('\\','/',$dir);     
+
                         if(substr($dir, -1) != '/'){  //add last slash
                             $dir .= "/";
                         }
 
-                        
-                        /* changed to check that folder is in HEURIST_FILESTORE_DIR 
-                        if(!file_exists($dir) ){ //probable this is relative
-                            $orig = $dir;
-                            chdir(HEURIST_FILESTORE_DIR);
-                            $dir = realpath($dir);
-                        }
-                        */
-                        $dir = str_replace('\\','/',$dir);     
+                        $dir_original = $dir;
                         
                         if(!( substr($dir, 0, strlen(HEURIST_FILESTORE_DIR)) === HEURIST_FILESTORE_DIR )){
                             chdir(HEURIST_FILESTORE_DIR);
@@ -172,6 +168,7 @@ if(!($max_size>0)) $max_size = 0;
                         
                         if(file_exists($dir) && is_dir($dir) && !in_array($dir, $system_folders)){
                             array_push($dirs2, $dir);
+                            array_push($dirs_checked, $dir_original);
                         }else{
                             if(in_array($dir, $system_folders)){
                                 print 'Folder "'.$dir.'" is system one and cannot be used for file upload<br>';    
@@ -182,6 +179,7 @@ if(!($max_size>0)) $max_size = 0;
                                 }else{
                                     print 'Created successfully<br>';    
                                     array_push($dirs2, $dir);
+                                    array_push($dirs_checked, $dir_original);
                                 }
                                 
                             }
@@ -189,7 +187,7 @@ if(!($max_size>0)) $max_size = 0;
                         }
                     }
                 }
-                $dirs = $dirs2;
+                $dirs = $dirs_checked; //$dirs2;
 
                 // add the scratch directory, which will be the default for upload of material for import
                 //array_push($dirs, HEURIST_FILESTORE_DIR.'scratch/');
@@ -245,7 +243,7 @@ if(!($max_size>0)) $max_size = 0;
             
             <input type="hidden" name="db" value="<?php echo HEURIST_DBNAME; ?>"/>
             <div><label for="upload_folder" style="color:black;">Select target folder:</label>
-                <select name="folder" id="upload_folder">
+                <select name="upload_subfolder" id="upload_folder">
                     <?php
                         $is_dir_found = false;
                         foreach($dirs as $upload_dir) {
@@ -758,7 +756,7 @@ if(!($max_size>0)) $max_size = 0;
                             acceptFileTypes:"<?php echo implode('|',$allowed_exts);?>",
                             unique_filename: 0,
                             max_file_size: <?php echo $max_size;?>,
-                            folder: $('#upload_folder').val() },
+                            upload_subfolder: $('#upload_folder').val() },  //subfolder of database upload folder
                     dataType: 'json',
                     /*
                     disableImageResize: /Android(?!.*Chrome)|Opera/
