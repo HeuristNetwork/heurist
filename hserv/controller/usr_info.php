@@ -761,8 +761,8 @@
 
                 if($res !== false){
                     // delete local file after upload
-                    fileDelete(HEURIST_FILESTORE_DIR . '/scratch/' . $_REQUEST['file'][0]['name']);
-                    fileDelete(HEURIST_FILESTORE_DIR . '/scratch/thumbnail/' . $_REQUEST['file'][0]['name']);
+                    fileDelete(HEURIST_FILESTORE_DIR . '/scratch/' . basename($_REQUEST['file'][0]['name']));
+                    fileDelete(HEURIST_FILESTORE_DIR . '/scratch/thumbnail/' . basename($_REQUEST['file'][0]['name']));
                 }
             } else {
 
