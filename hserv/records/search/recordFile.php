@@ -498,10 +498,12 @@ function downloadFile($mimeType, $filename, $originalFileName=null){
         
         $range = @$_SERVER['HTTP_RANGE'];
         $range_max = 0;
-        if($range){
+        if($range!=null){
             //get bytes range  bytes=0-88
             list($dim, $range) = explode('=', $range);
             list($range_min,$range_max) = explode('-', $range);
+            $range_min = intval($range_min);
+            $range_max = intval($range_maxs);
         }        
 
         header('Content-Description: File Transfer');
