@@ -224,13 +224,13 @@
         
         if($starts_with!=null && (mysql__check_dbname($starts_with)===true))
         {
-            $starts_with = $mysqli->real_escape_string($starts_with);
-            $where = "'hdb_$starts_with%'";
+            //$starts_with = $mysqli->real_escape_string($starts_with);
+            $where = 'hdb_'.$starts_with.'%';
         }else{
-            $where = "'hdb_%'";    
+            $where = 'hdb_%';    
         }
         
-        $query = "show databases where `database` like $where";
+        $query = "show databases where `database` like '".$mysqli->real_escape_string($where)."'";
         $res = $mysqli->query($query);
         $result = array();
         $isFilter = ($email != null && $role != null);
@@ -656,7 +656,7 @@
                     continue;
                 }
                 if($fieldname=='dtl_Geo'){
-                    $query = $query.$fieldname.'=ST_GeomFromText(?), ';
+                    $query = $query.'dtl_Geo=ST_GeomFromText(?), ';
                 }else{
                     $query = $query.$fieldname.'=?, ';
                 }

@@ -466,7 +466,7 @@ function recordGetRealtionship($system, $sourceID, $targetID ){
 
     //find all target related records
     $query = 'SELECT rl_RelationID FROM recLinks '
-        .'WHERE rl_SourceID='.$sourceID.' AND rl_TargetID='.$targetID.' AND rl_RelationID IS NOT NULL';
+        .'WHERE rl_SourceID='.intval($sourceID).' AND rl_TargetID='.intval($targetID).' AND rl_RelationID IS NOT NULL';
 
 
     $res = $mysqli->query($query);
@@ -496,7 +496,7 @@ function recordGetRealtionshipType($system, $sourceID, $targetID ){
 
     //find all target related records
     $query = 'SELECT rl_RelationTypeID FROM recLinks '
-        .'WHERE rl_SourceID='.$sourceID.' AND rl_TargetID='.$targetID.' AND rl_RelationID IS NOT NULL';
+        .'WHERE rl_SourceID='.intval($sourceID).' AND rl_TargetID='.intval($targetID).' AND rl_RelationID IS NOT NULL';
     $res = $mysqli->query($query);
     if (!$res){
         return null;// $system->addError(HEURIST_DB_ERROR, "Search query error", $mysqli->error);

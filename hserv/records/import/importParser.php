@@ -719,7 +719,7 @@ public static function parseAndValidate($encoded_filename, $original_filename, $
             $preproc['csv_enclosure'] = $csv_enclosure;
             $preproc['csv_mvsep'] = $csv_mvsep;            
            
-            $res = self::saveToDatabase($preproc);
+            $res = self::saveToDatabase($preproc, $prepared_filename);
             //delete prepare
             if(file_exists($prepared_filename)) unlink($prepared_filename);
             if($res!==false){
@@ -937,10 +937,10 @@ private static function parseKMLPlacemark($placemark, &$geom_types){
 //
 //  save content of file into import table, create session object and saves it to sysImportFiles table, returns session
 //
-private static function saveToDatabase($preproc){
+private static function saveToDatabase($preproc, $prepared_filename=null){
 
 
-    $filename = $preproc["prepared_filename"];
+    $filename = $prepared_filename?$prepared_filename:$preproc["prepared_filename"];
     
     $s = null;
     if (! file_exists($filename)) $s = ' does not exist';
@@ -1051,8 +1051,9 @@ private static function saveToDatabase($preproc){
     //." IGNORE 1 LINES
     ." (".$columns.")";
 
-
-    if (!$mysqli->query($query)) {
+    $rres = $mysqli->query($query);
+    
+    if(!$rres){
         
         self::$system->addError(HEURIST_DB_ERROR, 'Unable to import data. '
 .'Your MySQL system is not set up correctly for text file import. Please ask your system adminstrator to make the following changes:<br>'

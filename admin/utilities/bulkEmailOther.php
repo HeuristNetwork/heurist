@@ -176,9 +176,18 @@ if(isset($_REQUEST['get_email']) && isset($_REQUEST['recid'])) {	/* Get the Titl
 		$lastmod_logic = $mysqli->real_escape_string( filter_var($db_request['lastmod_logic'],FILTER_SANITIZE_STRING) );
 		$lastmod_logic = $lastmod_logic == 'more' ? '<=' : '>=';
 		$lastmod_period = intval($db_request['lastmod_period']);
-		$lastmod_unit = $mysqli->real_escape_string( filter_var($db_request['lastmod_unit'],FILTER_SANITIZE_STRING) );
+		//$lastmod_unit = $mysqli->real_escape_string( filter_var($db_request['lastmod_unit'],FILTER_SANITIZE_STRING) );
+        //to avoid injection
+        $lastmod_unit = 'ALL';
+        switch (strtoupper(@$db_request['lastmod_unit'])) {
+            case 'DAY':  $lastmod_unit = 'DAY'; break;
+            case 'MONTH':  $lastmod_unit = 'MONTH'; break;
+            case 'YEAR':  $lastmod_unit = 'YEAR';
+        }
 
-		$lastmod_where = ($lastmod_unit!="ALL") ? "AND rec_Modified " . $lastmod_logic . " date_format(curdate(), '%Y-%m-%d') - INTERVAL " . $lastmod_period . " " . $lastmod_unit . " " : "";
+		$lastmod_where = ($lastmod_unit!="ALL") ? "AND rec_Modified " . $lastmod_logic 
+                    . " date_format(curdate(), '%Y-%m-%d') - INTERVAL " 
+                    . $lastmod_period . " " . $lastmod_unit . " " : "";
 
 		foreach ($dbs as $db) {
 	
@@ -299,9 +308,7 @@ if(isset($_REQUEST['get_email']) && isset($_REQUEST['recid'])) {	/* Get the Titl
 	$data = array();
 	foreach($dbs as $db){
                         
-        $db = $mysqli->real_escape_string($db);
-        
-		$query = 'SELECT count(*) FROM `' . $db . '`.Records WHERE rec_FlagTemporary != 1';
+		$query = 'SELECT count(*) FROM `' . $mysqli->real_escape_string($db) . '`.Records WHERE rec_FlagTemporary != 1';
 		$res = $mysqli->query($query);
 		if(!$res){
 			$data[$db] = 'error';

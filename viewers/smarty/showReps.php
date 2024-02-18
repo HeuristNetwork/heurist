@@ -1445,7 +1445,7 @@ function smarty_function_wrap($params, &$smarty)
 }
 
 //
-// 
+//  Replace relative path to absolute
 //
 function cms_content_prepare($content){
     

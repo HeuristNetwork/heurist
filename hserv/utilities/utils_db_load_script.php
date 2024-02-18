@@ -486,7 +486,8 @@ if (!$error && isset($param_start) && isset($param_foffset) && preg_match("/(\.(
 
 // Cut off delimiter of the end of the query
 
-        $query = substr(trim($query),0,-1*strlen($delimiter));
+        $len = -1*strlen($delimiter);
+        $query = substr(trim($query),0,$len);
 
         if (!$mysqli->query($query)) //!TESTMODE && 
         { 
