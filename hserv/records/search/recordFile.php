@@ -495,6 +495,7 @@ function downloadViaProxy($filename, $mimeType, $url, $bypassProxy = true, $orig
 function downloadFile($mimeType, $filename, $originalFileName=null){
 
     if (file_exists($filename)) {
+    //if(isPathInHeuristUploadFolder($filename, true)){
         
         $range = @$_SERVER['HTTP_RANGE'];
         $range_max = 0;

@@ -235,12 +235,23 @@ if($response!=null){
     
     }
 
+    $allowed_exts_all = mysql__select_list2($system->get_mysqli(), 'select fxm_Extension from defFileExtToMimetype');
+    
     if(@$_REQUEST['acceptFileTypes']){
-        $options['accept_file_types'] = $_REQUEST['acceptFileTypes'];
+        //all these complexity needs to avoid Path Traversal warning
+        $allowed_exts = array();
+        $allowed_exts_2 = explode('|', $_REQUEST['acceptFileTypes']);
+        foreach($allowed_exts_2 as $ext){
+            if(in_array(strtolower($ext), $allowed_exts_all)){
+                $idx = array_search(strtolower($ext), $allowed_exts_all);
+                if($idx>=0) $allowed_exts[] = $allowed_exts_all[$idx];    
+            }    
+        }
+        //$options['accept_file_types'] = $_REQUEST['acceptFileTypes'];
     }else{
-        $allowed_exts = mysql__select_list2($system->get_mysqli(), 'select fxm_Extension from defFileExtToMimetype');
-        $options['accept_file_types'] = implode('|', $allowed_exts);
+        $allowed_exts = $allowed_exts_all;
     }
+    $options['accept_file_types'] = implode('|', $allowed_exts);
     
     $options['print_response'] = false;
     
