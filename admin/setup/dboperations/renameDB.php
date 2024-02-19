@@ -41,12 +41,12 @@ if($_REQUEST['mode'] == 2){ // verify the new name is unique
 	$targetdbname = htmlspecialchars(filter_var($_REQUEST['targetdbname']));
 
     if(strlen($targetdbname)>64){ // validate length
-        $sErrorMsg = 'Database name <b>'.htmlspecialchars($targetdbname).'</b> is too long. Max 64 characters allowed';
+        $sErrorMsg = 'Database name <b>'.$targetdbname.'</b> is too long. Max 64 characters allowed';
     }else{
         // Avoid illegal chars in db name
         $invalidDbName = System::dbname_check($targetdbname);
         if ($invalidDbName) {
-            $sErrorMsg =  '<p><hr></p><p>&nbsp;</p><p>Requested database rename: "'.htmlspecialchars($targetdbname)
+            $sErrorMsg =  '<p><hr></p><p>&nbsp;</p><p>Requested database rename: "'.$targetdbname
                     .'" is invalid. Only letters, numbers and underscores (_) are allowed in the database name</p>';
         } // rejecting illegal characters in db name
         else{
@@ -55,7 +55,7 @@ if($_REQUEST['mode'] == 2){ // verify the new name is unique
             $dblist = mysql__select_list2($mysqli, 'show databases');
             if (array_search(strtolower($targetdbname), array_map('strtolower', $dblist)) !== false ){
                 $sErrorMsg = "<div class='ui-state-error'>Warning: database '".
-                htmlspecialchars($targetdbname)
+                $targetdbname
                 ."' already exists. Please choose a different name<br></div>";
             }else{
                 ob_start();
@@ -405,7 +405,7 @@ function perform_clone($system, $targetdbname, $sourcedbname){
     }
 
     // Copy the images and the icons directories
-    $res = folderRecurseCopy( HEURIST_FILESTORE_ROOT.$source_database, HEURIST_FILESTORE_ROOT.$targetdbname );    
+    $res = folderRecurseCopy( HEURIST_FILESTORE_ROOT.$source_database, HEURIST_FILESTORE_ROOT.basename($targetdbname) );    
 
     // Update file path in target database  with absolute paths
     $query1 = "update recUploadedFiles set ulf_FilePath='".$mysqli->real_escape_string(HEURIST_FILESTORE_ROOT.$targetdbname).
