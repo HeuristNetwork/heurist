@@ -325,7 +325,7 @@ if($response!=null){
             }
             else if($entity_name=="temp" && $is_autodect_csv) {
                 
-                $filename = HEURIST_FILESTORE_DIR.'scratch/'.$file->original_name;
+                $filename = HEURIST_FILESTORE_DIR.'scratch/'.basename($file->original_name);
                 
                 $extension = strtolower(pathinfo($filename, PATHINFO_EXTENSION));
                 $isKML = ($extension=='kml' || $extension=='kmz');

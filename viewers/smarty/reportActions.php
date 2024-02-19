@@ -377,20 +377,21 @@ class ReportActions {
             $res = array("error"=>'Error occurred during upload - file had zero size');
             
         }else{
-            $filename = USanitize::sanitizePath($params['tmp_name']);
+
             $origfilename = $params['name'];
             $res = array("error"=>'Error occurred during upload - file does not exist');
-            
-            if(strpos($filename,'cms/')===0){
-                $filename = basename($filename);
+
+            if(strpos($params['tmp_name'],'cms/')===0){
+                $filename = basename($params['tmp_name']);                
                 $path = dirname(__FILE__).'/../../hclient/widgets/cms/templates/snippets/';
                 $path = realpath($path);
                 if($path!==false){ //does not exist
                     $filename = $path.DIRECTORY_SEPARATOR.basename($filename);    
                 }
             }else{
-               //$filename = USanitize::sanitizePath($filename); 
+                $filename = $params['tmp_name'];                
             }
+            $filename = USanitize::sanitizePath($filename);
             if(file_exists($filename)){
                 
                 //read tempfile

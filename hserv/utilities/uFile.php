@@ -219,7 +219,8 @@
     function allowWebAccessForForlder($folder){
         $res = true;
         if(file_exists($folder) && is_dir($folder) && !file_exists($folder.'/.htaccess')){
-            $res = copy(HEURIST_DIR.'admin/setup/.htaccess_via_url', $folder.'/.htaccess');
+            $folder = USanitize::sanitizePath($folder);
+            $res = copy(HEURIST_DIR.'admin/setup/.htaccess_via_url', $folder.'.htaccess');
         }
         return $res;
     }
