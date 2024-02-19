@@ -1820,7 +1820,7 @@ $siz = USystem::getConfigBytes('upload_max_filesize');
                         $file_name = str_replace('Ё','/',$file_name);
                         
                         $pathinfo = pathinfo($file_name);
-                        $subfolder_name = $pathinfo['dirname'];
+                        $subfolder_name = USanitize::sanitizePath($pathinfo['dirname']);
                         $file_name = $pathinfo['basename'];
                         
                         $origial_filename = $file_name;

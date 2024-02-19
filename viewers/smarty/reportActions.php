@@ -377,7 +377,7 @@ class ReportActions {
             $res = array("error"=>'Error occurred during upload - file had zero size');
             
         }else{
-            $filename = $params['tmp_name'];
+            $filename = USanitize::sanitizePath($params['tmp_name']);
             $origfilename = $params['name'];
             $res = array("error"=>'Error occurred during upload - file does not exist');
             
@@ -389,7 +389,7 @@ class ReportActions {
                     $filename = $path.DIRECTORY_SEPARATOR.basename($filename);    
                 }
             }else{
-               $filename = USanitize::sanitizePath($filename); 
+               //$filename = USanitize::sanitizePath($filename); 
             }
             if(file_exists($filename)){
                 
