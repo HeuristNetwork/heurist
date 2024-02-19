@@ -60,8 +60,9 @@ if(isset($_REQUEST) && count($_REQUEST)>0){ //if set it is included in dailyCron
     
     $format = null;
     if(array_key_exists('mode',$_REQUEST)){
+        $mode = htmlspecialchars($_REQUEST['mode']);
         $allowed_exts = array('html','js','txt','csv','xml','json','css');
-        $idx = array_search(strtolower(htmlspecialchars($_REQUEST['mode'])), $allowed_exts);
+        $idx = array_search(strtolower($mode), $allowed_exts);
         $format = ($idx>=0)?$allowed_exts[$idx]:'html';
         //preg_match('/html|js|txt|csv|xml|json|css/', $_REQUEST['mode'])
     }
