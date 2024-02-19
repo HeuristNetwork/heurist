@@ -64,7 +64,7 @@ class USanitize {
     //
     //  removes /../
     //
-    public static function sanitizePath($path) {
+    public static function sanitizePath($path, $use_native_separator=false) {
         // Skip invalid input.
         if (!isset($path)) {
             return '';
@@ -101,6 +101,11 @@ class USanitize {
         if( is_dir($path) && substr($path, -1, 1) != '/' )  {
             $path = $path.'/';
         }
+        
+        if($use_native_separator && DIRECTORY_SEPARATOR!='/'){
+            $path = str_replace('/', DIRECTORY_SEPARATOR, $path);
+        }
+        
         return $path;
     }
 
