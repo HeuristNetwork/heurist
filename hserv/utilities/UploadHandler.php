@@ -1585,12 +1585,17 @@ $siz = USystem::getConfigBytes('upload_max_filesize');
     protected function get_singular_param_name() {
         return substr($this->options['param_name'], 0, -1);  //files -> file
     }
+    
+    private function secure_file_name($filename){
+        $filename = htmlspecialchars(basename($filename)); //stripslashes()
+        $filename = str_replace('&amp;','&',$filename);
+        return $filename;
+    }
 
     protected function get_file_name_param() {
         $name = $this->get_singular_param_name();
         $filename = $this->get_query_param($name);
-        $filename = htmlspecialchars(basename($filename)); //stripslashes()
-        $filename = str_replace('&amp;','&',$filename);
+        $filename = $this->secure_file_name($filename);
         return $filename;
     }
 
@@ -1605,7 +1610,7 @@ $siz = USystem::getConfigBytes('upload_max_filesize');
             return null;
         }
         foreach ($params as $key => $value) {
-            $params[$key] = basename(stripslashes($value));
+            $params[$key] = secure_file_name($value);
         }
         return $params;
     }
