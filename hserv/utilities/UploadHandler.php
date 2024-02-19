@@ -1587,7 +1587,8 @@ $siz = USystem::getConfigBytes('upload_max_filesize');
 
     protected function get_file_name_param() {
         $name = $this->get_singular_param_name();
-        return basename(stripslashes($this->get_query_param($name)));
+        $filename = $this->get_query_param($name);
+        return basename($filename); //stripslashes()
     }
 
     //@todo    
