@@ -341,6 +341,10 @@ $siz = USystem::getConfigBytes('upload_max_filesize');
         } else {
             $version_dir = @$this->options['image_versions'][$version]['upload_dir'];
             if ($version_dir) {
+                //$thi->secure_file_name($file_name)
+                $file_name = htmlspecialchars(basename($file_name));
+                $file_name = str_replace('&amp;','&',$file_name);
+                
                 return USanitize::sanitizePath($version_dir.$this->get_user_path().$file_name); //realpath
             }
             $version_path = $version.'/';
