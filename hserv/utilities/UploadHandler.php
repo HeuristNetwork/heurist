@@ -352,6 +352,10 @@ $siz = USystem::getConfigBytes('upload_max_filesize');
             $subfolder = $subfolder.'/';
         }
         
+        //$thi->secure_file_name($filename)
+        $file_name = htmlspecialchars(basename($file_name));
+        $file_name = str_replace('&amp;','&',$file_name);
+        
         return USanitize::sanitizePath($this->options['upload_dir'].$this->get_user_path()
             .$subfolder.$version_path.$file_name);
     }
