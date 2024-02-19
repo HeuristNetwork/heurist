@@ -1821,9 +1821,14 @@ $siz = USystem::getConfigBytes('upload_max_filesize');
                         $file_name =  substr(strrchr($file_name, "/"), 1 );
                     }
                     
+
+                    $tmp_file = null;
+                    if(isset($upload['tmp_name'][$index])){
+                        $tmp_file = USanitize::sanitizePath($upload['tmp_name'][$index]);
+                    }
                     
                     $files[] = $this->handle_file_upload(
-                        $upload['tmp_name'][$index],
+                        $tmp_file,
                         $file_name,
                         $upload['name'][$index], //original name
                         $subfolder_name,

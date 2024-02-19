@@ -148,7 +148,7 @@ function executeSmartyTemplate($system, $params){
 // xml or text/xml        
     $is_headless = @$params['snippet']==1; //former $is_snippet_output
     if(array_key_exists("mode", $params) && $params["mode"]){
-        $outputmode = $params["mode"];
+        $outputmode = htmlspecialchars($params["mode"]);
     }
     if($outputmode!='js' && $outputmode!='html'){
         $is_headless = true;            
