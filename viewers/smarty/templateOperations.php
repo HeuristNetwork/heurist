@@ -80,9 +80,11 @@ require_once dirname(__FILE__).'/../../hserv/structure/conceptCode.php';
 
                 case 'import':
                 
-                    if(@$_REQUEST['import_template']){
+                    if(@$_REQUEST['import_template']){ 
+                        //for CMS
                         $params = $_REQUEST['import_template'];
                     }else{
+                        //for impport uloaded gpl
                         $params = $_FILES['import_template'];
                     }
                 

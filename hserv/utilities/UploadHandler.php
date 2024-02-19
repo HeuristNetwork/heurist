@@ -1594,6 +1594,9 @@ $siz = USystem::getConfigBytes('upload_max_filesize');
         return substr($this->options['param_name'], 0, -1);  //files -> file
     }
     
+    //
+    // Unfortunately Snyk security report doesn't see this code
+    //
     private function secure_file_name($filename){
         $filename = htmlspecialchars(basename($filename)); //stripslashes()
         $filename = str_replace('&amp;','&',$filename);
@@ -1835,8 +1838,14 @@ $siz = USystem::getConfigBytes('upload_max_filesize');
             } else {
                 // param_name is a single object identifier like "file",
                 // $upload is a one-dimensional array:
+                $tmp_file = null;
+                if(isset($upload['tmp_name'])){
+                    $tmp_file = USanitize::sanitizePath($upload['tmp_name']);
+                }
+                
+                
                 $files[] = $this->handle_file_upload(
-                    isset($upload['tmp_name']) ? $upload['tmp_name'] : null,
+                    $tmp_file,
                     //$prefix.USanitize::sanitizeFileName($file_name ? $file_name : (isset($upload['name']) ?$upload['name'] : null), false),
                     $file_name ? $file_name : (isset($upload['name']) ?$upload['name'] : null),
                     (isset($upload['name']) ? $upload['name'] : null), //original name

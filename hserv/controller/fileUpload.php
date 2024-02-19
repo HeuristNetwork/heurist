@@ -48,7 +48,7 @@ if($system->init(@$_REQUEST['db'])){
     $tiledImageStack = (@$_REQUEST['tiledImageStack']==1); //unzip archive and copy to uploaded_tilestacks
     
     $new_file_name = @$_REQUEST['newfilename'];
-    if($new_file_name) $new_file_name = USanitize::sanitizeFileName($new_file_name, false);
+    if($new_file_name) $new_file_name = USanitize::sanitizeFileName(basename($new_file_name), false);
     
     if(@$_REQUEST['entity']){
         $entity_name = entityResolveName($_REQUEST['entity']);
