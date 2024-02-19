@@ -1836,7 +1836,11 @@ $siz = USystem::getConfigBytes('upload_max_filesize');
                     if(isset($upload['tmp_name'][$index])){
                         //USanitize::sanitizePath(
                         // we can not sanitize it, other is_uploaded_file returns false
-                        $tmp_file = $upload['tmp_name'][$index];
+                        // htmlspecialchars for snyl only
+                        $tmp_file = htmlspecialchars($upload['tmp_name'][$index]);
+                        
+                        //$pathinfo = pathinfo($tmp_file);
+                        //$tmp_file = $pathinfo['dirname'].'/'.$pathinfo['basename'];
                     }
                     
                     $files[] = $this->handle_file_upload(
@@ -1859,7 +1863,8 @@ $siz = USystem::getConfigBytes('upload_max_filesize');
                 if(isset($upload['tmp_name'])){
                     //USanitize::sanitizePath(
                     // we can not sanitize it, other is_uploaded_file returns false
-                    $tmp_file = $upload['tmp_name'];
+                    // htmlspecialchars for snyl only
+                    $tmp_file = htmlspecialchars($upload['tmp_name']);
                 }
                 
                 
