@@ -74,7 +74,8 @@ class UploadHandler
             return;
         }
         
-        $replace_edited_file = @$_REQUEST['replace_edited_file']; //defined in form
+        $replace_edited_file = intval(@$_REQUEST['replace_edited_file']); //defined in form
+        if(!($replace_edited_file>0 && $replace_edited_file<4)) $replace_edited_file = false;
         $unique_filename = (@$_REQUEST['unique_filename']!=='0'); //defined in form
 
         if($options==null || @$options['upload_dir']==null){  //from UploadHandlerInit.php
@@ -1532,7 +1533,7 @@ $siz = USystem::getConfigBytes('upload_max_filesize');
     protected function readfile($file_path) {
         if(file_exists(file_path)){
             $file_size = $this->get_file_size($file_path);
-            $chunk_size = $this->options['readfile_chunk_size'];
+            $chunk_size = intval($this->options['readfile_chunk_size']);
             if ($chunk_size && $file_size > $chunk_size) {
                 $handle = fopen($file_path, 'rb');
                 while (!feof($handle)) {
@@ -1588,7 +1589,9 @@ $siz = USystem::getConfigBytes('upload_max_filesize');
     protected function get_file_name_param() {
         $name = $this->get_singular_param_name();
         $filename = $this->get_query_param($name);
-        return htmlspecialchars(basename($filename)); //stripslashes()
+        $filename = htmlspecialchars(basename($filename)); //stripslashes()
+        $filename = str_replace('&amp;','&',$filename);
+        return $filename;
     }
 
     //@todo    
