@@ -13,7 +13,7 @@
             if(!defined('HEURIST_SCRATCH_DIR')){
                 //$system->initPathConstants($dbname);
                 $upload_root = $system->getFileStoreRootFolder();
-                $filestore_dir = $upload_root . $dbname . '/';
+                $filestore_dir = $upload_root . htmlspecialchars($dbname) . '/';
                 if(file_exists($filestore_dir)){
                     $dir = $filestore_dir.'scratch/';
                     $warn = folderCreate2($dir, '', false);

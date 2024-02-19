@@ -407,10 +407,12 @@ $siz = USystem::getConfigBytes('upload_max_filesize');
         $file->deleteType = $this->options['delete_type'];
         if(@$this->options['upload_subfolder']){
             $file->deleteUrl .= ('&db='.$this->options['database'].'&upload_subfolder='.rawurlencode($this->options['upload_subfolder']));
-        }else if (!empty($file->subfolder)) {
-            $file->deleteUrl .= '&subfolder='.rawurlencode($file->subfolder);
         }else{
             $file->deleteUrl .= '&folder='.rawurlencode($this->options['upload_dir']);    
+        }
+        
+        if (!empty($file->subfolder)) {
+            $file->deleteUrl .= '&subfolder='.rawurlencode($file->subfolder);
         }
         
         if ($file->deleteType !== 'DELETE') {
@@ -1816,21 +1818,31 @@ $siz = USystem::getConfigBytes('upload_max_filesize');
                     $subfolder_name = '';
                     if(strpos($file_name,'Ё')>0){
                         $file_name = str_replace('Ё','/',$file_name);
-                        $k = strrpos($file_name, "/");
-                        $subfolder_name = substr($file_name, 0, $k);
-                        $file_name =  substr(strrchr($file_name, "/"), 1 );
+                        
+                        $pathinfo = pathinfo($file_name);
+                        $subfolder_name = $pathinfo['dirname'];
+                        $file_name = $pathinfo['basename'];
+                        
+                        $origial_filename = $file_name;
+                        //$k = strrpos($file_name, "/");
+                        //$subfolder_name = substr($file_name, 0, $k);
+                        //$file_name =  substr(strrchr($file_name, "/"), 1 );
+                    }else{
+                        $origial_filename = $upload['name'][$index];
                     }
                     
 
                     $tmp_file = null;
                     if(isset($upload['tmp_name'][$index])){
-                        $tmp_file = USanitize::sanitizePath($upload['tmp_name'][$index]);
+                        //USanitize::sanitizePath(
+                        // we can not sanitize it, other is_uploaded_file returns false
+                        $tmp_file = $upload['tmp_name'][$index];
                     }
                     
                     $files[] = $this->handle_file_upload(
                         $tmp_file,
                         $file_name,
-                        $upload['name'][$index], //original name
+                        $origial_filename, //original name
                         $subfolder_name,
                         $size ? $size : $upload['size'][$index],
                         $upload['type'][$index],
@@ -1845,7 +1857,9 @@ $siz = USystem::getConfigBytes('upload_max_filesize');
                 // $upload is a one-dimensional array:
                 $tmp_file = null;
                 if(isset($upload['tmp_name'])){
-                    $tmp_file = USanitize::sanitizePath($upload['tmp_name']);
+                    //USanitize::sanitizePath(
+                    // we can not sanitize it, other is_uploaded_file returns false
+                    $tmp_file = $upload['tmp_name'];
                 }
                 
                 

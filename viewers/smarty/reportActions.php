@@ -382,6 +382,7 @@ class ReportActions {
             $res = array("error"=>'Error occurred during upload - file does not exist');
             
             if(strpos($filename,'cms/')===0){
+                $filename = basename($filename);
                 $path = dirname(__FILE__).'/../../hclient/widgets/cms/templates/snippets/';
                 $path = realpath($path);
                 if($path!==false){ //does not exist
