@@ -1611,12 +1611,15 @@ $siz = USystem::getConfigBytes('upload_max_filesize');
         if (!$params) {
             return null;
         }
+        $params2 = array();
         foreach ($params as $key => $value) {
             $filename = htmlspecialchars(basename($value)); //stripslashes()
             $filename = str_replace('&amp;','&',$filename);
-            $params[$key] = $filename; //secure_file_name($value);
+            if($filename){
+                $params2[$key] = $filename; //secure_file_name($value);
+            }
         }
-        return $params;
+        return $params2;
     }
 
     protected function get_file_type($file_path) {
