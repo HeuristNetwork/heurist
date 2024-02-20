@@ -718,10 +718,14 @@ class DbUtils {
                 $dump_options = array(
                         'add-drop-table' => true,
                         'skip-triggers' => false,
-                        'single-transaction' => true,
+                        'single-transaction' => false, //was true till 2024-02-16
                         'add-drop-trigger' => true,
                         //'databases' => true,
                         'add-drop-database' => true);
+                        
+                //do not archive sysArchive and import tables??
+                        
+                        
             }else{
                 //$dump_options = array('skip-triggers' => true,  'add-drop-trigger' => false);
             }

@@ -71,7 +71,14 @@ class UploadHandler
         $error = System::dbname_check($heurist_db);
         if($error){
             //database not defined
-            return;
+            return $this->header('HTTP/1.1 403 Forbidden');
+        }
+        
+        $system = new System();
+        $res = $system->verify_credentials($heurist_db);
+        if(!($res>0)){
+            //not logged in
+            return $this->header('HTTP/1.1 403 Forbidden');
         }
         
         $replace_edited_file = intval(@$_REQUEST['replace_edited_file']); //defined in form
@@ -279,6 +286,7 @@ $siz = USystem::getConfigBytes('upload_max_filesize');
     }
 
     protected function initialize() {
+        
         switch ($this->get_server_var('REQUEST_METHOD')) {
             case 'OPTIONS':
             case 'HEAD':

@@ -109,7 +109,9 @@ class ReportRecord {
             $res = getLangCode3($res);
         }else if($param=='user'){
             
-            return $this->system->getCurrentUser();
+            $usr=$this->system->getCurrentUser();
+            unset($usr['ugr_Preferences']);
+            return $usr;
         }
 
         

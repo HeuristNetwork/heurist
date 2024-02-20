@@ -356,7 +356,13 @@
                 //session_write_close();
             }
 
-        }else if ($action=="file_in_folder") { //get list of system images
+        }
+        else if ( $system->get_user_id()<1 &&  !in_array($action,$quest_allowed)) {
+
+            $response = $system->addError(HEURIST_REQUEST_DENIED);
+
+        }
+        else if ($action=="file_in_folder") { //get list of system images
         
               $exts = @$_REQUEST['exts'];
               if($exts){
@@ -376,7 +382,8 @@
               
               $res = folderContent($lib_path, $exts);
               
-        }else if ($action=="foldercontent") { //get list of files for given folder
+        }
+        else if ($action=="foldercontent") { //get list of files for given folder
         
               //by default this are mbtiles in uploaded_tilestack  
         
@@ -397,7 +404,8 @@
               }
               $res = folderContent($lib_path, $exts);
               
-        }else if ($action=="folders") { //get list of system images
+        }
+        else if ($action=="folders") { //get list of system images
 
               $folders = $system->getArrayOfSystemFolders();
                
@@ -421,8 +429,11 @@
                   
                   if($dir_name==''){
                       $response = $system->addError(HEURIST_ACTION_BLOCKED, 'Folder name is not defined or out of the root');
+                  }else if(!is_dir(HEURIST_FILESTORE_DIR.$dir_name)){
+                      $response = $system->addError(HEURIST_ACTION_BLOCKED, 'Folder name is not a directory');
                   }else{
-                  
+
+                  $f_name = htmlspecialchars($dir_name);
                   $folder_name = HEURIST_FILESTORE_DIR.$dir_name;
                   
                   if($folders[strtolower($dir_name)]){
@@ -438,7 +449,7 @@
                       }else if(file_exists(HEURIST_FILESTORE_DIR.$new_name)){
                           $response = $system->addError(HEURIST_ACTION_BLOCKED, 'Folder with name "'.$new_name.'" already exists');
                       }else if(!file_exists($folder_name)){
-                          $response = $system->addError(HEURIST_ACTION_BLOCKED, 'Folder with name "'.$dir_name.'" does not exist');
+                          $response = $system->addError(HEURIST_ACTION_BLOCKED, 'Folder with name "'.$f_name.'" does not exist');
                       }else{
                           $res = rename($folder_name, HEURIST_FILESTORE_DIR.$new_name);    
                           if(!$res){
@@ -449,15 +460,16 @@
      
                   }else if($op=='delete'){
                       //if (is_dir($dir))
+
                       
                       if(!file_exists($folder_name)){
-                          $response = $system->addError(HEURIST_ACTION_BLOCKED, 'Folder with name "'.$dir_name.'" does not exist');             
+                          $response = $system->addError(HEURIST_ACTION_BLOCKED, 'Folder with name "'.$f_name.'" does not exist');             
                       }else if (count(scandir($folder_name))>2){
-                          $response = $system->addError(HEURIST_ACTION_BLOCKED, 'Non empty folder "'.$dir_name.'" cannot be removed');          
+                          $response = $system->addError(HEURIST_ACTION_BLOCKED, 'Non empty folder "'.$f_name.'" cannot be removed');          
                       }else{
                           $res = folderDelete2($folder_name, true);        
                           if(!$res){
-                              $response = $system->addError(HEURIST_ACTION_BLOCKED, 'Folder "'.$dir_name.'" cannot be removed');
+                              $response = $system->addError(HEURIST_ACTION_BLOCKED, 'Folder "'.$f_name.'" cannot be removed');
                           }
                       }
                       
@@ -474,7 +486,8 @@
                   
                   }
               }
-        }else if($action == 'check_allow_estc'){ // check if the ESTC or LRC18C lookups are allowed for current server+database
+        }
+        else if($action == 'check_allow_estc'){ // check if the ESTC or LRC18C lookups are allowed for current server+database
 
             $msg = '';
 
@@ -511,12 +524,9 @@
                 $system->addError(HEURIST_ACTION_BLOCKED, $msg);
                 $res = false;
             }
-        }else        
-        if ( $system->get_user_id()<1 &&  !in_array($action,$quest_allowed)) {
-
-            $response = $system->addError(HEURIST_REQUEST_DENIED);
-
-        }else{
+            
+        }
+        else{
 
             $res = false;
 

@@ -28,6 +28,8 @@ require_once dirname(__FILE__).'/../System.php';
 
 $options = array();
 
+$system = null;
+
 if(@$_REQUEST['db']){
     $system = new System(); //to init folder const without actual coonection to db
     $dbname = @$_REQUEST['db'];
@@ -40,6 +42,7 @@ if(@$_REQUEST['db']){
     $options['database'] = $dbname;
 }else{
     //database not defined
+    header('HTTP/1.1 403 Forbidden');
     exit;
 }
 

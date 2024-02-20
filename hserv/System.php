@@ -1693,12 +1693,12 @@ class System {
 
                     return true;
                 }else{
-                    $this->addError(HEURIST_REQUEST_DENIED,  "Password is incorrect");
+                    $this->addError(HEURIST_REQUEST_DENIED,  "The credentials supplied are not correct");
                     return false;
                 }
 
             }else{
-                $this->addError(HEURIST_REQUEST_DENIED,  "User name is incorrect");
+                $this->addError(HEURIST_REQUEST_DENIED,  "The credentials supplied are not correct");
                 return false;
             }
 

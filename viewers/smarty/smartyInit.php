@@ -25,6 +25,24 @@
     //require_once SMARTY_DIR.'Smarty.class.php';
     $smarty = null;
     
+class Heurist_Security_Policy extends Smarty_Security {
+    
+  // disable acess to static classes
+  public $static_classes = null;
+  
+  // disable PHP functions except listed, set to null to disable ALL
+  public $php_functions = array('isset', 'empty', 'count', 'sizeof', 'in_array', 'is_array','time','nl2br','print_r');
+        
+  // remove PHP tags
+  public $php_handling = Smarty::PHP_REMOVE;
+  
+  //public $php_modifiers = array('escape','count');
+  
+  public $allow_super_globals = false; //default true
+
+  public $allow_php_tag = false; //default false
+}    
+    
     initSmarty();
 
 
@@ -62,7 +80,7 @@ function initSmarty($smarty_templates_dir=null){
             "str_get_timestamp",
             "str_get_secure",
             "str_get_trusted"));
-
+            
         //$smarty->register_modifier('translate', 'getTranslation'); it does not work for standarad smarty distribution
         $smarty_plugin_dir = HEURIST_DIR.'/vendor/smarty/smarty/libs/plugins/';
         $modifier_translate = 'modifier.translate.php';
@@ -70,6 +88,9 @@ function initSmarty($smarty_templates_dir=null){
         if(!file_exists($smarty_plugin_dir.$modifier_translate) && file_exists($smarty_plugin_dir)){
             copy($modifier_translate,$smarty_plugin_dir.$modifier_translate);
         }
+        
+        // enable security
+        $smarty->enableSecurity('Heurist_Security_Policy');        
             
     }
 }

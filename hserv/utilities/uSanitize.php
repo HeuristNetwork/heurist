@@ -123,7 +123,7 @@ class USanitize {
     }
 
     //
-    //
+    // We can also use HTMLPurifier (see example in showReps.php)
     //
     public static function sanitizeString($message, $allowed_tags=null){
         if($message==null){
@@ -137,6 +137,7 @@ class USanitize {
             $message = htmlspecialchars(strip_tags($message, $allowed_tags), ENT_NOQUOTES);
             $message = preg_replace("/&lt;/", '<', $message);
             $message = preg_replace("/&gt;/", '>', $message);
+            $message = preg_replace("/<([a-z][a-z0-9]*)[^>]*?(\/?)>/si",'<$1$2>', $message);
         }
         return $message;
     }
