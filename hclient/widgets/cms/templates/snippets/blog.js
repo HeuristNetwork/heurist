@@ -38,7 +38,7 @@ function _prepareTemplateBlog(new_element_json, callback){
                 var baseurl = window.hWin.HAPI4.baseURL + "viewers/smarty/templateOperations.php";
                 
                 var request = {mode:'import', 
-                               import_template:{name:'Blog post format - DO NOT DELETE.tpl',tmp_name:'cms/Blog entry.gpl',size:999}, 
+                               import_template:{name:'Blog post format - DO NOT DELETE.tpl',cms_tmp_name:'Blog entry.gpl',size:999}, 
                                db:window.hWin.HAPI4.database};
                 
                 window.hWin.HEURIST4.util.sendRequest(baseurl, request, null, function(res){

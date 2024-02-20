@@ -370,9 +370,12 @@ class ReportActions {
     *
     * @param mixed $instream - source data with global concept IDs
     */
-    public function importTemplate($params){
+    public function importTemplate($params, $for_cms = null){
          
-        
+        if($params==null){
+            $res = array("error"=>'Error occurred - request is empty');
+            
+        }else
         if ( !@$params['size'] ) {
             $res = array("error"=>'Error occurred during upload - file had zero size');
             
@@ -381,16 +384,18 @@ class ReportActions {
             $origfilename = $params['name'];
             $res = array("error"=>'Error occurred during upload - file does not exist');
 
-            if(strpos($params['tmp_name'],'cms/')===0){
-                $filename = basename($params['tmp_name']);                
+            $filename = null;        
+            
+            if($for_cms!=null){
                 $path = dirname(__FILE__).'/../../hclient/widgets/cms/templates/snippets/';
                 $path = realpath($path);
                 if($path!==false){ //does not exist
-                    $filename = $path.DIRECTORY_SEPARATOR.basename($filename);    
+                    $filename = $path.DIRECTORY_SEPARATOR.basename($for_cms);    
                 }
             }else{
-                $filename = $params['tmp_name'];                
+                $filename = @$params['tmp_name'];                
             }
+            
             $filename = USanitize::sanitizePath($filename);
             if(file_exists($filename)){
                 
