@@ -84,7 +84,8 @@ require_once dirname(__FILE__).'/../../hserv/structure/conceptCode.php';
                     if(@$_REQUEST['import_template']['cms_tmp_name']){ 
                         //for CMS
                         $for_cms = basename($_REQUEST['import_template']['cms_tmp_name']);
-                        $params = $_REQUEST['import_template'];
+                        $params['size'] = 999;
+                        $params['name'] = @$_REQUEST['import_template']['name'];
                     }else{
                         //for impport uloaded gpl
                         $params = @$_FILES['import_template'];
