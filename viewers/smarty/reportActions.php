@@ -393,10 +393,9 @@ class ReportActions {
                     $filename = $path.DIRECTORY_SEPARATOR.basename($for_cms);    
                 }
             }else{
-                $filename = @$params['tmp_name'];                
+                $filename = USanitize::sanitizePath(@$params['tmp_name']);                
             }
             
-            $filename = USanitize::sanitizePath($filename);
             if(file_exists($filename)){
                 
                 //read tempfile
