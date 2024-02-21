@@ -134,10 +134,12 @@ class USanitize {
             }else if($allowed_tags===false){
                 $allowed_tags = null;
             }
-            $message = htmlspecialchars(strip_tags($message, $allowed_tags), ENT_NOQUOTES);
-            $message = preg_replace("/&lt;/", '<', $message);
-            $message = preg_replace("/&gt;/", '>', $message);
             $message = preg_replace("/<([a-z][a-z0-9]*)[^>]*?(\/?)>/si",'<$1$2>', $message);
+            $message = htmlspecialchars(strip_tags($message, $allowed_tags), ENT_NOQUOTES);
+            if($allowed_tags!==false){
+                $message = preg_replace("/&lt;/", '<', $message);
+                $message = preg_replace("/&gt;/", '>', $message);
+            }
         }
         return $message;
     }

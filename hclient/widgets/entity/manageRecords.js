@@ -3619,7 +3619,8 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
                             }
                             if(dtyID!=window.hWin.HAPI4.sysinfo['dbconst']['DT_CMS_EXTFILES'] && typeof values[k]==='string')
                             {
-                                if(values[k].indexOf('<script')>=0 && values[k].indexOf('</script>')>0){
+                                let sval = (values[k]).toLowerCase();
+                                if(sval.indexOf('<script')>=0 && sval.indexOf('</script>')>0){
                                     var inpt = this._editing.getFieldByName(dtyID);
                                     if(inpt) inpt.editing_input('showErrorMsg', '&lt;sctipt&gt; tag not allowed');  
                                     hasScriptTag = true;
