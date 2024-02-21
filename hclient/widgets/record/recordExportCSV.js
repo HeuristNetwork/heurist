@@ -186,25 +186,25 @@ $.widget( "heurist.recordExportCSV", $.heurist.recordAction, {
             } 
             
             rnode.visit(function(node){
-                        node.setSelected(false);
-                        var has_child = node.hasChildren();
-                        if(has_child===undefined){
-                            node.setExpanded(true);
-                            setTimeout(function(){
-                                    that._assignSelectedFields( node );
-                            },500);
+                node.setSelected(false);
+                var has_child = node.hasChildren();
+                if(has_child===undefined){
+                    node.setExpanded(true);
+                    setTimeout(function(){
+                            that._assignSelectedFields( node );
+                    },500);
 
-                        }else{
-                            if(that.selectedFields && that.selectedFields.length>0 && has_child===false){
-                                    for(var i=0; i<that.selectedFields.length; i++){
-                                        if(that.selectedFields[i]==node.data.code){
-                                            node.setSelected(true);
-                                            break;
-                                        }
-                                    }
+                }else{
+                    if(that.selectedFields && that.selectedFields.length>0 && has_child===false){
+                            for(var i=0; i<that.selectedFields.length; i++){
+                                if(that.selectedFields[i]==node.data.code){
+                                    node.setSelected(true);
+                                    break;
+                                }
                             }
-                        }
-                });
+                    }
+                }
+            });
 
     },
     
@@ -353,79 +353,52 @@ $.widget( "heurist.recordExportCSV", $.heurist.recordAction, {
     //
     doAction: function(mode){
 
-            var scope_val = this.selectRecordScope.val();
-            
-            var scope = [], 
-            rec_RecTypeID = 0;
-            
-            if(scope_val == 'selected'){
-                scope = this._currentRecordsetSelIds;
-            }else { //(scope_val == 'current'
-                scope = this._currentRecordset.getIds();
-                if(scope_val  >0 ){
-                    rec_RecTypeID = scope_val;
-                }   
-            }
-            
-            if(scope.length<1){
-                window.hWin.HEURIST4.msg.showMsgFlash('No results found. '
-                +'Please modify search/filter to return at least one result record.', 2000);
-                return;
-            }
-            
-            var settings = this.getSettings(true);
-            if(!settings) return;
+        var scope_val = this.selectRecordScope.val();
+        
+        var scope = [], 
+        rec_RecTypeID = 0;
+        
+        if(scope_val == 'selected'){
+            scope = this._currentRecordsetSelIds;
+        }else { //(scope_val == 'current'
+            scope = this._currentRecordset.getIds();
+            if(scope_val  >0 ){
+                rec_RecTypeID = scope_val;
+            }   
+        }
+        
+        if(scope.length<1){
+            window.hWin.HEURIST4.msg.showMsgFlash('No results found. '
+            +'Please modify search/filter to return at least one result record.', 2000);
+            return;
+        }
+        
+        var settings = this.getSettings(true);
+        if(!settings) return;
 
-            var request = {
-                'request_id' : window.hWin.HEURIST4.util.random(),
-                'db': window.hWin.HAPI4.database,
-                'ids'  : scope,
-                'format': 'csv',
-                'prefs': settings};
-                
-            if(rec_RecTypeID>0){
-                request['rec_RecTypeID'] = rec_RecTypeID;
-            }
+        var request = {
+            'request_id' : window.hWin.HEURIST4.util.random(),
+            'db': window.hWin.HAPI4.database,
+            'ids'  : scope,
+            'format': 'csv',
+            'prefs': settings};
             
-            var url = window.hWin.HAPI4.baseURL + 'hserv/controller/record_output.php'
-            
-            //posting via form allows send large list of ids
-            this.element.find('#postdata').val( JSON.stringify(request) );
-            this.element.find('#postform').attr('action', url);
-            this.element.find('#postform').submit();
-                
-            if(mode==1){ //open in new window
-                
-            }else{ //download
-                
-            }     
-            /*
-                var that = this;                                                
-                
-                window.hWin.HAPI4.RecordMgr.access(request, 
-                    function(response){
-                        if(response.status == window.hWin.ResponseStatus.OK){
+        if(rec_RecTypeID>0){
+            request['rec_RecTypeID'] = rec_RecTypeID;
+        }
+        
+        var url = window.hWin.HAPI4.baseURL + 'hserv/controller/record_output.php'
 
-                            that._context_on_close = (response.data.updated>0);
-                            
-                            that.closeDialog();
-                            
-                            var msg = 'Processed : '+response.data.processed + ' record'
-                                + (response.data.processed>1?'s':'') +'. Updated: '
-                                + response.data.updated  + ' record'
-                                + (response.data.updated>1?'s':'');
-                           if(response.data.noaccess>0){
-                               msg += ('<br><br>Not enough rights (logout/in to refresh) for '+response.data.noaccess+
-                                        ' record' + (response.data.noaccess>1?'s':''));
-                           }     
-                            
-                            window.hWin.HEURIST4.msg.showMsgFlash(msg, 2000);
-                            
-                        }else{
-                            window.hWin.HEURIST4.msg.showMsgErr(response);
-                        }
-                    });
-      */  
+        //posting via form allows send large list of ids
+        this.element.find('#postdata').val( JSON.stringify(request) );
+        this.element.find('#postform').attr('action', url);
+        this.element.find('#postform').submit();
+            
+        if(mode==1){ //open in new window
+            
+        }else{ //download
+            
+        }
     },
     
     //
@@ -433,84 +406,100 @@ $.widget( "heurist.recordExportCSV", $.heurist.recordAction, {
     //
     getSettings: function( mode_action ){
 
-            var header_fields = {ids:'rec_ID', title:'rec_Title', url:'rec_URL', modified:'rec_Modified', tag:'rec_Tags', 
-                typeid: 'rec_RecTypeID', typename: 'rec_RecTypeName', added: 'rec_Added', addedby: 'rec_AddedByUGrpID', 
-                owner: 'rec_OwnerUGrpID', access: 'rec_NonOwnerVisibility', notes: 'rec_ScratchPad'};
+        var header_fields = {ids:'rec_ID', title:'rec_Title', url:'rec_URL', modified:'rec_Modified', tag:'rec_Tags', 
+            typeid: 'rec_RecTypeID', typename: 'rec_RecTypeName', added: 'rec_Added', addedby: 'rec_AddedByUGrpID', 
+            owner: 'rec_OwnerUGrpID', access: 'rec_NonOwnerVisibility', notes: 'rec_ScratchPad'};
 
-            function __removeLinkType(dtid){
-                if(header_fields[dtid]){
-                    dtid = header_fields[dtid];
+        function __removeLinkType(dtid){
+            if(header_fields[dtid]){
+                dtid = header_fields[dtid];
+            }else{
+                var linktype = dtid.substr(0,2); //remove link type lt ot rt  10:lt34
+                if(isNaN(Number(linktype))){
+                    dtid = dtid.substr(2);
+                }
+            }
+            return dtid;
+        }
+        var mainRecordTypeIDs = [];
+        function __addSelectedField(ids, lvl, constr_rt_id){
+            
+            if(ids.length < lvl) return;
+            
+            //take last two - these are rt:dt
+            var rtid = ids[ids.length-lvl-1];
+            var dtid = __removeLinkType(ids[ids.length-lvl]);
+
+            if(!selectedFields[rtid]){
+                selectedFields[rtid] = [];    
+            }
+            if(constr_rt_id>0){
+                dtid = dtid+':'+constr_rt_id;
+            }
+
+            // Get main record type IDs.
+            if (lvl === 1 && typeof ids[0] !== 'undefined' && mainRecordTypeIDs.indexOf(ids[0]) < 0) {
+                mainRecordTypeIDs.push(ids[0]);
+            }
+            
+            //window.hWin.HEURIST4.util.findArrayIndex( dtid, selectedFields[rtid] )<0
+            if( selectedFields[rtid].indexOf( dtid )<0 ) {
+                if(dtid == 'rec_Title' || dtid == 'rec_ID'){ // place title and id fields at the start
+                    selectedFields[rtid].unshift(dtid);
                 }else{
-                    var linktype = dtid.substr(0,2); //remove link type lt ot rt  10:lt34
-                    if(isNaN(Number(linktype))){
-                        dtid = dtid.substr(2);
-                    }
+                    selectedFields[rtid].push(dtid);
                 }
-                return dtid;
-            }
-            var mainRecordTypeIDs = [];
-            function __addSelectedField(ids, lvl, constr_rt_id){
-                
-                if(ids.length < lvl) return;
-                
-                //take last two - these are rt:dt
-                var rtid = ids[ids.length-lvl-1];
-                var dtid = __removeLinkType(ids[ids.length-lvl]);
+            } 
+            //add resource field for parent recordtype
+            __addSelectedField(ids, lvl+2, rtid);
+        }
+        
+        //get selected fields from treeview
+        var selectedFields = mode_action?{}:[];
+        var tree = this.element.find('.rtt-tree').fancytree("getTree");
+        var fieldIds = tree.getSelectedNodes(false);
+        var k, len = fieldIds.length;
+        
+        if(len<1){
+            window.hWin.HEURIST4.msg.showMsgFlash('No fields selected. '
+                +'Please select at least one field in tree', 2000);
+            return false;
+        }
 
-                if(!selectedFields[rtid]){
-                    selectedFields[rtid] = [];    
-                }
-                if(constr_rt_id>0){
-                    dtid = dtid+':'+constr_rt_id;
-                }
+        for (k=0;k<len;k++){
 
-                // Get main record type IDs.
-                if (lvl === 1 && typeof ids[0] !== 'undefined' && mainRecordTypeIDs.indexOf(ids[0]) < 0) {
-                    mainRecordTypeIDs.push(ids[0]);
-                }
-                
-                //window.hWin.HEURIST4.util.findArrayIndex( dtid, selectedFields[rtid] )<0
-                if( selectedFields[rtid].indexOf( dtid )<0 ) {
-                    if(dtid == 'rec_Title' || dtid == 'rec_ID'){ // place title and id fields at the start
-                        selectedFields[rtid].unshift(dtid);
-                    }else{
-                        selectedFields[rtid].push(dtid);
-                    }
-                } 
-                //add resource field for parent recordtype
-                __addSelectedField(ids, lvl+2, rtid);
-            }
+            var node =  fieldIds[k];
             
-            //get selected fields from treeview
-            var selectedFields = mode_action?{}:[];
-            var tree = this.element.find('.rtt-tree').fancytree("getTree");
-            var fieldIds = tree.getSelectedNodes(false);
-            var k, len = fieldIds.length;
-            
-            if(len<1){
-                window.hWin.HEURIST4.msg.showMsgFlash('No fields selected. '
-                    +'Please select at least one field in tree', 2000);
-                return false;
-            }
-            
-            
-            for (k=0;k<len;k++){
-                var node =  fieldIds[k];
-                
-                if(window.hWin.HEURIST4.util.isempty(node.data.code)) continue;
-                
-                if(mode_action){
-                    var ids = node.data.code.split(":");
+            if(window.hWin.HEURIST4.util.isempty(node.data.code)) continue;
+
+            if(mode_action){
+
+                var ids = node.data.code.split(":");
+
+                if(isNaN(ids[ids.length - 1]) && ids[ids.length - 1].match(/\d/)){
+
+                    let rty = node.data.rt_ids ? node.data.rt_ids : node.data.rtyID_local;
+
+                    // Add title
+                    ids.push(rty, 'title');
+                    __addSelectedField(ids, 1, 0);
+
+                    // Add id
+                    ids.splice(-1, 1, 'ids');
                     __addSelectedField(ids, 1, 0);
                 }else{
-                    selectedFields.push(node.data.code);
+                    __addSelectedField(ids, 1, 0);
                 }
+
+            }else{
+                selectedFields.push(node.data.code);
             }
+        }
         return {
             'fields': selectedFields,
             'main_record_type_ids': mainRecordTypeIDs,
             'join_record_types': this.element.find('#chkJoinRecTypes').is(':checked')?1:0,
-            'advanced_options': this._getFieldAdvancedOptions(),
+            'advanced_options': this._getFieldAdvancedOptions(mode_action),
             'csv_delimiter':  this.element.find('#delimiterSelect').val(),
             'csv_enclosure':  this.element.find('#quoteSelect').val(),
             'csv_mvsep':'|',
@@ -621,6 +610,45 @@ $.widget( "heurist.recordExportCSV", $.heurist.recordAction, {
 
                     let order = that.element.find('[name="tree_order"]:checked').val();
 
+                    let check_rty = data.node.data.rtyID_local ? data.node.data.rtyID_local : null;
+                    check_rty = data.node.data.rt_ids ? data.node.data.rt_ids : check_rty;
+
+                    if(check_rty){
+
+                        let check_node = data.node;
+
+                        check_rty = check_rty.indexOf(',') > 0 ? check_rty.split(',') : [check_rty];
+
+                        while(check_node && check_node.parent){
+    
+                            let parent_rty = null;
+    
+                            if(check_node.parent.data.is_rec_fields){
+                                parent_rty = check_node.parent.parent.data.rtyID_local;
+                                check_node = check_node.parent.parent;
+                            }else{
+                                parent_rty = check_node.parent.data.rt_ids;
+                                check_node = check_node.parent;
+                            }
+    
+                            let found_idx = check_rty.indexOf(parent_rty);
+
+                            found_idx >= 0 ? check_rty.splice(found_idx, 1) : check_rty;
+    
+                            if(check_rty.length == 0){
+                                break;
+                            }
+                        }
+
+                        if(check_rty.length == 0){
+                            // remove fancytree-has-children, set lazy to false, remove child nodes
+
+                            $(data.node.span).removeClass('fancytree-has-children');
+                            data.node.lazy = false;
+                            data.node.removeChildren();
+                        }
+                    }
+
                     if(data.node.parent && data.node.parent.data.type == 'resource' || data.node.parent.data.type == 'relmarker'){ // add left border+margin
                         $(data.node.li).attr('style', 'border-left: black solid 1px !important;margin-left: 9px;');
                     }
@@ -675,7 +703,10 @@ $.widget( "heurist.recordExportCSV", $.heurist.recordAction, {
                             cur_parent = cur_parent.parent;
                         }
 
-                        that._addFieldAdvancedOptions(data.node.title, data.node.data.type, data.node.data.code, data.node.li);
+                        let rectypeId = data.node.data.rtyID_local ? data.node.data.rtyID_local : null;
+                        rectypeId = data.node.data.rt_ids && data.node.data.rt_ids.indexOf(',') < 0 ? data.node.data.rt_ids : rectypeId;
+
+                        that._addFieldAdvancedOptions(data.node.title, data.node.data.type, data.node.data.code, data.node.li, rectypeId);
                     } else {
                         that._removeFieldAdvancedOptionsByCode(data.node.data.code);
                     }
@@ -813,9 +844,10 @@ $.widget( "heurist.recordExportCSV", $.heurist.recordAction, {
      * @param {string} fieldType The type of the field.
      * @param {string} fieldCode The code of the field.
      * @param {Object} item The selected node
+     * @param {string} rectypeId The record type of the field
      * @private
      */
-    _addFieldAdvancedOptions: function (fieldName, fieldType, fieldCode, item) {
+    _addFieldAdvancedOptions: function (fieldName, fieldType, fieldCode, item, rectypeId) {
 
         if(this.element.find('div[data-field-code="'+ fieldCode +'"]').length != 0){
             this._displayAdvOption(fieldCode, true, item);
@@ -839,6 +871,10 @@ $.widget( "heurist.recordExportCSV", $.heurist.recordAction, {
                 itemElement.find('.export-advanced-list-item-percentage').hide();
             }
         });
+
+        if(!window.hWin.HEURIST4.util.isempty(rectypeId)){
+            fieldElement.data('rectype-id', rectypeId);
+        }
 
         var pos_top = item.offsetTop;
         fieldElement.css({
@@ -932,6 +968,8 @@ $.widget( "heurist.recordExportCSV", $.heurist.recordAction, {
     /**
      * Get the advanced options from the UI controls.
      *
+     * @param {bool} for_export - whether to return values for CSV export, or saving settings
+     * 
      * @return {Object} The object is keyed by the field code. Each element is an object which
      *   contains the following possible keys:
      *   - total: The total functions applied to the field: 'group', 'sum' or 'count'.
@@ -939,16 +977,23 @@ $.widget( "heurist.recordExportCSV", $.heurist.recordAction, {
      *   - use_percentage: boolean value when the total is 'sum' or 'count'.
      * @private
      */
-    _getFieldAdvancedOptions: function () {
+    _getFieldAdvancedOptions: function (for_export) {
+
         var that = this;
+
         if (this.element.find('.export-advanced-list-item').length > 0) {
+
             var options = {};
+
             this.element.find('.export-advanced-list-item').each(function () {
+
                 var option = {};
+
                 var totalSelectValue = $(this).find('.export-advanced-list-item-total-select').val();
                 if (totalSelectValue) {
                     option.total = totalSelectValue;
                 }
+
                 var sortSelectValue = that._handleSortByField($(this).attr('data-field-code'), true);
                 if (sortSelectValue) {
                     option.sort = sortSelectValue;
@@ -956,7 +1001,18 @@ $.widget( "heurist.recordExportCSV", $.heurist.recordAction, {
                 if (totalSelectValue === 'sum' || totalSelectValue === 'count') {
                     option.use_percentage = $(this).find('.export-advanced-list-item-percentage-checkbox').prop('checked');
                 }
-                options[$(this).data('field-code')] = option;
+
+                let key = $(this).data('field-code');
+                let rectype = $(this).data('rectype-id');
+
+                if(for_export && !window.hWin.HEURIST4.util.isempty(rectype) && !isNaN(rectype)){
+                    // Add title and id options
+
+                    options[`${key}:${rectype}:title`] = option;
+                    options[`${key}:${rectype}:ids`] = option;
+                }else{
+                    options[key] = option;
+                }
             });
             return options;
         }
