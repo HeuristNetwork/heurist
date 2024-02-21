@@ -363,7 +363,7 @@ function getDatabaseDetails($mysqli, $db_list){
 	// Retrieve record count and last update (record or structure)
 	foreach ($db_list as $database) {
 
-        $database = htmlspecialchars(str_replace('`','',$database));
+        $database = $mysqli->real_escape_string(str_replace('`','',$database));
 			
 		$db_data = array('name' => $database, 'rec_count' => 0, 'last_update' => null);
 

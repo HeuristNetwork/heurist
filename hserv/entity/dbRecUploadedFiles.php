@@ -1105,6 +1105,10 @@ When we open "iiif_image" in mirador viewer we generate manifest dynamically.
 
                 //find id with duplicated url 
                 while ($res = $remote_dups->fetch_row()) {
+                    
+                    if(@$res[0]==null || $res[0]=='') {
+                        continue;   
+                    }
 
                     $query = 'SELECT ulf_ID FROM recUploadedFiles WHERE ulf_ExternalFileReference="'
                              .$mysqli->real_escape_string($res[0]).'"'
@@ -1113,7 +1117,7 @@ When we open "iiif_image" in mirador viewer we generate manifest dynamically.
 
                     $dups_ids = array();
                     while ($remote_id = $res->fetch_row()) {
-                        array_push($dups_ids, $remote_id[0]);
+                        array_push($dups_ids, intval($remote_id[0]));
                     }
                     $res->close();
 
@@ -1167,19 +1171,21 @@ When we open "iiif_image" in mirador viewer we generate manifest dynamically.
                             $res_fullpath = resolveFilePath( $file_dtls['ulf_FilePath'].$file_dtls['ulf_FileName'] ); //see recordFile.php
                         }
                        
-                        
-                        $f_size = filesize($res_fullpath);
-                        $f_md5 = md5_file($res_fullpath);
-                        $is_unique = true;
-                        foreach ($dups_files as $ulf_ID => $file_arr){ 
-                            if ($file_arr['size'] == $f_size && $file_arr['md5'] == $f_md5){ // same file
-                                $is_unique = false;
-                                $dups_files[$ulf_ID]['dups'][] = intval($file_dtls['ulf_ID']);
-                                break;
+                        if(file_exists($res_fullpath)){
+                            $f_size = filesize($res_fullpath);
+                            $f_md5 = md5_file($res_fullpath);
+
+                            $is_unique = true;
+                            foreach ($dups_files as $ulf_ID => $file_arr){ 
+                                if ($file_arr['size'] == $f_size && $file_arr['md5'] == $f_md5){ // same file
+                                    $is_unique = false;
+                                    $dups_files[$ulf_ID]['dups'][] = intval($file_dtls['ulf_ID']);
+                                    break;
+                                }
                             }
-                        }
-                        if($is_unique){
-                            $dups_files[$file_dtls['ulf_ID']] = array('path'=>$res_fullpath, 'md5'=>$f_md5, 'size'=>$f_size, 'dups'=>array());
+                            if($is_unique){
+                                $dups_files[$file_dtls['ulf_ID']] = array('path'=>$res_fullpath, 'md5'=>$f_md5, 'size'=>$f_size, 'dups'=>array());
+                            }
                         }
                     }
                     $dup_local_files->close();
