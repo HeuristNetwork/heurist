@@ -876,8 +876,8 @@ function sendSystemEmail($data) {
 
 			echo "An error occurred with preparing and sending the system emails<br>";
 			$output = $email_obj->get_error_log();
-			echo $output[0];
-			echo "<br><br>System Log: <br>" . $output[1];
+			echo USanitize::sanitizeString($output[0]);
+			echo "<br><br>System Log: <br>" . USanitize::sanitizeString($output[1]);
 
 			$rtn_value = -1;
 		}

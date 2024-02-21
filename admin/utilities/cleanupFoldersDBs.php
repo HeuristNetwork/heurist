@@ -144,6 +144,8 @@ foreach ($databases as $idx=>$db_name){
 
     $dir_root = HEURIST_FILESTORE_ROOT.$db_name.'/';
 
+    $db_name = htmlspecialchars($db_name); 
+    
     if(file_exists($dir_root)){
 
         $dir_backup = $dir_root.'backup/';

@@ -318,7 +318,7 @@ class UArchive {
             }
 
             if($verbose){
-                echo "<br>Source $source $src";
+                echo '<br>Source '.htmlspecialchars($source.' '.$src);
             }
 
             $source = str_replace('\\', '/', $src);
