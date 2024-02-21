@@ -20,7 +20,7 @@
 // widget_cfg -json cfg for widget to be edited 
 // _layout_content- json cfg for website
 //
-function editCMS_WidgetCfg( widget_cfg, _layout_content, $dlg, main_callback ){
+function editCMS_WidgetCfg( widget_cfg, _layout_content, $dlg, main_callback, on_change = null ){
 
     var _className = 'editCMS_WidgetCfg';
     //var isWebPage = false;
@@ -1133,8 +1133,10 @@ function editCMS_WidgetCfg( widget_cfg, _layout_content, $dlg, main_callback ){
                         {'selectedValue': $select5.attr('fld-id')}, {extraOptions: {menu_parent: $dlg}});
                 }
             }
-            
 
+            if($.isFunction(on_change)){
+                $dlg.find(`div.${widget_name} input, div.${widget_name} select, div.${widget_name} textarea`).on('change', on_change);
+            }
         }
     }
     

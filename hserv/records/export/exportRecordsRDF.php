@@ -33,11 +33,13 @@ class ExportRecordsRDF extends ExportRecords {
     
     private $graph;
 
-    //indexes in defintions  
+    //indexes in defintions
+    private $idx_rty_name;
     private $idx_rty_ccode;
     private $idx_rty_surl;
     private $idx_rty_dbid;
     
+    private $idx_rst_name;
     private $idx_rst_surl;
     private $idx_rst_dbid;
 
@@ -48,6 +50,11 @@ class ExportRecordsRDF extends ExportRecords {
   
     private $serial_format = null;
     private $dbid;
+    
+    private $include_definition_label = true;
+    private $include_resource_rec_title = true;
+    private $include_resource_term_label = true;
+    private $include_resource_file_info = true;
     
     
 protected function _outputPrepare($data, $params)
@@ -60,6 +67,18 @@ protected function _outputPrepare($data, $params)
         if(!defined('HEURIST_REF')){
             define('HEURIST_REF','https://heuristref.net/');    
         }
+        
+        
+        $ext_info = @$params['extinfo'];
+        if($ext_info==null) $ext_info = '0';
+        else if($ext_info==='1') $ext_info = '1111';
+        if(strlen($ext_info)<4){
+            $ext_info = str_pad($ext_info,4,'0');
+        }
+        $this->include_definition_label = ($ext_info[0]==1);
+        $this->include_resource_term_label = ($ext_info[1]==1);
+        $this->include_resource_rec_title = ($ext_info[2]==1);
+        $this->include_resource_file_info = ($ext_info[3]==1);
     }
 
     return $res;
@@ -83,10 +102,12 @@ protected function _outputHeader(){
         self::$defDetailtypes = dbs_GetDetailTypes($this->system, null, 2);   
     }
     
+    $this->idx_rty_name = self::$defRecTypes['typedefs']['commonNamesToIndex']['rty_Name'];
     $this->idx_rty_surl = self::$defRecTypes['typedefs']['commonNamesToIndex']['rty_ReferenceURL'];
     $this->idx_rty_ccode = self::$defRecTypes['typedefs']['commonNamesToIndex']['rty_ConceptID'];
     $this->idx_rty_dbid = self::$defRecTypes['typedefs']['commonNamesToIndex']['rty_OriginatingDBID'];
     
+    $this->idx_rst_name = self::$defRecTypes['typedefs']['commonNamesToIndex']['rst_DiaplayName'];
     $this->idx_rst_surl = self::$defRecTypes['typedefs']['dtFieldNamesToIndex']['rst_SemanticReferenceURL'];
     $this->idx_rst_dbid = self::$defRecTypes['typedefs']['dtFieldNamesToIndex']['rst_OriginatingDBID'];
     
@@ -245,6 +266,7 @@ protected function _outputRecord($record){
     if($type){
         
         
+        
         //https://www.ica.org/standards/RiC/ontology#Person
         
         //$uri = HEURIST_BASE_URL_PRO.'api/'.$this->system->dbname().'/view/'.$recID;
@@ -303,6 +325,12 @@ private function _setResourceProps($record, &$resource){
     $rec_ID = $record['rec_ID'];
     $rty_ID = $record['rec_RecTypeID'];
     $rec_Title = $record['rec_Title'];
+    
+    if($this->include_definition_label){
+        // record type label
+        $resource->set('rdfs:label', self::$defRecTypes['typedefs'][$rty_ID]['commonFields'][$this->idx_rty_name]);
+    }
+        
 
     // label or name attribute    
     //$field_surl = $this->_prepareURI('http://www.w3.org/2000/01/rdf-schema#name'); //or label ?
@@ -320,15 +348,34 @@ private function _setResourceProps($record, &$resource){
         foreach($field_details as $dtl_ID=>$value){ //for detail multivalues
 
             if(is_array($value)){ //geo,file,resource
-                /*
+            
                 if(@$value['file']){
                     //remove some fields
-                    $val = $value['file'];
-                    unset($val['ulf_ID']);
-                    unset($val['fullPath']);
-                    unset($val['ulf_Parameters']);
-
-                }else if(@$value['id']){ //resource
+                    $fileinfo = $value['file'];
+                    
+                    $file_resource_uri = HEURIST_REF.'db/file/'.$this->dbid.'-'.$fileinfo['ulf_ObfuscatedFileID'];
+                    
+                    $value = $this->graph->resource($file_resource_uri); //create new or find resource
+                    if($this->include_resource_file_info){
+                        if(@$fileinfo['ulf_OrigFileName']){
+                            $skip_file = strpos(@$fileinfo['ulf_OrigFileName'], '_remote') === 0 || // skip if not local file
+                                         strpos(@$fileinfo['ulf_OrigFileName'], '_iiif') === 0 || 
+                                         strpos(@$fileinfo['ulf_OrigFileName'], '_tiled') === 0;
+                            if(!$skip_file){
+                                $value->set('dc:title', $fileinfo['ulf_OrigFileName']);    
+                            }
+                        }
+                        if(@$fileinfo['ulf_Description']){
+                            $value->set('dc:description', $fileinfo['ulf_Description']);    
+                        }
+                    }
+                    
+                }else{
+                    
+                    continue;
+                }
+                /*
+                else if(@$value['id']){ //resource
                     $val = $value['id'];
                 }else if(@$value['geo']){
                     
@@ -351,16 +398,6 @@ private function _setResourceProps($record, &$resource){
                     continue;  //it will be included into separate geometry property  
                 }
                 */
-                if(@$value['id']){ //resource
-                
-                    $val = $value['id'];
-                    //$uri = HEURIST_BASE_URL_PRO.'api/'.$this->system->dbname().'/view/'.$val;
-                    $uri = HEURIST_REF.'db/record/'.$this->dbid.'-'.$recID; //new
-
-                    //$resource->add($field_surl, $this->graph->resource($uri));
-                }
-                
-                continue;
             }
             else{
                 $lang = null;
@@ -379,7 +416,10 @@ private function _setResourceProps($record, &$resource){
                     }
                     if($term_resource_uri!=null){
                         $value = $this->graph->resource($term_resource_uri); //create new or find resource
-                        $value->set('dc:title', $trm_Label);
+                        if($this->include_resource_term_label){
+                            $value->set('dc:title', $trm_Label);    
+                        }
+                        
                         //works: $value->addLiteral('rdfs:name', $label);
                        
                         //as separate resource to graph root
@@ -545,7 +585,7 @@ private function _composeLinks(&$resource, $relations, $direction, $rty_ID, $hea
             $uri = HEURIST_REF.'db/record/'.$this->dbid.'-'.$related_rec_ID; //new
 
             $rec_resource = $this->graph->resource($uri);
-            if(@$headers[$related_rec_ID][0]){
+            if($this->include_resource_rec_title && @$headers[$related_rec_ID][0]){
                 $rec_resource->set('dc:title', $headers[$related_rec_ID][0]);    
             }
             

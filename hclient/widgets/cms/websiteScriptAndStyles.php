@@ -84,7 +84,8 @@
     var isCMS_InHeuristUI = <?php echo (@$_REQUEST['edit']==4 ?'true':'false'); ?>;
     var isCMS_NewWebsite = <?php echo (array_key_exists('newlycreated', $_REQUEST) ?'true':'false'); ?>;
     var is_embed =<?php echo array_key_exists('embed', $_REQUEST)?'true':'false'; ?>;
-    var is_execute_homepage_custom_javascript = false;
+    var is_execute_homepage_custom_javascript = false;  //semaphore
+    var isJsAllowed = <?php echo $website_custom_javascript_allowed?'true':'false'; ?>;
     var first_not_empty_page = 0;
     var website_title = <?php echo $website_title; ?>; 
     
@@ -549,9 +550,14 @@ if($website_custom_css!=null){
                     q: 'ids:'+pageid,
                     restapi: 1,
                     columns: 
-                    ['rec_ID', DT_NAME, DT_EXTENDED_DESCRIPTION, DT_CMS_SCRIPT, DT_CMS_CSS, DT_CMS_PAGETITLE, DT_CMS_TOPMENUSELECTABLE],
+                    ['rec_ID', DT_NAME, DT_EXTENDED_DESCRIPTION, DT_CMS_PAGETITLE, DT_CMS_TOPMENUSELECTABLE],
                     zip: 1,
                     format:'json'};
+                    
+                if(isJsAllowed){
+                    server_request.columns.push(DT_CMS_SCRIPT);
+                    server_request.columns.push(DT_CMS_CSS);
+                }
                 
                 //perform search see record_output.php       
                 window.hWin.HAPI4.RecordMgr.search_new(server_request,
@@ -743,7 +749,6 @@ function afterPageLoad(document, pageid, eventdata){
     
     if(typeof pageid==='undefined' || pageid==null ) return;
     
-    
     //remove old style and custom style per page ===========================
     if(DT_CMS_CSS>0){ 
         if(previous_page_id>0 
@@ -837,7 +842,7 @@ function afterPageLoad(document, pageid, eventdata){
        
         if(spath.endsWith('/web') || spath.endsWith('/website')) spath = spath + '/'; //add last slash  
        
-        if(spath.search(/\/([A-Za-z0-9_]+)\/(website|web)\/.*/)>=0){
+        if(spath.search(/\/([A-Za-z0-9_]+)\/(website|web)\/.*/)>=0 || spath.indexOf('/web/')===0 ){
             //folder style parameters [database]/web/[site id]/[page id]/?q=[query params]
 
             //remove after web

@@ -902,7 +902,7 @@ function recordSave($system, $record, $use_transaction=true, $suppress_parent_ch
         $title = 'Workflow Stage change';
         $msg = '<b>'.$title.'</b> '
         .'<a href="'.HEURIST_BASE_URL.'?db='.HEURIST_DBNAME.'&recID='.$recID.'&fmt=html">Record #'.$recID
-        .'  "'.strip_tags($newTitle).'"</a><br>'
+        .'  "'.USanitize::sanitizeString($newTitle, false).'"</a><br>'
         .' has been changed to "'.$stage_name
         .'"<br><br> by user: '.($user?$user:$system->get_user_id());
 
@@ -2445,6 +2445,7 @@ function _prepareDetails($system, $rectype, $record, $validation_mode, $recID, $
     //$query_size = 'select LENGTH(?)';
     //$stmt_size = $mysqli->prepare($query_size);
 
+    $system->defineConstant('RT_CMS_HOME');
     $system->defineConstant('RT_CMS_MENU');
     $system->defineConstant('DT_EXTENDED_DESCRIPTION');
 
@@ -2530,6 +2531,21 @@ function _prepareDetails($system, $rectype, $record, $validation_mode, $recID, $
                         $dtl_Value = preg_replace('#<script(.*?)>(.*?)</script>#is', '', $dtl_Value);
                         //$dtl_Value = $purifier->purify($dtl_Value);
                         //$dtl_Value = htmlspecialchars_decode( $dtl_Value );  //&gt; to >
+                        
+                        //if(!((defined('RT_CMS_MENU') && $rectype==RT_CMS_MENU) || 
+                        //     (defined('RT_CMS_HOME') && $rectype==RT_CMS_HOME) )){
+                           
+                        if($det_types[$dtyID]=="freetext"){
+                        //(\w+)
+                        $allowed = array('src','class','style','href');
+                        $allowed2 = implode('=|',$allowed).'=';
+                        $allowed = implode('|',$allowed);
+$dtl_Value = preg_replace('#<([A-Z][A-Z0-9]*)\s*(?:(?:(?:(?!'.$allowed2.')[^>]))*((?:'.$allowed
+                     .')=[\'"][^\'"]*[\'"]\s*)?)(?:(?:(?:(?!'.$allowed2.')[^>]))*((?:'.$allowed
+                     .')=[\'"][^\'"]*[\'"]\s*)?)(?:(?:(?:(?!'.$allowed2.')[^>]))*((?:'.$allowed
+                     .')=[\'"][^\'"]*[\'"]\s*)?)[^>]*>#si','<$1 $2$3$4>',$dtl_Value);
+                        }
+                        
                     }
                     break;
 
@@ -2640,7 +2656,7 @@ function _prepareDetails($system, $rectype, $record, $validation_mode, $recID, $
 
                                 $err_msg = '<div style="padding-left:30px">'
                                 . _getRtConstraintNames($system, $dtyID, $rectype)
-                                . '<br>Target ID:'.$dtl_Value.'  '.strip_tags($rectype_tocheck[1]).'</div>';
+                                . '<br>Target ID:'.$dtl_Value.'  '.USanitize::sanitizeString($rectype_tocheck[1], false).'</div>';
 
 
                                 //$err_msg = 'Record type '.$rectype_tocheck.' is not valid for specified constraints';

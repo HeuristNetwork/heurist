@@ -48,7 +48,10 @@ if($system->init(@$_REQUEST['db'])){
     $tiledImageStack = (@$_REQUEST['tiledImageStack']==1); //unzip archive and copy to uploaded_tilestacks
     
     $new_file_name = @$_REQUEST['newfilename'];
-    if($new_file_name) $new_file_name = USanitize::sanitizeFileName($new_file_name, false);
+    if($new_file_name){
+        $new_file_name = basename($new_file_name);
+        $new_file_name = USanitize::sanitizeFileName($new_file_name, false); 
+    }
     
     if(@$_REQUEST['entity']){
         $entity_name = entityResolveName($_REQUEST['entity']);
@@ -69,6 +72,9 @@ if($system->init(@$_REQUEST['db'])){
                   $response = $syfstem->addError(HEURIST_REQUEST_DENIED);
                 }
         }
+    }
+    if($entity_name==null){
+        $response = $system->addError(HEURIST_INVALID_REQUEST, "'entity' parameter is not defined");
     }
     
     if(!$response){
@@ -126,7 +132,8 @@ if($response!=null){
 //define options for upload handler    
     
     if($entity_name==null){
-        
+        //NOT USED
+        /*
         //direct upload from manageFileUpload
         $options = array(
                 'upload_dir' => HEURIST_FILESTORE_DIR.'insitu/',
@@ -147,13 +154,13 @@ if($response!=null){
                     )
                 )
         );
+       */
 /*
   it was form parameters in manageFilesUpload        
             <input type="hidden" name="upload_thumb_dir" value="<?php echo HEURIST_THUMB_DIR; ?>"/>
             <input type="hidden" name="upload_thumb_url" value="<?php echo (defined('HEURIST_THUMB_URL')?HEURIST_THUMB_URL:''); ?>"/>
 */        
-        //$response = $system->addError(HEURIST_INVALID_REQUEST, "'entity' parameter is not defined");
-            
+        
     }else
     if($entity_name=="temp"){//redirect uploaded content back to client side after some processing
                                    // for example in term list import 
@@ -175,7 +182,8 @@ if($response!=null){
                 //'download_via_php' => 1
                 );
                 
-    }else if($entity_name=="recUploadedFiles"){
+    }
+    else if($entity_name=="recUploadedFiles"){
         
         $options = array(
                 'upload_dir' => HEURIST_SCRATCH_DIR,
@@ -236,13 +244,26 @@ if($response!=null){
     }
 
     if(@$_REQUEST['acceptFileTypes']){
-        $options['accept_file_types'] = $_REQUEST['acceptFileTypes'];
+        /*
+        //all these complexity needs to avoid Path Traversal warning
+        $allowed_exts = array();
+        $allowed_exts_2 = explode('|', $_REQUEST['acceptFileTypes']);
+        foreach($allowed_exts_2 as $ext){
+            if(in_array(strtolower($ext), $allowed_exts_all)){
+                $idx = array_search(strtolower($ext), $allowed_exts_all);
+                if($idx>=0) $allowed_exts[] = $allowed_exts_all[$idx];    
+            }    
+        }
+        */
+        $options['accept_file_types'] = 'zip|mbtiles';//$_REQUEST['acceptFileTypes'];
     }else{
         $allowed_exts = mysql__select_list2($system->get_mysqli(), 'select fxm_Extension from defFileExtToMimetype');
         $options['accept_file_types'] = implode('|', $allowed_exts);
     }
     
     $options['print_response'] = false;
+    
+    $options['database'] = $system->dbname();
     
     $upload_handler = new UploadHandler($options);  // from 3d party uploader
     
@@ -304,7 +325,7 @@ if($response!=null){
             }
             else if($entity_name=="temp" && $is_autodect_csv) {
                 
-                $filename = HEURIST_FILESTORE_DIR.'scratch/'.$file->original_name;
+                $filename = HEURIST_FILESTORE_DIR.'scratch/'.basename($file->original_name);
                 
                 $extension = strtolower(pathinfo($filename, PATHINFO_EXTENSION));
                 $isKML = ($extension=='kml' || $extension=='kmz');

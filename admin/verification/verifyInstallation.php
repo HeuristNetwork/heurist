@@ -131,7 +131,12 @@ require_once dirname(__FILE__).'/../../hserv/dbaccess/utils_db.php';
                 printf("<br>Connection OK. Server version: %s\n", $version.$vers);
             }
             ?>
-            
+
+            <br><hr><br><h3>Paths</h3><br>
+            <?php    
+                print $defaultRootFileUploadPath.'<br>';
+                print $defaultRootFileUploadURL;
+            ?>
             <br><br><hr><br>
             Verification complete. Please note any errors listed above.
         </div>

@@ -147,7 +147,7 @@ if( @$_REQUEST['recID'] || @$_REQUEST['recid'] || array_key_exists('website', $_
         header( 'Location: '.$asset );
         return;
     }else{
-        exit('Asset not found: '.$name);
+        exit('Asset not found: '.htmlspecialchars($name));
     }
 
 }else if (@$_REQUEST['logo']){

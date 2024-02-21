@@ -30,7 +30,9 @@
 	    <script type="text/javascript">
             function onPageInit(success){
             	if(success){
-            		var importDefDetailTypes = new hImportDefDetailTypes();
+            		const urlParams = new URLSearchParams(window.location.search);
+            		let dtg_ID = urlParams.get('dtg_ID');
+            		let importDefDetailTypes = new hImportDefDetailTypes(dtg_ID);
             	}
             }
         </script>

@@ -49,7 +49,7 @@
             
             <div id="service_config" style="display:none">
             
-                <fieldset id="div_fieldset">
+                <fieldset id="assign_fieldset">
                     
                     <div style="padding: 0.2em; width: 100%;" class="input" id="service_type">
                         <div class="header" style="padding: 0 16px 0 16px;">
@@ -58,12 +58,26 @@
                         <select id="sel_servicetype" class="text ui-widget-content ui-corner-all" style="width:300px;max-width:40em"></select>
                     </div>
 
+                    <div style="padding: 0.2em; width: 100%;" class="service_urls">
+                        <div class="header" style="padding: 0 16px 10px 16px;">
+                            <label for="a_lookup_url">Lookup URL:</label>
+                        </div>
+                        <a id="a_lookup_url" href="#"></a>
+                    </div>
+
+                    <div style="padding: 0.2em; width: 100%;" class="service_urls">
+                        <div class="header" style="padding: 0 16px 20px 16px;">
+                            <label for="a_service_url">Public interface:</label>
+                        </div>
+                        <a id="a_service_url" href="#"></a>
+                    </div>
+
                 </fieldset>
 
                 <div id="service_description" style="font-style:italic;padding-left:20px;" class="service_details">
                 </div>
 
-                <fieldset id="div_fieldset" class="service_details">
+                <fieldset id="details_fieldset" class="service_details">
 
                     <div style="padding: 0.2em; width: 100%;" class="input">
                         <div class="header" style="padding: 0 16px 0 16px;">

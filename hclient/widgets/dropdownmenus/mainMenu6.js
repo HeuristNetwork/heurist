@@ -55,7 +55,6 @@ $.widget( "heurist.mainMenu6", {
     _current_explore_action: null,
     
     divMainMenu: null,  //main div
-
     
     currentSearch: null,
     reset_svs_edit: true,
@@ -72,6 +71,14 @@ $.widget( "heurist.mainMenu6", {
     _left_position: 91, //normal width for most languages, for German it is 115
 
     _show_quick_tips: false, // popup quick tips on next moving to the explore menu
+
+    _menu_colours: {
+        admin: '#676E80',
+        design: '#523365',
+        populate: '#307D96',
+        explore: '#4477B9',
+        publish: '#627E5D'
+    },
 
     // the widget's constructor
     _create: function() {
@@ -153,6 +160,8 @@ $.widget( "heurist.mainMenu6", {
                     //open explore by default, or "design" if db is empty
                     that._active_section = 'explore';
                     that.switchContainer( 'design' );
+                    that._loadStartHints();
+                    that._show_quick_tips = true;
                 }else{
                     that.switchContainer( 'explore' );
                 }
@@ -1511,11 +1520,7 @@ $.widget( "heurist.mainMenu6", {
                          +'<span class="menu-text truncate" style="max-width: 109px;">'+title+'</span>')
                         .appendTo(item);
 
-                        if(action_id=='menu-import-csv-fieldtypes' || 
-                           action_id=='menu-import-csv-rectypes'){
-                            item.css({'font-size':'10px', padding:'0 0 0 8px','margin-top':'-1px'});
-
-                        }else if(action_id=='menu-import-get-template'){
+                        if(action_id=='menu-import-get-template'){
                             item.find('.ui-icon').addClass('ui-icon-gear');
                             item.css({'font-size':'10px', padding:'0 0 0 25px','margin-top':'-1px', 'margin-left': '0.25em'});
                         }else{
@@ -1921,54 +1926,30 @@ $.widget( "heurist.mainMenu6", {
     _initIntroductory: function( section ){
         
         if(!this.introductions[section]){
-            
+
             var sname;
             if(section=='populate'){
                 sname = 'Populate';
             }else{
                 sname = section[0].toUpperCase()+section.substr(1);
             }
-            
+
             this.introductions[section] = $('<div><div class="gs-box" style="margin:10px;max-width:500px;height:100px;cursor:pointer">'
-        +'<div style="display:inline-block"><img width="110" height="60" alt="" src="'
-            +window.hWin.HAPI4.baseURL+'hclient/assets/v6/gs_'+section+'.png"></div>'
-            
-        +'<span class="ui-heurist-title header" id="menu-guide" style="display: inline-block; font-weight: normal;padding-left:20px;cursor: pointer">'
-            +'<span class="ui-icon ui-icon-help"></span>&nbsp;Menu guide</span>'            
-            
-        +'<span class="ui-heurist-title header" id="start-hints" style="display: inline-block; font-weight: normal;padding-left:20px;cursor: pointer">'
-            +'<span class="ui-icon ui-icon-help"></span>&nbsp;Startup hints</span>' 			
-			
-        +'<div class="ui-heurist-title" style="font-size: large !important;width: 80px;padding-top: 6px;">'+sname+'</div>'
-        +'</div></div>')            
+                +'<div style="display:inline-block"><img width="110" height="60" alt="" src="'
+                +window.hWin.HAPI4.baseURL+'hclient/assets/v6/gs_'+section+'.png"></div>'
+
+                +'<span class="ui-heurist-title header" id="start-hints" style="display: inline-block; font-weight: normal;padding-left:20px;cursor: pointer">'
+                    +'<span class="ui-icon ui-icon-help"></span>&nbsp;Startup hints</span>'
+
+                +'<div class="ui-heurist-title" style="font-size: large !important;width: 80px;padding-top: 6px;">'+sname+'</div>'
+            +'</div></div>')
                 .addClass('ui-menu6-container AAA'+this._left_position+' ui-heurist-'+section)
                 .css({'background':'none'})
                 .appendTo( this.element );
-                
-		this._on(this.introductions[section].find('#menu-guide'),{click:this._loadIntroductoryGuide});  
-		this._on(this.introductions[section].find('#start-hints'),{click:this._loadStartHints});			
-        
-        const urlParams = new URLSearchParams(window.hWin.location.search);
-                
-            if(section=='design' && urlParams.has('welcome')) //window.hWin.HEURIST4.util.getUrlParameter('welcome', window.hWin.location.search)
-            {
-                var ele = $('<div class="gs-box" style="margin:10px;width:500px;height:400px;">')
-                    .appendTo(this.introductions[section]);
-                ele.load(window.hWin.HAPI4.baseURL+'hclient/widgets/dropdownmenus/welcome.html',
-                        function(){
-                           var url = window.hWin.HAPI4.baseURL+'?db='+window.hWin.HAPI4.database;
-                           $('.bookmark-url').html('<a href="#">'+url+'</a>').on('click',function(e){
-                                window.hWin.HEURIST4.util.stopEvent(e);
-                                window.hWin.HEURIST4.msg.showMsgFlash('Press Ctrl+D to bookmark this page',1000);
-                                return false;
-                           });
-                           $('.template-url').attr('href', window.hWin.HAPI4.baseURL
-                                            +'documentation_and_templates/db_design_template.rtf');
-                        });
 
-                this._show_quick_tips = true;
-            }            
-        }
+        this._on(this.introductions[section].find('#start-hints'),{click:this._loadStartHints});
+
+    }
     },
 
     //
@@ -2419,11 +2400,6 @@ $.widget( "heurist.mainMenu6", {
 						img.attr('src',window.hWin.HAPI4.baseURL+'hclient/assets/v6/'+img.attr('data-src'));
                     });
 
-                    // Link to Menu Guide
-                    that.introductions[section].find('div.gs-box.ui-heurist-'+section)
-                    .prepend( '<span class="ui-heurist-title header" id="menu-guide" style="padding-top:57px;font-weight:normal;padding-left:20px;cursor:pointer">'
-								+'<span class="ui-icon ui-icon-help"></span>&nbsp;Menu guide</span>' ).on('click',function(){ that._loadIntroductoryGuide(null); });
-
                     // Display Content
                     that.introductions[section].find('.gs-box')
 							.css({position:'absolute', left:10, right:10, top:10, 'min-width':700, margin:0}) //,'padding-left':20
@@ -2445,6 +2421,8 @@ $.widget( "heurist.mainMenu6", {
 								window.hWin.HEURIST4.msg.showMsgFlash('Press Ctrl+D to bookmark this page',1000);
 								return false;
 							});
+
+                            $('.ui-icon-bookmark').css('color', that._menu_colours[section]);
 						})
 						.appendTo( that.introductions[section] );
                 })

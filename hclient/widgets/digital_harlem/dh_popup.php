@@ -197,7 +197,7 @@
 ?>
 
 <div class="infowindow infowindow-map">
-    <h3><?php echo getFieldValue($records, $recID, 'rec_Title') ?></h3>
+    <h3><?php echo getFieldValue($records, $recID, 'rec_Title'); ?></h3>
 
     <p><b><?php echo htmlspecialchars($person_role); ?></b>
 
@@ -274,8 +274,8 @@
 ?>
 
 <div class="infowindow infowindow-map">
-    <h3><?php echo getFieldValue($records, $recID, DT_NAME) ?></h3>
-        <p><b><?php echo getTermById(getFieldValue($records, $recID, DT_EVENT_TYPE)) ?> </b></p>
+    <h3><?php echo getFieldValue($records, $recID, DT_NAME); ?></h3>
+        <p><b><?php echo getTermById(getFieldValue($records, $recID, DT_EVENT_TYPE)); ?> </b></p>
 
         <p><?php echo $event_address;?>
 
@@ -299,7 +299,7 @@
 function getFieldValue($records, $recID, $fieldID, $needall=false){
 
     if(!@$records['records']){
-        return null;
+        return '';
     }
     $recs = $records['records'];
 
@@ -313,26 +313,30 @@ function getFieldValue($records, $recID, $fieldID, $needall=false){
         $record = @$recs[$recID];
     }
 
-    if(!$record) return null;
+    if(!$record) return '';
 
+    $res = '';
+    
     //echo 'B>'.print_r($record, true);
 
     if(is_numeric($fieldID)){ //detail
 
         $detail = @$record['d'][$fieldID];
         if($needall){
-            return $detail;
+            $res = $detail;
         }else{
-            return $detail[0];
+            $res = $detail[0];
         }
     }else{
         $fieldidx = array_search($fieldID, $records['fields'], true);
         if($fieldidx===false){
-            return null;
+            $res = '';
         }else{
-            return @$record[$fieldidx];
+            $res = @$record[$fieldidx];
         }
     }
+    
+    return htmlspecialchars($res);
 }
 
 
@@ -462,7 +466,7 @@ function recordGetRealtionship($system, $sourceID, $targetID ){
 
     //find all target related records
     $query = 'SELECT rl_RelationID FROM recLinks '
-        .'WHERE rl_SourceID='.$sourceID.' AND rl_TargetID='.$targetID.' AND rl_RelationID IS NOT NULL';
+        .'WHERE rl_SourceID='.intval($sourceID).' AND rl_TargetID='.intval($targetID).' AND rl_RelationID IS NOT NULL';
 
 
     $res = $mysqli->query($query);
@@ -492,7 +496,7 @@ function recordGetRealtionshipType($system, $sourceID, $targetID ){
 
     //find all target related records
     $query = 'SELECT rl_RelationTypeID FROM recLinks '
-        .'WHERE rl_SourceID='.$sourceID.' AND rl_TargetID='.$targetID.' AND rl_RelationID IS NOT NULL';
+        .'WHERE rl_SourceID='.intval($sourceID).' AND rl_TargetID='.intval($targetID).' AND rl_RelationID IS NOT NULL';
     $res = $mysqli->query($query);
     if (!$res){
         return null;// $system->addError(HEURIST_DB_ERROR, "Search query error", $mysqli->error);

@@ -105,7 +105,7 @@ ALTER TABLE sysIdentification
 ALTER TABLE usrSavedSearches
   CHANGE svs_Name svs_Name VARCHAR(128) NOT NULL COMMENT 'The display name for this saved search';
         
-UPDATE `sysIdentification` SET sys_dbVersion=1, sys_dbSubVersion=2, sys_dbSubSubVersion=0;
+UPDATE `sysIdentification` SET sys_dbVersion=1, sys_dbSubVersion=2, sys_dbSubSubVersion=0 WHERE 1=1;
 
 DROP PROCEDURE IF EXISTS sp_AlterTable;
 DROP PROCEDURE IF EXISTS sp_ExecSQL;

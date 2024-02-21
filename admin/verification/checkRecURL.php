@@ -99,7 +99,7 @@ function __updateRecords_lastverified($mysqli){
 //
 function checkURLs($system, $return_output){
 
-    global $is_included, $passed_rec_ids;
+    global $is_included, $passed_rec_ids, $glb_curl_error;
 
     $mysqli = $system->get_mysqli();
 
@@ -141,10 +141,12 @@ function checkURLs($system, $return_output){
                     //$glb_curl_error
                 $upd_query = 'UPDATE Records set rec_URLLastVerified=?, rec_URLErrorMessage=? WHERE rec_ID='.$rec_id;
                 $cnt = mysql__exec_param_query($mysqli, $upd_query, 
-                        array('ss', date('Y-m-d H:i:s'), substr($glb_curl_error,0,255)), true);
+                        array('ss', date('Y-m-d H:i:s'), 
+                        (isset($glb_curl_error)?substr($glb_curl_error,0,255):'')), true);
 
                 if(!$return_output){
-                    print '<div>'.intval($rec_id).' : '.filter_var($rec_url,FILTER_SANITIZE_URL).'  '.$glb_curl_error.'</div>';
+                    print '<div>'.intval($rec_id).' : '.filter_var($rec_url,FILTER_SANITIZE_URL).'  '
+                        .(isset($glb_curl_error)?$glb_curl_error:'').'</div>';
                 }else{
                     $results[0][0][] = $rec_id;
                 }

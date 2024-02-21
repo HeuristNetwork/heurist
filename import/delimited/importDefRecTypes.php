@@ -30,7 +30,9 @@
 	    <script type="text/javascript">
             function onPageInit(success){
             	if(success){
-            		var importDefRecTypes = new hImportDefRecTypes();
+            		const urlParams = new URLSearchParams(window.location.search);
+            		let rtg_ID = urlParams.get('rtg_ID');
+            		let importDefRecTypes = new hImportDefRecTypes(rtg_ID);
             	}
             }
         </script>

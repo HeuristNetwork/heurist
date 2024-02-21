@@ -110,6 +110,13 @@ require_once 'initPage.php';
                 <label style="font-size:smaller;"><input type="radio" name="serial_format" value="json"/>json</label>&nbsp;
                 <label style="font-size:smaller;"><input type="radio" name="serial_format" value="ntriples"/>ntriples</label>&nbsp;
                 <label style="font-size:smaller;"><input type="radio" name="serial_format" value="turtle" />turtle</label>
+                
+                <div class="prompt" style="padding-left:110px;width:400px">Include 
+                <label style="font-size:smaller;"><input type="checkbox" id="include_definition_label" checked/>&nbsp;record type label;</label>  
+                <label style="font-size:smaller;"><input type="checkbox" id="include_resource_term_label" checked/>&nbsp;term label;</label>  
+                <label style="font-size:smaller;"><input type="checkbox" id="include_resource_rec_title" checked/>&nbsp;record title;</label>  
+                <label style="font-size:smaller;"><input type="checkbox" id="include_resource_file_info" checked/>&nbsp;file info;</label>  
+                </div>
         </div>
         
         

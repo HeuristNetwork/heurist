@@ -334,14 +334,16 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
                 "searchdefrectypesonadd": function() {
                         this._onActionListener(null, 'add');
                 },
-                "searchdefrectypesonuichange": this.changeUI  //grouping, visible columns  
+                "searchdefrectypesonuichange": this.changeUI,  //grouping, visible columns  
+                "searchdefrectypesonimport": this.importRecordTypes
            });
         }else{
             this._on( this.searchForm, {
                 "searchdefrectypesonresult": this.updateRecordList,
                 "searchdefrectypesonadd": function() { this.addEditRecord(-1); },
-                "searchdefrectypesonuichange": this.changeUI  //grouping, visible columns
-                });
+                "searchdefrectypesonuichange": this.changeUI,  //grouping, visible columns
+                "searchdefrectypesonimport": this.importRecordTypes
+            });
         }
         
         
@@ -1825,7 +1827,35 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
                     }
                 )*/
         });
-    }                                    
+    },
 
-    
+    importRecordTypes: function(){
+
+        const that = this;
+
+        let sURL = `${window.hWin.HAPI4.baseURL}import/delimited/importDefRecTypes.php?db=${window.hWin.HAPI4.database}&rtg_ID=${this.options.rtg_ID}`;
+
+        window.hWin.HEURIST4.msg.showDialog(sURL, {
+            default_palette_class: 'ui-heurist-design',
+            'close-on-blur': false,
+            'no-resize': false,                  
+            title: 'Import Record types by CSV',
+            height: 800,
+            width: 1000,
+            context_help: `${window.hWin.HAPI4.baseURL}context_help/defRecTypes.html #import`,
+            callback: function(context){ 
+
+                if(context && context.result){
+
+                    that._loadData(false);
+
+                    let msg = $.isArray(context.result) ? context.result.join('<br>') : context.result;
+
+                    window.hWin.HEURIST4.msg.showMsgDlg(msg, null, 'Record types imported',
+                        {default_palette_class:that.options.default_palette_class});
+                }
+            }
+        });
+    }
+
 });

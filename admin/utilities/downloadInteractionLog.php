@@ -24,7 +24,7 @@ define('PDIR','../../');  //need for proper path to js and css
 
 require_once dirname(__FILE__).'/../../hclient/framecontent/initPageMin.php';
 
-$log_file = HEURIST_FILESTORE_DIR.'userInteraction.log';
+$log_file = $system->getSysDir().'userInteraction.log';
 
 if(!file_exists($log_file)){
 	print '<h2>There is no interactions log file</h2>';

@@ -60,6 +60,7 @@ $.widget( "heurist.searchDefDetailTypes", $.heurist.searchEntity, {
         
         this.btn_add_record = this.element.find('#btn_add_record');
         this.btn_find_record = this.element.find('#btn_find_record');
+        this.btn_csv_import = this.element.find('#btn_csv_import');
 
         if(this.options.edit_mode=='none' || this.options.import_structure){
             this.btn_add_record.hide();
@@ -77,6 +78,18 @@ $.widget( "heurist.searchDefDetailTypes", $.heurist.searchEntity, {
                         click: function(){
                             this._trigger( "onadd" );
                         }} );
+
+            this.btn_csv_import
+                .button({label: window.hWin.HR('Import from CSV'), showLabel:true, 
+                            icon:"ui-icon-upload"})
+                .addClass('ui-button-action')
+                .css({padding:'2.5px'});
+
+            this._on(this.btn_csv_import, {
+                click: function(){
+                    this._trigger("onimport");
+                }
+            });
         }
         
         //always hide        

@@ -38,6 +38,7 @@ $.widget( "heurist.searchDefRecTypes", $.heurist.searchEntity, {
         
         this.btn_add_record = this.element.find('#btn_add_record');
         this.btn_find_record = this.element.find('#btn_find_record');
+        this.btn_csv_import = this.element.find('#btn_csv_import');
 
         if(this.options.edit_mode=='none' || this.options.import_structure){
             this.btn_add_record.parent().hide();
@@ -57,24 +58,22 @@ $.widget( "heurist.searchDefRecTypes", $.heurist.searchEntity, {
                     .show();
                     
             this._on( this.btn_add_record, {
-                        click: function(){
-                            this._trigger( "onadd" );
-                        }} );
+                click: function(){
+                    this._trigger( "onadd" );
+                }
+            });
             
-            /*
+            this.btn_csv_import
+                .button({label: window.hWin.HR('Import from CSV'), showLabel:true, 
+                            icon:"ui-icon-upload"})
+                .addClass('ui-button-action')
+                .css({padding:'2.5px'});
 
-            this.btn_find_record.css({'min-width':'9m','z-index':2})
-                    .button({label: window.hWin.HR("Find/Add Record Type"), icon: "ui-icon-search"})
-                .on('click',function(e) {
-                    that._trigger( "onfind" );
-                }); 
-                
-            //@todo proper alignment
-            if(this.options.edit_mode=='inline'){
-                this.btn_add_record.css({'float':'left','border-bottom':'1px lightgray solid',
-                'min-height': '2.4em', 'margin-bottom': '0.4em'});    
-            }
-            */                       
+            this._on(this.btn_csv_import, {
+                click: function(){
+                    this._trigger("onimport");
+                }
+            });
         }
         
         this._on(this.input_search_type,  { change:this.startSearch });

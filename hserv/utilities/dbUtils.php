@@ -441,7 +441,7 @@ class DbUtils {
         }
 
         // Unable to retrieve existing user or provided password is wrong
-        if($user_id <= 0 || $valid_password){
+        if($user_id <= 0 || !$valid_password){
             return ($user_id <= 0 ? 'We were unable to retrieve your user account within the Heurist Index database.' 
                     : 'We were unable to authenicate your account on the Heurist Index database')
                 . '<br>Please ensure that your email address and password on the Heurist Index database match your current email address and password.'
@@ -718,10 +718,14 @@ class DbUtils {
                 $dump_options = array(
                         'add-drop-table' => true,
                         'skip-triggers' => false,
-                        'single-transaction' => true,
+                        'single-transaction' => false, //was true till 2024-02-16
                         'add-drop-trigger' => true,
                         //'databases' => true,
                         'add-drop-database' => true);
+                        
+                //do not archive sysArchive and import tables??
+                        
+                        
             }else{
                 //$dump_options = array('skip-triggers' => true,  'add-drop-trigger' => false);
             }
@@ -1269,6 +1273,9 @@ class DbUtils {
         $res = true;
         $mysqli = self::$mysqli;
         $message = null;
+
+        $db_source = $mysqli->real_escape_string($db_source);
+        $db_target = $mysqli->real_escape_string($db_target);
         
         if( mysql__usedatabase($mysqli, $db_source)!==true ){
             $message = 'Could not open source database '.$db_source;
@@ -1286,7 +1293,7 @@ class DbUtils {
                 }
             }
         }   
-
+        
         if($res){
             
                 // Remove initial values from empty target database

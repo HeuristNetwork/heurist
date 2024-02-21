@@ -309,7 +309,7 @@ if(@$_REQUEST['mode']=='2' && $targetdbname!=null){
             }
         }
         if($sErrorMsg){
-            echo $sErrorMsg;
+            echo htmlspecialchars($sErrorMsg);
         }
 
         // ---- SPECIFY THE TARGET DATABASE (first pass) -------------------------------------------------------------------
@@ -320,7 +320,7 @@ if(@$_REQUEST['mode']=='2' && $targetdbname!=null){
         <input name='db' value='<?=HEURIST_DBNAME?>' type='hidden'>
         <?php
         if($isCloneTemplate){
-            print '<input name="templatedb" value="'.$templateddb.'" type="hidden">';
+            print '<input name="templatedb" value="'.htmlspecialchars($templateddb).'" type="hidden">';
         }
         ?>
         <p>The database will be created with the prefix <b><?=HEURIST_DB_PREFIX?></b>
@@ -498,9 +498,9 @@ function cloneDatabase($targetdbname, $nodata=false, $templateddb, $user_id) {
     }
 
     // Success!
-    echo "<hr><p>&nbsp;</p><h2>New database '$targetdbname' created successfully</h2>";
-    print "<p>Please access your new database through this link: <a href='".HEURIST_BASE_URL."?db=".$targetdbname.
-    "' title='' target=\"_new\"><strong>".$targetdbname."</strong></a></p>";
+    echo "<hr><p>&nbsp;</p><h2>New database '".htmlspecialchars($targetdbname)."' created successfully</h2>";
+    print "<p>Please access your new database through this link: <a href='".HEURIST_BASE_URL."?db=".htmlspecialchars($targetdbname).
+    "&welcome=1' title='' target=\"_new\"><strong>".htmlspecialchars($targetdbname)."</strong></a></p>";
     
     //SEND EMAIL ABOUT CREATING NEW DB
     $user_record = mysql__select_row_assoc($mysqli, 'select ugr_Name, ugr_FirstName, ugr_LastName,'

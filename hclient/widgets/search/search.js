@@ -158,6 +158,7 @@ $.widget( "heurist.search", {
             'line-height': '14px', 
             'min-width':'80px', 'width':'100%' }) 
         .addClass("text ui-widget-content ui-corner-all")
+        .uniqueId()
         .appendTo(  this.div_search_input );
 
         var isNotFirefox = (navigator.userAgent.indexOf('Firefox')<0);

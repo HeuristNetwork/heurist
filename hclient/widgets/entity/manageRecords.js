@@ -44,6 +44,8 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
     // parententity
     // relmarker_field - if relationship record is opened from source or target record - constraints are applied
     // relmarker_is_inward
+    
+    _showCustomJsWarningOnce: true, //semaphore
 
     options: {
         fill_in_data: null // initial fill in data, for new records
@@ -3543,7 +3545,9 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
                     fields = null;
                 }
 
-                var hasValue = false, hasDtlField = false, hasScript = false;
+                var hasCustomJsOrCss = false, hasScriptTag = false;
+                
+                var hasValue = false, hasDtlField = false;
                 var ambig_dates = [];
 
                 let rty_ConceptCode = $Db.getConceptID('rty', this._currentEditRecTypeID);
@@ -3615,11 +3619,18 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
                             }
                             if(dtyID!=window.hWin.HAPI4.sysinfo['dbconst']['DT_CMS_EXTFILES'] && typeof values[k]==='string')
                             {
-                                if(values[k].indexOf('<script')>=0 && values[k].indexOf('</script>')>0){
+                                let sval = (values[k]).toLowerCase();
+                                if(sval.indexOf('<script')>=0 && sval.indexOf('</script>')>0){
                                     var inpt = this._editing.getFieldByName(dtyID);
                                     if(inpt) inpt.editing_input('showErrorMsg', '&lt;sctipt&gt; tag not allowed');  
-                                    hasScript = true;
+                                    hasScriptTag = true;
                                 }
+                            }
+                            if(!hasCustomJsOrCss && typeof values[k]==='string' && rty_ConceptCode == '99-51' &&
+                                     (dtyID==window.hWin.HAPI4.sysinfo['dbconst']['DT_CMS_EXTFILES'] ||
+                                      dtyID==window.hWin.HAPI4.sysinfo['dbconst']['DT_CMS_SCRIPT'] ||
+                                      dtyID==window.hWin.HAPI4.sysinfo['dbconst']['DT_CMS_CSS'])  ){
+                                hasCustomJsOrCss = true;         
                             }
 
                             if(fields['no_validation'] == 1){
@@ -3822,7 +3833,7 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
                             if($ele && $ele.length > 0) $ele.editing_input('setValue', values); // update field element editing_inputs
                         }
                     }
-                }//verify max size
+                }//for verify max size
                 
                 if(fields != null && !hasDtlField){
                     window.hWin.HEURIST4.msg.showMsgFlash("There are no details to save", 1500);
@@ -3830,13 +3841,25 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
                 }else if(fields != null && !hasValue){
                     window.hWin.HEURIST4.msg.showMsgFlash("Please enter a value into any field to save the record", 1500);
                     return;
-                }else if(fields != null && hasScript){
+                }else if(fields != null && hasScriptTag){
                     window.hWin.HEURIST4.msg.showMsgFlash("Some fields have &lt;sctipt&gt; tag. It is not allowed in database", 1500);
                     return;
                 }else if(fields != null && ambig_dates.length > 0){
                     that._handleAmbiguousDates(ambig_dates);
                     return;
                 }
+                
+                //show warning for disabled javascript
+                if(that._showCustomJsWarningOnce &&
+                    !window.hWin.HAPI4.sysinfo['custom_js_allowed'] && hasCustomJsOrCss)
+                {
+                    that._showCustomJsWarningOnce = false;
+                    window.hWin.HEURIST4.msg.showMsg(
+'<h4>Website programming blocked</h4>'
++'<p>Heurist blocks user-supplied Javascript by default (and strips out most user-defined CSS other than simple font changes) for security reasons.</p>'
++'<p>In order to have your Javascript (and CSS) recognised, please ask your server administrator to authorise this for your database by adding it to js_in_database_authorised.txt</p>');
+                }
+                
                 
                 //assign workflow stage field 2-9453
                 if(fields!=null && this._swf_rules.length>0){

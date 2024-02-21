@@ -1178,6 +1178,8 @@ class System {
                     
                     'need_encode'=>$needEncodeRecordDetails, 
                     
+                    'custom_js_allowed'=>$this->isJavaScriptAllowed(),
+                    
                     'common_languages'=>$common_languages,
                     
                     'saml_service_provides'=>$saml_service_provides,
@@ -1691,12 +1693,12 @@ class System {
 
                     return true;
                 }else{
-                    $this->addError(HEURIST_REQUEST_DENIED,  "Password is incorrect");
+                    $this->addError(HEURIST_REQUEST_DENIED,  "The credentials supplied are not correct");
                     return false;
                 }
 
             }else{
-                $this->addError(HEURIST_REQUEST_DENIED,  "User name is incorrect");
+                $this->addError(HEURIST_REQUEST_DENIED,  "The credentials supplied are not correct");
                 return false;
             }
 

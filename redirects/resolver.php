@@ -49,6 +49,9 @@
 // edit - record edit
 // adm - main admin ui
 //  heurist/database_name/action/param1/param2
+//
+// special case for dicobiosport.huma-num.fr
+//
 
 $requestUri = explode('/', trim($_SERVER['REQUEST_URI'],'/'));
 $allowedActions = array('website','web','hml','tpl','view','edit','adm');
@@ -61,10 +64,19 @@ $requestContent = array('xml'=>'text/xml',
 $format = null;
 $redirection_path = '../';
 
-//print $_SERVER['REQUEST_URI'];
-//print print_r($requestUri,true);
+$is_own_domain = (strpos($_SERVER["SERVER_NAME"],'.huma-num.fr')>0 && $_SERVER["SERVER_NAME"]!='heurist.huma-num.fr');
+
+//print $_SERVER["SERVER_NAME"].'  '.$is_own_domain.'   '.substr($_SERVER["SERVER_NAME"],0,-12);
 //exit;
 
+if($is_own_domain){
+    //'dicobiosport'
+    //detect databasename 
+    $database_name_from_domain = substr($_SERVER["SERVER_NAME"],0,-12);
+    if(count($requestUri)==0 || $requestUri[0]!=$database_name_from_domain){
+        array_unshift($requestUri, $database_name_from_domain);
+    }
+}
 
 /*
 if(count($requestUri)==1){
@@ -101,16 +113,17 @@ if ((count($requestUri)==1)
     }
 }
 
+$isMediaRequest = false;
 
 // db/record/2312-123  or  db/record/2312-123.rdf  or db/record/123?db=somedb&fmt=rdf
-if(count($requestUri)==3 && $requestUri[0]=='db' && $requestUri[1]=='record'){
+if(count($requestUri)==3 && $requestUri[0]=='db' && ($requestUri[1]=='record' || $requestUri[1]=='file')){
     //redirect to record info
     $recID = $requestUri[2];
     
     if(strpos($recID,'?')>0){
         list($recID, $query) = explode('?',$recID);
     }
-    if(strpos($recID,'.')>0){
+    if(strpos($recID,'.')>0){//not used  
         list($recID, $format) = explode('.',$recID);
     }
     
@@ -137,6 +150,8 @@ if(count($requestUri)==3 && $requestUri[0]=='db' && $requestUri[1]=='record'){
     
     $redirection_path = '../../heurist/';
 
+    $isMediaRequest = ($requestUri[1]=='file');
+    
     //header('Location: /h6-alpha/redirects/resolver.php?recID='.$requestUri[2].'&fmt='.$format);
     
 }else                            // dbname/action                               heurist/dbname/action
@@ -213,10 +228,10 @@ $requestUri:
             
             define('PDIR', $host_params['server_url'] . $host_params['install_dir']);
             
-            $rewrite_path = '../index.php';
+            $rewrite_path = dirname(__FILE__).'/../index.php';
 
         }else {
-            require_once '../hserv/dbaccess/utils_db.php';
+            require_once dirname(__FILE__).'/../hserv/dbaccess/utils_db.php';
             
             $redirect = $host_params['server_url'] . $host_params['install_dir'];
         
@@ -227,10 +242,10 @@ $requestUri:
                     $params['recID'] = intval($requestUri[3]);
                     
                     if($action=='view'){
-                        $rewrite_path = '../viewers/record/viewRecord.php';    
+                        $rewrite_path = dirname(__FILE__).'/../viewers/record/viewRecord.php';    
                     }else{
                         define('PDIR', $host_params['server_url'] . $host_params['install_dir']);
-                        $rewrite_path = '../hclient/framecontent/recordEdit.php';
+                        $rewrite_path = dirname(__FILE__).'/../hclient/framecontent/recordEdit.php';
                     }
                     
                 }else{
@@ -282,7 +297,7 @@ $requestUri:
                     $redirect = $redirect.'&q='.$query;
                 }
                 //define('PDIR', $host_params['server_url'] . $host_params['install_dir']);    
-                //$rewrite_path = '../index.php';
+                //$rewrite_path = dirname(__FILE__).'/../index.php';
                 
             }else if($action=='tpl'){
                 
@@ -307,7 +322,7 @@ $requestUri:
                         $params['w'] = 'a';
                         $params['q'] = urldecode($query);
                         $params['template'] = urldecode($requestUri[3]);
-                        $rewrite_path = '../viewers/smarty/showReps.php';
+                        $rewrite_path = dirname(__FILE__).'/../viewers/smarty/showReps.php';
                         
                     }else{
                         $error_msg = 'Query or Record ID is not defined';
@@ -348,7 +363,7 @@ if(@$_REQUEST['fmt']){
 }elseif(@$_REQUEST['format']){
     $format = filter_var($_REQUEST['format'], FILTER_SANITIZE_STRING);        
 }else{
-    $format = 'hml';
+    $format = ($isMediaRequest)?'html':'hml';
 }
 
 $entity = null;
@@ -373,23 +388,26 @@ if($recid!=null){
     if(strpos($recid, '-')>0){    
         list($database_id, $recid) = explode('-', $recid, 2);
         $database_id = intval($database_id);
-        $recid = intval($recid);
-    }else{
-        $recid = intval($recid);
         
+    }else{
         if (is_int(@$_REQUEST['db'])){
             $database_id = intval($_REQUEST['db']);
         }    
     }
 }
 
-if(!($recid>0)){
-    if(isset($error_msg)){
+if($isMediaRequest){
+    if($recid==null){
+        header('Location:'.$redirection_path.'hclient/framecontent/infoPage.php?error=File ID is not defined');
+        exit;
+    }
+}else{
+    $recid = intval($recid);    
+    if(!($recid>0)){
         header('Location:'.$redirection_path.'hclient/framecontent/infoPage.php?error=Record ID is not defined');
         exit;
     }
 }
-
 
 $database_url = null;    
 
@@ -423,15 +441,29 @@ if ($database_id>0) {
 if($database_url!=null){ //redirect to resolver for another database
     if($entity!=null){
         $redirect = $database_url.'&'.$entity.'='.$recid;        
+        
+    }else if($isMediaRequest){
+        
+        $redirect = $database_url.'&file='.$recid;    
+        
+        if($format=='html'){
+            $redirect .= '&mode=page';
+        }
+        
     }else{
         $redirect = $database_url.'&recID='.$recid.'&fmt='.$format;    
     }
+    $redirection_path = '';
 }else if($entity!=null){
     
     $redirect = 'hserv/structure/export/getDBStructureAsXML.php?db='.$_REQUEST['db'].'&'.$entity.'='.$recid;
+
+}else if($isMediaRequest){
+    
+    $redirect = '?db='.$_REQUEST['db'].'&mode=page&file='.$recid;  
     
 }else if($format=='html'){ //recirect to recordView
-    
+
     if(@$_REQUEST['noheader']){
         $redirect = 'viewers/record/renderRecordData.php?db='
             .$_REQUEST['db'].'&noheader=1&recID='.$recid;    

@@ -688,7 +688,7 @@ function do_fix_dupe()
     $res = $mysqli->query('select dtl_DetailTypeID, dtl_Value, dtl_ID, dtl_UploadedFileID, '
       .' if(dtl_Geo is not null, ST_asWKT(dtl_Geo), null) as dtl_Geo, trm_Label'
       .' from recDetails  left join defTerms on trm_ID = dtl_Value '
-      .' where dtl_RecID = ' . $master_rec_id . ' order by dtl_DetailTypeID, dtl_ID');
+      .' where dtl_RecID = ' . intval($master_rec_id) . ' order by dtl_DetailTypeID, dtl_ID');
       
     while ($row = $res->fetch_assoc()) {
 
@@ -706,7 +706,7 @@ function do_fix_dupe()
     }
     $res->close();    
     
-    $master_rectype_id = mysql__select_value($mysqli, 'SELECT rec_RecTypeID FROM Records where rec_ID='.$master_rec_id);
+    $master_rectype_id = mysql__select_value($mysqli, 'SELECT rec_RecTypeID FROM Records where rec_ID='.intval($master_rec_id));
 
     $dup_rec_ids=array();
     if(in_array($master_rec_id, $bib_ids )){
@@ -749,7 +749,7 @@ function do_fix_dupe()
     $now = date('Y-m-d H:i:s');
     $rec_values = array('rec_ID'=>$master_rec_id, "rec_Modified"=>$now);
     if(@$_REQUEST['URL']){
-        $rec_values['rec_URL'] = filter_var($_REQUEST['URL'], FILTER_SANITIZE_URL);   
+        $rec_values['rec_URL'] = $_REQUEST['URL'];   
     }
     
     mysql__insertupdate($mysqli, 'Records', 'rec_', $rec_values);
@@ -759,7 +759,7 @@ function do_fix_dupe()
     $master_rep_dt_ids = array();
     $master_rep_dt_ids = mysql__select_list2($mysqli, 
             'select rst_DetailTypeID from defRecStructure WHERE rst_MaxValues != 1 and rst_RecTypeID = '
-            .$master_rectype_id);
+            .intval($master_rectype_id));
 
     $master_rep_detail_ids = array();
     foreach($master_rep_dt_ids as $rep_dt_id ){
@@ -787,7 +787,7 @@ function do_fix_dupe()
         $update_detail=array();
         foreach($update_dt_ids as $rdt_id => $rd_id){
             //look up data for detail and
-            $update_detail = mysql__select_row_assoc($mysqli, 'select * from recDetails where dtl_ID='.$rd_id);
+            $update_detail = mysql__select_row_assoc($mysqli, 'select * from recDetails where dtl_ID='.intval($rd_id));
             // if exist in master details  update val
             if(in_array($rdt_id,array_keys($master_details))){
                 //@todo what about geo and file fields 

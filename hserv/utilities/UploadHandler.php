@@ -63,35 +63,56 @@ class UploadHandler
     function __construct($options = null, $initialize = true, $error_messages = null) {
 	
         //ARTEM - take upload folder from request
-        $upload_thumb_dir = @$_REQUEST['upload_thumb_dir'];
-        $upload_thumb_url = @$_REQUEST['upload_thumb_url'];
-        //get upload folder from parameters
-        $upload_dir = @$_REQUEST['folder']; //defined in form
-        $replace_edited_file = @$_REQUEST['replace_edited_file']; //defined in form
+        //$upload_thumb_dir = @$_REQUEST['upload_thumb_dir'];
+        //$upload_thumb_url = @$_REQUEST['upload_thumb_url'];
+        
+        $heurist_db = @$options['database'];
+        
+        $error = System::dbname_check($heurist_db);
+        if($error){
+            //database not defined
+            return $this->header('HTTP/1.1 403 Forbidden');
+        }
+        
+        $system = new System();
+        $res = $system->verify_credentials($heurist_db);
+        if(!($res>0)){
+            //not logged in
+            return $this->header('HTTP/1.1 403 Forbidden');
+        }
+        
+        $replace_edited_file = intval(@$_REQUEST['replace_edited_file']); //defined in form
+        if(!($replace_edited_file>0 && $replace_edited_file<4)) $replace_edited_file = false;
         $unique_filename = (@$_REQUEST['unique_filename']!=='0'); //defined in form
-        
-        if(!$upload_dir){
-            if(@$_REQUEST['db']){
-                //'/var/www/html/HEURIST/HEURIST_FILESTORE/'.$_REQUEST['db'].'/'
-                $upload_dir = HEURIST_FILESTORE_DIR.'insitu/'; 
-                $upload_url = HEURIST_FILESTORE_URL.'insitu/';
-            }else{
-                // by default into subfolder files next to script
-                $upload_dir = dirname($this->get_server_var('SCRIPT_FILENAME')).'/files/';
+
+        if($options==null || @$options['upload_dir']==null){  //from UploadHandlerInit.php
+
+            if($options==null) $options=array();
+
+            //get upload subfolder from parameters - this is subfolder of database upload folder
+            $upload_dir = @$_REQUEST['upload_subfolder']; //defined in form 
+            if(!$upload_dir){
+                $upload_dir = 'insitu/';
             }
-        }
-        //add last slash
-        if(substr($upload_dir, -1) != "/"){
-            $upload_dir = $upload_dir . "/";
-        }
-        
-        $k = strpos($upload_dir, "/HEURIST_FILESTORE/");
-        
-        if($k>0) {
-            //special case - add HEURIST folder
-            $upload_url = $this->get_server_url().'/HEURIST'.substr($upload_dir,$k); 
-        }else if(!@$_REQUEST['db']) {
-            $upload_url = $this->get_full_url().'/files/';  //default - next to script
+            
+            /*        
+                    //NOT ALLOWED
+                    // by default into subfolder files next to script
+                    $upload_dir = dirname($this->get_server_var('SCRIPT_FILENAME')).'/files/';
+                    $upload_url = $this->get_full_url().'/files/';  //default - next to script
+            */
+
+            //sanitize
+            $upload_dir = USanitize::sanitizePath($upload_dir);
+            //add last slash
+            if(substr($upload_dir, -1) != "/"){
+                $upload_dir = $upload_dir . "/";
+            }
+            
+            $options['upload_subfolder'] = $upload_dir;
+            $upload_url = HEURIST_FILESTORE_URL.$upload_dir;
+            $upload_dir = HEURIST_FILESTORE_DIR.$upload_dir;
+            
         }
         
         $this->response = array();
@@ -265,6 +286,7 @@ $siz = USystem::getConfigBytes('upload_max_filesize');
     }
 
     protected function initialize() {
+        
         switch ($this->get_server_var('REQUEST_METHOD')) {
             case 'OPTIONS':
             case 'HEAD':
@@ -296,9 +318,10 @@ $siz = USystem::getConfigBytes('upload_max_filesize');
         return
             ($https ? 'https://' : 'http://').
             (!empty($_SERVER['REMOTE_USER']) ? $_SERVER['REMOTE_USER'].'@' : '').
-            (isset($_SERVER['HTTP_HOST']) ? $_SERVER['HTTP_HOST'] : ($_SERVER['SERVER_NAME'].
+            //(isset($_SERVER['HTTP_HOST']) ? $_SERVER['HTTP_HOST'] :      )
+             ($_SERVER['SERVER_NAME'].
             ($https && $_SERVER['SERVER_PORT'] === 443 ||
-            $_SERVER['SERVER_PORT'] === 80 ? '' : ':'.$_SERVER['SERVER_PORT'])));
+            $_SERVER['SERVER_PORT'] === 80 ? '' : ':'.$_SERVER['SERVER_PORT']));
     
     }
     
@@ -326,6 +349,10 @@ $siz = USystem::getConfigBytes('upload_max_filesize');
         } else {
             $version_dir = @$this->options['image_versions'][$version]['upload_dir'];
             if ($version_dir) {
+                //$thi->secure_file_name($file_name)
+                $file_name = htmlspecialchars(basename($file_name));
+                $file_name = str_replace('&amp;','&',$file_name);
+                
                 return USanitize::sanitizePath($version_dir.$this->get_user_path().$file_name); //realpath
             }
             $version_path = $version.'/';
@@ -336,6 +363,10 @@ $siz = USystem::getConfigBytes('upload_max_filesize');
         }else{ //}if(substr($subfolder,strlen($subfolder)-1,1){
             $subfolder = $subfolder.'/';
         }
+        
+        //$thi->secure_file_name($filename)
+        $file_name = htmlspecialchars(basename($file_name));
+        $file_name = str_replace('&amp;','&',$file_name);
         
         return USanitize::sanitizePath($this->options['upload_dir'].$this->get_user_path()
             .$subfolder.$version_path.$file_name);
@@ -382,10 +413,15 @@ $siz = USystem::getConfigBytes('upload_max_filesize');
             .$this->get_singular_param_name()
             .'='.rawurlencode($file->name);
         $file->deleteType = $this->options['delete_type'];
+        if(@$this->options['upload_subfolder']){
+            $file->deleteUrl .= ('&db='.$this->options['database'].'&upload_subfolder='.rawurlencode($this->options['upload_subfolder']));
+        }else{
+            $file->deleteUrl .= '&folder='.rawurlencode($this->options['upload_dir']);    
+        }
+        
         if (!empty($file->subfolder)) {
             $file->deleteUrl .= '&subfolder='.rawurlencode($file->subfolder);
         }
-        $file->deleteUrl .= '&folder='.rawurlencode($this->options['upload_dir']);
         
         if ($file->deleteType !== 'DELETE') {
             $file->deleteUrl .= '&_method=DELETE';
@@ -1513,19 +1549,23 @@ $siz = USystem::getConfigBytes('upload_max_filesize');
     }
 
     protected function readfile($file_path) {
-        $file_size = $this->get_file_size($file_path);
-        $chunk_size = $this->options['readfile_chunk_size'];
-        if ($chunk_size && $file_size > $chunk_size) {
-            $handle = fopen($file_path, 'rb');
-            while (!feof($handle)) {
-                echo fread($handle, $chunk_size);
-                @ob_flush();
-                @flush();
+        if(file_exists(file_path)){
+            $file_size = $this->get_file_size($file_path);
+            $chunk_size = intval($this->options['readfile_chunk_size']);
+            if ($chunk_size && $file_size > $chunk_size) {
+                $handle = fopen($file_path, 'rb');
+                while (!feof($handle)) {
+                    echo fread($handle, $chunk_size);
+                    @ob_flush();
+                    @flush();
+                }
+                fclose($handle);
+                return $file_size;
             }
-            fclose($handle);
-            return $file_size;
+            return readfile($file_path);
+        }else{
+            return 0;
         }
-        return readfile($file_path);
     }
 
     protected function body($str) {
@@ -1563,10 +1603,23 @@ $siz = USystem::getConfigBytes('upload_max_filesize');
     protected function get_singular_param_name() {
         return substr($this->options['param_name'], 0, -1);  //files -> file
     }
+    
+    //
+    // Unfortunately Snyk security report doesn't see this code
+    //
+    private function secure_file_name($filename){
+        $filename = htmlspecialchars(basename($filename)); //stripslashes()
+        $filename = str_replace('&amp;','&',$filename);
+        return $filename;
+    }
 
     protected function get_file_name_param() {
         $name = $this->get_singular_param_name();
-        return basename(stripslashes($this->get_query_param($name)));
+        $filename = $this->get_query_param($name);
+        $filename = htmlspecialchars(basename($filename)); //stripslashes()
+        $filename = str_replace('&amp;','&',$filename);
+        //$filename = $this->secure_file_name($filename);
+        return $filename;
     }
 
     //@todo    
@@ -1579,10 +1632,15 @@ $siz = USystem::getConfigBytes('upload_max_filesize');
         if (!$params) {
             return null;
         }
+        $params2 = array();
         foreach ($params as $key => $value) {
-            $params[$key] = basename(stripslashes($value));
+            $filename = htmlspecialchars(basename($value)); //stripslashes()
+            $filename = str_replace('&amp;','&',$filename);
+            if($filename){
+                $params2[$key] = $filename; //secure_file_name($value);
+            }
         }
-        return $params;
+        return $params2;
     }
 
     protected function get_file_type($file_path) {
@@ -1768,16 +1826,30 @@ $siz = USystem::getConfigBytes('upload_max_filesize');
                     $subfolder_name = '';
                     if(strpos($file_name,'Ё')>0){
                         $file_name = str_replace('Ё','/',$file_name);
-                        $k = strrpos($file_name, "/");
-                        $subfolder_name = substr($file_name, 0, $k);
-                        $file_name =  substr(strrchr($file_name, "/"), 1 );
+                        
+                        $pathinfo = pathinfo($file_name);
+                        $subfolder_name = USanitize::sanitizePath($pathinfo['dirname']);
+                        $file_name = $pathinfo['basename'];
+                        
+                        $origial_filename = $file_name;
+                        //$k = strrpos($file_name, "/");
+                        //$subfolder_name = substr($file_name, 0, $k);
+                        //$file_name =  substr(strrchr($file_name, "/"), 1 );
+                    }else{
+                        $origial_filename = $upload['name'][$index];
                     }
                     
+
+                    $tmp_file = null;
+                    if(isset($upload['tmp_name'][$index])){
+                        // we can not sanitize it, other is_uploaded_file returns false
+                        $tmp_file = USanitize::sanitizePath($upload['tmp_name'][$index], true);
+                    }
                     
                     $files[] = $this->handle_file_upload(
-                        $upload['tmp_name'][$index],
+                        $tmp_file,
                         $file_name,
-                        $upload['name'][$index], //original name
+                        $origial_filename, //original name
                         $subfolder_name,
                         $size ? $size : $upload['size'][$index],
                         $upload['type'][$index],
@@ -1790,8 +1862,16 @@ $siz = USystem::getConfigBytes('upload_max_filesize');
             } else {
                 // param_name is a single object identifier like "file",
                 // $upload is a one-dimensional array:
+                $tmp_file = null;
+                if(isset($upload['tmp_name'])){
+                    //USanitize::sanitizePath(
+                    // we can not sanitize it, other is_uploaded_file returns false
+                    $tmp_file = USanitize::sanitizePath($upload['tmp_name'], true);
+                }
+                
+                
                 $files[] = $this->handle_file_upload(
-                    isset($upload['tmp_name']) ? $upload['tmp_name'] : null,
+                    $tmp_file,
                     //$prefix.USanitize::sanitizeFileName($file_name ? $file_name : (isset($upload['name']) ?$upload['name'] : null), false),
                     $file_name ? $file_name : (isset($upload['name']) ?$upload['name'] : null),
                     (isset($upload['name']) ? $upload['name'] : null), //original name

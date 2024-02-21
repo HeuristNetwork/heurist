@@ -41,9 +41,7 @@
 -- a small number of inactive legacy databases corrupted by Steve's unmanaged change of internal IDs in approx. June 2011)
 -- This file is maintained for historic information only, formerly named UpgradeDB_to_1.0.0.sql
 
-    update  sysIdentification set sys_dbVersion=1;
-    update  sysIdentification set sys_dbSubVersion=0;
-    update  sysIdentification set sys_dbSubSubVersion=0;
+    update  sysIdentification set sys_dbVersion=1, sys_dbSubVersion=0, sys_dbSubSubVersion=0 WHERE 1=1;
 
     -- Add new value 'public'
     Alter table sysIdentification

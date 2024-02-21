@@ -362,7 +362,7 @@ function hLayoutMgr(){
     // layout - json configuration
     // container - if not defined - it tries to find current one
     //
-    function _layoutAddWidget(layout, container){
+    function _layoutAddWidget(layout, container, forStorage){
 
         var $d = _layoutCreateDiv(layout, 'editable heurist-widget cms-element brick');
 

@@ -64,7 +64,7 @@ class USanitize {
     //
     //  removes /../
     //
-    public static function sanitizePath($path) {
+    public static function sanitizePath($path, $use_native_separator=false) {
         // Skip invalid input.
         if (!isset($path)) {
             return '';
@@ -101,6 +101,11 @@ class USanitize {
         if( is_dir($path) && substr($path, -1, 1) != '/' )  {
             $path = $path.'/';
         }
+        
+        if($use_native_separator && DIRECTORY_SEPARATOR!='/'){
+            $path = str_replace('/', DIRECTORY_SEPARATOR, $path);
+        }
+        
         return $path;
     }
 
@@ -118,7 +123,7 @@ class USanitize {
     }
 
     //
-    //
+    // We can also use HTMLPurifier (see example in showReps.php)
     //
     public static function sanitizeString($message, $allowed_tags=null){
         if($message==null){
@@ -129,9 +134,12 @@ class USanitize {
             }else if($allowed_tags===false){
                 $allowed_tags = null;
             }
+            $message = preg_replace("/<([a-z][a-z0-9]*)[^>]*?(\/?)>/si",'<$1$2>', $message);
             $message = htmlspecialchars(strip_tags($message, $allowed_tags), ENT_NOQUOTES);
-            $message = preg_replace("/&lt;/", '<', $message);
-            $message = preg_replace("/&gt;/", '>', $message);
+            if($allowed_tags!==false){
+                $message = preg_replace("/&lt;/", '<', $message);
+                $message = preg_replace("/&gt;/", '>', $message);
+            }
         }
         return $message;
     }

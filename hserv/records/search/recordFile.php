@@ -3,7 +3,7 @@
 * recordFile.php
 * 
 * methods for recUploadedFiles
-* @todo - 1) some methods to dbRecUploadedFiles 2) some to utils_image
+* @todo - 1) some methods to dbRecUploadedFiles 2) some to uImage
 * 
 * file - prefix for functions
 * 
@@ -312,7 +312,7 @@ function fileGetFullInfo($system, $file_ids, $all_fields=false){
 * @param mixed $system
 * @param mixed $recIDs
 */
-function fileGetThumbnailURL($system, $recID, $get_bgcolor){
+function fileGetThumbnailURL($system, $recID, $get_bgcolor, $check_linked_media = false){
 
     $thumb_url = null;
     $bg_color = null;
@@ -337,7 +337,25 @@ function fileGetThumbnailURL($system, $recID, $get_bgcolor){
             ." OR ulf_OrigFileName LIKE '_iiif%' OR ulf_PreferredSource LIKE 'iiif%')" // ORDER BY dtl_DetailTypeID, dtl_ID
             .' LIMIT 1';
         $fileid = mysql__select_value($system->get_mysqli(), $query);
-        
+    }
+
+    // Check linked record types
+    if(!$fileid && $check_linked_media && 
+        $system->defineConstant('RT_MEDIA_RECORD') && RT_MEDIA_RECORD > 0){
+
+        $query = "SELECT rec_ID FROM Records LEFT JOIN recLinks ON rl_TargetID = rec_ID WHERE rl_SourceID = $recID AND rec_RecTypeID = " . RT_MEDIA_RECORD;
+        $linked_rec_ids = mysql__select_list2($system->get_mysqli(), $query);
+
+        while(!empty($linked_rec_ids)){
+
+            $linked_rec_id = array_shift($linked_rec_ids);
+            $file_details = fileGetThumbnailURL($system, $linked_rec_id, $get_bgcolor, false);
+
+            if(!empty($file_details) && !empty($file_details['url'])){
+                return $file_details;
+                //break;
+            }
+        }
     }
     
     if($fileid){
@@ -477,18 +495,21 @@ function downloadViaProxy($filename, $mimeType, $url, $bypassProxy = true, $orig
 function downloadFile($mimeType, $filename, $originalFileName=null){
 
     if (file_exists($filename)) {
+    //if(isPathInHeuristUploadFolder($filename, true)){
         
         $range = @$_SERVER['HTTP_RANGE'];
         $range_max = 0;
-        if($range){
+        if($range!=null){
             //get bytes range  bytes=0-88
             list($dim, $range) = explode('=', $range);
             list($range_min,$range_max) = explode('-', $range);
+            $range_min = intval($range_min);
+            $range_max = intval($range_maxs);
         }        
 
         header('Content-Description: File Transfer');
         $is_zip = false;
-        if(!$mimeType || $mimeType == 'application/octet-stream'){
+        if(!$mimeType || $mimeType == 'application/octet-stream' || $mimeType == 'application/json'){
             $is_zip = true;
             header('Content-Encoding: gzip');
         }

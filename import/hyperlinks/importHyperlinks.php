@@ -379,7 +379,7 @@ if (@$urls) {
 <script src="importHyperlinks.js"></script>
 
 <?php //this frame is needed for title lookup ?>
-<form action="importHyperlinks.php?db=<?=HEURIST_DBNAME?>" method="post" 
+<form action="importHyperlinks.php?db=<?php echo HEURIST_DBNAME?>" method="post" 
         enctype="multipart/form-data" name="mainform" id="mainform" style="margin: 0px 3px;">
 
 <input type="hidden" name="wgTags" id="wgTags">
@@ -402,7 +402,7 @@ hyperlinks of interest).</p>
 <div class="separator_row" style="margin:20px 0 5px 0;"></div>
 
 <?php		if (@$error) {	?>
- <div class="input-row"><div class="error"><?= $error ?></div></div>
+ <div class="input-row"><div class="error"><?php echo  $error ?></div></div>
 <?php		} ?>
  <div class="input-row">
         <div class="input-header-cell">
@@ -437,12 +437,12 @@ hyperlinks of interest).</p>
 ?>
 <h2 style="padding-left: 20px;">Import Hyperlinks</h2>
 <p style="padding-left: 20px;">
-Web links in <b><?= htmlspecialchars($srcname) ?></b>
-<input type="hidden" name="old_srcname" value="<?= htmlspecialchars($srcname) ?>">
+Web links in <b><?php echo  htmlspecialchars($srcname) ?></b>
+<input type="hidden" name="old_srcname" value="<?php echo  htmlspecialchars($srcname) ?>">
 
 Note: the list only shows links which you have not already bookmarked.<br>
 <?php if ($word_limit) { ?>
-  Only links with at least <?= ($word_limit == 1)? 'one word' : $word_limit.' words' ?> are shown,
+  Only links with at least <?php echo  ($word_limit == 1)? 'one word' : $word_limit.' words' ?> are shown,
   and common
 <?php } else { ?>Common<?php } ?>
   hyperlink texts are ignored.
@@ -463,14 +463,14 @@ Note: the list only shows links which you have not already bookmarked.<br>
 We recommend bookmarking a few links at a time.<br>The list is reloaded after each addition and after change of settings.
 
 <?php		if (@$error) {	?>
- <div class="input-row"><?= $error ?></div>
+ <div class="input-row"><?php echo  $error ?></div>
 <?php		} ?>
 <?php		if (@$success) {	?>
- <div class="input-row" style="color:#0000ff;font-weight:bold;"><?= htmlspecialchars($success) ?></div>
+ <div class="input-row" style="color:#0000ff;font-weight:bold;"><?php echo  htmlspecialchars($success) ?></div>
 <?php		} ?>
 <?php		if (@$disambiguate_rec_ids) { ?>
  <div class="input-row" style="color:blue;"">
-  <b><?= (count($disambiguate_rec_ids) == 1)? 'One of your selected links is' : 'Some of your selected links are' ?>
+  <b><?php echo  (count($disambiguate_rec_ids) == 1)? 'One of your selected links is' : 'Some of your selected links are' ?>
   similar to record(s) already in the database.</b><br>
   The similar records are shown below: please select the appropriate page, or add a new URL to the database.<br>
   Then click on "Bookmark checked links" again.
@@ -610,28 +610,32 @@ function print_link($url, $title) {
     
     $url_visit = (strpos($url,'http://')===false)?'https://'.$url :$url;
 
+    $title_esc = htmlspecialchars($title);    
 ?>
 <div class="input-row" style="background-color:#CCCCCC; padding-left: 40px; width:90%;">
-		<input type="checkbox" name="links[<?= $linkno ?>]" value="1" class="check_link" id="flag<?= $linkno ?>" <?= @$_REQUEST['links'][$linkno]? 'checked' : '' ?> onChange="var t=document.getElementById('t<?= $linkno ?>').value; var n=document.getElementById('n<?= $linkno ?>').value; if (!this.checked || n.length > t.length) { var e=document.getElementById('un<?= $linkno ?>'); if(e) e.checked = this.checked; }">
-		&nbsp;<input type="text" name="title[<?= $linkno ?>]" value="<?= $title ?>" style="width:70%; font-weight: bold; background-color: #eee;" id="t<?= $linkno ?>">
-		<input type="hidden" name="alt_title[<?= $linkno ?>]" value="<?= $title ?>" id="at<?= $linkno ?>">
-		<input type="hidden" name="link[<?= $linkno ?>]" value="<?= htmlspecialchars($url) ?>" id="u<?= $linkno ?>">
+		<input type="checkbox" name="links[<?php echo  $linkno ?>]" value="1" class="check_link" id="flag<?php echo $linkno ?>" <?php echo  @$_REQUEST['links'][$linkno]? 'checked' : '' ?> 
+            onChange="var t=document.getElementById('t<?php echo $linkno ?>').value; var n=document.getElementById('n<?php echo $linkno ?>').value; if (!this.checked || n.length > t.length) { var e=document.getElementById('un<?php echo $linkno ?>'); if(e) e.checked = this.checked; }">
+		&nbsp;<input type="text" name="title[<?php echo  $linkno ?>]" value="<?php echo  $title_esc ?>" style="width:70%; font-weight: bold; background-color: #eee;" id="t<?php echo $linkno ?>">
+		<input type="hidden" name="alt_title[<?php echo  $linkno ?>]" value="<?php echo  $title_esc ?>" id="at<?php echo $linkno ?>">
+		<input type="hidden" name="link[<?php echo  $linkno ?>]" value="<?php echo  htmlspecialchars($url) ?>" id="u<?php echo $linkno ?>">
 
-  		&nbsp;&#91;<a href="<?= $url_visit ?>" target="_blank" rel="noopener"><span class="button">Visit</span></a>&#93;&nbsp;
-		<input type="button" style="padding-top: 2px;height:23px !important;font-weight:normal;font-size:1em;" name="lookup[<?= $linkno ?>]" value="Lookup Title" title="Lookup title from URL"
-			onClick="{lookup_revert(this, <?= $linkno ?>);}" id="lu<?= $linkno ?>">
-		<input type="hidden" name="kwd[<?= $linkno ?>]" value="<?= htmlspecialchars(@$_REQUEST['kwd'][$linkno]) ?>" id="key<?= $linkno ?>">
+  		&nbsp;&#91;<a href="<?php echo  htmlspecialchars($url_visit) ?>" target="_blank" rel="noopener"><span class="button">Visit</span></a>&#93;&nbsp;
+		<input type="button" style="padding-top: 2px;height:23px !important;font-weight:normal;font-size:1em;" name="lookup[<?php echo  $linkno ?>]" value="Lookup Title" title="Lookup title from URL"
+			onClick="{lookup_revert(this, <?php echo  $linkno ?>);}" id="lu<?php echo $linkno ?>">
+		<input type="hidden" name="kwd[<?php echo  $linkno ?>]" value="<?php echo  htmlspecialchars(@$_REQUEST['kwd'][$linkno]) ?>" id="key<?php echo $linkno ?>">
 </div>
 
 <div class="input-row" style="padding-left: 60px;">
-  <a target=_blank href="<?= $url_visit ?>" rel="noopener"><?= htmlspecialchars($url) ?></a>
+  <a target=_blank href="<?php echo  htmlspecialchars($url_visit) ?>" rel="noopener"><?php echo  htmlspecialchars($url) ?></a>
 </div>
 <div class="input-row" style="padding-left: 60px;">
 	<div style="display:inline-block;width:30px;vertical-align: middle;">
-		<input style="margin: 0px;" type="checkbox" name="use_notes[<?= $linkno ?>]" value="1" id="un<?= $linkno ?>" class="use_notes_checkbox" title="Use Notes">
-      	<input type="hidden" name="notes[<?= $linkno ?>]" id="n<?= $linkno ?>" value="<?= @$_REQUEST['notes'][$linkno]? str_replace('"', '\\"', htmlspecialchars($_REQUEST['notes'][$linkno])) : str_replace('"', '\\"', htmlspecialchars($notes[$url])) ?>">
+		<input style="margin: 0px;" type="checkbox" name="use_notes[<?php echo  $linkno ?>]" value="1" id="un<?php echo $linkno ?>" class="use_notes_checkbox" title="Use Notes">
+      	<input type="hidden" name="notes[<?php echo  $linkno ?>]" id="n<?php echo $linkno ?>" 
+            value="<?php echo  htmlspecialchars(@$_REQUEST['notes'][$linkno]? str_replace('"', '\\"', $_REQUEST['notes'][$linkno]) : str_replace('"', '\\"', $notes[$url])); ?>">
 	  </div>
-      <div style="display:inline-block;width:70%;max-height:5.5em;text-overflow: ellipsis; overflow:hidden; white-space:normal;"><?= @$_REQUEST['notes'][$linkno]? htmlspecialchars($_REQUEST['notes'][$linkno]) : wordwrap($notes[$url], 50, "\n", true) ?>
+      <div style="display:inline-block;width:70%;max-height:5.5em;text-overflow: ellipsis; overflow:hidden; white-space:normal;">
+            <?php echo  htmlspecialchars(@$_REQUEST['notes'][$linkno]? $_REQUEST['notes'][$linkno] : wordwrap($notes[$url], 50, "\n", true)) ?>
       </div>
       <small class="words">
 <?php
@@ -654,7 +658,7 @@ function print_link($url, $title) {
 <div class="input-row">
 	<div class="similar_bm">
 		<span>
-			<input type="radio" name="rec_ID[<?= $linkno ?>]" value="-1" checked="checked" onClick="selectExistingLink(<?= $linkno ?>);">
+			<input type="radio" name="rec_ID[<?php echo  $linkno ?>]" value="-1" checked="checked" onClick="selectExistingLink(<?php echo  $linkno ?>);">
 			<b>New (add this URL to the database)</b>
 		</span>
 	</div>
@@ -668,10 +672,10 @@ function print_link($url, $title) {
 ?>
 	<div class="similar_bm">
 		<span>
-			<input type="radio" name="rec_ID[<?= $linkno ?>]" value="<?php echo intval($rec_id); ?>" onClick="selectExistingLink(<?= $linkno ?>);">
+			<input type="radio" name="rec_ID[<?php echo  $linkno ?>]" value="<?php echo intval($rec_id); ?>" onClick="selectExistingLink(<?php echo  $linkno ?>);">
 			<?php echo htmlspecialchars($row[0]); //'rec_Title' ?>
 		</span>&nbsp;&nbsp;
-		<a style ="font-size: 80%; text-decoration:none;" target="_testwindow" href="<?= htmlspecialchars($row[1]) ?>"><?php
+		<a style ="font-size: 80%; text-decoration:none;" target="_testwindow" href="<?php echo  htmlspecialchars($row[1]) ?>"><?php
 				if (strlen($row[1]) < 100) //'rec_URL'
 					print htmlspecialchars(common_substring($row[1], $url));
 				else

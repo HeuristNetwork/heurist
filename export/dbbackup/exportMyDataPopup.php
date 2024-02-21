@@ -516,14 +516,14 @@ if($mode>1){
     <p>Your data have been backed up in <?php echo FOLDER_BACKUP;?></p>
     <br><br><div class='lbl_form'></div>
         <a href="exportMyDataPopup.php/<?php echo HEURIST_DBNAME;?>.<?php echo $format; ?>?mode=2&db=<?php echo HEURIST_DBNAME.$is_zip;?>"
-            target="_blank" style="color:blue; font-size:1.2em">Click here to download your data as a <?php echo $format;?> archive</a>
+            target="_blank" rel="noopener" style="color:blue; font-size:1.2em">Click here to download your data as a <?php echo $format;?> archive</a>
 
     <?php 
     if($separate_sql_zip){
         if($res_sql===true){ ?>
         <br><br>
         <a href="exportMyDataPopup.php/<?php echo HEURIST_DBNAME;?>_sql.<?php echo $format; ?>?mode=3&db=<?php echo HEURIST_DBNAME.$is_zip;?>"
-            target="_blank" style="color:blue; font-size:1.2em">Click here to download the SQL <?php echo $format;?> file only</a> 
+            target="_blank" rel="noopener" style="color:blue; font-size:1.2em">Click here to download the SQL <?php echo $format;?> file only</a> 
         <span class="heurist-helper1">(for db transfer on tiered servers)</span>
     <?php }else{ ?>
         <br><br>

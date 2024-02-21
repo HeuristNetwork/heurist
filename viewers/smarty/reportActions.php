@@ -370,26 +370,32 @@ class ReportActions {
     *
     * @param mixed $instream - source data with global concept IDs
     */
-    public function importTemplate($params){
+    public function importTemplate($params, $for_cms = null){
          
-        
+        if($params==null){
+            $res = array("error"=>'Error occurred - request is empty');
+            
+        }else
         if ( !@$params['size'] ) {
             $res = array("error"=>'Error occurred during upload - file had zero size');
             
         }else{
-            $filename = $params['tmp_name'];
+
             $origfilename = $params['name'];
             $res = array("error"=>'Error occurred during upload - file does not exist');
+
+            $filename = null;        
             
-            if(strpos($filename,'cms/')===0){
+            if($for_cms!=null){
                 $path = dirname(__FILE__).'/../../hclient/widgets/cms/templates/snippets/';
                 $path = realpath($path);
                 if($path!==false){ //does not exist
-                    $filename = $path.DIRECTORY_SEPARATOR.basename(substr($filename,4));    
+                    $filename = $path.DIRECTORY_SEPARATOR.basename($for_cms);    
                 }
             }else{
-               $filename = USanitize::sanitizePath($filename); 
+                $filename = USanitize::sanitizePath(@$params['tmp_name']);                
             }
+            
             if(file_exists($filename)){
                 
                 //read tempfile

@@ -40,6 +40,45 @@ $.widget( "heurist.lookupConfig", {
         beforeClose:null,     //to show warning before close
         onClose:null       
     },
+
+    _urls: {
+        tlcmap: {
+            lookup: 'https://tlcmap.org/ghap/search?format=csv&paging=10&fuzzyname=London',
+            service: 'https://ghap.tlcmap.org/places?containsname=London&searchausgaz=on&searchncg=on&searchpublicdatasets=on'
+        },
+        geoName: {
+            lookup: `http://api.geonames.org/searchJSON?username=${accessToken_GeonamesAPI}&maxRows=10&q=London`,
+            service: 'https://www.geonames.org/search.html?q=London&country='
+        },
+        postalCodeSearch: {
+            lookup: `http://api.geonames.org/postalCodeLookupJSON?username=${accessToken_GeonamesAPI}&maxRows=10&placename=London`,
+            service: 'https://www.geonames.org/postalcode-search.html?q=London&country='
+        },
+        bnfLibrary: {
+            lookup: `https://catalogue.bnf.fr/api/SRU?version=1.2&operation=searchRetrieve&maximumRecords=10&startRecord=1&query=${encodeURIComponent('(bib.anywhere any "Vincent")')}`,
+            service: 'https://catalogue.bnf.fr/rechercher.do?motRecherche=Vincent&critereRecherche=0&depart=0&facetteModifiee=ok'
+        },
+        bnfLibraryAut: {
+            lookup: `https://catalogue.bnf.fr/api/SRU?version=1.2&operation=searchRetrieve&recordSchema=unimarcxchange&maximumRecords=10&startRecord=1&query=${encodeURIComponent('(aut.anywhere any "Vincent")')}`,
+            service: 'https://catalogue.bnf.fr/resultats-auteur.do?nomAuteur=Vincent&filtre=1&pageRech=rau'
+        },
+        nomisma: {
+            lookup: {
+                getMints: 'https://nomisma.org/apis/getMints?id=denarius',
+                getHoards: 'https://nomisma.org/apis/getHoards?id=denarius',
+                getFindspots: 'https://nomisma.org/apis/getFindspots?id=denarius'
+            },
+            service: 'https://nomisma.org/browse?q=denarius'
+        },
+        nakala: {
+            lookup: 'https://api.nakala.fr/search?q=Literature&fq=scope%3Ddatas&order=relevance&page=1&size=15',
+            service: 'https://nakala.fr/search/?q=Literature'
+        },
+        nakala_author: {
+            lookup: 'https://api.nakala.fr/authors/search?q=John&order=asc&page=1&limit=15',
+            service: 'https://nakala.fr/'
+        }
+    },
     
     _as_dialog:null, //reference to itself as dialog (see options.isdialog)
     
@@ -739,11 +778,11 @@ $.widget( "heurist.lookupConfig", {
             
             if($.isEmptyObject(this._current_cfg) || this._isNewCfg){ //new cfg
 
-                this.element.find('#service_type').show();
+                this.element.find('#assign_fieldset').show();
                 this._is_modified = true;
             }else{
 
-                this.element.find('#service_type').hide();  //hide service selector
+                this.element.find('#assign_fieldset').hide();  //hide service selector
                 this.element.find('.service_details').show();
                 
                 //verify if modified
@@ -813,7 +852,8 @@ $.widget( "heurist.lookupConfig", {
     //
     _changeService: function( service_name ){
 
-        var cfg0 = null;
+        const that = this;
+        let cfg0 = null;
 
         $.each(this._available_services, function(i, srv){ // get new service info
           if(srv.service==service_name){
@@ -821,6 +861,42 @@ $.widget( "heurist.lookupConfig", {
               return false;
           }
         });
+
+        if(this._urls[service_name]){
+
+            this._off($('#a_lookup_url'), 'click');
+            if(service_name != 'geoName' && service_name != 'postalCodeSearch'){
+
+                this._on($('#a_lookup_url'), {
+                    click: function(){
+
+                        let url = that._urls[service_name];
+
+                        if($.isPlainObject(url)){
+                            for(let type in url) {
+                                window.open(url[type], '_blank');
+                            }
+                        }else{
+                            window.open(url, '_blank');
+                        }
+                    }
+                });
+            }else{
+
+                this._on($('#a_lookup_url'), {
+                    click: function(){
+                        window.hWin.HEURIST4.msg.showMsgErr('Due to security reasons this url cannot be provided.');
+                        return false;
+                    }
+                });
+            }
+    
+            $('#a_service_url').html(this._urls[service_name].service).attr('href', this._urls[service_name].service);
+
+            this.element.find('.service_urls').show();
+        }else{
+            this.element.find('.service_urls').hide();
+        }
         
         this._fillConfigForm(null, cfg0);
     },
@@ -842,37 +918,24 @@ $.widget( "heurist.lookupConfig", {
 
         if(!this.example_results[service_name]){
             // Retrieve data
-            var url = '';
-            var serviceType = service_name;
-            var request = {};
+            let url = this._urls[service_name].lookup;
+
+            let serviceType = service_name;
+            let request = {};
             switch (service_name) {
                 case 'bnfLibrary':
-                    url = 'https://catalogue.bnf.fr/api/SRU?version=1.2&operation=searchRetrieve&maximumRecords=10&startRecord=1&query='+encodeURIComponent('(bib.anywhere any "Vincent")');
                     serviceType = 'bnflibrary_bib';
                     break;
                 case 'bnfLibraryAut':
-                    url = 'https://catalogue.bnf.fr/api/SRU?version=1.2&operation=searchRetrieve&recordSchema=unimarcxchange&maximumRecords=10&startRecord=1&query='+encodeURIComponent('(aut.anywhere any "Vincent")');
                     serviceType = 'bnflibrary_aut';
                     break;
                 case 'nomisma':
                     this._runTestNomisma('getMints'); // run all nomisma services
-                    break;
-                case 'tlcmap':
-                    url = 'https://tlcmap.org/ghap/search?format=csv&paging=10&fuzzyname=London';
+                    url = '';
                     break;
                 case 'geoName':
-                    url = 'http://api.geonames.org/searchJSON?username='+accessToken_GeonamesAPI+'&maxRows=10&name=London';
-                    serviceType = 'geonames';
-                    break;
                 case 'postalCodeSearch':
-                    url = 'http://api.geonames.org/postalCodeLookupJSON?username='+accessToken_GeonamesAPI+'&maxRows=10&placename=London';
                     serviceType = 'geonames';
-                    break;
-                case 'nakala':
-                    url = 'https://api.nakala.fr/search?q=Literature&fq=scope%3Ddatas&order=relevance&page=1&size=15';
-                    break;
-                case 'nakala_author':
-                    url = 'https://api.nakala.fr/authors/search?q=John&order=asc&page=1&limit=15';
                     break;
                 default:
                     break;
@@ -888,6 +951,10 @@ $.widget( "heurist.lookupConfig", {
             };
 
             window.hWin.HAPI4.RecordMgr.lookup_external_service(request, function(response){
+
+                if(response.status != window.hWin.ResponseStatus.OK){
+                    return;
+                }
 
                 if(service_name.indexOf('bnfLibrary') != -1){
                     response = response.result;

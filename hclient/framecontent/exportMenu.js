@@ -433,6 +433,17 @@ function hexportMenu( container ) {
                         params = params + '&detail_mode='+$('input[name="detail_mode"]:checked').val();        
                     }else if(opts.format=='rdf'){
                         params = params + '&vers=2&serial_format='+$('input[name="serial_format"]:checked').val();        
+                        let include_additional_info = '';
+                        include_additional_info += $('#include_definition_label').is(':checked')?'1':'0';
+                        include_additional_info += $('#include_resource_term_label').is(':checked')?'1':'0';
+                        include_additional_info += $('#include_resource_rec_title').is(':checked')?'1':'0';
+                        include_additional_info += $('#include_resource_file_info').is(':checked')?'1':'0';
+                        if(include_additional_info=='1111'){
+                            include_additional_info = '1';
+                        }
+                        if(include_additional_info!==''){
+                            params = params + '&extinfo=' + include_additional_info;
+                        }
                     }else{
                         params = params +'&defs=0&extended='+($('#extendedJSON').is(':checked')?2:1);
                     }
