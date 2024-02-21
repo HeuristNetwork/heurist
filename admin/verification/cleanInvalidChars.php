@@ -95,7 +95,7 @@ $is_not_found = true;
                                     $prevInvalidRecId = $textDetail['dtl_RecID'];
                                     
                                     mysql__insertupdate($mysqli, 'Records', 'rec_', 
-                                            array('rec_ID'=>$textDetail['dtl_RecID'], 'rec_Modified'=>$now) );
+                                            array('rec_ID'=>intval($textDetail['dtl_RecID']), 'rec_Modified'=>$now) );
                                     
                                 }
                                 print "<tr><td><pre>" . "Invalid characters found in ".$textDetail['dty_Name'] 
@@ -104,7 +104,7 @@ $is_not_found = true;
                                 $newText = str_replace($invalidChars ,$replacements,$textDetail['dtl_Value']);
                                 
                                 $res = mysql__insertupdate($mysqli, 'recDetails', 'dtl_', 
-                                            array('dtl_ID'=>$textDetail['dtl_ID'], 'dtl_Value'=>$newText) );
+                                            array('dtl_ID'=>intval($textDetail['dtl_ID']), 'dtl_Value'=>$newText) );
                                 
                                 
                                 if ($res>0) {

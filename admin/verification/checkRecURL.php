@@ -132,7 +132,7 @@ function checkURLs($system, $return_output){
 
             if ($data){
                 $passed_cnt++;
-                $passed_rec_ids[] = $rec_id;
+                $passed_rec_ids[] = intval($rec_id);
                 if(count($passed_rec_ids)>1000){
                     __updateRecords_lastverified($mysqli);
                 }
