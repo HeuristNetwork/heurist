@@ -36,7 +36,7 @@ var editCMS_instance2 = null;
 //  window.hWin.layoutMgr - global variable defined in hLayoutMgr
 //  page_cache
 //  home_page_record_id
-//  website_languages
+//  website_languages,  default_language, current_language
 //  isWebPage
 //  current_page_id
 //  isCMS_InHeuristUI, isCMS_NewWebsite
@@ -679,10 +679,10 @@ var sMsg = '<p>Heurist\'s CMS editor has been upgraded to a new system which is 
                             
                             var lang = $(tinymce.activeEditor.targetElm).attr('data-lang');
                             if(lang==default_language || lang=='def' || window.hWin.HEURIST4.util.isempty(lang)){
-                                l_cfg.content = new_content;    
-                            }else{
-                                l_cfg['content'+lang] = new_content;    
+                                lang = '';
                             }
+                            l_cfg['content'+lang] = new_content;    
+                            
                             
                         }else{
                             page_was_modified = false;
@@ -1603,7 +1603,7 @@ function(value){
         if(default_language!=lang && lang!='def' && !window.hWin.HEURIST4.util.isempty(lang)){
             content = content + lang;
             if(!affected_cfg[content]){ //if not found -  add new content
-                affected_cfg[content] = 'Translate content to '+lang+'!';
+                affected_cfg[content] = 'Translate content to '+lang+'!' + affected_cfg['content'];
             }
         }
                        
@@ -1701,7 +1701,7 @@ function(value){
                     //save
                     if(new_cfg){
                         
-                        new_cfg.content = element_cfg.content;
+                        //new_cfg.content = element_cfg.content;
                         
                         window.hWin.layoutMgr.layoutContentSaveElement(_layout_content, new_cfg); //replace element to new one
 

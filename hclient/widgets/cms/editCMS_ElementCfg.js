@@ -491,7 +491,7 @@ function editCMS_ElementCfg( element_cfg, _layout_content, _layout_container, $c
         l_cfg.css = css;
         _assignCssTextArea();
         element.removeAttr('style');
-        element.css(css);
+        element.css(css); //assign changed css at once
 
         return css;
     }
@@ -751,12 +751,13 @@ function editCMS_ElementCfg( element_cfg, _layout_content, _layout_container, $c
     function _initCodeEditor() {
         
         var $dlg;
+        
+        var ce_container = $container.find('#codemirror-body');
 
         if(codeEditor==null){
             
-            
                 //document.getElementById('codemirror-container')
-                codeEditor = CodeMirror($container.find('#codemirror-body')[0], {
+                codeEditor = CodeMirror(ce_container[0], {
                     mode           : "htmlmixed",
                     tabSize        : 2,
                     indentUnit     : 2,
@@ -772,9 +773,11 @@ function editCMS_ElementCfg( element_cfg, _layout_content, _layout_container, $c
                     onFocus:function(){},
                     onBlur:function(){}
                 });
+        }        
+
+        var contents = null; //keep translations
                 
-                
-                codeEditorBtns = [
+        var codeEditorBtns = [
                     {text:window.hWin.HR('Cancel'), 
                         id:'btnCancel',
                         css:{'float':'right','margin-left':'30px','margin-right':'20px'}, 
@@ -789,18 +792,74 @@ function editCMS_ElementCfg( element_cfg, _layout_content, _layout_container, $c
                         click: function() { 
                             var newval = codeEditor.getValue();
 
-                            if(l_cfg.content != newval){
-                                _enableSave();                
+                            if(contents==null){ //no languages defined
+                                if(l_cfg.content != newval){
+                                    _enableSave();                
+                                    element.html(newval);    
+                                    l_cfg.content = newval;
+                                }
+                            }else{ //multilang
+                                let cur_lang = ce_container.attr('data-lang');
+                                contents[cur_lang] = newval;
+                                var langs = Object.keys(contents);
+                                for(var i=0; i<langs.length; i++){
+                                    let lang_key = 'content'+langs[i];
+                                    if(default_language.toUpperCase()==langs[i]){
+                                        lang_key = 'content';
+                                    }
+                                    if(l_cfg[lang_key] != contents[langs[i]]){
+                                        l_cfg[lang_key] = contents[langs[i]];
+                                        _enableSave();
+                                        if(current_language.toUpperCase()==langs[i]){
+                                            element.html(l_cfg[lang_key]);    
+                                        }
+                                    }
+                                }
                             }
-                            
-                            element.html(newval);    
-                            l_cfg.content = newval;
-                            element_cfg.content = newval;
                             
                             codeEditorDlg.dialog( "close" );    
                 }}]; 
                 
+        //add language buttons
+        if(website_languages!=''){
+            var langs = website_languages.split(',');
+            if(langs.length>0){
+                contents ={};
+                
+                for(var i=0;i<langs.length;i++){
+
+                     let lang = langs[i].toUpperCase();                     
+                     if(Object.hasOwn(l_cfg, 'content'+lang)){
+                            contents[lang] = l_cfg['content'+lang];    
+                     }else{
+                            contents[lang] = l_cfg['content'];
+                     }
+                    
+                     //swticth language   
+                     codeEditorBtns.push({
+                text: lang,
+                css:{'float':'left'}, 
+                click: function(event) { 
+                    
+                    
+                    //keep previous
+                    var newval = codeEditor.getValue();
+                    let cur_lang = ce_container.attr('data-lang');
+                    
+                    if(contents[cur_lang]!=newval){
+                        contents[cur_lang] = newval; 
+                    }
+                    
+                    let new_lang = $(event.target).text();
+                    if(window.hWin.HEURIST4.util.isempty(contents[new_lang])) contents[new_lang] = ' ';
+                    codeEditor.setValue(contents[new_lang]);
+                    ce_container.attr('data-lang',new_lang);
+                    
+                    }});
+                }
+            }
         }
+        
         
         codeEditorDlg = window.hWin.HEURIST4.msg.showElementAsDialog({
             window:  window.hWin, //opener is top most heurist window
@@ -813,9 +872,9 @@ function editCMS_ElementCfg( element_cfg, _layout_content, _layout_container, $c
             //h6style_class: 'ui-heurist-publish',
             default_palette_class: 'ui-heurist-publish'
             //close: function(){}
-        });                 
+        });     
         
-        
+        codeEditorDlg.find('.ui-dialog-buttonset').css({width:'100%'});
         
         //preformat - break lines for widget options
         /*
@@ -827,10 +886,26 @@ function editCMS_ElementCfg( element_cfg, _layout_content, _layout_container, $c
         });
         var content = ele.html();
         */
-        
-        if(window.hWin.HEURIST4.util.isempty(element_cfg.content)) element_cfg.content = ' ';
-        
-        codeEditor.setValue(element_cfg.content);
+
+
+        var initial_content, init_lang;
+        if(contents==null){
+            //languages not defined
+            //assign content to editor (default language)
+            initial_content = l_cfg.content;
+            
+        }else{
+            if(default_language && contents[default_language.toUpperCase()]){
+                init_lang = default_language.toUpperCase();
+            }else{
+                init_lang = Object.keys(contents)[0];
+            }
+            
+            initial_content = contents[init_lang];
+            ce_container.attr('data-lang', init_lang);
+        }
+        if(window.hWin.HEURIST4.util.isempty(initial_content)) initial_content = ' ';
+        codeEditor.setValue(initial_content);
 
         //autoformat
         setTimeout(function(){
