@@ -372,9 +372,11 @@
     {
         $dir = rtrim(str_replace('\\', '/', $dir), '/');
 
-        if (is_dir($dir) === true) {
+        if (file_exists($dir) && (is_dir($dir) === true)) {
             
             $totalSize = 0;
+            
+            $dir = USanitize::sanitizePath($dir);
             
             $dir = realpath($dir);
             
