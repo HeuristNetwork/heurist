@@ -96,7 +96,7 @@ function updateDtlValues($mysqli, $ids, $vals, $titles){
             //print $query.'<br>';                
             $res = $mysqli->query($query);
             if ($mysqli->error) {
-                    print 'Error for query '.$query.' '.$mysqli->error;
+                    print 'Error for query '.htmlspecialchars($query).' '.htmlspecialchars($mysqli->error);
             	    exit;
             }
 

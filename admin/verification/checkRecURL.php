@@ -145,7 +145,7 @@ function checkURLs($system, $return_output){
                         (isset($glb_curl_error)?substr($glb_curl_error,0,255):'')), true);
 
                 if(!$return_output){
-                    print '<div>'.intval($rec_id).' : '.filter_var($rec_url,FILTER_SANITIZE_URL).'  '
+                    print '<div>'.intval($rec_id).' : '.htmlspecialchars($rec_url).'  '
                         .(isset($glb_curl_error)?$glb_curl_error:'').'</div>';
                 }else{
                     $results[0][0][] = $rec_id;
@@ -332,7 +332,8 @@ function checkURLs($system, $return_output){
                      $fld_names = mysql__select_list2($mysqli, str_replace(array('DTYID'), array($dtyids), $def_name_query));
                 }
     
-                print '<div>' . $recid . ': ' . implode(' ; ', array_values($flds)) . '[found in field(s): ' . implode(',', $fld_names) . ']<br>';
+                print '<div>' . $recid . ': ' . implode(' ; ', array_values($flds)) 
+                        . '[found in field(s): ' . htmlspecialchars( implode(',', $fld_names) ). ']<br>';
             }
     
             $results = true;

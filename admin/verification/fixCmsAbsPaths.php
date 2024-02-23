@@ -120,9 +120,9 @@ function __correctAbsPaths(){
         'tag'=>0
         );
         
-        print '<h4>'.$db_name.'</h4><br>';
+        print '<h4>'.htmlspecialchars($db_name).'</h4><br>';
         
-        print 'Rectypes: '.implode(',',$rty_IDs).' Field: '.$dty_ID.'<br>';
+        print 'Rectypes: '.htmlspecialchars(implode(',',$rty_IDs)).' Field: '.intval($dty_ID).'<br>';
         
         $dbRecDetails->setData($data);
         $res = $dbRecDetails->detailsReplace();

@@ -166,8 +166,7 @@ $is_csv = (@$_REQUEST['html']!=1);
         header('Content-Disposition: attachment; filename='.$filename);
         header('Content-Length: ' . strlen($out));
         
-        exit($out);
-        
+        echo $out;
     }
     
     function getTermTopMostParent22($db_name, $mysqli, $termId, $terms=null){
