@@ -874,10 +874,10 @@ function sendSystemEmail($data) {
 
 		if ($rtn_value <= -1) {
 
-			echo "An error occurred with preparing and sending the system emails<br>";
+			echo "An error occurred with preparing and sending the system emails.<br>"; // See error log for details
 			$output = $email_obj->get_error_log();
 			echo USanitize::sanitizeString($output[0]);
-			echo "<br><br>System Log: <br>" . USanitize::sanitizeString($output[1]);
+			echo "<br><br>Log: <br>" . USanitize::sanitizeString($output[1]);
 
 			$rtn_value = -1;
 		}
