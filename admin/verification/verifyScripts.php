@@ -416,7 +416,7 @@ function verifySpatialVocab($sName,$f_code,$v_code){
             $f_code = explode('-',$f_code);
             $v_code = explode('-',$v_code);
             
-            print $fields[1];
+            print htmlspecialchars($fields[1]);
             
             if(!($fields[3]==$f_code[0] && $fields[4]==$f_code[1])){
                 //need change ccode for field
@@ -428,7 +428,7 @@ function verifySpatialVocab($sName,$f_code,$v_code){
             $vocab = mysql__select_row($mysqli, $query);
             if($vocab){
                 if(!($vocab[2]==$v_code[0] && $vocab[3]==$v_code[1])){
-                    print '<div>'.$vocab[1].' NEED CHANGE VOCAB CCODES '.$vocab[2].'-'.$vocab[3].'</div>';
+                    print '<div>'.htmlspecialchars($vocab[1].' NEED CHANGE VOCAB CCODES '.$vocab[2].'-'.$vocab[3]).'</div>';
                     
                     if(@$_REQUEST["fix"]==1){
                         $query = 'UPDATE '.$db_name.'.defTerms SET trm_OriginatingDBID='.$v_code[0].', trm_IDInOriginatingDB='
@@ -447,7 +447,8 @@ function verifySpatialVocab($sName,$f_code,$v_code){
                 $terms = mysql__select_all($mysqli, $query);
                 print '<table style="font-size:smaller">';
                 foreach($terms as $term){
-                    print '<tr><td>'.implode('</td><td>',$term).'</td></tr>';
+                    $list = str_replace(chr(29),'</td><td>',htmlspecialchars(implode(chr(29),$term)));
+                    print '<tr><td>'.$list.'</td></tr>';
                 }
                 print '</table>';
             }else{
@@ -458,7 +459,7 @@ function verifySpatialVocab($sName,$f_code,$v_code){
                 .$db_name.'.defDetailTypes WHERE  dty_OriginatingDBID='.$f_code[0].' AND dty_IDInOriginatingDB='.$f_code[1];
             $fields = mysql__select_row($mysqli, $query);
             if($fields){
-                print '<div style="color:red">FIELD HAS DIFFERENT NAME '.$fields[1].'</div>';                    
+                print '<div style="color:red">FIELD HAS DIFFERENT NAME '.htmlspecialchars($fields[1]).'</div>';                    
             }
         }
 } 
@@ -482,6 +483,8 @@ function __findWrongChars(){
             $list = mysql__select_assoc($mysqli, 'select rty_ID, rty_TitleMask from defRecTypes');
 
             $isOK = true;
+            
+            $db_name = htmlspecialchars($db_name);
             
             $res = json_encode($list); //JSON_INVALID_UTF8_IGNORE 
             if(true || !$res){
@@ -537,7 +540,7 @@ function __findLongTermLabels(){
 
             if($list && count($list)>0){
             
-                print $db_name.'<br>';
+                print htmlspecialchars($db_name).'<br>';
                 foreach($list as $id=>$row){
                     print '<div style="padding-left:100px">'.$id.'&nbsp;'.intval($row['chars']).'&nbsp;'.intval($row['len'])
                         .'&nbsp;'.htmlspecialchars($row['trm_Label']).'</div>';    
@@ -569,10 +572,10 @@ $query = "ALTER TABLE `defTerms` "
         
         $res = $mysqli->query($query);
         if(!$res){
-            print $db_name.' Cannot modify defTerms: '.$mysqli->error;
+            print htmlspecialchars($db_name.' Cannot modify defTerms: '.$mysqli->error);
             return false;
         }else{
-            print $db_name.'<br>';
+            print htmlspecialchars($db_name).'<br>';
         }
     }    
     print '[end update]';    
@@ -610,7 +613,7 @@ function __setTermYesNo(){
 
         mysql__usedatabase($mysqli, $db_name);
 
-        print $db_name.' ';    
+        print htmlspecialchars($db_name).' ';    
         
         if(!hasTable($mysqli, 'defTermsLinks')){
             print ' defTermsLinks does not exist<br>';
@@ -712,7 +715,7 @@ function __recreateProceduresTriggers(){
     
     foreach ($databases as $idx=>$db_name){
 
-        print $db_name.'<br>';
+        print htmlspecialchars($db_name).'<br>';
         
         mysql__usedatabase($mysqli, $db_name);
         
@@ -835,7 +838,7 @@ function __renameField39(){
     
     foreach ($databases as $idx=>$db_name){
 
-        print $db_name;
+        print htmlspecialchars($db_name);
         
         mysql__usedatabase($mysqli, $db_name);
         
@@ -912,7 +915,7 @@ function __correctGetEstDate(){
             }
             
             if($cnt>0 || $is_invalid)
-                print $db_name.'  '.$cnt.'<br>';
+                print htmlspecialchars($db_name.'  '.$cnt).'<br>';
         }
         
     }//for
@@ -934,7 +937,7 @@ function __correctGetEstDate_and_ConvertTemporals_JSON_to_Plain(){
         $ver = mysql__select_row_assoc($mysqli, $query);
         if($ver['sys_dbSubSubVersion']==13){
         
-            print '<br>'.$db_name;
+            print '<br>'.htmlspecialchars($db_name);
         
             // recreate getEstDate function
             if(db_script('hdb_'.$db_name, dirname(__FILE__).'/../setup/dbcreate/getEstDate.sql', false)){
@@ -1015,7 +1018,7 @@ function __delete_OLD_RecType_And_Term_Icons_Folders(){
         }
         
 
-        echo $db_name.'  '.$cnt.'<br>';
+        echo htmlspecialchars($db_name.'  '.$cnt).'<br>';
     }
     
 }
@@ -1320,7 +1323,7 @@ function __listOfAdminUsers(){
         $vals = mysql__select_row_assoc($mysqli, $query);
         if($vals){
             if(strpos($vals['ugr_Modified'],'2019')!==0 && $vals['ugr_Modified']<$mind) $mind = $vals['ugr_Modified'];
-            echo  '<br>'.$db_name.'   '.$vals['ugr_Modified'];//.'   '.$vals['ugr_Name'].'  '.$vals['ugr_eMail'];
+            echo  '<br>'.htmlspecialchars($db_name.'   '.$vals['ugr_Modified']);//.'   '.$vals['ugr_Name'].'  '.$vals['ugr_eMail'];
         }
     }
     print '<br>Earliest: '.$mind.'<br>END';
