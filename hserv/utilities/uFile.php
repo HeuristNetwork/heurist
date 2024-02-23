@@ -385,8 +385,9 @@
                 $os        = strtoupper(substr(PHP_OS, 0, 3));
                 // If on a Unix Host (Linux, Mac OS)
                 if ($os !== 'WIN') {
-                    $io = popen('/usr/bin/du -sb ' . $dir, 'r');
-                    if ($io !== false) {
+                    $cmd = escapeshellcmd('/usr/bin/du -sb ' . $dir); //
+                    $io = popen($cmd, 'r');
+                    if ($io !==false) {
                         $totalSize = intval(fgets($io, 80));
                         pclose($io);
                         return $totalSize;
