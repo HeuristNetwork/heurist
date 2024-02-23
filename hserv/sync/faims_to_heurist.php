@@ -88,9 +88,10 @@ if(! $system->init(@$_REQUEST['db'], true) ){
             }
             catch(PDOException $e)
             {
-                //2024-02-23 Information Exposure  echo $e->getMessage();
+                echo '<pre>';
+                print_r($e->getMessage());                
                 echo "<br><br>Database NOT loaded";
-                exit;
+                die();
             }
 
 
