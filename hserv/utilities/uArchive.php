@@ -404,7 +404,7 @@ class UArchive {
                     }
                 }
 
-                if($verbose) echo "Add file ".basename($source)." (size $size_mb)\n";        
+                if($verbose) echo "Add file ".htmlspecialchars(basename($source))." (size $size_mb)\n";        
 
                 $phar->addFile($source, basename($source));
                 $numFiles++;

@@ -216,6 +216,8 @@ foreach ($databases as $idx=>$db_name){
         echo @$res[1]."\n";
         continue;
     }
+    
+    $db_name = htmlspecialchars($db_name);
 
 /*    
 * Delete/archive any database not updated for more than: 

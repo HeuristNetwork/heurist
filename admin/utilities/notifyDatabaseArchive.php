@@ -143,7 +143,7 @@ foreach ($databases as $idx=>$db_name){
         continue;
     }
 
-    echo $eol.$db_name.' Checking'.$eol;
+    echo $eol.htmlspecialchars($db_name).' Checking'.$eol;
     
     $res = mysql__usedatabase($mysqli, $db_name);
     if(!$res){
