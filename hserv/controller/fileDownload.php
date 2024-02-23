@@ -65,7 +65,8 @@ if(!$error){
                 if(!$force_recreate && file_exists($thumbfile)){
                     
                     if(defined('HEURIST_THUMB_URL')){
-                        die(header('Location: '.HEURIST_THUMB_URL.'ulf_'.$fileid.'.png'));    
+                        $turl = filter_var(HEURIST_THUMB_URL.'ulf_'.$fileid.'.png',FILTER_SANITIZE_URL);
+                        header('Location: '.$turl);    
                     }else{
                         downloadFile('image/png', $thumbfile);    
                     }
