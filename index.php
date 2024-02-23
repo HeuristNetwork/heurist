@@ -136,13 +136,13 @@ if( @$_REQUEST['recID'] || @$_REQUEST['recid'] || array_key_exists('website', $_
         $locale = '';    
     }
 
-    $asset = 'context_help/'.$locale.$name;
-    if(!file_exists($asset)){
+    $asset = 'context_help/'.$locale.urlencode($name);
+    if(!file_exists('context_help/'.$locale.$name)){
         //without locale - default is English
-        $asset = 'context_help/'.$name;   
+        $asset = 'context_help/'.urlencode($name);   
     }
 
-    if(file_exists($asset)){
+    if(file_exists('context_help/'.$name)){
         //download
         header( 'Location: '.$asset );
         return;

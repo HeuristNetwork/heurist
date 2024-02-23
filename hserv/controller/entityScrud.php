@@ -82,7 +82,8 @@ if (@$argv) {
                         $url = $host_params['server_url'] . '/' . implode('/',array_slice($parts,3));
                     }
                     
-                    $url = filter_var($url.rawurlencode($dbname).'/entity/db.json',FILTER_SANITIZE_URL);
+                    //rawurlencode - required for security reports only
+                    $url = $url.rawurlencode($dbname).'/entity/db.json';
                     header('Location: '.$url);
                     
                 }else{

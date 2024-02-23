@@ -65,7 +65,8 @@ if(!$error){
                 if(!$force_recreate && file_exists($thumbfile)){
                     
                     if(defined('HEURIST_THUMB_URL')){
-                        $turl = filter_var(HEURIST_THUMB_URL.'ulf_'.rawurlencode($fileid).'.png',FILTER_SANITIZE_URL);
+                        //rawurlencode - required for security reports only
+                        $turl = HEURIST_THUMB_URL.'ulf_'.rawurlencode($fileid).'.png';
                         header('Location: '.$turl);    
                     }else{
                         downloadFile('image/png', $thumbfile);    
