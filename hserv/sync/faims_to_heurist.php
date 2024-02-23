@@ -88,7 +88,6 @@ if(! $system->init(@$_REQUEST['db'], true) ){
             }
             catch(PDOException $e)
             {
-                echo '<pre>';
                 print_r($e->getMessage());                
                 print_r("<br><br>Database NOT loaded");
                 die();
