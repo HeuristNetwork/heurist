@@ -90,7 +90,7 @@ if(! $system->init(@$_REQUEST['db'], true) ){
             {
                 echo '<pre>';
                 print_r($e->getMessage());                
-                echo "<br><br>Database NOT loaded";
+                print_r("<br><br>Database NOT loaded");
                 die();
             }
 

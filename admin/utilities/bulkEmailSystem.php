@@ -877,7 +877,7 @@ function sendSystemEmail($data) {
 			echo "An error occurred with preparing and sending the system emails. See error log for details<br>";
 			$output = $email_obj->get_error_log();
 			echo USanitize::sanitizeString($output[0]);
-            error_log( 'Sending the system emails: '.USanitize::sanitizeString($output[1]) );
+            error_log( 'Sending the system emails: '.print_r(USanitize::sanitizeString($output[1])) );
 			//2024-02-23 Information Exposure echo "<br><br>Log: <br>" . USanitize::sanitizeString($output[1]);
 
 			$rtn_value = -1;
@@ -892,7 +892,7 @@ function sendSystemEmail($data) {
 		echo "An error occurred with processing the form's data. See error log for details<br>";
 		$output = $email_obj->get_error();
         echo USanitize::sanitizeString($output[0]);
-        error_log( 'Processing the email form\'s data: '.USanitize::sanitizeString($output[1]) );
+        error_log( 'Processing the email form\'s data: '.print_r(USanitize::sanitizeString($output[1])) );
 
 		return -1;
 	}
