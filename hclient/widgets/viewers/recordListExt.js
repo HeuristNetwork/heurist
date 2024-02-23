@@ -54,7 +54,9 @@ $.widget( "heurist.recordListExt", {
         
         show_export_button: false, // show button to export current record set
         show_print_button: false, // show button to print current record set
-        export_options: 'all' // export formats allowed
+        export_options: 'all', // export formats allowed
+        
+        language: 'def'
     },
 
     _current_url: null, //keeps current url - see loadURL 

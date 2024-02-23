@@ -409,6 +409,9 @@ function initMainMenu( afterInitMainMenu ){
     window.hWin.HAPI4.LayoutMgr.appInitFromContainer( document, topmenu.parent(), lopts);
 
     topmenu.show();
+    
+    $('#main-languages').find('a[data-lang]').removeClass('lang-selected');
+    $('#main-languages').find(`a[data-lang=${current_language}]`).addClass('lang-selected');
 }
 
 //
@@ -425,6 +428,7 @@ function switchLanguage(event){
         initHeaderTitle();
         loadPageContent(current_page_id);
         initMainMenu();
+        
     }
     window.hWin.HEURIST4.util.stopEvent(event);
     return false;
