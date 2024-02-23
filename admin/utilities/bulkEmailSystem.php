@@ -876,7 +876,7 @@ function sendSystemEmail($data) {
 
 			echo "An error occurred with preparing and sending the system emails.<br>";// See error log for details
 			$output = $email_obj->get_error_log();
-            echo '<pre>'.print_r($output).'</pre>';
+            //2024-02-23 Information Exposure echo '<pre>'.print_r($output).'</pre>';
 
 			$rtn_value = -1;
 		}
@@ -889,7 +889,7 @@ function sendSystemEmail($data) {
 
 		echo "An error occurred with processing the form's data.<br>";
 		$output = $email_obj->get_error();
-        echo '<pre>'.print_r($output).'</pre>';
+        //2024-02-23 Information Exposure echo '<pre>'.print_r($output).'</pre>';
         //echo print_r(USanitize::sanitizeString($output[1])) ;
 
 		return -1;

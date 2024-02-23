@@ -1454,12 +1454,12 @@ class System {
                         'path' => '/',
                         'domain' => '',
                         'secure' => $is_https,
-                        'httponly' => false,
+                        'httponly' => true,
                         'samesite' => 'Lax'
                     ]);
                 }else{
                     //workaround: header("Set-Cookie: key=value; path=/; domain=example.org; HttpOnly; SameSite=Lax");
-                    $cres = setcookie('heurist-sessionid', $session_id, $lifetime, '/', '', $is_https );    
+                    $cres = setcookie('heurist-sessionid', $session_id, $lifetime, '/', '', $is_https, true );    
                 }
                 
                 
@@ -1735,11 +1735,11 @@ class System {
                 'path' => '/',
                 'domain' => '',
                 'secure' => $is_https,
-                'httponly' => false,
+                'httponly' => true,
                 'samesite' => 'Lax'
             ]);
         }else{
-            $cres = setcookie('heurist-sessionid', $session_id, $lifetime, '/', '', $is_https );  //login
+            $cres = setcookie('heurist-sessionid', $session_id, $lifetime, '/', '', $is_https, true );  //login
         }
 
         if(!$cres){
