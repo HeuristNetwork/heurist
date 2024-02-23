@@ -1738,6 +1738,7 @@ class System {
                 'httponly' => true,
                 'samesite' => 'Lax'
             ]);
+            
         }else{
             $cres = setcookie('heurist-sessionid', $session_id, $lifetime, '/', '', $is_https, true );  //login
         }
@@ -1780,7 +1781,7 @@ class System {
         // it means logout exits all databases
         $is_https = (@$_SERVER['HTTPS']!=null && $_SERVER['HTTPS']!='');
         //$session_id = session_id();
-        $cres = setcookie('heurist-sessionid', '', time() - 3600, '/', '', $is_https);  //logout
+        $cres = setcookie('heurist-sessionid', '', time() - 3600, '/', '', $is_https, true);  //logout
         $this->current_User = null;
         session_destroy();
         

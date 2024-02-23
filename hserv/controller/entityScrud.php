@@ -68,23 +68,28 @@ if (@$argv) {
     if( @$_REQUEST['a']=='structure' && @$_REQUEST['entity']=='all' 
         && $dbdef_cache!=null && file_exists($dbdef_cache)
         ){
+            if($error==null){
             
-            if(isset($allowWebAccessEntityFiles) && $allowWebAccessEntityFiles)
-            {
-                $host_params = USystem::getHostParams();
-                // 
-                if(strpos($defaultRootFileUploadURL, $host_params['server_url'])===0){
-                    $url = $defaultRootFileUploadURL;
+                if(isset($allowWebAccessEntityFiles) && $allowWebAccessEntityFiles)
+                {
+                    $host_params = USystem::getHostParams();
+                    // 
+                    if(strpos($defaultRootFileUploadURL, $host_params['server_url'])===0){
+                        $url = $defaultRootFileUploadURL;
+                    }else{
+                        //replace server name to avoid CORS issues
+                        $parts = explode('/',$defaultRootFileUploadURL);
+                        $url = $host_params['server_url'] . '/' . implode('/',array_slice($parts,3));
+                    }
+                    
+                    if(!preg_match('/[^A-Za-z0-9_\$]/', $db_name)){
+                        $url = $url.basename($dbname).'/entity/db.json';
+                        header('Location: '.$url);
+                    }
+                    
                 }else{
-                    //replace server name to avoid CORS issues
-                    $parts = explode('/',$defaultRootFileUploadURL);
-                    $url = $host_params['server_url'] . '/' . implode('/',array_slice($parts,3));
+                    downloadFile('application/json', $dbdef_cache);
                 }
-                
-                $url = $url.$dbname.'/entity/db.json';
-                header('Location: '.$url);
-            }else{
-                downloadFile('application/json', $dbdef_cache);
             }
             exit;
     }
