@@ -79,7 +79,7 @@
         $query = 'show databases';
 
         $res = $mysqli->query($query);      
-        if (!$res) {  print $query.'  '.$mysqli->error;  return; }
+        if (!$res) {  print htmlspecialchars($query.'  '.$mysqli->error);  return; }
         $databases = array();
         while (($row = $res->fetch_assoc())) {
             if( strpos($row[0], 'hdb_')===0 && ($filter=="all" || strpos($row[0], $filter)===0)){
@@ -154,7 +154,7 @@
                 .implode(',',$rty_IDs_ToCheck).')';
     
         $res = $mysqli->query($query);
-        if (!$res) {  print $query.'  '.$mysqli->error;  return; }
+        if (!$res) {  print htmlspecialchars($query.'  '.$mysqli->error);  return; }
         
         //gather fields ids, pointer constraints, vocabs/terms - as concept codes
         while (($row = $res->fetch_assoc())) {
@@ -361,7 +361,7 @@
                             array_push($missing, $rty_code.'  '.@$rty_Names[$rty_code] );
                         }
                         if(!@$fileds_missed_rectypes[$rty_code] && array_search($rty_code, $rty_Codes2)===false){
-                            $fileds_missed_rectypes[$rty_code] = $rty_code.'  '.@$rty_Names[$rty_code];
+                            $fileds_missed_rectypes[$rty_code] = $rty_code.'  '.htmlspecialchars(@$rty_Names[$rty_code]);
                             //array_push($missing2, $rty_code.'  '.@$rty_Names[$rty_code] );
                         }
                     }        
@@ -397,7 +397,8 @@
                         }        
                         if(count($missing)>0){
                                $fileds_differ_terms[$dty_Code] = 
-                                        "<p style='padding-left:10px'>field ".$dty_Code.' <b>'.$fields[$rty_Code][$dty_Code]
+                                        "<p style='padding-left:10px'>field ".$dty_Code.' <b>'
+                                        .htmlspecialchars($fields[$rty_Code][$dty_Code])
                                         .'</b>:</p><p style="padding-left:40px"> missing terms in defined list: '
                                         .implode(', ',$missing).'</p>';
                         }
@@ -418,8 +419,8 @@
             
             if($msg_error){
                 $smsg = $smsg
-                    ."<p style='padding-left:20px'>id = ".$rty_Code.'  <b>'.@$rty_Names[$rty_Code] 
-                    .((@$rty_Names[$rty_Code]!=$rty_Name)?'</b> <i>(in this database: '.$rty_Name.')</i>':'</b>').'</p>'
+                    ."<p style='padding-left:20px'>id = ".intval($rty_Code).'  <b>'.htmlspecialchars(@$rty_Names[$rty_Code]) 
+                    .((@$rty_Names[$rty_Code]!=$rty_Name)?'</b> <i>(in this database: '.htmlspecialchars($rty_Name).')</i>':'</b>').'</p>'
                     .$msg_error;
             }
                  

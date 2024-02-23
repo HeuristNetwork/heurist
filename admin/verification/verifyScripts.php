@@ -157,7 +157,7 @@ function __checkVersionDatabase(){
         $query = 'SELECT sys_dbSubVersion, sys_dbSubSubVersion from sysIdentification';
         $ver = mysql__select_row_assoc($mysqli, $query);
         if(!$ver){
-            print $db_name.'  >>> '.$mysqli->error;  
+            print htmlspecialchars($db_name.'  >>> '.$mysqli->error);  
         }else{
 
             if($ver['sys_dbSubVersion']<3){
@@ -169,7 +169,7 @@ function __checkVersionDatabase(){
             }else{
                 print '<div>';
             }
-            print $db_name.'  >>>  1.'.$ver['sys_dbSubVersion'].'.'.$ver['sys_dbSubSubVersion'].'</div>';
+            print htmlspecialchars($db_name.'  >>>  1.'.$ver['sys_dbSubVersion'].'.'.$ver['sys_dbSubSubVersion']).'</div>';
         }        
     }
 
@@ -185,6 +185,8 @@ function __updateDatabase(){
     foreach ($databases as $idx=>$db_name){
 
         mysql__usedatabase($mysqli, $db_name);
+        
+        $db_name = htmlspecialchars($db_name)
         
         if(hasTable($mysqli, 'defRecStructure')){
             
@@ -248,6 +250,8 @@ function __renameDegreeToKM(){
 
         mysql__usedatabase($mysqli, $db_name);
 
+        $db_name = htmlspecialchars($db_name);
+        
         if(hasTable($mysqli, 'defRecStructure')){
             
             $res1 = $mysqli->query($query1);
@@ -370,7 +374,7 @@ Show labels 3-1088  ( 2-6258 )  3-5084, 3-5085, 3-5086
     
     if(count($db2_with_links)>0){
         print '<p>v2 with defTermLinks</p>';
-        print print_r($db2_with_links, true);
+        print htmlspecialchars(print_r($db2_with_links, true));
     }
 
     print '<hr><p>v2 with individual term selection for relationtype</p>';
@@ -385,7 +389,7 @@ Show labels 3-1088  ( 2-6258 )  3-5084, 3-5085, 3-5086
 
     foreach ($db3_with_terms as $db_name=>$value){
         print $db_name.'<br>';
-        print print_r($value, true).'<br>';
+        print htmlspecialchars(print_r($value, true)).'<br>';
     }
     
 /*    
