@@ -130,7 +130,7 @@ if( @$_REQUEST['recID'] || @$_REQUEST['recid'] || array_key_exists('website', $_
 
     $locale = filter_var(@$_REQUEST['lang'], FILTER_SANITIZE_STRING); //locale
     if($locale && preg_match('/^[A-Za-z]{3}$/', $locale)){
-        $locale = strtolower($locale);
+        $locale = urlencode(strtolower($locale));
         $locale = ($locale=='eng')?'' :($locale.'/');
     }else{
         $locale = '';    
