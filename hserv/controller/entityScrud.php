@@ -82,10 +82,8 @@ if (@$argv) {
                         $url = $host_params['server_url'] . '/' . implode('/',array_slice($parts,3));
                     }
                     
-                    if(!preg_match('/[^A-Za-z0-9_\$]/', $db_name)){
-                        $url = $url.basename($dbname).'/entity/db.json';
-                        header('Location: '.$url);
-                    }
+                    $url = $url.$dbname.'/entity/db.json';
+                    die(header('Location: '.$url));
                     
                 }else{
                     downloadFile('application/json', $dbdef_cache);
