@@ -129,6 +129,8 @@ $.widget( "heurist.editTranslations", {
                 btns[window.HR('Add')] = function(){
 
                     let first_val = that.element.find('[data-def=1]').val();
+                    first_val = window.hWin.HEURIST4.util.isempty(first_val) ? this.element.find('input:first').val() : first_val;
+
                     let target = $dlg.find('#selLang').val();
 
                     if(window.hWin.HEURIST4.util.isempty(target)){
@@ -342,7 +344,8 @@ $.widget( "heurist.editTranslations", {
             
         }
 
-        let first_val = this.element.find('[data-def=1]').val(); console.log(first_val, window.hWin.HAPI4.sysinfo.api_Translator);
+        let first_val = this.element.find('[data-def=1]').val();
+        first_val = window.hWin.HEURIST4.util.isempty(first_val) ? this.element.find('input:first').val() : first_val;
         if(!window.hWin.HEURIST4.util.isempty(first_val) && window.hWin.HAPI4.sysinfo.api_Translator){
             this._btn_translate.show();
         }else{
