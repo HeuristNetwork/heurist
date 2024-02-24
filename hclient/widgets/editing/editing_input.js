@@ -321,7 +321,7 @@ $.widget( "heurist.editing_input", {
                                         target: target,
                                         source: source
                                     };
-    
+
                                     window.hWin.HAPI4.SystemMgr.translate_string(request, function(response){
 
                                         $dlg.dialog('close');
@@ -329,6 +329,7 @@ $.widget( "heurist.editing_input", {
                                         if(response.status == window.hWin.ResponseStatus.OK){
                                             that.new_value = target + ':' + response.data;
                                             $(that.btn_add[1]).click(); // 'click' normal repeat
+                                            that.onChange(); // trigger change
                                         }else{
                                             window.hWin.HEURIST4.msg.showMsgErr(response);
                                         }
@@ -347,9 +348,6 @@ $.widget( "heurist.editing_input", {
                             $dlg = window.hWin.HEURIST4.msg.showMsgDlg(msg, btns, labels, {default_palette_class: 'ui-heurist-populate'});
 
                             window.hWin.HEURIST4.ui.createLanguageSelect($dlg.find('#selLang'), null, null, true);
-
-                            //this.new_value = 'ENG:';
-                            //$(this.btn_add[1]).click();
 
                         }else{
                             
