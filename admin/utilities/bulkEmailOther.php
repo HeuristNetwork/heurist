@@ -389,7 +389,7 @@ function getDatabaseDetails($mysqli, $db_list){
 			}
 		} // else keep $last_rec null
 
-		$last_struct_query = 'SELECT MAX(rst_Modified) FROM `' . $database . '`defRecStructure';
+		$last_struct_query = 'SELECT MAX(rst_Modified) FROM `' . $database . '`.defRecStructure';
 		$res = $mysqli->query($last_struct_query);
 		if($res){
 			while($row = $res->fetch_row()){
