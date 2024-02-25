@@ -31,7 +31,9 @@ class Heurist_Security_Policy extends Smarty_Security {
   public $static_classes = null;
   
   // disable PHP functions except listed, set to null to disable ALL
-  public $php_functions = array('isset', 'empty', 'count', 'sizeof', 'in_array', 'is_array','asort','time','nl2br','print_r');
+  public $php_functions = array('isset', 'empty', 'count', 'sizeof', 'in_array', 'is_array', 
+  'array_key_exists', 'asort','time','nl2br','print_r',
+  'printf','substr');
         
   // remove PHP tags
   public $php_handling = Smarty::PHP_REMOVE;
