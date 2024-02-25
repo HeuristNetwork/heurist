@@ -437,19 +437,23 @@ if(!$isWebPage){  //not standalone web page
 
     $page_footer_type = defined('DT_CMS_FOOTER_FIXED')?__getValue($rec, DT_CMS_FOOTER_FIXED, null):null; 
     
-    if($page_footer_type !== ConceptCode::getTermLocalID('3-5029'))
+    if($page_footer_type !== ConceptCode::getTermLocalID('3-5029'))    //unknown position
     //== ConceptCode::getTermLocalID('2-532') || $page_footer_type == ConceptCode::getTermLocalID('2-531'))
     {
     
-        $page_footer = defined('DT_CMS_FOOTER')?__getValue($rec, DT_CMS_FOOTER, null):''; 
+        $page_footers = null;
+        if(defined('DT_CMS_FOOTER')){
+            $page_footers = @$rec['details'][DT_CMS_FOOTER];
+        }
+        //$page_footer = defined('DT_CMS_FOOTER')?__getValue($rec, DT_CMS_FOOTER, null):''; 
         $is_page_footer_fixed = ($page_footer_type != ConceptCode::getTermLocalID('2-531'));
         $default_style = ";border-top:2px solid rgb(112,146,190);background:lightgray;";
         if ($is_page_footer_fixed) {
-            $footer_height = $page_footer!='' ? '80px' : '48px';
+            $footer_height = ($page_footers!=null) ? '80px' : '48px';
             $page_footer_style = 'height:'.$footer_height.$default_style;
         } else {
             $footer_height = 'auto';
-            $page_footer_style = 'height:'.$footer_height.$page_footer ? '' : $default_style;
+            $page_footer_style = 'height:'.$footer_height.(($page_footers!=null) ? '' : $default_style);
         }
         
         // CSS in h4styles.css
@@ -471,11 +475,20 @@ if(!$isWebPage){  //not standalone web page
             .'</div>';
 
         $page_footer = '<footer id="page-footer" class="'.($is_page_footer_fixed?'ent_footer':'static_footer').'"'  
-                .' style="'.$page_footer_style.'">'
-                .'<div class="page-footer-content">'
-                .$page_footer.'</div>'
-                .$host_information
-            .'</footer>';
+                .' style="'.$page_footer_style.'">';
+        if($page_footers!=null){
+        foreach($page_footers as $val){
+                list($lang,$val) = extractLangPrefix($val);
+                
+                $st = (count($page_footers)==1 || ($current_language == $lang) 
+                        ||($current_language==$website_language_def && $lang==null))?'':' style="display:none"';
+                $page_footer = $page_footer. 
+                        '<div class="page-footer-content" data-lang="'.($lang!=null?$lang:'').'"'.$st.'>'
+                            .$val.'</div>';
+        }
+        }
+        $page_footer = $page_footer.$host_information.'</footer>';
+
     }
 }
 

@@ -429,6 +429,19 @@ function switchLanguage(event){
         loadPageContent(current_page_id);
         initMainMenu();
         
+        //change footer
+        let ele = $('div.page-footer-content');
+        if(ele.length>1){
+            ele.hide(); //hide all
+            let ele2 = $(`div.page-footer-content[data-lang=${lang_code}]`);
+            if(ele2.length==0){ //not found
+                $('div.page-footer-content[data-lang=""]').show();
+            }else{
+                ele2.show();
+            }
+        }
+        
+        
     }
     window.hWin.HEURIST4.util.stopEvent(event);
     return false;
