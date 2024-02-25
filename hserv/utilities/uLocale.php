@@ -209,7 +209,7 @@
 
         global $glb_lang_codes, $glb_lang_codes_index, $accessToken_DeepLAPI;
 
-        if(!isset($glb_lang_codes)){
+        if(!isset($glb_lang_codes)){ //load codes
             $glb_lang_codes = json_decode(file_get_contents(HEURIST_DIR.'hclient/assets/language-codes-3b2.json'),true);
             foreach($glb_lang_codes as $codes){
                 $glb_lang_codes_index[strtoupper($codes['a3'])] = strtoupper($codes['a2']);

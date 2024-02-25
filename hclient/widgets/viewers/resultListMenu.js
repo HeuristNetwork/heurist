@@ -175,6 +175,10 @@ $.widget( "heurist.resultListMenu", {
             this['menu_Recode'].find('li[data-user-admin-status]').each(___set_menu_item_visibility);
             this['menu_Shared'].find('li[data-user-admin-status]').each(___set_menu_item_visibility);
             
+            if(!window.hWin.HAPI4.sysinfo.api_Translator){
+                this['menu_Recode'].find('#menu-selected-translation').hide();
+            }
+            
         }else{
             //$(this.element).find('.logged-in-only').hide();//.css('visibility','hidden');
             this.menu_Selected.find('.logged-in-only').hide();
@@ -320,6 +324,11 @@ $.widget( "heurist.resultListMenu", {
                 });
                 
                 that['menu_'+name].find('li').css('padding-left',0);
+                
+                
+                if(name=='Recode' && !window.hWin.HAPI4.sysinfo.api_Translator){
+                    that['menu_Recode'].find('#menu-selected-translation').hide();
+                }
                 
             })
             //.position({my: "left top", at: "left bottom", of: this['btn_'+name] })
@@ -473,6 +482,10 @@ $.widget( "heurist.resultListMenu", {
         }else if(action == "menu-selected-case-conversion"){
 
             this.detailBatchEditPopup('case_conversion');
+
+        }else if(action == "menu-selected-translation"){
+
+            this.detailBatchEditPopup('translation');
 
         }else if(action == "menu-selected-value-delete"){
 
