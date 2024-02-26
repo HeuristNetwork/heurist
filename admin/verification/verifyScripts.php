@@ -279,8 +279,11 @@ function findMissedTermLinks() {
     $db3_with_terms = array();
     
     foreach ($databases as $idx=>$db_name){
+        
+        //htmlspecialchars for snyk
+        $dbn = '`'.htmlspecialchars(str_replace('`','',$db_name)).'`'; 
 
-        $query = 'SELECT sys_dbSubVersion from '.$db_name.'.sysIdentification';
+        $query = 'SELECT sys_dbSubVersion from '.$dbn.'.sysIdentification';
         $ver = mysql__select_value($mysqli, $query);
         
         if(false && $ver<3){
@@ -300,13 +303,13 @@ function findMissedTermLinks() {
         }else{
             
             
-            $query = 'select count(*) from '.$db_name.'.defDetailTypes where '
+            $query = 'select count(*) from '.$dbn.'.defDetailTypes where '
             .'(dty_Type="relationtype") and (dty_JsonTermIDTree!="")'; 
             //dty_Type="enum" OR dty_Type="relmarker" OR  OR dty_Type="relationtype"
             $value = mysql__select_value($mysqli, $query);
             if($value>0){
 
-                $query = 'select dty_ID, dty_Name, dty_JsonTermIDTree from '.$db_name.'.defDetailTypes where '
+                $query = 'select dty_ID, dty_Name, dty_JsonTermIDTree from '.$dbn.'.defDetailTypes where '
                 .'(dty_Type="relationtype") and (dty_JsonTermIDTree!="")'; // OR dty_Type="relationtype"
                 $value = mysql__select_all($mysqli, $query);
                 
@@ -314,7 +317,7 @@ function findMissedTermLinks() {
                     $db2_with_terms[$db_name] = $value;
                 }else{
                     if(@$_REQUEST["fix"]==1){
-                        $query = 'UPDATE '.$db_name.'.defDetailTypes SET dty_JsonTermIDTree="" where (dty_Type="relationtype")';
+                        $query = 'UPDATE '.$dbn.'.defDetailTypes SET dty_JsonTermIDTree="" where (dty_Type="relationtype")';
                         $mysqli->query($query);
                         if($mysqli->error){
                             print '<div style="color:red">'.$mysqli->error.'</div>';                    

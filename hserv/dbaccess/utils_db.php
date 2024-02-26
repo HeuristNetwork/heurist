@@ -1762,6 +1762,7 @@
             //$db_name = HEURIST_DBNAME_FULL;
             $db_name = ''; //$query = ;
         }else{
+            $db_name = str_replace('`','',$db_name);
             $db_name = "`$db_name`.";
         }
     
