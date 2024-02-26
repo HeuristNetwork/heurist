@@ -447,7 +447,7 @@ if($mode>1){
                 
                 
                 $database_dumpfile = FOLDER_BACKUP."/".HEURIST_DBNAME."_MySQL_Database_Dump.sql";
-                $dump_options = array('skip-triggers' => true,  'add-drop-trigger' => false, 'add-drop-table'=>true);
+                $dump_options = array('skip-triggers' => true,  'quick' =>true, 'add-drop-trigger' => false, 'no-create-db' =>true, 'add-drop-table'=>true);
                 
                 $res = DbUtils::databaseDump(HEURIST_DBNAME_FULL, $database_dumpfile, $dump_options, false );
                 

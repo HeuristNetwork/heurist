@@ -717,14 +717,18 @@ class DbUtils {
             if($dump_options==null){
                 $dump_options = array(
                         'add-drop-table' => true,
-                        'skip-triggers' => false,
-                        'single-transaction' => false, //was true till 2024-02-16
+                        //'skip-triggers' => false,
+                        'single-transaction' => true, //was true till 2024-02-16
                         'add-drop-trigger' => true,
+                        'quick' =>true,
                         //'databases' => true,
+                        'triggers' =>true,
+                        'no-create-db' =>true,
+                        'skip-dump-date' => true,
+                        //'routines' =>true,
                         'add-drop-database' => true);
                         
                 //do not archive sysArchive and import tables??
-                        
                         
             }else{
                 //$dump_options = array('skip-triggers' => true,  'add-drop-trigger' => false);
@@ -743,11 +747,15 @@ class DbUtils {
                 $dbScriptMode = 0;
             }
             
+            if($verbose){
+                echo 'dump mode: '.$dbScriptMode.'<br>';
+            }
+            
             //2023-12-01 - only default mode 
-            $dbScriptMode = 0; 
+            //$dbScriptMode = 0; 
             
             //remarked to avoid security report alert 
-/*
+/*    */
             if($dbScriptMode==2){ // use mysql native mysqldump utility via shell
             
                 $tables = array();
@@ -781,16 +789,14 @@ class DbUtils {
                 
                 
                 $cmd = escapeshellarg(HEURIST_DB_MYSQLDUMP)
-                ." --login-path=local {$database_name_full} {$options} {$tables} > " 
+                ." -u".ADMIN_DBUSERNAME." -p".ADMIN_DBUSERPSWD
+                //." --login-path=local 
+                ."{$options} {$tables} {$database_name_full} > " 
                 .$database_dumpfile;
-
+                
                 $arr_out = array();
                 
                 exec($cmd, $arr_out, $return);
-                
-                
-//echo 'return '.$return;                
-//echo print_r($arr_out,true)."\n\n";
 
                 if($return !== 0) {
                     self::$system->addError(HEURIST_SYSTEM_CONFIG, $msg);
@@ -808,89 +814,10 @@ class DbUtils {
                     //echo "- $message\n\n";
                     
                     return false;
+                }else if($verbose){
+                    echo 'MySQL Dump completed<br>';                
                 }
                             
-            
-            }
-            else 
-*/            
-            if($dbScriptMode==1){//NOT USED
-                //create dump manually - all tables without triggers
-                $file = fopen($database_dumpfile, "a+");
-                if(!$file){
-                    $msg = 'Unable to open dump file '.htmlspecialchars($file);
-                    self::$system->addError(HEURIST_SYSTEM_CONFIG, $msg);
-                    if($verbose) echo '<br>'.$msg;
-                    return false;
-                }
-                
-                
-                // SQL settings
-                $settings = "/*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;\n
-                /*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;\n
-                /*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;\n
-                /*!40101 SET NAMES utf8mb4 */;\n
-                /*!40103 SET @OLD_TIME_ZONE=@@TIME_ZONE */;\n
-                /*!40103 SET TIME_ZONE='+00:00' */;\n
-                /*!40014 SET @OLD_UNIQUE_CHECKS=@@UNIQUE_CHECKS, UNIQUE_CHECKS=0 */;\n
-                /*!40014 SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0 */;\n
-                /*!40101 SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='NO_AUTO_VALUE_ON_ZERO' */;\n
-                /*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;\n";
-                fwrite($file, $settings);
-
-                // Dump all tables of the database
-                $tables = $mysqli->query("SHOW TABLES");
-                if($tables){
-                    // Start to dump all tables
-                    while ($table = $tables->fetch_row()) {
-                        $table = $table[0];
-
-                        // Select everything in the table
-                        $result = $mysqli->query('SELECT * FROM '.$table);
-                        $num_fields = mysqli_field_count($mysqli);
-
-                        // Drop table sql
-                        $output = "\n\nDROP TABLE IF EXISTS `".$table.'`;';
-
-                        // Create table sql
-                        $row2 = mysqli_fetch_row($mysqli->query('SHOW CREATE TABLE '.$table));
-                        $output.= $row2[1].";\n\n";
-
-                        // Insert values sql
-                        $output .= '/*!40000 ALTER TABLE '.$table.' DISABLE KEYS */;';
-                        for ($i = 0; $i < $num_fields; $i++) {
-                            while($row = $result->fetch_row()) {
-                                $output.= 'INSERT INTO '.$table.' VALUES(';
-                                for($j=0; $j<$num_fields; $j++) {
-                                    $row[$j] = addslashes($row[$j]);
-                                    $row[$j] = str_replace("\n","\\n",$row[$j]);
-
-                                    if (isset($row[$j])) {
-                                        $output.= '"'.$row[$j].'"' ;
-                                    } else {
-                                        $output.= '""';
-                                    }
-
-                                    if ($j<($num_fields-1)) {
-                                        $output.= ',';
-                                    }
-                                }
-                                $output.= ");\n";
-                            }
-                        }
-                        $output .= '/*!40000 ALTER TABLE '.$table.' ENABLE KEYS */;';
-
-                        // Write table sql to file
-                        $output.="\n\n\n";
-                        fwrite($file, $output);
-                    }
-                }
-
-                fwrite($file, "SET FOREIGN_KEY_CHECKS=1;\n");
-                fwrite($file, "SET sql_mode = 'TRADITIONAL';\n");
-                
-                // Close file
-                fclose($file);
             
             }
             else{ //DEFAULT MODE - USE 3d Party php MySQLdump lib
