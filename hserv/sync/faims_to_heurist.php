@@ -204,7 +204,7 @@ if(! $system->init(@$_REQUEST['db'], true) ){
 
 
                 //if AttributeKey has Vocabulary entries it will be ENUM on Heurist
-                $query = "select VocabID, VocabName from Vocabulary where AttributeID=".$attrID;
+                $query = "select VocabID, VocabName from Vocabulary where AttributeID=".intval($attrID);
                 $vocabs = $dbfaims->query($query);
 
                 foreach ($vocabs as $row_vocab)
@@ -294,7 +294,7 @@ if(! $system->init(@$_REQUEST['db'], true) ){
 
                 //if AEntType has strucute described in IdealAEnt
 
-                $query2 =  "SELECT AttributeID, AEntDescription, IsIdentifier, MinCardinality, MaxCardinality FROM IdealAEnt where AEntTypeID=".$attrID;
+                $query2 =  "SELECT AttributeID, AEntDescription, IsIdentifier, MinCardinality, MaxCardinality FROM IdealAEnt where AEntTypeID=".intval($attrID);
                 $recstructure = $dbfaims->query($query2);
 
                 foreach ($recstructure as $row_recstr)

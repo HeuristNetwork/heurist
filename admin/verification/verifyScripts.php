@@ -281,7 +281,7 @@ function findMissedTermLinks() {
     foreach ($databases as $idx=>$db_name){
         
         //htmlspecialchars for snyk
-        $dbn = '`'.htmlspecialchars(str_replace('`','',$db_name)).'`'; 
+        $dbn = '`'.$mysqli->real_escape_string(str_replace('`','',$db_name)).'`'; 
 
         $query = 'SELECT sys_dbSubVersion from '.$dbn.'.sysIdentification';
         $ver = mysql__select_value($mysqli, $query);
@@ -638,7 +638,7 @@ function __setTermYesNo(){
         $vocab = getLocalCode(99, 5445);
         
 // get all enum fields        
-        $enums = mysql__select_list2($mysqli, 'select dty_ID from defDetailTypes WHERE dty_Type="enum"');
+        $enums = mysql__select_list2($mysqli, 'select dty_ID from defDetailTypes WHERE dty_Type="enum"', 'intval');
         $enums = 'dtl_DetailTypeID IN ('.implode(',',$enums).')';
         
         if($yes_1>0){
@@ -1479,7 +1479,7 @@ $html_to_hex = array(
 */    
     $cnt = 0;
     $missed = array();     //dty_Type="freetext" OR blocktext
-    $txt_field_types = mysql__select_list2($mysqli, 'SELECT dty_ID FROM defDetailTypes WHERE dty_Type="freetext" OR dty_Type="blocktext"');
+    $txt_field_types = mysql__select_list2($mysqli, 'SELECT dty_ID FROM defDetailTypes WHERE dty_Type="freetext" OR dty_Type="blocktext"','intval');
    
    
     $update_stmt = $mysqli->prepare('UPDATE recDetails SET dtl_Value=? WHERE dtl_ID=?');

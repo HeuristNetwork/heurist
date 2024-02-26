@@ -27,12 +27,14 @@
     */
     if(!@$_REQUEST['db']) $_REQUEST['db'] = 'Heurist_Bibliographic';
 
-    
     if(@$_REQUEST['verbose']!=1){
         
         define('OWNER_REQUIRED',1);   
         require_once dirname(__FILE__).'/../../hclient/framecontent/initPageMin.php';
         // <li>optrectypes=1    test for presence of missing record types not referenced by a pointer field</li>
+        require_once 'verifyValue.php';
+        require_once 'verifyFieldTypes.php';
+    
 ?>  
 <!DOCTYPE html>
 <html lang="en">
@@ -141,7 +143,7 @@
         foreach($rty_IDs as $rty_ID){
             $code = $rty_Codes[$rty_ID];
             if(!@$rty_CodesToCheck[$code]){ //not already was in previous database
-                array_push($rty_IDs_ToCheck, $rty_ID); 
+                array_push($rty_IDs_ToCheck, intval($rty_ID)); 
                 array_push($rty_CodesToCheck, $code); 
             }
        }
@@ -236,6 +238,8 @@
         $trm_Codes2 =  mysql__select_assoc2($mysqli,'SELECT trm_ID, CONCAT(trm_OriginatingDBID,"-",trm_IDInOriginatingDB) as trm_Code FROM defTerms');
         
 
+        $stmt = $mysqli->prepare('select rty_OriginatingDBID, rty_IDInOriginatingDB FROM defRecTypes WHERE rty_Name=?');
+        
         //loop by rectypes        
         foreach ($rty_CodesToCheck as $index=>$rty_Code){
    
@@ -250,9 +254,15 @@
             if($rty_Name==null){
                 $msg_error = $msg_error. "<p style='padding-left:20px'> Record type for code $rty_Code not found in original database</p>";
             }else{
-                $query = 'select rty_OriginatingDBID, rty_IDInOriginatingDB '
-                .' FROM defRecTypes WHERE rty_Name="'.$mysqli->real_escape_string($rty_Name).'"';
-                $res = $mysqli->query($query);
+                $res = false;
+
+                call_user_func_array(array($stmt, 'bind_param'), referenceValues(array('s',$rty_Name)));
+                if($stmt->execute()){
+                    $res = $stmt->get_result();
+                }
+                //$query = 'select rty_OriginatingDBID, rty_IDInOriginatingDB FROM defRecTypes WHERE rty_Name="'.$mysqli->real_escape_string($rty_Name).'"';
+                //$res = $mysqli->query($query);
+                
                 if (!$res) {  print htmlspecialchars($db_name.'  '.$query.'  '.$mysqli->error);  return; }
                 $row = $res->fetch_assoc();
                 if($row){
@@ -267,7 +277,7 @@
             .'dty_ID, dty_PtrTargetRectypeIDs, dty_JsonTermIDTree '
             .'from defRecStructure, defDetailTypes, defRecTypes '
             .'where rty_ID=rst_RecTypeID AND dty_ID=rst_DetailTypeID AND rty_OriginatingDBID='
-            .$db_id.' AND rty_IDInOriginatingDB='.$orig_id;
+            .intval($db_id).' AND rty_IDInOriginatingDB='.$orig_id;
         
             $res = $mysqli->query($query);
             if (!$res) {  print htmlspecialchars($db_name.'  '.$query.'  '.$mysqli->error);  return; }
