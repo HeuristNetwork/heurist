@@ -216,7 +216,21 @@
             }
         }
 
-        $allowed_languages = array('BG', 'CS', 'DA', 'DE', 'EL', 'EN', 'ES', 'ET', 'FI', 'FR', 'HU', 'ID', 'IT', 'JA', 'KO', 'LT', 'LV', 'NB', 'NL', 'PL', 'PT', 'RO', 'RU', 'SK', 'SL', 'SV', 'TR', 'UK', 'ZH');
+        // Default list of languages - from https://www.deepl.com/docs-api/general/get-languages
+        $def_languages = array('AR', 'BG', 'CS', 'DA', 'DE', 'EL', 'EN', 'ES', 'ET', 'FI', 'FR', 'HU', 'ID', 'IT', 'JA', 'KO', 'LT', 'LV', 'NB', 'NL', 'PL', 'PT', 'RO', 'RU', 'SK', 'SL', 'SV', 'TR', 'UK', 'ZH');
+
+        // Retrieve from file, created by daily script
+        $language_file = HEURIST_FILESTORE_ROOT . 'DEEPL_languages.json';
+        $deepl_languages = array();
+
+        if(file_exists($language_file)){
+            $langs = file_get_contents($language_file);
+
+            $langs = json_decode($langs, TRUE);
+            $deepl_languages = json_last_error() !== JSON_ERROR_NONE ? array() : $langs;
+            
+            $deepl_languages = !empty($langs) ? $langs : $def_languages;
+        }
 
         if(empty($string) || empty($target_language)){
 
@@ -267,7 +281,7 @@
         if(strlen($target_language) == 3){ // get ar2
             $target_language = $glb_lang_codes_index[$target_language];
         }
-        if(!in_array($target_language, $allowed_languages)){
+        if(!in_array($target_language, $deepl_languages)){
             $system->addError(HEURIST_INVALID_REQUEST, 'The provided language is not supported by Deepl.<br>If you believe this is in error, please contact the Heurist team.');
             return false;
         }
@@ -276,7 +290,7 @@
         if(!empty($source_language) && strlen($source_language) == 3){ // get ar2
             $source_language = $glb_lang_codes_index[$source_language];
         }
-        $source_language = !empty($source_language) && !in_array($source_language, $allowed_languages) ? '' : $source_language;
+        $source_language = !empty($source_language) && !in_array($source_language, $deepl_languages) ? '' : $source_language;
 
         $url = 'https://api-free.deepl.com/v2/translate?text=' . urlencode($string) . '&target_lang=' . $target_language;
 
@@ -346,10 +360,10 @@
 
                 case 413:
                 case 414:
-                    $herror = HEURIST_ERROR;
+                    $herror = HEURIST_ACTION_BLOCKED;
                     $hmsg = 'The request to Deepl\'s services was too large to process.<br>'
                            .'Please either:<br>'
-                           .'Split the value into smaller parts and then re-combine then when you are finished, or'
+                           .'Split the value into smaller parts and then re-combine then when you are finished, or '
                            .'Make a bug report including which record and field you were attempting to translate and into which language.';
                     break;
 

@@ -2120,6 +2120,7 @@ $allowed = array(HEURIST_MAIN_SERVER, 'https://epigraphia.efeo.fr', 'https://nov
                 //add functions for other daily tasks
                 $this->_sendDailyErrorReport();
                 $this->_heuristVersionCheck();   // Check if different local and server versions are different
+                $this->_getDeeplLanguages();    // Get list of allowed target languages from Deepl API
             }
     }
             
@@ -2209,6 +2210,49 @@ $allowed = array(HEURIST_MAIN_SERVER, 'https://epigraphia.efeo.fr', 'https://nov
                 return;
             }
         }
+    }
+
+    /**
+     * Get and save list of available languages from Deepl API
+     * Saved to FILESTORE_ROOT/DEEPL_languages.json
+     */
+    private function _getDeeplLanguages(){
+
+        global $accessToken_DeepLAPI;
+        if(empty($accessToken_DeepLAPI)){
+            return array();
+        }
+
+        $target_url = 'https://api-free.deepl.com/v2/languages?type=target';
+
+        $language_file = HEURIST_FILESTORE_ROOT . 'DEEPL_languages.json';
+
+        $target_res = loadRemoteURLContentWithRange($target_url, false, true, 60, array('Authorization: DeepL-Auth-Key ' . $accessToken_DeepLAPI));
+
+        $target_languages = array();
+
+        if(!empty($target_res)){
+
+            $target_res = json_decode($target_res, TRUE);
+            $target_res = json_last_error() !== JSON_ERROR_NONE ? array() : $target_res;
+
+            // Extra processing needed, some target languages have multiple versions; e.g. ENG-GB and ENG-US
+            foreach ($target_res as $lang) {
+
+                $lang_name = $lang['language'];
+                if(strpos($lang_name, '-') !== false){
+                    $lang_name = explode('-', $lang_name)[0];
+                }
+
+                if(array_search($lang_name, $target_languages) !== false){
+                    continue;
+                }
+
+                array_push($target_languages, $lang_name);
+            }
+        }
+
+        fileSave(json_encode($target_languages), $language_file);
     }
     
     /**
