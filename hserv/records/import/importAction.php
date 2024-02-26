@@ -850,6 +850,10 @@ public static function validateImport($params) {
 
     $mysqli = self::$system->get_mysqli();
     
+    if($id_field!=null){
+        $id_field = $mysqli->real_escape_string($id_field);
+    }
+    
     //get field mapping and selection query from _REQUEST(params)
     if(@$params['mapping']){    //new way
         $mapping_params = @$params['mapping'];
@@ -918,7 +922,7 @@ public static function validateImport($params) {
         if(!$ignore_insert){
             $imp_session['validation']["count_insert"] = $imp_session['reccount'];
             $imp_session['validation']["count_insert_rows"] = $imp_session['reccount'];  //all rows will be imported as new records
-            $select_query = "SELECT imp_id, ".implode(",",$sel_query)." FROM ".$import_table." LIMIT 5000"; //for peview only
+            $select_query = "SELECT imp_id, `".implode("`,`",$sel_query)."` FROM ".$import_table." LIMIT 5000"; //for peview only
             $imp_session['validation']['recs_insert'] = mysql__select_all($mysqli, $select_query);
         }
 
@@ -932,7 +936,7 @@ public static function validateImport($params) {
         if(!@$imp_session['indexes'][$id_field]){
 
             //find recid with different rectype
-            $query = "select imp_id, ".implode(",",$sel_query).", ".$id_field
+            $query = "select imp_id, `".implode("`,`",$sel_query)."`, ".$id_field
             ." from ".$import_table
             ." left join Records on rec_ID=".$id_field
             ." where rec_RecTypeID<>".$recordType;
@@ -964,18 +968,18 @@ public static function validateImport($params) {
 
         // find records to update
         if(!$ignore_update){
-            $select_query = "SELECT count(DISTINCT ".$id_field.") FROM ".$import_table
-            ." left join Records on rec_ID=".$id_field." WHERE rec_ID is not null and ".$id_field.">0";
+            $select_query = "SELECT count(DISTINCT `".$id_field."`) FROM ".$import_table
+            ." left join Records on rec_ID=`".$id_field."` WHERE rec_ID is not null and `".$id_field."`>0";
             $cnt = mysql__select_value($mysqli, $select_query);
             if($cnt>0){
                 
                     $imp_session['validation']['count_update'] = $cnt;
                     $imp_session['validation']['count_update_rows'] = $cnt;
                     //find first 5000 records to display
-                    $select_query = "SELECT ".$id_field.", imp_id, ".implode(",",$sel_query)
-                    ." FROM ".$import_table
-                    ." left join Records on rec_ID=".$id_field
-                    ." WHERE rec_ID is not null and ".$id_field.">0"
+                    $select_query = "SELECT `".$id_field."`, imp_id, `".implode("`,`",$sel_query)
+                    ."` FROM ".$import_table
+                    ." left join Records on rec_ID=`".$id_field
+                    ."` WHERE rec_ID is not null and `".$id_field."`>0"
                     ." ORDER BY ".$id_field." LIMIT 5000"; //for preview only
                     $imp_session['validation']['recs_update'] = mysql__select_all($mysqli, $select_query); //for preview only
 
@@ -1496,10 +1500,10 @@ them to incoming data before you can import new records:<br><br>'.implode(",", $
     if(is_array($geo_fields) && count($geo_fields)>0){
 
         // northing, easting
-        $query = "select ".implode(',',$geo_fields).", imp_ID from $import_table ";
+        $query = "select `".implode('`,`',$geo_fields)."`, imp_ID from `$import_table` ";
 
         if(count($geo_fields)==1){
-            $query = $query . ' WHERE '.$geo_fields[0].' > ""';    
+            $query = $query . ' WHERE `'.$geo_fields[0].'` > ""';    
         }else{
             $query = $query . ' LIMIT 5';
         }
@@ -1626,7 +1630,7 @@ private static function getWrongRecords($query, $imp_session, $message, $short_m
         $wrong_records_ids = array();
         while ($row = $res->fetch_row()){
             array_push($wrong_records, $row);
-            array_push($wrong_records_ids, $row[0]);
+            array_push($wrong_records_ids, intval($row[0]));
         }
         $res->close();
         $cnt_error = count($wrong_records);
@@ -2354,7 +2358,9 @@ private static function doInsertUpdateRecord($recordId, $import_table, $recordTy
                     
                     foreach($ids as $i=>$id){
                         if($id==$old_id_in_idfield){
-                             $ids[$i] = $new_recordID;
+                             $ids[$i] = intval($new_recordID);
+                        }else{
+                             $ids[$i] = intval($id);
                         }
                     }
                     /*array_map(function ($v) use ($old_id_in_idfield, $new_id) {
@@ -2732,7 +2738,7 @@ public static function performImport($params, $mode_output){
                 if(@$details['imp_id']==null){
                     $details['imp_id'] = array();
                 }
-                array_push( $details['imp_id'], end($row));
+                array_push( $details['imp_id'], intval(end($row)));
                 
                 //find values for mapping_keys fields 
                 // this array is filled on matching step

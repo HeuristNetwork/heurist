@@ -277,7 +277,7 @@
             .'dty_ID, dty_PtrTargetRectypeIDs, dty_JsonTermIDTree '
             .'from defRecStructure, defDetailTypes, defRecTypes '
             .'where rty_ID=rst_RecTypeID AND dty_ID=rst_DetailTypeID AND rty_OriginatingDBID='
-            .intval($db_id).' AND rty_IDInOriginatingDB='.$orig_id;
+            .intval($db_id).' AND rty_IDInOriginatingDB='.intval($orig_id);
         
             $res = $mysqli->query($query);
             if (!$res) {  print htmlspecialchars($db_name.'  '.$query.'  '.$mysqli->error);  return; }
