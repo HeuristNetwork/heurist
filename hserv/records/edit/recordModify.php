@@ -1105,8 +1105,8 @@ function recordDelete($system, $recids, $need_transaction=true,
 function recordGetIncrementedValue($system, $params){
 
 
-    $rt_ID = @$params["rtyID"];
-    $dt_ID = @$params["dtyID"];
+    $rt_ID = intval(@$params["rtyID"]);
+    $dt_ID = intval(@$params["dtyID"]);
 
     if($rt_ID>0 && $dt_ID>0){
 
@@ -1414,6 +1414,13 @@ $res = array("deleted"=>$deleted, "bkmk_count"=>$bkmk_count, "rels_count"=>$rels
 */
 function deleteOneRecord($system, $id, $rectype){
 
+    
+    $id = intval($id);
+    
+    if(!($id>0)){
+        return array("error" => 'Record id parameter is not defined or wrong');
+    }
+    
     $bkmk_count = 0;
     $rels_count = 0;
     $deleted = array();  //ids of deleted records
@@ -1422,7 +1429,7 @@ function deleteOneRecord($system, $id, $rectype){
 
     //get list if child records
     $query = 'SELECT dtl_Value FROM recDetails, defRecStructure WHERE dtl_RecID='
-    .$id.' AND dtl_DetailTypeID=rst_DetailTypeID AND rst_CreateChildIfRecPtr=1 AND rst_RecTypeID='.$rectype;
+    .$id.' AND dtl_DetailTypeID=rst_DetailTypeID AND rst_CreateChildIfRecPtr=1 AND rst_RecTypeID='.intval($rectype);
     $child_records = mysql__select_list2($mysqli, $query);
     if(is_array($child_records) && count($child_records)>0){
         $query = 'SELECT rec_ID, rec_RecTypeID FROM Records WHERE rec_ID in ('.implode(',',$child_records).')';    
@@ -1610,7 +1617,7 @@ function removeReverseChildToParentPointer($system, $parent_id, $rectype){
 
         $mysqli = $system->get_mysqli();
 
-        $recids = mysql__select_list2($mysqli, $query);
+        $recids = mysql__select_list2($mysqli, $query, 'intval');
 
         $query = 'DELETE FROM recDetails WHERE dtl_Value='.$parent_id.' AND dtl_DetailTypeID='.DT_PARENT_ENTITY;
 
@@ -1972,7 +1979,7 @@ function recordUpdateCalcFields($system, $recID, $rty_ID=null, $progress_session
             $rows = null;
             $mode = null;
             if($record_ids=='*'){
-                $query = 'SELECT rec_ID FROM Records WHERE (rec_RecTypeID='.$rty_ID.') AND (NOT rec_FlagTemporary)';                
+                $query = 'SELECT rec_ID FROM Records WHERE (rec_RecTypeID='.intval($rty_ID).') AND (NOT rec_FlagTemporary)';                
                 $rows = $mysqli->query($query);
                 //$mode = 'string:';
             }else if (count($record_ids)>1){
@@ -1989,13 +1996,13 @@ function recordUpdateCalcFields($system, $recID, $rty_ID=null, $progress_session
                 if($record_ids=='*'){
                      $row = $rows->fetch_row();
                      if($row){
-                         $recID = $row[0];
+                         $recID = intval($row[0]);
                      }else{
                          break;
                      }
                 }else{
                     if(is_array($record_ids) && $idx<count($record_ids)){
-                         $recID = $record_ids[$idx];
+                         $recID = intval($record_ids[$idx]);
                          $idx++;
                     }else{
                          break;
@@ -2977,7 +2984,7 @@ function recordDuplicate($system, $id){
     
     $row = mysql__select_row($mysqli, "SELECT rec_OwnerUGrpID, rec_RecTypeID FROM Records WHERE rec_ID = ".$id);
     //$owner = $row[0];
-    $recTypeID = $row[1];
+    $recTypeID = intval($row[1]);
     if (!is_numeric($new_owner) || !(intval($new_owner)>=0)){   //current user is not member of current group
         $new_owner = $currentUserId;
         //return $system->addError(HEURIST_REQUEST_DENIED, 'User not authorised to duplicate record');
@@ -3041,13 +3048,15 @@ function recordDuplicate($system, $id){
                 if($res['status']==HEURIST_OK){
                     $new_val = $res['result'];
 
-                    $query = 'UPDATE recDetails set dtl_Value="'
-                    .$mysqli->real_escape_string( $new_val )
-                    .'" where dtl_RecID='.$new_id
+                    $query = 'UPDATE recDetails set dtl_Value=?'
+                    .' where dtl_RecID='.$new_id
                     //.' and dtl_Value='.$id   //old record id
                     .' and dtl_DetailTypeID='.$dty_ID;
 
-                    $res = $mysqli->query($query);
+                    $res = mysql__exec_param_query($mysqli, $query, array('s', $new_val));
+                    
+                    // .$mysqli->real_escape_string( $new_val )
+                    // $res = $mysqli->query($query);
                     if(!$res){
                         $error = 'database error - ' .$mysqli->error;
                         break;
