@@ -322,7 +322,7 @@ $.widget( "heurist.editing_input", {
 
                                         if(response.status == window.hWin.ResponseStatus.OK){
                                             that.new_value = target + ':' + response.data;
-                                            $(that.btn_add[1]).click(); // 'click' normal repeat
+                                            $(that.btn_add[1]).trigger('click'); // 'click' normal repeat
                                             that.onChange(); // trigger change
                                         }else{
                                             window.hWin.HEURIST4.msg.showMsgErr(response);
@@ -341,7 +341,7 @@ $.widget( "heurist.editing_input", {
                             btns[window.HR('Insert blank')] = function(){
                                 that.new_value = $dlg.find('#selLang').val() + ':';
                                 $dlg.dialog('close');
-                                $(that.btn_add[1]).click(); // 'click' normal repeat
+                                $(that.btn_add[1]).trigger('click'); // 'click' normal repeat
                             };
                             labels['yes'] = window.HR('Insert blank');
 
@@ -3394,7 +3394,7 @@ $.widget( "heurist.editing_input", {
             var inpt = this;
             $input_img.off('click');
             $input_img.on({click: function(){
-                        $(inpt).click();
+                        $(inpt).trigger('click');
             }});
     },
     fail: function(e, data){
@@ -4494,7 +4494,7 @@ $.widget( "heurist.editing_input", {
                         })
                         .addClass('invalidImg');
 
-                        ele.parent().find('.hideTumbnail').click();
+                        ele.parent().find('.hideTumbnail').trigger('click');
                     }
 
                     ele.change();
@@ -4534,7 +4534,7 @@ $.widget( "heurist.editing_input", {
                                     })
                                     .addClass('invalidImg');
 
-                                    ele.parent().find('.hideTumbnail').click();
+                                    ele.parent().find('.hideTumbnail').trigger('click');
                                     ele.parent().find('.hideTumbnail').hide();
                                 }
                                 
