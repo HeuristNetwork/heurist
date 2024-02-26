@@ -379,13 +379,13 @@
             $dir = USanitize::sanitizePath($dir);
             
             $dir = realpath($dir);
-            
+
             if($dir!==false){
                 
                 $os        = strtoupper(substr(PHP_OS, 0, 3));
                 // If on a Unix Host (Linux, Mac OS)
                 if ($os !== 'WIN') {
-                    $cmd = escapeshellcmd('/usr/bin/du -sb ' . $dir); //
+                    $cmd = ('/usr/bin/du -sb ' . $dir); //escapeshellcmd
                     $io = popen($cmd, 'r');
                     if ($io !==false) {
                         $totalSize = intval(fgets($io, 80));
