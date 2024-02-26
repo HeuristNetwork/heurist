@@ -219,7 +219,7 @@ class RecordsBatch
                 if($rtyID){ //filter for record type
                     $recIDs = mysql__select_list($mysqli,'Records','rec_ID',"rec_RecTypeID = $rtyID and rec_ID  in ("
                                         .implode(",",$recIDs).")");
-                    $recIDs = prepareIds($recIDs);
+                    $recIDs = prepareIds($recIDs); //redundant for snyk
                     $passedRecIDCnt = is_array($recIDs)?count($recIDs):0;
                 }
                 if($passedRecIDCnt>0){
@@ -230,6 +230,7 @@ class RecordsBatch
                         $this->recIDs = mysql__select_list($mysqli,'Records','rec_ID',"rec_ID in ("
                             .implode(",",$recIDs).") and rec_OwnerUGrpID in (0,"
                             .join(",",$this->system->get_user_group_ids()).")");
+                        $this->recIDs = prepareIds($this->recIDs); //redundant for snyk
                     }
 
                     $inAccessibleRecCnt = $passedRecIDCnt - count(@$this->recIDs);
@@ -528,6 +529,7 @@ class RecordsBatch
         $sqlErrors = array();
         
         foreach ($this->recIDs as $recID) {
+            $recID = intval($recID); //redundant for snyk
             //check field limit for this record
             $query = "select rec_RecTypeID, tmp.cnt from Records ".
             "left join (select dtl_RecID as recID, count(dtl_ID) as cnt ".
@@ -730,6 +732,7 @@ class RecordsBatch
 
             //??? why we need it if $dtyID is defined
             $types = mysql__select_list2($mysqli, 'select dty_ID from defDetailTypes where dty_Type = "file"'); // OR dty_Type = "geo"
+            $types = prepareIds($types);//redundant for snyk
             $searchClause = 'dtl_DetailTypeID NOT IN ('.implode(',',$types).')';
             
         }else{
