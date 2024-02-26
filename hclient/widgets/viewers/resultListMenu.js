@@ -175,6 +175,7 @@ $.widget( "heurist.resultListMenu", {
             this['menu_Recode'].find('li[data-user-admin-status]').each(___set_menu_item_visibility);
             this['menu_Shared'].find('li[data-user-admin-status]').each(___set_menu_item_visibility);
             
+            
         }else{
             //$(this.element).find('.logged-in-only').hide();//.css('visibility','hidden');
             this.menu_Selected.find('.logged-in-only').hide();
@@ -320,6 +321,7 @@ $.widget( "heurist.resultListMenu", {
                 });
                 
                 that['menu_'+name].find('li').css('padding-left',0);
+                
                 
             })
             //.position({my: "left top", at: "left bottom", of: this['btn_'+name] })
@@ -474,6 +476,19 @@ $.widget( "heurist.resultListMenu", {
 
             this.detailBatchEditPopup('case_conversion');
 
+        }else if(action == "menu-selected-translation"){
+
+            
+            if(!window.hWin.HAPI4.sysinfo.api_Translator){
+                window.hWin.HEURIST4.msg.showMsg(
+                    '<span style="display:inline-block;margin-top:10px;">'
+                                        + 'To enable automatic translation please ask your system administrator to<br>'
+                                        + 'add a Deepl free or paid account API key to Heurist configuration'
+                                     + '</span>');                
+            }else{
+                this.detailBatchEditPopup('translation');    
+            }
+
         }else if(action == "menu-selected-value-delete"){
 
             this.detailBatchEditPopup('delete_detail');
@@ -521,13 +536,13 @@ $.widget( "heurist.resultListMenu", {
                     window.hWin.HAPI4.currentRecordset.length()==0)
             {
                         
-                window.hWin.HEURIST4.msg.showMsgDlg(
+                window.hWin.HEURIST4.msg.showMsg(
                 '<p>The working subset is created from your current query results. You have no query results, so no subset was created.</p>' 
                 +'<p>Please run a query which returns the set of records you wish to treat as the working subset and select this function again.</p>');
                     
             }else if(window.hWin.HAPI4.currentRecordset.length()>window.hWin.HAPI4.sysinfo.db_total_records*0.8){
                 
-                window.hWin.HEURIST4.msg.showMsgDlg(
+                window.hWin.HEURIST4.msg.showMsg(
                 '<p>You are trying to make a subset of everything or nearly everything (>=99%) of records  in the database. This does not make much sense.</p>'  
 +'<p>Please apply a filter which returns the subset you wish to work with and select this function again.</p>');
                 

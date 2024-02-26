@@ -54,7 +54,9 @@ $.widget( "heurist.recordListExt", {
         
         show_export_button: false, // show button to export current record set
         show_print_button: false, // show button to print current record set
-        export_options: 'all' // export formats allowed
+        export_options: 'all', // export formats allowed
+        
+        language: 'def'
     },
 
     _current_url: null, //keeps current url - see loadURL 
@@ -305,6 +307,9 @@ $.widget( "heurist.recordListExt", {
                                         + '&db=' + window.hWin.HAPI4.database
                                         + '&template=' + encodeURIComponent(smarty_template);
 
+                                        
+                                    newurl = that._assignLang(newurl, that.options.language);
+                                    
                                     if(that._current_url != newurl){    
                                         that.loadURL(newurl);
                                     }
@@ -597,7 +602,10 @@ $.widget( "heurist.recordListExt", {
                     }else if(newurl.indexOf('db=')<0){
                         newurl = newurl + '&db=' + window.hWin.HAPI4.database;    
                     }
-
+                    
+                    
+                    newurl = this._assignLang(newurl, this.options.language);
+                    
                     if(!window.hWin.HEURIST4.util.isempty(this._facet_value)){
                         newurl += `&facet_val=${this._facet_value}`;
                     }
@@ -642,6 +650,8 @@ $.widget( "heurist.recordListExt", {
 
             this.options.url = window.hWin.HAPI4.baseURL +  this.options.url.replace("[dbname]",  window.hWin.HAPI4.database);
 
+            this.options.url = this._assignLang(this.options.url, this.options.language);
+            
             this.loadURL( this.options.url );
             
             content_updated = true;
@@ -679,6 +689,8 @@ $.widget( "heurist.recordListExt", {
                 if(this.options.record_with_custom_styles){ //to load custom css and style links
                     newurl = newurl + '&cssid=' + this.options.record_with_custom_styles;
                 }
+                
+                newurl = this._assignLang(newurl, this.options.language);
                 
                 this.loadURL( newurl );
                 content_updated = true;
@@ -788,6 +800,20 @@ $.widget( "heurist.recordListExt", {
         // remove generated elements
         if(this.dosframe) this.dosframe.remove();
         this.div_content.remove();
+    },
+    
+    //
+    //
+    //
+    _assignLang: function (newurl, lang){
+        if(lang && lang!='def'){
+            if(newurl.indexOf('[lang]')>0){
+                newurl = newurl.replace('[lang]', lang);
+            }else if(newurl.indexOf('lang=')<0){
+                newurl = newurl + '&lang=' + lang;    
+            }
+        }
+        return newurl;
     },
 
     loadanimation: function(show){

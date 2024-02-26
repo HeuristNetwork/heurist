@@ -65,7 +65,7 @@ $mysqli = $system->get_mysqli();
     $query = 'show databases';
 
     $res = $mysqli->query($query);
-    if (!$res) {  print $query.'  '.$mysqli->error;  return; }
+    if (!$res) {  print htmlspecialchars($query.'  '.$mysqli->error);  return; }
     $databases = array();
     while (($row = $res->fetch_row())) {
         if( strpos($row[0], 'hdb_')===0 ){
@@ -139,7 +139,7 @@ if($mysqli->error){print $query.'  '.$mysqli->error; break;}
             //.' OR rty_Name LIKE "% 2" OR rty_Name LIKE "% 3"';
         
         $res = $mysqli->query($query);
-        if (!$res) {  print $query.'  '.$mysqli->error;  return; }
+        if (!$res) {  print htmlspecialchars($query.'  '.$mysqli->error);  return; }
         
         while (($row = $res->fetch_row())) {
                $is_found = true;
@@ -186,7 +186,7 @@ if($mysqli->error){print $query.'  '.$mysqli->error; break;}
             //.' OR dty_Name LIKE "% 2" OR dty_Name LIKE "% 3"';
         
         $res = $mysqli->query($query);
-        if (!$res) {  print $query.'  '.$mysqli->error;  return; }
+        if (!$res) {  print htmlspecialchars($query.'  '.$mysqli->error);  return; }
         
         while (($row = $res->fetch_row())) {
                $is_found = true;
@@ -218,7 +218,7 @@ $mysqli->query($query);
             ."OR trm_IDInOriginatingDB='' OR trm_IDInOriginatingDB=0 OR trm_IDInOriginatingDB IS NULL";
                 
             $res = $mysqli->query($query);
-            if (!$res) {  print $query.'  '.$mysqli->error;  return; }
+            if (!$res) {  print htmlspecialchars($query.'  '.$mysqli->error);  return; }
             
             while (($row = $res->fetch_row())) {
                    $is_found = true;

@@ -385,6 +385,7 @@ function editCMS_WidgetCfg( widget_cfg, _layout_content, $dlg, main_callback, on
                     if(opts['template']){
                         $dlg.find('select[name="rep_template"]').attr('data-template', opts['template']);        
                     }
+                    
                     $dlg.find('#empty_remark').val(opts['emptysetmessage']);
                     $dlg.find('#placeholder_text').val(opts['placeholder_text']);
 
@@ -438,7 +439,7 @@ function editCMS_WidgetCfg( widget_cfg, _layout_content, $dlg, main_callback, on
                     $dlg.find('#empty_remark').val(opts['emptyTableMsg']);
                     $dlg.find('#placeholder_text').val(opts['placeholder_text']);
                 }else if(widget_name=='heurist_SearchInput'){
-                    $dlg.find('#placeholder_text').val(opts['placeholder_text']);
+                    $dlg.find('#si_placeholder_text').val(opts['placeholder_text']);
                 }else if(widget_name=='heurist_StoryMap'){
                     $dlg.find('#placeholder_text').val(opts['storyPlaceholder']);
                 }
@@ -460,6 +461,9 @@ function editCMS_WidgetCfg( widget_cfg, _layout_content, $dlg, main_callback, on
 
                 if(opts['blank_placeholder'] || $dlg.find('#placeholder_text').val() == 'def'){ // replace 'def' with a blank
                     $dlg.find('#placeholder_text').val('');
+                }
+                if(opts['si_blank_placeholder'] || $dlg.find('#si_placeholder_text').val() == 'def'){ // replace 'def' with a blank
+                    $dlg.find('#si_placeholder_text').val('');
                 }
                 if(opts['blank_empty_remark'] || $dlg.find('#empty_remark').val() == 'def'){ // replace 'def' with a blank
                     $dlg.find('#empty_remark').val('');
@@ -1392,6 +1396,14 @@ function editCMS_WidgetCfg( widget_cfg, _layout_content, $dlg, main_callback, on
             opts['emptyTableMsg'] = empty_remark;
             opts['placeholder_text'] = placeholder;
         }else if(widget_name=='heurist_SearchInput'){
+            
+            placeholder = $dlg.find('#si_placeholder_text').val();
+            if(window.hWin.HEURIST4.util.isempty(placeholder) && !opts['si_blank_placeholder']){
+                placeholder = 'def';
+            }else if(opts['si_blank_placeholder']){
+                placeholder = '';
+            }
+            
             opts['placeholder_text'] = placeholder;
         }else if(widget_name=='heurist_StoryMap'){
 

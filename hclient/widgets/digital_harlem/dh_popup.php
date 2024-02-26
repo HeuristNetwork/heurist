@@ -63,7 +63,7 @@
     $records = recordSearch_2('ids:'.implode(',',$ids));
 
     if(is_array(@$records['records']) && count($records['records'])<$need_cnt){
-        echo 'Some records not found '.implode(',',$ids).'  '.print_r($records,true);
+        echo htmlspecialchars('Some records not found '.implode(',',$ids).'  '.print_r($records,true));
         return;
     }
 
@@ -415,10 +415,9 @@ function composeTime( $records, $recID, $prefix='') {
 function getTermById_2($term_id, $type_suffix=''){
     $ret = getTermById($term_id);
     if(null==$ret || strpos(strtolower($ret),'unknown')!==false ){
-        return ($type_suffix=='') ?'' :' unknown '.$type_suffix;
-    }else{
-        return $ret;
+        $ret = ($type_suffix=='') ?'' :' unknown '.$type_suffix;
     }
+    return htmlspecialchars($ret);
 }
 
 
@@ -430,7 +429,7 @@ function recordGetRealtionship_2($system, $sourceID, $targetID, $remark=' record
 
     $res = recordGetRealtionship($system, $sourceID, $targetID );
      if(@$res['status']!='ok'){
-        echo 'Cannot get related '.$remark.'. '.@$res['message'];
+        echo htmlspecialchars('Cannot get related '.$remark.'. '.@$res['message']);
         exit;
      }else{
         return $res['data'];
@@ -448,7 +447,7 @@ function recordSearch_2( $query ){
             'detail'=>'detail'));
 
      if(@$records['status']!='ok'){
-        echo 'Cannot get records '.$records['message'];
+        echo 'Cannot get records '.htmlspecialchars($records['message']);
         exit;
      }else{
         return $records['data'];

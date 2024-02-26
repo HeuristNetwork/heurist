@@ -78,7 +78,7 @@ $mysqli = $system->get_mysqli();
         //if($counter>50) break;
         $counter++;
         
-        print "<h2>".$db."</h2>";
+        print "<h2>".htmlspecialchars($db)."</h2>";
             
     $query1 = "SELECT * from ".$db.".recUploadedFiles"; // get a list of all the files
     $res1 = $mysqli->query($query1);

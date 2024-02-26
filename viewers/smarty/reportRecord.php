@@ -28,11 +28,18 @@ public methods
    getRecord - returns full info for given record ID in heurist smarty format (including visibility for current user)
    getRelatedRecords
    getLinkedRecords
+   
+   recordIsVisible - returns true if record is visible for current user
 
    getRecords - returns records ids for given query 
    getRecordsAggr - returns aggregation values
    
-   _getTranslation - returns translation for given entity + id
+   getFileField - returns the specific field for uploaded media (record's file) info
+
+   baseURL - returns HEURIST_BASE_URL 
+   getSysInfo
+   
+   getTranslation - returns translation for given entity + id
    
 */
 class ReportRecord {
@@ -852,13 +859,23 @@ class ReportRecord {
         
     }
 
-    // 
-    // returns translation for given entity + id
-    //
-    public function getTranslation($entity, $ids, $field, $language_code){
+    /**
+    * returns translation for given entity + id
+    * 
+    * @param mixed $entity - trm, rty, dty
+    * @param mixed $ids - 
+    * @param mixed $field - name of field
+    * @param null $language_code
+    */
+    public function getTranslation($entity, $ids, $field=null, $language_code=null){
         
+        if($language_code==null){
+            $language_code = $this->getSysInfo('lang');
+        }
+
         $language_code = getLangCode3($language_code);
 
+        
         $rtn = array();
         $def_values = array();
 
@@ -877,8 +894,9 @@ class ReportRecord {
         
         if($entity == 'trm'){
             $field = (strpos(strtolower($field), 'desc') === false) ? 'trm_Label' : 'trm_Description'; // grab label by default
+        }else{
+            $field = $entity.'_Name';
         }
-        
         
         if(count($cache) > 0){ // check cache first
             foreach ($ids as $idx => $id) {
@@ -891,10 +909,15 @@ class ReportRecord {
 
         if(count($ids) == 0){
             return count($rtn) == 1 ? array_shift($rtn) : $rtn;
-        }else if(count($ids) == 1){
-            $id_clause = ' ='.$ids[0];
-        }else{
-            $id_clause = ' IN (' .implode(',', $ids). ')';    
+        }else {
+            
+            $ids = prepareIds($ids);
+            
+            if(count($ids) == 1){
+                $id_clause = ' ='.intval($ids[0]);
+            }else{
+                $id_clause = ' IN (' .implode(',', $ids). ')';    
+            }
         }
 
         if($entity == 'trm'){
@@ -917,10 +940,15 @@ class ReportRecord {
         }
 
         if($id_clause != ''){
+            
+            $mysqli = $this->system->get_mysqli();
+            
+            $field = $mysqli->real_escape_string($field);
+            $language_code = $mysqli->real_escape_string($language_code);
 
             $query = "SELECT trn_Code, trn_Translation FROM defTranslations WHERE trn_Code $id_clause AND trn_Source = '$field' AND trn_LanguageCode = '$language_code'";
 
-            $res = mysql__select_assoc2($this->system->get_mysqli(), $query);
+            $res = mysql__select_assoc2($mysqli, $query);
 
             foreach ($ids as $id) {
                     
@@ -940,7 +968,14 @@ class ReportRecord {
 
         return count($rtn) == 1 ? array_shift($rtn) : $rtn;
     }
-
+    
+    /**
+    * returns the specific field for uploaded media (record's file) info
+    * 
+    * @param mixed $file_details
+    * @param mixed $field
+    * @return null[]
+    */
     public function getFileField($file_details, $field = 'name'){
 
         global $system;

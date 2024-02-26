@@ -765,7 +765,7 @@ function do_fix_dupe()
     foreach($master_rep_dt_ids as $rep_dt_id ){
         if (array_key_exists($rep_dt_id,$master_details)){
             foreach ($master_details[$rep_dt_id]as $detail){
-                array_push($master_rep_detail_ids, $detail['dtl_ID']);
+                array_push($master_rep_detail_ids, intval($detail['dtl_ID']));
             }
         }
     }
@@ -775,7 +775,7 @@ function do_fix_dupe()
         $master_keep_ids = array();
         foreach($keep_dt_ids as $dt_id => $details){
             foreach($details as $detail)
-                array_push($master_keep_ids,$detail);
+                array_push($master_keep_ids,intval($detail));
         }
     }
     //diff the arrays  don't delet yet as the user might be adding an existing value
@@ -792,7 +792,7 @@ function do_fix_dupe()
             if(in_array($rdt_id,array_keys($master_details))){
                 //@todo what about geo and file fields 
                 
-                $rec_detail = array('dtl_ID'=>$master_details[$rdt_id][0]['dtl_ID'], 'dtl_Value'=>$update_detail['dtl_Value']);
+                $rec_detail = array('dtl_ID'=>intval($master_details[$rdt_id][0]['dtl_ID']), 'dtl_Value'=>$update_detail['dtl_Value']);
                 mysql__insertupdate($mysqli, 'recDetails', 'dtl_', $rec_detail);  //update in master
 
                 // else  insert the data as detail for master record

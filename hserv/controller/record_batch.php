@@ -96,6 +96,10 @@
 
             $res = $dbRecDetails->caseConversion();
 
+        }else if(@$_REQUEST['a'] == 'translation'){
+
+            $res = $dbRecDetails->fieldTranslation();
+
         }else {
 
             $system->addError(HEURIST_INVALID_REQUEST, "Type of request not defined or not allowed");

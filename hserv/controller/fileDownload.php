@@ -55,7 +55,7 @@ if(!$error){
     if($fileid!=null){ 
         
         if(preg_match('/^[a-z0-9]+$/', $fileid)){ //validatate obfuscation id
-        
+            
             $force_recreate = (@$_REQUEST['refresh']==1);
 
             if($system->initPathConstants($db)){
@@ -65,7 +65,9 @@ if(!$error){
                 if(!$force_recreate && file_exists($thumbfile)){
                     
                     if(defined('HEURIST_THUMB_URL')){
-                        header('Location: '.HEURIST_THUMB_URL.'ulf_'.$fileid.'.png');    
+                        //rawurlencode - required for security reports only
+                        $turl = HEURIST_THUMB_URL.'ulf_'.rawurlencode($fileid).'.png';
+                        header('Location: '.$turl);    
                     }else{
                         downloadFile('image/png', $thumbfile);    
                     }

@@ -188,7 +188,7 @@ foreach ($databases as $idx=>$db_name){
                 if($smarty==null){ //init smarty for new db if there is at least one entry in schedule table
                     initSmarty($system->getSysDir('smarty-templates')); //reinit global smarty object for new database
                     if(!isset($smarty) || $smarty==null){
-                        echo 'Cannot init Smarty report engine for database '.$db_name.$eol;
+                        echo 'Cannot init Smarty report engine for database '.htmlspecialchars($db_name).$eol;
                         break;
                         //continue;
                     }
@@ -221,8 +221,8 @@ foreach ($databases as $idx=>$db_name){
         if($is_ok){
             $report_list[$db_name] = $report;
             //echo $tabs0.$db_name;
-            echo $tabs0.$db_name.$eol;
-            echo $tabs.' reports: '.implode(' ',$report).$eol;
+            echo $tabs0.htmlspecialchars($db_name).$eol;
+            echo $tabs.' reports: '.htmlspecialchars(implode(' ',$report)).$eol;
         }
             
     }
@@ -235,7 +235,7 @@ foreach ($databases as $idx=>$db_name){
         $reminders->setmysql($mysqli);
         $report = $reminders->batch_action();
         if(count($report)>0){
-            echo $tabs0.$db_name;
+            echo $tabs0.htmlspecialchars($db_name);
             echo $tabs.' reminders: ';
             foreach($report as $freq=>$cnt){
                 echo $freq.':'.$cnt.'  ';  
@@ -362,7 +362,7 @@ if(count($email_list)>0 || count($report_list)>0 || count($url_list)>0){
         $rec_URL = 'None';
         $fld_URL = 'None';
         if(array_key_exists(0, $reps)){
-            $rec_URL = $reps[0];
+            $rec_URL = htmlspecialchars($reps[0]);
         }
         if(array_key_exists(1, $reps)){
             $fld_URL = "\n  ".implode("\n  ", $reps[1]);

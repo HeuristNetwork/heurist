@@ -310,10 +310,12 @@ foreach ($databases as $idx=>$db_name){
     if($list_is_array && !in_array($db_name, $arg_database)){
         continue;
     }
+    $res = mysql__usedatabase($mysqli, $db_name);
+    
+    $db_name = htmlspecialchars($db_name);
 
     echo $tabs0.$db_name.' Starting'.$eol;
     
-    $res = mysql__usedatabase($mysqli, $db_name);
     if(!$res){
         echo $tabs0.@$res[1].$eol;
         continue;

@@ -342,6 +342,7 @@ regional['ENG'] = {
         'menu-selected-local-to-repository': 'Local files to remote repository',
         'menu-selected-reset-thumbs': 'Reset thumbnails',
         'menu-selected-case-conversion': 'Case conversion',
+        'menu-selected-translation': 'Translation',
     'Share': '',
         'menu-selected-notify': 'Notify (email)',
         'menu-selected-notify-hint': 'Select one or more records, then click to send notification',
@@ -596,6 +597,7 @@ regional['ENG'] = {
     'local_to_repository':'Upload local files to repository',
     'reset_thumbs':'Reset thumbnails',
     'case_conversion': 'Correct field capitalisations',
+    'translation': 'Translate text field',
 
     //helps
     'record_action_add_record':' ',
@@ -651,6 +653,10 @@ regional['ENG'] = {
     'record_action_fails_local_to_repository': 'Files that failed to upload to the selected repository',
 
     'record_action_undefined_case_conversion': 'Records with no values to convert',
+
+    'record_action_translation': 'Translate values for seleceted field',
+    'record_action_undefined_translation': 'Records with undefined fields',
+    'record_action_translated_translation': 'Records with already translated fields',
     
     'record_action_errors': 'Errors',
 

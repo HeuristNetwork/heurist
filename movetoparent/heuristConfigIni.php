@@ -126,8 +126,9 @@ $absolutePathsToRemoveFromWebPages = null;
 //
 if (!@$needEncodeRecordDetails) $needEncodeRecordDetails = 0; 
 
-// common languages for translation database definitions (ISO639-2 codes) in upper case
-$common_languages_for_translation = array('ARA','BUR','CHI','CZE','DAN','DUT','ENG','EST','FIN','FRE','GER','GRE','HIN','HUN','IND','ITA','JPN','JAV','KOR','KUR','LAO','LAT','MAO','MAY','MKH','BUR','NEP','NOR','PER','POR','RUS','SLO',' SLV','SPA','SWA','SWE','THA','TIB','TUR','UIG','UKR','VIE','YID','ZUL');
+// common languages for translation database definitions (ISO639-2 codes) in upper case'
+// change here to set for the entire installation, overriden by lsit in configIni.php if present for a specific instance
+$common_languages_for_translation = array('ENG','FRE','CHI','SPA','ITA','DUT','GER','GRE','TUR','DAN','NOR','SWE','EST','FIN','ARA','BUR','CZE','HIN','HUN','IND','JPN','JAV','KOR','KUR','LAO','LAT','MAO','MAY','MKH','BUR','NEP','PER','POR','RUS','SLO','SLV','SWA','THA','TIB','UIG','UKR','VIE','YID','ZUL');
 
 // array of saml service providers
 $saml_service_provides = null;

@@ -144,6 +144,8 @@ foreach ($databases as $idx=>$db_name){
 
     $dir_root = HEURIST_FILESTORE_ROOT.$db_name.'/';
 
+    $db_name = htmlspecialchars($db_name); 
+    
     if(file_exists($dir_root)){
 
         $dir_backup = $dir_root.'backup/';
@@ -155,8 +157,8 @@ foreach ($databases as $idx=>$db_name){
         
         //only list with size summary
         $res = listFolderContent($dir_root);
-        $db_size = $db_size + $res[0];
-        $report .= $tabs0.'..  '.$res[0].$eol;
+        $db_size = $db_size + intval($res[0]);
+        $report .= $tabs0.'..  '.intval($res[0]).$eol;
 
         $sz = folderSize2($dir_backup);
         $report .= $tabs0.substr($dir_backup, strrpos($dir_backup, '/',-2)+1, -1).'  '.$sz.$eol;
@@ -251,7 +253,7 @@ function listFolderContent($dir){
     foreach ($content['records'] as $object) {
         if ($object[1] != '.' && $object[1] != '..') {
             $list = $list.'<tr><td>'.$object[1].'</td><td align="right">'.$object[4].'</td></tr>'; //(intdiv($object[4], 1024))
-            $size += $object[4]; 
+            $size += intval($object[4]); 
         }
     }
     

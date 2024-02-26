@@ -442,7 +442,7 @@ public function output($data, $params){
                         header("Access-Control-Allow-Headers: {$_SERVER['HTTP_ACCESS_CONTROL_REQUEST_HEADERS']}");
                     exit(0);*/
                 }else{
-                    header("Access-Control-Allow-Origin: *");
+                    //2024-02-23 header("Access-Control-Allow-Origin: *");
                 }                
             }
             

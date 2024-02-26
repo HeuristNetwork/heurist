@@ -77,6 +77,8 @@ $.widget( "heurist.app_storymap", {
         , elementsPlaceholderSub: '<i>Story elements may exist but not be publicly visible</i>'
 
         , show_print_button: false // show button to print storymaps
+        
+        , language: 'def'
     },
 
     _resultset_main: null, // current all stories
@@ -222,6 +224,7 @@ $.widget( "heurist.app_storymap", {
         //add end page panel
         this.pnlEndPage = this.element.find('#pnlEndPage');
 
+        this._resultList.resultList('option', 'language', this.options.language);
         this._resultList.resultList('option', 'allow_record_content_view', true);
         this._resultList.resultList('applyViewMode', 'record_content', true);
 
@@ -1028,11 +1031,16 @@ $.widget( "heurist.app_storymap", {
                         + recID 
                         + '&db='+window.hWin.HAPI4.database+'&template='
                         + encodeURIComponent(this.options.reportOverview);
+                        
                 isSmarty = true;
             }else{
                 infoURL = window.hWin.HAPI4.baseURL + 'viewers/record/renderRecordData.php?mapPopup=1&recID='  // mapPopup=1 returns html snippet
                         +recID
                         +'&db='+window.hWin.HAPI4.database;
+            }
+            
+            if(this.options.language && this.options.language!='def'){
+                    infoURL = infoURL + '&lang='+this.options.language;
             }
             
             //reportOverviewMode: inline | tab | header | no
@@ -1141,12 +1149,17 @@ $.widget( "heurist.app_storymap", {
                     + recID 
                     + '&db='+window.hWin.HAPI4.database+'&template='
                     + encodeURIComponent(this.options.reportEndPage);
+                    
             isSmarty = true;
         }else{
             infoURL = window.hWin.HAPI4.baseURL + 'viewers/record/renderRecordData.php?mapPopup=1&recID='  //mapPopup=1 returns html snippet
                     +recID
                     +'&db='+window.hWin.HAPI4.database;
         }
+        if(this.options.language && this.options.language!='def'){
+            infoURL = infoURL + '&lang='+this.options.language;
+        }
+                    
         
         //reportEndPageMode: inline | tab | footer | no
         //reportElementMode: vertical | slide | tab
@@ -1597,6 +1610,10 @@ $.widget( "heurist.app_storymap", {
                             +'&db='+window.hWin.HAPI4.database;
                 }
 
+                if(this.options.language && this.options.language!='def'){
+                    infoURL = infoURL + '&lang='+this.options.language;
+                }
+                
                 
                 var that = this;
 

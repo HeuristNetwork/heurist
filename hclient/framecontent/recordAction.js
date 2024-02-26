@@ -34,6 +34,10 @@ IT USES
 1) record detail batch update
 2) record type change
 
+see    
+_createInputElements - create custom input elements specific for particular action
+_startAction - start the action
+
 */
 function hRecordAction(_action_type, _scope_type, _field_type, _field_value) {
     var _className = "RecordAction",
@@ -229,6 +233,7 @@ function hRecordAction(_action_type, _scope_type, _field_type, _field_value) {
             case 'url_to_file':
             case 'local_to_repository':
             case 'case_conversion':
+            case 'translation':
                 $('#div_sel_fieldtype').show();
                 _fillSelectFieldTypes();
                 break;
@@ -309,7 +314,7 @@ function hRecordAction(_action_type, _scope_type, _field_type, _field_value) {
                 allowed = ['blocktext'];    
             }else if(action_type=='url_to_file' || action_type=='local_to_repository'){
                 allowed = ['file'];    
-            }else if(action_type=='case_conversion'){
+            }else if(action_type=='case_conversion' || action_type=='translation'){
                 allowed = ['freetext','blocktext'];
             }
 
@@ -322,6 +327,7 @@ function hRecordAction(_action_type, _scope_type, _field_type, _field_value) {
     
     //
     // create editing_input element for selected field type
+    // create custom input elements specific for particular action
     //
     function _createInputElements(){
 
@@ -519,6 +525,23 @@ function hRecordAction(_action_type, _scope_type, _field_type, _field_value) {
             }
 
             $('#div_widget').css('padding-left', '0px');
+            
+        }else if(action_type=='translation'){
+            
+            $('<div style="padding: 0.2em; width: 100%;" class="input">'
+                + '<div class="header" style="padding-right: 16px;"><label for="sel_language">'
+                + window.hWin.HR('Language')+'</label></div>'
+                + '<select id="sel_language" style="max-width:30em" data-init="0"></select>'
+            + '</div>').appendTo($fieldset);
+
+            $('<div style="padding: 0.2em; width: 100%;" class="input">'
+                + '<div class="header" style="padding-right: 16px;"><span>Existing translations: </span></div>'
+                + '<label><input id="cb_translation_asis" type="radio" name="tr_act" checked class="text ui-widget-content ui-corner-all" style="margin-bottom:10px">as is</label>&nbsp;&nbsp;&nbsp;'
+                + '<label><input id="cb_translation_replace" type="radio" name="tr_act" class="text ui-widget-content ui-corner-all" style="margin-bottom:10px">Replace</label>&nbsp;&nbsp;&nbsp;'
+                + '<label><input id="cb_translation_delete" type="radio" name="tr_act" class="text ui-widget-content ui-corner-all" style="margin-bottom:10px">Detele</label>'
+            + '</div>').appendTo($fieldset);
+          
+            window.hWin.HEURIST4.ui.createLanguageSelect($fieldset.find('#sel_language'), null, null, true);
         }
 
     }
@@ -663,7 +686,7 @@ function hRecordAction(_action_type, _scope_type, _field_type, _field_value) {
     }
 
     // 
-    // 
+    //  Main action 
     //
     function _startAction(){
         
@@ -800,6 +823,20 @@ function hRecordAction(_action_type, _scope_type, _field_type, _field_value) {
                 except += $('#except_default').val().split('\n').join('|');
 
                 request['except'] = except;
+                
+            }else if(action_type=='translation'){
+
+                request['a'] = action_type;
+            
+                request['lang'] = $('#sel_language').val(); 
+                
+                if($('#cb_translation_delete').is(':checked')){
+                        request['delete'] = 1;
+                }else 
+                if($('#cb_translation_replace').is(':checked')){
+                        request['replace'] = 1;
+                }
+                
             }
 
         }

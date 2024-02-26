@@ -138,7 +138,9 @@ $.widget( "heurist.resultList", {
         show_export_button: false, // display to that opens the export menu, for exporting the current result set
         export_options: 'all', // export formats allowed
 
-        check_linked_media: true // check linked records (only type "media") for an image
+        check_linked_media: true, // check linked records (only type "media") for an image
+        
+        language: 'def'
     },
 
     _is_publication:false, //this is CMS publication - take css from parent
@@ -2520,6 +2522,9 @@ $.widget( "heurist.resultList", {
                         }
                     }
                     
+                    if(that.options.language && that.options.language!='def'){
+                        infoURL = infoURL + '&lang='+that.options.language;
+                    }
                     
                     //content is smarty report
                     if( this.options.rendererExpandInFrame ||  !isSmarty)
@@ -4447,6 +4452,10 @@ $.widget( "heurist.resultList", {
                 if(this._is_publication && this.options.recview_private_details !== null){
                     recInfoUrl += '&privateDetails=' + this.options.recview_private_details;
                 }
+            }
+            
+            if(this.options.language && this.options.language!='def'){
+                recInfoUrl = recInfoUrl + '&lang='+this.options.language;
             }
         }
         

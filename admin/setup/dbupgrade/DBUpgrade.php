@@ -54,7 +54,7 @@ function doUpgradeDatabase($system, $dbname, $trg_maj, $trg_min, $verbose=false)
                     if($verbose){
                         if(is_array($rep)){
                             foreach($rep as $msg){
-                                print '<p>'.$msg.'</p>';
+                                print '<p>'.htmlspecialchars($msg).'</p>';
                             }    
                         }
                         print "<p>Upgraded to ".$src_maj.".".$src_min.".0</p>";

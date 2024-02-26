@@ -1727,11 +1727,13 @@ $siz = USystem::getConfigBytes('upload_max_filesize');
         $this->response = $content;
         if ($print_response) {
             $json = json_encode($content);
+            /* disabled 2024-02-23 to avoid Open Redirect security issue
             $redirect = stripslashes($this->get_post_param('redirect'));
             if ($redirect && preg_match($this->options['redirect_allow_target'], $redirect)) {
                 $this->header('Location: '.sprintf($redirect, rawurlencode($json)));
                 return;
             }
+            */
             $this->head();
             if ($this->get_server_var('HTTP_CONTENT_RANGE')) {
                 $files = isset($content[$this->options['param_name']]) ?

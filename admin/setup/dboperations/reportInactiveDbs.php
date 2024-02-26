@@ -192,6 +192,7 @@ foreach ($databases as $idx=>$db_name){
     if(in_array($db_name,$exclusion_list)){
         continue;
     }
+    
     //if(strcmp($db_name,'crvr_eglisesXX')<=0){
     //    continue;
     //}
@@ -200,6 +201,7 @@ foreach ($databases as $idx=>$db_name){
         echo @$res[1]."\n";
         continue;
     }
+    $db_name = htmlspecialchars($db_name);
 
 /*    
 * Delete/archive any database not updated for more than: 
@@ -518,7 +520,7 @@ sendEmail(array($usr_owner['ugr_eMail']), $email_title, $email_text);
     }
     
     if($report!=''){
-        echo $tabs0.$db_name.$tabs.$report.$eol;
+        echo $tabs0.$db_name.$tabs.htmlspecialchars($report).$eol;
     }
 
 

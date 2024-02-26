@@ -874,10 +874,9 @@ function sendSystemEmail($data) {
 
 		if ($rtn_value <= -1) {
 
-			echo "An error occurred with preparing and sending the system emails<br>";
+			echo "An error occurred with preparing and sending the system emails.<br>";// See error log for details
 			$output = $email_obj->get_error_log();
-			echo $output[0];
-			echo "<br><br>System Log: <br>" . $output[1];
+            //2024-02-23 Information Exposure echo '<pre>'.print_r($output).'</pre>';
 
 			$rtn_value = -1;
 		}
@@ -888,9 +887,11 @@ function sendSystemEmail($data) {
 		return $rtn_value;
 	} else {
 
-		echo "An error occurred with processing the form's data<br>";
+		echo "An error occurred with processing the form's data.<br>";
 		$output = $email_obj->get_error();
-		print htmlspecialchars($output);
+        //2024-02-23 Information Exposure echo '<pre>'.print_r($output).'</pre>';
+        //echo print_r(USanitize::sanitizeString($output[1])) ;
+
 		return -1;
 	}
 }

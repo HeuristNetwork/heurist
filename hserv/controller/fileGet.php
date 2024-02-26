@@ -124,7 +124,7 @@ if($filename){ //download from scratch (for csv import)
         if($rec_id==null) $rec_id = @$_REQUEST['id'];  
         
         //icon, thumb, full
-        $viewmode = @$_REQUEST['version']; 
+        $viewmode = rawurlencode(@$_REQUEST['version']); 
         
         if($rec_id && substr($rec_id,0,4)=='term'){
             //backward support - icons for Digital Harlem

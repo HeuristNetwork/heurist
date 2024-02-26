@@ -372,19 +372,22 @@
     {
         $dir = rtrim(str_replace('\\', '/', $dir), '/');
 
-        if (is_dir($dir) === true) {
+        if (file_exists($dir) && (is_dir($dir) === true)) {
             
             $totalSize = 0;
             
-            $dir = realpath($dir);
+            $dir = USanitize::sanitizePath($dir);
             
+            $dir = realpath($dir);
+
             if($dir!==false){
                 
                 $os        = strtoupper(substr(PHP_OS, 0, 3));
                 // If on a Unix Host (Linux, Mac OS)
                 if ($os !== 'WIN') {
-                    $io = popen('/usr/bin/du -sb ' . $dir, 'r');
-                    if ($io !== false) {
+                    $cmd = ('/usr/bin/du -sb ' . $dir); //escapeshellcmd
+                    $io = popen($cmd, 'r');
+                    if ($io !==false) {
                         $totalSize = intval(fgets($io, 80));
                         pclose($io);
                         return $totalSize;

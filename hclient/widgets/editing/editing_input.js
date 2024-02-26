@@ -286,15 +286,9 @@ $.widget( "heurist.editing_input", {
                             let first_val = that.inputs.length > 0 ? that.inputs[0].val() : '';
 
                             let btns = {};
-                            btns[window.HR('Insert blank')] = function(){
-                                that.new_value = $dlg.find('#selLang').val() + ':';
-                                $dlg.dialog('close');
-                                $(that.btn_add[1]).trigger('click'); // 'click' normal repeat
-                            };
 
                             let labels = {
-                                title: window.HR('Insert translated value'),
-                                yes: window.HR('Insert blank')
+                                title: window.HR('Insert translated value')
                             };
 
                             if(!window.hWin.HEURIST4.util.isempty(first_val) && window.hWin.HAPI4.sysinfo.api_Translator){ // allow external API translations
@@ -321,7 +315,7 @@ $.widget( "heurist.editing_input", {
                                         target: target,
                                         source: source
                                     };
-    
+
                                     window.hWin.HAPI4.SystemMgr.translate_string(request, function(response){
 
                                         $dlg.dialog('close');
@@ -329,6 +323,7 @@ $.widget( "heurist.editing_input", {
                                         if(response.status == window.hWin.ResponseStatus.OK){
                                             that.new_value = target + ':' + response.data;
                                             $(that.btn_add[1]).trigger('click'); // 'click' normal repeat
+                                            that.onChange(); // trigger change
                                         }else{
                                             window.hWin.HEURIST4.msg.showMsgErr(response);
                                         }
@@ -336,20 +331,32 @@ $.widget( "heurist.editing_input", {
                                 };
 
                                 labels['ok'] = window.HR('Translate');
+                            }else{
+                                msg += '<span style="display:inline-block;margin-top:10px;">'
+                                        + 'To enable automatic translation please ask your system administrator to<br>'
+                                        + 'add a Deepl free or paid account API key to Heurist configuration'
+                                     + '</span>';
                             }
+
+                            btns[window.HR('Insert blank')] = function(){
+                                that.new_value = $dlg.find('#selLang').val() + ':';
+                                $dlg.dialog('close');
+                                $(that.btn_add[1]).trigger('click'); // 'click' normal repeat
+                            };
+                            labels['yes'] = window.HR('Insert blank');
 
                             btns[window.HR('Cancel')] = function(){
                                 $dlg.dialog('close');
                             };
-
                             labels['cancel'] = window.HR('Cancel');
 
                             $dlg = window.hWin.HEURIST4.msg.showMsgDlg(msg, btns, labels, {default_palette_class: 'ui-heurist-populate'});
 
                             window.hWin.HEURIST4.ui.createLanguageSelect($dlg.find('#selLang'), null, null, true);
 
-                            //this.new_value = 'ENG:';
-                            //$(this.btn_add[1]).trigger('click');
+                            $dlg.parent().find('.ui-dialog-buttonpane button').css({
+                                'margin-left': '10px', 'margin-right': '10px'
+                            });
 
                         }else{
                             

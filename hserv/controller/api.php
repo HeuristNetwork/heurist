@@ -166,7 +166,7 @@ if (@$requestUri[3]=='iiif') {
                     $is_https = (@$_SERVER['HTTPS']!=null && $_SERVER['HTTPS']!='');
                     $session_id = session_id();
                     $time = time() + 24*60*60;     //day
-                    $cres = setcookie('heurist-sessionid', $session_id, $time, '/', '', $is_https );
+                    $cres = setcookie('heurist-sessionid', $session_id, $time, '/', '', $is_https, true );
         }
         
     }else if($requestUri[3]==='logout'){

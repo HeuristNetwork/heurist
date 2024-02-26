@@ -135,7 +135,7 @@ if($recTypeID==RT_ADDRESS){
                                 .getTermById( getFieldValue($records_events, $eventID, DT_EVENT_TYPE) )
                                 .')';
 
-                                print ' <ul><li>'.$event_address.'</li>'; //type of location
+                                print ' <ul><li>'.htmlspecialchars($event_address).'</li>'; //type of location
                                 print  '<li>'.$date_out.'&nbsp;'.$time_out.'</li>';
 
                                 //involved persons

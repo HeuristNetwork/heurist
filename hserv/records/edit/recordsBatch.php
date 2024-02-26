@@ -2357,6 +2357,167 @@ public methods
         
         return $this->result_data;
     }
+    
+    
+    /**
+     * Translate field value
+     * 
+     * @return false|array - false on error | array with keys processed (records with updated vaules), undefined (no values) and errors (encountered an SQL error)
+     */
+    public function fieldTranslation(){
+        
+        if(!$this->_validateParamsAndCounts()){
+            return false;
+        }else if (!is_array(@$this->recIDs) || count($this->recIDs)==0){
+            return $this->result_data;
+        }
+
+        $mysqli = $this->system->get_mysqli();
+        $date_mode = date('Y-m-d H:i:s'); // for tags, rec_modified and dtl_modified
+        
+        // Field details
+        $dtyID = intval($this->data['dtyID']);
+        $dtyName = (@$this->data['dtyName'] ? "'".$this->data['dtyName']."'" : "id:".$this->data['dtyID']);
+        $baseTag = "~translation $dtyName $date_mode";
+
+        // Check field is freetext or blocktext
+        $fld_type = mysql__select_value($mysqli, 'SELECT dty_Type FROM defDetailTypes WHERE dty_ID = ' . $dtyID);
+        if($dtyID < 1 || ($fld_type != 'freetext' && $fld_type != 'blocktext')){
+            $this->system->addError(HEURIST_INVALID_REQUEST, 'Translation only works on valid freetext and blocktext fields');
+            return false;
+        }
+        
+        $is_replacement = (@$this->data['replace']==1);
+        $is_deletion = (@$this->data['delete']==1);
+        $lang = @$this->data['lang'];
+        
+        $lang = getLangCode3($lang);
+
+        if($lang==null){
+            $this->system->addError(HEURIST_INVALID_REQUEST, 'Language is not defined');
+            return false;
+        }
+        
+        // Setup report variable
+        $completed_recs = array();
+        $skipped_recs = array();
+        $already_translated = array();
+        $sql_errors = array();
+
+        // Cycle through records
+        foreach ($this->recIDs as $recID){
+
+            $res = $mysqli->query("SELECT dtl_ID, dtl_Value FROM recDetails WHERE dtl_DetailTypeID = $dtyID AND dtl_RecID = $recID");
+
+            if(!$res){
+                $sql_errors[$recID] = $mysqli->error;
+                continue;
+            }else if($res->num_rows == 0){ // no values within field
+                array_push($skipped_recs, $recID);
+                continue;
+            }
+
+            $sql_errors[$recID] = array();
+            
+            $replacement_dtl_id = -1;
+            $value_to_translate = null;
+            $all_detected = 0;
+
+            // Cycle through values - find and source and possible replacement
+            while( ($values = $res->fetch_row()) && ($all_detected<2)){
+
+                    //detect language
+                    list($lang2, $val) = extractLangPrefix($values[1]);
+                    if($lang2==null){
+                        //source 
+                        $value_to_translate = $val;      // $is_replacement
+                        $all_detected++;
+                    }else if($lang2==$lang){
+                        //already has this translation
+                        if($is_replacement || $is_deletion){
+                            $replacement_dtl_id = intval($values[0]);
+                        }else{
+                            $replacement_dtl_id = 0;
+                        }
+                        $all_detected++;
+                    }
+            }//while
+            
+            if($is_deletion){
+                
+                if($replacement_dtl_id>0){
+                    $query = 'DELETE FROM recDetails WHERE dtl_ID='.$replacement_dtl_id;
+                    $ret = $mysqli->query($query);        
+                    if(!$ret){
+                        $sql_errors[$recID][] = $mysqli->error;
+                    }
+                }else{
+                    array_push($skipped_recs, $recID);
+                }
+            }else if($value_to_translate==null){
+                //source not found - skip 
+                array_push($skipped_recs, $recID);
+            }else if($replacement_dtl_id==0){
+                //already translated
+                array_push($already_translated, $recID);
+            }else {
+                
+                // get translated value
+                // 
+                $translated = getExternalTranslation($this->system, $value_to_translate, $lang);
+                
+                //$translated = $lang.': TRNASLATED! '.$value_to_translate;
+                
+                if($translated===false){
+                    //break;
+                    $this->system->addErrorMsg('Translation has been terminated for record# '.$recID.'. <br>');
+                    return false; 
+                }
+                
+                $translated = $lang.':'.$translated;
+            
+                // Update details value + modified
+                $dtl_rec = array('dtl_Value' => $translated, 'dtl_Modified' => $date_mode);
+                if($replacement_dtl_id>0){
+                    $dtl_rec['dtl_ID'] = $replacement_dtl_id; 
+                }else{
+                    $dtl_rec['dtl_RecID'] = $recID; 
+                    $dtl_rec['dtl_DetailTypeID'] = $dtyID; 
+                }
+
+                $ret = mysql__insertupdate($mysqli, 'recDetails', 'dtl', $dtl_rec);
+                if(!is_numeric($ret)){
+                    $sql_errors[$recID][] = $ret;
+                    continue;
+                }
+
+                // Update record modified
+                $ret = mysql__insertupdate($mysqli, 'Records', 'rec', array('rec_ID' => $recID, 'rec_Modified' => $date_mode));
+                if(!is_numeric($ret)){
+                    $sql_errors[$recID][] = $ret;
+                    continue;
+                }
+            }
+
+            array_push($completed_recs, $recID);
+            if(!empty($sql_errors[$recID])){
+                $sql_errors[$recID] = implode(' ; ', $sql_errors[$recID]);
+            }else{
+                unset($sql_errors[$recID]);
+            }
+        }//foreach records
+
+        // Final touches to report
+        $this->_assignTagsAndReport('processed', $completed_recs, $baseTag);
+        $this->_assignTagsAndReport('undefined', $skipped_recs, $baseTag);
+        $this->_assignTagsAndReport('translated', $already_translated, $baseTag);
+        $this->_assignTagsAndReport('errors',  $sql_errors, $baseTag);
+
+        $this->result_data['undefined'] = count($skipped_recs);
+        $this->result_data['undefined_list'] = $skipped_recs;
+        
+        return $this->result_data;        
+    }
 
     /**
      * Upload file to an external repository

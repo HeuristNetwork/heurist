@@ -99,7 +99,7 @@ $mysqli = $system->get_mysqli();
             ."(rty_OriginatingDBID='' OR rty_OriginatingDBID=0 OR rty_OriginatingDBID IS NULL)";
         
         $res = $mysqli->query($query);
-        if (!$res) {  print $query.'  '.$mysqli->error;  return; }
+        if (!$res) {  print htmlspecialchars($query.'  '.$mysqli->error);  return; }
         
         while (($row = $res->fetch_row())) {
                $is_found = true;  
@@ -115,7 +115,7 @@ $mysqli = $system->get_mysqli();
             //'(NOT (dty_IDInOriginatingDB>0)) ';
         
         $res = $mysqli->query($query);
-        if (!$res) {  print $query.'  '.$mysqli->error;  return; }
+        if (!$res) {  print htmlspecialchars($query.'  '.$mysqli->error);  return; }
         
         while (($row = $res->fetch_row())) {
                $is_found = true;
@@ -135,7 +135,7 @@ $mysqli = $system->get_mysqli();
             .$db_name.'.defTerms WHERE  trm_OriginatingDBID>0 AND (NOT (trm_IDInOriginatingDB>0)) ';
             
         $res = $mysqli->query($query);
-        if (!$res) {  print $query.'  '.$mysqli->error;  return; }
+        if (!$res) {  print htmlspecialchars($query.'  '.$mysqli->error);  return; }
         
         while (($row = $res->fetch_row())) {
                $is_found = true;
@@ -145,27 +145,33 @@ $mysqli = $system->get_mysqli();
         }
         
         if($is_found){
-            print '<h4 style="margin:0;padding-top:20px">'.substr($db_name,4).'</h4><table style="font-size:12px">';    
+            print '<h4 style="margin:0;padding-top:20px">'.htmlspecialchars(substr($db_name,4)).'</h4><table style="font-size:12px">';    
             
             print '<tr><td>Internal code</td><td>Name in this DB</td><td>Name in origin DB</td><td>xxx_OriginDBID</td><td>xxx_IDinOriginDB</td></tr>';            
             
             if(count($rec_types)>0){
                 print '<tr><td colspan=5><i>Record types</i></td></tr>';
                 foreach($rec_types as $row){
-                    print '<tr><td>'.implode('</td><td>',$row).'</td></tr>';
+                    //snyk does not see htmlspecialchars above
+                    $list = str_replace(chr(29),'</td><td>',htmlspecialchars(implode(chr(29),$row)));
+                    print '<tr><td>'.$list.'</td></tr>';
                 }
             }
             if(count($det_types)>0){
                 print '<tr><td colspan=5>&nbsp;</td></tr>';
                 print '<tr><td colspan=5><i>Detail types</i></td></tr>';
                 foreach($det_types as $row){
-                    print '<tr><td>'.implode('</td><td>',$row).'</td></tr>';
+                    //snyk does not see htmlspecialchars above
+                    $list = str_replace(chr(29),'</td><td>',htmlspecialchars(implode(chr(29),$row)));
+                    print '<tr><td>'.$list.'</td></tr>';
                 }
             }
             if(count($terms)>0){
                 print '<tr><td colspan=5><i>Terms</i></td></tr>';
                 foreach($terms as $row){
-                    print '<tr><td>'.implode('</td><td>',$row).'</td></tr>';
+                    //snyk does not see htmlspecialchars above
+                    $list = str_replace(chr(29),'</td><td>',htmlspecialchars(implode(chr(29),$row)));
+                    print '<tr><td>'.$list.'</td></tr>';
                 }
             }
             print '</table>';

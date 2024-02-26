@@ -31,12 +31,19 @@ class Heurist_Security_Policy extends Smarty_Security {
   public $static_classes = null;
   
   // disable PHP functions except listed, set to null to disable ALL
-  public $php_functions = array('isset', 'empty', 'count', 'sizeof', 'in_array', 'is_array','time','nl2br','print_r');
+  public $php_functions = array('isset', 'empty', 'count', 'escape',
+                    'sizeof', 'in_array', 'is_array', 
+                    'array_key_exists', 'asort','time', 'nl2br', 'print_r',
+                    'printf', 'substr');
         
   // remove PHP tags
   public $php_handling = Smarty::PHP_REMOVE;
   
-  //public $php_modifiers = array('escape','count');
+  //public $php_modifiers = null; - disable all modifiers
+  public $php_modifiers = array('isset', 'empty', 'count', 'escape',
+                    'sizeof', 'in_array', 'is_array', 
+                    'array_key_exists', 'asort','time', 'nl2br', 'print_r',
+                    'printf', 'substr'); //array('escape','count');
   
   public $allow_super_globals = false; //default true
 

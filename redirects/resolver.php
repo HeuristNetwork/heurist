@@ -92,7 +92,7 @@ http://127.0.0.1/heurist/MBH
 */
 if(count($requestUri)==1 && ($requestUri[0]=='heurist' || $requestUri[0]=='h6-alpha')){
 
-    header('Location: /'.filter_var($requestUri[0]).'/index.php');  
+    header('Location: /'.rawurlencode($requestUri[0]).'/index.php');  
     exit;
 
 }else
@@ -104,11 +104,11 @@ if ((count($requestUri)==1)
     $dbname = filter_var((count($requestUri)==1)?$requestUri[0]:$requestUri[1]); //to avoid "Open redirect" security report
     
     if($dbname=='startup'){
-        header('Location: /'.filter_var($requestUri[0]).'/startup/index.php');  
+        header('Location: /'.rawurlencode($requestUri[0]).'/startup/index.php');  
         exit;
     }else
     if(!preg_match('/[^A-Za-z0-9_\$]/', $dbname)){
-        header('Location: /'.$dbname.'/web/');  
+        header('Location: /'.rawurlencode($dbname).'/web/');  
         exit;
     }
 }
@@ -200,7 +200,7 @@ $requestUri:
         if($database=='MBH'){
             $database='MBH_Manuscripta_Bibliae_Hebraicae';
         }else if($database=='heurist' || $database=='h6-alpha'){
-            header('Location: /'.$database.'/index.php');  
+            header('Location: /'.rawurlencode($database).'/index.php');  
             exit;
         }
 

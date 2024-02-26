@@ -246,7 +246,7 @@
                         $content_type = 'image/'.$ext;    
                     }
                     $filename = $fname.'.'.$ext;
-                    $url =  $defaultRootFileUploadURL.$db_name.$path.$rec_id.'.'.$ext;
+                    $url =  $defaultRootFileUploadURL.urlencode($db_name).$path.$rec_id.'.'.$ext;
                     break;
                 }
             }
