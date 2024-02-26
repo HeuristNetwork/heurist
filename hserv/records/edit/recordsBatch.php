@@ -219,6 +219,7 @@ class RecordsBatch
                 if($rtyID){ //filter for record type
                     $recIDs = mysql__select_list($mysqli,'Records','rec_ID',"rec_RecTypeID = $rtyID and rec_ID  in ("
                                         .implode(",",$recIDs).")");
+                    $recIDs = prepareIds($recIDs);
                     $passedRecIDCnt = is_array($recIDs)?count($recIDs):0;
                 }
                 if($passedRecIDCnt>0){

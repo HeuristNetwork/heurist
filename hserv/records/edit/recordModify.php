@@ -1622,6 +1622,7 @@ function removeReverseChildToParentPointer($system, $parent_id, $rectype){
         $query = 'DELETE FROM recDetails WHERE dtl_Value='.$parent_id.' AND dtl_DetailTypeID='.DT_PARENT_ENTITY;
 
         if(is_array($recids) && count($recids)>0){
+            $recids = prepareIds($recids);
             $query = $query.' AND dtl_RecID NOT IN ('.implode(',',$recids).')';
         }
 
