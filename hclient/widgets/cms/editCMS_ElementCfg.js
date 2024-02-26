@@ -835,12 +835,12 @@ function editCMS_ElementCfg( element_cfg, _layout_content, _layout_container, $c
                             contents[lang] = l_cfg['content'];
                      }
                     
-                     //swticth language   
+                     //swticth language buttons   
                      codeEditorBtns.push({
                 text: lang,
+                'data-lang': lang,
                 css:{'float':'left'}, 
-                click: function(event) { 
-                    
+                click: function(event) {  //switch language
                     
                     //keep previous
                     var newval = codeEditor.getValue();
@@ -855,8 +855,13 @@ function editCMS_ElementCfg( element_cfg, _layout_content, _layout_container, $c
                     codeEditor.setValue(contents[new_lang]);
                     ce_container.attr('data-lang',new_lang);
                     
+            codeEditorDlg.parent().find('.ui-dialog-buttonset').find('[data-lang]').removeClass('ui-button-action');
+            codeEditorDlg.parent().find('.ui-dialog-buttonset').find(`[data-lang=${new_lang}]`).addClass('ui-button-action');
+                    
+                    
                     }});
-                }
+                    
+                }//for
             }
         }
         
@@ -874,7 +879,7 @@ function editCMS_ElementCfg( element_cfg, _layout_content, _layout_container, $c
             //close: function(){}
         });     
         
-        codeEditorDlg.find('.ui-dialog-buttonset').css({width:'100%'});
+        codeEditorDlg.parent().find('.ui-dialog-buttonset').css({width:'100%'});
         
         //preformat - break lines for widget options
         /*
@@ -903,6 +908,10 @@ function editCMS_ElementCfg( element_cfg, _layout_content, _layout_container, $c
             
             initial_content = contents[init_lang];
             ce_container.attr('data-lang', init_lang);
+            
+            codeEditorDlg.parent().find('.ui-dialog-buttonset').find('[data-lang]').removeClass('ui-button-action');
+            codeEditorDlg.parent().find('.ui-dialog-buttonset').find(`[data-lang=${init_lang}]`).addClass('ui-button-action');
+            
         }
         if(window.hWin.HEURIST4.util.isempty(initial_content)) initial_content = ' ';
         codeEditor.setValue(initial_content);
