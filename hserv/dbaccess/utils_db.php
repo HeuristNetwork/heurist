@@ -499,17 +499,17 @@
             $idx = array_search($idfield, $columns);
             $columns2 = $columns;
             $columns2[$idx] = $newid;
-            $columns2 = implode(',',$columns2);
+            $columns2 = '`'.implode('`,`',$columns2).'`';
             
         }else{
-            $columns2 = implode(',',$columns);
+            $columns2 = '`'.implode('`,`',$columns).'`';
         }
         
         $where = ' where '.$idfield.'='.$oldid;
         
-        $columns = implode(',',$columns);
+        $columns = '`'.implode('`,`',$columns).'`';
         //
-        $query = 'INSERT INTO '.$table.' ('.$columns.') SELECT '.$columns2.' FROM '.$table.' '.$where;
+        $query = 'INSERT INTO `'.$table.'` ('.$columns.') SELECT '.$columns2.' FROM '.$table.' '.$where;
     //print $query.'<br>';    
         
         $res = $mysqli->query($query);

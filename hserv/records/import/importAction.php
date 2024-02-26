@@ -1243,12 +1243,12 @@ them to incoming data before you can import new records:<br><br>'.implode(",", $
 
     if($id_field){ //validate only for defined records IDs
         if($ignore_insert){
-            $only_for_specified_id = " (".$id_field." > 0) AND ";
+            $only_for_specified_id = " (`".$id_field."` > 0) AND ";
         }else{
             if($ignore_update){
-                $only_for_specified_id = " (NOT(".$id_field." > 0 OR ".$id_field."='')) AND ";
+                $only_for_specified_id = " (NOT(`".$id_field."` > 0 OR `".$id_field."`='')) AND ";
             }else{
-                $only_for_specified_id = " (".$id_field."!='') AND ";//otherwise it does not for skip matching " (NOT(".$id_field." is null OR ".$id_field."='')) AND ";
+                $only_for_specified_id = " (`".$id_field."`!='') AND ";//otherwise it does not for skip matching " (NOT(".$id_field." is null OR ".$id_field."='')) AND ";
             }
         }
     }else{
