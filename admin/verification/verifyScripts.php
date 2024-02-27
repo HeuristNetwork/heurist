@@ -280,7 +280,6 @@ function findMissedTermLinks() {
     
     foreach ($databases as $idx=>$db_name){
         
-        //htmlspecialchars for snyk
         $dbn = '`'.$mysqli->real_escape_string(str_replace('`','',$db_name)).'`'; 
 
         $query = 'SELECT sys_dbSubVersion from '.$dbn.'.sysIdentification';

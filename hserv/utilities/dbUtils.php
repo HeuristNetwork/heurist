@@ -787,12 +787,13 @@ class DbUtils {
                 // use mysql_config_editor to store authentication credentials 
                 // in an obfuscated login path file named .mylogin.cnf. 
                 
-                
-                $cmd = escapeshellarg(HEURIST_DB_MYSQLDUMP)
+                       //escapeshellcmd
+                       //escapeshellarg
+                $cmd = escapeshellcmd(HEURIST_DB_MYSQLDUMP)
                 ." -u".ADMIN_DBUSERNAME." -p".ADMIN_DBUSERPSWD
                 //." --login-path=local 
-                ."{$options} {$tables} {$database_name_full} > " 
-                .$database_dumpfile;
+                ." {$options} {$tables} ".escapeshellarg($database_name_full)
+                ." > ".$database_dumpfile;
                 
                 $arr_out = array();
                 

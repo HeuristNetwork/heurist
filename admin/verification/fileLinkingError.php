@@ -79,8 +79,11 @@ $mysqli = $system->get_mysqli();
         $counter++;
         
         print "<h2>".htmlspecialchars($db)."</h2>";
+
+    $db_name = $db;
+    $db = '`'.$mysqli->real_escape_string(str_replace('`','',$db)).'`'; 
             
-    $query1 = "SELECT * from ".$db.".recUploadedFiles"; // get a list of all the files
+    $query1 = "SELECT * from `".$db."`.recUploadedFiles"; // get a list of all the files
     $res1 = $mysqli->query($query1);
     if (!$res1 || $res1->num_rows == 0) {
         print "<p><b>This database does not have uploaded files</p>";
@@ -109,7 +112,7 @@ $mysqli = $system->get_mysqli();
             }
             
             //missed link from recDetails - orphaned files       
-            $query2 = "SELECT dtl_RecID from ".$db.".recDetails where dtl_UploadedFileID=".intval($res['ulf_ID']);
+            $query2 = "SELECT dtl_RecID from `".$db."`.recDetails where dtl_UploadedFileID=".intval($res['ulf_ID']);
             $res2 = $mysqli->query($query2);
             $currentRecID = null;
             if ($res2) {
@@ -140,7 +143,7 @@ $mysqli = $system->get_mysqli();
                     
                 }else{
                     
-                    $dbName = substr($db,4);
+                    $dbName = substr($db_name,4);
                     //HEURIST_FILESTORE_DIR
                     $_HEURIST_FILESTORE_DIR = HEURIST_FILESTORE_ROOT . $dbName . '/';
 
@@ -306,7 +309,7 @@ $mysqli = $system->get_mysqli();
 */                
                     foreach ($files_notfound as $row) {
                         //DBName, ULF ID, path, filename
-                        $log_data = $log_data.$db.','.$row['ulf_ID'].','.$row['db_fullpath'].','.$row['rec_ID']."\n";
+                        $log_data = $log_data.$db_name.','.$row['ulf_ID'].','.$row['db_fullpath'].','.$row['rec_ID']."\n";
                         ?>
                         <div class="msgline">
                                 <b><?php echo htmlspecialchars($row['ulf_ID']);?></b> 

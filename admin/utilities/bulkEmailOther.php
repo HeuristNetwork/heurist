@@ -191,12 +191,13 @@ if(isset($_REQUEST['get_email']) && isset($_REQUEST['recid'])) {	/* Get the Titl
 
 		foreach ($dbs as $db) {
             
-            $db = $mysqli->real_escape_string(str_replace('`','',$db));
+            $db_name = $db;
+            $db = '`'.$mysqli->real_escape_string(str_replace('`','',$db)).'`';
 	
 			$query = "SELECT count(*) 
 								FROM (
 									SELECT *
-									FROM `".$db."`.Records AS rec
+									FROM ".$db.".Records AS rec
 									WHERE rec_Title IS NOT NULL
 									AND rec_Title NOT LIKE 'Heurist System Email Receipt%'
 									AND rec_FlagTemporary != 1
@@ -209,7 +210,7 @@ if(isset($_REQUEST['get_email']) && isset($_REQUEST['recid'])) {	/* Get the Titl
                 $row = $count_res->fetch_row();
 
                 if($row[0] > $count){
-                    $data[] = $db;
+                    $data[] = $db_name;
                 }
                 
             }else{
