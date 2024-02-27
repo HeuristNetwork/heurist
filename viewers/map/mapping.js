@@ -2384,15 +2384,25 @@ $.widget( "heurist.mapping", {
             
         var ele = $(this.main_popup._container).find('.leaflet_layer_opt');
         ele.on({'click':function(evt){
-            var leaflet_id = $(evt.target).attr('data-id');
+            let $ele = $(evt.target);
+            if(!$ele.hasClass('leaflet_layer_opt')){
+                $ele = $ele.parents('.leaflet_layer_opt:first');
+            }
+
+            let leaflet_id = $ele.attr('data-id');
             that._onLayerSelect(selected_layers[leaflet_id], latlng);
         },'mousemove':function(evt){
-            var leaflet_id = $(evt.target).attr('data-id');
+            let $ele = $(evt.target);
+            if(!$ele.hasClass('leaflet_layer_opt')){
+                $ele = $ele.parents('.leaflet_layer_opt:first');
+            }
+
+            let leaflet_id = $ele.attr('data-id');
             if(leaflet_id>0){
-                $(evt.target).siblings().removeClass('selected');
-                $(evt.target).addClass('selected');
-                var layer = selected_layers[leaflet_id];
-                that.setFeatureSelection([layer.feature.properties.rec_ID], false); //highlight from popup without zoom
+                $ele.siblings().removeClass('selected');
+                $ele.addClass('selected');
+                let layer = selected_layers[leaflet_id];
+                that.setFeatureSelection([layer.feature.properties.rec_ID]); //highlight from popup
             }
         }});
     },
