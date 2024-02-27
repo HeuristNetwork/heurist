@@ -210,13 +210,13 @@ class RecordsBatch
             //normalize recIDs to an array for code below
             $recIDs = prepareIds($this->data['recIDs']);
             
-            $rtyID = @$this->data['rtyID'];
+            $rtyID = intval(@$this->data['rtyID']);
             
             $passedRecIDCnt = count($recIDs);
 
             if ($passedRecIDCnt>0) {//check editable access for passed records
             
-                if($rtyID){ //filter for record type
+                if($rtyID>0){ //filter for record type
                     $recIDs = mysql__select_list($mysqli,'Records','rec_ID',"rec_RecTypeID = $rtyID and rec_ID  in ("
                                         .implode(",",$recIDs).")");
                     $recIDs = prepareIds($recIDs); //redundant for snyk
@@ -245,11 +245,13 @@ class RecordsBatch
                 return true;
             }
             
-            if($rtyID){
+            if($rtyID>0){
                 $this->rtyIDs = array($rtyID);
             }else {
                 $this->rtyIDs = mysql__select_list($mysqli, 'Records','distinct(rec_RecTypeID)',"rec_ID in ("
                     .implode(",",$this->recIDs).")");
+                    
+                $this->rtyIDs = prepareIds($this->rtyIDs);
             }
 
         }        
@@ -807,7 +809,7 @@ class RecordsBatch
                     
                     $query = $query.', Records '
                             .'WHERE rec_ID=dtl_RecID AND  rec_RecTypeID '
-            .(count($this->rtyIDs)>1?('in ('.getCommaSepIds($this->rtyIDs).')'):('='.$this->rtyIDs[0]))
+            .(count($this->rtyIDs)>1?('in ('.implode(',',$this->rtyIDs).')'):('='.$this->rtyIDs[0]))
                             ." AND dtl_DetailTypeID = $dtyID and $searchClause";
                 }
             }else{
@@ -884,8 +886,8 @@ class RecordsBatch
                 }
 
             //foreach ($valuesToBeReplaced as $dtlID => $dtlVal) {
-                $dtlID = $row[0];
-                $recID = $row[1];
+                $dtlID = intval($row[0]);
+                $recID = intval($row[1]);
                 
                 if($is_multiline){ //replace with several values (long text)
 
@@ -952,13 +954,13 @@ class RecordsBatch
                 
                 if($replace_all_occurences || $is_multiline)
                 {
-                    if($is_multiline) array_push($valuesToBeDeleted, $dtlID);  //= array_keys($valuesToBeReplaced);
+                    if($is_multiline) array_push($valuesToBeDeleted, intval($dtlID));  //= array_keys($valuesToBeReplaced);
                     
                     while ($row = $res->fetch_row()) { //gather all old detail IDs
                         if($row[1]!=$recID){
                             break;    
                         }
-                        array_push($valuesToBeDeleted, $row[0]);
+                        array_push($valuesToBeDeleted, intval($row[0]));
                     }
                     $get_next_row = false;
                 }
