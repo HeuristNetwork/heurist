@@ -620,7 +620,7 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
             }
 
             $dosframe = $( "<iframe>").attr('parent-dlg-id', $dlg.attr('id'))
-            .css({border:'2px solid green', overflow: 'none !important', width:'100% !important'}).appendTo( $dlg );
+            .css({border:'none', overflow: 'none !important', width:'100% !important'}).appendTo( $dlg );
             
             if(options['allowfullscreen']){
                 $dosframe.attr('allowfullscreen',true);
