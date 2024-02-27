@@ -441,6 +441,8 @@ function editCMS_WidgetCfg( widget_cfg, _layout_content, $dlg, main_callback, on
                 }else if(widget_name=='heurist_SearchInput'){
                     $dlg.find('#si_placeholder_text').val(opts['placeholder_text']);
                 }else if(widget_name=='heurist_StoryMap'){
+                    window.hWin.HEURIST4.ui.initEditSymbologyControl($dlg.find('#def_map_symbology'), opts.def_map_symbology);
+                    window.hWin.HEURIST4.ui.initEditSymbologyControl($dlg.find('#def_story_symbology'), opts.def_story_symbology);
                     $dlg.find('#placeholder_text').val(opts['storyPlaceholder']);
                 }
 

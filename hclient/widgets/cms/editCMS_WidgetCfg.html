@@ -778,9 +778,9 @@
                         <label>Popup dimensions: </label>
                     </div>
 
-                    <label>&nbsp;&nbsp;&nbsp;<span id="pw_label">Width:</span> <input name="dialog_width" maxlength="3" size="3" value="300"></label>&nbsp;
+                    <label>&nbsp;&nbsp;&nbsp;<span>Width:</span> <input name="dialog_width" maxlength="3" size="3" value="300"></label>&nbsp;
                     <select name="dialog_hunit"><option value="px">px</option><option value="%">%</option></select>
-                    <label>&nbsp;<span id="ph_label">Height:</span> <input name="dialog_height" maxlength="3" size="3" value="400"></label>&nbsp;
+                    <label>&nbsp;<span>Height:</span> <input name="dialog_height" maxlength="3" size="3" value="400"></label>&nbsp;
                     <select name="dialog_wunit"><option value="px">px</option><option value="%">%</option></select>
 
                 </div>
@@ -877,6 +877,28 @@
 
                 </div>
 
+                <div class="heurist_StoryMap">
+
+                    <div class="header header_wide">
+                        <label>Map symbology:</label>
+                    </div>
+
+                    <input id="def_map_symbology" name="def_map_symbology" class="text ui-widget-content ui-corner-all"/>
+
+                </div>
+
+                <div class="heurist_StoryMap">
+
+                    <div class="header header_wide">
+                        <label>Story element symbology:</label>
+                    </div>
+
+                    <input id="def_story_symbology" name="def_story_symbology" class="text ui-widget-content ui-corner-all"/>
+
+                    <i class="help-text-block">This is overridden by any animation defined within<br>the story element's record</i>
+
+                </div>
+                
             </fieldset>
 
         </div>

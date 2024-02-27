@@ -79,6 +79,9 @@ $.widget( "heurist.app_storymap", {
         , show_print_button: false // show button to print storymaps
         
         , language: 'def'
+
+        , def_map_symbology: null
+        , def_story_symbology: null
     },
 
     _resultset_main: null, // current all stories
@@ -386,6 +389,13 @@ $.widget( "heurist.app_storymap", {
         
         if(window.hWin.HEURIST4.util.isempty(this.options.storyPlaceholder) && !this.options.blank_placeholder){
             this.options.storyPlaceholder = 'Please select a story in the list';
+        }
+
+        if(window.hWin.HEURIST4.util.isempty(this.options.def_map_symbology)){
+            this.options.def_map_symbology = {"stroke":"1","color":"#00009b","fill":"1","fillColor":"#0000fa", "fillOpacity":"0.8"}; //blue
+        }
+        if(window.hWin.HEURIST4.util.isempty(this.options.def_story_symbology)){
+            this.options.def_story_symbology = this.options.def_story_symbology;
         }
 
         this._initCompleted();
@@ -1484,7 +1494,7 @@ $.widget( "heurist.app_storymap", {
                 {geojson_data: that._currentElementID>0?null:that._cache_story_geo[that.options.storyRecordID], //story element is loaded already
                  timeline_data: that._cache_story_time[that.options.storyRecordID],
                     //popup_template: layer_popup_template,
-                    layer_style:{"stroke":"1","color":"#00009b","fill":"1","fillColor":"#0000fa", "fillOpacity":"0.8"},
+                    layer_style:that.options.def_map_symbology,
                     
                  selectable: false,
                  dataset_name: 'Story Timeline',
@@ -1845,7 +1855,7 @@ $.widget( "heurist.app_storymap", {
 
         let default_story_element_style = 
         window.hWin.HEURIST4.util.isempty(anime)
-                ?{"stroke":"1","color":"#00009b","fill":"1","fillColor":"#0000fa", "fillOpacity":"0.8"} //blue
+                ?this.options.def_story_symbology
                 :null;
         
         mapwidget.isMarkerClusterEnabled = false;
