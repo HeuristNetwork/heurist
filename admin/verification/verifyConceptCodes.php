@@ -81,8 +81,9 @@ $mysqli = $system->get_mysqli();
 
         //RECORD TYPES
         
-        $query = 'SELECT rty_OriginatingDBID, rty_IDInOriginatingDB, count(rty_ID) as cnt FROM '
-            .$db_name.'.defRecTypes WHERE  rty_OriginatingDBID>0 AND rty_IDInOriginatingDB>0 '
+        $query = 'SELECT rty_OriginatingDBID, rty_IDInOriginatingDB, count(rty_ID) as cnt '
+            ." FROM `$db_name`.defRecTypes "
+            .' WHERE  rty_OriginatingDBID>0 AND rty_IDInOriginatingDB>0 '
             .' GROUP BY rty_OriginatingDBID, rty_IDInOriginatingDB HAVING cnt>1';
         
         $res = $mysqli->query($query);
@@ -92,8 +93,9 @@ $mysqli = $system->get_mysqli();
 
                $is_found = true;
                 
-               $query = 'SELECT rty_ID, rty_Name, CONCAT(rty_OriginatingDBID,"-",rty_IDInOriginatingDB), rty_NameInOriginatingDB FROM '
-                .$db_name.'.defRecTypes WHERE  rty_OriginatingDBID='.intval($row[0]).' AND rty_IDInOriginatingDB='.intval($row[1])
+               $query = 'SELECT rty_ID, rty_Name, CONCAT(rty_OriginatingDBID,"-",rty_IDInOriginatingDB), rty_NameInOriginatingDB '
+               ." FROM `$db_name`.defRecTypes "
+                .' WHERE  rty_OriginatingDBID='.intval($row[0]).' AND rty_IDInOriginatingDB='.intval($row[1])
                 .' ORDER BY rty_OriginatingDBID, rty_IDInOriginatingDB';
                 
                $res2 = $mysqli->query($query);               
@@ -105,8 +107,9 @@ $mysqli = $system->get_mysqli();
 
         //FIELD TYPES
 
-        $query = 'SELECT dty_OriginatingDBID, dty_IDInOriginatingDB, count(dty_ID) as cnt FROM '
-            .$db_name.'.defDetailTypes WHERE  dty_OriginatingDBID>0 AND dty_IDInOriginatingDB>0 '
+        $query = 'SELECT dty_OriginatingDBID, dty_IDInOriginatingDB, count(dty_ID) as cnt '
+            ." FROM `$db_name`.defDetailTypes "
+            .' WHERE  dty_OriginatingDBID>0 AND dty_IDInOriginatingDB>0 '
             .' GROUP BY dty_OriginatingDBID, dty_IDInOriginatingDB HAVING cnt>1';
         
         $res = $mysqli->query($query);
@@ -117,8 +120,9 @@ $mysqli = $system->get_mysqli();
 
                $is_found = true;
                 
-               $query = 'SELECT dty_ID, dty_Name, CONCAT(dty_OriginatingDBID,"-",dty_IDInOriginatingDB), dty_NameInOriginatingDB FROM '
-                .$db_name.'.defDetailTypes WHERE  dty_OriginatingDBID='.intval($row[0]).' AND dty_IDInOriginatingDB='.intval($row[1])
+               $query = 'SELECT dty_ID, dty_Name, CONCAT(dty_OriginatingDBID,"-",dty_IDInOriginatingDB), dty_NameInOriginatingDB '
+               ." FROM `$db_name`.defDetailTypes "
+                .' WHERE  dty_OriginatingDBID='.intval($row[0]).' AND dty_IDInOriginatingDB='.intval($row[1])
                 .' ORDER BY dty_OriginatingDBID, dty_IDInOriginatingDB';
                 
                $res2 = $mysqli->query($query);               
@@ -130,8 +134,9 @@ $mysqli = $system->get_mysqli();
         
         //TERMS
 
-        $query = 'SELECT trm_OriginatingDBID, trm_IDInOriginatingDB, count(trm_ID) as cnt FROM '
-            .$db_name.'.defTerms WHERE  trm_OriginatingDBID>0 AND trm_IDInOriginatingDB>0 '
+        $query = 'SELECT trm_OriginatingDBID, trm_IDInOriginatingDB, count(trm_ID) as cnt '
+               ." FROM `$db_name`.defTerms "
+            .' WHERE  trm_OriginatingDBID>0 AND trm_IDInOriginatingDB>0 '
             .' GROUP BY trm_OriginatingDBID, trm_IDInOriginatingDB HAVING cnt>1';
         
         $res = $mysqli->query($query);
@@ -141,8 +146,9 @@ $mysqli = $system->get_mysqli();
 
                $is_found = true;
                 
-               $query = 'SELECT trm_ID, trm_Label, CONCAT(trm_OriginatingDBID,"-",trm_IDInOriginatingDB), trm_NameInOriginatingDB FROM '
-                .$db_name.'.defTerms WHERE  trm_OriginatingDBID='.intval($row[0]).' AND trm_IDInOriginatingDB='.intval($row[1])
+               $query = 'SELECT trm_ID, trm_Label, CONCAT(trm_OriginatingDBID,"-",trm_IDInOriginatingDB), trm_NameInOriginatingDB '
+                ." FROM `$db_name`.defTerms "
+                .' WHERE  trm_OriginatingDBID='.intval($row[0]).' AND trm_IDInOriginatingDB='.intval($row[1])
                 .' ORDER BY trm_OriginatingDBID, trm_IDInOriginatingDB';
                 
                $res2 = $mysqli->query($query);               

@@ -81,9 +81,9 @@ $mysqli = $system->get_mysqli();
         print "<h2>".htmlspecialchars($db)."</h2>";
 
     $db_name = $db;
-    $db = '`'.$mysqli->real_escape_string(str_replace('`','',$db)).'`'; 
+    $db = $mysqli->real_escape_string(str_replace('`','',$db)); 
             
-    $query1 = "SELECT * from $db.recUploadedFiles"; // get a list of all the files
+    $query1 = "SELECT * from `$db`.recUploadedFiles"; // get a list of all the files
     $res1 = $mysqli->query($query1);
     if (!$res1 || $res1->num_rows == 0) {
         print "<p><b>This database does not have uploaded files</p>";
@@ -112,7 +112,7 @@ $mysqli = $system->get_mysqli();
             }
             
             //missed link from recDetails - orphaned files       
-            $query2 = "SELECT dtl_RecID from $db.recDetails where dtl_UploadedFileID=".intval($res['ulf_ID']);
+            $query2 = "SELECT dtl_RecID from `$db`.recDetails where dtl_UploadedFileID=".intval($res['ulf_ID']);
             $res2 = $mysqli->query($query2);
             $currentRecID = null;
             if ($res2) {
