@@ -78,6 +78,8 @@ $mysqli = $system->get_mysqli();
         $det_types = array();
         $terms = array();
         $is_found = false;
+        
+        $db_name  = $mysqli->real_escape_string(str_replace('`','',$db_name)); 
 
         //RECORD TYPES
         

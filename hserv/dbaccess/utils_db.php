@@ -505,11 +505,11 @@
             $columns2 = '`'.implode('`,`',$columns).'`';
         }
         
-        $where = ' where '.$idfield.'='.$oldid;
+        $where = " where `$idfield`=".intval($oldid);
         
         $columns = '`'.implode('`,`',$columns).'`';
         //
-        $query = 'INSERT INTO `'.$table.'` ('.$columns.') SELECT '.$columns2.' FROM '.$table.' '.$where;
+        $query = "INSERT INTO `$table` ($columns) SELECT $columns2 FROM `$table`".$where;
     //print $query.'<br>';    
         
         $res = $mysqli->query($query);
