@@ -1123,6 +1123,8 @@ public static function validateImport($params) {
                 }
             }
             if($field_name1 && $field_name2){
+                $field_name1 = $mysqli->real_escape_string($field_name1);
+                $field_name2 = $mysqli->real_escape_string($field_name2);
                 array_push($query_num, $field_name1);
                 array_push($query_num_where, "(NOT(`$field_name1` is null or `$field_name1`='' or `$field_name1`='NULL') and NOT(`$field_name1` REGEXP ".$numeric_regex."))");
                 array_push($query_num, $field_name2);
@@ -1130,7 +1132,7 @@ public static function validateImport($params) {
                 
                 //if UTM zone is not specified need validate for possible UTM values
                 // northing, easting
-                $geo_fields = array('`'.$field_name1.'`',$field_name2);                
+                $geo_fields = array($field_name1,$field_name2);                
             }
 
         }else 
@@ -1247,12 +1249,12 @@ them to incoming data before you can import new records:<br><br>'.implode(",", $
 
     if($id_field){ //validate only for defined records IDs
         if($ignore_insert){
-            $only_for_specified_id = " (`".$id_field."` > 0) AND ";
+            $only_for_specified_id = " (`$id_field` > 0) AND ";
         }else{
             if($ignore_update){
-                $only_for_specified_id = " (NOT(`".$id_field."` > 0 OR `".$id_field."`='')) AND ";
+                $only_for_specified_id = " (NOT(`$id_field` > 0 OR `$id_field`='')) AND ";
             }else{
-                $only_for_specified_id = " (`".$id_field."`!='') AND ";//otherwise it does not for skip matching " (NOT(".$id_field." is null OR ".$id_field."='')) AND ";
+                $only_for_specified_id = " (`$id_field`!='') AND ";//otherwise it does not for skip matching " (NOT(".$id_field." is null OR ".$id_field."='')) AND ";
             }
         }
     }else{
