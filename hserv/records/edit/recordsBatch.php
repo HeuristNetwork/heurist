@@ -816,7 +816,7 @@ class RecordsBatch
                 $query = $query."WHERE  dtl_DetailTypeID = $dtyID and $searchClause";
                 //get matching detail value for record if there is one
                 if($recID!='all'){
-                    $query = $query." AND  dtl_RecID = $recID ";
+                    $query = $query.' AND  dtl_RecID = '.intval($recID);
                 }
             }
             $query = $query.' ORDER BY dtl_RecID';
@@ -1109,6 +1109,8 @@ class RecordsBatch
         }
         
         foreach ($this->recIDs as $recID) {
+            
+            $recID = intval($recID);
             
             //get matching detail value for record if there is one
             $query = "SELECT dtl_ID, dtl_Value FROM recDetails WHERE dtl_RecID = $recID and dtl_DetailTypeID = $dtyID and $searchClause";
@@ -1597,8 +1599,8 @@ class RecordsBatch
                     
                 }
 
-                $dtl_IDs[] = $row[0];
-                $rec_IDs[] = $row[3];
+                $dtl_IDs[] = intval($row[0]);
+                $rec_IDs[] = intval($row[3]);
                 
 
             }//while

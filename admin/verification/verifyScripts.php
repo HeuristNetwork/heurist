@@ -426,15 +426,16 @@ function verifySpatialVocab($sName,$f_code,$v_code){
             } 
                 
             $query = 'select trm_ID, trm_Label, trm_OriginatingDBID, trm_IDInOriginatingDB from '
-                .$db_name.'.defTerms where trm_ID='.$fields[2];
+                .$db_name.'.defTerms where trm_ID='.intval($fields[2]);
             $vocab = mysql__select_row($mysqli, $query);
             if($vocab){
                 if(!($vocab[2]==$v_code[0] && $vocab[3]==$v_code[1])){
                     print '<div>'.htmlspecialchars($vocab[1].' NEED CHANGE VOCAB CCODES '.$vocab[2].'-'.$vocab[3]).'</div>';
                     
                     if(@$_REQUEST["fix"]==1){
-                        $query = 'UPDATE '.$db_name.'.defTerms SET trm_OriginatingDBID='.$v_code[0].', trm_IDInOriginatingDB='
-                            .$v_code[1].' where trm_ID='.$fields[2];
+                        $query = 'UPDATE '.$db_name.'.defTerms SET trm_OriginatingDBID='.intval($v_code[0])
+                            .', trm_IDInOriginatingDB='.intval($v_code[1])
+                            .' where trm_ID='.intval($fields[2]);
                         $mysqli->query($query);
                         if($mysqli->error){
                             print '<div style="color:red">'.$mysqli->error.'</div>';                    
@@ -445,7 +446,7 @@ function verifySpatialVocab($sName,$f_code,$v_code){
                 }
                 //find terms
                 $query = 'select trm_ID, trm_Label, trm_OriginatingDBID, trm_IDInOriginatingDB from '
-                .$db_name.'.defTerms, '.$db_name.'.defTermsLinks WHERE trm_ID=trl_TermID AND trl_ParentID='.$vocab[0];
+                .$db_name.'.defTerms, '.$db_name.'.defTermsLinks WHERE trm_ID=trl_TermID AND trl_ParentID='.intval($vocab[0]);
                 $terms = mysql__select_all($mysqli, $query);
                 print '<table style="font-size:smaller">';
                 foreach($terms as $term){
@@ -458,7 +459,7 @@ function verifySpatialVocab($sName,$f_code,$v_code){
             } 
         }else{
             $query = 'SELECT dty_ID, dty_Name, dty_JsonTermIDTree FROM '
-                .$db_name.'.defDetailTypes WHERE  dty_OriginatingDBID='.$f_code[0].' AND dty_IDInOriginatingDB='.$f_code[1];
+                .$db_name.'.defDetailTypes WHERE  dty_OriginatingDBID='.intval($f_code[0]).' AND dty_IDInOriginatingDB='.intval($f_code[1]);
             $fields = mysql__select_row($mysqli, $query);
             if($fields){
                 print '<div style="color:red">FIELD HAS DIFFERENT NAME '.htmlspecialchars($fields[1]).'</div>';                    
@@ -637,7 +638,8 @@ function __setTermYesNo(){
         $vocab = getLocalCode(99, 5445);
         
 // get all enum fields        
-        $enums = mysql__select_list2($mysqli, 'select dty_ID from defDetailTypes WHERE dty_Type="enum"', 'intval');
+        $enums = mysql__select_list2($mysqli, 'select dty_ID from defDetailTypes WHERE dty_Type="enum"'); //, 'intval' snyk does not see it
+        $enums = prepareIds($enums);
         $enums = 'dtl_DetailTypeID IN ('.implode(',',$enums).')';
         
         if($yes_1>0){
@@ -646,7 +648,7 @@ function __setTermYesNo(){
                 $query = 'UPDATE recDetails SET dtl_Value='.$yes_0.' WHERE dtl_Value='.$yes_1.' AND '.$enums;
                 $mysqli->query($query);
     //replace in term links
-                $query = 'UPDATE defTermsLinks trl_TermID='.$yes_0.' WHERE trl_TermID='.$yes_1;
+                $query = 'UPDATE defTermsLinks trl_TermID='.$yes_0.' WHERE trl_TermID='.intval($yes_1);
                 $mysqli->query($query);
     //add references to vocabulary 99-5445       
                 if($vocab>0){
@@ -654,7 +656,7 @@ function __setTermYesNo(){
                     $mysqli->query($query);
                 }
     //remove old term                            
-                $query = 'DELETE FROM defTerms WHERE trm_ID='.$yes_1;
+                $query = 'DELETE FROM defTerms WHERE trm_ID='.intval($yes_1);
                 $mysqli->query($query);
                 
                 
@@ -1479,7 +1481,7 @@ $html_to_hex = array(
     $cnt = 0;
     $missed = array();     //dty_Type="freetext" OR blocktext
     $txt_field_types = mysql__select_list2($mysqli, 'SELECT dty_ID FROM defDetailTypes WHERE dty_Type="freetext" OR dty_Type="blocktext"','intval');
-   
+    $txt_field_types = prepareIds($txt_field_types); //snyk does see intval in previous function  
    
     $update_stmt = $mysqli->prepare('UPDATE recDetails SET dtl_Value=? WHERE dtl_ID=?');
     $keep_autocommit = mysql__begin_transaction($mysqli);    

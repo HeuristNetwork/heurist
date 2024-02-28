@@ -237,14 +237,14 @@
 
         if($res){
             while ($row = $res->fetch_row()) {
-                $database  = $mysqli->real_escape_string($row[0]);
                 $test = strpos($database, $prefix);
                 if ($test === 0) {
+                    $database  = $mysqli->real_escape_string(str_replace('`','',$row[0]));
                     if ($isFilter) {
                         if ($role == 'user') {
-                            $query = "select ugr_ID from " . $database . ".sysUGrps where ugr_eMail='" . $mysqli->real_escape_string($email) . "'";
+                            $query = "select ugr_ID from `$database`.sysUGrps where ugr_eMail='" . $mysqli->real_escape_string($email) . "'";
                         } else if ($role == 'admin') {
-                            $query = "select ugr_ID from " . $database . ".sysUGrps, " . $database .".sysUsrGrpLinks".
+                            $query = "select ugr_ID from `$database`.sysUGrps, `$database`.sysUsrGrpLinks".
                             " left join sysIdentification on ugl_GroupID = sys_OwnerGroupID".
                             " where ugr_ID=ugl_UserID and ugl_Role='admin' and ugr_eMail='" . $mysqli->real_escape_string($email) . "'";
                         }
