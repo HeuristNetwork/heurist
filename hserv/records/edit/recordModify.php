@@ -919,7 +919,7 @@ function recordSave($system, $record, $use_transaction=true, $suppress_parent_ch
     }
     
 
-    return array("status"=>HEURIST_OK, "data"=> $recID, 'rec_Title'=>$newTitle, 'affectedRty'=>$rectype); 
+    return array("status"=>HEURIST_OK, "data"=> intval($recID), 'rec_Title'=>$newTitle, 'affectedRty'=>$rectype); 
     //, 'counts'=>$rty_counts
     /*
     $response = array("status"=>HEURIST_OK,

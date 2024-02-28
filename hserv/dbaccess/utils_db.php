@@ -239,7 +239,7 @@
             while ($row = $res->fetch_row()) {
                 $test = strpos($database, $prefix);
                 if ($test === 0) {
-                    $database  = $mysqli->real_escape_string(str_replace('`','',$row[0]));
+                    $database  = $mysqli->real_escape_string(str_replace('`','',$row[0])); //snyk does not see it 
                     if ($isFilter) {
                         if ($role == 'user') {
                             $query = "select ugr_ID from `$database`.sysUGrps where ugr_eMail='" . $mysqli->real_escape_string($email) . "'";

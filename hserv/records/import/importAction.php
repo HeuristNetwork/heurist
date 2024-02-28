@@ -1118,19 +1118,19 @@ public static function validateImport($params) {
                 }else{
                     array_push($query_reqs, $field_name1);
                     array_push($query_reqs, $field_name2);
-                    array_push($query_reqs_where, $field_name1." is null or ".$field_name1."=''");
-                    array_push($query_reqs_where, $field_name2." is null or ".$field_name2."=''");
+                    array_push($query_reqs_where, "`$field_name1` is null or `$field_name1`=''");
+                    array_push($query_reqs_where, "`$field_name2` is null or `$field_name2`=''");
                 }
             }
             if($field_name1 && $field_name2){
                 array_push($query_num, $field_name1);
-                array_push($query_num_where, "(NOT($field_name1 is null or $field_name1='' or $field_name1='NULL') and NOT($field_name1 REGEXP ".$numeric_regex."))");
+                array_push($query_num_where, "(NOT(`$field_name1` is null or `$field_name1`='' or `$field_name1`='NULL') and NOT(`$field_name1` REGEXP ".$numeric_regex."))");
                 array_push($query_num, $field_name2);
-                array_push($query_num_where, "(NOT($field_name2 is null or $field_name2='' or $field_name2='NULL') and NOT($field_name2 REGEXP ".$numeric_regex."))");
+                array_push($query_num_where, "(NOT(`$field_name2` is null or `$field_name2`='' or `$field_name2`='NULL') and NOT(`$field_name2` REGEXP ".$numeric_regex."))");
                 
                 //if UTM zone is not specified need validate for possible UTM values
                 // northing, easting
-                $geo_fields = array($field_name1,$field_name2);                
+                $geo_fields = array('`'.$field_name1.'`',$field_name2);                
             }
 
         }else 
@@ -1500,10 +1500,10 @@ them to incoming data before you can import new records:<br><br>'.implode(",", $
     if(is_array($geo_fields) && count($geo_fields)>0){
 
         // northing, easting
-        $query = "select `".implode('`,`',$geo_fields)."`, imp_ID from `$import_table` ";
+        $query = "select ".implode(',',$geo_fields).", imp_ID from `$import_table` ";
 
         if(count($geo_fields)==1){
-            $query = $query . ' WHERE `'.$geo_fields[0].'` > ""';    
+            $query = $query . ' WHERE '.$geo_fields[0].' > ""';    
         }else{
             $query = $query . ' LIMIT 5';
         }
@@ -2063,11 +2063,11 @@ private static function validateGeoField($wkt, $rec_id, $table, $field){
                 $field_max_width = mysql__select_value($mysqli, $maxw_query);
 
                 if($field_max_width && $field_max_width < $geo_len){
-                    $update_col = "ALTER TABLE $table MODIFY ".$field." varchar($geo_len)";
+                    $update_col = "ALTER TABLE $table MODIFY $field varchar($geo_len)";
                     $mysqli->query($update_col);
                 }
 
-                $update_table = "UPDATE $table SET ".$field." = '" . $constructed_geo . "' WHERE imp_ID = ".intval($rec_id);
+                $update_table = "UPDATE $table SET $field = '" . $constructed_geo . "' WHERE imp_ID = ".intval($rec_id);
                 $update_table_res = $mysqli->query($update_table);
 
                 if($update_table_res){

@@ -2005,6 +2005,8 @@ public methods
         $keep_autocommit = mysql__begin_transaction($mysqli);
 
         foreach($record_ids as $rec_id){
+            
+            $rec_id = intval($rec_id); //snyk does not see intval in mysql__select_list2
 
             // 1. Get values -----
             $details_to_transfer = array();
@@ -2625,7 +2627,7 @@ public methods
 
                     $file_query = 'SELECT ulf_OrigFileName, concat(ulf_FilePath, ulf_FileName) AS "fullPath", fxm_MimeType, ulf_Description, concat(ugr_FirstName, " ", ugr_LastName) AS "fullName", DATE(ulf_Added) '
                     .'FROM recUploadedFiles, defFileExtToMimetype, sysUGrps '
-                    .'WHERE ulf_ID=' . $row[1] . ' AND ulf_MimeExt=fxm_Extension AND ulf_UploaderUGrpID=ugr_ID';
+                    .'WHERE ulf_ID=' . intval($row[1]) . ' AND ulf_MimeExt=fxm_Extension AND ulf_UploaderUGrpID=ugr_ID';
                     $file_res = $mysqli->query($file_query);
                     if(!$file_res){ // another mysql error, skip
                         $sqlErrors[$row[2]][] = 'File #' . $row[1] . ' &Rightarrow; ' . $mysqli->error;
@@ -2723,8 +2725,8 @@ public methods
                     }
                 }
 
-                $dtl_IDs[] = $row[0];
-                $rec_IDs[] = $row[3];
+                $dtl_IDs[] = intval($row[0]);
+                $rec_IDs[] = intval($row[3]);
 
             } // while
         }
