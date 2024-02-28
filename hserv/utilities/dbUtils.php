@@ -720,15 +720,16 @@ class DbUtils {
                         //'skip-triggers' => false,
                         'single-transaction' => true, //was true till 2024-02-16
                         'add-drop-trigger' => true,
-                        'quick' =>true,
                         //'databases' => true,
                         'triggers' =>true,
-                        'no-create-db' =>true,
                         'skip-dump-date' => true,
                         //'routines' =>true,
+                        'quick' =>true,
+                        'no-create-db' =>true,
                         'add-drop-database' => true);
                         
                 //do not archive sysArchive and import tables??
+
                         
             }else{
                 //$dump_options = array('skip-triggers' => true,  'add-drop-trigger' => false);
@@ -740,6 +741,8 @@ class DbUtils {
             if($dbScriptMode==2){
                 if(!defined('HEURIST_DB_MYSQLDUMP') || !file_exists(HEURIST_DB_MYSQLDUMP)){
                     $dbScriptMode = 0;  
+                }else{
+                    
                 }
             }else if($dbScriptMode==1){
                 $dbScriptMode = 0; //disabled 
@@ -822,6 +825,9 @@ class DbUtils {
             
             }
             else{ //DEFAULT MODE - USE 3d Party php MySQLdump lib
+            
+                if(@$dump_options['quick']){ unset($dump_options['quick']); }
+                if(@$dump_options['no-create-db']){ unset($dump_options['no-create-db']); }
                 
                 try{
                     $pdo_dsn = 'mysql:host='.HEURIST_DBSERVER_NAME.';dbname='.$database_name_full.';charset=utf8mb4';
