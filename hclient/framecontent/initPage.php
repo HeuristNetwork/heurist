@@ -150,8 +150,10 @@ if(defined('IS_INDEX_PAGE')){
 <?php 
 // Do not use google analytics unless requested in heuristConfigIni.php
 if($allowGoogleAnalytics && !$isLocalHost) {
-    if (strpos('HeuristRef.Net', $_SERVER["SERVER_NAME"]===0) 
-        || strpos('heuristref', $_SERVER["SERVER_NAME"])===0) {// Operating on Heurist reference server
+    $host = strtolower($_SERVER["SERVER_NAME"]);
+    
+    if (strpos('heuristref.net', $host===0) 
+        || strpos('heuristref', $host)===0) {// Operating on Heurist reference server
         ?>     
         <!-- Heurist Reference Server, Global site tag (gtag.js) - Google Analytics -->
         <script async src="https://www.googletagmanager.com/gtag/js?id=UA-131444459-1"></script>

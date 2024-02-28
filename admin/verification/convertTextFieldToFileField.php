@@ -109,9 +109,9 @@ if( $system->verifyActionPassword($_REQUEST['pwd'], $passwordForServerFunctions)
         //$rty_ID = mysql__select_value($mysqli, $query);
         
         //silly snyk doesn't understand
-        $db_name = $mysqli->real_escape_string(htmlspecialchars(str_replace('`','',$db_name)));
+        $db_name = $mysqli->real_escape_string(str_replace('`','',$db_name));
         
-        $query = 'select dty_ID from `'.$db_name.'`.defDetailTypes where  dty_Type="freetext" AND dty_OriginatingDBID='
+        $query = "select dty_ID from `$db_name`.defDetailTypes where  dty_Type='freetext' AND dty_OriginatingDBID="
                     .$orig_db_id.' and dty_IDInOriginatingDB='.$orig_id;
         $dty_ID = mysql__select_value($mysqli, $query);
         
@@ -121,12 +121,12 @@ if( $system->verifyActionPassword($_REQUEST['pwd'], $passwordForServerFunctions)
             //mysql__usedatabase($mysqli, $db_name);
             
             //change
-            $query = 'update `'.$db_name.'`.defDetailTypes set dty_Type="file" where dty_ID='.intval($dty_ID);
+            $query = "update `$db_name`.defDetailTypes set dty_Type='file' where dty_ID=".intval($dty_ID);
             $mysqli->query($query);
         
             $m = 0;
             //create new recUploadedFiles entries and set ulf_ID to records
-            $query = 'select dtl_ID, dtl_Value from `'.$db_name.'`.recDetails where dtl_DetailTypeID='.$dty_ID;
+            $query = "select dtl_ID, dtl_Value from `$db_name`.recDetails where dtl_DetailTypeID=".$dty_ID;
             $res = $mysqli->query($query);
             while ($row = $res->fetch_row()){
                
@@ -138,14 +138,15 @@ if( $system->verifyActionPassword($_REQUEST['pwd'], $passwordForServerFunctions)
                 $nonce = addslashes(sha1($k.'.'.random_int(0,99)));
                 $ext = ($type_=='_remote') ? recognizeMimeTypeFromURL($mysqli, $url) :'png'; //@todo check preferred source
                 
-                $query = 'insert into `'.$db_name.'`.recUploadedFiles '
+                $query = "insert into `$db_name`.recUploadedFiles "
                 .'(ulf_OrigFileName,ulf_ObfuscatedFileID,ulf_UploaderUGrpID,ulf_ExternalFileReference,ulf_MimeExt,ulf_PreferredSource) '
                 .' values ("'.$type_.'","'.$nonce.'",2,"'.$mysqli->real_escape_string($url).'","'.$ext.'","'.$type_2.'")';
                 $mysqli->query($query);
                 $ulf_ID = $mysqli->insert_id;
                 
                 if($ulf_ID>0){
-                    $query = 'update `'.$db_name.'`.recDetails set dtl_Value=null, `dtl_UploadedFileID`='.intval($ulf_ID).' where dtl_ID='.intval($dtl_ID);
+                    $query = "update `$db_name`.recDetails set dtl_Value=null, `dtl_UploadedFileID`="
+                            .intval($ulf_ID).' where dtl_ID='.intval($dtl_ID);
                     $mysqli->query($query);
                     
                     $k++;

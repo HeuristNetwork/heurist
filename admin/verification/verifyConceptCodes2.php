@@ -81,7 +81,7 @@ $mysqli = $system->get_mysqli();
     
     foreach ($databases as $idx=>$db_name){
 
-        $query = 'SELECT sys_dbSubVersion from '.$db_name.'.sysIdentification';
+        $query = 'SELECT sys_dbSubVersion from `'.$db_name.'`.sysIdentification';
         $ver = mysql__select_value($mysqli, $query);
         
         //if($ver<3) continue;
@@ -94,8 +94,8 @@ $mysqli = $system->get_mysqli();
 
         //RECORD TYPES
         
-        $query = 'SELECT rty_ID, rty_Name, rty_NameInOriginatingDB, rty_OriginatingDBID, rty_IDInOriginatingDB FROM '
-            .$db_name.'.defRecTypes WHERE  rty_OriginatingDBID>0 AND '
+        $query = 'SELECT rty_ID, rty_Name, rty_NameInOriginatingDB, rty_OriginatingDBID, rty_IDInOriginatingDB FROM `'
+            .$db_name.'`.defRecTypes WHERE  rty_OriginatingDBID>0 AND '
             ."(rty_OriginatingDBID='' OR rty_OriginatingDBID=0 OR rty_OriginatingDBID IS NULL)";
         
         $res = $mysqli->query($query);
@@ -109,8 +109,8 @@ $mysqli = $system->get_mysqli();
         if($need_Details){
         
         //FIELD TYPES
-        $query = 'SELECT dty_ID, dty_Name, dty_NameInOriginatingDB, dty_OriginatingDBID, dty_IDInOriginatingDB FROM '
-            .$db_name.'.defDetailTypes WHERE  dty_OriginatingDBID>0 AND '
+        $query = 'SELECT dty_ID, dty_Name, dty_NameInOriginatingDB, dty_OriginatingDBID, dty_IDInOriginatingDB FROM `'
+            .$db_name.'`.defDetailTypes WHERE  dty_OriginatingDBID>0 AND '
             ."(dty_IDInOriginatingDB='' OR dty_IDInOriginatingDB=0 OR dty_IDInOriginatingDB IS NULL)";
             //'(NOT (dty_IDInOriginatingDB>0)) ';
         
@@ -131,8 +131,8 @@ $mysqli = $system->get_mysqli();
         if($need_Terms){
         
         //TERMS
-        $query = 'SELECT trm_ID, trm_Label, trm_NameInOriginatingDB, trm_OriginatingDBID, trm_IDInOriginatingDB FROM '
-            .$db_name.'.defTerms WHERE  trm_OriginatingDBID>0 AND (NOT (trm_IDInOriginatingDB>0)) ';
+        $query = 'SELECT trm_ID, trm_Label, trm_NameInOriginatingDB, trm_OriginatingDBID, trm_IDInOriginatingDB FROM `'
+            .$db_name.'`.defTerms WHERE  trm_OriginatingDBID>0 AND (NOT (trm_IDInOriginatingDB>0)) ';
             
         $res = $mysqli->query($query);
         if (!$res) {  print htmlspecialchars($query.'  '.$mysqli->error);  return; }

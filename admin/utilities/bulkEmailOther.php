@@ -192,12 +192,12 @@ if(isset($_REQUEST['get_email']) && isset($_REQUEST['recid'])) {	/* Get the Titl
 		foreach ($dbs as $db) {
             
             $db_name = $db;
-            $db = '`'.$mysqli->real_escape_string(str_replace('`','',$db)).'`';
+            $db = $mysqli->real_escape_string(str_replace('`','',$db));
 	
 			$query = "SELECT count(*) 
 								FROM (
 									SELECT *
-									FROM ".$db.".Records AS rec
+									FROM `$db`.Records AS rec
 									WHERE rec_Title IS NOT NULL
 									AND rec_Title NOT LIKE 'Heurist System Email Receipt%'
 									AND rec_FlagTemporary != 1
@@ -369,7 +369,7 @@ function getDatabaseDetails($mysqli, $db_list){
 		$db_data = array('name' => $database, 'rec_count' => 0, 'last_update' => null);
 
 		// Get record count
-		$cnt_query = 'SELECT COUNT(*) FROM `' . $database . '`.Records WHERE rec_FlagTemporary != 1';
+		$cnt_query = "SELECT COUNT(*) FROM `$database`.Records WHERE rec_FlagTemporary != 1";
 		$res = $mysqli->query($cnt_query);
 		if(!$res){
 			$db_data['rec_count'] = 0;
@@ -382,7 +382,7 @@ function getDatabaseDetails($mysqli, $db_list){
 		$last_recent = null;
 		$last_struct = null;
 
-		$last_rec_query = 'SELECT MAX(rec_Modified) FROM `' . $database . '`.Records WHERE rec_FlagTemporary != 1';
+		$last_rec_query = "SELECT MAX(rec_Modified) FROM `$database`.Records WHERE rec_FlagTemporary != 1";
 		$res = $mysqli->query($last_rec_query);
 		if($res){
 			while($row = $res->fetch_row()){
@@ -390,7 +390,7 @@ function getDatabaseDetails($mysqli, $db_list){
 			}
 		} // else keep $last_rec null
 
-		$last_struct_query = 'SELECT MAX(rst_Modified) FROM `' . $database . '`.defRecStructure';
+		$last_struct_query = "SELECT MAX(rst_Modified) FROM `$database`.defRecStructure";
 		$res = $mysqli->query($last_struct_query);
 		if($res){
 			while($row = $res->fetch_row()){

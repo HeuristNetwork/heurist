@@ -316,7 +316,7 @@ function findMissedTermLinks() {
                     $db2_with_terms[$db_name] = $value;
                 }else{
                     if(@$_REQUEST["fix"]==1){
-                        $query = "UPDATE `$dbn`.defDetailTypes SET dty_JsonTermIDTree='' where (dty_Type='relationtype')";
+                        $query = "UPDATE `$dbn`.defDetailTypes SET dty_JsonTermIDTree='' WHERE (dty_Type='relationtype')";
                         $mysqli->query($query);
                         if($mysqli->error){
                             print '<div style="color:red">'.$mysqli->error.'</div>';                    
