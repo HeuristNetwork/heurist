@@ -32,7 +32,7 @@ class Heurist_Security_Policy extends Smarty_Security {
   
   // disable PHP functions except listed, set to null to disable ALL
   public $php_functions = array('isset', 'empty', 'count', 'escape',
-                    'sizeof', 'in_array', 'is_array', 'intval',
+                    'sizeof', 'in_array', 'is_array', 'intval', 'implode', 'explode', 
                     'array_key_exists', 'asort','time', 'nl2br', 'print_r',
                     'printf', 'substr');
         
@@ -41,7 +41,7 @@ class Heurist_Security_Policy extends Smarty_Security {
   
   //public $php_modifiers = null; - disable all modifiers
   public $php_modifiers = array('isset', 'empty', 'count', 'escape',
-                    'sizeof', 'in_array', 'is_array', 'intval', 
+                    'sizeof', 'in_array', 'is_array', 'intval', 'implode', 'explode', 
                     'array_key_exists', 'asort','time', 'nl2br', 'print_r',
                     'printf', 'substr'); //array('escape','count');
   
