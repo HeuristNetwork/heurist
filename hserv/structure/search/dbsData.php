@@ -822,6 +822,31 @@ function dbs_GetRectypeConstraint($system) {
         return $children;
         
     }
+    
+    //
+    // get inverse term and all its children terms
+    //
+    function getTermInverseAll($mysqli, $parent_ids, $all_levels=true){
+        
+        //compose query
+        $query = 'SELECT trm_InverseTermID FROM defTerms WHERE trm_ID';
+        
+        if(is_array($parent_ids) && count($parent_ids)>1)
+        {
+            $query = $query .' IN ('.implode(',',$parent_ids).')';    
+        }else{
+            if(is_array($parent_ids)) $parent_ids = @$parent_ids[0];
+            $query = $query . ' = '.$parent_ids;    
+        }
+
+        $ids = mysql__select_list2($mysqli, $query, 'intval');
+        if(is_array($ids) && count($ids)>0){
+            return array_merge($ids, getTermChildrenAll($mysqli, $ids, $all_levels));
+        }else{
+            return array();
+        }
+        
+    }
 
     //
     // get all children including by reference as a flat array

@@ -1127,7 +1127,7 @@ class HPredicate {
             if(is_array($value) &&  count($value)>0 && 
                 !(is_numeric(@$value[0]) || is_string(@$value[0])) )
             { //subqueries
-                //special bahvior for relation - extract reltypes and record ids
+                //special behavior for relation - extract reltypes and record ids
                 $p_type = strtolower($this->pred_type);
                 if($p_type=='related' ||
                    $p_type=='related_to' || $p_type=='relatedto' || $p_type=='rt' ||
@@ -2233,15 +2233,37 @@ class HPredicate {
         
         $where = '';
         
+        $where_reverce_reltypes = '';
+        $where_direct_reltypes = '';
+        
         if(is_array($this->relation_types)&& count($this->relation_types)>0){
+
+            //reverse                        
+            $inverse_reltype_ids = getTermInverseAll($mysqli, $this->relation_types );
+            if(count($inverse_reltype_ids)>0){
+                
+                $where_reverce_reltypes = "($rl.rl_RelationTypeID " .(count($inverse_reltype_ids)>1
+                            ?' IN ('.implode(',',$inverse_reltype_ids).')'
+                            :'='.$inverse_reltype_ids[0])
+                            .') AND '; 
+                
+            }
             
+            //direct
             $this->relation_types = array_merge($this->relation_types, 
                             getTermChildrenAll($mysqli, $this->relation_types));
             
-            $where = $where . "($rl.rl_RelationTypeID " .(count($this->relation_types)>1
+            $where_direct_reltypes = "($rl.rl_RelationTypeID " .(count($this->relation_types)>1
                         ?' IN ('.implode(',',$this->relation_types).')'
                         :'='.$this->relation_types[0])
-                        .') AND ';    
+                        .') AND ';
+                        
+            if($where_reverce_reltypes==''){
+                $where = $where_direct_reltypes;
+                $where_direct_reltypes = '';
+            }
+                         
+                        
             
         }else{
             $where = $where . "$rl.rl_RelationID is not null AND";
@@ -2257,8 +2279,8 @@ class HPredicate {
         
         $where = $where
         //(($this->field_id && false) ?"$rl.rl_RelationTypeID=".$this->field_id :"$rl.rl_RelationID is not null")
-         ." ((r$p.rec_ID=$rl.$s1 AND  $rl.rl_TargetID".$val
-            .") OR (r$p.rec_ID=$rl.$s2 AND  $rl.rl_SourceID".$val.'))';
+         ." (($where_direct_reltypes r$p.rec_ID=$rl.$s1 AND  $rl.rl_TargetID".$val                   //direct
+            .") OR ($where_reverce_reltypes r$p.rec_ID=$rl.$s2 AND  $rl.rl_SourceID".$val.'))';       //reverse
 
         return array("from"=>"recLinks ".$rl, "where"=>$where);
     }
