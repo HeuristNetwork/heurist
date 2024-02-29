@@ -59,7 +59,7 @@ if($isCloneTemplate){ //template db must be registered with id less than 21
     $ERROR_REDIR = PDIR.'hclient/framecontent/infoPage.php';
     //database validation - code duplicates System::dbname_check. However security reports does not recognize it
     if(preg_match('/[^A-Za-z0-9_\$]/', $templateddb)){ //validatate database name
-        $sErrorMsg = 'Database name '.$templateddb.' is wrong';
+        $sErrorMsg = 'Database name '.htmlspecialchars($templateddb).' is wrong';
     }else if(strlen($templateddb)>64){
         $sErrorMsg = 'Database name '.$templateddb.' is too long. Max 64 characters allowed';
     }else if(mysql__usedatabase($mysqli, $templateddb)!==true){
@@ -477,6 +477,8 @@ function cloneDatabase($targetdbname, $nodata=false, $templateddb, $user_id) {
         }
 
 // *** DO NOT FORGET TO ADD NEW DIRECTORIES TO CLONING FUNCTION **
+
+        $source_database = preg_replace('/[^a-zA-Z0-9_]/', "", $source_database);  //for snyk
 
         folderRecurseCopy( HEURIST_FILESTORE_ROOT.$source_database."/smarty-templates", 
                     HEURIST_FILESTORE_ROOT.$targetdbname."/smarty-templates" );
