@@ -501,13 +501,13 @@
         
         if($idfield!=null && $newid!=null){
             
-            $idx = array_search($idfield, $columns);
-            $columns2 = $columns;
+            $idx = array_search($idfield, $columns3);
+            $columns2 = $columns3;
             $columns2[$idx] = $newid;
             $columns2 = '`'.implode('`,`',$columns2).'`';
             
         }else{
-            $columns2 = '`'.implode('`,`',$columns).'`';
+            $columns2 = '`'.implode('`,`',$columns3).'`';
         }
         
         $where = " where `$idfield`=".intval($oldid);

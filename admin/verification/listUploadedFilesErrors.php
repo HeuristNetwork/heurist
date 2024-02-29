@@ -168,8 +168,9 @@ $mysqli = $system->get_mysqli();
             $fix_url = 0;
             //find id with duplicated path+filename 
             while ($roww = $res2->fetch_row()) {
+                $external_url = $roww[0];
                 $query3 = 'SELECT ulf_ID FROM recUploadedFiles where ulf_ExternalFileReference=?';
-                $res3 = mysql__select_param_query($mysqli, $query3, array('s', $roww[0]));
+                $res3 = mysql__select_param_query($mysqli, $query3, array('s', $external_url));
                     
                 $dups_ids = array();
                 
@@ -182,10 +183,11 @@ $mysqli = $system->get_mysqli();
                 
                 if(count($dups_ids)<2) continue;
                 
-                $files_duplicates[$roww[0]] = $dups_ids;
+                $files_duplicates[$external_url] = $dups_ids;
                 
                 //FIX duplicates at once
                 $max_ulf_id = array_shift($dups_ids);
+                $dups_ids = prepareIds($dups_ids); //for stupid snyk
                 $upd_query = 'UPDATE recDetails set dtl_UploadedFileID='.intval($max_ulf_id).' WHERE dtl_UploadedFileID in ('.implode(',',$dups_ids).')';
                 $del_query = 'DELETE FROM recUploadedFiles where ulf_ID in ('.implode(',',$dups_ids).')';
                 $mysqli->query($upd_query);
