@@ -1185,7 +1185,8 @@ function createResourceRecord($mysqli, $record_type, $recdetails, $missing_point
         return $recource_recids;
     }
 
-    $query = "";
+    $value_params = array('');
+    $query = '';
     $details = array();
     $dcnt = 1;
     $recource_recid = null; //returned value
@@ -1252,12 +1253,14 @@ function createResourceRecord($mysqli, $record_type, $recdetails, $missing_point
 
             $details['t:'.$dt_id] = $value;
             foreach($value as $idx=>$val){
+                $value_params[0] .= 's';
+                $value_params[] = $val;
                 $query = $query." and r.rec_Id=d$dcnt.dtl_recId and d$dcnt.dtl_DetailTypeID=".intval($dt_id).
-                " and d$dcnt.dtl_Value='".$mysqli->real_escape_string($val)."'";
+                " and d$dcnt.dtl_Value=? ";
                 $dcnt++;
             }
         }
-    }
+    }//for recdetails
 
     // try to find the existing record
     if($query){
@@ -1268,8 +1271,8 @@ function createResourceRecord($mysqli, $record_type, $recdetails, $missing_point
 
         //find resouce record , if not found create new one
         $query = "select r.rec_ID from Records r $qd where r.rec_RecTypeID=".intval($record_type).$query;
-
-        $res = $mysqli->query($query);
+        //$res = $mysqli->query($query);
+        $res = mysql__select_param_query($mysqli,$query,$value_params);
         if($res){
             $row = $res->fetch_row();
             if($row){

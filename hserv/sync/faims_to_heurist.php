@@ -175,13 +175,14 @@ if(! $system->init(@$_REQUEST['db'], true) ){
                 $row = mysql__select_row($mysqli, "select dty_ID, dty_Name, dty_JsonTermIDTree from defDetailTypes where dty_NameInOriginatingDB='FAIMS.".$attrID."'");
                 if($row){
 
-                    print  "DT ".$row[0]."  ".$row[1]."  =>".$attrID."<br>";
+                    $dtyId = intval($row[0]);
+                    
+                    print  "DT ".$dtyId."  ".$row[1]."  =>".$attrID."<br>";
 
-                    $dtyId = $row[0];
                     $dtyName = $row[1];
                     $vocabID = $row[2];
 
-                    $detailMap[$attrID] = $row[0];
+                    $detailMap[$attrID] = $dtyId;
                 }else{
                     //add new detail type into HEURIST
                     $query = "INSERT INTO defDetailTypes (dty_Name, dty_Documentation, dty_Type, dty_NameInOriginatingDB) VALUES (?,?,?,?)";
@@ -210,6 +211,7 @@ if(! $system->init(@$_REQUEST['db'], true) ){
                 foreach ($vocabs as $row_vocab)
                 {
                     if(!$vocabID){
+                        $vocabID = intval($vocabID);
                         //make shure that we have parent term in Heursit and our detail type refers to this vocabulary (parent term)
                         $query = "INSERT INTO defTerms (trm_Label, trm_Description, trm_Domain) VALUES (?,?,'enum')";
                         $stmt = $mysqli->prepare($query);

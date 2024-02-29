@@ -1110,6 +1110,12 @@ public static function validateImport($params) {
             if(is_array($field_name2) && count($field_name2)>0){
                 $field_name2 = $field_name2[0];
             }
+            if($field_name1){
+                $field_name1 = preg_replace('/[^a-zA-Z0-9_]/', "", $field_name1);  //for snyk
+            }
+            if($field_name2){
+                $field_name2 = preg_replace('/[^a-zA-Z0-9_]/', "", $field_name2);  //for snyk
+            }
 
             //search for empty required fields in import table
             if($ft_vals[$idx_reqtype] == "required"){
@@ -1123,8 +1129,6 @@ public static function validateImport($params) {
                 }
             }
             if($field_name1 && $field_name2){
-                $field_name1 = preg_replace('/[^a-zA-Z0-9_]/', "", $field_name1);  //for snyk
-                $field_name2 = preg_replace('/[^a-zA-Z0-9_]/', "", $field_name2);  //for snyk
                 array_push($query_num, $field_name1);
                 array_push($query_num_where, "(NOT(`$field_name1` is null or `$field_name1`='' or `$field_name1`='NULL') and NOT(`$field_name1` REGEXP ".$numeric_regex."))");
                 array_push($query_num, $field_name2);
@@ -2335,6 +2339,8 @@ private static function doInsertUpdateRecord($recordId, $import_table, $recordTy
         //change record id in import table from negative temp to id form Huerist records (for insert)        
         if($id_field){ // ($recordId==null || $recordId>0)){
 
+            $details['imp_id'] = prepareIds($details['imp_id']); //for snyk
+            $imp_ids = implode(",",$details['imp_id']);
         
             if($old_id_in_idfield==null){
                 
@@ -2342,11 +2348,10 @@ private static function doInsertUpdateRecord($recordId, $import_table, $recordTy
                 
                     $updquery = "UPDATE ".$import_table
                     ." SET ".$id_field."=".$new_recordID
-                    ." WHERE imp_id in (". implode(",",$details['imp_id']) .")";
+                    ." WHERE imp_id in ($imp_ids)";
 
                     if(!self::$mysqli->query($updquery) && $mode_output!='json'){
-                        print "<div style='color:red'>Cannot update import table (set record id ".$new_recordID.") for lines:".
-                        implode(",",$details['imp_id'])."</div>";
+                        print "<div style='color:red'>Cannot update import table (set record id ".$new_recordID.") for lines: $imp_ids</div>";
                     }
                 }
 
@@ -2354,23 +2359,23 @@ private static function doInsertUpdateRecord($recordId, $import_table, $recordTy
                 
                 $oldvals = mysql__select_all( self::$mysqli,
                             'SELECT imp_id, '.$id_field.' FROM '.$import_table
-                                .' WHERE imp_id in ('. implode(',',$details['imp_id']) .')');
+                                ." WHERE imp_id in ($imp_ids)");
                 if(is_array($oldvals))
                 foreach($oldvals as $idx=>$row){
                     $ids = explode($csv_mvsep, $row[1]);
-                    
+                    $new_ids = array();
                     foreach($ids as $i=>$id){
                         if($id==$old_id_in_idfield){
-                             $ids[$i] = intval($new_recordID);
+                             $new_ids[] = intval($new_recordID);
                         }else{
-                             $ids[$i] = intval($id);
+                             $new_ids[] = intval($id);
                         }
                     }
                     /*array_map(function ($v) use ($old_id_in_idfield, $new_id) {
                         return $v == $old_id_in_idfield ? $new_id : $v;
                     }, $ids);*/                    
                     
-                    $new_ids = implode($csv_mvsep, $ids);
+                    $new_ids = implode($csv_mvsep, $new_ids);
                     
                     $updquery = 'UPDATE '.$import_table
                         .' SET '.$id_field.'="'.$new_ids

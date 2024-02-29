@@ -1173,17 +1173,19 @@ When we open "iiif_image" in mirador viewer we generate manifest dynamically.
                         if(file_exists($res_fullpath)){
                             $f_size = filesize($res_fullpath);
                             $f_md5 = md5_file($res_fullpath);
+                            
+                            $file_id = intval($file_dtls['ulf_ID']);
 
                             $is_unique = true;
                             foreach ($dups_files as $ulf_ID => $file_arr){ 
                                 if ($file_arr['size'] == $f_size && $file_arr['md5'] == $f_md5){ // same file
                                     $is_unique = false;
-                                    $dups_files[$ulf_ID]['dups'][] = intval($file_dtls['ulf_ID']);
+                                    $dups_files[$ulf_ID]['dups'][] = $file_id;
                                     break;
                                 }
                             }
                             if($is_unique){
-                                $dups_files[$file_dtls['ulf_ID']] = array('md5'=>$f_md5, 'size'=>intval($f_size), 'dups'=>array());//'path'=>$res_fullpath, 
+                                $dups_files[$file_id] = array('md5'=>$f_md5, 'size'=>intval($f_size), 'dups'=>array());//'path'=>$res_fullpath, 
                             }
                         }
                     }

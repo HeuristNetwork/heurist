@@ -640,6 +640,8 @@
                 continue;
             }
 
+            $fieldname = preg_replace('/[^a-zA-Z0-9_]/', "", $fieldname);  //for snyk
+            
             if($isinsert){
                 if($primary_field_type=='integer' && $fieldname==$primary_field){ //ignore primary field for update
                     if($allow_insert_with_newid){
@@ -648,7 +650,7 @@
                         continue;     
                     }
                 }
-                $query = $query.$fieldname.', ';
+                $query = $query."`$fieldname`, ";
                 
                 if($fieldname=='dtl_Geo'){
                     $query2 = $query2.'ST_GeomFromText(?), ';
@@ -663,7 +665,6 @@
                 if($fieldname=='dtl_Geo'){
                     $query = $query.'dtl_Geo=ST_GeomFromText(?), ';
                 }else{
-                    $fieldname = preg_replace('/[^a-zA-Z0-9_]/', "", $fieldname);  //for snyk
                     $query = $query."`$fieldname`=?, ";
                 }
             }
