@@ -1123,8 +1123,8 @@ public static function validateImport($params) {
                 }
             }
             if($field_name1 && $field_name2){
-                $field_name1 = $mysqli->real_escape_string($field_name1);
-                $field_name2 = $mysqli->real_escape_string($field_name2);
+                $field_name1 = preg_replace('/[^a-zA-Z0-9_]/', "", $field_name1);  //for snyk
+                $field_name2 = preg_replace('/[^a-zA-Z0-9_]/', "", $field_name2);  //for snyk
                 array_push($query_num, $field_name1);
                 array_push($query_num_where, "(NOT(`$field_name1` is null or `$field_name1`='' or `$field_name1`='NULL') and NOT(`$field_name1` REGEXP ".$numeric_regex."))");
                 array_push($query_num, $field_name2);
@@ -1248,6 +1248,7 @@ them to incoming data before you can import new records:<br><br>'.implode(",", $
     }
 
     if($id_field){ //validate only for defined records IDs
+        $id_field = preg_replace('/[^a-zA-Z0-9_]/', "", $id_field);  //for snyk
         if($ignore_insert){
             $only_for_specified_id = " (`$id_field` > 0) AND ";
         }else{

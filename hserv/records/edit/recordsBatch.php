@@ -1792,6 +1792,8 @@ public methods
 
             $mysqli = $system->get_mysqli();
 
+            $record_ids = prepareIds($record_ids); //for snyk
+            
             //assign links
             $insert_query = 'insert ignore into usrRecTagLinks (rtl_RecID, rtl_TagID) '
                 . 'select rec_ID, tag_ID from usrTags, Records '
@@ -2095,6 +2097,8 @@ public methods
                 if($split_values != 0){
                     $dtl_IDs = $details_to_transfer[$idx];
                 }
+                
+                $dtl_IDs = prepareIds($dtl_IDs); //for snyk
 
                 $upd_where = count($dtl_IDs) == 1 ? ("= " . $dtl_IDs[0]) : ("IN (" . implode(',', $dtl_IDs) . ")");
                 $upd_query = "UPDATE recDetails SET dtl_RecID = $rec_id WHERE dtl_ID $upd_where";
@@ -2753,7 +2757,7 @@ public methods
                     $ulf_to_delete[] = $org_ID;
                 }else if(array_key_exists('delete_file', $this->data) && $this->data['delete_file'] == 1){
                     // update references
-                    $dtl_IDs = prepareIds($dtl_IDs);
+                    $dtl_IDs = prepareIds($dtl_IDs); //for snyk
                     if($this->_updateUploadedFileIDs($new_ID, $dtl_IDs, $date_mode)){
                         // then delete the file reference + local file
                         $ulf_to_delete[] = $org_ID;

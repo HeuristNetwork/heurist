@@ -1183,7 +1183,7 @@ When we open "iiif_image" in mirador viewer we generate manifest dynamically.
                                 }
                             }
                             if($is_unique){
-                                $dups_files[$file_dtls['ulf_ID']] = array('md5'=>$f_md5, 'size'=>$f_size, 'dups'=>array());//'path'=>$res_fullpath, 
+                                $dups_files[$file_dtls['ulf_ID']] = array('md5'=>$f_md5, 'size'=>intval($f_size), 'dups'=>array());//'path'=>$res_fullpath, 
                             }
                         }
                     }

@@ -613,17 +613,17 @@
             }else{
                 //check insert or update
                 $res = mysql__select_value($mysqli, 
-                    "SELECT $primary_field FROM $table_name WHERE $primary_field=?", array('s', $recID));
+                    "SELECT `$primary_field` FROM `$table_name` WHERE `$primary_field`=?", array('s', $recID));
                 $isinsert = ($res==null);
             }
         }
 
 
         if($isinsert){
-            $query = "INSERT into $table_name (";
+            $query = "INSERT into `$table_name` (";
             $query2 = ') VALUES (';
         }else{
-            $query = "UPDATE $table_name set ";
+            $query = "UPDATE `$table_name` set ";
         }
 
         $params = array();
@@ -663,7 +663,8 @@
                 if($fieldname=='dtl_Geo'){
                     $query = $query.'dtl_Geo=ST_GeomFromText(?), ';
                 }else{
-                    $query = $query.$fieldname.'=?, ';
+                    $fieldname = preg_replace('/[^a-zA-Z0-9_]/', "", $fieldname);  //for snyk
+                    $query = $query."`$fieldname`=?, ";
                 }
             }
 
