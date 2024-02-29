@@ -192,8 +192,9 @@ if(isset($_REQUEST['get_email']) && isset($_REQUEST['recid'])) {	/* Get the Titl
 		foreach ($dbs as $db) {
             
             $db_name = $db;
-            $db = $mysqli->real_escape_string(str_replace('`','',$db));
-	
+            //$db = $mysqli->real_escape_string(str_replace('`','',$db));
+            $db = preg_replace('/[^a-zA-Z0-9_]/', "", $db);
+            
 			$query = "SELECT count(*) 
 								FROM (
 									SELECT *
@@ -364,10 +365,10 @@ function getDatabaseDetails($mysqli, $db_list){
 	// Retrieve record count and last update (record or structure)
 	foreach ($db_list as $database) {
 
-        $database = $mysqli->real_escape_string(str_replace('`','',$database));
+        //$database = $mysqli->real_escape_string(str_replace('`','',$database));
+        $database = preg_replace('/[^a-zA-Z0-9_]/', "", $database);
 			
 		$db_data = array('name' => $database, 'rec_count' => 0, 'last_update' => null);
-
 		// Get record count
 		$cnt_query = "SELECT COUNT(*) FROM `$database`.Records WHERE rec_FlagTemporary != 1";
 		$res = $mysqli->query($cnt_query);

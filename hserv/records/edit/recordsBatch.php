@@ -2743,7 +2743,7 @@ public methods
             $ulf_to_delete = array();
             foreach ($completed_ulf_IDs as $org_ID => $new_ID) {
                 $query = 'SELECT dtl_ID FROM recDetails WHERE dtl_UploadedFileID = ' . $org_ID;
-                $dtl_IDs = mysql__select_list2($mysqli, $query);
+                $dtl_IDs = mysql__select_list2($mysqli, $query, 'intval');
 
                 if(!$dtl_IDs){
                     continue;
@@ -2753,6 +2753,7 @@ public methods
                     $ulf_to_delete[] = $org_ID;
                 }else if(array_key_exists('delete_file', $this->data) && $this->data['delete_file'] == 1){
                     // update references
+                    $dtl_IDs = prepareIds($dtl_IDs);
                     if($this->_updateUploadedFileIDs($new_ID, $dtl_IDs, $date_mode)){
                         // then delete the file reference + local file
                         $ulf_to_delete[] = $org_ID;
