@@ -1195,19 +1195,23 @@ public static function validateImport($params) {
             if($ft_vals[$idx_fieldtype] == "enum" ||  $ft_vals[$idx_fieldtype] == "relationtype") {
             
                 foreach($field_name as $f_name){
+                    
+                    $f_name = preg_replace('/[^a-zA-Z0-9_]/', "", $f_name);  //for snyk
                 
                     array_push($query_enum, $f_name);
                     $trm1 = "trm".count($query_enum);
                     array_push($query_enum_join,
-                        " defTerms $trm1 on ($trm1.trm_Code=$f_name OR "
-                        ." $trm1.trm_Label=$f_name OR $trm1.trm_Label=SUBSTRING_INDEX($f_name,'.',-1))"
+                        " defTerms $trm1 on ($trm1.trm_Code=`$f_name` OR "
+                        ." $trm1.trm_Label=`$f_name` OR $trm1.trm_Label=SUBSTRING_INDEX(`$f_name`,'.',-1))"
                         );
-                    array_push($query_enum_where, "(".$trm1.".trm_Label is null and not ($f_name is null or $f_name='' or $f_name='NULL'))");
+                    array_push($query_enum_where, "(".$trm1.".trm_Label is null and not (`$f_name` is null or `$f_name`='' or `$f_name`='NULL'))");
                 }
                 
             }else if($ft_vals[$idx_fieldtype] == "resource"){
                 
                 $f_name = $field_name[0]; //@todo for multimapping as for enum
+                
+                $f_name = preg_replace('/[^a-zA-Z0-9_]/', "", $f_name);  //for snyk
                 
                 array_push($query_res, $f_name);
                 $trm1 = "rec".count($query_res);
@@ -1226,6 +1230,8 @@ public static function validateImport($params) {
             }else if($ft_vals[$idx_fieldtype] == "date" ||  $ft_vals[$idx_fieldtype] == "year") {
 
                 $f_name = $field_name[0]; //@todo for multimapping as for enum
+                
+                $f_name = preg_replace('/[^a-zA-Z0-9_]/', "", $f_name);  //for snyk
                 
                 array_push($query_date, $f_name);
                 if($ft_vals[$idx_fieldtype] == "year"){

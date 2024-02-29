@@ -119,24 +119,28 @@ if(@$_REQUEST['mode']=='2'){
     }else{
 
         $targetdbname = filter_var(@$_REQUEST['targetdbname'], FILTER_SANITIZE_STRING);
+
         //database validation - code duplicates System::dbname_check. However security reports does not recognize it
         if(preg_match('/[^A-Za-z0-9_\$]/', $targetdbname)){ //validatate database name
-                $sErrorMsg = 'Database name '.$targetdbname.' is wrong';
+                $sErrorMsg = 'Database name '.htmlspecialchars($targetdbname).' is wrong';
         }else if(strlen($targetdbname)>64){
-                $sErrorMsg = 'Database name '.$targetdbname.' is too long. Max 64 characters allowed';
+                $sErrorMsg = 'Database name '.htmlspecialchars($targetdbname).' is too long. Max 64 characters allowed';
         }else{
             // Avoid illegal chars in db name
             $invalidDbName = System::dbname_check($targetdbname);
             if ($invalidDbName) {
-                $sErrorMsg = "<p><hr></p><p>&nbsp;</p><p>Requested database copy name: <b>$targetdbname</b> is invalid</p>".
-                "<p>Sorry, only letters, numbers and underscores (_) are allowed in the database name</p>";
+                $sErrorMsg = "<p><hr></p><p>&nbsp;</p><p>Requested database copy name: <b>".htmlspecialchars($targetdbname)
+                ."</b> is invalid</p>"
+                ."<p>Sorry, only letters, numbers and underscores (_) are allowed in the database name</p>";
             } // rejecting illegal characters in db name
             else{
+                $targetdbname = preg_replace('/[^a-zA-Z0-9_]/', "", $targetdbname);  //for snyk
+
                 list($targetdbname, $dbname) = mysql__get_names( $targetdbname );
 
                 $dblist = mysql__select_list2($mysqli, 'show databases');
                 if (array_search(strtolower($targetdbname), array_map('strtolower', $dblist)) !== false ){
-                    $sErrorMsg = "<div class='ui-state-error'>Warning: database '".$targetdbname
+                    $sErrorMsg = "<div class='ui-state-error'>Warning: database '".htmlspecialchars($targetdbname)
                     ."' already exists. Please choose a different name<br></div>";
                 }else{
                     ob_start();
