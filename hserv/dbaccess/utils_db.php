@@ -494,8 +494,9 @@
         //in our scheme first column is always id (primary key)
         array_shift($columns);
         
+        $columns3 = array();
         foreach($columns as $idx=>$column){
-            $columns[$idx] = preg_replace('/[^a-zA-Z0-9_]/', "", $column);  //for snyk
+            $columns3[] = preg_replace('/[^a-zA-Z0-9_]/', "", $column);  //for snyk
         }
         
         if($idfield!=null && $newid!=null){
@@ -511,9 +512,9 @@
         
         $where = " where `$idfield`=".intval($oldid);
         
-        $columns = '`'.implode('`,`',$columns).'`';
+        $columns3 = implode('`,`',$columns3);
         //
-        $query = "INSERT INTO `$table` ($columns) SELECT $columns2 FROM `$table`".$where;
+        $query = "INSERT INTO `$table` (`$columns3`) SELECT $columns2 FROM `$table`".$where;
     //print $query.'<br>';    
         
         $res = $mysqli->query($query);
