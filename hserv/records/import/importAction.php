@@ -930,15 +930,17 @@ public static function validateImport($params) {
 
         $cnt_recs_insert_nonexist_id = 0;
 
+        $id_field = preg_replace('/[^a-zA-Z0-9_]/', "", $id_field);  //for snyk
+        
         // validate selected record ID field
         // in case id field is not created on match step (it is from original set of columns)
         // we have to verify that its values are valid
         if(!@$imp_session['indexes'][$id_field]){
 
             //find recid with different rectype
-            $query = "select imp_id, `".implode("`,`",$sel_query)."`, ".$id_field
-            ." from ".$import_table
-            ." left join Records on rec_ID=".$id_field
+            $query = "select imp_id, `".implode("`,`",$sel_query)."`, `$id_field`"
+            ." from `$import_table` "
+            ." left join Records on rec_ID=`$id_field`"
             ." where rec_RecTypeID<>".$recordType;
             // TPDO: I'm not sure whether message below has been correctly interpreted
             $wrong_records = self::getWrongRecords($query, $imp_session,
@@ -956,9 +958,9 @@ public static function validateImport($params) {
             if(!$ignore_insert){      //WARNING - it ignores possible multivalue index field
                 //find record ID that do not exist in HDB - to insert
                 $query = "select count(imp_id) "
-                ." from ".$import_table
-                ." left join Records on rec_ID=".$id_field
-                ." where ".$id_field.">0 and rec_ID is null";
+                ." from `$import_table` "
+                ." left join Records on rec_ID=`$id_field` "
+                ." where `$id_field`>0 and rec_ID is null";
                 $cnt = mysql__select_value($mysqli, $query);
                 if($cnt>0){
                     $cnt_recs_insert_nonexist_id = $cnt;
@@ -968,19 +970,19 @@ public static function validateImport($params) {
 
         // find records to update
         if(!$ignore_update){
-            $select_query = "SELECT count(DISTINCT `".$id_field."`) FROM ".$import_table
-            ." left join Records on rec_ID=`".$id_field."` WHERE rec_ID is not null and `".$id_field."`>0";
+            $select_query = "SELECT count(DISTINCT `$id_field`) FROM `$import_table` "
+            ." left join Records on rec_ID=`$id_field` WHERE rec_ID is not null and `$id_field`>0";
             $cnt = mysql__select_value($mysqli, $select_query);
             if($cnt>0){
                 
                     $imp_session['validation']['count_update'] = $cnt;
                     $imp_session['validation']['count_update_rows'] = $cnt;
                     //find first 5000 records to display
-                    $select_query = "SELECT `".$id_field."`, imp_id, `".implode("`,`",$sel_query)
-                    ."` FROM ".$import_table
-                    ." left join Records on rec_ID=`".$id_field
-                    ."` WHERE rec_ID is not null and `".$id_field."`>0"
-                    ." ORDER BY ".$id_field." LIMIT 5000"; //for preview only
+                    $select_query = "SELECT `$id_field`, imp_id, `".implode("`,`",$sel_query)
+                    ."` FROM `$import_table` "
+                    ." left join Records on rec_ID=`$id_field` "
+                    ." WHERE rec_ID is not null and `$id_field`>0"
+                    ." ORDER BY `$id_field` LIMIT 5000"; //for preview only
                     $imp_session['validation']['recs_update'] = mysql__select_all($mysqli, $select_query); //for preview only
 
             }else if($cnt==null){
@@ -993,11 +995,11 @@ public static function validateImport($params) {
         if(!$ignore_insert){
 
             // find records to insert
-            $select_query = "SELECT count(DISTINCT ".$id_field.") FROM ".$import_table." WHERE ".$id_field."<0"; //$id_field." is null OR ".
+            $select_query = "SELECT count(DISTINCT `$id_field`) FROM `$import_table` WHERE `$id_field`<0"; //$id_field." is null OR ".
             $cnt = mysql__select_value($mysqli, $select_query);
             $cnt = ($cnt>0)?intval($cnt):0;
 
-            $select_query = "SELECT count(*) FROM ".$import_table." WHERE ".$id_field." IS NULL"; 
+            $select_query = "SELECT count(*) FROM `$import_table` WHERE `$id_field` IS NULL"; 
             $cnt2 = mysql__select_value($mysqli, $select_query);
             $cnt = $cnt + ($cnt2>0?intval($cnt2):0);
 
@@ -1006,8 +1008,8 @@ public static function validateImport($params) {
                     $imp_session['validation']['count_insert_rows'] = $cnt;
 
                     //find first 5000 records to preview display
-                    $select_query = "SELECT imp_id, ".implode(",",$sel_query)." FROM ".$import_table
-                            .' WHERE '.$id_field.'<0 or '.$id_field.' IS NULL LIMIT 5000'; //for preview only
+                    $select_query = "SELECT imp_id, ".implode(",",$sel_query)." FROM `$import_table` "
+                            ." WHERE `$id_field`<0 or `$id_field` IS NULL LIMIT 5000"; //for preview only
                     $imp_session['validation']['recs_insert'] = mysql__select_all($mysqli, $select_query);
             }
         }
@@ -1019,9 +1021,9 @@ public static function validateImport($params) {
             $imp_session['validation']['count_insert_rows'] = $imp_session['validation']['count_insert'];
 
             $select_query = "SELECT imp_id, ".implode(",",$sel_query)
-            ." FROM ".$import_table
-            ." LEFT JOIN Records on rec_ID=".$id_field
-            ." WHERE ".$id_field.">0 and rec_ID is null LIMIT 5000"; //for preview only
+            ." FROM `$import_table` "
+            ." LEFT JOIN Records on rec_ID=`$id_field` "
+            ." WHERE `$id_field`>0 and rec_ID is null LIMIT 5000"; //for preview only
             $res = mysql__select_all($mysqli, $select_query);
             if($res && count($res)>0){
                 if(@$imp_session['validation']['recs_insert']){
