@@ -80,8 +80,7 @@ $mysqli = $system->get_mysqli();
         
         print "<h2>".htmlspecialchars($db)."</h2>";
 
-    $db_name = $db;
-    $db = $mysqli->real_escape_string(str_replace('`','',$db)); 
+    $db = preg_replace('/[^a-zA-Z0-9_]/', "", $db);  //for snyk
             
     $query1 = "SELECT * from `$db`.recUploadedFiles"; // get a list of all the files
     $res1 = $mysqli->query($query1);
@@ -143,7 +142,7 @@ $mysqli = $system->get_mysqli();
                     
                 }else{
                     
-                    $dbName = substr($db_name,4);
+                    $dbName = substr($db,4);
                     //HEURIST_FILESTORE_DIR
                     $_HEURIST_FILESTORE_DIR = HEURIST_FILESTORE_ROOT . $dbName . '/';
 
@@ -309,7 +308,7 @@ $mysqli = $system->get_mysqli();
 */                
                     foreach ($files_notfound as $row) {
                         //DBName, ULF ID, path, filename
-                        $log_data = $log_data.$db_name.','.$row['ulf_ID'].','.$row['db_fullpath'].','.$row['rec_ID']."\n";
+                        $log_data = $log_data.$db.','.$row['ulf_ID'].','.$row['db_fullpath'].','.$row['rec_ID']."\n";
                         ?>
                         <div class="msgline">
                                 <b><?php echo htmlspecialchars($row['ulf_ID']);?></b> 

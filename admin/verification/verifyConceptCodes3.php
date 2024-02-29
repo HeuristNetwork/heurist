@@ -85,7 +85,7 @@ $mysqli = $system->get_mysqli();
     
     foreach ($databases as $idx=>$db_name){
 
-        $db_name = preg_replace('/[^a-zA-Z0-9_]/', "", $db_name);
+        $db_name = preg_replace('/[^a-zA-Z0-9_]/', "", $db_name);  //for snyk
         
         $query = 'SELECT sys_dbRegisteredID from '.$db_name.'.sysIdentification';
         $ver = mysql__select_value($mysqli, $query);

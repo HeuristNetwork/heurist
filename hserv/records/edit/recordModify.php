@@ -1246,7 +1246,7 @@ function recordUpdateOwnerAccess($system, $params){
         if($rec_RecTypeID>0){ 
             $recids = mysql__select_list2($mysqli, 'SELECT rec_ID from Records where rec_ID in ('
                 .implode(',', $recids).') and rec_RecTypeID='. $rec_RecTypeID);
-
+            $recids = prepareIds($recids); //for snyk
             if(!is_array($recids) || count($recids)==0){             
                 return $system->addError(HEURIST_NOT_FOUND, 'No record found for provided record type');
             }

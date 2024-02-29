@@ -239,7 +239,7 @@
             while ($row = $res->fetch_row()) {
                 $test = strpos($database, $prefix);
                 if ($test === 0) {
-                    $database  = $mysqli->real_escape_string(str_replace('`','',$row[0])); //snyk does not see it 
+                    $database = preg_replace('/[^a-zA-Z0-9_]/', "", $row[0]);  //for snyk
                     if ($isFilter) {
                         if ($role == 'user') {
                             $query = "select ugr_ID from `$database`.sysUGrps where ugr_eMail='" . $mysqli->real_escape_string($email) . "'";
@@ -1762,7 +1762,7 @@
             //$db_name = HEURIST_DBNAME_FULL;
             $db_name = ''; //$query = ;
         }else{
-            $db_name = str_replace('`','',$db_name);
+            $db_name = preg_replace('/[^a-zA-Z0-9_]/', "", $db_name);  //for snyk
             $db_name = "`$db_name`.";
         }
     

@@ -434,8 +434,8 @@
             
             $dbprefix = '';
             if($database!=null){
-                $dbprefix = str_replace('`','',$dbprefix); 
-                $dbprefix = '`'.$mysqli->real_escape_string($database).'`.';
+                $dbprefix = preg_replace('/[^a-zA-Z0-9_]/', "", $database);  //for snyk
+                $dbprefix = '`'.$dbprefix.'`.';
             }
 
             $query = 'select ugl_GroupID, ugl_Role '

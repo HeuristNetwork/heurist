@@ -1110,10 +1110,9 @@ When we open "iiif_image" in mirador viewer we generate manifest dynamically.
                         continue;   
                     }
 
-                    $query = 'SELECT ulf_ID FROM recUploadedFiles WHERE ulf_ExternalFileReference="'
-                             .$mysqli->real_escape_string($res[0]).'"'
+                    $query = 'SELECT ulf_ID FROM recUploadedFiles WHERE ulf_ExternalFileReference=? '
                              .$where_ids;
-                    $res = $mysqli->query($query);
+                    $res = mysql__select_param_query($mysqli, $query, array('s', $res[0]));
 
                     $dups_ids = array();
                     while ($remote_id = $res->fetch_row()) {
@@ -1184,7 +1183,7 @@ When we open "iiif_image" in mirador viewer we generate manifest dynamically.
                                 }
                             }
                             if($is_unique){
-                                $dups_files[$file_dtls['ulf_ID']] = array('path'=>$res_fullpath, 'md5'=>$f_md5, 'size'=>$f_size, 'dups'=>array());
+                                $dups_files[$file_dtls['ulf_ID']] = array('md5'=>$f_md5, 'size'=>$f_size, 'dups'=>array());//'path'=>$res_fullpath, 
                             }
                         }
                     }
@@ -1252,10 +1251,9 @@ When we open "iiif_image" in mirador viewer we generate manifest dynamically.
                     }
 
                     if(!empty($extra_desc)){
-                        $upd_query = 'UPDATE recUploadedFiles SET ulf_Description ="'
-                                . $mysqli->real_escape_string($extra_desc) 
-                                .'" WHERE ulf_ID=' . intval($ulf_ID);
-                        $mysqli->query($upd_query);
+                        $upd_query = 'UPDATE recUploadedFiles SET ulf_Description=? '
+                                    .' WHERE ulf_ID=' . intval($ulf_ID);
+                        mysql__exec_param_query($mysqli, $upd_query, array('s', $extra_desc));
                     }
                 }
 

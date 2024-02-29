@@ -108,8 +108,8 @@ if( $system->verifyActionPassword($_REQUEST['pwd'], $passwordForServerFunctions)
         //$query = 'select rty_ID from '.$db_name.'.defRecTypes where rty_OriginatingDBID=2 and rty_IDInOriginatingDB=11';
         //$rty_ID = mysql__select_value($mysqli, $query);
         
-        //silly snyk doesn't understand
-        $db_name = $mysqli->real_escape_string(str_replace('`','',$db_name));
+        
+        $db_name = preg_replace('/[^a-zA-Z0-9_]/', "", $db_name);//for snyk
         
         $query = "select dty_ID from `$db_name`.defDetailTypes where  dty_Type='freetext' AND dty_OriginatingDBID="
                     .$orig_db_id.' and dty_IDInOriginatingDB='.$orig_id;

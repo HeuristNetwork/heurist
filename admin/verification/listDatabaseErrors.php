@@ -901,7 +901,7 @@ if($active_all || in_array('target_parent', $active)) {
             $prec_ids1 = array();
             while ($row = $res->fetch_assoc()){
 
-                $child_ID = $row['dtl_Value'];
+                $child_ID = intval($row['dtl_Value']);
 
                 if(@$_REQUEST['fixparents']=="1"){ 
                     //new way: add missed reverse link to alleged children
@@ -943,7 +943,7 @@ if($active_all || in_array('target_parent', $active)) {
                 if(in_array( $row['child_d_id'], $det_ids)) continue;
                 $bibs2[] = $row;
                 $prec_ids2[] = $row['dtl_Value'];  //remove DT_PARENT_ENTITY from orphaned children
-                array_push($det_ids, $row['child_d_id']); 
+                array_push($det_ids, intval($row['child_d_id'])); 
                 /*
                 if($row['parent_d_id']>0){
                 // keep dtl_ID of pointer field in parent record 

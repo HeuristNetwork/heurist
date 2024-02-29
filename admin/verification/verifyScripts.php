@@ -280,7 +280,6 @@ function findMissedTermLinks() {
     
     foreach ($databases as $idx=>$db_name){
         
-        //$db_name = $mysqli->real_escape_string(str_replace('`','',$db_name));  
         $db_name = preg_replace('/[^a-zA-Z0-9_]/', "", $db_name);
 
         $query = "SELECT sys_dbSubVersion from `$db_name`.sysIdentification";
