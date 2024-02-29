@@ -87,7 +87,7 @@ $mysqli = $system->get_mysqli();
             <?php
 
     $files_duplicates = array();
-    $files_duplicates_all_ids = array();
+    $files_duplicates_all_ids = array(); //not used 
 
     $files_orphaned = array();
     $files_unused_local = array();
@@ -125,9 +125,12 @@ $mysqli = $system->get_mysqli();
                 
                 while ($res4 = $res3->fetch_row()) {
                     array_push($files_duplicates_all_ids, $res4[0]);
-                    array_push($dups_ids, intval($res4[0]));
+                    $dups_ids[] = intval($res4[0]);
+                    //array_push($dups_ids, intval($res4[0]));
                 }
                 $res3->close();
+                
+                if(count($dups_ids)<2) continue;
                 
                 if(@$res['ulf_FilePath']==null){
                     $res_fullpath = $res['ulf_FileName'];
@@ -166,15 +169,19 @@ $mysqli = $system->get_mysqli();
             //find id with duplicated path+filename 
             while ($res = $res2->fetch_row()) {
                 $query3 = 'SELECT ulf_ID FROM recUploadedFiles where ulf_ExternalFileReference=?';
-                $res3 = mysql__select_param_query($mysqli, $query3, array('s',$res[0]));
+                $res3 = mysql__select_param_query($mysqli, $query3, array('s', $res[0]));
                     
                 $dups_ids = array();
                 
                 while ($res4 = $res3->fetch_row()) {
                     array_push($files_duplicates_all_ids, $res4[0]);
-                    array_push($dups_ids, intval($res4[0]));
+                    $dups_ids[] = intval($res4[0]);
+                    //array_push($dups_ids, intval($res4[0]));
                 }
                 $res3->close();
+                
+                if(count($dups_ids)<2) continue;
+                
                 $files_duplicates[$res[0]] = $dups_ids;
                 
                 //FIX duplicates at once

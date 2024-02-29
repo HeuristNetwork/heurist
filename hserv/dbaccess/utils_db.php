@@ -494,6 +494,10 @@
         //in our scheme first column is always id (primary key)
         array_shift($columns);
         
+        foreach($columns as $idx=>$column){
+            $columns[$idx] = preg_replace('/[^a-zA-Z0-9_]/', "", $column);  //for snyk
+        }
+        
         if($idfield!=null && $newid!=null){
             
             $idx = array_search($idfield, $columns);
@@ -735,16 +739,16 @@
     function mysql__exec_param_query($mysqli, $query, $params, $return_affected_rows=false){
         
         $result = false;
+        
+        $is_insert = (strpos(strtoupper($query), 'INSERT')===0);
 
         if (!is_array($params) || count($params) < 1) {// not parameterised
             if ($result = $mysqli->query($query)) {
-                
-                $result = $return_affected_rows ?$mysqli->affected_rows  :true;
-                
+                $result = true;
             } else {
                 $result = $mysqli->error;
                 if ($result == '') {
-                   $result = $return_affected_rows ?$mysqli->affected_rows  :true;
+                   $result = true;
                 }
             }
         }else{        
@@ -756,12 +760,20 @@
                 if(!$stmt->execute()){
                     $result = $mysqli->error;
                 }else{
-                    $result = $return_affected_rows ?$mysqli->affected_rows  :true;
+                    $result = true;
                 }
                 $stmt->close();
             }else{
                 $result = $mysqli->error;
             }
+        }
+        
+        if($result===true && $return_affected_rows){
+            if($is_insert){
+                $result = $mysqli->insert_id;
+            }else{
+                $result = $mysqli->affected_rows;
+            }    
         }
 
         return $result;

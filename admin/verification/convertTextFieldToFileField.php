@@ -130,29 +130,30 @@ if( $system->verifyActionPassword($_REQUEST['pwd'], $passwordForServerFunctions)
             $res = $mysqli->query($query);
             while ($row = $res->fetch_row()){
                
-                $dtl_ID = $row[0];
-                $url = filter_var($row[1], FILTER_SANITIZE_URL);
+                $dtl_ID = intval($row[0]);
+                $url = $row[1];
 
                 //$ulf_ID = $entity->registerURL($url, $type_!=='_remote');
                 
                 $nonce = addslashes(sha1($k.'.'.random_int(0,99)));
                 $ext = ($type_=='_remote') ? recognizeMimeTypeFromURL($mysqli, $url) :'png'; //@todo check preferred source
                 
-                $query = "insert into `$db_name`.recUploadedFiles "
+                $insert_query = "insert into `$db_name`.recUploadedFiles "
                 .'(ulf_OrigFileName,ulf_ObfuscatedFileID,ulf_UploaderUGrpID,ulf_ExternalFileReference,ulf_MimeExt,ulf_PreferredSource) '
-                .' values ("'.$type_.'","'.$nonce.'",2,"'.$mysqli->real_escape_string($url).'","'.$ext.'","'.$type_2.'")';
-                $mysqli->query($query);
-                $ulf_ID = $mysqli->insert_id;
+                .' values (?,?,2,?,?,?)';
+
+                $ulf_ID = mysql__exec_param_query($mysqli, $insert_query, 
+                    array('sssss', $type_, $nonce, $url, $ext, $type_2), true);
                 
                 if($ulf_ID>0){
                     $query = "update `$db_name`.recDetails set dtl_Value=null, `dtl_UploadedFileID`="
-                            .intval($ulf_ID).' where dtl_ID='.intval($dtl_ID);
+                            .intval($ulf_ID).' where dtl_ID='.$dtl_ID;
                     $mysqli->query($query);
                     
                     $k++;
                     $m++;
                 }else{
-                    print 'Cannot register url '.htmlspecialchars($url).' for detail id '.intval($dtl_ID);
+                    print 'Cannot register url '.htmlspecialchars($url).' for detail id '.$dtl_ID;
                     exit;
                 }
                 
