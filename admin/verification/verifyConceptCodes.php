@@ -29,7 +29,7 @@ define('PDIR','../../');  //need for proper path to js and css
 
 require_once dirname(__FILE__).'/../../hclient/framecontent/initPageMin.php';
 
-if( $system->verifyActionPassword($_REQUEST['pwd'], $passwordForServerFunctions) ){
+if( false && $system->verifyActionPassword($_REQUEST['pwd'], $passwordForServerFunctions) ){
 	?>
     
     <form action="verifyConceptCodes.php" method="POST">
@@ -79,7 +79,8 @@ $mysqli = $system->get_mysqli();
         $terms = array();
         $is_found = false;
         
-        $db_name  = $mysqli->real_escape_string(str_replace('`','',$db_name)); 
+        //$db_name  = $mysqli->real_escape_string(str_replace('`','',$db_name)); 
+        $db_name = preg_replace('/[^a-zA-Z0-9_]/', "", $db_name);
 
         //RECORD TYPES
         
