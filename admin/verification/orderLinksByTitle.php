@@ -92,7 +92,7 @@ function updateDtlValues($mysqli, $ids, $vals, $titles){
         $k = 0;
         foreach ($ids as $dt) { //sorted dtl_ID
 //print $ids[$k].'  dtl_Value='.$vals[$k].'  title='.$titles[$k].'<br>';
-            $query = "update recDetails set dtl_Value=".$vals[$k].' where dtl_ID='.$ids[$k];
+            $query = "update recDetails set dtl_Value=".$mysqli->real_escape_string($vals[$k]).' where dtl_ID='.intval($ids[$k]);
             //print $query.'<br>';                
             $res = $mysqli->query($query);
             if ($mysqli->error) {

@@ -1204,6 +1204,7 @@ class DbDefTerms extends DbEntityBase
         }
             
         if(is_array($check_dty_IDs) && count($check_dty_IDs)>0){
+            $check_dty_IDs = prepareIds($check_dty_IDs); //for snyk
             $this->system->defineConstant('DT_RELATION_TYPE');
             $query = 'SELECT SQL_CALC_FOUND_ROWS DISTINCT dtl_RecID FROM recDetails '
                 .'WHERE (dtl_DetailTypeID IN ('.DT_RELATION_TYPE.','.implode(',',$check_dty_IDs).')) AND '

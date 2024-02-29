@@ -1884,6 +1884,8 @@ function recordSearch($system, $params, $relation_query=null)
         if(defined('DT_BG_COLOR')) $fieldtypes_ids[] = DT_BG_COLOR;
         if(defined('DT_OPACITY')) $fieldtypes_ids[] = DT_OPACITY;
 
+        $fieldtypes_ids = prepareIds($fieldtypes_ids);
+        
         $fieldtypes_ids = implode(',', $fieldtypes_ids);
         $needThumbField = true;
 

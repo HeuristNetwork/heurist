@@ -1436,7 +1436,7 @@
             $values[$idx] = $mysqli->real_escape_string($v);
         }
     }
-
+    
     //
     // $rec_IDs - may by csv string or array 
     // returns array of integers

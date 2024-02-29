@@ -1110,12 +1110,13 @@ public static function validateImport($params) {
             if(is_array($field_name2) && count($field_name2)>0){
                 $field_name2 = $field_name2[0];
             }
+            /*
             if($field_name1){
                 $field_name1 = preg_replace('/[^a-zA-Z0-9_]/', "", $field_name1);  //for snyk
             }
             if($field_name2){
                 $field_name2 = preg_replace('/[^a-zA-Z0-9_]/', "", $field_name2);  //for snyk
-            }
+            }*/
 
             //search for empty required fields in import table
             if($ft_vals[$idx_reqtype] == "required"){
@@ -1124,11 +1125,15 @@ public static function validateImport($params) {
                 }else{
                     array_push($query_reqs, $field_name1);
                     array_push($query_reqs, $field_name2);
+                    $field_name1 = preg_replace('/[^a-zA-Z0-9_]/', "", $field_name1);  //for snyk
+                    $field_name2 = preg_replace('/[^a-zA-Z0-9_]/', "", $field_name2);  //for snyk
                     array_push($query_reqs_where, "`$field_name1` is null or `$field_name1`=''");
                     array_push($query_reqs_where, "`$field_name2` is null or `$field_name2`=''");
                 }
             }
             if($field_name1 && $field_name2){
+                $field_name1 = preg_replace('/[^a-zA-Z0-9_]/', "", $field_name1);  //for snyk
+                $field_name2 = preg_replace('/[^a-zA-Z0-9_]/', "", $field_name2);  //for snyk
                 array_push($query_num, $field_name1);
                 array_push($query_num_where, "(NOT(`$field_name1` is null or `$field_name1`='' or `$field_name1`='NULL') and NOT(`$field_name1` REGEXP ".$numeric_regex."))");
                 array_push($query_num, $field_name2);
@@ -2065,6 +2070,8 @@ private static function validateGeoField($wkt, $rec_id, $table, $field){
             $test_geom = geoPHP::load($constructed_geo, 'wkt');
 
             if($test_geom!=null && !$test_geom->isEmpty()){
+                
+                $field = preg_replace('/[^a-zA-Z0-9_]/', "", $field);  //for snyk
 
                 $maxw_query = 'SELECT CHARACTER_MAXIMUM_LENGTH FROM information_schema.COLUMNS WHERE table_name = "'.$table.'" AND column_name = "'. $field .'"';
                 $field_max_width = mysql__select_value($mysqli, $maxw_query);
@@ -2339,8 +2346,8 @@ private static function doInsertUpdateRecord($recordId, $import_table, $recordTy
         //change record id in import table from negative temp to id form Huerist records (for insert)        
         if($id_field){ // ($recordId==null || $recordId>0)){
 
-            $details['imp_id'] = prepareIds($details['imp_id']); //for snyk
-            $imp_ids = implode(",",$details['imp_id']);
+            $imp_ids = prepareIds($details['imp_id']); //for snyk
+            $imp_ids = implode(",", $imp_ids);
         
             if($old_id_in_idfield==null){
                 
@@ -2379,7 +2386,7 @@ private static function doInsertUpdateRecord($recordId, $import_table, $recordTy
                     
                     $updquery = 'UPDATE '.$import_table
                         .' SET '.$id_field.'="'.$new_ids
-                        .'" WHERE imp_id='.$row[0];
+                        .'" WHERE imp_id='.intval($row[0]);
                         
                     self::$mysqli->query($updquery);
                 }//foreach

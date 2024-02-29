@@ -68,7 +68,7 @@ if($res){
 
 	                //print "\n\nchecking woot \"" . $woot["woot_Title"] . "\"... ";
 
-	                $res = $mysqli->query("select * from woot_Chunks where chunk_WootID = " . $woot["woot_ID"] . " and chunk_IsLatest and not chunk_Deleted");
+	                $res = $mysqli->query("select * from woot_Chunks where chunk_WootID = " . intval($woot["woot_ID"]) . " and chunk_IsLatest and not chunk_Deleted");
                     if($res){
                         while ($row = $res->fetch_assoc()) {
                             $err = check($row["chunk_Text"]);

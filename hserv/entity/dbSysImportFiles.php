@@ -204,7 +204,9 @@ class DbSysImportFiles extends DbEntityBase
         foreach($row as $id => $session){
 
             $session = json_decode($session, true);
-            $query = "drop table IF EXISTS ".$session['import_table'];
+            $table_name = preg_replace('/[^a-zA-Z0-9_]/', "", $session['import_table']);//for snyk
+            
+            $query = "drop table IF EXISTS `$table_name`";
 
             if (!$mysqli->query($query)) {
                 $this->system->addError(HEURIST_DB_ERROR, 

@@ -177,7 +177,7 @@ function getInvalidFieldTypes($mysqli, $rectype_id){
                 //clear wrong defult value
                 $row['reason'] = $reason;
                 $rtysWithInvalidDefaultValues[] = $row;    
-                $mysqli->query('UPDATE defRecStructure set rst_DefaultValue=NULL where rst_ID='.$row['rst_ID']);
+                $mysqli->query('UPDATE defRecStructure set rst_DefaultValue=NULL where rst_ID='.intval($row['rst_ID']));
             }
             
         }

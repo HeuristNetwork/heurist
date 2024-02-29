@@ -906,7 +906,7 @@ if($active_all || in_array('target_parent', $active)) {
                 if(@$_REQUEST['fixparents']=="1"){ 
                     //new way: add missed reverse link to alleged children
                     $query2 = 'insert into recDetails (dtl_RecID, dtl_DetailTypeID, dtl_Value) VALUES(' 
-                    .$child_ID . ','. DT_PARENT_ENTITY  .', '.$row['rec_ID'] . ')';
+                    .$child_ID . ','. DT_PARENT_ENTITY  .', '.intval($row['rec_ID']) . ')';
                     $mysqli->query($query2);
                     $wasadded1++;
                 }else{

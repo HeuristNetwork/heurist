@@ -237,11 +237,17 @@ function fileGetFullInfo($system, $file_ids, $all_fields=false){
         if(is_string($file_ids[0]) && strlen($file_ids[0])>15){
             
             $query = 'ulf_ObfuscatedFileID';
-            if(count($file_ids)>1){
-                escapeValues($mysqli, $file_ids);
-                $query = $query.' in ("'.implode('","', $file_ids).'")';
+
+            $filed_ids2 = array();            
+            foreach($file_ids as $idx=>$v){
+                $filed_ids2[] = preg_replace('/[^a-z0-9]/', "", $file_ids);//for snyk
+            }
+            
+            if(count($filed_ids2)>1){
+                //escapeValues($mysqli, $file_ids);
+                $query = $query.' in ("'.implode('","', $filed_ids2).'")';
             }else{
-                $query = $query.' = "'.$mysqli->real_escape_string($file_ids[0]).'"';
+                $query = $query.' = "'.$filed_ids2.'"';
             }
             
         }else if(is_numeric($file_ids[0]) && $file_ids[0]>0){

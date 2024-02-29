@@ -69,6 +69,8 @@ $is_csv = (@$_REQUEST['html']!=1);
         $cnt4 = 0;
     
     foreach ($databases as $idx=>$db_name){
+
+        $db_name = preg_replace('/[^a-zA-Z0-9_]/', "", $db_name);  //for snyk
         
         $rec_types = array();
         $det_types = array();
