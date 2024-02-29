@@ -1163,13 +1163,13 @@ public static function validateImport($params) {
                 $squery = array();
                 foreach($field_name as $f_name){
                 
-                
+                    $f_name = preg_replace('/[^a-zA-Z0-9_]/', "", $f_name);  //for snyk
+                    
                     if($ft_vals[$idx_fieldtype] == "resource"){ //|| $ft_vals[$idx_fieldtype] == "enum"){
                         //$squery = "not (".$field_name.">0)";
-                        $squery[] = $f_name.'>0';
+                        $squery[] = "`$f_name`>0";
                     }else{
-                        $squery[] = $f_name." is not null or ".$f_name."!=''";
-                        //$squery = $field_name." is null or ".$field_name."=''";
+                        $squery[] = "`$f_name` is not null or `$f_name`!=''";
                     }
                     array_push($query_reqs, $field_name);
                 }

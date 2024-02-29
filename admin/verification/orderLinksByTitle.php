@@ -75,8 +75,8 @@ if($res){
             $ids = array();
             $titles = array();
         }
-        $ids[]  = $row[0];
-        $vals[] = $row[2];
+        $ids[]  = intval($row[0]);
+        $vals[] = intval($row[2]);
         //$titles[] = $row[0].'  '.$row[2].'  '.$row[3];
     }
     $cnt = $cnt + updateDtlValues($mysqli, $ids, $vals, $titles);    
@@ -92,7 +92,7 @@ function updateDtlValues($mysqli, $ids, $vals, $titles){
         $k = 0;
         foreach ($ids as $dt) { //sorted dtl_ID
 //print $ids[$k].'  dtl_Value='.$vals[$k].'  title='.$titles[$k].'<br>';
-            $query = "update recDetails set dtl_Value=".$mysqli->real_escape_string($vals[$k]).' where dtl_ID='.intval($ids[$k]);
+            $query = "update recDetails set dtl_Value=".$vals[$k].' where dtl_ID='.$ids[$k];
             //print $query.'<br>';                
             $res = $mysqli->query($query);
             if ($mysqli->error) {

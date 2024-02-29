@@ -723,7 +723,7 @@ private static function __get_field_value( $rdt_id, $rt, $mode, $rec_id, $enum_p
                     }else if($dt_type=='date'){
                         $value = Temporal::toHumanReadable(trim($detail['dtl_Value']));
                     }else if($dt_type=="file"){
-                        $value = self::__get_file_name($detail['dtl_UploadedFileID']);
+                        $value = self::__get_file_name(intval($detail['dtl_UploadedFileID']));
                     }else if($dt_type=='freetext' || $dt_type=='blocktext'){
                         list(, $value) = extractLangPrefix($detail['dtl_Value']); // remove possible language prefix
                     }else{
