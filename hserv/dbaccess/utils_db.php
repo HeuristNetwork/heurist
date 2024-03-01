@@ -1266,7 +1266,7 @@
                         } 
                         
                         if($need_populate && $error){ //verbose output
-                            $report[] = 'Rec# '.$dtl_RecID.'  '.$dtl_Value.' '.(($dtl_Value!=$dtl_NewValue)?$dtl_NewValue:'').' '.$error;
+                            $report[] = 'Rec# '.$dtl_RecID.'  '.htmlspecialchars($dtl_Value).' '.(($dtl_Value!=$dtl_NewValue)?$dtl_NewValue:'').' '.$error;
                         }
                         
                     }

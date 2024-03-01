@@ -1183,7 +1183,7 @@ private static function writeResults( $streams, $temp_name, $headers, $error_log
             if($error_log) array_push($error_log, "Streams are not defined");
         }else{
             $rty_ID = array_keys($streams);
-            $rty_ID = $rty_ID[0];
+            $rty_ID = intval($rty_ID[0]);
         
             $filename = $temp_name;
             if($rty_ID>0){

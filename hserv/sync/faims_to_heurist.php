@@ -231,7 +231,7 @@ if(! $system->init(@$_REQUEST['db'], true) ){
                     $row = mysql__select_row($mysqli, "select trm_ID, trm_Label from defTerms where trm_NameInOriginatingDB='FAIMS.".$row_vocab[0]."'");
                     if($row){
 
-                        print  "&nbsp;&nbsp;&nbsp;&nbsp;Term ".$row[0]."  ".$row[1]."  =>".$row_vocab[0]."<br>";
+                        print  "&nbsp;&nbsp;&nbsp;&nbsp;Term ".htmlspecialchars($row[0]."  ".$row[1])."  =>".htmlspecialchars($row_vocab[0])."<br>";
 
                         $termsMap[$row_vocab[0]] = $row[0];
                     }else{

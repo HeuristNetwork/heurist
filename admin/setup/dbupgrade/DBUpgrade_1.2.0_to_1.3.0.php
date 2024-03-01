@@ -497,7 +497,7 @@ function fillTermsLinks( $mysqli ){
                     $is_first = false;
                 }    
                 
-                $domain = $row[4]=='enum'?'enum':'relation';
+                $domain = ($row[4]=='enum')?'enum':'relation';
                 $name = $row[0].' - selection';
                 
                 $cnt = mysql__select_value($mysqli, "SELECT count(trm_ID) FROM defTerms WHERE trm_Label LIKE '".$name."%'");
@@ -505,7 +505,7 @@ function fillTermsLinks( $mysqli ){
                    $name = $name . '  ' . $cnt; 
                 }
 
-                $report[] = $row[3].'  '.$name;   
+                $report[] = htmlspecialchars($row[3].'  '.$name);   
                 
                 //{"11":{"518":{},"519":{}},"94":{},"95":{},"3260":{"3115":{"3100":{}}}}
 
@@ -555,7 +555,7 @@ function fillTermsLinks( $mysqli ){
                     $mysqli->query($query);
 
                 }else{
-                    $report[] = 'Set vocabulary manually. Term tree not defined or corrupted: '.@$row[1];   
+                    $report[] = 'Set vocabulary manually. Term tree not defined or corrupted: '.htmlspecialchars(@$row[1]);   
                 }
             }
    

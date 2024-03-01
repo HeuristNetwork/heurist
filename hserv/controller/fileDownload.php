@@ -224,8 +224,9 @@ if(!$error){
                         //if it does not start with http - this is relative path             
                         if(!(strpos($external_url,'http://')===0 || strpos($external_url,'https://')===0)){
                             
+                            $path = USanitize::sanitizePath( $external_url );
                             //check presence of mbtiles file within folder
-                            $path = HEURIST_TILESTACKS_DIR.$external_url;
+                            $path = HEURIST_TILESTACKS_DIR.$path;
                             if(is_dir($path)){
                                 $recs = folderContent($path, 'mbtiles');
                                 if($recs['count']>0){

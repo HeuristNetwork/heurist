@@ -107,14 +107,14 @@ $mysqli = $system->get_mysqli();
     if(is_array($db_undef) && count($db_undef)>0){
         print '<p>It seems these are not Heurist databases</p>';
         foreach ($db_undef as $db_name){
-            print $db_name.'<br>';
+            print htmlspecialchars($db_name).'<br>';
         }
     }
     if(is_array($db) && count($db)>0){
         foreach ($db as $ver => $dbs){
            print '<p>List of databases with v 1.'.$ver.'   Cnt: '.count($dbs).'</p>';
            foreach ($dbs as $db_name){
-                print $db_name.'<br>';
+                print htmlspecialchars($db_name).'<br>';
            }
         }
     }

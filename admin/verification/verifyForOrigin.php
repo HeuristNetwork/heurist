@@ -252,7 +252,8 @@
             //check for unexpected concept code by name
             $rty_Name = @$rty_Names[$rty_Code];
             if($rty_Name==null){
-                $msg_error = $msg_error. "<p style='padding-left:20px'> Record type for code $rty_Code not found in original database</p>";
+                $msg_error = $msg_error. "<p style='padding-left:20px'> Record type for code ".htmlspecialchars($rty_Code)
+                        ." not found in original database</p>";
             }else{
                 $res = false;
 
@@ -267,7 +268,8 @@
                 $row = $res->fetch_assoc();
                 if($row){
                     if($row[0]!=$db_id || $row[1]!=$orig_id){
-                       $msg_error = $msg_error."<p style='padding-left:20px'>name = $rty_Name : Unexpected concept ID ".$row[0].'-'.$row[1].'</p>';
+                       $msg_error = $msg_error."<p style='padding-left:20px'>name = ".htmlspecialchars($rty_Name)
+                        ." : Unexpected concept ID ".$row[0].'-'.$row[1].'</p>';
                     }
                 }
             }
