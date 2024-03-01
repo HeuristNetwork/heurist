@@ -282,6 +282,9 @@ $.widget( "heurist.mapping", {
         minZoom: 4,
         maxZoom: 11
     }},
+    {name:'GeoportailFrance.plan'},
+    {name:'GeoportailFrance.parcels'},
+    {name:'GeoportailFrance.orthos'},
     {name:'None'}
     ],
 
