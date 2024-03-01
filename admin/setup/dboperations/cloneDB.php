@@ -55,21 +55,24 @@ $sHasNewDefsWarning = false;
 
 if($isCloneTemplate){ //template db must be registered with id less than 21
 
+    $templateddb_out = htmlspecialchars($templateddb);
+    
     $sErrorMsg = null;
     $ERROR_REDIR = PDIR.'hclient/framecontent/infoPage.php';
     //database validation - code duplicates System::dbname_check. However security reports does not recognize it
     if(preg_match('/[^A-Za-z0-9_\$]/', $templateddb)){ //validatate database name
-        $sErrorMsg = 'Database name '.htmlspecialchars($templateddb).' is wrong';
+        $sErrorMsg = "Database name '$templateddb_out' is wrong";
     }else if(strlen($templateddb)>64){
-        $sErrorMsg = 'Database name '.$templateddb.' is too long. Max 64 characters allowed';
+        $sErrorMsg = "Database name '$templateddb_out' is too long. Max 64 characters allowed";
     }else if(mysql__usedatabase($mysqli, $templateddb)!==true){
-        $sErrorMsg = "Sorry, could not connect to the database $templateddb. Operation is possible when database to be cloned is on the same server";
+        $sErrorMsg = "Sorry, could not connect to the database $templateddb_out. "
+        .'Operation is possible when database to be cloned is on the same server';
     }else{
 
         $dbRegID = $system->get_system('sys_dbRegisteredID', true);
 
         if(!($dbRegID>0 && $dbRegID<1000)){
-            $sErrorMsg = "Sorry, the database $templateddb must be registered with an ID less than 1000, indicating a database curated or approved by the Heurist team, to allow cloning through this function. You may also clone any database that you can log into through the Advanced functions under Administration.";
+            $sErrorMsg = "Sorry, the database $templateddb_out must be registered with an ID less than 1000, indicating a database curated or approved by the Heurist team, to allow cloning through this function. You may also clone any database that you can log into through the Advanced functions under Administration.";
         }
     }
     
@@ -119,28 +122,29 @@ if(@$_REQUEST['mode']=='2'){
     }else{
 
         $targetdbname = filter_var(@$_REQUEST['targetdbname'], FILTER_SANITIZE_STRING);
+        
+        $targetdbname_out = htmlspecialchars($targetdbname);
 
         //database validation - code duplicates System::dbname_check. However security reports does not recognize it
         if(preg_match('/[^A-Za-z0-9_\$]/', $targetdbname)){ //validatate database name
-                $sErrorMsg = 'Database name '.htmlspecialchars($targetdbname).' is wrong';
+                $sErrorMsg = 'Database name '.$targetdbname_out.' is wrong';
         }else if(strlen($targetdbname)>64){
-                $sErrorMsg = 'Database name '.htmlspecialchars($targetdbname).' is too long. Max 64 characters allowed';
+                $sErrorMsg = 'Database name '.$targetdbname_out.' is too long. Max 64 characters allowed';
         }else{
             // Avoid illegal chars in db name
             $invalidDbName = System::dbname_check($targetdbname);
             if ($invalidDbName) {
-                $sErrorMsg = "<p><hr></p><p>&nbsp;</p><p>Requested database copy name: <b>".htmlspecialchars($targetdbname)
+                $sErrorMsg = "<p><hr></p><p>&nbsp;</p><p>Requested database copy name: <b>$targetdbname_out"
                 ."</b> is invalid</p>"
                 ."<p>Sorry, only letters, numbers and underscores (_) are allowed in the database name</p>";
             } // rejecting illegal characters in db name
             else{
-                $targetdbname = preg_replace('/[^a-zA-Z0-9_]/', "", $targetdbname);  //for snyk
 
                 list($targetdbname, $dbname) = mysql__get_names( $targetdbname );
 
                 $dblist = mysql__select_list2($mysqli, 'show databases');
                 if (array_search(strtolower($targetdbname), array_map('strtolower', $dblist)) !== false ){
-                    $sErrorMsg = "<div class='ui-state-error'>Warning: database '".htmlspecialchars($targetdbname)
+                    $sErrorMsg = "<div class='ui-state-error'>Warning: database '$targetdbname_out"
                     ."' already exists. Please choose a different name<br></div>";
                 }else{
                     ob_start();
@@ -360,6 +364,9 @@ function cloneDatabase($targetdbname, $nodata=false, $templateddb, $user_id) {
     
     $isCloneTemplate = ($templateddb!=null);
     
+    $templateddb = preg_replace('/[^a-zA-Z0-9_]/', "", $templateddb);  //for snyk
+    $targetdbname = preg_replace('/[^a-zA-Z0-9_]/', "", $targetdbname);  //for snyk
+    
     list($targetdbname_full, $targetdbname) = mysql__get_names( $targetdbname );
 
     //create new empty database and structure
@@ -477,8 +484,6 @@ function cloneDatabase($targetdbname, $nodata=false, $templateddb, $user_id) {
         }
 
 // *** DO NOT FORGET TO ADD NEW DIRECTORIES TO CLONING FUNCTION **
-
-        $source_database = preg_replace('/[^a-zA-Z0-9_]/', "", $source_database);  //for snyk
 
         folderRecurseCopy( HEURIST_FILESTORE_ROOT.$source_database."/smarty-templates", 
                     HEURIST_FILESTORE_ROOT.$targetdbname."/smarty-templates" );
