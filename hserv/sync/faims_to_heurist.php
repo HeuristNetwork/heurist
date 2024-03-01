@@ -177,7 +177,7 @@ if(! $system->init(@$_REQUEST['db'], true) ){
 
                     $dtyId = intval($row[0]);
                     
-                    print  "DT ".$dtyId."  ".$row[1]."  =>".$attrID."<br>";
+                    print  "DT ".intval($dtyId)."  ".htmlspecialchars($row[1])."  =>".htmlspecialchars($attrID)."<br>";
 
                     $dtyName = $row[1];
                     $vocabID = $row[2];
@@ -200,7 +200,7 @@ if(! $system->init(@$_REQUEST['db'], true) ){
 
                     $detailMap[$attrID] = $dtyId;
 
-                    print  "DT added ".$dtyId."  based on ".$attrID." ".$row1[1]." ".$row1[3]."<br>";
+                    print  "DT added ".intval($dtyId)."  based on ".htmlspecialchars($attrID." ".$row1[1]." ".$row1[3])."<br>";
                 }
 
 
@@ -247,7 +247,7 @@ if(! $system->init(@$_REQUEST['db'], true) ){
 
                         $termsMap[$row_vocab[0]] = $trm_ID;
 
-                        print  "&nbsp;&nbsp;&nbsp;&nbsp;Term added ".$trm_ID."  based on ".$row_vocab[0]." ".$row_vocab[1]."<br>";
+                        print  "&nbsp;&nbsp;&nbsp;&nbsp;Term added ".intval($trm_ID)."  based on ".htmlspecialchars($row_vocab[0]." ".$row_vocab[1])."<br>";
                     }//add terms
 
                 }
@@ -269,7 +269,7 @@ if(! $system->init(@$_REQUEST['db'], true) ){
                 $row = mysql__select_row($mysqli, "select rty_ID, rty_Name from defRecTypes where rty_NameInOriginatingDB='FAIMS.".$attrID."'");
                 if($row){
 
-                    print  "RT ".$row[0]."  ".$row[1]."  =>".$attrID."<br>";
+                    print  "RT ".htmlspecialchars($row[0]."  ".$row[1])."  =>".htmlspecialchars($attrID)."<br>";
 
                     $rtyId = $row[0];
                     $rtyName = $row[1];
@@ -291,7 +291,7 @@ if(! $system->init(@$_REQUEST['db'], true) ){
 
                     $rectypeMap[$attrID] = $rtyId;
 
-                    print  "RT added ".$rtyId."  based on ".$attrID." ".$row1[1]." ".$row1[2]."<br>";
+                    print  "RT added ".htmlspecialchars($rtyId."  based on ".$attrID." ".$row1[1]." ".$row1[2])."<br>";
                 }
 
                 //if AEntType has strucute described in IdealAEnt
@@ -309,7 +309,7 @@ if(! $system->init(@$_REQUEST['db'], true) ){
 
                     if($row){  //such detal in structure already exists
 
-                        print  "&nbsp;&nbsp;&nbsp;&nbsp;detail ".$row[0]."  ".$row[1]."<br>";
+                        print  "&nbsp;&nbsp;&nbsp;&nbsp;detail ".htmlspecialchars($row[0]."  ".$row[1])."<br>";
 
                     }else{
 
@@ -324,9 +324,9 @@ if(! $system->init(@$_REQUEST['db'], true) ){
                             $stmt->close();
 
 
-                            print  "&nbsp;&nbsp;&nbsp;&nbsp;detail added ".$row3[0]."  ".$row3[1]."  based on ".$row_recstr[0]."<br>";
+                            print  "&nbsp;&nbsp;&nbsp;&nbsp;detail added ".htmlspecialchars($row3[0]."  ".$row3[1]."  based on ".$row_recstr[0])."<br>";
                         }else{
-                            print  "&nbsp;&nbsp;&nbsp;DETAIL NOT FOUND FAIMS.".$row_recstr[0]." !<br>";
+                            print  "&nbsp;&nbsp;&nbsp;DETAIL NOT FOUND FAIMS.".htmlspecialchars($row_recstr[0])." !<br>";
                         }
                     }
 
@@ -423,7 +423,7 @@ if(! $system->init(@$_REQUEST['db'], true) ){
                         print "UPDATED as #".$recID."<br>";
                     }else{
                         $cntInsterted++;
-                        print "INSERTED as #".$response['data']."<br>";
+                        print "INSERTED as #".htmlspecialchars($response['data'])."<br>";
                     }
                 }else{
                     print 'Error: '.htmlspecialchars(@$response['status'].'  '.@$response['message']);

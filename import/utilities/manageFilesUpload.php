@@ -557,7 +557,7 @@ if(!($max_size>0)) $max_size = 0;
                 $('#fileupload').fileupload({
                     // Uncomment the following to send cross-domain cookies:
                     //xhrFields: {withCredentials: true},
-                    //formData: {name: 'acceptFileTypes', value:"<?=implode('|',$allowed_exts)?>" },
+                    //formData: {name: 'acceptFileTypes', value:"echo implode('|',$allowed_exts)" },
                     //upload_thumb_dir: '<?=HEURIST_THUMB_DIR?>', 
                     url: '<?=HEURIST_BASE_URL?>hserv/utilities/UploadHandlerInit.php', //was external/jquery-file-upload/server/php/
                     added: function(e, data){
@@ -753,7 +753,7 @@ if(!($max_size>0)) $max_size = 0;
                     //xhrFields: {withCredentials: true},
                     url: $('#fileupload').fileupload('option', 'url'),
                     data: { db: "<?php echo HEURIST_DBNAME; ?>",
-                            acceptFileTypes:"<?php echo implode('|',$allowed_exts);?>",
+                            acceptFileTypes:"<?php echo htmlspecialchars(implode('|',$allowed_exts))?>",
                             unique_filename: 0,
                             max_file_size: <?php echo $max_size;?>,
                             upload_subfolder: $('#upload_folder').val() },  //subfolder of database upload folder

@@ -1117,7 +1117,7 @@ EOD;
                        }else if(!$dbsource_is_same || !defined('HEURIST_DBID')) { //do not copy file for the same database
                        
                             //download to scratch folder
-                            $tmp_file = HEURIST_SCRATCH_DIR.$value['ulf_OrigFileName'];
+                            $tmp_file = HEURIST_SCRATCH_DIR.USanitize::sanitizeFileName($value['ulf_OrigFileName']);
                             //source on the same server as target
                             if(strpos($source_url, HEURIST_SERVER_URL)===0 && @$value['fullPath'])
                             {

@@ -1275,11 +1275,11 @@ function print_header_line($bib) {
         <?php }
         if(!empty($wfs_details)){
 
-            $wfs_icon = HEURIST_BASE_URL . '?db=' . HEURIST_DBNAME . '&entity=defTerms&icon=' . $wfs_details[0];
+            $wfs_icon = HEURIST_BASE_URL . '?db=' . HEURIST_DBNAME . '&entity=defTerms&icon=' . intval($wfs_details[0]);
         ?>
 
             <span style="cursor: default; padding-left: 20px;">
-                Workflow stage: <?php echo $wfs_details[1]; ?>
+                Workflow stage: <?php echo htmlspecialchars($wfs_details[1]); ?>
                 <image class="rft" style="background-image: url('<?php echo $wfs_icon; ?>')" src="<?php echo HEURIST_BASE_URL; ?>hclient/assets/16x16.gif"></span>
             </span>
 

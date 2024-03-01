@@ -1518,8 +1518,11 @@ $html_to_hex = array(
 
             //3. List unrecognized
             if($m2!=$row[1]){
+                // remove remarks to see raw output
+                /*  remarked due snyk security report
                 print $row[3].' '.$row[0].'<xmp>'.$row[1].'</xmp>';
                 print '<xmp>'.$m2.'</xmp>';
+                */
                 $cnt++;
                 //if($cnt>1000) break;
             }
