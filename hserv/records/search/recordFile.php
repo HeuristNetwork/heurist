@@ -240,14 +240,14 @@ function fileGetFullInfo($system, $file_ids, $all_fields=false){
 
             $filed_ids2 = array();            
             foreach($file_ids as $idx=>$v){
-                $filed_ids2[] = preg_replace('/[^a-z0-9]/', "", $file_ids);//for snyk
+                $filed_ids2[] = preg_replace('/[^a-z0-9]/', "", $v);//for snyk
             }
             
             if(count($filed_ids2)>1){
                 //escapeValues($mysqli, $file_ids);
                 $query = $query.' in ("'.implode('","', $filed_ids2).'")';
             }else{
-                $query = $query.' = "'.$filed_ids2.'"';
+                $query = $query.' = "'.$filed_ids2[0].'"';
             }
             
         }else if(is_numeric($file_ids[0]) && $file_ids[0]>0){
@@ -366,6 +366,8 @@ function fileGetThumbnailURL($system, $recID, $get_bgcolor, $check_linked_media 
     
     if($fileid){
 
+        $fileid = preg_replace('/[^a-z0-9]/', "", $fileid);//for snyk
+        
         $thumbfile = 'ulf_'.$fileid.'.png'; // ulf_[obfuscation].png
 
         if(defined('HEURIST_THUMB_URL') && file_exists(HEURIST_THUMB_DIR . $thumbfile)){
@@ -624,14 +626,15 @@ function downloadFileWithMetadata($system, $fileinfo, $rec_ID){
     }    
     
     
-    $need_remove_tmpfile = false;
+    $_tmpfile = null;
     
     if($is_local){
         
     }else if($external_url && strpos($originalFileName,'_tiled')!==0 && $source_type!='tiled'){
-        $need_remove_tmpfile = true;
-        $filepath = tempnam(HEURIST_SCRATCH_DIR, '_remote_');
-        saveURLasFile($external_url, $filepath); //save to temp in scratch folder
+        
+        $_tmpfile = tempnam(HEURIST_SCRATCH_DIR, '_remote_');
+        $filepath = $_tmpfile;
+        saveURLasFile($external_url, $_tmpfile); //save to temp in scratch folder
     }
     
     $file_zip = $downloadFileName.'.zip';
@@ -650,7 +653,9 @@ function downloadFileWithMetadata($system, $fileinfo, $rec_ID){
     $zip->close();
     
     //remove temp file
-    if($need_remove_tmpfile) unlink($filepath);
+    if($_tmpfile!=null) {
+        unlink($_tmpfile);   
+    }
     
     //donwload
     $contentDispositionField = 'Content-Disposition: attachment; '
