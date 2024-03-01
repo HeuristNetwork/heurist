@@ -73,10 +73,42 @@ $mysqli = $system->get_mysqli();
         <div id="in_porgress" class="coverall-div" style="display:none;"><h2>Repairing....</h2></div>    
     
         <div class="banner">
+            <h2>Disk usage and quota</h2>
+        </div>
+<?php
+        $quota = $system->getDiskQuota(); //takes value from disk_quota_allowances.txt
+        $quota_not_defined = (!($quota>0));
+        if($quota_not_defined){
+            $quota = 1073741824; //1GB    
+        }
+        $usage = filestoreGetUsageByScan($system);
+        
+        $quota /= 1048576;
+        $quota = round((float)$quota, 2);
+
+        $usage /= 1048576;
+        $usage = round((float)$usage, 2);
+        
+        $dirs = filestoreGetUsageByFolders($system);
+        
+        print '<p>Disk quota: '.$quota.' MB</p>';
+        print 'Disk usage by folder<br><table><tr><th>folder</th><th>MB</th></tr>';
+        
+        foreach ($dirs as $dir=>$size){
+            if($size>0){
+                $size /= 1048576;
+                $size = round((float)$size, 2);
+                print '<tr><td>'.htmlspecialchars($dir).'</td><td>'.$size.'</td></tr>';    
+            }
+        }//for
+        print '</table>';
+        print 'Total usage: <b>'.$usage.' MB</b><br><hr>';
+?>        
+        <div class="banner">
             <h2>Check for missing and orphaned files and incorrect paths</h2>
         </div>
 
-        <div><br><br>
+        <div>
             These checks look for errors in uploaded file records.
             <br><br><hr><br><br>
             <div id="linkbar"></div>

@@ -355,7 +355,7 @@
         
         $dir = realpath($dir);
         
-        if($dir!==false && file_exists($dir)){
+        if($dir!==false && file_exists($dir) && is_dir($dir)===true){
         
             $arr = glob(rtrim($dir, '/').'/*', GLOB_NOSORT);
             foreach ($arr as $each) {

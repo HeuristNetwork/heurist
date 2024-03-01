@@ -1236,6 +1236,30 @@ function filestoreGetUsageByScan($system){
     return $sz1+$sz2;
 }
 
+function filestoreGetUsageByFolders($system){
+
+    $mediaFolders = $system->get_system('sys_MediaFolders'); 
+    if($mediaFolders==null || $mediaFolders == ''){ //not defined
+        $mediaFolders = 'uploaded_files';
+    }
+    $mediaFolders = explode(';', $mediaFolders); // get an array of folders
+    $dirs = array();
+    
+    foreach ($mediaFolders as $dir){
+        if( $dir && $dir!="*") {
+            $dir2 = $dir;
+            $dir = USanitize::sanitizePath(HEURIST_FILESTORE_DIR.$dir);
+            if($dir){
+                $dirs[$dir2] = folderSize2($dir);
+            }
+        }
+    }
+
+    $dirs['file_uploads'] = folderSize2(HEURIST_FILES_DIR);
+    $dirs['uploaded_tilestacks'] = folderSize2(HEURIST_TILESTACKS_DIR);
+    
+    return $dirs;
+}
 
 /**
 * Calculates disk usage for file_uploads and uploaded_tilestacks folders
@@ -1250,5 +1274,4 @@ function filestoreGetUsageByDb($system){
     
     return $res;
 }
-
 ?>
