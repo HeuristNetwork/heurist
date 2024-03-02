@@ -159,6 +159,7 @@ if(!$error){
             {
 
                 $filepath = resolveFilePath( $filepath );
+                $filepath = isPathInHeuristUploadFolder($filepath); //snyk SSRF
                 
                 if( @$_REQUEST['mode']=='metaonly'){ //get width and height for image file
 

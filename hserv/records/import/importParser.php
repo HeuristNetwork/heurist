@@ -760,9 +760,9 @@ private static function _saveEncodedFilename($encoded_filename){
             if(is_array($filenames) && count($filenames)>0){
                 //cleanup
                 foreach ($filenames as $fname){
-                    if(file_exists($fname)){ //&& in HEURIST_SCRATCH_DIR
+                    if(strpos($fname, HEURIST_SCRATCH_DIR)===0 && file_exists($fname)){ 
                         unlink($fname);
-                     }
+                    }
                 }
                 $query = 'DELETE FROM `import_tmp_file` WHERE imp_Date <  NOW() - INTERVAL 2 DAY';
                 $mysqli->query($query);

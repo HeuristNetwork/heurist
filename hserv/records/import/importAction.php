@@ -2301,7 +2301,7 @@ private static function doInsertUpdateRecord($recordId, $import_table, $recordTy
 
             //@todo special formatting
             //foreach($out["error"] as $idx=>$value){
-                $value = $out["message"];
+                $value = htmlspecialchars($out["message"]);
                 $value = str_replace(". You may need to make fields optional. Missing data","",$value);
                 $k = strpos($value, "Missing data for Required field(s) in");
                 if($k!==false){

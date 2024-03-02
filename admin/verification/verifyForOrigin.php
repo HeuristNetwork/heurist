@@ -357,7 +357,7 @@
                         $red_color = '>';
                     }
                 
-                    array_push($missing, '<i'.$red_color.$f_code.'  '.$f_name.'</i>');
+                    array_push($missing, '<i'.$red_color.htmlspecialchars($f_code.'  '.$f_name).'</i>');
                 }
             }
             if(count($missing)>0){

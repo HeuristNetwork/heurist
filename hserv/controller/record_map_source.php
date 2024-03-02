@@ -361,7 +361,7 @@
                         
                     header($contentDispositionField);
                     header('Content-Length: ' . strlen($file_content));
-                    exit($file_content);
+                    echo $file_content;
                 }    
                 
             }

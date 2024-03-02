@@ -343,6 +343,7 @@ class DbSysGroups extends DbEntityBase
             if(is_array(@$affectedUserIds) && count($affectedUserIds)>0)
             foreach($affectedUserIds as $usrID)  //affected users
             if($usrID!=$this->system->get_user_id()){
+                    $usrID = intval($usrID);
                     $fname = $this->getEntityImagePath($usrID);
                     if(file_exists($fname)){
                         unlink($fname);
