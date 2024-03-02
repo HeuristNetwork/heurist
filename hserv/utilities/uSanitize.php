@@ -222,19 +222,24 @@ class USanitize {
             $purifier = $this->purifier;
         }
 
-        foreach($params as $k => $v)
-        {
-            if($v!=null){
-                
-                if(is_array($v) && count($v)>0){
-                    USanitize::purifyHTML($v, $purifier);
-                }else{
-                    $v = $purifier->purify($v);
-                    //$v = htmlspecialchars_decode($v);
+        if(is_array($params)){
+        
+            foreach($params as $k => $v)
+            {
+                if($v!=null){
+                    
+                    if(is_array($v) && count($v)>0){
+                        USanitize::purifyHTML($v, $purifier);
+                    }else{
+                        $v = $purifier->purify($v);
+                        //$v = htmlspecialchars_decode($v);
+                    }
+                    $params[$k] = $v;
                 }
-                $params[$k] = $v;
-            }
-        }//for
+            }//for
+        }else{
+            return $purifier->purify($params);
+        }
     }
 
     //
