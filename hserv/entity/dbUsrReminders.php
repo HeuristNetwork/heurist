@@ -464,7 +464,9 @@ exit;
                     }
                     
                     //$res = sendEmail($recipient['email'], $email_title, $email_text, $email_headers, true);
-                    sendPHPMailer(null, $email_from_name, $recipient['email'], $email_title, $email_text, null, false);
+                    $recipient_sanitized = filter_var($recipient['email'], FILTER_VALIDATE_EMAIL);
+                    $email_text = USanitize::purifyHTML($email_text);                    
+                    sendPHPMailer(null, $email_from_name, $recipient_sanitized, $email_title, $email_text, null, false);
                     
                     
                 }//for recipients

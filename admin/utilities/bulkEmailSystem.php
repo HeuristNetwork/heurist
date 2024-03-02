@@ -508,7 +508,7 @@ class systemEmailExt {
 
                 $title = '=?utf-8?B?'.base64_encode($title).'?=';
 
-                $rv = mail($email, $title, $body, $email_header);
+                $rv = mail($email, $title, USanitize::purifyHTML($body), $email_header);
                 if(!$rv){
                     $this->set_error('Unknown error');
                     $email_rtn = -3;
@@ -525,7 +525,7 @@ class systemEmailExt {
                 if($email_rtn == 0){
 
                     $mailer->Subject = $title;
-                    $mailer->Body = $body;
+                    $mailer->Body = USanitize::purifyHTML($body);
 
                     try {
                         $mailer->send();

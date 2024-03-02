@@ -118,7 +118,7 @@ function doReport($system, $update_mode, $format, $row){
 
 	if($row['rps_FilePath']!=null){
 		$dir = $row['rps_FilePath'];
-		if(substr($dir,-1)!="/") $dir = $dir."/";
+        $dir = USanitize::sanitizePath($dir);
 	}else{
 		$dir = $system->getSysDir('generated-reports');
         if(!folderCreate($dir, true)){
@@ -127,14 +127,16 @@ function doReport($system, $update_mode, $format, $row){
 	}
     
     if($format==null){
-        $format = $row['rps_URL'];
+        $format = @$row['rps_URL'];
         if(strpos($format,'&mode=')!==false){
             $params = array();
             parse_str($format, $params);
             $format = $params['mode'];
+        }else{
+            $format = null;
         }
     }
-    if(!preg_match('/html|js|txt|csv|xml|json|css/',$format)){
+    if($format==null || !preg_match('/html|js|txt|csv|xml|json|css/',$format)){
         $format = 'html'; //default
     }
 

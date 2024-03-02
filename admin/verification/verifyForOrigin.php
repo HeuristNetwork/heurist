@@ -370,7 +370,7 @@
                     $missing2 = array();
                     foreach($codes as $rty_code){
                         if(!is_array(@$constraints2[$dty_Code]) || array_search($rty_code, $constraints2[$dty_Code])===false){ //not found or unconstrained
-                            array_push($missing, $rty_code.'  '.@$rty_Names[$rty_code] );
+                            array_push($missing, htmlspecialchars($rty_code.'  '.@$rty_Names[$rty_code]) );
                         }
                         if(!@$fileds_missed_rectypes[$rty_code] && array_search($rty_code, $rty_Codes2)===false){
                             $fileds_missed_rectypes[$rty_code] = $rty_code.'  '.htmlspecialchars(@$rty_Names[$rty_code]);

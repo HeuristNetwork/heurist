@@ -2160,9 +2160,11 @@ $allowed = array(HEURIST_MAIN_SERVER, 'https://epigraphia.efeo.fr', 'https://nov
                 $msgTitle = 'Error report '.HEURIST_SERVER_NAME.' for '.$y1.($y2==$y1?'':(' ~ '.$y2));
                 $msg = $msgTitle;
                 foreach($logs_to_be_emailed as $log_file){
-                    $msg = $msg.'<br>'.(file_get_contents($log_file));
+                    $msg = $msg.'<br>'.file_get_contents($log_file);
                 }
                 //'Bug reporter', 
+                $msg = USanitize::purifyHTML($msg);
+                
                 sendEmail(HEURIST_MAIL_TO_BUG, $msgTitle, $msg, true);
             }
             
