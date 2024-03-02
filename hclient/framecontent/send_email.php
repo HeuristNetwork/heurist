@@ -33,7 +33,8 @@ if(isset($_POST['data'])) {
     $header =  htmlspecialchars(filter_var($data->header));    // Email header
     foreach($data->emails as $email) {
         // Determine message & recipients
-        $message = USanitize::purifyHTML($email->message);       // Email message
+        $message = $email->message;
+        USanitize::purifyHTML($message);       // Email message
         $recipients = $email->recipients; // One or more e-mail adresses
         foreach($recipients as $recipient) {
             // Check if the e-mail address is valid
