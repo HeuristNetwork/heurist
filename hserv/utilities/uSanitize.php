@@ -216,10 +216,10 @@ class USanitize {
     public static function purifyHTML(&$params, $purifier = null){
         
         if($purifier==null){
-            if($this->purifier==null){
-                $this->purifier = USanitize::getHTMLPurifier();   
+            if(self::$purifier==null){
+               self::$purifier = USanitize::getHTMLPurifier();   
             }
-            $purifier = $this->purifier;
+            $purifier = self::$purifier;
         }
 
         if(is_array($params)){
