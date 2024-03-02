@@ -35,6 +35,8 @@
 class USanitize {
   
     private function __construct() {}    
+    
+    private static $purifier = null;
 
     //
     //
@@ -214,7 +216,10 @@ class USanitize {
     public static function purifyHTML(&$params, $purifier = null){
         
         if($purifier==null){
-            $purifier = USanitize::getHTMLPurifier();
+            if($this->purifier==null){
+                $this->purifier = USanitize::getHTMLPurifier();   
+            }
+            $purifier = $this->purifier;
         }
 
         foreach($params as $k => $v)

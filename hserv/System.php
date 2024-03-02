@@ -2163,7 +2163,7 @@ $allowed = array(HEURIST_MAIN_SERVER, 'https://epigraphia.efeo.fr', 'https://nov
                     $msg = $msg.'<br>'.file_get_contents($log_file);
                 }
                 //'Bug reporter', 
-                $msg = USanitize::purifyHTML($msg);
+                USanitize::purifyHTML($msg);
                 
                 sendEmail(HEURIST_MAIL_TO_BUG, $msgTitle, $msg, true);
             }
@@ -2206,7 +2206,7 @@ $allowed = array(HEURIST_MAIN_SERVER, 'https://epigraphia.efeo.fr', 'https://nov
                 . " features. They are safe to use and we will respond repidly to any reported bugs.";
                 
                 //Update notification
-                $msg = USanitize::purifyHTML($msg);
+                USanitize::purifyHTML($msg);
                 sendEmail(HEURIST_MAIL_TO_ADMIN, $title, $msg, true);
                 
                 return;
