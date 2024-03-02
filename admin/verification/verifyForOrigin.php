@@ -417,7 +417,8 @@
                         }
                     }
                     if(@$fileds_differ_terms[$dty_Code]){
-                       $msg_error = $msg_error."<p style='padding-left:40px'>field ".$dty_Code.' <i>'.$fields[$rty_Code][$dty_Code]
+                       $msg_error = $msg_error."<p style='padding-left:40px'>field ".$dty_Code
+                                    .' <i>'.htmlspecialchars($fields[$rty_Code][$dty_Code])
                                     .'</i>: missing terms (see below)</p>';
                     }
                     
