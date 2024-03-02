@@ -2313,7 +2313,7 @@ private static function doInsertUpdateRecord($recordId, $import_table, $recordTy
             //for}
         
             foreach($details['imp_id'] as $imp_id){
-                print "<div><span style='color:red'>Line: ".$imp_id.".</span> ".implode("; ",$value);
+                print "<div><span style='color:red'>Line: ".intval($imp_id).".</span> ".implode("; ",$value);
                 $res = self::getImportValue($imp_id, $import_table);
                 if(is_array($res)){
                     $s = htmlspecialchars(implode(", ", $res));

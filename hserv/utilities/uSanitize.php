@@ -180,6 +180,13 @@ class USanitize {
             $config->set('CSS.AllowTricky', true);
             $config->set('CSS.Proprietary', true);
             $config->set('CSS.Trusted', true);
+
+            $config->set('HTML.Doctype', 'HTML 4.01 Transitional');        
+            $config->set('HTML.DefinitionID', 'html5-definitions'); // unqiue id
+            $config->set('HTML.DefinitionRev', 1);
+
+            $config->set('Attr.AllowedFrameTargets','_blank');
+            $config->set('HTML.SafeIframe', true);
             /*$config->set('Core.AcceptFullDocuments',false);
             $config->set('Core.HiddenElements',array (
                     'script' => true,
@@ -195,6 +202,7 @@ class USanitize {
             $def->addAttribute('div', 'data-heurist-app-id', 'Text');            
             $def->addAttribute('div', 'data-inited', 'Text');
             $def->addAttribute('a', 'data-ref', 'Text');
+            
             
             return new HTMLPurifier($config);
         

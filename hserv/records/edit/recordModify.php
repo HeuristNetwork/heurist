@@ -2711,7 +2711,7 @@ $dtl_Value = preg_replace('#<([A-Z][A-Z0-9]*)\s*(?:(?:(?:(?!'.$allowed2.')[^>]))
                         if($err_msg!=''){
                             //send email to heurist team about fail generation from url
                             sendEmail(HEURIST_MAIL_TO_ADMIN, 'The thumbnailer fails to return an image '.$system->dbname(),
-                                'The thumbnailer fails to return an image '.$record['URL'].'. '.$err_msg);      
+                                'The thumbnailer fails to return an image '.htmlspecialchars($record['URL']).'. '.$err_msg);      
                             $err_msg = '';
                             $dtl_Value = '';
                             $isValid = 'ignore';

@@ -378,7 +378,8 @@
                         }
                     }        
                     if(count($missing)>0){
-                       $msg_error = $msg_error."<p style='padding-left:40px'>field ".$dty_Code.' '.$fields[$rty_Code][$dty_Code]
+                       $msg_error = $msg_error."<p style='padding-left:40px'>field ".$dty_Code
+                                    .' '.htmlspecialchars($fields[$rty_Code][$dty_Code])
                                     .': missing constraint record types '.implode(',',$missing).'</p>';
                     }
                     /*

@@ -552,6 +552,8 @@ skin_open();
     $kbytes_done  = round($bytes_done/1024,2);
     $mbytes_this  = round($kbytes_this/1024,2);
     $mbytes_done  = round($kbytes_done/1024,2);
+    
+    $filesize = intval($filesize);
 
     if (!$gzipmode)
     {

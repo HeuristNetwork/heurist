@@ -19,6 +19,7 @@
 * @subpackage  !!!subpackagename for file such as Administration, Search, Edit, Application, Library
 */
 define('PDIR','../../');  //need for proper path to js and css    
+define('MANAGER_REQUIRED', 1);   
 
 require_once 'initPageMin.php';
 require_once dirname(__FILE__).'/../../hserv/utilities/uMail.php';
@@ -28,11 +29,11 @@ if(isset($_POST['data'])) {
     $data = json_decode($_POST['data']);
     $response = "";
 
-    $subject = filter_var($data->subject);  // Email subject
-    $header = filter_var($data->header);    // Email header
+    $subject = htmlspecialchars(filter_var($data->subject));  // Email subject
+    $header =  htmlspecialchars(filter_var($data->header));    // Email header
     foreach($data->emails as $email) {
         // Determine message & recipients
-        $message = filter_var($email->message);       // Email message
+        $message = USanitize::purifyHTML($email->message);       // Email message
         $recipients = $email->recipients; // One or more e-mail adresses
         foreach($recipients as $recipient) {
             // Check if the e-mail address is valid

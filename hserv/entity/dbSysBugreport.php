@@ -129,7 +129,7 @@ class DbSysBugreport extends DbEntityBase
 
         //add current system information into message
         $ext_info = array();
-        array_push($ext_info, "    Browser information: ".$_SERVER['HTTP_USER_AGENT']);
+        array_push($ext_info, "    Browser information: ".htmlspecialchars($_SERVER['HTTP_USER_AGENT']));
 
         //add current heurist information into message
         array_push($ext_info, "   Heurist url: ".HEURIST_BASE_URL.'?db='.HEURIST_DBNAME);

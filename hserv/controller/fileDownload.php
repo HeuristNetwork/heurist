@@ -107,7 +107,7 @@ if(!$error){
         if(is_array($listpaths) && count($listpaths)>0){
 
             $fileinfo = $listpaths[0]; //
-            $filepath = $fileinfo['fullPath'];  //concat(ulf_FilePath,ulf_FileName as fullPath
+            $filepath = USanitize::sanitizePath($fileinfo['fullPath']);  //concat(ulf_FilePath,ulf_FileName as fullPath
             $external_url = $fileinfo['ulf_ExternalFileReference'];     //ulf_ExternalFileReference
             $mimeType = $fileinfo['fxm_MimeType'];  //fxm_MimeType
             $sourceType = $fileinfo['ulf_PreferredSource']; //not used
