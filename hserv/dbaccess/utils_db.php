@@ -496,25 +496,25 @@
         
         $columns3 = array();
         foreach($columns as $idx=>$column){
-            $columns3[] = preg_replace('/[^a-zA-Z0-9_]/', "", $column);  //for snyk
+            $columns3[] = '`'.preg_replace('/[^a-zA-Z0-9_]/', "", $column).'`';  //for snyk
         }
         
         if($idfield!=null && $newid!=null){
             
             $idx = array_search($idfield, $columns3);
             $columns2 = $columns3;
-            $columns2[$idx] = $newid;
-            $columns2 = '`'.implode('`,`',$columns2).'`';
+            $columns2[$idx] = intval($newid);
+            $columns2 = implode(',',$columns2);
             
         }else{
-            $columns2 = '`'.implode('`,`',$columns3).'`';
+            $columns2 = implode(',',$columns3);
         }
         
         $where = " where `$idfield`=".intval($oldid);
         
-        $columns3 = implode('`,`',$columns3);
+        $columns3 = implode(',',$columns3);
         //
-        $query = "INSERT INTO `$table` (`$columns3`) SELECT $columns2 FROM `$table`".$where;
+        $query = "INSERT INTO `$table` ($columns3) SELECT $columns2 FROM `$table`".$where;
     //print $query.'<br>';    
         
         $res = $mysqli->query($query);
