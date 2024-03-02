@@ -1690,6 +1690,7 @@ $siz = USystem::getConfigBytes('upload_max_filesize');
             );
         }
         $file_path = $this->get_upload_path($file_name, $subfolder, $this->get_version_param());
+        $file_path = USanitize::sanitizePath($file_path);
         // Prevent browsers from MIME-sniffing the content-type:
         $this->header('X-Content-Type-Options: nosniff');
         if (!preg_match($this->options['inline_file_types'], $file_name)) {
