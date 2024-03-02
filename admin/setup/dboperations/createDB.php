@@ -128,7 +128,7 @@ if( isset($passwordForDatabaseCreation) && $passwordForDatabaseCreation!='' &&
         //compose database name
         $uName = '';
         if(@$_REQUEST['uname']){
-            $uName = trim(htmlspecialchars(@$_REQUEST['uname'])).'_';
+            $uName = trim(preg_replace('/[^a-zA-Z0-9_]/', "", @$_REQUEST['uname'])).'_'; //for snyk            
             if ($uName == '_') {$uName='';}; // don't double up underscore if no user prefix
         }
         

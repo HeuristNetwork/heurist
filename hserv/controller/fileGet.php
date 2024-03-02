@@ -44,9 +44,11 @@ $entity_name = htmlspecialchars(@$_REQUEST['entity']);
 $error = System::dbname_check($db);
 
 if(!$error){
+    
+        $db = preg_replace('/[^a-zA-Z0-9_]/', "", $db); //for snyk
 
-$system = new System(); //without db connection and session - just paths
-$system->initPathConstants($db);
+        $system = new System(); //without db connection and session - just paths
+        $system->initPathConstants($db);
     
 if($filename){ //download from scratch (for csv import)
 

@@ -2192,9 +2192,10 @@ $allowed = array(HEURIST_MAIN_SERVER, 'https://epigraphia.efeo.fr', 'https://nov
                 continue;
             }else if($server_parts[$i] > $local_parts[$i]){ // main release is newer than installed version, send email
 
-                $title = "Heurist version " . $local_ver . " at " . HEURIST_BASE_URL . " is behind Heurist home server";
+                $title = "Heurist version " . htmlspecialchars($local_ver)
+                 . " at " . HEURIST_BASE_URL . " is behind Heurist home server";
 
-                $msg = "Heurist on the referenced server is running version " . $local_ver 
+                $msg = "Heurist on the referenced server is running version " . htmlspecialchars($local_ver) 
                     . " which can be upgraded to the newer " . htmlspecialchars($server_ver) . ".<br><br>"
                 . "Please check for an update package at <a href='https://heuristnetwork.org/installation/'>https://heuristnetwork.org/installation/</a><br><br>"
                 . "Update packages reflect the alpha version and install in parallel with existing versions"

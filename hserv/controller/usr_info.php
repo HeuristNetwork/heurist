@@ -39,6 +39,8 @@
     $dbname = @$_REQUEST['db'];
     $error = System::dbname_check($dbname);
 
+    $dbname = preg_replace('/[^a-zA-Z0-9_]/', "", $dbname); //for snyk    
+    
     if($error){
         $system->addError(HEURIST_INVALID_REQUEST, $error);
         $res = false;

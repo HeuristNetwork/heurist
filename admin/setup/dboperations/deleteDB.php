@@ -45,6 +45,7 @@ if(!@$_REQUEST['pwd']){
         $system->addError(HEURIST_ACTION_BLOCKED, $sErrorMsg);
     }else{
 
+    $database_to_delete = preg_replace('/[^a-zA-Z0-9_]/', "", $database_to_delete); //for snyk
 
     $create_arc = ( (@$_REQUEST['create_archive']===true)
             || (@$_REQUEST['create_archive']==='true') 

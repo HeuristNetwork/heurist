@@ -79,7 +79,7 @@ $mysqli = $system->get_mysqli();
         $terms = array();
         $is_found = false;
         
-        $db_name = preg_replace('/[^a-zA-Z0-9_]/', "", $db_name);
+        $db_name = preg_replace('/[^a-zA-Z0-9_]/', "", $db_name); //for snyk
 
         //RECORD TYPES
         
