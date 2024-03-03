@@ -68,8 +68,10 @@ if($is_included){
         exit;
     }
 ?>    
-<html>
+<!DOCTYPE html>
+<html lang="en">
     <head>
+        <title><?php echo HEURIST_TITLE; ?></title>
         <meta http-equiv="content-type" content="text/html; charset=utf-8">
         <link rel="stylesheet" type="text/css" href="<?php echo PDIR;?>h4styles.css" />
     </head>

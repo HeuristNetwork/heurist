@@ -124,13 +124,15 @@ if(defined('IS_INDEX_PAGE')){
 <html  class="no-js" lang="en" dir="ltr">
 */
 if(defined('IS_INDEX_PAGE')){
-    print "<!DOCTYPE html>\n";
+?>
+<!DOCTYPE html>
+<?php    
 }
 ?>
-<html>
+<html lang="en" xml:lang="en">
 <head>
 
-<title><?=(@$_REQUEST['db']?htmlspecialchars($_REQUEST['db']):'').'. '.HEURIST_TITLE ?></title>
+<title><?php echo (@$_REQUEST['db']?htmlspecialchars($_REQUEST['db']):'').'. '.HEURIST_TITLE; ?></title>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 
 <meta name="SKYPE_TOOLBAR" content="SKYPE_TOOLBAR_PARSER_COMPATIBLE" />

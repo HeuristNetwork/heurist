@@ -63,7 +63,8 @@ if($is_json){
 }
 
 ?>
-<html>
+<!DOCTYPE html>
+<html lang="en">
     <head>
         <title><?=HEURIST_TITLE?></title>
         <meta http-equiv="content-type" content="text/html; charset=utf-8">
