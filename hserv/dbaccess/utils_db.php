@@ -828,7 +828,7 @@
                 $dbScriptMode = 0;
             }
             
-            $dbScriptMode = 0; //disable all others
+            //$dbScriptMode = 0; //disable all others
             
             if($dbScriptMode==2){
                 //shell script - server admin must specify "local" login-path with mysql_config_editor 
@@ -837,20 +837,25 @@
                 $arr_out = array();
                 $res2 = null;
                 
-                /* remarked temporary to avoid security warnings
-                $cmd = HEURIST_DB_MYSQLPATH." --login-path=local -D"
-                        .escapeshellarg($database_name_full)." < ".escapeshellarg($script_file). ' 2>&1';
-                        
-                $output2 = exec($cmd, $arr_out, $res2);
+                $cmd = escapeshellcmd(HEURIST_DB_MYSQLPATH);
+                if(strpos(HEURIST_DB_MYSQLPATH,' ')>0){
+                    $cmd = '"'.$cmd.'"';
+                }
+                
+                /* remarked temporary to avoid security warnings */
+                $cmd = $cmd         //." --login-path=local "
+                ." -u".ADMIN_DBUSERNAME." -p".ADMIN_DBUSERPSWD
+                ." -D ".escapeshellarg($database_name_full)." < ".escapeshellarg($script_file). ' 2>&1'; 
+                
+                exec($cmd, $arr_out, $res2);
 
                 if ($res2 != 0 ) {
-                    $error = 'Error: '.print_r($arr_out, true);
-                    //echo($output2);
+                    $error = 'Error: '.print_r($res2, true);
                 }else{
                     $res = true;
                 }
-                */
-            }else if($dbScriptMode==1){
+                
+            /*}else if($dbScriptMode==1){ //DISABLED
                 //internal routine
                 $script_content = file_get_contents($script_file);
 
@@ -885,7 +890,7 @@
                 if($mysqli2!=null){
                     $mysqli2->close();
                 }
-
+            */
             }else{ //3d party function that uses PDO  - DEFAULT
                 
                 if(!function_exists('execute_db_script')){

@@ -789,10 +789,15 @@ class DbUtils {
                 //https://dev.mysql.com/doc/refman/8.0/en/mysql-config-editor.html
                 // use mysql_config_editor to store authentication credentials 
                 // in an obfuscated login path file named .mylogin.cnf. 
+
+
+                $cmd = escapeshellcmd(HEURIST_DB_MYSQLDUMP);
+                if(strpos(HEURIST_DB_MYSQLDUMP,' ')>0){
+                    $cmd = '"'.$cmd.'"';
+                }
                 
-                       //escapeshellcmd
-                       //escapeshellarg
-                $cmd = escapeshellcmd(HEURIST_DB_MYSQLDUMP)
+
+                $cmd = $cmd
                 ." -u".ADMIN_DBUSERNAME." -p".ADMIN_DBUSERPSWD
                 //." --login-path=local 
                 ." {$options} {$tables} ".escapeshellarg($database_name_full)
