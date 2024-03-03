@@ -237,7 +237,7 @@
 
         if($res){
             while ($row = $res->fetch_row()) {
-                $test = strpos($database, $prefix);
+                $test = strpos($row[0], $prefix);
                 if ($test === 0) {
                     $database = preg_replace('/[^a-zA-Z0-9_]/', "", $row[0]);  //for snyk
                     if ($isFilter) {
