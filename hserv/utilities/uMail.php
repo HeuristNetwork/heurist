@@ -41,6 +41,8 @@ use PHPMailer\PHPMailer\Exception;
         if(!$email_from) $email_from = 'no-reply@'.(defined('HEURIST_MAIL_DOMAIN')?HEURIST_MAIL_DOMAIN:HEURIST_DOMAIN);
         if(!$email_from_name) $email_from_name = 'Heurist system. ('.HEURIST_SERVER_NAME.')';
         
+        USanitize::purifyHTML($email_text);
+        
         if(is_array($email_text)){
             $email_text =  json_encode($email_text);    
         }

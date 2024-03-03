@@ -187,10 +187,9 @@ class DbSysBugreport extends DbEntityBase
             }
         }
 
-        $msg = USanitize::purifyHTML($sMessage); //since 02 Dec 2021 we sent human readable message
         if(sendPHPMailer(null, 'Bug reporter', $toEmailAddress, 
                 $bug_title, 
-                $msg,        
+                $sMessage,   //since 02 Dec 2021 we sent human readable message     
                 $filename, true)){
             return array(1); //fake rec id
         }else{

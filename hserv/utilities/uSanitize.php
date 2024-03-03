@@ -238,7 +238,7 @@ class USanitize {
                 }
             }//for
         }else{
-            return $purifier->purify($params);
+            $params = $purifier->purify($params);
         }
     }
 

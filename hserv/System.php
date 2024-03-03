@@ -2163,8 +2163,6 @@ $allowed = array(HEURIST_MAIN_SERVER, 'https://epigraphia.efeo.fr', 'https://nov
                     $msg = $msg.'<br>'.file_get_contents($log_file);
                 }
                 //'Bug reporter', 
-                $msg = USanitize::purifyHTML($msg);
-                
                 sendEmail(HEURIST_MAIL_TO_BUG, $msgTitle, $msg, true);
             }
             
@@ -2197,16 +2195,15 @@ $allowed = array(HEURIST_MAIN_SERVER, 'https://epigraphia.efeo.fr', 'https://nov
                 $title = "Heurist version " . htmlspecialchars($local_ver)
                  . " at " . HEURIST_BASE_URL . " is behind Heurist home server";
 
-                $msg = "Heurist on the referenced server is running version " . htmlspecialchars($local_ver) 
-                    . " which can be upgraded to the newer " . htmlspecialchars($server_ver) . ".<br><br>"
-                . "Please check for an update package at <a href='https://heuristnetwork.org/installation/'>https://heuristnetwork.org/installation/</a><br><br>"
-                . "Update packages reflect the alpha version and install in parallel with existing versions"
-                . " so you may test them before full adoption. We recommend use of the alpha package"
-                . " by any confident user, as they bring bug-fixes, cosmetic improvements and new"
-                . " features. They are safe to use and we will respond repidly to any reported bugs.";
+                $msg = 'Heurist on the referenced server is running version '
+                    . " $local_ver which can be upgraded to the newer $server_ver<br><br>"
+                . 'Please check for an update package at <a href="https://heuristnetwork.org/installation/">https://heuristnetwork.org/installation/</a><br><br>'
+                . 'Update packages reflect the alpha version and install in parallel with existing versions'
+                . ' so you may test them before full adoption. We recommend use of the alpha package'
+                . ' by any confident user, as they bring bug-fixes, cosmetic improvements and new'
+                . ' features. They are safe to use and we will respond repidly to any reported bugs.';
                 
                 //Update notification
-                $msg = USanitize::purifyHTML($msg);
                 sendEmail(HEURIST_MAIL_TO_ADMIN, $title, $msg, true);
                 
                 return;
