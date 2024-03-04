@@ -1074,7 +1074,7 @@ class System {
                $needEncodeRecordDetails, 
                $common_languages_for_translation, $glb_lang_codes, 
                $saml_service_provides, $hideStandardLogin,
-               $accessToken_DeepLAPI, $useRewrtieRulesForRecordLink;
+               $accessToken_DeepLAPI, $useRewriteRulesForRecordLink;
    
         if(!isset($needEncodeRecordDetails)){
             $needEncodeRecordDetails = 0;
@@ -1192,7 +1192,7 @@ class System {
                     'pwd_ReservedChanges' => (strlen(@$passwordForReservedChanges)>6),  //allow change reserved fields 
                     'pwd_ServerFunctions' => (strlen(@$passwordForServerFunctions)>6),   //allow run multi-db server actions
                     'api_Translator' => (!empty($accessToken_DeepLAPI)), // an api key has been setup for Deepl
-                    'use_redirect' => @$useRewrtieRulesForRecordLink
+                    'use_redirect' => @$useRewriteRulesForRecordLink
                 )
             );
             
@@ -1220,7 +1220,7 @@ class System {
                     'saml_service_provides'=>$saml_service_provides,
                     'hideStandardLogin' => $hideStandardLogin,
                     'common_languages'=>$common_languages,
-                    'use_redirect' => @$useRewrtieRulesForRecordLink
+                    'use_redirect' => @$useRewriteRulesForRecordLink
             );
 
         }
@@ -1923,7 +1923,7 @@ class System {
     //
     public function recordLink($rec_id){
 
-        global $useRewrtieRulesForRecordLink;
+        global $useRewriteRulesForRecordLink;
 
         $template = '';
         if(preg_match('/(\d+)\/(.+\.tpl)/', $rec_id, $matches)){ //strpos($rec_id, "/") !== false
@@ -1940,7 +1940,7 @@ class System {
             }
         }
 
-        if(isset($useRewrtieRulesForRecordLink) && $useRewrtieRulesForRecordLink){
+        if(isset($useRewriteRulesForRecordLink) && $useRewriteRulesForRecordLink){
             $url = empty($template) ? HEURIST_BASE_URL.$this->dbname.'/view/'.$rec_id 
                         : HEURIST_BASE_URL.$this->dbname.'/tpl/'.$template.'/'.$rec_id;
 

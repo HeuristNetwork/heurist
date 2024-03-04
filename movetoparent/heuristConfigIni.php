@@ -6,11 +6,11 @@
 *
 * @package     Heurist academic knowledge management system
 * @link        https://HeuristNetwork.org
-* @copyright   (C) 2005-2023 University of Sydney
+* @copyright   (C) 2005-2024 University of Sydney
 * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
 * @author      Ian Johnson     <ian.johnson@sydney.edu.au>
 * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
-* @version     4
+* @version     6
 */
 
 /*
@@ -21,43 +21,40 @@
 * See the License for the specific language governing permissions and limitations under the License.
 */
 
-// See configIni.php for documentation. 
-// This file shoudl be placed in the parent directory of Heurist, eg. the web root,
+// See configIni.php for further documentation
+ 
+// This file should be placed in the parent directory of Heurist, normally /var/www/html/HEURIST
 // and renamed heuristConfigIni.php, the values in this file will then overide those given (if any) 
-// in the configIni.php file in each copy of Heurist on the server (in practice the
-// configIni.php file does NOT specify the values, since heuristConfigIni.php
-// provides all copies with shared values)
+// in the configIni.php file in each copy of Heurist on the server 
+
+// In practice the configIni.php file does NOT specify most of the values, since heuristConfigIni.php
+// provides all copies with shared values. 
+
+// The installation script automatically moves this file along with other relevant files to /var/www/html/HEURIST
 
 // **** DO NOT EDIT THE COPY OF THIS FILE IN THE CODEBASE (..../HEURIST/movetoparent) 
 //      as this will have no effect (it is the copy in ..../HEURIST/ which is used)
 
 if (!@$serverName) $serverName = null; // override default taken from request header SERVER_NAME
 if (!@$mailDomain) $mailDomain = null; // You may need to set mail domain if it does not use server domain
-
-if (!@$heuristReferenceServer) $heuristReferenceServer = "https://heuristref.net"; 
-// address of the "reference server", ie. the server where the master index and code updates are located 
-
-// ------ VALUES YOU SHOULD SET -------------------------------------------------------------------------------------------
-
-// ------ ESSENTIAL SETTINGS ------------------------------------------------------------------------------------------------
+if (!@$dbHost) $dbHost= "";            // Optional, blank = localhost for single tier, or set IP of MySQL server
 
 // MySQL user with full write (create) access on this database server
 // The default installation of MySql gives you "root" as the master user with whatever password you set up for this,
-// but you can specify another user and password with full access if preferred. Password cannot be null
+// but you can specify another user and password with full access if preferred. We recommend "heurist". Password cannot be null.
 // MySQL passwords may not contain special characters - if generating random password generate as alphanumeric
 // Values can be assigned to environment variable or defined here
 if (!@$dbAdminUsername) $dbAdminUsername = getenv("DB_ADMIN_USERNAME") ?getenv("DB_ADMIN_USERNAME") : "";  // required
 if (!@$dbAdminPassword) $dbAdminPassword = getenv("DB_ADMIN_PASSWORD") ?getenv("DB_ADMIN_PASSWORD") : "";  // required
 
-
-// [folders]
+// [FOLDERS]
 
 // REQUIRED: defines URL of Heurist filestore (contains files associated with databases)
 if (!@$defaultRootFileUploadURL) $defaultRootFileUploadURL = "http://localhost/HEURIST/HEURIST_FILESTORE/";
 // REQUIRED: defines internal location of Heurist filestore
 if (!@$defaultRootFileUploadPath) $defaultRootFileUploadPath = "/var/www/html/HEURIST/HEURIST_FILESTORE/";
 
-// [email]
+// [EMAIL]
 
 if (!@$sysAdminEmail) $sysAdminEmail = "info@HeuristNetwork.org"; 
 // REQUIRED, please set to email of the system administrator or mailing group
@@ -66,42 +63,19 @@ if (!@$infoEmail) $infoEmail = "info@HeuristNetwork.org";
 if (!@$bugEmail) $bugEmail = "info@HeuristNetwork.org";
 // recommended, set to info@heuristNetwork.org if your server is running a standard Heurist installation
 
-// -------- THE REST IS OPTIONAL ----------------------------------------------------------------------------------------------
-
-// A simple challenge password for creation of new databases. If left blank, any logged in user can create a new database
+// [ADMINSTRATOR ACCESS PASSWORDS]
+// A simple challenge password > 14 characters for creation of new databases. 
+// If left blank - normal condition - any logged in user can create a new database
 if (!@$passwordForDatabaseCreation) $passwordForDatabaseCreation=""; // normally blank = any logged in user can create
-if (!@$passwordForDatabaseDeletion) $passwordForDatabaseDeletion=""; // if blank only db owner can delete. 
-   // If set >14 characters, system adminstrator can delete up to 10 at a time (with password challenge) 
-if (!@$passwordForReservedChanges) $passwordForReservedChanges="";// if blank, no-one can modify reserved fields, otherwise challenge
-if (!@$passwordForServerFunctions) $passwordForServerFunctions="";// if blank, no-one can run server analysis functions - risk of overload - otherwise challenge
 
-if (!@$dbHost) $dbHost= ""; //optional, blank = localhost
-
-
-$httpProxyAlwaysActive = false; // if true - always use proxy for CURL, otherwise proxy will be used for non heurist resources mostly
-if (!@$httpProxy) $httpProxy = ''; // blank = assumes direct internet access from server
-if (!@$httpProxyAuth) $httpProxyAuth = ''; // authorization for proxy server "username:password"
-// If set this will override the value of bypassProxy when making external requests via cURL within uFile.php
+// Note: We strongly recommend setting a password at least for the server functions
+// Password(s) to allow system adminstrator certain extra rights. Must be > 14 characters or they are treated as blank
+if (!@$passwordForServerFunctions) $passwordForServerFunctions="";   // if blank, no-one can run server functions, otherwise challenge for password
+if (!@$passwordForDatabaseDeletion) $passwordForDatabaseDeletion=""; // db owner can always delete. Can delete up to 10 at a time with password challenge.
+if (!@$passwordForReservedChanges) $passwordForReservedChanges="";   // if blank, no-one can modify reserved fields, otherwise challenge for password
 
 
-//  set to IP address and port of Elastic search server, if used
-if (!@$indexServerAddress) $indexServerAddress = ""; 
-if (!@$indexServerPort) $indexServerPort = "9200";
-
-// dbPrefix will be prepended to all database names so that you can easily distinguish Heurist databases on your database server
-// from other MySQL databases. Some Admin tools such as PHPMyAdmin will group databases with common prefixes ending in underscore
-// The prefix may be left blank, in which case nothing is prepended. For practial management we strongly recommend a prefix.
-if (!@$dbPrefix) $dbPrefix = "hdb_"; // WE STRONGLY recommend retaining hdb_
-
-//Determines how to execute sql script file - 0: use 3d party PDO library (bigdump) (default), 2 - call mysql via shell
-$dbScriptMode = 0;
-//Determines how to  dump database - 0: use 3d party PDO mysqldump (default), 2 - call mysqldump via shell 
-$dbDumpMode = 0;
- 
-// path to mysql executables
-$dbMySQLpath = '/usr/bin/mysql';
-$dbMySQLDump = '/usr/bin/mysqldump';
-
+// [THUMBNAILING SERVICE] 
 
 // URL of 3d party website thumbnail service. Heurist can call any thumbnailing service which returns an
 // appropriate JPEG or GIF file when passed the URL of a web page. This may be a thumbnail of a security block page
@@ -113,15 +87,86 @@ if (!@$websiteThumbnailPassword) $websiteThumbnailPassword = "";
 if (!@$websiteThumbnailXsize) $websiteThumbnailXsize = 500; // required
 if (!@$websiteThumbnailYsize) $websiteThumbnailYsize = 300; // required
 
-// Optional: if set to -1 this will block creation of new websites with a message to contact sysadmin 
-// $allowCMSCreation = -1;
 
-// This allows selected databases on specific servers to access the 
-// ESTC lookup data on the reference server (covered by a strict use license)
-// $ESTC_UserName = "????"; // User name and password for access to the database
-// $ESTC_Password = "????";
-// $ESTC_PermittedDBs=""; // comma-separated list of database names on the server
-// $ESTC_ServerURL = "https://HeuristRef.Net";
+// [ACCESS AND PERFORMANCE]
+
+// use [base_url]/[database]/view/[rec_id] links - Need to define RewriteRule in httpd.conf
+$useRewriteRulesForRecordLink = true;
+
+// array of saml service providers
+$saml_service_provides = null;
+//for example:  $saml_service_provides = array("default-sp"=>"BnF Authentication");
+
+// use webserver to speed access to thumbnail images and uploaded files
+// otherwise images will be accessed via php
+$allowWebAccessThumbnails = true;
+$allowWebAccessUploadedFiles = true;
+$allowWebAccessEntityFiles = true;
+
+//Proxy use. If httpProxyAuth is set this will override the value of bypassProxy when making external requests via cURL within uFile.php
+if (!@$httpProxy) $httpProxy = '';         // blank = assumes direct internet access from server
+if (!@$httpProxyAuth) $httpProxyAuth = ''; // authorization for proxy server "username:password"
+$httpProxyAlwaysActive = false;           // if true - always use proxy for CURL, otherwise proxy will mostly be used for non-heurist resources
+
+// API keys and accessTokens
+$accessToken_MapBox = 'OBTAIN THIS FROM MAPBOX';
+$accessToken_MapTiles = 'OBTAIN THIS FROM MAPTILER';
+$accessToken_GoogleAPI = 'OBTAIN THIS FROM GOOGLE MAPS';
+$accessToken_GeonamesAPI = 'OBTAIN THIS FROM GEONAMES';
+
+
+// [TRANSLATIONS]
+
+// Set these to enable translations with DEEPL
+$accessToken_DeepLAPI = 'OBTAIN THIS FROM DEEPL'; // To enable DeepL translations
+$serverName_DeepL = "DEPENDS ON WHETHER FREE OR PAID SERVICE";
+
+// Common languages for translation database definitions (ISO639-2 codes) 3 char in upper case
+// change here to set for the entire installation, overriden by list in configIni.php if present for a specific instance
+// The full names and 2 character codes will be looked up in hclient\assets\language-codes-3b2.txt
+// The order puts languages at the top which are most likely to be used on this installation
+// Place languages supported by DEEPL at the top of the list
+// Place languages which are not supported by DEEPL at the end of the list - they can still be used to insert the translation prefix
+$common_languages_for_translation = array('ENG','FRE','CHI','SPA','ITA','DUT','GER','GRE','TUR','DAN','NOR','SWE','EST','FIN','ARA','BUR','CZE','HIN','HUN','IND','JPN','JAV','KOR','KUR','LAO','LAT','MAO','MAY','MKH','BUR','NEP','PER','POR','RUS','SLO','SLV','SWA','THA','TIB','UIG','UKR','VIE','YID','ZUL');
+
+
+// [DATABASE DUMP CONFIGURATION - TIERED SERVERS]
+
+// Tiered system: Change this if running on a system with MySQL running on a separate server from the web application
+// MySQL script execution:  see https://dev.mysql.com/doc/refman/8.0/en/mysql-config-editor.html for info
+// Determines how to execute mysql scripts, notably mysqldump. 
+// On a multi-tier server you need to use the 0 option to use the PDO library (bigdump), which may fail on some (large) databases
+// On a single tier server, use the 2 option which uses the standard mysqldump program via the shell, which is faster and less likely to fail
+// 0: use 3d party PDO library (bigdump), 2: call mysql via shell (default)
+$dbScriptMode = 2;
+//Determines how to  dump database - 0: use 3d party PDO mysqldump (for multi-tier), 2 - call mysqldump via shell (default, single tier system)
+$dbDumpMode = 2;
+ 
+// path to mysql executables
+$dbMySQLpath = '/usr/bin/mysql';
+$dbMySQLDump = '/usr/bin/mysqldump';
+
+
+// [ELASTIC SEARCH]
+
+//  set to IP address and port of Elastic search server, if used
+if (!@$indexServerAddress) $indexServerAddress = ""; 
+if (!@$indexServerPort) $indexServerPort = "9200";
+
+
+// [SECURITY LOCKDOWNS]
+
+// set to -1 to block creation of new websites with a message to contact sysadmin 
+$allowCMSCreation = 1;
+
+// On some servers severe restrictions can be activated. They may prevent sending to server json, html or js code snippets
+// In other words it forbids any request which is suspected as malicious
+// To workaround set this value to "1" to encode json requests for record edit
+//
+if (!@$needEncodeRecordDetails) $needEncodeRecordDetails = 0; 
+
+
+// [LEGACY FIXES]
 
 // Add paths to any servers previously used (since 2020), in the form https://server.domain,http://server.domain, … 
 // which may have been incorporated in web pages and which should be replaced by local relative paths
@@ -129,18 +174,5 @@ if (!@$websiteThumbnailYsize) $websiteThumbnailYsize = 300; // required
 // if (!@$absolutePathsToRemoveFromWebPages) $absolutePathsToRemoveFromWebPages = array('https://heuristplus.sydney.edu.au');
 $absolutePathsToRemoveFromWebPages = null;
 
-//
-// On some servers the severe restrictions can be activated. They may prevent sending to server json, html or js code snippets
-// In other words it forbids any request which is suspected as malicious
-// To workaround set this value to "1" to encode json requests for record edit
-//
-if (!@$needEncodeRecordDetails) $needEncodeRecordDetails = 0; 
 
-// common languages for translation database definitions (ISO639-2 codes) in upper case'
-// change here to set for the entire installation, overriden by lsit in configIni.php if present for a specific instance
-$common_languages_for_translation = array('ENG','FRE','CHI','SPA','ITA','DUT','GER','GRE','TUR','DAN','NOR','SWE','EST','FIN','ARA','BUR','CZE','HIN','HUN','IND','JPN','JAV','KOR','KUR','LAO','LAT','MAO','MAY','MKH','BUR','NEP','PER','POR','RUS','SLO','SLV','SWA','THA','TIB','UIG','UKR','VIE','YID','ZUL');
-
-// array of saml service providers
-$saml_service_provides = null;
-//for example:  $saml_service_provides = array("default-sp"=>"BnF Authentication");
 ?>
