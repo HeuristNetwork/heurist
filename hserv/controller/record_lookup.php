@@ -60,7 +60,9 @@
         'opentheso' => array(
             'pactols' => 'https://pactols.frantiq.fr/opentheso/openapi/v1/',
             'huma-num' => 'https://opentheso.huma-num.fr/opentheso/openapi/v1/',
-            'other' => 'opentheso_get_thesauruses'
+            'serv' => 'opentheso_get_servers',
+            'theso' => 'opentheso_get_thesauruses',
+            'group' => 'opentheso_get_collections'
         ),
 
         'ESTC' => array(
@@ -68,6 +70,11 @@
             'action' => 'import_records' // 'record_output'
         )
     );
+
+    // Check if more servers have been defined within heuristConfigIni
+    if(!empty($OPENTHESO_SERVERS) && is_array($OPENTHESO_SERVERS)){
+        $service_types['opentheso'] = array_merge($service_types['opentheso'], $OPENTHESO_SERVERS);
+    }
 
     $NUMBERED = 'number';
     $MIXED = 'mixed';
@@ -292,11 +299,40 @@
     $system->dbclose();
 
     // Retrieve metadata values for use
-    if(@$params['service'] == 'nakala_get_metadata' || @$params['service'] == 'opentheso_get_thesauruses'){
+    $is_extra_service = in_array(@$params['service'], array('nakala_get_metadata', 'opentheso_get_servers', 'opentheso_get_thesauruses', 'opentheso_get_collections'));
+    if($is_extra_service){
 
         $response = array();
         if($cur_type == 'opentheso'){
-            $response = getOpenthesoThesauruses($system);
+
+            switch($params['service']){
+
+                case 'opentheso_get_servers':
+
+                    $response = $service_types['opentheso'];
+
+                    // Remove metadata entires
+                    unset($response['serv']);
+                    unset($response['theso']);
+                    unset($response['group']);
+
+                    $response = ['data' => $response];
+
+                    break;
+
+                case 'opentheso_get_thesauruses':
+                    $response = getOpenthesoThesauruses($system, $params['params']);
+                    break;
+
+                case 'opentheso_get_collections':
+                    $response = getOpenthesoCollections($system, $params['params']);
+                    break;
+                
+                default:
+                    $system->addError(HEURIST_INVALID_REQUEST, 'Invalid request for Opentheso metadata');
+                    break;
+            }
+
         }else if($cur_type == 'nakala'){
             $response = getNakalaMetadata($system, @$params['type']);
         }
@@ -981,7 +1017,9 @@
         }
     }else if(@$params['serviceType'] == 'opentheso'){
         
-        $def_lang = $system->user_GetPreference('layout_language', 'en');
+        $def_lang = $system->user_GetPreference('layout_language', 'fr');
+        $def_lang = getLangCode2($def_lang);
+        $def_lang = !$def_lang ? 'fr' : strtolower($def_lang);
 
         $remote_data = json_decode($remote_data, true);
 
@@ -990,6 +1028,10 @@
         $desc_idx = 'http://www.w3.org/2004/02/skos/core#definition';
         $code_idx = 'http://purl.org/dc/terms/identifier';
         $label_idx = 'http://www.w3.org/2004/02/skos/core#prefLabel';
+
+        $geopoint_idx = 'http://www.opengis.net/ont/geosparql#P625';
+        $valid_geopoint_type = 'http://www.opengis.net/ont/geosparql#wktLiteral';
+        $notes_idx = 'http://www.w3.org/2004/02/skos/core#editorialNote';
 
         $results = array();
 
@@ -1027,7 +1069,11 @@
                     $translated_labels[$lang_code] = $lang_code . ":" . $label_details['value']; // LANG_CODE:Value
                 }
 
-                array_push($results, array('label' => $label, 'desc' => $desc, 'code' => $code, 'uri' => $uri, 'translations' => $translated_labels));
+                $notes = array_key_exists($notes_idx, $details) ? $details[$notes_idx][0]['value'] : '';
+                $geopoint = array_key_exists($geopoint_idx, $details) && $details[$geopoint_idx][0]['datatype'] == $valid_geopoint_type ?
+                                $details[$geopoint_idx][0]['value'] : '';
+
+                array_push($results, array('label' => $label, 'desc' => $desc, 'code' => $code, 'uri' => $uri, 'translations' => $translated_labels, 'editor_notes' => $notes, 'geopoint' => $geopoint));
             }
         }else{
             $system->error_exit_api('An error occurred while attempting to process the search results from Opentheso', HEURIST_UNKNOWN_ERROR);
@@ -1042,23 +1088,26 @@
 
     exit($remote_data);
 
-    function getOpenthesoThesauruses($system){
+    function getOpenthesoThesauruses($system, $params){
 
         $opentheso_file = HEURIST_FILESTORE_ROOT . 'OPENTHESO_thesauruses.json';
 
         $data = array();
         $fd = fileOpen($opentheso_file);
 
+        $refresh = intval($params['refresh']) == 1;
+
         if($fd <= 0){ // create new file
             $data = updateOpenthesoThesauruses($system);
         }else{
 
             fclose($fd);
-            $data = file_get_contents($opentheso_file, filesize($opentheso_file));
             $already_updated = false;
 
-            if(!$data || empty($data)){
-                $data = updateOpenthesoThesauruses($system);
+            $data = file_get_contents($opentheso_file);
+
+            if($refresh || !$data || empty($data)){
+                $data = updateOpenthesoThesauruses($system, $params);
                 $already_updated = true;
             }else{
                 $data = json_decode($data, true);
@@ -1069,7 +1118,7 @@
                     $system->error_exit_api('Unable to retrieve Opentheso thesauruses due to unknown error.', HEURIST_ACTION_BLOCKED);
                     exit;
                 }
-                $data = updateOpenthesoThesauruses($system);
+                $data = updateOpenthesoThesauruses($system, $params);
             }
         }
 
@@ -1080,26 +1129,52 @@
             return $data;
         }
     }
-    function updateOpenthesoThesauruses($system){
+
+    /**
+     * Get list of thesauruses
+     * 
+     * @param bool $is_refresh
+     */
+    function updateOpenthesoThesauruses($system, $params = array()){
 
         global $service_types;
 
         // update OPENTHESO_thesauruses.json
         $opentheso_file = HEURIST_FILESTORE_ROOT . 'OPENTHESO_thesauruses.json';
 
-        $data_rtn = array('pactols' => array(), 'huma-num' => array());
+        // Get existing data
+        $data_old = file_exists($opentheso_file) && filesize($opentheso_file) > 0 ? 
+                        file_get_contents($opentheso_file) : []; // retain original collection data
+        $data_old = json_decode($data_old, TRUE);
+        $data_old = json_last_error() !== JSON_ERROR_NONE || !is_array($data_old) ?
+                        [] : $data_old;
 
-        foreach ($service_types['opentheso'] as $server => $base_uri) {
+        $data_rtn = array();
 
-            if($server == 'other'){
+        $servers = !is_array(@$params['servers']) || empty($params['servers']) ? array_keys($service_types['opentheso']) : $params['servers'];
+
+        foreach ($servers as $server){
+
+            $base_uri = $service_types['opentheso'][$server];
+
+            if(!filter_var($base_uri, FILTER_VALIDATE_URL)){
                 continue;
             }
 
-            $thesauruses = loadRemoteURLContentWithRange($base_uri.'thesaurus', null, true, 60);
+            // Check if server is available
+            $ping = loadRemoteURLContentWithRange("{$base_uri}ping", null, true, 60);
+            if(!$ping){
+                $data_rtn[$server] = array();
+                continue;
+            }
+            
+            $data_rtn[$server] = array();
+
+            $thesauruses = loadRemoteURLContentWithRange("{$base_uri}thesaurus", null, true, 60);
 
             if($thesauruses === false){
-                
-                $system->addError(HEURIST_UNKNOWN_ERROR, 'Unable to retrieve the available thesauruses from ' . $server);
+
+                $system->addError(HEURIST_UNKNOWN_ERROR, "Unable to retrieve the available thesauruses from $server");
                 $data_rtn[$server] = array();
 
                 continue;
@@ -1109,7 +1184,7 @@
 
             if(json_last_error() !== JSON_ERROR_NONE){
 
-                $system->addError(HEURIST_ERROR, 'An error occurred while handling the response from Opentheso server ' . $server);
+                $system->addError(HEURIST_ERROR, "An error occurred while handling the response for /thesaurus from Opentheso server $server");
                 $data_rtn[$server] = array();
 
                 continue;
@@ -1118,20 +1193,41 @@
 
                 $key = $thesaurus['idTheso'];
                 $label = '';
+                $def_label = true;
 
                 foreach($thesaurus['labels'] as $translated_label){
                     $lang = $translated_label['lang'];
 
-                    if(strpos($translated_label['title'], '_'.$lang) === false){
+                    if(empty($label) || $lang == 'fr' || (!$def_label && $lang == 'en')){
                         $label = $translated_label['title'];
-                        break;
-                    }
-                    if(empty($label)){
-                        $label = $translated_label['title'];
+                        $def_label = $lang == 'fr';
                     }
                 }
 
-                $data_rtn[$server][$key] = $label;
+                if(empty($label)){
+                    continue;
+                }
+
+                $data_rtn[$server][$key] = array('name' => $label, 'groups' => array());
+                if($data_old && is_array($data_old[$server][$key]) && !empty($data_old[$server][$key]['groups'])){
+                    // Validate cached groups, remove invalid ones
+
+                    $old_groups = $data_old[$server][$key]['groups'];
+
+                    foreach($old_groups as $group_id => $gname){
+
+                        $group_dtls = loadRemoteURLContentWithRange("{$base_uri}group/$key/$group_id", null, true, 60);
+                        if(!$group_dtls){ continue; }
+
+                        $group_dtls = json_decode($group_dtls, TRUE);
+                        if(json_last_error() !== JSON_ERROR_NONE || empty($group_dtls)){ continue; }
+
+                        $keys = array_keys($group_dtls);
+                        if(!array_key_exists('http://www.w3.org/2004/02/skos/core#prefLabel', $group_dtls[$keys[0]])){ continue; }
+
+                        $data_rtn[$server][$key]['groups'][$group_id] = $gname;
+                    }
+                }
             }
         }
 
@@ -1143,6 +1239,78 @@
         }
 
         return $data_rtn;
+    }
+
+    function getOpenthesoCollections($system, $params){
+
+        global $service_types;
+
+        if(empty($params['server']) || !array_key_exists($params['server'], $service_types['opentheso']) || empty($params['thesaurus'])){
+            return $system->addError(HEURIST_INVALID_REQUEST, 'Invalid request to retrieve record groups for thesauruses');
+        }
+
+        $server = $params['server'];
+        $theso = $params['thesaurus'];
+
+        $opentheso_file = HEURIST_FILESTORE_ROOT . 'OPENTHESO_thesauruses.json';
+
+        $fd = fileOpen($opentheso_file);
+        if(!$fd){
+            return $system->addError(HEURIST_UNKNOWN_ERROR, 'Unable to access the Opentheso cache file');
+        }
+        fclose($fd);
+
+        $data = file_exists($opentheso_file) && filesize($opentheso_file) > 0 ? 
+                file_get_contents($opentheso_file) : null;
+
+        $data = $data !== null ? json_decode($data, TRUE) : null;
+        if(json_last_error() !== JSON_ERROR_NONE || !is_array($data) || empty($data)){
+            return $system->addError(HEURIST_ERROR, "Unable to retrieve details from the Opentheso cache");
+        }
+
+        if(intval(@$params['refresh']) != 1 && !empty($data[$server][$theso]['groups'])){
+            return $data[$server][$theso]['groups'];
+        }
+
+        $url = $service_types['opentheso'][$server] . 'group/' . $theso;
+
+        $groups = loadRemoteURLContentWithRange($url, null, true, 60);
+
+        if($groups === false){
+            return $system->addError(HEURIST_UNKNOWN_ERROR, "Unable to retrieve the available groups for thesauruses $theso from server $server");
+        }
+
+        $groups = json_decode($groups, true);
+
+        if(json_last_error() !== JSON_ERROR_NONE){
+            return $system->addError(HEURIST_ERROR, "An error occurred while handling the response for /groups from Opentheso server $server and thesauruses $theso");
+        }
+        foreach($groups as $group) {
+
+            $key = $group['idGroup'];
+            $label = '';
+            $def_label = true;
+
+            foreach($group['labels'] as $translated_label){
+
+                $lang = $translated_label['lang'];
+
+                if(empty($label) || $lang == 'fr' || (!$def_label && $lang == 'en')){
+                    $label = $translated_label['title'];
+                    $def_label = $lang == 'fr';
+                }
+            }
+
+            if(empty($label)){
+                continue;
+            }
+
+            $data[$server][$theso]['groups'][$key] = $label;
+        }
+
+        fileSave(json_encode($data), $opentheso_file);
+
+        return $data[$server][$theso]; // return group details only
     }
 
     function getNakalaMetadata($system, $type){

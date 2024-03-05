@@ -42,6 +42,8 @@
 
                 </select>
 
+                <button title="Refresh list of thesauruses" id="btn_refTheso" style="margin-left: 10px;">Refresh</button>
+
             </div>
 
             <br>
@@ -57,7 +59,9 @@
 
             </div>
 
-            <!-- Group & Language -->
+            <br>
+
+            <!-- Language -->
             <div>
 
                 <div class="header recommended" style="text-align: right;">
@@ -68,11 +72,30 @@
 
                 </select>
 
-                <div class="header optional" style="text-align: right;">
+            </div>
+
+            <br>
+
+            <!-- Collections -->
+            <div>
+
+                <div class="header recommended" style="text-align: right;">
                     <label for="inpt_group">Group:</label>
                 </div>
 
-                <input id="inpt_group" class="text ui-widget-content ui-corner-all" style="max-width:30em;margin-bottom: 7px;"/>
+                <select id="inpt_group" style="max-width: 400px;max-height: 350px;vertical-align: text-top;" multiple="multiple">
+
+                </select>
+
+                <!--<input id="inpt_group" class="text ui-widget-content ui-corner-all" style="max-width:30em;margin-bottom: 7px;"/>-->
+
+                <div style="display: inline-block;vertical-align: top;width: 50px;">
+
+                    <button title="Refresh list of collections" id="btn_refGroups" style="top: 5px;margin-left: 10px;">Refresh</button>
+    
+                    <button title="Clear selected collections" id="btn_cnlGroups" style="top: 15px;margin-left: 10px;">Clear selection</button>
+
+                </div>
 
             </div>
 

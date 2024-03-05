@@ -65,6 +65,38 @@
         
         return $res;
     }
+
+    //
+    // get 2 letters ISO code
+    //
+    function getLangCode2($lang){
+
+        global $glb_lang_codes, $glb_lang_codes_index;
+
+        $res = null;
+        
+        if ($lang) { 
+
+            if(!isset($glb_lang_codes)){
+                $glb_lang_codes = json_decode(file_get_contents(HEURIST_DIR.'hclient/assets/language-codes-3b2.json'),true);
+                foreach($glb_lang_codes as $codes){
+                    $glb_lang_codes_index[strtoupper($codes['a3'])] = strtoupper($codes['a2']);
+                }
+            }
+            
+            $lang = strtoupper($lang);
+            if(strlen($lang)==3){
+                $lang = strtoupper($lang);
+                if(@$glb_lang_codes_index[$lang]!=null){
+                    $res = $glb_lang_codes_index[$lang];
+                }
+            }else{
+                $res = array_search($lang, $glb_lang_codes_index) === false ? null : $lang;
+            }
+        }
+        
+        return $res;
+    }
     
     //
     //  splits and extract language code and value from string code:value

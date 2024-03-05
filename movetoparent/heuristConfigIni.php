@@ -114,6 +114,13 @@ $accessToken_MapTiles = 'OBTAIN THIS FROM MAPTILER';
 $accessToken_GoogleAPI = 'OBTAIN THIS FROM GOOGLE MAPS';
 $accessToken_GeonamesAPI = 'OBTAIN THIS FROM GEONAMES';
 
+// Opentheso Servers for external lookup
+// List of opentheso compaitable servers for user's to query
+//  the uri needs to be up until to the point where the function name is added (as below for pactols and huma-num)
+$OPENTHESO_SERVERS = array(
+    "pactols" => "https://pactols.frantiq.fr/opentheso/openapi/v1/",
+    "huma-num" => "https://opentheso.huma-num.fr/opentheso/openapi/v1/"
+);
 
 // [TRANSLATIONS]
 
