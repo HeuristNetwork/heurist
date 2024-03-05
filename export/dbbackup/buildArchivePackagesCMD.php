@@ -221,9 +221,9 @@ foreach ($arg_database as $idx=>$db_name){
         folderRecurseCopy( $database_folder, $folder, $folders_to_copy, null, $copy_files_in_root);
     }
 
-    if(false){// 2016-10-25  
-        folderRecurseCopy( HEURIST_DIR.'context_help/', $folder.'/context_help/', null);
-    }
+    //if(false){// 2016-10-25  
+    //    folderRecurseCopy( HEURIST_DIR.'context_help/', $folder.'/context_help/', null);
+    //}
 
 
     if(!$arg_skip_hml){

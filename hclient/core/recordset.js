@@ -112,7 +112,7 @@ function hRecordSet(initdata) {
     */
     function _makeKeyValueArray(namefield){
         
-        var ids, record, key, title;
+        var ids, record, key, rec_title;
         
         var result = [];
         
@@ -122,9 +122,9 @@ function hRecordSet(initdata) {
                 key = order[idx];
                 
                 record = records[key];
-                title = _getFieldValue(record, namefield),
+                rec_title = _getFieldValue(record, namefield);
                 
-                result.push({key:key, title:title});
+                result.push({key:key, title:rec_title});
             }
         }        
         return result;
@@ -637,10 +637,6 @@ mapDraw.js initial_wkt -> parseWKT -> GeoJSON -> _loadGeoJSON (as set of separat
         var tot = 0;
         
         //{"geojson":[]}
-        var res_geo = [],
-            res_time = [],
-            res_geo_ids = [];
-        
         function __getGeoJsonFeature(record, extended, simplify){
                  
             var rec_ID = _getFieldValue(record, 'rec_ID');
@@ -653,7 +649,6 @@ mapDraw.js initial_wkt -> parseWKT -> GeoJSON -> _loadGeoJSON (as set of separat
                 for(k=0; k<timefields.length; k++){
                     var datetime = _getFieldValues(record, timefields[k]);
                     if(!isnull(datetime)){   
-                        var m, res = [];
                         for(m=0; m<datetime.length; m++){
                             if(timefields[k]==DT_START_DATE){
                                 startDate = datetime[m];
@@ -690,7 +685,7 @@ mapDraw.js initial_wkt -> parseWKT -> GeoJSON -> _loadGeoJSON (as set of separat
                 var timevalues = [];
                 for(k=0; k<dates.length; k++){
                         
-                        if(true || timeenabled<MAXITEMS){
+                        //if(true || timeenabled<MAXITEMS){
                      
                             dres = dates[k];
                             
@@ -703,7 +698,7 @@ mapDraw.js initial_wkt -> parseWKT -> GeoJSON -> _loadGeoJSON (as set of separat
                             if(date_end==null) date_end = '';
                             timevalues.push([date_start, '', '', date_end, '']);
                                 
-                        }
+                        //}
                         timeenabled++;
                 }                      
                 if(timevalues.length>0){
@@ -786,8 +781,13 @@ mapDraw.js initial_wkt -> parseWKT -> GeoJSON -> _loadGeoJSON (as set of separat
                     res['style'] = symbology;
                 }
             
+                return res;
         }//end __getGeoJsonFeature
         
+        
+        var res_geo = [],
+            res_time = [],
+            res_geo_ids = [];
         
         for(idx in records){
             if(idx)
@@ -1478,8 +1478,8 @@ mapDraw.js initial_wkt -> parseWKT -> GeoJSON -> _loadGeoJSON (as set of separat
                                 var val1 = that.fld(records[a], fieldName);
                                 var val2 = that.fld(records[b], fieldName);
                                 if(dataTypes[fieldName]=='integer' || dataTypes[fieldName]=='float'){
-                                    if(Number(val1)!=Number(val1)){
-                                        res = sortFields[fieldName]*(Number(val1)<Number(val1)?-1:1);
+                                    if(Number(val1)!=Number(val2)){
+                                        res = sortFields[fieldName]*(Number(val1)<Number(val2)?-1:1);
                                     }
                                 }else{
                                     if(dataTypes[fieldName]=='date'){

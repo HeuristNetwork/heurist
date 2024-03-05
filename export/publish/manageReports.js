@@ -243,6 +243,7 @@ return '<div align="center" data-id="'+data+'">'
             }
         ];
 
+        $('.div_datatable').empty();
         _dataTable = $('.div_datatable').DataTable( _dataTableParams );
 
         $('.dataTables_filter').css({float:'left'});

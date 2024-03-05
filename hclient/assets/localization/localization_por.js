@@ -309,7 +309,7 @@ regional['POR'] = {
         'menu-selected-rectype-change-hint': 'Altere os tipos de registo para os registos filtrados',
         'menu-selected-extract-pdf': 'Extrair texto de ficheiros PDF',
         'menu-selected-extract-pdf-hint': 'Extrair texto de PDFs (experimental)',
-    'Share': '',
+    'Share':'Compartilhar',
         'menu-selected-notify': 'Notificação (e-mail)',
         'menu-selected-notify-hint': 'Selecione um ou mais registos e, em seguida, clique para enviar uma notificação',
         'menu-selected-email': 'Enviar email',
@@ -558,9 +558,6 @@ regional['POR'] = {
 
     'thumbs3':'pré-visualizar',
     
-    'Collected':'Coletar',
-    'Shared':'Compartilhar',
-
 };
 
 

@@ -61,7 +61,8 @@ if($mode>1){
 }
 
 ?>
-<html>
+<!DOCTYPE html>
+<html lang="en">
     <head>
         <meta http-equiv="content-type" content="text/html; charset=utf-8">
         <title>Create data archive package</title>

@@ -508,7 +508,6 @@ regional['ENG'] = {
     filter_help_hint: 'Show syntax and examples of the Heurist query/filter language',
     save_filter_hint: 'Save the current filter and rules as a link in the navigation tree',
     search_filter_hint: 'enter search/filter or use "Filter builder"',
-    'Filter builder': '',
     filter_builder_hint: 'Build a filter expression using a form-driven approach',
     'Facet builder': '',
     filter_facetbuilder_hint: 'Build new faceted search',
@@ -662,9 +661,6 @@ regional['ENG'] = {
 
     'thumbs3':'preview',
     
-    'Collected':'Collect',
-    'Shared':'Share',
-
     'feature_request': 'Please request from Heurist team if needed or add to code and do a pull request'
 
 };
