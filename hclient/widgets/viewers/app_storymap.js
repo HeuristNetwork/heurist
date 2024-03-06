@@ -395,7 +395,7 @@ $.widget( "heurist.app_storymap", {
             this.options.def_map_symbology = {"stroke":"1","color":"#00009b","fill":"1","fillColor":"#0000fa", "fillOpacity":"0.8"}; //blue
         }
         if(window.hWin.HEURIST4.util.isempty(this.options.def_story_symbology)){
-            this.options.def_story_symbology = this.options.def_story_symbology;
+            this.options.def_story_symbology = this.options.def_map_symbology;
         }
 
         this._initCompleted();
