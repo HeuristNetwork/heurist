@@ -241,7 +241,6 @@ $.widget( "heurist.resultListMenu", {
             return false;
         };
 
-console.log(name, menu_label);        
         var link = $('<a href="#"'
                 +(this.options.is_h6style?' style="padding-right:22px !important"':'')
                 +'>'+window.hWin.HR(menu_label?menu_label:name)+'</a>')

@@ -52,7 +52,9 @@
 */
 
 // Default values for arguments
+$is_shell =  false;
 $arg_no_action = true;  
+$need_email = true;
 $eol = "\n";
 $tabs = "\t\t";
 $tabs0 = '';
@@ -93,11 +95,13 @@ if (@$argv) {
            with more than 50000 entries
 
  services files:
-     databases_not_to_purge.txt - file in heurist root wiht list of database to be excluded from this operation
+     databases_not_to_purge.txt - file in heurist root with list of database to be excluded from this operation
      _operation_locks.info - lock file in HEURIST_FILESTORE_ROOT
  
 */
 
+    $is_shell = true;
+    
     // handle command-line queries
     $ARGV = array();
     for ($i = 0;$i < count($argv);++$i) {
@@ -124,6 +128,8 @@ if (@$argv) {
 }else{
     //report only
     $arg_no_action = true;
+    $need_email = false;
+    
     $eol = "</div><br>";
     $tabs0 = '<div style="min-width:300px;display:inline-block;">';
     $tabs = "</div>".$tabs0;
@@ -131,17 +137,23 @@ if (@$argv) {
 }
 
 
-require_once dirname(__FILE__).'/../../../configIni.php'; // read in the configuration file
-require_once dirname(__FILE__).'/../../../hserv/consts.php';
-require_once dirname(__FILE__).'/../../../hserv/System.php';
-require_once dirname(__FILE__).'/../../../hserv/records/search/recordFile.php';
-require_once dirname(__FILE__).'/../../../hserv/utilities/dbUtils.php';
-require_once dirname(__FILE__).'/../../../external/php/Mysqldump8.php';
+require_once dirname(__FILE__).'/../../configIni.php'; // read in the configuration file
+require_once dirname(__FILE__).'/../../hserv/consts.php';
+require_once dirname(__FILE__).'/../../hserv/System.php';
+require_once dirname(__FILE__).'/../../hserv/records/search/recordFile.php';
+require_once dirname(__FILE__).'/../../hserv/utilities/dbUtils.php';
+//require_once dirname(__FILE__).'/../../external/php/Mysqldump8.php';
 
 //retrieve list of databases
 $system = new System();
 if( !$system->init(null, false, false) ){
     exit("Cannot establish connection to sql server\n");
+}
+
+if(!$is_shell && $system->verifyActionPassword( @$_REQUEST['pwd'], $passwordForServerFunctions) ){
+    $response = $system->getError();
+    print $response['message'];
+    exit;
 }
 
 if(!defined('HEURIST_MAIL_DOMAIN')) define('HEURIST_MAIL_DOMAIN', 'cchum-kvm-heurist.in2p3.fr');
@@ -257,7 +269,7 @@ foreach ($databases as $idx=>$db_name){
         //archive and drop database
         $report = $diff.' months, n='.$vals['cnt'];
         if($arg_no_action){
-            $report .= ' ARCHIVE'; 
+            $report .= ' to ARCHIVE'; 
         }else{
             $usr_owner = user_getByField($mysqli, 'ugr_ID', 2);
             
@@ -294,7 +306,9 @@ Heurist is research-led and responds rapidly to evolving user needs - we often t
 For more information email us at support@HeuristNetwork.org and visit our website at HeuristNetwork.org. We normally respond within hours, depending on time zones.                    
 EOD;
                             
-sendEmail(array($usr_owner['ugr_eMail']), $email_title, $email_text);                
+if($need_email){
+    sendEmail(array($usr_owner['ugr_eMail']), $email_title, $email_text);    
+}
                 
                 $report .= ' ARCHIVED'; 
                 $cnt_archived++;
@@ -412,23 +426,24 @@ sendEmail(array($usr_owner['ugr_eMail']), $email_title, $email_text);
                     $dumpfile = $backup_imports2."/".$file_name.'.sql';
                     
                     $opts = array('include-tables' => array($sif_table),
+                                  'default-character-set'=>'utf8',  
+                                  'single-transaction'=>true,  
+                                  'no-create-info'=>true,
                                   'skip-triggers' => true,  
                                   'add-drop-trigger' => false);
                     
-                    
-                    /* 
-                    if(false){
-                        $res = DbUtils::databaseDump($db_name, $dumpfile, $opts);    
-                        if($res===false){
-                            $report .= (" Error: unable to generate MySQL database dump for import table $sif_table in $db_name.\n");
-                        }else{
-                            $cnt_dumped++;
-                        }
+                    $res = DbUtils::databaseDump($db_name, $dumpfile, $opts);
+                    if($res===false){
+                        $err = $system->getError();
+                        $report .= (" Error: unable to generate MySQL database dump for import table $sif_table in $db_name. "
+                                .$err['message']."\n");
+                        if($err['status']==HEURIST_SYSTEM_CONFIG) break;
                     }else{
-                    */
+                        $cnt_dumped++;
+                    }
+
+                    /*                    
                         try{
-                            //$dump = new Mysqldump( 'hdb_'.$db_name, ADMIN_DBUSERNAME, ADMIN_DBUSERPSWD, HEURIST_DBSERVER_NAME, 'mysql', $opts);
-                                                                                                     
                             $pdo_dsn = 'mysql:host='.HEURIST_DBSERVER_NAME.';dbname=hdb_'.$db_name.';charset=utf8mb4';
                             $dump = new Mysqldump( $pdo_dsn, ADMIN_DBUSERNAME, ADMIN_DBUSERPSWD, $opts);
                                             
@@ -439,7 +454,7 @@ sendEmail(array($usr_owner['ugr_eMail']), $email_title, $email_text);
                            $report .= (" Error: unable to generate MySQL database dump for import table $sif_table in $db_name."
                                 .$e->getMessage()."\n");
                         }
-                    
+                    */
                 }
             }//foreach
             }
@@ -481,18 +496,15 @@ sendEmail(array($usr_owner['ugr_eMail']), $email_title, $email_text);
                 
                 $dumpfile = $backup_sysarch.$db_name.'_'.$datetime1->format('Y-m-d').'.sql';  //.$db_name.' '
                     $opts = array('include-tables' => array('sysArchive'),
+                                  'default-character-set'=>'utf8',  
+                                  'single-transaction'=>true,  
+                                  'no-create-info'=>true,
                                   'skip-triggers' => true,  
                                   'single-transaction' => false,
                                   'add-drop-trigger' => false);
                     
                     /*
-                    if(false){
-                        $res = DbUtils::databaseDump($db_name, $dumpfile, $opts);
-                    }else{
-                        // old way
-                    */
                         try{
-                            //$dump = new Mysqldump( 'hdb_'.$db_name, ADMIN_DBUSERNAME, ADMIN_DBUSERPSWD, HEURIST_DBSERVER_NAME, 'mysql', $opts);
                             $pdo_dsn = 'mysql:host='.HEURIST_DBSERVER_NAME.';dbname=hdb_'.$db_name.';charset=utf8mb4';
                             $dump = new Mysqldump( $pdo_dsn, ADMIN_DBUSERNAME, ADMIN_DBUSERPSWD, $opts);
                                 
@@ -504,10 +516,15 @@ sendEmail(array($usr_owner['ugr_eMail']), $email_title, $email_text);
                             $report .= ("Error: ".$e->getMessage()."\n");
                             $res = false;
                         }
+                    */
                     
-                        
+                    $res = DbUtils::databaseDump($db_name, $dumpfile, $opts);
                     if($res===false){
-                        $report .= (" Error: unable to generate MySQL database dump $dumpfile for sysArchive table in $db_name.\n");
+                        $err = $system->getError();
+
+                        $report .= (" Error: unable to generate MySQL database dump $dumpfile for sysArchive table in $db_name.\n"
+                                    .$err['message']."\n");
+                        if($err['status']==HEURIST_SYSTEM_CONFIG) break;
                     }else{
                         $destination = $backup_sysarch.$db_name.'_'.$datetime1->format('Y-m-d');
                         
@@ -568,7 +585,7 @@ sendEmail(array($usr_owner['ugr_eMail']), $email_title, $email_text);
 if(!$arg_no_action){
     echo $tabs0.'Archived '.$cnt_archived.' databases'.$eol;    
     
-    if(count($email_list_deleted)>0){
+    if(count($email_list_deleted)>0 && $need_email){
         $sTitle = 'Archived databases on '.HEURIST_SERVER_NAME;                
         sendEmail(array(HEURIST_MAIL_TO_ADMIN), $sTitle, $sTitle.' <table>'.implode("\n",$email_list_deleted).'</table>',true);
     }
@@ -576,11 +593,11 @@ if(!$arg_no_action){
 
 echo ($tabs0.'finished'.$eol);
 
-if(is_array($email_list) && count($email_list)>0){
-    
-sendEmail(HEURIST_MAIL_TO_ADMIN, "List of inactive databases on ".HEURIST_SERVER_NAME,
-    "List of inactive databases for more than a year with more than 200 records:\n"
-    .implode(",\n", $email_list));
+if(is_array($email_list) && count($email_list)>0 && $need_email)
+{
+    sendEmail(HEURIST_MAIL_TO_ADMIN, "List of inactive databases on ".HEURIST_SERVER_NAME,
+        "List of inactive databases for more than a year with more than 200 records:\n"
+        .implode(",\n", $email_list));
 }
 
 function exclusion_list(){

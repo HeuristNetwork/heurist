@@ -740,12 +740,15 @@ class DbUtils {
 
             if($dbScriptMode==2){
                 if(!defined('HEURIST_DB_MYSQLDUMP') || !file_exists(HEURIST_DB_MYSQLDUMP)){
-                    $dbScriptMode = 0;  
-                }else{
+
+                    $msg = 'The path to mysqldump has not been correctly specified. '
+                    .'Please ask your system administrator to fix this in the heuristConfigIni.php file';
+                    
+                    self::$system->addError(HEURIST_SYSTEM_CONFIG, $msg);
+                    if($verbose) echo '<br>'.$msg;
+                    return false;
                     
                 }
-            }else if($dbScriptMode==1){
-                $dbScriptMode = 0; //disabled 
             }else{
                 $dbScriptMode = 0;
             }
@@ -770,13 +773,15 @@ class DbUtils {
                         if(is_array($val) && count($val)>0){
                             $tables = $val;    
                         }
-                    }else if($val==true){
+                    }else if($val===true){
                         $options = $options .' --'.$opt;
+                    }else if($val!==false){
+                        $options = $options .' --'.$opt.'='.$val;
                     }
                 }
                 
                 if(count($tables)>0){
-                    $tables = '--tables '.implode(' ', $tables);
+                    $tables = implode(' ', $tables); //'--tables '.
                 }else{
                     $tables = '';
                 }
@@ -784,7 +789,7 @@ class DbUtils {
                 //--log-error=mysqldump_error.log -h {$server_name}
                 //--hex-blob --routines --skip-lock-tables 
                 //-u ".ADMIN_DBUSERNAME." -p".ADMIN_DBUSERPSWD."
-                $return = null;
+                $res2 = null;
                 
                 //https://dev.mysql.com/doc/refman/8.0/en/mysql-config-editor.html
                 // use mysql_config_editor to store authentication credentials 
@@ -800,18 +805,18 @@ class DbUtils {
                 $cmd = $cmd
                 ." -u".ADMIN_DBUSERNAME." -p".ADMIN_DBUSERPSWD
                 //." --login-path=local 
-                ." {$options} {$tables} ".escapeshellarg($database_name_full)
-                ." > ".$database_dumpfile;
+                ." {$options} ".escapeshellarg($database_name_full)
+                ." {$tables} > ".$database_dumpfile;
                 
                 $arr_out = array();
                 
-                exec($cmd, $arr_out, $return);
+                exec($cmd, $arr_out, $res2);
 
-                if($return !== 0) {
+                if($res2 !== 0) {
                     self::$system->addError(HEURIST_SYSTEM_CONFIG, $msg);
                     
                     $msg = "mysqldump for ".htmlspecialchars($database_name_full)
-                                ." failed with a return code of {$return}";
+                                ." failed with a return code of {$res2}";
                     if($verbose) echo '<br>'.$msg;
                     
                     self::$system->addError(HEURIST_SYSTEM_CONFIG, $msg);
@@ -829,7 +834,7 @@ class DbUtils {
                             
             
             }
-            else{ //DEFAULT MODE - USE 3d Party php MySQLdump lib
+            else{ //USE 3d Party php MySQLdump lib
             
                 if(@$dump_options['quick']){ unset($dump_options['quick']); }
                 if(@$dump_options['no-create-db']){ unset($dump_options['no-create-db']); }

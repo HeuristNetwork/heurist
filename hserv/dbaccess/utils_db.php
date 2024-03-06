@@ -823,8 +823,13 @@
         }else{
             
             if($dbScriptMode==2 && !(defined('HEURIST_DB_MYSQLPATH') && file_exists(HEURIST_DB_MYSQLPATH))){
-                $dbScriptMode = 0;  
-            }else if($dbScriptMode==1 && !USystem::isMemoryAllowed(filesize($script_file))){
+                
+                    $msg = 'The path to mysql executable has not been correctly specified. '
+                    .'Please ask your system administrator to fix this in the heuristConfigIni.php file';
+
+                    return array(HEURIST_SYSTEM_CONFIG, $msg);
+                
+            }else {
                 $dbScriptMode = 0;
             }
             

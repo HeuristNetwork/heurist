@@ -454,7 +454,7 @@ if($mode>1){
                 
                 if(!$res){
                     print '</div>';
-                    report_message("Sorry, unable to generate MySQL database dump.".$system->getError()['message'].'  '.$please_advise, true, true);
+                    report_message("Sorry, unable to generate MySQL database dump. ".$system->getError()['message'].'  '.$please_advise, true, true);
                 }
 
                 if($separate_sql_zip){ // copy sql dump to separate directory
