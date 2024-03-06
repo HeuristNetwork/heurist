@@ -2712,14 +2712,15 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
         //       2 - default icon/thumb for entity
         //       3 - check existence
         //
-        , getImageUrl: function (entityName, recID, version, def, database) {
+        , getImageUrl: function (entityName, recID, version, def, database, random_number = false) {
 
             return window.hWin.HAPI4.baseURL //redirected to + 'hserv/controller/fileGet.php'
                 + '?db=' + (database ? database : window.hWin.HAPI4.database)
                 + (entityName ? ('&entity=' + entityName) : '') //rty by default
                 + '&icon=' + recID
                 + (version ? ('&version=' + version) : '')
-                + (def ? ('&def=' + def) : '');
+                + (def ? ('&def=' + def) : '')
+                + (random_number ? `&${window.hWin.HEURIST4.util.random()}` : '');
         }
 
         //
