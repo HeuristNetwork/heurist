@@ -51,7 +51,8 @@ function hRecordAction(_action_type, _scope_type, _field_type, _field_value) {
         init_field_value = _field_value,
         repositories = ['Nakala'], // list of repositories
         _allow_empty_replace = false,
-        _default_exceptions = []; // array of default exceptions for case conversions
+        _default_exceptions = [], // array of default exceptions for case conversions
+        _check_field_repeat = false; // check if the field to be used is repeatable
 
 
     /*
@@ -542,6 +543,8 @@ function hRecordAction(_action_type, _scope_type, _field_type, _field_value) {
             + '</div>').appendTo($fieldset);
           
             window.hWin.HEURIST4.ui.createLanguageSelect($fieldset.find('#sel_language'), null, null, true);
+
+            _check_field_repeat = true;
         }
 
     }
@@ -839,6 +842,10 @@ function hRecordAction(_action_type, _scope_type, _field_type, _field_value) {
                 
             }
 
+            if(_check_field_repeat && _check_field_repeatability()){
+                return;
+            }
+
         }
 
         var scope_type = selectRecordScope.val();
@@ -882,9 +889,7 @@ function hRecordAction(_action_type, _scope_type, _field_type, _field_value) {
             _startAction_continue(request)
         }
     }
-        
 
-        
     /*
     * recIDs - list of records IDS to be processed
     * rtyID - optional filter by record type
@@ -1008,6 +1013,74 @@ function hRecordAction(_action_type, _scope_type, _field_type, _field_value) {
 
     }
 
+    /**
+     * Check if current record type + base field is repeatable; currently for bulk translating
+     * 
+     * @returns {bool} - true on success, false on failure
+     */
+    function _check_field_repeatability(){
+
+        let rty_ID = selectRecordScope.val();
+        if(!$.isNumeric(rty_ID)){ // multiple rectypes
+            return false;
+        }
+
+        let dty_ID = $('#sel_fieldtype').val();
+        if($Db.rst(rty_ID, dty_ID, 'rst_MaxValues') != 1){
+            return false;
+        }
+
+        // Warn about repeating fields
+        let $dlg = null;
+        let msg = `To avoid issues with editing the affected records in the future, we first recommend making the field "${$Db.rst(rty_ID, dty_ID, 'rst_DisplayName')}" repeatable.<br><br>Would you like to make the field repeatable?`;
+
+        let btns = {};
+
+        btns[window.hWin.HR('Yes')] = function(){
+
+            window.hWin.HEURIST4.msg.bringCoverallToFront($('body'), null, 'Updating field definition...');
+
+            let fields = {
+                'rst_DetailTypeID': dty_ID,
+                'rst_RecTypeID': rty_ID,
+                'rst_MaxValues': 0
+            };
+
+            let request = {
+                a: 'save',
+                entity: 'defRecStructure',
+                fields: fields,
+                request_id: window.hWin.HEURIST4.util.random()
+            };
+
+            window.hWin.HAPI4.EntityMgr.doRequest(request, function(response){
+
+                window.hWin.HEURIST4.msg.sendCoverallToBack();
+                $dlg.dialog('close');
+
+                if(response.status != window.hWin.ResponseStatus.OK){
+                    window.hWin.HEURIST4.msg.showMsgErr(response);
+                    return;
+                }
+
+                window.hWin.HAPI4.EntityMgr.refreshEntityData('rst', _startAction);
+            });
+        };
+
+        btns[window.hWin.HR('No, and continue with recode')] = function(){
+            $dlg.dialog('close');
+            _check_field_repeat = false;
+            _startAction();
+        };
+
+        btns[window.hWin.HR('Cancel')] = function(){
+            $dlg.dialog('close');
+        };
+
+        $dlg = window.hWin.HEURIST4.msg.showMsgDlg(msg, btns, {title: 'Field repeatability', yes: window.hWin.HR('Yes'), no: window.hWin.HR('No, and continue with recode'), cancel: window.hWin.HR('Cancel')}, {default_palette_class: 'ui-heurist-design'});
+
+        return true;
+    }
 
     //public members
     var that = {
