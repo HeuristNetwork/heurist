@@ -2739,7 +2739,7 @@ function linkifyValue($value){
 
     $new_value = str_replace(array("\r\n", "\n\r", "\r", "\n"), '<br>', $value); // "%0A", "%0D"
 
-    preg_match_all('/((?:https?|ftp|mailto))(\S)+/', $new_value, $url_matches); // only urls that contain a protocol [http|https|ftp|mailto]
+    preg_match_all('/((?:https?|ftps?|mailto))(\S)+/', $new_value, $url_matches); // only urls that contain a protocol [http|https|ftp|mailto]
 
     if(is_array($url_matches) && count($url_matches[0]) > 0){
 

@@ -659,6 +659,8 @@ var sMsg = '<p>Heurist\'s CMS editor has been upgraded to a new system which is 
             powerpaste_word_import: 'clean',
             powerpaste_html_import: 'clean',
 
+            default_link_target: "_blank", // default to new tab
+
             formats: custom_formatting.formats,
             style_formats_merge: true,
             style_formats: style_formats,
@@ -740,6 +742,44 @@ var sMsg = '<p>Heurist\'s CMS editor has been upgraded to a new system which is 
                         tinymce.activeEditor.insertContent( '<hr>' );
                     }
                 });
+            },
+            paste_preprocess: function(plugin, args){
+
+                let content = args.content;
+
+                if(content.indexOf('<img') === 0){
+                    // Tell user to use the 'Insert media' tool instead
+                    args.content = '';
+
+                    let msg = 'Please use the "Add media" tool located within the toolbar to added images';
+                    window.hWin.HEURIST4.msg.showMsgFlash(msg, 3000);
+                }else if(content.search(/https?|ftps?|mailto/) == 0){
+                    // Trigger 'Insert link' dialog
+                    
+                    let href = args.content;
+                    href = href.replaceAll(/&amp;/g, '&');
+
+                    const org_href = href;
+                    args.content = '';
+
+                    href += `_${Math.random()}`;
+
+                    tinymce.activeEditor.execCommand('mceInsertLink', false, href);
+
+                    let $link = $(tinymce.activeEditor.selection.getNode()); console.log($link);
+                    if(!$link.is('a')){
+                        $link = $link.find(`a[href="${href}"]`); console.log($link);
+                    }
+                    if($link.length == 0){
+                        $link = $(tinymce.activeEditor.contentDocument).find(`a[href="${href}"]`); console.log($link);
+                    }
+
+                    $link.attr({
+                        'href': org_href,
+                        'data-mce-href': org_href,
+                        'target': '_blank'
+                    }).text(org_href);
+                }
             }
         };
 
