@@ -170,7 +170,7 @@ if(!$error){
                     downloadFileWithMetadata($system, $fileinfo, $_REQUEST['metadata']);
                 
                 }else
-                if(file_exists($filepath)){
+                if(file_exists($filepath) && !is_dir($filepath)){
                     
                     //fix issue if original name does not have ext
                     if(@$_REQUEST['embedplayer']!=1){
@@ -223,7 +223,8 @@ if(!$error){
                     if(@$_REQUEST['mode']=='url'){
            
                         //if it does not start with http - this is relative path             
-                        if(!(strpos($external_url,'http://')===0 || strpos($external_url,'https://')===0)){
+                        if(strpos($originalFileName,'_tiled')===0 ||
+                          !(strpos($external_url,'http://')===0 || strpos($external_url,'https://')===0)){
                             
                             $path = USanitize::sanitizePath( $external_url );
                             //check presence of mbtiles file within folder

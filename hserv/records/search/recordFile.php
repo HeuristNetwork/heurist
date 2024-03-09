@@ -564,18 +564,21 @@ function downloadFile($mimeType, $filename, $originalFileName=null){
                 readfile($filename);  //if less than 10MB download at once  
             }else{
                 $handle = fopen($filename, "rb");
-                if($range_max>0){
-                    if($range_min>0) fseek($handle,$range_min);
-                    $chunk = fread($handle, $range_max-$range_min+1);
-                    //echo unpack("c2/n",$chunk); 
-                    echo $chunk; 
-                    //fread($handle, $range_max-$range_min+1);  //by chunks
+                if($handle!==false){
+                    if($range_max>0){
+                        if($range_min>0) fseek($handle,$range_min);
+                        $chunk = fread($handle, $range_max-$range_min+1);
+                        //echo unpack("c2/n",$chunk); 
+                        echo $chunk; 
+                        //fread($handle, $range_max-$range_min+1);  //by chunks
+                    }else{
+                        while (!feof($handle)) {
+                            echo fread($handle, 1000);  //by chunks
+                        }            
+                    }
                 }else{
-                    while (!feof($handle)) {
-                        echo fread($handle, 1000);  //by chunks
-                    }            
+                    error_log('file not found: '.htmlspecialchars($filename));
                 }
-                
             }
         }
     }
