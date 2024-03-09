@@ -159,8 +159,9 @@ $.widget( "heurist.resultList", {
 
     _currentRecordset:null,
     _currentMultiSelection:null, //for select_multi - to keep selection across pages and queries
-    _fullRecordset: null, //keep full set for multiselection (to get records diregard current filters)
-    _currentSubset: null, // subset of full record set (usually a recordset of the collected records to display)
+    _fullRecordset: null, //keep full set for multiselection (to get records disregard current filters)
+    _currentSubset: null, //subset of full record set (NOT USED for recordset of the collected records to display)
+    _isCollectionUsed: false,
 
     _startupInfo:null,
 
@@ -370,11 +371,11 @@ $.widget( "heurist.resultList", {
                     if(!that._isSameRealm(data)) return;
 
                     that._currentSubset = null; // override current subset
+                    that._isCollectionUsed = false;
                     
                     that.loadanimation(false);
                     
                     var recset = data.recordset;
-
                     if(recset==null){
                         
                         that._currentRecordset = recset;
@@ -517,6 +518,7 @@ $.widget( "heurist.resultList", {
             window.hWin.HAPI4.RecordSearch.doSearch(this.document, request);
             
         }else{
+             this.setCollected(null); //to obtain collection
             
              if(!window.hWin.HEURIST4.util.isempty(this.options.placeholder_text)){
                 this.div_content.html(this.options.placeholder_text);
@@ -2760,7 +2762,7 @@ $.widget( "heurist.resultList", {
     },
     
     //
-    //
+    // assign collection
     //
     setCollected: function(collection){
         
@@ -2770,7 +2772,7 @@ $.widget( "heurist.resultList", {
         if(this.options.support_collection){
 
             if(hasCollection){
-    
+                //highlight collected in current record set
                 this.div_content.find('.recordDiv').each(function(ids, rdiv){
                     var rec_id = $(rdiv).attr('recid');
                     var idx = window.hWin.HEURIST4.util.findArrayIndex(rec_id, collection);
@@ -2784,12 +2786,15 @@ $.widget( "heurist.resultList", {
             }
 
             // update local cache
+            /* Since 2024-03-09 - collection is independent on current record set 
             if(this._currentRecordset && this._currentRecordset.length() > 0 && hasCollection){
                 let collected = this._currentRecordset.getSubSetByIds(collection);
                 this._collection = collected && collected.length() > 0 ? collected.getIds() : [];
             }else{
                 this._collection = [];
             }
+            */
+            this._collection = hasCollection?collection:[];
 
             // update 'cart' count
             this._updateInfo();
@@ -2863,19 +2868,19 @@ $.widget( "heurist.resultList", {
         if(handleCollections){
 
             let hasCollection = this._collection && this._collection.length ? this._collection.length : 0;
-            let subset = this._currentSubset;
+            let is_subset = this._isCollectionUsed;
 
-            sinfo = `<a href="#" id="collectSelected" style="color:blue;padding-right:5px;" title="Add selected records to the collection">add selected</a> collected: ${hasCollection} `
-                  + `<a href="#" id="searchCollected" style="color:blue;padding-left:5px;" title="Show ${subset?'the original search result':'collected records'}">show ${subset?'all':''}`
-                    + `<span class="ui-icon ui-icon-arrowthick-1-s" style="font-size:18px;top:3px;"></span></a>`
-                  + `<a href="#" id="clearCollected" style="color:blue;padding:0px 5px;" title="Clear record collection">clear</a> | ${sinfo}`;
+            sinfo = `<a href="#" id="collectSelected" style="padding-right:5px;" title="Add selected records to the collection">Add selected</a> -&gt; Collected: ${hasCollection} `
+                  + `<a href="#" id="searchCollected" style="padding-left:5px;" title="Show ${is_subset?'the original search result':'collected records'}">Show ${is_subset?'results':''}`
+                  + `<span class="ui-icon ui-icon-arrowthick-1-s" style="font-size:18px;top:3px;"></span></a>`
+                  + `<a href="#" id="clearCollected" style="padding:0px 5px;" title="Clear record collection">Clear</a> | ${sinfo}`;
         }
 
         if(this.options.select_mode=='select_multi' && this._currentMultiSelection!=null && this._currentMultiSelection.length>0){
             sinfo = sinfo + " | Selected: "+this._currentMultiSelection.length;
             if(w>600){
                 sinfo = sinfo+' <a href="#">'+window.hWin.HR('Clear')+'</a>';
-            }
+            }                                       
         }
 
         this.span_info.prop('title','');
@@ -2900,10 +2905,20 @@ $.widget( "heurist.resultList", {
             // Show 'shopping cart' of collected records, or reset to complete record list
             this._on(this.span_info.find('a#searchCollected'), {
                 click: function(){
-                    if(!this._currentSubset){
-                        this._currentSubset = this._currentRecordset.getSubSetByIds(this._collection);
+                    if(!this._isCollectionUsed){
+                        
+                        this._isCollectionUsed = true;
+                        
+                        this._fullRecordset = this._currentRecordset;
+                        
+                        let cnt = this._collection.length;
+                        let rs = {count:cnt,entityName:"Records",offset:0,reccount:cnt,records:this._collection};           
+                        this._currentRecordset = new hRecordSet(rs);             
+                        //this._currentSubset = this._currentRecordset.getSubSetByIds(this._collection);
                     }else{
-                        this._currentSubset = null;
+                        //this._currentSubset = null;
+                        this._isCollectionUsed = false;
+                        this._currentRecordset = this._fullRecordset;
                     }
                     this._renderPage(0);
                 }
