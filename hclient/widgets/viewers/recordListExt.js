@@ -495,7 +495,7 @@ $.widget( "heurist.recordListExt", {
                 if(!hasContent){ //!hasRecords && 
                     this.print_button.hide();
                 }else{
-                    this.print_button.show().css('margin-right', `${this.export_button.is(':visible') ? '15px' : ''}`);
+                    this.print_button.show().css('margin-right', `${this.export_button && this.export_button.is(':visible') ? '15px' : ''}`);
                     this.dosframe.css('height', `${new_height}px`);
                 }
             }

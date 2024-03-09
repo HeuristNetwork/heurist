@@ -810,8 +810,8 @@
         $res = false;
     
         
-        //0: use 3d party PDO mysqldump (default), 1:use internal routine, 2 - call mysql via shell
-        $dbScriptMode = defined('HEURIST_DB_MYSQL_SCRIPT_MODE')?HEURIST_DB_MYSQL_SCRIPT_MODE :0;
+        //0: use 3d party PDO mysqldump, 2 - call mysql via shell (default)
+        $dbScriptMode = defined('HEURIST_DB_MYSQL_SCRIPT_MODE')?HEURIST_DB_MYSQL_SCRIPT_MODE :2;
         
         //all scripts are in admin/setup/dbcreate
         if($script_file = basename($script_file)){
@@ -822,13 +822,14 @@
             $res = 'Unable to find sql script '.htmlspecialchars($script_file);
         }else{
             
-            if($dbScriptMode==2 && !(defined('HEURIST_DB_MYSQLPATH') && file_exists(HEURIST_DB_MYSQLPATH))){
+            if($dbScriptMode==2){
+                if (!defined('HEURIST_DB_MYSQLDUMP') || !file_exists(HEURIST_DB_MYSQLDUMP)){
                 
                     $msg = 'The path to mysql executable has not been correctly specified. '
                     .'Please ask your system administrator to fix this in the heuristConfigIni.php file';
 
                     return array(HEURIST_SYSTEM_CONFIG, $msg);
-                
+                }                
             }else {
                 $dbScriptMode = 0;
             }

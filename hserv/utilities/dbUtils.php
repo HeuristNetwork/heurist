@@ -735,11 +735,11 @@ class DbUtils {
                 //$dump_options = array('skip-triggers' => true,  'add-drop-trigger' => false);
             }
 
-            //0: use 3d party PDO mysqldump (default), 1:use internal routine, 2 - call mysql via shell
-            $dbScriptMode = defined('HEURIST_DB_MYSQL_DUMP_MODE')?HEURIST_DB_MYSQL_DUMP_MODE :0;
+            //0: use 3d party PDO mysqldump, 2 - call mysql via shell (default)
+            $dbScriptMode = defined('HEURIST_DB_MYSQL_DUMP_MODE')?HEURIST_DB_MYSQL_DUMP_MODE :2;
 
             if($dbScriptMode==2){
-                if(!defined('HEURIST_DB_MYSQLDUMP') || !file_exists(HEURIST_DB_MYSQLDUMP)){
+                if (!defined('HEURIST_DB_MYSQLDUMP') || !file_exists(HEURIST_DB_MYSQLDUMP)){
 
                     $msg = 'The path to mysqldump has not been correctly specified. '
                     .'Please ask your system administrator to fix this in the heuristConfigIni.php file';
@@ -747,7 +747,6 @@ class DbUtils {
                     self::$system->addError(HEURIST_SYSTEM_CONFIG, $msg);
                     if($verbose) echo '<br>'.$msg;
                     return false;
-                    
                 }
             }else{
                 $dbScriptMode = 0;
@@ -757,11 +756,6 @@ class DbUtils {
                 echo 'dump mode: '.$dbScriptMode.'<br>';
             }
             
-            //2023-12-01 - only default mode 
-            //$dbScriptMode = 0; 
-            
-            //remarked to avoid security report alert 
-/*    */
             if($dbScriptMode==2){ // use mysql native mysqldump utility via shell
             
                 $tables = array();
