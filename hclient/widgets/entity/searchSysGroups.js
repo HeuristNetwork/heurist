@@ -153,28 +153,23 @@ $.widget( "heurist.searchSysGroups", $.heurist.searchEntity, {
             }
             
             
-            if(false && $.isEmptyObject(request)){
-                this._trigger( "onresult", null, {recordset:new hRecordSet()} );
-            }else{
-                this._trigger( "onstart" );
-        
-                request['a']          = 'search'; //action
-                request['entity']     = this.options.entity.entityName;
-                request['details']    = 'id'; //'id';
-                request['request_id'] = window.hWin.HEURIST4.util.random();
-                
-                var that = this;                                                
-                
-                window.hWin.HAPI4.EntityMgr.doRequest(request, 
-                    function(response){
-                        if(response.status == window.hWin.ResponseStatus.OK){
-                            that._trigger( "onresult", null, 
-                                {recordset:new hRecordSet(response.data), request:request} );
-                        }else{
-                            window.hWin.HEURIST4.msg.showMsgErr(response);
-                        }
-                    });
-                    
-            }            
+            this._trigger( "onstart" );
+    
+            request['a']          = 'search'; //action
+            request['entity']     = this.options.entity.entityName;
+            request['details']    = 'id'; //'id';
+            request['request_id'] = window.hWin.HEURIST4.util.random();
+            
+            var that = this;                                                
+            
+            window.hWin.HAPI4.EntityMgr.doRequest(request, 
+                function(response){
+                    if(response.status == window.hWin.ResponseStatus.OK){
+                        that._trigger( "onresult", null, 
+                            {recordset:new hRecordSet(response.data), request:request} );
+                    }else{
+                        window.hWin.HEURIST4.msg.showMsgErr(response);
+                    }
+                });
     }
 });

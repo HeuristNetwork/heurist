@@ -394,11 +394,9 @@ $.widget( "heurist.recordExportCSV", $.heurist.recordAction, {
         this.element.find('#postform').attr('action', url);
         this.element.find('#postform').submit();
             
-        if(mode==1){ //open in new window
-            
-        }else{ //download
-            
-        }
+        //if(mode==1){ //open in new window
+        //}else{ //download
+        //}
     },
     
     //
@@ -633,7 +631,9 @@ $.widget( "heurist.recordExportCSV", $.heurist.recordAction, {
     
                             let found_idx = check_rty.indexOf(parent_rty);
 
-                            found_idx >= 0 ? check_rty.splice(found_idx, 1) : check_rty;
+                            if(found_idx >= 0){
+                                check_rty.splice(found_idx, 1);//remove
+                            }
     
                             if(check_rty.length == 0){
                                 break;

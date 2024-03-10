@@ -124,33 +124,26 @@ $.widget( "heurist.searchUsrSavedSearches", $.heurist.searchEntity, {
             }
 */            
             
+            this._trigger( "onstart" );
+    
+            request['a']          = 'search'; //action
+            request['entity']     = this.options.entity.entityName;
+            request['details']    = 'id'; //'id';
+            request['request_id'] = window.hWin.HEURIST4.util.random();
             
-            
-            if(false && $.isEmptyObject(request)){
-                this._trigger( "onresult", null, {recordset:new hRecordSet()} );
-            }else{
-                this._trigger( "onstart" );
-        
-                request['a']          = 'search'; //action
-                request['entity']     = this.options.entity.entityName;
-                request['details']    = 'id'; //'id';
-                request['request_id'] = window.hWin.HEURIST4.util.random();
-                
-                //we may search users in any database
-                request['db']     = this.options.database;
+            //we may search users in any database
+            request['db']     = this.options.database;
 
-                var that = this;                                                
-           
-                window.hWin.HAPI4.EntityMgr.doRequest(request, 
-                    function(response){
-                        if(response.status == window.hWin.ResponseStatus.OK){
-                            that._trigger( "onresult", null, 
-                                {recordset:new hRecordSet(response.data), request:request} );
-                        }else{
-                            window.hWin.HEURIST4.msg.showMsgErr(response);
-                        }
-                    });
-                    
-            }            
+            var that = this;                                                
+       
+            window.hWin.HAPI4.EntityMgr.doRequest(request, 
+                function(response){
+                    if(response.status == window.hWin.ResponseStatus.OK){
+                        that._trigger( "onresult", null, 
+                            {recordset:new hRecordSet(response.data), request:request} );
+                    }else{
+                        window.hWin.HEURIST4.msg.showMsgErr(response);
+                    }
+                });
     }
 });

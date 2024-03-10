@@ -84,8 +84,6 @@ $.widget( "heurist.searchDefTerms", $.heurist.searchEntity, {
                 
                 
             //NOTE use_cache=false for terms has no practical sense                    
-            }else if(false && $.isEmptyObject(request)){
-                this._trigger( "onresult", null, {recordset:new hRecordSet()} );
             }else{
                 this._trigger( "onstart" );
         

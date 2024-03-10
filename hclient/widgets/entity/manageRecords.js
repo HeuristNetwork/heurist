@@ -852,7 +852,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                               click: function() { 
                                   
                                 /*A123  remarked since onselect triggered in onClose event  */
-                                if(true || that._additionWasPerformed){
+                                if(true){ // || that._additionWasPerformed
                                     that.options.select_mode = 'select_single'
                                     that.selectedRecords(that._currentEditRecordset); //it calls that._selectAndClose();
                                 }else{
@@ -2344,38 +2344,14 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
         }
 
         var record_stub = {};
-        if(false && that.options.edit_structure){ //2020-12-06  returns fake record to edit structure only
-            record_stub = {"status":"ok","is_insert":true,
-                        "data":{"entityName":"Records","count":"1","reccount":1,
-                        "fields":["rec_ID","rec_URL","rec_RecTypeID","rec_Title",
-                        "rec_OwnerUGrpID","rec_NonOwnerVisibility","rec_Modified","rec_Added","rec_AddedByUGrpID","rec_ScratchPad",
-                        "rec_NonOwnerVisibilityGroups"],
-                        "fields_detail":[],
-                        "records":{"3256":["3256",null,that.options.new_record_params.RecTypeID,"","2","public","2020-08-19 13:53:41",
-                        "2020-08-19 13:53:41","2",null,null]},
-                        "order":["3256"],
-                        "rectypes":[that.options.new_record_params.RecTypeID],
-                        //"limit_warning":false,"memory_warning":null,
-                        //"relations":{"direct":[],"reverse":[],"headers":{"3256":["","56","2","hidden"]}}},
-                        //"request_code":{"script":"record_edit","action":"a"}
-                        }};
-        }
         
         if(recID==null){
             this._editing.initEditForm(null, null); //clear and hide
         }else if(recID>0){ //edit existing record  - load complete information - full file info, relations, permissions
         
-            if(false && that.options.edit_structure){ //2020-12-06
-                
-                that._initEditForm_step4(record_stub);
-                
-            }else{
-                window.hWin.HAPI4.RecordMgr.search({q: 'ids:'+recID, w: "e", f:"complete", l:1, checkFields: 1}, 
+            window.hWin.HAPI4.RecordMgr.search({q: 'ids:'+recID, w: "e", f:"complete", l:1, checkFields: 1}, 
                             function(response){ response.is_insert = (is_insert==true); 
                                                 that._initEditForm_step4(response); });
-                
-            }
-        
 
         }else if(recID<0){ //add new record
         
@@ -2478,26 +2454,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                     that.options.new_record_params.OwnerUGrpID = window.hWin.HAPI4.user_id();
                 }
                 
-
-                if(false && that.options.edit_structure){ //2020-12-06 returns fake record to edit structure only
-/*
-                        var response = {"status":"ok","data":{"queryid":null,"pageno":null,"entityName":"Records","count":"1","offset":0,"reccount":1,"tmcount":0,
-                        "fields":["rec_ID","rec_URL","rec_RecTypeID","rec_Title","rec_OwnerUGrpID","rec_NonOwnerVisibility","rec_Modified","bkm_PwdReminder","rec_Added","rec_AddedByUGrpID","rec_ScratchPad","bkm_Rating","rec_ThumbnailURL",
-                        "rec_NonOwnerVisibilityGroups"],
-                        "fields_detail":[],
-                        "records":{"3256":["3256",null,that.options.new_record_params.RecTypeID,"","2","public","2020-08-19 13:53:41",null,"2020-08-19 13:53:41","2",null,null,null]},
-                        "order":["3256"],
-                        "rectypes":[that.options.new_record_params.RecTypeID],
-                        //"limit_warning":false,"memory_warning":null,
-                        //"relations":{"direct":[],"reverse":[],"headers":{"3256":["","56","2","hidden"]}}},
-                        //"request_code":{"script":"record_edit","action":"a"}
-                        }};
-*/
-                      that._initEditForm_step4(record_stub); //it returns full record data
-                      that.editRecordType(true);
-
-
-                }else if(that.options.new_record_params['details']){                     
+                if(that.options.new_record_params['details']){                     
                     //need to use save because method "add" inserts only header
                     
                     var msg = null;
@@ -4018,7 +3975,7 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
                       if(val && val.length>0 && !window.hWin.HEURIST4.util.isempty(val[0])){
                           
                             var mimetype = val[0]['ulf_MimeExt'];
-                            if(mimetype=='image/jpg') mimetype=='image/jpeg';
+                            if(mimetype=='image/jpg'){ mimetype='image/jpeg'; }
                             var ele = this._editing.getInputs( window.hWin.HAPI4.sysinfo['dbconst']['DT_MIME_TYPE'] );
                             if(ele.length>0){
                                 ele = $(ele[0]);
@@ -5322,7 +5279,7 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
         }
 
         content += '<br><br><span style="vertical-align: top;">If you wish to qualify the date with a short note, enter it here </span>'
-                +  '<textarea cols="30" rows="5" id="COM" style="resize: none"></textarea>';
+                +  '<textarea cols="30" rows="5" id="COM" style="resize: none"></textarea>'
                 +  '</div>';
 
         $dlg = window.hWin.HEURIST4.msg.showMsgDlg(content, btns, labels, options);
@@ -5718,7 +5675,7 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
                                 let scratchpad_txt = response.record + '\r\n\r\n';//JSON.stringify(response.record, null, 4);
 
                                 let fld_id = cfg.options.dump_field;
-                                if(parseInt(fld_id) == NaN || fld_id < 1 || !$Db.rst(that._currentEditRecTypeID, fld_id) || $Db.dty(fld_id, 'dty_Type') != 'blocktext'){
+                                if(isNaN(parseInt(fld_id)) || fld_id < 1 || !$Db.rst(that._currentEditRecTypeID, fld_id) || $Db.dty(fld_id, 'dty_Type') != 'blocktext'){
                                     fld_id = 'rec_ScratchPad';   
                                 }
                                 let $fld = that._editing.getFieldByName(fld_id);

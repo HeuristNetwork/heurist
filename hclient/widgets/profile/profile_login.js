@@ -412,7 +412,7 @@ function updateStatus($dlg, new_mode = false, error = ''){
  */
 function changeDisplay(mode, $dlg){
 
-    if(Number(mode) === NaN){
+    if(isNaN(Number(mode))){
         return;
     }
 

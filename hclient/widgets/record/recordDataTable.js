@@ -389,7 +389,7 @@ $.widget( "heurist.recordDataTable", $.heurist.recordAction, {
     getSettings: function( mode_action ){
 
         //get selected fields from treeview
-        var selectedFields = false&&mode_action?{}:[];
+        var selectedFields = []; //false && mode_action?{}:[];
         var tree = this.element.find('.rtt-tree').fancytree("getTree");
         var fieldIds = tree.getSelectedNodes(false);
         var k, len = fieldIds.length;

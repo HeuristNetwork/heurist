@@ -2661,7 +2661,7 @@ content = content.replace('http://heurist.sydney.edu.au/heurist/',window.hWin.HA
                 var nav = this.historyNav[idx];
                 var text = nav.page_name?nav.page_name:nav.title;   //(nav.entityType+'  '+nav.entityID);
 
-                if (true || !window.hWin.HEURIST4.util.isempty(text)){
+                if (true){ // || !window.hWin.HEURIST4.util.isempty(text)
 
 
 

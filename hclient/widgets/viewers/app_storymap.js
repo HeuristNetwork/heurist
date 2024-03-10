@@ -295,12 +295,10 @@ $.widget( "heurist.app_storymap", {
                 +'title="Next" role="button" aria-label="Next">&gt;</a></div>')        
                 .appendTo(this.pnlStory);
                 
-            if(this.options.reportOverviewMode=='header'){
+            //if(this.options.reportOverviewMode=='header'){
                 //navbar.css({top: this.pnlOverview.height()+10+'px'});
                 //this.pnlStoryReport.css({'position':'absolute',top:(this.pnlOverview.height()+'px'), bottom:0, left:0, right:0})
-            }else{
-                
-            }
+            //}
             this.pnlStoryReport.css({width:'100%',height:'100%'});   
                 
             this._on(this.pnlStory.find('#btn-prev'),{click:function(){ this._onNavigate(false); }});    
@@ -1201,7 +1199,7 @@ $.widget( "heurist.app_storymap", {
                             that._onNavigateStatus( that._resultset.getOrder().length );    
                             that.pnlStoryReport.html(that.pnlEndPage.html())
                         }else
-                        if(false && that.options.reportElementMode=='tabs'){
+                        if(false){// && that.options.reportElementMode=='tabs'
                             // Works, but would be better if part of _resultset
                             let $tabs = that._resultList.find('.div-result-list-content.tabs');
                             if($tabs.length == 0 || $tabs.tabs('instance') === undefined){

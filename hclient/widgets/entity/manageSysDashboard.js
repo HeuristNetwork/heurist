@@ -494,7 +494,7 @@ $.widget( "heurist.manageSysDashboard", $.heurist.manageEntity, {
         
         var specialWidth = '';
         
-        if (this.options.isViewMode & !this.options.is_iconlist_mode) {
+        if (this.options.isViewMode && !this.options.is_iconlist_mode) {
             specialWidth = 'width:250px';
             //detect if there is no description
             recordset.each( function(id, record){

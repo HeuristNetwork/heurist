@@ -1169,7 +1169,7 @@ $.widget( "heurist.search_faceted", {
                                     }
 
                                     let $fields = that._input_fields['$X'+field['var']].find('.input-div');
-                                    if($fields.length < 0){
+                                    if($fields.length < 1){
                                         return;
                                     }
 

@@ -988,7 +988,7 @@ $.widget( "heurist.search_faceted_wiz", {
                 }
                 
             }else{ //add new saved search
-                this.originalRectypeID == null;
+                this.originalRectypeID = null;
 
                 svs_id.val('');
                 svs_name.val('');
@@ -2284,7 +2284,7 @@ $.widget( "heurist.search_faceted_wiz", {
             return false;
         }
 
-        if(true || !Hul.isempty(svs_rules.val())){
+        if(true){ // || !Hul.isempty(svs_rules.val())
             this.options.params.rules = svs_rules.val();
             
             var rules_only = 0;
@@ -2297,7 +2297,7 @@ $.widget( "heurist.search_faceted_wiz", {
             this.options.params.rules = null;
             this.options.params.rulesonly = null;
         }
-        if(true || !Hul.isempty(svs_filter.val())){
+        if(true){ // || !Hul.isempty(svs_filter.val())
             this.options.params.sup_filter = svs_filter.val();
         }
 
