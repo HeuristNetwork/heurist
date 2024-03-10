@@ -180,21 +180,6 @@ CREATE TABLE defFileExtToMimetype (
 -- --------------------------------------------------------
 
 --
--- Table structure for table 'defLanguages'
---
-
-CREATE TABLE defLanguages (
-  lng_NISOZ3953 char(3) NOT NULL COMMENT 'Three character NISO Z39.53 language code',
-  lng_ISO639 char(2) NOT NULL COMMENT 'Two character ISO639 language code',
-  lng_Name varchar(63) NOT NULL COMMENT 'Language name, generally accepted name (normally English terminology)',
-  lng_Notes varchar(1000) default NULL COMMENT 'Semantic URI reference or URL for notes on the definition of the language',
-  lng_Modified timestamp NOT NULL default CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP COMMENT 'Date of last modification of this record, used to get last updated date for table',
-  PRIMARY KEY  (lng_NISOZ3953)
-) ENGINE=InnoDB COMMENT='Language list including optional standard language codes';
-
--- --------------------------------------------------------
-
---
 -- Table structure for table 'defOntologies'
 --
 
@@ -1094,44 +1079,6 @@ INSERT IGNORE INTO sysUsrGrpLinks (ugl_UserID,ugl_GroupID,ugl_Role) VALUES (2,4,
 
 -- defRectypegroups and defDetailtypeGroups are now inserted by coreDefinitions.txt
 
-INSERT INTO defLanguages (lng_NISOZ3953, lng_ISO639, lng_Name, lng_Notes)
-VALUES
-('ARA', 'AR', 'Arabic', NULL),
-('CAM', 'KM', 'Khmer', NULL),
-('CHI', 'ZH', 'Chinese', NULL),
-('CZE', 'CS', 'Czech', NULL),
-('DAN', 'DA', 'Danish', NULL),
-('DUT', 'NL', 'Dutch', NULL),
-('ENG', 'EN', 'English', NULL),
-('EST', 'ET', 'Estonian', NULL),
-('FIN', 'FI', 'Finish', NULL),
-('FRE', 'FR', 'French', NULL),
-('GER', 'DE', 'German', NULL),
-('GRE', 'EL', 'Greek', NULL),
-('HEB', 'HE', 'Hebrew', NULL),
-('HIN', 'HI', 'Hindi', NULL),
-('HUN', 'HU', 'Hungarian', NULL),
-('IND', 'ID', 'Indonesian', NULL),
-('ITA', 'IT', 'Italian', NULL),
-('JPN', 'JA', 'Japanese', NULL),
-('KOR', 'KO', 'Korean', NULL),
-('LAV', 'LV', 'Latvian', NULL),
-('MAL', 'MS', 'Malay', NULL),
-('NOR', 'NO', 'Norwegian', NULL),
-('POL', 'PL', 'Polish', NULL),
-('POR', 'PT', 'Portuguese', NULL),
-('RUS', 'RU', 'Russian', NULL),
-('SCC', 'HR', 'Croatian', NULL),
-('SCR', 'SR', 'Serbian', NULL),
-('SLO', 'SK', 'Slovak', NULL),
-('SPA', 'ES', 'Spanish', NULL),
-('SWA', 'SW', 'Swahili', NULL),
-('SWE', 'SV', 'Swedish', NULL),
-('THA', 'TH', 'Thai', NULL),
-('TUR', 'TR', 'Turkish', NULL),
-('UKR', 'UK', 'Ukranian', NULL),
-('VIE', 'VI', 'Vietnamese', NULL),
-('YID', 'YI', 'Yiddish', NULL);
 
 -- Note: language terms removed because of duplicate key error because they occur in the core definitions
 -- auto increment values for tables also removed because the concept code system takes care of core

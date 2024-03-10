@@ -1236,7 +1236,6 @@ class DbUtils {
             
                 // Remove initial values from empty target database
                 $mysqli->query('delete from sysIdentification where 1');
-                $mysqli->query('delete from defLanguages where 1');
                 
                 if(!$isCloneTemplate){
                     $mysqli->query('delete from sysUsrGrpLinks where 1');

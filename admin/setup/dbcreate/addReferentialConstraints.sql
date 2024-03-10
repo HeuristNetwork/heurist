@@ -31,10 +31,6 @@
 -- tag_UGrpID
 
 -- ----------------------------------------------------------------------------
--- defTranslations uses ISO639
--- ALTER TABLE `defTranslations` ADD CONSTRAINT fk_trn_LanguageCode FOREIGN KEY (trn_LanguageCode) REFERENCES defLanguages (lng_ISO639) ON UPDATE CASCADE;
-
--- ----------------------------------------------------------------------------
 
 ALTER TABLE `Records`
   ADD CONSTRAINT fk_rec_RecTypeID FOREIGN KEY (rec_RecTypeID) REFERENCES defRecTypes (rty_ID) ON DELETE RESTRICT ON UPDATE CASCADE,

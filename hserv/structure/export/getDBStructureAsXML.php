@@ -154,11 +154,6 @@ do_print_table2('defTranslations');
 do_print_table2('sysDashboard');
 
 // ------------------------------------------------------------------------------------------
-// defLanguages
-
-do_print_table2('defLanguages');
-
-// ------------------------------------------------------------------------------------------
 // defCalcFunctions
 
 do_print_table2('defCalcFunctions');

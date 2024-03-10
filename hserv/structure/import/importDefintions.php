@@ -153,8 +153,6 @@ class ImportDefinitions {
         'defTranslations',
         'usrSavedSearches',
         'sysDashboard' // added 12/11/18
-        // there are several more tables which are not used as at 12/11/18
-        //'defLanguages', // added 12/11/18 - AO it is already populated in blankDBStructure.sql
         );
         
         $splittedData = explode(START_TOKEN, $data);

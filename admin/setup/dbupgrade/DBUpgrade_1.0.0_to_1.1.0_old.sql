@@ -151,8 +151,8 @@
   ALTER TABLE  `defFileExtToMimetype` 
     ADD COLUMN `fxm_Modified` TIMESTAMP ON UPDATE CURRENT_TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'Date of last modification of this record, used to get last updated date for table';
 
-  ALTER TABLE  `defLanguages` 
-    ADD COLUMN `lng_Modified` TIMESTAMP ON UPDATE CURRENT_TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'Date of last modification of this record, used to get last updated date for table';
+--  ALTER TABLE  `defLanguages` 
+--    ADD COLUMN `lng_Modified` TIMESTAMP ON UPDATE CURRENT_TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'Date of last modification of this record, used to get last updated date for table';
 
   ALTER TABLE  `defOntologies` 
     ADD COLUMN `ont_Modified` TIMESTAMP ON UPDATE CURRENT_TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'Date of last modification of this record, used to get last updated date for table';

@@ -24,7 +24,7 @@
   Cloning workflow:
 
     1. Create empty database with blankDBStructure.sql
-    2. Empty sysIdentification, sysUsrGrpLinks, sysUGrps, defLanguages
+    2. Empty sysIdentification, sysUsrGrpLinks, sysUGrps
     3. Copy ALL tables  
     4. reset reginfo
     5. Create indexes and procedures
