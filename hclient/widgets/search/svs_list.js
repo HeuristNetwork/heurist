@@ -1308,7 +1308,7 @@ $.widget( "heurist.svs_list", {
             renderNode: function(event, data) {
                 // Optionally tweak data.node.span
                 var node = data.node;
-                if(true || node.data.cstrender){
+                if(true){ // || node.data.cstrender
                     var $span = $(node.span);
                     var s = '', s1='';
 

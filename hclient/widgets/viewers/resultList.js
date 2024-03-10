@@ -959,9 +959,7 @@ $.widget( "heurist.resultList", {
         }else{
             this.element.addClass('ui-heurist-bg-light');
             
-            if(true || this.element.parent().hasClass('ui-widget-content')){
-                this.element.parent().css({'background':'none','border':'none'});
-            }
+            this.element.parent().css({'background':'none','border':'none'});
 
             //this.div_toolbar.addClass('ui-heurist-bg-light');
             this.div_content.addClass('ui-heurist-bg-light');
@@ -1027,7 +1025,7 @@ $.widget( "heurist.resultList", {
                 var cols = this.div_content.find('.recordDiv:first').find('.item');
                 var tot = 0;
                 cols.each(function(i, col_item){
-                    if(i>0 & i<header_columns.length){ //skip recordSelector
+                    if(i>0 && i<header_columns.length){ //skip recordSelector
                         $(header_columns[i-1]).width( $(col_item).width() );    
                         tot = tot + $(col_item).width() + 4;
                     }
@@ -3734,7 +3732,6 @@ $.widget( "heurist.resultList", {
             && this.options.check_linked_media 
             && $allrecs.find('.recTypeThumb.rectypeThumb').length > 0){
 
-            this._cached_linked_images;
             let rec_images = [];
 
             // Check if any records need checking

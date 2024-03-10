@@ -1,6 +1,4 @@
 <?php 
-//declare(strict_types=1);
-
 /**
 * @package     Heurist academic knowledge management system
 * @link        https://HeuristNetwork.org
@@ -18,8 +16,7 @@
 * See the License for the specific language governing permissions and limitations under the License.
 */
 
-
-//@todo - reimplement using Singleton pattern
+//declare(strict_types=1);
 
 require_once dirname(__FILE__).'/../configIni.php'; // read in the configuration file
 require_once dirname(__FILE__).'/consts.php';
@@ -269,11 +266,11 @@ class System {
                
                foreach($config as $idx=>$cfg){
                    
-                   $allowed_dbs = @$cfg['database'];
-                   if(true){ //$allowed_dbs==null || $allowed_dbs=="*" || in_array(HEURIST_DBNAME,explode(',',$allowed_dbs))){
+                   //$allowed_dbs = @$cfg['database'];
+                   //if($allowed_dbs==null || $allowed_dbs=="*" || in_array(HEURIST_DBNAME,explode(',',$allowed_dbs))){
                    
                        $rty_ID = ConceptCode::getRecTypeLocalID($cfg['rty_ID']);
-                       if(true || $rty_ID>0){
+                       if(true){// || $rty_ID>0
                            
                             $cfg['rty_ID'] = $rty_ID;
                            
@@ -298,7 +295,7 @@ class System {
                            
                             $config_res[] = $cfg;
                        }
-                   }
+                   //}
                }
            }
         }
@@ -1103,6 +1100,24 @@ class System {
         */
         
         try{
+
+        //host organization logo and url (specified in root installation folder next to heuristConfigIni.php)
+        $host_logo = realpath(dirname(__FILE__)."/../../organisation_logo.jpg");
+        if(!$host_logo || !file_exists($host_logo)){
+            $host_logo = realpath(dirname(__FILE__)."/../../organisation_logo.png");
+        }
+        $host_url = null;
+        if($host_logo!==false &&  file_exists($host_logo)){
+            $host_logo = HEURIST_BASE_URL.'?logo=host';
+            $host_url = realpath(dirname(__FILE__)."/../../organisation_url.txt");
+            if($host_url!==false && file_exists($host_url)){
+                $host_url = file_get_contents($host_url);   
+            }else{
+                $host_url = null;
+            }
+        }else{
+            $host_logo = null;    
+        }
             
         //current user reset - reload actual info from database
         $this->login_verify( true );
@@ -1124,24 +1139,6 @@ class System {
                         array_push($dbrecent, $db);
                     }
                 }
-            }
-            
-            //host organization logo and url (specified in root installation folder next to heuristConfigIni.php)
-            $host_logo = realpath(dirname(__FILE__)."/../../organisation_logo.jpg");
-            if(!$host_logo || !file_exists($host_logo)){
-                $host_logo = realpath(dirname(__FILE__)."/../../organisation_logo.png");
-            }
-            $host_url = null;
-            if($host_logo!==false &&  file_exists($host_logo)){
-                $host_logo = HEURIST_BASE_URL.'?logo=host';
-                $host_url = realpath(dirname(__FILE__)."/../../organisation_url.txt");
-                if($host_url!==false && file_exists($host_url)){
-                    $host_url = file_get_contents($host_url);   
-                }else{
-                    $host_url = null;
-                }
-            }else{
-                $host_logo = null;    
             }
             
             //retrieve lastest code version (cached in localfile and refreshed from main index server daily)
@@ -1304,7 +1301,7 @@ class System {
             array_push($groups, intval($ugrID) );
             return $groups;
         }else{
-            null;
+            return null;
         }
     }
 
@@ -1514,7 +1511,6 @@ class System {
     private function login_verify( $user ){
         
         $reload_user_from_db = false; 
-        //$h3session = $this->dbname_full.'.heurist';
         
         if( is_array($user) ){  //user info already found (see login) - need reset session
             $reload_user_from_db = true;            
@@ -1524,16 +1520,6 @@ class System {
             $reload_user_from_db = ($user==true);  //reload user unconditionally
             
             $userID = @$_SESSION[$this->dbname_full]['ugr_ID'];
-            
-            /*
-            if(!$userID){ //in h4 or h5 session user not found
-                // vsn 3 backward capability  - restore user id from old session
-                $userID = @$_SESSION[$h3session]['user_id'];
-                if($userID){
-                    $_SESSION[$this->dbname_full]['keepalive'] = @$_SESSION[$h3session]['keepalive'];
-                    $reload_user_from_db = true;
-                }
-            }*/
         }
         
         if($userID == null){
@@ -1776,15 +1762,6 @@ class System {
         unset($_SESSION[$this->dbname_full]['ugr_Name']);
         unset($_SESSION[$this->dbname_full]['ugr_FullName']);
         if(@$_SESSION[$this->dbname_full]['ugr_Groups']) unset($_SESSION[$this->dbname_full]['ugr_Groups']);
-        
-        if(true){
-            $h3session = $this->dbname_full.'.heurist';
-            if(@$_SESSION[$h3session]['user_id']){
-                unset($_SESSION[$h3session]['user_id']);
-                unset($_SESSION[$h3session]['user_name']);
-                unset($_SESSION[$h3session]['user_realname']);
-            }
-        }
         
         // clear
         // even if user is logged to different databases he has the only session per browser

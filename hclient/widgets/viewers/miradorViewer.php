@@ -94,7 +94,7 @@ if q only defined all images linked to record(s) will be included
         $use_custom_mirador = file_exists(dirname(__FILE__).'/../../../external/mirador3/dist/main.js');
 ?>
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
-<html>
+<html lang="en">
 <head>
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Cache-Control" content="no-cache">

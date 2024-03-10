@@ -220,8 +220,7 @@ function getAction($method){
     }else if($method=='DELETE'){
         return 'delete';
     }else{
-        return $method;
+        return null;
     }       
-    return null;
 }
 ?>
