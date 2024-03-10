@@ -46,8 +46,8 @@
     */
 
 ?>
-
-<html>
+<!DOCTYPE html>
+<html lang="en">
 
 <head>
     <title><?php print htmlspecialchars(strip_tags($website_title_translated)); ?></title>

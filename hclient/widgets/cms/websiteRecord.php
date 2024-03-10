@@ -421,10 +421,10 @@ if(!$isWebPage){  //not standalone web page
             .'<span class="widget-options" style="font-style: italic; display: none;">{"menu_recIDs":"'.$rec_id
             .'","use_next_level":true,"orientation":"horizontal","init_at_once":true}</span>';
     
-    $custom_website_php_template = defined('DT_CMS_TEMPLATE')?__getValue($rec, DT_CMS_TEMPLATE, null):null; 
+    $custom_website_php_template = defined('DT_CMS_TEMPLATE')?__getValue($rec, DT_CMS_TEMPLATE):null; 
 
-    $record_view_smarty_template = defined('DT_SMARTY_TEMPLATE')?__getValue($rec, DT_SMARTY_TEMPLATE, null):null; 
-    $record_view_target = defined('DT_CMS_TARGET')?__getValue($rec, DT_CMS_TARGET, null):null; 
+    $record_view_smarty_template = defined('DT_SMARTY_TEMPLATE')?__getValue($rec, DT_SMARTY_TEMPLATE):null; 
+    $record_view_target = defined('DT_CMS_TARGET')?__getValue($rec, DT_CMS_TARGET):null; 
     if($record_view_target=='recordview') $record_view_target='main-recordview';
     
     //backward capability 
@@ -433,9 +433,9 @@ if(!$isWebPage){  //not standalone web page
         $record_view_smarty_template = null;
     }
     
-    $page_header = defined('DT_CMS_HEADER')?__getValue($rec, DT_CMS_HEADER, null):null; 
+    $page_header = defined('DT_CMS_HEADER')?__getValue($rec, DT_CMS_HEADER):null; 
 
-    $page_footer_type = defined('DT_CMS_FOOTER_FIXED')?__getValue($rec, DT_CMS_FOOTER_FIXED, null):null; 
+    $page_footer_type = defined('DT_CMS_FOOTER_FIXED')?__getValue($rec, DT_CMS_FOOTER_FIXED):null; 
     
     if($page_footer_type !== ConceptCode::getTermLocalID('3-5029'))    //unknown position
     //== ConceptCode::getTermLocalID('2-532') || $page_footer_type == ConceptCode::getTermLocalID('2-531'))
@@ -445,7 +445,7 @@ if(!$isWebPage){  //not standalone web page
         if(defined('DT_CMS_FOOTER')){
             $page_footers = @$rec['details'][DT_CMS_FOOTER];
         }
-        //$page_footer = defined('DT_CMS_FOOTER')?__getValue($rec, DT_CMS_FOOTER, null):''; 
+        //$page_footer = defined('DT_CMS_FOOTER')?__getValue($rec, DT_CMS_FOOTER):''; 
         $is_page_footer_fixed = ($page_footer_type != ConceptCode::getTermLocalID('2-531'));
         $default_style = ";border-top:2px solid rgb(112,146,190);background:lightgray;";
         if ($is_page_footer_fixed) {

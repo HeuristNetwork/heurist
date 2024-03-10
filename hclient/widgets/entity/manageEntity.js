@@ -1394,7 +1394,7 @@ $.widget( "heurist.manageEntity", {
             }else{
                 return this._cachedRecordset.getSubSetByIds(recIDs);    
             }
-        }else if(this.options.list_mode=='default'){
+        }else if(this.options.list_mode=='default' && this.recordList.resultList('instance')){
             if(window.hWin.HEURIST4.util.isnull(recIDs)){
                 return this.recordList.resultList('getRecordSet')
             }else{

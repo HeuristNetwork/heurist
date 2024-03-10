@@ -276,13 +276,6 @@ window.hWin.HEURIST4.ui = {
             }
             
             
-        }else  if(false && !$.isEmptyObject(topOptions) && Object.keys(topOptions).length>0 ) {
-           
-                for (var key in topOptions)
-                if(!window.hWin.HEURIST4.util.isempty(topOptions[key])){
-                        window.hWin.HEURIST4.ui.addoption(selObj, key, topOptions[key], false);
-                }
-            
         }else if(!window.hWin.HEURIST4.util.isempty(topOptions) && topOptions!==false){
             if(topOptions===true) topOptions = '  ';  // <blank>
             window.hWin.HEURIST4.ui.addoption(selObj, '', topOptions);
@@ -2995,7 +2988,7 @@ window.hWin.HEURIST4.ui = {
         
         if(doNotStartAgain===true) {
             window.hWin.HEURIST4.wait_terminated = true;
-            window.hWin.HEURIST4.ui.wait_ms == 0;
+            window.hWin.HEURIST4.ui.wait_ms = 0;
             return;   
         }
 
@@ -3485,7 +3478,7 @@ $.fn.sideFollow = function(dtime) {
     var originalTop =  parseInt(floating.attr('data-top'));
     if(!(originalTop>=0)) originalTop = 180;
 
-    dtime ? dtime = dtime : dtime = 1000;
+    dtime = dtime ?dtime :1000;
 
     goFollow();
 

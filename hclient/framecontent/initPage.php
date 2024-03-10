@@ -129,7 +129,7 @@ if(defined('IS_INDEX_PAGE')){
 <?php    
 }
 ?>
-<html lang="en" xml:lang="en">
+<html lang="en">
 <head>
 
 <title><?php echo (@$_REQUEST['db']?htmlspecialchars($_REQUEST['db']):'').'. '.HEURIST_TITLE; ?></title>

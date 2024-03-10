@@ -1368,16 +1368,16 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
             if(!options.height) options.height = 515;
             if(!options.width) options.width = 705;
             if(window.hWin.HEURIST4.util.isempty(options.resizable)) options.resizable = true;
-            if(false && options.resizable === true){
+            /* auto height dialog
+            if(options.resizable === true){
             options.resizeStop = function( event, ui ) {
-                
-
+ 
                var nh = $dlg.parent().height()
                             - $dlg.parent().find('.ui-dialog-titlebar').height() - $dlg.parent().find('.ui-dialog-buttonpane').height(); //-20
 
                     $dlg.css({overflow: 'none !important','width':'100%', 'height':nh });
                 };
-            }
+            }*/
         }else if(!options.width){
             options.width = 'auto';
         }

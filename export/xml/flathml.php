@@ -1084,7 +1084,7 @@ function outputRecords($result) {
                 if($res){
                     $already_out[$recID] = $relRT;   
                 }elseif ($intofile && file_exists(HEURIST_HML_DIR.$recID.".xml")){
-                    unlink(HEURIST_HML_DIR.$record['rec_ID'].".xml");
+                    unlink(HEURIST_HML_DIR.$recID.".xml");
                 }
             }
         }

@@ -43,6 +43,7 @@ define('HEURIST_TERM_ICON_URL', HEURIST_BASE_URL.'?db='.HEURIST_DBNAME.'&entity=
 <div id="legendtable">
     <p><b>PLACES</b></p>
     <table>
+        <thead></thead>
         <tbody>
             <tr>
                 <td class="legend_icon"><img src="<?=HEURIST_TERM_ICON_URL.PLACE_ICON?>"></td>
@@ -52,6 +53,7 @@ define('HEURIST_TERM_ICON_URL', HEURIST_BASE_URL.'?db='.HEURIST_DBNAME.'&entity=
 
     <p><b>EVENTS</b></p>                  
     <table>
+        <thead></thead>
         <tbody>
             <?php
             $query = 'SELECT trm_ID, trm_Label, trm_Code from defTerms where trm_ParentTermID='.EVENT_TYPE.' ORDER BY trm_Label';
@@ -70,6 +72,7 @@ define('HEURIST_TERM_ICON_URL', HEURIST_BASE_URL.'?db='.HEURIST_DBNAME.'&entity=
 
     <p><b>PEOPLE</b></p>
     <table>
+        <thead></thead>
         <tbody>
             <?php
             $query = 'SELECT trm_ID, trm_Label, trm_Code from defTerms where trm_ParentTermID='.PERSON_ROLE.' ORDER BY trm_Label';

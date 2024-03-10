@@ -343,7 +343,7 @@ function hexportMenu( container ) {
             
             var script; 
             var params = '';
-            if(true || $('#followPointers').is(':checked')){
+            if(true){
 
                 if(isEntireDb){
                     params =  'depth=0';

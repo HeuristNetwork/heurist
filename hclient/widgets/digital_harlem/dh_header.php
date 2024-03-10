@@ -41,7 +41,11 @@ if(@$_REQUEST['db'] && $system->init(@$_REQUEST['db'])){
     $is_inited = true;
 }
 ?>
-<html>
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <title>DigitalHarlem</title>
+    </head>
     <body>
         <div id="topstuff">
 

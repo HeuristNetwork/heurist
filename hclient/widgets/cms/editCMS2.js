@@ -1010,7 +1010,7 @@ var sMsg = '<p>Heurist\'s CMS editor has been upgraded to a new system which is 
             _panel_treePage[0].style.removeProperty('height'); //show();
         }
         
-        if(true || current_edit_mode=='website'){
+        if(true){ // || current_edit_mode=='website'
             _panel_propertyView.hide();
             __restoreTree();
         }else if(_panel_propertyView.is(':visible')){
@@ -1150,9 +1150,10 @@ var sMsg = '<p>Heurist\'s CMS editor has been upgraded to a new system which is 
             //+ ele_ID
             + (is_intreeview?'<span class="ui-icon ui-icon-menu" style="width:20px"></span>'
                             :'<span class="ui-icon ui-icon-gear" style="width:30px;height: 30px;font-size: 26px;margin-top: 0px;" title="Edit style and properties 2"></span>')
-            + (true || is_root || is_cardinal?'':
+            //+ (true || is_root || is_cardinal?'':
                 ('<span data-action="drag" style="display:block;padding:4px" title="Drag to reposition">' //
-                    + '<span class="ui-icon ui-icon-arrow-4" style="font-weight:normal"/>Drag</span>'))               
+                    + '<span class="ui-icon ui-icon-arrow-4" style="font-weight:normal"/>Drag</span>')
+                                   
             + '<span data-action="edit" style="display:block;padding:4px" title="Edit style and properties 3">'
             +'<span class="ui-icon ui-icon-pencil"/>Style</span>';               
             

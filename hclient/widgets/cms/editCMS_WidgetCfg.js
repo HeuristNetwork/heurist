@@ -670,7 +670,7 @@ function editCMS_WidgetCfg( widget_cfg, _layout_content, $dlg, main_callback, on
 
                     var init_val = $dlg.find('input[name="allowed_UGrpID"]').val();
                     if(init_val=='' && selval!=2 && $dlg.find('input[name="allowed_svsIDs"]').val()==''){
-                        init_val==5;//web search  by default
+                        init_val = 5;//web search  by default
                     }
 
                     var ed_options = {
