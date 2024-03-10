@@ -823,7 +823,6 @@ $.widget( "heurist.mainMenu", {
             
             // for entity show dialog inline in target container
             entity_dialog_options = {isdialog: false, 
-                                     isFrontUI: true, 
                                      innerTitle: true,
                                      isFrontUI: true, //inline in main screen
                                      menu_container: menu_container,
@@ -1951,10 +1950,9 @@ $.widget( "heurist.mainMenu", {
                         select_return_mode: 'recordset',
                         edit_mode: 'popup',
                         selectOnSave: true, //it means that select popup will be closed after add/edit is completed
-                        title: window.hWin.HR('Select or create a standalone web page'),
+                        title: window.hWin.HR('Select Web page'),
                         fixed_search: query_search_pages, // RT_CMS_MENU,
                         parententity: 0,
-                        title: window.hWin.HR('Select Web page'),
                         
                         layout_mode: 'listonly',
                         width:500, height:400,
@@ -2030,11 +2028,10 @@ $.widget( "heurist.mainMenu", {
                         select_return_mode: 'recordset',
                         edit_mode: 'popup',
                         selectOnSave: true, //it means that select popup will be closed after add/edit is completed
-                        title: window.hWin.HR('Select or create a website home record'),
+                        title: window.hWin.HR('Select Website'),
                         fixed_search: query_search_sites,
                         //rectype_set: RT_CMS_HOME,
                         parententity: 0,
-                        title: window.hWin.HR('Select Website'),
                         
                         layout_mode: 'listonly',
                         width:500, height:400,
@@ -2323,13 +2320,13 @@ $.widget( "heurist.mainMenu", {
     //
     //
     _doRegister: function(){
-
+        /*
         if(false && !$.isFunction(doRegister)){  // already loaded in index.php
-            //var that = this;
             $.getScript(window.hWin.HAPI4.baseURL+'hclient/widgets/profile/profile_login.js', this._doRegister );
-        }else{
-            doRegister();
-        }
+        }else{}
+        */
+        doRegister();
+        
     },
     
     //------------------------ EXPORT ------------------------------------------

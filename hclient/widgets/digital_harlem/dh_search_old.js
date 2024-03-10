@@ -476,16 +476,6 @@ $.widget( "heurist.dh_search", {
             var field = this._searches[svs_id][i];
             if(i>field_index && field['isfacet'] && field['facet']){
 
-
-                if(false && this._resultset && this._resultset.count_total()>1000){
-                    //replace with current query
-
-                }else{
-                    //replace with list of ids
-
-                }
-
-
                 var query = this._setFacetQuery( field['facet'], this._resultset.getIds() );
 
                 var request = {q: query, w: 'a', a:'getfacets',

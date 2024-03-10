@@ -28,12 +28,13 @@ if(!isset($terms)){   //global
 if($recTypeID==RT_PERSON){
 
     ?>
-    <html>
+    <!DOCTYPE html>
+    <html lang="en">
         <head>
         <title><?=(@$_REQUEST['db']?htmlspecialchars($_REQUEST['db']):'').'. '.HEURIST_TITLE ?></title>
         <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
         <link rel="stylesheet" type="text/css" href="dh_style.css">
-        <head>
+        </head>
         <body>
             <div class="infowindow">
 

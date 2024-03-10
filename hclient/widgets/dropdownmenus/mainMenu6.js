@@ -952,7 +952,7 @@ $.widget( "heurist.mainMenu6", {
         }
 
         let $favourite_container = this.menues.explore.find('ul.favourite-filters');
-        if($favourite_container.length < 0){
+        if($favourite_container.length==0){
             return;
         }
 
@@ -1207,7 +1207,7 @@ $.widget( "heurist.mainMenu6", {
     _switch_SvsList: function( mode ){
         
         return;//2020-12-15
-        
+/* disabled 2020-12-15        
         if(!this.svs_list && this.menues['explore'].find('#svs_list').length>0){
             this.svs_list = this._init_SvsList(this.menues['explore'].find('#svs_list'),1);
         }
@@ -1241,6 +1241,7 @@ $.widget( "heurist.mainMenu6", {
         }
         
         this.svs_list.show();
+*/        
     },
 
     //

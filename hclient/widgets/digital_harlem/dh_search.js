@@ -120,17 +120,19 @@ $.widget( "heurist.dh_search", {
 //alas it does not work - it is triggered before this widget is created                    
                     
                     if(that._isDigitalHarlem){
-                     
+
+                        /* initial search disabled                     
                         var init_search = window.hWin.HAPI4.get_prefs('defaultSearch');
                         if(false && !window.hWin.HEURIST4.util.isempty(init_search)){
                             var request = {q: init_search, w: 'a', f: 'map', source:'init' };
                             setTimeout(function(){
                                 window.hWin.HAPI4.RecordSearch.doSearch(document, request);
                             }, 3000);
-                        }else{
+                        }else{}
+                        */
                             //trigger search finish to init some widgets
                             $(document).trigger(window.hWin.HAPI4.Event.ON_REC_SEARCH_FINISH, {recordset:null} );   
-                        }
+                        
                         
                     }
                     
@@ -352,7 +354,7 @@ $.widget( "heurist.dh_search", {
                 this._first_search_in_list = svsID; //keep first
             }
 
-            if(true || isfaceted){
+            if(true){ // || isfaceted
 
                 $('<button>', {text: this.usr_SavedSearch[svsID][_NAME], 'data-svs-id':svsID })
                 .css({'width':'100%','margin-top':'0.4em'})
