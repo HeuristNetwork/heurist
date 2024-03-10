@@ -1084,13 +1084,25 @@ class System {
         if(!isset($glb_lang_codes)){
             $glb_lang_codes = json_decode(file_get_contents('../../hclient/assets/language-codes-3b2.json'),true);
         }
+        
         $common_languages = array();
+        //ordered as in $common_languages_for_translation (defined in heuristConfigIni)
+        foreach($common_languages_for_translation as $code){
+            $lang = strtolower($code);
+            
+            $key = array_search($lang, array_column($glb_lang_codes, 'a3'));
+            if($key!==false){
+                $common_languages[strtoupper($lang)] = $glb_lang_codes[$key];
+            }
+        }
+        /* ordered as in language-codes-3b2.json       
         foreach($glb_lang_codes as $codes){
             $lang = strtoupper($codes['a3']);
             if(in_array($lang, $common_languages_for_translation)){
                 $common_languages[$lang] = $codes;
             }
         }
+        */
         
         try{
             
