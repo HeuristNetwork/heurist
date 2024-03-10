@@ -574,9 +574,7 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
                     }
                 },
                 draggable:{
-                    axis: 'y'
-                },
-                draggable: {
+                    axis: 'y',
                     stop: function(event, ui){
                         if(drag_tooltip && drag_tooltip.tooltip('instance')!=undefined){
                             drag_tooltip.tooltip('destroy');
@@ -629,8 +627,8 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
                 +'font-size:9px;font-weight:normal;text-transform:none">'
                 +'<span data-action="delete" style="background:red;padding:4px"><span class="ui-icon ui-icon-close" title="'
                     +((is_folder)?'Delete header':'Exclude field from record type')+'" style="font-size:9px;font-weight:normal"/>Delete</span>'
-                +(true || is_folder?'':
-                '<span class="ui-icon ui-icon-star" title="Requirement"></span>'
+                //+(true || is_folder?'':
+                //'<span class="ui-icon ui-icon-star" title="Requirement"></span>'
                 +'<span class="ui-icon ui-icon-menu" title="Repeatability"></span>')
                 +'</div>').appendTo(item);
                 
@@ -929,7 +927,8 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
                }   
              html = html + '</div>'                   
         }
-        
+
+/*        
         if(false && this.options.edit_mode=='popup'){
                 //+ (showActionInList?this._rendererActionButton('edit'):'');
             html = html
@@ -937,6 +936,7 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
             + this._defineActionButton({key:'delete',label:'Remove', title:'', icon:'ui-icon-minus'}, null,'icon_text');
 
         }
+*/        
         html = html + '</div>'; //close recordDiv
         return html;
         

@@ -1712,7 +1712,7 @@ $.widget( "heurist.mainMenu6", {
         
         //IJ 2020-11-13 always show in explore menu only
         return;
-        
+/* DISABLED 2020-11-13 always show in explore menu only        
         var bm_on = (window.hWin.HAPI4.get_prefs('bookmarks_on')=='1');
         
         
@@ -1747,13 +1747,7 @@ $.widget( "heurist.mainMenu6", {
         var cont = this.divMainMenu.find('#filter_by_groups');
         cont.children().remove(); //.not(':first')
         $(s).appendTo(cont);
-
-        /*        
-        window.hWin.HEURIST4.filters.getFiltersTree( function(data){
-            window.hWin.HAPI4.currentUser.ugr_SvsTreeData = data; 
-        });
-        */
-        
+*/
     },
 
     //
@@ -1827,12 +1821,7 @@ $.widget( "heurist.mainMenu6", {
                 if(is_mouseleave){
                     that._resetCloseTimers();
                     return; //prevent close on mouse out
-                    
-                    if(that._explorer_menu_locked) return;
-                    that._myTimeoutId2 = setTimeout(function(){ //delay on close
-                            that._closeExploreMenuPopup();
-                            that._collapseMainMenuPanel();
-                    }, that._delayOnCollapse_ExploreMenu);
+
                 }else if(is_locked=='close'){
                     that.coverAll.hide();                 
                     //that._resetCloseTimers();

@@ -133,7 +133,7 @@ $.widget( "heurist.editTranslations", {
 
                     let target = $dlg.find('#selLang').val();
 
-                    if(window.hWin.HEURIST4.util.isempty(target)){
+                    if(window.hWin.HEURIST4.util.isempty(first_val)){
                         window.hWin.HEURIST4.msg.showMsgFlash('Please enter a value to translate in the first input...', 3000);
                         return;
                     }else if(window.hWin.HEURIST4.util.isempty(target)){

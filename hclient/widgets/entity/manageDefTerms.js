@@ -1211,11 +1211,11 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
             }else if(this.options.auxilary=='term'){
 
                 //Show grayed arrows next to terms with child terms or on the same level as a term with child terms    
-                if(record_divs.find('.has_child_terms').length == 0){
+                //if(record_divs.find('.has_child_terms').length == 0){
                     //record_divs.find('.no_child_terms').css('visibility', 'hidden');
-                }else{
+                //}else{
 
-                    // Artem: code is remarked dur it causes huge workload if vocabulary has more then 100 terms
+                    // Artem: code is remarked due it causes huge workload if vocabulary has more then 100 terms
                     // Besides it seems senceless. It just hides edit button for children terms
                     /*
                     $.each(record_divs, function(idx, term_div){
@@ -1235,7 +1235,7 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
                         }
                     });
                     */
-                }
+                //}
             }
         }
     },

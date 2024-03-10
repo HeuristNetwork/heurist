@@ -177,7 +177,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
         ); 
         
         //create field actions for rts editor
-        if(true || this.options.rts_editor){ //height:17px;background:#95A7B7 !important;
+        if(true){ // || this.options.rts_editor
             this.rts_actions_menu = 
             $('<div class="rts-editor-actions" '
                 +'style="width:110px;background:lightblue;display:none;padding-top:2px;'
@@ -837,24 +837,6 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
             var that = this;        
             var btns = [];
 
-            if(false && this.options.selectOnSave==true){ //always show standard set of buttons
-                btns = [
-                        {text:window.hWin.HR('Cancel'), 
-                              css:{'margin-right':'15px'},
-                              click: function() { 
-                                  that.closeEditDialog(); 
-                              }},
-                        /*{text:window.hWin.HR('Cancel'), id:'btnRecCancel', 
-                              css:{'visibility':'hidden','margin-right':'15px'},
-                              click: function() { that.closeEditDialog(); }},*/
-                       
-                        {text:window.hWin.HR('Save'), id:'btnRecSaveAndClose',
-                              css:{'margin-right':'15px'},
-                              click: function() { that._saveEditAndClose( null, 'close' ); }}
-                
-                ];
-            }else{
-                
                 if(this.options.selectOnSave==true){
                     btns = [               
                                 
@@ -1010,7 +992,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                               
                               ];
                 }
-            }
+            
             return btns;
     },
     
@@ -5316,17 +5298,13 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
 
                     if(ttype == 'carbon'){
                         content += '<label> Is a radiometric date? (Before Present (1950) Date) <input type="checkbox" id="BP" checked="checked"></label><br>';
+                        //content += `<label> ${date_help} <input type="text" id="BPD"></label>`;
                     }else{
                         content += '<label> Is approximate? <input type="checkbox" id="CIR" '+ is_checked +'></label><br>';
                     }
 
                     break;
                 
-                case 'carbon':
-
-                    content += `<label> ${date_help} <input type="text" id="BPD"></label>`
-                    break;
-
                 case 'range':
 
                     let early = cur_date.value.TPQ ? cur_date.value.TPQ : '';

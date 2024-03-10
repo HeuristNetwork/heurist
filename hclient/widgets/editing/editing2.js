@@ -431,7 +431,7 @@ function hEditing(_options) {
                         newFieldContainer.appendTo(groupContainer);
                     }
 
-                    if(true || headerHelpText!=''){
+                    if(true){ // || headerHelpText!=''
                          var div_prompt = $('<div>').text(headerHelpText)
                             .addClass('heurist-helper1')
                             .appendTo(newFieldContainer);

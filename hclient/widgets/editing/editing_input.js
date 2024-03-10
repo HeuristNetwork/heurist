@@ -168,7 +168,7 @@ $.widget( "heurist.editing_input", {
         var lblTitle = (window.hWin.HEURIST4.util.isempty(this.options.title)?this.f('rst_DisplayName'):this.options.title);
 
         //header
-        if(true || this.options.show_header){
+        if(true){ // || this.options.show_header
             this.header = $( "<div>")
             .addClass('header '+required)
             //.css('width','150px')
@@ -3457,10 +3457,6 @@ $.widget( "heurist.editing_input", {
                         //this._on( $btn_fileselect_dialog, { click: function(){ $input_img.click(); } } );
                         $input_img.on({click: function(e){ //find('a')
                             $input.click(); //open file browse
-                            
-                            if($(e.target).is('img')){
-                            }else{
-                            }
                         }});
             }
             else //------------------------------------------------------------------------------------
