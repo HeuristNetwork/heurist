@@ -1,5 +1,5 @@
 Languages in $common_languages_for_translation in heuristConfigIni.php define the languages to be used in translation (in data entry and in recode). 
 
-language-codes-3b2.json (from https://datahub.io/core/language-codes) is a full list which is matched with the 3 character code in $common_languages_for_translation to get the language name.
+language-codes-active-list.json (from https://datahub.io/core/language-codes) is a full list which is matched with the 3 character code in $common_languages_for_translation to get the language name.
 
-language-codes-full is a more complete set of data from the same site, but is not used
+language-codes-full-for-reference-not-used is a more complete set of data from the same site, but is not used

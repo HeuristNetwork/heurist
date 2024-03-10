@@ -130,7 +130,7 @@ $serverName_DeepL = "DEPENDS ON WHETHER FREE OR PAID SERVICE";
 
 // Common languages for translation database definitions (ISO639-2 codes) 3 char in upper case
 // change here to set for the entire installation, overriden by list in configIni.php if present for a specific instance
-// The full names and 2 character codes will be looked up in hclient\assets\language-codes-3b2.txt
+// The full names and 2 character codes will be looked up in hclient\assets\language-codes-active-list.txt
 // The order puts languages at the top which are most likely to be used on this installation
 // Place languages supported by DEEPL at the top of the list
 // Place languages which are not supported by DEEPL at the end of the list - they can still be used to insert the translation prefix

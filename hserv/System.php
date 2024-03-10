@@ -1072,7 +1072,7 @@ class System {
         global $passwordForDatabaseCreation, $passwordForDatabaseDeletion,
                $passwordForReservedChanges, $passwordForServerFunctions,
                $needEncodeRecordDetails, 
-               $common_languages_for_translation, $glb_lang_codes, 
+               $common_languages_for_translation, $glb_lang_codes, $glb_lang_codes_index, 
                $saml_service_provides, $hideStandardLogin,
                $accessToken_DeepLAPI, $useRewriteRulesForRecordLink;
    
@@ -1081,9 +1081,7 @@ class System {
         }
         
         // extracts from $glb_lang_codes names and alpha2 codes to be sent to client
-        if(!isset($glb_lang_codes)){
-            $glb_lang_codes = json_decode(file_get_contents('../../hclient/assets/language-codes-3b2.json'),true);
-        }
+        initLangCodes();
         
         $common_languages = array();
         //ordered as in $common_languages_for_translation (defined in heuristConfigIni)
@@ -1095,7 +1093,7 @@ class System {
                 $common_languages[strtoupper($lang)] = $glb_lang_codes[$key];
             }
         }
-        /* ordered as in language-codes-3b2.json       
+        /* ordered as in language-codes-active-list.json       
         foreach($glb_lang_codes as $codes){
             $lang = strtoupper($codes['a3']);
             if(in_array($lang, $common_languages_for_translation)){
