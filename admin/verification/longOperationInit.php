@@ -93,7 +93,7 @@ $dbname = htmlspecialchars($_REQUEST['db']);
     </head>
     <body class="popup" style="overflow:hidden">
         <div id='in_porgress'><h2><?php echo $sTitle; ?>. This may take up to a few minutes for large databases...</h2></div>    
-        <iframe id="verification_output" style='display:none;border:none;width:1;height:1;position:absolute;'>
+        <iframe id="verification_output" style='display:none;border:none;width:1;height:1;position:absolute;' title="">
         </iframe>
     </body>
 </html>
