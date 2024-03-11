@@ -314,7 +314,7 @@ class GpointConverter
 
         if (!$LongOrigin) { // Do a standard UTM conversion - so findout what zone the point is in
             $ZoneNumber = (integer)(($LongTemp + 180)/6) + 1;
-            if( $Lat >= 56.0 && $Lat < 64.0 && $LongTemp >= 3.0 && $LongTemp < 12.0 ) $ZoneNumber = 32;
+            if( $this->lat >= 56.0 && $this->lat < 64.0 && $LongTemp >= 3.0 && $LongTemp < 12.0 ) $ZoneNumber = 32;
             // Special zones for Svalbard
             if( $this->lat >= 72.0 && $this->lat < 84.0 )  {
                 if($LongTemp >= 0.0  && $LongTemp <  9.0) {

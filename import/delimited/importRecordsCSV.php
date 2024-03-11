@@ -301,11 +301,11 @@ if(!$format) $format='csv';
                 <div class="ent_content" id="divFieldRoles" style="top:6em;bottom:3.5em;padding: 0.2em 0.5em;border: 1px solid lightgray;">
                     
                     <table class="tbfields" style="font-weight:bold"><thead><tr>
-                                <td style="width:150px">Column</td>
-                                <td style="width:50px">&nbsp;</td>
-                                <td style="width:50px;text-align:center">Heurist<br>Identifier</td>
-                                <td style="width:50px;text-align:center" class="date-column">Date</td>
-                                <td style="width:200px"><span id="lbl_ID_select" style="display:none">IDs for which record type?<span></td></tr></thead><tbody></tbody></table>
+                                <th style="width:150px">Column</th>
+                                <th style="width:50px">&nbsp;</th>
+                                <th style="width:50px;text-align:center">Heurist<br>Identifier</th>
+                                <th style="width:50px;text-align:center" class="date-column">Date</th>
+                                <th style="width:200px"><span id="lbl_ID_select" style="display:none">IDs for which record type?<span></th></tr></thead><tbody></tbody></table>
                     
                     
                 </div>
@@ -533,30 +533,30 @@ if(!$format) $format='csv';
             <table class="tbresults" style="display:inline-block">
                 <tbody>
                                     <tr>
-                                        <td rowspan="3" width="250">
+                                        <th rowspan="3" width="250">
                                             <h2 id="mrr_big">Existing: 586  New: 100</h2>
-                                        </td>
-                                        <td rowspan="3">
+                                        </th>
+                                        <th rowspan="3">
                                             <div id="prepareWarnings" 
                                                 style="display:none;padding:2px;background-color:#ffaaaa;border-color:red;margin-left:2em">
                                                 <h2 id="mrr_warning" style="display:inline-block;margin:0 10px;">Data errors: 0</h2>
                                                 <div id="btnShowWarnings" style="display:none"></div>
                                                 <div id="btnShowUTMWarnings" style="display:none"></div>
                                             </div>
-                                        </td>
-                                        <td rowspan="3">
+                                        </th>
+                                        <th rowspan="3">
                                             <div id="prepareErrors" 
                                                 style="display:none;padding:2px;background-color:#ffaaaa;border-color:red;margin-left:2em">
                                                 <h2 id="mrr_error" style="display:inline-block;margin:0 10px;">Unrecognised terms: 0</h2>
                                                 <div id="btnShowErrors"></div>
                                             </div>
-                                        </td>
-                                        <td width="50" align=left style="width:120px">Existing:</td>
-                                        <td width="50" id="mrr_cnt_update"></td>
-                                        <td width="50" class="mrr_update">rows:</td>
-                                        <td width="50" class="mrr_update" id="mrr_cnt_update_rows"></td>
-                                        <td width="50" class="mrr_update"><a href="#" onclick="importRecordsCSV.showRecords2('update',false)">show</a></td>
-                                        <td width="50" class="mrr_update"><a href="#" onclick="importRecordsCSV.showRecords2('update',true)">download</a></td>
+                                        </th>
+                                        <th width="50" align=left style="width:120px">Existing:</th>
+                                        <th width="50" id="mrr_cnt_update"></th>
+                                        <th width="50" class="mrr_update">rows:</th>
+                                        <th width="50" class="mrr_update" id="mrr_cnt_update_rows"></th>
+                                        <th width="50" class="mrr_update"><a href="#" onclick="importRecordsCSV.showRecords2('update',false)">show</a></th>
+                                        <th width="50" class="mrr_update"><a href="#" onclick="importRecordsCSV.showRecords2('update',true)">download</a></th>
                                     </tr>
                                     <tr><td align=left>New:</td>
                                         <td width="50" id="mrr_cnt_insert"></td>
@@ -579,7 +579,7 @@ if(!$format) $format='csv';
    
         
         <table class="tbmain" style="width:99%;position:absolute;bottom:0px;" cellspacing="0" cellpadding="2">
-            <thead><tr> <!-- Table headings -->
+            <thead><tr> 
                 <th style="width:75px;">Use&nbsp;<br>value</th>
                 <th style="width:75px;">Unique&nbsp;<br>values</th>
                 <th style="width:300px;">Column</th>
@@ -598,6 +598,7 @@ if(!$format) $format='csv';
     <!-- CONTENT : MAPPING TABLE COLUMNS TO HEURIST FIELDS  -->
     <div class="ent_content" style="bottom:0;top:339px;padding: 0em 0.5em;" id="divFieldMapping">
                 <table id="tblFieldMapping" class="tbmain" style="width:100%" cellspacing="0" cellpadding="2">
+                    <thead><tr><th></th></tr></thead>
                     <!-- <thead><tr>
                         <th style="width:75px;">Use&nbsp;<br>value</th>
                         <th width="75px">Unique&nbsp;<br>values</th>

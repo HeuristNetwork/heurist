@@ -35,7 +35,8 @@ $max_size = min($file_max_size,$post_max_size);
 if(!($max_size>0)) $max_size = 0;
 
 ?>
-<html>
+<!DOCTYPE>
+<html lang="en">
     <head>
 
         <!-- Force latest IE rendering engine or ChromeFrame if installed -->

@@ -129,8 +129,7 @@ class UImage {
                     }
                 }
 
-            }else 
-            if(true){  
+            }else{  
 
                 //call Google PageSpeed Insights API
                 $googlePagespeedData = file_get_contents( //loadRemoteURLContent
@@ -153,18 +152,6 @@ class UImage {
                 
                 //display screenshot image
                 //echo "<img src=\"data:image/jpeg;base64,".$screenshot."\" /-->";
-
-            }else{ //microweber (https://github.com/microweber/screen) - it doesn't work
-                $screenCapture = new Capture();
-                $screenCapture->setUrl($siteURL);
-                $screenCapture->setWidth(1200);
-                $screenCapture->setHeight(800);
-
-                // allowed types are 'jpg' and 'png', default is 'jpg'.
-                //$screenCapture->setImageType(Screen\Image\Types\Png::FORMAT);
-                // or $screenCapture->setImageType('png');        
-                //$screenCapture->jobs->setLocation('/path/to/jobs/dir/');
-                $screenCapture->save($heurist_path);
             }
             
             if(file_exists($heurist_path)){

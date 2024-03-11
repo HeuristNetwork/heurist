@@ -278,7 +278,7 @@ function ShowReps( is_snippet_editor ) {
 
         }else{
             return; //use global recordset only
-            squery = _getQueryAndTemplate(template_file, false); //NOT USED
+            //squery = _getQueryAndTemplate(template_file, false); //NOT USED
         }
 
         if(_facet_value){
@@ -1652,7 +1652,7 @@ this_id       : "term"
                 
                 _varname = '';
                 
-                if(false && _nodep.data.varname){
+                if(false){ // && _nodep.data.varname
                     _varname = _nodep.data.varname;
                 }else
                 {

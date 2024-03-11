@@ -252,7 +252,7 @@ class Temporal {
                             }
                         }
                     }
-                }else if(preg_match('/[before|bef\.|bef|avant|after|post|aft\.|aft|après]/i',$value) 
+                }else if(preg_match('/(before|bef\.|bef|avant|after|post|aft\.|aft|après)/i',$value) 
                       || preg_match('/^\d{4}-$/i', $value))
                 {
                     if(preg_match('/^\d{4}-$/i', $value)){
@@ -260,7 +260,7 @@ class Temporal {
                         $matches[0][1] = substr($matches[0][0],0,4);
                         $matches[0][0] = 'after';
                     }else{
-                        preg_match_all('/[before|bef\.|bef|avant|after|post|aft\.|aft|après]\s+|[-|\w+|\s]+$/i', $value, $matches);     
+                        preg_match_all('/(before|bef\.|bef|avant|after|post|aft\.|aft|après)\s+|[-|\w+|\s]+$/i', $value, $matches);     
                     }
 
 
@@ -372,7 +372,7 @@ class Temporal {
 
                         $values = explode('±', $value);
                         $period = $values[1];
-                        if(preg_match('/[years|months|days]/',$period)){
+                        if(preg_match('/(years|months|days)/',$period)){
                             $period = str_replace('years','Y',$period);
                             $period = str_replace('months','M',$period);
                             $period = str_replace('days','D',$period);

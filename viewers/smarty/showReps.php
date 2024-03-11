@@ -567,7 +567,6 @@ function smarty_pre_filter($tpl_source, Smarty_Internal_Template $template){
 
             if(empty($str_replace)){
                 $str_replace = mysql__select_value($mysqli, "SELECT trm_Label FROM defTerms WHERE trm_ID=$id");
-                $str_replace = $str_replace;
             }
 
             $tpl_source = str_replace($match, $str_replace, $tpl_source);
@@ -1110,7 +1109,8 @@ function save_report_into_file($tpl_source){
 
                 $url = htmlspecialchars(HEURIST_FILESTORE_URL . 'generated-reports/' . $file_name);
                 ?>
-                <html>
+                <!DOCTYPE>
+                <html lang="en">
                 <head>
                     <meta http-equiv="content-type" content="text/html; charset=utf-8">
                     <link rel="stylesheet" type="text/css" href="../../h4styles.css">
@@ -1497,7 +1497,7 @@ function smarty_error_output($system, $error_msg){
     }
  
     if($outputmode=='js'){
-        $error_msg = add_javascript_wrap4($error_msg, null);
+        $error_msg = add_javascript_wrap4($error_msg);
     }
 
     if($publishmode>0 && $publishmode<4 && $outputfile!=null){ //save empty output into file

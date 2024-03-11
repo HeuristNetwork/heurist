@@ -950,7 +950,7 @@ function _editRecStructure(rty_ID) {
 /** Repositions all overlays */
 function updateOverlays() {
     return;
-    
+    /*   
     $(".overlay").each(function() {
         // Get information
         var pieces = $(this).attr("class").split(" ");
@@ -975,7 +975,7 @@ function updateOverlays() {
         
         
     });
-    
+    */
     /*
     
     

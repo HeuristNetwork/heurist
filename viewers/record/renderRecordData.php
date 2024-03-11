@@ -172,7 +172,8 @@ if(@$_REQUEST['ids']){
 }
 if(!($is_map_popup || $without_header)){
 ?>
-<html>
+<!DOCTYPE>
+<html lang="en">
     <head>
         <title>HEURIST - View record</title>
         <meta http-equiv="content-type" content="text/html; charset=utf-8">
@@ -1604,8 +1605,9 @@ function print_public_details($bib) {
         .' AND rec_ID = d2.dtl_RecID and rec_RecTypeID != '.intval($relRT)
         .' AND '.$ACCESS_CONDITION;
         
-//print $query;            
-        if(true){  //this query fails for maria db        
+//print $query; 
+        $allow_execute_this_complex_query = true;           
+        if($allow_execute_this_complex_query){  //this query fails for maria db        
                 
             $bds_res = $mysqli->query($query);     
             if($bds_res){   

@@ -318,8 +318,6 @@ $system->defineConstants();
         });
 
         <?php
-        if(true){ // defined('RT_MAP_LAYER') && RT_MAP_LAYER>0 && defined('RT_MAP_DOCUMENT') && RT_MAP_DOCUMENT>0){
-
             function checkRt($rt){
                 global $rtDefines;
                 if(defined($rt) && constant($rt)>0){
@@ -366,7 +364,7 @@ $system->defineConstants();
             $items = $items.'<li rtid="'.checkRt('RT_GEOTIFF_SOURCE').'"><a href="#">GeoTiff</a></li>';
             $items = $items.'<li rtid="'.checkRt('RT_TILED_IMAGE_SOURCE').'"><a href="#">Tiled image</a></li>';
             $items = $items.'<li rtid="'.checkRt('RT_QUERY_SOURCE').'"><a href="#">Query layer</a></li>';
-            ?>
+        ?>
             $("#btnMapRefresh").button({ showLabel:false, icon:"ui-icon-arrowrefresh-1-e" })
             .click( refreshMapDocument );
             $("#btnMapNew").button({ showLabel:false, icon: "ui-map-document" })
@@ -406,13 +404,6 @@ $system->defineConstants();
 
 
             $("#mapToolbar").controlgroup();
-            <?php } else { ?>
-            $("#mapSelector").hide();
-            $("#mapToolbar").hide();
-            <?php
-        }
-        ?>
-
 
     }
     

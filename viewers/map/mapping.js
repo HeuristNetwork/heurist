@@ -3298,7 +3298,7 @@ $.widget( "heurist.mapping", {
                 if(!(res.length>0)) res = val.split(';');
                 if(!(res.length>0)) res = val.split('|');
                 
-                if(res.length==0) res.push['all'];
+                if(res.length==0) res.push('all');
                 
             }
             

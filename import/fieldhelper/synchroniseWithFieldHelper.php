@@ -279,24 +279,9 @@ $failed_exts = array();
 
                 }else{
 
-                    if(substr($dir, -1) != '/'){
-                        $dir .= "/";
-                    }
-
-                    /* changed to check that folder is in HEURIST_FILESTORE_DIR 
-                    if(!file_exists($dir) ){ //probable this is relative
-                        $orig = $dir;
-                        chdir(HEURIST_FILESTORE_DIR);
-                        $dir = realpath($dir);
-                        if(!file_exists($dir)){
-                            $dir = $orig; //restore
-                        }
-                    }
-                    */
-                    
                     $dir = USanitize::sanitizePath($dir);
                     if(isPathInHeuristUploadFolder($dir, true)===false){
-                            print '<div style="color:red">'.htmlspecialchars($orig).'is ignored. Folder must be in heurist filestore directory.</div>';
+                            print '<div style="color:red">'.htmlspecialchars($dir).'is ignored. Folder must be in heurist filestore directory.</div>';
                             continue;
                     }
                     

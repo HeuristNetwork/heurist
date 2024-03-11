@@ -89,8 +89,8 @@ if($fh_data==null || is_string($fh_data)){
         exit;
 }
 ?>
-<html>
-
+<!DOCTYPE>
+<html lang="en">
     <head>
         <meta http-equiv="content-type" content="text/html; charset=utf-8">
         <title>Zotero synchronization</title>
@@ -940,10 +940,9 @@ function addMapping($arr, $zType, $rt_id, $org_rt_id)
             // Resource, NOT FOUND
             if(array_key_exists($dt_code, $mapping_errors)){
 
-                if(strpos($mapping_errors[$dt_code], $dt_err_str) === false){
-                    $mapping_errors[$dt_code] = str_replace("</td></tr>", "", $mapping_errors[$zType]).", ".$res."</td></tr>";
-                    $warning_count ++;
-                }
+                $mapping_errors[$dt_code] = str_replace("</td></tr>", "", $mapping_errors[$zType]).", ".$res."</td></tr>";
+                $warning_count ++;
+                
             }else{
                 $mapping_errors[$dt_code] = "<tr><td colspan='3'><strong>".$zType." (".$org_rt_id."):</strong></td><td colspan='4'>".$res."</td></tr>";
                 $warning_count ++;

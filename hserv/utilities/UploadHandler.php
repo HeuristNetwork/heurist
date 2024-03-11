@@ -230,8 +230,8 @@ class UploadHandler
                     // don't pose any restrictions on the type of uploaded files, e.g. by
                     // copying the .htaccess file from the files directory for Apache:
                     //'upload_dir' => dirname($this->get_server_var('SCRIPT_FILENAME')).'/thumb/',
-                    'upload_dir' => (@$upload_thumb_dir)?$upload_thumb_dir:null,
-                    'upload_url' => (@$upload_thumb_url)?$upload_thumb_url:null, //$this->get_full_url().'/thumb/',
+                    'upload_dir' => null, //$upload_thumb_dir
+                    'upload_url' => null, //$upload_thumb_url $this->get_full_url().'/thumb/',
                     // Uncomment the following to force the max
                     // dimensions and e.g. create square thumbnails:
                     //'crop' => true,
@@ -539,8 +539,8 @@ $siz = USystem::getConfigBytes('upload_max_filesize');
         $to = dirname($to);
         $to = USanitize::sanitizePath($to);
         if(isPathInHeuristUploadFolder($to, true)===false){
-            $file->error = $this->get_error_message('only_heurist')
-                .' 1)'.realpath($to).'  2) '.realpath(HEURIST_FILESTORE_DIR);
+            //$this->error = $this->get_error_message('only_heurist')
+            //    .' 1)'.realpath($to).'  2) '.realpath(HEURIST_FILESTORE_DIR);
             return false;
         }
         return copy($from, $to.$filename);
@@ -578,7 +578,7 @@ $siz = USystem::getConfigBytes('upload_max_filesize');
         }
 
         //Artem Osmakov - limited set of file types
-        if (preg_match('/\.(bat|exe|cmd|sh|php([0-9])?|pl|cgi|386|dll|com|torrent|js|app|jar|pif|vb|vbscript|wsf|asp|cer|csr|jsp|drv|sys|ade|adp|bas|chm|cpl|crt|csh|fxp|hlp|hta|inf|ins|isp|jse|htaccess|htpasswd|ksh|lnk|mdb|mde|mdt|mdw|msc|msi|msp|mst|ops|pcd|prg|reg|scr|sct|shb|shs|url|vbe|vbs|wsc|wsf|wsh)$/i'
+        if (preg_match('/\.(bat|exe|cmd|sh|php([0-9])?|pl|cgi|386|dll|com|torrent|js|app|jar|pif|vb|vbscript|asp|cer|csr|jsp|drv|sys|ade|adp|bas|chm|cpl|crt|csh|fxp|hlp|hta|inf|ins|isp|jse|htaccess|htpasswd|ksh|lnk|mdb|mde|mdt|mdw|msc|msi|msp|mst|ops|pcd|prg|reg|scr|sct|shb|shs|url|vbe|vbs|wsc|wsf|wsh)$/i'
                     , $file->original_name)) {
             $file->error = $this->get_error_message('except_file_types');
             return false;
@@ -1069,7 +1069,6 @@ $siz = USystem::getConfigBytes('upload_max_filesize');
             case 'gif':
             case 'png':
                 imagecolortransparent($new_img, imagecolorallocate($new_img, 0, 0, 0));
-            case 'png':
                 imagealphablending($new_img, false);
                 imagesavealpha($new_img, true);
                 break;
