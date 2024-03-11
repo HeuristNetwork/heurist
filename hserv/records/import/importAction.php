@@ -1161,7 +1161,7 @@ public static function validateImport($params) {
                 }
                 
             }else{
-                
+                //not empty
                 $squery = array();
                 foreach($field_name as $f_name){
                 
@@ -1171,14 +1171,14 @@ public static function validateImport($params) {
                         //$squery = "not (".$field_name.">0)";
                         $squery[] = "`$f_name`>0";
                     }else{
-                        $squery[] = "`$f_name` is not null or `$f_name`!=''";
+                        $squery[] = "`$f_name` is null or `$f_name`=''";
                     }
                     array_push($query_reqs, $field_name);
                 }
                 if($ft_vals[$idx_fieldtype] == "resource"){
                     $squery = 'not ('.implode(' OR ',$squery).')';
                 }else{
-                    $squery = 'not ('.implode(' OR ',$squery).')';
+                    $squery = ' ('.implode(' OR ',$squery).')';
                 }
 
                 array_push($query_reqs_where, $squery);
@@ -2924,7 +2924,7 @@ public static function performImport($params, $mode_output){
                                 }else{
                                     
                                     $k = strpos($r_value,'uploaded_files/');
-                                    if($k===false) $k ==strpos($r_value,'file_uploads/');
+                                    if($k===false) $k = strpos($r_value,'file_uploads/');
                                     
                                     if($k===0 || $k===1){
                                     //relative path in database folder
@@ -2951,12 +2951,7 @@ public static function performImport($params, $mode_output){
                                     
                                     $entity = new DbRecUploadedFiles(self::$system, null);
                                     
-                                    if(false){  //true || @$params['download_files']){
-                                        //download and register
-                                            $ulf_ID = $entity->downloadAndRegisterdURL($r_value, null); //it returns ulf_ID    
-                                    }else{
-                                        $ulf_ID = $entity->registerURL( $r_value );    
-                                    }
+                                    $ulf_ID = $entity->registerURL( $r_value );    
                                     
                                     /*
                                     $extension = null;

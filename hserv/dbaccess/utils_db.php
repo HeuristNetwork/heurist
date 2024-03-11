@@ -613,7 +613,7 @@
             }else{
                 //check insert or update
                 $res = mysql__select_value($mysqli, 
-                    "SELECT `$primary_field` FROM `$table_name` WHERE `$primary_field`=?", array('s', $recID));
+                    "SELECT `$primary_field` FROM `$table_name` WHERE `$primary_field`=?", array('s', $rec_ID));
                 $isinsert = ($res==null);
             }
         }
@@ -1204,7 +1204,8 @@
                                 $row2 = $res2->fetch_row();
                                 if(($row2[0]=='' && $row2[1]=='') || ($row2[0]=='0' && $row2[1]=='0')){
                                     //fails extraction estMinDate, estMaxDate
-                                    $error = 'Empty min, max dates. Min:"'.$min.'" Max:"'.$max.'". Query:'.$query;
+                                    $error = 'Empty min, max dates. Min:"'.
+                                        htmlspecialchars($row2[0].'" Max:"'.$row2[1]).'". Query:'.$query;
                                 }else{
             //4. Keep old plain string temporal object in backup table 
                                     if($json_for_record_details && strpos($dtl_Value,'|VER=1|')===0){ // !$is_date_simple

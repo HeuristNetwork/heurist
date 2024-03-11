@@ -121,7 +121,7 @@ public static function encodeAndGetPreview($upload_file_name, $params){
     
     $handle = @fopen($upload_file_name, "r");
     if (!$handle) {
-        self::$system->addError(HEURIST_ACTION_BLOCKED, 'Can\'t open temporary file (uploaded csv data) '.$upload_file_name);                          return false;
+        self::$system->addError(HEURIST_ACTION_BLOCKED, 'Can\'t open temporary file (uploaded csv data) '.$upload_file_name);
         return false;
     }
 

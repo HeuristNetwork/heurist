@@ -155,7 +155,7 @@ class DbUsrRecPermissions extends DbEntityBase
                 $recids[] = $record['rcp_RecID'];
             }
             $recids = array_unique($recids);
-            $grp_ids = $system->get_user_group_ids(); //current user groups ids + itself
+            $grp_ids = $this->system->get_user_group_ids(); //current user groups ids + itself
             
             //verify that current owner is "everyone" or current user is member of owner group
             $query = 'SELECT count(rec_OwnerUGrpID) FROM Records WHERE rec_ID in ('.implode(',',$recids)
@@ -270,6 +270,7 @@ class DbUsrRecPermissions extends DbEntityBase
     public function delete($disable_foreign_checks = false){
         
         //extract records from $_REQUEST data 
+        $mysqli = $this->system->get_mysqli();
         
         if(!@$this->data['rcp_RecID']){ //array of record ids
         
@@ -282,7 +283,7 @@ class DbUsrRecPermissions extends DbEntityBase
             if(!$this->_validatePermission()){
                 return false;
             }
-           
+            
             $query = 'DELETE FROM '.$this->config['tableName'].' WHERE rcp_RecID in ('.implode(',', $recids).')';
             $res = $mysqli->query( $query );
             if(!$res){
@@ -300,7 +301,7 @@ class DbUsrRecPermissions extends DbEntityBase
             
             foreach ($group_ids_to_delete as $id){
                 if(!in_array($id, $grp_ids)){
-                    $system->addError(HEURIST_REQUEST_DENIED,
+                    $this->system->addError(HEURIST_REQUEST_DENIED,
                         'Current user does not have sufficient authority to remove permissions. '
                         .' User must be either the owner or member of the group that owns record');
                     return false;

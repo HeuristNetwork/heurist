@@ -387,7 +387,7 @@ class DbUsrTags extends DbEntityBase
 
             
         }else { //assign by default
-            $mode=='assign';
+            $mode = 'assign';
         }
         
         //create new assignments

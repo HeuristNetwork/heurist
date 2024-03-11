@@ -1229,7 +1229,7 @@ class HPredicate {
         if($this->parent->level==0){
             return $this->parent;
         }else{
-            return getTopLevelQuery($parent->parent);
+            return getTopLevelQuery($this->parent->parent);
         }
     }
     

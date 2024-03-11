@@ -109,8 +109,10 @@ if($msg==null){
     }
 }
 ?>
-<html>
+<!DOCTYPE>
+<html lang="en">
 <head>
+<title>Heurist external authentification</title>
 <script>
     window.onload = function(){
 console.log('Authentification completed ','<?php echo htmlspecialchars($msg);?>');                                

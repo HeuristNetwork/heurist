@@ -500,18 +500,17 @@ private function _setResourceProps($record, &$resource){
         } //for detail multivalues
     } //for all details of record
 
-    if(true){
-        //all records related to original set of records are already found in outputPrepare (with recordSearchRelatedIds)
-        //now we need to detect only relation for current record 
-        $links = recordSearchRelated($this->system, $rec_ID, 0, true);        
-        
-        if($links['status']==HEURIST_OK){
-            if(@$links['data']['direct']){
-                $this->_composeLinks($resource, $links['data']['direct'], 'direct', $rty_ID, $links['data']['headers']);
-            }
-            if(@$links['data']['reverse']){
-                $this->_composeLinks($resource, $links['data']['reverse'], 'reverse', $rty_ID, $links['data']['headers']);
-            }
+
+    //all records related to original set of records are already found in outputPrepare (with recordSearchRelatedIds)
+    //now we need to detect only relation for current record 
+    $links = recordSearchRelated($this->system, $rec_ID, 0, true);        
+    
+    if($links['status']==HEURIST_OK){
+        if(@$links['data']['direct']){
+            $this->_composeLinks($resource, $links['data']['direct'], 'direct', $rty_ID, $links['data']['headers']);
+        }
+        if(@$links['data']['reverse']){
+            $this->_composeLinks($resource, $links['data']['reverse'], 'reverse', $rty_ID, $links['data']['headers']);
         }
     }
 

@@ -35,6 +35,8 @@ require_once dirname(__FILE__).'/recordTitleMask.php';
 require_once dirname(__FILE__).'/../search/recordSearch.php';
 //require_once dirname(__FILE__).'/../../vendor/ezyang/htmlpurifier/library/HTMLPurifier.auto.php';
 
+define('DEBUG_RUN', false);
+
 /**
 * Methods for batch actions for list of records (recIDs) OR by record type rtyID
 * 
@@ -1364,12 +1366,12 @@ class RecordsBatch
         // 3. Parse pdf file
                             try{
 
-                                if(true){ 
+                                if(!DEBUG_RUN){ 
                                     $pdf    = $parser->parseFile($file);
 
-                                    if(false){
-                                        $text = $pdf->getText();
-                                    }else{
+                                    //if(false){
+                                    //    $text = $pdf->getText();
+                                    //}else{
                                         // Retrieve all pages from the pdf file.
                                         $pages  = $pdf->getPages();
                                         $page_cnt = 0; 
@@ -1397,7 +1399,7 @@ class RecordsBatch
 
 
                                         }//foreach     
-                                    }
+                                    //}
 
                                 }else{
                                     //debug without real parsing 
@@ -1454,7 +1456,7 @@ class RecordsBatch
                 }else{}
                 */    
     // 5. Add new values to 2-652 - one entry per file
-                if(true){
+                if(!DEBUG_RUN){
                     $dtl['dtl_RecID'] = $recID;
                     foreach($details as $text){
                         $dtl['dtl_Value'] = $text;
@@ -1781,12 +1783,12 @@ public methods
                     $tag_ids = $this->_tagGetByName(array_filter(explode(',', $tag_names)), true, $ugrID);
                 }
             }
-            if( !is_array($record_ids) || count($record_ids)<0 ){
+            if( !is_array($record_ids) || count($record_ids)==0 ){
                 $system->addError(HEURIST_INVALID_REQUEST, 'Record ids are not defined');
                 return false;
             }
 
-            if( !is_array($tag_ids) || count($tag_ids)<0 ){
+            if( !is_array($tag_ids) || count($tag_ids)==0 ){
                 $system->addError(HEURIST_INVALID_REQUEST, 'Tags ids either not found or not defined');
                 return false;
             }

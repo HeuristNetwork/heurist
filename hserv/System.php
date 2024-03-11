@@ -270,7 +270,7 @@ class System {
                    //if($allowed_dbs==null || $allowed_dbs=="*" || in_array(HEURIST_DBNAME,explode(',',$allowed_dbs))){
                    
                        $rty_ID = ConceptCode::getRecTypeLocalID($cfg['rty_ID']);
-                       if(true){// || $rty_ID>0
+                       //if($rty_ID>0){
                            
                             $cfg['rty_ID'] = $rty_ID;
                            
@@ -294,7 +294,7 @@ class System {
                             }
                            
                             $config_res[] = $cfg;
-                       }
+                       //}
                    //}
                }
            }

@@ -291,8 +291,6 @@
                                     'geometry'=>$json,
                                     'properties'=>array()
                                 ));
-                            }else if(false){
-                                
                             }
                             
                             $json = json_encode($json);

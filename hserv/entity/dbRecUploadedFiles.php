@@ -1624,7 +1624,7 @@ When we open "iiif_image" in mirador viewer we generate manifest dynamically.
                     $res = mysql__insertupdate($this->system->get_mysqli(), 'recUploadedFiles', 'ulf', $file_details);
 
                     if($res != $ulf_row['ulf_ID']){
-                        array_push($ret, 'An error occurred while attempting to update file record #' . $ulf_ID);
+                        array_push($ret, 'An error occurred while attempting to update file record #' . intval($ulf_row['ulf_ID']));
                     }else{
                         array_push($ret, 'File details updated');
                     }

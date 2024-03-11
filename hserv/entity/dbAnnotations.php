@@ -189,9 +189,9 @@ class DbAnnotations extends DbEntityBase
           uuid: annotation.id,
         },
 */      
-        if( !(defined('RT_MAP_ANNOTATION') || defined('RT_MAP_ANNOTATION')) ){
+        if(!defined('RT_MAP_ANNOTATION')){
             $this->system->addError(HEURIST_ACTION_BLOCKED, 
-                    'Can not add annotation. This database does not have either "Map/Image Annotation" or "Annotation" record type. '
+                    'Can not add annotation. This database does not have "Map/Image Annotation" record type. '
                     .'Import required record type');
             return false;
         }
@@ -337,7 +337,7 @@ class DbAnnotations extends DbEntityBase
                                     $dtl_UploadedFileID = $entity->registerFile($tmp_file, null); //it returns ulf_ID
 
                                     if($dtl_UploadedFileID===false){
-                                        $err_msg = $system->getError();
+                                        $err_msg = $this->system->getError();
                                         $err_msg = $err_msg['message'];
                                         $system->clearError();  
                                     }else{

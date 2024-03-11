@@ -18,6 +18,7 @@
 * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
 * @version     4.0
 */
+//abstract 
 class DbEntityBase
 {
     protected $system;  
@@ -114,8 +115,7 @@ class DbEntityBase
     //
     // config getter
     //
-    public function init(){
-    }
+    public function init(){}
 
     //
     // assign parameters on server side
@@ -584,12 +584,14 @@ class DbEntityBase
     // various counts(aggregations) request - implementation depends on entity
     //
     public function counts(){
+        return 0;
     }
     
     //
     // see specific implemenation for every class 
-    //
+    // abstract 
     public function batch_action(){
+        return true;
     }
     
     //

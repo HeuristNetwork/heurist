@@ -43,6 +43,7 @@ class ExportRecordsJSON extends ExportRecords {
 
     //see ImportHerist->importRecordsFromDatabase    
     private $is_tlc_export = false;
+    private $tlc_mapdoc_name = null;
     private $maplayer_fields = null;
     private $mapdoc_defaults = array();
     private $maplayer_records = array();
@@ -158,6 +159,8 @@ protected function _outputPrepareFields($params){
         
         $this->is_tlc_export = (@$params['tlcmap']!=null && defined('RT_TLCMAP_DATASET'));
         if($this->is_tlc_export){
+            
+            $this->tlc_mapdoc_name = $params['tlcmap'];
             //get list of detail types for MAP_LAYER
             $this->maplayer_fields = mysql__select_list2($this->mysqli,
                 'select rst_DetailTypeID from defRecStructure where rst_RecTypeID='.RT_MAP_LAYER);        
@@ -180,7 +183,7 @@ protected function _outputPrepareFields($params){
 //  
 protected function _outputHeader(){
     
-    if($datatable_session_id>1){ //session id
+    if($this->datatable_session_id>1){ //session id
             
             //"recordsTotal": 57,"recordsFiltered":'.count($this->records).',
             fwrite($this->fd, '{"draw": '.$this->datatable_draw
@@ -189,7 +192,7 @@ protected function _outputHeader(){
                      .($this->records_cnt_filtered>0?$this->records_cnt_filtered:$this->records_cnt)
                      .',"data":[');     
             
-    }else if($datatable_session_id==1){
+    }else if($this->datatable_session_id==1){
             
             fwrite($this->fd, '{"data": [');     
             
@@ -213,7 +216,7 @@ protected function _outputHeader(){
 //  
 protected function _outputRecord($record){
 
-    if($datatable_session_id>0){
+    if($this->datatable_session_id>0){
         
         recordSearchDetailsRelations($this->system, $record, $this->retrieve_detail_fields);
 
@@ -224,7 +227,7 @@ protected function _outputRecord($record){
     }else if($this->extended_mode>0 && $this->extended_mode<3){ //with concept codes and labels
 
         $feature = $this->_getJsonFeature($record, $this->extended_mode);
-        fwrite($this->fd, $comma.json_encode($feature));
+        fwrite($this->fd, $this->comma.json_encode($feature));
         
     }else if($this->extended_mode==3){
 
@@ -271,7 +274,7 @@ protected function _outputRecord($record){
 //
 protected function _outputFooter(){
     
-    if($datatable_session_id>0){ //session id
+    if($this->datatable_session_id>0){ //session id
             
         fwrite($this->fd, ']}'); 
             
@@ -284,11 +287,11 @@ protected function _outputFooter(){
         }
         
     }else {
-        
+    
         
         if($this->is_tlc_export){
             //create mapdocument record and write it as a last record in th set
-            $record = _calculateSummaryExtent(true);
+            $record = $this->_calculateSummaryExtent(true);
             $this->_outputRecord($record);
         }
         
@@ -674,11 +677,11 @@ private function _calculateSummaryExtent($is_return_rec){
             //add constructed mapspace record
             $record['rec_ID'] = 999999999;
             $record['rec_RecTypeID'] = RT_MAP_DOCUMENT;
-            $record['rec_Title'] = $params['tlcmap'];
+            $record['rec_Title'] = $this->tlc_mapdoc_name;
             $record['rec_URL'] = ''; 
             $record['rec_ScratchPad'] = '';
             $record["details"] = array(
-                DT_NAME=>array('1'=>$params['tlcmap']),
+                DT_NAME=>array('1'=>$this->tlc_mapdoc_name),
                 DT_MAP_BOOKMARK=>array('2'=>($mbookmark!=null?$mbookmark:$this->mapdoc_defaults[DT_MAP_BOOKMARK])),
                 DT_ZOOM_KM_POINT=>array('3'=>($zoomKm>0?$zoomKm:$this->mapdoc_defaults[DT_ZOOM_KM_POINT])),
                 DT_GEO_OBJECT=>array('4'=>($mbox!=null?array('geo'=>array("type"=>"pl", "wkt"=>$mbox)):null)),

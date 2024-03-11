@@ -1076,9 +1076,10 @@ class SortPhrase {
                     }
                 } else if (preg_match('/^(?:f|field):"?([^":]+)"?(:m)?/i', $text, $matches)) {
                     @list($_, $field_name, $show_multiples) = $matches;
-                    $res = $mysqli->query("select dty_Type from defDetailTypes where dty_Name = '$field_name'");
+                    $res = $mysqli->query("select dty_ID, dty_Type from defDetailTypes where dty_Name = '$field_name'");
                     $baseType = $res->fetch_row();
-                    $baseType = @$baseType[0];
+                    $field_id = @$baseType[0];
+                    $baseType = @$baseType[1];
 
                     if ($show_multiples) {    // "multiple" flag has been provided -- provide (potentially) multiple matches for each entry by left-joining recDetails
                         $bd_name = 'bd' . (count($this->parent->sort_phrases) + 1);
@@ -1206,6 +1207,7 @@ class Predicate {
                 return "like '$datestamp%'";
 
                 //old way
+                /*
                 // it's a ":" ("like") query - try to figure out if the user means a whole year or month or default to a day
                 $match = preg_match('/^[0-9]{4}$/', $this->value, $matches);
                 if (@$matches[0]) {
@@ -1218,6 +1220,7 @@ class Predicate {
                     $date = date('Y-m-d', $timestamp);
                 }
                 return "like '$date%'";
+                */
             }
         }
     }
@@ -1469,12 +1472,25 @@ class AnyPredicate extends Predicate {
     
     function makeJSON() {
             $compare = '';
-            if ($this->parent->exact)
-                $compare = '=';
-            else if ($this->parent->lessthan)
-                $compare = '<';
-            else if ($this->parent->greaterthan)
-                $compare = '>';
+            
+            if($this->parent->negate){
+                
+                if ($this->parent->exact)
+                    $compare = '!=';
+                else if ($this->parent->lessthan)
+                    $compare = '>=';
+                else if ($this->parent->greaterthan)
+                    $compare = '<=';
+                
+            }else{
+            
+                if ($this->parent->exact)
+                    $compare = '=';
+                else if ($this->parent->lessthan)
+                    $compare = '<';
+                else if ($this->parent->greaterthan)
+                    $compare = '>';
+            }
             
             return array('f'=> $not.$compare.$this->value);
     }

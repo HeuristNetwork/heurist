@@ -614,7 +614,10 @@ class DbDefDetailTypes extends DbEntityBase
 
         return $ret;
     }
-
+    
+    //
+    //
+    //
     public function counts(){
 
         $mysqli = $this->system->get_mysqli();

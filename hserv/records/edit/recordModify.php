@@ -829,18 +829,12 @@ function recordSave($system, $record, $use_transaction=true, $suppress_parent_ch
     {
         $mysqli->query('set @suppress_update_trigger=1');
 
-        if(true){
-            recordUpdateCalcFields( $system, $recID, $rectype );  //update calculated fields in this record
+        recordUpdateCalcFields( $system, $recID, $rectype );  //update calculated fields in this record
             
-            //check that this record my affect other records with calculated fields
-            //1. cfn_RecTypeIDs -> cfn_ID
-            //2. defRecStructure where rst_CalcFunctionID  -> rst_RecTypeID+rst_DetailTypeID 
-            $aff_rectypes = findAffectedCalcFields( $system, $rectype );
-            if(is_array($aff_rectypes) && count($aff_rectypes)>0){
-                recordUpdateCalcFields( $system, null, $aff_rectypes);    
-            }
-            
-        }
+        //check that this record my affect other records with calculated fields
+        //1. cfn_RecTypeIDs -> cfn_ID
+        //2. defRecStructure where rst_CalcFunctionID  -> rst_RecTypeID+rst_DetailTypeID 
+        //it may consume waste of time findAndUpdateAffectedCalcFields( $system, $rectype );
 
         removeReverseChildToParentPointer($system, $recID, $rectype);    
 
@@ -1841,7 +1835,7 @@ function recordCanChangeOwnerwhipAndAccess($system, $recID, &$owner_grps, &$acce
 // 1. cfn_RecTypeIDs -> cfn_ID
 // 2. defRecStructure where rst_CalcFunctionID  -> rst_RecTypeID+rst_DetailTypeID 
 //
-function findAffectedCalcFields( $system, $rty_ID ){
+function findAndUpdateAffectedCalcFields( $system, $rty_ID ){
     
     $mysqli = $system->get_mysqli();
 
@@ -2570,14 +2564,10 @@ $dtl_Value = preg_replace('#<([A-Z][A-Z0-9]*)\s*(?:(?:(?:(?!'.$allowed2.')[^>]))
                         $err_msg = 'Value is empty';  
                     }else{
                         
-                        if(true){ 
-                            
-                            $dtl_Value = Temporal::getValueForRecDetails( $dtl_Value, $useNewTemporalFormatInRecDetails );
+                        $dtl_Value = Temporal::getValueForRecDetails( $dtl_Value, $useNewTemporalFormatInRecDetails );
                         
-                        
+/* Use old plain temporals                     
                         }else{
-                            // Use old plain temporals
-                            
                             //yesterday, today, tomorrow, now
                             $sdate = strtolower(super_trim($dtl_Value));
                             if($sdate=='today'){
@@ -2610,6 +2600,7 @@ $dtl_Value = preg_replace('#<([A-Z][A-Z0-9]*)\s*(?:(?:(?:(?!'.$allowed2.')[^>]))
                                 }
                             }
                         }
+*/                        
                     }
                     break;
                 case "float":
