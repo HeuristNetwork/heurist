@@ -198,7 +198,7 @@
 
 
 
-            if( true ){ //has calculation field
+            //has calculation field
                 //load calculation fields
                 $colNames = array('cfn_ID','cfn_Name','cfn_Domain','cfn_FunctionSpecification','cfn_Modified','cfn_RecTypeIDs');
                 $cfields = array();
@@ -219,8 +219,6 @@
                         $rtStructs['calcfields'][$row['cfn_ID']]  = $row; //array_slice($row, 1);
                     }
                 }
-                
-            }
         }
 
 
@@ -343,12 +341,11 @@
                     
                     if(@$rtGroups[$rtGroups['groupIDToIndex'][$rtg_ID]]){
                         $rtyID = $row[0];
-                        
-                        if(@$rtStructs['groups']['groupIDToIndex'][$rtg_ID]>=0){
-                            array_push($rtGroups[$rtGroups['groupIDToIndex'][$rtg_ID]]['allTypes'], $rtyID);
-                            if ($row[2]) { //rty_ShowInList
-                                array_push($rtGroups[$rtGroups['groupIDToIndex'][$rtg_ID]]['showTypes'], $rtyID);
-                            }
+
+                        //add rectype to allTypes and showTypes
+                        array_push($rtGroups[$rtGroups['groupIDToIndex'][$rtg_ID]]['allTypes'], $rtyID);
+                        if ($row[2]) { //rty_ShowInList
+                            array_push($rtGroups[$rtGroups['groupIDToIndex'][$rtg_ID]]['showTypes'], $rtyID);
                         }
                     }
                 }
@@ -752,16 +749,18 @@ function dbs_GetRectypeConstraint($system) {
                         array_push($parentlist, $subTermID);
                         $offspring = array_merge($offspring, getTermOffspringList($mysqli, $subTermID, $parentlist));
                     }else{
-                        $sMsg = 'DATABASE '.$system->dbname().'. Recursion in parent-term hierarchy '.$termID.'  '.$subTermID;
+                        $dbname = htmlspecialchars(mysql__select_value($mysqli, 'SELECT database() AS the_db'));
+                        
+                        $sMsg = 'DATABASE '.$dbname.'. Recursion in parent-term hierarchy '.$termID.'  '.$subTermID;
 
                         if(!$emailsent){
                             
                             $emailsent = true;
                             $dbowner = user_getDbOwner($mysqli); //info about user #2
                             
-                            sendEmail(HEURIST_MAIL_TO_ADMIN, 'CORRUPTED DATABASE '.$system->dbname()
+                            sendEmail(HEURIST_MAIL_TO_ADMIN, 'CORRUPTED DATABASE '.$dbname
                             .', owner '.@$dbowner['ugr_FirstName'].' '.@$dbowner['ugr_LastName'].' '.@$dbowner['ugr_eMail'],
-                            'db: '.$system->dbname().'\nOwner:'.@$dbowner['ugr_eMail']
+                            'db: '.$dbname.'\nOwner:'.@$dbowner['ugr_eMail']
                             .'\nUser was unable to load the database due to a corrupted terms tree. '
                             .'Recursion in parent-term hierarchy '.$termID.'  '.$subTermID);
                         }
@@ -928,9 +927,8 @@ function dbs_GetRectypeConstraint($system) {
         if ($res && $res->num_rows) { //child nodes exist
             while ($row = $res->fetch_assoc()) { // for each child node
                 array_push($terms, $row['trm_ID']);
-                if (true){ //ARTEM: trm_ChildCount is not reliable   }$row['trm_ChildCount'] > 0 && $getAllDescentTerms) {
-                    $terms = array_merge($terms, getTermOffspringList( $mysqli, $row['trm_ID'] ));
-                }
+                //ARTEM: trm_ChildCount is not reliable   }$row['trm_ChildCount'] > 0 && $getAllDescentTerms) {
+                $terms = array_merge($terms, getTermOffspringList( $mysqli, $row['trm_ID'] ));
             }
         }else{
         }
@@ -1024,17 +1022,17 @@ function dbs_GetRectypeConstraint($system) {
     }
 
     //
-    // to public method
+    // to public method (NOT USED)
     //
     function getTermByCode($term_code, $domain)
     {
         global $terms;
 
-        $idx = $terms['fieldNamesToIndex']['trm_Label'];
+        $idx = $terms['fieldNamesToIndex']['trm_Code'];
 
         $list = $terms['termsByDomainLookup'][$domain];
         foreach($list as $term_id => $term){
-            if(strcasecmp($term_label, $term[$idx])==0){
+            if(strcasecmp($term_code, $term[$idx])==0){
                 return $term_id;
             }
         }

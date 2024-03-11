@@ -171,7 +171,7 @@ class DbUsrRecPermissions extends DbEntityBase
                                 .' records provided in request';
                 }
                 
-                $system->addError(HEURIST_REQUEST_DENIED,
+                $this->system->addError(HEURIST_REQUEST_DENIED,
                     'Current user does not have sufficient authority to change '.$sMsg
                     .'. User must be either the owner or member of the group that owns record');
                     return false;
@@ -297,7 +297,7 @@ class DbUsrRecPermissions extends DbEntityBase
             $group_ids_to_delete = prepareIds($this->data['rcp_UGrpID']);
             
             //current user must be a member of all provided groups
-            $grp_ids = $system->get_user_group_ids(); //current user groups ids + itself
+            $grp_ids = $this->system->get_user_group_ids(); //current user groups ids + itself
             
             foreach ($group_ids_to_delete as $id){
                 if(!in_array($id, $grp_ids)){

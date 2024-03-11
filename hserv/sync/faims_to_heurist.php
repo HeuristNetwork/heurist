@@ -34,7 +34,8 @@ if(! $system->init(@$_REQUEST['db'], true) ){
     exit;
 }
 ?>
-<html>
+<!DOCTYPE>
+<html lang="en">
     <head>
         <title><?=HEURIST_TITLE ?></title>
         <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
@@ -101,8 +102,10 @@ if(! $system->init(@$_REQUEST['db'], true) ){
             {
             echo $row[0]."<br>";
             }*/
+            
+            $need_debug_info = false;
 
-            if(false){
+            if($need_debug_info){
                 // AttributeKey -> defDetailTypes
                 print "<h3>AttributeKey</h3>";
                 $query =  "SELECT AttributeID, AttributeType, AttributeName, AttributeDescription FROM AttributeKey";
@@ -139,7 +142,7 @@ if(! $system->init(@$_REQUEST['db'], true) ){
 
             //@TODO create mapping form with defRecTypes
 
-            if(false){
+            if($need_debug_info){
 
                 print "<h3>The most current Record set</h3>";
                 $query = "SELECT  a1.* FROM    ArchEntity a1 INNER JOIN ".

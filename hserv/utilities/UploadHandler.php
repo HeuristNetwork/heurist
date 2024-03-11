@@ -71,14 +71,16 @@ class UploadHandler
         $error = System::dbname_check($heurist_db);
         if($error){
             //database not defined
-            return $this->header('HTTP/1.1 403 Forbidden');
+            $this->header('HTTP/1.1 403 Forbidden');
+            return; 
         }
         
         $system = new System();
         $res = $system->verify_credentials($heurist_db);
         if(!($res>0)){
             //not logged in
-            return $this->header('HTTP/1.1 403 Forbidden');
+            $this->header('HTTP/1.1 403 Forbidden');
+            return;
         }
         
         $replace_edited_file = intval(@$_REQUEST['replace_edited_file']); //defined in form
@@ -1671,16 +1673,18 @@ $siz = USystem::getConfigBytes('upload_max_filesize');
                 $redirect_header = 'X-Accel-Redirect';
                 break;
             default:
-                return $this->header('HTTP/1.1 403 Forbidden');
+                $this->header('HTTP/1.1 403 Forbidden');
+                return;
         }
         $file_name = $this->get_file_name_param(); 
         $subfolder = $this->get_subfolder_param(); 
         
         if (!$this->is_valid_file_object($file_name, $subfolder)) {
-            return $this->header('HTTP/1.1 404 Not Found');
+            $this->header('HTTP/1.1 404 Not Found');
+            return;
         }
         if ($redirect_header) {
-            return $this->header(
+            $this->header(
                 $redirect_header.': '.$this->get_download_url(
                     $file_name,
                     $subfolder, 
@@ -1688,6 +1692,7 @@ $siz = USystem::getConfigBytes('upload_max_filesize');
                     true
                 )
             );
+            return;
         }
         $file_path = $this->get_upload_path($file_name, $subfolder, $this->get_version_param());
         //$file_path = USanitize::sanitizePath($file_path);

@@ -512,7 +512,7 @@ function downloadFile($mimeType, $filename, $originalFileName=null){
             list($dim, $range) = explode('=', $range);
             list($range_min,$range_max) = explode('-', $range);
             $range_min = intval($range_min);
-            $range_max = intval($range_maxs);
+            $range_max = intval($range_max);
         }        
 
         header('Content-Description: File Transfer');

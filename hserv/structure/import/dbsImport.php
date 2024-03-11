@@ -1916,7 +1916,7 @@ $mysqli->commit();
                     $src_group['vcg_ID'] = $new_grp_id;
                     $this->target_defs['terms']['groups'][$new_grp_id] = $src_group;
                 }else{
-                    $this->error_exit2("Can't add vocabulary group '".$grp_name."'. ".@$res['error']);
+                    $this->error_exit2("Can't add vocabulary group '".$grp_name."'. ".$mysqli->error);
                     return false;
                 }
             }

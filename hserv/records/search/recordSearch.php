@@ -599,6 +599,7 @@ function getDateHistogramData($system, $range, $interval, $rec_ids, $dty_id, $fo
     $years = $period['years'];
     $months = @$period['months'];
     $days = @$period['days'];
+    $fulldays = @$period['fulldays'];
     
     //$s_date = Temporal::dateToISO($range[0], 2, false);
     //$e_date = Temporal::dateToISO($range[1], 2, false);
@@ -734,8 +735,8 @@ function getDateHistogramData($system, $range, $interval, $rec_ids, $dty_id, $fo
     }
     else{  //DAYS
 
-        $days = $diff->days; // get the difference purely in days
-
+        $days = $fulldays>0?$fulldays:$days;
+        
         $count = $days / $interval; // get the init number of classes
 
         $format = 'd M Y';
@@ -905,7 +906,7 @@ function getDateHistogramData($system, $range, $interval, $rec_ids, $dty_id, $fo
         return array("status"=>HEURIST_OK, "data"=>$intervals);
     }
 
-    return $system->addError(HEURIST_UNKNOWN_ERROR, "An unknown error has occurred with attempting to retrieve the date data for DB => " . HEURIST_DBNAME . ", record ids => " . implode(',', $rec_ids));
+    //return $system->addError(HEURIST_UNKNOWN_ERROR, "An unknown error has occurred with attempting to retrieve the date data for DB => " . HEURIST_DBNAME . ", record ids => " . implode(',', $rec_ids));
 }
 
 //
@@ -1731,6 +1732,8 @@ function recordSearch($system, $params, $relation_query=null)
 
     $mysqli = $system->get_mysqli();
 
+    $return_h3_format = false;
+    
     if(@$params['q']){
 
         $svsID = null;
@@ -1847,7 +1850,7 @@ function recordSearch($system, $params, $relation_query=null)
     $is_ids_only = ('ids'==$params['detail']);
     
     if($params['detail']=='timemap'){ //($istimemap_request){
-        $params['detail']=='detail';
+        $params['detail']='detail';
 
         $system->defineConstant('DT_START_DATE');
         $system->defineConstant('DT_END_DATE');
@@ -2064,7 +2067,7 @@ function recordSearch($system, $params, $relation_query=null)
         $flat_rules[0] = array();
 
         //create flat rule array
-        $rules = _createFlatRule( $flat_rules, $rules_tree, 0 );
+        _createFlatRule( $flat_rules, $rules_tree, 0 );
 
         //find result for main query
         unset($params['rules']);
@@ -2669,11 +2672,7 @@ function recordSearch($system, $params, $relation_query=null)
                     $fieldtypes_in_res = array(); //reset
 
                     // FIX on fly: get "file" field types  - @todo  remove on 2022-08-22
-                    $file_field_types = array();
-                    if(true){
-                        $file_field_types = mysql__select_list2($mysqli,'select dty_ID from defDetailTypes where dty_Type="file"');
-                        $ruf_entity = new DbRecUploadedFiles($system, null);
-                    }
+                    $file_field_types = mysql__select_list2($mysqli,'select dty_ID from defDetailTypes where dty_Type="file"');
 
                     $datetime_field_types = mysql__select_list2($mysqli,'select dty_ID from defDetailTypes where dty_Type="date"');
 
@@ -2758,6 +2757,9 @@ function recordSearch($system, $params, $relation_query=null)
                                 
                                 // FIX on fly - @todo  remove on 2022-08-22
                                 if( (!($row[3]>0)) && in_array($dtyID,$file_field_types) ){
+                                    if($ruf_entity==null){
+                                        $ruf_entity = new DbRecUploadedFiles($system, null);
+                                    }
                                     $fileinfo = $ruf_entity->registerURL($row[1], false, $dtl_ID);
                                     
                                     if($fileinfo && is_array($fileinfo) && count($fileinfo)>0){
@@ -3335,6 +3337,7 @@ function recordSearchDetails($system, &$record, $detail_types) {
     //main query for details
     $res = $mysqli->query($squery);
 
+    $ruf_entity = null;
     $details = array();
     if($res){
         while ($rd = $res->fetch_assoc()) {
@@ -3365,7 +3368,9 @@ function recordSearchDetails($system, &$record, $detail_types) {
 
                     if(!($rd['dtl_UploadedFileID']>0)){
                          // FIX on fly - @todo  remove on 2022-08-22
-                         $ruf_entity = new DbRecUploadedFiles($system, null);
+                         if($ruf_entity==null){
+                            $ruf_entity = new DbRecUploadedFiles($system, null);
+                         }
                          $fileinfo = $ruf_entity->registerURL($rd['dtl_Value'], false, $rd['dtl_ID']);
                     }else{
                         $fileinfo = fileGetFullInfo($system, $rd["dtl_UploadedFileID"]);
@@ -3553,7 +3558,6 @@ function recordSearchGeoDetails($system, $recID, $find_geo_by_linked_rty, $find_
 
     $details = array();    
     
-    if(true){ //$system->defineConstant('DT_GEO_OBJECT')
     
         if ($find_geo_by_linked_rty===true && $system->defineConstant('RT_PLACE')){
             $find_geo_by_linked_rty = array(RT_PLACE);
@@ -3614,7 +3618,7 @@ function recordSearchGeoDetails($system, $recID, $find_geo_by_linked_rty, $find_
 
             }
         }
-    }
+    
     return $details;
 }
 

@@ -1492,7 +1492,7 @@ class AnyPredicate extends Predicate {
                     $compare = '>';
             }
             
-            return array('f'=> $not.$compare.$this->value);
+            return array('f'=> $compare.$this->value);
     }
     
     function makeSQL() {
@@ -1584,15 +1584,28 @@ class FieldPredicate extends Predicate {
 
     function makeJSON() {
             $compare = '';
-            if ($this->parent->exact)
-                $compare = '=';
-            else if ($this->parent->lessthan)
-                $compare = '<';
-            else if ($this->parent->greaterthan)
-                $compare = '>';
+            
+            if($this->parent->negate){
+                
+                if ($this->parent->exact)
+                    $compare = '!=';
+                else if ($this->parent->lessthan)
+                    $compare = '>=';
+                else if ($this->parent->greaterthan)
+                    $compare = '<=';
+                
+            }else{
+            
+                if ($this->parent->exact)
+                    $compare = '=';
+                else if ($this->parent->lessthan)
+                    $compare = '<';
+                else if ($this->parent->greaterthan)
+                    $compare = '>';
+            }
             
             $res = array();
-            $res['f:'.$this->field_type] = $not.$compare.$this->value;
+            $res['f:'.$this->field_type] = $compare.$this->value;
             return $res;
             //@todo implement nested values
     }
@@ -1609,8 +1622,9 @@ class FieldPredicate extends Predicate {
             $nest_joins = '';
             $relation_second_level = '';
             $relation_second_level_where = '';
+            $use_new_version = true;
 
-            if( true ){ //new test version
+            if( $use_new_version ){ //new test version
 
                 $isrelmarker_0 = ($this->field_type=="relmarker");
                 $isrelmarker_1 = false;
@@ -2051,15 +2065,28 @@ class FieldCountPredicate extends Predicate {
 
     function makeJSON() {
             $compare = '';
-            if ($this->parent->exact)
-                $compare = '=';
-            else if ($this->parent->lessthan)
-                $compare = '<';
-            else if ($this->parent->greaterthan)
-                $compare = '>';
+
+            if($this->parent->negate){
+                
+                if ($this->parent->exact)
+                    $compare = '!=';
+                else if ($this->parent->lessthan)
+                    $compare = '>=';
+                else if ($this->parent->greaterthan)
+                    $compare = '<=';
+                
+            }else{
+
+                if ($this->parent->exact)
+                    $compare = '=';
+                else if ($this->parent->lessthan)
+                    $compare = '<';
+                else if ($this->parent->greaterthan)
+                    $compare = '>';
+            }
             
             $res = array();
-            $res['f#:'.$this->field_type] = $not.$compare.$this->value;
+            $res['f#:'.$this->field_type] = $compare.$this->value;
             return $res;
             //@todo implement nested values
     }

@@ -339,7 +339,7 @@ class DbAnnotations extends DbEntityBase
                                     if($dtl_UploadedFileID===false){
                                         $err_msg = $this->system->getError();
                                         $err_msg = $err_msg['message'];
-                                        $system->clearError();  
+                                        $this->system->clearError();  
                                     }else{
                                         $details[DT_THUMBNAIL][] = $dtl_UploadedFileID[0];
                                     }
