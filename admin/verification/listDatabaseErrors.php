@@ -757,7 +757,7 @@ if($active_all || in_array('pointer_targets', $active)) {
                     ?>
                     <tr>
                         <td><input type=checkbox name="recCB" value=<?= $row['dtl_RecID'] ?>></td>
-                        <td><img class="rft" style="background-image:url(<?php echo HEURIST_RTY_ICON.$row['rec_RecTypeID']?>)" src="<?php echo HEURIST_BASE_URL.'hclient/assets/16x16.gif'?>"></td>
+                        <td><img alt="&ast;" alt="222" class="rft" style="background-image:url(<?php echo HEURIST_RTY_ICON.$row['rec_RecTypeID']?>)" src="<?php echo HEURIST_BASE_URL.'hclient/assets/16x16.gif'?>"></td>
                         <td style="white-space: nowrap;"><a target=_new
                                 href='<?=HEURIST_BASE_URL?>?fmt=edit&db=<?= HEURIST_DBNAME?>&recID=<?= $row['dtl_RecID'] ?>'>
                                 <?= $row['dtl_RecID'] ?>

@@ -162,7 +162,7 @@ if(!$dbowner['ugr_eMail'] || !$dbowner['ugr_FirstName'] || !$dbowner['ugr_LastNa
             
                 $edit_url = HEURIST_INDEX_BASE_URL.'?fmt=edit&recID='.$dbID.'&db='.HEURIST_INDEX_DATABASE;
 ?>
-    <fieldset>
+    <fieldset><legend style="display:none"></legend>
     
     <div>
         <div class="header"><label>Database:</label></div>
@@ -423,7 +423,7 @@ function registerDatabase() {
                         
                         $edit_url = HEURIST_INDEX_BASE_URL.'?fmt=edit&recID='.$dbID.'&db='.HEURIST_INDEX_DATABASE;
  ?>                  
- <fieldset>
+ <fieldset><legend style="display:none"></legend>
                         <div><div class='header'>Database:</div>
                         <div class='text'><?php echo HEURIST_DBNAME;?></div></div>
                         

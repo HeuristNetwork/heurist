@@ -147,7 +147,7 @@ if(!in_array($action_type, $allowed_actions)){
 
         </div>
 
-        <fieldset>
+        <fieldset><legend style="display:none"></legend>
             <div style="padding: 0.2em; width: 100%;" class="input">
                 <div class="header" style="padding: 0 16px 0 16px;"><label for="sel_record_scope">Records scope:</label></div>
                 <select id="sel_record_scope" class="text ui-widget-content ui-corner-all" style="max-width:30em"></select>
@@ -174,7 +174,7 @@ if(!in_array($action_type, $allowed_actions)){
         </fieldset>
 
         <div id="div_widget" style="padding-left: 16px; width: 100%;">
-            <fieldset>
+            <fieldset><legend style="display:none"></legend>
             </fieldset>
         </div>
 

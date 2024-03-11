@@ -629,7 +629,7 @@ if(!$format) $format='csv';
 <div id="divPopupPreview2" style="display:none"></div>
 
 <div id="divSelectPrimaryRecType" style="display:none;height:100%;" class="">
-        <fieldset>
+        <fieldset><legend style="display:none"></legend>
         <div>
             <div class="header optional" style="min-width: 150px; width: 150px;"><label>Select record type:</label></div>
             <div class="input-cell">

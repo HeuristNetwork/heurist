@@ -652,7 +652,7 @@ $system->defineConstants();
     </div>
 
     <div id="layer-edit-dialog"  style="display:none" class="ui-heurist-bg-light">
-        <fieldset>
+        <fieldset><legend style="display:none"></legend>
             <div>
                 <!-- What would you like to call<br>the new map layer -->
                 <div class="header"><label for="layer_name">Name for map layer:</label></div>
