@@ -628,8 +628,8 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
                 +'<span data-action="delete" style="background:red;padding:4px"><span class="ui-icon ui-icon-close" title="'
                     +((is_folder)?'Delete header':'Exclude field from record type')+'" style="font-size:9px;font-weight:normal"/>Delete</span>'
                 //+(true || is_folder?'':
-                //'<span class="ui-icon ui-icon-star" title="Requirement"></span>'
-                +'<span class="ui-icon ui-icon-menu" title="Repeatability"></span>')
+                //+'<span class="ui-icon ui-icon-star" title="Requirement"></span>'
+                //+'<span class="ui-icon ui-icon-menu" title="Repeatability"></span>')
                 +'</div>').appendTo(item);
                 
             var that = this;
