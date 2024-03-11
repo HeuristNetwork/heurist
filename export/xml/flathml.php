@@ -1932,7 +1932,7 @@ if($intofile){ // flags HuNI manifest + separate files per record
         <table style='width:500px;'>
             <tr><th colspan="2"></th></tr>
             <tr>
-                <td style='width:150px;'><img src='../../hclient/assets/branding/logo_huni.png'></td>
+                <td style='width:150px;'><img alt="&ast;" src='../../hclient/assets/branding/logo_huni.png'></td>
                 <td><h2 style="padding-top:1em;font-size: 16px;">The HuNI Project</h2></td>
             </tr>
             <tr>

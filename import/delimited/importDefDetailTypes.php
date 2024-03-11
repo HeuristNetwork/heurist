@@ -129,7 +129,7 @@
     				<div id="btnParseData" style="margin-top: 10px;">Analyse</div>
     			</div>
 
-    			<fieldset style="padding-top:1em;">
+    			<fieldset style="padding-top:1em;"><legend style="display:none"></legend>
 
     				<div>
     					<label for="csv_delimiter">Field separator:</label>
@@ -158,7 +158,7 @@
 					<p><b>Step 3</b></p>
 				</div>
 
-				<fieldset style="padding-top:1em;">
+				<fieldset style="padding-top:1em;"><legend style="display:none"></legend>
 
 					<p style="padding-top:0.4em; margin-bottom: 10px; color: red;">Select a Detail Type Group to add the new Fields to</p>
 

@@ -212,7 +212,7 @@ if(!$dbowner['ugr_eMail'] || !$dbowner['ugr_FirstName'] || !$dbowner['ugr_LastNa
 
                    <input type="hidden" name="sa_protected" value="<?=$sysadmin_protection?>">
                    <input type="hidden" name="db" value="<?=HEURIST_DBNAME?>">
-<fieldset style="padding-right:30px">
+<fieldset style="padding-right:30px"><legend style="display:none"></legend>
 
     <div>
         <div class="header" style="vertical-align:top;min-width:100px"><label>Registration URL:</label></div>

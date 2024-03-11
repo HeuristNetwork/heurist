@@ -193,7 +193,7 @@ if(!$format) $format='csv';
             <h2 class="curr_file_name truncate" style="display: inline-block;max-width: 300px;"></h2>
         </div>
 
-        <fieldset style="width:380px;">
+        <fieldset style="width:380px;"><legend style="display:none"></legend>
                 <div>
                     <div class="header" style="min-width: 50px;"><label>Encoding:</label></div>
                     <div class="input-cell">        
@@ -371,7 +371,7 @@ if(!$format) $format='csv';
                     <br>Matching and updates will be applied across all record types for which the base field(s) apply.</label>
         </div>
         
-        <fieldset style="position: absolute;left: 0;right: 0;top:80px;">
+        <fieldset style="position: absolute;left: 0;right: 0;top:80px;"><legend style="display:none"></legend>
         <div>
             <div class="header optional" style="min-width: 80px; width: 80px;">
                 <label style="vertical-align: top;">Importing:</label><br>

@@ -84,7 +84,7 @@ if(isset($_POST['data'])) {
 
 <body class="ui-heurist-bg-light" onload="setup()">
 
-    <fieldset style="font-size:0.8em">
+    <fieldset style="font-size:0.8em"><legend style="display:none"></legend>
 
         <span id="selected-records"></span>
 

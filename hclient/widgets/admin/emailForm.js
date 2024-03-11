@@ -467,7 +467,7 @@ $.widget( "heurist.emailForm", {
             $dd.load(url);
         }else{ //image captcha
             $dd.empty();
-            $('<img src="'+window.hWin.HAPI4.baseURL+'hserv/utilities/captcha.php?img='+id+'"/>').appendTo($dd);
+            $('<img alt="&ast;" src="'+window.hWin.HAPI4.baseURL+'hserv/utilities/captcha.php?img='+id+'"/>').appendTo($dd);
         }
     },
     

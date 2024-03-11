@@ -1009,7 +1009,7 @@ $.widget( "heurist.importStructure", {
         + html_thumb
         + '<div class="recordSelector"><input type="checkbox" /></div>'
         + '<div class="recordIcons">' //recid="'+recID+'" bkmk_id="'+bkm_ID+'">'
-        +     '<img src="'+window.hWin.HAPI4.baseURL+'hclient/assets/16x16.gif'
+        +     '<img alt="&ast;" src="'+window.hWin.HAPI4.baseURL+'hclient/assets/16x16.gif'
         +     '" style="background-image: url(&quot;'+rtIcon+'&quot;);">'
         + '</div>'
         + '<div style="left:40px !important" class="recordTitle">'

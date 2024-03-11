@@ -1947,7 +1947,7 @@ window.hWin.HEURIST4.ui = {
         }
         
         var rectype_icon = '<div style="display:table-cell;vertical-align: middle;padding: 0 4px'+(reltype==''?'':' 0 16px')+';">'
-                        + '<img src="'+ph_gif+'"  class="rt-icon" style="' //'margin-right:10px;'
+                        + '<img alt="&ast;" src="'+ph_gif+'"  class="rt-icon" style="' //'margin-right:10px;'
                         + ((info['rec_RecTypeID']>0)?
                             'background-image:url(\''    //vertical-align:top;margin-top:2px;
                             + top.HAPI4.iconBaseURL+info['rec_RecTypeID'] + '\');'   //rectype icon
@@ -2078,7 +2078,7 @@ window.hWin.HEURIST4.ui = {
             
             var bele = ele.find('.btn-rel');
             
-            $('<img src="'+ph_gif+'"  class="rt-icon" style="vertical-align: middle;background-image:url(\''
+            $('<img alt="&ast;" src="'+ph_gif+'"  class="rt-icon" style="vertical-align: middle;background-image:url(\''
                             + top.HAPI4.iconBaseURL + '1\');"/>'
             +'<span class="ui-button-icon ui-icon ui-icon-pencil" style="margin:0"></span>').appendTo(bele);
             
@@ -2176,7 +2176,7 @@ window.hWin.HEURIST4.ui = {
                 
                 if(info['relation_recID']>0){
             
-                    $('<img src="'+ph_gif+'"  class="rt-icon" style="vertical-align: middle;background-image:url(\''
+                    $('<img alt="&ast;" src="'+ph_gif+'"  class="rt-icon" style="vertical-align: middle;background-image:url(\''
                             + top.HAPI4.iconBaseURL + info['rec_RecTypeID'] + '\');"/>'
                             +'<span class="ui-button-icon ui-icon ui-icon-pencil" style="margin:0"></span>').appendTo(btn_edit);
             
@@ -3407,7 +3407,7 @@ $.widget( "heurist.hSelect", $.ui.selectmenu, {
     var icon_url = item.element.attr( "icon-url" );
     if(icon_url){
     
-        $('<span style="float:left;padding-right:2px"><img src="'+window.hWin.HAPI4.baseURL+'hclient/assets/16x16.gif'
+        $('<span style="float:left;padding-right:2px"><img alt="&ast;" src="'+window.hWin.HAPI4.baseURL+'hclient/assets/16x16.gif'
         + '" class="rt-icon" style="background-image: url(&quot;'+icon_url+ '&quot;);"/></span>')
           .prependTo( wrapper );    
 

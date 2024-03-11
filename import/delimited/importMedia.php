@@ -123,7 +123,7 @@ require_once dirname(__FILE__).'/../../hclient/framecontent/initPage.php';
         </div>
         <div id="btnParseData" style="margin-top: 10px;">Analyse</div>
     </div>
-    <fieldset style="padding-top:1em;">
+    <fieldset style="padding-top:1em;"><legend style="display:none"></legend>
             <div>
                 <br><br>
                 <label for="csv_delimiter">Field separator:</label>
@@ -164,7 +164,7 @@ require_once dirname(__FILE__).'/../../hclient/framecontent/initPage.php';
         <p><b>Step 3</b></p>
         <p style="padding-top:0.4em; margin-bottom: 10px;">Select field assignment<br>(URL/path is required)</p>
     </div>
-    <fieldset style="padding-top:1em;">
+    <fieldset style="padding-top:1em;"><legend style="display:none"></legend>
            
             <div>
                 <label style="color:red">URL/Path</label><br>

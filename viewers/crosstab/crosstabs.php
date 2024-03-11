@@ -106,7 +106,7 @@ require_once dirname(__FILE__) . '/../../hclient/framecontent/initPage.php';
 
                                         <div>
 
-                                            <fieldset id="shows" style="display:none;">
+                                            <fieldset id="shows" style="display:none;"><legend style="display:none"></legend>
                                                 <div class="align-items-center">
                                                     <div style="font-size: 14px;vertical-align: top;">
                                                         <label for="rbShowValue">Show</label>
@@ -206,7 +206,7 @@ require_once dirname(__FILE__) . '/../../hclient/framecontent/initPage.php';
                                     </div>
                                 </div>
 
-                                <fieldset id="vars" style="display:none;">
+                                <fieldset id="vars" style="display:none;"><legend style="display:none"></legend>
 
                                     <div id="row_container">
                                         <div class="align-items-center" id="rowVars" style="margin-bottom: 5px;">
