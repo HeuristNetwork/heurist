@@ -73,6 +73,9 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
     resource_values: [],
     relmarker_values: [],
 
+    // Record history
+    _record_history: null,
+
     _init: function() {
         
         this.options.entity = window.hWin.entityRecordCfg;
@@ -1297,7 +1300,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                 if(this.editFormSummary.text()=='....'){
                     this.editFormSummary.empty();
 
-                    var headers = ['Admin','Private','Tags','Linked records','Scratchpad','Discussion']; //,'Dates','Text',
+                    var headers = ['Admin','Private','Tags','Linked records','Scratchpad','Discussion','History']; //,'Dates','Text',
                     for(var idx in headers){
                         var acc = $('<div>').addClass('summary-accordion').appendTo(this.editFormSummary);
                         
@@ -1908,25 +1911,25 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                 break;
             case 6:   //dates - moved back to admin section (2017-10-31)
                 
- $('<div><label class="small-header">Added By:</label><span id="recAddedBy">'+that._getField('rec_AddedByUGrpID')+'</span></div>'
-+'<div><label class="small-header">Added:</label>'+that._getField('rec_Added')+'</div>'
-+'<div><label class="small-header">Updated:</label>'+that._getField('rec_Modified')+'</div>').appendTo(panel);
+                if(panel.text()!='') return;
 
-            //resolve user id to name
-            window.hWin.HAPI4.SystemMgr.usr_names({UGrpID:that._getField('rec_AddedByUGrpID')},
-                function(response){
-                    if(response.status == window.hWin.ResponseStatus.OK){
-                        panel.find('#recAddedBy').text(response.data[that._getField('rec_AddedByUGrpID')]);
+                sContent = '<div id="record-history">Click the <a href="#">history button</a> to retrieve this record\'s history</div>';
+
+                $(sContent).appendTo(panel);
+
+                this._on($(sContent).find('a'), {
+                    click: function(){
+                        this._getRecordHistory();
                     }
-            });
+                });
 
                 break;
             default:
                 sContent = '<p>to be implemented</p>';
         }
 
-        if(idx>1 && sContent) $(sContent).appendTo(panel);
-        if(idx>0 && idx<6){
+        if(idx>1 && idx!=6 && sContent) $(sContent).appendTo(panel);
+        if(idx>0 && idx<7){
             panel.css({'margin-left':'27px'});
         }
         
@@ -4232,6 +4235,7 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
 
                 +'<div style="padding:10px 50px 0px 0px;float:right">'
                     +'<span class="btn-edit-rt btns-admin-only">Attributes</span>'
+                    +'<span class="btn-rec-history btns-admin-only">History</span>'
                     +'<span class="btn-edit-rt-template btns-admin-only">Template</span>'
                     +'<span class="btn-bugreport">Bug report</span>'
                 +'</div>'
@@ -4276,13 +4280,22 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
                         
                 btn.find('.ui-button-icon')
                             .css({'font-size':'25px','float':'left',width:'25px',height:'25px','margin-top':'0px'});
-                                        
+
                 this.element.find('.btn-edit-rt-template').button({icon:'ui-icon-arrowthickstop-1-s'})
                         .css(btn_css).click(function(){
                             window.hWin.HEURIST4.ui.showRecordActionDialog('recordTemplate'
                                     ,{recordType:that._currentEditRecTypeID,
                                       default_palette_class: 'ui-heurist-design'});});
-                
+
+                if(this._currentEditID){
+
+                    this.element.find('.btn-rec-history').button({icon:'ui-icon-clock'})
+                            .css(btn_css).click(function(){
+                                that._getRecordHistory();
+                            });
+                }else{
+                    this.element.find('.btn-rec-history').hide();
+                }
             }else{
                 this.element.find('.btns-admin-only').hide();
             }
@@ -6372,5 +6385,254 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
                     window.hWin.HEURIST4.msg.showMsgErr(response);
                 }
         });
+    },
+
+    _getRecordHistory: function(){
+
+        const that = this;
+        const rectype = this._getField('rec_RecTypeID');
+
+        let request = {
+            entity: 'sysArchive',
+            a: 'batch',
+            get_record_history: 1,
+            rec_ID: this._currentEditID
+        };
+
+        window.hWin.HAPI4.EntityMgr.doRequest(request, function(response){
+
+            if(response.status != window.hWin.ResponseStatus.OK){
+                window.hWin.HEURIST4.msg.showMsgErr(response);
+                return;
+            }
+
+            that._record_history = response.data;
+
+            let rst_fields = [];
+            let fld_name_css = "font-size: larger;"; //14px
+            let date_stamp_css = "font-size: smaller;"; //10px
+            let header_value_css = "display: inline-block; max-width: 65%; width: 65%;vertical-align: middle;";
+            let value_css = "display: inline-block; max-width: 75%; width: 75%;vertical-align: middle;";
+
+            $Db.rst(rectype).each2(function(dty_ID, rst){
+
+                if($Db.dty(dty_ID, 'dty_Type') == 'separator') return;
+
+                let name = rst['rst_DisplayName'];
+                let rec = {
+                    id: dty_ID,
+                    name: name,
+                    t_name: name.length > 25 ? name.substring(0, 25) + '...' : name,
+                    order: rst['rst_DisplayOrder']
+                };
+                
+                rst_fields.push(rec);
+            });
+
+            rst_fields.sort( (a,b) => a.order < b.order ? -1 : 1 );
+
+            let rec_ids = {};
+
+            let content = "";
+            for(const field of rst_fields){
+
+                let fld = that._editing.getFieldByName(field.id);
+                let type = $Db.dty(field.id, 'dty_Type');
+
+                let cur_values = fld.editing_input('getValues');
+                let fld_history = that._record_history[field.id];
+
+                if(window.hWin.HEURIST4.util.isempty(fld_history)) continue;
+                
+                for(let fld_idx in cur_values){
+                    
+                    let history_head = '';
+                    let history_log = '';
+                    let cur_value = cur_values[fld_idx];
+
+                    if(type == 'resource' || type == 'relmarker'){
+                        rec_ids[`${field.id}-${fld_idx}-0`] = fld_history[fld_idx][0].arc_Value;
+                        cur_value = '';
+                    }else if(type == 'freetext' || type == 'blocktext'){ // remove html
+                        cur_value = window.hWin.HEURIST4.util.stripTags(cur_value, 'u, i, b, strong, em');
+                    }else if(type == 'date'){ // translate value
+                        cur_value = temporalToHumanReadableString(cur_value);
+                    }else if(type == 'enum'){ // grab label from dropdown
+                        cur_value = fld_history[fld_idx][0].arc_Value;
+                    }else if(type == 'file'){ // set value to filename / url
+                        cur_value = !window.hWin.HEURIST4.util.isempty(cur_value.ulf_OrigFileName) ? 
+                                        cur_value.ulf_OrigFileName : cur_value.ulf_ExternalFileReference;
+                    }
+
+                    let cur_date_stamp = fld_history[fld_idx][0].arc_TimeOfChange;
+                    cur_date_stamp = window.hWin.HEURIST4.util.isempty(cur_date_stamp) ? '...' : TDate.parse(cur_date_stamp).toString('y-m-d');
+
+                    history_head = `<div id="${field.id}-${fld_idx}-0" style="padding-bottom: 5px;">`
+                                    + `<strong title="${field.name}" style="${fld_name_css}">${field.t_name}</strong>: <em style="${date_stamp_css}">${cur_date_stamp}</em> `
+                                    + `<span class="truncate" style="${header_value_css}" data-idx="${field.id}-${fld_idx}-0" title="${cur_value}">${cur_value}</span>`
+                                 + `</div>`;
+
+                    for(let idx = 1; idx < fld_history[fld_idx].length; idx++){
+    
+                        let cur_history = fld_history[fld_idx][idx];
+                        let prev_value = cur_history.arc_Value;
+
+                        if(type == 'resource' || type == 'relmarker'){
+                            rec_ids[`${field.id}-${fld_idx}-${idx}`] = cur_history.arc_Value;
+                            prev_value = '';
+                        }else if(type == 'freetext' || type == 'blocktext'){
+                            prev_value = window.hWin.HEURIST4.util.stripTags(prev_value, 'u, i, b, strong, em');
+                            prev_value = prev_value.replaceAll(/"/g, '\\"');
+                        }
+    
+                        let date_stamp = cur_history['arc_TimeOfChange'];
+                        date_stamp = window.hWin.HEURIST4.util.isempty(date_stamp) ? '...' : TDate.parse(date_stamp).toString('y-m-d');
+
+                        history_log += `<div id="${field.id}-${fld_idx}-${idx}">`
+                                        + `<input type="checkbox" name="revert-change" value="${field.id}-${fld_idx}-${idx}"> <span>${cur_history.arc_Action}</span> <em style="${date_stamp_css}">${date_stamp}</em> `
+                                        + `<span class="truncate" style="${value_css}" data-idx="${field.id}-${fld_idx}-${idx}" title="${prev_value}">${prev_value}</span>`
+                                    + `</div>`;
+                    }
+
+                    if(!window.hWin.HEURIST4.util.isempty(history_log)){
+                        content += `<div data-dtyid="${field.id}" style="margin: 10px 5px;">${history_head}${history_log}</div>`;
+                    }
+                }
+
+            }
+
+            if(!window.hWin.HEURIST4.util.isempty(content)){
+
+                let $acc_ele = $(that.editFormSummary.find('.summary-accordion').get(6));
+
+                content = `Check values to be restored, then click <button id="btn-history-revert">Revert changes</button> <button id="btn-history-cancel">Cancel</button>`
+                        + content;
+                $acc_ele.children('div').html(content);
+
+                that._on($acc_ele.find('#btn-history-revert').button(), {
+                    click: function(){
+                        that._revertRecordHistory();
+                    }
+                });
+                that._on($acc_ele.find('#btn-history-cancel').button(), {
+                    click: function(){
+                        $acc_ele.find('input[type="checkbox"][name="revert-change"]').prop('checked', false);
+                    }
+                });
+
+                that.editFormPopup.layout().open('east'); // Expand layout panel
+
+                // Expand accordion header
+                if($acc_ele.accordion('instance') != undefined){
+                    $acc_ele.accordion('option', 'active', 0);
+                }
+
+                // Enlarge layout panel
+                let width = $(document).width() * 0.4;
+                if(that.editFormPopup.layout().state['east']['outerWidth'] < width){
+                    that.editFormPopup.layout().sizePane('east', width);
+                }
+            }
+
+            if(Object.keys(rec_ids).length > 0){
+
+                let $acc_ele = $(that.editFormSummary.find('.summary-accordion').get(6));
+
+                for(const fld_idx in rec_ids){
+
+                    let $ele = $acc_ele.find(`span[data-idx="${fld_idx}"]`);
+                    if($ele.length < 1){
+                        continue;
+                    }
+
+                    window.hWin.HEURIST4.ui.createRecordLinkInfo($ele, rec_ids[fld_idx], false);
+                    if($ele.find('.btn-edit').length > 0){
+                        $ele.find('.btn-edit').parent().css('padding-left', '');
+                        $ele.find('.btn-edit').remove();
+                    }
+                }
+            }
+        });
+    },
+
+    _revertRecordHistory: function(){
+
+        const that = this;
+
+        if(that.editFormPopup.find('input[type="checkbox"][name="revert-change"]:checked').length <= 0){
+            return;
+        }
+
+        let $dlg;
+        let msg = 'This will revert the changes that have been selected';
+
+        let btns = {};
+        btns[window.HR('OK')] = function(){
+
+            // Revert changes
+            $dlg.dialog('close');
+
+            let $checked_options = that.editFormPopup.find('input[type="checkbox"][name="revert-change"]:checked');
+
+            let changes = {};
+            $checked_options.each((idx, ele) => {
+
+                let value = $(ele).val();
+                if(value.indexOf('-') === -1){
+                    return;
+                }
+                let [dty_ID, fld_idx, arc_idx] = value.split('-');
+                if(window.hWin.HEURIST4.util.isempty(dty_ID) || window.hWin.HEURIST4.util.isempty(fld_idx) || window.hWin.HEURIST4.util.isempty(arc_idx)){
+                    return;
+                }
+
+                if(!Object.hasOwn(changes, dty_ID)){
+                    changes[dty_ID] = {};
+                }
+                changes[dty_ID][fld_idx] = that._record_history[dty_ID][fld_idx][arc_idx]['arc_ID'];
+            });
+
+            let request = {
+                entity: 'sysArchive',
+                a: 'batch',
+                rec_ID: that._currentEditID,
+                revert_record_history: 1,
+                revisions: changes
+            };
+
+            window.hWin.HEURIST4.msg.bringCoverallToFront(this.element, null, '<span style="color: white;">Reverting record changes...</span>');
+
+            window.hWin.HAPI4.EntityMgr.doRequest(request, function(response){
+
+                window.hWin.HEURIST4.msg.sendCoverallToBack();
+
+                if(response.status != window.hWin.ResponseStatus.OK){
+                    window.hWin.HEURIST4.msg.showMsgErr(response);
+                    return;
+                }
+
+                if(window.hWin.HEURIST4.util.isObject(response.data) && response.data.errors.length > 0){
+
+                    window.hWin.HEURIST4.msg.showMsgDlg(`The following issues were encountered:<br><br>${response.data.errors.join('<br>')}<br><br>`, null, null, {
+                        close: function(){
+                            that._initEditForm_step3(that._currentEditID);
+                        }
+                    });
+
+                }else{
+                    window.hWin.HEURIST4.msg.showMsgFlash('Record values successfully reverted, reloading record...', 3000);
+                    setTimeout(() => { that._initEditForm_step3(that._currentEditID); }, 2000); // trigger reload
+                }
+
+            });
+        };
+        btns[window.HR('Cancel')] = function(){
+            // Cancel
+            $dlg.dialog('close');
+        };
+
+        $dlg = window.hWin.HEURIST4.msg.showMsgDlg(msg, btns, 
+            {title: 'Revert record changes', yes: window.HR('OK'), no: window.HR('Cancel')}, {default_palette_class: 'ui-heurist-populate'}
+        );
     }
 });
