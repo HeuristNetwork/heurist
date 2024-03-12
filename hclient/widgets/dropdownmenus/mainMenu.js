@@ -667,7 +667,11 @@ $.widget( "heurist.mainMenu", {
         .load(
             window.hWin.HAPI4.baseURL+'hclient/widgets/dropdownmenus/mainMenu'+name+'.html',
           function(){    //add ?t=+(new Date().getTime()) to avoid cache in devtime
-          
+        
+            let content = that.menues[section].find('ul');
+            if(content.length>0){
+                that.menues[section].html(content.html());
+            }
           
             window.hWin.HAPI4.HRA(that.menues[section]);
           

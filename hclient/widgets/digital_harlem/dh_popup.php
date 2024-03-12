@@ -113,7 +113,7 @@
     if($recTypeID==RT_ADDRESS){
 
         if( @$_REQUEST['full']==1 ){
-            include 'dh_popup_place.php';
+            include_once 'dh_popup_place.php';
         }
 
         $comment = getFieldValue($records, $recID, DT_SHORT_SUMMARY);
@@ -139,7 +139,7 @@
                 $recTypeID = RT_ADDRESS;
                 $recID = $addrID;
 
-                include 'dh_popup_place.php';
+                include_once 'dh_popup_place.php';
             }
 
             $comment = getFieldValue($records, $recID, DT_EXTENDED_DESCRIPTION);
@@ -165,7 +165,7 @@
     }else if($recTypeID==RT_PERSON){
 
         if( @$_REQUEST['full']==1 ){
-            include 'dh_popup_person.php';
+            include_once 'dh_popup_person.php';
         }
 
         if($eventID){
@@ -246,7 +246,7 @@
     }else if($recTypeID==RT_EVENT){
 
         if( @$_REQUEST['full']==1 ){
-            include 'dh_popup_event.php';
+            include_once 'dh_popup_event.php';
         }
         
         if($entities_per_address>1){

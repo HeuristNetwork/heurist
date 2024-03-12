@@ -285,7 +285,7 @@ mapDraw.js initial_wkt -> parseWKT -> GeoJSON -> _loadGeoJSON (as set of separat
                 
                 var html_thumb = '';
                 if(recThumb){                             //class="timeline-event-bubble-image" 
-                    html_thumb = '<img alt="&ast;" src="'+recThumb+'" style="float:left;padding-bottom:5px;padding-right:5px;">'; 
+                    html_thumb = '<img alt src="'+recThumb+'" style="float:left;padding-bottom:5px;padding-right:5px;">'; 
                     //'<div class="recTypeThumb" style="background-image: url(&quot;'+ fld('rec_ThumbnailURL') + '&quot;);opacity:1"></div>'
                 }
                 
@@ -349,7 +349,7 @@ mapDraw.js initial_wkt -> parseWKT -> GeoJSON -> _loadGeoJSON (as set of separat
                                 id: dataset_name+'-'+recID+'-'+k, //unique id
                                 group: dataset_name,
                                 content: 
-                                '<img alt="&ast;" src="'+iconImg + 
+                                '<img alt src="'+iconImg + 
                                            '"  align="absmiddle" style="padding-right:3px;" width="12" height="12"/>&nbsp;<span>'+recName+'</span>',
                                 //'<span>'+recName+'</span>',
                                 title: recName,
