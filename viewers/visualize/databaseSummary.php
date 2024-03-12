@@ -172,7 +172,7 @@ A:link {
                     <div class="ent_content_full" style="padding-left:10px; top:0">
 
                         <table id="records" class="records" cellpadding="4" cellspacing="1">
-
+                            <caption></caption>
                             <tr>
                                 <th width="40">ID</th>
                                 <th class="space">Icon</th>

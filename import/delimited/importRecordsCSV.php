@@ -533,30 +533,30 @@ if(!$format) $format='csv';
             <table role="presentation" class="tbresults" style="display:inline-block">
                 <tbody>
                                     <tr>
-                                        <th rowspan="3" width="250">
+                                        <td rowspan="3" width="250">
                                             <h2 id="mrr_big">Existing: 586  New: 100</h2>
-                                        </th>
-                                        <th rowspan="3">
+                                        </td>
+                                        <td rowspan="3">
                                             <div id="prepareWarnings" 
                                                 style="display:none;padding:2px;background-color:#ffaaaa;border-color:red;margin-left:2em">
                                                 <h2 id="mrr_warning" style="display:inline-block;margin:0 10px;">Data errors: 0</h2>
                                                 <div id="btnShowWarnings" style="display:none"></div>
                                                 <div id="btnShowUTMWarnings" style="display:none"></div>
                                             </div>
-                                        </th>
-                                        <th rowspan="3">
+                                        </td>
+                                        <td rowspan="3">
                                             <div id="prepareErrors" 
                                                 style="display:none;padding:2px;background-color:#ffaaaa;border-color:red;margin-left:2em">
                                                 <h2 id="mrr_error" style="display:inline-block;margin:0 10px;">Unrecognised terms: 0</h2>
                                                 <div id="btnShowErrors"></div>
                                             </div>
-                                        </th>
-                                        <th width="50" align=left style="width:120px">Existing:</th>
-                                        <th width="50" id="mrr_cnt_update"></th>
-                                        <th width="50" class="mrr_update">rows:</th>
-                                        <th width="50" class="mrr_update" id="mrr_cnt_update_rows"></th>
-                                        <th width="50" class="mrr_update"><a href="#" onclick="importRecordsCSV.showRecords2('update',false)">show</a></th>
-                                        <th width="50" class="mrr_update"><a href="#" onclick="importRecordsCSV.showRecords2('update',true)">download</a></th>
+                                        </td>
+                                        <td width="50" align=left style="width:120px">Existing:</td>
+                                        <td width="50" id="mrr_cnt_update"></td>
+                                        <td width="50" class="mrr_update">rows:</td>
+                                        <td width="50" class="mrr_update" id="mrr_cnt_update_rows"></td>
+                                        <td width="50" class="mrr_update"><a href="#" onclick="importRecordsCSV.showRecords2('update',false)">show</a></td>
+                                        <td width="50" class="mrr_update"><a href="#" onclick="importRecordsCSV.showRecords2('update',true)">download</a></td>
                                     </tr>
                                     <tr><td align=left>New:</td>
                                         <td width="50" id="mrr_cnt_insert"></td>
