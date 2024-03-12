@@ -1221,10 +1221,12 @@
             //5A. If simple date - retain value in recDetails                                    
             //5B. If temporal object it saves JSON in recDetails
                                     if($dtl_Value != $dtl_NewValue_for_update){
-                                        $query = 'UPDATE recDetails SET dtl_Value="'.
-                                                $mysqli->real_escape_string($dtl_NewValue_for_update).'" WHERE dtl_ID='.$dtl_ID;
-                                        $mysqli->query($query);
-                                        if(!($mysqli->affected_rows>=0)){
+                                        $query = 'UPDATE recDetails SET dtl_Value=? WHERE dtl_ID=?';
+                                        
+                                        $affected = mysql__exec_param_query($mysqli, $query, 
+                                                        array('si',$dtl_NewValue_for_update, $dtl_ID),true);
+                                        
+                                        if(!($affected>=0)){
                                             //fails update recDetails
                                             $system->addError(HEURIST_DB_ERROR, $err_prefix.'Error on recDetails update query:'.$query, $mysqli->error);
                                             $isok = false;

@@ -436,7 +436,7 @@ if($active_all || in_array('dup_terms', $active)) {
                 
                     $trash_group_id = mysql__select_value($mysqli, 'select vcg_ID from defVocabularyGroups where vcg_Name="Trash"');
 
-                    $query = 'UPDATE defTerms set trm_ParentTermID=NULL, trm_VocabularyGroupID='.$trash_group_id
+                    $query = 'UPDATE defTerms set trm_ParentTermID=NULL, trm_VocabularyGroupID='.intval($trash_group_id)
                     .' WHERE trm_ID in ('.implode(',',$trmWithWrongParents).')';
                     $res = $mysqli->query( $query );
                     if(! $res )
@@ -2251,7 +2251,7 @@ if($active_all || in_array('defgroups', $active)) {
                 $trash_id = mysql__select_value($mysqli, 'select rtg_ID FROM defRecTypeGroups WHERE rtg_Name="Trash"');
                 if($trash_id>0){
             
-                    $mysqli->query('update defRecTypes left join defRecTypeGroups on rty_RecTypeGroupID=rtg_ID set rty_RecTypeGroupID='.$trash_id.' WHERE rtg_ID is null');        
+                    $mysqli->query('update defRecTypes left join defRecTypeGroups on rty_RecTypeGroupID=rtg_ID set rty_RecTypeGroupID='.intval($trash_id).' WHERE rtg_ID is null');        
                     
                     $cnt2 = $mysqli->affected_rows;
                     
@@ -2274,7 +2274,7 @@ if($active_all || in_array('defgroups', $active)) {
                 $trash_id = mysql__select_value($mysqli, 'select dtg_ID FROM defDetailTypeGroups WHERE dtg_Name="Trash"');
                 if($trash_id>0){
             
-                    $mysqli->query('update defDetailTypes left join defDetailTypeGroups on dty_DetailTypeGroupID=dtg_ID set dty_DetailTypeGroupID='.$trash_id.' WHERE dtg_ID is null');        
+                    $mysqli->query('update defDetailTypes left join defDetailTypeGroups on dty_DetailTypeGroupID=dtg_ID set dty_DetailTypeGroupID='.intval($trash_id).' WHERE dtg_ID is null');        
                     
                     $cnt2 = $mysqli->affected_rows;
                     
@@ -2297,7 +2297,7 @@ if($active_all || in_array('defgroups', $active)) {
                 $trash_id = mysql__select_value($mysqli, 'select vcg_ID FROM defVocabularyGroups WHERE vcg_Name="Trash"');
                 if($trash_id>0){
                     $trash_id = $mysqli->real_escape_string($trash_id);
-                    $mysqli->query('update defTerms left join defVocabularyGroups on trm_VocabularyGroupID=vcg_ID set trm_VocabularyGroupID='.$trash_id.' WHERE trm_ParentTermID is null and vcg_ID is null');        
+                    $mysqli->query('update defTerms left join defVocabularyGroups on trm_VocabularyGroupID=vcg_ID set trm_VocabularyGroupID='.intval($trash_id).' WHERE trm_ParentTermID is null and vcg_ID is null');        
                     
                     $cnt2 = $mysqli->affected_rows;
                     

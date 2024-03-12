@@ -644,11 +644,14 @@ function __setTermYesNo(){
         
         if($yes_1>0){
 //replace 99-544x to 2-53x in recDetails
+            $yes_0 = intval($yes_0);
+            $yes_1 = intval($yes_1);
+            $vocab = intval($vocab);
             if($yes_0>0){
                 $query = 'UPDATE recDetails SET dtl_Value='.$yes_0.' WHERE dtl_Value='.$yes_1.' AND '.$enums;
                 $mysqli->query($query);
     //replace in term links
-                $query = 'UPDATE defTermsLinks trl_TermID='.$yes_0.' WHERE trl_TermID='.intval($yes_1);
+                $query = 'UPDATE defTermsLinks trl_TermID='.$yes_0.' WHERE trl_TermID='.$yes_1;
                 $mysqli->query($query);
     //add references to vocabulary 99-5445       
                 if($vocab>0){
@@ -674,6 +677,10 @@ function __setTermYesNo(){
         
         if($no_1>0){
 //replace 99-544x to 2-53x in recDetails
+            $no_0 = intval($no_0);
+            $no_1 = intval($no_1);
+            $vocab = intval($vocab);
+
             if($no_0>0){
                 $query = 'UPDATE recDetails SET dtl_Value='.$no_0.' WHERE dtl_Value='.$no_1.' AND '.$enums;
                 $mysqli->query($query);
@@ -846,7 +853,7 @@ function __renameField39(){
         
         mysql__usedatabase($mysqli, $db_name);
         
-        $dty_ID = getDtyLocalCode(2, 39);
+        $dty_ID = intval(getDtyLocalCode(2, 39));
         
         if($dty_ID>0){
             

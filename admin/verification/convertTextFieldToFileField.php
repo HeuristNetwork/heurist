@@ -115,13 +115,15 @@ if( $system->verifyActionPassword($_REQUEST['pwd'], $passwordForServerFunctions)
                     .$orig_db_id.' and dty_IDInOriginatingDB='.$orig_id;
         $dty_ID = mysql__select_value($mysqli, $query);
         
+        $dty_ID = intval($dty_ID);
+        
         if($dty_ID>0)
         {
             //switch database
             //mysql__usedatabase($mysqli, $db_name);
             
             //change
-            $query = "update `$db_name`.defDetailTypes set dty_Type='file' where dty_ID=".intval($dty_ID);
+            $query = "update `$db_name`.defDetailTypes set dty_Type='file' where dty_ID=".$dty_ID;
             $mysqli->query($query);
         
             $m = 0;

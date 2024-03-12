@@ -512,6 +512,8 @@ exit;
                 .' and rem_Nonce="'.$mysqli->real_escape_string($this->data['h']).'"';
                     
             $rem_ID = mysql__select_value($mysqli, $query);  
+            $rem_ID = intval($rem_ID);    
+            
             if($rem_ID>0){
                 
                 //@$this->data['e'] || 

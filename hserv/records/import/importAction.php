@@ -1221,6 +1221,7 @@ public static function validateImport($params) {
             }else if($ft_vals[$idx_fieldtype] == "float" ||  $ft_vals[$idx_fieldtype] == "integer") {
 
                 $f_name = $field_name[0]; //@todo for multimapping as for enum
+                $f_name = preg_replace('/[^a-zA-Z0-9_]/', "", $f_name);  //for snyk
                 
                 array_push($query_num, $f_name);
                 array_push($query_num_where, "(NOT($f_name is null or $f_name='' or $f_name='NULL') and NOT($f_name REGEXP ".$numeric_regex."))");
@@ -1230,7 +1231,6 @@ public static function validateImport($params) {
             }else if($ft_vals[$idx_fieldtype] == "date" ||  $ft_vals[$idx_fieldtype] == "year") {
 
                 $f_name = $field_name[0]; //@todo for multimapping as for enum
-                
                 $f_name = preg_replace('/[^a-zA-Z0-9_]/', "", $f_name);  //for snyk
                 
                 array_push($query_date, $f_name);

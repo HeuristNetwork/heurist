@@ -931,8 +931,8 @@ function do_fix_dupe()
         $new_title = TitleMask::execute($mask, $master_rectype_id, 0, $master_rec_id);
         
         if ($new_title!=null) {
-            $mysqli->query("update Records set rec_Title = '" . $mysqli->real_escape_string($new_title) . "' where rec_ID = ".
-                intval($master_rec_id));
+            $query = 'update Records set rec_Title=? where rec_ID=?';
+            mysql__exec_param_query($mysqli, $query, array('si',$new_title, $master_rec_id));
         }
     }
     //reload with flag that operation is completed

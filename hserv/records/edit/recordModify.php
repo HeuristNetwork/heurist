@@ -3129,9 +3129,9 @@ function recordDuplicate($system, $id){
 
             if($res && @$res['status']==HEURIST_OK){
 
-                $new_rel_recid = @$res['data']['added'];
+                $new_rel_recid = intval(@$res['data']['added']);
 
-                if($new_rel_recid){
+                if($new_rel_recid>0){
 
                     //change reference to old record id to new one
                     $query = 'UPDATE recDetails set dtl_Value='.$new_id
