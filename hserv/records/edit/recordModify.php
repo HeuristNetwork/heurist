@@ -2747,7 +2747,7 @@ $dtl_Value = preg_replace('#<([A-Z][A-Z0-9]*)\s*(?:(?:(?:(?!'.$allowed2.')[^>]))
                     //note geoType can be not defined - detect it from dtl_Geo
                     list($dtl_Value, $dtl_Geo) = prepareGeoValue($mysqli, $dtl_Value);
                     if($dtl_Value===false){
-                        $err_msg = $geoValue; 
+                        $err_msg = $dtl_Geo; 
                         $isValid = ($validation_mode==0)?'ignore':false;
                         if(!$isValid && $modeImport == 1){
                             $dval['dtl_Value'] = $values[$eltID];
