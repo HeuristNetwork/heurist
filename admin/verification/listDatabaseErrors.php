@@ -1731,14 +1731,12 @@ if($active_all || in_array('expected_terms', $active)) {
                         <h3 style="padding-left:2px">Records with terms not in the list of terms specified for the field</h3>
                         <span><a target=_new href="javascript:void(0)" onclick="{document.getElementById('link_wrongterms').click(); return false;}">(show results as search)</a></span>
                         <table role="presentation">
-                        <thead>
                         <tr>
-                            <th style="width: 30px;text-align:left">Record</th>
-                            <th style="width: 45ex;text-align:left;">Field</th>
-                            <th style="width: 25ex;">Term</th>
-                            <th>Record title</th>
+                            <td style="width: 30px;text-align:left">Record</td>
+                            <td style="width: 45ex;text-align:left;">Field</td>
+                            <td style="width: 25ex;">Term</td>
+                            <td>Record title</td>
                         </tr>
-                        </thead><tbody>
                         <?php
                     }
                     ?>
@@ -1772,7 +1770,7 @@ if($active_all || in_array('expected_terms', $active)) {
                 print '<h3 class="res-valid">OK: All records have valid terms (terms are as specified for each field)</h3>';
                 echo '<script>$(".expected_terms").css("background-color", "#6AA84F");</script>';
             }else{
-                echo '</tbody></table><br>';   
+                echo '</table><br>';   
                 echo '<script>$(".expected_terms").css("background-color", "#E60000");</script>';
                 echo '<span style="font-size:0.9em;"><a target=_new id="link_wrongterms" href='.HEURIST_BASE_URL.'?db='.HEURIST_DBNAME
                 .'&w=all&q=ids:'.implode(',', array_keys($ids)).'>(show results as search)</a></span>';
@@ -1815,14 +1813,11 @@ if($active_all || in_array('expected_terms', $active)) {
 <br>however the same term label exists in the vocabulary specified for the field.
 <br><button onclick="window.open('listDatabaseErrors.php?db=<?= HEURIST_DBNAME?>&fix_samename_terms=1','_self')">Click here to change these terms</button> to the ones in the vocabularies specified for each field,<br>otherwise they can be fixed for each term individually in record editing.</span><br><br>
                         <table role="presentation">
-                        <thead>
                         <tr>
-                            <th style="width: 50px;text-align: left;">Field ID</th>
-                            <th style="width: 45ex;text-align:left;">Field</th>
-                            <th style="width: 25ex;">Term</th>
+                            <td style="width: 50px;text-align: left;">Field ID</td>
+                            <td style="width: 45ex;text-align:left;">Field</td>
+                            <td style="width: 25ex;">Term</td>
                         </tr>
-                        </thead>
-                        <tbody>
 
 <?php                   
                 foreach($same_name_suggestions as $code => $row){
@@ -1835,7 +1830,7 @@ if($active_all || in_array('expected_terms', $active)) {
                         </tr>
 <?php                    
                 }
-                echo '</tbody></table><br>'; 
+                echo '</table><br>'; 
                 echo '<span style="font-size:0.9em;"><a target=_new id="link_wrongterms2" href='.HEURIST_BASE_URL.'?db='.HEURIST_DBNAME
                 .'&w=all&q=ids:'.implode(',', array_keys($ids2)).'>(show results as search)</a></span>';
                     
