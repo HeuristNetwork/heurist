@@ -354,11 +354,11 @@ $reference_bdts = mysql__select_assoc2($mysqli,'select dty_ID, dty_Name from def
                                         $repeatCount = intval($rec_requirements[$record['rec_RecTypeID']][$rd_type]['rst_MaxValues']);
                                         if ($repeatCount==0){
                                             foreach ($detail as $val) {
-                                                print '<div style="word-break: break-word;">'. $val . '</div>';
+                                                print '<div style="word-break: break-word;">'. htmlspecialchars($val) . '</div>';
                                             }
                                         } else{
                                             for ($i = 0; $i < $repeatCount; $i++) {
-                                                print '<div style="word-break: break-word;">'. $detail[$i] . '</div>';
+                                                print '<div style="word-break: break-word;">'. htmlspecialchars($detail[$i]) . '</div>';
                                             }
                                             //FIXME  add code to remove the extra details that are not supposed to be there
                                         }
@@ -388,14 +388,14 @@ $reference_bdts = mysql__select_assoc2($mysqli,'select dty_ID, dty_Name from def
                                     print '</td></tr>';
                                 }
 
-                                $bkmk_count = mysql__select_value($mysqli,
-                                    'select count(distinct bkm_ID) from usrBookmarks where bkm_RecID='.$record['rec_ID']);
+                                $bkmk_count = intval(mysql__select_value($mysqli,
+                                    'select count(distinct bkm_ID) from usrBookmarks where bkm_RecID='.$record['rec_ID']));
                                     
                                 if ($bkmk_count>0) print '<tr><td>Bookmarks</td><td>'.$bkmk_count.'</td></tr>';
                                 
-                                $kwd_count = mysql__select_value($mysqli,
+                                $kwd_count = intval(mysql__select_value($mysqli,
                                     'select count(distinct rtl_ID) from usrBookmarks left join usrRecTagLinks '
-                                    .'on rtl_RecID=bkm_recID where bkm_RecID='.$rec_ID.' and rtl_ID is not null');
+                                    .'on rtl_RecID=bkm_recID where bkm_RecID='.$rec_ID.' and rtl_ID is not null'));
                                     
                                 if ($kwd_count>0) print '<tr><td>Tags</td><td>'.$kwd_count.'</td></tr>';
 
@@ -490,14 +490,14 @@ $reference_bdts = mysql__select_assoc2($mysqli,'select dty_ID, dty_Name from def
                                     if (is_array($detail)) {
                                         if ($repeatCount != 1){//repeatable
                                             foreach ($detail as $val) {
-                                                print '<div>'. $val . '</div>';
+                                                print '<div>'. htmlspecialchars($val) . '</div>';
                                             }
                                         } else{
-                                            print '<div>'. $detail[0] . '</div>';
+                                            print '<div>'. htmlspecialchars($detail[0]) . '</div>';
                                             //FIXME  add code to remove the extra details that are not supposed to be there
                                         }
                                     } else{
-                                        print '<div>'. $detail . '</div>';
+                                        print '<div>'. htmlspecialchars($detail) . '</div>';
                                     }
 
                                     print '</td>';
@@ -526,13 +526,13 @@ $reference_bdts = mysql__select_assoc2($mysqli,'select dty_ID, dty_Name from def
                                     print '</td></tr>';
                                 }
 
-                                $bkmk_count = mysql__select_value($mysqli, 
-                                    'select count(distinct bkm_ID) from usrBookmarks where bkm_recID='.$record['rec_ID']);
+                                $bkmk_count = intval(mysql__select_value($mysqli, 
+                                    'select count(distinct bkm_ID) from usrBookmarks where bkm_recID='.$record['rec_ID']));
                                 if ($bkmk_count>0) print '<tr><td>Bookmarks</td><td>'.$bkmk_count.'</td></tr>';
                                 
-                                $kwd_count = mysql__select_value($mysqli, 
+                                $kwd_count = intval(mysql__select_value($mysqli, 
                                     'select count(distinct rtl_ID) from usrBookmarks left join usrRecTagLinks '
-                                    .'on rtl_RecID=bkm_recID where bkm_RecID='.$record['rec_ID'].' and rtl_ID is not null');
+                                    .'on rtl_RecID=bkm_recID where bkm_RecID='.$record['rec_ID'].' and rtl_ID is not null'));
                                 if ($kwd_count>0) print '<tr><td>Tags</td><td>'.$kwd_count.'</td></tr>';
 
                                 

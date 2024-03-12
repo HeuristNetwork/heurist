@@ -1211,10 +1211,10 @@ function __updateDatabases_To_V14($db_process){
 
         //statistics
         $query = 'SELECT count(dtl_ID) FROM recDetails, defDetailTypes  WHERE dtl_DetailTypeID=dty_ID AND dty_Type="date" AND dtl_Value!=""';
-        $cnt_dates = mysql__select_value($mysqli, $query);
+        $cnt_dates = intval(mysql__select_value($mysqli, $query));
 
         $query = 'SELECT count(dtl_ID) FROM recDetails, defDetailTypes  WHERE dtl_DetailTypeID=dty_ID AND dty_Type="date" AND dtl_Value LIKE "|VER=1%"';
-        $cnt_fuzzy_dates = mysql__select_value($mysqli, $query);
+        $cnt_fuzzy_dates = intval(mysql__select_value($mysqli, $query));
         
         $cnt_index = 0;
         $cnt_fuzzy_dates2 = 0;
@@ -1588,15 +1588,15 @@ function __findRDF(){
         
         mysql__usedatabase($mysqli, $db_name);
         
-        $r1 = mysql__select_value($mysqli, 'select count(rty_ID) from defRecTypes');
-        $d1 = mysql__select_value($mysqli, 'select count(dty_ID) from defDetailTypes');
+        $r1 = intval(mysql__select_value($mysqli, 'select count(rty_ID) from defRecTypes'));
+        $d1 = intval(mysql__select_value($mysqli, 'select count(dty_ID) from defDetailTypes'));
         //$s1 = mysql__select_value($mysqli, 'select count(rst_ID) from defRecStructure');
-        $t1 = mysql__select_value($mysqli, 'select count(trm_ID) from defTerms');
+        $t1 = intval(mysql__select_value($mysqli, 'select count(trm_ID) from defTerms'));
         
-        $r2 = mysql__select_value($mysqli, 'select count(rty_ID) from defRecTypes where rty_ReferenceURL!="" and rty_ReferenceURL is not null');
-        $d2 = mysql__select_value($mysqli, 'select count(dty_ID) from defDetailTypes where dty_SemanticReferenceURL!="" and dty_SemanticReferenceURL is not null');
+        $r2 = intval(mysql__select_value($mysqli, 'select count(rty_ID) from defRecTypes where rty_ReferenceURL!="" and rty_ReferenceURL is not null'));
+        $d2 = intval(mysql__select_value($mysqli, 'select count(dty_ID) from defDetailTypes where dty_SemanticReferenceURL!="" and dty_SemanticReferenceURL is not null'));
         //$s2 = mysql__select_value($mysqli, 'select count(rst_ID) from defRecStructure where rst_SemanticReferenceURL!="" and rst_SemanticReferenceURL is not null');
-        $t2 = mysql__select_value($mysqli, 'select count(trm_ID) from defTerms where trm_SemanticReferenceURL!="" and trm_SemanticReferenceURL is not null');
+        $t2 = intval(mysql__select_value($mysqli, 'select count(trm_ID) from defTerms where trm_SemanticReferenceURL!="" and trm_SemanticReferenceURL is not null'));
 
         if($r2>0 && $d2>1){
             if($r2/$r1>0.2 || $d2>50){
@@ -1605,13 +1605,13 @@ function __findRDF(){
                 $s = 'normal';
             }
             
-            $rec_cnt2 = mysql__select_value($mysqli, 'select count(rec_ID) from Records, defRecTypes '
-                .'where rty_ID=rec_RecTypeID and rty_ReferenceURL!=""');
+            $rec_cnt2 = intval(mysql__select_value($mysqli, 'select count(rec_ID) from Records, defRecTypes '
+                .'where rty_ID=rec_RecTypeID and rty_ReferenceURL!=""'));
 
-            $rec_cnt1 = mysql__select_value($mysqli, 'select count(rec_ID) from Records');
+            $rec_cnt1 = intval(mysql__select_value($mysqli, 'select count(rec_ID) from Records'));
                 
-            $dtl_cnt = mysql__select_value($mysqli, 'select count(dtl_ID) from recDetails, defDetailTypes '
-                .'where dty_ID=dtl_DetailTypeID and dty_SemanticReferenceURL!=""');
+            $dtl_cnt = intval(mysql__select_value($mysqli, 'select count(dtl_ID) from recDetails, defDetailTypes '
+                .'where dty_ID=dtl_DetailTypeID and dty_SemanticReferenceURL!=""'));
             
             echo  "<div style='font-weight:$s'>$db_name rty: $r1/$r2&nbsp;&nbsp;&nbsp;dty: $d1/$d2 &nbsp;&nbsp;&nbsp;trm:$t1/$t2 &nbsp;&nbsp;&nbsp;Records:$rec_cnt1/$rec_cnt2 $dtl_cnt</div>";     //$s1/$s2 
         }

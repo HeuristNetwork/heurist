@@ -67,7 +67,7 @@ if(!$is_included){
         $fld_dates = mysql__select_list2($mysqli, $query);
         $fld_dates = implode(',',prepareIds($fld_dates));
         $query = 'SELECT count(dtl_ID) FROM recDetails  WHERE dtl_DetailTypeID in ('.$fld_dates.')'; //' AND dtl_Value!=""';
-        $cnt_dates = mysql__select_value($mysqli, $query);
+        $cnt_dates = intval(mysql__select_value($mysqli, $query));
 
         if($is_upgrade){
             
@@ -89,7 +89,7 @@ Please advise the Heurist team if you think you have a problem after the upgrade
 
 
         print '<div style="padding:5px">Total count of date fields:&nbsp;<b>'.$cnt_dates.'</b></div>';
-        print '<div style="padding:5px">Fuzzy/complex dates:&nbsp;<b>'.$cnt_fuzzy_dates.'</b></div>';
+        print '<div style="padding:5px">Fuzzy/complex dates:&nbsp;<b>'.intval($cnt_fuzzy_dates).'</b></div>';
     
         if($is_upgrade){
 ?>            
@@ -105,10 +105,10 @@ Please advise the Heurist team if you think you have a problem after the upgrade
     
             //count of index 
             $query = 'SELECT count(rdi_DetailID) FROM recDetailsDateIndex';
-            $cnt_index = mysql__select_value($mysqli, $query);
+            $cnt_index = intval(mysql__select_value($mysqli, $query));
 
             $query = 'SELECT count(rdi_DetailID) FROM recDetailsDateIndex WHERE rdi_estMinDate=0 AND rdi_estMaxDate=0';
-            $cnt_empty = mysql__select_value($mysqli, $query);
+            $cnt_empty = intval(mysql__select_value($mysqli, $query));
 
             if($cnt_dates==$cnt_index && $cnt_empty==0){
                 print '<div style="padding:5px">'

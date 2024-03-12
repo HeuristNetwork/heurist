@@ -2241,7 +2241,7 @@ if($active_all || in_array('defgroups', $active)) {
 
             $orphaned_entities = false;
             
-            $cnt = mysql__select_value($mysqli, 'select count(rty_ID) from defRecTypes left join defRecTypeGroups on rty_RecTypeGroupID=rtg_ID WHERE rtg_ID is null');
+            $cnt = intval(mysql__select_value($mysqli, 'select count(rty_ID) from defRecTypes left join defRecTypeGroups on rty_RecTypeGroupID=rtg_ID WHERE rtg_ID is null'));
             if($cnt>0){
                 
                 $orphaned_entities = true;
@@ -2264,7 +2264,7 @@ if($active_all || in_array('defgroups', $active)) {
             }
 
             // fields types =========================
-            $cnt = mysql__select_value($mysqli, 'select count(dty_ID) from defDetailTypes left join defDetailTypeGroups on dty_DetailTypeGroupID=dtg_ID WHERE dtg_ID is null');
+            $cnt = intval(mysql__select_value($mysqli, 'select count(dty_ID) from defDetailTypes left join defDetailTypeGroups on dty_DetailTypeGroupID=dtg_ID WHERE dtg_ID is null'));
             if($cnt>0){
                 
                 $orphaned_entities = true;
@@ -2287,7 +2287,7 @@ if($active_all || in_array('defgroups', $active)) {
             }
 
             // vocabularies =========================
-            $cnt = mysql__select_value($mysqli, 'select count(trm_ID) from defTerms left join defVocabularyGroups on trm_VocabularyGroupID=vcg_ID WHERE trm_ParentTermID is null and vcg_ID is null');
+            $cnt = intval(mysql__select_value($mysqli, 'select count(trm_ID) from defTerms left join defVocabularyGroups on trm_VocabularyGroupID=vcg_ID WHERE trm_ParentTermID is null and vcg_ID is null'));
             if($cnt>0){
                 
                 $orphaned_entities = true;
