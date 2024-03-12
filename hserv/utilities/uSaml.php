@@ -23,7 +23,7 @@
 $saml_script = '/var/simplesamlphp/lib/_autoload.php';
 $is_debug = true;
 if(file_exists($saml_script)){
-    require($saml_script);    
+    require_once $saml_script;    
     $is_debug = false;
 }
 

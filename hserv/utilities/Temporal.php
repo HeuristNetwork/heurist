@@ -91,7 +91,7 @@ class Temporal {
     );
 
 
-    function __construct( $date, $is_for_search=false ) {
+    public function __construct( $date, $is_for_search=false ) {
         $this->setValue($date, $is_for_search);
     }    
 

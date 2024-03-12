@@ -300,7 +300,7 @@ if(!$format) $format='csv';
                 </div>
                 <div class="ent_content" id="divFieldRoles" style="top:6em;bottom:3.5em;padding: 0.2em 0.5em;border: 1px solid lightgray;">
                     
-                    <table class="tbfields" style="font-weight:bold"><thead><tr>
+                    <table class="tbfields" style="font-weight:bold"><caption></caption><thead><tr>
                                 <th style="width:150px">Column</th>
                                 <th style="width:50px">&nbsp;</th>
                                 <th style="width:50px;text-align:center">Heurist<br>Identifier</th>
@@ -389,10 +389,10 @@ if(!$format) $format='csv';
         </div>                    
         </fieldset>
         
-        <img id="img_arrow1" src="../../hclient/assets/blackdot.png" height="2" style="position:absolute;left:0px;width:100px;display:none" >
-        <img id="img_arrow2" src="../../hclient/assets/blackdot.png" width="2"  style="position:absolute;left:0px;height:16px;display:none">
-        <img id="img_arrow3" src="../../hclient/assets/arrow.png" style="position:absolute;left:0px;display:none;z-index:2">        
-        <img id="img_arrow4" src="../../hclient/assets/blackdot.png" width="2" style="position:absolute;left:0px;height:18px;display:none;z-index:2">        
+        <img alt id="img_arrow1" src="../../hclient/assets/blackdot.png" height="2" style="position:absolute;left:0px;width:100px;display:none" >
+        <img alt id="img_arrow2" src="../../hclient/assets/blackdot.png" width="2"  style="position:absolute;left:0px;height:16px;display:none">
+        <img alt id="img_arrow3" src="../../hclient/assets/arrow.png" style="position:absolute;left:0px;display:none;z-index:2">        
+        <img alt id="img_arrow4" src="../../hclient/assets/blackdot.png" width="2" style="position:absolute;left:0px;height:18px;display:none;z-index:2">        
         
         <div style="padding:1em 0 1em 1em;position: absolute;top:145px;width:97%; border:none;background:rgba(151, 244, 128, 0.83);" id="divheader">
             <div style="float:left;font-weight:bold;text-align:center">WORKFLOW<br>instruction below</div>
@@ -530,7 +530,7 @@ if(!$format) $format='csv';
 <!-- end radiogroup setting divs -->     
 
         <div id="divFieldMapping2" class="step4" style="display:none;position:absolute;bottom:31px">
-            <table class="tbresults" style="display:inline-block">
+            <table role="presentation" class="tbresults" style="display:inline-block">
                 <tbody>
                                     <tr>
                                         <th rowspan="3" width="250">
@@ -579,6 +579,7 @@ if(!$format) $format='csv';
    
         
         <table class="tbmain" style="width:99%;position:absolute;bottom:0px;" cellspacing="0" cellpadding="2">
+            <caption></caption>
             <thead><tr> 
                 <th style="width:75px;">Use&nbsp;<br>value</th>
                 <th style="width:75px;">Unique&nbsp;<br>values</th>
@@ -597,8 +598,7 @@ if(!$format) $format='csv';
     </div>
     <!-- CONTENT : MAPPING TABLE COLUMNS TO HEURIST FIELDS  -->
     <div class="ent_content" style="bottom:0;top:339px;padding: 0em 0.5em;" id="divFieldMapping">
-                <table id="tblFieldMapping" class="tbmain" style="width:100%" cellspacing="0" cellpadding="2">
-                    <thead><tr><th></th></tr></thead>
+                <table role="presentation" id="tblFieldMapping" class="tbmain" style="width:100%" cellspacing="0" cellpadding="2">
                     <!-- <thead><tr>
                         <th style="width:75px;">Use&nbsp;<br>value</th>
                         <th width="75px">Unique&nbsp;<br>values</th>

@@ -458,7 +458,7 @@
      * @param boolean $ignoreEmpty Do not add empty directories to the tree
      * @return array
      */
-    function folderTree($dir, $params, $is_system=false)
+    function folderTree($dir, $params)
     {
         if($dir==null){
             $dir = HEURIST_FILESTORE_DIR;
@@ -489,7 +489,7 @@
                 //(@$params['is_system']==true) || 
                 //$params['is_system'] = $is_system;
                 
-                $tree = folderTree($node->getPathname(), $params, $is_system);
+                $tree = folderTree($node->getPathname(), $params);
                 if (!$ignoreEmpty || count($tree)) {
                     
                     if($isFancy){

@@ -28,7 +28,7 @@ class ReportActions {
     protected $system;
     protected $dir; //smarty folder
     
-    function __construct( $_system, $_dir) {
+    public function __construct( $_system, $_dir) {
        global $system; 
        
        if($_system){
@@ -139,7 +139,7 @@ class ReportActions {
     //
     //
     //
-    function getUniqueTemplateName($template_file){
+    private function getUniqueTemplateName($template_file){
 
          
 

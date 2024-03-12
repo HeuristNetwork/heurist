@@ -273,7 +273,7 @@ if(@$isDatabaseStructure == 1){
 -->
 <div id="iframeDiv">
     <button id="closeButton" onclick="hideNodeInformation()">X</button>
-    <iframe id="iframeInfo"></iframe>
+    <iframe title id="iframeInfo"></iframe>
 </div>
 
 <?php

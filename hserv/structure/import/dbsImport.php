@@ -78,7 +78,7 @@ class DbsImport {
     private $translations_report;
 
     //  $data = 
-    function __construct( $system ) {
+    public function __construct( $system ) {
         $this->system = $system;
     }
 
@@ -1727,9 +1727,9 @@ $mysqli->commit();
                 if($parent_id==null){
                     //for vocabularies
                     $term_import[$idx_code] = $this->targetTerms->doDisambiguateTerms($term_import[$idx_code], 
-                                                            null, $domain, $idx_code);
+                                                            $idx_code);
                     $term_import[$idx_label] = $this->targetTerms->doDisambiguateTerms($term_import[$idx_label],
-                                                            null, $domain, $idx_label);
+                                                            $idx_label);
                     
                     if(@$term_import[$idx_vocab_group_id]>0 && @$this->vcg_correspondence[$term_import[$idx_vocab_group_id]]>0){
                         $term_import[$idx_vocab_group_id] = $this->vcg_correspondence[$term_import[$idx_vocab_group_id]];

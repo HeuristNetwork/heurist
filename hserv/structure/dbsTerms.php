@@ -52,7 +52,7 @@ class DbsTerms
     //
     // constructor - load configuration from json file
     //    
-    function __construct( $system, $data ) {
+    public function __construct( $system, $data ) {
        $this->system = $system;
        $this->data = $data;
     }
@@ -458,7 +458,7 @@ class DbsTerms
     // $idx - field index to check
     // return new term name with index
     //
-    public function doDisambiguateTerms($term_import, $lvl_src, $domain, $idx){
+    public function doDisambiguateTerms($term_import, $idx){
 
         if(!$term_import || $term_import=="") return $term_import;
 

@@ -113,7 +113,7 @@ render: function() {
 		a.appendChild(i);
 	}
 	else
-	a.innerHTML = '<img src="'+ Heurist.uriBase +'hclient/assets/branding/h4logo16.png">';
+	a.innerHTML = '<img alt src="'+ Heurist.uriBase +'hclient/assets/branding/h4logo16.png">';
 	a.className='imglnk';
 	hdr.appendChild(a);
 	s = document.createTextNode('Heurist bookmarklet');

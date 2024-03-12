@@ -1161,7 +1161,7 @@ function save_report_into_file($tpl_source){
                 Javascript wrap:<br>
                 <textarea readonly style="border: 1px dotted gray; padding: 3px; margin: 2px; font-family: times; font-size: 10px;"
                     id="code-textbox2" onClick="select(); if (window.clipboardData) clipboardData.setData('Text', value);" rows="5" cols="150">
-                    <script type="text/javascript" src="<?php echo $surl;?>&mode=js"></script><noscript><iframe width="80%" height="70%" frameborder="0" src="<?php echo $surl;?>"></iframe></noscript>
+                    <script type="text/javascript" src="<?php echo $surl;?>&mode=js"></script><noscript><iframe title width="80%" height="70%" frameborder="0" src="<?php echo $surl;?>"></iframe></noscript>
                 </textarea>
                 <?php
                 echo "</p></body></html>";

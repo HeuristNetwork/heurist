@@ -54,7 +54,7 @@ class ReportRecord {
     
        protected $translations; //cache for translated db definitions (terms,...)
     
-    function __construct() {
+    public function __construct() {
        global $system; 
        
        $this->system = $system;

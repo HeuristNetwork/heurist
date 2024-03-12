@@ -60,7 +60,7 @@ class UploadHandler
     
     protected $image_objects = array();
 
-    function __construct($options = null, $initialize = true, $error_messages = null) {
+    public function __construct($options = null, $initialize = true, $error_messages = null) {
 	
         //ARTEM - take upload folder from request
         //$upload_thumb_dir = @$_REQUEST['upload_thumb_dir'];
@@ -512,7 +512,7 @@ $siz = USystem::getConfigBytes('upload_max_filesize');
             $this->error_messages[$error] : $error;
     }
 
-    function get_config_bytes($val) {
+    private function get_config_bytes($val) {
         $val = trim($val);
         $last = strtolower($val[strlen($val)-1]);
         if($last=='g' || $last=='m' || $last=='k'){
