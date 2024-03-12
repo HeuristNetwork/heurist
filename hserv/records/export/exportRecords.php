@@ -65,7 +65,7 @@ abstract class ExportRecords {
 //
 //
 //  
-function __construct( $system ) {
+public function __construct( $system ) {
     $this->setSession($system);
 }  
     

@@ -546,7 +546,7 @@
                     $sp = $_REQUEST['saml_entity'];
                     
                     //check saml session
-                    require (dirname(__FILE__).'/../utilities/utils_saml.php');
+                    require_once dirname(__FILE__).'/../utilities/utils_saml.php';
                     
                     $username = samlLogin($system, $sp, $system->dbname(), false);
                     

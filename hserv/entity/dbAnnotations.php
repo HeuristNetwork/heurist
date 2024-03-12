@@ -28,7 +28,7 @@ class DbAnnotations extends DbEntityBase
     private $dty_Annotation_Info;
     
     
-    function __construct( $system, $data ) {
+    public function __construct( $system, $data ) {
         $this->system = $system;
         $this->data = $data;
         $this->system->defineConstant('RT_ANNOTATION');

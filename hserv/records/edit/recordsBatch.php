@@ -99,7 +99,7 @@ class RecordsBatch
     private $not_putify = null; //fields that will not html purified
     private $purifier = null;   //html purifier instance
     
-    function __construct( $system, $data ) {
+    public function __construct( $system, $data ) {
        $this->system = $system;
        $this->data = $data;
        
@@ -135,7 +135,7 @@ class RecordsBatch
     //
     //
     //
-    function  setData($data){
+    public function setData($data){
         $this->data = $data;    
     }
     

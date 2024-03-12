@@ -85,7 +85,7 @@ class DbEntityBase
     //
     // constructor - loads configuration from json file
     //    
-    function __construct( $system, $data ) {
+    public function __construct( $system, $data ) {
        $this->system = $system;
        $this->data = $data;
        $this->_readConfig();    

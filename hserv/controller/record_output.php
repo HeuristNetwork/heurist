@@ -282,7 +282,7 @@
             spl_autoload_register(function ($class) {
                 $file = dirname(__FILE__).'/../records/export/'.$class.'.php';
                 if (file_exists($file)) {
-                    require $file;
+                    require_once $file;
                     return true;
                 }
                 return false;

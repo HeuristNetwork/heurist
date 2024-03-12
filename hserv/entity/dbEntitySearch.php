@@ -32,7 +32,7 @@ class DbEntitySearch
     //structure
     private $fields = array();
     
-    function __construct( $system, $fields ) {
+    public function __construct( $system, $fields ) {
        $this->system = $system;
        $this->fields = $fields;
     }

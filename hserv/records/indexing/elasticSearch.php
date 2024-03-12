@@ -258,7 +258,7 @@ class ElasticSearch {
     * @param int $recTypeID   The record type to rebuild for
     * @return bool True if successful
     */
-    function buildIndexForRectype ($dbName, $recTypeID) {
+    public function buildIndexForRectype ($dbName, $recTypeID) {
         if(isElasticUp()) {
             
             self::initialize();                        

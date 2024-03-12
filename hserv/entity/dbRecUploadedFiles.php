@@ -43,7 +43,7 @@ class DbRecUploadedFiles extends DbEntityBase
     //
     // constructor - load configuration from json file
     //    
-    function __construct( $system, $data ) {
+    public function __construct( $system, $data ) {
         
        if($data==null){
            $data = array();

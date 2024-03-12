@@ -290,6 +290,12 @@ $.widget( "heurist.resultListMenu", {
         
             this['menu_'+name] = $('<ul>')                               //add to avoid cache in devtime '?t='+(new Date().getTime())
             .load(window.hWin.HAPI4.baseURL+'hclient/widgets/viewers/resultListMenu'+name+'.html', function(){  
+                
+                let content = that['menu_'+name].find('ul');
+                if(content.length>0){
+                    that['menu_'+name].html(content.html());
+                }
+                
                 that['menu_'+name].addClass('menu-or-popup')
                 .css('position','absolute')
                 .appendTo( that.document.find('body') )

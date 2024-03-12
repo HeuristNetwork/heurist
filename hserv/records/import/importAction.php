@@ -1644,7 +1644,8 @@ private static function getWrongRecords($query, $imp_session, $message, $short_m
 
     $mysqli = self::$mysqli;
 
-    $res = $mysqli->query($query.((true || $type='error')?'':' LIMIT 5000')); //check all if its critical
+    //.((true || $type='error')?'':' LIMIT 5000')
+    $res = $mysqli->query($query); //check all if its critical
     if($res){
         $wrong_records = array();
         $wrong_records_ids = array();
