@@ -1227,10 +1227,10 @@ function __updateDatabases_To_V14($db_process){
         
         if($ver['sys_dbSubSubVersion']>12){
             $query = 'SELECT count(rdi_DetailID) FROM recDetailsDateIndex';
-            $cnt_index = mysql__select_value($mysqli, $query);
+            $cnt_index = intval(mysql__select_value($mysqli, $query));
 
             $query = 'SELECT count(dtl_ID) FROM recDetails, defDetailTypes  WHERE dtl_DetailTypeID=dty_ID AND dty_Type="date" AND dtl_Value LIKE "%estMinDate%"';
-            $cnt_fuzzy_dates2 = mysql__select_value($mysqli, $query);
+            $cnt_fuzzy_dates2 = intval(mysql__select_value($mysqli, $query));
             
             print '<br>'.htmlspecialchars($db_name).'  v.'.$ver['sys_dbSubSubVersion'].'  '.$cnt_dates
                 .($cnt_dates<>$cnt_index?'<span style="color:red">':'<span>')

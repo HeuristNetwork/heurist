@@ -131,7 +131,7 @@ if(! $system->init(@$_REQUEST['db'], true) ){
                 {
                     echo $row[0]."  ".$row[1]."  ".$row[3]."<br>";
 
-                    $query2 =  "SELECT AEntTypeID, AttributeID, AEntDescription, IsIdentifier, MinCardinality, MaxCardinality FROM IdealAEnt where AEntTypeID=".$row[0];
+                    $query2 =  "SELECT AEntTypeID, AttributeID, AEntDescription, IsIdentifier, MinCardinality, MaxCardinality FROM IdealAEnt where AEntTypeID=".intval($row[0]);
                     foreach ($dbfaims->query($query2) as $row2)
                     {
                         echo "<div style='padding-left:30px'>".$row2[1]."  ".$row2[2]."</div>";
@@ -153,7 +153,7 @@ if(! $system->init(@$_REQUEST['db'], true) ){
                 {
                     echo $row[0]."  ".$row[1]."  ".$row[4]."<br>";
 
-                    $query2 =  "SELECT * FROM AEntValue where uuid=".$row[0]." and VersionNum=".$row[7];
+                    $query2 =  "SELECT * FROM AEntValue where uuid=".intval($row[0])." and VersionNum=".intval($row[7]);
                     foreach ($dbfaims->query($query2) as $row2)
                     {
                         echo "<div style='padding-left:30px'>".$row2[3]."  ".$row2[5]."  ".$row2[2]."</div>";

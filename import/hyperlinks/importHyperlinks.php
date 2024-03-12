@@ -434,6 +434,7 @@ hyperlinks of interest).</p>
 */
 		
         $word_limit = mysql__select_value($mysqli, 'select ugr_MinHyperlinkWords from sysUGrps where ugr_ID = '.$system->get_user_id());
+        $word_limit = intval($word_limit);
 ?>
 <h2 style="padding-left: 20px;">Import Hyperlinks</h2>
 <p style="padding-left: 20px;">

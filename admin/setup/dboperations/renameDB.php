@@ -336,7 +336,7 @@ function updateRegDetails($mysqli, $regID, $new_db_name, $new_dbname_full){
             echo '<p class="ui-state-error">'
                 .'Unable to connect Heurist master index, possibly due to timeout or proxy setting<br><br>'
                 . $error_code . '<br>'
-                ."URL requested: $reg_url</p><br>";
+                ."URL requested: ".htmlspecialchars($reg_url)."</p><br>";
             return false;
         }
     }

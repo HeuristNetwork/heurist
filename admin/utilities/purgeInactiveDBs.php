@@ -487,7 +487,7 @@ if($need_email){
         }//sif list
         
         if(ALLOW_ARCHIVE_SYSARCHIVE){ //alow archive sysArchive
-        $arc_count = mysql__select_value($mysqli, 'SELECT count(arc_ID) FROM sysArchive'); //sif_TempDataTable, 
+        $arc_count = intval(mysql__select_value($mysqli, 'SELECT count(arc_ID) FROM sysArchive')); //sif_TempDataTable, 
         if($arc_count>50000){
             
             if($arg_no_action){
