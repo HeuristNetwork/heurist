@@ -570,10 +570,21 @@ class DbDefTerms extends DbEntityBase
                     
                     $thumb_file_name = @$record['trm_Thumb'];
                     //rename it to recID.png
-                    if($thumb_file_name){
+                    if($thumb_file_name == 'delete'){
+
+                        $thumb = parent::getEntityImagePath($trm_ID, 'thumb', HEURIST_DBNAME, 'png');
+                        $icon = parent::getEntityImagePath($trm_ID, 'icon', HEURIST_DBNAME, 'png');
+
+                        if(!empty($thumb) && file_exists($thumb)){
+                            unlink($thumb);
+                        }
+                        if(!empty($icon) && file_exists($icon)){
+                            unlink($icon);
+                        }
+
+                    }elseif($thumb_file_name){
                         parent::renameEntityImage($thumb_file_name, $record['trm_ID']);
                     }
-                    
                     
                     $inverse_termid = @$record['trm_InverseTermId'];
                     $inverse_termid_old = @$record['old_inverse_id'];

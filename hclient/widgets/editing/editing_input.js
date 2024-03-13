@@ -4048,7 +4048,25 @@ $.widget( "heurist.editing_input", {
                         if(that.is_disabled) return;
                         
                         //if empty
-                        if(that.getValues()[0] == '') return;
+                        if(that.getValues()[0] == '') { 
+
+                            let delete_images = that.configMode && that.configMode.entity == 'defTerms' && that.input_img && // only for defTerms for now
+                                                    !window.hWin.HEURIST4.util.isempty(that.input_img.find('img').attr('src'));
+                            if($(that.inputs[0]).fileupload('instance') !== undefined && delete_images){
+
+                                // Check there is an image to delete
+                                window.hWin.HAPI4.checkImage(that.configMode.entity, that.options.recID, 'thumb', function(response){
+                                    if(response.data=='ok'){
+                                        that.newvalues[$input.attr('id')] = 'delete'; // tell php script to delete image files
+                                        that.input_img.find('img').attr('src', ''); // remove from field input
+        
+                                        that.onChange(); // trigger modified flag
+                                    }
+                                });
+                            }
+
+                            return;
+                        }
 
                         var input_id = $(e.target).attr('data-input-id');  //parent(). need if button
                         
