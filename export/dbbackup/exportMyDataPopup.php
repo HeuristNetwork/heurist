@@ -610,7 +610,7 @@ if($mode>1){
                                 $params['status'] = 'pending'; // keep new record private, so it can be deleted
                                 $params['return_type'] = 'editor'; // return link to private record, will require login
         
-                                $rtn = uploadFileToNakala($system, $params);
+                                $rtn = uploadFileToNakala($system, $params); //upload database archive
         
                                 if($rtn === false){
                                     $rtn = $system->getError()['message'];

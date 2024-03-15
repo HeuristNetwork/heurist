@@ -1431,10 +1431,11 @@ window.hWin.HAPI4.baseURL+'?db=' + window.hWin.HAPI4.database  //(needplayer?'&p
 
                         $.each(data['types'], (idx, type) => {
                             window.hWin.HEURIST4.ui.addoption($select[0], type[1], type[0]);
-
+/* Artem 2024-03-13  label not defined
                             if(that._last_upload_details[0].type.indexOf(label.toLowerCase()) !== -1){
                                 selected_type = code;
                             }
+*/                            
                         });
                         window.hWin.HEURIST4.ui.initHSelect($select, false);
                         can_assign ++;

@@ -675,7 +675,7 @@
                 
                 $res = recognizeMimeTypeFromURL($mysqli, $url, false);
                 
-            }else if($action == 'upload_file_nakala'){
+            }else if($action == 'upload_file_nakala'){ //@todo - move to separate controller
 
                 // Prepare parameters
                 $params = array();
@@ -769,7 +769,7 @@
                 $params['status'] = 'published'; // publish uploaded file, return url to newly uploaded file on Nakala
 
                 // Upload file
-                $res = uploadFileToNakala($system, $params);
+                $res = uploadFileToNakala($system, $params); //from record edit - define file field
 
                 if($res !== false){
                     // delete local file after upload

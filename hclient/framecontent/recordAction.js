@@ -409,7 +409,7 @@ function hRecordAction(_action_type, _scope_type, _field_type, _field_value) {
                 +'<div class="heurist-helper1 style="padding: 0.2em 0px;">Looks for existing uploaded files based solely on name, and uses these rather than fetching a new copy. This will produce unwanted results if the names are re-used eg. in different folders.'
                 +'</div></div>').appendTo($fieldset);            
             
-        }else if(action_type=='local_to_repository'){
+        }else if(action_type=='local_to_repository'){ //upload local file to external repository (Nakala)
 
             $('<div style="padding: 0.2em; width: 100%;" class="input">'
                 + '<div class="header" style="padding-right: 16px;"><label for="sel_repository">Repository</label></div>'
