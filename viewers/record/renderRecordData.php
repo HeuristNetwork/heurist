@@ -1725,7 +1725,7 @@ function print_public_details($bib) {
 
                 if(!($bd['dtl_UploadedFileID']>0)){
                      // FIX on fly - @todo  remove on 2022-08-22
-                     $ruf_entity = new DbRecUploadedFiles($system, array('entity'=>'recUploadedFiles'));
+                     $ruf_entity = new DbRecUploadedFiles($system);
                      $fileinfo = $ruf_entity->registerURL($bd['val'], false, $bd['dtl_ID']);
                 }else{
                     $listpaths = fileGetFullInfo($system, $bd['dtl_UploadedFileID']); //see recordFile.php

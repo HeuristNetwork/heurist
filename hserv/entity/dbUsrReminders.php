@@ -28,7 +28,7 @@ require_once dirname(__FILE__).'/../utilities/uMail.php';
 class DbUsrReminders extends DbEntityBase
 {
     
- public function __construct( $system, $data ) {
+ public function __construct( $system, $data=null ) {
         
        if($data==null){
            $data = array();

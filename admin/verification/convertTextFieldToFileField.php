@@ -100,7 +100,7 @@ if( $system->verifyActionPassword($_REQUEST['pwd'], $passwordForServerFunctions)
     print '<div>';
     $k = 1;
     
-    //$entity = new DbRecUploadedFiles($system, array('entity'=>'recUploadedFiles'));
+    //$entity = new DbRecUploadedFiles($system);
     
     foreach ($databases as $idx=>$db_name){
         

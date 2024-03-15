@@ -560,7 +560,7 @@ public static function saveMapDocumentSnapShot($rec_ID, $tlcmapshot){
         //$mysqli = self::$system->get_mysqli();           
 
         //2. save encoded image as file and register it
-        $entity = new DbRecUploadedFiles(self::$system, null);
+        $entity = new DbRecUploadedFiles(self::$system);
         $ulf_ID = $entity->registerImage($tlcmapshot, 'map_snapshot_'.$rec_ID); //it returns ulf_ID
         if( is_bool($ulf_ID) && !$ulf_ID ){
             return false;
@@ -793,7 +793,7 @@ EOD;
         $def_rst  = $defs['rectypes']['typedefs'];
         $idx_parent = $def_rst['dtFieldNamesToIndex']['rst_CreateChildIfRecPtr'];
         
-        $file_entity = new DbRecUploadedFiles(self::$system, null);
+        $file_entity = new DbRecUploadedFiles(self::$system);
         $file_entity->setNeedTransaction(false);
         
         $records = $data['heurist']['records']; //records to be imported

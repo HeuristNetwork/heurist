@@ -30,10 +30,12 @@ class DbUsrRecPermissions extends DbEntityBase
     private $is_table_exists = false; 
     
     public function init(){
+    
+        $mysqli = $this->system->get_mysqli();
+        
+        $this->is_table_exists = hasTable($mysqli, 'sysImportFiles');
         
         if(!$this->is_table_exists){
-        
-            $mysqli = $this->system->get_mysqli();
         
             $query = 'CREATE TABLE IF NOT EXISTS `usrRecPermissions` ('
               ."`rcp_ID` int(10) unsigned NOT NULL auto_increment COMMENT 'Primary table key',"
@@ -52,7 +54,6 @@ class DbUsrRecPermissions extends DbEntityBase
         
             $query = 'DROP INDEX IF EXISTS rcp_composite_key ON usrRecPermissions';
             $res = $mysqli->query($query);
-        
         }
         
     }

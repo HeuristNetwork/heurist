@@ -1549,7 +1549,7 @@ class RecordsBatch
         //5. If download - register new file
         //6. Replace ulf_ID in dtl_UploadedFileID
 
-        $file_entity = new DbRecUploadedFiles($this->system, null);
+        $file_entity = new DbRecUploadedFiles($this->system);
         
         //1. find external urls for field values
         $query = 'SELECT dtl_ID, ulf_ID, ulf_ExternalFileReference, dtl_RecID FROM recUploadedFiles, recDetails '
@@ -2538,6 +2538,8 @@ public methods
 
     /**
      * Upload file to an external repository
+     * 1. Find files linked to given set of records
+     * 2. Create metadata
      */
     public function uploadFileToRepository(){
 
@@ -2559,7 +2561,7 @@ public methods
         $uploadError = array();
         $failed_ids = array();
 
-        $file_entity = new DbRecUploadedFiles($this->system, array('entity'=>'recUploadedFiles'));
+        $file_entity = new DbRecUploadedFiles($this->system);
         
         // Find relevant local files
         $query = 'SELECT dtl_ID, ulf_ID, dtl_RecID '
@@ -2658,7 +2660,10 @@ public methods
                         continue;
                     }
 
-                    $file = array('path' => $file_path, 'type' => $file_dtl[2], 'name' => $file_dtl[0], 'description' => $file_dtl[3]);
+                    $file = array('path' => $file_path, 
+                                  'type' => $file_dtl[2], 
+                                  'name' => $file_dtl[0], 
+                                  'description' => $file_dtl[3]);
 
                     $meta_values['title'] = array(
                         'value' => $file_dtl[0],
@@ -2711,10 +2716,12 @@ public methods
                         'propertyUri' => 'http://nakala.fr/terms#created'
                     );
 
-                    $rtn = uploadFileToNakala($this->system, array('api_key' => $api_key, 'file' => $file, 'meta' => $meta_values, 'status' => 'published')); // pending | published
+                    $rtn = uploadFileToNakala($this->system,   //upload in batch
+                        array('api_key' => $api_key, 'file' => $file, 
+                              'meta' => $meta_values, 'status' => 'published')); // pending | published
 
                     if($rtn){ // register URL ($rtn)
-                        $file_entity->setRecords(null); // reset records
+                        //$file_entity->setRecords(null); // reset records
                         $new_ulf_ID = $file_entity->registerURL($rtn); // register nakala url
                         if(!is_numeric($new_ulf_ID) || $new_ulf_ID > 0){
                             $sqlErrors[$row[2]][] = 'File #' . $row[1] . ' &Rightarrow; ' . $mysqli->error;

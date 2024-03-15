@@ -2758,7 +2758,7 @@ function recordSearch($system, $params, $relation_query=null)
                                 // FIX on fly - @todo  remove on 2022-08-22
                                 if( (!($row[3]>0)) && in_array($dtyID,$file_field_types) ){
                                     if($ruf_entity==null){
-                                        $ruf_entity = new DbRecUploadedFiles($system, null);
+                                        $ruf_entity = new DbRecUploadedFiles($system);
                                     }
                                     $fileinfo = $ruf_entity->registerURL($row[1], false, $dtl_ID);
                                     
@@ -3369,7 +3369,7 @@ function recordSearchDetails($system, &$record, $detail_types) {
                     if(!($rd['dtl_UploadedFileID']>0)){
                          // FIX on fly - @todo  remove on 2022-08-22
                          if($ruf_entity==null){
-                            $ruf_entity = new DbRecUploadedFiles($system, null);
+                            $ruf_entity = new DbRecUploadedFiles($system);
                          }
                          $fileinfo = $ruf_entity->registerURL($rd['dtl_Value'], false, $rd['dtl_ID']);
                     }else{

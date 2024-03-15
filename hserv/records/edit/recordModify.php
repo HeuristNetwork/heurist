@@ -2686,7 +2686,7 @@ $dtl_Value = preg_replace('#<([A-Z][A-Z0-9]*)\s*(?:(?:(?:(?!'.$allowed2.')[^>]))
                         if(!is_a($tmp_file,'stdClass')){
                             $err_msg = is_array($tmp_file) ?$tmp_file['error'] :('System message: '.$tmp_file);
                         }else{
-                            $entity = new DbRecUploadedFiles($system, null);
+                            $entity = new DbRecUploadedFiles($system);
 
                             $dtl_UploadedFileID = $entity->registerFile($tmp_file, null); //it returns ulf_ID
 
@@ -2717,7 +2717,7 @@ $dtl_Value = preg_replace('#<([A-Z][A-Z0-9]*)\s*(?:(?:(?:(?!'.$allowed2.')[^>]))
                     }else if(is_string($dtl_Value)){  //this is base64 encoded image
 
                         //save encoded image as file and register it
-                        $entity = new DbRecUploadedFiles($system, null);
+                        $entity = new DbRecUploadedFiles($system);
                         $dtl_UploadedFileID = $entity->registerImage($dtl_Value, 'map_snapshot_'.$recID); //it returns ulf_ID
                         if( is_bool($dtl_UploadedFileID) && !$dtl_UploadedFileID ){
                             $dtl_UploadedFileID = -1; //fail

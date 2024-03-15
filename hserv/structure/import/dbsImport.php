@@ -974,7 +974,7 @@ TitleMask::set_fields_correspondence(null);
 // VII. Import calculated fields
 if(is_array($cfn_tobeimported) && count($cfn_tobeimported)>0){
 
-$cfn_entity = new DbDefCalcFunctions($this->system, array('entity'=>'defCalcFunctions'));
+$cfn_entity = new DbDefCalcFunctions($this->system);
 
 $repAction = new ReportActions($this->system, null);
 
@@ -1035,7 +1035,7 @@ foreach($cfn_tobeimported as $cfn_ID => $rty_IDs){ //$rty_IDs $rty_ID=>$dty_ID
             $cfn_values = array('entity'=>'defCalcFunctions', 'fields'=>$cfn_values);
             
             $cfn_entity->setData($cfn_values);
-            $cfn_entity->setRecords(null); //reset
+            //$cfn_entity->setRecords(null); //reset
             $new_cfn_ID = $cfn_entity->save();   //register remote url - it returns ulf_ID
             if(is_array($new_cfn_ID)) $new_cfn_ID = $new_cfn_ID[0];
             

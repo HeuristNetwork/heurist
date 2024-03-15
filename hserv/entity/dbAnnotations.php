@@ -28,7 +28,7 @@ class DbAnnotations extends DbEntityBase
     private $dty_Annotation_Info;
     
     
-    public function __construct( $system, $data ) {
+    public function __construct( $system, $data=null ) {
         $this->system = $system;
         $this->data = $data;
         $this->system->defineConstant('RT_ANNOTATION');
@@ -45,7 +45,6 @@ class DbAnnotations extends DbEntityBase
                 ? DT_ANNOTATION_INFO
                 : 0; 
 
-        $this->init();
     }
 
     public function isvalid(){
@@ -332,7 +331,7 @@ class DbAnnotations extends DbEntityBase
                                 $res = saveURLasFile($url, $tmp_file);
 
                                 if($res>0){
-                                    $entity = new DbRecUploadedFiles($this->system, null);
+                                    $entity = new DbRecUploadedFiles($this->system);
 
                                     $dtl_UploadedFileID = $entity->registerFile($tmp_file, null); //it returns ulf_ID
 

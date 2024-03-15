@@ -2950,7 +2950,7 @@ public static function performImport($params, $mode_output){
                                 }else if($is_url) {
                                     //otherwise register as new external resource
                                     
-                                    $entity = new DbRecUploadedFiles(self::$system, null);
+                                    $entity = new DbRecUploadedFiles(self::$system);
                                     
                                     $ulf_ID = $entity->registerURL( $r_value );    
                                     

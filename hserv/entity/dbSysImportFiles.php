@@ -33,6 +33,10 @@ class DbSysImportFiles extends DbEntityBase
     public function init(){
         
         $mysqli = $this->system->get_mysqli();
+        
+        $this->is_table_exists = hasTable($mysqli, 'sysImportFiles');
+        
+        if(!$this->is_table_exists){
 
     $query = "CREATE TABLE IF NOT EXISTS `sysImportFiles` (
     `sif_ID` int(11) unsigned NOT NULL auto_increment
@@ -46,6 +50,8 @@ class DbSysImportFiles extends DbEntityBase
     
         if (!$mysqli->query($query)) {
             $this->is_table_exists = false;
+        }
+        
         }
         
     }

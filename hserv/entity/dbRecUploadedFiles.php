@@ -43,15 +43,8 @@ class DbRecUploadedFiles extends DbEntityBase
     //
     // constructor - load configuration from json file
     //    
-    public function __construct( $system, $data ) {
-        
-       if($data==null){
-           $data = array();
-       } 
-       if(!@$data['entity']){
-           $data['entity'] = 'recUploadedFiles';
-       }
-        
+    public function __construct( $system, $data=null ) {
+
        parent::__construct( $system, $data );
        
        $this->error_ext = 'Error inserting file metadata or unable to recognise uploaded file format. '
