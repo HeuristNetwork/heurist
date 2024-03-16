@@ -697,7 +697,7 @@ abstract class DbEntityBase
     //
     protected function _validateValues(){
         
-        $fieldvalues = $this->data['fields'];
+        $fieldvalues = $this->data['fields'];  //current record
         
         foreach($this->fields as $fieldname=>$field_config){
             if(@$field_config['dty_Role']=='virtual') continue;

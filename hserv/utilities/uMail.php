@@ -87,7 +87,7 @@ use PHPMailer\PHPMailer\Exception;
             $email_address = filter_var($email_address, FILTER_SANITIZE_EMAIL);
             if(!filter_var($email_address, FILTER_VALIDATE_EMAIL)){
 
-                $problem = is_empty($email_address) ? "is not defined" : "$email_address is invalid";
+                $problem = (($email_address==null) || (trim($email_address)==='')) ? "is not defined" : "$email_address is invalid";
 
                 $system->addError(HEURIST_ACTION_BLOCKED, 
                         "Cannot send email. Recipient email address $problem.");
@@ -130,7 +130,7 @@ use PHPMailer\PHPMailer\Exception;
 
         if(!filter_var($email_to, FILTER_VALIDATE_EMAIL)){
 
-            $problem = is_empty($email_to) ? "is not defined" : "$email_to is invalid";
+            $problem = (($email_to==null) || (trim($email_to)==='')) ? "is not defined" : "$email_to is invalid";
             $res = "Mail send failed. Recipient email address $problem.";
         }else if(!$email_text){
             $res = "Mail send failed. Message text is not defined.";

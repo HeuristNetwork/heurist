@@ -331,7 +331,7 @@ class DbRecUploadedFiles extends DbEntityBase
         
         if($ret){
             
-            $fieldvalues = $this->data['fields'];
+            $fieldvalues = $this->data['fields']; //current record
             
             /*
             if(!@$fieldvalues['ulf_OrigFileName']){

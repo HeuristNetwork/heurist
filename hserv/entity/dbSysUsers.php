@@ -233,6 +233,34 @@ class DbSysUsers extends DbEntityBase
     
     //
     //
+    //
+    protected function _validateValues(){
+        
+        $ret = parent::_validateValues();
+        
+        if($ret){
+            
+            $fieldvalues = $this->data['fields']; //current record
+            
+            $email_address = @$fieldvalues['ugr_eMail'];
+            
+            if($email_address){
+                $email_address = filter_var($email_address, FILTER_SANITIZE_EMAIL);
+                if(!filter_var($email_address, FILTER_VALIDATE_EMAIL)){
+                        $this->system->addError(HEURIST_ACTION_BLOCKED, 'Email address is not valid');
+                        return false;
+                }
+                $fieldvalues['ugr_eMail'] = $email_address;
+            }
+            
+        }
+        
+        return $ret;
+    }
+    
+    
+    //
+    //
     //    
     protected function prepareRecords(){
     
