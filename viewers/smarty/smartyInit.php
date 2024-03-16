@@ -34,7 +34,7 @@ class Heurist_Security_Policy extends Smarty_Security {
   public $php_functions = array('isset', 'empty', 'count', 'escape',
                     'sizeof', 'in_array', 'is_array', 'intval', 'implode', 'explode', 
                     'array_key_exists', 'array_count_values', 'array_column', 'array_unique',
-                    'asort', 'time', 'nl2br', 'print_r',
+                    'array_multisort', 'asort', 'time', 'nl2br', 'print_r',
                     'printf', 'substr');
         
   // remove PHP tags
