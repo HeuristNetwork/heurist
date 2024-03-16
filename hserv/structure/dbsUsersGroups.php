@@ -1,7 +1,7 @@
 <?php
 
     /**
-    * CRUD for User/Groups (sysUGrps) and User Preferences (from SESSION)
+    * Library for  User/Groups (sysUGrps) and User Preferences (from SESSION)
     *
     * user_ - prefix for functions
     *
@@ -40,6 +40,38 @@
     define('USER_GROUPS_ROLE_FIELD', 'ugl_Role');
     */
 
+    /**
+    * user_getByField
+    * user_getNamesByIds
+    * user_getDbOwner - returns user #2
+    * user_ResetPasswordRandom - Generates new passowrd and send it by email
+    * user_HandleResetPin - reset password actions
+    * user_ResetPassword - reset password via pin
+    * user_updateLoginTime
+    * user_getWorkgroups - Gets list of groups for given user
+    * user_getAllWorkgroups - Gets short list of all groups ID=>Name
+    * user_getWorkgroupMembers - Gets list of members for given group
+    * 
+    * user_getDefaultPreferences - minimal set of preferences
+    * user_setPreferences - save prefs into database
+    * user_getPreferences - loads and returns prefs from database 
+    * 
+    * user_isApprovement - returns true if user is not approved
+    * user_WorkSet
+    * user_Update - adds user on registration
+    * user_Validate - validates user info on save
+    * user_SyncCommonCredentials - Updates (adds) user info into databases listed in sys_UGrpsDatabase 
+    * 
+    * user_EmailAboutNewUser
+    * user_EmailApproval
+    * user_getNotifications
+    * 
+    * user_getRepositoryCredentials($serviceName, $ugr_ID) - returns read/write credentials for given service and user_id
+    * user_getRepositoryList($ugr_ID, $writeOnly=true) - returns list of available external repositories for given user
+    * 
+    */
+    
+    
     require_once dirname(__FILE__).'/../utilities/uMail.php';
 
     /**
@@ -72,6 +104,13 @@
         return user_getByField($mysqli, 'ugr_ID', $ugr_ID);
     }
     
+    /**
+    * Finds user by ID
+    * 
+    * @param mixed $system
+    * @param mixed $ugr_IDs
+    * @return array
+    */
     function user_getNamesByIds($system, $ugr_IDs){
         
         $ugr_IDs = prepareIds($ugr_IDs);
@@ -109,7 +148,7 @@
     }
 
     /**
-    * Generate new passowrd and send it by email
+    * Generates new passowrd and send it by email
     *
     * @param mixed $system
     * @param mixed $ugr_Name
@@ -419,7 +458,7 @@
     }
 
     /**
-    * Get list of groups for given user
+    * Gets list of groups for given user
     *
     * @param mixed $mysqli
     * @param mixed $ugr_ID
@@ -463,6 +502,12 @@
     }
 
     //@todo verify why it returns db onwer
+    /**
+    * Gets short list of all groups ID=>Name
+    * 
+    * @param mixed $mysqli
+    * @return array
+    */
     function user_getAllWorkgroups($mysqli){
 //OR (ugr_ID=2) 
         $query = 'SELECT ugr_ID, ugr_Name FROM sysUGrps WHERE (ugr_Type != "user") ORDER BY ugr_Name';
@@ -474,7 +519,7 @@
     }
     
     /**
-    * Get list of members for given group (this is non admin short info)
+    * Gets list of members for given group (this is non admin short info)
     *
     * @param mixed $mysqli
     * @param mixed $ugr_ID
@@ -502,8 +547,12 @@
         return $result;
     }
 
+    //==========================================================================
+    
     /**
     * Get default set of properties
+    * 
+    * private
     */
     function user_getDefaultPreferences(){
         return array(
@@ -531,7 +580,7 @@
     //@$_SESSION[$system->dbname_full()]['ugr_Groups'] = user_getWorkgroups( $this->mysqli, $userID );
 
     /**
-    * Get set of properties from SESSION and to database
+    * Save set of properties into database
     */
     function user_setPreferences($system, $params){
         
@@ -539,30 +588,46 @@
         $ugrID = $system->get_user_id();        
         $dbname = $system->dbname_full();
         
-        $exclude = array('a','db','DBGSESSID');
+        $exclude = array('a','db','DBGSESSID'); //do not save these params
         
+        //save into SESSION 
         foreach ($params as $property => $value) {
             if(!in_array($property, $exclude)){
                 @$_SESSION[$dbname]["ugr_Preferences"][$property] = $value;    
             }
         }
+        
+        //save into Database
         if($ugrID>0){
+            
+            $prefs = $_SESSION[$dbname]["ugr_Preferences"];
+            
+            if(@$prefs['externalRepositories']==null){
+                $repositories = user_getRepositoryCredentials($system, 'all', $ugr_ID);
+                if($repositories!=null){
+                    $prefs['externalRepositories'] = $repositories;
+                }
+            }
+            
             $res = mysql__insertupdate( $mysqli, 'sysUGrps', 'ugr', array(
                         'ugr_ID'=>$ugrID,
-                        'ugr_Preferences'=>json_encode($_SESSION[$dbname]["ugr_Preferences"]) ));
+                        'ugr_Preferences'=>json_encode($prefs) ));
         }
     }
 
-    //
-    // restore preferences from database and put it into SESSION (see login_verify)
-    // to get individual property use $system->user_GetPreference
-    //
+    /**
+    * Restores preferences from database and put it into SESSION (see login_verify)
+    * to get individual property use $system->user_GetPreference
+    * 
+    * @param mixed $system
+    * @return null
+    */
     function user_getPreferences( $system ){
 
         $mysqli = $system->get_mysqli();
         $ugrID = $system->get_user_id();        
         //1. from database
-        if($ugrID>0){
+        if($ugrID>0){ //logged in
             $res = mysql__select_value( $mysqli, 'select ugr_Preferences from sysUGrps where ugr_ID='.$ugrID);
             if($res!=null && $res!=''){
                 $res = json_decode($res, true);
@@ -581,6 +646,7 @@
     
     /**
     *  if user is not enabled and login count=0 - this is approvement operation
+    * private
     */
     function user_isApprovement( $system, $recID ) {
 
@@ -670,13 +736,14 @@
         return $res; 
     }
 
-    //CRUD methods
-    function user_Delete($system, $recID){
-
-        $response = array("status"=>HEURIST_UNKNOWN_ERROR, "data"=>"action to be implemented");
-    }
-
-
+    /**
+    * Used only for registration only 
+    * 
+    * @param mixed $system
+    * @param mixed $record
+    * @param mixed $allow_registration
+    * @return {false|null|true}
+    */
     function user_Update($system, $record, $allow_registration=false){
 
         if (user_Validate($system, $record))
@@ -792,6 +859,14 @@
         return false;
     }
 
+    /**
+    * Validates user record (for update)
+    * private
+    * 
+    * @param mixed $system
+    * @param mixed $record
+    * @return {false|true}
+    */
     function user_Validate($system, $record){
         $res = false;
 
@@ -827,9 +902,14 @@
         return $res;
     }
 
-    //
-    // sync (add) user into databases listed in sys_UGrpsDatabase 
-    //
+    
+    /**
+    * Updates (adds) user info into databases listed in sys_UGrpsDatabase 
+    * 
+    * @param mixed $system
+    * @param mixed $recID
+    * @param mixed $fromImport
+    */
     function user_SyncCommonCredentials($system, $userID, $is_approvement){
         
         $dbname_full = $system->dbname_full();
@@ -1005,7 +1085,7 @@
      * @param System - initialised system object
      * 
      * @return array - messages to show
-     */
+     */                                                                 
     function user_getNotifications($system){
 
         $user = $system->getCurrentUser(); // ugr_ID
@@ -1092,5 +1172,101 @@
         $salt = $s[random_int(0, strlen($s)-1)] . $s[random_int(0, strlen($s)-1)];
         return crypt($passwd, $salt);
     }
+    
+    //==========================================================================
+    
+    //
+    // returns read/write credentials for given service and user_id
+    //
+    function user_getRepositoryCredentials($system, $serviceName, $ugr_ID) {
+
+        //1. search all workgroups
+        $query = 'SELECT ugr_Preferences FROM sysUsrGrps '
+                    .' WHERE ugr_ID='.intval($ugr_ID);
+        
+        /*
+        if($all_groups){
+                $query .= ' WHERE ugr_ID=0 OR ugr_ID='.intval($ugr_ID)
+                .' OR ugr_ID in (SELECT ugl_GroupID FROM sysUsrGrpLinks WHERE ugl_UserID='.intval($ugr_ID).')';
+        }else{
+                $query .= ' WHERE ugr_ID='.intval($ugr_ID);
+        }*/
+                
+        $result = null;        
+        
+        $mysqli = $system->get_mysqli();
+        $res = $mysqli->query($query);           //ugr_Type
+        
+        //2. loop and parse preferences
+        if($res){
+            while ($row = $res->fetch_row()) {
+                //get preferences
+                $prefs = $row[0];
+                
+                if($prefs!=null && $prefs!=''){
+                    $prefs = json_decode($prefs, true);
+                    if($prefs && count($prefs)>0 && array_key_exists('externalRepositories',$prefs)){
+                        $prefs = $prefs['externalRepositories'];
+                        if($serviceName==null || $serviceName=='all'){
+                            return $prefs['externalRepositories']; //all services                           
+                        }else{
+                            foreach($prefs as $idx=>$service){
+                                if(@$service['repository']==$serviceName){
+                                     $result = $service;                               
+                                     break;
+                                }
+                            }
+                        }
+                    }
+                }
+                //3. extract required service
+                
+            }
+            $res->close();
+        }
+
+        return $result;        
+    }
+    
+    //
+    // returns list of available external repositories for given user
+    //
+    function user_getRepositoryList($system, $ugr_ID, $writeOnly=true){
+        
+        //1. search all workgroups
+        $query = 'SELECT ugr_ID, ugr_Name, ugr_Preferences FROM sysUsrGrps '
+                .' WHERE ugr_ID=0 OR ugr_ID='.intval($ugr_ID)
+                .' OR ugr_ID in (SELECT ugl_GroupID FROM sysUsrGrpLinks WHERE ugl_UserID='.intval($ugr_ID).')'
+                .' ORDER BY ugr_Type DESC';
+                
+        $result = null;        
+        
+        $mysqli = $system->get_mysqli();        
+        $res = $mysqli->query($query); //ugr_Type
+        
+        //2. loop and parse preferences
+        if($res){
+            while ($row = $res->fetch_row()) {
+                //get preferences
+                $prefs = $row[2];
+                if($prefs!=null && $prefs!=''){
+                    $prefs = json_decode($prefs, true);
+                    if($prefs && count($prefs)>0 && array_key_exists('externalRepositories',$prefs)){
+                            foreach($prefs as $idx=>$service){
+                                if(!$writeOnly || @$service['writeApiKey'] || @$service['writeUser'])
+                                {
+                                     //ugr_ID, ugr_Name, service Name
+                                     $result[] = array(intval($row[0]),$row[1],$service['repository']);
+                                }
+                            }
+                    }
+                }
+            }
+            $res->close();
+        }
+        
+        return $result;        
+    }
+    
 
 ?>

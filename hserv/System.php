@@ -1568,6 +1568,13 @@ class System {
                 $_SESSION[$this->dbname_full]['ugr_Preferences'] = user_getPreferences( $this );
             }
             $this->current_User['ugr_Preferences'] = $_SESSION[$this->dbname_full]['ugr_Preferences'];
+            
+            //remove credentials for remote repositories
+            if(@$this->current_User['ugr_Preferences']['externalRepositories']){
+                $this->current_User['ugr_Preferences']['externalRepositories'] = null;
+                unset($this->current_User['ugr_Preferences']['externalRepositories']);
+            }
+
         }
         return $islogged;
     }
@@ -1777,7 +1784,8 @@ class System {
     }
 
     //
-    //
+    // Returns individual property from SESSION
+    // To load the entire set of preferences from database use user_getPreferences
     //
     public function user_GetPreference($property, $def=null){
 
