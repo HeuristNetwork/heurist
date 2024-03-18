@@ -763,7 +763,7 @@
                 if($system->get_system('sys_NakalaKey')){
                     $params['api_key'] = $system->get_system('sys_NakalaKey');
                 }else{
-                    $system->addError(HEURIST_INVALID_REQUEST, 'No Nakala API Key provided, please ensure you have entered your personal key into Design > Setup > Properties > Personal Nakala API Key');
+                    $system->addError(HEURIST_INVALID_REQUEST, 'No Nakala API Key provided, please ensure you have entered your personal key into Design > Setup > Properties > General Nakala API key');
                 }
 
                 $params['status'] = 'published'; // publish uploaded file, return url to newly uploaded file on Nakala

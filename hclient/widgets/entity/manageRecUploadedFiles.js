@@ -483,7 +483,7 @@ $.widget( "heurist.manageRecUploadedFiles", $.heurist.manageEntity, {
                         // Check that an api key has been set
                         if(repo == 'Nakala' && window.hWin.HEURIST4.util.isempty(window.hWin.HAPI4.sysinfo.nakala_api_key)){
 
-                            window.hWin.HEURIST4.msg.showMsgErr('You need to enter your Nakala API Key into Design > Setup > Properties > Personal Nakala API Key, in order to use Nakala.');
+                            window.hWin.HEURIST4.msg.showMsgErr('You need to enter your Nakala API Key into Design > Setup > Properties > General Nakala API key, in order to use Nakala.');
                             $select.val('');
                             if($select.hSelect('instance') !== undefined){
                                 $select.hSelect('refresh');

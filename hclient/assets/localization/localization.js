@@ -180,8 +180,8 @@ regional['ENG'] = {
 
     'Setup': '',
         'menu-manage-dashboards': 'Shortcuts bar',
-        'menu-manage-archive': 'Archive file - download',
-        'menu-manage-archive-upload': 'Archive file - to repository',
+        'menu-manage-archive': 'Safeguard file - download',
+        'menu-manage-archive-upload': 'Safeguard file - to repository',
         'menu-manage-dashboards-hint': 'Defines an editable list of shortcuts to functions to be displayed on a toolbar at startup unless turned off',
         'menu-manage-archive-hint': 'Writes all the data in the database as SQL and XML files, plus all attached files, schema and documentation, to a ZIP file which you can download from a hyperlink',
     
