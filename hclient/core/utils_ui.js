@@ -2718,10 +2718,9 @@ window.hWin.HEURIST4.ui = {
             }else if( actionName=='thematicMapping'){
                 scripts = [window.hWin.HAPI4.baseURL + 'hclient/widgets/entity/popups/'+actionName+'.js'];
             }else if( actionName.indexOf('lookupGN')===0 || actionName=='lookupConfig'){
-                scripts.push( window.hWin.HAPI4.baseURL +'hclient/core/accessTokens.php' );
+                scripts.unshift( window.hWin.HAPI4.baseURL +'hclient/core/accessTokens.php' );
             }
-            
-            //load missed javascripts
+
             $.getMultiScripts(scripts)
             .done(function() {
                 // all done
@@ -2732,7 +2731,6 @@ window.hWin.HEURIST4.ui = {
             }).always(function() {
                 // always called, both on success and error
             });
-            
         }
     },    
     
