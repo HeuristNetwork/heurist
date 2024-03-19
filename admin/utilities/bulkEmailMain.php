@@ -221,6 +221,10 @@ if(!$has_emails || empty($emails)) {
                 max-width: 25%;
             }
 
+            #dbArea {
+                max-height: 1px;
+            }
+
             #dbSelection {
                 overflow-y: auto;
 
@@ -252,7 +256,7 @@ if(!$has_emails || empty($emails)) {
             var all_emails = <?php echo json_encode($emails)?>; // Object of Email records id->title
             
             var current_db = "<?php echo $current_db ?>";
-            var getting_databases = false; // Flag for database retrieval operation in progress
+            var getting_databases = false; // Flag for database retrieval operation in progress; true - general, 1 - intial list, false - none
 
             const handled_sort = ['name', 'rec_count', 'last_update'];
             var database_details = null; // [{name: db_name, rec_count: db_rec_count, last_update: db_last_update}, ...]
@@ -617,14 +621,21 @@ if(!$has_emails || empty($emails)) {
                     click: function(event, data) {
 
                         if(getting_databases){
-                            window.hWin.HEURIST4.msg.showMsgFlash('Please wait for the database list to update...', 3000);
+                            run_filter = getting_databases == 1;
+                            window.hWin.HEURIST4.msg.showMsgFlash('Please wait for the database list to update...', 5000);
                             return;
                         }
 
+                        let cont_height = $('#dbSelection').height() + 100;
+                        let cont_width = $('.l-col').width() + 50;
+                        let cont_top = $('.l-col').position().top;
+
                         getting_databases = true;
+                        window.hWin.HEURIST4.msg.bringCoverallToFront($('.l-col'), {top: `${cont_top}px`, 'max-height': `${cont_height}px`, width: `${cont_width}px`, color: 'white', opacity: 0.8}, 'Appling database filter...');
 
                         $("#dbSelection").find(".dbListCB").off("change");
                         $("#dbSelection").empty();
+                        $('#allDBs').prop('checked', false).trigger('change');
 
                         $("#filterMsg").show().text("Filtering Databases...");
 
@@ -635,7 +646,8 @@ if(!$has_emails || empty($emails)) {
                                 lastmod_logic: $("#recModifiedLogic").val(),
                                 lastmod_period: $("#recModified").val(),
                                 lastmod_unit: $("#recModifiedSel").val()
-                            }
+                            },
+                            req_id: window.hWin.HEURIST4.util.random()
                         }
 
                         $.ajax({
@@ -673,7 +685,12 @@ if(!$has_emails || empty($emails)) {
                             },
                             //always:
                             complete: function(jqXHR, textStatus){
+
                                 getting_databases = false;
+                                window.hWin.HEURIST4.msg.sendCoverallToBack();
+
+                                getUserCount();
+
                                 if(textStatus == 'success'){
                                     $("#filterMsg").text('Database Filtering is Completed, Loading List');
                                 }else{
@@ -702,12 +719,12 @@ if(!$has_emails || empty($emails)) {
             //
             function getInitDbList() {
 
-                getting_databases = true;
+                getting_databases = 1;
 
                 $.ajax({
                     url: 'bulkEmailOther.php',
                     type: 'POST',
-                    data: {db: current_db, db_filtering: "all"},
+                    data: {db: current_db, db_filtering: "all", req_id: window.hWin.HEURIST4.util.random()},
                     dataType: 'json',
                     cache: false,
                     xhrFields: {
@@ -716,7 +733,7 @@ if(!$has_emails || empty($emails)) {
                     //fail:
                     error: function(jqXHR, textStatus, errorThrown){
 
-                        window.hWin.HEURIST4.msg.showMsgErr("An error has occurred with retrieving the filtered list of databases."
+                        window.hWin.HEURIST4.msg.showMsgErr("An error has occurred with retrieving the complete list of databases."
                                 + "<br>Error Details: " + jqXHR.status + " => " + textStatus
                                 + "<br><br>Please contact the Heurist team if this problem persists");
                     },
@@ -740,6 +757,11 @@ if(!$has_emails || empty($emails)) {
                     },
                     complete: function(jqXHR, textStatus){
                         getting_databases = false;
+
+                        if(textStatus == 'success' && run_filter){
+                            run_filter = false;
+                            $("#btnApply").trigger('click');
+                        }
                     }
                 });
             }
@@ -752,7 +774,7 @@ if(!$has_emails || empty($emails)) {
                 $.ajax({
                     url: 'bulkEmailOther.php',
                     type: 'POST',
-                    data: {db: current_db, get_email: true, recid: id},
+                    data: {db: current_db, get_email: true, recid: id, req_id: window.hWin.HEURIST4.util.random()},
                     dataType: 'json',
                     cache: false,
                     xhrFields: {
@@ -850,7 +872,8 @@ if(!$has_emails || empty($emails)) {
                 var data = {
                     db: current_db,
                     db_list: dbs,
-                    rec_count: 1
+                    rec_count: 1,
+                    req_id: window.hWin.HEURIST4.util.random()
                 };
 
                 $.ajax({
@@ -914,7 +937,8 @@ if(!$has_emails || empty($emails)) {
                 var data = {
                     db: current_db,
                     user_count: $("#userSel").val(),
-                    db_list: dbs.join(',')
+                    db_list: dbs.join(','),
+                    req_id: window.hWin.HEURIST4.util.random()
                 };
                 
                 $.ajax({
