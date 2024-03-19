@@ -292,8 +292,7 @@ if($mode>1){
                 <div class="input-row">
                     <label title="Export / Upload the archive in Zip format, instead of BZip">
                         <input type="checkbox" name="is_zip" value="1">
-                        Use Zip format rather than BZip
-                    </label>
+                        Use Zip format rather than BZip (BZip is more efficient for archiving, but Zip is easier to open on personal computers )
                 </div>
 
                 <div class="input-row" style="display:none;">
