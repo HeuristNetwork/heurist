@@ -1166,6 +1166,12 @@ $.widget( "heurist.importStructure", {
 
                     let report = '';
 
+                    let entities = type == 'detailtype' ? 'dty' : '';
+                    entities = type == 'term' ? 'trm' : entities;
+                    entities = type == 'rectype' ? 'rty,trm,dty,rst' : entities;
+
+                    let add_trm = false, add_rty = false;
+
                     if(response.report){
                     
                         if( window.hWin.HEURIST4.util.isArrayNotEmpty(response.report.added) ){
@@ -1177,6 +1183,8 @@ $.widget( "heurist.importStructure", {
 
                                 if(type == 'detailtype'){
                                     label = $Db.dty(id,'dty_Name');
+                                    add_trm = add_trm || $Db.dty(id, 'dty_Type') == 'enum' || $Db.dty(id, 'dty_Type') == 'relmarker';
+                                    add_rty = add_rty || $Db.dty(id, 'dty_Type') == 'resource' || $Db.dty(id, 'dty_Type') == 'relmarker';
                                 }else if(type == 'term'){
                                     label = $Db.trm(id,'trm_Label');
                                 }else{
@@ -1200,6 +1208,8 @@ $.widget( "heurist.importStructure", {
 
                                 if(type == 'detailtype'){
                                     label = $Db.dty(id,'dty_Name');
+                                    add_trm = add_trm || $Db.dty(id, 'dty_Type') == 'enum' || $Db.dty(id, 'dty_Type') == 'relmarker';
+                                    add_rty = add_rty || $Db.dty(id, 'dty_Type') == 'resource' || $Db.dty(id, 'dty_Type') == 'relmarker';
                                 }else if(type == 'term'){
                                     label = $Db.trm(id,'trm_Label');
                                 }else{
@@ -1230,6 +1240,9 @@ $.widget( "heurist.importStructure", {
                             
                             report += ('</ul></p>');
                         }
+
+                        if(add_rty){ entities += ',rty,rst'; }
+                        if(add_trm){ entities += ',trm'; }
                     }
 
                     if(report!=''){ 
@@ -1238,6 +1251,8 @@ $.widget( "heurist.importStructure", {
                         window.hWin.HEURIST4.msg.showMsgDlg('<br>'+report,null,
                                 {title:'Import templates report'},
                                 {default_palette_class:'ui-heurist-design'});
+
+                        window.hWin.HAPI4.EntityMgr.refreshEntityData(entities, null);
 
                     }else{
                         report = 'Nothing imported. '+
