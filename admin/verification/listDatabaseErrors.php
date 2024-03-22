@@ -2876,6 +2876,137 @@ if($active_all || in_array('fld_spacing', $active)){ // Check spacing in freetex
 
     print '<br><br></div>';
 } //END fld_spacing check
+
+if($active_all || in_array('multi_swf_values', $active)) { 
+    ?>
+
+    <div id="multi_swf_values" style="top:110px"> <!-- Start of Multiple Workflow Stage Values -->
+    
+    <script>
+        $('#links').append('<li class="multi_swf_values"><a href="#multi_swf_values" style="white-space: nowrap;padding-right:10px;color:black;">Multiple workflow stages</a></li>');
+        tabs_obj.tabs('refresh');
+    </script>
+
+    <?php
+
+    $completedRecords = array();
+    if(defined('DT_WORKFLOW_STAGE')){
+
+        $recsWithManySWF = mysql__select_assoc($mysqli, "SELECT dtl_RecID, rec_RecTypeID, rec_Title FROM recDetails INNER JOIN Records ON rec_ID = dtl_RecID WHERE dtl_DetailTypeID = " . DT_WORKFLOW_STAGE . " GROUP BY dtl_RecID HAVING COUNT(dtl_RecID) > 1");
+
+        if($recsWithManySWF && !empty($recsWithManySWF)){
+
+            foreach($recsWithManySWF as $rec_ID => $rec){
+
+                $rectype_ID = $rec['rec_RecTypeID'];
+                $rec_Title = $rec['rec_Title'];
+
+                $rec_ID = intval($rec_ID);
+                $rectype_ID = intval($rectype_ID);
+
+                $repeatability = mysql__select_value($mysqli, "SELECT rst_MaxValues FROM defRecStructure WHERE rst_RecTypeID = $rectype_ID AND rst_DetailTypeID = " . DT_WORKFLOW_STAGE);
+                $repeatability = $repeatability === null ? 1 : intval($repeatability);
+
+                if($repeatability > 1 || $repeatability == 0){
+                    unset($recsWithManySWF[$rec_ID]);
+                    continue;
+                }
+
+                $stages = mysql__select_list2($myqsli, "SELECT dtl_ID, dtl_Value FROM recDetails WHERE dtl_RecID = $rec_ID ORDER BY dtl_ID", 'intval');
+
+                $final_stage = [];
+                $found_import = [];
+
+                foreach($stages as $dtl_ID => $swf_ID){
+
+                    if(defined('TRM_SWF_IMPORT') && $swf_ID == TRM_SWF_IMPORT){
+                        $found_import = empty($found_import) ? [$dtl_ID, $swf_ID] : $found_import;
+                        continue;
+                    }
+
+                    $final_stage = [$dtl_ID, $swf_ID]; // use the oldest
+                }
+
+                $final_stage = empty($final_stage) ? $found_import : $final_stage;
+                if(empty($final_stage)){
+                    unset($recsWithManySWF[$rec_ID]); // $strangeRecs[] = $rec_ID;
+                    continue;
+                }
+
+                unset( $stages[$final_stage[0]] );
+                $dtl_IDs = array_keys($stages);
+
+                if(count($dtl_IDs) > 1){
+                    $mysqli->query("DELETE FROM recDetails WHERE dtl_ID IN (". implode(',', $dtl_IDs) .")");
+                }else{
+                    $mysqli->query("DELETE FROM recDetails WHERE dtl_ID = {$dtl_IDs[0]})");
+                }
+
+                $rty_Label = mysql__select_value($mysqli, "SELECT rty_Name FROM defRecTypes WHERE rty_ID = $rectype_ID");
+                $swf_Label = mysql__select_value($mysqli, "SELECT trm_Label FROM defTerms WHERE trm_ID = {$final_stage[1]}");
+
+                $completedRecords[] = [ $rec_ID => [ 'title' => $rec_Title, 'type' => $rectype_ID, 'type_name' => $$rty_Label, 'stage' => $swf_Label ] ];
+            }
+        }
+    }
+
+    if(!empty($completedRecords)){
+        ?>
+        <h3>Records were found to have multiple workflow stages</h3><br>&nbsp;<br>
+
+        There workflow stage has been set to the newest available value, that is not the importing stage (unless it is the only value found).<br>
+
+        <span>
+            <a target=_new href='<?=HEURIST_BASE_URL.'?db='.HEURIST_DBNAME?>&w=all&q=ids:<?= implode(',', array_keys($completedRecords)) ?>'>
+                (show results as search) <img alt src='<?php echo HEURIST_BASE_URL.'hclient/assets/external_link_16x16.gif'?>'></a>
+            <a target=_new href='#' id=selected_link5 onClick="return open_selected_by_name('multi_swf_values');">(show selected as search) <img alt src='<?php echo HEURIST_BASE_URL.'hclient/assets/external_link_16x16.gif'?>'></a>
+            <button onclick="removeMultiSpacing()">Fix selected records</button>
+        </span>
+
+        <table role="none">
+
+            <tr>
+                <td colspan="6">
+                    <label><input type=checkbox onclick="{mark_all_by_name(event.target, 'multi_swf_values');}">Mark all</label>
+                </td>
+            </tr>
+        <?php 
+        foreach ($completedRecords as $rec_ID => $record) {
+        ?>
+            <tr>
+                <td>
+                    <input type=checkbox name="multi_swf_values" value=<?= $rec_ID ?>>
+                </td>
+                <td style="white-space: nowrap;">
+                    <a target=_new
+                        href='<?=HEURIST_BASE_URL?>?fmt=edit&db=<?= HEURIST_DBNAME?>&recID=<?= $rec_ID ?>'>
+                        <?= $rec_ID ?>
+                        <img alt class="rft" style="background-image:url(<?php echo HEURIST_RTY_ICON.$record['type'];?>)" title="<?php echo $record['type_name']?>" 
+                            src="<?php echo HEURIST_BASE_URL.'hclient/assets/16x16.gif'?>">&nbsp;
+                        <img alt src='<?php echo HEURIST_BASE_URL.'hclient/assets/external_link_16x16.gif'?>' title='Click to edit record'>
+                    </a>
+                </td>
+
+                <td class="truncate" style="max-width:400px"><?=strip_tags($record['title']) ?></td>
+
+                <td> was set to stage: </td>
+
+                <td width="100px" style="max-width:100px" class="truncate"><?=strip_tags($record['stage']) ?></td>
+            </tr>
+        <?php
+        }//for
+            ?>
+        </table>
+        <?php
+        echo '<script>$(".multi_swf_values").css("background-color", "#E60000");</script>';
+
+    }else{
+        print '<h3 class="res-valid">OK: All records have single values for their workflow stage</h3>';
+        echo '<script>$(".multi_swf_values").css("background-color", "#6AA84F");</script>';
+    }
+    print '<br><br></div>';   // End of Multiple Workflow Stage Values
+    
+} //END multi_swf_values
         ?>
 
         </div>

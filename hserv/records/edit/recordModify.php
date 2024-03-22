@@ -559,12 +559,16 @@ function recordSave($system, $record, $use_transaction=true, $suppress_parent_ch
     $new_swf_stage = 0; 
     $swf_emails = null;
     $stage_field_idx = -1;
+    $is_new_record = $is_insert || $is_save_new_record;
     if($record['FlagTemporary']!=1 && $system->defineConstant('DT_WORKFLOW_STAGE')){
         
-        if($modeImport>0 && $system->defineConstant('TRM_SWF_IMPORT')){
+        if($modeImport > 0 && $system->defineConstant('TRM_SWF_IMPORT')){
             //hardcoded term id for "import" stage
-            $new_swf_stage = TRM_SWF_IMPORT;
-            
+
+            $recID = abs(intval(@$record['ID']));
+            $existing_swf = mysql__select_value($mysqli, "SELECT dtl_ID FROM recDetails WHERE dtl_RecID = $recID AND dtl_DetailTypeID = " . DT_WORKFLOW_STAGE);
+
+            $new_swf_stage = !$existing_swf ? TRM_SWF_IMPORT : 0;
         }else{
             foreach ($detailValues as $idx=>$values) {
                 if($values['dtl_DetailTypeID']==DT_WORKFLOW_STAGE){
@@ -576,12 +580,19 @@ function recordSave($system, $record, $use_transaction=true, $suppress_parent_ch
             if($is_save_new_record && !($new_swf_stage>0)){
                 $new_swf_stage = TRM_SWF_ADDED;
             }
+            if($modeImport > 0 && $is_new_record && $new_swf_stage > 0){
+
+                $recID = abs(intval(@$record['ID']));
+                $existing_swf = mysql__select_value($mysqli, "SELECT dtl_ID FROM recDetails WHERE dtl_RecID = $recID AND dtl_DetailTypeID = " . DT_WORKFLOW_STAGE);
+    
+                $new_swf_stage = !$existing_swf ? $new_swf_stage : 0;
+            }
         }
         if($new_swf_stage>0){
             // set $record onwership and visibility 
             // and assign $record['swf'] = true, to avoid recordCanChangeOwnerwhipAndAccess
             // returns array( new_value, curr_value, emails )
-            $swf_res = recordWorkFlowStage($system, $record, $new_swf_stage, $is_insert || $is_save_new_record);
+            $swf_res = recordWorkFlowStage($system, $record, $new_swf_stage, $is_new_record);
             
             $new_swf_stage = @$swf_res['new_value'];
             if($new_swf_stage==0){ //not allowed - keep old stage
@@ -3342,7 +3353,7 @@ function recordWorkFlowStage($system, &$record, $new_value, $is_insert){
     
     if($new_value>0 && @$record['FlagTemporary']!=1){
     
-        $recID = intval(@$record['ID']);    
+        $recID = intval(@$record['ID']);
         $recID = abs($recID);
   
         
