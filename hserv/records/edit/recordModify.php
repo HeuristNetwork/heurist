@@ -580,13 +580,6 @@ function recordSave($system, $record, $use_transaction=true, $suppress_parent_ch
             if($is_save_new_record && !($new_swf_stage>0)){
                 $new_swf_stage = TRM_SWF_ADDED;
             }
-            if($modeImport > 0 && $is_new_record && $new_swf_stage > 0){
-
-                $recID = abs(intval(@$record['ID']));
-                $existing_swf = mysql__select_value($mysqli, "SELECT dtl_ID FROM recDetails WHERE dtl_RecID = $recID AND dtl_DetailTypeID = " . DT_WORKFLOW_STAGE);
-    
-                $new_swf_stage = !$existing_swf ? $new_swf_stage : 0;
-            }
         }
         if($new_swf_stage>0){
             // set $record onwership and visibility 
