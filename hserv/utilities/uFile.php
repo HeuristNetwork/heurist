@@ -1442,7 +1442,7 @@ When file is uploaded into repository it keeps user/group id in recUploadedFiles
 
 The following server side methods will be implemented (for Brandon)
 
-DbSysUsers:getRepoList($ugr_ID, $writeOnly) - returns list of repositories with defined credentials 
+DbSysUsers:getRepositoryList($ugr_ID, $writeOnly) - returns list of repositories with defined credentials 
     $ugr_ID - for user (including database and groups where user is member)
     $writeOnly - if true only write credentials
 

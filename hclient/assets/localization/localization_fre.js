@@ -271,6 +271,7 @@ regional['FRE'] = {
     'drag from saved filters': 'tirer depuis filtres enregistrés', 
     'Workflow stages': 'Etapes de travail',
     'External lookups': 'Consultations externes',
+    'External repositories': 'Dépôts externes',
 
     //admin menu
     'Database': 'Base de données',
@@ -326,6 +327,7 @@ regional['FRE'] = {
     'menu-import-csv-fieldtypes': 'Importer depuis CSV', 
     'menu-structure-import': 'Parcourir les modèles',
     'menu-lookup-config': 'Consultation externe',
+    'menu-repository-config': 'Dépôts externes',
     'menu-structure-summary': 'Visualiser',
     'menu-structure-refresh': 'Rafraîchir le cache',
 

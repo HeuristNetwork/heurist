@@ -1000,7 +1000,7 @@ window.hWin.HEURIST4.ui = {
                         topOptions.push({key:groupID, title:name});
                 }
             }
-            topOptions.push({key:0, title:'──────────',disabled:true});
+            topOptions.push({key:'', title:'──────────',disabled:true});
             
             groups = window.hWin.HAPI4.sysinfo.db_usergroups;
             
@@ -2720,7 +2720,7 @@ window.hWin.HEURIST4.ui = {
             }else if( actionName.indexOf('lookupGN')===0 || actionName=='lookupConfig'){
                 scripts.unshift( window.hWin.HAPI4.baseURL +'hclient/core/accessTokens.php' );
             }
-
+            
             $.getMultiScripts(scripts)
             .done(function() {
                 // all done

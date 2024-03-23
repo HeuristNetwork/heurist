@@ -2587,10 +2587,26 @@ public methods
         $dtl_IDs = array();
         $rec_IDs = array();
         $completed_ulf_IDs = array();
+        
+        //2024-03-23 
+        // Obtain write API key/credentials
+        $service_id = $this->data['repository'];
+        
+        $credentials = user_getRepositoryCredentials2($this->system, $service_id);
+        
+        if($credentials==null){
+            
+            $this->system->addError(HEURIST_ACTION_BLOCKED, 'Credentials for sepecified repository and user/group not found');
+            return false;
+            
+        }else if(!@$credentials[$service_id]['params']['writeApiKey']){  // || @$credentials['params']['writeUser']
 
-        if($this->data['repository'] == 'Nakala'){
+            $this->system->addError(HEURIST_ACTION_BLOCKED, 'Write Credentials for sepecified repository and user/group not defined');
+            return false;
+        
+        }else if(strpos($service_id,'nakala')===0){
 
-            if(array_key_exists('license', $this->data) || empty($this->data['license'])){ // ensure a license has been provided
+            if(!array_key_exists('license', $this->data) || empty($this->data['license'])){ // ensure a license has been provided
                 $this->system->addError(HEURIST_ACTION_BLOCKED, 'A license is missing');
                 return false;
             }
@@ -2614,7 +2630,7 @@ public methods
                 'propertyUri' => 'http://nakala.fr/terms#license'
             );
 
-            $api_key = $this->system->get_system('sys_NakalaKey');
+            $api_key = $credentials[$service_id]['params']['writeApiKey']; //$this->system->get_system('sys_NakalaKey');
 
             while($row = $res->fetch_row()){
 

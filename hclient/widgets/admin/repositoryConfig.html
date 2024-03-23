@@ -1,0 +1,100 @@
+<style type="text/css">
+    .lookup_data span{
+        padding-left: 5px;
+
+        cursor: default;
+    }
+    .lookup_data span.truncate{
+        display: inline-block;
+ 
+        max-width: 300px;
+
+        vertical-align: middle;
+    }
+</style>
+
+<div class="ent_wrapper">
+
+    <div class="ui-heurist-header"></div>
+                     
+    <div class="ent_content" style="font-size: 0.9em;">
+
+        <div class="ent_content_full" style="top:10px;padding-left:20px;">
+            Services configured here enable the story and retrieve of external resources such as a images, documents, video 
+            on/from the external repositories.<br><br>
+        </div>
+
+        <div class="ent_content_full" style="top:100px;width:300px;border-right:1px solid gray;">
+            <div style="width:280px;padding:10px 10px 0;font-weight:bold;">
+                Repository services
+            </div><br>
+
+            <div style="padding: 10px 10px 0px;">select to edit</div>
+            <ul id="sel_service" style="list-style-type: none;width:280px;padding:0 5px;">
+                List of repositories
+            </ul>
+
+            <div>
+                <button id="btnAddService" title="Add new service">Assign repository</button>
+            </div>
+        </div>
+
+        <div class="ent_content_full" id="editing_panel" style="top:100px;left:301px;padding:10px;">
+
+            <h4 id="service_name" style="padding-left:20px;"><span class="ui-icon ui-icon-arrowthick-1-w"></span>Select a service to edit or click the assign button</h4>
+            
+            <div id="service_config" style="display:none">
+            
+                <fieldset id="assign_fieldset"><legend style="display:none"></legend>
+                    
+                    <div style="padding: 0.2em; width: 100%;" class="input" id="service_type">
+                        <div class="header" style="padding: 0 16px 0 16px;">
+                            <label for="sel_servicetype">Repository:</label>
+                        </div>
+                        <select id="sel_servicetype" class="text ui-widget-content ui-corner-all" style="width:300px;max-width:40em"></select>
+                    </div>
+
+                    <div style="padding: 0.2em; width: 100%;" class="input">
+                        <div class="header" style="padding: 0 16px 0 16px;">
+                            <label for="sel_usergroup">Heurist user or group:</label>
+                        </div>
+                        <select id="sel_usergroup" class="text ui-widget-content ui-corner-all" style="width:300px;max-width:40em"></select>
+                    </div>
+                    
+                </fieldset>
+                
+                <div style="padding-left:20px;display: inline-block;" class="service_details" id="service_params">
+                    <h4 style="display: inline-block;margin-bottom: 1em;">Define credentials for selected repository</h4>
+
+                    <table role="presentation" id="tbl_matches" style="font-size:1em;" data-idx="0">
+                        <tr><td>Read/write API key</td><td><input data-field="writeApiKey"/></td></tr>
+                        <tr><td>Read/write User</td><td><input data-field="writeUser" autocomplete="off"/></td></tr>
+                        <tr><td>Read/write Password</td><td><input data-field="writePwd" type="password" autocomplete="off"/></td></tr>
+                        <tr><td colspan="2">&nbsp;</td></tr>
+                        <tr><td>Readonly API key</td><td><input data-field="readApiKey"/></td></tr>
+                        <tr><td>Readonly User</td><td><input data-field="readUser" autocomplete="off"/></td></tr>
+                        <tr><td>Readonly Password</td><td><input data-field="readPwd" type="password" autocomplete="off"/></td></tr>
+                    </table>
+                </div>
+                
+                <div style="text-align: center;padding: 20px;">
+                    <button id="btnApplyCfg" class="ui-button-action" title="Use this configuration">Apply</button>
+                    <button id="btnDiscard">Cancel</button>
+                </div>
+
+            </div>
+            
+        </div>
+
+    </div>
+
+    <div class="ui-dialog-buttonpane popup_buttons_div" style="padding: 13px;">
+        <div class="ui-dialog-buttonset">
+
+            <button id="btnSave" class="ui-button-action">Save</button>
+            <button id="btnClose">Close</button>
+
+        </div>
+    </div>
+
+</div>

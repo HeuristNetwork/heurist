@@ -677,6 +677,10 @@
                 
             }else if($action == 'upload_file_nakala'){ //@todo - move to separate controller
 
+                // load ONE file to ext.repository - from manageRecUploadedFiles
+                // see also local_to_repository in record_batch
+            
+            
                 // Prepare parameters
                 $params = array();
 

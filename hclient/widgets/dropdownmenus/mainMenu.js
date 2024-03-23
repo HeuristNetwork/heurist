@@ -1091,6 +1091,16 @@ $.widget( "heurist.mainMenu", {
             window.hWin.HEURIST4.ui.showRecordActionDialog('lookupConfig', popup_dialog_options);
 
         }
+        else if(action == "menu-repository-config"){
+
+            popup_dialog_options['classes'] = {"ui-dialog": "ui-heurist-design", "ui-dialog-titlebar": "ui-heurist-design"};
+            popup_dialog_options['service_config'] = window.hWin.HAPI4.sysinfo['repository_config'];
+            popup_dialog_options['title'] = "Repository service configuration";
+            popup_dialog_options['path'] = 'widgets/admin/';
+
+            window.hWin.HEURIST4.ui.showRecordActionDialog('repositoryConfig', popup_dialog_options);
+
+        }
         else if(action == "menu-database-rollback"){
 
             window.hWin.HEURIST4.msg.showMsgDlg('Although rollback data has been recorded, '

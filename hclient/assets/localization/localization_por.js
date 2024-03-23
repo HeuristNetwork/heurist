@@ -143,6 +143,7 @@ regional['POR'] = {
         'menu-structure-import': 'Navegue nos modelos',
         'menu-structure-workflowstages': 'Estágios do fluxo de trabalho',
         'menu-lookup-config': 'Procuras externas',
+        'menu-repository-config': 'Repositórios externos',
         'menu-structure-summary': 'Visualizar',
         'menu-structure-refresh': 'Refrescar a memória',
     

@@ -217,7 +217,7 @@
                 }
                 
             }else if(@$params['q']!=null){  //first request - save base filter
-                //remove all other datatable keys from session
+                //remove all other "datatableXXX" keys from session
                 $dbname = $system->dbname_full();
                 if(@$_SESSION[$dbname]['ugr_Preferences']!=null){
                     $keys = array_keys($_SESSION[$dbname]['ugr_Preferences']);

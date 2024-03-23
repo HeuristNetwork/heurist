@@ -775,21 +775,13 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
                 for (var idx in ugrp_ids) {
 
                     var usr_ID = Number(ugrp_ids[idx]);
-                    var sUserName = null;
+                    var sUserName = that.SystemMgr.getUserNameLocal(usr_ID);
 
-                    if (usr_ID == 0) {
-                        sUserName = window.hWin.HR('Everyone');
-                    } else if (usr_ID == window.hWin.HAPI4.currentUser['ugr_ID']) {
-                        sUserName = window.hWin.HAPI4.currentUser['ugr_FullName'];
-                    } else if (window.hWin.HAPI4.sysinfo.db_usergroups && window.hWin.HAPI4.sysinfo.db_usergroups[usr_ID]) {
-                        sUserName = window.hWin.HAPI4.sysinfo.db_usergroups[usr_ID];
-                    }
                     if (sUserName) {
                         sUserNames[usr_ID] = sUserName;
                     } else {
                         request.UGrpID.push(usr_ID);
                     }
-
                 }
 
 
@@ -810,6 +802,28 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
                     });
                 }
             },
+
+            /**
+            * Returns user or group name from local cache
+            *             
+            * @param ugrp_id
+            */
+            getUserNameLocal: function(ugrp_id) {
+                
+                var usr_ID = Number(ugrp_id);
+                var sUserName = null;
+
+                if (usr_ID == 0) {
+                    sUserName = window.hWin.HR('Everyone');
+                } else if (usr_ID == window.hWin.HAPI4.currentUser['ugr_ID']) {
+                    sUserName = window.hWin.HAPI4.currentUser['ugr_FullName'];
+                } else if (window.hWin.HAPI4.sysinfo.db_usergroups && window.hWin.HAPI4.sysinfo.db_usergroups[usr_ID]) {
+                    sUserName = window.hWin.HAPI4.sysinfo.db_usergroups[usr_ID];
+                }
+                
+                return sUserName;
+            },
+
 
             /**
              * Array of info about user's workgroups. Each key is a ugl_GroupID,
@@ -1387,7 +1401,9 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
                                     });
                             }
                         }
-                        window.hWin.HAPI4.save_pref('version_in_cache', window.hWin.HAPI4.sysinfo['version']);
+                        if (version_in_cache!=window.hWin.HAPI4.sysinfo['version']) {
+                            window.hWin.HAPI4.save_pref('version_in_cache', window.hWin.HAPI4.sysinfo['version']);
+                        }
                         if (need_exit) return true;
 
                         var res = window.hWin.HEURIST4.util.versionCompare(window.hWin.HAPI4.sysinfo.db_version_req,
@@ -1415,12 +1431,17 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
 
                 }
                 return false;
-            }
+            },
 
             /*
             ,databases: function(request, callback){
             _callserver('sys_databases', request, callback);
             }*/
+            
+            repositoryAction: function (request, callback) {
+                _callserver('repoController', request, callback);
+            },
+
         }
         return that;
     }

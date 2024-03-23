@@ -732,7 +732,7 @@ $.widget( "heurist.lookupConfig", {
             tbl.empty();
 
             $.each(this._current_cfg.fields, function(field, code){
-                $('<tr><td>'+field+'</td><td><select data-field="'+field+'"/></td><td class="lookup_data" data-field="'+field+'"></td></tr>').appendTo(tbl);
+                $('<tr><td>'+field+'</td><td><select data-field="'+field+'"></select></td><td class="lookup_data" data-field="'+field+'"></td></tr>').appendTo(tbl);
             });
 
             var rty_ID = this._current_cfg.rty_ID>0 ?$Db.getLocalID('rty',this._current_cfg.rty_ID) :'';
@@ -772,7 +772,7 @@ $.widget( "heurist.lookupConfig", {
 
         if(this._current_cfg==null){
             
-            this.element.find('#service_name').html('<span class="ui-icon ui-icon-arrowthick-1-w"/>Select a service to edit or click the assign button');
+            this.element.find('#service_name').html('<span class="ui-icon ui-icon-arrowthick-1-w"></span>Select a service to edit or click the assign button');
             this.element.find('#service_config').hide();
             
         }else{
@@ -1277,7 +1277,7 @@ $.widget( "heurist.lookupConfig", {
         
         if(this._isNewCfg && this._current_cfg.label){
 
-            var s = this._current_cfg.label + '<span class="ui-icon ui-icon-arrowthick-1-e"/> ' 
+            var s = this._current_cfg.label + '<span class="ui-icon ui-icon-arrowthick-1-e"></span> ' 
                     +  (rty_ID>0?$Db.rty(rty_ID, 'rty_Name'):'select record type');
             this.serviceList.find('li[data-service-id="new"]').html(s);
         }
@@ -1308,12 +1308,13 @@ $.widget( "heurist.lookupConfig", {
             for(j in this._available_services){
                 if(cfg.service == this._available_services[j].service){
                     name = this._available_services[j].label;
+                    break;
                 }
             }
 
-            s = name + ' <span class="ui-icon ui-icon-arrowthick-1-e"/> ' 
+            var s = name + ' <span class="ui-icon ui-icon-arrowthick-1-e"></span> ' 
                     + $Db.rty(cfg.rty_ID, 'rty_Name');
-            s = s + '<span data-service-id="'+idx+'" style="float:right;padding-top: 5px" class="ui-icon ui-icon-circle-b-close"/>';
+            s = s + '<span data-service-id="'+idx+'" style="float:right;padding-top: 5px" class="ui-icon ui-icon-circle-b-close"></span>';
 
             this._reloadServiceList_item( idx, s ); //add to list
         }

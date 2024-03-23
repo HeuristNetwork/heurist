@@ -144,6 +144,7 @@ regional['GER'] = {
         'menu-import-csv-fieldtypes': 'Import from CSV', //@translate
         'menu-structure-import': 'Templates durchsuchen',
         'menu-lookup-config': 'Externe Lookups',
+        'menu-repository-config': 'Externe Repositorys',
         'menu-structure-summary': 'Visualisieren',
         'menu-structure-refresh': 'Neuladen',
     

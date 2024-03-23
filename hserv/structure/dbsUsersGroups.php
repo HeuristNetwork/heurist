@@ -66,7 +66,7 @@
     * user_EmailApproval
     * user_getNotifications
     * 
-    * user_getRepositoryCredentials($serviceName, $ugr_ID) - returns read/write credentials for given service and user_id
+    * user_getRepositoryCredentials($serviceName, $all_groups, $ugr_ID) - returns read/write credentials for given service and user_id
     * user_getRepositoryList($ugr_ID, $writeOnly=true) - returns list of available external repositories for given user
     * 
     */
@@ -603,8 +603,9 @@
             $prefs = $_SESSION[$dbname]["ugr_Preferences"];
             
             if(@$prefs['externalRepositories']==null){
-                $repositories = user_getRepositoryCredentials($system, 'all', $ugr_ID);
-                if($repositories!=null){
+                //get current from database
+                $repositories = user_getRepositoryCredentials($system, false, $ugr_ID);
+                if($repositories!=null && count($repositories)>0){
                     $prefs['externalRepositories'] = $repositories;
                 }
             }
@@ -625,7 +626,8 @@
     function user_getPreferences( $system ){
 
         $mysqli = $system->get_mysqli();
-        $ugrID = $system->get_user_id();        
+        $ugrID = $system->get_user_id();            
+        
         //1. from database
         if($ugrID>0){ //logged in
             $res = mysql__select_value( $mysqli, 'select ugr_Preferences from sysUGrps where ugr_ID='.$ugrID);
@@ -636,6 +638,7 @@
                 }
             }
         }
+        
         //2. from session or default
         $dbname = $system->dbname_full();
         return(@$_SESSION[$dbname]['ugr_Preferences'])
@@ -1174,15 +1177,175 @@
     }
     
     //==========================================================================
+    //
+    //  nakala_2:{label:"Nakala",params:{writeApiKey: '111', writeUser: '', writePwd: '', readApiKey: '2222', readUser: '', …},
+    //              service:"nakala",service_id:"nakala_2",usr_ID:"2"}    
+    //
+    //
+    //
+    //
+    function user_saveRepositoryCredentials($system, $new_prefs, $to_remove) {
+        
+        $res = false;
+        
+        if(is_string($new_prefs)){
+            $new_prefs = json_decode($new_prefs, true);
+        }
+        
+        if(!(is_array($new_prefs) && count($new_prefs)>0 ||
+             is_array($to_remove) && count($to_remove)>0)) {
+                
+            $system->addError(HEURIST_INVALID_REQUEST, 'Data to update repository configuration are not defined');                
+            return false;
+        }
+        
+        //get groups for current user
+        $wg_ids = array();
+        $currentUser = $system->getCurrentUser();
+        if($currentUser && @$currentUser['ugr_ID']>0)
+        {
+            if(@$currentUser['ugr_Groups']){
+                $wg_ids = array_keys($currentUser['ugr_Groups']);
+            }
+            array_push($wg_ids, $currentUser['ugr_ID']);
+        }else{
+            $system->addError(HEURIST_REQUEST_DENIED);                
+            return false;
+        }
+        
+        
+        if($system->is_admin()){
+            // be sure to include the generic everybody workgroup
+            array_push($wg_ids, 0); 
+        }
+        
+        $mysqli = $system->get_mysqli();
+        
+        //prepare services - group by group/user ids        
+        $prepared = array();
+        
+        if(is_array($new_prefs)){
+            foreach($new_prefs as $service_id=>$service){
+            if(in_array($service['usr_ID'], $wg_ids)){
+                $usr_ID = intval($service['usr_ID']);
+                if(!@$prepared[$usr_ID]) $prepared[$usr_ID] = array(); 
+                        
+                $prepared[$usr_ID][$service_id] = $service;
+            }
+        }
+        }
+                
+        if(is_array($to_remove)){
+            foreach($to_remove as $service_id){
+
+                $parts = explode('_',$service_id);
+                $usr_ID = end($parts);
+                
+                if(!@$prepared[$usr_ID][$service_id] && in_array($usr_ID, $wg_ids)){
+                    //new value does not exists
+                    $prepared[$usr_ID][$service_id] = 'delete';
+                }
+            }
+        }
+        
+        //save into database
+        if(!(count($prepared)>0)){
+            $system->addError(HEURIST_INVALID_REQUEST, 'Data to update repository configuration are not defined');                
+            return false;
+        }
+        
+        foreach($prepared as $usr_ID=>$services){
+        
+            $prefs = mysql__select_value( $mysqli, 'select ugr_Preferences from sysUGrps where ugr_ID='.$usr_ID);
+            if($prefs!=null && $prefs!=''){
+                $prefs = json_decode($prefs, true);
+            }
+            if($prefs==null || count($prefs)===0){
+                $prefs = array();    
+            }
+            
+            $curr_services = @$prefs['externalRepositories'];
+            //if password is not set take passwords from current settings
+            foreach($services as $service_id=>$service){
+                if(is_array($to_remove) && in_array($service_id,$to_remove)){
+                    
+                    if($service=='delete'){
+                        unset($services[$service_id]);
+                    }
+                    continue; //do not take password from the existing one - it was removed
+                }
+                /*
+                if(is_array($curr_services) && count($curr_services)>0){
+                    if(@$curr_services[$service_id]['params']['writePwd']){ //old passsword exists
+                        if(!@$service['params']['writePwd']){ //new password not defined
+                            $services[$service_id]['params']['writePwd'] = $curr_services[$service_id]['params']['writePwd'];
+                        } 
+                    }
+                    if(@$curr_services[$service_id]['params']['readPwd']){ //old passsword exists
+                        if(!@$service['params']['readPwd']){ //new password not defined
+                            $services[$service_id]['params']['readPwd'] = $curr_services[$service_id]['params']['readPwd'];
+                        } 
+                    }
+                }*/
+            }
+            
+            if(count($services)==0){
+                if(@$prefs['externalRepositories']){
+                    unset($prefs['externalRepositories']);   
+                }
+            }else{
+                $prefs['externalRepositories'] = $services;    
+            }
+            
+            //$res = mysql__insertupdate( $mysqli, 'sysUGrps', 'ugr', array(     
+            //            'ugr_ID'=>$usr_ID,
+            //            'ugr_Preferences'=>json_encode($prefs) ));
+                        
+            $res = mysql__exec_param_query($mysqli, 
+                    'UPDATE `sysUGrps` set ugr_Preferences=? WHERE ugr_ID='.$usr_ID, 
+                    array('s', (count($prefs)==0?'':json_encode($prefs))));
+                    
+            if(!$res){
+                break;
+            }
+            
+        }//for
+
+        return $res;       
+    }
+
+    //
+    // returns credentials for given service_id  (service_name+user_id) 
+    //
+    function user_getRepositoryCredentials2($system, $serviceId) {
+        
+        $parts = explode('_', $serviceId);
+        $ugr_ID = end($parts);
+        if(count($parts)>2){
+            $serviceName = implode('_',array_slice($parts,0,count($parts)-1));            
+        }else{
+            $serviceName = $parts[0];
+        }
+        
+        return user_getRepositoryCredentials($system, false, $ugr_ID, $serviceName);                                                                                                    
+    }
     
     //
-    // returns read/write credentials for given service and user_id
+    // returns read/write credentials for given service and user_id  (for edit on client side)
     //
-    function user_getRepositoryCredentials($system, $serviceName, $ugr_ID) {
+    function user_getRepositoryCredentials($system, $search_all_groups, $ugr_ID, $serviceName=null) {
 
         //1. search all workgroups
-        $query = 'SELECT ugr_Preferences FROM sysUsrGrps '
+        if($search_all_groups){
+            $query = 'SELECT ugr_ID, ugr_Preferences FROM sysUGrps '
+                    .' WHERE ugr_ID=0 OR ugr_ID='.intval($ugr_ID)
+                    .' OR ugr_ID in (SELECT ugl_GroupID FROM sysUsrGrpLinks WHERE ugl_UserID='.$ugr_ID.')'
+                    .' ORDER BY ugr_Type DESC';
+        }else{
+        //2 search only specific group or user        
+            $query = 'SELECT ugr_ID, ugr_Preferences FROM sysUGrps '
                     .' WHERE ugr_ID='.intval($ugr_ID);
+        }
         
         /*
         if($all_groups){
@@ -1196,24 +1359,29 @@
         
         $mysqli = $system->get_mysqli();
         $res = $mysqli->query($query);           //ugr_Type
+        $result = array();
         
         //2. loop and parse preferences
         if($res){
-            while ($row = $res->fetch_row()) {
+            while ($row = $res->fetch_row()) { //loop for user/groups
                 //get preferences
-                $prefs = $row[0];
+                $usr_ID = intval($row[0]);
+                $prefs = $row[1];
                 
                 if($prefs!=null && $prefs!=''){
                     $prefs = json_decode($prefs, true);
-                    if($prefs && count($prefs)>0 && array_key_exists('externalRepositories',$prefs)){
+                    if(is_array($prefs) && count($prefs)>0 && array_key_exists('externalRepositories',$prefs)){
                         $prefs = $prefs['externalRepositories'];
-                        if($serviceName==null || $serviceName=='all'){
-                            return $prefs['externalRepositories']; //all services                           
-                        }else{
-                            foreach($prefs as $idx=>$service){
-                                if(@$service['repository']==$serviceName){
-                                     $result = $service;                               
-                                     break;
+                        if(is_array($prefs) && count($prefs)>0){
+                            if($serviceName==null || $serviceName=='all'){
+                                //all services                           
+                                $result = array_merge($result, $prefs);
+                            }else{
+                                foreach($prefs as $service_id=>$service){
+                                    if(@$service['service']==$serviceName){
+                                         $result[$service_id] = $service;
+                                         if(!$search_all_groups) break;
+                                    }
                                 }
                             }
                         }
@@ -1229,40 +1397,51 @@
     }
     
     //
-    // returns list of available external repositories for given user
+    // returns list of available/writeable external repositories for given user
+    //   
+    //   ugr_ID, ugr_Name,  serviceName 
     //
-    function user_getRepositoryList($system, $ugr_ID, $writeOnly=true){
+    function user_getRepositoryList($system, $ugr_ID, $writeOnly){
         
-        //1. search all workgroups
-        $query = 'SELECT ugr_ID, ugr_Name, ugr_Preferences FROM sysUsrGrps '
-                .' WHERE ugr_ID=0 OR ugr_ID='.intval($ugr_ID)
-                .' OR ugr_ID in (SELECT ugl_GroupID FROM sysUsrGrpLinks WHERE ugl_UserID='.intval($ugr_ID).')'
-                .' ORDER BY ugr_Type DESC';
-                
-        $result = null;        
+        $result = array();        
         
-        $mysqli = $system->get_mysqli();        
-        $res = $mysqli->query($query); //ugr_Type
+        $ugr_ID = intval($ugr_ID);
         
-        //2. loop and parse preferences
-        if($res){
-            while ($row = $res->fetch_row()) {
-                //get preferences
-                $prefs = $row[2];
-                if($prefs!=null && $prefs!=''){
-                    $prefs = json_decode($prefs, true);
-                    if($prefs && count($prefs)>0 && array_key_exists('externalRepositories',$prefs)){
-                            foreach($prefs as $idx=>$service){
-                                if(!$writeOnly || @$service['writeApiKey'] || @$service['writeUser'])
-                                {
-                                     //ugr_ID, ugr_Name, service Name
-                                     $result[] = array(intval($row[0]),$row[1],$service['repository']);
+        if($ugr_ID>=0){
+            //1. search all workgroups
+            $query = 'SELECT ugr_ID, ugr_Name, ugr_Preferences FROM sysUGrps '
+                    .' WHERE ugr_ID=0 OR ugr_ID='.intval($ugr_ID)
+                    .' OR ugr_ID in (SELECT ugl_GroupID FROM sysUsrGrpLinks WHERE ugl_UserID='.$ugr_ID.')'
+                    .' ORDER BY ugr_Type DESC';
+                    
+            
+            $mysqli = $system->get_mysqli();        
+            $res = $mysqli->query($query); //ugr_Type
+            
+            //2. loop and parse preferences
+            if($res){
+                while ($row = $res->fetch_row()) {
+                    //get preferences
+                    $prefs = $row[2];
+                    if($prefs!=null && $prefs!=''){
+                        $prefs = json_decode($prefs, true);
+                        if($prefs && count($prefs)>0 && array_key_exists('externalRepositories',$prefs)){
+                                $prefs = $prefs['externalRepositories'];
+                                if(is_array($prefs))                                
+                                foreach($prefs as $service_id=>$service){
+                                    if(!$writeOnly || @$service['params']['writeApiKey'] || @$service['params']['writeUser'])
+                                    {
+                                         //$service['service'].'_'.$usr_ID, 
+                                         $usr_ID = intval($row[0]);
+                                         $result[] = array($service_id, $service['label'], $usr_ID, $row[1]);
+                                         //$usr_ID, $row[1], $service['service'], $service['label']);
+                                    }
                                 }
-                            }
+                        }
                     }
                 }
+                $res->close();
             }
-            $res->close();
         }
         
         return $result;        

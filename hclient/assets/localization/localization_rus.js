@@ -280,10 +280,11 @@ regional['RUS'] = {
         'menu-import-csv-rectypes': 'Import from CSV', //@translate
         'menu-structure-vocabterms': 'Словари',
         'menu-structure-fieldtypes': 'Базовые поля',
-        'menu-import-csv-fieldtypes': 'Import from CSV', //@translate
+        'menu-import-csv-fieldtypes': 'Импорт из CSV',
         'menu-structure-import': 'Импорт шаблонов',
         'menu-structure-workflowstages': 'Стадии работы',
-        'menu-lookup-config': 'External lookups', //@translate
+        'menu-lookup-config': 'Внешний поиск данных',
+        'menu-repository-config': 'Внешние хранилища',
         'menu-structure-summary': 'Визуализация',
         'menu-structure-refresh': 'Перегрузить структуру',
     

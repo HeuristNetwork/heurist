@@ -168,6 +168,7 @@ regional['ENG'] = {
         'menu-structure-import': 'Browse templates',
         'menu-structure-workflowstages': 'Workflow stages',
         'menu-lookup-config': 'External lookups',
+        'menu-repository-config': 'External repositories',
         'menu-structure-summary': 'Visualise',
         'menu-structure-refresh': 'Refresh memory',
     
