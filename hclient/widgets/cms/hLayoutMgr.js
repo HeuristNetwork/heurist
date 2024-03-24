@@ -469,7 +469,6 @@ function hLayoutMgr(){
             layout.options['language'] = window.hWin.HAPI4.getLangCode3(_supp_options['lang'],'def');    
         }
         
-        
         if (app && app.script && app.widgetname) { //widgetname - function name to init widget
 
             if($.isFunction($('body')[app.widgetname])){ //OK! widget script js has been loaded            

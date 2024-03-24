@@ -655,6 +655,14 @@ regional['RUS'] = {
             'Personal Files':'Личные файлы',
             'Delete selected files': 'Удалить отмеченные файлы',
     
+    // EMAIL FORM WIDGET --------------------
+    'Email Us': 'Отправить',
+    'Your name': 'Ваше имя',
+    'Email Address': 'Ваш адрес эл.почты',
+    'Email Message': 'Текст сообщения',
+    'Prove you are human': 'Докажите что вы не робот',
+    'Email does not appear to be valid': 'Адрес эл.почты некорректен',
+    'Email has been sent': 'Сообщение отправлено'
     
 };
 

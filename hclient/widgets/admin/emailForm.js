@@ -52,8 +52,9 @@ $.widget( "heurist.emailForm", {
         //listeners
         onInitFinished:null,  //event listener when dialog is fully inited - use to perform initial search with specific parameters
         beforeClose:null,     //to show warning before close
-        onClose:null 
+        onClose:null,
         
+        language: 'def'
     },
     
     _as_dialog:null, //reference to itself as dialog (see options.isdialog)
@@ -147,6 +148,7 @@ $.widget( "heurist.emailForm", {
         if(this._open_button) this._open_button.remove();    
         if(this._as_dialog) this._as_dialog.remove();    
     },
+    
      
     //  
     // invoked from _init after loading of html content
@@ -165,6 +167,8 @@ $.widget( "heurist.emailForm", {
         if(missed.length>0){
             window.hWin.HEURIST4.msg.showMsgErr('Email form must have the following html elements: '+missed.join(','));            
         }
+        
+        window.hWin.HRA(this._element_form);//this.element
         
         this._refreshCaptcha();
         
@@ -291,6 +295,9 @@ $.widget( "heurist.emailForm", {
     //
     popupDialog: function(){
         if(this.options.isdialog){
+            
+            
+            window.hWin.HRA(this._element_form);//this.element
 
             var $dlg = this._as_dialog.dialog("open");
             
@@ -377,7 +384,7 @@ $.widget( "heurist.emailForm", {
 
         var ss = window.hWin.HEURIST4.msg.checkLength2( ele, '', 1, 0 );
         if(ss!=''){
-            err_text = err_text + ', Humanity check';
+            err_text = err_text + ', '+window.hWin.HR('Prove you are human');
         }else{
             ele.val(val);
         }
@@ -397,7 +404,7 @@ $.widget( "heurist.emailForm", {
 
 
         }else{
-            err_text = window.hWin.HR('Missing required field(s)')+': '+err_text.substring(2);
+            err_text = window.hWin.HR('Missing required fields')+': '+err_text.substring(2);
         }
         
         if(err_text==''){

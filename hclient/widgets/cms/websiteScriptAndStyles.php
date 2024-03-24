@@ -366,6 +366,10 @@ function onPageInit(success)
 
         }
         
+        if(current_language!='def'){
+            window.hWin.HR = window.hWin.HAPI4.setLocale(current_language);
+        }
+        
         var topmenu = $('#main-menu');
         
         if(topmenu.length==0){ //menu-less page
@@ -420,7 +424,7 @@ function initMainMenu( afterInitMainMenu ){
 function switchLanguage(event){
     
     var lang_code = $(event.target).attr('data-lang');
-
+    
     if(lang_code && current_language != lang_code){
         //add url parameter
         current_language = lang_code;

@@ -2633,8 +2633,13 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
         //
         //localize all elements with class slocale for given element
         //
-        HRA: function (ele) {
+        HRA: function (ele, lang) {
             if (ele) {
+                
+                if(lang){
+                    lang = that.getLangCode3(lang, _region);    
+                }
+                
                 $.each($(ele).find('.slocale'), function (i, item) {
                     var s = $(item).text();
                     $(item).html(window.hWin.HR(s));

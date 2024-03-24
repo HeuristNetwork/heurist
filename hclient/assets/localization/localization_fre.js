@@ -720,7 +720,17 @@ regional['FRE'] = {
     'Base Maps': 'Cartes de base',
     
     map_print_note: 'Après avoir cliqué sur Imprimer, vous devez faire glisser une boîte sur la carte pour définir la zone que vous souhaitez imprimer. Tant que vous ne l\'aurez pas fait, la boîte de dialogue d\'impression ne s\'affichera pas.',
-
+    
+    // EMAIL FORM  --------------------
+    'Email Us': 'Envoyez-nous un e-mail',
+    'Your name': 'Votre nom',
+    'Email Address': 'Adresse e-mail',
+    'Email Message': 'Message e-mail',
+    'Prove you are human': 'Prouvez que vous êtes humain',
+    'Email does not appear to be valid': "L'e-mail ne semble pas valide",
+    'Email has been sent': "L'e-mail a été envoyé",
+    
+    
 //===================    
     
     'Design database': 'Conçevoir base de données',
