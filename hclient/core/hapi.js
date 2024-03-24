@@ -775,7 +775,7 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
                 for (var idx in ugrp_ids) {
 
                     var usr_ID = Number(ugrp_ids[idx]);
-                    var sUserName = that.SystemMgr.getUserNameLocal(usr_ID);
+                    var sUserName = that.getUserNameLocal(usr_ID);
 
                     if (sUserName) {
                         sUserNames[usr_ID] = sUserName;
