@@ -66,8 +66,10 @@
     * user_EmailApproval
     * user_getNotifications
     * 
-    * user_getRepositoryCredentials($serviceName, $all_groups, $ugr_ID) - returns read/write credentials for given service and user_id
-    * user_getRepositoryList($ugr_ID, $writeOnly=true) - returns list of available external repositories for given user
+    * user_getRepositoryList - list of available/writeable external repositories for given user
+    * user_getRepositoryCredentials2 - returns credentials for given service_id  (service_name+user_id) 
+    * user_getRepositoryCredentials - returns read/write credentials for given service and user_id  (for edit on client side)
+    * user_saveRepositoryCredentials - Saves repository credentials in ugr_Preferences
     * 
     */
     
@@ -1182,7 +1184,7 @@
     //              service:"nakala",service_id:"nakala_2",usr_ID:"2"}    
     //
     //
-    //
+    //  Saves repository credentials in ugr_Preferences
     //
     function user_saveRepositoryCredentials($system, $new_prefs, $to_remove) {
         
@@ -1313,7 +1315,8 @@
 
         return $res;       
     }
-
+    
+    
     //
     // returns credentials for given service_id  (service_name+user_id) 
     //

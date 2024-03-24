@@ -2738,7 +2738,13 @@ public methods
 
                     if($rtn){ // register URL ($rtn)
                         //$file_entity->setRecords(null); // reset records
-                        $new_ulf_ID = $file_entity->registerURL($rtn); // register nakala url
+                        if($service_id){
+                            $fields = array('ulf_Parameters'=>'{"repository":"'.$service_id.'"}');    
+                        }else{
+                            $fields = null;
+                        }
+                        
+                        $new_ulf_ID = $file_entity->registerURL($rtn,false,0,$fields); // register nakala url
                         if(!is_numeric($new_ulf_ID) || $new_ulf_ID > 0){
                             $sqlErrors[$row[2]][] = 'File #' . $row[1] . ' &Rightarrow; ' . $mysqli->error;
                             $failed_ids[] = $row[2];

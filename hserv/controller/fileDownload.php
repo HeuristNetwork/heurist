@@ -114,6 +114,12 @@ if(!$error){
             $originalFileName = $fileinfo['ulf_OrigFileName'];
             $fileSize = $fileinfo['ulf_FileSizeKB'];
             $fileExt = $fileinfo['ulf_MimeExt'];
+            $fileParams = $fileinfo['ulf_Parameters']; // external repository service id
+            if($fileParams!=null && !empty($fileParams)){
+                $fileParams = json_decode($fileParams, true);
+            }
+                
+            
             $params = null;
             
             if( @$_REQUEST['mode']=='page')     //return full page with embed player
@@ -262,6 +268,18 @@ if(!$error){
                         
                         
                     }else{
+                        //modify $external_url or perform authorization to external repository here 
+                        // @todo
+                        //if(is_array($fileParams) && @$fileParams['repository']){
+                        //    $service_id = $fileParams['repository'];
+                        //    $credentials = user_getRepositoryCredentials2($system, $service_id);
+                        //    if($credentials!=null){
+                        //           @$credentials[$service_id]['params']['writeApiKey']    
+                        //           @$credentials[$service_id]['params']['readApiKey']
+                        //    }
+                        //}
+                        
+                        
                         header('Location: '.$external_url);  //redirect to URL (external)    
                     }
                     

@@ -1412,44 +1412,6 @@ function isActionInProgress($action, $range_minutes, $db_name=''){
     return true;
 }
 
-/*
-Notes about authorization to external services
-1. Per database - stored in sysUGrps.ugr_Preferences for user 0
-2. Per group or per user in sysUGrps.ugr_Preferences for the appropriate group/user records
-
-externalRepositories:[{
-repository: name of repository
-readApiKey:
-readUser:
-readPwd:
-writeApiKey:
-writeUser:
-writePwd:
-},....]
-
-api keys(?) and other credentials are not transferred to client side
-
-It retrieves list of services (with defined credentials) when
-1. Edit credentials for user or group
-2. When user uploads file to ext.repository
-
-When file is uploaded into repository it keeps user/group id in recUploadedFiles.ulf_Parameters
-{useCredentialsForUser:0}
-
-1. The separate form to edit credentials are called from user/group manager
-2. From Properties edit form (per database)
-
-
-The following server side methods will be implemented (for Brandon)
-
-DbSysUsers:getRepositoryList($ugr_ID, $writeOnly) - returns list of repositories with defined credentials 
-    $ugr_ID - for user (including database and groups where user is member)
-    $writeOnly - if true only write credentials
-
-DbSysUsers:getCredentials($serviceName, $ugr_ID) - returns read/write credentials for given service and user_id
-DbRecUploadedFiles:getCredentials($ulf_ID) - returns read credentials for given file
-
-*/
 //
 // Upload file to Nakala and return URL to new Nakala file
 // $system => Initiated System object

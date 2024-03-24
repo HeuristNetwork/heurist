@@ -1822,8 +1822,6 @@ When we open "iiif_image" in mirador viewer we generate manifest dynamically.
                     $ret['ulf_TempFileThumb'] = $file->thumbnailName;
                 }
                 
-                //!!!!! ,'ulf_Parameters' => "mediatype=".getMediaType($mimeType, $mimetypeExt)); //backward capability            
-                
         }else{
         
             /*if(is_a($file,'stdClass')){

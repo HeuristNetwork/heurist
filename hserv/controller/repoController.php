@@ -21,8 +21,69 @@ action
     
   update - save/delete credentials in ugr_Preferences - user_saveRepositoryCredentials 
   
-  upload - upload and register file to external repository
-  
+*/
+
+/*
+Credentials for external repositories are saved in sysUGrps.ugr_Preferences
+per database (group 0) per group or per user. 
+Unique id is "serviceName_groupUserid"
+{
+    "externalRepositories": {
+        "nakala_1": {
+            "service": "nakala",
+            "label": "Nakala",
+            "service_id": "nakala_1",
+            "usr_ID": "1",
+            "params": {
+                "writeApiKey": "2222",
+                "writeUser": "",
+                "writePwd": "",
+                "readApiKey": "",
+                "readUser": "",
+                "readPwd": ""
+            }
+        }
+    }
+}
+
+These values are not transferred  to client as other user preferences. 
+On client side it is possible to obtain
+1) either list of available repositories for current user (action "list")
+        see recordAction.js  window.hWin.HAPI4.SystemMgr.repositoryAction({'a': 'list'}
+2) or for edit form (action "get")
+        see repositoryConfig.js window.hWin.HAPI4.SystemMgr.repositoryAction({'a': 'get'}
+        
+When a file is uploaded to ext.repository, repository service_id should be provided.
+see recordBatch.php
+
+$service_id = $this->data['repository'];
+$credentials = user_getRepositoryCredentials2($this->system, $service_id);
+
+$credentials[$service_id]['params']['writeApiKey'] or user+pwd can be used for authentication
+
+on registration of URL, provide ulf_Parameters
+
+$fields = array('ulf_Parameters'=>'{"repository":"'.$service_id.'"}');        
+$new_ulf_ID = $file_entity->registerURL($rtn,false,0,$fields)
+
+It will be used later for authentication in fileDownload.php
+
+if(is_array($fileParams) && @$fileParams['repository']){
+    $service_id = $fileParams['repository'];
+    $credentials = user_getRepositoryCredentials2($system, $service_id);
+    if($credentials!=null){
+           $readApiKey = @$credentials[$service_id]['params']['readApiKey'];
+           
+    }
+}
+
+see dbsUserGroups.php for repository credentials methods 
+
+    user_getRepositoryList - list of available/writeable external repositories for given user
+    user_getRepositoryCredentials2 - returns credentials for given service_id  (service_name+user_id) 
+    user_getRepositoryCredentials - returns read/write credentials for given service and user_id  (for edit on client side)
+    user_saveRepositoryCredentials - Saves repository credentials in ugr_Preferences
+
 */
 require_once dirname(__FILE__).'/../System.php';
 require_once dirname(__FILE__).'/../structure/dbsUsersGroups.php';
@@ -64,7 +125,7 @@ if(!$system->init(@$_REQUEST['db'])){
             
             $res = user_saveRepositoryCredentials($system, $to_edit, $to_delete);
 
-        }else if($action=='upload'){   
+        //}else if($action=='upload'){   
             //upload and register file to external repository
 
             
