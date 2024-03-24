@@ -46,9 +46,7 @@ class DbUsrRecPermissions extends DbEntityBase
               //."UNIQUE KEY rcp_composite_key (rcp_RecID,rcp_UGrpID)"
             .") ENGINE=InnoDB COMMENT='Permissions for groups to records'";
         
-            if (!$mysqli->query($query)) {
-                $this->is_table_exists = false;
-            }else{
+            if ($mysqli->query($query)) {
                 $this->is_table_exists = true;
             }
         

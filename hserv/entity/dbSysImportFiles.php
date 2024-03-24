@@ -48,9 +48,9 @@ class DbSysImportFiles extends DbEntityBase
     PRIMARY KEY  (`sif_ID`))";    
     
     
-        if (!$mysqli->query($query)) {
-            $this->is_table_exists = false;
-        }
+            if ($mysqli->query($query)) {
+                $this->is_table_exists = true;
+            }
         
         }
         
