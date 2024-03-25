@@ -720,11 +720,10 @@ class DbUtils {
             if($dump_options==null){
                 $dump_options = array(
                         'add-drop-table' => true,
-                        //'skip-triggers' => false,
                         'single-transaction' => true, //was true till 2024-02-16
                         'add-drop-trigger' => true,
                         //'databases' => true,
-                        'triggers' =>true,
+                        'skip-triggers' =>true,
                         'skip-dump-date' => true,
                         //'routines' =>true,
                         'quick' =>true,
@@ -741,7 +740,7 @@ class DbUtils {
             //0: use 3d party PDO mysqldump, 2 - call mysql via shell (default)
             $dbScriptMode = defined('HEURIST_DB_MYSQL_DUMP_MODE')?HEURIST_DB_MYSQL_DUMP_MODE :2;
 
-            if($dbScriptMode==2){
+            if($dbScriptMode==2){  //use native mysqldump
                 if (!defined('HEURIST_DB_MYSQLDUMP') || !file_exists(HEURIST_DB_MYSQLDUMP)){
 
                     $msg = 'The path to mysqldump has not been correctly specified. '
@@ -751,7 +750,7 @@ class DbUtils {
                     if($verbose) echo '<br>'.$msg;
                     return false;
                 }
-            }else{
+            }else{ //use php library
                 $dbScriptMode = 0;
             }
             
