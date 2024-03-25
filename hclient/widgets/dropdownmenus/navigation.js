@@ -654,7 +654,10 @@ $.widget( "heurist.navigation", {
 
         if($ele && $ele.length>0){
             $($ele[$ele.length-1].firstChild).addClass('selected');
-            setTimeout(() => {this.divMainMenuItems.menu('collapseAll');}, 1000);
+            setTimeout(() => {
+                    if(this.divMainMenuItems.menu('instance'))
+                        this.divMainMenuItems.menu('collapseAll');
+            }, 1000);
         }
     },
     
