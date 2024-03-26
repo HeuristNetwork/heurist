@@ -676,7 +676,8 @@ function ShowReps( is_snippet_editor ) {
 
             if(mode<3)
             { //save
-                template_file = jQuery.trim(document.getElementById("edTemplateName").innerHTML);
+                template_file = document.getElementById("edTemplateName").innerHTML;
+                template_file = String(template_file).trim();
 
                 if(mode==1){ //save as - get new name
                 

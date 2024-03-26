@@ -744,12 +744,12 @@ window.hWin.HUL = window.hWin.HEURIST4.util = {
             {
                 var pos = styles[i].indexOf(':');
                 if(pos>1){
-                    k = $.trim(styles[i].substr(0,pos));
-                    v = $.trim(styles[i].substr(pos+1));
+                    k = String(styles[i].substr(0,pos)).trim();
+                    v = String(styles[i].substr(pos+1)).trim();
                 }
                 /*style = styles[i].split(':');
-                k = $.trim(style[0]);
-                v = $.trim(style[1]);*/
+                k = String(style[0]).trim();
+                v = String(style[1]).trim();*/
                 if (k && v && k.length > 0 && v.length > 0)
                 {
                     if(v==='true')v=true;

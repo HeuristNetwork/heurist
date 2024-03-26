@@ -2215,7 +2215,7 @@ function CrosstabsAnalysis(_query, _query_domain) {
             $('#titleSubmit').on('click',function(){
                 var title = $('#tableTitle').val();
 
-                if($('#tableTitle').val().length <=0 || $.trim($('#tableTitle').val()) == ''){
+                if($('#tableTitle').val().length <=0 || String($('#tableTitle').val()).trim() == ''){
                     $('#tableHeader').html(tableTitle);
                 }
                 else{

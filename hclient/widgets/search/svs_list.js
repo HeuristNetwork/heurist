@@ -280,7 +280,7 @@ $.widget( "heurist.svs_list", {
                 var leavesOnly = true; //$("#leavesOnly").is(":checked"),
                 match = $(this).val();
 
-                if(e && e.which === $.ui.keyCode.ESCAPE || $.trim(match) === ""){
+                if(e && e.which === $.ui.keyCode.ESCAPE || String(match).trim() === ""){
                     that.btn_reset.trigger('click');
                     return;
                 }
