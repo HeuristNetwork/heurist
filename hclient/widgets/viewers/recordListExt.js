@@ -88,7 +88,7 @@ $.widget( "heurist.recordListExt", {
 
         this.div_content = this.element;
         if(this.div_content.parent('.tab_ctrl').length==0 && !this.element.attr('data-widgetid')){
-            this.div_content.css({width:'100%', height:'100%'}); 
+            this.div_content.css({width:'100%', height:'100%', 'overflow':'hidden'}); 
         }
         
         //this.div_content = $('<div>').css({width:'100%', height:'100%'}).appendTo( this.element );
@@ -99,7 +99,7 @@ $.widget( "heurist.recordListExt", {
         
         
         if(this.options.is_frame_based){
-            this.dosframe = $( "<iframe>" ).css({overflow: 'none !important', width:'100% !important'})
+            this.dosframe = $( "<iframe>" ).css({overflow: 'none !important', width:'100% !important', position:'relative'})
             //.attr('src',window.hWin.HAPI4.baseURL+"common/html/msgNoRecordsSelected.html")
             .appendTo( this.div_content );
         }

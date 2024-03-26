@@ -123,7 +123,7 @@ if(defined('IS_INDEX_PAGE')){
 <!doctype html>
 <html  class="no-js" lang="en" dir="ltr">
 */
-if(defined('IS_INDEX_PAGE')){
+if(true || defined('IS_INDEX_PAGE')){
 ?>
 <!DOCTYPE html>
 <?php    

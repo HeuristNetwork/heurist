@@ -524,7 +524,7 @@ function hLayoutMgr(){
         $parent.appendTo(container);
         
         
-        var layout_opts = {applyDefaultStyles: true, maskContents: true};
+        var layout_opts = {applyDemoStyles: false, maskContents: true};
     
         for(var i=0; i<layout.children.length; i++){
             

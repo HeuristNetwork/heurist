@@ -436,7 +436,7 @@ function initRecTypeSelector(){
     var hidePane = getSetting('startup_rectype_'+window.hWin.HAPI4.database) != 1;
 
     var layout_options = { 
-        applyDefaultStyles: true,
+        applyDemoStyles: false,
         center:{
             size: $('#main_content').width(),
             contentSelector: '#main_content'

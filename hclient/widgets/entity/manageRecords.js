@@ -1176,7 +1176,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
             //summary tab - specific for records only    
             if(this.editFormSummary && this.editFormSummary.length>0){    
                 var layout_opts =  {
-                    applyDefaultStyles: true,
+                    applyDemoStyles: true,
                     //togglerContent_open:    '&nbsp;',
                     //togglerContent_closed:  '&nbsp;',
                     north:{

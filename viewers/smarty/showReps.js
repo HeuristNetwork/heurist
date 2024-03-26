@@ -1029,7 +1029,7 @@ function ShowReps( is_snippet_editor ) {
         //document.getElementById("editorcontainer").style.display = (iseditor) ?"block" :"none";
         
         var layout_opts = {
-            applyDefaultStyles: true,
+            applyDemoStyles: false,
             maskContents: true,
             north:{
                 minHeight:200

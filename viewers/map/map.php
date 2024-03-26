@@ -50,7 +50,7 @@ $system->defineConstants();
 <link type="text/css" rel="stylesheet" href="<?php echo PDIR;?>external/leaflet.plugins/draw/leaflet.draw.css">
 <link type="text/css" rel="stylesheet" href="<?php echo PDIR;?>external/leaflet.plugins/markercluster/MarkerCluster.css">
 <link type="text/css" rel="stylesheet" href="<?php echo PDIR;?>external/leaflet.plugins/markercluster/MarkerCluster.Default.css">
-<script src="<?php echo PDIR;?>external/leaflet.plugins/markercluster.plugins/leaflet.markercluster.js"></script>
+<script src="<?php echo PDIR;?>external/leaflet.plugins/markercluster/leaflet.markercluster.js"></script>
 <script src="<?php echo PDIR;?>external/leaflet.plugins/wise-leaflet-pip.js"></script>
 <script src="<?php echo PDIR;?>external/leaflet.plugins/leaflet.circle.topolygon-src.js"></script>
 
@@ -412,7 +412,7 @@ if (!(@$_REQUEST['notimeline']=='true' || @$_REQUEST['notimeline']=='1')) { ?>
 <!-- HTML -->
 
 <body>
-    <div id="mapping" style="min-height:1px;height:100%; width:100%;cursor:progress">
+    <div id="mapping" style="min-height:1px;position:absolute;height:97%; width:100%;cursor:progress">
         <!-- Map -->
         <div class="ui-layout-center">
                 <div id="map" style="width:100%; height:100%" class="ui-layout-content"><span id="map-loading">Mapping...</span></div>

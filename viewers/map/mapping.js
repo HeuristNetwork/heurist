@@ -315,7 +315,7 @@ $.widget( "heurist.mapping", {
         
         // Layout options
         var layout_opts =  {
-            applyDefaultStyles: true,
+                    applyDemoStyles: false,
             togglerContent_open:    '<div class="ui-icon"></div>',
             togglerContent_closed:  '<div class="ui-icon"></div>',
             onresize_end: function(){

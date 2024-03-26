@@ -266,7 +266,7 @@ function hLayout(args) {
     function _initLayoutCardinal(layout, $container){
         
         var layout_opts =  {
-            applyDefaultStyles: true,
+            applyDemoStyles: false,
             maskContents:       true,  //alows resize over iframe
             //togglerContent_open:    '<div class="ui-icon"></div>',
             //togglerContent_closed:  '<div class="ui-icon"></div>',
@@ -665,7 +665,7 @@ console.error('Cardinal layout widget does not have proper options');
                         $cardinal_container.children('#'+ele_id).addClass('ui-layout-'+keys[i]);    
                     }
                     
-                    layout_opts['applyDefaultStyles'] = true;
+                    layout_opts['applyDemoStyles'] = false;
                     layout_opts['maskContents']       = true;
                     layout_opts['togglerAlign_open']  = 'center';
                     layout_opts['togglerContent_open']   = '&nbsp;';

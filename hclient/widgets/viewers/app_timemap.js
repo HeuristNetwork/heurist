@@ -76,6 +76,7 @@ $.widget( "heurist.app_timemap", {
         //???? this.element.hide();
 
         this.framecontent = $('<div>').addClass('frame_container')
+        .css('overflow','hidden')
         //.css({position:'absolute', top:'2.5em', bottom:0, left:0, right:0,
         //     'background':'url('+window.hWin.HAPI4.baseURL+'assets/loading-animation-white.gif) no-repeat center center'})
         .appendTo( this.element );
@@ -89,7 +90,7 @@ $.widget( "heurist.app_timemap", {
 
         this.mapframe = $( "<iframe>" )
         .attr('id', 'map-frame')
-        .css('padding','0px')
+        .css({'padding':'0px', position:'relative'})
         .appendTo( this.framecontent );
           
         this.loadanimation(true);

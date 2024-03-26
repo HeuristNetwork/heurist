@@ -135,7 +135,7 @@ if(@$isDatabaseStructure == 1){
 
 </div>
 
-<div id="divSvg" class="ent_content_full" style="top:4.5em;">
+<div id="divSvg" class="ent_content_full" style="top:4.5em;overflow:hidden;">
     <!-- SVG -->
     <svg id="d3svg" class="fullscreen">
         <text x="25" y="25" fill="black">Building graph ...</text>
@@ -256,7 +256,7 @@ if(@$isDatabaseStructure == 1){
 </div>
 -->
 
-<div id="divSvg" class="ent_content_full" style="top:4.5em;">
+<div id="divSvg" class="ent_content_full" style="top:4.5em;overflow:hidden;">
     <!-- SVG -->
     <svg id="d3svg" class="fullscreen" style="width: 100%; height: 100%;">
         <text x="25" y="25" fill="black">Building graph ...</text>

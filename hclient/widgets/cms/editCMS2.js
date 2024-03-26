@@ -210,7 +210,7 @@ function editCMS2(website_document){
                         +'</div></div>').appendTo(_ws_body);
            
                     var layout_opts =  {
-                        applyDefaultStyles: true,
+                        applyDemoStyles: false,
                         maskContents:       true,  //alows resize over iframe
                         //togglerContent_open:    '&nbsp;',
                         //togglerContent_closed:  '&nbsp;',

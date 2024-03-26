@@ -176,7 +176,7 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
         if(!this.options.external_preview){
         
             var layout_opts =  {
-                applyDefaultStyles: true,
+                applyDemoStyles: true,
                 togglerContent_open:    '<div class="ui-icon ui-icon-triangle-1-w"></div>',
                 togglerContent_closed:  '<div class="ui-icon ui-icon-carat-2-e"></div>',
                 //togglerContent_open:    '&nbsp;',
