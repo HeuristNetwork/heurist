@@ -1040,7 +1040,7 @@ function hRecordAction(_action_type, _scope_type, _field_type, _field_value) {
     function _check_field_repeatability(){
 
         let rty_ID = selectRecordScope.val();
-        if(!$.isNumeric(rty_ID)){ // multiple rectypes
+        if(!window.hWin.HEURIST4.util.isNumber(rty_ID)){ // multiple rectypes
             return false;
         }
 

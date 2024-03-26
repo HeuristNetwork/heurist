@@ -91,7 +91,7 @@ $.widget( "heurist.svs_list", {
         if(!this.options.language) this.options.language = 'def'; //"xx" means use current language
         
         if(this.options.allowed_svsIDs && !Array.isArray(this.options.allowed_svsIDs)){
-            if($.isNumeric(this.options.allowed_svsIDs)){
+            if(window.hWin.HEURIST4.util.isNumber(this.options.allowed_svsIDs)){
                 this.options.allowed_svsIDs = [this.options.allowed_svsIDs];
             }else{
                 this.options.allowed_svsIDs = this.options.allowed_svsIDs.trim().replace(/\s+/g,'').split(',');    

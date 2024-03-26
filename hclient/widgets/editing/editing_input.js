@@ -2610,10 +2610,10 @@ $.widget( "heurist.editing_input", {
                     let max_val = this.f('rst_MaxValue');
                     let min_val = this.f('rst_MinValue');
     
-                    if($.isNumeric(min_val)){
+                    if(window.hWin.HEURIST4.util.isNumber(min_val)){
                         $input.prop('min', min_val);
                     }
-                    if($.isNumeric(max_val)){
+                    if(window.hWin.HEURIST4.util.isNumber(max_val)){
                         $input.prop('max', max_val);
                     }
                 }
@@ -2644,7 +2644,7 @@ $.widget( "heurist.editing_input", {
                 });
 
                 $input.on('paste', function(e){
-                    if(!$.isNumeric(e.originalEvent.clipboardData.getData('text'))){
+                    if(!window.hWin.HEURIST4.util.isNumber(e.originalEvent.clipboardData.getData('text'))){
                         window.hWin.HEURIST4.util.stopEvent(e);
                         e.preventDefault();
                         window.hWin.HEURIST4.msg.showTooltipFlash(window.hWin.HR('Numeric field'),1000,$input);
@@ -2661,10 +2661,10 @@ $.widget( "heurist.editing_input", {
                     let max_val = this.f('rst_MaxValue');
                     let min_val = this.f('rst_MinValue');
     
-                    if($.isNumeric(min_val)){
+                    if(window.hWin.HEURIST4.util.isNumber(min_val)){
                         $input.prop('min', min_val);
                     }
-                    if($.isNumeric(max_val)){
+                    if(window.hWin.HEURIST4.util.isNumber(max_val)){
                         $input.prop('max', max_val);
                     }
                 }

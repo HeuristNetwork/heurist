@@ -60,7 +60,7 @@ function getURL() {
 function getSetting(key, defvalue) {
     var value = localStorage.getItem(window.hWin.HAPI4.database+key);
     
-    if (   //(isNaN(value) && $.isNumeric(defvalue)) ||   //!isNaN(parseFloat(n)) && isFinite(n)
+    if (   //(isNaN(value) && window.hWin.HEURIST4.util.isNumber(defvalue)) ||   //!isNaN(parseFloat(n)) && isFinite(n)
         (window.hWin.HEURIST4.util.isnull(value) && !window.hWin.HEURIST4.util.isnull(defvalue))){
         value = defvalue;
         putSetting(key, value);

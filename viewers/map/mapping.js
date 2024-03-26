@@ -1010,7 +1010,7 @@ $.widget( "heurist.mapping", {
                     
                     function _is_point(pnt){
                             var isValid = (Array.isArray(pnt) && pnt.length==2 && 
-                                $.isNumeric(pnt[0]) && $.isNumeric(pnt[1]));
+                                window.hWin.HEURIST4.util.isNumber(pnt[0]) && window.hWin.HEURIST4.util.isNumber(pnt[1]));
                             return isValid;
                     }                    
                     
@@ -2677,9 +2677,9 @@ $.widget( "heurist.mapping", {
                         dashArray: '',
                         fillOpacity:0.3, iconSize:18, stroke:true, fill:true};
             }
-            def_style.weight = ($.isNumeric(def_style.opacity) && def_style.weight>=0) ?def_style.weight :3;
-            def_style.opacity = ($.isNumeric(def_style.opacity) && def_style.opacity>=0) ?def_style.opacity :1;
-            def_style.fillOpacity = ($.isNumeric(def_style.fillOpacity) && def_style.fillOpacity>=0) ?def_style.fillOpacity :0.3;
+            def_style.weight = (window.hWin.HEURIST4.util.isNumber(def_style.opacity) && def_style.weight>=0) ?def_style.weight :3;
+            def_style.opacity = (window.hWin.HEURIST4.util.isNumber(def_style.opacity) && def_style.opacity>=0) ?def_style.opacity :1;
+            def_style.fillOpacity = (window.hWin.HEURIST4.util.isNumber(def_style.fillOpacity) && def_style.fillOpacity>=0) ?def_style.fillOpacity :0.3;
             def_style.fill = true;
             def_style.stroke = true;
             

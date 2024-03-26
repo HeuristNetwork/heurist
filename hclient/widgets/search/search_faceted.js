@@ -2573,7 +2573,7 @@ $.widget( "heurist.search_faceted", {
                         var sl_count = (cterm && cterm.length==3)?cterm[2]:0;
                         
                         if(field.selectedvalue){ //currently selected value - some range was already set
-                                if($.isNumeric(field.selectedvalue.value) ||  
+                                if(window.hWin.HEURIST4.util.isNumber(field.selectedvalue.value) ||  
                                         (field.selectedvalue.value.indexOf('<>')<0 && 
                                          field.selectedvalue.value.indexOf('><')<0) ){
                                     cterm = [field.selectedvalue.value, field.selectedvalue.value];

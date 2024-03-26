@@ -3317,9 +3317,9 @@ window.hWin.HEURIST4.ui = {
         }
         style.color = (style.color?style.color:def_style.color);   //light blue
         style.fillColor = (style.fillColor?style.fillColor:def_style.fillColor);   //light blue
-        style.weight = ($.isNumeric(style.weight) && style.weight>=0) ?style.weight :def_style.weight;
-        style.opacity = ($.isNumeric(style.opacity) && style.opacity>=0) ?style.opacity :def_style.opacity;
-        style.fillOpacity = ($.isNumeric(style.fillOpacity) && style.fillOpacity>=0) ?style.fillOpacity :def_style.fillOpacity;
+        style.weight = (window.hWin.HEURIST4.util.isNumber(style.weight) && style.weight>=0) ?style.weight :def_style.weight;
+        style.opacity = (window.hWin.HEURIST4.util.isNumber(style.opacity) && style.opacity>=0) ?style.opacity :def_style.opacity;
+        style.fillOpacity = (window.hWin.HEURIST4.util.isNumber(style.fillOpacity) && style.fillOpacity>=0) ?style.fillOpacity :def_style.fillOpacity;
         
         style.fill = window.hWin.HEURIST4.util.isnull(style.fill)?def_style.fill:style.fill;
         style.fill = window.hWin.HEURIST4.util.istrue(style.fill);

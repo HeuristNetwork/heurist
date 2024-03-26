@@ -858,7 +858,7 @@ function hMappingDraw(_mapdiv_id, _initial_wkt) {
 
                         function _isvalid_pnt(pnt){
                             return (Array.isArray(pnt) && pnt.length==2 && 
-                                $.isNumeric(pnt[0]) && $.isNumeric(pnt[1]) &&
+                                window.hWin.HEURIST4.util.isNumber(pnt[0]) && window.hWin.HEURIST4.util.isNumber(pnt[1]) &&
                                 Math.abs(pnt[0])<=180.0 && Math.abs(pnt[1])<=90.0);
                         }
 

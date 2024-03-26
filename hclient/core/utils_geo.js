@@ -100,7 +100,7 @@ window.hWin.HEURIST4.geo = {
 
                     function _isvalid_pnt(pnt){
                             var isValid = (Array.isArray(pnt) && pnt.length==2 && 
-                                $.isNumeric(pnt[0]) && $.isNumeric(pnt[1]));
+                                window.hWin.HEURIST4.util.isNumber(pnt[0]) && window.hWin.HEURIST4.util.isNumber(pnt[1]));
                                 //(_crs=='simple' || (Math.abs(pnt[0])<=360.0 && Math.abs(pnt[1])<=90.0)));
                             if(isValid && resdata._extent){
                                 if(pnt[0]<resdata._extent.xmin) resdata._extent.xmin = pnt[0];
@@ -632,7 +632,7 @@ window.hWin.HEURIST4.geo = {
         $(extents).each(function(idx, item){
             
             var isValid = (Array.isArray(item) && item.length==2 && 
-                $.isNumeric(item[0][0]) && $.isNumeric(item[0][1]));
+                window.hWin.HEURIST4.util.isNumber(item[0][0]) && window.hWin.HEURIST4.util.isNumber(item[0][1]));
                 //Math.abs(item[0][1])<=360.0 && Math.abs(item[0][0])<=90.0);
             
             if(isValid){
@@ -653,7 +653,7 @@ window.hWin.HEURIST4.geo = {
     boundingBoxToWKT: function(extent){
 
         var isValid = (Array.isArray(extent) && extent.length==2 && 
-                $.isNumeric(extent[0][0]) && $.isNumeric(extent[0][1]));
+                window.hWin.HEURIST4.util.isNumber(extent[0][0]) && window.hWin.HEURIST4.util.isNumber(extent[0][1]));
                 //&& Math.abs(extent[0][1])<=360.0 && Math.abs(extent[0][0])<=90.0
                 
         if(isValid){
