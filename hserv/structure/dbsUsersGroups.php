@@ -1326,10 +1326,10 @@
         //  these keys are publicly available from their respective services
         $TEST_KEYS = [
             // Nakala => https://test.nakala.fr/
-            'tnakala' => ['01234567-89ab-cdef-0123-456789abcdef'],
-            'unakala1' => ['33170cfe-f53c-550b-5fb6-4814ce981293'],
-            'unakala2' => ['f41f5957-d396-3bb9-ce35-a4692773f636'],
-            'unakala3' => ['aae99aba-476e-4ff2-2886-0aaf1bfa6fd2']
+            'tnakala' => '01234567-89ab-cdef-0123-456789abcdef',
+            'unakala1' => '33170cfe-f53c-550b-5fb6-4814ce981293',
+            'unakala2' => 'f41f5957-d396-3bb9-ce35-a4692773f636',
+            'unakala3' => 'aae99aba-476e-4ff2-2886-0aaf1bfa6fd2'
         ];
         if(array_key_exists($serviceId, $TEST_KEYS)){
             return [ $serviceId => [ 'params' => [ 'writeApiKey' => $TEST_KEYS[$serviceId] ] ] ]; //implode('-', $TEST_KEYS[$serviceId])
