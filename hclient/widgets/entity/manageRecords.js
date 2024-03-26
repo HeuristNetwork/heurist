@@ -187,10 +187,10 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                 +'font-size:10px;font-weight:normal;cursor:pointer">'
                 //+'<div style="line-height:18px">&nbsp;</div>' 
                 +'<div data-action="edit" style="background:lightblue;padding:2px 4px;width:102px;">'
-                    +'<span class="ui-icon ui-icon-pencil" title="Edit" style="font-size:9px;font-weight:normal"/>Edit</div>'
+                    +'<span class="ui-icon ui-icon-pencil" title="Edit" style="font-size:9px;font-weight:normal"></span>Edit</div>'
                 +'<div data-action="field" style="background:lightcyan;padding:2px 4px;display:block;width: 102px;">'
                     +'<span class="ui-icon ui-icon-arrowreturn-1-e" title="Add a new field to this record type" '
-                    +'style="transform: rotate(90deg);font-size:9px;font-weight:normal"/>Insert field</div>'
+                    +'style="transform: rotate(90deg);font-size:9px;font-weight:normal"></span>Insert field</div>'
                 +'<div data-action="block" title="Add a new group/separator" style="background:lightgreen;padding:2px 4px;width:102px;">'    
                     +'<span class="ui-icon ui-icon-arrowreturn-1-e" '
                     +'style="transform: rotate(90deg);font-size:9px;font-weight:normal"></span>Insert tab/divider</div>'
@@ -312,7 +312,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                 mouseleave : function(){ this._rts_selector_flag = false; },
                 change: function(event){
                         this._rts_changed_flag = true;
-                        this.edit_rts_apply[0].trigger('click');
+                        $(this.edit_rts_apply[0]).trigger('click');
                         //this.edit_rts_apply.show();
                 }                
             });
